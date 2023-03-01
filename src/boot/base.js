@@ -6,6 +6,7 @@
 
 // Vue.use(VueQrcodeReader);
 // Vue.component(VueQrcode.name, VueQrcode);
+import { copyToClipboard } from "quasar";
 
 window.LOCALE = "en";
 // window.EventHub = new Vue();
@@ -265,67 +266,67 @@ window.LNbits = {
         icon: null,
       });
     },
-    search: function (data, q, field, separator) {
-      try {
-        var queries = q.toLowerCase().split(separator || " ");
-        return data.filter(function (obj) {
-          var matches = 0;
-          _.each(queries, function (q) {
-            if (obj[field].indexOf(q) !== -1) matches++;
-          });
-          return matches === queries.length;
-        });
-      } catch (err) {
-        return data;
-      }
-    },
-    exportCSV: function (columns, data, fileName) {
-      var wrapCsvValue = function (val, formatFn) {
-        var formatted = formatFn !== void 0 ? formatFn(val) : val;
+    // search: function (data, q, field, separator) {
+    //   try {
+    //     var queries = q.toLowerCase().split(separator || " ");
+    //     return data.filter(function (obj) {
+    //       var matches = 0;
+    //       _.each(queries, function (q) {
+    //         if (obj[field].indexOf(q) !== -1) matches++;
+    //       });
+    //       return matches === queries.length;
+    //     });
+    //   } catch (err) {
+    //     return data;
+    //   }
+    // },
+    // exportCSV: function (columns, data, fileName) {
+    //   var wrapCsvValue = function (val, formatFn) {
+    //     var formatted = formatFn !== void 0 ? formatFn(val) : val;
 
-        formatted =
-          formatted === void 0 || formatted === null ? "" : String(formatted);
+    //     formatted =
+    //       formatted === void 0 || formatted === null ? "" : String(formatted);
 
-        formatted = formatted.split('"').join('""');
+    //     formatted = formatted.split('"').join('""');
 
-        return `"${formatted}"`;
-      };
+    //     return `"${formatted}"`;
+    //   };
 
-      var content = [
-        columns.map(function (col) {
-          return wrapCsvValue(col.label);
-        }),
-      ]
-        .concat(
-          data.map(function (row) {
-            return columns
-              .map(function (col) {
-                return wrapCsvValue(
-                  typeof col.field === "function"
-                    ? col.field(row)
-                    : row[col.field === void 0 ? col.name : col.field],
-                  col.format
-                );
-              })
-              .join(",");
-          })
-        )
-        .join("\r\n");
+    //   var content = [
+    //     columns.map(function (col) {
+    //       return wrapCsvValue(col.label);
+    //     }),
+    //   ]
+    //     .concat(
+    //       data.map(function (row) {
+    //         return columns
+    //           .map(function (col) {
+    //             return wrapCsvValue(
+    //               typeof col.field === "function"
+    //                 ? col.field(row)
+    //                 : row[col.field === void 0 ? col.name : col.field],
+    //               col.format
+    //             );
+    //           })
+    //           .join(",");
+    //       })
+    //     )
+    //     .join("\r\n");
 
-      var status = Quasar.utils.exportFile(
-        `${fileName || "table-export"}.csv`,
-        content,
-        "text/csv"
-      );
+    //   var status = Quasar.utils.exportFile(
+    //     `${fileName || "table-export"}.csv`,
+    //     content,
+    //     "text/csv"
+    //   );
 
-      if (status !== true) {
-        Quasar.plugins.Notify.create({
-          message: "Browser denied file download...",
-          color: "negative",
-          icon: null,
-        });
-      }
-    },
+    //   if (status !== true) {
+    //     Quasar.plugins.Notify.create({
+    //       message: "Browser denied file download...",
+    //       color: "negative",
+    //       icon: null,
+    //     });
+    //   }
+    // },
   },
 };
 
@@ -355,7 +356,7 @@ window.windowMixin = {
     },
     copyText: function (text, message, position) {
       var notify = this.$q.notify;
-      Quasar.utils.copyToClipboard(text).then(function () {
+      copyToClipboard(text).then(function () {
         notify({
           message: message || "Copied to clipboard!",
           position: position || "bottom",

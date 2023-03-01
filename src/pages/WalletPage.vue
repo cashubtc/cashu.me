@@ -620,7 +620,7 @@
           </div>
         </div>
         <!-- <div v-else-if="payInvoiceData.lnurlauth">
-            
+
             <q-form @submit="authLnurl" class="q-gutter-md">
                 <p class="q-my-none text-h6">
                 Authenticate with <b>{{ payInvoiceData.lnurlauth.domain }}</b>?
@@ -648,7 +648,7 @@
                 >
                 </div>
             </q-form>
-            
+
             </div> -->
         <div v-else-if="payInvoiceData.lnurlpay">
           <q-form @submit="lnurlPaySecond" class="q-gutter-md">
@@ -1139,7 +1139,7 @@
 <script>
 import { axios } from "boot/axios";
 import { date } from "quasar";
-import { splitAmount } from "src/js/utils";
+import { splitAmount, bigIntStringify } from "src/js/utils";
 import * as nobleSecp256k1 from "src/js/noble-secp256k1";
 import { step1Alice, step3Alice } from "src/js/dhke";
 import { uint8ToBase64 } from "src/js/base64";
@@ -1158,6 +1158,7 @@ var mapMint = function (obj) {
 //     el: '#vue',
 //     mixins: [windowMixin],
 export default {
+  mixins: [windowMixin],
   data: function () {
     return {
       tickerShort: "sats",

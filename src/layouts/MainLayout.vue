@@ -15,8 +15,8 @@
             <span><strong>Cashu</strong>.me</span>
           </q-btn>
         </q-toolbar-title>
-        <q-badge color="yellow" text-color="black" class="q-mr-md">
-          <span class="gt-sm">Warning: Cashu is beta software</span>
+        <q-badge color="yellow" text-color="black" class="gt-sm q-mr-md">
+          <span>Warning: Cashu is beta software</span>
         </q-badge>
 
         <q-btn-dropdown
