@@ -348,11 +348,11 @@ window.windowMixin = {
   methods: {
     changeColor: function (newValue) {
       document.body.setAttribute("data-theme", newValue);
-      this.$q.localStorage.set("lnbits.theme", newValue);
+      this.$q.localStorage.set("cashu.theme", newValue);
     },
     toggleDarkMode: function () {
       this.$q.dark.toggle();
-      this.$q.localStorage.set("lnbits.darkMode", this.$q.dark.isActive);
+      this.$q.localStorage.set("cashu.darkMode", this.$q.dark.isActive);
     },
     copyText: function (text, message, position) {
       var notify = this.$q.notify;
@@ -366,10 +366,10 @@ window.windowMixin = {
   },
   created: function () {
     if (
-      this.$q.localStorage.getItem("lnbits.darkMode") == true ||
-      this.$q.localStorage.getItem("lnbits.darkMode") == false
+      this.$q.localStorage.getItem("cashu.darkMode") == true ||
+      this.$q.localStorage.getItem("cashu.darkMode") == false
     ) {
-      this.$q.dark.set(this.$q.localStorage.getItem("lnbits.darkMode"));
+      this.$q.dark.set(this.$q.localStorage.getItem("cashu.darkMode"));
     } else {
       this.$q.dark.set(true);
     }
@@ -383,62 +383,11 @@ window.windowMixin = {
       this.g.offline = false;
     });
 
-    // failsafe if admin changes themes halfway
-    if (!this.$q.localStorage.getItem("lnbits.theme")) {
-      this.changeColor(this.g.allowedThemes[0]);
-    }
-    if (
-      this.$q.localStorage.getItem("lnbits.theme") &&
-      !this.g.allowedThemes.includes(
-        this.$q.localStorage.getItem("lnbits.theme")
-      )
-    ) {
-      this.changeColor(this.g.allowedThemes[0]);
-    }
-
-    if (this.$q.localStorage.getItem("lnbits.theme")) {
+    if (this.$q.localStorage.getItem("cashu.theme")) {
       document.body.setAttribute(
         "data-theme",
-        this.$q.localStorage.getItem("lnbits.theme")
+        this.$q.localStorage.getItem("cashu.theme")
       );
-    }
-
-    if (window.user) {
-      this.g.user = Object.freeze(window.LNbits.map.user(window.user));
-    }
-    if (window.wallet) {
-      this.g.wallet = Object.freeze(window.LNbits.map.wallet(window.wallet));
-    }
-    if (window.extensions) {
-      var user = this.g.user;
-      const extensions = Object.freeze(
-        window.extensions
-          .map(function (data) {
-            return window.LNbits.map.extension(data);
-          })
-          .filter(function (obj) {
-            return !obj.hidden;
-          })
-          .filter(function (obj) {
-            if (window.user.admin) return obj;
-            return !obj.isAdminOnly;
-          })
-          .map(function (obj) {
-            if (user) {
-              obj.isEnabled = user.extensions.indexOf(obj.code) !== -1;
-            } else {
-              obj.isEnabled = false;
-            }
-            return obj;
-          })
-          .sort(function (a, b) {
-            const nameA = a.name.toUpperCase();
-            const nameB = b.name.toUpperCase();
-            return nameA < nameB ? -1 : nameA > nameB ? 1 : 0;
-          })
-      );
-
-      this.g.extensions = extensions;
     }
   },
 };

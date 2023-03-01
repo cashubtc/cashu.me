@@ -7,7 +7,7 @@
             <div class="row">
               <div class="col-12">
                 <h3 class="q-my-none q-py-none">
-                  <strong> {{ getBalance() }} </strong>
+                  <strong> {{ getTotalBalance }} </strong>
                   {{ tickerShort }}
                 </h3>
               </div>
@@ -15,15 +15,15 @@
             <div class="row q-mt-xs q-mb-none" v-if="mints.length > 1">
               <div class="col-12">
                 <a class="text-weight-light">
-                  Balance on all mints:
-                  <b>{{ getTotalBalance }} {{ tickerShort }} </b>{% endraw %}</a
+                  Balance on active mint:
+                  <b>{{ getBalance() }} {{ tickerShort }} </b></a
                 >
               </div>
             </div>
             <div class="row q-mt-none q-mb-none" v-if="activeMintURL">
               <div class="col-12">
                 <a class="text-weight-light">
-                  Mint:{{ getActiveMintUrlShort() }}</a
+                  Mint: <b>{{ getActiveMintUrlShort() }}</b></a
                 >
               </div>
             </div>
@@ -46,7 +46,7 @@
                 icon-right="toll"
                 class="full-width"
                 @click="showReceiveTokensDialog"
-                >Get Ecash</q-btn
+                >Receive Ecash</q-btn
               >
             </div>
             <div class="col-0 col-sm-2 col-md-4"></div>
@@ -269,7 +269,7 @@
               <q-table
                 dense
                 flat
-                :data="getTokenList()"
+                :rows="getTokenList()"
                 :columns="tokensTable.columns"
                 no-data-label="There are no tokens here yet"
                 :filter="tokensTable.filter"
@@ -304,7 +304,7 @@
               <q-table
                 dense
                 flat
-                :data="invoiceHistory"
+                :rows="invoiceHistory"
                 :columns="invoicesTable.columns"
                 no-data-label="There are no invoices here yet"
                 :filter="invoicesTable.filter"
@@ -389,7 +389,7 @@
               <q-table
                 dense
                 flat
-                :data="historyTokens"
+                :rows="historyTokens"
                 :columns="historyTable.columns"
                 no-data-label="There are no tokens here yet"
                 :filter="historyTable.filter"
@@ -473,14 +473,14 @@
               rectangle
               color="primary"
               @click="showInvoiceCreateDialog"
-              ><strong>Create invoice</strong>
+              ><strong>Receive</strong>
             </q-btn>
           </div>
           <!-- <div class="col-4"></div> -->
           <div class="col-4 q-pt-xs">
             <div align="center">
               <q-btn
-                class="q-mx-xs q-px-none q-my-sm"
+                class="q-mx-xs q-px-sm q-my-sm"
                 size="0.5rem"
                 rectangle
                 color="warning"
@@ -490,7 +490,7 @@
                 ><q-tooltip>Warning</q-tooltip></q-btn
               >
               <q-btn
-                class="q-mx-xs q-px-none q-my-sm"
+                class="q-mx-xs q-px-sm q-my-sm"
                 size="0.5rem"
                 outline
                 rectangle
@@ -500,7 +500,7 @@
                 ><q-tooltip>Download wallet backup</q-tooltip></q-btn
               >
               <q-btn
-                class="q-mx-xs q-px-none q-my-sm"
+                class="q-mx-xs q-px-sm q-my-sm"
                 outline
                 size="0.5rem"
                 v-if="
@@ -523,7 +523,7 @@
               align="between"
               rectangle
               color="primary"
-              ><strong>Pay invoice</strong>
+              ><strong>Send</strong>
             </q-btn>
           </div>
         </div>
@@ -579,10 +579,10 @@
       position="top"
       v-if="!camera.show"
     >
-      <q-card class="q-pa-lg q-pt-xl lnbits__dialog-card">
+      <q-card class="q-pa-lg q-pt-xl qcard">
         <div v-if="payInvoiceData.invoice">
           <h6 class="q-my-none">
-            Pay {{ payInvoiceData.invoice.fsat }}{% endraw %}
+            Pay {{ payInvoiceData.invoice.fsat }}
             {{ tickerShort }}
           </h6>
           <q-separator class="q-my-sm"></q-separator>
@@ -906,7 +906,7 @@
     </q-dialog>
 
     <q-dialog v-model="showInvoiceDetails" position="top">
-      <q-card class="q-pa-lg q-pt-xl lnbits__dialog-card">
+      <q-card class="q-pa-lg q-pt-xl qcard">
         <div v-if="!invoiceData.bolt11">
           <div class="row items-center no-wrap q-mb-sm">
             <div class="col-12">
@@ -966,7 +966,7 @@
     </q-dialog>
 
     <q-dialog v-model="showSendTokens" position="top">
-      <q-card class="q-pa-lg q-pt-xl lnbits__dialog-card">
+      <q-card class="q-pa-lg q-pt-xl qcard">
         <div v-if="!sendData.tokens">
           <div class="row items-center no-wrap q-mb-sm">
             <div class="col-12">
@@ -1048,7 +1048,7 @@
     </q-dialog>
 
     <q-dialog v-model="showReceiveTokens" position="top">
-      <q-card class="q-pa-lg q-pt-xl lnbits__dialog-card">
+      <q-card class="q-pa-lg q-pt-xl qcard">
         <div>
           <div class="row items-center no-wrap q-mb-sm">
             <div class="col-12">
@@ -1725,18 +1725,18 @@ export default {
         let [user, lnaddresshost] = address.split("@");
         host = `https://${lnaddresshost}/.well-known/lnurlp/${user}`;
       } else if (address.toLowerCase().slice(0, 6) === "lnurl1") {
-        // let host = Buffer.from(
-        //   bech32.fromWords(bech32.decode(address, 20000).words)
-        // ).toString()
-        // var {data} = await axios.get(host)
-        const { data } = await LNbits.api.request(
-          "POST",
-          "/api/v1/payments/decode",
-          "",
-          {
-            data: address,
-          }
-        );
+        let host = Buffer.from(
+          bech32.fromWords(bech32.decode(address, 20000).words)
+        ).toString();
+        var { data } = await axios.get(host);
+        // const { data } = await LNbits.api.request(
+        //   "POST",
+        //   "/api/v1/payments/decode",
+        //   "",
+        //   {
+        //     data: address,
+        //   }
+        // );
         host = data.domain;
       }
       var { data } = await axios.get(host);
