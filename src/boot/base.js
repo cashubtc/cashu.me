@@ -373,7 +373,7 @@ window.windowMixin = {
     } else {
       this.$q.dark.set(true);
     }
-    this.g.allowedThemes = window.allowedThemes ?? ["bitcoin"];
+    this.g.allowedThemes = window.allowedThemes ?? ["classic"];
 
     addEventListener("offline", (event) => {
       this.g.offline = true;

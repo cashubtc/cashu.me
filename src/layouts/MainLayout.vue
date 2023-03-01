@@ -231,10 +231,4 @@ export default defineComponent({
     };
   },
 });
-
-// // themes
-// const themes = ["classic", "bitcoin"];
-// if (themes && themes.length) {
-//   window.allowedThemes = themes.map((str) => str.trim());
-// }
 </script>
