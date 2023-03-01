@@ -133,28 +133,10 @@
         </q-btn>
       </q-toolbar>
     </q-header>
-    <!-- <q-header elevated>
-      <q-toolbar>
-        <q-btn
-          flat
-          dense
-          round
-          icon="menu"
-          aria-label="Menu"
-          @click="toggleLeftDrawer"
-        />
 
-        <q-toolbar-title>
-          Quasar App
-        </q-toolbar-title>
-
-        <div>Quasar v{{ $q.version }}</div>
-      </q-toolbar>
-    </q-header> -->
-
-    <q-drawer v-model="leftDrawerOpen" show-if-above bordered>
+    <q-drawer v-model="leftDrawerOpen" bordered>
       <q-list>
-        <q-item-label header> Essential Links </q-item-label>
+        <q-item-label header>Links </q-item-label>
 
         <EssentialLink
           v-for="link in essentialLinks"
@@ -173,49 +155,50 @@
 <script>
 import { defineComponent, ref } from "vue";
 import EssentialLink from "components/EssentialLink.vue";
+import { LocalStorage } from "quasar";
 
 const linksList = [
   {
-    title: "Docs",
-    caption: "quasar.dev",
+    title: "Cashu.space",
+    caption: "cashu.space",
     icon: "school",
-    link: "https://quasar.dev",
+    link: "https://cashu.space",
   },
   {
     title: "Github",
-    caption: "github.com/quasarframework",
+    caption: "github.com/cashubtc",
     icon: "code",
-    link: "https://github.com/quasarframework",
+    link: "https://github.com/cashubtc",
   },
   {
-    title: "Discord Chat Channel",
-    caption: "chat.quasar.dev",
+    title: "Telegram group",
+    caption: "t.me/CashuBTC",
     icon: "chat",
-    link: "https://chat.quasar.dev",
+    link: "https://t.me/CashuBTC",
   },
   {
-    title: "Forum",
-    caption: "forum.quasar.dev",
-    icon: "record_voice_over",
-    link: "https://forum.quasar.dev",
+    title: "Cashu faucet",
+    caption: "gandlaf.com/faucet",
+    icon: "generating_tokens",
+    link: "https://www.gandlaf.com/faucet/anarchy",
+  },
+  {
+    title: "Redeem on Lightning",
+    caption: "redeem.cashu.me",
+    icon: "money",
+    link: "https://redeem.cashu.me/",
   },
   {
     title: "Twitter",
-    caption: "@quasarframework",
+    caption: "@CashuBTC",
     icon: "rss_feed",
-    link: "https://twitter.quasar.dev",
+    link: "https://twitter.com/CashuBTC",
   },
   {
-    title: "Facebook",
-    caption: "@QuasarFramework",
-    icon: "public",
-    link: "https://facebook.quasar.dev",
-  },
-  {
-    title: "Quasar Awesome",
-    caption: "Community Quasar projects",
+    title: "Donate",
+    caption: "Support Cashu development",
     icon: "favorite",
-    link: "https://awesome.quasar.dev",
+    link: "https://legend.lnbits.com/tipjar/794",
   },
 ];
 
@@ -225,7 +208,6 @@ export default defineComponent({
   components: {
     EssentialLink,
   },
-
   setup() {
     const leftDrawerOpen = ref(false);
 

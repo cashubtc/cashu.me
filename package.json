@@ -18,6 +18,7 @@
     "light-bolt11-decoder": "^3.0.0",
     "qrcode-reader-vue3": "^3.1.2",
     "quasar": "^2.6.0",
+    "underscore": "^1.13.6",
     "vue": "^3.2.47",
     "vue-router": "^4.0.0"
   },

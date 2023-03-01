@@ -587,8 +587,10 @@
           </h6>
           <q-separator class="q-my-sm"></q-separator>
           <p class="text-wrap">
-            <strong>Description:</strong> {{ payInvoiceData.invoice.description
-            }}<br />
+            <strong v-if="payInvoiceData.invoice.description"
+              >Description:</strong
+            >
+            {{ payInvoiceData.invoice.description }}<br />
             <strong>Expire date:</strong> {{ payInvoiceData.invoice.expireDate
             }}<br />
             <strong>Hash:</strong> {{ payInvoiceData.invoice.hash }}
@@ -1143,6 +1145,7 @@ import { splitAmount, bigIntStringify } from "src/js/utils";
 import * as nobleSecp256k1 from "src/js/noble-secp256k1";
 import { step1Alice, step3Alice } from "src/js/dhke";
 import { uint8ToBase64 } from "src/js/base64";
+import * as _ from "underscore";
 
 var currentDateStr = function () {
   return date.formatDate(new Date(), "YYYY-MM-DD HH:mm:ss");
@@ -1684,21 +1687,32 @@ export default {
           return;
         }
 
-        let cleanInvoice = {
-          msat: invoice.human_readable_part.amount,
-          sat: invoice.human_readable_part.amount / 1000,
-          fsat: invoice.human_readable_part.amount / 1000,
-        };
-
-        _.each(invoice.data.tags, (tag) => {
-          if (_.isObject(tag) && _.has(tag, "description")) {
-            if (tag.description === "payment_hash") {
+        // invoice.amount = invoice.sections[2] / 1000;
+        // invoice.amount_msat = invoice.sections[2];
+        let cleanInvoice = {};
+        // let cleanInvoice = {
+        //   msat: invoice.amount_msat,
+        //   sat: invoice.amount,
+        //   fsat: invoice.amount,
+        // };
+        // _.each(invoice.sections, (tag) => {
+        //   console.log(tag);
+        // });
+        _.each(invoice.sections, (tag) => {
+          if (_.isObject(tag) && _.has(tag, "name")) {
+            if (tag.name === "amount") {
+              cleanInvoice.msat = tag.value;
+              cleanInvoice.sat = tag.value / 1000;
+              cleanInvoice.fsat = cleanInvoice.sat;
+            } else if (tag.name === "payment_hash") {
               cleanInvoice.hash = tag.value;
-            } else if (tag.description === "description") {
+            } else if (tag.name === "description") {
               cleanInvoice.description = tag.value;
-            } else if (tag.description === "expiry") {
+            } else if (tag.name === "timestamp") {
+              cleanInvoice.timestamp = tag.value;
+            } else if (tag.name === "expiry") {
               var expireDate = new Date(
-                (invoice.data.time_stamp + tag.value) * 1000
+                (cleanInvoice.timestamp + tag.value) * 1000
               );
               cleanInvoice.expireDate = date.formatDate(
                 expireDate,
