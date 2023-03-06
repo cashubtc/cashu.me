@@ -1,7 +1,14 @@
 <template>
   <div class="row q-col-gutter-y-md justify-center q-pt-sm q-pb-md">
     <div class="col-12 col-sm-11 col-md-8 text-center q-gutter-y-md">
-      <q-card class="q-my-md q-py-sm">
+      <BalanceView
+        :proofs="proofs"
+        :active-proofs="activeProofs"
+        :mints="mints"
+        :ticker-short="tickerShort"
+        :active-mint-url="activeMintUrl"
+      />
+      <!-- <q-card class="q-my-md q-py-sm">
         <q-card-section class="q-mt-sm q-py-xs">
           <div>
             <div class="row">
@@ -20,16 +27,16 @@
                 >
               </div>
             </div>
-            <div class="row q-mt-none q-mb-none" v-if="activeMintURL">
+            <div class="row q-mt-none q-mb-none" v-if="activeMintUrl">
               <div class="col-12">
                 <a class="text-weight-light">
-                  Mint: <b>{{ getActiveMintUrlShort() }}</b></a
+                  Mint: <b>{{ getactiveMintUrlShort() }}</b></a
                 >
               </div>
             </div>
           </div>
         </q-card-section>
-      </q-card>
+      </q-card> -->
 
       <q-card class="q-mt-xs">
         <q-card-section class="q-pt-sm">
@@ -100,16 +107,16 @@
                   <!-- <q-item-label header>Your mints</q-item-label> -->
                   <div v-for="mint in mints" :key="mint.url">
                     <q-item
-                      :active="mint.url == activeMintURL"
+                      :active="mint.url == activeMintUrl"
                       active-class="text-weight-bold text-white"
                     >
                       <q-item-section avatar>
                         <q-icon
                           :color="
-                            mint.url == activeMintURL ? 'primary' : 'grey'
+                            mint.url == activeMintUrl ? 'primary' : 'grey'
                           "
                           :name="
-                            mint.url == activeMintURL
+                            mint.url == activeMintUrl
                               ? 'check_circle'
                               : 'radio_button_unchecked'
                           "
@@ -135,7 +142,7 @@
                           @click="activateMint(mint.url, (verbose = false))"
                           >{{ mint.url }}</q-item-label
                         >
-                        <!-- <q-item-label caption v-if="mint.url == activeMintURL"
+                        <!-- <q-item-label caption v-if="mint.url == activeMintUrl"
                                 >This is your active mint.</q-item-label
                             > -->
                       </q-item-section>
@@ -143,7 +150,7 @@
                       <q-item-section side>
                         <q-badge
                           :color="
-                            mint.url == activeMintURL ? 'primary' : 'grey'
+                            mint.url == activeMintUrl ? 'primary' : 'grey'
                           "
                           :label="mint.balance + ' ' + tickerShort"
                         />
@@ -1147,6 +1154,9 @@ import { step1Alice, step3Alice } from "src/js/dhke";
 import { uint8ToBase64 } from "src/js/base64";
 import * as _ from "underscore";
 
+// Vue components
+import BalanceView from "components/BalanceView.vue";
+
 var currentDateStr = function () {
   return date.formatDate(new Date(), "YYYY-MM-DD HH:mm:ss");
 };
@@ -1157,11 +1167,11 @@ var mapMint = function (obj) {
   return obj;
 };
 
-// new Vue({
-//     el: '#vue',
-//     mixins: [windowMixin],
 export default {
   mixins: [windowMixin],
+  components: {
+    BalanceView,
+  },
   data: function () {
     return {
       tickerShort: "sats",
@@ -1170,7 +1180,7 @@ export default {
       mintId: "",
       mintName: "",
       mintToAdd: "https://8333.space:3338",
-      activeMintURL: "",
+      activeMintUrl: "",
       mints: [],
       keys: "",
       proofs: [],
@@ -1424,18 +1434,18 @@ export default {
       return this.payments.findIndex((payment) => payment.pending) !== -1;
     },
 
-    balance: function () {
-      return this.activeProofs
-        .map((t) => t)
-        .flat()
-        .reduce((sum, el) => (sum += el.amount), 0);
-    },
-    getTotalBalance: function () {
-      return this.proofs
-        .map((t) => t)
-        .flat()
-        .reduce((sum, el) => (sum += el.amount), 0);
-    },
+    // balance: function () {
+    //   return this.activeProofs
+    //     .map((t) => t)
+    //     .flat()
+    //     .reduce((sum, el) => (sum += el.amount), 0);
+    // },
+    // getTotalBalance: function () {
+    //   return this.proofs
+    //     .map((t) => t)
+    //     .flat()
+    //     .reduce((sum, el) => (sum += el.amount), 0);
+    // },
   },
   filters: {
     msatoshiFormat: function (value) {
@@ -1468,17 +1478,17 @@ export default {
       }
     },
     activateMint: async function (url, verbose = false, stop_workers = true) {
-      if (url == this.activeMintURL) {
+      if (url == this.activeMintUrl) {
         return;
       }
       if (stop_workers) {
         // we need to stop workers because they will reset the activeMint again
         this.clearAllWorkers();
       }
-      let presiouvURL = this.activeMintURL;
+      let presiouvURL = this.activeMintUrl;
       try {
-        this.activeMintURL = url;
-        console.log("### this.activeMintURL", this.activeMintURL);
+        this.activeMintUrl = url;
+        console.log("### this.activeMintUrl", this.activeMintUrl);
         let keys = await this.fetchMintKeys();
         // load proofs
         this.activeProofs = this.proofs.filter((p) =>
@@ -1487,10 +1497,10 @@ export default {
         if (verbose) {
           this.notifySuccess("Mint added.");
         }
-        localStorage.setItem("cashu.activeMintURL", this.activeMintURL);
-        console.log("### activateMint: Mint activated: ", this.activeMintURL);
+        localStorage.setItem("cashu.activeMintUrl", this.activeMintUrl);
+        console.log("### activateMint: Mint activated: ", this.activeMintUrl);
       } catch (error) {
-        this.activeMintURL = presiouvURL;
+        this.activeMintUrl = presiouvURL;
         let err_msg = "Could not connect to mint.";
         if (error.message.length) {
           err_msg = err_msg + ` ${error.message}.`;
@@ -1511,8 +1521,8 @@ export default {
         .map((t) => t)
         .flat()
         .reduce((sum, el) => (sum += el.amount), 0);
-      if (this.mints.length > 0 && this.activeMintURL) {
-        this.mints.filter((m) => m.url == this.activeMintURL)[0].balance =
+      if (this.mints.length > 0 && this.activeMintUrl) {
+        this.mints.filter((m) => m.url == this.activeMintUrl)[0].balance =
           balance;
       }
       return balance;
@@ -1528,9 +1538,9 @@ export default {
       }
       return url;
     },
-    getActiveMintUrlShort: function () {
-      return this.getShortUrl(this.activeMintURL);
-    },
+    // getactiveMintUrlShort: function () {
+    //   return this.getShortUrl(this.activeMintUrl);
+    // },
     shortenString: function (s, length = 20, lastchars = 5) {
       if (s.length > length + lastchars) {
         return (
@@ -1974,7 +1984,7 @@ export default {
                 */
       try {
         const { data } = await axios.get(
-          `${this.activeMintURL}/mint?amount=${this.invoiceData.amount}`
+          `${this.activeMintUrl}/mint?amount=${this.invoiceData.amount}`
         );
         this.assertMintError(data);
         console.log("### data", data);
@@ -1986,7 +1996,7 @@ export default {
           Object.assign({}, this.invoiceData, {
             date: currentDateStr(),
             status: "pending",
-            mint: this.activeMintURL,
+            mint: this.activeMintUrl,
           })
         );
         this.storeInvoiceHistory();
@@ -2012,7 +2022,7 @@ export default {
         let secrets = await this.generateSecrets(amounts);
         let { outputs, rs } = await this.constructOutputs(amounts, secrets);
         const promises = await axios.post(
-          `${this.activeMintURL}/mint?payment_hash=${payment_hash}`,
+          `${this.activeMintUrl}/mint?payment_hash=${payment_hash}`,
           {
             outputs,
           }
@@ -2125,7 +2135,7 @@ export default {
         };
 
         const { data } = await axios.post(
-          `${this.activeMintURL}/split`,
+          `${this.activeMintUrl}/split`,
           payload
         );
         this.assertMintError(data);
@@ -2232,7 +2242,7 @@ export default {
 
           // TODO: We assume here that all proofs are from one mint! This will fail if
           // that's not the case!
-          if (tokenJson.mints[0].url != this.activeMintURL) {
+          if (tokenJson.mints[0].url != this.activeMintUrl) {
             await this.activateMint(tokenJson.mints[0].url);
           }
         }
@@ -2330,7 +2340,7 @@ export default {
       };
       try {
         const { data } = await axios.post(
-          `${this.activeMintURL}/melt`,
+          `${this.activeMintUrl}/melt`,
           payload
         );
         this.assertMintError(data);
@@ -2363,7 +2373,7 @@ export default {
           memo: this.payInvoiceData.data.memo,
           date: currentDateStr(),
           status: "paid",
-          mint: this.activeMintURL,
+          mint: this.activeMintUrl,
         });
         this.storeInvoiceHistory();
 
@@ -2416,7 +2426,7 @@ export default {
       };
       try {
         const { data } = await axios.post(
-          `${this.activeMintURL}/check`,
+          `${this.activeMintUrl}/check`,
           payload
         );
         this.assertMintError(data);
@@ -2454,7 +2464,7 @@ export default {
       };
       try {
         const { data } = await axios.post(
-          `${this.activeMintURL}/checkfees`,
+          `${this.activeMintUrl}/checkfees`,
           payload
         );
         this.assertMintError(data);
@@ -2473,8 +2483,8 @@ export default {
 
     fetchMintKeys: async function () {
       try {
-        console.log("### GET", `${this.activeMintURL}/keys`);
-        const { data } = await axios.get(`${this.activeMintURL}/keys`, {
+        console.log("### GET", `${this.activeMintUrl}/keys`);
+        const { data } = await axios.get(`${this.activeMintUrl}/keys`, {
           timeout: 2000,
         });
         var keys = data;
@@ -2483,9 +2493,9 @@ export default {
         localStorage.setItem("cashu.keys", JSON.stringify(keys));
         let keysets = await this.fetchMintKeysets();
         // save keys to mints in local storage
-        if (this.mints.filter((m) => m.url == this.activeMintURL).length) {
-          this.mints.filter((m) => m.url == this.activeMintURL)[0].keys = keys;
-          this.mints.filter((m) => m.url == this.activeMintURL)[0].keysets =
+        if (this.mints.filter((m) => m.url == this.activeMintUrl).length) {
+          this.mints.filter((m) => m.url == this.activeMintUrl)[0].keys = keys;
+          this.mints.filter((m) => m.url == this.activeMintUrl)[0].keysets =
             keysets;
           localStorage.setItem("cashu.mints", JSON.stringify(this.mints));
         }
@@ -2504,7 +2514,7 @@ export default {
 
     fetchMintKeysets: async function () {
       try {
-        const { data } = await axios.get(`${this.activeMintURL}/keysets`, {
+        const { data } = await axios.get(`${this.activeMintUrl}/keysets`, {
           timeout: 2000,
         });
         this.assertMintError(data);
@@ -2736,7 +2746,7 @@ export default {
       });
     },
     showNoMintsWarning: function () {
-      if (!this.activeMintURL) {
+      if (!this.activeMintUrl) {
         this.walletURL = this.baseURL;
         // we have to check whether the welcome dialog was pressed away because
         // otherwise quasar falsely covers the welcome dialog with this notify
@@ -2762,7 +2772,7 @@ export default {
           this.proofs = JSON.parse(e.newValue);
         }
         // if these were the activeMintUrl, reload
-        if (e.key == "cashu.activeMintURL") {
+        if (e.key == "cashu.activeMintUrl") {
           this.activateMint(e.newValue);
         }
       });
@@ -2942,20 +2952,20 @@ export default {
     if (params.get("mint_id")) {
       this.mintId = params.get("mint_id");
       // works with only lnbits mints
-      let activeMintURL =
+      let activeMintUrl =
         location.protocol +
         "//" +
         location.host +
         `/cashu/api/v1/${this.mintId}`;
       this.walletURL = this.baseURL + "?mint_id=" + this.mintId;
-      await this.addMint(activeMintURL);
+      await this.addMint(activeMintUrl);
     }
-    if (localStorage.getItem("cashu.activeMintURL")) {
-      if (!this.activeMintURL) {
+    if (localStorage.getItem("cashu.activeMintUrl")) {
+      if (!this.activeMintUrl) {
         this.walletURL = this.baseURL;
       }
-      let activeMintURL = localStorage.getItem("cashu.activeMintURL");
-      await this.addMint(activeMintURL);
+      let activeMintUrl = localStorage.getItem("cashu.activeMintUrl");
+      await this.addMint(activeMintUrl);
     }
     this.showNoMintsWarning();
 
@@ -2964,10 +2974,10 @@ export default {
       this.mintId = "dummy";
     }
 
-    console.log("Mint URL " + this.activeMintURL);
+    console.log("Mint URL " + this.activeMintUrl);
     console.log("Wallet URL " + this.walletURL);
 
-    const startupMintUrl = this.activeMintURL;
+    const startupMintUrl = this.activeMintUrl;
 
     // get name
     if (params.get("mint_name")) {
