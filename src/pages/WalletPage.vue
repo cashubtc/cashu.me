@@ -8,6 +8,8 @@
         :ticker-short="tickerShort"
         :active-mint-url="activeMintUrl"
       />
+      <!-- BALANCE VIEW  -->
+
       <!-- <q-card class="q-my-md q-py-sm">
         <q-card-section class="q-mt-sm q-py-xs">
           <div>
@@ -38,6 +40,7 @@
         </q-card-section>
       </q-card> -->
 
+      <!-- ECASH BUTTONS  -->
       <q-card class="q-mt-xs">
         <q-card-section class="q-pt-sm">
           <div class="row items-center no-wrap q-mb-sm">
@@ -468,6 +471,9 @@
           </q-tab-panels>
         </q-card-section>
       </q-card>
+
+      <!-- LIGHTNING BUTTONS  -->
+
       <div style="margin-bottom: 7rem">
         <div class="row q-pt-sm">
           <div class="col-4 q-pt-none">
@@ -520,6 +526,7 @@
               >
             </div>
           </div>
+
           <div class="col-4 q-pt-none">
             <q-btn
               class="full-width gt-sm"
@@ -537,7 +544,8 @@
       </div>
     </div>
 
-    <!-- // BOTTOM BAR -->
+    <!-- BOTTOM LIGHTNING BUTTONS -->
+
     <!-- disable bottom bar if dialogs are shown -->
     <div
       class="q-col-gutter"
@@ -579,6 +587,10 @@
         </q-tab>
       </q-tabs>
     </div>
+
+    <!-- DIALOGS  -->
+
+    <!-- INPUT PARSER  -->
 
     <q-dialog
       v-model="payInvoiceData.show"
@@ -788,6 +800,8 @@
       </q-card>
     </q-dialog>
 
+    <!-- QR CODE SCANNER  -->
+
     <q-dialog v-model="camera.show">
       <q-card class="q-pa-lg q-pt-xl">
         <div class="text-center q-mb-lg">
@@ -804,6 +818,7 @@
       </q-card>
     </q-dialog>
 
+    <!-- WELCOME DIALOG  -->
     <q-dialog
       class="z-top"
       persistent
@@ -878,6 +893,8 @@
       </q-card>
     </q-dialog>
 
+    <!-- WARNING DIAGLOG  -->
+
     <q-dialog v-model="disclaimerDialog.show">
       <q-card class="q-pa-lg">
         <h6 class="q-my-md text-primary">Warning</h6>
@@ -913,6 +930,8 @@
         </div>
       </q-card>
     </q-dialog>
+
+    <!-- INVOICE DETAILS  -->
 
     <q-dialog v-model="showInvoiceDetails" position="top">
       <q-card class="q-pa-lg q-pt-xl qcard">
@@ -973,6 +992,8 @@
         </div>
       </q-card>
     </q-dialog>
+
+    <!-- SEND TOKENS DIALOG  -->
 
     <q-dialog v-model="showSendTokens" position="top">
       <q-card class="q-pa-lg q-pt-xl qcard">
@@ -1056,6 +1077,8 @@
       </q-card>
     </q-dialog>
 
+    <!-- RECEIVE TOKENS DIALOG  -->
+
     <q-dialog v-model="showReceiveTokens" position="top">
       <q-card class="q-pa-lg q-pt-xl qcard">
         <div>
@@ -1088,6 +1111,9 @@
         </div>
       </q-card>
     </q-dialog>
+
+    <!-- ADD MINT DIALOG  -->
+
     <q-dialog
       v-model="addMintDialog.show"
       @keydown.enter.prevent="addMint(mintToAdd, (verbose = true))"
