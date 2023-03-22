@@ -41,14 +41,6 @@ export default defineComponent({
     activeMintUrl: String,
   },
   computed: {
-    canPay: function () {
-      if (!this.payInvoiceData.invoice) return false;
-      return this.payInvoiceData.invoice.sat <= this.balance;
-    },
-    pendingPaymentsExist: function () {
-      return this.payments.findIndex((payment) => payment.pending) !== -1;
-    },
-
     balance: function () {
       return this.activeProofs
         .map((t) => t)
