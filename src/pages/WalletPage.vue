@@ -8,37 +8,6 @@
         :ticker-short="tickerShort"
         :active-mint-url="activeMintUrl"
       />
-      <!-- BALANCE VIEW  -->
-
-      <!-- <q-card class="q-my-md q-py-sm">
-        <q-card-section class="q-mt-sm q-py-xs">
-          <div>
-            <div class="row">
-              <div class="col-12">
-                <h3 class="q-my-none q-py-none">
-                  <strong> {{ getTotalBalance }} </strong>
-                  {{ tickerShort }}
-                </h3>
-              </div>
-            </div>
-            <div class="row q-mt-xs q-mb-none" v-if="mints.length > 1">
-              <div class="col-12">
-                <a class="text-weight-light">
-                  Balance on active mint:
-                  <b>{{ getBalance() }} {{ tickerShort }} </b></a
-                >
-              </div>
-            </div>
-            <div class="row q-mt-none q-mb-none" v-if="activeMintUrl">
-              <div class="col-12">
-                <a class="text-weight-light">
-                  Mint: <b>{{ getactiveMintUrlShort() }}</b></a
-                >
-              </div>
-            </div>
-          </div>
-        </q-card-section>
-      </q-card> -->
 
       <!-- ECASH BUTTONS  -->
       <q-card class="q-mt-xs">
@@ -91,187 +60,15 @@
             <!-- ////////////////////// SETTINGS ////////////////// -->
 
             <q-tab-panel name="settings" class="q-px-sm">
-              <div
-                class="q-py-md q-px-xs bg-grey-10 text-white text-left"
-                on-left
-              >
-                <q-list padding>
-                  <q-item>
-                    <q-item-section>
-                      <q-item-label overline>Mints</q-item-label>
-                      <q-item-label caption
-                        >You can connect your wallet to multiple Cashu mints.
-                        Enter a mint URL and select the mint your want to
-                        use.</q-item-label
-                      >
-                    </q-item-section>
-                  </q-item>
-
-                  <!-- <q-item-label header>Your mints</q-item-label> -->
-                  <div v-for="mint in mints" :key="mint.url">
-                    <q-item
-                      :active="mint.url == activeMintUrl"
-                      active-class="text-weight-bold text-white"
-                    >
-                      <q-item-section avatar>
-                        <q-icon
-                          :color="
-                            mint.url == activeMintUrl ? 'primary' : 'grey'
-                          "
-                          :name="
-                            mint.url == activeMintUrl
-                              ? 'check_circle'
-                              : 'radio_button_unchecked'
-                          "
-                          @click="activateMint(mint.url, (verbose = false))"
-                          class="cursor-pointer"
-                        />
-                      </q-item-section>
-                      <q-item-section
-                        class="q-mx-none q-pl-none"
-                        style="max-width: 1.05em"
-                      >
-                        <q-icon
-                          name="content_copy"
-                          @click="copyText(mint.url)"
-                          size="1em"
-                          color="grey"
-                          class="q-mr-xs cursor-pointer"
-                        />
-                      </q-item-section>
-                      <q-item-section>
-                        <q-item-label
-                          lines="1"
-                          @click="activateMint(mint.url, (verbose = false))"
-                          >{{ mint.url }}</q-item-label
-                        >
-                        <!-- <q-item-label caption v-if="mint.url == activeMintUrl"
-                                >This is your active mint.</q-item-label
-                            > -->
-                      </q-item-section>
-
-                      <q-item-section side>
-                        <q-badge
-                          :color="
-                            mint.url == activeMintUrl ? 'primary' : 'grey'
-                          "
-                          :label="mint.balance + ' ' + tickerShort"
-                        />
-                      </q-item-section>
-                      <q-item-section side>
-                        <q-icon
-                          name="close"
-                          @click="removeMint(mint.url)"
-                          class="cursor-pointer"
-                        />
-                      </q-item-section>
-                    </q-item>
-
-                    <q-separator spaced inset="item" />
-                  </div>
-                </q-list>
-              </div>
-              <div class="q-gutter-md q-pt-md q-px-sm">
-                <div class="row-12">
-                  <q-input
-                    standout
-                    bottom-slots
-                    @keydown.enter.prevent="showAddMintDialog"
-                    v-model="mintToAdd"
-                    label="Add new mint URL"
-                  >
-                    <template v-slot:before>
-                      <q-icon name="account_balance" />
-                    </template>
-
-                    <!-- <template v-slot:hint> Enter Mint URL</template> -->
-                    <!-- "addMint(mintToAdd)" -->
-                    <template v-slot:append>
-                      <q-btn
-                        round
-                        dense
-                        flat
-                        color="primary"
-                        icon="add"
-                        click
-                        @click="showAddMintDialog"
-                      />
-                    </template>
-                  </q-input>
-                </div>
-              </div>
-              <div
-                class="q-py-sm q-px-xs bg-grey-10 text-white text-left"
-                on-left
-              >
-                <q-list padding>
-                  <q-item>
-                    <q-item-section>
-                      <q-item-label overline>Multimint Swaps</q-item-label>
-                      <q-item-label caption
-                        >Swap funds from one mint to another via Lightning.
-                        Warning: this feature is still experimental and could
-                        behave in unexpected ways!</q-item-label
-                      >
-                    </q-item-section>
-                  </q-item>
-                  <q-item>
-                    <q-select
-                      clearable
-                      filled
-                      dense
-                      color="primary"
-                      v-model="swapData.from_url"
-                      :options="swapDataOptions()"
-                      option-value="url"
-                      option-label="shorturl"
-                      label="Swap from"
-                      style="min-width: 200px"
-                    />
-                  </q-item>
-                  <q-item>
-                    <q-select
-                      clearable
-                      filled
-                      dense
-                      color="primary"
-                      v-model="swapData.to_url"
-                      :options="swapDataOptions()"
-                      option-value="url"
-                      option-label="shorturl"
-                      label="Swap to"
-                      style="min-width: 200px"
-                    />
-                  </q-item>
-                  <q-item>
-                    <q-input
-                      filled
-                      dense
-                      v-model.number="swapData.amount"
-                      type="number"
-                      :label="'Amount (' + tickerShort + ')'"
-                      style="min-width: 200px"
-                    ></q-input>
-                    <q-btn
-                      class="q-mx-md"
-                      color="primary"
-                      @click="
-                        mintSwap(
-                          swapData.from_url.url,
-                          swapData.to_url.url,
-                          swapData.amount
-                        )
-                      "
-                      :disable="
-                        !swapData.from_url ||
-                        !swapData.to_url ||
-                        !(swapData.amount > 0)
-                      "
-                      >Swap</q-btn
-                    >
-                  </q-item>
-                </q-list>
-              </div>
+              <SettingsView
+                :proofs="proofs"
+                :active-proofs="activeProofs"
+                :mints="mints"
+                :ticker-short="tickerShort"
+                :active-mint-url="activeMintUrl"
+                :add-mint="addMint"
+                :remove-mint="removeMint"
+              />
             </q-tab-panel>
             <!-- ////////////////// TOKEN LIST ///////////////// -->
 
@@ -1116,7 +913,7 @@
 
     <!-- ADD MINT DIALOG  -->
 
-    <q-dialog
+    <!-- <q-dialog
       v-model="addMintDialog.show"
       @keydown.enter.prevent="addMint(mintToAdd, (verbose = true))"
     >
@@ -1150,7 +947,7 @@
           >
         </div>
       </q-card>
-    </q-dialog>
+    </q-dialog> -->
   </div>
 </template>
 <style>
@@ -1181,24 +978,21 @@ import * as nobleSecp256k1 from "src/js/noble-secp256k1";
 import { step1Alice, step3Alice } from "src/js/dhke";
 import { uint8ToBase64 } from "src/js/base64";
 import * as _ from "underscore";
+import { getShortUrl } from "src/js/wallet-helpers";
 
 // Vue components
 import BalanceView from "components/BalanceView.vue";
+import SettingsView from "components/SettingsView.vue";
 
 var currentDateStr = function () {
   return date.formatDate(new Date(), "YYYY-MM-DD HH:mm:ss");
-};
-var mapMint = function (obj) {
-  obj.date = date.formatDate(new Date(obj.time * 1000), "YYYY-MM-DD HH:mm:ss");
-  obj.fsat = new Intl.NumberFormat(LOCALE).format(obj.amount);
-  obj.cashu = ["/cashu/", obj.id].join("");
-  return obj;
 };
 
 export default {
   mixins: [windowMixin],
   components: {
     BalanceView,
+    SettingsView,
   },
   data: function () {
     return {
@@ -1207,7 +1001,6 @@ export default {
       name: "",
       mintId: "",
       mintName: "",
-      mintToAdd: "https://8333.space:3338",
       activeMintUrl: "",
       mints: [],
       keys: "",
@@ -1468,12 +1261,12 @@ export default {
         .flat()
         .reduce((sum, el) => (sum += el.amount), 0);
     },
-    getTotalBalance: function () {
-      return this.proofs
-        .map((t) => t)
-        .flat()
-        .reduce((sum, el) => (sum += el.amount), 0);
-    },
+    // getTotalBalance: function () {
+    //   return this.proofs
+    //     .map((t) => t)
+    //     .flat()
+    //     .reduce((sum, el) => (sum += el.amount), 0);
+    // },
   },
   filters: {
     msatoshiFormat: function (value) {
@@ -1481,13 +1274,6 @@ export default {
     },
   },
   methods: {
-    swapDataOptions: function () {
-      let options = [];
-      for (const [i, m] of Object.entries(this.mints)) {
-        options.push({ url: m.url, shorturl: this.getShortUrl(m.url) });
-      }
-      return options;
-    },
     addMint: async function (url, verbose = false) {
       try {
         // we have no mints at all
@@ -1559,17 +1345,17 @@ export default {
         .reduce((sum, el) => (sum += el.amount), 0);
       return balance;
     },
-    getShortUrl: function (url) {
-      url = url.replace("https://", "");
-      const cut_param = 46;
-      if (url.length > cut_param && url.indexOf("/") != -1) {
-        url =
-          url.substring(0, url.indexOf("/") + 1) +
-          "..." +
-          url.substring(url.length - cut_param / 2, url.length);
-      }
-      return url;
-    },
+    // getShortUrl: function (url) {
+    //   url = url.replace("https://", "");
+    //   const cut_param = 46;
+    //   if (url.length > cut_param && url.indexOf("/") != -1) {
+    //     url =
+    //       url.substring(0, url.indexOf("/") + 1) +
+    //       "..." +
+    //       url.substring(url.length - cut_param / 2, url.length);
+    //   }
+    //   return url;
+    // },
     // getactiveMintUrlShort: function () {
     //   return this.getShortUrl(this.activeMintUrl);
     // },
@@ -1910,9 +1696,9 @@ export default {
       this.showReceiveTokens = true;
     },
 
-    showAddMintDialog: function () {
-      this.addMintDialog.show = true;
-    },
+    // showAddMintDialog: function () {
+    //   this.addMintDialog.show = true;
+    // },
 
     //////////////////////// MINT //////////////////////////////////////////
 

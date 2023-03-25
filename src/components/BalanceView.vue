@@ -31,6 +31,7 @@
 </template>
 <script>
 import { defineComponent, ref } from "vue";
+import { getShortUrl } from "src/js/wallet-helpers";
 export default defineComponent({
   name: "BalanceView",
   props: {
@@ -54,7 +55,7 @@ export default defineComponent({
         .reduce((sum, el) => (sum += el.amount), 0);
     },
     getActiveMintUrlShort: function () {
-      return this.getShortUrl(this.activeMintUrl);
+      return getShortUrl(this.activeMintUrl);
     },
     getBalance: function () {
       var balance = this.activeProofs
@@ -64,19 +65,6 @@ export default defineComponent({
       return balance;
     },
   },
-  methods: {
-    getShortUrl: function (url) {
-      url = url.replace("https://", "");
-      url = url.replace("http://", "");
-      const cut_param = 46;
-      if (url.length > cut_param && url.indexOf("/") != -1) {
-        url =
-          url.substring(0, url.indexOf("/") + 1) +
-          "..." +
-          url.substring(url.length - cut_param / 2, url.length);
-      }
-      return url;
-    },
-  },
+  methods: {},
 });
 </script>
