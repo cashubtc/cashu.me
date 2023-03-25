@@ -213,7 +213,7 @@ export default defineComponent({
         "monochrome",
         "salvador",
         "freedom",
-        "cyber",
+        // "cyber",
         "flamingo",
       ],
       essentialLinks: linksList,
