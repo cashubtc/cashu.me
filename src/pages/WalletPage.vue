@@ -1503,14 +1503,12 @@ export default {
         this.addMintDialog.show = false;
       }
     },
-    activateMint: async function (url, verbose = false, stop_workers = true) {
+    activateMint: async function (url, verbose = false) {
       if (url == this.activeMintUrl) {
         return;
       }
-      if (stop_workers) {
-        // we need to stop workers because they will reset the activeMint again
-        this.clearAllWorkers();
-      }
+      // we need to stop workers because they will reset the activeMint again
+      this.clearAllWorkers();
       let presiouvURL = this.activeMintUrl;
       try {
         this.activeMintUrl = url;
@@ -1933,7 +1931,7 @@ export default {
       };
     },
 
-    constructProofs: function (promises, secrets, rs) {
+    constructProofs: function (promises, secrets, rs, mint_pubkeys) {
       const proofs = [];
       for (let i = 0; i < promises.length; i++) {
         const encodedSecret = uint8ToBase64.encode(secrets[i]);
@@ -1942,16 +1940,17 @@ export default {
           promises[i].amount,
           promises[i]["C_"],
           encodedSecret,
-          rs[i]
+          rs[i],
+          mint_pubkeys
         );
         proofs.push({ id, amount, C, secret });
       }
       return proofs;
     },
 
-    promiseToProof: function (id, amount, C_hex, secret, r) {
+    promiseToProof: function (id, amount, C_hex, secret, r, mint_pubkeys) {
       const C_ = nobleSecp256k1.Point.fromHex(C_hex);
-      const A = this.keys[amount];
+      const A = mint_pubkeys[amount];
       const C = step3Alice(
         C_,
         nobleSecp256k1.utils.hexToBytes(r),
@@ -2047,6 +2046,7 @@ export default {
       try {
         let secrets = await this.generateSecrets(amounts);
         let { outputs, rs } = await this.constructOutputs(amounts, secrets);
+        const keys = this.keys; // save keys here so they don't get updated before the next call is done and cause a race condition
         const promises = await axios.post(
           `${this.activeMintUrl}/mint?payment_hash=${payment_hash}`,
           {
@@ -2060,7 +2060,8 @@ export default {
         let proofs = await this.constructProofs(
           promises.data.promises,
           secrets,
-          rs
+          rs,
+          keys
         );
         return proofs;
       } catch (error) {
@@ -2159,7 +2160,7 @@ export default {
           proofs,
           outputs,
         };
-
+        const keys = this.keys;
         const { data } = await axios.post(
           `${this.activeMintUrl}/split`,
           payload
@@ -2172,12 +2173,14 @@ export default {
         const fristProofs = this.constructProofs(
           data.fst,
           frst_secrets,
-          frst_rs
+          frst_rs,
+          keys
         );
         const scndProofs = this.constructProofs(
           data.snd,
           scnd_secrets,
-          scnd_rs
+          scnd_rs,
+          keys
         );
 
         return { fristProofs, scndProofs };
@@ -2513,11 +2516,11 @@ export default {
         const { data } = await axios.get(`${this.activeMintUrl}/keys`, {
           timeout: 2000,
         });
-        var keys = data;
+        const keys = data;
         this.assertMintError(keys);
         this.keys = keys;
         localStorage.setItem("cashu.keys", JSON.stringify(keys));
-        let keysets = await this.fetchMintKeysets();
+        const keysets = await this.fetchMintKeysets();
         // save keys to mints in local storage
         if (this.mints.filter((m) => m.url == this.activeMintUrl).length) {
           this.mints.filter((m) => m.url == this.activeMintUrl)[0].keys = keys;
@@ -2567,9 +2570,9 @@ export default {
       const invoice = this.invoiceHistory.find((i) => i.hash === payment_hash);
       try {
         if (invoice.mint != null) {
-          await this.activateMint(invoice.mint, false, false);
+          await this.activateMint(invoice.mint, false);
         }
-        let proofs = await this.mint(invoice.amount, invoice.hash, verbose);
+        const proofs = await this.mint(invoice.amount, invoice.hash, verbose);
         return proofs;
       } catch (error) {
         console.log("Invoice still pending", invoice.hash);
@@ -2684,7 +2687,7 @@ export default {
           if (window.navigator.vibrate) navigator.vibrate(200);
           this.notifySuccess("Payment received", "top");
         } catch (error) {
-          console.log("not paid yet");
+          console.log("invoiceCheckWorker: not paid yet");
         }
       }, 3000);
     },
@@ -2703,7 +2706,7 @@ export default {
           console.log(this.sendData);
 
           // this will throw an error if the invoice is pending
-          paid = await this.checkTokenSpendable(
+          let paid = await this.checkTokenSpendable(
             this.sendData.tokensBase64,
             false
           );
@@ -2714,7 +2717,7 @@ export default {
             this.showSendTokens = false;
           }
         } catch (error) {
-          console.log("not paid yet");
+          console.log("checkTokenSpendableWorker: not paid yet");
         }
       }, 3000);
     },
@@ -2969,6 +2972,9 @@ export default {
   created: async function () {
     let params = new URL(document.location).searchParams;
 
+    // load proofs from db
+    this.proofs = JSON.parse(localStorage.getItem("cashu.proofs") || "[]");
+
     // load mints
     if (localStorage.getItem("cashu.mints")) {
       this.mints = JSON.parse(localStorage.getItem("cashu.mints"));
@@ -3017,7 +3023,6 @@ export default {
     this.historyTokens = JSON.parse(
       localStorage.getItem("cashu.historyTokens") || "[]"
     );
-    this.proofs = JSON.parse(localStorage.getItem("cashu.proofs") || "[]");
 
     // run migrations
     await this.migrationLocalstorage();
