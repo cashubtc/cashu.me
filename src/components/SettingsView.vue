@@ -204,6 +204,7 @@ import { getShortUrl } from "src/js/wallet-helpers";
 
 export default defineComponent({
   name: "SettingsView",
+  mixins: [windowMixin],
   props: {
     proofs: Array,
     activeProofs: Array,

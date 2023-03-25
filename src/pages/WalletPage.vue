@@ -109,161 +109,21 @@
             <!-- ////////////////// INVOICE LIST ///////////////// -->
 
             <q-tab-panel name="invoices">
-              <InvoicesTable :invoice-history="invoiceHistory" />
-              <!-- <q-table
-                dense
-                flat
-                :rows="invoiceHistory"
-                :columns="invoicesTable.columns"
-                no-data-label="There are no invoices here yet"
-                :filter="invoicesTable.filter"
-                :pagination="invoicesTable.pagination"
-              >
-                <template v-slot:body="props">
-                  <q-tr :props="props">
-                    <q-td key="status" :props="props">
-                      <div v-if="props.row.status == 'pending'">
-                        <q-icon
-                          @click="showInvoicInfoDialog(props.row)"
-                          name="settings_ethernet"
-                          color="grey"
-                        >
-                          <q-tooltip>Pending</q-tooltip>
-                        </q-icon>
-                        <q-icon
-                          name="sync"
-                          size="xs"
-                          color="grey"
-                          class="q-mr-xs cursor-pointer"
-                          @click="checkInvoice(props.row.hash)"
-                        >
-                          <q-tooltip>Check status</q-tooltip>
-                        </q-icon>
-                      </div>
-                      <div v-if="props.row.status === 'paid'">
-                        <q-icon
-                          v-if="props.row.amount > 0"
-                          name="call_received"
-                          color="green"
-                          ><q-tooltip>Received</q-tooltip></q-icon
-                        >
-                        <q-icon
-                          v-if="props.row.amount < 0"
-                          name="call_made"
-                          color="red"
-                          ><q-tooltip>Paid</q-tooltip></q-icon
-                        >
-                      </div>
-                    </q-td>
-                    <q-td
-                      key="amount"
-                      :props="props"
-                      :class="
-                        props.row.amount > 0 && props.row.status === 'paid'
-                          ? 'text-green-13 text-weight-bold'
-                          : ''
-                      "
-                    >
-                      <div>{{ props.row.amount }}</div>
-                    </q-td>
-
-                    <q-td key="date" :props="props">
-                      <div>{{ props.row.date }}</div>
-                    </q-td>
-                    <q-td key="bolt11" :props="props">
-                      <div @click="copyText(props.row.bolt11)">
-                        {{ shortenString(props.row.bolt11, 20, 10) }}
-                        <q-tooltip>Click to copy</q-tooltip>
-                      </div>
-                    </q-td>
-                    <q-td key="hash" :props="props">
-                      <div @click="copyText(props.row.hash)">
-                        {{ props.row.hash }}
-                      </div>
-                    </q-td>
-                    <q-td key="mint" :props="props">
-                      <div>{{ props.row.mint }}</div>
-                    </q-td>
-                  </q-tr>
-                </template>
-              </q-table> -->
+              <InvoicesTable
+                :invoice-history="invoiceHistory"
+                :show-invoice-info-dialog="showInvoicInfoDialog"
+                :check-invoice="checkInvoice"
+              />
             </q-tab-panel>
 
             <!-- ////////////////// HISTORY LIST ///////////////// -->
 
             <q-tab-panel name="history">
-              <q-table
-                dense
-                flat
-                :rows="historyTokens"
-                :columns="historyTable.columns"
-                no-data-label="There are no tokens here yet"
-                :filter="historyTable.filter"
-                :pagination="historyTable.pagination"
-              >
-                <template v-slot:body="props">
-                  <q-tr :props="props">
-                    <q-td key="status" :props="props">
-                      <div v-if="props.row.status == 'pending'">
-                        <q-icon
-                          @click="showTokenDialog(props.row.token)"
-                          name="settings_ethernet"
-                          color="grey"
-                        >
-                          <q-tooltip>Pending</q-tooltip>
-                        </q-icon>
-                        <q-icon
-                          name="sync"
-                          size="xs"
-                          color="grey"
-                          class="q-mr-xs cursor-pointer"
-                          @click="checkTokenSpendable(props.row.token)"
-                        >
-                          <q-tooltip>Check status</q-tooltip>
-                        </q-icon>
-                      </div>
-                      <div v-if="props.row.status === 'paid'">
-                        <q-icon
-                          v-if="props.row.amount > 0"
-                          name="call_received"
-                          color="green"
-                          ><q-tooltip>Received</q-tooltip></q-icon
-                        >
-                        <q-icon
-                          v-if="props.row.amount < 0"
-                          name="call_made"
-                          color="red"
-                          ><q-tooltip>Paid</q-tooltip></q-icon
-                        >
-                        <!-- <q-icon name="props.row.amount < 0 ? 'call_made' : 'call_received'" color="green"></q-icon> -->
-                      </div>
-                    </q-td>
-                    <q-td
-                      key="amount"
-                      :props="props"
-                      :class="
-                        props.row.amount > 0
-                          ? 'text-green-13 text-weight-bold'
-                          : ''
-                      "
-                    >
-                      <div>{{ props.row.amount }}</div>
-                    </q-td>
-                    <q-td key="date" :props="props">
-                      <div>{{ props.row.date }}</div>
-                    </q-td>
-                    <!-- <q-td key="memo" :props="props">
-                            <div>{{props.row.memo}}</div>
-                        </q-td> -->
-                    <q-td key="token" :props="props">
-                      <div @click="copyText(props.row.token)">
-                        {{ shortenString(props.row.token, 10, 40) }}
-                        <q-tooltip>Click to copy</q-tooltip>
-                      </div>
-                    </q-td>
-                  </q-tr>
-                </template>
-              </q-table>
+              <HistoryTable
+                :history-tokens="historyTokens"
+                :show-token-dialog="showTokenDialog"
+                :check-token-spendable="checkTokenSpendable"
+              />
             </q-tab-panel>
           </q-tab-panels>
         </q-card-section>
@@ -982,6 +842,7 @@ import { shortenString } from "src/js/string-utils";
 import BalanceView from "components/BalanceView.vue";
 import SettingsView from "components/SettingsView.vue";
 import InvoicesTable from "components/InvoicesTable.vue";
+import HistoryTable from "components/HistoryTable.vue";
 
 var currentDateStr = function () {
   return date.formatDate(new Date(), "YYYY-MM-DD HH:mm:ss");
@@ -993,6 +854,7 @@ export default {
     BalanceView,
     SettingsView,
     InvoicesTable,
+    HistoryTable,
   },
   data: function () {
     return {
@@ -1120,112 +982,6 @@ export default {
         },
         filter: null,
       },
-      // invoicesTable: {
-      //   columns: [
-      //     {
-      //       name: "status",
-      //       align: "left",
-      //       label: "",
-      //       field: "status",
-      //       sortable: true,
-      //     },
-      //     {
-      //       name: "amount",
-      //       align: "left",
-      //       label: "Amount",
-      //       field: "amount",
-      //       sortable: true,
-      //     },
-      //     {
-      //       name: "date",
-      //       align: "left",
-      //       label: "Date",
-      //       field: "date",
-      //       sortable: true,
-      //     },
-      //     // {
-      //     //   name: 'memo',
-      //     //   align: 'left',
-      //     //   label: 'Memo',
-      //     //   field: 'memo',
-      //     //   sortable: true
-      //     // },
-      //     {
-      //       name: "bolt11",
-      //       align: "left",
-      //       label: "Payment request",
-      //       field: "bolt11",
-      //       sortable: false,
-      //     },
-      //     {
-      //       name: "hash",
-      //       align: "left",
-      //       label: "Hash",
-      //       field: "hash",
-      //       sortable: false,
-      //     },
-      //     {
-      //       name: "mint",
-      //       align: "left",
-      //       label: "Mint",
-      //       field: "mint",
-      //       sortable: true,
-      //     },
-      //   ],
-      //   pagination: {
-      //     sortBy: "date",
-      //     descending: true,
-      //     rowsPerPage: 5,
-      //   },
-      //   filter: null,
-      // },
-
-      historyTable: {
-        columns: [
-          {
-            name: "status",
-            align: "left",
-            label: "",
-            field: "status",
-            sortable: true,
-          },
-          {
-            name: "amount",
-            align: "left",
-            label: "Amount",
-            field: "amount",
-            sortable: true,
-          },
-          {
-            name: "date",
-            align: "left",
-            label: "Date",
-            field: "date",
-            sortable: true,
-          },
-          // {
-          //   name: 'memo',
-          //   align: 'left',
-          //   label: 'Memo',
-          //   field: 'memo',
-          //   sortable: true
-          // },
-          {
-            name: "token",
-            align: "left",
-            label: "Token",
-            field: "token",
-            sortable: false,
-          },
-        ],
-        pagination: {
-          sortBy: "date",
-          descending: true,
-          rowsPerPage: 5,
-        },
-        filter: null,
-      },
-
       paymentsChart: {
         show: false,
       },
@@ -1368,6 +1124,9 @@ export default {
     //     );
     //   }
     // },
+    shortenString: function (s) {
+      return shortenString(s, 20, 10);
+    },
     getTokenList: function () {
       const amounts = this.activeProofs.map((t) => t.amount);
       const counts = {};
@@ -2369,6 +2128,9 @@ export default {
         const proofs = await this.mint(invoice.amount, invoice.hash, verbose);
         return proofs;
       } catch (error) {
+        if (verbose) {
+          this.notify("Invoice still pending");
+        }
         console.log("Invoice still pending", invoice.hash);
         throw error;
       }
@@ -2424,7 +2186,7 @@ export default {
       } else {
         console.log("### token not paid yet");
         if (verbose) {
-          this.notify("Token still pending", (color = "grey"));
+          this.notify("Token still pending");
         }
         // this.sendData.tokens = token
       }
@@ -2659,11 +2421,11 @@ export default {
       // failure
       this.$q.notify({
         timeout: 5000,
-        type: type,
-        color: color,
+        type: "nuill",
+        color: "grey",
         message: message,
-        caption: caption,
-        position: position,
+        caption: null,
+        position: "top",
         actions: [
           {
             icon: "close",

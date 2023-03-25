@@ -71,6 +71,7 @@ import { shortenString } from "src/js/string-utils";
 
 export default defineComponent({
   name: "HistoryTable",
+  mixins: [windowMixin],
   props: {
     proofs: Array,
     activeProofs: Array,

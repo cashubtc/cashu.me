@@ -13,7 +13,7 @@
         <q-td key="status" :props="props">
           <div v-if="props.row.status == 'pending'">
             <q-icon
-              @click="showInvoicInfoDialog(props.row)"
+              @click="showInvoiceInfoDialog(props.row)"
               name="settings_ethernet"
               color="grey"
             >
@@ -24,7 +24,7 @@
               size="xs"
               color="grey"
               class="q-mr-xs cursor-pointer"
-              @click="checkInvoice(props.row.hash)"
+              @click="checkInvoice(props.row.hash, true)"
             >
               <q-tooltip>Check status</q-tooltip>
             </q-icon>
@@ -84,6 +84,7 @@ import { shortenString } from "src/js/string-utils";
 
 export default defineComponent({
   name: "InvoicesTable",
+  mixins: [windowMixin],
   props: {
     proofs: Array,
     activeProofs: Array,
@@ -91,6 +92,8 @@ export default defineComponent({
     tickerShort: String,
     activeMintUrl: String,
     invoiceHistory: Array,
+    showInvoiceInfoDialog: Function,
+    checkInvoice: Function,
   },
   data: function () {
     return {
