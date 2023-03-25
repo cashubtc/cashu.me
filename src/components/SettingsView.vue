@@ -214,6 +214,11 @@ export default defineComponent({
     addMint: Function,
     removeMint: Function,
     activateMint: Function,
+    requestMint: Function,
+    decodeRequest: Function,
+    melt: Function,
+    invoiceCheckWorker: Function,
+    payInvoiceData: Object,
   },
   data: function () {
     return {
@@ -238,6 +243,21 @@ export default defineComponent({
     },
     showAddMintDialog: function () {
       this.addMintDialog.show = true;
+    },
+    //
+    mintSwap: async function (from_url, to_url, amount) {
+      // get invoice
+      await this.activateMint(to_url);
+      let invoice = await this.requestMint(amount);
+
+      // pay invoice
+      await this.activateMint(from_url);
+      await this.decodeRequest(invoice.pr);
+      await this.melt();
+
+      // settle invoice on other side
+      await this.activateMint(to_url);
+      await this.invoiceCheckWorker();
     },
   },
   created: function () {},

@@ -69,6 +69,11 @@
                 :add-mint="addMint"
                 :remove-mint="removeMint"
                 :activate-mint="activateMint"
+                :request-mint="requestMint"
+                :decode-request="decodeRequest"
+                :melt="melt"
+                :invoice-check-worker="invoiceCheckWorker"
+                :pay-invoice-data="payInvoiceData"
               />
             </q-tab-panel>
             <!-- ////////////////// TOKEN LIST ///////////////// -->
@@ -1221,7 +1226,11 @@ export default {
       this.decodeRequest();
       this.camera.show = false;
     },
-    decodeRequest: function () {
+    decodeRequest: function (request = null) {
+      // set the argument as the data to parse
+      if (request != null) {
+        this.payInvoiceData.data.request = request;
+      }
       let reqtype = null;
       let req = null;
       // get request
@@ -1556,10 +1565,13 @@ export default {
 
     // /mint
 
-    requestMint: async function () {
+    requestMint: async function (amount = null) {
       /*
                 gets an invoice from the mint to get new tokens
                 */
+      if (amount != null) {
+        this.invoiceData.amount = amount;
+      }
       try {
         const { data } = await axios.get(
           `${this.activeMintUrl}/mint?amount=${this.invoiceData.amount}`
@@ -1970,25 +1982,6 @@ export default {
         } catch {}
         throw error;
       }
-    },
-
-    //
-    mintSwap: async function (from_url, to_url, amount) {
-      // get invoice
-      await this.activateMint(to_url);
-      this.invoiceData.amount = amount;
-      let invoice = await this.requestMint();
-
-      // pay invoice
-      await this.activateMint(from_url);
-      this.payInvoiceData.data.request = invoice.pr;
-      await this.decodeRequest();
-      let invoiceAmount = this.payInvoiceData.invoice.sat;
-      await this.melt();
-
-      // settle invoice on other side
-      await this.activateMint(to_url);
-      await this.invoiceCheckWorker();
     },
 
     // /check
