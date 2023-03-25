@@ -234,7 +234,7 @@
         >
         </q-tab>
         <q-tab
-          class="col-2"
+          class="col-2 q-pb-md"
           icon="photo_camera"
           v-if="hasCamera"
           @click="showCamera"
