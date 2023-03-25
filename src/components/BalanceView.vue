@@ -5,7 +5,7 @@
         <div class="row">
           <div class="col-12">
             <h3 class="q-my-none q-py-none">
-              <strong> {{ getTotalBalance }} </strong>
+              <strong> {{ formatSat(getTotalBalance) }} </strong>
               {{ tickerShort }}
             </h3>
           </div>
@@ -14,7 +14,7 @@
           <div class="col-12">
             <h6 class="q-my-none q-py-none text-weight-regular">
               This mint:
-              <b>{{ getBalance }} {{ tickerShort }} </b>
+              <b>{{ formatSat(getBalance) }} {{ tickerShort }} </b>
             </h6>
           </div>
         </div>
@@ -34,6 +34,7 @@ import { defineComponent, ref } from "vue";
 import { getShortUrl } from "src/js/wallet-helpers";
 export default defineComponent({
   name: "BalanceView",
+  mixins: [windowMixin],
   props: {
     proofs: Array,
     activeProofs: Array,

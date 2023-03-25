@@ -51,7 +51,7 @@
               : ''
           "
         >
-          <div>{{ props.row.amount }}</div>
+          <div>{{ formatSat(props.row.amount) }}</div>
         </q-td>
 
         <q-td key="date" :props="props">

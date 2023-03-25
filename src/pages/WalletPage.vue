@@ -56,7 +56,7 @@
             <!-- <q-tab name="tokens" label="Tokens"></q-tab> -->
             <q-tab name="settings" label="Settings"></q-tab>
           </q-tabs>
-          <q-tab-panels v-model="tab" animated swipeable infinite>
+          <q-tab-panels v-model="tab" animated>
             <!-- ////////////////// HISTORY LIST ///////////////// -->
 
             <q-tab-panel name="history">
@@ -98,7 +98,7 @@
             </q-tab-panel>
             <!-- ////////////////// TOKEN LIST ///////////////// -->
 
-            <q-tab-panel name="tokens">
+            <!-- <q-tab-panel name="tokens">
               <q-table
                 dense
                 flat
@@ -129,7 +129,7 @@
                   </q-tr>
                 </template>
               </q-table>
-            </q-tab-panel>
+            </q-tab-panel> -->
           </q-tab-panels>
         </q-card-section>
       </q-card>
@@ -773,44 +773,6 @@
         </div>
       </q-card>
     </q-dialog>
-
-    <!-- ADD MINT DIALOG  -->
-
-    <!-- <q-dialog
-      v-model="addMintDialog.show"
-      @keydown.enter.prevent="addMint(mintToAdd, (verbose = true))"
-    >
-      <q-card class="q-pa-lg">
-        <h6 class="q-my-md text-primary">Do you trust this mint?</h6>
-        <p>
-          A Cashu mint does not know about your financial activity but it
-          controls your funds. Make sure that you trust the operator of this
-          mint.
-        </p>
-        <q-input
-          outlined
-          readonly
-          v-model="mintToAdd"
-          label="Mint URL"
-          type="textarea"
-          autogrow
-          class="q-mb-xs"
-        ></q-input>
-        <div class="row q-mt-lg">
-          <q-btn
-            outline
-            v-close-popup
-            color="primary"
-            icon="check"
-            @click="addMint(mintToAdd, (verbose = true))"
-            >Add mint</q-btn
-          >
-          <q-btn v-close-popup flat color="grey" class="q-ml-auto"
-            >Cancel</q-btn
-          >
-        </div>
-      </q-card>
-    </q-dialog> -->
   </div>
 </template>
 <style>

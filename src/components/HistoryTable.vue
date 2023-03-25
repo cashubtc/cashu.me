@@ -47,7 +47,7 @@
           :props="props"
           :class="props.row.amount > 0 ? 'text-green-13 text-weight-bold' : ''"
         >
-          <div>{{ props.row.amount }}</div>
+          <div>{{ formatSat(props.row.amount) }}</div>
         </q-td>
         <q-td key="date" :props="props">
           <div>{{ props.row.date }}</div>

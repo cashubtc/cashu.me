@@ -53,7 +53,7 @@
           <q-item-section side>
             <q-badge
               :color="mint.url == activeMintUrl ? 'primary' : 'grey'"
-              :label="mint.balance + ' ' + tickerShort"
+              :label="formatSat(mint.balance) + ' ' + tickerShort"
             />
           </q-item-section>
           <q-item-section side>
