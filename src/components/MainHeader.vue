@@ -10,9 +10,7 @@
         @click="toggleLeftDrawer"
       />
       <q-toolbar-title>
-        <q-btn flat no-caps dense size="lg" type="a" href="/">
-          <span><strong>Cashu</strong></span>
-        </q-btn>
+        <span><strong>Cashu</strong></span>
       </q-toolbar-title>
       <q-badge color="yellow" text-color="black" class="gt-sm q-mr-md">
         <span>Warning: Cashu is beta software</span>
