@@ -16,7 +16,7 @@
       <div v-for="mint in mints" :key="mint.url">
         <q-item
           :active="mint.url == activeMintUrl"
-          active-class="text-weight-bold"
+          active-class="text-weight-bold text-primary"
         >
           <q-item-section avatar>
             <q-icon
@@ -45,9 +45,9 @@
               @click="activateMint(mint.url, (verbose = false))"
               >{{ mint.url }}</q-item-label
             >
-            <!-- <q-item-label caption v-if="mint.url == activeMintUrl"
-                                >This is your active mint.</q-item-label
-                            > -->
+            <q-item-label caption v-if="mint.url == activeMintUrl"
+              >This is your active mint.</q-item-label
+            >
           </q-item-section>
 
           <q-item-section side>
@@ -199,7 +199,7 @@
   </q-dialog>
 </template>
 <script>
-import { defineComponent, ref } from "vue";
+import { defineComponent } from "vue";
 import { getShortUrl } from "src/js/wallet-helpers";
 
 export default defineComponent({
@@ -239,8 +239,6 @@ export default defineComponent({
       this.addMintDialog.show = true;
     },
   },
-  created: function () {
-    console.log("yo");
-  },
+  created: function () {},
 });
 </script>

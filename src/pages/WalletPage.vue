@@ -109,7 +109,8 @@
             <!-- ////////////////// INVOICE LIST ///////////////// -->
 
             <q-tab-panel name="invoices">
-              <q-table
+              <InvoicesTable :invoice-history="invoiceHistory" />
+              <!-- <q-table
                 dense
                 flat
                 :rows="invoiceHistory"
@@ -152,7 +153,6 @@
                           color="red"
                           ><q-tooltip>Paid</q-tooltip></q-icon
                         >
-                        <!-- <q-icon name="props.row.amount < 0 ? 'call_made' : 'call_received'" color="green"></q-icon> -->
                       </div>
                     </q-td>
                     <q-td
@@ -170,9 +170,6 @@
                     <q-td key="date" :props="props">
                       <div>{{ props.row.date }}</div>
                     </q-td>
-                    <!-- <q-td key="memo" :props="props">
-                            <div>{{props.row.memo}}</div>
-                        </q-td> -->
                     <q-td key="bolt11" :props="props">
                       <div @click="copyText(props.row.bolt11)">
                         {{ shortenString(props.row.bolt11, 20, 10) }}
@@ -189,7 +186,7 @@
                     </q-td>
                   </q-tr>
                 </template>
-              </q-table>
+              </q-table> -->
             </q-tab-panel>
 
             <!-- ////////////////// HISTORY LIST ///////////////// -->
@@ -980,10 +977,11 @@ import { step1Alice, step3Alice } from "src/js/dhke";
 import { uint8ToBase64 } from "src/js/base64";
 import * as _ from "underscore";
 import { getShortUrl } from "src/js/wallet-helpers";
-
+import { shortenString } from "src/js/string-utils";
 // Vue components
 import BalanceView from "components/BalanceView.vue";
 import SettingsView from "components/SettingsView.vue";
+import InvoicesTable from "components/InvoicesTable.vue";
 
 var currentDateStr = function () {
   return date.formatDate(new Date(), "YYYY-MM-DD HH:mm:ss");
@@ -994,6 +992,7 @@ export default {
   components: {
     BalanceView,
     SettingsView,
+    InvoicesTable,
   },
   data: function () {
     return {
@@ -1121,65 +1120,65 @@ export default {
         },
         filter: null,
       },
-      invoicesTable: {
-        columns: [
-          {
-            name: "status",
-            align: "left",
-            label: "",
-            field: "status",
-            sortable: true,
-          },
-          {
-            name: "amount",
-            align: "left",
-            label: "Amount",
-            field: "amount",
-            sortable: true,
-          },
-          {
-            name: "date",
-            align: "left",
-            label: "Date",
-            field: "date",
-            sortable: true,
-          },
-          // {
-          //   name: 'memo',
-          //   align: 'left',
-          //   label: 'Memo',
-          //   field: 'memo',
-          //   sortable: true
-          // },
-          {
-            name: "bolt11",
-            align: "left",
-            label: "Payment request",
-            field: "bolt11",
-            sortable: false,
-          },
-          {
-            name: "hash",
-            align: "left",
-            label: "Hash",
-            field: "hash",
-            sortable: false,
-          },
-          {
-            name: "mint",
-            align: "left",
-            label: "Mint",
-            field: "mint",
-            sortable: true,
-          },
-        ],
-        pagination: {
-          sortBy: "date",
-          descending: true,
-          rowsPerPage: 5,
-        },
-        filter: null,
-      },
+      // invoicesTable: {
+      //   columns: [
+      //     {
+      //       name: "status",
+      //       align: "left",
+      //       label: "",
+      //       field: "status",
+      //       sortable: true,
+      //     },
+      //     {
+      //       name: "amount",
+      //       align: "left",
+      //       label: "Amount",
+      //       field: "amount",
+      //       sortable: true,
+      //     },
+      //     {
+      //       name: "date",
+      //       align: "left",
+      //       label: "Date",
+      //       field: "date",
+      //       sortable: true,
+      //     },
+      //     // {
+      //     //   name: 'memo',
+      //     //   align: 'left',
+      //     //   label: 'Memo',
+      //     //   field: 'memo',
+      //     //   sortable: true
+      //     // },
+      //     {
+      //       name: "bolt11",
+      //       align: "left",
+      //       label: "Payment request",
+      //       field: "bolt11",
+      //       sortable: false,
+      //     },
+      //     {
+      //       name: "hash",
+      //       align: "left",
+      //       label: "Hash",
+      //       field: "hash",
+      //       sortable: false,
+      //     },
+      //     {
+      //       name: "mint",
+      //       align: "left",
+      //       label: "Mint",
+      //       field: "mint",
+      //       sortable: true,
+      //     },
+      //   ],
+      //   pagination: {
+      //     sortBy: "date",
+      //     descending: true,
+      //     rowsPerPage: 5,
+      //   },
+      //   filter: null,
+      // },
 
       historyTable: {
         columns: [
@@ -1360,15 +1359,15 @@ export default {
     // getactiveMintUrlShort: function () {
     //   return this.getShortUrl(this.activeMintUrl);
     // },
-    shortenString: function (s, length = 20, lastchars = 5) {
-      if (s.length > length + lastchars) {
-        return (
-          s.substring(0, length) +
-          "..." +
-          s.substring(s.length - lastchars, s.length)
-        );
-      }
-    },
+    // shortenString: function (s, length = 20, lastchars = 5) {
+    //   if (s.length > length + lastchars) {
+    //     return (
+    //       s.substring(0, length) +
+    //       "..." +
+    //       s.substring(s.length - lastchars, s.length)
+    //     );
+    //   }
+    // },
     getTokenList: function () {
       const amounts = this.activeProofs.map((t) => t.amount);
       const counts = {};
