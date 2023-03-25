@@ -1,6 +1,6 @@
 <template>
   <!-- ////////////////////// SETTINGS ////////////////// -->
-  <div class="q-py-md q-px-xs bg-grey-10 text-white text-left" on-left>
+  <div class="q-py-md q-px-xs text-left" on-left>
     <q-list padding>
       <q-item>
         <q-item-section>
@@ -16,7 +16,7 @@
       <div v-for="mint in mints" :key="mint.url">
         <q-item
           :active="mint.url == activeMintUrl"
-          active-class="text-weight-bold text-white"
+          active-class="text-weight-bold"
         >
           <q-item-section avatar>
             <q-icon
@@ -98,7 +98,7 @@
       </q-input>
     </div>
   </div>
-  <div class="q-py-sm q-px-xs bg-grey-10 text-white text-left" on-left>
+  <div class="q-py-sm q-px-xs text-left" on-left>
     <q-list padding>
       <q-item>
         <q-item-section>
@@ -212,6 +212,7 @@ export default defineComponent({
     activeMintUrl: String,
     addMint: Function,
     removeMint: Function,
+    activateMint: Function,
   },
   data: function () {
     return {

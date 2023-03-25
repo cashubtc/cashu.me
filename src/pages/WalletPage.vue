@@ -68,6 +68,7 @@
                 :active-mint-url="activeMintUrl"
                 :add-mint="addMint"
                 :remove-mint="removeMint"
+                :activate-mint="activateMint"
               />
             </q-tab-panel>
             <!-- ////////////////// TOKEN LIST ///////////////// -->
