@@ -50,7 +50,7 @@
           <!-- ///////////////////////////////////////////
                 ////////////////// TABLES /////////////////
                 /////////////////////////////////////////// -->
-          <q-tabs v-model="tab" no-caps class="bg-dark text-white shadow-2">
+          <q-tabs v-model="tab" no-caps class="bg-dark text-white">
             <q-tab name="invoices" label="Invoices"></q-tab>
             <!-- <q-tab name="tokens" label="Tokens"></q-tab> -->
             <q-tab name="history" label="History"></q-tab>
@@ -143,7 +143,7 @@
               rectangle
               color="primary"
               @click="showInvoiceCreateDialog"
-              ><strong>Receive</strong>
+              ><strong>Create Invoice</strong>
             </q-btn>
           </div>
           <!-- <div class="col-4"></div> -->
@@ -194,7 +194,7 @@
               align="between"
               rectangle
               color="primary"
-              ><strong>Send</strong>
+              ><strong>Pay Invoice</strong>
             </q-btn>
           </div>
         </div>
