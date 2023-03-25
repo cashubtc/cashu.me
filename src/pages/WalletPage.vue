@@ -318,6 +318,7 @@
                 :columns="invoicesTable.columns"
                 no-data-label="There are no invoices here yet"
                 :filter="invoicesTable.filter"
+                :pagination="invoicesTable.pagination"
               >
                 <template v-slot:body="props">
                   <q-tr :props="props">
@@ -403,6 +404,7 @@
                 :columns="historyTable.columns"
                 no-data-label="There are no tokens here yet"
                 :filter="historyTable.filter"
+                :pagination="historyTable.pagination"
               >
                 <template v-slot:body="props">
                   <q-tr :props="props">
@@ -1460,18 +1462,18 @@ export default {
       return this.payments.findIndex((payment) => payment.pending) !== -1;
     },
 
-    // balance: function () {
-    //   return this.activeProofs
-    //     .map((t) => t)
-    //     .flat()
-    //     .reduce((sum, el) => (sum += el.amount), 0);
-    // },
-    // getTotalBalance: function () {
-    //   return this.proofs
-    //     .map((t) => t)
-    //     .flat()
-    //     .reduce((sum, el) => (sum += el.amount), 0);
-    // },
+    balance: function () {
+      return this.activeProofs
+        .map((t) => t)
+        .flat()
+        .reduce((sum, el) => (sum += el.amount), 0);
+    },
+    getTotalBalance: function () {
+      return this.proofs
+        .map((t) => t)
+        .flat()
+        .reduce((sum, el) => (sum += el.amount), 0);
+    },
   },
   filters: {
     msatoshiFormat: function (value) {
