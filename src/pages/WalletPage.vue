@@ -51,12 +51,32 @@
                 ////////////////// TABLES /////////////////
                 /////////////////////////////////////////// -->
           <q-tabs v-model="tab" no-caps class="bg-dark text-white">
+            <q-tab name="history" label="History"></q-tab>
             <q-tab name="invoices" label="Invoices"></q-tab>
             <!-- <q-tab name="tokens" label="Tokens"></q-tab> -->
-            <q-tab name="history" label="History"></q-tab>
             <q-tab name="settings" label="Settings"></q-tab>
           </q-tabs>
-          <q-tab-panels v-model="tab">
+          <q-tab-panels v-model="tab" animated swipeable infinite>
+            <!-- ////////////////// HISTORY LIST ///////////////// -->
+
+            <q-tab-panel name="history">
+              <HistoryTable
+                :history-tokens="historyTokens"
+                :show-token-dialog="showTokenDialog"
+                :check-token-spendable="checkTokenSpendable"
+              />
+            </q-tab-panel>
+
+            <!-- ////////////////// INVOICE LIST ///////////////// -->
+
+            <q-tab-panel name="invoices">
+              <InvoicesTable
+                :invoice-history="invoiceHistory"
+                :show-invoice-info-dialog="showInvoicInfoDialog"
+                :check-invoice="checkInvoice"
+              />
+            </q-tab-panel>
+
             <!-- ////////////////////// SETTINGS ////////////////// -->
 
             <q-tab-panel name="settings" class="q-px-sm">
@@ -109,26 +129,6 @@
                   </q-tr>
                 </template>
               </q-table>
-            </q-tab-panel>
-
-            <!-- ////////////////// INVOICE LIST ///////////////// -->
-
-            <q-tab-panel name="invoices">
-              <InvoicesTable
-                :invoice-history="invoiceHistory"
-                :show-invoice-info-dialog="showInvoicInfoDialog"
-                :check-invoice="checkInvoice"
-              />
-            </q-tab-panel>
-
-            <!-- ////////////////// HISTORY LIST ///////////////// -->
-
-            <q-tab-panel name="history">
-              <HistoryTable
-                :history-tokens="historyTokens"
-                :show-token-dialog="showTokenDialog"
-                :check-token-spendable="checkTokenSpendable"
-              />
             </q-tab-panel>
           </q-tab-panels>
         </q-card-section>
@@ -926,7 +926,7 @@ export default {
       showReceiveTokens: false,
       promises: [],
       tokens: [],
-      tab: "invoices",
+      tab: "history",
       receive: {
         show: false,
         status: "pending",
@@ -1226,10 +1226,10 @@ export default {
       this.decodeRequest();
       this.camera.show = false;
     },
-    decodeRequest: function (request = null) {
+    decodeRequest: function (r = null) {
       // set the argument as the data to parse
-      if (request != null) {
-        this.payInvoiceData.data.request = request;
+      if (typeof r == "string" && r != null) {
+        this.payInvoiceData.data.request = r;
       }
       let reqtype = null;
       let req = null;
@@ -1927,12 +1927,18 @@ export default {
         this.activeProofs,
         amount
       );
-      const payload = {
-        proofs: scndProofs.flat(),
-        amount,
-        pr: this.payInvoiceData.data.request,
-      };
       try {
+        let amounts = [1, 1, 1, 1];
+        let secrets = await this.generateSecrets(amounts); // four change blank outputs
+        let { outputs, rs } = await this.constructOutputs(amounts, secrets);
+        let amount_paid = amount;
+        const payload = {
+          proofs: scndProofs.flat(),
+          amount,
+          pr: this.payInvoiceData.data.request,
+          outputs,
+        };
+        const keys = this.keys; // fix keys for constructProofs
         const { data } = await axios.post(
           `${this.activeMintUrl}/melt`,
           payload
@@ -1944,24 +1950,34 @@ export default {
         // delete spent tokens from db
         this.deleteProofs(scndProofs);
 
+        // get change
+        if (data.change != null) {
+          const changeProofs = this.constructProofs(
+            data.change,
+            secrets,
+            rs,
+            keys
+          );
+          console.log("## Received change: " + this.sumProofs(changeProofs));
+          amount_paid = amount_paid - this.sumProofs(changeProofs);
+          this.proofs = this.proofs.concat(changeProofs);
+          // hack to update balance
+          this.activeProofs = this.activeProofs.concat([]);
+          this.storeProofs();
+        }
+
         // update UI
 
         this.historyTokens.push({
           status: "paid",
-          amount: -amount,
+          amount: -amount_paid,
           date: currentDateStr(),
           token: this.serializeProofs(scndProofs),
         });
         this.storehistoryTokens();
 
-        console.log({
-          amount: -amount,
-          bolt11: this.payInvoiceData.data.request,
-          hash: this.payInvoiceData.data.hash,
-          memo: this.payInvoiceData.data.memo,
-        });
         this.invoiceHistory.push({
-          amount: -amount,
+          amount: -amount_paid,
           bolt11: this.payInvoiceData.data.request,
           hash: this.payInvoiceData.data.hash,
           memo: this.payInvoiceData.data.memo,
