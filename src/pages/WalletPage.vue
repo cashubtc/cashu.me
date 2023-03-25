@@ -1521,8 +1521,18 @@ export default {
         if (verbose) {
           this.notifySuccess("Mint added.");
         }
+        // update balance of active mint in this.mints
+        if (this.mints.length > 0 && this.activeMintUrl) {
+          this.mints.filter((m) => m.url == this.activeMintUrl)[0].balance =
+            this.getBalance();
+        }
         localStorage.setItem("cashu.activeMintUrl", this.activeMintUrl);
-        console.log("### activateMint: Mint activated: ", this.activeMintUrl);
+        console.log(
+          "### activateMint: Mint activated: ",
+          this.activeMintUrl,
+          "balanbce",
+          this.getBalance()
+        );
       } catch (error) {
         this.activeMintUrl = presiouvURL;
         let err_msg = "Could not connect to mint.";
@@ -1545,10 +1555,6 @@ export default {
         .map((t) => t)
         .flat()
         .reduce((sum, el) => (sum += el.amount), 0);
-      if (this.mints.length > 0 && this.activeMintUrl) {
-        this.mints.filter((m) => m.url == this.activeMintUrl)[0].balance =
-          balance;
-      }
       return balance;
     },
     getShortUrl: function (url) {

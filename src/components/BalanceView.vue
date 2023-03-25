@@ -12,17 +12,17 @@
         </div>
         <div class="row q-mt-xs q-mb-none" v-if="mints.length > 1">
           <div class="col-12">
-            <a class="text-weight-light">
-              Balance on active mint:
-              <b>{{ getBalance() }} {{ tickerShort }} </b></a
-            >
+            <h6 class="q-my-none q-py-none text-weight-regular">
+              This mint:
+              <b>{{ getBalance }} {{ tickerShort }} </b>
+            </h6>
           </div>
         </div>
-        <div class="row q-mt-none q-mb-none" v-if="activeMintUrl">
+        <div class="row q-mt-xs q-mb-none" v-if="activeMintUrl">
           <div class="col-12">
-            <a class="text-weight-light">
-              Mint: <b>{{ getActiveMintUrlShort }}</b></a
-            >
+            <span class="text-weight-light">
+              Mint: <b>{{ getActiveMintUrlShort }}</b>
+            </span>
           </div>
         </div>
       </div>
@@ -56,10 +56,18 @@ export default defineComponent({
     getActiveMintUrlShort: function () {
       return this.getShortUrl(this.activeMintUrl);
     },
+    getBalance: function () {
+      var balance = this.activeProofs
+        .map((t) => t)
+        .flat()
+        .reduce((sum, el) => (sum += el.amount), 0);
+      return balance;
+    },
   },
   methods: {
     getShortUrl: function (url) {
       url = url.replace("https://", "");
+      url = url.replace("http://", "");
       const cut_param = 46;
       if (url.length > cut_param && url.indexOf("/") != -1) {
         url =
