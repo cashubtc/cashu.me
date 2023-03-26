@@ -219,6 +219,8 @@ export default defineComponent({
     melt: Function,
     invoiceCheckWorker: Function,
     payInvoiceData: Object,
+    showMintDialog: Boolean,
+    mintToAddWalletPage: String,
   },
   data: function () {
     return {
@@ -232,6 +234,16 @@ export default defineComponent({
       },
       mintToAdd: "https://8333.space:3338",
     };
+  },
+  watch: {
+    showMintDialog: function () {
+      this.addMintDialog.show = this.showMintDialog;
+    },
+    mintToAddWalletPage: function () {
+      if (this.mintToAddWalletPage.length > 0) {
+        this.mintToAdd = this.mintToAddWalletPage;
+      }
+    },
   },
   methods: {
     swapDataOptions: function () {

@@ -1,7 +1,9 @@
 <template>
   <div class="row q-col-gutter-y-md justify-center q-pt-sm q-pb-md">
     <div class="col-12 col-sm-11 col-md-8 text-center q-gutter-y-md">
+      <NoMintWarnBanner v-if="mints.length == 0" />
       <BalanceView
+        v-else
         :proofs="proofs"
         :active-proofs="activeProofs"
         :mints="mints"
@@ -94,6 +96,8 @@
                 :melt="melt"
                 :invoice-check-worker="invoiceCheckWorker"
                 :pay-invoice-data="payInvoiceData"
+                :show-mint-dialog="this.addMintDialog.show"
+                :mint-to-add-wallet-page="this.addMintDialog.mintToAdd"
               />
             </q-tab-panel>
             <!-- ////////////////// TOKEN LIST ///////////////// -->
@@ -810,6 +814,7 @@ import BalanceView from "components/BalanceView.vue";
 import SettingsView from "components/SettingsView.vue";
 import InvoicesTable from "components/InvoicesTable.vue";
 import HistoryTable from "components/HistoryTable.vue";
+import NoMintWarnBanner from "components/NoMintWarnBanner.vue";
 
 var currentDateStr = function () {
   return date.formatDate(new Date(), "YYYY-MM-DD HH:mm:ss");
@@ -822,6 +827,7 @@ export default {
     SettingsView,
     InvoicesTable,
     HistoryTable,
+    NoMintWarnBanner,
   },
   data: function () {
     return {
@@ -962,6 +968,7 @@ export default {
       },
       addMintDialog: {
         show: false,
+        mintToAdd: "",
       },
       baseHost: location.protocol + "//" + location.host,
       baseURL: location.protocol + "//" + location.host + location.pathname,
@@ -1068,29 +1075,6 @@ export default {
         .reduce((sum, el) => (sum += el.amount), 0);
       return balance;
     },
-    // getShortUrl: function (url) {
-    //   url = url.replace("https://", "");
-    //   const cut_param = 46;
-    //   if (url.length > cut_param && url.indexOf("/") != -1) {
-    //     url =
-    //       url.substring(0, url.indexOf("/") + 1) +
-    //       "..." +
-    //       url.substring(url.length - cut_param / 2, url.length);
-    //   }
-    //   return url;
-    // },
-    // getactiveMintUrlShort: function () {
-    //   return this.getShortUrl(this.activeMintUrl);
-    // },
-    // shortenString: function (s, length = 20, lastchars = 5) {
-    //   if (s.length > length + lastchars) {
-    //     return (
-    //       s.substring(0, length) +
-    //       "..." +
-    //       s.substring(s.length - lastchars, s.length)
-    //     );
-    //   }
-    // },
     shortenString: function (s) {
       return shortenString(s, 20, 10);
     },
@@ -1163,10 +1147,8 @@ export default {
     },
     setWelcomeDialogSeen: function () {
       localStorage.setItem("cashu.welcomeDialogSeen", "seen");
-      // kick of notification that no mints are present
-      // we have to do this because we disabled this notification since it
-      // covers the dialog
-      this.showNoMintsWarning();
+      // switch to settings tab
+      this.tab = "settings";
     },
     showDisclaimerDialog: function () {
       this.disclaimerDialog.show = true;
@@ -1792,7 +1774,12 @@ export default {
             if (
               !this.mints.map((m) => m.url).includes(tokenJson.mints[i].url)
             ) {
-              await this.addMint(tokenJson.mints[i].url);
+              // pop up add mint dialog warning
+              this.addMintDialog.mintToAdd = tokenJson.mints[i].url;
+              this.addMintDialog.show = true;
+              // show the token receive dialog again for the next attempt
+              this.showReceiveTokens = true;
+              return;
             }
           }
 
@@ -2301,22 +2288,6 @@ export default {
         }
       });
     },
-    showNoMintsWarning: function () {
-      if (!this.activeMintUrl) {
-        this.walletURL = this.baseURL;
-        // we have to check whether the welcome dialog was pressed away because
-        // otherwise quasar falsely covers the welcome dialog with this notify
-        if (localStorage.getItem("cashu.welcomeDialogSeen") == "seen") {
-          this.notifyWarning(
-            "You are not connected to any mints yet.",
-            "Add a new mint URL in the settings.",
-            30000
-          );
-        }
-        // switch to settings tab
-        this.tab = "settings";
-      }
-    },
     registerLocalStorageSyncHook: function () {
       // makes sure that local storage stays up to date
       // in multiple tabs of the same window
@@ -2526,7 +2497,6 @@ export default {
       let activeMintUrl = localStorage.getItem("cashu.activeMintUrl");
       await this.addMint(activeMintUrl);
     }
-    this.showNoMintsWarning();
 
     // todo: remove:
     if (!this.mintId.length) {
