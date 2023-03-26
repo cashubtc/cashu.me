@@ -771,6 +771,7 @@
                 :ticker-short="tickerShort"
                 :active-mint-url="activeMintUrl"
                 :proofs-to-show="sendData.tokens"
+                :token-mint-url="getMint(decodeToken(sendData.tokensBase64))"
               />
             </div>
           </div>
@@ -843,6 +844,7 @@
               :ticker-short="tickerShort"
               :active-mint-url="activeMintUrl"
               :proofs-to-show="getProofs(decodeToken(receiveData.tokensBase64))"
+              :token-mint-url="getMint(decodeToken(receiveData.tokensBase64))"
             />
           </div>
         </div>
@@ -1155,7 +1157,11 @@ export default {
       /*
       Returns first mint of a token (very rough way).
       */
-      return decoded_token.token[0].mint;
+      if (decoded_token.token != null && decoded_token.token.length > 0) {
+        return decoded_token.token[0].mint;
+      } else {
+        return "";
+      }
     },
     //
     addMint: async function (url, verbose = false) {
@@ -1195,8 +1201,10 @@ export default {
         }
         // update balance of active mint in this.mints
         if (this.mints.length > 0 && this.activeMintUrl) {
-          this.mints.filter((m) => m.url == this.activeMintUrl)[0].balance =
-            this.getBalance();
+          let thisMint = this.mints.filter((m) => m.url == this.activeMintUrl);
+          if (thisMint.length > 0) {
+            thisMint[0].balance = this.getBalance();
+          }
         }
         localStorage.setItem("cashu.activeMintUrl", this.activeMintUrl);
         console.log(

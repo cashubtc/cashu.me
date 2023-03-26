@@ -1,15 +1,18 @@
 <template>
   <div class="row text-left q-py-none q-my-none">
-    <div class="col-6 q-px-sm">
+    <div class="col-12 q-px-sm">
       <q-icon name="toll" size="xs" color="grey" class="q-mr-xs" />
-      <span>
+      <span class="q-mr-md">
         <strong>{{ formatSat(sumProofs) }} {{ tickerShort }}</strong></span
       >
-    </div>
-
-    <div class="col-6">
       <q-icon name="account_balance" size="xs" color="grey" class="q-mr-xs" />
-      <span> Mint: {{ getProofsMint(proofsToShow) }} </span>
+      <span>Mint: </span>
+      <span v-if="mintKnownToUs(proofsToShow)">
+        {{ getProofsMint(proofsToShow) }}
+      </span>
+      <span v-else>
+        {{ tokenMintUrl }}
+      </span>
     </div>
   </div>
 </template>
@@ -27,6 +30,7 @@ export default defineComponent({
     tickerShort: String,
     activeMintUrl: String,
     proofsToShow: Array,
+    tokenMintUrl: String,
   },
   data: function () {
     return {};
@@ -49,7 +53,21 @@ export default defineComponent({
       );
       // what we put into the JSON
       let mints = mints_keysets.map((m) => [{ url: m.url, ids: m.keysets }][0]);
-      return getShortUrl(mints[0].url);
+      if (mints.length == 0) {
+        return "";
+      } else {
+        return getShortUrl(mints[0].url);
+      }
+    },
+    mintKnownToUs: function (proofs) {
+      // unique keyset IDs of proofs
+      let uniqueIds = [...new Set(proofs.map((p) => p.id))];
+      // mints that have any of the keyset IDs
+      return (
+        this.mints.filter((m) =>
+          m.keysets.some((r) => uniqueIds.indexOf(r) >= 0)
+        ).length > 0
+      );
     },
   },
 });
