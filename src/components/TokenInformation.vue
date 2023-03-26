@@ -2,8 +2,7 @@
   <div class="row text-left q-py-none q-my-none">
     <div class="col-6 q-px-sm">
       <q-icon name="toll" size="xs" color="grey" class="q-mr-xs" />
-      <span
-        >Amount:
+      <span>
         <strong>{{ formatSat(sumProofs) }} {{ tickerShort }}</strong></span
       >
     </div>
