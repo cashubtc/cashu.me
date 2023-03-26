@@ -152,6 +152,18 @@ module.exports = configure(function (ctx) {
         description: `Cashu Wallet`,
         display: "standalone",
         orientation: "portrait",
+        background_color: "#12091f",
+        theme_color: "#12091f",
+        protocol_handlers: [
+          {
+            protocol: "web+cashu",
+            url: "/?token=%s",
+          },
+          {
+            protocol: "web+lightning",
+            url: "/?lightning=%s",
+          },
+        ],
         icons: [
           {
             src: "icons/icon-128x128.png",

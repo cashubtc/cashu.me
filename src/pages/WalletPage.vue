@@ -728,7 +728,6 @@
         </div>
         <div v-else class="text-center q-mb-lg">
           <div class="text-center q-mb-lg" v-if="sendData.tokens.length < 2">
-            <!-- <a class="text-secondary" :href="'cashu:' + sendData.tokensBase64"> -->
             <q-responsive :ratio="1" class="q-mx-xl">
               <vue-qrcode
                 :value="baseURL + '?token=' + sendData.tokensBase64"
@@ -737,17 +736,44 @@
               >
               </vue-qrcode>
             </q-responsive>
-            <!-- </a> -->
           </div>
-          <q-input
-            outlined
-            dense
-            readonly
-            v-model="sendData.tokensBase64"
-            label="Token"
-            type="textarea"
-            class="q-mb-lg"
-          ></q-input>
+          <div class="row">
+            <div class="col-12">
+              <q-toggle
+                class="float-right"
+                v-model="showSendTokenLegacyV2TokenToggleState"
+                color="pink"
+                icon="bedtime"
+                label="Old token format"
+                @click="sendTokenDialogSwitchTokenV3ToLegacyV2()"
+              />
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-12">
+              <q-input
+                outlined
+                dense
+                readonly
+                v-model="sendData.tokensBase64"
+                label="Cashu token"
+                type="textarea"
+                class="q-mb-sm"
+              ></q-input>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-12">
+              <TokenInformation
+                :proofs="proofs"
+                :active-proofs="activeProofs"
+                :mints="mints"
+                :ticker-short="tickerShort"
+                :active-mint-url="activeMintUrl"
+                :proofs-to-show="sendData.tokens"
+              />
+            </div>
+          </div>
         </div>
         <div class="row q-mt-lg">
           <q-btn
@@ -762,10 +788,14 @@
                 >Burn Tokens</q-btn
                 > -->
           <div v-else>
-            <q-btn color="primary" @click="copyText(sendData.tokensBase64)"
+            <q-btn
+              class="q-mx-xs"
+              color="primary"
+              @click="copyText(sendData.tokensBase64)"
               >Copy token</q-btn
             >
             <q-btn
+              class="q-mx-xs"
               color="primary"
               outline
               @click="copyText(baseURL + '?token=' + sendData.tokensBase64)"
@@ -781,26 +811,48 @@
     <!-- RECEIVE TOKENS DIALOG  -->
 
     <q-dialog v-model="showReceiveTokens" position="top">
-      <q-card class="q-pa-lg q-pt-xl qcard">
+      <q-card class="q-pa-lg q-pt-md qcard">
         <div>
           <div class="row items-center no-wrap q-mb-sm">
             <div class="col-12">
-              <span class="text-subtitle1">Receive Cashu tokens</span>
+              <span class="text-subtitle1">Receive Ecash</span>
             </div>
           </div>
           <q-input
             filled
             dense
             v-model="receiveData.tokensBase64"
-            label="Eneter Cashu token"
+            label="Enter Cashu token"
             type="textarea"
             autofocus
             class="q-mb-lg"
           ></q-input>
         </div>
-
+        <div
+          class="row"
+          v-if="
+            receiveData.tokensBase64.length &&
+            decodeToken(receiveData.tokensBase64) != ''
+          "
+        >
+          <div class="col-12">
+            <TokenInformation
+              :proofs="proofs"
+              :active-proofs="activeProofs"
+              :mints="mints"
+              :ticker-short="tickerShort"
+              :active-mint-url="activeMintUrl"
+              :proofs-to-show="getProofs(decodeToken(receiveData.tokensBase64))"
+            />
+          </div>
+        </div>
         <div class="row q-mt-lg">
-          <q-btn @click="redeem" color="primary">Receive</q-btn>
+          <q-btn
+            @click="redeem"
+            color="primary"
+            :disabled="!decodeToken(receiveData.tokensBase64)"
+            >Receive</q-btn
+          >
           <q-btn
             unelevated
             icon="photo_camera"
@@ -835,6 +887,7 @@
 }
 </style>
 <script>
+import { ref } from "vue";
 import { axios } from "boot/axios";
 import { date } from "quasar";
 import { splitAmount, bigIntStringify } from "src/js/utils";
@@ -851,6 +904,7 @@ import InvoicesTable from "components/InvoicesTable.vue";
 import HistoryTable from "components/HistoryTable.vue";
 import NoMintWarnBanner from "components/NoMintWarnBanner.vue";
 import ChooseMint from "components/ChooseMint.vue";
+import TokenInformation from "components/TokenInformation.vue";
 var currentDateStr = function () {
   return date.formatDate(new Date(), "YYYY-MM-DD HH:mm:ss");
 };
@@ -864,6 +918,7 @@ export default {
     HistoryTable,
     NoMintWarnBanner,
     ChooseMint,
+    TokenInformation,
   },
   data: function () {
     return {
@@ -880,11 +935,6 @@ export default {
       deferredPWAInstallPrompt: null,
       invoiceHistory: [],
       historyTokens: [],
-      swapData: {
-        from_url: "",
-        to_url: "",
-        amount: 0,
-      },
       invoiceData: {
         amount: 0,
         memo: "",
@@ -927,6 +977,8 @@ export default {
       showInvoiceDetails: false,
       showPayInvoice: false,
       showSendTokens: false,
+      showSendTokenLegacyV2Token: false,
+      showSendTokenLegacyV2TokenToggleState: ref(false),
       showReceiveTokens: false,
       promises: [],
       tokens: [],
@@ -962,35 +1014,35 @@ export default {
         },
       },
       payments: [],
-      tokensTable: {
-        columns: [
-          {
-            name: "value",
-            align: "left",
-            label: "'Value",
-            field: "value",
-            sortable: true,
-          },
-          {
-            name: "count",
-            align: "left",
-            label: "Count",
-            field: "count",
-            sortable: true,
-          },
-          {
-            name: "sum",
-            align: "left",
-            label: "Sum (sats)",
-            field: "sum",
-            sortable: true,
-          },
-        ],
-        pagination: {
-          rowsPerPage: 5,
-        },
-        filter: null,
-      },
+      // tokensTable: {
+      //   columns: [
+      //     {
+      //       name: "value",
+      //       align: "left",
+      //       label: "'Value",
+      //       field: "value",
+      //       sortable: true,
+      //     },
+      //     {
+      //       name: "count",
+      //       align: "left",
+      //       label: "Count",
+      //       field: "count",
+      //       sortable: true,
+      //     },
+      //     {
+      //       name: "sum",
+      //       align: "left",
+      //       label: "Sum (sats)",
+      //       field: "sum",
+      //       sortable: true,
+      //     },
+      //   ],
+      //   pagination: {
+      //     rowsPerPage: 5,
+      //   },
+      //   filter: null,
+      // },
       paymentsChart: {
         show: false,
       },
@@ -1045,6 +1097,67 @@ export default {
     },
   },
   methods: {
+    // TOKEN METHODS
+
+    decodeToken: function (encoded_token) {
+      try {
+        // crop prefixes
+        let UriPrefixes = ["web+cashu://", "cashu:", "cashu://"];
+        UriPrefixes.forEach((prefix) => {
+          if (encoded_token.startsWith(prefix)) {
+            encoded_token = encoded_token.slice(prefix.length);
+          }
+        });
+
+        // v2 token
+        if (encoded_token.startsWith("eyJwcm9")) {
+          let tokenV2 = JSON.parse(atob(encoded_token));
+          let newToken = {
+            token: [
+              {
+                proofs: tokenV2.proofs,
+                mint: tokenV2.mints[0].url,
+              },
+            ],
+          };
+          return newToken;
+        }
+        // v3 token
+        let prefix = "cashuA";
+        if (encoded_token.startsWith(prefix)) {
+          let token_parsed = encoded_token.slice(prefix.length);
+          let tokenJson = JSON.parse(atob(token_parsed));
+          if (
+            !(tokenJson.token.length > 0) ||
+            !(tokenJson.token[0].proofs.length > 0)
+          ) {
+            throw new Error("No proofs in encoded token");
+          }
+          return tokenJson;
+        }
+      } catch (error) {
+        return "";
+      }
+    },
+    getProofs: function (decoded_token) {
+      /*
+      Returns all proofs in a decoded token.
+      */
+      if (
+        !(decoded_token.token.length > 0) ||
+        !(decoded_token.token[0].proofs.length > 0)
+      ) {
+        throw new Error("Token format wrong");
+      }
+      return decoded_token.token.map((t) => t.proofs).flat();
+    },
+    getMint: function (decoded_token) {
+      /*
+      Returns first mint of a token (very rough way).
+      */
+      return decoded_token.token[0].mint;
+    },
+    //
     addMint: async function (url, verbose = false) {
       try {
         // we have no mints at all
@@ -1437,13 +1550,30 @@ export default {
 
     showTokenDialog: function (tokensBase64) {
       console.log("##### showTokenDialog");
-      this.sendData.tokens = JSON.parse(atob(tokensBase64)).proofs;
+      this.sendData.tokens = this.getProofs(this.decodeToken(tokensBase64));
       this.sendData.tokensBase64 = _.clone(tokensBase64);
       this.showSendTokens = true;
       // kick off token check worker
       this.checkTokenSpendableWorker();
     },
-
+    sendTokenDialogSwitchTokenV3ToLegacyV2: function () {
+      // converts the (serialized) data in this.sendData.tokenBase64 between V2 and V3 token
+      if (!(this.sendData.tokens.length > 0)) {
+        // nothing to do
+        return;
+      }
+      if (this.showSendTokenLegacyV2Token) {
+        // convert to V3
+        this.sendData.tokensBase64 = this.serializeProofs(this.sendData.tokens);
+        this.showSendTokenLegacyV2Token = false;
+      } else {
+        // convert to V2
+        this.sendData.tokensBase64 = this.serializeProofsV2(
+          this.sendData.tokens
+        );
+        this.showSendTokenLegacyV2Token = true;
+      }
+    },
     showSendTokensDialog: function () {
       console.log("##### showSendTokensDialog");
       this.sendData.tokens = "";
@@ -1531,21 +1661,50 @@ export default {
       this.storeProofs();
       return this.proofs;
     },
-
+    // getAllMintKeysets: function () {
+    //   return this.mints.filter((m) =>
+    //     m.keysets.some((r) => uniqueIds.indexOf(r) >= 0)
+    //   );
+    // },
     serializeProofs: function (proofs) {
       // unique keyset IDs of proofs
-      var uniqueIds = [...new Set(proofs.map((p) => p.id))];
+      let uniqueIds = [...new Set(proofs.map((p) => p.id))];
       // mints that have any of the keyset IDs
-      var mints_keysets = this.mints.filter((m) =>
+      let mints_keysets = this.mints.filter((m) =>
         m.keysets.some((r) => uniqueIds.indexOf(r) >= 0)
       );
       // what we put into the JSON
-      var mints = mints_keysets.map((m) => [{ url: m.url, ids: m.keysets }][0]);
-      var token = {
+      let mints = mints_keysets.map((m) => [{ url: m.url, ids: m.keysets }][0]);
+      let tokenV3 = {
+        token: [{ proofs: proofs, mint: mints[0].url }],
+      };
+      return "cashuA" + btoa(JSON.stringify(tokenV3));
+    },
+    getProofsMint: function (proofs) {
+      // unique keyset IDs of proofs
+      let uniqueIds = [...new Set(proofs.map((p) => p.id))];
+      // mints that have any of the keyset IDs
+      let mints_keysets = this.mints.filter((m) =>
+        m.keysets.some((r) => uniqueIds.indexOf(r) >= 0)
+      );
+      // what we put into the JSON
+      let mints = mints_keysets.map((m) => [{ url: m.url, ids: m.keysets }][0]);
+      return mints[0];
+    },
+    serializeProofsV2: function (proofs) {
+      // unique keyset IDs of proofs
+      let uniqueIds = [...new Set(proofs.map((p) => p.id))];
+      // mints that have any of the keyset IDs
+      let mints_keysets = this.mints.filter((m) =>
+        m.keysets.some((r) => uniqueIds.indexOf(r) >= 0)
+      );
+      // what we put into the JSON
+      let mints = mints_keysets.map((m) => [{ url: m.url, ids: m.keysets }][0]);
+      var tokenV2 = {
         proofs: proofs,
         mints,
       };
-      return btoa(JSON.stringify(token));
+      return btoa(JSON.stringify(tokenV2));
     },
     //////////// API ///////////
 
@@ -1804,46 +1963,38 @@ export default {
 
     redeem: async function () {
       /*
-                uses split to receive new tokens.
-                */
+      uses split to receive new tokens.
+      */
       this.showReceiveTokens = false;
       console.log("### receive tokens", this.receiveData.tokensBase64);
       try {
         if (this.receiveData.tokensBase64.length == 0) {
           throw new Error("no tokens provided.");
         }
-        const tokenJson = JSON.parse(atob(this.receiveData.tokensBase64));
-        // v1 tokens:
-        var proofs = "";
-        if (tokenJson.proofs == null) {
-          proofs = tokenJson;
-        } else {
-          proofs = tokenJson.proofs;
-          // check if we have all mints
-          for (var i = 0; i < tokenJson.mints.length; i++) {
-            if (
-              !this.mints.map((m) => m.url).includes(tokenJson.mints[i].url)
-            ) {
-              // pop up add mint dialog warning
-              this.addMintDialog.mintToAdd = tokenJson.mints[i].url;
-              this.addMintDialog.show = true;
-              // show the token receive dialog again for the next attempt
-              this.showReceiveTokens = true;
-              return;
-            }
+        const tokenJson = this.decodeToken(this.receiveData.tokensBase64);
+        let proofs = this.getProofs(tokenJson);
+        // check if we have all mints
+        for (var i = 0; i < tokenJson.token.length; i++) {
+          if (!this.mints.map((m) => m.url).includes(this.getMint(tokenJson))) {
+            // pop up add mint dialog warning
+            this.addMintDialog.mintToAdd = tokenJson.token[i].mint;
+            this.addMintDialog.show = true;
+            // show the token receive dialog again for the next attempt
+            this.showReceiveTokens = true;
+            return;
           }
 
           // TODO: We assume here that all proofs are from one mint! This will fail if
           // that's not the case!
-          if (tokenJson.mints[0].url != this.activeMintUrl) {
-            await this.activateMint(tokenJson.mints[0].url);
+          if (this.getMint(tokenJson) != this.activeMintUrl) {
+            await this.activateMint(this.getMint(tokenJson));
           }
         }
 
         const amount = proofs.reduce((s, t) => (s += t.amount), 0);
 
         // redeem
-        let { fristProofs, scndProofs } = await this.split(proofs, amount);
+        await this.split(proofs, amount);
 
         // update UI
 
@@ -1874,8 +2025,8 @@ export default {
 
     sendTokens: async function () {
       /*
-                calls splitToSend, displays token and kicks off the spendableWorker
-                */
+      calls splitToSend, displays token and kicks off the spendableWorker
+      */
       try {
         // keep firstProofs, send scndProofs and delete them (invalidate=true)
         let { fristProofs, scndProofs } = await this.splitToSend(
@@ -1887,6 +2038,7 @@ export default {
         // update UI
         this.sendData.tokens = scndProofs;
         console.log("### this.sendData.tokens", this.sendData.tokens);
+
         this.sendData.tokensBase64 = this.serializeProofs(scndProofs);
 
         this.historyTokens.push({
@@ -2003,9 +2155,9 @@ export default {
 
     checkProofsSpendable: async function (proofs, update_history = false) {
       /*
-                checks with the mint whether an array of proofs is still
-                spendable or already invalidated
-                */
+      checks with the mint whether an array of proofs is still
+      spendable or already invalidated
+      */
       if (proofs.length == 0) {
         return;
       }
@@ -2183,15 +2335,15 @@ export default {
 
     checkTokenSpendable: async function (token, verbose = true) {
       /*
-                checks whether a base64-encoded token (from the history table) has been spent already.
-                if it is spent, the appropraite entry in the history table is set to paid.
-                */
-      const tokenJson = JSON.parse(atob(token));
-      const proofs = tokenJson.proofs;
+      checks whether a base64-encoded token (from the history table) has been spent already.
+      if it is spent, the appropraite entry in the history table is set to paid.
+      */
+      const tokenJson = this.decodeToken(token);
+      const proofs = this.getProofs(tokenJson);
 
-      if (tokenJson.mints != null && tokenJson.mints[0].url != null) {
-        // todo: we activate only the first mint in the token
-        await this.activateMint(tokenJson.mints[0].url);
+      // activate the mint
+      if (this.getMint(tokenJson).length > 0) {
+        await this.activateMint(this.getMint(tokenJson));
       }
 
       const spendable = await this.checkProofsSpendable(proofs);
