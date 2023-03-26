@@ -45,6 +45,79 @@ window.windowMixin = {
     formatSat: function (value) {
       return new Intl.NumberFormat(window.LOCALE).format(value);
     },
+    notifySuccess: async function (message, position = "top") {
+      this.$q.notify({
+        timeout: 5000,
+        type: "positive",
+        message: message,
+        position: position,
+        progress: true,
+        actions: [
+          {
+            icon: "close",
+            color: "white",
+            handler: () => {},
+          },
+        ],
+      });
+    },
+    notifyError: async function (message, caption = null) {
+      this.$q.notify({
+        color: "red",
+        message: message,
+        caption: caption,
+        position: "top",
+        progress: true,
+        actions: [
+          {
+            icon: "close",
+            color: "white",
+            handler: () => {},
+          },
+        ],
+      });
+    },
+    notifyWarning: async function (message, caption = null, timeout = 5000) {
+      this.$q.notify({
+        timeout: timeout,
+        type: "warning",
+        message: message,
+        caption: caption,
+        position: "top",
+        progress: true,
+        actions: [
+          {
+            icon: "close",
+            color: "black",
+            handler: () => {},
+          },
+        ],
+      });
+    },
+    notify: async function (
+      message,
+      type = "null",
+      position = "top",
+      caption = null,
+      color = null
+    ) {
+      // failure
+      this.$q.notify({
+        timeout: 5000,
+        type: "nuill",
+        color: "grey",
+        message: message,
+        caption: null,
+        position: "top",
+        actions: [
+          {
+            icon: "close",
+            color: "white",
+            handler: () => {},
+          },
+        ],
+      });
+    },
   },
   created: function () {
     if (

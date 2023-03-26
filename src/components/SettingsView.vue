@@ -104,9 +104,8 @@
         <q-item-section>
           <q-item-label overline>Multimint Swaps</q-item-label>
           <q-item-label caption
-            >Swap funds from one mint to another via Lightning. Warning: this
-            feature is still experimental and could behave in unexpected
-            ways!</q-item-label
+            >Swap funds from one mint to another via Lightning. Note: Leave room
+            for potential Lightning fees.</q-item-label
           >
         </q-item-section>
       </q-item>
@@ -270,6 +269,7 @@ export default defineComponent({
       // settle invoice on other side
       await this.activateMint(to_url);
       await this.invoiceCheckWorker();
+      this.notifySuccess("Swap successful!");
     },
   },
   created: function () {},

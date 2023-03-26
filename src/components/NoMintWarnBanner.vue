@@ -1,10 +1,12 @@
 <template>
-  <q-card class="bg-purple text-black" style="background: orange !important">
+  <q-card class="bg-purple">
     <q-card-section>
       <div class="text-overline">Warning</div>
-      <q-separator class="bg-black q-mb-sm" />
-      <div class="text-h6">You are not connected to a mint.</div>
-      <div class="text-subtitle2">Add a new mint URL in the settings tab.</div>
+      <q-separator class="q-mb-sm" />
+      <div class="text-h6">No mints connected</div>
+      <div class="text-subtitle2">
+        Go to the Settings tab to add a new mint.
+      </div>
     </q-card-section>
   </q-card>
 </template>

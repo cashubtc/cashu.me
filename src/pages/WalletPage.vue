@@ -9,6 +9,9 @@
         :mints="mints"
         :ticker-short="tickerShort"
         :active-mint-url="activeMintUrl"
+        :pending-balance="pendingBalance"
+        :check-pending-tokens="checkPendingTokens"
+        :tab-to-settings="tabToSettings"
       />
 
       <!-- ECASH BUTTONS  -->
@@ -991,6 +994,11 @@ export default {
         .flat()
         .reduce((sum, el) => (sum += el.amount), 0);
     },
+    pendingBalance: function () {
+      return -this.historyTokens
+        .filter((t) => t.status == "pending")
+        .reduce((sum, el) => (sum += el.amount), 0);
+    },
     // getTotalBalance: function () {
     //   return this.proofs
     //     .map((t) => t)
@@ -1064,8 +1072,14 @@ export default {
     removeMint: async function (url) {
       this.mints = this.mints.filter((m) => m.url != url);
       localStorage.setItem("cashu.mints", JSON.stringify(this.mints));
+      if (url == this.activeMintUrl) {
+        this.activeMintUrl = "";
+        localStorage.setItem("cashu.activeMintUrl", this.activeMintUrl);
+      }
       // todo: we always reset to the first mint, improve this
-      await this.activateMint(this.mints[0].url);
+      if (this.mints.length > 0) {
+        await this.activateMint(this.mints[0].url);
+      }
       this.notifySuccess("Mint removed.");
     },
     getBalance: function () {
@@ -1147,6 +1161,9 @@ export default {
     },
     setWelcomeDialogSeen: function () {
       localStorage.setItem("cashu.welcomeDialogSeen", "seen");
+      this.tabToSettings();
+    },
+    tabToSettings: function () {
       // switch to settings tab
       this.tab = "settings";
     },
@@ -2094,7 +2111,12 @@ export default {
       }
     },
     checkPendingInvoices: async function () {
+      const last_n = 10;
+      let i = 0;
       for (const invoice of this.invoiceHistory) {
+        if (i >= last_n) {
+          break;
+        }
         if (invoice.status === "pending" && invoice.amount > 0) {
           try {
             await this.checkInvoice(invoice.hash, false);
@@ -2103,14 +2125,21 @@ export default {
             throw error;
           }
         }
+        i += 1;
       }
     },
 
     checkPendingTokens: async function () {
+      const last_n = 10;
+      let i = 0;
       for (const token of this.historyTokens) {
+        if (i >= last_n) {
+          break;
+        }
         if (token.status === "pending" && token.amount < 0) {
           this.checkTokenSpendable(token.token, false);
         }
+        i += 1;
       }
     },
     setTokenPaid: async function (token) {
@@ -2304,79 +2333,6 @@ export default {
         }
       });
     },
-    notifySuccess: async function (message, position = "top") {
-      this.$q.notify({
-        timeout: 5000,
-        type: "positive",
-        message: message,
-        position: position,
-        progress: true,
-        actions: [
-          {
-            icon: "close",
-            color: "white",
-            handler: () => {},
-          },
-        ],
-      });
-    },
-    notifyError: async function (message, caption = null) {
-      this.$q.notify({
-        color: "red",
-        message: message,
-        caption: caption,
-        position: "top",
-        progress: true,
-        actions: [
-          {
-            icon: "close",
-            color: "white",
-            handler: () => {},
-          },
-        ],
-      });
-    },
-    notifyWarning: async function (message, caption = null, timeout = 5000) {
-      this.$q.notify({
-        timeout: timeout,
-        type: "warning",
-        message: message,
-        caption: caption,
-        position: "top",
-        progress: true,
-        actions: [
-          {
-            icon: "close",
-            color: "black",
-            handler: () => {},
-          },
-        ],
-      });
-    },
-    notify: async function (
-      message,
-      type = "null",
-      position = "top",
-      caption = null,
-      color = null
-    ) {
-      // failure
-      this.$q.notify({
-        timeout: 5000,
-        type: "nuill",
-        color: "grey",
-        message: message,
-        caption: null,
-        position: "top",
-        actions: [
-          {
-            icon: "close",
-            color: "white",
-            handler: () => {},
-          },
-        ],
-      });
-    },
 
     ////////////// STORAGE /////////////
 
@@ -2495,7 +2451,9 @@ export default {
         this.walletURL = this.baseURL;
       }
       let activeMintUrl = localStorage.getItem("cashu.activeMintUrl");
-      await this.addMint(activeMintUrl);
+      await this.activateMint(activeMintUrl);
+    } else {
+      this.tab = "settings";
     }
 
     // todo: remove:
