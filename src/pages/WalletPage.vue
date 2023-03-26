@@ -156,7 +156,7 @@
             <div align="center">
               <q-btn
                 class="q-mx-xs q-px-sm q-my-sm"
-                size="0.5rem"
+                size="0.6rem"
                 rectangle
                 color="warning"
                 icon="warning"
@@ -166,7 +166,7 @@
               >
               <q-btn
                 class="q-mx-xs q-px-sm q-my-sm"
-                size="0.5rem"
+                size="0.6rem"
                 outline
                 rectangle
                 color="warning"
@@ -177,7 +177,7 @@
               <q-btn
                 class="q-mx-xs q-px-sm q-my-sm"
                 outline
-                size="0.5rem"
+                size="0.6rem"
                 v-if="
                   getPWADisplayMode() == 'browser' &&
                   deferredPWAInstallPrompt != null
