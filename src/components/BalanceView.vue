@@ -11,11 +11,11 @@
           </div>
         </div>
         <!-- mint balance -->
-        <div class="row q-mt-xs q-mb-none" v-if="mints.length > 1">
+        <div class="row q-mt-sm q-mb-none" v-if="mints.length > 1">
           <div class="col-12">
             <q-icon
               name="account_balance"
-              size="xs"
+              size="0.9rem"
               color="grey"
               class="q-mr-none q-mb-xs"
             />
@@ -30,12 +30,12 @@
           <div class="col-12 cursor-pointer">
             <q-icon
               name="link"
-              size="xs"
+              size="1rem"
               color="grey"
               class="q-mr-none q-mb-none"
-              @click="tabToSettings()"
+              @click="setTab('settings')"
             />
-            <span class="text-weight-light" @click="tabToSettings()">
+            <span class="text-weight-light" @click="setTab('settings')">
               Mint: <b>{{ getActiveMintUrlShort }}</b>
             </span>
           </div>
@@ -46,12 +46,15 @@
         <div class="col-12">
           <q-icon
             name="history"
-            size="xs"
+            size="1rem"
             color="grey"
             class="q-mr-none q-mb-xs cursor-pointer"
             @click="checkPendingTokens()"
           />
-          <span class="text-weight-light">
+          <span
+            class="text-weight-light cursor-pointer"
+            @click="setTab('history')"
+          >
             Pending: {{ formatSat(pendingBalance) }} {{ tickerShort }}
           </span>
         </div>
@@ -73,7 +76,7 @@ export default defineComponent({
     activeMintUrl: String,
     pendingBalance: Number,
     checkPendingTokens: Function,
-    tabToSettings: Function,
+    setTab: Function,
   },
   computed: {
     balance: function () {

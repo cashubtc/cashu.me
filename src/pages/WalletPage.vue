@@ -11,7 +11,7 @@
         :active-mint-url="activeMintUrl"
         :pending-balance="pendingBalance"
         :check-pending-tokens="checkPendingTokens"
-        :tab-to-settings="tabToSettings"
+        :set-tab="setTab"
       />
 
       <!-- ECASH BUTTONS  -->
@@ -283,7 +283,16 @@
             }}<br />
             <strong>Hash:</strong> {{ payInvoiceData.invoice.hash }}
           </p>
-
+          <div class="col-12">
+            <ChooseMint
+              :proofs="proofs"
+              :active-proofs="activeProofs"
+              :mints="mints"
+              :ticker-short="tickerShort"
+              :active-mint-url="activeMintUrl"
+              :activate-mint="activateMint"
+            />
+          </div>
           <div v-if="canPay" class="row q-mt-lg">
             <q-btn
               unelevated
@@ -603,11 +612,23 @@
     <!-- INVOICE DETAILS  -->
 
     <q-dialog v-model="showInvoiceDetails" position="top">
-      <q-card class="q-pa-lg q-pt-xl qcard">
+      <q-card class="q-pa-lg q-pt-md qcard">
         <div v-if="!invoiceData.bolt11">
           <div class="row items-center no-wrap q-mb-sm">
             <div class="col-12">
               <span class="text-subtitle1">Create a Lightning invoice</span>
+            </div>
+          </div>
+          <div class="row items-center no-wrap q-my-sm q-py-none">
+            <div class="col-12">
+              <ChooseMint
+                :proofs="proofs"
+                :active-proofs="activeProofs"
+                :mints="mints"
+                :ticker-short="tickerShort"
+                :active-mint-url="activeMintUrl"
+                :activate-mint="activateMint"
+              />
             </div>
           </div>
           <q-input
@@ -665,15 +686,26 @@
     <!-- SEND TOKENS DIALOG  -->
 
     <q-dialog v-model="showSendTokens" position="top">
-      <q-card class="q-pa-lg q-pt-xl qcard">
+      <q-card class="q-pa-lg q-pt-md qcard">
         <div v-if="!sendData.tokens">
           <div class="row items-center no-wrap q-mb-sm">
             <div class="col-12">
-              <span class="text-subtitle1"
-                >How much would you like to send?</span
-              >
+              <span class="text-subtitle1">Send ecash</span>
             </div>
           </div>
+          <div class="row items-center no-wrap q-my-sm q-py-none">
+            <div class="col-12">
+              <ChooseMint
+                :proofs="proofs"
+                :active-proofs="activeProofs"
+                :mints="mints"
+                :ticker-short="tickerShort"
+                :active-mint-url="activeMintUrl"
+                :activate-mint="activateMint"
+              />
+            </div>
+          </div>
+
           <q-input
             filled
             dense
@@ -818,7 +850,7 @@ import SettingsView from "components/SettingsView.vue";
 import InvoicesTable from "components/InvoicesTable.vue";
 import HistoryTable from "components/HistoryTable.vue";
 import NoMintWarnBanner from "components/NoMintWarnBanner.vue";
-
+import ChooseMint from "components/ChooseMint.vue";
 var currentDateStr = function () {
   return date.formatDate(new Date(), "YYYY-MM-DD HH:mm:ss");
 };
@@ -831,6 +863,7 @@ export default {
     InvoicesTable,
     HistoryTable,
     NoMintWarnBanner,
+    ChooseMint,
   },
   data: function () {
     return {
@@ -1161,11 +1194,11 @@ export default {
     },
     setWelcomeDialogSeen: function () {
       localStorage.setItem("cashu.welcomeDialogSeen", "seen");
-      this.tabToSettings();
-    },
-    tabToSettings: function () {
       // switch to settings tab
-      this.tab = "settings";
+      this.setTab("settings");
+    },
+    setTab: function (to) {
+      this.tab = to;
     },
     showDisclaimerDialog: function () {
       this.disclaimerDialog.show = true;
