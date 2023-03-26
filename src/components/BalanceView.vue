@@ -13,20 +13,26 @@
         <!-- mint balance -->
         <div class="row q-mt-xs q-mb-none" v-if="mints.length > 1">
           <div class="col-12">
-            <h6 class="q-my-none q-py-none text-weight-regular">
-              This mint:
+            <q-icon
+              name="account_balance"
+              size="xs"
+              color="grey"
+              class="q-mr-none q-mb-xs"
+            />
+            <span class="q-my-none q-py-none text-weight-regular">
+              Active mint:
               <b>{{ formatSat(getBalance) }} {{ tickerShort }} </b>
-            </h6>
+            </span>
           </div>
         </div>
         <!-- mint url -->
         <div class="row q-mt-xs q-mb-none" v-if="activeMintUrl">
           <div class="col-12 cursor-pointer">
             <q-icon
-              name="account_balance"
+              name="link"
               size="xs"
               color="grey"
-              class="q-mr-none q-mb-xs"
+              class="q-mr-none q-mb-none"
               @click="tabToSettings()"
             />
             <span class="text-weight-light" @click="tabToSettings()">
@@ -72,13 +78,15 @@ export default defineComponent({
   computed: {
     balance: function () {
       return this.activeProofs
-        .map((t) => t)
         .flat()
         .reduce((sum, el) => (sum += el.amount), 0);
     },
+    allMintKeysets: function () {
+      return [].concat(...this.mints.map((m) => m.keysets));
+    },
     getTotalBalance: function () {
       return this.proofs
-        .map((t) => t)
+        .filter((p) => this.allMintKeysets.includes(p.id))
         .flat()
         .reduce((sum, el) => (sum += el.amount), 0);
     },
@@ -87,7 +95,6 @@ export default defineComponent({
     },
     getBalance: function () {
       var balance = this.activeProofs
-        .map((t) => t)
         .flat()
         .reduce((sum, el) => (sum += el.amount), 0);
       return balance;
