@@ -155,25 +155,31 @@ const linksList = [
     link: "https://cashu.space",
   },
   {
+    title: "Documentation",
+    caption: "docs.cashu.space",
+    icon: "school",
+    link: "https://docs.cashu.space",
+  },
+  {
     title: "Github",
     caption: "github.com/cashubtc",
     icon: "code",
-    link: "https://github.com/cashubtc",
+    link: "https://github.com/cashubtc/cashu.me",
   },
   {
-    title: "Telegram group",
-    caption: "t.me/CashuBTC",
+    title: "Telegram",
+    caption: "t.me/CashuMe",
     icon: "chat",
-    link: "https://t.me/CashuBTC",
+    link: "https://t.me/CashuMe",
   },
   {
-    title: "Cashu faucet",
+    title: "Faucet",
     caption: "gandlaf.com/faucet",
     icon: "generating_tokens",
     link: "https://www.gandlaf.com/faucet/anarchy",
   },
   {
-    title: "Redeem on Lightning",
+    title: "Redeem",
     caption: "redeem.cashu.me",
     icon: "money",
     link: "https://redeem.cashu.me/",
@@ -188,7 +194,7 @@ const linksList = [
     title: "Donate",
     caption: "Support Cashu development",
     icon: "favorite",
-    link: "https://legend.lnbits.com/tipjar/794",
+    link: "https://docs.cashu.space/contribute",
   },
 ];
 
