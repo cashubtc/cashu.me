@@ -151,7 +151,7 @@ const linksList = [
   {
     title: "Cashu.space",
     caption: "cashu.space",
-    icon: "school",
+    icon: "web",
     link: "https://cashu.space",
   },
   {
