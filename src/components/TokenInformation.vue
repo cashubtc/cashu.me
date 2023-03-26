@@ -9,6 +9,7 @@
       <span>Mint: </span>
       <span v-if="mintKnownToUs(proofsToShow)">
         {{ getProofsMint(proofsToShow) }}
+        <q-icon name="check" size="xs" color="green" class="q-mr-xs" />
       </span>
       <span v-else>
         {{ tokenMintUrl }}
