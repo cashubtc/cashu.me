@@ -1985,6 +1985,10 @@ export default {
         for (var i = 0; i < tokenJson.token.length; i++) {
           if (!this.mints.map((m) => m.url).includes(this.getMint(tokenJson))) {
             // pop up add mint dialog warning
+            // hack! The "add mint" component is in SettingsView which may now
+            // have been loaded yet. We switch the tab to settings to make sure
+            // that it loads. Remove this code when the TrustMintComnent is refactored!
+            await this.setTab("settings");
             this.addMintDialog.mintToAdd = tokenJson.token[i].mint;
             this.addMintDialog.show = true;
             // show the token receive dialog again for the next attempt
@@ -2646,7 +2650,7 @@ export default {
       let activeMintUrl = localStorage.getItem("cashu.activeMintUrl");
       await this.activateMint(activeMintUrl);
     } else {
-      this.tab = "settings";
+      this.setTab("settings");
     }
 
     // todo: remove:
