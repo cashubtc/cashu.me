@@ -2239,7 +2239,7 @@ export default {
       try {
         console.log("### GET", `${this.activeMintUrl}/keys`);
         const { data } = await axios.get(`${this.activeMintUrl}/keys`, {
-          timeout: 2000,
+          timeout: 6000,
         });
         const keys = data;
         this.assertMintError(keys);
@@ -2269,7 +2269,7 @@ export default {
     fetchMintKeysets: async function () {
       try {
         const { data } = await axios.get(`${this.activeMintUrl}/keysets`, {
-          timeout: 2000,
+          timeout: 6000,
         });
         this.assertMintError(data);
         this.keysets = data.keysets;
