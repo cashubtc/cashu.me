@@ -1932,7 +1932,7 @@ export default {
         if (this.sumProofs(spendableProofs) < amount) {
           this.notifyWarning(
             "Balance is too low.",
-            `Your balance is ${this.getBalance()} sat and you're tyring to pay ${amount} sats.`
+            `Your balance is ${this.getBalance()} sat and you're trying to pay ${amount} sats.`
           );
           throw Error("balance too low.");
         }
