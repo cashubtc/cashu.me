@@ -2632,6 +2632,14 @@ export default {
     }
 
     // mint url
+    if (params.get("mint")) {
+      let activeMintUrl = params.get("mint");
+      // await this.addMint(activeMintUrl);
+      await this.setTab("settings");
+      this.addMintDialog.mintToAdd = activeMintUrl;
+      this.addMintDialog.show = true;
+    }
+
     if (params.get("mint_id")) {
       this.mintId = params.get("mint_id");
       // works with only lnbits mints
@@ -2702,6 +2710,9 @@ export default {
       this.showParseDialog();
       this.payInvoiceData.data.request = params.get("lightning");
     }
+
+    // Clear all parameters from URL without refreshing the page
+    window.history.pushState({}, document.title, "/");
 
     // startup tasks
     this.checkProofsSpendable(this.activeProofs, true).catch((err) => {

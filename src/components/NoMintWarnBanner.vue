@@ -1,11 +1,13 @@
 <template>
-  <q-card class="bg-purple">
+  <q-card>
     <q-card-section>
-      <div class="text-overline">Warning</div>
+      <div class="text-overline">
+        <q-badge color="primary" label="Warning" />
+      </div>
       <q-separator class="q-mb-sm" />
-      <div class="text-h6">No mints connected</div>
+      <div class="text-h6">You're not connected to any mint yet</div>
       <div class="text-subtitle2">
-        Go to the Settings tab to add a new mint.
+        Go to the Settings tab to add a mint bewore using this wallet
       </div>
     </q-card-section>
   </q-card>
