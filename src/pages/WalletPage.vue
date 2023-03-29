@@ -578,11 +578,18 @@
         <h6 class="q-my-md text-primary">Warning</h6>
         <p>
           <strong>Bookmark this page and backup your tokens!</strong>
-          Ecash is a bearer asset, meaning losing access to this wallet will
-          mean you will lose the funds. This wallet stores ecash tokens in its
-          database. If you lose the link or delete your your data without
-          backing up, you will lose your tokens. Press the Backup button to
-          download a copy of your tokens.
+          Ecash is a bearer asset. Losing access to this wallet will mean you
+          will lose your funds. This wallet stores ecash tokens locally on your
+          device. If you lose the link or delete your your data without backing
+          up, you will lose your tokens. Press the Backup button to download a
+          copy of your tokens.
+        </p>
+        <p>
+          <strong>Where is my old wallet</strong>
+          This wallet was previously running on
+          https://legend.lnbits.com/cashu/wallet but has since moved to
+          https://wallet.cashu.me. Send all tokens from the old wallet to this
+          one.
         </p>
         <p>
           <strong>Add to home screen.</strong>
