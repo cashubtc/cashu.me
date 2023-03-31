@@ -1194,11 +1194,16 @@ export default {
       }
       // we need to stop workers because they will reset the activeMint again
       this.clearAllWorkers();
+      // temporarily store the objects that get overwritten if all goes well
+      // so we can restore it if it doesn't go well
       let presiouvURL = this.activeMintUrl;
+      let previousKeys = this.keys;
+      let previousKeysets = this.keysets;
+
       try {
         this.activeMintUrl = url;
         console.log("### this.activeMintUrl", this.activeMintUrl);
-        let keys = await this.fetchMintKeys();
+        await this.fetchMintKeys();
         // load proofs
         this.activeProofs = this.proofs.filter((p) =>
           this.keysets.includes(p.id)
@@ -1221,13 +1226,18 @@ export default {
           this.getBalance()
         );
       } catch (error) {
+        // restore previous values because the activation errored
         this.activeMintUrl = presiouvURL;
+        this.keys = previousKeys;
+        this.keysets = previousKeysets;
+
         let err_msg = "Could not connect to mint.";
         if (error.message.length) {
           err_msg = err_msg + ` ${error.message}.`;
         }
         this.notifyError(err_msg);
-        throw error;
+        // we don't handle this error yet so it commented out
+        // throw error;
       }
     },
     removeMint: async function (url) {
@@ -1779,7 +1789,7 @@ export default {
       try {
         let secrets = await this.generateSecrets(amounts);
         let { outputs, rs } = await this.constructOutputs(amounts, secrets);
-        const keys = this.keys; // save keys here so they don't get updated before the next call is done and cause a race condition
+        const keys = this.keys; // fix keys for constructProofs
         const promises = await axios.post(
           `${this.activeMintUrl}/mint?payment_hash=${payment_hash}`,
           {
@@ -1893,7 +1903,7 @@ export default {
           proofs,
           outputs,
         };
-        const keys = this.keys;
+        const keys = this.keys; // fix keys for constructProofs
         const { data } = await axios.post(
           `${this.activeMintUrl}/split`,
           payload
@@ -2098,9 +2108,11 @@ export default {
         amount
       );
       try {
-        let amounts = [1, 1, 1, 1];
-        let secrets = await this.generateSecrets(amounts); // four change blank outputs
+        // NUT-08 blank outputs for change
+        let amounts = [1, 1, 1, 1]; // four change blank outputs
+        let secrets = await this.generateSecrets(amounts);
         let { outputs, rs } = await this.constructOutputs(amounts, secrets);
+
         let amount_paid = amount;
         const payload = {
           proofs: scndProofs.flat(),
@@ -2120,7 +2132,7 @@ export default {
         // delete spent tokens from db
         this.deleteProofs(scndProofs);
 
-        // get change
+        // NUT-08 get change
         if (data.change != null) {
           const changeProofs = this.constructProofs(
             data.change,
@@ -2243,6 +2255,8 @@ export default {
     // /keys
 
     fetchMintKeys: async function () {
+      // attention: this function overwrites this.keys
+      // later, it calles fetchMintKeysets which overwrites this.keysets
       try {
         console.log("### GET", `${this.activeMintUrl}/keys`);
         const { data } = await axios.get(`${this.activeMintUrl}/keys`, {
@@ -2274,6 +2288,7 @@ export default {
     // /keysets
 
     fetchMintKeysets: async function () {
+      // attention: this function overwrites this.keysets
       try {
         const { data } = await axios.get(`${this.activeMintUrl}/keysets`, {
           timeout: 6000,
