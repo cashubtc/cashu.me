@@ -1235,7 +1235,7 @@ export default {
         if (error.message.length) {
           err_msg = err_msg + ` ${error.message}.`;
         }
-        this.notifyError(err_msg);
+        this.notifyError(err_msg, "Mint activation");
         // we don't handle this error yet so it commented out
         // throw error;
       }
@@ -2126,6 +2126,9 @@ export default {
           payload
         );
         this.assertMintError(data);
+        if (data.paid != true) {
+          throw new Error("Invoice not paid.");
+        }
         if (window.navigator.vibrate) navigator.vibrate(200);
         this.notifySuccess("Token paid.");
         console.log("#### pay lightning: token paid");
@@ -2175,9 +2178,6 @@ export default {
       } catch (error) {
         this.payInvoiceData.blocking = false;
         console.error(error);
-        try {
-          this.notifyApiError(error);
-        } catch {}
         throw error;
       }
     },
@@ -2492,7 +2492,7 @@ export default {
     assertMintError: function (response, verbose = true) {
       if (response.error != null) {
         if (verbose) {
-          this.notifyError(`Mint error: ${response.error}`);
+          this.notifyError(response.error, "Mint error");
         }
         throw new Error(`Mint error: ${response.error}`);
       }
