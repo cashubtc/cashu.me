@@ -45,6 +45,24 @@ window.windowMixin = {
     formatSat: function (value) {
       return new Intl.NumberFormat(window.LOCALE).format(value);
     },
+    notifyApiError: function (error) {
+      var types = {
+        400: "warning",
+        401: "warning",
+        500: "negative",
+      };
+      this.$q.notify({
+        timeout: 5000,
+        type: types[error.response.status] || "warning",
+        message:
+          error.response.data.message || error.response.data.detail || null,
+        caption:
+          [error.response.status, " ", error.response.statusText]
+            .join("")
+            .toUpperCase() || null,
+        icon: null,
+      });
+    },
     notifySuccess: async function (message, position = "top") {
       this.$q.notify({
         timeout: 5000,

@@ -1772,7 +1772,7 @@ export default {
       } catch (error) {
         console.error(error);
         try {
-          LNbits.utils.notifyApiError(error);
+          this.notifyApiError(error);
         } catch {}
         throw error;
       }
@@ -1811,7 +1811,7 @@ export default {
         console.error(error);
         if (verbose) {
           try {
-            LNbits.utils.notifyApiError(error);
+            this.notifyApiError(error);
           } catch {}
         }
         throw error;
@@ -1845,7 +1845,7 @@ export default {
         console.error(error);
         if (verbose) {
           try {
-            LNbits.utils.notifyApiError(error);
+            this.notifyApiError(error);
           } catch {}
         }
         throw error;
@@ -1873,7 +1873,7 @@ export default {
         console.error(error);
         try {
           try {
-            LNbits.utils.notifyApiError(error);
+            this.notifyApiError(error);
           } catch {}
         } catch {}
         throw error;
@@ -1931,7 +1931,7 @@ export default {
         this.payInvoiceData.blocking = false;
         console.error(error);
         try {
-          LNbits.utils.notifyApiError(error);
+          this.notifyApiError(error);
         } catch {}
         throw error;
       }
@@ -1980,7 +1980,7 @@ export default {
       } catch (error) {
         console.error(error);
         try {
-          LNbits.utils.notifyApiError(error);
+          this.notifyApiError(error);
         } catch {}
         throw error;
       }
@@ -2045,7 +2045,7 @@ export default {
       } catch (error) {
         console.error(error);
         try {
-          LNbits.utils.notifyApiError(error);
+          this.notifyApiError(error);
         } catch {}
         throw error;
       }
@@ -2176,7 +2176,7 @@ export default {
         this.payInvoiceData.blocking = false;
         console.error(error);
         try {
-          LNbits.utils.notifyApiError(error);
+          this.notifyApiError(error);
         } catch {}
         throw error;
       }
@@ -2224,7 +2224,7 @@ export default {
       } catch (error) {
         console.error(error);
         try {
-          LNbits.utils.notifyApiError(error);
+          this.notifyApiError(error);
         } catch {}
         throw error;
       }
@@ -2246,7 +2246,7 @@ export default {
       } catch (error) {
         console.error(error);
         try {
-          LNbits.utils.notifyApiError(error);
+          this.notifyApiError(error);
         } catch {}
         throw error;
       }
@@ -2279,7 +2279,7 @@ export default {
       } catch (error) {
         console.error(error);
         try {
-          LNbits.utils.notifyApiError(error);
+          this.notifyApiError(error);
         } catch {}
         throw error;
       }
@@ -2300,7 +2300,7 @@ export default {
       } catch (error) {
         console.error(error);
         try {
-          LNbits.utils.notifyApiError(error);
+          this.notifyApiError(error);
         } catch {}
         throw error;
       }
