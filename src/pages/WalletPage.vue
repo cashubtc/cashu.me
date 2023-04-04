@@ -2734,7 +2734,7 @@ export default {
     }
 
     // Clear all parameters from URL without refreshing the page
-    window.history.pushState({}, document.title, "/");
+    window.history.pushState({}, document.title, window.location.href);
 
     // startup tasks
     this.checkProofsSpendable(this.activeProofs, true).catch((err) => {
