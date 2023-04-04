@@ -1,0 +1,1 @@
+*{touch-action:manipulation}.keypad{grid-gap:8px;display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:repeat(4,1fr)}.keypad .btn{height:100%}.keypad .btn-confirm{grid-area:1/4/5/4}
