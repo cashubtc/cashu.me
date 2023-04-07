@@ -1394,9 +1394,9 @@ export default {
       ) {
         this.payInvoiceData.data.request = req;
         reqtype = "lnurl";
-      } else if (req.indexOf("eyJwcm")) {
+      } else if (req.indexOf("cashuA")) {
         // very dirty way of parsing cashu tokens from either a pasted token or a URL like https://host.com?token=eyJwcm
-        this.receiveData.tokensBase64 = req.slice(req.indexOf("eyJwcm"));
+        this.receiveData.tokensBase64 = req.slice(req.indexOf("cashuA"));
         reqtype = "cashu";
       }
 
