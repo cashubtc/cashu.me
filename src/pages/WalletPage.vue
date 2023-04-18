@@ -186,11 +186,11 @@
                 outline
                 size="0.6rem"
                 v-if="
-                  getPWADisplayMode() == 'browser' &&
+                  getPwaDisplayMode() == 'browser' &&
                   deferredPWAInstallPrompt != null
                 "
                 color="primary"
-                @click="triggerPWAInstall()"
+                @click="triggerPwaInstall()"
                 ><b>Install</b><q-tooltip>Install Cashu</q-tooltip></q-btn
               >
             </div>
@@ -497,79 +497,12 @@
     </q-dialog>
 
     <!-- WELCOME DIALOG  -->
-    <q-dialog
-      class="z-top"
-      persistent
-      v-model="welcomeDialog.show"
-      position="top"
-    >
-      <q-card class="q-pa-lg z-top">
-        <q-toolbar>
-          <q-avatar>
-            <img
-              src="https://raw.githubusercontent.com/cashubtc/cashu-ui/main/ui/icons/circle/128x128.png"
-            />
-          </q-avatar>
-          <q-toolbar-title
-            ><span class="text-weight-bold">Cashu</span> wallet</q-toolbar-title
-          >
-        </q-toolbar>
-        <q-card-section>
-          <p>Please take a moment to read the following information.</p>
-
-          <p>
-            <strong>Open this wallet on your device's native browser</strong>
-            Cashu stores your ecash on your device locally. For the best
-            experience, use this wallet with your device's native web browser
-            (for example Safari for iOS, Chrome for Android).
-          </p>
-          <p>
-            <strong>Add to home screen.</strong>
-            Add Cashu to your home screen as a progressive web app (PWA). On
-            Android Chrome, click the hamburger menu at the upper right. On iOS
-            Safari, click the share button. Now press the Add to Home screen
-            button.
-          </p>
-          <p>
-            <strong>This software is in BETA!</strong> We hold no responsibility
-            for people losing access to funds. Use at your own risk! Ecash is a
-            bearer asset, meaning losing access to this wallet will mean you
-            will lose the funds. This wallet stores ecash tokens in its
-            database. If you lose the link or delete your your data without
-            backing up, you will lose your tokens. Press the Backup button to
-            download a copy of your tokens.
-          </p>
-          <div class="row q-mt-lg">
-            <q-btn
-              outline
-              class="q-mx-sm"
-              v-if="
-                getPWADisplayMode() == 'browser' &&
-                deferredPWAInstallPrompt != null
-              "
-              color="primary"
-              @click="triggerPWAInstall()"
-              >Install Cashu</q-btn
-            >
-            <q-btn
-              outline
-              color="grey"
-              class="q-mx-sm"
-              @click="copyText(baseURL)"
-              >Copy URL</q-btn
-            >
-            <q-btn
-              v-close-popup
-              flat
-              color="primary"
-              class="q-ml-auto"
-              @click="setWelcomeDialogSeen()"
-              >Continue</q-btn
-            >
-          </div>
-        </q-card-section>
-      </q-card>
-    </q-dialog>
+    <WelcomeDialog
+      :welcome-dialog="welcomeDialog"
+      :trigger-pwa-install="triggerPwaInstall"
+      :set-tab="setTab"
+      :get-pwa-display-mode="getPwaDisplayMode"
+    />
 
     <!-- WARNING DIAGLOG  -->
 
@@ -914,6 +847,8 @@ import HistoryTable from "components/HistoryTable.vue";
 import NoMintWarnBanner from "components/NoMintWarnBanner.vue";
 import ChooseMint from "components/ChooseMint.vue";
 import TokenInformation from "components/TokenInformation.vue";
+import WelcomeDialog from "components/WelcomeDialog.vue";
+
 var currentDateStr = function () {
   return date.formatDate(new Date(), "YYYY-MM-DD HH:mm:ss");
 };
@@ -928,6 +863,7 @@ export default {
     NoMintWarnBanner,
     ChooseMint,
     TokenInformation,
+    WelcomeDialog,
   },
   data: function () {
     return {
@@ -1525,35 +1461,6 @@ export default {
         ],
       });
     },
-    // payLnurl: function () {
-    //   let dismissPaymentMsg = this.$q.notify({
-    //     timeout: 0,
-    //     message: 'Processing payment...',
-    //     position: 'top',
-    //     actions: [
-    //       {
-    //         icon: 'close',
-    //         color: 'white',
-    //         handler: () => {}
-    //       }
-    //     ]
-    //   })
-    //   this.lnurlPaySecond()
-    // },
-    // authLnurl: function () {
-    //   let dismissAuthMsg = this.$q.notify({
-    //     timeout: 10,
-    //     message: 'Performing authentication...',
-    //     position: 'top',
-    //     actions: [
-    //       {
-    //         icon: 'close',
-    //         color: 'white',
-    //         handler: () => {}
-    //       }
-    //     ]
-    //   })
-    // },
 
     /////////////////////////////////// WALLET ///////////////////////////////////
     showInvoiceCreateDialog: async function () {
@@ -2508,11 +2415,11 @@ export default {
         this.deferredPWAInstallPrompt = e;
         console.log(
           `'beforeinstallprompt' event was fired.`,
-          this.getPWADisplayMode()
+          this.getPwaDisplayMode()
         );
       });
     },
-    getPWADisplayMode: function () {
+    getPwaDisplayMode: function () {
       const isStandalone = window.matchMedia(
         "(display-mode: standalone)"
       ).matches;
@@ -2523,7 +2430,7 @@ export default {
       }
       return "browser";
     },
-    triggerPWAInstall: function () {
+    triggerPwaInstall: function () {
       // Show the install prompt
       this.deferredPWAInstallPrompt.prompt();
       // Wait for the user to respond to the prompt
