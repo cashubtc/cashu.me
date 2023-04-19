@@ -7,7 +7,7 @@
       <q-separator class="q-mb-sm" />
       <div class="text-h6">You're not connected to any mint yet</div>
       <div class="text-subtitle2">
-        Go to the Settings tab to add a mint bewore using this wallet
+        Go to the Settings tab to add a mint before using this wallet
       </div>
     </q-card-section>
   </q-card>
