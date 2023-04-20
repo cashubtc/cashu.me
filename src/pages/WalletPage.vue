@@ -502,6 +502,7 @@
       :trigger-pwa-install="triggerPwaInstall"
       :set-tab="setTab"
       :get-pwa-display-mode="getPwaDisplayMode"
+      :set-welcome-dialog-seen="setWelcomeDialogSeen"
     />
 
     <!-- WARNING DIAGLOG  -->
@@ -1268,6 +1269,7 @@ export default {
     },
     setWelcomeDialogSeen: function () {
       localStorage.setItem("cashu.welcomeDialogSeen", "seen");
+      this.welcomeDialog.show = false;
       // switch to settings tab
       this.setTab("settings");
     },

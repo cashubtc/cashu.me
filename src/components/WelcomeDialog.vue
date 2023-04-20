@@ -75,6 +75,7 @@ export default defineComponent({
     triggerPwaInstall: Function,
     setTab: Function,
     getPwaDisplayMode: Function,
+    setWelcomeDialogSeen: Function,
   },
   data: function () {
     return {
@@ -84,12 +85,6 @@ export default defineComponent({
   },
   watch: {},
   computed: {},
-  methods: {
-    setWelcomeDialogSeen: function () {
-      localStorage.setItem("cashu.welcomeDialogSeen", "seen");
-      // switch to settings tab
-      this.setTab("settings");
-    },
-  },
+  methods: {},
 });
 </script>
