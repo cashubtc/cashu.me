@@ -20,16 +20,14 @@
 <script>
 import { defineComponent } from "vue";
 import { getShortUrl } from "src/js/wallet-helpers";
+import { mapState } from "pinia";
+import { useMintsStore } from "stores/mints";
 
 export default defineComponent({
   name: "TokenInformation",
   mixins: [windowMixin],
   props: {
-    proofs: Array,
-    activeProofs: Array,
-    mints: Array,
     tickerShort: String,
-    activeMintUrl: String,
     proofsToShow: Array,
     tokenMintUrl: String,
   },
@@ -38,6 +36,12 @@ export default defineComponent({
   },
   watch: {},
   computed: {
+    ...mapState(useMintsStore, [
+      'activeMintUrl',
+      'activeProofs',
+      'mints',
+      'proofs',
+    ]),
     sumProofs: function () {
       return this.proofsToShow
         .flat()

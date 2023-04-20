@@ -74,7 +74,7 @@
       <q-input
         standout
         bottom-slots
-        @keydown.enter.prevent="showAddMintDialog"
+        @keydown.enter.prevent="setShowAddMintDialog(true)"
         v-model="mintToAdd"
         label="Add new mint URL"
       >
@@ -92,7 +92,7 @@
             color="primary"
             icon="add"
             click
-            @click="showAddMintDialog"
+            @click="setShowAddMintDialog(true)"
           />
         </template>
       </q-input>
@@ -165,7 +165,7 @@
     </q-list>
   </div>
   <q-dialog
-    v-model="addMintDialog.show"
+    v-model="showAddMintDialog"
     @keydown.enter.prevent="addMint(mintToAdd, (verbose = true))"
   >
     <q-card class="q-pa-lg">
@@ -200,19 +200,15 @@
 <script>
 import { defineComponent } from "vue";
 import { getShortUrl } from "src/js/wallet-helpers";
+import {mapActions, mapState, mapWritableState} from "pinia";
+import { useMintsStore } from "src/stores/mints";
+
 
 export default defineComponent({
   name: "SettingsView",
   mixins: [windowMixin],
   props: {
-    proofs: Array,
-    activeProofs: Array,
-    mints: Array,
     tickerShort: String,
-    activeMintUrl: String,
-    addMint: Function,
-    removeMint: Function,
-    activateMint: Function,
     requestMint: Function,
     decodeRequest: Function,
     melt: Function,
@@ -231,8 +227,17 @@ export default defineComponent({
       addMintDialog: {
         show: false,
       },
-      mintToAdd: "https://8333.space:3338",
     };
+  },
+  computed: {
+    ...mapState(useMintsStore, [
+      'activeMintUrl',
+      'mints',
+    ]),
+    ...mapWritableState(useMintsStore, [
+      'mintToAdd',
+      'showAddMintDialog',
+    ])
   },
   watch: {
     showMintDialog: function () {
@@ -245,6 +250,11 @@ export default defineComponent({
     },
   },
   methods: {
+    ...mapActions(useMintsStore, [
+      'addMint',
+      'removeMint',
+      'setShowAddMintDialog'
+    ]),
     swapDataOptions: function () {
       let options = [];
       for (const [i, m] of Object.entries(this.mints)) {
@@ -252,9 +262,9 @@ export default defineComponent({
       }
       return options;
     },
-    showAddMintDialog: function () {
+    /*showAddMintDialog: function () {
       this.addMintDialog.show = true;
-    },
+    },*/
     //
     mintSwap: async function (from_url, to_url, amount) {
       // get invoice
