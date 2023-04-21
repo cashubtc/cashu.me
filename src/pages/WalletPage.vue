@@ -1,12 +1,12 @@
 <template>
   <div class="row q-col-gutter-y-md justify-center q-pt-sm q-pb-md">
     <div class="col-12 col-sm-11 col-md-8 text-center q-gutter-y-md">
-      <NoMintWarnBanner v-if="mints.length == 0" />
+      <NoMintWarnBanner v-if="mintsStore.mints.length == 0" />
       <BalanceView
         v-else
         :proofs="proofs"
         :active-proofs="activeProofs"
-        :mints="mints"
+        :mints="mintsStore.mints"
         :ticker-short="tickerShort"
         :active-mint-url="activeMintUrl"
         :pending-balance="pendingBalance"
@@ -831,6 +831,8 @@
 </style>
 <script>
 import { ref } from "vue";
+import { mapStores } from "pinia";
+import { useMintsStore } from "stores/mints";
 import { axios } from "boot/axios";
 import { date } from "quasar";
 import { splitAmount, bigIntStringify } from "src/js/utils";
@@ -1011,6 +1013,7 @@ export default {
     };
   },
   computed: {
+    ...mapStores(useMintsStore),
     canPay: function () {
       if (!this.payInvoiceData.invoice) return false;
       return this.payInvoiceData.invoice.sat <= this.balance;
@@ -1116,6 +1119,7 @@ export default {
         } else if (this.mints.filter((m) => m.url == url).length == 0) {
           // we don't have this mint yet
           this.mints.push({ url: url, balance: 0 });
+          this.mintsStore.addMint({ url, balance: 0 });
         }
         localStorage.setItem("cashu.mints", JSON.stringify(this.mints));
         await this.activateMint(url, verbose);
@@ -2553,12 +2557,12 @@ export default {
 
   created: async function () {
     let params = new URL(document.location).searchParams;
-
     // load proofs from db
     this.proofs = JSON.parse(localStorage.getItem("cashu.proofs") || "[]");
 
     // load mints
     if (localStorage.getItem("cashu.mints")) {
+      this.mintsStore.setMints(JSON.parse(localStorage.getItem("cashu.mints")));
       this.mints = JSON.parse(localStorage.getItem("cashu.mints"));
     }
 
