@@ -8,8 +8,8 @@ export const useMintsStore = defineStore('mints', {
   state: () => {
     return {
       activeMintUrl: useLocalStorage('cashu.activeMintUrl', ''),
-      activeProofs: [],
-      keys: useLocalStorage('cashu.keys', ''),
+      activeProofs: useLocalStorage('cashu.activeProofs', []),
+      keys: useLocalStorage('cashu.keys', {}),
       keysets: useLocalStorage('cashu.keysets', []),
       mintToAdd: 'https://8333.space:3338',
       mints:  useLocalStorage('cashu.mints', []),

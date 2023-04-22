@@ -1024,6 +1024,7 @@ export default {
       'activateMint',
       'addMint',
       'assertMintError',
+      'getBalance',
       'setActiveProofs',
       'setMintToAdd',
       'setProofs',
@@ -1769,13 +1770,13 @@ export default {
         );
         // set scndProofs in this.proofs as reserved
         const usedSecrets = proofs.map((p) => p.secret);
-        let proofs = this.proofs.map(proof => {
+        let newProofs = this.proofs.map(proof => {
           if (usedSecrets.includes(proof.secret)) {
             proof.reserved = true;
           }
           return proof;
         })
-        this.setProofs(proofs)
+        this.setProofs(newProofs)
 
         // hack: to make Vue JS update
         this.setProofs(this.proofs.concat([]));

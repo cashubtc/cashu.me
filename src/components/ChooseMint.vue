@@ -43,8 +43,11 @@ export default defineComponent({
   },
   data: function () {
     return {
-      chosenMint: getShortUrl(this.activeMintUrl),
+      chosenMint: null,
     };
+  },
+  mounted() {
+    this.chosenMint = { url: this.activeMintUrl, shorturl: getShortUrl(this.activeMintUrl) }
   },
   watch: {
     chosenMint: async function () {
