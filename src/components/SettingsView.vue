@@ -220,6 +220,7 @@ export default defineComponent({
     payInvoiceData: Object,
     showMintDialog: Boolean,
     mintToAddWalletPage: String,
+    clearAllWorkers: Function,
   },
   data: function () {
     return {
@@ -257,6 +258,7 @@ export default defineComponent({
     },
     //
     mintSwap: async function (from_url, to_url, amount) {
+      this.clearAllWorkers();
       // get invoice
       await this.activateMint(to_url);
       let invoice = await this.requestMint(amount);

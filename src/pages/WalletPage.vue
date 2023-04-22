@@ -101,6 +101,7 @@
                 :pay-invoice-data="payInvoiceData"
                 :show-mint-dialog="this.addMintDialog.show"
                 :mint-to-add-wallet-page="this.addMintDialog.mintToAdd"
+                :clear-all-workers="clearAllWorkers"
               />
             </q-tab-panel>
             <!-- ////////////////// TOKEN LIST ///////////////// -->
