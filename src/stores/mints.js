@@ -48,6 +48,8 @@ export const useMintsStore = defineStore('mints', {
 
         await this.activateMint(url, verbose);
       } catch (error) {
+        // activation failed, we remove the mint again from local storage
+        this.mints = this.mints.filter((m) => m.url !== url);
         throw error;
       } finally {
         this.showAddMintDialog = false;
@@ -92,7 +94,6 @@ export const useMintsStore = defineStore('mints', {
           this.getBalance()
         );
       } catch (error) {
-        console.log('error activating mint', error)
         // restore previous values because the activation errored
         this.activeMintUrl = previousUrl;
         this.keys = previousKeys;
@@ -103,8 +104,7 @@ export const useMintsStore = defineStore('mints', {
           err_msg = err_msg + ` ${error.message}.`;
         }
         await notifyError(err_msg, "Mint activation");
-        // we don't handle this error yet so it commented out
-        // throw error;
+        throw error;
       }
     },
     fetchMintKeys: async function () {
