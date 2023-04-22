@@ -101,7 +101,6 @@
                 :pay-invoice-data="payInvoiceData"
                 :show-mint-dialog="this.addMintDialog.show"
                 :mint-to-add-wallet-page="this.addMintDialog.mintToAdd"
-                :clear-all-workers="clearAllWorkers"
               />
             </q-tab-panel>
             <!-- ////////////////// TOKEN LIST ///////////////// -->
@@ -1121,6 +1120,9 @@ export default {
         localStorage.setItem("cashu.mints", JSON.stringify(this.mints));
         await this.activateMint(url, verbose);
       } catch (error) {
+        // activation failed, we remove the mint again from local storage
+        this.mints = this.mints.filter((m) => m.url != url);
+        localStorage.setItem("cashu.mints", JSON.stringify(this.mints));
         throw error;
       } finally {
         this.addMintDialog.show = false;
@@ -1174,8 +1176,7 @@ export default {
           err_msg = err_msg + ` ${error.message}.`;
         }
         this.notifyError(err_msg, "Mint activation");
-        // we don't handle this error yet so it commented out
-        // throw error;
+        throw error;
       }
     },
     removeMint: async function (url) {
@@ -2644,7 +2645,11 @@ export default {
     }
 
     // Clear all parameters from URL without refreshing the page
-    window.history.pushState({}, document.title, "/");
+    window.history.pushState(
+      {},
+      document.title,
+      window.location.href.split("?")[0]
+    );
 
     // startup tasks
     this.checkProofsSpendable(this.activeProofs, true).catch((err) => {
