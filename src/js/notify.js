@@ -81,7 +81,7 @@ async function notify(
   // failure
   Notify.create({
     timeout: 5000,
-    type: "nuill",
+    type: "null",
     color: "grey",
     message: message,
     caption: null,

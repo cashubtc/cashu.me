@@ -1671,12 +1671,12 @@ export default {
         if (proofs.length == 0) {
           throw new Error("no proofs provided.");
         }
-        let { fristProofs, scndProofs } = await this.splitApi(proofs, amount);
+        let { firstProofs, scndProofs } = await this.splitApi(proofs, amount);
         this.deleteProofs(proofs);
-        // add new fristProofs, scndProofs to this.proofs
-        this.setProofs(this.proofs.concat(fristProofs).concat(scndProofs));
+        // add new firstProofs, scndProofs to this.proofs
+        this.setProofs(this.proofs.concat(firstProofs).concat(scndProofs));
         // this.storeProofs();
-        return { fristProofs, scndProofs };
+        return { firstProofs, scndProofs };
       } catch (error) {
         console.error(error);
         try {
@@ -1721,7 +1721,7 @@ export default {
         const frst_secrets = secrets.slice(0, frst_amounts.length);
         const scnd_rs = rs.slice(frst_amounts.length);
         const scnd_secrets = secrets.slice(frst_amounts.length);
-        const fristProofs = this.constructProofs(
+        const firstProofs = this.constructProofs(
           data.fst,
           frst_secrets,
           frst_rs,
@@ -1734,7 +1734,7 @@ export default {
           keys
         );
 
-        return { fristProofs, scndProofs };
+        return { firstProofs, scndProofs };
       } catch (error) {
         this.payInvoiceData.blocking = false;
         console.error(error);
@@ -1764,7 +1764,7 @@ export default {
 
         // call /split
 
-        let { fristProofs, scndProofs } = await this.split(
+        let { firstProofs, scndProofs } = await this.split(
           spendableProofs,
           amount
         );
@@ -1786,7 +1786,7 @@ export default {
           this.deleteProofs(scndProofs);
         }
 
-        return { fristProofs, scndProofs };
+        return { firstProofs, scndProofs };
       } catch (error) {
         console.error(error);
         try {
@@ -1869,7 +1869,7 @@ export default {
       */
       try {
         // keep firstProofs, send scndProofs and delete them (invalidate=true)
-        let { fristProofs, scndProofs } = await this.splitToSend(
+        let { firstProofs, scndProofs } = await this.splitToSend(
           this.activeProofs,
           this.sendData.amount,
           true
@@ -1914,7 +1914,7 @@ export default {
         amount
       );
 
-      let { fristProofs, scndProofs } = await this.splitToSend(
+      let { firstProofs, scndProofs } = await this.splitToSend(
         this.activeProofs,
         amount
       );
