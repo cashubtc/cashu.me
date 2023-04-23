@@ -800,6 +800,7 @@ import { uint8ToBase64 } from "src/js/base64";
 import * as _ from "underscore";
 import { getShortUrl } from "src/js/wallet-helpers";
 import { shortenString } from "src/js/string-utils";
+import token from "src/js/token";
 // Vue components
 import BalanceView from "components/BalanceView.vue";
 import SettingsView from "components/SettingsView.vue";
@@ -1026,68 +1027,14 @@ export default {
     ]),
     ...mapActions(useWorkersStore, ["clearAllWorkers"]),
     // TOKEN METHODS
-
     decodeToken: function (encoded_token) {
-      try {
-        // crop prefixes
-        let UriPrefixes = ["web+cashu://", "cashu:", "cashu://"];
-        UriPrefixes.forEach((prefix) => {
-          if (encoded_token.startsWith(prefix)) {
-            encoded_token = encoded_token.slice(prefix.length);
-          }
-        });
-
-        // v2 token
-        if (encoded_token.startsWith("eyJwcm9")) {
-          let tokenV2 = JSON.parse(atob(encoded_token));
-          let newToken = {
-            token: [
-              {
-                proofs: tokenV2.proofs,
-                mint: tokenV2.mints[0].url,
-              },
-            ],
-          };
-          return newToken;
-        }
-        // v3 token
-        let prefix = "cashuA";
-        if (encoded_token.startsWith(prefix)) {
-          let token_parsed = encoded_token.slice(prefix.length);
-          let tokenJson = JSON.parse(atob(token_parsed));
-          if (
-            !(tokenJson.token.length > 0) ||
-            !(tokenJson.token[0].proofs.length > 0)
-          ) {
-            throw new Error("No proofs in encoded token");
-          }
-          return tokenJson;
-        }
-      } catch (error) {
-        return "";
-      }
+      return token.decode(encoded_token);
     },
     getProofs: function (decoded_token) {
-      /*
-      Returns all proofs in a decoded token.
-      */
-      if (
-        !(decoded_token.token.length > 0) ||
-        !(decoded_token.token[0].proofs.length > 0)
-      ) {
-        throw new Error("Token format wrong");
-      }
-      return decoded_token.token.map((t) => t.proofs).flat();
+      return token.getProofs(decoded_token);
     },
     getMint: function (decoded_token) {
-      /*
-      Returns first mint of a token (very rough way).
-      */
-      if (decoded_token.token != null && decoded_token.token.length > 0) {
-        return decoded_token.token[0].mint;
-      } else {
-        return "";
-      }
+      return token.getMint(decoded_token);
     },
     //
     shortenString: function (s) {
