@@ -4,11 +4,7 @@
       <NoMintWarnBanner v-if="mints.length == 0" />
       <BalanceView
         v-else
-        :proofs="proofs"
-        :active-proofs="activeProofs"
-        :mints="mints"
         :ticker-short="tickerShort"
-        :active-mint-url="activeMintUrl"
         :pending-balance="pendingBalance"
         :check-pending-tokens="checkPendingTokens"
         :set-tab="setTab"
@@ -86,14 +82,7 @@
 
             <q-tab-panel name="settings" class="q-px-sm">
               <SettingsView
-                :proofs="proofs"
-                :active-proofs="activeProofs"
-                :mints="mints"
                 :ticker-short="tickerShort"
-                :active-mint-url="activeMintUrl"
-                :add-mint="addMint"
-                :remove-mint="removeMint"
-                :activate-mint="activateMint"
                 :request-mint="requestMint"
                 :decode-request="decodeRequest"
                 :melt="melt"
@@ -284,14 +273,7 @@
             <strong>Hash:</strong> {{ payInvoiceData.invoice.hash }}
           </p>
           <div class="col-12">
-            <ChooseMint
-              :proofs="proofs"
-              :active-proofs="activeProofs"
-              :mints="mints"
-              :ticker-short="tickerShort"
-              :active-mint-url="activeMintUrl"
-              :activate-mint="activateMint"
-            />
+            <ChooseMint :ticker-short="tickerShort" />
           </div>
           <div v-if="canPay" class="row q-mt-lg">
             <q-btn
@@ -562,14 +544,7 @@
           </div>
           <div class="row items-center no-wrap q-my-sm q-py-none">
             <div class="col-12">
-              <ChooseMint
-                :proofs="proofs"
-                :active-proofs="activeProofs"
-                :mints="mints"
-                :ticker-short="tickerShort"
-                :active-mint-url="activeMintUrl"
-                :activate-mint="activateMint"
-              />
+              <ChooseMint :ticker-short="tickerShort" />
             </div>
           </div>
           <q-input
@@ -636,14 +611,7 @@
           </div>
           <div class="row items-center no-wrap q-my-sm q-py-none">
             <div class="col-12">
-              <ChooseMint
-                :proofs="proofs"
-                :active-proofs="activeProofs"
-                :mints="mints"
-                :ticker-short="tickerShort"
-                :active-mint-url="activeMintUrl"
-                :activate-mint="activateMint"
-              />
+              <ChooseMint :ticker-short="tickerShort" />
             </div>
           </div>
 
@@ -706,11 +674,7 @@
           <div class="row">
             <div class="col-12">
               <TokenInformation
-                :proofs="proofs"
-                :active-proofs="activeProofs"
-                :mints="mints"
                 :ticker-short="tickerShort"
-                :active-mint-url="activeMintUrl"
                 :proofs-to-show="sendData.tokens"
                 :token-mint-url="getMint(decodeToken(sendData.tokensBase64))"
               />
@@ -779,11 +743,7 @@
         >
           <div class="col-12">
             <TokenInformation
-              :proofs="proofs"
-              :active-proofs="activeProofs"
-              :mints="mints"
               :ticker-short="tickerShort"
-              :active-mint-url="activeMintUrl"
               :proofs-to-show="getProofs(decodeToken(receiveData.tokensBase64))"
               :token-mint-url="getMint(decodeToken(receiveData.tokensBase64))"
             />
@@ -840,6 +800,7 @@ import { uint8ToBase64 } from "src/js/base64";
 import * as _ from "underscore";
 import { getShortUrl } from "src/js/wallet-helpers";
 import { shortenString } from "src/js/string-utils";
+import token from "src/js/token";
 // Vue components
 import BalanceView from "components/BalanceView.vue";
 import SettingsView from "components/SettingsView.vue";
@@ -849,6 +810,10 @@ import NoMintWarnBanner from "components/NoMintWarnBanner.vue";
 import ChooseMint from "components/ChooseMint.vue";
 import TokenInformation from "components/TokenInformation.vue";
 import WelcomeDialog from "components/WelcomeDialog.vue";
+
+import { mapActions, mapState, mapWritableState } from "pinia";
+import { useMintsStore } from "src/stores/mints";
+import { useWorkersStore } from "src/stores/workers";
 
 var currentDateStr = function () {
   return date.formatDate(new Date(), "YYYY-MM-DD HH:mm:ss");
@@ -873,11 +838,6 @@ export default {
       name: "",
       mintId: "",
       mintName: "",
-      activeMintUrl: "",
-      mints: [],
-      keys: "",
-      proofs: [],
-      activeProofs: [],
       deferredPWAInstallPrompt: null,
       invoiceHistory: [],
       historyTokens: [],
@@ -892,7 +852,7 @@ export default {
         show: false,
         camera: "auto",
       },
-      invoiceCheckListener: () => {},
+      //invoiceCheckListener: () => {},
       payInvoiceData: {
         blocking: false,
         bolt11: "",
@@ -1011,6 +971,18 @@ export default {
     };
   },
   computed: {
+    ...mapState(useMintsStore, [
+      "activeMintUrl",
+      "activeProofs",
+      "keys",
+      "mints",
+      "proofs",
+    ]),
+    ...mapWritableState(useMintsStore, ["showAddMintDialog"]),
+    ...mapWritableState(useWorkersStore, [
+      "invoiceCheckListener",
+      "tokensCheckSpendableListener",
+    ]),
     canPay: function () {
       if (!this.payInvoiceData.invoice) return false;
       return this.payInvoiceData.invoice.sat <= this.balance;
@@ -1043,160 +1015,28 @@ export default {
     },
   },
   methods: {
+    ...mapActions(useMintsStore, [
+      "activateMint",
+      "addMint",
+      "assertMintError",
+      "getBalance",
+      "setActiveProofs",
+      "setMintToAdd",
+      "setProofs",
+      "setShowAddMintDialog",
+    ]),
+    ...mapActions(useWorkersStore, ["clearAllWorkers"]),
     // TOKEN METHODS
-
     decodeToken: function (encoded_token) {
-      try {
-        // crop prefixes
-        let UriPrefixes = ["web+cashu://", "cashu:", "cashu://"];
-        UriPrefixes.forEach((prefix) => {
-          if (encoded_token.startsWith(prefix)) {
-            encoded_token = encoded_token.slice(prefix.length);
-          }
-        });
-
-        // v2 token
-        if (encoded_token.startsWith("eyJwcm9")) {
-          let tokenV2 = JSON.parse(atob(encoded_token));
-          let newToken = {
-            token: [
-              {
-                proofs: tokenV2.proofs,
-                mint: tokenV2.mints[0].url,
-              },
-            ],
-          };
-          return newToken;
-        }
-        // v3 token
-        let prefix = "cashuA";
-        if (encoded_token.startsWith(prefix)) {
-          let token_parsed = encoded_token.slice(prefix.length);
-          let tokenJson = JSON.parse(atob(token_parsed));
-          if (
-            !(tokenJson.token.length > 0) ||
-            !(tokenJson.token[0].proofs.length > 0)
-          ) {
-            throw new Error("No proofs in encoded token");
-          }
-          return tokenJson;
-        }
-      } catch (error) {
-        return "";
-      }
+      return token.decode(encoded_token);
     },
     getProofs: function (decoded_token) {
-      /*
-      Returns all proofs in a decoded token.
-      */
-      if (
-        !(decoded_token.token.length > 0) ||
-        !(decoded_token.token[0].proofs.length > 0)
-      ) {
-        throw new Error("Token format wrong");
-      }
-      return decoded_token.token.map((t) => t.proofs).flat();
+      return token.getProofs(decoded_token);
     },
     getMint: function (decoded_token) {
-      /*
-      Returns first mint of a token (very rough way).
-      */
-      if (decoded_token.token != null && decoded_token.token.length > 0) {
-        return decoded_token.token[0].mint;
-      } else {
-        return "";
-      }
+      return token.getMint(decoded_token);
     },
     //
-    addMint: async function (url, verbose = false) {
-      try {
-        // we have no mints at all
-        if (this.mints.length == 0) {
-          this.mints = [{ url: url, balance: 0 }];
-        } else if (this.mints.filter((m) => m.url == url).length == 0) {
-          // we don't have this mint yet
-          this.mints.push({ url: url, balance: 0 });
-        }
-        localStorage.setItem("cashu.mints", JSON.stringify(this.mints));
-        await this.activateMint(url, verbose);
-      } catch (error) {
-        throw error;
-      } finally {
-        this.addMintDialog.show = false;
-      }
-    },
-    activateMint: async function (url, verbose = false) {
-      if (url == this.activeMintUrl) {
-        return;
-      }
-      // we need to stop workers because they will reset the activeMint again
-      this.clearAllWorkers();
-      // temporarily store the objects that get overwritten if all goes well
-      // so we can restore it if it doesn't go well
-      let presiouvURL = this.activeMintUrl;
-      let previousKeys = this.keys;
-      let previousKeysets = this.keysets;
-
-      try {
-        this.activeMintUrl = url;
-        console.log("### this.activeMintUrl", this.activeMintUrl);
-        await this.fetchMintKeys();
-        // load proofs
-        this.activeProofs = this.proofs.filter((p) =>
-          this.keysets.includes(p.id)
-        );
-        if (verbose) {
-          this.notifySuccess("Mint added.");
-        }
-        // update balance of active mint in this.mints
-        if (this.mints.length > 0 && this.activeMintUrl) {
-          let thisMint = this.mints.filter((m) => m.url == this.activeMintUrl);
-          if (thisMint.length > 0) {
-            thisMint[0].balance = this.getBalance();
-          }
-        }
-        localStorage.setItem("cashu.activeMintUrl", this.activeMintUrl);
-        console.log(
-          "### activateMint: Mint activated: ",
-          this.activeMintUrl,
-          "balanbce",
-          this.getBalance()
-        );
-      } catch (error) {
-        // restore previous values because the activation errored
-        this.activeMintUrl = presiouvURL;
-        this.keys = previousKeys;
-        this.keysets = previousKeysets;
-
-        let err_msg = "Could not connect to mint.";
-        if (error.message.length) {
-          err_msg = err_msg + ` ${error.message}.`;
-        }
-        this.notifyError(err_msg, "Mint activation");
-        // we don't handle this error yet so it commented out
-        // throw error;
-      }
-    },
-    removeMint: async function (url) {
-      this.mints = this.mints.filter((m) => m.url != url);
-      localStorage.setItem("cashu.mints", JSON.stringify(this.mints));
-      if (url == this.activeMintUrl) {
-        this.activeMintUrl = "";
-        localStorage.setItem("cashu.activeMintUrl", this.activeMintUrl);
-      }
-      // todo: we always reset to the first mint, improve this
-      if (this.mints.length > 0) {
-        await this.activateMint(this.mints[0].url);
-      }
-      this.notifySuccess("Mint removed.");
-    },
-    getBalance: function () {
-      var balance = this.activeProofs
-        .map((t) => t)
-        .flat()
-        .reduce((sum, el) => (sum += el.amount), 0);
-      return balance;
-    },
     shortenString: function (s) {
       return shortenString(s, 20, 10);
     },
@@ -1591,8 +1431,10 @@ export default {
     deleteProofs: function (proofs) {
       // delete proofs from this.proofs
       const usedSecrets = proofs.map((p) => p.secret);
-      this.proofs = this.proofs.filter((p) => !usedSecrets.includes(p.secret));
-      this.storeProofs();
+      this.setProofs(
+        this.proofs.filter((p) => !usedSecrets.includes(p.secret))
+      );
+      // this.storeProofs();
       return this.proofs;
     },
     // getAllMintKeysets: function () {
@@ -1733,10 +1575,10 @@ export default {
         if (!proofs.length) {
           throw "could not mint";
         }
-        this.proofs = this.proofs.concat(proofs);
+        this.setProofs(this.proofs.concat(proofs));
         // hack to update balance
-        this.activeProofs = this.activeProofs.concat([]);
-        this.storeProofs();
+        this.setActiveProofs(this.activeProofs.concat([]));
+        // this.storeProofs();
 
         // update UI
         await this.setInvoicePaid(payment_hash);
@@ -1772,12 +1614,12 @@ export default {
         if (proofs.length == 0) {
           throw new Error("no proofs provided.");
         }
-        let { fristProofs, scndProofs } = await this.splitApi(proofs, amount);
+        let { firstProofs, scndProofs } = await this.splitApi(proofs, amount);
         this.deleteProofs(proofs);
-        // add new fristProofs, scndProofs to this.proofs
-        this.proofs = this.proofs.concat(fristProofs).concat(scndProofs);
-        this.storeProofs();
-        return { fristProofs, scndProofs };
+        // add new firstProofs, scndProofs to this.proofs
+        this.setProofs(this.proofs.concat(firstProofs).concat(scndProofs));
+        // this.storeProofs();
+        return { firstProofs, scndProofs };
       } catch (error) {
         console.error(error);
         try {
@@ -1822,7 +1664,7 @@ export default {
         const frst_secrets = secrets.slice(0, frst_amounts.length);
         const scnd_rs = rs.slice(frst_amounts.length);
         const scnd_secrets = secrets.slice(frst_amounts.length);
-        const fristProofs = this.constructProofs(
+        const firstProofs = this.constructProofs(
           data.fst,
           frst_secrets,
           frst_rs,
@@ -1835,7 +1677,7 @@ export default {
           keys
         );
 
-        return { fristProofs, scndProofs };
+        return { firstProofs, scndProofs };
       } catch (error) {
         this.payInvoiceData.blocking = false;
         console.error(error);
@@ -1865,27 +1707,29 @@ export default {
 
         // call /split
 
-        let { fristProofs, scndProofs } = await this.split(
+        let { firstProofs, scndProofs } = await this.split(
           spendableProofs,
           amount
         );
         // set scndProofs in this.proofs as reserved
         const usedSecrets = proofs.map((p) => p.secret);
-        for (let i = 0; i < this.proofs.length; i++) {
-          if (usedSecrets.includes(this.proofs[i].secret)) {
-            this.proofs[i].reserved = true;
+        let newProofs = this.proofs.map((proof) => {
+          if (usedSecrets.includes(proof.secret)) {
+            proof.reserved = true;
           }
-        }
+          return proof;
+        });
+        this.setProofs(newProofs);
 
         // hack: to make Vue JS update
-        this.proofs = this.proofs.concat([]);
+        this.setProofs(this.proofs.concat([]));
 
         if (invlalidate) {
           // delete scndProofs from db
           this.deleteProofs(scndProofs);
         }
 
-        return { fristProofs, scndProofs };
+        return { firstProofs, scndProofs };
       } catch (error) {
         console.error(error);
         try {
@@ -1915,8 +1759,9 @@ export default {
             // have been loaded yet. We switch the tab to settings to make sure
             // that it loads. Remove this code when the TrustMintComnent is refactored!
             await this.setTab("settings");
-            this.addMintDialog.mintToAdd = tokenJson.token[i].mint;
-            this.addMintDialog.show = true;
+            this.setMintToAdd(tokenJson.token[i].mint);
+            this.showAddMintDialog = true;
+            // this.addMintDialog.show = true;
             // show the token receive dialog again for the next attempt
             this.showReceiveTokens = true;
             return;
@@ -1937,8 +1782,8 @@ export default {
         // update UI
 
         // HACK: we need to do this so the balance updates
-        this.proofs = this.proofs.concat([]);
-        this.activeProofs = this.activeProofs.concat([]);
+        this.setProofs(this.proofs.concat([]));
+        this.setActiveProofs(this.activeProofs.concat([]));
         this.getBalance();
 
         this.historyTokens.push({
@@ -1967,7 +1812,7 @@ export default {
       */
       try {
         // keep firstProofs, send scndProofs and delete them (invalidate=true)
-        let { fristProofs, scndProofs } = await this.splitToSend(
+        let { firstProofs, scndProofs } = await this.splitToSend(
           this.activeProofs,
           this.sendData.amount,
           true
@@ -2012,11 +1857,11 @@ export default {
         amount
       );
 
-      let { fristProofs, scndProofs } = await this.splitToSend(
-        this.activeProofs,
-        amount
-      );
       try {
+        let { firstProofs, scndProofs } = await this.splitToSend(
+          this.activeProofs,
+          amount
+        );
         // NUT-08 blank outputs for change
         let amounts = [1, 1, 1, 1]; // four change blank outputs
         let secrets = await this.generateSecrets(amounts);
@@ -2054,10 +1899,10 @@ export default {
           );
           console.log("## Received change: " + this.sumProofs(changeProofs));
           amount_paid = amount_paid - this.sumProofs(changeProofs);
-          this.proofs = this.proofs.concat(changeProofs);
+          this.setProofs(this.proofs.concat(changeProofs));
           // hack to update balance
-          this.activeProofs = this.activeProofs.concat([]);
-          this.storeProofs();
+          this.setActiveProofs(this.activeProofs.concat([]));
+          // this.storeProofs();
         }
 
         // update UI
@@ -2152,60 +1997,6 @@ export default {
         this.assertMintError(data);
         console.log("#### checkFees", payment_request, data.fee);
         return data.fee;
-      } catch (error) {
-        console.error(error);
-        try {
-          this.notifyApiError(error);
-        } catch {}
-        throw error;
-      }
-    },
-
-    // /keys
-
-    fetchMintKeys: async function () {
-      // attention: this function overwrites this.keys
-      // later, it calles fetchMintKeysets which overwrites this.keysets
-      try {
-        console.log("### GET", `${this.activeMintUrl}/keys`);
-        const { data } = await axios.get(`${this.activeMintUrl}/keys`, {
-          timeout: 6000,
-        });
-        const keys = data;
-        this.assertMintError(keys);
-        this.keys = keys;
-        localStorage.setItem("cashu.keys", JSON.stringify(keys));
-        const keysets = await this.fetchMintKeysets();
-        // save keys to mints in local storage
-        if (this.mints.filter((m) => m.url == this.activeMintUrl).length) {
-          this.mints.filter((m) => m.url == this.activeMintUrl)[0].keys = keys;
-          this.mints.filter((m) => m.url == this.activeMintUrl)[0].keysets =
-            keysets;
-          localStorage.setItem("cashu.mints", JSON.stringify(this.mints));
-        }
-
-        return keys;
-      } catch (error) {
-        console.error(error);
-        try {
-          this.notifyApiError(error);
-        } catch {}
-        throw error;
-      }
-    },
-
-    // /keysets
-
-    fetchMintKeysets: async function () {
-      // attention: this function overwrites this.keysets
-      try {
-        const { data } = await axios.get(`${this.activeMintUrl}/keysets`, {
-          timeout: 6000,
-        });
-        this.assertMintError(data);
-        this.keysets = data.keysets;
-        localStorage.setItem("cashu.keysets", JSON.stringify(data.keysets));
-        return data.keysets;
       } catch (error) {
         console.error(error);
         try {
@@ -2324,14 +2115,14 @@ export default {
 
     ////////////// WORKERS //////////////
 
-    clearAllWorkers: function () {
+    /*clearAllWorkers: function () {
       if (this.invoiceCheckListener) {
         clearInterval(this.invoiceCheckListener);
       }
       if (this.tokensCheckSpendableListener) {
         clearInterval(this.tokensCheckSpendableListener);
       }
-    },
+    },*/
     invoiceCheckWorker: async function () {
       let nInterval = 0;
       this.clearAllWorkers();
@@ -2393,20 +2184,6 @@ export default {
       }, 3000);
     },
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    assertMintError: function (response, verbose = true) {
-      if (response.error != null) {
-        if (verbose) {
-          this.notifyError(response.error, "Mint error");
-        }
-        throw new Error(`Mint error: ${response.error}`);
-      }
-    },
-
     ////////////// UI HELPERS /////////////
     registerPWAEventHook: function () {
       // register event listener for PWA install prompt
@@ -2453,7 +2230,8 @@ export default {
         // console.log(`New Value: ${e.newValue}`)
         // if these were the proofs, reload them
         if (e.key == "cashu.proofs") {
-          this.proofs = JSON.parse(e.newValue);
+          console.log("updating proofs");
+          this.setProofs(JSON.parse(e.newValue));
         }
         // if these were the activeMintUrl, reload
         if (e.key == "cashu.activeMintUrl") {
@@ -2503,12 +2281,12 @@ export default {
         JSON.stringify(this.historyTokens)
       );
     },
-    storeProofs: function () {
+    /*storeProofs: function () {
       localStorage.setItem(
         "cashu.proofs",
         JSON.stringify(this.proofs, bigIntStringify)
       );
-    },
+    },*/
     migrationLocalstorage: async function () {
       // migration from old db to multimint
       for (var key in localStorage) {
@@ -2520,8 +2298,8 @@ export default {
             localStorage.getItem(`cashu.${mint_id}.proofs`)
           );
           if (old_proofs) {
-            this.proofs = this.proofs.concat(old_proofs);
-            this.storeProofs();
+            this.setProofs(this.proofs.concat(old_proofs));
+            // this.storeProofs();
             let mint_url = this.baseHost + `/cashu/api/v1/${mint_id}`;
             console.log("Adding mint", mint_url);
             await this.addMint(mint_url);
@@ -2540,13 +2318,13 @@ export default {
     // payments: function () {
     //   this.getBalance()
     // },
-    proofs: function () {
+    /*proofs: function () {
       if (this.keysets) {
         this.activeProofs = this.proofs.filter((p) =>
           this.keysets.includes(p.id)
         );
       }
-    },
+    },*/
   },
 
   mounted: function () {},
@@ -2555,12 +2333,12 @@ export default {
     let params = new URL(document.location).searchParams;
 
     // load proofs from db
-    this.proofs = JSON.parse(localStorage.getItem("cashu.proofs") || "[]");
+    // this.proofs = JSON.parse(localStorage.getItem("cashu.proofs") || "[]");
 
     // load mints
-    if (localStorage.getItem("cashu.mints")) {
+    /*if (localStorage.getItem("cashu.mints")) {
       this.mints = JSON.parse(localStorage.getItem("cashu.mints"));
-    }
+    }*/
 
     // mint url
     if (params.get("mint")) {
@@ -2568,7 +2346,8 @@ export default {
       // await this.addMint(activeMintUrl);
       await this.setTab("settings");
       this.addMintDialog.mintToAdd = activeMintUrl;
-      this.addMintDialog.show = true;
+      this.showAddMintDialog = true;
+      // this.addMintDialog.show = true;
     }
 
     if (params.get("mint_id")) {
@@ -2643,7 +2422,11 @@ export default {
     }
 
     // Clear all parameters from URL without refreshing the page
-    window.history.pushState({}, document.title, "/");
+    window.history.pushState(
+      {},
+      document.title,
+      window.location.href.split("?")[0]
+    );
 
     // startup tasks
     this.checkProofsSpendable(this.activeProofs, true).catch((err) => {
