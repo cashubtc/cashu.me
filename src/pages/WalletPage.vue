@@ -273,9 +273,7 @@
             <strong>Hash:</strong> {{ payInvoiceData.invoice.hash }}
           </p>
           <div class="col-12">
-            <ChooseMint
-              :ticker-short="tickerShort"
-            />
+            <ChooseMint :ticker-short="tickerShort" />
           </div>
           <div v-if="canPay" class="row q-mt-lg">
             <q-btn
@@ -546,9 +544,7 @@
           </div>
           <div class="row items-center no-wrap q-my-sm q-py-none">
             <div class="col-12">
-              <ChooseMint
-                :ticker-short="tickerShort"
-              />
+              <ChooseMint :ticker-short="tickerShort" />
             </div>
           </div>
           <q-input
@@ -615,9 +611,7 @@
           </div>
           <div class="row items-center no-wrap q-my-sm q-py-none">
             <div class="col-12">
-              <ChooseMint
-                :ticker-short="tickerShort"
-              />
+              <ChooseMint :ticker-short="tickerShort" />
             </div>
           </div>
 
@@ -816,7 +810,7 @@ import ChooseMint from "components/ChooseMint.vue";
 import TokenInformation from "components/TokenInformation.vue";
 import WelcomeDialog from "components/WelcomeDialog.vue";
 
-import {mapActions, mapState, mapWritableState} from "pinia";
+import { mapActions, mapState, mapWritableState } from "pinia";
 import { useMintsStore } from "src/stores/mints";
 import { useWorkersStore } from "src/stores/workers";
 
@@ -977,16 +971,16 @@ export default {
   },
   computed: {
     ...mapState(useMintsStore, [
-      'activeMintUrl',
-      'activeProofs',
-      'keys',
-      'mints',
-      'proofs',
+      "activeMintUrl",
+      "activeProofs",
+      "keys",
+      "mints",
+      "proofs",
     ]),
-    ...mapWritableState(useMintsStore, ['showAddMintDialog']),
+    ...mapWritableState(useMintsStore, ["showAddMintDialog"]),
     ...mapWritableState(useWorkersStore, [
-      'invoiceCheckListener',
-      'tokensCheckSpendableListener'
+      "invoiceCheckListener",
+      "tokensCheckSpendableListener",
     ]),
     canPay: function () {
       if (!this.payInvoiceData.invoice) return false;
@@ -1021,16 +1015,16 @@ export default {
   },
   methods: {
     ...mapActions(useMintsStore, [
-      'activateMint',
-      'addMint',
-      'assertMintError',
-      'getBalance',
-      'setActiveProofs',
-      'setMintToAdd',
-      'setProofs',
-      'setShowAddMintDialog'
+      "activateMint",
+      "addMint",
+      "assertMintError",
+      "getBalance",
+      "setActiveProofs",
+      "setMintToAdd",
+      "setProofs",
+      "setShowAddMintDialog",
     ]),
-    ...mapActions(useWorkersStore, ['clearAllWorkers']),
+    ...mapActions(useWorkersStore, ["clearAllWorkers"]),
     // TOKEN METHODS
 
     decodeToken: function (encoded_token) {
@@ -1490,7 +1484,9 @@ export default {
     deleteProofs: function (proofs) {
       // delete proofs from this.proofs
       const usedSecrets = proofs.map((p) => p.secret);
-      this.setProofs(this.proofs.filter((p) => !usedSecrets.includes(p.secret)));
+      this.setProofs(
+        this.proofs.filter((p) => !usedSecrets.includes(p.secret))
+      );
       // this.storeProofs();
       return this.proofs;
     },
@@ -1770,13 +1766,13 @@ export default {
         );
         // set scndProofs in this.proofs as reserved
         const usedSecrets = proofs.map((p) => p.secret);
-        let newProofs = this.proofs.map(proof => {
+        let newProofs = this.proofs.map((proof) => {
           if (usedSecrets.includes(proof.secret)) {
             proof.reserved = true;
           }
           return proof;
-        })
-        this.setProofs(newProofs)
+        });
+        this.setProofs(newProofs);
 
         // hack: to make Vue JS update
         this.setProofs(this.proofs.concat([]));
@@ -1914,11 +1910,11 @@ export default {
         amount
       );
 
-      let { firstProofs, scndProofs } = await this.splitToSend(
-        this.activeProofs,
-        amount
-      );
       try {
+        let { firstProofs, scndProofs } = await this.splitToSend(
+          this.activeProofs,
+          amount
+        );
         // NUT-08 blank outputs for change
         let amounts = [1, 1, 1, 1]; // four change blank outputs
         let secrets = await this.generateSecrets(amounts);
@@ -2287,7 +2283,7 @@ export default {
         // console.log(`New Value: ${e.newValue}`)
         // if these were the proofs, reload them
         if (e.key == "cashu.proofs") {
-          console.log('updating proofs')
+          console.log("updating proofs");
           this.setProofs(JSON.parse(e.newValue));
         }
         // if these were the activeMintUrl, reload

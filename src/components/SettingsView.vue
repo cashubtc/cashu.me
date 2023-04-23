@@ -200,9 +200,8 @@
 <script>
 import { defineComponent } from "vue";
 import { getShortUrl } from "src/js/wallet-helpers";
-import {mapActions, mapState, mapWritableState} from "pinia";
+import { mapActions, mapState, mapWritableState } from "pinia";
 import { useMintsStore } from "src/stores/mints";
-
 
 export default defineComponent({
   name: "SettingsView",
@@ -230,14 +229,8 @@ export default defineComponent({
     };
   },
   computed: {
-    ...mapState(useMintsStore, [
-      'activeMintUrl',
-      'mints',
-    ]),
-    ...mapWritableState(useMintsStore, [
-      'mintToAdd',
-      'showAddMintDialog',
-    ])
+    ...mapState(useMintsStore, ["activeMintUrl", "mints"]),
+    ...mapWritableState(useMintsStore, ["mintToAdd", "showAddMintDialog"]),
   },
   watch: {
     showMintDialog: function () {
@@ -251,9 +244,10 @@ export default defineComponent({
   },
   methods: {
     ...mapActions(useMintsStore, [
-      'addMint',
-      'removeMint',
-      'setShowAddMintDialog'
+      "addMint",
+      "removeMint",
+      "activateMint",
+      "setShowAddMintDialog",
     ]),
     swapDataOptions: function () {
       let options = [];
