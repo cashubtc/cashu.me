@@ -5,49 +5,37 @@ Cashu Wallet
 ## Install the dependencies
 
 ```bash
-yarn
-# or
 npm install
 ```
 
 ### Start the app in development mode (hot-code reloading, error reporting, etc.)
 
 ```bash
-quasar dev
+npm run dev
+```
+
+### Run unit tests
+
+```bash
+npm test
 ```
 
 ### Lint the files
 
 ```bash
-yarn lint
-# or
 npm run lint
 ```
 
 ### Format the files
 
 ```bash
-yarn format
-# or
 npm run format
 ```
 
 ### Build the app for production
 
 ```bash
-quasar build
-```
-
-### Build for Android
-
-```bash
-quasar build -m capacitor -T android -ide
-```
-
-### Build Electron app
-
-```bash
-quasar build -m electron
+npm run build
 ```
 
 ### Customize the configuration
