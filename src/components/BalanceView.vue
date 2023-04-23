@@ -65,20 +65,24 @@
 <script>
 import { defineComponent, ref } from "vue";
 import { getShortUrl } from "src/js/wallet-helpers";
+import {mapState} from "pinia";
+import {useMintsStore} from "stores/mints";
 export default defineComponent({
   name: "BalanceView",
   mixins: [windowMixin],
   props: {
-    proofs: Array,
-    activeProofs: Array,
-    mints: Array,
     tickerShort: String,
-    activeMintUrl: String,
     pendingBalance: Number,
     checkPendingTokens: Function,
     setTab: Function,
   },
   computed: {
+    ...mapState(useMintsStore, [
+      'activeMintUrl',
+      'activeProofs',
+      'mints',
+      'proofs',
+    ]),
     balance: function () {
       return this.activeProofs
         .flat()
