@@ -119,7 +119,7 @@ function getTokenJSON(token) {
  * @returns {string}
  */
 function cropPrefixes(token) {
-  let uriPrefixes = ["web+cashu://", "cashu:", "cashu://"];
+  let uriPrefixes = ["web+cashu://", "cashu://", "cashu:"];
   uriPrefixes.forEach((prefix) => {
     if (token.startsWith(prefix)) {
       token = token.slice(prefix.length);
