@@ -1,29 +1,29 @@
-import { defineStore } from 'pinia'
-import { useLocalStorage } from "@vueuse/core"
+import { defineStore } from "pinia";
+import { useLocalStorage } from "@vueuse/core";
 import { useWorkersStore } from "./workers";
-import {axios} from "boot/axios";
+import { axios } from "boot/axios";
 import { notifyApiError, notifyError, notifySuccess } from "src/js/notify";
 
-export const useMintsStore = defineStore('mints', {
+export const useMintsStore = defineStore("mints", {
   state: () => {
     return {
-      activeMintUrl: useLocalStorage('cashu.activeMintUrl', ''),
-      activeProofs: useLocalStorage('cashu.activeProofs', []),
-      keys: useLocalStorage('cashu.keys', {}),
-      keysets: useLocalStorage('cashu.keysets', []),
-      mintToAdd: 'https://8333.space:3338',
-      mints:  useLocalStorage('cashu.mints', []),
-      proofs: useLocalStorage('cashu.proofs', []),
+      activeMintUrl: useLocalStorage("cashu.activeMintUrl", ""),
+      activeProofs: useLocalStorage("cashu.activeProofs", []),
+      keys: useLocalStorage("cashu.keys", {}),
+      keysets: useLocalStorage("cashu.keysets", []),
+      mintToAdd: "https://8333.space:3338",
+      mints: useLocalStorage("cashu.mints", []),
+      proofs: useLocalStorage("cashu.proofs", []),
       showAddMintDialog: false,
-    }
+    };
   },
   getters: {},
   actions: {
     setShowAddMintDialog(show) {
-      this.showAddMintDialog = show
+      this.showAddMintDialog = show;
     },
     setMintToAdd(mint) {
-      this.mintToAdd = mint
+      this.mintToAdd = mint;
     },
     setProofs(proofs) {
       this.proofs = proofs;
@@ -56,7 +56,7 @@ export const useMintsStore = defineStore('mints', {
       }
     },
     activateMint: async function (url, verbose = false) {
-      const workers = useWorkersStore()
+      const workers = useWorkersStore();
       if (url === this.activeMintUrl) {
         return;
       }
@@ -165,6 +165,26 @@ export const useMintsStore = defineStore('mints', {
       }
       notifySuccess("Mint removed.");
     },
+    restoreFromBackup: function(backup) {
+      if(!backup || !backup["cashu.welcomeDialogSeen"])
+      {
+        notifyError("Unrecognized Backup Format!");
+      }
+      else
+      {
+        localStorage.setItem("cashu.welcomeDialogSeen", backup["cashu.welcomeDialogSeen"]);
+        localStorage.setItem("cashu.theme", backup["cashu.theme"]);
+        localStorage.setItem("cashu.mints", backup["cashu.mints"]);
+        localStorage.setItem("cashu.keysets", backup["cashu.keysets"]);
+        localStorage.setItem("cashu.keys", backup["cashu.keys"]);
+        localStorage.setItem("cashu.proofs", backup["cashu.proofs"]);
+        localStorage.setItem("cashu.historyTokens", backup["cashu.historyTokens"]);
+        localStorage.setItem("cashu.activeMintUrl", backup["cashu.activeMintUrl"]);
+        localStorage.setItem("cashu.activeProofs", backup["cashu.activeProofs"]);
+
+        notifySuccess("Backup Successfully Restored!");
+      }
+    },
     assertMintError: function (response, verbose = true) {
       if (response.error != null) {
         if (verbose) {
@@ -178,6 +198,6 @@ export const useMintsStore = defineStore('mints', {
         .map((t) => t)
         .flat()
         .reduce((sum, el) => (sum += el.amount), 0);
-    }
+    },
   },
-})
+});

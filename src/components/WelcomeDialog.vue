@@ -1,5 +1,5 @@
 <template>
-  <q-dialog class="z-top" persistent v-model="showWelcomeDialog" position="top">
+  <q-dialog class="z-top" persistent v-model="showWelcomeDialog" position="top" @drop="dragFile" @dragover="allowDrop">
     <q-card class="q-pa-lg z-top">
       <q-toolbar>
         <q-avatar>
@@ -36,6 +36,9 @@
           will lose your tokens. Press the Backup button to download a copy of
           your tokens.
         </p>
+        <p>
+          <strong class="text-green-13">RESTORE WALLET BACKUP</strong> by dragging and dropping the backup file here!
+        </p>
         <div class="row q-mt-lg">
           <q-btn
             outline
@@ -66,6 +69,8 @@
 </template>
 <script>
 import { defineComponent } from "vue";
+import { mapActions } from "pinia";
+import { useMintsStore } from "stores/mints";
 
 export default defineComponent({
   name: "WelcomeDialog",
@@ -85,6 +90,29 @@ export default defineComponent({
   },
   watch: {},
   computed: {},
-  methods: {},
+  methods: {
+     ...mapActions(useMintsStore, [
+       "restoreFromBackup",
+     ]),
+    dragFile(ev)
+    {
+      ev.preventDefault();
+
+      let files = ev.dataTransfer.files;
+      let file = files[0];
+
+      let reader = new FileReader();
+      reader.onload = f => {
+        let content = f.target.result;
+        let backup = JSON.parse(content);
+
+        this.restoreFromBackup(backup);
+      };
+      reader.readAsText(file);
+    },
+    allowDrop(ev) {
+      ev.preventDefault();
+    }
+  },
 });
 </script>
