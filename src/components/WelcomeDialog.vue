@@ -40,6 +40,8 @@
           <strong class="text-green-13">RESTORE WALLET BACKUP</strong> by dragging and dropping the backup file here!
         </p>
         <div class="row q-mt-lg">
+          <input type="file" id="fileUpload" ref="fileUpload" v-on:change="onChangeFileUpload()"/>
+
           <q-btn
             outline
             class="q-mx-sm"
@@ -55,6 +57,15 @@
             >Copy URL</q-btn
           >
           <q-btn
+            class="q-ml-auto"
+            outline
+            rectangle
+            color="warning"
+            icon="upload_for_offline"
+            @click="browseBackupFile"
+            >Restore Wallet<q-tooltip>Upload wallet backup</q-tooltip></q-btn
+          >
+          <q-btn
             v-close-popup
             flat
             color="primary"
@@ -67,6 +78,9 @@
     </q-card>
   </q-dialog>
 </template>
+<style scoped>
+  #fileUpload { display:none }
+</style>
 <script>
 import { defineComponent } from "vue";
 import { mapActions } from "pinia";
@@ -93,14 +107,9 @@ export default defineComponent({
   methods: {
      ...mapActions(useMintsStore, [
        "restoreFromBackup",
-     ]),
-    dragFile(ev)
+    ]),
+    readFile(file)
     {
-      ev.preventDefault();
-
-      let files = ev.dataTransfer.files;
-      let file = files[0];
-
       let reader = new FileReader();
       reader.onload = f => {
         let content = f.target.result;
@@ -110,8 +119,27 @@ export default defineComponent({
       };
       reader.readAsText(file);
     },
+    dragFile(ev)
+    {
+      ev.preventDefault();
+
+      let files = ev.dataTransfer.files;
+      let file = files[0];
+
+      this.readFile(file);
+    },
     allowDrop(ev) {
       ev.preventDefault();
+    },
+    onChangeFileUpload()
+    {
+      let file = this.$refs.fileUpload.files[0];
+
+      this.readFile(file);
+    },
+    browseBackupFile()
+    {
+      this.$refs.fileUpload.click();
     }
   },
 });
