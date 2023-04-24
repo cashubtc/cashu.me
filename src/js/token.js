@@ -9,19 +9,15 @@ export default { decode, getProofs, getMint };
 /**
  * Decodes an encoded cashu token
  * @param {string} encoded_token
- * @returns {Token}
+ * @returns {{token: Token[]}}
  */
 function decode(encoded_token) {
   if (!encoded_token || encoded_token === "") return "";
-  try {
-    encoded_token = cropPrefixes(encoded_token);
-    if (isV2Token(encoded_token)) return parseV2Token(encoded_token);
-    if (isV3Token(encoded_token)) return parseV3Token(encoded_token);
+  encoded_token = cropPrefixes(encoded_token);
+  if (isV2Token(encoded_token)) return parseV2Token(encoded_token);
+  if (isV3Token(encoded_token)) return parseV3Token(encoded_token);
 
-    throw new Error("Unknown token format");
-  } catch (error) {
-    return "";
-  }
+  throw new Error("Unknown token format");
 }
 
 /**
