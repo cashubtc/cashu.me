@@ -2366,6 +2366,8 @@ export default {
         this.walletURL = this.baseURL;
       }
       let activeMintUrl = localStorage.getItem("cashu.activeMintUrl");
+      // we'll force the activation of the mint for the migration
+      // from without a pinia store
       await this.activateMint(activeMintUrl, false, true);
     } else {
       this.setTab("settings");
