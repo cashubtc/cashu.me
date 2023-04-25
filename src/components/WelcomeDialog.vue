@@ -36,8 +36,18 @@
           will lose your tokens. Press the Backup button to download a copy of
           your tokens.
         </p>
-        <p>
-          <strong class="text-green-13">RESTORE WALLET BACKUP</strong> by dragging and dropping the backup file here!
+        <div class="row q-mt-lg">
+          <q-btn
+            outline
+            rectangle
+            color="warning"
+            icon="upload_for_offline"
+            @click="browseBackupFile"
+            >Restore wallet backup<q-tooltip>Upload wallet backup</q-tooltip></q-btn
+          >
+        </div>
+        <p class="text-muted">
+          You can drag &amp; drop the wallet backup file here!
         </p>
         <div class="row q-mt-lg">
           <input type="file" id="fileUpload" ref="fileUpload" v-on:change="onChangeFileUpload()"/>
@@ -56,15 +66,7 @@
           <q-btn outline color="grey" class="q-mx-sm" @click="copyText(baseURL)"
             >Copy URL</q-btn
           >
-          <q-btn
-            class="q-ml-auto"
-            outline
-            rectangle
-            color="warning"
-            icon="upload_for_offline"
-            @click="browseBackupFile"
-            >Restore Wallet<q-tooltip>Upload wallet backup</q-tooltip></q-btn
-          >
+
           <q-btn
             v-close-popup
             flat
@@ -79,7 +81,7 @@
   </q-dialog>
 </template>
 <style scoped>
-  #fileUpload { display:none }
+  #fileUpload { display:none };
 </style>
 <script>
 import { defineComponent } from "vue";
