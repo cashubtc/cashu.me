@@ -2366,7 +2366,7 @@ export default {
         this.walletURL = this.baseURL;
       }
       let activeMintUrl = localStorage.getItem("cashu.activeMintUrl");
-      await this.activateMint(activeMintUrl);
+      await this.activateMint(activeMintUrl, false, true);
     } else {
       this.setTab("settings");
     }
