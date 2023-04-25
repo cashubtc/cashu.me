@@ -1,5 +1,5 @@
 <template>
-  <q-dialog class="z-top" persistent v-model="showWelcomeDialog" position="top">
+  <q-dialog class="z-top" persistent v-model="showWelcomeDialog" position="top" @drop="dragFile" @dragover="allowDrop">
     <q-card class="q-pa-lg z-top">
       <q-toolbar>
         <q-avatar>
@@ -39,6 +39,21 @@
         <div class="row q-mt-lg">
           <q-btn
             outline
+            rectangle
+            color="warning"
+            icon="upload_for_offline"
+            @click="browseBackupFile"
+            >Restore wallet backup<q-tooltip>Upload wallet backup</q-tooltip></q-btn
+          >
+        </div>
+        <p class="text-muted">
+          You can drag &amp; drop the wallet backup file here!
+        </p>
+        <div class="row q-mt-lg">
+          <input type="file" id="fileUpload" ref="fileUpload" v-on:change="onChangeFileUpload()"/>
+
+          <q-btn
+            outline
             class="q-mx-sm"
             v-if="
               getPwaDisplayMode() == 'browser' &&
@@ -51,6 +66,7 @@
           <q-btn outline color="grey" class="q-mx-sm" @click="copyText(baseURL)"
             >Copy URL</q-btn
           >
+
           <q-btn
             v-close-popup
             flat
@@ -64,8 +80,13 @@
     </q-card>
   </q-dialog>
 </template>
+<style scoped>
+  #fileUpload { display:none };
+</style>
 <script>
 import { defineComponent } from "vue";
+import { mapActions } from "pinia";
+import { useMintsStore } from "stores/mints";
 
 export default defineComponent({
   name: "WelcomeDialog",
@@ -85,6 +106,43 @@ export default defineComponent({
   },
   watch: {},
   computed: {},
-  methods: {},
+  methods: {
+     ...mapActions(useMintsStore, [
+       "restoreFromBackup",
+    ]),
+    readFile(file)
+    {
+      let reader = new FileReader();
+      reader.onload = f => {
+        let content = f.target.result;
+        let backup = JSON.parse(content);
+
+        this.restoreFromBackup(backup);
+      };
+      reader.readAsText(file);
+    },
+    dragFile(ev)
+    {
+      ev.preventDefault();
+
+      let files = ev.dataTransfer.files;
+      let file = files[0];
+
+      this.readFile(file);
+    },
+    allowDrop(ev) {
+      ev.preventDefault();
+    },
+    onChangeFileUpload()
+    {
+      let file = this.$refs.fileUpload.files[0];
+
+      this.readFile(file);
+    },
+    browseBackupFile()
+    {
+      this.$refs.fileUpload.click();
+    }
+  },
 });
 </script>

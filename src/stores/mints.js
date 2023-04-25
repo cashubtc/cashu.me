@@ -168,6 +168,26 @@ export const useMintsStore = defineStore("mints", {
       }
       notifySuccess("Mint removed.");
     },
+    restoreFromBackup: function(backup) {
+      if(!backup || !backup["cashu.welcomeDialogSeen"])
+      {
+        notifyError("Unrecognized Backup Format!");
+      }
+      else
+      {
+        localStorage.setItem("cashu.welcomeDialogSeen", backup["cashu.welcomeDialogSeen"]);
+        localStorage.setItem("cashu.theme", backup["cashu.theme"]);
+        localStorage.setItem("cashu.mints", backup["cashu.mints"]);
+        localStorage.setItem("cashu.keysets", backup["cashu.keysets"]);
+        localStorage.setItem("cashu.keys", backup["cashu.keys"]);
+        localStorage.setItem("cashu.proofs", backup["cashu.proofs"]);
+        localStorage.setItem("cashu.historyTokens", backup["cashu.historyTokens"]);
+        localStorage.setItem("cashu.activeMintUrl", backup["cashu.activeMintUrl"]);
+        localStorage.setItem("cashu.activeProofs", backup["cashu.activeProofs"]);
+
+        notifySuccess("Backup Successfully Restored!");
+      }
+    },
     assertMintError: function (response, verbose = true) {
       if (response.error != null) {
         if (verbose) {

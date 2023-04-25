@@ -1112,6 +1112,11 @@ export default {
       this.welcomeDialog.show = false;
       // switch to settings tab
       this.setTab("settings");
+
+      // if a wallet has been restored the "cashu.activeMintUrl" is not null
+      if (!!localStorage.getItem("cashu.activeMintUrl")) {
+        window.location.reload();
+      }
     },
     setTab: function (to) {
       this.tab = to;
