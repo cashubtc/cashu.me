@@ -1,29 +1,29 @@
-import { defineStore } from 'pinia'
-import { useLocalStorage } from "@vueuse/core"
+import { defineStore } from "pinia";
+import { useLocalStorage } from "@vueuse/core";
 import { useWorkersStore } from "./workers";
-import {axios} from "boot/axios";
+import { axios } from "boot/axios";
 import { notifyApiError, notifyError, notifySuccess } from "src/js/notify";
 
-export const useMintsStore = defineStore('mints', {
+export const useMintsStore = defineStore("mints", {
   state: () => {
     return {
-      activeMintUrl: useLocalStorage('cashu.activeMintUrl', ''),
-      activeProofs: useLocalStorage('cashu.activeProofs', []),
-      keys: useLocalStorage('cashu.keys', {}),
-      keysets: useLocalStorage('cashu.keysets', []),
-      mintToAdd: 'https://8333.space:3338',
-      mints:  useLocalStorage('cashu.mints', []),
-      proofs: useLocalStorage('cashu.proofs', []),
+      activeMintUrl: useLocalStorage("cashu.activeMintUrl", ""),
+      activeProofs: useLocalStorage("cashu.activeProofs", []),
+      keys: useLocalStorage("cashu.keys", {}),
+      keysets: useLocalStorage("cashu.keysets", []),
+      mintToAdd: "https://8333.space:3338",
+      mints: useLocalStorage("cashu.mints", []),
+      proofs: useLocalStorage("cashu.proofs", []),
       showAddMintDialog: false,
-    }
+    };
   },
   getters: {},
   actions: {
     setShowAddMintDialog(show) {
-      this.showAddMintDialog = show
+      this.showAddMintDialog = show;
     },
     setMintToAdd(mint) {
-      this.mintToAdd = mint
+      this.mintToAdd = mint;
     },
     setProofs(proofs) {
       this.proofs = proofs;
@@ -55,9 +55,12 @@ export const useMintsStore = defineStore('mints', {
         this.showAddMintDialog = false;
       }
     },
-    activateMint: async function (url, verbose = false) {
-      const workers = useWorkersStore()
-      if (url === this.activeMintUrl) {
+    activateMint: async function (url, verbose = false, force = false) {
+      const workers = useWorkersStore();
+      if (url === this.activeMintUrl && !force) {
+        // return here because this function is called repeatedly by the
+        // invoice check and token spendable check workers and would otherwise
+        // run until cleaAllWorkers and kill the woerkers
         return;
       }
       // we need to stop workers because they will reset the activeMint again
@@ -178,6 +181,6 @@ export const useMintsStore = defineStore('mints', {
         .map((t) => t)
         .flat()
         .reduce((sum, el) => (sum += el.amount), 0);
-    }
+    },
   },
-})
+});
