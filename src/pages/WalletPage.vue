@@ -2371,7 +2371,9 @@ export default {
         this.walletURL = this.baseURL;
       }
       let activeMintUrl = localStorage.getItem("cashu.activeMintUrl");
-      await this.activateMint(activeMintUrl);
+      // we'll force the activation of the mint for the migration
+      // from without a pinia store
+      await this.activateMint(activeMintUrl, false, true);
     } else {
       this.setTab("settings");
     }
@@ -2434,13 +2436,13 @@ export default {
     );
 
     // startup tasks
-    this.checkProofsSpendable(this.activeProofs, true).catch((err) => {
+    await this.checkProofsSpendable(this.activeProofs, true).catch((err) => {
       return;
     });
-    this.checkPendingInvoices().catch((err) => {
+    await this.checkPendingInvoices().catch((err) => {
       return;
     });
-    this.checkPendingTokens().catch((err) => {
+    await this.checkPendingTokens().catch((err) => {
       return;
     });
 
