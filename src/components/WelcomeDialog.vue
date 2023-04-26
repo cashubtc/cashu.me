@@ -1,5 +1,12 @@
 <template>
-  <q-dialog class="z-top" persistent v-model="showWelcomeDialog" position="top" @drop="dragFile" @dragover="allowDrop">
+  <q-dialog
+    class="z-top"
+    persistent
+    v-model="showWelcomeDialog"
+    position="top"
+    @drop="dragFile"
+    @dragover="allowDrop"
+  >
     <q-card class="q-pa-lg z-top">
       <q-toolbar>
         <q-avatar>
@@ -8,7 +15,8 @@
           />
         </q-avatar>
         <q-toolbar-title
-          ><span class="text-weight-bold">Cashu</span> wallet</q-toolbar-title
+          ><span class="text-weight-bold">Cashu.me</span>
+          wallet</q-toolbar-title
         >
       </q-toolbar>
       <q-card-section>
@@ -36,22 +44,15 @@
           will lose your tokens. Press the Backup button to download a copy of
           your tokens.
         </p>
-        <div class="row q-mt-lg">
-          <q-btn
-            outline
-            rectangle
-            color="warning"
-            icon="upload_for_offline"
-            @click="browseBackupFile"
-            >Restore wallet backup<q-tooltip>Upload wallet backup</q-tooltip></q-btn
-          >
-        </div>
-        <p class="text-muted">
-          You can drag &amp; drop the wallet backup file here!
-        </p>
-        <div class="row q-mt-lg">
-          <input type="file" id="fileUpload" ref="fileUpload" v-on:change="onChangeFileUpload()"/>
+        <!-- wallet backup restore -->
+        <input
+          type="file"
+          id="fileUpload"
+          ref="fileUpload"
+          v-on:change="onChangeFileUpload()"
+        />
 
+        <div class="row q-mt-lg">
           <q-btn
             outline
             class="q-mx-sm"
@@ -63,13 +64,29 @@
             @click="triggerPwaInstall()"
             >Install Cashu</q-btn
           >
-          <q-btn outline color="grey" class="q-mx-sm" @click="copyText(baseURL)"
+          <q-btn
+            flat
+            size="0.6rem"
+            color="grey"
+            class="q-mx-xs q-px-none"
+            @click="copyText(baseURL)"
             >Copy URL</q-btn
           >
-
+          <q-btn
+            flat
+            size="0.6rem"
+            class="q-mx-xs q-px-none"
+            color="warning"
+            icon="upload_for_offline"
+            @click="browseBackupFile"
+            >Restore<q-tooltip
+              >You can drag &amp; drop the wallet backup here!</q-tooltip
+            ></q-btn
+          >
           <q-btn
             v-close-popup
-            flat
+            outline
+            size="0.8rem"
             color="primary"
             class="q-ml-auto"
             @click="setWelcomeDialogSeen()"
@@ -81,7 +98,9 @@
   </q-dialog>
 </template>
 <style scoped>
-  #fileUpload { display:none };
+#fileUpload {
+  display: none;
+}
 </style>
 <script>
 import { defineComponent } from "vue";
@@ -107,13 +126,10 @@ export default defineComponent({
   watch: {},
   computed: {},
   methods: {
-     ...mapActions(useMintsStore, [
-       "restoreFromBackup",
-    ]),
-    readFile(file)
-    {
+    ...mapActions(useMintsStore, ["restoreFromBackup"]),
+    readFile(file) {
       let reader = new FileReader();
-      reader.onload = f => {
+      reader.onload = (f) => {
         let content = f.target.result;
         let backup = JSON.parse(content);
 
@@ -121,8 +137,7 @@ export default defineComponent({
       };
       reader.readAsText(file);
     },
-    dragFile(ev)
-    {
+    dragFile(ev) {
       ev.preventDefault();
 
       let files = ev.dataTransfer.files;
@@ -133,16 +148,14 @@ export default defineComponent({
     allowDrop(ev) {
       ev.preventDefault();
     },
-    onChangeFileUpload()
-    {
+    onChangeFileUpload() {
       let file = this.$refs.fileUpload.files[0];
 
       this.readFile(file);
     },
-    browseBackupFile()
-    {
+    browseBackupFile() {
       this.$refs.fileUpload.click();
-    }
+    },
   },
 });
 </script>
