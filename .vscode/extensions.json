@@ -4,7 +4,8 @@
     "esbenp.prettier-vscode",
     "editorconfig.editorconfig",
     "vue.volar",
-    "wayou.vscode-todo-highlight"
+    "wayou.vscode-todo-highlight",
+    "PeterSchmalfeldt.explorer-exclude"
   ],
   "unwantedRecommendations": [
     "octref.vetur",
