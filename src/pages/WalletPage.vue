@@ -814,6 +814,7 @@ import WelcomeDialog from "components/WelcomeDialog.vue";
 import { mapActions, mapState, mapWritableState } from "pinia";
 import { useMintsStore } from "src/stores/mints";
 import { useWorkersStore } from "src/stores/workers";
+import { useTokensStore } from "src/stores/tokens";
 
 var currentDateStr = function () {
   return date.formatDate(new Date(), "YYYY-MM-DD HH:mm:ss");
@@ -840,7 +841,6 @@ export default {
       mintName: "",
       deferredPWAInstallPrompt: null,
       invoiceHistory: [],
-      historyTokens: [],
       invoiceData: {
         amount: 0,
         memo: "",
@@ -983,6 +983,8 @@ export default {
       "invoiceCheckListener",
       "tokensCheckSpendableListener",
     ]),
+    ...mapState(useTokensStore, ["historyTokens"]),
+    ...mapWritableState(useTokensStore, [""]),
     canPay: function () {
       if (!this.payInvoiceData.invoice) return false;
       return this.payInvoiceData.invoice.sat <= this.balance;
@@ -1026,6 +1028,11 @@ export default {
       "setShowAddMintDialog",
     ]),
     ...mapActions(useWorkersStore, ["clearAllWorkers"]),
+    ...mapActions(useTokensStore, [
+      "addPaidToken",
+      "addPendingToken",
+      "setTokenPaid",
+    ]),
     // TOKEN METHODS
     decodeToken: function (encoded_token) {
       return token.decode(encoded_token);
@@ -1587,14 +1594,10 @@ export default {
 
         // update UI
         await this.setInvoicePaid(payment_hash);
-
-        this.historyTokens.push({
-          status: "paid",
-          amount: amount,
-          date: currentDateStr(),
-          token: this.serializeProofs(proofs),
+        this.addPaidToken({
+          amount,
+          serializedProofs: this.serializeProofs(proofs),
         });
-        this.storehistoryTokens();
 
         return proofs;
       } catch (error) {
@@ -1791,13 +1794,10 @@ export default {
         this.setActiveProofs(this.activeProofs.concat([]));
         this.getBalance();
 
-        this.historyTokens.push({
-          status: "paid",
-          amount: amount,
-          date: currentDateStr(),
-          token: this.receiveData.tokensBase64,
+        this.addPaidToken({
+          amount,
+          serializedProofs: this.receiveData.tokensBase64,
         });
-        this.storehistoryTokens();
 
         if (window.navigator.vibrate) navigator.vibrate(200);
         this.notifySuccess("Tokens received.");
@@ -1828,16 +1828,10 @@ export default {
         console.log("### this.sendData.tokens", this.sendData.tokens);
 
         this.sendData.tokensBase64 = this.serializeProofs(scndProofs);
-
-        this.historyTokens.push({
-          status: "pending",
+        this.addPendingToken({
           amount: -this.sendData.amount,
-          date: currentDateStr(),
-          token: this.sendData.tokensBase64,
+          serializedProofs: this.sendData.tokensBase64,
         });
-
-        // store "pending" outgoing tokens in history table
-        this.storehistoryTokens();
 
         this.checkTokenSpendableWorker();
       } catch (error) {
@@ -1912,13 +1906,10 @@ export default {
 
         // update UI
 
-        this.historyTokens.push({
-          status: "paid",
+        this.addPaidToken({
           amount: -amount_paid,
-          date: currentDateStr(),
-          token: this.serializeProofs(scndProofs),
+          serializedProofs: this.serializeProofs(scndProofs),
         });
-        this.storehistoryTokens();
 
         this.invoiceHistory.push({
           amount: -amount_paid,
@@ -1969,13 +1960,10 @@ export default {
 
           // update UI
           if (update_history) {
-            this.historyTokens.push({
-              status: "paid",
+            this.addPaidToken({
               amount: -this.sumProofs(spentProofs),
-              date: currentDateStr(),
-              token: this.serializeProofs(spentProofs),
+              serializedProofs: this.serializeProofs(spentProofs),
             });
-            this.storehistoryTokens();
           }
         }
 
@@ -2065,11 +2053,6 @@ export default {
         }
         i += 1;
       }
-    },
-    setTokenPaid: async function (token) {
-      const invoice = this.historyTokens.find((i) => i.token === token);
-      invoice.status = "paid";
-      this.storehistoryTokens();
     },
 
     checkTokenSpendable: async function (token, verbose = true) {
@@ -2280,12 +2263,6 @@ export default {
         JSON.stringify(this.invoiceHistory)
       );
     },
-    storehistoryTokens: function () {
-      localStorage.setItem(
-        "cashu.historyTokens",
-        JSON.stringify(this.historyTokens)
-      );
-    },
     /*storeProofs: function () {
       localStorage.setItem(
         "cashu.proofs",
@@ -2395,10 +2372,6 @@ export default {
 
     this.invoiceHistory = JSON.parse(
       localStorage.getItem("cashu.invoiceHistory") || "[]"
-    );
-
-    this.historyTokens = JSON.parse(
-      localStorage.getItem("cashu.historyTokens") || "[]"
     );
 
     // run migrations
