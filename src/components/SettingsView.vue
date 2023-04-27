@@ -199,9 +199,9 @@
 </template>
 <script>
 import { defineComponent } from "vue";
-import { getShortUrl } from "src/js/wallet-helpers";
+import { getShortUrl } from "js/wallet-helpers";
 import { mapActions, mapState, mapWritableState } from "pinia";
-import { useMintsStore } from "src/stores/mints";
+import { useMintsStore } from "stores/mints";
 
 export default defineComponent({
   name: "SettingsView",

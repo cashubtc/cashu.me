@@ -67,7 +67,7 @@
 </template>
 <script>
 import { defineComponent } from "vue";
-import { shortenString } from "src/js/string-utils";
+import { shortenString } from "js/string-utils";
 
 export default defineComponent({
   name: "HistoryTable",

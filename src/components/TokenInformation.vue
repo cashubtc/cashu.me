@@ -19,7 +19,7 @@
 </template>
 <script>
 import { defineComponent } from "vue";
-import { getShortUrl } from "src/js/wallet-helpers";
+import { getShortUrl } from "js/wallet-helpers";
 import { mapState } from "pinia";
 import { useMintsStore } from "stores/mints";
 
@@ -37,10 +37,10 @@ export default defineComponent({
   watch: {},
   computed: {
     ...mapState(useMintsStore, [
-      'activeMintUrl',
-      'activeProofs',
-      'mints',
-      'proofs',
+      "activeMintUrl",
+      "activeProofs",
+      "mints",
+      "proofs",
     ]),
     sumProofs: function () {
       return this.proofsToShow

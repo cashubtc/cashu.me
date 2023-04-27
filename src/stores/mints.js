@@ -2,7 +2,7 @@ import { defineStore } from "pinia";
 import { useLocalStorage } from "@vueuse/core";
 import { useWorkersStore } from "./workers";
 import { axios } from "boot/axios";
-import { notifyApiError, notifyError, notifySuccess } from "src/js/notify";
+import { notifyApiError, notifyError, notifySuccess } from "js/notify";
 
 export const useMintsStore = defineStore("mints", {
   state: () => {

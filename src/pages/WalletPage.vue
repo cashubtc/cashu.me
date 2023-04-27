@@ -793,14 +793,14 @@
 import { ref } from "vue";
 import { axios } from "boot/axios";
 import { date } from "quasar";
-import { splitAmount, bigIntStringify } from "src/js/utils";
-import * as nobleSecp256k1 from "src/js/noble-secp256k1";
-import { step1Alice, step3Alice } from "src/js/dhke";
-import { uint8ToBase64 } from "src/js/base64";
+import { splitAmount, bigIntStringify } from "js/utils";
+import * as nobleSecp256k1 from "js/noble-secp256k1";
+import { step1Alice, step3Alice } from "js/dhke";
+import { uint8ToBase64 } from "js/base64";
 import * as _ from "underscore";
-import { getShortUrl } from "src/js/wallet-helpers";
-import { shortenString } from "src/js/string-utils";
-import token from "src/js/token";
+import { getShortUrl } from "js/wallet-helpers";
+import { shortenString } from "js/string-utils";
+import token from "js/token";
 // Vue components
 import BalanceView from "components/BalanceView.vue";
 import SettingsView from "components/SettingsView.vue";
@@ -812,8 +812,8 @@ import TokenInformation from "components/TokenInformation.vue";
 import WelcomeDialog from "components/WelcomeDialog.vue";
 
 import { mapActions, mapState, mapWritableState } from "pinia";
-import { useMintsStore } from "src/stores/mints";
-import { useWorkersStore } from "src/stores/workers";
+import { useMintsStore } from "stores/mints";
+import { useWorkersStore } from "stores/workers";
 
 var currentDateStr = function () {
   return date.formatDate(new Date(), "YYYY-MM-DD HH:mm:ss");

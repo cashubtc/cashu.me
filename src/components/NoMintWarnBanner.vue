@@ -14,7 +14,7 @@
 </template>
 <script>
 import { defineComponent, ref } from "vue";
-import { getShortUrl } from "src/js/wallet-helpers";
+import { getShortUrl } from "js/wallet-helpers";
 export default defineComponent({
   name: "NoMintWarnBanner",
   mixins: [windowMixin],

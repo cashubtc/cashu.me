@@ -64,9 +64,9 @@
 </template>
 <script>
 import { defineComponent, ref } from "vue";
-import { getShortUrl } from "src/js/wallet-helpers";
-import {mapState} from "pinia";
-import {useMintsStore} from "stores/mints";
+import { getShortUrl } from "js/wallet-helpers";
+import { mapState } from "pinia";
+import { useMintsStore } from "stores/mints";
 export default defineComponent({
   name: "BalanceView",
   mixins: [windowMixin],
@@ -78,10 +78,10 @@ export default defineComponent({
   },
   computed: {
     ...mapState(useMintsStore, [
-      'activeMintUrl',
-      'activeProofs',
-      'mints',
-      'proofs',
+      "activeMintUrl",
+      "activeProofs",
+      "mints",
+      "proofs",
     ]),
     balance: function () {
       return this.activeProofs
