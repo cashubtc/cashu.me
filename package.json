@@ -7,7 +7,7 @@
   "private": true,
   "scripts": {
     "build": "vite build",
-    "dev": "vite dev",
+    "dev": "vite dev --open",
     "lint": "eslint --ext .js,.vue ./",
     "format": "prettier --write \"**/*.{js,vue,scss,html,md,json}\" --ignore-path .gitignore",
     "preview": "vite preview",
