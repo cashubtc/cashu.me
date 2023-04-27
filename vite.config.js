@@ -15,7 +15,7 @@ export default defineConfig({
       sassVariables: "src/css/quasar.variables.scss",
     }),
   ],
-  preview: { port: 8080 },
+  preview: { port: 3000 },
   resolve: {
     alias: {
       boot: fileURLToPath(new URL("./src/boot", import.meta.url)),
