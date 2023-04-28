@@ -1,0 +1,5 @@
+{
+  "unit-vitest": {
+    "runnerCommand": "vitest run"
+  }
+}
