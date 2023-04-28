@@ -794,7 +794,7 @@ import { ref } from "vue";
 import { axios } from "boot/axios";
 import { date } from "quasar";
 import { splitAmount, bigIntStringify } from "src/js/utils";
-import * as nobleSecp256k1 from "src/js/noble-secp256k1";
+import * as nobleSecp256k1 from "@noble/secp256k1";
 import { step1Alice, step3Alice } from "src/js/dhke";
 import { uint8ToBase64 } from "src/js/base64";
 import * as _ from "underscore";
