@@ -36,6 +36,7 @@
   },
   "devDependencies": {
     "@babel/eslint-parser": "^7.13.14",
+    "@quasar/babel-preset-app": "^2.0.2",
     "@quasar/quasar-app-extension-testing": "^2.1.0",
     "@quasar/quasar-app-extension-testing-unit-jest": "^3.0.0-beta.5",
     "@quasar/vite-plugin": "^1.3.1",
