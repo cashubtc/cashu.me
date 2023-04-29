@@ -27,9 +27,10 @@ app.use(router);
 let store = createPinia();
 app.use(store);
 
-// boot
-Object.values(import.meta.globEager("boot/*.js")).forEach((module) => {
-  if (!!module.default) module.default({ app, router, store });
+// auto-imports boots
+Object.values(import.meta.glob("boot/*.js")).forEach(async (mod) => {
+  let boot = ((await mod()) || {}).default;
+  boot(app, router, store);
 });
 
 app.mount("#q-app");
