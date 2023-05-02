@@ -7,6 +7,7 @@
   "private": true,
   "scripts": {
     "build": "vite build",
+    "build:electron": "BUILD_MODE=electron vite build",
     "build:pwa": "BUILD_MODE=pwa vite build",
     "dev": "vite --open",
     "lint": "eslint --ext .js,.vue ./",
@@ -43,7 +44,7 @@
     "@types/jest": "^29.5.1",
     "@vitejs/plugin-vue": "^4.2.1",
     "@vue/test-utils": "^2.2.0",
-    "electron": "^23.1.1",
+    "electron": "^23.3.0",
     "electron-packager": "^15.5.2",
     "eslint": "^8.10.0",
     "eslint-config-prettier": "^8.1.0",
@@ -54,7 +55,8 @@
     "prettier": "^2.5.1",
     "sass": "^1.32.12",
     "vite": "^4.3.3",
-    "vite-jsconfig-paths": "^2.0.1"
+    "vite-jsconfig-paths": "^2.0.1",
+    "vite-plugin-electron": "^0.11.2"
   },
   "browserslist": [
     "last 10 Chrome versions",

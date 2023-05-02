@@ -3365,7 +3365,7 @@ electron-to-chromium@^1.4.284:
   resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.4.377.tgz#7f326a0b2c1b96eca6bb65907addc505d0d15989"
   integrity sha512-H3BYG6DW5Z+l0xcfXaicJGxrpA4kMlCxnN71+iNX+dBLkRMOdVJqFJiAmbNZZKA1zISpRg17JR03qGifXNsJtw==
 
-electron@^23.1.1:
+electron@^23.3.0:
   version "23.3.0"
   resolved "https://registry.yarnpkg.com/electron/-/electron-23.3.0.tgz#3e83e75d8bebe00764611c1d0c1bfa90cc197c7c"
   integrity sha512-DVAtptpOSxM7ycgriphSxzlkb3R92d28sFKG1hMtmPkAwHl/e87reaHXhGwyj8Xu4GY69e6yUoAJqma20w0Vgw==
@@ -7809,6 +7809,11 @@ vite-jsconfig-paths@^2.0.1:
     globrex "^0.1.2"
     recrawl-sync "^2.0.3"
     tsconfig-paths "^3.9.0"
+
+vite-plugin-electron@^0.11.2:
+  version "0.11.2"
+  resolved "https://registry.yarnpkg.com/vite-plugin-electron/-/vite-plugin-electron-0.11.2.tgz#bdb14aeb011fbea0f7cfec0550110fc111951c15"
+  integrity sha512-umQRmSuA80JVxKB3PfO55o8mFTrW+sEtu7kZ5TYKAnkuYpKw7qgxl4f/65gp8x5BGHJjYh/iIRIE26x3Xqc4mQ==
 
 vite-plugin-pwa@^0.14.7:
   version "0.14.7"

@@ -3,6 +3,7 @@
 // imports
 import { VitePWA } from "vite-plugin-pwa";
 import { defineConfig } from "vite";
+import electron from "vite-plugin-electron";
 import jsconfigPaths from "vite-jsconfig-paths";
 import { quasar, transformAssetUrls } from "@quasar/vite-plugin";
 import { fileURLToPath, URL } from "node:url";
@@ -10,6 +11,12 @@ import vue from "@vitejs/plugin-vue";
 
 export default defineConfig({
   plugins: [
+    process.env.BUILD_MODE == "electron"
+      ? electron({
+          entry: "electron/main.js",
+          vite: { build: { outDir: "dist" } },
+        })
+      : void 0,
     process.env.BUILD_MODE == "pwa"
       ? VitePWA({
           manifest: {
