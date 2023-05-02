@@ -4,7 +4,7 @@ import { app, BrowserWindow } from "electron";
 
 app.whenReady().then(() => {
   let browserWindow = new BrowserWindow({
-    title: "Main window",
+    title: "Cashu Wallet",
   });
   browserWindow.loadFile("dist/index.html");
 });
