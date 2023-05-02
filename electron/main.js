@@ -6,5 +6,6 @@ app.whenReady().then(() => {
   let browserWindow = new BrowserWindow({
     title: "Cashu Wallet",
   });
+  browserWindow.setAppDetails({ appId: "cashu" });
   browserWindow.loadFile("dist/index.html");
 });
