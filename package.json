@@ -5,6 +5,7 @@
   "productName": "Cashu",
   "author": "cashu.me",
   "private": true,
+  "main": "dist/main.js",
   "scripts": {
     "build": "vite build",
     "build:electron": "BUILD_MODE=electron vite build",
