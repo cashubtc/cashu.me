@@ -815,6 +815,7 @@ import { mapActions, mapState, mapWritableState } from "pinia";
 import { useMintsStore } from "src/stores/mints";
 import { useWorkersStore } from "src/stores/workers";
 import { useTokensStore } from "src/stores/tokens";
+import { useWalletStore } from "src/stores/wallet";
 
 var currentDateStr = function () {
   return date.formatDate(new Date(), "YYYY-MM-DD HH:mm:ss");
@@ -840,36 +841,10 @@ export default {
       mintId: "",
       mintName: "",
       deferredPWAInstallPrompt: null,
-      invoiceHistory: [],
-      invoiceData: {
-        amount: 0,
-        memo: "",
-        bolt11: "",
-        hash: "",
-      },
       camera: {
         data: null,
         show: false,
         camera: "auto",
-      },
-      //invoiceCheckListener: () => {},
-      payInvoiceData: {
-        blocking: false,
-        bolt11: "",
-        show: false,
-        invoice: null,
-        lnurlpay: null,
-        lnurlauth: null,
-        data: {
-          request: "",
-          amount: 0,
-          comment: "",
-        },
-        paymentChecker: null,
-        camera: {
-          show: false,
-          camera: "auto",
-        },
       },
       sendData: {
         amount: 0,
@@ -978,6 +953,11 @@ export default {
       "mints",
       "proofs",
       "activeMint",
+    ]),
+    ...mapState(useWalletStore, [
+      "invoiceHistory",
+      "invoiceData",
+      "payInvoiceData",
     ]),
     ...mapWritableState(useMintsStore, ["showAddMintDialog"]),
     ...mapWritableState(useWorkersStore, [
@@ -1529,7 +1509,6 @@ export default {
             mint: this.activeMintUrl,
           })
         );
-        this.storeInvoiceHistory();
         return data;
       } catch (error) {
         console.error(error);
@@ -1909,7 +1888,6 @@ export default {
           status: "paid",
           mint: this.activeMintUrl,
         });
-        this.storeInvoiceHistory();
 
         this.payInvoiceData.invoice = false;
         this.payInvoiceData.show = false;
@@ -1986,7 +1964,6 @@ export default {
     setInvoicePaid: async function (payment_hash) {
       const invoice = this.invoiceHistory.find((i) => i.hash === payment_hash);
       invoice.status = "paid";
-      this.storeInvoiceHistory();
     },
     checkInvoice: async function (payment_hash, verbose = true) {
       console.log("### checkInvoice.hash", payment_hash);
@@ -2240,18 +2217,6 @@ export default {
       downloadLink.click();
     },
 
-    storeInvoiceHistory: function () {
-      localStorage.setItem(
-        "cashu.invoiceHistory",
-        JSON.stringify(this.invoiceHistory)
-      );
-    },
-    /*storeProofs: function () {
-      localStorage.setItem(
-        "cashu.proofs",
-        JSON.stringify(this.proofs, bigIntStringify)
-      );
-    },*/
     migrationLocalstorage: async function () {
       // migration from old db to multimint
       for (var key in localStorage) {
@@ -2352,10 +2317,6 @@ export default {
     if (params.get("mint_name")) {
       this.mintName = params.get("mint_name");
     }
-
-    this.invoiceHistory = JSON.parse(
-      localStorage.getItem("cashu.invoiceHistory") || "[]"
-    );
 
     // run migrations
     await this.migrationLocalstorage();
