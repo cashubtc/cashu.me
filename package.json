@@ -7,9 +7,9 @@
   "private": true,
   "main": "dist/main.js",
   "scripts": {
-    "build": "vite build",
-    "build:electron": "BUILD_MODE=electron vite build",
-    "build:pwa": "BUILD_MODE=pwa vite build",
+    "build": "vite build --mode prod",
+    "build:electron": "BUILD_MODE=electron vite build --mode prod",
+    "build:pwa": "BUILD_MODE=pwa vite build --mode prod",
     "dev": "vite --open",
     "lint": "eslint --ext .js,.vue ./",
     "format": "prettier --write \"**/*.{js,vue,scss,html,md,json}\" --ignore-path .gitignore",
