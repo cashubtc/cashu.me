@@ -3,6 +3,7 @@ import { useLocalStorage } from "@vueuse/core";
 import { useWorkersStore } from "./workers";
 import { axios } from "boot/axios";
 import { notifyApiError, notifyError, notifySuccess } from "src/js/notify";
+import { CashuMint } from "@cashu/cashu-ts";
 
 export const useMintsStore = defineStore("mints", {
   state: () => {
@@ -17,7 +18,11 @@ export const useMintsStore = defineStore("mints", {
       showAddMintDialog: false,
     };
   },
-  getters: {},
+  getters: {
+    activeMint({ activeMintUrl }) {
+      return new CashuMint(activeMintUrl);
+    },
+  },
   actions: {
     setShowAddMintDialog(show) {
       this.showAddMintDialog = show;

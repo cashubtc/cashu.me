@@ -977,6 +977,7 @@ export default {
       "keys",
       "mints",
       "proofs",
+      "activeMint",
     ]),
     ...mapWritableState(useMintsStore, ["showAddMintDialog"]),
     ...mapWritableState(useWorkersStore, [
@@ -1514,9 +1515,7 @@ export default {
         this.invoiceData.amount = amount;
       }
       try {
-        const { data } = await axios.get(
-          `${this.activeMintUrl}/mint?amount=${this.invoiceData.amount}`
-        );
+        const data = await this.activeMint.requestMint(this.invoiceData.amount);
         this.assertMintError(data);
         console.log("### data", data);
 
@@ -1553,18 +1552,13 @@ export default {
         let secrets = await this.generateSecrets(amounts);
         let { outputs, rs } = await this.constructOutputs(amounts, secrets);
         const keys = this.keys; // fix keys for constructProofs
-        const promises = await axios.post(
-          `${this.activeMintUrl}/mint?payment_hash=${payment_hash}`,
-          {
-            outputs,
-          }
-        );
-        this.assertMintError(promises.data, false);
-        if (promises.data.promises == null) {
+        const data = await this.activeMint.mint({ outputs }, payment_hash);
+        this.assertMintError(data, false);
+        if (data.promises == null) {
           return {};
         }
         let proofs = await this.constructProofs(
-          promises.data.promises,
+          data.promises,
           secrets,
           rs,
           keys
@@ -1663,10 +1657,8 @@ export default {
           outputs,
         };
         const keys = this.keys; // fix keys for constructProofs
-        const { data } = await axios.post(
-          `${this.activeMintUrl}/split`,
-          payload
-        );
+        const data = await this.activeMint.split(payload);
+
         this.assertMintError(data);
         const frst_rs = rs.slice(0, frst_amounts.length);
         const frst_secrets = secrets.slice(0, frst_amounts.length);
@@ -1874,10 +1866,7 @@ export default {
           outputs,
         };
         const keys = this.keys; // fix keys for constructProofs
-        const { data } = await axios.post(
-          `${this.activeMintUrl}/melt`,
-          payload
-        );
+        const data = await this.activeMint.melt(payload);
         this.assertMintError(data);
         if (data.paid != true) {
           throw new Error("Invoice not paid.");
@@ -1948,10 +1937,7 @@ export default {
         }),
       };
       try {
-        const { data } = await axios.post(
-          `${this.activeMintUrl}/check`,
-          payload
-        );
+        const data = await this.activeMint.check(payload);
         this.assertMintError(data);
         // delete proofs from database if it is spent
         let spentProofs = proofs.filter((p, pidx) => !data.spendable[pidx]);
@@ -1983,10 +1969,7 @@ export default {
         pr: payment_request,
       };
       try {
-        const { data } = await axios.post(
-          `${this.activeMintUrl}/checkfees`,
-          payload
-        );
+        const data = await this.activeMint.checkFees(payload);
         this.assertMintError(data);
         console.log("#### checkFees", payment_request, data.fee);
         return data.fee;
