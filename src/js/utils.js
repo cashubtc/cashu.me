@@ -1,4 +1,5 @@
 import * as nobleSecp256k1 from "./noble-secp256k1";
+import { date } from "quasar";
 
 function splitAmount(value) {
   const chunks = [];
@@ -24,4 +25,8 @@ function hexToNumber(hex) {
   return BigInt(`0x${hex}`);
 }
 
-export { splitAmount, bytesToNumber, bigIntStringify };
+function currentDateStr() {
+  return date.formatDate(new Date(), "YYYY-MM-DD HH:mm:ss");
+}
+
+export { splitAmount, bytesToNumber, bigIntStringify, currentDateStr };

@@ -1014,6 +1014,7 @@ export default {
       "addPendingToken",
       "setTokenPaid",
     ]),
+    ...mapActions(useWalletStore, ["requestMint"]),
     // TOKEN METHODS
     decodeToken: function (encoded_token) {
       return token.decode(encoded_token);
@@ -1483,40 +1484,6 @@ export default {
       await this.requestMint();
       console.log("#### request mint", this.invoiceData);
       await this.invoiceCheckWorker();
-    },
-
-    // /mint
-
-    requestMint: async function (amount = null) {
-      /*
-                gets an invoice from the mint to get new tokens
-                */
-      if (amount != null) {
-        this.invoiceData.amount = amount;
-      }
-      try {
-        const data = await this.activeMint.requestMint(this.invoiceData.amount);
-        this.assertMintError(data);
-        console.log("### data", data);
-
-        this.invoiceData.bolt11 = data.pr;
-        this.invoiceData.hash = data.hash;
-        this.invoiceHistory.push(
-          // extend dictionary
-          Object.assign({}, this.invoiceData, {
-            date: currentDateStr(),
-            status: "pending",
-            mint: this.activeMintUrl,
-          })
-        );
-        return data;
-      } catch (error) {
-        console.error(error);
-        try {
-          this.notifyApiError(error);
-        } catch {}
-        throw error;
-      }
     },
 
     // /mint
