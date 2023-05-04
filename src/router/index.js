@@ -9,12 +9,22 @@ import {
 import routes from "./routes";
 
 /**
+ * vite env vars must have `VITE_` prefixes
+ */
+let allowedRouterModes = ["history", "hash"];
+let vueRouterMode = allowedRouterModes.includes(
+  import.meta.env.VITE_VUE_ROUTER_MODE
+)
+  ? import.meta.env.VITE_VUE_ROUTER_MODE
+  : "history";
+
+/**
  * `import.meta.env.PROD`: {boolean} whether the app is running in production.
  * @see https://vitejs.dev/guide/env-and-mode.html#env-variables
  */
 const createHistory = import.meta.env.PROD
   ? createMemoryHistory
-  : import.meta.env.VUE_ROUTER_MODE === "history" // either "history" or "hash"
+  : vueRouterMode === "history" // either "history" or "hash"
   ? createWebHistory
   : createWebHashHistory;
 
