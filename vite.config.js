@@ -71,7 +71,7 @@ export default defineConfig({
       template: transformAssetUrls,
     }),
     quasar({
-      sassVariables: "src/css/quasar.variables.scss",
+      sassVariables: "src/assets/css/quasar.variables.scss",
     }),
     jsconfigPaths(),
   ],
@@ -79,6 +79,7 @@ export default defineConfig({
   publicDir: "assets/static",
   resolve: {
     alias: {
+      assets: fileURLToPath(new URL("./src/assets", import.meta.url)),
       boot: fileURLToPath(new URL("./src/boot", import.meta.url)),
       components: fileURLToPath(new URL("./src/components", import.meta.url)),
       js: fileURLToPath(new URL("./src/js", import.meta.url)),

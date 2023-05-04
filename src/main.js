@@ -13,8 +13,8 @@ import "@quasar/extras/roboto-font/roboto-font.css";
 import "quasar/src/css/index.sass";
 
 // local styling
-import "./css/app.scss";
-import "./css/base.scss";
+import "assets/css/app.scss";
+import "assets/css/base.scss";
 
 import App from "./App.vue";
 
