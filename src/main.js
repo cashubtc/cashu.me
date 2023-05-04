@@ -27,10 +27,12 @@ app.use(router);
 let store = createPinia();
 app.use(store);
 
-// auto-imports boots
-Object.values(import.meta.glob("boot/*.js")).forEach(async (mod) => {
-  let boot = ((await mod()) || {}).default;
-  boot(app, router, store);
-});
+// manually boots
+import axiosBoot from "boot/axios";
+import globalComponentsBoot from "boot/global-components";
+axiosBoot({ app, router, store });
+globalComponentsBoot({ app, router, store });
+// mixins
+import "boot/base";
 
 app.mount("#q-app");
