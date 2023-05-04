@@ -76,7 +76,6 @@ export default defineConfig({
     jsconfigPaths(),
   ],
   preview: { port: 3000 },
-  publicDir: "assets/static",
   resolve: {
     alias: {
       assets: fileURLToPath(new URL("./src/assets", import.meta.url)),
