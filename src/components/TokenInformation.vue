@@ -19,7 +19,7 @@
 </template>
 <script>
 import { defineComponent } from "vue";
-import { getShortUrl } from "js/wallet-helpers";
+import { getShortUrl } from "assets/js/wallet-helpers";
 import { mapState } from "pinia";
 import { useMintsStore } from "stores/mints";
 

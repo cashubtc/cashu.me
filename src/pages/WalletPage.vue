@@ -793,14 +793,13 @@
 import { ref } from "vue";
 import { axios } from "boot/axios";
 import { date } from "quasar";
-import { splitAmount, bigIntStringify } from "js/utils";
-import * as nobleSecp256k1 from "js/noble-secp256k1";
-import { step1Alice, step3Alice } from "js/dhke";
-import { uint8ToBase64 } from "js/base64";
+import { splitAmount } from "assets/js/utils";
+import * as nobleSecp256k1 from "assets/js/noble-secp256k1";
+import { step1Alice, step3Alice } from "assets/js/dhke";
+import { uint8ToBase64 } from "assets/js/base64";
 import * as _ from "underscore";
-import { getShortUrl } from "js/wallet-helpers";
-import { shortenString } from "js/string-utils";
-import token from "js/token";
+import { shortenString } from "assets/js/string-utils";
+import token from "assets/js/token";
 // Vue components
 import BalanceView from "components/BalanceView.vue";
 import SettingsView from "components/SettingsView.vue";

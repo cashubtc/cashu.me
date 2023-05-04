@@ -32,7 +32,7 @@
 </template>
 <script>
 import { defineComponent, ref } from "vue";
-import { getShortUrl } from "js/wallet-helpers";
+import { getShortUrl } from "assets/js/wallet-helpers";
 import { mapActions, mapState } from "pinia";
 import { useMintsStore } from "stores/mints";
 export default defineComponent({

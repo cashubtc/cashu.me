@@ -80,7 +80,7 @@
 </template>
 <script>
 import { defineComponent } from "vue";
-import { shortenString } from "js/string-utils";
+import { shortenString } from "assets/js/string-utils";
 
 export default defineComponent({
   name: "InvoicesTable",
