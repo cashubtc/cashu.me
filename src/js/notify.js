@@ -1,4 +1,5 @@
-import { Notify } from 'quasar'
+import { Notify } from "quasar";
+import axios from "axios";
 
 function notifyApiError(error) {
   let types = {
@@ -6,15 +7,28 @@ function notifyApiError(error) {
     401: "warning",
     500: "negative",
   };
+  if (axios.isAxiosError(error)) {
+    notifyAxiosError(error);
+    return;
+  }
   Notify.create({
     timeout: 5000,
     type: types[error.response.status] || "warning",
-    message:
-      error.response.data.message || error.response.data.detail || null,
+    message: error.response.data.message || error.response.data.detail || null,
     caption:
       [error.response.status, " ", error.response.statusText]
         .join("")
         .toUpperCase() || null,
+    icon: null,
+  });
+}
+
+function notifyAxiosError(error) {
+  Notify.create({
+    timeout: 5000,
+    type: "warning",
+    message: error.message,
+    caption: error.code,
     icon: null,
   });
 }
@@ -96,10 +110,4 @@ async function notify(
   });
 }
 
-export {
-  notifyApiError,
-  notifySuccess,
-  notifyError,
-  notifyWarning,
-  notify,
-}
+export { notifyApiError, notifySuccess, notifyError, notifyWarning, notify };

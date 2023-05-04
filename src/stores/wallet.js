@@ -37,6 +37,13 @@ export const useWalletStore = defineStore("wallet", {
     },
   },
   actions: {
+    /**
+     * Ask the mint to generate an invoice for the given amount
+     * Upon paying the request, the mint will credit the wallet with
+     * cashu tokens
+     * @param {number | null} amount
+     * @returns
+     */
     requestMint: async function (amount = null) {
       const mints = useMintsStore();
       if (amount != null) {
@@ -61,6 +68,14 @@ export const useWalletStore = defineStore("wallet", {
         console.error(error);
         notifyApiError(error);
       }
+    },
+    /**
+     * Sets an invoice status to paid
+     * @param {string} payment_hash
+     */
+    setInvoicePaid(payment_hash) {
+      const invoice = this.invoiceHistory.find((i) => i.hash === payment_hash);
+      invoice.status = "paid";
     },
   },
 });

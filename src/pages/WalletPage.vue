@@ -1014,7 +1014,7 @@ export default {
       "addPendingToken",
       "setTokenPaid",
     ]),
-    ...mapActions(useWalletStore, ["requestMint"]),
+    ...mapActions(useWalletStore, ["requestMint", "setInvoicePaid"]),
     // TOKEN METHODS
     decodeToken: function (encoded_token) {
       return token.decode(encoded_token);
@@ -1928,10 +1928,6 @@ export default {
     },
 
     ////////////// UI HELPERS //////////////
-    setInvoicePaid: async function (payment_hash) {
-      const invoice = this.invoiceHistory.find((i) => i.hash === payment_hash);
-      invoice.status = "paid";
-    },
     checkInvoice: async function (payment_hash, verbose = true) {
       console.log("### checkInvoice.hash", payment_hash);
       const invoice = this.invoiceHistory.find((i) => i.hash === payment_hash);
