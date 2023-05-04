@@ -11,13 +11,13 @@ import vue from "@vitejs/plugin-vue";
 
 export default defineConfig({
   plugins: [
-    process.env.BUILD_MODE == "electron"
+    process.env.BUILD_TARGET == "electron"
       ? electron({
           entry: "electron/main.js",
           vite: { build: { outDir: "dist" } },
         })
       : void 0,
-    process.env.BUILD_MODE == "pwa"
+    process.env.BUILD_TARGET == "pwa"
       ? VitePWA({
           manifest: {
             name: "Cashu",
