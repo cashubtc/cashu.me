@@ -31,3 +31,8 @@ yarn-error.log*
 *.ntvs*
 *.njsproj
 *.sln
+
+# dotenv files except example
+.env
+.env.prod
+!.env.example
