@@ -19,7 +19,6 @@
     ".npmrc": true,
     ".postcssrc.js": true,
     ".quasar": true,
-    ".vscode": true,
     "dist": true,
     "node_modules": true
   },

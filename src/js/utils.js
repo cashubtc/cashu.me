@@ -1,5 +1,5 @@
-import * as nobleSecp256k1 from "./noble-secp256k1";
 import { date } from "quasar";
+import * as nobleSecp256k1 from "@noble/secp256k1";
 
 function splitAmount(value) {
   const chunks = [];

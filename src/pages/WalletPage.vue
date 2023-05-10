@@ -794,7 +794,8 @@ import { ref } from "vue";
 import { axios } from "boot/axios";
 import { date } from "quasar";
 import { splitAmount, bigIntStringify } from "src/js/utils";
-import * as nobleSecp256k1 from "src/js/noble-secp256k1";
+import * as nobleSecp256k1 from "@noble/secp256k1";
+import * as bolt11Decoder from "light-bolt11-decoder";
 import { step1Alice, step3Alice } from "src/js/dhke";
 import { uint8ToBase64 } from "src/js/base64";
 import * as _ from "underscore";
@@ -1177,14 +1178,11 @@ export default {
         this.payInvoiceData.show = true;
         let invoice;
         try {
-          invoice = require("light-bolt11-decoder").decode(
-            this.payInvoiceData.data.request
-          );
+          invoice = bolt11Decoder.decode(this.payInvoiceData.data.request);
         } catch (error) {
           this.notifyWarning("Failed to decode invoice", null, 3000);
           this.payInvoiceData.show = false;
           throw error;
-          return;
         }
 
         // invoice.amount = invoice.sections[2] / 1000;

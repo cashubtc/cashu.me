@@ -1,6 +1,7 @@
 import { uint8ToBase64 } from "./base64";
 import { bytesToNumber } from "./utils";
-import * as nobleSecp256k1 from "./noble-secp256k1";
+// import * as nobleSecp256k1 from "./noble-secp256k1";
+import * as nobleSecp256k1 from "@noble/secp256k1";
 
 async function hashToCurve(secretMessage) {
   let point;

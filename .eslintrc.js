@@ -5,9 +5,7 @@ module.exports = {
   root: true,
 
   parserOptions: {
-    parser: "@babel/eslint-parser",
-    ecmaVersion: 2018, // Allows for the parsing of modern ECMAScript features
-    sourceType: "module", // Allows for the use of imports
+    ecmaVersion: "2021", // Allows for the parsing of modern ECMAScript features
   },
 
   env: {
@@ -71,23 +69,6 @@ module.exports = {
       // as it's not able to detect their usage into the template
       // We disable this rule and only keep it for Vue files
       rules: { "vue/no-unused-properties": "off" },
-    },
-    {
-      files: [
-        "**/test/jest/__tests__/**/*.{spec,test}.{js,jsx,ts,tsx}",
-        "**/*.jest.{spec,test}.{js,jsx,ts,tsx}",
-      ],
-      env: {
-        browser: true,
-      },
-      extends: [
-        // Removes 'no-undef' lint errors for Jest global functions (`describe`, `it`, etc),
-        //  add Jest-specific lint rules and Jest plugin
-        // See https://github.com/jest-community/eslint-plugin-jest#recommended
-        "plugin:jest/recommended",
-        // Uncomment following line to apply style rules
-        // 'plugin:jest/style',
-      ],
     },
   ],
 };
