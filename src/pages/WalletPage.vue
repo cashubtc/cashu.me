@@ -1552,7 +1552,7 @@ export default {
         let { outputs, rs } = await this.constructOutputs(amounts, secrets);
         const keys = this.keys; // fix keys for constructProofs
         const promises = await axios.post(
-          `${this.activeMintUrl}/mint?payment_hash=${payment_hash}`,
+          `${this.activeMintUrl}/mint?hash=${payment_hash}&payment_hash=${payment_hash}`, // we keep payment_hash for backwards compatibility
           {
             outputs,
           }
