@@ -1,4 +1,4 @@
-import * as nobleSecp256k1 from "./noble-secp256k1";
+import * as nobleSecp256k1 from "@noble/secp256k1";
 
 function splitAmount(value) {
   const chunks = [];

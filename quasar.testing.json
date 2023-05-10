@@ -1,5 +1,5 @@
 {
-  "unit-jest": {
-    "runnerCommand": "jest --ci"
+  "unit-vitest": {
+    "runnerCommand": "vitest run"
   }
 }
