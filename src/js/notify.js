@@ -1,5 +1,5 @@
 import { Notify } from "quasar";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 
 function notifyApiError(error) {
   let types = {
@@ -23,10 +23,14 @@ function notifyApiError(error) {
   });
 }
 
+/**
+ * Cashu-TS will return axios errors when certain calls fail, so we should handle those
+ * @param {AxiosError} error
+ */
 function notifyAxiosError(error) {
   Notify.create({
     timeout: 5000,
-    type: "warning",
+    type: types[error.status] || "warning",
     message: error.message,
     caption: error.code,
     icon: null,
