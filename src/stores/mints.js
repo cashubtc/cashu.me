@@ -1,8 +1,8 @@
 import { defineStore } from "pinia";
 import { useLocalStorage } from "@vueuse/core";
 import { useWorkersStore } from "./workers";
-import { axios } from "boot/axios";
 import { notifyApiError, notifyError, notifySuccess } from "src/js/notify";
+import { CashuMint } from "@cashu/cashu-ts";
 
 export const useMintsStore = defineStore("mints", {
   state: () => {
@@ -17,7 +17,11 @@ export const useMintsStore = defineStore("mints", {
       showAddMintDialog: false,
     };
   },
-  getters: {},
+  getters: {
+    activeMint({ activeMintUrl }) {
+      return new CashuMint(activeMintUrl);
+    },
+  },
   actions: {
     setShowAddMintDialog(show) {
       this.showAddMintDialog = show;
@@ -115,9 +119,7 @@ export const useMintsStore = defineStore("mints", {
       // later, it calles fetchMintKeysets which overwrites this.keysets
       try {
         console.log("### GET", `${this.activeMintUrl}/keys`);
-        const { data } = await axios.get(`${this.activeMintUrl}/keys`, {
-          timeout: 6000,
-        });
+        const data = await this.activeMint.getKeys();
         const keys = data;
         this.assertMintError(keys);
         this.keys = keys;
@@ -142,9 +144,7 @@ export const useMintsStore = defineStore("mints", {
     fetchMintKeysets: async function () {
       // attention: this function overwrites this.keysets
       try {
-        const { data } = await axios.get(`${this.activeMintUrl}/keysets`, {
-          timeout: 6000,
-        });
+        const data = await this.activeMint.getKeySets();
         this.assertMintError(data);
         this.keysets = data.keysets;
 

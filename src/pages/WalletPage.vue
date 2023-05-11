@@ -816,6 +816,7 @@ import { mapActions, mapState, mapWritableState } from "pinia";
 import { useMintsStore } from "src/stores/mints";
 import { useWorkersStore } from "src/stores/workers";
 import { useTokensStore } from "src/stores/tokens";
+import { useWalletStore } from "src/stores/wallet";
 
 var currentDateStr = function () {
   return date.formatDate(new Date(), "YYYY-MM-DD HH:mm:ss");
@@ -841,36 +842,10 @@ export default {
       mintId: "",
       mintName: "",
       deferredPWAInstallPrompt: null,
-      invoiceHistory: [],
-      invoiceData: {
-        amount: 0,
-        memo: "",
-        bolt11: "",
-        hash: "",
-      },
       camera: {
         data: null,
         show: false,
         camera: "auto",
-      },
-      //invoiceCheckListener: () => {},
-      payInvoiceData: {
-        blocking: false,
-        bolt11: "",
-        show: false,
-        invoice: null,
-        lnurlpay: null,
-        lnurlauth: null,
-        data: {
-          request: "",
-          amount: 0,
-          comment: "",
-        },
-        paymentChecker: null,
-        camera: {
-          show: false,
-          camera: "auto",
-        },
       },
       sendData: {
         amount: 0,
@@ -978,6 +953,12 @@ export default {
       "keys",
       "mints",
       "proofs",
+      "activeMint",
+    ]),
+    ...mapState(useWalletStore, [
+      "invoiceHistory",
+      "invoiceData",
+      "payInvoiceData",
     ]),
     ...mapWritableState(useMintsStore, ["showAddMintDialog"]),
     ...mapWritableState(useWorkersStore, [
@@ -1034,6 +1015,7 @@ export default {
       "addPendingToken",
       "setTokenPaid",
     ]),
+    ...mapActions(useWalletStore, ["requestMint", "setInvoicePaid"]),
     // TOKEN METHODS
     decodeToken: function (encoded_token) {
       return token.decode(encoded_token);
@@ -1504,43 +1486,6 @@ export default {
 
     // /mint
 
-    requestMint: async function (amount = null) {
-      /*
-                gets an invoice from the mint to get new tokens
-                */
-      if (amount != null) {
-        this.invoiceData.amount = amount;
-      }
-      try {
-        const { data } = await axios.get(
-          `${this.activeMintUrl}/mint?amount=${this.invoiceData.amount}`
-        );
-        this.assertMintError(data);
-        console.log("### data", data);
-
-        this.invoiceData.bolt11 = data.pr;
-        this.invoiceData.hash = data.hash;
-        this.invoiceHistory.push(
-          // extend dictionary
-          Object.assign({}, this.invoiceData, {
-            date: currentDateStr(),
-            status: "pending",
-            mint: this.activeMintUrl,
-          })
-        );
-        this.storeInvoiceHistory();
-        return data;
-      } catch (error) {
-        console.error(error);
-        try {
-          this.notifyApiError(error);
-        } catch {}
-        throw error;
-      }
-    },
-
-    // /mint
-
     mintApi: async function (amounts, payment_hash, verbose = true) {
       /*
                 asks the mint to check whether the invoice with payment_hash has been paid
@@ -1551,18 +1496,13 @@ export default {
         let secrets = await this.generateSecrets(amounts);
         let { outputs, rs } = await this.constructOutputs(amounts, secrets);
         const keys = this.keys; // fix keys for constructProofs
-        const promises = await axios.post(
-          `${this.activeMintUrl}/mint?hash=${payment_hash}&payment_hash=${payment_hash}`, // we keep payment_hash for backwards compatibility
-          {
-            outputs,
-          }
-        );
-        this.assertMintError(promises.data, false);
-        if (promises.data.promises == null) {
+        const data = await this.activeMint.mint({ outputs }, payment_hash);
+        this.assertMintError(data, false);
+        if (data.promises == null) {
           return {};
         }
         let proofs = await this.constructProofs(
-          promises.data.promises,
+          data.promises,
           secrets,
           rs,
           keys
@@ -1661,10 +1601,8 @@ export default {
           outputs,
         };
         const keys = this.keys; // fix keys for constructProofs
-        const { data } = await axios.post(
-          `${this.activeMintUrl}/split`,
-          payload
-        );
+        const data = await this.activeMint.split(payload);
+
         this.assertMintError(data);
         const frst_rs = rs.slice(0, frst_amounts.length);
         const frst_secrets = secrets.slice(0, frst_amounts.length);
@@ -1872,10 +1810,7 @@ export default {
           outputs,
         };
         const keys = this.keys; // fix keys for constructProofs
-        const { data } = await axios.post(
-          `${this.activeMintUrl}/melt`,
-          payload
-        );
+        const data = await this.activeMint.melt(payload);
         this.assertMintError(data);
         if (data.paid != true) {
           throw new Error("Invoice not paid.");
@@ -1918,7 +1853,6 @@ export default {
           status: "paid",
           mint: this.activeMintUrl,
         });
-        this.storeInvoiceHistory();
 
         this.payInvoiceData.invoice = false;
         this.payInvoiceData.show = false;
@@ -1946,10 +1880,7 @@ export default {
         }),
       };
       try {
-        const { data } = await axios.post(
-          `${this.activeMintUrl}/check`,
-          payload
-        );
+        const data = await this.activeMint.check(payload);
         this.assertMintError(data);
         // delete proofs from database if it is spent
         let spentProofs = proofs.filter((p, pidx) => !data.spendable[pidx]);
@@ -1981,10 +1912,7 @@ export default {
         pr: payment_request,
       };
       try {
-        const { data } = await axios.post(
-          `${this.activeMintUrl}/checkfees`,
-          payload
-        );
+        const data = await this.activeMint.checkFees(payload);
         this.assertMintError(data);
         console.log("#### checkFees", payment_request, data.fee);
         return data.fee;
@@ -1998,11 +1926,6 @@ export default {
     },
 
     ////////////// UI HELPERS //////////////
-    setInvoicePaid: async function (payment_hash) {
-      const invoice = this.invoiceHistory.find((i) => i.hash === payment_hash);
-      invoice.status = "paid";
-      this.storeInvoiceHistory();
-    },
     checkInvoice: async function (payment_hash, verbose = true) {
       console.log("### checkInvoice.hash", payment_hash);
       const invoice = this.invoiceHistory.find((i) => i.hash === payment_hash);
@@ -2255,18 +2178,6 @@ export default {
       downloadLink.click();
     },
 
-    storeInvoiceHistory: function () {
-      localStorage.setItem(
-        "cashu.invoiceHistory",
-        JSON.stringify(this.invoiceHistory)
-      );
-    },
-    /*storeProofs: function () {
-      localStorage.setItem(
-        "cashu.proofs",
-        JSON.stringify(this.proofs, bigIntStringify)
-      );
-    },*/
     migrationLocalstorage: async function () {
       // migration from old db to multimint
       for (var key in localStorage) {
@@ -2367,10 +2278,6 @@ export default {
     if (params.get("mint_name")) {
       this.mintName = params.get("mint_name");
     }
-
-    this.invoiceHistory = JSON.parse(
-      localStorage.getItem("cashu.invoiceHistory") || "[]"
-    );
 
     // run migrations
     await this.migrationLocalstorage();
