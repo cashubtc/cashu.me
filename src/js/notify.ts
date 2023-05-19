@@ -1,25 +1,35 @@
-import { Notify } from "quasar";
+import { Notify, QNotifyCreateOptions } from "quasar";
 import axios, { AxiosError } from "axios";
 
-function notifyApiError(error) {
-  let types = {
-    400: "warning",
-    401: "warning",
-    500: "negative",
-  };
+type ApiError =
+  | AxiosError
+  | {
+      response: {
+        status: number;
+        statusText: string;
+        data: { message?: string; detail?: string };
+      };
+    };
+
+type StatusMap = { [x: number]: "warning" | "negative" };
+const errorTypes = {
+  400: "warning",
+  401: "warning",
+  500: "negative",
+} as StatusMap;
+
+function notifyApiError(error: ApiError) {
   if (axios.isAxiosError(error)) {
     notifyAxiosError(error);
     return;
   }
   Notify.create({
     timeout: 5000,
-    type: types[error.response.status] || "warning",
-    message: error.response.data.message || error.response.data.detail || null,
-    caption:
-      [error.response.status, " ", error.response.statusText]
-        .join("")
-        .toUpperCase() || null,
-    icon: null,
+    type: errorTypes[error.response.status] ?? "warning",
+    message: error.response.data.message ?? error.response.data.detail,
+    caption: [error.response.status, " ", error.response.statusText]
+      .join("")
+      .toUpperCase(),
   });
 }
 
@@ -27,22 +37,24 @@ function notifyApiError(error) {
  * Cashu-TS will return axios errors when certain calls fail, so we should handle those
  * @param {AxiosError} error
  */
-function notifyAxiosError(error) {
+function notifyAxiosError(error: AxiosError) {
   Notify.create({
     timeout: 5000,
-    type: types[error.status] || "warning",
+    type: errorTypes[error.status!] || "warning",
     message: error.message,
     caption: error.code,
-    icon: null,
   });
 }
 
-async function notifySuccess(message, position = "top") {
+async function notifySuccess(
+  message: string,
+  position = "top" as QNotifyCreateOptions["position"]
+) {
   Notify.create({
     timeout: 5000,
     type: "positive",
     message: message,
-    position: position,
+    position,
     progress: true,
     actions: [
       {
@@ -54,11 +66,11 @@ async function notifySuccess(message, position = "top") {
   });
 }
 
-async function notifyError(message, caption = null) {
+async function notifyError(message: string, caption?: string) {
   Notify.create({
     color: "red",
     message: message,
-    caption: caption,
+    caption,
     position: "top",
     progress: true,
     actions: [
@@ -71,7 +83,11 @@ async function notifyError(message, caption = null) {
   });
 }
 
-async function notifyWarning(message, caption = null, timeout = 5000) {
+async function notifyWarning(
+  message: string,
+  caption?: string,
+  timeout = 5000
+) {
   Notify.create({
     timeout: timeout,
     type: "warning",
@@ -89,20 +105,13 @@ async function notifyWarning(message, caption = null, timeout = 5000) {
   });
 }
 
-async function notify(
-  message,
-  type = "null",
-  position = "top",
-  caption = null,
-  color = null
-) {
+async function notify(message: string) {
   // failure
   Notify.create({
     timeout: 5000,
     type: "null",
     color: "grey",
     message: message,
-    caption: null,
     position: "top",
     actions: [
       {

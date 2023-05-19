@@ -14,8 +14,6 @@
     "**/Thumbs.db": true,
     ".editorconfig": true,
     ".eslintignore": true,
-    ".eslintrc.js": true,
-    ".gitignore": true,
     ".npmrc": true,
     ".postcssrc.js": true,
     ".quasar": true,
