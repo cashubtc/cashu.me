@@ -3,17 +3,34 @@ import { currentDateStr } from "src/js/utils";
 import { notifyApiError } from "src/js/notify";
 import { useMintsStore } from "./mints";
 import { useLocalStorage } from "@vueuse/core";
+import { CashuMint, CashuWallet } from "@cashu/cashu-ts";
+
+type Invoice = {
+  amount: number;
+  bolt11: string;
+  hash: string;
+  memo: string;
+};
+
+type InvoiceHistory = Invoice & {
+  date: string;
+  status: "pending" | "paid";
+  mint?: string;
+};
 
 export const useWalletStore = defineStore("wallet", {
   state: () => {
     return {
-      invoiceHistory: useLocalStorage("cashu.invoiceHistory", []),
+      invoiceHistory: useLocalStorage(
+        "cashu.invoiceHistory",
+        [] as InvoiceHistory[]
+      ),
       invoiceData: {
         amount: 0,
         memo: "",
         bolt11: "",
         hash: "",
-      },
+      } as Invoice,
       payInvoiceData: {
         blocking: false,
         bolt11: "",
@@ -32,7 +49,8 @@ export const useWalletStore = defineStore("wallet", {
   getters: {
     wallet() {
       const mints = useMintsStore();
-      const wallet = new CashuWallet(mints.keys, mints.activeMint);
+      const mint = new CashuMint(mints.activeMintUrl);
+      const wallet = new CashuWallet(mint);
       return wallet;
     },
   },
@@ -41,12 +59,10 @@ export const useWalletStore = defineStore("wallet", {
      * Ask the mint to generate an invoice for the given amount
      * Upon paying the request, the mint will credit the wallet with
      * cashu tokens
-     * @param {number | null} amount
-     * @returns
      */
-    requestMint: async function (amount = null) {
+    requestMint: async function (amount?: number) {
       const mints = useMintsStore();
-      if (amount != null) {
+      if (amount) {
         this.invoiceData.amount = amount;
       }
       try {
@@ -55,26 +71,21 @@ export const useWalletStore = defineStore("wallet", {
         );
         this.invoiceData.bolt11 = data.pr;
         this.invoiceData.hash = data.hash;
-        this.invoiceHistory.push(
-          // extend dictionary
-          Object.assign({}, this.invoiceData, {
-            date: currentDateStr(),
-            status: "pending",
-            mint: this.activeMintUrl,
-          })
-        );
+        this.invoiceHistory.push({
+          ...this.invoiceData,
+          date: currentDateStr(),
+          status: "pending",
+          mint: mints.activeMintUrl,
+        });
         return data;
-      } catch (error) {
+      } catch (error: any) {
         console.error(error);
         notifyApiError(error);
       }
     },
-    /**
-     * Sets an invoice status to paid
-     * @param {string} payment_hash
-     */
-    setInvoicePaid(payment_hash) {
+    setInvoicePaid(payment_hash: string) {
       const invoice = this.invoiceHistory.find((i) => i.hash === payment_hash);
+      if (!invoice) return;
       invoice.status = "paid";
     },
   },
