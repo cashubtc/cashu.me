@@ -600,8 +600,11 @@
     </q-dialog>
 
     <!-- SEND TOKENS DIALOG  -->
-
-    <q-dialog v-model="showSendTokens" position="top">
+    <SendTokenDialog
+      v-model="showSendTokens"
+      :check-token-spendable-worker="checkTokenSpendableWorker"
+    />
+    <!-- <q-dialog v-model="showSendTokens" position="top">
       <q-card class="q-pa-lg q-pt-md qcard">
         <div v-if="!sendData.tokens">
           <div class="row items-center no-wrap q-mb-sm">
@@ -628,12 +631,6 @@
             class="q-mb-lg"
             @keyup.enter="sendTokens"
           ></q-input>
-          <!-- <q-input
-                filled
-                dense
-                v-model.trim="sendData.memo"
-                label="Memo"
-                ></q-input> -->
         </div>
         <div v-else class="text-center q-mb-lg">
           <div class="text-center q-mb-lg" v-if="sendData.tokens.length < 2">
@@ -690,9 +687,6 @@
             type="submit"
             >Send Tokens</q-btn
           >
-          <!-- <q-btn v-else @click="burnTokens" outline color="grey"
-                >Burn Tokens</q-btn
-                > -->
           <div v-else>
             <q-btn
               class="q-mx-xs"
@@ -712,7 +706,7 @@
           <q-btn v-close-popup flat color="grey" class="q-ml-auto">Close</q-btn>
         </div>
       </q-card>
-    </q-dialog>
+    </q-dialog> -->
 
     <!-- RECEIVE TOKENS DIALOG  -->
 
@@ -794,10 +788,10 @@ import { ref } from "vue";
 import { axios } from "boot/axios";
 import { date } from "quasar";
 import { splitAmount, bigIntStringify } from "src/js/utils";
-import * as nobleSecp256k1 from "@noble/secp256k1";
+// import * as nobleSecp256k1 from "@noble/secp256k1";
 import * as bolt11Decoder from "light-bolt11-decoder";
-import { step1Alice, step3Alice } from "src/js/dhke";
-import { uint8ToBase64 } from "src/js/base64";
+// import { step1Alice, step3Alice } from "src/js/dhke";
+// import { uint8ToBase64 } from "src/js/base64";
 import * as _ from "underscore";
 import { getShortUrl } from "src/js/wallet-helpers";
 import { shortenString } from "src/js/string-utils";
@@ -811,12 +805,16 @@ import NoMintWarnBanner from "components/NoMintWarnBanner.vue";
 import ChooseMint from "components/ChooseMint.vue";
 import TokenInformation from "components/TokenInformation.vue";
 import WelcomeDialog from "components/WelcomeDialog.vue";
+import SendTokenDialog from "components/SendTokenDialog.vue";
 
 import { mapActions, mapState, mapWritableState } from "pinia";
 import { useMintsStore } from "src/stores/mints";
+import { useSendTokensStore } from "src/stores/sendTokensStore";
 import { useWorkersStore } from "src/stores/workers";
 import { useTokensStore } from "src/stores/tokens";
 import { useWalletStore } from "src/stores/wallet";
+import { useUiStore } from "src/stores/ui";
+import { useProofsStore } from "src/stores/proofs";
 
 var currentDateStr = function () {
   return date.formatDate(new Date(), "YYYY-MM-DD HH:mm:ss");
@@ -833,11 +831,12 @@ export default {
     ChooseMint,
     TokenInformation,
     WelcomeDialog,
+    SendTokenDialog,
   },
   data: function () {
     return {
-      tickerShort: "sats",
-      ticketLong: "Satoshis",
+      // tickerShort: "sats",
+      // ticketLong: "Satoshis",
       name: "",
       mintId: "",
       mintName: "",
@@ -847,20 +846,18 @@ export default {
         show: false,
         camera: "auto",
       },
-      sendData: {
-        amount: 0,
-        memo: "",
-        tokens: "",
-        tokensBase64: "",
-      },
+      // sendData: {
+      //   amount: 0,
+      //   memo: "",
+      //   tokens: "",
+      //   tokensBase64: "",
+      // },
       receiveData: {
         tokensBase64: "",
       },
       showInvoiceDetails: false,
       showPayInvoice: false,
-      showSendTokens: false,
-      showSendTokenLegacyV2Token: false,
-      showSendTokenLegacyV2TokenToggleState: ref(false),
+      // showSendTokens: false,
       showReceiveTokens: false,
       promises: [],
       tokens: [],
@@ -947,6 +944,9 @@ export default {
     };
   },
   computed: {
+    ...mapState(useUiStore, ["tickerShort"]),
+    ...mapWritableState(useSendTokensStore, ["showSendTokens"]),
+    ...mapWritableState(useSendTokensStore, ["sendData"]),
     ...mapState(useMintsStore, [
       "activeMintUrl",
       "activeProofs",
@@ -999,6 +999,13 @@ export default {
     },
   },
   methods: {
+    ...mapActions(useProofsStore, [
+      "serializeProofs",
+      "getProofsMint",
+      "serializeProofsV2",
+      "sumProofs",
+      "deleteProofs",
+    ]),
     ...mapActions(useMintsStore, [
       "activateMint",
       "addMint",
@@ -1015,7 +1022,12 @@ export default {
       "addPendingToken",
       "setTokenPaid",
     ]),
-    ...mapActions(useWalletStore, ["requestMint", "setInvoicePaid"]),
+    ...mapActions(useWalletStore, [
+      "requestMint",
+      "setInvoicePaid",
+      "mint",
+      "melt",
+    ]),
     // TOKEN METHODS
     decodeToken: function (encoded_token) {
       return token.decode(encoded_token);
@@ -1328,17 +1340,17 @@ export default {
         // nothing to do
         return;
       }
-      if (this.showSendTokenLegacyV2Token) {
-        // convert to V3
-        this.sendData.tokensBase64 = this.serializeProofs(this.sendData.tokens);
-        this.showSendTokenLegacyV2Token = false;
-      } else {
-        // convert to V2
-        this.sendData.tokensBase64 = this.serializeProofsV2(
-          this.sendData.tokens
-        );
-        this.showSendTokenLegacyV2Token = true;
-      }
+      // if (this.showSendTokenLegacyV2Token) {
+      //   // convert to V3
+      //   this.sendData.tokensBase64 = this.serializeProofs(this.sendData.tokens);
+      //   this.showSendTokenLegacyV2Token = false;
+      // } else {
+      //   // convert to V2
+      //   this.sendData.tokensBase64 = this.serializeProofsV2(
+      //     this.sendData.tokens
+      //   );
+      //   this.showSendTokenLegacyV2Token = true;
+      // }
     },
     showSendTokensDialog: function () {
       console.log("##### showSendTokensDialog");
@@ -1354,126 +1366,122 @@ export default {
       this.showReceiveTokens = true;
     },
 
-    // showAddMintDialog: function () {
-    //   this.addMintDialog.show = true;
-    // },
-
     //////////////////////// MINT //////////////////////////////////////////
 
-    generateSecrets: async function (amounts) {
-      const secrets = [];
-      for (let i = 0; i < amounts.length; i++) {
-        const secret = nobleSecp256k1.utils.randomBytes(32);
-        secrets.push(secret);
-      }
-      return secrets;
-    },
+    // generateSecrets: async function (amounts) {
+    //   const secrets = [];
+    //   for (let i = 0; i < amounts.length; i++) {
+    //     const secret = nobleSecp256k1.utils.randomBytes(32);
+    //     secrets.push(secret);
+    //   }
+    //   return secrets;
+    // },
 
-    constructOutputs: async function (amounts, secrets) {
-      const outputs = [];
-      const rs = [];
-      for (let i = 0; i < amounts.length; i++) {
-        const { B_, r } = await step1Alice(secrets[i]);
-        outputs.push({ amount: amounts[i], B_: B_ });
-        rs.push(r);
-      }
-      return {
-        outputs,
-        rs,
-      };
-    },
+    // constructOutputs: async function (amounts, secrets) {
+    //   const outputs = [];
+    //   const rs = [];
+    //   for (let i = 0; i < amounts.length; i++) {
+    //     const { B_, r } = await step1Alice(secrets[i]);
+    //     outputs.push({ amount: amounts[i], B_: B_ });
+    //     rs.push(r);
+    //   }
+    //   return {
+    //     outputs,
+    //     rs,
+    //   };
+    // },
 
-    constructProofs: function (promises, secrets, rs, mint_pubkeys) {
-      const proofs = [];
-      for (let i = 0; i < promises.length; i++) {
-        const encodedSecret = uint8ToBase64.encode(secrets[i]);
-        let { id, amount, C, secret } = this.promiseToProof(
-          promises[i].id,
-          promises[i].amount,
-          promises[i]["C_"],
-          encodedSecret,
-          rs[i],
-          mint_pubkeys
-        );
-        proofs.push({ id, amount, C, secret });
-      }
-      return proofs;
-    },
+    // constructProofs: function (promises, secrets, rs, mint_pubkeys) {
+    //   const proofs = [];
+    //   for (let i = 0; i < promises.length; i++) {
+    //     const encodedSecret = uint8ToBase64.encode(secrets[i]);
+    //     let { id, amount, C, secret } = this.promiseToProof(
+    //       promises[i].id,
+    //       promises[i].amount,
+    //       promises[i]["C_"],
+    //       encodedSecret,
+    //       rs[i],
+    //       mint_pubkeys
+    //     );
+    //     proofs.push({ id, amount, C, secret });
+    //   }
+    //   return proofs;
+    // },
 
-    promiseToProof: function (id, amount, C_hex, secret, r, mint_pubkeys) {
-      const C_ = nobleSecp256k1.Point.fromHex(C_hex);
-      const A = mint_pubkeys[amount];
-      const C = step3Alice(
-        C_,
-        nobleSecp256k1.utils.hexToBytes(r),
-        nobleSecp256k1.Point.fromHex(A)
-      );
-      return {
-        id,
-        amount,
-        C: C.toHex(true),
-        secret,
-      };
-    },
+    // promiseToProof: function (id, amount, C_hex, secret, r, mint_pubkeys) {
+    //   const C_ = nobleSecp256k1.Point.fromHex(C_hex);
+    //   const A = mint_pubkeys[amount];
+    //   const C = step3Alice(
+    //     C_,
+    //     nobleSecp256k1.utils.hexToBytes(r),
+    //     nobleSecp256k1.Point.fromHex(A)
+    //   );
+    //   return {
+    //     id,
+    //     amount,
+    //     C: C.toHex(true),
+    //     secret,
+    //   };
+    // },
 
-    sumProofs: function (proofs) {
-      return proofs.reduce((s, t) => (s += t.amount), 0);
-    },
+    // sumProofs: function (proofs) {
+    //   return proofs.reduce((s, t) => (s += t.amount), 0);
+    // },
 
-    deleteProofs: function (proofs) {
-      // delete proofs from this.proofs
-      const usedSecrets = proofs.map((p) => p.secret);
-      this.setProofs(
-        this.proofs.filter((p) => !usedSecrets.includes(p.secret))
-      );
-      // this.storeProofs();
-      return this.proofs;
-    },
+    // deleteProofs: function (proofs) {
+    //   // delete proofs from this.proofs
+    //   const usedSecrets = proofs.map((p) => p.secret);
+    //   this.setProofs(
+    //     this.proofs.filter((p) => !usedSecrets.includes(p.secret))
+    //   );
+    //   // this.storeProofs();
+    //   return this.proofs;
+    // },
     // getAllMintKeysets: function () {
     //   return this.mints.filter((m) =>
     //     m.keysets.some((r) => uniqueIds.indexOf(r) >= 0)
     //   );
     // },
-    serializeProofs: function (proofs) {
-      // unique keyset IDs of proofs
-      let uniqueIds = [...new Set(proofs.map((p) => p.id))];
-      // mints that have any of the keyset IDs
-      let mints_keysets = this.mints.filter((m) =>
-        m.keysets.some((r) => uniqueIds.indexOf(r) >= 0)
-      );
-      // what we put into the JSON
-      let mints = mints_keysets.map((m) => [{ url: m.url, ids: m.keysets }][0]);
-      let tokenV3 = {
-        token: [{ proofs: proofs, mint: mints[0].url }],
-      };
-      return "cashuA" + btoa(JSON.stringify(tokenV3));
-    },
-    getProofsMint: function (proofs) {
-      // unique keyset IDs of proofs
-      let uniqueIds = [...new Set(proofs.map((p) => p.id))];
-      // mints that have any of the keyset IDs
-      let mints_keysets = this.mints.filter((m) =>
-        m.keysets.some((r) => uniqueIds.indexOf(r) >= 0)
-      );
-      // what we put into the JSON
-      let mints = mints_keysets.map((m) => [{ url: m.url, ids: m.keysets }][0]);
-      return mints[0];
-    },
-    serializeProofsV2: function (proofs) {
-      // unique keyset IDs of proofs
-      let uniqueIds = [...new Set(proofs.map((p) => p.id))];
-      // mints that have any of the keyset IDs
-      let mints_keysets = this.mints.filter((m) =>
-        m.keysets.some((r) => uniqueIds.indexOf(r) >= 0)
-      );
-      // what we put into the JSON
-      let mints = mints_keysets.map((m) => [{ url: m.url, ids: m.keysets }][0]);
-      var tokenV2 = {
-        proofs: proofs,
-        mints,
-      };
-      return btoa(JSON.stringify(tokenV2));
-    },
+    // serializeProofs: function (proofs) {
+    //   // unique keyset IDs of proofs
+    //   let uniqueIds = [...new Set(proofs.map((p) => p.id))];
+    //   // mints that have any of the keyset IDs
+    //   let mints_keysets = this.mints.filter((m) =>
+    //     m.keysets.some((r) => uniqueIds.indexOf(r) >= 0)
+    //   );
+    //   // what we put into the JSON
+    //   let mints = mints_keysets.map((m) => [{ url: m.url, ids: m.keysets }][0]);
+    //   let tokenV3 = {
+    //     token: [{ proofs: proofs, mint: mints[0].url }],
+    //   };
+    //   return "cashuA" + btoa(JSON.stringify(tokenV3));
+    // },
+    // getProofsMint: function (proofs) {
+    //   // unique keyset IDs of proofs
+    //   let uniqueIds = [...new Set(proofs.map((p) => p.id))];
+    //   // mints that have any of the keyset IDs
+    //   let mints_keysets = this.mints.filter((m) =>
+    //     m.keysets.some((r) => uniqueIds.indexOf(r) >= 0)
+    //   );
+    //   // what we put into the JSON
+    //   let mints = mints_keysets.map((m) => [{ url: m.url, ids: m.keysets }][0]);
+    //   return mints[0];
+    // },
+    // serializeProofsV2: function (proofs) {
+    //   // unique keyset IDs of proofs
+    //   let uniqueIds = [...new Set(proofs.map((p) => p.id))];
+    //   // mints that have any of the keyset IDs
+    //   let mints_keysets = this.mints.filter((m) =>
+    //     m.keysets.some((r) => uniqueIds.indexOf(r) >= 0)
+    //   );
+    //   // what we put into the JSON
+    //   let mints = mints_keysets.map((m) => [{ url: m.url, ids: m.keysets }][0]);
+    //   var tokenV2 = {
+    //     proofs: proofs,
+    //     mints,
+    //   };
+    //   return btoa(JSON.stringify(tokenV2));
+    // },
     //////////// API ///////////
 
     // MINT
@@ -1484,385 +1492,385 @@ export default {
       await this.invoiceCheckWorker();
     },
 
-    // /mint
+    // // /mint
 
-    mintApi: async function (amounts, payment_hash, verbose = true) {
-      /*
-                asks the mint to check whether the invoice with payment_hash has been paid
-                and requests signing of the attached outputs.
-                */
+    // mintApi: async function (amounts, payment_hash, verbose = true) {
+    //   /*
+    //             asks the mint to check whether the invoice with payment_hash has been paid
+    //             and requests signing of the attached outputs.
+    //             */
 
-      try {
-        let secrets = await this.generateSecrets(amounts);
-        let { outputs, rs } = await this.constructOutputs(amounts, secrets);
-        const keys = this.keys; // fix keys for constructProofs
-        const data = await this.activeMint.mint({ outputs }, payment_hash);
-        this.assertMintError(data, false);
-        if (data.promises == null) {
-          return {};
-        }
-        let proofs = await this.constructProofs(
-          data.promises,
-          secrets,
-          rs,
-          keys
-        );
-        return proofs;
-      } catch (error) {
-        console.error(error);
-        if (verbose) {
-          try {
-            this.notifyApiError(error);
-          } catch {}
-        }
-        throw error;
-      }
-    },
-    mint: async function (amount, payment_hash, verbose = true) {
-      try {
-        const split = splitAmount(amount);
-        const proofs = await this.mintApi(split, payment_hash, verbose);
-        if (!proofs.length) {
-          throw "could not mint";
-        }
-        this.setProofs(this.proofs.concat(proofs));
-        // hack to update balance
-        this.setActiveProofs(this.activeProofs.concat([]));
-        // this.storeProofs();
+    //   try {
+    //     let secrets = await this.generateSecrets(amounts);
+    //     let { outputs, rs } = await this.constructOutputs(amounts, secrets);
+    //     const keys = this.keys; // fix keys for constructProofs
+    //     const data = await this.activeMint.mint({ outputs }, payment_hash);
+    //     this.assertMintError(data, false);
+    //     if (data.promises == null) {
+    //       return {};
+    //     }
+    //     let proofs = await this.constructProofs(
+    //       data.promises,
+    //       secrets,
+    //       rs,
+    //       keys
+    //     );
+    //     return proofs;
+    //   } catch (error) {
+    //     console.error(error);
+    //     if (verbose) {
+    //       try {
+    //         this.notifyApiError(error);
+    //       } catch {}
+    //     }
+    //     throw error;
+    //   }
+    // },
+    // mint: async function (amount, payment_hash, verbose = true) {
+    //   try {
+    //     const split = splitAmount(amount);
+    //     const proofs = await this.mintApi(split, payment_hash, verbose);
+    //     if (!proofs.length) {
+    //       throw "could not mint";
+    //     }
+    //     this.setProofs(this.proofs.concat(proofs));
+    //     // hack to update balance
+    //     this.setActiveProofs(this.activeProofs.concat([]));
+    //     // this.storeProofs();
 
-        // update UI
-        await this.setInvoicePaid(payment_hash);
-        this.addPaidToken({
-          amount,
-          serializedProofs: this.serializeProofs(proofs),
-        });
+    //     // update UI
+    //     await this.setInvoicePaid(payment_hash);
+    //     this.addPaidToken({
+    //       amount,
+    //       serializedProofs: this.serializeProofs(proofs),
+    //     });
 
-        return proofs;
-      } catch (error) {
-        console.error(error);
-        if (verbose) {
-          try {
-            this.notifyApiError(error);
-          } catch {}
-        }
-        throw error;
-      }
-    },
+    //     return proofs;
+    //   } catch (error) {
+    //     console.error(error);
+    //     if (verbose) {
+    //       try {
+    //         this.notifyApiError(error);
+    //       } catch {}
+    //     }
+    //     throw error;
+    //   }
+    // },
 
-    // SPLIT
+    // // SPLIT
 
-    split: async function (proofs, amount) {
-      /*
-                supplies proofs and requests a split from the mint of these
-                proofs at a specific amount
-                */
-      try {
-        if (proofs.length == 0) {
-          throw new Error("no proofs provided.");
-        }
-        let { firstProofs, scndProofs } = await this.splitApi(proofs, amount);
-        this.deleteProofs(proofs);
-        // add new firstProofs, scndProofs to this.proofs
-        this.setProofs(this.proofs.concat(firstProofs).concat(scndProofs));
-        // this.storeProofs();
-        return { firstProofs, scndProofs };
-      } catch (error) {
-        console.error(error);
-        try {
-          try {
-            this.notifyApiError(error);
-          } catch {}
-        } catch {}
-        throw error;
-      }
-    },
+    // split: async function (proofs, amount) {
+    //   /*
+    //             supplies proofs and requests a split from the mint of these
+    //             proofs at a specific amount
+    //             */
+    //   try {
+    //     if (proofs.length == 0) {
+    //       throw new Error("no proofs provided.");
+    //     }
+    //     let { firstProofs, scndProofs } = await this.splitApi(proofs, amount);
+    //     this.deleteProofs(proofs);
+    //     // add new firstProofs, scndProofs to this.proofs
+    //     this.setProofs(this.proofs.concat(firstProofs).concat(scndProofs));
+    //     // this.storeProofs();
+    //     return { firstProofs, scndProofs };
+    //   } catch (error) {
+    //     console.error(error);
+    //     try {
+    //       try {
+    //         this.notifyApiError(error);
+    //       } catch {}
+    //     } catch {}
+    //     throw error;
+    //   }
+    // },
 
-    // /split
+    // // /split
 
-    splitApi: async function (proofs, amount) {
-      try {
-        const total = this.sumProofs(proofs);
-        const frst_amount = total - amount;
-        const scnd_amount = amount;
-        const frst_amounts = splitAmount(frst_amount);
-        const scnd_amounts = splitAmount(scnd_amount);
-        const amounts = _.clone(frst_amounts);
-        amounts.push(...scnd_amounts);
-        let secrets = await this.generateSecrets(amounts);
-        if (secrets.length != amounts.length) {
-          throw new Error(
-            "number of secrets does not match number of outputs."
-          );
-        }
-        let { outputs, rs } = await this.constructOutputs(amounts, secrets);
-        const payload = {
-          amount,
-          proofs,
-          outputs,
-        };
-        const keys = this.keys; // fix keys for constructProofs
-        const data = await this.activeMint.split(payload);
+    // splitApi: async function (proofs, amount) {
+    //   try {
+    //     const total = this.sumProofs(proofs);
+    //     const frst_amount = total - amount;
+    //     const scnd_amount = amount;
+    //     const frst_amounts = splitAmount(frst_amount);
+    //     const scnd_amounts = splitAmount(scnd_amount);
+    //     const amounts = _.clone(frst_amounts);
+    //     amounts.push(...scnd_amounts);
+    //     let secrets = await this.generateSecrets(amounts);
+    //     if (secrets.length != amounts.length) {
+    //       throw new Error(
+    //         "number of secrets does not match number of outputs."
+    //       );
+    //     }
+    //     let { outputs, rs } = await this.constructOutputs(amounts, secrets);
+    //     const payload = {
+    //       amount,
+    //       proofs,
+    //       outputs,
+    //     };
+    //     const keys = this.keys; // fix keys for constructProofs
+    //     const data = await this.activeMint.split(payload);
 
-        this.assertMintError(data);
-        const frst_rs = rs.slice(0, frst_amounts.length);
-        const frst_secrets = secrets.slice(0, frst_amounts.length);
-        const scnd_rs = rs.slice(frst_amounts.length);
-        const scnd_secrets = secrets.slice(frst_amounts.length);
-        const firstProofs = this.constructProofs(
-          data.fst,
-          frst_secrets,
-          frst_rs,
-          keys
-        );
-        const scndProofs = this.constructProofs(
-          data.snd,
-          scnd_secrets,
-          scnd_rs,
-          keys
-        );
+    //     this.assertMintError(data);
+    //     const frst_rs = rs.slice(0, frst_amounts.length);
+    //     const frst_secrets = secrets.slice(0, frst_amounts.length);
+    //     const scnd_rs = rs.slice(frst_amounts.length);
+    //     const scnd_secrets = secrets.slice(frst_amounts.length);
+    //     const firstProofs = this.constructProofs(
+    //       data.fst,
+    //       frst_secrets,
+    //       frst_rs,
+    //       keys
+    //     );
+    //     const scndProofs = this.constructProofs(
+    //       data.snd,
+    //       scnd_secrets,
+    //       scnd_rs,
+    //       keys
+    //     );
 
-        return { firstProofs, scndProofs };
-      } catch (error) {
-        this.payInvoiceData.blocking = false;
-        console.error(error);
-        try {
-          this.notifyApiError(error);
-        } catch {}
-        throw error;
-      }
-    },
+    //     return { firstProofs, scndProofs };
+    //   } catch (error) {
+    //     this.payInvoiceData.blocking = false;
+    //     console.error(error);
+    //     try {
+    //       this.notifyApiError(error);
+    //     } catch {}
+    //     throw error;
+    //   }
+    // },
 
-    splitToSend: async function (proofs, amount, invlalidate = false) {
-      /*
-                splits proofs so the user can keep firstProofs, send scndProofs.
-                then sets scndProofs as reserved.
+    // splitToSend: async function (proofs, amount, invlalidate = false) {
+    //   /*
+    //             splits proofs so the user can keep firstProofs, send scndProofs.
+    //             then sets scndProofs as reserved.
 
-                if invalidate, scndProofs (the one to send) are invalidated
-                */
-      try {
-        const spendableProofs = proofs.filter((p) => !p.reserved);
-        if (this.sumProofs(spendableProofs) < amount) {
-          this.notifyWarning(
-            "Balance is too low.",
-            `Your balance is ${this.getBalance()} sat and you're trying to pay ${amount} sats.`
-          );
-          throw Error("balance too low.");
-        }
+    //             if invalidate, scndProofs (the one to send) are invalidated
+    //             */
+    //   try {
+    //     const spendableProofs = proofs.filter((p) => !p.reserved);
+    //     if (this.sumProofs(spendableProofs) < amount) {
+    //       this.notifyWarning(
+    //         "Balance is too low.",
+    //         `Your balance is ${this.getBalance()} sat and you're trying to pay ${amount} sats.`
+    //       );
+    //       throw Error("balance too low.");
+    //     }
 
-        // call /split
+    //     // call /split
 
-        let { firstProofs, scndProofs } = await this.split(
-          spendableProofs,
-          amount
-        );
-        // set scndProofs in this.proofs as reserved
-        const usedSecrets = proofs.map((p) => p.secret);
-        let newProofs = this.proofs.map((proof) => {
-          if (usedSecrets.includes(proof.secret)) {
-            proof.reserved = true;
-          }
-          return proof;
-        });
-        this.setProofs(newProofs);
+    //     let { firstProofs, scndProofs } = await this.split(
+    //       spendableProofs,
+    //       amount
+    //     );
+    //     // set scndProofs in this.proofs as reserved
+    //     const usedSecrets = proofs.map((p) => p.secret);
+    //     let newProofs = this.proofs.map((proof) => {
+    //       if (usedSecrets.includes(proof.secret)) {
+    //         proof.reserved = true;
+    //       }
+    //       return proof;
+    //     });
+    //     this.setProofs(newProofs);
 
-        // hack: to make Vue JS update
-        this.setProofs(this.proofs.concat([]));
+    //     // hack: to make Vue JS update
+    //     this.setProofs(this.proofs.concat([]));
 
-        if (invlalidate) {
-          // delete scndProofs from db
-          this.deleteProofs(scndProofs);
-        }
+    //     if (invlalidate) {
+    //       // delete scndProofs from db
+    //       this.deleteProofs(scndProofs);
+    //     }
 
-        return { firstProofs, scndProofs };
-      } catch (error) {
-        console.error(error);
-        try {
-          this.notifyApiError(error);
-        } catch {}
-        throw error;
-      }
-    },
+    //     return { firstProofs, scndProofs };
+    //   } catch (error) {
+    //     console.error(error);
+    //     try {
+    //       this.notifyApiError(error);
+    //     } catch {}
+    //     throw error;
+    //   }
+    // },
 
-    redeem: async function () {
-      /*
-      uses split to receive new tokens.
-      */
-      this.showReceiveTokens = false;
-      console.log("### receive tokens", this.receiveData.tokensBase64);
-      try {
-        if (this.receiveData.tokensBase64.length == 0) {
-          throw new Error("no tokens provided.");
-        }
-        const tokenJson = this.decodeToken(this.receiveData.tokensBase64);
-        let proofs = this.getProofs(tokenJson);
-        // check if we have all mints
-        for (var i = 0; i < tokenJson.token.length; i++) {
-          if (!this.mints.map((m) => m.url).includes(this.getMint(tokenJson))) {
-            // pop up add mint dialog warning
-            // hack! The "add mint" component is in SettingsView which may now
-            // have been loaded yet. We switch the tab to settings to make sure
-            // that it loads. Remove this code when the TrustMintComnent is refactored!
-            await this.setTab("settings");
-            this.setMintToAdd(tokenJson.token[i].mint);
-            this.showAddMintDialog = true;
-            // this.addMintDialog.show = true;
-            // show the token receive dialog again for the next attempt
-            this.showReceiveTokens = true;
-            return;
-          }
+    // redeem: async function () {
+    //   /*
+    //   uses split to receive new tokens.
+    //   */
+    //   this.showReceiveTokens = false;
+    //   console.log("### receive tokens", this.receiveData.tokensBase64);
+    //   try {
+    //     if (this.receiveData.tokensBase64.length == 0) {
+    //       throw new Error("no tokens provided.");
+    //     }
+    //     const tokenJson = this.decodeToken(this.receiveData.tokensBase64);
+    //     let proofs = this.getProofs(tokenJson);
+    //     // check if we have all mints
+    //     for (var i = 0; i < tokenJson.token.length; i++) {
+    //       if (!this.mints.map((m) => m.url).includes(this.getMint(tokenJson))) {
+    //         // pop up add mint dialog warning
+    //         // hack! The "add mint" component is in SettingsView which may now
+    //         // have been loaded yet. We switch the tab to settings to make sure
+    //         // that it loads. Remove this code when the TrustMintComnent is refactored!
+    //         await this.setTab("settings");
+    //         this.setMintToAdd(tokenJson.token[i].mint);
+    //         this.showAddMintDialog = true;
+    //         // this.addMintDialog.show = true;
+    //         // show the token receive dialog again for the next attempt
+    //         this.showReceiveTokens = true;
+    //         return;
+    //       }
 
-          // TODO: We assume here that all proofs are from one mint! This will fail if
-          // that's not the case!
-          if (this.getMint(tokenJson) != this.activeMintUrl) {
-            await this.activateMint(this.getMint(tokenJson));
-          }
-        }
+    //       // TODO: We assume here that all proofs are from one mint! This will fail if
+    //       // that's not the case!
+    //       if (this.getMint(tokenJson) != this.activeMintUrl) {
+    //         await this.activateMint(this.getMint(tokenJson));
+    //       }
+    //     }
 
-        const amount = proofs.reduce((s, t) => (s += t.amount), 0);
+    //     const amount = proofs.reduce((s, t) => (s += t.amount), 0);
 
-        // redeem
-        await this.split(proofs, amount);
+    //     // redeem
+    //     await this.split(proofs, amount);
 
-        // update UI
+    //     // update UI
 
-        // HACK: we need to do this so the balance updates
-        this.setProofs(this.proofs.concat([]));
-        this.setActiveProofs(this.activeProofs.concat([]));
-        this.getBalance();
+    //     // HACK: we need to do this so the balance updates
+    //     this.setProofs(this.proofs.concat([]));
+    //     this.setActiveProofs(this.activeProofs.concat([]));
+    //     this.getBalance();
 
-        this.addPaidToken({
-          amount,
-          serializedProofs: this.receiveData.tokensBase64,
-        });
+    //     this.addPaidToken({
+    //       amount,
+    //       serializedProofs: this.receiveData.tokensBase64,
+    //     });
 
-        if (window.navigator.vibrate) navigator.vibrate(200);
-        this.notifySuccess("Tokens received.");
-      } catch (error) {
-        console.error(error);
-        try {
-          this.notifyApiError(error);
-        } catch {}
-        throw error;
-      }
-      // }
-    },
+    //     if (window.navigator.vibrate) navigator.vibrate(200);
+    //     this.notifySuccess("Tokens received.");
+    //   } catch (error) {
+    //     console.error(error);
+    //     try {
+    //       this.notifyApiError(error);
+    //     } catch {}
+    //     throw error;
+    //   }
+    //   // }
+    // },
 
-    sendTokens: async function () {
-      /*
-      calls splitToSend, displays token and kicks off the spendableWorker
-      */
-      try {
-        // keep firstProofs, send scndProofs and delete them (invalidate=true)
-        let { firstProofs, scndProofs } = await this.splitToSend(
-          this.activeProofs,
-          this.sendData.amount,
-          true
-        );
+    // sendTokens: async function () {
+    //   /*
+    //   calls splitToSend, displays token and kicks off the spendableWorker
+    //   */
+    //   try {
+    //     // keep firstProofs, send scndProofs and delete them (invalidate=true)
+    //     let { firstProofs, scndProofs } = await this.splitToSend(
+    //       this.activeProofs,
+    //       this.sendData.amount,
+    //       true
+    //     );
 
-        // update UI
-        this.sendData.tokens = scndProofs;
-        console.log("### this.sendData.tokens", this.sendData.tokens);
+    //     // update UI
+    //     this.sendData.tokens = scndProofs;
+    //     console.log("### this.sendData.tokens", this.sendData.tokens);
 
-        this.sendData.tokensBase64 = this.serializeProofs(scndProofs);
-        this.addPendingToken({
-          amount: -this.sendData.amount,
-          serializedProofs: this.sendData.tokensBase64,
-        });
+    //     this.sendData.tokensBase64 = this.serializeProofs(scndProofs);
+    //     this.addPendingToken({
+    //       amount: -this.sendData.amount,
+    //       serializedProofs: this.sendData.tokensBase64,
+    //     });
 
-        this.checkTokenSpendableWorker();
-      } catch (error) {
-        console.error(error);
-      }
-    },
+    //     this.checkTokenSpendableWorker();
+    //   } catch (error) {
+    //     console.error(error);
+    //   }
+    // },
 
     // /melt
 
-    melt: async function () {
-      // todo: get fees from server and add to inputs
-      this.payInvoiceData.blocking = true;
-      console.log("#### pay lightning");
-      const amount_invoice = this.payInvoiceData.invoice.sat;
-      const amount =
-        amount_invoice +
-        (await this.checkFees(this.payInvoiceData.data.request));
-      console.log(
-        "#### amount invoice",
-        amount_invoice,
-        "amount with fees",
-        amount
-      );
+    // melt: async function () {
+    //   // todo: get fees from server and add to inputs
+    //   this.payInvoiceData.blocking = true;
+    //   console.log("#### pay lightning");
+    //   const amount_invoice = this.payInvoiceData.invoice.sat;
+    //   const amount =
+    //     amount_invoice +
+    //     (await this.checkFees(this.payInvoiceData.data.request));
+    //   console.log(
+    //     "#### amount invoice",
+    //     amount_invoice,
+    //     "amount with fees",
+    //     amount
+    //   );
 
-      try {
-        let { firstProofs, scndProofs } = await this.splitToSend(
-          this.activeProofs,
-          amount
-        );
-        // NUT-08 blank outputs for change
-        let amounts = [1, 1, 1, 1]; // four change blank outputs
-        let secrets = await this.generateSecrets(amounts);
-        let { outputs, rs } = await this.constructOutputs(amounts, secrets);
+    //   try {
+    //     let { firstProofs, scndProofs } = await this.splitToSend(
+    //       this.activeProofs,
+    //       amount
+    //     );
+    //     // NUT-08 blank outputs for change
+    //     let amounts = [1, 1, 1, 1]; // four change blank outputs
+    //     let secrets = await this.generateSecrets(amounts);
+    //     let { outputs, rs } = await this.constructOutputs(amounts, secrets);
 
-        let amount_paid = amount;
-        const payload = {
-          proofs: scndProofs.flat(),
-          amount,
-          pr: this.payInvoiceData.data.request,
-          outputs,
-        };
-        const keys = this.keys; // fix keys for constructProofs
-        const data = await this.activeMint.melt(payload);
-        this.assertMintError(data);
-        if (data.paid != true) {
-          throw new Error("Invoice not paid.");
-        }
-        if (window.navigator.vibrate) navigator.vibrate(200);
-        this.notifySuccess("Token paid.");
-        console.log("#### pay lightning: token paid");
-        // delete spent tokens from db
-        this.deleteProofs(scndProofs);
+    //     let amount_paid = amount;
+    //     const payload = {
+    //       proofs: scndProofs.flat(),
+    //       amount,
+    //       pr: this.payInvoiceData.data.request,
+    //       outputs,
+    //     };
+    //     const keys = this.keys; // fix keys for constructProofs
+    //     const data = await this.activeMint.melt(payload);
+    //     this.assertMintError(data);
+    //     if (data.paid != true) {
+    //       throw new Error("Invoice not paid.");
+    //     }
+    //     if (window.navigator.vibrate) navigator.vibrate(200);
+    //     this.notifySuccess("Token paid.");
+    //     console.log("#### pay lightning: token paid");
+    //     // delete spent tokens from db
+    //     this.deleteProofs(scndProofs);
 
-        // NUT-08 get change
-        if (data.change != null) {
-          const changeProofs = this.constructProofs(
-            data.change,
-            secrets,
-            rs,
-            keys
-          );
-          console.log("## Received change: " + this.sumProofs(changeProofs));
-          amount_paid = amount_paid - this.sumProofs(changeProofs);
-          this.setProofs(this.proofs.concat(changeProofs));
-          // hack to update balance
-          this.setActiveProofs(this.activeProofs.concat([]));
-          // this.storeProofs();
-        }
+    //     // NUT-08 get change
+    //     if (data.change != null) {
+    //       const changeProofs = this.constructProofs(
+    //         data.change,
+    //         secrets,
+    //         rs,
+    //         keys
+    //       );
+    //       console.log("## Received change: " + this.sumProofs(changeProofs));
+    //       amount_paid = amount_paid - this.sumProofs(changeProofs);
+    //       this.setProofs(this.proofs.concat(changeProofs));
+    //       // hack to update balance
+    //       this.setActiveProofs(this.activeProofs.concat([]));
+    //       // this.storeProofs();
+    //     }
 
-        // update UI
+    //     // update UI
 
-        this.addPaidToken({
-          amount: -amount_paid,
-          serializedProofs: this.serializeProofs(scndProofs),
-        });
+    //     this.addPaidToken({
+    //       amount: -amount_paid,
+    //       serializedProofs: this.serializeProofs(scndProofs),
+    //     });
 
-        this.invoiceHistory.push({
-          amount: -amount_paid,
-          bolt11: this.payInvoiceData.data.request,
-          hash: this.payInvoiceData.data.hash,
-          memo: this.payInvoiceData.data.memo,
-          date: currentDateStr(),
-          status: "paid",
-          mint: this.activeMintUrl,
-        });
+    //     this.invoiceHistory.push({
+    //       amount: -amount_paid,
+    //       bolt11: this.payInvoiceData.data.request,
+    //       hash: this.payInvoiceData.data.hash,
+    //       memo: this.payInvoiceData.data.memo,
+    //       date: currentDateStr(),
+    //       status: "paid",
+    //       mint: this.activeMintUrl,
+    //     });
 
-        this.payInvoiceData.invoice = false;
-        this.payInvoiceData.show = false;
-        this.payInvoiceData.blocking = false;
-      } catch (error) {
-        this.payInvoiceData.blocking = false;
-        console.error(error);
-        throw error;
-      }
-    },
+    //     this.payInvoiceData.invoice = false;
+    //     this.payInvoiceData.show = false;
+    //     this.payInvoiceData.blocking = false;
+    //   } catch (error) {
+    //     this.payInvoiceData.blocking = false;
+    //     console.error(error);
+    //     throw error;
+    //   }
+    // },
 
     // /check
 
@@ -1906,24 +1914,24 @@ export default {
       }
     },
 
-    // /checkfees
-    checkFees: async function (payment_request) {
-      const payload = {
-        pr: payment_request,
-      };
-      try {
-        const data = await this.activeMint.checkFees(payload);
-        this.assertMintError(data);
-        console.log("#### checkFees", payment_request, data.fee);
-        return data.fee;
-      } catch (error) {
-        console.error(error);
-        try {
-          this.notifyApiError(error);
-        } catch {}
-        throw error;
-      }
-    },
+    // // /checkfees
+    // checkFees: async function (payment_request) {
+    //   const payload = {
+    //     pr: payment_request,
+    //   };
+    //   try {
+    //     const data = await this.activeMint.checkFees(payload);
+    //     this.assertMintError(data);
+    //     console.log("#### checkFees", payment_request, data.fee);
+    //     return data.fee;
+    //   } catch (error) {
+    //     console.error(error);
+    //     try {
+    //       this.notifyApiError(error);
+    //     } catch {}
+    //     throw error;
+    //   }
+    // },
 
     ////////////// UI HELPERS //////////////
     checkInvoice: async function (payment_hash, verbose = true) {
@@ -2222,14 +2230,6 @@ export default {
 
   created: async function () {
     let params = new URL(document.location).searchParams;
-
-    // load proofs from db
-    // this.proofs = JSON.parse(localStorage.getItem("cashu.proofs") || "[]");
-
-    // load mints
-    /*if (localStorage.getItem("cashu.mints")) {
-      this.mints = JSON.parse(localStorage.getItem("cashu.mints"));
-    }*/
 
     // mint url
     if (params.get("mint")) {
