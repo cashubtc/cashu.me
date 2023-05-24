@@ -37,6 +37,7 @@
             />
             <span class="text-weight-light" @click="setTab('settings')">
               Mint: <b>{{ getActiveMintUrlShort }}</b>
+              <q-tooltip>Configure mint(s)</q-tooltip>
             </span>
           </div>
         </div>
@@ -46,16 +47,20 @@
         <div class="col-12">
           <q-icon
             name="history"
-            size="1rem"
+            size="1.5rem"
             color="grey"
             class="q-mr-none q-mb-xs cursor-pointer"
             @click="checkPendingTokens()"
-          />
+          >
+            <q-tooltip>Refresh pending</q-tooltip>
+          </q-icon>
+
           <span
             class="text-weight-light cursor-pointer"
             @click="setTab('history')"
           >
             Pending: {{ formatSat(pendingBalance) }} {{ tickerShort }}
+            <q-tooltip>Show history</q-tooltip>
           </span>
         </div>
       </div>
@@ -65,8 +70,8 @@
 <script>
 import { defineComponent, ref } from "vue";
 import { getShortUrl } from "src/js/wallet-helpers";
-import {mapState} from "pinia";
-import {useMintsStore} from "stores/mints";
+import { mapState } from "pinia";
+import { useMintsStore } from "stores/mints";
 export default defineComponent({
   name: "BalanceView",
   mixins: [windowMixin],
@@ -78,10 +83,10 @@ export default defineComponent({
   },
   computed: {
     ...mapState(useMintsStore, [
-      'activeMintUrl',
-      'activeProofs',
-      'mints',
-      'proofs',
+      "activeMintUrl",
+      "activeProofs",
+      "mints",
+      "proofs",
     ]),
     balance: function () {
       return this.activeProofs
