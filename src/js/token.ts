@@ -1,28 +1,19 @@
-import { getDecodedToken } from "@cashu/cashu-ts";
-/**
- * Functions related to cashu tokens
- * @typedef {{C: string, amount: number, id: number, secret: number}} Proof
- * @typedef {{proofs: Proof[], mint: string}} Token
- */
+import { type Token, getDecodedToken } from "@cashu/cashu-ts";
 
 export default { decode, getProofs, getMint };
 
 /**
  * Decodes an encoded cashu token
- * @param {string} encoded_token
- * @returns {{token: Token[]}}
  */
-function decode(encoded_token) {
-  if (!encoded_token || encoded_token === "") return "";
+function decode(encoded_token: string) {
+  if (!encoded_token || encoded_token === "") return;
   return getDecodedToken(encoded_token);
 }
 
 /**
  * Returns a list of proofs from a decoded token
- * @param {{token: Token[]}} decoded_token
- * @returns {Proof[]}
  */
-function getProofs(decoded_token) {
+function getProofs(decoded_token: Token) {
   if (
     !(decoded_token.token.length > 0) ||
     !(decoded_token.token[0].proofs.length > 0)
@@ -32,11 +23,7 @@ function getProofs(decoded_token) {
   return decoded_token.token.map((t) => t.proofs).flat();
 }
 
-/**
- * @param {{token: Token[]}} decoded_token
- * @returns {string}
- */
-function getMint(decoded_token) {
+function getMint(decoded_token: Token) {
   /*
       Returns first mint of a token (very rough way).
       */

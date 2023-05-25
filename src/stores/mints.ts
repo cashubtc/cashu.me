@@ -2,18 +2,25 @@ import { defineStore } from "pinia";
 import { useLocalStorage } from "@vueuse/core";
 import { useWorkersStore } from "./workers";
 import { notifyApiError, notifyError, notifySuccess } from "src/js/notify";
-import { CashuMint } from "@cashu/cashu-ts";
+import { CashuMint, MintKeys, Proof } from "@cashu/cashu-ts";
+
+type Mint = {
+  url: string;
+  balance: number;
+  keys?: MintKeys;
+  keysets?: string[];
+};
 
 export const useMintsStore = defineStore("mints", {
   state: () => {
     return {
-      activeMintUrl: useLocalStorage("cashu.activeMintUrl", ""),
-      activeProofs: useLocalStorage("cashu.activeProofs", []),
-      keys: useLocalStorage("cashu.keys", {}),
-      keysets: useLocalStorage("cashu.keysets", []),
+      activeMintUrl: useLocalStorage<string>("cashu.activeMintUrl", ""),
+      activeProofs: useLocalStorage("cashu.activeProofs", [] as Proof[]),
+      keys: useLocalStorage("cashu.keys", {} as MintKeys),
+      keysets: useLocalStorage("cashu.keysets", [] as string[]),
       mintToAdd: "https://8333.space:3338",
-      mints: useLocalStorage("cashu.mints", []),
-      proofs: useLocalStorage("cashu.proofs", []),
+      mints: useLocalStorage("cashu.mints", [] as Mint[]),
+      proofs: useLocalStorage("cashu.proofs", [] as Proof[]),
       showAddMintDialog: false,
     };
   },
@@ -23,13 +30,13 @@ export const useMintsStore = defineStore("mints", {
     },
   },
   actions: {
-    setShowAddMintDialog(show) {
+    setShowAddMintDialog(show: boolean) {
       this.showAddMintDialog = show;
     },
-    setMintToAdd(mint) {
+    setMintToAdd(mint: string) {
       this.mintToAdd = mint;
     },
-    setProofs(proofs) {
+    setProofs(proofs: Proof[]) {
       this.proofs = proofs;
       if (this.keysets) {
         this.activeProofs = this.proofs.filter((p) =>
@@ -37,14 +44,14 @@ export const useMintsStore = defineStore("mints", {
         );
       }
     },
-    setActiveProofs(proofs) {
+    setActiveProofs(proofs: Proof[]) {
       this.activeProofs = proofs;
     },
-    addMint: async function (url, verbose = false) {
+    addMint: async function (url: string, verbose = false) {
       try {
         // we have no mints at all
         if (this.mints.length === 0) {
-          this.mints = [{ url: url, balance: 0 }];
+          this.mints = [{ url, balance: 0 }];
         } else if (this.mints.filter((m) => m.url === url).length === 0) {
           // we don't have this mint yet
           this.mints.push({ url: url, balance: 0 });
@@ -59,7 +66,7 @@ export const useMintsStore = defineStore("mints", {
         this.showAddMintDialog = false;
       }
     },
-    activateMint: async function (url, verbose = false, force = false) {
+    activateMint: async function (url: string, verbose = false, force = false) {
       const workers = useWorkersStore();
       if (url === this.activeMintUrl && !force) {
         // return here because this function is called repeatedly by the
@@ -100,7 +107,7 @@ export const useMintsStore = defineStore("mints", {
           "balance",
           this.getBalance()
         );
-      } catch (error) {
+      } catch (error: any) {
         // restore previous values because the activation errored
         this.activeMintUrl = previousUrl;
         this.keys = previousKeys;
@@ -121,7 +128,6 @@ export const useMintsStore = defineStore("mints", {
         console.log("### GET", `${this.activeMintUrl}/keys`);
         const data = await this.activeMint.getKeys();
         const keys = data;
-        this.assertMintError(keys);
         this.keys = keys;
 
         const keysets = await this.fetchMintKeysets();
@@ -133,7 +139,7 @@ export const useMintsStore = defineStore("mints", {
         }
 
         return keys;
-      } catch (error) {
+      } catch (error: any) {
         console.error(error);
         try {
           notifyApiError(error);
@@ -145,11 +151,10 @@ export const useMintsStore = defineStore("mints", {
       // attention: this function overwrites this.keysets
       try {
         const data = await this.activeMint.getKeySets();
-        this.assertMintError(data);
         this.keysets = data.keysets;
 
         return data.keysets;
-      } catch (error) {
+      } catch (error: any) {
         console.error(error);
         try {
           notifyApiError(error);
@@ -157,7 +162,7 @@ export const useMintsStore = defineStore("mints", {
         throw error;
       }
     },
-    removeMint: async function (url) {
+    removeMint: async function (url: string) {
       this.mints = this.mints.filter((m) => m.url !== url);
       if (url === this.activeMintUrl) {
         this.activeMintUrl = "";
@@ -168,7 +173,7 @@ export const useMintsStore = defineStore("mints", {
       }
       notifySuccess("Mint removed.");
     },
-    restoreFromBackup: function (backup) {
+    restoreFromBackup: function (backup: any) {
       if (!backup || !backup["cashu.welcomeDialogSeen"]) {
         notifyError("Unrecognized Backup Format!");
       } else {
@@ -197,7 +202,7 @@ export const useMintsStore = defineStore("mints", {
         notifySuccess("Backup successfully restored!");
       }
     },
-    assertMintError: function (response, verbose = true) {
+    assertMintError: function (response: { error: any }, verbose = true) {
       if (response.error != null) {
         if (verbose) {
           notifyError(response.error, "Mint error");
