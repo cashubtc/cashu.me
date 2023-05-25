@@ -11,7 +11,7 @@ import { splitAmount } from "src/js/utils";
 import * as _ from "underscore";
 import { uint8ToBase64 } from "src/js/base64";
 import token from "src/js/token";
-import { notifyApiError, notifyError, notifySuccess } from "src/js/notify";
+import { notifyApiError, notifyError, notifySuccess, notify } from "src/js/notify";
 import { CashuMint, CashuWallet } from "@cashu/cashu-ts";
 
 type Invoice = {
@@ -594,6 +594,58 @@ export const useWalletStore = defineStore("wallet", {
         try {
           notifyApiError(error);
         } catch { }
+        throw error;
+      }
+    },
+    checkTokenSpendable: async function (token, verbose = true) {
+      /*
+      checks whether a base64-encoded token (from the history table) has been spent already.
+      if it is spent, the appropraite entry in the history table is set to paid.
+      */
+      const mintStore = useMintsStore();
+      const tokenStore = useTokensStore();
+
+      const tokenJson = token.decode(token);
+      const proofs = token.getProofs(tokenJson);
+
+      // activate the mint
+      if (token.getMint(tokenJson).length > 0) {
+        await mintStore.activateMint(token.getMint(tokenJson));
+      }
+
+      const spendable = await this.checkProofsSpendable(proofs);
+      let paid = false;
+      if (spendable.includes(false)) {
+        tokenStore.setTokenPaid(token);
+        paid = true;
+      }
+      if (paid) {
+        if (window.navigator.vibrate) navigator.vibrate(200);
+        notifySuccess("Token paid.");
+      } else {
+        console.log("### token not paid yet");
+        if (verbose) {
+          notify("Token still pending");
+        }
+        // this.sendData.tokens = token
+      }
+      return paid;
+    },
+    checkInvoice: async function (payment_hash, verbose = true) {
+      const mintStore = useMintsStore();
+      console.log("### checkInvoice.hash", payment_hash);
+      const invoice = this.invoiceHistory.find((i) => i.hash === payment_hash);
+      try {
+        if (invoice.mint != null) {
+          await mintStore.activateMint(invoice.mint, false);
+        }
+        const proofs = await this.mint(invoice.amount, invoice.hash, verbose);
+        return proofs;
+      } catch (error) {
+        if (verbose) {
+          notify("Invoice still pending");
+        }
+        console.log("Invoice still pending", invoice.hash);
         throw error;
       }
     },
