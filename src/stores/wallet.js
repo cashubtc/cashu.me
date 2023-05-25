@@ -1,15 +1,17 @@
 import { defineStore } from "pinia";
 import { currentDateStr } from "src/js/utils";
-import { notifyApiError } from "src/js/notify";
 import { useMintsStore } from "./mints";
 import { useLocalStorage } from "@vueuse/core";
 import { useProofsStore } from "./proofs";
 import { useTokensStore } from "./tokens";
+import { useReceiveTokensStore } from "./receiveTokensStore";
 import { step1Alice, step3Alice } from "src/js/dhke";
 import * as nobleSecp256k1 from "@noble/secp256k1";
 import { splitAmount } from "src/js/utils";
 import * as _ from "underscore";
 import { uint8ToBase64 } from "src/js/base64";
+import token from "src/js/token";
+import { notifyApiError, notifyError, notifySuccess } from "src/js/notify";
 
 export const useWalletStore = defineStore("wallet", {
   state: () => {
@@ -190,7 +192,7 @@ export const useWalletStore = defineStore("wallet", {
       } catch (error) {
         console.error(error);
         try {
-          this.notifyApiError(error);
+          notifyApiError(error);
         } catch {}
         throw error;
       }
@@ -204,37 +206,41 @@ export const useWalletStore = defineStore("wallet", {
       /*
       uses split to receive new tokens.
       */
-      const proofsStore = useProofsStore();
+      const receive = useReceiveTokensStore();
       const mintStore = useMintsStore();
       const tokenStore = useTokensStore();
-      this.showReceiveTokens = false;
-      console.log("### receive tokens", this.receiveData.tokensBase64);
+      receive.showReceiveTokens = false;
+      console.log("### receive tokens", receive.receiveData.tokensBase64);
       try {
-        if (this.receiveData.tokensBase64.length == 0) {
+        if (receive.receiveData.tokensBase64.length == 0) {
           throw new Error("no tokens provided.");
         }
-        const tokenJson = this.decodeToken(this.receiveData.tokensBase64);
-        let proofs = this.getProofs(tokenJson);
+        const tokenJson = token.decode(receive.receiveData.tokensBase64);
+        let proofs = token.getProofs(tokenJson);
         // check if we have all mints
         for (var i = 0; i < tokenJson.token.length; i++) {
-          if (!this.mints.map((m) => m.url).includes(this.getMint(tokenJson))) {
+          if (
+            !mintStore.mints
+              .map((m) => m.url)
+              .includes(token.getMint(tokenJson))
+          ) {
             // pop up add mint dialog warning
             // hack! The "add mint" component is in SettingsView which may now
             // have been loaded yet. We switch the tab to settings to make sure
             // that it loads. Remove this code when the TrustMintComnent is refactored!
-            await this.setTab("settings");
-            this.setMintToAdd(tokenJson.token[i].mint);
-            this.showAddMintDialog = true;
+            // await this.setTab("settings");
+            mintStore.setMintToAdd(tokenJson.token[i].mint);
+            mintStore.showAddMintDialog = true;
             // this.addMintDialog.show = true;
             // show the token receive dialog again for the next attempt
-            this.showReceiveTokens = true;
+            receive.showReceiveTokens = true;
             return;
           }
 
           // TODO: We assume here that all proofs are from one mint! This will fail if
           // that's not the case!
-          if (this.getMint(tokenJson) != mints.activeMintUrl) {
-            await this.activateMint(this.getMint(tokenJson));
+          if (token.getMint(tokenJson) != mintStore.activeMintUrl) {
+            await mintStore.activateMint(token.getMint(tokenJson));
           }
         }
 
@@ -246,21 +252,21 @@ export const useWalletStore = defineStore("wallet", {
         // update UI
 
         // HACK: we need to do this so the balance updates
-        mintStore.setProofs(this.proofs.concat([]));
-        mintStore.setActiveProofs(this.activeProofs.concat([]));
+        mintStore.setProofs(mintStore.proofs.concat([]));
+        mintStore.setActiveProofs(mintStore.activeProofs.concat([]));
         mintStore.getBalance();
 
         tokenStore.addPaidToken({
           amount,
-          serializedProofs: this.receiveData.tokensBase64,
+          serializedProofs: receive.receiveData.tokensBase64,
         });
 
         if (window.navigator.vibrate) navigator.vibrate(200);
-        this.notifySuccess("Tokens received.");
+        notifySuccess("Tokens received.");
       } catch (error) {
         console.error(error);
         try {
-          this.notifyApiError(error);
+          notifyApiError(error);
         } catch {}
         throw error;
       }
@@ -291,7 +297,7 @@ export const useWalletStore = defineStore("wallet", {
         console.error(error);
         try {
           try {
-            this.notifyApiError(error);
+            notifyApiError(error);
           } catch {}
         } catch {}
         throw error;
@@ -349,7 +355,7 @@ export const useWalletStore = defineStore("wallet", {
         this.payInvoiceData.blocking = false;
         console.error(error);
         try {
-          this.notifyApiError(error);
+          notifyApiError(error);
         } catch {}
         throw error;
       }
@@ -384,7 +390,7 @@ export const useWalletStore = defineStore("wallet", {
         console.error(error);
         if (verbose) {
           try {
-            this.notifyApiError(error);
+            notifyApiError(error);
           } catch {}
         }
         throw error;
@@ -418,7 +424,7 @@ export const useWalletStore = defineStore("wallet", {
         console.error(error);
         if (verbose) {
           try {
-            this.notifyApiError(error);
+            notifyApiError(error);
           } catch {}
         }
         throw error;
@@ -467,7 +473,7 @@ export const useWalletStore = defineStore("wallet", {
           throw new Error("Invoice not paid.");
         }
         if (window.navigator.vibrate) navigator.vibrate(200);
-        this.notifySuccess("Token paid.");
+        notifySuccess("Token paid.");
         console.log("#### pay lightning: token paid");
         // delete spent tokens from db
         proofsStore.deleteProofs(scndProofs);
@@ -519,7 +525,6 @@ export const useWalletStore = defineStore("wallet", {
 
     // /checkfees
     checkFees: async function (payment_request) {
-      const proofsStore = useProofsStore();
       const mintStore = useMintsStore();
       const payload = {
         pr: payment_request,
@@ -532,7 +537,51 @@ export const useWalletStore = defineStore("wallet", {
       } catch (error) {
         console.error(error);
         try {
-          this.notifyApiError(error);
+          notifyApiError(error);
+        } catch {}
+        throw error;
+      }
+    },
+    // /check
+
+    checkProofsSpendable: async function (proofs, update_history = false) {
+      /*
+      checks with the mint whether an array of proofs is still
+      spendable or already invalidated
+      */
+      const mintStore = useMintsStore();
+      const proofsStore = useProofsStore();
+      const tokenStore = useTokensStore();
+      if (proofs.length == 0) {
+        return;
+      }
+      const payload = {
+        proofs: proofs.map((p) => {
+          return { secret: p.secret };
+        }),
+      };
+      try {
+        const data = await mintStore.activeMint.check(payload);
+        mintStore.assertMintError(data);
+        // delete proofs from database if it is spent
+        let spentProofs = proofs.filter((p, pidx) => !data.spendable[pidx]);
+        if (spentProofs.length) {
+          proofsStore.deleteProofs(spentProofs);
+
+          // update UI
+          if (update_history) {
+            tokenStore.addPaidToken({
+              amount: -proofsStore.sumProofs(spentProofs),
+              serializedProofs: proofsStore.serializeProofs(spentProofs),
+            });
+          }
+        }
+
+        return data.spendable;
+      } catch (error) {
+        console.error(error);
+        try {
+          notifyApiError(error);
         } catch {}
         throw error;
       }
