@@ -1194,57 +1194,11 @@ export default {
 
     //////////////////////// MINT //////////////////////////////////////////
 
-    // MINT
-
     requestMintButton: async function () {
       await this.requestMint();
       console.log("#### request mint", this.invoiceData);
       await this.invoiceCheckWorker();
     },
-
-    // // /mint
-
-    // // /check
-
-    // checkProofsSpendable: async function (proofs, update_history = false) {
-    //   /*
-    //   checks with the mint whether an array of proofs is still
-    //   spendable or already invalidated
-    //   */
-    //   if (proofs.length == 0) {
-    //     return;
-    //   }
-    //   const payload = {
-    //     proofs: proofs.map((p) => {
-    //       return { secret: p.secret };
-    //     }),
-    //   };
-    //   try {
-    //     const data = await this.activeMint.check(payload);
-    //     this.assertMintError(data);
-    //     // delete proofs from database if it is spent
-    //     let spentProofs = proofs.filter((p, pidx) => !data.spendable[pidx]);
-    //     if (spentProofs.length) {
-    //       this.deleteProofs(spentProofs);
-
-    //       // update UI
-    //       if (update_history) {
-    //         this.addPaidToken({
-    //           amount: -this.sumProofs(spentProofs),
-    //           serializedProofs: this.serializeProofs(spentProofs),
-    //         });
-    //       }
-    //     }
-
-    //     return data.spendable;
-    //   } catch (error) {
-    //     console.error(error);
-    //     try {
-    //       this.notifyApiError(error);
-    //     } catch {}
-    //     throw error;
-    //   }
-    // },
 
     ////////////// UI HELPERS //////////////
     checkInvoice: async function (payment_hash, verbose = true) {
