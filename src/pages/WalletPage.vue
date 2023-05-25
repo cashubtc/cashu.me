@@ -1963,7 +1963,7 @@ export default {
     },
 
     checkPendingTokens: async function () {
-      const last_n = 10;
+      const last_n = this.historyTokens.length;
       let i = 0;
       for (const token of this.historyTokens) {
         if (i >= last_n) {
@@ -1974,6 +1974,7 @@ export default {
         }
         i += 1;
       }
+      this.notifyRefreshed("Refreshed");
     },
 
     checkTokenSpendable: async function (token, verbose = true) {
