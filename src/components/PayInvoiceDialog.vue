@@ -217,7 +217,7 @@ import * as bolt11Decoder from "light-bolt11-decoder";
 import * as _ from "underscore";
 
 export default defineComponent({
-  name: "SendTokenDialog",
+  name: "PayInvoiceDialog",
   mixins: [windowMixin],
   components: {
     ChooseMint,

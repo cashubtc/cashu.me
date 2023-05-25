@@ -9,7 +9,7 @@
         </div>
         <div class="row items-center no-wrap q-my-sm q-py-none">
           <div class="col-12">
-            <!-- <ChooseMint :ticker-short="tickerShort" /> -->
+            <ChooseMint :ticker-short="tickerShort" />
           </div>
         </div>
         <q-input
@@ -67,17 +67,17 @@
 </template>
 <script>
 import { defineComponent } from "vue";
+import { mapActions, mapState, mapWritableState } from "pinia";
 
 import { useWalletStore } from "src/stores/wallet";
-import { mapActions, mapState, mapWritableState } from "pinia";
+import ChooseMint from "components/ChooseMint.vue";
 import { useUiStore } from "src/stores/ui";
-// import ChooseMint from "components/ChooseMint.vue";
 
 export default defineComponent({
   name: "InvoiceDetailDialog",
   mixins: [windowMixin],
   componens: {
-    // ChooseMint,
+    ChooseMint,
   },
   props: {
     invoiceCheckWorker: Function,
