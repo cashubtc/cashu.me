@@ -462,7 +462,7 @@ export const useWalletStore = defineStore("wallet", {
 
       try {
         let { firstProofs, scndProofs } = await this.splitToSend(
-          this.activeProofs,
+          mintStore.activeProofs,
           amount
         );
         // NUT-08 blank outputs for change
@@ -511,7 +511,7 @@ export const useWalletStore = defineStore("wallet", {
 
         tokenStore.addPaidToken({
           amount: -amount_paid,
-          serializedProofs: this.serializeProofs(scndProofs),
+          serializedProofs: proofsStore.serializeProofs(scndProofs),
         });
 
         this.invoiceHistory.push({
@@ -521,7 +521,7 @@ export const useWalletStore = defineStore("wallet", {
           memo: this.payInvoiceData.data.memo,
           date: currentDateStr(),
           status: "paid",
-          mint: this.activeMintUrl,
+          mint: mintStore.activeMintUrl,
         });
 
         this.payInvoiceData.invoice = false;

@@ -225,7 +225,7 @@
         <q-tab
           class="col-5"
           label="Create Invoice"
-          icon="bolt"
+          icon="file_download"
           @click="showInvoiceCreateDialog"
         >
         </q-tab>
@@ -238,7 +238,7 @@
         </q-tab>
         <q-tab
           class="col-5"
-          icon="bolt"
+          icon="file_upload"
           @click="showParseDialog"
           label="Pay Invoice"
         >
@@ -249,8 +249,8 @@
     <!-- DIALOGS  -->
 
     <!-- INPUT PARSER  -->
-
-    <q-dialog
+    <PayInvoiceDialog v-model="payInvoiceData.show" />
+    <!-- <q-dialog
       v-model="payInvoiceData.show"
       @hide="closeParseDialog"
       position="top"
@@ -300,37 +300,6 @@
             >
           </div>
         </div>
-        <!-- <div v-else-if="payInvoiceData.lnurlauth">
-
-            <q-form @submit="authLnurl" class="q-gutter-md">
-                <p class="q-my-none text-h6">
-                Authenticate with <b>{{ payInvoiceData.lnurlauth.domain }}</b>?
-                </p>
-                <q-separator class="q-my-sm"></q-separator>
-                <p>
-                For every website and for every LNbits wallet, a new keypair
-                will be deterministically generated so your identity can't be
-                tied to your LNbits wallet or linked across websites. No other
-                data will be shared with {{ payInvoiceData.lnurlauth.domain }}.
-                </p>
-                <p>
-                Your public key for
-                <b>{{ payInvoiceData.lnurlauth.domain }}</b> is:
-                </p>
-                <p class="q-mx-xl">
-                <code class="text-wrap">
-                    {{ payInvoiceData.lnurlauth.pubkey }}
-                </code>
-                </p>
-                <div class="row q-mt-lg">
-                <q-btn unelevated color="primary" type="submit">Login</q-btn>
-                <q-btn v-close-popup flat color="grey" class="q-ml-auto"
-                    >Cancel</q-btn
-                >
-                </div>
-            </q-form>
-
-            </div> -->
         <div v-else-if="payInvoiceData.lnurlpay">
           <q-form @submit="lnurlPaySecond" class="q-gutter-md">
             <p
@@ -354,10 +323,6 @@
               and
               <b>{{ payInvoiceData.lnurlpay.maxSendable / 1000 }}</b>
               {{ tickerShort }}
-              <!-- <span v-if="payInvoiceData.lnurlpay.commentAllowed > 0">
-                    <br />
-                    and a {{payInvoiceData.lnurlpay.commentAllowed}}-char comment
-                </span> -->
             </p>
             <q-separator class="q-my-sm"></q-separator>
             <div class="row" v-if="payInvoiceData.lnurlpay.description">
@@ -443,22 +408,9 @@
               >
             </div>
           </q-form>
-          <!-- <div v-else>
-            <q-responsive :ratio="1">
-              <qrcode-stream
-                @decode="decodeQR"
-                class="rounded-borders"
-              ></qrcode-stream>
-            </q-responsive>
-            <div class="row q-mt-lg">
-              <q-btn @click="closeCamera" flat color="grey" class="q-ml-auto">
-                Cancel
-              </q-btn>
-            </div>
-          </div> -->
         </div>
       </q-card>
-    </q-dialog>
+    </q-dialog> -->
 
     <!-- QR CODE SCANNER  -->
 
@@ -533,7 +485,11 @@
     </q-dialog>
 
     <!-- INVOICE DETAILS  -->
-
+    <InvoiceDetailDialog
+      v-model="showInvoiceDetails"
+      :invoice-check-worker="invoiceCheckWorker"
+    />
+    <!--
     <q-dialog v-model="showInvoiceDetails" position="top">
       <q-card class="q-pa-lg q-pt-md qcard">
         <div v-if="!invoiceData.bolt11">
@@ -560,12 +516,6 @@
             class="q-mb-lg"
             @keyup.enter="requestMintButton"
           ></q-input>
-          <!-- <q-input
-                filled
-                dense
-                v-model.trim="invoiceData.memo"
-                label="Memo"
-                ></q-input> -->
         </div>
         <div v-else class="text-center q-mb-lg q-mt-none q-pt-none">
           <a class="text-secondary" :href="'lightning:' + invoiceData.bolt11">
@@ -597,7 +547,7 @@
           <q-btn v-close-popup flat color="grey" class="q-ml-auto">Close</q-btn>
         </div>
       </q-card>
-    </q-dialog>
+    </q-dialog> -->
 
     <!-- SEND TOKENS DIALOG  -->
     <SendTokenDialog
@@ -630,28 +580,23 @@
 }
 </style>
 <script>
-import { ref } from "vue";
-import { axios } from "boot/axios";
 import { date } from "quasar";
-import { splitAmount, bigIntStringify } from "src/js/utils";
-// import * as nobleSecp256k1 from "@noble/secp256k1";
-import * as bolt11Decoder from "light-bolt11-decoder";
-// import { step1Alice, step3Alice } from "src/js/dhke";
-// import { uint8ToBase64 } from "src/js/base64";
 import * as _ from "underscore";
-import { getShortUrl } from "src/js/wallet-helpers";
 import { shortenString } from "src/js/string-utils";
 import token from "src/js/token";
+
 // Vue components
 import BalanceView from "components/BalanceView.vue";
 import SettingsView from "components/SettingsView.vue";
 import InvoicesTable from "components/InvoicesTable.vue";
 import HistoryTable from "components/HistoryTable.vue";
 import NoMintWarnBanner from "components/NoMintWarnBanner.vue";
-import ChooseMint from "components/ChooseMint.vue";
 import WelcomeDialog from "components/WelcomeDialog.vue";
 import SendTokenDialog from "components/SendTokenDialog.vue";
+import PayInvoiceDialog from "components/PayInvoiceDialog.vue";
+import InvoiceDetailDialog from "components/InvoiceDetailDialog.vue";
 
+// pinia stores
 import { mapActions, mapState, mapWritableState } from "pinia";
 import { useMintsStore } from "src/stores/mints";
 import { useSendTokensStore } from "src/stores/sendTokensStore";
@@ -677,10 +622,11 @@ export default {
     InvoicesTable,
     HistoryTable,
     NoMintWarnBanner,
-    ChooseMint,
     WelcomeDialog,
     SendTokenDialog,
     ReceiveTokenDialog,
+    PayInvoiceDialog,
+    InvoiceDetailDialog,
   },
   data: function () {
     return {
@@ -704,12 +650,12 @@ export default {
       // receiveData: {
       //   tokensBase64: "",
       // },
-      showInvoiceDetails: false,
-      showPayInvoice: false,
+      // showInvoiceDetails: false,
+      // showPayInvoice: false,
       // showSendTokens: false,
       // showReceiveTokens: false,
-      promises: [],
-      tokens: [],
+      // promises: [],
+      // tokens: [],
       tab: "history",
       receive: {
         show: false,
@@ -793,6 +739,7 @@ export default {
     };
   },
   computed: {
+    ...mapWritableState(useUiStore, ["showInvoiceDetails"]),
     ...mapState(useUiStore, ["tickerShort"]),
     ...mapWritableState(useReceiveTokensStore, [
       "showReceiveTokens",
@@ -807,7 +754,7 @@ export default {
       "proofs",
       "activeMint",
     ]),
-    ...mapState(useWalletStore, [
+    ...mapWritableState(useWalletStore, [
       "invoiceHistory",
       "invoiceData",
       "payInvoiceData",
@@ -818,12 +765,7 @@ export default {
       "tokensCheckSpendableListener",
     ]),
     ...mapState(useTokensStore, ["historyTokens"]),
-    ...mapWritableState(useTokensStore, [""]),
     ...mapWritableState(useCameraStore, ["camera"]),
-    canPay: function () {
-      if (!this.payInvoiceData.invoice) return false;
-      return this.payInvoiceData.invoice.sat <= this.balance;
-    },
     pendingPaymentsExist: function () {
       return this.payments.findIndex((payment) => payment.pending) !== -1;
     },
@@ -921,7 +863,8 @@ export default {
       });
     },
     focusInput(el) {
-      this.$nextTick(() => this.$refs[el].focus());
+      // TODO: fix this
+      // this.$nextTick(() => this.$refs[el].focus());
     },
     showReceiveDialog: function () {
       this.receive.show = true;
@@ -976,167 +919,162 @@ export default {
         clearInterval(this.receive.paymentChecker);
       }, 10000);
     },
-    closeParseDialog: function () {
-      setTimeout(() => {
-        clearInterval(this.payInvoiceData.paymentChecker);
-      }, 10000);
-    },
     decodeQR: function (res) {
       this.camera.data = res;
       // this.payInvoiceData.data.request = res
       this.decodeRequest();
       this.camera.show = false;
     },
-    decodeRequest: function (r = null) {
-      // set the argument as the data to parse
-      if (typeof r == "string" && r != null) {
-        this.payInvoiceData.data.request = r;
-      }
-      let reqtype = null;
-      let req = null;
-      // get request
-      if (this.camera.data) {
-        // get request from camera
-        req = this.camera.data;
-      } else if (this.payInvoiceData.data.request) {
-        // get request from pay invoice dialog
-        req = this.payInvoiceData.data.request;
-      }
+    // decodeRequest: function (r = null) {
+    //   // set the argument as the data to parse
+    //   if (typeof r == "string" && r != null) {
+    //     this.payInvoiceData.data.request = r;
+    //   }
+    //   let reqtype = null;
+    //   let req = null;
+    //   // get request
+    //   if (this.camera.data) {
+    //     // get request from camera
+    //     req = this.camera.data;
+    //   } else if (this.payInvoiceData.data.request) {
+    //     // get request from pay invoice dialog
+    //     req = this.payInvoiceData.data.request;
+    //   }
 
-      if (req.toLowerCase().startsWith("lnbc")) {
-        this.payInvoiceData.data.request = req;
-        reqtype = "bolt11";
-      } else if (req.toLowerCase().startsWith("lightning:")) {
-        this.payInvoiceData.data.request = req.slice(10);
-        reqtype = "bolt11";
-      } else if (req.toLowerCase().startsWith("lnurl:")) {
-        this.payInvoiceData.data.request = req.slice(6);
-        reqtype = "lnurl";
-      } else if (req.indexOf("lightning=lnurl1") !== -1) {
-        this.payInvoiceData.data.request = req
-          .split("lightning=")[1]
-          .split("&")[0];
-        reqtype = "lnurl";
-      } else if (
-        req.toLowerCase().startsWith("lnurl1") ||
-        req.match(/[\w.+-~_]+@[\w.+-~_]/)
-      ) {
-        this.payInvoiceData.data.request = req;
-        reqtype = "lnurl";
-      } else if (req.indexOf("cashuA")) {
-        // very dirty way of parsing cashu tokens from either a pasted token or a URL like https://host.com?token=eyJwcm
-        this.receiveData.tokensBase64 = req.slice(req.indexOf("cashuA"));
-        reqtype = "cashu";
-      }
+    //   if (req.toLowerCase().startsWith("lnbc")) {
+    //     this.payInvoiceData.data.request = req;
+    //     reqtype = "bolt11";
+    //   } else if (req.toLowerCase().startsWith("lightning:")) {
+    //     this.payInvoiceData.data.request = req.slice(10);
+    //     reqtype = "bolt11";
+    //   } else if (req.toLowerCase().startsWith("lnurl:")) {
+    //     this.payInvoiceData.data.request = req.slice(6);
+    //     reqtype = "lnurl";
+    //   } else if (req.indexOf("lightning=lnurl1") !== -1) {
+    //     this.payInvoiceData.data.request = req
+    //       .split("lightning=")[1]
+    //       .split("&")[0];
+    //     reqtype = "lnurl";
+    //   } else if (
+    //     req.toLowerCase().startsWith("lnurl1") ||
+    //     req.match(/[\w.+-~_]+@[\w.+-~_]/)
+    //   ) {
+    //     this.payInvoiceData.data.request = req;
+    //     reqtype = "lnurl";
+    //   } else if (req.indexOf("cashuA")) {
+    //     // very dirty way of parsing cashu tokens from either a pasted token or a URL like https://host.com?token=eyJwcm
+    //     this.receiveData.tokensBase64 = req.slice(req.indexOf("cashuA"));
+    //     reqtype = "cashu";
+    //   }
 
-      if (reqtype == "bolt11") {
-        console.log("#### QR CODE: BOLT11");
-        this.payInvoiceData.show = true;
-        let invoice;
-        try {
-          invoice = bolt11Decoder.decode(this.payInvoiceData.data.request);
-        } catch (error) {
-          this.notifyWarning("Failed to decode invoice", null, 3000);
-          this.payInvoiceData.show = false;
-          throw error;
-        }
+    //   if (reqtype == "bolt11") {
+    //     console.log("#### QR CODE: BOLT11");
+    //     this.payInvoiceData.show = true;
+    //     let invoice;
+    //     try {
+    //       invoice = bolt11Decoder.decode(this.payInvoiceData.data.request);
+    //     } catch (error) {
+    //       this.notifyWarning("Failed to decode invoice", null, 3000);
+    //       this.payInvoiceData.show = false;
+    //       throw error;
+    //     }
 
-        // invoice.amount = invoice.sections[2] / 1000;
-        // invoice.amount_msat = invoice.sections[2];
-        let cleanInvoice = {};
-        // let cleanInvoice = {
-        //   msat: invoice.amount_msat,
-        //   sat: invoice.amount,
-        //   fsat: invoice.amount,
-        // };
-        // _.each(invoice.sections, (tag) => {
-        //   console.log(tag);
-        // });
-        _.each(invoice.sections, (tag) => {
-          if (_.isObject(tag) && _.has(tag, "name")) {
-            if (tag.name === "amount") {
-              cleanInvoice.msat = tag.value;
-              cleanInvoice.sat = tag.value / 1000;
-              cleanInvoice.fsat = cleanInvoice.sat;
-            } else if (tag.name === "payment_hash") {
-              cleanInvoice.hash = tag.value;
-            } else if (tag.name === "description") {
-              cleanInvoice.description = tag.value;
-            } else if (tag.name === "timestamp") {
-              cleanInvoice.timestamp = tag.value;
-            } else if (tag.name === "expiry") {
-              var expireDate = new Date(
-                (cleanInvoice.timestamp + tag.value) * 1000
-              );
-              cleanInvoice.expireDate = date.formatDate(
-                expireDate,
-                "YYYY-MM-DDTHH:mm:ss.SSSZ"
-              );
-              cleanInvoice.expired = false; // TODO
-            }
-          }
-        });
+    //     // invoice.amount = invoice.sections[2] / 1000;
+    //     // invoice.amount_msat = invoice.sections[2];
+    //     let cleanInvoice = {};
+    //     // let cleanInvoice = {
+    //     //   msat: invoice.amount_msat,
+    //     //   sat: invoice.amount,
+    //     //   fsat: invoice.amount,
+    //     // };
+    //     // _.each(invoice.sections, (tag) => {
+    //     //   console.log(tag);
+    //     // });
+    //     _.each(invoice.sections, (tag) => {
+    //       if (_.isObject(tag) && _.has(tag, "name")) {
+    //         if (tag.name === "amount") {
+    //           cleanInvoice.msat = tag.value;
+    //           cleanInvoice.sat = tag.value / 1000;
+    //           cleanInvoice.fsat = cleanInvoice.sat;
+    //         } else if (tag.name === "payment_hash") {
+    //           cleanInvoice.hash = tag.value;
+    //         } else if (tag.name === "description") {
+    //           cleanInvoice.description = tag.value;
+    //         } else if (tag.name === "timestamp") {
+    //           cleanInvoice.timestamp = tag.value;
+    //         } else if (tag.name === "expiry") {
+    //           var expireDate = new Date(
+    //             (cleanInvoice.timestamp + tag.value) * 1000
+    //           );
+    //           cleanInvoice.expireDate = date.formatDate(
+    //             expireDate,
+    //             "YYYY-MM-DDTHH:mm:ss.SSSZ"
+    //           );
+    //           cleanInvoice.expired = false; // TODO
+    //         }
+    //       }
+    //     });
 
-        this.payInvoiceData.invoice = Object.freeze(cleanInvoice);
-      } else if (reqtype == "lnurl") {
-        console.log("#### QR CODE: LNURL");
-        this.lnurlPayFirst(this.payInvoiceData.data.request);
-      } else if (reqtype == "cashu") {
-        console.log("#### QR CODE: CASHU TOKEN");
-        this.payInvoiceData.show = false;
-        this.showReceiveTokens = true;
-      }
-    },
-    lnurlPayFirst: async function (address) {
-      var host;
-      if (address.split("@").length == 2) {
-        let [user, lnaddresshost] = address.split("@");
-        host = `https://${lnaddresshost}/.well-known/lnurlp/${user}`;
-      } else if (address.toLowerCase().slice(0, 6) === "lnurl1") {
-        let host = Buffer.from(
-          bech32.fromWords(bech32.decode(address, 20000).words)
-        ).toString();
-        var { data } = await axios.get(host);
-        // const { data } = await LNbits.api.request(
-        //   "POST",
-        //   "/api/v1/payments/decode",
-        //   "",
-        //   {
-        //     data: address,
-        //   }
-        // );
-        host = data.domain;
-      }
-      var { data } = await axios.get(host);
-      if (data.tag == "payRequest") {
-        this.payInvoiceData.domain = host.split("https://")[1].split("/")[0];
-        this.payInvoiceData.lnurlpay = data;
-        if (
-          this.payInvoiceData.lnurlpay.maxSendable ==
-          this.payInvoiceData.lnurlpay.minSendable
-        ) {
-          this.payInvoiceData.data.amount =
-            this.payInvoiceData.lnurlpay.maxSendable / 1000;
-        }
-        this.payInvoiceData.show = true;
-      }
-    },
-    lnurlPaySecond: async function () {
-      let amount = this.payInvoiceData.data.amount;
-      if (
-        this.payInvoiceData.lnurlpay.tag == "payRequest" &&
-        this.payInvoiceData.lnurlpay.minSendable <=
-          amount * 1000 <=
-          this.payInvoiceData.lnurlpay.maxSendable
-      ) {
-        var { data } = await axios.get(
-          `${this.payInvoiceData.lnurlpay.callback}?amount=${amount * 1000}`
-        );
-        console.log(data.pr);
-        this.payInvoiceData.data.request = data.pr;
-        this.decodeRequest();
-      }
-    },
+    //     this.payInvoiceData.invoice = Object.freeze(cleanInvoice);
+    //   } else if (reqtype == "lnurl") {
+    //     console.log("#### QR CODE: LNURL");
+    //     this.lnurlPayFirst(this.payInvoiceData.data.request);
+    //   } else if (reqtype == "cashu") {
+    //     console.log("#### QR CODE: CASHU TOKEN");
+    //     this.payInvoiceData.show = false;
+    //     this.showReceiveTokens = true;
+    //   }
+    // },
+    // lnurlPayFirst: async function (address) {
+    //   var host;
+    //   if (address.split("@").length == 2) {
+    //     let [user, lnaddresshost] = address.split("@");
+    //     host = `https://${lnaddresshost}/.well-known/lnurlp/${user}`;
+    //   } else if (address.toLowerCase().slice(0, 6) === "lnurl1") {
+    //     let host = Buffer.from(
+    //       bech32.fromWords(bech32.decode(address, 20000).words)
+    //     ).toString();
+    //     var { data } = await axios.get(host);
+    //     // const { data } = await LNbits.api.request(
+    //     //   "POST",
+    //     //   "/api/v1/payments/decode",
+    //     //   "",
+    //     //   {
+    //     //     data: address,
+    //     //   }
+    //     // );
+    //     host = data.domain;
+    //   }
+    //   var { data } = await axios.get(host);
+    //   if (data.tag == "payRequest") {
+    //     this.payInvoiceData.domain = host.split("https://")[1].split("/")[0];
+    //     this.payInvoiceData.lnurlpay = data;
+    //     if (
+    //       this.payInvoiceData.lnurlpay.maxSendable ==
+    //       this.payInvoiceData.lnurlpay.minSendable
+    //     ) {
+    //       this.payInvoiceData.data.amount =
+    //         this.payInvoiceData.lnurlpay.maxSendable / 1000;
+    //     }
+    //     this.payInvoiceData.show = true;
+    //   }
+    // },
+    // lnurlPaySecond: async function () {
+    //   let amount = this.payInvoiceData.data.amount;
+    //   if (
+    //     this.payInvoiceData.lnurlpay.tag == "payRequest" &&
+    //     this.payInvoiceData.lnurlpay.minSendable <=
+    //       amount * 1000 <=
+    //       this.payInvoiceData.lnurlpay.maxSendable
+    //   ) {
+    //     var { data } = await axios.get(
+    //       `${this.payInvoiceData.lnurlpay.callback}?amount=${amount * 1000}`
+    //     );
+    //     console.log(data.pr);
+    //     this.payInvoiceData.data.request = data.pr;
+    //     this.decodeRequest();
+    //   }
+    // },
     payInvoice: function () {
       let dismissPaymentMsg = this.$q.notify({
         timeout: 0,
@@ -1194,11 +1132,11 @@ export default {
 
     //////////////////////// MINT //////////////////////////////////////////
 
-    requestMintButton: async function () {
-      await this.requestMint();
-      console.log("#### request mint", this.invoiceData);
-      await this.invoiceCheckWorker();
-    },
+    // requestMintButton: async function () {
+    //   await this.requestMint();
+    //   console.log("#### request mint", this.invoiceData);
+    //   await this.invoiceCheckWorker();
+    // },
 
     ////////////// UI HELPERS //////////////
     checkInvoice: async function (payment_hash, verbose = true) {

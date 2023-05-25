@@ -125,7 +125,9 @@ export default defineComponent({
     checkTokenSpendableWorker: Function,
   },
   data: function () {
-    return {};
+    return {
+      baseURL: location.protocol + "//" + location.host + location.pathname,
+    };
   },
   computed: {
     ...mapWritableState(useSendTokensStore, ["showSendTokens"]),
