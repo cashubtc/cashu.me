@@ -597,7 +597,7 @@ export const useWalletStore = defineStore("wallet", {
         throw error;
       }
     },
-    checkTokenSpendable: async function (token, verbose = true) {
+    checkTokenSpendable: async function (tokenStr: string, verbose: boolean = true) {
       /*
       checks whether a base64-encoded token (from the history table) has been spent already.
       if it is spent, the appropraite entry in the history table is set to paid.
@@ -605,7 +605,7 @@ export const useWalletStore = defineStore("wallet", {
       const mintStore = useMintsStore();
       const tokenStore = useTokensStore();
 
-      const tokenJson = token.decode(token);
+      const tokenJson = token.decode(tokenStr);
       const proofs = token.getProofs(tokenJson);
 
       // activate the mint
@@ -616,7 +616,7 @@ export const useWalletStore = defineStore("wallet", {
       const spendable = await this.checkProofsSpendable(proofs);
       let paid = false;
       if (spendable.includes(false)) {
-        tokenStore.setTokenPaid(token);
+        tokenStore.setTokenPaid(tokenStr);
         paid = true;
       }
       if (paid) {
@@ -640,6 +640,8 @@ export const useWalletStore = defineStore("wallet", {
           await mintStore.activateMint(invoice.mint, false);
         }
         const proofs = await this.mint(invoice.amount, invoice.hash, verbose);
+        if (window.navigator.vibrate) navigator.vibrate(200);
+        notifySuccess("Payment received", "top");
         return proofs;
       } catch (error) {
         if (verbose) {
@@ -649,5 +651,58 @@ export const useWalletStore = defineStore("wallet", {
         throw error;
       }
     },
+    ////////////// UI HELPERS //////////////
+
+    checkPendingInvoices: async function () {
+      const last_n = 10;
+      let i = 0;
+      for (const invoice of this.invoiceHistory.slice().reverse()) {
+        if (i >= last_n) {
+          break;
+        }
+        if (invoice.status === "pending" && invoice.amount > 0) {
+          console.log("### checkPendingInvoices", invoice.hash)
+          try {
+            await this.checkInvoice(invoice.hash, true);
+          } catch (error) {
+            console.log(`${invoice.hash} still pending`);
+            throw error;
+          }
+        }
+        i += 1;
+      }
+    },
+
+    checkPendingTokens: async function () {
+      const tokenStore = useTokensStore();
+      const last_n = 10;
+      let i = 0;
+      // invert for loop
+      for (const token of tokenStore.historyTokens.slice().reverse()) {
+        if (i >= last_n) {
+          break;
+        }
+        if (token.status === "pending" && token.amount < 0) {
+          console.log("### checkPendingTokens", token.token)
+          this.checkTokenSpendable(token.token, false);
+        }
+        i += 1;
+      }
+    },
+
+    // findTokenForAmount: function (amount) {
+    //   const mintStore = useMintsStore();
+    //   // unused coin selection
+    //   for (const token of mintStore.activeProofs) {
+    //     const index = token.promises?.findIndex((p) => p.amount === amount);
+    //     if (index >= 0) {
+    //       return {
+    //         promise: token.promises[index],
+    //         secret: token.secrets[index],
+    //         r: token.rs[index],
+    //       };
+    //     }
+    //   }
+    // },
   },
 });

@@ -609,6 +609,8 @@ export default {
       "checkProofsSpendable",
       "checkTokenSpendable",
       "checkInvoice",
+      "checkPendingInvoices",
+      "checkPendingTokens",
     ]),
     ...mapActions(useCameraStore, ["closeCamera", "showCamera", "hasCamera"]),
     // TOKEN METHODS
@@ -768,165 +770,56 @@ export default {
 
     //////////////////////// MINT //////////////////////////////////////////
 
-    ////////////// UI HELPERS //////////////
-    // checkInvoice: async function (payment_hash, verbose = true) {
-    //   console.log("### checkInvoice.hash", payment_hash);
-    //   const invoice = this.invoiceHistory.find((i) => i.hash === payment_hash);
-    //   try {
-    //     if (invoice.mint != null) {
-    //       await this.activateMint(invoice.mint, false);
+    // ////////////// UI HELPERS //////////////
+
+    // checkPendingInvoices: async function () {
+    //   const last_n = 10;
+    //   let i = 0;
+    //   for (const invoice of this.invoiceHistory) {
+    //     if (i >= last_n) {
+    //       break;
     //     }
-    //     const proofs = await this.mint(invoice.amount, invoice.hash, verbose);
-    //     return proofs;
-    //   } catch (error) {
-    //     if (verbose) {
-    //       this.notify("Invoice still pending");
+    //     if (invoice.status === "pending" && invoice.amount > 0) {
+    //       try {
+    //         await this.checkInvoice(invoice.hash, false);
+    //       } catch (error) {
+    //         console.log(`${invoice.hash} still pending`);
+    //         throw error;
+    //       }
     //     }
-    //     console.log("Invoice still pending", invoice.hash);
-    //     throw error;
+    //     i += 1;
     //   }
     // },
-    checkPendingInvoices: async function () {
-      const last_n = 10;
-      let i = 0;
-      for (const invoice of this.invoiceHistory) {
-        if (i >= last_n) {
-          break;
-        }
-        if (invoice.status === "pending" && invoice.amount > 0) {
-          try {
-            await this.checkInvoice(invoice.hash, false);
-          } catch (error) {
-            console.log(`${invoice.hash} still pending`);
-            throw error;
-          }
-        }
-        i += 1;
-      }
-    },
 
-    checkPendingTokens: async function () {
-      const last_n = 10;
-      let i = 0;
-      for (const token of this.historyTokens) {
-        if (i >= last_n) {
-          break;
-        }
-        if (token.status === "pending" && token.amount < 0) {
-          this.checkTokenSpendable(token.token, false);
-        }
-        i += 1;
-      }
-    },
-
-    // checkTokenSpendable: async function (token, verbose = true) {
-    //   /*
-    //   checks whether a base64-encoded token (from the history table) has been spent already.
-    //   if it is spent, the appropraite entry in the history table is set to paid.
-    //   */
-    //   const tokenJson = this.decodeToken(token);
-    //   const proofs = this.getProofs(tokenJson);
-
-    //   // activate the mint
-    //   if (this.getMint(tokenJson).length > 0) {
-    //     await this.activateMint(this.getMint(tokenJson));
-    //   }
-
-    //   const spendable = await this.checkProofsSpendable(proofs);
-    //   let paid = false;
-    //   if (spendable.includes(false)) {
-    //     this.setTokenPaid(token);
-    //     paid = true;
-    //   }
-    //   if (paid) {
-    //     if (window.navigator.vibrate) navigator.vibrate(200);
-    //     this.notifySuccess("Token paid.");
-    //   } else {
-    //     console.log("### token not paid yet");
-    //     if (verbose) {
-    //       this.notify("Token still pending");
+    // checkPendingTokens: async function () {
+    //   const last_n = 10;
+    //   let i = 0;
+    //   for (const token of this.historyTokens) {
+    //     if (i >= last_n) {
+    //       break;
     //     }
-    //     // this.sendData.tokens = token
+    //     if (token.status === "pending" && token.amount < 0) {
+    //       this.checkTokenSpendable(token.token, false);
+    //     }
+    //     i += 1;
     //   }
-    //   return paid;
     // },
 
-    findTokenForAmount: function (amount) {
-      // unused coin selection
-      for (const token of this.activeProofs) {
-        const index = token.promises?.findIndex((p) => p.amount === amount);
-        if (index >= 0) {
-          return {
-            promise: token.promises[index],
-            secret: token.secrets[index],
-            r: token.rs[index],
-          };
-        }
-      }
-    },
+    // findTokenForAmount: function (amount) {
+    //   // unused coin selection
+    //   for (const token of this.activeProofs) {
+    //     const index = token.promises?.findIndex((p) => p.amount === amount);
+    //     if (index >= 0) {
+    //       return {
+    //         promise: token.promises[index],
+    //         secret: token.secrets[index],
+    //         r: token.rs[index],
+    //       };
+    //     }
+    //   }
+    // },
 
     ////////////// WORKERS //////////////
-
-    // invoiceCheckWorker: async function () {
-    //   let nInterval = 0;
-    //   this.clearAllWorkers();
-    //   this.invoiceCheckListener = setInterval(async () => {
-    //     try {
-    //       nInterval += 1;
-
-    //       // exit loop after 2m
-    //       if (nInterval > 40) {
-    //         console.log("### stopping invoice check worker");
-    //         this.clearAllWorkers();
-    //       }
-    //       console.log("### invoiceCheckWorker setInterval", nInterval);
-    //       console.log(this.invoiceData);
-
-    //       // this will throw an error if the invoice is pending
-    //       await this.checkInvoice(this.invoiceData.hash, false);
-
-    //       // only without error (invoice paid) will we reach here
-    //       console.log("### stopping invoice check worker");
-    //       this.clearAllWorkers();
-    //       this.invoiceData.bolt11 = "";
-    //       this.showInvoiceDetails = false;
-    //       if (window.navigator.vibrate) navigator.vibrate(200);
-    //       this.notifySuccess("Payment received", "top");
-    //     } catch (error) {
-    //       console.log("invoiceCheckWorker: not paid yet");
-    //     }
-    //   }, 3000);
-    // },
-    // checkTokenSpendableWorker: async function () {
-    //   let nInterval = 0;
-    //   this.clearAllWorkers();
-    //   this.tokensCheckSpendableListener = setInterval(async () => {
-    //     try {
-    //       nInterval += 1;
-    //       // exit loop after 2m
-    //       if (nInterval > 24) {
-    //         console.log("### stopping token check worker");
-    //         this.clearAllWorkers();
-    //       }
-    //       console.log("### checkTokenSpendableWorker setInterval", nInterval);
-    //       console.log(this.sendData);
-
-    //       // this will throw an error if the invoice is pending
-    //       let paid = await this.checkTokenSpendable(
-    //         this.sendData.tokensBase64,
-    //         false
-    //       );
-    //       if (paid) {
-    //         console.log("### stopping token check worker");
-    //         this.clearAllWorkers();
-    //         this.sendData.tokens = "";
-    //         this.showSendTokens = false;
-    //       }
-    //     } catch (error) {
-    //       console.log("checkTokenSpendableWorker: not paid yet");
-    //     }
-    //   }, 3000);
-    // },
 
     ////////////// UI HELPERS /////////////
     registerPWAEventHook: function () {

@@ -46,8 +46,8 @@ export const useWorkersStore = defineStore("workers", {
           this.clearAllWorkers();
           walletStore.invoiceData.bolt11 = "";
           uiStore.showInvoiceDetails = false;
-          if (window.navigator.vibrate) navigator.vibrate(200);
-          notifySuccess("Payment received", "top");
+          // if (window.navigator.vibrate) navigator.vibrate(200);
+          // notifySuccess("Payment received", "top");
         } catch (error) {
           console.log("invoiceCheckWorker: not paid yet");
         }
