@@ -56,7 +56,7 @@
           v-else
           color="primary"
           @click="requestMintButton"
-          :disable="!invoiceData.amount > 0"
+          :disable="!(invoiceData.amount > 0)"
         >
           Create Invoice</q-btn
         >
@@ -68,16 +68,18 @@
 <script>
 import { defineComponent } from "vue";
 import { mapActions, mapState, mapWritableState } from "pinia";
+import VueQrcode from "@chenfengyuan/vue-qrcode";
 
 import { useWalletStore } from "src/stores/wallet";
-import ChooseMint from "components/ChooseMint.vue";
+import ChooseMint from "src/components/ChooseMint.vue";
 import { useUiStore } from "src/stores/ui";
 
 export default defineComponent({
   name: "InvoiceDetailDialog",
   mixins: [windowMixin],
-  componens: {
+  components: {
     ChooseMint,
+    VueQrcode,
   },
   props: {
     invoiceCheckWorker: Function,
