@@ -648,18 +648,6 @@
           </div>
           <div class="row">
             <div class="col-12">
-              <q-toggle
-                class="float-right"
-                v-model="showSendTokenLegacyV2TokenToggleState"
-                color="pink"
-                icon="bedtime"
-                label="Old token format"
-                @click="sendTokenDialogSwitchTokenV3ToLegacyV2()"
-              />
-            </div>
-          </div>
-          <div class="row">
-            <div class="col-12">
               <q-input
                 outlined
                 dense
@@ -859,8 +847,6 @@ export default {
       showInvoiceDetails: false,
       showPayInvoice: false,
       showSendTokens: false,
-      showSendTokenLegacyV2Token: false,
-      showSendTokenLegacyV2TokenToggleState: ref(false),
       showReceiveTokens: false,
       promises: [],
       tokens: [],
@@ -1321,24 +1307,6 @@ export default {
       this.showSendTokens = true;
       // kick off token check worker
       this.checkTokenSpendableWorker();
-    },
-    sendTokenDialogSwitchTokenV3ToLegacyV2: function () {
-      // converts the (serialized) data in this.sendData.tokenBase64 between V2 and V3 token
-      if (!(this.sendData.tokens.length > 0)) {
-        // nothing to do
-        return;
-      }
-      if (this.showSendTokenLegacyV2Token) {
-        // convert to V3
-        this.sendData.tokensBase64 = this.serializeProofs(this.sendData.tokens);
-        this.showSendTokenLegacyV2Token = false;
-      } else {
-        // convert to V2
-        this.sendData.tokensBase64 = this.serializeProofsV2(
-          this.sendData.tokens
-        );
-        this.showSendTokenLegacyV2Token = true;
-      }
     },
     showSendTokensDialog: function () {
       console.log("##### showSendTokensDialog");
