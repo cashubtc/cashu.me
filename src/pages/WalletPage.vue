@@ -387,12 +387,9 @@ import { useWalletStore } from "src/stores/wallet";
 import { useUiStore } from "src/stores/ui";
 import { useProofsStore } from "src/stores/proofs";
 import { useCameraStore } from "src/stores/camera";
+import { currentDateStr } from "src/js/utils";
 
 import ReceiveTokenDialog from "src/components/ReceiveTokenDialog.vue";
-
-var currentDateStr = function () {
-  return date.formatDate(new Date(), "YYYY-MM-DD HH:mm:ss");
-};
 
 export default {
   mixins: [windowMixin],
@@ -410,32 +407,10 @@ export default {
   },
   data: function () {
     return {
-      // tickerShort: "sats",
-      // ticketLong: "Satoshis",
       name: "",
       mintId: "",
       mintName: "",
       deferredPWAInstallPrompt: null,
-      // camera: {
-      //   data: null,
-      //   show: false,
-      //   camera: "auto",
-      // },
-      // sendData: {
-      //   amount: 0,
-      //   memo: "",
-      //   tokens: "",
-      //   tokensBase64: "",
-      // },
-      // receiveData: {
-      //   tokensBase64: "",
-      // },
-      // showInvoiceDetails: false,
-      // showPayInvoice: false,
-      // showSendTokens: false,
-      // showReceiveTokens: false,
-      // promises: [],
-      // tokens: [],
       tab: "history",
       receive: {
         show: false,
@@ -468,35 +443,6 @@ export default {
         },
       },
       payments: [],
-      // tokensTable: {
-      //   columns: [
-      //     {
-      //       name: "value",
-      //       align: "left",
-      //       label: "'Value",
-      //       field: "value",
-      //       sortable: true,
-      //     },
-      //     {
-      //       name: "count",
-      //       align: "left",
-      //       label: "Count",
-      //       field: "count",
-      //       sortable: true,
-      //     },
-      //     {
-      //       name: "sum",
-      //       align: "left",
-      //       label: "Sum (sats)",
-      //       field: "sum",
-      //       sortable: true,
-      //     },
-      //   ],
-      //   pagination: {
-      //     rowsPerPage: 5,
-      //   },
-      //   filter: null,
-      // },
       paymentsChart: {
         show: false,
       },
@@ -771,53 +717,6 @@ export default {
     //////////////////////// MINT //////////////////////////////////////////
 
     // ////////////// UI HELPERS //////////////
-
-    // checkPendingInvoices: async function () {
-    //   const last_n = 10;
-    //   let i = 0;
-    //   for (const invoice of this.invoiceHistory) {
-    //     if (i >= last_n) {
-    //       break;
-    //     }
-    //     if (invoice.status === "pending" && invoice.amount > 0) {
-    //       try {
-    //         await this.checkInvoice(invoice.hash, false);
-    //       } catch (error) {
-    //         console.log(`${invoice.hash} still pending`);
-    //         throw error;
-    //       }
-    //     }
-    //     i += 1;
-    //   }
-    // },
-
-    // checkPendingTokens: async function () {
-    //   const last_n = 10;
-    //   let i = 0;
-    //   for (const token of this.historyTokens) {
-    //     if (i >= last_n) {
-    //       break;
-    //     }
-    //     if (token.status === "pending" && token.amount < 0) {
-    //       this.checkTokenSpendable(token.token, false);
-    //     }
-    //     i += 1;
-    //   }
-    // },
-
-    // findTokenForAmount: function (amount) {
-    //   // unused coin selection
-    //   for (const token of this.activeProofs) {
-    //     const index = token.promises?.findIndex((p) => p.amount === amount);
-    //     if (index >= 0) {
-    //       return {
-    //         promise: token.promises[index],
-    //         secret: token.secrets[index],
-    //         r: token.rs[index],
-    //       };
-    //     }
-    //   }
-    // },
 
     ////////////// WORKERS //////////////
 

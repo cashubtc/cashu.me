@@ -1,6 +1,7 @@
 <template>
   <q-dialog v-model="showInvoiceDetails" position="top">
-    <q-card class="q-pa-lg q-pt-md qcard">
+    <q-card class="q-pa-lg q-pt-md qcard"
+      >lnurlPaySecond
       <div v-if="!invoiceData.bolt11">
         <div class="row items-center no-wrap q-mb-sm">
           <div class="col-12">
@@ -92,7 +93,7 @@ export default defineComponent({
     ...mapWritableState(useUiStore, ["showInvoiceDetails", "tickerShort"]),
   },
   methods: {
-    ...mapActions(useWalletStore, ["requestMint"]),
+    ...mapActions(useWalletStore, ["requestMint", "lnurlPaySecond"]),
     requestMintButton: async function () {
       await this.requestMint();
       console.log("#### request mint", this.invoiceData);
