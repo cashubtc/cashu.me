@@ -83,7 +83,7 @@ export const useWalletStore = defineStore("wallet", {
         rs,
       };
     },
-    promiseToProof: function (id, amount, C_hex, secret, r, mint_pubkeys) {
+    promiseToProof: function (id: string, amount: number, C_hex: string, r: string, mint_pubkeys: string[]) {
       const C_ = nobleSecp256k1.Point.fromHex(C_hex);
       const A = mint_pubkeys[amount];
       const C = step3Alice(
@@ -95,26 +95,24 @@ export const useWalletStore = defineStore("wallet", {
         id,
         amount,
         C: C.toHex(true),
-        secret,
       };
     },
-    constructProofs: function (promises, secrets, rs, mint_pubkeys) {
+    constructProofs: function (promises: [], secrets: string[], rs: string[], mint_pubkeys: string[]) {
       const proofs = [];
       for (let i = 0; i < promises.length; i++) {
         const encodedSecret = uint8ToBase64.encode(secrets[i]);
-        let { id, amount, C, secret } = this.promiseToProof(
+        let { id, amount, C } = this.promiseToProof(
           promises[i].id,
           promises[i].amount,
           promises[i]["C_"],
-          encodedSecret,
           rs[i],
           mint_pubkeys
         );
-        proofs.push({ id, amount, C, secret });
+        proofs.push({ id, amount, C, secret: encodedSecret });
       }
       return proofs;
     },
-    generateSecrets: async function (amounts) {
+    generateSecrets: async function (amounts: number[]) {
       let secrets = [];
       for (let i = 0; i < amounts.length; i++) {
         const secret = nobleSecp256k1.utils.randomBytes(32);
@@ -162,7 +160,7 @@ export const useWalletStore = defineStore("wallet", {
      * @param {number} amount
      * @returns
      */
-    splitToSend: async function (proofs, amount, invlalidate = false) {
+    splitToSend: async function (proofs: [], amount: number, invlalidate: boolean = false) {
       /*
       splits proofs so the user can keep firstProofs, send scndProofs.
       then sets scndProofs as reserved.
@@ -380,7 +378,7 @@ export const useWalletStore = defineStore("wallet", {
 
     // /mint
 
-    mintApi: async function (amounts, payment_hash, verbose = true) {
+    mintApi: async function (amounts: number[], hash: string, verbose: boolean = true) {
       /*
                 asks the mint to check whether the invoice with payment_hash has been paid
                 and requests signing of the attached outputs.
@@ -388,10 +386,10 @@ export const useWalletStore = defineStore("wallet", {
       const proofsStore = useProofsStore();
       const mintStore = useMintsStore();
       try {
-        let secrets = await this.generateSecrets(amounts);
-        let { outputs, rs } = await this.constructOutputs(amounts, secrets);
+        const secrets = await this.generateSecrets(amounts);
+        const { outputs, rs } = await this.constructOutputs(amounts, secrets);
         const keys = mintStore.keys; // fix keys for constructProofs
-        const data = await mintStore.activeMint.mint({ outputs }, payment_hash);
+        const data = await mintStore.activeMint.mint({ outputs }, hash);
         mintStore.assertMintError(data, false);
         if (data.promises == null) {
           return {};
@@ -413,14 +411,14 @@ export const useWalletStore = defineStore("wallet", {
         throw error;
       }
     },
-    mint: async function (amount, payment_hash, verbose = true) {
+    mint: async function (amount: number, hash: string, verbose: boolean = true) {
       const proofsStore = useProofsStore();
       const mintStore = useMintsStore();
       const tokenStore = useTokensStore();
 
       try {
         const split = splitAmount(amount);
-        const proofs = await this.mintApi(split, payment_hash, verbose);
+        const proofs = await this.mintApi(split, hash, verbose);
         if (!proofs.length) {
           throw "could not mint";
         }
@@ -430,7 +428,7 @@ export const useWalletStore = defineStore("wallet", {
         // this.storeProofs();
 
         // update UI
-        await this.setInvoicePaid(payment_hash);
+        await this.setInvoicePaid(hash);
         tokenStore.addPaidToken({
           amount,
           serializedProofs: proofsStore.serializeProofs(proofs),
@@ -678,7 +676,7 @@ export const useWalletStore = defineStore("wallet", {
         i += 1;
       }
     },
-    checkPendingTokens: async function (verbose: boolean = false) {
+    checkPendingTokens: async function (verbose: boolean = true) {
       const tokenStore = useTokensStore();
       const last_n = 10;
       let i = 0;

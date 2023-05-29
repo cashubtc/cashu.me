@@ -4,6 +4,7 @@
     @hide="closeParseDialog"
     position="top"
     v-if="!camera.show"
+    persistent
   >
     <q-card class="q-pa-lg q-pt-xl qcard">
       <div v-if="payInvoiceData.invoice">
