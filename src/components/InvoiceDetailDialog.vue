@@ -1,5 +1,5 @@
 <template>
-  <q-dialog v-model="showInvoiceDetails" position="top">
+  <q-dialog v-model="showInvoiceDetails" persistent position="top">
     <q-card class="q-pa-lg q-pt-md qcard"
       >lnurlPaySecond
       <div v-if="!invoiceData.bolt11">
@@ -57,10 +57,17 @@
           v-else
           color="primary"
           @click="requestMintButton"
-          :disable="!(invoiceData.amount > 0)"
-        >
-          Create Invoice</q-btn
-        >
+          :disable="!(invoiceData.amount > 0) || createInvoiceButtonBlocked"
+          :label="
+            createInvoiceButtonBlocked
+              ? 'Creating invoice...'
+              : 'Create Invoice'
+          "
+          ><q-spinner-tail
+            v-if="createInvoiceButtonBlocked"
+            color="white"
+            size="1em"
+        /></q-btn>
         <q-btn v-close-popup flat color="grey" class="q-ml-auto">Close</q-btn>
       </div>
     </q-card>
@@ -86,7 +93,9 @@ export default defineComponent({
     invoiceCheckWorker: Function,
   },
   data: function () {
-    return {};
+    return {
+      createInvoiceButtonBlocked: false,
+    };
   },
   computed: {
     ...mapState(useWalletStore, ["invoiceData"]),
@@ -95,9 +104,15 @@ export default defineComponent({
   methods: {
     ...mapActions(useWalletStore, ["requestMint", "lnurlPaySecond"]),
     requestMintButton: async function () {
-      await this.requestMint();
-      console.log("#### request mint", this.invoiceData);
-      await this.invoiceCheckWorker();
+      try {
+        this.createInvoiceButtonBlocked = true;
+        await this.requestMint();
+        await this.invoiceCheckWorker();
+      } catch (e) {
+        console.log("#### requestMintButton", e);
+      } finally {
+        this.createInvoiceButtonBlocked = false;
+      }
     },
   },
 });

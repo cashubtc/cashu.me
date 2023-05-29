@@ -23,6 +23,16 @@
               Active mint:
               <b>{{ formatSat(getBalance) }} {{ tickerShort }} </b>
             </span>
+            <!-- <q-knob
+              :model-value="getBalance"
+              :min="0"
+              :max="getTotalBalance"
+              show-value
+              size="50px"
+              :thickness="0.2"
+              color="orange"
+              class="q-ma-none q-pa-none q-mt-none q-pt-none"
+            /> -->
           </div>
         </div>
         <!-- mint url -->
@@ -65,8 +75,8 @@
 <script>
 import { defineComponent, ref } from "vue";
 import { getShortUrl } from "src/js/wallet-helpers";
-import {mapState} from "pinia";
-import {useMintsStore} from "stores/mints";
+import { mapState } from "pinia";
+import { useMintsStore } from "stores/mints";
 export default defineComponent({
   name: "BalanceView",
   mixins: [windowMixin],
@@ -78,10 +88,10 @@ export default defineComponent({
   },
   computed: {
     ...mapState(useMintsStore, [
-      'activeMintUrl',
-      'activeProofs',
-      'mints',
-      'proofs',
+      "activeMintUrl",
+      "activeProofs",
+      "mints",
+      "proofs",
     ]),
     balance: function () {
       return this.activeProofs

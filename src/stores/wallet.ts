@@ -659,7 +659,7 @@ export const useWalletStore = defineStore("wallet", {
     },
     ////////////// UI HELPERS //////////////
 
-    checkPendingInvoices: async function () {
+    checkPendingInvoices: async function (verbose: boolean = true) {
       const last_n = 10;
       let i = 0;
       for (const invoice of this.invoiceHistory.slice().reverse()) {
@@ -669,7 +669,7 @@ export const useWalletStore = defineStore("wallet", {
         if (invoice.status === "pending" && invoice.amount > 0) {
           console.log("### checkPendingInvoices", invoice.hash)
           try {
-            await this.checkInvoice(invoice.hash, true);
+            await this.checkInvoice(invoice.hash, verbose);
           } catch (error) {
             console.log(`${invoice.hash} still pending`);
             throw error;
@@ -678,8 +678,7 @@ export const useWalletStore = defineStore("wallet", {
         i += 1;
       }
     },
-
-    checkPendingTokens: async function () {
+    checkPendingTokens: async function (verbose: boolean = false) {
       const tokenStore = useTokensStore();
       const last_n = 10;
       let i = 0;
@@ -690,7 +689,7 @@ export const useWalletStore = defineStore("wallet", {
         }
         if (token.status === "pending" && token.amount < 0) {
           console.log("### checkPendingTokens", token.token)
-          this.checkTokenSpendable(token.token, false);
+          this.checkTokenSpendable(token.token, verbose);
         }
         i += 1;
       }

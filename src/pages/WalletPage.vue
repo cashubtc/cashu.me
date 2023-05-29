@@ -557,6 +557,7 @@ export default {
       "checkInvoice",
       "checkPendingInvoices",
       "checkPendingTokens",
+      "decodeRequest",
     ]),
     ...mapActions(useCameraStore, ["closeCamera", "showCamera", "hasCamera"]),
     // TOKEN METHODS
@@ -936,10 +937,10 @@ export default {
     await this.checkProofsSpendable(this.activeProofs, true).catch((err) => {
       return;
     });
-    await this.checkPendingInvoices().catch((err) => {
+    await this.checkPendingInvoices(false).catch((err) => {
       return;
     });
-    await this.checkPendingTokens().catch((err) => {
+    await this.checkPendingTokens(false).catch((err) => {
       return;
     });
 
