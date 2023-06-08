@@ -163,6 +163,10 @@ export const useMintsStore = defineStore("mints", {
       }
     },
     removeMint: async function (url: string) {
+      // Ask for confirmation before removing the mint
+      if (!confirm("Are you sure you want to remove this mint?")) {
+        return; // Abort the removal if the user cancels
+      }
       this.mints = this.mints.filter((m) => m.url !== url);
       if (url === this.activeMintUrl) {
         this.activeMintUrl = "";
