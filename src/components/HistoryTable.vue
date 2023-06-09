@@ -60,7 +60,10 @@
             {{
               props.row.token.slice(0, 8) +
               "..." +
-              props.row.token.slice(100, 110) +
+              props.row.token.slice(
+                props.row.token.length / 2,
+                props.row.token.length / 2 + 10
+              ) +
               "..." +
               props.row.token.slice(-8)
             }}
