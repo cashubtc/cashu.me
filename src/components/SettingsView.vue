@@ -59,7 +59,7 @@
           <q-item-section side>
             <q-icon
               name="close"
-              @click="setShowRemoveMintDialog(true)"
+              @click="removeMint(mint.url)"
               class="cursor-pointer"
             />
           </q-item-section>
@@ -196,24 +196,6 @@
       </div>
     </q-card>
   </q-dialog>
-  <q-dialog
-    v-model="showRemoveMintDialog"
-  >
-    <q-card class="q-pa-lg">
-      <h6 class="q-my-md text-primary">Are you sure you want to delete this mint?</h6>
-      <div class="row q-mt-lg">
-        <q-btn
-          outline
-          v-close-popup
-          color="primary"
-          icon="remove"
-          @click="removeMint(mintToAdd, (verbose = true))"
-          >Remove mint</q-btn
-        >
-        <q-btn v-close-popup flat color="grey" class="q-ml-auto">Cancel</q-btn>
-      </div>
-    </q-card>
-  </q-dialog>
 </template>
 <script>
 import { defineComponent } from "vue";
@@ -248,7 +230,7 @@ export default defineComponent({
   },
   computed: {
     ...mapState(useMintsStore, ["activeMintUrl", "mints"]),
-    ...mapWritableState(useMintsStore, ["mintToAdd", "showAddMintDialog", "showRemoveMintDialog"]),
+    ...mapWritableState(useMintsStore, ["mintToAdd", "showAddMintDialog"]),
   },
   watch: {
     showMintDialog: function () {
@@ -266,7 +248,6 @@ export default defineComponent({
       "removeMint",
       "activateMint",
       "setShowAddMintDialog",
-      "setShowRemoveMintDialog"
     ]),
     swapDataOptions: function () {
       let options = [];
