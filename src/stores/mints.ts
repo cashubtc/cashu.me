@@ -22,6 +22,7 @@ export const useMintsStore = defineStore("mints", {
       mints: useLocalStorage("cashu.mints", [] as Mint[]),
       proofs: useLocalStorage("cashu.proofs", [] as Proof[]),
       showAddMintDialog: false,
+      showRemoveMintDialog: false,
     };
   },
   getters: {
@@ -32,6 +33,9 @@ export const useMintsStore = defineStore("mints", {
   actions: {
     setShowAddMintDialog(show: boolean) {
       this.showAddMintDialog = show;
+    },
+    setShowRemoveMintDialog(show: boolean) {
+      this.showRemoveMintDialog = show;
     },
     setMintToAdd(mint: string) {
       this.mintToAdd = mint;
