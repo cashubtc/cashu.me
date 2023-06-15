@@ -5,6 +5,7 @@
       <BalanceView
         v-else
         :ticker-short="tickerShort"
+        :ticker-dollars="tickerDollars"
         :pending-balance="pendingBalance"
         :check-pending-tokens="checkPendingTokens"
         :set-tab="setTab"
@@ -826,6 +827,7 @@ export default {
     return {
       tickerShort: "sats",
       ticketLong: "Satoshis",
+      tickerDollars: "USD",
       name: "",
       mintId: "",
       mintName: "",
