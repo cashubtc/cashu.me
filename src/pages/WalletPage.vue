@@ -764,6 +764,8 @@
 <script>
 import { ref } from "vue";
 import { axios } from "boot/axios";
+import { Buffer } from "buffer";
+import * as bech32 from "bech32";
 import { date } from "quasar";
 import { splitAmount, bigIntStringify } from "src/js/utils";
 import * as nobleSecp256k1 from "@noble/secp256k1";
@@ -1205,24 +1207,14 @@ export default {
       }
     },
     lnurlPayFirst: async function (address) {
-      var host;
+      let host;
       if (address.split("@").length == 2) {
         let [user, lnaddresshost] = address.split("@");
         host = `https://${lnaddresshost}/.well-known/lnurlp/${user}`;
       } else if (address.toLowerCase().slice(0, 6) === "lnurl1") {
-        let host = Buffer.from(
+        host = Buffer.from(
           bech32.fromWords(bech32.decode(address, 20000).words)
         ).toString();
-        var { data } = await axios.get(host);
-        // const { data } = await LNbits.api.request(
-        //   "POST",
-        //   "/api/v1/payments/decode",
-        //   "",
-        //   {
-        //     data: address,
-        //   }
-        // );
-        host = data.domain;
       }
       var { data } = await axios.get(host);
       if (data.tag == "payRequest") {
