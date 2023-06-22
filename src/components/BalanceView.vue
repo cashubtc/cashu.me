@@ -45,23 +45,20 @@
       <!-- pending -->
       <div class="row q-mt-xs q-mb-none" v-if="pendingBalance > 0">
         <div class="col-12">
-          <q-icon
+          <q-btn
             name="history"
-            size="1.5rem"
-            color="grey"
-            class="q-mr-none q-mb-xs cursor-pointer"
+            size="sm"
+            align="between"
+            color="white"
+            dense
+            outline
+            icon="refresh"
+            class="q-mx-none q-mt-xs q-px-sm cursor-pointer"
             @click="checkPendingTokens()"
           >
-            <q-tooltip>Refresh pending</q-tooltip>
-          </q-icon>
-
-          <span
-            class="text-weight-light cursor-pointer"
-            @click="setTab('history')"
-          >
             Pending: {{ formatSat(pendingBalance) }} {{ tickerShort }}
-            <q-tooltip>Show history</q-tooltip>
-          </span>
+            <q-tooltip>Check all pending tokens</q-tooltip>
+          </q-btn>
         </div>
       </div>
     </q-card-section>
