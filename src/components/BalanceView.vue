@@ -47,17 +47,17 @@
         <div class="col-12">
           <q-btn
             name="history"
-            size="0.8rem"
-            color="grey"
-            unelevated
+            size="sm"
+            align="between"
+            color="white"
             dense
             outline
             icon="refresh"
-            class="q-mr-none q-mb-xs cursor-pointer"
+            class="q-mx-none q-mt-xs q-px-sm cursor-pointer"
             @click="checkPendingTokens()"
           >
             Pending: {{ formatSat(pendingBalance) }} {{ tickerShort }}
-            <q-tooltip>Refresh pending tokens</q-tooltip>
+            <q-tooltip>Check all pending tokens</q-tooltip>
           </q-btn>
         </div>
       </div>

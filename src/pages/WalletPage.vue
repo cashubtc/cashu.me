@@ -1913,7 +1913,7 @@ export default {
         }
         i += 1;
       }
-      this.notifyRefreshed("Refreshed");
+      this.notifyRefreshed("Outgoing tokens checked");
     },
 
     checkTokenSpendable: async function (token, verbose = true) {
