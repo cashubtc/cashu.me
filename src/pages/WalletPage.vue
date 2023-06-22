@@ -2264,12 +2264,12 @@ export default {
     await this.checkProofsSpendable(this.activeProofs, true).catch((err) => {
       return;
     });
-    await this.checkPendingInvoices().catch((err) => {
-      return;
-    });
-    await this.checkPendingTokens().catch((err) => {
-      return;
-    });
+    // await this.checkPendingInvoices().catch((err) => {
+    //   return;
+    // });
+    // await this.checkPendingTokens().catch((err) => {
+    //   return;
+    // });
 
     // reset to the mint from settings after workers have run
     if (startupMintUrl.length > 0) {
