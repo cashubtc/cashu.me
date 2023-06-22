@@ -443,6 +443,19 @@
               >
             </div>
           </q-form>
+          <!-- <div v-else>
+            <q-responsive :ratio="1">
+              <qrcode-stream
+                @decode="decodeQR"
+                class="rounded-borders"
+              ></qrcode-stream>
+            </q-responsive>
+            <div class="row q-mt-lg">
+              <q-btn @click="closeCamera" flat color="grey" class="q-ml-auto">
+                Cancel
+              </q-btn>
+            </div>
+          </div> -->
         </div>
       </q-card>
     </q-dialog>
@@ -452,7 +465,10 @@
     <q-dialog v-model="camera.show">
       <q-card class="q-pa-lg q-pt-xl">
         <div class="text-center q-mb-lg">
-          <QrcodeReader @decode="decodeQR" />
+          <qrcode-stream
+            @decode="decodeQR"
+            class="rounded-borders"
+          ></qrcode-stream>
         </div>
         <div class="row q-mt-lg">
           <q-btn @click="closeCamera" flat color="grey" class="q-ml-auto"
@@ -783,7 +799,6 @@ import NoMintWarnBanner from "components/NoMintWarnBanner.vue";
 import ChooseMint from "components/ChooseMint.vue";
 import TokenInformation from "components/TokenInformation.vue";
 import WelcomeDialog from "components/WelcomeDialog.vue";
-import QrcodeReader from "components/QrcodeReader.vue";
 
 import { mapActions, mapState, mapWritableState } from "pinia";
 import { useMintsStore } from "src/stores/mints";
@@ -807,7 +822,6 @@ export default {
     ChooseMint,
     TokenInformation,
     WelcomeDialog,
-    QrcodeReader,
   },
   data: function () {
     return {
