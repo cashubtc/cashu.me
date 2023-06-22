@@ -805,6 +805,7 @@ import { useMintsStore } from "src/stores/mints";
 import { useWorkersStore } from "src/stores/workers";
 import { useTokensStore } from "src/stores/tokens";
 import { useWalletStore } from "src/stores/wallet";
+import { notifyApiError, notifyError, notifySuccess } from "src/js/notify";
 
 var currentDateStr = function () {
   return date.formatDate(new Date(), "YYYY-MM-DD HH:mm:ss");
@@ -1480,7 +1481,7 @@ export default {
         console.error(error);
         if (verbose) {
           try {
-            this.notifyApiError(error);
+            notifyApiError(error);
           } catch {}
         }
         throw error;
@@ -1510,7 +1511,7 @@ export default {
         console.error(error);
         if (verbose) {
           try {
-            this.notifyApiError(error);
+            notifyApiError(error);
           } catch {}
         }
         throw error;
@@ -1536,11 +1537,6 @@ export default {
         return { firstProofs, scndProofs };
       } catch (error) {
         console.error(error);
-        try {
-          try {
-            this.notifyApiError(error);
-          } catch {}
-        } catch {}
         throw error;
       }
     },
@@ -1593,9 +1589,6 @@ export default {
       } catch (error) {
         this.payInvoiceData.blocking = false;
         console.error(error);
-        try {
-          this.notifyApiError(error);
-        } catch {}
         throw error;
       }
     },
@@ -1645,7 +1638,7 @@ export default {
       } catch (error) {
         console.error(error);
         try {
-          this.notifyApiError(error);
+          notifyApiError(error);
         } catch {}
         throw error;
       }
@@ -1704,11 +1697,11 @@ export default {
         });
 
         if (window.navigator.vibrate) navigator.vibrate(200);
-        this.notifySuccess("Tokens received.");
+        notifySuccess("Tokens received.");
       } catch (error) {
         console.error(error);
         try {
-          this.notifyApiError(error);
+          notifyApiError(error);
         } catch {}
         throw error;
       }
@@ -1784,7 +1777,7 @@ export default {
           throw new Error("Invoice not paid.");
         }
         if (window.navigator.vibrate) navigator.vibrate(200);
-        this.notifySuccess("Token paid.");
+        notifySuccess("Token paid.");
         console.log("#### pay lightning: token paid");
         // delete spent tokens from db
         this.deleteProofs(scndProofs);
@@ -1868,7 +1861,7 @@ export default {
       } catch (error) {
         console.error(error);
         try {
-          this.notifyApiError(error);
+          notifyApiError(error);
         } catch {}
         throw error;
       }
@@ -1887,7 +1880,7 @@ export default {
       } catch (error) {
         console.error(error);
         try {
-          this.notifyApiError(error);
+          notifyApiError(error);
         } catch {}
         throw error;
       }
@@ -1965,7 +1958,7 @@ export default {
       }
       if (paid) {
         if (window.navigator.vibrate) navigator.vibrate(200);
-        this.notifySuccess("Token paid.");
+        notifySuccess("Token paid.");
       } else {
         console.log("### token not paid yet");
         if (verbose) {
@@ -2024,7 +2017,7 @@ export default {
           this.invoiceData.bolt11 = "";
           this.showInvoiceDetails = false;
           if (window.navigator.vibrate) navigator.vibrate(200);
-          this.notifySuccess("Payment received", "top");
+          notifySuccess("Payment received", "top");
         } catch (error) {
           console.log("invoiceCheckWorker: not paid yet");
         }

@@ -1,15 +1,16 @@
 import { Notify, QNotifyCreateOptions } from "quasar";
 import axios, { AxiosError } from "axios";
+import { PassThrough } from "stream";
 
 type ApiError =
   | AxiosError
   | {
-      response: {
-        status: number;
-        statusText: string;
-        data: { message?: string; detail?: string };
-      };
+    response: {
+      status: number;
+      statusText: string;
+      data: { message?: string; detail?: string };
     };
+  };
 
 type StatusMap = { [x: number]: "warning" | "negative" };
 const errorTypes = {
@@ -19,9 +20,12 @@ const errorTypes = {
 } as StatusMap;
 
 function notifyApiError(error: ApiError) {
-  if (axios.isAxiosError(error)) {
+  // if (axios.isAxiosError(error)) {
+  try {
     notifyAxiosError(error);
     return;
+  } catch (e) {
+    // skip
   }
   Notify.create({
     timeout: 5000,
@@ -29,7 +33,7 @@ function notifyApiError(error: ApiError) {
     message: error.response.data.message ?? error.response.data.detail,
     caption: [error.response.status, " ", error.response.statusText]
       .join("")
-      .toUpperCase(),
+      .toUpperCase() ?? null,
   });
 }
 
@@ -41,8 +45,8 @@ function notifyAxiosError(error: AxiosError) {
   Notify.create({
     timeout: 5000,
     type: errorTypes[error.status!] || "warning",
-    message: error.message,
-    caption: error.code,
+    message: error.message || "Unknown error",
+    caption: error.code || "Error",
   });
 }
 
@@ -60,7 +64,7 @@ async function notifySuccess(
       {
         icon: "close",
         color: "white",
-        handler: () => {},
+        handler: () => { },
       },
     ],
   });
@@ -77,7 +81,7 @@ async function notifyError(message: string, caption?: string) {
       {
         icon: "close",
         color: "white",
-        handler: () => {},
+        handler: () => { },
       },
     ],
   });
@@ -99,7 +103,7 @@ async function notifyWarning(
       {
         icon: "close",
         color: "black",
-        handler: () => {},
+        handler: () => { },
       },
     ],
   });
@@ -117,7 +121,7 @@ async function notify(message: string) {
       {
         icon: "close",
         color: "white",
-        handler: () => {},
+        handler: () => { },
       },
     ],
   });

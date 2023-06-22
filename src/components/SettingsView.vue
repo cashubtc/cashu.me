@@ -59,7 +59,7 @@
           <q-item-section side>
             <q-icon
               name="close"
-              @click="setShowRemoveMintDialog(true)"
+              @click="showRemoveMintDialogWrapper(mint.url)"
               class="cursor-pointer"
             />
           </q-item-section>
@@ -196,17 +196,17 @@
       </div>
     </q-card>
   </q-dialog>
-  <q-dialog
-    v-model="showRemoveMintDialog"
-  >
+  <q-dialog v-model="showRemoveMintDialog">
     <q-card class="q-pa-lg">
-      <h6 class="q-my-md text-primary">Are you sure you want to delete this mint?</h6>
+      <h6 class="q-my-md text-primary">
+        Are you sure you want to delete this mint?
+      </h6>
       <div class="row q-mt-lg">
         <q-btn
           outline
           v-close-popup
           color="primary"
-          @click="removeMint(mintToAdd, (verbose = true))"
+          @click="removeMint(mintToRemove, (verbose = true))"
           >Remove mint</q-btn
         >
         <q-btn v-close-popup flat color="grey" class="q-ml-auto">Cancel</q-btn>
@@ -247,7 +247,12 @@ export default defineComponent({
   },
   computed: {
     ...mapState(useMintsStore, ["activeMintUrl", "mints"]),
-    ...mapWritableState(useMintsStore, ["mintToAdd", "showAddMintDialog", "showRemoveMintDialog"]),
+    ...mapWritableState(useMintsStore, [
+      "mintToAdd",
+      "mintToRemove",
+      "showAddMintDialog",
+      "showRemoveMintDialog",
+    ]),
   },
   watch: {
     showMintDialog: function () {
@@ -264,8 +269,9 @@ export default defineComponent({
       "addMint",
       "removeMint",
       "activateMint",
+      "setMintToRemove",
       "setShowAddMintDialog",
-      "setShowRemoveMintDialog"
+      "setShowRemoveMintDialog",
     ]),
     swapDataOptions: function () {
       let options = [];
@@ -274,9 +280,10 @@ export default defineComponent({
       }
       return options;
     },
-    /*showAddMintDialog: function () {
-      this.addMintDialog.show = true;
-    },*/
+    showRemoveMintDialogWrapper: function (mint) {
+      this.setMintToRemove(mint);
+      this.setShowRemoveMintDialog(true);
+    },
     //
     mintSwap: async function (from_url, to_url, amount) {
       // get invoice
