@@ -19,6 +19,7 @@ export const useMintsStore = defineStore("mints", {
       keys: useLocalStorage("cashu.keys", {} as MintKeys),
       keysets: useLocalStorage("cashu.keysets", [] as string[]),
       mintToAdd: "https://8333.space:3338",
+      mintToRemove: "",
       mints: useLocalStorage("cashu.mints", [] as Mint[]),
       proofs: useLocalStorage("cashu.proofs", [] as Proof[]),
       showAddMintDialog: false,
@@ -39,6 +40,9 @@ export const useMintsStore = defineStore("mints", {
     },
     setMintToAdd(mint: string) {
       this.mintToAdd = mint;
+    },
+    setMintToRemove(mint: string) {
+      this.mintToRemove = mint;
     },
     setProofs(proofs: Proof[]) {
       this.proofs = proofs;
