@@ -206,7 +206,6 @@
           outline
           v-close-popup
           color="primary"
-          icon="remove"
           @click="removeMint(mintToAdd, (verbose = true))"
           >Remove mint</q-btn
         >
