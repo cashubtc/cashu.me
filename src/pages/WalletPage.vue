@@ -450,8 +450,8 @@
     <!-- QR CODE SCANNER  -->
 
     <q-dialog v-model="camera.show">
-      <q-card class="q-pa-lg q-pt-xl">
-        <div class="text-center q-mb-lg">
+      <q-card>
+        <div class="text-center">
           <QrcodeReader @decode="decodeQR" />
         </div>
         <div class="row q-mt-lg">
