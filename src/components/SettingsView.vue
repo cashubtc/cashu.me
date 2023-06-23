@@ -164,6 +164,32 @@
       </q-item>
     </q-list>
   </div>
+  <div class="q-py-sm q-px-xs text-left" on-left>
+    <q-list padding>
+      <q-item>
+        <q-item-section>
+          <q-item-label overline>Advanced</q-item-label>
+          <q-item-label caption
+            >The following settings are for development and
+            debugging.</q-item-label
+          >
+        </q-item-section>
+      </q-item>
+      <q-item>
+        <q-btn
+          dense
+          flat
+          outline
+          color="primary"
+          click
+          @click="enable_terminal"
+        >
+          Open debug terminal
+        </q-btn>
+      </q-item>
+    </q-list>
+  </div>
+
   <q-dialog
     v-model="showAddMintDialog"
     @keydown.enter.prevent="addMint(mintToAdd, (verbose = true))"
@@ -299,6 +325,15 @@ export default defineComponent({
       await this.activateMint(to_url);
       await this.invoiceCheckWorker();
       this.notifySuccess("Swap successful!");
+    },
+    enable_terminal: function () {
+      // enable debug terminal
+      var script = document.createElement("script");
+      script.src = "//cdn.jsdelivr.net/npm/eruda";
+      document.body.appendChild(script);
+      script.onload = function () {
+        eruda.init();
+      };
     },
   },
   created: function () {},
