@@ -12,7 +12,12 @@ export default {
       (result: QrScanner.ScanResult) => {
         this.handleResult(result);
       },
-      { returnDetailedScanResult: true, onDecodeError: () => {} }
+      {
+        returnDetailedScanResult: true,
+        highlightScanRegion: true,
+        highlightCodeOutline: true,
+        onDecodeError: () => {},
+      }
     );
     this.qrScanner.start();
   },
@@ -29,7 +34,18 @@ export default {
 </script>
 
 <template>
+  <!-- <q-dialog v-model="camera.show">
+    <q-card>
+      <div class="text-center"> -->
   <div>
-    <video ref="cameraEl" style="width: 400px; height: 400px"></video>
+    <video ref="cameraEl" style="width: 100%"></video>
   </div>
+  <!-- </div>
+      <div class="row q-mt-lg">
+        <q-btn @click="closeCamera" flat color="grey" class="q-ml-auto"
+          >Cancel</q-btn
+        >
+      </div>
+    </q-card>
+  </q-dialog> -->
 </template>
