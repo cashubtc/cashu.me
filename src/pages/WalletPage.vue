@@ -1435,9 +1435,9 @@ export default {
 
     mintApi: async function (amounts, payment_hash, verbose = true) {
       /*
-                asks the mint to check whether the invoice with payment_hash has been paid
-                and requests signing of the attached outputs.
-                */
+      asks the mint to check whether the invoice with payment_hash has been paid
+      and requests signing of the attached outputs.
+      */
 
       try {
         let secrets = await this.generateSecrets(amounts);
