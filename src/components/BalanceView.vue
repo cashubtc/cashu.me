@@ -8,6 +8,24 @@
               <strong> {{ formatSat(getTotalBalance) }} </strong>
               {{ tickerShort }}
             </h3>
+            <div v-if="bitcoinPrice">
+              <strong>
+                {{
+                  formatCurrency(
+                    (bitcoinPrice / 100000000) * getTotalBalance,
+                    "USD"
+                  ).slice(1)
+                }}
+              </strong>
+              {{ tickerDollar }}
+              <q-tooltip>
+                {{
+                  formatCurrency(bitcoinPrice, "USD").slice(1) +
+                  " " +
+                  tickerDollar
+                }}/BTC</q-tooltip
+              >
+            </div>
           </div>
         </div>
         <!-- mint balance -->
@@ -69,11 +87,21 @@ import { defineComponent, ref } from "vue";
 import { getShortUrl } from "src/js/wallet-helpers";
 import { mapState } from "pinia";
 import { useMintsStore } from "stores/mints";
+import axios from "axios";
+
+async function fetchBitcoinPrice() {
+  var { data } = await axios.get(
+    "https://api.coinbase.com/v2/exchange-rates?currency=BTC"
+  );
+  return data.data.rates.USD;
+}
+
 export default defineComponent({
   name: "BalanceView",
   mixins: [windowMixin],
   props: {
     tickerShort: String,
+    tickerDollar: String,
     pendingBalance: Number,
     checkPendingTokens: Function,
     setTab: Function,
@@ -109,6 +137,18 @@ export default defineComponent({
       return balance;
     },
   },
-  methods: {},
+  data() {
+    return {
+      bitcoinPrice: null,
+    };
+  },
+  mounted() {
+    this.fetchBitcoinPrice();
+  },
+  methods: {
+    async fetchBitcoinPrice() {
+      this.bitcoinPrice = await fetchBitcoinPrice();
+    },
+  },
 });
 </script>
