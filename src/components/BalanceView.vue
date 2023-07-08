@@ -17,13 +17,13 @@
                   ).slice(1)
                 }}
               </strong>
-              {{ tickerDollars }}
+              {{ tickerDollar }}
               <q-tooltip>
                 @
                 {{
                   formatCurrency(bitcoinPrice, "USD").slice(1) +
                   " " +
-                  tickerDollars
+                  tickerDollar
                 }}/BTC</q-tooltip
               >
             </div>
@@ -102,17 +102,13 @@ export default defineComponent({
   mixins: [windowMixin],
   props: {
     tickerShort: String,
-    tickerDollars: String,
+    tickerDollar: String,
     pendingBalance: Number,
     checkPendingTokens: Function,
     setTab: Function,
   },
   computed: {
     ...mapState(useMintsStore, [
-      "activeMintUrl",
-      "activeProofs",
-      "mints",
-      "proofs",
       "activeMintUrl",
       "activeProofs",
       "mints",
