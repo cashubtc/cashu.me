@@ -8,17 +8,25 @@
               <strong> {{ formatSat(getTotalBalance) }} </strong>
               {{ tickerShort }}
             </h3>
-            <strong>
-              {{
-                formatCurrency(
-                  (bitcoinPrice / 100000000) * formatSat(getTotalBalance),
-                  "USD"
-                )
-              }}
-            </strong>
-            {{ tickerDollars }}
-            @
-            {{ formatCurrency(bitcoinPrice, "USD") + " " + tickerDollars }}/BTC
+            <div>
+              <strong>
+                {{
+                  formatCurrency(
+                    (bitcoinPrice / 100000000) * formatSat(getTotalBalance),
+                    "USD"
+                  ).slice(1)
+                }}
+              </strong>
+              {{ tickerDollars }}
+              <q-tooltip>
+                @
+                {{
+                  formatCurrency(bitcoinPrice, "USD").slice(1) +
+                  " " +
+                  tickerDollars
+                }}/BTC</q-tooltip
+              >
+            </div>
           </div>
         </div>
         <!-- mint balance -->
