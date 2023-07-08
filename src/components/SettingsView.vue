@@ -59,7 +59,7 @@
           <q-item-section side>
             <q-icon
               name="close"
-              @click="setShowRemoveMintDialog(true)"
+              @click="showRemoveMintDialogWrapper(mint.url)"
               class="cursor-pointer"
             />
           </q-item-section>
@@ -164,6 +164,32 @@
       </q-item>
     </q-list>
   </div>
+  <div class="q-py-sm q-px-xs text-left" on-left>
+    <q-list padding>
+      <q-item>
+        <q-item-section>
+          <q-item-label overline>Advanced</q-item-label>
+          <q-item-label caption
+            >The following settings are for development and
+            debugging.</q-item-label
+          >
+        </q-item-section>
+      </q-item>
+      <q-item>
+        <q-btn
+          dense
+          flat
+          outline
+          color="primary"
+          click
+          @click="enable_terminal"
+        >
+          Open debug terminal
+        </q-btn>
+      </q-item>
+    </q-list>
+  </div>
+
   <q-dialog
     v-model="showAddMintDialog"
     @keydown.enter.prevent="addMint(mintToAdd, (verbose = true))"
@@ -196,17 +222,17 @@
       </div>
     </q-card>
   </q-dialog>
-  <q-dialog
-    v-model="showRemoveMintDialog"
-  >
+  <q-dialog v-model="showRemoveMintDialog">
     <q-card class="q-pa-lg">
-      <h6 class="q-my-md text-primary">Are you sure you want to delete this mint?</h6>
+      <h6 class="q-my-md text-primary">
+        Are you sure you want to delete this mint?
+      </h6>
       <div class="row q-mt-lg">
         <q-btn
           outline
           v-close-popup
           color="primary"
-          @click="removeMint(mintToAdd, (verbose = true))"
+          @click="removeMint(mintToRemove, (verbose = true))"
           >Remove mint</q-btn
         >
         <q-btn v-close-popup flat color="grey" class="q-ml-auto">Cancel</q-btn>
@@ -247,7 +273,12 @@ export default defineComponent({
   },
   computed: {
     ...mapState(useMintsStore, ["activeMintUrl", "mints"]),
-    ...mapWritableState(useMintsStore, ["mintToAdd", "showAddMintDialog", "showRemoveMintDialog"]),
+    ...mapWritableState(useMintsStore, [
+      "mintToAdd",
+      "mintToRemove",
+      "showAddMintDialog",
+      "showRemoveMintDialog",
+    ]),
   },
   watch: {
     showMintDialog: function () {
@@ -264,8 +295,9 @@ export default defineComponent({
       "addMint",
       "removeMint",
       "activateMint",
+      "setMintToRemove",
       "setShowAddMintDialog",
-      "setShowRemoveMintDialog"
+      "setShowRemoveMintDialog",
     ]),
     swapDataOptions: function () {
       let options = [];
@@ -274,9 +306,10 @@ export default defineComponent({
       }
       return options;
     },
-    /*showAddMintDialog: function () {
-      this.addMintDialog.show = true;
-    },*/
+    showRemoveMintDialogWrapper: function (mint) {
+      this.setMintToRemove(mint);
+      this.setShowRemoveMintDialog(true);
+    },
     //
     mintSwap: async function (from_url, to_url, amount) {
       // get invoice
@@ -292,6 +325,15 @@ export default defineComponent({
       await this.activateMint(to_url);
       await this.invoiceCheckWorker();
       this.notifySuccess("Swap successful!");
+    },
+    enable_terminal: function () {
+      // enable debug terminal
+      var script = document.createElement("script");
+      script.src = "//cdn.jsdelivr.net/npm/eruda";
+      document.body.appendChild(script);
+      script.onload = function () {
+        eruda.init();
+      };
     },
   },
   created: function () {},

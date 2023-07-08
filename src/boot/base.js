@@ -82,6 +82,20 @@ window.windowMixin = {
         ],
       });
     },
+    notifyRefreshed: async function (message, position = "top") {
+      this.$q.notify({
+        timeout: 500,
+        type: "positive",
+        message: message,
+        position: position,
+        actions: [
+          {
+            color: "white",
+            handler: () => {},
+          },
+        ],
+      });
+    },
     notifyError: async function (message, caption = null) {
       this.$q.notify({
         color: "red",

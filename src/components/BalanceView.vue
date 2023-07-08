@@ -48,6 +48,7 @@
             />
             <span class="text-weight-light" @click="setTab('settings')">
               Mint: <b>{{ getActiveMintUrlShort }}</b>
+              <q-tooltip>Configure mint(s)</q-tooltip>
             </span>
           </div>
         </div>
@@ -55,19 +56,20 @@
       <!-- pending -->
       <div class="row q-mt-xs q-mb-none" v-if="pendingBalance > 0">
         <div class="col-12">
-          <q-icon
+          <q-btn
             name="history"
-            size="1rem"
-            color="grey"
-            class="q-mr-none q-mb-xs cursor-pointer"
+            size="sm"
+            align="between"
+            color="white"
+            dense
+            outline
+            icon="refresh"
+            class="q-mx-none q-mt-xs q-px-sm cursor-pointer"
             @click="checkPendingTokens()"
-          />
-          <span
-            class="text-weight-light cursor-pointer"
-            @click="setTab('history')"
           >
             Pending: {{ formatSat(pendingBalance) }} {{ tickerShort }}
-          </span>
+            <q-tooltip>Check all pending tokens</q-tooltip>
+          </q-btn>
         </div>
       </div>
     </q-card-section>
@@ -99,6 +101,10 @@ export default defineComponent({
   },
   computed: {
     ...mapState(useMintsStore, [
+      "activeMintUrl",
+      "activeProofs",
+      "mints",
+      "proofs",
       "activeMintUrl",
       "activeProofs",
       "mints",

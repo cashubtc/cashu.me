@@ -444,19 +444,6 @@
               >
             </div>
           </q-form>
-          <!-- <div v-else>
-            <q-responsive :ratio="1">
-              <qrcode-stream
-                @decode="decodeQR"
-                class="rounded-borders"
-              ></qrcode-stream>
-            </q-responsive>
-            <div class="row q-mt-lg">
-              <q-btn @click="closeCamera" flat color="grey" class="q-ml-auto">
-                Cancel
-              </q-btn>
-            </div>
-          </div> -->
         </div>
       </q-card>
     </q-dialog>
@@ -464,12 +451,9 @@
     <!-- QR CODE SCANNER  -->
 
     <q-dialog v-model="camera.show">
-      <q-card class="q-pa-lg q-pt-xl">
-        <div class="text-center q-mb-lg">
-          <qrcode-stream
-            @decode="decodeQR"
-            class="rounded-borders"
-          ></qrcode-stream>
+      <q-card>
+        <div class="text-center">
+          <QrcodeReader @decode="decodeQR" />
         </div>
         <div class="row q-mt-lg">
           <q-btn @click="closeCamera" flat color="grey" class="q-ml-auto"
@@ -781,6 +765,8 @@
 <script>
 import { ref } from "vue";
 import { axios } from "boot/axios";
+import { Buffer } from "buffer";
+import * as bech32 from "bech32";
 import { date } from "quasar";
 import { splitAmount, bigIntStringify } from "src/js/utils";
 import * as nobleSecp256k1 from "@noble/secp256k1";
@@ -800,12 +786,14 @@ import NoMintWarnBanner from "components/NoMintWarnBanner.vue";
 import ChooseMint from "components/ChooseMint.vue";
 import TokenInformation from "components/TokenInformation.vue";
 import WelcomeDialog from "components/WelcomeDialog.vue";
+import QrcodeReader from "components/QrcodeReader.vue";
 
 import { mapActions, mapState, mapWritableState } from "pinia";
 import { useMintsStore } from "src/stores/mints";
 import { useWorkersStore } from "src/stores/workers";
 import { useTokensStore } from "src/stores/tokens";
 import { useWalletStore } from "src/stores/wallet";
+import { notifyApiError, notifyError, notifySuccess } from "src/js/notify";
 
 var currentDateStr = function () {
   return date.formatDate(new Date(), "YYYY-MM-DD HH:mm:ss");
@@ -822,6 +810,7 @@ export default {
     ChooseMint,
     TokenInformation,
     WelcomeDialog,
+    QrcodeReader,
   },
   data: function () {
     return {
@@ -1220,24 +1209,14 @@ export default {
       }
     },
     lnurlPayFirst: async function (address) {
-      var host;
+      let host;
       if (address.split("@").length == 2) {
         let [user, lnaddresshost] = address.split("@");
         host = `https://${lnaddresshost}/.well-known/lnurlp/${user}`;
       } else if (address.toLowerCase().slice(0, 6) === "lnurl1") {
-        let host = Buffer.from(
+        host = Buffer.from(
           bech32.fromWords(bech32.decode(address, 20000).words)
         ).toString();
-        var { data } = await axios.get(host);
-        // const { data } = await LNbits.api.request(
-        //   "POST",
-        //   "/api/v1/payments/decode",
-        //   "",
-        //   {
-        //     data: address,
-        //   }
-        // );
-        host = data.domain;
       }
       var { data } = await axios.get(host);
       if (data.tag == "payRequest") {
@@ -1458,9 +1437,9 @@ export default {
 
     mintApi: async function (amounts, payment_hash, verbose = true) {
       /*
-                asks the mint to check whether the invoice with payment_hash has been paid
-                and requests signing of the attached outputs.
-                */
+      asks the mint to check whether the invoice with payment_hash has been paid
+      and requests signing of the attached outputs.
+      */
 
       try {
         let secrets = await this.generateSecrets(amounts);
@@ -1482,7 +1461,7 @@ export default {
         console.error(error);
         if (verbose) {
           try {
-            this.notifyApiError(error);
+            notifyApiError(error);
           } catch {}
         }
         throw error;
@@ -1512,7 +1491,7 @@ export default {
         console.error(error);
         if (verbose) {
           try {
-            this.notifyApiError(error);
+            notifyApiError(error);
           } catch {}
         }
         throw error;
@@ -1538,11 +1517,6 @@ export default {
         return { firstProofs, scndProofs };
       } catch (error) {
         console.error(error);
-        try {
-          try {
-            this.notifyApiError(error);
-          } catch {}
-        } catch {}
         throw error;
       }
     },
@@ -1595,9 +1569,6 @@ export default {
       } catch (error) {
         this.payInvoiceData.blocking = false;
         console.error(error);
-        try {
-          this.notifyApiError(error);
-        } catch {}
         throw error;
       }
     },
@@ -1647,7 +1618,7 @@ export default {
       } catch (error) {
         console.error(error);
         try {
-          this.notifyApiError(error);
+          notifyApiError(error);
         } catch {}
         throw error;
       }
@@ -1706,11 +1677,11 @@ export default {
         });
 
         if (window.navigator.vibrate) navigator.vibrate(200);
-        this.notifySuccess("Tokens received.");
+        notifySuccess("Tokens received.");
       } catch (error) {
         console.error(error);
         try {
-          this.notifyApiError(error);
+          notifyApiError(error);
         } catch {}
         throw error;
       }
@@ -1786,7 +1757,7 @@ export default {
           throw new Error("Invoice not paid.");
         }
         if (window.navigator.vibrate) navigator.vibrate(200);
-        this.notifySuccess("Token paid.");
+        notifySuccess("Token paid.");
         console.log("#### pay lightning: token paid");
         // delete spent tokens from db
         this.deleteProofs(scndProofs);
@@ -1870,7 +1841,7 @@ export default {
       } catch (error) {
         console.error(error);
         try {
-          this.notifyApiError(error);
+          notifyApiError(error);
         } catch {}
         throw error;
       }
@@ -1889,7 +1860,7 @@ export default {
       } catch (error) {
         console.error(error);
         try {
-          this.notifyApiError(error);
+          notifyApiError(error);
         } catch {}
         throw error;
       }
@@ -1933,7 +1904,7 @@ export default {
     },
 
     checkPendingTokens: async function () {
-      const last_n = 10;
+      const last_n = this.historyTokens.length;
       let i = 0;
       for (const token of this.historyTokens) {
         if (i >= last_n) {
@@ -1944,6 +1915,7 @@ export default {
         }
         i += 1;
       }
+      this.notifyRefreshed("Outgoing tokens checked");
     },
 
     checkTokenSpendable: async function (token, verbose = true) {
@@ -1967,7 +1939,7 @@ export default {
       }
       if (paid) {
         if (window.navigator.vibrate) navigator.vibrate(200);
-        this.notifySuccess("Token paid.");
+        notifySuccess("Token paid.");
       } else {
         console.log("### token not paid yet");
         if (verbose) {
@@ -2026,7 +1998,7 @@ export default {
           this.invoiceData.bolt11 = "";
           this.showInvoiceDetails = false;
           if (window.navigator.vibrate) navigator.vibrate(200);
-          this.notifySuccess("Payment received", "top");
+          notifySuccess("Payment received", "top");
         } catch (error) {
           console.log("invoiceCheckWorker: not paid yet");
         }
@@ -2287,12 +2259,12 @@ export default {
     await this.checkProofsSpendable(this.activeProofs, true).catch((err) => {
       return;
     });
-    await this.checkPendingInvoices().catch((err) => {
-      return;
-    });
-    await this.checkPendingTokens().catch((err) => {
-      return;
-    });
+    // await this.checkPendingInvoices().catch((err) => {
+    //   return;
+    // });
+    // await this.checkPendingTokens().catch((err) => {
+    //   return;
+    // });
 
     // reset to the mint from settings after workers have run
     if (startupMintUrl.length > 0) {
