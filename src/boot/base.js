@@ -55,7 +55,10 @@ window.windowMixin = {
         timeout: 5000,
         type: types[error.response.status] || "warning",
         message:
-          error.response.data.message || error.response.data.detail || null,
+          error.message ||
+          error.response.data.message ||
+          error.response.data.detail ||
+          null,
         caption:
           [error.response.status, " ", error.response.statusText]
             .join("")

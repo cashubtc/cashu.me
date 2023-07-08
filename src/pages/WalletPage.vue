@@ -943,7 +943,7 @@ export default {
       "proofs",
       "activeMint",
     ]),
-    ...mapState(useWalletStore, [
+    ...mapWritableState(useWalletStore, [
       "invoiceHistory",
       "invoiceData",
       "payInvoiceData",
@@ -953,7 +953,7 @@ export default {
       "invoiceCheckListener",
       "tokensCheckSpendableListener",
     ]),
-    ...mapState(useTokensStore, ["historyTokens"]),
+    ...mapWritableState(useTokensStore, ["historyTokens"]),
     ...mapWritableState(useTokensStore, [""]),
     canPay: function () {
       if (!this.payInvoiceData.invoice) return false;

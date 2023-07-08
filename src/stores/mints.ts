@@ -22,6 +22,7 @@ export const useMintsStore = defineStore("mints", {
       mints: useLocalStorage("cashu.mints", [] as Mint[]),
       proofs: useLocalStorage("cashu.proofs", [] as Proof[]),
       showAddMintDialog: false,
+      showRemoveMintDialog: false,
     };
   },
   getters: {
@@ -32,6 +33,9 @@ export const useMintsStore = defineStore("mints", {
   actions: {
     setShowAddMintDialog(show: boolean) {
       this.showAddMintDialog = show;
+    },
+    setShowRemoveMintDialog(show: boolean) {
+      this.showRemoveMintDialog = show;
     },
     setMintToAdd(mint: string) {
       this.mintToAdd = mint;
@@ -143,7 +147,7 @@ export const useMintsStore = defineStore("mints", {
         console.error(error);
         try {
           notifyApiError(error);
-        } catch {}
+        } catch { }
         throw error;
       }
     },
@@ -158,15 +162,11 @@ export const useMintsStore = defineStore("mints", {
         console.error(error);
         try {
           notifyApiError(error);
-        } catch {}
+        } catch { }
         throw error;
       }
     },
     removeMint: async function (url: string) {
-      // Ask for confirmation before removing the mint
-      if (!confirm("Are you sure you want to remove this mint?")) {
-        return; // Abort the removal if the user cancels
-      }
       this.mints = this.mints.filter((m) => m.url !== url);
       if (url === this.activeMintUrl) {
         this.activeMintUrl = "";
