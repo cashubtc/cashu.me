@@ -12,7 +12,7 @@
               <strong>
                 {{
                   formatCurrency(
-                    (bitcoinPrice / 100000000) * formatSat(getTotalBalance),
+                    (bitcoinPrice / 100000000) * getTotalBalance,
                     "USD"
                   ).slice(1)
                 }}
