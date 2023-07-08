@@ -19,7 +19,6 @@
               </strong>
               {{ tickerDollar }}
               <q-tooltip>
-                @
                 {{
                   formatCurrency(bitcoinPrice, "USD").slice(1) +
                   " " +
