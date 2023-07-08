@@ -8,7 +8,7 @@
               <strong> {{ formatSat(getTotalBalance) }} </strong>
               {{ tickerShort }}
             </h3>
-            <div>
+            <div v-if="bitcoinPrice">
               <strong>
                 {{
                   formatCurrency(
