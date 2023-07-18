@@ -711,7 +711,7 @@
           class="row"
           v-if="
             receiveData.tokensBase64.length &&
-            decodeToken(receiveData.tokensBase64) != ''
+            decodeToken(receiveData.tokensBase64) != null
           "
         >
           <div class="col-12">
@@ -995,7 +995,12 @@ export default {
     ...mapActions(useWalletStore, ["requestMint", "setInvoicePaid"]),
     // TOKEN METHODS
     decodeToken: function (encoded_token) {
-      return token.decode(encoded_token);
+      try {
+        return token.decode(encoded_token);
+      } catch (e) {
+        console.log(e);
+        return null;
+      }
     },
     getProofs: function (decoded_token) {
       return token.getProofs(decoded_token);
