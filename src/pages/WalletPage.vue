@@ -998,7 +998,6 @@ export default {
       try {
         return token.decode(encoded_token);
       } catch (e) {
-        console.log(e);
         return null;
       }
     },
