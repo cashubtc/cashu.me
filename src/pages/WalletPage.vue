@@ -915,7 +915,7 @@ export default {
       },
       addMintDialog: {
         show: false,
-        mintToAdd: "",
+        mintToAdd: "".replace(/\s+/g, ""),
       },
       baseHost: location.protocol + "//" + location.host,
       baseURL: location.protocol + "//" + location.host + location.pathname,
