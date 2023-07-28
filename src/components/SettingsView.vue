@@ -215,7 +215,7 @@
           v-close-popup
           color="primary"
           icon="check"
-          @click="addMint(mintToAdd, (verbose = true))"
+          @click="addMint(mintToAdd.replace(/\s+/g, ''), (verbose = true))"
           >Add mint</q-btn
         >
         <q-btn v-close-popup flat color="grey" class="q-ml-auto">Cancel</q-btn>
