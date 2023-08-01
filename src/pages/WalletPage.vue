@@ -415,12 +415,12 @@
             class="q-gutter-md"
           >
             <q-input
-              ref="pasteInput"
               filled
               dense
               v-model.trim="payInvoiceData.data.request"
               type="textarea"
               label="Enter a Lightning invoice, an LNURL, or a Lightning address"
+              ref="parseDialogInput"
             >
             </q-input>
             <div class="row q-mt-lg">
@@ -430,6 +430,13 @@
                 :disable="payInvoiceData.data.request == ''"
                 type="submit"
                 >Enter</q-btn
+              >
+              <q-btn
+                unelevated
+                icon="content_paste"
+                class="q-mx-0"
+                @click="pasteToParseDialog"
+                ><q-tooltip>Paste</q-tooltip></q-btn
               >
               <q-btn
                 unelevated
@@ -705,6 +712,7 @@
             type="textarea"
             autofocus
             class="q-mb-lg"
+            ref="receiveInput"
           ></q-input>
         </div>
         <div
@@ -731,8 +739,13 @@
           >
           <q-btn
             unelevated
+            icon="content_paste"
+            @click="pasteToReceiveEcashDialog"
+            ><q-tooltip>Paste</q-tooltip></q-btn
+          >
+          <q-btn
+            unelevated
             icon="photo_camera"
-            class="q-mx-0"
             v-if="hasCamera"
             @click="showCamera"
           ></q-btn>
@@ -1048,6 +1061,16 @@ export default {
     focusInput(el) {
       this.$nextTick(() => this.$refs[el].focus());
     },
+    pasteToParseDialog: function () {
+      navigator.clipboard.readText().then((text) => {
+        this.$refs.parseDialogInput.value = text;
+      });
+    },
+    pasteToReceiveEcashDialog: function () {
+      navigator.clipboard.readText().then((text) => {
+        this.$refs.receiveInput.value = text;
+      });
+    },
     showReceiveDialog: function () {
       this.receive.show = true;
       this.receive.status = "pending";
@@ -1071,7 +1094,7 @@ export default {
       this.payInvoiceData.data.comment = "";
       this.payInvoiceData.data.paymentChecker = null;
       this.camera.show = false;
-      this.focusInput("pasteInput");
+      this.focusInput("parseDialogInput");
     },
     showWelcomeDialog: function () {
       if (localStorage.getItem("cashu.welcomeDialogSeen") != "seen") {
