@@ -1686,8 +1686,10 @@ export default {
         console.error(error);
         try {
           notifyApiError(error);
-        } catch {}
-        throw error;
+        } catch (e) {
+          console.error(e);
+        }
+        // throw error;
       }
       // }
     },
