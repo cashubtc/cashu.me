@@ -20,21 +20,26 @@ const errorTypes = {
 } as StatusMap;
 
 function notifyApiError(error: ApiError) {
-  // if (axios.isAxiosError(error)) {
   try {
-    notifyAxiosError(error);
+    if (axios.isAxiosError(error)) {
+      notifyAxiosError(error);
+    }
     return;
   } catch (e) {
     // skip
   }
-  Notify.create({
-    timeout: 5000,
-    type: errorTypes[error.response.status] ?? "warning",
-    message: error.response.data.message ?? error.response.data.detail,
-    caption: [error.response.status, " ", error.response.statusText]
-      .join("")
-      .toUpperCase() ?? null,
-  });
+  try {
+    Notify.create({
+      timeout: 5000,
+      type: errorTypes[error.response.status] ?? "warning",
+      message: error.response.data.message ?? error.response.data.detail,
+      caption: [error.response.status, " ", error.response.statusText]
+        .join("")
+        .toUpperCase() ?? null,
+    });
+  } catch (e) {
+    // skip
+  }
 }
 
 /**

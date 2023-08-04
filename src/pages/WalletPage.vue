@@ -1487,9 +1487,7 @@ export default {
       } catch (error) {
         console.error(error);
         if (verbose) {
-          try {
-            notifyApiError(error);
-          } catch {}
+          notifyApiError(error);
         }
         throw error;
       }
@@ -1517,9 +1515,7 @@ export default {
       } catch (error) {
         console.error(error);
         if (verbose) {
-          try {
-            notifyApiError(error);
-          } catch {}
+          notifyApiError(error);
         }
         throw error;
       }
@@ -1644,9 +1640,7 @@ export default {
         return { firstProofs, scndProofs };
       } catch (error) {
         console.error(error);
-        try {
-          notifyApiError(error);
-        } catch {}
+        notifyApiError(error);
         throw error;
       }
     },
@@ -1707,10 +1701,7 @@ export default {
         notifySuccess("Tokens received.");
       } catch (error) {
         console.error(error);
-        try {
-          notifyApiError(error);
-        } catch {}
-        throw error;
+        notifyApiError(error);
       }
       // }
     },
@@ -1867,9 +1858,7 @@ export default {
         return data.spendable;
       } catch (error) {
         console.error(error);
-        try {
-          notifyApiError(error);
-        } catch {}
+        notifyApiError(error);
         throw error;
       }
     },
@@ -1886,9 +1875,7 @@ export default {
         return data.fee;
       } catch (error) {
         console.error(error);
-        try {
-          notifyApiError(error);
-        } catch {}
+        notifyApiError(error);
         throw error;
       }
     },
