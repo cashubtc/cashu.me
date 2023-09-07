@@ -9,6 +9,7 @@
 // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js
 
 const { configure } = require("quasar/wrappers");
+var path = require("path");
 
 module.exports = configure(function (/* ctx */) {
   return {
@@ -200,6 +201,20 @@ module.exports = configure(function (/* ctx */) {
 
       // extendBexScriptsConf (esbuildConf) {}
       // extendBexManifestJson (json) {}
+    },
+
+    // from: https://quasar.dev/quasar-cli-webpack/quasar-config-file#property-devserver
+    devServer: {
+      server: {
+        type: "https", // NECESSARY (alternative is type 'http')
+
+        options: {
+          // Use ABSOLUTE paths or path.join(__dirname, 'root/relative/path')
+          key: path.join(__dirname, "localhost+2-key.pem"),
+          cert: path.join(__dirname, "localhost+2.pem"),
+        },
+      },
+      vueDevtools: true,
     },
   };
 });

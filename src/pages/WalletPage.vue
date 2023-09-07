@@ -433,6 +433,7 @@
               >
               <q-btn
                 unelevated
+                v-if="canPasteFromClipboard"
                 icon="content_paste"
                 class="q-mx-0"
                 @click="pasteToParseDialog"
@@ -739,6 +740,7 @@
           >
           <q-btn
             unelevated
+            v-if="canPasteFromClipboard"
             icon="content_paste"
             @click="pasteToReceiveEcashDialog"
             ><q-tooltip>Paste</q-tooltip></q-btn
@@ -1060,6 +1062,13 @@ export default {
     },
     focusInput(el) {
       this.$nextTick(() => this.$refs[el].focus());
+    },
+    canPasteFromClipboard: function () {
+      return (
+        window.isSecureContext &&
+        navigator.clipboard &&
+        navigator.clipboard.readText
+      );
     },
     pasteToParseDialog: function () {
       navigator.clipboard.readText().then((text) => {
