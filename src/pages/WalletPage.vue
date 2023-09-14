@@ -1540,7 +1540,6 @@ export default {
         }
         let { outputs, rs } = await this.constructOutputs(amounts, secrets);
         const payload = {
-          amount,
           proofs,
           outputs,
         };
@@ -1548,23 +1547,14 @@ export default {
         const data = await this.activeMint.split(payload);
 
         this.assertMintError(data);
-        const frst_rs = rs.slice(0, frst_amounts.length);
-        const frst_secrets = secrets.slice(0, frst_amounts.length);
-        const scnd_rs = rs.slice(frst_amounts.length);
-        const scnd_secrets = secrets.slice(frst_amounts.length);
-        const firstProofs = this.constructProofs(
-          data.fst,
-          frst_secrets,
-          frst_rs,
+        const constructedProofs = this.constructProofs(
+          data.promises,
+          secrets,
+          rs,
           keys
         );
-        const scndProofs = this.constructProofs(
-          data.snd,
-          scnd_secrets,
-          scnd_rs,
-          keys
-        );
-
+        const firstProofs = constructedProofs.slice(0, frst_amounts.length);
+        const scndProofs = constructedProofs.slice(frst_amounts.length);
         return { firstProofs, scndProofs };
       } catch (error) {
         this.payInvoiceData.blocking = false;
