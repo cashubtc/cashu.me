@@ -963,12 +963,6 @@ export default {
         .filter((t) => t.status == "pending")
         .reduce((sum, el) => (sum += el.amount), 0);
     },
-    // getTotalBalance: function () {
-    //   return this.proofs
-    //     .map((t) => t)
-    //     .flat()
-    //     .reduce((sum, el) => (sum += el.amount), 0);
-    // },
   },
   filters: {
     msatoshiFormat: function (value) {
@@ -985,6 +979,7 @@ export default {
       "setMintToAdd",
       "setProofs",
       "setShowAddMintDialog",
+      "getKeysForKeyset",
     ]),
     ...mapActions(useWorkersStore, ["clearAllWorkers"]),
     ...mapActions(useTokensStore, [
@@ -1336,9 +1331,10 @@ export default {
       };
     },
 
-    constructProofs: function (promises, secrets, rs, mint_pubkeys) {
+    constructProofs: function (promises, secrets, rs) {
       const proofs = [];
       for (let i = 0; i < promises.length; i++) {
+        const mint_pubkeys = this.getKeysForKeyset(promises[i].id);
         const encodedSecret = uint8ToBase64.encode(secrets[i]);
         let { id, amount, C, secret } = this.promiseToProof(
           promises[i].id,
@@ -1382,11 +1378,6 @@ export default {
       // this.storeProofs();
       return this.proofs;
     },
-    // getAllMintKeysets: function () {
-    //   return this.mints.filter((m) =>
-    //     m.keysets.some((r) => uniqueIds.indexOf(r) >= 0)
-    //   );
-    // },
     serializeProofs: function (proofs) {
       // unique keyset IDs of proofs
       let uniqueIds = [...new Set(proofs.map((p) => p.id))];
@@ -1448,18 +1439,12 @@ export default {
       try {
         let secrets = await this.generateSecrets(amounts);
         let { outputs, rs } = await this.constructOutputs(amounts, secrets);
-        const keys = this.keys; // fix keys for constructProofs
         const data = await this.activeMint.mint({ outputs }, payment_hash);
         this.assertMintError(data, false);
         if (data.promises == null) {
           return {};
         }
-        let proofs = await this.constructProofs(
-          data.promises,
-          secrets,
-          rs,
-          keys
-        );
+        let proofs = await this.constructProofs(data.promises, secrets, rs);
         return proofs;
       } catch (error) {
         console.error(error);
@@ -1543,15 +1528,13 @@ export default {
           proofs,
           outputs,
         };
-        const keys = this.keys; // fix keys for constructProofs
         const data = await this.activeMint.split(payload);
 
         this.assertMintError(data);
         const constructedProofs = this.constructProofs(
           data.promises,
           secrets,
-          rs,
-          keys
+          rs
         );
         const firstProofs = constructedProofs.slice(0, frst_amounts.length);
         const scndProofs = constructedProofs.slice(frst_amounts.length);
@@ -1735,7 +1718,6 @@ export default {
           pr: this.payInvoiceData.data.request,
           outputs,
         };
-        const keys = this.keys; // fix keys for constructProofs
         const data = await this.activeMint.melt(payload);
         this.assertMintError(data);
         if (data.paid != true) {
@@ -1749,12 +1731,7 @@ export default {
 
         // NUT-08 get change
         if (data.change != null) {
-          const changeProofs = this.constructProofs(
-            data.change,
-            secrets,
-            rs,
-            keys
-          );
+          const changeProofs = this.constructProofs(data.change, secrets, rs);
           console.log("## Received change: " + this.sumProofs(changeProofs));
           amount_paid = amount_paid - this.sumProofs(changeProofs);
           this.setProofs(this.proofs.concat(changeProofs));
@@ -2122,24 +2099,8 @@ export default {
         }
       }
     },
-    mintKey: function (mintId, key) {
-      // returns a key for the local storage
-      // depending on the current mint
-      return "cashu." + mintId + "." + key;
-    },
   },
-  watch: {
-    // payments: function () {
-    //   this.getBalance()
-    // },
-    /*proofs: function () {
-      if (this.keysets) {
-        this.activeProofs = this.proofs.filter((p) =>
-          this.keysets.includes(p.id)
-        );
-      }
-    },*/
-  },
+  watch: {},
 
   mounted: function () {},
 
