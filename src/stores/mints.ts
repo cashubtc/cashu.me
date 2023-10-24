@@ -11,6 +11,12 @@ type Mint = {
   keysets?: string[];
 };
 
+type Keyset = {
+  id: string;
+  url: string;
+  keys: MintKeys
+};
+
 export const useMintsStore = defineStore("mints", {
   state: () => {
     return {
@@ -18,6 +24,7 @@ export const useMintsStore = defineStore("mints", {
       activeProofs: useLocalStorage("cashu.activeProofs", [] as Proof[]),
       keys: useLocalStorage("cashu.keys", {} as MintKeys),
       keysets: useLocalStorage("cashu.keysets", [] as string[]),
+      allKeysets: useLocalStorage("cashu.allKeysets", [] as Keyset[]),
       mintToAdd: "https://8333.space:3338",
       mintToRemove: "",
       mints: useLocalStorage("cashu.mints", [] as Mint[]),
@@ -55,6 +62,11 @@ export const useMintsStore = defineStore("mints", {
     setActiveProofs(proofs: Proof[]) {
       this.activeProofs = proofs;
     },
+    getKeysForKeyset: function (keyset_id: string) {
+      return this.allKeysets
+        .filter((m) => m.id == keyset_id)
+        .map((m) => m.keys)[0];
+    },
     addMint: async function (url: string, verbose = false) {
       try {
         // we have no mints at all
@@ -87,7 +99,6 @@ export const useMintsStore = defineStore("mints", {
       // temporarily store the objects that get overwritten if all goes well
       // so we can restore it if it doesn't go well
       let previousUrl = this.activeMintUrl;
-      let previousKeys = this.keys;
       let previousKeysets = this.keysets;
 
       try {
@@ -118,7 +129,6 @@ export const useMintsStore = defineStore("mints", {
       } catch (error: any) {
         // restore previous values because the activation errored
         this.activeMintUrl = previousUrl;
-        this.keys = previousKeys;
         this.keysets = previousKeysets;
 
         let err_msg = "Could not connect to mint.";
@@ -136,9 +146,26 @@ export const useMintsStore = defineStore("mints", {
         console.log("### GET", `${this.activeMintUrl}/keys`);
         const data = await this.activeMint.getKeys();
         const keys = data;
-        this.keys = keys;
 
         const keysets = await this.fetchMintKeysets();
+
+        // get keys from all keyset and store them in allKeysets local storage
+        for (let keyset of keysets) {
+          // skip if we already have the keyset
+          if (this.allKeysets.filter((m) => m.id == keyset).length) {
+            continue;
+          }
+          let keyset_keys = await this.activeMint.getKeys(keyset);
+          let keyset_struct: Keyset = {
+            id: keyset,
+            url: this.activeMintUrl,
+            keys: keyset_keys,
+          }
+          this.allKeysets.push(
+            keyset_struct
+          )
+        }
+
         // save keys to mints in local storage
         if (this.mints.filter((m) => m.url === this.activeMintUrl).length) {
           this.mints.filter((m) => m.url === this.activeMintUrl)[0].keys = keys;
