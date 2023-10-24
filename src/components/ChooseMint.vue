@@ -33,7 +33,7 @@
 <script>
 import { defineComponent, ref } from "vue";
 import { getShortUrl } from "src/js/wallet-helpers";
-import {mapActions, mapState} from "pinia";
+import { mapActions, mapState } from "pinia";
 import { useMintsStore } from "stores/mints";
 export default defineComponent({
   name: "ChooseMint",
@@ -47,7 +47,10 @@ export default defineComponent({
     };
   },
   mounted() {
-    this.chosenMint = { url: this.activeMintUrl, shorturl: getShortUrl(this.activeMintUrl) }
+    this.chosenMint = {
+      url: this.activeMintUrl,
+      shorturl: getShortUrl(this.activeMintUrl),
+    };
   },
   watch: {
     chosenMint: async function () {
@@ -57,10 +60,10 @@ export default defineComponent({
   },
   computed: {
     ...mapState(useMintsStore, [
-      'activeMintUrl',
-      'activeProofs',
-      'mints',
-      'proofs',
+      "activeMintUrl",
+      "activeProofs",
+      "mints",
+      "proofs",
     ]),
     balance: function () {
       return this.activeProofs
@@ -87,9 +90,7 @@ export default defineComponent({
     },
   },
   methods: {
-    ...mapActions(useMintsStore, [
-      'activateMint'
-    ]),
+    ...mapActions(useMintsStore, ["activateMint"]),
     chooseMintOptions: function () {
       let options = [];
       for (const [i, m] of Object.entries(this.mints)) {
