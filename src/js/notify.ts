@@ -1,16 +1,4 @@
 import { Notify, QNotifyCreateOptions } from "quasar";
-import axios, { AxiosError } from "axios";
-import { PassThrough } from "stream";
-
-type ApiError =
-  | AxiosError
-  | {
-    response: {
-      status: number;
-      statusText: string;
-      data: { message?: string; detail?: string };
-    };
-  };
 
 type StatusMap = { [x: number]: "warning" | "negative" };
 const errorTypes = {
@@ -19,40 +7,26 @@ const errorTypes = {
   500: "negative",
 } as StatusMap;
 
-function notifyApiError(error: ApiError) {
-  try {
-    if (axios.isAxiosError(error)) {
-      notifyAxiosError(error);
-    }
-    return;
-  } catch (e) {
-    // skip
-  }
+async function notifyApiError(error: Error, caption: string = "", position = "top" as QNotifyCreateOptions["position"]) {
   try {
     Notify.create({
       timeout: 5000,
-      type: errorTypes[error.response.status] ?? "warning",
-      message: error.response.data.message ?? error.response.data.detail,
-      caption: [error.response.status, " ", error.response.statusText]
-        .join("")
-        .toUpperCase() ?? null,
+      type: "warning",
+      position,
+      message: error.message,
+      caption: caption ?? null,
+      progress: true,
+      actions: [
+        {
+          icon: "close",
+          color: "white",
+          handler: () => { },
+        },
+      ],
     });
   } catch (e) {
     // skip
   }
-}
-
-/**
- * Cashu-TS will return axios errors when certain calls fail, so we should handle those
- * @param {AxiosError} error
- */
-function notifyAxiosError(error: AxiosError) {
-  Notify.create({
-    timeout: 5000,
-    type: errorTypes[error.status!] || "warning",
-    message: error.message || "Unknown error",
-    caption: error.code || "Error",
-  });
 }
 
 async function notifySuccess(

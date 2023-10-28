@@ -1430,7 +1430,7 @@ export default {
 
     // /mint
 
-    mintApi: async function (amounts, payment_hash, verbose = true) {
+    mintApi: async function (amounts, payment_hash) {
       /*
       asks the mint to check whether the invoice with payment_hash has been paid
       and requests signing of the attached outputs.
@@ -1448,9 +1448,6 @@ export default {
         return proofs;
       } catch (error) {
         console.error(error);
-        if (verbose) {
-          notifyApiError(error);
-        }
         throw error;
       }
     },
@@ -1477,7 +1474,7 @@ export default {
       } catch (error) {
         console.error(error);
         if (verbose) {
-          notifyApiError(error);
+          notifyApiError(error, "Could not mint");
         }
         throw error;
       }
@@ -1590,7 +1587,7 @@ export default {
         return { firstProofs, scndProofs };
       } catch (error) {
         console.error(error);
-        notifyApiError(error);
+        notifyApiError(error, "Could not send");
         throw error;
       }
     },
@@ -1651,7 +1648,7 @@ export default {
         notifySuccess("Tokens received.");
       } catch (error) {
         console.error(error);
-        notifyApiError(error);
+        notifyApiError(error, "Could not receive");
       }
       // }
     },
@@ -1802,7 +1799,7 @@ export default {
         return data.spendable;
       } catch (error) {
         console.error(error);
-        notifyApiError(error);
+        notifyApiError(erro, "Could not check tokens");
         throw error;
       }
     },
@@ -1819,7 +1816,7 @@ export default {
         return data.fee;
       } catch (error) {
         console.error(error);
-        notifyApiError(error);
+        notifyApiError(error, "Could not check fees");
         throw error;
       }
     },
