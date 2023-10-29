@@ -147,7 +147,11 @@ export default defineComponent({
   },
   methods: {
     async fetchBitcoinPrice() {
-      this.bitcoinPrice = await fetchBitcoinPrice();
+      try {
+        this.bitcoinPrice = await fetchBitcoinPrice();
+      } catch (e) {
+        console.warn("Could not get Bitcoin price.");
+      }
     },
   },
 });

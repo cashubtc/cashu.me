@@ -135,7 +135,7 @@ export const useMintsStore = defineStore("mints", {
         if (error.message.length) {
           err_msg = err_msg + ` ${error.message}.`;
         }
-        await notifyError(err_msg, "Mint activation");
+        await notifyError(err_msg, "Mint activation failed");
         throw error;
       }
     },
@@ -177,7 +177,7 @@ export const useMintsStore = defineStore("mints", {
       } catch (error: any) {
         console.error(error);
         try {
-          notifyApiError(error);
+          notifyApiError(error, "Could not get mint keys");
         } catch { }
         throw error;
       }
@@ -192,7 +192,7 @@ export const useMintsStore = defineStore("mints", {
       } catch (error: any) {
         console.error(error);
         try {
-          notifyApiError(error);
+          notifyApiError(error, "Could not get mint keysets");
         } catch { }
         throw error;
       }
