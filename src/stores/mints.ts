@@ -62,10 +62,23 @@ export const useMintsStore = defineStore("mints", {
     setActiveProofs(proofs: Proof[]) {
       this.activeProofs = proofs;
     },
-    getKeysForKeyset: function (keyset_id: string) {
-      return this.allKeysets
+    getKeysForKeyset: async function (keyset_id: string) {
+      let keys = this.allKeysets
         .filter((m) => m.id == keyset_id)
-        .map((m) => m.keys)[0];
+        .map((m) => m.keys)
+      if (keys.length) {
+        return keys[0];
+      } else {
+        await this.activateMint(this.activeMintUrl, false, true);
+        let keys = this.allKeysets
+          .filter((m) => m.id == keyset_id)
+          .map((m) => m.keys);
+        if (keys.length) {
+          return keys[0];
+        } else {
+          throw new Error("Could not get keys for keyset");
+        }
+      }
     },
     addMint: async function (url: string, verbose = false) {
       try {

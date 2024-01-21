@@ -1331,10 +1331,10 @@ export default {
       };
     },
 
-    constructProofs: function (promises, secrets, rs) {
+    constructProofs: async function (promises, secrets, rs) {
       const proofs = [];
       for (let i = 0; i < promises.length; i++) {
-        const mint_pubkeys = this.getKeysForKeyset(promises[i].id);
+        const mint_pubkeys = await this.getKeysForKeyset(promises[i].id);
         const encodedSecret = uint8ToBase64.encode(secrets[i]);
         let { id, amount, C, secret } = this.promiseToProof(
           promises[i].id,
@@ -1528,7 +1528,7 @@ export default {
         const data = await this.activeMint.split(payload);
 
         this.assertMintError(data);
-        const constructedProofs = this.constructProofs(
+        const constructedProofs = await this.constructProofs(
           data.promises,
           secrets,
           rs
@@ -1728,7 +1728,11 @@ export default {
 
         // NUT-08 get change
         if (data.change != null) {
-          const changeProofs = this.constructProofs(data.change, secrets, rs);
+          const changeProofs = await this.constructProofs(
+            data.change,
+            secrets,
+            rs
+          );
           console.log("## Received change: " + this.sumProofs(changeProofs));
           amount_paid = amount_paid - this.sumProofs(changeProofs);
           this.setProofs(this.proofs.concat(changeProofs));
