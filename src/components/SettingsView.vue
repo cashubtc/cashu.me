@@ -50,6 +50,9 @@
             >
           </q-item-section>
 
+          <!--add a button to update url of mint-->
+          <button @click="modifyMint(mint.url)">update mint url</button>
+
           <q-item-section side>
             <q-badge
               :color="mint.url == activeMintUrl ? 'primary' : 'grey'"
@@ -294,6 +297,7 @@ export default defineComponent({
     ...mapActions(useMintsStore, [
       "addMint",
       "removeMint",
+      "modifyMint",
       "activateMint",
       "setMintToRemove",
       "setShowAddMintDialog",
@@ -309,6 +313,11 @@ export default defineComponent({
     showRemoveMintDialogWrapper: function (mint) {
       this.setMintToRemove(mint);
       this.setShowRemoveMintDialog(true);
+    },
+    mintupdate: async function (update_url) {
+      // update mint url
+      console.log("update mint url " + update_url);
+      await modifyMint(update_url);
     },
     //
     mintSwap: async function (from_url, to_url, amount) {

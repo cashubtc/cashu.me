@@ -14,7 +14,7 @@ type Mint = {
 type Keyset = {
   id: string;
   url: string;
-  keys: MintKeys
+  keys: MintKeys;
 };
 
 export const useMintsStore = defineStore("mints", {
@@ -65,7 +65,7 @@ export const useMintsStore = defineStore("mints", {
     getKeysForKeyset: async function (keyset_id: string) {
       let keys = this.allKeysets
         .filter((m) => m.id == keyset_id)
-        .map((m) => m.keys)
+        .map((m) => m.keys);
       if (keys.length) {
         return keys[0];
       } else {
@@ -173,10 +173,8 @@ export const useMintsStore = defineStore("mints", {
             id: keyset,
             url: this.activeMintUrl,
             keys: keyset_keys,
-          }
-          this.allKeysets.push(
-            keyset_struct
-          )
+          };
+          this.allKeysets.push(keyset_struct);
         }
 
         // save keys to mints in local storage
@@ -191,7 +189,7 @@ export const useMintsStore = defineStore("mints", {
         console.error(error);
         try {
           notifyApiError(error, "Could not get mint keys");
-        } catch { }
+        } catch {}
         throw error;
       }
     },
@@ -206,7 +204,7 @@ export const useMintsStore = defineStore("mints", {
         console.error(error);
         try {
           notifyApiError(error, "Could not get mint keysets");
-        } catch { }
+        } catch {}
         throw error;
       }
     },
@@ -249,6 +247,23 @@ export const useMintsStore = defineStore("mints", {
 
         notifySuccess("Backup successfully restored!");
       }
+    },
+    modifyMint: async function (url: string) {
+      let mint = this.mints.filter((m) => m.url === url);
+      // print the mint url and balance
+
+      console.log("### modifyMint: mint url", url);
+      //if (mint.length > 0) {
+      //  mint[0].balance = balance;
+      //}
+
+      // print mint keysets
+      console.log("### modifyMint: mint keysets", mint[0].keysets[0]);
+      // print active proofs
+      console.log("### modifyMint: active proofs", this.activeProofs[0]);
+
+      // set the mints url to example.com
+      mint[0].url = "example.com";
     },
     assertMintError: function (response: { error: any }, verbose = true) {
       if (response.error != null) {
