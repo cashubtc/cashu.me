@@ -1,6 +1,4 @@
-import { uint8ToBase64 } from "./base64";
 import { bytesToNumber } from "./utils";
-// import * as nobleSecp256k1 from "./noble-secp256k1";
 import * as nobleSecp256k1 from "@noble/secp256k1";
 
 async function hashToCurve(secretMessage) {
@@ -19,7 +17,7 @@ async function hashToCurve(secretMessage) {
 }
 
 async function step1Alice(secretMessage) {
-  secretMessage = uint8ToBase64.encode(secretMessage);
+  secretMessage = nobleSecp256k1.utils.bytesToHex(secretMessage);
   secretMessage = new TextEncoder().encode(secretMessage);
   const Y = await hashToCurve(secretMessage);
   const r_bytes = nobleSecp256k1.utils.randomPrivateKey();

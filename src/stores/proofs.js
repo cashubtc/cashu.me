@@ -13,6 +13,7 @@ export const useProofsStore = defineStore("proofs", {
       mintStore.setProofs(
         mintStore.proofs.filter((p) => !usedSecrets.includes(p.secret))
       );
+      mintStore.setSpentProofs([...mintStore.spentProofs, ...proofs]);
       return mintStore.proofs;
     },
     serializeProofs: function (proofs) {

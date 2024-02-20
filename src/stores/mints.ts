@@ -29,6 +29,7 @@ export const useMintsStore = defineStore("mints", {
       mintToRemove: "",
       mints: useLocalStorage("cashu.mints", [] as Mint[]),
       proofs: useLocalStorage("cashu.proofs", [] as Proof[]),
+      spentProofs: useLocalStorage("cashu.spentProofs", [] as Proof[]),
       showAddMintDialog: false,
       showRemoveMintDialog: false,
     };
@@ -59,10 +60,13 @@ export const useMintsStore = defineStore("mints", {
         );
       }
     },
+    setSpentProofs(proofs: Proof[]) {
+      this.spentProofs = proofs;
+    },
     setActiveProofs(proofs: Proof[]) {
       this.activeProofs = proofs;
     },
-    getKeysForKeyset: async function (keyset_id: string) {
+    getKeysForKeyset: async function (keyset_id: string): Promise<MintKeys> {
       let keys = this.allKeysets
         .filter((m) => m.id == keyset_id)
         .map((m) => m.keys)
