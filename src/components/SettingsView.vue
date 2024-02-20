@@ -336,6 +336,7 @@ export default defineComponent({
       "addMint",
       "removeMint",
       "modifyMint",
+      "mintUpdate",
       "activateMint",
       "setMintToRemove",
       "setMintToUpdate",

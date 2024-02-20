@@ -258,22 +258,8 @@ export const useMintsStore = defineStore("mints", {
     },
     modifyMint: async function (oldurl: string, url: string) {
       // print oldurl and url
-      console.log("### modifyMint: oldurl", oldurl);
-      console.log("### modifyMint: url", url);
       let mint = this.mints.filter((m) => m.url === oldurl);
-      // print the mint url and balance
 
-      console.log("### modifyMint: mint url", url);
-      //if (mint.length > 0) {
-      //  mint[0].balance = balance;
-      //}
-
-      // print mint keysets
-      //console.log("### modifyMint: mint keysets", mint[0].keysets[0]);
-      // print active proofs
-      //console.log("### modifyMint: active proofs", this.activeProofs[0]);
-
-      // set the mints url to example.com
       mint[0].url = url;
     },
     assertMintError: function (response: { error: any }, verbose = true) {
