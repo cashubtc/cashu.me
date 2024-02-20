@@ -1,11 +1,11 @@
-import { defineStore } from 'pinia'
+import { defineStore } from "pinia";
 
-export const useWorkersStore = defineStore('workers', {
+export const useWorkersStore = defineStore("workers", {
   state: () => {
     return {
       invoiceCheckListener: () => {},
       tokensCheckSpendableListener: () => {},
-    }
+    };
   },
   getters: {},
   actions: {
@@ -16,6 +16,6 @@ export const useWorkersStore = defineStore('workers', {
       if (this.tokensCheckSpendableListener) {
         clearInterval(this.tokensCheckSpendableListener);
       }
-    }
-  }
-})
+    },
+  },
+});

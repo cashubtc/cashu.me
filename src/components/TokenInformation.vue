@@ -37,10 +37,10 @@ export default defineComponent({
   watch: {},
   computed: {
     ...mapState(useMintsStore, [
-      'activeMintUrl',
-      'activeProofs',
-      'mints',
-      'proofs',
+      "activeMintUrl",
+      "activeProofs",
+      "mints",
+      "proofs",
     ]),
     sumProofs: function () {
       return this.proofsToShow
