@@ -1,15 +1,4 @@
 import { Notify, QNotifyCreateOptions } from "quasar";
-import axios, { AxiosError } from "axios";
-
-type ApiError =
-  | AxiosError
-  | {
-      response: {
-        status: number;
-        statusText: string;
-        data: { message?: string; detail?: string };
-      };
-    };
 
 type StatusMap = { [x: number]: "warning" | "negative" };
 const errorTypes = {
@@ -18,32 +7,26 @@ const errorTypes = {
   500: "negative",
 } as StatusMap;
 
-function notifyApiError(error: ApiError) {
-  if (axios.isAxiosError(error)) {
-    notifyAxiosError(error);
-    return;
+async function notifyApiError(error: Error, caption: string = "", position = "top" as QNotifyCreateOptions["position"]) {
+  try {
+    Notify.create({
+      timeout: 5000,
+      type: "warning",
+      position,
+      message: error.message,
+      caption: caption ?? null,
+      progress: true,
+      actions: [
+        {
+          icon: "close",
+          color: "white",
+          handler: () => { },
+        },
+      ],
+    });
+  } catch (e) {
+    // skip
   }
-  Notify.create({
-    timeout: 5000,
-    type: errorTypes[error.response.status] ?? "warning",
-    message: error.response.data.message ?? error.response.data.detail,
-    caption: [error.response.status, " ", error.response.statusText]
-      .join("")
-      .toUpperCase(),
-  });
-}
-
-/**
- * Cashu-TS will return axios errors when certain calls fail, so we should handle those
- * @param {AxiosError} error
- */
-function notifyAxiosError(error: AxiosError) {
-  Notify.create({
-    timeout: 5000,
-    type: errorTypes[error.status!] || "warning",
-    message: error.message,
-    caption: error.code,
-  });
 }
 
 async function notifySuccess(
@@ -60,7 +43,7 @@ async function notifySuccess(
       {
         icon: "close",
         color: "white",
-        handler: () => {},
+        handler: () => { },
       },
     ],
   });
@@ -77,7 +60,7 @@ async function notifyError(message: string, caption?: string) {
       {
         icon: "close",
         color: "white",
-        handler: () => {},
+        handler: () => { },
       },
     ],
   });
@@ -99,7 +82,7 @@ async function notifyWarning(
       {
         icon: "close",
         color: "black",
-        handler: () => {},
+        handler: () => { },
       },
     ],
   });
@@ -117,7 +100,7 @@ async function notify(message: string) {
       {
         icon: "close",
         color: "white",
-        handler: () => {},
+        handler: () => { },
       },
     ],
   });

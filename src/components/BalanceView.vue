@@ -8,6 +8,24 @@
               <strong> {{ formatSat(getTotalBalance) }} </strong>
               {{ tickerShort }}
             </h3>
+            <div v-if="bitcoinPrice">
+              <strong>
+                {{
+                  formatCurrency(
+                    (bitcoinPrice / 100000000) * getTotalBalance,
+                    "USD"
+                  ).slice(1)
+                }}
+              </strong>
+              {{ tickerDollar }}
+              <q-tooltip>
+                {{
+                  formatCurrency(bitcoinPrice, "USD").slice(1) +
+                  " " +
+                  tickerDollar
+                }}/BTC</q-tooltip
+              >
+            </div>
           </div>
         </div>
         <!-- mint balance -->
@@ -47,6 +65,7 @@
             />
             <span class="text-weight-light" @click="setTab('settings')">
               Mint: <b>{{ getActiveMintUrlShort }}</b>
+              <q-tooltip>Configure mint(s)</q-tooltip>
             </span>
           </div>
         </div>
@@ -54,19 +73,20 @@
       <!-- pending -->
       <div class="row q-mt-xs q-mb-none" v-if="pendingBalance > 0">
         <div class="col-12">
-          <q-icon
+          <q-btn
             name="history"
-            size="1rem"
-            color="grey"
-            class="q-mr-none q-mb-xs cursor-pointer"
+            size="sm"
+            align="between"
+            color="white"
+            dense
+            outline
+            icon="refresh"
+            class="q-mx-none q-mt-xs q-px-sm cursor-pointer"
             @click="checkPendingTokens()"
-          />
-          <span
-            class="text-weight-light cursor-pointer"
-            @click="setTab('history')"
           >
             Pending: {{ formatSat(pendingBalance) }} {{ tickerShort }}
-          </span>
+            <q-tooltip>Check all pending tokens</q-tooltip>
+          </q-btn>
         </div>
       </div>
     </q-card-section>
@@ -77,11 +97,21 @@ import { defineComponent, ref } from "vue";
 import { getShortUrl } from "src/js/wallet-helpers";
 import { mapState } from "pinia";
 import { useMintsStore } from "stores/mints";
+import axios from "axios";
+
+async function fetchBitcoinPrice() {
+  var { data } = await axios.get(
+    "https://api.coinbase.com/v2/exchange-rates?currency=BTC"
+  );
+  return data.data.rates.USD;
+}
+
 export default defineComponent({
   name: "BalanceView",
   mixins: [windowMixin],
   props: {
     tickerShort: String,
+    tickerDollar: String,
     pendingBalance: Number,
     checkPendingTokens: Function,
     setTab: Function,
@@ -117,6 +147,22 @@ export default defineComponent({
       return balance;
     },
   },
-  methods: {},
+  data() {
+    return {
+      bitcoinPrice: null,
+    };
+  },
+  mounted() {
+    this.fetchBitcoinPrice();
+  },
+  methods: {
+    async fetchBitcoinPrice() {
+      try {
+        this.bitcoinPrice = await fetchBitcoinPrice();
+      } catch (e) {
+        console.warn("Could not get Bitcoin price.");
+      }
+    },
+  },
 });
 </script>

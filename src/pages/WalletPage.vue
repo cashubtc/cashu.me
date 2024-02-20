@@ -5,6 +5,7 @@
       <BalanceView
         v-else
         :ticker-short="tickerShort"
+        :ticker-dollar="tickerDollar"
         :pending-balance="pendingBalance"
         :check-pending-tokens="checkPendingTokens"
         :set-tab="setTab"
@@ -254,12 +255,9 @@
     <!-- QR CODE SCANNER  -->
 
     <q-dialog v-model="camera.show">
-      <q-card class="q-pa-lg q-pt-xl">
-        <div class="text-center q-mb-lg">
-          <qrcode-stream
-            @decode="decodeQR"
-            class="rounded-borders"
-          ></qrcode-stream>
+      <q-card>
+        <div class="text-center">
+          <QrcodeReader @decode="decodeQR" />
         </div>
         <div class="row q-mt-lg">
           <q-btn @click="closeCamera" flat color="grey" class="q-ml-auto"
@@ -456,7 +454,7 @@ export default {
       },
       addMintDialog: {
         show: false,
-        mintToAdd: "",
+        mintToAdd: "".replace(/\s+/g, ""),
       },
       baseHost: location.protocol + "//" + location.host,
       baseURL: location.protocol + "//" + location.host + location.pathname,
@@ -507,12 +505,6 @@ export default {
         .filter((t) => t.status == "pending")
         .reduce((sum, el) => (sum += el.amount), 0);
     },
-    // getTotalBalance: function () {
-    //   return this.proofs
-    //     .map((t) => t)
-    //     .flat()
-    //     .reduce((sum, el) => (sum += el.amount), 0);
-    // },
   },
   filters: {
     msatoshiFormat: function (value) {
@@ -536,6 +528,7 @@ export default {
       "setMintToAdd",
       "setProofs",
       "setShowAddMintDialog",
+      "getKeysForKeyset",
     ]),
     ...mapActions(useWorkersStore, [
       "clearAllWorkers",
@@ -562,7 +555,11 @@ export default {
     ...mapActions(useCameraStore, ["closeCamera", "showCamera", "hasCamera"]),
     // TOKEN METHODS
     decodeToken: function (encoded_token) {
-      return token.decode(encoded_token);
+      try {
+        return token.decode(encoded_token);
+      } catch (e) {
+        return null;
+      }
     },
     getProofs: function (decoded_token) {
       return token.getProofs(decoded_token);
@@ -827,24 +824,8 @@ export default {
         }
       }
     },
-    mintKey: function (mintId, key) {
-      // returns a key for the local storage
-      // depending on the current mint
-      return "cashu." + mintId + "." + key;
-    },
   },
-  watch: {
-    // payments: function () {
-    //   this.getBalance()
-    // },
-    /*proofs: function () {
-      if (this.keysets) {
-        this.activeProofs = this.proofs.filter((p) =>
-          this.keysets.includes(p.id)
-        );
-      }
-    },*/
-  },
+  watch: {},
 
   mounted: function () {},
 
@@ -937,12 +918,12 @@ export default {
     await this.checkProofsSpendable(this.activeProofs, true).catch((err) => {
       return;
     });
-    await this.checkPendingInvoices(false).catch((err) => {
-      return;
-    });
-    await this.checkPendingTokens(false).catch((err) => {
-      return;
-    });
+    // await this.checkPendingInvoices().catch((err) => {
+    //   return;
+    // });
+    // await this.checkPendingTokens().catch((err) => {
+    //   return;
+    // });
 
     // reset to the mint from settings after workers have run
     if (startupMintUrl.length > 0) {

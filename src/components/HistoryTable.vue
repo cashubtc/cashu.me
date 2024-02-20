@@ -57,7 +57,16 @@
                         </q-td> -->
         <q-td key="token" :props="props">
           <div @click="copyText(props.row.token)">
-            {{ shortenString(props.row.token, 10, 40) }}
+            {{
+              props.row.token.slice(0, 8) +
+              "..." +
+              props.row.token.slice(
+                props.row.token.length / 2,
+                props.row.token.length / 2 + 10
+              ) +
+              "..." +
+              props.row.token.slice(-8)
+            }}
             <q-tooltip>Click to copy</q-tooltip>
           </div>
         </q-td>

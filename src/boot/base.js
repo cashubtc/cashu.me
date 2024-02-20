@@ -55,7 +55,10 @@ window.windowMixin = {
         timeout: 5000,
         type: types[error.response.status] || "warning",
         message:
-          error.response.data.message || error.response.data.detail || null,
+          error.message ||
+          error.response.data.message ||
+          error.response.data.detail ||
+          null,
         caption:
           [error.response.status, " ", error.response.statusText]
             .join("")
@@ -73,6 +76,20 @@ window.windowMixin = {
         actions: [
           {
             icon: "close",
+            color: "white",
+            handler: () => {},
+          },
+        ],
+      });
+    },
+    notifyRefreshed: async function (message, position = "top") {
+      this.$q.notify({
+        timeout: 500,
+        type: "positive",
+        message: message,
+        position: position,
+        actions: [
+          {
             color: "white",
             handler: () => {},
           },

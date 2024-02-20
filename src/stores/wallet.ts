@@ -146,7 +146,7 @@ export const useWalletStore = defineStore("wallet", {
         return data;
       } catch (error: any) {
         console.error(error);
-        notifyApiError(error);
+        notifyApiError(error, "Could not request mint");
       }
     },
     setInvoicePaid(payment_hash: string) {
