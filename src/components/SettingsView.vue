@@ -50,10 +50,21 @@
             >
           </q-item-section>
 
+          <!--add a q-btn to update url of mint-->
+          <q-item-section side>
+            <q-btn
+              outline
+              dense
+              color="primary"
+              icon="edit"
+              @click="showModifyMintDialogWrapper(mint.url)"
+              >Update URL
+            </q-btn>
+          </q-item-section>
           <!--add a button to update url of mint-->
-          <button @click="showModifyMintDialogWrapper(mint.url)">
-            update mint url
-          </button>
+          <!-- <button @click="showModifyMintDialogWrapper(mint.url)"> -->
+          <!-- update mint url -->
+          <!-- </button> -->
 
           <q-item-section side>
             <q-badge
