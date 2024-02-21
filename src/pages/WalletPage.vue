@@ -16,39 +16,88 @@
         <q-card-section class="q-pt-sm">
           <div class="row items-center no-wrap q-mb-sm">
             <div class="col-6 col-sm-5 col-md-4 q-pr-xs">
-              <q-btn
-                size="0.75rem"
-                rectangle
-                unelevated
-                dense
-                color="primary"
-                align="between"
-                icon="file_download"
-                icon-right="toll"
-                class="full-width"
-                @click="showReceiveTokensDialog"
-                >Receive Ecash</q-btn
-              >
+              <div class="row items-center no-wrap q-mb-sm">
+                <q-btn
+                  size="1.0rem"
+                  rectangle
+                  unelevated
+                  dense
+                  color="primary"
+                  align="between"
+                  icon="file_download"
+                  icon-right="toll"
+                  class="full-width"
+                  @click="showReceiveTokensDialog"
+                  >Receive Ecash</q-btn
+                >
+              </div>
+              <div class="row items-center no-wrap q-mb-none">
+                <q-btn
+                  size="1.0rem"
+                  rectangle
+                  unelevated
+                  dense
+                  align="between"
+                  color="secondary"
+                  icon="file_download"
+                  icon-right="bolt"
+                  class="full-width"
+                  @click="showInvoiceCreateDialog"
+                >
+                  <strong class="gt-lg"> Create Lightning Invoice </strong>
+                  <strong class="gt-xs lt-xl"> Create Invoice </strong>
+                  <strong class="lt-sm"> LN Invoice </strong>
+                </q-btn>
+              </div>
             </div>
-            <div class="col-0 col-sm-2 col-md-4"></div>
-            <div class="col-6 col-sm-5 col-md-4 q-pl-xs">
+            <div class="col-0 col-sm-2 col-md-4">
               <q-btn
-                size="0.75rem"
-                rectangle
+                size="2rem"
                 unelevated
-                dense
-                align="between"
-                color="primary"
-                icon="file_upload"
-                icon-right="toll"
-                class="full-width"
-                @click="showSendTokensDialog"
-              >
-                Send Ecash</q-btn
-              >
+                icon="qr_code_scanner"
+                class="col-2 q-pb-md gt-xs q-mt-md"
+                @click="showCamera"
+              />
+            </div>
+            <div class="col-6 col-sm-5 col-md-4 q-pl-xs">
+              <div class="row items-center no-wrap q-mb-sm">
+                <q-btn
+                  size="1.0rem"
+                  rectangle
+                  unelevated
+                  dense
+                  align="between"
+                  color="primary"
+                  icon="file_upload"
+                  icon-right="toll"
+                  class="full-width"
+                  @click="showSendTokensDialog"
+                >
+                  Send Ecash</q-btn
+                >
+              </div>
+              <div class="row items-center no-wrap q-mb-none">
+                <q-btn
+                  size="1.0rem"
+                  rectangle
+                  unelevated
+                  dense
+                  align="between"
+                  color="secondary"
+                  icon="file_upload"
+                  icon-right="bolt"
+                  class="full-width"
+                  @click="showParseDialog"
+                >
+                  <strong class="gt-lg"> Pay Lightning Invoice </strong>
+                  <strong class="gt-xs lt-xl"> Pay Invoice </strong>
+                  <strong class="lt-sm"> Pay LN </strong>
+                </q-btn>
+              </div>
             </div>
           </div>
-
+        </q-card-section>
+        <q-card-section class="q-pt-none">
           <!-- ///////////////////////////////////////////
                 ////////////////// TABLES /////////////////
                 /////////////////////////////////////////// -->
@@ -136,17 +185,17 @@
       <div style="margin-bottom: 7rem">
         <div class="row q-pt-sm">
           <div class="col-4 q-pt-none">
-            <q-btn
+            <!-- <q-btn
               class="full-width gt-sm"
               size="1.0rem"
               icon-right="bolt"
               icon="file_download"
               align="between"
               rectangle
-              color="primary"
+              color="orange"
               @click="showInvoiceCreateDialog"
               ><strong>Create Invoice</strong>
-            </q-btn>
+            </q-btn> -->
           </div>
           <!-- <div class="col-4"></div> -->
           <div class="col-4 q-pt-xs">
@@ -187,7 +236,7 @@
           </div>
 
           <div class="col-4 q-pt-none">
-            <q-btn
+            <!-- <q-btn
               class="full-width gt-sm"
               @click="showParseDialog"
               size="1.0rem"
@@ -195,9 +244,9 @@
               icon="file_upload"
               align="between"
               rectangle
-              color="primary"
+              color="orange"
               ><strong>Pay Invoice</strong>
-            </q-btn>
+            </q-btn> -->
           </div>
         </div>
       </div>
@@ -219,234 +268,56 @@
       "
     >
       <q-tabs
-        class="lt-md fixed-bottom q-px-none q-py-md left-0 right-0 bg-primary text-white shadow-2 z-top q-px-0"
+        class="lt-sm fixed-bottom q-px-none q-py-md left-0 right-0 bg-primary text-white shadow-2 z-top q-px-0"
         indicator-color="transparent"
         align="justify"
       >
-        <q-tab
-          class="col-5"
-          label="Create Invoice"
-          icon="bolt"
+        <q-btn
+          size="1.0rem"
+          flat
+          unelevated
+          dense
+          class="full-width"
           @click="showInvoiceCreateDialog"
         >
-        </q-tab>
-        <q-tab
-          class="col-2 q-pb-md"
-          icon="photo_camera"
+          <q-avatar size="42px">
+            <q-icon name="download_file" size="44px" />
+          </q-avatar>
+
+          <strong class="gt-lg"> Create Lightning Invoice </strong>
+          <strong class="gt-xs lt-xl"> Create Invoice </strong>
+          <strong class="lt-sm"> Create<br />Invoice </strong>
+        </q-btn>
+        <q-btn
+          size="2rem"
+          unelevated
+          icon="qr_code_scanner"
+          class="col-2 q-pb-md q-mt-md"
           v-if="hasCamera"
           @click="showCamera"
-        >
-        </q-tab>
-        <q-tab
-          class="col-5"
-          icon="bolt"
+        />
+        <q-btn
+          size="1.0rem"
+          flat
+          unelevated
+          dense
+          class="full-width"
           @click="showParseDialog"
-          label="Pay Invoice"
         >
-        </q-tab>
+          <q-avatar size="42px">
+            <q-icon name="bolt" size="44px" />
+          </q-avatar>
+          <strong class="gt-lg"> Pay Lightning Invoice </strong>
+          <strong class="gt-xs lt-xl"> Pay Invoice </strong>
+          <strong class="lt-sm"> Pay<br />Invoice </strong>
+        </q-btn>
       </q-tabs>
     </div>
 
     <!-- DIALOGS  -->
 
     <!-- INPUT PARSER  -->
-
-    <q-dialog
-      v-model="payInvoiceData.show"
-      @hide="closeParseDialog"
-      position="top"
-      v-if="!camera.show"
-    >
-      <q-card class="q-pa-lg q-pt-xl qcard">
-        <div v-if="payInvoiceData.invoice">
-          <h6 class="q-my-none">
-            Pay {{ payInvoiceData.invoice.fsat }}
-            {{ tickerShort }}
-          </h6>
-          <q-separator class="q-my-sm"></q-separator>
-          <p class="text-wrap">
-            <strong v-if="payInvoiceData.invoice.description"
-              >Description:</strong
-            >
-            {{ payInvoiceData.invoice.description }}<br />
-            <strong>Expire date:</strong> {{ payInvoiceData.invoice.expireDate
-            }}<br />
-            <strong>Hash:</strong> {{ payInvoiceData.invoice.hash }}
-          </p>
-          <div class="col-12">
-            <ChooseMint :ticker-short="tickerShort" />
-          </div>
-          <div v-if="canPay" class="row q-mt-lg">
-            <q-btn
-              unelevated
-              color="primary"
-              :disabled="payInvoiceData.blocking"
-              @click="melt"
-              :label="!payInvoiceData.blocking ? 'Pay' : 'Paying...'"
-              ><q-spinner-tail
-                v-if="payInvoiceData.blocking"
-                color="white"
-                size="1em"
-            /></q-btn>
-            <q-btn v-close-popup flat color="grey" class="q-ml-auto"
-              >Cancel</q-btn
-            >
-          </div>
-          <div v-else class="row q-mt-lg">
-            <q-btn unelevated disabled color="yellow" text-color="black"
-              >Not enough funds!</q-btn
-            >
-            <q-btn v-close-popup flat color="grey" class="q-ml-auto"
-              >Cancel</q-btn
-            >
-          </div>
-        </div>
-        <!-- <div v-else-if="payInvoiceData.lnurlauth">
-
-            <q-form @submit="authLnurl" class="q-gutter-md">
-                <p class="q-my-none text-h6">
-                Authenticate with <b>{{ payInvoiceData.lnurlauth.domain }}</b>?
-                </p>
-                <q-separator class="q-my-sm"></q-separator>
-                <p>
-                For every website and for every LNbits wallet, a new keypair
-                will be deterministically generated so your identity can't be
-                tied to your LNbits wallet or linked across websites. No other
-                data will be shared with {{ payInvoiceData.lnurlauth.domain }}.
-                </p>
-                <p>
-                Your public key for
-                <b>{{ payInvoiceData.lnurlauth.domain }}</b> is:
-                </p>
-                <p class="q-mx-xl">
-                <code class="text-wrap">
-                    {{ payInvoiceData.lnurlauth.pubkey }}
-                </code>
-                </p>
-                <div class="row q-mt-lg">
-                <q-btn unelevated color="primary" type="submit">Login</q-btn>
-                <q-btn v-close-popup flat color="grey" class="q-ml-auto"
-                    >Cancel</q-btn
-                >
-                </div>
-            </q-form>
-
-            </div> -->
-        <div v-else-if="payInvoiceData.lnurlpay">
-          <q-form @submit="lnurlPaySecond" class="q-gutter-md">
-            <p
-              v-if="
-                payInvoiceData.lnurlpay.maxSendable ==
-                payInvoiceData.lnurlpay.minSendable
-              "
-              class="q-my-none text-h6 text-center"
-            >
-              <b>{{ payInvoiceData.domain }}</b> is requesting
-              {{ payInvoiceData.lnurlpay.maxSendable / 1000 }}
-              {{ tickerShort }}
-            </p>
-            <p v-else class="q-my-none text-h6 text-center">
-              <b>{{
-                payInvoiceData.lnurlpay.targetUser || payInvoiceData.domain
-              }}</b>
-              is requesting <br />
-              between
-              <b>{{ payInvoiceData.lnurlpay.minSendable / 1000 }}</b>
-              and
-              <b>{{ payInvoiceData.lnurlpay.maxSendable / 1000 }}</b>
-              {{ tickerShort }}
-              <!-- <span v-if="payInvoiceData.lnurlpay.commentAllowed > 0">
-                    <br />
-                    and a {{payInvoiceData.lnurlpay.commentAllowed}}-char comment
-                </span> -->
-            </p>
-            <q-separator class="q-my-sm"></q-separator>
-            <div class="row" v-if="payInvoiceData.lnurlpay.description">
-              <p class="col text-justify text-italic">
-                {{ payInvoiceData.lnurlpay.description }}
-              </p>
-              <p class="col-4 q-pl-md" v-if="payInvoiceData.lnurlpay.image">
-                <q-img :src="payInvoiceData.lnurlpay.image" />
-              </p>
-            </div>
-            <div class="row">
-              <div class="col">
-                <q-input
-                  filled
-                  dense
-                  autofocus
-                  v-model.number="payInvoiceData.data.amount"
-                  type="number"
-                  :label="'Amount (' + tickerShort + ') *'"
-                  :min="payInvoiceData.lnurlpay.minSendable / 1000"
-                  :max="payInvoiceData.lnurlpay.maxSendable / 1000"
-                  :readonly="
-                    payInvoiceData.lnurlpay.maxSendable ==
-                    payInvoiceData.lnurlpay.minSendable
-                  "
-                ></q-input>
-              </div>
-              <div
-                class="col-8 q-pl-md"
-                v-if="payInvoiceData.lnurlpay.commentAllowed > 0"
-              >
-                <q-input
-                  filled
-                  dense
-                  v-model="payInvoiceData.data.comment"
-                  _type="payInvoiceData.lnurlpay.commentAllowed > 64 ? 'textarea' : 'text'"
-                  label="Comment (optional)"
-                  :maxlength="payInvoiceData.lnurlpay.commentAllowed"
-                ></q-input>
-              </div>
-            </div>
-            <div class="row q-mt-lg">
-              <q-btn unelevated color="primary" type="submit">Send</q-btn>
-              <q-btn v-close-popup flat color="grey" class="q-ml-auto"
-                >Cancel</q-btn
-              >
-            </div>
-          </q-form>
-        </div>
-        <div v-else>
-          <q-form
-            v-if="!camera.show"
-            @submit="decodeRequest"
-            class="q-gutter-md"
-          >
-            <q-input
-              ref="pasteInput"
-              filled
-              dense
-              v-model.trim="payInvoiceData.data.request"
-              type="textarea"
-              label="Enter a Lightning invoice, an LNURL, or a Lightning address"
-            >
-            </q-input>
-            <div class="row q-mt-lg">
-              <q-btn
-                unelevated
-                color="primary"
-                :disable="payInvoiceData.data.request == ''"
-                type="submit"
-                >Enter</q-btn
-              >
-              <q-btn
-                unelevated
-                icon="photo_camera"
-                class="q-mx-0"
-                v-if="hasCamera"
-                @click="showCamera"
-              >
-              </q-btn>
-              <q-btn v-close-popup flat color="grey" class="q-ml-auto"
-                >Close</q-btn
-              >
-            </div>
-          </q-form>
-        </div>
-      </q-card>
-    </q-dialog>
+    <PayInvoiceDialog v-model="payInvoiceData.show" />
 
     <!-- QR CODE SCANNER  -->
 
@@ -518,228 +389,19 @@
     </q-dialog>
 
     <!-- INVOICE DETAILS  -->
-
-    <q-dialog v-model="showInvoiceDetails" position="top">
-      <q-card class="q-pa-lg q-pt-md qcard">
-        <div v-if="!invoiceData.bolt11">
-          <div class="row items-center no-wrap q-mb-sm">
-            <div class="col-12">
-              <span class="text-subtitle1">Create a Lightning invoice</span>
-            </div>
-          </div>
-          <div class="row items-center no-wrap q-my-sm q-py-none">
-            <div class="col-12">
-              <ChooseMint :ticker-short="tickerShort" />
-            </div>
-          </div>
-          <q-input
-            filled
-            dense
-            type="number"
-            v-model.number="invoiceData.amount"
-            :label="'Amount (' + tickerShort + ') *'"
-            mask="#"
-            fill-mask="0"
-            reverse-fill-mask
-            autofocus
-            class="q-mb-lg"
-            @keyup.enter="requestMintButton"
-          ></q-input>
-          <!-- <q-input
-                filled
-                dense
-                v-model.trim="invoiceData.memo"
-                label="Memo"
-                ></q-input> -->
-        </div>
-        <div v-else class="text-center q-mb-lg q-mt-none q-pt-none">
-          <a class="text-secondary" :href="'lightning:' + invoiceData.bolt11">
-            <q-responsive :ratio="1" class="q-mx-md q-mt-none q-pt-none">
-              <vue-qrcode
-                :value="'lightning:' + invoiceData.bolt11.toUpperCase()"
-                :options="{ width: 340 }"
-                class="rounded-borders"
-              >
-              </vue-qrcode>
-            </q-responsive>
-          </a>
-        </div>
-        <div class="row q-mt-lg">
-          <q-btn
-            v-if="invoiceData.bolt11"
-            @click="copyText(invoiceData.bolt11)"
-            outline
-            color="primary"
-            >Copy invoice</q-btn
-          >
-          <q-btn
-            v-else
-            color="primary"
-            @click="requestMintButton"
-            :disable="!invoiceData.amount > 0"
-            >Create Invoice</q-btn
-          >
-          <q-btn v-close-popup flat color="grey" class="q-ml-auto">Close</q-btn>
-        </div>
-      </q-card>
-    </q-dialog>
+    <InvoiceDetailDialog
+      v-model="showInvoiceDetails"
+      :invoice-check-worker="invoiceCheckWorker"
+    />
 
     <!-- SEND TOKENS DIALOG  -->
-
-    <q-dialog v-model="showSendTokens" position="top">
-      <q-card class="q-pa-lg q-pt-md qcard">
-        <div v-if="!sendData.tokens">
-          <div class="row items-center no-wrap q-mb-sm">
-            <div class="col-12">
-              <span class="text-subtitle1">Send ecash</span>
-            </div>
-          </div>
-          <div class="row items-center no-wrap q-my-sm q-py-none">
-            <div class="col-12">
-              <ChooseMint :ticker-short="tickerShort" />
-            </div>
-          </div>
-
-          <q-input
-            filled
-            dense
-            type="number"
-            v-model.number="sendData.amount"
-            :label="'Amount (' + tickerShort + ') *'"
-            mask="#"
-            fill-mask="0"
-            reverse-fill-mask
-            autofocus
-            class="q-mb-lg"
-            @keyup.enter="sendTokens"
-          ></q-input>
-          <!-- <q-input
-                filled
-                dense
-                v-model.trim="sendData.memo"
-                label="Memo"
-                ></q-input> -->
-        </div>
-        <div v-else class="text-center q-mb-lg">
-          <div class="text-center q-mb-lg" v-if="sendData.tokens.length < 2">
-            <q-responsive :ratio="1" class="q-mx-xl">
-              <vue-qrcode
-                :value="baseURL + '?token=' + sendData.tokensBase64"
-                :options="{ width: 340 }"
-                class="rounded-borders"
-              >
-              </vue-qrcode>
-            </q-responsive>
-          </div>
-          <div class="row">
-            <div class="col-12">
-              <q-input
-                outlined
-                dense
-                readonly
-                v-model="sendData.tokensBase64"
-                label="Cashu token"
-                type="textarea"
-                class="q-mb-sm"
-              ></q-input>
-            </div>
-          </div>
-          <div class="row">
-            <div class="col-12">
-              <TokenInformation
-                :ticker-short="tickerShort"
-                :proofs-to-show="sendData.tokens"
-                :token-mint-url="getMint(decodeToken(sendData.tokensBase64))"
-              />
-            </div>
-          </div>
-        </div>
-        <div class="row q-mt-lg">
-          <q-btn
-            v-if="!sendData.tokens"
-            :disable="sendData.amount == null || sendData.amount <= 0"
-            @click="sendTokens"
-            color="primary"
-            type="submit"
-            >Send Tokens</q-btn
-          >
-          <!-- <q-btn v-else @click="burnTokens" outline color="grey"
-                >Burn Tokens</q-btn
-                > -->
-          <div v-else>
-            <q-btn
-              class="q-mx-xs"
-              color="primary"
-              @click="copyText(sendData.tokensBase64)"
-              >Copy token</q-btn
-            >
-            <q-btn
-              class="q-mx-xs"
-              color="primary"
-              outline
-              @click="copyText(baseURL + '?token=' + sendData.tokensBase64)"
-              >Copy link</q-btn
-            >
-          </div>
-
-          <q-btn v-close-popup flat color="grey" class="q-ml-auto">Close</q-btn>
-        </div>
-      </q-card>
-    </q-dialog>
+    <SendTokenDialog
+      v-model="showSendTokens"
+      :check-token-spendable-worker="checkTokenSpendableWorker"
+    />
 
     <!-- RECEIVE TOKENS DIALOG  -->
-
-    <q-dialog v-model="showReceiveTokens" position="top">
-      <q-card class="q-pa-lg q-pt-md qcard">
-        <div>
-          <div class="row items-center no-wrap q-mb-sm">
-            <div class="col-12">
-              <span class="text-subtitle1">Receive Ecash</span>
-            </div>
-          </div>
-          <q-input
-            filled
-            dense
-            v-model="receiveData.tokensBase64"
-            label="Enter Cashu token"
-            type="textarea"
-            autofocus
-            class="q-mb-lg"
-          ></q-input>
-        </div>
-        <div
-          class="row"
-          v-if="
-            receiveData.tokensBase64.length &&
-            decodeToken(receiveData.tokensBase64) != null
-          "
-        >
-          <div class="col-12">
-            <TokenInformation
-              :ticker-short="tickerShort"
-              :proofs-to-show="getProofs(decodeToken(receiveData.tokensBase64))"
-              :token-mint-url="getMint(decodeToken(receiveData.tokensBase64))"
-            />
-          </div>
-        </div>
-        <div class="row q-mt-lg">
-          <q-btn
-            @click="redeem"
-            color="primary"
-            :disabled="!decodeToken(receiveData.tokensBase64)"
-            >Receive</q-btn
-          >
-          <q-btn
-            unelevated
-            icon="photo_camera"
-            class="q-mx-0"
-            v-if="hasCamera"
-            @click="showCamera"
-          ></q-btn>
-          <q-btn v-close-popup flat color="grey" class="q-ml-auto">Close</q-btn>
-        </div>
-      </q-card>
-    </q-dialog>
+    <ReceiveTokenDialog v-model="showReceiveTokens" />
   </div>
 </template>
 <style>
@@ -763,41 +425,37 @@
 }
 </style>
 <script>
-import { ref } from "vue";
-import { axios } from "boot/axios";
-import { Buffer } from "buffer";
-import * as bech32 from "bech32";
 import { date } from "quasar";
-import { splitAmount, bigIntStringify } from "src/js/utils";
-import * as nobleSecp256k1 from "@noble/secp256k1";
-import * as bolt11Decoder from "light-bolt11-decoder";
-import { step1Alice, step3Alice } from "src/js/dhke";
-import { uint8ToBase64 } from "src/js/base64";
 import * as _ from "underscore";
-import { getShortUrl } from "src/js/wallet-helpers";
 import { shortenString } from "src/js/string-utils";
 import token from "src/js/token";
+
 // Vue components
 import BalanceView from "components/BalanceView.vue";
 import SettingsView from "components/SettingsView.vue";
 import InvoicesTable from "components/InvoicesTable.vue";
 import HistoryTable from "components/HistoryTable.vue";
 import NoMintWarnBanner from "components/NoMintWarnBanner.vue";
-import ChooseMint from "components/ChooseMint.vue";
-import TokenInformation from "components/TokenInformation.vue";
 import WelcomeDialog from "components/WelcomeDialog.vue";
+import SendTokenDialog from "components/SendTokenDialog.vue";
+import PayInvoiceDialog from "components/PayInvoiceDialog.vue";
+import InvoiceDetailDialog from "components/InvoiceDetailDialog.vue";
 import QrcodeReader from "components/QrcodeReader.vue";
 
+// pinia stores
 import { mapActions, mapState, mapWritableState } from "pinia";
 import { useMintsStore } from "src/stores/mints";
+import { useSendTokensStore } from "src/stores/sendTokensStore";
+import { useReceiveTokensStore } from "src/stores/receiveTokensStore";
 import { useWorkersStore } from "src/stores/workers";
 import { useTokensStore } from "src/stores/tokens";
 import { useWalletStore } from "src/stores/wallet";
-import { notifyApiError, notifyError, notifySuccess } from "src/js/notify";
+import { useUiStore } from "src/stores/ui";
+import { useProofsStore } from "src/stores/proofs";
+import { useCameraStore } from "src/stores/camera";
+import { currentDateStr } from "src/js/utils";
 
-var currentDateStr = function () {
-  return date.formatDate(new Date(), "YYYY-MM-DD HH:mm:ss");
-};
+import ReceiveTokenDialog from "src/components/ReceiveTokenDialog.vue";
 
 export default {
   mixins: [windowMixin],
@@ -807,40 +465,19 @@ export default {
     InvoicesTable,
     HistoryTable,
     NoMintWarnBanner,
-    ChooseMint,
-    TokenInformation,
     WelcomeDialog,
+    SendTokenDialog,
+    ReceiveTokenDialog,
+    PayInvoiceDialog,
+    InvoiceDetailDialog,
     QrcodeReader,
   },
   data: function () {
     return {
-      tickerShort: "sats",
-      ticketLong: "Satoshis",
-      tickerDollar: "USD",
       name: "",
       mintId: "",
       mintName: "",
       deferredPWAInstallPrompt: null,
-      camera: {
-        data: null,
-        show: false,
-        camera: "auto",
-      },
-      sendData: {
-        amount: 0,
-        memo: "",
-        tokens: "",
-        tokensBase64: "",
-      },
-      receiveData: {
-        tokensBase64: "",
-      },
-      showInvoiceDetails: false,
-      showPayInvoice: false,
-      showSendTokens: false,
-      showReceiveTokens: false,
-      promises: [],
-      tokens: [],
       tab: "history",
       receive: {
         show: false,
@@ -873,35 +510,6 @@ export default {
         },
       },
       payments: [],
-      // tokensTable: {
-      //   columns: [
-      //     {
-      //       name: "value",
-      //       align: "left",
-      //       label: "'Value",
-      //       field: "value",
-      //       sortable: true,
-      //     },
-      //     {
-      //       name: "count",
-      //       align: "left",
-      //       label: "Count",
-      //       field: "count",
-      //       sortable: true,
-      //     },
-      //     {
-      //       name: "sum",
-      //       align: "left",
-      //       label: "Sum (sats)",
-      //       field: "sum",
-      //       sortable: true,
-      //     },
-      //   ],
-      //   pagination: {
-      //     rowsPerPage: 5,
-      //   },
-      //   filter: null,
-      // },
       paymentsChart: {
         show: false,
       },
@@ -924,6 +532,14 @@ export default {
     };
   },
   computed: {
+    ...mapWritableState(useUiStore, ["showInvoiceDetails"]),
+    ...mapState(useUiStore, ["tickerShort"]),
+    ...mapState(useUiStore, ["tickerDollar"]),
+    ...mapWritableState(useReceiveTokensStore, [
+      "showReceiveTokens",
+      "receiveData",
+    ]),
+    ...mapWritableState(useSendTokensStore, ["showSendTokens", "sendData"]),
     ...mapState(useMintsStore, [
       "activeMintUrl",
       "activeProofs",
@@ -942,12 +558,8 @@ export default {
       "invoiceCheckListener",
       "tokensCheckSpendableListener",
     ]),
-    ...mapWritableState(useTokensStore, ["historyTokens"]),
-    ...mapWritableState(useTokensStore, [""]),
-    canPay: function () {
-      if (!this.payInvoiceData.invoice) return false;
-      return this.payInvoiceData.invoice.sat <= this.balance;
-    },
+    ...mapState(useTokensStore, ["historyTokens"]),
+    ...mapWritableState(useCameraStore, ["camera"]),
     pendingPaymentsExist: function () {
       return this.payments.findIndex((payment) => payment.pending) !== -1;
     },
@@ -970,6 +582,13 @@ export default {
     },
   },
   methods: {
+    ...mapActions(useProofsStore, [
+      "serializeProofs",
+      "getProofsMint",
+      "serializeProofsV2",
+      "sumProofs",
+      "deleteProofs",
+    ]),
     ...mapActions(useMintsStore, [
       "activateMint",
       "addMint",
@@ -981,13 +600,29 @@ export default {
       "setShowAddMintDialog",
       "getKeysForKeyset",
     ]),
-    ...mapActions(useWorkersStore, ["clearAllWorkers"]),
+    ...mapActions(useWorkersStore, [
+      "clearAllWorkers",
+      "invoiceCheckWorker",
+      "checkTokenSpendableWorker",
+    ]),
     ...mapActions(useTokensStore, [
       "addPaidToken",
       "addPendingToken",
       "setTokenPaid",
     ]),
-    ...mapActions(useWalletStore, ["requestMint", "setInvoicePaid"]),
+    ...mapActions(useWalletStore, [
+      "requestMint",
+      "setInvoicePaid",
+      "mint",
+      "melt",
+      "checkProofsSpendable",
+      "checkTokenSpendable",
+      "checkInvoice",
+      "checkPendingInvoices",
+      "checkPendingTokens",
+      "decodeRequest",
+    ]),
+    ...mapActions(useCameraStore, ["closeCamera", "showCamera", "hasCamera"]),
     // TOKEN METHODS
     decodeToken: function (encoded_token) {
       try {
@@ -1023,17 +658,6 @@ export default {
     paymentTableRowKey: function (row) {
       return row.payment_hash + row.amount;
     },
-    closeCamera: function () {
-      this.camera.show = false;
-    },
-    showCamera: function () {
-      this.camera.show = true;
-    },
-    hasCamera: function () {
-      navigator.permissions.query({ name: "camera" }).then((res) => {
-        return res.state == "granted";
-      });
-    },
     showChart: function () {
       this.paymentsChart.show = true;
       this.$nextTick(() => {
@@ -1041,7 +665,8 @@ export default {
       });
     },
     focusInput(el) {
-      this.$nextTick(() => this.$refs[el].focus());
+      // TODO: fix this
+      // this.$nextTick(() => this.$refs[el].focus());
     },
     showReceiveDialog: function () {
       this.receive.show = true;
@@ -1096,156 +721,11 @@ export default {
         clearInterval(this.receive.paymentChecker);
       }, 10000);
     },
-    closeParseDialog: function () {
-      setTimeout(() => {
-        clearInterval(this.payInvoiceData.paymentChecker);
-      }, 10000);
-    },
     decodeQR: function (res) {
       this.camera.data = res;
       // this.payInvoiceData.data.request = res
       this.decodeRequest();
       this.camera.show = false;
-    },
-    decodeRequest: function (r = null) {
-      // set the argument as the data to parse
-      if (typeof r == "string" && r != null) {
-        this.payInvoiceData.data.request = r;
-      }
-      let reqtype = null;
-      let req = null;
-      // get request
-      if (this.camera.data) {
-        // get request from camera
-        req = this.camera.data;
-      } else if (this.payInvoiceData.data.request) {
-        // get request from pay invoice dialog
-        req = this.payInvoiceData.data.request;
-      }
-
-      if (req.toLowerCase().startsWith("lnbc")) {
-        this.payInvoiceData.data.request = req;
-        reqtype = "bolt11";
-      } else if (req.toLowerCase().startsWith("lightning:")) {
-        this.payInvoiceData.data.request = req.slice(10);
-        reqtype = "bolt11";
-      } else if (req.toLowerCase().startsWith("lnurl:")) {
-        this.payInvoiceData.data.request = req.slice(6);
-        reqtype = "lnurl";
-      } else if (req.indexOf("lightning=lnurl1") !== -1) {
-        this.payInvoiceData.data.request = req
-          .split("lightning=")[1]
-          .split("&")[0];
-        reqtype = "lnurl";
-      } else if (
-        req.toLowerCase().startsWith("lnurl1") ||
-        req.match(/[\w.+-~_]+@[\w.+-~_]/)
-      ) {
-        this.payInvoiceData.data.request = req;
-        reqtype = "lnurl";
-      } else if (req.indexOf("cashuA")) {
-        // very dirty way of parsing cashu tokens from either a pasted token or a URL like https://host.com?token=eyJwcm
-        this.receiveData.tokensBase64 = req.slice(req.indexOf("cashuA"));
-        reqtype = "cashu";
-      }
-
-      if (reqtype == "bolt11") {
-        console.log("#### QR CODE: BOLT11");
-        this.payInvoiceData.show = true;
-        let invoice;
-        try {
-          invoice = bolt11Decoder.decode(this.payInvoiceData.data.request);
-        } catch (error) {
-          this.notifyWarning("Failed to decode invoice", null, 3000);
-          this.payInvoiceData.show = false;
-          throw error;
-        }
-
-        // invoice.amount = invoice.sections[2] / 1000;
-        // invoice.amount_msat = invoice.sections[2];
-        let cleanInvoice = {};
-        // let cleanInvoice = {
-        //   msat: invoice.amount_msat,
-        //   sat: invoice.amount,
-        //   fsat: invoice.amount,
-        // };
-        // _.each(invoice.sections, (tag) => {
-        //   console.log(tag);
-        // });
-        _.each(invoice.sections, (tag) => {
-          if (_.isObject(tag) && _.has(tag, "name")) {
-            if (tag.name === "amount") {
-              cleanInvoice.msat = tag.value;
-              cleanInvoice.sat = tag.value / 1000;
-              cleanInvoice.fsat = cleanInvoice.sat;
-            } else if (tag.name === "payment_hash") {
-              cleanInvoice.hash = tag.value;
-            } else if (tag.name === "description") {
-              cleanInvoice.description = tag.value;
-            } else if (tag.name === "timestamp") {
-              cleanInvoice.timestamp = tag.value;
-            } else if (tag.name === "expiry") {
-              var expireDate = new Date(
-                (cleanInvoice.timestamp + tag.value) * 1000
-              );
-              cleanInvoice.expireDate = date.formatDate(
-                expireDate,
-                "YYYY-MM-DDTHH:mm:ss.SSSZ"
-              );
-              cleanInvoice.expired = false; // TODO
-            }
-          }
-        });
-
-        this.payInvoiceData.invoice = Object.freeze(cleanInvoice);
-      } else if (reqtype == "lnurl") {
-        console.log("#### QR CODE: LNURL");
-        this.lnurlPayFirst(this.payInvoiceData.data.request);
-      } else if (reqtype == "cashu") {
-        console.log("#### QR CODE: CASHU TOKEN");
-        this.payInvoiceData.show = false;
-        this.showReceiveTokens = true;
-      }
-    },
-    lnurlPayFirst: async function (address) {
-      let host;
-      if (address.split("@").length == 2) {
-        let [user, lnaddresshost] = address.split("@");
-        host = `https://${lnaddresshost}/.well-known/lnurlp/${user}`;
-      } else if (address.toLowerCase().slice(0, 6) === "lnurl1") {
-        host = Buffer.from(
-          bech32.fromWords(bech32.decode(address, 20000).words)
-        ).toString();
-      }
-      var { data } = await axios.get(host);
-      if (data.tag == "payRequest") {
-        this.payInvoiceData.domain = host.split("https://")[1].split("/")[0];
-        this.payInvoiceData.lnurlpay = data;
-        if (
-          this.payInvoiceData.lnurlpay.maxSendable ==
-          this.payInvoiceData.lnurlpay.minSendable
-        ) {
-          this.payInvoiceData.data.amount =
-            this.payInvoiceData.lnurlpay.maxSendable / 1000;
-        }
-        this.payInvoiceData.show = true;
-      }
-    },
-    lnurlPaySecond: async function () {
-      let amount = this.payInvoiceData.data.amount;
-      if (
-        this.payInvoiceData.lnurlpay.tag == "payRequest" &&
-        this.payInvoiceData.lnurlpay.minSendable <=
-          amount * 1000 <=
-          this.payInvoiceData.lnurlpay.maxSendable
-      ) {
-        var { data } = await axios.get(
-          `${this.payInvoiceData.lnurlpay.callback}?amount=${amount * 1000}`
-        );
-        console.log(data.pr);
-        this.payInvoiceData.data.request = data.pr;
-        this.decodeRequest();
-      }
     },
     payInvoice: function () {
       let dismissPaymentMsg = this.$q.notify({
@@ -1302,697 +782,11 @@ export default {
       this.showReceiveTokens = true;
     },
 
-    // showAddMintDialog: function () {
-    //   this.addMintDialog.show = true;
-    // },
-
     //////////////////////// MINT //////////////////////////////////////////
 
-    generateSecrets: async function (amounts) {
-      const secrets = [];
-      for (let i = 0; i < amounts.length; i++) {
-        const secret = nobleSecp256k1.utils.randomBytes(32);
-        secrets.push(secret);
-      }
-      return secrets;
-    },
-
-    constructOutputs: async function (amounts, secrets) {
-      const outputs = [];
-      const rs = [];
-      for (let i = 0; i < amounts.length; i++) {
-        const { B_, r } = await step1Alice(secrets[i]);
-        outputs.push({ amount: amounts[i], B_: B_ });
-        rs.push(r);
-      }
-      return {
-        outputs,
-        rs,
-      };
-    },
-
-    constructProofs: async function (promises, secrets, rs) {
-      const proofs = [];
-      for (let i = 0; i < promises.length; i++) {
-        const mint_pubkeys = await this.getKeysForKeyset(promises[i].id);
-        const encodedSecret = uint8ToBase64.encode(secrets[i]);
-        let { id, amount, C, secret } = this.promiseToProof(
-          promises[i].id,
-          promises[i].amount,
-          promises[i]["C_"],
-          encodedSecret,
-          rs[i],
-          mint_pubkeys
-        );
-        proofs.push({ id, amount, C, secret });
-      }
-      return proofs;
-    },
-
-    promiseToProof: function (id, amount, C_hex, secret, r, mint_pubkeys) {
-      const C_ = nobleSecp256k1.Point.fromHex(C_hex);
-      const A = mint_pubkeys[amount];
-      const C = step3Alice(
-        C_,
-        nobleSecp256k1.utils.hexToBytes(r),
-        nobleSecp256k1.Point.fromHex(A)
-      );
-      return {
-        id,
-        amount,
-        C: C.toHex(true),
-        secret,
-      };
-    },
-
-    sumProofs: function (proofs) {
-      return proofs.reduce((s, t) => (s += t.amount), 0);
-    },
-
-    deleteProofs: function (proofs) {
-      // delete proofs from this.proofs
-      const usedSecrets = proofs.map((p) => p.secret);
-      this.setProofs(
-        this.proofs.filter((p) => !usedSecrets.includes(p.secret))
-      );
-      // this.storeProofs();
-      return this.proofs;
-    },
-    serializeProofs: function (proofs) {
-      // unique keyset IDs of proofs
-      let uniqueIds = [...new Set(proofs.map((p) => p.id))];
-      // mints that have any of the keyset IDs
-      let mints_keysets = this.mints.filter((m) =>
-        m.keysets.some((r) => uniqueIds.indexOf(r) >= 0)
-      );
-      // what we put into the JSON
-      let mints = mints_keysets.map((m) => [{ url: m.url, ids: m.keysets }][0]);
-      let tokenV3 = {
-        token: [{ proofs: proofs, mint: mints[0].url }],
-      };
-      return "cashuA" + btoa(JSON.stringify(tokenV3));
-    },
-    getProofsMint: function (proofs) {
-      // unique keyset IDs of proofs
-      let uniqueIds = [...new Set(proofs.map((p) => p.id))];
-      // mints that have any of the keyset IDs
-      let mints_keysets = this.mints.filter((m) =>
-        m.keysets.some((r) => uniqueIds.indexOf(r) >= 0)
-      );
-      // what we put into the JSON
-      let mints = mints_keysets.map((m) => [{ url: m.url, ids: m.keysets }][0]);
-      return mints[0];
-    },
-    serializeProofsV2: function (proofs) {
-      // unique keyset IDs of proofs
-      let uniqueIds = [...new Set(proofs.map((p) => p.id))];
-      // mints that have any of the keyset IDs
-      let mints_keysets = this.mints.filter((m) =>
-        m.keysets.some((r) => uniqueIds.indexOf(r) >= 0)
-      );
-      // what we put into the JSON
-      let mints = mints_keysets.map((m) => [{ url: m.url, ids: m.keysets }][0]);
-      var tokenV2 = {
-        proofs: proofs,
-        mints,
-      };
-      return btoa(JSON.stringify(tokenV2));
-    },
-    //////////// API ///////////
-
-    // MINT
-
-    requestMintButton: async function () {
-      await this.requestMint();
-      console.log("#### request mint", this.invoiceData);
-      await this.invoiceCheckWorker();
-    },
-
-    // /mint
-
-    mintApi: async function (amounts, payment_hash) {
-      /*
-      asks the mint to check whether the invoice with payment_hash has been paid
-      and requests signing of the attached outputs.
-      */
-
-      try {
-        let secrets = await this.generateSecrets(amounts);
-        let { outputs, rs } = await this.constructOutputs(amounts, secrets);
-        const data = await this.activeMint.mint({ outputs }, payment_hash);
-        this.assertMintError(data, false);
-        if (data.promises == null) {
-          return {};
-        }
-        let proofs = await this.constructProofs(data.promises, secrets, rs);
-        return proofs;
-      } catch (error) {
-        console.error(error);
-        throw error;
-      }
-    },
-    mint: async function (amount, payment_hash, verbose = true) {
-      try {
-        const split = splitAmount(amount);
-        const proofs = await this.mintApi(split, payment_hash, verbose);
-        if (!proofs.length) {
-          throw "could not mint";
-        }
-        this.setProofs(this.proofs.concat(proofs));
-        // hack to update balance
-        this.setActiveProofs(this.activeProofs.concat([]));
-        // this.storeProofs();
-
-        // update UI
-        await this.setInvoicePaid(payment_hash);
-        this.addPaidToken({
-          amount,
-          serializedProofs: this.serializeProofs(proofs),
-        });
-
-        return proofs;
-      } catch (error) {
-        console.error(error);
-        if (verbose) {
-          notifyApiError(error, "Could not mint");
-        }
-        throw error;
-      }
-    },
-
-    // SPLIT
-
-    split: async function (proofs, amount) {
-      /*
-                supplies proofs and requests a split from the mint of these
-                proofs at a specific amount
-                */
-      try {
-        if (proofs.length == 0) {
-          throw new Error("no proofs provided.");
-        }
-        let { firstProofs, scndProofs } = await this.splitApi(proofs, amount);
-        this.deleteProofs(proofs);
-        // add new firstProofs, scndProofs to this.proofs
-        this.setProofs(this.proofs.concat(firstProofs).concat(scndProofs));
-        // this.storeProofs();
-        return { firstProofs, scndProofs };
-      } catch (error) {
-        console.error(error);
-        throw error;
-      }
-    },
-
-    // /split
-
-    splitApi: async function (proofs, amount) {
-      try {
-        const total = this.sumProofs(proofs);
-        const frst_amount = total - amount;
-        const scnd_amount = amount;
-        const frst_amounts = splitAmount(frst_amount);
-        const scnd_amounts = splitAmount(scnd_amount);
-        const amounts = _.clone(frst_amounts);
-        amounts.push(...scnd_amounts);
-        let secrets = await this.generateSecrets(amounts);
-        if (secrets.length != amounts.length) {
-          throw new Error(
-            "number of secrets does not match number of outputs."
-          );
-        }
-        let { outputs, rs } = await this.constructOutputs(amounts, secrets);
-        const payload = {
-          proofs,
-          outputs,
-        };
-        const data = await this.activeMint.split(payload);
-
-        this.assertMintError(data);
-        const constructedProofs = await this.constructProofs(
-          data.promises,
-          secrets,
-          rs
-        );
-        const firstProofs = constructedProofs.slice(0, frst_amounts.length);
-        const scndProofs = constructedProofs.slice(frst_amounts.length);
-        return { firstProofs, scndProofs };
-      } catch (error) {
-        this.payInvoiceData.blocking = false;
-        console.error(error);
-        throw error;
-      }
-    },
-
-    splitToSend: async function (proofs, amount, invlalidate = false) {
-      /*
-                splits proofs so the user can keep firstProofs, send scndProofs.
-                then sets scndProofs as reserved.
-
-                if invalidate, scndProofs (the one to send) are invalidated
-                */
-      try {
-        const spendableProofs = proofs.filter((p) => !p.reserved);
-        if (this.sumProofs(spendableProofs) < amount) {
-          this.notifyWarning(
-            "Balance is too low.",
-            `Your balance is ${this.getBalance()} sat and you're trying to pay ${amount} sats.`
-          );
-          throw Error("balance too low.");
-        }
-
-        // call /split
-
-        let { firstProofs, scndProofs } = await this.split(
-          spendableProofs,
-          amount
-        );
-        // set scndProofs in this.proofs as reserved
-        const usedSecrets = proofs.map((p) => p.secret);
-        let newProofs = this.proofs.map((proof) => {
-          if (usedSecrets.includes(proof.secret)) {
-            proof.reserved = true;
-          }
-          return proof;
-        });
-        this.setProofs(newProofs);
-
-        // hack: to make Vue JS update
-        this.setProofs(this.proofs.concat([]));
-
-        if (invlalidate) {
-          // delete scndProofs from db
-          this.deleteProofs(scndProofs);
-        }
-
-        return { firstProofs, scndProofs };
-      } catch (error) {
-        console.error(error);
-        notifyApiError(error, "Could not send");
-        throw error;
-      }
-    },
-
-    redeem: async function () {
-      /*
-      uses split to receive new tokens.
-      */
-      this.showReceiveTokens = false;
-      console.log("### receive tokens", this.receiveData.tokensBase64);
-      try {
-        if (this.receiveData.tokensBase64.length == 0) {
-          throw new Error("no tokens provided.");
-        }
-        const tokenJson = this.decodeToken(this.receiveData.tokensBase64);
-        let proofs = this.getProofs(tokenJson);
-        // check if we have all mints
-        for (var i = 0; i < tokenJson.token.length; i++) {
-          if (!this.mints.map((m) => m.url).includes(this.getMint(tokenJson))) {
-            // pop up add mint dialog warning
-            // hack! The "add mint" component is in SettingsView which may now
-            // have been loaded yet. We switch the tab to settings to make sure
-            // that it loads. Remove this code when the TrustMintComnent is refactored!
-            await this.setTab("settings");
-            this.setMintToAdd(tokenJson.token[i].mint);
-            this.showAddMintDialog = true;
-            // this.addMintDialog.show = true;
-            // show the token receive dialog again for the next attempt
-            this.showReceiveTokens = true;
-            return;
-          }
-
-          // TODO: We assume here that all proofs are from one mint! This will fail if
-          // that's not the case!
-          if (this.getMint(tokenJson) != this.activeMintUrl) {
-            await this.activateMint(this.getMint(tokenJson));
-          }
-        }
-
-        const amount = proofs.reduce((s, t) => (s += t.amount), 0);
-
-        // redeem
-        await this.split(proofs, amount);
-
-        // update UI
-
-        // HACK: we need to do this so the balance updates
-        this.setProofs(this.proofs.concat([]));
-        this.setActiveProofs(this.activeProofs.concat([]));
-        this.getBalance();
-
-        this.addPaidToken({
-          amount,
-          serializedProofs: this.receiveData.tokensBase64,
-        });
-
-        if (window.navigator.vibrate) navigator.vibrate(200);
-        notifySuccess("Tokens received.");
-      } catch (error) {
-        console.error(error);
-        notifyApiError(error, "Could not receive");
-      }
-      // }
-    },
-
-    sendTokens: async function () {
-      /*
-      calls splitToSend, displays token and kicks off the spendableWorker
-      */
-      try {
-        // keep firstProofs, send scndProofs and delete them (invalidate=true)
-        let { firstProofs, scndProofs } = await this.splitToSend(
-          this.activeProofs,
-          this.sendData.amount,
-          true
-        );
-
-        // update UI
-        this.sendData.tokens = scndProofs;
-        console.log("### this.sendData.tokens", this.sendData.tokens);
-
-        this.sendData.tokensBase64 = this.serializeProofs(scndProofs);
-        this.addPendingToken({
-          amount: -this.sendData.amount,
-          serializedProofs: this.sendData.tokensBase64,
-        });
-
-        this.checkTokenSpendableWorker();
-      } catch (error) {
-        console.error(error);
-      }
-    },
-
-    // /melt
-
-    melt: async function () {
-      // todo: get fees from server and add to inputs
-      this.payInvoiceData.blocking = true;
-      console.log("#### pay lightning");
-      const amount_invoice = this.payInvoiceData.invoice.sat;
-      const amount =
-        amount_invoice +
-        (await this.checkFees(this.payInvoiceData.data.request));
-      console.log(
-        "#### amount invoice",
-        amount_invoice,
-        "amount with fees",
-        amount
-      );
-
-      try {
-        let { firstProofs, scndProofs } = await this.splitToSend(
-          this.activeProofs,
-          amount
-        );
-        // NUT-08 blank outputs for change
-        let amounts = [1, 1, 1, 1]; // four change blank outputs
-        let secrets = await this.generateSecrets(amounts);
-        let { outputs, rs } = await this.constructOutputs(amounts, secrets);
-
-        let amount_paid = amount;
-        const payload = {
-          proofs: scndProofs.flat(),
-          amount,
-          pr: this.payInvoiceData.data.request,
-          outputs,
-        };
-        const data = await this.activeMint.melt(payload);
-        this.assertMintError(data);
-        if (data.paid != true) {
-          throw new Error("Invoice not paid.");
-        }
-        if (window.navigator.vibrate) navigator.vibrate(200);
-        notifySuccess("Token paid.");
-        console.log("#### pay lightning: token paid");
-        // delete spent tokens from db
-        this.deleteProofs(scndProofs);
-
-        // NUT-08 get change
-        if (data.change != null) {
-          const changeProofs = await this.constructProofs(
-            data.change,
-            secrets,
-            rs
-          );
-          console.log("## Received change: " + this.sumProofs(changeProofs));
-          amount_paid = amount_paid - this.sumProofs(changeProofs);
-          this.setProofs(this.proofs.concat(changeProofs));
-          // hack to update balance
-          this.setActiveProofs(this.activeProofs.concat([]));
-          // this.storeProofs();
-        }
-
-        // update UI
-
-        this.addPaidToken({
-          amount: -amount_paid,
-          serializedProofs: this.serializeProofs(scndProofs),
-        });
-
-        this.invoiceHistory.push({
-          amount: -amount_paid,
-          bolt11: this.payInvoiceData.data.request,
-          hash: this.payInvoiceData.data.hash,
-          memo: this.payInvoiceData.data.memo,
-          date: currentDateStr(),
-          status: "paid",
-          mint: this.activeMintUrl,
-        });
-
-        this.payInvoiceData.invoice = false;
-        this.payInvoiceData.show = false;
-        this.payInvoiceData.blocking = false;
-      } catch (error) {
-        this.payInvoiceData.blocking = false;
-        console.error(error);
-        throw error;
-      }
-    },
-
-    // /check
-
-    checkProofsSpendable: async function (proofs, update_history = false) {
-      /*
-      checks with the mint whether an array of proofs is still
-      spendable or already invalidated
-      */
-      if (proofs.length == 0) {
-        return;
-      }
-      const payload = {
-        proofs: proofs.map((p) => {
-          return { secret: p.secret };
-        }),
-      };
-      try {
-        const data = await this.activeMint.check(payload);
-        this.assertMintError(data);
-        // delete proofs from database if it is spent
-        let spentProofs = proofs.filter((p, pidx) => !data.spendable[pidx]);
-        if (spentProofs.length) {
-          this.deleteProofs(spentProofs);
-
-          // update UI
-          if (update_history) {
-            this.addPaidToken({
-              amount: -this.sumProofs(spentProofs),
-              serializedProofs: this.serializeProofs(spentProofs),
-            });
-          }
-        }
-
-        return data.spendable;
-      } catch (error) {
-        console.error(error);
-        notifyApiError(erro, "Could not check tokens");
-        throw error;
-      }
-    },
-
-    // /checkfees
-    checkFees: async function (payment_request) {
-      const payload = {
-        pr: payment_request,
-      };
-      try {
-        const data = await this.activeMint.checkFees(payload);
-        this.assertMintError(data);
-        console.log("#### checkFees", payment_request, data.fee);
-        return data.fee;
-      } catch (error) {
-        console.error(error);
-        notifyApiError(error, "Could not check fees");
-        throw error;
-      }
-    },
-
-    ////////////// UI HELPERS //////////////
-    checkInvoice: async function (payment_hash, verbose = true) {
-      console.log("### checkInvoice.hash", payment_hash);
-      const invoice = this.invoiceHistory.find((i) => i.hash === payment_hash);
-      try {
-        if (invoice.mint != null) {
-          await this.activateMint(invoice.mint, false);
-        }
-        const proofs = await this.mint(invoice.amount, invoice.hash, verbose);
-        return proofs;
-      } catch (error) {
-        if (verbose) {
-          this.notify("Invoice still pending");
-        }
-        console.log("Invoice still pending", invoice.hash);
-        throw error;
-      }
-    },
-    checkPendingInvoices: async function () {
-      const last_n = 10;
-      let i = 0;
-      for (const invoice of this.invoiceHistory) {
-        if (i >= last_n) {
-          break;
-        }
-        if (invoice.status === "pending" && invoice.amount > 0) {
-          try {
-            await this.checkInvoice(invoice.hash, false);
-          } catch (error) {
-            console.log(`${invoice.hash} still pending`);
-            throw error;
-          }
-        }
-        i += 1;
-      }
-    },
-
-    checkPendingTokens: async function () {
-      const last_n = this.historyTokens.length;
-      let i = 0;
-      for (const token of this.historyTokens) {
-        if (i >= last_n) {
-          break;
-        }
-        if (token.status === "pending" && token.amount < 0) {
-          this.checkTokenSpendable(token.token, false);
-        }
-        i += 1;
-      }
-      this.notifyRefreshed("Outgoing tokens checked");
-    },
-
-    checkTokenSpendable: async function (token, verbose = true) {
-      /*
-      checks whether a base64-encoded token (from the history table) has been spent already.
-      if it is spent, the appropraite entry in the history table is set to paid.
-      */
-      const tokenJson = this.decodeToken(token);
-      const proofs = this.getProofs(tokenJson);
-
-      // activate the mint
-      if (this.getMint(tokenJson).length > 0) {
-        await this.activateMint(this.getMint(tokenJson));
-      }
-
-      const spendable = await this.checkProofsSpendable(proofs);
-      let paid = false;
-      if (spendable.includes(false)) {
-        this.setTokenPaid(token);
-        paid = true;
-      }
-      if (paid) {
-        if (window.navigator.vibrate) navigator.vibrate(200);
-        notifySuccess("Token paid.");
-      } else {
-        console.log("### token not paid yet");
-        if (verbose) {
-          this.notify("Token still pending");
-        }
-        // this.sendData.tokens = token
-      }
-      return paid;
-    },
-
-    findTokenForAmount: function (amount) {
-      // unused coin selection
-      for (const token of this.activeProofs) {
-        const index = token.promises?.findIndex((p) => p.amount === amount);
-        if (index >= 0) {
-          return {
-            promise: token.promises[index],
-            secret: token.secrets[index],
-            r: token.rs[index],
-          };
-        }
-      }
-    },
+    // ////////////// UI HELPERS //////////////
 
     ////////////// WORKERS //////////////
-
-    /*clearAllWorkers: function () {
-      if (this.invoiceCheckListener) {
-        clearInterval(this.invoiceCheckListener);
-      }
-      if (this.tokensCheckSpendableListener) {
-        clearInterval(this.tokensCheckSpendableListener);
-      }
-    },*/
-    invoiceCheckWorker: async function () {
-      let nInterval = 0;
-      this.clearAllWorkers();
-      this.invoiceCheckListener = setInterval(async () => {
-        try {
-          nInterval += 1;
-
-          // exit loop after 2m
-          if (nInterval > 40) {
-            console.log("### stopping invoice check worker");
-            this.clearAllWorkers();
-          }
-          console.log("### invoiceCheckWorker setInterval", nInterval);
-          console.log(this.invoiceData);
-
-          // this will throw an error if the invoice is pending
-          await this.checkInvoice(this.invoiceData.hash, false);
-
-          // only without error (invoice paid) will we reach here
-          console.log("### stopping invoice check worker");
-          this.clearAllWorkers();
-          this.invoiceData.bolt11 = "";
-          this.showInvoiceDetails = false;
-          if (window.navigator.vibrate) navigator.vibrate(200);
-          notifySuccess("Payment received", "top");
-        } catch (error) {
-          console.log("invoiceCheckWorker: not paid yet");
-        }
-      }, 3000);
-    },
-    checkTokenSpendableWorker: async function () {
-      let nInterval = 0;
-      this.clearAllWorkers();
-      this.tokensCheckSpendableListener = setInterval(async () => {
-        try {
-          nInterval += 1;
-          // exit loop after 2m
-          if (nInterval > 24) {
-            console.log("### stopping token check worker");
-            this.clearAllWorkers();
-          }
-          console.log("### checkTokenSpendableWorker setInterval", nInterval);
-          console.log(this.sendData);
-
-          // this will throw an error if the invoice is pending
-          let paid = await this.checkTokenSpendable(
-            this.sendData.tokensBase64,
-            false
-          );
-          if (paid) {
-            console.log("### stopping token check worker");
-            this.clearAllWorkers();
-            this.sendData.tokens = "";
-            this.showSendTokens = false;
-          }
-        } catch (error) {
-          console.log("checkTokenSpendableWorker: not paid yet");
-        }
-      }, 3000);
-    },
 
     ////////////// UI HELPERS /////////////
     registerPWAEventHook: function () {
@@ -2108,14 +902,6 @@ export default {
   created: async function () {
     let params = new URL(document.location).searchParams;
 
-    // load proofs from db
-    // this.proofs = JSON.parse(localStorage.getItem("cashu.proofs") || "[]");
-
-    // load mints
-    /*if (localStorage.getItem("cashu.mints")) {
-      this.mints = JSON.parse(localStorage.getItem("cashu.mints"));
-    }*/
-
     // mint url
     if (params.get("mint")) {
       let activeMintUrl = params.get("mint");
@@ -2199,9 +985,9 @@ export default {
     );
 
     // startup tasks
-    await this.checkProofsSpendable(this.activeProofs, true).catch((err) => {
-      return;
-    });
+    // await this.checkProofsSpendable(this.activeProofs, true).catch((err) => {
+    //   return;
+    // });
     // await this.checkPendingInvoices().catch((err) => {
     //   return;
     // });

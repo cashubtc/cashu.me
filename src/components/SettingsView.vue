@@ -135,8 +135,8 @@
           :options="swapDataOptions()"
           option-value="url"
           option-label="shorturl"
-          label="Swap from"
-          style="min-width: 200px"
+          label="Swap from mint"
+          style="min-width: 200px; width: 100%"
         />
       </q-item>
       <q-item>
@@ -149,8 +149,8 @@
           :options="swapDataOptions()"
           option-value="url"
           option-label="shorturl"
-          label="Swap to"
-          style="min-width: 200px"
+          label="Swap to mint"
+          style="min-width: 200px; width: 100%"
         />
       </q-item>
       <q-item>
@@ -211,7 +211,7 @@
     @keydown.enter.prevent="addMint(mintToAdd, (verbose = true))"
   >
     <q-card class="q-pa-lg">
-      <h6 class="q-my-md text-primary">Do you trust this mint?</h6>
+      <h6 class="q-my-md">Do you trust this mint?</h6>
       <p>
         A Cashu mint does not know about your financial activity but it controls
         your funds. Make sure that you trust the operator of this mint.
@@ -226,32 +226,42 @@
         class="q-mb-xs"
       ></q-input>
       <div class="row q-mt-lg">
-        <q-btn
-          outline
-          v-close-popup
-          color="primary"
-          icon="check"
-          @click="addMint(mintToAdd, (verbose = true))"
-          >Add mint</q-btn
-        >
-        <q-btn v-close-popup flat color="grey" class="q-ml-auto">Cancel</q-btn>
+        <div class="col">
+          <q-btn v-close-popup flat color="grey" class="float-left"
+            >Cancel</q-btn
+          >
+        </div>
+        <div class="col-6">
+          <q-btn
+            class="float-right"
+            v-close-popup
+            color="primary"
+            icon="check"
+            @click="addMint(mintToAdd, (verbose = true))"
+            >Add mint</q-btn
+          >
+        </div>
       </div>
     </q-card>
   </q-dialog>
   <q-dialog v-model="showRemoveMintDialog">
     <q-card class="q-pa-lg">
-      <h6 class="q-my-md text-primary">
-        Are you sure you want to delete this mint?
-      </h6>
+      <h6 class="q-my-md">Are you sure you want to delete this mint?</h6>
       <div class="row q-mt-lg">
-        <q-btn
-          outline
-          v-close-popup
-          color="primary"
-          @click="removeMint(mintToRemove, (verbose = true))"
-          >Remove mint</q-btn
-        >
-        <q-btn v-close-popup flat color="grey" class="q-ml-auto">Cancel</q-btn>
+        <div class="col">
+          <q-btn v-close-popup flat color="grey" class="float-left"
+            >Cancel</q-btn
+          >
+        </div>
+        <div class="col">
+          <q-btn
+            v-close-popup
+            class="float-right"
+            color="primary"
+            @click="removeMint(mintToRemove, (verbose = true))"
+            >Remove mint</q-btn
+          >
+        </div>
       </div>
     </q-card>
   </q-dialog>
