@@ -16,75 +16,84 @@
         <q-card-section class="q-pt-sm">
           <div class="row items-center no-wrap q-mb-sm">
             <div class="col-6 col-sm-5 col-md-4 q-pr-xs">
-              <q-btn
-                size="1.0rem"
-                rectangle
-                unelevated
-                dense
-                color="primary"
-                align="between"
-                icon="file_download"
-                icon-right="toll"
-                class="full-width"
-                @click="showReceiveTokensDialog"
-                >Receive Ecash</q-btn
-              >
+              <div class="row items-center no-wrap q-mb-sm">
+                <q-btn
+                  size="1.0rem"
+                  rectangle
+                  unelevated
+                  dense
+                  color="primary"
+                  align="between"
+                  icon="file_download"
+                  icon-right="toll"
+                  class="full-width"
+                  @click="showReceiveTokensDialog"
+                  >Receive Ecash</q-btn
+                >
+              </div>
+              <div class="row items-center no-wrap q-mb-none">
+                <q-btn
+                  size="1.0rem"
+                  rectangle
+                  unelevated
+                  dense
+                  align="between"
+                  color="secondary"
+                  icon="file_download"
+                  icon-right="bolt"
+                  class="full-width"
+                  @click="showInvoiceCreateDialog"
+                >
+                  <strong class="gt-lg"> Create Lightning Invoice </strong>
+                  <strong class="gt-xs lt-xl"> Create Invoice </strong>
+                  <strong class="lt-sm"> LN Invoice </strong>
+                </q-btn>
+              </div>
             </div>
-            <div class="col-0 col-sm-2 col-md-4"></div>
+            <div class="col-0 col-sm-2 col-md-4">
+              <q-btn
+                size="2rem"
+                unelevated
+                icon="qr_code_scanner"
+                class="col-2 q-pb-md gt-xs q-mt-md"
+                @click="showCamera"
+              />
+            </div>
             <div class="col-6 col-sm-5 col-md-4 q-pl-xs">
-              <q-btn
-                size="1.0rem"
-                rectangle
-                unelevated
-                dense
-                align="between"
-                color="primary"
-                icon="file_upload"
-                icon-right="toll"
-                class="full-width"
-                @click="showSendTokensDialog"
-              >
-                Send Ecash</q-btn
-              >
-            </div>
-          </div>
-          <div class="row items-center no-wrap q-mb-none">
-            <div class="col-6 col-sm-5 col-md-4 q-pr-xs">
-              <q-btn
-                size="1.0rem"
-                rectangle
-                unelevated
-                dense
-                align="between"
-                color="secondary"
-                icon="file_download"
-                icon-right="bolt"
-                class="full-width"
-                @click="showInvoiceCreateDialog"
-              >
-                <strong class="gt-lg"> Create Lightning Invoice </strong>
-                <strong class="gt-xs lt-xl"> Create Invoice </strong>
-                <strong class="lt-sm"> LN Invoice </strong>
-              </q-btn>
-            </div>
-            <div class="col-0 col-sm-2 col-md-4"></div>
-            <div class="col-6 col-sm-5 col-md-4 q-pl-xs">
-              <q-btn
-                size="1.0rem"
-                rectangle
-                unelevated
-                dense
-                align="between"
-                color="secondary"
-                icon="file_upload"
-                icon-right="bolt"
-                class="full-width"
-                @click="showParseDialog"
-              >
-                <strong class="gt-lg"> Pay Lightning Invoice </strong>
-                <strong class="gt-xs lt-xl"> Pay Invoice </strong>
-                <strong class="lt-sm"> Pay LN </strong>
-              </q-btn>
+              <div class="row items-center no-wrap q-mb-sm">
+                <q-btn
+                  size="1.0rem"
+                  rectangle
+                  unelevated
+                  dense
+                  align="between"
+                  color="primary"
+                  icon="file_upload"
+                  icon-right="toll"
+                  class="full-width"
+                  @click="showSendTokensDialog"
+                >
+                  Send Ecash</q-btn
+                >
+              </div>
+              <div class="row items-center no-wrap q-mb-none">
+                <q-btn
+                  size="1.0rem"
+                  rectangle
+                  unelevated
+                  dense
+                  align="between"
+                  color="secondary"
+                  icon="file_upload"
+                  icon-right="bolt"
+                  class="full-width"
+                  @click="showParseDialog"
+                >
+                  <strong class="gt-lg"> Pay Lightning Invoice </strong>
+                  <strong class="gt-xs lt-xl"> Pay Invoice </strong>
+                  <strong class="lt-sm"> Pay LN </strong>
+                </q-btn>
+              </div>
             </div>
           </div>
         </q-card-section>
@@ -259,31 +268,49 @@
       "
     >
       <q-tabs
-        class="lt-md fixed-bottom q-px-none q-py-md left-0 right-0 bg-primary text-white shadow-2 z-top q-px-0"
+        class="lt-sm fixed-bottom q-px-none q-py-md left-0 right-0 bg-primary text-white shadow-2 z-top q-px-0"
         indicator-color="transparent"
         align="justify"
       >
-        <q-tab
-          class="col-5"
-          label="Create Invoice"
-          icon="file_download"
+        <q-btn
+          size="1.0rem"
+          flat
+          unelevated
+          dense
+          class="full-width"
           @click="showInvoiceCreateDialog"
         >
-        </q-tab>
-        <q-tab
-          class="col-2 q-pb-md"
-          icon="photo_camera"
+          <q-avatar size="42px">
+            <q-icon name="download_file" size="44px" />
+          </q-avatar>
+
+          <strong class="gt-lg"> Create Lightning Invoice </strong>
+          <strong class="gt-xs lt-xl"> Create Invoice </strong>
+          <strong class="lt-sm"> Create<br />Invoice </strong>
+        </q-btn>
+        <q-btn
+          size="2rem"
+          unelevated
+          icon="qr_code_scanner"
+          class="col-2 q-pb-md q-mt-md"
           v-if="hasCamera"
           @click="showCamera"
-        >
-        </q-tab>
-        <q-tab
-          class="col-5"
-          icon="file_upload"
+        />
+        <q-btn
+          size="1.0rem"
+          flat
+          unelevated
+          dense
+          class="full-width"
           @click="showParseDialog"
-          label="Pay Invoice"
         >
-        </q-tab>
+          <q-avatar size="42px">
+            <q-icon name="bolt" size="44px" />
+          </q-avatar>
+          <strong class="gt-lg"> Pay Lightning Invoice </strong>
+          <strong class="gt-xs lt-xl"> Pay Invoice </strong>
+          <strong class="lt-sm"> Pay<br />Invoice </strong>
+        </q-btn>
       </q-tabs>
     </div>
 
@@ -413,6 +440,7 @@ import WelcomeDialog from "components/WelcomeDialog.vue";
 import SendTokenDialog from "components/SendTokenDialog.vue";
 import PayInvoiceDialog from "components/PayInvoiceDialog.vue";
 import InvoiceDetailDialog from "components/InvoiceDetailDialog.vue";
+import QrcodeReader from "components/QrcodeReader.vue";
 
 // pinia stores
 import { mapActions, mapState, mapWritableState } from "pinia";
@@ -442,6 +470,7 @@ export default {
     ReceiveTokenDialog,
     PayInvoiceDialog,
     InvoiceDetailDialog,
+    QrcodeReader,
   },
   data: function () {
     return {
@@ -505,6 +534,7 @@ export default {
   computed: {
     ...mapWritableState(useUiStore, ["showInvoiceDetails"]),
     ...mapState(useUiStore, ["tickerShort"]),
+    ...mapState(useUiStore, ["tickerDollar"]),
     ...mapWritableState(useReceiveTokensStore, [
       "showReceiveTokens",
       "receiveData",
