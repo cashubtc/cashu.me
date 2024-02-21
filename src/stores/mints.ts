@@ -2,7 +2,7 @@ import { defineStore } from "pinia";
 import { useLocalStorage } from "@vueuse/core";
 import { useWorkersStore } from "./workers";
 import { notifyApiError, notifyError, notifySuccess } from "src/js/notify";
-import { CashuMint, MintKeys, Proof } from "@cashu/cashu-ts";
+import { CashuMint, MintKeys, Proof, SerializedBlindedSignature } from "@cashu/cashu-ts";
 
 type Mint = {
   url: string;
@@ -17,6 +17,13 @@ type Keyset = {
   keys: MintKeys
 };
 
+type BlindSignatureAudit = {
+  signature: SerializedBlindedSignature;
+  amount: number;
+  secret: Uint8Array;
+  r: string;
+};
+
 export const useMintsStore = defineStore("mints", {
   state: () => {
     return {
@@ -29,6 +36,8 @@ export const useMintsStore = defineStore("mints", {
       mintToRemove: "",
       mints: useLocalStorage("cashu.mints", [] as Mint[]),
       proofs: useLocalStorage("cashu.proofs", [] as Proof[]),
+      spentProofs: useLocalStorage("cashu.spentProofs", [] as Proof[]),
+      blindSignatures: useLocalStorage("cashu.blindSignatures", [] as BlindSignatureAudit[]),
       showAddMintDialog: false,
       showRemoveMintDialog: false,
     };
@@ -59,10 +68,22 @@ export const useMintsStore = defineStore("mints", {
         );
       }
     },
+    setSpentProofs(proofs: Proof[]) {
+      this.spentProofs = proofs;
+    },
+    appendBlindSignatures(signature: SerializedBlindedSignature, amount: number, secret: Uint8Array, r: string) {
+      const audit: BlindSignatureAudit = {
+        signature: signature,
+        amount: amount,
+        secret: secret,
+        r: r,
+      };
+      this.blindSignatures.push(audit);
+    },
     setActiveProofs(proofs: Proof[]) {
       this.activeProofs = proofs;
     },
-    getKeysForKeyset: async function (keyset_id: string) {
+    getKeysForKeyset: async function (keyset_id: string): Promise<MintKeys> {
       let keys = this.allKeysets
         .filter((m) => m.id == keyset_id)
         .map((m) => m.keys)

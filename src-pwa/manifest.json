@@ -1,7 +1,7 @@
 {
-  "name": "Cashu",
-  "short_name": "Cashu",
-  "description": "Cashu Wallet",
+  "name": "Cashu.me",
+  "short_name": "Cashu.me",
+  "description": "A Cashu wallet for the web",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#12091f",

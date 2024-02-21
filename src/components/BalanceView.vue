@@ -41,6 +41,16 @@
               Active mint:
               <b>{{ formatSat(getBalance) }} {{ tickerShort }} </b>
             </span>
+            <!-- <q-knob
+              :model-value="getBalance"
+              :min="0"
+              :max="getTotalBalance"
+              show-value
+              size="50px"
+              :thickness="0.2"
+              color="orange"
+              class="q-ma-none q-pa-none q-mt-none q-pt-none"
+            /> -->
           </div>
         </div>
         <!-- mint url -->
