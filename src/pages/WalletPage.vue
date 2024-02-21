@@ -958,9 +958,9 @@ export default {
     // await this.checkProofsSpendable(this.activeProofs, true).catch((err) => {
     //   return;
     // });
-    await this.checkPendingInvoices().catch((err) => {
-      return;
-    });
+    // await this.checkPendingInvoices().catch((err) => {
+    //   return;
+    // });
     // await this.checkPendingTokens().catch((err) => {
     //   return;
     // });
