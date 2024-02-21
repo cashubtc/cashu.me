@@ -10,10 +10,10 @@
         @click="toggleLeftDrawer"
       />
       <q-toolbar-title>
-        <span><strong>Cashu</strong></span>
+        <span><strong>Cashu.me</strong></span>
       </q-toolbar-title>
-      <q-badge color="yellow" text-color="black" class="gt-sm q-mr-md">
-        <span>Warning: Cashu is beta software</span>
+      <q-badge color="yellow" text-color="black" class="q-mr-md">
+        <span>Beta</span>
       </q-badge>
 
       <q-btn-dropdown
@@ -171,12 +171,6 @@ const linksList = [
     caption: "t.me/CashuMe",
     icon: "chat",
     link: "https://t.me/CashuMe",
-  },
-  {
-    title: "Faucet",
-    caption: "gandlaf.com/faucet",
-    icon: "generating_tokens",
-    link: "https://www.gandlaf.com/faucet/anarchy",
   },
   {
     title: "Redeem",

@@ -1,8 +1,8 @@
 {
   "name": "cashu",
   "version": "0.0.1",
-  "description": "Cashu Wallet",
-  "productName": "Cashu",
+  "description": "Cashu.me Wallet",
+  "productName": "Cashu.me",
   "author": "cashu.me",
   "private": true,
   "scripts": {

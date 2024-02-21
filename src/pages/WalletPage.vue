@@ -17,7 +17,7 @@
           <div class="row items-center no-wrap q-mb-sm">
             <div class="col-6 col-sm-5 col-md-4 q-pr-xs">
               <q-btn
-                size="0.75rem"
+                size="1.0rem"
                 rectangle
                 unelevated
                 dense
@@ -33,7 +33,7 @@
             <div class="col-0 col-sm-2 col-md-4"></div>
             <div class="col-6 col-sm-5 col-md-4 q-pl-xs">
               <q-btn
-                size="0.75rem"
+                size="1.0rem"
                 rectangle
                 unelevated
                 dense
@@ -48,7 +48,47 @@
               >
             </div>
           </div>
-
+          <div class="row items-center no-wrap q-mb-none">
+            <div class="col-6 col-sm-5 col-md-4 q-pr-xs">
+              <q-btn
+                size="1.0rem"
+                rectangle
+                unelevated
+                dense
+                align="between"
+                color="secondary"
+                icon="file_download"
+                icon-right="bolt"
+                class="full-width"
+                @click="showInvoiceCreateDialog"
+              >
+                <strong class="gt-lg"> Create Lightning Invoice </strong>
+                <strong class="gt-xs lt-xl"> Create Invoice </strong>
+                <strong class="lt-sm"> LN Invoice </strong>
+              </q-btn>
+            </div>
+            <div class="col-0 col-sm-2 col-md-4"></div>
+            <div class="col-6 col-sm-5 col-md-4 q-pl-xs">
+              <q-btn
+                size="1.0rem"
+                rectangle
+                unelevated
+                dense
+                align="between"
+                color="secondary"
+                icon="file_upload"
+                icon-right="bolt"
+                class="full-width"
+                @click="showParseDialog"
+              >
+                <strong class="gt-lg"> Pay Lightning Invoice </strong>
+                <strong class="gt-xs lt-xl"> Pay Invoice </strong>
+                <strong class="lt-sm"> Pay LN </strong>
+              </q-btn>
+            </div>
+          </div>
+        </q-card-section>
+        <q-card-section class="q-pt-none">
           <!-- ///////////////////////////////////////////
                 ////////////////// TABLES /////////////////
                 /////////////////////////////////////////// -->
@@ -136,17 +176,17 @@
       <div style="margin-bottom: 7rem">
         <div class="row q-pt-sm">
           <div class="col-4 q-pt-none">
-            <q-btn
+            <!-- <q-btn
               class="full-width gt-sm"
               size="1.0rem"
               icon-right="bolt"
               icon="file_download"
               align="between"
               rectangle
-              color="primary"
+              color="orange"
               @click="showInvoiceCreateDialog"
               ><strong>Create Invoice</strong>
-            </q-btn>
+            </q-btn> -->
           </div>
           <!-- <div class="col-4"></div> -->
           <div class="col-4 q-pt-xs">
@@ -187,7 +227,7 @@
           </div>
 
           <div class="col-4 q-pt-none">
-            <q-btn
+            <!-- <q-btn
               class="full-width gt-sm"
               @click="showParseDialog"
               size="1.0rem"
@@ -195,9 +235,9 @@
               icon="file_upload"
               align="between"
               rectangle
-              color="primary"
+              color="orange"
               ><strong>Pay Invoice</strong>
-            </q-btn>
+            </q-btn> -->
           </div>
         </div>
       </div>
@@ -915,12 +955,12 @@ export default {
     );
 
     // startup tasks
-    await this.checkProofsSpendable(this.activeProofs, true).catch((err) => {
-      return;
-    });
-    // await this.checkPendingInvoices().catch((err) => {
+    // await this.checkProofsSpendable(this.activeProofs, true).catch((err) => {
     //   return;
     // });
+    await this.checkPendingInvoices().catch((err) => {
+      return;
+    });
     // await this.checkPendingTokens().catch((err) => {
     //   return;
     // });

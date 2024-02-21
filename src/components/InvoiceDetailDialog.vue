@@ -1,7 +1,6 @@
 <template>
   <q-dialog v-model="showInvoiceDetails" persistent position="top">
-    <q-card class="q-pa-lg q-pt-md qcard"
-      >lnurlPaySecond
+    <q-card class="q-pa-lg q-pt-md qcard">
       <div v-if="!invoiceData.bolt11">
         <div class="row items-center no-wrap q-mb-sm">
           <div class="col-12">
