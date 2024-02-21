@@ -188,14 +188,24 @@ export const useWalletStore = defineStore("wallet", {
           throw Error("balance too low.");
         }
 
+        // filter spendable proofs so that the amount is reached
+        spendableProofs.sort((a, b) => a.amount - b.amount);
+        let sum = 0;
+        let i = 0;
+        while (sum < amount) {
+          sum += spendableProofs[i].amount;
+          i += 1;
+        }
+        const proofsToSplit = spendableProofs.slice(0, i);
+
         // call /split
 
         let { firstProofs, scndProofs } = await this.split(
-          spendableProofs,
+          proofsToSplit,
           amount
         );
         // set scndProofs in this.proofs as reserved
-        const usedSecrets = proofs.map((p) => p.secret);
+        const usedSecrets = proofsToSplit.map((p) => p.secret);
         let newProofs = mintStore.proofs.map((proof) => {
           if (usedSecrets.includes(proof.secret)) {
             proof.reserved = true;
@@ -354,6 +364,16 @@ export const useWalletStore = defineStore("wallet", {
           outputs,
         };
         const data = await mintStore.activeMint.split(payload);
+
+        // push all promise, amount, secret, rs to mintStore.appendBlindSignatures
+        for (let i = 0; i < data.promises.length; i++) {
+          mintStore.appendBlindSignatures(
+            data.promises[i],
+            amounts[i],
+            secrets[i],
+            rs[i]
+          );
+        }
 
         mintStore.assertMintError(data);
         const first_promises = data.promises.slice(0, frst_amounts.length);
