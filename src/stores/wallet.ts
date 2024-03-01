@@ -710,7 +710,7 @@ export const useWalletStore = defineStore("wallet", {
     },
     checkPendingTokens: async function (verbose: boolean = true) {
       const tokenStore = useTokensStore();
-      const last_n = 10;
+      const last_n = 5;
       let i = 0;
       // invert for loop
       for (const token of tokenStore.historyTokens.slice().reverse()) {
