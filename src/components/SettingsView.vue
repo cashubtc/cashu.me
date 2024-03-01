@@ -334,7 +334,7 @@ export default defineComponent({
       // settle invoice on other side
       await this.activateMint(to_url);
       await this.invoiceCheckWorker();
-      this.notifySuccess("Swap successful!");
+      this.notifySuccess("Swap successful");
     },
     enable_terminal: function () {
       // enable debug terminal
