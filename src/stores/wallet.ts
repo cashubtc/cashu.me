@@ -779,9 +779,9 @@ export const useWalletStore = defineStore("wallet", {
       ) {
         this.payInvoiceData.data.request = req;
         reqtype = "lnurl";
-      } else if (req.indexOf("cashuA")) {
+      } else if (req.indexOf("cashuA") !== -1) {
         // very dirty way of parsing cashu tokens from either a pasted token or a URL like https://host.com?token=eyJwcm
-        this.receiveData.tokensBase64 = req.slice(req.indexOf("cashuA"));
+        receiveStore.receiveData.tokensBase64 = req.slice(req.indexOf("cashuA"));
         reqtype = "cashu";
       }
 
@@ -840,7 +840,7 @@ export const useWalletStore = defineStore("wallet", {
       } else if (reqtype == "cashu") {
         console.log("#### QR CODE: CASHU TOKEN");
         this.payInvoiceData.show = false;
-        this.showReceiveTokens = true;
+        receiveStore.showReceiveTokens = true;
       }
     },
     lnurlPayFirst: async function (address) {

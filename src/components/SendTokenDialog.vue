@@ -34,10 +34,10 @@
                 ></q-input> -->
       </div>
       <div v-else class="text-center q-mb-lg">
-        <div class="text-center q-mb-lg" v-if="sendData.tokens.length < 2">
-          <q-responsive :ratio="1" class="q-mx-xl">
+        <div class="text-center q-mb-lg" v-if="qrCodeFragment">
+          <q-responsive :ratio="1" class="q-mx-xs">
             <vue-qrcode
-              :value="baseURL + '?token=' + sendData.tokensBase64"
+              :value="qrCodeFragment"
               :options="{ width: 340 }"
               class="rounded-borders"
             >
@@ -109,10 +109,12 @@ import { useProofsStore } from "src/stores/proofs";
 import { useMintsStore } from "src/stores/mints";
 import { useTokensStore } from "src/stores/tokens";
 import token from "src/js/token";
+import { Buffer } from "buffer";
 
 import { mapActions, mapState, mapWritableState } from "pinia";
 import ChooseMint from "components/ChooseMint.vue";
 import TokenInformation from "components/TokenInformation.vue";
+import { UR, UREncoder } from "@gandlaf21/bc-ur";
 
 export default defineComponent({
   name: "SendTokenDialog",
@@ -127,6 +129,10 @@ export default defineComponent({
   data: function () {
     return {
       baseURL: location.protocol + "//" + location.host + location.pathname,
+      stop: false,
+      qrCodeFragment: "",
+      qrInterval: null,
+      encoder: null,
     };
   },
   computed: {
@@ -134,6 +140,28 @@ export default defineComponent({
     ...mapWritableState(useSendTokensStore, ["sendData"]),
     ...mapState(useUiStore, ["tickerShort"]),
     ...mapState(useMintsStore, ["activeProofs"]),
+  },
+  watch: {
+    "sendData.tokensBase64": function (val) {
+      if (!val.length) {
+        return;
+      }
+      // check if token has more than one proof
+      const tokenObj = token.decode(val);
+      if (tokenObj.token[0].proofs.length == 1) {
+        this.qrCodeFragment = val;
+      } else {
+        this.qrCodeFragment = "";
+        this.startQrCodeLoop();
+      }
+    },
+    showSendTokens: function (val) {
+      if (val) {
+        // this.startQrCodeLoop();
+      } else {
+        clearInterval(this.qrInterval);
+      }
+    },
   },
   methods: {
     ...mapActions(useWalletStore, ["splitToSend"]),
@@ -156,6 +184,22 @@ export default defineComponent({
     },
     getMint: function (decoded_token) {
       return token.getMint(decoded_token);
+    },
+    startQrCodeLoop: async function () {
+      if (this.sendData.tokensBase64.length == 0) {
+        return;
+      }
+      const messageBuffer = Buffer.from(this.sendData.tokensBase64);
+      const ur = UR.fromBuffer(messageBuffer);
+      const maxFragmentLength = 200;
+      const firstSeqNum = 0;
+      this.encoder = new UREncoder(ur, maxFragmentLength, firstSeqNum);
+      this.qrInterval = setInterval(() => {
+        this.qrCodeFragment = this.encoder.nextPart();
+      }, 250);
+    },
+    updateQrCode: function () {
+      this.qrCodeFragment = this.encoder.nextPart();
     },
     sendTokens: async function () {
       /*
