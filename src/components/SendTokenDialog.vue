@@ -1,123 +1,127 @@
 <template>
   <q-dialog v-model="showSendTokens" position="top">
-    <q-card class="q-pa-lg q-pt-md qcard">
+    <q-card class="q-pa-none q-pt-none qcard">
       <div v-if="!sendData.tokens">
-        <div class="row items-center no-wrap q-mb-sm">
-          <div class="col-12">
-            <span class="text-subtitle1">Send ecash</span>
+        <q-card-section class="q-pa-lg q-pt-md">
+          <div class="row items-center no-wrap q-mb-sm">
+            <div class="col-12">
+              <span class="text-subtitle1">Send ecash</span>
+            </div>
           </div>
-        </div>
-        <div class="row items-center no-wrap q-my-sm q-py-none">
-          <div class="col-12">
-            <ChooseMint :ticker-short="tickerShort" />
+          <div class="row items-center no-wrap q-my-sm q-py-none">
+            <div class="col-12">
+              <ChooseMint :ticker-short="tickerShort" />
+            </div>
           </div>
-        </div>
 
-        <q-input
-          filled
-          dense
-          type="number"
-          v-model.number="sendData.amount"
-          :label="'Amount (' + tickerShort + ') *'"
-          mask="#"
-          fill-mask="0"
-          reverse-fill-mask
-          autofocus
-          class="q-mb-lg"
-          @keyup.enter="sendTokens"
-        ></q-input>
-        <!-- <q-input
+          <q-input
+            filled
+            dense
+            type="number"
+            v-model.number="sendData.amount"
+            :label="'Amount (' + tickerShort + ') *'"
+            mask="#"
+            fill-mask="0"
+            reverse-fill-mask
+            autofocus
+            class="q-mb-lg"
+            @keyup.enter="sendTokens"
+          ></q-input>
+          <!-- <q-input
                 filled
                 dense
                 v-model.trim="sendData.memo"
                 label="Memo"
                 ></q-input> -->
+          <q-btn
+            v-if="!sendData.tokens"
+            :disable="sendData.amount == null || sendData.amount <= 0"
+            @click="sendTokens"
+            color="primary"
+            type="submit"
+            >Send Tokens</q-btn
+          >
+        </q-card-section>
       </div>
-      <div v-else class="text-center q-mb-md">
-        <div class="text-center q-mb-md" v-if="qrCodeFragment">
-          <q-responsive :ratio="1" class="q-mx-xs">
-            <vue-qrcode
-              :value="qrCodeFragment"
-              :options="{ width: 340 }"
-              class="rounded-borders"
+      <div v-else class="text-center q-mb-xs">
+        <q-card-section class="q-pa-none q-pt-md">
+          <div class="text-center q-mb-md" v-if="qrCodeFragment">
+            <q-responsive :ratio="1" class="q-mx-none">
+              <vue-qrcode
+                :value="qrCodeFragment"
+                :options="{ width: 400 }"
+                class="rounded-borders"
+              >
+              </vue-qrcode>
+            </q-responsive>
+          </div>
+          <div class="q-pb-xs q-ba-none q-gutter-sm" v-if="showAnimatedQR">
+            <q-btn
+              flat
+              style="font-size: 12px"
+              color="primary"
+              class="q-ma-none"
+              @click="changeSpeed"
             >
-            </vue-qrcode>
-          </q-responsive>
-        </div>
-        <div class="q-pb-xs q-ba-none q-gutter-sm" v-if="showAnimatedQR">
-          <q-btn
-            flat
-            style="font-size: 12px"
-            color="primary"
-            class="q-ma-none"
-            @click="changeSpeed"
-          >
-            <q-icon name="speed" style="margin-right: 8px"></q-icon>
-            Speed: {{ fragmentSpeedLabel }}
-          </q-btn>
-          <q-btn
-            flat
-            style="font-size: 12px"
-            class="q-ma-none"
-            color="primary"
-            @click="changeSize"
-          >
-            <q-icon name="zoom_in" style="margin-right: 8px"></q-icon>
-            Size: {{ fragmentLengthLabel }}
-          </q-btn>
-        </div>
-        <div class="row">
-          <div class="col-12">
-            <q-input
-              outlined
-              dense
-              readonly
-              v-model="sendData.tokensBase64"
-              label="Cashu token"
-              type="textarea"
-              class="q-mb-sm"
-            ></q-input>
+              <q-icon name="speed" style="margin-right: 8px"></q-icon>
+              Speed: {{ fragmentSpeedLabel }}
+            </q-btn>
+            <q-btn
+              flat
+              style="font-size: 12px"
+              class="q-ma-none"
+              color="primary"
+              @click="changeSize"
+            >
+              <q-icon name="zoom_in" style="margin-right: 8px"></q-icon>
+              Size: {{ fragmentLengthLabel }}
+            </q-btn>
           </div>
-        </div>
-        <div class="row">
-          <div class="col-12">
-            <TokenInformation
-              :ticker-short="tickerShort"
-              :proofs-to-show="sendData.tokens"
-              :token-mint-url="getMint(decodeToken(sendData.tokensBase64))"
-            />
-          </div>
-        </div>
-      </div>
-      <div class="row q-mt-lg">
-        <q-btn
-          v-if="!sendData.tokens"
-          :disable="sendData.amount == null || sendData.amount <= 0"
-          @click="sendTokens"
-          color="primary"
-          type="submit"
-          >Send Tokens</q-btn
-        >
-        <!-- <q-btn v-else @click="burnTokens" outline color="grey"
-                >Burn Tokens</q-btn
-                > -->
-        <div v-else>
-          <q-btn
-            class="q-mx-xs"
-            color="primary"
-            @click="copyText(sendData.tokensBase64)"
-            >Copy token</q-btn
-          >
-          <q-btn
-            class="q-mx-xs"
-            color="primary"
-            outline
-            @click="copyText(baseURL + '?token=' + sendData.tokensBase64)"
-            >Copy link</q-btn
-          >
-        </div>
+          <q-card-section class="q-pa-sm">
+            <div class="row">
+              <div class="col-12">
+                <q-input
+                  outlined
+                  dense
+                  readonly
+                  v-model="sendData.tokensBase64"
+                  label="Cashu token"
+                  type="textarea"
+                  class="q-mb-sm"
+                ></q-input>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-12">
+                <TokenInformation
+                  :ticker-short="tickerShort"
+                  :proofs-to-show="sendData.tokens"
+                  :token-mint-url="getMint(decodeToken(sendData.tokensBase64))"
+                />
+              </div>
+            </div>
 
-        <q-btn v-close-popup flat color="grey" class="q-ml-auto">Close</q-btn>
+            <div class="row q-mt-lg">
+              <q-btn
+                class="q-mx-xs"
+                color="primary"
+                @click="copyText(sendData.tokensBase64)"
+                >Copy token</q-btn
+              >
+              <q-btn
+                class="q-mx-xs"
+                color="primary"
+                outline
+                @click="copyText(baseURL + '?token=' + sendData.tokensBase64)"
+                >Copy link</q-btn
+              >
+
+              <q-btn v-close-popup flat color="grey" class="q-ml-auto"
+                >Close</q-btn
+              >
+            </div>
+          </q-card-section>
+        </q-card-section>
       </div>
     </q-card>
   </q-dialog>
