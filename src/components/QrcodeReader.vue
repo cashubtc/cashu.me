@@ -3,6 +3,7 @@ import QrScanner from "qr-scanner";
 import { URDecoder } from "@gandlaf21/bc-ur";
 
 export default {
+  emits: ["decode"],
   data(): {
     qrScanner: QrScanner | null;
     urDecoder: URDecoder | null;
@@ -34,10 +35,9 @@ export default {
     handleResult(result: QrScanner.ScanResult) {
       // if this is a multipart-qr code, do not yet emit
       if (result.data.startsWith("ur:")) {
-        // console.log("ur: ", result.data);
-        console.log("progress: ", this.urDecoder?.getProgress());
-        this.urDecoderProgress = this.urDecoder?.getProgress() || 0;
         this.urDecoder?.receivePart(result.data);
+        this.urDecoderProgress =
+          this.urDecoder?.estimatedPercentComplete() || 0;
         if (this.urDecoder?.isComplete() && this.urDecoder?.isSuccess()) {
           const ur = this.urDecoder?.resultUR();
           const decoded = ur.decodeCBOR();
@@ -65,18 +65,24 @@ export default {
     <div class="row q-justify-center">
       <q-linear-progress
         rounded
-        size="25px"
+        size="30px"
         v-if="urDecoderProgress > 0"
         :value="urDecoderProgress"
         :indeterminate="urDecoderProgress === 0"
-        class="q-mt-md"
-        color="accent"
+        class="q-mt-none"
+        color="secondary"
       >
         <div class="absolute-full flex flex-center">
           <q-badge
             color="white"
-            text-color="accent"
-            :label="Math.round(urDecoderProgress * 100) + '%'"
+            text-color="secondary"
+            style="font-size: 1rem; padding: 5px"
+            class="text-weight-bold"
+            :label="
+              Math.round(urDecoderProgress * 100) +
+              '%' +
+              (urDecoderProgress > 0.9 ? ' - Keep scanning' : '')
+            "
           />
         </div>
       </q-linear-progress>
