@@ -297,7 +297,7 @@ export const useWalletStore = defineStore("wallet", {
         });
 
         if (window.navigator.vibrate) navigator.vibrate(200);
-        notifySuccess("Tokens received.");
+        notifySuccess("Ecash Received");
       } catch (error) {
         console.error(error);
         try {
@@ -515,7 +515,7 @@ export const useWalletStore = defineStore("wallet", {
 
         if (window.navigator.vibrate) navigator.vibrate(200);
 
-        notifySuccess("Token paid.");
+        notifySuccess("Ecash Paid");
         console.log("#### pay lightning: token paid");
         // delete spent tokens from db
         proofsStore.deleteProofs(scndProofs);
@@ -654,7 +654,7 @@ export const useWalletStore = defineStore("wallet", {
       }
       if (paid) {
         if (window.navigator.vibrate) navigator.vibrate(200);
-        notifySuccess("Token paid.");
+        notifySuccess("Ecash Paid");
       } else {
         console.log("### token not paid yet");
         if (verbose) {

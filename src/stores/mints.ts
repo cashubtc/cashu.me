@@ -144,7 +144,7 @@ export const useMintsStore = defineStore("mints", {
           this.keysets.includes(p.id)
         );
         if (verbose) {
-          await notifySuccess("Mint added.");
+          await notifySuccess("Mint added");
         }
         // update balance of active mint in this.mints
         if (this.mints.length > 0 && this.activeMintUrl) {
@@ -240,7 +240,7 @@ export const useMintsStore = defineStore("mints", {
       if (this.mints.length > 0) {
         await this.activateMint(this.mints[0].url);
       }
-      notifySuccess("Mint removed.");
+      notifySuccess("Mint removed");
     },
     restoreFromBackup: function (backup: any) {
       if (!backup || !backup["cashu.welcomeDialogSeen"]) {
@@ -268,7 +268,7 @@ export const useMintsStore = defineStore("mints", {
           backup["cashu.activeProofs"]
         );
 
-        notifySuccess("Backup successfully restored!");
+        notifySuccess("Backup restored");
       }
     },
     assertMintError: function (response: { error: any }, verbose = true) {
