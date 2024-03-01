@@ -161,17 +161,17 @@ export default defineComponent({
       encoder: null,
 
       // parameters for animated QR
-      currentFragmentLength: 100,
+      currentFragmentLength: 150,
       fragmentLengthMedium: 100,
       fragmentLengthShort: 50,
       fragmentLengthLong: 150,
-      fragmentLengthLabel: "M",
+      fragmentLengthLabel: "L",
 
-      currentFragmentInterval: 250,
+      currentFragmentInterval: 150,
       fragmentIntervalMedium: 250,
       fragmentIntervalFast: 150,
       framentInervalSlow: 500,
-      fragmentSpeedLabel: "M",
+      fragmentSpeedLabel: "F",
     };
   },
   computed: {
@@ -208,6 +208,8 @@ export default defineComponent({
         // this.startQrCodeLoop();
       } else {
         clearInterval(this.qrInterval);
+        this.sendData.data = "";
+        this.sendData.tokensBase64 = "";
       }
     },
   },
