@@ -148,7 +148,10 @@ export default defineComponent({
       }
       // check if token has more than one proof
       const tokenObj = token.decode(val);
-      if (tokenObj.token[0].proofs.length == 1) {
+      const proofs = tokenObj.token[0].proofs;
+      if (!proofs.length) {
+        return;
+      } else if (proofs.length <= 2) {
         this.qrCodeFragment = val;
       } else {
         this.qrCodeFragment = "";
