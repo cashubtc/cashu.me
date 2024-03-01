@@ -68,7 +68,7 @@ import { mapActions, mapState, mapWritableState } from "pinia";
 import TokenInformation from "components/TokenInformation.vue";
 
 export default defineComponent({
-  name: "SendTokenDialog",
+  name: "ReceiveTokenDialog",
   mixins: [windowMixin],
   components: {
     TokenInformation,
