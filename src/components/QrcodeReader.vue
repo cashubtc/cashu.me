@@ -76,7 +76,7 @@ export default {
           <q-badge
             color="white"
             text-color="accent"
-            :label="urDecoderProgress * 100 + '%'"
+            :label="Math.round(urDecoderProgress * 100) + '%'"
           />
         </div>
       </q-linear-progress>
