@@ -33,8 +33,8 @@
                 label="Memo"
                 ></q-input> -->
       </div>
-      <div v-else class="text-center q-mb-lg">
-        <div class="text-center q-mb-lg" v-if="qrCodeFragment">
+      <div v-else class="text-center q-mb-md">
+        <div class="text-center q-mb-md" v-if="qrCodeFragment">
           <q-responsive :ratio="1" class="q-mx-xs">
             <vue-qrcode
               :value="qrCodeFragment"
@@ -43,6 +43,28 @@
             >
             </vue-qrcode>
           </q-responsive>
+        </div>
+        <div class="q-pb-xs q-ba-none q-gutter-sm" v-if="showAnimatedQR">
+          <q-btn
+            flat
+            style="font-size: 12px"
+            color="primary"
+            class="q-ma-none"
+            @click="changeSpeed"
+          >
+            <q-icon name="speed" style="margin-right: 8px"></q-icon>
+            Speed: {{ fragmentSpeedLabel }}
+          </q-btn>
+          <q-btn
+            flat
+            style="font-size: 12px"
+            class="q-ma-none"
+            color="primary"
+            @click="changeSize"
+          >
+            <q-icon name="zoom_in" style="margin-right: 8px"></q-icon>
+            Size: {{ fragmentLengthLabel }}
+          </q-btn>
         </div>
         <div class="row">
           <div class="col-12">
@@ -129,10 +151,23 @@ export default defineComponent({
   data: function () {
     return {
       baseURL: location.protocol + "//" + location.host + location.pathname,
-      stop: false,
+      showAnimatedQR: false,
       qrCodeFragment: "",
       qrInterval: null,
       encoder: null,
+
+      // parameters for animated QR
+      currentFragmentLength: 100,
+      fragmentLengthMedium: 100,
+      fragmentLengthShort: 50,
+      fragmentLengthLong: 150,
+      fragmentLengthLabel: "M",
+
+      currentFragmentInterval: 250,
+      fragmentIntervalMedium: 250,
+      fragmentIntervalFast: 150,
+      framentInervalSlow: 500,
+      fragmentSpeedLabel: "M",
     };
   },
   computed: {
@@ -143,17 +178,23 @@ export default defineComponent({
   },
   watch: {
     "sendData.tokensBase64": function (val) {
+      this.showAnimatedQR = false;
       if (!val.length) {
+        // it's emptied
         return;
       }
       // check if token has more than one proof
       const tokenObj = token.decode(val);
       const proofs = tokenObj.token[0].proofs;
       if (!proofs.length) {
+        // no proofs
         return;
       } else if (proofs.length <= 2) {
+        // we can display a single QR code
         this.qrCodeFragment = val;
       } else {
+        // we need to split the token into multiple QR codes
+        this.showAnimatedQR = true;
         this.qrCodeFragment = "";
         this.startQrCodeLoop();
       }
@@ -194,15 +235,49 @@ export default defineComponent({
       }
       const messageBuffer = Buffer.from(this.sendData.tokensBase64);
       const ur = UR.fromBuffer(messageBuffer);
-      const maxFragmentLength = 200;
       const firstSeqNum = 0;
-      this.encoder = new UREncoder(ur, maxFragmentLength, firstSeqNum);
+      this.encoder = new UREncoder(ur, this.currentFragmentLength, firstSeqNum);
       this.qrInterval = setInterval(() => {
         this.qrCodeFragment = this.encoder.nextPart();
-      }, 250);
+      }, this.currentFragmentInterval);
     },
     updateQrCode: function () {
       this.qrCodeFragment = this.encoder.nextPart();
+    },
+    changeSpeed: function () {
+      // cycle currentFragmentInterval between slow, medium and fast
+      if (this.currentFragmentInterval == this.fragmentIntervalMedium) {
+        this.currentFragmentInterval = this.framentInervalSlow;
+        this.fragmentSpeedLabel = "S";
+      } else if (this.currentFragmentInterval == this.framentInervalSlow) {
+        this.currentFragmentInterval = this.fragmentIntervalFast;
+        this.fragmentSpeedLabel = "F";
+      } else {
+        this.currentFragmentInterval = this.fragmentIntervalMedium;
+        this.fragmentSpeedLabel = "M";
+      }
+      console.log(
+        "### this.currentFragmentInterval",
+        this.currentFragmentInterval
+      );
+      clearInterval(this.qrInterval);
+      this.startQrCodeLoop();
+    },
+    changeSize: function () {
+      // cycle currentFragmentLength between short, medium and long
+      if (this.currentFragmentLength == this.fragmentLengthMedium) {
+        this.currentFragmentLength = this.fragmentLengthShort;
+        this.fragmentLengthLabel = "S";
+      } else if (this.currentFragmentLength == this.fragmentLengthShort) {
+        this.currentFragmentLength = this.fragmentLengthLong;
+        this.fragmentLengthLabel = "L";
+      } else {
+        this.currentFragmentLength = this.fragmentLengthMedium;
+        this.fragmentLengthLabel = "M";
+      }
+      console.log("### this.currentFragmentLength", this.currentFragmentLength);
+      clearInterval(this.qrInterval);
+      this.startQrCodeLoop();
     },
     sendTokens: async function () {
       /*
