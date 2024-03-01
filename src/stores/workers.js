@@ -30,8 +30,8 @@ export const useWorkersStore = defineStore("workers", {
         try {
           nInterval += 1;
 
-          // exit loop after 2m
-          if (nInterval > 40) {
+          // exit loop after 1m
+          if (nInterval > 12) {
             console.log("### stopping invoice check worker");
             this.clearAllWorkers();
           }
@@ -51,7 +51,7 @@ export const useWorkersStore = defineStore("workers", {
         } catch (error) {
           console.log("invoiceCheckWorker: not paid yet");
         }
-      }, 3000);
+      }, 5000);
     },
     checkTokenSpendableWorker: async function () {
       const walletStore = useWalletStore();
@@ -61,8 +61,8 @@ export const useWorkersStore = defineStore("workers", {
       this.tokensCheckSpendableListener = setInterval(async () => {
         try {
           nInterval += 1;
-          // exit loop after 2m
-          if (nInterval > 24) {
+          // exit loop after 30s
+          if (nInterval > 10) {
             console.log("### stopping token check worker");
             this.clearAllWorkers();
           }
