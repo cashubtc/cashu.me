@@ -14,7 +14,7 @@ type Mint = {
 type Keyset = {
   id: string;
   url: string;
-  keys: MintKeys
+  keys: MintKeys;
 };
 
 type BlindSignatureAudit = {
@@ -34,12 +34,14 @@ export const useMintsStore = defineStore("mints", {
       allKeysets: useLocalStorage("cashu.allKeysets", [] as Keyset[]),
       mintToAdd: "https://8333.space:3338",
       mintToRemove: "",
+      mintToUpdate: "",
       mints: useLocalStorage("cashu.mints", [] as Mint[]),
       proofs: useLocalStorage("cashu.proofs", [] as Proof[]),
       spentProofs: useLocalStorage("cashu.spentProofs", [] as Proof[]),
       blindSignatures: useLocalStorage("cashu.blindSignatures", [] as BlindSignatureAudit[]),
       showAddMintDialog: false,
       showRemoveMintDialog: false,
+      showModifyMintDialog: false,
     };
   },
   getters: {
@@ -54,8 +56,14 @@ export const useMintsStore = defineStore("mints", {
     setShowRemoveMintDialog(show: boolean) {
       this.showRemoveMintDialog = show;
     },
+    setShowModifyMintDialog(show: boolean) {
+      this.showModifyMintDialog = show;
+    },
     setMintToAdd(mint: string) {
       this.mintToAdd = mint;
+    },
+    setMintToUpdate(mint: string) {
+      this.mintToUpdate = mint;
     },
     setMintToRemove(mint: string) {
       this.mintToRemove = mint;
@@ -86,7 +94,7 @@ export const useMintsStore = defineStore("mints", {
     getKeysForKeyset: async function (keyset_id: string): Promise<MintKeys> {
       let keys = this.allKeysets
         .filter((m) => m.id == keyset_id)
-        .map((m) => m.keys)
+        .map((m) => m.keys);
       if (keys.length) {
         return keys[0];
       } else {
@@ -194,10 +202,8 @@ export const useMintsStore = defineStore("mints", {
             id: keyset,
             url: this.activeMintUrl,
             keys: keyset_keys,
-          }
-          this.allKeysets.push(
-            keyset_struct
-          )
+          };
+          this.allKeysets.push(keyset_struct);
         }
 
         // save keys to mints in local storage
@@ -212,7 +218,7 @@ export const useMintsStore = defineStore("mints", {
         console.error(error);
         try {
           notifyApiError(error, "Could not get mint keys");
-        } catch { }
+        } catch {}
         throw error;
       }
     },
@@ -227,7 +233,7 @@ export const useMintsStore = defineStore("mints", {
         console.error(error);
         try {
           notifyApiError(error, "Could not get mint keysets");
-        } catch { }
+        } catch {}
         throw error;
       }
     },
@@ -270,6 +276,12 @@ export const useMintsStore = defineStore("mints", {
 
         notifySuccess("Backup restored");
       }
+    },
+    modifyMint: async function (oldurl: string, url: string) {
+      // print oldurl and url
+      let mint = this.mints.filter((m) => m.url === oldurl);
+
+      mint[0].url = url;
     },
     assertMintError: function (response: { error: any }, verbose = true) {
       if (response.error != null) {

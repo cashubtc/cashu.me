@@ -50,6 +50,22 @@
             >
           </q-item-section>
 
+          <!--add a q-btn to update url of mint-->
+          <q-item-section side>
+            <q-btn
+              outline
+              dense
+              color="primary"
+              icon="edit"
+              @click="showModifyMintDialogWrapper(mint.url)"
+              >Update URL
+            </q-btn>
+          </q-item-section>
+          <!--add a button to update url of mint-->
+          <!-- <button @click="showModifyMintDialogWrapper(mint.url)"> -->
+          <!-- update mint url -->
+          <!-- </button> -->
+
           <q-item-section side>
             <q-badge
               :color="mint.url == activeMintUrl ? 'primary' : 'grey'"
@@ -249,6 +265,29 @@
       </div>
     </q-card>
   </q-dialog>
+  <q-dialog v-model="showModifyMintDialog">
+    <q-card class="q-pa-lg">
+      <h6 class="q-my-md text-primary">Update mint URL</h6>
+      <q-input
+        outlined
+        v-model="mintUpdate"
+        label="Mint URL"
+        type="textarea"
+        autogrow
+        class="q-mb-xs"
+      ></q-input>
+      <div class="row q-mt-lg">
+        <q-btn
+          outline
+          v-close-popup
+          color="primary"
+          @click="modifyMint(mintToUpdate, mintUpdate)"
+          >Update mint
+        </q-btn>
+        <q-btn v-close-popup flat color="grey" class="q-ml-auto">Cancel</q-btn>
+      </div>
+    </q-card>
+  </q-dialog>
 </template>
 <script>
 import { defineComponent } from "vue";
@@ -286,8 +325,10 @@ export default defineComponent({
     ...mapWritableState(useMintsStore, [
       "mintToAdd",
       "mintToRemove",
+      "mintToUpdate",
       "showAddMintDialog",
       "showRemoveMintDialog",
+      "showModifyMintDialog",
     ]),
   },
   watch: {
@@ -304,10 +345,14 @@ export default defineComponent({
     ...mapActions(useMintsStore, [
       "addMint",
       "removeMint",
+      "modifyMint",
+      "mintUpdate",
       "activateMint",
       "setMintToRemove",
+      "setMintToUpdate",
       "setShowAddMintDialog",
       "setShowRemoveMintDialog",
+      "setShowModifyMintDialog",
     ]),
     swapDataOptions: function () {
       let options = [];
@@ -320,7 +365,10 @@ export default defineComponent({
       this.setMintToRemove(mint);
       this.setShowRemoveMintDialog(true);
     },
-    //
+    showModifyMintDialogWrapper: function (mint) {
+      this.setMintToUpdate(mint);
+      this.setShowModifyMintDialog(true);
+    },
     mintSwap: async function (from_url, to_url, amount) {
       // get invoice
       await this.activateMint(to_url);
