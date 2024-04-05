@@ -26,7 +26,7 @@
                   ? 'check_circle'
                   : 'radio_button_unchecked'
               "
-              @click="activateMint(mint.url, (verbose = false))"
+              @click="activateMintUrl(mint.url, (verbose = false))"
               class="cursor-pointer"
             />
           </q-item-section>
@@ -42,7 +42,7 @@
           <q-item-section>
             <q-item-label
               lines="1"
-              @click="activateMint(mint.url, (verbose = false))"
+              @click="activateMintUrl(mint.url, (verbose = false))"
               >{{ mint.url }}</q-item-label
             >
             <q-item-label caption v-if="mint.url == activeMintUrl"
@@ -305,7 +305,7 @@ export default defineComponent({
     ...mapActions(useMintsStore, [
       "addMint",
       "removeMint",
-      "activateMint",
+      "activateMintUrl",
       "setMintToRemove",
       "setShowAddMintDialog",
       "setShowRemoveMintDialog",
@@ -324,16 +324,16 @@ export default defineComponent({
     //
     mintSwap: async function (from_url, to_url, amount) {
       // get invoice
-      await this.activateMint(to_url);
+      await this.activateMintUrl(to_url);
       let invoice = await this.requestMint(amount);
 
       // pay invoice
-      await this.activateMint(from_url);
+      await this.activateMintUrl(from_url);
       await this.decodeRequest(invoice.pr);
       await this.melt();
 
       // settle invoice on other side
-      await this.activateMint(to_url);
+      await this.activateMintUrl(to_url);
       await this.invoiceCheckWorker();
       this.notifySuccess("Swap successful");
     },

@@ -55,7 +55,7 @@ export default defineComponent({
   watch: {
     chosenMint: async function () {
       console.log("Mint chosen ", this.chosenMint);
-      await this.activateMint(this.chosenMint.url);
+      await this.activateMintUrl(this.chosenMint.url);
     },
   },
   computed: {
@@ -90,7 +90,7 @@ export default defineComponent({
     },
   },
   methods: {
-    ...mapActions(useMintsStore, ["activateMint"]),
+    ...mapActions(useMintsStore, ["activateMintUrl"]),
     chooseMintOptions: function () {
       let options = [];
       for (const [i, m] of Object.entries(this.mints)) {

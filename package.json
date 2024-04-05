@@ -17,7 +17,7 @@
   },
   "dependencies": {
     "@capacitor/clipboard": "^4.1.0",
-    "@cashu/cashu-ts": "^0.9.0",
+    "@cashu/cashu-ts": "^1.0.0-rc.2",
     "@chenfengyuan/vue-qrcode": "^2.0.0",
     "@gandlaf21/bc-ur": "^1.1.12",
     "@noble/hashes": "^1.3.0",

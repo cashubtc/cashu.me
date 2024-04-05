@@ -588,7 +588,7 @@ export default {
       "deleteProofs",
     ]),
     ...mapActions(useMintsStore, [
-      "activateMint",
+      "activateMintUrl",
       "addMint",
       "assertMintError",
       "getBalance",
@@ -837,7 +837,7 @@ export default {
         }
         // if these were the activeMintUrl, reload
         if (e.key == "cashu.activeMintUrl") {
-          this.activateMint(e.newValue);
+          this.activateMintUrl(e.newValue);
         }
       });
     },
@@ -928,7 +928,7 @@ export default {
       let activeMintUrl = localStorage.getItem("cashu.activeMintUrl");
       // we'll force the activation of the mint for the migration
       // from without a pinia store
-      await this.activateMint(activeMintUrl, false, true);
+      await this.activateMintUrl(activeMintUrl, false, true);
     } else {
       this.setTab("settings");
     }
@@ -995,7 +995,7 @@ export default {
 
     // reset to the mint from settings after workers have run
     if (startupMintUrl.length > 0) {
-      await this.activateMint(startupMintUrl);
+      await this.activateMintUrl(startupMintUrl);
     }
 
     // Local storage sync hook
