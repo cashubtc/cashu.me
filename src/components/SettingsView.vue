@@ -193,6 +193,7 @@
   <q-dialog
     v-model="showAddMintDialog"
     @keydown.enter.prevent="addMint(mintToAdd, (verbose = true))"
+    position="top"
   >
     <q-card class="q-pa-lg">
       <h6 class="q-my-md">Do you trust this mint?</h6>
@@ -211,18 +212,18 @@
       ></q-input>
       <div class="row q-mt-lg">
         <div class="col">
-          <q-btn v-close-popup flat color="grey" class="float-left"
-            >Cancel</q-btn
-          >
-        </div>
-        <div class="col-6">
           <q-btn
-            class="float-right"
+            class="float-left"
             v-close-popup
             color="primary"
             icon="check"
             @click="addMint(mintToAdd, (verbose = true))"
             >Add mint</q-btn
+          >
+        </div>
+        <div class="col">
+          <q-btn v-close-popup flat class="float-right" color="grey"
+            >Cancel</q-btn
           >
         </div>
       </div>
@@ -233,17 +234,17 @@
       <h6 class="q-my-md">Are you sure you want to delete this mint?</h6>
       <div class="row q-mt-lg">
         <div class="col">
-          <q-btn v-close-popup flat color="grey" class="float-left"
-            >Cancel</q-btn
-          >
-        </div>
-        <div class="col">
           <q-btn
             v-close-popup
-            class="float-right"
+            class="float-left"
             color="primary"
             @click="removeMint(mintToRemove, (verbose = true))"
             >Remove mint</q-btn
+          >
+        </div>
+        <div class="col">
+          <q-btn v-close-popup flat color="grey" class="float-right"
+            >Cancel</q-btn
           >
         </div>
       </div>

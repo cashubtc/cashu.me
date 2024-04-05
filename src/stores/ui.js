@@ -6,5 +6,11 @@ export const useUiStore = defineStore("ui", {
     tickerLong: "Satoshis",
     tickerDollar: "USD",
     showInvoiceDetails: false,
+    tab: "history",
   }),
+  actions: {
+    setTab(tab) {
+      this.tab = tab;
+    },
+  },
 });

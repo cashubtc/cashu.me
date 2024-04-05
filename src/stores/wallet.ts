@@ -6,6 +6,7 @@ import { useProofsStore } from "./proofs";
 import { useTokensStore } from "./tokens";
 import { useReceiveTokensStore } from "./receiveTokensStore";
 import { useCameraStore } from "./camera";
+import { useUiStore } from "src/stores/ui";
 
 import { step1Alice, step3Alice } from "src/js/dhke";
 import * as nobleSecp256k1 from "@noble/secp256k1";
@@ -35,6 +36,7 @@ type InvoiceHistory = Invoice & {
 const proofsStore = useProofsStore();
 const receiveStore = useReceiveTokensStore();
 const tokenStore = useTokensStore();
+const uIStore = useUiStore();
 
 export const useWalletStore = defineStore("wallet", {
   state: () => {
@@ -264,6 +266,7 @@ export const useWalletStore = defineStore("wallet", {
             // have been loaded yet. We switch the tab to settings to make sure
             // that it loads. Remove this code when the TrustMintComnent is refactored!
             // await this.setTab("settings");
+            uIStore.setTab("settings");
             mintStore.setMintToAdd(tokenJson.token[i].mint);
             mintStore.showAddMintDialog = true;
             // this.addMintDialog.show = true;

@@ -478,7 +478,6 @@ export default {
       mintId: "",
       mintName: "",
       deferredPWAInstallPrompt: null,
-      tab: "history",
       receive: {
         show: false,
         status: "pending",
@@ -532,9 +531,8 @@ export default {
     };
   },
   computed: {
-    ...mapWritableState(useUiStore, ["showInvoiceDetails"]),
-    ...mapState(useUiStore, ["tickerShort"]),
-    ...mapState(useUiStore, ["tickerDollar"]),
+    ...mapWritableState(useUiStore, ["showInvoiceDetails", "tab"]),
+    ...mapState(useUiStore, ["tickerShort", "tickerDollar"]),
     ...mapWritableState(useReceiveTokensStore, [
       "showReceiveTokens",
       "receiveData",
