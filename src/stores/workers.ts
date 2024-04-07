@@ -7,8 +7,8 @@ import { notifyApiError, notifyError, notifySuccess } from "src/js/notify";
 export const useWorkersStore = defineStore("workers", {
   state: () => {
     return {
-      invoiceCheckListener: () => {},
-      tokensCheckSpendableListener: () => {},
+      invoiceCheckListener: null as NodeJS.Timeout | null,
+      tokensCheckSpendableListener: null as NodeJS.Timeout | null,
     };
   },
   getters: {},
@@ -44,7 +44,6 @@ export const useWorkersStore = defineStore("workers", {
           // only without error (invoice paid) will we reach here
           console.log("### stopping invoice check worker");
           this.clearAllWorkers();
-          walletStore.invoiceData.bolt11 = "";
           uiStore.showInvoiceDetails = false;
           // if (window.navigator.vibrate) navigator.vibrate(200);
           // notifySuccess("Payment received", "top");
@@ -53,7 +52,7 @@ export const useWorkersStore = defineStore("workers", {
         }
       }, 5000);
     },
-    checkTokenSpendableWorker: async function () {
+    checkTokenSpendableWorker: async function (tokensBase64: string) {
       const walletStore = useWalletStore();
       const sendTokensStore = useSendTokensStore();
       let nInterval = 0;
@@ -67,17 +66,13 @@ export const useWorkersStore = defineStore("workers", {
             this.clearAllWorkers();
           }
           console.log("### checkTokenSpendableWorker setInterval", nInterval);
-          console.log(sendTokensStore.sendData);
-
-          // this will throw an error if the invoice is pending
           let paid = await walletStore.checkTokenSpendable(
-            sendTokensStore.sendData.tokensBase64,
+            tokensBase64,
             false
           );
           if (paid) {
             console.log("### stopping token check worker");
             this.clearAllWorkers();
-            sendTokensStore.sendData.tokens = "";
             sendTokensStore.showSendTokens = false;
           }
         } catch (error) {

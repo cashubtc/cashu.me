@@ -329,7 +329,7 @@ export default defineComponent({
 
       // pay invoice
       await this.activateMintUrl(from_url);
-      await this.decodeRequest(invoice.pr);
+      await this.decodeRequest(invoice.request);
       await this.melt();
 
       // settle invoice on other side

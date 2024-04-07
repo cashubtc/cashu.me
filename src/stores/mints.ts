@@ -7,11 +7,26 @@ import { CashuMint, MintKeys, MintAllKeysets, Proof, SerializedBlindedSignature,
 export type Mint = {
   url: string;
   api: CashuMint;
+  keys: MintKeys[];
+  keysets: MintKeyset[];
   balance: number;
-  keys?: MintKeys[];
-  keysets?: MintKeyset[];
   // initialize api: new CashuMint(url) on activation
 };
+
+export class MintClass {
+  mint: Mint;
+  constructor(mint: Mint) {
+    this.mint = mint;
+  }
+  get proofs() {
+    const mintStore = useMintsStore();
+    return mintStore.proofs.filter((p) => this.mint.keysets.map((k) => k.id).includes(p.id));
+  }
+  get balance() {
+    const proofs = this.proofs;
+    return proofs.reduce((sum, p) => sum + p.amount, 0);
+  }
+}
 
 // type that extends type Proof with reserved boolean
 export type WalletProof = Proof & { reserved: boolean };
@@ -28,10 +43,6 @@ export const useMintsStore = defineStore("mints", {
   state: () => {
     return {
       activeMintUrl: useLocalStorage<string>("cashu.activeMintUrl", ""),
-      // activeProofs: useLocalStorage("cashu.activeProofs", [] as WalletProof[]),
-      // keys: useLocalStorage("cashu.keys", {} as MintKeys),
-      // keysets: useLocalStorage("cashu.keysets", [] as string[]),
-      // allKeysets: useLocalStorage("cashu.allKeysets", [] as MintKeys[]),
       mintToAdd: "https://8333.space:3338",
       mintToRemove: "",
       mints: useLocalStorage("cashu.mints", [] as Mint[]),
@@ -43,10 +54,7 @@ export const useMintsStore = defineStore("mints", {
     };
   },
   getters: {
-    // activeMint({ activeMintUrl }) {
-    //   return this.mints.find((m) => m.url === activeMintUrl);
-    // },
-    activeProofs({ activeMintUrl }) {
+    activeProofs({ activeMintUrl }): WalletProof[] {
       return this.proofs.filter((p) =>
         this.mints.find((m) => m.url === activeMintUrl)?.keysets?.map((k) => k.id).includes(p.id)
       );
@@ -63,6 +71,17 @@ export const useMintsStore = defineStore("mints", {
         throw new Error("No active mint");
       }
     },
+    proofsToWalletProofs(proofs: Proof[]): WalletProof[] {
+      return proofs.map((p) => {
+        return {
+          amount: p.amount,
+          secret: p.secret,
+          C: p.C,
+          reserved: false,
+          id: p.id,
+        };
+      });
+    },
     setShowAddMintDialog(show: boolean) {
       this.showAddMintDialog = show;
     },
@@ -75,30 +94,29 @@ export const useMintsStore = defineStore("mints", {
     setMintToRemove(mint: string) {
       this.mintToRemove = mint;
     },
-    addProofs(proofs: Proof[]) {
-      const walletProofs = proofs.map((p) => {
-        return {
-          amount: p.amount,
-          secret: p.secret,
-          C: p.C,
-          reserved: false,
-          id: p.id,
-        };
+    updateMintBalances() {
+      this.mints.forEach((m) => {
+        m.balance = new MintClass(m).balance;
       });
+    },
+    addProofs(proofs: Proof[]) {
+      const walletProofs = this.proofsToWalletProofs(proofs);
       this.proofs = this.proofs.concat(walletProofs);
+      this.updateMintBalances();
+      console.log("### addProofs", this.proofs, "length", this.proofs.length);
     },
     removeProofs(proofs: Proof[]) {
-      const walletProofs = proofs.map((p) => {
-        return {
-          amount: p.amount,
-          secret: p.secret,
-          C: p.C,
-          reserved: false,
-          id: p.id,
-        };
+      const walletProofs = this.proofsToWalletProofs(proofs);
+      // remove walletProofs with the same secret from this.proofs
+      this.proofs = this.proofs.filter((p) => {
+        return !walletProofs.some((wp) => {
+          return wp.secret === p.secret;
+        });
       });
-      this.proofs = this.proofs.filter((p) => !walletProofs.includes(p));
+      console.log("### removeProofs", this.proofs, "length", this.proofs.length);
       this.spentProofs = this.spentProofs.concat(walletProofs);
+      this.updateMintBalances();
+      console.log("### spentProofs", this.spentProofs, "length", this.spentProofs.length);
     },
     appendBlindSignatures(signature: SerializedBlindedSignature, amount: number, secret: Uint8Array, r: string) {
       const audit: BlindSignatureAudit = {
@@ -191,12 +209,13 @@ export const useMintsStore = defineStore("mints", {
         }
         // update balance using updateActiveMintBalance
         this.updateActiveMintBalance();
+        const mintClass = new MintClass(mint);
 
         console.log(
           "### activateMint: Mint activated: ",
           this.activeMintUrl,
           "balance",
-          this.getBalance()
+          mintClass.balance
         );
       } catch (error: any) {
         // restore previous values because the activation errored
@@ -280,7 +299,7 @@ export const useMintsStore = defineStore("mints", {
         notifySuccess("Backup restored");
       }
     },
-    assertMintError: function (response: { error: any }, verbose = true) {
+    assertMintError: function (response: { error?: any }, verbose = true) {
       if (response.error != null) {
         if (verbose) {
           notifyError(response.error, "Mint error");

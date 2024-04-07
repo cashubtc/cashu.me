@@ -291,7 +291,7 @@ export default defineComponent({
       */
       try {
         // keep firstProofs, send scndProofs and delete them (invalidate=true)
-        let { firstProofs, scndProofs } = await this.splitToSend(
+        let { _, scndProofs } = await this.splitToSend(
           this.activeProofs,
           this.sendData.amount,
           true
@@ -307,7 +307,7 @@ export default defineComponent({
           serializedProofs: this.sendData.tokensBase64,
         });
 
-        this.checkTokenSpendableWorker();
+        this.checkTokenSpendableWorker(this.sendData.tokensBase64);
       } catch (error) {
         console.error(error);
       }

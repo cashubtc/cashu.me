@@ -133,7 +133,12 @@ export default defineComponent({
     },
     getTotalBalance: function () {
       return this.proofs
-        .filter((p) => this.allMintKeysets.includes(p.id))
+        .filter((p) =>
+          this.mints
+            .map((m) => m.keysets.map((k) => k.id))
+            .flat()
+            .includes(p.id)
+        )
         .flat()
         .reduce((sum, el) => (sum += el.amount), 0);
     },

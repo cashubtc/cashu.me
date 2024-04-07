@@ -774,7 +774,9 @@ export default {
       this.sendData.memo = "";
       this.showSendTokens = true;
     },
-
+    hideSendTokensDialog: function () {
+      this.showSendTokens = false;
+    },
     showReceiveTokensDialog: function () {
       this.receiveData.tokensBase64 = "";
       this.showReceiveTokens = true;

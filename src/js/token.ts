@@ -1,5 +1,5 @@
 import { type Token, getDecodedToken } from "@cashu/cashu-ts";
-
+import { useMintsStore, WalletProof } from "src/stores/mints";
 export default { decode, getProofs, getMint };
 
 /**
@@ -13,14 +13,16 @@ function decode(encoded_token: string) {
 /**
  * Returns a list of proofs from a decoded token
  */
-function getProofs(decoded_token: Token) {
+function getProofs(decoded_token: Token): WalletProof[] {
   if (
     !(decoded_token.token.length > 0) ||
     !(decoded_token.token[0].proofs.length > 0)
   ) {
     throw new Error("Token format wrong");
   }
-  return decoded_token.token.map((t) => t.proofs).flat();
+  const proofs = decoded_token.token.map((t) => t.proofs).flat();
+  const mintStore = useMintsStore();
+  return mintStore.proofsToWalletProofs(proofs);
 }
 
 function getMint(decoded_token: Token) {
