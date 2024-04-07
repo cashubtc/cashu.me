@@ -23,7 +23,9 @@
           <template v-slot:append>
             <q-badge
               color="primary"
-              :label="formatSat(getBalance) + ' ' + tickerShort"
+              :label="
+                formatCurrency(getBalance, activeUnit) + ' ' + tickerShort
+              "
           /></template>
         </q-select>
       </div>
@@ -64,6 +66,7 @@ export default defineComponent({
       "activeProofs",
       "mints",
       "proofs",
+      "activeUnit",
     ]),
     balance: function () {
       return this.activeProofs

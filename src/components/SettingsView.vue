@@ -45,16 +45,19 @@
               @click="activateMintUrl(mint.url, (verbose = false))"
               >{{ mint.url }}</q-item-label
             >
-            <q-item-label caption v-if="mint.url == activeMintUrl"
-              >This is your active mint.</q-item-label
-            >
-          </q-item-section>
-
-          <q-item-section side>
-            <q-badge
-              :color="mint.url == activeMintUrl ? 'primary' : 'grey'"
-              :label="formatSat(mint.balance) + ' ' + tickerShort"
-            />
+            <q-item-label>
+              <q-badge
+                v-for="unit in mintClass(mint).units"
+                :key="unit"
+                :color="mint.url == activeMintUrl ? 'primary' : 'grey'"
+                :label="
+                  formatCurrency(mintClass(mint).unitBalance(unit), unit) +
+                  ' ' +
+                  unit
+                "
+                class="q-mx-xs"
+              />
+            </q-item-label>
           </q-item-section>
           <q-item-section side>
             <q-icon
@@ -255,7 +258,7 @@
 import { defineComponent } from "vue";
 import { getShortUrl } from "src/js/wallet-helpers";
 import { mapActions, mapState, mapWritableState } from "pinia";
-import { useMintsStore } from "src/stores/mints";
+import { useMintsStore, MintClass } from "src/stores/mints";
 
 export default defineComponent({
   name: "SettingsView",
@@ -310,6 +313,9 @@ export default defineComponent({
       "setShowAddMintDialog",
       "setShowRemoveMintDialog",
     ]),
+    mintClass(mint) {
+      return new MintClass(mint);
+    },
     swapDataOptions: function () {
       let options = [];
       for (const [i, m] of Object.entries(this.mints)) {

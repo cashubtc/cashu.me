@@ -2,13 +2,16 @@
   <q-card class="q-my-md q-py-sm">
     <q-card-section class="q-mt-sm q-py-xs">
       <div>
-        <div class="row">
+        <!-- call toggleUnit when clicked -->
+        <div class="row" @click="activeUnit = toggleUnit()">
           <div class="col-12">
             <h3 class="q-my-none q-py-none">
-              <strong> {{ formatSat(getTotalBalance) }} </strong>
+              <strong>
+                {{ formatCurrency(getTotalBalance, activeUnit) }}
+              </strong>
               {{ tickerShort }}
             </h3>
-            <div v-if="bitcoinPrice">
+            <div v-if="bitcoinPrice && tickerShort == 'sats'">
               <strong>
                 {{
                   formatCurrency(
@@ -39,7 +42,10 @@
             />
             <span class="q-my-none q-py-none text-weight-regular">
               Active mint:
-              <b>{{ formatSat(getBalance) }} {{ tickerShort }} </b>
+              <b
+                >{{ formatCurrency(getTotalBalance, activeUnit) }}
+                {{ tickerShort }}
+              </b>
             </span>
             <!-- <q-knob
               :model-value="getBalance"
@@ -95,7 +101,7 @@
 <script>
 import { defineComponent, ref } from "vue";
 import { getShortUrl } from "src/js/wallet-helpers";
-import { mapState } from "pinia";
+import { mapState, mapWritableState } from "pinia";
 import { useMintsStore } from "stores/mints";
 import axios from "axios";
 
@@ -122,7 +128,10 @@ export default defineComponent({
       "activeProofs",
       "mints",
       "proofs",
+      "totalBalance",
+      "activeUnit",
     ]),
+    ...mapWritableState(useMintsStore, ["activeUnit"]),
     balance: function () {
       return this.activeProofs
         .flat()
@@ -132,15 +141,7 @@ export default defineComponent({
       return [].concat(...this.mints.map((m) => m.keysets));
     },
     getTotalBalance: function () {
-      return this.proofs
-        .filter((p) =>
-          this.mints
-            .map((m) => m.keysets.map((k) => k.id))
-            .flat()
-            .includes(p.id)
-        )
-        .flat()
-        .reduce((sum, el) => (sum += el.amount), 0);
+      return this.totalBalance;
     },
     getActiveMintUrlShort: function () {
       return getShortUrl(this.activeMintUrl);
@@ -167,6 +168,9 @@ export default defineComponent({
       } catch (e) {
         console.warn("Could not get Bitcoin price.");
       }
+    },
+    toggleUnit: function () {
+      return this.activeUnit === "sat" ? "usd" : "sat";
     },
   },
 });

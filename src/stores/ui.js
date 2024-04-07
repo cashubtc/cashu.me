@@ -1,8 +1,14 @@
 import { defineStore } from "pinia";
+import { useLocalStorage } from "@vueuse/core";
+import { useMintsStore } from "./mints";
+
+const unitTickerShortMap = {
+  sat: "sats",
+  usd: "USD",
+};
 
 export const useUiStore = defineStore("ui", {
   state: () => ({
-    tickerShort: "sats",
     tickerLong: "Satoshis",
     tickerDollar: "USD",
     showInvoiceDetails: false,
@@ -11,6 +17,12 @@ export const useUiStore = defineStore("ui", {
   actions: {
     setTab(tab) {
       this.tab = tab;
+    },
+  },
+  getters: {
+    tickerShort() {
+      const unit = useMintsStore().activeUnit;
+      return unitTickerShortMap[unit];
     },
   },
 });

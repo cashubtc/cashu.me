@@ -6,7 +6,6 @@ import { CashuMint, MintKeys, MintAllKeysets, Proof, SerializedBlindedSignature,
 
 export type Mint = {
   url: string;
-  api: CashuMint;
   keys: MintKeys[];
   keysets: MintKeyset[];
   balance: number;
@@ -18,12 +17,47 @@ export class MintClass {
   constructor(mint: Mint) {
     this.mint = mint;
   }
+  get api() {
+    return new CashuMint(this.mint.url);
+  }
   get proofs() {
     const mintStore = useMintsStore();
     return mintStore.proofs.filter((p) => this.mint.keysets.map((k) => k.id).includes(p.id));
   }
   get balance() {
     const proofs = this.proofs;
+    return proofs.reduce((sum, p) => sum + p.amount, 0);
+  }
+
+  get allBalances() {
+    // return an object with all balances for each unit
+    const balances: Record<string, number> = {};
+    this.units.forEach((unit) => {
+      balances[unit] = this.unitBalance(unit);
+    });
+    return balances;
+  }
+
+  get keysets() {
+    return this.mint.keysets.filter((k) => k.active);
+  }
+
+  get units() {
+    // return all unique units of this.mint.keysets
+    return this.mint.keysets.map((k) => k.unit).filter((value, index, self) => self.indexOf(value) === index);
+  }
+
+  unitKeysets(unit: string): MintKeyset[] {
+    return this.mint.keysets.filter((k) => k.unit === unit && k.active);
+  }
+
+  proofsUnit(unit: string) {
+    const unitKeysets = this.unitKeysets(unit);
+    return this.proofs.filter((p) => unitKeysets.map((k) => k.id).includes(p.id));
+  }
+
+  unitBalance(unit: string) {
+    const proofs = this.proofsUnit(unit);
     return proofs.reduce((sum, p) => sum + p.amount, 0);
   }
 }
@@ -42,6 +76,7 @@ type BlindSignatureAudit = {
 export const useMintsStore = defineStore("mints", {
   state: () => {
     return {
+      activeUnit: useLocalStorage<string>("cashu.activeUnit", "sat"),
       activeMintUrl: useLocalStorage<string>("cashu.activeMintUrl", ""),
       mintToAdd: "https://8333.space:3338",
       mintToRemove: "",
@@ -54,19 +89,27 @@ export const useMintsStore = defineStore("mints", {
     };
   },
   getters: {
-    activeProofs({ activeMintUrl }): WalletProof[] {
+    activeProofs({ activeMintUrl, activeUnit }): WalletProof[] {
+      const unitKeysets = this.mints.find((m) => m.url === activeMintUrl)?.keysets?.filter((k) => k.unit === activeUnit);
+      if (!unitKeysets) {
+        return [];
+      }
       return this.proofs.filter((p) =>
-        this.mints.find((m) => m.url === activeMintUrl)?.keysets?.map((k) => k.id).includes(p.id)
+        unitKeysets.map((k) => k.id).includes(p.id)
       );
-    }
+    },
+    totalBalance({ activeUnit }): number {
+      const allUnitKeysets = this.mints.map((m) => m.keysets).flat().filter((k) => k.unit === activeUnit);
+      return this.proofs.filter((p) =>
+        allUnitKeysets.map((k) => k.id).includes(p.id)
+      ).reduce((sum, p) => sum + p.amount, 0);
+    },
   },
   actions: {
     activeMint() {
       const mint = this.mints.find((m) => m.url === this.activeMintUrl);
       if (mint) {
-        // set api
-        mint.api = new CashuMint(mint.url);
-        return mint;
+        return new MintClass(mint);
       } else {
         throw new Error("No active mint");
       }
@@ -155,7 +198,7 @@ export const useMintsStore = defineStore("mints", {
     addMint: async function (url: string, verbose = false) {
       try {
         // we have no mints at all
-        const mintToAdd: Mint = { url: url, balance: 0, api: new CashuMint(url) };
+        const mintToAdd: Mint = { url: url, balance: 0, keys: [], keysets: [] };
         if (this.mints.length === 0) {
           this.mints = [mintToAdd];
         } else if (this.mints.filter((m) => m.url === url).length === 0) {
@@ -198,7 +241,6 @@ export const useMintsStore = defineStore("mints", {
       workers.clearAllWorkers();
 
       // create new mint.api instance because we can't store it in local storage
-      mint.api = new CashuMint(mint.url);
       let previousUrl = this.activeMintUrl;
       try {
         this.activeMintUrl = mint.url;
@@ -215,7 +257,7 @@ export const useMintsStore = defineStore("mints", {
           "### activateMint: Mint activated: ",
           this.activeMintUrl,
           "balance",
-          mintClass.balance
+          mintClass.allBalances
         );
       } catch (error: any) {
         // restore previous values because the activation errored
@@ -230,12 +272,12 @@ export const useMintsStore = defineStore("mints", {
     },
     fetchMintKeys: async function (mint: Mint) {
       try {
-        mint.api = new CashuMint(mint.url);
+        const mintClass = new MintClass(mint);
         const keysets = await this.fetchMintKeysets(mint);
         // store keysets in mint and update local storage
         this.mints.filter((m) => m.url === mint.url)[0].keysets = keysets;
 
-        const keys = await mint.api.getKeys();
+        const keys = await mintClass.api.getKeys();
         // store keys in mint and update local storage
         this.mints.filter((m) => m.url === mint.url)[0].keys = keys.keysets;
         return
@@ -250,8 +292,8 @@ export const useMintsStore = defineStore("mints", {
     fetchMintKeysets: async function (mint: Mint) {
       // attention: this function overwrites this.keysets
       try {
-        mint.api = new CashuMint(mint.url);
-        const data = await mint.api.getKeySets();
+        const mintClass = new MintClass(mint);
+        const data = await mintClass.api.getKeySets();
         return data.keysets;
       } catch (error: any) {
         console.error(error);

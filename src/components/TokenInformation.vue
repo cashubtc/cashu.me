@@ -3,7 +3,9 @@
     <div class="col-12 q-px-sm">
       <q-icon name="toll" size="xs" color="grey" class="q-mr-xs" />
       <span class="q-mr-md">
-        <strong>{{ formatSat(sumProofs) }} {{ tickerShort }}</strong></span
+        <strong
+          >{{ formatCurrency(sumProofs, activeUnit) }} {{ tickerShort }}</strong
+        ></span
       >
       <q-icon name="account_balance" size="xs" color="grey" class="q-mr-xs" />
       <span>Mint: </span>
@@ -41,6 +43,7 @@ export default defineComponent({
       "activeProofs",
       "mints",
       "proofs",
+      "activeUnit",
     ]),
     sumProofs: function () {
       return this.proofsToShow
