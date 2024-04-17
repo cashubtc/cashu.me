@@ -51,7 +51,7 @@
               : ''
           "
         >
-          <div>{{ formatSat(props.row.amount) }}</div>
+          <div>{{ formatCurrency(props.row.amount, props.row.unit) }}</div>
         </q-td>
 
         <q-td key="date" :props="props">
@@ -66,13 +66,16 @@
             <q-tooltip>Click to copy</q-tooltip>
           </div>
         </q-td>
-        <q-td key="hash" :props="props">
+        <!-- <q-td key="hash" :props="props">
           <div @click="copyText(props.row.hash)">
             {{ props.row.hash }}
           </div>
-        </q-td>
+        </q-td> -->
         <q-td key="mint" :props="props">
           <div>{{ props.row.mint }}</div>
+        </q-td>
+        <q-td key="unit" :props="props">
+          <div>{{ props.row.unit }}</div>
         </q-td>
       </q-tr>
     </template>
@@ -134,13 +137,13 @@ export default defineComponent({
             field: "bolt11",
             sortable: false,
           },
-          {
-            name: "hash",
-            align: "left",
-            label: "Hash",
-            field: "hash",
-            sortable: false,
-          },
+          // {
+          //   name: "hash",
+          //   align: "left",
+          //   label: "Hash",
+          //   field: "hash",
+          //   sortable: false,
+          // },
           {
             name: "mint",
             align: "left",

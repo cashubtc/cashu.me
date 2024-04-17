@@ -25,11 +25,7 @@
         "
       >
         <div class="col-12">
-          <TokenInformation
-            :ticker-short="tickerShort"
-            :proofs-to-show="getProofs(decodeToken(receiveData.tokensBase64))"
-            :token-mint-url="getMint(decodeToken(receiveData.tokensBase64))"
-          />
+          <TokenInformation :encodedToken="receiveData.tokensBase64" />
         </div>
       </div>
       <div class="row q-mt-lg">
@@ -85,7 +81,7 @@ export default defineComponent({
       "receiveData",
     ]),
     ...mapState(useUiStore, ["tickerShort"]),
-    ...mapState(useMintsStore, ["activeProofs"]),
+    ...mapState(useMintsStore, ["activeProofs", "activeUnit"]),
   },
   methods: {
     ...mapActions(useWalletStore, ["redeem"]),

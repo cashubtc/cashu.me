@@ -50,11 +50,7 @@
                 v-for="unit in mintClass(mint).units"
                 :key="unit"
                 :color="mint.url == activeMintUrl ? 'primary' : 'grey'"
-                :label="
-                  formatCurrency(mintClass(mint).unitBalance(unit), unit) +
-                  ' ' +
-                  unit
-                "
+                :label="formatCurrency(mintClass(mint).unitBalance(unit), unit)"
                 class="q-mx-xs"
               />
             </q-item-label>

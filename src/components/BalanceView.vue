@@ -2,14 +2,61 @@
   <q-card class="q-my-md q-py-sm">
     <q-card-section class="q-mt-sm q-py-xs">
       <div>
-        <!-- call toggleUnit when clicked -->
-        <div class="row" @click="activeUnit = toggleUnit()">
+        <q-carousel
+          v-model="this.activeUnit"
+          transition-prev="slide-right"
+          transition-next="slide-left"
+          swipeable
+          animated
+          height="100px"
+          control-color="primary"
+          class="bg-transparent text-white rounded-borders"
+        >
+          <!-- make a q-carousel-slide with v-for for all possible units -->
+          <q-carousel-slide
+            v-for="unit in balancesOptions"
+            :key="unit.value"
+            :name="unit.value"
+          >
+            <div class="row" @click="activeUnit = toggleUnit()">
+              <div class="col-12">
+                <h3 class="q-my-none q-py-none">
+                  <strong>
+                    {{ formatCurrency(getTotalBalance, activeUnit) }}
+                  </strong>
+                </h3>
+                <div v-if="bitcoinPrice && tickerShort == 'sats'">
+                  <strong>
+                    {{
+                      formatCurrency(
+                        (bitcoinPrice / 100000000) * getTotalBalance,
+                        "USD"
+                      ).slice(1)
+                    }}
+                  </strong>
+                  <q-tooltip>
+                    {{
+                      formatCurrency(bitcoinPrice, "USD").slice(1)
+                    }}/BTC</q-tooltip
+                  >
+                </div>
+              </div>
+            </div>
+          </q-carousel-slide>
+        </q-carousel>
+        <div class="row justify-center">
+          <q-btn-toggle
+            glossy
+            v-model="this.activeUnit"
+            :options="balancesOptions"
+          />
+        </div>
+        <!-- <div class="row" @click="activeUnit = toggleUnit()">
           <div class="col-12">
             <h3 class="q-my-none q-py-none">
               <strong>
                 {{ formatCurrency(getTotalBalance, activeUnit) }}
               </strong>
-              {{ tickerShort }}
             </h3>
             <div v-if="bitcoinPrice && tickerShort == 'sats'">
               <strong>
@@ -20,17 +67,14 @@
                   ).slice(1)
                 }}
               </strong>
-              {{ tickerDollar }}
               <q-tooltip>
                 {{
-                  formatCurrency(bitcoinPrice, "USD").slice(1) +
-                  " " +
-                  tickerDollar
+                  formatCurrency(bitcoinPrice, "USD").slice(1)
                 }}/BTC</q-tooltip
               >
             </div>
           </div>
-        </div>
+        </div> -->
         <!-- mint balance -->
         <div class="row q-mt-sm q-mb-none" v-if="mints.length > 1">
           <div class="col-12">
@@ -42,10 +86,7 @@
             />
             <span class="q-my-none q-py-none text-weight-regular">
               Active mint:
-              <b
-                >{{ formatCurrency(getTotalBalance, activeUnit) }}
-                {{ tickerShort }}
-              </b>
+              <b>{{ formatCurrency(getTotalBalance, activeUnit) }} </b>
             </span>
             <!-- <q-knob
               :model-value="getBalance"
@@ -130,12 +171,19 @@ export default defineComponent({
       "proofs",
       "totalBalance",
       "activeUnit",
+      "balances",
     ]),
     ...mapWritableState(useMintsStore, ["activeUnit"]),
     balance: function () {
       return this.activeProofs
         .flat()
         .reduce((sum, el) => (sum += el.amount), 0);
+    },
+    balancesOptions: function () {
+      return Object.entries(this.balances).map(([key, value]) => ({
+        label: key,
+        value: key,
+      }));
     },
     allMintKeysets: function () {
       return [].concat(...this.mints.map((m) => m.keysets));

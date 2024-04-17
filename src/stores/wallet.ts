@@ -33,6 +33,7 @@ type InvoiceHistory = Invoice & {
   date: string;
   status: "pending" | "paid";
   mint?: string;
+  unit?: string;
 };
 
 const receiveStore = useReceiveTokensStore();
@@ -262,6 +263,10 @@ export const useWalletStore = defineStore("wallet", {
 
         const amount = proofs.reduce((s, t) => (s += t.amount), 0);
 
+        // set unit to unit in token
+        if (tokenJson.unit != undefined) {
+          mintStore.activeUnit = tokenJson.unit
+        }
         // redeem
         await this.split(proofs, amount);
 
@@ -275,6 +280,7 @@ export const useWalletStore = defineStore("wallet", {
         tokenStore.addPaidToken({
           amount,
           serializedProofs: receiveStore.receiveData.tokensBase64,
+          unit: mintStore.activeUnit,
         });
 
         if (!!window.navigator.vibrate) navigator.vibrate(200);
@@ -422,6 +428,7 @@ export const useWalletStore = defineStore("wallet", {
           date: currentDateStr(),
           status: "pending",
           mint: mintStore.activeMintUrl,
+          unit: mintStore.activeUnit
         });
         return data;
       } catch (error: any) {
@@ -489,9 +496,14 @@ export const useWalletStore = defineStore("wallet", {
 
         // update UI
         await this.setInvoicePaid(hash);
+        const serializedProofs = proofsStore.serializeProofs(proofs);
+        if (serializedProofs == null) {
+          throw new Error("could not serialize proofs.");
+        }
         tokenStore.addPaidToken({
           amount,
-          serializedProofs: proofsStore.serializeProofs(proofs),
+          serializedProofs: serializedProofs,
+          unit: mintStore.activeUnit,
         });
 
         return proofs;
@@ -581,9 +593,14 @@ export const useWalletStore = defineStore("wallet", {
           mintStore.addProofs(changeProofs);
         }
         // update UI
+        const serializedProofs = proofsStore.serializeProofs(scndProofs);
+        if (serializedProofs == null) {
+          throw new Error("could not serialize proofs.");
+        }
         tokenStore.addPaidToken({
           amount: -amount_paid,
-          serializedProofs: proofsStore.serializeProofs(scndProofs),
+          serializedProofs: serializedProofs,
+          unit: mintStore.activeUnit,
         });
 
         this.invoiceHistory.push({
@@ -658,10 +675,15 @@ export const useWalletStore = defineStore("wallet", {
           mintStore.removeProofs(spentProofs);
 
           // update UI
+          const serializedProofs = proofsStore.serializeProofs(spentProofs);
+          if (serializedProofs == null) {
+            throw new Error("could not serialize proofs.");
+          }
           if (update_history) {
             tokenStore.addPaidToken({
               amount: -proofsStore.sumProofs(spentProofs),
-              serializedProofs: proofsStore.serializeProofs(spentProofs),
+              serializedProofs: serializedProofs,
+              unit: mintStore.activeUnit,
             });
           }
         }

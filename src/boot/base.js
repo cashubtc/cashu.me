@@ -39,13 +39,17 @@ window.windowMixin = {
     formatCurrency: function (value, currency) {
       if (currency == "sat") return this.formatSat(value);
       if (currency == "usd") value = value / 100;
-      return new Intl.NumberFormat(window.LOCALE, {
-        style: "currency",
-        currency: currency,
-      }).format(value);
+      return (
+        new Intl.NumberFormat(window.LOCALE, {
+          style: "currency",
+          currency: currency,
+        }).format(value) +
+        " " +
+        currency.toUpperCase()
+      );
     },
     formatSat: function (value) {
-      return new Intl.NumberFormat(window.LOCALE).format(value);
+      return new Intl.NumberFormat(window.LOCALE).format(value) + " sat";
     },
     notifyApiError: function (error) {
       var types = {

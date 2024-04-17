@@ -93,11 +93,7 @@
             </div>
             <div class="row">
               <div class="col-12">
-                <TokenInformation
-                  :ticker-short="tickerShort"
-                  :proofs-to-show="sendData.tokens"
-                  :token-mint-url="getMint(decodeToken(sendData.tokensBase64))"
-                />
+                <TokenInformation :encodedToken="sendData.tokensBase64" />
               </div>
             </div>
 
@@ -178,7 +174,7 @@ export default defineComponent({
     ...mapWritableState(useSendTokensStore, ["showSendTokens"]),
     ...mapWritableState(useSendTokensStore, ["sendData"]),
     ...mapState(useUiStore, ["tickerShort"]),
-    ...mapState(useMintsStore, ["activeProofs"]),
+    ...mapState(useMintsStore, ["activeProofs", "activeUnit"]),
   },
   watch: {
     "sendData.tokensBase64": function (val) {
@@ -305,6 +301,7 @@ export default defineComponent({
         this.addPendingToken({
           amount: -this.sendData.amount,
           serializedProofs: this.sendData.tokensBase64,
+          unit: this.activeUnit,
         });
 
         this.checkTokenSpendableWorker(this.sendData.tokensBase64);

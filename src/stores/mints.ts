@@ -65,6 +65,11 @@ export class MintClass {
 // type that extends type Proof with reserved boolean
 export type WalletProof = Proof & { reserved: boolean };
 
+export type Balances = {
+  [unit: string]: number;
+};
+
+
 type BlindSignatureAudit = {
   signature: SerializedBlindedSignature;
   amount: number;
@@ -84,6 +89,7 @@ export const useMintsStore = defineStore("mints", {
       proofs: useLocalStorage("cashu.proofs", [] as WalletProof[]),
       spentProofs: useLocalStorage("cashu.spentProofs", [] as WalletProof[]),
       blindSignatures: useLocalStorage("cashu.blindSignatures", [] as BlindSignatureAudit[]),
+      balances: useLocalStorage("cashu.balances", { "sat": 0, "usd": 0 } as Balances),
       showAddMintDialog: false,
       showRemoveMintDialog: false,
     };
@@ -100,9 +106,11 @@ export const useMintsStore = defineStore("mints", {
     },
     totalBalance({ activeUnit }): number {
       const allUnitKeysets = this.mints.map((m) => m.keysets).flat().filter((k) => k.unit === activeUnit);
-      return this.proofs.filter((p) =>
+      const balance = this.proofs.filter((p) =>
         allUnitKeysets.map((k) => k.id).includes(p.id)
       ).reduce((sum, p) => sum + p.amount, 0);
+      this.balances[activeUnit] = balance;
+      return balance
     },
   },
   actions: {

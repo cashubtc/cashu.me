@@ -3,9 +3,7 @@
     <div class="col-12 q-px-sm">
       <q-icon name="toll" size="xs" color="grey" class="q-mr-xs" />
       <span class="q-mr-md">
-        <strong
-          >{{ formatCurrency(sumProofs, activeUnit) }} {{ tickerShort }}</strong
-        ></span
+        <strong>{{ displayUnit }} </strong></span
       >
       <q-icon name="account_balance" size="xs" color="grey" class="q-mr-xs" />
       <span>Mint: </span>
@@ -16,6 +14,10 @@
       <span v-else>
         {{ tokenMintUrl }}
       </span>
+      <div v-if="displayMemo" class="q-my-md">
+        <q-icon name="chat" size="xs" color="grey" class="q-mr-sm" />
+        <span>{{ displayMemo }}</span>
+      </div>
     </div>
   </div>
 </template>
@@ -24,14 +26,13 @@ import { defineComponent } from "vue";
 import { getShortUrl } from "src/js/wallet-helpers";
 import { mapState } from "pinia";
 import { useMintsStore } from "stores/mints";
+import token from "src/js/token";
 
 export default defineComponent({
   name: "TokenInformation",
   mixins: [windowMixin],
   props: {
-    tickerShort: String,
-    proofsToShow: Array,
-    tokenMintUrl: String,
+    encodedToken: String,
   },
   data: function () {
     return {};
@@ -45,10 +46,26 @@ export default defineComponent({
       "proofs",
       "activeUnit",
     ]),
+    proofsToShow: function () {
+      return token.getProofs(token.decode(this.encodedToken));
+    },
     sumProofs: function () {
-      return this.proofsToShow
-        .flat()
-        .reduce((sum, el) => (sum += el.amount), 0);
+      let proofs = token.getProofs(token.decode(this.encodedToken));
+      return proofs.flat().reduce((sum, el) => (sum += el.amount), 0);
+    },
+    displayUnit: function () {
+      let display = this.formatCurrency(this.sumProofs, this.tokenUnit);
+      return display;
+    },
+    tokenUnit: function () {
+      return token.getUnit(token.decode(this.encodedToken));
+    },
+    tokenMintUrl: function () {
+      let mint = token.getMint(token.decode(this.encodedToken));
+      return mint;
+    },
+    displayMemo: function () {
+      return token.getMemo(token.decode(this.encodedToken));
     },
   },
   methods: {

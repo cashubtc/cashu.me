@@ -23,9 +23,7 @@
           <template v-slot:append>
             <q-badge
               color="primary"
-              :label="
-                formatCurrency(getBalance, activeUnit) + ' ' + tickerShort
-              "
+              :label="formatCurrency(getBalance, activeUnit)"
           /></template>
         </q-select>
       </div>

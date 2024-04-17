@@ -1,6 +1,6 @@
 import { type Token, getDecodedToken } from "@cashu/cashu-ts";
 import { useMintsStore, WalletProof } from "src/stores/mints";
-export default { decode, getProofs, getMint };
+export default { decode, getProofs, getMint, getUnit, getMemo };
 
 /**
  * Decodes an encoded cashu token
@@ -31,6 +31,22 @@ function getMint(decoded_token: Token) {
       */
   if (decoded_token.token != null && decoded_token.token.length > 0) {
     return decoded_token.token[0].mint;
+  } else {
+    return "";
+  }
+}
+
+function getUnit(decoded_token: Token) {
+  if (decoded_token.unit != null) {
+    return decoded_token.unit;
+  } else {
+    return "";
+  }
+}
+
+function getMemo(decoded_token: Token) {
+  if (decoded_token.memo != null) {
+    return decoded_token.memo;
   } else {
     return "";
   }

@@ -22,14 +22,28 @@ export const useProofsStore = defineStore("proofs", {
       const mintStore = useMintsStore();
       // unique keyset IDs of proofs
       let uniqueIds = [...new Set(proofs.map((p) => p.id))];
+      // keysets with these uniqueIds
+      let keysets = mintStore.mints.flatMap((m) =>
+        m.keysets.filter((k) => uniqueIds.includes(k.id))
+      );
+      if (keysets.length === 0) {
+        return null;
+      }
       // mints that have any of the keyset.id
-      let mints_keysets = mintStore.mints.filter((m) =>
+      let mints = mintStore.mints.filter((m) =>
         m.keysets.some((k) => uniqueIds.includes(k.id))
       );
+      if (mints.length === 0) {
+        return null;
+      }
+      // unit of keysets
+      let unit = keysets[0].unit;
+
       // what we put into the JSON
-      let mints = mints_keysets.map((m) => [{ url: m.url, ids: m.keysets }][0]);
+      let mintsJson = mints.map((m) => [{ url: m.url, ids: m.keysets }][0]);
       let tokenV3 = {
-        token: [{ proofs: proofs, mint: mints[0].url }],
+        token: [{ proofs: proofs, mint: mintsJson[0].url }],
+        unit: unit,
       };
       return "cashuA" + btoa(JSON.stringify(tokenV3));
     },

@@ -47,7 +47,7 @@
           :props="props"
           :class="props.row.amount > 0 ? 'text-green-13 text-weight-bold' : ''"
         >
-          <div>{{ formatSat(props.row.amount) }}</div>
+          <div>{{ formatCurrency(props.row.amount, props.row.unit) }}</div>
         </q-td>
         <q-td key="date" :props="props">
           <div>{{ props.row.date }}</div>
@@ -116,13 +116,6 @@ export default defineComponent({
             field: "date",
             sortable: true,
           },
-          // {
-          //   name: 'memo',
-          //   align: 'left',
-          //   label: 'Memo',
-          //   field: 'memo',
-          //   sortable: true
-          // },
           {
             name: "token",
             align: "left",
