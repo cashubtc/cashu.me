@@ -8,7 +8,7 @@
           transition-next="slide-left"
           swipeable
           animated
-          height="100px"
+          :height="this.activeUnit == 'sat' ? `6.1rem` : `5rem`"
           control-color="primary"
           class="bg-transparent text-white rounded-borders"
         >
@@ -17,6 +17,7 @@
             v-for="unit in balancesOptions"
             :key="unit.value"
             :name="unit.value"
+            class="q-pt-sm"
           >
             <div class="row" @click="activeUnit = toggleUnit()">
               <div class="col-12">
@@ -25,7 +26,7 @@
                     {{ formatCurrency(getTotalBalance, activeUnit) }}
                   </strong>
                 </h3>
-                <div v-if="bitcoinPrice && tickerShort == 'sats'">
+                <div v-if="bitcoinPrice && this.activeUnit == 'sat'">
                   <strong>
                     {{
                       formatCurrency(
@@ -51,30 +52,6 @@
             :options="balancesOptions"
           />
         </div>
-        <!-- <div class="row" @click="activeUnit = toggleUnit()">
-          <div class="col-12">
-            <h3 class="q-my-none q-py-none">
-              <strong>
-                {{ formatCurrency(getTotalBalance, activeUnit) }}
-              </strong>
-            </h3>
-            <div v-if="bitcoinPrice && tickerShort == 'sats'">
-              <strong>
-                {{
-                  formatCurrency(
-                    (bitcoinPrice / 100000000) * getTotalBalance,
-                    "USD"
-                  ).slice(1)
-                }}
-              </strong>
-              <q-tooltip>
-                {{
-                  formatCurrency(bitcoinPrice, "USD").slice(1)
-                }}/BTC</q-tooltip
-              >
-            </div>
-          </div>
-        </div> -->
         <!-- mint balance -->
         <div class="row q-mt-sm q-mb-none" v-if="mints.length > 1">
           <div class="col-12">
@@ -131,7 +108,7 @@
             class="q-mx-none q-mt-xs q-px-sm cursor-pointer"
             @click="checkPendingTokens()"
           >
-            Pending: {{ formatSat(pendingBalance) }} {{ tickerShort }}
+            Pending: {{ formatCurrency(pendingBalance, this.activeUnit) }}
             <q-tooltip>Check all pending tokens</q-tooltip>
           </q-btn>
         </div>
@@ -144,6 +121,8 @@ import { defineComponent, ref } from "vue";
 import { getShortUrl } from "src/js/wallet-helpers";
 import { mapState, mapWritableState } from "pinia";
 import { useMintsStore } from "stores/mints";
+import { useTokensStore } from "stores/tokens";
+
 import axios from "axios";
 
 async function fetchBitcoinPrice() {
@@ -157,9 +136,6 @@ export default defineComponent({
   name: "BalanceView",
   mixins: [windowMixin],
   props: {
-    tickerShort: String,
-    tickerDollar: String,
-    pendingBalance: Number,
     checkPendingTokens: Function,
     setTab: Function,
   },
@@ -173,7 +149,14 @@ export default defineComponent({
       "activeUnit",
       "balances",
     ]),
+    ...mapState(useTokensStore, ["historyTokens"]),
     ...mapWritableState(useMintsStore, ["activeUnit"]),
+    pendingBalance: function () {
+      return -this.historyTokens
+        .filter((t) => t.status == "pending")
+        .filter((t) => t.unit == this.activeUnit)
+        .reduce((sum, el) => (sum += el.amount), 0);
+    },
     balance: function () {
       return this.activeProofs
         .flat()

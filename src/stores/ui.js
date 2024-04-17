@@ -10,7 +10,6 @@ const unitTickerShortMap = {
 export const useUiStore = defineStore("ui", {
   state: () => ({
     tickerLong: "Satoshis",
-    tickerDollar: "USD",
     showInvoiceDetails: false,
     tab: "history",
   }),

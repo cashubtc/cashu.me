@@ -4,9 +4,6 @@
       <NoMintWarnBanner v-if="mints.length == 0" />
       <BalanceView
         v-else
-        :ticker-short="tickerShort"
-        :ticker-dollar="tickerDollar"
-        :pending-balance="pendingBalance"
         :check-pending-tokens="checkPendingTokens"
         :set-tab="setTab"
       />
@@ -532,7 +529,7 @@ export default {
   },
   computed: {
     ...mapWritableState(useUiStore, ["showInvoiceDetails", "tab"]),
-    ...mapState(useUiStore, ["tickerShort", "tickerDollar"]),
+    ...mapState(useUiStore, ["tickerShort"]),
     ...mapWritableState(useReceiveTokensStore, [
       "showReceiveTokens",
       "receiveData",
@@ -566,11 +563,6 @@ export default {
       return this.activeProofs
         .map((t) => t)
         .flat()
-        .reduce((sum, el) => (sum += el.amount), 0);
-    },
-    pendingBalance: function () {
-      return -this.historyTokens
-        .filter((t) => t.status == "pending")
         .reduce((sum, el) => (sum += el.amount), 0);
     },
   },
