@@ -685,9 +685,9 @@ export default {
       this.payInvoiceData.lnurlpay = null;
       this.payInvoiceData.domain = "";
       this.payInvoiceData.lnurlauth = null;
-      this.payInvoiceData.data.request = "";
-      this.payInvoiceData.data.comment = "";
-      this.payInvoiceData.data.paymentChecker = null;
+      this.payInvoiceData.input.request = "";
+      this.payInvoiceData.input.comment = "";
+      this.payInvoiceData.input.paymentChecker = null;
       this.camera.show = false;
       this.focusInput("pasteInput");
     },
@@ -721,7 +721,7 @@ export default {
     },
     decodeQR: function (res) {
       this.camera.data = res;
-      // this.payInvoiceData.data.request = res
+      // this.payInvoiceData.input.request = res
       this.decodeRequest();
       this.camera.show = false;
     },
@@ -974,7 +974,7 @@ export default {
     // get lightning invoice from a link
     if (params.get("lightning")) {
       this.showParseDialog();
-      this.payInvoiceData.data.request = params.get("lightning");
+      this.payInvoiceData.input.request = params.get("lightning");
     }
 
     // Clear all parameters from URL without refreshing the page

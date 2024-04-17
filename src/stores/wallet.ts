@@ -15,7 +15,7 @@ import * as _ from "underscore";
 import { uint8ToBase64 } from "src/js/base64";
 import token from "src/js/token";
 import { notifyApiError, notifyError, notifySuccess, notifyWarning, notify } from "src/js/notify";
-import { CashuMint, CashuWallet, Proof, SerializedBlindedSignature, MintKeys, RequestMintPayload, SplitPayload, PostMintPayload, MeltPayload, CheckStatePayload, MeltQuotePayload } from "@cashu/cashu-ts";
+import { CashuMint, CashuWallet, Proof, SerializedBlindedSignature, MintKeys, MintQuotePayload, SplitPayload, MintPayload, MeltPayload, CheckStatePayload, MeltQuotePayload, MeltQuoteResponse } from "@cashu/cashu-ts";
 import { hashToCurve } from "@cashu/cashu-ts/dist/lib/es5/DHKE";
 import * as bolt11Decoder from "light-bolt11-decoder";
 import bech32 from "bech32";
@@ -56,6 +56,17 @@ export const useWalletStore = defineStore("wallet", {
         blocking: false,
         bolt11: "",
         show: false,
+        meltQuote: {
+          payload: {
+            unit: "",
+            request: "",
+          } as MeltQuotePayload,
+          response: {
+            quote: "",
+            amount: 0,
+            fee_reserve: 0,
+          } as MeltQuoteResponse,
+        },
         invoice: {
           sat: 0,
           memo: "",
@@ -72,7 +83,7 @@ export const useWalletStore = defineStore("wallet", {
           tag: "",
         },
         lnurlauth: {},
-        data: {
+        input: {
           request: "",
           amount: 0,
           comment: "",
@@ -397,8 +408,8 @@ export const useWalletStore = defineStore("wallet", {
         this.invoiceData.amount = amount;
       }
       try {
-        // create RequestMintPayload(this.invoiceData.amount) payload
-        const payload: RequestMintPayload = {
+        // create MintQuotePayload(this.invoiceData.amount) payload
+        const payload: MintQuotePayload = {
           amount: this.invoiceData.amount, unit: mintStore.activeUnit
         };
         const data = await mintStore.activeMint().api.mintQuote(
@@ -438,7 +449,7 @@ export const useWalletStore = defineStore("wallet", {
         const keyset_id = unitKeysets[0].id;
         const { outputs, rs } = await this.constructOutputs(amounts, secrets, keyset_id);
 
-        const payload: PostMintPayload = {
+        const payload: MintPayload = {
           outputs: outputs,
           quote: hash,
         };
@@ -505,8 +516,12 @@ export const useWalletStore = defineStore("wallet", {
         throw new Error("no invoice provided.");
       }
       const amount_invoice = this.payInvoiceData.invoice.sat;
-      const quote = await this.meltQuote(this.payInvoiceData.data.request);
-      const amount = amount_invoice + quote.fee_reserve;
+      // const quote = await this.meltQuote(this.payInvoiceData.input.request);
+      const quote = this.payInvoiceData.meltQuote.response;
+      if (quote == null) {
+        throw new Error("no quote found.");
+      }
+      const amount = quote.amount + quote.fee_reserve;
 
       console.log(
         "#### amount invoice",
@@ -525,11 +540,12 @@ export const useWalletStore = defineStore("wallet", {
         let n_outputs = Math.max(Math.ceil(Math.log2(quote.fee_reserve)), 1);
         let amounts = Array.from({ length: n_outputs }, () => 1);
         let secrets = await this.generateSecrets(amounts);
-        const keysets = mintStore.activeMint().keysets;
-        if (keysets == null || keysets.length == 0) {
-          throw new Error("no keysets found.");
+        const unitKeysets = mintStore.activeMint().unitKeysets(mintStore.activeUnit)
+        if (unitKeysets == null || unitKeysets.length == 0) {
+          console.error("no keysets found for unit", mintStore.activeUnit);
+          throw new Error("no keysets found for unit");
         }
-        const keyset_id = keysets[0].id;
+        const keyset_id = unitKeysets[0].id;
         let { outputs, rs } = await this.constructOutputs(amounts, secrets, keyset_id);
 
         let amount_paid = amount;
@@ -572,7 +588,7 @@ export const useWalletStore = defineStore("wallet", {
 
         this.invoiceHistory.push({
           amount: -amount_paid,
-          bolt11: this.payInvoiceData.data.request,
+          bolt11: this.payInvoiceData.input.request,
           quote: quote.quote,
           memo: "fixme",
           date: currentDateStr(),
@@ -592,16 +608,21 @@ export const useWalletStore = defineStore("wallet", {
     },
 
     // get a melt quote
-    meltQuote: async function (payment_request: string) {
+    meltQuote: async function () {
       const mintStore = useMintsStore();
+      if (this.payInvoiceData.input.request == "") {
+        throw new Error("no invoice provided.");
+      }
       const payload: MeltQuotePayload = {
         unit: mintStore.activeUnit,
-        request: payment_request,
+        request: this.payInvoiceData.input.request,
       };
+      this.payInvoiceData.meltQuote.payload = payload;
       try {
         const data = await mintStore.activeMint().api.meltQuote(payload);
         mintStore.assertMintError(data);
-        console.log("#### meltQuote", payment_request, data);
+        this.payInvoiceData.meltQuote.response = data;
+        console.log("#### meltQuote", payload, " response:", data);
         return data;
       } catch (error: any) {
         console.error(error);
@@ -751,26 +772,11 @@ export const useWalletStore = defineStore("wallet", {
         i += 1;
       }
     },
-
-    // findTokenForAmount: function (amount) {
-    //   const mintStore = useMintsStore();
-    //   // unused coin selection
-    //   for (const token of mintStore.activeProofs) {
-    //     const index = token.promises?.findIndex((p) => p.amount === amount);
-    //     if (index >= 0) {
-    //       return {
-    //         promise: token.promises[index],
-    //         secret: token.secrets[index],
-    //         r: token.rs[index],
-    //       };
-    //     }
-    //   }
-    // },
     decodeRequest: function (r = null) {
       const camera = useCameraStore();
       // set the argument as the data to parse
       if (typeof r == "string" && r != null) {
-        this.payInvoiceData.data.request = r;
+        this.payInvoiceData.input.request = r;
       }
       let reqtype = null;
       let req = null;
@@ -778,25 +784,25 @@ export const useWalletStore = defineStore("wallet", {
       if (camera.camera.data) {
         // get request from camera
         req = camera.camera.data;
-      } else if (this.payInvoiceData.data.request) {
+      } else if (this.payInvoiceData.input.request) {
         // get request from pay invoice dialog
-        req = this.payInvoiceData.data.request;
+        req = this.payInvoiceData.input.request;
       }
       if (req == null) {
         throw new Error("no request provided.");
       }
 
       if (req.toLowerCase().startsWith("lnbc")) {
-        this.payInvoiceData.data.request = req;
+        this.payInvoiceData.input.request = req;
         reqtype = "bolt11";
       } else if (req.toLowerCase().startsWith("lightning:")) {
-        this.payInvoiceData.data.request = req.slice(10);
+        this.payInvoiceData.input.request = req.slice(10);
         reqtype = "bolt11";
       } else if (req.toLowerCase().startsWith("lnurl:")) {
-        this.payInvoiceData.data.request = req.slice(6);
+        this.payInvoiceData.input.request = req.slice(6);
         reqtype = "lnurl";
       } else if (req.indexOf("lightning=lnurl1") !== -1) {
-        this.payInvoiceData.data.request = req
+        this.payInvoiceData.input.request = req
           .split("lightning=")[1]
           .split("&")[0];
         reqtype = "lnurl";
@@ -804,7 +810,7 @@ export const useWalletStore = defineStore("wallet", {
         req.toLowerCase().startsWith("lnurl1") ||
         req.match(/[\w.+-~_]+@[\w.+-~_]/)
       ) {
-        this.payInvoiceData.data.request = req;
+        this.payInvoiceData.input.request = req;
         reqtype = "lnurl";
       } else if (req.indexOf("cashuA") !== -1) {
         // very dirty way of parsing cashu tokens from either a pasted token or a URL like https://host.com?token=eyJwcm
@@ -817,7 +823,7 @@ export const useWalletStore = defineStore("wallet", {
         this.payInvoiceData.show = true;
         let invoice;
         try {
-          invoice = bolt11Decoder.decode(this.payInvoiceData.data.request);
+          invoice = bolt11Decoder.decode(this.payInvoiceData.input.request);
         } catch (error) {
           notifyWarning("Failed to decode invoice", undefined, 3000);
           this.payInvoiceData.show = false;
@@ -863,7 +869,7 @@ export const useWalletStore = defineStore("wallet", {
         this.payInvoiceData.invoice = Object.freeze(cleanInvoice);
       } else if (reqtype == "lnurl") {
         console.log("#### QR CODE: LNURL");
-        this.lnurlPayFirst(this.payInvoiceData.data.request);
+        this.lnurlPayFirst(this.payInvoiceData.input.request);
       } else if (reqtype == "cashu") {
         console.log("#### QR CODE: CASHU TOKEN");
         this.payInvoiceData.show = false;
@@ -880,14 +886,6 @@ export const useWalletStore = defineStore("wallet", {
           bech32.fromWords(bech32.decode(address, 20000).words)
         ).toString();
         var { data } = await axios.get(host);
-        // const { data } = await LNbits.api.request(
-        //   "POST",
-        //   "/api/v1/payments/decode",
-        //   "",
-        //   {
-        //     data: address,
-        //   }
-        // );
         host = data.domain;
       }
       if (host == undefined) {
@@ -902,14 +900,14 @@ export const useWalletStore = defineStore("wallet", {
           this.payInvoiceData.lnurlpay.maxSendable ==
           this.payInvoiceData.lnurlpay.minSendable
         ) {
-          this.payInvoiceData.data.amount =
+          this.payInvoiceData.input.amount =
             this.payInvoiceData.lnurlpay.maxSendable / 1000;
         }
         this.payInvoiceData.show = true;
       }
     },
     lnurlPaySecond: async function () {
-      let amount = this.payInvoiceData.data.amount;
+      let amount = this.payInvoiceData.input.amount;
       if (this.payInvoiceData.lnurlpay == null) {
         notifyError("No LNURL data", "LNURL Error");
         return;
@@ -928,7 +926,7 @@ export const useWalletStore = defineStore("wallet", {
           return;
         }
         console.log(data.pr);
-        this.payInvoiceData.data.request = data.pr;
+        this.payInvoiceData.input.request = data.pr;
         this.decodeRequest();
       }
     },
