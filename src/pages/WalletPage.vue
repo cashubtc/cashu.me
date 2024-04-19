@@ -7,11 +7,138 @@
         :check-pending-tokens="checkPendingTokens"
         :set-tab="setTab"
       />
-
       <!-- ECASH BUTTONS  -->
       <q-card class="q-mt-xs">
-        <q-card-section class="q-pt-sm">
-          <div class="row items-center no-wrap q-mb-sm">
+        <q-card-section class="q-py-xs">
+          <div
+            class="row items-center justify-center no-wrap q-mb-none q-mx-none q-px-none"
+          >
+            <q-carousel
+              v-model="action"
+              transition-prev="slide-right"
+              transition-next="slide-left"
+              swipeable
+              animated
+              navigation
+              :height="action == 'main' ? `10.5rem` : `7rem`"
+              control-color="primary"
+              class="bg-transparent text-white rounded-borders q-px-none q-mx-none"
+              style="width: 100%"
+            >
+              <q-carousel-slide name="ecash" class="q-pt-sm q-mx-none">
+                <div class="row items-center justify-center no-wrap q-mb-sm">
+                  <q-btn-group rounded>
+                    <q-btn
+                      icon="toll"
+                      color="primary"
+                      label="Receive"
+                      @click="showReceiveTokensDialog"
+                    />
+                    <q-btn
+                      color="primary"
+                      label="Send"
+                      @click="showSendTokensDialog"
+                    />
+                  </q-btn-group>
+                </div>
+              </q-carousel-slide>
+
+              <q-carousel-slide name="main" class="q-pt-sm q-pb-none">
+                <q-btn-group rounded outline style="width: 100%">
+                  <q-btn
+                    icon="toll"
+                    outline
+                    class="q-py-lg q-pl-xl"
+                    rounded
+                    label="Ecash"
+                    align="left"
+                    @click="action = 'ecash'"
+                    style="flex: 2"
+                  />
+                  <q-btn
+                    align="center"
+                    icon="qr_code_scanner"
+                    outline
+                    rounded
+                    class="q-py-lg"
+                    @click="showCamera"
+                  />
+                  <q-btn
+                    label="Lightning"
+                    outline
+                    rounded
+                    class="q-py-lg q-pr-xl"
+                    @click="action = 'lightning'"
+                    style="flex: 2"
+                  />
+                </q-btn-group>
+              </q-carousel-slide>
+
+              <q-carousel-slide name="lightning" class="q-pt-sm">
+                <div class="row items-center justify-center no-wrap q-mb-sm">
+                  <q-btn-group rounded>
+                    <q-btn
+                      icon="bolt"
+                      color="secondary"
+                      label="Receive"
+                      @click="showInvoiceCreateDialog"
+                    />
+                    <q-btn
+                      color="secondary"
+                      label="Send"
+                      @click="showParseDialog"
+                    />
+                  </q-btn-group>
+                </div>
+              </q-carousel-slide>
+            </q-carousel>
+          </div>
+
+          <!-- <div class="row items-center justify-center no-wrap q-mb-sm"></div>
+
+          <div class="row items-center justify-center no-wrap q-mb-sm">
+            <q-btn-group rounded v-if="action == 'lightning'">
+              <q-btn
+                color="secondary"
+                icon="bolt"
+                label="Receive"
+                @click="showInvoiceCreateDialog"
+              />
+              <q-btn color="secondary" label="Send" @click="showParseDialog" />
+            </q-btn-group>
+          </div>
+
+          <div class="row items-center justify-center no-wrap q-mb-sm">
+            <div class="col-4 col-sm-5 col-md-4 q-pr-xs">
+              <q-btn
+                color="primary"
+                icon="toll"
+                rounded
+                label="Ecash"
+                @click="action = 'ecash'"
+              />
+            </div>
+            <div class="col-4 col-sm-5 col-md-4 q-pr-xs">
+              <q-btn
+                size="2rem"
+                unelevated
+                icon="qr_code_scanner"
+                class="col-2 q-pb-md q-mt-md"
+                @click="showCamera"
+              />
+            </div>
+            <div class="col-4 col-sm-5 col-md-4 q-pr-xs">
+              <q-btn
+                color="secondary"
+                icon="bolt"
+                rounded
+                label="Lightning"
+                @click="action = 'lightning'"
+              />
+            </div>
+          </div> -->
+
+          <!-- <div class="row items-center no-wrap q-mb-sm">
             <div class="col-6 col-sm-5 col-md-4 q-pr-xs">
               <div class="row items-center no-wrap q-mb-sm">
                 <q-btn
@@ -25,8 +152,11 @@
                   icon-right="toll"
                   class="full-width"
                   @click="showReceiveTokensDialog"
-                  >Receive Ecash</q-btn
                 >
+                  <strong class="gt-lg"> Receive Ecash </strong>
+                  <strong class="gt-xs lt-xl"> Receive Ecash </strong>
+                  <strong class="lt-sm"> Receive </strong>
+                </q-btn>
               </div>
               <div class="row items-center no-wrap q-mb-none">
                 <q-btn
@@ -43,7 +173,7 @@
                 >
                   <strong class="gt-lg"> Create Lightning Invoice </strong>
                   <strong class="gt-xs lt-xl"> Create Invoice </strong>
-                  <strong class="lt-sm"> LN Invoice </strong>
+                  <strong class="lt-sm"> Invoice </strong>
                 </q-btn>
               </div>
             </div>
@@ -70,8 +200,10 @@
                   class="full-width"
                   @click="showSendTokensDialog"
                 >
-                  Send Ecash</q-btn
-                >
+                  <strong class="gt-lg"> Send Ecash </strong>
+                  <strong class="gt-xs lt-xl"> Send Ecash </strong>
+                  <strong class="lt-sm"> Send </strong>
+                </q-btn>
               </div>
               <div class="row items-center no-wrap q-mb-none">
                 <q-btn
@@ -88,11 +220,11 @@
                 >
                   <strong class="gt-lg"> Pay Lightning Invoice </strong>
                   <strong class="gt-xs lt-xl"> Pay Invoice </strong>
-                  <strong class="lt-sm"> Pay LN </strong>
+                  <strong class="lt-sm"> Pay </strong>
                 </q-btn>
               </div>
             </div>
-          </div>
+          </div> -->
         </q-card-section>
         <q-card-section class="q-pt-none">
           <!-- ///////////////////////////////////////////
@@ -264,7 +396,7 @@
         !camera.show
       "
     >
-      <q-tabs
+      <!-- <q-tabs
         class="lt-sm fixed-bottom q-px-none q-py-md left-0 right-0 bg-primary text-white shadow-2 z-top q-px-0"
         indicator-color="transparent"
         align="justify"
@@ -308,7 +440,7 @@
           <strong class="gt-xs lt-xl"> Pay Invoice </strong>
           <strong class="lt-sm"> Pay<br />Invoice </strong>
         </q-btn>
-      </q-tabs>
+      </q-tabs> -->
     </div>
 
     <!-- DIALOGS  -->
@@ -352,13 +484,6 @@
           device. If you lose the link or delete your your data without backing
           up, you will lose your tokens. Press the Backup button to download a
           copy of your tokens.
-        </p>
-        <p>
-          <strong>Where is my old wallet</strong>
-          This wallet was previously running on
-          https://legend.lnbits.com/cashu/wallet but has since moved to
-          https://wallet.cashu.me. Send all tokens from the old wallet to this
-          one.
         </p>
         <p>
           <strong>Add to home screen.</strong>
@@ -475,6 +600,7 @@ export default {
       mintId: "",
       mintName: "",
       deferredPWAInstallPrompt: null,
+      action: "main",
       receive: {
         show: false,
         status: "pending",

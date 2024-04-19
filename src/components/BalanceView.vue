@@ -10,7 +10,7 @@
           animated
           :height="this.activeUnit == 'sat' ? `6.1rem` : `5rem`"
           control-color="primary"
-          class="bg-transparent text-white rounded-borders"
+          class="bg-transparent rounded-borders"
         >
           <!-- make a q-carousel-slide with v-for for all possible units -->
           <q-carousel-slide
@@ -47,6 +47,7 @@
         </q-carousel>
         <div class="row justify-center">
           <q-btn-toggle
+            rounded
             glossy
             v-model="this.activeUnit"
             :options="balancesOptions"
