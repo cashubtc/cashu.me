@@ -1,72 +1,72 @@
 <template>
-  <q-card class="q-my-md q-py-sm">
-    <q-card-section class="q-mt-sm q-py-xs">
-      <div>
-        <q-carousel
-          v-model="this.activeUnit"
-          transition-prev="slide-right"
-          transition-next="slide-left"
-          swipeable
-          animated
-          :height="this.activeUnit == 'sat' ? `6.1rem` : `5rem`"
-          control-color="primary"
-          class="bg-transparent rounded-borders"
-        >
-          <!-- make a q-carousel-slide with v-for for all possible units -->
-          <q-carousel-slide
-            v-for="unit in balancesOptions"
-            :key="unit.value"
-            :name="unit.value"
-            class="q-pt-sm"
-          >
-            <div class="row" @click="activeUnit = toggleUnit()">
-              <div class="col-12">
-                <h3 class="q-my-none q-py-none">
-                  <strong>
-                    {{ formatCurrency(getTotalBalance, activeUnit) }}
-                  </strong>
-                </h3>
-                <div v-if="bitcoinPrice && this.activeUnit == 'sat'">
-                  <strong>
-                    {{
-                      formatCurrency(
-                        (bitcoinPrice / 100000000) * getTotalBalance,
-                        "USD"
-                      ).slice(1)
-                    }}
-                  </strong>
-                  <q-tooltip>
-                    {{
-                      formatCurrency(bitcoinPrice, "USD").slice(1)
-                    }}/BTC</q-tooltip
-                  >
-                </div>
-              </div>
-            </div>
-          </q-carousel-slide>
-        </q-carousel>
-        <div class="row justify-center">
-          <q-btn-toggle
-            rounded
-            glossy
-            v-model="this.activeUnit"
-            :options="balancesOptions"
-          />
-        </div>
-        <!-- mint balance -->
-        <div class="row q-mt-sm q-mb-none" v-if="mints.length > 1">
+  <!-- <q-card class="q-my-md q-py-sm">
+    <q-card-section class="q-mt-sm q-py-xs"> -->
+  <div>
+    <q-carousel
+      v-model="this.activeUnit"
+      transition-prev="slide-right"
+      transition-next="slide-left"
+      swipeable
+      animated
+      :height="this.activeUnit == 'sat' ? `6.1rem` : `5rem`"
+      control-color="primary"
+      class="bg-transparent rounded-borders"
+    >
+      <!-- make a q-carousel-slide with v-for for all possible units -->
+      <q-carousel-slide
+        v-for="unit in balancesOptions"
+        :key="unit.value"
+        :name="unit.value"
+        class="q-pt-sm"
+      >
+        <div class="row" @click="activeUnit = toggleUnit()">
           <div class="col-12">
-            <q-icon
-              name="account_balance"
-              size="0.9rem"
-              color="grey"
-              class="q-mr-none q-mb-xs"
-            />
-            <span class="q-my-none q-py-none text-weight-regular">
-              Active mint:
-              <b>{{ formatCurrency(getTotalBalance, activeUnit) }} </b>
-            </span>
-            <!-- <q-knob
+            <h3 class="q-my-none q-py-none">
+              <strong>
+                {{ formatCurrency(getTotalBalance, activeUnit) }}
+              </strong>
+            </h3>
+            <div v-if="bitcoinPrice && this.activeUnit == 'sat'">
+              <strong>
+                {{
+                  formatCurrency(
+                    (bitcoinPrice / 100000000) * getTotalBalance,
+                    "USD"
+                  ).slice(1)
+                }}
+              </strong>
+              <q-tooltip>
+                {{
+                  formatCurrency(bitcoinPrice, "USD").slice(1)
+                }}/BTC</q-tooltip
+              >
+            </div>
+          </div>
+        </div>
+      </q-carousel-slide>
+    </q-carousel>
+    <div class="row justify-center">
+      <q-btn-toggle
+        rounded
+        glossy
+        v-model="this.activeUnit"
+        :options="balancesOptions"
+      />
+    </div>
+    <!-- mint balance -->
+    <div class="row q-mt-lg q-mb-none" v-if="mints.length > 1">
+      <div class="col-12">
+        <q-icon
+          name="account_balance"
+          size="0.9rem"
+          color="grey"
+          class="q-mr-none q-mb-xs"
+        />
+        <span class="q-my-none q-py-none text-weight-regular">
+          Active mint:
+          <b>{{ formatCurrency(getTotalBalance, activeUnit) }} </b>
+        </span>
+        <!-- <q-knob
               :model-value="getBalance"
               :min="0"
               :max="getTotalBalance"
@@ -76,46 +76,46 @@
               color="orange"
               class="q-ma-none q-pa-none q-mt-none q-pt-none"
             /> -->
-          </div>
-        </div>
-        <!-- mint url -->
-        <div class="row q-mt-xs q-mb-none" v-if="activeMintUrl">
-          <div class="col-12 cursor-pointer">
-            <q-icon
-              name="link"
-              size="1rem"
-              color="grey"
-              class="q-mr-none q-mb-none"
-              @click="setTab('settings')"
-            />
-            <span class="text-weight-light" @click="setTab('settings')">
-              Mint: <b>{{ getActiveMintUrlShort }}</b>
-              <q-tooltip>Configure mint(s)</q-tooltip>
-            </span>
-          </div>
-        </div>
       </div>
-      <!-- pending -->
-      <div class="row q-mt-xs q-mb-none" v-if="pendingBalance > 0">
-        <div class="col-12">
-          <q-btn
-            name="history"
-            size="sm"
-            align="between"
-            color="white"
-            dense
-            outline
-            icon="refresh"
-            class="q-mx-none q-mt-xs q-px-sm cursor-pointer"
-            @click="checkPendingTokens()"
-          >
-            Pending: {{ formatCurrency(pendingBalance, this.activeUnit) }}
-            <q-tooltip>Check all pending tokens</q-tooltip>
-          </q-btn>
-        </div>
+    </div>
+    <!-- mint url -->
+    <div class="row q-mt-xs q-mb-none" v-if="activeMintUrl">
+      <div class="col-12 cursor-pointer">
+        <q-icon
+          name="link"
+          size="1rem"
+          color="grey"
+          class="q-mr-none q-mb-none"
+          @click="setTab('settings')"
+        />
+        <span class="text-weight-light" @click="setTab('settings')">
+          Mint: <b>{{ getActiveMintUrlShort }}</b>
+          <q-tooltip>Configure mint(s)</q-tooltip>
+        </span>
       </div>
-    </q-card-section>
-  </q-card>
+    </div>
+  </div>
+  <!-- pending -->
+  <div class="row q-mt-xs q-mb-none" v-if="pendingBalance > 0">
+    <div class="col-12">
+      <q-btn
+        name="history"
+        size="sm"
+        align="between"
+        color="white"
+        dense
+        outline
+        icon="refresh"
+        class="q-mx-none q-mt-xs q-px-sm cursor-pointer"
+        @click="checkPendingTokens()"
+      >
+        Pending: {{ formatCurrency(pendingBalance, this.activeUnit) }}
+        <q-tooltip>Check all pending tokens</q-tooltip>
+      </q-btn>
+    </div>
+  </div>
+  <!-- </q-card-section>
+  </q-card> -->
 </template>
 <script>
 import { defineComponent, ref } from "vue";

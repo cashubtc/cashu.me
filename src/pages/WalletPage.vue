@@ -8,93 +8,93 @@
         :set-tab="setTab"
       />
       <!-- ECASH BUTTONS  -->
-      <q-card class="q-mt-xs">
-        <q-card-section class="q-py-xs">
-          <div
-            class="row items-center justify-center no-wrap q-mb-none q-mx-none q-px-none"
-          >
-            <q-carousel
-              v-model="action"
-              transition-prev="slide-right"
-              transition-next="slide-left"
-              swipeable
-              animated
-              navigation
-              :height="action == 'main' ? `10.5rem` : `7rem`"
-              control-color="primary"
-              class="bg-transparent text-white rounded-borders q-px-none q-mx-none"
-              style="width: 100%"
-            >
-              <q-carousel-slide name="ecash" class="q-pt-sm q-mx-none">
-                <div class="row items-center justify-center no-wrap q-mb-sm">
-                  <q-btn-group rounded>
-                    <q-btn
-                      icon="toll"
-                      color="primary"
-                      label="Receive"
-                      @click="showReceiveTokensDialog"
-                    />
-                    <q-btn
-                      color="primary"
-                      label="Send"
-                      @click="showSendTokensDialog"
-                    />
-                  </q-btn-group>
-                </div>
-              </q-carousel-slide>
+      <!-- <q-card class="q-mt-xs">
+        <q-card-section class="q-py-xs"> -->
+      <div
+        class="row items-center justify-center no-wrap q-mb-none q-mx-none q-px-none"
+      >
+        <q-carousel
+          v-model="action"
+          transition-prev="slide-right"
+          transition-next="slide-left"
+          swipeable
+          animated
+          navigation
+          :height="action == 'main' ? `10.5rem` : `7rem`"
+          control-color="primary"
+          class="bg-transparent text-white rounded-borders q-px-none q-mx-none"
+          style="width: 100%"
+        >
+          <q-carousel-slide name="ecash" class="q-pt-sm q-mx-none">
+            <div class="row items-center justify-center no-wrap q-mb-sm">
+              <q-btn-group rounded>
+                <q-btn
+                  icon="toll"
+                  color="primary"
+                  label="Receive"
+                  @click="showReceiveTokensDialog"
+                />
+                <q-btn
+                  color="primary"
+                  label="Send"
+                  @click="showSendTokensDialog"
+                />
+              </q-btn-group>
+            </div>
+          </q-carousel-slide>
 
-              <q-carousel-slide name="main" class="q-pt-sm q-pb-none">
-                <q-btn-group rounded outline style="width: 100%">
-                  <q-btn
-                    icon="toll"
-                    outline
-                    class="q-py-lg q-pl-xl"
-                    rounded
-                    label="Ecash"
-                    align="left"
-                    @click="action = 'ecash'"
-                    style="flex: 2"
-                  />
-                  <q-btn
-                    align="center"
-                    icon="qr_code_scanner"
-                    outline
-                    rounded
-                    class="q-py-lg"
-                    @click="showCamera"
-                  />
-                  <q-btn
-                    label="Lightning"
-                    outline
-                    rounded
-                    class="q-py-lg q-pr-xl"
-                    @click="action = 'lightning'"
-                    style="flex: 2"
-                  />
-                </q-btn-group>
-              </q-carousel-slide>
+          <q-carousel-slide name="main" class="q-pt-sm q-pb-none">
+            <q-btn-group rounded outline style="width: 100%">
+              <q-btn
+                outline
+                class="q-py-lg q-pl-xl"
+                rounded
+                icon="toll"
+                label="Ecash"
+                align="left"
+                @click="action = 'ecash'"
+                style="flex: 2"
+              />
+              <q-btn
+                align="center"
+                icon="qr_code_scanner"
+                outline
+                rounded
+                class="q-py-lg"
+                @click="showCamera"
+              />
+              <q-btn
+                label="Lightning"
+                outline
+                rounded
+                class="q-py-lg q-pr-xl"
+                @click="action = 'lightning'"
+                style="flex: 2"
+              />
+            </q-btn-group>
+          </q-carousel-slide>
 
-              <q-carousel-slide name="lightning" class="q-pt-sm">
-                <div class="row items-center justify-center no-wrap q-mb-sm">
-                  <q-btn-group rounded>
-                    <q-btn
-                      icon="bolt"
-                      color="secondary"
-                      label="Receive"
-                      @click="showInvoiceCreateDialog"
-                    />
-                    <q-btn
-                      color="secondary"
-                      label="Send"
-                      @click="showParseDialog"
-                    />
-                  </q-btn-group>
-                </div>
-              </q-carousel-slide>
-            </q-carousel>
-          </div>
+          <q-carousel-slide name="lightning" class="q-pt-sm">
+            <div class="row items-center justify-center no-wrap q-mb-sm">
+              <q-btn-group rounded>
+                <q-btn
+                  icon="bolt"
+                  color="secondary"
+                  label="Receive"
+                  @click="showInvoiceCreateDialog"
+                />
+                <q-btn
+                  color="secondary"
+                  label="Send"
+                  @click="showParseDialog"
+                />
+              </q-btn-group>
+            </div>
+          </q-carousel-slide>
+        </q-carousel>
+      </div>
 
-          <!-- <div class="row items-center justify-center no-wrap q-mb-sm"></div>
+      <!-- <div class="row items-center justify-center no-wrap q-mb-sm"></div>
 
           <div class="row items-center justify-center no-wrap q-mb-sm">
             <q-btn-group rounded v-if="action == 'lightning'">
@@ -138,7 +138,7 @@
             </div>
           </div> -->
 
-          <!-- <div class="row items-center no-wrap q-mb-sm">
+      <!-- <div class="row items-center no-wrap q-mb-sm">
             <div class="col-6 col-sm-5 col-md-4 q-pr-xs">
               <div class="row items-center no-wrap q-mb-sm">
                 <q-btn
@@ -225,55 +225,55 @@
               </div>
             </div>
           </div> -->
-        </q-card-section>
-        <q-card-section class="q-pt-none">
-          <!-- ///////////////////////////////////////////
+      <!-- </q-card-section>
+        <q-card-section class="q-pt-none"> -->
+      <!-- ///////////////////////////////////////////
                 ////////////////// TABLES /////////////////
                 /////////////////////////////////////////// -->
-          <q-tabs v-model="tab" no-caps class="bg-dark text-white">
-            <q-tab name="history" label="History"></q-tab>
-            <q-tab name="invoices" label="Invoices"></q-tab>
-            <!-- <q-tab name="tokens" label="Tokens"></q-tab> -->
-            <q-tab name="settings" label="Settings"></q-tab>
-          </q-tabs>
-          <q-tab-panels v-model="tab" animated>
-            <!-- ////////////////// HISTORY LIST ///////////////// -->
+      <q-tabs v-model="tab" no-caps class="bg-dark text-white">
+        <q-tab name="history" label="History"></q-tab>
+        <q-tab name="invoices" label="Invoices"></q-tab>
+        <!-- <q-tab name="tokens" label="Tokens"></q-tab> -->
+        <q-tab name="settings" label="Settings"></q-tab>
+      </q-tabs>
+      <q-tab-panels v-model="tab" animated>
+        <!-- ////////////////// HISTORY LIST ///////////////// -->
 
-            <q-tab-panel name="history">
-              <HistoryTable
-                :history-tokens="historyTokens"
-                :show-token-dialog="showTokenDialog"
-                :check-token-spendable="checkTokenSpendable"
-              />
-            </q-tab-panel>
+        <q-tab-panel name="history">
+          <HistoryTable
+            :history-tokens="historyTokens"
+            :show-token-dialog="showTokenDialog"
+            :check-token-spendable="checkTokenSpendable"
+          />
+        </q-tab-panel>
 
-            <!-- ////////////////// INVOICE LIST ///////////////// -->
+        <!-- ////////////////// INVOICE LIST ///////////////// -->
 
-            <q-tab-panel name="invoices">
-              <InvoicesTable
-                :invoice-history="invoiceHistory"
-                :show-invoice-info-dialog="showInvoicInfoDialog"
-                :check-invoice="checkInvoice"
-              />
-            </q-tab-panel>
+        <q-tab-panel name="invoices">
+          <InvoicesTable
+            :invoice-history="invoiceHistory"
+            :show-invoice-info-dialog="showInvoicInfoDialog"
+            :check-invoice="checkInvoice"
+          />
+        </q-tab-panel>
 
-            <!-- ////////////////////// SETTINGS ////////////////// -->
+        <!-- ////////////////////// SETTINGS ////////////////// -->
 
-            <q-tab-panel name="settings" class="q-px-sm">
-              <SettingsView
-                :ticker-short="tickerShort"
-                :request-mint="requestMint"
-                :decode-request="decodeRequest"
-                :melt="melt"
-                :invoice-check-worker="invoiceCheckWorker"
-                :pay-invoice-data="payInvoiceData"
-                :show-mint-dialog="this.addMintDialog.show"
-                :mint-to-add-wallet-page="this.addMintDialog.mintToAdd"
-              />
-            </q-tab-panel>
-            <!-- ////////////////// TOKEN LIST ///////////////// -->
+        <q-tab-panel name="settings" class="q-px-sm">
+          <SettingsView
+            :ticker-short="tickerShort"
+            :request-mint="requestMint"
+            :decode-request="decodeRequest"
+            :melt="melt"
+            :invoice-check-worker="invoiceCheckWorker"
+            :pay-invoice-data="payInvoiceData"
+            :show-mint-dialog="this.addMintDialog.show"
+            :mint-to-add-wallet-page="this.addMintDialog.mintToAdd"
+          />
+        </q-tab-panel>
+        <!-- ////////////////// TOKEN LIST ///////////////// -->
 
-            <!-- <q-tab-panel name="tokens">
+        <!-- <q-tab-panel name="tokens">
               <q-table
                 dense
                 flat
@@ -305,9 +305,9 @@
                 </template>
               </q-table>
             </q-tab-panel> -->
-          </q-tab-panels>
-        </q-card-section>
-      </q-card>
+      </q-tab-panels>
+      <!-- </q-card-section>
+      </q-card> -->
 
       <!-- LIGHTNING BUTTONS  -->
 
