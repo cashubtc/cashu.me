@@ -44,12 +44,12 @@
           </q-carousel-slide>
 
           <q-carousel-slide name="main" class="q-pt-sm q-pb-none">
-            <q-btn-group rounded outline style="width: 100%">
+            <q-btn-group rounded outline style="width: 100%; max-width: 500px">
               <q-btn
                 outline
                 class="q-py-lg q-pl-xl"
                 rounded
-                icon="toll"
+                :icon="$q.screen.width >= 390 ? 'toll' : undefined"
                 label="Ecash"
                 align="left"
                 @click="action = 'ecash'"
@@ -65,6 +65,7 @@
               />
               <q-btn
                 label="Lightning"
+                :icon="$q.screen.width > 440 ? 'bolt' : undefined"
                 outline
                 rounded
                 class="q-py-lg q-pr-xl"
