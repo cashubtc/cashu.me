@@ -9,8 +9,8 @@
       </div>
       <div class="row items-center justify-center">
         <div class="text-subtitle2">
-          You're not connected to any ecash mint yet. Please add an mint to get
-          started.
+          You're not connected to any ecash mint yet. Please add a mint in the
+          settings to get started.
         </div>
       </div>
       <div class="row items-center justify-center q-pt-xl">
