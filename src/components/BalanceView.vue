@@ -4,11 +4,11 @@
   <div>
     <q-carousel
       v-model="this.activeUnit"
-      transition-prev="slide-right"
-      transition-next="slide-left"
+      transition-prev="jump-up"
+      transition-next="jump-up"
       swipeable
       animated
-      :height="this.activeUnit == 'sat' ? `6.1rem` : `5rem`"
+      height="5rem"
       control-color="primary"
       class="bg-transparent rounded-borders q-mb-lg q-mt-xl"
     >
@@ -46,11 +46,12 @@
       </q-carousel-slide>
     </q-carousel>
     <div class="row justify-center">
-      <q-btn-toggle
+      <q-btn
         rounded
-        glossy
-        v-model="this.activeUnit"
-        :options="balancesOptions"
+        outline
+        @click="activeUnit = toggleUnit()"
+        :label="activeUnit == 'sat' ? 'BTC' : 'USD'"
+        class="q-mt-none q-mb-md"
       />
     </div>
     <!-- mint balance -->

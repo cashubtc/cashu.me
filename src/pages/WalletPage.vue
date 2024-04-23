@@ -20,24 +20,38 @@
           swipeable
           animated
           navigation
-          :height="action == 'main' ? `10.5rem` : `7rem`"
+          height="10.7rem"
           control-color="primary"
           class="bg-transparent text-white rounded-borders q-px-none q-mx-none"
           style="width: 100%"
         >
           <q-carousel-slide name="ecash" class="q-pt-sm q-mx-none">
+            <div
+              class="row items-center justify-center no-wrap q-mb-sm relative-position"
+            >
+              <q-btn
+                flat
+                icon="arrow_forward"
+                @click="action = 'main'"
+                class="q-ml-auto"
+              />
+              <span class="text-h6 q-mr-auto absolute right"
+                >Ecash<q-icon class="q-ml-sm" name="toll"
+              /></span>
+            </div>
             <div class="row items-center justify-center no-wrap q-mb-sm">
               <q-btn-group rounded>
                 <q-btn
-                  icon="toll"
                   color="primary"
-                  label="Receive"
-                  @click="showReceiveTokensDialog"
+                  label="Send"
+                  icon="north_east"
+                  @click="showSendTokensDialog"
                 />
                 <q-btn
                   color="primary"
-                  label="Send"
-                  @click="showSendTokensDialog"
+                  label="Receive"
+                  icon="south_west"
+                  @click="showReceiveTokensDialog"
                 />
               </q-btn-group>
             </div>
@@ -76,18 +90,32 @@
           </q-carousel-slide>
 
           <q-carousel-slide name="lightning" class="q-pt-sm">
+            <div
+              class="row items-center justify-center no-wrap q-mb-sm relative-position"
+            >
+              <q-btn
+                flat
+                icon="arrow_back"
+                @click="action = 'main'"
+                class="q-mr-auto"
+              />
+              <span class="text-h6 q-mr-auto absolute left"
+                >Lightning<q-icon name="bolt"
+              /></span>
+            </div>
             <div class="row items-center justify-center no-wrap q-mb-sm">
               <q-btn-group rounded>
                 <q-btn
-                  icon="bolt"
-                  color="secondary"
-                  label="Receive"
-                  @click="showInvoiceCreateDialog"
-                />
-                <q-btn
-                  color="secondary"
+                  color="primary"
+                  icon="north_east"
                   label="Send"
                   @click="showParseDialog"
+                />
+                <q-btn
+                  color="primary"
+                  icon="south_west"
+                  label="Receive"
+                  @click="showInvoiceCreateDialog"
                 />
               </q-btn-group>
             </div>
