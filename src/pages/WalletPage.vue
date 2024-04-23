@@ -839,7 +839,6 @@ export default {
     },
     decodeQR: function (res) {
       this.camera.data = res;
-      // this.payInvoiceData.input.request = res
       this.decodeRequest();
       this.camera.show = false;
     },

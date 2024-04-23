@@ -9,7 +9,10 @@
     <q-card class="q-pa-lg q-pt-xl qcard">
       <div v-if="payInvoiceData.invoice">
         <h6
-          v-if="payInvoiceData.meltQuote.response.amount > 0"
+          v-if="
+            payInvoiceData.meltQuote.response &&
+            payInvoiceData.meltQuote.response.amount > 0
+          "
           class="q-my-none"
         >
           Pay

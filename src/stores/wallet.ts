@@ -798,6 +798,10 @@ export const useWalletStore = defineStore("wallet", {
       }
     },
     decodeRequest: function (r = null) {
+      // delete this.payInvoiceData.invoice;
+      this.payInvoiceData.invoice = null;
+      this.payInvoiceData.meltQuote.response = null;
+
       const camera = useCameraStore();
       // set the argument as the data to parse
       if (typeof r == "string" && r != null) {
