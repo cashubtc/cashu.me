@@ -11,6 +11,11 @@ access at http://localhost:3000 or serve it behind a reverse proxy.
 ## Install the dependencies
 
 ```bash
+npm install -g @quasar/cli
+quasar ext add @quasar/testing-unit-vitest
+```
+
+```bash
 npm install
 ```
 
