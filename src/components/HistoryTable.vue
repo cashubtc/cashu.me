@@ -26,7 +26,7 @@
           }}</q-item-label>
           <q-tooltip>Click to copy</q-tooltip>
           <q-item-label caption @click="showTokenDialog(token.token)">{{
-            token.date
+            formattedDate(token.date)
           }}</q-item-label>
         </q-item-section>
 
@@ -145,6 +145,7 @@
 <script>
 import { defineComponent } from "vue";
 import { shortenString } from "src/js/string-utils";
+import { formatDistanceToNow, parseISO } from "date-fns";
 
 export default defineComponent({
   name: "HistoryTable",
@@ -214,6 +215,10 @@ export default defineComponent({
     },
   },
   methods: {
+    formattedDate(date_str) {
+      const date = parseISO(date_str); // Convert string to date object
+      return formatDistanceToNow(date, { addSuffix: true }); // "6 hours ago"
+    },
     shortenString: function (s) {
       return shortenString(s, 20, 10);
     },
