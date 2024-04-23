@@ -777,6 +777,7 @@ export default {
       "checkPendingInvoices",
       "checkPendingTokens",
       "decodeRequest",
+      "generateNewMnemonic",
     ]),
     ...mapActions(useCameraStore, ["closeCamera", "showCamera", "hasCamera"]),
     // TOKEN METHODS
@@ -1165,6 +1166,8 @@ export default {
 
     // show welcome dialog
     this.showWelcomeDialog();
+
+    console.log(this.generateNewMnemonic());
   },
   // })
 };

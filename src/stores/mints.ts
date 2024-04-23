@@ -169,13 +169,13 @@ export const useMintsStore = defineStore("mints", {
       this.updateMintBalances();
       console.log("### spentProofs", this.spentProofs, "length", this.spentProofs.length);
     },
-    appendBlindSignatures(signature: SerializedBlindedSignature, amount: number, secret: Uint8Array, r: string) {
+    appendBlindSignatures(signature: SerializedBlindedSignature, amount: number, secret: Uint8Array, r: Uint8Array) {
       const audit: BlindSignatureAudit = {
         signature: signature,
         amount: amount,
         secret: secret,
         id: signature.id,
-        r: r,
+        r: Buffer.from(r).toString("hex"),
       };
       this.blindSignatures.push(audit);
     },
