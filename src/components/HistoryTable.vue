@@ -5,7 +5,13 @@
         <q-item-section side>
           <q-icon
             :name="token.amount >= 0 ? 'call_received' : 'call_made'"
-            :color="token.amount >= 0 ? 'green' : 'red'"
+            :color="
+              token.status === 'paid'
+                ? token.amount >= 0
+                  ? 'green'
+                  : 'red'
+                : ''
+            "
             class="q-mr-xs"
             @click="showTokenDialog(token.token)"
           />
@@ -15,15 +21,17 @@
         </q-item-section>
 
         <q-item-section>
-          <q-item-label @click="copyText(token.token)">{{
+          <q-item-label @click="showTokenDialog(token.token)">{{
             token.token.slice(0, 8) + "..." + token.token.slice(-8)
           }}</q-item-label>
           <q-tooltip>Click to copy</q-tooltip>
-          <q-item-label caption>{{ token.date }}</q-item-label>
+          <q-item-label caption @click="showTokenDialog(token.token)">{{
+            token.date
+          }}</q-item-label>
         </q-item-section>
 
         <q-item-section side top>
-          <q-btn
+          <!-- <q-btn
             flat
             dense
             icon="settings_ethernet"
@@ -31,7 +39,7 @@
             v-if="token.status === 'pending'"
           >
             <q-tooltip>Pending</q-tooltip>
-          </q-btn>
+          </q-btn> -->
           <q-btn
             flat
             dense
