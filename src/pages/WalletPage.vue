@@ -14,7 +14,6 @@
         class="row items-center justify-center no-wrap q-mb-none q-mx-none q-px-none"
       >
         <q-carousel
-          v-if="mints.length > 0"
           v-model="action"
           transition-prev="slide-right"
           transition-next="slide-left"
@@ -266,7 +265,7 @@
         <!-- <q-tab name="tokens" label="Tokens"></q-tab> -->
         <q-tab name="settings" label="Settings"></q-tab>
       </q-tabs>
-      <q-tab-panels v-model="tab" animated>
+      <q-tab-panels class="bg-dark" v-model="tab" animated>
         <!-- ////////////////// HISTORY LIST ///////////////// -->
 
         <q-tab-panel name="history">

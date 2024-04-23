@@ -1,4 +1,63 @@
 <template>
+  <div class="q-pa-md" style="max-width: 500px; margin: 0 auto">
+    <q-list>
+      <q-item v-for="token in paginatedTokens" :key="token.id">
+        <q-item-section side>
+          <q-icon
+            :name="token.amount >= 0 ? 'call_received' : 'call_made'"
+            :color="token.amount >= 0 ? 'green' : 'red'"
+            class="q-mr-xs"
+            @click="showTokenDialog(token.token)"
+          />
+          <q-item-label caption class="text-weight-bold">{{
+            formatCurrency(token.amount, token.unit)
+          }}</q-item-label>
+        </q-item-section>
+
+        <q-item-section>
+          <q-item-label @click="copyText(token.token)">{{
+            token.token.slice(0, 8) + "..." + token.token.slice(-8)
+          }}</q-item-label>
+          <q-tooltip>Click to copy</q-tooltip>
+          <q-item-label caption>{{ token.date }}</q-item-label>
+        </q-item-section>
+
+        <q-item-section side top>
+          <q-btn
+            flat
+            dense
+            icon="settings_ethernet"
+            @click="showTokenDialog(token.token)"
+            v-if="token.status === 'pending'"
+          >
+            <q-tooltip>Pending</q-tooltip>
+          </q-btn>
+          <q-btn
+            flat
+            dense
+            icon="sync"
+            @click="checkTokenSpendable(token.token)"
+            class="cursor-pointer"
+            v-if="token.status === 'pending'"
+          >
+            <q-tooltip>Check status</q-tooltip>
+          </q-btn>
+        </q-item-section>
+      </q-item>
+
+      <q-separator spaced inset v-if="!$last" />
+    </q-list>
+    <div style="display: flex; justify-content: center">
+      <q-pagination
+        v-model="currentPage"
+        :max="maxPages"
+        :max-pages="5"
+        direction-links
+        boundary-links
+        @input="handlePageChange"
+      />
+    </div>
+  </div>
   <q-table
     dense
     flat
@@ -7,6 +66,7 @@
     no-data-label="There are no tokens here yet"
     :filter="historyTable.filter"
     :pagination="historyTable.pagination"
+    v-if="false"
   >
     <template v-slot:body="props">
       <q-tr :props="props">
@@ -93,6 +153,8 @@ export default defineComponent({
   },
   data: function () {
     return {
+      currentPage: 1,
+      pageSize: 5,
       historyTable: {
         columns: [
           {
@@ -133,9 +195,22 @@ export default defineComponent({
       },
     };
   },
+  computed: {
+    maxPages() {
+      return Math.ceil(this.historyTokens.length / this.pageSize);
+    },
+    paginatedTokens() {
+      const start = (this.currentPage - 1) * this.pageSize;
+      const end = start + this.pageSize;
+      return this.historyTokens.slice().reverse().slice(start, end);
+    },
+  },
   methods: {
     shortenString: function (s) {
       return shortenString(s, 20, 10);
+    },
+    handlePageChange(page) {
+      this.currentPage = page;
     },
   },
   created: function () {},
