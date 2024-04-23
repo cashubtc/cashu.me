@@ -27,7 +27,7 @@
               </strong>
             </h3>
             <div v-if="bitcoinPrice">
-              <span v-if="this.activeUnit == 'sat'" class="text-secondary">
+              <span v-if="this.activeUnit == 'sat'">
                 {{
                   formatCurrency(
                     (bitcoinPrice / 100000000) * getTotalBalance,
@@ -35,7 +35,7 @@
                   )
                 }}
               </span>
-              <span v-if="this.activeUnit == 'usd'" class="text-secondary">
+              <span v-if="this.activeUnit == 'usd'">
                 {{
                   formatCurrency(
                     (getTotalBalance / 100 / bitcoinPrice) * 100000000,
