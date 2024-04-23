@@ -1,4 +1,63 @@
 <template>
+  <div v-if="false" class="q-pa-md" style="max-width: 500px; margin: 0 auto">
+    <q-list>
+      <q-item v-for="invoice in paginatedInvoices" :key="invoice.id">
+        <q-item-section side>
+          <q-icon
+            :name="invoice.amount >= 0 ? 'call_received' : 'call_made'"
+            :color="invoice.amount >= 0 ? 'green' : 'red'"
+            class="q-mr-xs"
+            @click="showInvoiceDialog(invoice)"
+          />
+          <q-item-label caption class="text-weight-bold">
+            {{ formatCurrency(invoice.amount, invoice.unit) }}
+          </q-item-label>
+        </q-item-section>
+
+        <q-item-section>
+          <q-item-label @click="copyText(invoice.bolt11)">
+            {{ invoice.bolt11.slice(0, 8) + "..." + invoice.bolt11.slice(-8) }}
+            <q-tooltip>Click to copy</q-tooltip>
+          </q-item-label>
+          <q-item-label caption>{{ invoice.date }}</q-item-label>
+        </q-item-section>
+
+        <q-item-section side top>
+          <q-btn
+            flat
+            dense
+            icon="settings_ethernet"
+            @click="showInvoiceDialog(invoice)"
+            v-if="invoice.status === 'pending'"
+          >
+            <q-tooltip>Pending</q-tooltip>
+          </q-btn>
+          <q-btn
+            flat
+            dense
+            icon="sync"
+            @click="checkInvoice(invoice.quote, true)"
+            class="cursor-pointer"
+            v-if="invoice.status === 'pending'"
+          >
+            <q-tooltip>Check status</q-tooltip>
+          </q-btn>
+        </q-item-section>
+      </q-item>
+
+      <q-separator spaced inset v-if="!$last" />
+    </q-list>
+    <div style="display: flex; justify-content: center">
+      <q-pagination
+        v-model="currentPage"
+        :max="maxPages"
+        :max-pages="5"
+        direction-links
+        boundary-links
+        @input="handlePageChange"
+      />
+    </div>
+  </div>
   <q-table
     dense
     flat
@@ -100,6 +159,8 @@ export default defineComponent({
   },
   data: function () {
     return {
+      currentPage: 1,
+      pageSize: 5,
       invoicesTable: {
         columns: [
           {
@@ -161,9 +222,22 @@ export default defineComponent({
       },
     };
   },
+  computed: {
+    maxPages() {
+      return Math.ceil(this.invoiceHistory.length / this.pageSize);
+    },
+    paginatedInvoices() {
+      const start = (this.currentPage - 1) * this.pageSize;
+      const end = start + this.pageSize;
+      return this.invoiceHistory.slice().reverse().slice(start, end);
+    },
+  },
   methods: {
     shortenString: function (s) {
       return shortenString(s, 20, 10);
+    },
+    handlePageChange(page) {
+      this.currentPage = page;
     },
   },
   created: function () {},
