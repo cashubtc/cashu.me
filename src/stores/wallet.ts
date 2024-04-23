@@ -10,6 +10,8 @@ import { useUiStore } from "src/stores/ui";
 
 import { step1Alice, step3Alice } from "src/js/dhke";
 import * as nobleSecp256k1 from "@noble/secp256k1";
+import { secp256k1 } from '@noble/curves/secp256k1';
+
 import { splitAmount } from "src/js/utils";
 import * as _ from "underscore";
 import { uint8ToBase64 } from "src/js/base64";
@@ -129,32 +131,39 @@ export const useWalletStore = defineStore("wallet", {
         return Array.from({ length: count }, (_, i) => i);
       }
     },
-    constructOutputs: async function (amounts: number[], secrets: Uint8Array[], id: string, counters: number[]) {
+    generateSecrets: async function (keysetId: string, counters: number[]) {
+      let secrets = [];
+      for (let i = 0; i < counters.length; i++) {
+        // const secret = nobleSecp256k1.utils.randomBytes(32);
+        const secret = deriveSecret(this.seed, keysetId, counters[i]);
+        secrets.push(secret);
+      }
+      return secrets;
+    },
+    constructOutputs: async function (amounts: number[], id: string, counters: number[]): Promise<{ amount: number, B_: string, id: string }[]> {
+      const secrets = await this.generateSecrets(id, counters);
+      console.log("### constructOutputs", amounts, secrets, id, counters);
       const outputs = [];
-      const rs = [];
       for (let i = 0; i < amounts.length; i++) {
         const r_deterministic = deriveBlindingFactor(this.seed, id, counters[i]);
         const { B_, r } = blindMessage(secrets[i], bytesToNumber(r_deterministic));
-        console.log("### r_deterministic", r_deterministic);
+        console.log("### constructOutput r_deterministic", r_deterministic);
         outputs.push({ amount: amounts[i], B_: B_.toHex(), id: id });
         console.log("### outputs", outputs[outputs.length - 1]);
-        rs.push(r_deterministic);
       }
-      return {
-        outputs,
-        rs,
-      };
+      return outputs;
     },
-    promiseToProof: async function (id: string, amount: number, C_hex: string, r: Uint8Array) {
-      console.log("### promiseToProof", id, amount, C_hex, r)
+    promiseToProof: async function (id: string, amount: number, C_hex: string, counter: number) {
+      console.log("### promiseToProof", id, amount, C_hex, counter)
       const mintStore = useMintsStore();
-      const C_ = nobleSecp256k1.Point.fromHex(C_hex);
       const A = await mintStore.getKeysForKeyset(id);
       const publicKey: string = A.keys[amount];
-      const C = step3Alice(
-        C_,
-        r,
-        nobleSecp256k1.Point.fromHex(publicKey)
+      const r_deterministic = deriveBlindingFactor(this.seed, id, counter);
+      console.log("### promiseToProof r_deterministic", r_deterministic);
+      const C = unblindSignature(
+        secp256k1.ProjectivePoint.fromHex(C_hex),
+        bytesToNumber(r_deterministic),
+        secp256k1.ProjectivePoint.fromHex(publicKey)
       );
       return {
         id,
@@ -162,30 +171,23 @@ export const useWalletStore = defineStore("wallet", {
         C: C.toHex(true),
       };
     },
-    constructProofs: async function (promises: SerializedBlindedSignature[], secrets: Uint8Array[], rs: Uint8Array[]) {
+    constructProofs: async function (promises: SerializedBlindedSignature[], id: string, counters: number[]) {
+      const secrets = await this.generateSecrets(id, counters);
+      console.log("### constructProofs", promises, secrets, id, counters);
       const proofs = [];
       for (let i = 0; i < promises.length; i++) {
         // const encodedSecret = uint8ToBase64.encode(secrets[i]);
         // use hex for now
-        const encodedSecret = nobleSecp256k1.utils.bytesToHex(secrets[i]);
+        const encodedSecret = nobleSecp256k1.etc.bytesToHex(secrets[i]);
         let { id, amount, C } = await this.promiseToProof(
           promises[i].id,
           promises[i].amount,
           promises[i].C_,
-          rs[i]
+          counters[i]
         );
         proofs.push({ id, amount, C, secret: encodedSecret });
       }
       return proofs;
-    },
-    generateSecrets: async function (amounts: number[], keysetId: string, counters: number[]) {
-      let secrets = [];
-      for (let i = 0; i < amounts.length; i++) {
-        // const secret = nobleSecp256k1.utils.randomBytes(32);
-        const secret = deriveSecret(this.seed, keysetId, counters[i]);
-        secrets.push(secret);
-      }
-      return secrets;
     },
     /**
      * Sets an invoice status to paid
@@ -377,52 +379,37 @@ export const useWalletStore = defineStore("wallet", {
 
         // const counters = Array.from({ length: amounts.length }, (_, i) => i);
         const counters = this.getCounterKeyset(keyset_id, amounts.length);
-        let secrets = await this.generateSecrets(amounts, keyset_id, counters);
-        if (secrets.length != amounts.length) {
-          throw new Error(
-            "number of secrets does not match number of outputs."
-          );
-        }
-        // const keysets = mintStore.activeMint().keysets;
-        // if (keysets == null || keysets.length == 0) {
-        //   throw new Error("no keysets found.");
-        // }
-        // const keyset_id = keysets[0].id;
-
-
-        let { outputs, rs } = await this.constructOutputs(amounts, secrets, keyset_id, counters);
+        const outputs = await this.constructOutputs(amounts, keyset_id, counters);
         const payload: SplitPayload = {
           inputs: proofs,
           outputs: outputs,
         };
         const data = await mintStore.activeMint().api.split(payload);
 
-        // push all promise, amount, secret, rs to mintStore.appendBlindSignatures
-        for (let i = 0; i < data.signatures.length; i++) {
-          mintStore.appendBlindSignatures(
-            data.signatures[i],
-            amounts[i],
-            secrets[i],
-            rs[i]
-          );
-        }
+        // // push all promise, amount, secret, rs to mintStore.appendBlindSignatures
+        // for (let i = 0; i < data.signatures.length; i++) {
+        //   mintStore.appendBlindSignatures(
+        //     data.signatures[i],
+        //     amounts[i],
+        //     secrets[i],
+        //     rs[i]
+        //   );
+        // }
 
         mintStore.assertMintError(data);
         const first_promises = data.signatures.slice(0, frst_amounts.length);
-        const frst_rs = rs.slice(0, frst_amounts.length);
-        const frst_secrets = secrets.slice(0, frst_amounts.length);
+        const frst_counters = counters.slice(0, frst_amounts.length);
         const scnd_promises = data.signatures.slice(frst_amounts.length);
-        const scnd_rs = rs.slice(frst_amounts.length);
-        const scnd_secrets = secrets.slice(frst_amounts.length);
+        const scnd_counters = counters.slice(frst_amounts.length);
         const firstProofs = await this.constructProofs(
           first_promises,
-          frst_secrets,
-          frst_rs,
+          keyset_id,
+          frst_counters,
         );
         const scndProofs = await this.constructProofs(
           scnd_promises,
-          scnd_secrets,
-          scnd_rs,
+          keyset_id,
+          scnd_counters,
         );
 
         return { firstProofs, scndProofs };
@@ -472,9 +459,9 @@ export const useWalletStore = defineStore("wallet", {
     },
     mintApi: async function (amounts: number[], hash: string, verbose: boolean = true) {
       /*
-                asks the mint to check whether the invoice with payment_hash has been paid
-                and requests signing of the attached outputs.
-                */
+      asks the mint to check whether the invoice with payment_hash has been paid
+      and requests signing of the attached outputs.
+      */
       const mintStore = useMintsStore();
       try {
 
@@ -488,11 +475,8 @@ export const useWalletStore = defineStore("wallet", {
           throw new Error("no keysets found for unit");
         }
         const keyset_id = unitKeysets[0].id;
-        // const counters = Array.from({ length: amounts.length }, (_, i) => i);
         const counters = this.getCounterKeyset(keyset_id, amounts.length);
-        const secrets = await this.generateSecrets(amounts, keyset_id, counters);
-
-        const { outputs, rs } = await this.constructOutputs(amounts, secrets, keyset_id, counters);
+        const outputs = await this.constructOutputs(amounts, keyset_id, counters);
 
         const payload: MintPayload = {
           outputs: outputs,
@@ -502,8 +486,8 @@ export const useWalletStore = defineStore("wallet", {
         mintStore.assertMintError(data, false);
         let proofs = await this.constructProofs(
           data.signatures,
-          secrets,
-          rs
+          keyset_id,
+          counters
         );
         return proofs;
       } catch (error: any) {
@@ -599,8 +583,8 @@ export const useWalletStore = defineStore("wallet", {
 
         // const counters = Array.from({ length: amounts.length }, (_, i) => i);
         const counters = this.getCounterKeyset(keyset_id, amounts.length);
-        let secrets = await this.generateSecrets(amounts, keyset_id, counters);
-        let { outputs, rs } = await this.constructOutputs(amounts, secrets, keyset_id, counters);
+        let secrets = await this.generateSecrets(keyset_id, counters);
+        let outputs = await this.constructOutputs(amounts, keyset_id, counters);
 
         let amount_paid = amount;
         const payload: MeltPayload = {
@@ -625,8 +609,8 @@ export const useWalletStore = defineStore("wallet", {
         if (data.change != null) {
           const changeProofs = await this.constructProofs(
             data.change,
-            secrets,
-            rs
+            keyset_id,
+            counters
           );
           console.log(
             "## Received change: " + proofsStore.sumProofs(changeProofs)
