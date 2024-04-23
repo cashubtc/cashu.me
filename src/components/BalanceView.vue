@@ -10,7 +10,7 @@
       animated
       :height="this.activeUnit == 'sat' ? `6.1rem` : `5rem`"
       control-color="primary"
-      class="bg-transparent rounded-borders"
+      class="bg-transparent rounded-borders q-mb-lg q-mt-xl"
     >
       <!-- make a q-carousel-slide with v-for for all possible units -->
       <q-carousel-slide
