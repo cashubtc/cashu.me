@@ -626,6 +626,7 @@ export const useWalletStore = defineStore("wallet", {
 
     // get a melt quote
     meltQuote: async function () {
+      this.payInvoiceData.blocking = true;
       const mintStore = useMintsStore();
       if (this.payInvoiceData.input.request == "") {
         throw new Error("no invoice provided.");
@@ -640,8 +641,10 @@ export const useWalletStore = defineStore("wallet", {
         mintStore.assertMintError(data);
         this.payInvoiceData.meltQuote.response = data;
         console.log("#### meltQuote", payload, " response:", data);
+        this.payInvoiceData.blocking = false;
         return data;
       } catch (error: any) {
+        this.payInvoiceData.blocking = false;
         console.error(error);
         try {
           notifyApiError(error);

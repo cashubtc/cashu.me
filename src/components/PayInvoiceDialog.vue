@@ -8,22 +8,23 @@
   >
     <q-card class="q-pa-lg q-pt-xl qcard">
       <div v-if="payInvoiceData.invoice">
-        <h6 class="q-my-none">
+        <h6
+          v-if="payInvoiceData.meltQuote.response.amount > 0"
+          class="q-my-none"
+        >
           Pay
           {{
             formatCurrency(payInvoiceData.meltQuote.response.amount, activeUnit)
           }}
-          {{ tickerShort }}
         </h6>
+        <h6 v-else class="q-my-none">Processing...</h6>
         <q-separator class="q-my-sm"></q-separator>
         <p class="text-wrap">
-          <strong v-if="payInvoiceData.invoice.description"
-            >Description:</strong
-          >
+          <strong v-if="payInvoiceData.invoice.description">Memo:</strong>
           {{ payInvoiceData.invoice.description }}<br />
-          <strong>Expire date:</strong> {{ payInvoiceData.invoice.expireDate
-          }}<br />
-          <strong>Hash:</strong> {{ payInvoiceData.invoice.hash }}
+          <!-- <strong>Expire date:</strong> {{ payInvoiceData.invoice.expireDate
+            }}<br />
+            <strong>Hash:</strong> {{ payInvoiceData.invoice.hash }} -->
         </p>
         <div class="col-12">
           <ChooseMint :ticker-short="tickerShort" />
@@ -34,7 +35,7 @@
             color="primary"
             :disabled="payInvoiceData.blocking"
             @click="melt"
-            :label="!payInvoiceData.blocking ? 'Pay' : 'Paying...'"
+            :label="!payInvoiceData.blocking ? 'Pay' : 'Processing...'"
             ><q-spinner-tail
               v-if="payInvoiceData.blocking"
               color="white"
