@@ -17,7 +17,7 @@ import token from "src/js/token";
 import { notifyApiError, notifyError, notifySuccess, notifyWarning, notify } from "src/js/notify";
 import { CashuMint, CashuWallet, Proof, SerializedBlindedSignature, MintKeys, MintQuotePayload, SplitPayload, MintPayload, MeltPayload, CheckStatePayload, MeltQuotePayload, MeltQuoteResponse, generateNewMnemonic, deriveSeedFromMnemonic } from "@cashu/cashu-ts";
 import { deriveSecret, deriveBlindingFactor } from "@cashu/cashu-ts/dist/lib/es5/secrets";
-import { blindMessage, hashToCurve } from "@cashu/cashu-ts/dist/lib/es5/DHKE";
+import { blindMessage, hashToCurve, unblindSignature } from "@cashu/cashu-ts/dist/lib/es5/DHKE";
 import * as bolt11Decoder from "light-bolt11-decoder";
 import bech32 from "bech32";
 import axios from "axios";
@@ -148,11 +148,9 @@ export const useWalletStore = defineStore("wallet", {
     promiseToProof: async function (id: string, amount: number, C_hex: string, r: Uint8Array) {
       console.log("### promiseToProof", id, amount, C_hex, r)
       const mintStore = useMintsStore();
-
       const C_ = nobleSecp256k1.Point.fromHex(C_hex);
       const A = await mintStore.getKeysForKeyset(id);
       const publicKey: string = A.keys[amount];
-
       const C = step3Alice(
         C_,
         r,
