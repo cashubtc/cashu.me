@@ -892,6 +892,8 @@ export const useWalletStore = defineStore("wallet", {
         });
 
         this.payInvoiceData.invoice = Object.freeze(cleanInvoice);
+        // get quote for this request
+        this.meltQuote();
       } else if (reqtype == "lnurl") {
         console.log("#### QR CODE: LNURL");
         this.lnurlPayFirst(this.payInvoiceData.input.request);

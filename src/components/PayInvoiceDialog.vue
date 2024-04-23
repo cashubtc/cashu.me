@@ -233,7 +233,6 @@ export default defineComponent({
     },
     decodeAndQuote: function (request) {
       this.decodeRequest(request);
-      this.meltQuote();
     },
   },
   created: function () {},
