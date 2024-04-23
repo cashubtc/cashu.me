@@ -27,7 +27,6 @@
               </strong>
             </h3>
             <div v-if="bitcoinPrice">
-              <q-icon name="compare_arrows" size="0.9rem" class="q-mr-xs" />
               <strong v-if="this.activeUnit == 'sat'">
                 {{
                   formatCurrency(
