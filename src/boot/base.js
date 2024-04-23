@@ -46,6 +46,8 @@ window.windowMixin = {
       // currency.toUpperCase()
     },
     formatSat: function (value) {
+      // convert value to integer
+      value = parseInt(value);
       return new Intl.NumberFormat(window.LOCALE).format(value) + " sat";
     },
     notifyApiError: function (error) {

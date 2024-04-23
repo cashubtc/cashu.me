@@ -26,19 +26,26 @@
                 {{ formatCurrency(getTotalBalance, activeUnit) }}
               </strong>
             </h3>
-            <div v-if="bitcoinPrice && this.activeUnit == 'sat'">
-              <strong>
+            <div v-if="bitcoinPrice">
+              <span v-if="this.activeUnit == 'sat'" class="text-secondary">
                 {{
                   formatCurrency(
                     (bitcoinPrice / 100000000) * getTotalBalance,
                     "USD"
                   )
                 }}
-              </strong>
-              <q-tooltip>
+              </span>
+              <span v-if="this.activeUnit == 'usd'" class="text-secondary">
                 {{
-                  formatCurrency(bitcoinPrice, "USD").slice(1)
-                }}/BTC</q-tooltip
+                  formatCurrency(
+                    (getTotalBalance / 100 / bitcoinPrice) * 100000000,
+                    "sat"
+                  )
+                }}
+              </span>
+              <q-tooltip>
+                {{ formatCurrency(bitcoinPrice, "USD").slice(1) }}
+                USD/BTC</q-tooltip
               >
             </div>
           </div>
@@ -51,7 +58,7 @@
         outline
         @click="activeUnit = toggleUnit()"
         :label="activeUnit == 'sat' ? 'BTC' : 'USD'"
-        class="q-mt-none q-mb-md"
+        class="q-mt-none q-mb-lg"
       />
     </div>
     <!-- mint balance -->
