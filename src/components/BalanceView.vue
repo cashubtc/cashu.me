@@ -32,7 +32,7 @@
                   formatCurrency(
                     (bitcoinPrice / 100000000) * getTotalBalance,
                     "USD"
-                  ).slice(1)
+                  )
                 }}
               </strong>
               <q-tooltip>
