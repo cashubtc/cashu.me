@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
-import { useLocalStorage } from "@vueuse/core";
 import { useMintsStore } from "./mints";
+import { useLocalStorage } from "@vueuse/core";
 
 const unitTickerShortMap = {
   sat: "sats",

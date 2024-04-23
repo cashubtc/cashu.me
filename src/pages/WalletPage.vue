@@ -65,6 +65,7 @@
                 rounded
                 :icon="$q.screen.width >= 390 ? 'toll' : undefined"
                 label="Ecash"
+                :color="$q.dark.isActive ? 'white' : 'black'"
                 align="left"
                 @click="action = 'ecash'"
                 style="flex: 2"
@@ -73,6 +74,7 @@
                 align="center"
                 icon="qr_code_scanner"
                 outline
+                :color="$q.dark.isActive ? 'white' : 'black'"
                 rounded
                 class="q-py-lg"
                 @click="showCamera"
@@ -81,6 +83,7 @@
                 label="Lightning"
                 :icon="$q.screen.width > 430 ? 'bolt' : undefined"
                 outline
+                :color="$q.dark.isActive ? 'white' : 'black'"
                 rounded
                 class="q-py-lg q-pr-xl q-pl-sm"
                 @click="action = 'lightning'"
@@ -259,13 +262,21 @@
       <!-- ///////////////////////////////////////////
                 ////////////////// TABLES /////////////////
                 /////////////////////////////////////////// -->
-      <q-tabs v-model="tab" no-caps class="bg-dark text-white">
+      <q-tabs
+        v-model="tab"
+        no-caps
+        :class="$q.dark.isActive ? 'bg-dark' : 'bg-white'"
+      >
         <q-tab name="history" label="History"></q-tab>
         <q-tab name="invoices" label="Invoices"></q-tab>
         <!-- <q-tab name="tokens" label="Tokens"></q-tab> -->
         <q-tab name="settings" label="Settings"></q-tab>
       </q-tabs>
-      <q-tab-panels class="bg-dark" v-model="tab" animated>
+      <q-tab-panels
+        :class="$q.dark.isActive ? 'bg-dark' : 'bg-white'"
+        v-model="tab"
+        animated
+      >
         <!-- ////////////////// HISTORY LIST ///////////////// -->
 
         <q-tab-panel name="history">

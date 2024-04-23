@@ -17,7 +17,6 @@ window.windowMixin = {
       },
     };
   },
-
   methods: {
     changeColor: function (newValue) {
       document.body.setAttribute("data-theme", newValue);

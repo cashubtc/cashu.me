@@ -67,7 +67,6 @@
           <q-btn
             flat
             size="0.6rem"
-            color="grey"
             class="q-mx-xs q-px-none"
             @click="copyText(baseURL)"
             >Copy URL</q-btn
@@ -87,7 +86,6 @@
             v-close-popup
             outline
             size="0.8rem"
-            color="primary"
             class="q-ml-auto"
             @click="setWelcomeDialogSeen()"
             >Continue</q-btn
