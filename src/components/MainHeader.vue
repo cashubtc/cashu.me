@@ -204,11 +204,11 @@ export default defineComponent({
 
     return {
       themes: [
+        "monochrome",
         "classic",
         "bitcoin",
         "mint",
         "autumn",
-        "monochrome",
         "salvador",
         "freedom",
         // "cyber",

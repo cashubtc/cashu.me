@@ -14,6 +14,7 @@
         class="row items-center justify-center no-wrap q-mb-none q-mx-none q-px-none"
       >
         <q-carousel
+          v-if="mints.length > 0"
           v-model="action"
           transition-prev="slide-right"
           transition-next="slide-left"

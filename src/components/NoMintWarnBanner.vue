@@ -1,13 +1,20 @@
 <template>
-  <q-card>
+  <q-card class="q-pa-lg q-ma-xl">
     <q-card-section>
-      <div class="text-overline">
-        <q-badge color="warning" text-color="black" label="No mint added" />
+      <div class="row items-center justify-center">
+        <q-icon class="q-pb-md" name="account_balance" size="50px" />
       </div>
-      <q-separator class="q-mb-sm" />
-      <div class="text-h6">You're not connected to any mint yet</div>
-      <div class="text-subtitle2">
-        Go to the Settings tab to add a mint before using this wallet
+      <div class="row items-center justify-center">
+        <div class="text-h6">Select an ecash mint</div>
+      </div>
+      <div class="row items-center justify-center">
+        <div class="text-subtitle2">
+          You're not connected to any ecash mint yet. Please add an mint to get
+          started.
+        </div>
+      </div>
+      <div class="row items-center justify-center q-pt-xl">
+        <q-btn outline label="Add mint" @click="this.tab = 'settings'" />
       </div>
     </q-card-section>
   </q-card>
@@ -15,6 +22,8 @@
 <script>
 import { defineComponent, ref } from "vue";
 import { getShortUrl } from "src/js/wallet-helpers";
+import { useUiStore } from "src/stores/ui";
+import { mapWritableState } from "pinia";
 export default defineComponent({
   name: "NoMintWarnBanner",
   mixins: [windowMixin],
@@ -26,6 +35,7 @@ export default defineComponent({
     activeMintUrl: String,
   },
   computed: {
+    ...mapWritableState(useUiStore, ["tab"]),
     balance: function () {
       return this.activeProofs
         .map((t) => t)
