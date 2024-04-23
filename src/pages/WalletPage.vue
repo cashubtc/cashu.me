@@ -47,7 +47,7 @@
             <q-btn-group rounded outline style="width: 100%; max-width: 500px">
               <q-btn
                 outline
-                class="q-py-lg q-pl-xl"
+                class="q-py-lg q-pl-xl q-pr-sm"
                 rounded
                 :icon="$q.screen.width >= 390 ? 'toll' : undefined"
                 label="Ecash"
@@ -65,10 +65,10 @@
               />
               <q-btn
                 label="Lightning"
-                :icon="$q.screen.width > 440 ? 'bolt' : undefined"
+                :icon="$q.screen.width > 430 ? 'bolt' : undefined"
                 outline
                 rounded
-                class="q-py-lg q-pr-xl"
+                class="q-py-lg q-pr-xl q-pl-sm"
                 @click="action = 'lightning'"
                 style="flex: 2"
               />
