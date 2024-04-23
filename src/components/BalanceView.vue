@@ -27,22 +27,22 @@
               </strong>
             </h3>
             <div v-if="bitcoinPrice">
-              <span v-if="this.activeUnit == 'sat'">
+              <strong v-if="this.activeUnit == 'sat'">
                 {{
                   formatCurrency(
                     (bitcoinPrice / 100000000) * getTotalBalance,
                     "USD"
                   )
                 }}
-              </span>
-              <span v-if="this.activeUnit == 'usd'">
+              </strong>
+              <strong v-if="this.activeUnit == 'usd'">
                 {{
                   formatCurrency(
                     (getTotalBalance / 100 / bitcoinPrice) * 100000000,
                     "sat"
                   )
                 }}
-              </span>
+              </strong>
               <q-tooltip>
                 {{ formatCurrency(bitcoinPrice, "USD").slice(1) }}
                 USD/BTC</q-tooltip
