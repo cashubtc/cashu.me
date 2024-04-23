@@ -183,7 +183,7 @@ window.windowMixin = {
         this.$q.localStorage.getItem("cashu.theme")
       );
     } else {
-      this.changeColor("classic");
+      this.changeColor("monochrome");
     }
   },
 };
