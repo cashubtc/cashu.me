@@ -180,7 +180,7 @@
       </q-tab-panels>
       <!-- LIGHTNING BUTTONS  -->
 
-      <div style="margin-bottom: 7rem">
+      <div style="margin-bottom: 0rem">
         <div class="row q-pt-sm">
           <div class="col-12 q-pt-xs">
             <!-- <q-btn
