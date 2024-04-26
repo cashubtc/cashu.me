@@ -109,7 +109,11 @@ export const useWalletStore = defineStore("wallet", {
     wallet() {
       const mints = useMintsStore();
       const mint = new CashuMint(mints.activeMintUrl);
-      const wallet = new CashuWallet(mint, { mnemonicOrSeed: generateNewMnemonic() });
+      if (this.mnemonic == "") {
+        this.mnemonic = generateNewMnemonic();
+      }
+      const mnemonic: string = this.mnemonic;
+      const wallet = new CashuWallet(mint, { mnemonicOrSeed: mnemonic });
       return wallet;
     },
     seed(): Uint8Array {
@@ -120,86 +124,92 @@ export const useWalletStore = defineStore("wallet", {
     keysetCounter: function (id: string) {
       const keysetCounter = this.keysetCounters.find((c) => c.id === id);
       if (keysetCounter) {
-        const currentCounter = keysetCounter.counter;
-        keysetCounter.counter += 1;
-        return currentCounter;
+        return keysetCounter.counter;
       } else {
         this.keysetCounters.push({ id, counter: 0 });
         return 0;
       }
     },
-    getCounterKeyset: function (id: string, count: number) {
+    increaseKeysetCounter: function (id: string, by: number) {
       const keysetCounter = this.keysetCounters.find((c) => c.id === id);
       if (keysetCounter) {
-        // generate counter array of numbers starting from keysetCounter.counter to count
-        const counters = Array.from({ length: count }, (_, i) => keysetCounter.counter + i);
-        // set new counter
-        keysetCounter.counter += count;
-        return counters;
+        keysetCounter.counter += by;
       } else {
-        // create new keyset counter
-        this.keysetCounters.push({ id, counter: count });
-        return Array.from({ length: count }, (_, i) => i);
+        this.keysetCounters.push({ id, counter: by });
       }
     },
-    generateSecrets: async function (keysetId: string, counters: number[]) {
-      let secrets = [];
-      for (let i = 0; i < counters.length; i++) {
-        // const secret = nobleSecp256k1.utils.randomBytes(32);
-        const secret = deriveSecret(this.seed, keysetId, counters[i]);
-        secrets.push(secret);
-      }
-      return secrets;
-    },
-    constructOutputs: async function (amounts: number[], id: string, counters: number[]): Promise<{ amount: number, B_: string, id: string }[]> {
-      const secrets = await this.generateSecrets(id, counters);
-      console.log("### constructOutputs", amounts, secrets, id, counters);
-      const outputs = [];
-      for (let i = 0; i < amounts.length; i++) {
-        const r_deterministic = deriveBlindingFactor(this.seed, id, counters[i]);
-        const { B_, r } = blindMessage(secrets[i], bytesToNumber(r_deterministic));
-        console.log("### constructOutput r_deterministic", r_deterministic);
-        outputs.push({ amount: amounts[i], B_: B_.toHex(), id: id });
-        console.log("### outputs", outputs[outputs.length - 1]);
-      }
-      return outputs;
-    },
-    promiseToProof: async function (id: string, amount: number, C_hex: string, counter: number) {
-      console.log("### promiseToProof", id, amount, C_hex, counter)
-      const mintStore = useMintsStore();
-      const A = await mintStore.getKeysForKeyset(id);
-      const publicKey: string = A.keys[amount];
-      const r_deterministic = deriveBlindingFactor(this.seed, id, counter);
-      console.log("### promiseToProof r_deterministic", r_deterministic);
-      const C = unblindSignature(
-        secp256k1.ProjectivePoint.fromHex(C_hex),
-        bytesToNumber(r_deterministic),
-        secp256k1.ProjectivePoint.fromHex(publicKey)
-      );
-      return {
-        id,
-        amount,
-        C: C.toHex(true),
-      };
-    },
-    constructProofs: async function (promises: SerializedBlindedSignature[], id: string, counters: number[]) {
-      const secrets = await this.generateSecrets(id, counters);
-      console.log("### constructProofs", promises, secrets, id, counters);
-      const proofs = [];
-      for (let i = 0; i < promises.length; i++) {
-        // const encodedSecret = uint8ToBase64.encode(secrets[i]);
-        // use hex for now
-        const encodedSecret = nobleSecp256k1.etc.bytesToHex(secrets[i]);
-        let { id, amount, C } = await this.promiseToProof(
-          promises[i].id,
-          promises[i].amount,
-          promises[i].C_,
-          counters[i]
-        );
-        proofs.push({ id, amount, C, secret: encodedSecret });
-      }
-      return proofs;
-    },
+    // getCounterKeyset: function (id: string, count: number) {
+    //   const keysetCounter = this.keysetCounters.find((c) => c.id === id);
+    //   if (keysetCounter) {
+    //     // generate counter array of numbers starting from keysetCounter.counter to count
+    //     const counters = Array.from({ length: count }, (_, i) => keysetCounter.counter + i);
+    //     // set new counter
+    //     keysetCounter.counter += count;
+    //     return counters;
+    //   } else {
+    //     // create new keyset counter
+    //     this.keysetCounters.push({ id, counter: count });
+    //     return Array.from({ length: count }, (_, i) => i);
+    //   }
+    // },
+    // generateSecrets: async function (keysetId: string, counters: number[]) {
+    //   let secrets = [];
+    //   for (let i = 0; i < counters.length; i++) {
+    //     // const secret = nobleSecp256k1.utils.randomBytes(32);
+    //     const secret = deriveSecret(this.seed, keysetId, counters[i]);
+    //     secrets.push(secret);
+    //   }
+    //   return secrets;
+    // },
+    // constructOutputs: async function (amounts: number[], id: string, counters: number[]): Promise<{ amount: number, B_: string, id: string }[]> {
+    //   const secrets = await this.generateSecrets(id, counters);
+    //   console.log("### constructOutputs", amounts, secrets, id, counters);
+    //   const outputs = [];
+    //   for (let i = 0; i < amounts.length; i++) {
+    //     const r_deterministic = deriveBlindingFactor(this.seed, id, counters[i]);
+    //     const { B_, r } = blindMessage(secrets[i], bytesToNumber(r_deterministic));
+    //     console.log("### constructOutput r_deterministic", r_deterministic);
+    //     outputs.push({ amount: amounts[i], B_: B_.toHex(), id: id });
+    //     console.log("### outputs", outputs[outputs.length - 1]);
+    //   }
+    //   return outputs;
+    // },
+    // promiseToProof: async function (id: string, amount: number, C_hex: string, counter: number) {
+    //   console.log("### promiseToProof", id, amount, C_hex, counter)
+    //   const mintStore = useMintsStore();
+    //   const A = await mintStore.getKeysForKeyset(id);
+    //   const publicKey: string = A.keys[amount];
+    //   const r_deterministic = deriveBlindingFactor(this.seed, id, counter);
+    //   console.log("### promiseToProof r_deterministic", r_deterministic);
+    //   const C = unblindSignature(
+    //     secp256k1.ProjectivePoint.fromHex(C_hex),
+    //     bytesToNumber(r_deterministic),
+    //     secp256k1.ProjectivePoint.fromHex(publicKey)
+    //   );
+    //   return {
+    //     id,
+    //     amount,
+    //     C: C.toHex(true),
+    //   };
+    // },
+    // constructProofs: async function (promises: SerializedBlindedSignature[], id: string, counters: number[]) {
+    //   const secrets = await this.generateSecrets(id, counters);
+    //   console.log("### constructProofs", promises, secrets, id, counters);
+    //   const proofs = [];
+    //   for (let i = 0; i < promises.length; i++) {
+    //     // const encodedSecret = uint8ToBase64.encode(secrets[i]);
+    //     // use hex for now
+    //     const encodedSecret = nobleSecp256k1.etc.bytesToHex(secrets[i]);
+    //     let { id, amount, C } = await this.promiseToProof(
+    //       promises[i].id,
+    //       promises[i].amount,
+    //       promises[i].C_,
+    //       counters[i]
+    //     );
+    //     proofs.push({ id, amount, C, secret: encodedSecret });
+    //   }
+    //   return proofs;
+    // },
     getKeyset(): string {
       const mintStore = useMintsStore();
       const keysets = mintStore.activeMint().keysets;
@@ -253,18 +263,20 @@ export const useWalletStore = defineStore("wallet", {
         const proofsToSplit = spendableProofs.slice(0, i);
 
         const keysetId = this.getKeyset()
-        const { returnChange: firstProofs, send: scndProofs } = await this.wallet.send(amount, proofsToSplit, { counter: this.keysetCounter(keysetId) })
+        const counter = this.keysetCounter(keysetId)
+        const { returnChange: keepProofs, send: sendProofs } = await this.wallet.send(amount, proofsToSplit, { counter: counter })
+        this.increaseKeysetCounter(keysetId, proofsToSplit.length);
 
-        mintStore.addProofs(firstProofs);
-        mintStore.addProofs(scndProofs);
+        mintStore.addProofs(keepProofs);
+        mintStore.addProofs(sendProofs);
 
         if (invlalidate) {
-          mintStore.removeProofs(scndProofs);
+          mintStore.removeProofs(sendProofs);
         }
 
         mintStore.removeProofs(proofsToSplit);
 
-        return { firstProofs, scndProofs };
+        return { keepProofs, sendProofs };
       } catch (error: any) {
         console.error(error);
         try {
@@ -285,54 +297,65 @@ export const useWalletStore = defineStore("wallet", {
       const mintStore = useMintsStore();
       receiveStore.showReceiveTokens = false;
       console.log("### receive tokens", receiveStore.receiveData.tokensBase64);
+
+      if (receiveStore.receiveData.tokensBase64.length == 0) {
+        throw new Error("no tokens provided.");
+      }
+      const tokenJson = token.decode(receiveStore.receiveData.tokensBase64);
+      if (tokenJson == undefined) {
+        throw new Error("no tokens provided.");
+      }
+      let proofs = token.getProofs(tokenJson);
+
+      // check if we have all mints
+      for (var i = 0; i < tokenJson.token.length; i++) {
+        if (
+          !mintStore.mints
+            .map((m) => m.url)
+            .includes(token.getMint(tokenJson))
+        ) {
+          // pop up add mint dialog warning
+          // hack! The "add mint" component is in SettingsView which may now
+          // have been loaded yet. We switch the tab to settings to make sure
+          // that it loads. Remove this code when the TrustMintComnent is refactored!
+          uIStore.setTab("settings");
+          mintStore.setMintToAdd(tokenJson.token[i].mint);
+          mintStore.showAddMintDialog = true;
+          // this.addMintDialog.show = true;
+          // show the token receive dialog again for the next attempt
+          receiveStore.showReceiveTokens = true;
+          return;
+        }
+
+        // TODO: We assume here that all proofs are from one mint! This will fail if
+        // that's not the case!
+        if (token.getMint(tokenJson) != mintStore.activeMintUrl) {
+          await mintStore.activateMintUrl(token.getMint(tokenJson));
+        }
+      }
+
+      const amount = proofs.reduce((s, t) => (s += t.amount), 0);
+
+      // set unit to unit in token
+      if (tokenJson.unit != undefined) {
+        mintStore.activeUnit = tokenJson.unit
+      }
       try {
-        if (receiveStore.receiveData.tokensBase64.length == 0) {
-          throw new Error("no tokens provided.");
-        }
-        const tokenJson = token.decode(receiveStore.receiveData.tokensBase64);
-        if (tokenJson == undefined) {
-          throw new Error("no tokens provided.");
-        }
-        let proofs = token.getProofs(tokenJson);
-
-        // check if we have all mints
-        for (var i = 0; i < tokenJson.token.length; i++) {
-          if (
-            !mintStore.mints
-              .map((m) => m.url)
-              .includes(token.getMint(tokenJson))
-          ) {
-            // pop up add mint dialog warning
-            // hack! The "add mint" component is in SettingsView which may now
-            // have been loaded yet. We switch the tab to settings to make sure
-            // that it loads. Remove this code when the TrustMintComnent is refactored!
-            uIStore.setTab("settings");
-            mintStore.setMintToAdd(tokenJson.token[i].mint);
-            mintStore.showAddMintDialog = true;
-            // this.addMintDialog.show = true;
-            // show the token receive dialog again for the next attempt
-            receiveStore.showReceiveTokens = true;
-            return;
-          }
-
-          // TODO: We assume here that all proofs are from one mint! This will fail if
-          // that's not the case!
-          if (token.getMint(tokenJson) != mintStore.activeMintUrl) {
-            await mintStore.activateMintUrl(token.getMint(tokenJson));
-          }
-        }
-
-        const amount = proofs.reduce((s, t) => (s += t.amount), 0);
-
-        // set unit to unit in token
-        if (tokenJson.unit != undefined) {
-          mintStore.activeUnit = tokenJson.unit
-        }
-
         // redeem
-        await this.split(proofs, amount);
+        // await this.split(proofs, amount);
+        const keysetId = this.getKeyset()
+        const counter = this.keysetCounter(keysetId)
+        const { token, tokensWithErrors } = await this.wallet.receive(receiveStore.receiveData.tokensBase64, { counter: counter })
+        if (tokensWithErrors?.token || token.token.length == 0) {
+          throw new Error("Error receiving tokens");
+        }
 
-        mintStore.getBalance();
+        this.increaseKeysetCounter(keysetId, token.token.length);
+
+        mintStore.removeProofs(proofs);
+        // gather all token.token[i].proofs
+        const receivedProofs = token.token.map((t) => t.proofs).flat();
+        mintStore.addProofs(receivedProofs);
 
         tokenStore.addPaidToken({
           amount,
@@ -365,7 +388,10 @@ export const useWalletStore = defineStore("wallet", {
         }
         // let { firstProofs, scndProofs } = await this.splitApi(proofs, amount);
         const keyset_id = this.getKeyset();
-        const { returnChange: firstProofs, send: scndProofs } = await this.wallet.send(amount, proofs, { counter: this.keysetCounter(keyset_id) })
+        const counter = this.keysetCounter(keyset_id);
+        const { returnChange: firstProofs, send: scndProofs } = await this.wallet.send(amount, proofs, { counter: counter })
+        this.increaseKeysetCounter(keyset_id, proofs.length);
+
         mintStore.removeProofs(proofs);
         // add new firstProofs, scndProofs to this.proofs
         mintStore.addProofs(
@@ -498,15 +524,15 @@ export const useWalletStore = defineStore("wallet", {
       try {
         // const split = splitAmount(amount);
         const keysetId = this.getKeyset()
-        const { proofs } = await this.wallet.mintTokens(amount, hash, { keysetId, counter: this.keysetCounter(keysetId) })
+        const counter = this.keysetCounter(keysetId)
+        const { proofs } = await this.wallet.mintTokens(amount, hash, { keysetId, counter })
+        this.increaseKeysetCounter(keysetId, proofs.length);
+
         // const proofs = await this.mintApi(split, hash, verbose);
         if (!proofs.length) {
           throw "could not mint";
         }
         mintStore.addProofs(proofs);
-        // hack to update balance
-        // mintStore.setActiveProofs(mintStore.activeProofs.concat([]));
-        // this.storeProofs();
 
         // update UI
         await this.setInvoicePaid(hash);
@@ -541,6 +567,7 @@ export const useWalletStore = defineStore("wallet", {
       if (this.payInvoiceData.invoice == null) {
         throw new Error("no invoice provided.");
       }
+      const invoice = this.payInvoiceData.invoice.bolt11;
       const amount_invoice = this.payInvoiceData.invoice.sat;
       // const quote = await this.meltQuote(this.payInvoiceData.input.request);
       const quote = this.payInvoiceData.meltQuote.response;
@@ -555,7 +582,7 @@ export const useWalletStore = defineStore("wallet", {
         "amount with fees",
         amount
       );
-      const { firstProofs: keepProofs, scndProofs: sendProofs } = await this.splitToSend(
+      const { keepProofs, sendProofs } = await this.splitToSend(
         mintStore.activeMint().proofsUnit(mintStore.activeUnit),
         amount
       );
@@ -565,29 +592,34 @@ export const useWalletStore = defineStore("wallet", {
         let n_outputs = Math.max(Math.ceil(Math.log2(quote.fee_reserve)), 1);
         let amounts = Array.from({ length: n_outputs }, () => 1);
 
-        const unitKeysets = mintStore.activeMint().unitKeysets(mintStore.activeUnit)
-        if (unitKeysets == null || unitKeysets.length == 0) {
-          console.error("no keysets found for unit", mintStore.activeUnit);
-          throw new Error("no keysets found for unit");
-        }
-        const keyset_id = unitKeysets[0].id;
+        // const unitKeysets = mintStore.activeMint().unitKeysets(mintStore.activeUnit)
+        // if (unitKeysets == null || unitKeysets.length == 0) {
+        //   console.error("no keysets found for unit", mintStore.activeUnit);
+        //   throw new Error("no keysets found for unit");
+        // }
+        // const keyset_id = unitKeysets[0].id;
 
-        // const counters = Array.from({ length: amounts.length }, (_, i) => i);
-        const counters = this.getCounterKeyset(keyset_id, amounts.length);
-        let secrets = await this.generateSecrets(keyset_id, counters);
-        let outputs = await this.constructOutputs(amounts, keyset_id, counters);
+        const keyset_id = this.getKeyset();
+        const counter = this.keysetCounter(keyset_id);
+        const data = await this.wallet.payLnInvoice(invoice, sendProofs, quote, { keysetId: keyset_id, counter: counter })
 
-        let amount_paid = amount;
-        const payload: MeltPayload = {
-          inputs: sendProofs.flat(),
-          outputs: outputs,
-          quote: quote.quote,
-        };
-        const data = await mintStore.activeMint().api.melt(payload);
-        mintStore.assertMintError(data);
-        if (data.paid != true) {
+        if (data.isPaid != true) {
           throw new Error("Invoice not paid.");
         }
+        // let secrets = await this.generateSecrets(keyset_id, counters);
+        // let outputs = await this.constructOutputs(amounts, keyset_id, counters);
+
+        let amount_paid = amount;
+        // const payload: MeltPayload = {
+        //   inputs: sendProofs.flat(),
+        //   outputs: outputs,
+        //   quote: quote.quote,
+        // };
+        // const data = await mintStore.activeMint().api.melt(payload);
+        // mintStore.assertMintError(data);
+        // if (data.paid != true) {
+        //   throw new Error("Invoice not paid.");
+        // }
 
         if (!!window.navigator.vibrate) navigator.vibrate(200);
 
@@ -598,11 +630,12 @@ export const useWalletStore = defineStore("wallet", {
 
         // NUT-08 get change
         if (data.change != null) {
-          const changeProofs = await this.constructProofs(
-            data.change,
-            keyset_id,
-            counters
-          );
+          const changeProofs = data.change;
+          // const changeProofs = await this.constructProofs(
+          //   data.change,
+          //   keyset_id,
+          //   counters
+          // );
           console.log(
             "## Received change: " + proofsStore.sumProofs(changeProofs)
           );

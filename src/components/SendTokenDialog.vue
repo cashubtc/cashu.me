@@ -287,17 +287,17 @@ export default defineComponent({
       */
       try {
         // keep firstProofs, send scndProofs and delete them (invalidate=true)
-        let { _, scndProofs } = await this.splitToSend(
+        let { _, sendProofs } = await this.splitToSend(
           this.activeProofs,
           this.sendData.amount,
           true
         );
 
         // update UI
-        this.sendData.tokens = scndProofs;
+        this.sendData.tokens = sendProofs;
         console.log("### this.sendData.tokens", this.sendData.tokens);
 
-        this.sendData.tokensBase64 = this.serializeProofs(scndProofs);
+        this.sendData.tokensBase64 = this.serializeProofs(sendProofs);
         this.addPendingToken({
           amount: -this.sendData.amount,
           serializedProofs: this.sendData.tokensBase64,

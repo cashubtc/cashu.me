@@ -52,9 +52,8 @@
           </q-btn>
         </q-item-section>
       </q-item>
-
-      <q-separator spaced inset v-if="!$last" />
     </q-list>
+    <q-separator spaced inset />
     <div style="display: flex; justify-content: center">
       <q-pagination
         v-model="currentPage"

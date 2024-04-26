@@ -922,7 +922,7 @@ export default {
       this.sendData.tokensBase64 = _.clone(tokensBase64);
       this.showSendTokens = true;
       // kick off token check worker
-      this.checkTokenSpendableWorker();
+      // this.checkTokenSpendableWorker(tokensBase64);
     },
     showSendTokensDialog: function () {
       console.log("##### showSendTokensDialog");
