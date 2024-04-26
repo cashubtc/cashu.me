@@ -79,6 +79,7 @@ export const useWalletStore = defineStore("wallet", {
             amount: 0,
             fee_reserve: 0,
           } as MeltQuoteResponse,
+          error: "",
         },
         invoice: {
           sat: 0,
@@ -138,78 +139,6 @@ export const useWalletStore = defineStore("wallet", {
         this.keysetCounters.push({ id, counter: by });
       }
     },
-    // getCounterKeyset: function (id: string, count: number) {
-    //   const keysetCounter = this.keysetCounters.find((c) => c.id === id);
-    //   if (keysetCounter) {
-    //     // generate counter array of numbers starting from keysetCounter.counter to count
-    //     const counters = Array.from({ length: count }, (_, i) => keysetCounter.counter + i);
-    //     // set new counter
-    //     keysetCounter.counter += count;
-    //     return counters;
-    //   } else {
-    //     // create new keyset counter
-    //     this.keysetCounters.push({ id, counter: count });
-    //     return Array.from({ length: count }, (_, i) => i);
-    //   }
-    // },
-    // generateSecrets: async function (keysetId: string, counters: number[]) {
-    //   let secrets = [];
-    //   for (let i = 0; i < counters.length; i++) {
-    //     // const secret = nobleSecp256k1.utils.randomBytes(32);
-    //     const secret = deriveSecret(this.seed, keysetId, counters[i]);
-    //     secrets.push(secret);
-    //   }
-    //   return secrets;
-    // },
-    // constructOutputs: async function (amounts: number[], id: string, counters: number[]): Promise<{ amount: number, B_: string, id: string }[]> {
-    //   const secrets = await this.generateSecrets(id, counters);
-    //   console.log("### constructOutputs", amounts, secrets, id, counters);
-    //   const outputs = [];
-    //   for (let i = 0; i < amounts.length; i++) {
-    //     const r_deterministic = deriveBlindingFactor(this.seed, id, counters[i]);
-    //     const { B_, r } = blindMessage(secrets[i], bytesToNumber(r_deterministic));
-    //     console.log("### constructOutput r_deterministic", r_deterministic);
-    //     outputs.push({ amount: amounts[i], B_: B_.toHex(), id: id });
-    //     console.log("### outputs", outputs[outputs.length - 1]);
-    //   }
-    //   return outputs;
-    // },
-    // promiseToProof: async function (id: string, amount: number, C_hex: string, counter: number) {
-    //   console.log("### promiseToProof", id, amount, C_hex, counter)
-    //   const mintStore = useMintsStore();
-    //   const A = await mintStore.getKeysForKeyset(id);
-    //   const publicKey: string = A.keys[amount];
-    //   const r_deterministic = deriveBlindingFactor(this.seed, id, counter);
-    //   console.log("### promiseToProof r_deterministic", r_deterministic);
-    //   const C = unblindSignature(
-    //     secp256k1.ProjectivePoint.fromHex(C_hex),
-    //     bytesToNumber(r_deterministic),
-    //     secp256k1.ProjectivePoint.fromHex(publicKey)
-    //   );
-    //   return {
-    //     id,
-    //     amount,
-    //     C: C.toHex(true),
-    //   };
-    // },
-    // constructProofs: async function (promises: SerializedBlindedSignature[], id: string, counters: number[]) {
-    //   const secrets = await this.generateSecrets(id, counters);
-    //   console.log("### constructProofs", promises, secrets, id, counters);
-    //   const proofs = [];
-    //   for (let i = 0; i < promises.length; i++) {
-    //     // const encodedSecret = uint8ToBase64.encode(secrets[i]);
-    //     // use hex for now
-    //     const encodedSecret = nobleSecp256k1.etc.bytesToHex(secrets[i]);
-    //     let { id, amount, C } = await this.promiseToProof(
-    //       promises[i].id,
-    //       promises[i].amount,
-    //       promises[i].C_,
-    //       counters[i]
-    //     );
-    //     proofs.push({ id, amount, C, secret: encodedSecret });
-    //   }
-    //   return proofs;
-    // },
     getKeyset(): string {
       const mintStore = useMintsStore();
       const keysets = mintStore.activeMint().keysets;
@@ -408,79 +337,6 @@ export const useWalletStore = defineStore("wallet", {
         throw error;
       }
     },
-
-    // /split
-
-    // splitApi: async function (proofs: Proof[], amount: number) {
-    //   const proofsStore = useProofsStore();
-    //   const mintStore = useMintsStore();
-    //   try {
-    //     const total = proofsStore.sumProofs(proofs);
-    //     const frst_amount = total - amount;
-    //     const scnd_amount = amount;
-    //     const frst_amounts = splitAmount(frst_amount);
-    //     const scnd_amounts = splitAmount(scnd_amount);
-    //     const amounts = _.clone(frst_amounts);
-    //     amounts.push(...scnd_amounts);
-
-    // const unitKeysets = mintStore.activeMint().unitKeysets(mintStore.activeUnit)
-    // if (unitKeysets == null || unitKeysets.length == 0) {
-    //   console.error("no keysets found for unit", mintStore.activeUnit);
-    //   throw new Error("no keysets found for unit");
-    // }
-    // const keyset_id = unitKeysets[0].id;
-
-    // const counters = Array.from({ length: amounts.length }, (_, i) => i);
-    // const counters = this.getCounterKeyset(keyset_id, amounts.length);
-
-
-    // const keysetId = this.getKeyset()
-    // const { returnChange: firstProofs, send: scndProofs } = await this.wallet.send(amount, proofs, { counter: this.keysetCounter(keysetId) })
-
-    // const outputs = await this.constructOutputs(amounts, keyset_id, counters);
-    // const payload: SplitPayload = {
-    //   inputs: proofs,
-    //   outputs: outputs,
-    // };
-
-    // const data = await mintStore.activeMint().api.split(payload);
-
-    // // push all promise, amount, secret, rs to mintStore.appendBlindSignatures
-    // for (let i = 0; i < data.signatures.length; i++) {
-    //   mintStore.appendBlindSignatures(
-    //     data.signatures[i],
-    //     amounts[i],
-    //     secrets[i],
-    //     rs[i]
-    //   );
-    // }
-
-    // mintStore.assertMintError(data);
-    // const first_promises = data.signatures.slice(0, frst_amounts.length);
-    // const frst_counters = counters.slice(0, frst_amounts.length);
-    // const scnd_promises = data.signatures.slice(frst_amounts.length);
-    // const scnd_counters = counters.slice(frst_amounts.length);
-    // const firstProofs = await this.constructProofs(
-    //   first_promises,
-    //   keyset_id,
-    //   frst_counters,
-    // );
-    // const scndProofs = await this.constructProofs(
-    //   scnd_promises,
-    //   keyset_id,
-    //   scnd_counters,
-    // );
-
-    //     return { firstProofs, scndProofs };
-    //   } catch (error: any) {
-    //     this.payInvoiceData.blocking = false;
-    //     console.error(error);
-    //     try {
-    //       notifyApiError(error);
-    //     } catch { }
-    //     throw error;
-    //   }
-    // },
 
     // /mint
     /**
@@ -695,6 +551,7 @@ export const useWalletStore = defineStore("wallet", {
         return data;
       } catch (error: any) {
         this.payInvoiceData.blocking = false;
+        this.payInvoiceData.meltQuote.error = error;
         console.error(error);
         try {
           notifyApiError(error);

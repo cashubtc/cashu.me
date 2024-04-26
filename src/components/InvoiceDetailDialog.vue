@@ -1,5 +1,5 @@
 <template>
-  <q-dialog v-model="showInvoiceDetails" persistent position="top">
+  <q-dialog v-model="showInvoiceDetails" position="top">
     <q-card class="q-pa-lg q-pt-md qcard">
       <div v-if="!invoiceData.bolt11">
         <div class="row items-center no-wrap q-mb-sm">

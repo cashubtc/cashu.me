@@ -15,7 +15,7 @@
           />
         </q-avatar>
         <q-toolbar-title
-          ><span class="text-weight-bold">Cashu.me</span>
+          ><span class="text-weight-bold">Cashu.me</span> ecash
           wallet</q-toolbar-title
         >
       </q-toolbar>
@@ -23,10 +23,9 @@
         <p>Please take a moment to read the following information.</p>
 
         <p>
-          <strong>Open this wallet on your device's native browser</strong>
-          Cashu stores your ecash on your device locally. For the best
-          experience, use this wallet with your device's native web browser (for
-          example Safari for iOS, Chrome for Android).
+          <strong>Install this app</strong>
+          For the best experience, use this wallet with your device's native web
+          browser (for example Safari for iOS, Chrome for Android).
         </p>
         <p>
           <strong>Add to home screen.</strong>
@@ -37,13 +36,34 @@
         </p>
         <p>
           <strong>This software is in BETA!</strong> We hold no responsibility
-          for people losing access to funds. Use at your own risk! Ecash is a
-          bearer asset, meaning losing access to this wallet will mean you will
-          lose the funds. This wallet stores ecash tokens in its database. If
-          you lose the link or delete your your data without backing up, you
-          will lose your tokens. Press the Backup button to download a copy of
-          your tokens.
+          for people losing access to funds. Use at your own risk! This wallet
+          stores ecash tokens in its database. If you delete your your browser
+          data without backing up, you will lose your tokens. Make sure to back
+          up your wallet seed.
         </p>
+        <div class="row">
+          <div class="col-12">
+            <q-input
+              outlined
+              readonly
+              v-model="mnemonic"
+              label="Seed phrase"
+              autogrow
+              class="q-ma-xs"
+              style="max-height: 100px"
+            >
+              <template v-slot:append>
+                <q-btn
+                  flat
+                  dense
+                  icon="content_copy"
+                  class="cursor-pointer q-mt-md"
+                  @click="copyText(mnemonic)"
+                ></q-btn>
+              </template>
+            </q-input>
+          </div>
+        </div>
         <!-- wallet backup restore -->
         <input
           type="file"
@@ -102,8 +122,9 @@
 </style>
 <script>
 import { defineComponent } from "vue";
-import { mapActions } from "pinia";
+import { mapActions, mapState } from "pinia";
 import { useMintsStore } from "stores/mints";
+import { useWalletStore } from "src/stores/wallet";
 
 export default defineComponent({
   name: "WelcomeDialog",
@@ -122,7 +143,9 @@ export default defineComponent({
     };
   },
   watch: {},
-  computed: {},
+  computed: {
+    ...mapState(useWalletStore, ["mnemonic"]),
+  },
   methods: {
     ...mapActions(useMintsStore, ["restoreFromBackup"]),
     readFile(file) {

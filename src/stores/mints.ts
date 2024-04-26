@@ -83,7 +83,7 @@ export const useMintsStore = defineStore("mints", {
     return {
       activeUnit: useLocalStorage<string>("cashu.activeUnit", "sat"),
       activeMintUrl: useLocalStorage<string>("cashu.activeMintUrl", ""),
-      mintToAdd: "https://8333.space:3338",
+      mintToAdd: "",
       mintToRemove: "",
       mints: useLocalStorage("cashu.mints", [] as Mint[]),
       proofs: useLocalStorage("cashu.proofs", [] as WalletProof[]),
