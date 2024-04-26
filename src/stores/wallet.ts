@@ -194,7 +194,7 @@ export const useWalletStore = defineStore("wallet", {
         const keysetId = this.getKeyset()
         const counter = this.keysetCounter(keysetId)
         const { returnChange: keepProofs, send: sendProofs } = await this.wallet.send(amount, proofsToSplit, { counter: counter })
-        this.increaseKeysetCounter(keysetId, proofsToSplit.length);
+        this.increaseKeysetCounter(keysetId, keepProofs.length + sendProofs.length);
 
         mintStore.addProofs(keepProofs);
         mintStore.addProofs(sendProofs);
@@ -236,33 +236,9 @@ export const useWalletStore = defineStore("wallet", {
       }
       let proofs = token.getProofs(tokenJson);
 
-      // check if we have all mints
-      for (var i = 0; i < tokenJson.token.length; i++) {
-        if (
-          !mintStore.mints
-            .map((m) => m.url)
-            .includes(token.getMint(tokenJson))
-        ) {
-          // pop up add mint dialog warning
-          // hack! The "add mint" component is in SettingsView which may now
-          // have been loaded yet. We switch the tab to settings to make sure
-          // that it loads. Remove this code when the TrustMintComnent is refactored!
-          uIStore.setTab("settings");
-          mintStore.setMintToAdd(tokenJson.token[i].mint);
-          mintStore.showAddMintDialog = true;
-          // this.addMintDialog.show = true;
-          // show the token receive dialog again for the next attempt
-          receiveStore.showReceiveTokens = true;
-          return;
-        }
-
-        // TODO: We assume here that all proofs are from one mint! This will fail if
-        // that's not the case!
-        if (token.getMint(tokenJson) != mintStore.activeMintUrl) {
-          await mintStore.activateMintUrl(token.getMint(tokenJson));
-        }
+      if (token.getMint(tokenJson) != mintStore.activeMintUrl) {
+        await mintStore.activateMintUrl(token.getMint(tokenJson));
       }
-
       const amount = proofs.reduce((s, t) => (s += t.amount), 0);
 
       // set unit to unit in token
@@ -274,16 +250,17 @@ export const useWalletStore = defineStore("wallet", {
         // await this.split(proofs, amount);
         const keysetId = this.getKeyset()
         const counter = this.keysetCounter(keysetId)
-        const { token, tokensWithErrors } = await this.wallet.receive(receiveStore.receiveData.tokensBase64, { counter: counter })
-        if (tokensWithErrors?.token || token.token.length == 0) {
+        const { token: tokenReceived, tokensWithErrors } = await this.wallet.receive(receiveStore.receiveData.tokensBase64, { counter })
+        if (tokensWithErrors?.token || tokenReceived.token.length == 0) {
           throw new Error("Error receiving tokens");
         }
 
-        this.increaseKeysetCounter(keysetId, token.token.length);
+        // this.increaseKeysetCounter(keysetId, tokenReceived.token[0].proofs.length);
+        this.increaseKeysetCounter(keysetId, tokenReceived.token.map(t => t.proofs.length).reduce((a, b) => a + b, 0));
 
         mintStore.removeProofs(proofs);
         // gather all token.token[i].proofs
-        const receivedProofs = token.token.map((t) => t.proofs).flat();
+        const receivedProofs = tokenReceived.token.map((t) => t.proofs).flat();
         mintStore.addProofs(receivedProofs);
 
         tokenStore.addPaidToken({
@@ -319,7 +296,7 @@ export const useWalletStore = defineStore("wallet", {
         const keyset_id = this.getKeyset();
         const counter = this.keysetCounter(keyset_id);
         const { returnChange: firstProofs, send: scndProofs } = await this.wallet.send(amount, proofs, { counter: counter })
-        this.increaseKeysetCounter(keyset_id, proofs.length);
+        this.increaseKeysetCounter(keyset_id, firstProofs.length + scndProofs.length);
 
         mintStore.removeProofs(proofs);
         // add new firstProofs, scndProofs to this.proofs

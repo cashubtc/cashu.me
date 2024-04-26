@@ -30,7 +30,7 @@
       </div>
       <div class="row q-mt-lg">
         <q-btn
-          @click="redeem"
+          @click="receiveToken(receiveData.tokensBase64)"
           color="primary"
           :disabled="!decodeToken(receiveData.tokensBase64)"
           >Receive</q-btn
@@ -98,6 +98,52 @@ export default defineComponent({
     //   "addPendingToken",
     //   "setTokenPaid",
     // ]),
+    knowThisMintOfTokenJson: function (tokenJson) {
+      const mintStore = useMintsStore();
+      // check if we have all mints
+      for (var i = 0; i < tokenJson.token.length; i++) {
+        if (
+          !mintStore.mints.map((m) => m.url).includes(token.getMint(tokenJson))
+        ) {
+          return false;
+        }
+      }
+      return true;
+    },
+    receiveToken: async function (encodedToken) {
+      const mintStore = useMintsStore();
+      const receiveStore = useReceiveTokensStore();
+      const uIStore = useUiStore();
+      receiveStore.showReceiveTokens = false;
+      console.log("### receive tokens", receiveStore.receiveData.tokensBase64);
+
+      if (receiveStore.receiveData.tokensBase64.length == 0) {
+        throw new Error("no tokens provided.");
+      }
+      const tokenJson = token.decode(receiveStore.receiveData.tokensBase64);
+      if (tokenJson == undefined) {
+        throw new Error("no tokens provided.");
+      }
+      // check if we have all mints
+      if (!this.knowThisMintOfTokenJson(tokenJson)) {
+        // pop up add mint dialog warning
+        // hack! The "add mint" component is in SettingsView which may now
+        // have been loaded yet. We switch the tab to settings to make sure
+        // that it loads. Remove this code when the TrustMintComnent is refactored!
+        uIStore.setTab("settings");
+        // hide the receive dialog
+        receiveStore.showReceiveTokens = false;
+        // set the mint to add
+        mintStore.setMintToAdd(tokenJson.token[0].mint);
+        // show the add mint dialog
+        mintStore.showAddMintDialog = true;
+        // show the token receive dialog again for the next attempt
+        receiveStore.showReceiveTokens = true;
+        return;
+      }
+      // redeem the token
+      await this.redeem(receiveStore.receiveData.tokensBase64);
+    },
     // TOKEN METHODS
     decodeToken: function (encoded_token) {
       return token.decode(encoded_token);
