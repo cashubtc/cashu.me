@@ -1,5 +1,5 @@
 <template>
-  <q-header bordered class="bg-marginal-bg">
+  <q-header class="bg-marginal-bg">
     <q-toolbar>
       <q-btn
         flat
@@ -10,9 +10,9 @@
         @click="toggleLeftDrawer"
       />
       <q-toolbar-title>
-        <span><strong>Cashu.me</strong></span>
+        <!-- <span><strong>Cashu.me</strong></span> -->
       </q-toolbar-title>
-      <q-badge color="yellow" text-color="black" class="q-mr-md">
+      <q-badge color="yellow" text-color="black" class="q-mr-none">
         <span>Beta</span>
       </q-badge>
 
@@ -115,19 +115,19 @@
             size="md"
             ><q-tooltip>flamingo</q-tooltip>
           </q-btn>
+          <q-btn
+            dense
+            flat
+            round
+            class="q-ml-sm"
+            @click="toggleDarkMode"
+            :icon="$q.dark.isActive ? 'brightness_3' : 'wb_sunny'"
+            size="md"
+          >
+            <q-tooltip>Toggle Dark Mode</q-tooltip>
+          </q-btn>
         </div>
       </q-btn-dropdown>
-
-      <q-btn
-        dense
-        flat
-        round
-        @click="toggleDarkMode"
-        :icon="$q.dark.isActive ? 'brightness_3' : 'wb_sunny'"
-        size="sm"
-      >
-        <q-tooltip>Toggle Dark Mode</q-tooltip>
-      </q-btn>
     </q-toolbar>
   </q-header>
 
