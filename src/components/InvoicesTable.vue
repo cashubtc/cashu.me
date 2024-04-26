@@ -1,5 +1,5 @@
 <template>
-  <div style="max-width: 800px; margin: 0 auto">
+  <div style="max-width: 1000px; margin: 0 auto">
     <div v-if="false" class="q-pa-md" style="max-width: 500px; margin: 0 auto">
       <q-list>
         <q-item v-for="invoice in paginatedInvoices" :key="invoice.id">
