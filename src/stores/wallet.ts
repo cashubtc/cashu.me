@@ -59,6 +59,7 @@ export const useWalletStore = defineStore("wallet", {
         [] as InvoiceHistory[]
       ),
       keysetCounters: useLocalStorage("cashu.keysetCounters", [] as KeysetCounter[]),
+      oldMnemonicCounters: useLocalStorage("cashu.oldMnemonicCounters", [] as { mnemonic: string, keysetCounters: KeysetCounter[] }[]),
       invoiceData: {
         amount: 0,
         memo: "",
@@ -122,12 +123,20 @@ export const useWalletStore = defineStore("wallet", {
     }
   },
   actions: {
+    newMnemonic: function () {
+      // store old mnemonic and keysetCounters
+      const oldMnemonicCounters = this.oldMnemonicCounters;
+      const keysetCounters = this.keysetCounters;
+      oldMnemonicCounters.push({ mnemonic: this.mnemonic, keysetCounters });
+      this.keysetCounters = [];
+      this.mnemonic = generateNewMnemonic();
+    },
     keysetCounter: function (id: string) {
       const keysetCounter = this.keysetCounters.find((c) => c.id === id);
       if (keysetCounter) {
         return keysetCounter.counter;
       } else {
-        this.keysetCounters.push({ id, counter: 0 });
+        this.keysetCounters.push({ id, counter: 1 });
         return 0;
       }
     },
@@ -192,7 +201,7 @@ export const useWalletStore = defineStore("wallet", {
         const proofsToSplit = spendableProofs.slice(0, i);
 
         const keysetId = this.getKeyset()
-        const counter = this.keysetCounter(keysetId)
+        const counter = this.keysetCounter(keysetId);
         const { returnChange: keepProofs, send: sendProofs } = await this.wallet.send(amount, proofsToSplit, { counter: counter })
         this.increaseKeysetCounter(keysetId, keepProofs.length + sendProofs.length);
 

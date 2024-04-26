@@ -149,6 +149,39 @@
                 </q-input>
               </div>
             </div>
+            <div class="row q-pt-md">
+              <div class="col-12" v-if="!confirmMnemonic">
+                <q-btn flat dense @click="confirmMnemonic = !confirmMnemonic"
+                  >Generate new seed phrase</q-btn
+                >
+              </div>
+              <div class="col-12" v-if="confirmMnemonic">
+                <span
+                  >Are you sure you want to generate a new seed phrase? You must
+                  send your entire balance to yourself in order to be able to
+                  restore it with a new seed.
+                </span>
+                <q-btn
+                  flat
+                  dense
+                  class="q-ml-sm"
+                  color="warning"
+                  @click="confirmMnemonic = false"
+                  >Cancel</q-btn
+                >
+                <q-btn
+                  flat
+                  dense
+                  class="q-ml-sm"
+                  color="secondary"
+                  @click="
+                    confirmMnemonic = false;
+                    generateNewMnemonic();
+                  "
+                  >Confirm</q-btn
+                >
+              </div>
+            </div>
           </q-item-section>
         </q-item>
       </q-list>
@@ -232,15 +265,13 @@
           </q-item-section>
         </q-item>
         <q-item>
-          <q-btn
-            dense
-            flat
-            outline
-            color="primary"
-            click
-            @click="enable_terminal"
-          >
+          <q-btn dense flat outline click @click="enable_terminal">
             Open debug terminal
+          </q-btn>
+        </q-item>
+        <q-item>
+          <q-btn dense flat outline click @click="getLocalstorageToFile">
+            Download wallet data
           </q-btn>
         </q-item>
       </q-list>
@@ -315,6 +346,9 @@ import { getShortUrl } from "src/js/wallet-helpers";
 import { mapActions, mapState, mapWritableState } from "pinia";
 import { useMintsStore, MintClass } from "src/stores/mints";
 import { useWalletStore } from "src/stores/wallet";
+import { map } from "underscore";
+import { currentDateStr } from "src/js/utils";
+
 export default defineComponent({
   name: "SettingsView",
   mixins: [windowMixin],
@@ -331,6 +365,7 @@ export default defineComponent({
   data: function () {
     return {
       hideMnemonic: true,
+      confirmMnemonic: false,
       swapData: {
         from_url: "",
         to_url: "",
@@ -352,7 +387,10 @@ export default defineComponent({
     ]),
     hiddenMnemonic() {
       if (this.hideMnemonic) {
-        return this.mnemonic.replace(/\S/g, "*");
+        return this.mnemonic
+          .split(" ")
+          .map((w) => "*".repeat(w.length))
+          .join(" ");
       } else {
         return this.mnemonic;
       }
@@ -377,6 +415,10 @@ export default defineComponent({
       "setShowAddMintDialog",
       "setShowRemoveMintDialog",
     ]),
+    ...mapActions(useWalletStore, ["newMnemonic"]),
+    generateNewMnemonic() {
+      this.newMnemonic();
+    },
     toggleMnemonicVisibility: function () {
       this.hideMnemonic = !this.hideMnemonic;
     },
@@ -418,6 +460,32 @@ export default defineComponent({
       script.onload = function () {
         eruda.init();
       };
+    },
+    getLocalstorageToFile: async function () {
+      // https://stackoverflow.com/questions/24263682/save-restore-local-storage-to-a-local-file
+      const fileName = `cashu_backup_${currentDateStr()}.json`;
+      var a = {};
+      for (var i = 0; i < localStorage.length; i++) {
+        var k = localStorage.key(i);
+        var v = localStorage.getItem(k);
+        a[k] = v;
+      }
+      var textToSave = JSON.stringify(a);
+      var textToSaveAsBlob = new Blob([textToSave], {
+        type: "text/plain",
+      });
+      var textToSaveAsURL = window.URL.createObjectURL(textToSaveAsBlob);
+
+      var downloadLink = document.createElement("a");
+      downloadLink.download = fileName;
+      downloadLink.innerHTML = "Download File";
+      downloadLink.href = textToSaveAsURL;
+      downloadLink.onclick = function () {
+        document.body.removeChild(event.target);
+      };
+      downloadLink.style.display = "none";
+      document.body.appendChild(downloadLink);
+      downloadLink.click();
     },
   },
   created: function () {},

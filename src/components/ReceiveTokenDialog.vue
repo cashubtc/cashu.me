@@ -15,6 +15,7 @@
           type="textarea"
           autofocus
           class="q-mb-lg"
+          @keyup.enter="receveIfDecodes"
         ></q-input>
       </div>
       <div
@@ -30,7 +31,7 @@
       </div>
       <div class="row q-mt-lg">
         <q-btn
-          @click="receiveToken(receiveData.tokensBase64)"
+          @click="receveIfDecodes"
           color="primary"
           :disabled="!decodeToken(receiveData.tokensBase64)"
           >Receive</q-btn
@@ -153,6 +154,16 @@ export default defineComponent({
     },
     getMint: function (decoded_token) {
       return token.getMint(decoded_token);
+    },
+    receveIfDecodes: function () {
+      try {
+        const decodedToken = this.decodeToken(this.receiveData.tokensBase64);
+        if (decodedToken) {
+          this.receiveToken(this.receiveData.tokensBase64);
+        }
+      } catch (error) {
+        console.error(error);
+      }
     },
     sendTokens: async function () {
       /*

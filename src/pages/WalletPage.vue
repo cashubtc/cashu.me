@@ -180,7 +180,7 @@
       <div style="margin-bottom: 7rem">
         <div class="row q-pt-sm">
           <div class="col-12 q-pt-xs">
-            <q-btn
+            <!-- <q-btn
               class="q-mx-xs q-px-sm q-my-sm"
               size="0.6rem"
               outline
@@ -189,7 +189,7 @@
               icon="download_for_offline"
               @click="getLocalstorageToFile"
               ><q-tooltip>Download wallet backup</q-tooltip></q-btn
-            >
+            > -->
             <q-btn
               class="q-mx-xs q-px-sm q-my-sm"
               outline
@@ -303,7 +303,6 @@ import { useWalletStore } from "src/stores/wallet";
 import { useUiStore } from "src/stores/ui";
 import { useProofsStore } from "src/stores/proofs";
 import { useCameraStore } from "src/stores/camera";
-import { currentDateStr } from "src/js/utils";
 
 import ReceiveTokenDialog from "src/components/ReceiveTokenDialog.vue";
 
@@ -460,7 +459,6 @@ export default {
       "checkPendingInvoices",
       "checkPendingTokens",
       "decodeRequest",
-      "generateNewMnemonic",
     ]),
     ...mapActions(useCameraStore, ["closeCamera", "showCamera", "hasCamera"]),
     // TOKEN METHODS
@@ -683,32 +681,32 @@ export default {
 
     ////////////// STORAGE /////////////
 
-    getLocalstorageToFile: async function () {
-      // https://stackoverflow.com/questions/24263682/save-restore-local-storage-to-a-local-file
-      const fileName = `cashu_backup_${currentDateStr()}.json`;
-      var a = {};
-      for (var i = 0; i < localStorage.length; i++) {
-        var k = localStorage.key(i);
-        var v = localStorage.getItem(k);
-        a[k] = v;
-      }
-      var textToSave = JSON.stringify(a);
-      var textToSaveAsBlob = new Blob([textToSave], {
-        type: "text/plain",
-      });
-      var textToSaveAsURL = window.URL.createObjectURL(textToSaveAsBlob);
+    // getLocalstorageToFile: async function () {
+    //   // https://stackoverflow.com/questions/24263682/save-restore-local-storage-to-a-local-file
+    //   const fileName = `cashu_backup_${currentDateStr()}.json`;
+    //   var a = {};
+    //   for (var i = 0; i < localStorage.length; i++) {
+    //     var k = localStorage.key(i);
+    //     var v = localStorage.getItem(k);
+    //     a[k] = v;
+    //   }
+    //   var textToSave = JSON.stringify(a);
+    //   var textToSaveAsBlob = new Blob([textToSave], {
+    //     type: "text/plain",
+    //   });
+    //   var textToSaveAsURL = window.URL.createObjectURL(textToSaveAsBlob);
 
-      var downloadLink = document.createElement("a");
-      downloadLink.download = fileName;
-      downloadLink.innerHTML = "Download File";
-      downloadLink.href = textToSaveAsURL;
-      downloadLink.onclick = function () {
-        document.body.removeChild(event.target);
-      };
-      downloadLink.style.display = "none";
-      document.body.appendChild(downloadLink);
-      downloadLink.click();
-    },
+    //   var downloadLink = document.createElement("a");
+    //   downloadLink.download = fileName;
+    //   downloadLink.innerHTML = "Download File";
+    //   downloadLink.href = textToSaveAsURL;
+    //   downloadLink.onclick = function () {
+    //     document.body.removeChild(event.target);
+    //   };
+    //   downloadLink.style.display = "none";
+    //   document.body.appendChild(downloadLink);
+    //   downloadLink.click();
+    // },
 
     migrationLocalstorage: async function () {
       // migration from old db to multimint
@@ -845,8 +843,6 @@ export default {
 
     // show welcome dialog
     this.showWelcomeDialog();
-
-    console.log(this.generateNewMnemonic());
   },
   // })
 };
