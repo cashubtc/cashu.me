@@ -16,11 +16,10 @@
           transition-next="slide-left"
           swipeable
           animated
-          navigation
-          height="10.7rem"
+          height="7rem"
           control-color="primary"
-          class="bg-transparent text-white rounded-borders q-px-none q-mx-none"
-          style="width: 100%"
+          class="bg-transparent text-white rounded-borders q-px-none q-mx-none q-mt-md"
+          style="max-width: 500px; width: 100%"
         >
           <q-carousel-slide name="ecash" class="q-pt-sm q-mx-none">
             <div

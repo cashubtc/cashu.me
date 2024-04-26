@@ -25,7 +25,7 @@
           >
         </q-item-section>
 
-        <q-item-section>
+        <q-item-section class="q-ml-xl">
           <q-item-label>
             {{
               token.token.slice(0, 10) + "..." + token.token.slice(-8)
