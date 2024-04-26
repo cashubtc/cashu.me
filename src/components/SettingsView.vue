@@ -8,14 +8,13 @@
             <q-item-label overline>Mints</q-item-label>
             <q-item-label caption
               >You can connect your wallet to multiple Cashu mints. Enter a mint
-              URL and select the mint your want to use. Check out
+              URL and select the mint your want to use. Find a mint at
               <a
                 href="https://bitcoinmints.com"
                 target="_blank"
-                class="text-secondary"
+                class="text-primary"
                 >bitcoinmints.com</a
-              >
-              to find a mint.
+              >. This wallet is not affiliated with any mint.
             </q-item-label>
           </q-item-section>
         </q-item>
@@ -24,7 +23,8 @@
         <div v-for="mint in mints" :key="mint.url">
           <q-item
             :active="mint.url == activeMintUrl"
-            active-class="text-weight-bold text-secondary"
+            active-class="text-weight-bold text-primary"
+            clickable
           >
             <q-item-section avatar>
               <q-icon
@@ -54,6 +54,7 @@
               <q-item-label
                 lines="1"
                 @click="activateMintUrl(mint.url, (verbose = false))"
+                class="cursor-pointer"
                 >{{ mint.url }}</q-item-label
               >
               <q-item-label>

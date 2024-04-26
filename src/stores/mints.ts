@@ -205,6 +205,16 @@ export const useMintsStore = defineStore("mints", {
     },
     addMint: async function (url: string, verbose = false) {
       try {
+        // sanitize url
+        const sanitizeUrl = (url: string): string => {
+          let cleanedUrl = url.trim().replace(/\/+$/, '').toLowerCase();
+          if (!/^[a-z]+:\/\//.test(cleanedUrl)) {  // Check for any protocol followed by "://"
+            cleanedUrl = 'https://' + cleanedUrl;
+          }
+          return cleanedUrl;
+        };
+        url = sanitizeUrl(url);
+
         // we have no mints at all
         const mintToAdd: Mint = { url: url, balance: 0, keys: [], keysets: [] };
         if (this.mints.length === 0) {

@@ -72,7 +72,7 @@
         />
         <span class="q-my-none q-py-none text-weight-regular">
           Active mint:
-          <b>{{ formatCurrency(getTotalBalance, activeUnit) }} </b>
+          <b>{{ formatCurrency(getActiveMintBalance, activeUnit) }} </b>
         </span>
         <!-- <q-knob
               :model-value="getBalance"
@@ -182,6 +182,11 @@ export default defineComponent({
     },
     getTotalBalance: function () {
       return this.totalBalance;
+    },
+    getActiveMintBalance: function () {
+      return this.activeProofs
+        .flat()
+        .reduce((sum, el) => (sum += el.amount), 0);
     },
     getActiveMintUrlShort: function () {
       return getShortUrl(this.activeMintUrl);

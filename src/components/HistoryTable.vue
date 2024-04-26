@@ -1,7 +1,13 @@
 <template>
   <div class="q-pa-xs" style="max-width: 500px; margin: 0 auto">
     <q-list>
-      <q-item v-for="token in paginatedTokens" :key="token.id">
+      <q-item
+        v-for="token in paginatedTokens"
+        :key="token.id"
+        clickable
+        v-ripple
+        @click="showTokenDialog(token.token)"
+      >
         <q-item-section side>
           <q-item-label class="text-weight-bold">
             <q-icon
@@ -14,22 +20,18 @@
                   : ''
               "
               class="q-mr-xs"
-              @click="showTokenDialog(token.token)"
             />
             {{ formatCurrency(token.amount, token.unit) }}</q-item-label
           >
         </q-item-section>
 
         <q-item-section>
-          <q-item-label @click="showTokenDialog(token.token)">
+          <q-item-label>
             {{
               token.token.slice(0, 10) + "..." + token.token.slice(-8)
             }}</q-item-label
           >
-          <q-tooltip>Click for details</q-tooltip>
-          <q-item-label caption @click="showTokenDialog(token.token)">{{
-            formattedDate(token.date)
-          }}</q-item-label>
+          <q-item-label caption>{{ formattedDate(token.date) }}</q-item-label>
         </q-item-section>
 
         <q-item-section side top>

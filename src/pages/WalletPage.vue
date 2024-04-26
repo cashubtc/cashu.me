@@ -55,7 +55,11 @@
           </q-carousel-slide>
 
           <q-carousel-slide name="main" class="q-pt-sm q-pb-none">
-            <q-btn-group rounded outline style="width: 100%; max-width: 500px">
+            <q-btn-group
+              rounded
+              outline
+              style="width: 100%; max-width: 500px; outline: 0.8px solid"
+            >
               <q-btn
                 outline
                 class="q-py-lg q-pl-xl q-pr-sm"
