@@ -1,5 +1,5 @@
 <template>
-  <div class="q-pa-md" style="max-width: 500px; margin: 0 auto">
+  <div class="q-pa-xs" style="max-width: 500px; margin: 0 auto">
     <q-list>
       <q-item v-for="token in paginatedTokens" :key="token.id">
         <q-item-section side>
@@ -21,12 +21,9 @@
         </q-item-section>
 
         <q-item-section>
-          <q-item-label
-            @click="showTokenDialog(token.token)"
-            class="text-subtitle2"
-          >
+          <q-item-label @click="showTokenDialog(token.token)">
             {{
-              token.token.slice(0, 15) + "..." + token.token.slice(-8)
+              token.token.slice(0, 10) + "..." + token.token.slice(-8)
             }}</q-item-label
           >
           <q-tooltip>Click for details</q-tooltip>
@@ -43,7 +40,7 @@
             @click="checkTokenSpendable(token.token)"
             class="cursor-pointer"
             v-if="token.status === 'pending'"
-            style="position: absolute; top: 5px"
+            style="position: absolute; right: 0"
           >
             <q-tooltip>Check status</q-tooltip>
           </q-btn>
