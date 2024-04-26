@@ -7,9 +7,6 @@
         :check-pending-tokens="checkPendingTokens"
         :set-tab="setTab"
       />
-      <!-- ECASH BUTTONS  -->
-      <!-- <q-card class="q-mt-xs">
-        <q-card-section class="q-py-xs"> -->
       <div
         class="row items-center justify-center no-wrap q-mb-none q-mx-none q-px-none"
       >
@@ -125,143 +122,9 @@
           </q-carousel-slide>
         </q-carousel>
       </div>
-
-      <!-- <div class="row items-center justify-center no-wrap q-mb-sm"></div>
-
-          <div class="row items-center justify-center no-wrap q-mb-sm">
-            <q-btn-group rounded v-if="action == 'lightning'">
-              <q-btn
-                color="secondary"
-                icon="bolt"
-                label="Receive"
-                @click="showInvoiceCreateDialog"
-              />
-              <q-btn color="secondary" label="Send" @click="showParseDialog" />
-            </q-btn-group>
-          </div>
-
-          <div class="row items-center justify-center no-wrap q-mb-sm">
-            <div class="col-4 col-sm-5 col-md-4 q-pr-xs">
-              <q-btn
-                color="primary"
-                icon="toll"
-                rounded
-                label="Ecash"
-                @click="action = 'ecash'"
-              />
-            </div>
-            <div class="col-4 col-sm-5 col-md-4 q-pr-xs">
-              <q-btn
-                size="2rem"
-                unelevated
-                icon="qr_code_scanner"
-                class="col-2 q-pb-md q-mt-md"
-                @click="showCamera"
-              />
-            </div>
-            <div class="col-4 col-sm-5 col-md-4 q-pr-xs">
-              <q-btn
-                color="secondary"
-                icon="bolt"
-                rounded
-                label="Lightning"
-                @click="action = 'lightning'"
-              />
-            </div>
-          </div> -->
-
-      <!-- <div class="row items-center no-wrap q-mb-sm">
-            <div class="col-6 col-sm-5 col-md-4 q-pr-xs">
-              <div class="row items-center no-wrap q-mb-sm">
-                <q-btn
-                  size="1.0rem"
-                  rectangle
-                  unelevated
-                  dense
-                  color="primary"
-                  align="between"
-                  icon="file_download"
-                  icon-right="toll"
-                  class="full-width"
-                  @click="showReceiveTokensDialog"
-                >
-                  <strong class="gt-lg"> Receive Ecash </strong>
-                  <strong class="gt-xs lt-xl"> Receive Ecash </strong>
-                  <strong class="lt-sm"> Receive </strong>
-                </q-btn>
-              </div>
-              <div class="row items-center no-wrap q-mb-none">
-                <q-btn
-                  size="1.0rem"
-                  rectangle
-                  unelevated
-                  dense
-                  align="between"
-                  color="secondary"
-                  icon="file_download"
-                  icon-right="bolt"
-                  class="full-width"
-                  @click="showInvoiceCreateDialog"
-                >
-                  <strong class="gt-lg"> Create Lightning Invoice </strong>
-                  <strong class="gt-xs lt-xl"> Create Invoice </strong>
-                  <strong class="lt-sm"> Invoice </strong>
-                </q-btn>
-              </div>
-            </div>
-            <div class="col-0 col-sm-2 col-md-4">
-              <q-btn
-                size="2rem"
-                unelevated
-                icon="qr_code_scanner"
-                class="col-2 q-pb-md gt-xs q-mt-md"
-                @click="showCamera"
-              />
-            </div>
-            <div class="col-6 col-sm-5 col-md-4 q-pl-xs">
-              <div class="row items-center no-wrap q-mb-sm">
-                <q-btn
-                  size="1.0rem"
-                  rectangle
-                  unelevated
-                  dense
-                  align="between"
-                  color="primary"
-                  icon="file_upload"
-                  icon-right="toll"
-                  class="full-width"
-                  @click="showSendTokensDialog"
-                >
-                  <strong class="gt-lg"> Send Ecash </strong>
-                  <strong class="gt-xs lt-xl"> Send Ecash </strong>
-                  <strong class="lt-sm"> Send </strong>
-                </q-btn>
-              </div>
-              <div class="row items-center no-wrap q-mb-none">
-                <q-btn
-                  size="1.0rem"
-                  rectangle
-                  unelevated
-                  dense
-                  align="between"
-                  color="secondary"
-                  icon="file_upload"
-                  icon-right="bolt"
-                  class="full-width"
-                  @click="showParseDialog"
-                >
-                  <strong class="gt-lg"> Pay Lightning Invoice </strong>
-                  <strong class="gt-xs lt-xl"> Pay Invoice </strong>
-                  <strong class="lt-sm"> Pay </strong>
-                </q-btn>
-              </div>
-            </div>
-          </div> -->
-      <!-- </q-card-section>
-        <q-card-section class="q-pt-none"> -->
       <!-- ///////////////////////////////////////////
-                ////////////////// TABLES /////////////////
-                /////////////////////////////////////////// -->
+      ////////////////// TABLES /////////////////
+      /////////////////////////////////////////// -->
       <q-tabs
         v-model="tab"
         no-caps
@@ -311,177 +174,40 @@
             :mint-to-add-wallet-page="this.addMintDialog.mintToAdd"
           />
         </q-tab-panel>
-        <!-- ////////////////// TOKEN LIST ///////////////// -->
-
-        <!-- <q-tab-panel name="tokens">
-              <q-table
-                dense
-                flat
-                :rows="getTokenList()"
-                :columns="tokensTable.columns"
-                no-data-label="There are no tokens here yet"
-                :filter="tokensTable.filter"
-              >
-                <template v-slot:body="props">
-                  <q-tr :props="props">
-                    <q-td
-                      key="value"
-                      :props="props"
-                      :class="
-                        props.row.value > 0
-                          ? 'text-green-13 text-weight-bold'
-                          : ''
-                      "
-                    >
-                      <div>{{ props.row.value }}</div>
-                    </q-td>
-                    <q-td key="count" :props="props">
-                      <div>{{ props.row.count }}</div>
-                    </q-td>
-                    <q-td key="sum" :props="props">
-                      <div>{{ props.row.sum }}</div>
-                    </q-td>
-                  </q-tr>
-                </template>
-              </q-table>
-            </q-tab-panel> -->
       </q-tab-panels>
-      <!-- </q-card-section>
-      </q-card> -->
-
       <!-- LIGHTNING BUTTONS  -->
 
       <div style="margin-bottom: 7rem">
         <div class="row q-pt-sm">
-          <div class="col-4 q-pt-none">
-            <!-- <q-btn
-              class="full-width gt-sm"
-              size="1.0rem"
-              icon-right="bolt"
-              icon="file_download"
-              align="between"
+          <div class="col-12 q-pt-xs">
+            <q-btn
+              class="q-mx-xs q-px-sm q-my-sm"
+              size="0.6rem"
+              outline
               rectangle
-              color="orange"
-              @click="showInvoiceCreateDialog"
-              ><strong>Create Invoice</strong>
-            </q-btn> -->
-          </div>
-          <!-- <div class="col-4"></div> -->
-          <div class="col-4 q-pt-xs">
-            <div align="center">
-              <q-btn
-                class="q-mx-xs q-px-sm q-my-sm"
-                size="0.6rem"
-                rectangle
-                color="warning"
-                icon="warning"
-                outline
-                @click="showDisclaimerDialog"
-                ><q-tooltip>Warning</q-tooltip></q-btn
-              >
-              <q-btn
-                class="q-mx-xs q-px-sm q-my-sm"
-                size="0.6rem"
-                outline
-                rectangle
-                color="warning"
-                icon="download_for_offline"
-                @click="getLocalstorageToFile"
-                ><q-tooltip>Download wallet backup</q-tooltip></q-btn
-              >
-              <q-btn
-                class="q-mx-xs q-px-sm q-my-sm"
-                outline
-                size="0.6rem"
-                v-if="
-                  getPwaDisplayMode() == 'browser' &&
-                  deferredPWAInstallPrompt != null
-                "
-                color="primary"
-                @click="triggerPwaInstall()"
-                ><b>Install</b><q-tooltip>Install Cashu</q-tooltip></q-btn
-              >
-            </div>
-          </div>
-
-          <div class="col-4 q-pt-none">
-            <!-- <q-btn
-              class="full-width gt-sm"
-              @click="showParseDialog"
-              size="1.0rem"
-              icon-right="bolt"
-              icon="file_upload"
-              align="between"
-              rectangle
-              color="orange"
-              ><strong>Pay Invoice</strong>
-            </q-btn> -->
+              color="warning"
+              icon="download_for_offline"
+              @click="getLocalstorageToFile"
+              ><q-tooltip>Download wallet backup</q-tooltip></q-btn
+            >
+            <q-btn
+              class="q-mx-xs q-px-sm q-my-sm"
+              outline
+              size="0.6rem"
+              v-if="
+                getPwaDisplayMode() == 'browser' &&
+                deferredPWAInstallPrompt != null
+              "
+              color="primary"
+              @click="triggerPwaInstall()"
+              ><b>Install</b><q-tooltip>Install Cashu</q-tooltip></q-btn
+            >
           </div>
         </div>
       </div>
     </div>
 
     <!-- BOTTOM LIGHTNING BUTTONS -->
-
-    <!-- disable bottom bar if dialogs are shown -->
-    <div
-      class="q-col-gutter"
-      v-if="
-        !welcomeDialog.show &&
-        !showSendTokens &&
-        !showInvoiceDetails &&
-        !showReceiveTokens &&
-        !payInvoiceData.show &&
-        !disclaimerDialog.show &&
-        !camera.show
-      "
-    >
-      <!-- <q-tabs
-        class="lt-sm fixed-bottom q-px-none q-py-md left-0 right-0 bg-primary text-white shadow-2 z-top q-px-0"
-        indicator-color="transparent"
-        align="justify"
-      >
-        <q-btn
-          size="1.0rem"
-          flat
-          unelevated
-          dense
-          class="full-width"
-          @click="showInvoiceCreateDialog"
-        >
-          <q-avatar size="42px">
-            <q-icon name="download_file" size="44px" />
-          </q-avatar>
-
-          <strong class="gt-lg"> Create Lightning Invoice </strong>
-          <strong class="gt-xs lt-xl"> Create Invoice </strong>
-          <strong class="lt-sm"> Create<br />Invoice </strong>
-        </q-btn>
-        <q-btn
-          size="2rem"
-          unelevated
-          icon="qr_code_scanner"
-          class="col-2 q-pb-md q-mt-md"
-          v-if="hasCamera"
-          @click="showCamera"
-        />
-        <q-btn
-          size="1.0rem"
-          flat
-          unelevated
-          dense
-          class="full-width"
-          @click="showParseDialog"
-        >
-          <q-avatar size="42px">
-            <q-icon name="bolt" size="44px" />
-          </q-avatar>
-          <strong class="gt-lg"> Pay Lightning Invoice </strong>
-          <strong class="gt-xs lt-xl"> Pay Invoice </strong>
-          <strong class="lt-sm"> Pay<br />Invoice </strong>
-        </q-btn>
-      </q-tabs> -->
-    </div>
 
     <!-- DIALOGS  -->
 
@@ -511,44 +237,6 @@
       :get-pwa-display-mode="getPwaDisplayMode"
       :set-welcome-dialog-seen="setWelcomeDialogSeen"
     />
-
-    <!-- WARNING DIAGLOG  -->
-
-    <q-dialog v-model="disclaimerDialog.show">
-      <q-card class="q-pa-lg">
-        <h6 class="q-my-md text-primary">Warning</h6>
-        <p>
-          <strong>Bookmark this page and backup your tokens!</strong>
-          Ecash is a bearer asset. Losing access to this wallet will mean you
-          will lose your funds. This wallet stores ecash tokens locally on your
-          device. If you lose the link or delete your your data without backing
-          up, you will lose your tokens. Press the Backup button to download a
-          copy of your tokens.
-        </p>
-        <p>
-          <strong>Add to home screen.</strong>
-          You can add Cashu to your home screen as a progressive web app (PWA).
-          On Android Chrome, click the hamburger menu at the upper right. On iOS
-          Safari, click the share button. Now press the Add to Home screen
-          button.
-        </p>
-        <p>
-          <strong>This software is in BETA!</strong> We hold no responsibility
-          for people losing access to funds. Use at your own risk!
-        </p>
-        <div class="row q-mt-lg">
-          <q-btn
-            outline
-            color="grey"
-            @click="copyText(disclaimerDialog.location.href)"
-            >Copy wallet URL</q-btn
-          >
-          <q-btn v-close-popup flat color="grey" class="q-ml-auto"
-            >I understand</q-btn
-          >
-        </div>
-      </q-card>
-    </q-dialog>
 
     <!-- INVOICE DETAILS  -->
     <InvoiceDetailDialog
@@ -678,11 +366,6 @@ export default {
       welcomeDialog: {
         show: false,
       },
-      disclaimerDialog: {
-        show: false,
-        location: window.location,
-        base_url: location.protocol + "//" + location.host + location.pathname,
-      },
       addMintDialog: {
         show: false,
         mintToAdd: "".replace(/\s+/g, ""),
@@ -777,6 +460,7 @@ export default {
       "checkPendingInvoices",
       "checkPendingTokens",
       "decodeRequest",
+      "generateNewMnemonic",
     ]),
     ...mapActions(useCameraStore, ["closeCamera", "showCamera", "hasCamera"]),
     // TOKEN METHODS
@@ -868,10 +552,6 @@ export default {
     setTab: function (to) {
       this.tab = to;
     },
-    showDisclaimerDialog: function () {
-      this.disclaimerDialog.show = true;
-    },
-
     closeReceiveDialog: function () {
       setTimeout(() => {
         clearInterval(this.receive.paymentChecker);
@@ -921,7 +601,7 @@ export default {
       this.sendData.tokensBase64 = _.clone(tokensBase64);
       this.showSendTokens = true;
       // kick off token check worker
-      this.checkTokenSpendableWorker();
+      // this.checkTokenSpendableWorker(tokensBase64);
     },
     showSendTokensDialog: function () {
       console.log("##### showSendTokensDialog");
@@ -1165,6 +845,8 @@ export default {
 
     // show welcome dialog
     this.showWelcomeDialog();
+
+    console.log(this.generateNewMnemonic());
   },
   // })
 };

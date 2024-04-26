@@ -2,6 +2,7 @@
   "extends": "@quasar/app-vite/tsconfig-preset",
   "compilerOptions": {
     "baseUrl": ".",
+    "target": "ES2020",
     "paths": {
       "src/*": ["src/*"],
       "app/*": ["*"],

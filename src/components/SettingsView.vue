@@ -7,8 +7,15 @@
           <q-item-label overline>Mints</q-item-label>
           <q-item-label caption
             >You can connect your wallet to multiple Cashu mints. Enter a mint
-            URL and select the mint your want to use.</q-item-label
-          >
+            URL and select the mint your want to use. Check out
+            <a
+              href="https://bitcoinmints.com"
+              target="_blank"
+              class="text-secondary"
+              >bitcoinmints.com</a
+            >
+            to find a mint.
+          </q-item-label>
         </q-item-section>
       </q-item>
 
@@ -16,7 +23,7 @@
       <div v-for="mint in mints" :key="mint.url">
         <q-item
           :active="mint.url == activeMintUrl"
-          active-class="text-weight-bold text-primary"
+          active-class="text-weight-bold text-secondary"
         >
           <q-item-section avatar>
             <q-icon
@@ -68,7 +75,7 @@
       </div>
     </q-list>
   </div>
-  <div class="q-gutter-md q-pt-md q-px-sm">
+  <div class="q-gutter-md q-pt-xs q-px-sm">
     <div class="row-12">
       <q-input
         standout
@@ -97,6 +104,49 @@
       </q-input>
     </div>
   </div>
+  <div class="q-py-sm q-px-xs text-left" on-left>
+    <q-list padding>
+      <q-item>
+        <q-item-section>
+          <q-item-label overline>Backup seed phrase</q-item-label>
+          <q-item-label caption
+            >Your seed phrase is the key to your wallet. Keep it safe and
+            private. Note that this wallet does not support wallet recovery yet.
+            To recover your wallet from a seed, you need to use another wallet.
+          </q-item-label>
+          <div class="row q-pt-md">
+            <div class="col-12">
+              <q-input
+                outlined
+                readonly
+                v-model="hiddenMnemonic"
+                label="Seed phrase"
+                autogrow
+              >
+                <template v-slot:append>
+                  <q-btn
+                    flat
+                    dense
+                    icon="visibility"
+                    class="cursor-pointer q-mt-md"
+                    @click="toggleMnemonicVisibility"
+                  ></q-btn>
+                  <q-btn
+                    flat
+                    dense
+                    icon="content_copy"
+                    class="cursor-pointer q-mt-md"
+                    @click="copyText(mnemonic)"
+                  ></q-btn>
+                </template>
+              </q-input>
+            </div>
+          </div>
+        </q-item-section>
+      </q-item>
+    </q-list>
+  </div>
+
   <div class="q-py-sm q-px-xs text-left" on-left>
     <q-list padding>
       <q-item>
@@ -255,7 +305,7 @@ import { defineComponent } from "vue";
 import { getShortUrl } from "src/js/wallet-helpers";
 import { mapActions, mapState, mapWritableState } from "pinia";
 import { useMintsStore, MintClass } from "src/stores/mints";
-
+import { useWalletStore } from "src/stores/wallet";
 export default defineComponent({
   name: "SettingsView",
   mixins: [windowMixin],
@@ -271,6 +321,7 @@ export default defineComponent({
   },
   data: function () {
     return {
+      hideMnemonic: true,
       swapData: {
         from_url: "",
         to_url: "",
@@ -283,12 +334,20 @@ export default defineComponent({
   },
   computed: {
     ...mapState(useMintsStore, ["activeMintUrl", "mints"]),
+    ...mapState(useWalletStore, ["mnemonic"]),
     ...mapWritableState(useMintsStore, [
       "mintToAdd",
       "mintToRemove",
       "showAddMintDialog",
       "showRemoveMintDialog",
     ]),
+    hiddenMnemonic() {
+      if (this.hideMnemonic) {
+        return this.mnemonic.replace(/\S/g, "*");
+      } else {
+        return this.mnemonic;
+      }
+    },
   },
   watch: {
     showMintDialog: function () {
@@ -309,6 +368,9 @@ export default defineComponent({
       "setShowAddMintDialog",
       "setShowRemoveMintDialog",
     ]),
+    toggleMnemonicVisibility: function () {
+      this.hideMnemonic = !this.hideMnemonic;
+    },
     mintClass(mint) {
       return new MintClass(mint);
     },

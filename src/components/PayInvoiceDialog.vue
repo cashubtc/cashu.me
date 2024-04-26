@@ -4,7 +4,6 @@
     @hide="closeParseDialog"
     position="top"
     v-if="!camera.show"
-    persistent
   >
     <q-card class="q-pa-lg q-pt-xl qcard">
       <div v-if="payInvoiceData.invoice">
@@ -20,14 +19,14 @@
             formatCurrency(payInvoiceData.meltQuote.response.amount, activeUnit)
           }}
         </h6>
+        <h6 v-else-if="payInvoiceData.meltQuote.error != ''" class="q-my-none">
+          {{ payInvoiceData.meltQuote.error }}
+        </h6>
         <h6 v-else class="q-my-none">Processing...</h6>
         <q-separator class="q-my-sm"></q-separator>
         <p class="text-wrap">
           <strong v-if="payInvoiceData.invoice.description">Memo:</strong>
           {{ payInvoiceData.invoice.description }}<br />
-          <!-- <strong>Expire date:</strong> {{ payInvoiceData.invoice.expireDate
-            }}<br />
-            <strong>Hash:</strong> {{ payInvoiceData.invoice.hash }} -->
         </p>
         <div class="col-12">
           <ChooseMint :ticker-short="tickerShort" />
@@ -36,7 +35,9 @@
           <q-btn
             unelevated
             color="primary"
-            :disabled="payInvoiceData.blocking"
+            :disabled="
+              payInvoiceData.blocking || payInvoiceData.meltQuote.error
+            "
             @click="melt"
             :label="!payInvoiceData.blocking ? 'Pay' : 'Processing...'"
             ><q-spinner-tail
@@ -142,6 +143,7 @@
             v-model.trim="payInvoiceData.input.request"
             type="textarea"
             label="Enter a Lightning invoice, an LNURL, or a Lightning address"
+            @keyup.enter="decodeAndQuote(payInvoiceData.input.request)"
           >
           </q-input>
           <div class="row q-mt-lg">

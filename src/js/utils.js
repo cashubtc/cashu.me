@@ -11,7 +11,7 @@ function splitAmount(value) {
 }
 
 function bytesToNumber(bytes) {
-  return hexToNumber(nobleSecp256k1.utils.bytesToHex(bytes));
+  return hexToNumber(nobleSecp256k1.etc.bytesToHex(bytes));
 }
 
 function bigIntStringify(key, value) {
