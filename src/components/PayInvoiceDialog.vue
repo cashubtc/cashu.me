@@ -36,7 +36,7 @@
             unelevated
             color="primary"
             :disabled="
-              payInvoiceData.blocking || payInvoiceData.meltQuote.error
+              payInvoiceData.blocking || payInvoiceData.meltQuote.error != ''
             "
             @click="melt"
             :label="!payInvoiceData.blocking ? 'Pay' : 'Processing...'"

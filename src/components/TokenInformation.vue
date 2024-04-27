@@ -62,7 +62,7 @@ export default defineComponent({
     },
     tokenMintUrl: function () {
       let mint = token.getMint(token.decode(this.encodedToken));
-      return mint;
+      return getShortUrl(mint);
     },
     displayMemo: function () {
       return token.getMemo(token.decode(this.encodedToken));

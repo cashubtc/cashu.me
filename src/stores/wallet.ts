@@ -57,12 +57,7 @@ export const useWalletStore = defineStore("wallet", {
       ),
       keysetCounters: useLocalStorage("cashu.keysetCounters", [] as KeysetCounter[]),
       oldMnemonicCounters: useLocalStorage("cashu.oldMnemonicCounters", [] as { mnemonic: string, keysetCounters: KeysetCounter[] }[]),
-      invoiceData: {
-        amount: 0,
-        memo: "",
-        bolt11: "",
-        quote: "",
-      } as Invoice,
+      invoiceData: {} as InvoiceHistory,
       payInvoiceData: {
         blocking: false,
         bolt11: "",

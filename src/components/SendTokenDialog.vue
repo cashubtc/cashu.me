@@ -51,6 +51,7 @@
                 :value="qrCodeFragment"
                 :options="{ width: 400 }"
                 class="rounded-borders"
+                @click="copyText(sendData.tokensBase64)"
               >
               </vue-qrcode>
             </q-responsive>
@@ -78,39 +79,45 @@
             </q-btn>
           </div>
           <q-card-section class="q-pa-sm">
-            <div class="row">
-              <div class="col-12">
-                <q-input
-                  outlined
-                  dense
-                  readonly
-                  v-model="sendData.tokensBase64"
-                  label="Cashu token"
-                  type="textarea"
-                  class="q-mb-sm"
-                ></q-input>
-              </div>
+            <div class="row justify-center">
+              <q-item-label overline class="q-mb-sm">Ecash</q-item-label>
             </div>
-            <div class="row">
-              <div class="col-12">
-                <TokenInformation :encodedToken="sendData.tokensBase64" />
-              </div>
+            <div class="row justify-center">
+              <q-item-label style="font-size: 28px" class="text-weight-bold"
+                ><strong>{{ displayUnit }}</strong></q-item-label
+              >
             </div>
-
+            <div class="row justify-center q-pt-sm">
+              <q-icon
+                name="account_balance"
+                size="0.95rem"
+                color="grey"
+                class="q-mr-xs"
+              />
+              <q-item-label
+                caption
+                class="text-weight-light"
+                style="font-size: 14px"
+                ><strong>{{ shortUrl }}</strong></q-item-label
+              >
+            </div>
             <div class="row q-mt-lg">
               <q-btn
                 class="q-mx-xs"
                 color="primary"
+                size="md"
+                flat
                 @click="copyText(sendData.tokensBase64)"
-                >Copy token</q-btn
+                >Copy</q-btn
               >
               <q-btn
-                class="q-mx-xs"
+                class="q-mx-none"
                 color="primary"
-                outline
+                size="md"
+                icon="link"
+                flat
                 @click="copyText(baseURL + '?token=' + sendData.tokensBase64)"
-                >Copy link</q-btn
-              >
+              />
 
               <q-btn v-close-popup flat color="grey" class="q-ml-auto"
                 >Close</q-btn
@@ -130,12 +137,13 @@ import { useUiStore } from "src/stores/ui";
 import { useProofsStore } from "src/stores/proofs";
 import { useMintsStore } from "src/stores/mints";
 import { useTokensStore } from "src/stores/tokens";
+import { getShortUrl } from "src/js/wallet-helpers";
+
 import token from "src/js/token";
 import { Buffer } from "buffer";
 
 import { mapActions, mapState, mapWritableState } from "pinia";
 import ChooseMint from "components/ChooseMint.vue";
-import TokenInformation from "components/TokenInformation.vue";
 import { UR, UREncoder } from "@gandlaf21/bc-ur";
 
 export default defineComponent({
@@ -143,7 +151,6 @@ export default defineComponent({
   mixins: [windowMixin],
   components: {
     ChooseMint,
-    TokenInformation,
   },
   props: {
     checkTokenSpendableWorker: Function,
@@ -175,6 +182,28 @@ export default defineComponent({
     ...mapWritableState(useSendTokensStore, ["sendData"]),
     ...mapState(useUiStore, ["tickerShort"]),
     ...mapState(useMintsStore, ["activeProofs", "activeUnit"]),
+    // TOKEN METHODS
+    sumProofs: function () {
+      let proofs = token.getProofs(token.decode(this.sendData.tokensBase64));
+      return proofs.flat().reduce((sum, el) => (sum += el.amount), 0);
+    },
+    displayUnit: function () {
+      let display = this.formatCurrency(this.sumProofs, this.tokenUnit);
+      return display;
+    },
+    tokenUnit: function () {
+      return token.getUnit(token.decode(this.sendData.tokensBase64));
+    },
+    tokenMintUrl: function () {
+      let mint = token.getMint(token.decode(this.sendData.tokensBase64));
+      return mint;
+    },
+    displayMemo: function () {
+      return token.getMemo(token.decode(this.sendData.tokensBase64));
+    },
+    shortUrl: function () {
+      return getShortUrl(this.tokenMintUrl);
+    },
   },
   watch: {
     "sendData.tokensBase64": function (val) {
@@ -221,12 +250,17 @@ export default defineComponent({
       "addPendingToken",
       "setTokenPaid",
     ]),
-    // TOKEN METHODS
     decodeToken: function (encoded_token) {
       return token.decode(encoded_token);
     },
     getProofs: function (decoded_token) {
       return token.getProofs(decoded_token);
+    },
+    getAmount: function (decoded_token) {
+      return token.getAmount(decoded_token);
+    },
+    getUnit: function (decoded_token) {
+      return token.getUnit(decoded_token);
     },
     getMint: function (decoded_token) {
       return token.getMint(decoded_token);

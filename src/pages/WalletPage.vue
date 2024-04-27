@@ -156,11 +156,7 @@
         <!-- ////////////////// INVOICE LIST ///////////////// -->
 
         <q-tab-panel name="invoices">
-          <InvoicesTable
-            :invoice-history="invoiceHistory"
-            :show-invoice-info-dialog="showInvoicInfoDialog"
-            :check-invoice="checkInvoice"
-          />
+          <InvoicesTable :check-invoice="checkInvoice" />
         </q-tab-panel>
 
         <!-- ////////////////////// SETTINGS ////////////////// -->

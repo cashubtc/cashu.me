@@ -44,13 +44,43 @@
           </q-responsive>
         </a>
       </div>
+      <div class="row justify-center">
+        <q-card-section class="q-pa-sm">
+          <div class="row justify-center">
+            <q-item-label overline class="q-mb-sm"
+              >Lightning invoice</q-item-label
+            >
+          </div>
+          <div class="row justify-center">
+            <q-item-label style="font-size: 28px" class="text-weight-bold"
+              ><strong>{{ displayUnit }}</strong></q-item-label
+            >
+          </div>
+          <div class="row justify-center q-pt-sm">
+            <q-icon
+              name="account_balance"
+              size="0.95rem"
+              color="grey"
+              class="q-mr-xs"
+            />
+            <q-item-label
+              caption
+              class="text-weight-light"
+              style="font-size: 14px"
+              ><strong>{{ shortUrl }}</strong></q-item-label
+            >
+          </div>
+        </q-card-section>
+      </div>
       <div class="row q-mt-lg">
         <q-btn
           v-if="invoiceData.bolt11"
-          @click="copyText(invoiceData.bolt11)"
-          outline
+          class="q-mx-xs"
           color="primary"
-          >Copy invoice</q-btn
+          size="md"
+          flat
+          @click="copyText(invoiceData.bolt11)"
+          >Copy</q-btn
         >
         <q-btn
           v-else
@@ -80,6 +110,7 @@ import VueQrcode from "@chenfengyuan/vue-qrcode";
 import { useWalletStore } from "src/stores/wallet";
 import ChooseMint from "src/components/ChooseMint.vue";
 import { useUiStore } from "src/stores/ui";
+import { getShortUrl } from "src/js/wallet-helpers";
 
 export default defineComponent({
   name: "InvoiceDetailDialog",
@@ -99,6 +130,16 @@ export default defineComponent({
   computed: {
     ...mapState(useWalletStore, ["invoiceData"]),
     ...mapWritableState(useUiStore, ["showInvoiceDetails", "tickerShort"]),
+    displayUnit: function () {
+      let display = this.formatCurrency(
+        this.invoiceData.amount,
+        this.invoiceData.unit
+      );
+      return display;
+    },
+    shortUrl: function () {
+      return getShortUrl(this.invoiceData.mint);
+    },
   },
   methods: {
     ...mapActions(useWalletStore, ["requestMint", "lnurlPaySecond"]),
