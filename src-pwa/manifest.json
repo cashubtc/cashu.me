@@ -4,15 +4,15 @@
   "description": "A Cashu wallet for the web",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#12091f",
-  "theme_color": "#12091f",
+  "background_color": "#000000",
+  "theme_color": "#000000",
   "protocol_handlers": [
     {
-      "protocol": "web+cashu",
+      "protocol": "cashu",
       "url": "/?token=%s"
     },
     {
-      "protocol": "web+lightning",
+      "protocol": "lightning",
       "url": "/?lightning=%s"
     }
   ],
