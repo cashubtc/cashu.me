@@ -89,7 +89,7 @@ export const useMintsStore = defineStore("mints", {
       proofs: useLocalStorage("cashu.proofs", [] as WalletProof[]),
       spentProofs: useLocalStorage("cashu.spentProofs", [] as WalletProof[]),
       blindSignatures: useLocalStorage("cashu.blindSignatures", [] as BlindSignatureAudit[]),
-      balances: useLocalStorage("cashu.balances", { "sat": 0, "usd": 0 } as Balances),
+      balances: useLocalStorage("cashu.balances", {} as Balances),
       showAddMintDialog: false,
       showRemoveMintDialog: false,
     };
@@ -179,9 +179,6 @@ export const useMintsStore = defineStore("mints", {
       };
       this.blindSignatures.push(audit);
     },
-    // setActiveProofs(proofs: Proof[]) {
-    //   this.activeProofs = proofs;
-    // },
     updateActiveMintBalance() {
       if (this.activeMintUrl) {
         let thisMint = this.mints.filter((m) => m.url === this.activeMintUrl);
@@ -270,6 +267,15 @@ export const useMintsStore = defineStore("mints", {
         // update balance using updateActiveMintBalance
         this.updateActiveMintBalance();
         const mintClass = new MintClass(mint);
+
+        // update all balances
+        this.balances = mintClass.allBalances
+
+        // if the selected mint does not support the activeUnit,
+        // switch to one that it does
+        if (this.balances[this.activeUnit] == undefined) {
+          this.activeUnit = mintClass.units[0]
+        }
 
         console.log(
           "### activateMint: Mint activated: ",

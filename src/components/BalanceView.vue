@@ -61,31 +61,6 @@
         class="q-mt-none q-mb-lg"
       />
     </div>
-    <!-- mint balance -->
-    <div class="row q-mt-lg q-mb-none" v-if="mints.length > 1">
-      <div class="col-12">
-        <q-icon
-          name="account_balance"
-          size="0.9rem"
-          color="grey"
-          class="q-mr-none q-mb-xs"
-        />
-        <span class="q-my-none q-py-none text-weight-regular">
-          Active mint:
-          <b>{{ formatCurrency(getActiveMintBalance, activeUnit) }} </b>
-        </span>
-        <!-- <q-knob
-              :model-value="getBalance"
-              :min="0"
-              :max="getTotalBalance"
-              show-value
-              size="50px"
-              :thickness="0.2"
-              color="orange"
-              class="q-ma-none q-pa-none q-mt-none q-pt-none"
-            /> -->
-      </div>
-    </div>
     <!-- mint url -->
     <div class="row q-mt-xs q-mb-none" v-if="activeMintUrl">
       <div class="col-12 cursor-pointer">
@@ -100,6 +75,31 @@
           Mint: <b>{{ getActiveMintUrlShort }}</b>
           <q-tooltip>Configure mint(s)</q-tooltip>
         </span>
+      </div>
+    </div>
+    <!-- mint balance -->
+    <div class="row q-mb-none" v-if="mints.length > 1">
+      <div class="col-12">
+        <!-- <q-icon
+          name="account_balance"
+          size="0.9rem"
+          color="grey"
+          class="q-mr-none q-mb-xs"
+        /> -->
+        <span class="q-my-none q-py-none text-weight-regular">
+          Balance:
+          <b>{{ formatCurrency(getActiveMintBalance, activeUnit) }} </b>
+        </span>
+        <!-- <q-knob
+              :model-value="getBalance"
+              :min="0"
+              :max="getTotalBalance"
+              show-value
+              size="50px"
+              :thickness="0.2"
+              color="orange"
+              class="q-ma-none q-pa-none q-mt-none q-pt-none"
+            /> -->
       </div>
     </div>
   </div>
@@ -157,6 +157,7 @@ export default defineComponent({
       "totalBalance",
       "activeUnit",
       "balances",
+      "activeMint",
     ]),
     ...mapState(useTokensStore, ["historyTokens"]),
     ...mapWritableState(useMintsStore, ["activeUnit"]),
@@ -215,7 +216,10 @@ export default defineComponent({
       }
     },
     toggleUnit: function () {
-      return this.activeUnit === "sat" ? "usd" : "sat";
+      const units = this.activeMint().units;
+      this.activeUnit =
+        units[(units.indexOf(this.activeUnit) + 1) % units.length];
+      return this.activeUnit;
     },
   },
 });

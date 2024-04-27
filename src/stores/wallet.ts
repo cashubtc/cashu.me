@@ -224,6 +224,39 @@ export const useWalletStore = defineStore("wallet", {
         throw error;
       }
     },
+    // SPLIT
+
+    // split: async function (proofs: WalletProof[], amount: number) {
+    //   /*
+    //   supplies proofs and requests a split from the mint of these
+    //   proofs at a specific amount
+    //   */
+    //   const mintStore = useMintsStore();
+    //   try {
+    //     if (proofs.length == 0) {
+    //       throw new Error("no proofs provided.");
+    //     }
+    //     const keyset_id = this.getKeyset();
+    //     const counter = this.keysetCounter(keyset_id);
+    //     const { returnChange: firstProofs, send: scndProofs } = await this.wallet.send(amount, proofs, { counter: counter })
+    //     this.increaseKeysetCounter(keyset_id, firstProofs.length + scndProofs.length);
+
+    //     mintStore.removeProofs(proofs);
+    //     // add new firstProofs, scndProofs to this.proofs
+    //     mintStore.addProofs(
+    //       firstProofs.concat(scndProofs)
+    //     );
+    //     return { firstProofs, scndProofs };
+    //   } catch (error: any) {
+    //     console.error(error);
+    //     try {
+    //       try {
+    //         notifyApiError(error);
+    //       } catch { }
+    //     } catch { }
+    //     throw error;
+    //   }
+    // },
     /**
      *
      *
@@ -257,7 +290,6 @@ export const useWalletStore = defineStore("wallet", {
       }
       try {
         // redeem
-        // await this.split(proofs, amount);
         const keysetId = this.getKeyset()
         const counter = this.keysetCounter(keysetId)
         const { token: tokenReceived, tokensWithErrors } = await this.wallet.receive(receiveStore.receiveData.tokensBase64, { counter })
@@ -290,40 +322,7 @@ export const useWalletStore = defineStore("wallet", {
       }
       // }
     },
-    // SPLIT
 
-    split: async function (proofs: WalletProof[], amount: number) {
-      /*
-      supplies proofs and requests a split from the mint of these
-      proofs at a specific amount
-      */
-      const mintStore = useMintsStore();
-      try {
-        if (proofs.length == 0) {
-          throw new Error("no proofs provided.");
-        }
-        // let { firstProofs, scndProofs } = await this.splitApi(proofs, amount);
-        const keyset_id = this.getKeyset();
-        const counter = this.keysetCounter(keyset_id);
-        const { returnChange: firstProofs, send: scndProofs } = await this.wallet.send(amount, proofs, { counter: counter })
-        this.increaseKeysetCounter(keyset_id, firstProofs.length + scndProofs.length);
-
-        mintStore.removeProofs(proofs);
-        // add new firstProofs, scndProofs to this.proofs
-        mintStore.addProofs(
-          firstProofs.concat(scndProofs)
-        );
-        return { firstProofs, scndProofs };
-      } catch (error: any) {
-        console.error(error);
-        try {
-          try {
-            notifyApiError(error);
-          } catch { }
-        } catch { }
-        throw error;
-      }
-    },
 
     // /mint
     /**
@@ -433,15 +432,6 @@ export const useWalletStore = defineStore("wallet", {
       try {
         // NUT-08 blank outputs for change
         let n_outputs = Math.max(Math.ceil(Math.log2(quote.fee_reserve)), 1);
-        let amounts = Array.from({ length: n_outputs }, () => 1);
-
-        // const unitKeysets = mintStore.activeMint().unitKeysets(mintStore.activeUnit)
-        // if (unitKeysets == null || unitKeysets.length == 0) {
-        //   console.error("no keysets found for unit", mintStore.activeUnit);
-        //   throw new Error("no keysets found for unit");
-        // }
-        // const keyset_id = unitKeysets[0].id;
-
         const keysetId = this.getKeyset();
         const counter = this.keysetCounter(keysetId);
         const data = await this.wallet.payLnInvoice(invoice, sendProofs, quote, { keysetId, counter })
@@ -449,21 +439,7 @@ export const useWalletStore = defineStore("wallet", {
         if (data.isPaid != true) {
           throw new Error("Invoice not paid.");
         }
-        // let secrets = await this.generateSecrets(keyset_id, counters);
-        // let outputs = await this.constructOutputs(amounts, keyset_id, counters);
-
         let amount_paid = amount;
-        // const payload: MeltPayload = {
-        //   inputs: sendProofs.flat(),
-        //   outputs: outputs,
-        //   quote: quote.quote,
-        // };
-        // const data = await mintStore.activeMint().api.melt(payload);
-        // mintStore.assertMintError(data);
-        // if (data.paid != true) {
-        //   throw new Error("Invoice not paid.");
-        // }
-
         if (!!window.navigator.vibrate) navigator.vibrate(200);
 
         notifySuccess("Invoice Paid");
@@ -474,11 +450,6 @@ export const useWalletStore = defineStore("wallet", {
         // NUT-08 get change
         if (data.change != null) {
           const changeProofs = data.change;
-          // const changeProofs = await this.constructProofs(
-          //   data.change,
-          //   keyset_id,
-          //   counters
-          // );
           console.log(
             "## Received change: " + proofsStore.sumProofs(changeProofs)
           );
