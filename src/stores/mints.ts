@@ -260,7 +260,7 @@ export const useMintsStore = defineStore("mints", {
       try {
         this.activeMintUrl = mint.url;
         console.log("### this.activeMintUrl", this.activeMintUrl);
-        await this.fetchMintKeys(mint);
+        mint = await this.fetchMintKeys(mint);
         if (verbose) {
           await notifySuccess("Mint added");
         }
@@ -268,7 +268,7 @@ export const useMintsStore = defineStore("mints", {
         this.updateActiveMintBalance();
         const mintClass = new MintClass(mint);
 
-        // update all balances
+        // update balances
         this.balances = mintClass.allBalances
 
         // if the selected mint does not support the activeUnit,
@@ -304,7 +304,7 @@ export const useMintsStore = defineStore("mints", {
         const keys = await mintClass.api.getKeys();
         // store keys in mint and update local storage
         this.mints.filter((m) => m.url === mint.url)[0].keys = keys.keysets;
-        return
+        return this.mints.filter((m) => m.url === mint.url)[0]
       } catch (error: any) {
         console.error(error);
         try {
