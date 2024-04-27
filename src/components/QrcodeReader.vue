@@ -45,11 +45,8 @@ export default {
           this.qrScanner?.stop();
           this.urDecoderProgress = 0;
         }
-      } else if (result.data.toLowerCase().startsWith("cashu")) {
-        this.$emit("decode", result.data);
-        this.qrScanner?.stop();
       } else {
-        console.log("Scanned QR code is not a Cashu token");
+        this.$emit("decode", result.data);
         this.qrScanner?.stop();
       }
     },
