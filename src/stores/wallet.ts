@@ -442,9 +442,9 @@ export const useWalletStore = defineStore("wallet", {
         // }
         // const keyset_id = unitKeysets[0].id;
 
-        const keyset_id = this.getKeyset();
-        const counter = this.keysetCounter(keyset_id);
-        const data = await this.wallet.payLnInvoice(invoice, sendProofs, quote, { keysetId: keyset_id, counter: counter })
+        const keysetId = this.getKeyset();
+        const counter = this.keysetCounter(keysetId);
+        const data = await this.wallet.payLnInvoice(invoice, sendProofs, quote, { keysetId, counter })
 
         if (data.isPaid != true) {
           throw new Error("Invoice not paid.");

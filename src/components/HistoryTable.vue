@@ -6,10 +6,15 @@
         :key="token.id"
         clickable
         v-ripple
-        @click="showTokenDialog(token.token)"
+        class="q-px-md"
       >
-        <q-item-section side>
-          <q-item-label class="text-weight-bold">
+        <q-item-section
+          side
+          @click="showTokenDialog(token.token)"
+          style="width: 140px"
+          class="q-pr-none"
+        >
+          <q-item-label class="text-weight-bold text-left">
             <q-icon
               :name="token.amount >= 0 ? 'call_received' : 'call_made'"
               :color="
@@ -20,17 +25,23 @@
                   : ''
               "
               class="q-mr-xs"
+              size="xs"
             />
-            {{ formatCurrency(token.amount, token.unit) }}</q-item-label
-          >
+            {{ formatCurrency(token.amount, token.unit) }}
+          </q-item-label>
         </q-item-section>
 
-        <q-item-section class="q-ml-xl">
+        <q-item-section
+          class="q-ml-md"
+          @click="showTokenDialog(token.token)"
+          style="width: 300px"
+        >
           <q-item-label>
-            {{
+            <!-- {{
               token.token.slice(0, 10) + "..." + token.token.slice(-8)
-            }}</q-item-label
-          >
+            }} -->
+            Ecash
+          </q-item-label>
           <q-item-label caption>{{ formattedDate(token.date) }}</q-item-label>
         </q-item-section>
 
