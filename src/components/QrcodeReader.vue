@@ -34,7 +34,7 @@ export default {
   methods: {
     handleResult(result: QrScanner.ScanResult) {
       // if this is a multipart-qr code, do not yet emit
-      if (result.data.startsWith("ur:")) {
+      if (result.data.toLowerCase().startsWith("ur:")) {
         this.urDecoder?.receivePart(result.data);
         this.urDecoderProgress =
           this.urDecoder?.estimatedPercentComplete() || 0;
@@ -45,8 +45,11 @@ export default {
           this.qrScanner?.stop();
           this.urDecoderProgress = 0;
         }
-      } else {
+      } else if (result.data.toLowerCase().startsWith("cashu")) {
         this.$emit("decode", result.data);
+        this.qrScanner?.stop();
+      } else {
+        console.log("Scanned QR code is not a Cashu token");
         this.qrScanner?.stop();
       }
     },
