@@ -89,6 +89,7 @@
           @keydown.enter.prevent="setShowAddMintDialog(true)"
           v-model="mintToAdd"
           label="Enter mint URL"
+          ref="mintInput"
         >
           <template v-slot:before>
             <q-icon class="q-pt-md" name="account_balance" />

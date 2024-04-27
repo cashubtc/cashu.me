@@ -14,7 +14,20 @@
         </div>
       </div>
       <div class="row items-center justify-center q-pt-xl">
-        <q-btn outline label="Add mint" @click="this.tab = 'settings'" />
+        <q-btn
+          outline
+          dense
+          class="q-px-sm"
+          label="Add mint"
+          @click="focusOnMint"
+        />
+        <q-btn
+          class="q-mx-sm q-px-sm"
+          dense
+          outline
+          label="Receive Ecash"
+          @click="showReceiveTokensDialog"
+        />
       </div>
     </q-card-section>
   </q-card>
@@ -24,6 +37,8 @@ import { defineComponent, ref } from "vue";
 import { getShortUrl } from "src/js/wallet-helpers";
 import { useUiStore } from "src/stores/ui";
 import { mapWritableState } from "pinia";
+import { useReceiveTokensStore } from "src/stores/receiveTokensStore";
+
 export default defineComponent({
   name: "NoMintWarnBanner",
   mixins: [windowMixin],
@@ -36,6 +51,10 @@ export default defineComponent({
   },
   computed: {
     ...mapWritableState(useUiStore, ["tab"]),
+    ...mapWritableState(useReceiveTokensStore, [
+      "showReceiveTokens",
+      "receiveData",
+    ]),
     balance: function () {
       return this.activeProofs
         .map((t) => t)
@@ -59,6 +78,14 @@ export default defineComponent({
       return balance;
     },
   },
-  methods: {},
+  methods: {
+    showReceiveTokensDialog: function () {
+      this.receiveData.tokensBase64 = "";
+      this.showReceiveTokens = true;
+    },
+    focusOnMint: function () {
+      this.tab = "settings";
+    },
+  },
 });
 </script>
