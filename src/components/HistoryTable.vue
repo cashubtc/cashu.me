@@ -12,9 +12,9 @@
           side
           @click="showTokenDialog(token.token)"
           style="width: 140px"
-          class="q-pr-none"
+          class="q-pr-none items-center"
         >
-          <q-item-label class="text-weight-bold text-left">
+          <q-item-label class="text-weight-bold">
             <q-icon
               :name="token.amount >= 0 ? 'call_received' : 'call_made'"
               :color="
@@ -32,7 +32,7 @@
         </q-item-section>
 
         <q-item-section
-          class="q-ml-md"
+          class="items-center q-pl-lg"
           @click="showTokenDialog(token.token)"
           style="width: 300px"
         >
@@ -99,44 +99,6 @@ export default defineComponent({
     return {
       currentPage: 1,
       pageSize: 5,
-      historyTable: {
-        columns: [
-          {
-            name: "status",
-            align: "left",
-            label: "",
-            field: "status",
-            sortable: true,
-          },
-          {
-            name: "amount",
-            align: "left",
-            label: "Amount",
-            field: "amount",
-            sortable: true,
-          },
-          {
-            name: "date",
-            align: "left",
-            label: "Date",
-            field: "date",
-            sortable: true,
-          },
-          {
-            name: "token",
-            align: "left",
-            label: "Token",
-            field: "token",
-            sortable: false,
-          },
-        ],
-        pagination: {
-          sortBy: "date",
-          descending: true,
-          rowsPerPage: 5,
-        },
-        filter: null,
-      },
     };
   },
   computed: {
