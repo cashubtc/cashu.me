@@ -9,61 +9,37 @@
   >
     <q-card class="q-pa-lg z-top">
       <q-toolbar>
-        <q-avatar>
+        <!-- <q-avatar>
           <img
             src="https://raw.githubusercontent.com/cashubtc/cashu-ui/main/ui/icons/circle/128x128.png"
           />
-        </q-avatar>
+        </q-avatar> -->
         <q-toolbar-title
-          ><span class="text-weight-bold">Cashu.me</span> ecash
+          ><span class="text-weight-bold">Cashu</span> ecash
           wallet</q-toolbar-title
         >
       </q-toolbar>
       <q-card-section>
         <p>Please take a moment to read the following information.</p>
-
         <p>
-          <strong>Install this app</strong>
+          <strong>Install and add to home screen.</strong>
           For the best experience, use this wallet with your device's native web
-          browser (for example Safari for iOS, Chrome for Android).
+          browser (Safari on iOS, Chrome on Android). In Chrome click the
+          hamburger menu at the upper right. In Safari click the share button
+          and press the Add to Home screen button.
         </p>
         <p>
-          <strong>Add to home screen.</strong>
-          Add Cashu to your home screen as a progressive web app (PWA). On
-          Android Chrome, click the hamburger menu at the upper right. On iOS
-          Safari, click the share button. Now press the Add to Home screen
-          button.
+          <strong>Back up your seed phrase.</strong> This wallet stores ecash
+          tokens in its database. If you delete your your browser data without
+          backing up, you will lose your tokens. Make sure to back up your
+          wallet seed phrase in the settings.
         </p>
         <p>
           <strong>This software is in BETA!</strong> We hold no responsibility
           for people losing access to funds. Use at your own risk! This wallet
-          stores ecash tokens in its database. If you delete your your browser
-          data without backing up, you will lose your tokens. Make sure to back
-          up your wallet seed.
+          is not affiliated with any mint. This wallet is open-source and the
+          source code under the MIT license.
         </p>
-        <div class="row">
-          <div class="col-12">
-            <q-input
-              outlined
-              readonly
-              v-model="mnemonic"
-              label="Seed phrase"
-              autogrow
-              class="q-ma-xs"
-              style="max-height: 100px"
-            >
-              <template v-slot:append>
-                <q-btn
-                  flat
-                  dense
-                  icon="content_copy"
-                  class="cursor-pointer q-mt-md"
-                  @click="copyText(mnemonic)"
-                ></q-btn>
-              </template>
-            </q-input>
-          </div>
-        </div>
         <!-- wallet backup restore -->
         <input
           type="file"
@@ -145,6 +121,16 @@ export default defineComponent({
   watch: {},
   computed: {
     ...mapState(useWalletStore, ["mnemonic"]),
+    hiddenMnemonic() {
+      if (this.hideMnemonic) {
+        return this.mnemonic
+          .split(" ")
+          .map((w) => "*".repeat(w.length))
+          .join(" ");
+      } else {
+        return this.mnemonic;
+      }
+    },
   },
   methods: {
     ...mapActions(useMintsStore, ["restoreFromBackup"]),

@@ -462,6 +462,7 @@ export default {
       "checkPendingInvoices",
       "checkPendingTokens",
       "decodeRequest",
+      "generateNewMnemonic",
     ]),
     ...mapActions(useCameraStore, ["closeCamera", "showCamera", "hasCamera"]),
     // TOKEN METHODS
@@ -843,6 +844,8 @@ export default {
 
     // PWA install hook
     this.registerPWAEventHook();
+
+    this.generateNewMnemonic();
 
     // show welcome dialog
     this.showWelcomeDialog();

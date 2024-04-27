@@ -85,14 +85,13 @@
     <div class="q-gutter-md q-pt-xs q-px-sm">
       <div class="row-12">
         <q-input
-          standout
           bottom-slots
           @keydown.enter.prevent="setShowAddMintDialog(true)"
           v-model="mintToAdd"
-          label="Add new mint URL"
+          label="Enter mint URL"
         >
           <template v-slot:before>
-            <q-icon name="account_balance" />
+            <q-icon class="q-pt-md" name="account_balance" />
           </template>
 
           <!-- <template v-slot:hint> Enter Mint URL</template> -->
@@ -286,9 +285,8 @@
       <q-card class="q-pa-lg">
         <h6 class="q-my-md">Do you trust this mint?</h6>
         <p>
-          A Cashu mint does not know about your financial activity but it
-          controls your funds. Make sure that you trust the operator of this
-          mint.
+          A Cashu mint controls the funds you send to it. Make sure that you
+          trust the operator of this mint.
         </p>
         <q-input
           outlined
