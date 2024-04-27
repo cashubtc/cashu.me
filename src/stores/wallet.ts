@@ -18,14 +18,11 @@ import { uint8ToBase64 } from "src/js/base64";
 import token from "src/js/token";
 import { notifyApiError, notifyError, notifySuccess, notifyWarning, notify } from "src/js/notify";
 import { CashuMint, CashuWallet, Proof, SerializedBlindedSignature, MintKeys, MintQuotePayload, SplitPayload, MintPayload, MeltPayload, CheckStatePayload, MeltQuotePayload, MeltQuoteResponse, generateNewMnemonic, deriveSeedFromMnemonic } from "@cashu/cashu-ts";
-import { deriveSecret, deriveBlindingFactor } from "@cashu/cashu-ts/dist/lib/es5/secrets";
-import { blindMessage, hashToCurve, unblindSignature } from "@cashu/cashu-ts/dist/lib/es5/DHKE";
+import { blindMessage, hashToCurve } from "@cashu/cashu-ts/dist/lib/es5/DHKE";
 import * as bolt11Decoder from "light-bolt11-decoder";
 import bech32 from "bech32";
 import axios from "axios";
 import { date } from "quasar";
-import { B, C } from "app/dist/spa/assets/QItem.3bf820c4";
-import { bytesToNumber } from "src/js/utils";
 
 type Invoice = {
   amount: number;
@@ -115,7 +112,7 @@ export const useWalletStore = defineStore("wallet", {
         this.mnemonic = generateNewMnemonic();
       }
       const mnemonic: string = this.mnemonic;
-      const wallet = new CashuWallet(mint, { mnemonicOrSeed: mnemonic });
+      const wallet = new CashuWallet(mint, { mnemonicOrSeed: mnemonic, unit: mints.activeUnit });
       return wallet;
     },
     seed(): Uint8Array {
@@ -160,6 +157,10 @@ export const useWalletStore = defineStore("wallet", {
         throw new Error("no keysets found for unit");
       }
       const keyset_id = unitKeysets[0].id;
+      const keys = mintStore.activeMint().mint.keys.find((k) => k.id === keyset_id);
+      if (keys) {
+        this.wallet.keys = keys;
+      }
       return keyset_id;
     },
     /**
