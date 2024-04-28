@@ -80,11 +80,13 @@
           </div>
           <q-card-section class="q-pa-sm">
             <div class="row justify-center">
-              <q-item-label overline class="q-mb-sm">Ecash</q-item-label>
+              <q-item-label overline class="q-mb-sm text-white"
+                >Ecash</q-item-label
+              >
             </div>
             <div class="row justify-center q-py-md">
-              <q-item-label style="font-size: 28px" class="text-weight-bold"
-                ><strong>{{ displayUnit }}</strong></q-item-label
+              <q-item-label style="font-size: 28px" class="text-weight-bold">
+                <strong>{{ displayUnit }}</strong></q-item-label
               >
             </div>
             <div class="row justify-center q-pt-sm">
@@ -92,11 +94,11 @@
                 name="account_balance"
                 size="0.95rem"
                 color="grey"
-                class="q-mr-xs"
+                class="q-mr-sm"
               />
               <q-item-label
                 caption
-                class="text-weight-light"
+                class="text-weight-light text-white"
                 style="font-size: 14px"
                 ><strong>{{ shortUrl }}</strong></q-item-label
               >
@@ -104,7 +106,6 @@
             <div class="row q-mt-lg">
               <q-btn
                 class="q-mx-xs"
-                color="primary"
                 size="md"
                 flat
                 @click="copyText(sendData.tokensBase64)"
@@ -112,7 +113,7 @@
               >
               <q-btn
                 class="q-mx-none"
-                color="primary"
+                color="grey"
                 size="md"
                 icon="link"
                 flat
@@ -203,6 +204,9 @@ export default defineComponent({
     },
     shortUrl: function () {
       return getShortUrl(this.tokenMintUrl);
+    },
+    decodedToken: function () {
+      return token.decode(this.sendData.tokensBase64);
     },
   },
   watch: {

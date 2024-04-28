@@ -62,8 +62,8 @@
         <div class="row justify-center">
           <q-card-section class="q-pa-sm">
             <div class="row justify-center">
-              <q-item-label overline class="q-mb-sm q-pt-md"
-                >Lightning invoice</q-item-label
+              <q-item-label overline class="q-mb-sm q-pt-md text-white">
+                Lightning invoice</q-item-label
               >
             </div>
             <div class="row justify-center q-py-md">
@@ -94,11 +94,11 @@
                 name="account_balance"
                 size="0.95rem"
                 color="grey"
-                class="q-mr-xs"
+                class="q-mr-sm"
               />
               <q-item-label
                 caption
-                class="text-weight-light"
+                class="text-weight-light text-white"
                 style="font-size: 14px"
                 ><strong>{{ shortUrl }}</strong></q-item-label
               >
@@ -109,7 +109,6 @@
           <q-btn
             v-if="invoiceData.bolt11"
             class="q-mx-xs"
-            color="primary"
             size="md"
             flat
             @click="copyText(invoiceData.bolt11)"
