@@ -82,7 +82,7 @@
             <div class="row justify-center">
               <q-item-label overline class="q-mb-sm">Ecash</q-item-label>
             </div>
-            <div class="row justify-center">
+            <div class="row justify-center q-py-md">
               <q-item-label style="font-size: 28px" class="text-weight-bold"
                 ><strong>{{ displayUnit }}</strong></q-item-label
               >

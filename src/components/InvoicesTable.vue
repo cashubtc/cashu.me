@@ -50,16 +50,23 @@
           </q-item-section>
         </q-item>
       </q-list>
-      <q-separator spaced inset />
-      <div style="display: flex; justify-content: center">
-        <q-pagination
-          v-model="currentPage"
-          :max="maxPages"
-          :max-pages="5"
-          direction-links
-          boundary-links
-          @input="handlePageChange"
-        />
+
+      <div v-if="paginatedInvoices.length === 0" class="text-center q-mt-lg">
+        <q-item-label caption class="text-primary"
+          >No invoices yet</q-item-label
+        >
+      </div>
+      <div v-else-if="maxPages > 1" class="text-center q-mt-lg">
+        <div style="display: flex; justify-content: center">
+          <q-pagination
+            v-model="currentPage"
+            :max="maxPages"
+            :max-pages="5"
+            direction-links
+            boundary-links
+            @input="handlePageChange"
+          />
+        </div>
       </div>
     </div>
   </div>

@@ -1,6 +1,8 @@
 <template>
   <q-dialog v-model="showInvoiceDetails" position="top">
-    <q-card class="q-pa-lg q-pt-md qcard">
+    <q-card class="q-px-lg q-pt-md qcard">
+      <!-- invoice is not entered -->
+
       <div v-if="!invoiceData.bolt11">
         <div class="row items-center no-wrap q-mb-sm">
           <div class="col-12">
@@ -25,14 +27,28 @@
           class="q-mb-lg"
           @keyup.enter="requestMintButton"
         ></q-input>
-        <!-- <q-input
-                filled
-                dense
-                v-model.trim="invoiceData.memo"
-                label="Memo"
-                ></q-input> -->
+        <div class="row items-center no-wrap q-my-sm q-py-none">
+          <q-btn
+            color="primary"
+            @click="requestMintButton"
+            :disable="!(invoiceData.amount > 0) || createInvoiceButtonBlocked"
+            :label="
+              createInvoiceButtonBlocked
+                ? 'Creating invoice...'
+                : 'Create Invoice'
+            "
+            ><q-spinner-tail
+              v-if="createInvoiceButtonBlocked"
+              color="white"
+              size="1em"
+          /></q-btn>
+          <q-btn v-close-popup flat color="grey" class="q-ml-auto">Close</q-btn>
+        </div>
       </div>
-      <div v-else class="text-center q-mb-lg q-mt-none q-pt-none">
+
+      <!-- invoice is entered -->
+
+      <div v-else class="text-center q-mb-md q-mt-none q-pt-none">
         <a class="text-secondary" :href="'lightning:' + invoiceData.bolt11">
           <q-responsive :ratio="1" class="q-mx-md q-mt-none q-pt-none">
             <vue-qrcode
@@ -43,61 +59,64 @@
             </vue-qrcode>
           </q-responsive>
         </a>
-      </div>
-      <div class="row justify-center">
-        <q-card-section class="q-pa-sm">
-          <div class="row justify-center">
-            <q-item-label overline class="q-mb-sm"
-              >Lightning invoice</q-item-label
+        <div class="row justify-center">
+          <q-card-section class="q-pa-sm">
+            <div class="row justify-center">
+              <q-item-label overline class="q-mb-sm q-pt-md"
+                >Lightning invoice</q-item-label
+              >
+            </div>
+            <div class="row justify-center q-py-md">
+              <q-item-label style="font-size: 28px" class="text-weight-bold">
+                <q-icon
+                  :name="
+                    invoiceData.amount >= 0 ? 'call_received' : 'call_made'
+                  "
+                  :color="
+                    invoiceData.status === 'paid'
+                      ? invoiceData.amount >= 0
+                        ? 'green'
+                        : 'red'
+                      : ''
+                  "
+                  class="q-mr-sm"
+                  size="sm"
+                />
+
+                <strong>{{ displayUnit }}</strong></q-item-label
+              >
+            </div>
+            <div
+              v-if="this.invoiceData.mint != undefined"
+              class="row justify-center q-pt-sm"
             >
-          </div>
-          <div class="row justify-center">
-            <q-item-label style="font-size: 28px" class="text-weight-bold"
-              ><strong>{{ displayUnit }}</strong></q-item-label
-            >
-          </div>
-          <div class="row justify-center q-pt-sm">
-            <q-icon
-              name="account_balance"
-              size="0.95rem"
-              color="grey"
-              class="q-mr-xs"
-            />
-            <q-item-label
-              caption
-              class="text-weight-light"
-              style="font-size: 14px"
-              ><strong>{{ shortUrl }}</strong></q-item-label
-            >
-          </div>
-        </q-card-section>
-      </div>
-      <div class="row q-mt-lg">
-        <q-btn
-          v-if="invoiceData.bolt11"
-          class="q-mx-xs"
-          color="primary"
-          size="md"
-          flat
-          @click="copyText(invoiceData.bolt11)"
-          >Copy</q-btn
-        >
-        <q-btn
-          v-else
-          color="primary"
-          @click="requestMintButton"
-          :disable="!(invoiceData.amount > 0) || createInvoiceButtonBlocked"
-          :label="
-            createInvoiceButtonBlocked
-              ? 'Creating invoice...'
-              : 'Create Invoice'
-          "
-          ><q-spinner-tail
-            v-if="createInvoiceButtonBlocked"
-            color="white"
-            size="1em"
-        /></q-btn>
-        <q-btn v-close-popup flat color="grey" class="q-ml-auto">Close</q-btn>
+              <q-icon
+                name="account_balance"
+                size="0.95rem"
+                color="grey"
+                class="q-mr-xs"
+              />
+              <q-item-label
+                caption
+                class="text-weight-light"
+                style="font-size: 14px"
+                ><strong>{{ shortUrl }}</strong></q-item-label
+              >
+            </div>
+          </q-card-section>
+        </div>
+        <div class="row q-mt-lg">
+          <q-btn
+            v-if="invoiceData.bolt11"
+            class="q-mx-xs"
+            color="primary"
+            size="md"
+            flat
+            @click="copyText(invoiceData.bolt11)"
+            >Copy</q-btn
+          >
+          <q-btn v-close-popup flat color="grey" class="q-ml-auto">Close</q-btn>
+        </div>
       </div>
     </q-card>
   </q-dialog>
