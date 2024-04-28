@@ -60,7 +60,7 @@
             <q-btn
               flat
               style="font-size: 12px"
-              color="primary"
+              color="grey"
               class="q-ma-none"
               @click="changeSpeed"
             >
@@ -71,7 +71,7 @@
               flat
               style="font-size: 12px"
               class="q-ma-none"
-              color="primary"
+              color="grey"
               @click="changeSize"
             >
               <q-icon name="zoom_in" style="margin-right: 8px"></q-icon>
