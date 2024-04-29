@@ -133,7 +133,7 @@
 
     <!-- QR CODE SCANNER  -->
 
-    <q-dialog v-model="camera.show">
+    <q-dialog v-model="camera.show" backdrop-filter="blur(2px) brightness(60%)">
       <q-card>
         <div class="text-center">
           <QrcodeReader @decode="decodeQR" />

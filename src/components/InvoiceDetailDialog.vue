@@ -1,5 +1,9 @@
 <template>
-  <q-dialog v-model="showInvoiceDetails" position="top">
+  <q-dialog
+    v-model="showInvoiceDetails"
+    position="top"
+    backdrop-filter="blur(2px) brightness(60%)"
+  >
     <q-card class="q-px-lg q-pt-md q-pb-md qcard">
       <!-- invoice is not entered -->
 

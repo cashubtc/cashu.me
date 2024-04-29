@@ -1,5 +1,9 @@
 <template>
-  <q-dialog v-model="showSendTokens" position="top">
+  <q-dialog
+    v-model="showSendTokens"
+    position="top"
+    backdrop-filter="blur(2px) brightness(60%)"
+  >
     <q-card class="q-pa-none q-pt-none qcard">
       <div v-if="!sendData.tokens">
         <q-card-section class="q-pa-lg q-pt-md">

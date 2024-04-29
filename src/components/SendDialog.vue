@@ -1,7 +1,11 @@
 <template>
-  <q-dialog v-model="showReceiveDialog" position="bottom">
+  <q-dialog
+    v-model="showReceiveDialog"
+    position="bottom"
+    backdrop-filter="blur(2px) brightness(60%)"
+  >
     <!-- two buttons in two lines with the labels "Ecash" and "Lightning" -->
-    <q-card class="q-pb-lg q-pt-sm">
+    <q-card class="q-pb-lg q-pt-sm" style="width: 100%">
       <q-card-section class="">
         <div class="row items-center no-wrap q-mb-sm">
           <div class="col-12 text-center">
@@ -27,10 +31,10 @@
           <q-btn
             outline
             rounded
+            push
             class="q-py-md q-px-xl"
             style="width: 85%"
             @click="showParseDialog"
-            :icon="$q.screen.width > 430 ? 'bolt' : undefined"
             >Lightning</q-btn
           >
         </div>

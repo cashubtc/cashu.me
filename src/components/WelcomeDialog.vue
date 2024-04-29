@@ -6,6 +6,7 @@
     position="top"
     @drop="dragFile"
     @dragover="allowDrop"
+    backdrop-filter="blur(2px) brightness(60%)"
   >
     <q-card class="q-pa-lg z-top">
       <q-toolbar>

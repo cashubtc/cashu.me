@@ -1,5 +1,9 @@
 <template>
-  <q-dialog v-model="showReceiveTokens" position="top">
+  <q-dialog
+    v-model="showReceiveTokens"
+    position="top"
+    backdrop-filter="blur(2px) brightness(60%)"
+  >
     <q-card class="q-pa-lg q-pt-md qcard">
       <div>
         <div class="row items-center no-wrap q-mb-sm">

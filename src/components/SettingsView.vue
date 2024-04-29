@@ -297,6 +297,7 @@
       v-model="showAddMintDialog"
       @keydown.enter.prevent="addMint(mintToAdd, (verbose = true))"
       position="top"
+      backdrop-filter="blur(2px) brightness(60%)"
     >
       <q-card class="q-pa-lg">
         <h6 class="q-my-md">Do you trust this mint?</h6>
@@ -332,7 +333,10 @@
         </div>
       </q-card>
     </q-dialog>
-    <q-dialog v-model="showRemoveMintDialog">
+    <q-dialog
+      v-model="showRemoveMintDialog"
+      backdrop-filter="blur(2px) brightness(60%)"
+    >
       <q-card class="q-pa-lg">
         <h6 class="q-my-md">Are you sure you want to delete this mint?</h6>
         <div class="row q-mt-lg">
