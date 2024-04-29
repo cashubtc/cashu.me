@@ -152,9 +152,8 @@ export default defineComponent({
       "activeProofs",
       "mints",
       "proofs",
-      "totalBalance",
+      "activeBalance",
       "activeUnit",
-      "balances",
       "activeMint",
     ]),
     ...mapState(useTokensStore, ["historyTokens"]),
@@ -171,7 +170,8 @@ export default defineComponent({
         .reduce((sum, el) => (sum += el.amount), 0);
     },
     balancesOptions: function () {
-      return Object.entries(this.balances).map(([key, value]) => ({
+      const mint = this.activeMint();
+      return Object.entries(mint.allBalances).map(([key, value]) => ({
         label: key,
         value: key,
       }));
@@ -180,7 +180,7 @@ export default defineComponent({
       return [].concat(...this.mints.map((m) => m.keysets));
     },
     getTotalBalance: function () {
-      return this.totalBalance;
+      return this.activeBalance;
     },
     getActiveMintBalance: function () {
       return this.activeProofs

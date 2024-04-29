@@ -61,12 +61,6 @@ export default defineComponent({
         .flat()
         .reduce((sum, el) => (sum += el.amount), 0);
     },
-    getTotalBalance: function () {
-      return this.proofs
-        .map((t) => t)
-        .flat()
-        .reduce((sum, el) => (sum += el.amount), 0);
-    },
     getActiveMintUrlShort: function () {
       return getShortUrl(this.activeMintUrl);
     },

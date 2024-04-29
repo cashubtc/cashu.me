@@ -217,6 +217,7 @@ export default defineComponent({
       "mints",
       "proofs",
       "activeUnit",
+      "activeBalance",
     ]),
   },
   methods: {
@@ -229,7 +230,7 @@ export default defineComponent({
     ...mapActions(useCameraStore, ["closeCamera", "showCamera", "hasCamera"]),
     canPay: function () {
       if (!this.payInvoiceData.invoice) return false;
-      return this.payInvoiceData.invoice.sat <= this.balance;
+      return payInvoiceData.meltQuote.response.amount <= this.activeBalance;
     },
     closeParseDialog: function () {
       setTimeout(() => {

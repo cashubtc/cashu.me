@@ -34,7 +34,7 @@
                   <div v-for="unit in scope.opt.units" :key="unit">
                     <q-badge
                       color="primary"
-                      :label="formatCurrency(scope.opt.balance[unit], unit)"
+                      :label="formatCurrency(scope.opt.balances[unit], unit)"
                       class="q-ma-xs q-pa-sm"
                       style="float: right"
                     />
@@ -67,6 +67,7 @@ import { defineComponent } from "vue";
 import { getShortUrl } from "src/js/wallet-helpers";
 import { mapActions, mapState } from "pinia";
 import { useMintsStore } from "stores/mints";
+import { MintClass } from "stores/mints";
 export default defineComponent({
   name: "ChooseMint",
   mixins: [windowMixin],
@@ -106,12 +107,6 @@ export default defineComponent({
     allMintKeysets: function () {
       return [].concat(...this.mints.map((m) => m.keysets));
     },
-    getTotalBalance: function () {
-      return this.proofs
-        .filter((p) => this.allMintKeysets.includes(p.id))
-        .flat()
-        .reduce((sum, el) => (sum += el.amount), 0);
-    },
     getActiveMintUrlShort: function () {
       return getShortUrl(this.activeMintUrl);
     },
@@ -129,10 +124,11 @@ export default defineComponent({
       for (const [i, m] of Object.entries(this.mints)) {
         const all_units = m.keysets.map((r) => r.unit);
         const units = [...new Set(all_units)];
+        const mint = new MintClass(m);
         options.push({
           url: m.url,
           shorturl: getShortUrl(m.url),
-          balance: m.balance,
+          balances: mint.allBalances,
           units: units,
         });
       }

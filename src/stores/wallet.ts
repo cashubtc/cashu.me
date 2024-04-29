@@ -178,7 +178,7 @@ export const useWalletStore = defineStore("wallet", {
       try {
         const spendableProofs = proofsStore.getUnreservedProofs(proofs);
         if (proofsStore.sumProofs(spendableProofs) < amount) {
-          const balance = await mintStore.getBalance();
+          const balance = await mintStore.activeBalance;
           notifyWarning(
             "Balance is too low.",
             `Your balance is ${balance} sat and you're trying to pay ${amount} sats.`
@@ -420,7 +420,7 @@ export const useWalletStore = defineStore("wallet", {
         amount
       );
       const { keepProofs, sendProofs } = await this.splitToSend(
-        mintStore.activeMint().proofsUnit(mintStore.activeUnit),
+        mintStore.activeMint().unitProofs(mintStore.activeUnit),
         amount
       );
       proofsStore.setReserved(sendProofs, true);
@@ -450,6 +450,7 @@ export const useWalletStore = defineStore("wallet", {
           );
           amount_paid = amount_paid - proofsStore.sumProofs(changeProofs);
           mintStore.addProofs(changeProofs);
+          this.increaseKeysetCounter(keysetId, changeProofs.length)
         }
         // update UI
         const serializedProofs = proofsStore.serializeProofs(sendProofs);
