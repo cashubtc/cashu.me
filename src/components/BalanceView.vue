@@ -122,10 +122,11 @@
 <script>
 import { defineComponent, ref } from "vue";
 import { getShortUrl } from "src/js/wallet-helpers";
-import { mapState, mapWritableState } from "pinia";
+import { mapState, mapWritableState, mapActions } from "pinia";
 import { useMintsStore } from "stores/mints";
 import { useSettingsStore } from "stores/settings";
 import { useTokensStore } from "stores/tokens";
+import { useWalletStore } from "stores/wallet";
 import ToggleUnit from "components/ToggleUnit.vue";
 
 import axios from "axios";
@@ -144,7 +145,6 @@ export default defineComponent({
     ToggleUnit,
   },
   props: {
-    checkPendingTokens: Function,
     setTab: Function,
   },
   computed: {
@@ -212,6 +212,10 @@ export default defineComponent({
     }
   },
   methods: {
+    ...mapActions(useWalletStore, [
+      "checkPendingInvoices",
+      "checkPendingTokens",
+    ]),
     async fetchPrice() {
       try {
         this.bitcoinPrice = await fetchBitcoinPrice();

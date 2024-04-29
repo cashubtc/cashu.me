@@ -2,11 +2,7 @@
   <div class="row q-col-gutter-y-md justify-center q-pt-sm q-pb-md">
     <div class="col-12 col-sm-11 col-md-8 text-center q-gutter-y-md">
       <NoMintWarnBanner v-if="mints.length == 0" />
-      <BalanceView
-        v-else
-        :check-pending-tokens="checkPendingTokens"
-        :set-tab="setTab"
-      />
+      <BalanceView v-else :set-tab="setTab" />
       <div
         class="row items-center justify-center no-wrap q-mb-none q-mx-none q-px-none q-pt-md q-pb-lg"
       >
@@ -66,7 +62,6 @@
 
         <q-tab-panel name="history">
           <HistoryTable
-            :history-tokens="historyTokens"
             :show-token-dialog="showTokenDialog"
             :check-token-spendable="checkTokenSpendable"
           />

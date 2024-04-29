@@ -81,17 +81,13 @@
 import { defineComponent } from "vue";
 import { shortenString } from "src/js/string-utils";
 import { formatDistanceToNow, parseISO } from "date-fns";
+import { useTokensStore } from "src/stores/tokens";
+import { mapState } from "pinia";
 
 export default defineComponent({
   name: "HistoryTable",
   mixins: [windowMixin],
   props: {
-    proofs: Array,
-    activeProofs: Array,
-    mints: Array,
-    tickerShort: String,
-    activeMintUrl: String,
-    historyTokens: Array,
     showTokenDialog: Function,
     checkTokenSpendable: Function,
   },
@@ -102,6 +98,7 @@ export default defineComponent({
     };
   },
   computed: {
+    ...mapState(useTokensStore, ["historyTokens"]),
     maxPages() {
       return Math.ceil(this.historyTokens.length / this.pageSize);
     },

@@ -647,13 +647,13 @@ export const useWalletStore = defineStore("wallet", {
       const last_n = 5;
       let i = 0;
       // invert for loop
-      for (const token of tokenStore.historyTokens.slice().reverse()) {
+      for (const t of tokenStore.historyTokens.slice().reverse()) {
         if (i >= last_n) {
           break;
         }
-        if (token.status === "pending" && token.amount < 0) {
-          console.log("### checkPendingTokens", token.token)
-          this.checkTokenSpendable(token.token, verbose);
+        if (t.status === "pending" && t.amount < 0) {
+          console.log("### checkPendingTokens", t.token)
+          this.checkTokenSpendable(t.token, verbose);
         }
         i += 1;
       }
