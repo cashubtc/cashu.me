@@ -165,7 +165,6 @@
           <SettingsView
             :ticker-short="tickerShort"
             :request-mint="requestMint"
-            :decode-request="decodeRequest"
             :melt="melt"
             :invoice-check-worker="invoiceCheckWorker"
             :pay-invoice-data="payInvoiceData"
@@ -557,8 +556,8 @@ export default {
     },
     decodeQR: function (res) {
       this.camera.data = res;
-      this.decodeRequest();
       this.camera.show = false;
+      this.decodeRequest(res);
     },
     payInvoice: function () {
       let dismissPaymentMsg = this.$q.notify({

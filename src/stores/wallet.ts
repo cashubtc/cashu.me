@@ -658,114 +658,87 @@ export const useWalletStore = defineStore("wallet", {
         i += 1;
       }
     },
-    decodeRequest: function (r = null) {
-      // delete this.payInvoiceData.invoice;
-      this.payInvoiceData.invoice = null;
-      this.payInvoiceData.meltQuote.response = null;
+    handleBolt11Invoice: function () {
+      this.payInvoiceData.show = true;
+      let invoice;
+      try {
+        invoice = bolt11Decoder.decode(this.payInvoiceData.input.request);
+      } catch (error) {
+        notifyWarning("Failed to decode invoice", undefined, 3000);
+        this.payInvoiceData.show = false;
+        throw error;
+      }
+      let cleanInvoice = {
+        bolt11: "",
+        memo: "",
+        msat: 0,
+        sat: 0,
+        fsat: 0,
+        hash: "",
+        description: "",
+        timestamp: 0,
+        expireDate: "",
+        expired: false,
+      };
+      _.each(invoice.sections, (tag) => {
+        if (_.isObject(tag) && _.has(tag, "name")) {
+          if (tag.name === "amount") {
+            cleanInvoice.msat = tag.value;
+            cleanInvoice.sat = tag.value / 1000;
+            cleanInvoice.fsat = cleanInvoice.sat;
+          } else if (tag.name === "payment_hash") {
+            cleanInvoice.hash = tag.value;
+          } else if (tag.name === "description") {
+            cleanInvoice.description = tag.value;
+          } else if (tag.name === "timestamp") {
+            cleanInvoice.timestamp = tag.value;
+          } else if (tag.name === "expiry") {
+            var expireDate = new Date(
+              (cleanInvoice.timestamp + tag.value) * 1000
+            );
+            cleanInvoice.expireDate = date.formatDate(
+              expireDate,
+              "YYYY-MM-DDTHH:mm:ss.SSSZ"
+            );
+            cleanInvoice.expired = false; // TODO
+          }
+        }
+      });
 
-      const camera = useCameraStore();
-      // set the argument as the data to parse
-      if (typeof r == "string" && r != null) {
-        this.payInvoiceData.input.request = r;
-      }
-      let reqtype = null;
-      let req = null;
-      // get request
-      if (camera.camera.data) {
-        // get request from camera
-        req = camera.camera.data;
-      } else if (this.payInvoiceData.input.request) {
-        // get request from pay invoice dialog
-        req = this.payInvoiceData.input.request;
-      }
-      if (req == null) {
-        throw new Error("no request provided.");
-      }
-
+      this.payInvoiceData.invoice = Object.freeze(cleanInvoice);
+      // get quote for this request
+      this.meltQuote();
+    },
+    handleCashuToken: function () {
+      this.payInvoiceData.show = false;
+      receiveStore.showReceiveTokens = true;
+    },
+    decodeRequest: function (req: string) {
+      this.payInvoiceData.input.request = req
       if (req.toLowerCase().startsWith("lnbc")) {
         this.payInvoiceData.input.request = req;
-        reqtype = "bolt11";
+        this.handleBolt11Invoice()
       } else if (req.toLowerCase().startsWith("lightning:")) {
         this.payInvoiceData.input.request = req.slice(10);
-        reqtype = "bolt11";
+        this.handleBolt11Invoice()
       } else if (req.toLowerCase().startsWith("lnurl:")) {
         this.payInvoiceData.input.request = req.slice(6);
-        reqtype = "lnurl";
+        this.lnurlPayFirst(this.payInvoiceData.input.request);
       } else if (req.indexOf("lightning=lnurl1") !== -1) {
         this.payInvoiceData.input.request = req
           .split("lightning=")[1]
           .split("&")[0];
-        reqtype = "lnurl";
+        this.lnurlPayFirst(this.payInvoiceData.input.request);
       } else if (
         req.toLowerCase().startsWith("lnurl1") ||
         req.match(/[\w.+-~_]+@[\w.+-~_]/)
       ) {
         this.payInvoiceData.input.request = req;
-        reqtype = "lnurl";
+        this.lnurlPayFirst(this.payInvoiceData.input.request);
       } else if (req.indexOf("cashuA") !== -1) {
         // very dirty way of parsing cashu tokens from either a pasted token or a URL like https://host.com?token=eyJwcm
         receiveStore.receiveData.tokensBase64 = req.slice(req.indexOf("cashuA"));
-        reqtype = "cashu";
-      }
-
-      if (reqtype == "bolt11") {
-        console.log("#### QR CODE: BOLT11");
-        this.payInvoiceData.show = true;
-        let invoice;
-        try {
-          invoice = bolt11Decoder.decode(this.payInvoiceData.input.request);
-        } catch (error) {
-          notifyWarning("Failed to decode invoice", undefined, 3000);
-          this.payInvoiceData.show = false;
-          throw error;
-        }
-
-        // invoice.amount = invoice.sections[2] / 1000;
-        // invoice.amount_msat = invoice.sections[2];
-        let cleanInvoice = {};
-        // let cleanInvoice = {
-        //   msat: invoice.amount_msat,
-        //   sat: invoice.amount,
-        //   fsat: invoice.amount,
-        // };
-        // _.each(invoice.sections, (tag) => {
-        //   console.log(tag);
-        // });
-        _.each(invoice.sections, (tag) => {
-          if (_.isObject(tag) && _.has(tag, "name")) {
-            if (tag.name === "amount") {
-              cleanInvoice.msat = tag.value;
-              cleanInvoice.sat = tag.value / 1000;
-              cleanInvoice.fsat = cleanInvoice.sat;
-            } else if (tag.name === "payment_hash") {
-              cleanInvoice.hash = tag.value;
-            } else if (tag.name === "description") {
-              cleanInvoice.description = tag.value;
-            } else if (tag.name === "timestamp") {
-              cleanInvoice.timestamp = tag.value;
-            } else if (tag.name === "expiry") {
-              var expireDate = new Date(
-                (cleanInvoice.timestamp + tag.value) * 1000
-              );
-              cleanInvoice.expireDate = date.formatDate(
-                expireDate,
-                "YYYY-MM-DDTHH:mm:ss.SSSZ"
-              );
-              cleanInvoice.expired = false; // TODO
-            }
-          }
-        });
-
-        this.payInvoiceData.invoice = Object.freeze(cleanInvoice);
-        // get quote for this request
-        this.meltQuote();
-      } else if (reqtype == "lnurl") {
-        console.log("#### QR CODE: LNURL");
-        this.lnurlPayFirst(this.payInvoiceData.input.request);
-      } else if (reqtype == "cashu") {
-        console.log("#### QR CODE: CASHU TOKEN");
-        this.payInvoiceData.show = false;
-        receiveStore.showReceiveTokens = true;
+        this.handleCashuToken()
       }
     },
     lnurlPayFirst: async function (address: string) {
@@ -786,8 +759,8 @@ export const useWalletStore = defineStore("wallet", {
       }
       var { data } = await axios.get(host);
       if (data.tag == "payRequest") {
-        this.payInvoiceData.domain = host.split("https://")[1].split("/")[0];
         this.payInvoiceData.lnurlpay = data;
+        this.payInvoiceData.lnurlpay.domain = host.split("https://")[1].split("/")[0];
         if (
           this.payInvoiceData.lnurlpay.maxSendable ==
           this.payInvoiceData.lnurlpay.minSendable
@@ -818,8 +791,7 @@ export const useWalletStore = defineStore("wallet", {
           return;
         }
         console.log(data.pr);
-        this.payInvoiceData.input.request = data.pr;
-        this.decodeRequest();
+        this.decodeRequest(data.pr);
       }
     },
     generateNewMnemonic: function () {

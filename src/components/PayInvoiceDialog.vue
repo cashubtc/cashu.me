@@ -133,7 +133,7 @@
       <div v-else>
         <q-form
           v-if="!camera.show"
-          @submit="decodeAndQuote"
+          @submit="decodeAndQuote(payInvoiceData.input.request)"
           class="q-gutter-md"
         >
           <q-input

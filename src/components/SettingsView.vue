@@ -355,7 +355,6 @@ export default defineComponent({
   props: {
     tickerShort: String,
     requestMint: Function,
-    decodeRequest: Function,
     melt: Function,
     invoiceCheckWorker: Function,
     payInvoiceData: Object,
@@ -415,7 +414,7 @@ export default defineComponent({
       "setShowAddMintDialog",
       "setShowRemoveMintDialog",
     ]),
-    ...mapActions(useWalletStore, ["newMnemonic"]),
+    ...mapActions(useWalletStore, ["newMnemonic", "decodeRequest"]),
     generateNewMnemonic() {
       this.newMnemonic();
     },
