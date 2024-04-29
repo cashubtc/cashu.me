@@ -1,12 +1,15 @@
 <template>
   <q-dialog v-model="showInvoiceDetails" position="top">
-    <q-card class="q-px-lg q-pt-md qcard">
+    <q-card class="q-px-lg q-pt-md q-pb-md qcard">
       <!-- invoice is not entered -->
 
       <div v-if="!invoiceData.bolt11">
         <div class="row items-center no-wrap q-mb-sm">
-          <div class="col-12">
+          <div class="col-10">
             <span class="text-subtitle1">Create a Lightning invoice</span>
+          </div>
+          <div class="col-2">
+            <ToggleUnit class="q-mt-md" />
           </div>
         </div>
         <div class="row items-center no-wrap q-my-sm q-py-none">
@@ -15,8 +18,8 @@
           </div>
         </div>
         <q-input
-          filled
-          dense
+          round
+          outlined
           type="number"
           v-model.number="invoiceData.amount"
           :label="'Amount (' + tickerShort + ') *'"
@@ -129,6 +132,7 @@ import { useWalletStore } from "src/stores/wallet";
 import ChooseMint from "src/components/ChooseMint.vue";
 import { useUiStore } from "src/stores/ui";
 import { getShortUrl } from "src/js/wallet-helpers";
+import ToggleUnit from "src/components/ToggleUnit.vue";
 
 export default defineComponent({
   name: "InvoiceDetailDialog",
@@ -136,6 +140,7 @@ export default defineComponent({
   components: {
     ChooseMint,
     VueQrcode,
+    ToggleUnit,
   },
   props: {
     invoiceCheckWorker: Function,

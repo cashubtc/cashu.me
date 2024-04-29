@@ -8,7 +8,9 @@ export type Mint = {
   url: string;
   keys: MintKeys[];
   keysets: MintKeyset[];
-  balance: number;
+  balance: {
+    [unit: string]: number;
+  };
   // initialize api: new CashuMint(url) on activation
 };
 
@@ -122,6 +124,12 @@ export const useMintsStore = defineStore("mints", {
         throw new Error("No active mint");
       }
     },
+    toggleUnit: function () {
+      const units = this.activeMint().units;
+      this.activeUnit =
+        units[(units.indexOf(this.activeUnit) + 1) % units.length];
+      return this.activeUnit;
+    },
     proofsToWalletProofs(proofs: Proof[]): WalletProof[] {
       return proofs.map((p) => {
         return {
@@ -147,7 +155,8 @@ export const useMintsStore = defineStore("mints", {
     },
     updateMintBalances() {
       this.mints.forEach((m) => {
-        m.balance = new MintClass(m).balance;
+        const mintClass = new MintClass(m);
+        m.balance = mintClass.allBalances
       });
     },
     addProofs(proofs: Proof[]) {

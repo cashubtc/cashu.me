@@ -31,7 +31,7 @@
                 @click="action = 'main'"
                 class="q-ml-auto"
               />
-              <span class="text-h6 q-mr-auto absolute right"
+              <span class="text-h6 q-mr-auto absolute right q-mb-md"
                 >Ecash<q-icon class="q-ml-sm" name="toll"
               /></span>
             </div>
@@ -39,15 +39,15 @@
               <q-btn-group rounded>
                 <q-btn
                   color="primary"
-                  label="Send"
-                  icon="north_east"
-                  @click="showSendTokensDialog"
-                />
-                <q-btn
-                  color="primary"
                   label="Receive"
                   icon="south_west"
                   @click="showReceiveTokensDialog"
+                />
+                <q-btn
+                  color="primary"
+                  label="Send"
+                  icon="north_east"
+                  @click="showSendTokensDialog"
                 />
               </q-btn-group>
             </div>
@@ -102,7 +102,7 @@
                 @click="action = 'main'"
                 class="q-mr-auto"
               />
-              <span class="text-h6 q-mr-auto absolute left"
+              <span class="text-h6 q-mr-auto absolute left q-mb-md"
                 >Lightning<q-icon name="bolt"
               /></span>
             </div>
@@ -110,15 +110,15 @@
               <q-btn-group rounded>
                 <q-btn
                   color="primary"
-                  icon="north_east"
-                  label="Send"
-                  @click="showParseDialog"
-                />
-                <q-btn
-                  color="primary"
                   icon="south_west"
                   label="Receive"
                   @click="showInvoiceCreateDialog"
+                />
+                <q-btn
+                  color="primary"
+                  icon="north_east"
+                  label="Send"
+                  @click="showParseDialog"
                 />
               </q-btn-group>
             </div>

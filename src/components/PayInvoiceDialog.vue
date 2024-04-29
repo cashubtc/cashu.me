@@ -138,11 +138,11 @@
         >
           <q-input
             ref="pasteInput"
-            filled
-            dense
+            round
+            outlined
             v-model.trim="payInvoiceData.input.request"
             type="textarea"
-            label="Enter a Lightning invoice, an LNURL, or a Lightning address"
+            label="Lightning invoice or address"
             @keyup.enter="decodeAndQuote(payInvoiceData.input.request)"
           >
           </q-input>

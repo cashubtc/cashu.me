@@ -5,14 +5,46 @@
       <div class="col-12 cursor-pointer">
         <q-select
           borderless
-          dense
-          color="primary"
+          round
+          class="q-px-md"
+          color="white"
           v-model="chosenMint"
           :options="chooseMintOptions()"
           option-value="url"
           option-label="shorturl"
         >
-          <template v-slot:prepend>
+          <template v-slot:option="scope">
+            <q-item v-bind="scope.itemProps">
+              <q-item-section avatar>
+                <q-icon
+                  name="account_balance"
+                  size="1.2rem"
+                  color="grey"
+                  class="q-pl-md"
+                />
+              </q-item-section>
+              <q-item-section>
+                <q-item-label class="text-body1 q-pa-md">{{
+                  scope.opt.shorturl
+                }}</q-item-label>
+                <!-- <q-item-label caption></q-item-label> -->
+              </q-item-section>
+              <q-item-section side>
+                <q-item-label>
+                  <div v-for="unit in scope.opt.units" :key="unit">
+                    <q-badge
+                      color="primary"
+                      :label="formatCurrency(scope.opt.balance[unit], unit)"
+                      class="q-ma-xs q-pa-sm"
+                      style="float: right"
+                    />
+                  </div>
+                </q-item-label>
+              </q-item-section>
+            </q-item>
+            <q-separator />
+          </template>
+          <!-- <template v-slot:prepend>
             <q-icon
               name="account_balance"
               size="1.2rem"
@@ -24,7 +56,7 @@
             <q-badge
               color="primary"
               :label="formatCurrency(getBalance, activeUnit)"
-          /></template>
+          /></template> -->
         </q-select>
       </div>
     </div>
@@ -95,7 +127,14 @@ export default defineComponent({
     chooseMintOptions: function () {
       let options = [];
       for (const [i, m] of Object.entries(this.mints)) {
-        options.push({ url: m.url, shorturl: getShortUrl(m.url) });
+        const all_units = m.keysets.map((r) => r.unit);
+        const units = [...new Set(all_units)];
+        options.push({
+          url: m.url,
+          shorturl: getShortUrl(m.url),
+          balance: m.balance,
+          units: units,
+        });
       }
       return options;
     },

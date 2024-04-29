@@ -8,10 +8,10 @@
           </div>
         </div>
         <q-input
-          filled
-          dense
+          round
+          outlined
           v-model="receiveData.tokensBase64"
-          label="Enter Cashu token"
+          label="Paste Cashu token"
           type="textarea"
           autofocus
           class="q-mb-lg"

@@ -4,8 +4,11 @@
       <div v-if="!sendData.tokens">
         <q-card-section class="q-pa-lg q-pt-md">
           <div class="row items-center no-wrap q-mb-sm">
-            <div class="col-12">
+            <div class="col-10">
               <span class="text-subtitle1">Send ecash</span>
+            </div>
+            <div class="col-2">
+              <ToggleUnit class="q-mt-md" />
             </div>
           </div>
           <div class="row items-center no-wrap q-my-sm q-py-none">
@@ -15,14 +18,14 @@
           </div>
 
           <q-input
-            filled
-            dense
             type="number"
             v-model.number="sendData.amount"
             :label="'Amount (' + tickerShort + ') *'"
             mask="#"
             fill-mask="0"
             reverse-fill-mask
+            round
+            outlined
             autofocus
             class="q-mb-lg"
             @keyup.enter="sendTokens"
@@ -145,6 +148,7 @@ import { Buffer } from "buffer";
 
 import { mapActions, mapState, mapWritableState } from "pinia";
 import ChooseMint from "components/ChooseMint.vue";
+import ToggleUnit from "components/ToggleUnit.vue";
 import { UR, UREncoder } from "@gandlaf21/bc-ur";
 
 export default defineComponent({
@@ -152,6 +156,7 @@ export default defineComponent({
   mixins: [windowMixin],
   components: {
     ChooseMint,
+    ToggleUnit,
   },
   props: {
     checkTokenSpendableWorker: Function,

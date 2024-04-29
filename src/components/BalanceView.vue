@@ -53,13 +53,7 @@
       </q-carousel-slide>
     </q-carousel>
     <div class="row justify-center">
-      <q-btn
-        rounded
-        outline
-        @click="activeUnit = toggleUnit()"
-        :label="activeUnit == 'sat' ? 'BTC' : 'USD'"
-        class="q-mt-none q-mb-lg"
-      />
+      <ToggleUnit class="q-mt-none q-mb-lg" />
     </div>
     <!-- mint url -->
     <div class="row q-mt-xs q-mb-none" v-if="activeMintUrl">
@@ -131,6 +125,7 @@ import { getShortUrl } from "src/js/wallet-helpers";
 import { mapState, mapWritableState } from "pinia";
 import { useMintsStore } from "stores/mints";
 import { useTokensStore } from "stores/tokens";
+import ToggleUnit from "components/ToggleUnit.vue";
 
 import axios from "axios";
 
@@ -144,6 +139,9 @@ async function fetchBitcoinPrice() {
 export default defineComponent({
   name: "BalanceView",
   mixins: [windowMixin],
+  components: {
+    ToggleUnit,
+  },
   props: {
     checkPendingTokens: Function,
     setTab: Function,
