@@ -1,7 +1,8 @@
 <script lang="ts">
 import QrScanner from "qr-scanner";
 import { URDecoder } from "@gandlaf21/bc-ur";
-
+import { useCameraStore } from "src/stores/camera";
+import { mapActions, mapState, mapWritableState } from "pinia";
 export default {
   emits: ["decode"],
   data(): {
@@ -31,7 +32,18 @@ export default {
     this.qrScanner.start();
     this.urDecoder = new URDecoder();
   },
+  computed: {
+    ...mapState(useCameraStore, ["camera", "hasCamera"]),
+    canPasteFromClipboard: function () {
+      return (
+        window.isSecureContext &&
+        navigator.clipboard &&
+        navigator.clipboard.readText
+      );
+    },
+  },
   methods: {
+    ...mapActions(useCameraStore, ["closeCamera", "showCamera"]),
     handleResult(result: QrScanner.ScanResult) {
       // if this is a multipart-qr code, do not yet emit
       if (result.data.startsWith("ur:")) {
@@ -50,42 +62,63 @@ export default {
         this.qrScanner?.stop();
       }
     },
+    pasteToParseDialog: function () {
+      console.log("pasteToParseDialog");
+      navigator.clipboard.readText().then((text) => {
+        this.$emit("decode", text);
+      });
+    },
   },
   unmounted() {
     this.qrScanner?.destroy();
   },
 };
 </script>
-
 <template>
-  <div>
-    <video ref="cameraEl" style="width: 100%"></video>
-  </div>
-  <div>
-    <div class="row q-justify-center">
-      <q-linear-progress
-        rounded
-        size="30px"
-        v-if="urDecoderProgress > 0"
-        :value="urDecoderProgress"
-        :indeterminate="urDecoderProgress === 0"
-        class="q-mt-none"
-        color="secondary"
-      >
-        <div class="absolute-full flex flex-center">
-          <q-badge
-            color="white"
-            text-color="secondary"
-            style="font-size: 1rem; padding: 5px"
-            class="text-weight-bold"
-            :label="
-              Math.round(urDecoderProgress * 100) +
-              '%' +
-              (urDecoderProgress > 0.9 ? ' - Keep scanning' : '')
-            "
-          />
+  <q-card>
+    <div class="text-center">
+      <div>
+        <video ref="cameraEl" style="width: 100%"></video>
+      </div>
+      <div>
+        <div class="row q-justify-center">
+          <q-linear-progress
+            rounded
+            size="30px"
+            v-if="urDecoderProgress > 0"
+            :value="urDecoderProgress"
+            :indeterminate="urDecoderProgress === 0"
+            class="q-mt-none"
+            color="secondary"
+          >
+            <div class="absolute-full flex flex-center">
+              <q-badge
+                color="white"
+                text-color="secondary"
+                style="font-size: 1rem; padding: 5px"
+                class="text-weight-bold"
+                :label="
+                  Math.round(urDecoderProgress * 100) +
+                  '%' +
+                  (urDecoderProgress > 0.9 ? ' - Keep scanning' : '')
+                "
+              />
+            </div>
+          </q-linear-progress>
         </div>
-      </q-linear-progress>
+      </div>
     </div>
-  </div>
+    <div class="row q-my-sm">
+      <q-btn
+        unelevated
+        v-if="canPasteFromClipboard"
+        icon="content_paste"
+        @click="pasteToParseDialog"
+        ><q-tooltip>Paste</q-tooltip></q-btn
+      >
+      <q-btn @click="closeCamera" flat color="grey" class="q-ml-auto"
+        >Cancel</q-btn
+      >
+    </div>
+  </q-card>
 </template>

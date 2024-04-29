@@ -122,18 +122,8 @@
     <PayInvoiceDialog v-model="payInvoiceData.show" />
 
     <!-- QR CODE SCANNER  -->
-
     <q-dialog v-model="camera.show" backdrop-filter="blur(2px) brightness(60%)">
-      <q-card>
-        <div class="text-center">
-          <QrcodeReader @decode="decodeQR" />
-        </div>
-        <div class="row q-mt-lg">
-          <q-btn @click="closeCamera" flat color="grey" class="q-ml-auto"
-            >Cancel</q-btn
-          >
-        </div>
-      </q-card>
+      <QrcodeReader @decode="decodeQR" />
     </q-dialog>
 
     <!-- WELCOME DIALOG  -->
@@ -302,7 +292,7 @@ export default {
       "tokensCheckSpendableListener",
     ]),
     ...mapState(useTokensStore, ["historyTokens"]),
-    ...mapWritableState(useCameraStore, ["camera"]),
+    ...mapWritableState(useCameraStore, ["camera", "hasCamera"]),
     pendingPaymentsExist: function () {
       return this.payments.findIndex((payment) => payment.pending) !== -1;
     },
@@ -361,7 +351,7 @@ export default {
       "decodeRequest",
       "generateNewMnemonic",
     ]),
-    ...mapActions(useCameraStore, ["closeCamera", "showCamera", "hasCamera"]),
+    ...mapActions(useCameraStore, ["closeCamera", "showCamera"]),
     // TOKEN METHODS
     decodeToken: function (encoded_token) {
       try {
@@ -417,7 +407,7 @@ export default {
       this.payInvoiceData.input.comment = "";
       this.payInvoiceData.input.paymentChecker = null;
       this.camera.show = false;
-      this.focusInput("pasteInput");
+      this.focusInput("parseDialogInput");
     },
     showWelcomeDialog: function () {
       if (localStorage.getItem("cashu.welcomeDialogSeen") != "seen") {

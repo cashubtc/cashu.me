@@ -217,7 +217,7 @@ export default defineComponent({
   },
   computed: {
     ...mapState(useUiStore, ["tickerShort"]),
-    ...mapWritableState(useCameraStore, ["camera"]),
+    ...mapWritableState(useCameraStore, ["camera", "hasCamera"]),
     ...mapState(useWalletStore, ["payInvoiceData"]),
     ...mapState(useMintsStore, [
       "activeMintUrl",
@@ -227,6 +227,13 @@ export default defineComponent({
       "activeUnit",
       "activeBalance",
     ]),
+    canPasteFromClipboard: function () {
+      return (
+        window.isSecureContext &&
+        navigator.clipboard &&
+        navigator.clipboard.readText
+      );
+    },
   },
   methods: {
     ...mapActions(useWalletStore, [
@@ -235,7 +242,7 @@ export default defineComponent({
       "decodeRequest",
       "lnurlPaySecond",
     ]),
-    ...mapActions(useCameraStore, ["closeCamera", "showCamera", "hasCamera"]),
+    ...mapActions(useCameraStore, ["closeCamera", "showCamera"]),
     canPay: function () {
       if (!this.payInvoiceData.invoice) return false;
       return payInvoiceData.meltQuote.response.amount <= this.activeBalance;
@@ -247,13 +254,6 @@ export default defineComponent({
     },
     decodeAndQuote: function (request) {
       this.decodeRequest(request);
-    },
-    canPasteFromClipboard: function () {
-      return (
-        window.isSecureContext &&
-        navigator.clipboard &&
-        navigator.clipboard.readText
-      );
     },
     pasteToParseDialog: function () {
       console.log("pasteToParseDialog");

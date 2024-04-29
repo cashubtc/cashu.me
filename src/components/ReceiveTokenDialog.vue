@@ -93,22 +93,18 @@ export default defineComponent({
     ]),
     ...mapState(useUiStore, ["tickerShort"]),
     ...mapState(useMintsStore, ["activeProofs", "activeUnit"]),
+    ...mapState(useCameraStore, ["hasCamera"]),
+    canPasteFromClipboard: function () {
+      return (
+        window.isSecureContext &&
+        navigator.clipboard &&
+        navigator.clipboard.readText
+      );
+    },
   },
   methods: {
     ...mapActions(useWalletStore, ["redeem"]),
-    ...mapActions(useCameraStore, ["closeCamera", "showCamera", "hasCamera"]),
-
-    // ...mapActions(useWalletStore, ["splitToSend"]),
-    // ...mapActions(useProofsStore, [
-    //   "serializeProofs",
-    //   "getProofsMint",
-    //   "serializeProofsV2",
-    // ]),
-    // ...mapActions(useTokensStore, [
-    //   "addPaidToken",
-    //   "addPendingToken",
-    //   "setTokenPaid",
-    // ]),
+    ...mapActions(useCameraStore, ["closeCamera", "showCamera"]),
     knowThisMintOfTokenJson: function (tokenJson) {
       const mintStore = useMintsStore();
       // check if we have all mints
@@ -174,13 +170,6 @@ export default defineComponent({
       } catch (error) {
         console.error(error);
       }
-    },
-    canPasteFromClipboard: function () {
-      return (
-        window.isSecureContext &&
-        navigator.clipboard &&
-        navigator.clipboard.readText
-      );
     },
     pasteToParseDialog: function () {
       console.log("pasteToParseDialog");
