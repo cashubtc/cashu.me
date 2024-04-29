@@ -266,6 +266,21 @@
           </q-item-section>
         </q-item>
         <q-item>
+          <q-btn
+            dense
+            flat
+            outline
+            click
+            @click="getBitcoinPrice = !getBitcoinPrice"
+            :label="
+              getBitcoinPrice
+                ? 'Don\'t fetch price'
+                : 'Fetch price from coinbase'
+            "
+          >
+          </q-btn>
+        </q-item>
+        <q-item>
           <q-btn dense flat outline click @click="enable_terminal">
             Open debug terminal
           </q-btn>
@@ -348,6 +363,7 @@ import { useMintsStore, MintClass } from "src/stores/mints";
 import { useWalletStore } from "src/stores/wallet";
 import { map } from "underscore";
 import { currentDateStr } from "src/js/utils";
+import { useSettingsStore } from "src/stores/settings";
 
 export default defineComponent({
   name: "SettingsView",
@@ -376,6 +392,7 @@ export default defineComponent({
     };
   },
   computed: {
+    ...mapWritableState(useSettingsStore, ["getBitcoinPrice"]),
     ...mapState(useMintsStore, ["activeMintUrl", "mints"]),
     ...mapState(useWalletStore, ["mnemonic"]),
     ...mapWritableState(useMintsStore, [
@@ -485,6 +502,9 @@ export default defineComponent({
       downloadLink.style.display = "none";
       document.body.appendChild(downloadLink);
       downloadLink.click();
+    },
+    toggleGetBitcoinPrice: function () {
+      this.getBitcoinPrice = !this.getBitcoinPrice;
     },
   },
   created: function () {},
