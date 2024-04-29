@@ -4,7 +4,7 @@
       <NoMintWarnBanner v-if="mints.length == 0" />
       <BalanceView v-else :set-tab="setTab" />
       <div
-        class="row items-center justify-center no-wrap q-mb-none q-mx-none q-px-none q-pt-xl q-pb-lg"
+        class="row items-center justify-center no-wrap q-mb-none q-mx-none q-px-none q-pt-lg q-pb-md"
       >
         <div class="col-5 q-mb-md">
           <q-btn flat @click="showSendDialog = true" size="1.2rem">
@@ -37,10 +37,10 @@
       <!-- ///////////////////////////////////////////
       ////////////////// TABLES /////////////////
       /////////////////////////////////////////// -->
-      <q-expansion-item expand-separator expand-icon-class="hidden">
+      <q-expansion-item expand-icon-class="hidden" v-model="expandHistory">
         <template v-slot:header="{ expanded }">
           <q-item-section class="item-center text-center">
-            <span class="text-h6"
+            <span
               ><q-icon
                 :name="expanded ? 'keyboard_arrow_up' : 'keyboard_arrow_down'"
             /></span>
@@ -294,6 +294,7 @@ export default {
       "showReceiveDialog",
     ]),
     ...mapState(useUiStore, ["tickerShort"]),
+    ...mapWritableState(useUiStore, ["expandHistory"]),
     ...mapWritableState(useReceiveTokensStore, [
       "showReceiveTokens",
       "receiveData",

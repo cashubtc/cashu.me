@@ -14,16 +14,18 @@ export const useUiStore = defineStore("ui", {
     showSendDialog: false,
     showReceiveDialog: false,
     tab: "history",
+    expandHistory:
+      useLocalStorage("cashu.settings.expandHistory", true as boolean),
   }),
   actions: {
-    setTab(tab) {
+    setTab(tab: string) {
       this.tab = tab;
     },
   },
   getters: {
     tickerShort() {
       const unit = useMintsStore().activeUnit;
-      return unitTickerShortMap[unit];
+      return unitTickerShortMap[unit as keyof typeof unitTickerShortMap];
     },
   },
 });
