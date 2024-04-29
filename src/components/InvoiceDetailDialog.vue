@@ -75,6 +75,12 @@
             </div>
             <div class="row justify-center q-py-md">
               <q-item-label style="font-size: 28px" class="text-weight-bold">
+                <q-spinner-dots
+                  v-if="runnerActive"
+                  color="primary"
+                  size="0.8em"
+                  class="q-mr-md"
+                />
                 <q-icon
                   :name="
                     invoiceData.amount >= 0 ? 'call_received' : 'call_made'
@@ -137,6 +143,7 @@ import ChooseMint from "src/components/ChooseMint.vue";
 import { useUiStore } from "src/stores/ui";
 import { getShortUrl } from "src/js/wallet-helpers";
 import ToggleUnit from "src/components/ToggleUnit.vue";
+import { useWorkersStore } from "src/stores/workers";
 
 export default defineComponent({
   name: "InvoiceDetailDialog",
@@ -156,6 +163,7 @@ export default defineComponent({
   },
   computed: {
     ...mapState(useWalletStore, ["invoiceData"]),
+    ...mapState(useWorkersStore, ["invoiceWorkerRunning"]),
     ...mapWritableState(useUiStore, ["showInvoiceDetails", "tickerShort"]),
     displayUnit: function () {
       let display = this.formatCurrency(
@@ -166,6 +174,9 @@ export default defineComponent({
     },
     shortUrl: function () {
       return getShortUrl(this.invoiceData.mint);
+    },
+    runnerActive: function () {
+      return this.invoiceWorkerRunning;
     },
   },
   methods: {

@@ -332,12 +332,12 @@ export const useWalletStore = defineStore("wallet", {
         );
         this.invoiceData.bolt11 = data.request;
         this.invoiceData.quote = data.quote;
+        this.invoiceData.date = currentDateStr();
+        this.invoiceData.status = "pending";
+        this.invoiceData.mint = mintStore.activeMintUrl;
+        this.invoiceData.unit = mintStore.activeUnit;
         this.invoiceHistory.push({
           ...this.invoiceData,
-          date: currentDateStr(),
-          status: "pending",
-          mint: mintStore.activeMintUrl,
-          unit: mintStore.activeUnit
         });
         return data;
       } catch (error: any) {

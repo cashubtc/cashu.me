@@ -93,6 +93,12 @@
             </div>
             <div class="row justify-center q-py-md">
               <q-item-label style="font-size: 28px" class="text-weight-bold">
+                <q-spinner-dots
+                  v-if="runnerActive"
+                  color="primary"
+                  size="0.8em"
+                  class="q-mr-md"
+                />
                 <strong>{{ displayUnit }}</strong></q-item-label
               >
             </div>
@@ -192,6 +198,7 @@ export default defineComponent({
     ...mapState(useUiStore, ["tickerShort"]),
     ...mapState(useMintsStore, ["activeProofs", "activeUnit"]),
     ...mapState(useSettingsStore, ["checkSentTokens"]),
+    ...mapState(useWorkersStore, ["tokenWorkerRunning"]),
     // TOKEN METHODS
     sumProofs: function () {
       let proofs = token.getProofs(token.decode(this.sendData.tokensBase64));
@@ -216,6 +223,9 @@ export default defineComponent({
     },
     decodedToken: function () {
       return token.decode(this.sendData.tokensBase64);
+    },
+    runnerActive: function () {
+      return this.tokenWorkerRunning;
     },
   },
   watch: {

@@ -8,6 +8,8 @@ export const useWorkersStore = defineStore("workers", {
     return {
       invoiceCheckListener: null as NodeJS.Timeout | null,
       tokensCheckSpendableListener: null as NodeJS.Timeout | null,
+      invoiceWorkerRunning: false,
+      tokenWorkerRunning: false,
     };
   },
   getters: {},
@@ -16,9 +18,11 @@ export const useWorkersStore = defineStore("workers", {
     clearAllWorkers: function () {
       if (this.invoiceCheckListener) {
         clearInterval(this.invoiceCheckListener);
+        this.invoiceWorkerRunning = false;
       }
       if (this.tokensCheckSpendableListener) {
         clearInterval(this.tokensCheckSpendableListener);
+        this.tokenWorkerRunning = false;
       }
     },
     invoiceCheckWorker: async function () {
@@ -28,6 +32,7 @@ export const useWorkersStore = defineStore("workers", {
       this.clearAllWorkers();
       this.invoiceCheckListener = setInterval(async () => {
         try {
+          this.invoiceWorkerRunning = true;
           nInterval += 1;
 
           // exit loop after 1m
@@ -59,6 +64,7 @@ export const useWorkersStore = defineStore("workers", {
         return;
       }
       console.log("### kicking off checkTokenSpendableWorker");
+      this.tokenWorkerRunning = true;
       const walletStore = useWalletStore();
       const sendTokensStore = useSendTokensStore();
       let nInterval = 0;
