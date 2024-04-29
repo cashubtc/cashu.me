@@ -19,9 +19,9 @@
         :name="unit.value"
         class="q-pt-sm"
       >
-        <div class="row" @click="activeUnit = toggleUnit()">
+        <div class="row">
           <div class="col-12">
-            <h3 class="q-my-none q-py-none">
+            <h3 class="q-my-none q-py-none" @click="activeUnit = toggleUnit()">
               <strong>
                 {{ formatCurrency(getTotalBalance, activeUnit) }}
               </strong>
@@ -124,6 +124,7 @@ import { defineComponent, ref } from "vue";
 import { getShortUrl } from "src/js/wallet-helpers";
 import { mapState, mapWritableState } from "pinia";
 import { useMintsStore } from "stores/mints";
+import { useSettingsStore } from "stores/settings";
 import { useTokensStore } from "stores/tokens";
 import ToggleUnit from "components/ToggleUnit.vue";
 
@@ -157,6 +158,7 @@ export default defineComponent({
       "activeMint",
     ]),
     ...mapState(useTokensStore, ["historyTokens"]),
+    ...mapState(useSettingsStore, ["getBitcoinPrice"]),
     ...mapWritableState(useMintsStore, ["activeUnit"]),
     pendingBalance: function () {
       return -this.historyTokens
@@ -200,13 +202,17 @@ export default defineComponent({
   data() {
     return {
       bitcoinPrice: null,
+      priceLabel: null,
     };
   },
   mounted() {
-    this.fetchBitcoinPrice();
+    const settingsStore = useSettingsStore();
+    if (this.getBitcoinPrice) {
+      this.fetchPrice();
+    }
   },
   methods: {
-    async fetchBitcoinPrice() {
+    async fetchPrice() {
       try {
         this.bitcoinPrice = await fetchBitcoinPrice();
       } catch (e) {

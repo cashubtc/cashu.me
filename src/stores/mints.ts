@@ -186,7 +186,7 @@ export const useMintsStore = defineStore("mints", {
     toggleActiveUnitForMint(mint: Mint) {
       // method to set the active unit to one that is supported by `mint`
       const mintClass = new MintClass(mint);
-      if (mintClass.allBalances[this.activeUnit] == undefined) {
+      if (!this.activeUnit || mintClass.allBalances[this.activeUnit] == undefined) {
         this.activeUnit = mintClass.units[0]
       }
     },
@@ -271,7 +271,7 @@ export const useMintsStore = defineStore("mints", {
         this.activeMintUrl = mint.url;
 
         console.log("### this.activeMintUrl", this.activeMintUrl);
-        await this.fetchMintKeys(mint);
+        mint = await this.fetchMintKeys(mint);
         this.toggleActiveUnitForMint(mint);
         if (verbose) {
           await notifySuccess("Mint activated.");
