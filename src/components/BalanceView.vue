@@ -2,6 +2,9 @@
   <!-- <q-card class="q-my-md q-py-sm">
     <q-card-section class="q-mt-sm q-py-xs"> -->
   <div class="q-pt-xl q-pb-md">
+    <div class="row justify-center">
+      <ToggleUnit class="q-mt-lg q-mb-none" />
+    </div>
     <q-carousel
       v-model="this.activeUnit"
       transition-prev="jump-up"
@@ -10,14 +13,14 @@
       animated
       height="5rem"
       control-color="primary"
-      class="bg-transparent rounded-borders q-mb-lg q-mt-xl"
+      class="bg-transparent rounded-borders q-mb-xl q-mt-xl"
     >
       <!-- make a q-carousel-slide with v-for for all possible units -->
       <q-carousel-slide
         v-for="unit in balancesOptions"
         :key="unit.value"
         :name="unit.value"
-        class="q-pt-sm"
+        class="q-pt-lg"
       >
         <div class="row">
           <div class="col-12">
@@ -52,11 +55,9 @@
         </div>
       </q-carousel-slide>
     </q-carousel>
-    <div class="row justify-center">
-      <ToggleUnit class="q-mt-none q-mb-lg" />
-    </div>
     <!-- mint url -->
-    <div class="row q-mt-xs q-mb-none" v-if="activeMintUrl">
+
+    <div class="row q-mt-md q-mb-none" v-if="activeMintUrl">
       <div class="col-12 cursor-pointer">
         <q-icon
           name="link"
@@ -74,26 +75,10 @@
     <!-- mint balance -->
     <div class="row q-mb-none" v-if="mints.length > 1">
       <div class="col-12">
-        <!-- <q-icon
-          name="account_balance"
-          size="0.9rem"
-          color="grey"
-          class="q-mr-none q-mb-xs"
-        /> -->
         <span class="q-my-none q-py-none text-weight-regular">
           Balance:
           <b>{{ formatCurrency(getActiveMintBalance, activeUnit) }} </b>
         </span>
-        <!-- <q-knob
-              :model-value="getBalance"
-              :min="0"
-              :max="getTotalBalance"
-              show-value
-              size="50px"
-              :thickness="0.2"
-              color="orange"
-              class="q-ma-none q-pa-none q-mt-none q-pt-none"
-            /> -->
       </div>
     </div>
   </div>

@@ -28,7 +28,7 @@
 
           <q-item-section>
             <q-item-label @click="copyText(invoice.bolt11)">
-              Lightning invoice
+              Lightning
               <q-tooltip>Click to copy</q-tooltip>
             </q-item-label>
             <q-item-label caption>{{

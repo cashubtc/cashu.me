@@ -4,19 +4,16 @@
       <NoMintWarnBanner v-if="mints.length == 0" />
       <BalanceView v-else :set-tab="setTab" />
       <div
-        class="row items-center justify-center no-wrap q-mb-none q-mx-none q-px-none q-pt-md q-pb-lg"
+        class="row items-center justify-center no-wrap q-mb-none q-mx-none q-px-none q-pt-xl q-pb-xl"
       >
-        <div class="col-4 q-mb-md">
-          <q-btn
-            flat
-            icon="north_east"
-            @click="showSendDialog = true"
-            size="1rem"
-            label="Send"
-          />
+        <div class="col-5 q-mb-md">
+          <q-btn flat @click="showSendDialog = true" size="1.2rem">
+            <q-icon name="north_east" size="1.2rem" class="q-mr-xs" />
+            Send</q-btn
+          >
         </div>
 
-        <div class="col-2 q-mb-md">
+        <div class="col-2 q-mb-md q-mx-none">
           <q-btn
             align="center"
             size="lg"
@@ -28,14 +25,11 @@
           />
         </div>
         <!-- button to showSendDialog -->
-        <div class="col-4 q-mb-md">
-          <q-btn
-            flat
-            icon="south_west"
-            @click="showReceiveDialog = true"
-            size="1rem"
-            label="Receive"
-          />
+        <div class="col-5 q-mb-md">
+          <q-btn flat @click="showReceiveDialog = true" size="1.2rem">
+            <q-icon name="south_west" size="1.2rem" class="q-mr-xs" />
+            Receive</q-btn
+          >
         </div>
         <ReceiveDialog v-model="showReceiveDialog" />
         <SendDialog v-model="showSendDialog" />
