@@ -138,12 +138,13 @@
           class="q-gutter-md"
         >
           <q-input
-            ref="pasteInput"
+            ref="parseDialogInput"
             round
             outlined
             v-model.trim="payInvoiceData.input.request"
             type="textarea"
             label="Lightning invoice or address"
+            autofocus
             @keyup.enter="decodeAndQuote(payInvoiceData.input.request)"
           >
           </q-input>
@@ -151,13 +152,21 @@
             <q-btn
               unelevated
               color="primary"
+              class="q-mr-sm"
               :disable="payInvoiceData.input.request == ''"
               type="submit"
               >Enter</q-btn
             >
             <q-btn
               unelevated
-              icon="photo_camera"
+              v-if="canPasteFromClipboard"
+              icon="content_paste"
+              @click="pasteToParseDialog"
+              ><q-tooltip>Paste</q-tooltip></q-btn
+            >
+            <q-btn
+              unelevated
+              icon="qr_code_scanner"
               class="q-mx-0"
               v-if="hasCamera"
               @click="showCamera"
@@ -238,6 +247,19 @@ export default defineComponent({
     },
     decodeAndQuote: function (request) {
       this.decodeRequest(request);
+    },
+    canPasteFromClipboard: function () {
+      return (
+        window.isSecureContext &&
+        navigator.clipboard &&
+        navigator.clipboard.readText
+      );
+    },
+    pasteToParseDialog: function () {
+      console.log("pasteToParseDialog");
+      navigator.clipboard.readText().then((text) => {
+        this.payInvoiceData.input.request = text;
+      });
     },
   },
   created: function () {},

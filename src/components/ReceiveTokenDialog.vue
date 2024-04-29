@@ -37,12 +37,20 @@
         <q-btn
           @click="receveIfDecodes"
           color="primary"
+          class="q-mr-sm"
           :disabled="!decodeToken(receiveData.tokensBase64)"
           >Receive</q-btn
         >
         <q-btn
           unelevated
-          icon="photo_camera"
+          v-if="canPasteFromClipboard"
+          icon="content_paste"
+          @click="pasteToParseDialog"
+          ><q-tooltip>Paste</q-tooltip></q-btn
+        >
+        <q-btn
+          unelevated
+          icon="qr_code_scanner"
           class="q-mx-0"
           v-if="hasCamera"
           @click="showCamera"
@@ -166,6 +174,19 @@ export default defineComponent({
       } catch (error) {
         console.error(error);
       }
+    },
+    canPasteFromClipboard: function () {
+      return (
+        window.isSecureContext &&
+        navigator.clipboard &&
+        navigator.clipboard.readText
+      );
+    },
+    pasteToParseDialog: function () {
+      console.log("pasteToParseDialog");
+      navigator.clipboard.readText().then((text) => {
+        this.receiveData.tokensBase64 = text;
+      });
     },
   },
   created: function () {},
