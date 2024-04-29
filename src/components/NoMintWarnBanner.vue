@@ -5,12 +5,12 @@
         <q-icon class="q-pb-md" name="account_balance" size="50px" />
       </div>
       <div class="row items-center justify-center">
-        <div class="text-h6">Connect to a mint</div>
+        <div class="text-h6">Join a mint</div>
       </div>
       <div class="row items-center justify-center">
         <div class="text-subtitle2">
-          You're not connected to any Cashu mint yet. Add a mint in the settings
-          to get started.
+          You haven't joined any Cashu mint yet. Connect to a mint URL in the
+          settings to get started.
         </div>
       </div>
       <div class="row items-center justify-center q-pt-xl">

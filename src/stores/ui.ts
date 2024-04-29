@@ -13,9 +13,9 @@ export const useUiStore = defineStore("ui", {
     showInvoiceDetails: false,
     showSendDialog: false,
     showReceiveDialog: false,
-    tab: "history",
+    tab: useLocalStorage("cashu.ui.tab", "history" as string),
     expandHistory:
-      useLocalStorage("cashu.settings.expandHistory", true as boolean),
+      useLocalStorage("cashu.ui.expandHistory", true as boolean),
   }),
   actions: {
     setTab(tab: string) {
