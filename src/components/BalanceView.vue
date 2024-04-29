@@ -2,7 +2,7 @@
   <!-- <q-card class="q-my-md q-py-sm">
     <q-card-section class="q-mt-sm q-py-xs"> -->
   <div class="q-pt-xl q-pb-md">
-    <div class="row justify-center">
+    <div class="row justify-center q-pb-lg">
       <ToggleUnit class="q-mt-lg q-mb-none" />
     </div>
     <q-carousel
@@ -11,7 +11,7 @@
       transition-next="jump-up"
       swipeable
       animated
-      height="5rem"
+      :height="$q.screen.width < 390 ? '130px' : '80px'"
       control-color="primary"
       class="bg-transparent rounded-borders q-mb-xl q-mt-xl"
     >
@@ -20,7 +20,7 @@
         v-for="unit in balancesOptions"
         :key="unit.value"
         :name="unit.value"
-        class="q-pt-lg"
+        class="q-pt-none"
       >
         <div class="row">
           <div class="col-12">
