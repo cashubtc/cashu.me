@@ -152,10 +152,7 @@
     />
 
     <!-- SEND TOKENS DIALOG  -->
-    <SendTokenDialog
-      v-model="showSendTokens"
-      :check-token-spendable-worker="checkTokenSpendableWorker"
-    />
+    <SendTokenDialog v-model="showSendTokens" />
 
     <!-- RECEIVE TOKENS DIALOG  -->
     <ReceiveTokenDialog v-model="showReceiveTokens" />
@@ -239,20 +236,6 @@ export default {
       mintName: "",
       deferredPWAInstallPrompt: null,
       action: "main",
-      // receive: {
-      //   show: false,
-      //   status: "pending",
-      //   paymentReq: null,
-      //   paymentHash: null,
-      //   minMax: [0, 2100000000000000],
-      //   lnurl: null,
-      //   units: ["sat"],
-      //   unit: "sat",
-      //   data: {
-      //     amount: null,
-      //     memo: "",
-      //   },
-      // },
       parse: {
         show: false,
         invoice: null,
@@ -455,31 +438,11 @@ export default {
     setTab: function (to) {
       this.tab = to;
     },
-    // closeReceiveDialog: function () {
-    //   setTimeout(() => {
-    //     clearInterval(this.receive.paymentChecker);
-    //   }, 10000);
-    // },
     decodeQR: function (res) {
       this.camera.data = res;
       this.camera.show = false;
       this.decodeRequest(res);
     },
-    // payInvoice: function () {
-    //   let dismissPaymentMsg = this.$q.notify({
-    //     timeout: 0,
-    //     message: "Processing payment...",
-    //     position: "top",
-    //     actions: [
-    //       {
-    //         icon: "close",
-    //         color: "white",
-    //         handler: () => {},
-    //       },
-    //     ],
-    //   });
-    // },
-
     /////////////////////////////////// WALLET ///////////////////////////////////
     showInvoiceCreateDialog: async function () {
       console.log("##### showInvoiceCreateDialog");
@@ -585,34 +548,6 @@ export default {
     },
 
     ////////////// STORAGE /////////////
-
-    // getLocalstorageToFile: async function () {
-    //   // https://stackoverflow.com/questions/24263682/save-restore-local-storage-to-a-local-file
-    //   const fileName = `cashu_backup_${currentDateStr()}.json`;
-    //   var a = {};
-    //   for (var i = 0; i < localStorage.length; i++) {
-    //     var k = localStorage.key(i);
-    //     var v = localStorage.getItem(k);
-    //     a[k] = v;
-    //   }
-    //   var textToSave = JSON.stringify(a);
-    //   var textToSaveAsBlob = new Blob([textToSave], {
-    //     type: "text/plain",
-    //   });
-    //   var textToSaveAsURL = window.URL.createObjectURL(textToSaveAsBlob);
-
-    //   var downloadLink = document.createElement("a");
-    //   downloadLink.download = fileName;
-    //   downloadLink.innerHTML = "Download File";
-    //   downloadLink.href = textToSaveAsURL;
-    //   downloadLink.onclick = function () {
-    //     document.body.removeChild(event.target);
-    //   };
-    //   downloadLink.style.display = "none";
-    //   document.body.appendChild(downloadLink);
-    //   downloadLink.click();
-    // },
-
     migrationLocalstorage: async function () {
       // migration from old db to multimint
       for (var key in localStorage) {
@@ -645,11 +580,9 @@ export default {
     // mint url
     if (params.get("mint")) {
       let activeMintUrl = params.get("mint");
-      // await this.addMint(activeMintUrl);
       await this.setTab("settings");
       this.addMintDialog.mintToAdd = activeMintUrl;
       this.showAddMintDialog = true;
-      // this.addMintDialog.show = true;
     }
 
     if (params.get("mint_id")) {
@@ -751,6 +684,5 @@ export default {
     // show welcome dialog
     this.showWelcomeDialog();
   },
-  // })
 };
 </script>

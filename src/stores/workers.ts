@@ -2,8 +2,7 @@ import { defineStore } from "pinia";
 import { useWalletStore } from "src/stores/wallet"; // invoiceData,
 import { useUiStore } from "src/stores/ui"; // showInvoiceDetails
 import { useSendTokensStore } from "src/stores/sendTokensStore"; // showSendTokens and sendData
-import { notifyApiError, notifyError, notifySuccess } from "src/js/notify";
-
+import { useSettingsStore } from "./settings";
 export const useWorkersStore = defineStore("workers", {
   state: () => {
     return {
@@ -12,6 +11,7 @@ export const useWorkersStore = defineStore("workers", {
     };
   },
   getters: {},
+
   actions: {
     clearAllWorkers: function () {
       if (this.invoiceCheckListener) {
@@ -53,6 +53,12 @@ export const useWorkersStore = defineStore("workers", {
       }, 5000);
     },
     checkTokenSpendableWorker: async function (tokensBase64: string) {
+      const settingsStore = useSettingsStore();
+      if (!settingsStore.checkSentTokens) {
+        console.log("### checkTokenSpendableWorker: disabled");
+        return;
+      }
+      console.log("### kicking off checkTokenSpendableWorker");
       const walletStore = useWalletStore();
       const sendTokensStore = useSendTokensStore();
       let nInterval = 0;

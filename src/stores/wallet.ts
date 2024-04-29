@@ -5,20 +5,12 @@ import { useLocalStorage } from "@vueuse/core";
 import { useProofsStore } from "./proofs";
 import { useTokensStore } from "./tokens";
 import { useReceiveTokensStore } from "./receiveTokensStore";
-import { useCameraStore } from "./camera";
 import { useUiStore } from "src/stores/ui";
-
-import { step1Alice, step3Alice } from "src/js/dhke";
-import * as nobleSecp256k1 from "@noble/secp256k1";
-import { secp256k1 } from '@noble/curves/secp256k1';
-
-import { splitAmount } from "src/js/utils";
 import * as _ from "underscore";
-import { uint8ToBase64 } from "src/js/base64";
 import token from "src/js/token";
 import { notifyApiError, notifyError, notifySuccess, notifyWarning, notify } from "src/js/notify";
-import { CashuMint, CashuWallet, Proof, SerializedBlindedSignature, MintKeys, MintQuotePayload, SplitPayload, MintPayload, MeltPayload, CheckStatePayload, MeltQuotePayload, MeltQuoteResponse, generateNewMnemonic, deriveSeedFromMnemonic } from "@cashu/cashu-ts";
-import { blindMessage, hashToCurve } from "@cashu/cashu-ts/dist/lib/es5/DHKE";
+import { CashuMint, CashuWallet, Proof, MintQuotePayload, CheckStatePayload, MeltQuotePayload, MeltQuoteResponse, generateNewMnemonic, deriveSeedFromMnemonic } from "@cashu/cashu-ts";
+import { hashToCurve } from "@cashu/cashu-ts/dist/lib/es5/DHKE";
 import * as bolt11Decoder from "light-bolt11-decoder";
 import bech32 from "bech32";
 import axios from "axios";

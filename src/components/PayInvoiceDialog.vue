@@ -202,9 +202,7 @@ export default defineComponent({
   components: {
     ChooseMint,
   },
-  props: {
-    checkTokenSpendableWorker: Function,
-  },
+  props: {},
   data: function () {
     return {};
   },

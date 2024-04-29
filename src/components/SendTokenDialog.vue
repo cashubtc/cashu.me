@@ -146,7 +146,8 @@ import { useProofsStore } from "src/stores/proofs";
 import { useMintsStore } from "src/stores/mints";
 import { useTokensStore } from "src/stores/tokens";
 import { getShortUrl } from "src/js/wallet-helpers";
-
+import { useSettingsStore } from "src/stores/settings";
+import { useWorkersStore } from "src/stores/workers";
 import token from "src/js/token";
 import { Buffer } from "buffer";
 
@@ -162,9 +163,7 @@ export default defineComponent({
     ChooseMint,
     ToggleUnit,
   },
-  props: {
-    checkTokenSpendableWorker: Function,
-  },
+  props: {},
   data: function () {
     return {
       baseURL: location.protocol + "//" + location.host + location.pathname,
@@ -192,6 +191,7 @@ export default defineComponent({
     ...mapWritableState(useSendTokensStore, ["sendData"]),
     ...mapState(useUiStore, ["tickerShort"]),
     ...mapState(useMintsStore, ["activeProofs", "activeUnit"]),
+    ...mapState(useSettingsStore, ["checkSentTokens"]),
     // TOKEN METHODS
     sumProofs: function () {
       let proofs = token.getProofs(token.decode(this.sendData.tokensBase64));
@@ -252,6 +252,7 @@ export default defineComponent({
     },
   },
   methods: {
+    ...mapActions(useWorkersStore, ["checkTokenSpendableWorker"]),
     ...mapActions(useWalletStore, ["splitToSend"]),
     ...mapActions(useProofsStore, [
       "serializeProofs",
@@ -350,8 +351,11 @@ export default defineComponent({
           serializedProofs: this.sendData.tokensBase64,
           unit: this.activeUnit,
         });
-
         this.checkTokenSpendableWorker(this.sendData.tokensBase64);
+        // if (this.checkSentTokens) {
+        //   console.log("### kick off checkTokenSpendableWorker");
+        //   this.checkTokenSpendableWorker(this.sendData.tokensBase64);
+        // }
       } catch (error) {
         console.error(error);
       }

@@ -74,9 +74,7 @@ export default defineComponent({
   components: {
     TokenInformation,
   },
-  props: {
-    checkTokenSpendableWorker: Function,
-  },
+  props: {},
   data: function () {
     return {};
   },
@@ -165,33 +163,6 @@ export default defineComponent({
         if (decodedToken) {
           this.receiveToken(this.receiveData.tokensBase64);
         }
-      } catch (error) {
-        console.error(error);
-      }
-    },
-    sendTokens: async function () {
-      /*
-      calls splitToSend, displays token and kicks off the spendableWorker
-      */
-      try {
-        // keep firstProofs, send scndProofs and delete them (invalidate=true)
-        let { firstProofs, scndProofs } = await this.splitToSend(
-          this.activeProofs,
-          this.sendData.amount,
-          true
-        );
-
-        // update UI
-        this.sendData.tokens = scndProofs;
-        console.log("### this.sendData.tokens", this.sendData.tokens);
-
-        this.sendData.tokensBase64 = this.serializeProofs(scndProofs);
-        this.addPendingToken({
-          amount: -this.sendData.amount,
-          serializedProofs: this.sendData.tokensBase64,
-        });
-
-        this.checkTokenSpendableWorker();
       } catch (error) {
         console.error(error);
       }

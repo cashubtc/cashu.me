@@ -265,6 +265,21 @@
             >
           </q-item-section>
         </q-item>
+        <!-- check outgoing token state setting -->
+        <q-item>
+          <q-btn
+            dense
+            flat
+            outline
+            click
+            @click="checkSentTokens = !checkSentTokens"
+            :label="
+              checkSentTokens ? 'Don\'t check sent tokens' : 'Check sent tokens'
+            "
+          >
+          </q-btn>
+        </q-item>
+        <!-- price check setting -->
         <q-item>
           <q-btn
             dense
@@ -396,7 +411,10 @@ export default defineComponent({
     };
   },
   computed: {
-    ...mapWritableState(useSettingsStore, ["getBitcoinPrice"]),
+    ...mapWritableState(useSettingsStore, [
+      "getBitcoinPrice",
+      "checkSentTokens",
+    ]),
     ...mapState(useMintsStore, ["activeMintUrl", "mints"]),
     ...mapState(useWalletStore, ["mnemonic"]),
     ...mapWritableState(useMintsStore, [
