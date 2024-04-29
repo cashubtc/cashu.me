@@ -8,122 +8,41 @@
         :set-tab="setTab"
       />
       <div
-        class="row items-center justify-center no-wrap q-mb-none q-mx-none q-px-none"
+        class="row items-center justify-center no-wrap q-mb-none q-mx-none q-px-none q-pt-md q-pb-lg"
       >
-        <q-carousel
-          v-model="action"
-          transition-prev="slide-right"
-          transition-next="slide-left"
-          swipeable
-          animated
-          height="7rem"
-          control-color="primary"
-          class="bg-transparent text-white rounded-borders q-px-none q-mx-none q-mt-md"
-          style="max-width: 500px; width: 100%"
-        >
-          <q-carousel-slide name="ecash" class="q-pt-sm q-mx-none">
-            <div
-              class="row items-center justify-center no-wrap q-mb-sm relative-position"
-            >
-              <q-btn
-                flat
-                icon="arrow_forward"
-                @click="action = 'main'"
-                class="q-ml-auto"
-              />
-              <span class="text-h6 q-mr-auto absolute right q-mb-md"
-                >Ecash<q-icon class="q-ml-sm" name="toll"
-              /></span>
-            </div>
-            <div class="row items-center justify-center no-wrap q-mb-sm">
-              <q-btn-group rounded>
-                <q-btn
-                  color="primary"
-                  label="Receive"
-                  icon="south_west"
-                  @click="showReceiveTokensDialog"
-                />
-                <q-btn
-                  color="primary"
-                  label="Send"
-                  icon="north_east"
-                  @click="showSendTokensDialog"
-                />
-              </q-btn-group>
-            </div>
-          </q-carousel-slide>
+        <div class="col-4 q-mb-md">
+          <q-btn
+            flat
+            icon="north_east"
+            @click="showSendDialog = true"
+            size="1rem"
+            label="Send"
+          />
+        </div>
 
-          <q-carousel-slide name="main" class="q-pt-sm q-pb-none">
-            <q-btn-group
-              rounded
-              outline
-              style="width: 100%; max-width: 500px; outline: 0.8px solid"
-            >
-              <q-btn
-                outline
-                class="q-py-lg q-pl-xl q-pr-sm"
-                rounded
-                :icon="$q.screen.width >= 390 ? 'toll' : undefined"
-                label="Ecash"
-                :color="$q.dark.isActive ? 'white' : 'black'"
-                align="left"
-                @click="action = 'ecash'"
-                style="flex: 2"
-              />
-              <q-btn
-                align="center"
-                icon="qr_code_scanner"
-                outline
-                :color="$q.dark.isActive ? 'white' : 'black'"
-                rounded
-                class="q-py-lg"
-                @click="showCamera"
-              />
-              <q-btn
-                label="Lightning"
-                :icon="$q.screen.width > 430 ? 'bolt' : undefined"
-                outline
-                :color="$q.dark.isActive ? 'white' : 'black'"
-                rounded
-                class="q-py-lg q-pr-xl q-pl-sm"
-                @click="action = 'lightning'"
-                style="flex: 2"
-              />
-            </q-btn-group>
-          </q-carousel-slide>
-
-          <q-carousel-slide name="lightning" class="q-pt-sm">
-            <div
-              class="row items-center justify-center no-wrap q-mb-sm relative-position"
-            >
-              <q-btn
-                flat
-                icon="arrow_back"
-                @click="action = 'main'"
-                class="q-mr-auto"
-              />
-              <span class="text-h6 q-mr-auto absolute left q-mb-md"
-                >Lightning<q-icon name="bolt"
-              /></span>
-            </div>
-            <div class="row items-center justify-center no-wrap q-mb-sm">
-              <q-btn-group rounded>
-                <q-btn
-                  color="primary"
-                  icon="south_west"
-                  label="Receive"
-                  @click="showInvoiceCreateDialog"
-                />
-                <q-btn
-                  color="primary"
-                  icon="north_east"
-                  label="Send"
-                  @click="showParseDialog"
-                />
-              </q-btn-group>
-            </div>
-          </q-carousel-slide>
-        </q-carousel>
+        <div class="col-2 q-mb-md">
+          <q-btn
+            align="center"
+            size="lg"
+            icon="qr_code_scanner"
+            outline
+            :color="$q.dark.isActive ? 'white' : 'black'"
+            flat
+            @click="showCamera"
+          />
+        </div>
+        <!-- button to showSendDialog -->
+        <div class="col-4 q-mb-md">
+          <q-btn
+            flat
+            icon="south_west"
+            @click="showReceiveDialog = true"
+            size="1rem"
+            label="Receive"
+          />
+        </div>
+        <ReceiveDialog v-model="showReceiveDialog" />
+        <SendDialog v-model="showSendDialog" />
       </div>
       <!-- ///////////////////////////////////////////
       ////////////////// TABLES /////////////////
@@ -288,6 +207,8 @@ import WelcomeDialog from "components/WelcomeDialog.vue";
 import SendTokenDialog from "components/SendTokenDialog.vue";
 import PayInvoiceDialog from "components/PayInvoiceDialog.vue";
 import InvoiceDetailDialog from "components/InvoiceDetailDialog.vue";
+import SendDialog from "components/SendDialog.vue";
+import ReceiveDialog from "components/ReceiveDialog.vue";
 import QrcodeReader from "components/QrcodeReader.vue";
 
 // pinia stores
@@ -318,6 +239,8 @@ export default {
     PayInvoiceDialog,
     InvoiceDetailDialog,
     QrcodeReader,
+    SendDialog,
+    ReceiveDialog,
   },
   data: function () {
     return {
@@ -326,20 +249,20 @@ export default {
       mintName: "",
       deferredPWAInstallPrompt: null,
       action: "main",
-      receive: {
-        show: false,
-        status: "pending",
-        paymentReq: null,
-        paymentHash: null,
-        minMax: [0, 2100000000000000],
-        lnurl: null,
-        units: ["sat"],
-        unit: "sat",
-        data: {
-          amount: null,
-          memo: "",
-        },
-      },
+      // receive: {
+      //   show: false,
+      //   status: "pending",
+      //   paymentReq: null,
+      //   paymentHash: null,
+      //   minMax: [0, 2100000000000000],
+      //   lnurl: null,
+      //   units: ["sat"],
+      //   unit: "sat",
+      //   data: {
+      //     amount: null,
+      //     memo: "",
+      //   },
+      // },
       parse: {
         show: false,
         invoice: null,
@@ -374,7 +297,12 @@ export default {
     };
   },
   computed: {
-    ...mapWritableState(useUiStore, ["showInvoiceDetails", "tab"]),
+    ...mapWritableState(useUiStore, [
+      "showInvoiceDetails",
+      "tab",
+      "showSendDialog",
+      "showReceiveDialog",
+    ]),
     ...mapState(useUiStore, ["tickerShort"]),
     ...mapWritableState(useReceiveTokensStore, [
       "showReceiveTokens",
@@ -505,19 +433,6 @@ export default {
       // TODO: fix this
       // this.$nextTick(() => this.$refs[el].focus());
     },
-    showReceiveDialog: function () {
-      this.receive.show = true;
-      this.receive.status = "pending";
-      this.receive.paymentReq = null;
-      this.receive.paymentHash = null;
-      this.receive.data.amount = null;
-      this.receive.data.memo = null;
-      this.receive.unit = "sat";
-      this.receive.paymentChecker = null;
-      this.receive.minMax = [0, 2100000000000000];
-      this.receive.lnurl = null;
-      this.focusInput("setAmount");
-    },
     showParseDialog: function () {
       this.payInvoiceData.show = true;
       this.payInvoiceData.invoice = null;
@@ -549,30 +464,30 @@ export default {
     setTab: function (to) {
       this.tab = to;
     },
-    closeReceiveDialog: function () {
-      setTimeout(() => {
-        clearInterval(this.receive.paymentChecker);
-      }, 10000);
-    },
+    // closeReceiveDialog: function () {
+    //   setTimeout(() => {
+    //     clearInterval(this.receive.paymentChecker);
+    //   }, 10000);
+    // },
     decodeQR: function (res) {
       this.camera.data = res;
       this.camera.show = false;
       this.decodeRequest(res);
     },
-    payInvoice: function () {
-      let dismissPaymentMsg = this.$q.notify({
-        timeout: 0,
-        message: "Processing payment...",
-        position: "top",
-        actions: [
-          {
-            icon: "close",
-            color: "white",
-            handler: () => {},
-          },
-        ],
-      });
-    },
+    // payInvoice: function () {
+    //   let dismissPaymentMsg = this.$q.notify({
+    //     timeout: 0,
+    //     message: "Processing payment...",
+    //     position: "top",
+    //     actions: [
+    //       {
+    //         icon: "close",
+    //         color: "white",
+    //         handler: () => {},
+    //       },
+    //     ],
+    //   });
+    // },
 
     /////////////////////////////////// WALLET ///////////////////////////////////
     showInvoiceCreateDialog: async function () {

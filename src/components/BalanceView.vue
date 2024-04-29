@@ -1,7 +1,7 @@
 <template>
   <!-- <q-card class="q-my-md q-py-sm">
     <q-card-section class="q-mt-sm q-py-xs"> -->
-  <div>
+  <div class="q-pt-xl q-pb-md">
     <q-carousel
       v-model="this.activeUnit"
       transition-prev="jump-up"

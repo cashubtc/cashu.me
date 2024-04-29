@@ -11,6 +11,8 @@ export const useUiStore = defineStore("ui", {
   state: () => ({
     tickerLong: "Satoshis",
     showInvoiceDetails: false,
+    showSendDialog: false,
+    showReceiveDialog: false,
     tab: "history",
   }),
   actions: {
