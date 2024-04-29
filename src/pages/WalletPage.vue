@@ -4,7 +4,7 @@
       <NoMintWarnBanner v-if="mints.length == 0" />
       <BalanceView v-else :set-tab="setTab" />
       <div
-        class="row items-center justify-center no-wrap q-mb-none q-mx-none q-px-none q-pt-xl q-pb-xl"
+        class="row items-center justify-center no-wrap q-mb-none q-mx-none q-px-none q-pt-xl q-pb-lg"
       >
         <div class="col-5 q-mb-md">
           <q-btn flat @click="showSendDialog = true" size="1.2rem">
@@ -37,65 +37,66 @@
       <!-- ///////////////////////////////////////////
       ////////////////// TABLES /////////////////
       /////////////////////////////////////////// -->
-      <q-tabs
-        v-model="tab"
-        no-caps
-        :class="$q.dark.isActive ? 'bg-dark' : 'bg-white'"
-      >
-        <q-tab name="history" label="History"></q-tab>
-        <q-tab name="invoices" label="Invoices"></q-tab>
-        <!-- <q-tab name="tokens" label="Tokens"></q-tab> -->
-        <q-tab name="settings" label="Settings"></q-tab>
-      </q-tabs>
-      <q-tab-panels
-        :class="$q.dark.isActive ? 'bg-dark' : 'bg-white'"
-        v-model="tab"
-        animated
-      >
-        <!-- ////////////////// HISTORY LIST ///////////////// -->
+      <q-expansion-item expand-separator expand-icon-class="hidden">
+        <template v-slot:header="{ expanded }">
+          <q-item-section class="item-center text-center">
+            <span class="text-h6"
+              ><q-icon
+                :name="expanded ? 'keyboard_arrow_up' : 'keyboard_arrow_down'"
+            /></span>
+          </q-item-section>
+        </template>
+        <q-tabs
+          v-model="tab"
+          no-caps
+          :class="$q.dark.isActive ? 'bg-dark' : 'bg-white'"
+        >
+          <q-tab name="history" label="History"></q-tab>
+          <q-tab name="invoices" label="Invoices"></q-tab>
+          <!-- <q-tab name="tokens" label="Tokens"></q-tab> -->
+          <q-tab name="settings" label="Settings"></q-tab>
+        </q-tabs>
 
-        <q-tab-panel name="history">
-          <HistoryTable
-            :show-token-dialog="showTokenDialog"
-            :check-token-spendable="checkTokenSpendable"
-          />
-        </q-tab-panel>
+        <q-tab-panels
+          :class="$q.dark.isActive ? 'bg-dark' : 'bg-white'"
+          v-model="tab"
+          animated
+        >
+          <!-- ////////////////// HISTORY LIST ///////////////// -->
 
-        <!-- ////////////////// INVOICE LIST ///////////////// -->
+          <q-tab-panel name="history">
+            <HistoryTable
+              :show-token-dialog="showTokenDialog"
+              :check-token-spendable="checkTokenSpendable"
+            />
+          </q-tab-panel>
 
-        <q-tab-panel name="invoices">
-          <InvoicesTable :check-invoice="checkInvoice" />
-        </q-tab-panel>
+          <!-- ////////////////// INVOICE LIST ///////////////// -->
 
-        <!-- ////////////////////// SETTINGS ////////////////// -->
+          <q-tab-panel name="invoices">
+            <InvoicesTable :check-invoice="checkInvoice" />
+          </q-tab-panel>
 
-        <q-tab-panel name="settings" class="q-px-sm">
-          <SettingsView
-            :ticker-short="tickerShort"
-            :request-mint="requestMint"
-            :melt="melt"
-            :invoice-check-worker="invoiceCheckWorker"
-            :pay-invoice-data="payInvoiceData"
-            :show-mint-dialog="this.addMintDialog.show"
-            :mint-to-add-wallet-page="this.addMintDialog.mintToAdd"
-          />
-        </q-tab-panel>
-      </q-tab-panels>
+          <!-- ////////////////////// SETTINGS ////////////////// -->
+
+          <q-tab-panel name="settings" class="q-px-sm">
+            <SettingsView
+              :ticker-short="tickerShort"
+              :request-mint="requestMint"
+              :melt="melt"
+              :invoice-check-worker="invoiceCheckWorker"
+              :pay-invoice-data="payInvoiceData"
+              :show-mint-dialog="this.addMintDialog.show"
+              :mint-to-add-wallet-page="this.addMintDialog.mintToAdd"
+            />
+          </q-tab-panel>
+        </q-tab-panels>
+      </q-expansion-item>
       <!-- LIGHTNING BUTTONS  -->
 
       <div style="margin-bottom: 0rem">
         <div class="row q-pt-sm">
           <div class="col-12 q-pt-xs">
-            <!-- <q-btn
-              class="q-mx-xs q-px-sm q-my-sm"
-              size="0.6rem"
-              outline
-              rectangle
-              color="warning"
-              icon="download_for_offline"
-              @click="getLocalstorageToFile"
-              ><q-tooltip>Download wallet backup</q-tooltip></q-btn
-            > -->
             <q-btn
               class="q-mx-xs q-px-sm q-my-sm"
               outline
