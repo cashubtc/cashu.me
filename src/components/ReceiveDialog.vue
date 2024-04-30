@@ -14,28 +14,6 @@
           </div>
         </div>
       </q-card-section>
-      <!-- <q-card-section class="">
-        <q-list padding clickable>
-          <q-item clickable @click="showReceiveTokensDialog">
-            <q-item-section avatar> <q-icon name="toll" /></q-item-section>
-            <q-item-section>
-              <q-item-label overline>Ecash</q-item-label>
-              <q-item-label caption>
-                Paste or scan a Cashu token to receive Ecash.
-              </q-item-label>
-            </q-item-section>
-          </q-item>
-          <q-item clickable @click="showInvoiceCreateDialog">
-            <q-item-section avatar> <q-icon name="bolt" /></q-item-section>
-            <q-item-section>
-              <q-item-label overline>Lightning</q-item-label>
-              <q-item-label caption
-                >Create a Lightning invoice to receive payments.
-              </q-item-label>
-            </q-item-section>
-          </q-item>
-        </q-list>
-      </q-card-section> -->
       <div class="row items-center text-center no-wrap q-mb-md">
         <div class="col-12">
           <q-btn

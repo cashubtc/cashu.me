@@ -92,7 +92,7 @@
           ref="mintInput"
         >
           <template v-slot:before>
-            <q-icon class="q-pt-md" name="account_balance" />
+            <q-icon class="q-pt-md" color="primary" name="account_balance" />
           </template>
 
           <!-- <template v-slot:hint> Enter Mint URL</template> -->
@@ -136,6 +136,7 @@
                       flat
                       dense
                       icon="visibility"
+                      color="primary"
                       class="cursor-pointer q-mt-md"
                       @click="toggleMnemonicVisibility"
                     ></q-btn>
@@ -143,6 +144,7 @@
                       flat
                       dense
                       icon="content_copy"
+                      color="primary"
                       class="cursor-pointer q-mt-md"
                       @click="copyText(mnemonic)"
                     ></q-btn>
@@ -239,6 +241,7 @@
           <q-btn
             class="q-mx-md"
             color="primary"
+            outline
             @click="
               mintSwap(
                 swapData.from_url.url,

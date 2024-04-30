@@ -45,6 +45,7 @@
             :disable="sendData.amount == null || sendData.amount <= 0"
             @click="sendTokens"
             color="primary"
+            outline
             type="submit"
             >Send Tokens</q-btn
           >

@@ -13,7 +13,7 @@
       animated
       :height="$q.screen.width < 390 ? '130px' : '80px'"
       control-color="primary"
-      class="bg-transparent rounded-borders q-mb-xl q-mt-xl"
+      class="bg-transparent rounded-borders q-mb-xl q-mt-xl text-primary"
     >
       <!-- make a q-carousel-slide with v-for for all possible units -->
       <q-carousel-slide
@@ -57,12 +57,12 @@
     </q-carousel>
     <!-- mint url -->
 
-    <div class="row q-mt-md q-mb-none" v-if="activeMintUrl">
+    <div class="row q-mt-md q-mb-none text-secondary" v-if="activeMintUrl">
       <div class="col-12 cursor-pointer">
         <q-icon
           name="link"
           size="1rem"
-          color="grey"
+          color="secondary"
           class="q-mr-none q-mb-none"
           @click="setTab('settings')"
         />
@@ -73,7 +73,7 @@
       </div>
     </div>
     <!-- mint balance -->
-    <div class="row q-mb-none" v-if="mints.length > 1">
+    <div class="row q-mb-none text-secondary" v-if="mints.length > 1">
       <div class="col-12">
         <span class="q-my-none q-py-none text-weight-regular">
           Balance:
@@ -89,7 +89,7 @@
         name="history"
         size="sm"
         align="between"
-        color="white"
+        color="secondary"
         dense
         outline
         icon="refresh"

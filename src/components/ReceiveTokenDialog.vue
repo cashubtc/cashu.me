@@ -37,6 +37,7 @@
         <q-btn
           @click="receveIfDecodes"
           color="primary"
+          outline
           class="q-mr-sm"
           :disabled="!decodeToken(receiveData.tokensBase64)"
           >Receive</q-btn

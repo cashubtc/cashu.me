@@ -36,6 +36,7 @@
           <q-btn
             unelevated
             color="primary"
+            outline
             :disabled="
               payInvoiceData.blocking || payInvoiceData.meltQuote.error != ''
             "
@@ -150,7 +151,7 @@
           </q-input>
           <div class="row q-mt-lg">
             <q-btn
-              unelevated
+              outline
               color="primary"
               class="q-mr-sm"
               :disable="payInvoiceData.input.request == ''"

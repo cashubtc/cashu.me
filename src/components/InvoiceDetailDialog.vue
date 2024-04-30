@@ -37,6 +37,7 @@
         <div class="row items-center no-wrap q-my-sm q-py-none">
           <q-btn
             color="primary"
+            outline
             @click="requestMintButton"
             :disable="!(invoiceData.amount > 0) || createInvoiceButtonBlocked"
             :label="

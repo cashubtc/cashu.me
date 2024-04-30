@@ -83,7 +83,7 @@
             icon="format_color_fill"
             color="blue-10"
             size="md"
-            ><q-tooltip>elSalvador</q-tooltip>
+            ><q-tooltip>blu</q-tooltip>
           </q-btn>
           <q-btn
             v-if="themes.includes('freedom')"
@@ -211,7 +211,7 @@ export default defineComponent({
         "autumn",
         "salvador",
         "freedom",
-        // "cyber",
+        "cyber",
         "flamingo",
       ],
       essentialLinks: linksList,

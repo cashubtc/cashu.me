@@ -7,7 +7,15 @@
         class="row items-center justify-center no-wrap q-mb-none q-mx-none q-px-none q-pt-lg q-pb-md"
       >
         <div class="col-5 q-mb-md">
-          <q-btn flat @click="showSendDialog = true" size="1.2rem">
+          <q-btn
+            rounded
+            dense
+            class="q-px-md"
+            style="width: 140px"
+            color="primary"
+            @click="showSendDialog = true"
+            size="1.2rem"
+          >
             <q-icon name="north_east" size="1.2rem" class="q-mr-xs" />
             Send</q-btn
           >
@@ -19,14 +27,22 @@
             size="lg"
             icon="qr_code_scanner"
             outline
-            :color="$q.dark.isActive ? 'white' : 'black'"
+            color="primary"
             flat
             @click="showCamera"
           />
         </div>
         <!-- button to showSendDialog -->
         <div class="col-5 q-mb-md">
-          <q-btn flat @click="showReceiveDialog = true" size="1.2rem">
+          <q-btn
+            rounded
+            dense
+            class="q-px-md"
+            color="primary"
+            style="width: 140px"
+            @click="showReceiveDialog = true"
+            size="1.2rem"
+          >
             <q-icon name="south_west" size="1.2rem" class="q-mr-xs" />
             Receive</q-btn
           >
@@ -51,10 +67,18 @@
           no-caps
           :class="$q.dark.isActive ? 'bg-dark' : 'bg-white'"
         >
-          <q-tab name="history" label="History"></q-tab>
-          <q-tab name="invoices" label="Invoices"></q-tab>
+          <q-tab name="history" class="text-secondary" label="History"></q-tab>
+          <q-tab
+            name="invoices"
+            class="text-secondary"
+            label="Invoices"
+          ></q-tab>
           <!-- <q-tab name="tokens" label="Tokens"></q-tab> -->
-          <q-tab name="settings" label="Settings"></q-tab>
+          <q-tab
+            name="settings"
+            class="text-secondary"
+            label="Settings"
+          ></q-tab>
         </q-tabs>
 
         <q-tab-panels
