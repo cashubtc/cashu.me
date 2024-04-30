@@ -16,7 +16,10 @@
     "test:ci": "vitest run"
   },
   "dependencies": {
-    "@capacitor/clipboard": "^4.1.0",
+    "@capacitor/cli": "^6.0.0",
+    "@capacitor/clipboard": "^6.0.0",
+    "@capacitor/core": "^6.0.0",
+    "@capacitor/ios": "^6.0.0",
     "@cashu/cashu-ts": "^1.0.0-rc.3",
     "@chenfengyuan/vue-qrcode": "^2.0.0",
     "@gandlaf21/bc-ur": "^1.1.12",
