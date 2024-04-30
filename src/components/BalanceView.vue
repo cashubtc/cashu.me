@@ -5,56 +5,66 @@
     <div class="row justify-center q-pb-lg">
       <ToggleUnit class="q-mt-lg q-mb-none" />
     </div>
-    <q-carousel
-      v-model="this.activeUnit"
-      transition-prev="jump-up"
-      transition-next="jump-up"
-      swipeable
-      animated
-      :height="$q.screen.width < 390 ? '130px' : '80px'"
-      control-color="primary"
-      class="bg-transparent rounded-borders q-mb-xl q-mt-xl text-primary"
+    <transition
+      appear
+      enter-active-class="animated fadeInDown"
+      leave-active-class="animated fadeInDown"
+      mode="out-in"
     >
-      <!-- make a q-carousel-slide with v-for for all possible units -->
-      <q-carousel-slide
-        v-for="unit in balancesOptions"
-        :key="unit.value"
-        :name="unit.value"
-        class="q-pt-none"
+      <q-carousel
+        v-model="this.activeUnit"
+        transition-prev="jump-up"
+        transition-next="jump-up"
+        swipeable
+        animated
+        :height="$q.screen.width < 390 ? '130px' : '80px'"
+        control-color="primary"
+        class="bg-transparent rounded-borders q-mb-xl q-mt-xl text-primary"
       >
-        <div class="row">
-          <div class="col-12">
-            <h3 class="q-my-none q-py-none" @click="activeUnit = toggleUnit()">
-              <strong>
-                {{ formatCurrency(getTotalBalance, activeUnit) }}
-              </strong>
-            </h3>
-            <div v-if="bitcoinPrice">
-              <strong v-if="this.activeUnit == 'sat'">
-                {{
-                  formatCurrency(
-                    (bitcoinPrice / 100000000) * getTotalBalance,
-                    "USD"
-                  )
-                }}
-              </strong>
-              <strong v-if="this.activeUnit == 'usd'">
-                {{
-                  formatCurrency(
-                    (getTotalBalance / 100 / bitcoinPrice) * 100000000,
-                    "sat"
-                  )
-                }}
-              </strong>
-              <q-tooltip>
-                {{ formatCurrency(bitcoinPrice, "USD").slice(1) }}
-                USD/BTC</q-tooltip
+        <!-- make a q-carousel-slide with v-for for all possible units -->
+        <q-carousel-slide
+          v-for="unit in balancesOptions"
+          :key="unit.value"
+          :name="unit.value"
+          class="q-pt-none"
+        >
+          <div class="row">
+            <div class="col-12">
+              <h3
+                class="q-my-none q-py-none"
+                @click="activeUnit = toggleUnit()"
               >
+                <strong>
+                  {{ formatCurrency(getTotalBalance, activeUnit) }}
+                </strong>
+              </h3>
+              <div v-if="bitcoinPrice">
+                <strong v-if="this.activeUnit == 'sat'">
+                  {{
+                    formatCurrency(
+                      (bitcoinPrice / 100000000) * getTotalBalance,
+                      "USD"
+                    )
+                  }}
+                </strong>
+                <strong v-if="this.activeUnit == 'usd'">
+                  {{
+                    formatCurrency(
+                      (getTotalBalance / 100 / bitcoinPrice) * 100000000,
+                      "sat"
+                    )
+                  }}
+                </strong>
+                <q-tooltip>
+                  {{ formatCurrency(bitcoinPrice, "USD").slice(1) }}
+                  USD/BTC</q-tooltip
+                >
+              </div>
             </div>
           </div>
-        </div>
-      </q-carousel-slide>
-    </q-carousel>
+        </q-carousel-slide>
+      </q-carousel>
+    </transition>
     <!-- mint url -->
 
     <div class="row q-mt-md q-mb-none text-secondary" v-if="activeMintUrl">
