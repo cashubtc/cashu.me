@@ -58,6 +58,7 @@
           <q-item-section class="item-center text-center">
             <span
               ><q-icon
+                color="primary"
                 :name="expanded ? 'keyboard_arrow_up' : 'keyboard_arrow_down'"
             /></span>
           </q-item-section>

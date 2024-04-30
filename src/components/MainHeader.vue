@@ -6,6 +6,7 @@
         dense
         round
         icon="menu"
+        color="primary"
         aria-label="Menu"
         @click="toggleLeftDrawer"
       />
@@ -21,6 +22,7 @@
         dense
         flat
         round
+        color="primary"
         size="sm"
         icon="dashboard_customize"
         class="q-pl-md"
