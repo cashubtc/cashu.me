@@ -50,15 +50,21 @@
               type="submit"
               >Send Ecash</q-btn
             >
-            <q-chip
-              v-if="canSpendOffline"
-              outline
-              color="primary"
-              icon="check"
-              class="q-ml-auto"
+            <transition
+              appear
+              enter-active-class="animated fadeIn"
+              leave-active-class="animated fadeOut"
             >
-              Can send offline
-            </q-chip>
+              <q-chip
+                v-if="canSpendOffline"
+                outline
+                color="primary"
+                icon="check"
+                class="q-ml-auto"
+              >
+                Can send offline
+              </q-chip>
+            </transition>
           </div>
         </q-card-section>
       </div>
@@ -144,7 +150,16 @@
                 flat
                 @click="copyText(baseURL + '?token=' + sendData.tokensBase64)"
               />
-
+              <q-btn
+                class="q-mx-none"
+                color="grey"
+                icon="delete"
+                size="md"
+                @click="showDeleteDialog = true"
+                flat
+              >
+                <q-tooltip>Delete Ecash</q-tooltip>
+              </q-btn>
               <q-btn v-close-popup flat color="grey" class="q-ml-auto"
                 >Close</q-btn
               >
@@ -152,6 +167,37 @@
           </q-card-section>
         </q-card-section>
       </div>
+    </q-card>
+  </q-dialog>
+  <!-- popup dialog to confirm deletion activated by showDeleteDialog -->
+  <q-dialog v-model="showDeleteDialog">
+    <q-card class="q-pa-lg q-pt-md qcard">
+      <q-card-section class="q-pa-none q-pt-md">
+        <div class="row items-center no-wrap q-mb-sm">
+          <div class="col-12">
+            <span class="text-h6">Delete Ecash</span>
+          </div>
+        </div>
+        <div class="row items-center no-wrap q-my-sm q-py-none">
+          <div class="col-12">
+            <q-item-label>
+              Are you sure you want to delete this Ecash from your history?
+            </q-item-label>
+          </div>
+        </div>
+        <div class="row q-mt-lg">
+          <q-btn
+            @click="deleteThisToken"
+            color="negative"
+            rounded
+            class="q-mr-sm"
+            >Delete</q-btn
+          >
+          <q-btn v-close-popup rounded flat color="grey" class="q-ml-auto"
+            >Cancel</q-btn
+          >
+        </div>
+      </q-card-section>
     </q-card>
   </q-dialog>
 </template>
@@ -189,6 +235,7 @@ export default defineComponent({
       qrCodeFragment: "",
       qrInterval: null,
       encoder: null,
+      showDeleteDialog: false,
 
       // parameters for animated QR
       currentFragmentLength: 150,
@@ -289,7 +336,10 @@ export default defineComponent({
     },
   },
   methods: {
-    ...mapActions(useWorkersStore, ["checkTokenSpendableWorker"]),
+    ...mapActions(useWorkersStore, [
+      "checkTokenSpendableWorker",
+      "clearAllWorkers",
+    ]),
     ...mapActions(useWalletStore, [
       "splitToSend",
       "coinSelect",
@@ -300,7 +350,11 @@ export default defineComponent({
       "getProofsMint",
       "serializeProofsV2",
     ]),
-    ...mapActions(useTokensStore, ["addPendingToken", "setTokenPaid"]),
+    ...mapActions(useTokensStore, [
+      "addPendingToken",
+      "setTokenPaid",
+      "deleteToken",
+    ]),
     decodeToken: function (encoded_token) {
       return token.decode(encoded_token);
     },
@@ -365,6 +419,12 @@ export default defineComponent({
       console.log("### this.currentFragmentLength", this.currentFragmentLength);
       clearInterval(this.qrInterval);
       this.startQrCodeLoop();
+    },
+    deleteThisToken: function () {
+      this.deleteToken(this.sendData.tokensBase64);
+      this.showSendTokens = false;
+      this.showDeleteDialog = false;
+      this.clearAllWorkers();
     },
     sendTokens: async function () {
       /*

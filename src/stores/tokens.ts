@@ -43,7 +43,7 @@ export const useTokensStore = defineStore("tokens", {
         token: serializedProofs,
         mint,
         unit,
-      });
+      } as HistoryToken);
     },
     addPendingToken({
       amount,
@@ -71,6 +71,12 @@ export const useTokensStore = defineStore("tokens", {
         this.historyTokens[index].status = "paid";
       }
     },
+    deleteToken(token: string) {
+      const index = this.historyTokens.findIndex((t) => t.token === token);
+      if (index >= 0) {
+        this.historyTokens.splice(index, 1);
+      }
+    }
   },
 });
 
