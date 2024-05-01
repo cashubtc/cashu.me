@@ -17,7 +17,6 @@ window.windowMixin = {
       },
     };
   },
-
   methods: {
     changeColor: function (newValue) {
       document.body.setAttribute("data-theme", newValue);
@@ -37,13 +36,22 @@ window.windowMixin = {
       });
     },
     formatCurrency: function (value, currency) {
+      if (currency == undefined) {
+        currency = "sat";
+      }
+      if (currency == "sat") return this.formatSat(value);
+      if (currency == "usd") value = value / 100;
       return new Intl.NumberFormat(window.LOCALE, {
         style: "currency",
         currency: currency,
       }).format(value);
+      // + " " +
+      // currency.toUpperCase()
     },
     formatSat: function (value) {
-      return new Intl.NumberFormat(window.LOCALE).format(value);
+      // convert value to integer
+      value = parseInt(value);
+      return new Intl.NumberFormat(window.LOCALE).format(value) + " sat";
     },
     notifyApiError: function (error) {
       var types = {
@@ -179,7 +187,7 @@ window.windowMixin = {
         this.$q.localStorage.getItem("cashu.theme")
       );
     } else {
-      this.changeColor("classic");
+      this.changeColor("monochrome");
     }
   },
 };

@@ -6,43 +6,40 @@
     position="top"
     @drop="dragFile"
     @dragover="allowDrop"
+    backdrop-filter="blur(2px) brightness(60%)"
   >
     <q-card class="q-pa-lg z-top">
       <q-toolbar>
-        <q-avatar>
+        <!-- <q-avatar>
           <img
             src="https://raw.githubusercontent.com/cashubtc/cashu-ui/main/ui/icons/circle/128x128.png"
           />
-        </q-avatar>
+        </q-avatar> -->
         <q-toolbar-title
-          ><span class="text-weight-bold">Cashu.me</span>
+          ><span class="text-weight-bold">Cashu</span> ecash
           wallet</q-toolbar-title
         >
       </q-toolbar>
       <q-card-section>
         <p>Please take a moment to read the following information.</p>
-
         <p>
-          <strong>Open this wallet on your device's native browser</strong>
-          Cashu stores your ecash on your device locally. For the best
-          experience, use this wallet with your device's native web browser (for
-          example Safari for iOS, Chrome for Android).
+          <strong>Install and add to home screen.</strong>
+          For the best experience, use this wallet with your device's native web
+          browser (Safari on iOS, Chrome on Android). In Chrome click the
+          hamburger menu at the upper right. In Safari click the share button
+          and press the Add to Home screen button.
         </p>
         <p>
-          <strong>Add to home screen.</strong>
-          Add Cashu to your home screen as a progressive web app (PWA). On
-          Android Chrome, click the hamburger menu at the upper right. On iOS
-          Safari, click the share button. Now press the Add to Home screen
-          button.
+          <strong>Back up your seed phrase.</strong> This wallet stores ecash
+          tokens in its database. If you delete your your browser data without
+          backing up, you will lose your tokens. Make sure to back up your
+          wallet seed phrase in the settings.
         </p>
         <p>
           <strong>This software is in BETA!</strong> We hold no responsibility
-          for people losing access to funds. Use at your own risk! Ecash is a
-          bearer asset, meaning losing access to this wallet will mean you will
-          lose the funds. This wallet stores ecash tokens in its database. If
-          you lose the link or delete your your data without backing up, you
-          will lose your tokens. Press the Backup button to download a copy of
-          your tokens.
+          for people losing access to funds. Use at your own risk! This wallet
+          is not affiliated with any mint. This wallet is open-source and the
+          source code under the MIT license.
         </p>
         <!-- wallet backup restore -->
         <input
@@ -67,7 +64,6 @@
           <q-btn
             flat
             size="0.6rem"
-            color="grey"
             class="q-mx-xs q-px-none"
             @click="copyText(baseURL)"
             >Copy URL</q-btn
@@ -87,7 +83,6 @@
             v-close-popup
             outline
             size="0.8rem"
-            color="primary"
             class="q-ml-auto"
             @click="setWelcomeDialogSeen()"
             >Continue</q-btn
@@ -104,8 +99,9 @@
 </style>
 <script>
 import { defineComponent } from "vue";
-import { mapActions } from "pinia";
+import { mapActions, mapState } from "pinia";
 import { useMintsStore } from "stores/mints";
+import { useWalletStore } from "src/stores/wallet";
 
 export default defineComponent({
   name: "WelcomeDialog",
@@ -124,7 +120,19 @@ export default defineComponent({
     };
   },
   watch: {},
-  computed: {},
+  computed: {
+    ...mapState(useWalletStore, ["mnemonic"]),
+    hiddenMnemonic() {
+      if (this.hideMnemonic) {
+        return this.mnemonic
+          .split(" ")
+          .map((w) => "*".repeat(w.length))
+          .join(" ");
+      } else {
+        return this.mnemonic;
+      }
+    },
+  },
   methods: {
     ...mapActions(useMintsStore, ["restoreFromBackup"]),
     readFile(file) {

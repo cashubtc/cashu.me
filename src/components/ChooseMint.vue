@@ -1,17 +1,53 @@
 <template>
   <div class="q-pb-md">
-    <!-- mint url -->
+    <!-- title that says choose a mint -->
+    <div class="row q-mb-none">
+      <div class="col-12">
+        <span class="text-caption">Select a mint</span>
+      </div>
+    </div>
     <div class="row q-mt-xs q-mb-none" v-if="activeMintUrl">
       <div class="col-12 cursor-pointer">
         <q-select
-          borderless
-          dense
-          color="primary"
+          outlined
+          class="q-px-none"
+          color="white"
           v-model="chosenMint"
           :options="chooseMintOptions()"
           option-value="url"
           option-label="shorturl"
         >
+          <template v-slot:option="scope">
+            <q-item v-bind="scope.itemProps">
+              <q-item-section avatar>
+                <q-icon
+                  name="account_balance"
+                  size="1.2rem"
+                  color="grey"
+                  class="q-pl-md"
+                />
+              </q-item-section>
+              <q-item-section>
+                <q-item-label class="text-body1 q-pa-md">{{
+                  scope.opt.shorturl
+                }}</q-item-label>
+                <!-- <q-item-label caption></q-item-label> -->
+              </q-item-section>
+              <q-item-section side>
+                <q-item-label>
+                  <div v-for="unit in scope.opt.units" :key="unit">
+                    <q-badge
+                      color="primary"
+                      :label="formatCurrency(scope.opt.balances[unit], unit)"
+                      class="q-ma-xs q-pa-sm"
+                      style="float: right"
+                    />
+                  </div>
+                </q-item-label>
+              </q-item-section>
+            </q-item>
+            <q-separator />
+          </template>
           <template v-slot:prepend>
             <q-icon
               name="account_balance"
@@ -23,7 +59,7 @@
           <template v-slot:append>
             <q-badge
               color="primary"
-              :label="formatSat(getBalance) + ' ' + tickerShort"
+              :label="formatCurrency(getBalance, activeUnit)"
           /></template>
         </q-select>
       </div>
@@ -35,6 +71,7 @@ import { defineComponent } from "vue";
 import { getShortUrl } from "src/js/wallet-helpers";
 import { mapActions, mapState } from "pinia";
 import { useMintsStore } from "stores/mints";
+import { MintClass } from "stores/mints";
 export default defineComponent({
   name: "ChooseMint",
   mixins: [windowMixin],
@@ -55,7 +92,7 @@ export default defineComponent({
   watch: {
     chosenMint: async function () {
       console.log("Mint chosen ", this.chosenMint);
-      await this.activateMint(this.chosenMint.url);
+      await this.activateMintUrl(this.chosenMint.url);
     },
   },
   computed: {
@@ -64,6 +101,7 @@ export default defineComponent({
       "activeProofs",
       "mints",
       "proofs",
+      "activeUnit",
     ]),
     balance: function () {
       return this.activeProofs
@@ -72,12 +110,6 @@ export default defineComponent({
     },
     allMintKeysets: function () {
       return [].concat(...this.mints.map((m) => m.keysets));
-    },
-    getTotalBalance: function () {
-      return this.proofs
-        .filter((p) => this.allMintKeysets.includes(p.id))
-        .flat()
-        .reduce((sum, el) => (sum += el.amount), 0);
     },
     getActiveMintUrlShort: function () {
       return getShortUrl(this.activeMintUrl);
@@ -90,11 +122,20 @@ export default defineComponent({
     },
   },
   methods: {
-    ...mapActions(useMintsStore, ["activateMint"]),
+    ...mapActions(useMintsStore, ["activateMintUrl"]),
     chooseMintOptions: function () {
       let options = [];
       for (const [i, m] of Object.entries(this.mints)) {
-        options.push({ url: m.url, shorturl: getShortUrl(m.url) });
+        const all_units = m.keysets.map((r) => r.unit);
+        const units = [...new Set(all_units)];
+        const mint = new MintClass(m);
+        options.push({
+          nickname: m.nickname,
+          url: m.url,
+          shorturl: m.nickname || getShortUrl(m.url),
+          balances: mint.allBalances,
+          units: units,
+        });
       }
       return options;
     },

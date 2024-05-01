@@ -1,5 +1,9 @@
 <template>
-  <q-dialog v-model="showReceiveTokens" position="top">
+  <q-dialog
+    v-model="showReceiveTokens"
+    position="top"
+    backdrop-filter="blur(2px) brightness(60%)"
+  >
     <q-card class="q-pa-lg q-pt-md qcard">
       <div>
         <div class="row items-center no-wrap q-mb-sm">
@@ -8,13 +12,14 @@
           </div>
         </div>
         <q-input
-          filled
-          dense
+          round
+          outlined
           v-model="receiveData.tokensBase64"
-          label="Enter Cashu token"
+          label="Paste Cashu token"
           type="textarea"
           autofocus
           class="q-mb-lg"
+          @keyup.enter="receveIfDecodes"
         ></q-input>
       </div>
       <div
@@ -25,23 +30,28 @@
         "
       >
         <div class="col-12">
-          <TokenInformation
-            :ticker-short="tickerShort"
-            :proofs-to-show="getProofs(decodeToken(receiveData.tokensBase64))"
-            :token-mint-url="getMint(decodeToken(receiveData.tokensBase64))"
-          />
+          <TokenInformation :encodedToken="receiveData.tokensBase64" />
         </div>
       </div>
       <div class="row q-mt-lg">
         <q-btn
-          @click="redeem"
+          @click="receveIfDecodes"
           color="primary"
+          outline
+          class="q-mr-sm"
           :disabled="!decodeToken(receiveData.tokensBase64)"
           >Receive</q-btn
         >
         <q-btn
           unelevated
-          icon="photo_camera"
+          v-if="canPasteFromClipboard"
+          icon="content_paste"
+          @click="pasteToParseDialog"
+          ><q-tooltip>Paste</q-tooltip></q-btn
+        >
+        <q-btn
+          unelevated
+          icon="qr_code_scanner"
           class="q-mx-0"
           v-if="hasCamera"
           @click="showCamera"
@@ -73,9 +83,7 @@ export default defineComponent({
   components: {
     TokenInformation,
   },
-  props: {
-    checkTokenSpendableWorker: Function,
-  },
+  props: {},
   data: function () {
     return {};
   },
@@ -85,23 +93,65 @@ export default defineComponent({
       "receiveData",
     ]),
     ...mapState(useUiStore, ["tickerShort"]),
-    ...mapState(useMintsStore, ["activeProofs"]),
+    ...mapState(useMintsStore, ["activeProofs", "activeUnit"]),
+    ...mapState(useCameraStore, ["hasCamera"]),
+    canPasteFromClipboard: function () {
+      return (
+        window.isSecureContext &&
+        navigator.clipboard &&
+        navigator.clipboard.readText
+      );
+    },
   },
   methods: {
     ...mapActions(useWalletStore, ["redeem"]),
-    ...mapActions(useCameraStore, ["closeCamera", "showCamera", "hasCamera"]),
+    ...mapActions(useCameraStore, ["closeCamera", "showCamera"]),
+    knowThisMintOfTokenJson: function (tokenJson) {
+      const mintStore = useMintsStore();
+      // check if we have all mints
+      for (var i = 0; i < tokenJson.token.length; i++) {
+        if (
+          !mintStore.mints.map((m) => m.url).includes(token.getMint(tokenJson))
+        ) {
+          return false;
+        }
+      }
+      return true;
+    },
+    receiveToken: async function (encodedToken) {
+      const mintStore = useMintsStore();
+      const receiveStore = useReceiveTokensStore();
+      const uIStore = useUiStore();
+      receiveStore.showReceiveTokens = false;
+      console.log("### receive tokens", receiveStore.receiveData.tokensBase64);
 
-    // ...mapActions(useWalletStore, ["splitToSend"]),
-    // ...mapActions(useProofsStore, [
-    //   "serializeProofs",
-    //   "getProofsMint",
-    //   "serializeProofsV2",
-    // ]),
-    // ...mapActions(useTokensStore, [
-    //   "addPaidToken",
-    //   "addPendingToken",
-    //   "setTokenPaid",
-    // ]),
+      if (receiveStore.receiveData.tokensBase64.length == 0) {
+        throw new Error("no tokens provided.");
+      }
+      const tokenJson = token.decode(receiveStore.receiveData.tokensBase64);
+      if (tokenJson == undefined) {
+        throw new Error("no tokens provided.");
+      }
+      // check if we have all mints
+      if (!this.knowThisMintOfTokenJson(tokenJson)) {
+        // pop up add mint dialog warning
+        // hack! The "add mint" component is in SettingsView which may now
+        // have been loaded yet. We switch the tab to settings to make sure
+        // that it loads. Remove this code when the TrustMintComnent is refactored!
+        uIStore.setTab("settings");
+        // hide the receive dialog
+        receiveStore.showReceiveTokens = false;
+        // set the mint to add
+        mintStore.setMintToAdd(tokenJson.token[0].mint);
+        // show the add mint dialog
+        mintStore.showAddMintDialog = true;
+        // show the token receive dialog again for the next attempt
+        receiveStore.showReceiveTokens = true;
+        return;
+      }
+      // redeem the token
+      await this.redeem(receiveStore.receiveData.tokensBase64);
+    },
     // TOKEN METHODS
     decodeToken: function (encoded_token) {
       return token.decode(encoded_token);
@@ -112,32 +162,21 @@ export default defineComponent({
     getMint: function (decoded_token) {
       return token.getMint(decoded_token);
     },
-    sendTokens: async function () {
-      /*
-      calls splitToSend, displays token and kicks off the spendableWorker
-      */
+    receveIfDecodes: function () {
       try {
-        // keep firstProofs, send scndProofs and delete them (invalidate=true)
-        let { firstProofs, scndProofs } = await this.splitToSend(
-          this.activeProofs,
-          this.sendData.amount,
-          true
-        );
-
-        // update UI
-        this.sendData.tokens = scndProofs;
-        console.log("### this.sendData.tokens", this.sendData.tokens);
-
-        this.sendData.tokensBase64 = this.serializeProofs(scndProofs);
-        this.addPendingToken({
-          amount: -this.sendData.amount,
-          serializedProofs: this.sendData.tokensBase64,
-        });
-
-        this.checkTokenSpendableWorker();
+        const decodedToken = this.decodeToken(this.receiveData.tokensBase64);
+        if (decodedToken) {
+          this.receiveToken(this.receiveData.tokensBase64);
+        }
       } catch (error) {
         console.error(error);
       }
+    },
+    pasteToParseDialog: function () {
+      console.log("pasteToParseDialog");
+      navigator.clipboard.readText().then((text) => {
+        this.receiveData.tokensBase64 = text;
+      });
     },
   },
   created: function () {},

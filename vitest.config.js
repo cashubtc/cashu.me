@@ -5,6 +5,14 @@ import jsconfigPaths from "vite-jsconfig-paths";
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  build: {
+    target: "esnext",
+  },
+  optimizeDeps: {
+    esbuildOptions: {
+      target: "esnext",
+    },
+  },
   test: {
     environment: "happy-dom",
     setupFiles: "test/vitest/setup-file.js",

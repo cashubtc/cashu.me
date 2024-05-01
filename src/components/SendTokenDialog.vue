@@ -1,11 +1,18 @@
 <template>
-  <q-dialog v-model="showSendTokens" position="top">
+  <q-dialog
+    v-model="showSendTokens"
+    position="top"
+    backdrop-filter="blur(2px) brightness(60%)"
+  >
     <q-card class="q-pa-none q-pt-none qcard">
       <div v-if="!sendData.tokens">
         <q-card-section class="q-pa-lg q-pt-md">
           <div class="row items-center no-wrap q-mb-sm">
-            <div class="col-12">
-              <span class="text-subtitle1">Send ecash</span>
+            <div class="col-10">
+              <span class="text-h6">Send ecash</span>
+            </div>
+            <div class="col-2">
+              <ToggleUnit class="q-mt-md" />
             </div>
           </div>
           <div class="row items-center no-wrap q-my-sm q-py-none">
@@ -15,14 +22,14 @@
           </div>
 
           <q-input
-            filled
-            dense
             type="number"
             v-model.number="sendData.amount"
             :label="'Amount (' + tickerShort + ') *'"
             mask="#"
             fill-mask="0"
             reverse-fill-mask
+            round
+            outlined
             autofocus
             class="q-mb-lg"
             @keyup.enter="sendTokens"
@@ -38,8 +45,9 @@
             :disable="sendData.amount == null || sendData.amount <= 0"
             @click="sendTokens"
             color="primary"
+            outline
             type="submit"
-            >Send Tokens</q-btn
+            >Send Ecash</q-btn
           >
         </q-card-section>
       </div>
@@ -51,6 +59,7 @@
                 :value="qrCodeFragment"
                 :options="{ width: 400 }"
                 class="rounded-borders"
+                @click="copyText(sendData.tokensBase64)"
               >
               </vue-qrcode>
             </q-responsive>
@@ -59,7 +68,7 @@
             <q-btn
               flat
               style="font-size: 12px"
-              color="primary"
+              color="grey"
               class="q-ma-none"
               @click="changeSpeed"
             >
@@ -70,7 +79,7 @@
               flat
               style="font-size: 12px"
               class="q-ma-none"
-              color="primary"
+              color="grey"
               @click="changeSize"
             >
               <q-icon name="zoom_in" style="margin-right: 8px"></q-icon>
@@ -78,43 +87,52 @@
             </q-btn>
           </div>
           <q-card-section class="q-pa-sm">
-            <div class="row">
-              <div class="col-12">
-                <q-input
-                  outlined
-                  dense
-                  readonly
-                  v-model="sendData.tokensBase64"
-                  label="Cashu token"
-                  type="textarea"
-                  class="q-mb-sm"
-                ></q-input>
-              </div>
+            <div class="row justify-center">
+              <q-item-label overline class="q-mb-sm text-white"
+                >Ecash</q-item-label
+              >
             </div>
-            <div class="row">
-              <div class="col-12">
-                <TokenInformation
-                  :ticker-short="tickerShort"
-                  :proofs-to-show="sendData.tokens"
-                  :token-mint-url="getMint(decodeToken(sendData.tokensBase64))"
+            <div class="row justify-center q-py-md">
+              <q-item-label style="font-size: 28px" class="text-weight-bold">
+                <q-spinner-dots
+                  v-if="runnerActive"
+                  color="primary"
+                  size="0.8em"
+                  class="q-mr-md"
                 />
-              </div>
+                <strong>{{ displayUnit }}</strong></q-item-label
+              >
             </div>
-
+            <div class="row justify-center q-pt-sm">
+              <q-icon
+                name="account_balance"
+                size="0.95rem"
+                color="grey"
+                class="q-mr-sm"
+              />
+              <q-item-label
+                caption
+                class="text-weight-light text-white"
+                style="font-size: 14px"
+                ><strong>{{ shortUrl }}</strong></q-item-label
+              >
+            </div>
             <div class="row q-mt-lg">
               <q-btn
                 class="q-mx-xs"
-                color="primary"
+                size="md"
+                flat
                 @click="copyText(sendData.tokensBase64)"
-                >Copy token</q-btn
+                >Copy</q-btn
               >
               <q-btn
-                class="q-mx-xs"
-                color="primary"
-                outline
+                class="q-mx-none"
+                color="grey"
+                size="md"
+                icon="link"
+                flat
                 @click="copyText(baseURL + '?token=' + sendData.tokensBase64)"
-                >Copy link</q-btn
-              >
+              />
 
               <q-btn v-close-popup flat color="grey" class="q-ml-auto"
                 >Close</q-btn
@@ -134,12 +152,15 @@ import { useUiStore } from "src/stores/ui";
 import { useProofsStore } from "src/stores/proofs";
 import { useMintsStore } from "src/stores/mints";
 import { useTokensStore } from "src/stores/tokens";
+import { getShortUrl } from "src/js/wallet-helpers";
+import { useSettingsStore } from "src/stores/settings";
+import { useWorkersStore } from "src/stores/workers";
 import token from "src/js/token";
 import { Buffer } from "buffer";
 
 import { mapActions, mapState, mapWritableState } from "pinia";
 import ChooseMint from "components/ChooseMint.vue";
-import TokenInformation from "components/TokenInformation.vue";
+import ToggleUnit from "components/ToggleUnit.vue";
 import { UR, UREncoder } from "@gandlaf21/bc-ur";
 
 export default defineComponent({
@@ -147,11 +168,9 @@ export default defineComponent({
   mixins: [windowMixin],
   components: {
     ChooseMint,
-    TokenInformation,
+    ToggleUnit,
   },
-  props: {
-    checkTokenSpendableWorker: Function,
-  },
+  props: {},
   data: function () {
     return {
       baseURL: location.protocol + "//" + location.host + location.pathname,
@@ -178,7 +197,37 @@ export default defineComponent({
     ...mapWritableState(useSendTokensStore, ["showSendTokens"]),
     ...mapWritableState(useSendTokensStore, ["sendData"]),
     ...mapState(useUiStore, ["tickerShort"]),
-    ...mapState(useMintsStore, ["activeProofs"]),
+    ...mapState(useMintsStore, ["activeProofs", "activeUnit", "activeMintUrl"]),
+    ...mapState(useSettingsStore, ["checkSentTokens"]),
+    ...mapState(useWorkersStore, ["tokenWorkerRunning"]),
+    // TOKEN METHODS
+    sumProofs: function () {
+      let proofs = token.getProofs(token.decode(this.sendData.tokensBase64));
+      return proofs.flat().reduce((sum, el) => (sum += el.amount), 0);
+    },
+    displayUnit: function () {
+      let display = this.formatCurrency(this.sumProofs, this.tokenUnit);
+      return display;
+    },
+    tokenUnit: function () {
+      return token.getUnit(token.decode(this.sendData.tokensBase64));
+    },
+    tokenMintUrl: function () {
+      let mint = token.getMint(token.decode(this.sendData.tokensBase64));
+      return mint;
+    },
+    displayMemo: function () {
+      return token.getMemo(token.decode(this.sendData.tokensBase64));
+    },
+    shortUrl: function () {
+      return getShortUrl(this.tokenMintUrl);
+    },
+    decodedToken: function () {
+      return token.decode(this.sendData.tokensBase64);
+    },
+    runnerActive: function () {
+      return this.tokenWorkerRunning;
+    },
   },
   watch: {
     "sendData.tokensBase64": function (val) {
@@ -214,23 +263,25 @@ export default defineComponent({
     },
   },
   methods: {
+    ...mapActions(useWorkersStore, ["checkTokenSpendableWorker"]),
     ...mapActions(useWalletStore, ["splitToSend"]),
     ...mapActions(useProofsStore, [
       "serializeProofs",
       "getProofsMint",
       "serializeProofsV2",
     ]),
-    ...mapActions(useTokensStore, [
-      "addPaidToken",
-      "addPendingToken",
-      "setTokenPaid",
-    ]),
-    // TOKEN METHODS
+    ...mapActions(useTokensStore, ["addPendingToken", "setTokenPaid"]),
     decodeToken: function (encoded_token) {
       return token.decode(encoded_token);
     },
     getProofs: function (decoded_token) {
       return token.getProofs(decoded_token);
+    },
+    getAmount: function (decoded_token) {
+      return token.getAmount(decoded_token);
+    },
+    getUnit: function (decoded_token) {
+      return token.getUnit(decoded_token);
     },
     getMint: function (decoded_token) {
       return token.getMint(decoded_token);
@@ -289,25 +340,36 @@ export default defineComponent({
       /*
       calls splitToSend, displays token and kicks off the spendableWorker
       */
+
       try {
+        let sendAmount = this.sendData.amount;
+        // if unit is USD, multiply by 100
+        if (this.activeUnit === "usd") {
+          sendAmount = sendAmount * 100;
+        }
         // keep firstProofs, send scndProofs and delete them (invalidate=true)
-        let { firstProofs, scndProofs } = await this.splitToSend(
+        let { _, sendProofs } = await this.splitToSend(
           this.activeProofs,
-          this.sendData.amount,
+          sendAmount,
           true
         );
 
         // update UI
-        this.sendData.tokens = scndProofs;
+        this.sendData.tokens = sendProofs;
         console.log("### this.sendData.tokens", this.sendData.tokens);
 
-        this.sendData.tokensBase64 = this.serializeProofs(scndProofs);
+        this.sendData.tokensBase64 = this.serializeProofs(sendProofs);
         this.addPendingToken({
           amount: -this.sendData.amount,
           serializedProofs: this.sendData.tokensBase64,
+          unit: this.activeUnit,
+          mint: this.activeMintUrl,
         });
-
-        this.checkTokenSpendableWorker();
+        this.checkTokenSpendableWorker(this.sendData.tokensBase64);
+        // if (this.checkSentTokens) {
+        //   console.log("### kick off checkTokenSpendableWorker");
+        //   this.checkTokenSpendableWorker(this.sendData.tokensBase64);
+        // }
       } catch (error) {
         console.error(error);
       }

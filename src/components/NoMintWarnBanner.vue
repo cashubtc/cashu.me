@@ -1,13 +1,33 @@
 <template>
-  <q-card>
+  <q-card class="q-pa-lg q-ma-xl">
     <q-card-section>
-      <div class="text-overline">
-        <q-badge color="warning" text-color="black" label="No mint added" />
+      <div class="row items-center justify-center">
+        <q-icon class="q-pb-md" name="account_balance" size="50px" />
       </div>
-      <q-separator class="q-mb-sm" />
-      <div class="text-h6">You're not connected to any mint yet</div>
-      <div class="text-subtitle2">
-        Go to the Settings tab to add a mint before using this wallet
+      <div class="row items-center justify-center">
+        <div class="text-h6">Join a mint</div>
+      </div>
+      <div class="row items-center justify-center">
+        <div class="text-subtitle2">
+          You haven't joined any Cashu mint yet. Connect to a mint URL in the
+          settings to get started.
+        </div>
+      </div>
+      <div class="row items-center justify-center q-pt-xl">
+        <q-btn
+          outline
+          dense
+          class="q-px-sm"
+          label="Add mint"
+          @click="focusOnMint"
+        />
+        <q-btn
+          class="q-mx-sm q-px-sm"
+          dense
+          outline
+          label="Receive Ecash"
+          @click="showReceiveTokensDialog"
+        />
       </div>
     </q-card-section>
   </q-card>
@@ -15,6 +35,10 @@
 <script>
 import { defineComponent, ref } from "vue";
 import { getShortUrl } from "src/js/wallet-helpers";
+import { useUiStore } from "src/stores/ui";
+import { mapWritableState } from "pinia";
+import { useReceiveTokensStore } from "src/stores/receiveTokensStore";
+
 export default defineComponent({
   name: "NoMintWarnBanner",
   mixins: [windowMixin],
@@ -26,14 +50,13 @@ export default defineComponent({
     activeMintUrl: String,
   },
   computed: {
+    ...mapWritableState(useUiStore, ["tab"]),
+    ...mapWritableState(useReceiveTokensStore, [
+      "showReceiveTokens",
+      "receiveData",
+    ]),
     balance: function () {
       return this.activeProofs
-        .map((t) => t)
-        .flat()
-        .reduce((sum, el) => (sum += el.amount), 0);
-    },
-    getTotalBalance: function () {
-      return this.proofs
         .map((t) => t)
         .flat()
         .reduce((sum, el) => (sum += el.amount), 0);
@@ -49,6 +72,14 @@ export default defineComponent({
       return balance;
     },
   },
-  methods: {},
+  methods: {
+    showReceiveTokensDialog: function () {
+      this.receiveData.tokensBase64 = "";
+      this.showReceiveTokens = true;
+    },
+    focusOnMint: function () {
+      this.tab = "settings";
+    },
+  },
 });
 </script>

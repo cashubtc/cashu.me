@@ -33,4 +33,4 @@ function step3Alice(C_, r, A) {
   return C;
 }
 
-export { step1Alice, step3Alice };
+export { step1Alice, step3Alice, hashToCurve };

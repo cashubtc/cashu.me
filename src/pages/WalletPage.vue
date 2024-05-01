@@ -2,251 +2,138 @@
   <div class="row q-col-gutter-y-md justify-center q-pt-sm q-pb-md">
     <div class="col-12 col-sm-11 col-md-8 text-center q-gutter-y-md">
       <NoMintWarnBanner v-if="mints.length == 0" />
-      <BalanceView
-        v-else
-        :ticker-short="tickerShort"
-        :ticker-dollar="tickerDollar"
-        :pending-balance="pendingBalance"
-        :check-pending-tokens="checkPendingTokens"
-        :set-tab="setTab"
-      />
+      <BalanceView v-else :set-tab="setTab" />
+      <div
+        class="row items-center justify-center no-wrap q-mb-none q-mx-none q-px-none q-pt-lg q-pb-md"
+      >
+        <div class="col-5 q-mb-md">
+          <q-btn
+            rounded
+            dense
+            class="q-px-md"
+            style="width: 140px"
+            color="primary"
+            @click="showSendDialog = true"
+            size="1.2rem"
+          >
+            <q-icon name="north_east" size="1.2rem" class="q-mr-xs" />
+            Send</q-btn
+          >
+        </div>
 
-      <!-- ECASH BUTTONS  -->
-      <q-card class="q-mt-xs">
-        <q-card-section class="q-pt-sm">
-          <div class="row items-center no-wrap q-mb-sm">
-            <div class="col-6 col-sm-5 col-md-4 q-pr-xs">
-              <div class="row items-center no-wrap q-mb-sm">
-                <q-btn
-                  size="1.0rem"
-                  rectangle
-                  unelevated
-                  dense
-                  color="primary"
-                  align="between"
-                  icon="file_download"
-                  icon-right="toll"
-                  class="full-width"
-                  @click="showReceiveTokensDialog"
-                  >Receive Ecash</q-btn
-                >
-              </div>
-              <div class="row items-center no-wrap q-mb-none">
-                <q-btn
-                  size="1.0rem"
-                  rectangle
-                  unelevated
-                  dense
-                  align="between"
-                  color="secondary"
-                  icon="file_download"
-                  icon-right="bolt"
-                  class="full-width"
-                  @click="showInvoiceCreateDialog"
-                >
-                  <strong class="gt-lg"> Create Lightning Invoice </strong>
-                  <strong class="gt-xs lt-xl"> Create Invoice </strong>
-                  <strong class="lt-sm"> LN Invoice </strong>
-                </q-btn>
-              </div>
-            </div>
-            <div class="col-0 col-sm-2 col-md-4">
-              <q-btn
-                size="2rem"
-                unelevated
-                icon="qr_code_scanner"
-                class="col-2 q-pb-md gt-xs q-mt-md"
-                @click="showCamera"
-              />
-            </div>
-            <div class="col-6 col-sm-5 col-md-4 q-pl-xs">
-              <div class="row items-center no-wrap q-mb-sm">
-                <q-btn
-                  size="1.0rem"
-                  rectangle
-                  unelevated
-                  dense
-                  align="between"
-                  color="primary"
-                  icon="file_upload"
-                  icon-right="toll"
-                  class="full-width"
-                  @click="showSendTokensDialog"
-                >
-                  Send Ecash</q-btn
-                >
-              </div>
-              <div class="row items-center no-wrap q-mb-none">
-                <q-btn
-                  size="1.0rem"
-                  rectangle
-                  unelevated
-                  dense
-                  align="between"
-                  color="secondary"
-                  icon="file_upload"
-                  icon-right="bolt"
-                  class="full-width"
-                  @click="showParseDialog"
-                >
-                  <strong class="gt-lg"> Pay Lightning Invoice </strong>
-                  <strong class="gt-xs lt-xl"> Pay Invoice </strong>
-                  <strong class="lt-sm"> Pay LN </strong>
-                </q-btn>
-              </div>
-            </div>
-          </div>
-        </q-card-section>
-        <q-card-section class="q-pt-none">
-          <!-- ///////////////////////////////////////////
-                ////////////////// TABLES /////////////////
-                /////////////////////////////////////////// -->
-          <q-tabs v-model="tab" no-caps class="bg-dark text-white">
-            <q-tab name="history" label="History"></q-tab>
-            <q-tab name="invoices" label="Invoices"></q-tab>
-            <!-- <q-tab name="tokens" label="Tokens"></q-tab> -->
-            <q-tab name="settings" label="Settings"></q-tab>
-          </q-tabs>
-          <q-tab-panels v-model="tab" animated>
-            <!-- ////////////////// HISTORY LIST ///////////////// -->
+        <div class="col-2 q-mb-md q-mx-none">
+          <q-btn
+            align="center"
+            size="lg"
+            icon="qr_code_scanner"
+            outline
+            color="primary"
+            flat
+            @click="showCamera"
+          />
+        </div>
+        <!-- button to showSendDialog -->
+        <div class="col-5 q-mb-md">
+          <q-btn
+            rounded
+            dense
+            class="q-px-md"
+            color="primary"
+            style="width: 140px"
+            @click="showReceiveDialog = true"
+            size="1.2rem"
+          >
+            <q-icon name="south_west" size="1.2rem" class="q-mr-xs" />
+            Receive</q-btn
+          >
+        </div>
+        <ReceiveDialog v-model="showReceiveDialog" />
+        <SendDialog v-model="showSendDialog" />
+      </div>
+      <!-- ///////////////////////////////////////////
+      ////////////////// TABLES /////////////////
+      /////////////////////////////////////////// -->
+      <q-expansion-item expand-icon-class="hidden" v-model="expandHistory">
+        <template v-slot:header="{ expanded }">
+          <q-item-section class="item-center text-center">
+            <span
+              ><q-icon
+                color="primary"
+                :name="expanded ? 'keyboard_arrow_up' : 'keyboard_arrow_down'"
+            /></span>
+          </q-item-section>
+        </template>
+        <q-tabs
+          v-model="tab"
+          no-caps
+          :class="$q.dark.isActive ? 'bg-dark' : 'bg-white'"
+        >
+          <q-tab name="history" class="text-secondary" label="History"></q-tab>
+          <q-tab
+            name="invoices"
+            class="text-secondary"
+            label="Invoices"
+          ></q-tab>
+          <!-- <q-tab name="tokens" label="Tokens"></q-tab> -->
+          <q-tab
+            name="settings"
+            class="text-secondary"
+            label="Settings"
+          ></q-tab>
+        </q-tabs>
 
-            <q-tab-panel name="history">
-              <HistoryTable
-                :history-tokens="historyTokens"
-                :show-token-dialog="showTokenDialog"
-                :check-token-spendable="checkTokenSpendable"
-              />
-            </q-tab-panel>
+        <q-tab-panels
+          :class="$q.dark.isActive ? 'bg-dark' : 'bg-white'"
+          v-model="tab"
+          animated
+        >
+          <!-- ////////////////// HISTORY LIST ///////////////// -->
 
-            <!-- ////////////////// INVOICE LIST ///////////////// -->
+          <q-tab-panel name="history">
+            <HistoryTable
+              :show-token-dialog="showTokenDialog"
+              :check-token-spendable="checkTokenSpendable"
+            />
+          </q-tab-panel>
 
-            <q-tab-panel name="invoices">
-              <InvoicesTable
-                :invoice-history="invoiceHistory"
-                :show-invoice-info-dialog="showInvoicInfoDialog"
-                :check-invoice="checkInvoice"
-              />
-            </q-tab-panel>
+          <!-- ////////////////// INVOICE LIST ///////////////// -->
 
-            <!-- ////////////////////// SETTINGS ////////////////// -->
+          <q-tab-panel name="invoices">
+            <InvoicesTable :check-invoice="checkInvoice" />
+          </q-tab-panel>
 
-            <q-tab-panel name="settings" class="q-px-sm">
-              <SettingsView
-                :ticker-short="tickerShort"
-                :request-mint="requestMint"
-                :decode-request="decodeRequest"
-                :melt="melt"
-                :invoice-check-worker="invoiceCheckWorker"
-                :pay-invoice-data="payInvoiceData"
-                :show-mint-dialog="this.addMintDialog.show"
-                :mint-to-add-wallet-page="this.addMintDialog.mintToAdd"
-              />
-            </q-tab-panel>
-            <!-- ////////////////// TOKEN LIST ///////////////// -->
+          <!-- ////////////////////// SETTINGS ////////////////// -->
 
-            <!-- <q-tab-panel name="tokens">
-              <q-table
-                dense
-                flat
-                :rows="getTokenList()"
-                :columns="tokensTable.columns"
-                no-data-label="There are no tokens here yet"
-                :filter="tokensTable.filter"
-              >
-                <template v-slot:body="props">
-                  <q-tr :props="props">
-                    <q-td
-                      key="value"
-                      :props="props"
-                      :class="
-                        props.row.value > 0
-                          ? 'text-green-13 text-weight-bold'
-                          : ''
-                      "
-                    >
-                      <div>{{ props.row.value }}</div>
-                    </q-td>
-                    <q-td key="count" :props="props">
-                      <div>{{ props.row.count }}</div>
-                    </q-td>
-                    <q-td key="sum" :props="props">
-                      <div>{{ props.row.sum }}</div>
-                    </q-td>
-                  </q-tr>
-                </template>
-              </q-table>
-            </q-tab-panel> -->
-          </q-tab-panels>
-        </q-card-section>
-      </q-card>
-
+          <q-tab-panel name="settings" class="q-px-sm">
+            <SettingsView
+              :ticker-short="tickerShort"
+              :request-mint="requestMint"
+              :melt="melt"
+              :invoice-check-worker="invoiceCheckWorker"
+              :pay-invoice-data="payInvoiceData"
+              :show-mint-dialog="this.addMintDialog.show"
+              :mint-to-add-wallet-page="this.addMintDialog.mintToAdd"
+            />
+          </q-tab-panel>
+        </q-tab-panels>
+      </q-expansion-item>
       <!-- LIGHTNING BUTTONS  -->
 
-      <div style="margin-bottom: 7rem">
+      <div style="margin-bottom: 0rem">
         <div class="row q-pt-sm">
-          <div class="col-4 q-pt-none">
-            <!-- <q-btn
-              class="full-width gt-sm"
-              size="1.0rem"
-              icon-right="bolt"
-              icon="file_download"
-              align="between"
-              rectangle
-              color="orange"
-              @click="showInvoiceCreateDialog"
-              ><strong>Create Invoice</strong>
-            </q-btn> -->
-          </div>
-          <!-- <div class="col-4"></div> -->
-          <div class="col-4 q-pt-xs">
-            <div align="center">
-              <q-btn
-                class="q-mx-xs q-px-sm q-my-sm"
-                size="0.6rem"
-                rectangle
-                color="warning"
-                icon="warning"
-                outline
-                @click="showDisclaimerDialog"
-                ><q-tooltip>Warning</q-tooltip></q-btn
-              >
-              <q-btn
-                class="q-mx-xs q-px-sm q-my-sm"
-                size="0.6rem"
-                outline
-                rectangle
-                color="warning"
-                icon="download_for_offline"
-                @click="getLocalstorageToFile"
-                ><q-tooltip>Download wallet backup</q-tooltip></q-btn
-              >
-              <q-btn
-                class="q-mx-xs q-px-sm q-my-sm"
-                outline
-                size="0.6rem"
-                v-if="
-                  getPwaDisplayMode() == 'browser' &&
-                  deferredPWAInstallPrompt != null
-                "
-                color="primary"
-                @click="triggerPwaInstall()"
-                ><b>Install</b><q-tooltip>Install Cashu</q-tooltip></q-btn
-              >
-            </div>
-          </div>
-
-          <div class="col-4 q-pt-none">
-            <!-- <q-btn
-              class="full-width gt-sm"
-              @click="showParseDialog"
-              size="1.0rem"
-              icon-right="bolt"
-              icon="file_upload"
-              align="between"
-              rectangle
-              color="orange"
-              ><strong>Pay Invoice</strong>
-            </q-btn> -->
+          <div class="col-12 q-pt-xs">
+            <q-btn
+              class="q-mx-xs q-px-sm q-my-sm"
+              outline
+              size="0.6rem"
+              v-if="
+                getPwaDisplayMode() == 'browser' &&
+                deferredPWAInstallPrompt != null
+              "
+              color="primary"
+              @click="triggerPwaInstall()"
+              ><b>Install</b><q-tooltip>Install Cashu</q-tooltip></q-btn
+            >
           </div>
         </div>
       </div>
@@ -254,84 +141,14 @@
 
     <!-- BOTTOM LIGHTNING BUTTONS -->
 
-    <!-- disable bottom bar if dialogs are shown -->
-    <div
-      class="q-col-gutter"
-      v-if="
-        !welcomeDialog.show &&
-        !showSendTokens &&
-        !showInvoiceDetails &&
-        !showReceiveTokens &&
-        !payInvoiceData.show &&
-        !disclaimerDialog.show &&
-        !camera.show
-      "
-    >
-      <q-tabs
-        class="lt-sm fixed-bottom q-px-none q-py-md left-0 right-0 bg-primary text-white shadow-2 z-top q-px-0"
-        indicator-color="transparent"
-        align="justify"
-      >
-        <q-btn
-          size="1.0rem"
-          flat
-          unelevated
-          dense
-          class="full-width"
-          @click="showInvoiceCreateDialog"
-        >
-          <q-avatar size="42px">
-            <q-icon name="download_file" size="44px" />
-          </q-avatar>
-
-          <strong class="gt-lg"> Create Lightning Invoice </strong>
-          <strong class="gt-xs lt-xl"> Create Invoice </strong>
-          <strong class="lt-sm"> Create<br />Invoice </strong>
-        </q-btn>
-        <q-btn
-          size="2rem"
-          unelevated
-          icon="qr_code_scanner"
-          class="col-2 q-pb-md q-mt-md"
-          v-if="hasCamera"
-          @click="showCamera"
-        />
-        <q-btn
-          size="1.0rem"
-          flat
-          unelevated
-          dense
-          class="full-width"
-          @click="showParseDialog"
-        >
-          <q-avatar size="42px">
-            <q-icon name="bolt" size="44px" />
-          </q-avatar>
-          <strong class="gt-lg"> Pay Lightning Invoice </strong>
-          <strong class="gt-xs lt-xl"> Pay Invoice </strong>
-          <strong class="lt-sm"> Pay<br />Invoice </strong>
-        </q-btn>
-      </q-tabs>
-    </div>
-
     <!-- DIALOGS  -->
 
     <!-- INPUT PARSER  -->
     <PayInvoiceDialog v-model="payInvoiceData.show" />
 
     <!-- QR CODE SCANNER  -->
-
-    <q-dialog v-model="camera.show">
-      <q-card>
-        <div class="text-center">
-          <QrcodeReader @decode="decodeQR" />
-        </div>
-        <div class="row q-mt-lg">
-          <q-btn @click="closeCamera" flat color="grey" class="q-ml-auto"
-            >Cancel</q-btn
-          >
-        </div>
-      </q-card>
+    <q-dialog v-model="camera.show" backdrop-filter="blur(2px) brightness(60%)">
+      <QrcodeReader @decode="decodeQR" />
     </q-dialog>
 
     <!-- WELCOME DIALOG  -->
@@ -343,51 +160,6 @@
       :set-welcome-dialog-seen="setWelcomeDialogSeen"
     />
 
-    <!-- WARNING DIAGLOG  -->
-
-    <q-dialog v-model="disclaimerDialog.show">
-      <q-card class="q-pa-lg">
-        <h6 class="q-my-md text-primary">Warning</h6>
-        <p>
-          <strong>Bookmark this page and backup your tokens!</strong>
-          Ecash is a bearer asset. Losing access to this wallet will mean you
-          will lose your funds. This wallet stores ecash tokens locally on your
-          device. If you lose the link or delete your your data without backing
-          up, you will lose your tokens. Press the Backup button to download a
-          copy of your tokens.
-        </p>
-        <p>
-          <strong>Where is my old wallet</strong>
-          This wallet was previously running on
-          https://legend.lnbits.com/cashu/wallet but has since moved to
-          https://wallet.cashu.me. Send all tokens from the old wallet to this
-          one.
-        </p>
-        <p>
-          <strong>Add to home screen.</strong>
-          You can add Cashu to your home screen as a progressive web app (PWA).
-          On Android Chrome, click the hamburger menu at the upper right. On iOS
-          Safari, click the share button. Now press the Add to Home screen
-          button.
-        </p>
-        <p>
-          <strong>This software is in BETA!</strong> We hold no responsibility
-          for people losing access to funds. Use at your own risk!
-        </p>
-        <div class="row q-mt-lg">
-          <q-btn
-            outline
-            color="grey"
-            @click="copyText(disclaimerDialog.location.href)"
-            >Copy wallet URL</q-btn
-          >
-          <q-btn v-close-popup flat color="grey" class="q-ml-auto"
-            >I understand</q-btn
-          >
-        </div>
-      </q-card>
-    </q-dialog>
-
     <!-- INVOICE DETAILS  -->
     <InvoiceDetailDialog
       v-model="showInvoiceDetails"
@@ -395,10 +167,7 @@
     />
 
     <!-- SEND TOKENS DIALOG  -->
-    <SendTokenDialog
-      v-model="showSendTokens"
-      :check-token-spendable-worker="checkTokenSpendableWorker"
-    />
+    <SendTokenDialog v-model="showSendTokens" />
 
     <!-- RECEIVE TOKENS DIALOG  -->
     <ReceiveTokenDialog v-model="showReceiveTokens" />
@@ -440,6 +209,8 @@ import WelcomeDialog from "components/WelcomeDialog.vue";
 import SendTokenDialog from "components/SendTokenDialog.vue";
 import PayInvoiceDialog from "components/PayInvoiceDialog.vue";
 import InvoiceDetailDialog from "components/InvoiceDetailDialog.vue";
+import SendDialog from "components/SendDialog.vue";
+import ReceiveDialog from "components/ReceiveDialog.vue";
 import QrcodeReader from "components/QrcodeReader.vue";
 
 // pinia stores
@@ -453,7 +224,6 @@ import { useWalletStore } from "src/stores/wallet";
 import { useUiStore } from "src/stores/ui";
 import { useProofsStore } from "src/stores/proofs";
 import { useCameraStore } from "src/stores/camera";
-import { currentDateStr } from "src/js/utils";
 
 import ReceiveTokenDialog from "src/components/ReceiveTokenDialog.vue";
 
@@ -471,6 +241,8 @@ export default {
     PayInvoiceDialog,
     InvoiceDetailDialog,
     QrcodeReader,
+    SendDialog,
+    ReceiveDialog,
   },
   data: function () {
     return {
@@ -478,20 +250,7 @@ export default {
       mintId: "",
       mintName: "",
       deferredPWAInstallPrompt: null,
-      receive: {
-        show: false,
-        status: "pending",
-        paymentReq: null,
-        paymentHash: null,
-        minMax: [0, 2100000000000000],
-        lnurl: null,
-        units: ["sat"],
-        unit: "sat",
-        data: {
-          amount: null,
-          memo: "",
-        },
-      },
+      action: "main",
       parse: {
         show: false,
         invoice: null,
@@ -515,11 +274,6 @@ export default {
       welcomeDialog: {
         show: false,
       },
-      disclaimerDialog: {
-        show: false,
-        location: window.location,
-        base_url: location.protocol + "//" + location.host + location.pathname,
-      },
       addMintDialog: {
         show: false,
         mintToAdd: "".replace(/\s+/g, ""),
@@ -531,8 +285,14 @@ export default {
     };
   },
   computed: {
-    ...mapWritableState(useUiStore, ["showInvoiceDetails", "tab"]),
-    ...mapState(useUiStore, ["tickerShort", "tickerDollar"]),
+    ...mapWritableState(useUiStore, [
+      "showInvoiceDetails",
+      "tab",
+      "showSendDialog",
+      "showReceiveDialog",
+    ]),
+    ...mapState(useUiStore, ["tickerShort"]),
+    ...mapWritableState(useUiStore, ["expandHistory"]),
     ...mapWritableState(useReceiveTokensStore, [
       "showReceiveTokens",
       "receiveData",
@@ -557,7 +317,7 @@ export default {
       "tokensCheckSpendableListener",
     ]),
     ...mapState(useTokensStore, ["historyTokens"]),
-    ...mapWritableState(useCameraStore, ["camera"]),
+    ...mapWritableState(useCameraStore, ["camera", "hasCamera"]),
     pendingPaymentsExist: function () {
       return this.payments.findIndex((payment) => payment.pending) !== -1;
     },
@@ -566,11 +326,6 @@ export default {
       return this.activeProofs
         .map((t) => t)
         .flat()
-        .reduce((sum, el) => (sum += el.amount), 0);
-    },
-    pendingBalance: function () {
-      return -this.historyTokens
-        .filter((t) => t.status == "pending")
         .reduce((sum, el) => (sum += el.amount), 0);
     },
   },
@@ -588,12 +343,11 @@ export default {
       "deleteProofs",
     ]),
     ...mapActions(useMintsStore, [
-      "activateMint",
+      "activateMintUrl",
       "addMint",
       "assertMintError",
       "getBalance",
       "setActiveProofs",
-      "setMintToAdd",
       "setProofs",
       "setShowAddMintDialog",
       "getKeysForKeyset",
@@ -603,11 +357,7 @@ export default {
       "invoiceCheckWorker",
       "checkTokenSpendableWorker",
     ]),
-    ...mapActions(useTokensStore, [
-      "addPaidToken",
-      "addPendingToken",
-      "setTokenPaid",
-    ]),
+    ...mapActions(useTokensStore, ["setTokenPaid"]),
     ...mapActions(useWalletStore, [
       "requestMint",
       "setInvoicePaid",
@@ -619,8 +369,9 @@ export default {
       "checkPendingInvoices",
       "checkPendingTokens",
       "decodeRequest",
+      "generateNewMnemonic",
     ]),
-    ...mapActions(useCameraStore, ["closeCamera", "showCamera", "hasCamera"]),
+    ...mapActions(useCameraStore, ["closeCamera", "showCamera"]),
     // TOKEN METHODS
     decodeToken: function (encoded_token) {
       try {
@@ -666,30 +417,17 @@ export default {
       // TODO: fix this
       // this.$nextTick(() => this.$refs[el].focus());
     },
-    showReceiveDialog: function () {
-      this.receive.show = true;
-      this.receive.status = "pending";
-      this.receive.paymentReq = null;
-      this.receive.paymentHash = null;
-      this.receive.data.amount = null;
-      this.receive.data.memo = null;
-      this.receive.unit = "sat";
-      this.receive.paymentChecker = null;
-      this.receive.minMax = [0, 2100000000000000];
-      this.receive.lnurl = null;
-      this.focusInput("setAmount");
-    },
     showParseDialog: function () {
       this.payInvoiceData.show = true;
       this.payInvoiceData.invoice = null;
       this.payInvoiceData.lnurlpay = null;
       this.payInvoiceData.domain = "";
       this.payInvoiceData.lnurlauth = null;
-      this.payInvoiceData.data.request = "";
-      this.payInvoiceData.data.comment = "";
-      this.payInvoiceData.data.paymentChecker = null;
+      this.payInvoiceData.input.request = "";
+      this.payInvoiceData.input.comment = "";
+      this.payInvoiceData.input.paymentChecker = null;
       this.camera.show = false;
-      this.focusInput("pasteInput");
+      this.focusInput("parseDialogInput");
     },
     showWelcomeDialog: function () {
       if (localStorage.getItem("cashu.welcomeDialogSeen") != "seen") {
@@ -710,36 +448,11 @@ export default {
     setTab: function (to) {
       this.tab = to;
     },
-    showDisclaimerDialog: function () {
-      this.disclaimerDialog.show = true;
-    },
-
-    closeReceiveDialog: function () {
-      setTimeout(() => {
-        clearInterval(this.receive.paymentChecker);
-      }, 10000);
-    },
     decodeQR: function (res) {
       this.camera.data = res;
-      // this.payInvoiceData.data.request = res
-      this.decodeRequest();
       this.camera.show = false;
+      this.decodeRequest(res);
     },
-    payInvoice: function () {
-      let dismissPaymentMsg = this.$q.notify({
-        timeout: 0,
-        message: "Processing payment...",
-        position: "top",
-        actions: [
-          {
-            icon: "close",
-            color: "white",
-            handler: () => {},
-          },
-        ],
-      });
-    },
-
     /////////////////////////////////// WALLET ///////////////////////////////////
     showInvoiceCreateDialog: async function () {
       console.log("##### showInvoiceCreateDialog");
@@ -764,7 +477,7 @@ export default {
       this.sendData.tokensBase64 = _.clone(tokensBase64);
       this.showSendTokens = true;
       // kick off token check worker
-      this.checkTokenSpendableWorker();
+      // this.checkTokenSpendableWorker(tokensBase64);
     },
     showSendTokensDialog: function () {
       console.log("##### showSendTokensDialog");
@@ -774,7 +487,9 @@ export default {
       this.sendData.memo = "";
       this.showSendTokens = true;
     },
-
+    hideSendTokensDialog: function () {
+      this.showSendTokens = false;
+    },
     showReceiveTokensDialog: function () {
       this.receiveData.tokensBase64 = "";
       this.showReceiveTokens = true;
@@ -837,40 +552,12 @@ export default {
         }
         // if these were the activeMintUrl, reload
         if (e.key == "cashu.activeMintUrl") {
-          this.activateMint(e.newValue);
+          this.activateMintUrl(e.newValue);
         }
       });
     },
 
     ////////////// STORAGE /////////////
-
-    getLocalstorageToFile: async function () {
-      // https://stackoverflow.com/questions/24263682/save-restore-local-storage-to-a-local-file
-      const fileName = `cashu_backup_${currentDateStr()}.json`;
-      var a = {};
-      for (var i = 0; i < localStorage.length; i++) {
-        var k = localStorage.key(i);
-        var v = localStorage.getItem(k);
-        a[k] = v;
-      }
-      var textToSave = JSON.stringify(a);
-      var textToSaveAsBlob = new Blob([textToSave], {
-        type: "text/plain",
-      });
-      var textToSaveAsURL = window.URL.createObjectURL(textToSaveAsBlob);
-
-      var downloadLink = document.createElement("a");
-      downloadLink.download = fileName;
-      downloadLink.innerHTML = "Download File";
-      downloadLink.href = textToSaveAsURL;
-      downloadLink.onclick = function () {
-        document.body.removeChild(event.target);
-      };
-      downloadLink.style.display = "none";
-      document.body.appendChild(downloadLink);
-      downloadLink.click();
-    },
-
     migrationLocalstorage: async function () {
       // migration from old db to multimint
       for (var key in localStorage) {
@@ -903,11 +590,9 @@ export default {
     // mint url
     if (params.get("mint")) {
       let activeMintUrl = params.get("mint");
-      // await this.addMint(activeMintUrl);
       await this.setTab("settings");
       this.addMintDialog.mintToAdd = activeMintUrl;
       this.showAddMintDialog = true;
-      // this.addMintDialog.show = true;
     }
 
     if (params.get("mint_id")) {
@@ -928,7 +613,7 @@ export default {
       let activeMintUrl = localStorage.getItem("cashu.activeMintUrl");
       // we'll force the activation of the mint for the migration
       // from without a pinia store
-      await this.activateMint(activeMintUrl, false, true);
+      await this.activateMintUrl(activeMintUrl, false, true);
     } else {
       this.setTab("settings");
     }
@@ -972,7 +657,7 @@ export default {
     // get lightning invoice from a link
     if (params.get("lightning")) {
       this.showParseDialog();
-      this.payInvoiceData.data.request = params.get("lightning");
+      this.payInvoiceData.input.request = params.get("lightning");
     }
 
     // Clear all parameters from URL without refreshing the page
@@ -995,7 +680,7 @@ export default {
 
     // reset to the mint from settings after workers have run
     if (startupMintUrl.length > 0) {
-      await this.activateMint(startupMintUrl);
+      await this.activateMintUrl(startupMintUrl);
     }
 
     // Local storage sync hook
@@ -1004,9 +689,10 @@ export default {
     // PWA install hook
     this.registerPWAEventHook();
 
+    this.generateNewMnemonic();
+
     // show welcome dialog
     this.showWelcomeDialog();
   },
-  // })
 };
 </script>

@@ -1,148 +1,123 @@
 <template>
-  <q-table
-    dense
-    flat
-    :rows="historyTokens"
-    :columns="historyTable.columns"
-    no-data-label="There are no tokens here yet"
-    :filter="historyTable.filter"
-    :pagination="historyTable.pagination"
-  >
-    <template v-slot:body="props">
-      <q-tr :props="props">
-        <q-td key="status" :props="props">
-          <div v-if="props.row.status == 'pending'">
-            <q-icon
-              @click="showTokenDialog(props.row.token)"
-              name="settings_ethernet"
-              color="grey"
-            >
-              <q-tooltip>Pending</q-tooltip>
-            </q-icon>
-            <q-icon
-              name="sync"
-              size="xs"
-              color="grey"
-              class="q-mr-xs cursor-pointer"
-              @click="checkTokenSpendable(props.row.token)"
-            >
-              <q-tooltip>Check status</q-tooltip>
-            </q-icon>
-          </div>
-          <div v-if="props.row.status === 'paid'">
-            <q-icon
-              v-if="props.row.amount > 0"
-              name="call_received"
-              color="green"
-              ><q-tooltip>Received</q-tooltip></q-icon
-            >
-            <q-icon v-if="props.row.amount < 0" name="call_made" color="red"
-              ><q-tooltip>Paid</q-tooltip></q-icon
-            >
-            <!-- <q-icon name="props.row.amount < 0 ? 'call_made' : 'call_received'" color="green"></q-icon> -->
-          </div>
-        </q-td>
-        <q-td
-          key="amount"
-          :props="props"
-          :class="props.row.amount > 0 ? 'text-green-13 text-weight-bold' : ''"
+  <div class="q-pa-xs" style="max-width: 500px; margin: 0 auto">
+    <q-list>
+      <q-item
+        v-for="token in paginatedTokens"
+        :key="token.id"
+        clickable
+        v-ripple
+        class="q-px-md"
+      >
+        <q-item-section
+          side
+          @click="showTokenDialog(token.token)"
+          style="width: 140px"
+          class="q-pr-none items-center"
         >
-          <div>{{ formatSat(props.row.amount) }}</div>
-        </q-td>
-        <q-td key="date" :props="props">
-          <div>{{ props.row.date }}</div>
-        </q-td>
-        <!-- <q-td key="memo" :props="props">
-                            <div>{{props.row.memo}}</div>
-                        </q-td> -->
-        <q-td key="token" :props="props">
-          <div @click="copyText(props.row.token)">
-            {{
-              props.row.token.slice(0, 8) +
-              "..." +
-              props.row.token.slice(
-                props.row.token.length / 2,
-                props.row.token.length / 2 + 10
-              ) +
-              "..." +
-              props.row.token.slice(-8)
-            }}
-            <q-tooltip>Click to copy</q-tooltip>
-          </div>
-        </q-td>
-      </q-tr>
-    </template>
-  </q-table>
+          <q-item-label class="text-weight-bold">
+            <q-icon
+              :name="token.amount >= 0 ? 'call_received' : 'call_made'"
+              :color="
+                token.status === 'paid'
+                  ? token.amount >= 0
+                    ? 'green'
+                    : 'red'
+                  : ''
+              "
+              class="q-mr-xs"
+              size="xs"
+            />
+            {{ formatCurrency(token.amount, token.unit) }}
+          </q-item-label>
+        </q-item-section>
+
+        <q-item-section
+          class="items-center q-pl-lg"
+          @click="showTokenDialog(token.token)"
+          style="width: 300px"
+        >
+          <q-item-label>
+            <!-- {{
+              token.token.slice(0, 10) + "..." + token.token.slice(-8)
+            }} -->
+            Ecash
+          </q-item-label>
+          <q-item-label caption>{{ formattedDate(token.date) }}</q-item-label>
+        </q-item-section>
+
+        <q-item-section side top>
+          <q-btn
+            flat
+            dense
+            icon="sync"
+            @click="checkTokenSpendable(token.token)"
+            class="cursor-pointer"
+            v-if="token.status === 'pending'"
+            style="position: absolute; right: 0"
+          >
+            <q-tooltip>Check status</q-tooltip>
+          </q-btn>
+        </q-item-section>
+      </q-item>
+    </q-list>
+    <div v-if="paginatedTokens.length === 0" class="text-center q-mt-lg">
+      <q-item-label caption class="text-primary">No history yet</q-item-label>
+    </div>
+    <div v-else-if="maxPages > 1" class="text-center q-mt-lg">
+      <div style="display: flex; justify-content: center">
+        <q-pagination
+          v-model="currentPage"
+          :max="maxPages"
+          :max-pages="5"
+          direction-links
+          boundary-links
+          @input="handlePageChange"
+        />
+      </div>
+    </div>
+  </div>
 </template>
 <script>
 import { defineComponent } from "vue";
 import { shortenString } from "src/js/string-utils";
+import { formatDistanceToNow, parseISO } from "date-fns";
+import { useTokensStore } from "src/stores/tokens";
+import { mapState } from "pinia";
 
 export default defineComponent({
   name: "HistoryTable",
   mixins: [windowMixin],
   props: {
-    proofs: Array,
-    activeProofs: Array,
-    mints: Array,
-    tickerShort: String,
-    activeMintUrl: String,
-    historyTokens: Array,
     showTokenDialog: Function,
     checkTokenSpendable: Function,
   },
   data: function () {
     return {
-      historyTable: {
-        columns: [
-          {
-            name: "status",
-            align: "left",
-            label: "",
-            field: "status",
-            sortable: true,
-          },
-          {
-            name: "amount",
-            align: "left",
-            label: "Amount",
-            field: "amount",
-            sortable: true,
-          },
-          {
-            name: "date",
-            align: "left",
-            label: "Date",
-            field: "date",
-            sortable: true,
-          },
-          // {
-          //   name: 'memo',
-          //   align: 'left',
-          //   label: 'Memo',
-          //   field: 'memo',
-          //   sortable: true
-          // },
-          {
-            name: "token",
-            align: "left",
-            label: "Token",
-            field: "token",
-            sortable: false,
-          },
-        ],
-        pagination: {
-          sortBy: "date",
-          descending: true,
-          rowsPerPage: 5,
-        },
-        filter: null,
-      },
+      currentPage: 1,
+      pageSize: 5,
     };
   },
+  computed: {
+    ...mapState(useTokensStore, ["historyTokens"]),
+    maxPages() {
+      return Math.ceil(this.historyTokens.length / this.pageSize);
+    },
+    paginatedTokens() {
+      const start = (this.currentPage - 1) * this.pageSize;
+      const end = start + this.pageSize;
+      return this.historyTokens.slice().reverse().slice(start, end);
+    },
+  },
   methods: {
+    formattedDate(date_str) {
+      const date = parseISO(date_str); // Convert string to date object
+      return formatDistanceToNow(date, { addSuffix: true }); // "6 hours ago"
+    },
     shortenString: function (s) {
       return shortenString(s, 20, 10);
+    },
+    handlePageChange(page) {
+      this.currentPage = page;
     },
   },
   created: function () {},
