@@ -40,15 +40,26 @@
                 v-model.trim="sendData.memo"
                 label="Memo"
                 ></q-input> -->
-          <q-btn
-            v-if="!sendData.tokens"
-            :disable="sendData.amount == null || sendData.amount <= 0"
-            @click="sendTokens"
-            color="primary"
-            outline
-            type="submit"
-            >Send Ecash</q-btn
-          >
+          <div class="row q-mt-lg">
+            <q-btn
+              v-if="!sendData.tokens"
+              :disable="sendData.amount == null || sendData.amount <= 0"
+              @click="sendTokens"
+              color="primary"
+              rounded
+              type="submit"
+              >Send Ecash</q-btn
+            >
+            <q-chip
+              v-if="canSpendOffline"
+              outline
+              color="primary"
+              icon="check"
+              class="q-ml-auto"
+            >
+              Can send offline
+            </q-chip>
+          </div>
         </q-card-section>
       </div>
       <div v-else class="text-center q-mb-xs">
@@ -228,6 +239,21 @@ export default defineComponent({
     runnerActive: function () {
       return this.tokenWorkerRunning;
     },
+    canSpendOffline: function () {
+      if (!this.sendData.amount) {
+        return false;
+      }
+      // check if entered amount is the same as the result of coinSelect(spendableProofs(activeProofs), amount)
+      let spendableProofs = this.spendableProofs(this.activeProofs);
+      let selectedProofs = this.coinSelect(
+        spendableProofs,
+        this.sendData.amount
+      );
+      const sumSelectedProofs = selectedProofs
+        .flat()
+        .reduce((sum, el) => (sum += el.amount), 0);
+      return sumSelectedProofs == this.sendData.amount;
+    },
   },
   watch: {
     "sendData.tokensBase64": function (val) {
@@ -264,7 +290,11 @@ export default defineComponent({
   },
   methods: {
     ...mapActions(useWorkersStore, ["checkTokenSpendableWorker"]),
-    ...mapActions(useWalletStore, ["splitToSend"]),
+    ...mapActions(useWalletStore, [
+      "splitToSend",
+      "coinSelect",
+      "spendableProofs",
+    ]),
     ...mapActions(useProofsStore, [
       "serializeProofs",
       "getProofsMint",
@@ -365,7 +395,11 @@ export default defineComponent({
           unit: this.activeUnit,
           mint: this.activeMintUrl,
         });
-        this.checkTokenSpendableWorker(this.sendData.tokensBase64);
+
+        if (!this.g.offline) {
+          this.checkTokenSpendableWorker(this.sendData.tokensBase64);
+        }
+
         // if (this.checkSentTokens) {
         //   console.log("### kick off checkTokenSpendableWorker");
         //   this.checkTokenSpendableWorker(this.sendData.tokensBase64);

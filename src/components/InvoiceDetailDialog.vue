@@ -37,7 +37,7 @@
         <div class="row items-center no-wrap q-my-sm q-py-none">
           <q-btn
             color="primary"
-            outline
+            rounded
             @click="requestMintButton"
             :disable="!(invoiceData.amount > 0) || createInvoiceButtonBlocked"
             :label="
@@ -50,7 +50,9 @@
               color="white"
               size="1em"
           /></q-btn>
-          <q-btn v-close-popup flat color="grey" class="q-ml-auto">Close</q-btn>
+          <q-btn v-close-popup rounded flat color="grey" class="q-ml-auto"
+            >Close</q-btn
+          >
         </div>
       </div>
 

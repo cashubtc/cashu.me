@@ -13,6 +13,21 @@
       <q-toolbar-title>
         <!-- <span><strong>Cashu.me</strong></span> -->
       </q-toolbar-title>
+      <!-- offline badge if offline is true -->
+      <transition
+        appear
+        enter-active-class="animated wobble"
+        leave-active-class="animated fadeOut"
+      >
+        <q-badge
+          v-if="g.offline"
+          color="red"
+          text-color="black"
+          class="q-mr-sm"
+        >
+          <span>Offline</span>
+        </q-badge>
+      </transition>
       <q-badge color="yellow" text-color="black" class="q-mr-none">
         <span>Beta</span>
       </q-badge>
