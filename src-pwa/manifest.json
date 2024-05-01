@@ -8,11 +8,11 @@
   "theme_color": "#000000",
   "protocol_handlers": [
     {
-      "protocol": "cashu",
+      "protocol": "web+cashu",
       "url": "/?token=%s"
     },
     {
-      "protocol": "lightning",
+      "protocol": "web+lightning",
       "url": "/?lightning=%s"
     }
   ],
@@ -46,6 +46,12 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
+    },
+    {
+      "src": "icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
     }
   ]
 }
