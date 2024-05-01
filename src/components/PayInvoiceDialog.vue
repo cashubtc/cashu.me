@@ -151,7 +151,7 @@
           </q-input>
           <div class="row q-mt-lg">
             <q-btn
-              outline
+              rounded
               color="primary"
               class="q-mr-sm"
               :disable="payInvoiceData.input.request == ''"
@@ -173,7 +173,7 @@
               @click="showCamera"
             >
             </q-btn>
-            <q-btn v-close-popup flat color="grey" class="q-ml-auto"
+            <q-btn v-close-popup flat rounded color="grey" class="q-ml-auto"
               >Close</q-btn
             >
           </div>

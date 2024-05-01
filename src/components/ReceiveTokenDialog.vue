@@ -37,7 +37,7 @@
         <q-btn
           @click="receveIfDecodes"
           color="primary"
-          outline
+          rounded
           class="q-mr-sm"
           :disabled="!decodeToken(receiveData.tokensBase64)"
           >Receive</q-btn
@@ -56,7 +56,9 @@
           v-if="hasCamera"
           @click="showCamera"
         ></q-btn>
-        <q-btn v-close-popup flat color="grey" class="q-ml-auto">Close</q-btn>
+        <q-btn v-close-popup rounded flat color="grey" class="q-ml-auto"
+          >Close</q-btn
+        >
       </div>
     </q-card>
   </q-dialog>

@@ -158,6 +158,33 @@ export const useWalletStore = defineStore("wallet", {
       if (!invoice) return;
       invoice.status = "paid";
     },
+    coinSelect: function (proofs: WalletProof[], amount: number) {
+      // if sum of amounts of proofs is less than amount, return empty array
+      if (proofs.reduce((s, t) => (s += t.amount), 0) < amount) {
+        return [];
+      }
+      let sum = 0;
+      let i = 0;
+      while (sum < amount) {
+        sum += proofs[i].amount;
+        i += 1;
+      }
+      return proofs.slice(0, i);
+    },
+    spendableProofs: function (proofs: WalletProof[], amount: number) {
+      const proofsStore = useProofsStore();
+      const mintStore = useMintsStore();
+      const spendableProofs = proofsStore.getUnreservedProofs(proofs);
+      if (proofsStore.sumProofs(spendableProofs) < amount) {
+        const balance = mintStore.activeBalance;
+        notifyWarning(
+          "Balance is too low.",
+          `Your balance is ${balance} sat and you're trying to pay ${amount} sats.`
+        );
+        throw Error("balance too low.");
+      }
+      return spendableProofs;
+    },
     splitToSend: async function (proofs: WalletProof[], amount: number, invlalidate: boolean = false) {
       /*
       splits proofs so the user can keep firstProofs, send scndProofs.
@@ -165,36 +192,30 @@ export const useWalletStore = defineStore("wallet", {
 
       if invalidate, scndProofs (the one to send) are invalidated
       */
-      const proofsStore = useProofsStore();
       const mintStore = useMintsStore();
       try {
-        const spendableProofs = proofsStore.getUnreservedProofs(proofs);
-        if (proofsStore.sumProofs(spendableProofs) < amount) {
-          const balance = await mintStore.activeBalance;
-          notifyWarning(
-            "Balance is too low.",
-            `Your balance is ${balance} sat and you're trying to pay ${amount} sats.`
-          );
-          throw Error("balance too low.");
+        const spendableProofs = this.spendableProofs(proofs, amount);
+        const proofsToSplit = this.coinSelect(spendableProofs, amount);
+        const totalAmount = proofsToSplit.reduce((s, t) => (s += t.amount), 0);
+        let keepProofs: WalletProof[] = [];
+        let sendProofs: WalletProof[] = [];
+        if (totalAmount != amount) {
+          const keysetId = this.getKeyset()
+          const counter = this.keysetCounter(keysetId);
+          const { returnChange: _keepProofs, send: _sendProofs } = await this.wallet.send(amount, proofsToSplit, { counter: counter })
+          keepProofs = _keepProofs;
+          sendProofs = _sendProofs;
+
+          this.increaseKeysetCounter(keysetId, keepProofs.length + sendProofs.length);
+
+          mintStore.addProofs(keepProofs);
+          mintStore.addProofs(sendProofs);
+        } else if (totalAmount == amount) {
+          keepProofs = [];
+          sendProofs = proofsToSplit;
+        } else {
+          throw new Error("could not split proofs.");
         }
-
-        // coin selection: sort and select proofs until amount is reached
-        spendableProofs.sort((a, b) => a.amount - b.amount);
-        let sum = 0;
-        let i = 0;
-        while (sum < amount) {
-          sum += spendableProofs[i].amount;
-          i += 1;
-        }
-        const proofsToSplit = spendableProofs.slice(0, i);
-
-        const keysetId = this.getKeyset()
-        const counter = this.keysetCounter(keysetId);
-        const { returnChange: keepProofs, send: sendProofs } = await this.wallet.send(amount, proofsToSplit, { counter: counter })
-        this.increaseKeysetCounter(keysetId, keepProofs.length + sendProofs.length);
-
-        mintStore.addProofs(keepProofs);
-        mintStore.addProofs(sendProofs);
 
         if (invlalidate) {
           mintStore.removeProofs(sendProofs);
