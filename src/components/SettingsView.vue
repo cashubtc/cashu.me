@@ -899,11 +899,21 @@ export default defineComponent({
       this.discoveringMints = true;
       await this.connect();
       console.log("### fetch mints");
-      const mintUrls = await this.fetchMints();
+      let maxTries = 5;
+      let tries = 0;
+      let mintUrls = [];
+      while (mintUrls.length == 0 && tries < maxTries) {
+        try {
+          mintUrls = await this.fetchMints();
+        } catch (e) {
+          console.log("Error fetching mints", e);
+        }
+        tries++;
+      }
       if (mintUrls.length == 0) {
         this.notifyError("No mints found");
       } else {
-        this.notifySuccess("Discovered " + mintUrls.length + " mints");
+        this.notifySuccess("Found " + mintUrls.length + " mints");
       }
       console.log(mintUrls);
       this.discoveringMints = false;

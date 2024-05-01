@@ -303,10 +303,28 @@ export const useMintsStore = defineStore("mints", {
           this.mints.filter((m) => m.url === mint.url)[0].keysets = keysets;
         }
 
-        const keys = await mintClass.api.getKeys();
-        // store keys in mint and update local storage
-        // TODO: Do not overwrite existing keysets, only add new ones
-        this.mints.filter((m) => m.url === mint.url)[0].keys = keys.keysets;
+        // if we do not have any keys yet, fetch them
+        if (mint.keys.length === 0) {
+          const keys = await mintClass.api.getKeys();
+          // store keys in mint and update local storage
+          this.mints.filter((m) => m.url === mint.url)[0].keys = keys.keysets;
+        }
+        // reload mint from local storage
+        mint = this.mints.filter((m) => m.url === mint.url)[0];
+
+        // for each keyset we do not have keys for, fetch keys
+        for (const keyset of keysets) {
+          if (!mint.keys.find((k) => k.id === keyset.id)) {
+            const keys = await mintClass.api.getKeys(keyset.id);
+            // store keys in mint and update local storage
+            this.mints.filter((m) => m.url === mint.url)[0].keys.push(keys.keysets[0]);
+          }
+        }
+
+        // const keys = await mintClass.api.getKeys();
+        // // store keys in mint and update local storage
+        // // TODO: Do not overwrite existing keysets, only add new ones
+        // this.mints.filter((m) => m.url === mint.url)[0].keys = keys.keysets;
 
         // return the mint with keys set
         return this.mints.filter((m) => m.url === mint.url)[0]

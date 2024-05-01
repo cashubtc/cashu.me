@@ -170,7 +170,7 @@ export const useWalletStore = defineStore("wallet", {
       return chunks;
     },
     outputAmountSelect: function (amount: number, target = 3) {
-      //This function produces an amount split for outputs based on the current state of the wallet.
+      // This function produces an amount split for outputs based on the current coins we have.
       // Its objective is to fill up the wallet so that it reaches `target` coins of each amount.
       // The coins we currently have are are this.activeProofs
       const mintStore = useMintsStore();
