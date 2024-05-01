@@ -193,39 +193,6 @@
                 </q-input>
               </div>
             </div>
-            <div class="row q-pt-md">
-              <div class="col-12" v-if="!confirmMnemonic">
-                <q-btn flat dense @click="confirmMnemonic = !confirmMnemonic"
-                  >Generate new seed phrase</q-btn
-                >
-              </div>
-              <div class="col-12" v-if="confirmMnemonic">
-                <span
-                  >Are you sure you want to generate a new seed phrase? You must
-                  send your entire balance to yourself in order to be able to
-                  restore it with a new seed.
-                </span>
-                <q-btn
-                  flat
-                  dense
-                  class="q-ml-sm"
-                  color="warning"
-                  @click="confirmMnemonic = false"
-                  >Cancel</q-btn
-                >
-                <q-btn
-                  flat
-                  dense
-                  class="q-ml-sm"
-                  color="secondary"
-                  @click="
-                    confirmMnemonic = false;
-                    generateNewMnemonic();
-                  "
-                  >Confirm</q-btn
-                >
-              </div>
-            </div>
           </q-item-section>
         </q-item>
       </q-list>
@@ -323,17 +290,24 @@
             /> </q-item
           ><q-item class="q-pt-none">
             <q-item-label caption
-              >If enabled, the wallet will request the state of sent tokens from
-              the mint.
+              >If enabled, the wallet will periodically request the state of
+              tokens you've sent and mark them as paid. You can manually check
+              pending tokens in the history tab.
             </q-item-label>
           </q-item>
           <!-- price check setting -->
           <q-item>
             <q-toggle
               v-model="getBitcoinPrice"
-              label="Fetch price from coinbase.com"
+              label="Get exchange rate from Coinbase"
               color="primary"
-            />
+            /> </q-item
+          ><q-item class="q-pt-none">
+            <q-item-label caption
+              >If enabled, the current Bitcoin exchange rate will be fetched
+              from the coinbase.com API and your converted balance will be
+              displayed.
+            </q-item-label>
           </q-item>
         </div>
         <q-expansion-item
@@ -341,12 +315,12 @@
           dense
           dense-toggle
           icon="code"
-          label="Developer"
+          label="Advanced"
         >
           <div>
             <q-item class="q-pt-lg">
               <q-item-section>
-                <q-item-label overline>Developer</q-item-label>
+                <q-item-label overline>Developer settings</q-item-label>
                 <q-item-label caption
                   >The following settings are for development and
                   debugging.</q-item-label
@@ -355,6 +329,51 @@
             </q-item>
             <div>
               <!-- check proofs spendable setting -->
+              <q-item>
+                <q-item-section>
+                  <div class="row q-pt-md">
+                    <div class="col-12" v-if="!confirmMnemonic">
+                      <q-btn
+                        flat
+                        dense
+                        @click="confirmMnemonic = !confirmMnemonic"
+                        >Generate new seed phrase</q-btn
+                      >
+                      <row>
+                        <q-item-label class="q-px-sm" caption
+                          >This will generate a new seed phrase. You must send
+                          your entire balance to yourself in order to be able to
+                          restore it with a new seed.
+                        </q-item-label>
+                      </row>
+                    </div>
+                    <div class="col-12" v-if="confirmMnemonic">
+                      <span
+                        >Are you sure you want to generate a new seed phrase?
+                      </span>
+                      <q-btn
+                        flat
+                        dense
+                        class="q-ml-sm"
+                        color="warning"
+                        @click="confirmMnemonic = false"
+                        >Cancel</q-btn
+                      >
+                      <q-btn
+                        flat
+                        dense
+                        class="q-ml-sm"
+                        color="secondary"
+                        @click="
+                          confirmMnemonic = false;
+                          generateNewMnemonic();
+                        "
+                        >Confirm</q-btn
+                      >
+                    </div>
+                  </div>
+                </q-item-section>
+              </q-item>
               <q-item>
                 <q-item-section>
                   <row>
