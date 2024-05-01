@@ -48,7 +48,7 @@
             </q-item>
             <q-separator />
           </template>
-          <!-- <template v-slot:prepend>
+          <template v-slot:prepend>
             <q-icon
               name="account_balance"
               size="1.2rem"
@@ -60,7 +60,7 @@
             <q-badge
               color="primary"
               :label="formatCurrency(getBalance, activeUnit)"
-          /></template> -->
+          /></template>
         </q-select>
       </div>
     </div>
