@@ -46,7 +46,7 @@ export default {
     ...mapActions(useCameraStore, ["closeCamera", "showCamera"]),
     handleResult(result: QrScanner.ScanResult) {
       // if this is a multipart-qr code, do not yet emit
-      if (result.data.startsWith("ur:")) {
+      if (result.data.toLowerCase().startsWith("ur:")) {
         this.urDecoder?.receivePart(result.data);
         this.urDecoderProgress =
           this.urDecoder?.estimatedPercentComplete() || 0;
