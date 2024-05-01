@@ -184,6 +184,10 @@ export default defineComponent({
     ...mapActions(useWalletStore, ["requestMint", "lnurlPaySecond"]),
     requestMintButton: async function () {
       try {
+        // if unit is USD, multiply by 100
+        if (this.invoiceData.unit === "usd") {
+          this.invoiceData.amount = this.invoiceData.amount * 100;
+        }
         this.createInvoiceButtonBlocked = true;
         await this.requestMint();
         await this.invoiceCheckWorker();

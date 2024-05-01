@@ -300,7 +300,7 @@ export const useWalletStore = defineStore("wallet", {
         });
 
         if (!!window.navigator.vibrate) navigator.vibrate(200);
-        notifySuccess("Ecash Received");
+        notifySuccess("Received " + uIStore.formatCurrency(amount, mintStore.activeUnit));
       } catch (error: any) {
         console.error(error);
         try {
@@ -431,7 +431,7 @@ export const useWalletStore = defineStore("wallet", {
         let amount_paid = amount;
         if (!!window.navigator.vibrate) navigator.vibrate(200);
 
-        notifySuccess("Invoice Paid");
+        notifySuccess("Paid " + uIStore.formatCurrency(amount_paid, mintStore.activeUnit) + " via Lightning");
         console.log("#### pay lightning: token paid");
         // delete spent tokens from db
         mintStore.removeProofs(sendProofs);
@@ -584,7 +584,8 @@ export const useWalletStore = defineStore("wallet", {
       }
       if (paid) {
         if (!!window.navigator.vibrate) navigator.vibrate(200);
-        notifySuccess("Ecash Paid");
+        const proofStore = useProofsStore();
+        notifySuccess("Sent " + uIStore.formatCurrency(proofStore.sumProofs(proofs), mintStore.activeUnit));
       } else {
         console.log("### token not paid yet");
         if (verbose) {
@@ -607,7 +608,7 @@ export const useWalletStore = defineStore("wallet", {
         }
         const proofs = await this.mint(invoice.amount, invoice.quote, verbose);
         if (!!window.navigator.vibrate) navigator.vibrate(200);
-        notifySuccess("Payment received", "top");
+        notifySuccess("Received " + uIStore.formatCurrency(invoice.amount, mintStore.activeUnit) + " via Lightning");
         return proofs;
       } catch (error) {
         if (verbose) {

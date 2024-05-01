@@ -340,11 +340,17 @@ export default defineComponent({
       /*
       calls splitToSend, displays token and kicks off the spendableWorker
       */
+
       try {
+        let sendAmount = this.sendData.amount;
+        // if unit is USD, multiply by 100
+        if (this.activeUnit === "usd") {
+          sendAmount = sendAmount * 100;
+        }
         // keep firstProofs, send scndProofs and delete them (invalidate=true)
         let { _, sendProofs } = await this.splitToSend(
           this.activeProofs,
-          this.sendData.amount,
+          sendAmount,
           true
         );
 
