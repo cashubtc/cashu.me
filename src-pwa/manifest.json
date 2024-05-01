@@ -1,7 +1,7 @@
 {
   "name": "Cashu.me",
   "short_name": "Cashu.me",
-  "description": "A Cashu wallet for the web",
+  "description": "A Cashu Ecash wallet for the web.",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#000000",
@@ -52,6 +52,36 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshots/narrow-1.png",
+      "form_factor": "narrow",
+      "sizes": "542x942",
+      "type": "image/png",
+      "label": "fullscreen view"
+    },
+    {
+      "src": "/screenshots/narrow-2.png",
+      "form_factor": "narrow",
+      "sizes": "542x942",
+      "type": "image/png",
+      "label": "fullscreen view"
+    },
+    {
+      "src": "/screenshots/wide-1.png",
+      "form_factor": "wide",
+      "sizes": "1910x932",
+      "type": "image/png",
+      "label": "fullscreen view"
+    },
+    {
+      "src": "/screenshots/wide-2.png",
+      "form_factor": "wide",
+      "sizes": "1910x932",
+      "type": "image/png",
+      "label": "fullscreen view"
     }
   ]
 }
