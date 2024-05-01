@@ -94,6 +94,7 @@ export default defineComponent({
     ]),
     ...mapState(useUiStore, ["tickerShort"]),
     ...mapState(useMintsStore, ["activeProofs", "activeUnit"]),
+    ...mapWritableState(useMintsStore, ["addMintData", "showAddMintDialog"]),
     ...mapState(useCameraStore, ["hasCamera"]),
     canPasteFromClipboard: function () {
       return (
@@ -142,9 +143,9 @@ export default defineComponent({
         // hide the receive dialog
         receiveStore.showReceiveTokens = false;
         // set the mint to add
-        mintStore.setMintToAdd(tokenJson.token[0].mint);
+        this.addMintData = { url: token.getMint(tokenJson) };
         // show the add mint dialog
-        mintStore.showAddMintDialog = true;
+        this.showAddMintDialog = true;
         // show the token receive dialog again for the next attempt
         receiveStore.showReceiveTokens = true;
         return;
