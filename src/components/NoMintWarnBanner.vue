@@ -1,5 +1,8 @@
 <template>
-  <q-card class="q-pa-lg q-ma-xl">
+  <div
+    class="q-ma-lg q-pa-md"
+    style="border: 1px solid #ccc; border-radius: 10px"
+  >
     <q-card-section>
       <div class="row items-center justify-center">
         <q-icon class="q-pb-md" name="account_balance" size="50px" />
@@ -9,28 +12,31 @@
       </div>
       <div class="row items-center justify-center">
         <div class="text-subtitle2">
-          You haven't joined any Cashu mint yet. Connect to a mint URL in the
-          settings to get started.
+          You haven't joined any Cashu mint yet. Add a mint URL in the settings
+          or receive ecash from a new mint to get started.
         </div>
       </div>
-      <div class="row items-center justify-center q-pt-xl">
+      <div class="row items-center justify-center q-pt-lg">
         <q-btn
-          outline
-          dense
-          class="q-px-sm"
+          rounded
+          color="primary"
+          class="q-px-md"
           label="Add mint"
           @click="focusOnMint"
         />
+      </div>
+      <div class="row items-center justify-center q-pt-md">
         <q-btn
-          class="q-mx-sm q-px-sm"
-          dense
           outline
+          rounded
+          color="primary"
+          class="q-px-md"
           label="Receive Ecash"
           @click="showReceiveTokensDialog"
         />
       </div>
     </q-card-section>
-  </q-card>
+  </div>
 </template>
 <script>
 import { defineComponent, ref } from "vue";
