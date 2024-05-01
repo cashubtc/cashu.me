@@ -46,12 +46,14 @@
                 v-if="mint.nickname"
                 @click="activateMintUrl(mint.url, (verbose = false))"
                 class="cursor-pointer"
+                style="word-break: break-word"
                 >{{ mint.nickname }}</q-item-label
               >
               <q-item-label
                 lines="1"
                 @click="activateMintUrl(mint.url, (verbose = false))"
                 class="cursor-pointer"
+                style="word-break: break-word"
                 >{{ mint.url }}</q-item-label
               >
               <q-item-label>
@@ -86,13 +88,8 @@
             <q-item-section>
               <q-item-label overline>Add mint</q-item-label>
               <q-item-label caption
-                >Enter the URL of a Cashu mint to connect to it. Find a mint at
-                <a
-                  href="https://bitcoinmints.com"
-                  target="_blank"
-                  class="text-primary"
-                  >bitcoinmints.com</a
-                >. This wallet is not affiliated with any mint.
+                >Enter the URL of a Cashu mint to connect to it. This wallet is
+                not affiliated with any mint.
               </q-item-label>
             </q-item-section>
           </q-item>
@@ -143,11 +140,16 @@
             class="q-px-lg q-mt-xs"
             color="primary"
             :disabled="addMintData.url.length == 0"
+            :loading="addingMint"
             @click="showAddMintDialog = true"
           >
             <q-icon size="xs" name="add" class="q-pr-xs" />
-            Add mint</q-btn
-          >
+            Add mint
+            <template v-slot:loading>
+              <q-spinner-hourglass class="on-left" />
+              Loading...
+            </template>
+          </q-btn>
         </div>
       </q-list>
     </div>
@@ -195,6 +197,87 @@
             </div>
           </q-item-section>
         </q-item>
+      </q-list>
+    </div>
+
+    <div class="q-py-sm q-px-xs text-left" on-left>
+      <q-list padding>
+        <q-item>
+          <q-item-section>
+            <q-item-label overline>Nostr</q-item-label>
+            <q-item-label caption
+              >Connect your wallet with nostr and discover mints recommended by
+              other users.</q-item-label
+            >
+          </q-item-section>
+        </q-item>
+        <q-item v-if="false">
+          <q-btn
+            class="q-ml-sm q-px-md"
+            color="primary"
+            rounded
+            outline
+            @click="initNdk"
+            >Link to extension</q-btn
+          >
+        </q-item>
+        <q-item>
+          <q-btn
+            class="q-ml-sm q-px-md"
+            color="primary"
+            rounded
+            outline
+            :loading="discoveringMints"
+            @click="fetchMintsFromNdk"
+            >Discover mints
+            <template v-slot:loading>
+              <q-spinner-hourglass class="on-left" />
+              Loading...
+            </template>
+          </q-btn>
+        </q-item>
+        <div v-if="mintRecommendations.length > 0">
+          <!-- for each entry in mintRecommendations, display the url and the count how often it was recommended -->
+          <q-item>
+            <q-item-section>
+              <q-item-label overline>Discovered mints</q-item-label>
+              <q-item-label caption
+                >These mints were recommended by other Nostr users. Read reviews
+                at
+                <a
+                  href="https://bitcoinmints.com"
+                  target="_blank"
+                  class="text-primary"
+                  >bitcoinmints.com</a
+                >. Be careful and do your own research before using a mint.
+              </q-item-label>
+            </q-item-section>
+          </q-item>
+          <q-expansion-item dense dense-toggle label="Click to browse mints">
+            <q-item v-for="mint in mintRecommendations" :key="mint.url">
+              <q-item-section
+                class="q-mx-none q-pl-none"
+                style="max-width: 1.05em"
+              >
+                <q-icon
+                  name="content_copy"
+                  @click="copyText(mint.url)"
+                  size="1em"
+                  color="grey"
+                  class="q-mr-xs cursor-pointer"
+                />
+              </q-item-section>
+              <q-item-section>
+                <q-item-label caption style="word-break: break-word">{{
+                  mint.url
+                }}</q-item-label>
+              </q-item-section>
+              <q-item-section side>
+                <q-badge :label="mint.count" color="primary" />
+              </q-item-section>
+            </q-item>
+          </q-expansion-item>
+        </div>
       </q-list>
     </div>
 
@@ -480,7 +563,7 @@
 
     <q-dialog
       v-model="showAddMintDialog"
-      @keydown.enter.prevent="addMint(addMintData, (verbose = true))"
+      @keydown.enter.prevent="addMintInternal(addMintData, (verbose = true))"
       backdrop-filter="blur(2px) brightness(60%)"
     >
       <q-card class="q-pa-lg">
@@ -505,9 +588,10 @@
               v-close-popup
               color="primary"
               icon="check"
-              @click="addMint(addMintData, (verbose = true))"
-              >Add mint</q-btn
-            >
+              :loading="addingMint"
+              @click="addMintInternal(addMintData, (verbose = true))"
+              >Add mint
+            </q-btn>
           </div>
           <div class="col">
             <q-btn v-close-popup flat class="float-right" color="grey"
@@ -592,7 +676,7 @@ import { useWalletStore } from "src/stores/wallet";
 import { map } from "underscore";
 import { currentDateStr } from "src/js/utils";
 import { useSettingsStore } from "src/stores/settings";
-
+import { useNdkStore } from "src/stores/ndk";
 export default defineComponent({
   name: "SettingsView",
   mixins: [windowMixin],
@@ -606,6 +690,8 @@ export default defineComponent({
   },
   data: function () {
     return {
+      discoveringMints: false,
+      addingMint: false,
       hideMnemonic: true,
       confirmMnemonic: false,
       swapData: {
@@ -638,6 +724,7 @@ export default defineComponent({
       "checkSentTokens",
     ]),
     ...mapState(useMintsStore, ["activeMintUrl", "mints", "activeProofs"]),
+    ...mapState(useNdkStore, ["pubkey", "mintRecommendations"]),
     ...mapState(useWalletStore, ["mnemonic"]),
     ...mapWritableState(useMintsStore, [
       "addMintData",
@@ -666,6 +753,13 @@ export default defineComponent({
     // },
   },
   methods: {
+    ...mapActions(useNdkStore, [
+      "init",
+      "connect",
+      "getUserPubkey",
+      "fetchEventsFromUser",
+      "fetchMints",
+    ]),
     ...mapActions(useMintsStore, [
       "addMint",
       "removeMint",
@@ -682,6 +776,14 @@ export default defineComponent({
       this.mintToEdit = Object.assign({}, mint);
       this.editMintData = Object.assign({}, mint);
       this.showEditMintDialog = true;
+    },
+    addMintInternal: function (mintToAdd, verbose) {
+      this.addingMint = true;
+      try {
+        this.addMint(mintToAdd, verbose);
+      } finally {
+        this.addingMint = false;
+      }
     },
     generateNewMnemonic() {
       this.newMnemonic();
@@ -782,6 +884,27 @@ export default defineComponent({
       } else {
         this.notifySuccess("No spent proofs found");
       }
+    },
+    initNdk: async function () {
+      await this.connect();
+      console.log(await this.getUserPubkey());
+      // console.log("### fetch events");
+      // console.log(await this.fetchEventsFromUser());
+      // console.log("### fetch mints");
+      // console.log(await this.fetchMints());
+    },
+    fetchMintsFromNdk: async function () {
+      this.discoveringMints = true;
+      await this.connect();
+      console.log("### fetch mints");
+      const mintUrls = await this.fetchMints();
+      if (mintUrls.length == 0) {
+        this.notifyError("No mints found");
+      } else {
+        this.notifySuccess("Discovered " + mintUrls.length + " mints");
+      }
+      console.log(mintUrls);
+      this.discoveringMints = false;
     },
   },
   created: function () {},
