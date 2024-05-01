@@ -181,7 +181,8 @@
         <div class="row items-center no-wrap q-my-sm q-py-none">
           <div class="col-12">
             <q-item-label>
-              Are you sure you want to delete this Ecash from your history?
+              Are you sure you want to delete this transaction from your
+              history?
             </q-item-label>
           </div>
         </div>

@@ -240,7 +240,9 @@
           <!-- for each entry in mintRecommendations, display the url and the count how often it was recommended -->
           <q-item>
             <q-item-section>
-              <q-item-label overline>Discovered mints</q-item-label>
+              <q-item-label overline
+                >Found {{ mintRecommendations.length }} mints</q-item-label
+              >
               <q-item-label caption
                 >These mints were recommended by other Nostr users. Read reviews
                 at
