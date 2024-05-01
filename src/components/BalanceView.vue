@@ -73,11 +73,12 @@
           name="link"
           size="1rem"
           color="secondary"
-          class="q-mr-none q-mb-none"
+          class="q-mr-none"
+          style="margin-bottom: 2px"
           @click="setTab('settings')"
         />
         <span class="text-weight-light" @click="setTab('settings')">
-          Mint: <b>{{ getActiveMintUrlShort }}</b>
+          Mint: <b>{{ activeMintLabel }}</b>
           <q-tooltip>Configure mint(s)</q-tooltip>
         </span>
       </div>
@@ -184,8 +185,10 @@ export default defineComponent({
         .flat()
         .reduce((sum, el) => (sum += el.amount), 0);
     },
-    getActiveMintUrlShort: function () {
-      return getShortUrl(this.activeMintUrl);
+    activeMintLabel: function () {
+      const mintClass = this.activeMint();
+
+      return mintClass.mint.nickname || getShortUrl(this.activeMintUrl);
     },
     getBalance: function () {
       var balance = this.activeProofs

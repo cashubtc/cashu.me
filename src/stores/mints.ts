@@ -209,7 +209,7 @@ export const useMintsStore = defineStore("mints", {
       try {
         // sanitize url
         const sanitizeUrl = (url: string): string => {
-          let cleanedUrl = url.trim().replace(/\/+$/, '').toLowerCase();
+          let cleanedUrl = url.trim().replace(/\/+$/, '')
           if (!/^[a-z]+:\/\//.test(cleanedUrl)) {  // Check for any protocol followed by "://"
             cleanedUrl = 'https://' + cleanedUrl;
           }
