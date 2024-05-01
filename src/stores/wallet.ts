@@ -313,12 +313,18 @@ export const useWalletStore = defineStore("wallet", {
         const receivedProofs = tokenReceived.token.map((t) => t.proofs).flat();
         mintStore.addProofs(receivedProofs);
 
-        tokenStore.addPaidToken({
-          amount,
-          serializedProofs: receiveStore.receiveData.tokensBase64,
-          unit: mintStore.activeUnit,
-          mint: mintStore.activeMintUrl,
-        });
+        // if token is already in history, set to paid, else add to history
+        if (tokenStore.historyTokens.find((t) => t.token === receiveStore.receiveData.tokensBase64)) {
+          tokenStore.setTokenPaid(receiveStore.receiveData.tokensBase64);
+        } else {
+          tokenStore.addPaidToken({
+            amount,
+            serializedProofs: receiveStore.receiveData.tokensBase64,
+            unit: mintStore.activeUnit,
+            mint: mintStore.activeMintUrl,
+          });
+        }
+
 
         if (!!window.navigator.vibrate) navigator.vibrate(200);
         notifySuccess("Received " + uIStore.formatCurrency(amount, mintStore.activeUnit));

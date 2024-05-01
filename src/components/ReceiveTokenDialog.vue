@@ -43,8 +43,21 @@
           >Receive</q-btn
         >
         <q-btn
+          @click="addPendingTokenToHistory(receiveData.tokensBase64)"
+          color="primary"
+          rounded
+          flat
+          class="q-mr-sm"
+          v-if="
+            decodeToken(receiveData.tokensBase64) &&
+            !tokenAlreadyInHistory(receiveData.tokensBase64)
+          "
+          >Later
+          <q-tooltip>Add to history to receive later</q-tooltip>
+        </q-btn>
+        <q-btn
           unelevated
-          v-if="canPasteFromClipboard"
+          v-if="canPasteFromClipboard && !receiveData.tokensBase64.length"
           icon="content_paste"
           @click="pasteToParseDialog"
           ><q-tooltip>Paste</q-tooltip></q-btn
@@ -53,7 +66,7 @@
           unelevated
           icon="qr_code_scanner"
           class="q-mx-0"
-          v-if="hasCamera"
+          v-if="hasCamera && !receiveData.tokensBase64.length"
           @click="showCamera"
         ></q-btn>
         <q-btn v-close-popup rounded flat color="grey" class="q-ml-auto"
@@ -70,7 +83,7 @@ import { useWalletStore } from "src/stores/wallet";
 import { useUiStore } from "src/stores/ui";
 // import { useProofsStore } from "src/stores/proofs";
 import { useMintsStore } from "src/stores/mints";
-// import { useTokensStore } from "src/stores/tokens";
+import { useTokensStore } from "src/stores/tokens";
 import { useCameraStore } from "src/stores/camera";
 
 import token from "src/js/token";
@@ -109,6 +122,7 @@ export default defineComponent({
   methods: {
     ...mapActions(useWalletStore, ["redeem"]),
     ...mapActions(useCameraStore, ["closeCamera", "showCamera"]),
+    ...mapActions(useTokensStore, ["addPendingToken"]),
     knowThisMintOfTokenJson: function (tokenJson) {
       const mintStore = useMintsStore();
       // check if we have all mints
@@ -174,6 +188,32 @@ export default defineComponent({
       } catch (error) {
         console.error(error);
       }
+    },
+    tokenAlreadyInHistory: function (token) {
+      const tokensStore = useTokensStore();
+      return (
+        tokensStore.historyTokens.find((t) => t.token === token) !== undefined
+      );
+    },
+    addPendingTokenToHistory: function (token) {
+      const tokensStore = useTokensStore();
+      if (this.tokenAlreadyInHistory(token)) {
+        return;
+      }
+      const decodedToken = this.decodeToken(token);
+      // get amount from decodedToken.token.proofs[..].amount
+      const amount = this.getProofs(decodedToken).reduce(
+        (sum, el) => (sum += el.amount),
+        0
+      );
+
+      tokensStore.addPendingToken({
+        amount: amount,
+        serializedProofs: token,
+      });
+      this.showReceiveTokens = false;
+      // show success notification
+      this.notifySuccess("Ecash added to history.");
     },
     pasteToParseDialog: function () {
       console.log("pasteToParseDialog");

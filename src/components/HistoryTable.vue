@@ -52,10 +52,21 @@
             icon="sync"
             @click="checkTokenSpendable(token.token)"
             class="cursor-pointer"
-            v-if="token.status === 'pending'"
+            v-if="token.status === 'pending' && token.amount < 0"
             style="position: absolute; right: 0"
           >
             <q-tooltip>Check status</q-tooltip>
+          </q-btn>
+          <q-btn
+            flat
+            dense
+            icon="arrow_circle_down"
+            @click="receiveToken(token.token)"
+            class="cursor-pointer"
+            v-if="token.status === 'pending' && token.amount > 0"
+            style="position: absolute; right: 0"
+          >
+            <q-tooltip>Receive</q-tooltip>
           </q-btn>
         </q-item-section>
       </q-item>
@@ -82,7 +93,8 @@ import { defineComponent } from "vue";
 import { shortenString } from "src/js/string-utils";
 import { formatDistanceToNow, parseISO } from "date-fns";
 import { useTokensStore } from "src/stores/tokens";
-import { mapState } from "pinia";
+import { mapState, mapWritableState } from "pinia";
+import { useReceiveTokensStore } from "src/stores/receiveTokensStore";
 
 export default defineComponent({
   name: "HistoryTable",
@@ -99,6 +111,10 @@ export default defineComponent({
   },
   computed: {
     ...mapState(useTokensStore, ["historyTokens"]),
+    ...mapWritableState(useReceiveTokensStore, [
+      "showReceiveTokens",
+      "receiveData",
+    ]),
     maxPages() {
       return Math.ceil(this.historyTokens.length / this.pageSize);
     },
@@ -111,13 +127,17 @@ export default defineComponent({
   methods: {
     formattedDate(date_str) {
       const date = parseISO(date_str); // Convert string to date object
-      return formatDistanceToNow(date, { addSuffix: true }); // "6 hours ago"
+      return formatDistanceToNow(date, { addSuffix: false }); // "6 hours ago"
     },
     shortenString: function (s) {
       return shortenString(s, 20, 10);
     },
     handlePageChange(page) {
       this.currentPage = page;
+    },
+    receiveToken(token) {
+      this.receiveData.tokensBase64 = token;
+      this.showReceiveTokens = true;
     },
   },
   created: function () {},
