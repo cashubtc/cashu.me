@@ -140,7 +140,6 @@
         <div class="row-12">
           <q-btn
             rounded
-            dense
             class="q-px-lg q-mt-xs"
             color="primary"
             :disabled="addMintData.url.length == 0"
@@ -153,7 +152,7 @@
       </q-list>
     </div>
 
-    <div class="q-py-xl q-px-xs text-left" on-left>
+    <div class="q-py-md q-px-xs text-left" on-left>
       <q-list padding>
         <q-item>
           <q-item-section>
@@ -284,7 +283,7 @@
             style="min-width: 200px"
           ></q-input>
           <q-btn
-            class="q-ml-md q-px-lg"
+            class="q-ml-sm q-px-md"
             color="primary"
             rounded
             @click="
@@ -308,68 +307,110 @@
       <q-list padding>
         <q-item>
           <q-item-section>
-            <q-item-label overline>Advanced</q-item-label>
-            <q-item-label caption
-              >The following settings are for development and
-              debugging.</q-item-label
-            >
+            <q-item-label overline>Privacy</q-item-label>
+            <q-item-label caption>
+              These settings affect your privacy.
+            </q-item-label>
           </q-item-section>
         </q-item>
-        <q-expansion-item label="Open advanced settings" dense>
+        <div>
+          <!-- check outgoing token state setting -->
+          <q-item>
+            <q-toggle
+              v-model="checkSentTokens"
+              label="Check sent token state"
+              color="primary"
+            /> </q-item
+          ><q-item class="q-pt-none">
+            <q-item-label caption
+              >If enabled, the wallet will request the state of sent tokens from
+              the mint.
+            </q-item-label>
+          </q-item>
+          <!-- price check setting -->
+          <q-item>
+            <q-toggle
+              v-model="getBitcoinPrice"
+              label="Fetch price from coinbase.com"
+              color="primary"
+            />
+          </q-item>
+        </div>
+        <q-expansion-item
+          class="q-pt-lg"
+          dense
+          dense-toggle
+          icon="code"
+          label="Developer"
+        >
           <div>
-            <!-- check outgoing token state setting -->
-            <q-item>
-              <q-btn
-                dense
-                flat
-                outline
-                click
-                @click="checkSentTokens = !checkSentTokens"
-                :label="
-                  checkSentTokens
-                    ? 'Don\'t check sent tokens'
-                    : 'Check sent tokens'
-                "
-              >
-              </q-btn>
+            <q-item class="q-pt-lg">
+              <q-item-section>
+                <q-item-label overline>Developer</q-item-label>
+                <q-item-label caption
+                  >The following settings are for development and
+                  debugging.</q-item-label
+                >
+              </q-item-section>
             </q-item>
-            <!-- price check setting -->
-            <q-item>
-              <q-btn
-                dense
-                flat
-                outline
-                click
-                @click="getBitcoinPrice = !getBitcoinPrice"
-                :label="
-                  getBitcoinPrice
-                    ? 'Don\'t fetch price'
-                    : 'Fetch price from coinbase'
-                "
-              >
-              </q-btn>
-            </q-item>
-            <!-- check proofs spendable setting -->
-            <q-item>
-              <q-btn
-                dense
-                flat
-                outline
-                click
-                @click="checkActiveProofsSpendable"
-                >Check proofs spendable</q-btn
-              >
-            </q-item>
-            <q-item>
-              <q-btn dense flat outline click @click="enable_terminal">
-                Open debug terminal
-              </q-btn>
-            </q-item>
-            <q-item>
-              <q-btn dense flat outline click @click="getLocalstorageToFile">
-                Download wallet data
-              </q-btn>
-            </q-item>
+            <div>
+              <!-- check proofs spendable setting -->
+              <q-item>
+                <q-item-section>
+                  <row>
+                    <q-btn
+                      dense
+                      flat
+                      outline
+                      click
+                      @click="checkActiveProofsSpendable"
+                      >Check proofs spendable</q-btn
+                    ></row
+                  ><row>
+                    <q-item-label class="q-px-sm" caption
+                      >Check if all proofs of your active mints are spendable
+                      and remove the spent ones from your wallet. Only use this
+                      if your wallet is stuck.
+                    </q-item-label>
+                  </row>
+                </q-item-section>
+              </q-item>
+              <q-item>
+                <q-item-section>
+                  <row>
+                    <q-btn dense flat outline click @click="enable_terminal">
+                      Open debug terminal
+                    </q-btn> </row
+                  ><row>
+                    <q-item-label class="q-px-sm" caption
+                      >Open a debug terminal.
+                    </q-item-label>
+                  </row>
+                </q-item-section>
+              </q-item>
+              <q-item>
+                <q-item-section>
+                  <row>
+                    <q-btn
+                      dense
+                      flat
+                      outline
+                      click
+                      @click="getLocalstorageToFile"
+                    >
+                      Export wallet data
+                    </q-btn></row
+                  ><row>
+                    <q-item-label class="q-px-sm" caption
+                      >Download a dump of your wallet. You can restore your
+                      wallet from this file in the welcome screen of a new
+                      wallet. This file will be out of sync if you keep using
+                      your wallet after exporting it.
+                    </q-item-label>
+                  </row>
+                </q-item-section>
+              </q-item>
+            </div>
           </div>
         </q-expansion-item>
       </q-list>
@@ -398,26 +439,22 @@
           class="q-mb-xs"
         ></q-input>
         <div class="row q-mt-lg">
-          <div class="col">
-            <q-btn
-              class="float-left"
-              v-close-popup
-              color="primary"
-              @click="updateMint(mintToEdit, editMintData)"
-              >Update mint</q-btn
-            >
-            <q-btn
-              icon="delete"
-              flat
-              class="float-left"
-              @click="showRemoveMintDialogWrapper(mintToEdit.url)"
-            />
-          </div>
-          <div class="col">
-            <q-btn v-close-popup flat class="float-right" color="grey"
-              >Cancel</q-btn
-            >
-          </div>
+          <q-btn
+            class="float-left"
+            v-close-popup
+            color="primary"
+            @click="updateMint(mintToEdit, editMintData)"
+            >Update</q-btn
+          >
+          <q-btn
+            icon="delete"
+            flat
+            class="float-left item-left text-left"
+            @click="showRemoveMintDialogWrapper(mintToEdit.url)"
+          />
+          <q-btn v-close-popup flat class="q-ml-auto" color="grey"
+            >Cancel</q-btn
+          >
         </div>
       </q-card>
     </q-dialog>
