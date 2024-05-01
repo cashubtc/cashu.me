@@ -1,12 +1,16 @@
 <template>
   <div class="q-pb-md">
-    <!-- mint url -->
+    <!-- title that says choose a mint -->
+    <div class="row q-mb-none">
+      <div class="col-12">
+        <span class="text-caption">Select a mint</span>
+      </div>
+    </div>
     <div class="row q-mt-xs q-mb-none" v-if="activeMintUrl">
       <div class="col-12 cursor-pointer">
         <q-select
-          borderless
-          round
-          class="q-px-md"
+          outlined
+          class="q-px-none"
           color="white"
           v-model="chosenMint"
           :options="chooseMintOptions()"
@@ -126,8 +130,9 @@ export default defineComponent({
         const units = [...new Set(all_units)];
         const mint = new MintClass(m);
         options.push({
+          nickname: m.nickname,
           url: m.url,
-          shorturl: getShortUrl(m.url),
+          shorturl: m.nickname || getShortUrl(m.url),
           balances: mint.allBalances,
           units: units,
         });

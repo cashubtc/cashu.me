@@ -12,6 +12,7 @@ type HistoryToken = {
   amount: number;
   date: string;
   token: string;
+  mint: string;
   unit: string;
 };
 
@@ -27,10 +28,12 @@ export const useTokensStore = defineStore("tokens", {
     addPaidToken({
       amount,
       serializedProofs,
+      mint,
       unit,
     }: {
       amount: number;
       serializedProofs: string;
+      mint: string;
       unit: string;
     }) {
       this.historyTokens.push({
@@ -38,16 +41,19 @@ export const useTokensStore = defineStore("tokens", {
         amount,
         date: currentDateStr(),
         token: serializedProofs,
+        mint,
         unit,
       });
     },
     addPendingToken({
       amount,
       serializedProofs,
+      mint,
       unit,
     }: {
       amount: number;
       serializedProofs: string;
+      mint: string;
       unit: string;
     }) {
       this.historyTokens.push({
@@ -55,6 +61,7 @@ export const useTokensStore = defineStore("tokens", {
         amount,
         date: currentDateStr(),
         token: serializedProofs,
+        mint,
         unit,
       });
     },

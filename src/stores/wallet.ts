@@ -296,6 +296,7 @@ export const useWalletStore = defineStore("wallet", {
           amount,
           serializedProofs: receiveStore.receiveData.tokensBase64,
           unit: mintStore.activeUnit,
+          mint: mintStore.activeMintUrl,
         });
 
         if (!!window.navigator.vibrate) navigator.vibrate(200);
@@ -373,6 +374,7 @@ export const useWalletStore = defineStore("wallet", {
           amount,
           serializedProofs: serializedProofs,
           unit: mintStore.activeUnit,
+          mint: mintStore.activeMintUrl,
         });
 
         return proofs;
@@ -453,6 +455,7 @@ export const useWalletStore = defineStore("wallet", {
           amount: -amount_paid,
           serializedProofs: serializedProofs,
           unit: mintStore.activeUnit,
+          mint: mintStore.activeMintUrl,
         });
 
         this.invoiceHistory.push({
@@ -540,6 +543,7 @@ export const useWalletStore = defineStore("wallet", {
               amount: -proofsStore.sumProofs(spentProofs),
               serializedProofs: serializedProofs,
               unit: mintStore.activeUnit,
+              mint: mintStore.activeMintUrl,
             });
           }
         }

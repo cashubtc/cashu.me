@@ -8,6 +8,7 @@ export type Mint = {
   url: string;
   keys: MintKeys[];
   keysets: MintKeyset[];
+  nickname?: string;
   // initialize api: new CashuMint(url) on activation
 };
 
@@ -81,8 +82,10 @@ export const useMintsStore = defineStore("mints", {
     return {
       activeUnit: useLocalStorage<string>("cashu.activeUnit", "sat"),
       activeMintUrl: useLocalStorage<string>("cashu.activeMintUrl", ""),
-      mintToAdd: "",
-      mintToRemove: "",
+      addMintData: {
+        url: "",
+        nickname: "",
+      },
       mints: useLocalStorage("cashu.mints", [] as Mint[]),
       proofs: useLocalStorage("cashu.proofs", [] as WalletProof[]),
       spentProofs: useLocalStorage("cashu.spentProofs", [] as WalletProof[]),
@@ -136,18 +139,12 @@ export const useMintsStore = defineStore("mints", {
         };
       });
     },
-    setShowAddMintDialog(show: boolean) {
-      this.showAddMintDialog = show;
-    },
-    setShowRemoveMintDialog(show: boolean) {
-      this.showRemoveMintDialog = show;
-    },
-    setMintToAdd(mint: string) {
-      this.mintToAdd = mint;
-    },
-    setMintToRemove(mint: string) {
-      this.mintToRemove = mint;
-    },
+    // setMintToAdd(mint: string) {
+    //   this.mintToAdd = mint;
+    // },
+    // setMintToRemove(mint: string) {
+    //   this.mintToRemove = mint;
+    // },
     // updateMintBalances() {
     //   this.mints.forEach((m) => {
     //     const mintClass = new MintClass(m);
@@ -190,6 +187,10 @@ export const useMintsStore = defineStore("mints", {
         this.activeUnit = mintClass.units[0]
       }
     },
+    updateMint(oldMint: Mint, newMint: Mint) {
+      const index = this.mints.findIndex((m) => m.url === oldMint.url);
+      this.mints[index] = newMint;
+    },
     getKeysForKeyset: async function (keyset_id: string): Promise<MintKeys> {
       const mint = this.mints.find((m) => m.url === this.activeMintUrl);
       if (mint) {
@@ -203,7 +204,8 @@ export const useMintsStore = defineStore("mints", {
         throw new Error("Mint not found");
       }
     },
-    addMint: async function (url: string, verbose = false) {
+    addMint: async function (addMintData: { url: string, nickname: string }, verbose = false) {
+      let url = addMintData.url;
       try {
         // sanitize url
         const sanitizeUrl = (url: string): string => {
@@ -215,7 +217,7 @@ export const useMintsStore = defineStore("mints", {
         };
         url = sanitizeUrl(url);
 
-        const mintToAdd: Mint = { url: url, keys: [], keysets: [] };
+        const mintToAdd: Mint = { url: url, keys: [], keysets: [], nickname: addMintData.nickname };
 
         // we have no mints at all
         if (this.mints.length === 0) {

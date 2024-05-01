@@ -6,16 +6,6 @@
         <q-item>
           <q-item-section>
             <q-item-label overline>Mints</q-item-label>
-            <q-item-label caption
-              >You can connect your wallet to multiple Cashu mints. Enter a mint
-              URL and select the mint your want to use. Find a mint at
-              <a
-                href="https://bitcoinmints.com"
-                target="_blank"
-                class="text-primary"
-                >bitcoinmints.com</a
-              >. This wallet is not affiliated with any mint.
-            </q-item-label>
           </q-item-section>
         </q-item>
 
@@ -53,6 +43,13 @@
             <q-item-section>
               <q-item-label
                 lines="1"
+                v-if="mint.nickname"
+                @click="activateMintUrl(mint.url, (verbose = false))"
+                class="cursor-pointer"
+                >{{ mint.nickname }}</q-item-label
+              >
+              <q-item-label
+                lines="1"
                 @click="activateMintUrl(mint.url, (verbose = false))"
                 class="cursor-pointer"
                 >{{ mint.url }}</q-item-label
@@ -71,8 +68,8 @@
             </q-item-section>
             <q-item-section side>
               <q-icon
-                name="close"
-                @click="showRemoveMintDialogWrapper(mint.url)"
+                name="edit"
+                @click="editMint(mint)"
                 class="cursor-pointer"
               />
             </q-item-section>
@@ -82,22 +79,39 @@
         </div>
       </q-list>
     </div>
-    <div class="q-gutter-md q-pt-xs q-px-sm">
-      <div class="row-12">
-        <q-input
-          bottom-slots
-          @keydown.enter.prevent="setShowAddMintDialog(true)"
-          v-model="mintToAdd"
-          label="Enter mint URL"
-          ref="mintInput"
-        >
-          <template v-slot:before>
-            <q-icon class="q-pt-md" color="primary" name="account_balance" />
-          </template>
-
-          <!-- <template v-slot:hint> Enter Mint URL</template> -->
-          <!-- "addMint(mintToAdd)" -->
-          <template v-slot:append>
+    <div class="q-pt-xs q-px-xs">
+      <q-list padding>
+        <div class="row-12 text-left">
+          <q-item>
+            <q-item-section>
+              <q-item-label overline>Add mint</q-item-label>
+              <q-item-label caption
+                >Enter the URL of a Cashu mint to connect to it. Find a mint at
+                <a
+                  href="https://bitcoinmints.com"
+                  target="_blank"
+                  class="text-primary"
+                  >bitcoinmints.com</a
+                >. This wallet is not affiliated with any mint.
+              </q-item-label>
+            </q-item-section>
+          </q-item>
+        </div>
+        <div class="row-12">
+          <q-input
+            bottom-slots
+            rounded
+            dense
+            outlined
+            @keydown.enter.prevent="showAddMintDialog = true"
+            v-model="addMintData.url"
+            placeholder="https://"
+            ref="mintInput"
+            class="q-pb-none q-mb-sm q-px-md"
+          >
+            <!-- <template v-slot:hint> Enter Mint URL</template> -->
+            <!-- "addMint(mintToAdd)" -->
+            <!-- <template v-slot:append>
             <q-btn
               round
               dense
@@ -107,20 +121,48 @@
               click
               @click="setShowAddMintDialog(true)"
             />
-          </template>
-        </q-input>
-      </div>
+          </template> -->
+          </q-input>
+        </div>
+        <div class="row-12">
+          <q-input
+            bottom-slots
+            rounded
+            dense
+            outlined
+            v-model="addMintData.nickname"
+            label="Nickname (e.g. Testnet)"
+            ref="mintNicknameInput"
+            class="q-pb-sm q-px-md"
+          >
+          </q-input>
+        </div>
+        <div class="row-12">
+          <q-btn
+            rounded
+            dense
+            class="q-px-lg q-mt-xs"
+            color="primary"
+            :disabled="addMintData.url.length == 0"
+            @click="showAddMintDialog = true"
+          >
+            <q-icon size="xs" name="add" class="q-pr-xs" />
+            Add mint</q-btn
+          >
+        </div>
+      </q-list>
     </div>
-    <div class="q-py-sm q-px-xs text-left" on-left>
+
+    <div class="q-py-xl q-px-xs text-left" on-left>
       <q-list padding>
         <q-item>
           <q-item-section>
             <q-item-label overline>Backup seed phrase</q-item-label>
             <q-item-label caption
-              >Your seed phrase is the key to your wallet. Keep it safe and
-              private. Note that this wallet does not support wallet recovery
-              yet. To recover your wallet from a seed, you need to use another
-              wallet.
+              >Your seed phrase can restore your wallet. Keep it safe and
+              private. Warning: this wallet does not support seed phrase
+              recovery yet. Use a different Cashu wallet to recover from seed
+              phrase.
             </q-item-label>
             <div class="row q-pt-md">
               <div class="col-12">
@@ -204,34 +246,37 @@
         <q-item>
           <q-select
             clearable
-            filled
+            rounded
+            outlined
             dense
             color="primary"
             v-model="swapData.from_url"
             :options="swapDataOptions()"
             option-value="url"
             option-label="shorturl"
-            label="Swap from mint"
+            label="From"
             style="min-width: 200px; width: 100%"
           />
         </q-item>
         <q-item>
           <q-select
             clearable
-            filled
+            rounded
+            outlined
             dense
             color="primary"
             v-model="swapData.to_url"
             :options="swapDataOptions()"
             option-value="url"
             option-label="shorturl"
-            label="Swap to mint"
+            label="To"
             style="min-width: 200px; width: 100%"
           />
         </q-item>
         <q-item>
           <q-input
-            filled
+            rounded
+            outlined
             dense
             v-model.number="swapData.amount"
             type="number"
@@ -239,9 +284,9 @@
             style="min-width: 200px"
           ></q-input>
           <q-btn
-            class="q-mx-md"
+            class="q-ml-md q-px-lg"
             color="primary"
-            outline
+            rounded
             @click="
               mintSwap(
                 swapData.from_url.url,
@@ -252,7 +297,9 @@
             :disable="
               !swapData.from_url || !swapData.to_url || !(swapData.amount > 0)
             "
-            >Swap</q-btn
+          >
+            <q-icon size="xs" name="swap_horiz" class="q-pr-xs" />
+            Swap</q-btn
           >
         </q-item>
       </q-list>
@@ -268,53 +315,116 @@
             >
           </q-item-section>
         </q-item>
-        <!-- check outgoing token state setting -->
-        <q-item>
-          <q-btn
-            dense
-            flat
-            outline
-            click
-            @click="checkSentTokens = !checkSentTokens"
-            :label="
-              checkSentTokens ? 'Don\'t check sent tokens' : 'Check sent tokens'
-            "
-          >
-          </q-btn>
-        </q-item>
-        <!-- price check setting -->
-        <q-item>
-          <q-btn
-            dense
-            flat
-            outline
-            click
-            @click="getBitcoinPrice = !getBitcoinPrice"
-            :label="
-              getBitcoinPrice
-                ? 'Don\'t fetch price'
-                : 'Fetch price from coinbase'
-            "
-          >
-          </q-btn>
-        </q-item>
-        <q-item>
-          <q-btn dense flat outline click @click="enable_terminal">
-            Open debug terminal
-          </q-btn>
-        </q-item>
-        <q-item>
-          <q-btn dense flat outline click @click="getLocalstorageToFile">
-            Download wallet data
-          </q-btn>
-        </q-item>
+        <q-expansion-item label="Open advanced settings" dense>
+          <div>
+            <!-- check outgoing token state setting -->
+            <q-item>
+              <q-btn
+                dense
+                flat
+                outline
+                click
+                @click="checkSentTokens = !checkSentTokens"
+                :label="
+                  checkSentTokens
+                    ? 'Don\'t check sent tokens'
+                    : 'Check sent tokens'
+                "
+              >
+              </q-btn>
+            </q-item>
+            <!-- price check setting -->
+            <q-item>
+              <q-btn
+                dense
+                flat
+                outline
+                click
+                @click="getBitcoinPrice = !getBitcoinPrice"
+                :label="
+                  getBitcoinPrice
+                    ? 'Don\'t fetch price'
+                    : 'Fetch price from coinbase'
+                "
+              >
+              </q-btn>
+            </q-item>
+            <!-- check proofs spendable setting -->
+            <q-item>
+              <q-btn
+                dense
+                flat
+                outline
+                click
+                @click="checkActiveProofsSpendable"
+                >Check proofs spendable</q-btn
+              >
+            </q-item>
+            <q-item>
+              <q-btn dense flat outline click @click="enable_terminal">
+                Open debug terminal
+              </q-btn>
+            </q-item>
+            <q-item>
+              <q-btn dense flat outline click @click="getLocalstorageToFile">
+                Download wallet data
+              </q-btn>
+            </q-item>
+          </div>
+        </q-expansion-item>
       </q-list>
     </div>
 
     <q-dialog
+      v-model="showEditMintDialog"
+      backdrop-filter="blur(2px) brightness(60%)"
+    >
+      <q-card class="q-pa-lg" style="max-width: 500px; width: 100%">
+        <h6 class="q-my-md">Edit mint</h6>
+        <q-input
+          outlined
+          v-model="editMintData.url"
+          label="Mint URL"
+          type="textarea"
+          autogrow
+          class="q-mb-xs"
+        ></q-input>
+        <q-input
+          outlined
+          v-model="editMintData.nickname"
+          label="Nickname"
+          type="textarea"
+          autogrow
+          class="q-mb-xs"
+        ></q-input>
+        <div class="row q-mt-lg">
+          <div class="col">
+            <q-btn
+              class="float-left"
+              v-close-popup
+              color="primary"
+              @click="updateMint(mintToEdit, editMintData)"
+              >Update mint</q-btn
+            >
+            <q-btn
+              icon="delete"
+              flat
+              class="float-left"
+              @click="showRemoveMintDialogWrapper(mintToEdit.url)"
+            />
+          </div>
+          <div class="col">
+            <q-btn v-close-popup flat class="float-right" color="grey"
+              >Cancel</q-btn
+            >
+          </div>
+        </div>
+      </q-card>
+    </q-dialog>
+
+    <q-dialog
       v-model="showAddMintDialog"
-      @keydown.enter.prevent="addMint(mintToAdd, (verbose = true))"
-      position="top"
+      @keydown.enter.prevent="addMint(addMintData, (verbose = true))"
       backdrop-filter="blur(2px) brightness(60%)"
     >
       <q-card class="q-pa-lg">
@@ -326,7 +436,7 @@
         <q-input
           outlined
           readonly
-          v-model="mintToAdd"
+          v-model="addMintData.url"
           label="Mint URL"
           type="textarea"
           autogrow
@@ -339,7 +449,7 @@
               v-close-popup
               color="primary"
               icon="check"
-              @click="addMint(mintToAdd, (verbose = true))"
+              @click="addMint(addMintData, (verbose = true))"
               >Add mint</q-btn
             >
           </div>
@@ -357,13 +467,53 @@
     >
       <q-card class="q-pa-lg">
         <h6 class="q-my-md">Are you sure you want to delete this mint?</h6>
+        <div v-if="mintToRemove.nickname">
+          <span class="text-weight-bold"> Nickname: </span>
+          <span class="text-weight-light"> {{ mintToRemove.nickname }}</span>
+        </div>
+        <div class="row q-my-md">
+          <div class="col">
+            <span class="text-weight-bold">Balances:</span>
+            <q-badge
+              v-for="unit in mintClass(mintToRemove).units"
+              :key="unit"
+              color="primary"
+              :label="
+                formatCurrency(mintClass(mintToRemove).unitBalance(unit), unit)
+              "
+              class="q-mx-xs"
+            />
+          </div>
+        </div>
+        <q-input
+          outlined
+          readonly
+          v-model="mintToRemove.url"
+          label="Mint URL"
+          type="textarea"
+          autogrow
+          class="q-mb-xs"
+        ></q-input>
+        <div class="row q-my-md">
+          <div class="col">
+            <span class="text-caption"
+              >Note: Because this wallet is paranoid, your ecash from this mint
+              will not be actually deleted but will remain stored on your
+              device. You will see it reappear if you re-add this mint later
+              again.</span
+            >
+          </div>
+        </div>
         <div class="row q-mt-lg">
           <div class="col">
             <q-btn
               v-close-popup
               class="float-left"
               color="primary"
-              @click="removeMint(mintToRemove, (verbose = true))"
+              @click="
+                showEditMintDialog = false;
+                removeMint(mintToRemove.url, (verbose = true));
+              "
               >Remove mint</q-btn
             >
           </div>
@@ -397,7 +547,6 @@ export default defineComponent({
     invoiceCheckWorker: Function,
     payInvoiceData: Object,
     showMintDialog: Boolean,
-    mintToAddWalletPage: String,
   },
   data: function () {
     return {
@@ -408,9 +557,23 @@ export default defineComponent({
         to_url: "",
         amount: 0,
       },
+      mintToEdit: {
+        url: "",
+        nickname: "",
+      },
+      mintToRemove: {
+        url: "",
+        nickname: "",
+        balances: {},
+      },
+      editMintData: {
+        url: "",
+        nickname: "",
+      },
       addMintDialog: {
         show: false,
       },
+      showEditMintDialog: false,
     };
   },
   computed: {
@@ -418,11 +581,10 @@ export default defineComponent({
       "getBitcoinPrice",
       "checkSentTokens",
     ]),
-    ...mapState(useMintsStore, ["activeMintUrl", "mints"]),
+    ...mapState(useMintsStore, ["activeMintUrl", "mints", "activeProofs"]),
     ...mapState(useWalletStore, ["mnemonic"]),
     ...mapWritableState(useMintsStore, [
-      "mintToAdd",
-      "mintToRemove",
+      "addMintData",
       "showAddMintDialog",
       "showRemoveMintDialog",
     ]),
@@ -441,22 +603,30 @@ export default defineComponent({
     showMintDialog: function () {
       this.addMintDialog.show = this.showMintDialog;
     },
-    mintToAddWalletPage: function () {
-      if (this.mintToAddWalletPage.length > 0) {
-        this.mintToAdd = this.mintToAddWalletPage;
-      }
-    },
+    // mintToAddWalletPage: function () {
+    //   if (this.mintToAddWalletPage.length > 0) {
+    //     this.mintToAdd = this.mintToAddWalletPage;
+    //   }
+    // },
   },
   methods: {
     ...mapActions(useMintsStore, [
       "addMint",
       "removeMint",
       "activateMintUrl",
-      "setMintToRemove",
-      "setShowAddMintDialog",
-      "setShowRemoveMintDialog",
+      "updateMint",
     ]),
-    ...mapActions(useWalletStore, ["newMnemonic", "decodeRequest"]),
+    ...mapActions(useWalletStore, [
+      "newMnemonic",
+      "decodeRequest",
+      "checkProofsSpendable",
+    ]),
+    editMint: function (mint) {
+      // copy object to avoid changing the original
+      this.mintToEdit = Object.assign({}, mint);
+      this.editMintData = Object.assign({}, mint);
+      this.showEditMintDialog = true;
+    },
     generateNewMnemonic() {
       this.newMnemonic();
     },
@@ -469,13 +639,19 @@ export default defineComponent({
     swapDataOptions: function () {
       let options = [];
       for (const [i, m] of Object.entries(this.mints)) {
-        options.push({ url: m.url, shorturl: getShortUrl(m.url) });
+        options.push({
+          url: m.url,
+          shorturl: m.nickname || getShortUrl(m.url),
+        });
       }
       return options;
     },
     showRemoveMintDialogWrapper: function (mint) {
-      this.setMintToRemove(mint);
-      this.setShowRemoveMintDialog(true);
+      // select the mint from this.mints and add its balances
+      let mintToRemove = this.mints.find((m) => m.url == mint);
+
+      this.mintToRemove = mintToRemove;
+      this.showRemoveMintDialog = true;
     },
     //
     mintSwap: async function (from_url, to_url, amount) {
@@ -530,6 +706,26 @@ export default defineComponent({
     },
     toggleGetBitcoinPrice: function () {
       this.getBitcoinPrice = !this.getBitcoinPrice;
+    },
+    checkActiveProofsSpendable: async function () {
+      // iterate over this.activeProofs in batches of 50 and check if they are spendable
+      let proofs = this.activeProofs.flat();
+      console.log("Checking proofs", proofs);
+      let allSpentProofs = [];
+      let batch_size = 50;
+      for (let i = 0; i < proofs.length; i += batch_size) {
+        console.log("Checking proofs", i, i + batch_size);
+        let batch = proofs.slice(i, i + batch_size);
+        let spent = await this.checkProofsSpendable(batch, true);
+        allSpentProofs.push(spent);
+      }
+      let spentProofs = allSpentProofs.flat();
+      if (spentProofs.length > 0) {
+        console.log("Spent proofs", spentProofs);
+        this.notifySuccess("Removed " + spentProofs.length + " spent proofs");
+      } else {
+        this.notifySuccess("No spent proofs found");
+      }
     },
   },
   created: function () {},

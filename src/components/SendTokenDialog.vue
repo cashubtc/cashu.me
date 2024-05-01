@@ -9,7 +9,7 @@
         <q-card-section class="q-pa-lg q-pt-md">
           <div class="row items-center no-wrap q-mb-sm">
             <div class="col-10">
-              <span class="text-subtitle1">Send ecash</span>
+              <span class="text-h6">Send ecash</span>
             </div>
             <div class="col-2">
               <ToggleUnit class="q-mt-md" />
@@ -47,7 +47,7 @@
             color="primary"
             outline
             type="submit"
-            >Send Tokens</q-btn
+            >Send Ecash</q-btn
           >
         </q-card-section>
       </div>
@@ -197,7 +197,7 @@ export default defineComponent({
     ...mapWritableState(useSendTokensStore, ["showSendTokens"]),
     ...mapWritableState(useSendTokensStore, ["sendData"]),
     ...mapState(useUiStore, ["tickerShort"]),
-    ...mapState(useMintsStore, ["activeProofs", "activeUnit"]),
+    ...mapState(useMintsStore, ["activeProofs", "activeUnit", "activeMintUrl"]),
     ...mapState(useSettingsStore, ["checkSentTokens"]),
     ...mapState(useWorkersStore, ["tokenWorkerRunning"]),
     // TOKEN METHODS
@@ -270,11 +270,7 @@ export default defineComponent({
       "getProofsMint",
       "serializeProofsV2",
     ]),
-    ...mapActions(useTokensStore, [
-      "addPaidToken",
-      "addPendingToken",
-      "setTokenPaid",
-    ]),
+    ...mapActions(useTokensStore, ["addPendingToken", "setTokenPaid"]),
     decodeToken: function (encoded_token) {
       return token.decode(encoded_token);
     },
@@ -361,6 +357,7 @@ export default defineComponent({
           amount: -this.sendData.amount,
           serializedProofs: this.sendData.tokensBase64,
           unit: this.activeUnit,
+          mint: this.activeMintUrl,
         });
         this.checkTokenSpendableWorker(this.sendData.tokensBase64);
         // if (this.checkSentTokens) {

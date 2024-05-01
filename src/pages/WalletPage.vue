@@ -348,7 +348,6 @@ export default {
       "assertMintError",
       "getBalance",
       "setActiveProofs",
-      "setMintToAdd",
       "setProofs",
       "setShowAddMintDialog",
       "getKeysForKeyset",
@@ -358,11 +357,7 @@ export default {
       "invoiceCheckWorker",
       "checkTokenSpendableWorker",
     ]),
-    ...mapActions(useTokensStore, [
-      "addPaidToken",
-      "addPendingToken",
-      "setTokenPaid",
-    ]),
+    ...mapActions(useTokensStore, ["setTokenPaid"]),
     ...mapActions(useWalletStore, [
       "requestMint",
       "setInvoicePaid",
