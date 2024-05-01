@@ -1,8 +1,5 @@
 <template>
-  <div
-    class="q-ma-lg q-pa-md"
-    style="border: 1px solid #ccc; border-radius: 10px"
-  >
+  <div class="q-ma-lg q-pa-md" style="border: 2px solid; border-radius: 10px">
     <q-card-section>
       <div class="row items-center justify-center">
         <q-icon class="q-pb-md" name="account_balance" size="50px" />
