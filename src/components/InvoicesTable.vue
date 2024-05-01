@@ -1,6 +1,6 @@
 <template>
   <div style="max-width: 1000px; margin: 0 auto">
-    <div class="q-pa-md" style="max-width: 500px; margin: 0 auto">
+    <div class="q-pa-xs" style="max-width: 500px; margin: 0 auto">
       <q-list>
         <q-item v-for="invoice in paginatedInvoices" :key="invoice.id">
           <q-item-section
@@ -121,7 +121,7 @@ export default defineComponent({
     },
     formattedDate(date_str) {
       const date = parseISO(date_str); // Convert string to date object
-      return formatDistanceToNow(date, { addSuffix: true }); // "6 hours ago"
+      return formatDistanceToNow(date, { addSuffix: false }); // "6 hours ago"
     },
   },
   created: function () {},
