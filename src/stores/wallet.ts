@@ -9,13 +9,13 @@ import { useUiStore } from "src/stores/ui";
 import * as _ from "underscore";
 import token from "src/js/token";
 import { notifyApiError, notifyError, notifySuccess, notifyWarning, notify } from "src/js/notify";
-import { CashuMint, CashuWallet, Proof, MintQuotePayload, CheckStatePayload, MeltQuotePayload, MeltQuoteResponse, generateNewMnemonic, deriveSeedFromMnemonic } from "@cashu/cashu-ts";
+import { CashuMint, CashuWallet, Proof, MintQuotePayload, CheckStatePayload, MeltQuotePayload, MeltQuoteResponse, generateNewMnemonic, deriveSeedFromMnemonic, AmountPreference } from "@cashu/cashu-ts";
 import { hashToCurve } from "@cashu/cashu-ts/dist/lib/es5/DHKE";
 import * as bolt11Decoder from "light-bolt11-decoder";
 import bech32 from "bech32";
 import axios from "axios";
 import { date } from "quasar";
-
+import { splitAmount } from "@cashu/cashu-ts/dist/lib/es5/utils";
 type Invoice = {
   amount: number;
   bolt11: string;
@@ -158,18 +158,104 @@ export const useWalletStore = defineStore("wallet", {
       if (!invoice) return;
       invoice.status = "paid";
     },
+    splitAmount: function (value: number) {
+      // returns optimal 2^n split
+      const chunks: Array<number> = [];
+      for (let i = 0; i < 32; i++) {
+        const mask: number = 1 << i;
+        if ((value & mask) !== 0) {
+          chunks.push(Math.pow(2, i));
+        }
+      }
+      return chunks;
+    },
+    outputAmountSelect: function (amount: number, target = 3) {
+      //This function produces an amount split for outputs based on the current state of the wallet.
+      // Its objective is to fill up the wallet so that it reaches `target` coins of each amount.
+      // The coins we currently have are are this.activeProofs
+      const mintStore = useMintsStore();
+      const amountsWeHave = mintStore.activeProofs.map((p) => p.amount);
+      /*
+      # NOTE: Do not assume 2^n here. This is not a general case.
+      */
+      // calculate until 2^64
+      const allPossibleAmounts = Array.from({ length: 64 }, (_, i) => 2 ** i);
+      const amountsWeWantLL = allPossibleAmounts.map((a) => {
+        const count = Math.max(0, target - amountsWeHave.filter((x) => x === a).length);
+        return Array(count).fill(a);
+      });
+      const amountsWeWant = amountsWeWantLL.flat().sort((a, b) => a - b);
+
+      let amounts: number[] = [];
+      while (amounts.reduce((s, t) => (s += t), 0) < amount && amountsWeWant.length) {
+        if (amounts.reduce((s, t) => (s += t), 0) + amountsWeWant[0] > amount) {
+          break;
+        }
+        amounts.push(amountsWeWant.shift() as number);
+      }
+      const remainingAmount = amount - amounts.reduce((s, t) => (s += t), 0);
+      if (remainingAmount > 0) {
+        // amount_split is the optimal 2^n split: splitAmount
+        amounts = amounts.concat(this.splitAmount(remainingAmount));
+      }
+      if (amounts.reduce((s, t) => (s += t), 0) != amount) {
+        throw new Error(`Amounts do not sum to ${amount}.`);
+      }
+
+      // make array of AmountPreference types which have a unique `amount` and its `count`
+      const amountsWithCount: AmountPreference[] = [];
+      amounts.forEach((a) => {
+        const existing = amountsWithCount.find((ac) => ac.amount === a);
+        if (existing) {
+          existing.count += 1;
+        } else {
+          amountsWithCount.push({ amount: a, count: 1 });
+        }
+      });
+
+      return amountsWithCount;
+    },
     coinSelect: function (proofs: WalletProof[], amount: number) {
-      // if sum of amounts of proofs is less than amount, return empty array
+
       if (proofs.reduce((s, t) => (s += t.amount), 0) < amount) {
         return [];
       }
-      let sum = 0;
-      let i = 0;
-      while (sum < amount) {
-        sum += proofs[i].amount;
-        i += 1;
+
+      proofs = proofs.slice().sort((a, b) => a.amount - b.amount);
+      // remember next bigger proof as a fallback
+      const nextBigger = proofs.find((p) => p.amount >= amount);
+
+      // go through smaller proofs until sum is bigger than amount
+      const smallerProofs = proofs.filter((p) => p.amount < amount);
+      // sort by amount descending
+      smallerProofs.sort((a, b) => b.amount - a.amount);
+
+      let selectedProofs: WalletProof[] = [];
+
+      if (smallerProofs.length == 0 && nextBigger) {
+        return [nextBigger];
+      } else if (smallerProofs.length == 0 && !nextBigger) {
+        return [];
       }
-      return proofs.slice(0, i);
+
+      // recursively select the largest proof of smallerProofs, subtract the amount from the remainder
+      // and call coinSelect again with the remainder and the rest of the smallerProofs (without the largest proof)
+      let remainder = amount;
+      selectedProofs = [smallerProofs[0]];
+      remainder -= smallerProofs[0].amount;
+      if (remainder > 0) {
+        selectedProofs = selectedProofs.concat(this.coinSelect(smallerProofs.slice(1), remainder));
+      }
+      let sum = selectedProofs.reduce((s, t) => (s += t.amount), 0);
+
+      // if sum of selectedProofs is smaller than amount, take next bigger proof instead
+      if (sum < amount && nextBigger) {
+        selectedProofs = [nextBigger];
+      }
+
+      console.log("### selected amounts", selectedProofs.map(p => p.amount));
+      console.log("### outputAmountSelect amounts", this.outputAmountSelect(amount));
+      return selectedProofs
     },
     spendableProofs: function (proofs: WalletProof[], amount: number) {
       const proofsStore = useProofsStore();
@@ -202,7 +288,7 @@ export const useWalletStore = defineStore("wallet", {
         if (totalAmount != amount) {
           const keysetId = this.getKeyset()
           const counter = this.keysetCounter(keysetId);
-          const { returnChange: _keepProofs, send: _sendProofs } = await this.wallet.send(amount, proofsToSplit, { counter: counter })
+          const { returnChange: _keepProofs, send: _sendProofs } = await this.wallet.send(amount, proofsToSplit, { counter })
           keepProofs = _keepProofs;
           sendProofs = _sendProofs;
 
@@ -300,7 +386,9 @@ export const useWalletStore = defineStore("wallet", {
         // redeem
         const keysetId = this.getKeyset()
         const counter = this.keysetCounter(keysetId)
-        const { token: tokenReceived, tokensWithErrors } = await this.wallet.receive(receiveStore.receiveData.tokensBase64, { counter })
+        const preference = this.outputAmountSelect(amount);
+        console.log("### preference", preference);
+        const { token: tokenReceived, tokensWithErrors } = await this.wallet.receive(receiveStore.receiveData.tokensBase64, { counter, preference })
         if (tokensWithErrors?.token || tokenReceived.token.length == 0) {
           throw new Error("Error receiving tokens");
         }
@@ -382,7 +470,9 @@ export const useWalletStore = defineStore("wallet", {
         // const split = splitAmount(amount);
         const keysetId = this.getKeyset()
         const counter = this.keysetCounter(keysetId)
-        const { proofs } = await this.wallet.mintTokens(amount, hash, { keysetId, counter })
+        const preference = this.outputAmountSelect(amount);
+        console.log("### preference", preference);
+        const { proofs } = await this.wallet.mintTokens(amount, hash, { keysetId, counter, amountPreference: preference })
         this.increaseKeysetCounter(keysetId, proofs.length);
 
         // const proofs = await this.mintApi(split, hash, verbose);
