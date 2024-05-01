@@ -88,7 +88,8 @@ export const useWorkersStore = defineStore("workers", {
             sendTokensStore.showSendTokens = false;
           }
         } catch (error) {
-          console.log("checkTokenSpendableWorker: not paid yet");
+          console.log("checkTokenSpendableWorker: some error", error);
+          this.clearAllWorkers();
         }
       }, 3000);
     },
