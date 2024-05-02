@@ -120,6 +120,7 @@ export const useMintsStore = defineStore("mints", {
         return new MintClass(mint);
       } else {
         if (this.mints.length) {
+          console.error("No active mint. This should not happen. switching to first one.")
           // fallback
           this.activeMintUrl = this.mints[0].url
           return new MintClass(this.mints[0]);
