@@ -195,6 +195,7 @@ export const useWalletStore = defineStore("wallet", {
       }
       const remainingAmount = amount - amounts.reduce((s, t) => (s += t), 0);
       if (remainingAmount > 0) {
+        console.log("remaining amount", remainingAmount)
         // amount_split is the optimal 2^n split: splitAmount
         amounts = amounts.concat(this.splitAmount(remainingAmount));
       }
@@ -253,8 +254,10 @@ export const useWalletStore = defineStore("wallet", {
         selectedProofs = [nextBigger];
       }
 
-      console.log("### selected amounts", selectedProofs.map(p => p.amount));
-      console.log("### outputAmountSelect amounts", this.outputAmountSelect(amount));
+      console.log("### selected amounts", "sum", selectedProofs.reduce((s, t) => (s += t.amount), 0), selectedProofs.map(p => p.amount));
+      // temporary
+      const outputAmounts = this.outputAmountSelect(amount)
+      console.log("### outputAmountSelect amounts", "sum", outputAmounts.reduce((s, t) => (s += t.amount), 0), outputAmounts);
       return selectedProofs
     },
     spendableProofs: function (proofs: WalletProof[], amount: number) {
