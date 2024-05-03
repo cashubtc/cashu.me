@@ -30,7 +30,11 @@
         "
       >
         <div class="col-12">
-          <TokenInformation :encodedToken="receiveData.tokensBase64" />
+          <TokenInformation
+            :encodedToken="receiveData.tokensBase64"
+            :showAmount="true"
+            :showMintCheck="true"
+          />
         </div>
       </div>
       <div class="row q-mt-lg">

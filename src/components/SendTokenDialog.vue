@@ -209,7 +209,7 @@
               >
             </div>
             <div class="row justify-center q-py-md">
-              <q-item-label style="font-size: 28px" class="text-weight-bold">
+              <q-item-label style="font-size: 30px" class="text-weight-bold">
                 <q-spinner-dots
                   v-if="runnerActive"
                   color="primary"
@@ -220,18 +220,10 @@
               >
             </div>
             <div class="row justify-center q-pt-sm">
-              <q-icon
-                name="account_balance"
-                size="0.95rem"
-                color="grey"
-                class="q-mr-sm"
+              <TokenInformation
+                :encodedToken="sendData.tokensBase64"
+                :showAmount="false"
               />
-              <q-item-label
-                caption
-                class="text-weight-light text-white"
-                style="font-size: 14px"
-                ><strong>{{ shortUrl }}</strong></q-item-label
-              >
             </div>
             <div class="row q-mt-lg">
               <q-btn
@@ -248,7 +240,8 @@
                 icon="link"
                 flat
                 @click="copyText(baseURL + '?token=' + sendData.tokensBase64)"
-              />
+                ><q-tooltip>Copy link</q-tooltip></q-btn
+              >
               <q-btn
                 class="q-mx-none"
                 color="grey"
@@ -257,7 +250,7 @@
                 @click="showDeleteDialog = true"
                 flat
               >
-                <q-tooltip>Delete Ecash</q-tooltip>
+                <q-tooltip>Delete from history</q-tooltip>
               </q-btn>
               <q-btn v-close-popup flat color="grey" class="q-ml-auto"
                 >Close</q-btn
@@ -316,6 +309,7 @@ import token from "src/js/token";
 import { Buffer } from "buffer";
 import { useCameraStore } from "src/stores/camera";
 import { useP2PKStore } from "src/stores/p2pk";
+import TokenInformation from "components/TokenInformation.vue";
 
 import { mapActions, mapState, mapWritableState } from "pinia";
 import ChooseMint from "components/ChooseMint.vue";
@@ -328,6 +322,7 @@ export default defineComponent({
   components: {
     ChooseMint,
     ToggleUnit,
+    TokenInformation,
   },
   props: {},
   data: function () {

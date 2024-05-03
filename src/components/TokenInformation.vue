@@ -1,26 +1,20 @@
 <template>
   <div class="row text-left q-py-none q-my-none">
     <div class="col-12 q-px-none">
-      <q-chip outline color="primary" icon="toll" class="q-mr-md q-pa-md">
+      <q-chip v-if="showAmount" outline icon="toll" class="q-mr-md q-pa-md">
         <strong>{{ displayUnit }} </strong>
       </q-chip>
-      <q-chip outline color="primary" icon="account_balance" class="q-pa-md">
+      <q-chip outline icon="account_balance" class="q-pa-md">
         {{ tokenMintUrl }}
         <q-icon
-          v-if="mintKnownToUs(proofsToShow)"
+          v-if="showMintCheck && mintKnownToUs(proofsToShow)"
           name="check"
           size="sm"
           color="green"
           class="q-ml-xs"
         />
       </q-chip>
-      <q-chip
-        v-if="isLocked(proofsToShow)"
-        outline
-        color="primary"
-        icon="lock"
-        class="q-pa-md"
-      >
+      <q-chip v-if="isLocked(proofsToShow)" outline icon="lock" class="q-pa-md">
         P2PK
         <q-icon
           :name="isLockedToUs(proofsToShow) ? 'check' : 'close'"
@@ -52,6 +46,8 @@ export default defineComponent({
   mixins: [windowMixin],
   props: {
     encodedToken: String,
+    showAmount: Boolean,
+    showMintCheck: Boolean,
   },
   data: function () {
     return {};
