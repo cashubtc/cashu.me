@@ -8,6 +8,7 @@ export const useSendTokensStore = defineStore("sendTokensStore", {
       memo: "",
       tokens: "",
       tokensBase64: "",
+      p2pkPubkey: "",
     },
   }),
   actions: {},

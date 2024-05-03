@@ -274,6 +274,15 @@ export const useWalletStore = defineStore("wallet", {
       }
       return spendableProofs;
     },
+    sendToLock: async function (proofs: WalletProof[], amount: number, receiverPubkey: string) {
+      const spendableProofs = this.spendableProofs(proofs, amount);
+      const proofsToSplit = this.coinSelect(spendableProofs, amount);
+      const { returnChange: keepProofs, send: sendProofs } = await this.wallet.send(amount, proofsToSplit, { pubkey: receiverPubkey })
+      const mintStore = useMintsStore();
+      mintStore.addProofs(keepProofs);
+      mintStore.addProofs(sendProofs);
+      return { keepProofs, sendProofs };
+    },
     splitToSend: async function (proofs: WalletProof[], amount: number, invlalidate: boolean = false) {
       /*
       splits proofs so the user can keep firstProofs, send scndProofs.
@@ -286,8 +295,8 @@ export const useWalletStore = defineStore("wallet", {
         const spendableProofs = this.spendableProofs(proofs, amount);
         const proofsToSplit = this.coinSelect(spendableProofs, amount);
         const totalAmount = proofsToSplit.reduce((s, t) => (s += t.amount), 0);
-        let keepProofs: WalletProof[] = [];
-        let sendProofs: WalletProof[] = [];
+        let keepProofs: Proof[] = [];
+        let sendProofs: Proof[] = [];
         if (totalAmount != amount) {
           const keysetId = this.getKeyset()
           const counter = this.keysetCounter(keysetId);

@@ -5,6 +5,7 @@
     backdrop-filter="blur(2px) brightness(60%)"
   >
     <q-card class="q-pa-none q-pt-none qcard">
+      <!--  enter send data -->
       <div v-if="!sendData.tokens">
         <q-card-section class="q-pa-lg q-pt-md">
           <div class="row items-center no-wrap q-mb-sm">
@@ -40,6 +41,57 @@
                 v-model.trim="sendData.memo"
                 label="Memo"
                 ></q-input> -->
+          <transition
+            appear
+            enter-active-class="animated fadeIn"
+            leave-active-class="animated fadeOut"
+          >
+            <div v-if="showLockInput" class="row items-center no-wrap">
+              <div class="col-9">
+                <q-input
+                  v-model="p2pkInput"
+                  label="P2PK public key"
+                  outlined
+                  clearable
+                  @keyup.enter="lockTokens"
+                ></q-input>
+              </div>
+              <div class="col-3">
+                <q-btn
+                  rounded
+                  color="primary"
+                  class="q-mx-md"
+                  icon="add"
+                  v-if="isValidPubkey(p2pkInput)"
+                  @click="addPubkey(p2pkInput)"
+                ></q-btn>
+                <q-btn
+                  align="center"
+                  v-if="!p2pkInput"
+                  icon="qr_code_scanner"
+                  flat
+                  outline
+                  color="primary"
+                  rounded
+                  @click="showCamera"
+                />
+                <q-btn
+                  align="center"
+                  v-if="p2pkInput"
+                  icon="close"
+                  flat
+                  outline
+                  color="primary"
+                  label="close"
+                  rounded
+                  @click="
+                    p2pkInput = '';
+                    showLockInput = false;
+                  "
+                />
+              </div>
+            </div>
+          </transition>
           <div class="row q-mt-lg">
             <q-btn
               v-if="!sendData.tokens"
@@ -50,13 +102,45 @@
               type="submit"
               >Send Ecash</q-btn
             >
+            <div v-if="sendData.p2pkPubkey" class="row">
+              <transition
+                appear
+                enter-active-class="animated fadeIn"
+                leave-active-class="animated fadeOut"
+              >
+                <q-btn
+                  rounded
+                  flat
+                  color="primary"
+                  icon="lock"
+                  @click="showLockInput = true"
+                >
+                </q-btn>
+              </transition>
+            </div>
+            <transition
+              appear
+              enter-active-class="animated fadeIn"
+              leave-active-class="animated fadeOut"
+            >
+              <q-btn
+                v-if="sendData.amount > 0 && !showLockInput"
+                :disable="sendData.p2pkPubkey == null || sendData.amount <= 0"
+                color="primary"
+                class="q-ml-md"
+                outline
+                rounded
+                @click="showLockInput = true"
+                ><q-icon size="xs" class="q-mr-xs" name="lock" /> Lock</q-btn
+              >
+            </transition>
             <transition
               appear
               enter-active-class="animated fadeIn"
               leave-active-class="animated fadeOut"
             >
               <q-chip
-                v-if="canSpendOffline"
+                v-if="canSpendOffline && !sendData.p2pkPubkey && !showLockInput"
                 outline
                 color="primary"
                 icon="check"
@@ -68,6 +152,8 @@
           </div>
         </q-card-section>
       </div>
+
+      <!-- show ecash details -->
       <div v-else class="text-center q-mb-xs">
         <q-card-section class="q-pa-none q-pt-md">
           <div class="text-center q-mb-md" v-if="qrCodeFragment">
@@ -201,6 +287,11 @@
       </q-card-section>
     </q-card>
   </q-dialog>
+
+  <!-- QR CODE SCANNER  -->
+  <q-dialog v-model="camera.show">
+    <QrcodeReader @decode="decodeQR" />
+  </q-dialog>
 </template>
 <script>
 import { defineComponent } from "vue";
@@ -215,6 +306,7 @@ import { useSettingsStore } from "src/stores/settings";
 import { useWorkersStore } from "src/stores/workers";
 import token from "src/js/token";
 import { Buffer } from "buffer";
+import { useCameraStore } from "src/stores/camera";
 
 import { mapActions, mapState, mapWritableState } from "pinia";
 import ChooseMint from "components/ChooseMint.vue";
@@ -237,6 +329,9 @@ export default defineComponent({
       qrInterval: null,
       encoder: null,
       showDeleteDialog: false,
+      showLockInput: false,
+
+      p2pkInput: "",
 
       // parameters for animated QR
       currentFragmentLength: 150,
@@ -255,6 +350,7 @@ export default defineComponent({
   computed: {
     ...mapWritableState(useSendTokensStore, ["showSendTokens"]),
     ...mapWritableState(useSendTokensStore, ["sendData"]),
+    ...mapWritableState(useCameraStore, ["camera", "hasCamera"]),
     ...mapState(useUiStore, ["tickerShort"]),
     ...mapState(useMintsStore, ["activeProofs", "activeUnit", "activeMintUrl"]),
     ...mapState(useSettingsStore, ["checkSentTokens"]),
@@ -343,6 +439,7 @@ export default defineComponent({
     ]),
     ...mapActions(useWalletStore, [
       "splitToSend",
+      "sendToLock",
       "coinSelect",
       "spendableProofs",
     ]),
@@ -356,6 +453,19 @@ export default defineComponent({
       "setTokenPaid",
       "deleteToken",
     ]),
+    ...mapActions(useCameraStore, ["closeCamera", "showCamera"]),
+    decodeQR: function (res) {
+      this.camera.data = res;
+      this.camera.show = false;
+      // this.decodeRequest(res);
+      this.sendData.p2pkPubkey = res;
+      return;
+      if (isValidPubkey(res)) {
+        this.sendData.p2pkPubkey = res;
+      } else {
+        this.notifyError("No valid key");
+      }
+    },
     decodeToken: function (encoded_token) {
       return token.decode(encoded_token);
     },
@@ -427,6 +537,45 @@ export default defineComponent({
       this.showDeleteDialog = false;
       this.clearAllWorkers();
     },
+    showQrScanner: function () {},
+    isValidPubkey: function (pubkey) {
+      return pubkey && pubkey.length == 66;
+    },
+    addPubkey: function (pubkey) {
+      this.sendData.p2pkPubkey = pubkey;
+    },
+    lockTokens: async function () {
+      let sendAmount = this.sendData.amount;
+      // if unit is USD, multiply by 100
+      if (this.activeUnit === "usd") {
+        sendAmount = sendAmount * 100;
+      }
+      try {
+        // keep firstProofs, send scndProofs and delete them (invalidate=true)
+        let { _, sendProofs } = await this.sendToLock(
+          this.activeProofs,
+          sendAmount,
+          this.sendData.p2pkPubkey
+        );
+        // update UI
+        this.sendData.tokens = sendProofs;
+        console.log("### this.sendData.tokens", this.sendData.tokens);
+
+        this.sendData.tokensBase64 = this.serializeProofs(sendProofs);
+        this.addPendingToken({
+          amount: -this.sendData.amount,
+          serializedProofs: this.sendData.tokensBase64,
+          unit: this.activeUnit,
+          mint: this.activeMintUrl,
+        });
+
+        if (!this.g.offline) {
+          this.checkTokenSpendableWorker(this.sendData.tokensBase64);
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    },
     sendTokens: async function () {
       /*
       calls splitToSend, displays token and kicks off the spendableWorker
@@ -470,6 +619,5 @@ export default defineComponent({
       }
     },
   },
-  created: function () {},
 });
 </script>

@@ -95,6 +95,7 @@ export default defineComponent({
       this.sendData.tokensBase64 = "";
       this.sendData.amount = "";
       this.sendData.memo = "";
+      this.sendData.p2pkPubkey = "";
       this.showSendDialog = false;
       this.showSendTokens = true;
     },
