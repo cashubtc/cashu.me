@@ -47,7 +47,7 @@
 <script>
 import { defineComponent } from "vue";
 import { getShortUrl } from "src/js/wallet-helpers";
-import { mapState } from "pinia";
+import { mapActions, mapState } from "pinia";
 import { useMintsStore } from "stores/mints";
 import { useP2PKStore } from "src/stores/p2pk";
 import token from "src/js/token";
@@ -63,7 +63,6 @@ export default defineComponent({
   },
   watch: {},
   computed: {
-    ...mapState(useP2PKStore, ["haveThisKey"]),
     ...mapState(useMintsStore, [
       "activeMintUrl",
       "activeProofs",
@@ -94,6 +93,7 @@ export default defineComponent({
     },
   },
   methods: {
+    ...mapActions(useP2PKStore, ["isLocked", "isLockedToUs"]),
     getProofsMint: function (proofs) {
       // unique keyset IDs of proofs
       let uniqueIds = [...new Set(proofs.map((p) => p.id))];
@@ -120,35 +120,35 @@ export default defineComponent({
         ).length > 0
       );
     },
-    getSecretP2PKPubkey: function (secret) {
-      try {
-        let secretObject = JSON.parse(secret);
-        if (secretObject[0] == "P2PK" && secretObject[1]["data"] != undefined) {
-          return secretObject[1]["data"];
-        }
-      } catch {}
-      return "";
-    },
-    isLocked: function (proofs) {
-      const secrets = proofs.map((p) => p.secret);
-      for (const secret of secrets) {
-        try {
-          if (this.getSecretP2PKPubkey(secret)) {
-            return true;
-          }
-        } catch {}
-      }
-      return false;
-    },
-    isLockedToUs: function (proofs) {
-      const secrets = proofs.map((p) => p.secret);
-      for (const secret of secrets) {
-        const pubkey = this.getSecretP2PKPubkey(secret);
-        if (pubkey) {
-          return this.haveThisKey(pubkey);
-        }
-      }
-    },
+    // getSecretP2PKPubkey: function (secret) {
+    //   try {
+    //     let secretObject = JSON.parse(secret);
+    //     if (secretObject[0] == "P2PK" && secretObject[1]["data"] != undefined) {
+    //       return secretObject[1]["data"];
+    //     }
+    //   } catch {}
+    //   return "";
+    // },
+    // isLocked: function (proofs) {
+    //   const secrets = proofs.map((p) => p.secret);
+    //   for (const secret of secrets) {
+    //     try {
+    //       if (this.getSecretP2PKPubkey(secret)) {
+    //         return true;
+    //       }
+    //     } catch {}
+    //   }
+    //   return false;
+    // },
+    // isLockedToUs: function (proofs) {
+    //   const secrets = proofs.map((p) => p.secret);
+    //   for (const secret of secrets) {
+    //     const pubkey = this.getSecretP2PKPubkey(secret);
+    //     if (pubkey) {
+    //       return this.haveThisKey(pubkey);
+    //     }
+    //   }
+    // },
   },
 });
 </script>

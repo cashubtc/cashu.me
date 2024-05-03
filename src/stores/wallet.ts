@@ -6,6 +6,9 @@ import { useProofsStore } from "./proofs";
 import { useTokensStore } from "./tokens";
 import { useReceiveTokensStore } from "./receiveTokensStore";
 import { useUiStore } from "src/stores/ui";
+import { useP2PKStore } from "src/stores/p2pk"
+import { useSendTokensStore } from "src/stores/sendTokensStore"
+
 import * as _ from "underscore";
 import token from "src/js/token";
 import { notifyApiError, notifyError, notifySuccess, notifyWarning, notify } from "src/js/notify";
@@ -330,39 +333,6 @@ export const useWalletStore = defineStore("wallet", {
         throw error;
       }
     },
-    // SPLIT
-
-    // split: async function (proofs: WalletProof[], amount: number) {
-    //   /*
-    //   supplies proofs and requests a split from the mint of these
-    //   proofs at a specific amount
-    //   */
-    //   const mintStore = useMintsStore();
-    //   try {
-    //     if (proofs.length == 0) {
-    //       throw new Error("no proofs provided.");
-    //     }
-    //     const keyset_id = this.getKeyset();
-    //     const counter = this.keysetCounter(keyset_id);
-    //     const { returnChange: firstProofs, send: scndProofs } = await this.wallet.send(amount, proofs, { counter: counter })
-    //     this.increaseKeysetCounter(keyset_id, firstProofs.length + scndProofs.length);
-
-    //     mintStore.removeProofs(proofs);
-    //     // add new firstProofs, scndProofs to this.proofs
-    //     mintStore.addProofs(
-    //       firstProofs.concat(scndProofs)
-    //     );
-    //     return { firstProofs, scndProofs };
-    //   } catch (error: any) {
-    //     console.error(error);
-    //     try {
-    //       try {
-    //         notifyApiError(error);
-    //       } catch { }
-    //     } catch { }
-    //     throw error;
-    //   }
-    // },
     /**
      *
      *
@@ -399,8 +369,8 @@ export const useWalletStore = defineStore("wallet", {
         const keysetId = this.getKeyset()
         const counter = this.keysetCounter(keysetId)
         const preference = this.outputAmountSelect(amount);
-        console.log("### preference", preference);
-        const { token: tokenReceived, tokensWithErrors } = await this.wallet.receive(receiveStore.receiveData.tokensBase64, { counter, preference })
+        const privkey = receiveStore.receiveData.p2pkPrivateKey;
+        const { token: tokenReceived, tokensWithErrors } = await this.wallet.receive(receiveStore.receiveData.tokensBase64, { counter, preference, privkey })
         if (tokensWithErrors?.token || tokenReceived.token.length == 0) {
           throw new Error("Error receiving tokens");
         }
@@ -840,6 +810,7 @@ export const useWalletStore = defineStore("wallet", {
       receiveStore.showReceiveTokens = true;
     },
     decodeRequest: function (req: string) {
+      const p2pkStore = useP2PKStore()
       this.payInvoiceData.input.request = req
       if (req.toLowerCase().startsWith("lnbc")) {
         this.payInvoiceData.input.request = req;
@@ -865,6 +836,9 @@ export const useWalletStore = defineStore("wallet", {
         // very dirty way of parsing cashu tokens from either a pasted token or a URL like https://host.com?token=eyJwcm
         receiveStore.receiveData.tokensBase64 = req.slice(req.indexOf("cashuA"));
         this.handleCashuToken()
+      } else if (p2pkStore.isValidPubkey(req)) {
+        const sendTokenStore = useSendTokensStore()
+        sendTokenStore.sendData.p2pkPubkey = req
       }
     },
     lnurlPayFirst: async function (address: string) {

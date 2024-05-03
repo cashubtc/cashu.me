@@ -74,7 +74,11 @@ export default defineComponent({
       "payInvoiceData",
     ]),
     ...mapWritableState(useCameraStore, ["camera"]),
-    ...mapWritableState(useSendTokensStore, ["showSendTokens", "sendData"]),
+    ...mapWritableState(useSendTokensStore, [
+      "showSendTokens",
+      "sendData",
+      "showLockInput",
+    ]),
   },
   methods: {
     showParseDialog: function () {
@@ -98,6 +102,7 @@ export default defineComponent({
       this.sendData.p2pkPubkey = "";
       this.showSendDialog = false;
       this.showSendTokens = true;
+      this.showLockInput = false;
     },
   },
   created: function () {},
