@@ -5,6 +5,7 @@ export const useReceiveTokensStore = defineStore("receiveTokensStore", {
     showReceiveTokens: false,
     receiveData: {
       tokensBase64: "",
+      p2pkPrivateKey: "",
     },
   }),
   actions: {},

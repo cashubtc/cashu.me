@@ -45,5 +45,12 @@ export const useUiStore = defineStore("ui", {
       const unit = useMintsStore().activeUnit;
       return unitTickerShortMap[unit as keyof typeof unitTickerShortMap];
     },
+    canPasteFromClipboard() {
+      return (
+        window.isSecureContext &&
+        navigator.clipboard &&
+        navigator.clipboard.readText
+      );
+    },
   },
 });

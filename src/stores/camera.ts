@@ -9,6 +9,11 @@ export const useCameraStore = defineStore("camera", {
       show: false,
       camera: "auto",
     },
+    hasCamera: function () {
+      navigator.permissions.query({ name: "camera" }).then((res) => {
+        return res.state == "granted";
+      });
+    },
   }),
   actions: {
     closeCamera: function () {
@@ -16,11 +21,6 @@ export const useCameraStore = defineStore("camera", {
     },
     showCamera: function () {
       this.camera.show = true;
-    },
-    hasCamera: function () {
-      navigator.permissions.query({ name: "camera" }).then((res) => {
-        return res.state == "granted";
-      });
     },
   },
 });

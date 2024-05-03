@@ -199,7 +199,83 @@
         </q-item>
       </q-list>
     </div>
+    <!-- P2PK -->
+    <div class="q-py-sm q-px-xs text-left" on-left>
+      <q-list padding>
+        <q-item>
+          <q-item-section>
+            <q-item-label overline>Generate Keys</q-item-label>
+            <q-item-label caption
+              >Generate keys to be able to receive P2PK-locked
+              ecash.</q-item-label
+            >
+          </q-item-section>
+        </q-item>
+        <q-item>
+          <q-btn
+            class="q-ml-sm q-px-md"
+            color="primary"
+            rounded
+            outline
+            @click="generateKeypair"
+            >Generate keys</q-btn
+          >
+        </q-item>
+      </q-list>
+    </div>
 
+    <q-item class="text-left" v-if="p2pkKeys.length">
+      <q-item-section>
+        <q-item-label overline
+          >You have {{ p2pkKeys.length }} keys</q-item-label
+        >
+        <q-item-label caption
+          >You can use these keys to receive ecash.
+        </q-item-label>
+      </q-item-section>
+    </q-item>
+    <q-expansion-item
+      dense
+      dense-toggle
+      v-if="p2pkKeys.length"
+      class="text-left"
+      label="Click to browse your keys"
+    >
+      <q-item v-for="key in p2pkKeys" :key="key.privakey">
+        <q-item-section class="q-mx-none q-pl-none" style="max-width: 1.05em">
+          <q-icon
+            name="content_copy"
+            @click="copyText(key.publicKey)"
+            size="1em"
+            color="grey"
+            class="q-mr-xs cursor-pointer"
+          />
+        </q-item-section>
+        <q-item-section>
+          <q-item-label
+            caption
+            clickable
+            style="word-break: break-word"
+            @click="showP2PKKeyEntry(key.publicKey)"
+            >{{ key.publicKey }}</q-item-label
+          >
+        </q-item-section>
+        <q-item-section side>
+          <q-badge v-if="key.used" label="used" color="primary" />
+        </q-item-section>
+        <q-item-section class="q-mx-none q-pl-none" style="max-width: 1.05em">
+          <q-icon
+            name="qr_code"
+            @click="showP2PKKeyEntry(key.publicKey)"
+            size="1em"
+            color="grey"
+            class="q-mr-xs cursor-pointer"
+          />
+        </q-item-section>
+      </q-item>
+    </q-expansion-item>
+
+    <!-- nostr -->
     <div class="q-py-sm q-px-xs text-left" on-left>
       <q-list padding>
         <q-item>
@@ -255,7 +331,12 @@
               </q-item-label>
             </q-item-section>
           </q-item>
-          <q-expansion-item dense dense-toggle label="Click to browse mints">
+          <q-expansion-item
+            dense
+            dense-toggle
+            class="text-left"
+            label="Click to browse mints"
+          >
             <q-item v-for="mint in mintRecommendations" :key="mint.url">
               <q-item-section
                 class="q-mx-none q-pl-none"
@@ -679,6 +760,7 @@ import { map } from "underscore";
 import { currentDateStr } from "src/js/utils";
 import { useSettingsStore } from "src/stores/settings";
 import { useNdkStore } from "src/stores/ndk";
+import { useP2PKStore } from "src/stores/p2pk";
 export default defineComponent({
   name: "SettingsView",
   mixins: [windowMixin],
@@ -725,6 +807,7 @@ export default defineComponent({
       "getBitcoinPrice",
       "checkSentTokens",
     ]),
+    ...mapState(useP2PKStore, ["p2pkKeys"]),
     ...mapState(useMintsStore, ["activeMintUrl", "mints", "activeProofs"]),
     ...mapState(useNdkStore, ["pubkey", "mintRecommendations"]),
     ...mapState(useWalletStore, ["mnemonic"]),
@@ -762,6 +845,7 @@ export default defineComponent({
       "fetchEventsFromUser",
       "fetchMints",
     ]),
+    ...mapActions(useP2PKStore, ["generateKeypair", "showKeyDetails"]),
     ...mapActions(useMintsStore, [
       "addMint",
       "removeMint",
@@ -899,14 +983,28 @@ export default defineComponent({
       this.discoveringMints = true;
       await this.connect();
       console.log("### fetch mints");
-      const mintUrls = await this.fetchMints();
+      let maxTries = 5;
+      let tries = 0;
+      let mintUrls = [];
+      while (mintUrls.length == 0 && tries < maxTries) {
+        try {
+          mintUrls = await this.fetchMints();
+        } catch (e) {
+          console.log("Error fetching mints", e);
+        }
+        tries++;
+      }
       if (mintUrls.length == 0) {
         this.notifyError("No mints found");
       } else {
-        this.notifySuccess("Discovered " + mintUrls.length + " mints");
+        this.notifySuccess("Found " + mintUrls.length + " mints");
       }
       console.log(mintUrls);
       this.discoveringMints = false;
+    },
+    showP2PKKeyEntry: async function (pubKey) {
+      this.showKeyDetails(pubKey);
+      this.showP2PKDialog = true;
     },
   },
   created: function () {},

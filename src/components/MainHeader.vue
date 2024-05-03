@@ -29,7 +29,8 @@
         </q-badge>
       </transition>
       <q-badge color="yellow" text-color="black" class="q-mr-none">
-        <span>Beta</span>
+        <span v-if="!isStaging()">Beta</span>
+        <span v-else>Staging – don't use with real funds!</span>
       </q-badge>
 
       <q-btn-dropdown
@@ -218,7 +219,6 @@ export default defineComponent({
   },
   setup() {
     const leftDrawerOpen = ref(false);
-
     return {
       themes: [
         "monochrome",
@@ -235,6 +235,9 @@ export default defineComponent({
       leftDrawerOpen,
       toggleLeftDrawer() {
         leftDrawerOpen.value = !leftDrawerOpen.value;
+      },
+      isStaging() {
+        return location.host.includes("staging");
       },
     };
   },

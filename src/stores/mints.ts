@@ -119,6 +119,12 @@ export const useMintsStore = defineStore("mints", {
       if (mint) {
         return new MintClass(mint);
       } else {
+        if (this.mints.length) {
+          console.error("No active mint. This should not happen. switching to first one.")
+          // fallback
+          this.activeMintUrl = this.mints[0].url
+          return new MintClass(this.mints[0]);
+        }
         throw new Error("No active mint");
       }
     },
@@ -139,23 +145,9 @@ export const useMintsStore = defineStore("mints", {
         };
       });
     },
-    // setMintToAdd(mint: string) {
-    //   this.mintToAdd = mint;
-    // },
-    // setMintToRemove(mint: string) {
-    //   this.mintToRemove = mint;
-    // },
-    // updateMintBalances() {
-    //   this.mints.forEach((m) => {
-    //     const mintClass = new MintClass(m);
-    //     m.balance = mintClass.allBalances
-    //   });
-    // },
     addProofs(proofs: Proof[]) {
       const walletProofs = this.proofsToWalletProofs(proofs);
       this.proofs = this.proofs.concat(walletProofs);
-      // this.updateMintBalances();
-      console.log("### addProofs", this.proofs, "length", this.proofs.length);
     },
     removeProofs(proofs: Proof[]) {
       const walletProofs = this.proofsToWalletProofs(proofs);
@@ -165,10 +157,7 @@ export const useMintsStore = defineStore("mints", {
           return wp.secret === p.secret;
         });
       });
-      console.log("### removeProofs", this.proofs, "length", this.proofs.length);
       this.spentProofs = this.spentProofs.concat(walletProofs);
-      // this.updateMintBalances();
-      console.log("### spentProofs", this.spentProofs, "length", this.spentProofs.length);
     },
     appendBlindSignatures(signature: SerializedBlindedSignature, amount: number, secret: Uint8Array, r: Uint8Array) {
       const audit: BlindSignatureAudit = {
@@ -303,10 +292,28 @@ export const useMintsStore = defineStore("mints", {
           this.mints.filter((m) => m.url === mint.url)[0].keysets = keysets;
         }
 
-        const keys = await mintClass.api.getKeys();
-        // store keys in mint and update local storage
-        // TODO: Do not overwrite existing keysets, only add new ones
-        this.mints.filter((m) => m.url === mint.url)[0].keys = keys.keysets;
+        // if we do not have any keys yet, fetch them
+        if (mint.keys.length === 0) {
+          const keys = await mintClass.api.getKeys();
+          // store keys in mint and update local storage
+          this.mints.filter((m) => m.url === mint.url)[0].keys = keys.keysets;
+        }
+        // reload mint from local storage
+        mint = this.mints.filter((m) => m.url === mint.url)[0];
+
+        // for each keyset we do not have keys for, fetch keys
+        for (const keyset of keysets) {
+          if (!mint.keys.find((k) => k.id === keyset.id)) {
+            const keys = await mintClass.api.getKeys(keyset.id);
+            // store keys in mint and update local storage
+            this.mints.filter((m) => m.url === mint.url)[0].keys.push(keys.keysets[0]);
+          }
+        }
+
+        // const keys = await mintClass.api.getKeys();
+        // // store keys in mint and update local storage
+        // // TODO: Do not overwrite existing keysets, only add new ones
+        // this.mints.filter((m) => m.url === mint.url)[0].keys = keys.keysets;
 
         // return the mint with keys set
         return this.mints.filter((m) => m.url === mint.url)[0]

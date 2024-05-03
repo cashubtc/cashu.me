@@ -30,7 +30,11 @@
         "
       >
         <div class="col-12">
-          <TokenInformation :encodedToken="receiveData.tokensBase64" />
+          <TokenInformation
+            :encodedToken="receiveData.tokensBase64"
+            :showAmount="true"
+            :showMintCheck="true"
+          />
         </div>
       </div>
       <div class="row q-mt-lg">
@@ -85,7 +89,7 @@ import { useUiStore } from "src/stores/ui";
 import { useMintsStore } from "src/stores/mints";
 import { useTokensStore } from "src/stores/tokens";
 import { useCameraStore } from "src/stores/camera";
-
+import { useP2PKStore } from "src/stores/p2pk";
 import token from "src/js/token";
 
 import { mapActions, mapState, mapWritableState } from "pinia";
@@ -123,6 +127,7 @@ export default defineComponent({
     ...mapActions(useWalletStore, ["redeem"]),
     ...mapActions(useCameraStore, ["closeCamera", "showCamera"]),
     ...mapActions(useTokensStore, ["addPendingToken"]),
+    ...mapActions(useP2PKStore, ["getPrivateKeyForP2PKEncodedToken"]),
     knowThisMintOfTokenJson: function (tokenJson) {
       const mintStore = useMintsStore();
       // check if we have all mints
@@ -145,6 +150,13 @@ export default defineComponent({
       if (receiveStore.receiveData.tokensBase64.length == 0) {
         throw new Error("no tokens provided.");
       }
+
+      // get the private key for the token we want to receive if it is locked with P2PK
+      receiveStore.receiveData.p2pkPrivateKey =
+        this.getPrivateKeyForP2PKEncodedToken(
+          receiveStore.receiveData.tokensBase64
+        );
+
       const tokenJson = token.decode(receiveStore.receiveData.tokensBase64);
       if (tokenJson == undefined) {
         throw new Error("no tokens provided.");

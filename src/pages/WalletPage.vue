@@ -171,6 +171,9 @@
 
     <!-- RECEIVE TOKENS DIALOG  -->
     <ReceiveTokenDialog v-model="showReceiveTokens" />
+
+    <!-- P2PK DIALOG -->
+    <P2PKDialog v-model="showP2PKDialog" />
   </div>
 </template>
 <style>
@@ -212,7 +215,7 @@ import InvoiceDetailDialog from "components/InvoiceDetailDialog.vue";
 import SendDialog from "components/SendDialog.vue";
 import ReceiveDialog from "components/ReceiveDialog.vue";
 import QrcodeReader from "components/QrcodeReader.vue";
-
+import P2PKDialog from "components/P2PKDialog.vue";
 // pinia stores
 import { mapActions, mapState, mapWritableState } from "pinia";
 import { useMintsStore } from "src/stores/mints";
@@ -224,6 +227,7 @@ import { useWalletStore } from "src/stores/wallet";
 import { useUiStore } from "src/stores/ui";
 import { useProofsStore } from "src/stores/proofs";
 import { useCameraStore } from "src/stores/camera";
+import { useP2PKStore } from "src/stores/p2pk";
 
 import ReceiveTokenDialog from "src/components/ReceiveTokenDialog.vue";
 
@@ -243,6 +247,7 @@ export default {
     QrcodeReader,
     SendDialog,
     ReceiveDialog,
+    P2PKDialog,
   },
   data: function () {
     return {
@@ -318,6 +323,7 @@ export default {
     ]),
     ...mapState(useTokensStore, ["historyTokens"]),
     ...mapWritableState(useCameraStore, ["camera", "hasCamera"]),
+    ...mapWritableState(useP2PKStore, ["showP2PKDialog"]),
     pendingPaymentsExist: function () {
       return this.payments.findIndex((payment) => payment.pending) !== -1;
     },
@@ -594,44 +600,12 @@ export default {
       this.addMintDialog.mintToAdd = activeMintUrl;
       this.showAddMintDialog = true;
     }
-
-    if (params.get("mint_id")) {
-      this.mintId = params.get("mint_id");
-      // works with only lnbits mints
-      let activeMintUrl =
-        location.protocol +
-        "//" +
-        location.host +
-        `/cashu/api/v1/${this.mintId}`;
-      this.walletURL = this.baseURL + "?mint_id=" + this.mintId;
-      await this.addMint(activeMintUrl);
-    }
-    if (localStorage.getItem("cashu.activeMintUrl")) {
-      if (!this.activeMintUrl) {
-        this.walletURL = this.baseURL;
-      }
-      let activeMintUrl = localStorage.getItem("cashu.activeMintUrl");
-      // we'll force the activation of the mint for the migration
-      // from without a pinia store
-      await this.activateMintUrl(activeMintUrl, false, true);
-    } else {
+    if (!localStorage.getItem("cashu.activeMintUrl")) {
       this.setTab("settings");
     }
 
-    // todo: remove:
-    if (!this.mintId.length) {
-      this.mintId = "dummy";
-    }
-
     console.log("Mint URL " + this.activeMintUrl);
-    console.log("Wallet URL " + this.walletURL);
-
-    const startupMintUrl = this.activeMintUrl;
-
-    // get name
-    if (params.get("mint_name")) {
-      this.mintName = params.get("mint_name");
-    }
+    console.log("Wallet URL " + this.baseURL);
 
     // run migrations
     await this.migrationLocalstorage();
@@ -678,17 +652,13 @@ export default {
     //   return;
     // });
 
-    // reset to the mint from settings after workers have run
-    if (startupMintUrl.length > 0) {
-      await this.activateMintUrl(startupMintUrl);
-    }
-
     // Local storage sync hook
     this.registerLocalStorageSyncHook();
 
     // PWA install hook
     this.registerPWAEventHook();
 
+    // generate new mnemonic
     this.generateNewMnemonic();
 
     // show welcome dialog
