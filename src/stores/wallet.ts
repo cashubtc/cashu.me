@@ -282,8 +282,10 @@ export const useWalletStore = defineStore("wallet", {
       const proofsToSplit = this.coinSelect(spendableProofs, amount);
       const { returnChange: keepProofs, send: sendProofs } = await this.wallet.send(amount, proofsToSplit, { pubkey: receiverPubkey })
       const mintStore = useMintsStore();
+      // note: we do not store sendProofs in the proofs store but
+      // expect from the caller to store it in the history
       mintStore.addProofs(keepProofs);
-      mintStore.addProofs(sendProofs);
+      mintStore.removeProofs(proofsToSplit);
       return { keepProofs, sendProofs };
     },
     splitToSend: async function (proofs: WalletProof[], amount: number, invlalidate: boolean = false) {
