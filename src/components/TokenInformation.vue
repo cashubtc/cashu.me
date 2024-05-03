@@ -4,12 +4,7 @@
       <q-chip outline color="primary" icon="toll" class="q-mr-md q-pa-md">
         <strong>{{ displayUnit }} </strong>
       </q-chip>
-      <q-chip
-        outline
-        color="primary"
-        icon="account_balance"
-        class="q-mr-md q-pa-md"
-      >
+      <q-chip outline color="primary" icon="account_balance" class="q-pa-md">
         {{ tokenMintUrl }}
         <q-icon
           v-if="mintKnownToUs(proofsToShow)"
@@ -24,11 +19,11 @@
         outline
         color="primary"
         icon="lock"
-        class="q-ml-auto q-pa-md"
+        class="q-pa-md"
       >
         P2PK
         <q-icon
-          :name="isLockedToUs(proofsToShow) ? 'check' : 'remove'"
+          :name="isLockedToUs(proofsToShow) ? 'check' : 'close'"
           size="sm"
           :color="isLockedToUs(proofsToShow) ? 'green' : 'red'"
           class="q-ml-xs"

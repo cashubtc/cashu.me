@@ -263,6 +263,15 @@
         <q-item-section side>
           <q-badge v-if="key.used" label="used" color="primary" />
         </q-item-section>
+        <q-item-section class="q-mx-none q-pl-none" style="max-width: 1.05em">
+          <q-icon
+            name="qr_code"
+            @click="showP2PKKeyEntry(key.publicKey)"
+            size="1em"
+            color="grey"
+            class="q-mr-xs cursor-pointer"
+          />
+        </q-item-section>
       </q-item>
     </q-expansion-item>
 
