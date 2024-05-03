@@ -269,9 +269,10 @@ export const useWalletStore = defineStore("wallet", {
       const spendableProofs = proofsStore.getUnreservedProofs(proofs);
       if (proofsStore.sumProofs(spendableProofs) < amount) {
         const balance = mintStore.activeBalance;
+        const unit = mintStore.activeUnit
         notifyWarning(
           "Balance is too low.",
-          `Your balance is ${balance} sat and you're trying to pay ${amount} sats.`
+          `Your balance is ${uIStore.formatCurrency(balance, unit)} and you're trying to pay ${uIStore.formatCurrency(amount, unit)}.`
         );
         throw Error("balance too low.");
       }

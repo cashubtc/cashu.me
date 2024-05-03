@@ -138,9 +138,8 @@
                 v-if="sendData.amount > 0 && !showLockInput"
                 :disable="sendData.p2pkPubkey == null || sendData.amount <= 0"
                 color="primary"
-                class="q-ml-md"
-                outline
-                rounded
+                class="q-ml-sm"
+                flat
                 @click="showLockInput = true"
               >
                 <!-- <q-icon size="xs" class="q-mr-xs" name="lock" />  -->
@@ -162,6 +161,15 @@
                 Offline
               </q-chip>
             </transition>
+            <q-btn
+              v-if="!sendData.amount"
+              v-close-popup
+              rounded
+              flat
+              color="grey"
+              class="q-ml-auto"
+              >Close</q-btn
+            >
           </div>
         </q-card-section>
       </div>
