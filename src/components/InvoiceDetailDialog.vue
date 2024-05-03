@@ -147,6 +147,7 @@ import { useUiStore } from "src/stores/ui";
 import { getShortUrl } from "src/js/wallet-helpers";
 import ToggleUnit from "src/components/ToggleUnit.vue";
 import { useWorkersStore } from "src/stores/workers";
+import { useMintsStore } from "src/stores/mints";
 
 export default defineComponent({
   name: "InvoiceDetailDialog",
@@ -187,7 +188,8 @@ export default defineComponent({
     requestMintButton: async function () {
       try {
         // if unit is USD, multiply by 100
-        if (this.invoiceData.unit === "usd") {
+        const mintStore = useMintsStore();
+        if (mintStore.activeUnit === "usd") {
           this.invoiceData.amount = this.invoiceData.amount * 100;
         }
         this.createInvoiceButtonBlocked = true;
