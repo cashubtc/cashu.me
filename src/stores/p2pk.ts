@@ -1,11 +1,8 @@
 import { defineStore } from "pinia";
-import NDK, { NDKEvent, NDKNip07Signer, NDKNip46Signer, NDKFilter, NDKPrivateKeySigner } from "@nostr-dev-kit/ndk";
-import { connected } from "process";
-import { min } from "underscore";
 import { useLocalStorage } from "@vueuse/core";
 import { generateSecretKey, getPublicKey } from 'nostr-tools/pure'
-import { bytesToHex, hexToBytes } from '@noble/hashes/utils' // already an installed dependency
-import { useMintsStore, WalletProof } from "stores/mints";
+import { bytesToHex } from '@noble/hashes/utils' // already an installed dependency
+import { WalletProof } from "stores/mints";
 import token from "src/js/token";
 
 type P2PKKey = {

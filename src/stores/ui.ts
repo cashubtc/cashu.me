@@ -21,7 +21,7 @@ export const useUiStore = defineStore("ui", {
     setTab(tab: string) {
       this.tab = tab;
     },
-    formatCurrency: function (value, currency) {
+    formatCurrency: function (value: number, currency: string) {
       if (currency == undefined) {
         currency = "sat";
       }
@@ -34,9 +34,7 @@ export const useUiStore = defineStore("ui", {
       // + " " +
       // currency.toUpperCase()
     },
-    formatSat: function (value) {
-      // convert value to integer
-      value = parseInt(value);
+    formatSat: function (value: number) {
       return new Intl.NumberFormat(navigator.language).format(value) + " sat";
     },
   },
