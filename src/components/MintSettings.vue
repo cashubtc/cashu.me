@@ -159,10 +159,10 @@
       <q-list padding>
         <q-item>
           <q-item-section>
-            <q-item-label overline>Nostr</q-item-label>
+            <q-item-label overline>Discover</q-item-label>
             <q-item-label caption
-              >Connect your wallet with nostr and discover mints recommended by
-              other users.</q-item-label
+              >Discover mints other users have recommended on
+              nostr.</q-item-label
             >
           </q-item-section>
         </q-item>

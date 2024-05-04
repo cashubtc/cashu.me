@@ -167,7 +167,7 @@ export default defineComponent({
         // hack! The "add mint" component is in SettingsView which may now
         // have been loaded yet. We switch the tab to settings to make sure
         // that it loads. Remove this code when the TrustMintComnent is refactored!
-        uIStore.setTab("settings");
+        uIStore.setTab("mints");
         // hide the receive dialog
         receiveStore.showReceiveTokens = false;
         // set the mint to add

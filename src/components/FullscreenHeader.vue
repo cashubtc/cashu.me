@@ -10,14 +10,10 @@
         color="primary"
         aria-label="Menu"
         @click="toggleLeftDrawer"
-      />
-      <q-toolbar-title>
-        Wallet
-        <!-- <span><strong>Cashu.me</strong></span> -->
-      </q-toolbar-title>
-      <q-badge color="yellow" text-color="black" class="q-mr-none">
-        <span>Beta</span>
-      </q-badge>
+        no-caps
+        ><span class="q-ml-md text-weight-bold">Wallet</span>
+      </q-btn>
+      <!-- <q-toolbar-title> </q-toolbar-title> -->
     </q-toolbar>
   </q-header>
 </template>

@@ -19,7 +19,10 @@
           color="primary"
           class="q-px-md"
           label="Add mint"
-          @click="focusOnMint"
+          @click="
+            expandHistory = true;
+            tab = 'mints';
+          "
         />
       </div>
       <div class="row items-center justify-center q-pt-md">
@@ -53,7 +56,7 @@ export default defineComponent({
     activeMintUrl: String,
   },
   computed: {
-    ...mapWritableState(useUiStore, ["tab"]),
+    ...mapWritableState(useUiStore, ["tab", "expandHistory"]),
     ...mapWritableState(useReceiveTokensStore, [
       "showReceiveTokens",
       "receiveData",
@@ -79,9 +82,6 @@ export default defineComponent({
     showReceiveTokensDialog: function () {
       this.receiveData.tokensBase64 = "";
       this.showReceiveTokens = true;
-    },
-    focusOnMint: function () {
-      this.tab = "settings";
     },
   },
 });

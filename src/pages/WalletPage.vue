@@ -75,11 +75,7 @@
             label="Invoices"
           ></q-tab>
           <!-- <q-tab name="tokens" label="Tokens"></q-tab> -->
-          <q-tab
-            name="settings"
-            class="text-secondary"
-            label="Settings"
-          ></q-tab>
+          <q-tab name="mints" class="text-secondary" label="Mints"></q-tab>
         </q-tabs>
 
         <q-tab-panels
@@ -104,16 +100,8 @@
 
           <!-- ////////////////////// SETTINGS ////////////////// -->
 
-          <q-tab-panel name="settings" class="q-px-sm">
-            <SettingsView
-              :ticker-short="tickerShort"
-              :request-mint="requestMint"
-              :melt="melt"
-              :invoice-check-worker="invoiceCheckWorker"
-              :pay-invoice-data="payInvoiceData"
-              :show-mint-dialog="this.addMintDialog.show"
-              :mint-to-add-wallet-page="this.addMintDialog.mintToAdd"
-            />
+          <q-tab-panel name="mints" class="q-px-sm">
+            <MintSettings />
           </q-tab-panel>
         </q-tab-panels>
       </q-expansion-item>
@@ -204,7 +192,7 @@ import token from "src/js/token";
 
 // Vue components
 import BalanceView from "components/BalanceView.vue";
-import SettingsView from "components/SettingsView.vue";
+import MintSettings from "components/MintSettings.vue";
 import InvoicesTable from "components/InvoicesTable.vue";
 import HistoryTable from "components/HistoryTable.vue";
 import NoMintWarnBanner from "components/NoMintWarnBanner.vue";
@@ -235,7 +223,7 @@ export default {
   mixins: [windowMixin],
   components: {
     BalanceView,
-    SettingsView,
+    MintSettings,
     InvoicesTable,
     HistoryTable,
     NoMintWarnBanner,
@@ -335,11 +323,7 @@ export default {
         .reduce((sum, el) => (sum += el.amount), 0);
     },
   },
-  filters: {
-    msatoshiFormat: function (value) {
-      return LNbits.utils.formatSat(value / 1000);
-    },
-  },
+  filters: {},
   methods: {
     ...mapActions(useProofsStore, [
       "serializeProofs",
@@ -444,7 +428,7 @@ export default {
       localStorage.setItem("cashu.welcomeDialogSeen", "seen");
       this.welcomeDialog.show = false;
       // switch to settings tab
-      this.setTab("settings");
+      this.setTab("mints");
 
       // if a wallet has been restored the "cashu.activeMintUrl" is not null
       if (!!localStorage.getItem("cashu.activeMintUrl")) {
@@ -596,12 +580,12 @@ export default {
     // mint url
     if (params.get("mint")) {
       let activeMintUrl = params.get("mint");
-      await this.setTab("settings");
+      await this.setTab("mints");
       this.addMintDialog.mintToAdd = activeMintUrl;
       this.showAddMintDialog = true;
     }
     if (!localStorage.getItem("cashu.activeMintUrl")) {
-      this.setTab("settings");
+      this.setTab("mints");
     }
 
     console.log("Mint URL " + this.activeMintUrl);

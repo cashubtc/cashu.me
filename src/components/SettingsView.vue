@@ -1,160 +1,7 @@
 <template>
   <div style="max-width: 800px; margin: 0 auto">
     <!-- ////////////////////// SETTINGS ////////////////// -->
-    <div class="q-py-md q-px-xs text-left" on-left>
-      <q-list padding>
-        <q-item>
-          <q-item-section>
-            <q-item-label overline>Mints</q-item-label>
-          </q-item-section>
-        </q-item>
-
-        <!-- <q-item-label header>Your mints</q-item-label> -->
-        <div v-for="mint in mints" :key="mint.url">
-          <q-item
-            :active="mint.url == activeMintUrl"
-            active-class="text-weight-bold text-primary"
-            clickable
-          >
-            <q-item-section avatar>
-              <q-icon
-                :color="mint.url == activeMintUrl ? 'primary' : 'grey'"
-                :name="
-                  mint.url == activeMintUrl
-                    ? 'check_circle'
-                    : 'radio_button_unchecked'
-                "
-                @click="activateMintUrl(mint.url, (verbose = false))"
-                class="cursor-pointer"
-              />
-            </q-item-section>
-            <q-item-section
-              class="q-mx-none q-pl-none"
-              style="max-width: 1.05em"
-            >
-              <q-icon
-                name="content_copy"
-                @click="copyText(mint.url)"
-                size="1em"
-                color="grey"
-                class="q-mr-xs cursor-pointer"
-              />
-            </q-item-section>
-            <q-item-section>
-              <q-item-label
-                lines="1"
-                v-if="mint.nickname"
-                @click="activateMintUrl(mint.url, (verbose = false))"
-                class="cursor-pointer"
-                style="word-break: break-word"
-                >{{ mint.nickname }}</q-item-label
-              >
-              <q-item-label
-                lines="1"
-                @click="activateMintUrl(mint.url, (verbose = false))"
-                class="cursor-pointer"
-                style="word-break: break-word"
-                >{{ mint.url }}</q-item-label
-              >
-              <q-item-label>
-                <q-badge
-                  v-for="unit in mintClass(mint).units"
-                  :key="unit"
-                  :color="mint.url == activeMintUrl ? 'primary' : 'grey'"
-                  :label="
-                    formatCurrency(mintClass(mint).unitBalance(unit), unit)
-                  "
-                  class="q-mx-xs"
-                />
-              </q-item-label>
-            </q-item-section>
-            <q-item-section side>
-              <q-icon
-                name="edit"
-                @click="editMint(mint)"
-                class="cursor-pointer"
-              />
-            </q-item-section>
-          </q-item>
-
-          <q-separator spaced inset="item" />
-        </div>
-      </q-list>
-    </div>
-    <div class="q-pt-xs q-px-xs">
-      <q-list padding>
-        <div class="row-12 text-left">
-          <q-item>
-            <q-item-section>
-              <q-item-label overline>Add mint</q-item-label>
-              <q-item-label caption
-                >Enter the URL of a Cashu mint to connect to it. This wallet is
-                not affiliated with any mint.
-              </q-item-label>
-            </q-item-section>
-          </q-item>
-        </div>
-        <div class="row-12">
-          <q-input
-            bottom-slots
-            rounded
-            dense
-            outlined
-            @keydown.enter.prevent="showAddMintDialog = true"
-            v-model="addMintData.url"
-            placeholder="https://"
-            ref="mintInput"
-            class="q-pb-none q-mb-sm q-px-md"
-          >
-            <!-- <template v-slot:hint> Enter Mint URL</template> -->
-            <!-- "addMint(mintToAdd)" -->
-            <!-- <template v-slot:append>
-            <q-btn
-              round
-              dense
-              flat
-              color="primary"
-              icon="add"
-              click
-              @click="setShowAddMintDialog(true)"
-            />
-          </template> -->
-          </q-input>
-        </div>
-        <div class="row-12">
-          <q-input
-            bottom-slots
-            rounded
-            dense
-            outlined
-            v-model="addMintData.nickname"
-            label="Nickname (e.g. Testnet)"
-            ref="mintNicknameInput"
-            class="q-pb-sm q-px-md"
-          >
-          </q-input>
-        </div>
-        <div class="row-12">
-          <q-btn
-            rounded
-            class="q-px-lg q-mt-xs"
-            color="primary"
-            :disabled="addMintData.url.length == 0"
-            :loading="addingMint"
-            @click="showAddMintDialog = true"
-          >
-            <q-icon size="xs" name="add" class="q-pr-xs" />
-            Add mint
-            <template v-slot:loading>
-              <q-spinner-hourglass class="on-left" />
-              Loading...
-            </template>
-          </q-btn>
-        </div>
-      </q-list>
-    </div>
-
-    <div class="q-py-md q-px-xs text-left" on-left>
+    <div class="q-pb-md q-px-xs text-left" on-left>
       <q-list padding>
         <q-item>
           <q-item-section>
@@ -204,10 +51,9 @@
       <q-list padding>
         <q-item>
           <q-item-section>
-            <q-item-label overline>Generate Keys</q-item-label>
+            <q-item-label overline>Generate P2PK Keys</q-item-label>
             <q-item-label caption
-              >Generate keys to be able to receive P2PK-locked
-              ecash.</q-item-label
+              >Generate a key pair to receive P2PK-locked ecash.</q-item-label
             >
           </q-item-section>
         </q-item>
@@ -275,19 +121,127 @@
       </q-item>
     </q-expansion-item>
 
-    <!-- nostr -->
-    <div class="q-py-sm q-px-xs text-left" on-left>
+    <!-- theme -->
+    <div class="q-py-lg q-px-xs text-left" on-left>
       <q-list padding>
         <q-item>
           <q-item-section>
-            <q-item-label overline>Nostr</q-item-label>
-            <q-item-label caption
-              >Connect your wallet with nostr and discover mints recommended by
-              other users.</q-item-label
-            >
+            <q-item-label overline>Appearance</q-item-label>
+            <q-item-label caption>Change how your wallet looks </q-item-label>
+            <!-- <div class="row q-py-md">
+              <q-btn dense flat rounded @click="toggleDarkMode" size="md"
+                >Toggle dark mode<q-icon
+                  class="q-ml-sm"
+                  :name="$q.dark.isActive ? 'brightness_3' : 'wb_sunny'"
+                />
+              </q-btn>
+            </div> -->
+            <div class="row q-pt-md">
+              <q-btn
+                v-if="themes.includes('classic')"
+                dense
+                flat
+                @click="changeColor('classic')"
+                icon="format_color_fill"
+                color="deep-purple"
+                size="md"
+                ><q-tooltip>classic</q-tooltip>
+              </q-btn>
+              <q-btn
+                v-if="themes.includes('bitcoin')"
+                dense
+                flat
+                @click="changeColor('bitcoin')"
+                icon="format_color_fill"
+                color="orange"
+                size="md"
+                ><q-tooltip>bitcoin</q-tooltip>
+              </q-btn>
+              <q-btn
+                v-if="themes.includes('mint')"
+                dense
+                flat
+                @click="changeColor('mint')"
+                icon="format_color_fill"
+                color="green"
+                size="md"
+                ><q-tooltip>mint</q-tooltip> </q-btn
+              ><q-btn
+                v-if="themes.includes('autumn')"
+                dense
+                flat
+                @click="changeColor('autumn')"
+                icon="format_color_fill"
+                color="brown"
+                size="md"
+                ><q-tooltip>autumn</q-tooltip>
+              </q-btn>
+              <q-btn
+                v-if="themes.includes('monochrome')"
+                dense
+                flat
+                @click="changeColor('monochrome')"
+                icon="format_color_fill"
+                color="grey"
+                size="md"
+                ><q-tooltip>monochrome</q-tooltip>
+              </q-btn>
+              <q-btn
+                v-if="themes.includes('salvador')"
+                dense
+                flat
+                @click="changeColor('salvador')"
+                icon="format_color_fill"
+                color="blue-10"
+                size="md"
+                ><q-tooltip>blu</q-tooltip>
+              </q-btn>
+              <q-btn
+                v-if="themes.includes('freedom')"
+                dense
+                flat
+                @click="changeColor('freedom')"
+                icon="format_color_fill"
+                color="pink-13"
+                size="md"
+                ><q-tooltip>freedom</q-tooltip>
+              </q-btn>
+              <q-btn
+                v-if="themes.includes('cyber')"
+                dense
+                flat
+                @click="changeColor('cyber')"
+                icon="format_color_fill"
+                color="light-green-9"
+                size="md"
+                ><q-tooltip>cyber</q-tooltip>
+              </q-btn>
+              <q-btn
+                v-if="themes.includes('flamingo')"
+                dense
+                flat
+                @click="changeColor('flamingo')"
+                icon="format_color_fill"
+                color="pink-3"
+                size="md"
+                ><q-tooltip>flamingo</q-tooltip>
+              </q-btn>
+            </div>
           </q-item-section>
         </q-item>
-        <q-item v-if="false">
+      </q-list>
+    </div>
+
+    <!-- nostr -->
+    <!-- <div class="q-py-sm q-px-xs text-left" on-left>
+      <q-list padding>
+        <q-item>
+          <q-item-section>
+            <q-item-label overline>Discover mints</q-item-label>
+            <q-item-label caption>Connect your wallet with nostr.</q-item-label>
+          </q-item-section>
+        </q-item>
+        <q-item>
           <q-btn
             class="q-ml-sm q-px-md"
             color="primary"
@@ -297,145 +251,8 @@
             >Link to extension</q-btn
           >
         </q-item>
-        <q-item>
-          <q-btn
-            class="q-ml-sm q-px-md"
-            color="primary"
-            rounded
-            outline
-            :loading="discoveringMints"
-            @click="fetchMintsFromNdk"
-            >Discover mints
-            <template v-slot:loading>
-              <q-spinner-hourglass class="on-left" />
-              Loading...
-            </template>
-          </q-btn>
-        </q-item>
-        <div v-if="mintRecommendations.length > 0">
-          <!-- for each entry in mintRecommendations, display the url and the count how often it was recommended -->
-          <q-item>
-            <q-item-section>
-              <q-item-label overline
-                >Found {{ mintRecommendations.length }} mints</q-item-label
-              >
-              <q-item-label caption
-                >These mints were recommended by other Nostr users. Read reviews
-                at
-                <a
-                  href="https://bitcoinmints.com"
-                  target="_blank"
-                  class="text-primary"
-                  >bitcoinmints.com</a
-                >. Be careful and do your own research before using a mint.
-              </q-item-label>
-            </q-item-section>
-          </q-item>
-          <q-expansion-item
-            dense
-            dense-toggle
-            class="text-left"
-            label="Click to browse mints"
-          >
-            <q-item v-for="mint in mintRecommendations" :key="mint.url">
-              <q-item-section
-                class="q-mx-none q-pl-none"
-                style="max-width: 1.05em"
-              >
-                <q-icon
-                  name="content_copy"
-                  @click="copyText(mint.url)"
-                  size="1em"
-                  color="grey"
-                  class="q-mr-xs cursor-pointer"
-                />
-              </q-item-section>
-              <q-item-section>
-                <q-item-label caption style="word-break: break-word">{{
-                  mint.url
-                }}</q-item-label>
-              </q-item-section>
-              <q-item-section side>
-                <q-badge :label="mint.count" color="primary" />
-              </q-item-section>
-            </q-item>
-          </q-expansion-item>
-        </div>
       </q-list>
-    </div>
-
-    <div class="q-py-sm q-px-xs text-left" on-left>
-      <q-list padding>
-        <q-item>
-          <q-item-section>
-            <q-item-label overline>Multimint Swaps</q-item-label>
-            <q-item-label caption
-              >Swap funds from one mint to another via Lightning. Note: Leave
-              room for potential Lightning fees.</q-item-label
-            >
-          </q-item-section>
-        </q-item>
-        <q-item>
-          <q-select
-            clearable
-            rounded
-            outlined
-            dense
-            color="primary"
-            v-model="swapData.from_url"
-            :options="swapDataOptions()"
-            option-value="url"
-            option-label="shorturl"
-            label="From"
-            style="min-width: 200px; width: 100%"
-          />
-        </q-item>
-        <q-item>
-          <q-select
-            clearable
-            rounded
-            outlined
-            dense
-            color="primary"
-            v-model="swapData.to_url"
-            :options="swapDataOptions()"
-            option-value="url"
-            option-label="shorturl"
-            label="To"
-            style="min-width: 200px; width: 100%"
-          />
-        </q-item>
-        <q-item>
-          <q-input
-            rounded
-            outlined
-            dense
-            v-model.number="swapData.amount"
-            type="number"
-            :label="'Amount (' + tickerShort + ')'"
-            style="min-width: 200px"
-          ></q-input>
-          <q-btn
-            class="q-ml-sm q-px-md"
-            color="primary"
-            rounded
-            @click="
-              mintSwap(
-                swapData.from_url.url,
-                swapData.to_url.url,
-                swapData.amount
-              )
-            "
-            :disable="
-              !swapData.from_url || !swapData.to_url || !(swapData.amount > 0)
-            "
-          >
-            <q-icon size="xs" name="swap_horiz" class="q-pr-xs" />
-            Swap</q-btn
-          >
-        </q-item>
-      </q-list>
-    </div>
+    </div> -->
     <div class="q-py-sm q-px-xs text-left" on-left>
       <q-list padding>
         <q-item>
@@ -774,6 +591,17 @@ export default defineComponent({
   },
   data: function () {
     return {
+      themes: [
+        "monochrome",
+        "classic",
+        "bitcoin",
+        "mint",
+        "autumn",
+        "salvador",
+        "freedom",
+        "cyber",
+        "flamingo",
+      ],
       discoveringMints: false,
       addingMint: false,
       hideMnemonic: true,
