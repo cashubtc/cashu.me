@@ -4,7 +4,7 @@
       <q-btn
         flat
         dense
-        round
+        rounded
         icon="arrow_back_ios_new"
         to="/"
         color="primary"

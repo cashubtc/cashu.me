@@ -233,15 +233,28 @@
     </div>
 
     <!-- nostr -->
-    <!-- <div class="q-py-sm q-px-xs text-left" on-left>
+    <div class="q-py-sm q-px-xs text-left" on-left>
       <q-list padding>
         <q-item>
           <q-item-section>
-            <q-item-label overline>Discover mints</q-item-label>
-            <q-item-label caption>Connect your wallet with nostr.</q-item-label>
+            <q-item-label overline>Link wallet</q-item-label>
+            <q-item-label caption
+              >Use Nostr Wallet Connect (NWC) to link and control your wallet
+              with any other application.</q-item-label
+            >
           </q-item-section>
         </q-item>
         <q-item>
+          <q-btn
+            class="q-ml-sm q-px-md"
+            color="primary"
+            rounded
+            outline
+            @click="generateNWCConnection()"
+            >Link wallet</q-btn
+          >
+        </q-item>
+        <q-item v-if="false">
           <q-btn
             class="q-ml-sm q-px-md"
             color="primary"
@@ -252,7 +265,7 @@
           >
         </q-item>
       </q-list>
-    </div> -->
+    </div>
     <div class="q-py-sm q-px-xs text-left" on-left>
       <q-list padding>
         <q-item>
@@ -576,8 +589,10 @@ import { useWalletStore } from "src/stores/wallet";
 import { map } from "underscore";
 import { currentDateStr } from "src/js/utils";
 import { useSettingsStore } from "src/stores/settings";
-import { useNdkStore } from "src/stores/ndk";
+import { useNostrStore } from "src/stores/nostr";
 import { useP2PKStore } from "src/stores/p2pk";
+import { useNWCStore } from "src/stores/nwc";
+
 export default defineComponent({
   name: "SettingsView",
   mixins: [windowMixin],
@@ -637,7 +652,7 @@ export default defineComponent({
     ]),
     ...mapState(useP2PKStore, ["p2pkKeys"]),
     ...mapState(useMintsStore, ["activeMintUrl", "mints", "activeProofs"]),
-    ...mapState(useNdkStore, ["pubkey", "mintRecommendations"]),
+    ...mapState(useNostrStore, ["pubkey", "mintRecommendations"]),
     ...mapState(useWalletStore, ["mnemonic"]),
     ...mapWritableState(useMintsStore, [
       "addMintData",
@@ -666,13 +681,14 @@ export default defineComponent({
     // },
   },
   methods: {
-    ...mapActions(useNdkStore, [
+    ...mapActions(useNostrStore, [
       "init",
       "connect",
       "getUserPubkey",
       "fetchEventsFromUser",
       "fetchMints",
     ]),
+    ...mapActions(useNWCStore, ["generateNWCConnection"]),
     ...mapActions(useP2PKStore, ["generateKeypair", "showKeyDetails"]),
     ...mapActions(useMintsStore, [
       "addMint",

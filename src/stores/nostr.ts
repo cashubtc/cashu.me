@@ -9,7 +9,7 @@ type MintRecommendation = {
   count: number;
 };
 
-export const useNdkStore = defineStore("ndk", {
+export const useNostrStore = defineStore("nostr", {
   state: () => ({
     connected: false,
     pubkey: "",
