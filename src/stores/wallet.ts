@@ -530,7 +530,7 @@ export const useWalletStore = defineStore("wallet", {
         if (data.isPaid != true) {
           throw new Error("Invoice not paid.");
         }
-        let amount_paid = amount;
+        let amount_paid = amount - proofsStore.sumProofs(data.change);
         if (!!window.navigator.vibrate) navigator.vibrate(200);
 
         notifySuccess("Paid " + uIStore.formatCurrency(amount_paid, mintStore.activeUnit) + " via Lightning");
@@ -895,7 +895,7 @@ export const useWalletStore = defineStore("wallet", {
           return;
         }
         console.log(data.pr);
-        this.decodeRequest(data.pr);
+        await this.decodeRequest(data.pr);
       }
     },
     generateNewMnemonic: function () {

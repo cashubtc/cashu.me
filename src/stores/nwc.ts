@@ -8,6 +8,7 @@ import { nip04, generateSecretKey, getPublicKey } from 'nostr-tools'
 import { useMintsStore } from './mints'
 import { useWalletStore } from "./wallet";
 import { unsubscribe } from "diagnostics_channel";
+import { useProofsStore } from "./proofs";
 
 type NWCConnection = {
   walletPublicKey: string,
@@ -15,7 +16,7 @@ type NWCConnection = {
   connectionSecret: string,
   connectionPublicKey: string,
   connectionString: string,
-  allowanceLeft?: number
+  allowanceLeft: number
 }
 
 type NWCCommand = {
@@ -38,7 +39,7 @@ export const useNWCStore = defineStore("nwc", {
     nwcEnabled: useLocalStorage<boolean>("cashu.nwc.enabled", false),
     connections: useLocalStorage<NWCConnection[]>("cashu.nwc.connections", []),
     supportedMethods: ["pay_invoice", "get_balance", "get_info", "list_transactions"],
-    relays: ["wss://relay.snort.social"],
+    relays: ["wss://relay.primal.net"],
     ndk: new NDK(),
     subscriptions: [] as NDKSubscription[],
     showNWCDialog: false,
@@ -58,7 +59,10 @@ export const useNWCStore = defineStore("nwc", {
         result: {
           alias: "Cashu.me",
           color: "#FF0000",
+          pubkey: this.connections[0].walletPublicKey,
           network: "mainnet",
+          block_height: 1,
+          block_hash: "blockchain disrespectoor",
           methods: this.supportedMethods
         }
       }
@@ -81,12 +85,19 @@ export const useNWCStore = defineStore("nwc", {
       console.log("### amountMsat", amountMsat)
       // pay invoice
       const walletStore = useWalletStore()
-      walletStore.decodeRequest(invoice)
+      const proofsStore = useProofsStore();
+      await walletStore.decodeRequest(invoice)
       // expect that the melt quote was requested
       if (walletStore.payInvoiceData.meltQuote.response.amount == 0 || walletStore.payInvoiceData.meltQuote.error) {
         throw new Error("Melt quote not requested")
       }
+      const maximumAmount = walletStore.payInvoiceData.meltQuote.response.amount + walletStore.payInvoiceData.meltQuote.response.fee_reserve
+      if (maximumAmount > this.connections[0].allowanceLeft) {
+        throw new Error("Insufficient allowance")
+      }
       const meltData = await walletStore.melt()
+      const paidAmount = walletStore.payInvoiceData.meltQuote.response.amount + proofsStore.sumProofs(meltData.change);
+      this.connections[0].allowanceLeft -= paidAmount;
       return {
         result_type: "pay_invoice",
         result: {
@@ -186,7 +197,8 @@ export const useNWCStore = defineStore("nwc", {
           walletPrivateKey: walletPrivateKeyHex,
           connectionSecret: connectionSecretHex,
           connectionPublicKey: connectionPublicKeyHex,
-          connectionString: connectionString
+          connectionString: connectionString,
+          allowanceLeft: 1000
         } as NWCConnection;
         this.connections = this.connections.concat(conn)
       } else {
@@ -203,6 +215,7 @@ export const useNWCStore = defineStore("nwc", {
       nip47InfoEvent.content = this.supportedMethods.join(' ')
       try {
         await nip47InfoEvent.publish()
+        console.log("### published nip47InfoEvent", nip47InfoEvent)
       } catch (e) {
         console.log("### could not publish nip47InfoEvent", nip47InfoEvent)
         console.log("### error", e)
@@ -245,7 +258,7 @@ export const useNWCStore = defineStore("nwc", {
             console.log("### Received NWC command but NWC is disabled")
             return
           }
-          // console.log("### is a NWC request!")
+          console.log("### NWC request!")
           const decryptedContent = await nip04.decrypt(conn.connectionSecret, conn.walletPublicKey, event.content)
           // console.log("### decryptedContent", decryptedContent)
           await this.parseNWCCommand(decryptedContent, event, conn)

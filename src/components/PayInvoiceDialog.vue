@@ -253,8 +253,8 @@ export default defineComponent({
         clearInterval(this.payInvoiceData.paymentChecker);
       }, 10000);
     },
-    decodeAndQuote: function (request) {
-      this.decodeRequest(request);
+    decodeAndQuote: async function (request) {
+      await this.decodeRequest(request);
     },
     pasteToParseDialog: function () {
       console.log("pasteToParseDialog");

@@ -239,8 +239,8 @@
           <q-item-section>
             <q-item-label overline>Link wallet</q-item-label>
             <q-item-label caption
-              >Use Nostr Wallet Connect (NWC) to link and control your wallet
-              with any other application.</q-item-label
+              >Use Nostr Wallet Connect (NWC) to control your wallet from any
+              other application.</q-item-label
             >
           </q-item-section>
         </q-item>
@@ -265,10 +265,11 @@
         </q-item> -->
         <q-item v-if="enableNwc">
           <q-item-section>
-            <q-item-label overline>Connections</q-item-label>
+            <!-- <q-item-label overline>Connections</q-item-label> -->
             <q-item-label caption
-              >These are the connections to your wallet. You can link your
-              wallet to an extension or another application.
+              >These are active connections to your wallet. Note: You can only
+              use NWC for payments from your Bitcoin balance. Payments will be
+              made from your active mint.
             </q-item-label>
           </q-item-section>
         </q-item>
@@ -279,44 +280,80 @@
           >
             <q-item-section
               class="q-mx-none q-pl-none"
-              style="max-width: 1.05em"
+              style="max-width: 1.5em"
             >
               <q-icon
                 name="content_copy"
                 @click="copyText(connection.connectionString)"
-                size="1em"
+                size="1.3em"
                 color="grey"
-                class="q-mr-xs cursor-pointer"
-              />
+                class="q-mr-sm cursor-pointer"
+                ><q-tooltip>Copy connection string</q-tooltip></q-icon
+              >
+            </q-item-section>
+            <q-item-section
+              class="q-mx-none q-pl-none"
+              style="max-width: 1.5em"
+            >
+              <q-icon
+                name="qr_code"
+                @click="showNWCEntry(connection.connectionString)"
+                size="1.3em"
+                color="grey"
+                class="q-mr-sm cursor-pointer"
+              >
+                <q-tooltip>Show QR code</q-tooltip>
+              </q-icon>
             </q-item-section>
             <q-item-section>
-              <q-item-label
+              <!-- <q-item-label
                 caption
                 clickable
                 style="word-break: break-word"
                 @click="showNWCEntry(connection.connectionString)"
-                >{{ connection.connectionString }}</q-item-label
+                >********************</q-item-label
+              > -->
+              <!-- input for allowanceleft -->
+              <q-input
+                outlined
+                rounded
+                dense
+                v-model="connection.allowanceLeft"
+                label="Allowance left (sat)"
               >
+              </q-input>
+              <!-- <q-btn
+                flat
+                dense
+                @click="showNWCEntry(connection.connectionString)"
+                >Show qr code
+                <q-icon
+                  name="qr_code"
+                  @click="showNWCEntry(connection.connectionString)"
+                  size="1em"
+                  color="grey"
+                  class="q-ml-sm cursor-pointer"
+              /></q-btn> -->
             </q-item-section>
-            <q-item-section side>
+            <!-- <q-item-section side>
               <q-badge
                 v-if="connection.allowanceLeft"
                 :label="connection.allowanceLeft"
                 color="primary"
               />
-            </q-item-section>
-            <q-item-section
+            </q-item-section> -->
+            <!-- <q-item-section
               class="q-mx-none q-pl-none"
               style="max-width: 1.05em"
             >
               <q-icon
                 name="qr_code"
                 @click="showNWCEntry(connection.connectionString)"
-                size="1em"
+                size="1.3em"
                 color="grey"
                 class="q-mr-xs cursor-pointer"
               />
-            </q-item-section>
+            </q-item-section> -->
           </q-item>
           <!-- <q-item v-if="false">
           <q-btn
@@ -644,9 +681,18 @@
       </q-card>
     </q-dialog>
   </div>
+
+  <!-- P2PK DIALOG -->
+  <P2PKDialog v-model="showP2PKDialog" />
+
+  <!-- NWC DIALOG -->
+  <NWCDialog v-model="showNWCDialog" />
 </template>
 <script>
 import { defineComponent } from "vue";
+import P2PKDialog from "./P2PKDialog.vue";
+import NWCDialog from "./NWCDialog.vue";
+
 import { getShortUrl } from "src/js/wallet-helpers";
 import { mapActions, mapState, mapWritableState } from "pinia";
 import { useMintsStore, MintClass } from "src/stores/mints";
@@ -662,6 +708,10 @@ import { useWorkersStore } from "src/stores/workers";
 export default defineComponent({
   name: "SettingsView",
   mixins: [windowMixin],
+  components: {
+    P2PKDialog,
+    NWCDialog,
+  },
   props: {},
   data: function () {
     return {

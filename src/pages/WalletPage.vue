@@ -159,12 +159,6 @@
 
     <!-- RECEIVE TOKENS DIALOG  -->
     <ReceiveTokenDialog v-model="showReceiveTokens" />
-
-    <!-- P2PK DIALOG -->
-    <P2PKDialog v-model="showP2PKDialog" />
-
-    <!-- NWC DIALOG -->
-    <NWCDialog v-model="showNWCDialog" />
   </div>
 </template>
 <style>
@@ -241,8 +235,6 @@ export default {
     QrcodeReader,
     SendDialog,
     ReceiveDialog,
-    P2PKDialog,
-    NWCDialog,
   },
   data: function () {
     return {
@@ -319,7 +311,7 @@ export default {
     ...mapState(useTokensStore, ["historyTokens"]),
     ...mapWritableState(useCameraStore, ["camera", "hasCamera"]),
     ...mapWritableState(useP2PKStore, ["showP2PKDialog"]),
-    ...mapWritableState(useNWCStore, ["showNWCDialog"]),
+    ...mapWritableState(useNWCStore, ["showNWCDialog", "nwcEnabled"]),
     pendingPaymentsExist: function () {
       return this.payments.findIndex((payment) => payment.pending) !== -1;
     },
@@ -370,6 +362,7 @@ export default {
       "generateNewMnemonic",
     ]),
     ...mapActions(useCameraStore, ["closeCamera", "showCamera"]),
+    ...mapActions(useNWCStore, ["listenToNWCCommands"]),
     // TOKEN METHODS
     decodeToken: function (encoded_token) {
       try {
@@ -655,6 +648,11 @@ export default {
 
     // show welcome dialog
     this.showWelcomeDialog();
+
+    // listen to NWC commands if enabled
+    if (this.nwcEnabled) {
+      this.listenToNWCCommands();
+    }
   },
 };
 </script>
