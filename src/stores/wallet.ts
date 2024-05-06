@@ -573,6 +573,7 @@ export const useWalletStore = defineStore("wallet", {
         this.payInvoiceData.invoice = { sat: 0, memo: "", bolt11: "" };
         this.payInvoiceData.show = false;
         this.payInvoiceData.blocking = false;
+        return data;
       } catch (error) {
         this.payInvoiceData.blocking = false;
         proofsStore.setReserved(sendProofs, false);
@@ -757,7 +758,7 @@ export const useWalletStore = defineStore("wallet", {
         i += 1;
       }
     },
-    handleBolt11Invoice: function () {
+    handleBolt11Invoice: async function () {
       this.payInvoiceData.show = true;
       let invoice;
       try {
@@ -806,35 +807,35 @@ export const useWalletStore = defineStore("wallet", {
 
       this.payInvoiceData.invoice = Object.freeze(cleanInvoice);
       // get quote for this request
-      this.meltQuote();
+      await this.meltQuote()
     },
     handleCashuToken: function () {
       this.payInvoiceData.show = false;
       receiveStore.showReceiveTokens = true;
     },
-    decodeRequest: function (req: string) {
+    decodeRequest: async function (req: string) {
       const p2pkStore = useP2PKStore()
       this.payInvoiceData.input.request = req
       if (req.toLowerCase().startsWith("lnbc")) {
         this.payInvoiceData.input.request = req;
-        this.handleBolt11Invoice()
+        await this.handleBolt11Invoice()
       } else if (req.toLowerCase().startsWith("lightning:")) {
         this.payInvoiceData.input.request = req.slice(10);
-        this.handleBolt11Invoice()
+        await this.handleBolt11Invoice()
       } else if (req.toLowerCase().startsWith("lnurl:")) {
         this.payInvoiceData.input.request = req.slice(6);
-        this.lnurlPayFirst(this.payInvoiceData.input.request);
+        await this.lnurlPayFirst(this.payInvoiceData.input.request);
       } else if (req.indexOf("lightning=lnurl1") !== -1) {
         this.payInvoiceData.input.request = req
           .split("lightning=")[1]
           .split("&")[0];
-        this.lnurlPayFirst(this.payInvoiceData.input.request);
+        await this.lnurlPayFirst(this.payInvoiceData.input.request);
       } else if (
         req.toLowerCase().startsWith("lnurl1") ||
         req.match(/[\w.+-~_]+@[\w.+-~_]/)
       ) {
         this.payInvoiceData.input.request = req;
-        this.lnurlPayFirst(this.payInvoiceData.input.request);
+        await this.lnurlPayFirst(this.payInvoiceData.input.request);
       } else if (req.indexOf("cashuA") !== -1) {
         // very dirty way of parsing cashu tokens from either a pasted token or a URL like https://host.com?token=eyJwcm
         receiveStore.receiveData.tokensBase64 = req.slice(req.indexOf("cashuA"));

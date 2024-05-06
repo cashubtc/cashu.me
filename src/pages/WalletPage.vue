@@ -162,6 +162,9 @@
 
     <!-- P2PK DIALOG -->
     <P2PKDialog v-model="showP2PKDialog" />
+
+    <!-- NWC DIALOG -->
+    <NWCDialog v-model="showNWCDialog" />
   </div>
 </template>
 <style>
@@ -204,6 +207,8 @@ import SendDialog from "components/SendDialog.vue";
 import ReceiveDialog from "components/ReceiveDialog.vue";
 import QrcodeReader from "components/QrcodeReader.vue";
 import P2PKDialog from "components/P2PKDialog.vue";
+import NWCDialog from "components/NWCDialog.vue";
+
 // pinia stores
 import { mapActions, mapState, mapWritableState } from "pinia";
 import { useMintsStore } from "src/stores/mints";
@@ -216,6 +221,7 @@ import { useUiStore } from "src/stores/ui";
 import { useProofsStore } from "src/stores/proofs";
 import { useCameraStore } from "src/stores/camera";
 import { useP2PKStore } from "src/stores/p2pk";
+import { useNWCStore } from "src/stores/nwc";
 
 import ReceiveTokenDialog from "src/components/ReceiveTokenDialog.vue";
 
@@ -236,6 +242,7 @@ export default {
     SendDialog,
     ReceiveDialog,
     P2PKDialog,
+    NWCDialog,
   },
   data: function () {
     return {
@@ -312,6 +319,7 @@ export default {
     ...mapState(useTokensStore, ["historyTokens"]),
     ...mapWritableState(useCameraStore, ["camera", "hasCamera"]),
     ...mapWritableState(useP2PKStore, ["showP2PKDialog"]),
+    ...mapWritableState(useNWCStore, ["showNWCDialog"]),
     pendingPaymentsExist: function () {
       return this.payments.findIndex((payment) => payment.pending) !== -1;
     },

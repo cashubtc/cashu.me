@@ -244,17 +244,81 @@
             >
           </q-item-section>
         </q-item>
+        <!-- use a q-toggle to turn nwc on and off -->
         <q-item>
+          <q-toggle
+            v-model="enableNwc"
+            label="Enable Nostr Wallet Connect"
+            color="primary"
+          />
+        </q-item>
+        <!-- <q-item>
           <q-btn
+            v-if="false"
             class="q-ml-sm q-px-md"
             color="primary"
             rounded
             outline
-            @click="generateNWCConnection()"
+            @click="listenToNWCCommands()"
             >Link wallet</q-btn
           >
+        </q-item> -->
+        <q-item v-if="enableNwc">
+          <q-item-section>
+            <q-item-label overline>Connections</q-item-label>
+            <q-item-label caption
+              >These are the connections to your wallet. You can link your
+              wallet to an extension or another application.
+            </q-item-label>
+          </q-item-section>
         </q-item>
-        <q-item v-if="false">
+        <div v-if="enableNwc">
+          <q-item
+            v-for="connection in connections"
+            :key="connection.connectionString"
+          >
+            <q-item-section
+              class="q-mx-none q-pl-none"
+              style="max-width: 1.05em"
+            >
+              <q-icon
+                name="content_copy"
+                @click="copyText(connection.connectionString)"
+                size="1em"
+                color="grey"
+                class="q-mr-xs cursor-pointer"
+              />
+            </q-item-section>
+            <q-item-section>
+              <q-item-label
+                caption
+                clickable
+                style="word-break: break-word"
+                @click="showNWCEntry(connection.connectionString)"
+                >{{ connection.connectionString }}</q-item-label
+              >
+            </q-item-section>
+            <q-item-section side>
+              <q-badge
+                v-if="connection.allowanceLeft"
+                :label="connection.allowanceLeft"
+                color="primary"
+              />
+            </q-item-section>
+            <q-item-section
+              class="q-mx-none q-pl-none"
+              style="max-width: 1.05em"
+            >
+              <q-icon
+                name="qr_code"
+                @click="showNWCEntry(connection.connectionString)"
+                size="1em"
+                color="grey"
+                class="q-mr-xs cursor-pointer"
+              />
+            </q-item-section>
+          </q-item>
+          <!-- <q-item v-if="false">
           <q-btn
             class="q-ml-sm q-px-md"
             color="primary"
@@ -263,7 +327,8 @@
             @click="initNdk"
             >Link to extension</q-btn
           >
-        </q-item>
+        </q-item> -->
+        </div>
       </q-list>
     </div>
     <div class="q-py-sm q-px-xs text-left" on-left>
@@ -592,18 +657,12 @@ import { useSettingsStore } from "src/stores/settings";
 import { useNostrStore } from "src/stores/nostr";
 import { useP2PKStore } from "src/stores/p2pk";
 import { useNWCStore } from "src/stores/nwc";
+import { useWorkersStore } from "src/stores/workers";
 
 export default defineComponent({
   name: "SettingsView",
   mixins: [windowMixin],
-  props: {
-    tickerShort: String,
-    requestMint: Function,
-    melt: Function,
-    invoiceCheckWorker: Function,
-    payInvoiceData: Object,
-    showMintDialog: Boolean,
-  },
+  props: {},
   data: function () {
     return {
       themes: [
@@ -651,6 +710,8 @@ export default defineComponent({
       "checkSentTokens",
     ]),
     ...mapState(useP2PKStore, ["p2pkKeys"]),
+    ...mapWritableState(useP2PKStore, ["showP2PKDialog"]),
+    ...mapWritableState(useNWCStore, ["showNWCDialog", "showNWCData"]),
     ...mapState(useMintsStore, ["activeMintUrl", "mints", "activeProofs"]),
     ...mapState(useNostrStore, ["pubkey", "mintRecommendations"]),
     ...mapState(useWalletStore, ["mnemonic"]),
@@ -659,6 +720,7 @@ export default defineComponent({
       "showAddMintDialog",
       "showRemoveMintDialog",
     ]),
+    ...mapWritableState(useNWCStore, ["nwcEnabled", "connections"]),
     hiddenMnemonic() {
       if (this.hideMnemonic) {
         return this.mnemonic
@@ -668,6 +730,14 @@ export default defineComponent({
       } else {
         return this.mnemonic;
       }
+    },
+    enableNwc: {
+      get() {
+        return this.nwcEnabled;
+      },
+      set(value) {
+        this.nwcEnabled = value;
+      },
     },
   },
   watch: {
@@ -679,6 +749,13 @@ export default defineComponent({
     //     this.mintToAdd = this.mintToAddWalletPage;
     //   }
     // },
+    enableNwc: function () {
+      if (this.enableNwc) {
+        this.listenToNWCCommands();
+      } else {
+        this.unsubscribeNWC();
+      }
+    },
   },
   methods: {
     ...mapActions(useNostrStore, [
@@ -688,7 +765,11 @@ export default defineComponent({
       "fetchEventsFromUser",
       "fetchMints",
     ]),
-    ...mapActions(useNWCStore, ["generateNWCConnection"]),
+    ...mapActions(useNWCStore, [
+      "generateNWCConnection",
+      "listenToNWCCommands",
+      "unsubscribeNWC",
+    ]),
     ...mapActions(useP2PKStore, ["generateKeypair", "showKeyDetails"]),
     ...mapActions(useMintsStore, [
       "addMint",
@@ -700,7 +781,10 @@ export default defineComponent({
       "newMnemonic",
       "decodeRequest",
       "checkProofsSpendable",
+      "melt",
+      "requestMint",
     ]),
+    ...mapActions(useWorkersStore, ["invoiceCheckWorker"]),
     editMint: function (mint) {
       // copy object to avoid changing the original
       this.mintToEdit = Object.assign({}, mint);
@@ -849,6 +933,10 @@ export default defineComponent({
     showP2PKKeyEntry: async function (pubKey) {
       this.showKeyDetails(pubKey);
       this.showP2PKDialog = true;
+    },
+    showNWCEntry: async function (connectionString) {
+      this.showNWCData.connectionString = connectionString;
+      this.showNWCDialog = true;
     },
   },
   created: function () {},

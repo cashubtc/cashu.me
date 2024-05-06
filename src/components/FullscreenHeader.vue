@@ -9,7 +9,6 @@
         to="/"
         color="primary"
         aria-label="Menu"
-        @click="toggleLeftDrawer"
         no-caps
         ><span class="q-ml-md text-weight-bold">Wallet</span>
       </q-btn>
