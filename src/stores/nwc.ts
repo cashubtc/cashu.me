@@ -233,8 +233,6 @@ export const useNWCStore = defineStore("nwc", {
       // we only support one connection for now
       const conn = this.connections[0]
 
-      console.log("### REMOVE THIS: connection string: ", conn.connectionString)
-
       const currentUnitTime = Math.floor(Date.now() / 1000)
       let filter = {
         kinds: [NWCKind.NWCRequest as NDKKind],

@@ -530,7 +530,7 @@ export const useWalletStore = defineStore("wallet", {
         if (data.isPaid != true) {
           throw new Error("Invoice not paid.");
         }
-        let amount_paid = amount - proofsStore.sumProofs(data.change);
+        let amount_paid = amount - proofsStore.sumProofs(data.change)
         if (!!window.navigator.vibrate) navigator.vibrate(200);
 
         notifySuccess("Paid " + uIStore.formatCurrency(amount_paid, mintStore.activeUnit) + " via Lightning");
@@ -544,7 +544,6 @@ export const useWalletStore = defineStore("wallet", {
           console.log(
             "## Received change: " + proofsStore.sumProofs(changeProofs)
           );
-          amount_paid = amount_paid - proofsStore.sumProofs(changeProofs);
           mintStore.addProofs(changeProofs);
           this.increaseKeysetCounter(keysetId, changeProofs.length)
         }
