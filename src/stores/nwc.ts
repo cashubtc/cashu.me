@@ -86,12 +86,16 @@ export const useNWCStore = defineStore("nwc", {
       // pay invoice
       const walletStore = useWalletStore()
       const proofsStore = useProofsStore();
+      const mintStore = useMintsStore()
       await walletStore.decodeRequest(invoice)
       // expect that the melt quote was requested
       if (walletStore.payInvoiceData.meltQuote.response.amount == 0 || walletStore.payInvoiceData.meltQuote.error) {
         throw new Error("Melt quote not requested")
       }
       const maximumAmount = walletStore.payInvoiceData.meltQuote.response.amount + walletStore.payInvoiceData.meltQuote.response.fee_reserve
+      if (mintStore.activeUnit != "sat") {
+        throw new Error("Can use NWC only with sats")
+      }
       if (maximumAmount > this.connections[0].allowanceLeft) {
         throw new Error("Insufficient allowance")
       }
