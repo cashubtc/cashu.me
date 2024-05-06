@@ -315,6 +315,7 @@
               > -->
               <!-- input for allowanceleft -->
               <q-input
+                type="number"
                 outlined
                 rounded
                 dense
