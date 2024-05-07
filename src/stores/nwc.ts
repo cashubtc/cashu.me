@@ -28,6 +28,15 @@ type NWCResult = {
   result_type: string,
   result: any
 }
+
+type NWCError = {
+  result_type: string,
+  error: {
+    code: string,
+    message: string
+  }
+}
+
 enum NWCKind {
   NWCInfo = 13194,
   NWCRequest = 23194,
@@ -87,27 +96,51 @@ export const useNWCStore = defineStore("nwc", {
       const walletStore = useWalletStore()
       const proofsStore = useProofsStore();
       const mintStore = useMintsStore()
-      await walletStore.decodeRequest(invoice)
+      try {
+        await walletStore.decodeRequest(invoice)
+      } catch (e) {
+        return {
+          result_type: nwcCommand.method,
+          error: { code: "INTERNAL", message: "Invalid invoice" }
+        } as NWCError
+      }
       // expect that the melt quote was requested
       if (walletStore.payInvoiceData.meltQuote.response.amount == 0 || walletStore.payInvoiceData.meltQuote.error) {
-        throw new Error("Melt quote not requested")
+        return {
+          result_type: nwcCommand.method,
+          error: { code: "INTERNAL", message: "Error requesting melt quote" }
+        } as NWCError
       }
       const maximumAmount = walletStore.payInvoiceData.meltQuote.response.amount + walletStore.payInvoiceData.meltQuote.response.fee_reserve
       if (mintStore.activeUnit != "sat") {
-        throw new Error("Can use NWC only with sats")
+        return {
+          result_type: nwcCommand.method,
+          error: { code: "INTERNAL", message: "Your active unit can only be Satoshis" }
+        } as NWCError
       }
       if (maximumAmount > this.connections[0].allowanceLeft) {
-        throw new Error("Insufficient allowance")
+        return {
+          result_type: nwcCommand.method,
+          error: { code: "QUOTA_EXCEEDED", message: "Your quota is exceeded" }
+        } as NWCError
       }
-      const meltData = await walletStore.melt()
-      const paidAmount = walletStore.payInvoiceData.meltQuote.response.amount + proofsStore.sumProofs(meltData.change);
-      this.connections[0].allowanceLeft -= paidAmount;
-      return {
-        result_type: "pay_invoice",
-        result: {
-          preimage: meltData.preimage,
+      try {
+        const meltData = await walletStore.melt()
+        const paidAmount = walletStore.payInvoiceData.meltQuote.response.amount + proofsStore.sumProofs(meltData.change);
+        this.connections[0].allowanceLeft -= paidAmount;
+        return {
+          result_type: nwcCommand.method,
+          result: {
+            preimage: meltData.preimage,
+          }
         }
+      } catch (e) {
+        return {
+          result_type: nwcCommand.method,
+          error: { code: "INTERNAL", message: "Could not pay invoice" }
+        } as NWCError
       }
+
     },
     handleListTransactions: async function (nwcCommand: NWCCommand) {
       console.log("### list_transactions", nwcCommand.method)
@@ -151,7 +184,7 @@ export const useNWCStore = defineStore("nwc", {
       }
     },
     // ––––---------- NWC Connection ––––----------
-    replyNWC: async function (result: NWCResult, event: NDKEvent, conn: NWCConnection) {
+    replyNWC: async function (result: NWCResult | NWCError, event: NDKEvent, conn: NWCConnection) {
       // reply to NWC with result
       let replyEvent = new NDKEvent(event.ndk);
       replyEvent.kind = 23195;
@@ -166,7 +199,7 @@ export const useNWCStore = defineStore("nwc", {
     parseNWCCommand: async function (command: string, event: NDKEvent, conn: NWCConnection) {
       // parse command to JSON object {method: 'pay_invoice', params: {invoice: '1234'}}
       let nwcCommand: NWCCommand = JSON.parse(command)
-      let result: NWCResult
+      let result: NWCResult | NWCError
       console.log("### nwcCommand", nwcCommand)
       // parse "get_info" without params
       if (nwcCommand.method == "get_info") {
@@ -179,7 +212,10 @@ export const useNWCStore = defineStore("nwc", {
         result = await this.handleListTransactions(nwcCommand)
       } else {
         console.log("### method not supported", nwcCommand.method)
-        return // do nothing
+        result = {
+          result_type: nwcCommand.method,
+          error: { code: "NOT_IMPLEMENTED", message: "Method not supported" }
+        } as NWCError;
       }
       await this.replyNWC(result, event, conn)
     },

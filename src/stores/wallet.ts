@@ -495,14 +495,22 @@ export const useWalletStore = defineStore("wallet", {
       const mintStore = useMintsStore();
       const tokenStore = useTokensStore();
 
+      // throw an error if this.payInvoiceData.blocking is true
+      if (this.payInvoiceData.blocking) {
+        throw new Error("already processing an invoice.");
+      }
       this.payInvoiceData.blocking = true;
       console.log("#### pay lightning");
       if (this.payInvoiceData.invoice == null) {
         throw new Error("no invoice provided.");
       }
       const invoice = this.payInvoiceData.invoice.bolt11;
+      // throw an error if the invoice is already in invoiceHistory
+      if (this.invoiceHistory.find((i) => i.bolt11 === invoice)) {
+        throw new Error("invoice already paid.");
+      }
+
       const amount_invoice = this.payInvoiceData.invoice.sat;
-      // const quote = await this.meltQuote(this.payInvoiceData.input.request);
       const quote = this.payInvoiceData.meltQuote.response;
       if (quote == null) {
         throw new Error("no quote found.");
