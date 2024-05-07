@@ -307,6 +307,7 @@ export const useWalletStore = defineStore("wallet", {
           const keysetId = this.getKeyset()
           const counter = this.keysetCounter(keysetId);
           const { returnChange: _keepProofs, send: _sendProofs } = await this.wallet.send(amount, proofsToSplit, { counter })
+          mintStore.removeProofs(proofsToSplit);
           keepProofs = _keepProofs;
           sendProofs = _sendProofs;
 
@@ -324,8 +325,6 @@ export const useWalletStore = defineStore("wallet", {
         if (invlalidate) {
           mintStore.removeProofs(sendProofs);
         }
-
-        mintStore.removeProofs(proofsToSplit);
 
         return { keepProofs, sendProofs };
       } catch (error: any) {
@@ -573,10 +572,11 @@ export const useWalletStore = defineStore("wallet", {
         this.payInvoiceData.invoice = { sat: 0, memo: "", bolt11: "" };
         this.payInvoiceData.show = false;
         this.payInvoiceData.blocking = false;
-      } catch (error) {
+      } catch (error: any) {
         this.payInvoiceData.blocking = false;
         proofsStore.setReserved(sendProofs, false);
         console.error(error);
+        notifyApiError(error);
         throw error;
       }
     },
