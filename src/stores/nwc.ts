@@ -37,10 +37,10 @@ type NWCError = {
   }
 }
 
-enum NWCKind {
-  NWCInfo = 13194,
-  NWCRequest = 23194,
-  NWCResponse = 23195
+const NWCKind = {
+  NWCInfo: 13194,
+  NWCRequest: 23194,
+  NWCResponse: 23195
 }
 
 export const useNWCStore = defineStore("nwc", {
@@ -48,7 +48,8 @@ export const useNWCStore = defineStore("nwc", {
     nwcEnabled: useLocalStorage<boolean>("cashu.nwc.enabled", false),
     connections: useLocalStorage<NWCConnection[]>("cashu.nwc.connections", []),
     supportedMethods: ["pay_invoice", "get_balance", "get_info", "list_transactions"],
-    relays: ["wss://relay.primal.net"],
+    relays: ["wss://relay.primal.net", "wss://nos.lol", "wss://relay.damus.io", "wss://relay.snort.social", "wss://nostr.mutinywallet.com", "wss://nos.lol"],
+    blocking: false,
     ndk: new NDK(),
     subscriptions: [] as NDKSubscription[],
     showNWCDialog: false,
@@ -99,6 +100,7 @@ export const useNWCStore = defineStore("nwc", {
       try {
         await walletStore.decodeRequest(invoice)
       } catch (e) {
+        console.log("### error decoding invoice", e)
         return {
           result_type: nwcCommand.method,
           error: { code: "INTERNAL", message: "Invalid invoice" }
@@ -207,7 +209,20 @@ export const useNWCStore = defineStore("nwc", {
       } else if (nwcCommand.method == "get_balance") {
         result = await this.handleGetBalance(nwcCommand)
       } else if (nwcCommand.method == "pay_invoice") {
-        result = await this.handlePayInvoice(nwcCommand)
+        if (this.blocking) {
+          result = {
+            result_type: nwcCommand.method,
+            error: { code: "INTERNAL", message: "Already processing a payment." }
+          } as NWCError
+        }
+        this.blocking = true
+        try {
+          result = await this.handlePayInvoice(nwcCommand)
+        } catch (e) {
+          return
+        } finally {
+          this.blocking = false
+        }
       } else if (nwcCommand.method == "list_transactions") {
         result = await this.handleListTransactions(nwcCommand)
       } else {
@@ -246,6 +261,8 @@ export const useNWCStore = defineStore("nwc", {
       }
 
       const walletSigner = new NDKPrivateKeySigner(conn.walletPrivateKey)
+      // close and delete all old subscriptions
+      this.unsubscribeNWC()
       this.ndk = new NDK({ explicitRelayUrls: this.relays, signer: walletSigner });
       this.ndk.connect();
 
@@ -254,8 +271,16 @@ export const useNWCStore = defineStore("nwc", {
       nip47InfoEvent.kind = NWCKind.NWCInfo;
       nip47InfoEvent.content = this.supportedMethods.join(' ')
       try {
-        await nip47InfoEvent.publish()
-        console.log("### published nip47InfoEvent", nip47InfoEvent)
+        // let's fetch the info event from the relay to see if we need to republish it
+        // use NWCKind.NWCInfo as an integer here
+        let filterInfoEvent: NDKFilter = { kinds: [NWCKind.NWCInfo], authors: [conn.walletPublicKey] };
+        let eventsInfoEvent = await this.ndk.fetchEvents(filterInfoEvent);
+        if (!eventsInfoEvent) {
+          await nip47InfoEvent.publish()
+          console.log("### published nip47InfoEvent", nip47InfoEvent)
+        } else {
+          console.log("### nip47InfoEvent already published")
+        }
       } catch (e) {
         console.log("### could not publish nip47InfoEvent", nip47InfoEvent)
         console.log("### error", e)
@@ -291,25 +316,26 @@ export const useNWCStore = defineStore("nwc", {
         // console.log("### event.tagValue('p')", event.tagValue("p"))
         // console.log("### event.tagValue('e')", event.tagValue("e"))
         // console.log("### event.content", event.content)
-        if (event.kind == 23194) {
-          if (!this.nwcEnabled) {
-            console.log("### Received NWC command but NWC is disabled")
-            return
-          }
-          console.log("### NWC request!")
-          const decryptedContent = await nip04.decrypt(conn.connectionSecret, conn.walletPublicKey, event.content)
-          // console.log("### decryptedContent", decryptedContent)
-          await this.parseNWCCommand(decryptedContent, event, conn)
+        if (event.kind != NWCKind.NWCRequest) {
+          return // ignore non-NWC events
         }
-
+        if (!this.nwcEnabled) {
+          console.log("### Received NWC command but NWC is disabled")
+          return
+        }
+        console.log("### NWC request!")
+        console.log("### event", event)
+        const decryptedContent = await nip04.decrypt(conn.connectionSecret, conn.walletPublicKey, event.content)
+        // console.log("### decryptedContent", decryptedContent)
+        await this.parseNWCCommand(decryptedContent, event, conn)
       });
     },
-    unsubscribeNWC: async function () {
+    unsubscribeNWC: function () {
       console.log("### unsubscribing from NWC")
       for (let sub of this.subscriptions) {
-        sub.closeOnEose = true
-        console.log("### closing subscription")
+        sub.stop()
       }
+      this.subscriptions = []
     }
   },
 });

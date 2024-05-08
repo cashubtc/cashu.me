@@ -329,9 +329,7 @@ export const useWalletStore = defineStore("wallet", {
         return { keepProofs, sendProofs };
       } catch (error: any) {
         console.error(error);
-        try {
-          notifyApiError(error);
-        } catch { }
+        notifyApiError(error);
         throw error;
       }
     },
@@ -402,9 +400,7 @@ export const useWalletStore = defineStore("wallet", {
         notifySuccess("Received " + uIStore.formatCurrency(amount, mintStore.activeUnit));
       } catch (error: any) {
         console.error(error);
-        try {
-          notifyApiError(error);
-        } catch { }
+        notifyApiError(error);
         throw error;
       }
       // }
@@ -481,11 +477,38 @@ export const useWalletStore = defineStore("wallet", {
         return proofs;
       } catch (error: any) {
         console.error(error);
-        if (verbose) {
-          try {
-            notifyApiError(error);
-          } catch { }
+        notifyApiError(error);
+        throw error;
+      }
+    },
+    // get a melt quote
+    meltQuote: async function () {
+      // throw an error if this.payInvoiceData.blocking is true
+      if (this.payInvoiceData.blocking) {
+        throw new Error("already processing an melt quote.");
+      }
+      this.payInvoiceData.blocking = true;
+      try {
+        const mintStore = useMintsStore();
+        if (this.payInvoiceData.input.request == "") {
+          throw new Error("no invoice provided.");
         }
+        const payload: MeltQuotePayload = {
+          unit: mintStore.activeUnit,
+          request: this.payInvoiceData.input.request,
+        };
+        this.payInvoiceData.meltQuote.payload = payload;
+        const data = await mintStore.activeMint().api.meltQuote(payload);
+        mintStore.assertMintError(data);
+        this.payInvoiceData.meltQuote.response = data;
+        console.log("#### meltQuote", payload, " response:", data);
+        this.payInvoiceData.blocking = false;
+        return data;
+      } catch (error: any) {
+        this.payInvoiceData.blocking = false;
+        this.payInvoiceData.meltQuote.error = error;
+        console.error(error);
+        notifyApiError(error);
         throw error;
       }
     },
@@ -588,38 +611,7 @@ export const useWalletStore = defineStore("wallet", {
         throw error;
       }
     },
-
-    // get a melt quote
-    meltQuote: async function () {
-      this.payInvoiceData.blocking = true;
-      const mintStore = useMintsStore();
-      if (this.payInvoiceData.input.request == "") {
-        throw new Error("no invoice provided.");
-      }
-      const payload: MeltQuotePayload = {
-        unit: mintStore.activeUnit,
-        request: this.payInvoiceData.input.request,
-      };
-      this.payInvoiceData.meltQuote.payload = payload;
-      try {
-        const data = await mintStore.activeMint().api.meltQuote(payload);
-        mintStore.assertMintError(data);
-        this.payInvoiceData.meltQuote.response = data;
-        console.log("#### meltQuote", payload, " response:", data);
-        this.payInvoiceData.blocking = false;
-        return data;
-      } catch (error: any) {
-        this.payInvoiceData.blocking = false;
-        this.payInvoiceData.meltQuote.error = error;
-        console.error(error);
-        try {
-          notifyApiError(error);
-        } catch { }
-        throw error;
-      }
-    },
     // /check
-
     checkProofsSpendable: async function (proofs: Proof[], update_history = false) {
       /*
       checks with the mint whether an array of proofs is still
@@ -661,9 +653,7 @@ export const useWalletStore = defineStore("wallet", {
         return spentProofs;
       } catch (error: any) {
         console.error(error);
-        try {
-          notifyApiError(error);
-        } catch { }
+        notifyApiError(error);
         throw error;
       }
     },
