@@ -482,13 +482,13 @@
                       outline
                       click
                       @click="checkActiveProofsSpendable"
-                      >Check proofs spendable</q-btn
+                      >Remove spent proofs</q-btn
                     ></row
                   ><row>
                     <q-item-label class="q-px-sm" caption
-                      >Check if all proofs of your active mints are spendable
-                      and remove the spent ones from your wallet. Only use this
-                      if your wallet is stuck.
+                      >Check if the ecash tokens from your active mints are
+                      spent and remove the spent ones from your wallet. Only use
+                      this if your wallet is stuck.
                     </q-item-label>
                   </row>
                 </q-item-section>

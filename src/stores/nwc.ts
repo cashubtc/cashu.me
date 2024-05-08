@@ -301,8 +301,8 @@ export const useNWCStore = defineStore("nwc", {
         authors: [conn.connectionPublicKey],
         "#p": [conn.walletPublicKey]
       } as NDKFilter;
-      console.log("### filter", filter)
       const sub = this.ndk.subscribe(filter);
+      console.log("### subscribing to NWC")
       this.subscriptions.push(sub)
 
       sub.on("eose", () => console.log("All relays have reached the end of the event stream"));

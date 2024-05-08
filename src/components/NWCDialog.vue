@@ -42,8 +42,8 @@
                   class="q-pb-md"
                 />
                 <br />
-                Warning: anyone who has access to your NWC connection string can
-                make payments from your wallet.</q-item-label
+                Warning: anyone with access to this connection string can
+                initiate payments from your wallet.</q-item-label
               >
             </div>
           </q-card-section>
