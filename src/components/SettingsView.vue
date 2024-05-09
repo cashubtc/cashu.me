@@ -530,6 +530,34 @@
               <q-item>
                 <q-item-section>
                   <row>
+                    <!-- add a caption, not a button here -->
+                    <q-item-label class="q-pb-sm"
+                      >Increment keyset counters</q-item-label
+                    ></row
+                  >
+                  <row>
+                    <q-item-label class="q-px-sm" caption
+                      >Click the keyset ID to increment the derivation path
+                      counters for the keysets in your wallet. This is useful if
+                      you see the "outputs have already been signed" error.
+                    </q-item-label>
+                  </row>
+                  <row class="q-pa-sm">
+                    <q-btn
+                      v-for="(counter, id) in keysetCounters"
+                      :key="id"
+                      dense
+                      flat
+                      click
+                      @click="increaseKeysetCounter(counter.id, 1)"
+                      >{{ counter.id }} - {{ counter.counter }}</q-btn
+                    >
+                  </row>
+                </q-item-section>
+              </q-item>
+              <q-item>
+                <q-item-section>
+                  <row>
                     <q-btn
                       dense
                       flat
@@ -788,6 +816,7 @@ export default defineComponent({
     ...mapState(useMintsStore, ["activeMintUrl", "mints", "activeProofs"]),
     ...mapState(useNostrStore, ["pubkey", "mintRecommendations"]),
     ...mapState(useWalletStore, ["mnemonic"]),
+    ...mapWritableState(useWalletStore, ["keysetCounters"]),
     ...mapWritableState(useMintsStore, [
       "addMintData",
       "showAddMintDialog",
@@ -856,6 +885,7 @@ export default defineComponent({
       "checkProofsSpendable",
       "melt",
       "requestMint",
+      "increaseKeysetCounter",
     ]),
     ...mapActions(useWorkersStore, ["invoiceCheckWorker"]),
     ...mapActions(useProofsStore, ["serializeProofs"]),
