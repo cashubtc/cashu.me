@@ -530,46 +530,38 @@ export default {
         }
       });
     },
-    registerLocalStorageSyncHook: function () {
-      // makes sure that local storage stays up to date
-      // in multiple tabs of the same window
-      window.addEventListener("storage", (e) => {
-        // console.log(`Key Changed: ${e.key}`)
-        // console.log(`New Value: ${e.newValue}`)
-        // if these were the proofs, reload them
-        if (e.key == "cashu.proofs") {
-          console.log("updating proofs");
-          this.setProofs(JSON.parse(e.newValue));
+    registerBroadcastChannel: function () {
+      // register broadcast channel to communicate between tabs
+      const channel = new BroadcastChannel("app_channel");
+      channel.postMessage("new_tab_opened");
+      channel.onmessage = (event) => {
+        console.log("Message from another tab:", event.data);
+        if (event.data == "new_tab_opened") {
+          // if another tab is opened, respond with "already_running"
+          channel.postMessage("already_running");
         }
-        // if these were the activeMintUrl, reload
-        if (e.key == "cashu.activeMintUrl") {
-          this.activateMintUrl(e.newValue);
+        if (event.data == "already_running") {
+          // if another tab is already running, navigate to /already-running
+          window.location.href = "/already-running";
         }
-      });
+      };
     },
-
-    ////////////// STORAGE /////////////
-    migrationLocalstorage: async function () {
-      // migration from old db to multimint
-      for (var key in localStorage) {
-        let match = key.match("cashu.(.+).proofs");
-        if (match != null) {
-          console.log("Migrating mint", match[1]);
-          let mint_id = match[1];
-          const old_proofs = JSON.parse(
-            localStorage.getItem(`cashu.${mint_id}.proofs`)
-          );
-          if (old_proofs) {
-            this.setProofs(this.proofs.concat(old_proofs));
-            // this.storeProofs();
-            let mint_url = this.baseHost + `/cashu/api/v1/${mint_id}`;
-            console.log("Adding mint", mint_url);
-            await this.addMint(mint_url);
-            localStorage.removeItem(`cashu.${mint_id}.proofs`);
-          }
-        }
-      }
-    },
+    // registerLocalStorageSyncHook: function () {
+    //   // receives events if other tabs change local storage
+    //   window.addEventListener("storage", (e) => {
+    //     // console.log(`Key Changed: ${e.key}`);
+    //     // console.log(`New Value: ${e.newValue}`);
+    //     // if these were the proofs, reload them
+    //     // if (e.key == "cashu.proofs") {
+    //     //   console.log("updating proofs");
+    //     //   this.setProofs(JSON.parse(e.newValue));
+    //     // }
+    //     // // if these were the activeMintUrl, reload
+    //     // if (e.key == "cashu.activeMintUrl") {
+    //     //   this.activateMintUrl(e.newValue);
+    //     // }
+    //   });
+    // },
   },
   watch: {},
 
@@ -591,9 +583,6 @@ export default {
 
     console.log("Mint URL " + this.activeMintUrl);
     console.log("Wallet URL " + this.baseURL);
-
-    // run migrations
-    await this.migrationLocalstorage();
 
     // get token to receive tokens from a link
     if (params.get("token")) {
@@ -627,18 +616,12 @@ export default {
     );
 
     // startup tasks
-    // await this.checkProofsSpendable(this.activeProofs, true).catch((err) => {
-    //   return;
-    // });
-    // await this.checkPendingInvoices().catch((err) => {
-    //   return;
-    // });
-    // await this.checkPendingTokens().catch((err) => {
-    //   return;
-    // });
 
-    // Local storage sync hook
-    this.registerLocalStorageSyncHook();
+    // check if another tab is open
+    this.registerBroadcastChannel();
+
+    // // Local storage sync hook
+    // this.registerLocalStorageSyncHook();
 
     // PWA install hook
     this.registerPWAEventHook();
