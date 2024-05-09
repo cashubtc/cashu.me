@@ -1,13 +1,10 @@
 import { defineStore } from "pinia";
 import NDK, { NDKEvent, NDKNip07Signer, NDKNip46Signer, NDKFilter, NDKPrivateKeySigner, NDKKind, NDKSubscription } from "@nostr-dev-kit/ndk";
-import { connected } from "process";
-import { min } from "underscore";
 import { useLocalStorage } from "@vueuse/core";
 import { bytesToHex } from '@noble/hashes/utils' // already an installed dependency
 import { nip04, generateSecretKey, getPublicKey } from 'nostr-tools'
 import { useMintsStore } from './mints'
 import { useWalletStore } from "./wallet";
-import { unsubscribe } from "diagnostics_channel";
 import { useProofsStore } from "./proofs";
 
 type NWCConnection = {
