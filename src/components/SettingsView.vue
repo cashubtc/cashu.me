@@ -504,7 +504,25 @@
                     </q-btn> </row
                   ><row>
                     <q-item-label class="q-px-sm" caption
-                      >Open a debug terminal.
+                      >Open the Javascript debug terminal. Never paste anything
+                      into this terminal that you don't understand. A thief
+                      might try to trick you into pasting malicious code here.
+                    </q-item-label>
+                  </row>
+                </q-item-section>
+              </q-item>
+              <q-item>
+                <q-item-section>
+                  <row>
+                    <q-btn dense flat outline click @click="exportActiveProofs">
+                      Export active proofs
+                    </q-btn></row
+                  ><row>
+                    <q-item-label class="q-px-sm" caption
+                      >Copy your entire balance from the active mint as a Cashu
+                      token into your clipboard. This will only export the
+                      tokens from the selected mint and unit. For a full export,
+                      select a different mint and unit and export again.
                     </q-item-label>
                   </row>
                 </q-item-section>
@@ -708,6 +726,7 @@ import { useNostrStore } from "src/stores/nostr";
 import { useP2PKStore } from "src/stores/p2pk";
 import { useNWCStore } from "src/stores/nwc";
 import { useWorkersStore } from "src/stores/workers";
+import { useProofsStore } from "src/stores/proofs";
 
 export default defineComponent({
   name: "SettingsView",
@@ -839,6 +858,7 @@ export default defineComponent({
       "requestMint",
     ]),
     ...mapActions(useWorkersStore, ["invoiceCheckWorker"]),
+    ...mapActions(useProofsStore, ["serializeProofs"]),
     editMint: function (mint) {
       // copy object to avoid changing the original
       this.mintToEdit = Object.assign({}, mint);
@@ -991,6 +1011,11 @@ export default defineComponent({
     showNWCEntry: async function (connectionString) {
       this.showNWCData.connectionString = connectionString;
       this.showNWCDialog = true;
+    },
+    exportActiveProofs: async function () {
+      // export active proofs
+      const token = await this.serializeProofs(this.activeProofs);
+      this.copyText(token);
     },
   },
   created: function () {},
