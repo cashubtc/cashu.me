@@ -530,18 +530,26 @@ export default {
         }
       });
     },
-    registerBroadcastChannel: function () {
-      // register broadcast channel to communicate between tabs
+    registerBroadcastChannel: async function () {
+      // uses session storage to identify the tab so we can ignore incoming messages from the same tab
+      if (!sessionStorage.getItem("tabId")) {
+        sessionStorage.setItem(
+          "tabId",
+          Math.random().toString(36).substring(2) +
+            new Date().getTime().toString(36)
+        );
+      }
+      const tabId = sessionStorage.getItem("tabId");
       const channel = new BroadcastChannel("app_channel");
-      channel.postMessage("new_tab_opened");
-      channel.onmessage = (event) => {
-        console.log("Message from another tab:", event.data);
-        if (event.data == "new_tab_opened") {
-          // if another tab is opened, respond with "already_running"
-          channel.postMessage("already_running");
+      channel.postMessage({ type: "new_tab_opened", senderId: tabId });
+      channel.onmessage = async (event) => {
+        // console.log("Received message in tab " + tabId, event.data);
+        if (event.data.senderId === tabId) {
+          return; // Ignore the message if it comes from the same tab
         }
-        if (event.data == "already_running") {
-          // if another tab is already running, navigate to /already-running
+        if (event.data.type == "new_tab_opened") {
+          channel.postMessage({ type: "already_running", senderId: tabId });
+        } else if (event.data.type == "already_running") {
           window.location.href = "/already-running";
         }
       };
