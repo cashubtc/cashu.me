@@ -53,7 +53,10 @@
           <q-item-section>
             <q-item-label overline>Generate P2PK Keys</q-item-label>
             <q-item-label caption
-              >Generate a key pair to receive P2PK-locked ecash.</q-item-label
+              >Generate a key pair to receive P2PK-locked ecash. Warning: This
+              feature is experimental. Only use with small amounts. If you lose
+              your private keys, nobody will be able to unlock the ecash locked
+              ot it anymore.</q-item-label
             >
           </q-item-section>
         </q-item>
