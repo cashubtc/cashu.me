@@ -477,7 +477,9 @@ export const useWalletStore = defineStore("wallet", {
         return proofs;
       } catch (error: any) {
         console.error(error);
-        notifyApiError(error);
+        if (verbose) {
+          notifyApiError(error);
+        }
         throw error;
       }
     },
