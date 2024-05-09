@@ -11,6 +11,13 @@ const routes = [
     component: () => import("layouts/FullscreenLayout.vue"),
     children: [{ path: "", component: () => import("src/pages/Settings.vue") }],
   },
+  {
+    path: "/already-running",
+    component: () => import("layouts/FullscreenLayout.vue"),
+    children: [
+      { path: "", component: () => import("src/pages/AlreadyRunning.vue") },
+    ],
+  },
   // Always leave this as last one,
   // but you can also remove it
   {
