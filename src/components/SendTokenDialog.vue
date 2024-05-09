@@ -232,6 +232,7 @@
               <TokenInformation
                 :encodedToken="sendData.tokensBase64"
                 :showAmount="false"
+                :showP2PKCheck="false"
               />
             </div>
             <div class="row q-mt-lg">

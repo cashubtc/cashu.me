@@ -17,6 +17,7 @@
       <q-chip v-if="isLocked(proofsToShow)" outline icon="lock" class="q-pa-md">
         P2PK
         <q-icon
+          v-if="showP2PKCheck || isLockedToUs(proofsToShow)"
           :name="isLockedToUs(proofsToShow) ? 'check' : 'close'"
           size="sm"
           :color="isLockedToUs(proofsToShow) ? 'green' : 'red'"
@@ -48,6 +49,7 @@ export default defineComponent({
     encodedToken: String,
     showAmount: Boolean,
     showMintCheck: Boolean,
+    showP2PKCheck: Boolean,
   },
   data: function () {
     return {};

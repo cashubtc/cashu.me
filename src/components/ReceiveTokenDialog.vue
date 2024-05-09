@@ -34,6 +34,7 @@
             :encodedToken="receiveData.tokensBase64"
             :showAmount="true"
             :showMintCheck="true"
+            :showP2PKCheck="true"
           />
         </div>
       </div>
