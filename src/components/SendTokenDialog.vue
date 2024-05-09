@@ -458,11 +458,7 @@ export default defineComponent({
       "coinSelect",
       "spendableProofs",
     ]),
-    ...mapActions(useProofsStore, [
-      "serializeProofs",
-      "getProofsMint",
-      "serializeProofsV2",
-    ]),
+    ...mapActions(useProofsStore, ["serializeProofs"]),
     ...mapActions(useTokensStore, [
       "addPendingToken",
       "setTokenPaid",
