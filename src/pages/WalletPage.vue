@@ -568,6 +568,9 @@ export default {
   mounted: function () {},
 
   created: async function () {
+    // check if another tab is open
+    this.registerBroadcastChannel();
+
     let params = new URL(document.location).searchParams;
 
     // mint url
@@ -616,9 +619,6 @@ export default {
     );
 
     // startup tasks
-
-    // check if another tab is open
-    this.registerBroadcastChannel();
 
     // // Local storage sync hook
     // this.registerLocalStorageSyncHook();
