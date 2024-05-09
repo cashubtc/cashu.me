@@ -103,7 +103,6 @@ export default defineComponent({
       }
     },
     mintKnownToUs: function (proofs) {
-      console.log(proofs);
       // unique keyset IDs of proofs
       let uniqueIds = [...new Set(proofs.map((p) => p.id))];
       // mints that have any of the keyset IDs
