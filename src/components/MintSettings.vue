@@ -474,7 +474,7 @@ import { useWalletStore } from "src/stores/wallet";
 import { map } from "underscore";
 import { currentDateStr } from "src/js/utils";
 import { useSettingsStore } from "src/stores/settings";
-import { useNdkStore } from "src/stores/ndk";
+import { useNostrStore } from "src/stores/nostr";
 import { useP2PKStore } from "src/stores/p2pk";
 export default defineComponent({
   name: "MintSettings",
@@ -524,7 +524,7 @@ export default defineComponent({
     ]),
     ...mapState(useP2PKStore, ["p2pkKeys"]),
     ...mapState(useMintsStore, ["activeMintUrl", "mints", "activeProofs"]),
-    ...mapState(useNdkStore, ["pubkey", "mintRecommendations"]),
+    ...mapState(useNostrStore, ["pubkey", "mintRecommendations"]),
     ...mapState(useWalletStore, ["mnemonic"]),
     ...mapWritableState(useMintsStore, [
       "addMintData",
@@ -553,7 +553,7 @@ export default defineComponent({
     // },
   },
   methods: {
-    ...mapActions(useNdkStore, [
+    ...mapActions(useNostrStore, [
       "init",
       "connect",
       "getUserPubkey",

@@ -159,9 +159,6 @@
 
     <!-- RECEIVE TOKENS DIALOG  -->
     <ReceiveTokenDialog v-model="showReceiveTokens" />
-
-    <!-- P2PK DIALOG -->
-    <P2PKDialog v-model="showP2PKDialog" />
   </div>
 </template>
 <style>
@@ -204,6 +201,8 @@ import SendDialog from "components/SendDialog.vue";
 import ReceiveDialog from "components/ReceiveDialog.vue";
 import QrcodeReader from "components/QrcodeReader.vue";
 import P2PKDialog from "components/P2PKDialog.vue";
+import NWCDialog from "components/NWCDialog.vue";
+
 // pinia stores
 import { mapActions, mapState, mapWritableState } from "pinia";
 import { useMintsStore } from "src/stores/mints";
@@ -216,6 +215,7 @@ import { useUiStore } from "src/stores/ui";
 import { useProofsStore } from "src/stores/proofs";
 import { useCameraStore } from "src/stores/camera";
 import { useP2PKStore } from "src/stores/p2pk";
+import { useNWCStore } from "src/stores/nwc";
 
 import ReceiveTokenDialog from "src/components/ReceiveTokenDialog.vue";
 
@@ -235,7 +235,6 @@ export default {
     QrcodeReader,
     SendDialog,
     ReceiveDialog,
-    P2PKDialog,
   },
   data: function () {
     return {
@@ -312,6 +311,7 @@ export default {
     ...mapState(useTokensStore, ["historyTokens"]),
     ...mapWritableState(useCameraStore, ["camera", "hasCamera"]),
     ...mapWritableState(useP2PKStore, ["showP2PKDialog"]),
+    ...mapWritableState(useNWCStore, ["showNWCDialog", "nwcEnabled"]),
     pendingPaymentsExist: function () {
       return this.payments.findIndex((payment) => payment.pending) !== -1;
     },
@@ -362,6 +362,7 @@ export default {
       "generateNewMnemonic",
     ]),
     ...mapActions(useCameraStore, ["closeCamera", "showCamera"]),
+    ...mapActions(useNWCStore, ["listenToNWCCommands"]),
     // TOKEN METHODS
     decodeToken: function (encoded_token) {
       try {
@@ -647,6 +648,11 @@ export default {
 
     // show welcome dialog
     this.showWelcomeDialog();
+
+    // listen to NWC commands if enabled
+    if (this.nwcEnabled) {
+      this.listenToNWCCommands();
+    }
   },
 };
 </script>

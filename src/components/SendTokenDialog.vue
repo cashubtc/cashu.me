@@ -139,6 +139,7 @@
                 :disable="sendData.p2pkPubkey == null || sendData.amount <= 0"
                 color="primary"
                 class="q-ml-sm"
+                rounded
                 flat
                 @click="showLockInput = true"
               >

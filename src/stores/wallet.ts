@@ -329,9 +329,7 @@ export const useWalletStore = defineStore("wallet", {
         return { keepProofs, sendProofs };
       } catch (error: any) {
         console.error(error);
-        try {
-          notifyApiError(error);
-        } catch { }
+        notifyApiError(error);
         throw error;
       }
     },
@@ -402,9 +400,7 @@ export const useWalletStore = defineStore("wallet", {
         notifySuccess("Received " + uIStore.formatCurrency(amount, mintStore.activeUnit));
       } catch (error: any) {
         console.error(error);
-        try {
-          notifyApiError(error);
-        } catch { }
+        notifyApiError(error);
         throw error;
       }
       // }
@@ -481,11 +477,38 @@ export const useWalletStore = defineStore("wallet", {
         return proofs;
       } catch (error: any) {
         console.error(error);
-        if (verbose) {
-          try {
-            notifyApiError(error);
-          } catch { }
+        notifyApiError(error);
+        throw error;
+      }
+    },
+    // get a melt quote
+    meltQuote: async function () {
+      // throw an error if this.payInvoiceData.blocking is true
+      if (this.payInvoiceData.blocking) {
+        throw new Error("already processing an melt quote.");
+      }
+      this.payInvoiceData.blocking = true;
+      try {
+        const mintStore = useMintsStore();
+        if (this.payInvoiceData.input.request == "") {
+          throw new Error("no invoice provided.");
         }
+        const payload: MeltQuotePayload = {
+          unit: mintStore.activeUnit,
+          request: this.payInvoiceData.input.request,
+        };
+        this.payInvoiceData.meltQuote.payload = payload;
+        const data = await mintStore.activeMint().api.meltQuote(payload);
+        mintStore.assertMintError(data);
+        this.payInvoiceData.meltQuote.response = data;
+        console.log("#### meltQuote", payload, " response:", data);
+        this.payInvoiceData.blocking = false;
+        return data;
+      } catch (error: any) {
+        this.payInvoiceData.blocking = false;
+        this.payInvoiceData.meltQuote.error = error;
+        console.error(error);
+        notifyApiError(error);
         throw error;
       }
     },
@@ -494,14 +517,22 @@ export const useWalletStore = defineStore("wallet", {
       const mintStore = useMintsStore();
       const tokenStore = useTokensStore();
 
+      // throw an error if this.payInvoiceData.blocking is true
+      if (this.payInvoiceData.blocking) {
+        throw new Error("already processing an invoice.");
+      }
       this.payInvoiceData.blocking = true;
       console.log("#### pay lightning");
       if (this.payInvoiceData.invoice == null) {
         throw new Error("no invoice provided.");
       }
       const invoice = this.payInvoiceData.invoice.bolt11;
+      // throw an error if the invoice is already in invoiceHistory
+      if (this.invoiceHistory.find((i) => i.bolt11 === invoice)) {
+        throw new Error("invoice already paid.");
+      }
+
       const amount_invoice = this.payInvoiceData.invoice.sat;
-      // const quote = await this.meltQuote(this.payInvoiceData.input.request);
       const quote = this.payInvoiceData.meltQuote.response;
       if (quote == null) {
         throw new Error("no quote found.");
@@ -529,7 +560,7 @@ export const useWalletStore = defineStore("wallet", {
         if (data.isPaid != true) {
           throw new Error("Invoice not paid.");
         }
-        let amount_paid = amount;
+        let amount_paid = amount - proofsStore.sumProofs(data.change)
         if (!!window.navigator.vibrate) navigator.vibrate(200);
 
         notifySuccess("Paid " + uIStore.formatCurrency(amount_paid, mintStore.activeUnit) + " via Lightning");
@@ -543,7 +574,6 @@ export const useWalletStore = defineStore("wallet", {
           console.log(
             "## Received change: " + proofsStore.sumProofs(changeProofs)
           );
-          amount_paid = amount_paid - proofsStore.sumProofs(changeProofs);
           mintStore.addProofs(changeProofs);
           this.increaseKeysetCounter(keysetId, changeProofs.length)
         }
@@ -572,6 +602,7 @@ export const useWalletStore = defineStore("wallet", {
         this.payInvoiceData.invoice = { sat: 0, memo: "", bolt11: "" };
         this.payInvoiceData.show = false;
         this.payInvoiceData.blocking = false;
+        return data;
       } catch (error: any) {
         this.payInvoiceData.blocking = false;
         proofsStore.setReserved(sendProofs, false);
@@ -580,38 +611,7 @@ export const useWalletStore = defineStore("wallet", {
         throw error;
       }
     },
-
-    // get a melt quote
-    meltQuote: async function () {
-      this.payInvoiceData.blocking = true;
-      const mintStore = useMintsStore();
-      if (this.payInvoiceData.input.request == "") {
-        throw new Error("no invoice provided.");
-      }
-      const payload: MeltQuotePayload = {
-        unit: mintStore.activeUnit,
-        request: this.payInvoiceData.input.request,
-      };
-      this.payInvoiceData.meltQuote.payload = payload;
-      try {
-        const data = await mintStore.activeMint().api.meltQuote(payload);
-        mintStore.assertMintError(data);
-        this.payInvoiceData.meltQuote.response = data;
-        console.log("#### meltQuote", payload, " response:", data);
-        this.payInvoiceData.blocking = false;
-        return data;
-      } catch (error: any) {
-        this.payInvoiceData.blocking = false;
-        this.payInvoiceData.meltQuote.error = error;
-        console.error(error);
-        try {
-          notifyApiError(error);
-        } catch { }
-        throw error;
-      }
-    },
     // /check
-
     checkProofsSpendable: async function (proofs: Proof[], update_history = false) {
       /*
       checks with the mint whether an array of proofs is still
@@ -653,9 +653,7 @@ export const useWalletStore = defineStore("wallet", {
         return spentProofs;
       } catch (error: any) {
         console.error(error);
-        try {
-          notifyApiError(error);
-        } catch { }
+        notifyApiError(error);
         throw error;
       }
     },
@@ -757,7 +755,7 @@ export const useWalletStore = defineStore("wallet", {
         i += 1;
       }
     },
-    handleBolt11Invoice: function () {
+    handleBolt11Invoice: async function () {
       this.payInvoiceData.show = true;
       let invoice;
       try {
@@ -806,35 +804,35 @@ export const useWalletStore = defineStore("wallet", {
 
       this.payInvoiceData.invoice = Object.freeze(cleanInvoice);
       // get quote for this request
-      this.meltQuote();
+      await this.meltQuote()
     },
     handleCashuToken: function () {
       this.payInvoiceData.show = false;
       receiveStore.showReceiveTokens = true;
     },
-    decodeRequest: function (req: string) {
+    decodeRequest: async function (req: string) {
       const p2pkStore = useP2PKStore()
       this.payInvoiceData.input.request = req
       if (req.toLowerCase().startsWith("lnbc")) {
         this.payInvoiceData.input.request = req;
-        this.handleBolt11Invoice()
+        await this.handleBolt11Invoice()
       } else if (req.toLowerCase().startsWith("lightning:")) {
         this.payInvoiceData.input.request = req.slice(10);
-        this.handleBolt11Invoice()
+        await this.handleBolt11Invoice()
       } else if (req.toLowerCase().startsWith("lnurl:")) {
         this.payInvoiceData.input.request = req.slice(6);
-        this.lnurlPayFirst(this.payInvoiceData.input.request);
+        await this.lnurlPayFirst(this.payInvoiceData.input.request);
       } else if (req.indexOf("lightning=lnurl1") !== -1) {
         this.payInvoiceData.input.request = req
           .split("lightning=")[1]
           .split("&")[0];
-        this.lnurlPayFirst(this.payInvoiceData.input.request);
+        await this.lnurlPayFirst(this.payInvoiceData.input.request);
       } else if (
         req.toLowerCase().startsWith("lnurl1") ||
         req.match(/[\w.+-~_]+@[\w.+-~_]/)
       ) {
         this.payInvoiceData.input.request = req;
-        this.lnurlPayFirst(this.payInvoiceData.input.request);
+        await this.lnurlPayFirst(this.payInvoiceData.input.request);
       } else if (req.indexOf("cashuA") !== -1) {
         // very dirty way of parsing cashu tokens from either a pasted token or a URL like https://host.com?token=eyJwcm
         receiveStore.receiveData.tokensBase64 = req.slice(req.indexOf("cashuA"));
@@ -894,7 +892,7 @@ export const useWalletStore = defineStore("wallet", {
           return;
         }
         console.log(data.pr);
-        this.decodeRequest(data.pr);
+        await this.decodeRequest(data.pr);
       }
     },
     generateNewMnemonic: function () {

@@ -53,7 +53,10 @@
           <q-item-section>
             <q-item-label overline>Generate P2PK Keys</q-item-label>
             <q-item-label caption
-              >Generate a key pair to receive P2PK-locked ecash.</q-item-label
+              >Generate a key pair to receive P2PK-locked ecash. Warning: This
+              feature is experimental. Only use with small amounts. If you lose
+              your private keys, nobody will be able to unlock the ecash locked
+              ot it anymore.</q-item-label
             >
           </q-item-section>
         </q-item>
@@ -233,15 +236,130 @@
     </div>
 
     <!-- nostr -->
-    <!-- <div class="q-py-sm q-px-xs text-left" on-left>
+    <div class="q-py-sm q-px-xs text-left" on-left>
       <q-list padding>
         <q-item>
           <q-item-section>
-            <q-item-label overline>Discover mints</q-item-label>
-            <q-item-label caption>Connect your wallet with nostr.</q-item-label>
+            <q-item-label overline>Link wallet</q-item-label>
+            <q-item-label caption
+              >Use Nostr Wallet Connect (NWC) to control your wallet from any
+              other application.</q-item-label
+            >
           </q-item-section>
         </q-item>
+        <!-- use a q-toggle to turn nwc on and off -->
         <q-item>
+          <q-toggle
+            v-model="enableNwc"
+            label="Enable Nostr Wallet Connect"
+            color="primary"
+          />
+        </q-item>
+        <!-- <q-item>
+          <q-btn
+            v-if="false"
+            class="q-ml-sm q-px-md"
+            color="primary"
+            rounded
+            outline
+            @click="listenToNWCCommands()"
+            >Link wallet</q-btn
+          >
+        </q-item> -->
+        <q-item v-if="enableNwc">
+          <q-item-section>
+            <!-- <q-item-label overline>Connections</q-item-label> -->
+            <q-item-label caption
+              >These are active connections to your wallet. Note: You can only
+              use NWC for payments from your Bitcoin balance. Payments will be
+              made from your active mint.
+            </q-item-label>
+          </q-item-section>
+        </q-item>
+        <div v-if="enableNwc">
+          <q-item
+            v-for="connection in connections"
+            :key="connection.connectionString"
+          >
+            <q-item-section
+              class="q-mx-none q-pl-none"
+              style="max-width: 1.5em"
+            >
+              <q-icon
+                name="content_copy"
+                @click="copyText(connection.connectionString)"
+                size="1.3em"
+                color="grey"
+                class="q-mr-sm cursor-pointer"
+                ><q-tooltip>Copy connection string</q-tooltip></q-icon
+              >
+            </q-item-section>
+            <q-item-section
+              class="q-mx-none q-pl-none"
+              style="max-width: 1.5em"
+            >
+              <q-icon
+                name="qr_code"
+                @click="showNWCEntry(connection.connectionString)"
+                size="1.3em"
+                color="grey"
+                class="q-mr-sm cursor-pointer"
+              >
+                <q-tooltip>Show QR code</q-tooltip>
+              </q-icon>
+            </q-item-section>
+            <q-item-section>
+              <!-- <q-item-label
+                caption
+                clickable
+                style="word-break: break-word"
+                @click="showNWCEntry(connection.connectionString)"
+                >********************</q-item-label
+              > -->
+              <!-- input for allowanceleft -->
+              <q-input
+                type="number"
+                outlined
+                rounded
+                dense
+                v-model="connection.allowanceLeft"
+                label="Allowance left (sat)"
+              >
+              </q-input>
+              <!-- <q-btn
+                flat
+                dense
+                @click="showNWCEntry(connection.connectionString)"
+                >Show qr code
+                <q-icon
+                  name="qr_code"
+                  @click="showNWCEntry(connection.connectionString)"
+                  size="1em"
+                  color="grey"
+                  class="q-ml-sm cursor-pointer"
+              /></q-btn> -->
+            </q-item-section>
+            <!-- <q-item-section side>
+              <q-badge
+                v-if="connection.allowanceLeft"
+                :label="connection.allowanceLeft"
+                color="primary"
+              />
+            </q-item-section> -->
+            <!-- <q-item-section
+              class="q-mx-none q-pl-none"
+              style="max-width: 1.05em"
+            >
+              <q-icon
+                name="qr_code"
+                @click="showNWCEntry(connection.connectionString)"
+                size="1.3em"
+                color="grey"
+                class="q-mr-xs cursor-pointer"
+              />
+            </q-item-section> -->
+          </q-item>
+          <!-- <q-item v-if="false">
           <q-btn
             class="q-ml-sm q-px-md"
             color="primary"
@@ -250,9 +368,10 @@
             @click="initNdk"
             >Link to extension</q-btn
           >
-        </q-item>
+        </q-item> -->
+        </div>
       </q-list>
-    </div> -->
+    </div>
     <div class="q-py-sm q-px-xs text-left" on-left>
       <q-list padding>
         <q-item>
@@ -366,13 +485,13 @@
                       outline
                       click
                       @click="checkActiveProofsSpendable"
-                      >Check proofs spendable</q-btn
+                      >Remove spent proofs</q-btn
                     ></row
                   ><row>
                     <q-item-label class="q-px-sm" caption
-                      >Check if all proofs of your active mints are spendable
-                      and remove the spent ones from your wallet. Only use this
-                      if your wallet is stuck.
+                      >Check if the ecash tokens from your active mints are
+                      spent and remove the spent ones from your wallet. Only use
+                      this if your wallet is stuck.
                     </q-item-label>
                   </row>
                 </q-item-section>
@@ -566,9 +685,18 @@
       </q-card>
     </q-dialog>
   </div>
+
+  <!-- P2PK DIALOG -->
+  <P2PKDialog v-model="showP2PKDialog" />
+
+  <!-- NWC DIALOG -->
+  <NWCDialog v-model="showNWCDialog" />
 </template>
 <script>
 import { defineComponent } from "vue";
+import P2PKDialog from "./P2PKDialog.vue";
+import NWCDialog from "./NWCDialog.vue";
+
 import { getShortUrl } from "src/js/wallet-helpers";
 import { mapActions, mapState, mapWritableState } from "pinia";
 import { useMintsStore, MintClass } from "src/stores/mints";
@@ -576,19 +704,19 @@ import { useWalletStore } from "src/stores/wallet";
 import { map } from "underscore";
 import { currentDateStr } from "src/js/utils";
 import { useSettingsStore } from "src/stores/settings";
-import { useNdkStore } from "src/stores/ndk";
+import { useNostrStore } from "src/stores/nostr";
 import { useP2PKStore } from "src/stores/p2pk";
+import { useNWCStore } from "src/stores/nwc";
+import { useWorkersStore } from "src/stores/workers";
+
 export default defineComponent({
   name: "SettingsView",
   mixins: [windowMixin],
-  props: {
-    tickerShort: String,
-    requestMint: Function,
-    melt: Function,
-    invoiceCheckWorker: Function,
-    payInvoiceData: Object,
-    showMintDialog: Boolean,
+  components: {
+    P2PKDialog,
+    NWCDialog,
   },
+  props: {},
   data: function () {
     return {
       themes: [
@@ -636,14 +764,17 @@ export default defineComponent({
       "checkSentTokens",
     ]),
     ...mapState(useP2PKStore, ["p2pkKeys"]),
+    ...mapWritableState(useP2PKStore, ["showP2PKDialog"]),
+    ...mapWritableState(useNWCStore, ["showNWCDialog", "showNWCData"]),
     ...mapState(useMintsStore, ["activeMintUrl", "mints", "activeProofs"]),
-    ...mapState(useNdkStore, ["pubkey", "mintRecommendations"]),
+    ...mapState(useNostrStore, ["pubkey", "mintRecommendations"]),
     ...mapState(useWalletStore, ["mnemonic"]),
     ...mapWritableState(useMintsStore, [
       "addMintData",
       "showAddMintDialog",
       "showRemoveMintDialog",
     ]),
+    ...mapWritableState(useNWCStore, ["nwcEnabled", "connections"]),
     hiddenMnemonic() {
       if (this.hideMnemonic) {
         return this.mnemonic
@@ -653,6 +784,14 @@ export default defineComponent({
       } else {
         return this.mnemonic;
       }
+    },
+    enableNwc: {
+      get() {
+        return this.nwcEnabled;
+      },
+      set(value) {
+        this.nwcEnabled = value;
+      },
     },
   },
   watch: {
@@ -664,14 +803,26 @@ export default defineComponent({
     //     this.mintToAdd = this.mintToAddWalletPage;
     //   }
     // },
+    enableNwc: function () {
+      if (this.enableNwc) {
+        this.listenToNWCCommands();
+      } else {
+        this.unsubscribeNWC();
+      }
+    },
   },
   methods: {
-    ...mapActions(useNdkStore, [
+    ...mapActions(useNostrStore, [
       "init",
       "connect",
       "getUserPubkey",
       "fetchEventsFromUser",
       "fetchMints",
+    ]),
+    ...mapActions(useNWCStore, [
+      "generateNWCConnection",
+      "listenToNWCCommands",
+      "unsubscribeNWC",
     ]),
     ...mapActions(useP2PKStore, ["generateKeypair", "showKeyDetails"]),
     ...mapActions(useMintsStore, [
@@ -684,7 +835,10 @@ export default defineComponent({
       "newMnemonic",
       "decodeRequest",
       "checkProofsSpendable",
+      "melt",
+      "requestMint",
     ]),
+    ...mapActions(useWorkersStore, ["invoiceCheckWorker"]),
     editMint: function (mint) {
       // copy object to avoid changing the original
       this.mintToEdit = Object.assign({}, mint);
@@ -833,6 +987,10 @@ export default defineComponent({
     showP2PKKeyEntry: async function (pubKey) {
       this.showKeyDetails(pubKey);
       this.showP2PKDialog = true;
+    },
+    showNWCEntry: async function (connectionString) {
+      this.showNWCData.connectionString = connectionString;
+      this.showNWCDialog = true;
     },
   },
   created: function () {},

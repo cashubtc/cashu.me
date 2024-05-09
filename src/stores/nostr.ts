@@ -1,7 +1,5 @@
 import { defineStore } from "pinia";
 import NDK, { NDKEvent, NDKNip07Signer, NDKNip46Signer, NDKFilter, NDKPrivateKeySigner } from "@nostr-dev-kit/ndk";
-import { connected } from "process";
-import { min } from "underscore";
 import { useLocalStorage } from "@vueuse/core";
 
 type MintRecommendation = {
@@ -9,7 +7,7 @@ type MintRecommendation = {
   count: number;
 };
 
-export const useNdkStore = defineStore("ndk", {
+export const useNostrStore = defineStore("nostr", {
   state: () => ({
     connected: false,
     pubkey: "",
