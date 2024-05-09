@@ -3,6 +3,9 @@ import { useLocalStorage } from "@vueuse/core";
 import { useWorkersStore } from "./workers";
 import { notifyApiError, notifyError, notifySuccess } from "src/js/notify";
 import { CashuMint, MintKeys, MintAllKeysets, Proof, SerializedBlindedSignature, MintKeyset } from "@cashu/cashu-ts";
+import { useDexieStore } from "src/stores/dexie"
+
+const dexieStore = useDexieStore();
 
 export type Mint = {
   url: string;
@@ -148,6 +151,12 @@ export const useMintsStore = defineStore("mints", {
     addProofs(proofs: Proof[]) {
       const walletProofs = this.proofsToWalletProofs(proofs);
       this.proofs = this.proofs.concat(walletProofs);
+
+      const proofsTable = dexieStore.db.proofs;
+      walletProofs.forEach((p) => {
+        proofsTable.put(p);
+      }
+      );
     },
     removeProofs(proofs: Proof[]) {
       const walletProofs = this.proofsToWalletProofs(proofs);
@@ -158,16 +167,14 @@ export const useMintsStore = defineStore("mints", {
         });
       });
       this.spentProofs = this.spentProofs.concat(walletProofs);
-    },
-    appendBlindSignatures(signature: SerializedBlindedSignature, amount: number, secret: Uint8Array, r: Uint8Array) {
-      const audit: BlindSignatureAudit = {
-        signature: signature,
-        amount: amount,
-        secret: secret,
-        id: signature.id,
-        r: Buffer.from(r).toString("hex"),
-      };
-      this.blindSignatures.push(audit);
+
+      // dexie
+      const proofsTable = dexieStore.db.proofs;
+      const spentProofsTable = dexieStore.db.spentProofs;
+      walletProofs.forEach((p) => {
+        proofsTable.delete(p.secret);
+        spentProofsTable.put(p);
+      });
     },
     toggleActiveUnitForMint(mint: Mint) {
       // method to set the active unit to one that is supported by `mint`
