@@ -531,7 +531,7 @@ export default {
       });
     },
     registerBroadcastChannel: async function () {
-      // Check if the tabId is already set in sessionStorage, if not generate and store it
+      // uses session storage to identify the tab so we can ignore incoming messages from the same tab
       if (!sessionStorage.getItem("tabId")) {
         sessionStorage.setItem(
           "tabId",
@@ -543,7 +543,7 @@ export default {
       const channel = new BroadcastChannel("app_channel");
       channel.postMessage({ type: "new_tab_opened", senderId: tabId });
       channel.onmessage = async (event) => {
-        console.log("Received message in tab " + tabId, event.data);
+        // console.log("Received message in tab " + tabId, event.data);
         if (event.data.senderId === tabId) {
           return; // Ignore the message if it comes from the same tab
         }
