@@ -31,15 +31,15 @@
         </p>
         <p>
           <strong>Back up your seed phrase.</strong> This wallet stores ecash
-          tokens in its database. If you delete your your browser data without
+          tokens in its database. If you delete your browser data without
           backing up, you will lose your tokens. Make sure to back up your
           wallet seed phrase in the settings.
         </p>
         <p>
           <strong>This software is in BETA!</strong> We hold no responsibility
           for people losing access to funds. Use at your own risk! This wallet
-          is not affiliated with any mint. This wallet is open-source and the
-          source code under the MIT license.
+          is not affiliated with any mint. This code is open-source and licensed
+          under the MIT license.
         </p>
         <!-- wallet backup restore -->
         <input
