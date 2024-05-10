@@ -1,6 +1,8 @@
 name: Docker Build
 
 on:
+  pull_request:
+    types: [opened, synchronize]
   release:
     types: [released]
 
