@@ -1,8 +1,6 @@
 name: Docker Build
 
 on:
-  pull_request:
-    types: [opened, synchronize]
   release:
     types: [released]
 
@@ -45,7 +43,7 @@ jobs:
         with:
           context: .
           push: ${{ github.event_name == 'release' && github.event.action == 'released' }}
-          tags: ${{ secrets.DOCKER_USERNAME }}/${{ github.event.repository.name }}
+          tags: ${{ secrets.DOCKER_USERNAME }}/${{ github.event.repository.name }}:${{ steps.get_tag.outputs.tag }}
           platforms: linux/amd64
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache
