@@ -6,6 +6,7 @@ WORKDIR /app
 COPY package*.json ./
 
 # Install application dependencies
+RUN apt install -y libpng-dev
 RUN npm install -g @quasar/cli
 RUN npm install
 
