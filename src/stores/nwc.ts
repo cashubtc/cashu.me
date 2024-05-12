@@ -6,6 +6,7 @@ import { nip04, generateSecretKey, getPublicKey } from 'nostr-tools'
 import { useMintsStore } from './mints'
 import { useWalletStore } from "./wallet";
 import { useProofsStore } from "./proofs";
+import { notify, notifyError, notifyWarning } from "src/js/notify";
 
 type NWCConnection = {
   walletPublicKey: string,
@@ -105,6 +106,7 @@ export const useNWCStore = defineStore("nwc", {
       }
       // expect that the melt quote was requested
       if (walletStore.payInvoiceData.meltQuote.response.amount == 0 || walletStore.payInvoiceData.meltQuote.error) {
+        notifyWarning("NWC: Error requesting melt quote")
         return {
           result_type: nwcCommand.method,
           error: { code: "INTERNAL", message: "Error requesting melt quote" }
@@ -112,15 +114,17 @@ export const useNWCStore = defineStore("nwc", {
       }
       const maximumAmount = walletStore.payInvoiceData.meltQuote.response.amount + walletStore.payInvoiceData.meltQuote.response.fee_reserve
       if (mintStore.activeUnit != "sat") {
+        notifyWarning("NWC: Active unit must be sats")
         return {
           result_type: nwcCommand.method,
-          error: { code: "INTERNAL", message: "Your active unit can only be Satoshis" }
+          error: { code: "INTERNAL", message: "Your active must be sats" }
         } as NWCError
       }
       if (maximumAmount > this.connections[0].allowanceLeft) {
+        notifyWarning("NWC: Allowance exceeded")
         return {
           result_type: nwcCommand.method,
-          error: { code: "QUOTA_EXCEEDED", message: "Your quota is exceeded" }
+          error: { code: "QUOTA_EXCEEDED", message: "Your quota has exceeded" }
         } as NWCError
       }
       try {
