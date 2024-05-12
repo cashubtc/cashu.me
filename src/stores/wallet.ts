@@ -490,6 +490,7 @@ export const useWalletStore = defineStore("wallet", {
         throw new Error("already processing an melt quote.");
       }
       this.payInvoiceData.blocking = true;
+      this.payInvoiceData.meltQuote.error = "";
       try {
         const mintStore = useMintsStore();
         if (this.payInvoiceData.input.request == "") {
