@@ -13,7 +13,7 @@ import * as _ from "underscore";
 import token from "src/js/token";
 import { notifyApiError, notifyError, notifySuccess, notifyWarning, notify } from "src/js/notify";
 import { CashuMint, CashuWallet, Proof, MintQuotePayload, CheckStatePayload, MeltQuotePayload, MeltQuoteResponse, generateNewMnemonic, deriveSeedFromMnemonic, AmountPreference } from "@cashu/cashu-ts";
-import { hashToCurve } from "@cashu/cashu-ts/dist/lib/es5/DHKE";
+import { hashToCurve } from "@cashu/cashu-ts/dist/lib/es6/DHKE";
 import * as bolt11Decoder from "light-bolt11-decoder";
 import bech32 from "bech32";
 import axios from "axios";
@@ -447,6 +447,15 @@ export const useWalletStore = defineStore("wallet", {
       const tokenStore = useTokensStore();
 
       try {
+        // first we check if the mint quote is paid
+        const mintQuote = await mintStore.activeMint().api.getMintQuote(hash);
+        if (!mintQuote.paid) {
+          console.log("### mintQuote not paid yet");
+          if (verbose) {
+            notify("Invoice still pending");
+          }
+          throw new Error("invoice not paid yet.");
+        }
         // const split = splitAmount(amount);
         const keysetId = this.getKeyset()
         const counter = this.keysetCounter(keysetId)
