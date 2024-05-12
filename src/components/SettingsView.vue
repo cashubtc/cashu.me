@@ -843,14 +843,6 @@ export default defineComponent({
     },
   },
   watch: {
-    showMintDialog: function () {
-      this.addMintDialog.show = this.showMintDialog;
-    },
-    // mintToAddWalletPage: function () {
-    //   if (this.mintToAddWalletPage.length > 0) {
-    //     this.mintToAdd = this.mintToAddWalletPage;
-    //   }
-    // },
     enableNwc: function () {
       if (this.enableNwc) {
         this.listenToNWCCommands();
