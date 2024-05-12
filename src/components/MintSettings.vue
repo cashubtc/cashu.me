@@ -476,16 +476,13 @@ import { currentDateStr } from "src/js/utils";
 import { useSettingsStore } from "src/stores/settings";
 import { useNostrStore } from "src/stores/nostr";
 import { useP2PKStore } from "src/stores/p2pk";
+import { useWorkersStore } from "src/stores/workers";
+
 export default defineComponent({
   name: "MintSettings",
   mixins: [windowMixin],
   props: {
     tickerShort: String,
-    requestMint: Function,
-    melt: Function,
-    invoiceCheckWorker: Function,
-    payInvoiceData: Object,
-    showMintDialog: Boolean,
   },
   data: function () {
     return {
@@ -542,16 +539,7 @@ export default defineComponent({
       }
     },
   },
-  watch: {
-    showMintDialog: function () {
-      this.addMintDialog.show = this.showMintDialog;
-    },
-    // mintToAddWalletPage: function () {
-    //   if (this.mintToAddWalletPage.length > 0) {
-    //     this.mintToAdd = this.mintToAddWalletPage;
-    //   }
-    // },
-  },
+  watch: {},
   methods: {
     ...mapActions(useNostrStore, [
       "init",
@@ -571,6 +559,13 @@ export default defineComponent({
       "newMnemonic",
       "decodeRequest",
       "checkProofsSpendable",
+      "requestMint",
+      "melt",
+    ]),
+    ...mapActions(useWorkersStore, [
+      "clearAllWorkers",
+      "invoiceCheckWorker",
+      "checkTokenSpendableWorker",
     ]),
     editMint: function (mint) {
       // copy object to avoid changing the original
@@ -626,7 +621,6 @@ export default defineComponent({
       // settle invoice on other side
       await this.activateMintUrl(to_url);
       await this.invoiceCheckWorker();
-      this.notifySuccess("Swap successful");
     },
     enable_terminal: function () {
       // enable debug terminal
