@@ -22,6 +22,7 @@ import { splitAmount } from "@cashu/cashu-ts/dist/lib/es5/utils";
 type Invoice = {
   amount: number;
   bolt11: string;
+  payment_hash: string;
   quote: string;
   memo: string;
 };
@@ -414,24 +415,30 @@ export const useWalletStore = defineStore("wallet", {
      * cashu tokens
      */
     requestMint: async function (amount?: number) {
-      const mintStore = useMintsStore();
-      if (amount) {
-        this.invoiceData.amount = amount;
+      if (amount == undefined) {
+        amount = this.invoiceData.amount;
       }
+      const mintStore = useMintsStore();
       try {
-        // create MintQuotePayload(this.invoiceData.amount) payload
         const payload: MintQuotePayload = {
-          amount: this.invoiceData.amount, unit: mintStore.activeUnit
+          amount: amount, unit: mintStore.activeUnit
         };
         const data = await mintStore.activeMint().api.mintQuote(
           payload
         );
-        this.invoiceData.bolt11 = data.request;
-        this.invoiceData.quote = data.quote;
-        this.invoiceData.date = currentDateStr();
-        this.invoiceData.status = "pending";
-        this.invoiceData.mint = mintStore.activeMintUrl;
-        this.invoiceData.unit = mintStore.activeUnit;
+        // parse bolt11 invoice to get payment_hash
+        const invoice = bolt11Decoder.decode(data.request);
+        this.invoiceData = {
+          bolt11: data.request,
+          amount: amount,
+          memo: invoice.memo,
+          payment_hash: invoice.payment_hash,
+          quote: data.quote,
+          date: currentDateStr(),
+          status: "pending",
+          mint: mintStore.activeMintUrl,
+          unit: mintStore.activeUnit
+        };
         this.invoiceHistory.push({
           ...this.invoiceData,
         });
@@ -441,7 +448,10 @@ export const useWalletStore = defineStore("wallet", {
         notifyApiError(error, "Could not request mint");
       }
     },
-    mint: async function (amount: number, hash: string, verbose: boolean = true) {
+    checkMint: async function (quote: string) {
+
+    },
+    mint: async function (amount: number, quote: string, verbose: boolean = true) {
       const proofsStore = useProofsStore();
       const mintStore = useMintsStore();
       const tokenStore = useTokensStore();
@@ -452,7 +462,7 @@ export const useWalletStore = defineStore("wallet", {
         const counter = this.keysetCounter(keysetId)
         const preference = this.outputAmountSelect(amount);
         console.log("### preference", preference);
-        const { proofs } = await this.wallet.mintTokens(amount, hash, { keysetId, counter, amountPreference: preference })
+        const { proofs } = await this.wallet.mintTokens(amount, quote, { keysetId, counter, amountPreference: preference })
         this.increaseKeysetCounter(keysetId, proofs.length);
 
         // const proofs = await this.mintApi(split, hash, verbose);
@@ -462,7 +472,7 @@ export const useWalletStore = defineStore("wallet", {
         mintStore.addProofs(proofs);
 
         // update UI
-        await this.setInvoicePaid(hash);
+        await this.setInvoicePaid(quote);
         const serializedProofs = proofsStore.serializeProofs(proofs);
         if (serializedProofs == null) {
           throw new Error("could not serialize proofs.");
@@ -591,11 +601,14 @@ export const useWalletStore = defineStore("wallet", {
           mint: mintStore.activeMintUrl,
         });
 
+        // add invoice to history
+        const invoiceObj = bolt11Decoder.decode(this.payInvoiceData.input.request);
         this.invoiceHistory.push({
           amount: -amount_paid,
           bolt11: this.payInvoiceData.input.request,
+          payment_hash: invoiceObj.payment_hash,
           quote: quote.quote,
-          memo: "fixme",
+          memo: invoiceObj.memo,
           date: currentDateStr(),
           status: "paid",
           mint: mintStore.activeMintUrl,
