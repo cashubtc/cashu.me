@@ -280,11 +280,13 @@
             <span class="text-h6">Delete Ecash</span>
           </div>
         </div>
+          <div style="width:100%; display:flex; flex-direction:column; justify-content:center; align-items:center;">
+            <img style="width:80px;" src="/icons/warning.svg">
+          </div>
         <div class="row items-center no-wrap q-my-sm q-py-none">
           <div class="col-12">
             <q-item-label>
-              Are you sure you want to delete this transaction from your
-              history?
+              Deleting a transaction is irreversible and if the token is lost there will be no way of recovering it.
             </q-item-label>
           </div>
         </div>
