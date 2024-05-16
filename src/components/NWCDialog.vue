@@ -10,12 +10,16 @@
     >
       <div class="text-center q-mb-md q-mt-none q-pt-none">
         <q-responsive :ratio="1" class="q-mx-md q-mt-none q-pt-none">
-          <vue-qrcode
-            :value="showNWCData.connectionString"
-            :options="{ width: 340 }"
-            class="rounded-borders"
+          <routerlink
+            :to="showNWCData.connectionString"
           >
-          </vue-qrcode>
+            <vue-qrcode
+              :value="showNWCData.connectionString"
+              :options="{ width: 340 }"
+              class="rounded-borders"
+            >
+            </vue-qrcode>
+          </routerlink>
         </q-responsive>
         <div class="row justify-center">
           <q-card-section class="q-pa-sm">
