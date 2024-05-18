@@ -578,11 +578,10 @@ export default {
 
     // mint url
     if (params.get("mint")) {
-      let activeMintUrl = params.get("mint");
+      let addMintUrl = params.get("mint");
       await this.setTab("mints");
       this.showAddMintDialog = true;
-      this.addMintData = { url: activeMintUrl };
-      // this.addMint(addMintData, true);
+      this.addMintData = { url: addMintUrl };
     }
     if (!localStorage.getItem("cashu.activeMintUrl")) {
       this.setTab("mints");
