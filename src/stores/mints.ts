@@ -293,7 +293,7 @@ export const useMintsStore = defineStore("mints", {
         }
 
         // if we do not have any keys yet, fetch them
-        if (mint.keys.length === 0) {
+        if (mint.keys.length === 0 || mint.keys.length == undefined) {
           const keys = await mintClass.api.getKeys();
           // store keys in mint and update local storage
           this.mints.filter((m) => m.url === mint.url)[0].keys = keys.keysets;
