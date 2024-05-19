@@ -545,7 +545,7 @@ export default {
         if (event.data.type == "new_tab_opened") {
           channel.postMessage({ type: "already_running", senderId: tabId });
         } else if (event.data.type == "already_running") {
-          window.location.href = "/already-running";
+          window.location.href = "/#/already-running";
         }
       };
     },
@@ -618,7 +618,7 @@ export default {
     window.history.pushState(
       {},
       document.title,
-      window.location.href.split("?")[0]
+      window.location.href.split("?")[0].split("#")[0]
     );
 
     // startup tasks
