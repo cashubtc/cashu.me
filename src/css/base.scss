@@ -24,7 +24,7 @@ $themes: (
     marginal-text: #fff,
   ),
   "salvador": (
-    primary: #0e57df,
+    primary: #2d68d5,
     secondary: #1366cb,
     dark: #242424,
     info: #333646,
@@ -48,11 +48,11 @@ $themes: (
     marginal-text: rgb(255, 255, 255),
   ),
   "flamingo": (
-    primary: #f74e81,
-    secondary: #db3e6d,
-    dark: #56353a,
-    info: #ec7599,
-    marginal-bg: #631420,
+    primary: #ff64b4,
+    secondary: #ff61b3,
+    dark: #56353f,
+    info: #56353a,
+    marginal-bg: #56353a,
     marginal-text: rgb(255, 255, 255),
   ),
   "monochrome": (
@@ -122,22 +122,6 @@ $themes: (
 
 [data-theme="freedom"] .q-header {
   background: #0a0a0a !important;
-}
-
-[data-theme="salvador"] .q-drawer--dark {
-  background: #242424 !important;
-}
-
-[data-theme="salvador"] .q-header {
-  background: #0f47af !important;
-}
-
-[data-theme="flamingo"] .q-drawer--dark {
-  background: #e75480 !important;
-}
-
-[data-theme="flamingo"] .q-header {
-  background: #e75480 !important;
 }
 
 [v-cloak] {
