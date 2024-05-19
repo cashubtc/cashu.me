@@ -278,7 +278,7 @@
   <!-- popup dialog to confirm deletion activated by showDeleteDialog -->
   <q-dialog v-model="showDeleteDialog">
     <q-card class="q-pa-lg q-pt-md qcard">
-      <q-card-section class="q-pa-none q-pt-md">
+      <q-card-section class="q-pa-none">
         <div class="row items-center no-wrap q-mb-sm">
           <div class="col-12">
             <span class="text-h6">Delete Ecash</span>
@@ -289,6 +289,10 @@
             <q-item-label>
               Are you sure you want to delete this transaction from your
               history?
+            </q-item-label>
+            <q-item-label class="q-pt-md text-weight-bold">
+              Warning: This action cannot be undone and there is no way to
+              recover the token.
             </q-item-label>
           </div>
         </div>
