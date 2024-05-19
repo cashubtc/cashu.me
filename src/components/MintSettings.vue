@@ -140,14 +140,14 @@
             class="q-px-lg q-mt-xs"
             color="primary"
             :disabled="addMintData.url.length == 0"
-            :loading="addingMint"
+            :loading="addMintBlocking"
             @click="showAddMintDialog = true"
           >
             <q-icon size="xs" name="add" class="q-pr-xs" />
             Add mint
             <template v-slot:loading>
-              <q-spinner-hourglass class="on-left" />
-              Loading...
+              <q-spinner-hourglass />
+              Adding mint...
             </template>
           </q-btn>
         </div>
@@ -386,9 +386,13 @@
               v-close-popup
               color="primary"
               icon="check"
-              :loading="addingMint"
+              :loading="addMintBlocking"
               @click="addMintInternal(addMintData, (verbose = true))"
               >Add mint
+              <template v-slot:loading>
+                <q-spinner-hourglass />
+                Adding mint...
+              </template>
             </q-btn>
           </div>
           <div class="col">
@@ -520,7 +524,12 @@ export default defineComponent({
       "checkSentTokens",
     ]),
     ...mapState(useP2PKStore, ["p2pkKeys"]),
-    ...mapState(useMintsStore, ["activeMintUrl", "mints", "activeProofs"]),
+    ...mapState(useMintsStore, [
+      "activeMintUrl",
+      "mints",
+      "activeProofs",
+      "addMintBlocking",
+    ]),
     ...mapState(useNostrStore, ["pubkey", "mintRecommendations"]),
     ...mapState(useWalletStore, ["mnemonic"]),
     ...mapWritableState(useMintsStore, [

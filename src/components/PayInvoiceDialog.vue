@@ -54,7 +54,7 @@
             "
             @click="melt"
             :label="!payInvoiceData.blocking ? 'Pay' : 'Processing...'"
-            ><q-spinner-tail
+            ><q-spinner-hourglass
               v-if="payInvoiceData.blocking"
               color="white"
               size="1em"

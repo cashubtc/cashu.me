@@ -92,6 +92,7 @@ export const useMintsStore = defineStore("mints", {
       blindSignatures: useLocalStorage("cashu.blindSignatures", [] as BlindSignatureAudit[]),
       // balances: useLocalStorage("cashu.balances", {} as Balances),
       showAddMintDialog: false,
+      addMintBlocking: false,
       showRemoveMintDialog: false,
     };
   },
@@ -195,6 +196,7 @@ export const useMintsStore = defineStore("mints", {
     },
     addMint: async function (addMintData: { url: string, nickname: string }, verbose = false) {
       let url = addMintData.url;
+      this.addMintBlocking = true;
       try {
         // sanitize url
         const sanitizeUrl = (url: string): string => {
@@ -232,6 +234,7 @@ export const useMintsStore = defineStore("mints", {
         throw error;
       } finally {
         this.showAddMintDialog = false;
+        this.addMintBlocking = false;
       }
     },
     activateMintUrl: async function (url: string, verbose = false, force = false) {
