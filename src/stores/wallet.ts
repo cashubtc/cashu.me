@@ -449,6 +449,7 @@ export const useWalletStore = defineStore("wallet", {
       try {
         // first we check if the mint quote is paid
         const mintQuote = await mintStore.activeMint().api.getMintQuote(hash);
+        console.log("### mintQuote", mintQuote);
         if (!mintQuote.paid) {
           console.log("### mintQuote not paid yet");
           if (verbose) {
