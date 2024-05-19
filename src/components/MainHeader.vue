@@ -32,6 +32,15 @@
         <span v-if="!isStaging()">Beta</span>
         <span v-else>Staging – don't use with real funds!</span>
       </q-badge>
+      <q-btn
+        flat
+        dense
+        round
+        size="sm"
+        icon="refresh"
+        aria-label="Refresh"
+        @click="reload"
+      />
       <!-- profile button -->
       <!-- <q-btn dense round flat color="primary" icon="account_circle"></q-btn> -->
     </q-toolbar>
@@ -120,6 +129,9 @@ export default defineComponent({
       },
       isStaging() {
         return location.host.includes("staging");
+      },
+      reload() {
+        location.reload();
       },
     };
   },
