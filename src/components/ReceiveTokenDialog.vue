@@ -45,8 +45,8 @@
           rounded
           class="q-mr-sm"
           :disabled="!decodeToken(receiveData.tokensBase64)"
-          >Receive</q-btn
-        >
+          :label="knowThisMint ? 'Receive' : 'Add mint'"
+        />
         <q-btn
           @click="addPendingTokenToHistory(receiveData.tokensBase64)"
           color="primary"
@@ -122,6 +122,13 @@ export default defineComponent({
         navigator.clipboard &&
         navigator.clipboard.readText
       );
+    },
+    knowThisMint: function () {
+      const tokenJson = token.decode(this.receiveData.tokensBase64);
+      if (tokenJson == undefined) {
+        return false;
+      }
+      return this.knowThisMintOfTokenJson(tokenJson);
     },
   },
   methods: {
