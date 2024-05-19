@@ -39,7 +39,7 @@
                     <q-badge
                       color="primary"
                       :label="formatCurrency(scope.opt.balances[unit], unit)"
-                      class="q-ma-xs q-pa-sm"
+                      class="q-ma-xs q-pa-sm text-weight-bold"
                       style="float: right"
                     />
                   </div>
@@ -60,6 +60,7 @@
             <q-badge
               color="primary"
               :label="formatCurrency(getBalance, activeUnit)"
+              class="q-ma-xs q-pa-sm text-weight-bold"
           /></template>
         </q-select>
       </div>
