@@ -8,7 +8,7 @@
     <q-card class="q-pb-lg q-pt-sm" style="width: 100%">
       <q-card-section class="">
         <div class="row items-center no-wrap q-mb-sm">
-          <div class="col-12 text-center">
+          <div class="col-12 text-center text-primary">
             <q-icon name="south_west" size="1.3rem" class="q-mb-sm q-pr-sm" />
             <span class="text-h5">Receive</span>
           </div>
@@ -18,6 +18,7 @@
         <div class="col-12">
           <q-btn
             outline
+            color="primary"
             rounded
             class="q-py-md q-px-xl"
             style="width: 85%"
@@ -30,6 +31,7 @@
         <div class="col-12">
           <q-btn
             outline
+            color="primary"
             rounded
             class="q-py-md q-px-xl"
             style="width: 85%"

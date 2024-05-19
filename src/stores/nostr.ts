@@ -1,7 +1,7 @@
 import { defineStore } from "pinia";
 import NDK, { NDKEvent, NDKNip07Signer, NDKNip46Signer, NDKFilter, NDKPrivateKeySigner } from "@nostr-dev-kit/ndk";
 import { useLocalStorage } from "@vueuse/core";
-
+import { useSettingsStore } from "./settings";
 type MintRecommendation = {
   url: string;
   count: number;
@@ -11,7 +11,7 @@ export const useNostrStore = defineStore("nostr", {
   state: () => ({
     connected: false,
     pubkey: "",
-    relays: ["wss://relay.snort.social", "wss://relay.damus.io", "wss://nostr.mutinywallet.com"],
+    relays: useSettingsStore().defaultNostrRelays,
     ndk: new NDK(),
     nip07signer: new NDKNip07Signer(),
     nip46signer: {} as NDKNip46Signer,

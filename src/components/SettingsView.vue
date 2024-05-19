@@ -279,7 +279,7 @@
         <div v-if="enableNwc">
           <q-item
             v-for="connection in connections"
-            :key="connection.connectionString"
+            :key="getConnectionString(connection)"
           >
             <q-item-section
               class="q-mx-none q-pl-none"
@@ -287,7 +287,7 @@
             >
               <q-icon
                 name="content_copy"
-                @click="copyText(connection.connectionString)"
+                @click="copyText(getConnectionString(connection))"
                 size="1.3em"
                 color="grey"
                 class="q-mr-sm cursor-pointer"
@@ -300,7 +300,7 @@
             >
               <q-icon
                 name="qr_code"
-                @click="showNWCEntry(connection.connectionString)"
+                @click="showNWCEntry(connection)"
                 size="1.3em"
                 color="grey"
                 class="q-mr-sm cursor-pointer"
@@ -326,38 +326,7 @@
                 label="Allowance left (sat)"
               >
               </q-input>
-              <!-- <q-btn
-                flat
-                dense
-                @click="showNWCEntry(connection.connectionString)"
-                >Show qr code
-                <q-icon
-                  name="qr_code"
-                  @click="showNWCEntry(connection.connectionString)"
-                  size="1em"
-                  color="grey"
-                  class="q-ml-sm cursor-pointer"
-              /></q-btn> -->
             </q-item-section>
-            <!-- <q-item-section side>
-              <q-badge
-                v-if="connection.allowanceLeft"
-                :label="connection.allowanceLeft"
-                color="primary"
-              />
-            </q-item-section> -->
-            <!-- <q-item-section
-              class="q-mx-none q-pl-none"
-              style="max-width: 1.05em"
-            >
-              <q-icon
-                name="qr_code"
-                @click="showNWCEntry(connection.connectionString)"
-                size="1.3em"
-                color="grey"
-                class="q-mr-xs cursor-pointer"
-              />
-            </q-item-section> -->
           </q-item>
           <!-- <q-item v-if="false">
           <q-btn
@@ -863,6 +832,7 @@ export default defineComponent({
       "generateNWCConnection",
       "listenToNWCCommands",
       "unsubscribeNWC",
+      "getConnectionString",
     ]),
     ...mapActions(useP2PKStore, ["generateKeypair", "showKeyDetails"]),
     ...mapActions(useMintsStore, [
@@ -881,6 +851,7 @@ export default defineComponent({
     ]),
     ...mapActions(useWorkersStore, ["invoiceCheckWorker"]),
     ...mapActions(useProofsStore, ["serializeProofs"]),
+
     editMint: function (mint) {
       // copy object to avoid changing the original
       this.mintToEdit = Object.assign({}, mint);
@@ -1030,8 +1001,11 @@ export default defineComponent({
       this.showKeyDetails(pubKey);
       this.showP2PKDialog = true;
     },
-    showNWCEntry: async function (connectionString) {
-      this.showNWCData.connectionString = connectionString;
+    showNWCEntry: async function (connection) {
+      this.showNWCData = {
+        connection,
+        connectionString: this.getConnectionString(connection),
+      };
       this.showNWCDialog = true;
     },
     exportActiveProofs: async function () {
