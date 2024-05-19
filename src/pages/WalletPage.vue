@@ -266,10 +266,6 @@ export default {
       welcomeDialog: {
         show: false,
       },
-      addMintDialog: {
-        show: false,
-        mintToAdd: "".replace(/\s+/g, ""),
-      },
       baseHost: location.protocol + "//" + location.host,
       baseURL: location.protocol + "//" + location.host + location.pathname,
       credit: 0,
@@ -303,7 +299,7 @@ export default {
       "invoiceData",
       "payInvoiceData",
     ]),
-    ...mapWritableState(useMintsStore, ["showAddMintDialog"]),
+    ...mapWritableState(useMintsStore, ["addMintData", "showAddMintDialog"]),
     ...mapWritableState(useWorkersStore, [
       "invoiceCheckListener",
       "tokensCheckSpendableListener",
@@ -339,7 +335,6 @@ export default {
       "getBalance",
       "setActiveProofs",
       "setProofs",
-      "setShowAddMintDialog",
       "getKeysForKeyset",
     ]),
     ...mapActions(useWorkersStore, [
@@ -583,10 +578,10 @@ export default {
 
     // mint url
     if (params.get("mint")) {
-      let activeMintUrl = params.get("mint");
+      let addMintUrl = params.get("mint");
       await this.setTab("mints");
-      this.addMintDialog.mintToAdd = activeMintUrl;
       this.showAddMintDialog = true;
+      this.addMintData = { url: addMintUrl };
     }
     if (!localStorage.getItem("cashu.activeMintUrl")) {
       this.setTab("mints");

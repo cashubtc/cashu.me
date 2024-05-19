@@ -8,23 +8,35 @@
   >
     <q-card class="q-pa-lg q-pt-xl qcard">
       <div v-if="payInvoiceData.invoice">
-        <h6
-          v-if="
-            payInvoiceData.meltQuote.response &&
-            payInvoiceData.meltQuote.response.amount > 0
-          "
-          class="q-my-none"
-        >
-          Pay
-          {{
-            formatCurrency(payInvoiceData.meltQuote.response.amount, activeUnit)
-          }}
-        </h6>
-        <h6 v-else-if="payInvoiceData.meltQuote.error != ''" class="q-my-none">
-          {{ payInvoiceData.meltQuote.error }}
-        </h6>
-        <h6 v-else class="q-my-none">Processing...</h6>
-        <q-separator class="q-my-sm"></q-separator>
+        <div class="row items-center no-wrap q-mb-sm">
+          <div class="col-10">
+            <h6
+              v-if="
+                payInvoiceData.meltQuote.response &&
+                payInvoiceData.meltQuote.response.amount > 0
+              "
+              class="q-my-none"
+            >
+              Pay
+              {{
+                formatCurrency(
+                  payInvoiceData.meltQuote.response.amount,
+                  activeUnit
+                )
+              }}
+            </h6>
+            <h6
+              v-else-if="payInvoiceData.meltQuote.error != ''"
+              class="q-my-none"
+            >
+              {{ payInvoiceData.meltQuote.error }}
+            </h6>
+            <h6 v-else class="q-my-none">Processing...</h6>
+          </div>
+          <div class="col-2">
+            <ToggleUnit class="q-mt-md" />
+          </div>
+        </div>
         <p class="text-wrap">
           <strong v-if="payInvoiceData.invoice.description">Memo:</strong>
           {{ payInvoiceData.invoice.description }}<br />
@@ -203,6 +215,8 @@ import { useCameraStore } from "src/stores/camera";
 import { useMintsStore } from "src/stores/mints";
 import { mapActions, mapState, mapWritableState } from "pinia";
 import ChooseMint from "components/ChooseMint.vue";
+import ToggleUnit from "components/ToggleUnit.vue";
+
 // import * as bolt11Decoder from "light-bolt11-decoder";
 import * as _ from "underscore";
 
@@ -211,10 +225,23 @@ export default defineComponent({
   mixins: [windowMixin],
   components: {
     ChooseMint,
+    ToggleUnit,
   },
   props: {},
   data: function () {
     return {};
+  },
+  watch: {
+    activeMintUrl: async function () {
+      if (this.payInvoiceData.show) {
+        await this.meltQuote();
+      }
+    },
+    activeUnit: async function () {
+      if (this.payInvoiceData.show) {
+        await this.meltQuote();
+      }
+    },
   },
   computed: {
     ...mapState(useUiStore, ["tickerShort"]),

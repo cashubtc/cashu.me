@@ -6,13 +6,14 @@ import { nip04, generateSecretKey, getPublicKey } from 'nostr-tools'
 import { useMintsStore } from './mints'
 import { useWalletStore } from "./wallet";
 import { useProofsStore } from "./proofs";
+import { notify, notifyError, notifyWarning } from "src/js/notify";
+import { useSettingsStore } from "./settings";
 
 type NWCConnection = {
   walletPublicKey: string,
   walletPrivateKey: string,
   connectionSecret: string,
   connectionPublicKey: string,
-  connectionString: string,
   allowanceLeft: number
 }
 
@@ -45,14 +46,12 @@ export const useNWCStore = defineStore("nwc", {
     nwcEnabled: useLocalStorage<boolean>("cashu.nwc.enabled", false),
     connections: useLocalStorage<NWCConnection[]>("cashu.nwc.connections", []),
     supportedMethods: ["pay_invoice", "get_balance", "get_info", "list_transactions"],
-    relays: ["wss://relay.primal.net", "wss://nos.lol", "wss://relay.damus.io", "wss://relay.snort.social", "wss://nostr.mutinywallet.com", "wss://nos.lol"],
+    relays: useSettingsStore().defaultNostrRelays,
     blocking: false,
     ndk: new NDK(),
     subscriptions: [] as NDKSubscription[],
     showNWCDialog: false,
-    showNWCData: {
-      connectionString: "",
-    }
+    showNWCData: { connection: {} as NWCConnection, connectionString: "" },
   }),
   getters: {
 
@@ -105,6 +104,7 @@ export const useNWCStore = defineStore("nwc", {
       }
       // expect that the melt quote was requested
       if (walletStore.payInvoiceData.meltQuote.response.amount == 0 || walletStore.payInvoiceData.meltQuote.error) {
+        notifyWarning("NWC: Error requesting melt quote")
         return {
           result_type: nwcCommand.method,
           error: { code: "INTERNAL", message: "Error requesting melt quote" }
@@ -112,15 +112,17 @@ export const useNWCStore = defineStore("nwc", {
       }
       const maximumAmount = walletStore.payInvoiceData.meltQuote.response.amount + walletStore.payInvoiceData.meltQuote.response.fee_reserve
       if (mintStore.activeUnit != "sat") {
+        notifyWarning("NWC: Active unit must be sats")
         return {
           result_type: nwcCommand.method,
-          error: { code: "INTERNAL", message: "Your active unit can only be Satoshis" }
+          error: { code: "INTERNAL", message: "Your active must be sats" }
         } as NWCError
       }
       if (maximumAmount > this.connections[0].allowanceLeft) {
+        notifyWarning("NWC: Allowance exceeded")
         return {
           result_type: nwcCommand.method,
-          error: { code: "QUOTA_EXCEEDED", message: "Your quota is exceeded" }
+          error: { code: "QUOTA_EXCEEDED", message: "Your quota has exceeded" }
         } as NWCError
       }
       try {
@@ -231,6 +233,11 @@ export const useNWCStore = defineStore("nwc", {
       }
       await this.replyNWC(result, event, conn)
     },
+    getConnectionString: function (connection: NWCConnection) {
+      const walletPublicKeyHex = connection.walletPublicKey
+      const connectionSecretHex = connection.connectionSecret
+      return `nostr+walletconnect://${walletPublicKeyHex}?relay=${this.relays.join('&relay=')}&secret=${connectionSecretHex}`
+    },
     generateNWCConnection: async function () {
       let conn: NWCConnection
       // NOTE: we only support one connection for now
@@ -242,14 +249,11 @@ export const useNWCStore = defineStore("nwc", {
         const connectionSecret = generateSecretKey()
         const connectionPublicKeyHex = getPublicKey(connectionSecret)
         const connectionSecretHex = bytesToHex(connectionSecret)
-        // create a string with format nostr+walletconnect://<walletPublicKeyHex>?relay=<relay1>&relay=<relay2>&relay=<relay3>&secret=<connectionSecret>
-        const connectionString = `nostr+walletconnect://${walletPublicKeyHex}?relay=${this.relays.join('&relay=')}&secret=${connectionSecretHex}`
         conn = {
           walletPublicKey: walletPublicKeyHex,
           walletPrivateKey: walletPrivateKeyHex,
           connectionSecret: connectionSecretHex,
           connectionPublicKey: connectionPublicKeyHex,
-          connectionString: connectionString,
           allowanceLeft: 1000
         } as NWCConnection;
         this.connections = this.connections.concat(conn)
@@ -262,7 +266,6 @@ export const useNWCStore = defineStore("nwc", {
       this.unsubscribeNWC()
       this.ndk = new NDK({ explicitRelayUrls: this.relays, signer: walletSigner });
       this.ndk.connect();
-
 
       const nip47InfoEvent = new NDKEvent(this.ndk);
       nip47InfoEvent.kind = NWCKind.NWCInfo;
