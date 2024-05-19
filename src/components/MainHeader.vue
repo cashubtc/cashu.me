@@ -28,7 +28,7 @@
           <span>Offline</span>
         </q-badge>
       </transition>
-      <q-badge outline color="yellow" text-color="black" class="q-mr-sm">
+      <q-badge color="yellow" text-color="black" class="q-mr-sm">
         <span v-if="!isStaging()">Beta</span>
         <span v-else>Staging – don't use with real funds!</span>
       </q-badge>
