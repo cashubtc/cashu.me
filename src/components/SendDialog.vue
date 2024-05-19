@@ -18,6 +18,7 @@
         <div class="col-12">
           <q-btn
             outline
+            color="primary"
             rounded
             class="q-py-md q-px-xl"
             style="width: 85%"
@@ -30,6 +31,7 @@
         <div class="col-12">
           <q-btn
             outline
+            color="primary"
             rounded
             push
             class="q-py-md q-px-xl"
