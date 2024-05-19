@@ -44,9 +44,21 @@
           color="primary"
           rounded
           class="q-mr-sm"
-          :disabled="!decodeToken(receiveData.tokensBase64)"
-          :label="knowThisMint ? 'Receive' : 'Add mint'"
-        />
+          :disabled="!decodeToken(receiveData.tokensBase64) || addMintBlocking"
+          :label="
+            knowThisMint
+              ? addMintBlocking
+                ? 'Adding mint ...'
+                : 'Receive'
+              : 'Add mint'
+          "
+        >
+          <!-- <q-spinner-hourglass
+            v-if="addMintBlocking"
+            size="1em"
+            class="q-ml-md"
+        /> -->
+        </q-btn>
         <q-btn
           @click="addPendingTokenToHistory(receiveData.tokensBase64)"
           color="primary"
@@ -113,7 +125,11 @@ export default defineComponent({
       "receiveData",
     ]),
     ...mapState(useUiStore, ["tickerShort"]),
-    ...mapState(useMintsStore, ["activeProofs", "activeUnit"]),
+    ...mapState(useMintsStore, [
+      "activeProofs",
+      "activeUnit",
+      "addMintBlocking",
+    ]),
     ...mapWritableState(useMintsStore, ["addMintData", "showAddMintDialog"]),
     ...mapState(useCameraStore, ["hasCamera"]),
     canPasteFromClipboard: function () {

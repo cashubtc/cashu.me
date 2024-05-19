@@ -49,7 +49,7 @@
                 ? 'Creating invoice...'
                 : 'Create Invoice'
             "
-            ><q-spinner-tail
+            ><q-spinner-hourglass
               v-if="createInvoiceButtonBlocked"
               color="white"
               size="1em"
