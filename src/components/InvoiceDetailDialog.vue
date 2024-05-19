@@ -12,9 +12,6 @@
           <div class="col-10">
             <span class="text-subtitle1">Create a Lightning invoice</span>
           </div>
-          <div class="col-2">
-            <ToggleUnit class="q-mt-md" />
-          </div>
         </div>
         <div class="row items-center no-wrap q-my-sm q-py-none">
           <div class="col-12">
@@ -33,7 +30,14 @@
           autofocus
           class="q-mb-lg"
           @keyup.enter="requestMintButton"
-        ></q-input>
+        >
+          <q-btn
+            flat
+            color="primary"
+            @click="toggleUnit()"
+            :label="activeUnit == 'sat' ? 'BTC' : 'USD'"
+          />
+        </q-input>
         <div class="row items-center no-wrap q-my-sm q-py-none">
           <q-btn
             color="primary"
@@ -145,7 +149,6 @@ import { useWalletStore } from "src/stores/wallet";
 import ChooseMint from "src/components/ChooseMint.vue";
 import { useUiStore } from "src/stores/ui";
 import { getShortUrl } from "src/js/wallet-helpers";
-import ToggleUnit from "src/components/ToggleUnit.vue";
 import { useWorkersStore } from "src/stores/workers";
 import { useMintsStore } from "src/stores/mints";
 
@@ -155,7 +158,6 @@ export default defineComponent({
   components: {
     ChooseMint,
     VueQrcode,
-    ToggleUnit,
   },
   props: {
     invoiceCheckWorker: Function,
@@ -167,6 +169,7 @@ export default defineComponent({
   },
   computed: {
     ...mapState(useWalletStore, ["invoiceData"]),
+    ...mapState(useMintsStore, ["activeUnit"]),
     ...mapState(useWorkersStore, ["invoiceWorkerRunning"]),
     ...mapWritableState(useUiStore, ["showInvoiceDetails", "tickerShort"]),
     displayUnit: function () {
@@ -185,6 +188,7 @@ export default defineComponent({
   },
   methods: {
     ...mapActions(useWalletStore, ["requestMint", "lnurlPaySecond"]),
+    ...mapActions(useMintsStore, ["toggleUnit"]),
     requestMintButton: async function () {
       try {
         // if unit is USD, multiply by 100
