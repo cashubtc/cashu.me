@@ -233,10 +233,14 @@ export default defineComponent({
   },
   watch: {
     activeMintUrl: async function () {
-      await this.meltQuote();
+      if (this.payInvoiceData.show) {
+        await this.meltQuote();
+      }
     },
     activeUnit: async function () {
-      await this.meltQuote();
+      if (this.payInvoiceData.show) {
+        await this.meltQuote();
+      }
     },
   },
   computed: {
