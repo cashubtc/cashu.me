@@ -381,7 +381,8 @@ export default defineComponent({
       return display;
     },
     tokenUnit: function () {
-      return token.getUnit(token.decode(this.sendData.tokensBase64));
+      let unit = token.getUnit(token.decode(this.sendData.tokensBase64));
+      return unit;
     },
     tokenMintUrl: function () {
       let mint = token.getMint(token.decode(this.sendData.tokensBase64));
