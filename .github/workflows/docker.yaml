@@ -1,6 +1,8 @@
 name: Docker Build
 
 on:
+  pull_request:
+    types: [opened, synchronize, reopened]
   release:
     types: [released]
 
@@ -32,10 +34,10 @@ jobs:
       - name: Determine Tag
         id: get_tag
         run: |
-          if [[ "${{ github.event_name }}" == "push" ]]; then
-            echo "::set-output name=tag::latest"
-          elif [[ "${{ github.event_name }}" == "release" ]]; then
+          if [[ "${{ github.event_name }}" == "release" ]]; then
             echo "::set-output name=tag::${{ github.event.release.tag_name }}"
+          else
+            echo "::set-output name=tag::${{ github.sha }}"
           fi
 
       - name: Build and push on release
