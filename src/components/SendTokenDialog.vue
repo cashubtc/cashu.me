@@ -12,9 +12,6 @@
             <div class="col-10">
               <span class="text-h6">Send Ecash</span>
             </div>
-            <div class="col-2">
-              <ToggleUnit class="q-mt-md" />
-            </div>
           </div>
           <div class="row items-center no-wrap q-my-sm q-py-none">
             <div class="col-12">
@@ -34,7 +31,14 @@
             autofocus
             class="q-mb-lg"
             @keyup.enter="sendTokens"
-          ></q-input>
+          >
+            <q-btn
+              flat
+              color="primary"
+              @click="toggleUnit()"
+              :label="activeUnit == 'sat' ? 'BTC' : 'USD'"
+            />
+          </q-input>
           <!-- <q-input
                 filled
                 dense
@@ -323,7 +327,6 @@ import TokenInformation from "components/TokenInformation.vue";
 
 import { mapActions, mapState, mapWritableState } from "pinia";
 import ChooseMint from "components/ChooseMint.vue";
-import ToggleUnit from "components/ToggleUnit.vue";
 import { UR, UREncoder } from "@gandlaf21/bc-ur";
 
 export default defineComponent({
@@ -331,7 +334,6 @@ export default defineComponent({
   mixins: [windowMixin],
   components: {
     ChooseMint,
-    ToggleUnit,
     TokenInformation,
   },
   props: {},
@@ -381,7 +383,8 @@ export default defineComponent({
       return display;
     },
     tokenUnit: function () {
-      return token.getUnit(token.decode(this.sendData.tokensBase64));
+      let unit = token.getUnit(token.decode(this.sendData.tokensBase64));
+      return unit;
     },
     tokenMintUrl: function () {
       let mint = token.getMint(token.decode(this.sendData.tokensBase64));
@@ -467,6 +470,7 @@ export default defineComponent({
     ]),
     ...mapActions(useP2PKStore, ["isValidPubkey"]),
     ...mapActions(useCameraStore, ["closeCamera", "showCamera"]),
+    ...mapActions(useMintsStore, ["toggleUnit"]),
     // decodeP2PKQR: function (res) {
     //   console.log("### SendToken qr", res);
     //   this.camera.data = res;

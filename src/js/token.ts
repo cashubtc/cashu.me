@@ -40,6 +40,15 @@ function getUnit(decoded_token: Token) {
   if (decoded_token.unit != null) {
     return decoded_token.unit;
   } else {
+    // search for unit in mints[...].keysets[...].unit
+    const mintStore = useMintsStore();
+    const mint = getMint(decoded_token);
+    const keysets = mintStore.mints
+      .filter((m) => m.url === mint)
+      .flatMap((m) => m.keysets);
+    if (keysets.length > 0) {
+      return keysets[0].unit;
+    }
     return "";
   }
 }

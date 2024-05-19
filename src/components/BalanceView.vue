@@ -69,14 +69,6 @@
 
     <div class="row q-mt-md q-mb-none text-secondary" v-if="activeMintUrl">
       <div class="col-12 cursor-pointer">
-        <q-icon
-          name="link"
-          size="1rem"
-          color="secondary"
-          class="q-mr-none"
-          style="margin-bottom: 2px"
-          @click="setTab('settings')"
-        />
         <span class="text-weight-light" @click="setTab('settings')">
           Mint: <b>{{ activeMintLabel }}</b>
           <q-tooltip>Configure mint(s)</q-tooltip>
@@ -103,11 +95,10 @@
         color="secondary"
         dense
         outline
-        icon="refresh"
-        class="q-mx-none q-mt-xs q-px-sm cursor-pointer"
+        class="q-mx-none q-mt-xs q-pr-sm cursor-pointer"
         @click="checkPendingTokens()"
-      >
-        Pending: {{ formatCurrency(pendingBalance, this.activeUnit) }}
+        ><q-icon name="history" size="1rem" class="q-mx-xs" /> Pending:
+        {{ formatCurrency(pendingBalance, this.activeUnit) }}
         <q-tooltip>Check all pending tokens</q-tooltip>
       </q-btn>
     </div>

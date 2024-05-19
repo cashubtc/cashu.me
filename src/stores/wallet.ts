@@ -227,10 +227,10 @@ export const useWalletStore = defineStore("wallet", {
 
       proofs = proofs.slice().sort((a, b) => a.amount - b.amount);
       // remember next bigger proof as a fallback
-      const nextBigger = proofs.find((p) => p.amount >= amount);
+      const nextBigger = proofs.find((p) => p.amount > amount);
 
       // go through smaller proofs until sum is bigger than amount
-      const smallerProofs = proofs.filter((p) => p.amount < amount);
+      const smallerProofs = proofs.filter((p) => p.amount <= amount);
       // sort by amount descending
       smallerProofs.sort((a, b) => b.amount - a.amount);
 
