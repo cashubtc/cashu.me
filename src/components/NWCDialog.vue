@@ -9,16 +9,16 @@
       class="q-px-lg q-pt-md q-pb-md qcard"
     >
       <div class="text-center q-mb-md q-mt-none q-pt-none">
-        <q-responsive :ratio="1" class="q-mx-md q-mt-none q-pt-none">
-          <a :href="showNWCData.connectionString">
+        <a :href="showNWCData.connectionString">
+          <q-responsive :ratio="1" class="q-mx-md q-mt-none q-pt-none">
             <vue-qrcode
               :value="showNWCData.connectionString"
               :options="{ width: 340 }"
               class="rounded-borders"
             >
             </vue-qrcode>
-          </a>
-        </q-responsive>
+          </q-responsive>
+        </a>
         <div class="row justify-center">
           <q-card-section class="q-pa-sm">
             <div class="row justify-center">
