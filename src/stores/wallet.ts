@@ -534,7 +534,6 @@ export const useWalletStore = defineStore("wallet", {
       if (this.payInvoiceData.blocking) {
         throw new Error("already processing an invoice.");
       }
-      this.payInvoiceData.blocking = true;
       console.log("#### pay lightning");
       if (this.payInvoiceData.invoice == null) {
         throw new Error("no invoice provided.");
@@ -558,12 +557,13 @@ export const useWalletStore = defineStore("wallet", {
         "amount with fees",
         amount
       );
-      const { keepProofs, sendProofs } = await this.splitToSend(
-        mintStore.activeMint().unitProofs(mintStore.activeUnit),
-        amount
-      );
-      proofsStore.setReserved(sendProofs, true);
+      this.payInvoiceData.blocking = true;
       try {
+        const { keepProofs, sendProofs } = await this.splitToSend(
+          mintStore.activeMint().unitProofs(mintStore.activeUnit),
+          amount
+        );
+        proofsStore.setReserved(sendProofs, true);
         // NUT-08 blank outputs for change
         let n_outputs = Math.max(Math.ceil(Math.log2(quote.fee_reserve)), 1);
         const keysetId = this.getKeyset();
@@ -614,14 +614,14 @@ export const useWalletStore = defineStore("wallet", {
 
         this.payInvoiceData.invoice = { sat: 0, memo: "", bolt11: "" };
         this.payInvoiceData.show = false;
-        this.payInvoiceData.blocking = false;
         return data;
       } catch (error: any) {
-        this.payInvoiceData.blocking = false;
         proofsStore.setReserved(sendProofs, false);
         console.error(error);
         notifyApiError(error);
         throw error;
+      } finally {
+        this.payInvoiceData.blocking = false;
       }
     },
     // /check
