@@ -56,7 +56,7 @@
             :label="!payInvoiceData.blocking ? 'Pay' : 'Processing...'"
             ><q-spinner-hourglass
               v-if="payInvoiceData.blocking"
-              color="white"
+              color="primary"
               size="1em"
           /></q-btn>
           <q-btn v-close-popup flat color="grey" class="q-ml-auto"

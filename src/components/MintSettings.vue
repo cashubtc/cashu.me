@@ -249,9 +249,12 @@
           <q-item-section>
             <q-item-label overline>Multimint Swaps</q-item-label>
             <q-item-label caption
-              >Swap funds from one mint to another via Lightning. Note: Leave
-              room for potential Lightning fees.</q-item-label
-            >
+              >Swap funds from one mint to another via Lightning. Note: This is
+              an experimental feature and should be used carefully. Leave room
+              for potential Lightning fees. If the incoming payment does not
+              succeed, check the incoming pending invoice manually by clicking
+              the refresh button.
+            </q-item-label>
           </q-item-section>
         </q-item>
         <q-item>
@@ -306,12 +309,20 @@
               )
             "
             :disable="
-              !swapData.from_url || !swapData.to_url || !(swapData.amount > 0)
+              !swapData.from_url ||
+              !swapData.to_url ||
+              !(swapData.amount > 0) ||
+              swapData.from_url == swapData.to_url
             "
+            :loading="swapBlocking"
           >
             <q-icon size="xs" name="swap_horiz" class="q-pr-xs" />
-            Swap</q-btn
-          >
+            Swap
+            <template v-slot:loading>
+              <q-spinner-hourglass size="xs" />
+              Swap
+            </template>
+          </q-btn>
         </q-item>
       </q-list>
     </div>
@@ -481,6 +492,7 @@ import { useSettingsStore } from "src/stores/settings";
 import { useNostrStore } from "src/stores/nostr";
 import { useP2PKStore } from "src/stores/p2pk";
 import { useWorkersStore } from "src/stores/workers";
+import { notifyError, notifyWarning } from "src/js/notify";
 
 export default defineComponent({
   name: "MintSettings",
@@ -516,6 +528,7 @@ export default defineComponent({
         show: false,
       },
       showEditMintDialog: false,
+      swapBlocking: false,
     };
   },
   computed: {
@@ -532,6 +545,7 @@ export default defineComponent({
     ]),
     ...mapState(useNostrStore, ["pubkey", "mintRecommendations"]),
     ...mapState(useWalletStore, ["mnemonic"]),
+    ...mapState(useWorkersStore, ["invoiceWorkerRunning"]),
     ...mapWritableState(useMintsStore, [
       "addMintData",
       "showAddMintDialog",
@@ -548,7 +562,14 @@ export default defineComponent({
       }
     },
   },
-  watch: {},
+  watch: {
+    // if swapBlocking is true and invoiceWorkerRunning changes to false, then swapBlocking should be set to false
+    invoiceWorkerRunning: function (val) {
+      if (this.swapBlocking && !val) {
+        this.swapBlocking = false;
+      }
+    },
+  },
   methods: {
     ...mapActions(useNostrStore, [
       "init",
@@ -618,18 +639,28 @@ export default defineComponent({
     },
     //
     mintSwap: async function (from_url, to_url, amount) {
-      // get invoice
-      await this.activateMintUrl(to_url);
-      let invoice = await this.requestMint(amount);
+      if (this.swapBlocking) {
+        notifyWarning("Swap in progress");
+        return;
+      }
+      this.swapBlocking = true;
+      try {
+        // get invoice
+        await this.activateMintUrl(to_url);
+        let invoice = await this.requestMint(amount);
 
-      // pay invoice
-      await this.activateMintUrl(from_url);
-      await this.decodeRequest(invoice.request);
-      await this.melt();
+        // pay invoice
+        await this.activateMintUrl(from_url);
+        await this.decodeRequest(invoice.request);
+        await this.melt();
 
-      // settle invoice on other side
-      await this.activateMintUrl(to_url);
-      await this.invoiceCheckWorker();
+        // settle invoice on other side
+        await this.activateMintUrl(to_url);
+        await this.invoiceCheckWorker();
+      } catch (e) {
+        console.error("Error swapping", e);
+        notifyError("Error swapping");
+      }
     },
     enable_terminal: function () {
       // enable debug terminal
