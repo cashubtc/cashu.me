@@ -559,6 +559,7 @@ export const useWalletStore = defineStore("wallet", {
         amount
       );
       this.payInvoiceData.blocking = true;
+      let sendProofs: Proof[] = [];
       try {
         const { keepProofs, sendProofs } = await this.splitToSend(
           mintStore.activeMint().unitProofs(mintStore.activeUnit),
