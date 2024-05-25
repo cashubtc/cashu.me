@@ -222,9 +222,11 @@ export const useWalletStore = defineStore("wallet", {
     coinSelect: function (proofs: WalletProof[], amount: number) {
 
       if (proofs.reduce((s, t) => (s += t.amount), 0) < amount) {
+        // there are not enough proofs to pay the amount
         return [];
       }
 
+      // sort proofs by amount ascending
       proofs = proofs.slice().sort((a, b) => a.amount - b.amount);
       // remember next bigger proof as a fallback
       const nextBigger = proofs.find((p) => p.amount > amount);
@@ -237,8 +239,10 @@ export const useWalletStore = defineStore("wallet", {
       let selectedProofs: WalletProof[] = [];
 
       if (smallerProofs.length == 0 && nextBigger) {
+        // if there are no smaller proofs, take the next bigger proof as a fallback
         return [nextBigger];
       } else if (smallerProofs.length == 0 && !nextBigger) {
+        // no proofs available
         return [];
       }
 
@@ -252,15 +256,12 @@ export const useWalletStore = defineStore("wallet", {
       }
       let sum = selectedProofs.reduce((s, t) => (s += t.amount), 0);
 
-      // if sum of selectedProofs is smaller than amount, take next bigger proof instead
+      // if sum of selectedProofs is smaller than amount, take next bigger proof instead as a fallback
       if (sum < amount && nextBigger) {
         selectedProofs = [nextBigger];
       }
 
       console.log("### selected amounts", "sum", selectedProofs.reduce((s, t) => (s += t.amount), 0), selectedProofs.map(p => p.amount));
-      // temporary
-      const outputAmounts = this.outputAmountSelect(amount)
-      console.log("### outputAmountSelect amounts", "sum", outputAmounts.reduce((s, t) => (s += t.amount), 0), outputAmounts);
       return selectedProofs
     },
     spendableProofs: function (proofs: WalletProof[], amount: number) {
