@@ -634,11 +634,6 @@ export default defineComponent({
         if (!this.g.offline) {
           this.checkTokenSpendableWorker(this.sendData.tokensBase64);
         }
-
-        // if (this.checkSentTokens) {
-        //   console.log("### kick off checkTokenSpendableWorker");
-        //   this.checkTokenSpendableWorker(this.sendData.tokensBase64);
-        // }
       } catch (error) {
         console.error(error);
       }
