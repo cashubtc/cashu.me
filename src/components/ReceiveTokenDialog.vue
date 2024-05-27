@@ -3,12 +3,13 @@
     v-model="showReceiveTokens"
     position="top"
     backdrop-filter="blur(2px) brightness(60%)"
+    no-backdrop-dismiss
   >
     <q-card class="q-pa-lg q-pt-md qcard">
       <div>
         <div class="row items-center no-wrap q-mb-sm">
-          <div class="col-12">
-            <span class="text-subtitle1">Receive Ecash</span>
+          <div class="col-10">
+            <span class="text-h6">Receive Ecash</span>
           </div>
         </div>
         <q-input

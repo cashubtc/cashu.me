@@ -5,6 +5,7 @@
     position="top"
     v-if="!camera.show"
     backdrop-filter="blur(2px) brightness(60%)"
+    no-backdrop-dismiss
   >
     <q-card class="q-pa-lg q-pt-xl qcard">
       <div v-if="payInvoiceData.invoice">
@@ -145,6 +146,11 @@
         </q-form>
       </div>
       <div v-else>
+        <div class="row items-center no-wrap q-mb-xl">
+          <div class="col-10">
+            <span class="text-h6">Pay Lightning</span>
+          </div>
+        </div>
         <q-form
           v-if="!camera.show"
           @submit="decodeAndQuote(payInvoiceData.input.request)"

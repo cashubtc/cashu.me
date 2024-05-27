@@ -3,6 +3,7 @@
     v-model="showSendTokens"
     position="top"
     backdrop-filter="blur(2px) brightness(60%)"
+    no-backdrop-dismiss
   >
     <q-card class="q-pa-none q-pt-none qcard">
       <!--  enter send data -->
@@ -156,23 +157,19 @@
               enter-active-class="animated fadeIn"
               leave-active-class="animated fadeOut"
             >
-              <q-chip
+              <q-badge
                 v-if="canSpendOffline && !sendData.p2pkPubkey && !showLockInput"
                 outline
-                color="primary"
-                icon="check"
-                class="q-ml-auto"
+                rounded
+                color="grey"
+                class="q-mr-auto q-pl-xs q-ml-sm q-pr-sm q-pt-none q-my-xs"
+                size="sm"
               >
+                <q-icon name="check" class="q-mr-xs" size="xs" />
                 Offline
-              </q-chip>
+              </q-badge>
             </transition>
-            <q-btn
-              v-if="!sendData.amount"
-              v-close-popup
-              rounded
-              flat
-              color="grey"
-              class="q-ml-auto"
+            <q-btn v-close-popup rounded flat color="grey" class="q-ml-auto"
               >Close</q-btn
             >
           </div>

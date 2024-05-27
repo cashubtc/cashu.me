@@ -31,6 +31,7 @@ type InvoiceHistory = Invoice & {
   status: "pending" | "paid";
   mint?: string;
   unit?: string;
+  token?: string;
 };
 
 type KeysetCounter = {
@@ -565,17 +566,31 @@ export const useWalletStore = defineStore("wallet", {
       );
       this.payInvoiceData.blocking = true;
       let sendProofs: Proof[] = [];
+      let countChangeOutputs = 0;
+      const keysetId = this.getKeyset();
       try {
         const { keepProofs, sendProofs: _sendProofs } = await this.splitToSend(
           mintStore.activeMint().unitProofs(mintStore.activeUnit),
           amount
         );
         sendProofs = _sendProofs;
+        // update UI
+        const serializedSendProofs = proofsStore.serializeProofs(sendProofs);
         proofsStore.setReserved(sendProofs, true);
+        await this.addOutgoingPendingInvoiceToHistory(quote, serializedSendProofs || undefined)
+
         // NUT-08 blank outputs for change
-        let n_outputs = Math.max(Math.ceil(Math.log2(quote.fee_reserve)), 1);
-        const keysetId = this.getKeyset();
         const counter = this.keysetCounter(keysetId);
+
+        // QUICK: we increase the keyset counter by the maximum number of possible change outputs let count = Math.ceil(Math.log2(feeReserve)) || 1;
+        // so that in case the user exits the app before payInvoice is completed, the returned change outputs won't cause a "outputs already signed" error
+        // if the use remains in the app, we decrease the counter again by the difference of the maximum number of possible change outputs and the actual
+        // number of change outputs
+        if (quote.fee_reserve > 0) {
+          countChangeOutputs = Math.ceil(Math.log2(quote.fee_reserve)) || 1;
+          this.increaseKeysetCounter(keysetId, countChangeOutputs);
+        }
+
         const data = await this.wallet.payLnInvoice(invoice, sendProofs, quote, { keysetId, counter })
 
         if (data.isPaid != true) {
@@ -596,35 +611,28 @@ export const useWalletStore = defineStore("wallet", {
             "## Received change: " + proofsStore.sumProofs(changeProofs)
           );
           mintStore.addProofs(changeProofs);
-          this.increaseKeysetCounter(keysetId, changeProofs.length)
+          this.increaseKeysetCounter(keysetId, -changeProofs.length)
         }
-        // update UI
-        const serializedProofs = proofsStore.serializeProofs(sendProofs);
-        if (serializedProofs == null) {
+
+        if (serializedSendProofs == null) {
           throw new Error("could not serialize proofs.");
         }
         tokenStore.addPaidToken({
           amount: -amount_paid,
-          serializedProofs: serializedProofs,
+          serializedProofs: serializedSendProofs,
           unit: mintStore.activeUnit,
           mint: mintStore.activeMintUrl,
         });
 
-        this.invoiceHistory.push({
-          amount: -amount_paid,
-          bolt11: this.payInvoiceData.input.request,
-          quote: quote.quote,
-          memo: "Outgoing invoice",
-          date: currentDateStr(),
-          status: "paid",
-          mint: mintStore.activeMintUrl,
-        });
+        this.updateInvoiceInHistory(quote, { status: "paid", amount: -amount_paid })
 
         this.payInvoiceData.invoice = { sat: 0, memo: "", bolt11: "" };
         this.payInvoiceData.show = false;
         return data;
       } catch (error: any) {
         proofsStore.setReserved(sendProofs, false);
+        this.increaseKeysetCounter(keysetId, -countChangeOutputs);
+        this.removeOutgoingInvoiceFromHistory(quote)
         console.error(error);
         notifyApiError(error);
         throw error;
@@ -702,12 +710,26 @@ export const useWalletStore = defineStore("wallet", {
       if (spentProofs != undefined && spentProofs.length == proofs.length) {
         tokenStore.setTokenPaid(tokenStr);
       } else if (spentProofs != undefined && spentProofs.length && spentProofs.length < proofs.length) {
-        // not all proofs are spent, let's edit the history token accordingly
+        // not all proofs are spent, let's edit the token history accordingly. we set the paid part to paid
+        // and ad a new pending incoming token with the unspent proofs
         const spentAmount = proofsStore.sumProofs(spentProofs);
         const serializedSpentProofs = proofsStore.serializeProofs(spentProofs);
         if (serializedSpentProofs) {
           tokenStore.editHistoryToken(tokenStr, { newAmount: - spentAmount, newStatus: "paid", newToken: serializedSpentProofs })
         }
+        // add all unspent proofs (proofs without spentProofs, check by secret) back to the history
+        const unspentProofs = proofs.filter(p => !spentProofs.find(sp => sp.secret === p.secret))
+        const unspentAmount = proofsStore.sumProofs(unspentProofs);
+        const serializedUnspentProofs = proofsStore.serializeProofs(unspentProofs);
+        if (serializedUnspentProofs) {
+          tokenStore.addPendingToken({
+            amount: unspentAmount,
+            serializedProofs: serializedUnspentProofs,
+            unit: mintStore.activeUnit,
+            mint: mintStore.activeMintUrl,
+          });
+        }
+
       }
       if (spentProofs != undefined && spentProofs.length) {
         if (!!window.navigator.vibrate) navigator.vibrate(200);
@@ -746,7 +768,38 @@ export const useWalletStore = defineStore("wallet", {
       }
     },
     ////////////// UI HELPERS //////////////
-
+    addOutgoingPendingInvoiceToHistory: function (quote: MeltQuoteResponse, serlializedToken?: string) {
+      const mintStore = useMintsStore();
+      this.invoiceHistory.push({
+        amount: -(quote.amount + quote.fee_reserve),
+        bolt11: this.payInvoiceData.input.request,
+        quote: quote.quote,
+        memo: "Outgoing invoice",
+        date: currentDateStr(),
+        status: "pending",
+        mint: mintStore.activeMintUrl,
+        token: serlializedToken,
+      });
+    },
+    removeOutgoingInvoiceFromHistory: function (quote: MeltQuoteResponse) {
+      const index = this.invoiceHistory.findIndex((i) => i.quote === quote.quote);
+      if (index >= 0) {
+        this.invoiceHistory.splice(index, 1);
+      }
+    },
+    updateInvoiceInHistory: function (quote: MeltQuoteResponse, options?: { status?: "pending" | "paid", amount?: number }) {
+      this.invoiceHistory.filter((i) => i.quote === quote.quote).forEach((i) => {
+        if (options) {
+          if (options.status) {
+            i.status = options.status;
+          }
+          if (options.amount) {
+            i.amount = options.amount;
+          }
+        }
+      }
+      );
+    },
     checkPendingInvoices: async function (verbose: boolean = true) {
       const last_n = 10;
       let i = 0;
