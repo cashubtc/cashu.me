@@ -117,7 +117,7 @@ export default {
         ><q-tooltip>Paste</q-tooltip></q-btn
       >
       <q-btn @click="closeCamera" flat color="grey" class="q-ml-auto"
-        >Cancel</q-btn
+        >Close</q-btn
       >
     </div>
   </q-card>

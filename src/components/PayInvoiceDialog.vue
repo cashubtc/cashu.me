@@ -60,17 +60,13 @@
               color="primary"
               size="1em"
           /></q-btn>
-          <q-btn v-close-popup flat color="grey" class="q-ml-auto"
-            >Cancel</q-btn
-          >
+          <q-btn v-close-popup flat color="grey" class="q-ml-auto">Close</q-btn>
         </div>
         <div v-else class="row q-mt-lg">
           <q-btn unelevated disabled color="yellow" text-color="black"
             >Not enough funds!</q-btn
           >
-          <q-btn v-close-popup flat color="grey" class="q-ml-auto"
-            >Cancel</q-btn
-          >
+          <q-btn v-close-popup flat color="grey" class="q-ml-auto">Close</q-btn>
         </div>
       </div>
       <div v-else-if="payInvoiceData.lnurlpay">
@@ -140,7 +136,7 @@
           <div class="row q-mt-lg">
             <q-btn unelevated color="primary" type="submit">Send</q-btn>
             <q-btn v-close-popup flat color="grey" class="q-ml-auto"
-              >Cancel</q-btn
+              >Close</q-btn
             >
           </div>
         </q-form>
@@ -205,7 +201,7 @@
             </q-responsive>
             <div class="row q-mt-lg">
               <q-btn @click="closeCamera" flat color="grey" class="q-ml-auto">
-                Cancel
+                Close
               </q-btn>
             </div>
           </div> -->
