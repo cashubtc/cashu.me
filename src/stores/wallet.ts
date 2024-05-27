@@ -710,26 +710,28 @@ export const useWalletStore = defineStore("wallet", {
 
       const spentProofs = await this.checkProofsSpendable(proofs);
       if (spentProofs != undefined && spentProofs.length == proofs.length) {
+        // all proofs are spent, set token to paid
         tokenStore.setTokenPaid(tokenStr);
       } else if (spentProofs != undefined && spentProofs.length && spentProofs.length < proofs.length) {
-        // not all proofs are spent, let's edit the token history accordingly. we set the paid part to paid
-        // and ad a new pending incoming token with the unspent proofs
+        // not all proofs are spent, we remove the spent part of the token from the history
         const spentAmount = proofsStore.sumProofs(spentProofs);
         const serializedSpentProofs = proofsStore.serializeProofs(spentProofs);
-        if (serializedSpentProofs) {
-          tokenStore.editHistoryToken(tokenStr, { newAmount: - spentAmount, newStatus: "paid", newToken: serializedSpentProofs })
-        }
-        // add all unspent proofs (proofs without spentProofs, check by secret) back to the history
         const unspentProofs = proofs.filter(p => !spentProofs.find(sp => sp.secret === p.secret))
         const unspentAmount = proofsStore.sumProofs(unspentProofs);
         const serializedUnspentProofs = proofsStore.serializeProofs(unspentProofs);
-        if (serializedUnspentProofs) {
-          tokenStore.addPendingToken({
-            amount: unspentAmount,
-            serializedProofs: serializedUnspentProofs,
-            unit: mintStore.activeUnit,
-            mint: mintStore.activeMintUrl,
-          });
+
+        if (serializedSpentProofs && serializedUnspentProofs) {
+          const historyToken = tokenStore.editHistoryToken(tokenStr, { newAmount: spentAmount, newStatus: "paid", newToken: serializedSpentProofs })
+          // add all unspent proofs back to the history
+          // QUICK: we use the historyToken object here because we don't know if the transaction is incoming or outgoing (we don't know the sign of the amount)
+          if (historyToken) {
+            tokenStore.addPendingToken({
+              amount: unspentAmount * Math.sign(historyToken.amount),
+              serializedProofs: serializedUnspentProofs,
+              unit: historyToken.unit,
+              mint: historyToken.mint,
+            });
+          }
         }
 
       }

@@ -9,9 +9,37 @@
       <!--  enter send data -->
       <div v-if="!sendData.tokens">
         <q-card-section class="q-pa-lg q-pt-md">
-          <div class="row items-center no-wrap q-mb-sm">
+          <div class="row items-center no-wrap q-mb-sm q-pr-md">
             <div class="col-10">
               <span class="text-h6">Send Ecash</span>
+            </div>
+            <div class="col-2">
+              <transition
+                appear
+                enter-active-class="animated fadeIn"
+                leave-active-class="animated fadeOut"
+              >
+                <div>
+                  <q-badge
+                    v-if="
+                      canSpendOffline && !sendData.p2pkPubkey && !showLockInput
+                    "
+                    outline
+                    rounded
+                    color="grey"
+                    class="q-ml-auto q-pl-sm q-ml-sm q-pr-sm q-my-xs q-mt-md"
+                    size="md"
+                  >
+                    <q-icon
+                      name="check"
+                      color="primary"
+                      class="q-mr-xs"
+                      size="sm"
+                    />
+                    <span class="text-weight-medium">Offline</span>
+                  </q-badge>
+                </div>
+              </transition>
             </div>
           </div>
           <div class="row items-center no-wrap q-my-sm q-py-none">
@@ -151,23 +179,6 @@
                 <!-- <q-icon size="xs" class="q-mr-xs" name="lock" />  -->
                 Lock</q-btn
               >
-            </transition>
-            <transition
-              appear
-              enter-active-class="animated fadeIn"
-              leave-active-class="animated fadeOut"
-            >
-              <q-badge
-                v-if="canSpendOffline && !sendData.p2pkPubkey && !showLockInput"
-                outline
-                rounded
-                color="grey"
-                class="q-mr-auto q-pl-xs q-ml-sm q-pr-sm q-pt-none q-my-xs"
-                size="sm"
-              >
-                <q-icon name="check" class="q-mr-xs" size="xs" />
-                Offline
-              </q-badge>
             </transition>
             <q-btn v-close-popup rounded flat color="grey" class="q-ml-auto"
               >Close</q-btn

@@ -65,7 +65,7 @@ export const useTokensStore = defineStore("tokens", {
         unit,
       });
     },
-    editHistoryToken(tokenToEdit: string, options?: { newAmount?: number; newStatus?: "paid" | "pending", newToken?: string }) {
+    editHistoryToken(tokenToEdit: string, options?: { newAmount?: number; addAmount?: number, newStatus?: "paid" | "pending", newToken?: string, }): HistoryToken | undefined {
       const index = this.historyTokens.findIndex((t) => t.token === tokenToEdit);
       if (index >= 0) {
         if (options) {
@@ -73,13 +73,25 @@ export const useTokensStore = defineStore("tokens", {
             this.historyTokens[index].token = options.newToken;
           }
           if (options.newAmount) {
-            this.historyTokens[index].amount = options.newAmount;
+            this.historyTokens[index].amount = options.newAmount * Math.sign(this.historyTokens[index].amount);
+          }
+          if (options.addAmount) {
+            if (this.historyTokens[index].amount > 0) {
+              this.historyTokens[index].amount += options.addAmount;
+            } else {
+              this.historyTokens[index].amount -= options.addAmount;
+            }
+
           }
           if (options.newStatus) {
             this.historyTokens[index].status = options.newStatus;
           }
         }
+
+        return this.historyTokens[index];
       }
+
+      return undefined;
     },
     setTokenPaid(token: string) {
       const index = this.historyTokens.findIndex((t) => t.token === token);
