@@ -145,7 +145,18 @@ export const useNWCStore = defineStore("nwc", {
     },
     handleListTransactions: async function (nwcCommand: NWCCommand) {
       console.log("### list_transactions", nwcCommand.method)
-
+      type nwcTransaction = {
+        type: string,
+        invoice: string,
+        description: string | null,
+        preimage: string | null,
+        payment_hash: string | null,
+        amount: number,
+        fees_paid: number | null,
+        created_at: number,
+        settled_at: number | null
+        expires_at: number | null
+      }
       const walletStore = useWalletStore()
       const from = nwcCommand.params.from || 0
       const until = nwcCommand.params.until || Math.floor(Date.now() / 1000)
@@ -156,13 +167,13 @@ export const useNWCStore = defineStore("nwc", {
 
 
       const invoiceHistory = walletStore.invoiceHistory
-      const transactions = invoiceHistory.filter((invoice) => {
+      const transactionsHistory = invoiceHistory.filter((invoice) => {
         const date = new Date(invoice.date)
-        const dateSeconds = Math.floor(date.getTime() / 1000)
-        if (from && dateSeconds < from) {
+        const created_at = Math.floor(date.getTime() / 1000)
+        if (from && created_at < from) {
           return false
         }
-        if (until && dateSeconds > until) {
+        if (until && created_at > until) {
           return false
         }
         if (type && type == "incoming" && invoice.amount < 0) {
@@ -177,6 +188,28 @@ export const useNWCStore = defineStore("nwc", {
         return true
       }
       ).slice(offset, offset + limit)
+      // now create an array "transactions" out of nwcTransaction from transactionsHistory
+      //
+      // type = "incoming" if amount > 0 else "outgoing"
+      // amount = abs(amount)
+      // created_at = unix timestamp of date
+      // settled_at = unix timestamp of date if status == "paid" else null
+
+      const transactions = transactionsHistory.map((invoice) => {
+        let type = invoice.amount > 0 ? "incoming" : "outgoing"
+        let amount = Math.abs(invoice.amount)
+        let created_at = Math.floor(new Date(invoice.date).getTime() / 1000)
+        let settled_at = invoice.status == "paid" ? Math.floor(new Date(invoice.date).getTime() / 1000) : null
+        return {
+          type: type,
+          invoice: invoice.bolt11,
+          description: invoice.memo,
+          amount: amount,
+          created_at: created_at,
+          settled_at: settled_at,
+        } as nwcTransaction
+      })
+
       return {
         result_type: "list_transactions",
         result: {
