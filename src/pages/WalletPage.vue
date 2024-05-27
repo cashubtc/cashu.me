@@ -94,7 +94,7 @@
           <!-- ////////////////// INVOICE LIST ///////////////// -->
 
           <q-tab-panel name="invoices">
-            <InvoicesTable :check-invoice="checkInvoice" />
+            <InvoicesTable />
           </q-tab-panel>
 
           <!-- ////////////////////// SETTINGS ////////////////// -->

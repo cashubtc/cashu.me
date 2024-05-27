@@ -93,15 +93,15 @@ import { defineComponent } from "vue";
 import { shortenString } from "src/js/string-utils";
 import { formatDistanceToNow, parseISO } from "date-fns";
 import { useTokensStore } from "src/stores/tokens";
-import { mapState, mapWritableState } from "pinia";
+import { mapState, mapWritableState, mapActions } from "pinia";
 import { useReceiveTokensStore } from "src/stores/receiveTokensStore";
+import { useWalletStore } from "src/stores/wallet";
 
 export default defineComponent({
   name: "HistoryTable",
   mixins: [windowMixin],
   props: {
     showTokenDialog: Function,
-    checkTokenSpendable: Function,
   },
   data: function () {
     return {
@@ -125,6 +125,7 @@ export default defineComponent({
     },
   },
   methods: {
+    ...mapActions(useWalletStore, ["checkTokenSpendable"]),
     formattedDate(date_str) {
       const date = parseISO(date_str); // Convert string to date object
       return formatDistanceToNow(date, { addSuffix: false }); // "6 hours ago"
