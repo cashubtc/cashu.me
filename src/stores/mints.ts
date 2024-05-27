@@ -123,7 +123,8 @@ export const useMintsStore = defineStore("mints", {
         if (this.mints.length) {
           console.error("No active mint. This should not happen. switching to first one.")
           // fallback
-          this.activeMintUrl = this.mints[0].url
+          // this.activeMintUrl = this.mints[0].url
+          this.activateMintUrl(this.mints[0].url, false, true)
           return new MintClass(this.mints[0]);
         }
         throw new Error("No active mint");
@@ -240,7 +241,6 @@ export const useMintsStore = defineStore("mints", {
     activateMintUrl: async function (url: string, verbose = false, force = false) {
       const mint = this.mints.filter((m) => m.url === url)[0];
       if (mint) {
-
         await this.activateMint(mint, verbose, force);
       } else {
         notifyError("Mint not found", "Mint activation failed");
@@ -259,11 +259,8 @@ export const useMintsStore = defineStore("mints", {
 
       // create new mint.api instance because we can't store it in local storage
       let previousUrl = this.activeMintUrl;
-
-
       try {
         this.activeMintUrl = mint.url;
-
         console.log("### this.activeMintUrl", this.activeMintUrl);
         mint = await this.fetchMintKeys(mint);
         this.toggleActiveUnitForMint(mint);
