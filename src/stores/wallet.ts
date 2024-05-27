@@ -587,14 +587,13 @@ export const useWalletStore = defineStore("wallet", {
         // so that in case the user exits the app before payInvoice is completed, the returned change outputs won't cause a "outputs already signed" error
         // if the use remains in the app, we decrease the counter again by the difference of the maximum number of possible change outputs and the actual
         // number of change outputs
+        this.increaseKeysetCounter(keysetId, sendProofs.length);
         if (quote.fee_reserve > 0) {
           countChangeOutputs = Math.ceil(Math.log2(quote.fee_reserve)) || 1;
-          this.increaseKeysetCounter(keysetId, countChangeOutputs);
+          this.increaseKeysetCounter(keysetId, sendProofs.length);
         }
 
         const data = await this.wallet.payLnInvoice(invoice, sendProofs, quote, { keysetId, counter })
-
-        this.increaseKeysetCounter(keysetId, sendProofs.length);
 
         if (data.isPaid != true) {
           throw new Error("Invoice not paid.");
@@ -634,7 +633,7 @@ export const useWalletStore = defineStore("wallet", {
         return data;
       } catch (error: any) {
         proofsStore.setReserved(sendProofs, false);
-        this.increaseKeysetCounter(keysetId, -countChangeOutputs);
+        this.increaseKeysetCounter(keysetId, -(countChangeOutputs + sendProofs.length));
         this.removeOutgoingInvoiceFromHistory(quote)
         console.error(error);
         notifyApiError(error);
