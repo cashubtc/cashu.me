@@ -927,8 +927,8 @@ export const useWalletStore = defineStore("wallet", {
         if (t.status === "pending" && t.amount < 0) {
           console.log("### checkPendingTokens", t.token)
           this.checkTokenSpendable(t.token, verbose);
+          i += 1;
         }
-        i += 1;
       }
     },
     handleBolt11Invoice: async function () {
