@@ -547,7 +547,8 @@ export const useWalletStore = defineStore("wallet", {
       }
       const invoice = this.payInvoiceData.invoice.bolt11;
       // throw an error if the invoice is already in invoiceHistory
-      if (this.invoiceHistory.find((i) => i.bolt11 === invoice)) {
+      if (this.invoiceHistory.find((i) => i.bolt11 === invoice && i.amount < 0 && i.status === "paid")) {
+        notifyError("Invoice already paid.");
         throw new Error("invoice already paid.");
       }
 
@@ -593,6 +594,8 @@ export const useWalletStore = defineStore("wallet", {
 
         const data = await this.wallet.payLnInvoice(invoice, sendProofs, quote, { keysetId, counter })
 
+        this.increaseKeysetCounter(keysetId, sendProofs.length);
+
         if (data.isPaid != true) {
           throw new Error("Invoice not paid.");
         }
@@ -611,7 +614,7 @@ export const useWalletStore = defineStore("wallet", {
             "## Received change: " + proofsStore.sumProofs(changeProofs)
           );
           mintStore.addProofs(changeProofs);
-          this.increaseKeysetCounter(keysetId, -changeProofs.length)
+          this.increaseKeysetCounter(keysetId, -countChangeOutputs + changeProofs.length)
         }
 
         if (serializedSendProofs == null) {
@@ -846,7 +849,7 @@ export const useWalletStore = defineStore("wallet", {
         throw error;
       }
       let cleanInvoice = {
-        bolt11: "",
+        bolt11: invoice.paymentRequest,
         memo: "",
         msat: 0,
         sat: 0,
