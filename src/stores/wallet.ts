@@ -614,7 +614,7 @@ export const useWalletStore = defineStore("wallet", {
           amount: -amount_paid,
           bolt11: this.payInvoiceData.input.request,
           quote: quote.quote,
-          memo: "fixme",
+          memo: "Outgoing invoice",
           date: currentDateStr(),
           status: "paid",
           mint: mintStore.activeMintUrl,

@@ -197,7 +197,7 @@ export const useNWCStore = defineStore("nwc", {
 
       const transactions = transactionsHistory.map((invoice) => {
         let type = invoice.amount > 0 ? "incoming" : "outgoing"
-        let amount = Math.abs(invoice.amount)
+        let amount = Math.abs(invoice.amount) * 1000
         let created_at = Math.floor(new Date(invoice.date).getTime() / 1000)
         let settled_at = invoice.status == "paid" ? Math.floor(new Date(invoice.date).getTime() / 1000) : null
         return {
@@ -205,6 +205,7 @@ export const useNWCStore = defineStore("nwc", {
           invoice: invoice.bolt11,
           description: invoice.memo,
           amount: amount,
+          fees_paid: 0,
           created_at: created_at,
           settled_at: settled_at,
         } as nwcTransaction
