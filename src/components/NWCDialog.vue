@@ -22,13 +22,12 @@
         <div class="row justify-center">
           <q-card-section class="q-pa-sm">
             <div class="row justify-center">
-              <q-item-label overline class="q-mb-sm q-pt-md text-white">
-                Nostr Wallet Connect</q-item-label
+              <q-item-label
+                overline
+                class="q-mb-sm q-pt-md text-white"
+                style="font-size: 14px"
               >
-            </div>
-            <div class="row justify-center q-pt-sm">
-              <q-item-label caption class="text-white" style="font-size: 14px"
-                >Control your wallet remotely.</q-item-label
+                Nostr Wallet Connect</q-item-label
               >
             </div>
             <div class="row justify-center q-pt-md">
@@ -37,16 +36,13 @@
                 class="text-weight-light text-white"
                 style="font-size: 14px"
               >
-                <q-icon
-                  name="warning"
-                  color="warning"
-                  size="xs"
-                  class="q-pb-md"
-                />
-                <br />
+                Control your wallet remotely with NWC. Press the QR code to link
+                your wallet with a compatible app.
+              </q-item-label>
+              <q-item-label caption class="text-weight-bold text-white q-pt-md">
                 Warning: anyone with access to this connection string can
-                initiate payments from your wallet.</q-item-label
-              >
+                initiate payments from your wallet. Do not share!
+              </q-item-label>
             </div>
           </q-card-section>
         </div>
