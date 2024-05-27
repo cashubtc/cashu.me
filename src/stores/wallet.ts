@@ -261,7 +261,7 @@ export const useWalletStore = defineStore("wallet", {
         selectedProofs = [nextBigger];
       }
 
-      console.log("### selected amounts", "sum", selectedProofs.reduce((s, t) => (s += t.amount), 0), selectedProofs.map(p => p.amount));
+      // console.log("### selected amounts", "sum", selectedProofs.reduce((s, t) => (s += t.amount), 0), selectedProofs.map(p => p.amount));
       return selectedProofs
     },
     spendableProofs: function (proofs: WalletProof[], amount: number) {
@@ -298,10 +298,14 @@ export const useWalletStore = defineStore("wallet", {
       if invalidate, scndProofs (the one to send) are invalidated
       */
       const mintStore = useMintsStore();
+      const proofsStore = useProofsStore()
+      let proofsToSplit: WalletProof[] = [];
+
       try {
         const spendableProofs = this.spendableProofs(proofs, amount);
-        const proofsToSplit = this.coinSelect(spendableProofs, amount);
+        proofsToSplit = this.coinSelect(spendableProofs, amount);
         const totalAmount = proofsToSplit.reduce((s, t) => (s += t.amount), 0);
+        proofsStore.setReserved(proofsToSplit, true);
         let keepProofs: Proof[] = [];
         let sendProofs: Proof[] = [];
         if (totalAmount != amount) {
@@ -329,6 +333,7 @@ export const useWalletStore = defineStore("wallet", {
 
         return { keepProofs, sendProofs };
       } catch (error: any) {
+        proofsStore.setReserved(proofsToSplit, false);
         console.error(error);
         notifyApiError(error);
         throw error;
@@ -561,10 +566,11 @@ export const useWalletStore = defineStore("wallet", {
       this.payInvoiceData.blocking = true;
       let sendProofs: Proof[] = [];
       try {
-        const { keepProofs, sendProofs } = await this.splitToSend(
+        const { keepProofs, sendProofs: _sendProofs } = await this.splitToSend(
           mintStore.activeMint().unitProofs(mintStore.activeUnit),
           amount
         );
+        sendProofs = _sendProofs;
         proofsStore.setReserved(sendProofs, true);
         // NUT-08 blank outputs for change
         let n_outputs = Math.max(Math.ceil(Math.log2(quote.fee_reserve)), 1);
@@ -679,6 +685,7 @@ export const useWalletStore = defineStore("wallet", {
       */
       const mintStore = useMintsStore();
       const tokenStore = useTokensStore();
+      const proofsStore = useProofsStore();
 
       const tokenJson = token.decode(tokenStr);
       if (tokenJson == undefined) {
@@ -692,23 +699,28 @@ export const useWalletStore = defineStore("wallet", {
       }
 
       const spentProofs = await this.checkProofsSpendable(proofs);
-      let paid = false;
       if (spentProofs != undefined && spentProofs.length == proofs.length) {
         tokenStore.setTokenPaid(tokenStr);
-        paid = true;
+      } else if (spentProofs != undefined && spentProofs.length && spentProofs.length < proofs.length) {
+        // not all proofs are spent, let's edit the history token accordingly
+        const spentAmount = proofsStore.sumProofs(spentProofs);
+        const serializedSpentProofs = proofsStore.serializeProofs(spentProofs);
+        if (serializedSpentProofs) {
+          tokenStore.editHistoryToken(tokenStr, { newAmount: - spentAmount, newStatus: "paid", newToken: serializedSpentProofs })
+        }
       }
-      if (paid) {
+      if (spentProofs != undefined && spentProofs.length) {
         if (!!window.navigator.vibrate) navigator.vibrate(200);
         const proofStore = useProofsStore();
-        notifySuccess("Sent " + uIStore.formatCurrency(proofStore.sumProofs(proofs), mintStore.activeUnit));
+        notifySuccess("Sent " + uIStore.formatCurrency(proofStore.sumProofs(spentProofs), mintStore.activeUnit));
       } else {
         console.log("### token not paid yet");
         if (verbose) {
           notify("Token still pending");
         }
-        // this.sendData.tokens = token
+        return false;
       }
-      return paid;
+      return true;
     },
     checkInvoice: async function (quote: string, verbose = true) {
       const mintStore = useMintsStore();

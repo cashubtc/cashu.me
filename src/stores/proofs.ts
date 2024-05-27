@@ -14,6 +14,13 @@ export const useProofsStore = defineStore("proofs", {
       const mintStore = useMintsStore();
       const walletProofs = mintStore.proofsToWalletProofs(proofs);
       walletProofs.forEach((p) => (p.reserved = reserved));
+      // for each proof in mintStore.proofs with the same walletProofs.secret, set the reserved
+      walletProofs.forEach((p) => {
+        mintStore.proofs
+          .filter((pr) => pr.secret === p.secret)
+          .forEach((pr) => (pr.reserved = reserved));
+      }
+      );
     },
     getUnreservedProofs: function (proofs: WalletProof[]) {
       return proofs.filter((p) => !p.reserved);

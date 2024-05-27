@@ -532,6 +532,29 @@
                       flat
                       outline
                       click
+                      @click="unsetAllReservedProofs"
+                    >
+                      Unset all reserved tokens
+                    </q-btn></row
+                  ><row>
+                    <q-item-label class="q-px-sm" caption
+                      >To avoid double-spending attempts, this wallet marks
+                      ecash as reserved so you don't reuse it. This button will
+                      unset all reserved tokens so they can be used again. If
+                      you do this, your wallet might include spent proofs. Press
+                      the "Remove spent proofs" button to get rid of them.
+                    </q-item-label>
+                  </row>
+                </q-item-section>
+              </q-item>
+              <q-item>
+                <q-item-section>
+                  <row>
+                    <q-btn
+                      dense
+                      flat
+                      outline
+                      click
                       @click="getLocalstorageToFile"
                     >
                       Export wallet data
@@ -634,7 +657,12 @@ export default defineComponent({
     ...mapState(useP2PKStore, ["p2pkKeys"]),
     ...mapWritableState(useP2PKStore, ["showP2PKDialog"]),
     ...mapWritableState(useNWCStore, ["showNWCDialog", "showNWCData"]),
-    ...mapState(useMintsStore, ["activeMintUrl", "mints", "activeProofs"]),
+    ...mapState(useMintsStore, [
+      "activeMintUrl",
+      "mints",
+      "activeProofs",
+      "proofs",
+    ]),
     ...mapState(useNostrStore, ["pubkey", "mintRecommendations"]),
     ...mapState(useWalletStore, ["mnemonic"]),
     ...mapWritableState(useWalletStore, ["keysetCounters"]),
@@ -794,6 +822,13 @@ export default defineComponent({
       downloadLink.style.display = "none";
       document.body.appendChild(downloadLink);
       downloadLink.click();
+    },
+    unsetAllReservedProofs: async function () {
+      // mark all this.proofs as reserved=false
+      for (let proof of this.proofs) {
+        proof.reserved = false;
+      }
+      this.notifySuccess("No reserved proofs left");
     },
     toggleGetBitcoinPrice: function () {
       this.getBitcoinPrice = !this.getBitcoinPrice;

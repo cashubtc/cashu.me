@@ -65,6 +65,22 @@ export const useTokensStore = defineStore("tokens", {
         unit,
       });
     },
+    editHistoryToken(tokenToEdit: string, options?: { newAmount?: number; newStatus?: "paid" | "pending", newToken?: string }) {
+      const index = this.historyTokens.findIndex((t) => t.token === tokenToEdit);
+      if (index >= 0) {
+        if (options) {
+          if (options.newToken) {
+            this.historyTokens[index].token = options.newToken;
+          }
+          if (options.newAmount) {
+            this.historyTokens[index].amount = options.newAmount;
+          }
+          if (options.newStatus) {
+            this.historyTokens[index].status = options.newStatus;
+          }
+        }
+      }
+    },
     setTokenPaid(token: string) {
       const index = this.historyTokens.findIndex((t) => t.token === token);
       if (index >= 0) {
