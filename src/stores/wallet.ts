@@ -634,7 +634,7 @@ export const useWalletStore = defineStore("wallet", {
         this.payInvoiceData.invoice = { sat: 0, memo: "", bolt11: "" };
         this.payInvoiceData.show = false;
         return data;
-      } catch (error) {
+      } catch (error: any) {
         if (isUnloading) {
           // do not handle the error if the user exits the app
           return;
@@ -642,10 +642,8 @@ export const useWalletStore = defineStore("wallet", {
         proofsStore.setReserved(sendProofs, false);
         this.increaseKeysetCounter(keysetId, -(countChangeOutputs + sendProofs.length));
         this.removeOutgoingInvoiceFromHistory(quote.quote)
-        // remove all quotes from history this.invoiceHistory
-        this.invoiceHistory = [];
         console.error(error);
-        // notifyApiError(error);
+        notifyApiError(error, "Payment failed");
         throw error;
       } finally {
         this.payInvoiceData.blocking = false;
