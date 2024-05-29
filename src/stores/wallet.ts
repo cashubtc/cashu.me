@@ -587,14 +587,15 @@ export const useWalletStore = defineStore("wallet", {
         // NUT-08 blank outputs for change
         const counter = this.keysetCounter(keysetId);
 
-        // QUIRK: we increase the keyset counter by the maximum number of possible change outputs let count = Math.ceil(Math.log2(feeReserve)) || 1;
-        // so that in case the user exits the app before payInvoice is completed, the returned change outputs won't cause a "outputs already signed" error
-        // if the use remains in the app, we decrease the counter again by the difference of the maximum number of possible change outputs and the actual
+        // QUIRK: we increase the keyset counter by sendProofs and the maximum number of possible change outputs
+        // this way, in case the user exits the app before payLnInvoice is completed, the returned change outputs won't cause a "outputs already signed" error
+        // if the payment succeeds, we decrease the counter by the difference of the maximum number of possible change outputs and the actual
         // number of change outputs
+        // if the payment fails, we decrease the counter to the original value
         this.increaseKeysetCounter(keysetId, sendProofs.length);
         if (quote.fee_reserve > 0) {
           countChangeOutputs = Math.ceil(Math.log2(quote.fee_reserve)) || 1;
-          this.increaseKeysetCounter(keysetId, sendProofs.length);
+          this.increaseKeysetCounter(keysetId, countChangeOutputs);
         }
 
         // NOTE: if the user exits the app while we're in the API call, JS will emit an error that we would catch below!
