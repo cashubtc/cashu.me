@@ -256,6 +256,8 @@ export const useMintsStore = defineStore("mints", {
       const mintClass = new MintClass(mint);
       if (mintClass.units.includes(unit)) {
         this.activeUnit = unit;
+      } else {
+        notifyError("Unit not supported by mint", "Unit activation failed");
       }
     },
     activateMint: async function (mint: Mint, verbose = false, force = false) {
