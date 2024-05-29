@@ -47,7 +47,7 @@
                 lines="1"
                 v-if="mint.nickname"
                 @click="
-                  activateMintUrl(mint.url, (verbose = false), (force = true))
+                  activateMintUrl(mint.url, (verbose = false), (force = false))
                 "
                 class="cursor-pointer"
                 style="word-break: break-word"
@@ -56,7 +56,7 @@
               <q-item-label
                 lines="1"
                 @click="
-                  activateMintUrl(mint.url, (verbose = false), (force = true))
+                  activateMintUrl(mint.url, (verbose = false), (force = false))
                 "
                 class="cursor-pointer"
                 style="word-break: break-word"

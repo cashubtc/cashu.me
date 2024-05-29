@@ -85,10 +85,7 @@
           <!-- ////////////////// HISTORY LIST ///////////////// -->
 
           <q-tab-panel name="history">
-            <HistoryTable
-              :show-token-dialog="showTokenDialog"
-              :check-token-spendable="checkTokenSpendable"
-            />
+            <HistoryTable :show-token-dialog="showTokenDialog" />
           </q-tab-panel>
 
           <!-- ////////////////// INVOICE LIST ///////////////// -->

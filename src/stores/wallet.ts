@@ -38,7 +38,7 @@ type Invoice = {
 type InvoiceHistory = Invoice & {
   date: string;
   status: "pending" | "paid";
-  mint?: string;
+  mint: string;
   unit?: string;
   token?: string;
 };
@@ -371,15 +371,10 @@ export const useWalletStore = defineStore("wallet", {
       }
       let proofs = token.getProofs(tokenJson);
 
-      if (token.getMint(tokenJson) != mintStore.activeMintUrl) {
-        await mintStore.activateMintUrl(token.getMint(tokenJson));
-      }
-      const amount = proofs.reduce((s, t) => (s += t.amount), 0);
+      // activate the mint and the unit
+      await mintStore.activateMintUrl(token.getMint(tokenJson), false, false, tokenJson.unit);
 
-      // set unit to unit in token
-      if (tokenJson.unit != undefined) {
-        mintStore.activeUnit = tokenJson.unit
-      }
+      const amount = proofs.reduce((s, t) => (s += t.amount), 0);
       try {
         // redeem
         const keysetId = this.getKeyset()
@@ -725,9 +720,8 @@ export const useWalletStore = defineStore("wallet", {
       const proofs = token.getProofs(tokenJson);
 
       // activate the mint
-      if (token.getMint(tokenJson).length > 0) {
-        await mintStore.activateMintUrl(token.getMint(tokenJson));
-      }
+      const mintInToken = token.getMint(tokenJson);
+      await mintStore.activateMintUrl(mintInToken);
 
       const spentProofs = await this.checkProofsSpendable(proofs);
       if (spentProofs != undefined && spentProofs.length == proofs.length) {
@@ -777,9 +771,9 @@ export const useWalletStore = defineStore("wallet", {
         throw new Error("invoice not found");
       }
       try {
-        if (invoice.mint != mintStore.activeMintUrl && invoice.mint != undefined) {
-          await mintStore.activateMintUrl(invoice.mint, false);
-        }
+        // activate the mint
+        await mintStore.activateMintUrl(invoice.mint, false, false, invoice.unit);
+
         const proofs = await this.mint(invoice.amount, invoice.quote, verbose);
         if (!!window.navigator.vibrate) navigator.vibrate(200);
         notifySuccess("Received " + uIStore.formatCurrency(invoice.amount, mintStore.activeUnit) + " via Lightning");
@@ -799,9 +793,7 @@ export const useWalletStore = defineStore("wallet", {
         throw new Error("invoice not found");
       }
       try {
-        if (invoice.mint != mintStore.activeMintUrl && invoice.mint != undefined) {
-          await mintStore.activateMintUrl(invoice.mint, false);
-        }
+        await mintStore.activateMintUrl(invoice.mint, false, false, invoice.unit);
         // this is an outgoing invoice, we first do a getMintQuote to check if the invoice is paid
         const mintQuote = await mintStore.activeMint().api.getMeltQuote(quote);
         console.log("### mintQuote", mintQuote);
