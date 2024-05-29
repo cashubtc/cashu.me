@@ -122,8 +122,7 @@ export const useMintsStore = defineStore("mints", {
       } else {
         if (this.mints.length) {
           console.error("No active mint. This should not happen. switching to first one.")
-          // fallback
-          this.activeMintUrl = this.mints[0].url
+          this.activateMintUrl(this.mints[0].url, false, true)
           return new MintClass(this.mints[0]);
         }
         throw new Error("No active mint");
@@ -237,13 +236,28 @@ export const useMintsStore = defineStore("mints", {
         this.addMintBlocking = false;
       }
     },
-    activateMintUrl: async function (url: string, verbose = false, force = false) {
+    activateMintUrl: async function (url: string, verbose = false, force = false, unit: string | undefined = undefined) {
       const mint = this.mints.filter((m) => m.url === url)[0];
       if (mint) {
-
         await this.activateMint(mint, verbose, force);
+        if (unit) {
+          await this.activateUnit(unit, verbose);
+        }
       } else {
         notifyError("Mint not found", "Mint activation failed");
+      }
+    },
+    activateUnit: async function (unit: string, verbose = false) {
+      const mint = this.mints.find((m) => m.url === this.activeMintUrl);
+      if (!mint) {
+        notifyError("No active mint", "Unit activation failed");
+        return;
+      }
+      const mintClass = new MintClass(mint);
+      if (mintClass.units.includes(unit)) {
+        this.activeUnit = unit;
+      } else {
+        notifyError("Unit not supported by mint", "Unit activation failed");
       }
     },
     activateMint: async function (mint: Mint, verbose = false, force = false) {
@@ -259,11 +273,8 @@ export const useMintsStore = defineStore("mints", {
 
       // create new mint.api instance because we can't store it in local storage
       let previousUrl = this.activeMintUrl;
-
-
       try {
         this.activeMintUrl = mint.url;
-
         console.log("### this.activeMintUrl", this.activeMintUrl);
         mint = await this.fetchMintKeys(mint);
         this.toggleActiveUnitForMint(mint);

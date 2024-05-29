@@ -12,13 +12,22 @@ import { useSendTokensStore } from "src/stores/sendTokensStore"
 import * as _ from "underscore";
 import token from "src/js/token";
 import { notifyApiError, notifyError, notifySuccess, notifyWarning, notify } from "src/js/notify";
-import { CashuMint, CashuWallet, Proof, MintQuotePayload, CheckStatePayload, MeltQuotePayload, MeltQuoteResponse, generateNewMnemonic, deriveSeedFromMnemonic, AmountPreference } from "@cashu/cashu-ts";
+import { CashuMint, CashuWallet, Proof, MintQuotePayload, CheckStatePayload, MeltQuotePayload, MeltQuoteResponse, generateNewMnemonic, deriveSeedFromMnemonic, AmountPreference, CheckStateEnum } from "@cashu/cashu-ts";
 import { hashToCurve } from "@cashu/cashu-ts/dist/lib/es6/DHKE";
 import * as bolt11Decoder from "light-bolt11-decoder";
 import bech32 from "bech32";
 import axios from "axios";
 import { date } from "quasar";
 import { splitAmount } from "@cashu/cashu-ts/dist/lib/es5/utils";
+
+// HACK: this is a workaround so that the catch block in the melt function does not throw an error when the user exits the app
+// before the payment is completed. This is necessary because the catch block in the melt function would otherwise remove all
+// quotes from the invoiceHistory and the user would not be able to pay the invoice again after reopening the app.
+let isUnloading = false;
+window.addEventListener('beforeunload', () => {
+  isUnloading = true;
+});
+
 type Invoice = {
   amount: number;
   bolt11: string;
@@ -29,8 +38,9 @@ type Invoice = {
 type InvoiceHistory = Invoice & {
   date: string;
   status: "pending" | "paid";
-  mint?: string;
+  mint: string;
   unit?: string;
+  token?: string;
 };
 
 type KeysetCounter = {
@@ -361,15 +371,10 @@ export const useWalletStore = defineStore("wallet", {
       }
       let proofs = token.getProofs(tokenJson);
 
-      if (token.getMint(tokenJson) != mintStore.activeMintUrl) {
-        await mintStore.activateMintUrl(token.getMint(tokenJson));
-      }
-      const amount = proofs.reduce((s, t) => (s += t.amount), 0);
+      // activate the mint and the unit
+      await mintStore.activateMintUrl(token.getMint(tokenJson), false, false, tokenJson.unit);
 
-      // set unit to unit in token
-      if (tokenJson.unit != undefined) {
-        mintStore.activeUnit = tokenJson.unit
-      }
+      const amount = proofs.reduce((s, t) => (s += t.amount), 0);
       try {
         // redeem
         const keysetId = this.getKeyset()
@@ -546,7 +551,8 @@ export const useWalletStore = defineStore("wallet", {
       }
       const invoice = this.payInvoiceData.invoice.bolt11;
       // throw an error if the invoice is already in invoiceHistory
-      if (this.invoiceHistory.find((i) => i.bolt11 === invoice)) {
+      if (this.invoiceHistory.find((i) => i.bolt11 === invoice && i.amount < 0 && i.status === "paid")) {
+        notifyError("Invoice already paid.");
         throw new Error("invoice already paid.");
       }
 
@@ -565,17 +571,35 @@ export const useWalletStore = defineStore("wallet", {
       );
       this.payInvoiceData.blocking = true;
       let sendProofs: Proof[] = [];
+      let countChangeOutputs = 0;
+      const keysetId = this.getKeyset();
       try {
         const { keepProofs, sendProofs: _sendProofs } = await this.splitToSend(
           mintStore.activeMint().unitProofs(mintStore.activeUnit),
           amount
         );
         sendProofs = _sendProofs;
+        // update UI
+        const serializedSendProofs = proofsStore.serializeProofs(sendProofs);
         proofsStore.setReserved(sendProofs, true);
+        await this.addOutgoingPendingInvoiceToHistory(quote, serializedSendProofs || undefined)
+
         // NUT-08 blank outputs for change
-        let n_outputs = Math.max(Math.ceil(Math.log2(quote.fee_reserve)), 1);
-        const keysetId = this.getKeyset();
         const counter = this.keysetCounter(keysetId);
+
+        // QUIRK: we increase the keyset counter by sendProofs and the maximum number of possible change outputs
+        // this way, in case the user exits the app before payLnInvoice is completed, the returned change outputs won't cause a "outputs already signed" error
+        // if the payment succeeds, we decrease the counter by the difference of the maximum number of possible change outputs and the actual
+        // number of change outputs
+        // if the payment fails, we decrease the counter to the original value
+        this.increaseKeysetCounter(keysetId, sendProofs.length);
+        if (quote.fee_reserve > 0) {
+          countChangeOutputs = Math.ceil(Math.log2(quote.fee_reserve)) || 1;
+          this.increaseKeysetCounter(keysetId, countChangeOutputs);
+        }
+
+        // NOTE: if the user exits the app while we're in the API call, JS will emit an error that we would catch below!
+        // We have to handle that case in the catch block below
         const data = await this.wallet.payLnInvoice(invoice, sendProofs, quote, { keysetId, counter })
 
         if (data.isPaid != true) {
@@ -596,41 +620,42 @@ export const useWalletStore = defineStore("wallet", {
             "## Received change: " + proofsStore.sumProofs(changeProofs)
           );
           mintStore.addProofs(changeProofs);
-          this.increaseKeysetCounter(keysetId, changeProofs.length)
+          this.increaseKeysetCounter(keysetId, -countChangeOutputs + changeProofs.length)
         }
-        // update UI
-        const serializedProofs = proofsStore.serializeProofs(sendProofs);
-        if (serializedProofs == null) {
-          throw new Error("could not serialize proofs.");
+        if (serializedSendProofs != null) {
+          tokenStore.addPaidToken({
+            amount: -amount_paid,
+            serializedProofs: serializedSendProofs,
+            unit: mintStore.activeUnit,
+            mint: mintStore.activeMintUrl,
+          });
         }
-        tokenStore.addPaidToken({
-          amount: -amount_paid,
-          serializedProofs: serializedProofs,
-          unit: mintStore.activeUnit,
-          mint: mintStore.activeMintUrl,
-        });
-
-        this.invoiceHistory.push({
-          amount: -amount_paid,
-          bolt11: this.payInvoiceData.input.request,
-          quote: quote.quote,
-          memo: "Outgoing invoice",
-          date: currentDateStr(),
-          status: "paid",
-          mint: mintStore.activeMintUrl,
-        });
-
+        this.updateInvoiceInHistory(quote, { status: "paid", amount: -amount_paid })
         this.payInvoiceData.invoice = { sat: 0, memo: "", bolt11: "" };
         this.payInvoiceData.show = false;
         return data;
       } catch (error: any) {
+        if (isUnloading) {
+          // do not handle the error if the user exits the app
+          return;
+        }
         proofsStore.setReserved(sendProofs, false);
+        this.increaseKeysetCounter(keysetId, -(countChangeOutputs + sendProofs.length));
+        this.removeOutgoingInvoiceFromHistory(quote.quote)
         console.error(error);
-        notifyApiError(error);
+        notifyApiError(error, "Payment failed");
         throw error;
       } finally {
         this.payInvoiceData.blocking = false;
       }
+    },
+    getProofState: async function (proofs: Proof[]) {
+      const mintStore = useMintsStore();
+      const enc = new TextEncoder();
+      const Ys = proofs.map((p) => hashToCurve(enc.encode(p.secret)).toHex(true));
+      const payload = { Ys: Ys };
+      const { states } = await new CashuMint(mintStore.activeMintUrl).check(payload);
+      return states;
     },
     // /check
     checkProofsSpendable: async function (proofs: Proof[], update_history = false) {
@@ -694,20 +719,35 @@ export const useWalletStore = defineStore("wallet", {
       const proofs = token.getProofs(tokenJson);
 
       // activate the mint
-      if (token.getMint(tokenJson).length > 0) {
-        await mintStore.activateMintUrl(token.getMint(tokenJson));
-      }
+      const mintInToken = token.getMint(tokenJson);
+      await mintStore.activateMintUrl(mintInToken);
 
       const spentProofs = await this.checkProofsSpendable(proofs);
       if (spentProofs != undefined && spentProofs.length == proofs.length) {
+        // all proofs are spent, set token to paid
         tokenStore.setTokenPaid(tokenStr);
       } else if (spentProofs != undefined && spentProofs.length && spentProofs.length < proofs.length) {
-        // not all proofs are spent, let's edit the history token accordingly
+        // not all proofs are spent, we remove the spent part of the token from the history
         const spentAmount = proofsStore.sumProofs(spentProofs);
         const serializedSpentProofs = proofsStore.serializeProofs(spentProofs);
-        if (serializedSpentProofs) {
-          tokenStore.editHistoryToken(tokenStr, { newAmount: - spentAmount, newStatus: "paid", newToken: serializedSpentProofs })
+        const unspentProofs = proofs.filter(p => !spentProofs.find(sp => sp.secret === p.secret))
+        const unspentAmount = proofsStore.sumProofs(unspentProofs);
+        const serializedUnspentProofs = proofsStore.serializeProofs(unspentProofs);
+
+        if (serializedSpentProofs && serializedUnspentProofs) {
+          const historyToken = tokenStore.editHistoryToken(tokenStr, { newAmount: spentAmount, newStatus: "paid", newToken: serializedSpentProofs })
+          // add all unspent proofs back to the history
+          // QUICK: we use the historyToken object here because we don't know if the transaction is incoming or outgoing (we don't know the sign of the amount)
+          if (historyToken) {
+            tokenStore.addPendingToken({
+              amount: unspentAmount * Math.sign(historyToken.amount),
+              serializedProofs: serializedUnspentProofs,
+              unit: historyToken.unit,
+              mint: historyToken.mint,
+            });
+          }
         }
+
       }
       if (spentProofs != undefined && spentProofs.length) {
         if (!!window.navigator.vibrate) navigator.vibrate(200);
@@ -730,9 +770,9 @@ export const useWalletStore = defineStore("wallet", {
         throw new Error("invoice not found");
       }
       try {
-        if (invoice.mint != mintStore.activeMintUrl && invoice.mint != undefined) {
-          await mintStore.activateMintUrl(invoice.mint, false);
-        }
+        // activate the mint
+        await mintStore.activateMintUrl(invoice.mint, false, false, invoice.unit);
+
         const proofs = await this.mint(invoice.amount, invoice.quote, verbose);
         if (!!window.navigator.vibrate) navigator.vibrate(200);
         notifySuccess("Received " + uIStore.formatCurrency(invoice.amount, mintStore.activeUnit) + " via Lightning");
@@ -745,27 +785,127 @@ export const useWalletStore = defineStore("wallet", {
         throw error;
       }
     },
-    ////////////// UI HELPERS //////////////
-
-    checkPendingInvoices: async function (verbose: boolean = true) {
-      const last_n = 10;
-      let i = 0;
-      for (const invoice of this.invoiceHistory.slice().reverse()) {
-        if (i >= last_n) {
-          break;
-        }
-        if (invoice.status === "pending" && invoice.amount > 0) {
-          console.log("### checkPendingInvoices", invoice.quote)
-          try {
-            await this.checkInvoice(invoice.quote, verbose);
-          } catch (error) {
-            console.log(`${invoice.quote} still pending`);
-            throw error;
+    checkOutgoingInvoice: async function (quote: string, verbose = true) {
+      const mintStore = useMintsStore();
+      const invoice = this.invoiceHistory.find((i) => i.quote === quote);
+      if (!invoice) {
+        throw new Error("invoice not found");
+      }
+      try {
+        await mintStore.activateMintUrl(invoice.mint, false, false, invoice.unit);
+        // this is an outgoing invoice, we first do a getMintQuote to check if the invoice is paid
+        const mintQuote = await mintStore.activeMint().api.getMeltQuote(quote);
+        console.log("### mintQuote", mintQuote);
+        if (!mintQuote.paid) {
+          console.log("### mintQuote not paid yet");
+          if (invoice.token) {
+            const tokenJson = token.decode(invoice.token);
+            if (tokenJson == undefined) {
+              throw new Error("no tokens provided.");
+            }
+            let proofs = token.getProofs(tokenJson);
+            if (proofs.length == 0) {
+              throw new Error("no proofs found.");
+            }
+            const states = await this.getProofState(proofs);
+            // if all proofs are CheckStateEnum.PENDING, we notify that the invoice is still pending
+            if (states.every((s) => s.state === CheckStateEnum.PENDING)) {
+              if (verbose) {
+                notify("Invoice still pending");
+              }
+              throw new Error("invoice not paid yet.");
+            }
+            // if all proofs are CheckStateEnum.UNSPENT, we assume that the payment failed and we unset the proofs as reserved
+            // and remove the invoice from the history
+            if (states.every((s) => s.state === CheckStateEnum.UNSPENT)) {
+              useProofsStore().setReserved(proofs, false);
+              this.removeOutgoingInvoiceFromHistory(quote);
+              notifyWarning("Lightning payment failed");
+            }
+            //
+          } else {
+            throw new Error("no token in invoice.");
+          }
+        } else {
+          // if the invoice is paid, we check if all proofs are spent and if so, we invalidate them and set the invoice state in the history to "paid"
+          if (invoice.token) {
+            const tokenJson = token.decode(invoice.token);
+            if (tokenJson == undefined) {
+              throw new Error("no tokens provided.");
+            }
+            let proofs = token.getProofs(tokenJson);
+            if (proofs.length == 0) {
+              throw new Error("no proofs found.");
+            }
+            const spentProofs = await this.checkProofsSpendable(proofs, true);
+            if (spentProofs != undefined && spentProofs.length == proofs.length) {
+              if (!!window.navigator.vibrate) navigator.vibrate(200);
+              notifySuccess("Sent " + uIStore.formatCurrency(useProofsStore().sumProofs(spentProofs), mintStore.activeUnit));
+            }
+            // set invoice in history to paid
+            this.setInvoicePaid(quote);
           }
         }
-        i += 1;
+      } catch (error: any) {
+        if (verbose) {
+          notifyApiError(error);
+        }
+        console.log("Could not check quote", invoice.quote, error);
+        throw error;
       }
     },
+    ////////////// UI HELPERS //////////////
+    addOutgoingPendingInvoiceToHistory: function (quote: MeltQuoteResponse, serlializedToken?: string) {
+      const mintStore = useMintsStore();
+      this.invoiceHistory.push({
+        amount: -(quote.amount + quote.fee_reserve),
+        bolt11: this.payInvoiceData.input.request,
+        quote: quote.quote,
+        memo: "Outgoing invoice",
+        date: currentDateStr(),
+        status: "pending",
+        mint: mintStore.activeMintUrl,
+        token: serlializedToken,
+      });
+    },
+    removeOutgoingInvoiceFromHistory: function (quote: string) {
+      const index = this.invoiceHistory.findIndex((i) => i.quote === quote);
+      if (index >= 0) {
+        this.invoiceHistory.splice(index, 1);
+      }
+    },
+    updateInvoiceInHistory: function (quote: MeltQuoteResponse, options?: { status?: "pending" | "paid", amount?: number }) {
+      this.invoiceHistory.filter((i) => i.quote === quote.quote).forEach((i) => {
+        if (options) {
+          if (options.status) {
+            i.status = options.status;
+          }
+          if (options.amount) {
+            i.amount = options.amount;
+          }
+        }
+      }
+      );
+    },
+    // checkPendingInvoices: async function (verbose: boolean = true) {
+    //   const last_n = 10;
+    //   let i = 0;
+    //   for (const invoice of this.invoiceHistory.slice().reverse()) {
+    //     if (i >= last_n) {
+    //       break;
+    //     }
+    //     if (invoice.status === "pending" && invoice.amount > 0) {
+    //       console.log("### checkPendingInvoices", invoice.quote)
+    //       try {
+    //         await this.checkInvoice(invoice.quote, verbose);
+    //       } catch (error) {
+    //         console.log(`${invoice.quote} still pending`);
+    //         throw error;
+    //       }
+    //     }
+    //     i += 1;
+    //   }
+    // },
     checkPendingTokens: async function (verbose: boolean = true) {
       const tokenStore = useTokensStore();
       const last_n = 5;
@@ -778,8 +918,8 @@ export const useWalletStore = defineStore("wallet", {
         if (t.status === "pending" && t.amount < 0) {
           console.log("### checkPendingTokens", t.token)
           this.checkTokenSpendable(t.token, verbose);
+          i += 1;
         }
-        i += 1;
       }
     },
     handleBolt11Invoice: async function () {
@@ -793,7 +933,7 @@ export const useWalletStore = defineStore("wallet", {
         throw error;
       }
       let cleanInvoice = {
-        bolt11: "",
+        bolt11: invoice.paymentRequest,
         memo: "",
         msat: 0,
         sat: 0,

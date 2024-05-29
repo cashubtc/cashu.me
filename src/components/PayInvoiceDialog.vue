@@ -5,6 +5,7 @@
     position="top"
     v-if="!camera.show"
     backdrop-filter="blur(2px) brightness(60%)"
+    no-backdrop-dismiss
   >
     <q-card class="q-pa-lg q-pt-xl qcard">
       <div v-if="payInvoiceData.invoice">
@@ -59,17 +60,13 @@
               color="primary"
               size="1em"
           /></q-btn>
-          <q-btn v-close-popup flat color="grey" class="q-ml-auto"
-            >Cancel</q-btn
-          >
+          <q-btn v-close-popup flat color="grey" class="q-ml-auto">Close</q-btn>
         </div>
         <div v-else class="row q-mt-lg">
           <q-btn unelevated disabled color="yellow" text-color="black"
             >Not enough funds!</q-btn
           >
-          <q-btn v-close-popup flat color="grey" class="q-ml-auto"
-            >Cancel</q-btn
-          >
+          <q-btn v-close-popup flat color="grey" class="q-ml-auto">Close</q-btn>
         </div>
       </div>
       <div v-else-if="payInvoiceData.lnurlpay">
@@ -139,12 +136,17 @@
           <div class="row q-mt-lg">
             <q-btn unelevated color="primary" type="submit">Send</q-btn>
             <q-btn v-close-popup flat color="grey" class="q-ml-auto"
-              >Cancel</q-btn
+              >Close</q-btn
             >
           </div>
         </q-form>
       </div>
       <div v-else>
+        <div class="row items-center no-wrap q-mb-xl">
+          <div class="col-10">
+            <span class="text-h6">Pay Lightning</span>
+          </div>
+        </div>
         <q-form
           v-if="!camera.show"
           @submit="decodeAndQuote(payInvoiceData.input.request)"
@@ -199,7 +201,7 @@
             </q-responsive>
             <div class="row q-mt-lg">
               <q-btn @click="closeCamera" flat color="grey" class="q-ml-auto">
-                Cancel
+                Close
               </q-btn>
             </div>
           </div> -->

@@ -40,7 +40,11 @@
               flat
               dense
               icon="sync"
-              @click="checkInvoice(invoice.quote, true)"
+              @click="
+                invoice.amount > 0
+                  ? checkInvoice(invoice.quote, true)
+                  : checkOutgoingInvoice(invoice.quote, true)
+              "
               class="cursor-pointer"
               v-if="invoice.status === 'pending'"
               style="position: absolute; right: 0"
@@ -74,7 +78,7 @@
 <script>
 import { defineComponent } from "vue";
 import { shortenString } from "src/js/string-utils";
-import { mapWritableState } from "pinia";
+import { mapWritableState, mapActions } from "pinia";
 import { useUiStore } from "src/stores/ui";
 import { useWalletStore } from "src/stores/wallet";
 import { formatDistanceToNow, parseISO } from "date-fns";
@@ -82,9 +86,7 @@ import { formatDistanceToNow, parseISO } from "date-fns";
 export default defineComponent({
   name: "InvoicesTable",
   mixins: [windowMixin],
-  props: {
-    checkInvoice: Function,
-  },
+  props: {},
   data: function () {
     return {
       currentPage: 1,
@@ -108,6 +110,7 @@ export default defineComponent({
     },
   },
   methods: {
+    ...mapActions(useWalletStore, ["checkInvoice", "checkOutgoingInvoice"]),
     shortenString: function (s) {
       return shortenString(s, 20, 10);
     },

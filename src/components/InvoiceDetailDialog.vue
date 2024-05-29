@@ -3,6 +3,7 @@
     v-model="showInvoiceDetails"
     position="top"
     backdrop-filter="blur(2px) brightness(60%)"
+    no-backdrop-dismiss
   >
     <q-card class="q-px-lg q-pt-md q-pb-md qcard">
       <!-- invoice is not entered -->
@@ -10,7 +11,7 @@
       <div v-if="!invoiceData.bolt11">
         <div class="row items-center no-wrap q-mb-sm">
           <div class="col-10">
-            <span class="text-subtitle1">Create a Lightning invoice</span>
+            <span class="text-h6">Create Invoice</span>
           </div>
         </div>
         <div class="row items-center no-wrap q-my-sm q-py-none">

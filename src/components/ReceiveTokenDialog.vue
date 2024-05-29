@@ -3,12 +3,13 @@
     v-model="showReceiveTokens"
     position="top"
     backdrop-filter="blur(2px) brightness(60%)"
+    no-backdrop-dismiss
   >
     <q-card class="q-pa-lg q-pt-md qcard">
       <div>
         <div class="row items-center no-wrap q-mb-sm">
-          <div class="col-12">
-            <span class="text-subtitle1">Receive Ecash</span>
+          <div class="col-10">
+            <span class="text-h6">Receive Ecash</span>
           </div>
         </div>
         <q-input
@@ -26,7 +27,7 @@
         class="row"
         v-if="
           receiveData.tokensBase64.length &&
-          decodeToken(receiveData.tokensBase64) != ''
+          decodeToken(receiveData.tokensBase64)
         "
       >
         <div class="col-12">
@@ -140,7 +141,7 @@ export default defineComponent({
       );
     },
     knowThisMint: function () {
-      const tokenJson = token.decode(this.receiveData.tokensBase64);
+      const tokenJson = this.decodeToken(this.receiveData.tokensBase64);
       if (tokenJson == undefined) {
         return false;
       }
@@ -207,7 +208,11 @@ export default defineComponent({
     },
     // TOKEN METHODS
     decodeToken: function (encoded_token) {
-      return token.decode(encoded_token);
+      let decodedToken = undefined;
+      try {
+        decodedToken = token.decode(encoded_token);
+      } catch (error) {}
+      return decodedToken;
     },
     getProofs: function (decoded_token) {
       return token.getProofs(decoded_token);

@@ -3,14 +3,41 @@
     v-model="showSendTokens"
     position="top"
     backdrop-filter="blur(2px) brightness(60%)"
+    no-backdrop-dismiss
   >
     <q-card class="q-pa-none q-pt-none qcard">
       <!--  enter send data -->
       <div v-if="!sendData.tokens">
         <q-card-section class="q-pa-lg q-pt-md">
-          <div class="row items-center no-wrap q-mb-sm">
-            <div class="col-10">
+          <div class="row items-center no-wrap q-mb-sm q-pr-md q-py-lg">
+            <div class="col-9">
               <span class="text-h6">Send Ecash</span>
+            </div>
+            <div class="col-3" style="height: 30px">
+              <transition
+                appear
+                enter-active-class="animated fadeIn"
+                leave-active-class="animated fadeOut"
+              >
+                <q-badge
+                  v-if="
+                    canSpendOffline && !sendData.p2pkPubkey && !showLockInput
+                  "
+                  outline
+                  rounded
+                  color="grey"
+                  class="q-mr-auto q-pl-sm q-ml-md q-pr-sm q-my-xs q-mt-xs"
+                  size="lg"
+                >
+                  <q-icon
+                    name="check"
+                    color="primary"
+                    class="q-mr-sm"
+                    size="sm"
+                  />
+                  <span class="text-subtitle2 text-weight-medium">Offline</span>
+                </q-badge>
+              </transition>
             </div>
           </div>
           <div class="row items-center no-wrap q-my-sm q-py-none">
@@ -151,28 +178,7 @@
                 Lock</q-btn
               >
             </transition>
-            <transition
-              appear
-              enter-active-class="animated fadeIn"
-              leave-active-class="animated fadeOut"
-            >
-              <q-chip
-                v-if="canSpendOffline && !sendData.p2pkPubkey && !showLockInput"
-                outline
-                color="primary"
-                icon="check"
-                class="q-ml-auto"
-              >
-                Offline
-              </q-chip>
-            </transition>
-            <q-btn
-              v-if="!sendData.amount"
-              v-close-popup
-              rounded
-              flat
-              color="grey"
-              class="q-ml-auto"
+            <q-btn v-close-popup rounded flat color="grey" class="q-ml-auto"
               >Close</q-btn
             >
           </div>

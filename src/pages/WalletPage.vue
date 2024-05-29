@@ -11,16 +11,15 @@
             rounded
             dense
             class="q-px-md"
-            style="width: 140px"
             color="primary"
-            @click="showSendDialog = true"
+            style="width: 140px"
+            @click="showReceiveDialog = true"
             size="1.2rem"
           >
-            <q-icon name="north_east" size="1.2rem" class="q-mr-xs" />
-            Send</q-btn
+            <q-icon name="south_west" size="1.2rem" class="q-mr-xs" />
+            Receive</q-btn
           >
         </div>
-
         <div class="col-2 q-mb-md q-mx-none">
           <q-btn
             align="center"
@@ -38,13 +37,13 @@
             rounded
             dense
             class="q-px-md"
-            color="primary"
             style="width: 140px"
-            @click="showReceiveDialog = true"
+            color="primary"
+            @click="showSendDialog = true"
             size="1.2rem"
           >
-            <q-icon name="south_west" size="1.2rem" class="q-mr-xs" />
-            Receive</q-btn
+            <q-icon name="north_east" size="1.2rem" class="q-mr-xs" />
+            Send</q-btn
           >
         </div>
         <ReceiveDialog v-model="showReceiveDialog" />
@@ -86,16 +85,13 @@
           <!-- ////////////////// HISTORY LIST ///////////////// -->
 
           <q-tab-panel name="history">
-            <HistoryTable
-              :show-token-dialog="showTokenDialog"
-              :check-token-spendable="checkTokenSpendable"
-            />
+            <HistoryTable :show-token-dialog="showTokenDialog" />
           </q-tab-panel>
 
           <!-- ////////////////// INVOICE LIST ///////////////// -->
 
           <q-tab-panel name="invoices">
-            <InvoicesTable :check-invoice="checkInvoice" />
+            <InvoicesTable />
           </q-tab-panel>
 
           <!-- ////////////////////// SETTINGS ////////////////// -->

@@ -24,7 +24,9 @@
                     ? 'check_circle'
                     : 'radio_button_unchecked'
                 "
-                @click="activateMintUrl(mint.url, (verbose = false))"
+                @click="
+                  activateMintUrl(mint.url, (verbose = false), (force = true))
+                "
                 class="cursor-pointer"
               />
             </q-item-section>
@@ -44,14 +46,18 @@
               <q-item-label
                 lines="1"
                 v-if="mint.nickname"
-                @click="activateMintUrl(mint.url, (verbose = false))"
+                @click="
+                  activateMintUrl(mint.url, (verbose = false), (force = false))
+                "
                 class="cursor-pointer"
                 style="word-break: break-word"
                 >{{ mint.nickname }}</q-item-label
               >
               <q-item-label
                 lines="1"
-                @click="activateMintUrl(mint.url, (verbose = false))"
+                @click="
+                  activateMintUrl(mint.url, (verbose = false), (force = false))
+                "
                 class="cursor-pointer"
                 style="word-break: break-word"
                 >{{ mint.url }}</q-item-label
