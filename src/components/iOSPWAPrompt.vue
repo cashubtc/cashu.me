@@ -11,7 +11,7 @@
     >
       <div class="pwa-prompt-content">
         <span
-          >Tap <q-icon name="ios_share" size="sm" /> and then
+          >Tap <q-icon name="ios_share" size="sm" /> and
           <strong>Add to Home Screen</strong></span
         >
         <q-btn
@@ -29,8 +29,6 @@
 </template>
 <script>
 import { defineComponent } from "vue";
-import { mapActions, mapState } from "pinia";
-import { useSettingsStore } from "stores/settings";
 export default defineComponent({
   name: "iOSPWAPrompt",
   mixins: [windowMixin],

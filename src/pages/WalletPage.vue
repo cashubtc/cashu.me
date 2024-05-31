@@ -510,6 +510,7 @@ export default {
     },
     triggerPwaInstall: function () {
       // Show the install prompt
+      // Note: this doesn't work with IOS, we do it with iOSPWAPrompt
       this.deferredPWAInstallPrompt.prompt();
       // Wait for the user to respond to the prompt
       this.deferredPWAInstallPrompt.userChoice.then((choiceResult) => {
@@ -520,8 +521,6 @@ export default {
           console.log("User dismissed the install prompt");
         }
       });
-
-      // for IOS all this doesn't work so we need to hack it
     },
     registerBroadcastChannel: async function () {
       // uses session storage to identify the tab so we can ignore incoming messages from the same tab
