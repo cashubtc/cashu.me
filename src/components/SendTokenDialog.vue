@@ -125,7 +125,10 @@
               </div>
             </div>
           </transition>
-          <div v-if="activeMintBalance() > sendData.amount" class="row q-mt-lg">
+          <div
+            v-if="activeMintBalance() >= sendData.amount"
+            class="row q-mt-lg"
+          >
             <q-btn
               v-if="!sendData.tokens"
               :disable="
