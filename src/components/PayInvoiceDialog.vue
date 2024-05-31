@@ -45,9 +45,10 @@
         <div class="col-12">
           <ChooseMint :ticker-short="tickerShort" />
         </div>
-        <div v-if="canPay" class="row q-mt-lg">
+        <div v-if="enoughActiveBalance" class="row q-mt-lg">
           <q-btn
             unelevated
+            rounded
             color="primary"
             outline
             :disabled="
@@ -63,8 +64,8 @@
           <q-btn v-close-popup flat color="grey" class="q-ml-auto">Close</q-btn>
         </div>
         <div v-else class="row q-mt-lg">
-          <q-btn unelevated disabled color="yellow" text-color="black"
-            >Not enough funds!</q-btn
+          <q-btn unelevated rounded disabled color="yellow" text-color="black"
+            >Mint balance too low</q-btn
           >
           <q-btn v-close-popup flat color="grey" class="q-ml-auto">Close</q-btn>
         </div>
@@ -256,12 +257,19 @@ export default defineComponent({
       "proofs",
       "activeUnit",
       "activeBalance",
+      "activeMintBalance",
     ]),
     canPasteFromClipboard: function () {
       return (
         window.isSecureContext &&
         navigator.clipboard &&
         navigator.clipboard.readText
+      );
+    },
+    enoughActiveBalance: function () {
+      return (
+        this.activeMintBalance() >=
+        this.payInvoiceData.meltQuote.response.amount
       );
     },
   },
