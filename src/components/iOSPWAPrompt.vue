@@ -43,7 +43,7 @@ export default defineComponent({
   mounted() {
     if (
       this.showIosPWAPromptLocal &&
-      this.isOS() &&
+      this.isiOsSafari() &&
       !this.isInStandaloneMode()
     ) {
       this.showIosPWAPrompt = true;
@@ -56,10 +56,9 @@ export default defineComponent({
       localStorage.setItem("cashu.showIosPWAPrompt", "seen");
       this.showIosPWAPrompt = false;
     },
-    isOS() {
+    isiOsSafari() {
       const userAgent = window.navigator.userAgent.toLowerCase();
-      return /iphone|ipad|ipod/.test(userAgent);
-      // return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+      return /iphone|ipad|ipod/.test(userAgent) && /safari/.test(userAgent);
     },
     isInStandaloneMode() {
       return "standalone" in window.navigator && window.navigator.standalone;
