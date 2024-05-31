@@ -122,16 +122,6 @@ export default defineComponent({
   watch: {},
   computed: {
     ...mapState(useWalletStore, ["mnemonic"]),
-    hiddenMnemonic() {
-      if (this.hideMnemonic) {
-        return this.mnemonic
-          .split(" ")
-          .map((w) => "*".repeat(w.length))
-          .join(" ");
-      } else {
-        return this.mnemonic;
-      }
-    },
   },
   methods: {
     ...mapActions(useMintsStore, ["restoreFromBackup"]),

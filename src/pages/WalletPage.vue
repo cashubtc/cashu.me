@@ -101,7 +101,6 @@
           </q-tab-panel>
         </q-tab-panels>
       </q-expansion-item>
-      <!-- LIGHTNING BUTTONS  -->
 
       <div style="margin-bottom: 0rem">
         <div class="row q-pt-sm">
@@ -121,6 +120,8 @@
           </div>
         </div>
       </div>
+
+      <iOSPWAPrompt />
     </div>
 
     <!-- BOTTOM LIGHTNING BUTTONS -->
@@ -196,9 +197,7 @@ import InvoiceDetailDialog from "components/InvoiceDetailDialog.vue";
 import SendDialog from "components/SendDialog.vue";
 import ReceiveDialog from "components/ReceiveDialog.vue";
 import QrcodeReader from "components/QrcodeReader.vue";
-import P2PKDialog from "components/P2PKDialog.vue";
-import NWCDialog from "components/NWCDialog.vue";
-
+import iOSPWAPrompt from "components/iOSPWAPrompt.vue";
 // pinia stores
 import { mapActions, mapState, mapWritableState } from "pinia";
 import { useMintsStore } from "src/stores/mints";
@@ -231,6 +230,7 @@ export default {
     QrcodeReader,
     SendDialog,
     ReceiveDialog,
+    iOSPWAPrompt,
   },
   data: function () {
     return {
@@ -520,6 +520,8 @@ export default {
           console.log("User dismissed the install prompt");
         }
       });
+
+      // for IOS all this doesn't work so we need to hack it
     },
     registerBroadcastChannel: async function () {
       // uses session storage to identify the tab so we can ignore incoming messages from the same tab
