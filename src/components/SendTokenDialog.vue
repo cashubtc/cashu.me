@@ -125,26 +125,21 @@
               </div>
             </div>
           </transition>
-          <div class="row q-mt-lg">
+          <div v-if="activeMintBalance() > sendData.amount" class="row q-mt-lg">
             <q-btn
               v-if="!sendData.tokens"
               :disable="
                 sendData.amount == null ||
                 sendData.amount <= 0 ||
                 (sendData.p2pkPubkey != '' &&
-                  !isValidPubkey(sendData.p2pkPubkey)) ||
-                activeMintBalance() < sendData.amount
+                  !isValidPubkey(sendData.p2pkPubkey))
               "
               @click="sendTokens"
               color="primary"
               rounded
               type="submit"
-              :label="
-                activeMintBalance() < sendData.amount
-                  ? 'Mint balance too low'
-                  : 'Send'
-              "
-            />
+              >Send</q-btn
+            >
             <div
               v-if="sendData.p2pkPubkey && isValidPubkey(sendData.p2pkPubkey)"
               class="row"
@@ -187,6 +182,14 @@
                 Lock</q-btn
               >
             </transition>
+            <q-btn v-close-popup rounded flat color="grey" class="q-ml-auto"
+              >Close</q-btn
+            >
+          </div>
+          <div v-else class="row q-mt-lg">
+            <q-btn unelevated rounded disabled color="yellow" text-color="black"
+              >Mint balance too low</q-btn
+            >
             <q-btn v-close-popup rounded flat color="grey" class="q-ml-auto"
               >Close</q-btn
             >

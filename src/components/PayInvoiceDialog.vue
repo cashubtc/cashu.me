@@ -50,7 +50,6 @@
             unelevated
             rounded
             color="primary"
-            outline
             :disabled="
               payInvoiceData.blocking || payInvoiceData.meltQuote.error != ''
             "
