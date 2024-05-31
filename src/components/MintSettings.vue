@@ -153,7 +153,7 @@
             Add mint
             <template v-slot:loading>
               <q-spinner-hourglass />
-              Adding mint...
+              Adding mint
             </template>
           </q-btn>
         </div>
@@ -408,7 +408,7 @@
               >Add mint
               <template v-slot:loading>
                 <q-spinner-hourglass />
-                Adding mint...
+                Adding mint
               </template>
             </q-btn>
           </div>

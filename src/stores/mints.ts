@@ -128,6 +128,10 @@ export const useMintsStore = defineStore("mints", {
         throw new Error("No active mint");
       }
     },
+    activeMintBalance() {
+      // return balance of active mint in active unit
+      return this.activeMint().unitBalance(this.activeUnit);
+    },
     toggleUnit: function () {
       const units = this.activeMint().units;
       this.activeUnit =

@@ -132,14 +132,19 @@
                 sendData.amount == null ||
                 sendData.amount <= 0 ||
                 (sendData.p2pkPubkey != '' &&
-                  !isValidPubkey(sendData.p2pkPubkey))
+                  !isValidPubkey(sendData.p2pkPubkey)) ||
+                activeMintBalance() < sendData.amount
               "
               @click="sendTokens"
               color="primary"
               rounded
               type="submit"
-              >Send</q-btn
-            >
+              :label="
+                activeMintBalance() < sendData.amount
+                  ? 'Mint balance too low'
+                  : 'Send'
+              "
+            />
             <div
               v-if="sendData.p2pkPubkey && isValidPubkey(sendData.p2pkPubkey)"
               class="row"
@@ -166,7 +171,11 @@
               leave-active-class="animated fadeOut"
             >
               <q-btn
-                v-if="sendData.amount > 0 && !showLockInput"
+                v-if="
+                  sendData.amount > 0 &&
+                  !showLockInput &&
+                  activeMintBalance() >= sendData.amount
+                "
                 :disable="sendData.p2pkPubkey == null || sendData.amount <= 0"
                 color="primary"
                 class="q-ml-sm"
@@ -380,7 +389,12 @@ export default defineComponent({
     ...mapWritableState(useSendTokensStore, ["sendData"]),
     ...mapWritableState(useCameraStore, ["camera", "hasCamera"]),
     ...mapState(useUiStore, ["tickerShort", "canPasteFromClipboard"]),
-    ...mapState(useMintsStore, ["activeProofs", "activeUnit", "activeMintUrl"]),
+    ...mapState(useMintsStore, [
+      "activeProofs",
+      "activeUnit",
+      "activeMintUrl",
+      "activeMintBalance",
+    ]),
     ...mapState(useSettingsStore, ["checkSentTokens"]),
     ...mapState(useWorkersStore, ["tokenWorkerRunning"]),
     // TOKEN METHODS

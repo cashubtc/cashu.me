@@ -54,11 +54,6 @@
               : 'Add mint'
           "
         >
-          <!-- <q-spinner-hourglass
-            v-if="addMintBlocking"
-            size="1em"
-            class="q-ml-md"
-        /> -->
         </q-btn>
         <q-btn
           @click="addPendingTokenToHistory(receiveData.tokensBase64)"
