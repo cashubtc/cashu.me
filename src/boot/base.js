@@ -1,5 +1,5 @@
 import { copyToClipboard } from "quasar";
-import { useMintsStore } from "stores/mints";
+import { useUiStore } from "stores/ui";
 
 window.LOCALE = "en";
 // window.EventHub = new Vue();
@@ -40,7 +40,7 @@ window.windowMixin = {
       if (currency == undefined) {
         currency = "sat";
       }
-      if (useMintsStore().hideBalance && !showBalance) {
+      if (useUiStore().hideBalance && !showBalance) {
         return "****"
       }
       if (currency == "sat") return this.formatSat(value);

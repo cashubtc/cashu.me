@@ -80,7 +80,6 @@ type BlindSignatureAudit = {
 export const useMintsStore = defineStore("mints", {
   state: () => {
     return {
-      hideBalance: useLocalStorage<boolean>("cashu.hideBalance", false),
       activeUnit: useLocalStorage<string>("cashu.activeUnit", "sat"),
       activeMintUrl: useLocalStorage<string>("cashu.activeMintUrl", ""),
       addMintData: {

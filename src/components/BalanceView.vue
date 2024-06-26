@@ -113,6 +113,7 @@ import { mapState, mapWritableState, mapActions } from "pinia";
 import { useMintsStore } from "stores/mints";
 import { useSettingsStore } from "stores/settings";
 import { useTokensStore } from "stores/tokens";
+import { useUiStore } from "stores/ui";
 import { useWalletStore } from "stores/wallet";
 import ToggleUnit from "components/ToggleUnit.vue";
 
@@ -146,10 +147,8 @@ export default defineComponent({
     ]),
     ...mapState(useTokensStore, ["historyTokens"]),
     ...mapState(useSettingsStore, ["getBitcoinPrice"]),
-    ...mapWritableState(useMintsStore, [
-      "activeUnit",
-      "hideBalance"
-    ]),
+    ...mapWritableState(useMintsStore, ["activeUnit"]),
+    ...mapWritableState(useUiStore, ["hideBalance"]),
     pendingBalance: function () {
       return -this.historyTokens
         .filter((t) => t.status == "pending")
