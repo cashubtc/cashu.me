@@ -22,7 +22,8 @@
               {{
                 formatCurrency(
                   payInvoiceData.meltQuote.response.amount,
-                  activeUnit
+                  activeUnit,
+                  true
                 )
               }}
             </h6>
