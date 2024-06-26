@@ -176,7 +176,8 @@ export default defineComponent({
     displayUnit: function () {
       let display = this.formatCurrency(
         this.invoiceData.amount,
-        this.invoiceData.unit
+        this.invoiceData.unit,
+        true
       );
       return display;
     },

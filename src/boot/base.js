@@ -1,4 +1,5 @@
 import { copyToClipboard } from "quasar";
+import { useMintsStore } from "stores/mints";
 
 window.LOCALE = "en";
 // window.EventHub = new Vue();
@@ -35,9 +36,12 @@ window.windowMixin = {
         });
       });
     },
-    formatCurrency: function (value, currency) {
+    formatCurrency: function (value, currency, showBalance = false) {
       if (currency == undefined) {
         currency = "sat";
+      }
+      if (useMintsStore().hideBalance && !showBalance) {
+        return "****"
       }
       if (currency == "sat") return this.formatSat(value);
       if (currency == "usd") value = value / 100;

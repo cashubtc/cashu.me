@@ -31,8 +31,8 @@
           <div class="row">
             <div class="col-12">
               <h3
-                class="q-my-none q-py-none"
-                @click="activeUnit = toggleUnit()"
+                class="q-my-none q-py-none cursor-pointer"
+                @click="toggleHideBalance"
               >
                 <strong>
                   {{ formatCurrency(getTotalBalance, activeUnit) }}
@@ -146,7 +146,10 @@ export default defineComponent({
     ]),
     ...mapState(useTokensStore, ["historyTokens"]),
     ...mapState(useSettingsStore, ["getBitcoinPrice"]),
-    ...mapWritableState(useMintsStore, ["activeUnit"]),
+    ...mapWritableState(useMintsStore, [
+      "activeUnit",
+      "hideBalance"
+    ]),
     pendingBalance: function () {
       return -this.historyTokens
         .filter((t) => t.status == "pending")
@@ -218,6 +221,9 @@ export default defineComponent({
         units[(units.indexOf(this.activeUnit) + 1) % units.length];
       return this.activeUnit;
     },
+    toggleHideBalance() {
+      this.hideBalance = !this.hideBalance
+    }
   },
 });
 </script>
