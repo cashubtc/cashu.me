@@ -74,18 +74,6 @@
     <div v-if="paginatedTokens.length === 0" class="text-center q-mt-lg">
       <q-item-label caption class="text-primary">No history yet</q-item-label>
     </div>
-    <div v-else-if="maxPages > 1" class="text-center q-mt-lg">
-      <div style="display: flex; justify-content: center">
-        <q-pagination
-          v-model="currentPage"
-          :max="maxPages"
-          :max-pages="5"
-          direction-links
-          boundary-links
-          @input="handlePageChange"
-        />
-      </div>
-    </div>
   </div>
 </template>
 <script>
@@ -119,9 +107,7 @@ export default defineComponent({
       return Math.ceil(this.historyTokens.length / this.pageSize);
     },
     paginatedTokens() {
-      const start = (this.currentPage - 1) * this.pageSize;
-      const end = start + this.pageSize;
-      return this.historyTokens.slice().reverse().slice(start, end);
+      return this.historyTokens.slice().reverse()
     },
   },
   methods: {

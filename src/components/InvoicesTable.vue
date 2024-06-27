@@ -60,18 +60,6 @@
           >No invoices yet</q-item-label
         >
       </div>
-      <div v-else-if="maxPages > 1" class="text-center q-mt-lg">
-        <div style="display: flex; justify-content: center">
-          <q-pagination
-            v-model="currentPage"
-            :max="maxPages"
-            :max-pages="5"
-            direction-links
-            boundary-links
-            @input="handlePageChange"
-          />
-        </div>
-      </div>
     </div>
   </div>
 </template>
@@ -104,9 +92,7 @@ export default defineComponent({
       return Math.ceil(this.invoiceHistory.length / this.pageSize);
     },
     paginatedInvoices() {
-      const start = (this.currentPage - 1) * this.pageSize;
-      const end = start + this.pageSize;
-      return this.invoiceHistory.slice().reverse().slice(start, end);
+      return this.invoiceHistory.slice().reverse()
     },
   },
   methods: {

@@ -52,55 +52,63 @@
       <!-- ///////////////////////////////////////////
       ////////////////// TABLES /////////////////
       /////////////////////////////////////////// -->
-      <q-expansion-item expand-icon-class="hidden" v-model="expandHistory">
-        <template v-slot:header="{ expanded }">
-          <q-item-section class="item-center text-center">
-            <span
-              ><q-icon
-                color="primary"
-                :name="expanded ? 'keyboard_arrow_up' : 'keyboard_arrow_down'"
-            /></span>
-          </q-item-section>
-        </template>
-        <q-tabs
-          v-model="tab"
-          no-caps
-          :class="$q.dark.isActive ? 'bg-dark' : 'bg-white'"
-        >
-          <q-tab name="history" class="text-secondary" label="History"></q-tab>
-          <q-tab
-            name="invoices"
-            class="text-secondary"
-            label="Invoices"
-          ></q-tab>
-          <!-- <q-tab name="tokens" label="Tokens"></q-tab> -->
-          <q-tab name="mints" class="text-secondary" label="Mints"></q-tab>
-        </q-tabs>
 
-        <q-tab-panels
-          :class="$q.dark.isActive ? 'bg-dark' : 'bg-white'"
-          v-model="tab"
-          animated
-        >
-          <!-- ////////////////// HISTORY LIST ///////////////// -->
+      <div class="flex justify-center absolute-bottom" style="bottom: 15px;">
+        <q-btn flat no-caps label="History" class="q-mx-md text-secondary"  @click="viewTab('history')"/>
+        <q-btn flat no-caps label="Invoices" class="q-mx-md text-secondary"  @click="viewTab('invoices')"/>
+        <q-btn flat no-caps label="Mints" class="q-mx-md text-secondary"  @click="viewTab('mints')"/>
+      </div>
 
-          <q-tab-panel name="history">
-            <HistoryTable :show-token-dialog="showTokenDialog" />
-          </q-tab-panel>
+      <q-dialog v-model="expandHistory" seamless :persistent="false" position="bottom">
+        <q-card style="min-width: 80vw;" bordered>
+          <div
+            class="flex justify-center"
+            :class="$q.dark.isActive ? 'bg-dark' : 'bg-white'"
+          >
+            <q-btn flat round icon="expand_more" v-close-popup />
+          </div>
+          <q-tabs
+            v-model="tab"
+            no-caps
+            :class="$q.dark.isActive ? 'bg-dark' : 'bg-white'"
+          >
+            <q-tab name="history" class="text-secondary" label="History"></q-tab>
+            <q-tab
+              name="invoices"
+              class="text-secondary"
+              label="Invoices"
+            ></q-tab>
+            <!-- <q-tab name="tokens" label="Tokens"></q-tab> -->
+            <q-tab name="mints" class="text-secondary" label="Mints"></q-tab>
+          </q-tabs>
 
-          <!-- ////////////////// INVOICE LIST ///////////////// -->
+          <div style="height: 50vh" class="scroll" :class="$q.dark.isActive ? 'bg-dark' : 'bg-white'">
+            <q-tab-panels
+              :class="$q.dark.isActive ? 'bg-dark' : 'bg-white'"
+              v-model="tab"
+              animated
+            >
+              <!-- ////////////////// HISTORY LIST ///////////////// -->
 
-          <q-tab-panel name="invoices">
-            <InvoicesTable />
-          </q-tab-panel>
+              <q-tab-panel name="history">
+                <HistoryTable :show-token-dialog="showTokenDialog" />
+              </q-tab-panel>
 
-          <!-- ////////////////////// SETTINGS ////////////////// -->
+              <!-- ////////////////// INVOICE LIST ///////////////// -->
 
-          <q-tab-panel name="mints" class="q-px-sm">
-            <MintSettings />
-          </q-tab-panel>
-        </q-tab-panels>
-      </q-expansion-item>
+              <q-tab-panel name="invoices">
+                <InvoicesTable />
+              </q-tab-panel>
+
+              <!-- ////////////////////// SETTINGS ////////////////// -->
+
+              <q-tab-panel name="mints" class="q-px-sm">
+                <MintSettings />
+              </q-tab-panel>
+            </q-tab-panels>
+          </div>
+        </q-card>
+      </q-dialog>
 
       <div style="margin-bottom: 0rem">
         <div class="row q-pt-sm">
@@ -354,6 +362,10 @@ export default {
     ]),
     ...mapActions(useCameraStore, ["closeCamera", "showCamera"]),
     ...mapActions(useNWCStore, ["listenToNWCCommands"]),
+    viewTab(tab) {
+      this.expandHistory = true
+      this.tab = tab
+    },
     // TOKEN METHODS
     decodeToken: function (encoded_token) {
       try {
