@@ -9,6 +9,7 @@ const unitTickerShortMap = {
 
 export const useUiStore = defineStore("ui", {
   state: () => ({
+    hideBalance: useLocalStorage<boolean>("cashu.ui.hideBalance", false),
     tickerLong: "Satoshis",
     showInvoiceDetails: false,
     showSendDialog: false,

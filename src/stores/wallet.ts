@@ -50,7 +50,6 @@ type KeysetCounter = {
 
 const receiveStore = useReceiveTokensStore();
 const tokenStore = useTokensStore();
-const uIStore = useUiStore();
 
 export const useWalletStore = defineStore("wallet", {
   state: () => {
@@ -275,6 +274,7 @@ export const useWalletStore = defineStore("wallet", {
       return selectedProofs
     },
     spendableProofs: function (proofs: WalletProof[], amount: number) {
+      const uIStore = useUiStore();
       const proofsStore = useProofsStore();
       const mintStore = useMintsStore();
       const spendableProofs = proofsStore.getUnreservedProofs(proofs);
@@ -358,6 +358,7 @@ export const useWalletStore = defineStore("wallet", {
       /*
       uses split to receive new tokens.
       */
+      const uIStore = useUiStore();
       const mintStore = useMintsStore();
       receiveStore.showReceiveTokens = false;
       console.log("### receive tokens", receiveStore.receiveData.tokensBase64);
@@ -537,6 +538,7 @@ export const useWalletStore = defineStore("wallet", {
       }
     },
     melt: async function () {
+      const uIStore = useUiStore();
       const proofsStore = useProofsStore();
       const mintStore = useMintsStore();
       const tokenStore = useTokensStore();
@@ -708,6 +710,7 @@ export const useWalletStore = defineStore("wallet", {
       checks whether a base64-encoded token (from the history table) has been spent already.
       if it is spent, the appropraite entry in the history table is set to paid.
       */
+      const uIStore = useUiStore();
       const mintStore = useMintsStore();
       const tokenStore = useTokensStore();
       const proofsStore = useProofsStore();
@@ -763,6 +766,7 @@ export const useWalletStore = defineStore("wallet", {
       return true;
     },
     checkInvoice: async function (quote: string, verbose = true) {
+      const uIStore = useUiStore();
       const mintStore = useMintsStore();
       console.log("### checkInvoice.quote", quote);
       const invoice = this.invoiceHistory.find((i) => i.quote === quote);
@@ -786,6 +790,7 @@ export const useWalletStore = defineStore("wallet", {
       }
     },
     checkOutgoingInvoice: async function (quote: string, verbose = true) {
+      const uIStore = useUiStore();
       const mintStore = useMintsStore();
       const invoice = this.invoiceHistory.find((i) => i.quote === quote);
       if (!invoice) {
