@@ -300,7 +300,7 @@ export const useWalletStore = defineStore("wallet", {
       mintStore.removeProofs(proofsToSplit);
       return { keepProofs, sendProofs };
     },
-    splitToSend: async function (proofs: WalletProof[], amount: number, invlalidate: boolean = false) {
+    splitToSend: async function (proofs: WalletProof[], amount: number, invalidate: boolean = false) {
       /*
       splits proofs so the user can keep firstProofs, send scndProofs.
       then sets scndProofs as reserved.
@@ -332,12 +332,19 @@ export const useWalletStore = defineStore("wallet", {
           mintStore.addProofs(sendProofs);
         } else if (totalAmount == amount) {
           keepProofs = [];
-          sendProofs = proofsToSplit;
+          sendProofs = proofsToSplit.map((p) => {
+            return {
+              amount: p.amount,
+              secret: p.secret,
+              C: p.C,
+              id: p.id,
+            };
+          });
         } else {
           throw new Error("could not split proofs.");
         }
 
-        if (invlalidate) {
+        if (invalidate) {
           mintStore.removeProofs(sendProofs);
         }
 
