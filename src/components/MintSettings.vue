@@ -106,7 +106,7 @@
             rounded
             dense
             outlined
-            @keydown.enter.prevent="showAddMintDialog = true"
+            @keydown.enter.prevent="sanitizeMintUrlAndShowAddDialog"
             v-model="addMintData.url"
             placeholder="https://"
             ref="mintInput"
@@ -133,6 +133,7 @@
             rounded
             dense
             outlined
+            @keydown.enter.prevent="sanitizeMintUrlAndShowAddDialog"
             v-model="addMintData.nickname"
             label="Nickname (e.g. Testnet)"
             ref="mintNicknameInput"
@@ -147,7 +148,7 @@
             color="primary"
             :disabled="addMintData.url.length == 0"
             :loading="addMintBlocking"
-            @click="showAddMintDialog = true"
+            @click="sanitizeMintUrlAndShowAddDialog"
           >
             <q-icon size="xs" name="add" class="q-pr-xs" />
             Add mint
@@ -608,6 +609,25 @@ export default defineComponent({
       this.mintToEdit = Object.assign({}, mint);
       this.editMintData = Object.assign({}, mint);
       this.showEditMintDialog = true;
+    },
+    validateMintUrl: function (url) {
+      try {
+        new URL(url);
+        return true;
+      } catch (e) {
+        return false;
+      }
+    },
+    sanitizeMintUrlAndShowAddDialog: function () {
+      if (!this.validateMintUrl(this.addMintData.url)) {
+        notifyError("Invalid URL");
+        return;
+      }
+      let urlObj = new URL(this.addMintData.url);
+      urlObj.hostname = urlObj.hostname.toLowerCase();
+      this.addMintData.url = urlObj.toString();
+      this.addMintData.url = this.addMintData.url.replace(/\/$/, "");
+      this.showAddMintDialog = true;
     },
     addMintInternal: function (mintToAdd, verbose) {
       this.addingMint = true;
