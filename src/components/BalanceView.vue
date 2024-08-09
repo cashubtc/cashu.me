@@ -1,7 +1,7 @@
 <template>
   <!-- <q-card class="q-my-md q-py-sm">
     <q-card-section class="q-mt-sm q-py-xs"> -->
-  <div class="q-pt-xl q-pb-md">
+  <div class="q-pt-md q-pb-md">
     <div class="row justify-center q-pb-lg">
       <ToggleUnit class="q-mt-lg q-mb-none" />
     </div>
@@ -19,7 +19,7 @@
         animated
         :height="$q.screen.width < 390 ? '130px' : '80px'"
         control-color="primary"
-        class="bg-transparent rounded-borders q-mb-xl q-mt-xl text-primary"
+        class="bg-transparent rounded-borders q-mb-md q-mt-md text-primary"
       >
         <!-- make a q-carousel-slide with v-for for all possible units -->
         <q-carousel-slide
