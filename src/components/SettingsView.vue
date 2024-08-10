@@ -9,8 +9,11 @@
             <q-item-label caption
               >Your seed phrase can restore your wallet. Keep it safe and
               private. Warning: this wallet does not support seed phrase
-              recovery yet. Use a different Cashu wallet to recover from seed
-              phrase.
+              recovery yet. Use a different Cashu wallet or
+              <a href="https://v2alpha.nutstash.app/" target="blank"
+                >this tool</a
+              >
+              to recover from seed phrase.
             </q-item-label>
             <div class="row q-pt-md">
               <div class="col-12">
