@@ -65,7 +65,7 @@
             </q-item-section>
             <q-item-section side class="q-mx-none q-pl-none">
               <q-icon
-                name="qr_code"
+                name="info_outline"
                 @click="showMintInfo(mint)"
                 color="grey"
                 class="q-mr-xs cursor-pointer"
