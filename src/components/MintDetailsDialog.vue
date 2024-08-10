@@ -117,7 +117,14 @@
                   <span v-else class="text-weight-bold q-mr-xs">
                     {{ contactMethods[contactInfo.method] }}
                   </span>
-                  {{ contactInfo.info }}
+                  {{ shortenText(contactInfo.info, 30) }}
+                  <q-icon
+                    name="content_copy"
+                    @click="copyText(contactInfo.info)"
+                    size="1em"
+                    color="grey"
+                    class="q-mr-xs cursor-pointer"
+                  />
                 </q-item-label>
               </div>
             </div>
@@ -164,6 +171,13 @@ export default defineComponent({
     ...mapState(useMintsStore, ["showMintInfoData"]),
     ...mapWritableState(useMintsStore, ["showMintInfoDialog"]),
   },
-  methods: {},
+  methods: {
+    shortenText: function (text, maxLength) {
+      if (text.length > maxLength) {
+        return text.substring(0, maxLength) + "...";
+      }
+      return text;
+    },
+  },
 });
 </script>
