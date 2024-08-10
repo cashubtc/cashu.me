@@ -156,6 +156,12 @@ body.body--dark .q-field--error {
   }
 }
 
+a {
+  color: var(--primary-color);
+  text-decoration: underline;
+  font-weight: bold;
+}
+
 a.inherit {
   color: inherit;
   text-decoration: none;
