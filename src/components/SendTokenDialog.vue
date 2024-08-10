@@ -104,14 +104,6 @@
                   @click="pasteToP2PKField"
                   ><q-tooltip>Paste</q-tooltip></q-btn
                 >
-                <!-- <q-btn
-                  rounded
-                  color="primary"
-                  icon="add"
-                  v-if="isValidPubkey(sendData.p2pkPubkey)"
-                  @click="addPubkey(sendData.p2pkPubkey)"
-                  >Add</q-btn
-                > -->
                 <q-btn
                   align="center"
                   v-if="!sendData.p2pkPubkey"
@@ -584,9 +576,6 @@ export default defineComponent({
       this.showSendTokens = false;
       this.showDeleteDialog = false;
       this.clearAllWorkers();
-    },
-    addPubkey: function (pubkey) {
-      this.sendData.p2pkPubkey = pubkey;
     },
     lockTokens: async function () {
       let sendAmount = this.sendData.amount;

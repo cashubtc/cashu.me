@@ -1019,6 +1019,11 @@ export const useWalletStore = defineStore("wallet", {
       } else if (p2pkStore.isValidPubkey(req)) {
         const sendTokenStore = useSendTokensStore()
         sendTokenStore.sendData.p2pkPubkey = req
+      } else if (
+        req.startsWith("http")
+      ) {
+        const mintStore = useMintsStore();
+        mintStore.addMintData = { url: req, nickname: "" }
       }
     },
     lnurlPayFirst: async function (address: string) {

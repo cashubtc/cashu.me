@@ -9,6 +9,7 @@ export type Mint = {
   keys: MintKeys[];
   keysets: MintKeyset[];
   nickname?: string;
+  info?: any;
   // initialize api: new CashuMint(url) on activation
 };
 
@@ -94,6 +95,8 @@ export const useMintsStore = defineStore("mints", {
       showAddMintDialog: false,
       addMintBlocking: false,
       showRemoveMintDialog: false,
+      showMintInfoDialog: false,
+      showMintInfoData: {} as Mint,
     };
   },
   getters: {
@@ -280,6 +283,8 @@ export const useMintsStore = defineStore("mints", {
       try {
         this.activeMintUrl = mint.url;
         console.log("### this.activeMintUrl", this.activeMintUrl);
+        mint.info = await this.fetchMintInfo(mint);
+        console.log("### activateMint: Mint info: ", mint.info);
         mint = await this.fetchMintKeys(mint);
         this.toggleActiveUnitForMint(mint);
         if (verbose) {
@@ -297,6 +302,19 @@ export const useMintsStore = defineStore("mints", {
           err_msg = err_msg + ` ${error.message}.`;
         }
         await notifyError(err_msg, "Mint activation failed");
+        throw error;
+      }
+    },
+    fetchMintInfo: async function (mint: Mint) {
+      try {
+        const mintClass = new MintClass(mint);
+        const data = await mintClass.api.getInfo();
+        return data;
+      } catch (error: any) {
+        console.error(error);
+        try {
+          notifyApiError(error, "Could not get mint info");
+        } catch { }
         throw error;
       }
     },
