@@ -2,8 +2,6 @@ import { defineStore } from "pinia";
 
 export const useCameraStore = defineStore("camera", {
   state: () => ({
-    tickerShort: "sats",
-    tickerLong: "Satoshis",
     camera: {
       data: null,
       show: false,

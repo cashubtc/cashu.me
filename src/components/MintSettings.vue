@@ -1,4 +1,5 @@
 <template>
+  <MintDetailsDialog />
   <div style="max-width: 800px; margin: 0 auto">
     <!-- ////////////////////// SETTINGS ////////////////// -->
     <div class="q-py-md q-px-xs text-left" on-left>
@@ -28,18 +29,6 @@
                   activateMintUrl(mint.url, (verbose = false), (force = true))
                 "
                 class="cursor-pointer"
-              />
-            </q-item-section>
-            <q-item-section
-              class="q-mx-none q-pl-none"
-              style="max-width: 1.05em"
-            >
-              <q-icon
-                name="content_copy"
-                @click="copyText(mint.url)"
-                size="1em"
-                color="grey"
-                class="q-mr-xs cursor-pointer"
               />
             </q-item-section>
             <q-item-section>
@@ -73,6 +62,14 @@
                   class="q-mx-xs"
                 />
               </q-item-label>
+            </q-item-section>
+            <q-item-section side class="q-mx-none q-pl-none">
+              <q-icon
+                name="qr_code"
+                @click="showMintInfo(mint)"
+                color="grey"
+                class="q-mr-xs cursor-pointer"
+              />
             </q-item-section>
             <q-item-section side>
               <q-icon
@@ -143,6 +140,17 @@
         </div>
         <div class="row-12">
           <q-btn
+            v-if="addMintData.url.length == 0"
+            rounded
+            class="q-px-lg q-mt-xs"
+            color="primary"
+            @click="showCamera"
+          >
+            <q-icon size="xs" name="qr_code" class="q-pr-xs" />
+            Scan QR code
+          </q-btn>
+          <q-btn
+            v-if="addMintData.url.length > 0"
             rounded
             class="q-px-lg q-mt-xs"
             color="primary"
@@ -493,6 +501,7 @@ import { getShortUrl } from "src/js/wallet-helpers";
 import { mapActions, mapState, mapWritableState } from "pinia";
 import { useMintsStore, MintClass } from "src/stores/mints";
 import { useWalletStore } from "src/stores/wallet";
+import { useCameraStore } from "src/stores/camera";
 import { map } from "underscore";
 import { currentDateStr } from "src/js/utils";
 import { useSettingsStore } from "src/stores/settings";
@@ -500,10 +509,12 @@ import { useNostrStore } from "src/stores/nostr";
 import { useP2PKStore } from "src/stores/p2pk";
 import { useWorkersStore } from "src/stores/workers";
 import { notifyError, notifyWarning } from "src/js/notify";
+import MintDetailsDialog from "src/components/MintDetailsDialog.vue";
 
 export default defineComponent({
   name: "MintSettings",
   mixins: [windowMixin],
+  components: { MintDetailsDialog },
   props: {
     tickerShort: String,
   },
@@ -557,6 +568,8 @@ export default defineComponent({
       "addMintData",
       "showAddMintDialog",
       "showRemoveMintDialog",
+      "showMintInfoDialog",
+      "showMintInfoData",
     ]),
     hiddenMnemonic() {
       if (this.hideMnemonic) {
@@ -604,6 +617,7 @@ export default defineComponent({
       "invoiceCheckWorker",
       "checkTokenSpendableWorker",
     ]),
+    ...mapActions(useCameraStore, ["closeCamera", "showCamera"]),
     editMint: function (mint) {
       // copy object to avoid changing the original
       this.mintToEdit = Object.assign({}, mint);
@@ -777,9 +791,9 @@ export default defineComponent({
       console.log(mintUrls);
       this.discoveringMints = false;
     },
-    showP2PKKeyEntry: async function (pubKey) {
-      this.showKeyDetails(pubKey);
-      this.showP2PKDialog = true;
+    showMintInfo: async function (mint) {
+      this.showMintInfoData = mint;
+      this.showMintInfoDialog = true;
     },
   },
   created: function () {},
