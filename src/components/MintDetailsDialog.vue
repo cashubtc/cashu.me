@@ -69,7 +69,7 @@
                 caption
                 v-if="showMintInfoData.info.version"
                 class="text-weight-light text-white"
-                style="font-size: 12px"
+                style="font-size: 10px"
               >
                 Version: {{ showMintInfoData.info.version }}
               </q-item-label>
@@ -82,11 +82,44 @@
                 caption
                 v-if="showMintInfoData.info.nuts"
                 class="text-weight-light text-white"
-                style="font-size: 12px"
+                style="font-size: 10px"
               >
                 <!-- only the keys of the info.nuts object -->
                 Nuts: {{ Object.keys(showMintInfoData.info.nuts).join(", ") }}
               </q-item-label>
+            </div>
+          </q-card-section>
+
+          <q-card-section>
+            <div
+              v-if="
+                showMintInfoData.info.contact &&
+                showMintInfoData.info.contact.length > 0
+              "
+              class="justify-center"
+            >
+              <div
+                v-for="contactInfo in showMintInfoData.info.contact"
+                :key="contactInfo.method"
+                class="row justify-center q-pt-sm"
+              >
+                <q-item-label
+                  caption
+                  class="text-weight-light text-white"
+                  style="font-size: 12px"
+                >
+                  <q-icon
+                    v-if="contactIcons[contactInfo.method]"
+                    :name="contactIcons[contactInfo.method]"
+                    size="xs"
+                    class="q-mr-xs"
+                  />
+                  <span v-else class="text-weight-bold q-mr-xs">
+                    {{ contactMethods[contactInfo.method] }}
+                  </span>
+                  {{ contactInfo.info }}
+                </q-item-label>
+              </div>
             </div>
           </q-card-section>
         </div>
@@ -117,7 +150,15 @@ export default defineComponent({
     VueQrcode,
   },
   data: function () {
-    return {};
+    return {
+      contactIcons: {
+        email: "mail_outline",
+      },
+      contactMethods: {
+        twitter: "X",
+        nostr: "Nostr",
+      },
+    };
   },
   computed: {
     ...mapState(useMintsStore, ["showMintInfoData"]),
