@@ -355,11 +355,7 @@ export default {
     ]),
     ...mapActions(useCameraStore, ["closeCamera", "showCamera"]),
     ...mapActions(useNWCStore, ["listenToNWCCommands"]),
-    ...mapActions(useNPCStore, [
-      "generateNPCConnection",
-      "getBalance",
-      "getClaim",
-    ]),
+    ...mapActions(useNPCStore, ["generateNPCConnection", "claimAllTokens"]),
     // TOKEN METHODS
     decodeToken: function (encoded_token) {
       try {
@@ -642,19 +638,10 @@ export default {
     if (this.nwcEnabled) {
       this.listenToNWCCommands();
     }
+
+    // generate NPC connection
     this.generateNPCConnection();
-    const npubCashBalance = await this.getBalance();
-    console.log("npub.cash balance: " + npubCashBalance);
-    if (npubCashBalance > 0) {
-      this.$q.notify({
-        message: `You have ${npubCashBalance} sats on npub.cash`,
-        color: "positive",
-        position: "top",
-        timeout: 5000,
-      });
-      this.showReceiveTokens = true;
-      this.receiveData.tokensBase64 = await this.getClaim();
-    }
+    this.claimAllTokens();
   },
 };
 </script>

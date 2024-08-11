@@ -4,6 +4,9 @@ import { useLocalStorage } from "@vueuse/core";
 import { bytesToHex } from '@noble/hashes/utils' // already an installed dependency
 import { generateSecretKey, getPublicKey } from 'nostr-tools'
 import { nip19 } from 'nostr-tools'
+import { useWalletStore } from "./wallet";
+import { useReceiveTokensStore } from "./receiveTokensStore";
+import { notifyApiError, notifyError, notifySuccess, notifyWarning, notify } from "src/js/notify";
 
 type NPCConnection = {
   walletPublicKey: string,
@@ -21,6 +24,21 @@ type NPCClaim = {
     token: string,
   }
 }
+type NPCWithdrawl = {
+  id: number;
+  claim_ids: number[];
+  created_at: number;
+  pubkey: string;
+  amount: number;
+}
+
+type NPCWithdrawals = {
+  error: string,
+  data: {
+    count: number,
+    withdrawals: Array<NPCWithdrawl>
+  }
+}
 
 const NIP98Kind = 27235;
 
@@ -31,19 +49,46 @@ export const useNPCStore = defineStore("npc", {
     npcAddress: useLocalStorage<string>("cashu.npc.address", ""),
     npcDomain: useLocalStorage<string>("cashu.npc.domain", "npub.cash"),
     baseURL: useLocalStorage<string>("cashu.npc.baseURL", "https://npub.cash"),
+    tokensToClaim: useLocalStorage<string[]>("cashu.npc.tokensToClaim", []),
+    tokensClaimed: useLocalStorage<string[]>("cashu.npc.tokensClaimed", []),
     ndk: new NDK(),
     signer: {} as NDKPrivateKeySigner,
   }),
   getters: {
   },
   actions: {
+    claimAllTokens: async function () {
+      if (!this.npcEnabled) {
+        return
+      }
+      const receiveStore = useReceiveTokensStore();
+      const npubCashBalance = await this.getBalance();
+      console.log("npub.cash balance: " + npubCashBalance);
+      if (npubCashBalance > 0) {
+        notifySuccess(`You have ${npubCashBalance} sats on npub.cash`);
+        receiveStore.showReceiveTokens = true;
+        const token = await this.getClaim();
+        if (token) {
+          this.storeTokenToClaim(token)
+          receiveStore.receiveData.tokensBase64 = token;
+        }
+      }
+    },
+    storeTokenToClaim: function (token: string) {
+      this.tokensToClaim = this.tokensToClaim.concat(token)
+    },
     generateNPCConnection: async function () {
       let conn: NPCConnection
       // NOTE: we only support one connection for now
       if (!this.npcConnections.length) {
-        const sk = generateSecretKey() // `sk` is a Uint8Array
+        const walletStore = useWalletStore();
+        const sk = walletStore.seed.slice(0, 32)
         const walletPublicKeyHex = getPublicKey(sk) // `pk` is a hex string
         const walletPrivateKeyHex = bytesToHex(sk)
+        // print nsec and npub
+        console.log('Lightning address for wallet:', nip19.npubEncode(walletPublicKeyHex) + '@npub.cash')
+        // console.log('nsec:', nip19.nsecEncode(sk))
+        console.log('npub:', nip19.npubEncode(walletPublicKeyHex))
         conn = {
           walletPublicKey: walletPublicKeyHex,
           walletPrivateKey: walletPrivateKeyHex,
@@ -88,7 +133,6 @@ export const useNPCStore = defineStore("npc", {
         `${this.baseURL}/api/v1/balance`,
         "GET"
       );
-      console.log("Npub cash " + authHeader);
       try {
         const response = await fetch(`${this.baseURL}/api/v1/balance`, {
           method: "GET",
@@ -112,7 +156,6 @@ export const useNPCStore = defineStore("npc", {
         `${this.baseURL}/api/v1/claim`,
         "GET"
       );
-      console.log("Npub cash " + authHeader);
       try {
         const response = await fetch(`${this.baseURL}/api/v1/claim`, {
           method: "GET",
@@ -130,6 +173,29 @@ export const useNPCStore = defineStore("npc", {
         console.error(e)
         return ""
       }
-    }
+    },
+    // getWithdraw: async function (): Promise<string> {
+    //   const authHeader = await this.generateNip98Event(
+    //     `${this.baseURL}/api/v1/withdrawals`,
+    //     "POST",
+    //   );
+    //   try {
+    //     const response = await fetch(`${this.baseURL}/api/v1/withdraw`, {
+    //       method: "GET",
+    //       headers: {
+    //         Authorization: `Nostr ${authHeader}`,
+    //       },
+    //     })
+    //     // deserialize the response to NPCClaim
+    //     const claim: NPCClaim = await response.json()
+    //     if (claim.error) {
+    //       return ""
+    //     }
+    //     return claim.data.token
+    //   } catch (e) {
+    //     console.error(e)
+    //     return ""
+    //   }
+    // }
   }
 });

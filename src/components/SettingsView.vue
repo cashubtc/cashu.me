@@ -244,7 +244,10 @@
         <q-item>
           <q-item-section>
             <q-item-label overline>Lightning address</q-item-label>
-            <q-item-label caption>This is your lightning address.</q-item-label>
+            <q-item-label caption
+              >This is your lightning address. Enable it to check for incoming
+              payments at startup.</q-item-label
+            >
           </q-item-section>
         </q-item>
         <q-item>
@@ -265,6 +268,14 @@
                   </template>
                 </q-input>
               </div>
+            </div>
+            <!-- toggle to turn Lightning address on and off in new row -->
+            <div class="row q-pt-md">
+              <q-toggle
+                v-model="npcEnabled"
+                label="Enable Lightning address"
+                color="primary"
+              />
             </div>
           </q-item-section>
         </q-item>
@@ -698,6 +709,7 @@ export default defineComponent({
     ...mapState(useNPCStore, ["npcAddress"]),
     ...mapState(useNostrStore, ["pubkey", "mintRecommendations"]),
     ...mapState(useWalletStore, ["mnemonic"]),
+    ...mapWritableState(useNPCStore, ["npcEnabled"]),
     ...mapWritableState(useWalletStore, ["keysetCounters"]),
     ...mapWritableState(useMintsStore, [
       "addMintData",
