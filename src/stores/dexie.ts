@@ -37,6 +37,7 @@ export const useDexieStore = defineStore("dexie", {
       if (this.migratedToDexie) {
         return;
       }
+      console.log("Migrating to Dexie");
       // get all proofs from localstorage "cashu.proofs" ad migrate them to Dexie db.proofs
       const proofs = localStorage.getItem("cashu.proofs");
       if (proofs) {
@@ -45,6 +46,7 @@ export const useDexieStore = defineStore("dexie", {
           this.db.proofs.add(proof);
         });
       }
+      console.log(`Migrated ${this.db.proofs.count()} proofs`);
       // do the same with spentProofs
       const spentProofs = localStorage.getItem("cashu.spentProofs");
       if (spentProofs) {
@@ -53,10 +55,11 @@ export const useDexieStore = defineStore("dexie", {
           this.db.spentProofs.add(proof);
         });
       }
+      console.log(`Migrated ${this.db.spentProofs.count()} spent proofs`);
       this.migratedToDexie = true;
       // remove localstorage "cashu.proofs" and "cashu.spentProofs"
-      // localStorage.removeItem("cashu.proofs");
-      // localStorage.removeItem("cashu.spentProofs");
+      localStorage.removeItem("cashu.proofs");
+      localStorage.removeItem("cashu.spentProofs");
     }
   },
 });

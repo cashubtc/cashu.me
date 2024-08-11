@@ -91,7 +91,8 @@ export const useMintsStore = defineStore("mints", {
         nickname: "",
       },
       mints: useLocalStorage("cashu.mints", [] as Mint[]),
-      proofs: useLocalStorage("cashu.proofs", [] as WalletProof[]),
+      // proofs: useLocalStorage("cashu.proofs", [] as WalletProof[]),
+      proofs: [] as WalletProof[],
       spentProofs: useLocalStorage("cashu.spentProofs", [] as WalletProof[]),
       blindSignatures: useLocalStorage("cashu.blindSignatures", [] as BlindSignatureAudit[]),
       // balances: useLocalStorage("cashu.balances", {} as Balances),
@@ -121,6 +122,9 @@ export const useMintsStore = defineStore("mints", {
     },
   },
   actions: {
+    async fetchProofs() {
+      this.proofs = await dexieStore.db.proofs.toArray();
+    },
     activeMint() {
       const mint = this.mints.find((m) => m.url === this.activeMintUrl);
       if (mint) {
@@ -435,5 +439,5 @@ export const useMintsStore = defineStore("mints", {
     //   }
     //   return null
     // }
-  }
+  },
 });

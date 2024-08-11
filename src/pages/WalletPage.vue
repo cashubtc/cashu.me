@@ -212,6 +212,7 @@ import { useCameraStore } from "src/stores/camera";
 import { useP2PKStore } from "src/stores/p2pk";
 import { useNWCStore } from "src/stores/nwc";
 import { useNPCStore } from "src/stores/npubcash";
+import { useDexieStore } from "src/stores/dexie";
 
 import ReceiveTokenDialog from "src/components/ReceiveTokenDialog.vue";
 
@@ -333,6 +334,7 @@ export default {
       "setActiveProofs",
       "setProofs",
       "getKeysForKeyset",
+      "fetchProofs",
     ]),
     ...mapActions(useWorkersStore, [
       "clearAllWorkers",
@@ -360,6 +362,7 @@ export default {
       "getBalance",
       "getClaim",
     ]),
+    ...mapActions(useDexieStore, ["migrateToDexie"]),
     // TOKEN METHODS
     decodeToken: function (encoded_token) {
       try {
@@ -625,7 +628,8 @@ export default {
     );
 
     // startup tasks
-
+    this.migrateToDexie();
+    await this.fetchProofs();
     // // Local storage sync hook
     // this.registerLocalStorageSyncHook();
 
