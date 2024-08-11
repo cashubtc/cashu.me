@@ -243,6 +243,34 @@
       <q-list padding>
         <q-item>
           <q-item-section>
+            <q-item-label overline>Lightning address</q-item-label>
+            <q-item-label caption>This is your lightning address.</q-item-label>
+          </q-item-section>
+        </q-item>
+        <q-item>
+          <q-item-section class="q-mx-none q-pl-none">
+            <div class="row q-pt-md">
+              <div class="col-12">
+                <q-input outlined v-model="npcAddress" dense rounded readonly>
+                  <template v-slot:append>
+                    <q-icon
+                      name="content_copy"
+                      @click="copyText(npcAddress)"
+                      size="0.8em"
+                      color="grey"
+                      class="q-mr-sm cursor-pointer"
+                    >
+                      <q-tooltip>Copy Lightning address</q-tooltip>
+                    </q-icon>
+                  </template>
+                </q-input>
+              </div>
+            </div>
+          </q-item-section>
+        </q-item>
+
+        <q-item>
+          <q-item-section>
             <q-item-label overline>Link wallet</q-item-label>
             <q-item-label caption
               >Use Nostr Wallet Connect (NWC) to control your wallet from any
@@ -311,7 +339,7 @@
                 <q-tooltip>Show QR code</q-tooltip>
               </q-icon>
             </q-item-section>
-            <q-item-section>
+            <q-item-section style="max-width: 10rem">
               <!-- <q-item-label
                 caption
                 clickable
@@ -598,6 +626,7 @@ import { map } from "underscore";
 import { currentDateStr } from "src/js/utils";
 import { useSettingsStore } from "src/stores/settings";
 import { useNostrStore } from "src/stores/nostr";
+import { useNPCStore } from "src/stores/npubcash";
 import { useP2PKStore } from "src/stores/p2pk";
 import { useNWCStore } from "src/stores/nwc";
 import { useWorkersStore } from "src/stores/workers";
@@ -666,6 +695,7 @@ export default defineComponent({
       "activeProofs",
       "proofs",
     ]),
+    ...mapState(useNPCStore, ["npcAddress"]),
     ...mapState(useNostrStore, ["pubkey", "mintRecommendations"]),
     ...mapState(useWalletStore, ["mnemonic"]),
     ...mapWritableState(useWalletStore, ["keysetCounters"]),

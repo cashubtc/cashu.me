@@ -211,6 +211,7 @@ import { useProofsStore } from "src/stores/proofs";
 import { useCameraStore } from "src/stores/camera";
 import { useP2PKStore } from "src/stores/p2pk";
 import { useNWCStore } from "src/stores/nwc";
+import { useNPCStore } from "src/stores/npubcash";
 
 import ReceiveTokenDialog from "src/components/ReceiveTokenDialog.vue";
 
@@ -354,6 +355,11 @@ export default {
     ]),
     ...mapActions(useCameraStore, ["closeCamera", "showCamera"]),
     ...mapActions(useNWCStore, ["listenToNWCCommands"]),
+    ...mapActions(useNPCStore, [
+      "generateNPCConnection",
+      "getBalance",
+      "getClaim",
+    ]),
     // TOKEN METHODS
     decodeToken: function (encoded_token) {
       try {
@@ -635,6 +641,19 @@ export default {
     // listen to NWC commands if enabled
     if (this.nwcEnabled) {
       this.listenToNWCCommands();
+    }
+    this.generateNPCConnection();
+    const npubCashBalance = await this.getBalance();
+    console.log("npub.cash balance: " + npubCashBalance);
+    if (npubCashBalance > 0) {
+      this.$q.notify({
+        message: `You have ${npubCashBalance} sats on npub.cash`,
+        color: "positive",
+        position: "top",
+        timeout: 5000,
+      });
+      this.showReceiveTokens = true;
+      this.receiveData.tokensBase64 = await this.getClaim();
     }
   },
 };
