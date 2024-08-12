@@ -13,7 +13,7 @@
               <a href="https://v2alpha.nutstash.app/" target="_blank">
                 this tool
               </a>
-              > to recover from seed phrase.
+              to recover from seed phrase.
             </q-item-label>
             <div class="row q-pt-md">
               <div class="col-12">
