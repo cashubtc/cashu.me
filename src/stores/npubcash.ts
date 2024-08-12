@@ -6,7 +6,11 @@ import { generateSecretKey, getPublicKey } from 'nostr-tools'
 import { nip19 } from 'nostr-tools'
 import { useWalletStore } from "./wallet";
 import { useReceiveTokensStore } from "./receiveTokensStore";
-import { notifyApiError, notifyError, notifySuccess, notifyWarning, notify } from "src/js/notify";
+import { notifyApiError, notifyError, notifySuccess, notifyWarning, notify } from "../js/notify";
+import { Proof } from "@cashu/cashu-ts";
+import token from "../js/token";
+import { WalletProof, useMintsStore } from "./mints";
+import { useTokensStore } from "../stores/tokens";
 
 type NPCConnection = {
   walletPublicKey: string,
@@ -49,8 +53,6 @@ export const useNPCStore = defineStore("npc", {
     npcAddress: useLocalStorage<string>("cashu.npc.address", ""),
     npcDomain: useLocalStorage<string>("cashu.npc.domain", "npub.cash"),
     baseURL: useLocalStorage<string>("cashu.npc.baseURL", "https://npub.cash"),
-    tokensToClaim: useLocalStorage<string[]>("cashu.npc.tokensToClaim", []),
-    tokensClaimed: useLocalStorage<string[]>("cashu.npc.tokensClaimed", []),
     ndk: new NDK(),
     signer: {} as NDKPrivateKeySigner,
   }),
@@ -66,16 +68,85 @@ export const useNPCStore = defineStore("npc", {
       console.log("npub.cash balance: " + npubCashBalance);
       if (npubCashBalance > 0) {
         notifySuccess(`You have ${npubCashBalance} sats on npub.cash`);
-        receiveStore.showReceiveTokens = true;
         const token = await this.getClaim();
         if (token) {
-          this.storeTokenToClaim(token)
+          // add token to history first
+          this.addPendingTokenToHistory(token)
           receiveStore.receiveData.tokensBase64 = token;
+          try {
+            // redeem token automatically
+            const walletStore = useWalletStore()
+            await walletStore.redeem()
+          } catch {
+            // if it doesn't work, show the receive window
+            receiveStore.showReceiveTokens = true;
+          }
+          // this.storeUnclaimedProofs(token)
+          // const proofsToClaim = this.getUnclaimedProofs(token)
+          // const proofsStore = useProofsStore()
+          // const encodedToken = proofsStore.serializeProofs(proofsToClaim)
+          // receiveStore.receiveData.tokensBase64 = encodedToken;
+          // const walletStore = useWalletStore()
+          // try {
+          //   // try to receive automatically
+          //   await walletStore.redeem()
+          // } catch {
+          //   // if it doesn't work, show the receive window
+          //   receiveStore.showReceiveTokens = true;
+          // }
         }
       }
     },
-    storeTokenToClaim: function (token: string) {
-      this.tokensToClaim = this.tokensToClaim.concat(token)
+    // storeUnclaimedProofs: function (encodedToken: string) {
+    //   const proofs: WalletProof[] = token.getProofs(token.decode(encodedToken))
+    //   const unclaimedProofs = proofs.filter((p) =>
+    //     !this.unclaimedProofs.map((pu) => pu.secret).includes(p.secret)
+    //   );
+    //   this.unclaimedProofs = this.unclaimedProofs.concat(unclaimedProofs)
+    // },
+    // getUnclaimedProofs: function (encodedToken: string): WalletProof[] {
+    //   // get all unclaimedProofs from the same mint as encodedToken
+    //   const mintUrl = token.getMint(token.decode(encodedToken))
+    //   const mintsStore = useMintsStore()
+    //   const mint = mintsStore.mints.find((m) => m.url == mintUrl);
+    //   if (mint == undefined) {
+    //     return []
+    //   }
+    //   const mintKeysetIds = mint.keysets.map((k) => k.id)
+    //   const unclaimedProofsFromSameMint = this.unclaimedProofs.filter((p) => mintKeysetIds.includes(p.id))
+    //   console.log(`unclaimed: ${unclaimedProofsFromSameMint.length}`)
+    //   return unclaimedProofsFromSameMint;
+    // },
+    tokenAlreadyInHistory: function (tokenStr: string) {
+      const tokensStore = useTokensStore();
+      return (
+        tokensStore.historyTokens.find((t) => t.token === tokenStr) !== undefined
+      );
+    },
+    addPendingTokenToHistory: function (tokenStr: string) {
+      const tokensStore = useTokensStore();
+      if (this.tokenAlreadyInHistory(tokenStr)) {
+        return;
+      }
+      const decodedToken = token.decode(tokenStr);
+      if (decodedToken == undefined) {
+        throw Error('could not decode token')
+      }
+      // get amount from decodedToken.token.proofs[..].amount
+      const amount = token.getProofs(decodedToken).reduce(
+        (sum, el) => (sum += el.amount),
+        0
+      );
+
+      const mintUrl = token.getMint(decodedToken)
+      const unit = token.getUnit(decodedToken)
+      tokensStore.addPendingToken({
+        amount: amount,
+        serializedProofs: tokenStr,
+        mint: mintUrl,
+        unit: unit
+      });
+      this.showReceiveTokens = false;
     },
     generateNPCConnection: async function () {
       let conn: NPCConnection
@@ -129,6 +200,7 @@ export const useNPCStore = defineStore("npc", {
       }
     },
     getBalance: async function (): Promise<number> {
+      return 123;
       const authHeader = await this.generateNip98Event(
         `${this.baseURL}/api/v1/balance`,
         "GET"
@@ -152,6 +224,7 @@ export const useNPCStore = defineStore("npc", {
       }
     },
     getClaim: async function (): Promise<string> {
+      return "cashuAeyJ0b2tlbiI6W3sicHJvb2ZzIjpbeyJhbW91bnQiOjY0LCJzZWNyZXQiOiJlZjExOTBhYWYyY2UzMjBmZDg5ZDRlZWZmNjk3NTZiZTU1YjUxOThjMDk5N2ZkMjdkNjE1MjVjZTAwOTgyZDc5IiwiQyI6IjAzYjdkMzJlODgyNDA4YmE0ODVhODQ4NWY2NWFjNWFlYzM5ZTU5YTFlZjQzNTY1NjU1ODU5ZjIxNzE0Zjk1N2RmNyIsImlkIjoiMDBhZDI2OGM0ZDFmNTgyNiJ9LHsiYW1vdW50Ijo4LCJzZWNyZXQiOiIzOWZiY2ExZDE3YjNkZTU0MGQyMjI1OGRiYTkyYmRjMTZjMjM4N2M4NGYxMDM5MjBhNzc1NDI3ODg2OGY1MTU3IiwiQyI6IjAzZjU2ODAyZGNmNzE3NWYyNTViYTFhYmRiMmEyYjdjOTFhMWI0N2EzMDBkOGY1YjhhNzNkMDQwNzhhYTJmNGU5NCIsImlkIjoiMDBhZDI2OGM0ZDFmNTgyNiJ9LHsiYW1vdW50Ijo0LCJzZWNyZXQiOiJkOTYwYWVhM2UwMTc3YTg5NjQ4ZGU2NDFlMTIxOWJlZThlMWU5ZTUyNDdhYTdlNjU1NmJlMjQwMDUxMDE4YzE1IiwiQyI6IjAyZGYyZTA4MGZlOTQzYzAyYTIyNzQ0YzQ1YzQ2NDAwMzFiNmE5NThmZDcxODRlNDJmMTllMjczM2EwYjNkMTY0NyIsImlkIjoiMDBhZDI2OGM0ZDFmNTgyNiJ9LHsiYW1vdW50IjoxLCJzZWNyZXQiOiI3MWM2NmMwZTkyMjVhODc4OWRhNTM4NGUzMTI3ODBkYmU3NGRlY2I2OGQ0YWY4ODQ5MGUxYWNhNTUwMTQ5MjI3IiwiQyI6IjAyNzNhYzhjODQzMTUxNjI2MDExYjJiYTBjMWY3OGFiYmY5YWEwYjY5ZWQ5YzE5NmY2MTM2MzBhNGNjM2VkYzhiNSIsImlkIjoiMDBhZDI2OGM0ZDFmNTgyNiJ9XSwibWludCI6Imh0dHA6Ly9sb2NhbGhvc3Q6MzMzOCJ9XSwidW5pdCI6InNhdCJ9";
       const authHeader = await this.generateNip98Event(
         `${this.baseURL}/api/v1/claim`,
         "GET"
