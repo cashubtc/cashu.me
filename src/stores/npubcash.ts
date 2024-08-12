@@ -200,7 +200,6 @@ export const useNPCStore = defineStore("npc", {
       }
     },
     getBalance: async function (): Promise<number> {
-      return 123;
       const authHeader = await this.generateNip98Event(
         `${this.baseURL}/api/v1/balance`,
         "GET"
@@ -224,7 +223,6 @@ export const useNPCStore = defineStore("npc", {
       }
     },
     getClaim: async function (): Promise<string> {
-      return "cashuAeyJ0b2tlbiI6W3sicHJvb2ZzIjpbeyJhbW91bnQiOjY0LCJzZWNyZXQiOiJlZjExOTBhYWYyY2UzMjBmZDg5ZDRlZWZmNjk3NTZiZTU1YjUxOThjMDk5N2ZkMjdkNjE1MjVjZTAwOTgyZDc5IiwiQyI6IjAzYjdkMzJlODgyNDA4YmE0ODVhODQ4NWY2NWFjNWFlYzM5ZTU5YTFlZjQzNTY1NjU1ODU5ZjIxNzE0Zjk1N2RmNyIsImlkIjoiMDBhZDI2OGM0ZDFmNTgyNiJ9LHsiYW1vdW50Ijo4LCJzZWNyZXQiOiIzOWZiY2ExZDE3YjNkZTU0MGQyMjI1OGRiYTkyYmRjMTZjMjM4N2M4NGYxMDM5MjBhNzc1NDI3ODg2OGY1MTU3IiwiQyI6IjAzZjU2ODAyZGNmNzE3NWYyNTViYTFhYmRiMmEyYjdjOTFhMWI0N2EzMDBkOGY1YjhhNzNkMDQwNzhhYTJmNGU5NCIsImlkIjoiMDBhZDI2OGM0ZDFmNTgyNiJ9LHsiYW1vdW50Ijo0LCJzZWNyZXQiOiJkOTYwYWVhM2UwMTc3YTg5NjQ4ZGU2NDFlMTIxOWJlZThlMWU5ZTUyNDdhYTdlNjU1NmJlMjQwMDUxMDE4YzE1IiwiQyI6IjAyZGYyZTA4MGZlOTQzYzAyYTIyNzQ0YzQ1YzQ2NDAwMzFiNmE5NThmZDcxODRlNDJmMTllMjczM2EwYjNkMTY0NyIsImlkIjoiMDBhZDI2OGM0ZDFmNTgyNiJ9LHsiYW1vdW50IjoxLCJzZWNyZXQiOiI3MWM2NmMwZTkyMjVhODc4OWRhNTM4NGUzMTI3ODBkYmU3NGRlY2I2OGQ0YWY4ODQ5MGUxYWNhNTUwMTQ5MjI3IiwiQyI6IjAyNzNhYzhjODQzMTUxNjI2MDExYjJiYTBjMWY3OGFiYmY5YWEwYjY5ZWQ5YzE5NmY2MTM2MzBhNGNjM2VkYzhiNSIsImlkIjoiMDBhZDI2OGM0ZDFmNTgyNiJ9XSwibWludCI6Imh0dHA6Ly9sb2NhbGhvc3Q6MzMzOCJ9XSwidW5pdCI6InNhdCJ9";
       const authHeader = await this.generateNip98Event(
         `${this.baseURL}/api/v1/claim`,
         "GET"
