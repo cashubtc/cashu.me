@@ -243,6 +243,78 @@
       <q-list padding>
         <q-item>
           <q-item-section>
+            <q-item-label overline>Nostr</q-item-label>
+            <q-item-label caption>Your nostr account.</q-item-label>
+          </q-item-section>
+        </q-item>
+        <!-- Nip07Signer -->
+        <q-item>
+          <q-item-section>
+            <q-btn
+              class="q-ml-sm q-px-md"
+              color="primary"
+              rounded
+              outline
+              @click="initNip07Signer"
+              >Use extension</q-btn
+            >
+          </q-item-section>
+        </q-item>
+        <!-- Nip46Signer -->
+        <q-item>
+          <q-item-section>
+            <!-- input field for nip46Token -->
+            <q-input
+              outlined
+              rounded
+              dense
+              v-model="nip46Token"
+              label="Nip46 token"
+              type="textarea"
+              autogrow
+            ></q-input>
+
+            <q-btn
+              class="q-ml-sm q-px-md"
+              color="primary"
+              rounded
+              outline
+              @click="initNip46Signer(nip46Token)"
+              >Use Nip46Signer</q-btn
+            >
+          </q-item-section>
+        </q-item>
+        <!-- PrivateKeySigner -->
+        <q-item>
+          <q-item-section>
+            <!-- input for nostrPrivateKey -->
+            <q-input
+              outlined
+              rounded
+              dense
+              v-model="nostrPrivateKey"
+              label="Private key"
+              type="textarea"
+              autogrow
+            ></q-input>
+
+            <q-btn
+              class="q-ml-sm q-px-md"
+              color="primary"
+              rounded
+              outline
+              @click="btnInitPrivateKeySigner"
+              >Use private key</q-btn
+            >
+          </q-item-section>
+        </q-item>
+      </q-list>
+    </div>
+    <!-- ln address -->
+    <div class="q-py-sm q-px-xs text-left" on-left>
+      <q-list padding>
+        <q-item>
+          <q-item-section>
             <q-item-label overline>Lightning address</q-item-label>
             <q-item-label caption
               >This is your lightning address. Enable it to check for incoming
@@ -665,31 +737,10 @@ export default defineComponent({
         "flamingo",
       ],
       discoveringMints: false,
-      addingMint: false,
       hideMnemonic: true,
       confirmMnemonic: false,
-      swapData: {
-        from_url: "",
-        to_url: "",
-        amount: 0,
-      },
-      mintToEdit: {
-        url: "",
-        nickname: "",
-      },
-      mintToRemove: {
-        url: "",
-        nickname: "",
-        balances: {},
-      },
-      editMintData: {
-        url: "",
-        nickname: "",
-      },
-      addMintDialog: {
-        show: false,
-      },
-      showEditMintDialog: false,
+      nip46Token: "",
+      nostrPrivateKey: "",
     };
   },
   computed: {
@@ -748,10 +799,9 @@ export default defineComponent({
   methods: {
     ...mapActions(useNostrStore, [
       "init",
-      "connect",
-      "getUserPubkey",
-      "fetchEventsFromUser",
-      "fetchMints",
+      "initNip07Signer",
+      "initNip46Signer",
+      "initPrivateKeySigner",
     ]),
     ...mapActions(useNWCStore, [
       "generateNWCConnection",
@@ -776,63 +826,6 @@ export default defineComponent({
     ]),
     ...mapActions(useWorkersStore, ["invoiceCheckWorker"]),
     ...mapActions(useProofsStore, ["serializeProofs"]),
-
-    editMint: function (mint) {
-      // copy object to avoid changing the original
-      this.mintToEdit = Object.assign({}, mint);
-      this.editMintData = Object.assign({}, mint);
-      this.showEditMintDialog = true;
-    },
-    addMintInternal: function (mintToAdd, verbose) {
-      this.addingMint = true;
-      try {
-        this.addMint(mintToAdd, verbose);
-      } finally {
-        this.addingMint = false;
-      }
-    },
-    generateNewMnemonic() {
-      this.newMnemonic();
-    },
-    toggleMnemonicVisibility: function () {
-      this.hideMnemonic = !this.hideMnemonic;
-    },
-    mintClass(mint) {
-      return new MintClass(mint);
-    },
-    swapDataOptions: function () {
-      let options = [];
-      for (const [i, m] of Object.entries(this.mints)) {
-        options.push({
-          url: m.url,
-          shorturl: m.nickname || getShortUrl(m.url),
-        });
-      }
-      return options;
-    },
-    showRemoveMintDialogWrapper: function (mint) {
-      // select the mint from this.mints and add its balances
-      let mintToRemove = this.mints.find((m) => m.url == mint);
-
-      this.mintToRemove = mintToRemove;
-      this.showRemoveMintDialog = true;
-    },
-    //
-    mintSwap: async function (from_url, to_url, amount) {
-      // get invoice
-      await this.activateMintUrl(to_url);
-      let invoice = await this.requestMint(amount);
-
-      // pay invoice
-      await this.activateMintUrl(from_url);
-      await this.decodeRequest(invoice.request);
-      await this.melt();
-
-      // settle invoice on other side
-      await this.activateMintUrl(to_url);
-      await this.invoiceCheckWorker();
-      this.notifySuccess("Swap successful");
-    },
     enable_terminal: function () {
       // enable debug terminal
       var script = document.createElement("script");
@@ -898,37 +891,6 @@ export default defineComponent({
         this.notifySuccess("No spent proofs found");
       }
     },
-    initNdk: async function () {
-      await this.connect();
-      console.log(await this.getUserPubkey());
-      // console.log("### fetch events");
-      // console.log(await this.fetchEventsFromUser());
-      // console.log("### fetch mints");
-      // console.log(await this.fetchMints());
-    },
-    fetchMintsFromNdk: async function () {
-      this.discoveringMints = true;
-      await this.connect();
-      console.log("### fetch mints");
-      let maxTries = 5;
-      let tries = 0;
-      let mintUrls = [];
-      while (mintUrls.length == 0 && tries < maxTries) {
-        try {
-          mintUrls = await this.fetchMints();
-        } catch (e) {
-          console.log("Error fetching mints", e);
-        }
-        tries++;
-      }
-      if (mintUrls.length == 0) {
-        this.notifyError("No mints found");
-      } else {
-        this.notifySuccess("Found " + mintUrls.length + " mints");
-      }
-      console.log(mintUrls);
-      this.discoveringMints = false;
-    },
     showP2PKKeyEntry: async function (pubKey) {
       this.showKeyDetails(pubKey);
       this.showP2PKDialog = true;
@@ -944,6 +906,10 @@ export default defineComponent({
       // export active proofs
       const token = await this.serializeProofs(this.activeProofs);
       this.copyText(token);
+    },
+    btnInitPrivateKeySigner: async function () {
+      // init the private key signer
+      this.initPrivateKeySigner(this.nostrPrivateKey);
     },
   },
   created: function () {},
