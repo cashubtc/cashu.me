@@ -247,66 +247,88 @@
             <q-item-label caption>Your nostr account.</q-item-label>
           </q-item-section>
         </q-item>
-        <!-- Nip07Signer -->
+        <!-- initWalletSeedPrivateKeySigner -->
         <q-item>
-          <q-item-section>
-            <q-btn
-              class="q-ml-sm q-px-md"
-              color="primary"
-              rounded
-              outline
-              @click="initNip07Signer"
-              >Use extension</q-btn
-            >
-          </q-item-section>
-        </q-item>
-        <!-- Nip46Signer -->
-        <q-item>
-          <q-item-section>
-            <!-- input field for nip46Token -->
-            <q-input
-              outlined
-              rounded
-              dense
-              v-model="nip46Token"
-              label="Nip46 token"
-              type="textarea"
-              autogrow
-            ></q-input>
+          <q-btn
+            class="q-ml-sm q-px-md"
+            :color="signerType === 'SEED' ? 'primary' : 'grey'"
+            rounded
+            outline
+            @click="handleSeedClick"
+            >Seed</q-btn
+          >
+          <!-- Nip07Signer -->
+          <q-btn
+            class="q-ml-sm q-px-md"
+            :color="signerType === 'NIP07' ? 'primary' : 'grey'"
+            rounded
+            outline
+            :disabled="!nip07SignerAvailable"
+            @click="handleExtensionClick"
+            >Extension</q-btn
+          >
+          <!-- Nip46Signer -->
+          <!-- input field for nip46Token -->
+          <q-input
+            v-if="false"
+            outlined
+            rounded
+            dense
+            v-model="nip46Token"
+            label="Nip46 token"
+            type="textarea"
+            autogrow
+          ></q-input>
 
-            <q-btn
-              class="q-ml-sm q-px-md"
-              color="primary"
-              rounded
-              outline
-              @click="initNip46Signer(nip46Token)"
-              >Use Nip46Signer</q-btn
-            >
-          </q-item-section>
-        </q-item>
-        <!-- PrivateKeySigner -->
-        <q-item>
-          <q-item-section>
-            <!-- input for nostrPrivateKey -->
-            <q-input
-              outlined
-              rounded
-              dense
-              v-model="nostrPrivateKey"
-              label="Private key"
-              type="textarea"
-              autogrow
-            ></q-input>
+          <q-btn
+            class="q-ml-sm q-px-md"
+            :color="signerType === 'NIP46' ? 'primary' : 'grey'"
+            rounded
+            outline
+            @click="handleBunkerClick"
+            >Bunker</q-btn
+          >
+          <!-- reset bunker button if bunker is selected -->
+          <q-btn
+            v-if="signerType === 'NIP46'"
+            class="q-ml-sm q-px-md"
+            color="warning"
+            rounded
+            outline
+            @click="resetNip46Signer"
+            >Reset</q-btn
+          >
+          <!-- PrivateKeySigner -->
+          <!-- input for nostrPrivateKey -->
+          <q-input
+            v-if="false"
+            outlined
+            rounded
+            dense
+            v-model="nostrPrivateKey"
+            label="Private key"
+            type="textarea"
+            autogrow
+          ></q-input>
 
-            <q-btn
-              class="q-ml-sm q-px-md"
-              color="primary"
-              rounded
-              outline
-              @click="btnInitPrivateKeySigner"
-              >Use private key</q-btn
-            >
-          </q-item-section>
+          <q-btn
+            class="q-ml-sm q-px-md"
+            :color="signerType === 'PRIVATEKEY' ? 'primary' : 'grey'"
+            rounded
+            outline
+            @click="handleNsecClick"
+            >nsec</q-btn
+          >
+          <!-- reset nsec button if nsec is selected -->
+          <q-btn
+            v-if="signerType === 'PRIVATEKEY'"
+            class="q-ml-sm q-px-md"
+            color="warning"
+            rounded
+            outline
+            @click="resetPrivateKeySigner"
+            >Reset</q-btn
+          >
         </q-item>
       </q-list>
     </div>
@@ -741,6 +763,7 @@ export default defineComponent({
       confirmMnemonic: false,
       nip46Token: "",
       nostrPrivateKey: "",
+      nip07SignerAvailable: false,
     };
   },
   computed: {
@@ -758,7 +781,7 @@ export default defineComponent({
       "proofs",
     ]),
     ...mapState(useNPCStore, ["npcAddress"]),
-    ...mapState(useNostrStore, ["pubkey", "mintRecommendations"]),
+    ...mapState(useNostrStore, ["pubkey", "mintRecommendations", "signerType"]),
     ...mapState(useWalletStore, ["mnemonic"]),
     ...mapWritableState(useNPCStore, ["npcEnabled"]),
     ...mapWritableState(useWalletStore, ["keysetCounters"]),
@@ -802,6 +825,10 @@ export default defineComponent({
       "initNip07Signer",
       "initNip46Signer",
       "initPrivateKeySigner",
+      "initWalletSeedPrivateKeySigner",
+      "checkNip07Signer",
+      "resetPrivateKeySigner",
+      "resetNip46Signer",
     ]),
     ...mapActions(useNWCStore, [
       "generateNWCConnection",
@@ -826,6 +853,7 @@ export default defineComponent({
     ]),
     ...mapActions(useWorkersStore, ["invoiceCheckWorker"]),
     ...mapActions(useProofsStore, ["serializeProofs"]),
+    ...mapActions(useNPCStore, ["generateNPCConnection"]),
     enable_terminal: function () {
       // enable debug terminal
       var script = document.createElement("script");
@@ -907,11 +935,26 @@ export default defineComponent({
       const token = await this.serializeProofs(this.activeProofs);
       this.copyText(token);
     },
-    btnInitPrivateKeySigner: async function () {
-      // init the private key signer
-      this.initPrivateKeySigner(this.nostrPrivateKey);
+    handleSeedClick: async function () {
+      await this.initWalletSeedPrivateKeySigner();
+      await this.generateNPCConnection();
+    },
+    handleExtensionClick: async function () {
+      await this.initNip07Signer();
+      await this.generateNPCConnection();
+    },
+    handleBunkerClick: async function () {
+      await this.initNip46Signer();
+      await this.generateNPCConnection();
+    },
+    handleNsecClick: async function () {
+      await this.initPrivateKeySigner();
+      await this.generateNPCConnection();
     },
   },
-  created: function () {},
+  created: async function () {
+    this.nip07SignerAvailable = await this.checkNip07Signer();
+    console.log("Nip07 signer available", this.nip07SignerAvailable);
+  },
 });
 </script>

@@ -11,10 +11,16 @@ import { Proof } from "@cashu/cashu-ts";
 import token from "../js/token";
 import { WalletProof, useMintsStore } from "./mints";
 import { useTokensStore } from "../stores/tokens";
+import { useNostrStore } from "../stores/nostr";
+// type NPCConnection = {
+//   walletPublicKey: string,
+//   walletPrivateKey: string,
+// }
 
-type NPCConnection = {
-  walletPublicKey: string,
-  walletPrivateKey: string,
+type NPCInfo = {
+  mintUrl: string,
+  npub: string,
+  username: string
 }
 
 type NPCBalance = {
@@ -49,12 +55,12 @@ const NIP98Kind = 27235;
 export const useNPCStore = defineStore("npc", {
   state: () => ({
     npcEnabled: useLocalStorage<boolean>("cashu.npc.enabled", false),
-    npcConnections: useLocalStorage<NPCConnection[]>("cashu.npc.connections", []),
+    // npcConnections: useLocalStorage<NPCConnection[]>("cashu.npc.connections", []),
     npcAddress: useLocalStorage<string>("cashu.npc.address", ""),
     npcDomain: useLocalStorage<string>("cashu.npc.domain", "npub.cash"),
     baseURL: useLocalStorage<string>("cashu.npc.baseURL", "https://npub.cash"),
-    ndk: new NDK(),
-    signer: {} as NDKPrivateKeySigner,
+    // ndk: new NDK(),
+    // signer: {} as NDKPrivateKeySigner,
   }),
   getters: {
   },
@@ -149,40 +155,62 @@ export const useNPCStore = defineStore("npc", {
       this.showReceiveTokens = false;
     },
     generateNPCConnection: async function () {
-      let conn: NPCConnection
-      // NOTE: we only support one connection for now
-      if (!this.npcConnections.length) {
-        const walletStore = useWalletStore();
-        const sk = walletStore.seed.slice(0, 32)
-        const walletPublicKeyHex = getPublicKey(sk) // `pk` is a hex string
-        const walletPrivateKeyHex = bytesToHex(sk)
-        // print nsec and npub
-        console.log('Lightning address for wallet:', nip19.npubEncode(walletPublicKeyHex) + '@npub.cash')
-        // console.log('nsec:', nip19.nsecEncode(sk))
-        console.log('npub:', nip19.npubEncode(walletPublicKeyHex))
-        conn = {
-          walletPublicKey: walletPublicKeyHex,
-          walletPrivateKey: walletPrivateKeyHex,
-        } as NPCConnection;
-        this.npcConnections = this.npcConnections.concat(conn)
-        this.npcAddress = nip19.npubEncode(this.npcConnections[0].walletPublicKey) + '@' + this.npcDomain
-        this.baseURL = `https://${this.npcDomain}`
+      const nostrStore = useNostrStore()
+      // await nostrStore.initSigner()
+      const walletPublicKeyHex = nostrStore.pubkey
+      console.log('Lightning address for wallet:', nip19.npubEncode(walletPublicKeyHex) + '@' + this.npcDomain)
+      console.log('npub:', nip19.npubEncode(walletPublicKeyHex))
+      this.baseURL = `https://${this.npcDomain}`
+      // get info
+      const info = await this.getInfo()
+      if (info.error) {
+        notifyError(info.error)
+        return
       }
-      this.signer = new NDKPrivateKeySigner(this.npcConnections[0].walletPrivateKey)
-      this.ndk = new NDK({ explicitRelayUrls: this.relays, signer: this.signer });
+      // log info
+      console.log(info)
+      if (info.username) {
+        notifySuccess(`You are now logged in as ${info.username}`)
+        this.npcAddress = info.username + '@' + this.npcDomain
+      } else {
+        this.npcAddress = nip19.npubEncode(walletPublicKeyHex) + '@' + this.npcDomain
+      }
+      // let conn: NPCConnection
+      // NOTE: we only support one connection for now
+      // if (!this.npcConnections.length) {
+      //   const walletStore = useWalletStore();
+      //   const sk = walletStore.seed.slice(0, 32)
+      //   const walletPublicKeyHex = getPublicKey(sk) // `pk` is a hex string
+      //   const walletPrivateKeyHex = bytesToHex(sk)
+      //   // print nsec and npub
+      //   console.log('Lightning address for wallet:', nip19.npubEncode(walletPublicKeyHex) + '@npub.cash')
+      //   // console.log('nsec:', nip19.nsecEncode(sk))
+      //   console.log('npub:', nip19.npubEncode(walletPublicKeyHex))
+      //   // conn = {
+      //   //   walletPublicKey: walletPublicKeyHex,
+      //   //   walletPrivateKey: walletPrivateKeyHex,
+      //   // } as NPCConnection;
+      //   // this.npcConnections = this.npcConnections.concat(conn)
+      //   this.npcAddress = nip19.npubEncode(this.npcConnections[0].walletPublicKey) + '@' + this.npcDomain
+
+      // }
+      // this.signer = new NDKPrivateKeySigner(this.npcConnections[0].walletPrivateKey)
+      // this.ndk = new NDK({ explicitRelayUrls: this.relays, signer: this.signer });
     },
     generateNip98Event: async function (url: string, method: string, body: string): Promise<string> {
-      const nip98Event = new NDKEvent(this.ndk);
+      const nostrStore = useNostrStore()
+      await nostrStore.initSigner()
+      const nip98Event = new NDKEvent(new NDK());
       nip98Event.kind = NIP98Kind;
       nip98Event.content = '';
       nip98Event.tags = [['u', url], ['method', method]];
       // TODO: if body is set, add 'payload' tag with sha256 hash of body
-      const sig = await nip98Event.sign(this.signer)
+      const sig = await nip98Event.sign(nostrStore.signer)
       const eventString = JSON.stringify(nip98Event.rawEvent());
       // encode the eventString to base64
       return btoa(eventString)
     },
-    getInfo: async function () {
+    getInfo: async function (): Promise<NPCInfo> {
       const authHeader = await this.generateNip98Event(
         `${this.baseURL}/api/v1/info`,
         "GET"
@@ -194,9 +222,15 @@ export const useNPCStore = defineStore("npc", {
             Authorization: `Nostr ${authHeader}`,
           },
         })
-        return response.json()
+        const info: NPCInfo = await response.json()
+        return info
       } catch (e) {
         console.error(e)
+        return {
+          mintUrl: "",
+          npub: "",
+          username: ""
+        }
       }
     },
     getBalance: async function (): Promise<number> {

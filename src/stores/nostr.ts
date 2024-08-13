@@ -2,7 +2,8 @@ import { defineStore } from "pinia";
 import NDK, { NDKEvent, NDKSigner, NDKNip07Signer, NDKNip46Signer, NDKFilter, NDKPrivateKeySigner, NostrEvent } from "@nostr-dev-kit/ndk";
 import { nip19 } from 'nostr-tools'
 import { bytesToHex } from '@noble/hashes/utils' // already an installed dependency
-
+import { useWalletStore } from "./wallet";
+import { generateSecretKey, getPublicKey } from 'nostr-tools'
 import { useLocalStorage } from "@vueuse/core";
 import { useSettingsStore } from "./settings";
 type MintRecommendation = {
@@ -10,14 +11,25 @@ type MintRecommendation = {
   count: number;
 };
 
+export enum SignerType {
+  NIP07 = "NIP07",
+  NIP46 = "NIP46",
+  PRIVATEKEY = "PRIVATEKEY",
+  SEED = "SEED"
+}
+
 export const useNostrStore = defineStore("nostr", {
   state: () => ({
     connected: false,
-    pubkey: "",
+    pubkey: useLocalStorage<string>("cashu.ndk.pubkey", ""),
     relays: useSettingsStore().defaultNostrRelays,
     ndk: new NDK(),
+    signerType: useLocalStorage<SignerType>("cashu.ndk.signerType", SignerType.SEED),
     nip07signer: {} as NDKNip07Signer,
+    nip46Token: useLocalStorage<string>("cashu.ndk.nip46Token", ""),
     nip46signer: {} as NDKNip46Signer,
+    privateKeySignerPrivateKey: useLocalStorage<string>("cashu.ndk.privateKeySignerPrivateKey", ""),
+    seedSignerPrivateKey: useLocalStorage<string>("cashu.ndk.seedSignerPrivateKey", ""),
     privateKeySigner: {} as NDKPrivateKeySigner,
     signer: {} as NDKSigner,
     mintRecommendations: useLocalStorage<MintRecommendation[]>("cashu.ndk.mintRecommendations", []),
@@ -31,10 +43,21 @@ export const useNostrStore = defineStore("nostr", {
       this.ndk.connect();
       this.connected = true;
     },
+    initSigner: async function () {
+      if (this.signerType === SignerType.NIP07) {
+        await this.initNip07Signer();
+      } else if (this.signerType === SignerType.NIP46) {
+        await this.initNip46Signer();
+      } else if (this.signerType === SignerType.PRIVATEKEY) {
+        await this.initPrivateKeySigner();
+      } else {
+        await this.initWalletSeedPrivateKeySigner();
+      }
+    },
     setSigner: async function (signer: NDKSigner) {
       this.signer = signer
       this.ndk = new NDK({ signer: signer, explicitRelayUrls: this.relays })
-      const ndkEvent = await this.signDummyEvent()
+      // const ndkEvent = await this.signDummyEvent()
       // ndkEvent.publish()
     },
     signDummyEvent: async function (): Promise<NDKEvent> {
@@ -51,6 +74,15 @@ export const useNostrStore = defineStore("nostr", {
       console.log("Setting pubkey to", pubkey);
       this.pubkey = pubkey;
     },
+    checkNip07Signer: async function (): Promise<boolean> {
+      const signer = new NDKNip07Signer()
+      try {
+        await signer.user();
+        return true;
+      } catch (e) {
+        return false;
+      }
+    },
     initNip07Signer: async function () {
       const signer = new NDKNip07Signer()
       signer.user().then(async (user) => {
@@ -59,40 +91,73 @@ export const useNostrStore = defineStore("nostr", {
           const me = this.ndk.getUser({
             npub: user.npub,
           });
-          this.setPubkey(user.pubkey);
+          this.signerType = SignerType.NIP07;
           await this.setSigner(signer);
+          this.setPubkey(user.pubkey);
         }
       });
+      await signer.blockUntilReady();
     },
     initNip46Signer: async function (nip46Token?: string) {
       const ndk = new NDK({ explicitRelayUrls: this.relays });
-      if (!nip46Token) {
+      if (!nip46Token && !this.nip46Token.length) {
         nip46Token = await prompt("enter your nip-46 token") as string;
+        if (!nip46Token) {
+          return;
+        }
+        this.nip46Token = nip46Token;
+      } else {
+        if (nip46Token) {
+          this.nip46Token = nip46Token;
+        }
       }
-      const signer = new NDKNip46Signer(ndk, nip46Token)
+      const signer = new NDKNip46Signer(ndk, this.nip46Token)
+      this.signerType = SignerType.NIP46;
+      await this.setSigner(signer);
       // If the backend sends an auth_url event, open that URL as a popup so the user can authorize the app
       signer.on("authUrl", (url) => { window.open(url, "auth", "width=600,height=600") })
       // wait until the signer is ready
       const loggedinUser = await signer.blockUntilReady()
       alert("You are now logged in as " + loggedinUser.npub)
-      signer.user().then(async (user) => {
-        if (!!user.npub) {
-          console.log("Permission granted to read their public key:", user.npub);
-          const me = this.ndk.getUser({
-            npub: user.npub,
-          });
-          this.setPubkey(user.pubkey);
-          await this.setSigner(signer);
-        }
-      });
+      this.setPubkey(loggedinUser.pubkey);
+    },
+    resetNip46Signer: async function () {
+      this.nip46Token = "";
+      await this.initNip46Signer();
     },
     initPrivateKeySigner: async function (nsec?: string) {
-      if (!nsec) {
+      if (!nsec && !this.privateKeySignerPrivateKey.length) {
         nsec = await prompt("enter your nsec") as string;
+        if (!nsec) {
+          return;
+        }
+        const privateKeyBytes = nip19.decode(nsec).data as Uint8Array
+        this.privateKeySignerPrivateKey = bytesToHex(privateKeyBytes);
+      } else {
+        if (nsec) {
+          const privateKeyBytes = nip19.decode(nsec).data as Uint8Array
+          this.privateKeySignerPrivateKey = bytesToHex(privateKeyBytes);
+        }
       }
-      const privateKey = bytesToHex(nip19.decode(nsec).data as Uint8Array);
-      this.privateKeySigner = new NDKPrivateKeySigner(privateKey);
+      this.privateKeySigner = new NDKPrivateKeySigner(this.privateKeySignerPrivateKey);
+      this.signerType = SignerType.PRIVATEKEY;
       await this.setSigner(this.privateKeySigner);
+      this.setPubkey(this.privateKeySignerPrivateKey);
+    },
+    resetPrivateKeySigner: async function () {
+      this.privateKeySignerPrivateKey = "";
+      await this.initWalletSeedPrivateKeySigner();
+    },
+    initWalletSeedPrivateKeySigner: async function () {
+      const walletStore = useWalletStore();
+      const sk = walletStore.seed.slice(0, 32)
+      const walletPublicKeyHex = getPublicKey(sk) // `pk` is a hex string
+      const walletPrivateKeyHex = bytesToHex(sk)
+      this.seedSignerPrivateKey = walletPrivateKeyHex;
+      this.privateKeySigner = new NDKPrivateKeySigner(walletPrivateKeyHex)
+      this.signerType = SignerType.SEED;
+      this.setSigner(this.privateKeySigner);
+      this.setPubkey(walletPublicKeyHex);
     },
     fetchEventsFromUser: async function () {
       const filter: NDKFilter = { kinds: [1], authors: [this.pubkey] };
