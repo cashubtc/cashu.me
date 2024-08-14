@@ -238,100 +238,6 @@
       </q-list>
     </div>
 
-    <!-- nostr -->
-    <div class="q-py-sm q-px-xs text-left" on-left>
-      <q-list padding>
-        <q-item>
-          <q-item-section>
-            <q-item-label overline>Nostr</q-item-label>
-            <q-item-label caption>Your nostr account.</q-item-label>
-          </q-item-section>
-        </q-item>
-        <!-- initWalletSeedPrivateKeySigner -->
-        <q-item>
-          <q-btn
-            class="q-ml-sm q-px-md"
-            :color="signerType === 'SEED' ? 'primary' : 'grey'"
-            rounded
-            outline
-            @click="handleSeedClick"
-            >Seed</q-btn
-          >
-          <!-- Nip07Signer -->
-          <q-btn
-            class="q-ml-sm q-px-md"
-            :color="signerType === 'NIP07' ? 'primary' : 'grey'"
-            rounded
-            outline
-            :disabled="!nip07SignerAvailable"
-            @click="handleExtensionClick"
-            >Extension</q-btn
-          >
-          <!-- Nip46Signer -->
-          <!-- input field for nip46Token -->
-          <q-input
-            v-if="false"
-            outlined
-            rounded
-            dense
-            v-model="nip46Token"
-            label="Nip46 token"
-            type="textarea"
-            autogrow
-          ></q-input>
-
-          <q-btn
-            class="q-ml-sm q-px-md"
-            :color="signerType === 'NIP46' ? 'primary' : 'grey'"
-            rounded
-            outline
-            @click="handleBunkerClick"
-            >Bunker</q-btn
-          >
-          <!-- reset bunker button if bunker is selected -->
-          <q-btn
-            v-if="signerType === 'NIP46'"
-            class="q-ml-sm q-px-md"
-            color="warning"
-            rounded
-            outline
-            @click="resetNip46Signer"
-            >Reset</q-btn
-          >
-          <!-- PrivateKeySigner -->
-          <!-- input for nostrPrivateKey -->
-          <q-input
-            v-if="false"
-            outlined
-            rounded
-            dense
-            v-model="nostrPrivateKey"
-            label="Private key"
-            type="textarea"
-            autogrow
-          ></q-input>
-
-          <q-btn
-            class="q-ml-sm q-px-md"
-            :color="signerType === 'PRIVATEKEY' ? 'primary' : 'grey'"
-            rounded
-            outline
-            @click="handleNsecClick"
-            >nsec</q-btn
-          >
-          <!-- reset nsec button if nsec is selected -->
-          <q-btn
-            v-if="signerType === 'PRIVATEKEY'"
-            class="q-ml-sm q-px-md"
-            color="warning"
-            rounded
-            outline
-            @click="resetPrivateKeySigner"
-            >Reset</q-btn
-          >
-        </q-item>
-      </q-list>
-    </div>
     <!-- ln address -->
     <div class="q-py-sm q-px-xs text-left" on-left>
       <q-list padding>
@@ -339,14 +245,22 @@
           <q-item-section>
             <q-item-label overline>Lightning address</q-item-label>
             <q-item-label caption
-              >This is your lightning address. Enable it to check for incoming
-              payments at startup.</q-item-label
+              >Your Lightning address is generated from your nostr
+              keys.</q-item-label
             >
           </q-item-section>
         </q-item>
         <q-item>
           <q-item-section class="q-mx-none q-pl-none">
+            <!-- toggle to turn Lightning address on and off in new row -->
             <div class="row q-pt-md">
+              <q-toggle
+                v-model="npcEnabled"
+                label="Enable Lightning address"
+                color="primary"
+              />
+            </div>
+            <div class="row q-pt-md" v-if="npcEnabled">
               <div class="col-12">
                 <q-input outlined v-model="npcAddress" dense rounded readonly>
                   <template v-slot:append>
@@ -362,17 +276,170 @@
                   </template>
                 </q-input>
               </div>
-            </div>
-            <!-- toggle to turn Lightning address on and off in new row -->
-            <div class="row q-pt-md">
-              <q-toggle
-                v-model="npcEnabled"
-                label="Enable Lightning address"
-                color="primary"
-              />
+              <div class="row q-pt-md">
+                <q-toggle v-model="automaticClaim" color="primary" />
+                <q-item-section>
+                  <q-item-label overline>Claim automatically</q-item-label>
+                  <q-item-label caption
+                    >Receive incoming payments automatically when the wallet is
+                    started.
+                  </q-item-label>
+                </q-item-section>
+              </div>
             </div>
           </q-item-section>
         </q-item>
+
+        <!-- nostr -->
+        <div class="q-py-sm q-px-md text-left" on-left v-if="npcEnabled">
+          <q-list padding>
+            <q-item>
+              <q-item-section>
+                <q-item-label overline>Your nostr keys</q-item-label>
+                <q-item-label caption
+                  >Link your wallet to a nostr account to generate your
+                  Lightning address.</q-item-label
+                >
+              </q-item-section>
+            </q-item>
+            <!-- initWalletSeedPrivateKeySigner -->
+            <q-item
+              :active="signerType === 'SEED'"
+              active-class="text-weight-bold text-primary"
+              clickable
+            >
+              <q-item-section avatar>
+                <q-icon
+                  :color="signerType === 'SEED' ? 'primary' : 'grey'"
+                  :name="
+                    signerType === 'SEED'
+                      ? 'check_circle'
+                      : 'radio_button_unchecked'
+                  "
+                  @click="handleSeedClick"
+                  class="cursor-pointer"
+                />
+              </q-item-section>
+              <q-item-section
+                lines="1"
+                class="cursor-pointer"
+                style="word-break: break-word"
+              >
+                <q-item-label title>Wallet seed phrase</q-item-label>
+                <q-item-label caption
+                  >Generate nostr key pair from seed
+                </q-item-label>
+              </q-item-section>
+            </q-item>
+            <!-- Nip46Signer -->
+            <q-item
+              :active="signerType === 'NIP46'"
+              active-class="text-weight-bold text-primary"
+              clickable
+              v-if="false"
+            >
+              <q-item-section avatar>
+                <q-icon
+                  :color="signerType === 'NIP46' ? 'primary' : 'grey'"
+                  :name="
+                    signerType === 'NIP46'
+                      ? 'check_circle'
+                      : 'radio_button_unchecked'
+                  "
+                  @click="handleBunkerClick"
+                  class="cursor-pointer"
+                />
+              </q-item-section>
+              <q-item-section
+                lines="1"
+                class="cursor-pointer"
+                style="word-break: break-word"
+              >
+                <q-item-label title>Nsec Bunker</q-item-label>
+                <q-item-label caption>Use a NIP-46 bunker </q-item-label>
+              </q-item-section>
+              <q-item-section side v-if="signerType === 'NIP46'">
+                <q-icon
+                  name="delete_outline"
+                  @click="resetNip46Signer"
+                  class="cursor-pointer"
+                  ><q-tooltip>Delete connection</q-tooltip>
+                </q-icon>
+              </q-item-section>
+            </q-item>
+            <q-item
+              :active="signerType === 'PRIVATEKEY'"
+              active-class="text-weight-bold text-primary"
+              clickable
+            >
+              <q-item-section avatar>
+                <q-icon
+                  :color="signerType === 'PRIVATEKEY' ? 'primary' : 'grey'"
+                  :name="
+                    signerType === 'PRIVATEKEY'
+                      ? 'check_circle'
+                      : 'radio_button_unchecked'
+                  "
+                  @click="handleNsecClick"
+                  class="cursor-pointer"
+                />
+              </q-item-section>
+              <q-item-section
+                lines="1"
+                class="cursor-pointer"
+                style="word-break: break-word"
+              >
+                <q-item-label title>Use your nsec</q-item-label>
+                <q-item-label caption
+                  >Enter your nostr private key
+                </q-item-label>
+              </q-item-section>
+              <q-item-section side v-if="signerType === 'PRIVATEKEY'">
+                <q-icon
+                  name="delete_outline"
+                  @click="resetPrivateKeySigner"
+                  class="cursor-pointer"
+                  ><q-tooltip>Delete nsec</q-tooltip></q-icon
+                >
+              </q-item-section>
+            </q-item>
+            <!-- Nip07Signer -->
+            <q-item
+              :active="signerType === 'NIP07'"
+              active-class="text-weight-bold text-primary"
+              clickable
+              v-if="nip07SignerAvailable"
+            >
+              <q-item-section avatar>
+                <q-icon
+                  :color="signerType === 'NIP07' ? 'primary' : 'grey'"
+                  :name="
+                    signerType === 'NIP07'
+                      ? 'check_circle'
+                      : 'radio_button_unchecked'
+                  "
+                  @click="handleExtensionClick"
+                  class="cursor-pointer"
+                />
+              </q-item-section>
+              <q-item-section
+                lines="1"
+                class="cursor-pointer"
+                style="word-break: break-word"
+              >
+                <q-item-label title>Signing extension</q-item-label>
+                <q-item-label caption v-if="nip07SignerAvailable"
+                  >Use a NIP-07 signing extension
+                </q-item-label>
+                <q-item-label caption v-else
+                  >No NIP-07 signing extension found
+                </q-item-label>
+              </q-item-section>
+            </q-item>
+          </q-list>
+        </div>
+
+        <!-- NWC -->
 
         <q-item>
           <q-item-section>
@@ -783,7 +850,7 @@ export default defineComponent({
     ...mapState(useNPCStore, ["npcAddress"]),
     ...mapState(useNostrStore, ["pubkey", "mintRecommendations", "signerType"]),
     ...mapState(useWalletStore, ["mnemonic"]),
-    ...mapWritableState(useNPCStore, ["npcEnabled"]),
+    ...mapWritableState(useNPCStore, ["npcEnabled", "automaticClaim"]),
     ...mapWritableState(useWalletStore, ["keysetCounters"]),
     ...mapWritableState(useMintsStore, [
       "addMintData",
@@ -816,6 +883,13 @@ export default defineComponent({
         this.listenToNWCCommands();
       } else {
         this.unsubscribeNWC();
+      }
+    },
+    npcEnabled: function () {
+      if (this.npcEnabled) {
+        this.generateNPCConnection();
+      } else {
+        this.npcAddress = "";
       }
     },
   },

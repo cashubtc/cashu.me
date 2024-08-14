@@ -55,6 +55,7 @@ const NIP98Kind = 27235;
 export const useNPCStore = defineStore("npc", {
   state: () => ({
     npcEnabled: useLocalStorage<boolean>("cashu.npc.enabled", false),
+    automaticClaim: useLocalStorage<boolean>("cashu.npc.automaticClaim", false),
     // npcConnections: useLocalStorage<NPCConnection[]>("cashu.npc.connections", []),
     npcAddress: useLocalStorage<string>("cashu.npc.address", ""),
     npcDomain: useLocalStorage<string>("cashu.npc.domain", "npub.cash"),
@@ -79,14 +80,19 @@ export const useNPCStore = defineStore("npc", {
           // add token to history first
           this.addPendingTokenToHistory(token)
           receiveStore.receiveData.tokensBase64 = token;
-          try {
-            // redeem token automatically
-            const walletStore = useWalletStore()
-            await walletStore.redeem()
-          } catch {
-            // if it doesn't work, show the receive window
+          if (this.automaticClaim) {
+            try {
+              // redeem token automatically
+              const walletStore = useWalletStore()
+              await walletStore.redeem()
+            } catch {
+              // if it doesn't work, show the receive window
+              receiveStore.showReceiveTokens = true;
+            }
+          } else {
             receiveStore.showReceiveTokens = true;
           }
+
           // this.storeUnclaimedProofs(token)
           // const proofsToClaim = this.getUnclaimedProofs(token)
           // const proofsStore = useProofsStore()
@@ -156,11 +162,16 @@ export const useNPCStore = defineStore("npc", {
     },
     generateNPCConnection: async function () {
       const nostrStore = useNostrStore()
-      // await nostrStore.initSigner()
+      if (!nostrStore.pubkey) {
+        return
+      }
       const walletPublicKeyHex = nostrStore.pubkey
       console.log('Lightning address for wallet:', nip19.npubEncode(walletPublicKeyHex) + '@' + this.npcDomain)
       console.log('npub:', nip19.npubEncode(walletPublicKeyHex))
       this.baseURL = `https://${this.npcDomain}`
+      if (!this.npcEnabled) {
+        return
+      }
       // get info
       const info = await this.getInfo()
       if (info.error) {

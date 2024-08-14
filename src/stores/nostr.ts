@@ -123,7 +123,7 @@ export const useNostrStore = defineStore("nostr", {
     },
     resetNip46Signer: async function () {
       this.nip46Token = "";
-      await this.initNip46Signer();
+      await this.initWalletSeedPrivateKeySigner();
     },
     initPrivateKeySigner: async function (nsec?: string) {
       if (!nsec && !this.privateKeySignerPrivateKey.length) {
