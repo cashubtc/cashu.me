@@ -6,7 +6,7 @@ import { nip04, generateSecretKey, getPublicKey } from 'nostr-tools'
 import { useMintsStore } from './mints'
 import { useWalletStore } from "./wallet";
 import { useProofsStore } from "./proofs";
-import { notify, notifyError, notifyWarning } from "src/js/notify";
+import { notify, notifyError, notifyWarning } from "../js/notify";
 import { useSettingsStore } from "./settings";
 
 type NWCConnection = {

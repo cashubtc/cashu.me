@@ -164,10 +164,12 @@ export const useNPCStore = defineStore("npc", {
       );
     },
     addPendingTokenToHistory: function (tokenStr: string) {
-      const tokensStore = useTokensStore();
       if (this.tokenAlreadyInHistory(tokenStr)) {
+        notifySuccess("Ecash already in history")
+        this.showReceiveTokens = false;
         return;
       }
+      const tokensStore = useTokensStore();
       const decodedToken = token.decode(tokenStr);
       if (decodedToken == undefined) {
         throw Error('could not decode token')

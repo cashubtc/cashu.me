@@ -71,6 +71,18 @@
         </q-item-section>
       </q-item>
     </q-list>
+    <div class="text-center q-mt-lg">
+      <q-btn
+        rounded
+        outline
+        dense
+        @click="filterPending = !filterPending"
+        :color="filterPending ? 'primary' : 'grey'"
+        :label="filterPending ? 'Show all' : 'Only pending'"
+        class="q-ml-sm q-px-md"
+        size="sm"
+      />
+    </div>
     <div v-if="paginatedTokens.length === 0" class="text-center q-mt-lg">
       <q-item-label caption class="text-primary">No history yet</q-item-label>
     </div>
@@ -107,7 +119,13 @@ export default defineComponent({
     return {
       currentPage: 1,
       pageSize: 5,
+      filterPending: false,
     };
+  },
+  watch: {
+    filterPending: function () {
+      this.currentPage = 1;
+    },
   },
   computed: {
     ...mapState(useTokensStore, ["historyTokens"]),
@@ -121,6 +139,13 @@ export default defineComponent({
     paginatedTokens() {
       const start = (this.currentPage - 1) * this.pageSize;
       const end = start + this.pageSize;
+      if (this.filterPending) {
+        return this.historyTokens
+          .filter((token) => token.status === "pending")
+          .slice()
+          .reverse()
+          .slice(start, end);
+      }
       return this.historyTokens.slice().reverse().slice(start, end);
     },
   },

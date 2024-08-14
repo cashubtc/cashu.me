@@ -61,10 +61,7 @@
           rounded
           flat
           class="q-mr-sm"
-          v-if="
-            decodeToken(receiveData.tokensBase64) &&
-            !tokenAlreadyInHistory(receiveData.tokensBase64)
-          "
+          v-if="decodeToken(receiveData.tokensBase64)"
           >Later
           <q-tooltip>Add to history to receive later</q-tooltip>
         </q-btn>
@@ -232,10 +229,12 @@ export default defineComponent({
       );
     },
     addPendingTokenToHistory: function (token) {
-      const tokensStore = useTokensStore();
       if (this.tokenAlreadyInHistory(token)) {
+        this.notifySuccess("Ecash already in history");
+        this.showReceiveTokens = false;
         return;
       }
+      const tokensStore = useTokensStore();
       const decodedToken = this.decodeToken(token);
       // get amount from decodedToken.token.proofs[..].amount
       const amount = this.getProofs(decodedToken).reduce(

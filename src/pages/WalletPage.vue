@@ -567,7 +567,11 @@ export default {
   },
   watch: {},
 
-  mounted: function () {},
+  mounted: function () {
+    // generate NPC connection
+    this.generateNPCConnection();
+    this.claimAllTokens();
+  },
 
   created: async function () {
     // check if another tab is open
@@ -638,10 +642,6 @@ export default {
     if (this.nwcEnabled) {
       this.listenToNWCCommands();
     }
-
-    // generate NPC connection
-    this.generateNPCConnection();
-    this.claimAllTokens();
   },
 };
 </script>

@@ -165,7 +165,7 @@ export const useNostrStore = defineStore("nostr", {
     },
     fetchMints: async function () {
       const filter: NDKFilter = { kinds: [38000], limit: 2000 };
-      const events: NDKEvent[] = await this.ndk.fetchEvents(filter);
+      const events = await this.ndk.fetchEvents(filter);
       let mintUrls: string[] = [];
       events.forEach((event) => {
         if (event.tagValue("k") == "38172" && event.tagValue("u")) {
