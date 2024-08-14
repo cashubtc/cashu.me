@@ -84,7 +84,7 @@
         </div>
       </q-list>
     </div>
-    <div class="q-pt-xs q-px-xs">
+    <div class="q-pt-xs q-px-xs" ref="addMintDiv">
       <q-list padding>
         <div class="row-12 text-left">
           <q-item>
@@ -496,7 +496,7 @@
   </div>
 </template>
 <script>
-import { defineComponent } from "vue";
+import { ref, defineComponent, onMounted, onBeforeUnmount } from "vue";
 import { getShortUrl } from "src/js/wallet-helpers";
 import { mapActions, mapState, mapWritableState } from "pinia";
 import { useMintsStore, MintClass } from "src/stores/mints";
@@ -510,6 +510,7 @@ import { useP2PKStore } from "src/stores/p2pk";
 import { useWorkersStore } from "src/stores/workers";
 import { notifyError, notifyWarning } from "src/js/notify";
 import MintDetailsDialog from "src/components/MintDetailsDialog.vue";
+import { EventBus } from "../js/eventBus";
 
 export default defineComponent({
   name: "MintSettings",
@@ -517,6 +518,32 @@ export default defineComponent({
   components: { MintDetailsDialog },
   props: {
     tickerShort: String,
+  },
+  setup() {
+    const addMintDiv = ref(null);
+
+    const scrollToAddMintDiv = () => {
+      if (addMintDiv.value) {
+        // addMintDiv.value.scrollIntoView({ behavior: "smooth" });
+        // const top = addMintDiv.value.offsetTop;
+        const rect = addMintDiv.value.getBoundingClientRect();
+        window.scrollTo({
+          top: window.scrollY + rect.top,
+          behavior: "smooth",
+        });
+      }
+    };
+
+    onMounted(() => {
+      EventBus.on("scrollToAddMintDiv", scrollToAddMintDiv);
+    });
+
+    onBeforeUnmount(() => {
+      EventBus.off("scrollToAddMintDiv", scrollToAddMintDiv);
+    });
+    return {
+      addMintDiv,
+    };
   },
   data: function () {
     return {

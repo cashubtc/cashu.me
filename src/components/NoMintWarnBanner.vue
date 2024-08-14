@@ -19,10 +19,7 @@
           color="primary"
           class="q-px-md"
           label="Add mint"
-          @click="
-            expandHistory = true;
-            tab = 'mints';
-          "
+          @click="handleAddMintClick"
         />
       </div>
       <div class="row items-center justify-center q-pt-md">
@@ -44,6 +41,7 @@ import { getShortUrl } from "src/js/wallet-helpers";
 import { useUiStore } from "src/stores/ui";
 import { mapWritableState } from "pinia";
 import { useReceiveTokensStore } from "src/stores/receiveTokensStore";
+import { EventBus } from "../js/eventBus";
 
 export default defineComponent({
   name: "NoMintWarnBanner",
@@ -82,6 +80,20 @@ export default defineComponent({
     showReceiveTokensDialog: function () {
       this.receiveData.tokensBase64 = "";
       this.showReceiveTokens = true;
+    },
+    handleAddMintClick: function () {
+      this.expandHistory = true;
+      this.tab = "mints";
+      EventBus.emit("scrollToAddMintDiv");
+      // const addMintDiv = inject("addMintDiv");
+      // if (addMintDiv) {
+      //   addMintDiv.value.$el.scrollIntoView({ behavior: "smooth" });
+      // } else {
+      //   window.scrollTo({
+      //     top: 620,
+      //     behavior: "smooth",
+      //   });
+      // }
     },
   },
 });
