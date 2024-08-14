@@ -4,6 +4,7 @@
     position="top"
     backdrop-filter="blur(2px) brightness(60%)"
     no-backdrop-dismiss
+    full-height
   >
     <q-card class="q-px-lg q-pt-md q-pb-md qcard">
       <!-- invoice is not entered -->
