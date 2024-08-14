@@ -886,9 +886,10 @@ export default defineComponent({
         this.unsubscribeNWC();
       }
     },
-    npcEnabled: function () {
+    npcEnabled: async function () {
       if (this.npcEnabled) {
-        this.generateNPCConnection();
+        await this.initSigner();
+        await this.generateNPCConnection();
       } else {
         this.npcAddress = "";
       }
@@ -904,6 +905,7 @@ export default defineComponent({
       "checkNip07Signer",
       "resetPrivateKeySigner",
       "resetNip46Signer",
+      "initSigner",
     ]),
     ...mapActions(useNWCStore, [
       "generateNWCConnection",
@@ -929,6 +931,14 @@ export default defineComponent({
     ...mapActions(useWorkersStore, ["invoiceCheckWorker"]),
     ...mapActions(useProofsStore, ["serializeProofs"]),
     ...mapActions(useNPCStore, ["generateNPCConnection"]),
+    generateNewMnemonic: async function () {
+      this.newMnemonic();
+      await this.initSigner();
+      await this.generateNPCConnection();
+    },
+    toggleMnemonicVisibility: function () {
+      this.hideMnemonic = !this.hideMnemonic;
+    },
     enable_terminal: function () {
       // enable debug terminal
       var script = document.createElement("script");
