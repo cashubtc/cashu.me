@@ -55,7 +55,7 @@ const NIP98Kind = 27235;
 export const useNPCStore = defineStore("npc", {
   state: () => ({
     npcEnabled: useLocalStorage<boolean>("cashu.npc.enabled", false),
-    automaticClaim: useLocalStorage<boolean>("cashu.npc.automaticClaim", false),
+    automaticClaim: useLocalStorage<boolean>("cashu.npc.automaticClaim", true),
     // npcConnections: useLocalStorage<NPCConnection[]>("cashu.npc.connections", []),
     npcAddress: useLocalStorage<string>("cashu.npc.address", ""),
     npcDomain: useLocalStorage<string>("cashu.npc.domain", "npub.cash"),

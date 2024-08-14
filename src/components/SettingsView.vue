@@ -245,8 +245,7 @@
           <q-item-section>
             <q-item-label overline>Lightning address</q-item-label>
             <q-item-label caption
-              >Your Lightning address is generated from your nostr
-              keys.</q-item-label
+              >Receive payments to your Lightning address.</q-item-label
             >
           </q-item-section>
         </q-item>
@@ -254,11 +253,13 @@
           <q-item-section class="q-mx-none q-pl-none">
             <!-- toggle to turn Lightning address on and off in new row -->
             <div class="row q-pt-md">
-              <q-toggle
-                v-model="npcEnabled"
-                label="Enable Lightning address"
-                color="primary"
-              />
+              <q-toggle v-model="npcEnabled" color="primary" />
+              <q-item-section>
+                <q-item-label overline>Enable</q-item-label>
+                <q-item-label caption>
+                  Your wallet will check for incoming payments at every startup.
+                </q-item-label>
+              </q-item-section>
             </div>
             <div class="row q-pt-md" v-if="npcEnabled">
               <div class="col-12">
@@ -282,8 +283,7 @@
                 <q-item-section>
                   <q-item-label overline>Claim automatically</q-item-label>
                   <q-item-label caption
-                    >Receive incoming payments automatically when the wallet is
-                    started.
+                    >Receive incoming payments automatically.
                   </q-item-label>
                 </q-item-section>
               </div>
@@ -299,7 +299,8 @@
                 <q-item-label overline>Your nostr keys</q-item-label>
                 <q-item-label caption
                   >Link your wallet to a nostr account to generate your
-                  Lightning address.</q-item-label
+                  Lightning address. You can only receive payments to one
+                  address at a time.</q-item-label
                 >
               </q-item-section>
             </q-item>
@@ -328,7 +329,7 @@
               >
                 <q-item-label title>Wallet seed phrase</q-item-label>
                 <q-item-label caption
-                  >Generate nostr key pair from seed
+                  >Generate nostr key pair from wallet seed
                 </q-item-label>
               </q-item-section>
             </q-item>
