@@ -61,7 +61,7 @@
           dense
           @click="filterPending = !filterPending"
           :color="filterPending ? 'primary' : 'grey'"
-          :label="filterPending ? 'Show all' : 'Only pending'"
+          :label="filterPending ? 'Show all' : 'Filter pending'"
           class="q-ml-sm q-px-md"
           size="sm"
         />
