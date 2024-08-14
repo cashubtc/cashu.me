@@ -11,93 +11,98 @@
             :value="showMintInfoData.url"
             :options="{ width: 340 }"
             class="rounded-borders"
+            @click="copyText(showMintInfoData.url)"
           >
           </vue-qrcode>
         </q-responsive>
-        <div class="row justify-center">
-          <div class="row justify-center">
+        <div class="row justify-center q-px-md">
+          <div
+            class="row justify-center"
+            @click="copyText(showMintInfoData.url)"
+          >
             <q-chip outline class="q-pa-md q-mt-md">
               <q-icon name="account_balance" size="xs" class="q-mr-xs" />
               {{ showMintInfoData.url }}
             </q-chip>
           </div>
-          <q-card-section class="q-pa-sm">
-            <div
-              v-if="showMintInfoData.info.name"
-              class="row justify-center q-pt-sm"
-            >
-              <q-item-label
-                caption
+          <div class="row justify-center q-px-md">
+            <q-card-section class="q-pa-sm">
+              <div
                 v-if="showMintInfoData.info.name"
-                class="text-weight-bold text-white"
-                style="font-size: 16px"
+                class="row justify-center q-pt-sm"
               >
-                {{ showMintInfoData.info.name }}
-              </q-item-label>
-            </div>
-            <div
-              v-if="showMintInfoData.info.description"
-              class="row justify-center q-pt-sm"
-            >
-              <q-item-label
-                caption
+                <q-item-label
+                  caption
+                  v-if="showMintInfoData.info.name"
+                  class="text-weight-bold text-white"
+                  style="font-size: 16px"
+                >
+                  {{ showMintInfoData.info.name }}
+                </q-item-label>
+              </div>
+              <div
                 v-if="showMintInfoData.info.description"
-                class="text-white"
-                style="font-size: 12px"
+                class="row justify-center q-pt-sm q-px-md"
               >
-                {{ showMintInfoData.info.description }}
-              </q-item-label>
-            </div>
-            <div
-              v-if="showMintInfoData.info.description_long"
-              class="row justify-center q-pt-sm"
-            >
-              <q-item-label
-                caption
+                <q-item-label
+                  caption
+                  v-if="showMintInfoData.info.description"
+                  class="text-white"
+                  style="font-size: 12px"
+                >
+                  {{ showMintInfoData.info.description }}
+                </q-item-label>
+              </div>
+              <div
                 v-if="showMintInfoData.info.description_long"
-                class="text-weight-light text-white"
-                style="font-size: 12px"
+                class="row justify-center q-pt-sm"
               >
-                {{ showMintInfoData.info.description_long }}
-              </q-item-label>
-            </div>
-            <div
-              v-if="showMintInfoData.info.version"
-              class="row justify-center q-pt-sm"
-            >
-              <q-item-label
-                caption
+                <q-item-label
+                  caption
+                  v-if="showMintInfoData.info.description_long"
+                  class="text-weight-light text-white"
+                  style="font-size: 12px"
+                >
+                  {{ showMintInfoData.info.description_long }}
+                </q-item-label>
+              </div>
+              <div
                 v-if="showMintInfoData.info.version"
-                class="text-weight-light text-white"
-                style="font-size: 10px"
+                class="row justify-center q-pt-sm"
               >
-                Version: {{ showMintInfoData.info.version }}
-              </q-item-label>
-            </div>
-            <div
-              v-if="showMintInfoData.info.nuts"
-              class="row justify-center q-pt-sm"
-            >
-              <q-item-label
-                caption
+                <q-item-label
+                  caption
+                  v-if="showMintInfoData.info.version"
+                  class="text-weight-light text-white"
+                  style="font-size: 10px"
+                >
+                  Version: {{ showMintInfoData.info.version }}
+                </q-item-label>
+              </div>
+              <div
                 v-if="showMintInfoData.info.nuts"
-                class="text-weight-light text-white"
-                style="font-size: 10px"
+                class="row justify-center q-pt-sm"
               >
-                <!-- only the keys of the info.nuts object -->
-                Nuts: {{ Object.keys(showMintInfoData.info.nuts).join(", ") }}
-              </q-item-label>
-            </div>
-          </q-card-section>
+                <q-item-label
+                  caption
+                  v-if="showMintInfoData.info.nuts"
+                  class="text-weight-light text-white"
+                  style="font-size: 10px"
+                >
+                  <!-- only the keys of the info.nuts object -->
+                  Nuts: {{ Object.keys(showMintInfoData.info.nuts).join(", ") }}
+                </q-item-label>
+              </div>
+            </q-card-section>
+          </div>
 
-          <q-card-section>
-            <div
-              v-if="
-                showMintInfoData.info.contact &&
-                showMintInfoData.info.contact.length > 0
-              "
-              class="justify-center"
-            >
+          <q-card-section
+            v-if="
+              showMintInfoData.info.contact &&
+              showMintInfoData.info.contact.length > 0
+            "
+          >
+            <div class="justify-center">
               <div
                 v-for="contactInfo in showMintInfoData.info.contact"
                 :key="contactInfo.method"
@@ -107,6 +112,7 @@
                   caption
                   class="text-weight-light text-white"
                   style="font-size: 12px"
+                  v-if="contactInfo.method && contactInfo.info"
                 >
                   <q-icon
                     v-if="contactIcons[contactInfo.method]"

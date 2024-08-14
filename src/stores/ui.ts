@@ -5,6 +5,8 @@ import { useLocalStorage } from "@vueuse/core";
 const unitTickerShortMap = {
   sat: "sats",
   usd: "USD",
+  eur: "EUR",
+  msat: "msats"
 };
 
 export const useUiStore = defineStore("ui", {
@@ -22,19 +24,19 @@ export const useUiStore = defineStore("ui", {
     setTab(tab: string) {
       this.tab = tab;
     },
-    formatCurrency: function (value: number, currency: string) {
-      if (currency == undefined) {
-        currency = "sat";
-      }
-      if (currency == "sat") return this.formatSat(value);
-      if (currency == "usd") value = value / 100;
-      return new Intl.NumberFormat(navigator.language, {
-        style: "currency",
-        currency: currency,
-      }).format(value);
-      // + " " +
-      // currency.toUpperCase()
-    },
+    // formatCurrency: function (value: number, currency: string) {
+    //   if (currency == undefined) {
+    //     currency = "sat";
+    //   }
+    //   if (currency == "sat") return this.formatSat(value);
+    //   if (currency == "usd") value = value / 100;
+    //   return new Intl.NumberFormat(navigator.language, {
+    //     style: "currency",
+    //     currency: currency,
+    //   }).format(value);
+    //   // + " " +
+    //   // currency.toUpperCase()
+    // },
     formatSat: function (value: number) {
       return new Intl.NumberFormat(navigator.language).format(value) + " sat";
     },

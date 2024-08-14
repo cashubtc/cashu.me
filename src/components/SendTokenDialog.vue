@@ -64,7 +64,7 @@
               flat
               color="primary"
               @click="toggleUnit()"
-              :label="activeUnit == 'sat' ? 'BTC' : 'USD'"
+              :label="activeUnitLabel"
             />
           </q-input>
           <!-- <q-input
@@ -391,6 +391,7 @@ export default defineComponent({
     ...mapState(useMintsStore, [
       "activeProofs",
       "activeUnit",
+      "activeUnitLabel",
       "activeMintUrl",
       "activeMintBalance",
     ]),
@@ -581,7 +582,7 @@ export default defineComponent({
     lockTokens: async function () {
       let sendAmount = this.sendData.amount;
       // if unit is USD, multiply by 100
-      if (this.activeUnit === "usd") {
+      if (this.activeUnit === "usd" || this.activeUnit == "eur") {
         sendAmount = sendAmount * 100;
       }
       try {
@@ -625,7 +626,7 @@ export default defineComponent({
       try {
         let sendAmount = this.sendData.amount;
         // if unit is USD, multiply by 100
-        if (this.activeUnit === "usd") {
+        if (this.activeUnit === "usd" || this.activeUnit == "eur") {
           sendAmount = sendAmount * 100;
         }
         // keep firstProofs, send scndProofs and delete them (invalidate=true)

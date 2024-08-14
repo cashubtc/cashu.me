@@ -4,7 +4,7 @@
     outline
     color="primary"
     @click="toggleUnit()"
-    :label="activeUnit == 'sat' ? 'BTC' : 'USD'"
+    :label="activeUnitLabel"
   />
 </template>
 <script>
@@ -26,7 +26,20 @@ export default defineComponent({
   mounted() {},
   watch: {},
   computed: {
-    ...mapState(useMintsStore, ["activeUnit"]),
+    ...mapState(useMintsStore, ["activeUnit", "activeUnitLabel"]),
+    // activeUnitLabel: function () {
+    //   if (this.activeUnit == "sat") {
+    //     return "BTC";
+    //   } else if (this.activeUnit == "usd") {
+    //     return "USD";
+    //   } else if (this.activeUnit == "eur") {
+    //     return "EUR";
+    //   } else if (this.activeUnit == "msat") {
+    //     return "msat";
+    //   } else {
+    //     return this.activeUnit;
+    //   }
+    // },
   },
   methods: {
     ...mapActions(useMintsStore, ["toggleUnit"]),
