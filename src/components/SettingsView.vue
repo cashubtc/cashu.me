@@ -362,7 +362,7 @@
               <q-item-section side v-if="signerType === 'NIP46'">
                 <q-icon
                   name="delete_outline"
-                  @click="resetNip46Signer"
+                  @click="handleResetNip46Signer"
                   class="cursor-pointer"
                   ><q-tooltip>Delete connection</q-tooltip>
                 </q-icon>
@@ -398,7 +398,7 @@
               <q-item-section side v-if="signerType === 'PRIVATEKEY'">
                 <q-icon
                   name="delete_outline"
-                  @click="resetPrivateKeySigner"
+                  @click="handleResetPrivateKeySigner"
                   class="cursor-pointer"
                   ><q-tooltip>Delete nsec</q-tooltip></q-icon
                 >
@@ -1035,6 +1035,14 @@ export default defineComponent({
     },
     handleNsecClick: async function () {
       await this.initPrivateKeySigner();
+      await this.generateNPCConnection();
+    },
+    handleResetPrivateKeySigner: async function () {
+      await this.resetPrivateKeySigner();
+      await this.generateNPCConnection();
+    },
+    handleResetNip46Signer: async function () {
+      await this.resetNip46Signer();
       await this.generateNPCConnection();
     },
   },
