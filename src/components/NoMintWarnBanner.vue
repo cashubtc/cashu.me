@@ -85,15 +85,6 @@ export default defineComponent({
       this.expandHistory = true;
       this.tab = "mints";
       EventBus.emit("scrollToAddMintDiv");
-      // const addMintDiv = inject("addMintDiv");
-      // if (addMintDiv) {
-      //   addMintDiv.value.$el.scrollIntoView({ behavior: "smooth" });
-      // } else {
-      //   window.scrollTo({
-      //     top: 620,
-      //     behavior: "smooth",
-      //   });
-      // }
     },
   },
 });
