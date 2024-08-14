@@ -54,7 +54,18 @@
           </q-item-section>
         </q-item>
       </q-list>
-
+      <div class="text-center q-mt-lg">
+        <q-btn
+          rounded
+          outline
+          dense
+          @click="filterPending = !filterPending"
+          :color="filterPending ? 'primary' : 'grey'"
+          :label="filterPending ? 'Show all' : 'Filter pending'"
+          class="q-ml-sm q-px-md"
+          size="sm"
+        />
+      </div>
       <div v-if="paginatedInvoices.length === 0" class="text-center q-mt-lg">
         <q-item-label caption class="text-primary"
           >No invoices yet</q-item-label
@@ -91,7 +102,13 @@ export default defineComponent({
     return {
       currentPage: 1,
       pageSize: 5,
+      filterPending: false,
     };
+  },
+  watch: {
+    filterPending: function () {
+      this.currentPage = 1;
+    },
   },
   computed: {
     ...mapWritableState(useUiStore, ["showInvoiceDetails"]),
@@ -106,6 +123,11 @@ export default defineComponent({
     paginatedInvoices() {
       const start = (this.currentPage - 1) * this.pageSize;
       const end = start + this.pageSize;
+      if (this.filterPending) {
+        return this.invoiceHistory
+          .filter((invoice) => invoice.status === "pending")
+          .slice(start, end);
+      }
       return this.invoiceHistory.slice().reverse().slice(start, end);
     },
   },

@@ -593,7 +593,7 @@ export default defineComponent({
   methods: {
     ...mapActions(useNostrStore, [
       "init",
-      "connect",
+      "initNdkReadOnly",
       "getUserPubkey",
       "fetchEventsFromUser",
       "fetchMints",
@@ -761,7 +761,7 @@ export default defineComponent({
       }
     },
     initNdk: async function () {
-      await this.connect();
+      await this.initNdkReadOnly();
       console.log(await this.getUserPubkey());
       // console.log("### fetch events");
       // console.log(await this.fetchEventsFromUser());
@@ -770,7 +770,7 @@ export default defineComponent({
     },
     fetchMintsFromNdk: async function () {
       this.discoveringMints = true;
-      await this.connect();
+      await this.initNdkReadOnly();
       console.log("### fetch mints");
       let maxTries = 5;
       let tries = 0;

@@ -211,6 +211,7 @@ import { useProofsStore } from "src/stores/proofs";
 import { useCameraStore } from "src/stores/camera";
 import { useP2PKStore } from "src/stores/p2pk";
 import { useNWCStore } from "src/stores/nwc";
+import { useNPCStore } from "src/stores/npubcash";
 
 import ReceiveTokenDialog from "src/components/ReceiveTokenDialog.vue";
 
@@ -354,6 +355,7 @@ export default {
     ]),
     ...mapActions(useCameraStore, ["closeCamera", "showCamera"]),
     ...mapActions(useNWCStore, ["listenToNWCCommands"]),
+    ...mapActions(useNPCStore, ["generateNPCConnection", "claimAllTokens"]),
     // TOKEN METHODS
     decodeToken: function (encoded_token) {
       try {
@@ -565,7 +567,11 @@ export default {
   },
   watch: {},
 
-  mounted: function () {},
+  mounted: function () {
+    // generate NPC connection
+    this.generateNPCConnection();
+    this.claimAllTokens();
+  },
 
   created: async function () {
     // check if another tab is open

@@ -238,9 +238,210 @@
       </q-list>
     </div>
 
-    <!-- nostr -->
+    <!-- ln address -->
     <div class="q-py-sm q-px-xs text-left" on-left>
       <q-list padding>
+        <q-item>
+          <q-item-section>
+            <q-item-label overline>Lightning address</q-item-label>
+            <q-item-label caption
+              >Your Lightning address is generated from your nostr
+              keys.</q-item-label
+            >
+          </q-item-section>
+        </q-item>
+        <q-item>
+          <q-item-section class="q-mx-none q-pl-none">
+            <!-- toggle to turn Lightning address on and off in new row -->
+            <div class="row q-pt-md">
+              <q-toggle
+                v-model="npcEnabled"
+                label="Enable Lightning address"
+                color="primary"
+              />
+            </div>
+            <div class="row q-pt-md" v-if="npcEnabled">
+              <div class="col-12">
+                <q-input outlined v-model="npcAddress" dense rounded readonly>
+                  <template v-slot:append>
+                    <q-spinner-hourglass size="sm" v-if="npcLoading" />
+                    <q-icon
+                      name="content_copy"
+                      @click="copyText(npcAddress)"
+                      size="0.8em"
+                      color="grey"
+                      class="q-mr-sm cursor-pointer"
+                    >
+                      <q-tooltip>Copy Lightning address</q-tooltip>
+                    </q-icon>
+                  </template>
+                </q-input>
+              </div>
+              <div class="row q-pt-md">
+                <q-toggle v-model="automaticClaim" color="primary" />
+                <q-item-section>
+                  <q-item-label overline>Claim automatically</q-item-label>
+                  <q-item-label caption
+                    >Receive incoming payments automatically when the wallet is
+                    started.
+                  </q-item-label>
+                </q-item-section>
+              </div>
+            </div>
+          </q-item-section>
+        </q-item>
+
+        <!-- nostr -->
+        <div class="q-py-sm q-px-md text-left" on-left v-if="npcEnabled">
+          <q-list padding>
+            <q-item>
+              <q-item-section>
+                <q-item-label overline>Your nostr keys</q-item-label>
+                <q-item-label caption
+                  >Link your wallet to a nostr account to generate your
+                  Lightning address.</q-item-label
+                >
+              </q-item-section>
+            </q-item>
+            <!-- initWalletSeedPrivateKeySigner -->
+            <q-item
+              :active="signerType === 'SEED'"
+              active-class="text-weight-bold text-primary"
+              clickable
+            >
+              <q-item-section avatar>
+                <q-icon
+                  :color="signerType === 'SEED' ? 'primary' : 'grey'"
+                  :name="
+                    signerType === 'SEED'
+                      ? 'check_circle'
+                      : 'radio_button_unchecked'
+                  "
+                  @click="handleSeedClick"
+                  class="cursor-pointer"
+                />
+              </q-item-section>
+              <q-item-section
+                lines="1"
+                class="cursor-pointer"
+                style="word-break: break-word"
+              >
+                <q-item-label title>Wallet seed phrase</q-item-label>
+                <q-item-label caption
+                  >Generate nostr key pair from seed
+                </q-item-label>
+              </q-item-section>
+            </q-item>
+            <!-- Nip46Signer -->
+            <q-item
+              :active="signerType === 'NIP46'"
+              active-class="text-weight-bold text-primary"
+              clickable
+              v-if="false"
+            >
+              <q-item-section avatar>
+                <q-icon
+                  :color="signerType === 'NIP46' ? 'primary' : 'grey'"
+                  :name="
+                    signerType === 'NIP46'
+                      ? 'check_circle'
+                      : 'radio_button_unchecked'
+                  "
+                  @click="handleBunkerClick"
+                  class="cursor-pointer"
+                />
+              </q-item-section>
+              <q-item-section
+                lines="1"
+                class="cursor-pointer"
+                style="word-break: break-word"
+              >
+                <q-item-label title>Nsec Bunker</q-item-label>
+                <q-item-label caption>Use a NIP-46 bunker </q-item-label>
+              </q-item-section>
+              <q-item-section side v-if="signerType === 'NIP46'">
+                <q-icon
+                  name="delete_outline"
+                  @click="resetNip46Signer"
+                  class="cursor-pointer"
+                  ><q-tooltip>Delete connection</q-tooltip>
+                </q-icon>
+              </q-item-section>
+            </q-item>
+            <q-item
+              :active="signerType === 'PRIVATEKEY'"
+              active-class="text-weight-bold text-primary"
+              clickable
+            >
+              <q-item-section avatar>
+                <q-icon
+                  :color="signerType === 'PRIVATEKEY' ? 'primary' : 'grey'"
+                  :name="
+                    signerType === 'PRIVATEKEY'
+                      ? 'check_circle'
+                      : 'radio_button_unchecked'
+                  "
+                  @click="handleNsecClick"
+                  class="cursor-pointer"
+                />
+              </q-item-section>
+              <q-item-section
+                lines="1"
+                class="cursor-pointer"
+                style="word-break: break-word"
+              >
+                <q-item-label title>Use your nsec</q-item-label>
+                <q-item-label caption
+                  >Enter your nostr private key
+                </q-item-label>
+              </q-item-section>
+              <q-item-section side v-if="signerType === 'PRIVATEKEY'">
+                <q-icon
+                  name="delete_outline"
+                  @click="resetPrivateKeySigner"
+                  class="cursor-pointer"
+                  ><q-tooltip>Delete nsec</q-tooltip></q-icon
+                >
+              </q-item-section>
+            </q-item>
+            <!-- Nip07Signer -->
+            <q-item
+              :active="signerType === 'NIP07'"
+              active-class="text-weight-bold text-primary"
+              clickable
+              v-if="nip07SignerAvailable"
+            >
+              <q-item-section avatar>
+                <q-icon
+                  :color="signerType === 'NIP07' ? 'primary' : 'grey'"
+                  :name="
+                    signerType === 'NIP07'
+                      ? 'check_circle'
+                      : 'radio_button_unchecked'
+                  "
+                  @click="handleExtensionClick"
+                  class="cursor-pointer"
+                />
+              </q-item-section>
+              <q-item-section
+                lines="1"
+                class="cursor-pointer"
+                style="word-break: break-word"
+              >
+                <q-item-label title>Signing extension</q-item-label>
+                <q-item-label caption v-if="nip07SignerAvailable"
+                  >Use a NIP-07 signing extension
+                </q-item-label>
+                <q-item-label caption v-else
+                  >No NIP-07 signing extension found
+                </q-item-label>
+              </q-item-section>
+            </q-item>
+          </q-list>
+        </div>
+
+        <!-- NWC -->
+
         <q-item>
           <q-item-section>
             <q-item-label overline>Link wallet</q-item-label>
@@ -311,7 +512,7 @@
                 <q-tooltip>Show QR code</q-tooltip>
               </q-icon>
             </q-item-section>
-            <q-item-section>
+            <q-item-section style="max-width: 10rem">
               <!-- <q-item-label
                 caption
                 clickable
@@ -598,6 +799,7 @@ import { map } from "underscore";
 import { currentDateStr } from "src/js/utils";
 import { useSettingsStore } from "src/stores/settings";
 import { useNostrStore } from "src/stores/nostr";
+import { useNPCStore } from "src/stores/npubcash";
 import { useP2PKStore } from "src/stores/p2pk";
 import { useNWCStore } from "src/stores/nwc";
 import { useWorkersStore } from "src/stores/workers";
@@ -625,31 +827,11 @@ export default defineComponent({
         "flamingo",
       ],
       discoveringMints: false,
-      addingMint: false,
       hideMnemonic: true,
       confirmMnemonic: false,
-      swapData: {
-        from_url: "",
-        to_url: "",
-        amount: 0,
-      },
-      mintToEdit: {
-        url: "",
-        nickname: "",
-      },
-      mintToRemove: {
-        url: "",
-        nickname: "",
-        balances: {},
-      },
-      editMintData: {
-        url: "",
-        nickname: "",
-      },
-      addMintDialog: {
-        show: false,
-      },
-      showEditMintDialog: false,
+      nip46Token: "",
+      nostrPrivateKey: "",
+      nip07SignerAvailable: false,
     };
   },
   computed: {
@@ -666,8 +848,10 @@ export default defineComponent({
       "activeProofs",
       "proofs",
     ]),
-    ...mapState(useNostrStore, ["pubkey", "mintRecommendations"]),
+    ...mapState(useNPCStore, ["npcAddress", "npcLoading"]),
+    ...mapState(useNostrStore, ["pubkey", "mintRecommendations", "signerType"]),
     ...mapState(useWalletStore, ["mnemonic"]),
+    ...mapWritableState(useNPCStore, ["npcEnabled", "automaticClaim"]),
     ...mapWritableState(useWalletStore, ["keysetCounters"]),
     ...mapWritableState(useMintsStore, [
       "addMintData",
@@ -702,14 +886,24 @@ export default defineComponent({
         this.unsubscribeNWC();
       }
     },
+    npcEnabled: function () {
+      if (this.npcEnabled) {
+        this.generateNPCConnection();
+      } else {
+        this.npcAddress = "";
+      }
+    },
   },
   methods: {
     ...mapActions(useNostrStore, [
       "init",
-      "connect",
-      "getUserPubkey",
-      "fetchEventsFromUser",
-      "fetchMints",
+      "initNip07Signer",
+      "initNip46Signer",
+      "initPrivateKeySigner",
+      "initWalletSeedPrivateKeySigner",
+      "checkNip07Signer",
+      "resetPrivateKeySigner",
+      "resetNip46Signer",
     ]),
     ...mapActions(useNWCStore, [
       "generateNWCConnection",
@@ -734,63 +928,7 @@ export default defineComponent({
     ]),
     ...mapActions(useWorkersStore, ["invoiceCheckWorker"]),
     ...mapActions(useProofsStore, ["serializeProofs"]),
-
-    editMint: function (mint) {
-      // copy object to avoid changing the original
-      this.mintToEdit = Object.assign({}, mint);
-      this.editMintData = Object.assign({}, mint);
-      this.showEditMintDialog = true;
-    },
-    addMintInternal: function (mintToAdd, verbose) {
-      this.addingMint = true;
-      try {
-        this.addMint(mintToAdd, verbose);
-      } finally {
-        this.addingMint = false;
-      }
-    },
-    generateNewMnemonic() {
-      this.newMnemonic();
-    },
-    toggleMnemonicVisibility: function () {
-      this.hideMnemonic = !this.hideMnemonic;
-    },
-    mintClass(mint) {
-      return new MintClass(mint);
-    },
-    swapDataOptions: function () {
-      let options = [];
-      for (const [i, m] of Object.entries(this.mints)) {
-        options.push({
-          url: m.url,
-          shorturl: m.nickname || getShortUrl(m.url),
-        });
-      }
-      return options;
-    },
-    showRemoveMintDialogWrapper: function (mint) {
-      // select the mint from this.mints and add its balances
-      let mintToRemove = this.mints.find((m) => m.url == mint);
-
-      this.mintToRemove = mintToRemove;
-      this.showRemoveMintDialog = true;
-    },
-    //
-    mintSwap: async function (from_url, to_url, amount) {
-      // get invoice
-      await this.activateMintUrl(to_url);
-      let invoice = await this.requestMint(amount);
-
-      // pay invoice
-      await this.activateMintUrl(from_url);
-      await this.decodeRequest(invoice.request);
-      await this.melt();
-
-      // settle invoice on other side
-      await this.activateMintUrl(to_url);
-      await this.invoiceCheckWorker();
-      this.notifySuccess("Swap successful");
-    },
+    ...mapActions(useNPCStore, ["generateNPCConnection"]),
     enable_terminal: function () {
       // enable debug terminal
       var script = document.createElement("script");
@@ -856,37 +994,6 @@ export default defineComponent({
         this.notifySuccess("No spent proofs found");
       }
     },
-    initNdk: async function () {
-      await this.connect();
-      console.log(await this.getUserPubkey());
-      // console.log("### fetch events");
-      // console.log(await this.fetchEventsFromUser());
-      // console.log("### fetch mints");
-      // console.log(await this.fetchMints());
-    },
-    fetchMintsFromNdk: async function () {
-      this.discoveringMints = true;
-      await this.connect();
-      console.log("### fetch mints");
-      let maxTries = 5;
-      let tries = 0;
-      let mintUrls = [];
-      while (mintUrls.length == 0 && tries < maxTries) {
-        try {
-          mintUrls = await this.fetchMints();
-        } catch (e) {
-          console.log("Error fetching mints", e);
-        }
-        tries++;
-      }
-      if (mintUrls.length == 0) {
-        this.notifyError("No mints found");
-      } else {
-        this.notifySuccess("Found " + mintUrls.length + " mints");
-      }
-      console.log(mintUrls);
-      this.discoveringMints = false;
-    },
     showP2PKKeyEntry: async function (pubKey) {
       this.showKeyDetails(pubKey);
       this.showP2PKDialog = true;
@@ -903,7 +1010,26 @@ export default defineComponent({
       const token = await this.serializeProofs(this.activeProofs);
       this.copyText(token);
     },
+    handleSeedClick: async function () {
+      await this.initWalletSeedPrivateKeySigner();
+      await this.generateNPCConnection();
+    },
+    handleExtensionClick: async function () {
+      await this.initNip07Signer();
+      await this.generateNPCConnection();
+    },
+    handleBunkerClick: async function () {
+      await this.initNip46Signer();
+      await this.generateNPCConnection();
+    },
+    handleNsecClick: async function () {
+      await this.initPrivateKeySigner();
+      await this.generateNPCConnection();
+    },
   },
-  created: function () {},
+  created: async function () {
+    this.nip07SignerAvailable = await this.checkNip07Signer();
+    console.log("Nip07 signer available", this.nip07SignerAvailable);
+  },
 });
 </script>
