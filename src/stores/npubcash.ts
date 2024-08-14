@@ -76,6 +76,7 @@ export const useNPCStore = defineStore("npc", {
       console.log('Lightning address for wallet:', nip19.npubEncode(walletPublicKeyHex) + '@' + this.npcDomain)
       console.log('npub:', nip19.npubEncode(walletPublicKeyHex))
       this.baseURL = `https://${this.npcDomain}`
+      const previousAddress = this.npcAddress
       this.npcAddress = nip19.npubEncode(walletPublicKeyHex) + '@' + this.npcDomain
       if (!this.npcEnabled) {
         return
@@ -92,10 +93,10 @@ export const useNPCStore = defineStore("npc", {
         console.log(info)
         if (info.username) {
           const usernameAddress = info.username + '@' + this.npcDomain
-          if (this.npcAddress !== usernameAddress) {
+          if (previousAddress !== usernameAddress) {
             notifySuccess(`Logged in as ${info.username}`)
-            this.npcAddress = usernameAddress
           }
+          this.npcAddress = usernameAddress
         }
       } catch (e) {
         notifyApiError(e)
