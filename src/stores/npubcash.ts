@@ -60,6 +60,7 @@ export const useNPCStore = defineStore("npc", {
     npcAddress: useLocalStorage<string>("cashu.npc.address", ""),
     npcDomain: useLocalStorage<string>("cashu.npc.domain", "npub.cash"),
     baseURL: useLocalStorage<string>("cashu.npc.baseURL", "https://npub.cash"),
+    npcLoading: false,
     // ndk: new NDK(),
     // signer: {} as NDKPrivateKeySigner,
   }),
@@ -75,22 +76,34 @@ export const useNPCStore = defineStore("npc", {
       console.log('Lightning address for wallet:', nip19.npubEncode(walletPublicKeyHex) + '@' + this.npcDomain)
       console.log('npub:', nip19.npubEncode(walletPublicKeyHex))
       this.baseURL = `https://${this.npcDomain}`
+      this.npcAddress = nip19.npubEncode(walletPublicKeyHex) + '@' + this.npcDomain
       if (!this.npcEnabled) {
         return
       }
       // get info
-      const info = await this.getInfo()
-      if (info.error) {
-        notifyError(info.error)
-        return
+      this.npcLoading = true;
+      try {
+        const info = await this.getInfo()
+        if (info.error) {
+          notifyError(info.error)
+          return
+        }
+        // log info
+        console.log(info)
+        if (info.username) {
+          const usernameAddress = info.username + '@' + this.npcDomain
+          if (this.npcAddress !== usernameAddress) {
+            notifySuccess(`Logged in as ${info.username}`)
+            this.npcAddress = usernameAddress
+          }
+        }
+      } catch (e) {
+        notifyApiError(e)
+      } finally {
+        this.npcLoading = false;
       }
-      // log info
-      console.log(info)
-      if (info.username) {
-        this.npcAddress = info.username + '@' + this.npcDomain
-      } else {
-        this.npcAddress = nip19.npubEncode(walletPublicKeyHex) + '@' + this.npcDomain
-      }
+
+
     },
     generateNip98Event: async function (url: string, method: string, body: string): Promise<string> {
       const nostrStore = useNostrStore()
@@ -237,28 +250,5 @@ export const useNPCStore = defineStore("npc", {
         return ""
       }
     },
-    // getWithdraw: async function (): Promise<string> {
-    //   const authHeader = await this.generateNip98Event(
-    //     `${this.baseURL}/api/v1/withdrawals`,
-    //     "POST",
-    //   );
-    //   try {
-    //     const response = await fetch(`${this.baseURL}/api/v1/withdraw`, {
-    //       method: "GET",
-    //       headers: {
-    //         Authorization: `Nostr ${authHeader}`,
-    //       },
-    //     })
-    //     // deserialize the response to NPCClaim
-    //     const claim: NPCClaim = await response.json()
-    //     if (claim.error) {
-    //       return ""
-    //     }
-    //     return claim.data.token
-    //   } catch (e) {
-    //     console.error(e)
-    //     return ""
-    //   }
-    // }
   }
 });

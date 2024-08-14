@@ -101,7 +101,7 @@ export const useNostrStore = defineStore("nostr", {
     initNip46Signer: async function (nip46Token?: string) {
       const ndk = new NDK({ explicitRelayUrls: this.relays });
       if (!nip46Token && !this.nip46Token.length) {
-        nip46Token = await prompt("enter your nip-46 token") as string;
+        nip46Token = await prompt("Enter your NIP-46 connection string") as string;
         if (!nip46Token) {
           return;
         }
@@ -127,7 +127,7 @@ export const useNostrStore = defineStore("nostr", {
     },
     initPrivateKeySigner: async function (nsec?: string) {
       if (!nsec && !this.privateKeySignerPrivateKey.length) {
-        nsec = await prompt("enter your nsec") as string;
+        nsec = await prompt("Enter your nsec") as string;
         if (!nsec) {
           return;
         }
