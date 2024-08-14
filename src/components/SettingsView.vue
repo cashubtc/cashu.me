@@ -848,9 +848,10 @@ export default defineComponent({
       "activeProofs",
       "proofs",
     ]),
-    ...mapState(useNPCStore, ["npcAddress", "npcLoading"]),
+    ...mapState(useNPCStore, ["npcLoading"]),
     ...mapState(useNostrStore, ["pubkey", "mintRecommendations", "signerType"]),
     ...mapState(useWalletStore, ["mnemonic"]),
+    ...mapWritableState(useNPCStore, ["npcAddress"]),
     ...mapWritableState(useNPCStore, ["npcEnabled", "automaticClaim"]),
     ...mapWritableState(useWalletStore, ["keysetCounters"]),
     ...mapWritableState(useMintsStore, [
