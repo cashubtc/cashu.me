@@ -390,26 +390,10 @@ export const useMintsStore = defineStore("mints", {
       if (!backup || !backup["cashu.welcomeDialogSeen"]) {
         notifyError("Unrecognized Backup Format!");
       } else {
-        localStorage.setItem(
-          "cashu.welcomeDialogSeen",
-          backup["cashu.welcomeDialogSeen"]
-        );
-        localStorage.setItem("cashu.theme", backup["cashu.theme"]);
-        localStorage.setItem("cashu.mints", backup["cashu.mints"]);
-        localStorage.setItem("cashu.proofs", backup["cashu.proofs"]);
-        localStorage.setItem("cashu.spentProofs", backup["cashu.spentProofs"]);
-        localStorage.setItem(
-          "cashu.blindSignatures",
-          backup["cashu.blindSignatures"]
-        );
-        localStorage.setItem(
-          "cashu.historyTokens",
-          backup["cashu.historyTokens"]
-        );
-        localStorage.setItem(
-          "cashu.activeMintUrl",
-          backup["cashu.activeMintUrl"]
-        );
+        const keys = Object.keys(backup);
+        keys.forEach((key) => {
+          localStorage.setItem(key, backup[key]);
+        });
         notifySuccess("Backup restored");
       }
     },
