@@ -97,6 +97,8 @@ export const useMintsStore = defineStore("mints", {
       showRemoveMintDialog: false,
       showMintInfoDialog: false,
       showMintInfoData: {} as Mint,
+      mintReconnectRetries: 0,
+      mintReconnectMaxRetries: 3,
     };
   },
   getters: {
@@ -268,6 +270,12 @@ export const useMintsStore = defineStore("mints", {
       }
     },
     activateMint: async function (mint: Mint, verbose = false, force = false) {
+      if (this.mintReconnectRetries >= this.mintReconnectMaxRetries) {
+        notifyError("Could not connect to mint.");
+        return;
+      }
+      this.mintReconnectRetries++;
+
       const workers = useWorkersStore();
       if (mint.url === this.activeMintUrl && !force) {
         // return here because this function is called repeatedly by the
@@ -283,10 +291,10 @@ export const useMintsStore = defineStore("mints", {
       try {
         this.activeMintUrl = mint.url;
         console.log("### this.activeMintUrl", this.activeMintUrl);
-        mint.info = await this.fetchMintInfo(mint);
-        console.log("### activateMint: Mint info: ", mint.info);
         mint = await this.fetchMintKeys(mint);
         this.toggleActiveUnitForMint(mint);
+        mint.info = await this.fetchMintInfo(mint);
+        console.log("### activateMint: Mint info: ", mint.info);
         if (verbose) {
           await notifySuccess("Mint activated.");
         }
@@ -294,6 +302,7 @@ export const useMintsStore = defineStore("mints", {
           "### activateMint: Mint activated: ",
           this.activeMintUrl,
         );
+        this.mintReconnectRetries = 0;
       } catch (error: any) {
         // restore previous values because the activation errored
         this.activeMintUrl = previousUrl;
