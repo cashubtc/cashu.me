@@ -1,7 +1,7 @@
 import { defineStore } from "pinia";
 import NDK, { NDKEvent, NDKSigner, NDKNip07Signer, NDKNip46Signer, NDKFilter, NDKPrivateKeySigner, NostrEvent } from "@nostr-dev-kit/ndk";
 import { nip19 } from 'nostr-tools'
-import { bytesToHex } from '@noble/hashes/utils' // already an installed dependency
+import { bytesToHex, hexToBytes } from '@noble/hashes/utils' // already an installed dependency
 import { useWalletStore } from "./wallet";
 import { generateSecretKey, getPublicKey } from 'nostr-tools'
 import { useLocalStorage } from "@vueuse/core";
@@ -126,23 +126,25 @@ export const useNostrStore = defineStore("nostr", {
       await this.initWalletSeedPrivateKeySigner();
     },
     initPrivateKeySigner: async function (nsec?: string) {
+      let privateKeyBytes: Uint8Array;
       if (!nsec && !this.privateKeySignerPrivateKey.length) {
         nsec = await prompt("Enter your nsec") as string;
         if (!nsec) {
           return;
         }
-        const privateKeyBytes = nip19.decode(nsec).data as Uint8Array
-        this.privateKeySignerPrivateKey = bytesToHex(privateKeyBytes);
+        privateKeyBytes = nip19.decode(nsec).data as Uint8Array
       } else {
         if (nsec) {
-          const privateKeyBytes = nip19.decode(nsec).data as Uint8Array
-          this.privateKeySignerPrivateKey = bytesToHex(privateKeyBytes);
+          privateKeyBytes = nip19.decode(nsec).data as Uint8Array
+        } else {
+          privateKeyBytes = hexToBytes(this.privateKeySignerPrivateKey);
         }
       }
       this.privateKeySigner = new NDKPrivateKeySigner(this.privateKeySignerPrivateKey);
       this.signerType = SignerType.PRIVATEKEY;
       await this.setSigner(this.privateKeySigner);
-      this.setPubkey(this.privateKeySignerPrivateKey);
+      const publicKeyHex = getPublicKey(privateKeyBytes);
+      this.setPubkey(publicKeyHex);
     },
     resetPrivateKeySigner: async function () {
       this.privateKeySignerPrivateKey = "";
