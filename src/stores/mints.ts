@@ -118,13 +118,13 @@ export const useMintsStore = defineStore("mints", {
     },
     activeUnitLabel({ activeUnit }): string {
       if (activeUnit == "sat") {
-        return "BTC";
+        return "SAT";
       } else if (activeUnit == "usd") {
         return "USD";
       } else if (activeUnit == "eur") {
         return "EUR";
       } else if (activeUnit == "msat") {
-        return "msat";
+        return "mSAT";
       } else {
         return activeUnit;
       }
