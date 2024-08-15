@@ -1026,11 +1026,18 @@ export const useWalletStore = defineStore("wallet", {
         mintStore.addMintData = { url: req, nickname: "" }
       }
     },
+    fetchBitcoinPriceUSD: async function () {
+      var { data } = await axios.get(
+        "https://api.coinbase.com/v2/exchange-rates?currency=BTC"
+      );
+      return data.data.rates.USD;
+    },
     lnurlPayFirst: async function (address: string) {
       var host;
       if (address.split("@").length == 2) {
         let [user, lnaddresshost] = address.split("@");
         host = `https://${lnaddresshost}/.well-known/lnurlp/${user}`;
+        var { data } = await axios.get(host); // Moved it here: we don't want 2 potential calls
       } else if (address.toLowerCase().slice(0, 6) === "lnurl1") {
         let host = Buffer.from(
           bech32.fromWords(bech32.decode(address, 20000).words)
@@ -1042,7 +1049,6 @@ export const useWalletStore = defineStore("wallet", {
         notifyError("Invalid LNURL", "LNURL Error");
         return;
       }
-      var { data } = await axios.get(host);
       if (data.tag == "payRequest") {
         this.payInvoiceData.lnurlpay = data;
         this.payInvoiceData.lnurlpay.domain = host.split("https://")[1].split("/")[0];
@@ -1057,6 +1063,7 @@ export const useWalletStore = defineStore("wallet", {
       }
     },
     lnurlPaySecond: async function () {
+      const mintStore = useMintsStore();
       let amount = this.payInvoiceData.input.amount;
       if (this.payInvoiceData.lnurlpay == null) {
         notifyError("No LNURL data", "LNURL Error");
@@ -1067,6 +1074,22 @@ export const useWalletStore = defineStore("wallet", {
         this.payInvoiceData.lnurlpay.minSendable <= amount * 1000 &&
         this.payInvoiceData.lnurlpay.maxSendable >= amount * 1000
       ) {
+        if (mintStore.activeUnit == "usd") {
+          try {
+            var priceUsd = await this.fetchBitcoinPriceUSD();
+          } catch (e) {
+            notifyError(
+              "Couldn't get Bitcoin price",
+              "fetchBitcoinPriceUSD Error"
+            );
+            return;
+          }
+
+          const satPrice = 1 / (priceUsd / 1e8);
+          const usdAmount = amount;
+          amount = Math.floor(usdAmount * satPrice);
+          console.log(`converted amount: ${amount}`);
+        }
         var { data } = await axios.get(
           `${this.payInvoiceData.lnurlpay.callback}?amount=${amount * 1000}`
         );
@@ -1076,6 +1099,7 @@ export const useWalletStore = defineStore("wallet", {
           return;
         }
         console.log(data.pr);
+        console.log(`callback: ${this.payInvoiceData.lnurlpay.callback}`);
         await this.decodeRequest(data.pr);
       }
     },
