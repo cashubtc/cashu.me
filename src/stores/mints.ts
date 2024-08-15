@@ -116,6 +116,19 @@ export const useMintsStore = defineStore("mints", {
       ).reduce((sum, p) => sum + p.amount, 0);
       return balance
     },
+    activeUnitLabel({ activeUnit }): string {
+      if (activeUnit == "sat") {
+        return "SAT";
+      } else if (activeUnit == "usd") {
+        return "USD";
+      } else if (activeUnit == "eur") {
+        return "EUR";
+      } else if (activeUnit == "msat") {
+        return "mSAT";
+      } else {
+        return activeUnit;
+      }
+    }
   },
   actions: {
     activeMint() {

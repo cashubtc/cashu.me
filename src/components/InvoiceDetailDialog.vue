@@ -37,7 +37,7 @@
             flat
             color="primary"
             @click="toggleUnit()"
-            :label="activeUnit == 'sat' ? 'BTC' : 'USD'"
+            :label="activeUnitLabel"
           />
         </q-input>
         <div class="row items-center no-wrap q-my-sm q-py-none">
@@ -171,7 +171,7 @@ export default defineComponent({
   },
   computed: {
     ...mapState(useWalletStore, ["invoiceData"]),
-    ...mapState(useMintsStore, ["activeUnit"]),
+    ...mapState(useMintsStore, ["activeUnit", "activeUnitLabel"]),
     ...mapState(useWorkersStore, ["invoiceWorkerRunning"]),
     ...mapWritableState(useUiStore, ["showInvoiceDetails", "tickerShort"]),
     displayUnit: function () {

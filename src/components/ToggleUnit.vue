@@ -4,7 +4,7 @@
     outline
     color="primary"
     @click="toggleUnit()"
-    :label="activeUnit == 'sat' ? 'BTC' : 'USD'"
+    :label="activeUnitLabel"
   />
 </template>
 <script>
@@ -26,7 +26,7 @@ export default defineComponent({
   mounted() {},
   watch: {},
   computed: {
-    ...mapState(useMintsStore, ["activeUnit"]),
+    ...mapState(useMintsStore, ["activeUnit", "activeUnitLabel"]),
   },
   methods: {
     ...mapActions(useMintsStore, ["toggleUnit"]),
