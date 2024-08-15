@@ -27,19 +27,6 @@ export default defineComponent({
   watch: {},
   computed: {
     ...mapState(useMintsStore, ["activeUnit", "activeUnitLabel"]),
-    // activeUnitLabel: function () {
-    //   if (this.activeUnit == "sat") {
-    //     return "BTC";
-    //   } else if (this.activeUnit == "usd") {
-    //     return "USD";
-    //   } else if (this.activeUnit == "eur") {
-    //     return "EUR";
-    //   } else if (this.activeUnit == "msat") {
-    //     return "msat";
-    //   } else {
-    //     return this.activeUnit;
-    //   }
-    // },
   },
   methods: {
     ...mapActions(useMintsStore, ["toggleUnit"]),
