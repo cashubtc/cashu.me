@@ -108,7 +108,7 @@ export const useNPCStore = defineStore("npc", {
     },
     generateNip98Event: async function (url: string, method: string, body: string): Promise<string> {
       const nostrStore = useNostrStore()
-      await nostrStore.initSigner()
+      await nostrStore.initSignerIfNotSet()
       const nip98Event = new NDKEvent(new NDK());
       nip98Event.kind = NIP98Kind;
       nip98Event.content = '';
