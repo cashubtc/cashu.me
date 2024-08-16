@@ -367,6 +367,8 @@ export const useWalletStore = defineStore("wallet", {
       */
       const uIStore = useUiStore();
       const mintStore = useMintsStore();
+      const p2pkStore = useP2PKStore();
+
       receiveStore.showReceiveTokens = false;
       console.log("### receive tokens", receiveStore.receiveData.tokensBase64);
 
@@ -393,6 +395,7 @@ export const useWalletStore = defineStore("wallet", {
         if (tokensWithErrors?.token || tokenReceived.token.length == 0) {
           throw new Error("Error receiving tokens");
         }
+        p2pkStore.setPrivateKeyUsed(privkey);
 
         // this.increaseKeysetCounter(keysetId, tokenReceived.token[0].proofs.length);
         this.increaseKeysetCounter(keysetId, tokenReceived.token.map(t => t.proofs.length).reduce((a, b) => a + b, 0));
