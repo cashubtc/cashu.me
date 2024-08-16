@@ -122,7 +122,8 @@ export const useNPCStore = defineStore("npc", {
     getInfo: async function (): Promise<NPCInfo> {
       const authHeader = await this.generateNip98Event(
         `${this.baseURL}/api/v1/info`,
-        "GET"
+        "GET",
+        ""
       );
       try {
         const response = await fetch(`${this.baseURL}/api/v1/info`, {
