@@ -989,6 +989,12 @@ export const useWalletStore = defineStore("wallet", {
       this.payInvoiceData.show = false;
       receiveStore.showReceiveTokens = true;
     },
+    handleP2PK: function (req: string) {
+      const sendTokenStore = useSendTokensStore()
+      sendTokenStore.sendData.p2pkPubkey = req
+      sendTokenStore.showSendTokens = true
+      sendTokenStore.showLockInput = true
+    },
     decodeRequest: async function (req: string) {
       const p2pkStore = useP2PKStore()
       this.payInvoiceData.input.request = req
@@ -1017,8 +1023,7 @@ export const useWalletStore = defineStore("wallet", {
         receiveStore.receiveData.tokensBase64 = req.slice(req.indexOf("cashuA"));
         this.handleCashuToken()
       } else if (p2pkStore.isValidPubkey(req)) {
-        const sendTokenStore = useSendTokensStore()
-        sendTokenStore.sendData.p2pkPubkey = req
+        this.handleP2PK(req)
       } else if (
         req.startsWith("http")
       ) {
