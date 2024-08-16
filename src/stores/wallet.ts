@@ -15,7 +15,7 @@ import { notifyApiError, notifyError, notifySuccess, notifyWarning, notify } fro
 import { CashuMint, CashuWallet, Proof, MintQuotePayload, CheckStatePayload, MeltQuotePayload, MeltQuoteResponse, generateNewMnemonic, deriveSeedFromMnemonic, AmountPreference, CheckStateEnum } from "@cashu/cashu-ts";
 import { hashToCurve } from "@cashu/cashu-ts/dist/lib/es6/DHKE";
 import * as bolt11Decoder from "light-bolt11-decoder";
-import bech32 from "bech32";
+import { bech32 } from "bech32";
 import axios from "axios";
 import { date } from "quasar";
 import { splitAmount } from "@cashu/cashu-ts/dist/lib/es5/utils";
@@ -82,7 +82,7 @@ export const useWalletStore = defineStore("wallet", {
           sat: 0,
           memo: "",
           bolt11: "",
-        },
+        } as { sat: number, memo: string, bolt11: string } | null,
         lnurlpay: {
           domain: "",
           callback: "",
@@ -96,10 +96,10 @@ export const useWalletStore = defineStore("wallet", {
         lnurlauth: {},
         input: {
           request: "",
-          amount: 0,
+          amount: null,
           comment: "",
           quote: "",
-        },
+        } as { request: string, amount: number | null, comment: string, quote: string },
       },
     };
   },
@@ -1019,7 +1019,7 @@ export const useWalletStore = defineStore("wallet", {
         req.toLowerCase().startsWith("lnurl1") ||
         req.match(/[\w.+-~_]+@[\w.+-~_]/)
       ) {
-        this.payInvoiceData.input.request = req;
+        this.payInvoiceData.input.request = req
         await this.lnurlPayFirst(this.payInvoiceData.input.request);
       } else if (req.indexOf("cashuA") !== -1) {
         // very dirty way of parsing cashu tokens from either a pasted token or a URL like https://host.com?token=eyJwcm
@@ -1042,16 +1042,24 @@ export const useWalletStore = defineStore("wallet", {
     },
     lnurlPayFirst: async function (address: string) {
       var host;
+      var data
       if (address.split("@").length == 2) {
         let [user, lnaddresshost] = address.split("@");
         host = `https://${lnaddresshost}/.well-known/lnurlp/${user}`;
-        var { data } = await axios.get(host); // Moved it here: we don't want 2 potential calls
+        const resp = await axios.get(host); // Moved it here: we don't want 2 potential calls
+        data = resp.data;
       } else if (address.toLowerCase().slice(0, 6) === "lnurl1") {
-        let host = Buffer.from(
-          bech32.fromWords(bech32.decode(address, 20000).words)
-        ).toString();
-        var { data } = await axios.get(host);
-        host = data.domain;
+        // let host = Buffer.from(
+        //   bech32.fromWords(bech32.decode(address, 20000).words)
+        // ).toString();
+        // without Buffer:
+        let decoded = bech32.decode(address, 20000);
+        const words = bech32.fromWords(decoded.words);
+        const uint8Array = new Uint8Array(words);
+        host = new TextDecoder().decode(uint8Array);
+
+        const resp = await axios.get(host);
+        data = resp.data;
       }
       if (host == undefined) {
         notifyError("Invalid LNURL", "LNURL Error");
@@ -1067,12 +1075,23 @@ export const useWalletStore = defineStore("wallet", {
           this.payInvoiceData.input.amount =
             this.payInvoiceData.lnurlpay.maxSendable / 1000;
         }
+        this.payInvoiceData.invoice = null;
+        this.payInvoiceData.input = {
+          request: "",
+          amount: null,
+          comment: "",
+          quote: "",
+        };
         this.payInvoiceData.show = true;
       }
     },
     lnurlPaySecond: async function () {
       const mintStore = useMintsStore();
       let amount = this.payInvoiceData.input.amount;
+      if (amount == null) {
+        notifyError("No amount", "LNURL Error");
+        return;
+      }
       if (this.payInvoiceData.lnurlpay == null) {
         notifyError("No LNURL data", "LNURL Error");
         return;

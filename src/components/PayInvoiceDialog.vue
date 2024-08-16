@@ -79,13 +79,14 @@
             "
             class="q-my-none text-h6 text-center"
           >
-            <b>{{ payInvoiceData.domain }}</b> is requesting
+            <b>{{ payInvoiceData.lnurlpay.domain }}</b> is requesting
             {{ payInvoiceData.lnurlpay.maxSendable / 1000 }}
             {{ tickerShort }}
           </p>
           <p v-else class="q-my-none text-h6 text-center">
             <b>{{
-              payInvoiceData.lnurlpay.targetUser || payInvoiceData.domain
+              payInvoiceData.lnurlpay.targetUser ||
+              payInvoiceData.lnurlpay.domain
             }}</b>
             is requesting <br />
             between
