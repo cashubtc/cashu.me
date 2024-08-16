@@ -790,7 +790,7 @@
                       flat
                       dense
                       class="q-ml-sm"
-                      color="warning"
+                      color="primary"
                       @click="confirmNuke = false"
                       >Cancel</q-btn
                     >
@@ -798,7 +798,7 @@
                       flat
                       dense
                       class="q-ml-sm"
-                      color="secondary"
+                      color="warning"
                       @click="
                         confirmNuke = false;
                         nukeWallet();
