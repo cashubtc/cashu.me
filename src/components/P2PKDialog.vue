@@ -40,6 +40,7 @@
           </q-card-section>
         </div>
         <q-btn
+          v-if="false"
           class="q-mx-xs q-px-md q-mt-md"
           size="md"
           color="primary"

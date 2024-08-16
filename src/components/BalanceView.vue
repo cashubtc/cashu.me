@@ -3,7 +3,7 @@
     <q-card-section class="q-mt-sm q-py-xs"> -->
   <div class="q-pt-xl q-pb-md">
     <div class="row justify-center q-pb-lg">
-      <ToggleUnit class="q-mt-lg q-mb-none" />
+      <ToggleUnit class="q-mt-lg q-mb-none" :balanceView="true" />
     </div>
     <transition
       appear
@@ -47,7 +47,9 @@
                     )
                   }}
                 </strong>
-                <strong v-if="this.activeUnit == 'usd'">
+                <strong
+                  v-if="this.activeUnit == 'usd' || this.activeUnit == 'eur'"
+                >
                   {{
                     formatCurrency(
                       (getTotalBalance / 100 / bitcoinPrice) * 100000000,
