@@ -4,7 +4,7 @@
     outline
     color="primary"
     @click="toggleUnit()"
-    :label="activeUnitLabel"
+    :label="activeUnitLabelAdopted"
   />
 </template>
 <script>
@@ -16,7 +16,10 @@ export default defineComponent({
   name: "ToggleUnit",
   mixins: [windowMixin],
   props: {
-    tickerShort: String,
+    balanceView: {
+      type: Boolean,
+      required: false,
+    },
   },
   data: function () {
     return {
@@ -27,6 +30,17 @@ export default defineComponent({
   watch: {},
   computed: {
     ...mapState(useMintsStore, ["activeUnit", "activeUnitLabel"]),
+    activeUnitLabelAdopted: function () {
+      if (!this.balanceView) {
+        return this.activeUnitLabel;
+      }
+      // if the toggle is in the balance view, we want to show BTC instead of SAT
+      if (this.activeUnitLabel === "SAT") {
+        return "BTC";
+      } else {
+        return this.activeUnitLabel;
+      }
+    },
   },
   methods: {
     ...mapActions(useMintsStore, ["toggleUnit"]),

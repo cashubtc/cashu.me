@@ -33,7 +33,13 @@ export const useP2PKStore = defineStore("p2pk", {
     showKeyDetails: function (key: string) {
       const thisKeys = this.p2pkKeys.filter((k) => k.publicKey == key)
       if (thisKeys.length) {
-        this.showP2PKData = thisKeys[0];
+        this.showP2PKData = JSON.parse(JSON.stringify(thisKeys[0]));
+        this.showP2PKDialog = true;
+      }
+    },
+    showLastKey: function () {
+      if (this.p2pkKeys.length) {
+        this.showP2PKData = JSON.parse(JSON.stringify(this.p2pkKeys[this.p2pkKeys.length - 1]));
         this.showP2PKDialog = true;
       }
     },

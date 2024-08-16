@@ -18,31 +18,15 @@
           <q-card-section class="q-pa-sm">
             <div class="row justify-center">
               <q-item-label overline class="q-mb-sm q-pt-md text-white">
-                P2PK Lock</q-item-label
+                P2PK Key</q-item-label
               >
-            </div>
-            <div class="row justify-center q-py-md">
-              <q-item-label style="font-size: 28px" class="text-weight-bold">
-                <q-spinner-dots
-                  v-if="runnerActive"
-                  color="primary"
-                  size="0.8em"
-                  class="q-mr-md"
-                />
-                <q-icon
-                  name="lock"
-                  :color="showP2PKData.used ? 'red' : 'green'"
-                  class="q-mr-sm"
-                  size="sm"
-                />
-              </q-item-label>
             </div>
             <div v-if="showP2PKData.used" class="row justify-center q-pt-sm">
               <q-item-label
                 caption
                 class="text-weight-light text-white"
                 style="font-size: 14px"
-                >Warning: You have already used this lock before.</q-item-label
+                >Warning: You have already used this lock before</q-item-label
               >
             </div>
             <div v-else class="row justify-center q-pt-sm">
@@ -50,11 +34,23 @@
                 caption
                 class="text-weight-light text-white"
                 style="font-size: 14px"
-                >You can receive ecash locked to this key.</q-item-label
+                >Receive ecash locked to this key</q-item-label
               >
             </div>
           </q-card-section>
         </div>
+        <q-btn
+          class="q-mx-xs q-px-md q-mt-md"
+          size="md"
+          color="primary"
+          flat
+          rounded
+          dense
+          @click="newKeys"
+        >
+          <q-icon name="refresh" class="q-pr-sm" size="xs" />
+          Generate new key</q-btn
+        >
         <div class="row q-mt-lg">
           <q-btn
             class="q-mx-xs"
@@ -86,11 +82,15 @@ export default defineComponent({
     return {};
   },
   computed: {
-    ...mapState(useP2PKStore, ["p2pkKeys", "showP2PKData"]),
+    ...mapState(useP2PKStore, ["p2pkKeys", "showP2PKData", "showLastKey"]),
     ...mapWritableState(useP2PKStore, ["showP2PKDialog"]),
   },
   methods: {
     ...mapActions(useP2PKStore, ["generateKeypair", "showKeyDetails"]),
+    newKeys: function () {
+      this.generateKeypair();
+      this.showLastKey();
+    },
   },
 });
 </script>

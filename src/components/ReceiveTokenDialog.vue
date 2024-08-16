@@ -11,6 +11,18 @@
           <div class="col-10">
             <span class="text-h6">Receive Ecash</span>
           </div>
+          <q-btn
+            unelevated
+            class="q-mx-none"
+            v-if="!receiveData.tokensBase64.length"
+            @click="handleLockBtn"
+          >
+            <q-icon name="lock_outline" class="q-pr-sm" />
+          </q-btn>
+        </div>
+        <div>
+          <!-- P2PK DIALOG -->
+          <P2PKDialog v-model="showP2PKDialog" />
         </div>
         <q-input
           round
@@ -21,7 +33,15 @@
           autofocus
           class="q-mb-lg"
           @keyup.enter="receveIfDecodes"
-        ></q-input>
+        >
+          <template v-if="receiveData.tokensBase64" v-slot:append>
+            <q-icon
+              name="close"
+              class="cursor-pointer"
+              @click="receiveData.tokensBase64 = ''"
+            />
+          </template>
+        </q-input>
       </div>
       <div
         class="row"
@@ -45,7 +65,8 @@
           color="primary"
           rounded
           class="q-mr-sm"
-          :disabled="!decodeToken(receiveData.tokensBase64) || addMintBlocking"
+          v-if="decodeToken(receiveData.tokensBase64)"
+          :disabled="addMintBlocking"
           :label="
             knowThisMint
               ? addMintBlocking
@@ -68,17 +89,21 @@
         <q-btn
           unelevated
           v-if="canPasteFromClipboard && !receiveData.tokensBase64.length"
-          icon="content_paste"
           @click="pasteToParseDialog"
-          ><q-tooltip>Paste</q-tooltip></q-btn
+          class="q-ml-none q-pl-none"
+        >
+          <q-icon name="content_paste" class="q-pr-sm" />Paste</q-btn
         >
         <q-btn
           unelevated
-          icon="qr_code_scanner"
-          class="q-mx-0"
+          class="q-mx-none"
           v-if="hasCamera && !receiveData.tokensBase64.length"
           @click="showCamera"
-        ></q-btn>
+        >
+          <q-icon name="qr_code_scanner" class="q-pr-sm" />
+          Scan</q-btn
+        >
+
         <q-btn v-close-popup rounded flat color="grey" class="q-ml-auto"
           >Close</q-btn
         >
@@ -97,6 +122,7 @@ import { useTokensStore } from "src/stores/tokens";
 import { useCameraStore } from "src/stores/camera";
 import { useP2PKStore } from "src/stores/p2pk";
 import token from "src/js/token";
+import P2PKDialog from "./P2PKDialog.vue";
 
 import { mapActions, mapState, mapWritableState } from "pinia";
 // import ChooseMint from "components/ChooseMint.vue";
@@ -107,10 +133,13 @@ export default defineComponent({
   mixins: [windowMixin],
   components: {
     TokenInformation,
+    P2PKDialog,
   },
   props: {},
   data: function () {
-    return {};
+    return {
+      showP2PKDialog: false,
+    };
   },
   computed: {
     ...mapWritableState(useReceiveTokensStore, [
@@ -125,6 +154,7 @@ export default defineComponent({
     ]),
     ...mapWritableState(useMintsStore, ["addMintData", "showAddMintDialog"]),
     ...mapState(useCameraStore, ["hasCamera"]),
+    ...mapState(useP2PKStore, ["p2pkKeys"]),
     canPasteFromClipboard: function () {
       return (
         window.isSecureContext &&
@@ -144,7 +174,11 @@ export default defineComponent({
     ...mapActions(useWalletStore, ["redeem"]),
     ...mapActions(useCameraStore, ["closeCamera", "showCamera"]),
     ...mapActions(useTokensStore, ["addPendingToken"]),
-    ...mapActions(useP2PKStore, ["getPrivateKeyForP2PKEncodedToken"]),
+    ...mapActions(useP2PKStore, [
+      "getPrivateKeyForP2PKEncodedToken",
+      "generateKeypair",
+      "showLastKey",
+    ]),
     knowThisMintOfTokenJson: function (tokenJson) {
       const mintStore = useMintsStore();
       // check if we have all mints
@@ -211,6 +245,13 @@ export default defineComponent({
     },
     getMint: function (decoded_token) {
       return token.getMint(decoded_token);
+    },
+    handleLockBtn: function () {
+      this.showP2PKDialog = !this.showP2PKDialog;
+      if (!this.p2pkKeys.length || !this.showP2PKDialog) {
+        this.generateKeypair();
+      }
+      this.showLastKey();
     },
     receveIfDecodes: function () {
       try {
