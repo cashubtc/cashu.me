@@ -14,7 +14,7 @@
           <q-btn
             unelevated
             class="q-mx-none"
-            v-if="!receiveData.tokensBase64.length && p2pkKeys.length"
+            v-if="!receiveData.tokensBase64.length"
             @click="handleLockBtn"
           >
             <q-icon name="lock_outline" class="q-pr-sm" />
@@ -176,7 +176,8 @@ export default defineComponent({
     ...mapActions(useTokensStore, ["addPendingToken"]),
     ...mapActions(useP2PKStore, [
       "getPrivateKeyForP2PKEncodedToken",
-      "showKeyDetails",
+      "generateKeypair",
+      "showLastKey",
     ]),
     knowThisMintOfTokenJson: function (tokenJson) {
       const mintStore = useMintsStore();
@@ -248,9 +249,9 @@ export default defineComponent({
     handleLockBtn: function () {
       this.showP2PKDialog = !this.showP2PKDialog;
       if (!this.p2pkKeys.length || !this.showP2PKDialog) {
-        return;
+        this.generateKeypair();
       }
-      this.showKeyDetails(this.p2pkKeys[0].publicKey);
+      this.showLastKey();
     },
     receveIfDecodes: function () {
       try {
