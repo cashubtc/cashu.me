@@ -737,15 +737,6 @@
                         >{{ counter.id }} - counter: {{ counter.counter }}
                       </q-btn>
                     </row>
-                    <!-- <q-btn
-                      v-for="(counter, id) in keysetCounters"
-                      :key="id"
-                      dense
-                      flat
-                      click
-                      @click="increaseKeysetCounter(counter.id, 1)"
-                      >{{ counter.id }} - {{ counter.counter }}</q-btn
-                    > -->
                   </row>
                 </q-item-section>
               </q-item>
@@ -882,11 +873,7 @@ export default defineComponent({
     ]),
     ...mapWritableState(useNWCStore, ["nwcEnabled", "connections"]),
     keysetCountersByMint() {
-      // get all keyset counter ids:
-      const keysetIds = map(this.keysetCounters, (counter) => counter.id);
-      // get all mints:
       const mints = this.mints;
-      // get all keyset counters by mint:
       const keysetCountersByMint = {}; // {mintUrl: [keysetCounter: {id: string, count: number}, ...]}
       for (let mint of mints) {
         const mintIds = mint.keysets.map((keyset) => keyset.id);
