@@ -393,7 +393,7 @@
               >
                 <q-item-label title>Use your nsec</q-item-label>
                 <q-item-label caption
-                  >Enter your nostr private key
+                  >This method is dangerous and not recommended
                 </q-item-label>
               </q-item-section>
               <q-item-section side v-if="signerType === 'PRIVATEKEY'">
@@ -445,20 +445,16 @@
 
         <q-item>
           <q-item-section>
-            <q-item-label overline>Link wallet</q-item-label>
+            <q-item-label overline>Nostr Wallet Connect (NWC)</q-item-label>
             <q-item-label caption
-              >Use Nostr Wallet Connect (NWC) to control your wallet from any
-              other application.</q-item-label
+              >Use NWC to control your wallet from any other
+              application.</q-item-label
             >
           </q-item-section>
         </q-item>
         <!-- use a q-toggle to turn nwc on and off -->
         <q-item>
-          <q-toggle
-            v-model="enableNwc"
-            label="Enable Nostr Wallet Connect"
-            color="primary"
-          />
+          <q-toggle v-model="enableNwc" label="Enable NWC" color="primary" />
         </q-item>
         <!-- <q-item>
           <q-btn

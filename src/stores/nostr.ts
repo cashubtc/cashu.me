@@ -43,6 +43,11 @@ export const useNostrStore = defineStore("nostr", {
       this.ndk.connect();
       this.connected = true;
     },
+    initSignerIfNotSet: async function () {
+      if (!this.signer) {
+        await this.initSigner();
+      }
+    },
     initSigner: async function () {
       if (this.signerType === SignerType.NIP07) {
         await this.initNip07Signer();
@@ -141,6 +146,7 @@ export const useNostrStore = defineStore("nostr", {
         }
       }
       this.privateKeySigner = new NDKPrivateKeySigner(this.privateKeySignerPrivateKey);
+      this.privateKeySignerPrivateKey = bytesToHex(privateKeyBytes);
       this.signerType = SignerType.PRIVATEKEY;
       await this.setSigner(this.privateKeySigner);
       const publicKeyHex = getPublicKey(privateKeyBytes);
