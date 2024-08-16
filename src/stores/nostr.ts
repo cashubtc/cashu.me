@@ -6,6 +6,7 @@ import { useWalletStore } from "./wallet";
 import { generateSecretKey, getPublicKey } from 'nostr-tools'
 import { useLocalStorage } from "@vueuse/core";
 import { useSettingsStore } from "./settings";
+
 type MintRecommendation = {
   url: string;
   count: number;
@@ -33,6 +34,7 @@ export const useNostrStore = defineStore("nostr", {
     privateKeySigner: {} as NDKPrivateKeySigner,
     signer: {} as NDKSigner,
     mintRecommendations: useLocalStorage<MintRecommendation[]>("cashu.ndk.mintRecommendations", []),
+    initialized: false,
   }),
   getters: {
 
@@ -44,7 +46,7 @@ export const useNostrStore = defineStore("nostr", {
       this.connected = true;
     },
     initSignerIfNotSet: async function () {
-      if (!this.signer) {
+      if (!this.initialized) {
         await this.initSigner();
       }
     },
@@ -58,6 +60,7 @@ export const useNostrStore = defineStore("nostr", {
       } else {
         await this.initWalletSeedPrivateKeySigner();
       }
+      this.initialized = true;
     },
     setSigner: async function (signer: NDKSigner) {
       this.signer = signer
