@@ -98,7 +98,7 @@
           <q-icon
             name="content_copy"
             @click="copyText(key.publicKey)"
-            size="1em"
+            size="1.2em"
             color="grey"
             class="q-mr-xs cursor-pointer"
           />
@@ -107,13 +107,19 @@
           <q-item-label
             caption
             clickable
-            style="word-break: break-word"
+            style="word-break: break-word; font-size: 0.65rem"
+            class="q-mx-sm"
             @click="showP2PKKeyEntry(key.publicKey)"
             >{{ key.publicKey }}</q-item-label
           >
         </q-item-section>
         <q-item-section side>
-          <q-badge v-if="key.used" label="used" color="primary" />
+          <q-badge
+            v-if="key.used"
+            label="used"
+            color="primary"
+            class="q-mr-sm"
+          />
         </q-item-section>
         <q-item-section class="q-mx-none q-pl-none" style="max-width: 1.05em">
           <q-icon

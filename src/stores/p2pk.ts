@@ -30,6 +30,13 @@ export const useP2PKStore = defineStore("p2pk", {
     isValidPubkey: function (key: string) {
       return key && key.length == 66;
     },
+    setPrivateKeyUsed: function (key: string) {
+      const thisKeys = this.p2pkKeys.filter((k) => k.privateKey == key)
+      if (thisKeys.length) {
+        thisKeys[0].used = true;
+        thisKeys[0].usedCount += 1;
+      }
+    },
     showKeyDetails: function (key: string) {
       const thisKeys = this.p2pkKeys.filter((k) => k.publicKey == key)
       if (thisKeys.length) {

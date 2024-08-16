@@ -24,9 +24,10 @@
             <div v-if="showP2PKData.used" class="row justify-center q-pt-sm">
               <q-item-label
                 caption
-                class="text-weight-light text-white"
+                class="text-weight-bold text-warning"
                 style="font-size: 14px"
-                >Warning: You have already used this lock before</q-item-label
+                >Warning: This key was used before. Use a new key for better
+                privacy.</q-item-label
               >
             </div>
             <div v-else class="row justify-center q-pt-sm">
