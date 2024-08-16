@@ -119,13 +119,6 @@ import ToggleUnit from "components/ToggleUnit.vue";
 
 import axios from "axios";
 
-async function fetchBitcoinPrice() {
-  var { data } = await axios.get(
-    "https://api.coinbase.com/v2/exchange-rates?currency=BTC"
-  );
-  return data.data.rates.USD;
-}
-
 export default defineComponent({
   name: "BalanceView",
   mixins: [windowMixin],
@@ -206,12 +199,14 @@ export default defineComponent({
     ...mapActions(useWalletStore, [
       "checkPendingInvoices",
       "checkPendingTokens",
+      "fetchBitcoinPriceUSD",
     ]),
     async fetchPrice() {
       try {
-        this.bitcoinPrice = await fetchBitcoinPrice();
+        this.bitcoinPrice = await this.fetchBitcoinPriceUSD();
+        console.log(`bitcoinPrice: ${this.bitcoinPrice}`);
       } catch (e) {
-        console.warn("Could not get Bitcoin price.");
+        console.warn(`Could not get Bitcoin price. ${e}`);
       }
     },
     toggleUnit: function () {
@@ -221,8 +216,8 @@ export default defineComponent({
       return this.activeUnit;
     },
     toggleHideBalance() {
-      this.hideBalance = !this.hideBalance
-    }
+      this.hideBalance = !this.hideBalance;
+    },
   },
 });
 </script>
