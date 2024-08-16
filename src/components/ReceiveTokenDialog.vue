@@ -90,10 +90,10 @@
           unelevated
           v-if="canPasteFromClipboard && !receiveData.tokensBase64.length"
           @click="pasteToParseDialog"
-          class="q-ml-sm q-px-none"
+          class="q-ml-none q-pl-none"
         >
-          <q-icon name="content_paste"
-        /></q-btn>
+          <q-icon name="content_paste" class="q-pr-sm" />Paste</q-btn
+        >
         <q-btn
           unelevated
           class="q-mx-none"
