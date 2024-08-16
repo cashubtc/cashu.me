@@ -767,6 +767,51 @@
                 <q-item-section>
                   <row>
                     <q-btn
+                      v-if="!confirmNuke"
+                      dense
+                      flat
+                      outline
+                      click
+                      @click="confirmNuke = !confirmNuke"
+                    >
+                      Reset wallet data
+                    </q-btn></row
+                  ><row v-if="!confirmNuke">
+                    <q-item-label class="q-px-sm" caption
+                      >Reset your wallet data. Warning: This will delete
+                      everything! Make sure you create a backup first.
+                    </q-item-label>
+                  </row>
+                  <row v-if="confirmNuke">
+                    <span
+                      >Are you sure you want to delete your wallet data?</span
+                    >
+                    <q-btn
+                      flat
+                      dense
+                      class="q-ml-sm"
+                      color="warning"
+                      @click="confirmNuke = false"
+                      >Cancel</q-btn
+                    >
+                    <q-btn
+                      flat
+                      dense
+                      class="q-ml-sm"
+                      color="secondary"
+                      @click="
+                        confirmNuke = false;
+                        nukeWallet();
+                      "
+                      >Delete wallet</q-btn
+                    >
+                  </row>
+                </q-item-section>
+              </q-item>
+              <q-item>
+                <q-item-section>
+                  <row>
+                    <q-btn
                       dense
                       flat
                       outline
@@ -841,6 +886,7 @@ export default defineComponent({
       discoveringMints: false,
       hideMnemonic: true,
       confirmMnemonic: false,
+      confirmNuke: false,
       nip46Token: "",
       nostrPrivateKey: "",
       nip07SignerAvailable: false,
@@ -944,6 +990,7 @@ export default defineComponent({
       "removeMint",
       "activateMintUrl",
       "updateMint",
+      "restoreFromBackup",
     ]),
     ...mapActions(useWalletStore, [
       "newMnemonic",
@@ -1071,6 +1118,13 @@ export default defineComponent({
     handleResetNip46Signer: async function () {
       await this.resetNip46Signer();
       await this.generateNPCConnection();
+    },
+    nukeWallet: async function () {
+      // create a backup just in case
+      await this.getLocalstorageToFile();
+      localStorage.clear();
+      this.$router.push("/");
+      this.$emit("close");
     },
   },
   created: async function () {
