@@ -40,7 +40,6 @@
           </q-card-section>
         </div>
         <q-btn
-          v-if="false"
           class="q-mx-xs q-px-md q-mt-md"
           size="md"
           color="primary"
@@ -83,15 +82,14 @@ export default defineComponent({
     return {};
   },
   computed: {
-    ...mapState(useP2PKStore, ["p2pkKeys", "showP2PKData"]),
+    ...mapState(useP2PKStore, ["p2pkKeys", "showP2PKData", "showLastKey"]),
     ...mapWritableState(useP2PKStore, ["showP2PKDialog"]),
   },
   methods: {
     ...mapActions(useP2PKStore, ["generateKeypair", "showKeyDetails"]),
     newKeys: function () {
       this.generateKeypair();
-      const newPubkey = this.p2pkKeys[this.p2pkKeys.length - 1].publicKey;
-      this.showP2PKData.publicKey = newPubkey;
+      this.showLastKey();
     },
   },
 });
