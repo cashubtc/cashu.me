@@ -719,15 +719,24 @@
                     </q-item-label>
                   </row>
                   <row class="q-pa-sm">
-                    <q-btn
-                      v-for="(counter, id) in keysetCounters"
-                      :key="id"
-                      dense
-                      flat
-                      click
-                      @click="increaseKeysetCounter(counter.id, 1)"
-                      >{{ counter.id }} - {{ counter.counter }}</q-btn
+                    <row
+                      class="q-px-sm"
+                      v-for="(mintCounter, mintUrl) in keysetCountersByMint"
+                      :key="mintUrl"
                     >
+                      <q-item-label class="q-px-xs" caption>
+                        {{ shortUrl(mintUrl) }}
+                      </q-item-label>
+                      <q-btn
+                        dense
+                        v-for="(counter, id) in mintCounter"
+                        :key="id"
+                        flat
+                        click
+                        @click="increaseKeysetCounter(counter.id, 1)"
+                        >{{ counter.id }} - counter: {{ counter.counter }}
+                      </q-btn>
+                    </row>
                   </row>
                 </q-item-section>
               </q-item>
@@ -863,6 +872,18 @@ export default defineComponent({
       "showRemoveMintDialog",
     ]),
     ...mapWritableState(useNWCStore, ["nwcEnabled", "connections"]),
+    keysetCountersByMint() {
+      const mints = this.mints;
+      const keysetCountersByMint = {}; // {mintUrl: [keysetCounter: {id: string, count: number}, ...]}
+      for (let mint of mints) {
+        const mintIds = mint.keysets.map((keyset) => keyset.id);
+        const keysetCounterThisMint = this.keysetCounters.filter((entry) =>
+          mintIds.includes(entry.id)
+        );
+        keysetCountersByMint[mint.url] = keysetCounterThisMint;
+      }
+      return keysetCountersByMint;
+    },
     hiddenMnemonic() {
       if (this.hideMnemonic) {
         return this.mnemonic
@@ -939,6 +960,9 @@ export default defineComponent({
       this.newMnemonic();
       await this.initSigner();
       await this.generateNPCConnection();
+    },
+    shortUrl: function (url) {
+      return getShortUrl(url);
     },
     toggleMnemonicVisibility: function () {
       this.hideMnemonic = !this.hideMnemonic;
