@@ -25,7 +25,29 @@ export const useUiStore = defineStore("ui", {
       this.tab = tab;
     },
     formatSat: function (value: number) {
+      // convert value to integer
       return new Intl.NumberFormat(navigator.language).format(value) + " sat";
+    },
+    fromMsat: function (value: number) {
+      return new Intl.NumberFormat(navigator.language).format(value) + " msat";
+    },
+    formatCurrency: function (value: number, currency: string, showBalance = false) {
+      if (currency == undefined) {
+        currency = "sat";
+      }
+      if (useUiStore().hideBalance && !showBalance) {
+        return "****";
+      }
+      if (currency == "sat") return this.formatSat(value);
+      if (currency == "msat") return this.fromMsat(value);
+      if (currency == "usd") value = value / 100;
+      if (currency == "eur") value = value / 100;
+      return new Intl.NumberFormat(navigator.language, {
+        style: "currency",
+        currency: currency,
+      }).format(value);
+      // + " " +
+      // currency.toUpperCase()
     },
   },
   getters: {
