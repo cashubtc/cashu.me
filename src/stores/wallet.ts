@@ -1049,10 +1049,6 @@ export const useWalletStore = defineStore("wallet", {
         const resp = await axios.get(host); // Moved it here: we don't want 2 potential calls
         data = resp.data;
       } else if (address.toLowerCase().slice(0, 6) === "lnurl1") {
-        // let host = Buffer.from(
-        //   bech32.fromWords(bech32.decode(address, 20000).words)
-        // ).toString();
-        // without Buffer:
         let decoded = bech32.decode(address, 20000);
         const words = bech32.fromWords(decoded.words);
         const uint8Array = new Uint8Array(words);
