@@ -467,7 +467,7 @@ export default {
       console.log("##### showSendTokensDialog");
       this.sendData.tokens = "";
       this.sendData.tokensBase64 = "";
-      this.sendData.amount = "";
+      this.sendData.amount = null;
       this.sendData.memo = "";
       this.showSendTokens = true;
     },
