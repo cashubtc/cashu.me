@@ -309,7 +309,7 @@ export const useNWCStore = defineStore("nwc", {
         // use NWCKind.NWCInfo as an integer here
         let filterInfoEvent: NDKFilter = { kinds: [NWCKind.NWCInfo], authors: [conn.walletPublicKey] };
         let eventsInfoEvent = await this.ndk.fetchEvents(filterInfoEvent);
-        if (!eventsInfoEvent) {
+        if (eventsInfoEvent.size === 0) {
           await nip47InfoEvent.publish()
           console.log("### published nip47InfoEvent", nip47InfoEvent)
         } else {
