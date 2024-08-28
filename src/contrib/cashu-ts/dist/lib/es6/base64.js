@@ -3,7 +3,11 @@ function encodeUint8toBase64(uint8array) {
     return Buffer.from(uint8array).toString('base64');
 }
 function encodeUint8toBase64Url(bytes) {
-    return Buffer.from(bytes).toString('base64url').replace(/\=+$/, '');
+    return Buffer.from(bytes)
+        .toString('base64')
+        .replace(/\+/g, '-') // Replace + with -
+        .replace(/\//g, '_') // Replace / with _
+        .replace(/=+$/, ''); // Remove padding characters
 }
 function encodeBase64toUint8(base64String) {
     return Buffer.from(base64String, 'base64');
