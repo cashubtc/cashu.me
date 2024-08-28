@@ -7,10 +7,7 @@ function encodeUint8toBase64(uint8array) {
 }
 exports.encodeUint8toBase64 = encodeUint8toBase64;
 function encodeUint8toBase64Url(bytes) {
-    return buffer_1.Buffer.from(bytes).toString('base64')
-        .replace(/\+/g, '-') // Replace + with -
-        .replace(/\//g, '_') // Replace / with _
-        .replace(/=+$/, ''); // Remove padding characters
+    return buffer_1.Buffer.from(bytes).toString('base64url').replace(/\=+$/, '');
 }
 exports.encodeUint8toBase64Url = encodeUint8toBase64Url;
 function encodeBase64toUint8(base64String) {
