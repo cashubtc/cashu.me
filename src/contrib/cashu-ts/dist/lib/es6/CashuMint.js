@@ -34,8 +34,12 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+import { MeltQuoteState } from './model/types/index.js';
 import request from './request.js';
-import { isObj, joinUrls } from './utils.js';
+import { isObj, joinUrls, sanitizeUrl } from './utils.js';
+import { handleMeltQuoteResponseDeprecated } from './legacy/nut-05.js';
+import { handleMintQuoteResponseDeprecated } from './legacy/nut-04.js';
+import { handleMintInfoContactFieldDeprecated } from './legacy/nut-06.js';
 /**
  * Class represents Cashu Mint API. This class contains Lower level functions that are implemented by CashuWallet.
  */
@@ -46,6 +50,8 @@ var CashuMint = /** @class */ (function () {
      */
     function CashuMint(_mintUrl, _customRequest) {
         this._mintUrl = _mintUrl;
+        this._customRequest = _customRequest;
+        this._mintUrl = sanitizeUrl(_mintUrl);
         this._customRequest = _customRequest;
     }
     Object.defineProperty(CashuMint.prototype, "mintUrl", {
@@ -62,10 +68,19 @@ var CashuMint = /** @class */ (function () {
      */
     CashuMint.getInfo = function (mintUrl, customRequest) {
         return __awaiter(this, void 0, void 0, function () {
-            var requestInstance;
+            var requestInstance, response, data;
             return __generator(this, function (_a) {
-                requestInstance = customRequest || request;
-                return [2 /*return*/, requestInstance({ endpoint: joinUrls(mintUrl, '/v1/info') })];
+                switch (_a.label) {
+                    case 0:
+                        requestInstance = customRequest || request;
+                        return [4 /*yield*/, requestInstance({
+                                endpoint: joinUrls(mintUrl, '/v1/info')
+                            })];
+                    case 1:
+                        response = _a.sent();
+                        data = handleMintInfoContactFieldDeprecated(response);
+                        return [2 /*return*/, data];
+                }
             });
         });
     };
@@ -128,16 +143,23 @@ var CashuMint = /** @class */ (function () {
      * @param customRequest
      * @returns the mint will create and return a new mint quote containing a payment request for the specified amount and unit
      */
-    CashuMint.mintQuote = function (mintUrl, mintQuotePayload, customRequest) {
+    CashuMint.createMintQuote = function (mintUrl, mintQuotePayload, customRequest) {
         return __awaiter(this, void 0, void 0, function () {
-            var requestInstance;
+            var requestInstance, response, data;
             return __generator(this, function (_a) {
-                requestInstance = customRequest || request;
-                return [2 /*return*/, requestInstance({
-                        endpoint: joinUrls(mintUrl, '/v1/mint/quote/bolt11'),
-                        method: 'POST',
-                        requestBody: mintQuotePayload
-                    })];
+                switch (_a.label) {
+                    case 0:
+                        requestInstance = customRequest || request;
+                        return [4 /*yield*/, requestInstance({
+                                endpoint: joinUrls(mintUrl, '/v1/mint/quote/bolt11'),
+                                method: 'POST',
+                                requestBody: mintQuotePayload
+                            })];
+                    case 1:
+                        response = _a.sent();
+                        data = handleMintQuoteResponseDeprecated(response);
+                        return [2 /*return*/, data];
+                }
             });
         });
     };
@@ -146,10 +168,10 @@ var CashuMint = /** @class */ (function () {
      * @param mintQuotePayload Payload for creating a new mint quote
      * @returns the mint will create and return a new mint quote containing a payment request for the specified amount and unit
      */
-    CashuMint.prototype.mintQuote = function (mintQuotePayload) {
+    CashuMint.prototype.createMintQuote = function (mintQuotePayload) {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
-                return [2 /*return*/, CashuMint.mintQuote(this._mintUrl, mintQuotePayload, this._customRequest)];
+                return [2 /*return*/, CashuMint.createMintQuote(this._mintUrl, mintQuotePayload, this._customRequest)];
             });
         });
     };
@@ -160,15 +182,22 @@ var CashuMint = /** @class */ (function () {
      * @param customRequest
      * @returns the mint will create and return a Lightning invoice for the specified amount
      */
-    CashuMint.getMintQuote = function (mintUrl, quote, customRequest) {
+    CashuMint.checkMintQuote = function (mintUrl, quote, customRequest) {
         return __awaiter(this, void 0, void 0, function () {
-            var requestInstance;
+            var requestInstance, response, data;
             return __generator(this, function (_a) {
-                requestInstance = customRequest || request;
-                return [2 /*return*/, requestInstance({
-                        endpoint: joinUrls(mintUrl, '/v1/mint/quote/bolt11', quote),
-                        method: 'GET',
-                    })];
+                switch (_a.label) {
+                    case 0:
+                        requestInstance = customRequest || request;
+                        return [4 /*yield*/, requestInstance({
+                                endpoint: joinUrls(mintUrl, '/v1/mint/quote/bolt11', quote),
+                                method: 'GET'
+                            })];
+                    case 1:
+                        response = _a.sent();
+                        data = handleMintQuoteResponseDeprecated(response);
+                        return [2 /*return*/, data];
+                }
             });
         });
     };
@@ -177,10 +206,10 @@ var CashuMint = /** @class */ (function () {
      * @param quote Quote ID
      * @returns the mint will create and return a Lightning invoice for the specified amount
      */
-    CashuMint.prototype.getMintQuote = function (quote) {
+    CashuMint.prototype.checkMintQuote = function (quote) {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
-                return [2 /*return*/, CashuMint.getMintQuote(this._mintUrl, quote, this._customRequest)];
+                return [2 /*return*/, CashuMint.checkMintQuote(this._mintUrl, quote, this._customRequest)];
             });
         });
     };
@@ -231,9 +260,9 @@ var CashuMint = /** @class */ (function () {
      * @param MeltQuotePayload
      * @returns
      */
-    CashuMint.meltQuote = function (mintUrl, meltQuotePayload, customRequest) {
+    CashuMint.createMeltQuote = function (mintUrl, meltQuotePayload, customRequest) {
         return __awaiter(this, void 0, void 0, function () {
-            var requestInstance, data;
+            var requestInstance, response, data;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -244,7 +273,8 @@ var CashuMint = /** @class */ (function () {
                                 requestBody: meltQuotePayload
                             })];
                     case 1:
-                        data = _a.sent();
+                        response = _a.sent();
+                        data = handleMeltQuoteResponseDeprecated(response);
                         if (!isObj(data) ||
                             typeof (data === null || data === void 0 ? void 0 : data.amount) !== 'number' ||
                             typeof (data === null || data === void 0 ? void 0 : data.fee_reserve) !== 'number' ||
@@ -261,10 +291,10 @@ var CashuMint = /** @class */ (function () {
      * @param MeltQuotePayload
      * @returns
      */
-    CashuMint.prototype.meltQuote = function (meltQuotePayload) {
+    CashuMint.prototype.createMeltQuote = function (meltQuotePayload) {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
-                return [2 /*return*/, CashuMint.meltQuote(this._mintUrl, meltQuotePayload, this._customRequest)];
+                return [2 /*return*/, CashuMint.createMeltQuote(this._mintUrl, meltQuotePayload, this._customRequest)];
             });
         });
     };
@@ -274,23 +304,26 @@ var CashuMint = /** @class */ (function () {
      * @param quote Quote ID
      * @returns
      */
-    CashuMint.getMeltQuote = function (mintUrl, quote, customRequest) {
+    CashuMint.checkMeltQuote = function (mintUrl, quote, customRequest) {
         return __awaiter(this, void 0, void 0, function () {
-            var requestInstance, data;
+            var requestInstance, response, data;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         requestInstance = customRequest || request;
                         return [4 /*yield*/, requestInstance({
                                 endpoint: joinUrls(mintUrl, '/v1/melt/quote/bolt11', quote),
-                                method: 'GET',
+                                method: 'GET'
                             })];
                     case 1:
-                        data = _a.sent();
+                        response = _a.sent();
+                        data = handleMeltQuoteResponseDeprecated(response);
                         if (!isObj(data) ||
                             typeof (data === null || data === void 0 ? void 0 : data.amount) !== 'number' ||
                             typeof (data === null || data === void 0 ? void 0 : data.fee_reserve) !== 'number' ||
-                            typeof (data === null || data === void 0 ? void 0 : data.quote) !== 'string') {
+                            typeof (data === null || data === void 0 ? void 0 : data.quote) !== 'string' ||
+                            typeof (data === null || data === void 0 ? void 0 : data.state) !== 'string' ||
+                            !Object.values(MeltQuoteState).includes(data.state)) {
                             throw new Error('bad response');
                         }
                         return [2 /*return*/, data];
@@ -303,10 +336,10 @@ var CashuMint = /** @class */ (function () {
      * @param quote Quote ID
      * @returns
      */
-    CashuMint.prototype.getMeltQuote = function (quote) {
+    CashuMint.prototype.checkMeltQuote = function (quote) {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
-                return [2 /*return*/, CashuMint.getMeltQuote(this._mintUrl, quote, this._customRequest)];
+                return [2 /*return*/, CashuMint.checkMeltQuote(this._mintUrl, quote, this._customRequest)];
             });
         });
     };
@@ -319,7 +352,7 @@ var CashuMint = /** @class */ (function () {
      */
     CashuMint.melt = function (mintUrl, meltPayload, customRequest) {
         return __awaiter(this, void 0, void 0, function () {
-            var requestInstance, data;
+            var requestInstance, response, data;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -330,10 +363,11 @@ var CashuMint = /** @class */ (function () {
                                 requestBody: meltPayload
                             })];
                     case 1:
-                        data = _a.sent();
+                        response = _a.sent();
+                        data = handleMeltQuoteResponseDeprecated(response);
                         if (!isObj(data) ||
-                            typeof (data === null || data === void 0 ? void 0 : data.paid) !== 'boolean' ||
-                            ((data === null || data === void 0 ? void 0 : data.payment_preimage) !== null && typeof (data === null || data === void 0 ? void 0 : data.payment_preimage) !== 'string')) {
+                            typeof (data === null || data === void 0 ? void 0 : data.state) !== 'string' ||
+                            !Object.values(MeltQuoteState).includes(data.state)) {
                             throw new Error('bad response');
                         }
                         return [2 /*return*/, data];

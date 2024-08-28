@@ -1,30 +1,11 @@
 "use strict";
-var __assign = (this && this.__assign) || function () {
-    __assign = Object.assign || function(t) {
-        for (var s, i = 1, n = arguments.length; i < n; i++) {
-            s = arguments[i];
-            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
-                t[p] = s[p];
-        }
-        return t;
-    };
-    return __assign.apply(this, arguments);
-};
-var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
-    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
-        if (ar || !(i in from)) {
-            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
-            ar[i] = from[i];
-        }
-    }
-    return to.concat(ar || Array.prototype.slice.call(from));
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getDefaultAmountPreference = exports.splitAmount = exports.hexToNumber = exports.getEncodedToken = exports.getDecodedToken = exports.bytesToNumber = exports.bigIntStringify = exports.joinUrls = exports.checkResponse = exports.isObj = exports.sortProofsById = exports.cleanToken = exports.deriveKeysetId = void 0;
+exports.getDefaultAmountPreference = exports.splitAmount = exports.hexToNumber = exports.getEncodedTokenV4 = exports.getEncodedToken = exports.getDecodedToken = exports.bytesToNumber = exports.bigIntStringify = exports.sanitizeUrl = exports.joinUrls = exports.checkResponse = exports.isObj = exports.sortProofsById = exports.deriveKeysetId = void 0;
 var base64_js_1 = require("./base64.js");
 var Constants_js_1 = require("./utils/Constants.js");
 var utils_1 = require("@noble/curves/abstract/utils");
 var sha256_1 = require("@noble/hashes/sha256");
+var cbor_js_1 = require("./cbor.js");
 function splitAmount(value, amountPreference) {
     var chunks = [];
     if (amountPreference) {
@@ -93,6 +74,46 @@ function getEncodedToken(token) {
     return Constants_js_1.TOKEN_PREFIX + Constants_js_1.TOKEN_VERSION + (0, base64_js_1.encodeJsonToBase64)(token);
 }
 exports.getEncodedToken = getEncodedToken;
+function getEncodedTokenV4(token) {
+    var idMap = {};
+    var mint = undefined;
+    for (var i = 0; i < token.token.length; i++) {
+        if (!mint) {
+            mint = token.token[i].mint;
+        }
+        else {
+            if (mint !== token.token[i].mint) {
+                throw new Error('Multimint token can not be encoded as V4 token');
+            }
+        }
+        for (var j = 0; j < token.token[i].proofs.length; j++) {
+            var proof = token.token[i].proofs[j];
+            if (idMap[proof.id]) {
+                idMap[proof.id].push(proof);
+            }
+            else {
+                idMap[proof.id] = [proof];
+            }
+        }
+    }
+    var tokenTemplate = {
+        m: mint,
+        u: token.unit || 'sat',
+        t: Object.keys(idMap).map(function (id) { return ({
+            i: (0, utils_1.hexToBytes)(id),
+            p: idMap[id].map(function (p) { return ({ a: p.amount, s: p.secret, c: (0, utils_1.hexToBytes)(p.C) }); })
+        }); })
+    };
+    if (token.memo) {
+        tokenTemplate.d = token.memo;
+    }
+    var encodedData = (0, cbor_js_1.encodeCBOR)(tokenTemplate);
+    var prefix = 'cashu';
+    var version = 'B';
+    var base64Data = (0, base64_js_1.encodeUint8toBase64Url)(encodedData);
+    return prefix + version + base64Data;
+}
+exports.getEncodedTokenV4 = getEncodedTokenV4;
 /**
  * Helper function to decode cashu tokens into object
  * @param token an encoded cashu token (cashuAey...)
@@ -100,7 +121,7 @@ exports.getEncodedToken = getEncodedToken;
  */
 function getDecodedToken(token) {
     // remove prefixes
-    var uriPrefixes = ['web+cashu://', 'cashu://', 'cashu:', 'cashuA'];
+    var uriPrefixes = ['web+cashu://', 'cashu://', 'cashu:', 'cashu'];
     uriPrefixes.forEach(function (prefix) {
         if (!token.startsWith(prefix)) {
             return;
@@ -115,18 +136,28 @@ exports.getDecodedToken = getDecodedToken;
  * @returns
  */
 function handleTokens(token) {
-    var _a, _b;
-    var obj = (0, base64_js_1.encodeBase64ToJson)(token);
-    // check if v3
-    if ('token' in obj) {
-        return obj;
+    var version = token.slice(0, 1);
+    var encodedToken = token.slice(1);
+    if (version === 'A') {
+        return (0, base64_js_1.encodeBase64ToJson)(encodedToken);
     }
-    // check if v1
-    if (Array.isArray(obj)) {
-        return { token: [{ proofs: obj, mint: '' }] };
+    else if (version === 'B') {
+        var uInt8Token = (0, base64_js_1.encodeBase64toUint8)(encodedToken);
+        var tokenData = (0, cbor_js_1.decodeCBOR)(uInt8Token);
+        var mergedTokenEntry_1 = { mint: tokenData.m, proofs: [] };
+        tokenData.t.forEach(function (tokenEntry) {
+            return tokenEntry.p.forEach(function (p) {
+                mergedTokenEntry_1.proofs.push({
+                    secret: p.s,
+                    C: (0, utils_1.bytesToHex)(p.c),
+                    amount: p.a,
+                    id: (0, utils_1.bytesToHex)(tokenEntry.i)
+                });
+            });
+        });
+        return { token: [mergedTokenEntry_1], memo: tokenData.d || '', unit: tokenData.u || 'sat' };
     }
-    // if v2 token return v3 format
-    return { token: [{ proofs: obj.proofs, mint: (_b = (_a = obj === null || obj === void 0 ? void 0 : obj.mints[0]) === null || _a === void 0 ? void 0 : _a.url) !== null && _b !== void 0 ? _b : '' }] };
+    throw new Error('Token version is not supported');
 }
 /**
  * Returns the keyset id of a set of keys
@@ -153,39 +184,6 @@ function mergeUInt8Arrays(a1, a2) {
     mergedArray.set(a2, a1.length);
     return mergedArray;
 }
-/**
- * merge proofs from same mint,
- * removes TokenEntrys with no proofs or no mint field
- * and sorts proofs by id
- *
- * @export
- * @param {Token} token
- * @return {*}  {Token}
- */
-function cleanToken(token) {
-    var _a;
-    var _b;
-    var tokenEntryMap = {};
-    for (var _i = 0, _c = token.token; _i < _c.length; _i++) {
-        var tokenEntry = _c[_i];
-        if (!((_b = tokenEntry === null || tokenEntry === void 0 ? void 0 : tokenEntry.proofs) === null || _b === void 0 ? void 0 : _b.length) || !(tokenEntry === null || tokenEntry === void 0 ? void 0 : tokenEntry.mint)) {
-            continue;
-        }
-        if (tokenEntryMap[tokenEntry.mint]) {
-            (_a = tokenEntryMap[tokenEntry.mint].proofs).push.apply(_a, __spreadArray([], tokenEntry.proofs, true));
-            continue;
-        }
-        tokenEntryMap[tokenEntry.mint] = {
-            mint: tokenEntry.mint,
-            proofs: __spreadArray([], tokenEntry.proofs, true)
-        };
-    }
-    return {
-        memo: token === null || token === void 0 ? void 0 : token.memo,
-        token: Object.values(tokenEntryMap).map(function (x) { return (__assign(__assign({}, x), { proofs: sortProofsById(x.proofs) })); })
-    };
-}
-exports.cleanToken = cleanToken;
 function sortProofsById(proofs) {
     return proofs.sort(function (a, b) { return a.id.localeCompare(b.id); });
 }
@@ -213,3 +211,7 @@ function joinUrls() {
     return parts.map(function (part) { return part.replace(/(^\/+|\/+$)/g, ''); }).join('/');
 }
 exports.joinUrls = joinUrls;
+function sanitizeUrl(url) {
+    return url.replace(/\/$/, '');
+}
+exports.sanitizeUrl = sanitizeUrl;

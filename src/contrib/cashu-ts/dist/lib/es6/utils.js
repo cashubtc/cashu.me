@@ -1,27 +1,8 @@
-var __assign = (this && this.__assign) || function () {
-    __assign = Object.assign || function(t) {
-        for (var s, i = 1, n = arguments.length; i < n; i++) {
-            s = arguments[i];
-            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
-                t[p] = s[p];
-        }
-        return t;
-    };
-    return __assign.apply(this, arguments);
-};
-var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
-    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
-        if (ar || !(i in from)) {
-            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
-            ar[i] = from[i];
-        }
-    }
-    return to.concat(ar || Array.prototype.slice.call(from));
-};
-import { encodeBase64ToJson, encodeJsonToBase64 } from './base64.js';
+import { encodeBase64ToJson, encodeBase64toUint8, encodeJsonToBase64, encodeUint8toBase64Url } from './base64.js';
 import { TOKEN_PREFIX, TOKEN_VERSION } from './utils/Constants.js';
 import { bytesToHex, hexToBytes } from '@noble/curves/abstract/utils';
 import { sha256 } from '@noble/hashes/sha256';
+import { decodeCBOR, encodeCBOR } from './cbor.js';
 function splitAmount(value, amountPreference) {
     var chunks = [];
     if (amountPreference) {
@@ -84,6 +65,45 @@ function bigIntStringify(_key, value) {
 function getEncodedToken(token) {
     return TOKEN_PREFIX + TOKEN_VERSION + encodeJsonToBase64(token);
 }
+function getEncodedTokenV4(token) {
+    var idMap = {};
+    var mint = undefined;
+    for (var i = 0; i < token.token.length; i++) {
+        if (!mint) {
+            mint = token.token[i].mint;
+        }
+        else {
+            if (mint !== token.token[i].mint) {
+                throw new Error('Multimint token can not be encoded as V4 token');
+            }
+        }
+        for (var j = 0; j < token.token[i].proofs.length; j++) {
+            var proof = token.token[i].proofs[j];
+            if (idMap[proof.id]) {
+                idMap[proof.id].push(proof);
+            }
+            else {
+                idMap[proof.id] = [proof];
+            }
+        }
+    }
+    var tokenTemplate = {
+        m: mint,
+        u: token.unit || 'sat',
+        t: Object.keys(idMap).map(function (id) { return ({
+            i: hexToBytes(id),
+            p: idMap[id].map(function (p) { return ({ a: p.amount, s: p.secret, c: hexToBytes(p.C) }); })
+        }); })
+    };
+    if (token.memo) {
+        tokenTemplate.d = token.memo;
+    }
+    var encodedData = encodeCBOR(tokenTemplate);
+    var prefix = 'cashu';
+    var version = 'B';
+    var base64Data = encodeUint8toBase64Url(encodedData);
+    return prefix + version + base64Data;
+}
 /**
  * Helper function to decode cashu tokens into object
  * @param token an encoded cashu token (cashuAey...)
@@ -91,7 +111,7 @@ function getEncodedToken(token) {
  */
 function getDecodedToken(token) {
     // remove prefixes
-    var uriPrefixes = ['web+cashu://', 'cashu://', 'cashu:', 'cashuA'];
+    var uriPrefixes = ['web+cashu://', 'cashu://', 'cashu:', 'cashu'];
     uriPrefixes.forEach(function (prefix) {
         if (!token.startsWith(prefix)) {
             return;
@@ -105,18 +125,28 @@ function getDecodedToken(token) {
  * @returns
  */
 function handleTokens(token) {
-    var _a, _b;
-    var obj = encodeBase64ToJson(token);
-    // check if v3
-    if ('token' in obj) {
-        return obj;
+    var version = token.slice(0, 1);
+    var encodedToken = token.slice(1);
+    if (version === 'A') {
+        return encodeBase64ToJson(encodedToken);
     }
-    // check if v1
-    if (Array.isArray(obj)) {
-        return { token: [{ proofs: obj, mint: '' }] };
+    else if (version === 'B') {
+        var uInt8Token = encodeBase64toUint8(encodedToken);
+        var tokenData = decodeCBOR(uInt8Token);
+        var mergedTokenEntry_1 = { mint: tokenData.m, proofs: [] };
+        tokenData.t.forEach(function (tokenEntry) {
+            return tokenEntry.p.forEach(function (p) {
+                mergedTokenEntry_1.proofs.push({
+                    secret: p.s,
+                    C: bytesToHex(p.c),
+                    amount: p.a,
+                    id: bytesToHex(tokenEntry.i)
+                });
+            });
+        });
+        return { token: [mergedTokenEntry_1], memo: tokenData.d || '', unit: tokenData.u || 'sat' };
     }
-    // if v2 token return v3 format
-    return { token: [{ proofs: obj.proofs, mint: (_b = (_a = obj === null || obj === void 0 ? void 0 : obj.mints[0]) === null || _a === void 0 ? void 0 : _a.url) !== null && _b !== void 0 ? _b : '' }] };
+    throw new Error('Token version is not supported');
 }
 /**
  * Returns the keyset id of a set of keys
@@ -142,38 +172,6 @@ function mergeUInt8Arrays(a1, a2) {
     mergedArray.set(a2, a1.length);
     return mergedArray;
 }
-/**
- * merge proofs from same mint,
- * removes TokenEntrys with no proofs or no mint field
- * and sorts proofs by id
- *
- * @export
- * @param {Token} token
- * @return {*}  {Token}
- */
-export function cleanToken(token) {
-    var _a;
-    var _b;
-    var tokenEntryMap = {};
-    for (var _i = 0, _c = token.token; _i < _c.length; _i++) {
-        var tokenEntry = _c[_i];
-        if (!((_b = tokenEntry === null || tokenEntry === void 0 ? void 0 : tokenEntry.proofs) === null || _b === void 0 ? void 0 : _b.length) || !(tokenEntry === null || tokenEntry === void 0 ? void 0 : tokenEntry.mint)) {
-            continue;
-        }
-        if (tokenEntryMap[tokenEntry.mint]) {
-            (_a = tokenEntryMap[tokenEntry.mint].proofs).push.apply(_a, __spreadArray([], tokenEntry.proofs, true));
-            continue;
-        }
-        tokenEntryMap[tokenEntry.mint] = {
-            mint: tokenEntry.mint,
-            proofs: __spreadArray([], tokenEntry.proofs, true)
-        };
-    }
-    return {
-        memo: token === null || token === void 0 ? void 0 : token.memo,
-        token: Object.values(tokenEntryMap).map(function (x) { return (__assign(__assign({}, x), { proofs: sortProofsById(x.proofs) })); })
-    };
-}
 export function sortProofsById(proofs) {
     return proofs.sort(function (a, b) { return a.id.localeCompare(b.id); });
 }
@@ -197,5 +195,8 @@ export function joinUrls() {
     }
     return parts.map(function (part) { return part.replace(/(^\/+|\/+$)/g, ''); }).join('/');
 }
-export { bigIntStringify, bytesToNumber, getDecodedToken, getEncodedToken, hexToNumber, splitAmount, getDefaultAmountPreference };
+export function sanitizeUrl(url) {
+    return url.replace(/\/$/, '');
+}
+export { bigIntStringify, bytesToNumber, getDecodedToken, getEncodedToken, getEncodedTokenV4, hexToNumber, splitAmount, getDefaultAmountPreference };
 //# sourceMappingURL=utils.js.map

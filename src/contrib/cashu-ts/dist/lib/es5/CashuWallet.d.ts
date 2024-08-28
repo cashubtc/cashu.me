@@ -1,5 +1,5 @@
 import { CashuMint } from './CashuMint.js';
-import { type AmountPreference, type MeltQuoteResponse, type MintKeys, type MeltTokensResponse, type Proof, type ReceiveResponse, type ReceiveTokenEntryResponse, type SendResponse, type Token, type TokenEntry } from './model/types/index.js';
+import { type AmountPreference, type MeltQuoteResponse, type MintKeys, type MeltTokensResponse, type Proof, type SendResponse, type Token, type TokenEntry } from './model/types/index.js';
 /**
  * Class that represents a Cashu wallet.
  * This class should act as the entry point for this library
@@ -25,7 +25,12 @@ declare class CashuWallet {
     get keys(): MintKeys;
     set keys(keys: MintKeys);
     /**
-     * Receive an encoded or raw Cashu token
+     * Get information about the mint
+     * @returns mint info
+     */
+    getMintInfo(): Promise<import("./model/types/index.js").GetInfoResponse>;
+    /**
+     * Receive an encoded or raw Cashu token (only supports single tokens. It will only process the first token in the token array)
      * @param {(string|Token)} token - Cashu token
      * @param preference optional preference for splitting proofs into specific amounts
      * @param counter? optionally set counter to derive secret deterministically. CashuWallet class must be initialized with seed phrase to take effect
@@ -34,11 +39,12 @@ declare class CashuWallet {
      * @returns New token with newly created proofs, token entries that had errors
      */
     receive(token: string | Token, options?: {
+        keysetId?: string;
         preference?: Array<AmountPreference>;
         counter?: number;
         pubkey?: string;
         privkey?: string;
-    }): Promise<ReceiveResponse>;
+    }): Promise<Array<Proof>>;
     /**
      * Receive a single cashu token entry
      * @param tokenEntry a single entry of a cashu token
@@ -49,11 +55,12 @@ declare class CashuWallet {
      * @returns New token entry with newly created proofs, proofs that had errors
      */
     receiveTokenEntry(tokenEntry: TokenEntry, options?: {
+        keysetId?: string;
         preference?: Array<AmountPreference>;
         counter?: number;
         pubkey?: string;
         privkey?: string;
-    }): Promise<ReceiveTokenEntryResponse>;
+    }): Promise<Array<Proof>>;
     /**
      * Splits and creates sendable tokens
      * if no amount is specified, the amount is implied by the cumulative amount of all proofs
@@ -71,6 +78,7 @@ declare class CashuWallet {
         counter?: number;
         pubkey?: string;
         privkey?: string;
+        keysetId?: string;
     }): Promise<SendResponse>;
     /**
      * Regenerates
@@ -92,13 +100,13 @@ declare class CashuWallet {
      * @param amount Amount requesting for mint.
      * @returns the mint will return a mint quote with a Lightning invoice for minting tokens of the specified amount and unit
      */
-    mintQuote(amount: number): Promise<import("./model/types/index.js").MintQuoteResponse>;
+    createMintQuote(amount: number): Promise<import("./model/types/index.js").MintQuoteResponse>;
     /**
      * Gets an existing mint quote from the mint.
      * @param quote Quote ID
      * @returns the mint will create and return a Lightning invoice for the specified amount
      */
-    getMintQuote(quote: string): Promise<import("./model/types/index.js").MintQuoteResponse>;
+    checkMintQuote(quote: string): Promise<import("./model/types/index.js").MintQuoteResponse>;
     /**
      * Mint tokens for a given mint quote
      * @param amount amount to request
@@ -107,7 +115,7 @@ declare class CashuWallet {
      */
     mintTokens(amount: number, quote: string, options?: {
         keysetId?: string;
-        amountPreference?: Array<AmountPreference>;
+        preference?: Array<AmountPreference>;
         counter?: number;
         pubkey?: string;
     }): Promise<{
@@ -118,13 +126,13 @@ declare class CashuWallet {
      * @param invoice LN invoice that needs to get a fee estimate
      * @returns the mint will create and return a melt quote for the invoice with an amount and fee reserve
      */
-    meltQuote(invoice: string): Promise<MeltQuoteResponse>;
+    createMeltQuote(invoice: string): Promise<MeltQuoteResponse>;
     /**
      * Return an existing melt quote from the mint.
      * @param quote ID of the melt quote
      * @returns the mint will return an existing melt quote
      */
-    getMeltQuote(quote: string): Promise<MeltQuoteResponse>;
+    checkMeltQuote(quote: string): Promise<MeltQuoteResponse>;
     /**
      * Melt tokens for a melt quote. proofsToSend must be at least amount+fee_reserve form the melt quote.
      * Returns payment proof and change proofs
@@ -148,7 +156,7 @@ declare class CashuWallet {
      * @param options.counter? optionally set counter to derive secret deterministically. CashuWallet class must be initialized with seed phrase to take effect
      * @returns
      */
-    payLnInvoice(invoice: string, proofsToSend: Array<Proof>, meltQuote: MeltQuoteResponse, options?: {
+    payLnInvoice(invoice: string, proofsToSend: Array<Proof>, meltQuote?: MeltQuoteResponse, options?: {
         keysetId?: string;
         counter?: number;
     }): Promise<MeltTokensResponse>;
@@ -212,5 +220,14 @@ declare class CashuWallet {
      * @returns blinded messages, secrets, and rs
      */
     private createBlankOutputs;
+    /**
+     * construct proofs from @params promises, @params rs, @params secrets, and @params keyset
+     * @param promises array of serialized blinded signatures
+     * @param rs arrays of binding factors
+     * @param secrets array of secrets
+     * @param keyset mint keyset
+     * @returns array of serialized proofs
+     */
+    private constructProofs;
 }
 export { CashuWallet };

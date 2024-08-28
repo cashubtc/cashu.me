@@ -3,7 +3,6 @@ import type {
 	CheckStateResponse,
 	GetInfoResponse,
 	MeltPayload,
-	MeltResponse,
 	MintActiveKeys,
 	MintAllKeysets,
 	PostRestoreResponse,
@@ -16,11 +15,21 @@ import type {
 	MintResponse,
 	PostRestorePayload,
 	MeltQuotePayload,
-	MeltQuoteResponse
+	MeltQuoteResponse,
+	MintContactInfo
 } from './model/types/index.js';
+import { MeltQuoteState } from './model/types/index.js';
 import request from './request.js';
-import { isObj, joinUrls } from './utils.js';
-
+import { isObj, joinUrls, sanitizeUrl } from './utils.js';
+import {
+	MeltQuoteResponsePaidDeprecated,
+	handleMeltQuoteResponseDeprecated
+} from './legacy/nut-05.js';
+import {
+	MintQuoteResponsePaidDeprecated,
+	handleMintQuoteResponseDeprecated
+} from './legacy/nut-04.js';
+import { handleMintInfoContactFieldDeprecated } from './legacy/nut-06.js';
 /**
  * Class represents Cashu Mint API. This class contains Lower level functions that are implemented by CashuWallet.
  */
@@ -29,7 +38,10 @@ class CashuMint {
 	 * @param _mintUrl requires mint URL to create this object
 	 * @param _customRequest if passed, use custom request implementation for network communication with the mint
 	 */
-	constructor(private _mintUrl: string, private _customRequest?: typeof request) { }
+	constructor(private _mintUrl: string, private _customRequest?: typeof request) {
+		this._mintUrl = sanitizeUrl(_mintUrl);
+		this._customRequest = _customRequest;
+	}
 
 	get mintUrl() {
 		return this._mintUrl;
@@ -45,7 +57,11 @@ class CashuMint {
 		customRequest?: typeof request
 	): Promise<GetInfoResponse> {
 		const requestInstance = customRequest || request;
-		return requestInstance<GetInfoResponse>({ endpoint: joinUrls(mintUrl, '/v1/info') });
+		const response = await requestInstance<GetInfoResponse>({
+			endpoint: joinUrls(mintUrl, '/v1/info')
+		});
+		const data = handleMintInfoContactFieldDeprecated(response);
+		return data;
 	}
 	/**
 	 * fetches mints info at the /info endpoint
@@ -95,25 +111,27 @@ class CashuMint {
 	 * @param customRequest
 	 * @returns the mint will create and return a new mint quote containing a payment request for the specified amount and unit
 	 */
-	public static async mintQuote(
+	public static async createMintQuote(
 		mintUrl: string,
 		mintQuotePayload: MintQuotePayload,
 		customRequest?: typeof request
 	): Promise<MintQuoteResponse> {
 		const requestInstance = customRequest || request;
-		return requestInstance<MintQuoteResponse>({
+		const response = await requestInstance<MintQuoteResponse & MintQuoteResponsePaidDeprecated>({
 			endpoint: joinUrls(mintUrl, '/v1/mint/quote/bolt11'),
 			method: 'POST',
 			requestBody: mintQuotePayload
 		});
+		const data = handleMintQuoteResponseDeprecated(response);
+		return data;
 	}
 	/**
 	 * Requests a new mint quote from the mint.
 	 * @param mintQuotePayload Payload for creating a new mint quote
 	 * @returns the mint will create and return a new mint quote containing a payment request for the specified amount and unit
 	 */
-	async mintQuote(mintQuotePayload: MintQuotePayload): Promise<MintQuoteResponse> {
-		return CashuMint.mintQuote(this._mintUrl, mintQuotePayload, this._customRequest);
+	async createMintQuote(mintQuotePayload: MintQuotePayload): Promise<MintQuoteResponse> {
+		return CashuMint.createMintQuote(this._mintUrl, mintQuotePayload, this._customRequest);
 	}
 
 	/**
@@ -123,24 +141,27 @@ class CashuMint {
 	 * @param customRequest
 	 * @returns the mint will create and return a Lightning invoice for the specified amount
 	 */
-	public static async getMintQuote(
+	public static async checkMintQuote(
 		mintUrl: string,
 		quote: string,
 		customRequest?: typeof request
 	): Promise<MintQuoteResponse> {
 		const requestInstance = customRequest || request;
-		return requestInstance<MintQuoteResponse>({
+		const response = await requestInstance<MintQuoteResponse & MintQuoteResponsePaidDeprecated>({
 			endpoint: joinUrls(mintUrl, '/v1/mint/quote/bolt11', quote),
-			method: 'GET',
+			method: 'GET'
 		});
+
+		const data = handleMintQuoteResponseDeprecated(response);
+		return data;
 	}
 	/**
 	 * Gets an existing mint quote from the mint.
 	 * @param quote Quote ID
 	 * @returns the mint will create and return a Lightning invoice for the specified amount
 	 */
-	async getMintQuote(quote: string): Promise<MintQuoteResponse> {
-		return CashuMint.getMintQuote(this._mintUrl, quote, this._customRequest);
+	async checkMintQuote(quote: string): Promise<MintQuoteResponse> {
+		return CashuMint.checkMintQuote(this._mintUrl, quote, this._customRequest);
 	}
 
 	/**
@@ -183,17 +204,19 @@ class CashuMint {
 	 * @param MeltQuotePayload
 	 * @returns
 	 */
-	public static async meltQuote(
+	public static async createMeltQuote(
 		mintUrl: string,
 		meltQuotePayload: MeltQuotePayload,
 		customRequest?: typeof request
 	): Promise<MeltQuoteResponse> {
 		const requestInstance = customRequest || request;
-		const data = await requestInstance<MeltQuoteResponse>({
+		const response = await requestInstance<MeltQuoteResponse & MeltQuoteResponsePaidDeprecated>({
 			endpoint: joinUrls(mintUrl, '/v1/melt/quote/bolt11'),
 			method: 'POST',
 			requestBody: meltQuotePayload
 		});
+
+		const data = handleMeltQuoteResponseDeprecated(response);
 
 		if (
 			!isObj(data) ||
@@ -210,8 +233,8 @@ class CashuMint {
 	 * @param MeltQuotePayload
 	 * @returns
 	 */
-	async meltQuote(meltQuotePayload: MeltQuotePayload): Promise<MeltQuoteResponse> {
-		return CashuMint.meltQuote(this._mintUrl, meltQuotePayload, this._customRequest);
+	async createMeltQuote(meltQuotePayload: MeltQuotePayload): Promise<MeltQuoteResponse> {
+		return CashuMint.createMeltQuote(this._mintUrl, meltQuotePayload, this._customRequest);
 	}
 
 	/**
@@ -220,22 +243,26 @@ class CashuMint {
 	 * @param quote Quote ID
 	 * @returns
 	 */
-	public static async getMeltQuote(
+	public static async checkMeltQuote(
 		mintUrl: string,
 		quote: string,
 		customRequest?: typeof request
 	): Promise<MeltQuoteResponse> {
 		const requestInstance = customRequest || request;
-		const data = await requestInstance<MeltQuoteResponse>({
+		const response = await requestInstance<MeltQuoteResponse & MeltQuoteResponsePaidDeprecated>({
 			endpoint: joinUrls(mintUrl, '/v1/melt/quote/bolt11', quote),
-			method: 'GET',
+			method: 'GET'
 		});
+
+		const data = handleMeltQuoteResponseDeprecated(response);
 
 		if (
 			!isObj(data) ||
 			typeof data?.amount !== 'number' ||
 			typeof data?.fee_reserve !== 'number' ||
-			typeof data?.quote !== 'string'
+			typeof data?.quote !== 'string' ||
+			typeof data?.state !== 'string' ||
+			!Object.values(MeltQuoteState).includes(data.state)
 		) {
 			throw new Error('bad response');
 		}
@@ -247,8 +274,8 @@ class CashuMint {
 	 * @param quote Quote ID
 	 * @returns
 	 */
-	async getMeltQuote(quote: string): Promise<MeltQuoteResponse> {
-		return CashuMint.getMeltQuote(this._mintUrl, quote, this._customRequest);
+	async checkMeltQuote(quote: string): Promise<MeltQuoteResponse> {
+		return CashuMint.checkMeltQuote(this._mintUrl, quote, this._customRequest);
 	}
 
 	/**
@@ -262,18 +289,20 @@ class CashuMint {
 		mintUrl: string,
 		meltPayload: MeltPayload,
 		customRequest?: typeof request
-	): Promise<MeltResponse> {
+	): Promise<MeltQuoteResponse> {
 		const requestInstance = customRequest || request;
-		const data = await requestInstance<MeltResponse>({
+		const response = await requestInstance<MeltQuoteResponse & MeltQuoteResponsePaidDeprecated>({
 			endpoint: joinUrls(mintUrl, '/v1/melt/bolt11'),
 			method: 'POST',
 			requestBody: meltPayload
 		});
 
+		const data = handleMeltQuoteResponseDeprecated(response);
+
 		if (
 			!isObj(data) ||
-			typeof data?.paid !== 'boolean' ||
-			(data?.payment_preimage !== null && typeof data?.payment_preimage !== 'string')
+			typeof data?.state !== 'string' ||
+			!Object.values(MeltQuoteState).includes(data.state)
 		) {
 			throw new Error('bad response');
 		}
@@ -285,7 +314,7 @@ class CashuMint {
 	 * @param meltPayload
 	 * @returns
 	 */
-	async melt(meltPayload: MeltPayload): Promise<MeltResponse> {
+	async melt(meltPayload: MeltPayload): Promise<MeltQuoteResponse> {
 		return CashuMint.melt(this._mintUrl, meltPayload, this._customRequest);
 	}
 	/**

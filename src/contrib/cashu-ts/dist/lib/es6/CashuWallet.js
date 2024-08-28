@@ -45,16 +45,15 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
 };
 import { bytesToHex, randomBytes } from '@noble/hashes/utils';
 import { CashuMint } from './CashuMint.js';
-import * as dhke from './DHKE.js';
 import { BlindedMessage } from './model/BlindedMessage.js';
-import { CheckStateEnum } from './model/types/index.js';
-import { bytesToNumber, cleanToken, getDecodedToken, getDefaultAmountPreference, splitAmount } from './utils.js';
-import { deriveBlindingFactor, deriveSecret, deriveSeedFromMnemonic } from './secrets.js';
+import { CheckStateEnum, MeltQuoteState } from './model/types/index.js';
+import { bytesToNumber, getDecodedToken, getDefaultAmountPreference, splitAmount } from './utils.js';
 import { validateMnemonic } from '@scure/bip39';
 import { wordlist } from '@scure/bip39/wordlists/english';
+import { hashToCurve, pointFromHex } from '@cashu/crypto/modules/common';
+import { blindMessage, constructProofFromPromise, serializeProof } from '@cashu/crypto/modules/client';
+import { deriveBlindingFactor, deriveSecret, deriveSeedFromMnemonic } from '@cashu/crypto/modules/client/NUT09';
 import { createP2PKsecret, getSignedProofs } from '@cashu/crypto/modules/client/NUT11';
-import { serializeProof } from '@cashu/crypto/modules/client';
-import { pointFromHex } from './DHKE';
 /**
  * Class that represents a Cashu wallet.
  * This class should act as the entry point for this library
@@ -110,7 +109,18 @@ var CashuWallet = /** @class */ (function () {
         configurable: true
     });
     /**
-     * Receive an encoded or raw Cashu token
+     * Get information about the mint
+     * @returns mint info
+     */
+    CashuWallet.prototype.getMintInfo = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                return [2 /*return*/, this.mint.getInfo()];
+            });
+        });
+    };
+    /**
+     * Receive an encoded or raw Cashu token (only supports single tokens. It will only process the first token in the token array)
      * @param {(string|Token)} token - Cashu token
      * @param preference optional preference for splitting proofs into specific amounts
      * @param counter? optionally set counter to derive secret deterministically. CashuWallet class must be initialized with seed phrase to take effect
@@ -119,57 +129,30 @@ var CashuWallet = /** @class */ (function () {
      * @returns New token with newly created proofs, token entries that had errors
      */
     CashuWallet.prototype.receive = function (token, options) {
-        var _a;
         return __awaiter(this, void 0, void 0, function () {
-            var decodedToken, tokenEntries, tokenEntriesWithError, _i, decodedToken_1, tokenEntry, _b, proofs, proofsWithError, error_1;
-            return __generator(this, function (_c) {
-                switch (_c.label) {
+            var tokenEntries, proofs, error_1;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
                     case 0:
+                        _a.trys.push([0, 2, , 3]);
                         if (typeof token === 'string') {
-                            decodedToken = cleanToken(getDecodedToken(token)).token;
+                            token = getDecodedToken(token);
                         }
-                        else {
-                            decodedToken = token.token;
-                        }
-                        tokenEntries = [];
-                        tokenEntriesWithError = [];
-                        _i = 0, decodedToken_1 = decodedToken;
-                        _c.label = 1;
-                    case 1:
-                        if (!(_i < decodedToken_1.length)) return [3 /*break*/, 6];
-                        tokenEntry = decodedToken_1[_i];
-                        if (!((_a = tokenEntry === null || tokenEntry === void 0 ? void 0 : tokenEntry.proofs) === null || _a === void 0 ? void 0 : _a.length)) {
-                            return [3 /*break*/, 5];
-                        }
-                        _c.label = 2;
-                    case 2:
-                        _c.trys.push([2, 4, , 5]);
-                        return [4 /*yield*/, this.receiveTokenEntry(tokenEntry, {
+                        tokenEntries = token.token;
+                        return [4 /*yield*/, this.receiveTokenEntry(tokenEntries[0], {
+                                keysetId: options === null || options === void 0 ? void 0 : options.keysetId,
                                 preference: options === null || options === void 0 ? void 0 : options.preference,
                                 counter: options === null || options === void 0 ? void 0 : options.counter,
                                 pubkey: options === null || options === void 0 ? void 0 : options.pubkey,
                                 privkey: options === null || options === void 0 ? void 0 : options.privkey
                             })];
-                    case 3:
-                        _b = _c.sent(), proofs = _b.proofs, proofsWithError = _b.proofsWithError;
-                        if (proofsWithError === null || proofsWithError === void 0 ? void 0 : proofsWithError.length) {
-                            tokenEntriesWithError.push(tokenEntry);
-                            return [3 /*break*/, 5];
-                        }
-                        tokenEntries.push({ mint: tokenEntry.mint, proofs: __spreadArray([], proofs, true) });
-                        return [3 /*break*/, 5];
-                    case 4:
-                        error_1 = _c.sent();
-                        console.error(error_1);
-                        tokenEntriesWithError.push(tokenEntry);
-                        return [3 /*break*/, 5];
-                    case 5:
-                        _i++;
-                        return [3 /*break*/, 1];
-                    case 6: return [2 /*return*/, {
-                            token: { token: tokenEntries },
-                            tokensWithErrors: tokenEntriesWithError.length ? { token: tokenEntriesWithError } : undefined
-                        }];
+                    case 1:
+                        proofs = _a.sent();
+                        return [2 /*return*/, proofs];
+                    case 2:
+                        error_1 = _a.sent();
+                        throw new Error('Error when receiving');
+                    case 3: return [2 /*return*/];
                 }
             });
         });
@@ -185,11 +168,10 @@ var CashuWallet = /** @class */ (function () {
      */
     CashuWallet.prototype.receiveTokenEntry = function (tokenEntry, options) {
         return __awaiter(this, void 0, void 0, function () {
-            var proofsWithError, proofs, amount, preference, keys, _a, payload, blindedMessages, signatures, newProofs, error_2;
+            var proofs, amount, preference, keys, _a, payload, blindedMessages, signatures, newProofs, error_2;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
-                        proofsWithError = [];
                         proofs = [];
                         _b.label = 1;
                     case 1:
@@ -199,25 +181,20 @@ var CashuWallet = /** @class */ (function () {
                         if (!preference) {
                             preference = getDefaultAmountPreference(amount);
                         }
-                        return [4 /*yield*/, this.getKeys()];
+                        return [4 /*yield*/, this.getKeys(options === null || options === void 0 ? void 0 : options.keysetId)];
                     case 2:
                         keys = _b.sent();
                         _a = this.createSwapPayload(amount, tokenEntry.proofs, keys, preference, options === null || options === void 0 ? void 0 : options.counter, options === null || options === void 0 ? void 0 : options.pubkey, options === null || options === void 0 ? void 0 : options.privkey), payload = _a.payload, blindedMessages = _a.blindedMessages;
                         return [4 /*yield*/, CashuMint.split(tokenEntry.mint, payload)];
                     case 3:
                         signatures = (_b.sent()).signatures;
-                        newProofs = dhke.constructProofs(signatures, blindedMessages.rs, blindedMessages.secrets, keys);
+                        newProofs = this.constructProofs(signatures, blindedMessages.rs, blindedMessages.secrets, keys);
                         proofs.push.apply(proofs, newProofs);
                         return [3 /*break*/, 5];
                     case 4:
                         error_2 = _b.sent();
-                        console.error(error_2);
-                        proofsWithError.push.apply(proofsWithError, tokenEntry.proofs);
-                        return [3 /*break*/, 5];
-                    case 5: return [2 /*return*/, {
-                            proofs: proofs,
-                            proofsWithError: proofsWithError.length ? proofsWithError : undefined
-                        }];
+                        throw new Error('Error receiving token entry');
+                    case 5: return [2 /*return*/, proofs];
                 }
             });
         });
@@ -244,7 +221,7 @@ var CashuWallet = /** @class */ (function () {
                         if (options === null || options === void 0 ? void 0 : options.preference) {
                             amount = (_a = options === null || options === void 0 ? void 0 : options.preference) === null || _a === void 0 ? void 0 : _a.reduce(function (acc, curr) { return acc + curr.amount * curr.count; }, 0);
                         }
-                        return [4 /*yield*/, this.getKeys()];
+                        return [4 /*yield*/, this.getKeys(options === null || options === void 0 ? void 0 : options.keysetId)];
                     case 1:
                         keyset = _d.sent();
                         amountAvailable = 0;
@@ -267,7 +244,7 @@ var CashuWallet = /** @class */ (function () {
                         return [4 /*yield*/, this.mint.split(payload)];
                     case 2:
                         signatures = (_d.sent()).signatures;
-                        proofs_1 = dhke.constructProofs(signatures, blindedMessages.rs, blindedMessages.secrets, keyset);
+                        proofs_1 = this.constructProofs(signatures, blindedMessages.rs, blindedMessages.secrets, keyset);
                         splitProofsToKeep_1 = [];
                         splitProofsToSend_1 = [];
                         amountKeepCounter_1 = 0;
@@ -315,7 +292,7 @@ var CashuWallet = /** @class */ (function () {
                             return outputs.map(function (o) { return o.B_; }).includes(blindedMessages[i].B_);
                         });
                         return [2 /*return*/, {
-                                proofs: dhke.constructProofs(promises, validRs, validSecrets, keys)
+                                proofs: this.constructProofs(promises, validRs, validSecrets, keys)
                             }];
                 }
             });
@@ -330,7 +307,7 @@ var CashuWallet = /** @class */ (function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        if (!(!this._keys || this._keys.id !== keysetId)) return [3 /*break*/, 2];
+                        if (!(!this._keys || (keysetId !== undefined && this._keys.id !== keysetId))) return [3 /*break*/, 2];
                         return [4 /*yield*/, this.mint.getKeys(keysetId)];
                     case 1:
                         allKeys = _a.sent();
@@ -358,7 +335,7 @@ var CashuWallet = /** @class */ (function () {
      * @param amount Amount requesting for mint.
      * @returns the mint will return a mint quote with a Lightning invoice for minting tokens of the specified amount and unit
      */
-    CashuWallet.prototype.mintQuote = function (amount) {
+    CashuWallet.prototype.createMintQuote = function (amount) {
         return __awaiter(this, void 0, void 0, function () {
             var mintQuotePayload;
             return __generator(this, function (_a) {
@@ -368,7 +345,7 @@ var CashuWallet = /** @class */ (function () {
                             unit: this._unit,
                             amount: amount
                         };
-                        return [4 /*yield*/, this.mint.mintQuote(mintQuotePayload)];
+                        return [4 /*yield*/, this.mint.createMintQuote(mintQuotePayload)];
                     case 1: return [2 /*return*/, _a.sent()];
                 }
             });
@@ -379,11 +356,11 @@ var CashuWallet = /** @class */ (function () {
      * @param quote Quote ID
      * @returns the mint will create and return a Lightning invoice for the specified amount
      */
-    CashuWallet.prototype.getMintQuote = function (quote) {
+    CashuWallet.prototype.checkMintQuote = function (quote) {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.mint.getMintQuote(quote)];
+                    case 0: return [4 /*yield*/, this.mint.checkMintQuote(quote)];
                     case 1: return [2 /*return*/, _a.sent()];
                 }
             });
@@ -404,7 +381,7 @@ var CashuWallet = /** @class */ (function () {
                     case 0: return [4 /*yield*/, this.getKeys(options === null || options === void 0 ? void 0 : options.keysetId)];
                     case 1:
                         keyset = _c.sent();
-                        _b = this.createRandomBlindedMessages(amount, (_a = options === null || options === void 0 ? void 0 : options.keysetId) !== null && _a !== void 0 ? _a : keyset.id, options === null || options === void 0 ? void 0 : options.amountPreference, options === null || options === void 0 ? void 0 : options.counter, options === null || options === void 0 ? void 0 : options.pubkey), blindedMessages = _b.blindedMessages, secrets = _b.secrets, rs = _b.rs;
+                        _b = this.createRandomBlindedMessages(amount, (_a = options === null || options === void 0 ? void 0 : options.keysetId) !== null && _a !== void 0 ? _a : keyset.id, options === null || options === void 0 ? void 0 : options.preference, options === null || options === void 0 ? void 0 : options.counter, options === null || options === void 0 ? void 0 : options.pubkey), blindedMessages = _b.blindedMessages, secrets = _b.secrets, rs = _b.rs;
                         mintPayload = {
                             outputs: blindedMessages,
                             quote: quote
@@ -413,7 +390,7 @@ var CashuWallet = /** @class */ (function () {
                     case 2:
                         signatures = (_c.sent()).signatures;
                         return [2 /*return*/, {
-                                proofs: dhke.constructProofs(signatures, rs, secrets, keyset)
+                                proofs: this.constructProofs(signatures, rs, secrets, keyset)
                             }];
                 }
             });
@@ -424,7 +401,7 @@ var CashuWallet = /** @class */ (function () {
      * @param invoice LN invoice that needs to get a fee estimate
      * @returns the mint will create and return a melt quote for the invoice with an amount and fee reserve
      */
-    CashuWallet.prototype.meltQuote = function (invoice) {
+    CashuWallet.prototype.createMeltQuote = function (invoice) {
         return __awaiter(this, void 0, void 0, function () {
             var meltQuotePayload, meltQuote;
             return __generator(this, function (_a) {
@@ -434,7 +411,7 @@ var CashuWallet = /** @class */ (function () {
                             unit: this._unit,
                             request: invoice
                         };
-                        return [4 /*yield*/, this.mint.meltQuote(meltQuotePayload)];
+                        return [4 /*yield*/, this.mint.createMeltQuote(meltQuotePayload)];
                     case 1:
                         meltQuote = _a.sent();
                         return [2 /*return*/, meltQuote];
@@ -447,12 +424,12 @@ var CashuWallet = /** @class */ (function () {
      * @param quote ID of the melt quote
      * @returns the mint will return an existing melt quote
      */
-    CashuWallet.prototype.getMeltQuote = function (quote) {
+    CashuWallet.prototype.checkMeltQuote = function (quote) {
         return __awaiter(this, void 0, void 0, function () {
             var meltQuote;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.mint.getMeltQuote(quote)];
+                    case 0: return [4 /*yield*/, this.mint.checkMeltQuote(quote)];
                     case 1:
                         meltQuote = _a.sent();
                         return [2 /*return*/, meltQuote];
@@ -470,15 +447,14 @@ var CashuWallet = /** @class */ (function () {
      * @returns
      */
     CashuWallet.prototype.meltTokens = function (meltQuote, proofsToSend, options) {
-        var _a;
         return __awaiter(this, void 0, void 0, function () {
-            var keys, _b, blindedMessages, secrets, rs, meltPayload, meltResponse;
-            return __generator(this, function (_c) {
-                switch (_c.label) {
+            var keys, _a, blindedMessages, secrets, rs, meltPayload, meltResponse;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
                     case 0: return [4 /*yield*/, this.getKeys(options === null || options === void 0 ? void 0 : options.keysetId)];
                     case 1:
-                        keys = _c.sent();
-                        _b = this.createBlankOutputs(meltQuote.fee_reserve, keys.id, options === null || options === void 0 ? void 0 : options.counter), blindedMessages = _b.blindedMessages, secrets = _b.secrets, rs = _b.rs;
+                        keys = _b.sent();
+                        _a = this.createBlankOutputs(meltQuote.fee_reserve, keys.id, options === null || options === void 0 ? void 0 : options.counter), blindedMessages = _a.blindedMessages, secrets = _a.secrets, rs = _a.rs;
                         meltPayload = {
                             quote: meltQuote.quote,
                             inputs: proofsToSend,
@@ -486,12 +462,12 @@ var CashuWallet = /** @class */ (function () {
                         };
                         return [4 /*yield*/, this.mint.melt(meltPayload)];
                     case 2:
-                        meltResponse = _c.sent();
+                        meltResponse = _b.sent();
                         return [2 /*return*/, {
-                                isPaid: (_a = meltResponse.paid) !== null && _a !== void 0 ? _a : false,
+                                isPaid: meltResponse.state === MeltQuoteState.PAID,
                                 preimage: meltResponse.payment_preimage,
                                 change: (meltResponse === null || meltResponse === void 0 ? void 0 : meltResponse.change)
-                                    ? dhke.constructProofs(meltResponse.change, rs, secrets, keys)
+                                    ? this.constructProofs(meltResponse.change, rs, secrets, keys)
                                     : []
                             }];
                 }
@@ -514,7 +490,7 @@ var CashuWallet = /** @class */ (function () {
                 switch (_a.label) {
                     case 0:
                         if (!!meltQuote) return [3 /*break*/, 2];
-                        return [4 /*yield*/, this.mint.meltQuote({ unit: this._unit, request: invoice })];
+                        return [4 /*yield*/, this.mint.createMeltQuote({ unit: this._unit, request: invoice })];
                     case 1:
                         meltQuote = _a.sent();
                         _a.label = 2;
@@ -603,7 +579,7 @@ var CashuWallet = /** @class */ (function () {
                 switch (_a.label) {
                     case 0:
                         enc = new TextEncoder();
-                        Ys = proofs.map(function (p) { return dhke.hashToCurve(enc.encode(p.secret)).toHex(true); });
+                        Ys = proofs.map(function (p) { return hashToCurve(enc.encode(p.secret)).toHex(true); });
                         payload = {
                             // array of Ys of proofs to check
                             Ys: Ys
@@ -671,7 +647,7 @@ var CashuWallet = /** @class */ (function () {
                 secretBytes = new TextEncoder().encode(secretHex);
             }
             secrets.push(secretBytes);
-            var _a = dhke.blindMessage(secretBytes, deterministicR), B_ = _a.B_, r = _a.r;
+            var _a = blindMessage(secretBytes, deterministicR), B_ = _a.B_, r = _a.r;
             rs.push(r);
             var blindedMessage = new BlindedMessage(amounts[i], B_, keysetId);
             blindedMessages.push(blindedMessage.getSerializedBlindedMessage());
@@ -695,6 +671,25 @@ var CashuWallet = /** @class */ (function () {
         var amounts = count ? Array(count).fill(1) : [];
         var _a = this.createBlindedMessages(amounts, keysetId, counter), blindedMessages = _a.blindedMessages, rs = _a.rs, secrets = _a.secrets;
         return { blindedMessages: blindedMessages, secrets: secrets, rs: rs };
+    };
+    /**
+     * construct proofs from @params promises, @params rs, @params secrets, and @params keyset
+     * @param promises array of serialized blinded signatures
+     * @param rs arrays of binding factors
+     * @param secrets array of secrets
+     * @param keyset mint keyset
+     * @returns array of serialized proofs
+     */
+    CashuWallet.prototype.constructProofs = function (promises, rs, secrets, keyset) {
+        return promises
+            .map(function (p, i) {
+            var blindSignature = { id: p.id, amount: p.amount, C_: pointFromHex(p.C_) };
+            var r = rs[i];
+            var secret = secrets[i];
+            var A = pointFromHex(keyset.keys[p.amount]);
+            return constructProofFromPromise(blindSignature, r, secret, A);
+        })
+            .map(function (p) { return serializeProof(p); });
     };
     return CashuWallet;
 }());

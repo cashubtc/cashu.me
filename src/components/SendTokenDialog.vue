@@ -207,8 +207,9 @@
               </vue-qrcode>
             </q-responsive>
           </div>
-          <div class="q-pb-xs q-ba-none q-gutter-sm" v-if="showAnimatedQR">
+          <div class="q-pb-xs q-ba-none q-gutter-sm">
             <q-btn
+              v-if="showAnimatedQR"
               flat
               style="font-size: 12px"
               color="grey"
@@ -219,6 +220,7 @@
               Speed: {{ fragmentSpeedLabel }}
             </q-btn>
             <q-btn
+              v-if="showAnimatedQR"
               flat
               style="font-size: 12px"
               class="q-ma-none"
@@ -228,6 +230,13 @@
               <q-icon name="zoom_in" style="margin-right: 8px"></q-icon>
               Size: {{ fragmentLengthLabel }}
             </q-btn>
+            <q-badge
+                :color="!isV4Token ? 'primary' : 'grey'"
+                :label="isV4Token ? 'V4' : 'V3'"
+                class="q-my-sm q-mx-md"
+                @click="toggleTokenEncoding"
+                :outline="isV4Token"
+              />
           </div>
           <q-card-section class="q-pa-sm">
             <div class="row justify-center">
@@ -342,6 +351,7 @@ import { Buffer } from "buffer";
 import { useCameraStore } from "src/stores/camera";
 import { useP2PKStore } from "src/stores/p2pk";
 import TokenInformation from "components/TokenInformation.vue";
+import { getDecodedToken, getEncodedTokenV4, getEncodedToken } from "@cashu/cashu-ts";
 
 import { mapActions, mapState, mapWritableState } from "pinia";
 import ChooseMint from "components/ChooseMint.vue";
@@ -378,6 +388,7 @@ export default defineComponent({
       fragmentIntervalFast: 150,
       framentInervalSlow: 500,
       fragmentSpeedLabel: "F",
+      isV4Token: false,
     };
   },
   computed: {
@@ -464,6 +475,8 @@ export default defineComponent({
         this.qrCodeFragment = "";
         this.startQrCodeLoop();
       }
+      // set isV4Token to true if token starts with 'cashuB'
+      this.isV4Token = val.startsWith("cashuB");
     },
     showSendTokens: function (val) {
       if (val) {
@@ -531,6 +544,7 @@ export default defineComponent({
       const ur = UR.fromBuffer(messageBuffer);
       const firstSeqNum = 0;
       this.encoder = new UREncoder(ur, this.currentFragmentLength, firstSeqNum);
+      clearInterval(this.qrInterval);
       this.qrInterval = setInterval(() => {
         this.qrCodeFragment = this.encoder.nextPart();
       }, this.currentFragmentInterval);
@@ -554,7 +568,6 @@ export default defineComponent({
         "### this.currentFragmentInterval",
         this.currentFragmentInterval
       );
-      clearInterval(this.qrInterval);
       this.startQrCodeLoop();
     },
     changeSize: function () {
@@ -570,8 +583,22 @@ export default defineComponent({
         this.fragmentLengthLabel = "M";
       }
       console.log("### this.currentFragmentLength", this.currentFragmentLength);
-      clearInterval(this.qrInterval);
       this.startQrCodeLoop();
+    },
+    toggleTokenEncoding: function () {
+      const decodedToken = getDecodedToken(this.sendData.tokensBase64);
+      // if the token starts with 'cashuA', it is a v3 token
+      // if it starts with 'cashuB', it is a v4 token
+      if (this.sendData.tokensBase64.startsWith("cashuA")) {
+        this.sendData.tokensBase64 = getEncodedTokenV4(
+          decodedToken
+        );
+      } else {
+        this.sendData.tokensBase64 = getEncodedToken(
+          decodedToken
+        );
+
+      }
     },
     deleteThisToken: function () {
       this.deleteToken(this.sendData.tokensBase64);

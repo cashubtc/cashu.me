@@ -89,10 +89,6 @@ export type ReceiveTokenEntryResponse = {
 	 * Received proofs
 	 */
 	proofs: Array<Proof>;
-	/**
-	 * Proofs that could not be received. Doesn't throw an error, but if this field is populated it should be handled by the implementation accordingly
-	 */
-	proofsWithError: Array<Proof> | undefined;
 };
 
 /**
@@ -150,6 +146,12 @@ export type MeltQuotePayload = {
 	request: string;
 };
 
+export enum MeltQuoteState {
+	UNPAID = 'UNPAID',
+	PENDING = 'PENDING',
+	PAID = 'PAID'
+}
+
 /**
  * Response from the mint after requesting a melt quote
  */
@@ -167,14 +169,21 @@ export type MeltQuoteResponse = {
 	 */
 	fee_reserve: number;
 	/**
-	 * Whether the quote has been paid.
+	 * State of the melt quote
 	 */
-	paid: boolean;
+	state: MeltQuoteState;
 	/**
 	 * Timestamp of when the quote expires
 	 */
 	expiry: number;
-
+	/**
+	 * preimage of the paid invoice. is null if it the invoice has not been paid yet. can be null, depending on which LN-backend the mint uses
+	 */
+	payment_preimage: string | null;
+	/**
+	 * Return/Change from overpaid fees. This happens due to Lighting fee estimation being inaccurate
+	 */
+	change?: Array<SerializedBlindedSignature>;
 } & ApiError;
 
 /**
@@ -194,24 +203,6 @@ export type MeltPayload = {
 	 */
 	outputs: Array<SerializedBlindedMessage>;
 };
-
-/**
- * Response from the mint after paying a lightning invoice (melt)
- */
-export type MeltResponse = {
-	/**
-	 * if false, the proofs have not been invalidated and the payment can be tried later again with the same proofs
-	 */
-	paid: boolean;
-	/**
-	 * preimage of the paid invoice. can be null, depending on which LN-backend the mint uses
-	 */
-	payment_preimage: string | null;
-	/**
-	 * Return/Change from overpaid fees. This happens due to Lighting fee estimation being inaccurate
-	 */
-	change?: Array<SerializedBlindedSignature>;
-} & ApiError;
 
 /**
  * Response after paying a Lightning invoice
@@ -285,12 +276,19 @@ export type MintQuotePayload = {
 	 */
 	amount: number;
 };
+
+export enum MintQuoteState {
+	UNPAID = 'UNPAID',
+	PAID = 'PAID',
+	ISSUED = 'ISSUED'
+}
+
 /**
  * Response from the mint after requesting a mint
  */
 export type MintQuoteResponse = {
 	/**
-	 * Payment request 
+	 * Payment request
 	 */
 	request: string;
 	/**
@@ -298,9 +296,9 @@ export type MintQuoteResponse = {
 	 */
 	quote: string;
 	/**
-	 * Whether the quote has been paid.
-	*/
-	paid: boolean;
+	 * State of the mint quote
+	 */
+	state: MintQuoteState;
 	/**
 	 * Timestamp of when the quote expires
 	 */
@@ -412,8 +410,8 @@ export type Token = {
 	 */
 	memo?: string;
 	/**
-	  * the unit of the token
-	  */
+	 * the unit of the token
+	 */
 	unit?: string;
 };
 /**
@@ -478,6 +476,11 @@ export type BlindedMessageData = {
 	rs: Array<bigint>;
 };
 
+export type MintContactInfo = {
+	method: string;
+	info: string;
+};
+
 /**
  * Response from mint at /info endpoint
  */
@@ -487,7 +490,7 @@ export type GetInfoResponse = {
 	version: string;
 	description?: string;
 	description_long?: string;
-	contact: Array<[string, string]>;
+	contact: Array<MintContactInfo>;
 	nuts: {
 		'4': {
 			methods: Array<SwapMethod>;
@@ -561,4 +564,22 @@ export type InvoiceData = {
 	paymentHash?: string;
 	memo?: string;
 	expiry?: number;
+};
+
+export type V4ProofTemplate = {
+	a: number;
+	s: string;
+	c: Uint8Array;
+};
+
+export type V4InnerToken = {
+	i: Uint8Array;
+	p: Array<V4ProofTemplate>;
+};
+
+export type TokenV4Template = {
+	t: Array<V4InnerToken>;
+	d: string;
+	m: string;
+	u: string;
 };

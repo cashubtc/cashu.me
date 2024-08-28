@@ -53,15 +53,42 @@ Go to the [docs](https://cashubtc.github.io/cashu-ts/docs) for detailed usage, o
 npm i @cashu/cashu-ts
 ```
 
-### Example
+### Examples
+
+#### Mint tokens
 
 ```typescript
-import { CashuMint, CashuWallet, getEncodedToken } from '@cashu/cashu-ts';
-
+import { CashuMint, CashuWallet, MintQuoteState } from '@cashu/cashu-ts';
+const mintUrl = 'http://localhost:3338'; // the mint URL
 const mint = new CashuMint(mintUrl);
 const wallet = new CashuWallet(mint);
-const mintQuote = await wallet.mintQuote(64);
-const tokens = await wallet.mintTokens(64, mintQuote.quote);
+const mintQuote = await wallet.createMintQuote(64);
+// pay the invoice here before you continue...
+const mintQuoteChecked = await wallet.checkMintQuote(mintQuote.quote);
+if (mintQuoteChecked.state == MintQuoteState.PAID) {
+	const { proofs } = await wallet.mintTokens(64, mintQuote.quote);
+}
+```
+
+#### Melt tokens
+
+```typescript
+import { CashuMint, CashuWallet } from '@cashu/cashu-ts';
+const mintUrl = 'http://localhost:3338'; // the mint URL
+const mint = new CashuMint(mintUrl);
+const wallet = new CashuWallet(mint);
+
+const invoice = 'lnbc......'; // Lightning invoice to pay
+const meltQuote = await wallet.createMeltQuote(invoice);
+const amountToSend = meltQuote.amount + meltQuote.fee_reserve;
+
+// in a real wallet, we would coin select the correct amount of proofs from the wallet's storage
+// instead of that, here we swap `proofs` with the mint to get the correct amount of proofs
+const { returnChange: proofsToKeep, send: proofsToSend } = await wallet.send(amountToSend, proofs);
+// store proofsToKeep in wallet ..
+
+const meltResponse = await wallet.meltTokens(meltQuote, proofsToSend);
+// store meltResponse.change in wallet ..
 ```
 
 ## Contribute
@@ -69,3 +96,30 @@ const tokens = await wallet.mintTokens(64, mintQuote.quote);
 Contributions are very welcome.
 
 If you want to contribute, please open an Issue or a PR.
+If you open a PR, please do so from the `development` branch as the base branch.
+
+### Version
+
+```
+* `main`
+|\
+|\ \
+| | * `hotfix`
+| |
+| * `staging`
+| |\
+| |\ \
+| | | * `bugfix`
+| | |
+| | * `development`
+| | |\
+| | | * `feature1`
+| | | |
+| | |/
+| | *
+| | |\
+| | | * `feature2`
+| | |/
+| |/
+|/ (create new version)
+```

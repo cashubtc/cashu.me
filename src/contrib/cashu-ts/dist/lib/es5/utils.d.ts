@@ -10,6 +10,7 @@ declare function bigIntStringify<T>(_key: unknown, value: T): string | T;
  * @returns
  */
 declare function getEncodedToken(token: Token): string;
+declare function getEncodedTokenV4(token: Token): string;
 /**
  * Helper function to decode cashu tokens into object
  * @param token an encoded cashu token (cashuAey...)
@@ -22,16 +23,6 @@ declare function getDecodedToken(token: string): Token;
  * @returns
  */
 export declare function deriveKeysetId(keys: Keys): string;
-/**
- * merge proofs from same mint,
- * removes TokenEntrys with no proofs or no mint field
- * and sorts proofs by id
- *
- * @export
- * @param {Token} token
- * @return {*}  {Token}
- */
-export declare function cleanToken(token: Token): Token;
 export declare function sortProofsById(proofs: Array<Proof>): Proof[];
 export declare function isObj(v: unknown): v is object;
 export declare function checkResponse(data: {
@@ -39,4 +30,5 @@ export declare function checkResponse(data: {
     detail?: string;
 }): void;
 export declare function joinUrls(...parts: Array<string>): string;
-export { bigIntStringify, bytesToNumber, getDecodedToken, getEncodedToken, hexToNumber, splitAmount, getDefaultAmountPreference };
+export declare function sanitizeUrl(url: string): string;
+export { bigIntStringify, bytesToNumber, getDecodedToken, getEncodedToken, getEncodedTokenV4, hexToNumber, splitAmount, getDefaultAmountPreference };

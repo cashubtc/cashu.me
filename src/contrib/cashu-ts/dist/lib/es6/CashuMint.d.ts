@@ -1,4 +1,4 @@
-import type { CheckStatePayload, CheckStateResponse, GetInfoResponse, MeltPayload, MeltResponse, MintActiveKeys, MintAllKeysets, PostRestoreResponse, MintQuoteResponse, SerializedBlindedMessage, SwapPayload, SwapResponse, MintQuotePayload, MintPayload, MintResponse, PostRestorePayload, MeltQuotePayload, MeltQuoteResponse } from './model/types/index.js';
+import type { CheckStatePayload, CheckStateResponse, GetInfoResponse, MeltPayload, MintActiveKeys, MintAllKeysets, PostRestoreResponse, MintQuoteResponse, SerializedBlindedMessage, SwapPayload, SwapResponse, MintQuotePayload, MintPayload, MintResponse, PostRestorePayload, MeltQuotePayload, MeltQuoteResponse } from './model/types/index.js';
 import request from './request.js';
 /**
  * Class represents Cashu Mint API. This class contains Lower level functions that are implemented by CashuWallet.
@@ -43,13 +43,13 @@ declare class CashuMint {
      * @param customRequest
      * @returns the mint will create and return a new mint quote containing a payment request for the specified amount and unit
      */
-    static mintQuote(mintUrl: string, mintQuotePayload: MintQuotePayload, customRequest?: typeof request): Promise<MintQuoteResponse>;
+    static createMintQuote(mintUrl: string, mintQuotePayload: MintQuotePayload, customRequest?: typeof request): Promise<MintQuoteResponse>;
     /**
      * Requests a new mint quote from the mint.
      * @param mintQuotePayload Payload for creating a new mint quote
      * @returns the mint will create and return a new mint quote containing a payment request for the specified amount and unit
      */
-    mintQuote(mintQuotePayload: MintQuotePayload): Promise<MintQuoteResponse>;
+    createMintQuote(mintQuotePayload: MintQuotePayload): Promise<MintQuoteResponse>;
     /**
      * Gets an existing mint quote from the mint.
      * @param mintUrl
@@ -57,13 +57,13 @@ declare class CashuMint {
      * @param customRequest
      * @returns the mint will create and return a Lightning invoice for the specified amount
      */
-    static getMintQuote(mintUrl: string, quote: string, customRequest?: typeof request): Promise<MintQuoteResponse>;
+    static checkMintQuote(mintUrl: string, quote: string, customRequest?: typeof request): Promise<MintQuoteResponse>;
     /**
      * Gets an existing mint quote from the mint.
      * @param quote Quote ID
      * @returns the mint will create and return a Lightning invoice for the specified amount
      */
-    getMintQuote(quote: string): Promise<MintQuoteResponse>;
+    checkMintQuote(quote: string): Promise<MintQuoteResponse>;
     /**
      * Mints new tokens by requesting blind signatures on the provided outputs.
      * @param mintUrl
@@ -84,26 +84,26 @@ declare class CashuMint {
      * @param MeltQuotePayload
      * @returns
      */
-    static meltQuote(mintUrl: string, meltQuotePayload: MeltQuotePayload, customRequest?: typeof request): Promise<MeltQuoteResponse>;
+    static createMeltQuote(mintUrl: string, meltQuotePayload: MeltQuotePayload, customRequest?: typeof request): Promise<MeltQuoteResponse>;
     /**
      * Requests a new melt quote from the mint.
      * @param MeltQuotePayload
      * @returns
      */
-    meltQuote(meltQuotePayload: MeltQuotePayload): Promise<MeltQuoteResponse>;
+    createMeltQuote(meltQuotePayload: MeltQuotePayload): Promise<MeltQuoteResponse>;
     /**
      * Gets an existing melt quote.
      * @param mintUrl
      * @param quote Quote ID
      * @returns
      */
-    static getMeltQuote(mintUrl: string, quote: string, customRequest?: typeof request): Promise<MeltQuoteResponse>;
+    static checkMeltQuote(mintUrl: string, quote: string, customRequest?: typeof request): Promise<MeltQuoteResponse>;
     /**
      * Gets an existing melt quote.
      * @param quote Quote ID
      * @returns
      */
-    getMeltQuote(quote: string): Promise<MeltQuoteResponse>;
+    checkMeltQuote(quote: string): Promise<MeltQuoteResponse>;
     /**
      * Requests the mint to pay for a Bolt11 payment request by providing ecash as inputs to be spent. The inputs contain the amount and the fee_reserves for a Lightning payment. The payload can also contain blank outputs in order to receive back overpaid Lightning fees.
      * @param mintUrl
@@ -111,13 +111,13 @@ declare class CashuMint {
      * @param customRequest
      * @returns
      */
-    static melt(mintUrl: string, meltPayload: MeltPayload, customRequest?: typeof request): Promise<MeltResponse>;
+    static melt(mintUrl: string, meltPayload: MeltPayload, customRequest?: typeof request): Promise<MeltQuoteResponse>;
     /**
      * Ask mint to perform a melt operation. This pays a lightning invoice and destroys tokens matching its amount + fees
      * @param meltPayload
      * @returns
      */
-    melt(meltPayload: MeltPayload): Promise<MeltResponse>;
+    melt(meltPayload: MeltPayload): Promise<MeltQuoteResponse>;
     /**
      * Checks if specific proofs have already been redeemed
      * @param mintUrl

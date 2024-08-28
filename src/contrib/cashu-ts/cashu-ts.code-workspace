@@ -14,7 +14,8 @@
 		"editor.formatOnSave": true,
 		"editor.bracketPairColorization.enabled": true,
 		"editor.guides.bracketPairs": true,
-		"editor.codeActionsOnSave": ["source.fixAll.eslint"]
+		"editor.codeActionsOnSave": ["source.fixAll.eslint"],
+		"editor.defaultFormatter": "vscode.typescript-language-features"
 	},
 	"launch": {
 		"version": "0.2.0",

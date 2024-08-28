@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 import { useMintsStore, WalletProof } from "./mints";
-import { Proof } from "@cashu/cashu-ts";
+import { Proof, getEncodedToken, getEncodedTokenV4, Token, TokenEntry } from "@cashu/cashu-ts";
 
 export const useProofsStore = defineStore("proofs", {
   state: () => ({}),
@@ -45,14 +45,19 @@ export const useProofsStore = defineStore("proofs", {
       }
       // unit of keysets
       let unit = keysets[0].unit;
-
-      // what we put into the JSON
-      let mintsJson = mints.map((m) => [{ url: m.url, ids: m.keysets }][0]);
-      let tokenV3 = {
-        token: [{ proofs: proofs, mint: mintsJson[0].url }],
+      const token = {
+        token: [{ proofs: proofs, mint: mints[0].url }],
         unit: unit,
-      };
-      return "cashuA" + btoa(JSON.stringify(tokenV3));
+      } as Token;
+      return getEncodedTokenV4(token);
+
+      // // what we put into the JSON
+      // let mintsJson = mints.map((m) => [{ url: m.url, ids: m.keysets }][0]);
+      // let tokenV3 = {
+      //   token: [{ proofs: proofs, mint: mintsJson[0].url }],
+      //   unit: unit,
+      // };
+      // return "cashuA" + btoa(JSON.stringify(tokenV3));
     },
     getProofsMint: function (proofs: WalletProof[]) {
       const mintStore = useMintsStore();

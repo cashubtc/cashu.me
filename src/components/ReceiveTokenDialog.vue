@@ -72,7 +72,7 @@
               ? addMintBlocking
                 ? 'Adding mint ...'
                 : 'Receive'
-              : 'Add mint'
+              : 'Add mint and receive'
           "
         >
         </q-btn>
@@ -179,6 +179,7 @@ export default defineComponent({
       "generateKeypair",
       "showLastKey",
     ]),
+    ...mapActions(useMintsStore, ["addMint"]),
     knowThisMintOfTokenJson: function (tokenJson) {
       const mintStore = useMintsStore();
       // check if we have all mints
@@ -214,20 +215,23 @@ export default defineComponent({
       }
       // check if we have all mints
       if (!this.knowThisMintOfTokenJson(tokenJson)) {
-        // pop up add mint dialog warning
-        // hack! The "add mint" component is in SettingsView which may now
-        // have been loaded yet. We switch the tab to settings to make sure
-        // that it loads. Remove this code when the TrustMintComnent is refactored!
-        uIStore.setTab("mints");
-        // hide the receive dialog
-        receiveStore.showReceiveTokens = false;
-        // set the mint to add
-        this.addMintData = { url: token.getMint(tokenJson) };
-        // show the add mint dialog
-        this.showAddMintDialog = true;
-        // show the token receive dialog again for the next attempt
-        receiveStore.showReceiveTokens = true;
-        return;
+        // // pop up add mint dialog warning
+        // // hack! The "add mint" component is in SettingsView which may now
+        // // have been loaded yet. We switch the tab to settings to make sure
+        // // that it loads. Remove this code when the TrustMintComnent is refactored!
+        // uIStore.setTab("mints");
+        // // hide the receive dialog
+        // receiveStore.showReceiveTokens = false;
+        // // set the mint to add
+        // this.addMintData = { url: token.getMint(tokenJson) };
+        // // show the add mint dialog
+        // this.showAddMintDialog = true;
+        // // show the token receive dialog again for the next attempt
+        // receiveStore.showReceiveTokens = true;
+        // return;
+
+        // add the mint
+        await this.addMint( { url: token.getMint(tokenJson) });
       }
       // redeem the token
       await this.redeem(receiveStore.receiveData.tokensBase64);
