@@ -233,7 +233,7 @@
             <q-badge
                 :color="!isV4Token ? 'primary' : 'grey'"
                 :label="isV4Token ? 'V4' : 'V3'"
-                class="q-my-sm q-mx-md"
+                class="q-my-sm q-mx-md cursor-pointer"
                 @click="toggleTokenEncoding"
                 :outline="isV4Token"
               />
