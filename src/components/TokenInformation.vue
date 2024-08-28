@@ -5,7 +5,7 @@
         <q-icon name="toll" size="xs" class="q-mr-sm" />
         <strong>{{ displayUnit }} </strong>
       </q-chip>
-      <q-chip outline class="q-pa-md">
+      <q-chip outline class="q-pa-md q-ml-md">
         <q-icon name="account_balance" size="xs" class="q-mr-xs" />
         {{ tokenMintUrl }}
         <q-spinner-hourglass v-if="addMintBlocking" size="sm" class="q-ml-sm" />

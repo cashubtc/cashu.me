@@ -12,8 +12,8 @@ import { useSendTokensStore } from "src/stores/sendTokensStore"
 import * as _ from "underscore";
 import token from "src/js/token";
 import { notifyApiError, notifyError, notifySuccess, notifyWarning, notify } from "src/js/notify";
-import { CashuMint, CashuWallet, Proof, MintQuotePayload, CheckStatePayload, MeltQuotePayload, MeltQuoteResponse, generateNewMnemonic, deriveSeedFromMnemonic, AmountPreference, CheckStateEnum } from "@cashu/cashu-ts";
-import { hashToCurve } from "@cashu/cashu-ts/dist/lib/es6/DHKE";
+import { CashuMint, CashuWallet, Proof, MintQuotePayload, CheckStatePayload, MeltQuotePayload, MeltQuoteResponse, generateNewMnemonic, deriveSeedFromMnemonic, AmountPreference, CheckStateEnum, getDecodedToken, Token } from "@cashu/cashu-ts";
+import { hashToCurve } from '@cashu/crypto/modules/common';
 import * as bolt11Decoder from "light-bolt11-decoder";
 import { bech32 } from "bech32";
 import axios from "axios";
@@ -322,11 +322,11 @@ export const useWalletStore = defineStore("wallet", {
           const keysetId = this.getKeyset()
           const counter = this.keysetCounter(keysetId);
           const { returnChange: _keepProofs, send: _sendProofs } = await this.wallet.send(amount, proofsToSplit, { counter })
+          this.increaseKeysetCounter(keysetId, keepProofs.length + sendProofs.length);
+
           mintStore.removeProofs(proofsToSplit);
           keepProofs = _keepProofs;
           sendProofs = _sendProofs;
-
-          this.increaseKeysetCounter(keysetId, keepProofs.length + sendProofs.length);
 
           mintStore.addProofs(keepProofs);
           mintStore.addProofs(sendProofs);
@@ -391,19 +391,23 @@ export const useWalletStore = defineStore("wallet", {
         const counter = this.keysetCounter(keysetId)
         const preference = this.outputAmountSelect(amount);
         const privkey = receiveStore.receiveData.p2pkPrivateKey;
-        const { token: tokenReceived, tokensWithErrors } = await this.wallet.receive(receiveStore.receiveData.tokensBase64, { counter, preference, privkey })
-        if (tokensWithErrors?.token || tokenReceived.token.length == 0) {
+        const decodedToken = getDecodedToken(receiveStore.receiveData.tokensBase64);
+        let tokenCts: Token
+        let proofs: Proof[]
+        try {
+          proofs = await this.wallet.receive(receiveStore.receiveData.tokensBase64, { counter, preference, privkey })
+          this.increaseKeysetCounter(keysetId, proofs.length);
+        } catch (error: any) {
+          console.error(error);
           throw new Error("Error receiving tokens");
         }
-        p2pkStore.setPrivateKeyUsed(privkey);
+        // const proofs: Proof[] = tokenCts.token.map(t => t.proofs).flat();
 
-        // this.increaseKeysetCounter(keysetId, tokenReceived.token[0].proofs.length);
-        this.increaseKeysetCounter(keysetId, tokenReceived.token.map(t => t.proofs.length).reduce((a, b) => a + b, 0));
+        p2pkStore.setPrivateKeyUsed(privkey);
 
         mintStore.removeProofs(proofs);
         // gather all token.token[i].proofs
-        const receivedProofs = tokenReceived.token.map((t) => t.proofs).flat();
-        mintStore.addProofs(receivedProofs);
+        mintStore.addProofs(proofs);
 
         // if token is already in history, set to paid, else add to history
         if (tokenStore.historyTokens.find((t) => t.token === receiveStore.receiveData.tokensBase64)) {
@@ -445,7 +449,7 @@ export const useWalletStore = defineStore("wallet", {
         const payload: MintQuotePayload = {
           amount: this.invoiceData.amount, unit: mintStore.activeUnit
         };
-        const data = await mintStore.activeMint().api.mintQuote(
+        const data = await mintStore.activeMint().api.createMintQuote(
           payload
         );
         this.invoiceData.bolt11 = data.request;
@@ -470,7 +474,7 @@ export const useWalletStore = defineStore("wallet", {
 
       try {
         // first we check if the mint quote is paid
-        const mintQuote = await mintStore.activeMint().api.getMintQuote(hash);
+        const mintQuote = await mintStore.activeMint().api.checkMintQuote(hash);
         console.log("### mintQuote", mintQuote);
         if (!mintQuote.paid) {
           console.log("### mintQuote not paid yet");
@@ -1024,6 +1028,9 @@ export const useWalletStore = defineStore("wallet", {
       } else if (req.indexOf("cashuA") !== -1) {
         // very dirty way of parsing cashu tokens from either a pasted token or a URL like https://host.com?token=eyJwcm
         receiveStore.receiveData.tokensBase64 = req.slice(req.indexOf("cashuA"));
+        this.handleCashuToken()
+      } else if (req.indexOf("cashuB") !== -1) {
+        receiveStore.receiveData.tokensBase64 = req.slice(req.indexOf("cashuB"));
         this.handleCashuToken()
       } else if (p2pkStore.isValidPubkey(req)) {
         this.handleP2PK(req)
