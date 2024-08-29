@@ -309,9 +309,11 @@ export const useWalletStore = defineStore("wallet", {
       */
       const mintStore = useMintsStore();
       const proofsStore = useProofsStore()
+      const uIStore = useUiStore();
       let proofsToSplit: WalletProof[] = [];
 
       try {
+        uIStore.lockMutex();
         const spendableProofs = this.spendableProofs(proofs, amount);
         proofsToSplit = this.coinSelect(spendableProofs, amount);
         const totalAmount = proofsToSplit.reduce((s, t) => (s += t.amount), 0);
@@ -354,6 +356,8 @@ export const useWalletStore = defineStore("wallet", {
         console.error(error);
         notifyApiError(error);
         throw error;
+      } finally {
+        uIStore.unlockMutex();
       }
     },
     /**
@@ -386,6 +390,7 @@ export const useWalletStore = defineStore("wallet", {
 
       const amount = proofs.reduce((s, t) => (s += t.amount), 0);
       try {
+        uIStore.lockMutex();
         // redeem
         const keysetId = this.getKeyset()
         const counter = this.keysetCounter(keysetId)
@@ -428,6 +433,8 @@ export const useWalletStore = defineStore("wallet", {
         console.error(error);
         notifyApiError(error);
         throw error;
+      } finally {
+        uIStore.unlockMutex();
       }
       // }
     },
@@ -441,10 +448,13 @@ export const useWalletStore = defineStore("wallet", {
      */
     requestMint: async function (amount?: number) {
       const mintStore = useMintsStore();
+      const uIStore = useUiStore();
+
       if (amount) {
         this.invoiceData.amount = amount;
       }
       try {
+        uIStore.lockMutex();
         // create MintQuotePayload(this.invoiceData.amount) payload
         const payload: MintQuotePayload = {
           amount: this.invoiceData.amount, unit: mintStore.activeUnit
@@ -465,14 +475,18 @@ export const useWalletStore = defineStore("wallet", {
       } catch (error: any) {
         console.error(error);
         notifyApiError(error, "Could not request mint");
+      } finally {
+        uIStore.unlockMutex();
       }
     },
     mint: async function (amount: number, hash: string, verbose: boolean = true) {
       const proofsStore = useProofsStore();
       const mintStore = useMintsStore();
       const tokenStore = useTokensStore();
+      const uIStore = useUiStore();
 
       try {
+        uIStore.lockMutex();
         // first we check if the mint quote is paid
         const mintQuote = await mintStore.activeMint().api.checkMintQuote(hash);
         console.log("### mintQuote", mintQuote);
@@ -517,10 +531,13 @@ export const useWalletStore = defineStore("wallet", {
           notifyApiError(error);
         }
         throw error;
+      } finally {
+        uIStore.unlockMutex();
       }
     },
     // get a melt quote
     meltQuote: async function () {
+      const uIStore = useUiStore();
       // throw an error if this.payInvoiceData.blocking is true
       if (this.payInvoiceData.blocking) {
         throw new Error("already processing an melt quote.");
@@ -528,6 +545,7 @@ export const useWalletStore = defineStore("wallet", {
       this.payInvoiceData.blocking = true;
       this.payInvoiceData.meltQuote.error = "";
       try {
+        uIStore.lockMutex();
         const mintStore = useMintsStore();
         if (this.payInvoiceData.input.request == "") {
           throw new Error("no invoice provided.");
@@ -549,6 +567,8 @@ export const useWalletStore = defineStore("wallet", {
         console.error(error);
         notifyApiError(error);
         throw error;
+      } finally {
+        uIStore.unlockMutex();
       }
     },
     melt: async function () {
@@ -590,6 +610,7 @@ export const useWalletStore = defineStore("wallet", {
       let countChangeOutputs = 0;
       const keysetId = this.getKeyset();
       try {
+        uIStore.lockMutex();
         const { keepProofs, sendProofs: _sendProofs } = await this.splitToSend(
           mintStore.activeMint().unitProofs(mintStore.activeUnit),
           amount
@@ -663,6 +684,7 @@ export const useWalletStore = defineStore("wallet", {
         throw error;
       } finally {
         this.payInvoiceData.blocking = false;
+        uIStore.unlockMutex();
       }
     },
     getProofState: async function (proofs: Proof[]) {

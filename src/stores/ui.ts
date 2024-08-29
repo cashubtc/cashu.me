@@ -19,8 +19,32 @@ export const useUiStore = defineStore("ui", {
     tab: useLocalStorage("cashu.ui.tab", "history" as string),
     expandHistory:
       useLocalStorage("cashu.ui.expandHistory", true as boolean),
+    globalMutexLock: false,
   }),
   actions: {
+    lockMutex() {
+      const nRetries = 10;
+      const retryInterval = 100;
+      if (this.globalMutexLock) {
+        // retry, and wait for the lock to be released
+        // if the lock isn't released, throw an error
+        let retries = 0;
+        const interval = setInterval(() => {
+          if (!this.globalMutexLock) {
+            clearInterval(interval);
+          }
+          retries++;
+          if (retries > nRetries) {
+            clearInterval(interval);
+            throw new Error("Failed to acquire global mutex lock");
+          }
+        }, retryInterval);
+      }
+      this.globalMutexLock = true;
+    },
+    unlockMutex() {
+      this.globalMutexLock = false;
+    },
     setTab(tab: string) {
       this.tab = tab;
     },
