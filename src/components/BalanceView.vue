@@ -6,7 +6,7 @@
       <div v-if="globalMutexLock">
         <transition
           appear
-          enter-active-class="animated wobble"
+          enter-active-class="animated fadeIn"
           leave-active-class="animated fadeOut"
         >
         <q-spinner-hourglass  class="q-mt-lg q-mb-none" size="lg" color="primary" />
@@ -15,7 +15,7 @@
       <div v-else >
         <transition
           appear
-          enter-active-class="animated wobble"
+          enter-active-class="animated fadeIn"
           leave-active-class="animated fadeOut"
         >
           <ToggleUnit class="q-mt-lg q-mb-none" :balanceView="true" />
