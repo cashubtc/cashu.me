@@ -3,13 +3,8 @@
     <q-card-section class="q-mt-sm q-py-xs"> -->
   <div class="q-pt-xl q-pb-md">
     <div class="row justify-center q-pb-lg" style="height:80px">
-      <transition-group
-      enter-active-class="animated fadeInDown"
-      leave-active-class="animated fadeInDown"
-    >
-      <q-spinner-hourglass size="xl" v-if="globalMutexLock" />
+      <q-spinner-hourglass size="xl" color="primary" v-if="globalMutexLock" />
       <ToggleUnit v-else class="q-mt-lg q-mb-none" :balanceView="true" />
-    </transition-group>
     </div>
     <transition
       appear

@@ -590,14 +590,17 @@ export default defineComponent({
       // if the token starts with 'cashuA', it is a v3 token
       // if it starts with 'cashuB', it is a v4 token
       if (this.sendData.tokensBase64.startsWith("cashuA")) {
-        this.sendData.tokensBase64 = getEncodedTokenV4(
+        try {
+          this.sendData.tokensBase64 = getEncodedTokenV4(decodedToken)
+        } catch {
+          this.sendData.tokensBase64 = getEncodedToken(
           decodedToken
         );
+        }
       } else {
         this.sendData.tokensBase64 = getEncodedToken(
           decodedToken
         );
-
       }
     },
     deleteThisToken: function () {

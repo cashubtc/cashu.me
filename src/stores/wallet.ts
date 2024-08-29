@@ -311,7 +311,7 @@ export const useWalletStore = defineStore("wallet", {
       const proofsStore = useProofsStore()
       const uIStore = useUiStore();
       let proofsToSplit: WalletProof[] = [];
-
+      const keysetId = this.getKeyset()
       try {
         uIStore.lockMutex();
         const spendableProofs = this.spendableProofs(proofs, amount);
@@ -321,7 +321,6 @@ export const useWalletStore = defineStore("wallet", {
         let keepProofs: Proof[] = [];
         let sendProofs: Proof[] = [];
         if (totalAmount != amount) {
-          const keysetId = this.getKeyset()
           const counter = this.keysetCounter(keysetId);
           const { returnChange: _keepProofs, send: _sendProofs } = await this.wallet.send(amount, proofsToSplit, { counter })
           this.increaseKeysetCounter(keysetId, keepProofs.length + sendProofs.length);
@@ -355,6 +354,7 @@ export const useWalletStore = defineStore("wallet", {
         proofsStore.setReserved(proofsToSplit, false);
         console.error(error);
         notifyApiError(error);
+        this.handleOutputsHaveAlreadyBeenSignedError(keysetId, error);
         throw error;
       } finally {
         uIStore.unlockMutex();
@@ -484,6 +484,7 @@ export const useWalletStore = defineStore("wallet", {
       const mintStore = useMintsStore();
       const tokenStore = useTokensStore();
       const uIStore = useUiStore();
+      const keysetId = this.getKeyset()
 
       try {
         uIStore.lockMutex();
@@ -497,8 +498,6 @@ export const useWalletStore = defineStore("wallet", {
           }
           throw new Error("invoice not paid yet.");
         }
-        // const split = splitAmount(amount);
-        const keysetId = this.getKeyset()
         const counter = this.keysetCounter(keysetId)
         const preference = this.outputAmountSelect(amount);
         console.log("### preference", preference);
@@ -530,6 +529,7 @@ export const useWalletStore = defineStore("wallet", {
         if (verbose) {
           notifyApiError(error);
         }
+        this.handleOutputsHaveAlreadyBeenSignedError(keysetId, error);
         throw error;
       } finally {
         uIStore.unlockMutex();
@@ -1160,6 +1160,14 @@ export const useWalletStore = defineStore("wallet", {
         this.mnemonic = generateNewMnemonic();
       }
       return this.mnemonic
-    }
+    },
+    handleOutputsHaveAlreadyBeenSignedError: function (keysetId: string, error: any) {
+      if (error.message.includes("outputs have already been signed")) {
+        this.increaseKeysetCounter(keysetId, 10);
+        notify("Increasing keyset counter by 10");
+        return true;
+      }
+      return false;
+    },
   },
 });
