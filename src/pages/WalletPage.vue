@@ -356,7 +356,6 @@ export default {
     ...mapActions(useCameraStore, ["closeCamera", "showCamera"]),
     ...mapActions(useNWCStore, ["listenToNWCCommands"]),
     ...mapActions(useNPCStore, ["generateNPCConnection", "claimAllTokens"]),
-    ...mapActions(useUiStore, ["lockMutex", "unlockMutex"]),
     // TOKEN METHODS
     decodeToken: function (encoded_token) {
       try {
