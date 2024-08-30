@@ -134,7 +134,12 @@
               color="primary"
               rounded
               type="submit"
-              >Send</q-btn
+              :loading="globalMutexLock"
+              >Send
+              <template v-slot:loading>
+                <q-spinner-hourglass />
+              </template>
+              </q-btn
             >
             <div
               v-if="sendData.p2pkPubkey && isValidPubkey(sendData.p2pkPubkey)"
@@ -398,7 +403,7 @@ export default defineComponent({
     ]),
     ...mapWritableState(useSendTokensStore, ["sendData"]),
     ...mapWritableState(useCameraStore, ["camera", "hasCamera"]),
-    ...mapState(useUiStore, ["tickerShort", "canPasteFromClipboard"]),
+    ...mapState(useUiStore, ["tickerShort", "canPasteFromClipboard", "globalMutexLock"]),
     ...mapState(useMintsStore, [
       "activeProofs",
       "activeUnit",

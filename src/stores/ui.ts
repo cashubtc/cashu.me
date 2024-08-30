@@ -1,6 +1,7 @@
 import { defineStore } from "pinia";
 import { useMintsStore } from "./mints";
 import { useLocalStorage } from "@vueuse/core";
+import { notifyApiError, notifyError, notifySuccess, notifyWarning, notify } from "../js/notify";
 
 const unitTickerShortMap = {
   sat: "sats",
@@ -22,24 +23,20 @@ export const useUiStore = defineStore("ui", {
     globalMutexLock: false,
   }),
   actions: {
-    lockMutex() {
+    async lockMutex() {
       const nRetries = 10;
-      const retryInterval = 100;
-      if (this.globalMutexLock) {
-        // retry, and wait for the lock to be released
-        // if the lock isn't released, throw an error
-        let retries = 0;
-        const interval = setInterval(() => {
-          if (!this.globalMutexLock) {
-            clearInterval(interval);
-          }
-          retries++;
-          if (retries > nRetries) {
-            clearInterval(interval);
-            throw new Error("Failed to acquire global mutex lock");
-          }
-        }, retryInterval);
+      const retryInterval = 500;
+      let retries = 0;
+
+      while (this.globalMutexLock) {
+        if (retries >= nRetries) {
+          notify("Please try again.")
+          throw new Error("Failed to acquire global mutex lock");
+        }
+        retries++;
+        await new Promise(resolve => setTimeout(resolve, retryInterval));
       }
+
       this.globalMutexLock = true;
     },
     unlockMutex() {

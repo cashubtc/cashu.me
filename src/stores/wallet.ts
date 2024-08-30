@@ -312,7 +312,7 @@ export const useWalletStore = defineStore("wallet", {
       const uIStore = useUiStore();
       let proofsToSplit: WalletProof[] = [];
       const keysetId = this.getKeyset()
-      uIStore.lockMutex();
+      await uIStore.lockMutex();
       try {
         const spendableProofs = this.spendableProofs(proofs, amount);
         proofsToSplit = this.coinSelect(spendableProofs, amount);
@@ -389,7 +389,7 @@ export const useWalletStore = defineStore("wallet", {
       await mintStore.activateMintUrl(token.getMint(tokenJson), false, false, tokenJson.unit);
 
       const amount = proofs.reduce((s, t) => (s += t.amount), 0);
-      uIStore.lockMutex();
+      await uIStore.lockMutex();
       try {
         // redeem
         const keysetId = this.getKeyset()
@@ -454,7 +454,7 @@ export const useWalletStore = defineStore("wallet", {
       if (amount) {
         this.invoiceData.amount = amount;
       }
-      uIStore.lockMutex();
+      await uIStore.lockMutex();
       try {
         // create MintQuotePayload(this.invoiceData.amount) payload
         const payload: MintQuotePayload = {
@@ -486,7 +486,7 @@ export const useWalletStore = defineStore("wallet", {
       const tokenStore = useTokensStore();
       const uIStore = useUiStore();
       const keysetId = this.getKeyset()
-      uIStore.lockMutex();
+      await uIStore.lockMutex();
       try {
         // first we check if the mint quote is paid
         const mintQuote = await mintStore.activeMint().api.checkMintQuote(hash);
@@ -544,7 +544,7 @@ export const useWalletStore = defineStore("wallet", {
       }
       this.payInvoiceData.blocking = true;
       this.payInvoiceData.meltQuote.error = "";
-      uIStore.lockMutex();
+      await uIStore.lockMutex();
       try {
         const mintStore = useMintsStore();
         if (this.payInvoiceData.input.request == "") {
@@ -609,7 +609,7 @@ export const useWalletStore = defineStore("wallet", {
       let sendProofs: Proof[] = [];
       let countChangeOutputs = 0;
       const keysetId = this.getKeyset();
-      uIStore.lockMutex();
+      await uIStore.lockMutex();
       try {
         const { keepProofs, sendProofs: _sendProofs } = await this.splitToSend(
           mintStore.activeMint().unitProofs(mintStore.activeUnit),
