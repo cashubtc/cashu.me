@@ -404,7 +404,8 @@ export const useWalletStore = defineStore("wallet", {
           this.increaseKeysetCounter(keysetId, proofs.length);
         } catch (error: any) {
           console.error(error);
-          throw new Error("Error receiving tokens");
+          this.handleOutputsHaveAlreadyBeenSignedError(keysetId, error);
+          throw new Error("Error receiving tokens: " + error);
         }
         // const proofs: Proof[] = tokenCts.token.map(t => t.proofs).flat();
 
@@ -554,7 +555,7 @@ export const useWalletStore = defineStore("wallet", {
           request: this.payInvoiceData.input.request,
         };
         this.payInvoiceData.meltQuote.payload = payload;
-        const data = await mintStore.activeMint().api.meltQuote(payload);
+        const data = await mintStore.activeMint().api.createMeltQuote(payload);
         mintStore.assertMintError(data);
         this.payInvoiceData.meltQuote.response = data;
         console.log("#### meltQuote", payload, " response:", data);
@@ -1163,7 +1164,7 @@ export const useWalletStore = defineStore("wallet", {
     handleOutputsHaveAlreadyBeenSignedError: function (keysetId: string, error: any) {
       if (error.message.includes("outputs have already been signed")) {
         this.increaseKeysetCounter(keysetId, 10);
-        notify("Increasing keyset counter by 10");
+        notify("Please try again.");
         return true;
       }
       return false;
