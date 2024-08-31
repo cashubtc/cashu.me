@@ -59,7 +59,7 @@
           />
         </div>
       </div>
-      <div class="row q-mt-lg">
+      <div class="row q-mt-lg q-pl-xs">
         <q-btn
           @click="receveIfDecodes"
           color="primary"

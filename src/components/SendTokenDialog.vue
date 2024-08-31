@@ -598,6 +598,7 @@ export default defineComponent({
         try {
           this.sendData.tokensBase64 = getEncodedTokenV4(decodedToken)
         } catch {
+          console.log("### Could not encode token to V4");
           this.sendData.tokensBase64 = getEncodedToken(
           decodedToken
         );

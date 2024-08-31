@@ -325,12 +325,11 @@ export const useWalletStore = defineStore("wallet", {
         let sendProofs: Proof[] = [];
         if (totalAmount != amount) {
           const counter = this.keysetCounter(keysetId);
-          const { returnChange: _keepProofs, send: _sendProofs } = await this.wallet.send(amount, proofsToSplit, { counter })
+          ({ returnChange: keepProofs, send: sendProofs } = await this.wallet.send(amount, proofsToSplit, { counter }));
           this.increaseKeysetCounter(keysetId, keepProofs.length + sendProofs.length);
 
           mintStore.removeProofs(proofsToSplit);
-          keepProofs = _keepProofs;
-          sendProofs = _sendProofs;
+
 
           mintStore.addProofs(keepProofs);
           mintStore.addProofs(sendProofs);
