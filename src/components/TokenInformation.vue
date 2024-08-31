@@ -1,11 +1,11 @@
 <template>
   <div class="row text-left q-py-none q-my-none">
     <div class="col-12 q-px-none">
-      <q-chip v-if="showAmount" outline class="q-mr-md q-pa-md">
+      <q-chip v-if="showAmount" outline class="q-pa-md" style="border-width: 2px;">
         <q-icon name="toll" size="xs" class="q-mr-sm" />
         <strong>{{ displayUnit }} </strong>
       </q-chip>
-      <q-chip outline class="q-pa-md q-ml-md">
+      <q-chip outline class="q-pa-md">
         <q-icon name="account_balance" size="xs" class="q-mr-xs" />
         {{ tokenMintUrl }}
         <q-spinner-hourglass v-if="addMintBlocking" size="sm" class="q-ml-sm" />

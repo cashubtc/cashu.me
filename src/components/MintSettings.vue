@@ -660,6 +660,10 @@ export default defineComponent({
       }
     },
     sanitizeMintUrlAndShowAddDialog: function () {
+      // if no protocol is given, add https
+      if (!this.addMintData.url.match(/^[a-zA-Z]+:\/\//)) {
+        this.addMintData.url = "https://" + this.addMintData.url;
+      }
       if (!this.validateMintUrl(this.addMintData.url)) {
         notifyError("Invalid URL");
         return;

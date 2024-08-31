@@ -3,7 +3,7 @@ import { useLocalStorage } from "@vueuse/core";
 import { useWorkersStore } from "./workers";
 import { notifyApiError, notifyError, notifySuccess } from "src/js/notify";
 import { CashuMint, MintKeys, MintAllKeysets, Proof, SerializedBlindedSignature, MintKeyset } from "@cashu/cashu-ts";
-
+import { useUiStore } from "./ui";
 export type Mint = {
   url: string;
   keys: MintKeys[];
@@ -282,6 +282,7 @@ export const useMintsStore = defineStore("mints", {
     },
     activateMint: async function (mint: Mint, verbose = false, force = false) {
       const workers = useWorkersStore();
+      const uIStore = useUiStore();
       if (mint.url === this.activeMintUrl && !force) {
         // return here because this function is called repeatedly by the
         // invoice check and token spendable check workers and would otherwise
@@ -293,6 +294,7 @@ export const useMintsStore = defineStore("mints", {
 
       // create new mint.api instance because we can't store it in local storage
       let previousUrl = this.activeMintUrl;
+      await uIStore.lockMutex();
       try {
         this.activeMintUrl = mint.url;
         console.log("### this.activeMintUrl", this.activeMintUrl);
@@ -316,6 +318,8 @@ export const useMintsStore = defineStore("mints", {
         }
         await notifyError(err_msg, "Mint activation failed");
         throw error;
+      } finally {
+        await uIStore.unlockMutex();
       }
     },
     fetchMintInfo: async function (mint: Mint) {
@@ -332,6 +336,7 @@ export const useMintsStore = defineStore("mints", {
       }
     },
     fetchMintKeys: async function (mint: Mint) {
+
       try {
         const mintClass = new MintClass(mint);
         const keysets = await this.fetchMintKeysets(mint);

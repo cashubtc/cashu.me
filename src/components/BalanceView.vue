@@ -2,8 +2,25 @@
   <!-- <q-card class="q-my-md q-py-sm">
     <q-card-section class="q-mt-sm q-py-xs"> -->
   <div class="q-pt-xl q-pb-md">
-    <div class="row justify-center q-pb-lg">
-      <ToggleUnit class="q-mt-lg q-mb-none" :balanceView="true" />
+    <div class="row justify-center q-pb-lg" style="height:80px">
+      <div v-if="globalMutexLock">
+        <transition
+          appear
+          enter-active-class="animated fadeIn"
+          leave-active-class="animated fadeOut"
+        >
+        <q-spinner-hourglass  class="q-mt-lg q-mb-none" size="lg" color="primary" />
+      </transition>
+      </div>
+      <div v-else >
+        <transition
+          appear
+          enter-active-class="animated fadeIn"
+          leave-active-class="animated fadeOut"
+        >
+          <ToggleUnit class="q-mt-lg q-mb-none" :balanceView="true" />
+        </transition>
+      </div>
     </div>
     <transition
       appear
@@ -142,6 +159,7 @@ export default defineComponent({
     ]),
     ...mapState(useTokensStore, ["historyTokens"]),
     ...mapState(useSettingsStore, ["getBitcoinPrice"]),
+    ...mapState(useUiStore, ["globalMutexLock"]),
     ...mapWritableState(useMintsStore, ["activeUnit"]),
     ...mapWritableState(useUiStore, ["hideBalance"]),
     pendingBalance: function () {

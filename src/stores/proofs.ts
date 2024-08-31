@@ -49,7 +49,13 @@ export const useProofsStore = defineStore("proofs", {
         token: [{ proofs: proofs, mint: mints[0].url }],
         unit: unit,
       } as Token;
-      return getEncodedTokenV4(token);
+      try {
+        return getEncodedTokenV4(token);
+      } catch (e) {
+        console.log("Could not encode TokenV4, defaulting to TokenV3", e);
+        return getEncodedToken(token);
+      }
+
 
       // // what we put into the JSON
       // let mintsJson = mints.map((m) => [{ url: m.url, ids: m.keysets }][0]);

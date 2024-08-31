@@ -55,12 +55,14 @@
               payInvoiceData.blocking || payInvoiceData.meltQuote.error != ''
             "
             @click="melt"
-            :label="!payInvoiceData.blocking ? 'Pay' : 'Processing...'"
-            ><q-spinner-hourglass
-              v-if="payInvoiceData.blocking"
-              color="primary"
-              size="1em"
-          /></q-btn>
+            :label="payInvoiceData.meltQuote.error != '' ? 'Error' : !payInvoiceData.blocking ? 'Pay' : 'Processing...'"
+            :loading="globalMutexLock && !payInvoiceData.blocking"
+            class="q-px-lg"
+            >
+          <template v-slot:loading >
+              <q-spinner-hourglass />
+            </template>
+          </q-btn>
           <q-btn v-close-popup flat color="grey" class="q-ml-auto">Close</q-btn>
         </div>
         <div v-else class="row q-mt-lg">
@@ -248,7 +250,7 @@ export default defineComponent({
     },
   },
   computed: {
-    ...mapState(useUiStore, ["tickerShort"]),
+    ...mapState(useUiStore, ["tickerShort", "globalMutexLock"]),
     ...mapWritableState(useCameraStore, ["camera", "hasCamera"]),
     ...mapState(useWalletStore, ["payInvoiceData"]),
     ...mapState(useMintsStore, [
