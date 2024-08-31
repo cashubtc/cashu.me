@@ -158,7 +158,23 @@ export const useWalletStore = defineStore("wallet", {
         console.error("no keysets found for unit", mintStore.activeUnit);
         throw new Error("no keysets found for unit");
       }
-      const keyset_id = unitKeysets[0].id;
+      // select the keyset id
+      // const keyset_id = unitKeysets[0].id;
+      // rules for selection:
+      // - filter all keysets that are active=true
+      // - order by id (whether it is hex or base64)
+      // - order by input_fee_ppk (ascending) TODO: this is not implemented yet
+      // - select the first one
+      const activeKeysets = unitKeysets.filter(k => k.active)
+      const hexKeysets = activeKeysets.filter(k => k.id.startsWith("00"))
+      const base64Keysets = activeKeysets.filter(k => !k.id.startsWith("00"))
+      const sortedKeysets = hexKeysets.concat(base64Keysets)
+      // const sortedKeysets = _.sortBy(activeKeysets, k => [k.id, k.input_fee_ppk])
+      if (sortedKeysets.length == 0) {
+        console.error("no active keysets found for unit", mintStore.activeUnit);
+        throw new Error("no active keysets found for unit");
+      }
+      const keyset_id = sortedKeysets[0].id;
       const keys = mintStore.activeMint().mint.keys.find((k) => k.id === keyset_id);
       if (keys) {
         this.wallet.keys = keys;
@@ -237,7 +253,22 @@ export const useWalletStore = defineStore("wallet", {
         // there are not enough proofs to pay the amount
         return [];
       }
-
+      // override: if there are proofs with a base64 id, use them all
+      const base64Proofs = proofs.filter(p => !p.id.startsWith("00"))
+      if (base64Proofs.length > 0) {
+        // sort by amount descending and return when sum is bigger than amount
+        base64Proofs.sort((a, b) => b.amount - a.amount);
+        let sum = 0;
+        let selectedProofs: WalletProof[] = [];
+        for (let i = 0; i < base64Proofs.length; i++) {
+          const proof = base64Proofs[i];
+          sum += proof.amount;
+          selectedProofs.push(proof);
+          if (sum >= amount) {
+            return selectedProofs;
+          }
+        }
+      }
       // sort proofs by amount ascending
       proofs = proofs.slice().sort((a, b) => a.amount - b.amount);
       // remember next bigger proof as a fallback
