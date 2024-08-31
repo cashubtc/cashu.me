@@ -140,8 +140,11 @@ export const useWalletStore = defineStore("wallet", {
       const keysetCounter = this.keysetCounters.find((c) => c.id === id);
       if (keysetCounter) {
         keysetCounter.counter += by;
+        console.log("### increaseKeysetCounter", keysetCounter);
       } else {
-        this.keysetCounters.push({ id, counter: by });
+        const newCounter = { id, counter: by } as KeysetCounter;
+        this.keysetCounters.push(newCounter);
+        console.log("### new keyset counter", keysetCounter);
       }
     },
     getKeyset(): string {
@@ -300,7 +303,7 @@ export const useWalletStore = defineStore("wallet", {
       mintStore.removeProofs(proofsToSplit);
       return { keepProofs, sendProofs };
     },
-    splitToSend: async function (proofs: WalletProof[], amount: number, invalidate: boolean = false) {
+    splitToSend: async function (proofs: WalletProof[], amount: number, invalidate: boolean = false): Promise<{ keepProofs: Proof[], sendProofs: Proof[] }> {
       /*
       splits proofs so the user can keep firstProofs, send scndProofs.
       then sets scndProofs as reserved.
@@ -605,18 +608,22 @@ export const useWalletStore = defineStore("wallet", {
         "amount with fees",
         amount
       );
-      this.payInvoiceData.blocking = true;
-      let sendProofs: Proof[] = [];
       let countChangeOutputs = 0;
       const keysetId = this.getKeyset();
+      let keysetCounterIncrease = 0;
+
+      // get right amount of proofs to send
+      const { keepProofs, sendProofs } = await this.splitToSend(
+        mintStore.activeMint().unitProofs(mintStore.activeUnit),
+        amount
+      );
+      if (sendProofs.length == 0) {
+        throw new Error("could not split proofs.");
+      }
+      // start melt
       await uIStore.lockMutex();
       try {
-        const { keepProofs, sendProofs: _sendProofs } = await this.splitToSend(
-          mintStore.activeMint().unitProofs(mintStore.activeUnit),
-          amount
-        );
-        sendProofs = _sendProofs;
-        // update UI
+        // proof management
         const serializedSendProofs = proofsStore.serializeProofs(sendProofs);
         proofsStore.setReserved(sendProofs, true);
         await this.addOutgoingPendingInvoiceToHistory(quote, serializedSendProofs || undefined)
@@ -626,13 +633,12 @@ export const useWalletStore = defineStore("wallet", {
 
         // QUIRK: we increase the keyset counter by sendProofs and the maximum number of possible change outputs
         // this way, in case the user exits the app before payLnInvoice is completed, the returned change outputs won't cause a "outputs already signed" error
-        // if the payment succeeds, we decrease the counter by the difference of the maximum number of possible change outputs and the actual
-        // number of change outputs
-        // if the payment fails, we decrease the counter to the original value
+        // if the payment fails, we decrease the counter again
         this.increaseKeysetCounter(keysetId, sendProofs.length);
         if (quote.fee_reserve > 0) {
           countChangeOutputs = Math.ceil(Math.log2(quote.fee_reserve)) || 1;
           this.increaseKeysetCounter(keysetId, countChangeOutputs);
+          keysetCounterIncrease += countChangeOutputs;
         }
 
         // NOTE: if the user exits the app while we're in the API call, JS will emit an error that we would catch below!
@@ -657,7 +663,6 @@ export const useWalletStore = defineStore("wallet", {
             "## Received change: " + proofsStore.sumProofs(changeProofs)
           );
           mintStore.addProofs(changeProofs);
-          this.increaseKeysetCounter(keysetId, -countChangeOutputs + changeProofs.length)
         }
         if (serializedSendProofs != null) {
           tokenStore.addPaidToken({
@@ -676,14 +681,16 @@ export const useWalletStore = defineStore("wallet", {
           // do not handle the error if the user exits the app
           return;
         }
+        // roll back proof management and keyset counter
         proofsStore.setReserved(sendProofs, false);
-        this.increaseKeysetCounter(keysetId, -(countChangeOutputs + sendProofs.length));
+        this.increaseKeysetCounter(keysetId, -keysetCounterIncrease);
         this.removeOutgoingInvoiceFromHistory(quote.quote)
+
         console.error(error);
+        this.handleOutputsHaveAlreadyBeenSignedError(keysetId, error);
         notifyApiError(error, "Payment failed");
         throw error;
       } finally {
-        this.payInvoiceData.blocking = false;
         uIStore.unlockMutex();
       }
     },
@@ -835,7 +842,7 @@ export const useWalletStore = defineStore("wallet", {
       try {
         await mintStore.activateMintUrl(invoice.mint, false, false, invoice.unit);
         // this is an outgoing invoice, we first do a getMintQuote to check if the invoice is paid
-        const mintQuote = await mintStore.activeMint().api.getMeltQuote(quote);
+        const mintQuote = await mintStore.activeMint().api.checkMeltQuote(quote);
         console.log("### mintQuote", mintQuote);
         if (!mintQuote.paid) {
           console.log("### mintQuote not paid yet");
