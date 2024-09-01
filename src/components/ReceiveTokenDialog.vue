@@ -13,15 +13,15 @@
           </div>
           <q-btn
             unelevated
-            class="q-mx-none"
+            class="q-mx-none q-pl-md"
             v-if="!receiveData.tokensBase64.length"
             @click="handleLockBtn"
+            dense
           >
             <q-icon name="lock_outline" class="q-pr-sm" />
           </q-btn>
         </div>
         <div>
-          <!-- P2PK DIALOG -->
           <P2PKDialog v-model="showP2PKDialog" />
         </div>
         <q-input
@@ -32,7 +32,7 @@
           type="textarea"
           autofocus
           class="q-mb-lg"
-          @keyup.enter="receveIfDecodes"
+          @keyup.enter="receiveIfDecodes"
         >
           <template v-if="receiveData.tokensBase64" v-slot:append>
             <q-icon
@@ -45,10 +45,7 @@
       </div>
       <div
         class="row"
-        v-if="
-          receiveData.tokensBase64.length &&
-          decodeToken(receiveData.tokensBase64)
-        "
+        v-if="receiveData.tokensBase64.length && tokenDecodesCorrectly"
       >
         <div class="col-12">
           <TokenInformation
@@ -60,19 +57,30 @@
         </div>
       </div>
       <div class="row q-mt-lg q-pl-xs">
+        <!-- if !tokenDecodesCorrectly, display error -->
         <q-btn
-          @click="receveIfDecodes"
+          v-if="receiveData.tokensBase64.length && !tokenDecodesCorrectly"
+          disabled="true"
+          color="negative"
+          rounded
+          outlined
+          class="q-mr-sm"
+          label="Invalid token"
+        ></q-btn>
+
+        <q-btn
+          @click="receiveIfDecodes"
           color="primary"
           rounded
           class="q-mr-sm"
-          v-if="decodeToken(receiveData.tokensBase64)"
+          v-if="tokenDecodesCorrectly"
           :disabled="addMintBlocking"
           :label="
             knowThisMint
               ? addMintBlocking
                 ? 'Adding mint ...'
                 : 'Receive'
-              : 'Add mint and receive'
+              : 'Receive'
           "
         >
         </q-btn>
@@ -82,7 +90,7 @@
           rounded
           flat
           class="q-mr-sm"
-          v-if="decodeToken(receiveData.tokensBase64)"
+          v-if="tokenDecodesCorrectly"
           >Later
           <q-tooltip>Add to history to receive later</q-tooltip>
         </q-btn>
@@ -162,6 +170,9 @@ export default defineComponent({
         navigator.clipboard.readText
       );
     },
+    tokenDecodesCorrectly: function () {
+      return this.decodeToken(this.receiveData.tokensBase64) !== undefined;
+    },
     knowThisMint: function () {
       const tokenJson = this.decodeToken(this.receiveData.tokensBase64);
       if (tokenJson == undefined) {
@@ -231,7 +242,7 @@ export default defineComponent({
         // return;
 
         // add the mint
-        await this.addMint( { url: token.getMint(tokenJson) });
+        await this.addMint({ url: token.getMint(tokenJson) });
       }
       // redeem the token
       await this.redeem(receiveStore.receiveData.tokensBase64);
@@ -257,7 +268,7 @@ export default defineComponent({
       }
       this.showLastKey();
     },
-    receveIfDecodes: function () {
+    receiveIfDecodes: function () {
       try {
         const decodedToken = this.decodeToken(this.receiveData.tokensBase64);
         if (decodedToken) {

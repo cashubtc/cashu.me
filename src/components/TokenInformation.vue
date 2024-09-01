@@ -1,7 +1,12 @@
 <template>
   <div class="row text-left q-py-none q-my-none">
     <div class="col-12 q-px-none">
-      <q-chip v-if="showAmount" outline class="q-pa-md" style="border-width: 2px;">
+      <q-chip
+        v-if="showAmount"
+        outline
+        class="q-pa-md"
+        style="border-width: 2px"
+      >
         <q-icon name="toll" size="xs" class="q-mr-sm" />
         <strong>{{ displayUnit }} </strong>
       </q-chip>
