@@ -11,17 +11,8 @@
           <div class="col-10">
             <span class="text-h6">Receive Ecash</span>
           </div>
-          <q-btn
-            unelevated
-            class="q-mx-none"
-            v-if="!receiveData.tokensBase64.length"
-            @click="handleLockBtn"
-          >
-            <q-icon name="lock_outline" class="q-pr-sm" />
-          </q-btn>
         </div>
         <div>
-          <!-- P2PK DIALOG -->
           <P2PKDialog v-model="showP2PKDialog" />
         </div>
         <q-input
@@ -32,7 +23,7 @@
           type="textarea"
           autofocus
           class="q-mb-lg"
-          @keyup.enter="receveIfDecodes"
+          @keyup.enter="receiveIfDecodes"
         >
           <template v-if="receiveData.tokensBase64" v-slot:append>
             <q-icon
@@ -45,10 +36,7 @@
       </div>
       <div
         class="row"
-        v-if="
-          receiveData.tokensBase64.length &&
-          decodeToken(receiveData.tokensBase64)
-        "
+        v-if="receiveData.tokensBase64.length && tokenDecodesCorrectly"
       >
         <div class="col-12">
           <TokenInformation
@@ -59,20 +47,32 @@
           />
         </div>
       </div>
-      <div class="row q-mt-lg q-pl-xs">
+      <div class="row q-mt-lg">
+        <!-- if !tokenDecodesCorrectly, display error -->
         <q-btn
-          @click="receveIfDecodes"
+          v-if="receiveData.tokensBase64.length && !tokenDecodesCorrectly"
+          disabled
+          color="yellow"
+          text-color="black"
+          rounded
+          unelevated
+          class="q-mr-sm"
+          label="Invalid token"
+        ></q-btn>
+
+        <q-btn
+          @click="receiveIfDecodes"
           color="primary"
           rounded
           class="q-mr-sm"
-          v-if="decodeToken(receiveData.tokensBase64)"
+          v-if="tokenDecodesCorrectly"
           :disabled="addMintBlocking"
           :label="
             knowThisMint
               ? addMintBlocking
                 ? 'Adding mint ...'
                 : 'Receive'
-              : 'Add mint and receive'
+              : 'Receive'
           "
         >
         </q-btn>
@@ -82,15 +82,15 @@
           rounded
           flat
           class="q-mr-sm"
-          v-if="decodeToken(receiveData.tokensBase64)"
+          v-if="tokenDecodesCorrectly"
           >Later
           <q-tooltip>Add to history to receive later</q-tooltip>
         </q-btn>
         <q-btn
           unelevated
+          dense
           v-if="canPasteFromClipboard && !receiveData.tokensBase64.length"
           @click="pasteToParseDialog"
-          class="q-ml-none q-pl-none"
         >
           <q-icon name="content_paste" class="q-pr-sm" />Paste</q-btn
         >
@@ -100,9 +100,16 @@
           v-if="hasCamera && !receiveData.tokensBase64.length"
           @click="showCamera"
         >
-          <q-icon name="qr_code_scanner" class="q-pr-sm" />
-          Scan</q-btn
+          <q-icon name="qr_code_scanner" />
+        </q-btn>
+        <q-btn
+          unelevated
+          class="q-mx-none"
+          v-if="!receiveData.tokensBase64.length"
+          @click="handleLockBtn"
         >
+          <q-icon name="lock_outline" />
+        </q-btn>
 
         <q-btn v-close-popup rounded flat color="grey" class="q-ml-auto"
           >Close</q-btn
@@ -161,6 +168,9 @@ export default defineComponent({
         navigator.clipboard &&
         navigator.clipboard.readText
       );
+    },
+    tokenDecodesCorrectly: function () {
+      return this.decodeToken(this.receiveData.tokensBase64) !== undefined;
     },
     knowThisMint: function () {
       const tokenJson = this.decodeToken(this.receiveData.tokensBase64);
@@ -231,7 +241,7 @@ export default defineComponent({
         // return;
 
         // add the mint
-        await this.addMint( { url: token.getMint(tokenJson) });
+        await this.addMint({ url: token.getMint(tokenJson) });
       }
       // redeem the token
       await this.redeem(receiveStore.receiveData.tokensBase64);
@@ -257,7 +267,7 @@ export default defineComponent({
       }
       this.showLastKey();
     },
-    receveIfDecodes: function () {
+    receiveIfDecodes: function () {
       try {
         const decodedToken = this.decodeToken(this.receiveData.tokensBase64);
         if (decodedToken) {
