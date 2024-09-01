@@ -12,7 +12,7 @@ import { useSendTokensStore } from "src/stores/sendTokensStore"
 import * as _ from "underscore";
 import token from "src/js/token";
 import { notifyApiError, notifyError, notifySuccess, notifyWarning, notify } from "src/js/notify";
-import { CashuMint, CashuWallet, Proof, MintQuotePayload, CheckStatePayload, MeltQuotePayload, MeltQuoteResponse, generateNewMnemonic, deriveSeedFromMnemonic, AmountPreference, CheckStateEnum, getDecodedToken, Token } from "@cashu/cashu-ts";
+import { CashuMint, CashuWallet, Proof, MintQuotePayload, CheckStatePayload, MeltQuotePayload, MeltQuoteResponse, generateNewMnemonic, deriveSeedFromMnemonic, AmountPreference, CheckStateEnum, getDecodedToken, Token, MeltQuoteState, MintQuoteState } from "@cashu/cashu-ts";
 import { hashToCurve } from '@cashu/crypto/modules/common';
 import * as bolt11Decoder from "light-bolt11-decoder";
 import { bech32 } from "bech32";
@@ -525,7 +525,7 @@ export const useWalletStore = defineStore("wallet", {
         // first we check if the mint quote is paid
         const mintQuote = await mintStore.activeMint().api.checkMintQuote(hash);
         console.log("### mintQuote", mintQuote);
-        if (!mintQuote.paid) {
+        if (mintQuote.state != MintQuoteState.PAID) {
           console.log("### mintQuote not paid yet");
           if (verbose) {
             notify("Invoice still pending");
@@ -535,7 +535,7 @@ export const useWalletStore = defineStore("wallet", {
         const counter = this.keysetCounter(keysetId)
         const preference = this.outputAmountSelect(amount);
         console.log("### preference", preference);
-        const { proofs } = await this.wallet.mintTokens(amount, hash, { keysetId, counter, amountPreference: preference })
+        const { proofs } = await this.wallet.mintTokens(amount, hash, { keysetId, counter, preference: preference })
         this.increaseKeysetCounter(keysetId, proofs.length);
 
         // const proofs = await this.mintApi(split, hash, verbose);
@@ -875,7 +875,7 @@ export const useWalletStore = defineStore("wallet", {
         // this is an outgoing invoice, we first do a getMintQuote to check if the invoice is paid
         const mintQuote = await mintStore.activeMint().api.checkMeltQuote(quote);
         console.log("### mintQuote", mintQuote);
-        if (!mintQuote.paid) {
+        if (mintQuote.state != MeltQuoteState.PAID) {
           console.log("### mintQuote not paid yet");
           if (invoice.token) {
             const tokenJson = token.decode(invoice.token);
