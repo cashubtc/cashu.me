@@ -60,10 +60,11 @@
         <!-- if !tokenDecodesCorrectly, display error -->
         <q-btn
           v-if="receiveData.tokensBase64.length && !tokenDecodesCorrectly"
-          disabled="true"
-          color="negative"
+          disabled
+          color="yellow"
+          text-color="black"
           rounded
-          outlined
+          unelevated
           class="q-mr-sm"
           label="Invalid token"
         ></q-btn>
