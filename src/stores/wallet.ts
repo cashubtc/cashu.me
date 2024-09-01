@@ -247,14 +247,7 @@ export const useWalletStore = defineStore("wallet", {
 
       return amountsWithCount;
     },
-    coinSelect: function (proofs: WalletProof[], amount: number) {
-
-      if (proofs.reduce((s, t) => (s += t.amount), 0) < amount) {
-        // there are not enough proofs to pay the amount
-        return [];
-      }
-
-      // override: if there are proofs with a base64 id, use them
+    coinSelectSpendBase64: function (proofs: WalletProof[], amount: number): WalletProof[] {
       const base64Proofs = proofs.filter(p => !p.id.startsWith("00"))
       if (base64Proofs.length > 0) {
         base64Proofs.sort((a, b) => b.amount - a.amount);
@@ -268,6 +261,20 @@ export const useWalletStore = defineStore("wallet", {
             return selectedProofs;
           }
         }
+        return [];
+      }
+      return [];
+    },
+    coinSelect: function (proofs: WalletProof[], amount: number) {
+      if (proofs.reduce((s, t) => (s += t.amount), 0) < amount) {
+        // there are not enough proofs to pay the amount
+        return [];
+      }
+
+      // override: if there are proofs with a base64 id, use them
+      const base64Proofs = this.coinSelectSpendBase64(proofs, amount);
+      if (base64Proofs.length > 0) {
+        return base64Proofs;
       }
 
       // sort proofs by amount ascending
