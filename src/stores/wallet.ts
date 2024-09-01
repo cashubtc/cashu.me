@@ -133,7 +133,7 @@ export const useWalletStore = defineStore("wallet", {
         return keysetCounter.counter;
       } else {
         this.keysetCounters.push({ id, counter: 1 });
-        return 0;
+        return 1;
       }
     },
     increaseKeysetCounter: function (id: string, by: number) {
