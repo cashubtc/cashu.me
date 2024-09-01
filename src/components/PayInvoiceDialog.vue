@@ -185,7 +185,7 @@
             <q-btn
               unelevated
               dense
-              v-if="canPasteFromClipboard"
+              v-if="canPasteFromClipboard && payInvoiceData.input.request == ''"
               @click="pasteToParseDialog"
               ><q-icon name="content_paste" class="q-pr-sm" />Paste</q-btn
             >
@@ -193,7 +193,7 @@
               unelevated
               icon="qr_code_scanner"
               class="q-mx-0"
-              v-if="hasCamera"
+              v-if="hasCamera && payInvoiceData.input.request == ''"
               @click="showCamera"
             >
             </q-btn>
