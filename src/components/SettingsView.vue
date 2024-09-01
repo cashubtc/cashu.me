@@ -5,7 +5,9 @@
       <q-list padding>
         <q-item>
           <q-item-section>
-            <q-item-label overline>Backup seed phrase</q-item-label>
+            <q-item-label overline class="text-weight-bold"
+              >Backup seed phrase</q-item-label
+            >
             <q-item-label caption
               >Your seed phrase can restore your wallet. Keep it safe and
               private. Warning: this wallet does not support seed phrase
@@ -54,7 +56,7 @@
       <q-list padding>
         <q-item>
           <q-item-section>
-            <q-item-label overline>Generate P2PK Keys</q-item-label>
+            <q-item-label overline class="text-weight-bold">P2PK</q-item-label>
             <q-item-label caption
               >Generate a key pair to receive P2PK-locked ecash. Warning: This
               feature is experimental. Only use with small amounts. If you lose
@@ -138,7 +140,9 @@
       <q-list padding>
         <q-item>
           <q-item-section>
-            <q-item-label overline>Appearance</q-item-label>
+            <q-item-label overline class="text-weight-bold"
+              >Appearance</q-item-label
+            >
             <q-item-label caption>Change how your wallet looks </q-item-label>
             <!-- <div class="row q-py-md">
               <q-btn dense flat rounded @click="toggleDarkMode" size="md"
@@ -249,7 +253,9 @@
       <q-list padding>
         <q-item>
           <q-item-section>
-            <q-item-label overline>Lightning address</q-item-label>
+            <q-item-label overline class="text-weight-bold"
+              >Lightning address</q-item-label
+            >
             <q-item-label caption
               >Receive payments to your Lightning address.</q-item-label
             >
@@ -449,9 +455,11 @@
 
         <!-- NWC -->
 
-        <q-item>
+        <q-item class="q-pt-lg">
           <q-item-section>
-            <q-item-label overline>Nostr Wallet Connect (NWC)</q-item-label>
+            <q-item-label overline class="text-weight-bold"
+              >Nostr Wallet Connect (NWC)</q-item-label
+            >
             <q-item-label caption
               >Use NWC to control your wallet from any other
               application.</q-item-label
@@ -477,9 +485,8 @@
           <q-item-section>
             <!-- <q-item-label overline>Connections</q-item-label> -->
             <q-item-label caption
-              >These are active connections to your wallet. Note: You can only
-              use NWC for payments from your Bitcoin balance. Payments will be
-              made from your active mint.
+              >You can only use NWC for payments from your Bitcoin balance.
+              Payments will be made from your active mint.
             </q-item-label>
           </q-item-section>
         </q-item>
@@ -535,16 +542,81 @@
               </q-input>
             </q-item-section>
           </q-item>
-          <!-- <q-item v-if="false">
-          <q-btn
-            class="q-ml-sm q-px-md"
-            color="primary"
-            rounded
-            outline
-            @click="initNdk"
-            >Link to extension</q-btn
+          <!-- an input to add a new relay with a plus button in a slot of the input. below the input, show the relays -->
+          <q-item>
+            <q-item-section>
+              <q-item-label overline>Add relay</q-item-label>
+              <q-item-label caption
+                >Add a relay to connect to your wallet from a different device.
+              </q-item-label>
+            </q-item-section>
+          </q-item>
+          <q-item>
+            <q-item-section>
+              <q-input
+                outlined
+                rounded
+                dense
+                v-model="newRelay"
+                label="Relay"
+                append
+              >
+                <template v-slot:append>
+                  <q-btn
+                    flat
+                    dense
+                    icon="add"
+                    color="primary"
+                    @click="addRelay"
+                  ></q-btn>
+                </template>
+              </q-input>
+            </q-item-section>
+          </q-item>
+          <q-item>
+            <q-item-section>
+              <q-item-label overline>Relays</q-item-label>
+              <q-item-label caption
+                >These are the relays you can connect to your wallet from.
+              </q-item-label>
+            </q-item-section>
+          </q-item>
+          <q-item
+            v-for="relay in relays"
+            :key="relay"
+            class="q-mb-sm"
+            clickable
           >
-        </q-item> -->
+            <q-item-section
+              class="q-mx-none q-pl-none"
+              style="max-width: 1.5em"
+            >
+              <q-icon
+                name="content_copy"
+                @click="copyText(relay)"
+                size="1.1em"
+                color="grey"
+                class="q-mr-sm cursor-pointer"
+                ><q-tooltip>Copy relay</q-tooltip></q-icon
+              >
+            </q-item-section>
+            <q-item-section
+              class="q-mx-none q-pl-none"
+              style="max-width: 1.5em"
+            >
+              <q-icon
+                name="delete_outline"
+                @click="removeRelay(relay)"
+                size="1.3em"
+                color="grey"
+                class="q-mr-sm cursor-pointer"
+                ><q-tooltip>Remove relay</q-tooltip></q-icon
+              >
+            </q-item-section>
+            <q-item-section style="max-width: 10rem" class="cursor-pointer">
+              <q-item-label caption>{{ relay }} </q-item-label>
+            </q-item-section>
+          </q-item>
         </div>
       </q-list>
     </div>
@@ -552,7 +624,9 @@
       <q-list padding>
         <q-item>
           <q-item-section>
-            <q-item-label overline>Privacy</q-item-label>
+            <q-item-label overline class="text-weight-bold"
+              >Privacy</q-item-label
+            >
             <q-item-label caption>
               These settings affect your privacy.
             </q-item-label>
@@ -890,6 +964,7 @@ export default defineComponent({
       nip46Token: "",
       nostrPrivateKey: "",
       nip07SignerAvailable: false,
+      newRelay: "",
     };
   },
   computed: {
@@ -917,7 +992,7 @@ export default defineComponent({
       "showAddMintDialog",
       "showRemoveMintDialog",
     ]),
-    ...mapWritableState(useNWCStore, ["nwcEnabled", "connections"]),
+    ...mapWritableState(useNWCStore, ["nwcEnabled", "connections", "relays"]),
     keysetCountersByMint() {
       const mints = this.mints;
       const keysetCountersByMint = {}; // {mintUrl: [keysetCounter: {id: string, count: number}, ...]}
@@ -1125,6 +1200,20 @@ export default defineComponent({
       localStorage.clear();
       this.$router.push("/");
       this.$emit("close");
+    },
+    addRelay: function () {
+      if (this.newRelay) {
+        // if relay is already in relays, don't add it, send notification
+        if (this.relays.includes(this.newRelay)) {
+          this.notifyWarning("Relay already added");
+        } else {
+          this.relays.push(this.newRelay);
+          this.newRelay = "";
+        }
+      }
+    },
+    removeRelay: function (relay) {
+      this.relays = this.relays.filter((r) => r !== relay);
     },
   },
   created: async function () {
