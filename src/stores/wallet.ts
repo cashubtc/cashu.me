@@ -273,7 +273,7 @@ export const useWalletStore = defineStore("wallet", {
 
       // override: if there are proofs with a base64 id, use them
       const base64Proofs = this.coinSelectSpendBase64(proofs, amount);
-      if (base64Proofs.length > 0) {
+      if (base64Proofs.length > 0 && base64Proofs.reduce((s, t) => (s += t.amount), 0) >= amount) {
         return base64Proofs;
       }
 
