@@ -11,15 +11,6 @@
           <div class="col-10">
             <span class="text-h6">Receive Ecash</span>
           </div>
-          <q-btn
-            unelevated
-            class="q-mx-none q-pl-md"
-            v-if="!receiveData.tokensBase64.length"
-            @click="handleLockBtn"
-            dense
-          >
-            <q-icon name="lock_outline" class="q-pr-sm" />
-          </q-btn>
         </div>
         <div>
           <P2PKDialog v-model="showP2PKDialog" />
@@ -56,7 +47,7 @@
           />
         </div>
       </div>
-      <div class="row q-mt-lg q-pl-xs">
+      <div class="row q-mt-lg">
         <!-- if !tokenDecodesCorrectly, display error -->
         <q-btn
           v-if="receiveData.tokensBase64.length && !tokenDecodesCorrectly"
@@ -97,9 +88,9 @@
         </q-btn>
         <q-btn
           unelevated
+          dense
           v-if="canPasteFromClipboard && !receiveData.tokensBase64.length"
           @click="pasteToParseDialog"
-          class="q-ml-none q-pl-none"
         >
           <q-icon name="content_paste" class="q-pr-sm" />Paste</q-btn
         >
@@ -109,9 +100,16 @@
           v-if="hasCamera && !receiveData.tokensBase64.length"
           @click="showCamera"
         >
-          <q-icon name="qr_code_scanner" class="q-pr-sm" />
-          Scan</q-btn
+          <q-icon name="qr_code_scanner" />
+        </q-btn>
+        <q-btn
+          unelevated
+          class="q-mx-none"
+          v-if="!receiveData.tokensBase64.length"
+          @click="handleLockBtn"
         >
+          <q-icon name="lock_outline" />
+        </q-btn>
 
         <q-btn v-close-popup rounded flat color="grey" class="q-ml-auto"
           >Close</q-btn

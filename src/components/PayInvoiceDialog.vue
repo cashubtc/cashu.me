@@ -55,11 +55,17 @@
               payInvoiceData.blocking || payInvoiceData.meltQuote.error != ''
             "
             @click="melt"
-            :label="payInvoiceData.meltQuote.error != '' ? 'Error' : !payInvoiceData.blocking ? 'Pay' : 'Processing...'"
+            :label="
+              payInvoiceData.meltQuote.error != ''
+                ? 'Error'
+                : !payInvoiceData.blocking
+                ? 'Pay'
+                : 'Processing...'
+            "
             :loading="globalMutexLock && !payInvoiceData.blocking"
             class="q-px-lg"
-            >
-          <template v-slot:loading >
+          >
+            <template v-slot:loading>
               <q-spinner-hourglass />
             </template>
           </q-btn>
@@ -172,16 +178,16 @@
               rounded
               color="primary"
               class="q-mr-sm"
-              :disable="payInvoiceData.input.request == ''"
+              v-if="payInvoiceData.input.request != ''"
               type="submit"
               >Enter</q-btn
             >
             <q-btn
               unelevated
+              dense
               v-if="canPasteFromClipboard"
-              icon="content_paste"
               @click="pasteToParseDialog"
-              ><q-tooltip>Paste</q-tooltip></q-btn
+              ><q-icon name="content_paste" class="q-pr-sm" />Paste</q-btn
             >
             <q-btn
               unelevated
