@@ -335,8 +335,7 @@ export const useMintsStore = defineStore("mints", {
         throw error;
       }
     },
-    fetchMintKeys: async function (mint: Mint) {
-
+    fetchMintKeys: async function (mint: Mint): Promise<Mint> {
       try {
         const mintClass = new MintClass(mint);
         const keysets = await this.fetchMintKeysets(mint);

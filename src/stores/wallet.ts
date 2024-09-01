@@ -158,7 +158,23 @@ export const useWalletStore = defineStore("wallet", {
         console.error("no keysets found for unit", mintStore.activeUnit);
         throw new Error("no keysets found for unit");
       }
-      const keyset_id = unitKeysets[0].id;
+      // select the keyset id
+      // const keyset_id = unitKeysets[0].id;
+      // rules for selection:
+      // - filter all keysets that are active=true
+      // - order by id (whether it is hex or base64)
+      // - order by input_fee_ppk (ascending) TODO: this is not implemented yet
+      // - select the first one
+      const activeKeysets = unitKeysets.filter(k => k.active)
+      const hexKeysets = activeKeysets.filter(k => k.id.startsWith("00"))
+      const base64Keysets = activeKeysets.filter(k => !k.id.startsWith("00"))
+      const sortedKeysets = hexKeysets.concat(base64Keysets)
+      // const sortedKeysets = _.sortBy(activeKeysets, k => [k.id, k.input_fee_ppk])
+      if (sortedKeysets.length == 0) {
+        console.error("no active keysets found for unit", mintStore.activeUnit);
+        throw new Error("no active keysets found for unit");
+      }
+      const keyset_id = sortedKeysets[0].id;
       const keys = mintStore.activeMint().mint.keys.find((k) => k.id === keyset_id);
       if (keys) {
         this.wallet.keys = keys;
