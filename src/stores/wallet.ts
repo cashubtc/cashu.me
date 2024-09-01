@@ -253,22 +253,7 @@ export const useWalletStore = defineStore("wallet", {
         // there are not enough proofs to pay the amount
         return [];
       }
-      // override: if there are proofs with a base64 id, use them all
-      const base64Proofs = proofs.filter(p => !p.id.startsWith("00"))
-      if (base64Proofs.length > 0) {
-        // sort by amount descending and return when sum is bigger than amount
-        base64Proofs.sort((a, b) => b.amount - a.amount);
-        let sum = 0;
-        let selectedProofs: WalletProof[] = [];
-        for (let i = 0; i < base64Proofs.length; i++) {
-          const proof = base64Proofs[i];
-          sum += proof.amount;
-          selectedProofs.push(proof);
-          if (sum >= amount) {
-            return selectedProofs;
-          }
-        }
-      }
+
       // sort proofs by amount ascending
       proofs = proofs.slice().sort((a, b) => a.amount - b.amount);
       // remember next bigger proof as a fallback
