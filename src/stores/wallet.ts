@@ -663,8 +663,11 @@ export const useWalletStore = defineStore("wallet", {
       try {
         // proof management
         const serializedSendProofs = proofsStore.serializeProofs(sendProofs);
+        if (serializedSendProofs == null) {
+          throw new Error("could not serialize proofs.");
+        }
         proofsStore.setReserved(sendProofs, true);
-        await this.addOutgoingPendingInvoiceToHistory(quote, serializedSendProofs || undefined)
+        await this.addOutgoingPendingInvoiceToHistory(quote, serializedSendProofs);
 
         // NUT-08 blank outputs for change
         const counter = this.keysetCounter(keysetId);
@@ -702,22 +705,30 @@ export const useWalletStore = defineStore("wallet", {
           );
           mintStore.addProofs(changeProofs);
         }
-        if (serializedSendProofs != null) {
-          tokenStore.addPaidToken({
-            amount: -amount_paid,
-            serializedProofs: serializedSendProofs,
-            unit: mintStore.activeUnit,
-            mint: mintStore.activeMintUrl,
-          });
-        }
+
+        tokenStore.addPaidToken({
+          amount: -amount_paid,
+          serializedProofs: serializedSendProofs,
+          unit: mintStore.activeUnit,
+          mint: mintStore.activeMintUrl,
+        });
+
         this.updateInvoiceInHistory(quote, { status: "paid", amount: -amount_paid })
+
         this.payInvoiceData.invoice = { sat: 0, memo: "", bolt11: "" };
         this.payInvoiceData.show = false;
         return data;
       } catch (error: any) {
         if (isUnloading) {
+          // NOTE: An error is thrown when the user exits the app while the payment is in progress.
           // do not handle the error if the user exits the app
-          return;
+          throw error;
+        }
+        // get quote and check state
+        const mintQuote = await mintStore.activeMint().api.checkMeltQuote(quote.quote);
+        if (mintQuote.state == MeltQuoteState.PAID || mintQuote.state == MeltQuoteState.PENDING) {
+          console.log("### melt: error, but quote is paid or pending. not rolling back.");
+          throw error;
         }
         // roll back proof management and keyset counter
         proofsStore.setReserved(sendProofs, false);
