@@ -581,15 +581,10 @@
               </q-item-label>
             </q-item-section>
           </q-item>
-          <q-item
-            v-for="relay in relays"
-            :key="relay"
-            class="q-mb-sm"
-            clickable
-          >
+          <q-item v-for="relay in relays" :key="relay" clickable>
             <q-item-section
               class="q-mx-none q-pl-none"
-              style="max-width: 1.5em"
+              style="max-width: 1.2em"
             >
               <q-icon
                 name="content_copy"
