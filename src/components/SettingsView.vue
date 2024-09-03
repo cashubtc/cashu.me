@@ -337,6 +337,25 @@
                 <q-item-label caption
                   >Generate nostr key pair from wallet seed
                 </q-item-label>
+                <q-item-label
+                  caption
+                  v-if="signerType === 'SEED' && seedSignerPrivateKeyNsec"
+                >
+                  <q-badge
+                    class="cursor-pointer q-mt-xs"
+                    @click="copyText(seedSignerPrivateKeyNsec)"
+                    outline
+                    color="grey"
+                  >
+                    <q-icon
+                      name="content_copy"
+                      size="0.8em"
+                      color="grey"
+                      class="q-mr-xs"
+                    ></q-icon
+                    >Copy nsec
+                  </q-badge>
+                </q-item-label>
               </q-item-section>
             </q-item>
             <!-- Nip46Signer -->
@@ -888,7 +907,6 @@ export default defineComponent({
       confirmMnemonic: false,
       confirmNuke: false,
       nip46Token: "",
-      nostrPrivateKey: "",
       nip07SignerAvailable: false,
     };
   },
@@ -907,7 +925,12 @@ export default defineComponent({
       "proofs",
     ]),
     ...mapState(useNPCStore, ["npcLoading"]),
-    ...mapState(useNostrStore, ["pubkey", "mintRecommendations", "signerType"]),
+    ...mapState(useNostrStore, [
+      "pubkey",
+      "mintRecommendations",
+      "signerType",
+      "seedSignerPrivateKeyNsec",
+    ]),
     ...mapState(useWalletStore, ["mnemonic"]),
     ...mapWritableState(useNPCStore, ["npcAddress"]),
     ...mapWritableState(useNPCStore, ["npcEnabled", "automaticClaim"]),
