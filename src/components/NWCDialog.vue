@@ -34,7 +34,7 @@
               <q-item-label
                 caption
                 class="text-weight-light text-white"
-                style="font-size: 14px"
+                style="font-size: 12px"
               >
                 Control your wallet remotely with NWC. Press the QR code to link
                 your wallet with a compatible app.

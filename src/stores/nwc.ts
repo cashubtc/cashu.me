@@ -46,7 +46,7 @@ export const useNWCStore = defineStore("nwc", {
     nwcEnabled: useLocalStorage<boolean>("cashu.nwc.enabled", false),
     connections: useLocalStorage<NWCConnection[]>("cashu.nwc.connections", []),
     supportedMethods: ["pay_invoice", "get_balance", "get_info", "list_transactions"],
-    relays: useSettingsStore().defaultNostrRelays,
+    relays: useLocalStorage<string[]>("cashu.nwc.relays", useSettingsStore().defaultNostrRelays),
     blocking: false,
     ndk: new NDK(),
     subscriptions: [] as NDKSubscription[],
@@ -336,7 +336,7 @@ export const useNWCStore = defineStore("nwc", {
         "#p": [conn.walletPublicKey]
       } as NDKFilter;
       const sub = this.ndk.subscribe(filter);
-      console.log("### subscribing to NWC")
+      console.log("### subscribing to NWC on relays: ", this.relays)
       this.subscriptions.push(sub)
 
       sub.on("eose", () => console.log("All relays have reached the end of the event stream"));

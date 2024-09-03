@@ -1,19 +1,21 @@
 <template>
   <div style="max-width: 800px; margin: 0 auto">
     <!-- ////////////////////// SETTINGS ////////////////// -->
-    <div class="q-pb-md q-px-xs text-left" on-left>
+    <div class="q-px-xs text-left" on-left>
       <q-list padding>
         <q-item>
           <q-item-section>
-            <q-item-label overline>Backup seed phrase</q-item-label>
+            <q-item-label overline class="text-weight-bold"
+              >Backup seed phrase</q-item-label
+            >
             <q-item-label caption
               >Your seed phrase can restore your wallet. Keep it safe and
               private. Warning: this wallet does not support seed phrase
               recovery yet. Use a different Cashu wallet or
-              <a href="https://v2alpha.nutstash.app/" target="_blank">
-                this tool
-              </a>
-              > to recover from seed phrase.
+              <a href="https://v2alpha.nutstash.app/" target="_blank"
+                >this tool</a
+              >
+              to recover from seed phrase.
             </q-item-label>
             <div class="row q-pt-md">
               <div class="col-12">
@@ -54,7 +56,7 @@
       <q-list padding>
         <q-item>
           <q-item-section>
-            <q-item-label overline>Generate P2PK Keys</q-item-label>
+            <q-item-label overline class="text-weight-bold">P2PK</q-item-label>
             <q-item-label caption
               >Generate a key pair to receive P2PK-locked ecash. Warning: This
               feature is experimental. Only use with small amounts. If you lose
@@ -67,31 +69,21 @@
           <q-btn
             class="q-ml-sm q-px-md"
             color="primary"
+            size="sm"
             rounded
             outline
             @click="generateKeypair"
-            >Generate keys</q-btn
+            >Generate key</q-btn
           >
         </q-item>
       </q-list>
     </div>
-
-    <q-item class="text-left" v-if="p2pkKeys.length">
-      <q-item-section>
-        <q-item-label overline
-          >You have {{ p2pkKeys.length }} keys</q-item-label
-        >
-        <q-item-label caption
-          >You can use these keys to receive ecash.
-        </q-item-label>
-      </q-item-section>
-    </q-item>
     <q-expansion-item
       dense
       dense-toggle
       v-if="p2pkKeys.length"
       class="text-left"
-      label="Click to browse your keys"
+      :label="`Click to browse ${p2pkKeys.length} keys`"
     >
       <q-item v-for="key in p2pkKeys" :key="key.privakey">
         <q-item-section class="q-mx-none q-pl-none" style="max-width: 1.05em">
@@ -133,123 +125,14 @@
       </q-item>
     </q-expansion-item>
 
-    <!-- theme -->
-    <div class="q-py-lg q-px-xs text-left" on-left>
-      <q-list padding>
-        <q-item>
-          <q-item-section>
-            <q-item-label overline>Appearance</q-item-label>
-            <q-item-label caption>Change how your wallet looks </q-item-label>
-            <!-- <div class="row q-py-md">
-              <q-btn dense flat rounded @click="toggleDarkMode" size="md"
-                >Toggle dark mode<q-icon
-                  class="q-ml-sm"
-                  :name="$q.dark.isActive ? 'brightness_3' : 'wb_sunny'"
-                />
-              </q-btn>
-            </div> -->
-            <div class="row q-pt-md">
-              <q-btn
-                v-if="themes.includes('classic')"
-                dense
-                flat
-                @click="changeColor('classic')"
-                icon="format_color_fill"
-                color="deep-purple"
-                size="md"
-                ><q-tooltip>classic</q-tooltip>
-              </q-btn>
-              <q-btn
-                v-if="themes.includes('bitcoin')"
-                dense
-                flat
-                @click="changeColor('bitcoin')"
-                icon="format_color_fill"
-                color="orange"
-                size="md"
-                ><q-tooltip>bitcoin</q-tooltip>
-              </q-btn>
-              <q-btn
-                v-if="themes.includes('mint')"
-                dense
-                flat
-                @click="changeColor('mint')"
-                icon="format_color_fill"
-                color="green"
-                size="md"
-                ><q-tooltip>mint</q-tooltip> </q-btn
-              ><q-btn
-                v-if="themes.includes('autumn')"
-                dense
-                flat
-                @click="changeColor('autumn')"
-                icon="format_color_fill"
-                color="brown"
-                size="md"
-                ><q-tooltip>autumn</q-tooltip>
-              </q-btn>
-              <q-btn
-                v-if="themes.includes('monochrome')"
-                dense
-                flat
-                @click="changeColor('monochrome')"
-                icon="format_color_fill"
-                color="grey"
-                size="md"
-                ><q-tooltip>monochrome</q-tooltip>
-              </q-btn>
-              <q-btn
-                v-if="themes.includes('salvador')"
-                dense
-                flat
-                @click="changeColor('salvador')"
-                icon="format_color_fill"
-                color="blue-10"
-                size="md"
-                ><q-tooltip>blu</q-tooltip>
-              </q-btn>
-              <q-btn
-                v-if="themes.includes('freedom')"
-                dense
-                flat
-                @click="changeColor('freedom')"
-                icon="format_color_fill"
-                color="pink-13"
-                size="md"
-                ><q-tooltip>freedom</q-tooltip>
-              </q-btn>
-              <q-btn
-                v-if="themes.includes('cyber')"
-                dense
-                flat
-                @click="changeColor('cyber')"
-                icon="format_color_fill"
-                color="light-green-9"
-                size="md"
-                ><q-tooltip>cyber</q-tooltip>
-              </q-btn>
-              <q-btn
-                v-if="themes.includes('flamingo')"
-                dense
-                flat
-                @click="changeColor('flamingo')"
-                icon="format_color_fill"
-                color="pink-3"
-                size="md"
-                ><q-tooltip>flamingo</q-tooltip>
-              </q-btn>
-            </div>
-          </q-item-section>
-        </q-item>
-      </q-list>
-    </div>
-
     <!-- ln address -->
     <div class="q-py-sm q-px-xs text-left" on-left>
       <q-list padding>
         <q-item>
           <q-item-section>
-            <q-item-label overline>Lightning address</q-item-label>
+            <q-item-label overline class="text-weight-bold"
+              >Lightning address</q-item-label
+            >
             <q-item-label caption
               >Receive payments to your Lightning address.</q-item-label
             >
@@ -468,9 +351,11 @@
 
         <!-- NWC -->
 
-        <q-item>
+        <q-item class="q-pt-lg">
           <q-item-section>
-            <q-item-label overline>Nostr Wallet Connect (NWC)</q-item-label>
+            <q-item-label overline class="text-weight-bold"
+              >Nostr Wallet Connect (NWC)</q-item-label
+            >
             <q-item-label caption
               >Use NWC to control your wallet from any other
               application.</q-item-label
@@ -496,9 +381,8 @@
           <q-item-section>
             <!-- <q-item-label overline>Connections</q-item-label> -->
             <q-item-label caption
-              >These are active connections to your wallet. Note: You can only
-              use NWC for payments from your Bitcoin balance. Payments will be
-              made from your active mint.
+              >You can only use NWC for payments from your Bitcoin balance.
+              Payments will be made from your active mint.
             </q-item-label>
           </q-item-section>
         </q-item>
@@ -554,16 +438,84 @@
               </q-input>
             </q-item-section>
           </q-item>
-          <!-- <q-item v-if="false">
-          <q-btn
-            class="q-ml-sm q-px-md"
-            color="primary"
-            rounded
-            outline
-            @click="initNdk"
-            >Link to extension</q-btn
+
+          <q-expansion-item
+            dense
+            dense-toggle
+            class="text-left"
+            label="Click to edit relays"
           >
-        </q-item> -->
+            <q-item>
+              <q-item-section>
+                <q-item-label overline>Add relay</q-item-label>
+                <q-item-label caption
+                  >Nostr Wallet Connect uses nostr relays to connect your wallet
+                  to other applications.
+                </q-item-label>
+              </q-item-section>
+            </q-item>
+            <q-item>
+              <q-item-section>
+                <q-input
+                  outlined
+                  rounded
+                  dense
+                  v-model="newRelay"
+                  label="Relay"
+                  append
+                >
+                  <template v-slot:append>
+                    <q-btn
+                      flat
+                      dense
+                      icon="add"
+                      color="primary"
+                      @click="addRelay"
+                    ></q-btn>
+                  </template>
+                </q-input>
+              </q-item-section>
+            </q-item>
+            <q-item>
+              <q-item-section>
+                <q-item-label overline>Relays</q-item-label>
+                <q-item-label caption
+                  >Your wallet will connect to these relays.
+                </q-item-label>
+              </q-item-section>
+            </q-item>
+            <q-item v-for="relay in relays" :key="relay" clickable>
+              <q-item-section
+                class="q-mx-none q-pl-none"
+                style="max-width: 1.2em"
+              >
+                <q-icon
+                  name="content_copy"
+                  @click="copyText(relay)"
+                  size="1.1em"
+                  color="grey"
+                  class="q-mr-sm cursor-pointer"
+                  ><q-tooltip>Copy relay</q-tooltip></q-icon
+                >
+              </q-item-section>
+              <q-item-section
+                class="q-mx-none q-pl-none"
+                style="max-width: 1.5em"
+              >
+                <q-icon
+                  name="delete_outline"
+                  @click="removeRelay(relay)"
+                  size="1.3em"
+                  color="grey"
+                  class="q-mr-sm cursor-pointer"
+                  ><q-tooltip>Remove relay</q-tooltip></q-icon
+                >
+              </q-item-section>
+              <q-item-section style="max-width: 10rem" class="cursor-pointer">
+                <q-item-label caption>{{ relay }} </q-item-label>
+              </q-item-section>
+            </q-item>
+          </q-expansion-item>
         </div>
       </q-list>
     </div>
@@ -571,7 +523,9 @@
       <q-list padding>
         <q-item>
           <q-item-section>
-            <q-item-label overline>Privacy</q-item-label>
+            <q-item-label overline class="text-weight-bold"
+              >Privacy</q-item-label
+            >
             <q-item-label caption>
               These settings affect your privacy.
             </q-item-label>
@@ -607,6 +561,122 @@
             </q-item-label>
           </q-item>
         </div>
+
+        <!-- theme -->
+        <div class="q-py-mb q-px-xs text-left" on-left>
+          <q-list padding>
+            <q-item>
+              <q-item-section>
+                <q-item-label overline class="text-weight-bold"
+                  >Appearance</q-item-label
+                >
+                <q-item-label caption
+                  >Change how your wallet looks
+                </q-item-label>
+                <!-- <div class="row q-py-md">
+              <q-btn dense flat rounded @click="toggleDarkMode" size="md"
+                >Toggle dark mode<q-icon
+                  class="q-ml-sm"
+                  :name="$q.dark.isActive ? 'brightness_3' : 'wb_sunny'"
+                />
+              </q-btn>
+            </div> -->
+                <div class="row q-pt-md">
+                  <q-btn
+                    v-if="themes.includes('monochrome')"
+                    dense
+                    flat
+                    @click="changeColor('monochrome')"
+                    icon="format_color_fill"
+                    color="grey"
+                    size="md"
+                    ><q-tooltip>mono</q-tooltip>
+                  </q-btn>
+                  <q-btn
+                    v-if="themes.includes('cyber')"
+                    dense
+                    flat
+                    @click="changeColor('cyber')"
+                    icon="format_color_fill"
+                    color="light-green-9"
+                    size="md"
+                    ><q-tooltip>cyber</q-tooltip>
+                  </q-btn>
+                  <q-btn
+                    v-if="themes.includes('freedom')"
+                    dense
+                    flat
+                    @click="changeColor('freedom')"
+                    icon="format_color_fill"
+                    color="pink-13"
+                    size="md"
+                    ><q-tooltip>freedom</q-tooltip>
+                  </q-btn>
+                  <q-btn
+                    v-if="themes.includes('classic')"
+                    dense
+                    flat
+                    @click="changeColor('classic')"
+                    icon="format_color_fill"
+                    color="deep-purple"
+                    size="md"
+                    ><q-tooltip>nostr</q-tooltip>
+                  </q-btn>
+                  <q-btn
+                    v-if="themes.includes('bitcoin')"
+                    dense
+                    flat
+                    @click="changeColor('bitcoin')"
+                    icon="format_color_fill"
+                    color="orange"
+                    size="md"
+                    ><q-tooltip>bitcoin</q-tooltip>
+                  </q-btn>
+                  <q-btn
+                    v-if="themes.includes('mint')"
+                    dense
+                    flat
+                    @click="changeColor('mint')"
+                    icon="format_color_fill"
+                    color="green"
+                    size="md"
+                    ><q-tooltip>mint</q-tooltip> </q-btn
+                  ><q-btn
+                    v-if="themes.includes('autumn')"
+                    dense
+                    flat
+                    @click="changeColor('autumn')"
+                    icon="format_color_fill"
+                    color="brown"
+                    size="md"
+                    ><q-tooltip>nut</q-tooltip>
+                  </q-btn>
+                  <q-btn
+                    v-if="themes.includes('salvador')"
+                    dense
+                    flat
+                    @click="changeColor('salvador')"
+                    icon="format_color_fill"
+                    color="blue-10"
+                    size="md"
+                    ><q-tooltip>blu</q-tooltip>
+                  </q-btn>
+                  <q-btn
+                    v-if="themes.includes('flamingo')"
+                    dense
+                    flat
+                    @click="changeColor('flamingo')"
+                    icon="format_color_fill"
+                    color="pink-3"
+                    size="md"
+                    ><q-tooltip>flamingo</q-tooltip>
+                  </q-btn>
+                </div>
+              </q-item-section>
+            </q-item>
+          </q-list>
+        </div>
+
         <q-expansion-item
           class="q-pt-lg"
           dense
@@ -908,6 +978,7 @@ export default defineComponent({
       confirmNuke: false,
       nip46Token: "",
       nip07SignerAvailable: false,
+      newRelay: "",
     };
   },
   computed: {
@@ -940,7 +1011,7 @@ export default defineComponent({
       "showAddMintDialog",
       "showRemoveMintDialog",
     ]),
-    ...mapWritableState(useNWCStore, ["nwcEnabled", "connections"]),
+    ...mapWritableState(useNWCStore, ["nwcEnabled", "connections", "relays"]),
     keysetCountersByMint() {
       const mints = this.mints;
       const keysetCountersByMint = {}; // {mintUrl: [keysetCounter: {id: string, count: number}, ...]}
@@ -1148,6 +1219,21 @@ export default defineComponent({
       localStorage.clear();
       this.$router.push("/");
       this.$emit("close");
+    },
+    addRelay: function () {
+      if (this.newRelay) {
+        this.newRelay = this.newRelay.trim();
+        // if relay is already in relays, don't add it, send notification
+        if (this.relays.includes(this.newRelay)) {
+          this.notifyWarning("Relay already added");
+        } else {
+          this.relays.push(this.newRelay);
+          this.newRelay = "";
+        }
+      }
+    },
+    removeRelay: function (relay) {
+      this.relays = this.relays.filter((r) => r !== relay);
     },
   },
   created: async function () {
