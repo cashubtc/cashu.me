@@ -31,13 +31,17 @@ export const useNostrStore = defineStore("nostr", {
     nip46signer: {} as NDKNip46Signer,
     privateKeySignerPrivateKey: useLocalStorage<string>("cashu.ndk.privateKeySignerPrivateKey", ""),
     seedSignerPrivateKey: useLocalStorage<string>("cashu.ndk.seedSignerPrivateKey", ""),
+    seedSignerPrivateKeyNsec: "",
     privateKeySigner: {} as NDKPrivateKeySigner,
     signer: {} as NDKSigner,
     mintRecommendations: useLocalStorage<MintRecommendation[]>("cashu.ndk.mintRecommendations", []),
     initialized: false,
   }),
   getters: {
-
+    seedSignerPrivateKeyNsec: (state) => {
+      const sk = hexToBytes(state.seedSignerPrivateKey);
+      return nip19.nsecEncode(sk);
+    }
   },
   actions: {
     initNdkReadOnly: function () {
