@@ -1222,6 +1222,7 @@ export default defineComponent({
     },
     addRelay: function () {
       if (this.newRelay) {
+        this.newRelay = this.newRelay.trim();
         // if relay is already in relays, don't add it, send notification
         if (this.relays.includes(this.newRelay)) {
           this.notifyWarning("Relay already added");
