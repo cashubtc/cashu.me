@@ -583,6 +583,36 @@
             </div> -->
                 <div class="row q-pt-md">
                   <q-btn
+                    v-if="themes.includes('monochrome')"
+                    dense
+                    flat
+                    @click="changeColor('monochrome')"
+                    icon="format_color_fill"
+                    color="grey"
+                    size="md"
+                    ><q-tooltip>mono</q-tooltip>
+                  </q-btn>
+                  <q-btn
+                    v-if="themes.includes('cyber')"
+                    dense
+                    flat
+                    @click="changeColor('cyber')"
+                    icon="format_color_fill"
+                    color="light-green-9"
+                    size="md"
+                    ><q-tooltip>cyber</q-tooltip>
+                  </q-btn>
+                  <q-btn
+                    v-if="themes.includes('freedom')"
+                    dense
+                    flat
+                    @click="changeColor('freedom')"
+                    icon="format_color_fill"
+                    color="pink-13"
+                    size="md"
+                    ><q-tooltip>freedom</q-tooltip>
+                  </q-btn>
+                  <q-btn
                     v-if="themes.includes('classic')"
                     dense
                     flat
@@ -590,7 +620,7 @@
                     icon="format_color_fill"
                     color="deep-purple"
                     size="md"
-                    ><q-tooltip>classic</q-tooltip>
+                    ><q-tooltip>nostr</q-tooltip>
                   </q-btn>
                   <q-btn
                     v-if="themes.includes('bitcoin')"
@@ -619,17 +649,7 @@
                     icon="format_color_fill"
                     color="brown"
                     size="md"
-                    ><q-tooltip>autumn</q-tooltip>
-                  </q-btn>
-                  <q-btn
-                    v-if="themes.includes('monochrome')"
-                    dense
-                    flat
-                    @click="changeColor('monochrome')"
-                    icon="format_color_fill"
-                    color="grey"
-                    size="md"
-                    ><q-tooltip>monochrome</q-tooltip>
+                    ><q-tooltip>nut</q-tooltip>
                   </q-btn>
                   <q-btn
                     v-if="themes.includes('salvador')"
@@ -640,26 +660,6 @@
                     color="blue-10"
                     size="md"
                     ><q-tooltip>blu</q-tooltip>
-                  </q-btn>
-                  <q-btn
-                    v-if="themes.includes('freedom')"
-                    dense
-                    flat
-                    @click="changeColor('freedom')"
-                    icon="format_color_fill"
-                    color="pink-13"
-                    size="md"
-                    ><q-tooltip>freedom</q-tooltip>
-                  </q-btn>
-                  <q-btn
-                    v-if="themes.includes('cyber')"
-                    dense
-                    flat
-                    @click="changeColor('cyber')"
-                    icon="format_color_fill"
-                    color="light-green-9"
-                    size="md"
-                    ><q-tooltip>cyber</q-tooltip>
                   </q-btn>
                   <q-btn
                     v-if="themes.includes('flamingo')"
