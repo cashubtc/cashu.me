@@ -449,8 +449,8 @@
               <q-item-section>
                 <q-item-label overline>Add relay</q-item-label>
                 <q-item-label caption
-                  >Add a relay to connect to your wallet from a different
-                  device.
+                  >Nostr Wallet Connect uses nostr relays to connect your wallet
+                  to other applications.
                 </q-item-label>
               </q-item-section>
             </q-item>
@@ -480,7 +480,7 @@
               <q-item-section>
                 <q-item-label overline>Relays</q-item-label>
                 <q-item-label caption
-                  >These are the relays you can connect to your wallet from.
+                  >Your wallet will connect to these relays.
                 </q-item-label>
               </q-item-section>
             </q-item>
