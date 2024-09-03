@@ -31,6 +31,7 @@ export const useNostrStore = defineStore("nostr", {
     nip46signer: {} as NDKNip46Signer,
     privateKeySignerPrivateKey: useLocalStorage<string>("cashu.ndk.privateKeySignerPrivateKey", ""),
     seedSignerPrivateKey: useLocalStorage<string>("cashu.ndk.seedSignerPrivateKey", ""),
+    seedSignerPrivateKeyNsec: useLocalStorage<string>("cashu.ndk.seedSignerPrivateKeyNsec", ""),
     privateKeySigner: {} as NDKPrivateKeySigner,
     signer: {} as NDKSigner,
     mintRecommendations: useLocalStorage<MintRecommendation[]>("cashu.ndk.mintRecommendations", []),
@@ -165,6 +166,7 @@ export const useNostrStore = defineStore("nostr", {
       const walletPublicKeyHex = getPublicKey(sk) // `pk` is a hex string
       const walletPrivateKeyHex = bytesToHex(sk)
       this.seedSignerPrivateKey = walletPrivateKeyHex;
+      this.seedSignerPrivateKeyNsec = nip19.nsecEncode(sk);
       this.privateKeySigner = new NDKPrivateKeySigner(walletPrivateKeyHex)
       this.signerType = SignerType.SEED;
       this.setSigner(this.privateKeySigner);
