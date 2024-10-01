@@ -2,7 +2,7 @@ import { defineStore } from "pinia";
 import { useLocalStorage } from "@vueuse/core";
 import { useWorkersStore } from "./workers";
 import { notifyApiError, notifyError, notifySuccess } from "src/js/notify";
-import { CashuMint, MintKeys, MintAllKeysets, Proof, SerializedBlindedSignature, MintKeyset } from "@cashu/cashu-ts";
+import { CashuMint, MintKeys, MintAllKeysets, MintActiveKeys, Proof, SerializedBlindedSignature, MintKeyset, GetInfoResponse } from "@cashu/cashu-ts";
 import { useUiStore } from "./ui";
 export type Mint = {
   url: string;
@@ -115,6 +115,23 @@ export const useMintsStore = defineStore("mints", {
         allUnitKeysets.map((k) => k.id).includes(p.id)
       ).reduce((sum, p) => sum + p.amount, 0);
       return balance
+    },
+    activeKeysets({ activeMintUrl, activeUnit }): MintKeyset[] {
+      const unitKeysets = this.mints.find((m) => m.url === activeMintUrl)?.keysets?.filter((k) => k.unit === activeUnit);
+      if (!unitKeysets) {
+        return [];
+      }
+      return unitKeysets;
+    },
+    activeKeys({ activeMintUrl, activeUnit }): MintKeys[] {
+      const unitKeys = this.mints.find((m) => m.url === activeMintUrl)?.keys?.filter((k) => k.unit === activeUnit);
+      if (!unitKeys) {
+        return [];
+      }
+      return unitKeys;
+    },
+    activeInfo({ activeMintUrl }): GetInfoResponse {
+      return this.mints.find((m) => m.url === activeMintUrl)?.info;
     },
     activeUnitLabel({ activeUnit }): string {
       if (activeUnit == "sat") {

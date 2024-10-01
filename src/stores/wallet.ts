@@ -111,7 +111,7 @@ export const useWalletStore = defineStore("wallet", {
         this.mnemonic = generateNewMnemonic();
       }
       const mnemonic: string = this.mnemonic;
-      const wallet = new CashuWallet(mint, { mnemonicOrSeed: mnemonic, unit: mints.activeUnit });
+      const wallet = new CashuWallet(mint, { keys: mints.activeKeys, keysets: mints.activeKeysets, mintInfo: mints.activeInfo, mnemonicOrSeed: mnemonic, unit: mints.activeUnit });
       return wallet;
     },
     seed(): Uint8Array {
@@ -176,9 +176,9 @@ export const useWalletStore = defineStore("wallet", {
       }
       const keyset_id = sortedKeysets[0].id;
       const keys = mintStore.activeMint().mint.keys.find((k) => k.id === keyset_id);
-      if (keys) {
-        this.wallet.keys = keys;
-      }
+      // if (keys) {
+      //   this.wallet.keys = keys;
+      // }
       return keyset_id;
     },
     /**
@@ -441,7 +441,7 @@ export const useWalletStore = defineStore("wallet", {
         let tokenCts: Token
         let proofs: Proof[]
         try {
-          proofs = await this.wallet.receive(receiveStore.receiveData.tokensBase64, { counter, preference, privkey })
+          proofs = await this.wallet.receive(receiveStore.receiveData.tokensBase64, { counter, privkey, proofsWeHave: this.activeProofs })
           this.increaseKeysetCounter(keysetId, proofs.length);
         } catch (error: any) {
           console.error(error);
@@ -456,12 +456,14 @@ export const useWalletStore = defineStore("wallet", {
         // gather all token.token[i].proofs
         mintStore.addProofs(proofs);
 
+        const receivedAdmount = proofs.reduce((s, t) => (s += t.amount), 0);
+
         // if token is already in history, set to paid, else add to history
-        if (tokenStore.historyTokens.find((t) => t.token === receiveStore.receiveData.tokensBase64)) {
+        if (tokenStore.historyTokens.find((t) => t.token === receiveStore.receiveData.tokensBase64 && t.amount == receivedAdmount)) {
           tokenStore.setTokenPaid(receiveStore.receiveData.tokensBase64);
         } else {
           tokenStore.addPaidToken({
-            amount,
+            amount: receivedAdmount,
             serializedProofs: receiveStore.receiveData.tokensBase64,
             unit: mintStore.activeUnit,
             mint: mintStore.activeMintUrl,
@@ -470,7 +472,7 @@ export const useWalletStore = defineStore("wallet", {
 
 
         if (!!window.navigator.vibrate) navigator.vibrate(200);
-        notifySuccess("Received " + uIStore.formatCurrency(amount, mintStore.activeUnit));
+        notifySuccess("Received " + uIStore.formatCurrency(receivedAdmount, mintStore.activeUnit));
       } catch (error: any) {
         console.error(error);
         notifyApiError(error);
