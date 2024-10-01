@@ -265,55 +265,57 @@ export const useWalletStore = defineStore("wallet", {
       }
       return [];
     },
-    coinSelect: function (proofs: WalletProof[], amount: number) {
+    coinSelect: function (proofs: WalletProof[], amount: number, includeFees: boolean = false): WalletProof[] {
       if (proofs.reduce((s, t) => (s += t.amount), 0) < amount) {
         // there are not enough proofs to pay the amount
         return [];
       }
+      const { send: selectedProofs, returnChange: _ } = this.wallet.selectProofsToSend(proofs, amount, includeFees);
+      return selectedProofs;
 
-      // override: if there are proofs with a base64 id, use them
-      const base64Proofs = this.coinSelectSpendBase64(proofs, amount);
-      if (base64Proofs.length > 0 && base64Proofs.reduce((s, t) => (s += t.amount), 0) >= amount) {
-        return base64Proofs;
-      }
+      // // override: if there are proofs with a base64 id, use them
+      // const base64Proofs = this.coinSelectSpendBase64(proofs, amount);
+      // if (base64Proofs.length > 0 && base64Proofs.reduce((s, t) => (s += t.amount), 0) >= amount) {
+      //   return base64Proofs;
+      // }
 
-      // sort proofs by amount ascending
-      proofs = proofs.slice().sort((a, b) => a.amount - b.amount);
-      // remember next bigger proof as a fallback
-      const nextBigger = proofs.find((p) => p.amount > amount);
+      // // sort proofs by amount ascending
+      // proofs = proofs.slice().sort((a, b) => a.amount - b.amount);
+      // // remember next bigger proof as a fallback
+      // const nextBigger = proofs.find((p) => p.amount > amount);
 
-      // go through smaller proofs until sum is bigger than amount
-      const smallerProofs = proofs.filter((p) => p.amount <= amount);
-      // sort by amount descending
-      smallerProofs.sort((a, b) => b.amount - a.amount);
+      // // go through smaller proofs until sum is bigger than amount
+      // const smallerProofs = proofs.filter((p) => p.amount <= amount);
+      // // sort by amount descending
+      // smallerProofs.sort((a, b) => b.amount - a.amount);
 
-      let selectedProofs: WalletProof[] = [];
+      // let selectedProofs: WalletProof[] = [];
 
-      if (smallerProofs.length == 0 && nextBigger) {
-        // if there are no smaller proofs, take the next bigger proof as a fallback
-        return [nextBigger];
-      } else if (smallerProofs.length == 0 && !nextBigger) {
-        // no proofs available
-        return [];
-      }
+      // if (smallerProofs.length == 0 && nextBigger) {
+      //   // if there are no smaller proofs, take the next bigger proof as a fallback
+      //   return [nextBigger];
+      // } else if (smallerProofs.length == 0 && !nextBigger) {
+      //   // no proofs available
+      //   return [];
+      // }
 
-      // recursively select the largest proof of smallerProofs, subtract the amount from the remainder
-      // and call coinSelect again with the remainder and the rest of the smallerProofs (without the largest proof)
-      let remainder = amount;
-      selectedProofs = [smallerProofs[0]];
-      remainder -= smallerProofs[0].amount;
-      if (remainder > 0) {
-        selectedProofs = selectedProofs.concat(this.coinSelect(smallerProofs.slice(1), remainder));
-      }
-      let sum = selectedProofs.reduce((s, t) => (s += t.amount), 0);
+      // // recursively select the largest proof of smallerProofs, subtract the amount from the remainder
+      // // and call coinSelect again with the remainder and the rest of the smallerProofs (without the largest proof)
+      // let remainder = amount;
+      // selectedProofs = [smallerProofs[0]];
+      // remainder -= smallerProofs[0].amount;
+      // if (remainder > 0) {
+      //   selectedProofs = selectedProofs.concat(this.coinSelect(smallerProofs.slice(1), remainder));
+      // }
+      // let sum = selectedProofs.reduce((s, t) => (s += t.amount), 0);
 
-      // if sum of selectedProofs is smaller than amount, take next bigger proof instead as a fallback
-      if (sum < amount && nextBigger) {
-        selectedProofs = [nextBigger];
-      }
+      // // if sum of selectedProofs is smaller than amount, take next bigger proof instead as a fallback
+      // if (sum < amount && nextBigger) {
+      //   selectedProofs = [nextBigger];
+      // }
 
-      // console.log("### selected amounts", "sum", selectedProofs.reduce((s, t) => (s += t.amount), 0), selectedProofs.map(p => p.amount));
-      return selectedProofs
+      // // console.log("### selected amounts", "sum", selectedProofs.reduce((s, t) => (s += t.amount), 0), selectedProofs.map(p => p.amount));
+      // return selectedProofs
     },
     spendableProofs: function (proofs: WalletProof[], amount: number) {
       const uIStore = useUiStore();
@@ -342,7 +344,7 @@ export const useWalletStore = defineStore("wallet", {
       mintStore.removeProofs(proofsToSplit);
       return { keepProofs, sendProofs };
     },
-    splitToSend: async function (proofs: WalletProof[], amount: number, invalidate: boolean = false): Promise<{ keepProofs: Proof[], sendProofs: Proof[] }> {
+    splitToSend: async function (proofs: WalletProof[], amount: number, invalidate: boolean = false, includeFees: boolean = false): Promise<{ keepProofs: Proof[], sendProofs: Proof[] }> {
       /*
       splits proofs so the user can keep firstProofs, send scndProofs.
       then sets scndProofs as reserved.
@@ -357,14 +359,16 @@ export const useWalletStore = defineStore("wallet", {
       await uIStore.lockMutex();
       try {
         const spendableProofs = this.spendableProofs(proofs, amount);
-        proofsToSplit = this.coinSelect(spendableProofs, amount);
+        proofsToSplit = this.coinSelect(spendableProofs, amount, includeFees);
         const totalAmount = proofsToSplit.reduce((s, t) => (s += t.amount), 0);
+        const fees = this.wallet.getFeesForProofs(proofsToSplit);
+        const targetAmount = amount + fees;
         proofsStore.setReserved(proofsToSplit, true);
         let keepProofs: Proof[] = [];
         let sendProofs: Proof[] = [];
-        if (totalAmount != amount) {
+        if (totalAmount != targetAmount) {
           const counter = this.keysetCounter(keysetId);
-          ({ returnChange: keepProofs, send: sendProofs } = await this.wallet.send(amount, proofsToSplit, { counter }));
+          ({ returnChange: keepProofs, send: sendProofs } = await this.wallet.send(amount, proofsToSplit, { counter, proofsWeHave: spendableProofs }));
           this.increaseKeysetCounter(keysetId, keepProofs.length + sendProofs.length);
 
           mintStore.removeProofs(proofsToSplit);
@@ -372,7 +376,7 @@ export const useWalletStore = defineStore("wallet", {
 
           mintStore.addProofs(keepProofs);
           mintStore.addProofs(sendProofs);
-        } else if (totalAmount == amount) {
+        } else if (totalAmount == targetAmount) {
           keepProofs = [];
           sendProofs = proofsToSplit.map((p) => {
             return {
@@ -462,6 +466,10 @@ export const useWalletStore = defineStore("wallet", {
         if (tokenStore.historyTokens.find((t) => t.token === receiveStore.receiveData.tokensBase64 && t.amount == receivedAdmount)) {
           tokenStore.setTokenPaid(receiveStore.receiveData.tokensBase64);
         } else {
+          // if this is a self-sent token, we will find an outgoing token with the inverse amount
+          if (tokenStore.historyTokens.find((t) => t.token === receiveStore.receiveData.tokensBase64 && t.amount == -receivedAdmount)) {
+            tokenStore.setTokenPaid(receiveStore.receiveData.tokensBase64);
+          }
           tokenStore.addPaidToken({
             amount: receivedAdmount,
             serializedProofs: receiveStore.receiveData.tokensBase64,
@@ -655,7 +663,9 @@ export const useWalletStore = defineStore("wallet", {
       // get right amount of proofs to send
       const { keepProofs, sendProofs } = await this.splitToSend(
         mintStore.activeMint().unitProofs(mintStore.activeUnit),
-        amount
+        amount,
+        false,
+        true
       );
       if (sendProofs.length == 0) {
         throw new Error("could not split proofs.");
