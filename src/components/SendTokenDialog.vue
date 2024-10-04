@@ -139,8 +139,7 @@
               <template v-slot:loading>
                 <q-spinner-hourglass />
               </template>
-              </q-btn
-            >
+            </q-btn>
             <div
               v-if="sendData.p2pkPubkey && isValidPubkey(sendData.p2pkPubkey)"
               class="row"
@@ -236,12 +235,12 @@
               Size: {{ fragmentLengthLabel }}
             </q-btn>
             <q-badge
-                :color="!isV4Token ? 'primary' : 'grey'"
-                :label="isV4Token ? 'V4' : 'V3'"
-                class="q-my-sm q-mx-md cursor-pointer"
-                @click="toggleTokenEncoding"
-                :outline="isV4Token"
-              />
+              :color="!isV4Token ? 'primary' : 'grey'"
+              :label="isV4Token ? 'V4' : 'V3'"
+              class="q-my-sm q-mx-md cursor-pointer"
+              @click="toggleTokenEncoding"
+              :outline="isV4Token"
+            />
           </div>
           <q-card-section class="q-pa-sm">
             <div class="row justify-center">
@@ -289,12 +288,35 @@
                 color="grey"
                 icon="delete"
                 size="md"
-                @click="showDeleteDialog = true"
+                @click="
+                  showDeleteDialog = true;
+                  closeCardScanner();
+                "
                 flat
               >
                 <q-tooltip>Delete from history</q-tooltip>
               </q-btn>
-              <q-btn v-close-popup flat color="grey" class="q-ml-auto"
+              <q-btn
+                :disabled="scanningCard"
+                :loading="scanningCard"
+                class="q-mx-none"
+                color="grey"
+                icon="nfc"
+                size="md"
+                @click="writeTokensToCard"
+                flat
+              >
+                <q-tooltip>Flash to NFC tag</q-tooltip>
+                <template v-slot:loading>
+                  <q-spinner />
+                </template>
+              </q-btn>
+              <q-btn
+                v-close-popup
+                @click="closeCardScanner"
+                flat
+                color="grey"
+                class="q-ml-auto"
                 >Close</q-btn
               >
             </div>
@@ -356,12 +378,21 @@ import { Buffer } from "buffer";
 import { useCameraStore } from "src/stores/camera";
 import { useP2PKStore } from "src/stores/p2pk";
 import TokenInformation from "components/TokenInformation.vue";
-import { getDecodedToken, getEncodedTokenV4, getEncodedToken } from "@cashu/cashu-ts";
+import {
+  getDecodedToken,
+  getEncodedTokenV4,
+  getEncodedToken,
+} from "@cashu/cashu-ts";
 
 import { mapActions, mapState, mapWritableState } from "pinia";
 import ChooseMint from "components/ChooseMint.vue";
 import { UR, UREncoder } from "@gandlaf21/bc-ur";
-
+import {
+  notifyError,
+  notifySuccess,
+  notify,
+  notifyWarning,
+} from "src/js/notify.ts";
 export default defineComponent({
   name: "SendTokenDialog",
   mixins: [windowMixin],
@@ -394,6 +425,7 @@ export default defineComponent({
       framentInervalSlow: 500,
       fragmentSpeedLabel: "F",
       isV4Token: false,
+      scanningCard: false,
     };
   },
   computed: {
@@ -403,7 +435,11 @@ export default defineComponent({
     ]),
     ...mapWritableState(useSendTokensStore, ["sendData"]),
     ...mapWritableState(useCameraStore, ["camera", "hasCamera"]),
-    ...mapState(useUiStore, ["tickerShort", "canPasteFromClipboard", "globalMutexLock"]),
+    ...mapState(useUiStore, [
+      "tickerShort",
+      "canPasteFromClipboard",
+      "globalMutexLock",
+    ]),
     ...mapState(useMintsStore, [
       "activeProofs",
       "activeUnit",
@@ -596,17 +632,13 @@ export default defineComponent({
       // if it starts with 'cashuB', it is a v4 token
       if (this.sendData.tokensBase64.startsWith("cashuA")) {
         try {
-          this.sendData.tokensBase64 = getEncodedTokenV4(decodedToken)
+          this.sendData.tokensBase64 = getEncodedTokenV4(decodedToken);
         } catch {
           console.log("### Could not encode token to V4");
-          this.sendData.tokensBase64 = getEncodedToken(
-          decodedToken
-        );
+          this.sendData.tokensBase64 = getEncodedToken(decodedToken);
         }
       } else {
-        this.sendData.tokensBase64 = getEncodedToken(
-          decodedToken
-        );
+        this.sendData.tokensBase64 = getEncodedToken(decodedToken);
       }
     },
     deleteThisToken: function () {
@@ -614,6 +646,71 @@ export default defineComponent({
       this.showSendTokens = false;
       this.showDeleteDialog = false;
       this.clearAllWorkers();
+    },
+    writeTokensToCard: function () {
+      if (!this.scanningCard) {
+        try {
+          this.ndef = new window.NDEFReader();
+          this.controller = new AbortController();
+          const signal = this.controller.signal;
+          this.ndef
+            .scan({ signal })
+            .then(() => {
+              console.log("> Scan started");
+
+              this.ndef.onreadingerror = (error) => {
+                console.error(`Cannot read NDEF data! ${error}`);
+                notifyError("Cannot read data from the NFC tag");
+                this.controller.abort();
+                this.scanningCard = false;
+              };
+
+              this.ndef.onreading = ({ message, serialNumber }) => {
+                console.log(`Read card ${serialNumber}`);
+                notify(`Serial: ${serialNumber}`);
+                this.controller.abort();
+                this.scanningCard = false;
+                try {
+                  const arrBuffer = new TextEncoder().encode(
+                    this.sendData.tokensBase64
+                  );
+                  this.ndef
+                    .write(arrBuffer, {
+                      overwrite: true,
+                    })
+                    .then(() => {
+                      console.log("Successfully flashed tokens to card!");
+                      notifySuccess("Successfully flashed tokens to card!");
+                      this.showSendTokens = false;
+                    })
+                    .catch((err) => {
+                      console.error(`Argh! ${error}`);
+                      notifyError(`Argh! ${err}`);
+                    });
+                } catch (err) {
+                  console.error(`Argh! ${error}`);
+                  notifyError(`Argh! ${err}`);
+                }
+              };
+              this.scanningCard = true;
+            })
+            .catch((error) => {
+              console.error(`Argh! ${error}`);
+              notifyError(`Argh! ${error}`);
+              this.scanningCard = false;
+            });
+          notifyWarning("THIS WILL OVERWRITE YOUR CARD!");
+        } catch (error) {
+          console.error(`Argh! ${error}`);
+          notifyError(`Argh! ${error}`);
+          this.scanningCard = false;
+        }
+      }
+    },
+    closeCardScanner: function () {
+      console.log("Closing scanner!");
+      this.controller.abort();
+      this.scanningCard = false;
     },
     lockTokens: async function () {
       let sendAmount = this.sendData.amount;

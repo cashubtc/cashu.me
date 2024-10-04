@@ -6,6 +6,37 @@
       <div
         class="row items-center justify-center no-wrap q-mb-none q-mx-none q-px-none q-pt-lg q-pb-md"
       >
+        <div class="col-2 q-mb-md q-mx-none">
+          <q-btn
+            align="center"
+            size="lg"
+            icon="qr_code_scanner"
+            outline
+            color="primary"
+            flat
+            @click="showCamera"
+          />
+        </div>
+        <div class="col-2 q-mb-md q-mx-none">
+          <q-btn
+            align="center"
+            :loading="scanningCard"
+            size="lg"
+            icon="nfc"
+            outline
+            color="primary"
+            flat
+            @click="startScanner"
+          >
+            <template v-slot:loading>
+              <q-spinner />
+            </template>
+          </q-btn>
+        </div>
+      </div>
+      <div
+        class="row items-center justify-center no-wrap q-mb-none q-mx-none q-px-none q-pt-lg q-pb-md"
+      >
         <div class="col-5 q-mb-md">
           <q-btn
             rounded
@@ -19,17 +50,6 @@
             <q-icon name="south_west" size="1.2rem" class="q-mr-xs" />
             Receive</q-btn
           >
-        </div>
-        <div class="col-2 q-mb-md q-mx-none">
-          <q-btn
-            align="center"
-            size="lg"
-            icon="qr_code_scanner"
-            outline
-            color="primary"
-            flat
-            @click="showCamera"
-          />
         </div>
         <!-- button to showSendDialog -->
         <div class="col-5 q-mb-md">
@@ -212,8 +232,8 @@ import { useCameraStore } from "src/stores/camera";
 import { useP2PKStore } from "src/stores/p2pk";
 import { useNWCStore } from "src/stores/nwc";
 import { useNPCStore } from "src/stores/npubcash";
-
 import ReceiveTokenDialog from "src/components/ReceiveTokenDialog.vue";
+import { notifyError, notify } from "src/js/notify.ts";
 
 export default {
   mixins: [windowMixin],
@@ -267,6 +287,7 @@ export default {
       baseURL: location.protocol + "//" + location.host + location.pathname,
       credit: 0,
       newName: "",
+      scanningCard: false,
     };
   },
   computed: {
@@ -352,10 +373,60 @@ export default {
       "checkPendingTokens",
       "decodeRequest",
       "generateNewMnemonic",
+      "redeem",
     ]),
     ...mapActions(useCameraStore, ["closeCamera", "showCamera"]),
     ...mapActions(useNWCStore, ["listenToNWCCommands"]),
     ...mapActions(useNPCStore, ["generateNPCConnection", "claimAllTokens"]),
+    startScanner: function () {
+      if (!this.scanningCard) {
+        try {
+          this.ndef = new window.NDEFReader();
+          this.controller = new AbortController();
+          const signal = this.controller.signal;
+          this.ndef
+            .scan({ signal })
+            .then(() => {
+              console.log("> Scan started");
+
+              this.ndef.addEventListener("readingerror", () => {
+                console.error("Argh! Cannot read data from the NFC tag.");
+                notifyError("Argh! Cannot read data from the NFC tag.");
+                this.controller.abort();
+                this.scanningCard = false;
+              });
+
+              this.ndef.addEventListener("reading", ({ message, serial }) => {
+                notify(`Serial: ${serial}`);
+                try {
+                  const tokensBase64 = new TextDecoder().decode(
+                    message.records[0].data
+                  );
+                  //getDecodedToken(tokensBase64);
+                  this.receiveData.tokensBase64 = tokensBase64;
+                  this.redeem();
+                } catch (err) {
+                  console.error(`Something went wrong! ${error}`);
+                  notifyError(`Something went wrong! ${err}`);
+                }
+                this.controller.abort();
+                this.scanningCard = false;
+              });
+              this.scanningCard = true;
+            })
+            .catch((error) => {
+              console.error(`Argh! ${error}`);
+              notifyError(`Argh! ${error}`);
+            });
+        } catch (error) {
+          console.error(`Argh! ${error}`);
+          notifyError(`Argh! ${error}`);
+        }
+      } else {
+        this.controller.abort();
+        this.scanningCard = false;
+      }
+    },
     // TOKEN METHODS
     decodeToken: function (encoded_token) {
       try {
