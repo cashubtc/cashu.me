@@ -408,7 +408,7 @@ export default {
                     this.receiveData.tokensBase64 = tokensBase64;
                     this.redeem();
                   } catch (err) {
-                    console.error(`Something went wrong! ${error}`);
+                    console.error(`Something went wrong! ${err}`);
                     notifyError(`Something went wrong! ${err}`);
                   }
                   this.controller.abort();
