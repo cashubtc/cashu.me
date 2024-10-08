@@ -674,8 +674,13 @@ export default defineComponent({
                   const arrBuffer = new TextEncoder().encode(
                     this.sendData.tokensBase64
                   );
+                  const ndefRecord = new NDEFRecord({
+                    data: arrBuffer,
+                    mediaType: "text/plain",
+                    recordType: "text",
+                  });
                   this.ndef
-                    .write(arrBuffer, {
+                    .write([ndefRecord], {
                       overwrite: true,
                     })
                     .then(() => {
@@ -684,7 +689,7 @@ export default defineComponent({
                       this.showSendTokens = false;
                     })
                     .catch((err) => {
-                      console.error(`Argh! ${error}`);
+                      console.error(`Argh! ${err}`);
                       notifyError(`Argh! ${err}`);
                     });
                 } catch (err) {
