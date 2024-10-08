@@ -676,13 +676,16 @@ export default defineComponent({
                   );
                   const ndefRecord = new NDEFRecord({
                     data: arrBuffer,
+                    recordType: "mime",
                     mediaType: "text/plain",
-                    recordType: "text",
                   });
                   this.ndef
-                    .write([ndefRecord], {
-                      overwrite: true,
-                    })
+                    .write(
+                      { records: [ndefRecord] },
+                      {
+                        overwrite: true,
+                      }
+                    )
                     .then(() => {
                       console.log("Successfully flashed tokens to card!");
                       notifySuccess("Successfully flashed tokens to card!");
@@ -693,7 +696,7 @@ export default defineComponent({
                       notifyError(`Argh! ${err}`);
                     });
                 } catch (err) {
-                  console.error(`Argh! ${error}`);
+                  console.error(`Argh! ${err}`);
                   notifyError(`Argh! ${err}`);
                 }
               };

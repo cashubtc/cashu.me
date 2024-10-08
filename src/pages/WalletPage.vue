@@ -396,22 +396,25 @@ export default {
                 this.scanningCard = false;
               });
 
-              this.ndef.addEventListener("reading", ({ message, serial }) => {
-                notify(`Serial: ${serial}`);
-                try {
-                  const tokensBase64 = new TextDecoder().decode(
-                    message.records[0].data
-                  );
-                  //getDecodedToken(tokensBase64);
-                  this.receiveData.tokensBase64 = tokensBase64;
-                  this.redeem();
-                } catch (err) {
-                  console.error(`Something went wrong! ${error}`);
-                  notifyError(`Something went wrong! ${err}`);
+              this.ndef.addEventListener(
+                "reading",
+                ({ message, serialNumber }) => {
+                  notify(`Serial: ${serialNumber}`);
+                  try {
+                    const tokensBase64 = new TextDecoder().decode(
+                      message.records[0].data
+                    );
+                    //getDecodedToken(tokensBase64);
+                    this.receiveData.tokensBase64 = tokensBase64;
+                    this.redeem();
+                  } catch (err) {
+                    console.error(`Something went wrong! ${error}`);
+                    notifyError(`Something went wrong! ${err}`);
+                  }
+                  this.controller.abort();
+                  this.scanningCard = false;
                 }
-                this.controller.abort();
-                this.scanningCard = false;
-              });
+              );
               this.scanningCard = true;
             })
             .catch((error) => {
