@@ -26,10 +26,10 @@
             outline
             color="primary"
             flat
-            @click="startScanner"
+            @click="toggleScanner"
           >
             <template v-slot:loading>
-              <q-spinner />
+              <q-spinner @click="toggleScanner"> </q-spinner>
             </template>
           </q-btn>
         </div>
@@ -378,7 +378,19 @@ export default {
     ...mapActions(useCameraStore, ["closeCamera", "showCamera"]),
     ...mapActions(useNWCStore, ["listenToNWCCommands"]),
     ...mapActions(useNPCStore, ["generateNPCConnection", "claimAllTokens"]),
-    startScanner: function () {
+    knowThisMintOfTokenJson: function (tokenJson) {
+      const mintStore = useMintsStore();
+      // check if we have all mints
+      for (var i = 0; i < tokenJson.token.length; i++) {
+        if (
+          !mintStore.mints.map((m) => m.url).includes(token.getMint(tokenJson))
+        ) {
+          return false;
+        }
+      }
+      return true;
+    },
+    toggleScanner: function () {
       if (!this.scanningCard) {
         try {
           this.ndef = new window.NDEFReader();
@@ -406,6 +418,15 @@ export default {
                     );
                     //getDecodedToken(tokensBase64);
                     this.receiveData.tokensBase64 = tokensBase64;
+                    const tokenJson = token.decode(
+                      this.receiveData.tokensBase64
+                    );
+                    if (tokenJson == undefined) {
+                      throw new Error("unreadable token");
+                    }
+                    if (!this.knowThisMintOfTokenJson(tokenJson)) {
+                      this.addMint({ url: token.getMint(tokenJson) });
+                    }
                     this.redeem();
                   } catch (err) {
                     console.error(`Something went wrong! ${err}`);
