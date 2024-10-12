@@ -297,7 +297,7 @@
                 <q-tooltip>Delete from history</q-tooltip>
               </q-btn>
               <q-btn
-                :disabled="scanningCard"
+                :disabled="!isNdefSupported()"
                 :loading="scanningCard"
                 class="q-mx-none"
                 color="grey"
@@ -306,7 +306,9 @@
                 @click="writeTokensToCard"
                 flat
               >
-                <q-tooltip>Flash to NFC tag</q-tooltip>
+                <q-tooltip>{{
+                  isNdefSupported() ? "Flash to NFC card" : "NDEF unsupported"
+                }}</q-tooltip>
                 <template v-slot:loading>
                   <q-spinner />
                 </template>
@@ -719,6 +721,9 @@ export default defineComponent({
       console.log("Closing scanner!");
       this.controller.abort();
       this.scanningCard = false;
+    },
+    isNdefSupported: function () {
+      return "NDEFReader" in globalThis;
     },
     lockTokens: async function () {
       let sendAmount = this.sendData.amount;
