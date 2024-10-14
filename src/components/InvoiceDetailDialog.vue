@@ -52,11 +52,11 @@
                 : 'Create Invoice'
             "
             :loading="globalMutexLock"
-            >
-          <template v-slot:loading>
-                <q-spinner-hourglass />
-                Creating
-              </template>
+          >
+            <template v-slot:loading>
+              <q-spinner-hourglass />
+              Creating
+            </template>
           </q-btn>
           <q-btn v-close-popup rounded flat color="grey" class="q-ml-auto"
             >Close</q-btn
@@ -175,7 +175,11 @@ export default defineComponent({
     ...mapState(useWalletStore, ["invoiceData"]),
     ...mapState(useMintsStore, ["activeUnit", "activeUnitLabel"]),
     ...mapState(useWorkersStore, ["invoiceWorkerRunning"]),
-    ...mapWritableState(useUiStore, ["showInvoiceDetails", "tickerShort", "globalMutexLock"]),
+    ...mapWritableState(useUiStore, [
+      "showInvoiceDetails",
+      "tickerShort",
+      "globalMutexLock",
+    ]),
     displayUnit: function () {
       let display = this.formatCurrency(
         this.invoiceData.amount,

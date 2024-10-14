@@ -65,15 +65,26 @@ export const useTokensStore = defineStore("tokens", {
         unit,
       });
     },
-    editHistoryToken(tokenToEdit: string, options?: { newAmount?: number; addAmount?: number, newStatus?: "paid" | "pending", newToken?: string, }): HistoryToken | undefined {
-      const index = this.historyTokens.findIndex((t) => t.token === tokenToEdit);
+    editHistoryToken(
+      tokenToEdit: string,
+      options?: {
+        newAmount?: number;
+        addAmount?: number;
+        newStatus?: "paid" | "pending";
+        newToken?: string;
+      }
+    ): HistoryToken | undefined {
+      const index = this.historyTokens.findIndex(
+        (t) => t.token === tokenToEdit
+      );
       if (index >= 0) {
         if (options) {
           if (options.newToken) {
             this.historyTokens[index].token = options.newToken;
           }
           if (options.newAmount) {
-            this.historyTokens[index].amount = options.newAmount * Math.sign(this.historyTokens[index].amount);
+            this.historyTokens[index].amount =
+              options.newAmount * Math.sign(this.historyTokens[index].amount);
           }
           if (options.addAmount) {
             if (this.historyTokens[index].amount > 0) {
@@ -81,7 +92,6 @@ export const useTokensStore = defineStore("tokens", {
             } else {
               this.historyTokens[index].amount -= options.addAmount;
             }
-
           }
           if (options.newStatus) {
             this.historyTokens[index].status = options.newStatus;
@@ -104,7 +114,7 @@ export const useTokensStore = defineStore("tokens", {
       if (index >= 0) {
         this.historyTokens.splice(index, 1);
       }
-    }
+    },
   },
 });
 

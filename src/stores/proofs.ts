@@ -1,6 +1,12 @@
 import { defineStore } from "pinia";
 import { useMintsStore, WalletProof } from "./mints";
-import { Proof, getEncodedToken, getEncodedTokenV4, Token, TokenEntry } from "@cashu/cashu-ts";
+import {
+  Proof,
+  getEncodedToken,
+  getEncodedTokenV4,
+  Token,
+  TokenEntry,
+} from "@cashu/cashu-ts";
 
 export const useProofsStore = defineStore("proofs", {
   state: () => ({}),
@@ -19,8 +25,7 @@ export const useProofsStore = defineStore("proofs", {
         mintStore.proofs
           .filter((pr) => pr.secret === p.secret)
           .forEach((pr) => (pr.reserved = reserved));
-      }
-      );
+      });
     },
     getUnreservedProofs: function (proofs: WalletProof[]) {
       return proofs.filter((p) => !p.reserved);
@@ -55,7 +60,6 @@ export const useProofsStore = defineStore("proofs", {
         console.log("Could not encode TokenV4, defaulting to TokenV3", e);
         return getEncodedToken(token);
       }
-
 
       // // what we put into the JSON
       // let mintsJson = mints.map((m) => [{ url: m.url, ids: m.keysets }][0]);

@@ -2,17 +2,21 @@
   <!-- <q-card class="q-my-md q-py-sm">
     <q-card-section class="q-mt-sm q-py-xs"> -->
   <div class="q-pt-xl q-pb-md">
-    <div class="row justify-center q-pb-lg" style="height:80px">
+    <div class="row justify-center q-pb-lg" style="height: 80px">
       <div v-if="globalMutexLock">
         <transition
           appear
           enter-active-class="animated fadeIn"
           leave-active-class="animated fadeOut"
         >
-        <q-spinner-hourglass  class="q-mt-lg q-mb-none" size="lg" color="primary" />
-      </transition>
+          <q-spinner-hourglass
+            class="q-mt-lg q-mb-none"
+            size="lg"
+            color="primary"
+          />
+        </transition>
       </div>
-      <div v-else >
+      <div v-else>
         <transition
           appear
           enter-active-class="animated fadeIn"
