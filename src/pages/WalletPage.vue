@@ -20,7 +20,7 @@
         <div class="col-2 q-mb-md q-mx-none">
           <q-btn
             align="center"
-            :disabled="!isNdefSupported()"
+            :disabled="!ndefSupported"
             :loading="scanningCard"
             size="lg"
             icon="nfc"
@@ -30,7 +30,7 @@
             @click="toggleScanner"
           >
             <q-tooltip>{{
-              isNdefSupported() ? "Read from NFC card" : "NDEF unsupported"
+              ndefSupported ? "Read from NFC card" : "NDEF unsupported"
             }}</q-tooltip>
             <template v-slot:loading>
               <q-spinner @click="toggleScanner"> </q-spinner>
@@ -292,6 +292,7 @@ export default {
       credit: 0,
       newName: "",
       scanningCard: false,
+      ndefSupported: "NDEFReader" in globalThis,
     };
   },
   computed: {
@@ -454,10 +455,6 @@ export default {
         this.controller.abort();
         this.scanningCard = false;
       }
-    },
-    // Do we show the NFC button?
-    isNdefSupported: function () {
-      return "NDEFReader" in globalThis;
     },
     // TOKEN METHODS
     decodeToken: function (encoded_token) {
