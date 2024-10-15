@@ -20,7 +20,7 @@
     "@capacitor/clipboard": "^6.0.0",
     "@capacitor/core": "^6.0.0",
     "@capacitor/ios": "^6.0.0",
-    "@cashu/cashu-ts": "^1.1.0-3",
+    "@cashu/cashu-ts": "file:../cashu-ts",
     "@cashu/crypto": "^0.2.7",
     "@chenfengyuan/vue-qrcode": "^2.0.0",
     "@gandlaf21/bc-ur": "^1.1.12",
