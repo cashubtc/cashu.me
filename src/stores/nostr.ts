@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
-import NDK, { NDKEvent, NDKSigner, NDKNip07Signer, NDKNip46Signer, NDKFilter, NDKPrivateKeySigner, NostrEvent } from "@nostr-dev-kit/ndk";
-import { nip19 } from 'nostr-tools'
+import NDK, { NDKEvent, NDKSigner, NDKNip07Signer, NDKNip46Signer, NDKFilter, NDKPrivateKeySigner, NostrEvent, NDKKind, NDKRelaySet, NDKRelay, NDKTag } from "@nostr-dev-kit/ndk";
+import { nip04, nip19 } from 'nostr-tools'
 import { bytesToHex, hexToBytes } from '@noble/hashes/utils' // already an installed dependency
 import { useWalletStore } from "./wallet";
 import { generateSecretKey, getPublicKey } from 'nostr-tools'
@@ -24,7 +24,7 @@ export const useNostrStore = defineStore("nostr", {
     connected: false,
     pubkey: useLocalStorage<string>("cashu.ndk.pubkey", ""),
     relays: useSettingsStore().defaultNostrRelays,
-    ndk: new NDK(),
+    ndk: {} as NDK,
     signerType: useLocalStorage<SignerType>("cashu.ndk.signerType", SignerType.SEED),
     nip07signer: {} as NDKNip07Signer,
     nip46Token: useLocalStorage<string>("cashu.ndk.nip46Token", ""),
@@ -69,8 +69,6 @@ export const useNostrStore = defineStore("nostr", {
     setSigner: async function (signer: NDKSigner) {
       this.signer = signer
       this.ndk = new NDK({ signer: signer, explicitRelayUrls: this.relays })
-      // const ndkEvent = await this.signDummyEvent()
-      // ndkEvent.publish()
     },
     signDummyEvent: async function (): Promise<NDKEvent> {
       const ndkEvent = new NDKEvent();
@@ -200,6 +198,41 @@ export const useNostrStore = defineStore("nostr", {
       mintUrlsCounted.sort((a, b) => b.count - a.count);
       this.mintRecommendations = mintUrlsCounted;
       return mintUrlsCounted;
+    },
+    sendNip04DirectMessage: async function (recipient: string, message: string) {
+      const event = new NDKEvent(this.ndk);
+      this.ndk.connect();
+      event.kind = NDKKind.EncryptedDirectMessage;
+      event.content = await nip04.encrypt(hexToBytes(this.seedSignerPrivateKey), recipient, message);
+      event.tags = [['p', recipient]];
+      event.publish();
+      await this.subscribeToNip04DirectMessages();
+    },
+    subscribeToNip04DirectMessages: async function () {
+      let nip04DirectMessageEvents: Set<NDKEvent> = new Set();
+      const fetchEventsPromise = new Promise<Set<NDKEvent>>(resolve => {
+        const sub = this.ndk.subscribe(
+          {
+            kinds: [NDKKind.EncryptedDirectMessage],
+            "#p": [this.pubkey],
+            since: Math.floor(Date.now() / 1000) - 60 * 60 * 24 * 7,
+          } as NDKFilter,
+          { closeOnEose: false, groupable: false },
+        );
+
+        sub.on('event', (event: NDKEvent) => {
+          nip04.decrypt(hexToBytes(this.seedSignerPrivateKey), event.pubkey, event.content).then((content) => {
+            console.log('Decrypted content:', content);
+            nip04DirectMessageEvents.add(event)
+          });
+        });
+
+      });
+      try {
+        nip04DirectMessageEvents = await fetchEventsPromise;
+      } catch (error) {
+        console.error('Error fetching contact events:', error);
+      }
     },
   },
 });

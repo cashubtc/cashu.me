@@ -12,13 +12,12 @@ import { useSendTokensStore } from "src/stores/sendTokensStore"
 import * as _ from "underscore";
 import token from "src/js/token";
 import { notifyApiError, notifyError, notifySuccess, notifyWarning, notify } from "src/js/notify";
-import { CashuMint, CashuWallet, Proof, MintQuotePayload, CheckStatePayload, MeltQuotePayload, MeltQuoteResponse, generateNewMnemonic, deriveSeedFromMnemonic, AmountPreference, CheckStateEnum, getDecodedToken, Token, MeltQuoteState, MintQuoteState } from "@cashu/cashu-ts";
+import { CashuMint, CashuWallet, Proof, MintQuotePayload, CheckStatePayload, MeltQuotePayload, MeltQuoteResponse, generateNewMnemonic, deriveSeedFromMnemonic, AmountPreference, CheckStateEnum, getDecodedToken, Token, MeltQuoteState, MintQuoteState, PaymentRequest, PaymentRequestTransportType, PaymentRequestTransport, decodePaymentRequest } from "@cashu/cashu-ts";
 import { hashToCurve } from '@cashu/crypto/modules/common';
 import * as bolt11Decoder from "light-bolt11-decoder";
 import { bech32 } from "bech32";
 import axios from "axios";
 import { date } from "quasar";
-import { splitAmount } from "@cashu/cashu-ts/dist/lib/es5/utils";
 
 // HACK: this is a workaround so that the catch block in the melt function does not throw an error when the user exits the app
 // before the payment is completed. This is necessary because the catch block in the melt function would otherwise remove all
@@ -1225,5 +1224,21 @@ export const useWalletStore = defineStore("wallet", {
       }
       return false;
     },
+    createPaymentRequest: async function (amount: number, memo: string) {
+      const mintStore = useMintsStore();
+      const transport = [{
+        type: PaymentRequestTransportType.POST,
+        target: "https://google.com/this/would/be",
+      }] as PaymentRequestTransport[];
+      const paymentRequest = new PaymentRequest(
+        transport,
+        "payment_id",
+        amount,
+        "sat",
+        [mintStore.activeMintUrl],
+      );
+      console.log("### paymentRequest", paymentRequest.toEncodedRequest());
+      console.log('### decoded paymentRequest', decodePaymentRequest(paymentRequest.toEncodedRequest()));
+    }
   },
 });
