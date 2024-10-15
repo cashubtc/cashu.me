@@ -52,6 +52,7 @@ export const useNWCStore = defineStore("nwc", {
     subscriptions: [] as NDKSubscription[],
     showNWCDialog: false,
     showNWCData: { connection: {} as NWCConnection, connectionString: "" },
+    lastCommandTimestamp: useLocalStorage<number>("cashu.nwc.lastCommandTimestamp", 0),
   }),
   getters: {
 
@@ -266,6 +267,7 @@ export const useNWCStore = defineStore("nwc", {
         } as NWCError;
       }
       await this.replyNWC(result, event, conn)
+      this.lastCommandTimestamp = Math.floor(Date.now() / 1000)
     },
     getConnectionString: function (connection: NWCConnection) {
       const walletPublicKeyHex = connection.walletPublicKey
@@ -327,16 +329,15 @@ export const useNWCStore = defineStore("nwc", {
       await this.generateNWCConnection()
       // we only support one connection for now
       const conn = this.connections[0]
-
       const currentUnitTime = Math.floor(Date.now() / 1000)
       let filter = {
         kinds: [NWCKind.NWCRequest as NDKKind],
-        since: currentUnitTime,
+        since: this.lastCommandTimestamp > 0 ? this.lastCommandTimestamp : currentUnitTime,
         authors: [conn.connectionPublicKey],
         "#p": [conn.walletPublicKey]
       } as NDKFilter;
       const sub = this.ndk.subscribe(filter);
-      console.log("### subscribing to NWC on relays: ", this.relays)
+      // console.log("### subscribing to NWC on relays: ", this.relays)
       this.subscriptions.push(sub)
 
       sub.on("eose", () => console.log("All relays have reached the end of the event stream"));
