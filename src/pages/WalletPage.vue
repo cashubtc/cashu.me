@@ -212,6 +212,7 @@ import { useCameraStore } from "src/stores/camera";
 import { useP2PKStore } from "src/stores/p2pk";
 import { useNWCStore } from "src/stores/nwc";
 import { useNPCStore } from "src/stores/npubcash";
+import { useNostrStore } from "src/stores/nostr";
 
 import ReceiveTokenDialog from "src/components/ReceiveTokenDialog.vue";
 
@@ -270,13 +271,13 @@ export default {
     };
   },
   computed: {
+    ...mapState(useUiStore, ["tickerShort"]),
     ...mapWritableState(useUiStore, [
       "showInvoiceDetails",
       "tab",
       "showSendDialog",
       "showReceiveDialog",
     ]),
-    ...mapState(useUiStore, ["tickerShort"]),
     ...mapWritableState(useUiStore, ["expandHistory"]),
     ...mapWritableState(useReceiveTokensStore, [
       "showReceiveTokens",
@@ -352,10 +353,12 @@ export default {
       "checkPendingTokens",
       "decodeRequest",
       "generateNewMnemonic",
+      "createPaymentRequest",
     ]),
     ...mapActions(useCameraStore, ["closeCamera", "showCamera"]),
     ...mapActions(useNWCStore, ["listenToNWCCommands"]),
     ...mapActions(useNPCStore, ["generateNPCConnection", "claimAllTokens"]),
+    ...mapActions(useNostrStore, ["sendNip04DirectMessage", "initSigner"]),
     // TOKEN METHODS
     decodeToken: function (encoded_token) {
       try {
@@ -635,6 +638,8 @@ export default {
     // generate new mnemonic
     this.generateNewMnemonic();
 
+    this.initSigner();
+
     // show welcome dialog
     this.showWelcomeDialog();
 
@@ -642,6 +647,12 @@ export default {
     if (this.nwcEnabled) {
       this.listenToNWCCommands();
     }
+
+    await this.createPaymentRequest(13, "this is the memo");
+    await this.sendNip04DirectMessage(
+      "50d94fc2d8580c682b071a542f8b1e31a200b0508bab95a33bef0855df281d63",
+      "asd"
+    );
   },
 };
 </script>

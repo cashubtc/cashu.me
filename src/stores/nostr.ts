@@ -1,12 +1,13 @@
 import { defineStore } from "pinia";
-import NDK, { NDKEvent, NDKSigner, NDKNip07Signer, NDKNip46Signer, NDKFilter, NDKPrivateKeySigner, NostrEvent, NDKKind, NDKRelaySet, NDKRelay, NDKTag } from "@nostr-dev-kit/ndk";
+import NDK, { NDKEvent, NDKSigner, NDKNip07Signer, NDKNip46Signer, NDKFilter, NDKPrivateKeySigner, NostrEvent, NDKKind, NDKRelaySet, NDKRelay, NDKTag, ProfilePointer } from "@nostr-dev-kit/ndk";
 import { nip04, nip19 } from 'nostr-tools'
 import { bytesToHex, hexToBytes } from '@noble/hashes/utils' // already an installed dependency
 import { useWalletStore } from "./wallet";
 import { generateSecretKey, getPublicKey } from 'nostr-tools'
 import { useLocalStorage } from "@vueuse/core";
 import { useSettingsStore } from "./settings";
-
+import { useReceiveTokensStore } from "./receiveTokensStore";
+import { getEncodedTokenV4, PaymentRequestPayload, Token } from "@cashu/cashu-ts";
 type MintRecommendation = {
   url: string;
   count: number;
@@ -36,12 +37,20 @@ export const useNostrStore = defineStore("nostr", {
     signer: {} as NDKSigner,
     mintRecommendations: useLocalStorage<MintRecommendation[]>("cashu.ndk.mintRecommendations", []),
     initialized: false,
+    lastEventTimestamp: useLocalStorage<number>("cashu.ndk.lastEventTimestamp", 0),
   }),
   getters: {
     seedSignerPrivateKeyNsec: (state) => {
       const sk = hexToBytes(state.seedSignerPrivateKey);
       return nip19.nsecEncode(sk);
-    }
+    },
+    nprofile: (state) => {
+      const profile: ProfilePointer = {
+        pubkey: state.pubkey,
+        relays: state.relays,
+      };
+      return nip19.nprofileEncode(profile);
+    },
   },
   actions: {
     initNdkReadOnly: function () {
@@ -206,24 +215,32 @@ export const useNostrStore = defineStore("nostr", {
       event.content = await nip04.encrypt(hexToBytes(this.seedSignerPrivateKey), recipient, message);
       event.tags = [['p', recipient]];
       event.publish();
+      // TEMP: subscribe
       await this.subscribeToNip04DirectMessages();
     },
     subscribeToNip04DirectMessages: async function () {
       let nip04DirectMessageEvents: Set<NDKEvent> = new Set();
       const fetchEventsPromise = new Promise<Set<NDKEvent>>(resolve => {
+        console.log("### Subscribing to NIP-04 direct messages");
+        if (!this.lastEventTimestamp) {
+          this.lastEventTimestamp = Math.floor(Date.now() / 1000);
+        }
         const sub = this.ndk.subscribe(
           {
             kinds: [NDKKind.EncryptedDirectMessage],
             "#p": [this.pubkey],
-            since: Math.floor(Date.now() / 1000) - 60 * 60 * 24 * 7,
+            since: this.lastEventTimestamp,
           } as NDKFilter,
           { closeOnEose: false, groupable: false },
         );
 
         sub.on('event', (event: NDKEvent) => {
           nip04.decrypt(hexToBytes(this.seedSignerPrivateKey), event.pubkey, event.content).then((content) => {
-            console.log('Decrypted content:', content);
+            console.log('NIP-04 DM from', event.pubkey);
+            console.log("Content:", content);
             nip04DirectMessageEvents.add(event)
+            this.lastEventTimestamp = Math.floor(Date.now() / 1000);
+            this.parseMessageForEcash(content);
           });
         });
 
@@ -232,6 +249,37 @@ export const useNostrStore = defineStore("nostr", {
         nip04DirectMessageEvents = await fetchEventsPromise;
       } catch (error) {
         console.error('Error fetching contact events:', error);
+      }
+    },
+    parseMessageForEcash: async function (message: string) {
+      // first check if the message can be converted to a json and then to a PaymentRequestPayload
+      try {
+        const payload = JSON.parse(message) as PaymentRequestPayload;
+        if (payload) {
+          const receiveStore = useReceiveTokensStore();
+          const proofs = payload.proofs;
+          const mint = payload.mint;
+          const unit = payload.unit;
+          const token = {
+            token: [{ proofs: proofs, mint: mint }],
+            unit: unit,
+          } as Token;
+          receiveStore.receiveData.tokensBase64 = getEncodedTokenV4(token);
+          receiveStore.showReceiveTokens = true;
+        }
+      } catch (e) {
+        console.log("### parsing message for ecash failed", e);
+      }
+
+      console.log("### parsing message for ecash", message);
+      const receiveStore = useReceiveTokensStore();
+      const words = message.split(" ");
+      const tokens = words.filter((word) => {
+        return word.startsWith("cashuA") || word.startsWith("cashuB");
+      });
+      for (const token of tokens) {
+        receiveStore.receiveData.tokensBase64 = token;
+        receiveStore.showReceiveTokens = true;
       }
     },
   },
