@@ -8,6 +8,10 @@ import { useLocalStorage } from "@vueuse/core";
 import { useSettingsStore } from "./settings";
 import { useReceiveTokensStore } from "./receiveTokensStore";
 import { getEncodedTokenV4, PaymentRequestPayload, Token } from "@cashu/cashu-ts";
+import { useTokensStore } from "./tokens";
+import { notifyApiError, notifyError, notifySuccess, notifyWarning, notify } from "../js/notify";
+import token from "../js/token";
+
 type MintRecommendation = {
   url: string;
   count: number;
@@ -277,10 +281,45 @@ export const useNostrStore = defineStore("nostr", {
       const tokens = words.filter((word) => {
         return word.startsWith("cashuA") || word.startsWith("cashuB");
       });
-      for (const token of tokens) {
-        receiveStore.receiveData.tokensBase64 = token;
+      for (const tokenStr of tokens) {
+        receiveStore.receiveData.tokensBase64 = tokenStr;
         receiveStore.showReceiveTokens = true;
+        await this.addPendingTokenToHistory(tokenStr);
       }
+    },
+    tokenAlreadyInHistory: function (tokenStr: string) {
+      const tokensStore = useTokensStore();
+      return (
+        tokensStore.historyTokens.find((t) => t.token === tokenStr) !== undefined
+      );
+    },
+    addPendingTokenToHistory: function (tokenStr: string) {
+      const receiveStore = useReceiveTokensStore();
+      if (this.tokenAlreadyInHistory(tokenStr)) {
+        notifySuccess("Ecash already in history");
+        receiveStore.showReceiveTokens = false;
+        return;
+      }
+      const tokensStore = useTokensStore();
+      const decodedToken = token.decode(tokenStr);
+      if (decodedToken == undefined) {
+        throw Error('could not decode token')
+      }
+      // get amount from decodedToken.token.proofs[..].amount
+      const amount = token.getProofs(decodedToken).reduce(
+        (sum, el) => (sum += el.amount),
+        0
+      );
+
+      tokensStore.addPendingToken({
+        amount: amount,
+        serializedProofs: tokenStr,
+        mint: token.getMint(decodedToken),
+        unit: token.getUnit(decodedToken),
+      });
+      receiveStore.showReceiveTokens = false;
+      // show success notification
+      notifySuccess("Ecash added to history.");
     },
   },
 });
