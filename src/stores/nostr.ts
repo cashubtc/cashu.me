@@ -240,6 +240,7 @@ export const useNostrStore = defineStore("nostr", {
         if (!this.lastEventTimestamp) {
           this.lastEventTimestamp = Math.floor(Date.now() / 1000);
         }
+        this.ndk.connect();
         const sub = this.ndk.subscribe(
           {
             kinds: [NDKKind.EncryptedDirectMessage],
@@ -248,8 +249,8 @@ export const useNostrStore = defineStore("nostr", {
           } as NDKFilter,
           { closeOnEose: false, groupable: false },
         );
-
         sub.on('event', (event: NDKEvent) => {
+          console.log('event')
           nip04.decrypt(hexToBytes(this.seedSignerPrivateKey), event.pubkey, event.content).then((content) => {
             console.log('NIP-04 DM from', event.pubkey);
             console.log("Content:", content);
@@ -265,12 +266,19 @@ export const useNostrStore = defineStore("nostr", {
         console.error('Error fetching contact events:', error);
       }
     },
-    sendNip17DirectMessage: async function (recipient: string, message: string) {
+    sendNip17DirectMessageToNprofile: async function (nprofile: string, message: string) {
+      nprofile = this.nprofile
+      const result = nip19.decode(nprofile);
+      const pubkey: string = (result.data as ProfilePointer).pubkey;
+      const relays: string[] | undefined = (result.data as ProfilePointer).relays;
+      console.log("## decode pubkey", pubkey)
+      console.log("## decode relays", relays)
+      this.sendNip17DirectMessage(pubkey, message, relays)
+    },
+    sendNip17DirectMessage: async function (recipient: string, message: string, relays?: string[]) {
       const randomPrivateKey = generateSecretKey();
       const randomPublicKey = getPublicKey(randomPrivateKey);
-      console.log("### randomPublicKey", randomPublicKey);
-      console.log("### randomPrivateKey", randomPrivateKey);
-      const ndk = new NDK({ explicitRelayUrls: this.relays, signer: new NDKPrivateKeySigner(bytesToHex(randomPrivateKey)) });
+      const ndk = new NDK({ explicitRelayUrls: relays ?? this.relays, signer: new NDKPrivateKeySigner(bytesToHex(randomPrivateKey)) });
 
       const dmEvent = new NDKEvent();
       dmEvent.kind = 14;
@@ -280,7 +288,6 @@ export const useNostrStore = defineStore("nostr", {
       dmEvent.pubkey = this.pubkey;
       dmEvent.id = dmEvent.getEventHash();
       const dmEventString = JSON.stringify(await dmEvent.toNostrEvent());
-      console.log("### dmEvent", dmEventString);
 
       const sealEvent = new NDKEvent(this.ndk as NDK);
       sealEvent.kind = 13;
@@ -290,7 +297,6 @@ export const useNostrStore = defineStore("nostr", {
       sealEvent.id = sealEvent.getEventHash();
       sealEvent.sig = await sealEvent.sign();
       const sealEventString = JSON.stringify(await sealEvent.toNostrEvent());
-      console.log("### sealEvent", sealEventString);
 
       const wrapEvent = new NDKEvent(ndk);
       wrapEvent.kind = 1059;
@@ -300,7 +306,6 @@ export const useNostrStore = defineStore("nostr", {
       wrapEvent.pubkey = randomPublicKey;
       wrapEvent.id = wrapEvent.getEventHash();
       wrapEvent.sig = await wrapEvent.sign();
-      console.log("### wrapEvent", JSON.stringify(await wrapEvent.toNostrEvent()));
 
       try {
         ndk.connect();
@@ -310,9 +315,6 @@ export const useNostrStore = defineStore("nostr", {
         console.error(e);
         notifyError("Could not publish NIP-17 event");
       }
-
-      this.subscribeToNip17DirectMessages();
-
     },
     subscribeToNip17DirectMessages: async function () {
       let nip17DirectMessageEvents: Set<NDKEvent> = new Set();
@@ -321,6 +323,7 @@ export const useNostrStore = defineStore("nostr", {
         if (!this.lastEventTimestamp) {
           this.lastEventTimestamp = Math.floor(Date.now() / 1000);
         }
+        this.ndk.connect();
         const sub = this.ndk.subscribe(
           {
             kinds: [1059 as NDKKind],
@@ -329,12 +332,15 @@ export const useNostrStore = defineStore("nostr", {
           { closeOnEose: false, groupable: false },
         );
 
-        sub.on('event', (event: NDKEvent) => {
-          console.log('NIP-17 DM from', event.pubkey);
-          const content = nip44.v2.decrypt(event.content, nip44.v2.utils.getConversationKey(this.seedSignerPrivateKey, event.pubkey))
-          console.log("Content:", content);
-          nip17DirectMessageEvents.add(event)
+        sub.on('event', (wrapEvent: NDKEvent) => {
+          const wappedContent = nip44.v2.decrypt(wrapEvent.content, nip44.v2.utils.getConversationKey(this.seedSignerPrivateKey, wrapEvent.pubkey))
+          const sealEvent = JSON.parse(wappedContent) as NostrEvent;
+          const dmEventString = nip44.v2.decrypt(sealEvent.content, nip44.v2.utils.getConversationKey(this.seedSignerPrivateKey, sealEvent.pubkey));
+          const dmEvent = JSON.parse(dmEventString) as NDKEvent;
+          const content = dmEvent.content;
+          nip17DirectMessageEvents.add(dmEvent)
           this.lastEventTimestamp = Math.floor(Date.now() / 1000);
+          console.log(content)
           this.parseMessageForEcash(content);
         });
       });
@@ -361,7 +367,8 @@ export const useNostrStore = defineStore("nostr", {
           receiveStore.showReceiveTokens = true;
         }
       } catch (e) {
-        console.log("### parsing message for ecash failed", e);
+        // console.log("### parsing message for ecash failed");
+        return
       }
 
       console.log("### parsing message for ecash", message);

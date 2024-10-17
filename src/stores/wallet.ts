@@ -1235,7 +1235,7 @@ export const useWalletStore = defineStore("wallet", {
     createPaymentRequest: function (amount?: number, memo?: string): string {
       const nostrStore = useNostrStore();
       const mintStore = useMintsStore();
-      const tags = [["1", "NIP-04"]] as PaymentRequestTag[];
+      const tags = [["n", "17"]] as PaymentRequestTag[];
       const transport = [{
         type: PaymentRequestTransportType.NOSTR,
         target: nostrStore.nprofile,

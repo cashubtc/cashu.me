@@ -159,7 +159,6 @@ export default defineComponent({
   data: function () {
     return {
       showP2PKDialog: false,
-      showPRDialog: false,
     };
   },
   computed: {

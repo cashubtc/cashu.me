@@ -362,6 +362,8 @@ export default {
       "sendNip04DirectMessage",
       "sendNip17DirectMessage",
       "subscribeToNip04DirectMessages",
+      "subscribeToNip17DirectMessages",
+      "sendNip17DirectMessageToNprofile",
       "initSigner",
     ]),
     // TOKEN METHODS
@@ -653,15 +655,13 @@ export default {
       this.listenToNWCCommands();
     }
 
-    await this.createPaymentRequest(13, "this is the memo");
+    this.subscribeToNip17DirectMessages();
 
-    this.subscribeToNip04DirectMessages();
-
-    // await this.sendNip04DirectMessage(
+    // this.sendNip04DirectMessage(
     //   "50d94fc2d8580c682b071a542f8b1e31a200b0508bab95a33bef0855df281d63",
     //   "NIP-04"
     // );
-    // await this.sendNip17DirectMessage(
+    // this.sendNip17DirectMessage(
     //   "50d94fc2d8580c682b071a542f8b1e31a200b0508bab95a33bef0855df281d63",
     //   "NIP-17"
     // );
