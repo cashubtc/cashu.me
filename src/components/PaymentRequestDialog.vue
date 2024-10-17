@@ -76,7 +76,7 @@ export default defineComponent({
   methods: {
     ...mapActions(usePRStore, ["newPaymentRequest"]),
     newRequest() {
-      this.newPaymentRequest();
+      this.newPaymentRequest(10);
     },
   },
 });
