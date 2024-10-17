@@ -8,6 +8,7 @@ import { useReceiveTokensStore } from "./receiveTokensStore";
 import { useUiStore } from "src/stores/ui";
 import { useP2PKStore } from "src/stores/p2pk"
 import { useSendTokensStore } from "src/stores/sendTokensStore"
+import { usePRStore } from "./payment-request";
 
 import * as _ from "underscore";
 import token from "src/js/token";
@@ -19,7 +20,7 @@ import { bech32 } from "bech32";
 import axios from "axios";
 import { date } from "quasar";
 import { useNostrStore } from "./nostr";
-
+import { v4 as uuidv4 } from 'uuid';
 // HACK: this is a workaround so that the catch block in the melt function does not throw an error when the user exits the app
 // before the payment is completed. This is necessary because the catch block in the melt function would otherwise remove all
 // quotes from the invoiceHistory and the user would not be able to pay the invoice again after reopening the app.
@@ -1080,6 +1081,10 @@ export const useWalletStore = defineStore("wallet", {
       sendTokenStore.showSendTokens = true
       sendTokenStore.showLockInput = true
     },
+    handlePaymentRequest: function (req: string) {
+      const prStore = usePRStore()
+      prStore.parsePaymentRequest(req)
+    },
     decodeRequest: async function (req: string) {
       const p2pkStore = useP2PKStore()
       this.payInvoiceData.input.request = req
@@ -1117,6 +1122,8 @@ export const useWalletStore = defineStore("wallet", {
       ) {
         const mintStore = useMintsStore();
         mintStore.addMintData = { url: req, nickname: "" }
+      } else if (req.startsWith("creqA")) {
+        await this.handlePaymentRequest(req)
       }
     },
     fetchBitcoinPriceUSD: async function () {
@@ -1225,7 +1232,7 @@ export const useWalletStore = defineStore("wallet", {
       }
       return false;
     },
-    createPaymentRequest: async function (amount: number, memo: string) {
+    createPaymentRequest: function (amount?: number, memo?: string): string {
       const nostrStore = useNostrStore();
       const mintStore = useMintsStore();
       const tags = [["1", "NIP-04"]] as PaymentRequestTag[];
@@ -1234,17 +1241,22 @@ export const useWalletStore = defineStore("wallet", {
         target: nostrStore.nprofile,
         tags: tags,
       }] as PaymentRequestTransport[];
+      const uuid = uuidv4().split("-")[0];
       const paymentRequest = new PaymentRequest(
         transport,
-        "payment_id",
+        uuid,
         amount,
         "sat",
-        [mintStore.activeMintUrl],
+        mintStore.activeMintUrl ? [mintStore.activeMintUrl] : undefined,
         memo,
       );
+
+      // TMP
       console.log("### paymentRequest", paymentRequest.toEncodedRequest());
       const request: PaymentRequest = decodePaymentRequest(paymentRequest.toEncodedRequest())
       console.log('### decoded paymentRequest', request);
+
+      return paymentRequest.toEncodedRequest();
     }
   },
 });

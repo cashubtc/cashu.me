@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 import NDK, { NDKEvent, NDKSigner, NDKNip07Signer, NDKNip46Signer, NDKFilter, NDKPrivateKeySigner, NostrEvent, NDKKind, NDKRelaySet, NDKRelay, NDKTag, ProfilePointer } from "@nostr-dev-kit/ndk";
-import { nip04, nip19 } from 'nostr-tools'
+import { nip04, nip19, nip44 } from 'nostr-tools'
 import { bytesToHex, hexToBytes } from '@noble/hashes/utils' // already an installed dependency
 import { useWalletStore } from "./wallet";
 import { generateSecretKey, getPublicKey } from 'nostr-tools'
@@ -213,14 +213,22 @@ export const useNostrStore = defineStore("nostr", {
       return mintUrlsCounted;
     },
     sendNip04DirectMessage: async function (recipient: string, message: string) {
-      const event = new NDKEvent(this.ndk);
-      this.ndk.connect();
+      const randomPrivateKey = generateSecretKey();
+      const randomPublicKey = getPublicKey(randomPrivateKey);
+      const ndk = new NDK({ explicitRelayUrls: this.relays, signer: new NDKPrivateKeySigner(bytesToHex(randomPrivateKey)) });
+      const event = new NDKEvent(ndk);
+      ndk.connect();
       event.kind = NDKKind.EncryptedDirectMessage;
-      event.content = await nip04.encrypt(hexToBytes(this.seedSignerPrivateKey), recipient, message);
+      event.content = await nip04.encrypt(randomPrivateKey, recipient, message);
       event.tags = [['p', recipient]];
-      event.publish();
-      // TEMP: subscribe
-      await this.subscribeToNip04DirectMessages();
+      event.sign()
+      try {
+        await event.publish();
+        notifySuccess("NIP-04 event published");
+      } catch (e) {
+        console.error(e);
+        notifyError("Could not publish NIP-04 event");
+      }
     },
     subscribeToNip04DirectMessages: async function () {
       let nip04DirectMessageEvents: Set<NDKEvent> = new Set();
@@ -247,13 +255,59 @@ export const useNostrStore = defineStore("nostr", {
             this.parseMessageForEcash(content);
           });
         });
-
       });
       try {
         nip04DirectMessageEvents = await fetchEventsPromise;
       } catch (error) {
         console.error('Error fetching contact events:', error);
       }
+    },
+    sendNip17DirectMessage: async function (recipient: string, message: string) {
+      const randomPrivateKey = generateSecretKey();
+      const randomPublicKey = getPublicKey(randomPrivateKey);
+      console.log("### randomPublicKey", randomPublicKey);
+      console.log("### randomPrivateKey", randomPrivateKey);
+      const ndk = new NDK({ explicitRelayUrls: this.relays, signer: new NDKPrivateKeySigner(bytesToHex(randomPrivateKey)) });
+
+      const dmEvent = new NDKEvent();
+      dmEvent.kind = 14;
+      dmEvent.content = message;
+      dmEvent.tags = [['p', recipient]];
+      dmEvent.created_at = Math.floor(Date.now() / 1000);
+      dmEvent.pubkey = this.pubkey;
+      dmEvent.id = dmEvent.getEventHash();
+      const dmEventString = JSON.stringify(await dmEvent.toNostrEvent());
+      console.log("### dmEvent", dmEventString);
+
+      const sealEvent = new NDKEvent(this.ndk);
+      sealEvent.kind = 13;
+      sealEvent.content = nip44.v2.encrypt(dmEventString, hexToBytes(this.seedSignerPrivateKey), hexToBytes(recipient));
+      sealEvent.created_at = Math.floor(Date.now() / 1000);
+      sealEvent.pubkey = this.pubkey;
+      sealEvent.id = sealEvent.getEventHash();
+      sealEvent.sig = await sealEvent.sign();
+      const sealEventString = JSON.stringify(await sealEvent.toNostrEvent());
+      console.log("### sealEvent", sealEventString);
+
+      const wrapEvent = new NDKEvent(ndk);
+      wrapEvent.kind = 1059;
+      wrapEvent.tags = [['p', recipient]];
+      wrapEvent.content = nip44.v2.encrypt(sealEventString, randomPrivateKey, hexToBytes(recipient));
+      wrapEvent.created_at = Math.floor(Date.now() / 1000);
+      wrapEvent.pubkey = randomPublicKey;
+      wrapEvent.id = wrapEvent.getEventHash();
+      wrapEvent.sig = await wrapEvent.sign();
+      console.log("### wrapEvent", JSON.stringify(await wrapEvent.toNostrEvent()));
+
+      try {
+        ndk.connect();
+        await wrapEvent.publish();
+        notifySuccess("NIP-17 event published");
+      } catch (e) {
+        console.error(e);
+        notifyError("Could not publish NIP-17 event");
+      }
+
     },
     parseMessageForEcash: async function (message: string) {
       // first check if the message can be converted to a json and then to a PaymentRequestPayload

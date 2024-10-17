@@ -14,6 +14,7 @@
         </div>
         <div>
           <P2PKDialog v-model="showP2PKDialog" />
+          <PRDialog v-model="showPRDialog" />
         </div>
         <q-input
           round
@@ -111,6 +112,15 @@
           <q-icon name="lock_outline" />
         </q-btn>
 
+        <q-btn
+          unelevated
+          class="q-mx-none"
+          v-if="!receiveData.tokensBase64.length"
+          @click="handlePaymentRequestBtn"
+        >
+          <q-icon name="download" />
+        </q-btn>
+
         <q-btn v-close-popup rounded flat color="grey" class="q-ml-auto"
           >Close</q-btn
         >
@@ -128,8 +138,10 @@ import { useMintsStore } from "src/stores/mints";
 import { useTokensStore } from "src/stores/tokens";
 import { useCameraStore } from "src/stores/camera";
 import { useP2PKStore } from "src/stores/p2pk";
+import { usePRStore } from "src/stores/payment-request";
 import token from "src/js/token";
 import P2PKDialog from "./P2PKDialog.vue";
+import PRDialog from "./PaymentRequestDialog.vue";
 
 import { mapActions, mapState, mapWritableState } from "pinia";
 // import ChooseMint from "components/ChooseMint.vue";
@@ -141,11 +153,13 @@ export default defineComponent({
   components: {
     TokenInformation,
     P2PKDialog,
+    PRDialog,
   },
   props: {},
   data: function () {
     return {
       showP2PKDialog: false,
+      showPRDialog: false,
     };
   },
   computed: {
@@ -160,6 +174,7 @@ export default defineComponent({
       "addMintBlocking",
     ]),
     ...mapWritableState(useMintsStore, ["addMintData", "showAddMintDialog"]),
+    ...mapWritableState(usePRStore, ["showPRDialog"]),
     ...mapState(useCameraStore, ["hasCamera"]),
     ...mapState(useP2PKStore, ["p2pkKeys"]),
     canPasteFromClipboard: function () {
@@ -266,6 +281,13 @@ export default defineComponent({
         this.generateKeypair();
       }
       this.showLastKey();
+    },
+    handlePaymentRequestBtn: function () {
+      const prStore = usePRStore();
+      this.showPRDialog = !this.showPRDialog;
+      if (this.showPRDialog) {
+        prStore.newPaymentRequest();
+      }
     },
     receiveIfDecodes: function () {
       try {
