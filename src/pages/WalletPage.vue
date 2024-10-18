@@ -421,12 +421,13 @@ export default {
                     const decodedTokenLink = new TextDecoder().decode(
                       message.records[0].data
                     );
-                    const cashuIndex = decodedTokenLink.indexOf("cashu");
+                    const cashuIndex = decodedTokenLink.indexOf("?token=cashu");
                     if (cashuIndex === -1) {
                       throw new Error("not a cashu token");
                     }
-                    this.receiveData.tokensBase64 =
-                      decodedTokenLink.substring(cashuIndex);
+                    this.receiveData.tokensBase64 = decodedTokenLink.substring(
+                      cashuIndex + 7
+                    );
                     const tokenJson = token.decode(
                       this.receiveData.tokensBase64
                     );
