@@ -6,7 +6,7 @@ import { useSendTokensStore } from "./sendTokensStore";
 import { useNostrStore } from "./nostr";
 import { useTokensStore } from "./tokens";
 import token from "src/js/token";
-import { notifyError } from "src/js/notify";
+import { notify, notifyError, notifySuccess } from "src/js/notify";
 export const usePRStore = defineStore("payment-request", {
   state: () => ({
     showPRDialog: false,
@@ -80,7 +80,13 @@ export const usePRStore = defineStore("payment-request", {
         proofs: proofs,
       };
       const paymentPayloadString = JSON.stringify(paymentPayload);
-      await nostrStore.sendNip17DirectMessageToNprofile(transport.target, paymentPayloadString);
+      try {
+        await nostrStore.sendNip17DirectMessageToNprofile(transport.target, paymentPayloadString);
+      } catch (error) {
+        console.error("Error paying payment request:", error);
+        notifyError("Could not pay request");
+      }
+      notifySuccess("Payment sent");
     },
     async payPostPaymentRequest(request: PaymentRequest, transport: PaymentRequestTransport, tokenStr: string) {
       console.log("payPostPaymentRequest", request, tokenStr);
@@ -98,10 +104,20 @@ export const usePRStore = defineStore("payment-request", {
         proofs: proofs,
       };
       const paymentPayloadString = JSON.stringify(paymentPayload);
-      const response = await fetch(transport.target, {
-        method: "POST",
-        body: paymentPayloadString,
-      });
+      try {
+        const response = await fetch(transport.target, {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          method: "POST",
+          body: paymentPayloadString,
+        });
+        notifySuccess("Payment sent");
+
+      } catch (error) {
+        console.error("Error paying payment request:", error);
+        notifyError("Could not pay request");
+      }
 
     },
   },
