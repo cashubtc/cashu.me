@@ -1083,7 +1083,7 @@ export const useWalletStore = defineStore("wallet", {
     },
     handlePaymentRequest: function (req: string) {
       const prStore = usePRStore()
-      prStore.parsePaymentRequest(req)
+      prStore.decodePaymentRequest(req)
     },
     decodeRequest: async function (req: string) {
       const p2pkStore = useP2PKStore()

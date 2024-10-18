@@ -1,9 +1,12 @@
 import { defineStore } from "pinia";
 import { useWalletStore } from "./wallet";
-import { decodePaymentRequest, PaymentRequest } from "@cashu/cashu-ts";
+import { decodePaymentRequest, PaymentRequest, PaymentRequestPayload, PaymentRequestTransport, PaymentRequestTransportType } from "@cashu/cashu-ts";
 import { useMintsStore } from "./mints";
 import { useSendTokensStore } from "./sendTokensStore";
-
+import { useNostrStore } from "./nostr";
+import { useTokensStore } from "./tokens";
+import token from "src/js/token";
+import { notifyError } from "src/js/notify";
 export const usePRStore = defineStore("payment-request", {
   state: () => ({
     showPRDialog: false,
@@ -16,30 +19,90 @@ export const usePRStore = defineStore("payment-request", {
       const walletStore = useWalletStore();
       this.showPRKData = walletStore.createPaymentRequest(amount, memo);
     },
-    parsePaymentRequest(pr: string) {
-      console.log("parsePaymentRequest", pr);
+    decodePaymentRequest(pr: string) {
+      console.log("decodePaymentRequest", pr);
       const request: PaymentRequest = decodePaymentRequest(pr)
-      console.log("parsePaymentRequest", request);
+      console.log("decodePaymentRequest", request);
       // activate the mint in the payment request
       if (request.mints && request.mints.length > 0) {
         const walletStore = useWalletStore();
         const mintsStore = useMintsStore();
+        let foundMint = false;
         for (const mint of request.mints) {
           if (mintsStore.mints.find((m) => m.url == mint)) {
             mintsStore.activateMintUrl(mint);
+            foundMint = true;
+            break;
           }
+        }
+        if (!foundMint) {
+          notifyError("We do not know the mint in the payment request");
+          throw new Error(`We do not know the mint in the payment request: ${request.mints}`);
         }
       }
 
       const sendTokenStore = useSendTokensStore();
-      sendTokenStore.showSendTokens = true;
-
+      sendTokenStore.clearSendData();
       // if the payment request has an amount, set it
       if (request.amount) {
         sendTokenStore.sendData.amount = request.amount;
       }
-
       sendTokenStore.sendData.paymentRequest = request;
+      sendTokenStore.showSendTokens = true;
+    },
+    parseAndPayPaymentRequest(request: PaymentRequest, tokenStr: string) {
+      const transports: PaymentRequestTransport[] = request.transport;
+      for (const transport of transports) {
+        if (transport.type == PaymentRequestTransportType.NOSTR) {
+          this.payNostrPaymentRequest(request, transport, tokenStr);
+          return;
+        }
+        if (transport.type == PaymentRequestTransportType.POST) {
+          this.payPostPaymentRequest(request, transport, tokenStr);
+          return;
+        }
+      }
+    },
+    async payNostrPaymentRequest(request: PaymentRequest, transport: PaymentRequestTransport, tokenStr: string) {
+      console.log("payNostrPaymentRequest", request, tokenStr);
+      console.log("transport", transport);
+      const nostrStore = useNostrStore();
+      const decodedToken = token.decode(tokenStr);
+      if (!decodedToken) {
+        console.error("could not decode token");
+        return;
+      }
+      const proofs = token.getProofs(decodedToken);
+      const paymentPayload: PaymentRequestPayload = {
+        id: request.id,
+        mint: request.mints ? request.mints[0] : "",
+        unit: request.unit || "",
+        proofs: proofs,
+      };
+      const paymentPayloadString = JSON.stringify(paymentPayload);
+      await nostrStore.sendNip17DirectMessageToNprofile(transport.target, paymentPayloadString);
+    },
+    async payPostPaymentRequest(request: PaymentRequest, transport: PaymentRequestTransport, tokenStr: string) {
+      console.log("payPostPaymentRequest", request, tokenStr);
+      // get the endpoint from the transport target and make an HTTP POST request with the paymentPayload as the body
+      const decodedToken = token.decode(tokenStr);
+      if (!decodedToken) {
+        console.error("could not decode token");
+        return;
+      }
+      const proofs = token.getProofs(decodedToken);
+      const paymentPayload: PaymentRequestPayload = {
+        id: request.id,
+        mint: request.mints ? request.mints[0] : "",
+        unit: request.unit || "",
+        proofs: proofs,
+      };
+      const paymentPayloadString = JSON.stringify(paymentPayload);
+      const response = await fetch(transport.target, {
+        method: "POST",
+        body: paymentPayloadString,
+      });
+
     },
   },
 });

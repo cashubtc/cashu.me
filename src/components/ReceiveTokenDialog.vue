@@ -298,10 +298,11 @@ export default defineComponent({
         console.error(error);
       }
     },
-    tokenAlreadyInHistory: function (token) {
+    tokenAlreadyInHistory: function (tokenStr) {
       const tokensStore = useTokensStore();
       return (
-        tokensStore.historyTokens.find((t) => t.token === token) !== undefined
+        tokensStore.historyTokens.find((t) => t.token === tokenStr) !==
+        undefined
       );
     },
     addPendingTokenToHistory: function (token) {

@@ -10,7 +10,7 @@
       >
         <q-item-section
           side
-          @click="showTokenDialog(token.token)"
+          @click="showTokenDialog(token)"
           style="width: 140px"
           class="q-pr-none items-center"
         >
@@ -33,7 +33,7 @@
 
         <q-item-section
           class="items-center q-pl-lg"
-          @click="showTokenDialog(token.token)"
+          @click="showTokenDialog(token)"
           style="width: 300px"
         >
           <q-item-label>
@@ -141,7 +141,7 @@ export default defineComponent({
       const end = start + this.pageSize;
       if (this.filterPending) {
         return this.historyTokens
-          .filter((token) => token.status === "pending")
+          .filter((historyToken) => historyToken.status === "pending")
           .slice()
           .reverse()
           .slice(start, end);
@@ -161,8 +161,8 @@ export default defineComponent({
     handlePageChange(page) {
       this.currentPage = page;
     },
-    receiveToken(token) {
-      this.receiveData.tokensBase64 = token;
+    receiveToken(tokenStr) {
+      this.receiveData.tokensBase64 = tokenStr;
       this.showReceiveTokens = true;
     },
   },

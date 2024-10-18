@@ -266,6 +266,12 @@
                 :showP2PKCheck="false"
               />
             </div>
+            <div
+              v-if="sendData.paymentRequest"
+              class="row justify-center q-pt-sm"
+            >
+              <SendPaymentRequest />
+            </div>
             <div class="row q-mt-lg">
               <q-btn
                 class="q-mx-xs"
@@ -364,6 +370,7 @@ import {
 import { mapActions, mapState, mapWritableState } from "pinia";
 import ChooseMint from "components/ChooseMint.vue";
 import { UR, UREncoder } from "@gandlaf21/bc-ur";
+import SendPaymentRequest from "./SendPaymentRequest.vue";
 
 export default defineComponent({
   name: "SendTokenDialog",
@@ -371,6 +378,7 @@ export default defineComponent({
   components: {
     ChooseMint,
     TokenInformation,
+    SendPaymentRequest,
   },
   props: {},
   data: function () {

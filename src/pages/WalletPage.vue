@@ -465,10 +465,12 @@ export default {
       this.invoiceCheckWorker();
     },
 
-    showTokenDialog: function (tokensBase64) {
+    showTokenDialog: function (tokenObj) {
+      const tokensBase64 = tokenObj.token;
       console.log("##### showTokenDialog");
       this.sendData.tokens = this.getProofs(this.decodeToken(tokensBase64));
       this.sendData.tokensBase64 = _.clone(tokensBase64);
+      this.sendData.paymentRequest = tokenObj.paymentRequest;
       this.showSendTokens = true;
       // kick off token check worker
       // this.checkTokenSpendableWorker(tokensBase64);

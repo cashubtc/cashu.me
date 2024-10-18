@@ -11,7 +11,6 @@ import { getEncodedTokenV4, PaymentRequestPayload, Token } from "@cashu/cashu-ts
 import { useTokensStore } from "./tokens";
 import { notifyApiError, notifyError, notifySuccess, notifyWarning, notify } from "../js/notify";
 import token from "../js/token";
-import { subscribe } from "diagnostics_channel";
 
 type MintRecommendation = {
   url: string;
@@ -236,10 +235,10 @@ export const useNostrStore = defineStore("nostr", {
     subscribeToNip04DirectMessages: async function () {
       let nip04DirectMessageEvents: Set<NDKEvent> = new Set();
       const fetchEventsPromise = new Promise<Set<NDKEvent>>(resolve => {
-        console.log(`### Subscribing to NIP-04 direct messages to ${this.pubkey}`);
         if (!this.lastEventTimestamp) {
           this.lastEventTimestamp = Math.floor(Date.now() / 1000);
         }
+        console.log(`### Subscribing to NIP-04 direct messages to ${this.pubkey} since ${this.lastEventTimestamp}`);
         this.ndk.connect();
         const sub = this.ndk.subscribe(
           {
@@ -319,15 +318,16 @@ export const useNostrStore = defineStore("nostr", {
     subscribeToNip17DirectMessages: async function () {
       let nip17DirectMessageEvents: Set<NDKEvent> = new Set();
       const fetchEventsPromise = new Promise<Set<NDKEvent>>(resolve => {
-        console.log("### Subscribing to NIP-17 direct messages");
         if (!this.lastEventTimestamp) {
           this.lastEventTimestamp = Math.floor(Date.now() / 1000);
         }
+        console.log(`### Subscribing to NIP-17 direct messages to ${this.pubkey} since ${this.lastEventTimestamp}`);
         this.ndk.connect();
         const sub = this.ndk.subscribe(
           {
             kinds: [1059 as NDKKind],
             "#p": [this.pubkey],
+            since: this.lastEventTimestamp,
           } as NDKFilter,
           { closeOnEose: false, groupable: false },
         );
