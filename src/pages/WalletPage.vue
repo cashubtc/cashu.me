@@ -418,11 +418,15 @@ export default {
                 ({ message, serialNumber }) => {
                   notify(`Serial: ${serialNumber}`);
                   try {
-                    const tokensBase64 = new TextDecoder().decode(
+                    const decodedTokenLink = new TextDecoder().decode(
                       message.records[0].data
                     );
-                    //getDecodedToken(tokensBase64);
-                    this.receiveData.tokensBase64 = tokensBase64;
+                    const cashuIndex = decodedTokenLink.indexOf("cashu");
+                    if (cashuIndex === -1) {
+                      throw new Error("not a cashu token");
+                    }
+                    this.receiveData.tokensBase64 =
+                      decodedTokenLink.substring(cashuIndex);
                     const tokenJson = token.decode(
                       this.receiveData.tokensBase64
                     );

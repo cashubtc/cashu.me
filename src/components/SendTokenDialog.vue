@@ -653,7 +653,7 @@ export default defineComponent({
     writeTokensToCard: function () {
       if (!this.scanningCard) {
         try {
-          this.ndef = new window.NDEFReader();
+          this.ndef = new NDEFReader();
           this.controller = new AbortController();
           const signal = this.controller.signal;
           this.ndef
@@ -674,17 +674,20 @@ export default defineComponent({
                 this.controller.abort();
                 this.scanningCard = false;
                 try {
-                  const arrBuffer = new TextEncoder().encode(
-                    this.sendData.tokensBase64
-                  );
-                  const ndefRecord = new NDEFRecord({
-                    data: arrBuffer,
-                    recordType: "mime",
-                    mediaType: "text/plain",
-                  });
+                  const tokenURL =
+                    window.location.toString() +
+                    "?token=" +
+                    this.sendData.tokensBase64;
                   this.ndef
                     .write(
-                      { records: [ndefRecord] },
+                      {
+                        records: [
+                          {
+                            recordType: "url",
+                            data: tokenURL,
+                          },
+                        ],
+                      },
                       {
                         overwrite: true,
                       }
