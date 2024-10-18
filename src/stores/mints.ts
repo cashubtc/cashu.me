@@ -4,6 +4,7 @@ import { useWorkersStore } from "./workers";
 import { notifyApiError, notifyError, notifySuccess } from "src/js/notify";
 import { CashuMint, MintKeys, MintAllKeysets, Proof, SerializedBlindedSignature, MintKeyset } from "@cashu/cashu-ts";
 import { useUiStore } from "./ui";
+import token from "src/js/token";
 export type Mint = {
   url: string;
   keys: MintKeys[];
@@ -421,6 +422,15 @@ export const useMintsStore = defineStore("mints", {
         }
         throw new Error(`Mint error: ${response.error}`);
       }
+    },
+    knowThisMintOfTokenJson: function (tokenJson: any) {
+      // check if we have all mints
+      for (var i = 0; i < tokenJson.token.length; i++) {
+        if (!this.mints.map((m) => m.url).includes(token.getMint(tokenJson))) {
+          return false;
+        }
+      }
+      return true;
     },
     // getBalance: function () {
     //   const mint = this.mints.find((m) => m.url === this.activeMintUrl);

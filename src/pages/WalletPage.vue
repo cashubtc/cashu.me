@@ -359,6 +359,7 @@ export default {
       "setActiveProofs",
       "setProofs",
       "getKeysForKeyset",
+      "knowThisMintOfTokenJson",
     ]),
     ...mapActions(useWorkersStore, [
       "clearAllWorkers",
@@ -383,18 +384,6 @@ export default {
     ...mapActions(useCameraStore, ["closeCamera", "showCamera"]),
     ...mapActions(useNWCStore, ["listenToNWCCommands"]),
     ...mapActions(useNPCStore, ["generateNPCConnection", "claimAllTokens"]),
-    knowThisMintOfTokenJson: function (tokenJson) {
-      const mintStore = useMintsStore();
-      // check if we have all mints
-      for (var i = 0; i < tokenJson.token.length; i++) {
-        if (
-          !mintStore.mints.map((m) => m.url).includes(token.getMint(tokenJson))
-        ) {
-          return false;
-        }
-      }
-      return true;
-    },
     toggleScanner: function () {
       if (!this.scanningCard) {
         try {
