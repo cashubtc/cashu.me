@@ -266,7 +266,6 @@ export const useNostrStore = defineStore("nostr", {
       }
     },
     sendNip17DirectMessageToNprofile: async function (nprofile: string, message: string) {
-      nprofile = this.nprofile
       const result = nip19.decode(nprofile);
       const pubkey: string = (result.data as ProfilePointer).pubkey;
       const relays: string[] | undefined = (result.data as ProfilePointer).relays;
