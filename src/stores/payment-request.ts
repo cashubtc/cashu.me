@@ -7,10 +7,14 @@ import { useNostrStore } from "./nostr";
 import { useTokensStore } from "./tokens";
 import token from "src/js/token";
 import { notify, notifyError, notifySuccess } from "src/js/notify";
+import { useLocalStorage } from "@vueuse/core";
+
+
 export const usePRStore = defineStore("payment-request", {
   state: () => ({
     showPRDialog: false,
     showPRKData: "" as string,
+    enablePaymentRequest: useLocalStorage<boolean>("cashu.pr.enable", false),
   }),
   getters: {
   },
@@ -73,9 +77,10 @@ export const usePRStore = defineStore("payment-request", {
         return;
       }
       const proofs = token.getProofs(decodedToken);
+      const mint = token.getMint(decodedToken);
       const paymentPayload: PaymentRequestPayload = {
         id: request.id,
-        mint: request.mints ? request.mints[0] : "",
+        mint: mint,
         unit: request.unit || "",
         proofs: proofs,
       };

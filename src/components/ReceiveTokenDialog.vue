@@ -115,7 +115,7 @@
         <q-btn
           unelevated
           class="q-mx-none"
-          v-if="!receiveData.tokensBase64.length"
+          v-if="!receiveData.tokensBase64.length && enablePaymentRequest"
           @click="handlePaymentRequestBtn"
         >
           <q-icon name="download" />
@@ -146,6 +146,7 @@ import PRDialog from "./PaymentRequestDialog.vue";
 import { mapActions, mapState, mapWritableState } from "pinia";
 // import ChooseMint from "components/ChooseMint.vue";
 import TokenInformation from "components/TokenInformation.vue";
+import { map } from "underscore";
 
 export default defineComponent({
   name: "ReceiveTokenDialog",
@@ -176,6 +177,7 @@ export default defineComponent({
     ...mapWritableState(usePRStore, ["showPRDialog"]),
     ...mapState(useCameraStore, ["hasCamera"]),
     ...mapState(useP2PKStore, ["p2pkKeys"]),
+    ...mapState(usePRStore, ["enablePaymentRequest"]),
     canPasteFromClipboard: function () {
       return (
         window.isSecureContext &&

@@ -10,6 +10,8 @@ import { useReceiveTokensStore } from "./receiveTokensStore";
 import { getEncodedTokenV4, PaymentRequestPayload, Token } from "@cashu/cashu-ts";
 import { useTokensStore } from "./tokens";
 import { notifyApiError, notifyError, notifySuccess, notifyWarning, notify } from "../js/notify";
+import { useSendTokensStore } from "./sendTokensStore";
+import { usePRStore } from "./payment-request";
 import token from "../js/token";
 
 type MintRecommendation = {
@@ -269,8 +271,6 @@ export const useNostrStore = defineStore("nostr", {
       const result = nip19.decode(nprofile);
       const pubkey: string = (result.data as ProfilePointer).pubkey;
       const relays: string[] | undefined = (result.data as ProfilePointer).relays;
-      console.log("## decode pubkey", pubkey)
-      console.log("## decode relays", relays)
       this.sendNip17DirectMessage(pubkey, message, relays)
     },
     sendNip17DirectMessage: async function (recipient: string, message: string, relays?: string[]) {
@@ -362,8 +362,16 @@ export const useNostrStore = defineStore("nostr", {
             token: [{ proofs: proofs, mint: mint }],
             unit: unit,
           } as Token;
+
+          const sendTokensStore = useSendTokensStore();
+          sendTokensStore.showSendTokens = false;
+          const prStore = usePRStore();
+          prStore.showPRDialog = false;
+
           receiveStore.receiveData.tokensBase64 = getEncodedTokenV4(token);
           receiveStore.showReceiveTokens = true;
+
+          notify("Pending payment received", "bottom");
         }
       } catch (e) {
         // console.log("### parsing message for ecash failed");

@@ -213,6 +213,7 @@ import { useP2PKStore } from "src/stores/p2pk";
 import { useNWCStore } from "src/stores/nwc";
 import { useNPCStore } from "src/stores/npubcash";
 import { useNostrStore } from "src/stores/nostr";
+import { usePRStore } from "src/stores/payment-request";
 
 import ReceiveTokenDialog from "src/components/ReceiveTokenDialog.vue";
 
@@ -303,6 +304,7 @@ export default {
       "tokensCheckSpendableListener",
     ]),
     ...mapState(useTokensStore, ["historyTokens"]),
+    ...mapState(usePRStore, ["enablePaymentRequest"]),
     ...mapWritableState(useCameraStore, ["camera", "hasCamera"]),
     ...mapWritableState(useP2PKStore, ["showP2PKDialog"]),
     ...mapWritableState(useNWCStore, ["showNWCDialog", "nwcEnabled"]),
@@ -657,20 +659,9 @@ export default {
       this.listenToNWCCommands();
     }
 
-    this.subscribeToNip17DirectMessages();
-
-    // this.sendNip04DirectMessage(
-    //   "50d94fc2d8580c682b071a542f8b1e31a200b0508bab95a33bef0855df281d63",
-    //   "NIP-04"
-    // );
-    // this.sendNip17DirectMessage(
-    //   "50d94fc2d8580c682b071a542f8b1e31a200b0508bab95a33bef0855df281d63",
-    //   "NIP-17"
-    // );
-
-    // this.decodeRequest(
-    //   "creqApGF0gaNhdGVub3N0cmFheKlucHJvZmlsZTFxeTI4d3VtbjhnaGo3dW45ZDNzaGp0bnl2OWtoMnVld2Q5aHN6OW1od2RlbjV0ZTB3ZmprY2N0ZTljdXJ4dmVuOWVlaHFjdHJ2NWhzenJ0aHdkZW41dGUwZGVoaHh0bnZkYWtxcWdyY3ZqN3lsZ3R4c2tzYTd0enYwcjV2d3Z1ZXk2YTQyeTZneTR6d2xhNHhzc3VrYTA5N2Z5M3c3Z3EzYWeBgmExZk5JUC0wNGFpaDFjMWFmNDA0YXVjc2F0YW2BeCJodHRwczovL25vZmVlcy50ZXN0bnV0LmNhc2h1LnNwYWNl"
-    // );
+    if (this.enablePaymentRequest) {
+      this.subscribeToNip17DirectMessages();
+    }
   },
 };
 </script>
