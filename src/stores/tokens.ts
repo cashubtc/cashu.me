@@ -1,7 +1,7 @@
 import { useLocalStorage } from "@vueuse/core";
 import { date } from "quasar";
 import { defineStore } from "pinia";
-import { Proof, Token } from "@cashu/cashu-ts";
+import { PaymentRequest, Proof, Token } from "@cashu/cashu-ts";
 
 /**
  * The tokens store handles everything related to tokens and proofs
@@ -14,6 +14,7 @@ type HistoryToken = {
   token: string;
   mint: string;
   unit: string;
+  paymentRequest?: PaymentRequest;
 };
 
 export const useTokensStore = defineStore("tokens", {
@@ -23,7 +24,7 @@ export const useTokensStore = defineStore("tokens", {
   }),
   actions: {
     /**
-     * @param {{amount: number, serializedProofs: string}}
+     * @param {{amount: number, serializedProofs: string, mint: string, unit: string}} param0
      */
     addPaidToken({
       amount,
@@ -63,7 +64,7 @@ export const useTokensStore = defineStore("tokens", {
         token: serializedProofs,
         mint,
         unit,
-      });
+      } as HistoryToken);
     },
     editHistoryToken(tokenToEdit: string, options?: { newAmount?: number; addAmount?: number, newStatus?: "paid" | "pending", newToken?: string, }): HistoryToken | undefined {
       const index = this.historyTokens.findIndex((t) => t.token === tokenToEdit);

@@ -212,6 +212,7 @@ import { useCameraStore } from "src/stores/camera";
 import { useP2PKStore } from "src/stores/p2pk";
 import { useNWCStore } from "src/stores/nwc";
 import { useNPCStore } from "src/stores/npubcash";
+import { useNostrStore } from "src/stores/nostr";
 
 import ReceiveTokenDialog from "src/components/ReceiveTokenDialog.vue";
 
@@ -270,13 +271,13 @@ export default {
     };
   },
   computed: {
+    ...mapState(useUiStore, ["tickerShort"]),
     ...mapWritableState(useUiStore, [
       "showInvoiceDetails",
       "tab",
       "showSendDialog",
       "showReceiveDialog",
     ]),
-    ...mapState(useUiStore, ["tickerShort"]),
     ...mapWritableState(useUiStore, ["expandHistory"]),
     ...mapWritableState(useReceiveTokensStore, [
       "showReceiveTokens",
@@ -352,10 +353,19 @@ export default {
       "checkPendingTokens",
       "decodeRequest",
       "generateNewMnemonic",
+      "createPaymentRequest",
     ]),
     ...mapActions(useCameraStore, ["closeCamera", "showCamera"]),
     ...mapActions(useNWCStore, ["listenToNWCCommands"]),
     ...mapActions(useNPCStore, ["generateNPCConnection", "claimAllTokens"]),
+    ...mapActions(useNostrStore, [
+      "sendNip04DirectMessage",
+      "sendNip17DirectMessage",
+      "subscribeToNip04DirectMessages",
+      "subscribeToNip17DirectMessages",
+      "sendNip17DirectMessageToNprofile",
+      "initSigner",
+    ]),
     // TOKEN METHODS
     decodeToken: function (encoded_token) {
       try {
@@ -455,10 +465,12 @@ export default {
       this.invoiceCheckWorker();
     },
 
-    showTokenDialog: function (tokensBase64) {
+    showTokenDialog: function (tokenObj) {
+      const tokensBase64 = tokenObj.token;
       console.log("##### showTokenDialog");
       this.sendData.tokens = this.getProofs(this.decodeToken(tokensBase64));
       this.sendData.tokensBase64 = _.clone(tokensBase64);
+      this.sendData.paymentRequest = tokenObj.paymentRequest;
       this.showSendTokens = true;
       // kick off token check worker
       // this.checkTokenSpendableWorker(tokensBase64);
@@ -635,6 +647,8 @@ export default {
     // generate new mnemonic
     this.generateNewMnemonic();
 
+    this.initSigner();
+
     // show welcome dialog
     this.showWelcomeDialog();
 
@@ -642,6 +656,21 @@ export default {
     if (this.nwcEnabled) {
       this.listenToNWCCommands();
     }
+
+    this.subscribeToNip17DirectMessages();
+
+    // this.sendNip04DirectMessage(
+    //   "50d94fc2d8580c682b071a542f8b1e31a200b0508bab95a33bef0855df281d63",
+    //   "NIP-04"
+    // );
+    // this.sendNip17DirectMessage(
+    //   "50d94fc2d8580c682b071a542f8b1e31a200b0508bab95a33bef0855df281d63",
+    //   "NIP-17"
+    // );
+
+    // this.decodeRequest(
+    //   "creqApGF0gaNhdGVub3N0cmFheKlucHJvZmlsZTFxeTI4d3VtbjhnaGo3dW45ZDNzaGp0bnl2OWtoMnVld2Q5aHN6OW1od2RlbjV0ZTB3ZmprY2N0ZTljdXJ4dmVuOWVlaHFjdHJ2NWhzenJ0aHdkZW41dGUwZGVoaHh0bnZkYWtxcWdyY3ZqN3lsZ3R4c2tzYTd0enYwcjV2d3Z1ZXk2YTQyeTZneTR6d2xhNHhzc3VrYTA5N2Z5M3c3Z3EzYWeBgmExZk5JUC0wNGFpaDFjMWFmNDA0YXVjc2F0YW2BeCJodHRwczovL25vZmVlcy50ZXN0bnV0LmNhc2h1LnNwYWNl"
+    // );
   },
 };
 </script>

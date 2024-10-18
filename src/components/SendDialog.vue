@@ -102,6 +102,7 @@ export default defineComponent({
       this.sendData.amount = null;
       this.sendData.memo = "";
       this.sendData.p2pkPubkey = "";
+      this.sendData.paymentRequest = {};
       this.showSendDialog = false;
       this.showSendTokens = true;
       this.showLockInput = false;
