@@ -1,129 +1,81 @@
 <template>
   <q-dialog
     v-model="showReceiveTokens"
-    position="top"
-    backdrop-filter="blur(2px) brightness(60%)"
-    no-backdrop-dismiss
+    position="bottom"
+    :maximized="$q.screen.lt.sm"
+    transition-show="slide-up"
+    transition-hide="slide-down"
   >
-    <q-card class="q-pa-lg q-pt-md qcard">
-      <div>
-        <div class="row items-center no-wrap q-mb-sm">
-          <div class="col-10">
-            <span class="text-h6">Receive Ecash</span>
-          </div>
+    <q-card class="bg-grey-10 text-white full-width-card">
+      <q-card-section class="row items-center q-pb-none">
+        <q-btn flat round dense @click="goBack" class="q-ml-sm">
+          <ChevronLeftIcon />
+        </q-btn>
+        <div class="col text-center">
+          <span class="text-h6">Receive ecash</span>
         </div>
-        <div>
-          <P2PKDialog v-model="showP2PKDialog" />
-        </div>
-        <q-input
-          round
-          outlined
-          v-model="receiveData.tokensBase64"
-          label="Paste Cashu token"
-          type="textarea"
-          autofocus
-          class="q-mb-lg"
-          @keyup.enter="receiveIfDecodes"
-        >
-          <template v-if="receiveData.tokensBase64" v-slot:append>
-            <q-icon
-              name="close"
-              class="cursor-pointer"
-              @click="receiveData.tokensBase64 = ''"
-            />
-          </template>
-        </q-input>
-      </div>
-      <div
-        class="row"
-        v-if="receiveData.tokensBase64.length && tokenDecodesCorrectly"
-      >
-        <div class="col-12">
-          <TokenInformation
-            :encodedToken="receiveData.tokensBase64"
-            :showAmount="true"
-            :showMintCheck="true"
-            :showP2PKCheck="true"
-          />
-        </div>
-      </div>
-      <div class="row q-mt-lg">
-        <!-- if !tokenDecodesCorrectly, display error -->
-        <q-btn
-          v-if="receiveData.tokensBase64.length && !tokenDecodesCorrectly"
-          disabled
-          color="yellow"
-          text-color="black"
-          rounded
-          unelevated
-          class="q-mr-sm"
-          label="Invalid token"
-        ></q-btn>
+        <q-btn flat round dense @click="openCamera" class="q-mr-sm">
+          <ScanIcon />
+        </q-btn>
+      </q-card-section>
 
-        <q-btn
-          @click="receiveIfDecodes"
-          color="primary"
-          rounded
-          class="q-mr-sm"
-          v-if="tokenDecodesCorrectly"
-          :disabled="addMintBlocking"
-          :label="
-            knowThisMint
-              ? addMintBlocking
-                ? 'Adding mint ...'
-                : 'Receive'
-              : 'Receive'
-          "
-        >
-        </q-btn>
-        <q-btn
-          @click="addPendingTokenToHistory(receiveData.tokensBase64)"
-          color="primary"
-          rounded
-          flat
-          class="q-mr-sm"
-          v-if="tokenDecodesCorrectly"
-          >Later
-          <q-tooltip>Add to history to receive later</q-tooltip>
-        </q-btn>
-        <q-btn
-          unelevated
-          dense
-          v-if="canPasteFromClipboard && !receiveData.tokensBase64.length"
-          @click="pasteToParseDialog"
-        >
-          <q-icon name="content_paste" class="q-pr-sm" />Paste</q-btn
-        >
-        <q-btn
-          unelevated
-          class="q-mx-none"
-          v-if="hasCamera && !receiveData.tokensBase64.length"
-          @click="showCamera"
-        >
-          <q-icon name="qr_code_scanner" />
-        </q-btn>
-        <q-btn
-          unelevated
-          class="q-mx-none"
-          v-if="!receiveData.tokensBase64.length"
-          @click="handleLockBtn"
-        >
-          <q-icon name="lock_outline" />
-        </q-btn>
+      <q-card-section class="q-pa-md">
+        <div class="q-gutter-y-md">
+          <q-btn
+            class="full-width custom-btn"
+            @click="pasteToParseDialog"
+            :disabled="!canPasteFromClipboard"
+          >
+            <div class="row items-center full-width">
+              <div class="icon-background q-mr-sm">
+                <ClipboardIcon />
+              </div>
+              <div class="text-left">
+                <div class="text-weight-bold">PASTE</div>
+              </div>
+            </div>
+          </q-btn>
 
-        <q-btn v-close-popup rounded flat color="grey" class="q-ml-auto"
-          >Close</q-btn
-        >
-      </div>
+          <q-btn
+            class="full-width custom-btn"
+            @click="showRequestDialog"
+          >
+            <div class="row items-center full-width">
+              <div class="icon-background q-mr-sm">
+                <FileTextIcon />
+              </div>
+              <div class="text-left">
+                <div class="text-weight-bold">REQUEST</div>
+              </div>
+            </div>
+          </q-btn>
+
+          <q-btn
+            class="full-width custom-btn"
+            @click="handleLockBtn"
+          >
+            <div class="row items-center full-width">
+              <div class="icon-background q-mr-sm">
+                <LockIcon />
+              </div>
+              <div class="text-left">
+                <div class="text-weight-bold">LOCK</div>
+              </div>
+            </div>
+          </q-btn>
+        </div>
+      </q-card-section>
     </q-card>
   </q-dialog>
+
+  <P2PKDialog v-model="showP2PKDialog" />
 </template>
+
 <script>
 import { defineComponent } from "vue";
 import { useReceiveTokensStore } from "src/stores/receiveTokensStore";
 import { useWalletStore } from "src/stores/wallet";
 import { useUiStore } from "src/stores/ui";
-// import { useProofsStore } from "src/stores/proofs";
 import { useMintsStore } from "src/stores/mints";
 import { useTokensStore } from "src/stores/tokens";
 import { useCameraStore } from "src/stores/camera";
@@ -132,17 +84,19 @@ import token from "src/js/token";
 import P2PKDialog from "./P2PKDialog.vue";
 
 import { mapActions, mapState, mapWritableState } from "pinia";
-// import ChooseMint from "components/ChooseMint.vue";
-import TokenInformation from "components/TokenInformation.vue";
+import { ChevronLeft as ChevronLeftIcon, Clipboard as ClipboardIcon, FileText as FileTextIcon, Lock as LockIcon, Scan as ScanIcon } from 'lucide-vue-next';
 
 export default defineComponent({
   name: "ReceiveTokenDialog",
   mixins: [windowMixin],
   components: {
-    TokenInformation,
     P2PKDialog,
+    ChevronLeftIcon,
+    ClipboardIcon,
+    FileTextIcon,
+    LockIcon,
+    ScanIcon,
   },
-  props: {},
   data: function () {
     return {
       showP2PKDialog: false,
@@ -169,16 +123,8 @@ export default defineComponent({
         navigator.clipboard.readText
       );
     },
-    tokenDecodesCorrectly: function () {
-      return this.decodeToken(this.receiveData.tokensBase64) !== undefined;
-    },
-    knowThisMint: function () {
-      const tokenJson = this.decodeToken(this.receiveData.tokensBase64);
-      if (tokenJson == undefined) {
-        return false;
-      }
-      return this.knowThisMintOfTokenJson(tokenJson);
-    },
+    ...mapWritableState(useUiStore, ["showReceiveDialog"]),
+    ...mapState(useCameraStore, ['lastScannedResult']),
   },
   methods: {
     ...mapActions(useWalletStore, ["redeem"]),
@@ -190,76 +136,6 @@ export default defineComponent({
       "showLastKey",
     ]),
     ...mapActions(useMintsStore, ["addMint"]),
-    knowThisMintOfTokenJson: function (tokenJson) {
-      const mintStore = useMintsStore();
-      // check if we have all mints
-      for (var i = 0; i < tokenJson.token.length; i++) {
-        if (
-          !mintStore.mints.map((m) => m.url).includes(token.getMint(tokenJson))
-        ) {
-          return false;
-        }
-      }
-      return true;
-    },
-    receiveToken: async function (encodedToken) {
-      const mintStore = useMintsStore();
-      const receiveStore = useReceiveTokensStore();
-      const uIStore = useUiStore();
-      receiveStore.showReceiveTokens = false;
-      console.log("### receive tokens", receiveStore.receiveData.tokensBase64);
-
-      if (receiveStore.receiveData.tokensBase64.length == 0) {
-        throw new Error("no tokens provided.");
-      }
-
-      // get the private key for the token we want to receive if it is locked with P2PK
-      receiveStore.receiveData.p2pkPrivateKey =
-        this.getPrivateKeyForP2PKEncodedToken(
-          receiveStore.receiveData.tokensBase64
-        );
-
-      const tokenJson = token.decode(receiveStore.receiveData.tokensBase64);
-      if (tokenJson == undefined) {
-        throw new Error("no tokens provided.");
-      }
-      // check if we have all mints
-      if (!this.knowThisMintOfTokenJson(tokenJson)) {
-        // // pop up add mint dialog warning
-        // // hack! The "add mint" component is in SettingsView which may now
-        // // have been loaded yet. We switch the tab to settings to make sure
-        // // that it loads. Remove this code when the TrustMintComnent is refactored!
-        // uIStore.setTab("mints");
-        // // hide the receive dialog
-        // receiveStore.showReceiveTokens = false;
-        // // set the mint to add
-        // this.addMintData = { url: token.getMint(tokenJson) };
-        // // show the add mint dialog
-        // this.showAddMintDialog = true;
-        // // show the token receive dialog again for the next attempt
-        // receiveStore.showReceiveTokens = true;
-        // return;
-
-        // add the mint
-        await this.addMint({ url: token.getMint(tokenJson) });
-      }
-      // redeem the token
-      await this.redeem(receiveStore.receiveData.tokensBase64);
-    },
-    // TOKEN METHODS
-    decodeToken: function (encoded_token) {
-      let decodedToken = undefined;
-      try {
-        decodedToken = token.decode(encoded_token);
-      } catch (error) {}
-      return decodedToken;
-    },
-    getProofs: function (decoded_token) {
-      return token.getProofs(decoded_token);
-    },
-    getMint: function (decoded_token) {
-      return token.getMint(decoded_token);
-    },
     handleLockBtn: function () {
       this.showP2PKDialog = !this.showP2PKDialog;
       if (!this.p2pkKeys.length || !this.showP2PKDialog) {
@@ -267,51 +143,84 @@ export default defineComponent({
       }
       this.showLastKey();
     },
-    receiveIfDecodes: function () {
-      try {
-        const decodedToken = this.decodeToken(this.receiveData.tokensBase64);
-        if (decodedToken) {
-          this.receiveToken(this.receiveData.tokensBase64);
-        }
-      } catch (error) {
-        console.error(error);
-      }
-    },
-    tokenAlreadyInHistory: function (token) {
-      const tokensStore = useTokensStore();
-      return (
-        tokensStore.historyTokens.find((t) => t.token === token) !== undefined
-      );
-    },
-    addPendingTokenToHistory: function (token) {
-      if (this.tokenAlreadyInHistory(token)) {
-        this.notifySuccess("Ecash already in history");
-        this.showReceiveTokens = false;
-        return;
-      }
-      const tokensStore = useTokensStore();
-      const decodedToken = this.decodeToken(token);
-      // get amount from decodedToken.token.proofs[..].amount
-      const amount = this.getProofs(decodedToken).reduce(
-        (sum, el) => (sum += el.amount),
-        0
-      );
-
-      tokensStore.addPendingToken({
-        amount: amount,
-        serializedProofs: token,
-      });
-      this.showReceiveTokens = false;
-      // show success notification
-      this.notifySuccess("Ecash added to history.");
-    },
     pasteToParseDialog: function () {
       console.log("pasteToParseDialog");
       navigator.clipboard.readText().then((text) => {
         this.receiveData.tokensBase64 = text;
+        // TODO: Implement token processing logic
       });
     },
+    showRequestDialog: function () {
+      console.log("Show request dialog");
+      // TODO: Implement request dialog logic
+    },
+    openCamera: function () {
+      this.closeCamera(); // Ensure any existing camera instance is closed
+      this.showCamera();
+      this.showReceiveTokens = false;
+    },
+    closeCamera() {
+      this.camera.show = false;
+      if (this.camera.previousComponent === 'ReceiveTokenDialog') {
+        this.showReceiveTokens = true;
+      }
+    },
+    handleQrCodeDecode(result) {
+      console.log("QR code decoded:", result);
+      // Handle the decoded QR code result here
+      this.closeCamera();
+      // You might want to process the result here
+    },
+    goBack: function () {
+      this.showReceiveTokens = false;
+      this.showReceiveDialog = true;
+    },
   },
-  created: function () {},
 });
 </script>
+
+<style lang="scss" scoped>
+.custom-btn {
+  background: $grey-9;
+  color: white;
+  border-radius: 8px;
+  height: 60px;
+  box-shadow: none;
+  font-size: 14px;
+}
+
+.full-width-card {
+  width: 100%;
+  max-width: 100%;
+}
+
+.q-dialog__inner--minimized > div {
+  max-width: 100%;
+}
+
+.q-dialog__inner > div {
+  border-top-left-radius: 20px;
+  border-top-right-radius: 20px;
+}
+
+@media (max-width: 599px) {
+  .q-dialog__inner > div {
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+  }
+}
+
+.icon-background {
+  background-color: $grey-10;
+  border-radius: 8px;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lucide {
+  width: 24px;
+  height: 24px;
+}
+</style>
