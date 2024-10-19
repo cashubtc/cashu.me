@@ -191,23 +191,17 @@ export default defineComponent({
 
 .full-width-card {
   width: 100%;
-  max-width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
 }
 
 .q-dialog__inner--minimized > div {
-  max-width: 100%;
+  max-width: 600px;
 }
 
 .q-dialog__inner > div {
   border-top-left-radius: 20px;
   border-top-right-radius: 20px;
-}
-
-@media (max-width: 599px) {
-  .q-dialog__inner > div {
-    border-top-left-radius: 0;
-    border-top-right-radius: 0;
-  }
 }
 
 .icon-background {
@@ -222,5 +216,10 @@ export default defineComponent({
 .lucide {
   width: 24px;
   height: 24px;
+}
+
+.q-card {
+  border-top-left-radius: 20px !important;
+  border-top-right-radius: 20px !important;
 }
 </style>

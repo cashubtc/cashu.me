@@ -1,12 +1,18 @@
 <template>
   <q-dialog
     v-model="showInvoiceDetails"
-    position="top"
-    backdrop-filter="blur(2px) brightness(60%)"
-    no-backdrop-dismiss
-    full-height
+    position="bottom"
+    :full-width="$q.screen.lt.sm"
+    :full-height="$q.screen.lt.sm"
   >
     <q-card class="q-px-lg q-pt-md q-pb-md qcard">
+      <q-bar class="bg-transparent">
+        <q-space />
+        <q-btn dense flat icon="close" v-close-popup>
+          <q-tooltip>Close</q-tooltip>
+        </q-btn>
+      </q-bar>
+      
       <!-- invoice is not entered -->
 
       <div v-if="!invoiceData.bolt11">
@@ -190,6 +196,9 @@ export default defineComponent({
     runnerActive: function () {
       return this.invoiceWorkerRunning;
     },
+    isSmallScreen() {
+      return this.$q.screen.lt.sm;
+    },
   },
   methods: {
     ...mapActions(useWalletStore, ["requestMint", "lnurlPaySecond"]),
@@ -213,3 +222,10 @@ export default defineComponent({
   },
 });
 </script>
+
+<style scoped>
+.qcard {
+  border-top-left-radius: 20px;
+  border-top-right-radius: 20px;
+}
+</style>

@@ -1,0 +1,8 @@
+button {
+    border-radius: 8px;
+  }
+  
+  /* Add this new rule */
+  [class$="-btn"] {
+    border-radius: 8px;
+  }

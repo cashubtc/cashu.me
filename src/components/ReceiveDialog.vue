@@ -2,11 +2,12 @@
   <q-dialog
     v-model="showReceiveDialog"
     position="bottom"
-    :maximized="$q.screen.lt.sm"
+    :full-width="$q.screen.lt.sm"
+    :full-height="$q.screen.lt.sm"
     transition-show="slide-up"
     transition-hide="slide-down"
   >
-    <q-card class="bg-grey-10 text-white full-width-card">
+    <q-card class="bg-grey-10 text-white q-px-lg q-pt-md q-pb-md qcard">
       <q-card-section class="row items-center q-pb-none">
         <q-btn flat round dense v-close-popup class="q-ml-sm">
           <XIcon />
@@ -133,13 +134,6 @@ export default defineComponent({
   border-top-right-radius: 20px;
 }
 
-@media (max-width: 599px) {
-  .q-dialog__inner > div {
-    border-top-left-radius: 0;
-    border-top-right-radius: 0;
-  }
-}
-
 .icon-background {
   background-color: $grey-10;
   border-radius: 8px;
@@ -152,5 +146,10 @@ export default defineComponent({
 .lucide {
   width: 24px;
   height: 24px;
+}
+
+.qcard {
+  border-top-left-radius: 20px;
+  border-top-right-radius: 20px;
 }
 </style>
