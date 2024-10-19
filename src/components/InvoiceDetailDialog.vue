@@ -4,14 +4,11 @@
     position="bottom"
     :full-width="$q.screen.lt.sm"
     :full-height="$q.screen.lt.sm"
+    backdrop-filter="blur(2px) brightness(60%)"
+    no-backdrop-dismiss
   >
     <q-card class="q-px-lg q-pt-md q-pb-md qcard">
-      <q-bar class="bg-transparent">
-        <q-space />
-        <q-btn dense flat icon="close" v-close-popup>
-          <q-tooltip>Close</q-tooltip>
-        </q-btn>
-      </q-bar>
+      <!-- Removed q-bar with close button -->
       
       <!-- invoice is not entered -->
 

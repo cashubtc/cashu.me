@@ -5,6 +5,8 @@
     :maximized="$q.screen.lt.sm"
     transition-show="slide-up"
     transition-hide="slide-down"
+    backdrop-filter="blur(2px) brightness(60%)"
+    no-backdrop-dismiss
   >
     <q-card class="bg-grey-10 text-white full-width-card">
       <q-card-section class="row items-center q-pb-none">
@@ -216,10 +218,5 @@ export default defineComponent({
 .lucide {
   width: 24px;
   height: 24px;
-}
-
-.q-card {
-  border-top-left-radius: 20px !important;
-  border-top-right-radius: 20px !important;
 }
 </style>

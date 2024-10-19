@@ -2,7 +2,7 @@
   <q-dialog
     v-model="payInvoiceData.show"
     @hide="closeParseDialog"
-    position="top"
+    position="bottom"
     v-if="!camera.show"
     backdrop-filter="blur(2px) brightness(60%)"
     no-backdrop-dismiss
@@ -312,3 +312,15 @@ export default defineComponent({
   created: function () {},
 });
 </script>
+
+<style lang="scss" scoped>
+.q-dialog__inner > div {
+  border-top-left-radius: 20px;
+  border-top-right-radius: 20px;
+}
+
+.qcard {
+  border-top-left-radius: 20px;
+  border-top-right-radius: 20px;
+}
+</style>

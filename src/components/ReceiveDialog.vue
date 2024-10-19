@@ -6,6 +6,8 @@
     :full-height="$q.screen.lt.sm"
     transition-show="slide-up"
     transition-hide="slide-down"
+    backdrop-filter="blur(2px) brightness(60%)"
+    no-backdrop-dismiss
   >
     <q-card class="bg-grey-10 text-white q-px-lg q-pt-md q-pb-md qcard">
       <q-card-section class="row items-center q-pb-none">

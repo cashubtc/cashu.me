@@ -1,49 +1,62 @@
 <template>
   <q-dialog
-    v-model="showReceiveDialog"
+    v-model="showSendDialog"
     position="bottom"
+    :full-width="$q.screen.lt.sm"
+    :full-height="$q.screen.lt.sm"
+    transition-show="slide-up"
+    transition-hide="slide-down"
     backdrop-filter="blur(2px) brightness(60%)"
+    no-backdrop-dismiss
   >
-    <!-- two buttons in two lines with the labels "Ecash" and "Lightning" -->
-    <q-card class="q-pb-lg q-pt-sm" style="width: 100%">
-      <q-card-section class="">
-        <div class="row items-center no-wrap q-mb-sm">
-          <div class="col-12 text-center text-primary">
-            <q-icon name="north_east" size="1.3rem" class="q-mb-sm q-pr-sm" />
-            <span class="text-h5">Send</span>
-          </div>
+    <q-card class="bg-grey-10 text-white q-px-lg q-pt-md q-pb-md qcard">
+      <q-card-section class="row items-center q-pb-none">
+        <q-btn flat round dense v-close-popup class="q-ml-sm">
+          <XIcon />
+        </q-btn>
+        <div class="col text-center">
+          <span class="text-h6">Send</span>
+        </div>
+        <q-btn flat round dense class="q-mr-sm">
+          <ScanIcon />
+        </q-btn>
+      </q-card-section>
+
+      <q-card-section class="q-pa-md">
+        <div class="q-gutter-y-md">
+          <q-btn
+            class="full-width custom-btn"
+            @click="showSendTokensDialog"
+          >
+            <div class="row items-center full-width">
+              <div class="icon-background q-mr-sm">
+                <BanknoteIcon />
+              </div>
+              <div class="text-left">
+                <div class="text-weight-bold">ECASH</div>
+              </div>
+            </div>
+          </q-btn>
+
+          <q-btn
+            class="full-width custom-btn"
+            @click="showParseDialog"
+          >
+            <div class="row items-center full-width">
+              <div class="icon-background q-mr-sm">
+                <ZapIcon />
+              </div>
+              <div class="text-left">
+                <div class="text-weight-bold">LIGHTNING</div>
+              </div>
+            </div>
+          </q-btn>
         </div>
       </q-card-section>
-      <div class="row items-center text-center no-wrap q-mb-md">
-        <div class="col-12">
-          <q-btn
-            outline
-            color="primary"
-            rounded
-            class="q-py-md q-px-xl"
-            style="width: 85%"
-            @click="showSendTokensDialog"
-            >Ecash</q-btn
-          >
-        </div>
-      </div>
-      <div class="row items-center text-center no-wrap q-mb-md">
-        <div class="col-12">
-          <q-btn
-            outline
-            color="primary"
-            rounded
-            push
-            class="q-py-md q-px-xl"
-            style="width: 85%"
-            @click="showParseDialog"
-            >Lightning</q-btn
-          >
-        </div>
-      </div>
     </q-card>
   </q-dialog>
 </template>
+
 <script>
 import { defineComponent } from "vue";
 import { useReceiveTokensStore } from "src/stores/receiveTokensStore";
@@ -52,9 +65,16 @@ import { useUiStore } from "src/stores/ui";
 import { useWalletStore } from "src/stores/wallet";
 import { useCameraStore } from "src/stores/camera";
 import { useSendTokensStore } from "src/stores/sendTokensStore";
+import { X as XIcon, Banknote as BanknoteIcon, Zap as ZapIcon, Scan as ScanIcon } from 'lucide-vue-next';
 
 export default defineComponent({
   name: "SendDialog",
+  components: {
+    XIcon,
+    BanknoteIcon,
+    ZapIcon,
+    ScanIcon,
+  },
   mixins: [windowMixin],
   props: {},
   data: function () {
@@ -110,3 +130,36 @@ export default defineComponent({
   created: function () {},
 });
 </script>
+
+<style lang="scss" scoped>
+.custom-btn {
+  background: $grey-9;
+  color: white;
+  border-radius: 8px;
+  height: 60px;
+  font-size: 14px;
+}
+
+.q-dialog__inner--minimized > div {
+  max-width: 100%;
+}
+
+.q-dialog__inner > div {
+  border-top-left-radius: 20px;
+  border-top-right-radius: 20px;
+}
+
+.icon-background {
+  background-color: $grey-10;
+  border-radius: 8px;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lucide {
+  width: 24px;
+  height: 24px;
+}
+</style>
