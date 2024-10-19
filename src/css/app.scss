@@ -1,1 +1,15 @@
 // app global css in SCSS form
+.q-dialog__inner > div {
+  border-top-left-radius: 20px !important;
+  border-top-right-radius: 20px !important;
+}
+
+.q-card {
+  border-top-left-radius: 20px;
+  border-top-right-radius: 20px;
+}
+
+.q-dialog__inner--minimized > div {
+  border-top-left-radius: 20px;
+  border-top-right-radius: 20px;
+}

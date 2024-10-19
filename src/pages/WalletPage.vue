@@ -10,7 +10,7 @@
           <q-btn
             rounded
             dense
-            class="q-px-md"
+            class="q-px-md custom-btn"
             color="primary"
             style="width: 140px"
             @click="showReceiveDialog = true"
@@ -29,14 +29,14 @@
             color="primary"
             flat
             @click="showCamera"
+            class="custom-btn"
           />
         </div>
-        <!-- button to showSendDialog -->
         <div class="col-5 q-mb-md">
           <q-btn
             rounded
             dense
-            class="q-px-md"
+            class="q-px-md custom-btn"
             style="width: 140px"
             color="primary"
             @click="showSendDialog = true"
@@ -176,6 +176,10 @@
 
 .keypad .btn-confirm {
   grid-area: 1 / 4 / 5 / 4;
+}
+
+.custom-btn {
+  border-radius: 8px !important;
 }
 </style>
 <script>
@@ -571,6 +575,15 @@ export default {
     // generate NPC connection
     this.generateNPCConnection();
     this.claimAllTokens();
+
+    // Add a global style for all q-btn components
+    const style = document.createElement('style');
+    style.textContent = `
+      .q-btn {
+        border-radius: 8px !important;
+      }
+    `;
+    document.head.appendChild(style);
   },
 
   created: async function () {
