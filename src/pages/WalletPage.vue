@@ -85,7 +85,7 @@
           <!-- ////////////////// HISTORY LIST ///////////////// -->
 
           <q-tab-panel name="history">
-            <HistoryTable :show-token-dialog="showTokenDialog" />
+            <HistoryTable />
           </q-tab-panel>
 
           <!-- ////////////////// INVOICE LIST ///////////////// -->
@@ -465,17 +465,6 @@ export default {
       this.showInvoiceDetails = true;
       // kick off invoice check worker
       this.invoiceCheckWorker();
-    },
-
-    showTokenDialog: function (tokenObj) {
-      const tokensBase64 = tokenObj.token;
-      console.log("##### showTokenDialog");
-      this.sendData.tokens = this.getProofs(this.decodeToken(tokensBase64));
-      this.sendData.tokensBase64 = _.clone(tokensBase64);
-      this.sendData.paymentRequest = tokenObj.paymentRequest;
-      this.showSendTokens = true;
-      // kick off token check worker
-      // this.checkTokenSpendableWorker(tokensBase64);
     },
     showSendTokensDialog: function () {
       console.log("##### showSendTokensDialog");

@@ -101,6 +101,7 @@
   </div>
 </template>
 <script>
+import * as _ from "underscore";
 import { defineComponent } from "vue";
 import { shortenString } from "src/js/string-utils";
 import { formatDistanceToNow, parseISO } from "date-fns";
@@ -108,13 +109,13 @@ import { useTokensStore } from "src/stores/tokens";
 import { mapState, mapWritableState, mapActions } from "pinia";
 import { useReceiveTokensStore } from "src/stores/receiveTokensStore";
 import { useWalletStore } from "src/stores/wallet";
+import { useSendTokensStore } from "src/stores/sendTokensStore";
+import token from "../js/token";
 
 export default defineComponent({
   name: "HistoryTable",
   mixins: [windowMixin],
-  props: {
-    showTokenDialog: Function,
-  },
+  props: {},
   data: function () {
     return {
       currentPage: 1,
@@ -132,6 +133,11 @@ export default defineComponent({
     ...mapWritableState(useReceiveTokensStore, [
       "showReceiveTokens",
       "receiveData",
+    ]),
+    ...mapWritableState(useSendTokensStore, [
+      "showSendTokens",
+      "sendData",
+      "showLockInput",
     ]),
     maxPages() {
       return Math.ceil(this.historyTokens.length / this.pageSize);
@@ -164,6 +170,15 @@ export default defineComponent({
     receiveToken(tokenStr) {
       this.receiveData.tokensBase64 = tokenStr;
       this.showReceiveTokens = true;
+    },
+    showTokenDialog: function (historyToken) {
+      const tokensBase64 = historyToken.token;
+      console.log("##### showTokenDialog");
+      const tokenObj = token.decode(tokensBase64);
+      this.sendData.tokens = token.getProofs(tokenObj);
+      this.sendData.tokensBase64 = _.clone(tokensBase64);
+      this.sendData.paymentRequest = historyToken.paymentRequest;
+      this.showSendTokens = true;
     },
   },
   created: function () {},

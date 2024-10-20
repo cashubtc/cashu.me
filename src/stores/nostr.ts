@@ -8,7 +8,7 @@ import { useLocalStorage } from "@vueuse/core";
 import { useSettingsStore } from "./settings";
 import { useReceiveTokensStore } from "./receiveTokensStore";
 import { getEncodedTokenV4, PaymentRequestPayload, Token } from "@cashu/cashu-ts";
-import { useTokensStore } from "./tokens";
+import { useTokensStore, useTokensStore } from "./tokens";
 import { notifyApiError, notifyError, notifySuccess, notifyWarning, notify } from "../js/notify";
 import { useSendTokensStore } from "./sendTokensStore";
 import { usePRStore } from "./payment-request";
@@ -363,15 +363,24 @@ export const useNostrStore = defineStore("nostr", {
             unit: unit,
           } as Token;
 
+          const tokenStr = getEncodedTokenV4(token);
+
+          if (this.tokenAlreadyInHistory(tokenStr)) {
+            console.log("### token already in history");
+            return;
+          }
+          await this.addPendingTokenToHistory(tokenStr);
+
+          receiveStore.receiveData.tokensBase64 = tokenStr;
           const sendTokensStore = useSendTokensStore();
           sendTokensStore.showSendTokens = false;
           const prStore = usePRStore();
           prStore.showPRDialog = false;
 
-          receiveStore.receiveData.tokensBase64 = getEncodedTokenV4(token);
-          receiveStore.showReceiveTokens = true;
+          // receiveStore.showReceiveTokens = true;
 
           notify("Pending payment received", "bottom");
+          return
         }
       } catch (e) {
         // console.log("### parsing message for ecash failed");
