@@ -85,7 +85,7 @@
           <!-- ////////////////// HISTORY LIST ///////////////// -->
 
           <q-tab-panel name="history">
-            <HistoryTable :show-token-dialog="showTokenDialog" />
+            <HistoryTable />
           </q-tab-panel>
 
           <!-- ////////////////// INVOICE LIST ///////////////// -->
@@ -212,6 +212,8 @@ import { useCameraStore } from "src/stores/camera";
 import { useP2PKStore } from "src/stores/p2pk";
 import { useNWCStore } from "src/stores/nwc";
 import { useNPCStore } from "src/stores/npubcash";
+import { useNostrStore } from "src/stores/nostr";
+import { usePRStore } from "src/stores/payment-request";
 
 import ReceiveTokenDialog from "src/components/ReceiveTokenDialog.vue";
 
@@ -270,13 +272,13 @@ export default {
     };
   },
   computed: {
+    ...mapState(useUiStore, ["tickerShort"]),
     ...mapWritableState(useUiStore, [
       "showInvoiceDetails",
       "tab",
       "showSendDialog",
       "showReceiveDialog",
     ]),
-    ...mapState(useUiStore, ["tickerShort"]),
     ...mapWritableState(useUiStore, ["expandHistory"]),
     ...mapWritableState(useReceiveTokensStore, [
       "showReceiveTokens",
@@ -302,6 +304,7 @@ export default {
       "tokensCheckSpendableListener",
     ]),
     ...mapState(useTokensStore, ["historyTokens"]),
+    ...mapState(usePRStore, ["enablePaymentRequest"]),
     ...mapWritableState(useCameraStore, ["camera", "hasCamera"]),
     ...mapWritableState(useP2PKStore, ["showP2PKDialog"]),
     ...mapWritableState(useNWCStore, ["showNWCDialog", "nwcEnabled"]),
@@ -352,10 +355,19 @@ export default {
       "checkPendingTokens",
       "decodeRequest",
       "generateNewMnemonic",
+      "createPaymentRequest",
     ]),
     ...mapActions(useCameraStore, ["closeCamera", "showCamera"]),
     ...mapActions(useNWCStore, ["listenToNWCCommands"]),
     ...mapActions(useNPCStore, ["generateNPCConnection", "claimAllTokens"]),
+    ...mapActions(useNostrStore, [
+      "sendNip04DirectMessage",
+      "sendNip17DirectMessage",
+      "subscribeToNip04DirectMessages",
+      "subscribeToNip17DirectMessages",
+      "sendNip17DirectMessageToNprofile",
+      "initSigner",
+    ]),
     // TOKEN METHODS
     decodeToken: function (encoded_token) {
       try {
@@ -453,15 +465,6 @@ export default {
       this.showInvoiceDetails = true;
       // kick off invoice check worker
       this.invoiceCheckWorker();
-    },
-
-    showTokenDialog: function (tokensBase64) {
-      console.log("##### showTokenDialog");
-      this.sendData.tokens = this.getProofs(this.decodeToken(tokensBase64));
-      this.sendData.tokensBase64 = _.clone(tokensBase64);
-      this.showSendTokens = true;
-      // kick off token check worker
-      // this.checkTokenSpendableWorker(tokensBase64);
     },
     showSendTokensDialog: function () {
       console.log("##### showSendTokensDialog");
@@ -635,12 +638,18 @@ export default {
     // generate new mnemonic
     this.generateNewMnemonic();
 
+    this.initSigner();
+
     // show welcome dialog
     this.showWelcomeDialog();
 
     // listen to NWC commands if enabled
     if (this.nwcEnabled) {
       this.listenToNWCCommands();
+    }
+
+    if (this.enablePaymentRequest) {
+      this.subscribeToNip17DirectMessages();
     }
   },
 };

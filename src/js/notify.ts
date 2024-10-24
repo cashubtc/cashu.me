@@ -88,14 +88,14 @@ async function notifyWarning(
   });
 }
 
-async function notify(message: string) {
+async function notify(message: string, position = "top" as QNotifyCreateOptions["position"]) {
   // failure
   Notify.create({
     timeout: 5000,
     type: "null",
     color: "grey",
     message: message,
-    position: "top",
+    position: position,
     actions: [
       {
         icon: "close",
