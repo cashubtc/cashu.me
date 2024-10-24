@@ -13,11 +13,17 @@ import { notifyApiError, notifyError, notifySuccess, notifyWarning, notify } fro
 import { useSendTokensStore } from "./sendTokensStore";
 import { usePRStore } from "./payment-request";
 import token from "../js/token";
+import { HistoryToken } from "./tokens";
 
 type MintRecommendation = {
   url: string;
   count: number;
 };
+
+type NostrEventLog = {
+  id: string,
+  created_at: number,
+}
 
 export enum SignerType {
   NIP07 = "NIP07",
@@ -44,6 +50,7 @@ export const useNostrStore = defineStore("nostr", {
     mintRecommendations: useLocalStorage<MintRecommendation[]>("cashu.ndk.mintRecommendations", []),
     initialized: false,
     lastEventTimestamp: useLocalStorage<number>("cashu.ndk.lastEventTimestamp", 0),
+    nip17EventIdsWeHaveSeen: useLocalStorage<NostrEventLog[]>("cashu.ndk.nip17EventIdsWeHaveSeen", []),
   }),
   getters: {
     seedSignerPrivateKeyNsec: (state) => {
@@ -273,6 +280,9 @@ export const useNostrStore = defineStore("nostr", {
       const relays: string[] | undefined = (result.data as ProfilePointer).relays;
       this.sendNip17DirectMessage(pubkey, message, relays)
     },
+    randomTimeUpTo2DaysInThePast: function () {
+      return Math.floor(Date.now() / 1000) - Math.floor(Math.random() * 172800);
+    },
     sendNip17DirectMessage: async function (recipient: string, message: string, relays?: string[]) {
       const randomPrivateKey = generateSecretKey();
       const randomPublicKey = getPublicKey(randomPrivateKey);
@@ -290,7 +300,7 @@ export const useNostrStore = defineStore("nostr", {
       const sealEvent = new NDKEvent(this.ndk as NDK);
       sealEvent.kind = 13;
       sealEvent.content = nip44.v2.encrypt(dmEventString, nip44.v2.utils.getConversationKey(this.seedSignerPrivateKey, recipient));
-      sealEvent.created_at = Math.floor(Date.now() / 1000);
+      sealEvent.created_at = this.randomTimeUpTo2DaysInThePast();
       sealEvent.pubkey = this.pubkey;
       sealEvent.id = sealEvent.getEventHash();
       sealEvent.sig = await sealEvent.sign();
@@ -300,7 +310,7 @@ export const useNostrStore = defineStore("nostr", {
       wrapEvent.kind = 1059;
       wrapEvent.tags = [['p', recipient]];
       wrapEvent.content = nip44.v2.encrypt(sealEventString, nip44.v2.utils.getConversationKey(bytesToHex(randomPrivateKey), recipient));
-      wrapEvent.created_at = Math.floor(Date.now() / 1000);
+      wrapEvent.created_at = this.randomTimeUpTo2DaysInThePast();
       wrapEvent.pubkey = randomPublicKey;
       wrapEvent.id = wrapEvent.getEventHash();
       wrapEvent.sig = await wrapEvent.sign();
@@ -320,18 +330,29 @@ export const useNostrStore = defineStore("nostr", {
         if (!this.lastEventTimestamp) {
           this.lastEventTimestamp = Math.floor(Date.now() / 1000);
         }
-        console.log(`### Subscribing to NIP-17 direct messages to ${this.pubkey} since ${this.lastEventTimestamp}`);
+        const since = this.lastEventTimestamp - 172800; // last 2 days
+        console.log(`### Subscribing to NIP-17 direct messages to ${this.pubkey} since ${since}`);
         this.ndk.connect();
         const sub = this.ndk.subscribe(
           {
             kinds: [1059 as NDKKind],
             "#p": [this.pubkey],
-            since: this.lastEventTimestamp,
+            since: since,
           } as NDKFilter,
           { closeOnEose: false, groupable: false },
         );
 
         sub.on('event', (wrapEvent: NDKEvent) => {
+          const eventLog = { id: wrapEvent.id, created_at: wrapEvent.created_at } as NostrEventLog;
+          if (this.nip17EventIdsWeHaveSeen.find((e) => e.id === wrapEvent.id)) {
+            console.log(`### Already seen NIP-17 event ${wrapEvent.id}`);
+            return;
+          } else {
+            console.log(`### New event ${wrapEvent.id}`);
+            this.nip17EventIdsWeHaveSeen.push(eventLog);
+            // remove all events older than 4 days to keep the list small
+            this.nip17EventIdsWeHaveSeen = this.nip17EventIdsWeHaveSeen.filter((e) => e.created_at > Math.floor(Date.now() / 1000) - 345600);
+          }
           const wappedContent = nip44.v2.decrypt(wrapEvent.content, nip44.v2.utils.getConversationKey(this.seedSignerPrivateKey, wrapEvent.pubkey))
           const sealEvent = JSON.parse(wappedContent) as NostrEvent;
           const dmEventString = nip44.v2.decrypt(sealEvent.content, nip44.v2.utils.getConversationKey(this.seedSignerPrivateKey, sealEvent.pubkey));
@@ -339,7 +360,6 @@ export const useNostrStore = defineStore("nostr", {
           const content = dmEvent.content;
           nip17DirectMessageEvents.add(dmEvent)
           this.lastEventTimestamp = Math.floor(Date.now() / 1000);
-          console.log(content)
           this.parseMessageForEcash(content);
         });
       });
@@ -365,8 +385,9 @@ export const useNostrStore = defineStore("nostr", {
 
           const tokenStr = getEncodedTokenV4(token);
 
-          if (this.tokenAlreadyInHistory(tokenStr)) {
-            console.log("### token already in history");
+          const tokenInHistory = this.tokenAlreadyInHistory(tokenStr);
+          if (tokenInHistory && tokenInHistory.amount > 0) {
+            console.log("### incoming token already in history");
             return;
           }
           await this.addPendingTokenToHistory(tokenStr);
@@ -377,7 +398,7 @@ export const useNostrStore = defineStore("nostr", {
           const prStore = usePRStore();
           prStore.showPRDialog = false;
 
-          // receiveStore.showReceiveTokens = true;
+          receiveStore.showReceiveTokens = true;
 
           notify("Pending payment received", "bottom");
           return
@@ -399,11 +420,9 @@ export const useNostrStore = defineStore("nostr", {
         await this.addPendingTokenToHistory(tokenStr);
       }
     },
-    tokenAlreadyInHistory: function (tokenStr: string) {
+    tokenAlreadyInHistory: function (tokenStr: string): HistoryToken | undefined {
       const tokensStore = useTokensStore();
-      return (
-        tokensStore.historyTokens.find((t) => t.token === tokenStr) !== undefined
-      );
+      return tokensStore.historyTokens.find((t) => t.token === tokenStr);
     },
     addPendingTokenToHistory: function (tokenStr: string) {
       const receiveStore = useReceiveTokensStore();

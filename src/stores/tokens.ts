@@ -7,7 +7,7 @@ import { PaymentRequest, Proof, Token } from "@cashu/cashu-ts";
  * The tokens store handles everything related to tokens and proofs
  */
 
-type HistoryToken = {
+export type HistoryToken = {
   status: "paid" | "pending";
   amount: number;
   date: string;
