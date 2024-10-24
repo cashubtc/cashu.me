@@ -67,7 +67,7 @@ type Invoice = {
   memo: string;
 };
 
-type InvoiceHistory = Invoice & {
+export type InvoiceHistory = Invoice & {
   date: string;
   status: "pending" | "paid";
   mint: string;
