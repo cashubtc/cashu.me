@@ -8,6 +8,7 @@ import { useWalletStore } from "./wallet";
 import { useProofsStore } from "./proofs";
 import { notify, notifyError, notifyWarning } from "../js/notify";
 import { useSettingsStore } from "./settings";
+import { decode as decodeBolt11 } from 'light-bolt11-decoder'
 
 type NWCConnection = {
   walletPublicKey: string,
@@ -20,6 +21,19 @@ type NWCConnection = {
 type NWCCommand = {
   method: string,
   params: any
+}
+
+type NWCTransaction = {
+  type: string,
+  invoice: string,
+  description: string | null,
+  preimage: string | null,
+  payment_hash: string | null,
+  amount: number,
+  fees_paid: number | null,
+  created_at: number,
+  settled_at: number | null
+  expires_at: number | null
 }
 
 type NWCResult = {
@@ -45,7 +59,7 @@ export const useNWCStore = defineStore("nwc", {
   state: () => ({
     nwcEnabled: useLocalStorage<boolean>("cashu.nwc.enabled", false),
     connections: useLocalStorage<NWCConnection[]>("cashu.nwc.connections", []),
-    supportedMethods: ["pay_invoice", "get_balance", "get_info", "list_transactions"],
+    supportedMethods: ["pay_invoice", "make_invoice", "get_balance", "get_info", "list_transactions", "lookup_invoice"],
     relays: useLocalStorage<string[]>("cashu.nwc.relays", useSettingsStore().defaultNostrRelays),
     blocking: false,
     ndk: new NDK(),
@@ -141,22 +155,38 @@ export const useNWCStore = defineStore("nwc", {
           error: { code: "INTERNAL", message: "Could not pay invoice" }
         } as NWCError
       }
+    },
+    handleMakeInvoice: async function (nwcCommand: NWCCommand) {
+      const { amount, description, expiry } = nwcCommand.params
+      console.log("### make_invoice")
+      console.log("### amount", amount) // msats
+      console.log("### description", description)
+      console.log("### expiry", expiry) // seconds
+      // make invoice
+      const walletStore = useWalletStore()
+      const quote = await walletStore.requestMint(amount / 1000, "sat")
+      if (!quote) {
+        return {
+          // requesting mint invoice can fail if no mint was selected yet
+          // the error will have been shown as a notification
+          // TODO: make requestMint throw and return useful message
+          result_type: nwcCommand.method,
+          error: { code: "INTERNAL", message: "failed to request mint invoice"}
+        }
+      }
 
+      return {
+        result_type: nwcCommand.method,
+        result: {
+          type: "incoming",
+          invoice: quote?.request,
+          description,
+          amount,
+        }
+      }
     },
     handleListTransactions: async function (nwcCommand: NWCCommand) {
       console.log("### list_transactions", nwcCommand.method)
-      type nwcTransaction = {
-        type: string,
-        invoice: string,
-        description: string | null,
-        preimage: string | null,
-        payment_hash: string | null,
-        amount: number,
-        fees_paid: number | null,
-        created_at: number,
-        settled_at: number | null
-        expires_at: number | null
-      }
       const walletStore = useWalletStore()
       const from = nwcCommand.params.from || 0
       const until = nwcCommand.params.until || Math.floor(Date.now() / 1000)
@@ -195,21 +225,7 @@ export const useNWCStore = defineStore("nwc", {
       // created_at = unix timestamp of date
       // settled_at = unix timestamp of date if status == "paid" else null
 
-      const transactions = transactionsHistory.map((invoice) => {
-        let type = invoice.amount > 0 ? "incoming" : "outgoing"
-        let amount = Math.abs(invoice.amount) * 1000
-        let created_at = Math.floor(new Date(invoice.date).getTime() / 1000)
-        let settled_at = invoice.status == "paid" ? Math.floor(new Date(invoice.date).getTime() / 1000) : null
-        return {
-          type: type,
-          invoice: invoice.bolt11,
-          description: invoice.memo,
-          amount: amount,
-          fees_paid: 0,
-          created_at: created_at,
-          settled_at: settled_at,
-        } as nwcTransaction
-      })
+      const transactions = transactionsHistory.map(this.mapToNwcTransaction)
 
       return {
         result_type: "list_transactions",
@@ -217,6 +233,59 @@ export const useNWCStore = defineStore("nwc", {
           transactions: transactions
         }
       }
+    },
+    handleLookupInvoice: async function (nwcCommand: NWCCommand) {
+      let hash = nwcCommand.params.payment_hash
+      if (!hash) {
+        const bolt11 = nwcCommand.params.invoice
+        const decoded = bolt11 ? decodeBolt11(bolt11) : null
+        // @ts-ignore
+        hash = decoded?.sections.find(s => s.name === "payment_hash")?.value
+      }
+      if (!hash) {
+        return {
+          result_type: nwcCommand.method,
+          error: { code: "OTHER", message: "invoice or payment_hash required"}
+        }
+      }
+
+      console.log("### lookup_invoice")
+      const walletStore = useWalletStore()
+      const invoiceHistory = walletStore.invoiceHistory
+
+      for (const inv of invoiceHistory) {
+        const decoded = decodeBolt11( nwcCommand.params.invoice)
+        // @ts-ignore
+        const invHash = decoded.sections.find(s => s.name === "payment_hash")?.value
+        if (invHash === hash) {
+          return {
+            result_type: nwcCommand.method,
+            result: this.mapToNwcTransaction(inv)
+          }
+        }
+      }
+
+      return {
+        result_type: nwcCommand.method,
+        error: {
+          code: "NOT_FOUND", message: "invoice not found"
+        } 
+      }
+    },
+    mapToNwcTransaction(invoice: InvoiceHistory) {
+      let type = invoice.amount > 0 ? "incoming" : "outgoing"
+      let amount = Math.abs(invoice.amount) * 1000
+      let created_at = Math.floor(new Date(invoice.date).getTime() / 1000)
+      let settled_at = invoice.status == "paid" ? Math.floor(new Date(invoice.date).getTime() / 1000) : null
+      return {
+        type: type,
+        invoice: invoice.bolt11,
+        description: invoice.memo,
+        amount: amount,
+        fees_paid: 0,
+        created_at: created_at,
+        settled_at: settled_at,
+      } as NWCTransaction
     },
     // ––––---------- NWC Connection ––––----------
     replyNWC: async function (result: NWCResult | NWCError, event: NDKEvent, conn: NWCConnection) {
@@ -256,8 +325,12 @@ export const useNWCStore = defineStore("nwc", {
         } finally {
           this.blocking = false
         }
+      } else if (nwcCommand.method === "make_invoice") {
+        result = await this.handleMakeInvoice(nwcCommand)
       } else if (nwcCommand.method == "list_transactions") {
         result = await this.handleListTransactions(nwcCommand)
+      } else if (nwcCommand.method === "lookup_invoice") {
+        result = await this.handleLookupInvoice(nwcCommand)
       } else {
         console.log("### method not supported", nwcCommand.method)
         result = {
