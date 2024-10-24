@@ -55,6 +55,7 @@ export const useNWCStore = defineStore("nwc", {
     connections: useLocalStorage<NWCConnection[]>("cashu.nwc.connections", []),
     supportedMethods: [
       "pay_invoice",
+      "make_invoice",
       "get_balance",
       "get_info",
       "list_transactions",
@@ -161,6 +162,35 @@ export const useNWCStore = defineStore("nwc", {
           result_type: nwcCommand.method,
           error: { code: "INTERNAL", message: "Could not pay invoice" },
         } as NWCError;
+      }
+    },
+    handleMakeInvoice: async function (nwcCommand: NWCCommand) {
+      const { amount, description, expiry } = nwcCommand.params
+      console.log("### make_invoice")
+      console.log("### amount", amount) // msats
+      console.log("### description", description)
+      console.log("### expiry", expiry) // seconds
+      // make invoice
+      const walletStore = useWalletStore()
+      const quote = await walletStore.requestMint(amount / 1000)
+      if (!quote) {
+        return {
+          // requesting mint invoice can fail if no mint was selected yet
+          // the error will have been shown as a notification
+          // TODO: make requestMint throw and return useful message
+          result_type: nwcCommand.method,
+          error: { code: "INTERNAL", message: "failed to request mint invoice"}
+        }
+      }
+
+      return {
+        result_type: nwcCommand.method,
+        result: {
+          type: "incoming",
+          invoice: quote?.request,
+          description,
+          amount,
+        }
       }
     },
     handleListTransactions: async function (nwcCommand: NWCCommand) {
@@ -297,6 +327,8 @@ export const useNWCStore = defineStore("nwc", {
         } finally {
           this.blocking = false;
         }
+      } else if (nwcCommand.method === "make_invoice") {
+        result = await this.handleMakeInvoice(nwcCommand)
       } else if (nwcCommand.method == "list_transactions") {
         result = await this.handleListTransactions(nwcCommand);
       } else {
