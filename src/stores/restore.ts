@@ -60,16 +60,15 @@ export const useRestoreStore = defineStore("restore", {
             console.log(`No proofs found for keyset ${keyset.id}`);
             emptyBatchCount++;
           } else {
-            console.log(`Restored ${proofs.length} proofs with sum ${proofs.reduce((s, p) => s + p.amount, 0)}`);
+            console.log(`> Restored ${proofs.length} proofs with sum ${proofs.reduce((s, p) => s + p.amount, 0)}`);
             restoreProofs = restoreProofs.concat(proofs);
             emptyBatchCount = 0;
           }
           start += BATCH_SIZE;
         }
 
-        console.log(`Restored ${restoreProofs.length} proofs with sum ${restoreProofs.reduce((s, p) => s + p.amount, 0)}`);
         let restoredProofs: Proof[] = [];
-        for (let i = 0; i < restoreProofs.length; i++) {
+        for (let i = 0; i < restoreProofs.length; i += BATCH_SIZE) {
           const checkRestoreProofs = restoreProofs.slice(0, i + BATCH_SIZE);
           const spentProofs = await wallet.checkProofsSpent(checkRestoreProofs);
           const spentProofsSecrets = spentProofs.map((p) => p.secret);
