@@ -63,8 +63,15 @@
         <div v-for="mint in mints" :key="mint.url">
           <q-item>
             <q-item-section>
-              <q-item-label lines="1" style="word-break: break-word">
-                {{ mint.nickname || mint.url }}
+              <q-item-label
+                class="q-mb-xs"
+                lines="1"
+                style="word-break: break-word"
+              >
+                <q-span class="q-pa-md" style="font-size: 15px">
+                  <q-icon name="account_balance" size="xs" class="q-mr-xs" />
+                  {{ mint.nickname || mint.url }}
+                </q-span>
               </q-item-label>
               <q-item-label>
                 <q-badge
@@ -77,13 +84,28 @@
                   class="q-mx-xs"
                 />
               </q-item-label>
+              <q-item-label
+                class="q-px-xs q-pt-xs q-pb-xs"
+                v-if="restoringMint === mint.url"
+                caption
+              >
+                {{ restoreStatus }}
+              </q-item-label>
+              <q-linear-progress
+                v-if="restoringMint === mint.url"
+                :value="restoreProgress"
+                color="primary"
+                class="q-pl-md"
+                style="max-width: 630px"
+              />
             </q-item-section>
             <q-item-section side>
               <q-btn
                 class="q-ml-sm q-px-md"
                 color="primary"
-                size="sm"
+                size="md"
                 rounded
+                dense
                 outline
                 @click="restoreMintForMint(mint.url)"
                 :disabled="!isMnemonicValid || restoringState"
@@ -93,7 +115,7 @@
               </q-btn>
             </q-item-section>
           </q-item>
-          <q-separator spaced inset="item" />
+          <q-separator spaced />
         </div>
       </q-list>
     </div>
@@ -118,8 +140,15 @@ export default defineComponent({
   computed: {
     ...mapState(useMintsStore, ["mints"]),
     ...mapWritableState(useWalletStore, ["mnemonic"]),
-    ...mapWritableState(useRestoreStore, ["mnemonicToRestore"]),
-    ...mapState(useRestoreStore, ["restoringState", "restoringMint"]),
+    ...mapWritableState(useRestoreStore, [
+      "mnemonicToRestore",
+      "restoreProgress",
+    ]),
+    ...mapState(useRestoreStore, [
+      "restoringState",
+      "restoringMint",
+      "restoreStatus",
+    ]),
     isMnemonicValid() {
       if (!this.mnemonicToRestore) {
         return false;
@@ -154,7 +183,6 @@ export default defineComponent({
       }
       try {
         await this.restoreMint(mintUrl);
-        // notifySuccess(`Successfully restored mint: ${mintUrl}`);
       } catch (error) {
         console.error("Error restoring mint:", error);
         notifyError(`Error restoring mint: ${error.message || error}`);

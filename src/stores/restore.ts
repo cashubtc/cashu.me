@@ -17,6 +17,9 @@ export const useRestoreStore = defineStore("restore", {
     restoringState: false,
     restoringMint: "",
     mnemonicToRestore: useLocalStorage<string>("cashu.restore.mnemonicToRestore", ""),
+    restoreProgress: 0,
+    restoreCounter: 0,
+    restoreStatus: "",
   }),
   getters: {
 
@@ -25,6 +28,9 @@ export const useRestoreStore = defineStore("restore", {
     restoreMint: async function (url: string) {
       this.restoringState = true;
       this.restoringMint = url;
+      this.restoreProgress = 0;
+      this.restoreCounter = 0;
+      this.restoreStatus = "";
       try {
         await this._restoreMint(url);
       } catch (error) {
@@ -32,6 +38,7 @@ export const useRestoreStore = defineStore("restore", {
       } finally {
         this.restoringState = false;
         this.restoringMint = "";
+        this.restoreProgress = 0;
       }
     },
     _restoreMint: async function (url: string) {
@@ -39,13 +46,20 @@ export const useRestoreStore = defineStore("restore", {
         notifyError("Please enter a mnemonic");
         return;
       }
+      this.restoreProgress = 0;
       const mintStore = useMintsStore();
       await mintStore.activateMintUrl(url);
 
-      const mnemonic = useWalletStore().mnemonic;
+      const mnemonic = this.mnemonicToRestore;
+      this.restoreStatus = `Restoring proofs for mint ${url}`;
       const mint = new CashuMint(url);
       const keysets = (await mint.getKeySets()).keysets;
       let restoredSomething = false;
+
+      // Calculate total steps for progress calculation
+      let totalSteps = keysets.length * MAX_GAP;
+      let currentStep = 1;
+
       for (const keyset of keysets) {
         console.log(`Restoring keyset ${keyset.id} with unit ${keyset.unit}`);
         const wallet = new CashuWallet(mint, { mnemonicOrSeed: mnemonic, unit: keyset.unit });
@@ -53,7 +67,7 @@ export const useRestoreStore = defineStore("restore", {
         let emptyBatchCount = 0;
         let restoreProofs: Proof[] = [];
 
-        while (emptyBatchCount < MAX_GAP - 1) {
+        while (emptyBatchCount < MAX_GAP) {
           console.log(`Restoring proofs ${start} to ${start + BATCH_SIZE}`);
           const proofs = (await wallet.restore(start, BATCH_SIZE, { keysetId: keyset.id })).proofs;
           if (proofs.length === 0) {
@@ -63,16 +77,27 @@ export const useRestoreStore = defineStore("restore", {
             console.log(`> Restored ${proofs.length} proofs with sum ${proofs.reduce((s, p) => s + p.amount, 0)}`);
             restoreProofs = restoreProofs.concat(proofs);
             emptyBatchCount = 0;
+            totalSteps += MAX_GAP;
+            this.restoreCounter += proofs.length;
           }
+          this.restoreStatus = `Restored ${this.restoreCounter} proofs for keyset ${keyset.id}`;
           start += BATCH_SIZE;
+
+          // Update progress
+          currentStep++;
+          console.log(`currentStep: ${currentStep}, totalSteps: ${totalSteps}`);
+          this.restoreProgress = currentStep / totalSteps;
+          console.log(`Progress: ${this.restoreProgress}`);
+
         }
 
         let restoredProofs: Proof[] = [];
         for (let i = 0; i < restoreProofs.length; i += BATCH_SIZE) {
-          const checkRestoreProofs = restoreProofs.slice(0, i + BATCH_SIZE);
+          this.restoreStatus = `Checking proofs ${i} to ${i + BATCH_SIZE} for keyset ${keyset.id}`;
+          const checkRestoreProofs = restoreProofs.slice(i, i + BATCH_SIZE);
           const spentProofs = await wallet.checkProofsSpent(checkRestoreProofs);
           const spentProofsSecrets = spentProofs.map((p) => p.secret);
-          const unspentProofs = restoreProofs.filter((p) => !spentProofsSecrets.includes(p.secret));
+          const unspentProofs = checkRestoreProofs.filter((p) => !spentProofsSecrets.includes(p.secret));
           if (unspentProofs.length > 0) {
             console.log(`Found ${unspentProofs.length} unspent proofs with sum ${unspentProofs.reduce((s, p) => s + p.amount, 0)}`);
           }
