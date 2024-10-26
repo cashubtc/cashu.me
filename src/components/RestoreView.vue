@@ -57,8 +57,21 @@
     </div>
 
     <!-- List of mints with restore buttons and balance badges -->
-    <div class="q-py-md q-px-xs text-left" on-left>
-      <q-list padding>
+    <div class="q-pb-md q-px-xs text-left" on-left>
+      <q-btn
+        class="q-ml-sm q-px-md"
+        color="primary"
+        size="md"
+        rounded
+        dense
+        outline
+        @click="restoreAllMints"
+        :disabled="!isMnemonicValid || restoringState"
+      >
+        <q-spinner-hourglass size="sm" v-if="restoringState" class="q-mr-sm" />
+        {{ restoreAllMintsText }}
+      </q-btn>
+      <q-list padding class="q-pt-md">
         <!-- List mints here -->
         <div v-for="mint in mints" :key="mint.url">
           <q-item>
@@ -85,7 +98,7 @@
                   :label="
                     formatCurrency(mintClass(mint).unitBalance(unit), unit)
                   "
-                  class="q-mx-xs"
+                  class="q-mx-xs q-mb-xs"
                 />
               </q-item-label>
               <q-item-label
@@ -140,6 +153,7 @@ export default defineComponent({
   data() {
     return {
       mnemonicError: "",
+      restoreAllMintsText: "Restore All Mints",
     };
   },
   computed: {
@@ -194,6 +208,26 @@ export default defineComponent({
         this.mnemonicToRestore = text.trim();
       } catch (error) {
         notifyError("Failed to read clipboard contents.");
+      }
+    },
+    async restoreAllMints() {
+      let i = 0;
+      if (!this.validateMnemonic()) {
+        return;
+      }
+      try {
+        for (const mint of this.mints) {
+          this.restoreAllMintsText = `Restoring mint ${++i} of ${
+            this.mints.length
+          } ...`;
+          await this.restoreMint(mint.url);
+        }
+        notifySuccess("All mints restored successfully.");
+      } catch (error) {
+        console.error("Error restoring mints:", error);
+        notifyError(`Error restoring mints: ${error.message || error}`);
+      } finally {
+        this.restoreAllMintsText = "Restore All Mints";
       }
     },
   },
