@@ -48,7 +48,7 @@ export class MintClass {
   }
 
   unitKeysets(unit: string): MintKeyset[] {
-    return this.mint.keysets.filter((k) => k.unit === unit && k.active);
+    return this.mint.keysets.filter((k) => k.unit === unit);
   }
 
   unitProofs(unit: string) {
@@ -145,7 +145,16 @@ export const useMintsStore = defineStore("mints", {
       } else {
         return activeUnit;
       }
-    }
+    },
+    activeUnitCurrencyMultiplyer({ activeUnit }): number {
+      if (activeUnit == "usd") {
+        return 100;
+      } else if (activeUnit == "eur") {
+        return 100;
+      } else {
+        return 1;
+      }
+    },
   },
   actions: {
     activeMint() {
@@ -174,12 +183,9 @@ export const useMintsStore = defineStore("mints", {
     proofsToWalletProofs(proofs: Proof[]): WalletProof[] {
       return proofs.map((p) => {
         return {
-          amount: p.amount,
-          secret: p.secret,
-          C: p.C,
+          ...p,
           reserved: false,
-          id: p.id,
-        };
+        } as WalletProof;
       });
     },
     addProofs(proofs: Proof[]) {
@@ -285,6 +291,8 @@ export const useMintsStore = defineStore("mints", {
       }
     },
     activateUnit: async function (unit: string, verbose = false) {
+      const uIStore = useUiStore();
+      await uIStore.lockMutex();
       const mint = this.mints.find((m) => m.url === this.activeMintUrl);
       if (!mint) {
         notifyError("No active mint", "Unit activation failed");
@@ -296,6 +304,9 @@ export const useMintsStore = defineStore("mints", {
       } else {
         notifyError("Unit not supported by mint", "Unit activation failed");
       }
+      await uIStore.unlockMutex();
+      const worker = useWorkersStore();
+      worker.clearAllWorkers();
     },
     activateMint: async function (mint: Mint, verbose = false, force = false) {
       const workers = useWorkersStore();

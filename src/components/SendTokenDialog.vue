@@ -139,8 +139,7 @@
               <template v-slot:loading>
                 <q-spinner-hourglass />
               </template>
-              </q-btn
-            >
+            </q-btn>
             <div
               v-if="sendData.p2pkPubkey && isValidPubkey(sendData.p2pkPubkey)"
               class="row"
@@ -236,12 +235,12 @@
               Size: {{ fragmentLengthLabel }}
             </q-btn>
             <q-badge
-                :color="!isV4Token ? 'primary' : 'grey'"
-                :label="isV4Token ? 'V4' : 'V3'"
-                class="q-my-sm q-mx-md cursor-pointer"
-                @click="toggleTokenEncoding"
-                :outline="isV4Token"
-              />
+              :color="!isV4Token ? 'primary' : 'grey'"
+              :label="isV4Token ? 'V4' : 'V3'"
+              class="q-my-sm q-mx-md cursor-pointer"
+              @click="toggleTokenEncoding"
+              :outline="isV4Token"
+            />
           </div>
           <q-card-section class="q-pa-sm">
             <div class="row justify-center">
@@ -356,7 +355,11 @@ import { Buffer } from "buffer";
 import { useCameraStore } from "src/stores/camera";
 import { useP2PKStore } from "src/stores/p2pk";
 import TokenInformation from "components/TokenInformation.vue";
-import { getDecodedToken, getEncodedTokenV4, getEncodedToken } from "@cashu/cashu-ts";
+import {
+  getDecodedToken,
+  getEncodedTokenV4,
+  getEncodedToken,
+} from "@cashu/cashu-ts";
 
 import { mapActions, mapState, mapWritableState } from "pinia";
 import ChooseMint from "components/ChooseMint.vue";
@@ -403,15 +406,23 @@ export default defineComponent({
     ]),
     ...mapWritableState(useSendTokensStore, ["sendData"]),
     ...mapWritableState(useCameraStore, ["camera", "hasCamera"]),
-    ...mapState(useUiStore, ["tickerShort", "canPasteFromClipboard", "globalMutexLock"]),
+    ...mapState(useUiStore, [
+      "tickerShort",
+      "canPasteFromClipboard",
+      "globalMutexLock",
+    ]),
     ...mapState(useMintsStore, [
       "activeProofs",
       "activeUnit",
       "activeUnitLabel",
+      "activeUnitCurrencyMultiplyer",
       "activeMintUrl",
       "activeMintBalance",
     ]),
-    ...mapState(useSettingsStore, ["checkSentTokens"]),
+    ...mapState(useSettingsStore, [
+      "checkSentTokens",
+      "includeFeesInSendAmount",
+    ]),
     ...mapState(useWorkersStore, ["tokenWorkerRunning"]),
     // TOKEN METHODS
     sumProofs: function () {
@@ -450,12 +461,32 @@ export default defineComponent({
       let spendableProofs = this.spendableProofs(this.activeProofs);
       let selectedProofs = this.coinSelect(
         spendableProofs,
-        this.sendData.amount
+        this.sendData.amount * this.activeUnitCurrencyMultiplyer,
+        this.includeFeesInSendAmount
       );
+      const feesToAdd = this.includeFeesInSendAmount
+        ? this.getFeesForProofs(selectedProofs)
+        : 0;
       const sumSelectedProofs = selectedProofs
         .flat()
         .reduce((sum, el) => (sum += el.amount), 0);
-      return sumSelectedProofs == this.sendData.amount;
+      console.log(
+        `## selected proof amounts: ${selectedProofs
+          .flat()
+          .map((p) => p.amount)}`
+      );
+      console.log(
+        "### sumSelectedProofs",
+        sumSelectedProofs,
+        "amount",
+        this.sendData.amount * this.activeUnitCurrencyMultiplyer,
+        "feesToAdd",
+        feesToAdd
+      );
+      return (
+        sumSelectedProofs ==
+        this.sendData.amount * this.activeUnitCurrencyMultiplyer + feesToAdd
+      );
     },
   },
   watch: {
@@ -499,10 +530,11 @@ export default defineComponent({
       "clearAllWorkers",
     ]),
     ...mapActions(useWalletStore, [
-      "splitToSend",
+      "send",
       "sendToLock",
       "coinSelect",
       "spendableProofs",
+      "getFeesForProofs",
     ]),
     ...mapActions(useProofsStore, ["serializeProofs"]),
     ...mapActions(useTokensStore, [
@@ -596,17 +628,13 @@ export default defineComponent({
       // if it starts with 'cashuB', it is a v4 token
       if (this.sendData.tokensBase64.startsWith("cashuA")) {
         try {
-          this.sendData.tokensBase64 = getEncodedTokenV4(decodedToken)
+          this.sendData.tokensBase64 = getEncodedTokenV4(decodedToken);
         } catch {
           console.log("### Could not encode token to V4");
-          this.sendData.tokensBase64 = getEncodedToken(
-          decodedToken
-        );
+          this.sendData.tokensBase64 = getEncodedToken(decodedToken);
         }
       } else {
-        this.sendData.tokensBase64 = getEncodedToken(
-          decodedToken
-        );
+        this.sendData.tokensBase64 = getEncodedToken(decodedToken);
       }
     },
     deleteThisToken: function () {
@@ -649,7 +677,7 @@ export default defineComponent({
     },
     sendTokens: async function () {
       /*
-      calls splitToSend, displays token and kicks off the spendableWorker
+      calls send, displays token and kicks off the spendableWorker
       */
       if (
         this.sendData.p2pkPubkey &&
@@ -660,16 +688,15 @@ export default defineComponent({
       }
 
       try {
-        let sendAmount = this.sendData.amount;
-        // if unit is USD, multiply by 100
-        if (this.activeUnit === "usd" || this.activeUnit == "eur") {
-          sendAmount = sendAmount * 100;
-        }
+        let sendAmount =
+          this.sendData.amount * this.activeUnitCurrencyMultiplyer;
+        console.log(`### sendAmount: ${sendAmount}`);
         // keep firstProofs, send scndProofs and delete them (invalidate=true)
-        let { _, sendProofs } = await this.splitToSend(
+        let { _, sendProofs } = await this.send(
           this.activeProofs,
           sendAmount,
-          true
+          true,
+          this.includeFeesInSendAmount
         );
 
         // update UI
@@ -678,7 +705,7 @@ export default defineComponent({
 
         this.sendData.tokensBase64 = this.serializeProofs(sendProofs);
         this.addPendingToken({
-          amount: -this.sendData.amount,
+          amount: -sendAmount,
           serializedProofs: this.sendData.tokensBase64,
           unit: this.activeUnit,
           mint: this.activeMintUrl,
