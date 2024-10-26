@@ -57,7 +57,7 @@ export const useRestoreStore = defineStore("restore", {
       let restoredSomething = false;
 
       // Calculate total steps for progress calculation
-      let totalSteps = keysets.length * MAX_GAP;
+      let totalSteps = keysets.length * MAX_GAP * 2;
       let currentStep = 1;
 
       for (const keyset of keysets) {
@@ -77,17 +77,14 @@ export const useRestoreStore = defineStore("restore", {
             console.log(`> Restored ${proofs.length} proofs with sum ${proofs.reduce((s, p) => s + p.amount, 0)}`);
             restoreProofs = restoreProofs.concat(proofs);
             emptyBatchCount = 0;
-            totalSteps += MAX_GAP;
+            totalSteps += MAX_GAP * 2;
             this.restoreCounter += proofs.length;
           }
           this.restoreStatus = `Restored ${this.restoreCounter} proofs for keyset ${keyset.id}`;
           start += BATCH_SIZE;
 
-          // Update progress
           currentStep++;
-          console.log(`currentStep: ${currentStep}, totalSteps: ${totalSteps}`);
           this.restoreProgress = currentStep / totalSteps;
-          console.log(`Progress: ${this.restoreProgress}`);
 
         }
 
@@ -104,6 +101,8 @@ export const useRestoreStore = defineStore("restore", {
           const newProofs = unspentProofs.filter((p) => !mintStore.proofs.some((pr) => pr.secret === p.secret));
           mintStore.addProofs(newProofs);
           restoredProofs = restoredProofs.concat(newProofs);
+          currentStep++;
+          this.restoreProgress = currentStep / totalSteps;
         }
         const restoredAmount = restoredProofs.reduce((s, p) => s + p.amount, 0);
         const restoredAmountStr = useUiStore().formatCurrency(restoredAmount, keyset.unit);

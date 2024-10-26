@@ -68,8 +68,12 @@
                 lines="1"
                 style="word-break: break-word"
               >
-                <q-span class="q-pa-md" style="font-size: 15px">
-                  <q-icon name="account_balance" size="xs" class="q-mr-xs" />
+                <q-icon
+                  name="account_balance"
+                  size="xs"
+                  class="q-ml-xs q-mb-xs"
+                />
+                <q-span class="q-ma-xs" style="font-size: 15px">
                   {{ mint.nickname || mint.url }}
                 </q-span>
               </q-item-label>
@@ -132,6 +136,7 @@ import { notifyError, notifySuccess } from "src/js/notify";
 
 export default defineComponent({
   name: "RestoreView",
+  mixins: [windowMixin],
   data() {
     return {
       mnemonicError: "",
@@ -161,11 +166,6 @@ export default defineComponent({
     ...mapActions(useRestoreStore, ["restoreMint"]),
     mintClass(mint) {
       return new MintClass(mint);
-    },
-    formatCurrency(amount, unit) {
-      // Implement your currency formatting logic here
-      // For example, converting satoshis to BTC if needed
-      return `${amount} ${unit}`;
     },
     validateMnemonic() {
       // Simple validation: check if mnemonicToRestore has at least 12 words
