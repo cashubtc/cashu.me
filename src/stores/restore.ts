@@ -8,8 +8,8 @@ import { useMintsStore } from "./mints";
 import { notify, notifyError, notifySuccess } from "src/js/notify";
 import { useUiStore } from "./ui";
 
-const BATCH_SIZE = 50;
-const MAX_GAP = 3;
+const BATCH_SIZE = 100;
+const MAX_GAP = 2;
 
 export const useRestoreStore = defineStore("restore", {
   state: () => ({
@@ -51,7 +51,7 @@ export const useRestoreStore = defineStore("restore", {
       await mintStore.activateMintUrl(url);
 
       const mnemonic = this.mnemonicToRestore;
-      this.restoreStatus = `Restoring proofs for mint ${url}`;
+      this.restoreStatus = `Preparing restore process...`;
       const mint = new CashuMint(url);
       const keysets = (await mint.getKeySets()).keysets;
       let restoredSomething = false;
