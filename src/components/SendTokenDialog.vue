@@ -470,19 +470,6 @@ export default defineComponent({
       const sumSelectedProofs = selectedProofs
         .flat()
         .reduce((sum, el) => (sum += el.amount), 0);
-      console.log(
-        `## selected proof amounts: ${selectedProofs
-          .flat()
-          .map((p) => p.amount)}`
-      );
-      console.log(
-        "### sumSelectedProofs",
-        sumSelectedProofs,
-        "amount",
-        this.sendData.amount * this.activeUnitCurrencyMultiplyer,
-        "feesToAdd",
-        feesToAdd
-      );
       return (
         sumSelectedProofs ==
         this.sendData.amount * this.activeUnitCurrencyMultiplyer + feesToAdd
@@ -658,7 +645,6 @@ export default defineComponent({
         );
         // update UI
         this.sendData.tokens = sendProofs;
-        console.log("### this.sendData.tokens", this.sendData.tokens);
 
         this.sendData.tokensBase64 = this.serializeProofs(sendProofs);
         this.addPendingToken({
@@ -690,7 +676,6 @@ export default defineComponent({
       try {
         let sendAmount =
           this.sendData.amount * this.activeUnitCurrencyMultiplyer;
-        console.log(`### sendAmount: ${sendAmount}`);
         // keep firstProofs, send scndProofs and delete them (invalidate=true)
         let { _, sendProofs } = await this.send(
           this.activeProofs,
@@ -701,7 +686,6 @@ export default defineComponent({
 
         // update UI
         this.sendData.tokens = sendProofs;
-        console.log("### this.sendData.tokens", this.sendData.tokens);
 
         this.sendData.tokensBase64 = this.serializeProofs(sendProofs);
         this.addPendingToken({
