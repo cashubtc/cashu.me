@@ -141,11 +141,9 @@ export const useWalletStore = defineStore("wallet", {
       const keysetCounter = this.keysetCounters.find((c) => c.id === id);
       if (keysetCounter) {
         keysetCounter.counter += by;
-        console.log("### increaseKeysetCounter", keysetCounter);
       } else {
         const newCounter = { id, counter: by } as KeysetCounter;
         this.keysetCounters.push(newCounter);
-        console.log("### new keyset counter", keysetCounter);
       }
     },
     getKeyset(): string {
@@ -224,9 +222,7 @@ export const useWalletStore = defineStore("wallet", {
         // there are not enough proofs to pay the amount
         return [];
       }
-      console.log(`selecting ${amount} from proofs: ${proofs.reduce((s, t) => (s += t.amount), 0)} and includeFees ${includeFees}`);
       const { send: selectedProofs, keep: _ } = this.wallet.selectProofsToSend(proofs, amount, includeFees);
-      console.log(`### coinSelect: selected sum: ${selectedProofs.reduce((s, t) => (s += t.amount), 0)}`);
       const selectedWalletProofs = selectedProofs.map((p) => {
         return { ...p, reserved: false } as WalletProof;
       });
@@ -275,27 +271,21 @@ export const useWalletStore = defineStore("wallet", {
       let proofsToSend: WalletProof[] = [];
       const keysetId = this.getKeyset()
       await uIStore.lockMutex();
-      console.log(`### send ${amount} from proofs: ${proofsStore.sumProofs(proofs)} includeFees: ${includeFees}`);
       try {
         const spendableProofs = this.spendableProofs(proofs, amount);
-        console.log(`### includeFees: ${includeFees}`);
 
         proofsToSend = this.coinSelect(spendableProofs, amount, includeFees);
         const totalAmount = proofsToSend.reduce((s, t) => (s += t.amount), 0);
         const fees = includeFees ? this.wallet.getFeesForProofs(proofsToSend) : 0;
         const targetAmount = amount + fees;
 
-        console.log(`### sending... ${amount} selected: ${totalAmount} target: ${targetAmount} fees: ${fees}`);
-
         let keepProofs: Proof[] = [];
         let sendProofs: Proof[] = [];
 
         if (totalAmount != targetAmount) {
           const counter = this.keysetCounter(keysetId);
-          console.log(`calling send with ${amount} from ${totalAmount} target: ${targetAmount} fees: ${fees}`);
           proofsToSend = this.coinSelect(spendableProofs, targetAmount, true);
           ({ keep: keepProofs, send: sendProofs } = await this.wallet.send(targetAmount, proofsToSend, { counter, proofsWeHave: spendableProofs }));
-          console.log(`### send sum: ${proofsStore.sumProofs(sendProofs)} keep sum: ${proofsStore.sumProofs(keepProofs)}`);
           this.increaseKeysetCounter(keysetId, keepProofs.length + sendProofs.length);
           mintStore.addProofs(keepProofs);
           mintStore.addProofs(sendProofs);
@@ -337,7 +327,6 @@ export const useWalletStore = defineStore("wallet", {
       const p2pkStore = useP2PKStore();
 
       receiveStore.showReceiveTokens = false;
-      console.log("### receive tokens", receiveStore.receiveData.tokensBase64);
 
       if (receiveStore.receiveData.tokensBase64.length == 0) {
         throw new Error("no tokens provided.");
@@ -532,7 +521,6 @@ export const useWalletStore = defineStore("wallet", {
         const data = await mintStore.activeMint().api.createMeltQuote(payload);
         mintStore.assertMintError(data);
         this.payInvoiceData.meltQuote.response = data;
-        console.log("#### meltQuote", payload, " response:", data);
         this.payInvoiceData.blocking = false;
         return data;
       } catch (error: any) {
@@ -572,13 +560,6 @@ export const useWalletStore = defineStore("wallet", {
         throw new Error("no quote found.");
       }
       const amount = quote.amount + quote.fee_reserve;
-
-      console.log(
-        "#### amount invoice",
-        amount_invoice,
-        "amount with fees",
-        amount
-      );
       let countChangeOutputs = 0;
       const keysetId = this.getKeyset();
       let keysetCounterIncrease = 0;
@@ -592,8 +573,6 @@ export const useWalletStore = defineStore("wallet", {
         if (sendProofs.length == 0) {
           throw new Error("could not split proofs.");
         }
-        console.log("### sendProofs", sendProofs);
-        console.log(`sum proofs: ${proofsStore.sumProofs(sendProofs)} amount: ${amount}`);
       } catch (error: any) {
         console.error(error);
         notifyApiError(error, "Payment failed");
@@ -795,7 +774,6 @@ export const useWalletStore = defineStore("wallet", {
     checkInvoice: async function (quote: string, verbose = true) {
       const uIStore = useUiStore();
       const mintStore = useMintsStore();
-      console.log("### checkInvoice.quote", quote);
       const invoice = this.invoiceHistory.find((i) => i.quote === quote);
       if (!invoice) {
         throw new Error("invoice not found");
@@ -848,7 +826,6 @@ export const useWalletStore = defineStore("wallet", {
         // this is an outgoing invoice, we first do a getMintQuote to check if the invoice is paid
         const mint = new CashuMint(invoice.mint);
         const mintQuote = await mint.checkMeltQuote(quote);
-        console.log("### mintQuote", mintQuote);
         if (mintQuote.state == MeltQuoteState.PENDING) {
           console.log("### mintQuote not paid yet");
           if (verbose) {
@@ -1130,7 +1107,6 @@ export const useWalletStore = defineStore("wallet", {
           const satPrice = 1 / (priceUsd / 1e8);
           const usdAmount = amount;
           amount = Math.floor(usdAmount * satPrice);
-          console.log(`converted amount: ${amount}`);
         }
         var { data } = await axios.get(
           `${this.payInvoiceData.lnurlpay.callback}?amount=${amount * 1000}`
@@ -1140,8 +1116,6 @@ export const useWalletStore = defineStore("wallet", {
           notifyError(data.reason, "LNURL Error");
           return;
         }
-        console.log(data.pr);
-        console.log(`callback: ${this.payInvoiceData.lnurlpay.callback}`);
         await this.decodeRequest(data.pr);
       }
     },
