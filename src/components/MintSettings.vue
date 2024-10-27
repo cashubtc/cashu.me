@@ -16,6 +16,7 @@
             :active="mint.url == activeMintUrl"
             active-class="text-weight-bold text-primary"
             clickable
+            class="q-pb-xs"
           >
             <q-item-section avatar>
               <q-icon
@@ -59,7 +60,7 @@
                   :label="
                     formatCurrency(mintClass(mint).unitBalance(unit), unit)
                   "
-                  class="q-mx-xs"
+                  class="q-mx-xs q-mb-xs"
                 />
               </q-item-label>
             </q-item-section>

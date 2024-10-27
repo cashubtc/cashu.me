@@ -2,7 +2,7 @@ import { defineStore } from "pinia";
 import { useLocalStorage } from "@vueuse/core";
 import { useWorkersStore } from "./workers";
 import { notifyApiError, notifyError, notifySuccess } from "src/js/notify";
-import { CashuMint, MintKeys, MintAllKeysets, Proof, SerializedBlindedSignature, MintKeyset } from "@cashu/cashu-ts";
+import { CashuMint, MintKeys, MintAllKeysets, MintActiveKeys, Proof, SerializedBlindedSignature, MintKeyset, GetInfoResponse } from "@cashu/cashu-ts";
 import { useUiStore } from "./ui";
 export type Mint = {
   url: string;
@@ -48,7 +48,7 @@ export class MintClass {
   }
 
   unitKeysets(unit: string): MintKeyset[] {
-    return this.mint.keysets.filter((k) => k.unit === unit && k.active);
+    return this.mint.keysets.filter((k) => k.unit === unit);
   }
 
   unitProofs(unit: string) {
@@ -116,6 +116,23 @@ export const useMintsStore = defineStore("mints", {
       ).reduce((sum, p) => sum + p.amount, 0);
       return balance
     },
+    activeKeysets({ activeMintUrl, activeUnit }): MintKeyset[] {
+      const unitKeysets = this.mints.find((m) => m.url === activeMintUrl)?.keysets?.filter((k) => k.unit === activeUnit);
+      if (!unitKeysets) {
+        return [];
+      }
+      return unitKeysets;
+    },
+    activeKeys({ activeMintUrl, activeUnit }): MintKeys[] {
+      const unitKeys = this.mints.find((m) => m.url === activeMintUrl)?.keys?.filter((k) => k.unit === activeUnit);
+      if (!unitKeys) {
+        return [];
+      }
+      return unitKeys;
+    },
+    activeInfo({ activeMintUrl }): GetInfoResponse {
+      return this.mints.find((m) => m.url === activeMintUrl)?.info;
+    },
     activeUnitLabel({ activeUnit }): string {
       if (activeUnit == "sat") {
         return "SAT";
@@ -128,7 +145,16 @@ export const useMintsStore = defineStore("mints", {
       } else {
         return activeUnit;
       }
-    }
+    },
+    activeUnitCurrencyMultiplyer({ activeUnit }): number {
+      if (activeUnit == "usd") {
+        return 100;
+      } else if (activeUnit == "eur") {
+        return 100;
+      } else {
+        return 1;
+      }
+    },
   },
   actions: {
     activeMint() {
@@ -157,12 +183,9 @@ export const useMintsStore = defineStore("mints", {
     proofsToWalletProofs(proofs: Proof[]): WalletProof[] {
       return proofs.map((p) => {
         return {
-          amount: p.amount,
-          secret: p.secret,
-          C: p.C,
+          ...p,
           reserved: false,
-          id: p.id,
-        };
+        } as WalletProof;
       });
     },
     addProofs(proofs: Proof[]) {
@@ -268,6 +291,8 @@ export const useMintsStore = defineStore("mints", {
       }
     },
     activateUnit: async function (unit: string, verbose = false) {
+      const uIStore = useUiStore();
+      await uIStore.lockMutex();
       const mint = this.mints.find((m) => m.url === this.activeMintUrl);
       if (!mint) {
         notifyError("No active mint", "Unit activation failed");
@@ -279,6 +304,9 @@ export const useMintsStore = defineStore("mints", {
       } else {
         notifyError("Unit not supported by mint", "Unit activation failed");
       }
+      await uIStore.unlockMutex();
+      const worker = useWorkersStore();
+      worker.clearAllWorkers();
     },
     activateMint: async function (mint: Mint, verbose = false, force = false) {
       const workers = useWorkersStore();

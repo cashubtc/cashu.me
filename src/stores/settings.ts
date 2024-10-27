@@ -9,6 +9,7 @@ export const useSettingsStore = defineStore("settings", {
       getBitcoinPrice: useLocalStorage<boolean>("cashu.settings.getBitcoinPrice", false),
       checkSentTokens: useLocalStorage<boolean>("cashu.settings.checkSentTokens", true),
       defaultNostrRelays: useLocalStorage<string[]>("cashu.settings.defaultNostrRelays", defaultNostrRelays),
+      includeFeesInSendAmount: useLocalStorage<boolean>("cashu.settings.includeFeesInSendAmount", false),
     }
   }
 });
