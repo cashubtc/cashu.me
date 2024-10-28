@@ -46,6 +46,9 @@
         <div class="col-12">
           <ChooseMint :ticker-short="tickerShort" />
         </div>
+        <div class="col-12">
+          <MultinutPicker />
+        </div>
         <div v-if="enoughActiveBalance" class="row q-mt-lg">
           <q-btn
             unelevated
@@ -202,19 +205,6 @@
             >
           </div>
         </q-form>
-        <!-- <div v-else>
-            <q-responsive :ratio="1">
-              <qrcode-stream
-                @decode="decodeQR"
-                class="rounded-borders"
-              ></qrcode-stream>
-            </q-responsive>
-            <div class="row q-mt-lg">
-              <q-btn @click="closeCamera" flat color="grey" class="q-ml-auto">
-                Close
-              </q-btn>
-            </div>
-          </div> -->
       </div>
     </q-card>
   </q-dialog>
@@ -231,6 +221,7 @@ import ToggleUnit from "components/ToggleUnit.vue";
 
 // import * as bolt11Decoder from "light-bolt11-decoder";
 import * as _ from "underscore";
+import MultinutPicker from "./MultinutPicker.vue";
 
 export default defineComponent({
   name: "PayInvoiceDialog",
@@ -238,6 +229,7 @@ export default defineComponent({
   components: {
     ChooseMint,
     ToggleUnit,
+    MultinutPicker,
   },
   props: {},
   data: function () {

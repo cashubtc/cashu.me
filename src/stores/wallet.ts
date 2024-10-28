@@ -97,10 +97,10 @@ export const useWalletStore = defineStore("wallet", {
         lnurlauth: {},
         input: {
           request: "",
-          amount: null,
+          amount: undefined,
           comment: "",
           quote: "",
-        } as { request: string, amount: number | null, comment: string, quote: string },
+        } as { request: string, amount: number | undefined, comment: string, quote: string },
       },
     };
   },
@@ -513,23 +513,23 @@ export const useWalletStore = defineStore("wallet", {
         if (this.payInvoiceData.input.request == "") {
           throw new Error("no invoice provided.");
         }
-        const payload: MeltQuotePayload = {
-          unit: mintStore.activeUnit,
-          request: this.payInvoiceData.input.request,
-        };
-        this.payInvoiceData.meltQuote.payload = payload;
-        const data = await mintStore.activeMint().api.createMeltQuote(payload);
+        // const payload: MeltQuotePayload = {
+        //   unit: mintStore.activeUnit,
+        //   request: this.payInvoiceData.input.request,
+        // };
+        // this.payInvoiceData.meltQuote.payload = payload;
+        // const data = await mintStore.activeMint().api.createMeltQuote(payload);
+        const data = await this.wallet.createMeltQuote(this.payInvoiceData.input.request, { mpp_amount: this.payInvoiceData.input.amount });
         mintStore.assertMintError(data);
         this.payInvoiceData.meltQuote.response = data;
-        this.payInvoiceData.blocking = false;
         return data;
       } catch (error: any) {
-        this.payInvoiceData.blocking = false;
         this.payInvoiceData.meltQuote.error = error;
         console.error(error);
         notifyApiError(error);
         throw error;
       } finally {
+        this.payInvoiceData.blocking = false;
         uIStore.unlockMutex();
       }
     },
@@ -554,7 +554,6 @@ export const useWalletStore = defineStore("wallet", {
         throw new Error("invoice already paid.");
       }
 
-      const amount_invoice = this.payInvoiceData.invoice.sat;
       const quote = this.payInvoiceData.meltQuote.response;
       if (quote == null) {
         throw new Error("no quote found.");
