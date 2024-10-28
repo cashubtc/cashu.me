@@ -25,7 +25,7 @@ export const useProofsStore = defineStore("proofs", {
     getUnreservedProofs: function (proofs: WalletProof[]) {
       return proofs.filter((p) => !p.reserved);
     },
-    serializeProofs: function (proofs: Proof[]) {
+    serializeProofs: function (proofs: Proof[]): string {
       const mintStore = useMintsStore();
       // unique keyset IDs of proofs
       let uniqueIds = [...new Set(proofs.map((p) => p.id))];
@@ -34,14 +34,14 @@ export const useProofsStore = defineStore("proofs", {
         m.keysets.filter((k) => uniqueIds.includes(k.id))
       );
       if (keysets.length === 0) {
-        return null;
+        throw new Error("No keysets found for proofs");
       }
       // mints that have any of the keyset.id
       let mints = mintStore.mints.filter((m) =>
         m.keysets.some((k) => uniqueIds.includes(k.id))
       );
       if (mints.length === 0) {
-        return null;
+        throw new Error("No mints found for proofs");
       }
       // unit of keysets
       let unit = keysets[0].unit;

@@ -10,12 +10,7 @@
             >
             <q-item-label caption
               >Your seed phrase can restore your wallet. Keep it safe and
-              private. Warning: this wallet does not support seed phrase
-              recovery yet. Use a different Cashu wallet or
-              <a href="https://v2alpha.nutstash.app/" target="_blank"
-                >this tool</a
-              >
-              to recover from seed phrase.
+              private.
             </q-item-label>
             <div class="row q-pt-md">
               <div class="col-12">
@@ -51,79 +46,6 @@
         </q-item>
       </q-list>
     </div>
-    <!-- P2PK -->
-    <div class="q-py-sm q-px-xs text-left" on-left>
-      <q-list padding>
-        <q-item>
-          <q-item-section>
-            <q-item-label overline class="text-weight-bold">P2PK</q-item-label>
-            <q-item-label caption
-              >Generate a key pair to receive P2PK-locked ecash. Warning: This
-              feature is experimental. Only use with small amounts. If you lose
-              your private keys, nobody will be able to unlock the ecash locked
-              to it anymore.</q-item-label
-            >
-          </q-item-section>
-        </q-item>
-        <q-item>
-          <q-btn
-            class="q-ml-sm q-px-md"
-            color="primary"
-            size="sm"
-            rounded
-            outline
-            @click="generateKeypair"
-            >Generate key</q-btn
-          >
-        </q-item>
-      </q-list>
-    </div>
-    <q-expansion-item
-      dense
-      dense-toggle
-      v-if="p2pkKeys.length"
-      class="text-left"
-      :label="`Click to browse ${p2pkKeys.length} keys`"
-    >
-      <q-item v-for="key in p2pkKeys" :key="key.privakey">
-        <q-item-section class="q-mx-none q-pl-none" style="max-width: 1.05em">
-          <q-icon
-            name="content_copy"
-            @click="copyText(key.publicKey)"
-            size="1.2em"
-            color="grey"
-            class="q-mr-xs cursor-pointer"
-          />
-        </q-item-section>
-        <q-item-section>
-          <q-item-label
-            caption
-            clickable
-            style="word-break: break-word; font-size: 0.65rem"
-            class="q-mx-sm"
-            @click="showP2PKKeyEntry(key.publicKey)"
-            >{{ key.publicKey }}</q-item-label
-          >
-        </q-item-section>
-        <q-item-section side>
-          <q-badge
-            v-if="key.used"
-            label="used"
-            color="primary"
-            class="q-mr-sm"
-          />
-        </q-item-section>
-        <q-item-section class="q-mx-none q-pl-none" style="max-width: 1.05em">
-          <q-icon
-            name="qr_code"
-            @click="showP2PKKeyEntry(key.publicKey)"
-            size="1em"
-            color="grey"
-            class="q-mr-xs cursor-pointer"
-          />
-        </q-item-section>
-      </q-item>
-    </q-expansion-item>
 
     <!-- nostr -->
     <div class="q-py-sm q-px-md text-left" on-left>
@@ -132,8 +54,8 @@
           <q-item-section>
             <q-item-label overline>Your nostr keys</q-item-label>
             <q-item-label caption
-              >Link your wallet to nostr. This nostr account will be used for
-              your Lightning address and for generating payment
+              >Link your wallet to nostr. Your nostr keys will be used for your
+              Lightning address and for generating payment
               requests.</q-item-label
             >
           </q-item-section>
@@ -584,6 +506,116 @@
           </q-item>
         </div>
 
+        <!-- P2PK -->
+        <div class="q-py-sm q-px-xs text-left" on-left>
+          <q-list padding>
+            <q-item>
+              <q-item-section>
+                <q-item-label overline class="text-weight-bold"
+                  >P2PK</q-item-label
+                >
+                <q-item-label caption
+                  >Generate a key pair to receive P2PK-locked ecash. Warning:
+                  This feature is experimental. Only use with small amounts. If
+                  you lose your private keys, nobody will be able to unlock the
+                  ecash locked to it anymore.</q-item-label
+                >
+              </q-item-section>
+            </q-item>
+            <q-item>
+              <q-btn
+                class="q-ml-sm q-px-md"
+                color="primary"
+                size="sm"
+                rounded
+                outline
+                @click="generateKeypair"
+                >Generate key</q-btn
+              >
+            </q-item>
+          </q-list>
+        </div>
+        <q-expansion-item
+          dense
+          dense-toggle
+          v-if="p2pkKeys.length"
+          class="text-left"
+          :label="`Click to browse ${p2pkKeys.length} keys`"
+        >
+          <q-item v-for="key in p2pkKeys" :key="key.privakey">
+            <q-item-section
+              class="q-mx-none q-pl-none"
+              style="max-width: 1.05em"
+            >
+              <q-icon
+                name="content_copy"
+                @click="copyText(key.publicKey)"
+                size="1.2em"
+                color="grey"
+                class="q-mr-xs cursor-pointer"
+              />
+            </q-item-section>
+            <q-item-section>
+              <q-item-label
+                caption
+                clickable
+                style="word-break: break-word; font-size: 0.65rem"
+                class="q-mx-sm"
+                @click="showP2PKKeyEntry(key.publicKey)"
+                >{{ key.publicKey }}</q-item-label
+              >
+            </q-item-section>
+            <q-item-section side>
+              <q-badge
+                v-if="key.used"
+                label="used"
+                color="primary"
+                class="q-mr-sm"
+              />
+            </q-item-section>
+            <q-item-section
+              class="q-mx-none q-pl-none"
+              style="max-width: 1.05em"
+            >
+              <q-icon
+                name="qr_code"
+                @click="showP2PKKeyEntry(key.publicKey)"
+                size="1em"
+                color="grey"
+                class="q-mr-xs cursor-pointer"
+              />
+            </q-item-section>
+          </q-item>
+        </q-expansion-item>
+
+        <!-- restore -->
+        <div class="q-py-sm q-px-xs text-left" on-left>
+          <q-list padding>
+            <q-item>
+              <q-item-section>
+                <q-item-label overline class="text-weight-bold"
+                  >Restore ecash</q-item-label
+                >
+                <q-item-label caption
+                  >The restore wizard lets you recover lost ecash from a
+                  mnemonic seed phrase.</q-item-label
+                >
+              </q-item-section>
+            </q-item>
+            <q-item>
+              <q-btn
+                class="q-ml-sm q-px-md"
+                color="primary"
+                size="sm"
+                rounded
+                outline
+                to="/restore"
+                >Restore</q-btn
+              >
+            </q-item>
+          </q-list>
+        </div>
+
         <!-- theme -->
         <div class="q-py-mb q-px-xs text-left" on-left>
           <q-list padding>
@@ -973,6 +1005,7 @@ import { useNWCStore } from "src/stores/nwc";
 import { useWorkersStore } from "src/stores/workers";
 import { useProofsStore } from "src/stores/proofs";
 import { usePRStore } from "../stores/payment-request";
+import { useRestoreStore } from "src/stores/restore";
 
 export default defineComponent({
   name: "SettingsView",
@@ -1121,6 +1154,7 @@ export default defineComponent({
     ...mapActions(useWorkersStore, ["invoiceCheckWorker"]),
     ...mapActions(useProofsStore, ["serializeProofs"]),
     ...mapActions(useNPCStore, ["generateNPCConnection"]),
+    ...mapActions(useRestoreStore, ["restoreMint"]),
     generateNewMnemonic: async function () {
       this.newMnemonic();
       await this.initSigner();

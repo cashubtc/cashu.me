@@ -15,6 +15,7 @@ export type HistoryToken = {
   mint: string;
   unit: string;
   paymentRequest?: PaymentRequest;
+  fee?: number;
 };
 
 export const useTokensStore = defineStore("tokens", {
@@ -31,11 +32,13 @@ export const useTokensStore = defineStore("tokens", {
       serializedProofs,
       mint,
       unit,
+      fee,
     }: {
       amount: number;
       serializedProofs: string;
       mint: string;
       unit: string;
+      fee?: number;
     }) {
       this.historyTokens.push({
         status: "paid",
@@ -44,6 +47,7 @@ export const useTokensStore = defineStore("tokens", {
         token: serializedProofs,
         mint,
         unit,
+        fee,
       } as HistoryToken);
     },
     addPendingToken({
@@ -51,11 +55,13 @@ export const useTokensStore = defineStore("tokens", {
       serializedProofs,
       mint,
       unit,
+      fee,
     }: {
       amount: number;
       serializedProofs: string;
       mint: string;
       unit: string;
+      fee?: number;
     }) {
       this.historyTokens.push({
         status: "pending",
@@ -64,9 +70,10 @@ export const useTokensStore = defineStore("tokens", {
         token: serializedProofs,
         mint,
         unit,
-      } as HistoryToken);
+        fee,
+      });
     },
-    editHistoryToken(tokenToEdit: string, options?: { newAmount?: number; addAmount?: number, newStatus?: "paid" | "pending", newToken?: string, }): HistoryToken | undefined {
+    editHistoryToken(tokenToEdit: string, options?: { newAmount?: number; addAmount?: number, newStatus?: "paid" | "pending", newToken?: string, newFee?: number }): HistoryToken | undefined {
       const index = this.historyTokens.findIndex((t) => t.token === tokenToEdit);
       if (index >= 0) {
         if (options) {
@@ -86,6 +93,9 @@ export const useTokensStore = defineStore("tokens", {
           }
           if (options.newStatus) {
             this.historyTokens[index].status = options.newStatus;
+          }
+          if (options.newFee) {
+            this.historyTokens[index].fee = options.newFee;
           }
         }
 

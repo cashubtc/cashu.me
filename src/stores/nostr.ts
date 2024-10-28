@@ -8,7 +8,7 @@ import { useLocalStorage } from "@vueuse/core";
 import { useSettingsStore } from "./settings";
 import { useReceiveTokensStore } from "./receiveTokensStore";
 import { getEncodedTokenV4, PaymentRequestPayload, Token } from "@cashu/cashu-ts";
-import { useTokensStore, useTokensStore } from "./tokens";
+import { useTokensStore } from "./tokens";
 import { notifyApiError, notifyError, notifySuccess, notifyWarning, notify } from "../js/notify";
 import { useSendTokensStore } from "./sendTokensStore";
 import { usePRStore } from "./payment-request";
