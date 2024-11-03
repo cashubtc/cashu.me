@@ -681,12 +681,10 @@ export const useWalletStore = defineStore("wallet", {
         return;
       }
       const enc = new TextEncoder();
-      const payload: CheckStatePayload = {
-        // Ys is hashToCurve of the secret of proofs
-        Ys: proofs.map((p) => hashToCurve(enc.encode(p.secret)).toHex(true)),
-      };
       try {
-        const spentProofs = await this.wallet.checkProofsSpent(proofs);
+        const proofStates = await this.wallet.checkProofsStates(proofs);
+        const spentProofsStates = proofStates.filter((p) => p.state == CheckStateEnum.SPENT)
+        const spentProofs = proofs.filter((p) => spentProofsStates.find((s) => s.Y == hashToCurve(enc.encode(p.secret)).toHex(true)))
         if (spentProofs.length) {
           mintStore.removeProofs(spentProofs);
 
