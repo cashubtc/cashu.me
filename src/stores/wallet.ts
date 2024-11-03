@@ -13,7 +13,7 @@ import { usePRStore } from "./payment-request";
 import * as _ from "underscore";
 import token from "src/js/token";
 import { notifyApiError, notifyError, notifySuccess, notifyWarning, notify } from "src/js/notify";
-import { CashuMint, CashuWallet, Proof, MintQuotePayload, CheckStatePayload, MeltQuotePayload, MeltQuoteResponse, generateNewMnemonic, deriveSeedFromMnemonic, AmountPreference, CheckStateEnum, getDecodedToken, Token, MeltQuoteState, MintQuoteState, PaymentRequest, PaymentRequestTransportType, PaymentRequestTransport, decodePaymentRequest, PaymentRequestTag } from "@cashu/cashu-ts";
+import { CashuMint, CashuWallet, Proof, MintQuotePayload, MeltQuotePayload, MeltQuoteResponse, CheckStateEnum, MeltQuoteState, MintQuoteState, PaymentRequest, PaymentRequestTransportType, PaymentRequestTransport, decodePaymentRequest } from "@cashu/cashu-ts";
 import { hashToCurve } from '@cashu/crypto/modules/common';
 import * as bolt11Decoder from "light-bolt11-decoder";
 import { bech32 } from "bech32";
@@ -21,6 +21,11 @@ import axios from "axios";
 import { date } from "quasar";
 import { useNostrStore } from "./nostr";
 import { v4 as uuidv4 } from 'uuid';
+
+// bip39 requires Buffer
+import { Buffer } from 'buffer';
+window.Buffer = Buffer;
+import { generateMnemonic, mnemonicToSeedSync } from "bip39";
 
 // HACK: this is a workaround so that the catch block in the melt function does not throw an error when the user exits the app
 // before the payment is completed. This is necessary because the catch block in the melt function would otherwise remove all
@@ -110,24 +115,28 @@ export const useWalletStore = defineStore("wallet", {
       const mints = useMintsStore();
       const mint = new CashuMint(mints.activeMintUrl);
       if (this.mnemonic == "") {
-        this.mnemonic = generateNewMnemonic();
+        this.mnemonic = generateMnemonic();
       }
       const mnemonic: string = this.mnemonic;
-      const wallet = new CashuWallet(mint, { keys: mints.activeKeys, keysets: mints.activeKeysets, mintInfo: mints.activeInfo, mnemonicOrSeed: mnemonic, unit: mints.activeUnit });
+      const bip39Seed = mnemonicToSeedSync(mnemonic);
+      const wallet = new CashuWallet(mint, { keys: mints.activeKeys, keysets: mints.activeKeysets, mintInfo: mints.activeInfo, bip39seed: bip39Seed, unit: mints.activeUnit });
       return wallet;
     },
     seed(): Uint8Array {
-      return deriveSeedFromMnemonic(this.mnemonic);
+      return mnemonicToSeedSync(this.mnemonic);
     }
   },
   actions: {
+    mnemonicToSeedSync: function (mnemonic: string): Uint8Array {
+      return mnemonicToSeedSync(mnemonic);
+    },
     newMnemonic: function () {
       // store old mnemonic and keysetCounters
       const oldMnemonicCounters = this.oldMnemonicCounters;
       const keysetCounters = this.keysetCounters;
       oldMnemonicCounters.push({ mnemonic: this.mnemonic, keysetCounters });
       this.keysetCounters = [];
-      this.mnemonic = generateNewMnemonic();
+      this.mnemonic = generateMnemonic();
     },
     keysetCounter: function (id: string) {
       const keysetCounter = this.keysetCounters.find((c) => c.id === id);
@@ -1124,9 +1133,9 @@ export const useWalletStore = defineStore("wallet", {
         await this.decodeRequest(data.pr);
       }
     },
-    generateNewMnemonic: function () {
+    initializeMnemonic: function () {
       if (this.mnemonic == "") {
-        this.mnemonic = generateNewMnemonic();
+        this.mnemonic = generateMnemonic();
       }
       return this.mnemonic
     },
@@ -1141,7 +1150,7 @@ export const useWalletStore = defineStore("wallet", {
     createPaymentRequest: function (amount?: number, memo?: string): string {
       const nostrStore = useNostrStore();
       const mintStore = useMintsStore();
-      const tags = [["n", "17"]] as PaymentRequestTag[];
+      const tags = [["n", "17"]];
       const transport = [{
         type: PaymentRequestTransportType.NOSTR,
         target: nostrStore.nprofile,

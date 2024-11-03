@@ -354,7 +354,7 @@ export default {
       "checkPendingInvoices",
       "checkPendingTokens",
       "decodeRequest",
-      "generateNewMnemonic",
+      "initializeMnemonic",
       "createPaymentRequest",
     ]),
     ...mapActions(useCameraStore, ["closeCamera", "showCamera"]),
@@ -636,7 +636,7 @@ export default {
     this.registerPWAEventHook();
 
     // generate new mnemonic
-    this.generateNewMnemonic();
+    this.initializeMnemonic();
 
     this.initSigner();
 
