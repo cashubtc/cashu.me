@@ -379,7 +379,8 @@ export const useNostrStore = defineStore("nostr", {
           const mint = payload.mint;
           const unit = payload.unit;
           const token = {
-            token: [{ proofs: proofs, mint: mint }],
+            proofs: proofs,
+            mint: mint,
             unit: unit,
           } as Token;
 

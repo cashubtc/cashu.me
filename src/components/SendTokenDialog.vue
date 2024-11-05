@@ -266,12 +266,12 @@
                 :showP2PKCheck="false"
               />
             </div>
-            <!-- <div
+            <div
               v-if="sendData.paymentRequest"
               class="row justify-center q-pt-sm"
             >
               <SendPaymentRequest />
-            </div> -->
+            </div>
             <div class="row q-mt-lg">
               <q-btn
                 class="q-mx-xs"
@@ -378,7 +378,7 @@ export default defineComponent({
   components: {
     ChooseMint,
     TokenInformation,
-    // SendPaymentRequest,
+    SendPaymentRequest,
   },
   props: {},
   data: function () {
@@ -701,6 +701,7 @@ export default defineComponent({
           serializedProofs: this.sendData.tokensBase64,
           unit: this.activeUnit,
           mint: this.activeMintUrl,
+          paymentRequest: this.sendData.paymentRequest,
         });
 
         if (!this.g.offline) {

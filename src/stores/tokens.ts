@@ -33,12 +33,14 @@ export const useTokensStore = defineStore("tokens", {
       mint,
       unit,
       fee,
+      paymentRequest,
     }: {
       amount: number;
       serializedProofs: string;
       mint: string;
       unit: string;
       fee?: number;
+      paymentRequest?: PaymentRequest
     }) {
       this.historyTokens.push({
         status: "paid",
@@ -48,6 +50,7 @@ export const useTokensStore = defineStore("tokens", {
         mint,
         unit,
         fee,
+        paymentRequest,
       } as HistoryToken);
     },
     addPendingToken({
@@ -56,12 +59,14 @@ export const useTokensStore = defineStore("tokens", {
       mint,
       unit,
       fee,
+      paymentRequest,
     }: {
       amount: number;
       serializedProofs: string;
       mint: string;
       unit: string;
       fee?: number;
+      paymentRequest?: PaymentRequest;
     }) {
       this.historyTokens.push({
         status: "pending",
@@ -71,6 +76,7 @@ export const useTokensStore = defineStore("tokens", {
         mint,
         unit,
         fee,
+        paymentRequest,
       });
     },
     editHistoryToken(tokenToEdit: string, options?: { newAmount?: number; addAmount?: number, newStatus?: "paid" | "pending", newToken?: string, newFee?: number }): HistoryToken | undefined {
