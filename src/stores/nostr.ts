@@ -400,8 +400,6 @@ export const useNostrStore = defineStore("nostr", {
           prStore.showPRDialog = false;
 
           receiveStore.showReceiveTokens = true;
-
-          notify("Pending payment received", "bottom");
           return
         }
       } catch (e) {
