@@ -266,12 +266,12 @@
                 :showP2PKCheck="false"
               />
             </div>
-            <div
+            <!-- <div
               v-if="sendData.paymentRequest"
               class="row justify-center q-pt-sm"
             >
               <SendPaymentRequest />
-            </div>
+            </div> -->
             <div class="row q-mt-lg">
               <q-btn
                 class="q-mx-xs"
@@ -378,7 +378,7 @@ export default defineComponent({
   components: {
     ChooseMint,
     TokenInformation,
-    SendPaymentRequest,
+    // SendPaymentRequest,
   },
   props: {},
   data: function () {
@@ -493,7 +493,7 @@ export default defineComponent({
       }
       // check if token has more than one proof
       const tokenObj = token.decode(val);
-      const proofs = tokenObj.token[0].proofs;
+      const proofs = tokenObj.proofs;
       if (!proofs.length) {
         // no proofs
         return;

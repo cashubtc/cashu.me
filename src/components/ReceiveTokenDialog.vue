@@ -208,15 +208,9 @@ export default defineComponent({
     ...mapActions(useMintsStore, ["addMint"]),
     knowThisMintOfTokenJson: function (tokenJson) {
       const mintStore = useMintsStore();
-      // check if we have all mints
-      for (var i = 0; i < tokenJson.token.length; i++) {
-        if (
-          !mintStore.mints.map((m) => m.url).includes(token.getMint(tokenJson))
-        ) {
-          return false;
-        }
-      }
-      return true;
+      return mintStore.mints
+        .map((m) => m.url)
+        .includes(token.getMint(tokenJson));
     },
     receiveToken: async function (encodedToken) {
       const mintStore = useMintsStore();
