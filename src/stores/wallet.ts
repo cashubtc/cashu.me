@@ -23,9 +23,10 @@ import { useNostrStore } from "./nostr";
 import { v4 as uuidv4 } from 'uuid';
 
 // bip39 requires Buffer
-import { Buffer } from 'buffer';
-window.Buffer = Buffer;
-import { generateMnemonic, mnemonicToSeedSync } from "bip39";
+// import { Buffer } from 'buffer';
+// window.Buffer = Buffer;
+import { generateMnemonic, mnemonicToSeedSync } from "@scure/bip39";
+import { wordlist } from '@scure/bip39/wordlists/english';
 
 // HACK: this is a workaround so that the catch block in the melt function does not throw an error when the user exits the app
 // before the payment is completed. This is necessary because the catch block in the melt function would otherwise remove all
@@ -115,7 +116,7 @@ export const useWalletStore = defineStore("wallet", {
       const mints = useMintsStore();
       const mint = new CashuMint(mints.activeMintUrl);
       if (this.mnemonic == "") {
-        this.mnemonic = generateMnemonic();
+        this.mnemonic = generateMnemonic(wordlist);
       }
       const mnemonic: string = this.mnemonic;
       const bip39Seed = mnemonicToSeedSync(mnemonic);
@@ -136,7 +137,7 @@ export const useWalletStore = defineStore("wallet", {
       const keysetCounters = this.keysetCounters;
       oldMnemonicCounters.push({ mnemonic: this.mnemonic, keysetCounters });
       this.keysetCounters = [];
-      this.mnemonic = generateMnemonic();
+      this.mnemonic = generateMnemonic(wordlist);
     },
     keysetCounter: function (id: string) {
       const keysetCounter = this.keysetCounters.find((c) => c.id === id);
@@ -1135,7 +1136,7 @@ export const useWalletStore = defineStore("wallet", {
     },
     initializeMnemonic: function () {
       if (this.mnemonic == "") {
-        this.mnemonic = generateMnemonic();
+        this.mnemonic = generateMnemonic(wordlist);
       }
       return this.mnemonic
     },
