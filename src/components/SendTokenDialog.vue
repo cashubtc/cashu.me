@@ -295,7 +295,7 @@
                 size="md"
                 icon="link"
                 flat
-                @click="copyText(baseURL + '?token=' + sendData.tokensBase64)"
+                @click="copyText(baseURL + '#token=' + sendData.tokensBase64)"
                 ><q-tooltip>Copy link</q-tooltip></q-btn
               >
               <q-btn

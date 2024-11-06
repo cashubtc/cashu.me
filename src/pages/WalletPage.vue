@@ -581,6 +581,7 @@ export default {
     this.registerBroadcastChannel();
 
     let params = new URL(document.location).searchParams;
+    let hash = new URL(document.location).hash;
 
     // mint url
     if (params.get("mint")) {
@@ -597,8 +598,8 @@ export default {
     console.log("Wallet URL " + this.baseURL);
 
     // get token to receive tokens from a link
-    if (params.get("token")) {
-      let tokenBase64 = params.get("token");
+    if (params.get("token") || hash.includes("token")) {
+      let tokenBase64 = params.get("token") || hash.split("token=")[1];
       // make sure to react only to tokens not in the users history
       let seen = false;
       for (var i = 0; i < this.historyTokens.length; i++) {
@@ -609,7 +610,7 @@ export default {
       }
       if (!seen) {
         // show receive token dialog
-        this.receiveData.tokensBase64 = params.get("token");
+        this.receiveData.tokensBase64 = tokenBase64;
         this.showReceiveTokens = true;
       }
     }
