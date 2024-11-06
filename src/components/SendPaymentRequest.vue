@@ -1,5 +1,9 @@
 <template>
-  <div class="row text-left q-py-none q-my-none" @click="clickPaymentRequest">
+  <div
+    v-if="sendData.paymentRequest"
+    class="row text-left q-py-none q-my-none"
+    @click="clickPaymentRequest"
+  >
     <q-btn rounded dense color="primary" class="q-px-md"
       ><q-icon name="send" class="q-pr-xs" /> Pay via
       {{ getPaymentRequestTransportType(sendData.paymentRequest) }}
@@ -48,7 +52,7 @@ export default defineComponent({
       );
     },
     getPaymentRequestTransportType: function (request) {
-      if (!request) {
+      if (!request || !request.transport) {
         return "Unknown";
       }
       console.log(`### getPaymentRequestTransportType: ${request}`);

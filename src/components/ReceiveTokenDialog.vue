@@ -90,6 +90,7 @@
         <q-btn
           unelevated
           dense
+          class="q-mr-sm"
           v-if="canPasteFromClipboard && !receiveData.tokensBase64.length"
           @click="pasteToParseDialog"
         >
@@ -97,31 +98,32 @@
         >
         <q-btn
           unelevated
-          class="q-mx-none"
+          dense
+          class="q-mx-sm"
           v-if="hasCamera && !receiveData.tokensBase64.length"
           @click="showCamera"
         >
-          <q-icon name="qr_code_scanner" />
+          <q-icon name="qr_code_scanner" class="q-pr-sm" />
         </q-btn>
         <q-btn
           unelevated
+          dense
+          class="q-mr-sm"
+          v-if="!receiveData.tokensBase64.length && enablePaymentRequest"
+          @click="handlePaymentRequestBtn"
+        >
+          <q-icon name="move_to_inbox" class="q-pr-sm" />
+        </q-btn>
+        <q-btn
+          unelevated
+          dense
           class="q-mx-none"
           v-if="!receiveData.tokensBase64.length"
           @click="handleLockBtn"
         >
           <q-icon name="lock_outline" />
         </q-btn>
-
-        <q-btn
-          unelevated
-          class="q-mx-none"
-          v-if="!receiveData.tokensBase64.length && enablePaymentRequest"
-          @click="handlePaymentRequestBtn"
-        >
-          <q-icon name="download" />
-        </q-btn>
-
-        <q-btn v-close-popup rounded flat color="grey" class="q-ml-auto"
+        <q-btn v-close-popup rounded flat color="grey" class="q-ml-auto q-pr-xs"
           >Close</q-btn
         >
       </div>

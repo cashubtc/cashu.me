@@ -281,6 +281,15 @@
                 >Copy</q-btn
               >
               <q-btn
+                unelevated
+                dense
+                class="q-mx-sm"
+                v-if="hasCamera && !sendData.paymentRequest"
+                @click="showCamera"
+              >
+                <q-icon name="qr_code_scanner" class="q-pr-sm" />
+              </q-btn>
+              <q-btn
                 class="q-mx-none"
                 color="grey"
                 size="md"

@@ -46,13 +46,19 @@ export const usePRStore = defineStore("payment-request", {
       }
 
       const sendTokenStore = useSendTokensStore();
-      sendTokenStore.clearSendData();
+      if (!sendTokenStore.showSendTokens) {
+        // if the sendtokendialog is not currently open, clear all data and then show the send dialog
+        sendTokenStore.clearSendData();
+      }
       // if the payment request has an amount, set it
       if (request.amount) {
         sendTokenStore.sendData.amount = request.amount;
       }
       sendTokenStore.sendData.paymentRequest = request;
-      sendTokenStore.showSendTokens = true;
+      if (!sendTokenStore.showSendTokens) {
+        // show the send dialog
+        sendTokenStore.showSendTokens = true;
+      }
     },
     parseAndPayPaymentRequest(request: PaymentRequest, tokenStr: string) {
       const transports: PaymentRequestTransport[] = request.transport;
