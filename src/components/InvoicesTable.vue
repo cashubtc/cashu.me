@@ -31,9 +31,9 @@
               Lightning
               <q-tooltip>Click to copy</q-tooltip>
             </q-item-label>
-            <q-item-label caption>{{
-              formattedDate(invoice.date)
-            }}</q-item-label>
+            <q-item-label caption
+              >{{ formattedDate(invoice.date) }} ago</q-item-label
+            >
           </q-item-section>
           <q-item-section side top>
             <q-btn

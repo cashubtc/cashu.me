@@ -65,7 +65,7 @@
           @click="receiveIfDecodes"
           color="primary"
           rounded
-          class="q-mr-sm"
+          class="q-ml-xs q-mr-sm"
           v-if="tokenDecodesCorrectly"
           :disabled="addMintBlocking"
           :label="

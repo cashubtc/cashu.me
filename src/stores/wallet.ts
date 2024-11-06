@@ -351,7 +351,7 @@ export const useWalletStore = defineStore("wallet", {
       // activate the mint and the unit
       await mintStore.activateMintUrl(token.getMint(tokenJson), false, false, tokenJson.unit);
 
-      const amount = proofs.reduce((s, t) => (s += t.amount), 0);
+      const inputAmount = proofs.reduce((s, t) => (s += t.amount), 0);
       await uIStore.lockMutex();
       try {
         // redeem
@@ -375,27 +375,29 @@ export const useWalletStore = defineStore("wallet", {
         mintStore.removeProofs(proofs);
         mintStore.addProofs(proofs);
 
-        const receivedAdmount = proofs.reduce((s, t) => (s += t.amount), 0);
+        const outputAmount = proofs.reduce((s, t) => (s += t.amount), 0);
 
         // if token is already in history, set to paid, else add to history
-        if (tokenStore.historyTokens.find((t) => t.token === receiveStore.receiveData.tokensBase64 && t.amount == receivedAdmount)) {
+        if (tokenStore.historyTokens.find((t) => t.token === receiveStore.receiveData.tokensBase64 && t.amount > 0)) {
           tokenStore.setTokenPaid(receiveStore.receiveData.tokensBase64);
         } else {
           // if this is a self-sent token, we will find an outgoing token with the inverse amount
-          if (tokenStore.historyTokens.find((t) => t.token === receiveStore.receiveData.tokensBase64 && t.amount == -receivedAdmount)) {
+          if (tokenStore.historyTokens.find((t) => t.token === receiveStore.receiveData.tokensBase64 && t.amount < 0)) {
             tokenStore.setTokenPaid(receiveStore.receiveData.tokensBase64);
           }
+          const fee = inputAmount - outputAmount;
           tokenStore.addPaidToken({
-            amount: receivedAdmount,
+            amount: outputAmount,
             serializedProofs: receiveStore.receiveData.tokensBase64,
             unit: mintStore.activeUnit,
             mint: mintStore.activeMintUrl,
+            fee: fee
           });
         }
 
 
         if (!!window.navigator.vibrate) navigator.vibrate(200);
-        notifySuccess("Received " + uIStore.formatCurrency(receivedAdmount, mintStore.activeUnit));
+        notifySuccess("Received " + uIStore.formatCurrency(outputAmount, mintStore.activeUnit));
       } catch (error: any) {
         console.error(error);
         notifyApiError(error);

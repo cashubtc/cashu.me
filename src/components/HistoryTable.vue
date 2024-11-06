@@ -27,7 +27,7 @@
               class="q-mr-xs"
               size="xs"
             />
-            {{ formatCurrency(token.amount, token.unit) }}
+            <span> {{ formatCurrency(token.amount, token.unit) }} </span>
           </q-item-label>
         </q-item-section>
 
@@ -42,7 +42,9 @@
             }} -->
             Ecash
           </q-item-label>
-          <q-item-label caption>{{ formattedDate(token.date) }}</q-item-label>
+          <q-item-label caption
+            >{{ formattedDate(token.date) }} ago</q-item-label
+          >
         </q-item-section>
 
         <q-item-section side top>
