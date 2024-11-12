@@ -11,22 +11,35 @@
       <div v-if="payInvoiceData.invoice">
         <div class="row items-center no-wrap q-mb-sm">
           <div class="col-10">
-            <h6
+            <div
               v-if="
                 payInvoiceData.meltQuote.response &&
                 payInvoiceData.meltQuote.response.amount > 0
               "
-              class="q-my-none"
             >
-              Pay
-              {{
-                formatCurrency(
-                  payInvoiceData.meltQuote.response.amount,
-                  activeUnit,
-                  true
-                )
-              }}
-            </h6>
+              <h6 class="q-my-none inline-block">
+                Pay
+                {{
+                  formatCurrency(
+                    payInvoiceData.meltQuote.response.amount,
+                    activeUnit,
+                    true
+                  )
+                }}
+              </h6>
+              <span
+                v-if="bitcoinPrice && activeUnit == 'sat'"
+                class="q-ml-xs text-subtitle2 text-grey-6"
+              >
+                ({{
+                  formatCurrency(
+                    (bitcoinPrice / 100000000) *
+                      payInvoiceData.meltQuote.response.amount,
+                    "USD"
+                  )
+                }})
+              </span>
+            </div>
             <h6
               v-else-if="payInvoiceData.meltQuote.error != ''"
               class="q-my-none"
@@ -225,6 +238,8 @@ import { useWalletStore } from "src/stores/wallet";
 import { useUiStore } from "src/stores/ui";
 import { useCameraStore } from "src/stores/camera";
 import { useMintsStore } from "src/stores/mints";
+import { useSettingsStore } from "src/stores/settings";
+import { usePriceStore } from "src/stores/price";
 import { mapActions, mapState, mapWritableState } from "pinia";
 import ChooseMint from "components/ChooseMint.vue";
 import ToggleUnit from "components/ToggleUnit.vue";
@@ -257,6 +272,7 @@ export default defineComponent({
   },
   computed: {
     ...mapState(useUiStore, ["tickerShort", "globalMutexLock"]),
+    ...mapState(useSettingsStore, ["getBitcoinPrice"]),
     ...mapWritableState(useCameraStore, ["camera", "hasCamera"]),
     ...mapState(useWalletStore, ["payInvoiceData"]),
     ...mapState(useMintsStore, [
@@ -268,6 +284,7 @@ export default defineComponent({
       "activeBalance",
       "activeMintBalance",
     ]),
+    ...mapState(usePriceStore, ["bitcoinPrice"]),
     canPasteFromClipboard: function () {
       return (
         window.isSecureContext &&
