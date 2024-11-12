@@ -415,7 +415,7 @@ export const useWalletStore = defineStore("wallet", {
      * Upon paying the request, the mint will credit the wallet with
      * cashu tokens
      */
-    requestMint: async function (amount?: number) {
+    requestMint: async function (amount?: number, unit?: string) {
       const mintStore = useMintsStore();
       const uIStore = useUiStore();
 
@@ -426,7 +426,7 @@ export const useWalletStore = defineStore("wallet", {
       try {
         // create MintQuotePayload(this.invoiceData.amount) payload
         const payload: MintQuotePayload = {
-          amount: this.invoiceData.amount, unit: mintStore.activeUnit
+          amount: this.invoiceData.amount, unit: unit || mintStore.activeUnit
         };
         const data = await mintStore.activeMint().api.createMintQuote(
           payload
