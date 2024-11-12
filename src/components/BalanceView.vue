@@ -164,7 +164,6 @@ export default defineComponent({
       "activeMint",
     ]),
     ...mapState(useTokensStore, ["historyTokens"]),
-    ...mapState(useSettingsStore, ["getBitcoinPrice"]),
     ...mapState(useUiStore, ["globalMutexLock"]),
     ...mapState(usePriceStore, ["bitcoinPrice"]),
     ...mapWritableState(useMintsStore, ["activeUnit"]),
