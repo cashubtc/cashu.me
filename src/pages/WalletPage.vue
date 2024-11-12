@@ -85,7 +85,7 @@
           <!-- ////////////////// HISTORY LIST ///////////////// -->
 
           <q-tab-panel name="history">
-            <HistoryTable :show-token-dialog="showTokenDialog" />
+            <HistoryTable />
           </q-tab-panel>
 
           <!-- ////////////////// INVOICE LIST ///////////////// -->
@@ -212,6 +212,8 @@ import { useCameraStore } from "src/stores/camera";
 import { useP2PKStore } from "src/stores/p2pk";
 import { useNWCStore } from "src/stores/nwc";
 import { useNPCStore } from "src/stores/npubcash";
+import { useNostrStore } from "src/stores/nostr";
+import { usePRStore } from "src/stores/payment-request";
 
 import ReceiveTokenDialog from "src/components/ReceiveTokenDialog.vue";
 
@@ -270,13 +272,13 @@ export default {
     };
   },
   computed: {
+    ...mapState(useUiStore, ["tickerShort"]),
     ...mapWritableState(useUiStore, [
       "showInvoiceDetails",
       "tab",
       "showSendDialog",
       "showReceiveDialog",
     ]),
-    ...mapState(useUiStore, ["tickerShort"]),
     ...mapWritableState(useUiStore, ["expandHistory"]),
     ...mapWritableState(useReceiveTokensStore, [
       "showReceiveTokens",
@@ -302,6 +304,7 @@ export default {
       "tokensCheckSpendableListener",
     ]),
     ...mapState(useTokensStore, ["historyTokens"]),
+    ...mapState(usePRStore, ["enablePaymentRequest"]),
     ...mapWritableState(useCameraStore, ["camera", "hasCamera"]),
     ...mapWritableState(useP2PKStore, ["showP2PKDialog"]),
     ...mapWritableState(useNWCStore, ["showNWCDialog", "nwcEnabled"]),
@@ -351,11 +354,20 @@ export default {
       "checkPendingInvoices",
       "checkPendingTokens",
       "decodeRequest",
-      "generateNewMnemonic",
+      "initializeMnemonic",
+      "createPaymentRequest",
     ]),
     ...mapActions(useCameraStore, ["closeCamera", "showCamera"]),
     ...mapActions(useNWCStore, ["listenToNWCCommands"]),
     ...mapActions(useNPCStore, ["generateNPCConnection", "claimAllTokens"]),
+    ...mapActions(useNostrStore, [
+      "sendNip04DirectMessage",
+      "sendNip17DirectMessage",
+      "subscribeToNip04DirectMessages",
+      "subscribeToNip17DirectMessages",
+      "sendNip17DirectMessageToNprofile",
+      "initSigner",
+    ]),
     // TOKEN METHODS
     decodeToken: function (encoded_token) {
       try {
@@ -453,15 +465,6 @@ export default {
       this.showInvoiceDetails = true;
       // kick off invoice check worker
       this.invoiceCheckWorker();
-    },
-
-    showTokenDialog: function (tokensBase64) {
-      console.log("##### showTokenDialog");
-      this.sendData.tokens = this.getProofs(this.decodeToken(tokensBase64));
-      this.sendData.tokensBase64 = _.clone(tokensBase64);
-      this.showSendTokens = true;
-      // kick off token check worker
-      // this.checkTokenSpendableWorker(tokensBase64);
     },
     showSendTokensDialog: function () {
       console.log("##### showSendTokensDialog");
@@ -578,6 +581,7 @@ export default {
     this.registerBroadcastChannel();
 
     let params = new URL(document.location).searchParams;
+    let hash = new URL(document.location).hash;
 
     // mint url
     if (params.get("mint")) {
@@ -594,8 +598,8 @@ export default {
     console.log("Wallet URL " + this.baseURL);
 
     // get token to receive tokens from a link
-    if (params.get("token")) {
-      let tokenBase64 = params.get("token");
+    if (params.get("token") || hash.includes("token")) {
+      let tokenBase64 = params.get("token") || hash.split("token=")[1];
       // make sure to react only to tokens not in the users history
       let seen = false;
       for (var i = 0; i < this.historyTokens.length; i++) {
@@ -606,7 +610,7 @@ export default {
       }
       if (!seen) {
         // show receive token dialog
-        this.receiveData.tokensBase64 = params.get("token");
+        this.receiveData.tokensBase64 = tokenBase64;
         this.showReceiveTokens = true;
       }
     }
@@ -633,7 +637,9 @@ export default {
     this.registerPWAEventHook();
 
     // generate new mnemonic
-    this.generateNewMnemonic();
+    this.initializeMnemonic();
+
+    this.initSigner();
 
     // show welcome dialog
     this.showWelcomeDialog();
@@ -641,6 +647,10 @@ export default {
     // listen to NWC commands if enabled
     if (this.nwcEnabled) {
       this.listenToNWCCommands();
+    }
+
+    if (this.enablePaymentRequest) {
+      this.subscribeToNip17DirectMessages();
     }
   },
 };

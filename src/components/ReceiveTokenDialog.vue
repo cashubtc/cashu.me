@@ -14,6 +14,7 @@
         </div>
         <div>
           <P2PKDialog v-model="showP2PKDialog" />
+          <PRDialog v-model="showPRDialog" />
         </div>
         <q-input
           round
@@ -64,7 +65,7 @@
           @click="receiveIfDecodes"
           color="primary"
           rounded
-          class="q-mr-sm"
+          class="q-ml-xs q-mr-sm"
           v-if="tokenDecodesCorrectly"
           :disabled="addMintBlocking"
           :label="
@@ -89,6 +90,7 @@
         <q-btn
           unelevated
           dense
+          class="q-mr-sm"
           v-if="canPasteFromClipboard && !receiveData.tokensBase64.length"
           @click="pasteToParseDialog"
         >
@@ -96,22 +98,32 @@
         >
         <q-btn
           unelevated
-          class="q-mx-none"
+          dense
+          class="q-mx-sm"
           v-if="hasCamera && !receiveData.tokensBase64.length"
           @click="showCamera"
         >
-          <q-icon name="qr_code_scanner" />
+          <q-icon name="qr_code_scanner" class="q-pr-sm" />
         </q-btn>
         <q-btn
           unelevated
+          dense
+          class="q-mr-sm"
+          v-if="!receiveData.tokensBase64.length && enablePaymentRequest"
+          @click="handlePaymentRequestBtn"
+        >
+          <q-icon name="move_to_inbox" class="q-pr-sm" />
+        </q-btn>
+        <q-btn
+          unelevated
+          dense
           class="q-mx-none"
           v-if="!receiveData.tokensBase64.length"
           @click="handleLockBtn"
         >
           <q-icon name="lock_outline" />
         </q-btn>
-
-        <q-btn v-close-popup rounded flat color="grey" class="q-ml-auto"
+        <q-btn v-close-popup rounded flat color="grey" class="q-ml-auto q-pr-xs"
           >Close</q-btn
         >
       </div>
@@ -128,12 +140,15 @@ import { useMintsStore } from "src/stores/mints";
 import { useTokensStore } from "src/stores/tokens";
 import { useCameraStore } from "src/stores/camera";
 import { useP2PKStore } from "src/stores/p2pk";
+import { usePRStore } from "src/stores/payment-request";
 import token from "src/js/token";
 import P2PKDialog from "./P2PKDialog.vue";
+import PRDialog from "./PaymentRequestDialog.vue";
 
 import { mapActions, mapState, mapWritableState } from "pinia";
 // import ChooseMint from "components/ChooseMint.vue";
 import TokenInformation from "components/TokenInformation.vue";
+import { map } from "underscore";
 
 export default defineComponent({
   name: "ReceiveTokenDialog",
@@ -141,6 +156,7 @@ export default defineComponent({
   components: {
     TokenInformation,
     P2PKDialog,
+    PRDialog,
   },
   props: {},
   data: function () {
@@ -160,8 +176,10 @@ export default defineComponent({
       "addMintBlocking",
     ]),
     ...mapWritableState(useMintsStore, ["addMintData", "showAddMintDialog"]),
+    ...mapWritableState(usePRStore, ["showPRDialog"]),
     ...mapState(useCameraStore, ["hasCamera"]),
     ...mapState(useP2PKStore, ["p2pkKeys"]),
+    ...mapState(usePRStore, ["enablePaymentRequest"]),
     canPasteFromClipboard: function () {
       return (
         window.isSecureContext &&
@@ -192,15 +210,9 @@ export default defineComponent({
     ...mapActions(useMintsStore, ["addMint"]),
     knowThisMintOfTokenJson: function (tokenJson) {
       const mintStore = useMintsStore();
-      // check if we have all mints
-      for (var i = 0; i < tokenJson.token.length; i++) {
-        if (
-          !mintStore.mints.map((m) => m.url).includes(token.getMint(tokenJson))
-        ) {
-          return false;
-        }
-      }
-      return true;
+      return mintStore.mints
+        .map((m) => m.url)
+        .includes(token.getMint(tokenJson));
     },
     receiveToken: async function (encodedToken) {
       const mintStore = useMintsStore();
@@ -267,6 +279,13 @@ export default defineComponent({
       }
       this.showLastKey();
     },
+    handlePaymentRequestBtn: function () {
+      const prStore = usePRStore();
+      this.showPRDialog = !this.showPRDialog;
+      if (this.showPRDialog) {
+        prStore.newPaymentRequest();
+      }
+    },
     receiveIfDecodes: function () {
       try {
         const decodedToken = this.decodeToken(this.receiveData.tokensBase64);
@@ -277,10 +296,11 @@ export default defineComponent({
         console.error(error);
       }
     },
-    tokenAlreadyInHistory: function (token) {
+    tokenAlreadyInHistory: function (tokenStr) {
       const tokensStore = useTokensStore();
       return (
-        tokensStore.historyTokens.find((t) => t.token === token) !== undefined
+        tokensStore.historyTokens.find((t) => t.token === tokenStr) !==
+        undefined
       );
     },
     addPendingTokenToHistory: function (token) {

@@ -291,6 +291,9 @@ export const useMintsStore = defineStore("mints", {
       }
     },
     activateUnit: async function (unit: string, verbose = false) {
+      if (unit === this.activeUnit) {
+        return;
+      }
       const uIStore = useUiStore();
       await uIStore.lockMutex();
       const mint = this.mints.find((m) => m.url === this.activeMintUrl);
@@ -309,14 +312,12 @@ export const useMintsStore = defineStore("mints", {
       worker.clearAllWorkers();
     },
     activateMint: async function (mint: Mint, verbose = false, force = false) {
-      const workers = useWorkersStore();
-      const uIStore = useUiStore();
+
       if (mint.url === this.activeMintUrl && !force) {
-        // return here because this function is called repeatedly by the
-        // invoice check and token spendable check workers and would otherwise
-        // run until cleaAllWorkers and kill the woerkers
         return;
       }
+      const workers = useWorkersStore();
+      const uIStore = useUiStore();
       // we need to stop workers because they will reset the activeMint again
       workers.clearAllWorkers();
 

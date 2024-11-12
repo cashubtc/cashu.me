@@ -15,12 +15,11 @@ function decode(encoded_token: string) {
  */
 function getProofs(decoded_token: Token): WalletProof[] {
   if (
-    !(decoded_token.token.length > 0) ||
-    !(decoded_token.token[0].proofs.length > 0)
+    !(decoded_token.proofs.length > 0)
   ) {
     throw new Error("Token format wrong");
   }
-  const proofs = decoded_token.token.map((t) => t.proofs).flat();
+  const proofs = decoded_token.proofs.flat();
   const mintStore = useMintsStore();
   return mintStore.proofsToWalletProofs(proofs);
 }
@@ -29,8 +28,8 @@ function getMint(decoded_token: Token) {
   /*
       Returns first mint of a token (very rough way).
       */
-  if (decoded_token.token != null && decoded_token.token.length > 0) {
-    return decoded_token.token[0].mint;
+  if (decoded_token.proofs.length > 0) {
+    return decoded_token.mint;
   } else {
     return "";
   }

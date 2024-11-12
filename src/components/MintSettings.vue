@@ -550,8 +550,6 @@ export default defineComponent({
     return {
       discoveringMints: false,
       addingMint: false,
-      hideMnemonic: true,
-      confirmMnemonic: false,
       swapData: {
         from_url: "",
         to_url: "",
@@ -590,7 +588,6 @@ export default defineComponent({
       "addMintBlocking",
     ]),
     ...mapState(useNostrStore, ["pubkey", "mintRecommendations"]),
-    ...mapState(useWalletStore, ["mnemonic"]),
     ...mapState(useWorkersStore, ["invoiceWorkerRunning"]),
     ...mapWritableState(useMintsStore, [
       "addMintData",
@@ -599,16 +596,6 @@ export default defineComponent({
       "showMintInfoDialog",
       "showMintInfoData",
     ]),
-    hiddenMnemonic() {
-      if (this.hideMnemonic) {
-        return this.mnemonic
-          .split(" ")
-          .map((w) => "*".repeat(w.length))
-          .join(" ");
-      } else {
-        return this.mnemonic;
-      }
-    },
   },
   watch: {
     // if swapBlocking is true and invoiceWorkerRunning changes to false, then swapBlocking should be set to false
@@ -634,7 +621,6 @@ export default defineComponent({
       "updateMint",
     ]),
     ...mapActions(useWalletStore, [
-      "newMnemonic",
       "decodeRequest",
       "checkProofsSpendable",
       "requestMint",
@@ -682,12 +668,6 @@ export default defineComponent({
       } finally {
         this.addingMint = false;
       }
-    },
-    generateNewMnemonic() {
-      this.newMnemonic();
-    },
-    toggleMnemonicVisibility: function () {
-      this.hideMnemonic = !this.hideMnemonic;
     },
     mintClass(mint) {
       return new MintClass(mint);

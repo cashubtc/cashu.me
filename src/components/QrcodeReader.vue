@@ -112,9 +112,10 @@ export default {
       <q-btn
         unelevated
         v-if="canPasteFromClipboard"
-        icon="content_paste"
         @click="pasteToParseDialog"
-        ><q-tooltip>Paste</q-tooltip></q-btn
+      >
+        <q-icon name="content_paste" class="q-mr-sm" />
+        Paste</q-btn
       >
       <q-btn @click="closeCamera" flat color="grey" class="q-ml-auto"
         >Close</q-btn

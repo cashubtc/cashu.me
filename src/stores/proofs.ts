@@ -46,7 +46,8 @@ export const useProofsStore = defineStore("proofs", {
       // unit of keysets
       let unit = keysets[0].unit;
       const token = {
-        token: [{ proofs: proofs, mint: mints[0].url }],
+        mint: mints[0].url,
+        proofs: proofs,
         unit: unit,
       } as Token;
       try {

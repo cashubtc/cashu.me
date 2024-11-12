@@ -266,6 +266,12 @@
                 :showP2PKCheck="false"
               />
             </div>
+            <div
+              v-if="sendData.paymentRequest"
+              class="row justify-center q-pt-sm"
+            >
+              <SendPaymentRequest />
+            </div>
             <div class="row q-mt-lg">
               <q-btn
                 class="q-mx-xs"
@@ -275,12 +281,21 @@
                 >Copy</q-btn
               >
               <q-btn
+                unelevated
+                dense
+                class="q-mx-sm"
+                v-if="hasCamera && !sendData.paymentRequest"
+                @click="showCamera"
+              >
+                <q-icon name="qr_code_scanner" class="q-pr-sm" />
+              </q-btn>
+              <q-btn
                 class="q-mx-none"
                 color="grey"
                 size="md"
                 icon="link"
                 flat
-                @click="copyText(baseURL + '?token=' + sendData.tokensBase64)"
+                @click="copyText(baseURL + '#token=' + sendData.tokensBase64)"
                 ><q-tooltip>Copy link</q-tooltip></q-btn
               >
               <q-btn
@@ -364,6 +379,7 @@ import {
 import { mapActions, mapState, mapWritableState } from "pinia";
 import ChooseMint from "components/ChooseMint.vue";
 import { UR, UREncoder } from "@gandlaf21/bc-ur";
+import SendPaymentRequest from "./SendPaymentRequest.vue";
 
 export default defineComponent({
   name: "SendTokenDialog",
@@ -371,6 +387,7 @@ export default defineComponent({
   components: {
     ChooseMint,
     TokenInformation,
+    SendPaymentRequest,
   },
   props: {},
   data: function () {
@@ -403,8 +420,8 @@ export default defineComponent({
     ...mapWritableState(useSendTokensStore, [
       "showSendTokens",
       "showLockInput",
+      "sendData",
     ]),
-    ...mapWritableState(useSendTokensStore, ["sendData"]),
     ...mapWritableState(useCameraStore, ["camera", "hasCamera"]),
     ...mapState(useUiStore, [
       "tickerShort",
@@ -485,7 +502,7 @@ export default defineComponent({
       }
       // check if token has more than one proof
       const tokenObj = token.decode(val);
-      const proofs = tokenObj.token[0].proofs;
+      const proofs = tokenObj.proofs;
       if (!proofs.length) {
         // no proofs
         return;
@@ -693,6 +710,7 @@ export default defineComponent({
           serializedProofs: this.sendData.tokensBase64,
           unit: this.activeUnit,
           mint: this.activeMintUrl,
+          paymentRequest: this.sendData.paymentRequest,
         });
 
         if (!this.g.offline) {

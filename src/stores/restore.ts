@@ -3,7 +3,7 @@ import { useLocalStorage } from "@vueuse/core";
 import { generateSecretKey, getPublicKey } from 'nostr-tools'
 import { bytesToHex } from '@noble/hashes/utils' // already an installed dependency
 import { useWalletStore } from "./wallet";
-import { CashuMint, CashuWallet, Proof } from "@cashu/cashu-ts";
+import { CashuMint, CashuWallet, CheckStateEnum, Proof } from "@cashu/cashu-ts";
 import { useMintsStore } from "./mints";
 import { notify, notifyError, notifySuccess } from "src/js/notify";
 import { useUiStore } from "./ui";
@@ -47,6 +47,7 @@ export const useRestoreStore = defineStore("restore", {
         return;
       }
       this.restoreProgress = 0;
+      const walletStore = useWalletStore();
       const mintStore = useMintsStore();
       await mintStore.activateMintUrl(url);
 
@@ -62,7 +63,8 @@ export const useRestoreStore = defineStore("restore", {
 
       for (const keyset of keysets) {
         console.log(`Restoring keyset ${keyset.id} with unit ${keyset.unit}`);
-        const wallet = new CashuWallet(mint, { mnemonicOrSeed: mnemonic, unit: keyset.unit });
+        const bip39Seed = walletStore.mnemonicToSeedSync(mnemonic);
+        const wallet = new CashuWallet(mint, { bip39seed: bip39Seed, unit: keyset.unit });
         let start = 0;
         let emptyBatchCount = 0;
         let restoreProofs: Proof[] = [];
@@ -92,7 +94,8 @@ export const useRestoreStore = defineStore("restore", {
         for (let i = 0; i < restoreProofs.length; i += BATCH_SIZE) {
           this.restoreStatus = `Checking proofs ${i} to ${i + BATCH_SIZE} for keyset ${keyset.id}`;
           const checkRestoreProofs = restoreProofs.slice(i, i + BATCH_SIZE);
-          const spentProofs = await wallet.checkProofsSpent(checkRestoreProofs);
+          const proofStates = await wallet.checkProofsStates(checkRestoreProofs);
+          const spentProofs = checkRestoreProofs.filter((p, i) => proofStates[i].state === CheckStateEnum.SPENT);
           const spentProofsSecrets = spentProofs.map((p) => p.secret);
           const unspentProofs = checkRestoreProofs.filter((p) => !spentProofsSecrets.includes(p.secret));
           if (unspentProofs.length > 0) {

@@ -21,6 +21,7 @@ type NPCInfo = {
   mintUrl: string,
   npub: string,
   username: string
+  error?: string
 }
 
 type NPCBalance = {
@@ -98,7 +99,7 @@ export const useNPCStore = defineStore("npc", {
           }
           this.npcAddress = usernameAddress
         }
-      } catch (e) {
+      } catch (e: any) {
         notifyApiError(e)
       } finally {
         this.npcLoading = false;
@@ -106,7 +107,7 @@ export const useNPCStore = defineStore("npc", {
 
 
     },
-    generateNip98Event: async function (url: string, method: string, body: string): Promise<string> {
+    generateNip98Event: async function (url: string, method: string, body?: string): Promise<string> {
       const nostrStore = useNostrStore()
       await nostrStore.initSignerIfNotSet()
       const nip98Event = new NDKEvent(new NDK());
@@ -122,8 +123,7 @@ export const useNPCStore = defineStore("npc", {
     getInfo: async function (): Promise<NPCInfo> {
       const authHeader = await this.generateNip98Event(
         `${this.baseURL}/api/v1/info`,
-        "GET",
-        ""
+        "GET"
       );
       try {
         const response = await fetch(`${this.baseURL}/api/v1/info`, {
@@ -179,9 +179,10 @@ export const useNPCStore = defineStore("npc", {
       );
     },
     addPendingTokenToHistory: function (tokenStr: string) {
+      const receiveStore = useReceiveTokensStore();
       if (this.tokenAlreadyInHistory(tokenStr)) {
         notifySuccess("Ecash already in history")
-        this.showReceiveTokens = false;
+        receiveStore.showReceiveTokens = false;
         return;
       }
       const tokensStore = useTokensStore();
@@ -203,7 +204,7 @@ export const useNPCStore = defineStore("npc", {
         mint: mintUrl,
         unit: unit
       });
-      this.showReceiveTokens = false;
+      receiveStore.showReceiveTokens = false;
     },
 
     getBalance: async function (): Promise<number> {

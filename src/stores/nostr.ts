@@ -1,16 +1,29 @@
 import { defineStore } from "pinia";
-import NDK, { NDKEvent, NDKSigner, NDKNip07Signer, NDKNip46Signer, NDKFilter, NDKPrivateKeySigner, NostrEvent } from "@nostr-dev-kit/ndk";
-import { nip19 } from 'nostr-tools'
+import NDK, { NDKEvent, NDKSigner, NDKNip07Signer, NDKNip46Signer, NDKFilter, NDKPrivateKeySigner, NostrEvent, NDKKind, NDKRelaySet, NDKRelay, NDKTag, ProfilePointer } from "@nostr-dev-kit/ndk";
+import { nip04, nip19, nip44 } from 'nostr-tools'
 import { bytesToHex, hexToBytes } from '@noble/hashes/utils' // already an installed dependency
 import { useWalletStore } from "./wallet";
 import { generateSecretKey, getPublicKey } from 'nostr-tools'
 import { useLocalStorage } from "@vueuse/core";
 import { useSettingsStore } from "./settings";
+import { useReceiveTokensStore } from "./receiveTokensStore";
+import { getEncodedTokenV4, PaymentRequestPayload, Token } from "@cashu/cashu-ts";
+import { useTokensStore } from "./tokens";
+import { notifyApiError, notifyError, notifySuccess, notifyWarning, notify } from "../js/notify";
+import { useSendTokensStore } from "./sendTokensStore";
+import { usePRStore } from "./payment-request";
+import token from "../js/token";
+import { HistoryToken } from "./tokens";
 
 type MintRecommendation = {
   url: string;
   count: number;
 };
+
+type NostrEventLog = {
+  id: string,
+  created_at: number,
+}
 
 export enum SignerType {
   NIP07 = "NIP07",
@@ -24,7 +37,7 @@ export const useNostrStore = defineStore("nostr", {
     connected: false,
     pubkey: useLocalStorage<string>("cashu.ndk.pubkey", ""),
     relays: useSettingsStore().defaultNostrRelays,
-    ndk: new NDK(),
+    ndk: {} as NDK,
     signerType: useLocalStorage<SignerType>("cashu.ndk.signerType", SignerType.SEED),
     nip07signer: {} as NDKNip07Signer,
     nip46Token: useLocalStorage<string>("cashu.ndk.nip46Token", ""),
@@ -36,12 +49,21 @@ export const useNostrStore = defineStore("nostr", {
     signer: {} as NDKSigner,
     mintRecommendations: useLocalStorage<MintRecommendation[]>("cashu.ndk.mintRecommendations", []),
     initialized: false,
+    lastEventTimestamp: useLocalStorage<number>("cashu.ndk.lastEventTimestamp", 0),
+    nip17EventIdsWeHaveSeen: useLocalStorage<NostrEventLog[]>("cashu.ndk.nip17EventIdsWeHaveSeen", []),
   }),
   getters: {
     seedSignerPrivateKeyNsec: (state) => {
       const sk = hexToBytes(state.seedSignerPrivateKey);
       return nip19.nsecEncode(sk);
-    }
+    },
+    nprofile: (state) => {
+      const profile: ProfilePointer = {
+        pubkey: state.pubkey,
+        relays: state.relays,
+      };
+      return nip19.nprofileEncode(profile);
+    },
   },
   actions: {
     initNdkReadOnly: function () {
@@ -69,8 +91,6 @@ export const useNostrStore = defineStore("nostr", {
     setSigner: async function (signer: NDKSigner) {
       this.signer = signer
       this.ndk = new NDK({ signer: signer, explicitRelayUrls: this.relays })
-      // const ndkEvent = await this.signDummyEvent()
-      // ndkEvent.publish()
     },
     signDummyEvent: async function (): Promise<NDKEvent> {
       const ndkEvent = new NDKEvent();
@@ -179,7 +199,7 @@ export const useNostrStore = defineStore("nostr", {
       return await this.ndk.fetchEvents(filter);
     },
     fetchMints: async function () {
-      const filter: NDKFilter = { kinds: [38000], limit: 2000 };
+      const filter: NDKFilter = { kinds: [38000 as NDKKind], limit: 2000 };
       const events = await this.ndk.fetchEvents(filter);
       let mintUrls: string[] = [];
       events.forEach((event) => {
@@ -200,6 +220,236 @@ export const useNostrStore = defineStore("nostr", {
       mintUrlsCounted.sort((a, b) => b.count - a.count);
       this.mintRecommendations = mintUrlsCounted;
       return mintUrlsCounted;
+    },
+    sendNip04DirectMessage: async function (recipient: string, message: string) {
+      // const randomPrivateKey = generateSecretKey();
+      // const randomPublicKey = getPublicKey(randomPrivateKey);
+      const randomPrivateKey = hexToBytes(this.seedSignerPrivateKey);
+      const randomPublicKey = this.pubkey;
+      const ndk = new NDK({ explicitRelayUrls: this.relays, signer: new NDKPrivateKeySigner(bytesToHex(randomPrivateKey)) });
+      const event = new NDKEvent(ndk);
+      ndk.connect();
+      event.kind = NDKKind.EncryptedDirectMessage;
+      event.content = await nip04.encrypt(randomPrivateKey, recipient, message);
+      event.tags = [['p', recipient]];
+      event.sign()
+      try {
+        await event.publish();
+        notifySuccess("NIP-04 event published");
+      } catch (e) {
+        console.error(e);
+        notifyError("Could not publish NIP-04 event");
+      }
+    },
+    subscribeToNip04DirectMessages: async function () {
+      let nip04DirectMessageEvents: Set<NDKEvent> = new Set();
+      const fetchEventsPromise = new Promise<Set<NDKEvent>>(resolve => {
+        if (!this.lastEventTimestamp) {
+          this.lastEventTimestamp = Math.floor(Date.now() / 1000);
+        }
+        console.log(`### Subscribing to NIP-04 direct messages to ${this.pubkey} since ${this.lastEventTimestamp}`);
+        this.ndk.connect();
+        const sub = this.ndk.subscribe(
+          {
+            kinds: [NDKKind.EncryptedDirectMessage],
+            "#p": [this.pubkey],
+            since: this.lastEventTimestamp,
+          } as NDKFilter,
+          { closeOnEose: false, groupable: false },
+        );
+        sub.on('event', (event: NDKEvent) => {
+          console.log('event')
+          nip04.decrypt(hexToBytes(this.seedSignerPrivateKey), event.pubkey, event.content).then((content) => {
+            console.log('NIP-04 DM from', event.pubkey);
+            console.log("Content:", content);
+            nip04DirectMessageEvents.add(event)
+            this.lastEventTimestamp = Math.floor(Date.now() / 1000);
+            this.parseMessageForEcash(content);
+          });
+        });
+      });
+      try {
+        nip04DirectMessageEvents = await fetchEventsPromise;
+      } catch (error) {
+        console.error('Error fetching contact events:', error);
+      }
+    },
+    sendNip17DirectMessageToNprofile: async function (nprofile: string, message: string) {
+      const result = nip19.decode(nprofile);
+      const pubkey: string = (result.data as ProfilePointer).pubkey;
+      const relays: string[] | undefined = (result.data as ProfilePointer).relays;
+      this.sendNip17DirectMessage(pubkey, message, relays)
+    },
+    randomTimeUpTo2DaysInThePast: function () {
+      return Math.floor(Date.now() / 1000) - Math.floor(Math.random() * 172800);
+    },
+    sendNip17DirectMessage: async function (recipient: string, message: string, relays?: string[]) {
+      const randomPrivateKey = generateSecretKey();
+      const randomPublicKey = getPublicKey(randomPrivateKey);
+      const ndk = new NDK({ explicitRelayUrls: relays ?? this.relays, signer: new NDKPrivateKeySigner(bytesToHex(randomPrivateKey)) });
+
+      const dmEvent = new NDKEvent();
+      dmEvent.kind = 14;
+      dmEvent.content = message;
+      dmEvent.tags = [['p', recipient]];
+      dmEvent.created_at = Math.floor(Date.now() / 1000);
+      dmEvent.pubkey = this.pubkey;
+      dmEvent.id = dmEvent.getEventHash();
+      const dmEventString = JSON.stringify(await dmEvent.toNostrEvent());
+
+      const sealEvent = new NDKEvent(this.ndk as NDK);
+      sealEvent.kind = 13;
+      sealEvent.content = nip44.v2.encrypt(dmEventString, nip44.v2.utils.getConversationKey(this.seedSignerPrivateKey, recipient));
+      sealEvent.created_at = this.randomTimeUpTo2DaysInThePast();
+      sealEvent.pubkey = this.pubkey;
+      sealEvent.id = sealEvent.getEventHash();
+      sealEvent.sig = await sealEvent.sign();
+      const sealEventString = JSON.stringify(await sealEvent.toNostrEvent());
+
+      const wrapEvent = new NDKEvent(ndk);
+      wrapEvent.kind = 1059;
+      wrapEvent.tags = [['p', recipient]];
+      wrapEvent.content = nip44.v2.encrypt(sealEventString, nip44.v2.utils.getConversationKey(bytesToHex(randomPrivateKey), recipient));
+      wrapEvent.created_at = this.randomTimeUpTo2DaysInThePast();
+      wrapEvent.pubkey = randomPublicKey;
+      wrapEvent.id = wrapEvent.getEventHash();
+      wrapEvent.sig = await wrapEvent.sign();
+
+      try {
+        ndk.connect();
+        await wrapEvent.publish();
+        notifySuccess("NIP-17 event published");
+      } catch (e) {
+        console.error(e);
+        notifyError("Could not publish NIP-17 event");
+      }
+    },
+    subscribeToNip17DirectMessages: async function () {
+      let nip17DirectMessageEvents: Set<NDKEvent> = new Set();
+      const fetchEventsPromise = new Promise<Set<NDKEvent>>(resolve => {
+        if (!this.lastEventTimestamp) {
+          this.lastEventTimestamp = Math.floor(Date.now() / 1000);
+        }
+        const since = this.lastEventTimestamp - 172800; // last 2 days
+        console.log(`### Subscribing to NIP-17 direct messages to ${this.pubkey} since ${since}`);
+        this.ndk.connect();
+        const sub = this.ndk.subscribe(
+          {
+            kinds: [1059 as NDKKind],
+            "#p": [this.pubkey],
+            since: since,
+          } as NDKFilter,
+          { closeOnEose: false, groupable: false },
+        );
+
+        sub.on('event', (wrapEvent: NDKEvent) => {
+          const eventLog = { id: wrapEvent.id, created_at: wrapEvent.created_at } as NostrEventLog;
+          if (this.nip17EventIdsWeHaveSeen.find((e) => e.id === wrapEvent.id)) {
+            console.log(`### Already seen NIP-17 event ${wrapEvent.id}`);
+            return;
+          } else {
+            console.log(`### New event ${wrapEvent.id}`);
+            this.nip17EventIdsWeHaveSeen.push(eventLog);
+            // remove all events older than 4 days to keep the list small
+            this.nip17EventIdsWeHaveSeen = this.nip17EventIdsWeHaveSeen.filter((e) => e.created_at > Math.floor(Date.now() / 1000) - 345600);
+          }
+          const wappedContent = nip44.v2.decrypt(wrapEvent.content, nip44.v2.utils.getConversationKey(this.seedSignerPrivateKey, wrapEvent.pubkey))
+          const sealEvent = JSON.parse(wappedContent) as NostrEvent;
+          const dmEventString = nip44.v2.decrypt(sealEvent.content, nip44.v2.utils.getConversationKey(this.seedSignerPrivateKey, sealEvent.pubkey));
+          const dmEvent = JSON.parse(dmEventString) as NDKEvent;
+          const content = dmEvent.content;
+          nip17DirectMessageEvents.add(dmEvent)
+          this.lastEventTimestamp = Math.floor(Date.now() / 1000);
+          this.parseMessageForEcash(content);
+        });
+      });
+      try {
+        nip17DirectMessageEvents = await fetchEventsPromise;
+      } catch (error) {
+        console.error('Error fetching contact events:', error);
+      }
+    },
+    parseMessageForEcash: async function (message: string) {
+      // first check if the message can be converted to a json and then to a PaymentRequestPayload
+      try {
+        const payload = JSON.parse(message) as PaymentRequestPayload;
+        if (payload) {
+          const receiveStore = useReceiveTokensStore();
+          const proofs = payload.proofs;
+          const mint = payload.mint;
+          const unit = payload.unit;
+          const token = {
+            proofs: proofs,
+            mint: mint,
+            unit: unit,
+          } as Token;
+
+          const tokenStr = getEncodedTokenV4(token);
+
+          const tokenInHistory = this.tokenAlreadyInHistory(tokenStr);
+          if (tokenInHistory && tokenInHistory.amount > 0) {
+            console.log("### incoming token already in history");
+            return;
+          }
+          await this.addPendingTokenToHistory(tokenStr);
+
+          receiveStore.receiveData.tokensBase64 = tokenStr;
+          const sendTokensStore = useSendTokensStore();
+          sendTokensStore.showSendTokens = false;
+          const prStore = usePRStore();
+          prStore.showPRDialog = false;
+
+          receiveStore.showReceiveTokens = true;
+          return
+        }
+      } catch (e) {
+        // console.log("### parsing message for ecash failed");
+        return
+      }
+
+      console.log("### parsing message for ecash", message);
+      const receiveStore = useReceiveTokensStore();
+      const words = message.split(" ");
+      const tokens = words.filter((word) => {
+        return word.startsWith("cashuA") || word.startsWith("cashuB");
+      });
+      for (const tokenStr of tokens) {
+        receiveStore.receiveData.tokensBase64 = tokenStr;
+        receiveStore.showReceiveTokens = true;
+        await this.addPendingTokenToHistory(tokenStr);
+      }
+    },
+    tokenAlreadyInHistory: function (tokenStr: string): HistoryToken | undefined {
+      const tokensStore = useTokensStore();
+      return tokensStore.historyTokens.find((t) => t.token === tokenStr);
+    },
+    addPendingTokenToHistory: function (tokenStr: string) {
+      const receiveStore = useReceiveTokensStore();
+      if (this.tokenAlreadyInHistory(tokenStr)) {
+        notifySuccess("Ecash already in history");
+        receiveStore.showReceiveTokens = false;
+        return;
+      }
+      const tokensStore = useTokensStore();
+      const decodedToken = token.decode(tokenStr);
+      if (decodedToken == undefined) {
+        throw Error('could not decode token')
+      }
+      // get amount from decodedToken.token.proofs[..].amount
+      const amount = token.getProofs(decodedToken).reduce(
+        (sum, el) => (sum += el.amount),
+        0
+      );
+
+      tokensStore.addPendingToken({
+        amount: amount,
+        serializedProofs: tokenStr,
+        mint: token.getMint(decodedToken),
+        unit: token.getUnit(decodedToken),
+      });
+      receiveStore.showReceiveTokens = false;
+      // show success notification
+      notifySuccess("Ecash added to history.");
     },
   },
 });

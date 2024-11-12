@@ -8,18 +8,25 @@ import { useReceiveTokensStore } from "./receiveTokensStore";
 import { useUiStore } from "src/stores/ui";
 import { useP2PKStore } from "src/stores/p2pk"
 import { useSendTokensStore } from "src/stores/sendTokensStore"
+import { usePRStore } from "./payment-request";
 
 import * as _ from "underscore";
 import token from "src/js/token";
 import { notifyApiError, notifyError, notifySuccess, notifyWarning, notify } from "src/js/notify";
-import { CashuMint, CashuWallet, Proof, MintQuotePayload, CheckStatePayload, MeltQuotePayload, MeltQuoteResponse, generateNewMnemonic, deriveSeedFromMnemonic, AmountPreference, CheckStateEnum, getDecodedToken, Token, MeltQuoteState, MintQuoteState } from "@cashu/cashu-ts";
+import { CashuMint, CashuWallet, Proof, MintQuotePayload, MeltQuotePayload, MeltQuoteResponse, CheckStateEnum, MeltQuoteState, MintQuoteState, PaymentRequest, PaymentRequestTransportType, PaymentRequestTransport, decodePaymentRequest } from "@cashu/cashu-ts";
 import { hashToCurve } from '@cashu/crypto/modules/common';
 import * as bolt11Decoder from "light-bolt11-decoder";
 import { bech32 } from "bech32";
 import axios from "axios";
 import { date } from "quasar";
-import { getKeepAmounts, splitAmount } from "@cashu/cashu-ts/dist/lib/es5/utils";
-import { KeepAlive } from "vue";
+import { useNostrStore } from "./nostr";
+import { v4 as uuidv4 } from 'uuid';
+
+// bip39 requires Buffer
+// import { Buffer } from 'buffer';
+// window.Buffer = Buffer;
+import { generateMnemonic, mnemonicToSeedSync } from "@scure/bip39";
+import { wordlist } from '@scure/bip39/wordlists/english';
 
 // HACK: this is a workaround so that the catch block in the melt function does not throw an error when the user exits the app
 // before the payment is completed. This is necessary because the catch block in the melt function would otherwise remove all
@@ -109,24 +116,28 @@ export const useWalletStore = defineStore("wallet", {
       const mints = useMintsStore();
       const mint = new CashuMint(mints.activeMintUrl);
       if (this.mnemonic == "") {
-        this.mnemonic = generateNewMnemonic();
+        this.mnemonic = generateMnemonic(wordlist);
       }
       const mnemonic: string = this.mnemonic;
-      const wallet = new CashuWallet(mint, { keys: mints.activeKeys, keysets: mints.activeKeysets, mintInfo: mints.activeInfo, mnemonicOrSeed: mnemonic, unit: mints.activeUnit });
+      const bip39Seed = mnemonicToSeedSync(mnemonic);
+      const wallet = new CashuWallet(mint, { keys: mints.activeKeys, keysets: mints.activeKeysets, mintInfo: mints.activeInfo, bip39seed: bip39Seed, unit: mints.activeUnit });
       return wallet;
     },
     seed(): Uint8Array {
-      return deriveSeedFromMnemonic(this.mnemonic);
+      return mnemonicToSeedSync(this.mnemonic);
     }
   },
   actions: {
+    mnemonicToSeedSync: function (mnemonic: string): Uint8Array {
+      return mnemonicToSeedSync(mnemonic);
+    },
     newMnemonic: function () {
       // store old mnemonic and keysetCounters
       const oldMnemonicCounters = this.oldMnemonicCounters;
       const keysetCounters = this.keysetCounters;
       oldMnemonicCounters.push({ mnemonic: this.mnemonic, keysetCounters });
       this.keysetCounters = [];
-      this.mnemonic = generateNewMnemonic();
+      this.mnemonic = generateMnemonic(wordlist);
     },
     keysetCounter: function (id: string) {
       const keysetCounter = this.keysetCounters.find((c) => c.id === id);
@@ -340,7 +351,7 @@ export const useWalletStore = defineStore("wallet", {
       // activate the mint and the unit
       await mintStore.activateMintUrl(token.getMint(tokenJson), false, false, tokenJson.unit);
 
-      const amount = proofs.reduce((s, t) => (s += t.amount), 0);
+      const inputAmount = proofs.reduce((s, t) => (s += t.amount), 0);
       await uIStore.lockMutex();
       try {
         // redeem
@@ -364,27 +375,29 @@ export const useWalletStore = defineStore("wallet", {
         mintStore.removeProofs(proofs);
         mintStore.addProofs(proofs);
 
-        const receivedAdmount = proofs.reduce((s, t) => (s += t.amount), 0);
+        const outputAmount = proofs.reduce((s, t) => (s += t.amount), 0);
 
         // if token is already in history, set to paid, else add to history
-        if (tokenStore.historyTokens.find((t) => t.token === receiveStore.receiveData.tokensBase64 && t.amount == receivedAdmount)) {
+        if (tokenStore.historyTokens.find((t) => t.token === receiveStore.receiveData.tokensBase64 && t.amount > 0)) {
           tokenStore.setTokenPaid(receiveStore.receiveData.tokensBase64);
         } else {
           // if this is a self-sent token, we will find an outgoing token with the inverse amount
-          if (tokenStore.historyTokens.find((t) => t.token === receiveStore.receiveData.tokensBase64 && t.amount == -receivedAdmount)) {
+          if (tokenStore.historyTokens.find((t) => t.token === receiveStore.receiveData.tokensBase64 && t.amount < 0)) {
             tokenStore.setTokenPaid(receiveStore.receiveData.tokensBase64);
           }
+          const fee = inputAmount - outputAmount;
           tokenStore.addPaidToken({
-            amount: receivedAdmount,
+            amount: outputAmount,
             serializedProofs: receiveStore.receiveData.tokensBase64,
             unit: mintStore.activeUnit,
             mint: mintStore.activeMintUrl,
+            fee: fee
           });
         }
 
 
         if (!!window.navigator.vibrate) navigator.vibrate(200);
-        notifySuccess("Received " + uIStore.formatCurrency(receivedAdmount, mintStore.activeUnit));
+        notifySuccess("Received " + uIStore.formatCurrency(outputAmount, mintStore.activeUnit));
       } catch (error: any) {
         console.error(error);
         notifyApiError(error);
@@ -680,12 +693,10 @@ export const useWalletStore = defineStore("wallet", {
         return;
       }
       const enc = new TextEncoder();
-      const payload: CheckStatePayload = {
-        // Ys is hashToCurve of the secret of proofs
-        Ys: proofs.map((p) => hashToCurve(enc.encode(p.secret)).toHex(true)),
-      };
       try {
-        const spentProofs = await this.wallet.checkProofsSpent(proofs);
+        const proofStates = await this.wallet.checkProofsStates(proofs);
+        const spentProofsStates = proofStates.filter((p) => p.state == CheckStateEnum.SPENT)
+        const spentProofs = proofs.filter((p) => spentProofsStates.find((s) => s.Y == hashToCurve(enc.encode(p.secret)).toHex(true)))
         if (spentProofs.length) {
           mintStore.removeProofs(spentProofs);
 
@@ -991,6 +1002,10 @@ export const useWalletStore = defineStore("wallet", {
       sendTokenStore.showSendTokens = true
       sendTokenStore.showLockInput = true
     },
+    handlePaymentRequest: function (req: string) {
+      const prStore = usePRStore()
+      prStore.decodePaymentRequest(req)
+    },
     decodeRequest: async function (req: string) {
       const p2pkStore = useP2PKStore()
       this.payInvoiceData.input.request = req
@@ -1028,6 +1043,8 @@ export const useWalletStore = defineStore("wallet", {
       ) {
         const mintStore = useMintsStore();
         mintStore.addMintData = { url: req, nickname: "" }
+      } else if (req.startsWith("creqA")) {
+        await this.handlePaymentRequest(req)
       }
     },
     fetchBitcoinPriceUSD: async function () {
@@ -1119,9 +1136,9 @@ export const useWalletStore = defineStore("wallet", {
         await this.decodeRequest(data.pr);
       }
     },
-    generateNewMnemonic: function () {
+    initializeMnemonic: function () {
       if (this.mnemonic == "") {
-        this.mnemonic = generateNewMnemonic();
+        this.mnemonic = generateMnemonic(wordlist);
       }
       return this.mnemonic
     },
@@ -1133,5 +1150,31 @@ export const useWalletStore = defineStore("wallet", {
       }
       return false;
     },
+    createPaymentRequest: function (amount?: number, memo?: string): string {
+      const nostrStore = useNostrStore();
+      const mintStore = useMintsStore();
+      const tags = [["n", "17"]];
+      const transport = [{
+        type: PaymentRequestTransportType.NOSTR,
+        target: nostrStore.nprofile,
+        tags: tags,
+      }] as PaymentRequestTransport[];
+      const uuid = uuidv4().split("-")[0];
+      const paymentRequest = new PaymentRequest(
+        transport,
+        uuid,
+        amount,
+        "sat",
+        mintStore.activeMintUrl ? [mintStore.activeMintUrl] : undefined,
+        memo,
+      );
+
+      // TMP
+      console.log("### paymentRequest", paymentRequest.toEncodedRequest());
+      const request: PaymentRequest = decodePaymentRequest(paymentRequest.toEncodedRequest())
+      console.log('### decoded paymentRequest', request);
+
+      return paymentRequest.toEncodedRequest();
+    }
   },
 });
