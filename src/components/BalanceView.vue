@@ -2,17 +2,21 @@
   <!-- <q-card class="q-my-md q-py-sm">
     <q-card-section class="q-mt-sm q-py-xs"> -->
   <div class="q-pt-xl q-pb-md">
-    <div class="row justify-center q-pb-lg" style="height:80px">
+    <div class="row justify-center q-pb-lg" style="height: 80px">
       <div v-if="globalMutexLock">
         <transition
           appear
           enter-active-class="animated fadeIn"
           leave-active-class="animated fadeOut"
         >
-        <q-spinner-hourglass  class="q-mt-lg q-mb-none" size="lg" color="primary" />
-      </transition>
+          <q-spinner-hourglass
+            class="q-mt-lg q-mb-none"
+            size="lg"
+            color="primary"
+          />
+        </transition>
       </div>
-      <div v-else >
+      <div v-else>
         <transition
           appear
           enter-active-class="animated fadeIn"
@@ -134,9 +138,11 @@ import { useSettingsStore } from "stores/settings";
 import { useTokensStore } from "stores/tokens";
 import { useUiStore } from "stores/ui";
 import { useWalletStore } from "stores/wallet";
+import { usePriceStore } from "stores/price";
 import ToggleUnit from "components/ToggleUnit.vue";
 
 import axios from "axios";
+import { map } from "underscore";
 
 export default defineComponent({
   name: "BalanceView",
@@ -158,8 +164,8 @@ export default defineComponent({
       "activeMint",
     ]),
     ...mapState(useTokensStore, ["historyTokens"]),
-    ...mapState(useSettingsStore, ["getBitcoinPrice"]),
     ...mapState(useUiStore, ["globalMutexLock"]),
+    ...mapState(usePriceStore, ["bitcoinPrice"]),
     ...mapWritableState(useMintsStore, ["activeUnit"]),
     ...mapWritableState(useUiStore, ["hideBalance"]),
     pendingBalance: function () {
@@ -205,30 +211,18 @@ export default defineComponent({
   },
   data() {
     return {
-      bitcoinPrice: null,
       priceLabel: null,
     };
   },
   mounted() {
-    const settingsStore = useSettingsStore();
-    if (this.getBitcoinPrice) {
-      this.fetchPrice();
-    }
+    this.fetchBitcoinPriceUSD();
   },
   methods: {
     ...mapActions(useWalletStore, [
       "checkPendingInvoices",
       "checkPendingTokens",
-      "fetchBitcoinPriceUSD",
     ]),
-    async fetchPrice() {
-      try {
-        this.bitcoinPrice = await this.fetchBitcoinPriceUSD();
-        console.log(`bitcoinPrice: ${this.bitcoinPrice}`);
-      } catch (e) {
-        console.warn(`Could not get Bitcoin price. ${e}`);
-      }
-    },
+    ...mapActions(usePriceStore, ["fetchBitcoinPriceUSD"]),
     toggleUnit: function () {
       const units = this.activeMint().units;
       this.activeUnit =

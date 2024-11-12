@@ -1209,9 +1209,6 @@ export default defineComponent({
       }
       this.notifySuccess("No reserved proofs left");
     },
-    toggleGetBitcoinPrice: function () {
-      this.getBitcoinPrice = !this.getBitcoinPrice;
-    },
     checkActiveProofsSpendable: async function () {
       // iterate over this.activeProofs in batches of 50 and check if they are spendable
       let proofs = this.activeProofs.flat();
