@@ -216,7 +216,9 @@
       </q-list>
     </div>
 
-    <div class="q-py-sm q-px-xs text-left" on-left>
+    <!-- payment requests -->
+    <!-- NOTE: temporarily disabled the button until fix -->
+    <div v-if="enablePaymentRequest" class="q-py-sm q-px-xs text-left" on-left>
       <q-item class="q-pt-lg">
         <q-item-section>
           <q-item-label overline class="text-weight-bold"
@@ -228,7 +230,6 @@
           >
         </q-item-section>
       </q-item>
-      <!-- use a q-toggle to turn nwc on and off -->
       <q-item>
         <q-toggle
           v-model="enablePaymentRequest"

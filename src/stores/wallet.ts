@@ -1008,6 +1008,7 @@ export const useWalletStore = defineStore("wallet", {
     },
     decodeRequest: async function (req: string) {
       const p2pkStore = useP2PKStore()
+      req = req.trim();
       this.payInvoiceData.input.request = req
       if (req.toLowerCase().startsWith("lnbc")) {
         this.payInvoiceData.input.request = req;
@@ -1015,6 +1016,12 @@ export const useWalletStore = defineStore("wallet", {
       } else if (req.toLowerCase().startsWith("lightning:")) {
         this.payInvoiceData.input.request = req.slice(10);
         await this.handleBolt11Invoice()
+      } else if (req.startsWith("bitcoin:")) {
+        const lightningInvoice = req.match(/lightning=([^&]+)/);
+        if (lightningInvoice) {
+          this.payInvoiceData.input.request = lightningInvoice[1];
+          await this.handleBolt11Invoice();
+        }
       } else if (req.toLowerCase().startsWith("lnurl:")) {
         this.payInvoiceData.input.request = req.slice(6);
         await this.lnurlPayFirst(this.payInvoiceData.input.request);
