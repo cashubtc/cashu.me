@@ -35,7 +35,8 @@
                   formatCurrency(
                     (bitcoinPrice / 100000000) *
                       payInvoiceData.meltQuote.response.amount,
-                    "USD"
+                    "USD",
+                    true
                   )
                 }})
               </span>
