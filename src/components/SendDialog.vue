@@ -18,7 +18,6 @@
         <div class="col-12">
           <q-btn
             outline
-            disabled
             color="primary"
             rounded
             class="q-py-md q-px-xl"
@@ -53,6 +52,7 @@ import { useUiStore } from "src/stores/ui";
 import { useWalletStore } from "src/stores/wallet";
 import { useCameraStore } from "src/stores/camera";
 import { useSendTokensStore } from "src/stores/sendTokensStore";
+import { notifyWarning } from "src/js/notify";
 
 export default defineComponent({
   name: "SendDialog",
@@ -97,6 +97,10 @@ export default defineComponent({
       this.showSendDialog = false;
     },
     showSendTokensDialog: function () {
+      notifyWarning(
+        "Sending ecash tokens is currently disabled due to a bug. We are working on a fix."
+      );
+      return;
       console.log("##### showSendTokensDialog");
       this.sendData.tokens = "";
       this.sendData.tokensBase64 = "";
