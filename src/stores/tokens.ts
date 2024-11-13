@@ -111,7 +111,7 @@ export const useTokensStore = defineStore("tokens", {
       return undefined;
     },
     setTokenPaid(token: string) {
-      const index = this.historyTokens.findIndex((t) => t.token === token);
+      const index = this.historyTokens.findIndex((t) => t.token === token && t.status == "pending");
       if (index >= 0) {
         this.historyTokens[index].status = "paid";
       }
