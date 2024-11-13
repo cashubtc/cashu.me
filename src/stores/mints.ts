@@ -4,6 +4,12 @@ import { useWorkersStore } from "./workers";
 import { notifyApiError, notifyError, notifySuccess } from "src/js/notify";
 import { CashuMint, MintKeys, MintAllKeysets, MintActiveKeys, Proof, SerializedBlindedSignature, MintKeyset, GetInfoResponse } from "@cashu/cashu-ts";
 import { useUiStore } from "./ui";
+import { useDexieStore } from "src/stores/dexie"
+import { liveQuery } from 'dexie';
+import { ref, computed, watch } from 'vue';
+
+const dexieStore = useDexieStore();
+
 export type Mint = {
   url: string;
   keys: MintKeys[];
@@ -25,11 +31,6 @@ export class MintClass {
     const mintStore = useMintsStore();
     return mintStore.proofs.filter((p) => this.mint.keysets.map((k) => k.id).includes(p.id));
   }
-  // get balance() {
-  //   const proofs = this.proofs;
-  //   return proofs.reduce((sum, p) => sum + p.amount, 0);
-  // }
-
   get allBalances() {
     // return an object with all balances for each unit
     const balances: Record<string, number> = {};
@@ -80,35 +81,78 @@ type BlindSignatureAudit = {
 
 export const useMintsStore = defineStore("mints", {
   state: () => {
-    return {
-      activeUnit: useLocalStorage<string>("cashu.activeUnit", "sat"),
-      activeMintUrl: useLocalStorage<string>("cashu.activeMintUrl", ""),
-      addMintData: {
-        url: "",
-        nickname: "",
+    const dexieStore = useDexieStore();
+
+    // State variables
+    const proofs = ref<WalletProof[]>([]);
+    const activeProofs = ref<WalletProof[]>([]);
+    const activeUnit = useLocalStorage<string>('cashu.activeUnit', 'sat');
+    const activeMintUrl = useLocalStorage<string>('cashu.activeMintUrl', '');
+    const addMintData = ref({
+      url: '',
+      nickname: '',
+    });
+    const mints = useLocalStorage('cashu.mints', [] as Mint[]);
+    const showAddMintDialog = ref(false);
+    const addMintBlocking = ref(false);
+    const showRemoveMintDialog = ref(false);
+    const showMintInfoDialog = ref(false);
+    const showMintInfoData = ref({} as Mint);
+
+    liveQuery(() => dexieStore.db.proofs.toArray()).subscribe({
+      next: (newProofs) => {
+        proofs.value = newProofs;
       },
-      mints: useLocalStorage("cashu.mints", [] as Mint[]),
-      proofs: useLocalStorage("cashu.proofs", [] as WalletProof[]),
-      spentProofs: useLocalStorage("cashu.spentProofs", [] as WalletProof[]),
-      blindSignatures: useLocalStorage("cashu.blindSignatures", [] as BlindSignatureAudit[]),
-      // balances: useLocalStorage("cashu.balances", {} as Balances),
-      showAddMintDialog: false,
-      addMintBlocking: false,
-      showRemoveMintDialog: false,
-      showMintInfoDialog: false,
-      showMintInfoData: {} as Mint,
+      error: (err) => {
+        console.error(err);
+      },
+    });
+
+    // Function to update activeProofs
+    const updateActiveProofs = () => {
+      const currentMint = mints.value.find((m) => m.url === activeMintUrl.value);
+      const unitKeysets = currentMint?.keysets?.filter((k) => k.unit === activeUnit.value);
+
+      if (!unitKeysets || unitKeysets.length === 0) {
+        activeProofs.value = [];
+        return;
+      }
+
+      const keysetIds = unitKeysets.map((k) => k.id);
+
+      // Fetch proofs from Dexie where 'id' is any of keysetIds
+      dexieStore.db.proofs
+        .where('id')
+        .anyOf(keysetIds)
+        .toArray()
+        .then((newActiveProofs) => {
+          activeProofs.value = newActiveProofs;
+        })
+        .catch((err) => {
+          console.error(err);
+        });
+    };
+
+    // Watch for changes in activeMintUrl and activeUnit
+    watch([activeMintUrl, activeUnit], () => {
+      updateActiveProofs();
+    });
+
+    return {
+      proofs,
+      activeProofs,
+      activeUnit,
+      activeMintUrl,
+      addMintData,
+      mints,
+      showAddMintDialog,
+      addMintBlocking,
+      showRemoveMintDialog,
+      showMintInfoDialog,
+      showMintInfoData,
     };
   },
   getters: {
-    activeProofs({ activeMintUrl, activeUnit }): WalletProof[] {
-      const unitKeysets = this.mints.find((m) => m.url === activeMintUrl)?.keysets?.filter((k) => k.unit === activeUnit);
-      if (!unitKeysets) {
-        return [];
-      }
-      return this.proofs.filter((p) =>
-        unitKeysets.map((k) => k.id).includes(p.id)
-      );
-    },
     activeBalance({ activeUnit }): number {
       const allUnitKeysets = this.mints.map((m) => m.keysets).flat().filter((k) => k.unit === activeUnit);
       const balance = this.proofs.filter((p) =>
@@ -190,27 +234,21 @@ export const useMintsStore = defineStore("mints", {
     },
     addProofs(proofs: Proof[]) {
       const walletProofs = this.proofsToWalletProofs(proofs);
-      this.proofs = this.proofs.concat(walletProofs);
+      const proofsTable = dexieStore.db.proofs;
+      walletProofs.forEach((p) => {
+        proofsTable.add(p);
+      }
+      );
     },
     removeProofs(proofs: Proof[]) {
       const walletProofs = this.proofsToWalletProofs(proofs);
-      // remove walletProofs with the same secret from this.proofs
-      this.proofs = this.proofs.filter((p) => {
-        return !walletProofs.some((wp) => {
-          return wp.secret === p.secret;
-        });
-      });
-      this.spentProofs = this.spentProofs.concat(walletProofs);
-    },
-    appendBlindSignatures(signature: SerializedBlindedSignature, amount: number, secret: Uint8Array, r: Uint8Array) {
-      const audit: BlindSignatureAudit = {
-        signature: signature,
-        amount: amount,
-        secret: secret,
-        id: signature.id,
-        r: Buffer.from(r).toString("hex"),
-      };
-      this.blindSignatures.push(audit);
+      const proofsTable = dexieStore.db.proofs;
+      const spentProofsTable = dexieStore.db.spentProofs;
+      walletProofs.forEach((p) => {
+        proofsTable.delete(p.secret);
+        spentProofsTable.add(p);
+      }
+      );
     },
     toggleActiveUnitForMint(mint: Mint) {
       // method to set the active unit to one that is supported by `mint`
@@ -392,11 +430,6 @@ export const useMintsStore = defineStore("mints", {
           }
         }
 
-        // const keys = await mintClass.api.getKeys();
-        // // store keys in mint and update local storage
-        // // TODO: Do not overwrite existing keysets, only add new ones
-        // this.mints.filter((m) => m.url === mint.url)[0].keys = keys.keysets;
-
         // return the mint with keys set
         return this.mints.filter((m) => m.url === mint.url)[0]
       } catch (error: any) {
@@ -451,12 +484,5 @@ export const useMintsStore = defineStore("mints", {
         throw new Error(`Mint error: ${response.error}`);
       }
     },
-    // getBalance: function () {
-    //   const mint = this.mints.find((m) => m.url === this.activeMintUrl);
-    //   if (mint) {
-    //     return mint.balance;
-    //   }
-    //   return null
-    // }
   }
 });

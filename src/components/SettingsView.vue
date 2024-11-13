@@ -1007,6 +1007,7 @@ import { useWorkersStore } from "src/stores/workers";
 import { useProofsStore } from "src/stores/proofs";
 import { usePRStore } from "../stores/payment-request";
 import { useRestoreStore } from "src/stores/restore";
+import { useDexieStore } from "../stores/dexie";
 
 export default defineComponent({
   name: "SettingsView",
@@ -1156,6 +1157,7 @@ export default defineComponent({
     ...mapActions(useProofsStore, ["serializeProofs"]),
     ...mapActions(useNPCStore, ["generateNPCConnection"]),
     ...mapActions(useRestoreStore, ["restoreMint"]),
+    ...mapActions(useDexieStore, ["deleteAllTables"]),
     generateNewMnemonic: async function () {
       this.newMnemonic();
       await this.initSigner();
@@ -1177,6 +1179,12 @@ export default defineComponent({
       };
     },
     getLocalstorageToFile: async function () {
+      const proofs = useMintsStore().proofs;
+      // put all proofs into localstorage
+      localStorage.setItem("cashu.proofs", JSON.stringify(proofs));
+      // set cashu.dexie.migrated to false so proofs will be restored from localstorage
+      localStorage.setItem("cashu.dexie.migrated", "false");
+
       // https://stackoverflow.com/questions/24263682/save-restore-local-storage-to-a-local-file
       const fileName = `cashu_backup_${currentDateStr()}.json`;
       var a = {};
@@ -1272,6 +1280,8 @@ export default defineComponent({
     nukeWallet: async function () {
       // create a backup just in case
       await this.getLocalstorageToFile();
+      // clear dexie tables
+      this.deleteAllTables();
       localStorage.clear();
       this.$router.push("/");
       this.$emit("close");

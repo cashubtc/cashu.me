@@ -214,6 +214,7 @@ import { useNWCStore } from "src/stores/nwc";
 import { useNPCStore } from "src/stores/npubcash";
 import { useNostrStore } from "src/stores/nostr";
 import { usePRStore } from "src/stores/payment-request";
+import { useDexieStore } from "src/stores/dexie";
 
 import ReceiveTokenDialog from "src/components/ReceiveTokenDialog.vue";
 
@@ -368,6 +369,7 @@ export default {
       "sendNip17DirectMessageToNprofile",
       "initSigner",
     ]),
+    ...mapActions(useDexieStore, ["migrateToDexie"]),
     // TOKEN METHODS
     decodeToken: function (encoded_token) {
       try {
@@ -629,6 +631,9 @@ export default {
     );
 
     // startup tasks
+
+    // migrate to dexie
+    this.migrateToDexie();
 
     // // Local storage sync hook
     // this.registerLocalStorageSyncHook();
