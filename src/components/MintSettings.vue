@@ -182,16 +182,6 @@
             >
           </q-item-section>
         </q-item>
-        <q-item v-if="false">
-          <q-btn
-            class="q-ml-sm q-px-md"
-            color="primary"
-            rounded
-            outline
-            @click="initNdk"
-            >Link to extension</q-btn
-          >
-        </q-item>
         <q-item>
           <q-btn
             class="q-ml-sm q-px-md"
@@ -713,72 +703,6 @@ export default defineComponent({
         console.error("Error swapping", e);
         notifyError("Error swapping");
       }
-    },
-    enable_terminal: function () {
-      // enable debug terminal
-      var script = document.createElement("script");
-      script.src = "//cdn.jsdelivr.net/npm/eruda";
-      document.body.appendChild(script);
-      script.onload = function () {
-        eruda.init();
-      };
-    },
-    getLocalstorageToFile: async function () {
-      // https://stackoverflow.com/questions/24263682/save-restore-local-storage-to-a-local-file
-      const fileName = `cashu_backup_${currentDateStr()}.json`;
-      var a = {};
-      for (var i = 0; i < localStorage.length; i++) {
-        var k = localStorage.key(i);
-        var v = localStorage.getItem(k);
-        a[k] = v;
-      }
-      var textToSave = JSON.stringify(a);
-      var textToSaveAsBlob = new Blob([textToSave], {
-        type: "text/plain",
-      });
-      var textToSaveAsURL = window.URL.createObjectURL(textToSaveAsBlob);
-
-      var downloadLink = document.createElement("a");
-      downloadLink.download = fileName;
-      downloadLink.innerHTML = "Download File";
-      downloadLink.href = textToSaveAsURL;
-      downloadLink.onclick = function () {
-        document.body.removeChild(event.target);
-      };
-      downloadLink.style.display = "none";
-      document.body.appendChild(downloadLink);
-      downloadLink.click();
-    },
-    toggleGetBitcoinPrice: function () {
-      this.getBitcoinPrice = !this.getBitcoinPrice;
-    },
-    checkActiveProofsSpendable: async function () {
-      // iterate over this.activeProofs in batches of 50 and check if they are spendable
-      let proofs = this.activeProofs.flat();
-      console.log("Checking proofs", proofs);
-      let allSpentProofs = [];
-      let batch_size = 50;
-      for (let i = 0; i < proofs.length; i += batch_size) {
-        console.log("Checking proofs", i, i + batch_size);
-        let batch = proofs.slice(i, i + batch_size);
-        let spent = await this.checkProofsSpendable(batch, true);
-        allSpentProofs.push(spent);
-      }
-      let spentProofs = allSpentProofs.flat();
-      if (spentProofs.length > 0) {
-        console.log("Spent proofs", spentProofs);
-        this.notifySuccess("Removed " + spentProofs.length + " spent proofs");
-      } else {
-        this.notifySuccess("No spent proofs found");
-      }
-    },
-    initNdk: async function () {
-      await this.initNdkReadOnly();
-      console.log(await this.getUserPubkey());
-      // console.log("### fetch events");
-      // console.log(await this.fetchEventsFromUser());
-      // console.log("### fetch mints");
-      // console.log(await this.fetchMints());
     },
     fetchMintsFromNdk: async function () {
       this.discoveringMints = true;
