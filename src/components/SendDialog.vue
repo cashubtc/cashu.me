@@ -18,6 +18,7 @@
         <div class="col-12">
           <q-btn
             outline
+            disabled
             color="primary"
             rounded
             class="q-py-md q-px-xl"
