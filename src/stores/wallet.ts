@@ -1054,12 +1054,6 @@ export const useWalletStore = defineStore("wallet", {
         await this.handlePaymentRequest(req)
       }
     },
-    fetchBitcoinPriceUSD: async function () {
-      var { data } = await axios.get(
-        "https://api.coinbase.com/v2/exchange-rates?currency=BTC"
-      );
-      return data.data.rates.USD;
-    },
     lnurlPayFirst: async function (address: string) {
       var host;
       var data

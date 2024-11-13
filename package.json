@@ -35,6 +35,7 @@
     "bech32": "^2.0.0",
     "core-js": "^3.37.0",
     "date-fns": "^3.6.0",
+    "dexie": "^4.0.9",
     "light-bolt11-decoder": "^3.1.1",
     "nostr-tools": "^2.5.2",
     "pinia": "^2.1.7",
