@@ -1107,7 +1107,7 @@ export const useWalletStore = defineStore("wallet", {
         // parse cashu tokens from a pasted token
         receiveStore.receiveData.tokensBase64 = req;
         this.handleCashuToken();
-      } else if (req.indexOf("?token=cashu") !== -1) {
+      } else if (req.indexOf("token=cashu") !== -1) {
         // parse cashu tokens from a URL like https://example.com#token=cashu...
         const token = req.slice(req.indexOf("token=cashu") + 6);
         receiveStore.receiveData.tokensBase64 = token;
