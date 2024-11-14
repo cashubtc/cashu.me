@@ -16,9 +16,9 @@
             :active="mint.url == activeMintUrl"
             active-class="text-weight-bold text-primary"
             clickable
-            class="q-pb-xs"
+            class="q-pb-xs q-pl-xs"
           >
-            <q-item-section avatar>
+            <q-item-section avatar style="min-width: 36px; max-width: 39px">
               <q-icon
                 :color="mint.url == activeMintUrl ? 'primary' : 'grey'"
                 :name="
@@ -32,6 +32,13 @@
                 class="cursor-pointer"
               />
             </q-item-section>
+            <q-avatar
+              v-if="getMintIconUrl(mint)"
+              size="32px"
+              class="q-mr-sm q-mt-xs"
+            >
+              <img :src="getMintIconUrl(mint)" alt="Mint Icon" />
+            </q-avatar>
             <q-item-section>
               <q-item-label
                 lines="1"
@@ -60,7 +67,7 @@
                   :label="
                     formatCurrency(mintClass(mint).unitBalance(unit), unit)
                   "
-                  class="q-mx-xs q-mb-xs"
+                  class="q-mr-xs q-mb-xs"
                 />
               </q-item-label>
             </q-item-section>
@@ -81,7 +88,7 @@
             </q-item-section>
           </q-item>
 
-          <q-separator spaced inset="item" />
+          <q-separator spaced style="margin-left: 50px" />
         </div>
       </q-list>
     </div>
@@ -806,6 +813,17 @@ export default defineComponent({
     showMintInfo: async function (mint) {
       this.showMintInfoData = mint;
       this.showMintInfoDialog = true;
+    },
+    getMintIconUrl: function (mint) {
+      if (mint.info) {
+        if (mint.info.icon_url) {
+          return mint.info.icon_url;
+        } else {
+          return undefined;
+        }
+      } else {
+        return undefined;
+      }
     },
   },
   created: function () {},
