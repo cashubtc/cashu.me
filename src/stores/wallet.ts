@@ -1036,13 +1036,15 @@ export const useWalletStore = defineStore("wallet", {
       ) {
         this.payInvoiceData.input.request = req
         await this.lnurlPayFirst(this.payInvoiceData.input.request);
-      } else if (req.indexOf("cashuA") !== -1) {
-        // very dirty way of parsing cashu tokens from either a pasted token or a URL like https://host.com?token=eyJwcm
-        receiveStore.receiveData.tokensBase64 = req.slice(req.indexOf("cashuA"));
-        this.handleCashuToken()
-      } else if (req.indexOf("cashuB") !== -1) {
-        receiveStore.receiveData.tokensBase64 = req.slice(req.indexOf("cashuB"));
-        this.handleCashuToken()
+      } else if (req.startsWith("cashuA") || req.startsWith("cashuB")) {
+        // parse cashu tokens from a pasted token
+        receiveStore.receiveData.tokensBase64 = req;
+        this.handleCashuToken();
+      } else if (req.indexOf("token=cashu") !== -1) {
+        // parse cashu tokens from a URL like https://example.com#token=cashu...
+        const token = req.slice(req.indexOf("token=cashu") + 6);
+        receiveStore.receiveData.tokensBase64 = token;
+        this.handleCashuToken();
       } else if (p2pkStore.isValidPubkey(req)) {
         this.handleP2PK(req)
       } else if (
