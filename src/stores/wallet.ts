@@ -477,7 +477,7 @@ export const useWalletStore = defineStore("wallet", {
           throw new Error("invoice not paid yet.");
         }
         const counter = this.keysetCounter(keysetId)
-        const { proofs } = await this.wallet.mintProofs(amount, hash, { keysetId, counter, proofsWeHave: mintStore.activeProofs })
+        const proofs = await this.wallet.mintProofs(amount, hash, { keysetId, counter, proofsWeHave: mintStore.activeProofs })
         this.increaseKeysetCounter(keysetId, proofs.length);
 
         // const proofs = await this.mintApi(split, hash, verbose);
