@@ -787,6 +787,7 @@ export const useWalletStore = defineStore("wallet", {
       const activeMint = useMintsStore().activeMint().mint;
       const mintStore = useMintsStore();
       if (!activeMint.info?.nuts[17]?.supported || !activeMint.info?.nuts[17]?.supported.find((s) => s.method == "bolt11" && s.unit == mintStore.activeUnit && s.commands.indexOf("bolt11_mint_quote") != -1)) {
+        console.log("Websockets not supported, kicking off invoice check worker.")
         useWorkersStore().invoiceCheckWorker(quote);
         return;
       }
@@ -795,22 +796,28 @@ export const useWalletStore = defineStore("wallet", {
       if (!invoice) {
         throw new Error("invoice not found");
       }
-      await this.wallet.onMintQuotePaid(quote,
-        async (mintQuoteResponse: MintQuoteResponse) => {
-          const proofs = await this.mint(invoice.amount, quote, verbose);
-          uIStore.showInvoiceDetails = false;
-          if (!!window.navigator.vibrate) navigator.vibrate(200);
-          notifySuccess("Received " + invoice.amount + " via Lightning");
-          return proofs;
-        },
-        async (error: any) => {
-          if (verbose) {
-            notifyApiError(error);
+      try {
+        await this.wallet.onMintQuotePaid(quote,
+          async (mintQuoteResponse: MintQuoteResponse) => {
+            console.log("Websocket: mint quote paid.")
+            const proofs = await this.mint(invoice.amount, quote, verbose);
+            uIStore.showInvoiceDetails = false;
+            if (!!window.navigator.vibrate) navigator.vibrate(200);
+            notifySuccess("Received " + invoice.amount + " via Lightning");
+            return proofs;
+          },
+          async (error: any) => {
+            if (verbose) {
+              notifyApiError(error);
+            }
+            console.log("Invoice still pending", invoice.quote);
+            throw error;
           }
-          console.log("Invoice still pending", invoice.quote);
-          throw error;
-        }
-      );
+        );
+      } catch (error) {
+        console.log("Error in websocket subscription", error);
+        useWorkersStore().invoiceCheckWorker(quote);
+      }
     },
     checkInvoice: async function (quote: string, verbose = true) {
       const uIStore = useUiStore();
@@ -929,25 +936,6 @@ export const useWalletStore = defineStore("wallet", {
       }
       );
     },
-    // checkPendingInvoices: async function (verbose: boolean = true) {
-    //   const last_n = 10;
-    //   let i = 0;
-    //   for (const invoice of this.invoiceHistory.slice().reverse()) {
-    //     if (i >= last_n) {
-    //       break;
-    //     }
-    //     if (invoice.status === "pending" && invoice.amount > 0) {
-    //       console.log("### checkPendingInvoices", invoice.quote)
-    //       try {
-    //         await this.checkInvoice(invoice.quote, verbose);
-    //       } catch (error) {
-    //         console.log(`${invoice.quote} still pending`);
-    //         throw error;
-    //       }
-    //     }
-    //     i += 1;
-    //   }
-    // },
     checkPendingTokens: async function (verbose: boolean = true) {
       const tokenStore = useTokensStore();
       const last_n = 5;

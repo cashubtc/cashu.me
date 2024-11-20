@@ -632,6 +632,7 @@ export default defineComponent({
       "checkProofsSpendable",
       "requestMint",
       "melt",
+      "mintOnPaid",
     ]),
     ...mapActions(useWorkersStore, [
       "clearAllWorkers",
