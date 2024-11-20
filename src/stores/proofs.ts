@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 import { useMintsStore, WalletProof } from "./mints";
-import { Proof, getEncodedToken, getEncodedTokenV4, Token, TokenEntry } from "@cashu/cashu-ts";
+import { Proof, getEncodedToken, getEncodedTokenV4, Token } from "@cashu/cashu-ts";
 
 export const useProofsStore = defineStore("proofs", {
   state: () => ({}),

@@ -922,7 +922,7 @@ export const useWalletStore = defineStore("wallet", {
         if (i >= last_n) {
           break;
         }
-        if (t.status === "pending" && t.amount < 0) {
+        if (t.status === "pending" && t.amount < 0 && t.token) {
           console.log("### checkPendingTokens", t.token)
           this.checkTokenSpendable(t.token, verbose);
           i += 1;

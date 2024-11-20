@@ -214,8 +214,10 @@ import { useNWCStore } from "src/stores/nwc";
 import { useNPCStore } from "src/stores/npubcash";
 import { useNostrStore } from "src/stores/nostr";
 import { usePRStore } from "src/stores/payment-request";
+import { useStorageStore } from "src/stores/storage";
 
 import ReceiveTokenDialog from "src/components/ReceiveTokenDialog.vue";
+import { notifyError, notifySuccess, notify } from "../js/notify";
 
 export default {
   mixins: [windowMixin],
@@ -368,6 +370,7 @@ export default {
       "sendNip17DirectMessageToNprofile",
       "initSigner",
     ]),
+    ...mapActions(useStorageStore, ["checkLocalStorage"]),
     // TOKEN METHODS
     decodeToken: function (encoded_token) {
       try {
@@ -551,29 +554,95 @@ export default {
         }
       };
     },
-    cleanUpLocalStorage: function () {
-      // delete cashu.spentProofs from local storage
-      localStorage.removeItem("cashu.spentProofs");
+    // checkLocalStorageQuota: function () {
+    //   // determine if the user might have exceeded the local storage
+    //   // quota store 10kb of data in local storage to check if the
+    //   // user has exceeded the quota
+    //   let data = new Array(10240).join("x");
+    //   try {
+    //     localStorage.setItem("cashu.test", data);
+    //     localStorage.removeItem("cashu.test");
+    //   } catch (e) {
+    //     console.log("Local storage quota exceeded");
+    //     notifyError(
+    //       "Local storage quota exceeded. Clean up your local storage."
+    //     );
+    //   }
+    // },
+    // cleanUpLocalStorageScheduler: function () {
+    //   // get cashu.lastLocalStorageCleanUp from local storage
+    //   const cleanUpInterval = 1000 * 60 * 60 * 24; // 1 day
+    //   let lastCleanUp = localStorage.getItem("cashu.lastLocalStorageCleanUp");
+    //   // if lastCleanup is not set, not a valid date, or older than cleanUpInterval
+    //   // clean up local storage, otherwise do nothing
+    //   if (
+    //     !lastCleanUp ||
+    //     isNaN(new Date(lastCleanUp).getTime()) ||
+    //     new Date() - new Date(lastCleanUp) > cleanUpInterval
+    //   ) {
+    //     this.cleanUpLocalStorage();
+    //     localStorage.setItem("cashu.lastLocalStorageCleanUp", new Date());
+    //   }
+    // },
+    // cleanUpLocalStorage: function (verbose = false) {
+    //   const localStorageSizeBefore = JSON.stringify(localStorage).length;
 
-      // determine if the user might have exceeded the local storage quota
-      // store 10kb of data in local storage to check if the user has exceeded the quota
-      let data = new Array(10240).join("x");
-      try {
-        localStorage.setItem("cashu.test", data);
-        localStorage.removeItem("cashu.test");
-      } catch (e) {
-        console.log("Local storage quota exceeded");
-        // delete all proofs
-      }
+    //   // delete cashu.spentProofs from local storage
+    //   localStorage.removeItem("cashu.spentProofs");
 
-      // walk through all this.invoiceHistory and if the invoice amount is not negative and the state is not pending, delete invoice.token
-      for (var i = 0; i < this.invoiceHistory.length; i++) {
-        var thisInvoice = this.invoiceHistory[i];
-        if (thisInvoice.amount > 0 || thisInvoice.state != "paid") {
-          thisInvoice.token = "";
-        }
-      }
-    },
+    //   // from all paid invoices in this.invoiceHistory, delete the oldest so that only max 100 remain
+    //   const max_history = 2;
+    //   let paidInvoices = this.invoiceHistory.filter((i) => i.state == "paid");
+
+    //   if (paidInvoices.length > max_history) {
+    //     let sortedInvoices = paidInvoices.sort((a, b) => {
+    //       return new Date(a.date) - new Date(b.date);
+    //     });
+    //     const deleteInvoices = sortedInvoices.slice(
+    //       0,
+    //       sortedInvoices.length - max_history
+    //     );
+    //     this.invoiceHistory = this.invoiceHistory.filter(
+    //       (i) => !deleteInvoices.includes(i)
+    //     );
+    //   }
+
+    //   // walk through all this.invoiceHistory and delete the token
+    //   // we only need to keep the token for pending outgoing (amount < 0) invoices
+    //   for (var i = 0; i < this.invoiceHistory.length; i++) {
+    //     var thisInvoice = this.invoiceHistory[i];
+    //     if (thisInvoice.amount > 0 || thisInvoice.state != "paid") {
+    //       thisInvoice.token = undefined;
+    //     }
+    //   }
+
+    //   // walk through the oldest incoming (amount > 0) paid this.historyTokens and delete the token
+    //   let paidTokens = this.historyTokens.filter(
+    //     (t) => t.amount > 0 && t.status == "paid"
+    //   );
+
+    //   if (paidTokens.length > max_history) {
+    //     let sortedTokens = paidTokens.sort((a, b) => {
+    //       return new Date(a.date) - new Date(b.date);
+    //     });
+    //     const deleteTokens = sortedTokens.slice(
+    //       0,
+    //       sortedTokens.length - max_history
+    //     );
+    //     for (var i = 0; i < deleteTokens.length; i++) {
+    //       deleteTokens[i].token = undefined;
+    //     }
+    //   }
+
+    //   const localStorageSizeAfter = JSON.stringify(localStorage).length;
+    //   const localStorageSizeDiff =
+    //     localStorageSizeBefore - localStorageSizeAfter;
+    //   if (localStorageSizeDiff > 0 && verbose) {
+    //     notifySuccess(
+    //       `Cleaned up ${localStorageSizeDiff} bytes of local storage`
+    //     );
+    //   }
+    // },
     // registerLocalStorageSyncHook: function () {
     //   // receives events if other tabs change local storage
     //   window.addEventListener("storage", (e) => {
@@ -653,8 +722,8 @@ export default {
 
     // startup tasks
 
-    // clean up local storage
-    this.cleanUpLocalStorage();
+    // check local storage
+    this.checkLocalStorage();
 
     // // Local storage sync hook
     // this.registerLocalStorageSyncHook();
