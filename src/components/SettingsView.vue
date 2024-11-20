@@ -218,7 +218,7 @@
 
     <!-- payment requests -->
     <!-- NOTE: temporarily disabled the button until fix -->
-    <div v-if="enablePaymentRequest" class="q-py-sm q-px-xs text-left" on-left>
+    <div class="q-py-sm q-px-xs text-left" on-left>
       <q-item class="q-pt-lg">
         <q-item-section>
           <q-item-label overline class="text-weight-bold"
