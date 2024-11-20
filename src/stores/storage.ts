@@ -37,7 +37,7 @@ export const useStorageStore = defineStore("storage", {
       }
     },
     cleanUpLocalStorageScheduler: function () {
-      const cleanUpInterval = 1000 * 60 * 60 * 24; // 1 day
+      const cleanUpInterval = 1000 * 60 * 60 * 24 * 7; // 7 day
       let lastCleanUp = this.lastLocalStorageCleanUp;
       if (
         !lastCleanUp ||
@@ -45,7 +45,6 @@ export const useStorageStore = defineStore("storage", {
         new Date().getTime() - new Date(lastCleanUp).getTime() > cleanUpInterval
       ) {
         this.cleanUpLocalStorage();
-        this.lastLocalStorageCleanUp = new Date();
       }
     },
     cleanUpLocalStorage: function (verbose = false) {
@@ -100,6 +99,7 @@ export const useStorageStore = defineStore("storage", {
           `Cleaned up ${localStorageSizeDiff} bytes`
         );
       }
+      this.lastLocalStorageCleanUp = new Date();
     },
 
   },
