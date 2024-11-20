@@ -759,26 +759,6 @@ export default defineComponent({
     toggleGetBitcoinPrice: function () {
       this.getBitcoinPrice = !this.getBitcoinPrice;
     },
-    checkActiveProofsSpendable: async function () {
-      // iterate over this.activeProofs in batches of 50 and check if they are spendable
-      let proofs = this.activeProofs.flat();
-      console.log("Checking proofs", proofs);
-      let allSpentProofs = [];
-      let batch_size = 50;
-      for (let i = 0; i < proofs.length; i += batch_size) {
-        console.log("Checking proofs", i, i + batch_size);
-        let batch = proofs.slice(i, i + batch_size);
-        let spent = await this.checkProofsSpendable(batch, true);
-        allSpentProofs.push(spent);
-      }
-      let spentProofs = allSpentProofs.flat();
-      if (spentProofs.length > 0) {
-        console.log("Spent proofs", spentProofs);
-        this.notifySuccess("Removed " + spentProofs.length + " spent proofs");
-      } else {
-        this.notifySuccess("No spent proofs found");
-      }
-    },
     initNdk: async function () {
       await this.initNdkReadOnly();
       console.log(await this.getUserPubkey());

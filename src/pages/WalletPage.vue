@@ -214,8 +214,10 @@ import { useNWCStore } from "src/stores/nwc";
 import { useNPCStore } from "src/stores/npubcash";
 import { useNostrStore } from "src/stores/nostr";
 import { usePRStore } from "src/stores/payment-request";
+import { useStorageStore } from "src/stores/storage";
 
 import ReceiveTokenDialog from "src/components/ReceiveTokenDialog.vue";
+import { notifyError, notifySuccess, notify } from "../js/notify";
 
 export default {
   mixins: [windowMixin],
@@ -368,6 +370,7 @@ export default {
       "sendNip17DirectMessageToNprofile",
       "initSigner",
     ]),
+    ...mapActions(useStorageStore, ["checkLocalStorage"]),
     // TOKEN METHODS
     decodeToken: function (encoded_token) {
       try {
@@ -543,22 +546,6 @@ export default {
         }
       };
     },
-    // registerLocalStorageSyncHook: function () {
-    //   // receives events if other tabs change local storage
-    //   window.addEventListener("storage", (e) => {
-    //     // console.log(`Key Changed: ${e.key}`);
-    //     // console.log(`New Value: ${e.newValue}`);
-    //     // if these were the proofs, reload them
-    //     // if (e.key == "cashu.proofs") {
-    //     //   console.log("updating proofs");
-    //     //   this.setProofs(JSON.parse(e.newValue));
-    //     // }
-    //     // // if these were the activeMintUrl, reload
-    //     // if (e.key == "cashu.activeMintUrl") {
-    //     //   this.activateMintUrl(e.newValue);
-    //     // }
-    //   });
-    // },
   },
   watch: {},
 
@@ -621,6 +608,9 @@ export default {
     );
 
     // startup tasks
+
+    // check local storage
+    this.checkLocalStorage();
 
     // // Local storage sync hook
     // this.registerLocalStorageSyncHook();
