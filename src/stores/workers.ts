@@ -58,7 +58,7 @@ export const useWorkersStore = defineStore("workers", {
     checkTokenSpendableWorker: async function (tokensBase64: string) {
       const settingsStore = useSettingsStore();
       if (!settingsStore.checkSentTokens) {
-        console.log("### checkTokenSpendableWorker: disabled");
+        console.log("settingsStore.checkSentTokens is disabled, not kicking off checkTokenSpendableWorker");
         return;
       }
       console.log("### kicking off checkTokenSpendableWorker");

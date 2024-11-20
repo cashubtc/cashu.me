@@ -28,6 +28,7 @@ import { v4 as uuidv4 } from 'uuid';
 // window.Buffer = Buffer;
 import { generateMnemonic, mnemonicToSeedSync } from "@scure/bip39";
 import { wordlist } from '@scure/bip39/wordlists/english';
+import { useSettingsStore } from "./settings";
 
 // HACK: this is a workaround so that the catch block in the melt function does not throw an error when the user exits the app
 // before the payment is completed. This is necessary because the catch block in the melt function would otherwise remove all
@@ -728,7 +729,12 @@ export const useWalletStore = defineStore("wallet", {
       const tokenJson = token.decode(tokenStr);
       const activeMint = useMintsStore().activeMint().mint;
       const mintStore = useMintsStore();
-      if (!activeMint.info?.nuts[17]?.supported || !activeMint.info?.nuts[17]?.supported.find((s) => s.method == "bolt11" && s.unit == mintStore.activeUnit && s.commands.indexOf("proof_state") != -1)) {
+      const settingsStore = useSettingsStore();
+      if (!settingsStore.checkSentTokens) {
+        console.log('settingsStore.checkSentTokens is disabled, skipping token check');
+        return;
+      }
+      if (!settingsStore.useWebsockets || !activeMint.info?.nuts[17]?.supported || !activeMint.info?.nuts[17]?.supported.find((s) => s.method == "bolt11" && s.unit == mintStore.activeUnit && s.commands.indexOf("proof_state") != -1)) {
         console.log("Websockets not supported, kicking off token check worker.")
         useWorkersStore().checkTokenSpendableWorker(tokenStr);
         return;
@@ -824,7 +830,8 @@ export const useWalletStore = defineStore("wallet", {
     mintOnPaid: async function (quote: string, verbose = true) {
       const activeMint = useMintsStore().activeMint().mint;
       const mintStore = useMintsStore();
-      if (!activeMint.info?.nuts[17]?.supported || !activeMint.info?.nuts[17]?.supported.find((s) => s.method == "bolt11" && s.unit == mintStore.activeUnit && s.commands.indexOf("bolt11_mint_quote") != -1)) {
+      const settingsStore = useSettingsStore();
+      if (!settingsStore.useWebsockets || !activeMint.info?.nuts[17]?.supported || !activeMint.info?.nuts[17]?.supported.find((s) => s.method == "bolt11" && s.unit == mintStore.activeUnit && s.commands.indexOf("bolt11_mint_quote") != -1)) {
         console.log("Websockets not supported, kicking off invoice check worker.")
         useWorkersStore().invoiceCheckWorker(quote);
         return;
