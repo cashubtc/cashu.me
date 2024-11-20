@@ -14,7 +14,7 @@ import { useWorkersStore } from "./workers";
 import * as _ from "underscore";
 import token from "src/js/token";
 import { notifyApiError, notifyError, notifySuccess, notifyWarning, notify } from "src/js/notify";
-import { CashuMint, CashuWallet, Proof, MintQuotePayload, MeltQuotePayload, MeltQuoteResponse, CheckStateEnum, MeltQuoteState, MintQuoteState, PaymentRequest, PaymentRequestTransportType, PaymentRequestTransport, decodePaymentRequest, MintQuoteResponse } from "@cashu/cashu-ts";
+import { CashuMint, CashuWallet, Proof, MintQuotePayload, MeltQuotePayload, MeltQuoteResponse, CheckStateEnum, MeltQuoteState, MintQuoteState, PaymentRequest, PaymentRequestTransportType, PaymentRequestTransport, decodePaymentRequest, MintQuoteResponse, ProofState } from "@cashu/cashu-ts";
 import { hashToCurve } from '@cashu/crypto/modules/common';
 import * as bolt11Decoder from "light-bolt11-decoder";
 import { bech32 } from "bech32";
@@ -723,6 +723,44 @@ export const useWalletStore = defineStore("wallet", {
         throw error;
       }
     },
+    onTokenPaid: async function (tokenStr: string) {
+      const sendTokensStore = useSendTokensStore();
+      const tokenJson = token.decode(tokenStr);
+      const activeMint = useMintsStore().activeMint().mint;
+      const mintStore = useMintsStore();
+      if (!activeMint.info?.nuts[17]?.supported || !activeMint.info?.nuts[17]?.supported.find((s) => s.method == "bolt11" && s.unit == mintStore.activeUnit && s.commands.indexOf("proof_state") != -1)) {
+        console.log("Websockets not supported, kicking off token check worker.")
+        useWorkersStore().checkTokenSpendableWorker(tokenStr);
+        return;
+      }
+      try {
+        if (tokenJson == undefined) {
+          throw new Error("no tokens provided.");
+        }
+        const proofs = token.getProofs(tokenJson);
+        const oneProof = [proofs[0]];
+        const unsub = await this.wallet.onProofStateUpdates(oneProof,
+          async (proofState: ProofState) => {
+            console.log(`Websocket: proof state updated: ${proofState.state}`);
+            if (proofState.state == CheckStateEnum.SPENT) {
+              const tokenSpent = await this.checkTokenSpendable(tokenStr);
+              if (tokenSpent) {
+                sendTokensStore.showSendTokens = false;
+                unsub();
+              }
+            }
+          },
+          async (error: any) => {
+            console.error(error);
+            notifyApiError(error);
+            throw error;
+          }
+        );
+      } catch (error) {
+        console.error("Error in websocket subscription", error);
+        useWorkersStore().checkTokenSpendableWorker(tokenStr);
+      }
+    },
     checkTokenSpendable: async function (tokenStr: string, verbose: boolean = true) {
       /*
       checks whether a base64-encoded token (from the history table) has been spent already.
@@ -797,13 +835,14 @@ export const useWalletStore = defineStore("wallet", {
         throw new Error("invoice not found");
       }
       try {
-        await this.wallet.onMintQuotePaid(quote,
+        const unsub = await this.wallet.onMintQuotePaid(quote,
           async (mintQuoteResponse: MintQuoteResponse) => {
             console.log("Websocket: mint quote paid.")
             const proofs = await this.mint(invoice.amount, quote, verbose);
             uIStore.showInvoiceDetails = false;
             if (!!window.navigator.vibrate) navigator.vibrate(200);
             notifySuccess("Received " + invoice.amount + " via Lightning");
+            unsub();
             return proofs;
           },
           async (error: any) => {
