@@ -14,14 +14,12 @@ export const useProofsStore = defineStore("proofs", {
       const mintStore = useMintsStore();
       const walletProofs = mintStore.proofsToWalletProofs(proofs);
       // unset quote if we unset reserved
-      let proofQuote: string;
+      let proofQuote: string | undefined;
       if (reserved && quote) {
         proofQuote = quote;
       } else {
-        proofQuote = "";
+        proofQuote = undefined;
       }
-      walletProofs.forEach((p) => (p.reserved = reserved));
-      // for each proof in mintStore.proofs with the same walletProofs.secret, set the reserved and quote
       walletProofs.forEach((p) => {
         mintStore.proofs
           .filter((pr) => pr.secret === p.secret)

@@ -791,12 +791,16 @@ export const useWalletStore = defineStore("wallet", {
       try {
         // check the state first
         const state = await this.getMintQuoteState(invoice.quote, new CashuMint(invoice.mint));
+        if (state == MintQuoteState.ISSUED) {
+          this.setInvoicePaid(invoice.quote);
+          return;
+        }
         if (state != MintQuoteState.PAID) {
           console.log("### mintQuote not paid yet");
           if (verbose) {
             notify("Invoice still pending");
           }
-          throw new Error("invoice not paid yet.");
+          throw new Error(`invoice state not paid: ${state}`);
         }
         // activate the mint
         await mintStore.activateMintUrl(invoice.mint, false, false, invoice.unit);
