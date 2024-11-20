@@ -113,13 +113,7 @@ import { useReceiveTokensStore } from "src/stores/receiveTokensStore";
 import { useWalletStore } from "src/stores/wallet";
 import { useSendTokensStore } from "src/stores/sendTokensStore";
 import token from "../js/token";
-import {
-  notifyApiError,
-  notifyError,
-  notifySuccess,
-  notifyWarning,
-  notify,
-} from "src/js/notify";
+import { notify } from "src/js/notify";
 
 export default defineComponent({
   name: "HistoryTable",

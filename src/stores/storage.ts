@@ -44,7 +44,7 @@ export const useStorageStore = defineStore("storage", {
         isNaN(new Date(lastCleanUp).getTime()) ||
         new Date().getTime() - new Date(lastCleanUp).getTime() > cleanUpInterval
       ) {
-        this.cleanUpLocalStorage(true);
+        this.cleanUpLocalStorage();
         this.lastLocalStorageCleanUp = new Date();
       }
     },
