@@ -673,7 +673,7 @@ export default defineComponent({
         });
 
         if (!this.g.offline) {
-          this.checkTokenSpendableWorker(this.sendData.tokensBase64);
+          this.onTokenPaid(this.sendData.tokensBase64);
         }
       } catch (error) {
         console.error(error);
@@ -715,7 +715,6 @@ export default defineComponent({
         });
 
         if (!this.g.offline) {
-          //this.checkTokenSpendableWorker(this.sendData.tokensBase64);
           this.onTokenPaid(this.sendData.tokensBase64);
         }
       } catch (error) {
