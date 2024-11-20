@@ -9,7 +9,7 @@ export type Mint = {
   keys: MintKeys[];
   keysets: MintKeyset[];
   nickname?: string;
-  info?: any;
+  info?: GetInfoResponse;
   // initialize api: new CashuMint(url) on activation
 };
 
@@ -131,7 +131,7 @@ export const useMintsStore = defineStore("mints", {
       return unitKeys;
     },
     activeInfo({ activeMintUrl }): GetInfoResponse {
-      return this.mints.find((m) => m.url === activeMintUrl)?.info;
+      return this.mints.find((m) => m.url === activeMintUrl)?.info || {} as GetInfoResponse;
     },
     activeUnitLabel({ activeUnit }): string {
       if (activeUnit == "sat") {

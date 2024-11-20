@@ -715,7 +715,7 @@ export default defineComponent({
 
         // settle invoice on other side
         await this.activateMintUrl(to_url);
-        await this.invoiceCheckWorker();
+        await this.mintOnPaid(invoice.quote);
       } catch (e) {
         console.error("Error swapping", e);
         notifyError("Error swapping");

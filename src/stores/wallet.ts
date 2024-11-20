@@ -9,11 +9,12 @@ import { useUiStore } from "src/stores/ui";
 import { useP2PKStore } from "src/stores/p2pk"
 import { useSendTokensStore } from "src/stores/sendTokensStore"
 import { usePRStore } from "./payment-request";
+import { useWorkersStore } from "./workers";
 
 import * as _ from "underscore";
 import token from "src/js/token";
 import { notifyApiError, notifyError, notifySuccess, notifyWarning, notify } from "src/js/notify";
-import { CashuMint, CashuWallet, Proof, MintQuotePayload, MeltQuotePayload, MeltQuoteResponse, CheckStateEnum, MeltQuoteState, MintQuoteState, PaymentRequest, PaymentRequestTransportType, PaymentRequestTransport, decodePaymentRequest } from "@cashu/cashu-ts";
+import { CashuMint, CashuWallet, Proof, MintQuotePayload, MeltQuotePayload, MeltQuoteResponse, CheckStateEnum, MeltQuoteState, MintQuoteState, PaymentRequest, PaymentRequestTransportType, PaymentRequestTransport, decodePaymentRequest, MintQuoteResponse } from "@cashu/cashu-ts";
 import { hashToCurve } from '@cashu/crypto/modules/common';
 import * as bolt11Decoder from "light-bolt11-decoder";
 import { bech32 } from "bech32";
@@ -415,7 +416,7 @@ export const useWalletStore = defineStore("wallet", {
      * Upon paying the request, the mint will credit the wallet with
      * cashu tokens
      */
-    requestMint: async function (amount?: number) {
+    requestMint: async function (amount?: number): Promise<MintQuoteResponse> {
       const mintStore = useMintsStore();
       const uIStore = useUiStore();
 
@@ -444,6 +445,7 @@ export const useWalletStore = defineStore("wallet", {
       } catch (error: any) {
         console.error(error);
         notifyApiError(error, "Could not request mint");
+        throw error;
       } finally {
         uIStore.unlockMutex();
       }
@@ -782,6 +784,35 @@ export const useWalletStore = defineStore("wallet", {
       }
       return true;
     },
+    mintOnPaid: async function (quote: string, verbose = true) {
+      const activeMint = useMintsStore().activeMint().mint;
+      const mintStore = useMintsStore();
+      if (!activeMint.info?.nuts[17]?.supported || !activeMint.info?.nuts[17]?.supported.find((s) => s.method == "bolt11" && s.unit == mintStore.activeUnit && s.commands.indexOf("bolt11_mint_quote") != -1)) {
+        useWorkersStore().invoiceCheckWorker(quote);
+        return;
+      }
+      const uIStore = useUiStore();
+      const invoice = this.invoiceHistory.find((i) => i.quote === quote);
+      if (!invoice) {
+        throw new Error("invoice not found");
+      }
+      await this.wallet.onMintQuotePaid(quote,
+        async (mintQuoteResponse: MintQuoteResponse) => {
+          const proofs = await this.mint(invoice.amount, quote, verbose);
+          uIStore.showInvoiceDetails = false;
+          if (!!window.navigator.vibrate) navigator.vibrate(200);
+          notifySuccess("Received " + invoice.amount + " via Lightning");
+          return proofs;
+        },
+        async (error: any) => {
+          if (verbose) {
+            notifyApiError(error);
+          }
+          console.log("Invoice still pending", invoice.quote);
+          throw error;
+        }
+      );
+    },
     checkInvoice: async function (quote: string, verbose = true) {
       const uIStore = useUiStore();
       const mintStore = useMintsStore();
@@ -802,6 +833,7 @@ export const useWalletStore = defineStore("wallet", {
         // activate the mint
         await mintStore.activateMintUrl(invoice.mint, false, false, invoice.unit);
         const proofs = await this.mint(invoice.amount, invoice.quote, verbose);
+        uIStore.showInvoiceDetails = false;
         if (!!window.navigator.vibrate) navigator.vibrate(200);
         notifySuccess("Received " + uIStore.formatCurrency(invoice.amount, mintStore.activeUnit) + " via Lightning");
         return proofs;

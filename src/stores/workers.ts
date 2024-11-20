@@ -25,9 +25,8 @@ export const useWorkersStore = defineStore("workers", {
         this.tokenWorkerRunning = false;
       }
     },
-    invoiceCheckWorker: async function () {
+    invoiceCheckWorker: async function (quote: string) {
       const walletStore = useWalletStore();
-      const uiStore = useUiStore();
       let nInterval = 0;
       this.clearAllWorkers();
       this.invoiceCheckListener = setInterval(async () => {
@@ -41,15 +40,14 @@ export const useWorkersStore = defineStore("workers", {
             this.clearAllWorkers();
           }
           console.log("### invoiceCheckWorker setInterval", nInterval);
-          console.log(walletStore.invoiceData);
 
           // this will throw an error if the invoice is pending
-          await walletStore.checkInvoice(walletStore.invoiceData.quote, false);
+          await walletStore.checkInvoice(quote, false);
 
           // only without error (invoice paid) will we reach here
           console.log("### stopping invoice check worker");
           this.clearAllWorkers();
-          uiStore.showInvoiceDetails = false;
+
           // if (window.navigator.vibrate) navigator.vibrate(200);
           // notifySuccess("Payment received", "top");
         } catch (error) {
