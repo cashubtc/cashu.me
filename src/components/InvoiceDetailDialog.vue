@@ -200,15 +200,19 @@ export default defineComponent({
     },
   },
   methods: {
-    ...mapActions(useWalletStore, ["requestMint", "lnurlPaySecond"]),
+    ...mapActions(useWalletStore, [
+      "requestMint",
+      "lnurlPaySecond",
+      "mintOnPaid",
+    ]),
     ...mapActions(useMintsStore, ["toggleUnit"]),
     requestMintButton: async function () {
       try {
         const mintStore = useMintsStore();
         this.invoiceData.amount *= this.activeUnitCurrencyMultiplyer;
         this.createInvoiceButtonBlocked = true;
-        await this.requestMint();
-        await this.invoiceCheckWorker();
+        const mintQuote = await this.requestMint();
+        await this.mintOnPaid(mintQuote.quote);
       } catch (e) {
         console.log("#### requestMintButton", e);
       } finally {

@@ -491,6 +491,19 @@
               pending tokens in the history tab.
             </q-item-label>
           </q-item>
+          <q-item>
+            <q-toggle
+              v-model="useWebsockets"
+              label="Use websockets"
+              color="primary"
+            /> </q-item
+          ><q-item class="q-pt-none">
+            <q-item-label caption
+              >If enabled the wallet will use websockets to receive updates on
+              paid invoices and spent tokens. This feature is experimental, use
+              with caution and manually check the history for pending tokens.
+            </q-item-label>
+          </q-item>
           <!-- price check setting -->
           <q-item>
             <q-toggle
@@ -1042,6 +1055,7 @@ export default defineComponent({
     ...mapWritableState(useSettingsStore, [
       "getBitcoinPrice",
       "checkSentTokens",
+      "useWebsockets",
     ]),
     ...mapState(useP2PKStore, ["p2pkKeys"]),
     ...mapWritableState(useP2PKStore, ["showP2PKDialog"]),

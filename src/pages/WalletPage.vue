@@ -461,14 +461,6 @@ export default {
       this.invoiceData.memo = "";
       this.showInvoiceDetails = true;
     },
-
-    showInvoicInfoDialog: function (data) {
-      console.log("##### showInvoicInfoDialog");
-      this.invoiceData = _.clone(data);
-      this.showInvoiceDetails = true;
-      // kick off invoice check worker
-      this.invoiceCheckWorker();
-    },
     showSendTokensDialog: function () {
       console.log("##### showSendTokensDialog");
       this.sendData.tokens = "";

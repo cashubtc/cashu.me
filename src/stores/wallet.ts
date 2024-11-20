@@ -9,11 +9,12 @@ import { useUiStore } from "src/stores/ui";
 import { useP2PKStore } from "src/stores/p2pk"
 import { useSendTokensStore } from "src/stores/sendTokensStore"
 import { usePRStore } from "./payment-request";
+import { useWorkersStore } from "./workers";
 
 import * as _ from "underscore";
 import token from "src/js/token";
 import { notifyApiError, notifyError, notifySuccess, notifyWarning, notify } from "src/js/notify";
-import { CashuMint, CashuWallet, Proof, MintQuotePayload, MeltQuotePayload, MeltQuoteResponse, CheckStateEnum, MeltQuoteState, MintQuoteState, PaymentRequest, PaymentRequestTransportType, PaymentRequestTransport, decodePaymentRequest } from "@cashu/cashu-ts";
+import { CashuMint, CashuWallet, Proof, MintQuotePayload, MeltQuotePayload, MeltQuoteResponse, CheckStateEnum, MeltQuoteState, MintQuoteState, PaymentRequest, PaymentRequestTransportType, PaymentRequestTransport, decodePaymentRequest, MintQuoteResponse, ProofState } from "@cashu/cashu-ts";
 import { hashToCurve } from '@cashu/crypto/modules/common';
 import * as bolt11Decoder from "light-bolt11-decoder";
 import { bech32 } from "bech32";
@@ -27,6 +28,7 @@ import { v4 as uuidv4 } from 'uuid';
 // window.Buffer = Buffer;
 import { generateMnemonic, mnemonicToSeedSync } from "@scure/bip39";
 import { wordlist } from '@scure/bip39/wordlists/english';
+import { useSettingsStore } from "./settings";
 
 // HACK: this is a workaround so that the catch block in the melt function does not throw an error when the user exits the app
 // before the payment is completed. This is necessary because the catch block in the melt function would otherwise remove all
@@ -259,7 +261,7 @@ export const useWalletStore = defineStore("wallet", {
     },
     sendToLock: async function (proofs: WalletProof[], amount: number, receiverPubkey: string) {
       const spendableProofs = this.spendableProofs(proofs, amount);
-      const proofsToSend = this.coinSelect(spendableProofs, amount);
+      const proofsToSend = this.coinSelect(spendableProofs, amount, true);
       const { keep: keepProofs, send: sendProofs } = await this.wallet.send(amount, proofsToSend, { pubkey: receiverPubkey })
       const mintStore = useMintsStore();
       // note: we do not store sendProofs in the proofs store but
@@ -414,7 +416,7 @@ export const useWalletStore = defineStore("wallet", {
      * Upon paying the request, the mint will credit the wallet with
      * cashu tokens
      */
-    requestMint: async function (amount?: number) {
+    requestMint: async function (amount?: number): Promise<MintQuoteResponse> {
       const mintStore = useMintsStore();
       const uIStore = useUiStore();
 
@@ -443,6 +445,7 @@ export const useWalletStore = defineStore("wallet", {
       } catch (error: any) {
         console.error(error);
         notifyApiError(error, "Could not request mint");
+        throw error;
       } finally {
         uIStore.unlockMutex();
       }
@@ -721,6 +724,49 @@ export const useWalletStore = defineStore("wallet", {
         throw error;
       }
     },
+    onTokenPaid: async function (tokenStr: string) {
+      const sendTokensStore = useSendTokensStore();
+      const tokenJson = token.decode(tokenStr);
+      const activeMint = useMintsStore().activeMint().mint;
+      const mintStore = useMintsStore();
+      const settingsStore = useSettingsStore();
+      if (!settingsStore.checkSentTokens) {
+        console.log('settingsStore.checkSentTokens is disabled, skipping token check');
+        return;
+      }
+      if (!settingsStore.useWebsockets || !activeMint.info?.nuts[17]?.supported || !activeMint.info?.nuts[17]?.supported.find((s) => s.method == "bolt11" && s.unit == mintStore.activeUnit && s.commands.indexOf("proof_state") != -1)) {
+        console.log("Websockets not supported, kicking off token check worker.")
+        useWorkersStore().checkTokenSpendableWorker(tokenStr);
+        return;
+      }
+      try {
+        if (tokenJson == undefined) {
+          throw new Error("no tokens provided.");
+        }
+        const proofs = token.getProofs(tokenJson);
+        const oneProof = [proofs[0]];
+        const unsub = await this.wallet.onProofStateUpdates(oneProof,
+          async (proofState: ProofState) => {
+            console.log(`Websocket: proof state updated: ${proofState.state}`);
+            if (proofState.state == CheckStateEnum.SPENT) {
+              const tokenSpent = await this.checkTokenSpendable(tokenStr);
+              if (tokenSpent) {
+                sendTokensStore.showSendTokens = false;
+                unsub();
+              }
+            }
+          },
+          async (error: any) => {
+            console.error(error);
+            notifyApiError(error);
+            throw error;
+          }
+        );
+      } catch (error) {
+        console.error("Error in websocket subscription", error);
+        useWorkersStore().checkTokenSpendableWorker(tokenStr);
+      }
+    },
     checkTokenSpendable: async function (tokenStr: string, verbose: boolean = true) {
       /*
       checks whether a base64-encoded token (from the history table) has been spent already.
@@ -781,6 +827,44 @@ export const useWalletStore = defineStore("wallet", {
       }
       return true;
     },
+    mintOnPaid: async function (quote: string, verbose = true) {
+      const activeMint = useMintsStore().activeMint().mint;
+      const mintStore = useMintsStore();
+      const settingsStore = useSettingsStore();
+      if (!settingsStore.useWebsockets || !activeMint.info?.nuts[17]?.supported || !activeMint.info?.nuts[17]?.supported.find((s) => s.method == "bolt11" && s.unit == mintStore.activeUnit && s.commands.indexOf("bolt11_mint_quote") != -1)) {
+        console.log("Websockets not supported, kicking off invoice check worker.")
+        useWorkersStore().invoiceCheckWorker(quote);
+        return;
+      }
+      const uIStore = useUiStore();
+      const invoice = this.invoiceHistory.find((i) => i.quote === quote);
+      if (!invoice) {
+        throw new Error("invoice not found");
+      }
+      try {
+        const unsub = await this.wallet.onMintQuotePaid(quote,
+          async (mintQuoteResponse: MintQuoteResponse) => {
+            console.log("Websocket: mint quote paid.")
+            const proofs = await this.mint(invoice.amount, quote, verbose);
+            uIStore.showInvoiceDetails = false;
+            if (!!window.navigator.vibrate) navigator.vibrate(200);
+            notifySuccess("Received " + invoice.amount + " via Lightning");
+            unsub();
+            return proofs;
+          },
+          async (error: any) => {
+            if (verbose) {
+              notifyApiError(error);
+            }
+            console.log("Invoice still pending", invoice.quote);
+            throw error;
+          }
+        );
+      } catch (error) {
+        console.log("Error in websocket subscription", error);
+        useWorkersStore().invoiceCheckWorker(quote);
+      }
+    },
     checkInvoice: async function (quote: string, verbose = true) {
       const uIStore = useUiStore();
       const mintStore = useMintsStore();
@@ -805,6 +889,7 @@ export const useWalletStore = defineStore("wallet", {
         // activate the mint
         await mintStore.activateMintUrl(invoice.mint, false, false, invoice.unit);
         const proofs = await this.mint(invoice.amount, invoice.quote, verbose);
+        uIStore.showInvoiceDetails = false;
         if (!!window.navigator.vibrate) navigator.vibrate(200);
         notifySuccess("Received " + uIStore.formatCurrency(invoice.amount, mintStore.activeUnit) + " via Lightning");
         return proofs;
@@ -897,25 +982,6 @@ export const useWalletStore = defineStore("wallet", {
       }
       );
     },
-    // checkPendingInvoices: async function (verbose: boolean = true) {
-    //   const last_n = 10;
-    //   let i = 0;
-    //   for (const invoice of this.invoiceHistory.slice().reverse()) {
-    //     if (i >= last_n) {
-    //       break;
-    //     }
-    //     if (invoice.status === "pending" && invoice.amount > 0) {
-    //       console.log("### checkPendingInvoices", invoice.quote)
-    //       try {
-    //         await this.checkInvoice(invoice.quote, verbose);
-    //       } catch (error) {
-    //         console.log(`${invoice.quote} still pending`);
-    //         throw error;
-    //       }
-    //     }
-    //     i += 1;
-    //   }
-    // },
     checkPendingTokens: async function (verbose: boolean = true) {
       const tokenStore = useTokensStore();
       const last_n = 5;
