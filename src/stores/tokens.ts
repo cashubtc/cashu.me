@@ -11,7 +11,7 @@ export type HistoryToken = {
   status: "paid" | "pending";
   amount: number;
   date: string;
-  token: string;
+  token?: string;
   mint: string;
   unit: string;
   paymentRequest?: PaymentRequest;

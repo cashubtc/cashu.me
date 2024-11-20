@@ -113,6 +113,7 @@ import { useReceiveTokensStore } from "src/stores/receiveTokensStore";
 import { useWalletStore } from "src/stores/wallet";
 import { useSendTokensStore } from "src/stores/sendTokensStore";
 import token from "../js/token";
+import { notify } from "src/js/notify";
 
 export default defineComponent({
   name: "HistoryTable",
@@ -174,6 +175,10 @@ export default defineComponent({
       this.showReceiveTokens = true;
     },
     showTokenDialog: function (historyToken) {
+      if (historyToken.token === undefined) {
+        notify("Old token not found");
+        return;
+      }
       const tokensBase64 = historyToken.token;
       console.log("##### showTokenDialog");
       const tokenObj = token.decode(tokensBase64);

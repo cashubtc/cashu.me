@@ -48,7 +48,6 @@ type InvoiceHistory = Invoice & {
   status: "pending" | "paid";
   mint: string;
   unit?: string;
-  token?: string;
 };
 
 type KeysetCounter = {
@@ -792,12 +791,16 @@ export const useWalletStore = defineStore("wallet", {
       try {
         // check the state first
         const state = await this.getMintQuoteState(invoice.quote, new CashuMint(invoice.mint));
+        if (state == MintQuoteState.ISSUED) {
+          this.setInvoicePaid(invoice.quote);
+          return;
+        }
         if (state != MintQuoteState.PAID) {
           console.log("### mintQuote not paid yet");
           if (verbose) {
             notify("Invoice still pending");
           }
-          throw new Error("invoice not paid yet.");
+          throw new Error(`invoice state not paid: ${state}`);
         }
         // activate the mint
         await mintStore.activateMintUrl(invoice.mint, false, false, invoice.unit);
@@ -821,18 +824,8 @@ export const useWalletStore = defineStore("wallet", {
         throw new Error("invoice not found");
       }
 
-      let proofs: Proof[] = [];
-      if (invoice.token) {
-        const tokenJson = token.decode(invoice.token);
-        if (tokenJson == undefined) {
-          throw new Error("no tokens provided.");
-        }
-        proofs = token.getProofs(tokenJson);
-        if (proofs.length == 0) {
-          throw new Error("no proofs found.");
-        }
-      }
 
+      const proofs: Proof[] = mintStore.proofs.filter((p) => p.quote === quote);
       try {
         // this is an outgoing invoice, we first do a getMintQuote to check if the invoice is paid
         const mint = new CashuMint(invoice.mint);
@@ -872,8 +865,7 @@ export const useWalletStore = defineStore("wallet", {
     ////////////// UI HELPERS //////////////
     addOutgoingPendingInvoiceToHistory: function (quote: MeltQuoteResponse, sendProofs: Proof[]) {
       const proofsStore = useProofsStore();
-      const serlializedToken = proofsStore.serializeProofs(sendProofs);
-      proofsStore.setReserved(sendProofs, true);
+      proofsStore.setReserved(sendProofs, true, quote.quote);
       const mintStore = useMintsStore();
       this.invoiceHistory.push({
         amount: -(quote.amount + quote.fee_reserve),
@@ -883,7 +875,6 @@ export const useWalletStore = defineStore("wallet", {
         date: currentDateStr(),
         status: "pending",
         mint: mintStore.activeMintUrl,
-        token: serlializedToken,
         unit: mintStore.activeUnit,
       });
     },
@@ -934,7 +925,7 @@ export const useWalletStore = defineStore("wallet", {
         if (i >= last_n) {
           break;
         }
-        if (t.status === "pending" && t.amount < 0) {
+        if (t.status === "pending" && t.amount < 0 && t.token) {
           console.log("### checkPendingTokens", t.token)
           this.checkTokenSpendable(t.token, verbose);
           i += 1;
