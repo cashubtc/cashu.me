@@ -825,7 +825,6 @@ export const useWalletStore = defineStore("wallet", {
       }
 
 
-      // select from this.proofs where proof.quote == quote
       const proofs: Proof[] = mintStore.proofs.filter((p) => p.quote === quote);
       try {
         // this is an outgoing invoice, we first do a getMintQuote to check if the invoice is paid
