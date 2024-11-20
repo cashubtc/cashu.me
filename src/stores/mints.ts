@@ -190,6 +190,18 @@ export const useMintsStore = defineStore("mints", {
     },
     addProofs(proofs: Proof[], quote?: string) {
       const walletProofs = this.proofsToWalletProofs(proofs);
+      // do not store DLEQ proofs
+      walletProofs.forEach((p) => {
+        if (!p.dleq) {
+          return;
+        }
+        if (!p.dleqValid) {
+          notifyError("Invalid DLEQ, mint might be tagging you!")
+        }
+        delete p.dleq;
+        delete p.dleqValid;
+      });
+
       this.proofs = this.proofs.concat(walletProofs);
     },
     removeProofs(proofs: Proof[]) {
