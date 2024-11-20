@@ -10,15 +10,25 @@ export const useProofsStore = defineStore("proofs", {
       const walletProofs = mintStore.proofsToWalletProofs(proofs);
       return walletProofs.reduce((s, t) => (s += t.amount), 0);
     },
-    setReserved: function (proofs: Proof[], reserved: boolean = true) {
+    setReserved: function (proofs: Proof[], reserved: boolean = true, quote?: string) {
       const mintStore = useMintsStore();
       const walletProofs = mintStore.proofsToWalletProofs(proofs);
+      // unset quote if we unset reserved
+      let proofQuote: string;
+      if (reserved && quote) {
+        proofQuote = quote;
+      } else {
+        proofQuote = "";
+      }
       walletProofs.forEach((p) => (p.reserved = reserved));
-      // for each proof in mintStore.proofs with the same walletProofs.secret, set the reserved
+      // for each proof in mintStore.proofs with the same walletProofs.secret, set the reserved and quote
       walletProofs.forEach((p) => {
         mintStore.proofs
           .filter((pr) => pr.secret === p.secret)
-          .forEach((pr) => (pr.reserved = reserved));
+          .forEach((pr) => {
+            pr.reserved = reserved;
+            pr.quote = proofQuote;
+          });
       }
       );
     },

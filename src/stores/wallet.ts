@@ -48,7 +48,6 @@ type InvoiceHistory = Invoice & {
   status: "pending" | "paid";
   mint: string;
   unit?: string;
-  token?: string;
 };
 
 type KeysetCounter = {
@@ -821,18 +820,9 @@ export const useWalletStore = defineStore("wallet", {
         throw new Error("invoice not found");
       }
 
-      let proofs: Proof[] = [];
-      if (invoice.token) {
-        const tokenJson = token.decode(invoice.token);
-        if (tokenJson == undefined) {
-          throw new Error("no tokens provided.");
-        }
-        proofs = token.getProofs(tokenJson);
-        if (proofs.length == 0) {
-          throw new Error("no proofs found.");
-        }
-      }
 
+      // select from this.proofs where proof.quote == quote
+      const proofs: Proof[] = mintStore.proofs.filter((p) => p.quote === quote);
       try {
         // this is an outgoing invoice, we first do a getMintQuote to check if the invoice is paid
         const mint = new CashuMint(invoice.mint);
@@ -872,8 +862,7 @@ export const useWalletStore = defineStore("wallet", {
     ////////////// UI HELPERS //////////////
     addOutgoingPendingInvoiceToHistory: function (quote: MeltQuoteResponse, sendProofs: Proof[]) {
       const proofsStore = useProofsStore();
-      const serlializedToken = proofsStore.serializeProofs(sendProofs);
-      proofsStore.setReserved(sendProofs, true);
+      proofsStore.setReserved(sendProofs, true, quote.quote);
       const mintStore = useMintsStore();
       this.invoiceHistory.push({
         amount: -(quote.amount + quote.fee_reserve),
@@ -883,7 +872,6 @@ export const useWalletStore = defineStore("wallet", {
         date: currentDateStr(),
         status: "pending",
         mint: mintStore.activeMintUrl,
-        token: serlializedToken,
         unit: mintStore.activeUnit,
       });
     },

@@ -551,6 +551,29 @@ export default {
         }
       };
     },
+    cleanUpLocalStorage: function () {
+      // delete cashu.spentProofs from local storage
+      localStorage.removeItem("cashu.spentProofs");
+
+      // determine if the user might have exceeded the local storage quota
+      // store 10kb of data in local storage to check if the user has exceeded the quota
+      let data = new Array(10240).join("x");
+      try {
+        localStorage.setItem("cashu.test", data);
+        localStorage.removeItem("cashu.test");
+      } catch (e) {
+        console.log("Local storage quota exceeded");
+        // delete all proofs
+      }
+
+      // walk through all this.invoiceHistory and if the invoice amount is not negative and the state is not pending, delete invoice.token
+      for (var i = 0; i < this.invoiceHistory.length; i++) {
+        var thisInvoice = this.invoiceHistory[i];
+        if (thisInvoice.amount > 0 || thisInvoice.state != "paid") {
+          thisInvoice.token = "";
+        }
+      }
+    },
     // registerLocalStorageSyncHook: function () {
     //   // receives events if other tabs change local storage
     //   window.addEventListener("storage", (e) => {
@@ -629,6 +652,9 @@ export default {
     );
 
     // startup tasks
+
+    // clean up local storage
+    this.cleanUpLocalStorage();
 
     // // Local storage sync hook
     // this.registerLocalStorageSyncHook();

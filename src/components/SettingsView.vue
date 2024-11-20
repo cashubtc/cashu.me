@@ -1206,6 +1206,7 @@ export default defineComponent({
       // mark all this.proofs as reserved=false
       for (let proof of this.proofs) {
         proof.reserved = false;
+        proof.quote = undefined;
       }
       this.notifySuccess("No reserved proofs left");
     },

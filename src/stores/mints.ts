@@ -63,7 +63,7 @@ export class MintClass {
 }
 
 // type that extends type Proof with reserved boolean
-export type WalletProof = Proof & { reserved: boolean };
+export type WalletProof = Proof & { reserved: boolean, quote?: string };
 
 export type Balances = {
   [unit: string]: number;
@@ -89,7 +89,6 @@ export const useMintsStore = defineStore("mints", {
       },
       mints: useLocalStorage("cashu.mints", [] as Mint[]),
       proofs: useLocalStorage("cashu.proofs", [] as WalletProof[]),
-      spentProofs: useLocalStorage("cashu.spentProofs", [] as WalletProof[]),
       blindSignatures: useLocalStorage("cashu.blindSignatures", [] as BlindSignatureAudit[]),
       // balances: useLocalStorage("cashu.balances", {} as Balances),
       showAddMintDialog: false,
@@ -180,15 +179,16 @@ export const useMintsStore = defineStore("mints", {
         units[(units.indexOf(this.activeUnit) + 1) % units.length];
       return this.activeUnit;
     },
-    proofsToWalletProofs(proofs: Proof[]): WalletProof[] {
+    proofsToWalletProofs(proofs: Proof[], quote?: string): WalletProof[] {
       return proofs.map((p) => {
         return {
           ...p,
           reserved: false,
+          quote: quote,
         } as WalletProof;
       });
     },
-    addProofs(proofs: Proof[]) {
+    addProofs(proofs: Proof[], quote?: string) {
       const walletProofs = this.proofsToWalletProofs(proofs);
       this.proofs = this.proofs.concat(walletProofs);
     },
@@ -200,7 +200,6 @@ export const useMintsStore = defineStore("mints", {
           return wp.secret === p.secret;
         });
       });
-      this.spentProofs = this.spentProofs.concat(walletProofs);
     },
     appendBlindSignatures(signature: SerializedBlindedSignature, amount: number, secret: Uint8Array, r: Uint8Array) {
       const audit: BlindSignatureAudit = {
