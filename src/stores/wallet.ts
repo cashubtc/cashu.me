@@ -261,7 +261,7 @@ export const useWalletStore = defineStore("wallet", {
     },
     sendToLock: async function (proofs: WalletProof[], amount: number, receiverPubkey: string) {
       const spendableProofs = this.spendableProofs(proofs, amount);
-      const proofsToSend = this.coinSelect(spendableProofs, amount);
+      const proofsToSend = this.coinSelect(spendableProofs, amount, true);
       const { keep: keepProofs, send: sendProofs } = await this.wallet.send(amount, proofsToSend, { pubkey: receiverPubkey })
       const mintStore = useMintsStore();
       // note: we do not store sendProofs in the proofs store but
