@@ -14,9 +14,7 @@ function decode(encoded_token: string) {
  * Returns a list of proofs from a decoded token
  */
 function getProofs(decoded_token: Token): WalletProof[] {
-  if (
-    !(decoded_token.proofs.length > 0)
-  ) {
+  if (!(decoded_token.proofs.length > 0)) {
     throw new Error("Token format wrong");
   }
   const proofs = decoded_token.proofs.flat();

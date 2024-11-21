@@ -4,10 +4,12 @@ import { useLocalStorage } from "@vueuse/core";
 import { notifyError, notifySuccess } from "../js/notify";
 import { useTokensStore } from "./tokens";
 
-
 export const useStorageStore = defineStore("storage", {
   state: () => ({
-    lastLocalStorageCleanUp: useLocalStorage("cashu.lastLocalStorageCleanUp", new Date()),
+    lastLocalStorageCleanUp: useLocalStorage(
+      "cashu.lastLocalStorageCleanUp",
+      new Date()
+    ),
   }),
   actions: {
     checkLocalStorage: function () {
@@ -58,7 +60,9 @@ export const useStorageStore = defineStore("storage", {
 
       // from all paid invoices in this.invoiceHistory, delete the oldest so that only max 100 remain
       const max_history = 200;
-      let paidInvoices = walletStore.invoiceHistory.filter((i) => i.status == "paid");
+      let paidInvoices = walletStore.invoiceHistory.filter(
+        (i) => i.status == "paid"
+      );
 
       if (paidInvoices.length > max_history) {
         let sortedInvoices = paidInvoices.sort((a, b) => {
@@ -96,13 +100,10 @@ export const useStorageStore = defineStore("storage", {
         localStorageSizeBefore - localStorageSizeAfter;
       console.log(`Cleaned up ${localStorageSizeDiff} bytes of local storage`);
       if (localStorageSizeDiff > 0 && verbose) {
-        notifySuccess(
-          `Cleaned up ${localStorageSizeDiff} bytes`
-        );
+        notifySuccess(`Cleaned up ${localStorageSizeDiff} bytes`);
       }
       this.lastLocalStorageCleanUp = new Date();
     },
-
   },
   getters: {
     canPasteFromClipboard() {
