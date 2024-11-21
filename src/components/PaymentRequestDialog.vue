@@ -26,7 +26,7 @@
                 caption
                 class="text-weight-light text-white"
                 style="font-size: 14px"
-                >Receive payments to this requests</q-item-label
+                >Receive payments via Nostr</q-item-label
               >
             </div>
           </q-card-section>
