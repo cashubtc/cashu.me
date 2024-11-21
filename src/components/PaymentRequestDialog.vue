@@ -31,6 +31,19 @@
             </div>
           </q-card-section>
         </div>
+        <div class="row justify-center">
+          <q-card-section class="q-pa-sm">
+            <div class="row justify-center q-pt-sm">
+              <q-chip outline class="q-pa-md q-py-md">
+                <q-icon name="account_balance" size="xs" class="q-mr-xs" />
+                {{ getShortUrl(activeMintUrl) }}
+              </q-chip>
+              <div @click="newRequest" class="q-ml-sm q-pt-xs">
+                <ToggleUnit class="q-py-none" :balanceView="true" />
+              </div>
+            </div>
+          </q-card-section>
+        </div>
         <q-btn
           class="q-mx-xs q-px-md q-mt-md"
           size="md"
@@ -59,24 +72,35 @@ import { mapActions, mapState, mapWritableState } from "pinia";
 import VueQrcode from "@chenfengyuan/vue-qrcode";
 
 import { usePRStore } from "src/stores/payment-request";
+import { useMintsStore } from "../stores/mints";
+import { getShortUrl } from "src/js/wallet-helpers";
+import ToggleUnit from "./ToggleUnit.vue";
 
+import { map } from "underscore";
 export default defineComponent({
   name: "PRDialog",
   mixins: [windowMixin],
   components: {
     VueQrcode,
+    ToggleUnit,
   },
   data: function () {
-    return {};
+    return {
+      paymentRequestAmount: undefined,
+    };
   },
   computed: {
     ...mapState(usePRStore, ["showPRKData"]),
+    ...mapState(useMintsStore, ["activeMintUrl"]),
     ...mapWritableState(usePRStore, ["showPRDialog"]),
   },
   methods: {
     ...mapActions(usePRStore, ["newPaymentRequest"]),
     newRequest() {
-      this.newPaymentRequest();
+      this.newPaymentRequest(this.paymentRequestAmount);
+    },
+    getShortUrl(url) {
+      return getShortUrl(url);
     },
   },
 });

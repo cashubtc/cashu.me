@@ -205,11 +205,10 @@
             >
             <q-btn
               unelevated
-              icon="qr_code_scanner"
               class="q-mx-0"
               v-if="hasCamera && payInvoiceData.input.request == ''"
               @click="showCamera"
-            >
+              ><q-icon name="qr_code_scanner" class="q-pr-sm" />Scan
             </q-btn>
             <q-btn v-close-popup flat rounded color="grey" class="q-ml-auto"
               >Close</q-btn

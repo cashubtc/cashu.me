@@ -57,16 +57,16 @@ export const useReceiveTokensStore = defineStore("receiveTokensStore", {
       // redeem the token
       await walletStore.redeem(receiveStore.receiveData.tokensBase64);
     },
-    receiveIfDecodes: function () {
+    receiveIfDecodes: async function () {
       try {
         const decodedToken = this.decodeToken(this.receiveData.tokensBase64);
         if (decodedToken) {
-          this.receiveToken(this.receiveData.tokensBase64);
-          return true
+          await this.receiveToken(this.receiveData.tokensBase64);
+          return true;
         }
       } catch (error) {
         console.error(error);
-        return false
+        return false;
       }
     },
   },

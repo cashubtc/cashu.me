@@ -423,7 +423,7 @@ export const useNostrStore = defineStore("nostr", {
           receiveStore.receiveData.tokensBase64 = tokenStr;
           sendTokensStore.showSendTokens = false;
           if (prStore.receivePaymentRequestsAutomatically) {
-            const success = receiveStore.receiveIfDecodes();
+            const success = await receiveStore.receiveIfDecodes();
             if (success) {
               prStore.showPRDialog = false;
             } else {

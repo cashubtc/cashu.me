@@ -1230,7 +1230,7 @@ export const useWalletStore = defineStore("wallet", {
         transport,
         uuid,
         amount,
-        "sat",
+        mintStore.activeUnit,
         mintStore.activeMintUrl ? [mintStore.activeMintUrl] : undefined,
         memo,
       );
