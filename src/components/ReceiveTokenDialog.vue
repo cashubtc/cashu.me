@@ -208,64 +208,12 @@ export default defineComponent({
       "showLastKey",
     ]),
     ...mapActions(useMintsStore, ["addMint"]),
-    knowThisMintOfTokenJson: function (tokenJson) {
-      const mintStore = useMintsStore();
-      return mintStore.mints
-        .map((m) => m.url)
-        .includes(token.getMint(tokenJson));
-    },
-    receiveToken: async function (encodedToken) {
-      const mintStore = useMintsStore();
-      const receiveStore = useReceiveTokensStore();
-      const uIStore = useUiStore();
-      receiveStore.showReceiveTokens = false;
-      console.log("### receive tokens", receiveStore.receiveData.tokensBase64);
-
-      if (receiveStore.receiveData.tokensBase64.length == 0) {
-        throw new Error("no tokens provided.");
-      }
-
-      // get the private key for the token we want to receive if it is locked with P2PK
-      receiveStore.receiveData.p2pkPrivateKey =
-        this.getPrivateKeyForP2PKEncodedToken(
-          receiveStore.receiveData.tokensBase64
-        );
-
-      const tokenJson = token.decode(receiveStore.receiveData.tokensBase64);
-      if (tokenJson == undefined) {
-        throw new Error("no tokens provided.");
-      }
-      // check if we have all mints
-      if (!this.knowThisMintOfTokenJson(tokenJson)) {
-        // // pop up add mint dialog warning
-        // // hack! The "add mint" component is in SettingsView which may now
-        // // have been loaded yet. We switch the tab to settings to make sure
-        // // that it loads. Remove this code when the TrustMintComnent is refactored!
-        // uIStore.setTab("mints");
-        // // hide the receive dialog
-        // receiveStore.showReceiveTokens = false;
-        // // set the mint to add
-        // this.addMintData = { url: token.getMint(tokenJson) };
-        // // show the add mint dialog
-        // this.showAddMintDialog = true;
-        // // show the token receive dialog again for the next attempt
-        // receiveStore.showReceiveTokens = true;
-        // return;
-
-        // add the mint
-        await this.addMint({ url: token.getMint(tokenJson) });
-      }
-      // redeem the token
-      await this.redeem(receiveStore.receiveData.tokensBase64);
-    },
+    ...mapActions(useReceiveTokensStore, [
+      "receiveIfDecodes",
+      "decodeToken",
+      "knowThisMintOfTokenJson",
+    ]),
     // TOKEN METHODS
-    decodeToken: function (encoded_token) {
-      let decodedToken = undefined;
-      try {
-        decodedToken = token.decode(encoded_token);
-      } catch (error) {}
-      return decodedToken;
-    },
     getProofs: function (decoded_token) {
       return token.getProofs(decoded_token);
     },
@@ -286,16 +234,6 @@ export default defineComponent({
         prStore.newPaymentRequest();
       }
     },
-    receiveIfDecodes: function () {
-      try {
-        const decodedToken = this.decodeToken(this.receiveData.tokensBase64);
-        if (decodedToken) {
-          this.receiveToken(this.receiveData.tokensBase64);
-        }
-      } catch (error) {
-        console.error(error);
-      }
-    },
     tokenAlreadyInHistory: function (tokenStr) {
       const tokensStore = useTokensStore();
       return (
@@ -310,7 +248,7 @@ export default defineComponent({
         return;
       }
       const tokensStore = useTokensStore();
-      const decodedToken = this.decodeToken(token);
+      const decodedToken = tokensStore.decodeToken(token);
       // get amount from decodedToken.token.proofs[..].amount
       const amount = this.getProofs(decodedToken).reduce(
         (sum, el) => (sum += el.amount),
@@ -323,7 +261,7 @@ export default defineComponent({
       });
       this.showReceiveTokens = false;
       // show success notification
-      this.notifySuccess("Ecash added to history.");
+      this.notifySuccess("Incoming payment added to history.");
     },
     pasteToParseDialog: function () {
       console.log("pasteToParseDialog");

@@ -1059,9 +1059,9 @@ export const useWalletStore = defineStore("wallet", {
       sendTokenStore.showSendTokens = true
       sendTokenStore.showLockInput = true
     },
-    handlePaymentRequest: function (req: string) {
+    handlePaymentRequest: async function (req: string) {
       const prStore = usePRStore()
-      prStore.decodePaymentRequest(req)
+      await prStore.decodePaymentRequest(req)
     },
     decodeRequest: async function (req: string) {
       const p2pkStore = useP2PKStore()
@@ -1222,7 +1222,7 @@ export const useWalletStore = defineStore("wallet", {
       const tags = [["n", "17"]];
       const transport = [{
         type: PaymentRequestTransportType.NOSTR,
-        target: nostrStore.nprofile,
+        target: nostrStore.seedSignerNprofile,
         tags: tags,
       }] as PaymentRequestTransport[];
       const uuid = uuidv4().split("-")[0];

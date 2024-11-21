@@ -179,6 +179,14 @@ export const useMintsStore = defineStore("mints", {
         units[(units.indexOf(this.activeUnit) + 1) % units.length];
       return this.activeUnit;
     },
+    selectUnit: function (unit: string) {
+      const units = this.activeMint().units;
+      if (units.includes(unit)) {
+        this.activeUnit = unit;
+      } else {
+        notifyError(`Unit ${unit} not supported by mint`, "Unit selection failed");
+      }
+    },
     proofsToWalletProofs(proofs: Proof[], quote?: string): WalletProof[] {
       return proofs.map((p) => {
         return {

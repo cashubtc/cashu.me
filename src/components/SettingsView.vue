@@ -217,7 +217,6 @@
     </div>
 
     <!-- payment requests -->
-    <!-- NOTE: temporarily disabled the button until fix -->
     <div class="q-py-sm q-px-xs text-left" on-left>
       <q-item class="q-pt-lg">
         <q-item-section>
@@ -225,8 +224,9 @@
             >Payment requests</q-item-label
           >
           <q-item-label caption
-            >Payment requests allow you to receive payments via
-            nostr.</q-item-label
+            >Payment requests allow you to receive payments via nostr. If you
+            enable this, your wallet will subscribe to your nostr
+            relays.</q-item-label
           >
         </q-item-section>
       </q-item>
@@ -236,6 +236,19 @@
           label="Enable Payment Requests"
           color="primary"
         />
+      </q-item>
+    </div>
+    <div v-if="enablePaymentRequest" class="q-pb-sm q-px-xl text-left" on-left>
+      <q-item>
+        <q-toggle
+          v-model="receivePaymentRequestsAutomatically"
+          label="Receive automatically"
+          color="primary"
+        /> </q-item
+      ><q-item class="q-pt-none">
+        <q-item-label caption
+          >If enabled, the wallet will automatically receive incoming payments.
+        </q-item-label>
       </q-item>
     </div>
 
@@ -1083,7 +1096,10 @@ export default defineComponent({
       "showRemoveMintDialog",
     ]),
     ...mapWritableState(useNWCStore, ["nwcEnabled", "connections", "relays"]),
-    ...mapWritableState(usePRStore, ["enablePaymentRequest"]),
+    ...mapWritableState(usePRStore, [
+      "enablePaymentRequest",
+      "receivePaymentRequestsAutomatically",
+    ]),
     keysetCountersByMint() {
       const mints = this.mints;
       const keysetCountersByMint = {}; // {mintUrl: [keysetCounter: {id: string, count: number}, ...]}

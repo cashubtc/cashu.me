@@ -44,6 +44,7 @@ export const useNostrStore = defineStore("nostr", {
     nip46signer: {} as NDKNip46Signer,
     privateKeySignerPrivateKey: useLocalStorage<string>("cashu.ndk.privateKeySignerPrivateKey", ""),
     seedSignerPrivateKey: useLocalStorage<string>("cashu.ndk.seedSignerPrivateKey", ""),
+    seedSignerPublicKey: useLocalStorage<string>("cashu.ndk.seedSignerPublicKey", ""),
     seedSignerPrivateKeyNsec: "",
     privateKeySigner: {} as NDKPrivateKeySigner,
     signer: {} as NDKSigner,
@@ -60,6 +61,13 @@ export const useNostrStore = defineStore("nostr", {
     nprofile: (state) => {
       const profile: ProfilePointer = {
         pubkey: state.pubkey,
+        relays: state.relays,
+      };
+      return nip19.nprofileEncode(profile);
+    },
+    seedSignerNprofile: (state) => {
+      const profile: ProfilePointer = {
+        pubkey: state.seedSignerPublicKey,
         relays: state.relays,
       };
       return nip19.nprofileEncode(profile);
@@ -183,16 +191,20 @@ export const useNostrStore = defineStore("nostr", {
       this.privateKeySignerPrivateKey = "";
       await this.initWalletSeedPrivateKeySigner();
     },
-    initWalletSeedPrivateKeySigner: async function () {
+    walletSeedGenerateKeyPair: async function () {
       const walletStore = useWalletStore();
       const sk = walletStore.seed.slice(0, 32)
       const walletPublicKeyHex = getPublicKey(sk) // `pk` is a hex string
       const walletPrivateKeyHex = bytesToHex(sk)
       this.seedSignerPrivateKey = walletPrivateKeyHex;
-      this.privateKeySigner = new NDKPrivateKeySigner(walletPrivateKeyHex)
+      this.seedSignerPublicKey = walletPublicKeyHex;
+    },
+    initWalletSeedPrivateKeySigner: async function () {
+      await this.walletSeedGenerateKeyPair();
+      this.privateKeySigner = new NDKPrivateKeySigner(this.seedSignerPrivateKey)
       this.signerType = SignerType.SEED;
       this.setSigner(this.privateKeySigner);
-      this.setPubkey(walletPublicKeyHex);
+      this.setPubkey(this.seedSignerPublicKey);
     },
     fetchEventsFromUser: async function () {
       const filter: NDKFilter = { kinds: [1], authors: [this.pubkey] };
@@ -222,10 +234,10 @@ export const useNostrStore = defineStore("nostr", {
       return mintUrlsCounted;
     },
     sendNip04DirectMessage: async function (recipient: string, message: string) {
-      // const randomPrivateKey = generateSecretKey();
-      // const randomPublicKey = getPublicKey(randomPrivateKey);
-      const randomPrivateKey = hexToBytes(this.seedSignerPrivateKey);
-      const randomPublicKey = this.pubkey;
+      const randomPrivateKey = generateSecretKey();
+      const randomPublicKey = getPublicKey(randomPrivateKey);
+      // const randomPrivateKey = hexToBytes(this.seedSignerPrivateKey);
+      // const randomPublicKey = this.pubkey;
       const ndk = new NDK({ explicitRelayUrls: this.relays, signer: new NDKPrivateKeySigner(bytesToHex(randomPrivateKey)) });
       const event = new NDKEvent(ndk);
       ndk.connect();
@@ -242,17 +254,19 @@ export const useNostrStore = defineStore("nostr", {
       }
     },
     subscribeToNip04DirectMessages: async function () {
+      await this.walletSeedGenerateKeyPair();
+      await this.initNdkReadOnly();
       let nip04DirectMessageEvents: Set<NDKEvent> = new Set();
       const fetchEventsPromise = new Promise<Set<NDKEvent>>(resolve => {
         if (!this.lastEventTimestamp) {
           this.lastEventTimestamp = Math.floor(Date.now() / 1000);
         }
-        console.log(`### Subscribing to NIP-04 direct messages to ${this.pubkey} since ${this.lastEventTimestamp}`);
+        console.log(`### Subscribing to NIP-04 direct messages to ${this.seedSignerPublicKey} since ${this.lastEventTimestamp}`);
         this.ndk.connect();
         const sub = this.ndk.subscribe(
           {
             kinds: [NDKKind.EncryptedDirectMessage],
-            "#p": [this.pubkey],
+            "#p": [this.seedSignerPublicKey],
             since: this.lastEventTimestamp,
           } as NDKFilter,
           { closeOnEose: false, groupable: false },
@@ -293,7 +307,7 @@ export const useNostrStore = defineStore("nostr", {
       dmEvent.content = message;
       dmEvent.tags = [['p', recipient]];
       dmEvent.created_at = Math.floor(Date.now() / 1000);
-      dmEvent.pubkey = this.pubkey;
+      dmEvent.pubkey = this.seedSignerPublicKey;
       dmEvent.id = dmEvent.getEventHash();
       const dmEventString = JSON.stringify(await dmEvent.toNostrEvent());
 
@@ -301,7 +315,7 @@ export const useNostrStore = defineStore("nostr", {
       sealEvent.kind = 13;
       sealEvent.content = nip44.v2.encrypt(dmEventString, nip44.v2.utils.getConversationKey(this.seedSignerPrivateKey, recipient));
       sealEvent.created_at = this.randomTimeUpTo2DaysInThePast();
-      sealEvent.pubkey = this.pubkey;
+      sealEvent.pubkey = this.seedSignerPublicKey;
       sealEvent.id = sealEvent.getEventHash();
       sealEvent.sig = await sealEvent.sign();
       const sealEventString = JSON.stringify(await sealEvent.toNostrEvent());
@@ -318,25 +332,26 @@ export const useNostrStore = defineStore("nostr", {
       try {
         ndk.connect();
         await wrapEvent.publish();
-        notifySuccess("NIP-17 event published");
       } catch (e) {
         console.error(e);
         notifyError("Could not publish NIP-17 event");
       }
     },
     subscribeToNip17DirectMessages: async function () {
+      await this.walletSeedGenerateKeyPair();
+      await this.initNdkReadOnly();
       let nip17DirectMessageEvents: Set<NDKEvent> = new Set();
       const fetchEventsPromise = new Promise<Set<NDKEvent>>(resolve => {
         if (!this.lastEventTimestamp) {
           this.lastEventTimestamp = Math.floor(Date.now() / 1000);
         }
         const since = this.lastEventTimestamp - 172800; // last 2 days
-        console.log(`### Subscribing to NIP-17 direct messages to ${this.pubkey} since ${since}`);
+        console.log(`### Subscribing to NIP-17 direct messages to ${this.seedSignerPublicKey} since ${since}`);
         this.ndk.connect();
         const sub = this.ndk.subscribe(
           {
             kinds: [1059 as NDKKind],
-            "#p": [this.pubkey],
+            "#p": [this.seedSignerPublicKey],
             since: since,
           } as NDKFilter,
           { closeOnEose: false, groupable: false },
@@ -345,19 +360,29 @@ export const useNostrStore = defineStore("nostr", {
         sub.on('event', (wrapEvent: NDKEvent) => {
           const eventLog = { id: wrapEvent.id, created_at: wrapEvent.created_at } as NostrEventLog;
           if (this.nip17EventIdsWeHaveSeen.find((e) => e.id === wrapEvent.id)) {
-            console.log(`### Already seen NIP-17 event ${wrapEvent.id}`);
+            // console.log(`### Already seen NIP-17 event ${wrapEvent.id} (time: ${wrapEvent.created_at})`);
             return;
           } else {
             console.log(`### New event ${wrapEvent.id}`);
             this.nip17EventIdsWeHaveSeen.push(eventLog);
-            // remove all events older than 4 days to keep the list small
-            this.nip17EventIdsWeHaveSeen = this.nip17EventIdsWeHaveSeen.filter((e) => e.created_at > Math.floor(Date.now() / 1000) - 345600);
+            // remove all events older than 10 days to keep the list small
+            const fourDaysAgo = Math.floor(Date.now() / 1000) - 10 * 24 * 60 * 60;
+            this.nip17EventIdsWeHaveSeen = this.nip17EventIdsWeHaveSeen.filter((e) => e.created_at > fourDaysAgo);
           }
-          const wappedContent = nip44.v2.decrypt(wrapEvent.content, nip44.v2.utils.getConversationKey(this.seedSignerPrivateKey, wrapEvent.pubkey))
-          const sealEvent = JSON.parse(wappedContent) as NostrEvent;
-          const dmEventString = nip44.v2.decrypt(sealEvent.content, nip44.v2.utils.getConversationKey(this.seedSignerPrivateKey, sealEvent.pubkey));
-          const dmEvent = JSON.parse(dmEventString) as NDKEvent;
-          const content = dmEvent.content;
+          let dmEvent: NDKEvent;
+          let content: string;
+          try {
+            const wappedContent = nip44.v2.decrypt(wrapEvent.content, nip44.v2.utils.getConversationKey(this.seedSignerPrivateKey, wrapEvent.pubkey))
+            const sealEvent = JSON.parse(wappedContent) as NostrEvent;
+            const dmEventString = nip44.v2.decrypt(sealEvent.content, nip44.v2.utils.getConversationKey(this.seedSignerPrivateKey, sealEvent.pubkey));
+            dmEvent = JSON.parse(dmEventString) as NDKEvent;
+            content = dmEvent.content;
+            console.log("### NIP-17 DM from", dmEvent.pubkey);
+            console.log("Content:", content);
+          } catch (e) {
+            console.error(e);
+            return;
+          }
           nip17DirectMessageEvents.add(dmEvent)
           this.lastEventTimestamp = Math.floor(Date.now() / 1000);
           this.parseMessageForEcash(content);
@@ -391,15 +416,23 @@ export const useNostrStore = defineStore("nostr", {
             console.log("### incoming token already in history");
             return;
           }
-          await this.addPendingTokenToHistory(tokenStr);
+          await this.addPendingTokenToHistory(tokenStr, false);
 
           receiveStore.receiveData.tokensBase64 = tokenStr;
           const sendTokensStore = useSendTokensStore();
           sendTokensStore.showSendTokens = false;
           const prStore = usePRStore();
-          prStore.showPRDialog = false;
-
-          receiveStore.showReceiveTokens = true;
+          if (prStore.receivePaymentRequestsAutomatically) {
+            const success = receiveStore.receiveIfDecodes();
+            if (success) {
+              prStore.showPRDialog = false;
+            } else {
+              notifyWarning("Could not receive incoming payment");
+            }
+          } else {
+            prStore.showPRDialog = false;
+            receiveStore.showReceiveTokens = true;
+          }
           return
         }
       } catch (e) {
@@ -423,7 +456,7 @@ export const useNostrStore = defineStore("nostr", {
       const tokensStore = useTokensStore();
       return tokensStore.historyTokens.find((t) => t.token === tokenStr);
     },
-    addPendingTokenToHistory: function (tokenStr: string) {
+    addPendingTokenToHistory: function (tokenStr: string, verbose = true) {
       const receiveStore = useReceiveTokensStore();
       if (this.tokenAlreadyInHistory(tokenStr)) {
         notifySuccess("Ecash already in history");
@@ -449,7 +482,9 @@ export const useNostrStore = defineStore("nostr", {
       });
       receiveStore.showReceiveTokens = false;
       // show success notification
-      notifySuccess("Ecash added to history.");
+      if (verbose) {
+        notifySuccess("Ecash added to history.");
+      }
     },
   },
 });
