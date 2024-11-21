@@ -38,14 +38,37 @@
                 <q-icon name="account_balance" size="xs" class="q-mr-xs" />
                 {{ getShortUrl(activeMintUrl) }}
               </q-chip>
-              <div @click="newRequest" class="q-ml-sm q-pt-xs">
-                <ToggleUnit class="q-py-none" :balanceView="true" />
+            </div>
+          </q-card-section>
+        </div>
+        <!-- New amount button and input field -->
+        <div class="row justify-center">
+          <q-card-section class="q-pa-sm">
+            <div class="row justify-center q-pt-sm">
+              <div v-if="!isEditingAmount">
+                <q-btn outline rounded @click="startEditingAmount">
+                  <q-icon name="edit_note" size="xs" class="q-mr-sm" />
+                  {{ amountLabel }}</q-btn
+                >
+              </div>
+              <div v-else>
+                <q-input
+                  ref="amountInput"
+                  v-model="amountInputValue"
+                  type="number"
+                  placeholder="Enter amount"
+                  @blur="finishEditingAmount"
+                  @keyup.enter="finishEditingAmount"
+                ></q-input>
+              </div>
+              <div @click="newRequest" class="q-ml-sm">
+                <ToggleUnit class="q-py-none" />
               </div>
             </div>
           </q-card-section>
         </div>
         <q-btn
-          class="q-mx-xs q-px-md q-mt-md"
+          class="q-mx-xs q-px-md q-mt-lg"
           size="md"
           color="primary"
           flat
@@ -66,6 +89,7 @@
     </q-card>
   </q-dialog>
 </template>
+
 <script>
 import { defineComponent } from "vue";
 import { mapActions, mapState, mapWritableState } from "pinia";
@@ -74,9 +98,9 @@ import VueQrcode from "@chenfengyuan/vue-qrcode";
 import { usePRStore } from "src/stores/payment-request";
 import { useMintsStore } from "../stores/mints";
 import { getShortUrl } from "src/js/wallet-helpers";
+import { useUiStore } from "../stores/ui";
 import ToggleUnit from "./ToggleUnit.vue";
 
-import { map } from "underscore";
 export default defineComponent({
   name: "PRDialog",
   mixins: [windowMixin],
@@ -84,9 +108,13 @@ export default defineComponent({
     VueQrcode,
     ToggleUnit,
   },
-  data: function () {
+  data() {
     return {
       paymentRequestAmount: undefined,
+      isEditingAmount: false,
+      amountInputValue: "",
+      amountLabelDefault: "Amount",
+      amountLabel: "Amount",
     };
   },
   computed: {
@@ -101,6 +129,27 @@ export default defineComponent({
     },
     getShortUrl(url) {
       return getShortUrl(url);
+    },
+    startEditingAmount() {
+      this.isEditingAmount = true;
+      this.$nextTick(() => {
+        if (this.$refs.amountInput) {
+          this.$refs.amountInput.focus();
+        }
+      });
+    },
+    finishEditingAmount() {
+      const amount = parseFloat(this.amountInputValue);
+      if (isNaN(amount) || amount <= 0 || this.amountInputValue == "") {
+        this.paymentRequestAmount = undefined;
+        this.amountLabel = this.amountLabelDefault;
+      } else {
+        this.paymentRequestAmount = amount;
+        this.amountLabel = useUiStore().formatCurrency(amount, this.activeUnit);
+      }
+      this.newPaymentRequest(this.paymentRequestAmount);
+      this.isEditingAmount = false;
+      this.amountInputValue = "";
     },
   },
 });
