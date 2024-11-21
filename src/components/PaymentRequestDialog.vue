@@ -34,10 +34,13 @@
         <div class="row justify-center">
           <q-card-section class="q-pa-sm">
             <div class="row justify-center q-pt-sm">
-              <q-chip outline class="q-pa-md q-py-md">
+              <q-chip outline class="q-pa-md q-py-md" style="height: 36px">
                 <q-icon name="account_balance" size="xs" class="q-mr-xs" />
                 {{ getShortUrl(activeMintUrl) }}
               </q-chip>
+              <div @click="toggleUnit" class="q-mt-xs q-ml-sm">
+                <ToggleUnit class="q-py-none" />
+              </div>
             </div>
           </q-card-section>
         </div>
@@ -60,9 +63,6 @@
                   @blur="finishEditingAmount"
                   @keyup.enter="finishEditingAmount"
                 ></q-input>
-              </div>
-              <div @click="newRequest" class="q-ml-sm">
-                <ToggleUnit class="q-py-none" />
               </div>
             </div>
           </q-card-section>
@@ -119,11 +119,16 @@ export default defineComponent({
   },
   computed: {
     ...mapState(usePRStore, ["showPRKData"]),
-    ...mapState(useMintsStore, ["activeMintUrl"]),
+    ...mapState(useMintsStore, ["activeMintUrl", "activeUnit"]),
     ...mapWritableState(usePRStore, ["showPRDialog"]),
   },
   methods: {
     ...mapActions(usePRStore, ["newPaymentRequest"]),
+    toggleUnit() {
+      this.paymentRequestAmount = undefined;
+      this.amountLabel = this.amountLabelDefault;
+      this.newPaymentRequest(this.paymentRequestAmount);
+    },
     newRequest() {
       this.newPaymentRequest(this.paymentRequestAmount);
     },
