@@ -52,7 +52,7 @@ export const usePRStore = defineStore("payment-request", {
       }
       // if the payment request has an amount, set it
       if (request.amount) {
-        sendTokenStore.sendData.amount = request.amount;
+        sendTokenStore.sendData.amount = request.amount / mintsStore.activeUnitCurrencyMultiplyer;
       }
       sendTokenStore.sendData.paymentRequest = request;
       if (!sendTokenStore.showSendTokens) {

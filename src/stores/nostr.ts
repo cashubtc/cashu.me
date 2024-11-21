@@ -298,6 +298,7 @@ export const useNostrStore = defineStore("nostr", {
       return Math.floor(Date.now() / 1000) - Math.floor(Math.random() * 172800);
     },
     sendNip17DirectMessage: async function (recipient: string, message: string, relays?: string[]) {
+      await this.initWalletSeedPrivateKeySigner();
       const randomPrivateKey = generateSecretKey();
       const randomPublicKey = getPublicKey(randomPrivateKey);
       const ndk = new NDK({ explicitRelayUrls: relays ?? this.relays, signer: new NDKPrivateKeySigner(bytesToHex(randomPrivateKey)) });

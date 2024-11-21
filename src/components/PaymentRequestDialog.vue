@@ -119,7 +119,11 @@ export default defineComponent({
   },
   computed: {
     ...mapState(usePRStore, ["showPRKData"]),
-    ...mapState(useMintsStore, ["activeMintUrl", "activeUnit"]),
+    ...mapState(useMintsStore, [
+      "activeMintUrl",
+      "activeUnit",
+      "activeUnitCurrencyMultiplyer",
+    ]),
     ...mapWritableState(usePRStore, ["showPRDialog"]),
   },
   methods: {
@@ -149,8 +153,11 @@ export default defineComponent({
         this.paymentRequestAmount = undefined;
         this.amountLabel = this.amountLabelDefault;
       } else {
-        this.paymentRequestAmount = amount;
-        this.amountLabel = useUiStore().formatCurrency(amount, this.activeUnit);
+        this.paymentRequestAmount = amount * this.activeUnitCurrencyMultiplyer;
+        this.amountLabel = useUiStore().formatCurrency(
+          amount * this.activeUnitCurrencyMultiplyer,
+          this.activeUnit
+        );
       }
       this.newPaymentRequest(this.paymentRequestAmount);
       this.isEditingAmount = false;
