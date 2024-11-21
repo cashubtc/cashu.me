@@ -114,18 +114,35 @@
         >
           <q-icon name="lock_outline" class="q-pr-sm" />Lock
         </q-btn>
+        <q-btn
+          v-if="!enablePaymentRequest"
+          v-close-popup
+          rounded
+          flat
+          color="grey"
+          class="q-ml-auto"
+          >Close</q-btn
+        >
       </div>
-      <div class="row q-mt-lg">
+      <div
+        v-if="!receiveData.tokensBase64.length && enablePaymentRequest"
+        class="row q-mt-lg"
+      >
         <q-btn
           unelevated
           dense
           class="q-mr-sm"
-          v-if="!receiveData.tokensBase64.length && enablePaymentRequest"
           @click="handlePaymentRequestBtn"
         >
           <q-icon name="move_to_inbox" class="q-pr-sm" />Payment Request
         </q-btn>
-        <q-btn v-close-popup rounded flat color="grey" class="q-ml-auto q-pr-xs"
+        <q-btn
+          v-if="enablePaymentRequest"
+          v-close-popup
+          rounded
+          flat
+          color="grey"
+          class="q-ml-auto"
           >Close</q-btn
         >
       </div>
