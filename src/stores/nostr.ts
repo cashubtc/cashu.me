@@ -400,6 +400,9 @@ export const useNostrStore = defineStore("nostr", {
         const payload = JSON.parse(message) as PaymentRequestPayload;
         if (payload) {
           const receiveStore = useReceiveTokensStore();
+          const prStore = usePRStore();
+          const sendTokensStore = useSendTokensStore();
+
           const proofs = payload.proofs;
           const mint = payload.mint;
           const unit = payload.unit;
@@ -417,11 +420,8 @@ export const useNostrStore = defineStore("nostr", {
             return;
           }
           await this.addPendingTokenToHistory(tokenStr, false);
-
           receiveStore.receiveData.tokensBase64 = tokenStr;
-          const sendTokensStore = useSendTokensStore();
           sendTokensStore.showSendTokens = false;
-          const prStore = usePRStore();
           if (prStore.receivePaymentRequestsAutomatically) {
             const success = receiveStore.receiveIfDecodes();
             if (success) {

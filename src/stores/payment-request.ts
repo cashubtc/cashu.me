@@ -34,7 +34,7 @@ export const usePRStore = defineStore("payment-request", {
         let foundMint = false;
         for (const mint of request.mints) {
           if (mintsStore.mints.find((m) => m.url == mint)) {
-            await mintsStore.activateMintUrl(mint);
+            await mintsStore.activateMintUrl(mint, false, false, request.unit);
             foundMint = true;
             break;
           }
@@ -43,11 +43,6 @@ export const usePRStore = defineStore("payment-request", {
           notifyError("We do not know the mint in the payment request");
           throw new Error(`We do not know the mint in the payment request: ${request.mints}`);
         }
-      }
-
-      // activate the unit in the payment request
-      if (request.unit) {
-        mintsStore.activateUnit(request.unit);
       }
 
       const sendTokenStore = useSendTokensStore();
