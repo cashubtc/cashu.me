@@ -1,15 +1,32 @@
 <template>
-  <div
-    v-if="sendData.paymentRequest"
-    class="row text-left q-py-none q-my-none"
-    @click="clickPaymentRequest"
-  >
-    <q-btn rounded dense color="primary" class="q-px-md"
-      ><q-icon name="send" class="q-pr-xs" /> Pay via
-      {{ getPaymentRequestTransportType(sendData.paymentRequest) }}
-    </q-btn>
+  <div v-if="sendData.paymentRequest" class="q-pa-none q-ma-none q-mt-md">
+    <div class="q-mb-md text-center">
+      <q-btn
+        rounded
+        dense
+        color="primary"
+        class="q-px-md"
+        @click="clickPaymentRequest"
+      >
+        <q-icon name="send" class="q-pr-xs" />
+        Pay via {{ getPaymentRequestTransportType(sendData.paymentRequest) }}
+      </q-btn>
+    </div>
+    <div class="q-mb-md text-center">
+      <pre
+        class="q-mt-md q-mb-md text-center"
+        style="
+          white-space: pre-wrap;
+          word-wrap: break-word;
+          max-width: 350px;
+          margin: 0 auto;
+        "
+        >{{ getPaymentRequestTarget(sendData.paymentRequest) }}
+      </pre>
+    </div>
   </div>
 </template>
+
 <script>
 import { defineComponent } from "vue";
 import { mapActions, mapState, mapWritableState } from "pinia";
@@ -33,14 +50,7 @@ export default defineComponent({
       "showLockInput",
       "sendData",
     ]),
-    ...mapState(useMintsStore, [
-      "activeMintUrl",
-      "activeProofs",
-      "mints",
-      "proofs",
-      "activeUnit",
-      "addMintBlocking",
-    ]),
+    ...mapState(useMintsStore, ["activeMintUrl", "mints"]),
   },
   methods: {
     ...mapActions(useP2PKStore, ["isLocked", "isLockedToUs"]),
@@ -63,6 +73,32 @@ export default defineComponent({
         }
         if (transport.type == PaymentRequestTransportType.POST) {
           return "HTTP";
+        }
+      }
+    },
+    getPaymentRequestTarget: function (request) {
+      if (!request || !request.transport) {
+        return "Unknown";
+      }
+      console.log(`### getPaymentRequestDestination: ${request}`);
+      const transports = request.transport;
+      for (const transport of transports) {
+        if (transport.type == PaymentRequestTransportType.NOSTR) {
+          return `${transport.target.slice(0, 20)}..${transport.target.slice(
+            -10
+          )}`;
+        }
+        if (transport.type == PaymentRequestTransportType.POST) {
+          try {
+            const url = new URL(transport.target);
+            return url.hostname;
+          } catch (error) {
+            console.error(
+              `Invalid URL in transport.target: ${transport.target}`,
+              error
+            );
+            return "Invalid URL";
+          }
         }
       }
     },
