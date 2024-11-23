@@ -463,10 +463,6 @@ export const useMintsStore = defineStore("mints", {
         throw new Error(`Mint error: ${response.error}`);
       }
     },
-    // TODO: Temporary fix. We are only checking the first token entry.
-    knowThisMintOfTokenJson: function (tokenJson: any) {
-      return this.mints.map((m) => m.url).includes(token.getMint(tokenJson));
-    },
     // getBalance: function () {
     //   const mint = this.mints.find((m) => m.url === this.activeMintUrl);
     //   if (mint) {
