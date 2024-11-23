@@ -40,9 +40,6 @@
       </div>
     </div>
   </div>
-  <div class="row text-left q-py-none q-my-none">
-    <div class="col-12 q-px-sm"></div>
-  </div>
 </template>
 <script>
 import { defineComponent } from "vue";

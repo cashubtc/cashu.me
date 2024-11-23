@@ -16,8 +16,9 @@
             :active="mint.url == activeMintUrl"
             active-class="text-weight-bold text-primary"
             clickable
+            class="q-pb-xs q-pl-xs"
           >
-            <q-item-section avatar>
+            <q-item-section avatar style="min-width: 36px; max-width: 39px">
               <q-icon
                 :color="mint.url == activeMintUrl ? 'primary' : 'grey'"
                 :name="
@@ -31,6 +32,13 @@
                 class="cursor-pointer"
               />
             </q-item-section>
+            <q-avatar
+              v-if="getMintIconUrl(mint)"
+              size="32px"
+              class="q-mr-sm q-mt-xs"
+            >
+              <img :src="getMintIconUrl(mint)" alt="Mint Icon" />
+            </q-avatar>
             <q-item-section>
               <q-item-label
                 lines="1"
@@ -59,7 +67,7 @@
                   :label="
                     formatCurrency(mintClass(mint).unitBalance(unit), unit)
                   "
-                  class="q-mx-xs"
+                  class="q-mr-xs q-mb-xs"
                 />
               </q-item-label>
             </q-item-section>
@@ -80,7 +88,7 @@
             </q-item-section>
           </q-item>
 
-          <q-separator spaced inset="item" />
+          <q-separator spaced style="margin-left: 50px" />
         </div>
       </q-list>
     </div>
@@ -549,8 +557,6 @@ export default defineComponent({
     return {
       discoveringMints: false,
       addingMint: false,
-      hideMnemonic: true,
-      confirmMnemonic: false,
       swapData: {
         from_url: "",
         to_url: "",
@@ -589,7 +595,6 @@ export default defineComponent({
       "addMintBlocking",
     ]),
     ...mapState(useNostrStore, ["pubkey", "mintRecommendations"]),
-    ...mapState(useWalletStore, ["mnemonic"]),
     ...mapState(useWorkersStore, ["invoiceWorkerRunning"]),
     ...mapWritableState(useMintsStore, [
       "addMintData",
@@ -598,16 +603,6 @@ export default defineComponent({
       "showMintInfoDialog",
       "showMintInfoData",
     ]),
-    hiddenMnemonic() {
-      if (this.hideMnemonic) {
-        return this.mnemonic
-          .split(" ")
-          .map((w) => "*".repeat(w.length))
-          .join(" ");
-      } else {
-        return this.mnemonic;
-      }
-    },
   },
   watch: {
     // if swapBlocking is true and invoiceWorkerRunning changes to false, then swapBlocking should be set to false
@@ -633,11 +628,11 @@ export default defineComponent({
       "updateMint",
     ]),
     ...mapActions(useWalletStore, [
-      "newMnemonic",
       "decodeRequest",
       "checkProofsSpendable",
       "requestMint",
       "melt",
+      "mintOnPaid",
     ]),
     ...mapActions(useWorkersStore, [
       "clearAllWorkers",
@@ -682,12 +677,6 @@ export default defineComponent({
         this.addingMint = false;
       }
     },
-    generateNewMnemonic() {
-      this.newMnemonic();
-    },
-    toggleMnemonicVisibility: function () {
-      this.hideMnemonic = !this.hideMnemonic;
-    },
     mintClass(mint) {
       return new MintClass(mint);
     },
@@ -727,7 +716,7 @@ export default defineComponent({
 
         // settle invoice on other side
         await this.activateMintUrl(to_url);
-        await this.invoiceCheckWorker();
+        await this.mintOnPaid(invoice.quote);
       } catch (e) {
         console.error("Error swapping", e);
         notifyError("Error swapping");
@@ -771,26 +760,6 @@ export default defineComponent({
     toggleGetBitcoinPrice: function () {
       this.getBitcoinPrice = !this.getBitcoinPrice;
     },
-    checkActiveProofsSpendable: async function () {
-      // iterate over this.activeProofs in batches of 50 and check if they are spendable
-      let proofs = this.activeProofs.flat();
-      console.log("Checking proofs", proofs);
-      let allSpentProofs = [];
-      let batch_size = 50;
-      for (let i = 0; i < proofs.length; i += batch_size) {
-        console.log("Checking proofs", i, i + batch_size);
-        let batch = proofs.slice(i, i + batch_size);
-        let spent = await this.checkProofsSpendable(batch, true);
-        allSpentProofs.push(spent);
-      }
-      let spentProofs = allSpentProofs.flat();
-      if (spentProofs.length > 0) {
-        console.log("Spent proofs", spentProofs);
-        this.notifySuccess("Removed " + spentProofs.length + " spent proofs");
-      } else {
-        this.notifySuccess("No spent proofs found");
-      }
-    },
     initNdk: async function () {
       await this.initNdkReadOnly();
       console.log(await this.getUserPubkey());
@@ -825,6 +794,17 @@ export default defineComponent({
     showMintInfo: async function (mint) {
       this.showMintInfoData = mint;
       this.showMintInfoDialog = true;
+    },
+    getMintIconUrl: function (mint) {
+      if (mint.info) {
+        if (mint.info.icon_url) {
+          return mint.info.icon_url;
+        } else {
+          return undefined;
+        }
+      } else {
+        return undefined;
+      }
     },
   },
   created: function () {},

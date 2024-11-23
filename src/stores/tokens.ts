@@ -1,19 +1,21 @@
 import { useLocalStorage } from "@vueuse/core";
 import { date } from "quasar";
 import { defineStore } from "pinia";
-import { Proof, Token } from "@cashu/cashu-ts";
+import { PaymentRequest, Proof, Token } from "@cashu/cashu-ts";
 
 /**
  * The tokens store handles everything related to tokens and proofs
  */
 
-type HistoryToken = {
+export type HistoryToken = {
   status: "paid" | "pending";
   amount: number;
   date: string;
-  token: string;
+  token?: string;
   mint: string;
   unit: string;
+  paymentRequest?: PaymentRequest;
+  fee?: number;
 };
 
 export const useTokensStore = defineStore("tokens", {
@@ -23,18 +25,22 @@ export const useTokensStore = defineStore("tokens", {
   }),
   actions: {
     /**
-     * @param {{amount: number, serializedProofs: string}}
+     * @param {{amount: number, serializedProofs: string, mint: string, unit: string}} param0
      */
     addPaidToken({
       amount,
       serializedProofs,
       mint,
       unit,
+      fee,
+      paymentRequest,
     }: {
       amount: number;
       serializedProofs: string;
       mint: string;
       unit: string;
+      fee?: number;
+      paymentRequest?: PaymentRequest
     }) {
       this.historyTokens.push({
         status: "paid",
@@ -43,6 +49,8 @@ export const useTokensStore = defineStore("tokens", {
         token: serializedProofs,
         mint,
         unit,
+        fee,
+        paymentRequest,
       } as HistoryToken);
     },
     addPendingToken({
@@ -50,11 +58,15 @@ export const useTokensStore = defineStore("tokens", {
       serializedProofs,
       mint,
       unit,
+      fee,
+      paymentRequest,
     }: {
       amount: number;
       serializedProofs: string;
       mint: string;
       unit: string;
+      fee?: number;
+      paymentRequest?: PaymentRequest;
     }) {
       this.historyTokens.push({
         status: "pending",
@@ -63,9 +75,11 @@ export const useTokensStore = defineStore("tokens", {
         token: serializedProofs,
         mint,
         unit,
+        fee,
+        paymentRequest,
       });
     },
-    editHistoryToken(tokenToEdit: string, options?: { newAmount?: number; addAmount?: number, newStatus?: "paid" | "pending", newToken?: string, }): HistoryToken | undefined {
+    editHistoryToken(tokenToEdit: string, options?: { newAmount?: number; addAmount?: number, newStatus?: "paid" | "pending", newToken?: string, newFee?: number }): HistoryToken | undefined {
       const index = this.historyTokens.findIndex((t) => t.token === tokenToEdit);
       if (index >= 0) {
         if (options) {
@@ -86,6 +100,9 @@ export const useTokensStore = defineStore("tokens", {
           if (options.newStatus) {
             this.historyTokens[index].status = options.newStatus;
           }
+          if (options.newFee) {
+            this.historyTokens[index].fee = options.newFee;
+          }
         }
 
         return this.historyTokens[index];
@@ -94,7 +111,7 @@ export const useTokensStore = defineStore("tokens", {
       return undefined;
     },
     setTokenPaid(token: string) {
-      const index = this.historyTokens.findIndex((t) => t.token === token);
+      const index = this.historyTokens.findIndex((t) => t.token === token && t.status == "pending");
       if (index >= 0) {
         this.historyTokens[index].status = "paid";
       }

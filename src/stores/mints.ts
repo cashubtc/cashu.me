@@ -2,7 +2,7 @@ import { defineStore } from "pinia";
 import { useLocalStorage } from "@vueuse/core";
 import { useWorkersStore } from "./workers";
 import { notifyApiError, notifyError, notifySuccess } from "src/js/notify";
-import { CashuMint, MintKeys, MintAllKeysets, Proof, SerializedBlindedSignature, MintKeyset } from "@cashu/cashu-ts";
+import { CashuMint, MintKeys, MintAllKeysets, MintActiveKeys, Proof, SerializedBlindedSignature, MintKeyset, GetInfoResponse } from "@cashu/cashu-ts";
 import { useUiStore } from "./ui";
 import token from "src/js/token";
 export type Mint = {
@@ -10,7 +10,7 @@ export type Mint = {
   keys: MintKeys[];
   keysets: MintKeyset[];
   nickname?: string;
-  info?: any;
+  info?: GetInfoResponse;
   // initialize api: new CashuMint(url) on activation
 };
 
@@ -49,7 +49,7 @@ export class MintClass {
   }
 
   unitKeysets(unit: string): MintKeyset[] {
-    return this.mint.keysets.filter((k) => k.unit === unit && k.active);
+    return this.mint.keysets.filter((k) => k.unit === unit);
   }
 
   unitProofs(unit: string) {
@@ -64,7 +64,7 @@ export class MintClass {
 }
 
 // type that extends type Proof with reserved boolean
-export type WalletProof = Proof & { reserved: boolean };
+export type WalletProof = Proof & { reserved: boolean, quote?: string };
 
 export type Balances = {
   [unit: string]: number;
@@ -90,7 +90,6 @@ export const useMintsStore = defineStore("mints", {
       },
       mints: useLocalStorage("cashu.mints", [] as Mint[]),
       proofs: useLocalStorage("cashu.proofs", [] as WalletProof[]),
-      spentProofs: useLocalStorage("cashu.spentProofs", [] as WalletProof[]),
       blindSignatures: useLocalStorage("cashu.blindSignatures", [] as BlindSignatureAudit[]),
       // balances: useLocalStorage("cashu.balances", {} as Balances),
       showAddMintDialog: false,
@@ -117,6 +116,23 @@ export const useMintsStore = defineStore("mints", {
       ).reduce((sum, p) => sum + p.amount, 0);
       return balance
     },
+    activeKeysets({ activeMintUrl, activeUnit }): MintKeyset[] {
+      const unitKeysets = this.mints.find((m) => m.url === activeMintUrl)?.keysets?.filter((k) => k.unit === activeUnit);
+      if (!unitKeysets) {
+        return [];
+      }
+      return unitKeysets;
+    },
+    activeKeys({ activeMintUrl, activeUnit }): MintKeys[] {
+      const unitKeys = this.mints.find((m) => m.url === activeMintUrl)?.keys?.filter((k) => k.unit === activeUnit);
+      if (!unitKeys) {
+        return [];
+      }
+      return unitKeys;
+    },
+    activeInfo({ activeMintUrl }): GetInfoResponse {
+      return this.mints.find((m) => m.url === activeMintUrl)?.info || {} as GetInfoResponse;
+    },
     activeUnitLabel({ activeUnit }): string {
       if (activeUnit == "sat") {
         return "SAT";
@@ -129,7 +145,16 @@ export const useMintsStore = defineStore("mints", {
       } else {
         return activeUnit;
       }
-    }
+    },
+    activeUnitCurrencyMultiplyer({ activeUnit }): number {
+      if (activeUnit == "usd") {
+        return 100;
+      } else if (activeUnit == "eur") {
+        return 100;
+      } else {
+        return 1;
+      }
+    },
   },
   actions: {
     activeMint() {
@@ -155,19 +180,29 @@ export const useMintsStore = defineStore("mints", {
         units[(units.indexOf(this.activeUnit) + 1) % units.length];
       return this.activeUnit;
     },
-    proofsToWalletProofs(proofs: Proof[]): WalletProof[] {
+    proofsToWalletProofs(proofs: Proof[], quote?: string): WalletProof[] {
       return proofs.map((p) => {
         return {
-          amount: p.amount,
-          secret: p.secret,
-          C: p.C,
+          ...p,
           reserved: false,
-          id: p.id,
-        };
+          quote: quote,
+        } as WalletProof;
       });
     },
-    addProofs(proofs: Proof[]) {
+    addProofs(proofs: Proof[], quote?: string) {
       const walletProofs = this.proofsToWalletProofs(proofs);
+      // do not store DLEQ proofs
+      walletProofs.forEach((p) => {
+        if (!p.dleq) {
+          return;
+        }
+        if (!p.dleqValid) {
+          notifyError("Invalid DLEQ, mint might be tagging you!")
+        }
+        delete p.dleq;
+        delete p.dleqValid;
+      });
+
       this.proofs = this.proofs.concat(walletProofs);
     },
     removeProofs(proofs: Proof[]) {
@@ -178,7 +213,6 @@ export const useMintsStore = defineStore("mints", {
           return wp.secret === p.secret;
         });
       });
-      this.spentProofs = this.spentProofs.concat(walletProofs);
     },
     appendBlindSignatures(signature: SerializedBlindedSignature, amount: number, secret: Uint8Array, r: Uint8Array) {
       const audit: BlindSignatureAudit = {
@@ -269,6 +303,11 @@ export const useMintsStore = defineStore("mints", {
       }
     },
     activateUnit: async function (unit: string, verbose = false) {
+      if (unit === this.activeUnit) {
+        return;
+      }
+      const uIStore = useUiStore();
+      await uIStore.lockMutex();
       const mint = this.mints.find((m) => m.url === this.activeMintUrl);
       if (!mint) {
         notifyError("No active mint", "Unit activation failed");
@@ -280,16 +319,17 @@ export const useMintsStore = defineStore("mints", {
       } else {
         notifyError("Unit not supported by mint", "Unit activation failed");
       }
+      await uIStore.unlockMutex();
+      const worker = useWorkersStore();
+      worker.clearAllWorkers();
     },
     activateMint: async function (mint: Mint, verbose = false, force = false) {
-      const workers = useWorkersStore();
-      const uIStore = useUiStore();
+
       if (mint.url === this.activeMintUrl && !force) {
-        // return here because this function is called repeatedly by the
-        // invoice check and token spendable check workers and would otherwise
-        // run until cleaAllWorkers and kill the woerkers
         return;
       }
+      const workers = useWorkersStore();
+      const uIStore = useUiStore();
       // we need to stop workers because they will reset the activeMint again
       workers.clearAllWorkers();
 

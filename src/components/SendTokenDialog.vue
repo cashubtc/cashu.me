@@ -266,6 +266,12 @@
                 :showP2PKCheck="false"
               />
             </div>
+            <div
+              v-if="sendData.paymentRequest"
+              class="row justify-center q-pt-sm"
+            >
+              <SendPaymentRequest />
+            </div>
             <div class="row q-mt-lg">
               <q-btn
                 class="q-mx-xs"
@@ -275,12 +281,21 @@
                 >Copy</q-btn
               >
               <q-btn
+                unelevated
+                dense
+                class="q-mx-sm"
+                v-if="hasCamera && !sendData.paymentRequest"
+                @click="showCamera"
+              >
+                <q-icon name="qr_code_scanner" class="q-pr-sm" />
+              </q-btn>
+              <q-btn
                 class="q-mx-none"
                 color="grey"
                 size="md"
                 icon="link"
                 flat
-                @click="copyText(baseURL + '?token=' + sendData.tokensBase64)"
+                @click="copyText(baseURL + '#token=' + sendData.tokensBase64)"
                 ><q-tooltip>Copy link</q-tooltip></q-btn
               >
               <q-btn
@@ -389,6 +404,7 @@ import {
 import { mapActions, mapState, mapWritableState } from "pinia";
 import ChooseMint from "components/ChooseMint.vue";
 import { UR, UREncoder } from "@gandlaf21/bc-ur";
+import SendPaymentRequest from "./SendPaymentRequest.vue";
 import {
   notifyError,
   notifySuccess,
@@ -401,6 +417,7 @@ export default defineComponent({
   components: {
     ChooseMint,
     TokenInformation,
+    SendPaymentRequest,
   },
   props: {},
   data: function () {
@@ -435,8 +452,8 @@ export default defineComponent({
     ...mapWritableState(useSendTokensStore, [
       "showSendTokens",
       "showLockInput",
+      "sendData",
     ]),
-    ...mapWritableState(useSendTokensStore, ["sendData"]),
     ...mapWritableState(useCameraStore, ["camera", "hasCamera"]),
     ...mapState(useUiStore, [
       "tickerShort",
@@ -447,10 +464,14 @@ export default defineComponent({
       "activeProofs",
       "activeUnit",
       "activeUnitLabel",
+      "activeUnitCurrencyMultiplyer",
       "activeMintUrl",
       "activeMintBalance",
     ]),
-    ...mapState(useSettingsStore, ["checkSentTokens"]),
+    ...mapState(useSettingsStore, [
+      "checkSentTokens",
+      "includeFeesInSendAmount",
+    ]),
     ...mapState(useWorkersStore, ["tokenWorkerRunning"]),
     // TOKEN METHODS
     sumProofs: function () {
@@ -489,12 +510,19 @@ export default defineComponent({
       let spendableProofs = this.spendableProofs(this.activeProofs);
       let selectedProofs = this.coinSelect(
         spendableProofs,
-        this.sendData.amount
+        this.sendData.amount * this.activeUnitCurrencyMultiplyer,
+        this.includeFeesInSendAmount
       );
+      const feesToAdd = this.includeFeesInSendAmount
+        ? this.getFeesForProofs(selectedProofs)
+        : 0;
       const sumSelectedProofs = selectedProofs
         .flat()
         .reduce((sum, el) => (sum += el.amount), 0);
-      return sumSelectedProofs == this.sendData.amount;
+      return (
+        sumSelectedProofs ==
+        this.sendData.amount * this.activeUnitCurrencyMultiplyer + feesToAdd
+      );
     },
   },
   watch: {
@@ -506,7 +534,7 @@ export default defineComponent({
       }
       // check if token has more than one proof
       const tokenObj = token.decode(val);
-      const proofs = tokenObj.token[0].proofs;
+      const proofs = tokenObj.proofs;
       if (!proofs.length) {
         // no proofs
         return;
@@ -538,10 +566,12 @@ export default defineComponent({
       "clearAllWorkers",
     ]),
     ...mapActions(useWalletStore, [
-      "splitToSend",
+      "send",
       "sendToLock",
       "coinSelect",
       "spendableProofs",
+      "getFeesForProofs",
+      "onTokenPaid",
     ]),
     ...mapActions(useProofsStore, ["serializeProofs"]),
     ...mapActions(useTokensStore, [
@@ -741,7 +771,6 @@ export default defineComponent({
         );
         // update UI
         this.sendData.tokens = sendProofs;
-        console.log("### this.sendData.tokens", this.sendData.tokens);
 
         this.sendData.tokensBase64 = this.serializeProofs(sendProofs);
         this.addPendingToken({
@@ -752,7 +781,7 @@ export default defineComponent({
         });
 
         if (!this.g.offline) {
-          this.checkTokenSpendableWorker(this.sendData.tokensBase64);
+          this.onTokenPaid(this.sendData.tokensBase64);
         }
       } catch (error) {
         console.error(error);
@@ -760,7 +789,7 @@ export default defineComponent({
     },
     sendTokens: async function () {
       /*
-      calls splitToSend, displays token and kicks off the spendableWorker
+      calls send, displays token and kicks off the spendableWorker
       */
       if (
         this.sendData.p2pkPubkey &&
@@ -771,32 +800,30 @@ export default defineComponent({
       }
 
       try {
-        let sendAmount = this.sendData.amount;
-        // if unit is USD, multiply by 100
-        if (this.activeUnit === "usd" || this.activeUnit == "eur") {
-          sendAmount = sendAmount * 100;
-        }
+        let sendAmount =
+          this.sendData.amount * this.activeUnitCurrencyMultiplyer;
         // keep firstProofs, send scndProofs and delete them (invalidate=true)
-        let { _, sendProofs } = await this.splitToSend(
+        let { _, sendProofs } = await this.send(
           this.activeProofs,
           sendAmount,
-          true
+          true,
+          this.includeFeesInSendAmount
         );
 
         // update UI
         this.sendData.tokens = sendProofs;
-        console.log("### this.sendData.tokens", this.sendData.tokens);
 
         this.sendData.tokensBase64 = this.serializeProofs(sendProofs);
         this.addPendingToken({
-          amount: -this.sendData.amount,
+          amount: -sendAmount,
           serializedProofs: this.sendData.tokensBase64,
           unit: this.activeUnit,
           mint: this.activeMintUrl,
+          paymentRequest: this.sendData.paymentRequest,
         });
 
         if (!this.g.offline) {
-          this.checkTokenSpendableWorker(this.sendData.tokensBase64);
+          this.onTokenPaid(this.sendData.tokensBase64);
         }
       } catch (error) {
         console.error(error);

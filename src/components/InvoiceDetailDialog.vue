@@ -52,11 +52,11 @@
                 : 'Create Invoice'
             "
             :loading="globalMutexLock"
-            >
-          <template v-slot:loading>
-                <q-spinner-hourglass />
-                Creating
-              </template>
+          >
+            <template v-slot:loading>
+              <q-spinner-hourglass />
+              Creating
+            </template>
           </q-btn>
           <q-btn v-close-popup rounded flat color="grey" class="q-ml-auto"
             >Close</q-btn
@@ -173,9 +173,17 @@ export default defineComponent({
   },
   computed: {
     ...mapState(useWalletStore, ["invoiceData"]),
-    ...mapState(useMintsStore, ["activeUnit", "activeUnitLabel"]),
+    ...mapState(useMintsStore, [
+      "activeUnit",
+      "activeUnitLabel",
+      "activeUnitCurrencyMultiplyer",
+    ]),
     ...mapState(useWorkersStore, ["invoiceWorkerRunning"]),
-    ...mapWritableState(useUiStore, ["showInvoiceDetails", "tickerShort", "globalMutexLock"]),
+    ...mapWritableState(useUiStore, [
+      "showInvoiceDetails",
+      "tickerShort",
+      "globalMutexLock",
+    ]),
     displayUnit: function () {
       let display = this.formatCurrency(
         this.invoiceData.amount,
@@ -192,18 +200,19 @@ export default defineComponent({
     },
   },
   methods: {
-    ...mapActions(useWalletStore, ["requestMint", "lnurlPaySecond"]),
+    ...mapActions(useWalletStore, [
+      "requestMint",
+      "lnurlPaySecond",
+      "mintOnPaid",
+    ]),
     ...mapActions(useMintsStore, ["toggleUnit"]),
     requestMintButton: async function () {
       try {
-        // if unit is USD, multiply by 100
         const mintStore = useMintsStore();
-        if (mintStore.activeUnit === "usd") {
-          this.invoiceData.amount = this.invoiceData.amount * 100;
-        }
+        this.invoiceData.amount *= this.activeUnitCurrencyMultiplyer;
         this.createInvoiceButtonBlocked = true;
-        await this.requestMint();
-        await this.invoiceCheckWorker();
+        const mintQuote = await this.requestMint();
+        await this.mintOnPaid(mintQuote.quote);
       } catch (e) {
         console.log("#### requestMintButton", e);
       } finally {

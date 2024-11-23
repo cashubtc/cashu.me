@@ -10,18 +10,16 @@ describe("token", () => {
   describe("decode", () => {
     it("should properly decode a V3 token", () => {
       const decoded = token.decode(VALID_V3_TOKEN);
-      expect(decoded.token.length).toEqual(1);
-      const { mint, proofs } = decoded.token[0];
-      expect(mint).toEqual("https://8333.space:3338");
-      expect(proofs.length).toEqual(1);
+      expect(decoded.proofs.length).toEqual(1);
+      expect(decoded.mint).toEqual("https://8333.space:3338");
+      expect(decoded.proofs.length).toEqual(1);
     });
 
     it("should properly decode a V2 token", () => {
       const decoded = token.decode(VALID_V2_TOKEN);
-      expect(decoded.token.length).toEqual(1);
-      const { mint, proofs } = decoded.token[0];
-      expect(mint).toEqual("https://8333.space:3338");
-      expect(proofs.length).toEqual(1);
+      expect(decoded.proofs.length).toEqual(1);
+      expect(decoded.mint).toEqual("https://8333.space:3338");
+      expect(decoded.proofs.length).toEqual(1);
     });
   });
 
