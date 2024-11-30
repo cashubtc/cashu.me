@@ -706,7 +706,7 @@ export default defineComponent({
                 try {
                   const tokenURL =
                     window.location.toString() +
-                    "?token=" +
+                    "#token=" +
                     this.sendData.tokensBase64;
                   this.ndef
                     .write(
