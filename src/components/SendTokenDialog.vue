@@ -303,12 +303,37 @@
                 color="grey"
                 icon="delete"
                 size="md"
-                @click="showDeleteDialog = true"
+                @click="
+                  showDeleteDialog = true;
+                  closeCardScanner();
+                "
                 flat
               >
                 <q-tooltip>Delete from history</q-tooltip>
               </q-btn>
-              <q-btn v-close-popup flat color="grey" class="q-ml-auto"
+              <q-btn
+                :disabled="!ndefSupported"
+                :loading="scanningCard"
+                class="q-mx-none"
+                color="grey"
+                icon="nfc"
+                size="md"
+                @click="writeTokensToCard"
+                flat
+              >
+                <q-tooltip>{{
+                  ndefSupported ? "Flash to NFC card" : "NDEF unsupported"
+                }}</q-tooltip>
+                <template v-slot:loading>
+                  <q-spinner />
+                </template>
+              </q-btn>
+              <q-btn
+                v-close-popup
+                @click="closeCardScanner"
+                flat
+                color="grey"
+                class="q-ml-auto"
                 >Close</q-btn
               >
             </div>
@@ -380,7 +405,12 @@ import { mapActions, mapState, mapWritableState } from "pinia";
 import ChooseMint from "components/ChooseMint.vue";
 import { UR, UREncoder } from "@gandlaf21/bc-ur";
 import SendPaymentRequest from "./SendPaymentRequest.vue";
-
+import {
+  notifyError,
+  notifySuccess,
+  notify,
+  notifyWarning,
+} from "src/js/notify.ts";
 export default defineComponent({
   name: "SendTokenDialog",
   mixins: [windowMixin],
@@ -414,6 +444,8 @@ export default defineComponent({
       framentInervalSlow: 500,
       fragmentSpeedLabel: "F",
       isV4Token: false,
+      scanningCard: false,
+      ndefSupported: "NDEFReader" in globalThis,
     };
   },
   computed: {
@@ -647,6 +679,82 @@ export default defineComponent({
       this.showSendTokens = false;
       this.showDeleteDialog = false;
       this.clearAllWorkers();
+    },
+    writeTokensToCard: function () {
+      if (!this.scanningCard) {
+        try {
+          this.ndef = new NDEFReader();
+          this.controller = new AbortController();
+          const signal = this.controller.signal;
+          this.ndef
+            .scan({ signal })
+            .then(() => {
+              console.log("> Scan started");
+
+              this.ndef.onreadingerror = (error) => {
+                console.error(`Cannot read NDEF data! ${error}`);
+                notifyError("Cannot read data from the NFC tag");
+                this.controller.abort();
+                this.scanningCard = false;
+              };
+
+              this.ndef.onreading = ({ message, serialNumber }) => {
+                console.log(`Read card ${serialNumber}`);
+                notify(`Serial: ${serialNumber}`);
+                this.controller.abort();
+                this.scanningCard = false;
+                try {
+                  const tokenURL =
+                    window.location.toString() +
+                    "#token=" +
+                    this.sendData.tokensBase64;
+                  this.ndef
+                    .write(
+                      {
+                        records: [
+                          {
+                            recordType: "url",
+                            data: tokenURL,
+                          },
+                        ],
+                      },
+                      {
+                        overwrite: true,
+                      }
+                    )
+                    .then(() => {
+                      console.log("Successfully flashed tokens to card!");
+                      notifySuccess("Successfully flashed tokens to card!");
+                      this.showSendTokens = false;
+                    })
+                    .catch((err) => {
+                      console.error(`Argh! ${err}`);
+                      notifyError(`Argh! ${err}`);
+                    });
+                } catch (err) {
+                  console.error(`Argh! ${err}`);
+                  notifyError(`Argh! ${err}`);
+                }
+              };
+              this.scanningCard = true;
+            })
+            .catch((error) => {
+              console.error(`Argh! ${error}`);
+              notifyError(`Argh! ${error}`);
+              this.scanningCard = false;
+            });
+          notifyWarning("THIS WILL OVERWRITE YOUR CARD!");
+        } catch (error) {
+          console.error(`Argh! ${error}`);
+          notifyError(`Argh! ${error}`);
+          this.scanningCard = false;
+        }
+      }
+    },
+    closeCardScanner: function () {
+      console.log("Closing scanner!");
+      this.controller.abort();
+      this.scanningCard = false;
     },
     lockTokens: async function () {
       let sendAmount = this.sendData.amount;
