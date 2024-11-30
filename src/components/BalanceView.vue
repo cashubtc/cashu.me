@@ -56,27 +56,27 @@
                 @click="toggleHideBalance"
               >
                 <strong>
-                  {{ formatCurrency(getTotalBalance, activeUnit) }}
+                  <AnimatedNumber
+                    :value="getTotalBalance"
+                    :format="(val) => formatCurrency(val, activeUnit)"
+                    class="q-my-none q-py-none cursor-pointer"
+                  />
                 </strong>
               </h3>
               <div v-if="bitcoinPrice">
                 <strong v-if="this.activeUnit == 'sat'">
-                  {{
-                    formatCurrency(
-                      (bitcoinPrice / 100000000) * getTotalBalance,
-                      "USD"
-                    )
-                  }}
+                  <AnimatedNumber
+                    :value="(bitcoinPrice / 100000000) * getTotalBalance"
+                    :format="(val) => formatCurrency(val, 'USD')"
+                  />
                 </strong>
                 <strong
                   v-if="this.activeUnit == 'usd' || this.activeUnit == 'eur'"
                 >
-                  {{
-                    formatCurrency(
-                      (getTotalBalance / 100 / bitcoinPrice) * 100000000,
-                      "sat"
-                    )
-                  }}
+                  <AnimatedNumber
+                    :value="(getTotalBalance / 100 / bitcoinPrice) * 100000000"
+                    :format="(val) => formatCurrency(val, 'sat')"
+                  />
                 </strong>
                 <q-tooltip>
                   {{ formatCurrency(bitcoinPrice, "USD").slice(1) }}
@@ -103,7 +103,13 @@
       <div class="col-12">
         <span class="q-my-none q-py-none text-weight-regular">
           Balance:
-          <b>{{ formatCurrency(getActiveMintBalance, activeUnit) }} </b>
+          <b>
+            <AnimatedNumber
+              :value="getActiveMintBalance"
+              :format="(val) => formatCurrency(val, activeUnit)"
+              class="q-my-none q-py-none cursor-pointer"
+            />
+          </b>
         </span>
       </div>
     </div>
@@ -140,7 +146,7 @@ import { useUiStore } from "stores/ui";
 import { useWalletStore } from "stores/wallet";
 import { usePriceStore } from "stores/price";
 import ToggleUnit from "components/ToggleUnit.vue";
-
+import AnimatedNumber from "components/AnimatedNumber.vue";
 import axios from "axios";
 import { map } from "underscore";
 
@@ -149,6 +155,7 @@ export default defineComponent({
   mixins: [windowMixin],
   components: {
     ToggleUnit,
+    AnimatedNumber,
   },
   props: {
     setTab: Function,
