@@ -1,20 +1,29 @@
 import { defineStore } from "pinia";
 import { useSettingsStore } from "./settings";
 import { useLocalStorage } from "@vueuse/core";
-import { notifyApiError, notifyError, notifySuccess, notifyWarning, notify } from "../js/notify";
+import {
+  notifyApiError,
+  notifyError,
+  notifySuccess,
+  notifyWarning,
+  notify,
+} from "../js/notify";
 import axios from "axios";
 
 const unitTickerShortMap = {
   sat: "sats",
   usd: "USD",
   eur: "EUR",
-  msat: "msats"
+  msat: "msats",
 };
 
 export const usePriceStore = defineStore("price", {
   state: () => ({
     bitcoinPrice: useLocalStorage("cashu.price.bitcoinPrice", 0 as number),
-    bitcoinPriceLastUpdated: useLocalStorage("cashu.price.bitcoinPriceLastUpdated", 0 as number),
+    bitcoinPriceLastUpdated: useLocalStorage(
+      "cashu.price.bitcoinPriceLastUpdated",
+      0 as number
+    ),
     bitcoinPriceMinRefreshInterval: 60_000,
   }),
   actions: {
@@ -25,8 +34,15 @@ export const usePriceStore = defineStore("price", {
         console.log("Not fetching bitcoin price, disabled in settings");
         return;
       }
-      if (Date.now() - this.bitcoinPriceLastUpdated < this.bitcoinPriceMinRefreshInterval) {
-        console.log(`Not fetching bitcoin price, last updated ${Date.now() - this.bitcoinPriceLastUpdated}ms ago: ${this.bitcoinPrice}`);
+      if (
+        Date.now() - this.bitcoinPriceLastUpdated <
+        this.bitcoinPriceMinRefreshInterval
+      ) {
+        console.log(
+          `Not fetching bitcoin price, last updated ${
+            Date.now() - this.bitcoinPriceLastUpdated
+          }ms ago: ${this.bitcoinPrice}`
+        );
         return;
       }
       var { data } = await axios.get(
@@ -36,7 +52,5 @@ export const usePriceStore = defineStore("price", {
       this.bitcoinPriceLastUpdated = Date.now();
     },
   },
-  getters: {
-
-  },
+  getters: {},
 });

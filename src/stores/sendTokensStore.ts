@@ -29,6 +29,6 @@ export const useSendTokensStore = defineStore("sendTokensStore", {
       this.sendData.tokensBase64 = "";
       this.sendData.p2pkPubkey = "";
       this.sendData.paymentRequest = undefined;
-    }
+    },
   },
 });

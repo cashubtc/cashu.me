@@ -1,4 +1,4 @@
-version: '2'
+version: "2"
 services:
   cashu.me:
     image: cashu.me
@@ -6,4 +6,4 @@ services:
     container_name: cashu.me
     restart: always
     ports:
-    - "127.0.0.1:3000:80"
+      - "127.0.0.1:3000:80"
