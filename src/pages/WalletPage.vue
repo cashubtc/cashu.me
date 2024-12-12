@@ -364,7 +364,7 @@ export default {
       "setProofs",
       "getKeysForKeyset",
     ]),
-    ...mapActions(useReceiveStore, ["knowThisMintOfTokenJson"]),
+    ...mapActions(useReceiveTokensStore, ["knowThisMintOfTokenJson"]),
     ...mapActions(useWorkersStore, [
       "clearAllWorkers",
       "invoiceCheckWorker",
