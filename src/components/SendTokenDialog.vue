@@ -290,6 +290,24 @@
                 <q-icon name="qr_code_scanner" class="q-pr-sm" />
               </q-btn>
               <q-btn
+                unelevated
+                dense
+                :disabled="!ndefSupported || scanningCard"
+                :loading="scanningCard"
+                class="q-mx-sm"
+                icon="nfc"
+                size="md"
+                @click="writeTokensToCard"
+                flat
+              >
+                <q-tooltip>{{
+                  ndefSupported ? "Flash to NFC card" : "NDEF unsupported"
+                }}</q-tooltip>
+                <template v-slot:loading>
+                  <q-spinner @click="closeCardScanner" />
+                </template>
+              </q-btn>
+              <q-btn
                 class="q-mx-none"
                 color="grey"
                 size="md"
@@ -310,23 +328,6 @@
                 flat
               >
                 <q-tooltip>Delete from history</q-tooltip>
-              </q-btn>
-              <q-btn
-                :disabled="!ndefSupported"
-                :loading="scanningCard"
-                class="q-mx-none"
-                color="grey"
-                icon="nfc"
-                size="md"
-                @click="writeTokensToCard"
-                flat
-              >
-                <q-tooltip>{{
-                  ndefSupported ? "Flash to NFC card" : "NDEF unsupported"
-                }}</q-tooltip>
-                <template v-slot:loading>
-                  <q-spinner />
-                </template>
               </q-btn>
               <q-btn
                 v-close-popup
@@ -700,7 +701,6 @@ export default defineComponent({
 
               this.ndef.onreading = ({ message, serialNumber }) => {
                 console.log(`Read card ${serialNumber}`);
-                notify(`Serial: ${serialNumber}`);
                 this.controller.abort();
                 this.scanningCard = false;
                 try {
@@ -743,7 +743,7 @@ export default defineComponent({
               notifyError(`Argh! ${error}`);
               this.scanningCard = false;
             });
-          notifyWarning("THIS WILL OVERWRITE YOUR CARD!");
+          notifyWarning("This will OVERWRITE your card!");
         } catch (error) {
           console.error(`Argh! ${error}`);
           notifyError(`Argh! ${error}`);

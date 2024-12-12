@@ -6,41 +6,6 @@
       <div
         class="row items-center justify-center no-wrap q-mb-none q-mx-none q-px-none q-pt-lg q-pb-md"
       >
-        <div class="col-2 q-mb-md q-mx-none">
-          <q-btn
-            align="center"
-            size="lg"
-            icon="qr_code_scanner"
-            outline
-            color="primary"
-            flat
-            @click="showCamera"
-          />
-        </div>
-        <div class="col-2 q-mb-md q-mx-none">
-          <q-btn
-            align="center"
-            :disabled="!ndefSupported"
-            :loading="scanningCard"
-            size="lg"
-            icon="nfc"
-            outline
-            color="primary"
-            flat
-            @click="toggleScanner"
-          >
-            <q-tooltip>{{
-              ndefSupported ? "Read from NFC card" : "NDEF unsupported"
-            }}</q-tooltip>
-            <template v-slot:loading>
-              <q-spinner @click="toggleScanner"> </q-spinner>
-            </template>
-          </q-btn>
-        </div>
-      </div>
-      <div
-        class="row items-center justify-center no-wrap q-mb-none q-mx-none q-px-none q-pt-lg q-pb-md"
-      >
         <div class="col-5 q-mb-md">
           <q-btn
             rounded
@@ -54,6 +19,17 @@
             <q-icon name="south_west" size="1.2rem" class="q-mr-xs" />
             Receive</q-btn
           >
+        </div>
+        <div class="col-2 q-mb-md q-mx-none">
+          <q-btn
+            align="center"
+            size="lg"
+            icon="qr_code_scanner"
+            outline
+            color="primary"
+            flat
+            @click="showCamera"
+          />
         </div>
         <!-- button to showSendDialog -->
         <div class="col-5 q-mb-md">
@@ -240,7 +216,7 @@ import { useNostrStore } from "src/stores/nostr";
 import { usePRStore } from "src/stores/payment-request";
 import { useStorageStore } from "src/stores/storage";
 import ReceiveTokenDialog from "src/components/ReceiveTokenDialog.vue";
-import { notifyError, notifySuccess, notify } from "../js/notify";
+import { notifyError, notify } from "../js/notify";
 
 export default {
   mixins: [windowMixin],
@@ -295,7 +271,6 @@ export default {
       credit: 0,
       newName: "",
       scanningCard: false,
-      ndefSupported: "NDEFReader" in globalThis,
     };
   },
   computed: {
@@ -364,7 +339,6 @@ export default {
       "setProofs",
       "getKeysForKeyset",
     ]),
-    ...mapActions(useReceiveTokensStore, ["knowThisMintOfTokenJson"]),
     ...mapActions(useWorkersStore, [
       "clearAllWorkers",
       "invoiceCheckWorker",
@@ -397,72 +371,6 @@ export default {
       "initSigner",
     ]),
     ...mapActions(useStorageStore, ["checkLocalStorage"]),
-    toggleScanner: function () {
-      if (!this.scanningCard) {
-        try {
-          this.ndef = new window.NDEFReader();
-          this.controller = new AbortController();
-          const signal = this.controller.signal;
-          this.ndef
-            .scan({ signal })
-            .then(() => {
-              console.log("> Scan started");
-
-              this.ndef.addEventListener("readingerror", () => {
-                console.error("Argh! Cannot read data from the NFC tag.");
-                notifyError("Argh! Cannot read data from the NFC tag.");
-                this.controller.abort();
-                this.scanningCard = false;
-              });
-
-              this.ndef.addEventListener(
-                "reading",
-                ({ message, serialNumber }) => {
-                  notify(`Serial: ${serialNumber}`);
-                  try {
-                    const decodedTokenLink = new TextDecoder().decode(
-                      message.records[0].data
-                    );
-                    const cashuIndex = decodedTokenLink.indexOf("?token=cashu");
-                    if (cashuIndex === -1) {
-                      throw new Error("not a cashu token");
-                    }
-                    this.receiveData.tokensBase64 = decodedTokenLink.substring(
-                      cashuIndex + 7
-                    );
-                    const tokenJson = token.decode(
-                      this.receiveData.tokensBase64
-                    );
-                    if (tokenJson == undefined) {
-                      throw new Error("unreadable token");
-                    }
-                    if (!this.knowThisMintOfTokenJson(tokenJson)) {
-                      this.addMint({ url: token.getMint(tokenJson) });
-                    }
-                    this.redeem();
-                  } catch (err) {
-                    console.error(`Something went wrong! ${err}`);
-                    notifyError(`Something went wrong! ${err}`);
-                  }
-                  this.controller.abort();
-                  this.scanningCard = false;
-                }
-              );
-              this.scanningCard = true;
-            })
-            .catch((error) => {
-              console.error(`Argh! ${error}`);
-              notifyError(`Argh! ${error}`);
-            });
-        } catch (error) {
-          console.error(`Argh! ${error}`);
-          notifyError(`Argh! ${error}`);
-        }
-      } else {
-        this.controller.abort();
-        this.scanningCard = false;
-      }
-    },
     // TOKEN METHODS
     decodeToken: function (encoded_token) {
       try {

@@ -99,7 +99,7 @@
         <q-btn
           unelevated
           dense
-          class="q-mx-sm"
+          class="q-mr-sm"
           v-if="hasCamera && !receiveData.tokensBase64.length"
           @click="showCamera"
         >
@@ -108,11 +108,29 @@
         <q-btn
           unelevated
           dense
-          class="q-mx-none"
+          class="q-mr-none"
           v-if="!receiveData.tokensBase64.length"
           @click="handleLockBtn"
         >
           <q-icon name="lock_outline" class="q-pr-sm" />Lock
+        </q-btn>
+        <q-btn
+          unelevated
+          dense
+          class="q-mx-sm"
+          v-if="!receiveData.tokensBase64.length && ndefSupported"
+          :loading="scanningCard"
+          :disabled="scanningCard"
+          @click="toggleScanner"
+        >
+          <q-icon name="nfc" class="q-pr-sm" />
+          <q-tooltip>{{
+            ndefSupported ? "Read from NFC card" : "NDEF unsupported"
+          }}</q-tooltip>
+          <template v-slot:loading>
+            <q-spinner @click="toggleScanner"> </q-spinner>
+          </template>
+          NFC
         </q-btn>
         <q-btn
           v-if="!enablePaymentRequest"
@@ -168,6 +186,7 @@ import { mapActions, mapState, mapWritableState } from "pinia";
 // import ChooseMint from "components/ChooseMint.vue";
 import TokenInformation from "components/TokenInformation.vue";
 import { map } from "underscore";
+import { notifyError, notifySuccess, notify } from "../js/notify";
 
 export default defineComponent({
   name: "ReceiveTokenDialog",
@@ -181,6 +200,8 @@ export default defineComponent({
   data: function () {
     return {
       showP2PKDialog: false,
+      ndefSupported: "NDEFReader" in globalThis,
+      scanningCard: false,
     };
   },
   computed: {
@@ -232,6 +253,72 @@ export default defineComponent({
       "decodeToken",
       "knowThisMintOfTokenJson",
     ]),
+    toggleScanner: function () {
+      if (this.scanningCard === false) {
+        try {
+          this.ndef = new window.NDEFReader();
+          this.controller = new AbortController();
+          const signal = this.controller.signal;
+          this.ndef
+            .scan({ signal })
+            .then(() => {
+              console.log("> Scan started");
+
+              this.ndef.addEventListener("readingerror", () => {
+                console.error("Cannot read data from the NFC tag.");
+                notifyError("Cannot read data from the NFC tag.");
+                this.controller.abort();
+                this.scanningCard = false;
+              });
+
+              this.ndef.addEventListener(
+                "reading",
+                ({ message, serialNumber }) => {
+                  notify(`Serial: ${serialNumber}`);
+                  try {
+                    const decodedTokenLink = new TextDecoder().decode(
+                      message.records[0].data
+                    );
+                    const cashuIndex = decodedTokenLink.indexOf("#token=cashu");
+                    if (cashuIndex === -1) {
+                      throw new Error("not a cashu token");
+                    }
+                    this.receiveData.tokensBase64 = decodedTokenLink.substring(
+                      cashuIndex + 7
+                    );
+                    const tokenJson = token.decode(
+                      this.receiveData.tokensBase64
+                    );
+                    if (tokenJson == undefined) {
+                      throw new Error("unreadable token");
+                    }
+                    if (!this.knowThisMintOfTokenJson(tokenJson)) {
+                      this.addMint({ url: token.getMint(tokenJson) });
+                    }
+                    this.redeem();
+                  } catch (err) {
+                    console.error(`Something went wrong! ${err}`);
+                    notifyError(`Something went wrong! ${err}`);
+                  }
+                  this.controller.abort();
+                  this.scanningCard = false;
+                }
+              );
+              this.scanningCard = true;
+            })
+            .catch((error) => {
+              console.error(`Argh! ${error}`);
+              notifyError(`Argh! ${error}`);
+            });
+        } catch (error) {
+          console.error(`Argh! ${error}`);
+          notifyError(`Argh! ${error}`);
+        }
+      } else {
+        this.controller.abort();
+        this.scanningCard = false;
+      }
+    },
     // TOKEN METHODS
     getProofs: function (decoded_token) {
       return token.getProofs(decoded_token);
