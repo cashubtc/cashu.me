@@ -306,12 +306,12 @@ export default defineComponent({
               this.scanningCard = true;
             })
             .catch((error) => {
-              console.error(`Argh! ${error}`);
-              notifyError(`Argh! ${error}`);
+              console.error(`NFC error: ${error.message}`);
+              notifyError(`NFC error: ${error.message}`);
             });
         } catch (error) {
-          console.error(`Argh! ${error}`);
-          notifyError(`Argh! ${error}`);
+          console.error(`NFC error: ${error.message}`);
+          notifyError(`NFC error: ${error.message}`);
         }
       } else {
         this.controller.abort();

@@ -728,25 +728,29 @@ export default defineComponent({
                       this.showSendTokens = false;
                     })
                     .catch((err) => {
-                      console.error(`Argh! ${err}`);
-                      notifyError(`Argh! ${err}`);
+                      console.error(
+                        "NFC write failed: The card may not have enough capacity."
+                      );
+                      notifyError(
+                        "NFC write failed: The card may not have enough capacity."
+                      );
                     });
                 } catch (err) {
-                  console.error(`Argh! ${err}`);
-                  notifyError(`Argh! ${err}`);
+                  console.error(`NFC error: ${err.message}`);
+                  notifyError(`NFC error: ${err.message}`);
                 }
               };
               this.scanningCard = true;
             })
             .catch((error) => {
-              console.error(`Argh! ${error}`);
-              notifyError(`Argh! ${error}`);
+              console.error(`NFC error: ${error.message}`);
+              notifyError(`NFC error: ${error.message}`);
               this.scanningCard = false;
             });
           notifyWarning("This will OVERWRITE your card!");
         } catch (error) {
-          console.error(`Argh! ${error}`);
-          notifyError(`Argh! ${error}`);
+          console.error(`NFC error: ${error.message}`);
+          notifyError(`NFC error: ${error.message}`);
           this.scanningCard = false;
         }
       }
