@@ -274,7 +274,6 @@ export default defineComponent({
               this.ndef.addEventListener(
                 "reading",
                 ({ message, serialNumber }) => {
-                  notify(`Serial: ${serialNumber}`);
                   try {
                     const decodedTokenLink = new TextDecoder().decode(
                       message.records[0].data
