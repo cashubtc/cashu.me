@@ -323,7 +323,6 @@ export default defineComponent({
                     if (!this.knowThisMintOfTokenJson(tokenJson)) {
                       this.addMint({ url: token.getMint(tokenJson) });
                     }
-                    this.redeem();
                   } catch (err) {
                     console.error(`Something went wrong! ${err}`);
                     notifyError(`Something went wrong! ${err}`);
