@@ -533,6 +533,88 @@
           </q-item>
         </div>
 
+        <!-- Web NFC -->
+        <div class="q-px-xs text-left" on-left>
+          <q-list padding>
+            <q-item>
+              <q-item-section>
+                <q-item-label overline class="text-weight-bold"
+                  >WebNFC</q-item-label
+                >
+                <q-item-label caption>
+                  Choose the encoding for storing tokens in NFC cards.
+                </q-item-label>
+              </q-item-section>
+            </q-item>
+            <q-item clickable @click="nfcEncoding = 'cashuB'">
+              <q-item-section avatar>
+                <q-icon
+                  :color="nfcEncoding === 'cashuB' ? 'primary' : 'grey'"
+                  :name="
+                    nfcEncoding === 'cashuB'
+                      ? 'check_circle'
+                      : 'radio_button_unchecked'
+                  "
+                  class="cursor-pointer"
+                />
+              </q-item-section>
+              <q-item-section
+                lines="1"
+                class="cursor-pointer"
+                style="word-break: break-word"
+              >
+                <q-item-label title>CashuB</q-item-label>
+                <q-item-label caption>
+                  The cashuB base64 encoding (e.g. "cashuB...")
+                </q-item-label>
+              </q-item-section>
+            </q-item>
+            <q-item clickable @click="nfcEncoding = 'weburl'">
+              <q-item-section avatar>
+                <q-icon
+                  :color="nfcEncoding === 'weburl' ? 'primary' : 'grey'"
+                  :name="
+                    nfcEncoding === 'weburl'
+                      ? 'check_circle'
+                      : 'radio_button_unchecked'
+                  "
+                  class="cursor-pointer"
+                />
+              </q-item-section>
+              <q-item-section
+                lines="1"
+                class="cursor-pointer"
+                style="word-break: break-word"
+              >
+                <q-item-label title>Web URL + CashuB</q-item-label>
+                <q-item-label caption>
+                  a URL that redirects the receiver to their wallet (e.g.
+                  "https://wallet.cashu.me/#token=cashuB...")
+                </q-item-label>
+              </q-item-section>
+            </q-item>
+            <q-item clickable @click="nfcEncoding = 'binary'">
+              <q-item-section avatar>
+                <q-icon
+                  :color="nfcEncoding === 'binary' ? 'primary' : 'grey'"
+                  :name="
+                    nfcEncoding === 'binary'
+                      ? 'check_circle'
+                      : 'radio_button_unchecked'
+                  "
+                  class="cursor-pointer"
+                />
+              </q-item-section>
+              <q-item-section>
+                <q-item-label title>Raw Binary</q-item-label>
+                <q-item-label caption>
+                  Raw bytes instead of base64. Makes ~33% shorter tokens.
+                </q-item-label>
+              </q-item-section>
+            </q-item>
+          </q-list>
+        </div>
+
         <!-- P2PK -->
         <div class="q-py-sm q-px-xs text-left" on-left>
           <q-list padding>
@@ -1069,6 +1151,7 @@ export default defineComponent({
       "getBitcoinPrice",
       "checkSentTokens",
       "useWebsockets",
+      "nfcEncoding",
     ]),
     ...mapState(useP2PKStore, ["p2pkKeys"]),
     ...mapWritableState(useP2PKStore, ["showP2PKDialog"]),
