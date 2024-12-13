@@ -546,12 +546,12 @@
                 </q-item-label>
               </q-item-section>
             </q-item>
-            <q-item clickable @click="nfcEncoding = 'cashuB'">
+            <q-item clickable @click="nfcEncoding = 'text'">
               <q-item-section avatar>
                 <q-icon
-                  :color="nfcEncoding === 'cashuB' ? 'primary' : 'grey'"
+                  :color="nfcEncoding === 'text' ? 'primary' : 'grey'"
                   :name="
-                    nfcEncoding === 'cashuB'
+                    nfcEncoding === 'text'
                       ? 'check_circle'
                       : 'radio_button_unchecked'
                   "
@@ -563,9 +563,9 @@
                 class="cursor-pointer"
                 style="word-break: break-word"
               >
-                <q-item-label title>CashuB</q-item-label>
+                <q-item-label title>Base64 Text</q-item-label>
                 <q-item-label caption>
-                  The cashuB base64 encoding (e.g. "cashuB...")
+                  The Base64 text encoding (e.g. "cashuB...")
                 </q-item-label>
               </q-item-section>
             </q-item>
@@ -586,13 +586,18 @@
                 class="cursor-pointer"
                 style="word-break: break-word"
               >
-                <q-item-label title>Web URL + CashuB</q-item-label>
+                <q-item-label title>Web URL + Base64 Text</q-item-label>
                 <q-item-label caption>
                   a URL that redirects the receiver to their wallet (e.g.
                   "https://wallet.cashu.me/#token=cashuB...")
                 </q-item-label>
               </q-item-section>
             </q-item>
+            <!--
+              disable binary for now
+              TODO: re-enable once we can decode
+            -->
+            <!--
             <q-item clickable @click="nfcEncoding = 'binary'">
               <q-item-section avatar>
                 <q-icon
@@ -608,10 +613,11 @@
               <q-item-section>
                 <q-item-label title>Raw Binary</q-item-label>
                 <q-item-label caption>
-                  Raw bytes instead of base64. Makes ~33% shorter tokens.
+                  Raw bytes instead of Base64. Makes ~33% shorter tokens.
                 </q-item-label>
               </q-item-section>
             </q-item>
+            -->
           </q-list>
         </div>
 

@@ -275,16 +275,45 @@ export default defineComponent({
                 "reading",
                 ({ message, serialNumber }) => {
                   try {
-                    const decodedTokenLink = new TextDecoder().decode(
-                      message.records[0].data
-                    );
-                    const cashuIndex = decodedTokenLink.indexOf("#token=cashu");
-                    if (cashuIndex === -1) {
-                      throw new Error("not a cashu token");
+                    const record = message.records[0];
+                    const recordType = record.recordType;
+                    switch (recordType) {
+                      case "text":
+                        const text = new TextDecoder().decode(record.data);
+                        if (!text.startsWith("cashu")) {
+                          throw new Error(
+                            "text does not contain a cashu token"
+                          );
+                        }
+                        this.receiveData.tokensBase64 = text;
+                        break;
+                      case "url":
+                        const url = new TextDecoder().decode(record.data);
+                        const i = url.indexOf("#token=cashu");
+                        if (i === -1) {
+                          throw new Error("URL does not contain a cashu token");
+                        }
+                        this.receiveData.tokensBase64 = url.substring(i + 7);
+                        break;
+                      case "mime":
+                        if (record.mediaType !== "application/octet-stream") {
+                          throw new Error("binary data expected");
+                        }
+                        const data = new Uint8Array(record.data.buffer);
+                        const prefix = String.fromCharCode(...data.slice(0, 4));
+                        if (prefix !== "craw") {
+                          throw new Error(
+                            "binary data does not contain a cashu token"
+                          );
+                        }
+                        // TODO: decode the binary token from data
+                        throw new Error(
+                          "binary token parsing not implemented yet"
+                        );
+                        break;
+                      default:
+                        throw new Error(`unsupported recordType ${recordType}`);
                     }
-                    this.receiveData.tokensBase64 = decodedTokenLink.substring(
-                      cashuIndex + 7
-                    );
                     const tokenJson = token.decode(
                       this.receiveData.tokensBase64
                     );

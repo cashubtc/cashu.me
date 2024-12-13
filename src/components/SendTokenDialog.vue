@@ -472,6 +472,7 @@ export default defineComponent({
     ...mapState(useSettingsStore, [
       "checkSentTokens",
       "includeFeesInSendAmount",
+      "nfcEncoding",
     ]),
     ...mapState(useWorkersStore, ["tokenWorkerRunning"]),
     // TOKEN METHODS
@@ -704,24 +705,44 @@ export default defineComponent({
                 this.controller.abort();
                 this.scanningCard = false;
                 try {
-                  const tokenURL =
-                    window.location.toString() +
-                    "#token=" +
-                    this.sendData.tokensBase64;
+                  let records = [];
+                  switch (this.nfcEncoding) {
+                    case "text":
+                      records = [
+                        {
+                          recordType: "text",
+                          data: `${this.sendData.tokensBase64}`,
+                        },
+                      ];
+                      break;
+                    case "weburl":
+                      records = [
+                        {
+                          recordType: "url",
+                          data: `${window.location}#token=${this.sendData.tokensBase64}`,
+                        },
+                      ];
+                      break;
+                    case "binary":
+                      throw new Error("Binary encoding not supported yet");
+                    /*
+                      const data = null;
+                      records = [
+                        {
+                          recordType: "mime",
+                          mediaType: "application/octet-stream",
+                          data: data,
+                        },
+                      ];
+                      break;
+                      */
+                    default:
+                      throw new Error(
+                        `Unknown NFC encoding: ${this.nfcEncoding}`
+                      );
+                  }
                   this.ndef
-                    .write(
-                      {
-                        records: [
-                          {
-                            recordType: "url",
-                            data: tokenURL,
-                          },
-                        ],
-                      },
-                      {
-                        overwrite: true,
-                      }
-                    )
+                    .write({ records: records }, { overwrite: true })
                     .then(() => {
                       console.log("Successfully flashed tokens to card!");
                       notifySuccess("Successfully flashed tokens to card!");
@@ -729,10 +750,10 @@ export default defineComponent({
                     })
                     .catch((err) => {
                       console.error(
-                        "NFC write failed: The card may not have enough capacity."
+                        `NFC write failed: The card may not have enough capacity (needed ${records[0].data.length} bytes).`
                       );
                       notifyError(
-                        "NFC write failed: The card may not have enough capacity."
+                        `NFC write failed: The card may not have enough capacity (needed ${records[0].data.length} bytes).`
                       );
                     });
                 } catch (err) {
