@@ -34,6 +34,7 @@ export const useReceiveTokensStore = defineStore("receiveTokensStore", {
       const mintStore = useMintsStore();
       const walletStore = useWalletStore();
       const receiveStore = useReceiveTokensStore();
+      const uiStore = useUiStore();
       console.log("### receive tokens", receiveStore.receiveData.tokensBase64);
 
       if (receiveStore.receiveData.tokensBase64.length == 0) {
@@ -58,6 +59,7 @@ export const useReceiveTokensStore = defineStore("receiveTokensStore", {
       // redeem the token
       await walletStore.redeem(receiveStore.receiveData.tokensBase64);
       receiveStore.showReceiveTokens = false;
+      uiStore.closeDialogs();
     },
     receiveIfDecodes: async function () {
       try {

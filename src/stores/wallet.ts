@@ -1106,6 +1106,8 @@ export const useWalletStore = defineStore("wallet", {
       } else if (req.startsWith("creqA")) {
         await this.handlePaymentRequest(req)
       }
+      const uiStore = useUiStore();
+      uiStore.closeDialogs();
     },
     fetchBitcoinPriceUSD: async function () {
       var { data } = await axios.get(

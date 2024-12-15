@@ -8,14 +8,14 @@
     backdrop-filter="blur(2px) brightness(60%)"
   >
     <q-card class="bg-grey-10 text-white full-width-card">
-      <q-card-section class="row items-center q-pb-none">
+      <q-card-section class="row items-center q-pb-sm">
         <q-btn flat round dense @click="goBack" class="q-ml-sm">
           <ChevronLeftIcon />
         </q-btn>
         <div class="col text-center">
           <span class="text-h6">Receive ecash</span>
         </div>
-        <q-btn flat round dense @click="openCamera" class="q-mr-sm">
+        <q-btn flat round dense @click="showCamera" class="q-mr-sm">
           <ScanIcon />
         </q-btn>
       </q-card-section>
@@ -63,6 +63,7 @@
     </q-card>
   </q-dialog>
   <P2PKDialog v-model="showP2PKDialog" />
+  <PRDialog v-model="showPRDialog" />
 </template>
 
 <script>
@@ -97,6 +98,7 @@ export default defineComponent({
   mixins: [windowMixin],
   components: {
     P2PKDialog,
+    PRDialog,
     ChevronLeftIcon,
     ClipboardIcon,
     FileTextIcon,
@@ -165,6 +167,7 @@ export default defineComponent({
         if (this.decodeToken(text)) {
           this.receiveData.tokensBase64 = text;
         }
+        this.showReceiveEcashDrawer = false;
         this.showReceiveTokens = true;
       });
     },
@@ -174,6 +177,7 @@ export default defineComponent({
         this.generateKeypair();
       }
       this.showLastKey();
+      this.showReceiveEcashDrawer = false;
     },
     handlePaymentRequestBtn: function () {
       const prStore = usePRStore();
@@ -182,17 +186,7 @@ export default defineComponent({
       if (this.showPRDialog) {
         prStore.newPaymentRequest();
       }
-    },
-    openCamera: function () {
-      this.closeCamera(); // Ensure any existing camera instance is closed
-      this.showCamera();
-      this.showReceiveTokens = false;
-    },
-    closeCamera() {
-      this.camera.show = false;
-      if (this.camera.previousComponent === "ReceiveTokenDialog") {
-        this.showReceiveTokens = true;
-      }
+      this.showReceiveEcashDrawer = false;
     },
     handleQrCodeDecode(result) {
       console.log("QR code decoded:", result);
@@ -209,15 +203,6 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-.custom-btn {
-  background: $grey-9;
-  color: white;
-  border-radius: 8px;
-  height: 60px;
-  box-shadow: none;
-  font-size: 14px;
-}
-
 .full-width-card {
   width: 100%;
   max-width: 600px;
@@ -231,6 +216,8 @@ export default defineComponent({
 .q-dialog__inner > div {
   border-top-left-radius: 20px;
   border-top-right-radius: 20px;
+  border-bottom-left-radius: 0px !important;
+  border-bottom-right-radius: 0px !important;
 }
 
 .icon-background {
@@ -245,12 +232,5 @@ export default defineComponent({
 .lucide {
   width: 24px;
   height: 24px;
-}
-
-.close-btn-position {
-  position: absolute;
-  right: 16px;
-  bottom: 22px;
-  z-index: 100;
 }
 </style>

@@ -9,14 +9,14 @@
     backdrop-filter="blur(2px) brightness(60%)"
   >
     <q-card class="bg-grey-10 text-white q-px-lg q-pt-md q-pb-md qcard">
-      <q-card-section class="row items-center q-pb-none">
+      <q-card-section class="row items-center q-pb-sm">
         <q-btn flat round dense v-close-popup class="q-ml-sm">
           <XIcon />
         </q-btn>
         <div class="col text-center">
           <span class="text-h6">Receive</span>
         </div>
-        <q-btn flat round dense class="q-mr-sm">
+        <q-btn flat round dense class="q-mr-sm" @click="showCamera">
           <ScanIcon />
         </q-btn>
       </q-card-section>
@@ -60,6 +60,7 @@ import { useReceiveTokensStore } from "src/stores/receiveTokensStore";
 import { mapActions, mapState, mapWritableState } from "pinia";
 import { useUiStore } from "src/stores/ui";
 import { useWalletStore } from "src/stores/wallet";
+import { useCameraStore } from "src/stores/camera";
 import ReceiveEcashDrawer from "src/components/ReceiveEcashDrawer.vue";
 import {
   X as XIcon,
@@ -117,21 +118,13 @@ export default defineComponent({
       this.showInvoiceDetails = true;
       this.showReceiveDialog = false;
     },
+    ...mapActions(useCameraStore, ["closeCamera", "showCamera"]),
   },
   created: function () {},
 });
 </script>
 
 <style lang="scss" scoped>
-.custom-btn {
-  background: $grey-9;
-  color: white;
-  border-radius: 8px;
-  height: 60px;
-  box-shadow: none;
-  font-size: 14px;
-}
-
 .full-width-card {
   width: 100%;
   max-width: 100%;
@@ -144,6 +137,8 @@ export default defineComponent({
 .q-dialog__inner > div {
   border-top-left-radius: 20px;
   border-top-right-radius: 20px;
+  border-bottom-left-radius: 0px !important;
+  border-bottom-right-radius: 0px !important;
 }
 
 .icon-background {

@@ -9,7 +9,7 @@
     backdrop-filter="blur(2px) brightness(60%)"
   >
     <q-card class="bg-grey-10 text-white q-px-lg q-pt-md q-pb-md qcard">
-      <q-card-section class="row items-center q-pb-none">
+      <q-card-section class="row items-center q-pb-sm">
         <q-btn flat round dense v-close-popup class="q-ml-sm">
           <XIcon />
         </q-btn>
@@ -131,14 +131,6 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-.custom-btn {
-  background: $grey-9;
-  color: white;
-  border-radius: 8px;
-  height: 60px;
-  font-size: 14px;
-}
-
 .q-dialog__inner--minimized > div {
   max-width: 100%;
 }
@@ -146,6 +138,8 @@ export default defineComponent({
 .q-dialog__inner > div {
   border-top-left-radius: 20px;
   border-top-right-radius: 20px;
+  border-bottom-left-radius: 0px !important;
+  border-bottom-right-radius: 0px !important;
 }
 
 .icon-background {

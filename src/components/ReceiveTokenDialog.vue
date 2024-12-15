@@ -8,7 +8,7 @@
     no-backdrop-dismiss
     z-index="10000"
   >
-    <q-card v-model="showReceiveTokens" class="q-pa-lg q-pt-md qcard">
+    <q-card v-model="showReceiveTokens" class="q-pa-lg qcard q-card-top">
       <q-btn v-close-popup rounded flat color="grey" class="close-btn-position"
         >Close</q-btn
       >
@@ -18,10 +18,7 @@
             <span class="text-h6">Receive Ecash</span>
           </div>
         </div>
-        <div>
-          <P2PKDialog v-model="showP2PKDialog" />
-          <PRDialog v-model="showPRDialog" />
-        </div>
+        <div></div>
         <q-input
           round
           outlined
@@ -105,7 +102,7 @@
         <q-btn
           unelevated
           dense
-          class="q-mr-sm"
+          class="q-mx-sm"
           v-if="hasCamera && !receiveData.tokensBase64.length"
           @click="showCamera"
         >
@@ -114,7 +111,7 @@
         <q-btn
           unelevated
           dense
-          class="q-mr-sm"
+          class="q-mx-sm"
           v-if="!receiveData.tokensBase64.length && !ndefSupported"
           :loading="scanningCard"
           :disabled="scanningCard"
@@ -130,45 +127,8 @@
           NFC
         </q-btn>
       </div>
-      <div
-        v-if="
-          !receiveData.tokensBase64.length &&
-          (enablePaymentRequest || ndefSupported)
-        "
-        class="row q-mt-lg"
-      >
-        <!-- does require second row of buttons -->
-        <q-btn
-          unelevated
-          dense
-          class="q-mr-sm"
-          v-if="!receiveData.tokensBase64.length && ndefSupported"
-          :loading="scanningCard"
-          :disabled="scanningCard"
-          @click="toggleScanner"
-        >
-          <q-icon name="nfc" class="q-pr-sm" />
-          <q-tooltip>{{
-            ndefSupported ? "Read from NFC card" : "NDEF unsupported"
-          }}</q-tooltip>
-          <template v-slot:loading>
-            <q-spinner @click="toggleScanner"> </q-spinner>
-          </template>
-          NFC
-        </q-btn>
-        <q-btn
-          unelevated
-          dense
-          class="q-mr-sm"
-          v-if="!receiveData.tokensBase64.length && enablePaymentRequest"
-          @click="handlePaymentRequestBtn"
-        >
-          <q-icon name="move_to_inbox" class="q-pr-sm" />Request
-        </q-btn>
-      </div>
     </q-card>
   </q-dialog>
-  <P2PKDialog v-model="showP2PKDialog" />
 </template>
 
 <script>
@@ -182,8 +142,6 @@ import { useCameraStore } from "src/stores/camera";
 import { useP2PKStore } from "src/stores/p2pk";
 import { usePRStore } from "src/stores/payment-request";
 import token from "src/js/token";
-import P2PKDialog from "./P2PKDialog.vue";
-import PRDialog from "./PaymentRequestDialog.vue";
 
 import { mapActions, mapState, mapWritableState } from "pinia";
 import {
@@ -201,10 +159,7 @@ import { notifyError, notifySuccess, notify } from "../js/notify";
 export default defineComponent({
   name: "ReceiveTokenDialog",
   mixins: [windowMixin],
-  components: {
-    P2PKDialog,
-    PRDialog,
-  },
+  components: {},
   data: function () {
     return {
       showP2PKDialog: false,
@@ -224,6 +179,7 @@ export default defineComponent({
       "addMintBlocking",
     ]),
     ...mapWritableState(useMintsStore, ["addMintData", "showAddMintDialog"]),
+    ...mapWritableState(usePRStore, ["showPRDialog"]),
     ...mapState(useCameraStore, ["hasCamera"]),
     ...mapState(useP2PKStore, ["p2pkKeys"]),
     ...mapState(usePRStore, ["enablePaymentRequest"]),
@@ -277,13 +233,13 @@ export default defineComponent({
     //   }
     //   this.showLastKey();
     // },
-    handlePaymentRequestBtn: function () {
-      const prStore = usePRStore();
-      this.showPRDialog = !this.showPRDialog;
-      if (this.showPRDialog) {
-        prStore.newPaymentRequest();
-      }
-    },
+    // handlePaymentRequestBtn: function () {
+    //   const prStore = usePRStore();
+    //   this.showPRDialog = !this.showPRDialog;
+    //   if (this.showPRDialog) {
+    //     prStore.newPaymentRequest();
+    //   }
+    // },
     tokenAlreadyInHistory: function (tokenStr) {
       const tokensStore = useTokensStore();
       return (
@@ -368,5 +324,10 @@ export default defineComponent({
   right: 16px;
   bottom: 22px;
   z-index: 100;
+}
+
+.q-card-top {
+  border-top-left-radius: 0px !important;
+  border-top-right-radius: 0px !important;
 }
 </style>
