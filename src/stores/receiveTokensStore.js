@@ -76,6 +76,7 @@ export const useReceiveTokensStore = defineStore("receiveTokensStore", {
     toggleScanner: function () {
       const receiveStore = useReceiveTokensStore();
       const tokenStore = useTokensStore();
+      const uiStore = useUiStore();
       if (this.scanningCard === false) {
         try {
           this.ndef = new window.NDEFReader();
@@ -142,6 +143,7 @@ export const useReceiveTokensStore = defineStore("receiveTokensStore", {
                     if (!historyToken || historyToken.status === "pending") {
                       receiveStore.receiveData.tokensBase64 = tokenStr;
                       receiveStore.showReceiveTokens = true;
+                      uiStore.closeDialogs();
                     } else {
                       notify("Token already in history.");
                     }

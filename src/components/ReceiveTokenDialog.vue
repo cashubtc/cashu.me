@@ -14,7 +14,7 @@
       <div>
         <div class="row items-center no-wrap q-mb-sm">
           <div class="col-10">
-            <span class="text-h6">Receive Ecash</span>
+            <span class="text-h6">Receive ecash</span>
           </div>
         </div>
         <div></div>
@@ -116,7 +116,7 @@
           :disabled="scanningCard"
           @click="toggleScanner"
         >
-          <q-icon name="nfc" class="q-pr-sm" />
+          <NfcIcon class="q-pr-xs" />
           <q-tooltip>{{
             ndefSupported ? "Read from NFC card" : "NDEF unsupported"
           }}</q-tooltip>
@@ -149,6 +149,7 @@ import {
   FileText as FileTextIcon,
   Lock as LockIcon,
   Scan as ScanIcon,
+  Nfc as NfcIcon,
 } from "lucide-vue-next";
 // import ChooseMint from "components/ChooseMint.vue";
 import TokenInformation from "components/TokenInformation.vue";
@@ -165,6 +166,7 @@ export default defineComponent({
   mixins: [windowMixin],
   components: {
     TokenInformation,
+    NfcIcon,
   },
   data: function () {
     return {
@@ -302,10 +304,6 @@ export default defineComponent({
   width: 100%;
   max-width: 600px;
   margin: 0 auto;
-}
-
-.q-dialog__inner--minimized > div {
-  max-width: 600px;
 }
 
 .q-dialog__inner > div {

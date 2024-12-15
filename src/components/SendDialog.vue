@@ -138,10 +138,6 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-.q-dialog__inner--minimized > div {
-  max-width: 100%;
-}
-
 .q-dialog__inner > div {
   border-top-left-radius: 20px;
   border-top-right-radius: 20px;

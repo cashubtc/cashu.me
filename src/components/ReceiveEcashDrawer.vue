@@ -40,6 +40,17 @@
             </div>
           </q-btn>
 
+          <q-btn class="full-width custom-btn" @click="showCamera">
+            <div class="row items-center full-width">
+              <div class="icon-background q-mr-md">
+                <ScanIcon />
+              </div>
+              <div class="text-left">
+                <div class="text-weight-bold custom-btn-text">SCAN</div>
+              </div>
+            </div>
+          </q-btn>
+
           <q-btn
             v-if="enablePaymentRequest"
             class="full-width custom-btn"
@@ -55,13 +66,36 @@
             </div>
           </q-btn>
 
-          <q-btn class="full-width custom-btn" @click="handleLockBtn">
+          <q-btn
+            v-if="showP2PkButtonInDrawer"
+            class="full-width custom-btn"
+            @click="handleLockBtn"
+          >
             <div class="row items-center full-width">
               <div class="icon-background q-mr-md">
                 <LockIcon />
               </div>
               <div class="text-left">
                 <div class="text-weight-bold custom-btn-text">LOCK</div>
+              </div>
+            </div>
+          </q-btn>
+
+          <q-btn
+            v-if="ndefSupported"
+            class="full-width custom-btn"
+            @click="handleNFCBtn"
+          >
+            <div class="row items-center full-width">
+              <div class="icon-background q-mr-md">
+                <q-spinner v-if="scanningCard" size="sm" />
+                <NfcIcon v-else />
+              </div>
+              <div class="text-left">
+                <div class="text-weight-bold custom-btn-text">
+                  NFC
+                  {{ scanningCard ? "Scanning..." : "" }}
+                </div>
               </div>
             </div>
           </q-btn>
@@ -93,6 +127,7 @@ import {
   Clipboard as ClipboardIcon,
   FileText as FileTextIcon,
   Lock as LockIcon,
+  Nfc as NfcIcon,
   Scan as ScanIcon,
 } from "lucide-vue-next";
 // import ChooseMint from "components/ChooseMint.vue";
@@ -111,6 +146,7 @@ export default defineComponent({
     FileTextIcon,
     LockIcon,
     ScanIcon,
+    NfcIcon,
   },
   data: function () {
     return {
@@ -130,11 +166,14 @@ export default defineComponent({
       "activeUnit",
       "addMintBlocking",
     ]),
-    ...mapWritableState(useUiStore, ["showReceiveEcashDrawer"]),
+    ...mapWritableState(useUiStore, [
+      "showReceiveEcashDrawer",
+      "showNfcButtonInDrawer",
+    ]),
     ...mapWritableState(useMintsStore, ["addMintData", "showAddMintDialog"]),
     ...mapWritableState(usePRStore, ["showPRDialog"]),
     ...mapState(useCameraStore, ["hasCamera"]),
-    ...mapState(useP2PKStore, ["p2pkKeys"]),
+    ...mapState(useP2PKStore, ["p2pkKeys", "showP2PkButtonInDrawer"]),
     ...mapState(usePRStore, ["enablePaymentRequest"]),
     canPasteFromClipboard: function () {
       return (
@@ -193,6 +232,9 @@ export default defineComponent({
       }
       this.showReceiveEcashDrawer = false;
     },
+    handleNFCBtn: function () {
+      this.toggleScanner();
+    },
     handleQrCodeDecode(result) {
       console.log("QR code decoded:", result);
       // Handle the decoded QR code result here
@@ -208,10 +250,6 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-.q-dialog__inner--minimized > div {
-  max-width: 600px;
-}
-
 .q-dialog__inner > div {
   border-top-left-radius: 20px !important;
   border-top-right-radius: 20px !important;

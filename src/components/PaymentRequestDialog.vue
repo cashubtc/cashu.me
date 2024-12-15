@@ -39,7 +39,7 @@
                 {{ getShortUrl(activeMintUrl) }}
               </q-chip>
               <div @click="toggleUnit" class="q-mt-xs q-ml-sm">
-                <ToggleUnit class="q-py-none" />
+                <ToggleUnit class="q-py-none" color="white" />
               </div>
             </div>
           </q-card-section>

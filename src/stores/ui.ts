@@ -22,6 +22,7 @@ export const useUiStore = defineStore("ui", {
     expandHistory:
       useLocalStorage("cashu.ui.expandHistory", true as boolean),
     globalMutexLock: false,
+    showNfcButtonInDrawer: useLocalStorage("cashu.ui.showNfcButtonInDrawer", true as boolean),
   }),
   actions: {
     closeDialogs() {

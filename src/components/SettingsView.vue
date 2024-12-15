@@ -590,6 +590,17 @@
                 </q-item-label>
               </q-item-section>
             </q-item>
+            <q-item v-if="false">
+              <q-toggle
+                v-model="showNfcButtonInDrawer"
+                label="Quick access to NFC"
+                color="primary"
+              /> </q-item
+            ><q-item class="q-pt-none">
+              <q-item-label caption
+                >Quickly scan NFC cards in the receive ecash menu.
+              </q-item-label>
+            </q-item>
             <!--
               disable binary for now
               TODO: re-enable once we can decode
@@ -644,6 +655,18 @@
                 @click="generateKeypair"
                 >Generate key</q-btn
               >
+            </q-item>
+            <q-item>
+              <q-toggle
+                v-model="showP2PkButtonInDrawer"
+                label="Quick access to lock"
+                color="primary"
+              /> </q-item
+            ><q-item class="q-pt-none">
+              <q-item-label caption
+                >Use this to quickly show your P2PK locking key in the receive
+                ecash menu.
+              </q-item-label>
             </q-item>
           </q-list>
         </div>
@@ -1114,10 +1137,12 @@ import { useNostrStore } from "src/stores/nostr";
 import { useNPCStore } from "src/stores/npubcash";
 import { useP2PKStore } from "src/stores/p2pk";
 import { useNWCStore } from "src/stores/nwc";
+import { useUiStore } from "../stores/ui";
 import { useWorkersStore } from "src/stores/workers";
 import { useProofsStore } from "src/stores/proofs";
 import { usePRStore } from "../stores/payment-request";
 import { useRestoreStore } from "src/stores/restore";
+import { useReceiveTokensStore } from "../stores/receiveTokensStore";
 
 export default defineComponent({
   name: "SettingsView",
@@ -1158,7 +1183,11 @@ export default defineComponent({
       "nfcEncoding",
     ]),
     ...mapState(useP2PKStore, ["p2pkKeys"]),
-    ...mapWritableState(useP2PKStore, ["showP2PKDialog"]),
+    ...mapWritableState(useP2PKStore, [
+      "showP2PKDialog",
+      "showP2PkButtonInDrawer",
+    ]),
+    ...mapWritableState(useUiStore, "showNfcButtonInDrawer"),
     ...mapWritableState(useNWCStore, ["showNWCDialog", "showNWCData"]),
     ...mapState(useMintsStore, [
       "activeMintUrl",
@@ -1187,6 +1216,7 @@ export default defineComponent({
       "enablePaymentRequest",
       "receivePaymentRequestsAutomatically",
     ]),
+
     keysetCountersByMint() {
       const mints = this.mints;
       const keysetCountersByMint = {}; // {mintUrl: [keysetCounter: {id: string, count: number}, ...]}
