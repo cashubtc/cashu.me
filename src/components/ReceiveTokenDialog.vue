@@ -6,7 +6,6 @@
     transition-show="slide-down"
     transition-hide="slide-up"
     no-backdrop-dismiss
-    z-index="10000"
   >
     <q-card v-model="showReceiveTokens" class="q-pa-lg qcard q-card-top">
       <q-btn v-close-popup rounded flat color="grey" class="close-btn-position"
@@ -154,7 +153,12 @@ import {
 // import ChooseMint from "components/ChooseMint.vue";
 import TokenInformation from "components/TokenInformation.vue";
 import { map } from "underscore";
-import { notifyError, notifySuccess, notify } from "../js/notify";
+import {
+  notifyError,
+  notifySuccess,
+  notifyWarning,
+  notify,
+} from "../js/notify";
 
 export default defineComponent({
   name: "ReceiveTokenDialog",
@@ -272,10 +276,12 @@ export default defineComponent({
       this.notifySuccess("Incoming payment added to history.");
     },
     pasteToParseDialog: function () {
-      console.log("pasteToParseDialog");
       navigator.clipboard.readText().then((text) => {
-        this.receiveData.tokensBase64 = text;
-        // TODO: Implement token processing logic
+        if (this.decodeToken(text)) {
+          this.receiveData.tokensBase64 = text;
+        } else {
+          notifyWarning("Invalid token");
+        }
       });
     },
   },

@@ -2,13 +2,12 @@
   <q-dialog
     v-model="showSendDialog"
     position="bottom"
-    :full-width="$q.screen.lt.sm"
-    :full-height="$q.screen.lt.sm"
+    :maximized="$q.screen.lt.sm"
     transition-show="slide-up"
     transition-hide="slide-down"
     backdrop-filter="blur(2px) brightness(60%)"
   >
-    <q-card class="bg-grey-10 text-white q-px-lg q-pt-md q-pb-md qcard">
+    <q-card class="bg-grey-10 text-white full-width-card">
       <q-card-section class="row items-center q-pb-sm">
         <q-btn flat round dense v-close-popup class="q-ml-sm" color="primary">
           <XIcon />

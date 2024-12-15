@@ -168,7 +168,6 @@ export default defineComponent({
     ]),
 
     pasteToParseDialog: function () {
-      console.log("pasteToParseDialog");
       this.showReceiveTokens = true;
       navigator.clipboard.readText().then((text) => {
         if (this.decodeToken(text)) {
@@ -189,7 +188,6 @@ export default defineComponent({
     handlePaymentRequestBtn: function () {
       const prStore = usePRStore();
       this.showPRDialog = !this.showPRDialog;
-      console.log("handlePaymentRequestBtn", this.showPRDialog);
       if (this.showPRDialog) {
         prStore.newPaymentRequest();
       }
@@ -210,12 +208,6 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-.full-width-card {
-  width: 100%;
-  max-width: 600px;
-  margin: 0 auto;
-}
-
 .q-dialog__inner--minimized > div {
   max-width: 600px;
 }
