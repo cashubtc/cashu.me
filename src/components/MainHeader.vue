@@ -73,6 +73,7 @@
 <script>
 import { defineComponent, ref } from "vue";
 import EssentialLink from "components/EssentialLink.vue";
+import { useUiStore } from "src/stores/ui";
 
 const linksList = [
   {
@@ -122,6 +123,7 @@ export default defineComponent({
   },
   setup() {
     const leftDrawerOpen = ref(false);
+    const uiStore = useUiStore();
     return {
       essentialLinks: linksList,
       leftDrawerOpen,
@@ -132,7 +134,9 @@ export default defineComponent({
         return location.host.includes("staging");
       },
       reload() {
-        location.reload();
+        if (!uiStore.globalMutexLock) {
+          location.reload();
+        }
       },
     };
   },
