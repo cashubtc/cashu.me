@@ -1,7 +1,7 @@
 <template>
   <q-dialog
     v-model="showInvoiceDetails"
-    position="bottom"
+    position="top"
     :full-width="$q.screen.lt.sm"
     :full-height="$q.screen.lt.sm"
     backdrop-filter="blur(2px) brightness(60%)"
@@ -9,7 +9,7 @@
   >
     <q-card class="q-px-lg q-pt-md q-pb-md qcard">
       <!-- Removed q-bar with close button -->
-      
+
       <!-- invoice is not entered -->
 
       <div v-if="!invoiceData.bolt11">

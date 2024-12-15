@@ -1,11 +1,12 @@
 <template>
   <q-dialog
     v-model="showSendTokens"
-    position="bottom"
+    position="top"
     backdrop-filter="blur(2px) brightness(60%)"
+    transition-show="slide-up"
+    transition-hide="slide-up"
     no-backdrop-dismiss
     full-height
-    
   >
     <q-card class="q-pa-none q-pt-none qcard">
       <!--  enter send data -->

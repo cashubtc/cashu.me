@@ -1,68 +1,14 @@
 <template>
   <q-dialog
     v-model="showReceiveTokens"
-    position="bottom"
+    position="top"
     :maximized="$q.screen.lt.sm"
-    transition-show="slide-up"
-    transition-hide="slide-down"
-    backdrop-filter="blur(2px) brightness(60%)"
+    transition-show="slide-down"
+    transition-hide="slide-up"
     no-backdrop-dismiss
+    z-index="10000"
   >
-    <q-card class="bg-grey-10 text-white full-width-card">
-      <q-card-section class="row items-center q-pb-none">
-        <q-btn flat round dense @click="goBack" class="q-ml-sm">
-          <ChevronLeftIcon />
-        </q-btn>
-        <div class="col text-center">
-          <span class="text-h6">Receive ecash</span>
-        </div>
-        <q-btn flat round dense @click="openCamera" class="q-mr-sm">
-          <ScanIcon />
-        </q-btn>
-      </q-card-section>
-
-      <q-card-section class="q-pa-md">
-        <div class="q-gutter-y-md">
-          <q-btn
-            class="full-width custom-btn"
-            @click="pasteToParseDialog"
-            :disabled="!canPasteFromClipboard"
-          >
-            <div class="row items-center full-width">
-              <div class="icon-background q-mr-sm">
-                <ClipboardIcon />
-              </div>
-              <div class="text-left">
-                <div class="text-weight-bold">PASTE</div>
-              </div>
-            </div>
-          </q-btn>
-
-          <q-btn class="full-width custom-btn" @click="showRequestDialog">
-            <div class="row items-center full-width">
-              <div class="icon-background q-mr-sm">
-                <FileTextIcon />
-              </div>
-              <div class="text-left">
-                <div class="text-weight-bold">REQUEST</div>
-              </div>
-            </div>
-          </q-btn>
-
-          <q-btn class="full-width custom-btn" @click="handleLockBtn">
-            <div class="row items-center full-width">
-              <div class="icon-background q-mr-sm">
-                <LockIcon />
-              </div>
-              <div class="text-left">
-                <div class="text-weight-bold">LOCK</div>
-              </div>
-            </div>
-          </q-btn>
-        </div>
-      </q-card-section>
-    </q-card>
-    <q-card class="q-pa-lg q-pt-md qcard">
+    <q-card v-model="showReceiveTokens" class="q-pa-lg q-pt-md qcard">
       <q-btn v-close-popup rounded flat color="grey" class="close-btn-position"
         >Close</q-btn
       >
@@ -213,7 +159,70 @@
       </div>
     </q-card>
   </q-dialog>
+  <q-dialog
+    v-model="showReceiveTokens"
+    position="bottom"
+    :maximized="$q.screen.lt.sm"
+    transition-show="slide-up"
+    transition-hide="slide-down"
+    backdrop-filter="blur(2px) brightness(60%)"
+    no-backdrop-dismiss
+  >
+    <q-card class="bg-grey-10 text-white full-width-card">
+      <q-card-section class="row items-center q-pb-none">
+        <q-btn flat round dense @click="goBack" class="q-ml-sm">
+          <ChevronLeftIcon />
+        </q-btn>
+        <div class="col text-center">
+          <span class="text-h6">Receive ecash</span>
+        </div>
+        <q-btn flat round dense @click="openCamera" class="q-mr-sm">
+          <ScanIcon />
+        </q-btn>
+      </q-card-section>
 
+      <q-card-section class="q-pa-md">
+        <div class="q-gutter-y-md">
+          <q-btn
+            class="full-width custom-btn"
+            @click="pasteToParseDialog"
+            :disabled="!canPasteFromClipboard"
+          >
+            <div class="row items-center full-width">
+              <div class="icon-background q-mr-sm">
+                <ClipboardIcon />
+              </div>
+              <div class="text-left">
+                <div class="text-weight-bold">PASTE</div>
+              </div>
+            </div>
+          </q-btn>
+
+          <q-btn class="full-width custom-btn" @click="showRequestDialog">
+            <div class="row items-center full-width">
+              <div class="icon-background q-mr-sm">
+                <FileTextIcon />
+              </div>
+              <div class="text-left">
+                <div class="text-weight-bold">REQUEST</div>
+              </div>
+            </div>
+          </q-btn>
+
+          <q-btn class="full-width custom-btn" @click="handleLockBtn">
+            <div class="row items-center full-width">
+              <div class="icon-background q-mr-sm">
+                <LockIcon />
+              </div>
+              <div class="text-left">
+                <div class="text-weight-bold">LOCK</div>
+              </div>
+            </div>
+          </q-btn>
+        </div>
+      </q-card-section>
+    </q-card>
+  </q-dialog>
   <P2PKDialog v-model="showP2PKDialog" />
 </template>
 

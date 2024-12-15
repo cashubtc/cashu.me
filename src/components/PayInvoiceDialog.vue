@@ -2,7 +2,7 @@
   <q-dialog
     v-model="payInvoiceData.show"
     @hide="closeParseDialog"
-    position="bottom"
+    position="top"
     v-if="!camera.show"
     backdrop-filter="blur(2px) brightness(60%)"
     no-backdrop-dismiss
