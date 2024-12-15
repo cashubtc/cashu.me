@@ -92,7 +92,6 @@ export default defineComponent({
   },
   watch: {
     chosenMint: async function () {
-      console.log("Mint chosen ", this.chosenMint);
       await this.activateMintUrl(this.chosenMint.url);
     },
   },

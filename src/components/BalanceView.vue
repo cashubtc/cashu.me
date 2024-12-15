@@ -2,20 +2,24 @@
   <!-- <q-card class="q-my-md q-py-sm">
     <q-card-section class="q-mt-sm q-py-xs"> -->
   <div class="q-pt-xl q-pb-md">
-    <div class="row justify-center q-pb-lg" style="height:80px">
+    <div class="row justify-center q-pb-lg" style="height: 80px">
       <div v-if="globalMutexLock">
         <transition
           appear
-          enter-active-class="animated fadeIn"
+          enter-active-class="animated pulse"
           leave-active-class="animated fadeOut"
         >
-        <q-spinner-hourglass  class="q-mt-lg q-mb-none" size="lg" color="primary" />
-      </transition>
+          <q-spinner-hourglass
+            class="q-mt-lg q-mb-none"
+            size="lg"
+            color="primary"
+          />
+        </transition>
       </div>
-      <div v-else >
+      <div v-else>
         <transition
           appear
-          enter-active-class="animated fadeIn"
+          enter-active-class="animated pulse"
           leave-active-class="animated fadeOut"
         >
           <ToggleUnit class="q-mt-lg q-mb-none" :balanceView="true" />
@@ -52,27 +56,27 @@
                 @click="toggleHideBalance"
               >
                 <strong>
-                  {{ formatCurrency(getTotalBalance, activeUnit) }}
+                  <AnimatedNumber
+                    :value="getTotalBalance"
+                    :format="(val) => formatCurrency(val, activeUnit)"
+                    class="q-my-none q-py-none cursor-pointer"
+                  />
                 </strong>
               </h3>
               <div v-if="bitcoinPrice">
                 <strong v-if="this.activeUnit == 'sat'">
-                  {{
-                    formatCurrency(
-                      (bitcoinPrice / 100000000) * getTotalBalance,
-                      "USD"
-                    )
-                  }}
+                  <AnimatedNumber
+                    :value="(bitcoinPrice / 100000000) * getTotalBalance"
+                    :format="(val) => formatCurrency(val, 'USD')"
+                  />
                 </strong>
                 <strong
                   v-if="this.activeUnit == 'usd' || this.activeUnit == 'eur'"
                 >
-                  {{
-                    formatCurrency(
-                      (getTotalBalance / 100 / bitcoinPrice) * 100000000,
-                      "sat"
-                    )
-                  }}
+                  <AnimatedNumber
+                    :value="(getTotalBalance / 100 / bitcoinPrice) * 100000000"
+                    :format="(val) => formatCurrency(val, 'sat')"
+                  />
                 </strong>
                 <q-tooltip>
                   {{ formatCurrency(bitcoinPrice, "USD").slice(1) }}
@@ -99,7 +103,13 @@
       <div class="col-12">
         <span class="q-my-none q-py-none text-weight-regular">
           Balance:
-          <b>{{ formatCurrency(getActiveMintBalance, activeUnit) }} </b>
+          <b>
+            <AnimatedNumber
+              :value="getActiveMintBalance"
+              :format="(val) => formatCurrency(val, activeUnit)"
+              class="q-my-none q-py-none cursor-pointer"
+            />
+          </b>
         </span>
       </div>
     </div>
@@ -134,15 +144,18 @@ import { useSettingsStore } from "stores/settings";
 import { useTokensStore } from "stores/tokens";
 import { useUiStore } from "stores/ui";
 import { useWalletStore } from "stores/wallet";
+import { usePriceStore } from "stores/price";
 import ToggleUnit from "components/ToggleUnit.vue";
-
+import AnimatedNumber from "components/AnimatedNumber.vue";
 import axios from "axios";
+import { map } from "underscore";
 
 export default defineComponent({
   name: "BalanceView",
   mixins: [windowMixin],
   components: {
     ToggleUnit,
+    AnimatedNumber,
   },
   props: {
     setTab: Function,
@@ -158,8 +171,8 @@ export default defineComponent({
       "activeMint",
     ]),
     ...mapState(useTokensStore, ["historyTokens"]),
-    ...mapState(useSettingsStore, ["getBitcoinPrice"]),
     ...mapState(useUiStore, ["globalMutexLock"]),
+    ...mapState(usePriceStore, ["bitcoinPrice"]),
     ...mapWritableState(useMintsStore, ["activeUnit"]),
     ...mapWritableState(useUiStore, ["hideBalance"]),
     pendingBalance: function () {
@@ -205,30 +218,18 @@ export default defineComponent({
   },
   data() {
     return {
-      bitcoinPrice: null,
       priceLabel: null,
     };
   },
   mounted() {
-    const settingsStore = useSettingsStore();
-    if (this.getBitcoinPrice) {
-      this.fetchPrice();
-    }
+    this.fetchBitcoinPriceUSD();
   },
   methods: {
     ...mapActions(useWalletStore, [
       "checkPendingInvoices",
       "checkPendingTokens",
-      "fetchBitcoinPriceUSD",
     ]),
-    async fetchPrice() {
-      try {
-        this.bitcoinPrice = await this.fetchBitcoinPriceUSD();
-        console.log(`bitcoinPrice: ${this.bitcoinPrice}`);
-      } catch (e) {
-        console.warn(`Could not get Bitcoin price. ${e}`);
-      }
-    },
+    ...mapActions(usePriceStore, ["fetchBitcoinPriceUSD"]),
     toggleUnit: function () {
       const units = this.activeMint().units;
       this.activeUnit =

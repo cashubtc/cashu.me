@@ -10,12 +10,7 @@
             >
             <q-item-label caption
               >Your seed phrase can restore your wallet. Keep it safe and
-              private. Warning: this wallet does not support seed phrase
-              recovery yet. Use a different Cashu wallet or
-              <a href="https://v2alpha.nutstash.app/" target="_blank"
-                >this tool</a
-              >
-              to recover from seed phrase.
+              private.
             </q-item-label>
             <div class="row q-pt-md">
               <div class="col-12">
@@ -51,79 +46,211 @@
         </q-item>
       </q-list>
     </div>
-    <!-- P2PK -->
-    <div class="q-py-sm q-px-xs text-left" on-left>
+
+    <!-- nostr -->
+    <div class="q-py-sm q-px-md text-left" on-left>
       <q-list padding>
         <q-item>
           <q-item-section>
-            <q-item-label overline class="text-weight-bold">P2PK</q-item-label>
+            <q-item-label overline>Your nostr keys</q-item-label>
             <q-item-label caption
-              >Generate a key pair to receive P2PK-locked ecash. Warning: This
-              feature is experimental. Only use with small amounts. If you lose
-              your private keys, nobody will be able to unlock the ecash locked
-              to it anymore.</q-item-label
+              >Link your wallet to nostr. Your nostr keys will be used for your
+              Lightning address and for generating payment
+              requests.</q-item-label
             >
           </q-item-section>
         </q-item>
-        <q-item>
-          <q-btn
-            class="q-ml-sm q-px-md"
-            color="primary"
-            size="sm"
-            rounded
-            outline
-            @click="generateKeypair"
-            >Generate key</q-btn
+        <!-- initWalletSeedPrivateKeySigner -->
+        <q-item
+          :active="signerType === 'SEED'"
+          active-class="text-weight-bold text-primary"
+          clickable
+        >
+          <q-item-section avatar>
+            <q-icon
+              :color="signerType === 'SEED' ? 'primary' : 'grey'"
+              :name="
+                signerType === 'SEED'
+                  ? 'check_circle'
+                  : 'radio_button_unchecked'
+              "
+              @click="handleSeedClick"
+              class="cursor-pointer"
+            />
+          </q-item-section>
+          <q-item-section
+            lines="1"
+            class="cursor-pointer"
+            style="word-break: break-word"
           >
+            <q-item-label title>Wallet seed phrase</q-item-label>
+            <q-item-label caption
+              >Generate nostr key pair from wallet seed
+            </q-item-label>
+            <q-item-label
+              caption
+              v-if="signerType === 'SEED' && seedSignerPrivateKeyNsec"
+            >
+              <q-badge
+                class="cursor-pointer q-mt-xs"
+                @click="copyText(seedSignerPrivateKeyNsec)"
+                outline
+                color="grey"
+              >
+                <q-icon
+                  name="content_copy"
+                  size="0.8em"
+                  color="grey"
+                  class="q-mr-xs"
+                ></q-icon
+                >Copy nsec
+              </q-badge>
+            </q-item-label>
+          </q-item-section>
+        </q-item>
+        <!-- Nip46Signer -->
+        <q-item
+          :active="signerType === 'NIP46'"
+          active-class="text-weight-bold text-primary"
+          clickable
+          v-if="false"
+        >
+          <q-item-section avatar>
+            <q-icon
+              :color="signerType === 'NIP46' ? 'primary' : 'grey'"
+              :name="
+                signerType === 'NIP46'
+                  ? 'check_circle'
+                  : 'radio_button_unchecked'
+              "
+              @click="handleBunkerClick"
+              class="cursor-pointer"
+            />
+          </q-item-section>
+          <q-item-section
+            lines="1"
+            class="cursor-pointer"
+            style="word-break: break-word"
+          >
+            <q-item-label title>Nsec Bunker</q-item-label>
+            <q-item-label caption>Use a NIP-46 bunker </q-item-label>
+          </q-item-section>
+          <q-item-section side v-if="signerType === 'NIP46'">
+            <q-icon
+              name="delete_outline"
+              @click="handleResetNip46Signer"
+              class="cursor-pointer"
+              ><q-tooltip>Delete connection</q-tooltip>
+            </q-icon>
+          </q-item-section>
+        </q-item>
+        <q-item
+          :active="signerType === 'PRIVATEKEY'"
+          active-class="text-weight-bold text-primary"
+          clickable
+        >
+          <q-item-section avatar>
+            <q-icon
+              :color="signerType === 'PRIVATEKEY' ? 'primary' : 'grey'"
+              :name="
+                signerType === 'PRIVATEKEY'
+                  ? 'check_circle'
+                  : 'radio_button_unchecked'
+              "
+              @click="handleNsecClick"
+              class="cursor-pointer"
+            />
+          </q-item-section>
+          <q-item-section
+            lines="1"
+            class="cursor-pointer"
+            style="word-break: break-word"
+          >
+            <q-item-label title>Use your nsec</q-item-label>
+            <q-item-label caption
+              >This method is dangerous and not recommended
+            </q-item-label>
+          </q-item-section>
+          <q-item-section side v-if="signerType === 'PRIVATEKEY'">
+            <q-icon
+              name="delete_outline"
+              @click="handleResetPrivateKeySigner"
+              class="cursor-pointer"
+              ><q-tooltip>Delete nsec</q-tooltip></q-icon
+            >
+          </q-item-section>
+        </q-item>
+        <!-- Nip07Signer -->
+        <q-item
+          :active="signerType === 'NIP07'"
+          active-class="text-weight-bold text-primary"
+          clickable
+          v-if="nip07SignerAvailable"
+        >
+          <q-item-section avatar>
+            <q-icon
+              :color="signerType === 'NIP07' ? 'primary' : 'grey'"
+              :name="
+                signerType === 'NIP07'
+                  ? 'check_circle'
+                  : 'radio_button_unchecked'
+              "
+              @click="handleExtensionClick"
+              class="cursor-pointer"
+            />
+          </q-item-section>
+          <q-item-section
+            lines="1"
+            class="cursor-pointer"
+            style="word-break: break-word"
+          >
+            <q-item-label title>Signing extension</q-item-label>
+            <q-item-label caption v-if="nip07SignerAvailable"
+              >Use a NIP-07 signing extension
+            </q-item-label>
+            <q-item-label caption v-else
+              >No NIP-07 signing extension found
+            </q-item-label>
+          </q-item-section>
         </q-item>
       </q-list>
     </div>
-    <q-expansion-item
-      dense
-      dense-toggle
-      v-if="p2pkKeys.length"
-      class="text-left"
-      :label="`Click to browse ${p2pkKeys.length} keys`"
-    >
-      <q-item v-for="key in p2pkKeys" :key="key.privakey">
-        <q-item-section class="q-mx-none q-pl-none" style="max-width: 1.05em">
-          <q-icon
-            name="content_copy"
-            @click="copyText(key.publicKey)"
-            size="1.2em"
-            color="grey"
-            class="q-mr-xs cursor-pointer"
-          />
-        </q-item-section>
+
+    <!-- payment requests -->
+    <div class="q-py-sm q-px-xs text-left" on-left>
+      <q-item class="q-pt-lg">
         <q-item-section>
-          <q-item-label
-            caption
-            clickable
-            style="word-break: break-word; font-size: 0.65rem"
-            class="q-mx-sm"
-            @click="showP2PKKeyEntry(key.publicKey)"
-            >{{ key.publicKey }}</q-item-label
+          <q-item-label overline class="text-weight-bold"
+            >Payment requests</q-item-label
+          >
+          <q-item-label caption
+            >Payment requests allow you to receive payments via nostr. If you
+            enable this, your wallet will subscribe to your nostr
+            relays.</q-item-label
           >
         </q-item-section>
-        <q-item-section side>
-          <q-badge
-            v-if="key.used"
-            label="used"
-            color="primary"
-            class="q-mr-sm"
-          />
-        </q-item-section>
-        <q-item-section class="q-mx-none q-pl-none" style="max-width: 1.05em">
-          <q-icon
-            name="qr_code"
-            @click="showP2PKKeyEntry(key.publicKey)"
-            size="1em"
-            color="grey"
-            class="q-mr-xs cursor-pointer"
-          />
-        </q-item-section>
       </q-item>
-    </q-expansion-item>
+      <q-item>
+        <q-toggle
+          v-model="enablePaymentRequest"
+          label="Enable Payment Requests"
+          color="primary"
+        />
+      </q-item>
+    </div>
+    <div v-if="enablePaymentRequest" class="q-pb-sm q-px-xl text-left" on-left>
+      <q-item>
+        <q-toggle
+          v-model="receivePaymentRequestsAutomatically"
+          label="Receive automatically"
+          color="primary"
+        /> </q-item
+      ><q-item class="q-pt-none">
+        <q-item-label caption
+          >If enabled, the wallet will automatically receive incoming payments.
+        </q-item-label>
+      </q-item>
+    </div>
 
     <!-- ln address -->
     <div class="q-py-sm q-px-xs text-left" on-left>
@@ -179,175 +306,6 @@
             </div>
           </q-item-section>
         </q-item>
-
-        <!-- nostr -->
-        <div class="q-py-sm q-px-md text-left" on-left v-if="npcEnabled">
-          <q-list padding>
-            <q-item>
-              <q-item-section>
-                <q-item-label overline>Your nostr keys</q-item-label>
-                <q-item-label caption
-                  >Link your wallet to a nostr account to generate your
-                  Lightning address. You can only receive payments to one
-                  address at a time.</q-item-label
-                >
-              </q-item-section>
-            </q-item>
-            <!-- initWalletSeedPrivateKeySigner -->
-            <q-item
-              :active="signerType === 'SEED'"
-              active-class="text-weight-bold text-primary"
-              clickable
-            >
-              <q-item-section avatar>
-                <q-icon
-                  :color="signerType === 'SEED' ? 'primary' : 'grey'"
-                  :name="
-                    signerType === 'SEED'
-                      ? 'check_circle'
-                      : 'radio_button_unchecked'
-                  "
-                  @click="handleSeedClick"
-                  class="cursor-pointer"
-                />
-              </q-item-section>
-              <q-item-section
-                lines="1"
-                class="cursor-pointer"
-                style="word-break: break-word"
-              >
-                <q-item-label title>Wallet seed phrase</q-item-label>
-                <q-item-label caption
-                  >Generate nostr key pair from wallet seed
-                </q-item-label>
-                <q-item-label
-                  caption
-                  v-if="signerType === 'SEED' && seedSignerPrivateKeyNsec"
-                >
-                  <q-badge
-                    class="cursor-pointer q-mt-xs"
-                    @click="copyText(seedSignerPrivateKeyNsec)"
-                    outline
-                    color="grey"
-                  >
-                    <q-icon
-                      name="content_copy"
-                      size="0.8em"
-                      color="grey"
-                      class="q-mr-xs"
-                    ></q-icon
-                    >Copy nsec
-                  </q-badge>
-                </q-item-label>
-              </q-item-section>
-            </q-item>
-            <!-- Nip46Signer -->
-            <q-item
-              :active="signerType === 'NIP46'"
-              active-class="text-weight-bold text-primary"
-              clickable
-              v-if="false"
-            >
-              <q-item-section avatar>
-                <q-icon
-                  :color="signerType === 'NIP46' ? 'primary' : 'grey'"
-                  :name="
-                    signerType === 'NIP46'
-                      ? 'check_circle'
-                      : 'radio_button_unchecked'
-                  "
-                  @click="handleBunkerClick"
-                  class="cursor-pointer"
-                />
-              </q-item-section>
-              <q-item-section
-                lines="1"
-                class="cursor-pointer"
-                style="word-break: break-word"
-              >
-                <q-item-label title>Nsec Bunker</q-item-label>
-                <q-item-label caption>Use a NIP-46 bunker </q-item-label>
-              </q-item-section>
-              <q-item-section side v-if="signerType === 'NIP46'">
-                <q-icon
-                  name="delete_outline"
-                  @click="handleResetNip46Signer"
-                  class="cursor-pointer"
-                  ><q-tooltip>Delete connection</q-tooltip>
-                </q-icon>
-              </q-item-section>
-            </q-item>
-            <q-item
-              :active="signerType === 'PRIVATEKEY'"
-              active-class="text-weight-bold text-primary"
-              clickable
-            >
-              <q-item-section avatar>
-                <q-icon
-                  :color="signerType === 'PRIVATEKEY' ? 'primary' : 'grey'"
-                  :name="
-                    signerType === 'PRIVATEKEY'
-                      ? 'check_circle'
-                      : 'radio_button_unchecked'
-                  "
-                  @click="handleNsecClick"
-                  class="cursor-pointer"
-                />
-              </q-item-section>
-              <q-item-section
-                lines="1"
-                class="cursor-pointer"
-                style="word-break: break-word"
-              >
-                <q-item-label title>Use your nsec</q-item-label>
-                <q-item-label caption
-                  >This method is dangerous and not recommended
-                </q-item-label>
-              </q-item-section>
-              <q-item-section side v-if="signerType === 'PRIVATEKEY'">
-                <q-icon
-                  name="delete_outline"
-                  @click="handleResetPrivateKeySigner"
-                  class="cursor-pointer"
-                  ><q-tooltip>Delete nsec</q-tooltip></q-icon
-                >
-              </q-item-section>
-            </q-item>
-            <!-- Nip07Signer -->
-            <q-item
-              :active="signerType === 'NIP07'"
-              active-class="text-weight-bold text-primary"
-              clickable
-              v-if="nip07SignerAvailable"
-            >
-              <q-item-section avatar>
-                <q-icon
-                  :color="signerType === 'NIP07' ? 'primary' : 'grey'"
-                  :name="
-                    signerType === 'NIP07'
-                      ? 'check_circle'
-                      : 'radio_button_unchecked'
-                  "
-                  @click="handleExtensionClick"
-                  class="cursor-pointer"
-                />
-              </q-item-section>
-              <q-item-section
-                lines="1"
-                class="cursor-pointer"
-                style="word-break: break-word"
-              >
-                <q-item-label title>Signing extension</q-item-label>
-                <q-item-label caption v-if="nip07SignerAvailable"
-                  >Use a NIP-07 signing extension
-                </q-item-label>
-                <q-item-label caption v-else
-                  >No NIP-07 signing extension found
-                </q-item-label>
-              </q-item-section>
-            </q-item>
-          </q-list>
-        </div>
 
         <!-- NWC -->
 
@@ -546,6 +504,19 @@
               pending tokens in the history tab.
             </q-item-label>
           </q-item>
+          <q-item>
+            <q-toggle
+              v-model="useWebsockets"
+              label="Use websockets"
+              color="primary"
+            /> </q-item
+          ><q-item class="q-pt-none">
+            <q-item-label caption
+              >If enabled the wallet will use websockets to receive updates on
+              paid invoices and spent tokens. This feature is experimental, use
+              with caution and manually check the history for pending tokens.
+            </q-item-label>
+          </q-item>
           <!-- price check setting -->
           <q-item>
             <q-toggle
@@ -560,6 +531,201 @@
               displayed.
             </q-item-label>
           </q-item>
+        </div>
+
+        <!-- Web NFC -->
+        <div v-if="ndefSupported" class="q-px-xs text-left" on-left>
+          <q-list padding>
+            <q-item>
+              <q-item-section>
+                <q-item-label overline class="text-weight-bold"
+                  >WebNFC</q-item-label
+                >
+                <q-item-label caption>
+                  Choose the encoding for writing to NFC cards
+                </q-item-label>
+              </q-item-section>
+            </q-item>
+            <q-item clickable @click="nfcEncoding = 'text'">
+              <q-item-section avatar>
+                <q-icon
+                  :color="nfcEncoding === 'text' ? 'primary' : 'grey'"
+                  :name="
+                    nfcEncoding === 'text'
+                      ? 'check_circle'
+                      : 'radio_button_unchecked'
+                  "
+                  class="cursor-pointer"
+                />
+              </q-item-section>
+              <q-item-section
+                lines="1"
+                class="cursor-pointer"
+                style="word-break: break-word"
+              >
+                <q-item-label title>Text</q-item-label>
+                <q-item-label caption> Store token in plain text </q-item-label>
+              </q-item-section>
+            </q-item>
+            <q-item clickable @click="nfcEncoding = 'weburl'">
+              <q-item-section avatar>
+                <q-icon
+                  :color="nfcEncoding === 'weburl' ? 'primary' : 'grey'"
+                  :name="
+                    nfcEncoding === 'weburl'
+                      ? 'check_circle'
+                      : 'radio_button_unchecked'
+                  "
+                  class="cursor-pointer"
+                />
+              </q-item-section>
+              <q-item-section
+                lines="1"
+                class="cursor-pointer"
+                style="word-break: break-word"
+              >
+                <q-item-label title>URL</q-item-label>
+                <q-item-label caption>
+                  Store URL to this wallet with token
+                </q-item-label>
+              </q-item-section>
+            </q-item>
+            <!--
+              disable binary for now
+              TODO: re-enable once we can decode
+            -->
+            <!--
+            <q-item clickable @click="nfcEncoding = 'binary'">
+              <q-item-section avatar>
+                <q-icon
+                  :color="nfcEncoding === 'binary' ? 'primary' : 'grey'"
+                  :name="
+                    nfcEncoding === 'binary'
+                      ? 'check_circle'
+                      : 'radio_button_unchecked'
+                  "
+                  class="cursor-pointer"
+                />
+              </q-item-section>
+              <q-item-section>
+                <q-item-label title>Raw Binary</q-item-label>
+                <q-item-label caption>
+                  Raw bytes instead of Base64. Makes ~33% shorter tokens.
+                </q-item-label>
+              </q-item-section>
+            </q-item>
+            -->
+          </q-list>
+        </div>
+
+        <!-- P2PK -->
+        <div class="q-py-sm q-px-xs text-left" on-left>
+          <q-list padding>
+            <q-item>
+              <q-item-section>
+                <q-item-label overline class="text-weight-bold"
+                  >P2PK</q-item-label
+                >
+                <q-item-label caption
+                  >Generate a key pair to receive P2PK-locked ecash. Warning:
+                  This feature is experimental. Only use with small amounts. If
+                  you lose your private keys, nobody will be able to unlock the
+                  ecash locked to it anymore.</q-item-label
+                >
+              </q-item-section>
+            </q-item>
+            <q-item>
+              <q-btn
+                class="q-ml-sm q-px-md"
+                color="primary"
+                size="sm"
+                rounded
+                outline
+                @click="generateKeypair"
+                >Generate key</q-btn
+              >
+            </q-item>
+          </q-list>
+        </div>
+        <q-expansion-item
+          dense
+          dense-toggle
+          v-if="p2pkKeys.length"
+          class="text-left"
+          :label="`Click to browse ${p2pkKeys.length} keys`"
+        >
+          <q-item v-for="key in p2pkKeys" :key="key.privakey">
+            <q-item-section
+              class="q-mx-none q-pl-none"
+              style="max-width: 1.05em"
+            >
+              <q-icon
+                name="content_copy"
+                @click="copyText(key.publicKey)"
+                size="1.2em"
+                color="grey"
+                class="q-mr-xs cursor-pointer"
+              />
+            </q-item-section>
+            <q-item-section>
+              <q-item-label
+                caption
+                clickable
+                style="word-break: break-word; font-size: 0.65rem"
+                class="q-mx-sm"
+                @click="showP2PKKeyEntry(key.publicKey)"
+                >{{ key.publicKey }}</q-item-label
+              >
+            </q-item-section>
+            <q-item-section side>
+              <q-badge
+                v-if="key.used"
+                label="used"
+                color="primary"
+                class="q-mr-sm"
+              />
+            </q-item-section>
+            <q-item-section
+              class="q-mx-none q-pl-none"
+              style="max-width: 1.05em"
+            >
+              <q-icon
+                name="qr_code"
+                @click="showP2PKKeyEntry(key.publicKey)"
+                size="1em"
+                color="grey"
+                class="q-mr-xs cursor-pointer"
+              />
+            </q-item-section>
+          </q-item>
+        </q-expansion-item>
+
+        <!-- restore -->
+        <div class="q-py-sm q-px-xs text-left" on-left>
+          <q-list padding>
+            <q-item>
+              <q-item-section>
+                <q-item-label overline class="text-weight-bold"
+                  >Restore ecash</q-item-label
+                >
+                <q-item-label caption
+                  >The restore wizard lets you recover lost ecash from a
+                  mnemonic seed phrase.</q-item-label
+                >
+              </q-item-section>
+            </q-item>
+            <q-item>
+              <q-btn
+                class="q-ml-sm q-px-md"
+                color="primary"
+                size="sm"
+                rounded
+                outline
+                to="/restore"
+                >Restore</q-btn
+              >
+            </q-item>
+          </q-list>
         </div>
 
         <!-- theme -->
@@ -950,6 +1116,8 @@ import { useP2PKStore } from "src/stores/p2pk";
 import { useNWCStore } from "src/stores/nwc";
 import { useWorkersStore } from "src/stores/workers";
 import { useProofsStore } from "src/stores/proofs";
+import { usePRStore } from "../stores/payment-request";
+import { useRestoreStore } from "src/stores/restore";
 
 export default defineComponent({
   name: "SettingsView",
@@ -979,12 +1147,15 @@ export default defineComponent({
       nip46Token: "",
       nip07SignerAvailable: false,
       newRelay: "",
+      ndefSupported: "NDEFReader" in globalThis,
     };
   },
   computed: {
     ...mapWritableState(useSettingsStore, [
       "getBitcoinPrice",
       "checkSentTokens",
+      "useWebsockets",
+      "nfcEncoding",
     ]),
     ...mapState(useP2PKStore, ["p2pkKeys"]),
     ...mapWritableState(useP2PKStore, ["showP2PKDialog"]),
@@ -1012,6 +1183,10 @@ export default defineComponent({
       "showRemoveMintDialog",
     ]),
     ...mapWritableState(useNWCStore, ["nwcEnabled", "connections", "relays"]),
+    ...mapWritableState(usePRStore, [
+      "enablePaymentRequest",
+      "receivePaymentRequestsAutomatically",
+    ]),
     keysetCountersByMint() {
       const mints = this.mints;
       const keysetCountersByMint = {}; // {mintUrl: [keysetCounter: {id: string, count: number}, ...]}
@@ -1097,6 +1272,7 @@ export default defineComponent({
     ...mapActions(useWorkersStore, ["invoiceCheckWorker"]),
     ...mapActions(useProofsStore, ["serializeProofs"]),
     ...mapActions(useNPCStore, ["generateNPCConnection"]),
+    ...mapActions(useRestoreStore, ["restoreMint"]),
     generateNewMnemonic: async function () {
       this.newMnemonic();
       await this.initSigner();
@@ -1147,11 +1323,9 @@ export default defineComponent({
       // mark all this.proofs as reserved=false
       for (let proof of this.proofs) {
         proof.reserved = false;
+        proof.quote = undefined;
       }
       this.notifySuccess("No reserved proofs left");
-    },
-    toggleGetBitcoinPrice: function () {
-      this.getBitcoinPrice = !this.getBitcoinPrice;
     },
     checkActiveProofsSpendable: async function () {
       // iterate over this.activeProofs in batches of 50 and check if they are spendable

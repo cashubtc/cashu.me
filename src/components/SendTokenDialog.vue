@@ -140,8 +140,7 @@
               <template v-slot:loading>
                 <q-spinner-hourglass />
               </template>
-              </q-btn
-            >
+            </q-btn>
             <div
               v-if="sendData.p2pkPubkey && isValidPubkey(sendData.p2pkPubkey)"
               class="row"
@@ -237,17 +236,22 @@
               Size: {{ fragmentLengthLabel }}
             </q-btn>
             <q-badge
-                :color="!isV4Token ? 'primary' : 'grey'"
-                :label="isV4Token ? 'V4' : 'V3'"
-                class="q-my-sm q-mx-md cursor-pointer"
-                @click="toggleTokenEncoding"
-                :outline="isV4Token"
-              />
+              :color="!isV4Token ? 'primary' : 'grey'"
+              :label="isV4Token ? 'V4' : 'V3'"
+              class="q-my-sm q-mx-md cursor-pointer"
+              @click="toggleTokenEncoding"
+              :outline="isV4Token"
+            />
           </div>
           <q-card-section class="q-pa-sm">
             <div class="row justify-center">
-              <q-item-label overline class="q-mb-sm text-white"
-                >Ecash</q-item-label
+              <q-item-label overline class="q-mb-sm text-white">
+                {{
+                  sendData.historyAmount && sendData.historyAmount < 0
+                    ? "Sent"
+                    : "Received"
+                }}
+                Ecash</q-item-label
               >
             </div>
             <div class="row justify-center q-py-md">
@@ -261,12 +265,23 @@
                 <strong>{{ displayUnit }}</strong></q-item-label
               >
             </div>
+            <div v-if="paidFees" class="row justify-center q-pb-md">
+              <q-item-label class="text-weight-bold">
+                Fees: {{ formatCurrency(paidFees, tokenUnit) }}
+              </q-item-label>
+            </div>
             <div class="row justify-center q-pt-sm">
               <TokenInformation
                 :encodedToken="sendData.tokensBase64"
                 :showAmount="false"
                 :showP2PKCheck="false"
               />
+            </div>
+            <div
+              v-if="sendData.paymentRequest"
+              class="row justify-center q-pt-sm"
+            >
+              <SendPaymentRequest />
             </div>
             <div class="row q-mt-lg">
               <q-btn
@@ -277,12 +292,48 @@
                 >Copy</q-btn
               >
               <q-btn
+                unelevated
+                dense
+                class="q-mx-sm"
+                v-if="
+                  hasCamera &&
+                  !sendData.paymentRequest &&
+                  sendData.historyAmount < 0
+                "
+                @click="showCamera"
+              >
+                <q-icon name="qr_code_scanner" class="q-pr-sm" />
+              </q-btn>
+              <q-btn
+                unelevated
+                dense
+                v-if="
+                  ndefSupported &&
+                  !sendData.paymentRequest &&
+                  sendData.historyAmount < 0
+                "
+                :disabled="scanningCard"
+                :loading="scanningCard"
+                class="q-mx-sm"
+                icon="nfc"
+                size="md"
+                @click="writeTokensToCard"
+                flat
+              >
+                <q-tooltip>{{
+                  ndefSupported ? "Flash to NFC card" : "NDEF unsupported"
+                }}</q-tooltip>
+                <template v-slot:loading>
+                  <q-spinner @click="closeCardScanner" />
+                </template>
+              </q-btn>
+              <q-btn
                 class="q-mx-none"
                 color="grey"
                 size="md"
                 icon="link"
                 flat
-                @click="copyText(baseURL + '?token=' + sendData.tokensBase64)"
+                @click="copyText(baseURL + '#token=' + sendData.tokensBase64)"
                 ><q-tooltip>Copy link</q-tooltip></q-btn
               >
               <q-btn
@@ -290,12 +341,20 @@
                 color="grey"
                 icon="delete"
                 size="md"
-                @click="showDeleteDialog = true"
+                @click="
+                  showDeleteDialog = true;
+                  closeCardScanner();
+                "
                 flat
               >
                 <q-tooltip>Delete from history</q-tooltip>
               </q-btn>
-              <q-btn v-close-popup flat color="grey" class="q-ml-auto"
+              <q-btn
+                v-close-popup
+                @click="closeCardScanner"
+                flat
+                color="grey"
+                class="q-ml-auto"
                 >Close</q-btn
               >
             </div>
@@ -357,18 +416,26 @@ import { Buffer } from "buffer";
 import { useCameraStore } from "src/stores/camera";
 import { useP2PKStore } from "src/stores/p2pk";
 import TokenInformation from "components/TokenInformation.vue";
-import { getDecodedToken, getEncodedTokenV4, getEncodedToken } from "@cashu/cashu-ts";
+import { getDecodedToken, getEncodedTokenV4 } from "@cashu/cashu-ts";
 
 import { mapActions, mapState, mapWritableState } from "pinia";
 import ChooseMint from "components/ChooseMint.vue";
 import { UR, UREncoder } from "@gandlaf21/bc-ur";
-
+import SendPaymentRequest from "./SendPaymentRequest.vue";
+import {
+  notifyError,
+  notifySuccess,
+  notify,
+  notifyWarning,
+} from "src/js/notify.ts";
+import { getEncodedTokenV3 } from "@cashu/cashu-ts/dist/lib/es5/utils";
 export default defineComponent({
   name: "SendTokenDialog",
   mixins: [windowMixin],
   components: {
     ChooseMint,
     TokenInformation,
+    SendPaymentRequest,
   },
   props: {},
   data: function () {
@@ -395,24 +462,35 @@ export default defineComponent({
       framentInervalSlow: 500,
       fragmentSpeedLabel: "F",
       isV4Token: false,
+      scanningCard: false,
+      ndefSupported: "NDEFReader" in globalThis,
     };
   },
   computed: {
     ...mapWritableState(useSendTokensStore, [
       "showSendTokens",
       "showLockInput",
+      "sendData",
     ]),
-    ...mapWritableState(useSendTokensStore, ["sendData"]),
     ...mapWritableState(useCameraStore, ["camera", "hasCamera"]),
-    ...mapState(useUiStore, ["tickerShort", "canPasteFromClipboard", "globalMutexLock"]),
+    ...mapState(useUiStore, [
+      "tickerShort",
+      "canPasteFromClipboard",
+      "globalMutexLock",
+    ]),
     ...mapState(useMintsStore, [
       "activeProofs",
       "activeUnit",
       "activeUnitLabel",
+      "activeUnitCurrencyMultiplyer",
       "activeMintUrl",
       "activeMintBalance",
     ]),
-    ...mapState(useSettingsStore, ["checkSentTokens"]),
+    ...mapState(useSettingsStore, [
+      "checkSentTokens",
+      "includeFeesInSendAmount",
+      "nfcEncoding",
+    ]),
     ...mapState(useWorkersStore, ["tokenWorkerRunning"]),
     // TOKEN METHODS
     sumProofs: function () {
@@ -430,6 +508,9 @@ export default defineComponent({
     tokenMintUrl: function () {
       let mint = token.getMint(token.decode(this.sendData.tokensBase64));
       return mint;
+    },
+    paidFees: function () {
+      return this.sumProofs - Math.abs(this.sendData.historyAmount);
     },
     displayMemo: function () {
       return token.getMemo(token.decode(this.sendData.tokensBase64));
@@ -451,12 +532,19 @@ export default defineComponent({
       let spendableProofs = this.spendableProofs(this.activeProofs);
       let selectedProofs = this.coinSelect(
         spendableProofs,
-        this.sendData.amount
+        this.sendData.amount * this.activeUnitCurrencyMultiplyer,
+        this.includeFeesInSendAmount
       );
+      const feesToAdd = this.includeFeesInSendAmount
+        ? this.getFeesForProofs(selectedProofs)
+        : 0;
       const sumSelectedProofs = selectedProofs
         .flat()
         .reduce((sum, el) => (sum += el.amount), 0);
-      return sumSelectedProofs == this.sendData.amount;
+      return (
+        sumSelectedProofs ==
+        this.sendData.amount * this.activeUnitCurrencyMultiplyer + feesToAdd
+      );
     },
   },
   watch: {
@@ -468,7 +556,7 @@ export default defineComponent({
       }
       // check if token has more than one proof
       const tokenObj = token.decode(val);
-      const proofs = tokenObj.token[0].proofs;
+      const proofs = tokenObj.proofs;
       if (!proofs.length) {
         // no proofs
         return;
@@ -500,10 +588,12 @@ export default defineComponent({
       "clearAllWorkers",
     ]),
     ...mapActions(useWalletStore, [
-      "splitToSend",
+      "send",
       "sendToLock",
       "coinSelect",
       "spendableProofs",
+      "getFeesForProofs",
+      "onTokenPaid",
     ]),
     ...mapActions(useProofsStore, ["serializeProofs"]),
     ...mapActions(useTokensStore, [
@@ -597,17 +687,13 @@ export default defineComponent({
       // if it starts with 'cashuB', it is a v4 token
       if (this.sendData.tokensBase64.startsWith("cashuA")) {
         try {
-          this.sendData.tokensBase64 = getEncodedTokenV4(decodedToken)
+          this.sendData.tokensBase64 = getEncodedTokenV4(decodedToken);
         } catch {
           console.log("### Could not encode token to V4");
-          this.sendData.tokensBase64 = getEncodedToken(
-          decodedToken
-        );
+          this.sendData.tokensBase64 = getEncodedTokenV3(decodedToken);
         }
       } else {
-        this.sendData.tokensBase64 = getEncodedToken(
-          decodedToken
-        );
+        this.sendData.tokensBase64 = getEncodedTokenV3(decodedToken);
       }
     },
     deleteThisToken: function () {
@@ -615,6 +701,104 @@ export default defineComponent({
       this.showSendTokens = false;
       this.showDeleteDialog = false;
       this.clearAllWorkers();
+    },
+    writeTokensToCard: function () {
+      if (!this.scanningCard) {
+        try {
+          this.ndef = new NDEFReader();
+          this.controller = new AbortController();
+          const signal = this.controller.signal;
+          this.ndef
+            .scan({ signal })
+            .then(() => {
+              console.log("> Scan started");
+
+              this.ndef.onreadingerror = (error) => {
+                console.error(`Cannot read NDEF data! ${error}`);
+                notifyError("Cannot read data from the NFC tag");
+                this.controller.abort();
+                this.scanningCard = false;
+              };
+
+              this.ndef.onreading = ({ message, serialNumber }) => {
+                console.log(`Read card ${serialNumber}`);
+                this.controller.abort();
+                this.scanningCard = false;
+                try {
+                  let records = [];
+                  switch (this.nfcEncoding) {
+                    case "text":
+                      records = [
+                        {
+                          recordType: "text",
+                          data: `${this.sendData.tokensBase64}`,
+                        },
+                      ];
+                      break;
+                    case "weburl":
+                      records = [
+                        {
+                          recordType: "url",
+                          data: `${window.location}#token=${this.sendData.tokensBase64}`,
+                        },
+                      ];
+                      break;
+                    case "binary":
+                      throw new Error("Binary encoding not supported yet");
+                    /*
+                      const data = null;
+                      records = [
+                        {
+                          recordType: "mime",
+                          mediaType: "application/octet-stream",
+                          data: data,
+                        },
+                      ];
+                      break;
+                      */
+                    default:
+                      throw new Error(
+                        `Unknown NFC encoding: ${this.nfcEncoding}`
+                      );
+                  }
+                  this.ndef
+                    .write({ records: records }, { overwrite: true })
+                    .then(() => {
+                      console.log("Successfully flashed tokens to card!");
+                      notifySuccess("Successfully flashed tokens to card!");
+                      this.showSendTokens = false;
+                    })
+                    .catch((err) => {
+                      console.error(
+                        `NFC write failed: The card may not have enough capacity (needed ${records[0].data.length} bytes).`
+                      );
+                      notifyError(
+                        `NFC write failed: The card may not have enough capacity (needed ${records[0].data.length} bytes).`
+                      );
+                    });
+                } catch (err) {
+                  console.error(`NFC error: ${err.message}`);
+                  notifyError(`NFC error: ${err.message}`);
+                }
+              };
+              this.scanningCard = true;
+            })
+            .catch((error) => {
+              console.error(`NFC error: ${error.message}`);
+              notifyError(`NFC error: ${error.message}`);
+              this.scanningCard = false;
+            });
+          notifyWarning("This will overwrite your card!");
+        } catch (error) {
+          console.error(`NFC error: ${error.message}`);
+          notifyError(`NFC error: ${error.message}`);
+          this.scanningCard = false;
+        }
+      }
+    },
+    closeCardScanner: function () {
+      this.controller.abort();
+      this.scanningCard = false;
     },
     lockTokens: async function () {
       let sendAmount = this.sendData.amount;
@@ -631,7 +815,6 @@ export default defineComponent({
         );
         // update UI
         this.sendData.tokens = sendProofs;
-        console.log("### this.sendData.tokens", this.sendData.tokens);
 
         this.sendData.tokensBase64 = this.serializeProofs(sendProofs);
         this.addPendingToken({
@@ -642,7 +825,7 @@ export default defineComponent({
         });
 
         if (!this.g.offline) {
-          this.checkTokenSpendableWorker(this.sendData.tokensBase64);
+          this.onTokenPaid(this.sendData.tokensBase64);
         }
       } catch (error) {
         console.error(error);
@@ -650,7 +833,7 @@ export default defineComponent({
     },
     sendTokens: async function () {
       /*
-      calls splitToSend, displays token and kicks off the spendableWorker
+      calls send, displays token and kicks off the spendableWorker
       */
       if (
         this.sendData.p2pkPubkey &&
@@ -661,32 +844,31 @@ export default defineComponent({
       }
 
       try {
-        let sendAmount = this.sendData.amount;
-        // if unit is USD, multiply by 100
-        if (this.activeUnit === "usd" || this.activeUnit == "eur") {
-          sendAmount = sendAmount * 100;
-        }
+        let sendAmount =
+          this.sendData.amount * this.activeUnitCurrencyMultiplyer;
         // keep firstProofs, send scndProofs and delete them (invalidate=true)
-        let { _, sendProofs } = await this.splitToSend(
+        let { _, sendProofs } = await this.send(
           this.activeProofs,
           sendAmount,
-          true
+          true,
+          this.includeFeesInSendAmount
         );
 
         // update UI
         this.sendData.tokens = sendProofs;
-        console.log("### this.sendData.tokens", this.sendData.tokens);
-
         this.sendData.tokensBase64 = this.serializeProofs(sendProofs);
+        this.sendData.historyAmount = -this.sendData.amount;
+
         this.addPendingToken({
-          amount: -this.sendData.amount,
+          amount: -sendAmount,
           serializedProofs: this.sendData.tokensBase64,
           unit: this.activeUnit,
           mint: this.activeMintUrl,
+          paymentRequest: this.sendData.paymentRequest,
         });
 
         if (!this.g.offline) {
-          this.checkTokenSpendableWorker(this.sendData.tokensBase64);
+          this.onTokenPaid(this.sendData.tokensBase64);
         }
       } catch (error) {
         console.error(error);

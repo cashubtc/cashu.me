@@ -10,10 +10,7 @@
         aria-label="Menu"
         @click="toggleLeftDrawer"
       />
-      <q-toolbar-title>
-        <!-- <span><strong>Cashu.me</strong></span> -->
-      </q-toolbar-title>
-      <!-- offline badge if offline is true -->
+      <q-toolbar-title></q-toolbar-title>
       <transition
         appear
         enter-active-class="animated wobble"
@@ -32,18 +29,35 @@
         <span v-if="!isStaging()">Beta</span>
         <span v-else>Staging – don't use with real funds!</span>
       </q-badge>
+      <transition-group appear enter-active-class="animated pulse">
+        <q-badge
+          v-if="countdown > 0"
+          color="negative"
+          text-color="white"
+          class="q-mr-sm"
+          @click="reload"
+        >
+          Reload in {{ countdown }}
+          <q-spinner
+            v-if="countdown > 0"
+            size="0.8em"
+            :thickness="10"
+            class="q-ml-sm"
+            color="white"
+          />
+        </q-badge>
+      </transition-group>
       <q-btn
         flat
         dense
         round
         size="sm"
-        icon="refresh"
-        color="primary"
+        :icon="countdown > 0 ? 'close' : 'refresh'"
+        :color="countdown > 0 ? 'negative' : 'primary'"
         aria-label="Refresh"
         @click="reload"
-      />
-      <!-- profile button -->
-      <!-- <q-btn dense round flat color="primary" icon="account_circle"></q-btn> -->
+      >
+      </q-btn>
     </q-toolbar>
   </q-header>
 
@@ -54,14 +68,12 @@
         <q-item-section avatar>
           <q-icon name="settings" />
         </q-item-section>
-
         <q-item-section>
           <q-item-label>Settings</q-item-label>
           <q-item-label caption>Wallet configuration</q-item-label>
         </q-item-section>
       </q-item>
       <q-item-label header>Links </q-item-label>
-
       <EssentialLink
         v-for="link in essentialLinks"
         :key="link.title"
@@ -70,9 +82,11 @@
     </q-list>
   </q-drawer>
 </template>
+
 <script>
 import { defineComponent, ref } from "vue";
 import EssentialLink from "components/EssentialLink.vue";
+import { useUiStore } from "src/stores/ui";
 
 const linksList = [
   {
@@ -116,24 +130,51 @@ const linksList = [
 export default defineComponent({
   name: "MainHeader",
   mixins: [windowMixin],
-  props: {},
   components: {
     EssentialLink,
   },
   setup() {
     const leftDrawerOpen = ref(false);
+    const uiStore = useUiStore();
+    const countdown = ref(0);
+    let countdownInterval;
+
+    const toggleLeftDrawer = () => {
+      leftDrawerOpen.value = !leftDrawerOpen.value;
+    };
+
+    const isStaging = () => {
+      return location.host.includes("staging");
+    };
+
+    const reload = () => {
+      if (countdown.value > 0) {
+        uiStore.unlockMutex();
+        clearInterval(countdownInterval);
+        countdown.value = 0;
+        return;
+      }
+      if (uiStore.globalMutexLock) return;
+      uiStore.lockMutex();
+      countdown.value = 3;
+      countdownInterval = setInterval(() => {
+        countdown.value--;
+        if (countdown.value === 0) {
+          clearInterval(countdownInterval);
+          uiStore.unlockMutex();
+          location.reload();
+        }
+      }, 1000);
+    };
+
     return {
       essentialLinks: linksList,
       leftDrawerOpen,
-      toggleLeftDrawer() {
-        leftDrawerOpen.value = !leftDrawerOpen.value;
-      },
-      isStaging() {
-        return location.host.includes("staging");
-      },
-      reload() {
-        location.reload();
-      },
+      toggleLeftDrawer,
+      isStaging,
+      reload,
+      countdown,
+      uiStore,
     };
   },
 });
