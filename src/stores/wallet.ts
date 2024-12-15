@@ -418,12 +418,10 @@ export const useWalletStore = defineStore("wallet", {
      */
     requestMint: async function (amount?: number): Promise<MintQuoteResponse> {
       const mintStore = useMintsStore();
-      const uIStore = useUiStore();
 
       if (amount) {
         this.invoiceData.amount = amount;
       }
-      await uIStore.lockMutex();
       try {
         // create MintQuotePayload(this.invoiceData.amount) payload
         const payload: MintQuotePayload = {
@@ -447,7 +445,6 @@ export const useWalletStore = defineStore("wallet", {
         notifyApiError(error, "Could not request mint");
         throw error;
       } finally {
-        uIStore.unlockMutex();
       }
     },
     getMintQuoteState: async function (quote: string, mint: CashuMint): Promise<MintQuoteState> {
@@ -515,14 +512,12 @@ export const useWalletStore = defineStore("wallet", {
     },
     // get a melt quote
     meltQuote: async function () {
-      const uIStore = useUiStore();
       // throw an error if this.payInvoiceData.blocking is true
       if (this.payInvoiceData.blocking) {
         throw new Error("already processing an melt quote.");
       }
       this.payInvoiceData.blocking = true;
       this.payInvoiceData.meltQuote.error = "";
-      await uIStore.lockMutex();
       try {
         const mintStore = useMintsStore();
         if (this.payInvoiceData.input.request == "") {
@@ -545,7 +540,6 @@ export const useWalletStore = defineStore("wallet", {
         notifyApiError(error);
         throw error;
       } finally {
-        uIStore.unlockMutex();
       }
     },
     melt: async function () {
