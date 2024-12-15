@@ -215,9 +215,8 @@ import { useNPCStore } from "src/stores/npubcash";
 import { useNostrStore } from "src/stores/nostr";
 import { usePRStore } from "src/stores/payment-request";
 import { useStorageStore } from "src/stores/storage";
-
 import ReceiveTokenDialog from "src/components/ReceiveTokenDialog.vue";
-import { notifyError, notifySuccess, notify } from "../js/notify";
+import { notifyError, notify } from "../js/notify";
 
 export default {
   mixins: [windowMixin],

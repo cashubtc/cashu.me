@@ -533,6 +533,91 @@
           </q-item>
         </div>
 
+        <!-- Web NFC -->
+        <div v-if="ndefSupported" class="q-px-xs text-left" on-left>
+          <q-list padding>
+            <q-item>
+              <q-item-section>
+                <q-item-label overline class="text-weight-bold"
+                  >WebNFC</q-item-label
+                >
+                <q-item-label caption>
+                  Choose the encoding for writing to NFC cards
+                </q-item-label>
+              </q-item-section>
+            </q-item>
+            <q-item clickable @click="nfcEncoding = 'text'">
+              <q-item-section avatar>
+                <q-icon
+                  :color="nfcEncoding === 'text' ? 'primary' : 'grey'"
+                  :name="
+                    nfcEncoding === 'text'
+                      ? 'check_circle'
+                      : 'radio_button_unchecked'
+                  "
+                  class="cursor-pointer"
+                />
+              </q-item-section>
+              <q-item-section
+                lines="1"
+                class="cursor-pointer"
+                style="word-break: break-word"
+              >
+                <q-item-label title>Text</q-item-label>
+                <q-item-label caption> Store token in plain text </q-item-label>
+              </q-item-section>
+            </q-item>
+            <q-item clickable @click="nfcEncoding = 'weburl'">
+              <q-item-section avatar>
+                <q-icon
+                  :color="nfcEncoding === 'weburl' ? 'primary' : 'grey'"
+                  :name="
+                    nfcEncoding === 'weburl'
+                      ? 'check_circle'
+                      : 'radio_button_unchecked'
+                  "
+                  class="cursor-pointer"
+                />
+              </q-item-section>
+              <q-item-section
+                lines="1"
+                class="cursor-pointer"
+                style="word-break: break-word"
+              >
+                <q-item-label title>URL</q-item-label>
+                <q-item-label caption>
+                  Store URL to this wallet with token
+                </q-item-label>
+              </q-item-section>
+            </q-item>
+            <!--
+              disable binary for now
+              TODO: re-enable once we can decode
+            -->
+            <!--
+            <q-item clickable @click="nfcEncoding = 'binary'">
+              <q-item-section avatar>
+                <q-icon
+                  :color="nfcEncoding === 'binary' ? 'primary' : 'grey'"
+                  :name="
+                    nfcEncoding === 'binary'
+                      ? 'check_circle'
+                      : 'radio_button_unchecked'
+                  "
+                  class="cursor-pointer"
+                />
+              </q-item-section>
+              <q-item-section>
+                <q-item-label title>Raw Binary</q-item-label>
+                <q-item-label caption>
+                  Raw bytes instead of Base64. Makes ~33% shorter tokens.
+                </q-item-label>
+              </q-item-section>
+            </q-item>
+            -->
+          </q-list>
+        </div>
+
         <!-- P2PK -->
         <div class="q-py-sm q-px-xs text-left" on-left>
           <q-list padding>
@@ -1062,6 +1147,7 @@ export default defineComponent({
       nip46Token: "",
       nip07SignerAvailable: false,
       newRelay: "",
+      ndefSupported: "NDEFReader" in globalThis,
     };
   },
   computed: {
@@ -1069,6 +1155,7 @@ export default defineComponent({
       "getBitcoinPrice",
       "checkSentTokens",
       "useWebsockets",
+      "nfcEncoding",
     ]),
     ...mapState(useP2PKStore, ["p2pkKeys"]),
     ...mapWritableState(useP2PKStore, ["showP2PKDialog"]),

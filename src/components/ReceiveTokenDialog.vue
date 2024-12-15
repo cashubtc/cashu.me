@@ -99,7 +99,7 @@
         <q-btn
           unelevated
           dense
-          class="q-mx-sm"
+          class="q-mr-sm"
           v-if="hasCamera && !receiveData.tokensBase64.length"
           @click="showCamera"
         >
@@ -114,8 +114,9 @@
         >
           <q-icon name="lock_outline" class="q-pr-sm" />Lock
         </q-btn>
+        <!-- does not require a second dow of buttons, close button here -->
         <q-btn
-          v-if="!enablePaymentRequest"
+          v-if="!(enablePaymentRequest || ndefSupported)"
           v-close-popup
           rounded
           flat
@@ -125,16 +126,38 @@
         >
       </div>
       <div
-        v-if="!receiveData.tokensBase64.length && enablePaymentRequest"
+        v-if="
+          !receiveData.tokensBase64.length &&
+          (enablePaymentRequest || ndefSupported)
+        "
         class="row q-mt-lg"
       >
+        <!-- does require second row of buttons -->
+        <q-btn
+          unelevated
+          dense
+          class="q-mr-sm"
+          v-if="!receiveData.tokensBase64.length && ndefSupported"
+          :loading="scanningCard"
+          :disabled="scanningCard"
+          @click="toggleScanner"
+        >
+          <q-icon name="nfc" class="q-pr-sm" />
+          <q-tooltip>{{
+            ndefSupported ? "Read from NFC card" : "NDEF unsupported"
+          }}</q-tooltip>
+          <template v-slot:loading>
+            <q-spinner @click="toggleScanner"> </q-spinner>
+          </template>
+          NFC
+        </q-btn>
         <q-btn
           unelevated
           dense
           class="q-mr-sm"
           @click="handlePaymentRequestBtn"
         >
-          <q-icon name="move_to_inbox" class="q-pr-sm" />Payment Request
+          <q-icon name="move_to_inbox" class="q-pr-sm" />Request
         </q-btn>
         <q-btn
           v-if="enablePaymentRequest"
@@ -168,6 +191,7 @@ import { mapActions, mapState, mapWritableState } from "pinia";
 // import ChooseMint from "components/ChooseMint.vue";
 import TokenInformation from "components/TokenInformation.vue";
 import { map } from "underscore";
+import { notifyError, notifySuccess, notify } from "../js/notify";
 
 export default defineComponent({
   name: "ReceiveTokenDialog",
@@ -181,12 +205,14 @@ export default defineComponent({
   data: function () {
     return {
       showP2PKDialog: false,
+      ndefSupported: "NDEFReader" in globalThis,
     };
   },
   computed: {
     ...mapWritableState(useReceiveTokensStore, [
       "showReceiveTokens",
       "receiveData",
+      "scanningCard",
     ]),
     ...mapState(useUiStore, ["tickerShort"]),
     ...mapState(useMintsStore, [
@@ -231,6 +257,7 @@ export default defineComponent({
       "receiveIfDecodes",
       "decodeToken",
       "knowThisMintOfTokenJson",
+      "toggleScanner",
     ]),
     // TOKEN METHODS
     getProofs: function (decoded_token) {
@@ -289,6 +316,5 @@ export default defineComponent({
       });
     },
   },
-  created: function () {},
 });
 </script>

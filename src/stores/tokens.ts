@@ -2,6 +2,7 @@ import { useLocalStorage } from "@vueuse/core";
 import { date } from "quasar";
 import { defineStore } from "pinia";
 import { PaymentRequest, Proof, Token } from "@cashu/cashu-ts";
+import token from "src/js/token";
 
 /**
  * The tokens store handles everything related to tokens and proofs
@@ -121,7 +122,10 @@ export const useTokensStore = defineStore("tokens", {
       if (index >= 0) {
         this.historyTokens.splice(index, 1);
       }
-    }
+    },
+    tokenAlreadyInHistory(tokenStr: string): HistoryToken | undefined {
+      return this.historyTokens.find((t) => t.token === tokenStr);
+    },
   },
 });
 
