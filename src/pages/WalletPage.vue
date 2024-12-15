@@ -270,7 +270,6 @@ export default {
       baseURL: location.protocol + "//" + location.host + location.pathname,
       credit: 0,
       newName: "",
-      scanningCard: false,
     };
   },
   computed: {

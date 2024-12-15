@@ -790,7 +790,7 @@ export default defineComponent({
               notifyError(`NFC error: ${error.message}`);
               this.scanningCard = false;
             });
-          notifyWarning("This will OVERWRITE your card!");
+          notifyWarning("This will overwrite your card!");
         } catch (error) {
           console.error(`NFC error: ${error.message}`);
           notifyError(`NFC error: ${error.message}`);
