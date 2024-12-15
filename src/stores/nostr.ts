@@ -403,7 +403,7 @@ export const useNostrStore = defineStore("nostr", {
           const receiveStore = useReceiveTokensStore();
           const prStore = usePRStore();
           const sendTokensStore = useSendTokensStore();
-
+          const tokensStore = useTokensStore();
           const proofs = payload.proofs;
           const mint = payload.mint;
           const unit = payload.unit;
@@ -415,7 +415,7 @@ export const useNostrStore = defineStore("nostr", {
 
           const tokenStr = getEncodedTokenV4(token);
 
-          const tokenInHistory = this.tokenAlreadyInHistory(tokenStr);
+          const tokenInHistory = tokensStore.tokenAlreadyInHistory(tokenStr);
           if (tokenInHistory && tokenInHistory.amount > 0) {
             console.log("### incoming token already in history");
             return;
@@ -453,18 +453,14 @@ export const useNostrStore = defineStore("nostr", {
         await this.addPendingTokenToHistory(tokenStr);
       }
     },
-    tokenAlreadyInHistory: function (tokenStr: string): HistoryToken | undefined {
-      const tokensStore = useTokensStore();
-      return tokensStore.historyTokens.find((t) => t.token === tokenStr);
-    },
     addPendingTokenToHistory: function (tokenStr: string, verbose = true) {
       const receiveStore = useReceiveTokensStore();
-      if (this.tokenAlreadyInHistory(tokenStr)) {
+      const tokensStore = useTokensStore();
+      if (tokensStore.tokenAlreadyInHistory(tokenStr)) {
         notifySuccess("Ecash already in history");
         receiveStore.showReceiveTokens = false;
         return;
       }
-      const tokensStore = useTokensStore();
       const decodedToken = token.decode(tokenStr);
       if (decodedToken == undefined) {
         throw Error('could not decode token')

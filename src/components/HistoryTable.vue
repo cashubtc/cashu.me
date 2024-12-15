@@ -185,7 +185,7 @@ export default defineComponent({
       this.sendData.tokens = token.getProofs(tokenObj);
       this.sendData.tokensBase64 = _.clone(tokensBase64);
       this.sendData.paymentRequest = historyToken.paymentRequest;
-      this.sendData.amount = historyToken.amount;
+      this.sendData.historyAmount = historyToken.amount;
       this.showSendTokens = true;
     },
   },

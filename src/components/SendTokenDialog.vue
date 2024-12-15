@@ -245,7 +245,11 @@
           <q-card-section class="q-pa-sm">
             <div class="row justify-center">
               <q-item-label overline class="q-mb-sm text-white">
-                {{ sendData.amount < 0 ? "Sent" : "Received" }}
+                {{
+                  sendData.historyAmount && sendData.historyAmount < 0
+                    ? "Sent"
+                    : "Received"
+                }}
                 Ecash</q-item-label
               >
             </div>
@@ -259,6 +263,11 @@
                 />
                 <strong>{{ displayUnit }}</strong></q-item-label
               >
+            </div>
+            <div v-if="paidFees" class="row justify-center q-pb-md">
+              <q-item-label class="text-weight-bold">
+                Fees: {{ formatCurrency(paidFees, tokenUnit) }}
+              </q-item-label>
             </div>
             <div class="row justify-center q-pt-sm">
               <TokenInformation
@@ -286,7 +295,9 @@
                 dense
                 class="q-mx-sm"
                 v-if="
-                  hasCamera && !sendData.paymentRequest && sendData.amount < 0
+                  hasCamera &&
+                  !sendData.paymentRequest &&
+                  sendData.historyAmount < 0
                 "
                 @click="showCamera"
               >
@@ -298,7 +309,7 @@
                 v-if="
                   ndefSupported &&
                   !sendData.paymentRequest &&
-                  sendData.amount < 0
+                  sendData.historyAmount < 0
                 "
                 :disabled="scanningCard"
                 :loading="scanningCard"
@@ -499,6 +510,9 @@ export default defineComponent({
     tokenMintUrl: function () {
       let mint = token.getMint(token.decode(this.sendData.tokensBase64));
       return mint;
+    },
+    paidFees: function () {
+      return this.sumProofs - Math.abs(this.sendData.historyAmount);
     },
     displayMemo: function () {
       return token.getMemo(token.decode(this.sendData.tokensBase64));
@@ -844,8 +858,9 @@ export default defineComponent({
 
         // update UI
         this.sendData.tokens = sendProofs;
-
         this.sendData.tokensBase64 = this.serializeProofs(sendProofs);
+        this.sendData.historyAmount = -this.sendData.amount;
+
         this.addPendingToken({
           amount: -sendAmount,
           serializedProofs: this.sendData.tokensBase64,
