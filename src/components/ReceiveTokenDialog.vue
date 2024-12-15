@@ -155,12 +155,13 @@
           unelevated
           dense
           class="q-mr-sm"
+          v-if="!receiveData.tokensBase64.length && enablePaymentRequest"
           @click="handlePaymentRequestBtn"
         >
           <q-icon name="move_to_inbox" class="q-pr-sm" />Request
         </q-btn>
         <q-btn
-          v-if="enablePaymentRequest"
+          v-if="enablePaymentRequest || ndefSupported"
           v-close-popup
           rounded
           flat
