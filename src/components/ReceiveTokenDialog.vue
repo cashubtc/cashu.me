@@ -6,6 +6,9 @@
     no-backdrop-dismiss
   >
     <q-card class="q-pa-lg q-pt-md qcard">
+      <q-btn v-close-popup rounded flat color="grey" class="close-btn-position"
+        >Close</q-btn
+      >
       <div>
         <div class="row items-center no-wrap q-mb-sm">
           <div class="col-10">
@@ -114,16 +117,6 @@
         >
           <q-icon name="lock_outline" class="q-pr-sm" />Lock
         </q-btn>
-        <!-- does not require a second dow of buttons, close button here -->
-        <q-btn
-          v-if="!(enablePaymentRequest || ndefSupported)"
-          v-close-popup
-          rounded
-          flat
-          color="grey"
-          class="q-ml-auto"
-          >Close</q-btn
-        >
       </div>
       <div
         v-if="
@@ -160,15 +153,6 @@
         >
           <q-icon name="move_to_inbox" class="q-pr-sm" />Request
         </q-btn>
-        <q-btn
-          v-if="enablePaymentRequest || ndefSupported"
-          v-close-popup
-          rounded
-          flat
-          color="grey"
-          class="q-ml-auto"
-          >Close</q-btn
-        >
       </div>
     </q-card>
   </q-dialog>
@@ -319,3 +303,11 @@ export default defineComponent({
   },
 });
 </script>
+<style scoped>
+.close-btn-position {
+  position: absolute;
+  right: 16px;
+  bottom: 22px;
+  z-index: 100;
+}
+</style>
