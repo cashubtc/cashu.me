@@ -415,11 +415,7 @@ import { Buffer } from "buffer";
 import { useCameraStore } from "src/stores/camera";
 import { useP2PKStore } from "src/stores/p2pk";
 import TokenInformation from "components/TokenInformation.vue";
-import {
-  getDecodedToken,
-  getEncodedTokenV4,
-  getEncodedToken,
-} from "@cashu/cashu-ts";
+import { getDecodedToken, getEncodedTokenV4 } from "@cashu/cashu-ts";
 
 import { mapActions, mapState, mapWritableState } from "pinia";
 import ChooseMint from "components/ChooseMint.vue";
@@ -431,6 +427,7 @@ import {
   notify,
   notifyWarning,
 } from "src/js/notify.ts";
+import { getEncodedTokenV3 } from "@cashu/cashu-ts/dist/lib/es5/utils";
 export default defineComponent({
   name: "SendTokenDialog",
   mixins: [windowMixin],
@@ -692,10 +689,10 @@ export default defineComponent({
           this.sendData.tokensBase64 = getEncodedTokenV4(decodedToken);
         } catch {
           console.log("### Could not encode token to V4");
-          this.sendData.tokensBase64 = getEncodedToken(decodedToken);
+          this.sendData.tokensBase64 = getEncodedTokenV3(decodedToken);
         }
       } else {
-        this.sendData.tokensBase64 = getEncodedToken(decodedToken);
+        this.sendData.tokensBase64 = getEncodedTokenV3(decodedToken);
       }
     },
     deleteThisToken: function () {
