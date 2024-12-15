@@ -159,7 +159,9 @@ import { notifyError, notifySuccess, notify } from "../js/notify";
 export default defineComponent({
   name: "ReceiveTokenDialog",
   mixins: [windowMixin],
-  components: {},
+  components: {
+    TokenInformation,
+  },
   data: function () {
     return {
       showP2PKDialog: false,
