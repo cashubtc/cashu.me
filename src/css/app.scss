@@ -24,5 +24,15 @@
   border-radius: 8px;
   height: 80px;
   box-shadow: none;
-  font-size: 16px;
+  font-size: 18px;
+}
+
+.custom-btn:hover {
+  background: $grey-8;
+}
+
+.custom-btn-text {
+  font-size: 18px !important;
+  color: white;
+  padding-top: 2px;
 }

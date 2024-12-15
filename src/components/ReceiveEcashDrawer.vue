@@ -9,13 +9,20 @@
   >
     <q-card class="bg-grey-10 text-white full-width-card">
       <q-card-section class="row items-center q-pb-sm">
-        <q-btn flat round dense @click="goBack" class="q-ml-sm">
+        <q-btn flat round dense @click="goBack" class="q-ml-sm" color="primary">
           <ChevronLeftIcon />
         </q-btn>
         <div class="col text-center">
           <span class="text-h6">Receive ecash</span>
         </div>
-        <q-btn flat round dense @click="showCamera" class="q-mr-sm">
+        <q-btn
+          flat
+          round
+          dense
+          @click="showCamera"
+          class="q-mr-sm"
+          color="primary"
+        >
           <ScanIcon />
         </q-btn>
       </q-card-section>
@@ -24,11 +31,11 @@
         <div class="q-gutter-y-md">
           <q-btn class="full-width custom-btn" @click="pasteToParseDialog">
             <div class="row items-center full-width">
-              <div class="icon-background q-mr-sm">
+              <div class="icon-background q-mr-md">
                 <ClipboardIcon />
               </div>
               <div class="text-left">
-                <div class="text-weight-bold">PASTE</div>
+                <div class="text-weight-bold custom-btn-text">PASTE</div>
               </div>
             </div>
           </q-btn>
@@ -39,22 +46,22 @@
             @click="handlePaymentRequestBtn"
           >
             <div class="row items-center full-width">
-              <div class="icon-background q-mr-sm">
+              <div class="icon-background q-mr-md">
                 <FileTextIcon />
               </div>
               <div class="text-left">
-                <div class="text-weight-bold">REQUEST</div>
+                <div class="text-weight-bold custom-btn-text">REQUEST</div>
               </div>
             </div>
           </q-btn>
 
           <q-btn class="full-width custom-btn" @click="handleLockBtn">
             <div class="row items-center full-width">
-              <div class="icon-background q-mr-sm">
+              <div class="icon-background q-mr-md">
                 <LockIcon />
               </div>
               <div class="text-left">
-                <div class="text-weight-bold">LOCK</div>
+                <div class="text-weight-bold custom-btn-text">LOCK</div>
               </div>
             </div>
           </q-btn>

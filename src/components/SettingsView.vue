@@ -764,7 +764,7 @@
                     flat
                     @click="changeColor('cyber')"
                     icon="format_color_fill"
-                    color="light-green-9"
+                    color="green"
                     size="md"
                     ><q-tooltip>cyber</q-tooltip>
                   </q-btn>
@@ -804,7 +804,7 @@
                     flat
                     @click="changeColor('mint')"
                     icon="format_color_fill"
-                    color="green"
+                    color="light-green-9"
                     size="md"
                     ><q-tooltip>mint</q-tooltip> </q-btn
                   ><q-btn

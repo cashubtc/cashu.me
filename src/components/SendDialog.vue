@@ -10,13 +10,20 @@
   >
     <q-card class="bg-grey-10 text-white q-px-lg q-pt-md q-pb-md qcard">
       <q-card-section class="row items-center q-pb-sm">
-        <q-btn flat round dense v-close-popup class="q-ml-sm">
+        <q-btn flat round dense v-close-popup class="q-ml-sm" color="primary">
           <XIcon />
         </q-btn>
         <div class="col text-center">
           <span class="text-h6">Send</span>
         </div>
-        <q-btn flat round dense class="q-mr-sm">
+        <q-btn
+          flat
+          round
+          dense
+          class="q-mr-sm"
+          @click="showCamera"
+          color="primary"
+        >
           <ScanIcon />
         </q-btn>
       </q-card-section>
@@ -25,22 +32,22 @@
         <div class="q-gutter-y-md">
           <q-btn class="full-width custom-btn" @click="showSendTokensDialog">
             <div class="row items-center full-width">
-              <div class="icon-background q-mr-sm">
+              <div class="icon-background q-mr-md">
                 <BanknoteIcon />
               </div>
               <div class="text-left">
-                <div class="text-weight-bold">ECASH</div>
+                <div class="text-weight-bold custom-btn-text">ECASH</div>
               </div>
             </div>
           </q-btn>
 
           <q-btn class="full-width custom-btn" @click="showParseDialog">
             <div class="row items-center full-width">
-              <div class="icon-background q-mr-sm">
+              <div class="icon-background q-mr-md">
                 <ZapIcon />
               </div>
               <div class="text-left">
-                <div class="text-weight-bold">LIGHTNING</div>
+                <div class="text-weight-bold custom-btn-text">LIGHTNING</div>
               </div>
             </div>
           </q-btn>
@@ -101,6 +108,7 @@ export default defineComponent({
     ]),
   },
   methods: {
+    ...mapActions(useCameraStore, ["closeCamera", "showCamera"]),
     showParseDialog: function () {
       this.payInvoiceData.show = true;
       this.payInvoiceData.invoice = null;
