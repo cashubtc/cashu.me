@@ -4,7 +4,6 @@ import { useWorkersStore } from "./workers";
 import { notifyApiError, notifyError, notifySuccess } from "src/js/notify";
 import { CashuMint, MintKeys, MintAllKeysets, MintActiveKeys, Proof, SerializedBlindedSignature, MintKeyset, GetInfoResponse } from "@cashu/cashu-ts";
 import { useUiStore } from "./ui";
-import token from "src/js/token";
 export type Mint = {
   url: string;
   keys: MintKeys[];

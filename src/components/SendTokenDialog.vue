@@ -244,8 +244,9 @@
           </div>
           <q-card-section class="q-pa-sm">
             <div class="row justify-center">
-              <q-item-label overline class="q-mb-sm text-white"
-                >Ecash</q-item-label
+              <q-item-label overline class="q-mb-sm text-white">
+                {{ sendData.amount < 0 ? "Sent" : "Received" }}
+                Ecash</q-item-label
               >
             </div>
             <div class="row justify-center q-py-md">
@@ -284,7 +285,9 @@
                 unelevated
                 dense
                 class="q-mx-sm"
-                v-if="hasCamera && !sendData.paymentRequest"
+                v-if="
+                  hasCamera && !sendData.paymentRequest && sendData.amount < 0
+                "
                 @click="showCamera"
               >
                 <q-icon name="qr_code_scanner" class="q-pr-sm" />
@@ -292,7 +295,12 @@
               <q-btn
                 unelevated
                 dense
-                :disabled="!ndefSupported || scanningCard"
+                v-if="
+                  ndefSupported &&
+                  !sendData.paymentRequest &&
+                  sendData.amount < 0
+                "
+                :disabled="scanningCard"
                 :loading="scanningCard"
                 class="q-mx-sm"
                 icon="nfc"
@@ -777,7 +785,6 @@ export default defineComponent({
       }
     },
     closeCardScanner: function () {
-      console.log("Closing scanner!");
       this.controller.abort();
       this.scanningCard = false;
     },

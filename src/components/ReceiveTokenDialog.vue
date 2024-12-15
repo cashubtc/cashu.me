@@ -108,16 +108,35 @@
         <q-btn
           unelevated
           dense
-          class="q-mr-none"
+          class="q-mx-none"
           v-if="!receiveData.tokensBase64.length"
           @click="handleLockBtn"
         >
           <q-icon name="lock_outline" class="q-pr-sm" />Lock
         </q-btn>
+        <!-- does not require a second dow of buttons, close button here -->
+        <q-btn
+          v-if="!(enablePaymentRequest || ndefSupported)"
+          v-close-popup
+          rounded
+          flat
+          color="grey"
+          class="q-ml-auto"
+          >Close</q-btn
+        >
+      </div>
+      <div
+        v-if="
+          !receiveData.tokensBase64.length &&
+          (enablePaymentRequest || ndefSupported)
+        "
+        class="row q-mt-lg"
+      >
+        <!-- does require second row of buttons -->
         <q-btn
           unelevated
           dense
-          class="q-mx-sm"
+          class="q-mr-sm"
           v-if="!receiveData.tokensBase64.length && ndefSupported"
           :loading="scanningCard"
           :disabled="scanningCard"
@@ -133,26 +152,12 @@
           NFC
         </q-btn>
         <q-btn
-          v-if="!enablePaymentRequest"
-          v-close-popup
-          rounded
-          flat
-          color="grey"
-          class="q-ml-auto"
-          >Close</q-btn
-        >
-      </div>
-      <div
-        v-if="!receiveData.tokensBase64.length && enablePaymentRequest"
-        class="row q-mt-lg"
-      >
-        <q-btn
           unelevated
           dense
           class="q-mr-sm"
           @click="handlePaymentRequestBtn"
         >
-          <q-icon name="move_to_inbox" class="q-pr-sm" />Payment Request
+          <q-icon name="move_to_inbox" class="q-pr-sm" />Request
         </q-btn>
         <q-btn
           v-if="enablePaymentRequest"
