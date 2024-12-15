@@ -534,7 +534,7 @@
         </div>
 
         <!-- Web NFC -->
-        <div class="q-px-xs text-left" on-left>
+        <div v-if="ndefSupported" class="q-px-xs text-left" on-left>
           <q-list padding>
             <q-item>
               <q-item-section>
@@ -542,7 +542,7 @@
                   >WebNFC</q-item-label
                 >
                 <q-item-label caption>
-                  Choose the encoding for storing tokens in NFC cards.
+                  Choose the encoding for writing to NFC cards
                 </q-item-label>
               </q-item-section>
             </q-item>
@@ -563,10 +563,8 @@
                 class="cursor-pointer"
                 style="word-break: break-word"
               >
-                <q-item-label title>Base64 Text</q-item-label>
-                <q-item-label caption>
-                  The Base64 text encoding (e.g. "cashuB...")
-                </q-item-label>
+                <q-item-label title>Text</q-item-label>
+                <q-item-label caption> Store token in plain text </q-item-label>
               </q-item-section>
             </q-item>
             <q-item clickable @click="nfcEncoding = 'weburl'">
@@ -586,10 +584,9 @@
                 class="cursor-pointer"
                 style="word-break: break-word"
               >
-                <q-item-label title>Web URL + Base64 Text</q-item-label>
+                <q-item-label title>URL</q-item-label>
                 <q-item-label caption>
-                  a URL that redirects the receiver to their wallet (e.g.
-                  "https://wallet.cashu.me/#token=cashuB...")
+                  Store URL to this wallet with token
                 </q-item-label>
               </q-item-section>
             </q-item>
@@ -1150,6 +1147,7 @@ export default defineComponent({
       nip46Token: "",
       nip07SignerAvailable: false,
       newRelay: "",
+      ndefSupported: "NDEFReader" in globalThis,
     };
   },
   computed: {
