@@ -5,7 +5,10 @@
     position="top"
     v-if="!camera.show"
     backdrop-filter="blur(2px) brightness(60%)"
+    transition-show="slide-up"
+    transition-hide="slide-up"
     no-backdrop-dismiss
+    full-height
   >
     <q-card class="q-pa-lg q-pt-xl qcard">
       <div v-if="payInvoiceData.invoice">

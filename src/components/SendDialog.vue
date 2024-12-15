@@ -7,7 +7,6 @@
     transition-show="slide-up"
     transition-hide="slide-down"
     backdrop-filter="blur(2px) brightness(60%)"
-    no-backdrop-dismiss
   >
     <q-card class="bg-grey-10 text-white q-px-lg q-pt-md q-pb-md qcard">
       <q-card-section class="row items-center q-pb-none">
@@ -24,10 +23,7 @@
 
       <q-card-section class="q-pa-md">
         <div class="q-gutter-y-md">
-          <q-btn
-            class="full-width custom-btn"
-            @click="showSendTokensDialog"
-          >
+          <q-btn class="full-width custom-btn" @click="showSendTokensDialog">
             <div class="row items-center full-width">
               <div class="icon-background q-mr-sm">
                 <BanknoteIcon />
@@ -38,10 +34,7 @@
             </div>
           </q-btn>
 
-          <q-btn
-            class="full-width custom-btn"
-            @click="showParseDialog"
-          >
+          <q-btn class="full-width custom-btn" @click="showParseDialog">
             <div class="row items-center full-width">
               <div class="icon-background q-mr-sm">
                 <ZapIcon />
@@ -65,7 +58,12 @@ import { useUiStore } from "src/stores/ui";
 import { useWalletStore } from "src/stores/wallet";
 import { useCameraStore } from "src/stores/camera";
 import { useSendTokensStore } from "src/stores/sendTokensStore";
-import { X as XIcon, Banknote as BanknoteIcon, Zap as ZapIcon, Scan as ScanIcon } from 'lucide-vue-next';
+import {
+  X as XIcon,
+  Banknote as BanknoteIcon,
+  Zap as ZapIcon,
+  Scan as ScanIcon,
+} from "lucide-vue-next";
 
 export default defineComponent({
   name: "SendDialog",

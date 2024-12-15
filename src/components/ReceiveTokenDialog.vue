@@ -114,11 +114,20 @@
         <q-btn
           unelevated
           dense
-          class="q-mx-none"
-          v-if="!receiveData.tokensBase64.length"
-          @click="handleLockBtn"
+          class="q-mr-sm"
+          v-if="!receiveData.tokensBase64.length && !ndefSupported"
+          :loading="scanningCard"
+          :disabled="scanningCard"
+          @click="toggleScanner"
         >
-          <q-icon name="lock_outline" class="q-pr-sm" />Lock
+          <q-icon name="nfc" class="q-pr-sm" />
+          <q-tooltip>{{
+            ndefSupported ? "Read from NFC card" : "NDEF unsupported"
+          }}</q-tooltip>
+          <template v-slot:loading>
+            <q-spinner @click="toggleScanner"> </q-spinner>
+          </template>
+          NFC
         </q-btn>
       </div>
       <div
@@ -159,70 +168,6 @@
       </div>
     </q-card>
   </q-dialog>
-  <q-dialog
-    v-model="showReceiveTokens"
-    position="bottom"
-    :maximized="$q.screen.lt.sm"
-    transition-show="slide-up"
-    transition-hide="slide-down"
-    backdrop-filter="blur(2px) brightness(60%)"
-    no-backdrop-dismiss
-  >
-    <q-card class="bg-grey-10 text-white full-width-card">
-      <q-card-section class="row items-center q-pb-none">
-        <q-btn flat round dense @click="goBack" class="q-ml-sm">
-          <ChevronLeftIcon />
-        </q-btn>
-        <div class="col text-center">
-          <span class="text-h6">Receive ecash</span>
-        </div>
-        <q-btn flat round dense @click="openCamera" class="q-mr-sm">
-          <ScanIcon />
-        </q-btn>
-      </q-card-section>
-
-      <q-card-section class="q-pa-md">
-        <div class="q-gutter-y-md">
-          <q-btn
-            class="full-width custom-btn"
-            @click="pasteToParseDialog"
-            :disabled="!canPasteFromClipboard"
-          >
-            <div class="row items-center full-width">
-              <div class="icon-background q-mr-sm">
-                <ClipboardIcon />
-              </div>
-              <div class="text-left">
-                <div class="text-weight-bold">PASTE</div>
-              </div>
-            </div>
-          </q-btn>
-
-          <q-btn class="full-width custom-btn" @click="showRequestDialog">
-            <div class="row items-center full-width">
-              <div class="icon-background q-mr-sm">
-                <FileTextIcon />
-              </div>
-              <div class="text-left">
-                <div class="text-weight-bold">REQUEST</div>
-              </div>
-            </div>
-          </q-btn>
-
-          <q-btn class="full-width custom-btn" @click="handleLockBtn">
-            <div class="row items-center full-width">
-              <div class="icon-background q-mr-sm">
-                <LockIcon />
-              </div>
-              <div class="text-left">
-                <div class="text-weight-bold">LOCK</div>
-              </div>
-            </div>
-          </q-btn>
-        </div>
-      </q-card-section>
-    </q-card>
-  </q-dialog>
   <P2PKDialog v-model="showP2PKDialog" />
 </template>
 
@@ -258,11 +203,6 @@ export default defineComponent({
   mixins: [windowMixin],
   components: {
     P2PKDialog,
-    ChevronLeftIcon,
-    ClipboardIcon,
-    FileTextIcon,
-    LockIcon,
-    ScanIcon,
     PRDialog,
   },
   data: function () {
@@ -284,7 +224,6 @@ export default defineComponent({
       "addMintBlocking",
     ]),
     ...mapWritableState(useMintsStore, ["addMintData", "showAddMintDialog"]),
-    ...mapWritableState(usePRStore, ["showPRDialog"]),
     ...mapState(useCameraStore, ["hasCamera"]),
     ...mapState(useP2PKStore, ["p2pkKeys"]),
     ...mapState(usePRStore, ["enablePaymentRequest"]),
@@ -297,6 +236,16 @@ export default defineComponent({
     },
     ...mapWritableState(useUiStore, ["showReceiveDialog"]),
     ...mapState(useCameraStore, ["lastScannedResult"]),
+    tokenDecodesCorrectly: function () {
+      return this.decodeToken(this.receiveData.tokensBase64) !== undefined;
+    },
+    knowThisMint: function () {
+      const tokenJson = this.decodeToken(this.receiveData.tokensBase64);
+      if (tokenJson == undefined) {
+        return false;
+      }
+      return this.knowThisMintOfTokenJson(tokenJson);
+    },
   },
   methods: {
     ...mapActions(useWalletStore, ["redeem"]),
@@ -321,13 +270,13 @@ export default defineComponent({
     getMint: function (decoded_token) {
       return token.getMint(decoded_token);
     },
-    handleLockBtn: function () {
-      this.showP2PKDialog = !this.showP2PKDialog;
-      if (!this.p2pkKeys.length || !this.showP2PKDialog) {
-        this.generateKeypair();
-      }
-      this.showLastKey();
-    },
+    // handleLockBtn: function () {
+    //   this.showP2PKDialog = !this.showP2PKDialog;
+    //   if (!this.p2pkKeys.length || !this.showP2PKDialog) {
+    //     this.generateKeypair();
+    //   }
+    //   this.showLastKey();
+    // },
     handlePaymentRequestBtn: function () {
       const prStore = usePRStore();
       this.showPRDialog = !this.showPRDialog;
@@ -370,31 +319,6 @@ export default defineComponent({
         this.receiveData.tokensBase64 = text;
         // TODO: Implement token processing logic
       });
-    },
-    showRequestDialog: function () {
-      console.log("Show request dialog");
-      // TODO: Implement request dialog logic
-    },
-    openCamera: function () {
-      this.closeCamera(); // Ensure any existing camera instance is closed
-      this.showCamera();
-      this.showReceiveTokens = false;
-    },
-    closeCamera() {
-      this.camera.show = false;
-      if (this.camera.previousComponent === "ReceiveTokenDialog") {
-        this.showReceiveTokens = true;
-      }
-    },
-    handleQrCodeDecode(result) {
-      console.log("QR code decoded:", result);
-      // Handle the decoded QR code result here
-      this.closeCamera();
-      // You might want to process the result here
-    },
-    goBack: function () {
-      this.showReceiveTokens = false;
-      this.showReceiveDialog = true;
     },
   },
 });

@@ -7,7 +7,6 @@
     transition-show="slide-up"
     transition-hide="slide-down"
     backdrop-filter="blur(2px) brightness(60%)"
-    no-backdrop-dismiss
   >
     <q-card class="bg-grey-10 text-white q-px-lg q-pt-md q-pb-md qcard">
       <q-card-section class="row items-center q-pb-none">
@@ -26,7 +25,7 @@
         <div class="q-gutter-y-md">
           <q-btn
             class="full-width custom-btn"
-            @click="showReceiveTokensDialog"
+            @click="toggleReceiveEcashDrawer"
           >
             <div class="row items-center full-width">
               <div class="icon-background q-mr-sm">
@@ -38,10 +37,7 @@
             </div>
           </q-btn>
 
-          <q-btn
-            class="full-width custom-btn"
-            @click="showInvoiceCreateDialog"
-          >
+          <q-btn class="full-width custom-btn" @click="showInvoiceCreateDialog">
             <div class="row items-center full-width">
               <div class="icon-background q-mr-sm">
                 <ZapIcon />
@@ -55,6 +51,7 @@
       </q-card-section>
     </q-card>
   </q-dialog>
+  <ReceiveEcashDrawer />
 </template>
 
 <script>
@@ -63,7 +60,13 @@ import { useReceiveTokensStore } from "src/stores/receiveTokensStore";
 import { mapActions, mapState, mapWritableState } from "pinia";
 import { useUiStore } from "src/stores/ui";
 import { useWalletStore } from "src/stores/wallet";
-import { X as XIcon, Banknote as BanknoteIcon, Zap as ZapIcon, Scan as ScanIcon } from 'lucide-vue-next';
+import ReceiveEcashDrawer from "src/components/ReceiveEcashDrawer.vue";
+import {
+  X as XIcon,
+  Banknote as BanknoteIcon,
+  Zap as ZapIcon,
+  Scan as ScanIcon,
+} from "lucide-vue-next";
 
 export default defineComponent({
   name: "ReceiveDialog",
@@ -72,6 +75,7 @@ export default defineComponent({
     BanknoteIcon,
     ZapIcon,
     ScanIcon,
+    ReceiveEcashDrawer,
   },
   mixins: [windowMixin],
   props: {},
@@ -85,6 +89,7 @@ export default defineComponent({
     ...mapWritableState(useUiStore, [
       "showInvoiceDetails",
       "showReceiveDialog",
+      "showReceiveEcashDrawer",
     ]),
     ...mapWritableState(useReceiveTokensStore, [
       "showReceiveTokens",
@@ -93,6 +98,11 @@ export default defineComponent({
     ...mapWritableState(useWalletStore, ["invoiceData"]),
   },
   methods: {
+    toggleReceiveEcashDrawer: function () {
+      this.showReceiveDialog = false;
+      this.showReceiveTokens = false;
+      this.showReceiveEcashDrawer = true;
+    },
     showReceiveTokensDialog: function () {
       this.receiveData.tokensBase64 = "";
       this.showReceiveTokens = true;

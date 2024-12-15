@@ -178,6 +178,7 @@ export default defineComponent({
     handlePaymentRequestBtn: function () {
       const prStore = usePRStore();
       this.showPRDialog = !this.showPRDialog;
+      console.log("handlePaymentRequestBtn", this.showPRDialog);
       if (this.showPRDialog) {
         prStore.newPaymentRequest();
       }
