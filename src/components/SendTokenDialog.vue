@@ -117,13 +117,13 @@
                 <q-btn
                   align="center"
                   v-if="!sendData.p2pkPubkey"
-                  icon="qr_code_scanner"
                   flat
                   outline
                   color="primary"
                   round
                   @click="showCamera"
-                />
+                  ><ScanIcon size="1.5em"
+                /></q-btn>
               </div>
             </div>
           </transition>
@@ -310,7 +310,7 @@
                 "
                 @click="showCamera"
               >
-                <q-icon name="qr_code_scanner" class="q-pr-sm" />
+                <ScanIcon />
               </q-btn>
               <q-btn
                 unelevated
@@ -431,7 +431,15 @@ import ChooseMint from "components/ChooseMint.vue";
 import { UR, UREncoder } from "@gandlaf21/bc-ur";
 import SendPaymentRequest from "./SendPaymentRequest.vue";
 import NumericKeyboard from "components/NumericKeyboard.vue";
-
+import {
+  ChevronLeft as ChevronLeftIcon,
+  Clipboard as ClipboardIcon,
+  FileText as FileTextIcon,
+  Lock as LockIcon,
+  Scan as ScanIcon,
+  Nfc as NfcIcon,
+  Scan,
+} from "lucide-vue-next";
 import {
   notifyError,
   notifySuccess,
@@ -447,6 +455,7 @@ export default defineComponent({
     TokenInformation,
     SendPaymentRequest,
     NumericKeyboard,
+    ScanIcon,
   },
   props: {},
   data: function () {

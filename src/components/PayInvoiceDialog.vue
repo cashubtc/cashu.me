@@ -5,8 +5,8 @@
     position="top"
     v-if="!camera.show"
     backdrop-filter="blur(2px) brightness(60%)"
-    transition-show="slide-up"
-    transition-hide="slide-up"
+    transition-show="fade"
+    transition-hide="fade"
     no-backdrop-dismiss
     full-height
   >
@@ -211,7 +211,9 @@
               class="q-mx-0"
               v-if="hasCamera && payInvoiceData.input.request == ''"
               @click="showCamera"
-              ><q-icon name="qr_code_scanner" class="q-pr-sm" />Scan
+            >
+              <ScanIcon />
+              <span class="q-pl-sm">Scan</span>
             </q-btn>
             <q-btn v-close-popup flat rounded color="grey" class="q-ml-auto"
               >Close</q-btn
@@ -249,6 +251,7 @@ import ToggleUnit from "components/ToggleUnit.vue";
 
 // import * as bolt11Decoder from "light-bolt11-decoder";
 import * as _ from "underscore";
+import { Scan as ScanIcon } from "lucide-vue-next";
 
 export default defineComponent({
   name: "PayInvoiceDialog",
@@ -256,6 +259,7 @@ export default defineComponent({
   components: {
     ChooseMint,
     ToggleUnit,
+    ScanIcon,
   },
   props: {},
   data: function () {

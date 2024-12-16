@@ -673,6 +673,7 @@ export default defineComponent({
       this.addingMint = true;
       try {
         this.addMint(mintToAdd, verbose);
+        this.addMintData = { url: "", nickname: "" };
       } finally {
         this.addingMint = false;
       }

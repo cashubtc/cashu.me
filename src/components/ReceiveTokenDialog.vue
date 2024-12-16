@@ -105,7 +105,8 @@
           v-if="hasCamera && !receiveData.tokensBase64.length"
           @click="showCamera"
         >
-          <q-icon name="qr_code_scanner" class="q-pr-sm" />Scan
+          <ScanIcon size="1.5em" />
+          <span class="q-pl-sm">Scan</span>
         </q-btn>
         <q-btn
           unelevated
@@ -167,6 +168,7 @@ export default defineComponent({
   components: {
     TokenInformation,
     NfcIcon,
+    ScanIcon,
   },
   data: function () {
     return {
