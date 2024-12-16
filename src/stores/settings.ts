@@ -20,7 +20,7 @@ export const useSettingsStore = defineStore("settings", {
       ),
       useWebsockets: useLocalStorage<boolean>(
         "cashu.settings.useWebsockets",
-        false
+        true
       ),
       defaultNostrRelays: useLocalStorage<string[]>(
         "cashu.settings.defaultNostrRelays",
@@ -33,6 +33,10 @@ export const useSettingsStore = defineStore("settings", {
       nfcEncoding: useLocalStorage<string>(
         "cashu.settings.nfcEncoding",
         "weburl"
+      ),
+      useNumericKeyboard: useLocalStorage<boolean>(
+        "cashu.settings.useNumericKeyboard",
+        true
       ),
     };
   },

@@ -24,12 +24,13 @@
           <q-btn
             align="center"
             size="lg"
-            icon="qr_code_scanner"
             outline
             color="primary"
             flat
             @click="showCamera"
-          />
+          >
+            <ScanIcon size="2em" />
+          </q-btn>
         </div>
         <!-- button to showSendDialog -->
         <div class="col-5 q-mb-md">
@@ -217,6 +218,12 @@ import { usePRStore } from "src/stores/payment-request";
 import { useStorageStore } from "src/stores/storage";
 import ReceiveTokenDialog from "src/components/ReceiveTokenDialog.vue";
 import { notifyError, notify } from "../js/notify";
+import {
+  X as XIcon,
+  Banknote as BanknoteIcon,
+  Zap as ZapIcon,
+  Scan as ScanIcon,
+} from "lucide-vue-next";
 
 export default {
   mixins: [windowMixin],
@@ -235,6 +242,7 @@ export default {
     SendDialog,
     ReceiveDialog,
     iOSPWAPrompt,
+    ScanIcon,
   },
   data: function () {
     return {
@@ -541,7 +549,7 @@ export default {
         if (event.data.type == "new_tab_opened") {
           channel.postMessage({ type: "already_running", senderId: tabId });
         } else if (event.data.type == "already_running") {
-          window.location.href = "/#/already-running";
+          window.location.href = "/already-running";
         }
       };
     },

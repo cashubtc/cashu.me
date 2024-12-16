@@ -5,11 +5,17 @@ import { useP2PKStore } from "./p2pk";
 import { useWalletStore } from "./wallet";
 import token from "src/js/token";
 import { useTokensStore } from "./tokens";
-import { notifyError, notifySuccess, notify } from "../js/notify";
+import {
+  notifyError,
+  notifySuccess,
+  notify,
+  notifyWarning,
+} from "../js/notify";
 
 export const useReceiveTokensStore = defineStore("receiveTokensStore", {
   state: () => ({
     showReceiveTokens: false,
+    watchClipboardPaste: false,
     receiveData: {
       tokensBase64: "",
       p2pkPrivateKey: "",
@@ -34,6 +40,7 @@ export const useReceiveTokensStore = defineStore("receiveTokensStore", {
       const mintStore = useMintsStore();
       const walletStore = useWalletStore();
       const receiveStore = useReceiveTokensStore();
+      const uiStore = useUiStore();
       console.log("### receive tokens", receiveStore.receiveData.tokensBase64);
 
       if (receiveStore.receiveData.tokensBase64.length == 0) {
@@ -58,6 +65,7 @@ export const useReceiveTokensStore = defineStore("receiveTokensStore", {
       // redeem the token
       await walletStore.redeem(receiveStore.receiveData.tokensBase64);
       receiveStore.showReceiveTokens = false;
+      uiStore.closeDialogs();
     },
     receiveIfDecodes: async function () {
       try {
@@ -71,9 +79,33 @@ export const useReceiveTokensStore = defineStore("receiveTokensStore", {
         return false;
       }
     },
+    pasteToParseDialog: function (verbose = false) {
+      navigator.clipboard.readText().then((text) => {
+        if (this.decodeToken(text)) {
+          const tokensStore = useTokensStore();
+          const historyToken = tokensStore.tokenAlreadyInHistory(text);
+          if (
+            historyToken &&
+            (historyToken.amuont > 0 || historyToken.status === "paid")
+          ) {
+            if (verbose) {
+              notify("Token already in history.");
+            }
+
+            return false;
+          }
+          this.receiveData.tokensBase64 = text;
+          return true;
+        } else {
+          // notifyWarning("Invalid token");
+          return false;
+        }
+      });
+    },
     toggleScanner: function () {
       const receiveStore = useReceiveTokensStore();
       const tokenStore = useTokensStore();
+      const uiStore = useUiStore();
       if (this.scanningCard === false) {
         try {
           this.ndef = new window.NDEFReader();
@@ -140,6 +172,7 @@ export const useReceiveTokensStore = defineStore("receiveTokensStore", {
                     if (!historyToken || historyToken.status === "pending") {
                       receiveStore.receiveData.tokensBase64 = tokenStr;
                       receiveStore.showReceiveTokens = true;
+                      uiStore.closeDialogs();
                     } else {
                       notify("Token already in history.");
                     }

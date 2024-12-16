@@ -353,6 +353,7 @@ export const useWalletStore = defineStore("wallet", {
       await mintStore.activateMintUrl(token.getMint(tokenJson), false, false, tokenJson.unit);
 
       const inputAmount = proofs.reduce((s, t) => (s += t.amount), 0);
+      let fee = 0;
       await uIStore.lockMutex();
       try {
         // redeem
@@ -386,7 +387,7 @@ export const useWalletStore = defineStore("wallet", {
           if (tokenStore.historyTokens.find((t) => t.token === receiveStore.receiveData.tokensBase64 && t.amount < 0)) {
             tokenStore.setTokenPaid(receiveStore.receiveData.tokensBase64);
           }
-          const fee = inputAmount - outputAmount;
+          fee = inputAmount - outputAmount;
           tokenStore.addPaidToken({
             amount: outputAmount,
             serializedProofs: receiveStore.receiveData.tokensBase64,
@@ -398,7 +399,11 @@ export const useWalletStore = defineStore("wallet", {
 
 
         if (!!window.navigator.vibrate) navigator.vibrate(200);
-        notifySuccess("Received " + uIStore.formatCurrency(outputAmount, mintStore.activeUnit));
+        let message = "Received " + uIStore.formatCurrency(outputAmount, mintStore.activeUnit);
+        if (fee > 0) {
+          message += " (fee: " + uIStore.formatCurrency(fee, mintStore.activeUnit) + ")";
+        }
+        notifySuccess(message);
       } catch (error: any) {
         console.error(error);
         notifyApiError(error);
@@ -1106,6 +1111,8 @@ export const useWalletStore = defineStore("wallet", {
       } else if (req.startsWith("creqA")) {
         await this.handlePaymentRequest(req)
       }
+      const uiStore = useUiStore();
+      uiStore.closeDialogs();
     },
     fetchBitcoinPriceUSD: async function () {
       var { data } = await axios.get(

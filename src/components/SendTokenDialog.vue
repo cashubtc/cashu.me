@@ -3,10 +3,19 @@
     v-model="showSendTokens"
     position="top"
     backdrop-filter="blur(2px) brightness(60%)"
+    transition-show="fade"
+    transition-hide="fade"
     no-backdrop-dismiss
     full-height
+    @show="onDialogShown"
   >
     <q-card class="q-pa-none q-pt-none qcard">
+      <NumericKeyboard
+        v-if="showNumericKeyboard && useNumericKeyboard"
+        :model-value="sendData.amount"
+        @update:modelValue="(val) => (sendData.amount = val)"
+        @done="sendTokens"
+      />
       <!--  enter send data -->
       <div v-if="!sendData.tokens">
         <q-card-section class="q-pa-lg q-pt-md">
@@ -108,13 +117,13 @@
                 <q-btn
                   align="center"
                   v-if="!sendData.p2pkPubkey"
-                  icon="qr_code_scanner"
                   flat
                   outline
                   color="primary"
                   round
                   @click="showCamera"
-                />
+                  ><ScanIcon size="1.5em"
+                /></q-btn>
               </div>
             </div>
           </transition>
@@ -215,24 +224,13 @@
             <q-btn
               v-if="showAnimatedQR"
               flat
-              style="font-size: 12px"
+              style="font-size: 10px"
               color="grey"
               class="q-ma-none"
               @click="changeSpeed"
             >
               <q-icon name="speed" style="margin-right: 8px"></q-icon>
               Speed: {{ fragmentSpeedLabel }}
-            </q-btn>
-            <q-btn
-              v-if="showAnimatedQR"
-              flat
-              style="font-size: 12px"
-              class="q-ma-none"
-              color="grey"
-              @click="changeSize"
-            >
-              <q-icon name="zoom_in" style="margin-right: 8px"></q-icon>
-              Size: {{ fragmentLengthLabel }}
             </q-btn>
             <q-badge
               :color="!isV4Token ? 'primary' : 'grey'"
@@ -241,10 +239,25 @@
               @click="toggleTokenEncoding"
               :outline="isV4Token"
             />
+            <q-btn
+              v-if="showAnimatedQR"
+              flat
+              style="font-size: 10px"
+              class="q-ma-none"
+              color="grey"
+              @click="changeSize"
+            >
+              <q-icon name="zoom_in" style="margin-right: 8px"></q-icon>
+              Size: {{ fragmentLengthLabel }}
+            </q-btn>
           </div>
           <q-card-section class="q-pa-sm">
             <div class="row justify-center">
-              <q-item-label overline class="q-mb-sm text-white">
+              <q-item-label
+                overline
+                class="q-mb-sm text-white"
+                style="font-size: 1rem"
+              >
                 {{
                   sendData.historyAmount && sendData.historyAmount < 0
                     ? "Sent"
@@ -253,7 +266,7 @@
                 Ecash</q-item-label
               >
             </div>
-            <div class="row justify-center q-py-md">
+            <div class="row justify-center q-pt-sm">
               <q-item-label style="font-size: 30px" class="text-weight-bold">
                 <q-spinner-dots
                   v-if="runnerActive"
@@ -264,12 +277,12 @@
                 <strong>{{ displayUnit }}</strong></q-item-label
               >
             </div>
-            <div v-if="paidFees" class="row justify-center q-pb-md">
+            <div v-if="paidFees" class="row justify-center q-pt-sm">
               <q-item-label class="text-weight-bold">
-                Fees: {{ formatCurrency(paidFees, tokenUnit) }}
+                Fee: {{ formatCurrency(paidFees, tokenUnit) }}
               </q-item-label>
             </div>
-            <div class="row justify-center q-pt-sm">
+            <div class="row justify-center q-pt-md">
               <TokenInformation
                 :encodedToken="sendData.tokensBase64"
                 :showAmount="false"
@@ -284,11 +297,22 @@
             </div>
             <div class="row q-mt-lg">
               <q-btn
-                class="q-mx-xs"
+                class="q-mx-sm"
                 size="md"
                 flat
+                dense
                 @click="copyText(sendData.tokensBase64)"
                 >Copy</q-btn
+              >
+              <q-btn
+                class="q-mr-sm"
+                color="grey"
+                size="md"
+                dense
+                icon="link"
+                flat
+                @click="copyText(baseURL + '#token=' + sendData.tokensBase64)"
+                ><q-tooltip>Copy link</q-tooltip></q-btn
               >
               <q-btn
                 unelevated
@@ -301,7 +325,7 @@
                 "
                 @click="showCamera"
               >
-                <q-icon name="qr_code_scanner" class="q-pr-sm" />
+                <ScanIcon />
               </q-btn>
               <q-btn
                 unelevated
@@ -314,11 +338,11 @@
                 :disabled="scanningCard"
                 :loading="scanningCard"
                 class="q-mx-sm"
-                icon="nfc"
                 size="md"
                 @click="writeTokensToCard"
                 flat
               >
+                <NfcIcon />
                 <q-tooltip>{{
                   ndefSupported ? "Flash to NFC card" : "NDEF unsupported"
                 }}</q-tooltip>
@@ -326,15 +350,6 @@
                   <q-spinner @click="closeCardScanner" />
                 </template>
               </q-btn>
-              <q-btn
-                class="q-mx-none"
-                color="grey"
-                size="md"
-                icon="link"
-                flat
-                @click="copyText(baseURL + '#token=' + sendData.tokensBase64)"
-                ><q-tooltip>Copy link</q-tooltip></q-btn
-              >
               <q-btn
                 class="q-mx-none"
                 color="grey"
@@ -421,6 +436,15 @@ import { mapActions, mapState, mapWritableState } from "pinia";
 import ChooseMint from "components/ChooseMint.vue";
 import { UR, UREncoder } from "@gandlaf21/bc-ur";
 import SendPaymentRequest from "./SendPaymentRequest.vue";
+import NumericKeyboard from "components/NumericKeyboard.vue";
+import {
+  ChevronLeft as ChevronLeftIcon,
+  Clipboard as ClipboardIcon,
+  FileText as FileTextIcon,
+  Lock as LockIcon,
+  Scan as ScanIcon,
+  Nfc as NfcIcon,
+} from "lucide-vue-next";
 import {
   notifyError,
   notifySuccess,
@@ -435,6 +459,9 @@ export default defineComponent({
     ChooseMint,
     TokenInformation,
     SendPaymentRequest,
+    NumericKeyboard,
+    ScanIcon,
+    NfcIcon,
   },
   props: {},
   data: function () {
@@ -445,7 +472,6 @@ export default defineComponent({
       qrInterval: null,
       encoder: null,
       showDeleteDialog: false,
-
       p2pkInput: "",
 
       // parameters for animated QR
@@ -477,7 +503,9 @@ export default defineComponent({
       "canPasteFromClipboard",
       "globalMutexLock",
     ]),
+    ...mapWritableState(useUiStore, ["showNumericKeyboard"]),
     ...mapState(useMintsStore, [
+      "mints",
       "activeProofs",
       "activeUnit",
       "activeUnitLabel",
@@ -489,7 +517,9 @@ export default defineComponent({
       "checkSentTokens",
       "includeFeesInSendAmount",
       "nfcEncoding",
+      "useNumericKeyboard",
     ]),
+
     ...mapState(useWorkersStore, ["tokenWorkerRunning"]),
     // TOKEN METHODS
     sumProofs: function () {
@@ -573,7 +603,13 @@ export default defineComponent({
     },
     showSendTokens: function (val) {
       if (val) {
-        // this.startQrCodeLoop();
+        this.$nextTick(() => {
+          if (!this.sendData.tokensBase64.length) {
+            this.showNumericKeyboard = true;
+          } else {
+            this.showNumericKeyboard = false;
+          }
+        });
       } else {
         clearInterval(this.qrInterval);
         this.sendData.data = "";
@@ -834,6 +870,7 @@ export default defineComponent({
       /*
       calls send, displays token and kicks off the spendableWorker
       */
+      this.showNumericKeyboard = false;
       if (
         this.sendData.p2pkPubkey &&
         this.isValidPubkey(this.sendData.p2pkPubkey)
@@ -856,7 +893,8 @@ export default defineComponent({
         // update UI
         this.sendData.tokens = sendProofs;
         this.sendData.tokensBase64 = this.serializeProofs(sendProofs);
-        this.sendData.historyAmount = -this.sendData.amount;
+        this.sendData.historyAmount =
+          -this.sendData.amount * this.activeUnitCurrencyMultiplyer;
 
         this.addPendingToken({
           amount: -sendAmount,

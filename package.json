@@ -36,6 +36,7 @@
     "core-js": "^3.37.0",
     "date-fns": "^3.6.0",
     "light-bolt11-decoder": "^3.1.1",
+    "lucide-vue-next": "^0.453.0",
     "nostr-tools": "^2.5.2",
     "pinia": "^2.1.7",
     "qr-scanner": "^1.4.2",

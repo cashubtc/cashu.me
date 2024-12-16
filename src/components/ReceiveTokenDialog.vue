@@ -2,23 +2,22 @@
   <q-dialog
     v-model="showReceiveTokens"
     position="top"
-    backdrop-filter="blur(2px) brightness(60%)"
+    :maximized="$q.screen.lt.sm"
+    transition-show="fade"
+    transition-hide="fade"
     no-backdrop-dismiss
   >
-    <q-card class="q-pa-lg q-pt-md qcard">
+    <q-card v-model="showReceiveTokens" class="q-pa-lg qcard q-card-top">
       <q-btn v-close-popup rounded flat color="grey" class="close-btn-position"
         >Close</q-btn
       >
       <div>
-        <div class="row items-center no-wrap q-mb-sm">
-          <div class="col-10">
-            <span class="text-h6">Receive Ecash</span>
+        <div class="row items-center no-wrap q-mb-sm q-mb-sm q-pr-md q-py-lg">
+          <div class="col-9">
+            <span class="text-h6">Receive ecash</span>
           </div>
         </div>
-        <div>
-          <P2PKDialog v-model="showP2PKDialog" />
-          <PRDialog v-model="showPRDialog" />
-        </div>
+        <div></div>
         <q-input
           round
           outlined
@@ -95,47 +94,30 @@
           dense
           class="q-mr-sm"
           v-if="canPasteFromClipboard && !receiveData.tokensBase64.length"
-          @click="pasteToParseDialog"
+          @click="pasteToParseDialog(true)"
         >
           <q-icon name="content_paste" class="q-pr-sm" />Paste</q-btn
         >
         <q-btn
           unelevated
           dense
-          class="q-mr-sm"
+          class="q-mx-sm"
           v-if="hasCamera && !receiveData.tokensBase64.length"
           @click="showCamera"
         >
-          <q-icon name="qr_code_scanner" class="q-pr-sm" />Scan
+          <ScanIcon size="1.5em" />
+          <span class="q-pl-sm">Scan</span>
         </q-btn>
         <q-btn
           unelevated
           dense
-          class="q-mx-none"
-          v-if="!receiveData.tokensBase64.length"
-          @click="handleLockBtn"
-        >
-          <q-icon name="lock_outline" class="q-pr-sm" />Lock
-        </q-btn>
-      </div>
-      <div
-        v-if="
-          !receiveData.tokensBase64.length &&
-          (enablePaymentRequest || ndefSupported)
-        "
-        class="row q-mt-lg"
-      >
-        <!-- does require second row of buttons -->
-        <q-btn
-          unelevated
-          dense
-          class="q-mr-sm"
+          class="q-mx-sm"
           v-if="!receiveData.tokensBase64.length && ndefSupported"
           :loading="scanningCard"
           :disabled="scanningCard"
           @click="toggleScanner"
         >
-          <q-icon name="nfc" class="q-pr-sm" />
+          <NfcIcon class="q-pr-xs" />
           <q-tooltip>{{
             ndefSupported ? "Read from NFC card" : "NDEF unsupported"
           }}</q-tooltip>
@@ -144,58 +126,70 @@
           </template>
           NFC
         </q-btn>
-        <q-btn
-          unelevated
-          dense
-          class="q-mr-sm"
-          v-if="!receiveData.tokensBase64.length && enablePaymentRequest"
-          @click="handlePaymentRequestBtn"
-        >
-          <q-icon name="move_to_inbox" class="q-pr-sm" />Request
-        </q-btn>
       </div>
     </q-card>
   </q-dialog>
 </template>
+
 <script>
 import { defineComponent } from "vue";
 import { useReceiveTokensStore } from "src/stores/receiveTokensStore";
 import { useWalletStore } from "src/stores/wallet";
 import { useUiStore } from "src/stores/ui";
-// import { useProofsStore } from "src/stores/proofs";
 import { useMintsStore } from "src/stores/mints";
 import { useTokensStore } from "src/stores/tokens";
 import { useCameraStore } from "src/stores/camera";
 import { useP2PKStore } from "src/stores/p2pk";
 import { usePRStore } from "src/stores/payment-request";
 import token from "src/js/token";
-import P2PKDialog from "./P2PKDialog.vue";
-import PRDialog from "./PaymentRequestDialog.vue";
 
 import { mapActions, mapState, mapWritableState } from "pinia";
+import {
+  ChevronLeft as ChevronLeftIcon,
+  Clipboard as ClipboardIcon,
+  FileText as FileTextIcon,
+  Lock as LockIcon,
+  Scan as ScanIcon,
+  Nfc as NfcIcon,
+} from "lucide-vue-next";
 // import ChooseMint from "components/ChooseMint.vue";
 import TokenInformation from "components/TokenInformation.vue";
 import { map } from "underscore";
-import { notifyError, notifySuccess, notify } from "../js/notify";
+import {
+  notifyError,
+  notifySuccess,
+  notifyWarning,
+  notify,
+} from "../js/notify";
 
 export default defineComponent({
   name: "ReceiveTokenDialog",
   mixins: [windowMixin],
   components: {
     TokenInformation,
-    P2PKDialog,
-    PRDialog,
+    NfcIcon,
+    ScanIcon,
   },
-  props: {},
   data: function () {
     return {
       showP2PKDialog: false,
       ndefSupported: "NDEFReader" in globalThis,
     };
   },
+  watch: {
+    watchClipboardPaste(val) {
+      if (val) {
+        this.$nextTick(() => {
+          this.pasteToParseDialog();
+          this.watchClipboardPaste = false;
+        });
+      }
+    },
+  },
   computed: {
     ...mapWritableState(useReceiveTokensStore, [
       "showReceiveTokens",
+      "watchClipboardPaste",
       "receiveData",
       "scanningCard",
     ]),
@@ -217,6 +211,8 @@ export default defineComponent({
         navigator.clipboard.readText
       );
     },
+    ...mapWritableState(useUiStore, ["showReceiveDialog"]),
+    ...mapState(useCameraStore, ["lastScannedResult"]),
     tokenDecodesCorrectly: function () {
       return this.decodeToken(this.receiveData.tokensBase64) !== undefined;
     },
@@ -243,6 +239,7 @@ export default defineComponent({
       "decodeToken",
       "knowThisMintOfTokenJson",
       "toggleScanner",
+      "pasteToParseDialog",
     ]),
     // TOKEN METHODS
     getProofs: function (decoded_token) {
@@ -250,20 +247,6 @@ export default defineComponent({
     },
     getMint: function (decoded_token) {
       return token.getMint(decoded_token);
-    },
-    handleLockBtn: function () {
-      this.showP2PKDialog = !this.showP2PKDialog;
-      if (!this.p2pkKeys.length || !this.showP2PKDialog) {
-        this.generateKeypair();
-      }
-      this.showLastKey();
-    },
-    handlePaymentRequestBtn: function () {
-      const prStore = usePRStore();
-      this.showPRDialog = !this.showPRDialog;
-      if (this.showPRDialog) {
-        prStore.newPaymentRequest();
-      }
     },
     tokenAlreadyInHistory: function (tokenStr) {
       const tokensStore = useTokensStore();
@@ -294,20 +277,54 @@ export default defineComponent({
       // show success notification
       this.notifySuccess("Incoming payment added to history.");
     },
-    pasteToParseDialog: function () {
-      console.log("pasteToParseDialog");
-      navigator.clipboard.readText().then((text) => {
-        this.receiveData.tokensBase64 = text;
-      });
-    },
   },
 });
 </script>
-<style scoped>
+
+<style lang="scss" scoped>
+.custom-btn {
+  background: $grey-9;
+  color: white;
+  border-radius: 8px;
+  height: 60px;
+  box-shadow: none;
+  font-size: 14px;
+}
+
+.full-width-card {
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.q-dialog__inner > div {
+  border-top-left-radius: 20px;
+  border-top-right-radius: 20px;
+}
+
+.icon-background {
+  background-color: $grey-10;
+  border-radius: 8px;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lucide {
+  width: 24px;
+  height: 24px;
+}
+
 .close-btn-position {
   position: absolute;
   right: 16px;
   bottom: 22px;
   z-index: 100;
+}
+
+.q-card-top {
+  border-top-left-radius: 0px !important;
+  border-top-right-radius: 0px !important;
 }
 </style>

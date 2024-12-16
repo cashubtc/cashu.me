@@ -17,12 +17,21 @@ export const useUiStore = defineStore("ui", {
     showInvoiceDetails: false,
     showSendDialog: false,
     showReceiveDialog: false,
+    showReceiveEcashDrawer: false,
+    showNumericKeyboard: false,
     tab: useLocalStorage("cashu.ui.tab", "history" as string),
     expandHistory:
       useLocalStorage("cashu.ui.expandHistory", true as boolean),
     globalMutexLock: false,
+    showNfcButtonInDrawer: useLocalStorage("cashu.ui.showNfcButtonInDrawer", true as boolean),
   }),
   actions: {
+    closeDialogs() {
+      this.showInvoiceDetails = false;
+      this.showSendDialog = false;
+      this.showReceiveDialog = false;
+      this.showReceiveEcashDrawer = false;
+    },
     async lockMutex() {
       const nRetries = 10;
       const retryInterval = 500;

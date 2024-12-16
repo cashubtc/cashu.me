@@ -17,7 +17,11 @@
         <div class="row justify-center">
           <q-card-section class="q-pa-sm">
             <div class="row justify-center">
-              <q-item-label overline class="q-mb-sm q-pt-md text-white">
+              <q-item-label
+                overline
+                class="q-mb-sm q-pt-md text-white"
+                style="font-size: 1rem"
+              >
                 Payment Request</q-item-label
               >
             </div>
@@ -39,7 +43,7 @@
                 {{ getShortUrl(activeMintUrl) }}
               </q-chip>
               <div @click="toggleUnit" class="q-mt-xs q-ml-sm">
-                <ToggleUnit class="q-py-none" />
+                <ToggleUnit class="q-py-none" color="white" />
               </div>
             </div>
           </q-card-section>
@@ -49,7 +53,7 @@
           <q-card-section class="q-pa-sm">
             <div class="row justify-center q-pt-sm">
               <div v-if="!isEditingAmount">
-                <q-btn outline rounded @click="startEditingAmount">
+                <q-btn color="primary" rounded @click="startEditingAmount">
                   <q-icon name="edit_note" size="xs" class="q-mr-sm" />
                   {{ amountLabel }}</q-btn
                 >
@@ -70,7 +74,6 @@
         <q-btn
           class="q-mx-xs q-px-md q-mt-lg"
           size="md"
-          color="primary"
           flat
           rounded
           dense
@@ -113,8 +116,8 @@ export default defineComponent({
       paymentRequestAmount: undefined,
       isEditingAmount: false,
       amountInputValue: "",
-      amountLabelDefault: "Amount",
-      amountLabel: "Amount",
+      amountLabelDefault: "Add amount",
+      amountLabel: "Add amount",
     };
   },
   computed: {

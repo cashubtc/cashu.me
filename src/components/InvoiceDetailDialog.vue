@@ -2,15 +2,23 @@
   <q-dialog
     v-model="showInvoiceDetails"
     position="top"
+    :full-width="$q.screen.lt.sm"
+    :full-height="$q.screen.lt.sm"
     backdrop-filter="blur(2px) brightness(60%)"
+    transition-show="fade"
+    transition-hide="fade"
     no-backdrop-dismiss
-    full-height
   >
-    <q-card class="q-px-lg q-pt-md q-pb-md qcard">
+    <q-card class="q-pa-lg q-px-sm qcard q-card-top">
+      <NumericKeyboard
+        v-if="showNumericKeyboard && useNumericKeyboard"
+        :model-value="invoiceData.amount"
+        @update:modelValue="(val) => (invoiceData.amount = val)"
+        @done="requestMintButton"
+      />
       <!-- invoice is not entered -->
-
       <div v-if="!invoiceData.bolt11">
-        <div class="row items-center no-wrap q-mb-sm">
+        <div class="row items-center no-wrap q-mb-sm q-pr-md q-py-lg">
           <div class="col-10">
             <span class="text-h6">Create Invoice</span>
           </div>
@@ -66,7 +74,7 @@
 
       <!-- invoice is entered -->
 
-      <div v-else class="text-center q-mb-md q-mt-none q-pt-none">
+      <div v-else class="text-center q-mt-none q-pt-none">
         <a class="text-secondary" :href="'lightning:' + invoiceData.bolt11">
           <q-responsive :ratio="1" class="q-mx-md q-mt-none q-pt-none">
             <vue-qrcode
@@ -80,7 +88,11 @@
         <div class="row justify-center">
           <q-card-section class="q-pa-sm">
             <div class="row justify-center">
-              <q-item-label overline class="q-mb-sm q-pt-md text-white">
+              <q-item-label
+                overline
+                class="q-mb-sm q-pt-md text-white"
+                style="font-size: 1rem"
+              >
                 Lightning invoice</q-item-label
               >
             </div>
@@ -114,18 +126,15 @@
               v-if="this.invoiceData.mint != undefined"
               class="row justify-center q-pt-sm"
             >
-              <q-icon
-                name="account_balance"
-                size="0.95rem"
-                color="grey"
-                class="q-mr-sm"
-              />
-              <q-item-label
-                caption
-                class="text-weight-light text-white"
-                style="font-size: 14px"
-                ><strong>{{ shortUrl }}</strong></q-item-label
-              >
+              <q-chip outline class="q-pa-md">
+                <q-icon
+                  name="account_balance"
+                  size="xs"
+                  color="grey"
+                  class="q-mr-sm"
+                />
+                {{ shortUrl }}
+              </q-chip>
             </div>
           </q-card-section>
         </div>
@@ -155,6 +164,8 @@ import { useUiStore } from "src/stores/ui";
 import { getShortUrl } from "src/js/wallet-helpers";
 import { useWorkersStore } from "src/stores/workers";
 import { useMintsStore } from "src/stores/mints";
+import { useSettingsStore } from "../stores/settings";
+import NumericKeyboard from "components/NumericKeyboard.vue";
 
 export default defineComponent({
   name: "InvoiceDetailDialog",
@@ -162,6 +173,7 @@ export default defineComponent({
   components: {
     ChooseMint,
     VueQrcode,
+    NumericKeyboard,
   },
   props: {
     invoiceCheckWorker: Function,
@@ -170,6 +182,19 @@ export default defineComponent({
     return {
       createInvoiceButtonBlocked: false,
     };
+  },
+  watch: {
+    showInvoiceDetails: function (val) {
+      if (val) {
+        this.$nextTick(() => {
+          if (!this.invoiceData.amount) {
+            this.showNumericKeyboard = true;
+          } else {
+            this.showNumericKeyboard = false;
+          }
+        });
+      }
+    },
   },
   computed: {
     ...mapState(useWalletStore, ["invoiceData"]),
@@ -183,7 +208,9 @@ export default defineComponent({
       "showInvoiceDetails",
       "tickerShort",
       "globalMutexLock",
+      "showNumericKeyboard",
     ]),
+    ...mapState(useSettingsStore, ["useNumericKeyboard"]),
     displayUnit: function () {
       let display = this.formatCurrency(
         this.invoiceData.amount,
@@ -198,6 +225,9 @@ export default defineComponent({
     runnerActive: function () {
       return this.invoiceWorkerRunning;
     },
+    isSmallScreen() {
+      return this.$q.screen.lt.sm;
+    },
   },
   methods: {
     ...mapActions(useWalletStore, [
@@ -208,6 +238,7 @@ export default defineComponent({
     ...mapActions(useMintsStore, ["toggleUnit"]),
     requestMintButton: async function () {
       try {
+        this.showNumericKeyboard = false;
         const mintStore = useMintsStore();
         this.invoiceData.amount *= this.activeUnitCurrencyMultiplyer;
         this.createInvoiceButtonBlocked = true;
@@ -222,3 +253,10 @@ export default defineComponent({
   },
 });
 </script>
+
+<style scoped>
+.qcard {
+  border-top-left-radius: 20px;
+  border-top-right-radius: 20px;
+}
+</style>

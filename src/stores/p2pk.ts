@@ -15,6 +15,7 @@ type P2PKKey = {
 export const useP2PKStore = defineStore("p2pk", {
   state: () => ({
     p2pkKeys: useLocalStorage<P2PKKey[]>("cashu.P2PKKeys", []),
+    showP2PkButtonInDrawer: useLocalStorage<boolean>("cashu.p2pk.showP2PkButtonInDrawer", false),
     showP2PKDialog: false,
     showP2PKData: {} as P2PKKey
   }),
