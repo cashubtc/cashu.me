@@ -64,6 +64,7 @@ import { useUiStore } from "src/stores/ui";
 import { useWalletStore } from "src/stores/wallet";
 import { useCameraStore } from "src/stores/camera";
 import { useSendTokensStore } from "src/stores/sendTokensStore";
+import { useSettingsStore } from "../stores/settings";
 import {
   X as XIcon,
   Banknote as BanknoteIcon,
@@ -93,6 +94,7 @@ export default defineComponent({
       "tab",
       "showSendDialog",
       "showReceiveDialog",
+      "showNumericKeyboard",
     ]),
     ...mapWritableState(useWalletStore, [
       "invoiceHistory",

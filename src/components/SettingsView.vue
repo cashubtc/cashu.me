@@ -751,6 +751,34 @@
           </q-list>
         </div>
 
+        <!-- use numeric keyboard -->
+        <div class="q-py-sm q-px-xs text-left" on-left>
+          <q-list padding>
+            <q-item>
+              <q-item-section>
+                <q-item-label overline class="text-weight-bold"
+                  >Use numeric keyboard</q-item-label
+                >
+                <q-item-label caption
+                  >Use the numeric keyboard for entering amounts.</q-item-label
+                >
+              </q-item-section>
+            </q-item>
+            <q-item>
+              <q-toggle
+                v-model="useNumericKeyboard"
+                label="Use numeric keyboard"
+                color="primary"
+              /> </q-item
+            ><q-item class="q-pt-none">
+              <q-item-label caption
+                >If enabled, the numeric keyboard will be used for entering
+                amounts.
+              </q-item-label>
+            </q-item>
+          </q-list>
+        </div>
+
         <!-- theme -->
         <div class="q-py-mb q-px-xs text-left" on-left>
           <q-list padding>
@@ -1181,6 +1209,7 @@ export default defineComponent({
       "checkSentTokens",
       "useWebsockets",
       "nfcEncoding",
+      "useNumericKeyboard",
     ]),
     ...mapState(useP2PKStore, ["p2pkKeys"]),
     ...mapWritableState(useP2PKStore, [

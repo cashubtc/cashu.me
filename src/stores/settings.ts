@@ -34,6 +34,10 @@ export const useSettingsStore = defineStore("settings", {
         "cashu.settings.nfcEncoding",
         "weburl"
       ),
+      useNumericKeyboard: useLocalStorage<boolean>(
+        "cashu.settings.useNumericKeyboard",
+        false
+      ),
     };
   },
 });

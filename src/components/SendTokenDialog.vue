@@ -3,12 +3,20 @@
     v-model="showSendTokens"
     position="top"
     backdrop-filter="blur(2px) brightness(60%)"
-    transition-show="slide-up"
-    transition-hide="slide-up"
+    transition-show="fade"
+    transition-hide="fade"
     no-backdrop-dismiss
     full-height
+    @show="onDialogShown"
   >
     <q-card class="q-pa-none q-pt-none qcard">
+      <!-- emit enter keyboard on @done -->
+      <NumericKeyboard
+        v-if="showNumericKeyboard && useNumericKeyboard"
+        :model-value="sendData.amount"
+        @update:modelValue="(val) => (sendData.amount = val)"
+        @done="sendTokens"
+      />
       <!--  enter send data -->
       <div v-if="!sendData.tokens">
         <q-card-section class="q-pa-lg q-pt-md">
@@ -423,6 +431,8 @@ import { mapActions, mapState, mapWritableState } from "pinia";
 import ChooseMint from "components/ChooseMint.vue";
 import { UR, UREncoder } from "@gandlaf21/bc-ur";
 import SendPaymentRequest from "./SendPaymentRequest.vue";
+import NumericKeyboard from "components/NumericKeyboard.vue";
+
 import {
   notifyError,
   notifySuccess,
@@ -437,6 +447,7 @@ export default defineComponent({
     ChooseMint,
     TokenInformation,
     SendPaymentRequest,
+    NumericKeyboard,
   },
   props: {},
   data: function () {
@@ -447,7 +458,6 @@ export default defineComponent({
       qrInterval: null,
       encoder: null,
       showDeleteDialog: false,
-
       p2pkInput: "",
 
       // parameters for animated QR
@@ -479,6 +489,7 @@ export default defineComponent({
       "canPasteFromClipboard",
       "globalMutexLock",
     ]),
+    ...mapWritableState(useUiStore, ["showNumericKeyboard"]),
     ...mapState(useMintsStore, [
       "activeProofs",
       "activeUnit",
@@ -491,7 +502,9 @@ export default defineComponent({
       "checkSentTokens",
       "includeFeesInSendAmount",
       "nfcEncoding",
+      "useNumericKeyboard",
     ]),
+
     ...mapState(useWorkersStore, ["tokenWorkerRunning"]),
     // TOKEN METHODS
     sumProofs: function () {
@@ -575,7 +588,9 @@ export default defineComponent({
     },
     showSendTokens: function (val) {
       if (val) {
-        // this.startQrCodeLoop();
+        this.$nextTick(() => {
+          this.showNumericKeyboard = true;
+        });
       } else {
         clearInterval(this.qrInterval);
         this.sendData.data = "";
@@ -836,6 +851,7 @@ export default defineComponent({
       /*
       calls send, displays token and kicks off the spendableWorker
       */
+      this.showNumericKeyboard = false;
       if (
         this.sendData.p2pkPubkey &&
         this.isValidPubkey(this.sendData.p2pkPubkey)

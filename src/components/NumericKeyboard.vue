@@ -1,0 +1,113 @@
+<!-- NumericKeyboard.vue -->
+<template>
+  <transition name="slide-up-fade">
+    <q-card
+      class="numeric-keyboard q-pa-md q-pb-xl q-pt-lg"
+      style="position: fixed; bottom: 0; width: 100%; left: 0"
+      v-if="showNumericKeyboard"
+    >
+      <div class="keyboard-grid">
+        <q-btn flat dense class="text-h5" @click="addDigit('1')">1</q-btn>
+        <q-btn flat dense class="text-h5" @click="addDigit('2')">2</q-btn>
+        <q-btn flat dense class="text-h5" @click="addDigit('3')">3</q-btn>
+
+        <q-btn flat dense class="text-h5" @click="addDigit('4')">4</q-btn>
+        <q-btn flat dense class="text-h5" @click="addDigit('5')">5</q-btn>
+        <q-btn flat dense class="text-h5" @click="addDigit('6')">6</q-btn>
+
+        <q-btn flat dense class="text-h5" @click="addDigit('7')">7</q-btn>
+        <q-btn flat dense class="text-h5" @click="addDigit('8')">8</q-btn>
+        <q-btn flat dense class="text-h5" @click="addDigit('9')">9</q-btn>
+
+        <q-btn flat dense class="text-h5" @click="backspace">
+          <q-icon name="backspace" size="sm" />
+        </q-btn>
+        <q-btn flat dense class="text-h5" @click="addDigit('0')">0</q-btn>
+        <q-btn flat dense class="text-h5" @click="addComma">.</q-btn>
+        <q-btn flat dense @click="closeKeyboard">Close</q-btn>
+        <br />
+        <q-btn flat dense @click="emitDone">Enter</q-btn>
+      </div>
+
+      <!-- Bottom row with Close and Enter -->
+    </q-card>
+  </transition>
+</template>
+
+<script>
+import { defineComponent } from "vue";
+import { useUiStore } from "../stores/ui";
+import { mapWritableState } from "pinia";
+import { useSettingsStore } from "../stores/settings";
+
+export default defineComponent({
+  name: "NumericKeyboard",
+  props: {
+    modelValue: {
+      type: String,
+      default: "0",
+    },
+  },
+  emits: ["update:modelValue", "done"],
+  computed: {
+    ...mapWritableState(useUiStore, ["showNumericKeyboard"]),
+    ...mapWritableState(useSettingsStore, ["useNumericKeyboard"]),
+  },
+  methods: {
+    addDigit(digit) {
+      const current = this.modelValue || "0";
+      const newVal = current === "0" ? digit : current + digit;
+      this.$emit("update:modelValue", newVal);
+    },
+    backspace() {
+      const current = this.modelValue || "0";
+      const newVal = current.length > 1 ? current.slice(0, -1) : "0";
+      this.$emit("update:modelValue", newVal);
+    },
+    addComma() {
+      const current = this.modelValue || "0";
+      if (!current.includes(".")) {
+        this.$emit("update:modelValue", current + ".");
+      }
+    },
+    closeKeyboard() {
+      this.useNumericKeyboard = false;
+      this.showNumericKeyboard = false;
+    },
+    emitDone() {
+      this.$emit("done");
+    },
+  },
+});
+</script>
+
+<style scoped lang="scss">
+.numeric-keyboard {
+  border-top-left-radius: 20px !important;
+  border-top-right-radius: 20px !important;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: var(--q-color-grey-1);
+}
+
+.keyboard-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  width: 100%;
+  max-width: 300px;
+  margin: 0 auto;
+}
+
+/* Transition styles */
+.slide-up-fade-enter-active,
+.slide-up-fade-leave-active {
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+.slide-up-fade-enter,
+.slide-up-fade-leave-to {
+  transform: translateY(100%);
+  opacity: 0;
+}
+</style>

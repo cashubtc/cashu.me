@@ -18,6 +18,7 @@ export const useUiStore = defineStore("ui", {
     showSendDialog: false,
     showReceiveDialog: false,
     showReceiveEcashDrawer: false,
+    showNumericKeyboard: false,
     tab: useLocalStorage("cashu.ui.tab", "history" as string),
     expandHistory:
       useLocalStorage("cashu.ui.expandHistory", true as boolean),
