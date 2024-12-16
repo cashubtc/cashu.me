@@ -35,8 +35,6 @@
         <br />
         <q-btn flat dense @click="emitDone">Enter</q-btn>
       </div>
-
-      <!-- Bottom row with Close and Enter -->
     </q-card>
   </transition>
 </template>
@@ -46,6 +44,7 @@ import { defineComponent } from "vue";
 import { useUiStore } from "../stores/ui";
 import { mapWritableState } from "pinia";
 import { useSettingsStore } from "../stores/settings";
+import { notify } from "src/js/notify";
 
 export default defineComponent({
   name: "NumericKeyboard",
@@ -80,6 +79,10 @@ export default defineComponent({
     closeKeyboard() {
       this.useNumericKeyboard = false;
       this.showNumericKeyboard = false;
+      notify(
+        "Keyboard disabled. You can re-enable the keyboard in the settings.",
+        "bottom"
+      );
     },
     emitDone() {
       this.$emit("done");

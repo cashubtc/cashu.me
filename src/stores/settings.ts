@@ -36,7 +36,7 @@ export const useSettingsStore = defineStore("settings", {
       ),
       useNumericKeyboard: useLocalStorage<boolean>(
         "cashu.settings.useNumericKeyboard",
-        false
+        true
       ),
     };
   },

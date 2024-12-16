@@ -889,7 +889,8 @@ export default defineComponent({
         // update UI
         this.sendData.tokens = sendProofs;
         this.sendData.tokensBase64 = this.serializeProofs(sendProofs);
-        this.sendData.historyAmount = -this.sendData.amount;
+        this.sendData.historyAmount =
+          -this.sendData.amount * this.activeUnitCurrencyMultiplyer;
 
         this.addPendingToken({
           amount: -sendAmount,

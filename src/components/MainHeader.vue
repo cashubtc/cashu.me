@@ -25,10 +25,18 @@
           <span>Offline</span>
         </q-badge>
       </transition>
-      <q-badge color="yellow" text-color="black" class="q-mr-sm">
+      <q-badge
+        v-if="isStaging()"
+        color="yellow"
+        text-color="black"
+        class="q-mr-sm"
+      >
+        <span>Staging – don't use with real funds!</span>
+      </q-badge>
+      <!-- <q-badge color="yellow" text-color="black" class="q-mr-sm">
         <span v-if="!isStaging()">Beta</span>
         <span v-else>Staging – don't use with real funds!</span>
-      </q-badge>
+      </q-badge> -->
       <transition-group appear enter-active-class="animated pulse">
         <q-badge
           v-if="countdown > 0"
@@ -51,7 +59,7 @@
         flat
         dense
         round
-        size="sm"
+        size="0.8em"
         :icon="countdown > 0 ? 'close' : 'refresh'"
         :color="countdown > 0 ? 'negative' : 'primary'"
         aria-label="Refresh"
