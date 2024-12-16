@@ -224,24 +224,13 @@
             <q-btn
               v-if="showAnimatedQR"
               flat
-              style="font-size: 12px"
+              style="font-size: 10px"
               color="grey"
               class="q-ma-none"
               @click="changeSpeed"
             >
               <q-icon name="speed" style="margin-right: 8px"></q-icon>
               Speed: {{ fragmentSpeedLabel }}
-            </q-btn>
-            <q-btn
-              v-if="showAnimatedQR"
-              flat
-              style="font-size: 12px"
-              class="q-ma-none"
-              color="grey"
-              @click="changeSize"
-            >
-              <q-icon name="zoom_in" style="margin-right: 8px"></q-icon>
-              Size: {{ fragmentLengthLabel }}
             </q-btn>
             <q-badge
               :color="!isV4Token ? 'primary' : 'grey'"
@@ -250,10 +239,25 @@
               @click="toggleTokenEncoding"
               :outline="isV4Token"
             />
+            <q-btn
+              v-if="showAnimatedQR"
+              flat
+              style="font-size: 10px"
+              class="q-ma-none"
+              color="grey"
+              @click="changeSize"
+            >
+              <q-icon name="zoom_in" style="margin-right: 8px"></q-icon>
+              Size: {{ fragmentLengthLabel }}
+            </q-btn>
           </div>
           <q-card-section class="q-pa-sm">
             <div class="row justify-center">
-              <q-item-label overline class="q-mb-sm text-white">
+              <q-item-label
+                overline
+                class="q-mb-sm text-white"
+                style="font-size: 1rem"
+              >
                 {{
                   sendData.historyAmount && sendData.historyAmount < 0
                     ? "Sent"
@@ -262,7 +266,7 @@
                 Ecash</q-item-label
               >
             </div>
-            <div class="row justify-center q-py-md">
+            <div class="row justify-center q-pt-sm">
               <q-item-label style="font-size: 30px" class="text-weight-bold">
                 <q-spinner-dots
                   v-if="runnerActive"
@@ -273,12 +277,12 @@
                 <strong>{{ displayUnit }}</strong></q-item-label
               >
             </div>
-            <div v-if="paidFees" class="row justify-center q-pb-md">
+            <div v-if="paidFees" class="row justify-center q-pt-sm">
               <q-item-label class="text-weight-bold">
-                Fees: {{ formatCurrency(paidFees, tokenUnit) }}
+                Fee: {{ formatCurrency(paidFees, tokenUnit) }}
               </q-item-label>
             </div>
-            <div class="row justify-center q-pt-sm">
+            <div class="row justify-center q-pt-md">
               <TokenInformation
                 :encodedToken="sendData.tokensBase64"
                 :showAmount="false"

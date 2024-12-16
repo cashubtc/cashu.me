@@ -17,7 +17,11 @@
         <div class="row justify-center">
           <q-card-section class="q-pa-sm">
             <div class="row justify-center">
-              <q-item-label overline class="q-mb-sm q-pt-md text-white">
+              <q-item-label
+                overline
+                class="q-mb-sm q-pt-md text-white"
+                style="font-size: 1rem"
+              >
                 Payment Request</q-item-label
               >
             </div>
