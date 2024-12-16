@@ -541,7 +541,7 @@ export default {
         if (event.data.type == "new_tab_opened") {
           channel.postMessage({ type: "already_running", senderId: tabId });
         } else if (event.data.type == "already_running") {
-          window.location.href = "/#/already-running";
+          window.location.href = "/already-running";
         }
       };
     },
