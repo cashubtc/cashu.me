@@ -1235,12 +1235,6 @@ export const useWalletStore = defineStore("wallet", {
         mintStore.activeMintUrl ? [mintStore.activeMintUrl] : undefined,
         memo,
       );
-
-      // TMP
-      console.log("### paymentRequest", paymentRequest.toEncodedRequest());
-      const request: PaymentRequest = decodePaymentRequest(paymentRequest.toEncodedRequest())
-      console.log('### decoded paymentRequest', request);
-
       return paymentRequest.toEncodedRequest();
     }
   },
