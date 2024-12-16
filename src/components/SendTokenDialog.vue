@@ -438,7 +438,6 @@ import {
   Lock as LockIcon,
   Scan as ScanIcon,
   Nfc as NfcIcon,
-  Scan,
 } from "lucide-vue-next";
 import {
   notifyError,

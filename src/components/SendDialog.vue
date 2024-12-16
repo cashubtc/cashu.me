@@ -32,7 +32,7 @@
           <q-btn class="full-width custom-btn" @click="showSendTokensDialog">
             <div class="row items-center full-width">
               <div class="icon-background q-mr-md">
-                <BanknoteIcon />
+                <CoinsIcon />
               </div>
               <div class="text-left">
                 <div class="text-weight-bold custom-btn-text">ECASH</div>
@@ -71,6 +71,7 @@ import {
   Banknote as BanknoteIcon,
   Zap as ZapIcon,
   Scan as ScanIcon,
+  Coins as CoinsIcon,
 } from "lucide-vue-next";
 import { notifyWarning } from "src/js/notify";
 
@@ -78,7 +79,7 @@ export default defineComponent({
   name: "SendDialog",
   components: {
     XIcon,
-    BanknoteIcon,
+    CoinsIcon,
     ZapIcon,
     ScanIcon,
   },

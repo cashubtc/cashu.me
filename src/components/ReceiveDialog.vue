@@ -35,7 +35,7 @@
           >
             <div class="row items-center full-width">
               <div class="icon-background q-mr-md">
-                <BanknoteIcon />
+                <CoinsIcon />
               </div>
               <div class="text-left">
                 <div class="text-weight-bold custom-btn-text">ECASH</div>
@@ -77,7 +77,7 @@ import {
 } from "src/js/notify.ts";
 import {
   X as XIcon,
-  Banknote as BanknoteIcon,
+  Coins as CoinsIcon,
   Zap as ZapIcon,
   Scan as ScanIcon,
 } from "lucide-vue-next";
@@ -86,7 +86,7 @@ export default defineComponent({
   name: "ReceiveDialog",
   components: {
     XIcon,
-    BanknoteIcon,
+    CoinsIcon,
     ZapIcon,
     ScanIcon,
     ReceiveEcashDrawer,
