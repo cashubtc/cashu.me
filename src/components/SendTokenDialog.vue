@@ -589,7 +589,11 @@ export default defineComponent({
     showSendTokens: function (val) {
       if (val) {
         this.$nextTick(() => {
-          this.showNumericKeyboard = true;
+          if (!this.sendData.tokensBase64.length) {
+            this.showNumericKeyboard = true;
+          } else {
+            this.showNumericKeyboard = false;
+          }
         });
       } else {
         clearInterval(this.qrInterval);
