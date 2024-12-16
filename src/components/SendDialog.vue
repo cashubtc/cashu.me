@@ -65,12 +65,14 @@ import { useWalletStore } from "src/stores/wallet";
 import { useCameraStore } from "src/stores/camera";
 import { useSendTokensStore } from "src/stores/sendTokensStore";
 import { useSettingsStore } from "../stores/settings";
+import { useMintsStore } from "src/stores/mints";
 import {
   X as XIcon,
   Banknote as BanknoteIcon,
   Zap as ZapIcon,
   Scan as ScanIcon,
 } from "lucide-vue-next";
+import { notifyWarning } from "src/js/notify";
 
 export default defineComponent({
   name: "SendDialog",
@@ -89,6 +91,7 @@ export default defineComponent({
     };
   },
   computed: {
+    ...mapState(useMintsStore, ["mints"]),
     ...mapWritableState(useUiStore, [
       "showInvoiceDetails",
       "tab",
@@ -106,10 +109,22 @@ export default defineComponent({
       "sendData",
       "showLockInput",
     ]),
+    canMakePayments: function () {
+      if (!this.mints.length) {
+        return false;
+      } else {
+        return true;
+      }
+    },
   },
   methods: {
     ...mapActions(useCameraStore, ["closeCamera", "showCamera"]),
     showParseDialog: function () {
+      if (!this.canMakePayments) {
+        notifyWarning("No mints available");
+        this.showSendDialog = false;
+        return;
+      }
       this.payInvoiceData.show = true;
       this.payInvoiceData.invoice = null;
       this.payInvoiceData.lnurlpay = null;
@@ -123,6 +138,11 @@ export default defineComponent({
     },
     showSendTokensDialog: function () {
       console.log("##### showSendTokensDialog");
+      if (!this.canMakePayments) {
+        notifyWarning("No mints available");
+        this.showSendDialog = false;
+        return;
+      }
       this.sendData.tokens = "";
       this.sendData.tokensBase64 = "";
       this.sendData.amount = null;

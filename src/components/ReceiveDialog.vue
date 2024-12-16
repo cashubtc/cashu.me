@@ -68,6 +68,13 @@ import { useUiStore } from "src/stores/ui";
 import { useWalletStore } from "src/stores/wallet";
 import { useCameraStore } from "src/stores/camera";
 import ReceiveEcashDrawer from "src/components/ReceiveEcashDrawer.vue";
+import { useMintsStore } from "src/stores/mints";
+import {
+  notifyError,
+  notifySuccess,
+  notify,
+  notifyWarning,
+} from "src/js/notify.ts";
 import {
   X as XIcon,
   Banknote as BanknoteIcon,
@@ -103,6 +110,14 @@ export default defineComponent({
       "receiveData",
     ]),
     ...mapWritableState(useWalletStore, ["invoiceData"]),
+    ...mapState(useMintsStore, ["mints"]),
+    canReceivePayments: function () {
+      if (!this.mints.length) {
+        return false;
+      } else {
+        return true;
+      }
+    },
   },
   methods: {
     toggleReceiveEcashDrawer: function () {
@@ -116,6 +131,11 @@ export default defineComponent({
       this.showReceiveDialog = false;
     },
     showInvoiceCreateDialog: async function () {
+      if (!this.canReceivePayments) {
+        notifyWarning("You need to connect to a mint to receive via Lightning");
+        this.showReceiveDialog = false;
+        return;
+      }
       console.log("##### showInvoiceCreateDialog");
       this.invoiceData.amount = "";
       this.invoiceData.bolt11 = "";

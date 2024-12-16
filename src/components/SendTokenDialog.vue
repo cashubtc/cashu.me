@@ -490,6 +490,7 @@ export default defineComponent({
     ]),
     ...mapWritableState(useUiStore, ["showNumericKeyboard"]),
     ...mapState(useMintsStore, [
+      "mints",
       "activeProofs",
       "activeUnit",
       "activeUnitLabel",
