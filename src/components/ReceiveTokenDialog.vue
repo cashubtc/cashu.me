@@ -12,8 +12,8 @@
         >Close</q-btn
       >
       <div>
-        <div class="row items-center no-wrap q-mb-sm">
-          <div class="col-10">
+        <div class="row items-center no-wrap q-mb-sm q-mb-sm q-pr-md q-py-lg">
+          <div class="col-9">
             <span class="text-h6">Receive ecash</span>
           </div>
         </div>

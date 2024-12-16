@@ -9,7 +9,7 @@
     transition-hide="fade"
     no-backdrop-dismiss
   >
-    <q-card class="q-px-lg q-pt-md q-pb-md qcard">
+    <q-card class="q-pa-lg q-px-sm qcard q-card-top">
       <NumericKeyboard
         v-if="showNumericKeyboard && useNumericKeyboard"
         :model-value="invoiceData.amount"
@@ -18,7 +18,7 @@
       />
       <!-- invoice is not entered -->
       <div v-if="!invoiceData.bolt11">
-        <div class="row items-center no-wrap q-mb-sm">
+        <div class="row items-center no-wrap q-mb-sm q-pr-md q-py-lg">
           <div class="col-10">
             <span class="text-h6">Create Invoice</span>
           </div>
@@ -74,7 +74,7 @@
 
       <!-- invoice is entered -->
 
-      <div v-else class="text-center q-mb-md q-mt-none q-pt-none">
+      <div v-else class="text-center q-mt-none q-pt-none">
         <a class="text-secondary" :href="'lightning:' + invoiceData.bolt11">
           <q-responsive :ratio="1" class="q-mx-md q-mt-none q-pt-none">
             <vue-qrcode
@@ -122,18 +122,15 @@
               v-if="this.invoiceData.mint != undefined"
               class="row justify-center q-pt-sm"
             >
-              <q-icon
-                name="account_balance"
-                size="0.95rem"
-                color="grey"
-                class="q-mr-sm"
-              />
-              <q-item-label
-                caption
-                class="text-weight-light text-white"
-                style="font-size: 14px"
-                ><strong>{{ shortUrl }}</strong></q-item-label
-              >
+              <q-chip outline class="q-pa-md">
+                <q-icon
+                  name="account_balance"
+                  size="xs"
+                  color="grey"
+                  class="q-mr-sm"
+                />
+                {{ shortUrl }}
+              </q-chip>
             </div>
           </q-card-section>
         </div>

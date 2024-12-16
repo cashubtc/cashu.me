@@ -293,11 +293,22 @@
             </div>
             <div class="row q-mt-lg">
               <q-btn
-                class="q-mx-xs"
+                class="q-mx-sm"
                 size="md"
                 flat
+                dense
                 @click="copyText(sendData.tokensBase64)"
                 >Copy</q-btn
+              >
+              <q-btn
+                class="q-mr-sm"
+                color="grey"
+                size="md"
+                dense
+                icon="link"
+                flat
+                @click="copyText(baseURL + '#token=' + sendData.tokensBase64)"
+                ><q-tooltip>Copy link</q-tooltip></q-btn
               >
               <q-btn
                 unelevated
@@ -323,11 +334,11 @@
                 :disabled="scanningCard"
                 :loading="scanningCard"
                 class="q-mx-sm"
-                icon="nfc"
                 size="md"
                 @click="writeTokensToCard"
                 flat
               >
+                <NfcIcon />
                 <q-tooltip>{{
                   ndefSupported ? "Flash to NFC card" : "NDEF unsupported"
                 }}</q-tooltip>
@@ -335,15 +346,6 @@
                   <q-spinner @click="closeCardScanner" />
                 </template>
               </q-btn>
-              <q-btn
-                class="q-mx-none"
-                color="grey"
-                size="md"
-                icon="link"
-                flat
-                @click="copyText(baseURL + '#token=' + sendData.tokensBase64)"
-                ><q-tooltip>Copy link</q-tooltip></q-btn
-              >
               <q-btn
                 class="q-mx-none"
                 color="grey"
@@ -455,6 +457,7 @@ export default defineComponent({
     SendPaymentRequest,
     NumericKeyboard,
     ScanIcon,
+    NfcIcon,
   },
   props: {},
   data: function () {
