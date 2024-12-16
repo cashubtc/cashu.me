@@ -10,7 +10,6 @@
     @show="onDialogShown"
   >
     <q-card class="q-pa-none q-pt-none qcard">
-      <!-- emit enter keyboard on @done -->
       <NumericKeyboard
         v-if="showNumericKeyboard && useNumericKeyboard"
         :model-value="sendData.amount"

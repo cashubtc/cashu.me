@@ -94,7 +94,6 @@ export default defineComponent({
       "tab",
       "showSendDialog",
       "showReceiveDialog",
-      "showNumericKeyboard",
     ]),
     ...mapWritableState(useWalletStore, [
       "invoiceHistory",

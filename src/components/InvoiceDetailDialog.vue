@@ -5,13 +5,18 @@
     :full-width="$q.screen.lt.sm"
     :full-height="$q.screen.lt.sm"
     backdrop-filter="blur(2px) brightness(60%)"
+    transition-show="fade"
+    transition-hide="fade"
     no-backdrop-dismiss
   >
     <q-card class="q-px-lg q-pt-md q-pb-md qcard">
-      <!-- Removed q-bar with close button -->
-
+      <NumericKeyboard
+        v-if="showNumericKeyboard && useNumericKeyboard"
+        :model-value="invoiceData.amount"
+        @update:modelValue="(val) => (invoiceData.amount = val)"
+        @done="requestMintButton"
+      />
       <!-- invoice is not entered -->
-
       <div v-if="!invoiceData.bolt11">
         <div class="row items-center no-wrap q-mb-sm">
           <div class="col-10">
@@ -158,6 +163,8 @@ import { useUiStore } from "src/stores/ui";
 import { getShortUrl } from "src/js/wallet-helpers";
 import { useWorkersStore } from "src/stores/workers";
 import { useMintsStore } from "src/stores/mints";
+import { useSettingsStore } from "../stores/settings";
+import NumericKeyboard from "components/NumericKeyboard.vue";
 
 export default defineComponent({
   name: "InvoiceDetailDialog",
@@ -165,6 +172,7 @@ export default defineComponent({
   components: {
     ChooseMint,
     VueQrcode,
+    NumericKeyboard,
   },
   props: {
     invoiceCheckWorker: Function,
@@ -173,6 +181,19 @@ export default defineComponent({
     return {
       createInvoiceButtonBlocked: false,
     };
+  },
+  watch: {
+    showInvoiceDetails: function (val) {
+      if (val) {
+        this.$nextTick(() => {
+          if (!this.invoiceData.amount) {
+            this.showNumericKeyboard = true;
+          } else {
+            this.showNumericKeyboard = false;
+          }
+        });
+      }
+    },
   },
   computed: {
     ...mapState(useWalletStore, ["invoiceData"]),
@@ -186,7 +207,9 @@ export default defineComponent({
       "showInvoiceDetails",
       "tickerShort",
       "globalMutexLock",
+      "showNumericKeyboard",
     ]),
+    ...mapState(useSettingsStore, ["useNumericKeyboard"]),
     displayUnit: function () {
       let display = this.formatCurrency(
         this.invoiceData.amount,
@@ -214,6 +237,7 @@ export default defineComponent({
     ...mapActions(useMintsStore, ["toggleUnit"]),
     requestMintButton: async function () {
       try {
+        this.showNumericKeyboard = false;
         const mintStore = useMintsStore();
         this.invoiceData.amount *= this.activeUnitCurrencyMultiplyer;
         this.createInvoiceButtonBlocked = true;

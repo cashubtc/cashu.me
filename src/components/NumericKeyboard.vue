@@ -3,7 +3,14 @@
   <transition name="slide-up-fade">
     <q-card
       class="numeric-keyboard q-pa-md q-pb-xl q-pt-lg"
-      style="position: fixed; bottom: 0; width: 100%; left: 0"
+      style="
+        position: fixed;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 100%;
+        max-width: 650px;
+      "
       v-if="showNumericKeyboard"
     >
       <div class="keyboard-grid">
@@ -89,6 +96,17 @@ export default defineComponent({
   flex-direction: column;
   align-items: center;
   background: var(--q-color-grey-1);
+  width: 100%;
+  max-width: 650px;
+}
+
+/* Responsive adjustment: Full width on small screens */
+@media (max-width: 600px) {
+  .numeric-keyboard {
+    left: 0;
+    transform: none;
+    max-width: 100%;
+  }
 }
 
 .keyboard-grid {
@@ -98,6 +116,26 @@ export default defineComponent({
   width: 100%;
   max-width: 300px;
   margin: 0 auto;
+}
+
+/* Enhance button design */
+.q-btn {
+  border-radius: 8px; /* Slightly rounded corners */
+  font-weight: 600; /* Bold text for better readability */
+  text-transform: capitalize; /* Capitalize button text */
+  transition: background-color 0.3s, transform 0.2s; /* Smooth transitions */
+  background-color: var(--q-color-grey-2); /* Subtle background */
+  color: var(--q-color-grey-10); /* Text color */
+}
+
+.q-btn:hover {
+  background-color: var(--q-color-grey-3); /* Slightly darker on hover */
+  transform: translateY(-2px); /* Slight lift on hover */
+}
+
+.q-btn:active {
+  transform: translateY(0); /* Reset position on click */
+  box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.2); /* Pressed effect */
 }
 
 /* Transition styles */
