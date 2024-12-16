@@ -3,8 +3,8 @@
     v-model="showReceiveTokens"
     position="top"
     :maximized="$q.screen.lt.sm"
-    transition-show="slide-down"
-    transition-hide="slide-up"
+    transition-show="fade"
+    transition-hide="fade"
     no-backdrop-dismiss
   >
     <q-card v-model="showReceiveTokens" class="q-pa-lg qcard q-card-top">
