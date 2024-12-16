@@ -49,7 +49,7 @@
           <q-card-section class="q-pa-sm">
             <div class="row justify-center q-pt-sm">
               <div v-if="!isEditingAmount">
-                <q-btn outline rounded @click="startEditingAmount">
+                <q-btn color="primary" rounded @click="startEditingAmount">
                   <q-icon name="edit_note" size="xs" class="q-mr-sm" />
                   {{ amountLabel }}</q-btn
                 >
@@ -70,7 +70,6 @@
         <q-btn
           class="q-mx-xs q-px-md q-mt-lg"
           size="md"
-          color="primary"
           flat
           rounded
           dense
@@ -113,8 +112,8 @@ export default defineComponent({
       paymentRequestAmount: undefined,
       isEditingAmount: false,
       amountInputValue: "",
-      amountLabelDefault: "Amount",
-      amountLabel: "Amount",
+      amountLabelDefault: "Add amount",
+      amountLabel: "Add amount",
     };
   },
   computed: {

@@ -94,7 +94,7 @@
           dense
           class="q-mr-sm"
           v-if="canPasteFromClipboard && !receiveData.tokensBase64.length"
-          @click="pasteToParseDialog"
+          @click="pasteToParseDialog(true)"
         >
           <q-icon name="content_paste" class="q-pr-sm" />Paste</q-btn
         >
@@ -111,7 +111,7 @@
           unelevated
           dense
           class="q-mx-sm"
-          v-if="!receiveData.tokensBase64.length && !ndefSupported"
+          v-if="!receiveData.tokensBase64.length && ndefSupported"
           :loading="scanningCard"
           :disabled="scanningCard"
           @click="toggleScanner"
@@ -174,9 +174,20 @@ export default defineComponent({
       ndefSupported: "NDEFReader" in globalThis,
     };
   },
+  watch: {
+    watchClipboardPaste(val) {
+      if (val) {
+        this.$nextTick(() => {
+          this.pasteToParseDialog();
+          this.watchClipboardPaste = false;
+        });
+      }
+    },
+  },
   computed: {
     ...mapWritableState(useReceiveTokensStore, [
       "showReceiveTokens",
+      "watchClipboardPaste",
       "receiveData",
       "scanningCard",
     ]),
@@ -226,6 +237,7 @@ export default defineComponent({
       "decodeToken",
       "knowThisMintOfTokenJson",
       "toggleScanner",
+      "pasteToParseDialog",
     ]),
     // TOKEN METHODS
     getProofs: function (decoded_token) {
@@ -234,20 +246,6 @@ export default defineComponent({
     getMint: function (decoded_token) {
       return token.getMint(decoded_token);
     },
-    // handleLockBtn: function () {
-    //   this.showP2PKDialog = !this.showP2PKDialog;
-    //   if (!this.p2pkKeys.length || !this.showP2PKDialog) {
-    //     this.generateKeypair();
-    //   }
-    //   this.showLastKey();
-    // },
-    // handlePaymentRequestBtn: function () {
-    //   const prStore = usePRStore();
-    //   this.showPRDialog = !this.showPRDialog;
-    //   if (this.showPRDialog) {
-    //     prStore.newPaymentRequest();
-    //   }
-    // },
     tokenAlreadyInHistory: function (tokenStr) {
       const tokensStore = useTokensStore();
       return (
@@ -276,15 +274,6 @@ export default defineComponent({
       this.showReceiveTokens = false;
       // show success notification
       this.notifySuccess("Incoming payment added to history.");
-    },
-    pasteToParseDialog: function () {
-      navigator.clipboard.readText().then((text) => {
-        if (this.decodeToken(text)) {
-          this.receiveData.tokensBase64 = text;
-        } else {
-          notifyWarning("Invalid token");
-        }
-      });
     },
   },
 });

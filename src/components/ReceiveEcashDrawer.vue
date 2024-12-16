@@ -7,7 +7,7 @@
     transition-hide="slide-down"
     backdrop-filter="blur(2px) brightness(60%)"
   >
-    <q-card class="bg-grey-10 text-white full-width-card">
+    <q-card class="bg-grey-10 text-white full-width-card q-pb-lg">
       <q-card-section class="row items-center q-pb-sm">
         <q-btn flat round dense @click="goBack" class="q-ml-sm" color="primary">
           <ChevronLeftIcon />
@@ -29,7 +29,7 @@
 
       <q-card-section class="q-pa-md">
         <div class="q-gutter-y-md">
-          <q-btn class="full-width custom-btn" @click="pasteToParseDialog">
+          <q-btn class="full-width custom-btn" @click="handlePasteBtn">
             <div class="row items-center full-width">
               <div class="icon-background q-mr-md">
                 <ClipboardIcon />
@@ -159,6 +159,7 @@ export default defineComponent({
       "showReceiveTokens",
       "receiveData",
       "scanningCard",
+      "watchClipboardPaste",
     ]),
     ...mapState(useUiStore, ["tickerShort"]),
     ...mapState(useMintsStore, [
@@ -200,21 +201,24 @@ export default defineComponent({
       "decodeToken",
       "knowThisMintOfTokenJson",
       "toggleScanner",
+      "pasteToParseDialog",
     ]),
     ...mapWritableState(useReceiveTokensStore, [
       "showReceiveTokens",
       "receiveData",
     ]),
-
-    pasteToParseDialog: function () {
+    isiOsSafari() {
+      const userAgent = window.navigator.userAgent.toLowerCase();
+      return /iphone|ipad|ipod/.test(userAgent) && /safari/.test(userAgent);
+    },
+    handlePasteBtn: function () {
+      this.receiveData.tokensBase64 = "";
       this.showReceiveTokens = true;
-      navigator.clipboard.readText().then((text) => {
-        if (this.decodeToken(text)) {
-          this.receiveData.tokensBase64 = text;
-        }
-        this.showReceiveEcashDrawer = false;
-        this.showReceiveTokens = true;
-      });
+      this.showReceiveEcashDrawer = false;
+      this.watchClipboardPaste = true;
+      if (!this.isiOsSafari()) {
+        // const success = this.pasteToParseDialog();
+      }
     },
     handleLockBtn: function () {
       this.showP2PKDialog = !this.showP2PKDialog;

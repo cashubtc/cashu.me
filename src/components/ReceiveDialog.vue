@@ -7,7 +7,7 @@
     transition-hide="slide-down"
     backdrop-filter="blur(2px) brightness(60%)"
   >
-    <q-card class="bg-grey-10 text-white full-width-card">
+    <q-card class="bg-grey-10 text-white full-width-card q-pb-lg">
       <q-card-section class="row items-center q-pb-sm">
         <q-btn flat round dense v-close-popup class="q-ml-sm" color="primary">
           <XIcon />
