@@ -36,6 +36,6 @@ export const useSendTokensStore = defineStore("sendTokensStore", {
       this.sendData.p2pkPubkey = "";
       this.sendData.paymentRequest = undefined;
       this.sendData.historyToken = undefined;
-    }
+    },
   },
 });
