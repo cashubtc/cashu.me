@@ -1,8 +1,8 @@
-import { createApp } from 'vue'
-import App from './App.vue'
-import registerIcons from './icons'
+import { createApp } from "vue";
+import App from "./App.vue";
+import registerIcons from "./icons";
 
-const app = createApp(App)
-registerIcons(app)
+const app = createApp(App);
+registerIcons(app);
 // ... other app configurations
-app.mount('#app')
+app.mount("#app");
