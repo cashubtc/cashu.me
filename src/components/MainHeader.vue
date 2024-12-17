@@ -81,6 +81,16 @@
           <q-item-label caption>Wallet configuration</q-item-label>
         </q-item-section>
       </q-item>
+      <q-item-label header>Terms </q-item-label>
+      <q-item clickable to="/terms">
+        <q-item-section avatar>
+          <q-icon name="gavel" />
+        </q-item-section>
+        <q-item-section>
+          <q-item-label>Terms</q-item-label>
+          <q-item-label caption>Terms of Service</q-item-label>
+        </q-item-section>
+      </q-item>
       <q-item-label header>Links </q-item-label>
       <EssentialLink
         v-for="link in essentialLinks"
@@ -120,12 +130,6 @@ const linksList = [
     caption: "@CashuBTC",
     icon: "rss_feed",
     link: "https://twitter.com/CashuBTC",
-  },
-  {
-    title: "Terms",
-    caption: "Terms of service",
-    icon: "info_i",
-    link: "https://docs.cashu.space/contribute",
   },
   {
     title: "Donate",

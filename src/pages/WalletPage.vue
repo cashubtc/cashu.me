@@ -443,6 +443,9 @@ export default {
       this.focusInput("parseDialogInput");
     },
     showWelcomePage: function () {
+      if (!useWelcomeStore().termsAccepted) {
+        useWelcomeStore().showWelcome = true;
+      }
       if (useWelcomeStore().showWelcome) {
         this.$router.push("/welcome");
       }
