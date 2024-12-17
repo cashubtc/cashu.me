@@ -217,6 +217,7 @@ import { useNostrStore } from "src/stores/nostr";
 import { usePRStore } from "src/stores/payment-request";
 import { useStorageStore } from "src/stores/storage";
 import ReceiveTokenDialog from "src/components/ReceiveTokenDialog.vue";
+import { useWelcomeStore } from "../stores/welcome";
 import { notifyError, notify } from "../js/notify";
 import {
   X as XIcon,
@@ -435,20 +436,9 @@ export default {
       this.camera.show = false;
       this.focusInput("parseDialogInput");
     },
-    showWelcomeDialog: function () {
-      if (localStorage.getItem("cashu.welcomeDialogSeen") != "seen") {
-        this.welcomeDialog.show = true;
-      }
-    },
-    setWelcomeDialogSeen: function () {
-      localStorage.setItem("cashu.welcomeDialogSeen", "seen");
-      this.welcomeDialog.show = false;
-      // switch to settings tab
-      this.setTab("mints");
-
-      // if a wallet has been restored the "cashu.activeMintUrl" is not null
-      if (!!localStorage.getItem("cashu.activeMintUrl")) {
-        window.location.reload();
+    showWelcomePage: function () {
+      if (useWelcomeStore().showWelcome) {
+        window.location.href = "/welcome";
       }
     },
     setTab: function (to) {
@@ -631,7 +621,7 @@ export default {
     this.initSigner();
 
     // show welcome dialog
-    this.showWelcomeDialog();
+    this.showWelcomePage();
 
     // listen to NWC commands if enabled
     if (this.nwcEnabled) {

@@ -18,11 +18,19 @@ const routes = [
   },
   {
     path: "/already-running",
-    component: () => import("layouts/FullscreenLayout.vue"),
+    component: () => import("layouts/BlankLayout.vue"),
     children: [
       { path: "", component: () => import("src/pages/AlreadyRunning.vue") },
     ],
   },
+  {
+    path: "/welcome",
+    component: () => import("layouts/BlankLayout.vue"),
+    children: [
+      { path: "", component: () => import("src/pages/WelcomePage.vue") },
+    ],
+  },
+
   // Always leave this as last one,
   // but you can also remove it
   {
