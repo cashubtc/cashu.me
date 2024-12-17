@@ -32,7 +32,7 @@ export default defineComponent({
   data() {
     return {
       showAndroidPWAPromptLocal:
-        localStorage.getItem("cashu.showAndroidPWAPrompt") != "seen",
+        localStorage.getItem("cashu.ui.showAndroidPWAPrompt") != "seen",
       showAndroidPWAPrompt: false,
     };
   },
@@ -47,7 +47,7 @@ export default defineComponent({
   },
   methods: {
     closePrompt() {
-      localStorage.setItem("cashu.showAndroidPWAPrompt", "seen");
+      localStorage.setItem("cashu.ui.showAndroidPWAPrompt", "seen");
       this.showAndroidPWAPrompt = false;
     },
     isChromeOnAndroid() {
