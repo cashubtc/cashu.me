@@ -3,7 +3,7 @@
   <div class="q-pa-md flex flex-center">
     <div class="text-center">
       <q-icon name="wallet" size="4em" color="primary" />
-      <h2 class="q-mt-md">Welcome to Cashu</h2>
+      <h2 class="q-mt-none">Welcome to Cashu</h2>
       <div class="text-left">
         <p class="q-mt-sm">
           Cashu is a simple and secure Bitcoin wallet that uses Ecash technology

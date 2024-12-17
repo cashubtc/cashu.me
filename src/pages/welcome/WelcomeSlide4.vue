@@ -2,8 +2,8 @@
 <template>
   <div class="q-pa-md flex flex-center">
     <div class="text-center" style="max-width: 600px; width: 100%">
-      <q-icon name="gavel" size="4em" color="primary" class="q-mb-md" />
-      <h2 class="text-center">Terms and Conditions</h2>
+      <q-icon name="gavel" size="4em" color="primary" class="q-mb-none" />
+      <h2 class="text-center q-mt-lg q-mb-xl">Terms and Conditions</h2>
       <div
         class="text-left q-mt-sm"
         style="
@@ -62,14 +62,16 @@
       </div>
       <q-checkbox
         v-model="welcomeStore.termsAccepted"
-        label="I agree to the Terms and Conditions"
+        label="I have read and accept the terms and conditions"
         class="q-mt-md"
       />
       <q-btn
-        flat
-        label="Accept and Continue"
+        rounded
+        outline
+        :label="welcomeStore.termsAccepted ? 'Continue' : 'Accept to continue'"
         color="primary"
-        class="full-width q-mt-sm"
+        class="q-mt-lg"
+        style="font-size: 1rem"
         :disable="!welcomeStore.termsAccepted"
         @click="acceptTerms"
       />

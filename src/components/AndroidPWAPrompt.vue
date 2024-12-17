@@ -13,7 +13,7 @@
       <div class="pwa-prompt-content">
         <span>
           Tap <q-icon name="menu" size="sm" /> and
-          <strong>Install App</strong>
+          <strong>Add to Home screen</strong>
         </span>
         <q-btn
           flat

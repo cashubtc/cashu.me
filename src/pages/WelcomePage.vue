@@ -7,13 +7,12 @@
     transition-hide="slide-down"
     full-screen
   >
-    <q-card class="q-pa-none" style="height: 100%; width: 100%">
+    <q-card class="q-pa-none" style="height: 100%">
       <q-carousel
         v-model="welcomeStore.currentSlide"
         animated
         control-color="primary"
         navigation-visible
-        swipeable
         arrows
         prev-icon="arrow_left"
         :next-icon="welcomeStore.canProceed ? 'arrow_right' : 'none'"

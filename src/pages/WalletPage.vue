@@ -123,6 +123,7 @@
       </div>
 
       <iOSPWAPrompt />
+      <AndroidPWAPrompt />
     </div>
 
     <!-- BOTTOM LIGHTNING BUTTONS -->
@@ -199,6 +200,7 @@ import SendDialog from "components/SendDialog.vue";
 import ReceiveDialog from "components/ReceiveDialog.vue";
 import QrcodeReader from "components/QrcodeReader.vue";
 import iOSPWAPrompt from "components/iOSPWAPrompt.vue";
+import AndroidPWAPrompt from "components/AndroidPWAPrompt.vue";
 // pinia stores
 import { mapActions, mapState, mapWritableState } from "pinia";
 import { useMintsStore } from "src/stores/mints";
@@ -219,6 +221,7 @@ import { useStorageStore } from "src/stores/storage";
 import ReceiveTokenDialog from "src/components/ReceiveTokenDialog.vue";
 import { useWelcomeStore } from "../stores/welcome";
 import { notifyError, notify } from "../js/notify";
+
 import {
   X as XIcon,
   Banknote as BanknoteIcon,
@@ -243,6 +246,7 @@ export default {
     SendDialog,
     ReceiveDialog,
     iOSPWAPrompt,
+    AndroidPWAPrompt,
     ScanIcon,
   },
   data: function () {
@@ -438,7 +442,7 @@ export default {
     },
     showWelcomePage: function () {
       if (useWelcomeStore().showWelcome) {
-        window.location.href = "/welcome";
+        this.$router.push("/welcome");
       }
     },
     setTab: function (to) {

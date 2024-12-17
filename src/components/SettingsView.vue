@@ -19,6 +19,7 @@
                   readonly
                   v-model="hiddenMnemonic"
                   label="Seed phrase"
+                  class="seed-phrase"
                   autogrow
                 >
                   <template v-slot:append>
@@ -1477,3 +1478,13 @@ export default defineComponent({
   },
 });
 </script>
+<style scoped>
+:deep(.q-field__control) {
+  padding: 12px 12px !important;
+}
+.seed-phrase {
+  font-size: 0.9rem;
+  font-family: monospace;
+  padding: 12px 12px !important;
+}
+</style>
