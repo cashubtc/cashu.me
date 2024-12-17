@@ -35,9 +35,10 @@
           flat
           icon="arrow_left"
           label="Previous"
-          :disable="!welcomeStore.canGoPrev"
+          v-if="welcomeStore.canGoPrev"
           @click="welcomeStore.goToPrevSlide"
         />
+        <q-space />
         <q-btn
           flat
           icon="arrow_right"
