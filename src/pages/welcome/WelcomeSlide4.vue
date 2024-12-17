@@ -7,7 +7,7 @@
       <div
         class="text-left q-mt-sm"
         style="
-          max-height: 300px;
+          max-height: 350px;
           max-width: 90%;
           overflow-y: auto;
           margin: 0 auto;
@@ -62,18 +62,8 @@
       </div>
       <q-checkbox
         v-model="welcomeStore.termsAccepted"
-        label="I have read and accept the terms and conditions"
+        label="I accept the terms and conditions"
         class="q-mt-md"
-      />
-      <q-btn
-        rounded
-        outline
-        :label="welcomeStore.termsAccepted ? 'Continue' : 'Accept to continue'"
-        color="primary"
-        class="q-mt-lg"
-        style="font-size: 1rem"
-        :disable="!welcomeStore.termsAccepted"
-        @click="acceptTerms"
       />
     </div>
   </div>
@@ -105,5 +95,10 @@ export default {
 <style scoped>
 h2 {
   font-weight: bold;
+}
+p {
+  font-size: 0.82rem;
+  /* color grey */
+  color: #c6c6c6;
 }
 </style>

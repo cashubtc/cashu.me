@@ -2,8 +2,8 @@
 <template>
   <div class="q-pa-md flex flex-center">
     <div class="text-center relative-position">
-      <q-icon name="install_mobile" size="4em" color="primary" />
-      <h2 class="q-mt-none">Install PWA</h2>
+      <q-icon name="download_for_offline" size="4em" color="primary" />
+      <h2 class="q-mt-xl">Install PWA</h2>
       <div class="text-left" v-if="!isPWA()">
         <p class="q-mt-md instruction">
           For the best experience, use this wallet with your device's native web
@@ -12,13 +12,13 @@
         <h6>Android (Chrome)</h6>
         <p class="sub-instruction">
           1. <q-icon name="menu" size="1.5em" class="q-pr-xs" />
-          <span>Tap the menu on the top right </span><br />
+          <span>Tap the menu (top right) </span><br />
           2. Press <strong>Add to Home screen</strong>
         </p>
         <h6>iOS (Safari)</h6>
         <p class="sub-instruction">
           1. <q-icon name="ios_share" size="1.2em" class="q-pr-xs" />
-          <span>Tap the share button </span> <br />
+          <span>Tap share (bottom) </span> <br />
           2. Press <strong>Add to Home screen</strong>
         </p>
         <p>

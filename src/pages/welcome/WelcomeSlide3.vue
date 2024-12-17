@@ -3,7 +3,7 @@
   <div class="q-pa-md flex flex-center">
     <div class="text-center">
       <q-icon name="vpn_key" size="4em" color="primary" />
-      <h2 class="q-mt-sm">Your Seed Phrase</h2>
+      <h2 class="q-mt-xl">Your Seed Phrase</h2>
       <p class="q-mt-sm">
         Store your seed phrase in a password manager or write it down on paper.
         It is the only way to recover your wallet if you lose access to this
@@ -22,21 +22,12 @@
           <q-btn flat dense icon="content_copy" @click="copySeed" />
         </template>
       </q-input>
-      <q-btn
-        outline
-        rounded
-        color="primary "
-        class="q-mt-lg"
-        @click="proceed"
+      <q-checkbox
+        v-model="welcomeStore.seedPhraseValidated"
+        label="I have written it down"
+        class="q-mt-md"
         style="font-size: 1rem"
-      >
-        <q-icon
-          :name="welcomeStore.seedPhraseValidated ? 'check' : 'close'"
-          :color="welcomeStore.seedPhraseValidated ? 'positive' : 'negative'"
-          class="q-mr-sm"
-        />
-        I have written it down
-      </q-btn>
+      />
     </div>
   </div>
 </template>
