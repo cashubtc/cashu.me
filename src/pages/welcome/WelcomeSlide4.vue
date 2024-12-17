@@ -131,11 +131,12 @@
         </p>
         <p><strong>8. Arbitration and Dispute Resolution</strong></p>
         <p>
-          Except for certain intellectual property claims, disputes shall be
-          resolved by binding arbitration in Wyoming under the American
-          Arbitration Association. The Federal Arbitration Act applies. You
-          waive any right to a trial by jury or to participate in a class
-          action.
+          Except for certain intellectual property claims, any dispute arising
+          out of or relating to these Terms, the Site, or the Services shall be
+          resolved through final and binding arbitration administered by a
+          reputable arbitration provider. You agree that all proceedings will be
+          conducted on an individual basis and you waive any right to a trial by
+          jury or to participate in a class action.
         </p>
         <p><strong>9. Prohibited Uses</strong></p>
         <p>
@@ -181,10 +182,11 @@
           By using the Site or Services, you consent to receive communications
           electronically. We will communicate in English.
         </p>
-        <p><strong>18. Governing Law; Venue</strong></p>
+        <p><strong>18. Governing Law</strong></p>
         <p>
-          These Terms are governed by the laws of Wyoming. All disputes are
-          subject to arbitration or Wyoming courts, as provided herein.
+          These Terms and any dispute arising from or related to these Terms,
+          the Site, or the Services shall be governed by principles of law
+          generally applicable, without regard to any conflicts of law rules.
         </p>
         <p><strong>19. E-Sign Consent Policy</strong></p>
         <p>
