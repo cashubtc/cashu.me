@@ -371,7 +371,6 @@ export default {
       "checkPendingTokens",
       "decodeRequest",
       "initializeMnemonic",
-      "createPaymentRequest",
     ]),
     ...mapActions(useCameraStore, ["closeCamera", "showCamera"]),
     ...mapActions(useNWCStore, ["listenToNWCCommands"]),
@@ -385,6 +384,7 @@ export default {
       "initSigner",
     ]),
     ...mapActions(useStorageStore, ["checkLocalStorage"]),
+    ...mapActions(usePRStore, ["createPaymentRequest"]),
     // TOKEN METHODS
     decodeToken: function (encoded_token) {
       try {

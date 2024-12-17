@@ -42,8 +42,6 @@ import * as bolt11Decoder from "light-bolt11-decoder";
 import { bech32 } from "bech32";
 import axios from "axios";
 import { date } from "quasar";
-import { useNostrStore } from "./nostr";
-import { v4 as uuidv4 } from "uuid";
 
 // bip39 requires Buffer
 // import { Buffer } from 'buffer';
@@ -740,8 +738,8 @@ export const useWalletStore = defineStore("wallet", {
 
         notifySuccess(
           "Paid " +
-            uIStore.formatCurrency(amount_paid, mintStore.activeUnit) +
-            " via Lightning"
+          uIStore.formatCurrency(amount_paid, mintStore.activeUnit) +
+          " via Lightning"
         );
         console.log("#### pay lightning: token paid");
         // delete spent tokens from db
@@ -988,10 +986,10 @@ export const useWalletStore = defineStore("wallet", {
         const proofStore = useProofsStore();
         notifySuccess(
           "Sent " +
-            uIStore.formatCurrency(
-              proofStore.sumProofs(spentProofs),
-              mintStore.activeUnit
-            )
+          uIStore.formatCurrency(
+            proofStore.sumProofs(spentProofs),
+            mintStore.activeUnit
+          )
         );
       } else {
         console.log("### token not paid yet");
@@ -1088,8 +1086,8 @@ export const useWalletStore = defineStore("wallet", {
         if (!!window.navigator.vibrate) navigator.vibrate(200);
         notifySuccess(
           "Received " +
-            uIStore.formatCurrency(invoice.amount, mintStore.activeUnit) +
-            " via Lightning"
+          uIStore.formatCurrency(invoice.amount, mintStore.activeUnit) +
+          " via Lightning"
         );
         return proofs;
       } catch (error) {
@@ -1138,10 +1136,10 @@ export const useWalletStore = defineStore("wallet", {
             if (!!window.navigator.vibrate) navigator.vibrate(200);
             notifySuccess(
               "Sent " +
-                uIStore.formatCurrency(
-                  useProofsStore().sumProofs(proofs),
-                  mintStore.activeUnit
-                )
+              uIStore.formatCurrency(
+                useProofsStore().sumProofs(proofs),
+                mintStore.activeUnit
+              )
             );
           }
           // set invoice in history to paid
@@ -1435,28 +1433,6 @@ export const useWalletStore = defineStore("wallet", {
         return true;
       }
       return false;
-    },
-    createPaymentRequest: function (amount?: number, memo?: string): string {
-      const nostrStore = useNostrStore();
-      const mintStore = useMintsStore();
-      const tags = [["n", "17"]];
-      const transport = [
-        {
-          type: PaymentRequestTransportType.NOSTR,
-          target: nostrStore.seedSignerNprofile,
-          tags: tags,
-        },
-      ] as PaymentRequestTransport[];
-      const uuid = uuidv4().split("-")[0];
-      const paymentRequest = new PaymentRequest(
-        transport,
-        uuid,
-        amount,
-        mintStore.activeUnit,
-        mintStore.activeMintUrl ? [mintStore.activeMintUrl] : undefined,
-        memo
-      );
-      return paymentRequest.toEncodedRequest();
     },
   },
 });
