@@ -68,18 +68,10 @@ export const useNostrStore = defineStore("nostr", {
     nip07signer: {} as NDKNip07Signer,
     nip46Token: useLocalStorage<string>("cashu.ndk.nip46Token", ""),
     nip46signer: {} as NDKNip46Signer,
-    privateKeySignerPrivateKey: useLocalStorage<string>(
-      "cashu.ndk.privateKeySignerPrivateKey",
-      ""
-    ),
-    seedSignerPrivateKey: useLocalStorage<string>(
-      "cashu.ndk.seedSignerPrivateKey",
-      ""
-    ),
-    seedSignerPublicKey: useLocalStorage<string>(
-      "cashu.ndk.seedSignerPublicKey",
-      ""
-    ),
+    privateKeySignerPrivateKey: useLocalStorage<string>("cashu.ndk.privateKeySignerPrivateKey", ""),
+    seedSignerPrivateKey: useLocalStorage<string>("cashu.ndk.seedSignerPrivateKey", ""),
+    seedSignerPublicKey: useLocalStorage<string>("cashu.ndk.seedSignerPublicKey", ""),
+    seedSigner: {} as NDKPrivateKeySigner,
     seedSignerPrivateKeyNsec: "",
     privateKeySigner: {} as NDKPrivateKeySigner,
     signer: {} as NDKSigner,
@@ -251,12 +243,12 @@ export const useNostrStore = defineStore("nostr", {
       const walletPrivateKeyHex = bytesToHex(sk);
       this.seedSignerPrivateKey = walletPrivateKeyHex;
       this.seedSignerPublicKey = walletPublicKeyHex;
+      this.seedSigner = new NDKPrivateKeySigner(this.seedSignerPrivateKey);
     },
     initWalletSeedPrivateKeySigner: async function () {
       await this.walletSeedGenerateKeyPair();
-      this.privateKeySigner = new NDKPrivateKeySigner(
-        this.seedSignerPrivateKey
-      );
+      // TODO: remove duplicate privateKeysigner
+      this.privateKeySigner = this.seedSigner;
       this.signerType = SignerType.SEED;
       this.setSigner(this.privateKeySigner);
       this.setPubkey(this.seedSignerPublicKey);
@@ -373,18 +365,11 @@ export const useNostrStore = defineStore("nostr", {
     randomTimeUpTo2DaysInThePast: function () {
       return Math.floor(Date.now() / 1000) - Math.floor(Math.random() * 172800);
     },
-    sendNip17DirectMessage: async function (
-      recipient: string,
-      message: string,
-      relays?: string[]
-    ) {
-      await this.initWalletSeedPrivateKeySigner();
+    sendNip17DirectMessage: async function (recipient: string, message: string, relays?: string[]) {
+      await this.walletSeedGenerateKeyPair();
       const randomPrivateKey = generateSecretKey();
       const randomPublicKey = getPublicKey(randomPrivateKey);
-      const ndk = new NDK({
-        explicitRelayUrls: relays ?? this.relays,
-        signer: new NDKPrivateKeySigner(bytesToHex(randomPrivateKey)),
-      });
+
 
       const dmEvent = new NDKEvent();
       dmEvent.kind = 14;
@@ -395,7 +380,8 @@ export const useNostrStore = defineStore("nostr", {
       dmEvent.id = dmEvent.getEventHash();
       const dmEventString = JSON.stringify(await dmEvent.toNostrEvent());
 
-      const sealEvent = new NDKEvent(this.ndk as NDK);
+      const seedNdk = new NDK({ signer: this.seedSigner, explicitRelayUrls: this.relays })
+      const sealEvent = new NDKEvent(seedNdk);
       sealEvent.kind = 13;
       sealEvent.content = nip44.v2.encrypt(
         dmEventString,
@@ -407,7 +393,8 @@ export const useNostrStore = defineStore("nostr", {
       sealEvent.sig = await sealEvent.sign();
       const sealEventString = JSON.stringify(await sealEvent.toNostrEvent());
 
-      const wrapEvent = new NDKEvent(ndk);
+      const randomNdk = new NDK({ explicitRelayUrls: relays ?? this.relays, signer: new NDKPrivateKeySigner(bytesToHex(randomPrivateKey)) });
+      const wrapEvent = new NDKEvent(randomNdk);
       wrapEvent.kind = 1059;
       wrapEvent.tags = [["p", recipient]];
       wrapEvent.content = nip44.v2.encrypt(
@@ -423,7 +410,7 @@ export const useNostrStore = defineStore("nostr", {
       wrapEvent.sig = await wrapEvent.sign();
 
       try {
-        ndk.connect();
+        randomNdk.connect();
         await wrapEvent.publish();
       } catch (e) {
         console.error(e);
