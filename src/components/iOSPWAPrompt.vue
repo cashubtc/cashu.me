@@ -36,7 +36,7 @@ export default defineComponent({
   data: function () {
     return {
       showIosPWAPromptLocal:
-        localStorage.getItem("cashu.showIosPWAPrompt") != "seen",
+        localStorage.getItem("cashu.ui.showIosPWAPrompt") != "seen",
       showIosPWAPrompt: false,
     };
   },
@@ -53,7 +53,7 @@ export default defineComponent({
   computed: {},
   methods: {
     closePrompt() {
-      localStorage.setItem("cashu.showIosPWAPrompt", "seen");
+      localStorage.setItem("cashu.ui.showIosPWAPrompt", "seen");
       this.showIosPWAPrompt = false;
     },
     isiOsSafari() {

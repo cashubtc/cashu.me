@@ -12,7 +12,7 @@
     >
       <div class="pwa-prompt-content">
         <span>
-          Tap <q-icon name="menu" size="sm" /> and
+          Tap <q-icon name="more_vert" size="sm" /> and
           <strong>Add to Home screen</strong>
         </span>
         <q-btn

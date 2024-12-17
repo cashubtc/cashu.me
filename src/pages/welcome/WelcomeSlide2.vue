@@ -9,24 +9,28 @@
       <h2 class="q-mt-xl">Install PWA</h2>
       <div class="text-left" v-if="!isPWA()">
         <p class="q-mt-md instruction">
-          For the best experience, use this wallet with your device's native web
-          browser (Safari on iOS, Chrome on Android) and install it as a PWA.
+          For the best experience, open this wallet with your device's native
+          web browser and install it as a Progressive Web App.
         </p>
         <h6>Android (Chrome)</h6>
         <p class="sub-instruction">
-          1. <q-icon name="menu" size="1.5em" class="q-pr-xs" />
+          1. <q-icon name="more_vert" size="1.5em" class="q-pr-xs" />
           <span>Tap the menu (top right) </span><br />
-          2. Press <strong>Add to Home screen</strong>
+          2.
+          <q-icon name="mobile_friendly" size="1.2em" class="q-pr-xs" /> Press
+          <strong>Add to Home screen</strong>
         </p>
         <h6>iOS (Safari)</h6>
         <p class="sub-instruction">
           1. <q-icon name="ios_share" size="1.2em" class="q-pr-xs" />
           <span>Tap share (bottom) </span> <br />
-          2. Press <strong>Add to Home screen</strong>
+          2.
+          <q-icon name="add_box_outline" size="1.2em" class="q-pr-xs" /> Press
+          <strong>Add to Home screen</strong>
         </p>
         <p>
-          Once you have installed this app on your device, close this browser
-          window and use the app from your home screen.
+          Once you installed this app on your device, close this browser window
+          and use the app from your home screen.
         </p>
       </div>
 
@@ -47,7 +51,7 @@
 
 <script>
 import iOSPWAPrompt from "components/iOSPWAPrompt.vue";
-import AndroidPWAPrompt from "../../components/AndroidPWAPrompt.vue";
+import AndroidPWAPrompt from "components/AndroidPWAPrompt.vue";
 export default {
   name: "WelcomeSlide2",
   components: {
