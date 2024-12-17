@@ -1472,8 +1472,7 @@ export default defineComponent({
       // create a backup just in case
       await this.getLocalstorageToFile();
       localStorage.clear();
-      this.$router.push("/");
-      this.$emit("close");
+      window.location.href = "/";
     },
     addRelay: function () {
       if (this.newRelay) {

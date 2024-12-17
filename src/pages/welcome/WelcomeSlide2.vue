@@ -9,8 +9,8 @@
       <h2 class="q-mt-xl">Install PWA</h2>
       <div class="text-left" v-if="!isPWA()">
         <p class="q-mt-md instruction">
-          For the best experience, open this wallet with your device's native
-          web browser and install it as a Progressive Web App.
+          For the best experience, use this wallet with your device's native web
+          browser to install it as a Progressive Web App. Do this right now.
         </p>
         <h6>Android (Chrome)</h6>
         <p class="sub-instruction">

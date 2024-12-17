@@ -4,8 +4,10 @@
     v-model="welcomeStore.showWelcome"
     persistent
     transition-show="slide-up"
-    transition-hide="slide-down"
+    transition-hide="fadeOut"
     full-screen
+    @drop.prevent="dragFile"
+    @dragover.prevent
   >
     <q-card class="q-pa-none" style="height: 100%">
       <q-carousel
@@ -49,8 +51,9 @@
 </template>
 
 <script>
-import { onMounted } from "vue";
+import { onMounted, ref } from "vue";
 import { useWelcomeStore } from "src/stores/welcome";
+import { useMintsStore } from "src/stores/mints";
 import WelcomeSlide1 from "./welcome/WelcomeSlide1.vue";
 import WelcomeSlide2 from "./welcome/WelcomeSlide2.vue";
 import WelcomeSlide3 from "./welcome/WelcomeSlide3.vue";
@@ -66,6 +69,27 @@ export default {
   },
   setup() {
     const welcomeStore = useWelcomeStore();
+    const mintsStore = useMintsStore();
+    const fileUpload = ref(null);
+
+    const onChangeFileUpload = () => {
+      const file = fileUpload.value.files[0];
+      if (file) readFile(file);
+    };
+
+    const readFile = (file) => {
+      const reader = new FileReader();
+      reader.onload = (f) => {
+        const backup = JSON.parse(f.target.result);
+        mintsStore.restoreFromBackup(backup);
+      };
+      reader.readAsText(file);
+    };
+
+    const dragFile = (ev) => {
+      const file = ev.dataTransfer.files[0];
+      if (file) readFile(file);
+    };
 
     onMounted(() => {
       welcomeStore.initializeWelcome();
@@ -73,6 +97,9 @@ export default {
 
     return {
       welcomeStore,
+      fileUpload,
+      onChangeFileUpload,
+      dragFile,
     };
   },
 };

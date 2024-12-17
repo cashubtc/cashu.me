@@ -420,7 +420,7 @@ export const useMintsStore = defineStore("mints", {
         console.error(error);
         try {
           notifyApiError(error, "Could not get mint info");
-        } catch {}
+        } catch { }
         throw error;
       }
     },
@@ -465,7 +465,7 @@ export const useMintsStore = defineStore("mints", {
         console.error(error);
         try {
           notifyApiError(error, "Could not get mint keys");
-        } catch {}
+        } catch { }
         throw error;
       }
     },
@@ -479,7 +479,7 @@ export const useMintsStore = defineStore("mints", {
         console.error(error);
         try {
           notifyApiError(error, "Could not get mint keysets");
-        } catch {}
+        } catch { }
         throw error;
       }
     },
@@ -495,7 +495,7 @@ export const useMintsStore = defineStore("mints", {
       notifySuccess("Mint removed");
     },
     restoreFromBackup: function (backup: any) {
-      if (!backup || !backup["cashu.welcomeDialogSeen"]) {
+      if (!backup) {
         notifyError("Unrecognized Backup Format!");
       } else {
         const keys = Object.keys(backup);
@@ -503,6 +503,7 @@ export const useMintsStore = defineStore("mints", {
           localStorage.setItem(key, backup[key]);
         });
         notifySuccess("Backup restored");
+        window.location.reload();
       }
     },
     assertMintError: function (response: { error?: any }, verbose = true) {

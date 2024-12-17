@@ -1,11 +1,6 @@
 <!-- src/components/AndroidPWAPrompt.vue -->
 <template>
-  <transition
-    appear
-    enter-active-class="animated fadeInDown"
-    leave-active-class="animated fadeOutUp"
-    mode="out-in"
-  >
+  <transition appear enter-active-class="animated fadeInDown">
     <div
       v-if="showAndroidPWAPrompt"
       class="pwa-prompt android-pwa-prompt q-pa-md text-center"
@@ -91,7 +86,7 @@ export default defineComponent({
   flex-direction: column; /* Add this line */
   align-items: center; /* Add this line */
   justify-content: center;
-  animation: moveUpDown 2s infinite; /* Add this line for animation */
+  animation: moveUpDown 1s infinite; /* Add this line for animation */
 }
 
 .pwa-prompt-content {
@@ -111,8 +106,8 @@ export default defineComponent({
   position: relative;
   width: 0;
   height: 0;
-  bottom: 58px;
-  left: 42%;
+  bottom: 60px;
+  left: 45%;
   border-left: 10px solid transparent;
   border-right: 10px solid transparent;
   border-bottom: 10px solid white;

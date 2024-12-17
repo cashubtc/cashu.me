@@ -1,10 +1,5 @@
 <template>
-  <transition
-    appear
-    enter-active-class="animated fadeInUp"
-    leave-active-class="animated fadeInDown"
-    mode="out-in"
-  >
+  <transition enter-active-class="animated fadeInUp">
     <div
       v-if="showIosPWAPrompt"
       class="pwa-prompt q-pa-md q-mx-auto text-center"
@@ -58,7 +53,7 @@ export default defineComponent({
     },
     isiOsSafari() {
       const userAgent = window.navigator.userAgent.toLowerCase();
-      return /iphone|ipad|ipod/.test(userAgent) && /safari/.test(userAgent);
+      return /iphone|ipod/.test(userAgent) && /safari/.test(userAgent);
     },
     isInStandaloneMode() {
       return "standalone" in window.navigator && window.navigator.standalone;
@@ -89,7 +84,7 @@ export default defineComponent({
   flex-direction: column; /* Add this line */
   align-items: center; /* Add this line */
   justify-content: center;
-  animation: moveUpDown 2s infinite; /* Add this line for animation */
+  animation: moveUpDown 1s infinite; /* Add this line for animation */
 }
 
 .pwa-prompt-content {
@@ -111,7 +106,7 @@ export default defineComponent({
   border-left: 10px solid transparent;
   border-right: 10px solid transparent;
   border-top: 10px solid white;
-  margin: 0 auto;
+  margin: 2px auto;
   text-align: center;
 }
 </style>
