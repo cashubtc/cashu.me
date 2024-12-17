@@ -133,7 +133,7 @@ const linksList = [
   },
   {
     title: "Donate",
-    caption: "Support Cashu development",
+    caption: "Support Cashu",
     icon: "favorite",
     link: "https://docs.cashu.space/contribute",
   },
