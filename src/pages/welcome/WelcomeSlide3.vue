@@ -5,9 +5,9 @@
       <q-icon name="vpn_key" size="4em" color="primary" />
       <h2 class="q-mt-xl">Your Seed Phrase</h2>
       <p class="q-mt-sm">
-        Store your seed phrase in a password manager or write it down on paper.
-        It is the only way to recover your wallet if you lose access to this
-        device. You can find your seed phrase in the settings menu.
+        Store your seed phrase in a password manager or on paper. Your seed
+        phrase is the only way to recover your funds if you lose access to this
+        device.
       </p>
       <q-input
         v-model="walletStore.mnemonic"
@@ -22,6 +22,9 @@
           <q-btn flat dense icon="content_copy" @click="copySeed" />
         </template>
       </q-input>
+      <p class="q-mt-none" style="font-size: 0.8rem; color: grey">
+        You can see your seed phrase in the settings.
+      </p>
       <q-checkbox
         v-model="welcomeStore.seedPhraseValidated"
         label="I have written it down"
@@ -83,7 +86,7 @@ h2 {
 p {
   font-size: large;
 }
-:deep(.q-field__control) {
+.seed-phrase :deep(.q-field__control) {
   padding: 12px 12px !important;
 }
 .seed-phrase {

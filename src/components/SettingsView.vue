@@ -1075,6 +1075,19 @@
               <q-item>
                 <q-item-section>
                   <row>
+                    <q-btn dense flat outline click @click="showOnboarding">
+                      Show onboarding
+                    </q-btn></row
+                  ><row>
+                    <q-item-label class="q-px-sm" caption
+                      >Show the onboarding screen again.
+                    </q-item-label>
+                  </row>
+                </q-item-section>
+              </q-item>
+              <q-item>
+                <q-item-section>
+                  <row>
                     <q-btn
                       v-if="!confirmNuke"
                       dense
@@ -1174,6 +1187,7 @@ import { useProofsStore } from "src/stores/proofs";
 import { usePRStore } from "../stores/payment-request";
 import { useRestoreStore } from "src/stores/restore";
 import { useReceiveTokensStore } from "../stores/receiveTokensStore";
+import { useWelcomeStore } from "src/stores/welcome";
 
 export default defineComponent({
   name: "SettingsView",
@@ -1449,6 +1463,11 @@ export default defineComponent({
       await this.resetNip46Signer();
       await this.generateNPCConnection();
     },
+    showOnboarding: function () {
+      const welcomeStore = useWelcomeStore();
+      welcomeStore.resetWelcome();
+      this.$router.push("/welcome");
+    },
     nukeWallet: async function () {
       // create a backup just in case
       await this.getLocalstorageToFile();
@@ -1479,7 +1498,7 @@ export default defineComponent({
 });
 </script>
 <style scoped>
-:deep(.q-field__control) {
+.seed-phrase :deep(.q-field__control) {
   padding: 12px 12px !important;
 }
 .seed-phrase {

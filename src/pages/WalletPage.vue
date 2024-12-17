@@ -20,18 +20,20 @@
             Receive</q-btn
           >
         </div>
-        <div class="col-2 q-mb-md q-mx-none">
-          <q-btn
-            align="center"
-            size="lg"
-            outline
-            color="primary"
-            flat
-            @click="showCamera"
-          >
-            <ScanIcon size="2em" />
-          </q-btn>
-        </div>
+        <transition appear enter-active-class="animated pulse">
+          <div class="col-2 q-mb-md q-mx-none">
+            <q-btn
+              align="center"
+              size="lg"
+              outline
+              color="primary"
+              flat
+              @click="showCamera"
+            >
+              <ScanIcon size="2em" />
+            </q-btn>
+          </div>
+        </transition>
         <!-- button to showSendDialog -->
         <div class="col-5 q-mb-md">
           <q-btn

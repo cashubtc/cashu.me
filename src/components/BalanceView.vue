@@ -242,3 +242,11 @@ export default defineComponent({
   },
 });
 </script>
+<style scoped>
+.animated.pulse {
+  animation-duration: 0.5s;
+}
+.animated.fadeInDown {
+  animation-duration: 0.3s;
+}
+</style>
