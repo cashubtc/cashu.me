@@ -740,8 +740,8 @@ export const useWalletStore = defineStore("wallet", {
 
         notifySuccess(
           "Paid " +
-          uIStore.formatCurrency(amount_paid, mintStore.activeUnit) +
-          " via Lightning"
+            uIStore.formatCurrency(amount_paid, mintStore.activeUnit) +
+            " via Lightning"
         );
         console.log("#### pay lightning: token paid");
         // delete spent tokens from db
@@ -988,10 +988,10 @@ export const useWalletStore = defineStore("wallet", {
         const proofStore = useProofsStore();
         notifySuccess(
           "Sent " +
-          uIStore.formatCurrency(
-            proofStore.sumProofs(spentProofs),
-            mintStore.activeUnit
-          )
+            uIStore.formatCurrency(
+              proofStore.sumProofs(spentProofs),
+              mintStore.activeUnit
+            )
         );
       } else {
         console.log("### token not paid yet");
@@ -1088,8 +1088,8 @@ export const useWalletStore = defineStore("wallet", {
         if (!!window.navigator.vibrate) navigator.vibrate(200);
         notifySuccess(
           "Received " +
-          uIStore.formatCurrency(invoice.amount, mintStore.activeUnit) +
-          " via Lightning"
+            uIStore.formatCurrency(invoice.amount, mintStore.activeUnit) +
+            " via Lightning"
         );
         return proofs;
       } catch (error) {
@@ -1138,10 +1138,10 @@ export const useWalletStore = defineStore("wallet", {
             if (!!window.navigator.vibrate) navigator.vibrate(200);
             notifySuccess(
               "Sent " +
-              uIStore.formatCurrency(
-                useProofsStore().sumProofs(proofs),
-                mintStore.activeUnit
-              )
+                uIStore.formatCurrency(
+                  useProofsStore().sumProofs(proofs),
+                  mintStore.activeUnit
+                )
             );
           }
           // set invoice in history to paid
