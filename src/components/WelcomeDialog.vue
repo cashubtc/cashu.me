@@ -2,7 +2,6 @@
   <q-dialog
     class="z-top"
     persistent
-    v-model="showWelcomeDialog"
     position="top"
     @drop="dragFile"
     @dragover="allowDrop"
@@ -114,10 +113,7 @@ export default defineComponent({
     setWelcomeDialogSeen: Function,
   },
   data: function () {
-    return {
-      showWelcomeDialog:
-        localStorage.getItem("cashu.welcomeDialogSeen") != "seen",
-    };
+    return {};
   },
   watch: {},
   computed: {

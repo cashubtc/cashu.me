@@ -9,6 +9,7 @@
         color="primary"
         aria-label="Menu"
         @click="toggleLeftDrawer"
+        :disable="uiStore.globalMutexLock"
       />
       <q-toolbar-title></q-toolbar-title>
       <transition
@@ -64,6 +65,7 @@
         :color="countdown > 0 ? 'negative' : 'primary'"
         aria-label="Refresh"
         @click="reload"
+        :disable="uiStore.globalMutexLock && countdown === 0"
       >
       </q-btn>
     </q-toolbar>
@@ -79,6 +81,16 @@
         <q-item-section>
           <q-item-label>Settings</q-item-label>
           <q-item-label caption>Wallet configuration</q-item-label>
+        </q-item-section>
+      </q-item>
+      <q-item-label header>Terms </q-item-label>
+      <q-item clickable to="/terms">
+        <q-item-section avatar>
+          <q-icon name="gavel" />
+        </q-item-section>
+        <q-item-section>
+          <q-item-label>Terms</q-item-label>
+          <q-item-label caption>Terms of Service</q-item-label>
         </q-item-section>
       </q-item>
       <q-item-label header>Links </q-item-label>
@@ -122,14 +134,8 @@ const linksList = [
     link: "https://twitter.com/CashuBTC",
   },
   {
-    title: "Terms",
-    caption: "Terms of service",
-    icon: "info_i",
-    link: "https://docs.cashu.space/contribute",
-  },
-  {
     title: "Donate",
-    caption: "Support Cashu development",
+    caption: "Support Cashu",
     icon: "favorite",
     link: "https://docs.cashu.space/contribute",
   },

@@ -1,14 +1,15 @@
+<!-- src/components/AndroidPWAPrompt.vue -->
 <template>
-  <transition enter-active-class="animated fadeInUp">
+  <transition appear enter-active-class="animated fadeInDown">
     <div
-      v-if="showIosPWAPrompt"
-      class="pwa-prompt q-pa-md q-mx-auto text-center"
+      v-if="showAndroidPWAPrompt"
+      class="pwa-prompt android-pwa-prompt q-pa-md text-center"
     >
       <div class="pwa-prompt-content">
-        <span
-          >Tap <q-icon name="ios_share" size="sm" /> and
-          <strong>Add to Home Screen</strong></span
-        >
+        <span>
+          Tap <q-icon name="more_vert" size="sm" /> and
+          <strong>Add to Home screen</strong>
+        </span>
         <q-btn
           flat
           icon="close"
@@ -22,45 +23,47 @@
     </div>
   </transition>
 </template>
+
 <script>
 import { defineComponent } from "vue";
+
 export default defineComponent({
-  name: "iOSPWAPrompt",
-  mixins: [windowMixin],
-  props: {},
-  data: function () {
+  name: "AndroidPWAPrompt",
+  data() {
     return {
-      showIosPWAPromptLocal:
-        localStorage.getItem("cashu.ui.showIosPWAPrompt") != "seen",
-      showIosPWAPrompt: false,
+      showAndroidPWAPromptLocal:
+        localStorage.getItem("cashu.ui.showAndroidPWAPrompt") != "seen",
+      showAndroidPWAPrompt: false,
     };
   },
   mounted() {
     if (
-      this.showIosPWAPromptLocal &&
-      this.isiOsSafari() &&
+      this.showAndroidPWAPromptLocal &&
+      this.isChromeOnAndroid() &&
       !this.isInStandaloneMode()
     ) {
-      this.showIosPWAPrompt = true;
+      this.showAndroidPWAPrompt = true;
     }
   },
-  watch: {},
-  computed: {},
   methods: {
     closePrompt() {
-      localStorage.setItem("cashu.ui.showIosPWAPrompt", "seen");
-      this.showIosPWAPrompt = false;
+      localStorage.setItem("cashu.ui.showAndroidPWAPrompt", "seen");
+      this.showAndroidPWAPrompt = false;
     },
-    isiOsSafari() {
-      const userAgent = window.navigator.userAgent.toLowerCase();
-      return /iphone|ipod/.test(userAgent) && /safari/.test(userAgent);
+    isChromeOnAndroid() {
+      const userAgent = navigator.userAgent.toLowerCase();
+      const isAndroid = /android/.test(userAgent);
+      const isChrome =
+        /chrome/.test(userAgent) && !/edge|edg|opr|opera/.test(userAgent);
+      return isAndroid && isChrome;
     },
     isInStandaloneMode() {
-      return "standalone" in window.navigator && window.navigator.standalone;
+      return window.matchMedia("(display-mode: standalone)").matches;
     },
   },
 });
 </script>
+
 <style scoped>
 @keyframes moveUpDown {
   0%,
@@ -74,9 +77,8 @@ export default defineComponent({
 
 .pwa-prompt {
   position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
+  top: 20px;
+  right: 20px;
   margin: 0 auto;
   z-index: 9999;
   text-align: center;
@@ -101,12 +103,15 @@ export default defineComponent({
 }
 
 .pwa-prompt-arrow {
+  position: relative;
   width: 0;
   height: 0;
+  bottom: 60px;
+  left: 45%;
   border-left: 10px solid transparent;
   border-right: 10px solid transparent;
-  border-top: 10px solid white;
-  margin: 2px auto;
+  border-bottom: 10px solid white;
   text-align: center;
+  margin: 0 auto;
 }
 </style>

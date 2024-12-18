@@ -14,6 +14,7 @@ import { useTokensStore } from "./tokens";
 import token from "src/js/token";
 import { notify, notifyError, notifySuccess } from "src/js/notify";
 import { useLocalStorage } from "@vueuse/core";
+import { v4 as uuidv4 } from "uuid";
 
 export const usePRStore = defineStore("payment-request", {
   state: () => ({
@@ -27,9 +28,31 @@ export const usePRStore = defineStore("payment-request", {
   }),
   getters: {},
   actions: {
-    newPaymentRequest(amount?: number, memo?: string) {
+    newPaymentRequest(amount?: number, memo?: string, mintUrl?: string) {
       const walletStore = useWalletStore();
-      this.showPRKData = walletStore.createPaymentRequest(amount, memo);
+      this.showPRKData = this.createPaymentRequest(amount, memo, mintUrl);
+    },
+    createPaymentRequest: function (amount?: number, memo?: string, mintUrl?: string) {
+      const nostrStore = useNostrStore();
+      const mintStore = useMintsStore();
+      const tags = [["n", "17"]];
+      const transport = [
+        {
+          type: PaymentRequestTransportType.NOSTR,
+          target: nostrStore.seedSignerNprofile,
+          tags: tags,
+        },
+      ] as PaymentRequestTransport[];
+      const uuid = uuidv4().split("-")[0];
+      const paymentRequest = new PaymentRequest(
+        transport,
+        uuid,
+        amount,
+        mintStore.activeUnit,
+        mintUrl?.length ? mintStore.activeMintUrl ? [mintStore.activeMintUrl] : undefined : undefined,
+        memo
+      );
+      return paymentRequest.toEncodedRequest();
     },
     async decodePaymentRequest(pr: string) {
       console.log("decodePaymentRequest", pr);

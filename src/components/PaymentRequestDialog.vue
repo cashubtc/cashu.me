@@ -38,9 +38,15 @@
         <div class="row justify-center">
           <q-card-section class="q-pa-sm">
             <div class="row justify-center q-pt-sm">
-              <q-chip outline class="q-pa-md q-py-md" style="height: 36px">
-                <q-icon name="account_balance" size="xs" class="q-mr-xs" />
-                {{ getShortUrl(activeMintUrl) }}
+              <q-chip
+                outline
+                clickable
+                class="q-pa-md q-py-md"
+                style="height: 36px"
+                @click="setActiveMintUrl"
+              >
+                <q-icon name="account_balance" size="xs" class="q-mr-sm" />
+                {{ getShortUrl(chosenMintUrl) }}
               </q-chip>
               <div @click="toggleUnit" class="q-mt-xs q-ml-sm">
                 <ToggleUnit class="q-py-none" color="white" />
@@ -118,6 +124,8 @@ export default defineComponent({
       amountInputValue: "",
       amountLabelDefault: "Add amount",
       amountLabel: "Add amount",
+      chosenMintUrl: "Any mint",
+      memo: "",
     };
   },
   computed: {
@@ -134,13 +142,32 @@ export default defineComponent({
     toggleUnit() {
       this.paymentRequestAmount = undefined;
       this.amountLabel = this.amountLabelDefault;
-      this.newPaymentRequest(this.paymentRequestAmount);
+      this.newPaymentRequest(
+        this.paymentRequestAmount,
+        this.memo,
+        this.chosenMintUrl
+      );
     },
     newRequest() {
-      this.newPaymentRequest(this.paymentRequestAmount);
+      this.newPaymentRequest(
+        this.paymentRequestAmount,
+        this.memo,
+        this.chosenMintUrl
+      );
     },
     getShortUrl(url) {
       return getShortUrl(url);
+    },
+    setActiveMintUrl() {
+      if (this.activeMintUrl == this.chosenMintUrl) {
+        return;
+      }
+      this.chosenMintUrl = this.activeMintUrl;
+      this.newPaymentRequest(
+        this.paymentRequestAmount,
+        this.memo,
+        this.chosenMintUrl
+      );
     },
     startEditingAmount() {
       this.isEditingAmount = true;
@@ -162,7 +189,11 @@ export default defineComponent({
           this.activeUnit
         );
       }
-      this.newPaymentRequest(this.paymentRequestAmount);
+      this.newPaymentRequest(
+        this.paymentRequestAmount,
+        this.memo,
+        this.chosenMintUrl
+      );
       this.isEditingAmount = false;
       this.amountInputValue = "";
     },

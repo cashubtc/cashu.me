@@ -20,18 +20,20 @@
             Receive</q-btn
           >
         </div>
-        <div class="col-2 q-mb-md q-mx-none">
-          <q-btn
-            align="center"
-            size="lg"
-            outline
-            color="primary"
-            flat
-            @click="showCamera"
-          >
-            <ScanIcon size="2em" />
-          </q-btn>
-        </div>
+        <transition appear enter-active-class="animated pulse">
+          <div class="col-2 q-mb-md q-mx-none">
+            <q-btn
+              align="center"
+              size="lg"
+              outline
+              color="primary"
+              flat
+              @click="showCamera"
+            >
+              <ScanIcon size="2em" />
+            </q-btn>
+          </div>
+        </transition>
         <!-- button to showSendDialog -->
         <div class="col-5 q-mb-md">
           <q-btn
@@ -123,6 +125,7 @@
       </div>
 
       <iOSPWAPrompt />
+      <AndroidPWAPrompt />
     </div>
 
     <!-- BOTTOM LIGHTNING BUTTONS -->
@@ -199,6 +202,7 @@ import SendDialog from "components/SendDialog.vue";
 import ReceiveDialog from "components/ReceiveDialog.vue";
 import QrcodeReader from "components/QrcodeReader.vue";
 import iOSPWAPrompt from "components/iOSPWAPrompt.vue";
+import AndroidPWAPrompt from "components/AndroidPWAPrompt.vue";
 // pinia stores
 import { mapActions, mapState, mapWritableState } from "pinia";
 import { useMintsStore } from "src/stores/mints";
@@ -217,7 +221,9 @@ import { useNostrStore } from "src/stores/nostr";
 import { usePRStore } from "src/stores/payment-request";
 import { useStorageStore } from "src/stores/storage";
 import ReceiveTokenDialog from "src/components/ReceiveTokenDialog.vue";
+import { useWelcomeStore } from "../stores/welcome";
 import { notifyError, notify } from "../js/notify";
+
 import {
   X as XIcon,
   Banknote as BanknoteIcon,
@@ -242,6 +248,7 @@ export default {
     SendDialog,
     ReceiveDialog,
     iOSPWAPrompt,
+    AndroidPWAPrompt,
     ScanIcon,
   },
   data: function () {
@@ -364,7 +371,6 @@ export default {
       "checkPendingTokens",
       "decodeRequest",
       "initializeMnemonic",
-      "createPaymentRequest",
     ]),
     ...mapActions(useCameraStore, ["closeCamera", "showCamera"]),
     ...mapActions(useNWCStore, ["listenToNWCCommands"]),
@@ -378,6 +384,7 @@ export default {
       "initSigner",
     ]),
     ...mapActions(useStorageStore, ["checkLocalStorage"]),
+    ...mapActions(usePRStore, ["createPaymentRequest"]),
     // TOKEN METHODS
     decodeToken: function (encoded_token) {
       try {
@@ -435,20 +442,12 @@ export default {
       this.camera.show = false;
       this.focusInput("parseDialogInput");
     },
-    showWelcomeDialog: function () {
-      if (localStorage.getItem("cashu.welcomeDialogSeen") != "seen") {
-        this.welcomeDialog.show = true;
+    showWelcomePage: function () {
+      if (!useWelcomeStore().termsAccepted) {
+        useWelcomeStore().showWelcome = true;
       }
-    },
-    setWelcomeDialogSeen: function () {
-      localStorage.setItem("cashu.welcomeDialogSeen", "seen");
-      this.welcomeDialog.show = false;
-      // switch to settings tab
-      this.setTab("mints");
-
-      // if a wallet has been restored the "cashu.activeMintUrl" is not null
-      if (!!localStorage.getItem("cashu.activeMintUrl")) {
-        window.location.reload();
+      if (useWelcomeStore().showWelcome) {
+        this.$router.push("/welcome");
       }
     },
     setTab: function (to) {
@@ -549,7 +548,7 @@ export default {
         if (event.data.type == "new_tab_opened") {
           channel.postMessage({ type: "already_running", senderId: tabId });
         } else if (event.data.type == "already_running") {
-          window.location.href = "/already-running";
+          this.$router.push("/already-running");
         }
       };
     },
@@ -631,7 +630,7 @@ export default {
     this.initSigner();
 
     // show welcome dialog
-    this.showWelcomeDialog();
+    this.showWelcomePage();
 
     // listen to NWC commands if enabled
     if (this.nwcEnabled) {
