@@ -9,6 +9,7 @@
         color="primary"
         aria-label="Menu"
         @click="toggleLeftDrawer"
+        :disable="uiStore.globalMutexLock"
       />
       <q-toolbar-title></q-toolbar-title>
       <transition

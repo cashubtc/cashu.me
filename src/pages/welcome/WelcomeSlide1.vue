@@ -19,7 +19,7 @@
         <q-expansion-item
           dense
           dense-toggle
-          class="text-left"
+          class="text-left q-mt-lg"
           label="Click to learn more"
         >
           <p class="q-mt-md">

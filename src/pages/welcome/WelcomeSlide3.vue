@@ -28,7 +28,7 @@
       <q-checkbox
         v-model="welcomeStore.seedPhraseValidated"
         label="I have written it down"
-        class="q-mt-md"
+        class="q-mt-sm"
         style="font-size: 1rem"
       />
     </div>
