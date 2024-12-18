@@ -65,6 +65,7 @@
         :color="countdown > 0 ? 'negative' : 'primary'"
         aria-label="Refresh"
         @click="reload"
+        :disable="uiStore.globalMutexLock"
       >
       </q-btn>
     </q-toolbar>
