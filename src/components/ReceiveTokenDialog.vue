@@ -25,7 +25,7 @@
           label="Paste Cashu token"
           type="textarea"
           autofocus
-          class="q-mb-lg"
+          class="q-mb-lg cashub-nowrap"
           @keyup.enter="receiveIfDecodes"
         >
           <template v-if="receiveData.tokensBase64" v-slot:append>
@@ -326,5 +326,12 @@ export default defineComponent({
 .q-card-top {
   border-top-left-radius: 0px !important;
   border-top-right-radius: 0px !important;
+}
+
+.cashub-nowrap {
+  word-break: break-all;
+  -webkit-hyphens: none;
+  -moz-hyphens: none;
+  hyphens: none;
 }
 </style>
