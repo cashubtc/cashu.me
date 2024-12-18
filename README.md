@@ -54,6 +54,8 @@ See [Configuring quasar.config.js](https://v2.quasar.dev/quasar-cli-webpack/quas
 
 For Quasar Vue Router with history mode, add this fallback URL to allow refreshes: https://router.vuejs.org/guide/essentials/history-mode.html#HTML5-Mode
 
+More info: https://stackoverflow.com/questions/36399319/vue-router-return-404-when-revisit-to-the-url
+
 `Caddyfile`:
 
 ```
