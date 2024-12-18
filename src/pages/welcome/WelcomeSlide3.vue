@@ -19,7 +19,12 @@
         dense
       >
         <template v-slot:append>
-          <q-btn flat dense icon="content_copy" @click="copySeed" />
+          <q-btn
+            flat
+            dense
+            icon="content_copy"
+            @click="copyText(walletStore.mnemonic)"
+          />
         </template>
       </q-input>
       <p class="q-mt-none" style="font-size: 0.8rem; color: grey">
@@ -43,27 +48,11 @@ import { useQuasar } from "quasar";
 
 export default {
   name: "WelcomeSlide3",
+  mixins: [windowMixin],
   setup() {
     const welcomeStore = useWelcomeStore();
     const walletStore = useWalletStore();
     const $q = useQuasar();
-
-    const copySeed = () => {
-      navigator.clipboard
-        .writeText(welcomeStore.seedPhrase)
-        .then(() => {
-          $q.notify({
-            type: "positive",
-            message: "Seed phrase copied to clipboard!",
-          });
-        })
-        .catch(() => {
-          $q.notify({
-            type: "negative",
-            message: "Failed to copy seed phrase.",
-          });
-        });
-    };
 
     const proceed = () => {
       welcomeStore.seedPhraseValidated = true;
@@ -72,7 +61,6 @@ export default {
     return {
       welcomeStore,
       walletStore,
-      copySeed,
       proceed,
     };
   },
