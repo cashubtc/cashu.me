@@ -10,7 +10,7 @@
         device.
       </p>
       <q-input
-        v-model="walletStore.mnemonic"
+        v-model="hiddenMnemonic"
         outlined
         readonly
         autogrow
@@ -22,9 +22,17 @@
           <q-btn
             flat
             dense
+            icon="visibility"
+            class="cursor-pointer q-mt-md"
+            @click="toggleMnemonicVisibility"
+          ></q-btn>
+          <q-btn
+            flat
+            dense
             icon="content_copy"
+            class="cursor-pointer q-mt-md"
             @click="copyText(walletStore.mnemonic)"
-          />
+          ></q-btn>
         </template>
       </q-input>
       <p class="q-mt-none" style="font-size: 0.8rem; color: grey">
@@ -43,7 +51,7 @@
 <script>
 import { useWelcomeStore } from "src/stores/welcome";
 import { useWalletStore } from "src/stores/wallet";
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import { useQuasar } from "quasar";
 
 export default {
@@ -53,6 +61,21 @@ export default {
     const welcomeStore = useWelcomeStore();
     const walletStore = useWalletStore();
     const $q = useQuasar();
+    let hideMnemonic = ref(true);
+
+    const hiddenMnemonic = computed(() => {
+      if (hideMnemonic.value) {
+        return walletStore.mnemonic
+          .split(" ")
+          .map((w) => "*".repeat(w.length))
+          .join(" ");
+      }
+      return walletStore.mnemonic;
+    });
+
+    const toggleMnemonicVisibility = () => {
+      hideMnemonic.value = !hideMnemonic.value;
+    };
 
     const proceed = () => {
       welcomeStore.seedPhraseValidated = true;
@@ -62,6 +85,8 @@ export default {
       welcomeStore,
       walletStore,
       proceed,
+      toggleMnemonicVisibility,
+      hiddenMnemonic,
     };
   },
 };
