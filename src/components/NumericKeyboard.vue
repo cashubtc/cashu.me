@@ -26,11 +26,11 @@
         <q-btn flat dense class="text-h5" @click="addDigit('8')">8</q-btn>
         <q-btn flat dense class="text-h5" @click="addDigit('9')">9</q-btn>
 
+        <q-btn flat dense class="text-h5" @click="addComma">.</q-btn>
+        <q-btn flat dense class="text-h5" @click="addDigit('0')">0</q-btn>
         <q-btn flat dense class="text-h5" @click="backspace">
           <q-icon name="backspace" size="sm" />
         </q-btn>
-        <q-btn flat dense class="text-h5" @click="addDigit('0')">0</q-btn>
-        <q-btn flat dense class="text-h5" @click="addComma">.</q-btn>
         <q-btn flat dense @click="closeKeyboard">Close</q-btn>
         <br />
         <q-btn flat dense @click="emitDone">Enter</q-btn>
