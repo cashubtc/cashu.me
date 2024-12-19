@@ -100,7 +100,11 @@
               <q-item-label
                 class="q-mb-xs"
                 lines="1"
-                style="word-break: break-word"
+                style="
+                  word-break: break-all;
+                  overflow-wrap: break-word;
+                  white-space: normal;
+                "
               >
                 <q-icon
                   name="account_balance"
