@@ -42,7 +42,11 @@
                 outline
                 clickable
                 class="q-pa-md q-py-md"
-                style="height: 36px"
+                :style="
+                  chosenMintUrl == undefined
+                    ? ''
+                    : 'height: 36px; font-family: monospace'
+                "
                 @click="setActiveMintUrl"
               >
                 <q-icon name="account_balance" size="xs" class="q-mr-sm" />
@@ -124,7 +128,8 @@ export default defineComponent({
       amountInputValue: "",
       amountLabelDefault: "Add amount",
       amountLabel: "Add amount",
-      chosenMintUrl: "Any mint",
+      defaultAnyMint: "Any Mint",
+      chosenMintUrl: undefined,
       memo: "",
     };
   },
@@ -156,6 +161,9 @@ export default defineComponent({
       );
     },
     getShortUrl(url) {
+      if (!url) {
+        return this.defaultAnyMint;
+      }
       return getShortUrl(url);
     },
     setActiveMintUrl() {
