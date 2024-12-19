@@ -161,8 +161,8 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .q-dialog__inner > div {
-  border-top-left-radius: 20px;
-  border-top-right-radius: 20px;
+  border-top-left-radius: 20px !important;
+  border-top-right-radius: 20px !important;
   border-bottom-left-radius: 0px !important;
   border-bottom-right-radius: 0px !important;
 }
