@@ -121,19 +121,38 @@ export default defineComponent({
   margin: 0 auto;
 }
 
-/* Enhance button design */
 .q-btn {
-  border-radius: 8px; /* Slightly rounded corners */
-  font-weight: 600; /* Bold text for better readability */
-  text-transform: capitalize; /* Capitalize button text */
-  transition: background-color 0.3s, transform 0.2s; /* Smooth transitions */
-  background-color: var(--q-color-grey-2); /* Subtle background */
-  color: var(--q-color-grey-10); /* Text color */
+  border-radius: 8px;
+  font-weight: 600;
+  text-transform: capitalize;
+  transition: background-color 0.3s, transform 0.2s;
+  background-color: var(--q-color-grey-2);
+  color: var(--q-color-grey-10);
+}
+
+// on not tall screens, make the keyboard smaller
+@media (max-height: 700px) {
+  .numeric-keyboard {
+    max-height: 300px;
+  }
+  .keyboard-grid {
+    gap: 6px;
+  }
+}
+
+// on even smaller screens, make the keyboard even smaller
+@media (max-height: 600px) {
+  .numeric-keyboard {
+    max-height: 260px;
+  }
+  .keyboard-grid {
+    gap: 0px;
+  }
 }
 
 .q-btn:hover {
-  background-color: var(--q-color-grey-3); /* Slightly darker on hover */
-  transform: translateY(-2px); /* Slight lift on hover */
+  background-color: var(--q-color-grey-3);
+  transform: translateY(-2px);
 }
 
 .q-btn:active {
