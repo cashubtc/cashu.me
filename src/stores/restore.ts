@@ -9,7 +9,7 @@ import { notify, notifyError, notifySuccess } from "src/js/notify";
 import { useUiStore } from "./ui";
 
 const BATCH_SIZE = 100;
-const MAX_GAP = 2;
+const MAX_GAP = 1;
 
 export const useRestoreStore = defineStore("restore", {
   state: () => ({
@@ -62,8 +62,8 @@ export const useRestoreStore = defineStore("restore", {
       let restoredSomething = false;
 
       // Calculate total steps for progress calculation
-      let totalSteps = keysets.length * MAX_GAP * 2;
-      let currentStep = 1;
+      let totalSteps = keysets.length * MAX_GAP;
+      let currentStep = 0;
 
       for (const keyset of keysets) {
         console.log(`Restoring keyset ${keyset.id} with unit ${keyset.unit}`);
@@ -93,8 +93,8 @@ export const useRestoreStore = defineStore("restore", {
             );
             restoreProofs = restoreProofs.concat(proofs);
             emptyBatchCount = 0;
-            totalSteps += MAX_GAP * 2;
             this.restoreCounter += proofs.length;
+            totalSteps += 1;
           }
           this.restoreStatus = `Restored ${this.restoreCounter} proofs for keyset ${keyset.id}`;
           start += BATCH_SIZE;
@@ -105,9 +105,8 @@ export const useRestoreStore = defineStore("restore", {
 
         let restoredProofs: Proof[] = [];
         for (let i = 0; i < restoreProofs.length; i += BATCH_SIZE) {
-          this.restoreStatus = `Checking proofs ${i} to ${
-            i + BATCH_SIZE
-          } for keyset ${keyset.id}`;
+          this.restoreStatus = `Checking proofs ${i} to ${i + BATCH_SIZE
+            } for keyset ${keyset.id}`;
           const checkRestoreProofs = restoreProofs.slice(i, i + BATCH_SIZE);
           const proofStates = await wallet.checkProofsStates(
             checkRestoreProofs
@@ -121,8 +120,7 @@ export const useRestoreStore = defineStore("restore", {
           );
           if (unspentProofs.length > 0) {
             console.log(
-              `Found ${
-                unspentProofs.length
+              `Found ${unspentProofs.length
               } unspent proofs with sum ${unspentProofs.reduce(
                 (s, p) => s + p.amount,
                 0

@@ -9,7 +9,8 @@
               Restore from Seed Phrase
             </q-item-label>
             <q-item-label caption>
-              Enter your seed phrase to restore your wallet.
+              Enter your seed phrase to restore your wallet. Before you restore,
+              make sure you have added all the mints that you have used before.
             </q-item-label>
             <div class="row q-pt-md">
               <div class="col-12">
@@ -34,6 +35,26 @@
                 </q-input>
               </div>
             </div>
+          </q-item-section>
+        </q-item>
+      </q-list>
+    </div>
+
+    <!-- Information about restoring mints -->
+    <div class="q-px-xs text-left" on-left>
+      <q-list padding>
+        <q-item>
+          <q-item-section>
+            <q-item-label overline class="text-weight-bold">
+              Information
+            </q-item-label>
+            <q-item-label caption>
+              The wizard will only <i>restore</i> ecash from another seed
+              phrase, you will not be able to use this seed phrase or change the
+              seed phrase of the wallet that you're currently using. This means
+              that restored ecash will not be protected by your current seed
+              phrase as long as you don't send the ecash to yourself once.
+            </q-item-label>
           </q-item-section>
         </q-item>
       </q-list>
@@ -196,10 +217,13 @@ export default defineComponent({
         return;
       }
       try {
+        this.restoreAllMintsText = "Restoring mint ...";
         await this.restoreMint(mintUrl);
       } catch (error) {
         console.error("Error restoring mint:", error);
         notifyError(`Error restoring mint: ${error.message || error}`);
+      } finally {
+        this.restoreAllMintsText = "Restore All Mints";
       }
     },
     async pasteMnemonic() {

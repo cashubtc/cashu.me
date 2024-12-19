@@ -48,6 +48,35 @@
       </q-list>
     </div>
 
+    <!-- restore -->
+    <div class="q-py-sm q-px-xs text-left" on-left>
+      <q-list padding>
+        <q-item>
+          <q-item-section>
+            <q-item-label overline class="text-weight-bold"
+              >Restore ecash</q-item-label
+            >
+            <q-item-label caption
+              >The restore wizard lets you recover lost ecash from a mnemonic
+              seed phrase. The seed phrase of your current wallet will remain
+              unaffected, the wizard will only allow you to <i>restore</i> ecash
+              from another seed phrase.</q-item-label
+            >
+          </q-item-section>
+        </q-item>
+        <q-item>
+          <q-btn
+            class="q-ml-sm q-px-md"
+            color="primary"
+            size="sm"
+            rounded
+            outline
+            to="/restore"
+            >Restore</q-btn
+          >
+        </q-item>
+      </q-list>
+    </div>
     <!-- nostr -->
     <div class="q-py-sm q-px-sm text-left" on-left>
       <q-list padding>
@@ -671,34 +700,6 @@
             </q-item-section>
           </q-item>
         </q-expansion-item>
-
-        <!-- restore -->
-        <div class="q-py-sm q-px-xs text-left" on-left>
-          <q-list padding>
-            <q-item>
-              <q-item-section>
-                <q-item-label overline class="text-weight-bold"
-                  >Restore ecash</q-item-label
-                >
-                <q-item-label caption
-                  >The restore wizard lets you recover lost ecash from a
-                  mnemonic seed phrase.</q-item-label
-                >
-              </q-item-section>
-            </q-item>
-            <q-item>
-              <q-btn
-                class="q-ml-sm q-px-md"
-                color="primary"
-                size="sm"
-                rounded
-                outline
-                to="/restore"
-                >Restore</q-btn
-              >
-            </q-item>
-          </q-list>
-        </div>
 
         <q-item>
           <q-item-section>
