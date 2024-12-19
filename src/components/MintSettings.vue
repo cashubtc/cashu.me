@@ -47,7 +47,7 @@
                   activateMintUrl(mint.url, (verbose = false), (force = false))
                 "
                 class="cursor-pointer"
-                style="word-break: break-word"
+                style="word-break: break-all; font-weight: bold"
                 >{{ mint.nickname }}</q-item-label
               >
               <q-item-label
@@ -56,7 +56,11 @@
                   activateMintUrl(mint.url, (verbose = false), (force = false))
                 "
                 class="cursor-pointer"
-                style="word-break: break-word"
+                style="
+                  word-break: break-all;
+                  overflow-wrap: break-word;
+                  white-space: normal;
+                "
                 >{{ mint.url }}</q-item-label
               >
               <q-item-label>

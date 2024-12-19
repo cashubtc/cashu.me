@@ -126,13 +126,12 @@
               v-if="this.invoiceData.mint != undefined"
               class="row justify-center q-pt-sm"
             >
-              <q-chip outline class="q-pa-md">
-                <q-icon
-                  name="account_balance"
-                  size="xs"
-                  color="grey"
-                  class="q-mr-sm"
-                />
+              <q-chip
+                outline
+                class="q-pa-md"
+                style="height: 36px; font-family: monospace"
+              >
+                <q-icon name="account_balance" size="xs" class="q-mr-sm" />
                 {{ shortUrl }}
               </q-chip>
             </div>

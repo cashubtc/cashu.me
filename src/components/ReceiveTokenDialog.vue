@@ -17,40 +17,29 @@
             <span class="text-h6">Receive ecash</span>
           </div>
         </div>
-        <div></div>
-        <q-input
-          round
-          outlined
-          v-model="receiveData.tokensBase64"
-          label="Paste Cashu token"
-          type="textarea"
-          autofocus
-          class="q-mb-lg cashub-nowrap"
-          @keyup.enter="receiveIfDecodes"
-        >
-          <template v-if="receiveData.tokensBase64" v-slot:append>
+        <div class="relative-container">
+          <q-input
+            round
+            outlined
+            spellcheck="false"
+            v-model="receiveData.tokensBase64"
+            label="Paste Cashu token"
+            type="textarea"
+            autofocus
+            class="q-mb-lg cashub-nowrap"
+            @keyup.enter="receiveIfDecodes"
+          >
             <q-icon
+              v-if="receiveData.tokensBase64"
+              color="dark"
               name="close"
-              class="cursor-pointer"
+              class="floating-button cursor-pointer"
               @click="receiveData.tokensBase64 = ''"
             />
-          </template>
-        </q-input>
-      </div>
-      <div
-        class="row"
-        v-if="receiveData.tokensBase64.length && tokenDecodesCorrectly"
-      >
-        <div class="col-12">
-          <TokenInformation
-            :encodedToken="receiveData.tokensBase64"
-            :showAmount="true"
-            :showMintCheck="true"
-            :showP2PKCheck="true"
-          />
+          </q-input>
         </div>
       </div>
-      <div class="row q-mt-lg">
+      <div class="row">
         <!-- if !tokenDecodesCorrectly, display error -->
         <q-btn
           v-if="receiveData.tokensBase64.length && !tokenDecodesCorrectly"
@@ -59,73 +48,88 @@
           text-color="black"
           rounded
           unelevated
-          class="q-mr-sm"
+          class="q-ml-xs q-mr-sm"
           label="Invalid token"
         ></q-btn>
 
-        <q-btn
-          @click="receiveIfDecodes"
-          color="primary"
-          rounded
-          class="q-ml-xs q-mr-sm"
-          v-if="tokenDecodesCorrectly"
-          :disabled="addMintBlocking"
-          :label="
-            knowThisMint
-              ? addMintBlocking
-                ? 'Adding mint ...'
-                : 'Receive'
-              : 'Receive'
-          "
-        >
-        </q-btn>
-        <q-btn
-          @click="addPendingTokenToHistory(receiveData.tokensBase64)"
-          color="primary"
-          rounded
-          flat
-          class="q-mr-sm"
-          v-if="tokenDecodesCorrectly"
-          >Later
-          <q-tooltip>Add to history to receive later</q-tooltip>
-        </q-btn>
-        <q-btn
-          unelevated
-          dense
-          class="q-mr-sm"
-          v-if="canPasteFromClipboard && !receiveData.tokensBase64.length"
-          @click="pasteToParseDialog(true)"
-        >
-          <q-icon name="content_paste" class="q-pr-sm" />Paste</q-btn
-        >
-        <q-btn
-          unelevated
-          dense
-          class="q-mx-sm"
-          v-if="hasCamera && !receiveData.tokensBase64.length"
-          @click="showCamera"
-        >
-          <ScanIcon size="1.5em" />
-          <span class="q-pl-sm">Scan</span>
-        </q-btn>
-        <q-btn
-          unelevated
-          dense
-          class="q-mx-sm"
-          v-if="!receiveData.tokensBase64.length && ndefSupported"
-          :loading="scanningCard"
-          :disabled="scanningCard"
-          @click="toggleScanner"
-        >
-          <NfcIcon class="q-pr-xs" />
-          <q-tooltip>{{
-            ndefSupported ? "Read from NFC card" : "NDEF unsupported"
-          }}</q-tooltip>
-          <template v-slot:loading>
-            <q-spinner @click="toggleScanner"> </q-spinner>
-          </template>
-          NFC
-        </q-btn>
+        <!-- EMPTY INPUT -->
+        <div v-if="!receiveData.tokensBase64.length">
+          <q-btn
+            unelevated
+            dense
+            class="q-mr-sm"
+            v-if="canPasteFromClipboard"
+            @click="pasteToParseDialog(true)"
+          >
+            <q-icon name="content_paste" class="q-pr-sm" />Paste</q-btn
+          >
+          <q-btn
+            unelevated
+            dense
+            class="q-mx-sm"
+            v-if="hasCamera"
+            @click="showCamera"
+          >
+            <ScanIcon size="1.5em" />
+            <span class="q-pl-sm">Scan</span>
+          </q-btn>
+          <q-btn
+            unelevated
+            dense
+            class="q-mx-sm"
+            v-if="ndefSupported"
+            :loading="scanningCard"
+            :disabled="scanningCard"
+            @click="toggleScanner"
+          >
+            <NfcIcon class="q-pr-xs" />
+            <q-tooltip>{{
+              ndefSupported ? "Read from NFC card" : "NDEF unsupported"
+            }}</q-tooltip>
+            <template v-slot:loading>
+              <q-spinner @click="toggleScanner"> </q-spinner>
+            </template>
+            NFC
+          </q-btn>
+        </div>
+
+        <!-- VALID TOKEN -->
+        <div v-if="tokenDecodesCorrectly">
+          <div class="row">
+            <TokenInformation
+              :encodedToken="receiveData.tokensBase64"
+              :showAmount="true"
+              :showMintCheck="true"
+              :showP2PKCheck="true"
+            />
+          </div>
+          <div class="row q-pt-md">
+            <q-btn
+              @click="receiveIfDecodes"
+              color="primary"
+              rounded
+              class="q-ml-xs q-mr-sm"
+              :disabled="addMintBlocking"
+              :label="
+                knowThisMint
+                  ? addMintBlocking
+                    ? 'Adding mint ...'
+                    : 'Receive'
+                  : 'Receive'
+              "
+            >
+            </q-btn>
+            <q-btn
+              @click="addPendingTokenToHistory(receiveData.tokensBase64)"
+              color="primary"
+              rounded
+              flat
+              class="q-mr-sm"
+              >Later
+              <q-tooltip>Add to history to receive later</q-tooltip>
+            </q-btn>
+          </div>
+        </div>
       </div>
     </q-card>
   </q-dialog>
@@ -333,5 +337,22 @@ export default defineComponent({
   -webkit-hyphens: none;
   -moz-hyphens: none;
   hyphens: none;
+  font-size: 0.9em;
+  font-family: monospace;
+}
+
+.relative-container {
+  position: relative;
+}
+
+.floating-button {
+  position: absolute;
+  top: 10px;
+  right: 0px;
+  z-index: 100;
+  padding: 1px;
+  background-color: var(--q-primary);
+  border-radius: 50%;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 </style>
