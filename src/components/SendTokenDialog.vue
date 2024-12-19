@@ -197,7 +197,7 @@
           </div>
           <div v-else class="row q-mt-lg">
             <q-btn unelevated rounded disabled color="yellow" text-color="black"
-              >Mint balance too low</q-btn
+              >Too much</q-btn
             >
             <q-btn v-close-popup rounded flat color="grey" class="q-ml-auto"
               >Close</q-btn
