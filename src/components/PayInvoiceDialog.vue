@@ -144,7 +144,8 @@
                   payInvoiceData.lnurlpay.maxSendable ==
                   payInvoiceData.lnurlpay.minSendable
                 "
-              ></q-input>
+              >
+              </q-input>
             </div>
             <div
               class="col-8 q-pl-md"
@@ -177,18 +178,27 @@
         <q-form
           v-if="!camera.show"
           @submit="decodeAndQuote(payInvoiceData.input.request)"
-          class="q-gutter-md"
+          class="q-gutter-md relative-container"
         >
           <q-input
             ref="parseDialogInput"
             round
             outlined
+            class="request-input"
+            spellcheck="false"
             v-model.trim="payInvoiceData.input.request"
             type="textarea"
             label="Lightning invoice or address"
             autofocus
             @keyup.enter="decodeAndQuote(payInvoiceData.input.request)"
           >
+            <q-icon
+              name="close"
+              color="dark"
+              v-if="payInvoiceData.input.request"
+              class="cursor-pointer floating-button"
+              @click="payInvoiceData.input.request = ''"
+            />
           </q-input>
           <div class="row q-mt-lg">
             <q-btn
@@ -346,5 +356,29 @@ export default defineComponent({
 .qcard {
   border-top-left-radius: 20px;
   border-top-right-radius: 20px;
+}
+
+.request-input {
+  word-break: break-all;
+  -webkit-hyphens: none;
+  -moz-hyphens: none;
+  hyphens: none;
+  font-size: 0.9em;
+  font-family: monospace;
+}
+
+.relative-container {
+  position: relative;
+}
+
+.floating-button {
+  position: absolute;
+  top: 10px;
+  right: 0px;
+  z-index: 100;
+  padding: 1px;
+  background-color: var(--q-primary);
+  border-radius: 50%;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 </style>
