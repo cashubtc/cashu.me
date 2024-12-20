@@ -15,12 +15,20 @@
       >
         <p><strong>Last Updated: 17.12.2024</strong></p>
         <p>
-          <strong
-            >IMPORTANT NOTICE: THESE TERMS OF SERVICE CONTAIN AN ARBITRATION
-            PROVISION REQUIRING BINDING ARBITRATION OF DISPUTES AND A WAIVER OF
-            CERTAIN RIGHTS TO A JURY TRIAL. PLEASE READ THESE TERMS OF SERVICE
-            CAREFULLY. IF YOU DO NOT AGREE, DO NOT USE CASHU.ME.</strong
-          >
+          <strong>
+            IMPORTANT NOTICE: THESE TERMS OF SERVICE INCLUDE A MEDIATION-FIRST
+            CLAUSE REQUIRING MEDIATION BEFORE ARBITRATION OR LITIGATION. PLEASE
+            READ THESE TERMS CAREFULLY. IF YOU DO NOT AGREE, DO NOT USE
+            CASHU.ME.
+          </strong>
+        </p>
+        <p>
+          <strong>
+            ALL REFERENCES TO LAW, REGULATION, AND JURISDICTION IN THESE TERMS
+            REFER TO THE LAWS AND REGULATIONS OF THE USER’S JURISDICTION. USERS
+            ARE RESPONSIBLE FOR DETERMINING THE LEGALITY AND REGULATORY
+            COMPLIANCE OF THEIR ACTIVITIES.
+          </strong>
         </p>
         <p>
           These Terms of Service (these “Terms”) constitute the entire agreement
@@ -53,6 +61,11 @@
           solely by your actions and through your chosen Mint. We do not
           monitor, verify, or facilitate transfers between you and any Mint or
           other parties.
+        </p>
+        <p>
+          1.4 <strong>Web Server Only:</strong> Cashu.me does not operate any
+          servers except for the web server that delivers the application to
+          your device. The application is executed entirely on your device.
         </p>
         <p><strong>2. User Responsibilities & Disclaimers</strong></p>
         <p>
@@ -112,6 +125,11 @@
           theft, and regulatory uncertainty.
         </p>
         <p>
+          6.2 <strong>Waiver of Accountability:</strong> By using the Site, you
+          waive any right to hold Cashu.me accountable for any damages, losses,
+          or disputes arising from your use of the Site or Services.
+        </p>
+        <p>
           6.3 <strong>No Warranties:</strong> THE SITE AND SERVICES ARE PROVIDED
           “AS IS” WITHOUT ANY WARRANTIES. WE DISCLAIM ALL WARRANTIES TO THE
           MAXIMUM EXTENT PERMITTED BY LAW.
@@ -129,14 +147,26 @@
           have a dispute with any Mint or third party, you release Cashu.me from
           all related claims.
         </p>
-        <p><strong>8. Arbitration and Dispute Resolution</strong></p>
+        <p><strong>8. Mediation and Dispute Resolution</strong></p>
         <p>
-          Except for certain intellectual property claims, any dispute arising
-          out of or relating to these Terms, the Site, or the Services shall be
-          resolved through final and binding arbitration administered by a
-          reputable arbitration provider. You agree that all proceedings will be
-          conducted on an individual basis and you waive any right to a trial by
-          jury or to participate in a class action.
+          8.1 <strong>Mediation Requirement:</strong> If a dispute arises out of
+          or relates to these Terms, the Site, or the Services, the parties
+          agree to first attempt to resolve the dispute through good-faith
+          mediation administered by a reputable mediation provider. Each party
+          shall bear its own costs for the mediation, and the costs of the
+          mediator shall be shared equally.
+        </p>
+        <p>
+          8.2 <strong>Arbitration Option:</strong> If mediation does not resolve
+          the dispute within 30 days (or a mutually agreed period), either party
+          may initiate final and binding arbitration administered by a reputable
+          arbitration provider. Arbitration shall be conducted on an individual
+          basis, and class actions or collective proceedings are not permitted.
+        </p>
+        <p>
+          8.3 <strong>Waiver of Jury Trial:</strong> If arbitration is not
+          invoked and the dispute proceeds to court, you waive your right to a
+          trial by jury to the fullest extent permitted by law.
         </p>
         <p><strong>9. Prohibited Uses</strong></p>
         <p>
@@ -144,11 +174,11 @@
           violate applicable laws, or to engage in market manipulation. We may
           suspend or terminate access for prohibited uses.
         </p>
-        <p><strong>10. Intellectual Property</strong></p>
+        <p><strong>10. Privacy and Data Protection</strong></p>
         <p>
-          All trademarks, logos, and content on the Site are owned by Cashu.me
-          or its licensors. You shall not use them without prior written
-          consent.
+          10.1 <strong>GDPR Compliance:</strong> Cashu.me does not collect or
+          store any personal data, including IP addresses. No data is shared
+          with third parties.
         </p>
         <p><strong>11. Your Representations and Warranties</strong></p>
         <p>
