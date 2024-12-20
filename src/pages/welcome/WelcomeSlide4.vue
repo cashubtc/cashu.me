@@ -32,8 +32,7 @@
         <p>
           <strong
             >CASHU.ME DOES NOT HOLD ECASH, DOES NOT EXECUTE AND CANNOT MONITOR
-            TRANSACTIONS, AND DOES NOT OPERATE ANY MINTS OR VERIFY
-            MINTS.</strong
+            TRANSACTIONS, AND DOES NOT OPERATE OR VERIFY ANY MINTS.</strong
           >
         </p>
         <p>

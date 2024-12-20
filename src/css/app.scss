@@ -1,4 +1,10 @@
 // app global css in SCSS form
+
+// prevent pull to refresh on android chrome
+body {
+  overscroll-behavior-y: contain;
+}
+
 .q-dialog__inner > div {
   border-top-left-radius: 0px;
   border-top-right-radius: 0px;

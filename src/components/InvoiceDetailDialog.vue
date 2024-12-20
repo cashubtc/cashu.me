@@ -2,6 +2,7 @@
   <q-dialog
     v-model="showInvoiceDetails"
     position="top"
+    :maximized="$q.screen.lt.sm"
     :full-width="$q.screen.lt.sm"
     :full-height="$q.screen.lt.sm"
     backdrop-filter="blur(2px) brightness(60%)"
