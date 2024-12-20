@@ -315,7 +315,7 @@ export default defineComponent({
 
       tokensStore.addPendingToken({
         amount: amount,
-        serializedProofs: token,
+        token: token,
       });
       this.showReceiveTokens = false;
       // show success notification

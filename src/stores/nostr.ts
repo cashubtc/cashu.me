@@ -589,7 +589,7 @@ export const useNostrStore = defineStore("nostr", {
 
       tokensStore.addPendingToken({
         amount: amount,
-        serializedProofs: tokenStr,
+        token: tokenStr,
         mint: token.getMint(decodedToken),
         unit: token.getUnit(decodedToken),
       });

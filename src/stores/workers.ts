@@ -3,6 +3,7 @@ import { useWalletStore } from "src/stores/wallet"; // invoiceData,
 import { useUiStore } from "src/stores/ui"; // showInvoiceDetails
 import { useSendTokensStore } from "src/stores/sendTokensStore"; // showSendTokens and sendData
 import { useSettingsStore } from "./settings";
+import { HistoryToken, useTokensStore } from "./tokens";
 export const useWorkersStore = defineStore("workers", {
   state: () => {
     return {
@@ -55,7 +56,7 @@ export const useWorkersStore = defineStore("workers", {
         }
       }, 5000);
     },
-    checkTokenSpendableWorker: async function (tokensBase64: string) {
+    checkTokenSpendableWorker: async function (historyToken: HistoryToken) {
       const settingsStore = useSettingsStore();
       if (!settingsStore.checkSentTokens) {
         console.log(
@@ -78,7 +79,7 @@ export const useWorkersStore = defineStore("workers", {
             this.clearAllWorkers();
           }
           console.log("### checkTokenSpendableWorker setInterval", nInterval);
-          let paid = await walletStore.checkTokenSpendable(tokensBase64, false);
+          let paid = await walletStore.checkTokenSpendable(historyToken, false);
           if (paid) {
             console.log("### stopping token check worker");
             this.clearAllWorkers();

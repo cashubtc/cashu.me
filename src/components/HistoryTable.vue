@@ -52,7 +52,7 @@
             flat
             dense
             icon="sync"
-            @click="checkTokenSpendable(token.token)"
+            @click="checkTokenSpendable(token)"
             class="cursor-pointer"
             v-if="token.status === 'pending' && token.amount < 0"
             style="position: absolute; right: 0"

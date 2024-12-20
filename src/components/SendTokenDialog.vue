@@ -644,10 +644,7 @@ export default defineComponent({
     },
   },
   methods: {
-    ...mapActions(useWorkersStore, [
-      "checkTokenSpendableWorker",
-      "clearAllWorkers",
-    ]),
+    ...mapActions(useWorkersStore, ["clearAllWorkers"]),
     ...mapActions(useWalletStore, [
       "send",
       "sendToLock",
@@ -878,15 +875,16 @@ export default defineComponent({
         this.sendData.tokens = sendProofs;
 
         this.sendData.tokensBase64 = this.serializeProofs(sendProofs);
-        this.addPendingToken({
+        const historyToken = {
           amount: -this.sendData.amount,
-          serializedProofs: this.sendData.tokensBase64,
+          token: this.sendData.tokensBase64,
           unit: this.activeUnit,
           mint: this.activeMintUrl,
-        });
+        };
+        this.addPendingToken(historyToken);
 
         if (!this.g.offline) {
-          this.onTokenPaid(this.sendData.tokensBase64);
+          this.onTokenPaid(historyToken);
         }
       } catch (error) {
         console.error(error);
@@ -922,16 +920,17 @@ export default defineComponent({
         this.sendData.historyAmount =
           -this.sendData.amount * this.activeUnitCurrencyMultiplyer;
 
-        this.addPendingToken({
+        const historyToken = {
           amount: -sendAmount,
-          serializedProofs: this.sendData.tokensBase64,
+          token: this.sendData.tokensBase64,
           unit: this.activeUnit,
           mint: this.activeMintUrl,
           paymentRequest: this.sendData.paymentRequest,
-        });
+        };
+        this.addPendingToken(historyToken);
 
         if (!this.g.offline) {
-          this.onTokenPaid(this.sendData.tokensBase64);
+          this.onTokenPaid(historyToken);
         }
       } catch (error) {
         console.error(error);

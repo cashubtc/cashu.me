@@ -1406,6 +1406,10 @@ export default defineComponent({
     },
     checkActiveProofsSpendable: async function () {
       // iterate over this.activeProofs in batches of 50 and check if they are spendable
+      let wallet = useWalletStore().mintWallet(
+        this.activeMintUrl,
+        this.activeUnit
+      );
       let proofs = this.activeProofs.flat();
       console.log("Checking proofs", proofs);
       let allSpentProofs = [];
@@ -1413,7 +1417,7 @@ export default defineComponent({
       for (let i = 0; i < proofs.length; i += batch_size) {
         console.log("Checking proofs", i, i + batch_size);
         let batch = proofs.slice(i, i + batch_size);
-        let spent = await this.checkProofsSpendable(batch, true);
+        let spent = await this.checkProofsSpendable(batch, wallet, true);
         allSpentProofs.push(spent);
       }
       let spentProofs = allSpentProofs.flat();

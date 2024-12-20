@@ -3,7 +3,7 @@ import { currentDateStr } from "src/js/utils";
 import { useMintsStore, WalletProof, MintClass } from "./mints";
 import { useLocalStorage } from "@vueuse/core";
 import { useProofsStore } from "./proofs";
-import { useTokensStore } from "./tokens";
+import { HistoryToken, useTokensStore } from "./tokens";
 import { useReceiveTokensStore } from "./receiveTokensStore";
 import { useUiStore } from "src/stores/ui";
 import { useP2PKStore } from "src/stores/p2pk";
@@ -513,7 +513,7 @@ export const useWalletStore = defineStore("wallet", {
           fee = inputAmount - outputAmount;
           tokenStore.addPaidToken({
             amount: outputAmount,
-            serializedProofs: receiveStore.receiveData.tokensBase64,
+            token: receiveStore.receiveData.tokensBase64,
             unit: mintStore.activeUnit,
             mint: mintStore.activeMintUrl,
             fee: fee,
@@ -626,7 +626,7 @@ export const useWalletStore = defineStore("wallet", {
         }
         tokenStore.addPaidToken({
           amount: invoice.amount,
-          serializedProofs: serializedProofs,
+          token: serializedProofs,
           unit: invoice.unit,
           mint: invoice.mint,
         });
@@ -774,7 +774,7 @@ export const useWalletStore = defineStore("wallet", {
 
         tokenStore.addPaidToken({
           amount: -amount_paid,
-          serializedProofs: proofsStore.serializeProofs(sendProofs),
+          token: proofsStore.serializeProofs(sendProofs),
           unit: mintStore.activeUnit,
           mint: mintStore.activeMintUrl,
         });
@@ -834,6 +834,7 @@ export const useWalletStore = defineStore("wallet", {
     // /check
     checkProofsSpendable: async function (
       proofs: Proof[],
+      wallet: CashuWallet,
       update_history = false
     ) {
       /*
@@ -848,7 +849,7 @@ export const useWalletStore = defineStore("wallet", {
       }
       const enc = new TextEncoder();
       try {
-        const proofStates = await this.wallet.checkProofsStates(proofs);
+        const proofStates = await wallet.checkProofsStates(proofs);
         const spentProofsStates = proofStates.filter(
           (p) => p.state == CheckStateEnum.SPENT
         );
@@ -867,9 +868,9 @@ export const useWalletStore = defineStore("wallet", {
           if (update_history) {
             tokenStore.addPaidToken({
               amount: -proofsStore.sumProofs(spentProofs),
-              serializedProofs: serializedProofs,
-              unit: mintStore.activeUnit,
-              mint: mintStore.activeMintUrl,
+              token: serializedProofs,
+              unit: wallet.unit,
+              mint: wallet.mint.mintUrl,
             });
           }
         }
@@ -881,9 +882,9 @@ export const useWalletStore = defineStore("wallet", {
         throw error;
       }
     },
-    onTokenPaid: async function (tokenStr: string) {
+    onTokenPaid: async function (historyToken: HistoryToken) {
       const sendTokensStore = useSendTokensStore();
-      const tokenJson = token.decode(tokenStr);
+      const tokenJson = token.decode(historyToken.token);
       const activeMint = useMintsStore().activeMint().mint;
       const mintStore = useMintsStore();
       const settingsStore = useSettingsStore();
@@ -893,20 +894,25 @@ export const useWalletStore = defineStore("wallet", {
         );
         return;
       }
+      const mintWallet = this.mintWallet(historyToken.mint, historyToken.unit);
+      const mint = mintStore.mints.find((m) => m.url === historyToken.mint);
+      if (!mint) {
+        throw new Error("mint not found");
+      }
       if (
         !settingsStore.useWebsockets ||
-        !activeMint.info?.nuts[17]?.supported ||
-        !activeMint.info?.nuts[17]?.supported.find(
+        !mint.info?.nuts[17]?.supported ||
+        !mint.info?.nuts[17]?.supported.find(
           (s) =>
             s.method == "bolt11" &&
-            s.unit == mintStore.activeUnit &&
+            s.unit == historyToken.unit &&
             s.commands.indexOf("proof_state") != -1
         )
       ) {
         console.log(
           "Websockets not supported, kicking off token check worker."
         );
-        useWorkersStore().checkTokenSpendableWorker(tokenStr);
+        useWorkersStore().checkTokenSpendableWorker(historyToken);
         return;
       }
       try {
@@ -920,7 +926,7 @@ export const useWalletStore = defineStore("wallet", {
           async (proofState: ProofState) => {
             console.log(`Websocket: proof state updated: ${proofState.state}`);
             if (proofState.state == CheckStateEnum.SPENT) {
-              const tokenSpent = await this.checkTokenSpendable(tokenStr);
+              const tokenSpent = await this.checkTokenSpendable(historyToken);
               if (tokenSpent) {
                 sendTokensStore.showSendTokens = false;
                 unsub();
@@ -935,11 +941,11 @@ export const useWalletStore = defineStore("wallet", {
         );
       } catch (error) {
         console.error("Error in websocket subscription", error);
-        useWorkersStore().checkTokenSpendableWorker(tokenStr);
+        useWorkersStore().checkTokenSpendableWorker(historyToken);
       }
     },
     checkTokenSpendable: async function (
-      tokenStr: string,
+      historyToken: HistoryToken,
       verbose: boolean = true
     ) {
       /*
@@ -951,24 +957,25 @@ export const useWalletStore = defineStore("wallet", {
       const tokenStore = useTokensStore();
       const proofsStore = useProofsStore();
 
-      const tokenJson = token.decode(tokenStr);
+      const tokenJson = token.decode(historyToken.token);
       if (tokenJson == undefined) {
         throw new Error("no tokens provided.");
       }
       const proofs = token.getProofs(tokenJson);
-      const unitInToken = token.getUnit(tokenJson);
-      const mintInToken = token.getMint(tokenJson);
-      const mintWallet = this.mintWallet(mintInToken, unitInToken);
-      const mint = mintStore.mints.find((m) => m.url === mintInToken);
+      // const unitInToken = token.getUnit(tokenJson);
+      // const mintInToken = token.getMint(tokenJson);
+      const mintWallet = this.mintWallet(historyToken.mint, historyToken.unit);
+
+      const mint = mintStore.mints.find((m) => m.url === historyToken.mint);
       if (!mint) {
         throw new Error("mint not found");
       }
       // await mintStore.activateMintUrl(mintInToken);
 
-      const spentProofs = await this.checkProofsSpendable(proofs);
+      const spentProofs = await this.checkProofsSpendable(proofs, mintWallet);
       if (spentProofs != undefined && spentProofs.length == proofs.length) {
         // all proofs are spent, set token to paid
-        tokenStore.setTokenPaid(tokenStr);
+        tokenStore.setTokenPaid(historyToken.token);
       } else if (
         spentProofs != undefined &&
         spentProofs.length &&
@@ -985,19 +992,19 @@ export const useWalletStore = defineStore("wallet", {
           proofsStore.serializeProofs(unspentProofs);
 
         if (serializedSpentProofs && serializedUnspentProofs) {
-          const historyToken = tokenStore.editHistoryToken(tokenStr, {
+          const historyToken2 = tokenStore.editHistoryToken(historyToken.token, {
             newAmount: spentAmount,
             newStatus: "paid",
             newToken: serializedSpentProofs,
           });
           // add all unspent proofs back to the history
           // QUICK: we use the historyToken object here because we don't know if the transaction is incoming or outgoing (we don't know the sign of the amount)
-          if (historyToken) {
+          if (historyToken2) {
             tokenStore.addPendingToken({
-              amount: unspentAmount * Math.sign(historyToken.amount),
-              serializedProofs: serializedUnspentProofs,
-              unit: historyToken.unit,
-              mint: historyToken.mint,
+              amount: unspentAmount * Math.sign(historyToken2.amount),
+              token: serializedUnspentProofs,
+              unit: historyToken2.unit,
+              mint: historyToken2.mint,
             });
           }
         }
@@ -1009,7 +1016,7 @@ export const useWalletStore = defineStore("wallet", {
           "Sent " +
           uIStore.formatCurrency(
             proofStore.sumProofs(spentProofs),
-            mintStore.activeUnit
+            historyToken.unit
           )
         );
       } else {
@@ -1154,7 +1161,7 @@ export const useWalletStore = defineStore("wallet", {
             false,
             invoice.unit
           );
-          const spentProofs = await this.checkProofsSpendable(proofs, true);
+          const spentProofs = await this.checkProofsSpendable(proofs, mintWallet, true);
           if (spentProofs != undefined && spentProofs.length == proofs.length) {
             mintStore.removeProofs(proofs);
             if (!!window.navigator.vibrate) navigator.vibrate(200);
@@ -1230,7 +1237,7 @@ export const useWalletStore = defineStore("wallet", {
         }
         if (t.status === "pending" && t.amount < 0 && t.token) {
           console.log("### checkPendingTokens", t.token);
-          this.checkTokenSpendable(t.token, verbose);
+          this.checkTokenSpendable(t, verbose);
           i += 1;
         }
       }
