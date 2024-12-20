@@ -76,9 +76,7 @@ import { MintClass } from "stores/mints";
 export default defineComponent({
   name: "ChooseMint",
   mixins: [windowMixin],
-  props: {
-    tickerShort: String,
-  },
+  props: {},
   data: function () {
     return {
       chosenMint: null,
