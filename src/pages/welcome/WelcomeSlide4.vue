@@ -12,7 +12,7 @@
           margin: 0 auto;
         "
       >
-        <p><strong>Last Updated: 17.12.2024</strong></p>
+        <p><strong>Last Updated: 20.12.2024</strong></p>
         <p>
           <strong>
             IMPORTANT NOTICE: THESE TERMS OF SERVICE INCLUDE A MEDIATION-FIRST
