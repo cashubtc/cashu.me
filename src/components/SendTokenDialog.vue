@@ -19,7 +19,7 @@
       <!--  enter send data -->
       <div v-if="!sendData.tokens">
         <q-card-section class="q-pa-lg q-pt-md">
-          <div class="row items-center no-wrap q-mb-sm q-pr-md q-py-lg">
+          <div class="row items-center no-wrap q-mb-sm q-pr-lg q-py-lg">
             <div class="col-9">
               <span class="text-h6"
                 >Send
