@@ -436,7 +436,7 @@ export const useWalletStore = defineStore("wallet", {
      */
     redeem: async function () {
       /*
-      uses split to receive new tokens.
+      Receives a token that is prepared in the receiveToken – it is not yet in the history
       */
       const uIStore = useUiStore();
       const mintStore = useMintsStore();
@@ -452,31 +452,37 @@ export const useWalletStore = defineStore("wallet", {
         throw new Error("no tokens provided.");
       }
       let proofs = token.getProofs(tokenJson);
-
-      // activate the mint and the unit
-      await mintStore.activateMintUrl(
-        token.getMint(tokenJson),
-        false,
-        false,
-        tokenJson.unit
-      );
-
+      if (proofs.length == 0) {
+        throw new Error("no proofs found.");
+      }
       const inputAmount = proofs.reduce((s, t) => (s += t.amount), 0);
       let fee = 0;
+      let mintInToken = token.getMint(tokenJson);
+      let unitInToken = token.getUnit(tokenJson);
+
+      const historyToken = {
+        amount: inputAmount,
+        token: receiveStore.receiveData.tokensBase64,
+        unit: unitInToken,
+        mint: mintInToken,
+        fee: fee,
+      }
       await uIStore.lockMutex();
+      const mintWallet = this.mintWallet(historyToken.mint, historyToken.unit);
+      const mint = mintStore.mints.find((m) => m.url === historyToken.mint);
+      if (!mint) {
+        throw new Error("mint not found");
+      }
       try {
         // redeem
-        const keysetId = this.getKeyset();
+        const keysetId = this.getKeyset(historyToken.mint, historyToken.unit);
         const counter = this.keysetCounter(keysetId);
-        // const preference = this.outputAmountSelect(amount);
         const privkey = receiveStore.receiveData.p2pkPrivateKey;
-        // const decodedToken = getDecodedToken(receiveStore.receiveData.tokensBase64);
-        // let tokenCts: Token
         let proofs: Proof[];
         try {
-          proofs = await this.wallet.receive(
+          proofs = await mintWallet.receive(
             receiveStore.receiveData.tokensBase64,
-            { counter, privkey, proofsWeHave: mintStore.activeProofs }
+            { counter, privkey, proofsWeHave: mintStore.mintUnitProofs(mint, historyToken.unit) }
           );
           this.increaseKeysetCounter(keysetId, proofs.length);
         } catch (error: any) {
@@ -511,22 +517,18 @@ export const useWalletStore = defineStore("wallet", {
             tokenStore.setTokenPaid(receiveStore.receiveData.tokensBase64);
           }
           fee = inputAmount - outputAmount;
-          tokenStore.addPaidToken({
-            amount: outputAmount,
-            token: receiveStore.receiveData.tokensBase64,
-            unit: mintStore.activeUnit,
-            mint: mintStore.activeMintUrl,
-            fee: fee,
-          });
+          historyToken.fee = fee;
+          historyToken.amount = outputAmount;
+          tokenStore.addPaidToken(historyToken);
         }
 
         if (!!window.navigator.vibrate) navigator.vibrate(200);
         let message =
           "Received " +
-          uIStore.formatCurrency(outputAmount, mintStore.activeUnit);
+          uIStore.formatCurrency(outputAmount, historyToken.unit);
         if (fee > 0) {
           message +=
-            " (fee: " + uIStore.formatCurrency(fee, mintStore.activeUnit) + ")";
+            " (fee: " + uIStore.formatCurrency(fee, historyToken.unit) + ")";
         }
         notifySuccess(message);
       } catch (error: any) {
@@ -593,7 +595,6 @@ export const useWalletStore = defineStore("wallet", {
       }
       try {
         // first we check if the mint quote is paid
-        // const mintQuote = await mintStore.activeMint().api.checkMintQuote(invoice.quote);
         const mintQuote = await mintWallet.checkMintQuote(invoice.quote);
         invoice.mintQuote = mintQuote;
         console.log("### mintQuote", mintQuote);
@@ -970,8 +971,6 @@ export const useWalletStore = defineStore("wallet", {
       if (!mint) {
         throw new Error("mint not found");
       }
-      // await mintStore.activateMintUrl(mintInToken);
-
       const spentProofs = await this.checkProofsSpendable(proofs, mintWallet);
       if (spentProofs != undefined && spentProofs.length == proofs.length) {
         // all proofs are spent, set token to paid
@@ -1169,7 +1168,7 @@ export const useWalletStore = defineStore("wallet", {
               "Sent " +
               uIStore.formatCurrency(
                 useProofsStore().sumProofs(proofs),
-                mintStore.activeUnit
+                invoice.unit
               )
             );
           }
