@@ -30,6 +30,13 @@
           </strong>
         </p>
         <p>
+          <strong
+            >CASHU.ME DOES NOT HOLD ECASH, DOES NOT EXECUTE AND CANNOT MONITOR
+            TRANSACTIONS, AND DOES NOT OPERATE ANY MINTS OR VERIFY
+            MINTS.</strong
+          >
+        </p>
+        <p>
           These Terms of Service (these “Terms”) constitute the entire agreement
           and understanding between you (“you” or “your”) and Cashu.me
           (“Cashu.me,” “we,” “us,” or “our”) regarding your use of the Cashu.me
@@ -64,7 +71,23 @@
         <p>
           1.4 <strong>Web Server Only:</strong> Cashu.me does not operate any
           servers except for the web server that delivers the application to
-          your device. The application is executed entirely on your device.
+          your device. The application is executed entirely on your device. Once
+          the code is served, all logic executes locally and Cashu.me has no
+          control over the application.
+        </p>
+        <p>
+          1.5 <strong>Open Source Code:</strong> The application code is open
+          source, meaning it can be self-hosted and run by third parties using
+          different domains. Cashu.me has no control over, and does not endorse
+          or assume responsibility for, any instances of the code running
+          outside of the Cashu.me service. Your use of any such third-party
+          instances is at your own risk.
+        </p>
+        <p>
+          1.6 <strong>Code Disclaimer:</strong> The open-source code is provided
+          without any guarantee of security, error-free operation, or technical
+          support. Users must independently verify the authenticity, security,
+          and integrity of the open-source code prior to use.
         </p>
         <p><strong>2. User Responsibilities & Disclaimers</strong></p>
         <p>
@@ -81,7 +104,10 @@
           representations, warranties, or guarantees about any Mint’s integrity,
           legality, liquidity, or functionality. Your relationship with any
           Mint, including the issuance, redemption, or valuation of ecash, is
-          solely a matter between you and that Mint.
+          solely a matter between you and that Mint. Cashu.me is not a party to
+          any transaction between you and any Mint or third party. No agency,
+          partnership, or joint venture relationship is formed by your use of
+          the Site.
         </p>
         <p>
           2.3 <strong>Risk of Ecash:</strong> Ecash is an experimental,
@@ -92,17 +118,26 @@
         </p>
         <p><strong>3. Modifications to Terms</strong></p>
         <p>
-          We may amend or update these Terms at any time without notice. Your
-          continued use of the Site or Services after any modifications
-          constitutes acceptance of the updated Terms. If you do not agree,
-          discontinue your use.
+          We may amend or update these Terms at any time without notice. You are
+          advised to review these Terms periodically. Your continued use of the
+          Site or Services after any modifications constitutes acceptance of the
+          updated Terms. If you do not agree, discontinue your use.
         </p>
         <p><strong>4. Compliance with Laws</strong></p>
         <p>
-          Your use of the Site and any Services is void where prohibited by law.
-          You must determine whether your use of ecash and related activities
-          are lawful. You are solely responsible for compliance with all
-          applicable laws, taxes, and regulations.
+          4.1 <strong>Legal Compliance:</strong> Your use of the Site and any
+          Services is void where prohibited by law. You must determine whether
+          your use of ecash and related activities are lawful. You are solely
+          responsible for compliance with all applicable laws, taxes, and
+          regulations.
+        </p>
+        <p>
+          4.2 <strong>Not Financial Services:</strong> The Services are not
+          intended to constitute regulated financial, banking, e-money, or
+          payment services. You are solely responsible for determining whether
+          your use of ecash or related activities requires any form of license,
+          registration, or compliance with financial regulations in your
+          jurisdiction.
         </p>
         <p><strong>5. License to Use the Site</strong></p>
         <p>
@@ -138,6 +173,13 @@
           SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES ARISING OUT OF OR RELATED
           TO THESE TERMS, THE SITE, OR THE SERVICES.
         </p>
+        <p>
+          6.6 <strong>Maximum Liability:</strong> To the maximum extent
+          permitted by applicable law, the Site and Services are provided ‘as
+          is’ without warranties of any kind. This does not affect any statutory
+          warranties or rights which cannot be excluded under your
+          jurisdiction’s law.
+        </p>
         <p><strong>7. Indemnification and Release</strong></p>
         <p>
           You agree to indemnify and hold harmless Cashu.me and its affiliates
@@ -168,17 +210,43 @@
           trial by jury to the fullest extent permitted by the governing law of
           your jurisdiction.
         </p>
+        <p>
+          8.4 <strong>EU Consumer Rights:</strong> If you are residing in the
+          EU, any mandatory statutory rights regarding dispute resolution
+          procedures remain unaffected by this clause. Nothing in this Section 8
+          shall limit or affect any mandatory rights you may have under EU
+          consumer protection or other applicable statutory laws.
+        </p>
         <p><strong>9. Prohibited Uses</strong></p>
         <p>
           You may not use the Site or Services for unlawful activities, to
           violate applicable laws, or to engage in market manipulation. We may
-          suspend or terminate access for prohibited uses.
+          suspend or terminate access for prohibited uses. You agree not to use
+          the Site or Services to engage in any activity that violates
+          applicable anti-money laundering (AML), counter-terrorism financing
+          (CTF), or other financial crime regulations. Any use of the Site or
+          Services for unlawful or fraudulent purposes is strictly prohibited.
         </p>
         <p><strong>10. Privacy and Data Protection</strong></p>
         <p>
           10.1 <strong>GDPR Compliance:</strong> Cashu.me does not collect or
           store any personal data, including IP addresses. No data is shared
-          with third parties.
+          with third parties. As such, Cashu.me does not engage in data
+          processing activities that would subject it to GDPR or similar
+          regulations. Users remain responsible for ensuring their own device’s
+          security and verifying the authenticity of the code they run.
+        </p>
+        <p>
+          10.2 <strong>Security:</strong> Because the code executes entirely on
+          your device and no personal data is collected, Cashu.me does not
+          perform any data processing activities that would fall under the GDPR
+          or similar data protection laws.
+        </p>
+        <p>
+          10.3 <strong>Local Data:</strong> Any data or information stored
+          locally on your device, including browser storage, cookies, or
+          application state, is controlled by you and not transmitted to or
+          accessible by Cashu.me.
         </p>
         <p><strong>11. Your Representations and Warranties</strong></p>
         <p>
@@ -186,7 +254,11 @@
           into these Terms and that your use of the Site will be lawful.
         </p>
         <p><strong>12. No Investment Advice</strong></p>
-        <p>Cashu.me does not provide investment, legal, or tax advice.</p>
+        <p>
+          Cashu.me does not provide investment, legal, or tax advice. No
+          fiduciary, advisory, or trust relationship is formed between you and
+          Cashu.me by using the Site or Services.
+        </p>
         <p><strong>13. No Waiver</strong></p>
         <p>
           No failure or delay to exercise any right by Cashu.me shall constitute
@@ -214,9 +286,17 @@
         </p>
         <p><strong>18. Governing Law</strong></p>
         <p>
+          18.1 <strong>Choice of Law:</strong>
           These Terms and any dispute arising from or related to these Terms,
           the Site, or the Services shall be governed by the applicable laws of
-          your jurisdiction, without regard to any conflicts of law rules.
+          your jurisdiction, without regard to conflict of law principles.
+        </p>
+        <p>
+          18.2 <strong>Consumer Rights:</strong>
+          Nothing in these Terms shall exclude or limit any rights you may have
+          under applicable mandatory consumer protection laws or regulations in
+          your jurisdiction, including any rights under EU law that cannot be
+          lawfully limited or disclaimed.
         </p>
         <p><strong>19. E-Sign Consent Policy</strong></p>
         <p>
