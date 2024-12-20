@@ -1,4 +1,3 @@
-<!-- src/components/WelcomeSlide4.vue -->
 <template>
   <div class="q-pa-md flex flex-center">
     <div class="text-center">
@@ -114,10 +113,9 @@
         </p>
         <p><strong>6. Risks and Limitation of Liability</strong></p>
         <p>
-          6.1
-          <strong>No Liability for Interactions with Mints:</strong> Cashu.me is
-          not liable for any transactions, disputes, or issues arising from your
-          dealings with Mints.
+          6.1 <strong>No Liability for Interactions with Mints:</strong>
+          Cashu.me is not liable for any transactions, disputes, or issues
+          arising from your dealings with Mints.
         </p>
         <p>
           6.2 <strong>Assumption of Risk:</strong> You acknowledge ecash-related
@@ -125,17 +123,17 @@
           theft, and regulatory uncertainty.
         </p>
         <p>
-          6.2 <strong>Waiver of Accountability:</strong> By using the Site, you
+          6.3 <strong>Waiver of Accountability:</strong> By using the Site, you
           waive any right to hold Cashu.me accountable for any damages, losses,
           or disputes arising from your use of the Site or Services.
         </p>
         <p>
-          6.3 <strong>No Warranties:</strong> THE SITE AND SERVICES ARE PROVIDED
+          6.4 <strong>No Warranties:</strong> THE SITE AND SERVICES ARE PROVIDED
           “AS IS” WITHOUT ANY WARRANTIES. WE DISCLAIM ALL WARRANTIES TO THE
           MAXIMUM EXTENT PERMITTED BY LAW.
         </p>
         <p>
-          6.4 <strong>Limitation of Liability:</strong> TO THE FULLEST EXTENT
+          6.5 <strong>Limitation of Liability:</strong> TO THE FULLEST EXTENT
           PERMITTED BY LAW, CASHU.ME IS NOT LIABLE FOR INDIRECT, INCIDENTAL,
           SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES ARISING OUT OF OR RELATED
           TO THESE TERMS, THE SITE, OR THE SERVICES.
@@ -160,13 +158,15 @@
           8.2 <strong>Arbitration Option:</strong> If mediation does not resolve
           the dispute within 30 days (or a mutually agreed period), either party
           may initiate final and binding arbitration administered by a reputable
-          arbitration provider. Arbitration shall be conducted on an individual
-          basis, and class actions or collective proceedings are not permitted.
+          arbitration provider within the user’s jurisdiction. Arbitration shall
+          be conducted on an individual basis, and class actions or collective
+          proceedings are not permitted.
         </p>
         <p>
           8.3 <strong>Waiver of Jury Trial:</strong> If arbitration is not
           invoked and the dispute proceeds to court, you waive your right to a
-          trial by jury to the fullest extent permitted by law.
+          trial by jury to the fullest extent permitted by the governing law of
+          your jurisdiction.
         </p>
         <p><strong>9. Prohibited Uses</strong></p>
         <p>
@@ -215,8 +215,8 @@
         <p><strong>18. Governing Law</strong></p>
         <p>
           These Terms and any dispute arising from or related to these Terms,
-          the Site, or the Services shall be governed by principles of law
-          generally applicable, without regard to any conflicts of law rules.
+          the Site, or the Services shall be governed by the applicable laws of
+          your jurisdiction, without regard to any conflicts of law rules.
         </p>
         <p><strong>19. E-Sign Consent Policy</strong></p>
         <p>
