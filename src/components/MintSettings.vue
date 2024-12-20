@@ -635,7 +635,6 @@ export default defineComponent({
     ]),
     ...mapActions(useWalletStore, [
       "decodeRequest",
-      "checkProofsSpendable",
       "requestMint",
       "melt",
       "mintOnPaid",

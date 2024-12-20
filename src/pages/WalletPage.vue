@@ -364,7 +364,6 @@ export default {
       "setInvoicePaid",
       "mint",
       "melt",
-      "checkProofsSpendable",
       "checkTokenSpendable",
       "checkInvoice",
       "checkPendingInvoices",

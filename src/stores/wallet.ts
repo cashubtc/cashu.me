@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 import { currentDateStr } from "src/js/utils";
-import { useMintsStore, WalletProof } from "./mints";
+import { useMintsStore, WalletProof, MintClass } from "./mints";
 import { useLocalStorage } from "@vueuse/core";
 import { useProofsStore } from "./proofs";
 import { useTokensStore } from "./tokens";
@@ -69,7 +69,8 @@ type InvoiceHistory = Invoice & {
   date: string;
   status: "pending" | "paid";
   mint: string;
-  unit?: string;
+  unit: string;
+  mintQuote?: MintQuoteResponse;
 };
 
 type KeysetCounter = {
@@ -166,6 +167,30 @@ export const useWalletStore = defineStore("wallet", {
     },
   },
   actions: {
+    mintWallet(url: string, unit: string): CashuWallet {
+      // short-lived wallet for mint operations
+      // note: the unit of the wallet will be activeUnit by default,
+      // overwrite wallet.unit if needed
+      const mints = useMintsStore();
+      const storedMint = mints.mints.find((m) => m.url === url);
+      if (!storedMint) {
+        throw new Error("mint not found");
+      }
+      const mint = new CashuMint(url);
+      if (this.mnemonic == "") {
+        this.mnemonic = generateMnemonic(wordlist);
+      }
+      const mnemonic: string = this.mnemonic;
+      const bip39Seed = mnemonicToSeedSync(mnemonic);
+      const wallet = new CashuWallet(mint, {
+        keys: storedMint.keys,
+        keysets: storedMint.keysets,
+        mintInfo: storedMint.info,
+        bip39seed: bip39Seed,
+        unit: unit,
+      });
+      return wallet;
+    },
     mnemonicToSeedSync: function (mnemonic: string): Uint8Array {
       return mnemonicToSeedSync(mnemonic);
     },
@@ -195,17 +220,22 @@ export const useWalletStore = defineStore("wallet", {
         this.keysetCounters.push(newCounter);
       }
     },
-    getKeyset(): string {
-      const mintStore = useMintsStore();
-      const keysets = mintStore.activeMint().keysets;
+    getKeyset(mintUrl: string | null = null, unit: string | null = null): string {
+      unit = unit || useMintsStore().activeUnit;
+      mintUrl = mintUrl || useMintsStore().activeMintUrl;
+      const mint = useMintsStore().mints.find((m) => m.url === mintUrl);
+      if (!mint) {
+        throw new Error("mint not found");
+      }
+      const mintClass = new MintClass(mint);
+      // const mintStore = useMintsStore();
+      const keysets = mint.keysets;
       if (keysets == null || keysets.length == 0) {
         throw new Error("no keysets found.");
       }
-      const unitKeysets = mintStore
-        .activeMint()
-        .unitKeysets(mintStore.activeUnit);
+      const unitKeysets = mintClass.unitKeysets(unit);
       if (unitKeysets == null || unitKeysets.length == 0) {
-        console.error("no keysets found for unit", mintStore.activeUnit);
+        console.error("no keysets found for unit", unit);
         throw new Error("no keysets found for unit");
       }
       // select the keyset id
@@ -221,13 +251,11 @@ export const useWalletStore = defineStore("wallet", {
       const sortedKeysets = hexKeysets.concat(base64Keysets);
       // const sortedKeysets = _.sortBy(activeKeysets, k => [k.id, k.input_fee_ppk])
       if (sortedKeysets.length == 0) {
-        console.error("no active keysets found for unit", mintStore.activeUnit);
+        console.error("no active keysets found for unit", unit);
         throw new Error("no active keysets found for unit");
       }
       const keyset_id = sortedKeysets[0].id;
-      const keys = mintStore
-        .activeMint()
-        .mint.keys.find((k) => k.id === keyset_id);
+      // const keys = mint.keys.find((k) => k.id === keyset_id);
       // if (keys) {
       //   this.wallet.keys = keys;
       // }
@@ -536,6 +564,7 @@ export const useWalletStore = defineStore("wallet", {
         this.invoiceData.status = "pending";
         this.invoiceData.mint = mintStore.activeMintUrl;
         this.invoiceData.unit = mintStore.activeUnit;
+        this.invoiceData.mintQuote = data;
         this.invoiceHistory.push({
           ...this.invoiceData,
         });
@@ -547,36 +576,26 @@ export const useWalletStore = defineStore("wallet", {
       } finally {
       }
     },
-    getMintQuoteState: async function (
-      quote: string,
-      mint: CashuMint
-    ): Promise<MintQuoteState> {
-      // stateless function to check the state of a mint quote
-      const resp = await mint.checkMintQuote(quote);
-      return resp.state;
-    },
-    getMeltQuoteState: async function (
-      quote: string,
-      mint: CashuMint
-    ): Promise<MeltQuoteState> {
-      // stateless function to check the state of a melt quote
-      const resp = await mint.checkMeltQuote(quote);
-      return resp.state;
-    },
     mint: async function (
-      amount: number,
-      hash: string,
+      invoice: InvoiceHistory,
       verbose: boolean = true
     ) {
       const proofsStore = useProofsStore();
       const mintStore = useMintsStore();
       const tokenStore = useTokensStore();
       const uIStore = useUiStore();
-      const keysetId = this.getKeyset();
+      const keysetId = this.getKeyset(invoice.mint, invoice.unit);
       await uIStore.lockMutex();
+      const mintWallet = this.mintWallet(invoice.mint, invoice.unit);
+      const mint = mintStore.mints.find((m) => m.url === invoice.mint);
+      if (!mint) {
+        throw new Error("mint not found");
+      }
       try {
         // first we check if the mint quote is paid
-        const mintQuote = await mintStore.activeMint().api.checkMintQuote(hash);
+        // const mintQuote = await mintStore.activeMint().api.checkMintQuote(invoice.quote);
+        const mintQuote = await mintWallet.checkMintQuote(invoice.quote);
+        invoice.mintQuote = mintQuote;
         console.log("### mintQuote", mintQuote);
         if (mintQuote.state != MintQuoteState.PAID) {
           console.log("### mintQuote not paid yet");
@@ -586,10 +605,10 @@ export const useWalletStore = defineStore("wallet", {
           throw new Error("invoice not paid yet.");
         }
         const counter = this.keysetCounter(keysetId);
-        const proofs = await this.wallet.mintProofs(amount, hash, {
+        const proofs = await mintWallet.mintProofs(invoice.amount, invoice.quote, {
           keysetId,
           counter,
-          proofsWeHave: mintStore.activeProofs,
+          proofsWeHave: mintStore.mintUnitProofs(mint, invoice.unit),
         });
         this.increaseKeysetCounter(keysetId, proofs.length);
 
@@ -600,16 +619,16 @@ export const useWalletStore = defineStore("wallet", {
         mintStore.addProofs(proofs);
 
         // update UI
-        await this.setInvoicePaid(hash);
+        await this.setInvoicePaid(invoice.quote);
         const serializedProofs = proofsStore.serializeProofs(proofs);
         if (serializedProofs == null) {
           throw new Error("could not serialize proofs.");
         }
         tokenStore.addPaidToken({
-          amount,
+          amount: invoice.amount,
           serializedProofs: serializedProofs,
-          unit: mintStore.activeUnit,
-          mint: mintStore.activeMintUrl,
+          unit: invoice.unit,
+          mint: invoice.mint,
         });
 
         return proofs;
@@ -681,7 +700,6 @@ export const useWalletStore = defineStore("wallet", {
         throw new Error("invoice already paid.");
       }
 
-      const amount_invoice = this.payInvoiceData.invoice.sat;
       const quote = this.payInvoiceData.meltQuote.response;
       if (quote == null) {
         throw new Error("no quote found.");
@@ -841,7 +859,6 @@ export const useWalletStore = defineStore("wallet", {
         );
         if (spentProofs.length) {
           mintStore.removeProofs(spentProofs);
-
           // update UI
           const serializedProofs = proofsStore.serializeProofs(spentProofs);
           if (serializedProofs == null) {
@@ -939,10 +956,14 @@ export const useWalletStore = defineStore("wallet", {
         throw new Error("no tokens provided.");
       }
       const proofs = token.getProofs(tokenJson);
-
-      // activate the mint
+      const unitInToken = token.getUnit(tokenJson);
       const mintInToken = token.getMint(tokenJson);
-      await mintStore.activateMintUrl(mintInToken);
+      const mintWallet = this.mintWallet(mintInToken, unitInToken);
+      const mint = mintStore.mints.find((m) => m.url === mintInToken);
+      if (!mint) {
+        throw new Error("mint not found");
+      }
+      // await mintStore.activateMintUrl(mintInToken);
 
       const spentProofs = await this.checkProofsSpendable(proofs);
       if (spentProofs != undefined && spentProofs.length == proofs.length) {
@@ -1001,16 +1022,24 @@ export const useWalletStore = defineStore("wallet", {
       return true;
     },
     mintOnPaid: async function (quote: string, verbose = true) {
-      const activeMint = useMintsStore().activeMint().mint;
       const mintStore = useMintsStore();
       const settingsStore = useSettingsStore();
+      const invoice = this.invoiceHistory.find((i) => i.quote === quote);
+      if (!invoice) {
+        throw new Error("invoice not found");
+      }
+      const mintWallet = this.mintWallet(invoice.mint, invoice.unit);
+      const mint = mintStore.mints.find((m) => m.url === invoice.mint);
+      if (!mint) {
+        throw new Error("mint not found");
+      }
       if (
         !settingsStore.useWebsockets ||
-        !activeMint.info?.nuts[17]?.supported ||
-        !activeMint.info?.nuts[17]?.supported.find(
+        !mint.info?.nuts[17]?.supported ||
+        !mint.info?.nuts[17]?.supported.find(
           (s) =>
             s.method == "bolt11" &&
-            s.unit == mintStore.activeUnit &&
+            s.unit == invoice.unit &&
             s.commands.indexOf("bolt11_mint_quote") != -1
         )
       ) {
@@ -1021,19 +1050,16 @@ export const useWalletStore = defineStore("wallet", {
         return;
       }
       const uIStore = useUiStore();
-      const invoice = this.invoiceHistory.find((i) => i.quote === quote);
-      if (!invoice) {
-        throw new Error("invoice not found");
-      }
       try {
-        const unsub = await this.wallet.onMintQuotePaid(
+        const unsub = await mintWallet.onMintQuotePaid(
           quote,
           async (mintQuoteResponse: MintQuoteResponse) => {
             console.log("Websocket: mint quote paid.");
-            const proofs = await this.mint(invoice.amount, quote, verbose);
+            const proofs = await this.mint(invoice, verbose);
             uIStore.showInvoiceDetails = false;
+            invoice.mintQuote = mintQuoteResponse;
             if (!!window.navigator.vibrate) navigator.vibrate(200);
-            notifySuccess("Received " + invoice.amount + " via Lightning");
+            notifySuccess("Received " + uIStore.formatCurrency(invoice.amount, invoice.unit) + " via Lightning");
             unsub();
             return proofs;
           },
@@ -1057,12 +1083,14 @@ export const useWalletStore = defineStore("wallet", {
       if (!invoice) {
         throw new Error("invoice not found");
       }
+      const mintWallet = this.mintWallet(invoice.mint, invoice.unit);
+      const mint = mintStore.mints.find((m) => m.url === invoice.mint);
+      if (!mint) {
+        throw new Error("mint not found");
+      }
       try {
         // check the state first
-        const state = await this.getMintQuoteState(
-          invoice.quote,
-          new CashuMint(invoice.mint)
-        );
+        const state = (await mintWallet.checkMintQuote(quote)).state;
         if (state == MintQuoteState.ISSUED) {
           this.setInvoicePaid(invoice.quote);
           return;
@@ -1074,19 +1102,12 @@ export const useWalletStore = defineStore("wallet", {
           }
           throw new Error(`invoice state not paid: ${state}`);
         }
-        // activate the mint
-        await mintStore.activateMintUrl(
-          invoice.mint,
-          false,
-          false,
-          invoice.unit
-        );
-        const proofs = await this.mint(invoice.amount, invoice.quote, verbose);
+        const proofs = await this.mint(invoice, verbose);
         uIStore.showInvoiceDetails = false;
         if (!!window.navigator.vibrate) navigator.vibrate(200);
         notifySuccess(
           "Received " +
-          uIStore.formatCurrency(invoice.amount, mintStore.activeUnit) +
+          uIStore.formatCurrency(invoice.amount, invoice.unit) +
           " via Lightning"
         );
         return proofs;
@@ -1105,12 +1126,15 @@ export const useWalletStore = defineStore("wallet", {
       if (!invoice) {
         throw new Error("invoice not found");
       }
-
+      const mintWallet = this.mintWallet(invoice.mint, invoice.unit);
+      const mint = mintStore.mints.find((m) => m.url === invoice.mint);
+      if (!mint) {
+        throw new Error("mint not found");
+      }
       const proofs: Proof[] = mintStore.proofs.filter((p) => p.quote === quote);
       try {
         // this is an outgoing invoice, we first do a getMintQuote to check if the invoice is paid
-        const mint = new CashuMint(invoice.mint);
-        const mintQuote = await mint.checkMeltQuote(quote);
+        const mintQuote = await mintWallet.mint.checkMeltQuote(quote);
         if (mintQuote.state == MeltQuoteState.PENDING) {
           console.log("### mintQuote not paid yet");
           if (verbose) {
