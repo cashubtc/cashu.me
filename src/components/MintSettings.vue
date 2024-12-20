@@ -291,10 +291,10 @@
             outlined
             dense
             color="primary"
-            v-model="swapData.from_url"
-            :options="swapDataOptions()"
+            v-model="swapData.fromUrl"
+            :options="swapAmountDataOptions()"
             option-value="url"
-            option-label="shorturl"
+            option-label="optionLabel"
             label="From"
             style="min-width: 200px; width: 100%"
           />
@@ -306,10 +306,10 @@
             outlined
             dense
             color="primary"
-            v-model="swapData.to_url"
-            :options="swapDataOptions()"
+            v-model="swapData.toUrl"
+            :options="swapAmountDataOptions()"
             option-value="url"
-            option-label="shorturl"
+            option-label="optionLabel"
             label="To"
             style="min-width: 200px; width: 100%"
           />
@@ -328,18 +328,12 @@
             class="q-ml-sm q-px-md"
             color="primary"
             rounded
-            @click="
-              mintSwap(
-                swapData.from_url.url,
-                swapData.to_url.url,
-                swapData.amount
-              )
-            "
+            @click="extractAndMintAmountSwap(swapAmountData)"
             :disable="
-              !swapData.from_url ||
-              !swapData.to_url ||
+              !swapData.fromUrl ||
+              !swapData.toUrl ||
               !(swapData.amount > 0) ||
-              swapData.from_url == swapData.to_url
+              swapData.fromUrl == swapData.toUrl
             "
             :loading="swapBlocking"
           >
@@ -520,6 +514,8 @@ import { useSettingsStore } from "src/stores/settings";
 import { useNostrStore } from "src/stores/nostr";
 import { useP2PKStore } from "src/stores/p2pk";
 import { useWorkersStore } from "src/stores/workers";
+import { useSwapStore } from "src/stores/swap";
+import { useUiStore } from "src/stores/ui";
 import { notifyError, notifyWarning } from "src/js/notify";
 import MintDetailsDialog from "src/components/MintDetailsDialog.vue";
 import { EventBus } from "../js/eventBus";
@@ -528,9 +524,7 @@ export default defineComponent({
   name: "MintSettings",
   mixins: [windowMixin],
   components: { MintDetailsDialog },
-  props: {
-    tickerShort: String,
-  },
+  props: {},
   setup() {
     const addMintDiv = ref(null);
 
@@ -561,11 +555,6 @@ export default defineComponent({
     return {
       discoveringMints: false,
       addingMint: false,
-      swapData: {
-        from_url: "",
-        to_url: "",
-        amount: 0,
-      },
       mintToEdit: {
         url: "",
         nickname: "",
@@ -582,8 +571,18 @@ export default defineComponent({
       addMintDialog: {
         show: false,
       },
+      swapData: {
+        fromUrl: {
+          url: "",
+          optionLabel: "",
+        },
+        toUrl: {
+          url: "",
+          optionLabel: "",
+        },
+        amount: undefined,
+      },
       showEditMintDialog: false,
-      swapBlocking: false,
     };
   },
   computed: {
@@ -607,6 +606,9 @@ export default defineComponent({
       "showMintInfoDialog",
       "showMintInfoData",
     ]),
+    ...mapState(useUiStore, ["tickerShort"]),
+    ...mapState(useSwapStore, ["swapAmountData"]),
+    ...mapWritableState(useSwapStore, ["swapBlocking"]),
   },
   watch: {
     // if swapBlocking is true and invoiceWorkerRunning changes to false, then swapBlocking should be set to false
@@ -644,6 +646,7 @@ export default defineComponent({
       "checkTokenSpendableWorker",
     ]),
     ...mapActions(useCameraStore, ["closeCamera", "showCamera"]),
+    ...mapActions(useSwapStore, ["mintAmountSwap"]),
     editMint: function (mint) {
       // copy object to avoid changing the original
       this.mintToEdit = Object.assign({}, mint);
@@ -685,12 +688,18 @@ export default defineComponent({
     mintClass(mint) {
       return new MintClass(mint);
     },
-    swapDataOptions: function () {
+    swapAmountDataOptions: function () {
       let options = [];
       for (const [i, m] of Object.entries(this.mints)) {
+        const unitStr = "sat";
+        const unitBalance = this.mintClass(m).unitBalance(unitStr);
+        const balanceStr = useUiStore().formatCurrency(unitBalance, unitStr);
+
         options.push({
           url: m.url,
-          shorturl: m.nickname || getShortUrl(m.url),
+          // add balance to optionLabel, like with formatCurrency(mintClass(mint).unitBalance(unit), unit)
+          optionLabel:
+            m.nickname || getShortUrl(m.url) + " (" + balanceStr + ")",
         });
       }
       return options;
@@ -702,30 +711,11 @@ export default defineComponent({
       this.mintToRemove = mintToRemove;
       this.showRemoveMintDialog = true;
     },
-    //
-    mintSwap: async function (from_url, to_url, amount) {
-      if (this.swapBlocking) {
-        notifyWarning("Swap in progress");
-        return;
-      }
-      this.swapBlocking = true;
-      try {
-        // get invoice
-        await this.activateMintUrl(to_url);
-        let invoice = await this.requestMint(amount);
-
-        // pay invoice
-        await this.activateMintUrl(from_url);
-        await this.decodeRequest(invoice.request);
-        await this.melt();
-
-        // settle invoice on other side
-        await this.activateMintUrl(to_url);
-        await this.mintOnPaid(invoice.quote);
-      } catch (e) {
-        console.error("Error swapping", e);
-        notifyError("Error swapping");
-      }
+    extractAndMintAmountSwap: function (swapAmountData) {
+      swapAmountData.fromUrl = this.swapData.fromUrl.url;
+      swapAmountData.toUrl = this.swapData.toUrl.url;
+      swapAmountData.amount = this.swapData.amount;
+      this.mintAmountSwap(swapAmountData);
     },
     enable_terminal: function () {
       // enable debug terminal

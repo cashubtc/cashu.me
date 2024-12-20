@@ -25,7 +25,7 @@
         </div>
         <div class="row items-center no-wrap q-my-sm q-py-none">
           <div class="col-12">
-            <ChooseMint :ticker-short="tickerShort" />
+            <ChooseMint />
           </div>
         </div>
         <q-input

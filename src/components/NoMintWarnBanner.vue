@@ -34,7 +34,7 @@
           color="primary"
           class="q-px-md"
           label="Receive Ecash"
-          @click="showReceiveTokensDialog"
+          @click="handleReceiveEcash"
         />
       </div>
     </q-card-section>
@@ -59,7 +59,11 @@ export default defineComponent({
     activeMintUrl: String,
   },
   computed: {
-    ...mapWritableState(useUiStore, ["tab", "expandHistory"]),
+    ...mapWritableState(useUiStore, [
+      "tab",
+      "expandHistory",
+      "showReceiveEcashDrawer",
+    ]),
     ...mapWritableState(useReceiveTokensStore, [
       "showReceiveTokens",
       "receiveData",
@@ -82,9 +86,12 @@ export default defineComponent({
     },
   },
   methods: {
-    showReceiveTokensDialog: function () {
-      this.receiveData.tokensBase64 = "";
-      this.showReceiveTokens = true;
+    // showReceiveTokensDialog: function () {
+    //   this.receiveData.tokensBase64 = "";
+    //   this.showReceiveTokens = true;
+    // },
+    handleReceiveEcash: function () {
+      this.showReceiveEcashDrawer = true;
     },
     handleAddMintClick: function () {
       this.expandHistory = true;

@@ -61,7 +61,7 @@
           {{ payInvoiceData.invoice.description }}<br />
         </p>
         <div class="col-12">
-          <ChooseMint :ticker-short="tickerShort" />
+          <ChooseMint />
         </div>
         <div v-if="enoughActiveBalance" class="row q-mt-lg">
           <q-btn
@@ -90,7 +90,7 @@
         </div>
         <div v-else class="row q-mt-lg">
           <q-btn unelevated rounded disabled color="yellow" text-color="black"
-            >Mint balance too low</q-btn
+            >Balance too low</q-btn
           >
           <q-btn v-close-popup flat color="grey" class="q-ml-auto">Close</q-btn>
         </div>
@@ -289,7 +289,6 @@ export default defineComponent({
   },
   computed: {
     ...mapState(useUiStore, ["tickerShort", "globalMutexLock"]),
-    ...mapState(useSettingsStore, ["getBitcoinPrice"]),
     ...mapWritableState(useCameraStore, ["camera", "hasCamera"]),
     ...mapState(useWalletStore, ["payInvoiceData"]),
     ...mapState(useMintsStore, [
