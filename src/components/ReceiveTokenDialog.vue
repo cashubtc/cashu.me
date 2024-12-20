@@ -12,9 +12,30 @@
         >Close</q-btn
       >
       <div>
-        <div class="row items-center no-wrap q-mb-sm q-mb-sm q-pr-md q-py-lg">
+        <div class="row items-center no-wrap q-mb-sm q-mb-sm q-py-lg">
           <div class="col-9">
-            <span class="text-h6">Receive ecash</span>
+            <span class="text-h6"
+              >Receive
+              {{
+                tokenAmount && tokenUnit
+                  ? formatCurrency(tokenAmount, tokenUnit)
+                  : "Ecash"
+              }}</span
+            >
+            <span
+              v-if="
+                tokenAmount && tokenUnit && tokenUnit == 'sat' && bitcoinPrice
+              "
+              class="q-ml-xs text-subtitle2 text-grey-6"
+            >
+              ({{
+                formatCurrency(
+                  (bitcoinPrice / 100000000) * tokenAmount,
+                  "USD",
+                  true
+                )
+              }})
+            </span>
           </div>
         </div>
         <div class="relative-container">
@@ -145,6 +166,7 @@ import { useTokensStore } from "src/stores/tokens";
 import { useCameraStore } from "src/stores/camera";
 import { useP2PKStore } from "src/stores/p2pk";
 import { usePRStore } from "src/stores/payment-request";
+import { usePriceStore } from "src/stores/price";
 import token from "src/js/token";
 
 import { mapActions, mapState, mapWritableState } from "pinia";
@@ -198,6 +220,7 @@ export default defineComponent({
       "scanningCard",
     ]),
     ...mapState(useUiStore, ["tickerShort"]),
+    ...mapState(usePriceStore, ["bitcoinPrice"]),
     ...mapState(useMintsStore, [
       "activeProofs",
       "activeUnit",
@@ -226,6 +249,23 @@ export default defineComponent({
         return false;
       }
       return this.knowThisMintOfTokenJson(tokenJson);
+    },
+    tokenAmount: function () {
+      if (!this.tokenDecodesCorrectly) {
+        return 0;
+      }
+      const decodedToken = this.decodeToken(this.receiveData.tokensBase64);
+      return this.getProofs(decodedToken).reduce(
+        (sum, el) => (sum += el.amount),
+        0
+      );
+    },
+    tokenUnit: function () {
+      if (!this.tokenDecodesCorrectly) {
+        return "";
+      }
+      const decodedToken = this.decodeToken(this.receiveData.tokensBase64);
+      return token.getUnit(decodedToken);
     },
   },
   methods: {

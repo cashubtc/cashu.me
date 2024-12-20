@@ -25,7 +25,10 @@
                 >Send
                 {{
                   sendData.amount
-                    ? formatCurrency(sendData.amount, activeUnit)
+                    ? formatCurrency(
+                        sendData.amount * activeUnitCurrencyMultiplyer,
+                        activeUnit
+                      )
                     : "Ecash"
                 }}
               </span>
@@ -35,7 +38,9 @@
               >
                 ({{
                   formatCurrency(
-                    (bitcoinPrice / 100000000) * sendData.amount,
+                    (bitcoinPrice / 100000000) *
+                      sendData.amount *
+                      activeUnitCurrencyMultiplyer,
                     "USD",
                     true
                   )
