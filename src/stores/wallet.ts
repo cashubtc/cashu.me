@@ -1154,12 +1154,6 @@ export const useWalletStore = defineStore("wallet", {
           notifyWarning("Lightning payment failed");
         } else if (mintQuote.state == MeltQuoteState.PAID) {
           // if the invoice is paid, we check if all proofs are spent and if so, we invalidate them and set the invoice state in the history to "paid"
-          await mintStore.activateMintUrl(
-            invoice.mint,
-            false,
-            false,
-            invoice.unit
-          );
           const spentProofs = await this.checkProofsSpendable(proofs, mintWallet, true);
           if (spentProofs != undefined && spentProofs.length == proofs.length) {
             mintStore.removeProofs(proofs);
