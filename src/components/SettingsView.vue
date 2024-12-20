@@ -576,7 +576,7 @@
               /> </q-item
             ><q-item class="q-pt-none">
               <q-item-label caption
-                >Quickly scan NFC cards in the receive ecash menu.
+                >Quickly scan NFC cards in the Receive Ecash menu.
               </q-item-label>
             </q-item>
             <!--

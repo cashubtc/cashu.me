@@ -13,7 +13,7 @@
           <ChevronLeftIcon />
         </q-btn>
         <div class="col text-center">
-          <span class="text-h6">Receive ecash</span>
+          <span class="text-h6">Receive Ecash</span>
         </div>
         <q-btn
           flat

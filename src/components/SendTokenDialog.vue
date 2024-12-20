@@ -21,7 +21,26 @@
         <q-card-section class="q-pa-lg q-pt-md">
           <div class="row items-center no-wrap q-mb-sm q-pr-md q-py-lg">
             <div class="col-9">
-              <span class="text-h6">Send Ecash</span>
+              <span class="text-h6"
+                >Send
+                {{
+                  sendData.amount
+                    ? formatCurrency(sendData.amount, activeUnit)
+                    : "Ecash"
+                }}
+              </span>
+              <span
+                v-if="sendData.amount && bitcoinPrice && activeUnit == 'sat'"
+                class="q-ml-xs text-subtitle2 text-grey-6"
+              >
+                ({{
+                  formatCurrency(
+                    (bitcoinPrice / 100000000) * sendData.amount,
+                    "USD",
+                    true
+                  )
+                }})
+              </span>
             </div>
             <div class="col-3" style="height: 30px">
               <transition
@@ -425,6 +444,7 @@ import { useTokensStore } from "src/stores/tokens";
 import { getShortUrl } from "src/js/wallet-helpers";
 import { useSettingsStore } from "src/stores/settings";
 import { useWorkersStore } from "src/stores/workers";
+import { usePriceStore } from "src/stores/price";
 import token from "src/js/token";
 import { Buffer } from "buffer";
 import { useCameraStore } from "src/stores/camera";
@@ -519,7 +539,7 @@ export default defineComponent({
       "nfcEncoding",
       "useNumericKeyboard",
     ]),
-
+    ...mapState(usePriceStore, ["bitcoinPrice"]),
     ...mapState(useWorkersStore, ["tokenWorkerRunning"]),
     // TOKEN METHODS
     sumProofs: function () {
