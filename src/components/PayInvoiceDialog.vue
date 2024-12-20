@@ -4,6 +4,7 @@
     @hide="closeParseDialog"
     position="top"
     v-if="!camera.show"
+    :maximized="$q.screen.lt.sm"
     backdrop-filter="blur(2px) brightness(60%)"
     transition-show="fade"
     transition-hide="fade"
