@@ -175,19 +175,23 @@
             </q-btn>
           </div>
           <!-- swap mint selection -->
-          <div class="row q-pt-md" v-if="swapSelected">
+          <div class="row q-pl-md q-pt-sm" v-if="swapSelected">
+            <q-icon name="arrow_downward" class="q-mr-xs" />
+            <span>Swap to mint</span>
+          </div>
+          <div class="row q-pt-sm" v-if="swapSelected">
             <ChooseMint
               :rounded="true"
               :title="``"
-              :style="`font-family: monospace; font-size: 13px;`"
+              :style="`font-family: monospace; font-size: 12px;`"
             />
           </div>
-          <div class="row q-pt-md" v-if="swapSelected">
+          <div class="row q-pt-sm" v-if="swapSelected">
             <q-btn
               @click="handleSwapToTrustedMint"
               color="primary"
               rounded
-              class="q-mr-none q-pr-sm"
+              class="q-pr-md"
               :loading="swapBlocking"
             >
               <q-icon name="swap_horiz" class="q-pr-sm" />
@@ -391,9 +395,9 @@ export default defineComponent({
       // show success notification
       this.notifySuccess("Incoming payment added to history.");
     },
-    handleSwapToTrustedMint: function () {
+    handleSwapToTrustedMint: async function () {
       const mint = useMintsStore().activeMint().mint;
-      useReceiveTokensStore().meltTokenToMint(
+      await useReceiveTokensStore().meltTokenToMint(
         this.receiveData.tokensBase64,
         mint
       );
