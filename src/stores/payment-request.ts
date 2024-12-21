@@ -64,7 +64,8 @@ export const usePRStore = defineStore("payment-request", {
         let foundMint = false;
         for (const mint of request.mints) {
           if (mintsStore.mints.find((m) => m.url == mint)) {
-            await mintsStore.activateMintUrl(mint, false, false, request.unit);
+            // await mintsStore.activateMintUrl(mint, false, false, request.unit);
+            mintsStore.activeMintUrl = mint;
             foundMint = true;
             break;
           }
