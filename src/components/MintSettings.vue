@@ -305,6 +305,7 @@
               font-family: monospace;
               font-size: 0.9em;
             "
+            :disable="swapBlocking"
           />
         </q-item>
         <q-item>
@@ -325,6 +326,7 @@
               font-family: monospace;
               font-size: 0.9em;
             "
+            :disable="swapBlocking"
           />
         </q-item>
         <q-item>
@@ -336,6 +338,8 @@
             type="number"
             :label="'Amount (' + tickerShort + ')'"
             style="min-width: 200px"
+            @keydown.enter.prevent="extractAndMintAmountSwap(swapAmountData)"
+            :disable="!(swapData.fromUrl && swapData.toUrl) || swapBlocking"
           ></q-input>
           <q-btn
             class="q-ml-sm q-px-md"
@@ -712,11 +716,17 @@ export default defineComponent({
       this.mintToRemove = mintToRemove;
       this.showRemoveMintDialog = true;
     },
-    extractAndMintAmountSwap: function (swapAmountData) {
+    clearSwapData: function () {
+      this.swapData.fromUrl = "";
+      this.swapData.toUrl = "";
+      this.swapData.amount = undefined;
+    },
+    extractAndMintAmountSwap: async function (swapAmountData) {
       swapAmountData.fromUrl = this.swapData.fromUrl.url;
       swapAmountData.toUrl = this.swapData.toUrl.url;
       swapAmountData.amount = this.swapData.amount;
-      this.mintAmountSwap(swapAmountData);
+      await this.mintAmountSwap(swapAmountData);
+      this.clearSwapData();
     },
     enable_terminal: function () {
       // enable debug terminal
