@@ -375,7 +375,7 @@
       backdrop-filter="blur(2px) brightness(60%)"
     >
       <q-card class="q-pa-lg" style="max-width: 500px; width: 100%">
-        <h6 class="q-my-md">Edit mint</h6>
+        <h6 class="q-mt-none q-mb-md">Edit mint</h6>
         <q-input
           outlined
           v-model="editMintData.url"
@@ -383,6 +383,7 @@
           type="textarea"
           autogrow
           class="q-mb-xs"
+          style="font-family: monospace; font-size: 0.9em"
         ></q-input>
         <q-input
           outlined
@@ -396,6 +397,7 @@
           <q-btn
             class="float-left"
             v-close-popup
+            rounded
             color="primary"
             @click="updateMint(mintToEdit, editMintData)"
             >Update</q-btn
@@ -419,10 +421,10 @@
       backdrop-filter="blur(2px) brightness(60%)"
     >
       <q-card class="q-pa-lg">
-        <h6 class="q-my-md">Do you trust this mint?</h6>
+        <h6 class="q-mt-none q-mb-md">Do you trust this mint?</h6>
         <p>
-          A Cashu mint controls the funds you send to it. Make sure that you
-          trust the operator of this mint.
+          Before using this mint, make sure you trust it. Mints could become
+          malicious or cease operation at any time.
         </p>
         <q-input
           outlined
@@ -432,11 +434,13 @@
           type="textarea"
           autogrow
           class="q-mb-xs"
+          style="font-family: monospace; font-size: 0.9em"
         ></q-input>
         <div class="row q-mt-lg">
           <div class="col">
             <q-btn
               class="float-left"
+              rounded
               v-close-popup
               color="primary"
               icon="check"
