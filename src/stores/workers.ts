@@ -11,6 +11,7 @@ export const useWorkersStore = defineStore("workers", {
       tokensCheckSpendableListener: null as NodeJS.Timeout | null,
       invoiceWorkerRunning: false,
       tokenWorkerRunning: false,
+      checkInterval: 5000,
     };
   },
   getters: {},
@@ -49,12 +50,10 @@ export const useWorkersStore = defineStore("workers", {
           console.log("### stopping invoice check worker");
           this.clearAllWorkers();
 
-          // if (window.navigator.vibrate) navigator.vibrate(200);
-          // notifySuccess("Payment received", "top");
         } catch (error) {
           console.log("invoiceCheckWorker: not paid yet");
         }
-      }, 5000);
+      }, this.checkInterval);
     },
     checkTokenSpendableWorker: async function (historyToken: HistoryToken) {
       const settingsStore = useSettingsStore();
@@ -89,7 +88,7 @@ export const useWorkersStore = defineStore("workers", {
           console.log("checkTokenSpendableWorker: some error", error);
           this.clearAllWorkers();
         }
-      }, 3000);
+      }, this.checkInterval);
     },
   },
 });

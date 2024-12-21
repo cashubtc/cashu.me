@@ -150,10 +150,7 @@
     />
 
     <!-- INVOICE DETAILS  -->
-    <InvoiceDetailDialog
-      v-model="showInvoiceDetails"
-      :invoice-check-worker="invoiceCheckWorker"
-    />
+    <InvoiceDetailDialog v-model="showInvoiceDetails" />
 
     <!-- SEND TOKENS DIALOG  -->
     <SendTokenDialog v-model="showSendTokens" />
@@ -222,6 +219,7 @@ import { usePRStore } from "src/stores/payment-request";
 import { useStorageStore } from "src/stores/storage";
 import ReceiveTokenDialog from "src/components/ReceiveTokenDialog.vue";
 import { useWelcomeStore } from "../stores/welcome";
+import { useInvoicesWorkerStore } from "src/stores/invoicesWorker";
 import { notifyError, notify } from "../js/notify";
 
 import {
@@ -360,8 +358,6 @@ export default {
       "setInvoicePaid",
       "mint",
       "melt",
-      "checkInvoice",
-      "checkPendingInvoices",
       "checkPendingTokens",
       "decodeRequest",
       "initializeMnemonic",
@@ -379,6 +375,7 @@ export default {
     ]),
     ...mapActions(useStorageStore, ["checkLocalStorage"]),
     ...mapActions(usePRStore, ["createPaymentRequest"]),
+    ...mapActions(useInvoicesWorkerStore, ["startInvoiceCheckerWorker"]),
     // TOKEN METHODS
     decodeToken: function (encoded_token) {
       try {
@@ -634,6 +631,9 @@ export default {
     if (this.enablePaymentRequest) {
       this.subscribeToNip17DirectMessages();
     }
+
+    // start invoice checker worker
+    this.startInvoiceCheckerWorker();
   },
 };
 </script>

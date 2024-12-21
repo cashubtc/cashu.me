@@ -175,9 +175,7 @@ export default defineComponent({
     VueQrcode,
     NumericKeyboard,
   },
-  props: {
-    invoiceCheckWorker: Function,
-  },
+  props: {},
   data: function () {
     return {
       createInvoiceButtonBlocked: false,

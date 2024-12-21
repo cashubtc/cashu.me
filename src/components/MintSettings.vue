@@ -639,7 +639,7 @@ export default defineComponent({
       "melt",
       "mintOnPaid",
     ]),
-    ...mapActions(useWorkersStore, ["clearAllWorkers", "invoiceCheckWorker"]),
+    ...mapActions(useWorkersStore, ["clearAllWorkers"]),
     ...mapActions(useCameraStore, ["closeCamera", "showCamera"]),
     ...mapActions(useSwapStore, ["mintAmountSwap"]),
     editMint: function (mint) {

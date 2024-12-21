@@ -712,6 +712,36 @@
           </q-item-section>
         </q-item>
         <div>
+          <!-- websockets -->
+          <q-item>
+            <q-toggle
+              v-model="useWebsockets"
+              label="Use WebSockets"
+              color="primary"
+            /> </q-item
+          ><q-item class="q-pt-none">
+            <q-item-label caption
+              >If enabled the wallet will use websockets to receive updates on
+              paid invoices and spent tokens. Alternatively, you can manually
+              check the history for pending tokens.
+            </q-item-label>
+          </q-item>
+          <!-- periodically check incoming invoices -->
+          <q-item>
+            <q-toggle
+              v-model="periodicallyCheckIncomingInvoices"
+              label="Check incoming invoices"
+              color="primary"
+            />
+          </q-item>
+          <q-item class="q-pt-none">
+            <q-item-label caption
+              >If enabled, the wallet will periodically check incoming invoices
+              for up to 2 weeks. You can manually check pending invoices in the
+              history tab.
+            </q-item-label>
+          </q-item>
+
           <!-- check outgoing token state setting -->
           <q-item>
             <q-toggle
@@ -724,19 +754,6 @@
               >If enabled, the wallet will periodically request the state of
               tokens you've sent and mark them as paid. You can manually check
               pending tokens in the history tab.
-            </q-item-label>
-          </q-item>
-          <q-item>
-            <q-toggle
-              v-model="useWebsockets"
-              label="Use websockets"
-              color="primary"
-            /> </q-item
-          ><q-item class="q-pt-none">
-            <q-item-label caption
-              >If enabled the wallet will use websockets to receive updates on
-              paid invoices and spent tokens. Alternatively, you can manually
-              check the history for pending tokens.
             </q-item-label>
           </q-item>
           <!-- price check setting -->
@@ -1228,6 +1245,7 @@ export default defineComponent({
       "useWebsockets",
       "nfcEncoding",
       "useNumericKeyboard",
+      "periodicallyCheckIncomingInvoices",
     ]),
     ...mapState(useP2PKStore, ["p2pkKeys"]),
     ...mapWritableState(useP2PKStore, [
@@ -1346,7 +1364,6 @@ export default defineComponent({
       "requestMint",
       "increaseKeysetCounter",
     ]),
-    ...mapActions(useWorkersStore, ["invoiceCheckWorker"]),
     ...mapActions(useProofsStore, ["serializeProofs"]),
     ...mapActions(useNPCStore, ["generateNPCConnection"]),
     ...mapActions(useRestoreStore, ["restoreMint"]),

@@ -10,6 +10,7 @@ import { useP2PKStore } from "src/stores/p2pk";
 import { useSendTokensStore } from "src/stores/sendTokensStore";
 import { usePRStore } from "./payment-request";
 import { useWorkersStore } from "./workers";
+import { useInvoicesWorkerStore } from "./invoicesWorker";
 
 import * as _ from "underscore";
 import token from "src/js/token";
@@ -598,13 +599,26 @@ export const useWalletStore = defineStore("wallet", {
         const mintQuote = await mintWallet.checkMintQuote(invoice.quote);
         invoice.mintQuote = mintQuote;
         console.log("### mintQuote", mintQuote);
-        if (mintQuote.state != MintQuoteState.PAID) {
-          console.log("### mintQuote not paid yet");
-          if (verbose) {
-            notify("Invoice still pending");
-          }
-          throw new Error("invoice not paid yet.");
+        switch (mintQuote.state) {
+          case MintQuoteState.PAID:
+            break;
+          case MintQuoteState.UNPAID:
+            if (verbose) {
+              notify("Invoice still pending");
+            }
+            throw new Error("invoice pending.");
+          case MintQuoteState.ISSUED:
+            throw new Error("invoice already issued.");
+          default:
+            throw new Error("unknown state.");
         }
+        // if (mintQuote.state != MintQuoteState.PAID) {
+        //   console.log("### mintQuote not paid yet");
+        //   if (verbose) {
+        //     notify("Invoice still pending");
+        //   }
+        //   throw new Error("invoice not paid yet.");
+        // }
         const counter = this.keysetCounter(keysetId);
         const proofs = await mintWallet.mintProofs(invoice.amount, invoice.quote, {
           keysetId,
@@ -941,7 +955,7 @@ export const useWalletStore = defineStore("wallet", {
           }
         );
       } catch (error) {
-        console.error("Error in websocket subscription", error);
+        console.error("Error in websocket subscription. Starting invoices worker.", error);
         useWorkersStore().checkTokenSpendableWorker(historyToken);
       }
     },
@@ -1036,9 +1050,12 @@ export const useWalletStore = defineStore("wallet", {
       }
       const mintWallet = this.mintWallet(invoice.mint, invoice.unit);
       const mint = mintStore.mints.find((m) => m.url === invoice.mint);
+
       if (!mint) {
         throw new Error("mint not found");
       }
+      // add to checker before we try a websocket
+      useInvoicesWorkerStore().addInvoiceToChecker(quote);
       if (
         !settingsStore.useWebsockets ||
         !mint.info?.nuts[17]?.supported ||
@@ -1050,9 +1067,8 @@ export const useWalletStore = defineStore("wallet", {
         )
       ) {
         console.log(
-          "Websockets not supported, kicking off invoice check worker."
+          "Websockets not supported. Fallback to invoice check worker."
         );
-        useWorkersStore().invoiceCheckWorker(quote);
         return;
       }
       const uIStore = useUiStore();
@@ -1061,7 +1077,7 @@ export const useWalletStore = defineStore("wallet", {
           quote,
           async (mintQuoteResponse: MintQuoteResponse) => {
             console.log("Websocket: mint quote paid.");
-            const proofs = await this.mint(invoice, verbose);
+            const proofs = await this.mint(invoice, false);
             uIStore.showInvoiceDetails = false;
             invoice.mintQuote = mintQuoteResponse;
             if (!!window.navigator.vibrate) navigator.vibrate(200);
@@ -1079,7 +1095,6 @@ export const useWalletStore = defineStore("wallet", {
         );
       } catch (error) {
         console.log("Error in websocket subscription", error);
-        useWorkersStore().invoiceCheckWorker(quote);
       }
     },
     checkInvoice: async function (quote: string, verbose = true) {

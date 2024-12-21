@@ -92,6 +92,7 @@ import { shortenString } from "src/js/string-utils";
 import { mapWritableState, mapActions } from "pinia";
 import { useUiStore } from "src/stores/ui";
 import { useWalletStore } from "src/stores/wallet";
+import { useInvoicesWorkerStore } from "src/stores/invoicesWorker";
 import { formatDistanceToNow, parseISO } from "date-fns";
 
 export default defineComponent({
@@ -142,6 +143,7 @@ export default defineComponent({
     showInvoiceDialog(invoice) {
       this.invoiceData = invoice;
       this.showInvoiceDetails = true;
+      useInvoicesWorkerStore().addInvoiceToChecker(invoice.quote);
       // this.tab("invoice");
     },
     formattedDate(date_str) {
