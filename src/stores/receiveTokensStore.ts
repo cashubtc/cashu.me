@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import { useMintsStore } from "./mints";
+import { Mint, useMintsStore } from "./mints";
 import { useUiStore } from "./ui";
 import { useP2PKStore } from "./p2pk";
 import { useWalletStore } from "./wallet";
@@ -12,6 +12,7 @@ import {
   notifyWarning,
 } from "../js/notify";
 import { Token } from "@cashu/cashu-ts";
+import { useSwapStore } from "./swap";
 
 export const useReceiveTokensStore = defineStore("receiveTokensStore", {
   state: () => ({
@@ -80,6 +81,23 @@ export const useReceiveTokensStore = defineStore("receiveTokensStore", {
         console.error(error);
         return false;
       }
+    },
+    meltTokenToMint: async function (encodedToken: string, mint: Mint) {
+      const receiveStore = useReceiveTokensStore();
+      const mintStore = useMintsStore();
+      const uiStore = useUiStore();
+      const tokenJson = token.decode(encodedToken);
+      if (tokenJson == undefined) {
+        throw new Error("no tokens provided.");
+      }
+      // check if we have all mints
+      if (!this.knowThisMintOfTokenJson(tokenJson)) {
+        // add the mint
+        await mintStore.addMint({ url: token.getMint(tokenJson) });
+      }
+      await useSwapStore().meltProofsToMint(tokenJson, mint);
+      receiveStore.showReceiveTokens = false;
+      uiStore.closeDialogs();
     },
     pasteToParseDialog: function (verbose = false) {
       navigator.clipboard.readText().then((text) => {

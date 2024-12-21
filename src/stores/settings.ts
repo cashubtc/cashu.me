@@ -50,6 +50,10 @@ export const useSettingsStore = defineStore("settings", {
         "cashu.settings.useNumericKeyboard",
         true
       ),
+      enableReceiveSwaps: useLocalStorage<boolean>(
+        "cashu.settings.enableReceiveSwaps",
+        false
+      ),
     };
   },
 });

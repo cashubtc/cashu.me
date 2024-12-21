@@ -812,6 +812,30 @@
           </q-item>
         </div>
 
+        <!-- enable receive swaps -->
+        <q-item>
+          <q-item-section>
+            <q-item-label overline class="text-weight-bold"
+              >Experimental</q-item-label
+            >
+            <q-item-label caption>
+              These features are experimental.
+            </q-item-label>
+          </q-item-section>
+        </q-item>
+        <q-item>
+          <q-toggle
+            v-model="enableReceiveSwaps"
+            label="Receive swaps"
+            color="primary"
+          />
+        </q-item>
+        <q-item class="q-pt-none">
+          <q-item-label caption
+            >Swap received ecash to your active mint.
+          </q-item-label>
+        </q-item>
+
         <!-- use numeric keyboard -->
         <div class="q-py-sm q-px-xs text-left" on-left>
           <q-list padding>
@@ -1288,6 +1312,7 @@ export default defineComponent({
       "periodicallyCheckIncomingInvoices",
       "checkIncomingInvoices",
       "checkInvoicesOnStartup",
+      "enableReceiveSwaps",
     ]),
     ...mapState(useP2PKStore, ["p2pkKeys"]),
     ...mapWritableState(useP2PKStore, [

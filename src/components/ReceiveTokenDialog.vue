@@ -131,6 +131,7 @@
               rounded
               class="q-ml-xs q-mr-sm"
               :disabled="addMintBlocking"
+              :loading="swapBlocking"
               :label="
                 knowThisMint
                   ? addMintBlocking
@@ -139,6 +140,9 @@
                   : 'Receive'
               "
             >
+              <template v-slot:loading>
+                <q-spinner-hourglass />
+              </template>
             </q-btn>
             <q-btn
               @click="addPendingTokenToHistory(receiveData.tokensBase64)"
@@ -148,6 +152,24 @@
               class="q-mr-sm"
               >Later
               <q-tooltip>Add to history to receive later</q-tooltip>
+            </q-btn>
+            <!-- swap to trusted mint -->
+            <q-btn
+              v-if="
+                enableReceiveSwaps &&
+                (!knowThisMint || true) &&
+                activeMintUrl &&
+                getMint(decodeToken(receiveData.tokensBase64)) != activeMintUrl
+              "
+              @click="handleSwapToTrustedMint"
+              color="primary"
+              rounded
+              outline
+              class="q-mr-sm"
+            >
+              <q-icon name="swap_horiz" class="q-pr-sm" />
+              Swap
+              <q-tooltip>Swap to a trusted mint</q-tooltip>
             </q-btn>
           </div>
         </div>
@@ -167,6 +189,8 @@ import { useCameraStore } from "src/stores/camera";
 import { useP2PKStore } from "src/stores/p2pk";
 import { usePRStore } from "src/stores/payment-request";
 import { usePriceStore } from "src/stores/price";
+import { useSwapStore } from "src/stores/swap";
+import { useSettingsStore } from "src/stores/settings";
 import token from "src/js/token";
 
 import { mapActions, mapState, mapWritableState } from "pinia";
@@ -222,15 +246,18 @@ export default defineComponent({
     ...mapState(useUiStore, ["tickerShort"]),
     ...mapState(usePriceStore, ["bitcoinPrice"]),
     ...mapState(useMintsStore, [
+      "activeMintUrl",
       "activeProofs",
       "activeUnit",
       "addMintBlocking",
     ]),
+    ...mapState(useSettingsStore, ["enableReceiveSwaps"]),
     ...mapWritableState(useMintsStore, ["addMintData", "showAddMintDialog"]),
     ...mapWritableState(usePRStore, ["showPRDialog"]),
     ...mapState(useCameraStore, ["hasCamera"]),
     ...mapState(useP2PKStore, ["p2pkKeys"]),
     ...mapState(usePRStore, ["enablePaymentRequest"]),
+    ...mapState(useSwapStore, ["swapBlocking"]),
     canPasteFromClipboard: function () {
       return (
         window.isSecureContext &&
@@ -320,6 +347,13 @@ export default defineComponent({
       this.showReceiveTokens = false;
       // show success notification
       this.notifySuccess("Incoming payment added to history.");
+    },
+    handleSwapToTrustedMint: function () {
+      const mint = useMintsStore().activeMint().mint;
+      useReceiveTokensStore().meltTokenToMint(
+        this.receiveData.tokensBase64,
+        mint
+      );
     },
   },
 });
