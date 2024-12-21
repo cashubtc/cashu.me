@@ -585,8 +585,10 @@ export default defineComponent({
       }
       // check if entered amount is the same as the result of coinSelect(spendableProofs(activeProofs), amount)
       let spendableProofs = this.spendableProofs(this.activeProofs);
+      const mintWallet = useWalletStore().wallet;
       let selectedProofs = this.coinSelect(
         spendableProofs,
+        mintWallet,
         this.sendData.amount * this.activeUnitCurrencyMultiplyer,
         this.includeFeesInSendAmount
       );

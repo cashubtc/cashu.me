@@ -124,6 +124,7 @@
             placeholder="https://"
             ref="mintInput"
             class="q-pb-none q-mb-sm q-px-md"
+            style="font-family: monospace"
           >
             <!-- <template v-slot:hint> Enter Mint URL</template> -->
             <!-- "addMint(mintToAdd)" -->
@@ -280,11 +281,9 @@
           <q-item-section>
             <q-item-label overline>Multimint Swaps</q-item-label>
             <q-item-label caption
-              >Swap funds from one mint to another via Lightning. Note: This is
-              an experimental feature and should be used carefully. Leave room
-              for potential Lightning fees. If the incoming payment does not
-              succeed, check the incoming pending invoice manually by clicking
-              the refresh button.
+              >Swap funds between mints via Lightning. Note: Leave room for
+              potential Lightning fees. If the incoming payment does not
+              succeed, check the invoice manually.
             </q-item-label>
           </q-item-section>
         </q-item>
@@ -300,7 +299,12 @@
             option-value="url"
             option-label="optionLabel"
             label="From"
-            style="min-width: 200px; width: 100%"
+            style="
+              min-width: 200px;
+              width: 100%;
+              font-family: monospace;
+              font-size: 0.9em;
+            "
           />
         </q-item>
         <q-item>
@@ -315,7 +319,12 @@
             option-value="url"
             option-label="optionLabel"
             label="To"
-            style="min-width: 200px; width: 100%"
+            style="
+              min-width: 200px;
+              width: 100%;
+              font-family: monospace;
+              font-size: 0.9em;
+            "
           />
         </q-item>
         <q-item>
@@ -635,12 +644,7 @@ export default defineComponent({
       "activateMintUrl",
       "updateMint",
     ]),
-    ...mapActions(useWalletStore, [
-      "decodeRequest",
-      "requestMint",
-      "melt",
-      "mintOnPaid",
-    ]),
+    ...mapActions(useWalletStore, ["decodeRequest", "mintOnPaid"]),
     ...mapActions(useWorkersStore, ["clearAllWorkers"]),
     ...mapActions(useCameraStore, ["closeCamera", "showCamera"]),
     ...mapActions(useSwapStore, ["mintAmountSwap"]),
@@ -696,7 +700,7 @@ export default defineComponent({
           url: m.url,
           // add balance to optionLabel, like with formatCurrency(mintClass(mint).unitBalance(unit), unit)
           optionLabel:
-            m.nickname || getShortUrl(m.url) + " (" + balanceStr + ")",
+            (m.nickname || getShortUrl(m.url)) + " (" + balanceStr + ")",
         });
       }
       return options;

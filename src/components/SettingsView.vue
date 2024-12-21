@@ -1402,8 +1402,6 @@ export default defineComponent({
       "newMnemonic",
       "decodeRequest",
       "checkProofsSpendable",
-      "melt",
-      "requestMint",
       "increaseKeysetCounter",
     ]),
     ...mapActions(useProofsStore, ["serializeProofs"]),

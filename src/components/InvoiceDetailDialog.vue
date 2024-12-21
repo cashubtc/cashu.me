@@ -249,7 +249,14 @@ export default defineComponent({
         const mintStore = useMintsStore();
         this.invoiceData.amount *= this.activeUnitCurrencyMultiplyer;
         this.createInvoiceButtonBlocked = true;
-        const mintQuote = await this.requestMint();
+        const mintWallet = useWalletStore().mintWallet(
+          mintStore.activeMintUrl,
+          mintStore.activeUnit
+        );
+        const mintQuote = await this.requestMint(
+          this.invoiceData.amount,
+          mintWallet
+        );
         await this.mintOnPaid(mintQuote.quote);
       } catch (e) {
         console.log("#### requestMintButton", e);

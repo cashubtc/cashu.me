@@ -358,10 +358,8 @@ export default {
     ...mapActions(useWorkersStore, ["clearAllWorkers", "invoiceCheckWorker"]),
     ...mapActions(useTokensStore, ["setTokenPaid"]),
     ...mapActions(useWalletStore, [
-      "requestMint",
       "setInvoicePaid",
       "mint",
-      "melt",
       "checkPendingTokens",
       "decodeRequest",
       "initializeMnemonic",

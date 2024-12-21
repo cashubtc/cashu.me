@@ -305,6 +305,7 @@ export const useWalletStore = defineStore("wallet", {
     },
     coinSelect: function (
       proofs: WalletProof[],
+      wallet: CashuWallet,
       amount: number,
       includeFees: boolean = false
     ): WalletProof[] {
@@ -312,7 +313,7 @@ export const useWalletStore = defineStore("wallet", {
         // there are not enough proofs to pay the amount
         return [];
       }
-      const { send: selectedProofs, keep: _ } = this.wallet.selectProofsToSend(
+      const { send: selectedProofs, keep: _ } = wallet.selectProofsToSend(
         proofs,
         amount,
         includeFees
@@ -351,7 +352,7 @@ export const useWalletStore = defineStore("wallet", {
       receiverPubkey: string
     ) {
       const spendableProofs = this.spendableProofs(proofs, amount);
-      const proofsToSend = this.coinSelect(spendableProofs, amount, true);
+      const proofsToSend = this.coinSelect(spendableProofs, wallet, amount, true);
       const { keep: keepProofs, send: sendProofs } = await wallet.send(
         amount,
         proofsToSend,
@@ -386,7 +387,7 @@ export const useWalletStore = defineStore("wallet", {
       try {
         const spendableProofs = this.spendableProofs(proofs, amount);
 
-        proofsToSend = this.coinSelect(spendableProofs, amount, includeFees);
+        proofsToSend = this.coinSelect(spendableProofs, wallet, amount, includeFees);
         const totalAmount = proofsToSend.reduce((s, t) => (s += t.amount), 0);
         const fees = includeFees
           ? wallet.getFeesForProofs(proofsToSend)
@@ -398,7 +399,7 @@ export const useWalletStore = defineStore("wallet", {
 
         if (totalAmount != targetAmount) {
           const counter = this.keysetCounter(keysetId);
-          proofsToSend = this.coinSelect(spendableProofs, targetAmount, true);
+          proofsToSend = this.coinSelect(spendableProofs, wallet, targetAmount, true);
           ({ keep: keepProofs, send: sendProofs } = await wallet.send(
             targetAmount,
             proofsToSend,
@@ -551,25 +552,21 @@ export const useWalletStore = defineStore("wallet", {
      * Upon paying the request, the mint will credit the wallet with
      * cashu tokens
      */
-    requestMint: async function (amount?: number): Promise<MintQuoteResponse> {
-      const mintStore = useMintsStore();
-
-      if (amount) {
-        this.invoiceData.amount = amount;
-      }
+    requestMint: async function (amount: number, mintWallet: CashuWallet): Promise<MintQuoteResponse> {
       try {
         // create MintQuotePayload(this.invoiceData.amount) payload
         const payload: MintQuotePayload = {
-          amount: this.invoiceData.amount,
-          unit: mintStore.activeUnit,
+          amount: amount,
+          unit: mintWallet.unit,
         };
-        const data = await mintStore.activeMint().api.createMintQuote(payload);
+        const data = await mintWallet.mint.createMintQuote(payload);
+        this.invoiceData.amount = amount;
         this.invoiceData.bolt11 = data.request;
         this.invoiceData.quote = data.quote;
         this.invoiceData.date = currentDateStr();
         this.invoiceData.status = "pending";
-        this.invoiceData.mint = mintStore.activeMintUrl;
-        this.invoiceData.unit = mintStore.activeUnit;
+        this.invoiceData.mint = mintWallet.mint.mintUrl;
+        this.invoiceData.unit = mintWallet.unit;
         this.invoiceData.mintQuote = data;
         this.invoiceHistory.push({
           ...this.invoiceData,
@@ -663,8 +660,10 @@ export const useWalletStore = defineStore("wallet", {
         uIStore.unlockMutex();
       }
     },
-    // get a melt quote
-    meltQuote: async function () {
+    // get a melt quote for the current invoice data
+    meltQuoteInvoiceData: async function () {
+      // choose active wallet with active mint and unit
+      const mintWallet = this.wallet;
       // throw an error if this.payInvoiceData.blocking is true
       if (this.payInvoiceData.blocking) {
         throw new Error("already processing an melt quote.");
@@ -681,7 +680,7 @@ export const useWalletStore = defineStore("wallet", {
           request: this.payInvoiceData.input.request,
         };
         this.payInvoiceData.meltQuote.payload = payload;
-        const data = await mintStore.activeMint().api.createMeltQuote(payload);
+        const data = await this.meltQuote(mintWallet, payload.request);
         mintStore.assertMintError(data);
         this.payInvoiceData.meltQuote.response = data;
         this.payInvoiceData.blocking = false;
@@ -695,40 +694,64 @@ export const useWalletStore = defineStore("wallet", {
       } finally {
       }
     },
-    melt: async function () {
-      const uIStore = useUiStore();
-      const proofsStore = useProofsStore();
+    meltQuote: async function (wallet: CashuWallet, request: string): Promise<MeltQuoteResponse> {
       const mintStore = useMintsStore();
-      const tokenStore = useTokensStore();
-
-      // throw an error if this.payInvoiceData.blocking is true
-      if (this.payInvoiceData.blocking) {
-        throw new Error("already processing an invoice.");
-      }
-      console.log("#### pay lightning");
+      const data = await wallet.createMeltQuote(request);
+      mintStore.assertMintError(data);
+      return data;
+    },
+    meltInvoiceData: async function () {
       if (this.payInvoiceData.invoice == null) {
         throw new Error("no invoice provided.");
       }
-      const invoice = this.payInvoiceData.invoice.bolt11;
-      // throw an error if the invoice is already in invoiceHistory
+      const quote = this.payInvoiceData.meltQuote.response;
+      if (quote == null) {
+        throw new Error("no quote found.");
+      }
+      const request = this.payInvoiceData.invoice.bolt11;
       if (
         this.invoiceHistory.find(
-          (i) => i.bolt11 === invoice && i.amount < 0 && i.status === "paid"
+          (i) => i.bolt11 === request && i.amount < 0 && i.status === "paid"
         )
       ) {
         notifyError("Invoice already paid.");
         throw new Error("invoice already paid.");
       }
 
-      const quote = this.payInvoiceData.meltQuote.response;
-      if (quote == null) {
-        throw new Error("no quote found.");
-      }
+      const mintStore = useMintsStore();
       const mintWallet = this.mintWallet(mintStore.activeMintUrl, mintStore.activeUnit);
+      await this.melt(mintStore.activeProofs, quote, mintWallet);
+    },
+    melt: async function (proofs: WalletProof[], quote: MeltQuoteResponse, mintWallet: CashuWallet) {
+      const uIStore = useUiStore();
+      const proofsStore = useProofsStore();
+      const mintStore = useMintsStore();
+      const tokenStore = useTokensStore();
+
+      console.log("#### pay lightning");
+      // if (this.payInvoiceData.invoice == null) {
+      //   throw new Error("no invoice provided.");
+      // }
+      // const invoice = this.payInvoiceData.invoice.bolt11;
+      // throw an error if the invoice is already in invoiceHistory
+      // if (
+      //   this.invoiceHistory.find(
+      //     (i) => i.bolt11 === quote.request && i.amount < 0 && i.status === "paid"
+      //   )
+      // ) {
+      //   notifyError("Invoice already paid.");
+      //   throw new Error("invoice already paid.");
+      // }
+
+      // const quote = this.payInvoiceData.meltQuote.response;
+      // if (quote == null) {
+      //   throw new Error("no quote found.");
+      // }
+
 
       const amount = quote.amount + quote.fee_reserve;
       let countChangeOutputs = 0;
-      const keysetId = this.getKeyset(mintStore.activeMintUrl, mintStore.activeUnit);
+      const keysetId = this.getKeyset(mintWallet.mint.mintUrl, mintWallet.unit);
       let keysetCounterIncrease = 0;
 
 
@@ -736,7 +759,7 @@ export const useWalletStore = defineStore("wallet", {
       let sendProofs: Proof[] = [];
       try {
         const { keepProofs: keepProofs, sendProofs: _sendProofs } =
-          await this.send(mintStore.activeProofs, mintWallet, amount, false, true);
+          await this.send(proofs, mintWallet, amount, false, true);
         sendProofs = _sendProofs;
         if (sendProofs.length == 0) {
           throw new Error("could not split proofs.");
@@ -755,7 +778,7 @@ export const useWalletStore = defineStore("wallet", {
         const counter = this.keysetCounter(keysetId);
 
         // QUIRK: we increase the keyset counter by sendProofs and the maximum number of possible change outputs
-        // this way, in case the user exits the app before payLnInvoice is completed, the returned change outputs won't cause a "outputs already signed" error
+        // this way, in case the user exits the app before meltProofs is completed, the returned change outputs won't cause a "outputs already signed" error
         // if the payment fails, we decrease the counter again
         this.increaseKeysetCounter(keysetId, sendProofs.length);
         if (quote.fee_reserve > 0) {
@@ -781,7 +804,7 @@ export const useWalletStore = defineStore("wallet", {
 
         notifySuccess(
           "Paid " +
-          uIStore.formatCurrency(amount_paid, mintStore.activeUnit) +
+          uIStore.formatCurrency(amount_paid, mintWallet.unit) +
           " via Lightning"
         );
         console.log("#### pay lightning: token paid");
@@ -819,9 +842,7 @@ export const useWalletStore = defineStore("wallet", {
           throw error;
         }
         // get quote and check state
-        const mintQuote = await mintStore
-          .activeMint()
-          .api.checkMeltQuote(quote.quote);
+        const mintQuote = await mintWallet.mint.checkMeltQuote(quote.quote);
         if (
           mintQuote.state == MeltQuoteState.PAID ||
           mintQuote.state == MeltQuoteState.PENDING
@@ -992,8 +1013,6 @@ export const useWalletStore = defineStore("wallet", {
         throw new Error("no tokens provided.");
       }
       const proofs = token.getProofs(tokenJson);
-      // const unitInToken = token.getUnit(tokenJson);
-      // const mintInToken = token.getMint(tokenJson);
       const mintWallet = this.mintWallet(historyToken.mint, historyToken.unit);
 
       const mint = mintStore.mints.find((m) => m.url === historyToken.mint);
@@ -1105,7 +1124,15 @@ export const useWalletStore = defineStore("wallet", {
           quote,
           async (mintQuoteResponse: MintQuoteResponse) => {
             console.log("Websocket: mint quote paid.");
-            const proofs = await this.mint(invoice, false);
+            let proofs;
+            try {
+              proofs = await this.mint(invoice, false);
+            } catch (error: any) {
+              console.error(error);
+              notifyApiError(error);
+              throw error;
+            }
+
             if (hideInvoiceDetailsOnMint) {
               uIStore.showInvoiceDetails = false;
             }
@@ -1333,7 +1360,7 @@ export const useWalletStore = defineStore("wallet", {
 
       this.payInvoiceData.invoice = Object.freeze(cleanInvoice);
       // get quote for this request
-      await this.meltQuote();
+      await this.meltQuoteInvoiceData();
     },
     handleCashuToken: function () {
       this.payInvoiceData.show = false;
