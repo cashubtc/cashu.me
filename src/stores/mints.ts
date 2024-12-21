@@ -293,7 +293,7 @@ export const useMintsStore = defineStore("mints", {
       }
     },
     addMint: async function (
-      addMintData: { url: string; nickname: string },
+      addMintData: { url: string; nickname?: string },
       verbose = false
     ): Promise<Mint> {
       let url = addMintData.url;

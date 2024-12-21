@@ -11,6 +11,7 @@ import {
   notify,
   notifyWarning,
 } from "../js/notify";
+import { Token } from "@cashu/cashu-ts";
 
 export const useReceiveTokensStore = defineStore("receiveTokensStore", {
   state: () => ({
@@ -23,21 +24,21 @@ export const useReceiveTokensStore = defineStore("receiveTokensStore", {
     scanningCard: false,
   }),
   actions: {
-    decodeToken: function (encoded_token) {
+    decodeToken: function (encodedToken: string) {
       let decodedToken = undefined;
       try {
-        decodedToken = token.decode(encoded_token);
-      } catch (error) {}
+        decodedToken = token.decode(encodedToken);
+      } catch (error) { }
       return decodedToken;
     },
-    knowThisMintOfTokenJson: function (tokenJson) {
+    knowThisMintOfTokenJson: function (tokenJson: Token) {
       const mintStore = useMintsStore();
       let uniqueIds = [...new Set(token.getProofs(tokenJson).map((p) => p.id))];
       return mintStore.mints
         .map((m) => m.url)
         .includes(token.getMint(tokenJson));
     },
-    receiveToken: async function (encodedToken) {
+    receiveToken: async function (encodedToken: string) {
       const mintStore = useMintsStore();
       const walletStore = useWalletStore();
       const receiveStore = useReceiveTokensStore();
@@ -64,7 +65,7 @@ export const useReceiveTokensStore = defineStore("receiveTokensStore", {
         await mintStore.addMint({ url: token.getMint(tokenJson) });
       }
       // redeem the token
-      await walletStore.redeem(receiveStore.receiveData.tokensBase64);
+      await walletStore.redeem();
       receiveStore.showReceiveTokens = false;
       uiStore.closeDialogs();
     },
