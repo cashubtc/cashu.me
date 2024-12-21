@@ -339,7 +339,12 @@
             :label="'Amount (' + tickerShort + ')'"
             style="min-width: 200px"
             @keydown.enter.prevent="extractAndMintAmountSwap(swapAmountData)"
-            :disable="!(swapData.fromUrl && swapData.toUrl) || swapBlocking"
+            :disable="
+              !swapData.fromUrl ||
+              !swapData.toUrl ||
+              swapData.fromUrl == swapData.toUrl ||
+              swapBlocking
+            "
           ></q-input>
           <q-btn
             class="q-ml-sm q-px-md"
@@ -699,10 +704,8 @@ export default defineComponent({
         const unitStr = "sat";
         const unitBalance = this.mintClass(m).unitBalance(unitStr);
         const balanceStr = useUiStore().formatCurrency(unitBalance, unitStr);
-
         options.push({
           url: m.url,
-          // add balance to optionLabel, like with formatCurrency(mintClass(mint).unitBalance(unit), unit)
           optionLabel:
             (m.nickname || getShortUrl(m.url)) + " (" + balanceStr + ")",
         });

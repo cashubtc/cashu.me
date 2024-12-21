@@ -71,7 +71,7 @@
 <script>
 import { defineComponent } from "vue";
 import { getShortUrl } from "src/js/wallet-helpers";
-import { mapActions, mapState } from "pinia";
+import { mapActions, mapState, mapWritableState } from "pinia";
 import { useMintsStore } from "stores/mints";
 import { MintClass } from "stores/mints";
 
@@ -91,7 +91,7 @@ export default defineComponent({
   },
   watch: {
     chosenMint: async function () {
-      await this.activateMintUrl(this.chosenMint.url);
+      this.activeMintUrl = this.chosenMint.url;
     },
   },
   computed: {
@@ -102,6 +102,7 @@ export default defineComponent({
       "proofs",
       "activeUnit",
     ]),
+    ...mapWritableState(useMintsStore, ["activeMintUrl"]),
     getBalance: function () {
       return this.activeProofs
         .flat()

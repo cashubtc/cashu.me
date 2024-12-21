@@ -295,7 +295,7 @@ export const useMintsStore = defineStore("mints", {
     addMint: async function (
       addMintData: { url: string; nickname: string },
       verbose = false
-    ) {
+    ): Promise<Mint> {
       let url = addMintData.url;
       this.addMintBlocking = true;
       try {
@@ -329,12 +329,13 @@ export const useMintsStore = defineStore("mints", {
           if (verbose) {
             notifySuccess("Mint already added");
           }
-          return;
+          return mintToAdd;
         }
-        await this.activateMint(mintToAdd, false);
+        await this.activateMint(mintToAdd, false, true);
         if (verbose) {
           await notifySuccess("Mint added");
         }
+        return mintToAdd;
       } catch (error) {
         // activation failed, we remove the mint again from local storage
         this.mints = this.mints.filter((m) => m.url !== url);
@@ -406,7 +407,7 @@ export const useMintsStore = defineStore("mints", {
         console.log("### activateMint: Mint activated: ", this.activeMintUrl);
       } catch (error: any) {
         // restore previous values because the activation errored
-        this.activeMintUrl = previousUrl;
+        // this.activeMintUrl = previousUrl;
         let err_msg = "Could not connect to mint.";
         if (error.message.length) {
           err_msg = err_msg + ` ${error.message}.`;
@@ -425,7 +426,7 @@ export const useMintsStore = defineStore("mints", {
       } catch (error: any) {
         console.error(error);
         try {
-          notifyApiError(error, "Could not get mint info");
+          // notifyApiError(error, "Could not get mint info");
         } catch { }
         throw error;
       }
@@ -470,7 +471,7 @@ export const useMintsStore = defineStore("mints", {
       } catch (error: any) {
         console.error(error);
         try {
-          notifyApiError(error, "Could not get mint keys");
+          // notifyApiError(error, "Could not get mint keys");
         } catch { }
         throw error;
       }
@@ -484,7 +485,7 @@ export const useMintsStore = defineStore("mints", {
       } catch (error: any) {
         console.error(error);
         try {
-          notifyApiError(error, "Could not get mint keysets");
+          // notifyApiError(error, "Could not get mint keysets");
         } catch { }
         throw error;
       }

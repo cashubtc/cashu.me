@@ -1129,7 +1129,7 @@ export const useWalletStore = defineStore("wallet", {
               proofs = await this.mint(invoice, false);
             } catch (error: any) {
               console.error(error);
-              notifyApiError(error);
+              // notifyApiError(error);
               throw error;
             }
 
