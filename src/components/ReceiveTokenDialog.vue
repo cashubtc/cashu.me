@@ -146,14 +146,7 @@
             </q-btn>
             <!-- swap to trusted mint -->
             <q-btn
-              v-if="
-                enableReceiveSwaps &&
-                (!knowThisMint || true) &&
-                activeMintUrl &&
-                (getMint(decodeToken(receiveData.tokensBase64)) !=
-                  activeMintUrl ||
-                  true)
-              "
+              v-if="enableReceiveSwaps && activeMintUrl && mints.length"
               @click="swapSelected = true"
               color="primary"
               rounded
@@ -176,10 +169,22 @@
           </div>
           <!-- swap mint selection -->
           <div class="row q-pl-md q-pt-sm" v-if="swapSelected">
-            <q-icon name="arrow_downward" class="q-mr-xs" />
-            <span>Swap to mint</span>
+            <!-- <div v-if="activeMintUrl != tokenMint || swapBlocking"> -->
+            <div>
+              <q-icon name="arrow_downward" class="q-mr-xs" color="positive" />
+              <span
+                >Swap
+                <strong>{{
+                  formatCurrency(swapToMintAmount, tokenUnit)
+                }}</strong>
+              </span>
+            </div>
+            <!-- <div v-else>
+              <q-icon name="south" class="q-mr-xs" color="negative" />
+              <span>Can't swap to same mint</span>
+            </div> -->
           </div>
-          <div class="row q-pt-sm" v-if="swapSelected">
+          <div class="row q-pt-xs" v-if="swapSelected">
             <ChooseMint
               :rounded="true"
               :title="``"
@@ -193,6 +198,7 @@
               rounded
               class="q-pr-md"
               :loading="swapBlocking"
+              :disabled="activeMintUrl == tokenMint"
             >
               <q-icon name="swap_horiz" class="q-pr-sm" />
               Swap
@@ -256,6 +262,7 @@ import {
   notifyWarning,
   notify,
 } from "../js/notify";
+import MintSettings from "./MintSettings.vue";
 
 export default defineComponent({
   name: "ReceiveTokenDialog",
@@ -297,6 +304,7 @@ export default defineComponent({
       "activeProofs",
       "activeUnit",
       "addMintBlocking",
+      "mints",
     ]),
     ...mapState(useSettingsStore, ["enableReceiveSwaps"]),
     ...mapWritableState(useMintsStore, ["addMintData", "showAddMintDialog"]),
@@ -340,6 +348,17 @@ export default defineComponent({
       }
       const decodedToken = this.decodeToken(this.receiveData.tokensBase64);
       return token.getUnit(decodedToken);
+    },
+    tokenMint: function () {
+      if (!this.tokenDecodesCorrectly) {
+        return "";
+      }
+      const decodedToken = this.decodeToken(this.receiveData.tokensBase64);
+      return this.getMint(decodedToken);
+    },
+    swapToMintAmount: function () {
+      const decodedToken = this.decodeToken(this.receiveData.tokensBase64);
+      return this.tokenAmount - useSwapStore().meltToMintFees(decodedToken);
     },
   },
   methods: {

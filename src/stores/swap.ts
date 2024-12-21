@@ -75,6 +75,22 @@ export const useSwapStore = defineStore("swap", {
         this.swapBlocking = false;
       }
     },
+    meltToMintFees: function (tokenJson: Token) {
+      const proofsStore = useProofsStore();
+      const walletStore = useWalletStore();
+      const fromMintUrl = token.getMint(tokenJson)
+      const unit = token.getUnit(tokenJson)
+      const tokenAmount = proofsStore.sumProofs(token.getProofs(tokenJson));
+      let meltAmount = tokenAmount - Math.max(2, tokenAmount * 0.02);
+      try {
+        // walletStore.mintWallet(fromMintUrl, unit); will fail if we don't have fromMintUrl yet
+        const fromWallet = walletStore.mintWallet(fromMintUrl, unit);
+        const proofs = token.getProofs(tokenJson);
+        meltAmount -= fromWallet.getFeesForProofs(proofs);
+      } catch (e) {
+      }
+      return tokenAmount - meltAmount;
+    },
     meltProofsToMint: async function (tokenJson: Token, mint: Mint) {
       const proofsStore = useProofsStore();
       const walletStore = useWalletStore();
