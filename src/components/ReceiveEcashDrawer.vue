@@ -82,7 +82,7 @@
           </q-btn>
 
           <q-btn
-            v-if="ndefSupported"
+            v-if="ndefSupported && showNfcButtonInDrawer"
             class="full-width custom-btn"
             @click="handleNFCBtn"
           >

@@ -568,17 +568,6 @@
                 </q-item-label>
               </q-item-section>
             </q-item>
-            <q-item v-if="false">
-              <q-toggle
-                v-model="showNfcButtonInDrawer"
-                label="Quick access to NFC"
-                color="primary"
-              /> </q-item
-            ><q-item class="q-pt-none">
-              <q-item-label caption
-                >Quickly scan NFC cards in the Receive Ecash menu.
-              </q-item-label>
-            </q-item>
             <!--
               disable binary for now
               TODO: re-enable once we can decode
@@ -604,6 +593,17 @@
               </q-item-section>
             </q-item>
             -->
+            <q-item>
+              <q-toggle
+                v-model="showNfcButtonInDrawer"
+                label="Quick access to NFC"
+                color="primary"
+              /> </q-item
+            ><q-item class="q-pt-none">
+              <q-item-label caption
+                >Quickly scan NFC cards in the Receive Ecash menu.
+              </q-item-label>
+            </q-item>
           </q-list>
         </div>
 
@@ -712,31 +712,89 @@
           </q-item-section>
         </q-item>
         <div>
+          <!-- periodically check incoming invoices -->
+          <q-item>
+            <q-toggle
+              v-model="checkIncomingInvoices"
+              label="Check incoming invoice"
+              color="primary"
+            >
+            </q-toggle>
+          </q-item>
+          <q-item class="q-pt-none">
+            <q-item-label caption
+              >If enabled, the wallet will check the latest invoice in the
+              background. This increases the wallet's responsiveness which makes
+              fingerprinting easier. You can manually check unpaid invoices in
+              the Invoices tab.
+            </q-item-label>
+          </q-item>
+          <!-- check pending invoices on startup -->
+          <q-item>
+            <q-toggle
+              v-model="checkInvoicesOnStartup"
+              label="Check pending invoices on startup"
+              color="primary"
+            >
+            </q-toggle>
+          </q-item>
+          <q-item class="q-pt-none">
+            <q-item-label caption
+              >If enabled, the wallet will check pending invoices from the last
+              24 hours on startup.
+            </q-item-label>
+          </q-item>
+          <!-- periodically check incoming invoices -->
+          <q-item>
+            <q-toggle
+              v-model="periodicallyCheckIncomingInvoices"
+              label="Check all invoices"
+              color="primary"
+            >
+              <q-badge color="primary" label="Beta" class="q-mx-sm"></q-badge>
+            </q-toggle>
+          </q-item>
+          <q-item class="q-pt-none">
+            <q-item-label caption
+              >If enabled, the wallet will periodically check unpaid invoices in
+              the background for up to two weeks. This increases the wallet's
+              online activity which makes fingerprinting easier. You can
+              manually check unpaid invoices in the Invoices tab.
+            </q-item-label>
+          </q-item>
+
           <!-- check outgoing token state setting -->
           <q-item>
             <q-toggle
               v-model="checkSentTokens"
-              label="Check sent token state"
+              label="Check sent ecash"
               color="primary"
             /> </q-item
           ><q-item class="q-pt-none">
             <q-item-label caption
-              >If enabled, the wallet will periodically request the state of
-              tokens you've sent and mark them as paid. You can manually check
-              pending tokens in the history tab.
+              >If enabled, the wallet will use periodic background checks to
+              determine if sent tokens have been redeemed. This increases the
+              wallet's online activity which makes fingerprinting easier.
             </q-item-label>
           </q-item>
-          <q-item>
+          <!-- websockets -->
+          <q-item v-if="checkIncomingInvoices || checkSentTokens">
             <q-toggle
+              v-if="checkIncomingInvoices || checkSentTokens"
               v-model="useWebsockets"
-              label="Use websockets"
+              label="Use WebSockets"
               color="primary"
-            /> </q-item
-          ><q-item class="q-pt-none">
+              ><q-badge color="primary" label="Beta" class="q-mx-sm"></q-badge>
+            </q-toggle> </q-item
+          ><q-item
+            class="q-pt-none"
+            v-if="checkIncomingInvoices || checkSentTokens"
+          >
             <q-item-label caption
-              >If enabled the wallet will use websockets to receive updates on
-              paid invoices and spent tokens. Alternatively, you can manually
-              check the history for pending tokens.
+              >If enabled, the wallet will use long-lived WebSocket connections
+              to receive updates on paid invoices and spent tokens from mints.
+              This increases the wallet's responsiveness but also makes
+              fingerprinting easier.
             </q-item-label>
           </q-item>
           <!-- price check setting -->
@@ -749,8 +807,7 @@
           ><q-item class="q-pt-none">
             <q-item-label caption
               >If enabled, the current Bitcoin exchange rate will be fetched
-              from the coinbase.com API and your converted balance will be
-              displayed.
+              from coinbase.com and your converted balance will be displayed.
             </q-item-label>
           </q-item>
         </div>
@@ -792,7 +849,7 @@
                   >Appearance</q-item-label
                 >
                 <q-item-label caption
-                  >Change how your wallet looks
+                  >Change how your wallet looks.
                 </q-item-label>
                 <!-- <div class="row q-py-md">
               <q-btn dense flat rounded @click="toggleDarkMode" size="md"
@@ -1228,6 +1285,9 @@ export default defineComponent({
       "useWebsockets",
       "nfcEncoding",
       "useNumericKeyboard",
+      "periodicallyCheckIncomingInvoices",
+      "checkIncomingInvoices",
+      "checkInvoicesOnStartup",
     ]),
     ...mapState(useP2PKStore, ["p2pkKeys"]),
     ...mapWritableState(useP2PKStore, [
@@ -1342,11 +1402,8 @@ export default defineComponent({
       "newMnemonic",
       "decodeRequest",
       "checkProofsSpendable",
-      "melt",
-      "requestMint",
       "increaseKeysetCounter",
     ]),
-    ...mapActions(useWorkersStore, ["invoiceCheckWorker"]),
     ...mapActions(useProofsStore, ["serializeProofs"]),
     ...mapActions(useNPCStore, ["generateNPCConnection"]),
     ...mapActions(useRestoreStore, ["restoreMint"]),
@@ -1406,6 +1463,10 @@ export default defineComponent({
     },
     checkActiveProofsSpendable: async function () {
       // iterate over this.activeProofs in batches of 50 and check if they are spendable
+      let wallet = useWalletStore().mintWallet(
+        this.activeMintUrl,
+        this.activeUnit
+      );
       let proofs = this.activeProofs.flat();
       console.log("Checking proofs", proofs);
       let allSpentProofs = [];
@@ -1413,7 +1474,7 @@ export default defineComponent({
       for (let i = 0; i < proofs.length; i += batch_size) {
         console.log("Checking proofs", i, i + batch_size);
         let batch = proofs.slice(i, i + batch_size);
-        let spent = await this.checkProofsSpendable(batch, true);
+        let spent = await this.checkProofsSpendable(batch, wallet, true);
         allSpentProofs.push(spent);
       }
       let spentProofs = allSpentProofs.flat();

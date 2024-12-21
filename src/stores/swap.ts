@@ -49,17 +49,22 @@ export const useSwapStore = defineStore("swap", {
       this.swapBlocking = true;
       try {
         // get invoice
-        await mintStore.activateMintUrl(swapAmountData.toUrl);
-        let mintQuote = await walletStore.requestMint(swapAmountData.amount);
+        // await mintStore.activateMintUrl(swapAmountData.toUrl);
+        const toWallet = walletStore.mintWallet(swapAmountData.toUrl, mintStore.activeUnit);
+        let mintQuote = await walletStore.requestMint(swapAmountData.amount, toWallet);
 
         // pay invoice
-        await mintStore.activateMintUrl(swapAmountData.fromUrl);
-        await walletStore.decodeRequest(mintQuote.request);
-        await walletStore.melt();
+        const fromWallet = walletStore.mintWallet(swapAmountData.fromUrl, mintStore.activeUnit);
+        const meltQuote = await walletStore.meltQuote(fromWallet, mintQuote.request);
+        const mint = mintStore.mints.find((m) => m.url === swapAmountData.fromUrl);
+        if (!mint) {
+          throw new Error("mint not found");
+        }
+        const mintProofs = mintStore.mintUnitProofs(mint, fromWallet.unit);
+        await walletStore.melt(mintProofs, meltQuote, fromWallet);
 
         // settle invoice on other side
-        await mintStore.activateMintUrl(swapAmountData.toUrl);
-        await walletStore.mintOnPaid(mintQuote.quote);
+        await walletStore.checkInvoice(mintQuote.quote);
       } catch (e) {
         console.error("Error swapping", e);
         notifyError("Error swapping");

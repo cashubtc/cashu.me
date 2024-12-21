@@ -200,6 +200,12 @@ export const useMintsStore = defineStore("mints", {
         throw new Error("No active mint");
       }
     },
+    mintUnitProofs(mint: Mint, unit: string): WalletProof[] {
+      const unitKeysets = mint.keysets.filter((k) => k.unit === unit);
+      return this.proofs.filter((p) =>
+        unitKeysets.map((k) => k.id).includes(p.id)
+      );
+    },
     activeMintBalance() {
       // return balance of active mint in active unit
       return this.activeMint().unitBalance(this.activeUnit);
@@ -420,7 +426,7 @@ export const useMintsStore = defineStore("mints", {
         console.error(error);
         try {
           notifyApiError(error, "Could not get mint info");
-        } catch {}
+        } catch { }
         throw error;
       }
     },
@@ -465,7 +471,7 @@ export const useMintsStore = defineStore("mints", {
         console.error(error);
         try {
           notifyApiError(error, "Could not get mint keys");
-        } catch {}
+        } catch { }
         throw error;
       }
     },
@@ -479,7 +485,7 @@ export const useMintsStore = defineStore("mints", {
         console.error(error);
         try {
           notifyApiError(error, "Could not get mint keysets");
-        } catch {}
+        } catch { }
         throw error;
       }
     },

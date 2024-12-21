@@ -25,6 +25,7 @@ export const useUiStore = defineStore("ui", {
     showReceiveDialog: false,
     showReceiveEcashDrawer: false,
     showNumericKeyboard: false,
+    activityOrb: false,
     tab: useLocalStorage("cashu.ui.tab", "history" as string),
     expandHistory: useLocalStorage("cashu.ui.expandHistory", true as boolean),
     globalMutexLock: false,
@@ -58,6 +59,9 @@ export const useUiStore = defineStore("ui", {
     },
     unlockMutex() {
       this.globalMutexLock = false;
+    },
+    triggerActivityOrb() {
+      this.activityOrb = true
     },
     setTab(tab: string) {
       this.tab = tab;

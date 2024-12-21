@@ -153,7 +153,7 @@ export const useNWCStore = defineStore("nwc", {
         return {
           result_type: nwcCommand.method,
           result: {
-            preimage: meltData.preimage,
+            // preimage: meltData.preimage,
           },
         };
       } catch (e) {

@@ -12,7 +12,7 @@ export type HistoryToken = {
   status: "paid" | "pending";
   amount: number;
   date: string;
-  token?: string;
+  token: string;
   mint: string;
   unit: string;
   paymentRequest?: PaymentRequest;
@@ -26,18 +26,18 @@ export const useTokensStore = defineStore("tokens", {
   }),
   actions: {
     /**
-     * @param {{amount: number, serializedProofs: string, mint: string, unit: string}} param0
+     * @param {{amount: number, token: string, mint: string, unit: string}} param0
      */
     addPaidToken({
       amount,
-      serializedProofs,
+      token,
       mint,
       unit,
       fee,
       paymentRequest,
     }: {
       amount: number;
-      serializedProofs: string;
+      token: string;
       mint: string;
       unit: string;
       fee?: number;
@@ -47,7 +47,7 @@ export const useTokensStore = defineStore("tokens", {
         status: "paid",
         amount,
         date: currentDateStr(),
-        token: serializedProofs,
+        token,
         mint,
         unit,
         fee,
@@ -56,14 +56,14 @@ export const useTokensStore = defineStore("tokens", {
     },
     addPendingToken({
       amount,
-      serializedProofs,
+      token,
       mint,
       unit,
       fee,
       paymentRequest,
     }: {
       amount: number;
-      serializedProofs: string;
+      token: string;
       mint: string;
       unit: string;
       fee?: number;
@@ -73,7 +73,7 @@ export const useTokensStore = defineStore("tokens", {
         status: "pending",
         amount,
         date: currentDateStr(),
-        token: serializedProofs,
+        token: token,
         mint,
         unit,
         fee,

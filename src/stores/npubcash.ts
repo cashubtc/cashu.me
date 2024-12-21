@@ -214,7 +214,7 @@ export const useNPCStore = defineStore("npc", {
       const unit = token.getUnit(decodedToken);
       tokensStore.addPendingToken({
         amount: amount,
-        serializedProofs: tokenStr,
+        token: tokenStr,
         mint: mintUrl,
         unit: unit,
       });
