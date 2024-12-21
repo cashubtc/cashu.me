@@ -642,6 +642,9 @@ export default {
 
     // reconnect all websockets
     this.checkPendingInvoices();
+
+    // debug console
+    useUiStore().enableDebugConsole();
   },
 };
 </script>

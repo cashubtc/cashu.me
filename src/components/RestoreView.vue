@@ -250,7 +250,7 @@ export default defineComponent({
           } ...`;
           await this.restoreMint(mint.url);
         }
-        notifySuccess("All mints restored successfully.");
+        notifySuccess("Restore finished successfully");
       } catch (error) {
         console.error("Error restoring mints:", error);
         notifyError(`Error restoring mints: ${error.message || error}`);

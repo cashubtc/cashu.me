@@ -33,6 +33,7 @@ export const useUiStore = defineStore("ui", {
       "cashu.ui.showNfcButtonInDrawer",
       true as boolean
     ),
+    showDebugConsole: useLocalStorage("cashu.ui.showDebugConsole", false),
   }),
   actions: {
     closeDialogs() {
@@ -95,6 +96,32 @@ export const useUiStore = defineStore("ui", {
       // + " " +
       // currency.toUpperCase()
     },
+    toggleDebugConsole() {
+      this.showDebugConsole = !this.showDebugConsole;
+      if (this.showDebugConsole) {
+        this.enableDebugConsole();
+      } else {
+        this.disableDebugConsole();
+      }
+    },
+    enableDebugConsole() {
+      if (!this.showDebugConsole) {
+        return;
+      }
+      // enable debug terminal
+      var script = document.createElement("script");
+      script.src = "//cdn.jsdelivr.net/npm/eruda";
+      document.body.appendChild(script);
+      script.onload = function () {
+        // @ts-ignore
+        eruda.init();
+      };
+    },
+    disableDebugConsole() {
+      // @ts-ignore
+      document.querySelector("#eruda").remove();
+    }
+
   },
   getters: {
     tickerShort() {

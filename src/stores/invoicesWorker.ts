@@ -12,7 +12,7 @@ interface InvoiceQuote {
 export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
   state: () => {
     return {
-      checkInterval: 3000,
+      checkInterval: 5000,
       maxLength: 50,
       // Two weeks
       maxAge: 1000 * 60 * 60 * 24 * 14,
@@ -27,7 +27,7 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
       lastInvoiceCheckTime: 0,
       maxQuotesToCheckOnStartup: 10,
       lastPendingInvoiceCheck: useLocalStorage<number>("cashu.worker.invoices.lastPendingInvoiceCheck", 0),
-      checkPendingInvoicesInterval: 1000 * 10,
+      checkPendingInvoicesInterval: 1000 * 10, // delay between bulk invoice checks
     };
   },
   actions: {

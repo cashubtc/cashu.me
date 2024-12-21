@@ -39,6 +39,7 @@ import {
   ProofState,
 } from "@cashu/cashu-ts";
 import { hashToCurve } from "@cashu/crypto/modules/common";
+// @ts-ignore
 import * as bolt11Decoder from "light-bolt11-decoder";
 import { bech32 } from "bech32";
 import axios from "axios";
@@ -1095,8 +1096,10 @@ export const useWalletStore = defineStore("wallet", {
       // add to checker before we try a websocket
       if (kickOffInvoiceChecker) {
         if (useSettingsStore().periodicallyCheckIncomingInvoices) {
+          console.log(`Adding quote ${quote} to long-polling checker.`);
           useInvoicesWorkerStore().addInvoiceToChecker(quote);
         } else if (useSettingsStore().checkIncomingInvoices) {
+          console.log(`Adding quote ${quote} to old worker checker.`);
           useWorkersStore().invoiceCheckWorker(quote);
         }
       }
@@ -1112,7 +1115,7 @@ export const useWalletStore = defineStore("wallet", {
         )
       ) {
         console.log(
-          "Websockets not supported. Fallback to invoice check worker."
+          "Websockets not supported."
         );
         return;
       }

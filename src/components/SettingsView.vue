@@ -1066,8 +1066,8 @@
               <q-item>
                 <q-item-section>
                   <row>
-                    <q-btn dense flat outline click @click="enable_terminal">
-                      Open debug terminal
+                    <q-btn dense flat outline click @click="toggleTerminal">
+                      Toggle Debug Console
                     </q-btn> </row
                   ><row>
                     <q-item-label class="q-px-sm" caption
@@ -1443,14 +1443,8 @@ export default defineComponent({
     toggleMnemonicVisibility: function () {
       this.hideMnemonic = !this.hideMnemonic;
     },
-    enable_terminal: function () {
-      // enable debug terminal
-      var script = document.createElement("script");
-      script.src = "//cdn.jsdelivr.net/npm/eruda";
-      document.body.appendChild(script);
-      script.onload = function () {
-        eruda.init();
-      };
+    toggleTerminal: function () {
+      useUiStore().toggleDebugConsole();
     },
     getLocalstorageToFile: async function () {
       // https://stackoverflow.com/questions/24263682/save-restore-local-storage-to-a-local-file
