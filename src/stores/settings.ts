@@ -52,7 +52,7 @@ export const useSettingsStore = defineStore("settings", {
       ),
       enableReceiveSwaps: useLocalStorage<boolean>(
         "cashu.settings.enableReceiveSwaps",
-        false
+        true
       ),
     };
   },

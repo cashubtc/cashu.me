@@ -115,7 +115,7 @@
         </div>
 
         <!-- VALID TOKEN -->
-        <div v-if="tokenDecodesCorrectly">
+        <div v-if="tokenDecodesCorrectly" class="q-mr-xl">
           <div class="row">
             <TokenInformation
               :encodedToken="receiveData.tokensBase64"
@@ -144,15 +144,6 @@
                 <q-spinner-hourglass />
               </template>
             </q-btn>
-            <q-btn
-              @click="addPendingTokenToHistory(receiveData.tokensBase64)"
-              color="primary"
-              rounded
-              flat
-              class="q-mr-sm"
-              >Later
-              <q-tooltip>Add to history to receive later</q-tooltip>
-            </q-btn>
             <!-- swap to trusted mint -->
             <q-btn
               v-if="
@@ -164,12 +155,21 @@
               @click="handleSwapToTrustedMint"
               color="primary"
               rounded
-              outline
-              class="q-mr-sm"
+              flat
+              class="q-mr-none q-pr-sm"
             >
               <q-icon name="swap_horiz" class="q-pr-sm" />
               Swap
               <q-tooltip>Swap to a trusted mint</q-tooltip>
+            </q-btn>
+            <q-btn
+              @click="addPendingTokenToHistory(receiveData.tokensBase64)"
+              color="primary"
+              rounded
+              flat
+              class="q-mr-none q-pr-sm"
+              >Later
+              <q-tooltip>Add to history to receive later</q-tooltip>
             </q-btn>
           </div>
         </div>
