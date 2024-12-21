@@ -720,7 +720,7 @@ export const useWalletStore = defineStore("wallet", {
 
       const mintStore = useMintsStore();
       const mintWallet = this.mintWallet(mintStore.activeMintUrl, mintStore.activeUnit);
-      await this.melt(mintStore.activeProofs, quote, mintWallet);
+      return await this.melt(mintStore.activeProofs, quote, mintWallet);
     },
     melt: async function (proofs: WalletProof[], quote: MeltQuoteResponse, mintWallet: CashuWallet) {
       const uIStore = useUiStore();

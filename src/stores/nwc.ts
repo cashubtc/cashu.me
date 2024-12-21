@@ -145,7 +145,7 @@ export const useNWCStore = defineStore("nwc", {
         } as NWCError;
       }
       try {
-        const meltData = await walletStore.melt();
+        const meltData = await walletStore.meltInvoiceData();
         const paidAmount =
           walletStore.payInvoiceData.meltQuote.response.amount +
           proofsStore.sumProofs(meltData.change);
@@ -378,9 +378,10 @@ export const useNWCStore = defineStore("nwc", {
       const conn = this.connections[0];
 
       const currentUnitTime = Math.floor(Date.now() / 1000);
+      const subscribeSince = currentUnitTime - 60; // 1 minute
       let filter = {
         kinds: [NWCKind.NWCRequest as NDKKind],
-        since: currentUnitTime,
+        since: subscribeSince,
         authors: [conn.connectionPublicKey],
         "#p": [conn.walletPublicKey],
       } as NDKFilter;
