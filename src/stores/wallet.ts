@@ -1053,9 +1053,13 @@ export const useWalletStore = defineStore("wallet", {
       }
       return true;
     },
-    mintOnPaid: async function (quote: string, verbose = true, kickOffInvoiceChecker = true) {
+    mintOnPaid: async function (quote: string, verbose = true, kickOffInvoiceChecker = true, hideInvoiceDetailsOnMint = true) {
       const mintStore = useMintsStore();
       const settingsStore = useSettingsStore();
+      if (!settingsStore.checkIncomingInvoices) {
+        console.log("settingsStore.checkIncomingInvoices is disabled, skipping invoice check");
+        return;
+      }
       const invoice = this.invoiceHistory.find((i) => i.quote === quote);
       if (!invoice) {
         throw new Error("invoice not found");
@@ -1068,8 +1072,13 @@ export const useWalletStore = defineStore("wallet", {
       }
       // add to checker before we try a websocket
       if (kickOffInvoiceChecker) {
-        useInvoicesWorkerStore().addInvoiceToChecker(quote);
+        if (useSettingsStore().periodicallyCheckIncomingInvoices) {
+          useInvoicesWorkerStore().addInvoiceToChecker(quote);
+        } else if (useSettingsStore().checkIncomingInvoices) {
+          useWorkersStore().invoiceCheckWorker(quote);
+        }
       }
+
       if (
         !settingsStore.useWebsockets ||
         !mint.info?.nuts[17]?.supported ||
@@ -1094,8 +1103,9 @@ export const useWalletStore = defineStore("wallet", {
           async (mintQuoteResponse: MintQuoteResponse) => {
             console.log("Websocket: mint quote paid.");
             const proofs = await this.mint(invoice, false);
-            uIStore.showInvoiceDetails = false;
-            invoice.mintQuote = mintQuoteResponse;
+            if (hideInvoiceDetailsOnMint) {
+              uIStore.showInvoiceDetails = false;
+            }
             if (!!window.navigator.vibrate) navigator.vibrate(200);
             notifySuccess("Received " + uIStore.formatCurrency(invoice.amount, invoice.unit) + " via Lightning");
             unsub();
@@ -1115,7 +1125,7 @@ export const useWalletStore = defineStore("wallet", {
         this.activeWebsocketConnections--;
       }
     },
-    checkInvoice: async function (quote: string, verbose = true) {
+    checkInvoice: async function (quote: string, verbose = true, hideInvoiceDetailsOnMint = true) {
       const uIStore = useUiStore();
       uIStore.triggerActivityOrb();
       const mintStore = useMintsStore();
@@ -1143,7 +1153,9 @@ export const useWalletStore = defineStore("wallet", {
           throw new Error(`invoice state not paid: ${state}`);
         }
         const proofs = await this.mint(invoice, verbose);
-        uIStore.showInvoiceDetails = false;
+        if (hideInvoiceDetailsOnMint) {
+          uIStore.showInvoiceDetails = false;
+        }
         if (!!window.navigator.vibrate) navigator.vibrate(200);
         notifySuccess(
           "Received " +

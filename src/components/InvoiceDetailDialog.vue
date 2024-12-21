@@ -77,7 +77,7 @@
 
       <div v-else class="text-center q-mt-none q-pt-none">
         <a class="text-secondary" :href="'lightning:' + invoiceData.bolt11">
-          <q-responsive :ratio="1" class="q-mx-md q-mt-none q-pt-none">
+          <q-responsive :ratio="1" class="q-ma-none q-ma-none">
             <vue-qrcode
               :value="'lightning:' + invoiceData.bolt11.toUpperCase()"
               :options="{ width: 340 }"
@@ -99,12 +99,6 @@
             </div>
             <div class="row justify-center q-py-md">
               <q-item-label style="font-size: 28px" class="text-weight-bold">
-                <q-spinner-dots
-                  v-if="runnerActive"
-                  color="primary"
-                  size="0.8em"
-                  class="q-mr-md"
-                />
                 <q-icon
                   :name="
                     invoiceData.amount >= 0 ? 'call_received' : 'call_made'
@@ -135,6 +129,21 @@
                 <q-icon name="account_balance" size="xs" class="q-mr-sm" />
                 {{ shortUrl }}
               </q-chip>
+            </div>
+            <div
+              v-if="invoiceData.amount > 0 && invoiceData.status === 'paid'"
+              class="row justify-center"
+            >
+              <transition appear enter-active-class="animated tada">
+                <span class="q-mt-lg text-h6">
+                  <q-icon
+                    name="check_circle"
+                    size="1.5rem"
+                    color="positive"
+                    class="q-mr-sm q-mb-xs"
+                  />Paid!
+                </span>
+              </transition>
             </div>
           </q-card-section>
         </div>

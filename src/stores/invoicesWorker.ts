@@ -25,6 +25,9 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
       invoiceWorkerRunning: false,
       quotes: useLocalStorage<InvoiceQuote[]>("cashu.worker.invoices.quotesQueue", []),
       lastInvoiceCheckTime: 0,
+      maxQuotesToCheckOnStartup: 10,
+      lastPendingInvoiceCheck: useLocalStorage<number>("cashu.worker.invoices.lastPendingInvoiceCheck", 0),
+      checkPendingInvoicesInterval: 1000 * 10,
     };
   },
   actions: {
@@ -102,16 +105,24 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
         }
       }
     },
-    async reconnectWebsockets() {
-      if (!useSettingsStore().useWebsockets) return;
+    async checkPendingInvoices() {
+      if (!useSettingsStore().checkInvoicesOnStartup) return;
+      if (Date.now() < this.lastPendingInvoiceCheck + this.checkPendingInvoicesInterval) return;
       const walletStore = useWalletStore();
-      // for each quote that is less than one hour old, call walletStore.mintOnPaid(quote)
-      const now = Date.now();
-      for (const q of this.quotes) {
-        if (now - q.addedAt < this.oneHour) {
-          walletStore.mintOnPaid(q.quote, false, false);
-          console.log(`Connected Websocket for quote ${q.quote}`);
-        }
+      const quotesToCheck =
+        walletStore.invoiceHistory.filter((q) =>
+          q.status === "pending" &&
+          q.amount > 0 &&
+          Date.now() - Date.parse(q.date) < this.oneDay
+        );
+      if (quotesToCheck.length > this.maxQuotesToCheckOnStartup) {
+        quotesToCheck.splice(this.maxQuotesToCheckOnStartup);
+      }
+      this.lastPendingInvoiceCheck = Date.now();
+      console.log(`Checking ${quotesToCheck.length} quotes`);
+      for (const q of quotesToCheck) {
+        console.log(`Checking quote ${q.quote}`);
+        walletStore.mintOnPaid(q.quote, false, true);
       }
     },
   },

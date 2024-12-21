@@ -381,7 +381,7 @@ export default {
     ...mapActions(usePRStore, ["createPaymentRequest"]),
     ...mapActions(useInvoicesWorkerStore, [
       "startInvoiceCheckerWorker",
-      "reconnectWebsockets",
+      "checkPendingInvoices",
     ]),
     // TOKEN METHODS
     decodeToken: function (encoded_token) {
@@ -643,7 +643,7 @@ export default {
     this.startInvoiceCheckerWorker();
 
     // reconnect all websockets
-    this.reconnectWebsockets();
+    this.checkPendingInvoices();
   },
 };
 </script>

@@ -133,17 +133,28 @@ export default defineComponent({
     },
   },
   methods: {
-    ...mapActions(useWalletStore, ["checkInvoice", "checkOutgoingInvoice"]),
+    ...mapActions(useWalletStore, [
+      "checkInvoice",
+      "mintOnPaid",
+      "checkOutgoingInvoice",
+    ]),
     shortenString: function (s) {
       return shortenString(s, 20, 10);
     },
     handlePageChange(page) {
       this.currentPage = page;
     },
-    showInvoiceDialog(invoice) {
+    showInvoiceDialog: async function (invoice) {
       this.invoiceData = invoice;
       this.showInvoiceDetails = true;
-      useInvoicesWorkerStore().addInvoiceToChecker(invoice.quote);
+      if (invoice.status === "pending") {
+        try {
+          await this.checkInvoice(invoice.quote, false, false);
+        } catch (e) {
+          this.mintOnPaid(invoice.quote, false, true, false);
+        }
+      }
+      // useInvoicesWorkerStore().addInvoiceToChecker(invoice.quote);
       // this.tab("invoice");
     },
     formattedDate(date_str) {

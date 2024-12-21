@@ -590,10 +590,7 @@ export default defineComponent({
     };
   },
   computed: {
-    ...mapWritableState(useSettingsStore, [
-      "getBitcoinPrice",
-      "checkSentTokens",
-    ]),
+    ...mapWritableState(useSettingsStore, ["getBitcoinPrice"]),
     ...mapState(useP2PKStore, ["p2pkKeys"]),
     ...mapState(useMintsStore, [
       "activeMintUrl",

@@ -18,8 +18,16 @@ export const useSettingsStore = defineStore("settings", {
         "cashu.settings.checkSentTokens",
         true
       ),
+      checkIncomingInvoices: useLocalStorage<boolean>(
+        "cashu.settings.checkIncomingInvoices",
+        true
+      ),
       periodicallyCheckIncomingInvoices: useLocalStorage<boolean>(
         "cashu.settings.periodicallyCheckIncomingInvoices",
+        true
+      ),
+      checkInvoicesOnStartup: useLocalStorage<boolean>(
+        "cashu.settings.checkInvoicesOnStartup",
         true
       ),
       useWebsockets: useLocalStorage<boolean>(

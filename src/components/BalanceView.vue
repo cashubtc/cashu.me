@@ -132,24 +132,6 @@
       </q-btn>
     </div>
   </div>
-  <!-- active websockets -->
-  <div class="row q-mt-xs q-mb-none" v-if="activeWebsocketConnections > 0">
-    <div class="col-12">
-      <q-btn
-        name="history"
-        size="sm"
-        align="between"
-        color="secondary"
-        dense
-        outline
-        class="q-mx-none q-mt-xs q-pr-sm cursor-pointer"
-        @click="checkPendingInvoices()"
-        ><q-icon name="history" size="1rem" class="q-mx-xs" /> Active
-        websockets: {{ activeWebsocketConnections }}
-        <q-tooltip>Check all active websockets</q-tooltip>
-      </q-btn>
-    </div>
-  </div>
   <!-- </q-card-section>
   </q-card> -->
 </template>
@@ -191,9 +173,8 @@ export default defineComponent({
     ...mapState(useTokensStore, ["historyTokens"]),
     ...mapState(useUiStore, ["globalMutexLock"]),
     ...mapState(usePriceStore, ["bitcoinPrice"]),
-    ...mapState(useWalletStore, ["activeWebsocketConnections"]),
     ...mapWritableState(useMintsStore, ["activeUnit"]),
-    ...mapWritableState(useUiStore, ["hideBalance", "activityOrb"]),
+    ...mapWritableState(useUiStore, ["hideBalance"]),
     pendingBalance: function () {
       return -this.historyTokens
         .filter((t) => t.status == "pending")
@@ -244,10 +225,7 @@ export default defineComponent({
     this.fetchBitcoinPriceUSD();
   },
   methods: {
-    ...mapActions(useWalletStore, [
-      "checkPendingInvoices",
-      "checkPendingTokens",
-    ]),
+    ...mapActions(useWalletStore, ["checkPendingTokens"]),
     ...mapActions(usePriceStore, ["fetchBitcoinPriceUSD"]),
     toggleUnit: function () {
       const units = this.activeMint().units;
