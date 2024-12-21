@@ -1,9 +1,9 @@
 <template>
   <div class="q-pb-md">
     <!-- title that says choose a mint -->
-    <div class="row q-mb-none">
+    <div class="row q-mb-none" v-if="title.length">
       <div class="col-12">
-        <span class="text-caption">Select a mint</span>
+        <span class="text-caption">{{ title }}</span>
       </div>
     </div>
     <div class="row q-mt-xs q-mb-none" v-if="activeMintUrl">
@@ -16,6 +16,8 @@
           :options="chooseMintOptions()"
           option-value="url"
           option-label="shorturl"
+          :rounded="rounded"
+          :style="style"
         >
           <template v-slot:option="scope">
             <q-item v-bind="scope.itemProps">
@@ -74,10 +76,25 @@ import { getShortUrl } from "src/js/wallet-helpers";
 import { mapActions, mapState, mapWritableState } from "pinia";
 import { useMintsStore } from "stores/mints";
 import { MintClass } from "stores/mints";
+import { title } from "process";
 
 export default defineComponent({
   name: "ChooseMint",
   mixins: [windowMixin],
+  props: {
+    rounded: {
+      type: Boolean,
+      default: false,
+    },
+    title: {
+      type: String,
+      default: "Select a mint",
+    },
+    style: {
+      type: String,
+      default: "",
+    },
+  },
   data: function () {
     return {
       chosenMint: null,

@@ -124,7 +124,7 @@
               :showP2PKCheck="true"
             />
           </div>
-          <div class="row q-pt-md">
+          <div class="row q-pt-md" v-if="!swapSelected">
             <q-btn
               @click="receiveIfDecodes"
               color="primary"
@@ -150,9 +150,11 @@
                 enableReceiveSwaps &&
                 (!knowThisMint || true) &&
                 activeMintUrl &&
-                getMint(decodeToken(receiveData.tokensBase64)) != activeMintUrl
+                (getMint(decodeToken(receiveData.tokensBase64)) !=
+                  activeMintUrl ||
+                  true)
               "
-              @click="handleSwapToTrustedMint"
+              @click="swapSelected = true"
               color="primary"
               rounded
               flat
@@ -170,6 +172,43 @@
               class="q-mr-none q-pr-sm"
               >Later
               <q-tooltip>Add to history to receive later</q-tooltip>
+            </q-btn>
+          </div>
+          <!-- swap mint selection -->
+          <div class="row q-pt-md" v-if="swapSelected">
+            <ChooseMint
+              :rounded="true"
+              :title="``"
+              :style="`font-family: monospace; font-size: 13px;`"
+            />
+          </div>
+          <div class="row q-pt-md" v-if="swapSelected">
+            <q-btn
+              @click="handleSwapToTrustedMint"
+              color="primary"
+              rounded
+              class="q-mr-none q-pr-sm"
+              :loading="swapBlocking"
+            >
+              <q-icon name="swap_horiz" class="q-pr-sm" />
+              Swap
+              <template v-slot:loading>
+                <q-spinner-hourglass size="xs" />
+                Swap
+              </template>
+              <q-tooltip>Swap to a trusted mint</q-tooltip>
+            </q-btn>
+            <q-btn
+              @click="swapSelected = false"
+              color="grey"
+              rounded
+              flat
+              class="q-mr-none q-pr-sm"
+              v-if="!swapBlocking"
+            >
+              <q-icon name="close" class="q-pr-sm" />
+              Cancel
+              <q-tooltip>Cancel swap</q-tooltip>
             </q-btn>
           </div>
         </div>
@@ -193,6 +232,9 @@ import { useSwapStore } from "src/stores/swap";
 import { useSettingsStore } from "src/stores/settings";
 import token from "src/js/token";
 
+import ChooseMint from "src/components/ChooseMint.vue";
+import TokenInformation from "components/TokenInformation.vue";
+
 import { mapActions, mapState, mapWritableState } from "pinia";
 import {
   ChevronLeft as ChevronLeftIcon,
@@ -202,8 +244,7 @@ import {
   Scan as ScanIcon,
   Nfc as NfcIcon,
 } from "lucide-vue-next";
-// import ChooseMint from "components/ChooseMint.vue";
-import TokenInformation from "components/TokenInformation.vue";
+
 import { map } from "underscore";
 import {
   notifyError,
@@ -219,11 +260,13 @@ export default defineComponent({
     TokenInformation,
     NfcIcon,
     ScanIcon,
+    ChooseMint,
   },
   data: function () {
     return {
       showP2PKDialog: false,
       ndefSupported: "NDEFReader" in globalThis,
+      swapSelected: false,
     };
   },
   watch: {
@@ -354,6 +397,7 @@ export default defineComponent({
         this.receiveData.tokensBase64,
         mint
       );
+      this.swapSelected = false;
     },
   },
 });

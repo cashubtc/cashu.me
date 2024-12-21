@@ -244,6 +244,9 @@ export default defineComponent({
     ]),
     ...mapActions(useMintsStore, ["toggleUnit"]),
     requestMintButton: async function () {
+      if (!this.invoiceData.amount) {
+        return;
+      }
       try {
         this.showNumericKeyboard = false;
         const mintStore = useMintsStore();

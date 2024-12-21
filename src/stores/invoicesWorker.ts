@@ -72,7 +72,7 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
     },
     dueTime(q: InvoiceQuote) {
       if (q.checkCount > this.keepIntervalConstantForNChecks) {
-        return q.lastChecked + Math.min(this.checkInterval * (1 + q.checkCount - this.keepIntervalConstantForNChecks), this.maxInterval);
+        return q.lastChecked + Math.min(this.checkInterval * (Math.pow(2, q.checkCount - this.keepIntervalConstantForNChecks)), this.maxInterval);
       } else {
         return q.lastChecked + this.checkInterval;
       }
@@ -122,7 +122,7 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
       console.log(`Checking ${quotesToCheck.length} quotes`);
       for (const q of quotesToCheck) {
         console.log(`Checking quote ${q.quote}`);
-        walletStore.mintOnPaid(q.quote, false, true);
+        walletStore.mintOnPaid(q.quote, false, false);
       }
     },
   },
