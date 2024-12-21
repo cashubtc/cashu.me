@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 import { currentDateStr } from "src/js/utils";
-import { useMintsStore, WalletProof, MintClass } from "./mints";
+import { useMintsStore, WalletProof, MintClass, Mint } from "./mints";
 import { useLocalStorage } from "@vueuse/core";
 import { useProofsStore } from "./proofs";
 import { HistoryToken, useTokensStore } from "./tokens";
@@ -346,12 +346,13 @@ export const useWalletStore = defineStore("wallet", {
     },
     sendToLock: async function (
       proofs: WalletProof[],
+      wallet: CashuWallet,
       amount: number,
       receiverPubkey: string
     ) {
       const spendableProofs = this.spendableProofs(proofs, amount);
       const proofsToSend = this.coinSelect(spendableProofs, amount, true);
-      const { keep: keepProofs, send: sendProofs } = await this.wallet.send(
+      const { keep: keepProofs, send: sendProofs } = await wallet.send(
         amount,
         proofsToSend,
         { pubkey: receiverPubkey }
@@ -365,6 +366,7 @@ export const useWalletStore = defineStore("wallet", {
     },
     send: async function (
       proofs: WalletProof[],
+      wallet: CashuWallet,
       amount: number,
       invalidate: boolean = false,
       includeFees: boolean = false
@@ -379,7 +381,7 @@ export const useWalletStore = defineStore("wallet", {
       const proofsStore = useProofsStore();
       const uIStore = useUiStore();
       let proofsToSend: WalletProof[] = [];
-      const keysetId = this.getKeyset();
+      const keysetId = this.getKeyset(wallet.mint.mintUrl, wallet.unit);
       await uIStore.lockMutex();
       try {
         const spendableProofs = this.spendableProofs(proofs, amount);
@@ -387,7 +389,7 @@ export const useWalletStore = defineStore("wallet", {
         proofsToSend = this.coinSelect(spendableProofs, amount, includeFees);
         const totalAmount = proofsToSend.reduce((s, t) => (s += t.amount), 0);
         const fees = includeFees
-          ? this.wallet.getFeesForProofs(proofsToSend)
+          ? wallet.getFeesForProofs(proofsToSend)
           : 0;
         const targetAmount = amount + fees;
 
@@ -397,7 +399,7 @@ export const useWalletStore = defineStore("wallet", {
         if (totalAmount != targetAmount) {
           const counter = this.keysetCounter(keysetId);
           proofsToSend = this.coinSelect(spendableProofs, targetAmount, true);
-          ({ keep: keepProofs, send: sendProofs } = await this.wallet.send(
+          ({ keep: keepProofs, send: sendProofs } = await wallet.send(
             targetAmount,
             proofsToSend,
             { counter, proofsWeHave: spendableProofs }
@@ -468,13 +470,13 @@ export const useWalletStore = defineStore("wallet", {
         unit: unitInToken,
         mint: mintInToken,
         fee: fee,
-      }
-      await uIStore.lockMutex();
+      } as HistoryToken;
       const mintWallet = this.mintWallet(historyToken.mint, historyToken.unit);
       const mint = mintStore.mints.find((m) => m.url === historyToken.mint);
       if (!mint) {
         throw new Error("mint not found");
       }
+      await uIStore.lockMutex();
       try {
         // redeem
         const keysetId = this.getKeyset(historyToken.mint, historyToken.unit);
@@ -722,16 +724,19 @@ export const useWalletStore = defineStore("wallet", {
       if (quote == null) {
         throw new Error("no quote found.");
       }
+      const mintWallet = this.mintWallet(mintStore.activeMintUrl, mintStore.activeUnit);
+
       const amount = quote.amount + quote.fee_reserve;
       let countChangeOutputs = 0;
-      const keysetId = this.getKeyset();
+      const keysetId = this.getKeyset(mintStore.activeMintUrl, mintStore.activeUnit);
       let keysetCounterIncrease = 0;
+
 
       // start melt
       let sendProofs: Proof[] = [];
       try {
         const { keepProofs: keepProofs, sendProofs: _sendProofs } =
-          await this.send(mintStore.activeProofs, amount, false, true);
+          await this.send(mintStore.activeProofs, mintWallet, amount, false, true);
         sendProofs = _sendProofs;
         if (sendProofs.length == 0) {
           throw new Error("could not split proofs.");
@@ -763,7 +768,7 @@ export const useWalletStore = defineStore("wallet", {
 
         // NOTE: if the user exits the app while we're in the API call, JS will emit an error that we would catch below!
         // We have to handle that case in the catch block below
-        const data = await this.wallet.meltProofs(quote, sendProofs, {
+        const data = await mintWallet.meltProofs(quote, sendProofs, {
           keysetId,
           counter,
         });
@@ -795,8 +800,8 @@ export const useWalletStore = defineStore("wallet", {
         tokenStore.addPaidToken({
           amount: -amount_paid,
           token: proofsStore.serializeProofs(sendProofs),
-          unit: mintStore.activeUnit,
-          mint: mintStore.activeMintUrl,
+          unit: mintWallet.unit,
+          mint: mintWallet.mint.mintUrl,
         });
 
         this.updateInvoiceInHistory(quote, {
@@ -908,7 +913,6 @@ export const useWalletStore = defineStore("wallet", {
       const sendTokensStore = useSendTokensStore();
       const uIStore = useUiStore();
       const tokenJson = token.decode(historyToken.token);
-      const activeMint = useMintsStore().activeMint().mint;
       const mintStore = useMintsStore();
       const settingsStore = useSettingsStore();
       if (!settingsStore.checkSentTokens) {
@@ -917,7 +921,6 @@ export const useWalletStore = defineStore("wallet", {
         );
         return;
       }
-      const mintWallet = this.mintWallet(historyToken.mint, historyToken.unit);
       const mint = mintStore.mints.find((m) => m.url === historyToken.mint);
       if (!mint) {
         throw new Error("mint not found");

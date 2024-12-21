@@ -652,6 +652,7 @@ export default defineComponent({
       "spendableProofs",
       "getFeesForProofs",
       "onTokenPaid",
+      "mintWallet",
     ]),
     ...mapActions(useProofsStore, ["serializeProofs"]),
     ...mapActions(useTokensStore, [
@@ -866,8 +867,10 @@ export default defineComponent({
       }
       try {
         // keep firstProofs, send scndProofs and delete them (invalidate=true)
+        const mintWallet = this.mintWallet(this.activeMintUrl, this.activeUnit);
         let { _, sendProofs } = await this.sendToLock(
           this.activeProofs,
+          mintWallet,
           sendAmount,
           this.sendData.p2pkPubkey
         );
@@ -906,9 +909,11 @@ export default defineComponent({
       try {
         let sendAmount =
           this.sendData.amount * this.activeUnitCurrencyMultiplyer;
+        const mintWallet = this.mintWallet(this.activeMintUrl, this.activeUnit);
         // keep firstProofs, send scndProofs and delete them (invalidate=true)
         let { _, sendProofs } = await this.send(
           this.activeProofs,
+          mintWallet,
           sendAmount,
           true,
           this.includeFeesInSendAmount
