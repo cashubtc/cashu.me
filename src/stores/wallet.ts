@@ -99,6 +99,7 @@ export const useWalletStore = defineStore("wallet", {
         [] as { mnemonic: string; keysetCounters: KeysetCounter[] }[]
       ),
       invoiceData: {} as InvoiceHistory,
+      activeWebsocketConnections: 0,
       payInvoiceData: {
         blocking: false,
         bolt11: "",
@@ -1073,6 +1074,7 @@ export const useWalletStore = defineStore("wallet", {
       }
       const uIStore = useUiStore();
       try {
+        this.activeWebsocketConnections++;
         const unsub = await mintWallet.onMintQuotePaid(
           quote,
           async (mintQuoteResponse: MintQuoteResponse) => {
@@ -1095,6 +1097,8 @@ export const useWalletStore = defineStore("wallet", {
         );
       } catch (error) {
         console.log("Error in websocket subscription", error);
+      } finally {
+        this.activeWebsocketConnections--;
       }
     },
     checkInvoice: async function (quote: string, verbose = true) {
@@ -1133,9 +1137,9 @@ export const useWalletStore = defineStore("wallet", {
         );
         return proofs;
       } catch (error) {
-        if (verbose) {
-          notify("Invoice still pending");
-        }
+        // if (verbose) {
+        //   notify("Invoice still pending");
+        // }
         console.log("Invoice still pending", invoice.quote);
         throw error;
       }
