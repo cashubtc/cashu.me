@@ -379,7 +379,10 @@ export default {
     ]),
     ...mapActions(useStorageStore, ["checkLocalStorage"]),
     ...mapActions(usePRStore, ["createPaymentRequest"]),
-    ...mapActions(useInvoicesWorkerStore, ["startInvoiceCheckerWorker"]),
+    ...mapActions(useInvoicesWorkerStore, [
+      "startInvoiceCheckerWorker",
+      "reconnectWebsockets",
+    ]),
     // TOKEN METHODS
     decodeToken: function (encoded_token) {
       try {
@@ -638,6 +641,9 @@ export default {
 
     // start invoice checker worker
     this.startInvoiceCheckerWorker();
+
+    // reconnect all websockets
+    this.reconnectWebsockets();
   },
 };
 </script>

@@ -16,6 +16,8 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
       maxLength: 50,
       // Two weeks
       maxAge: 1000 * 60 * 60 * 24 * 14,
+      oneDay: 1000 * 60 * 60 * 24,
+      oneHour: 1000 * 60 * 60,
       // Once per day
       maxInterval: 1000 * 60 * 60 * 24,
       keepIntervalConstantForNChecks: 5,
@@ -59,6 +61,12 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
       });
       this.startInvoiceCheckerWorker();
     },
+    removeInvoiceFromChecker(quote: string) {
+      const index = this.quotes.findIndex((q) => q.quote === quote);
+      if (index !== -1) {
+        this.quotes.splice(index, 1);
+      }
+    },
     dueTime(q: InvoiceQuote) {
       if (q.checkCount > this.keepIntervalConstantForNChecks) {
         return q.lastChecked + Math.min(this.checkInterval * (1 + q.checkCount - this.keepIntervalConstantForNChecks), this.maxInterval);
@@ -91,6 +99,18 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
           }
           this.lastInvoiceCheckTime = now;
           break;
+        }
+      }
+    },
+    async reconnectWebsockets() {
+      if (!useSettingsStore().useWebsockets) return;
+      const walletStore = useWalletStore();
+      // for each quote that is less than one hour old, call walletStore.mintOnPaid(quote)
+      const now = Date.now();
+      for (const q of this.quotes) {
+        if (now - q.addedAt < this.oneHour) {
+          walletStore.mintOnPaid(q.quote, false, false);
+          console.log(`Connected Websocket for quote ${q.quote}`);
         }
       }
     },

@@ -60,6 +60,8 @@
                   word-break: break-all;
                   overflow-wrap: break-word;
                   white-space: normal;
+                  font-family: monospace;
+                  font-size: 0.9em;
                 "
                 >{{ mint.url }}</q-item-label
               >
@@ -67,7 +69,8 @@
                 <q-badge
                   v-for="unit in mintClass(mint).units"
                   :key="unit"
-                  :color="mint.url == activeMintUrl ? 'primary' : 'grey'"
+                  :color="mint.url == activeMintUrl ? 'primary' : 'grey-5'"
+                  :outline="mint.url != activeMintUrl || unit != activeUnit"
                   :label="
                     formatCurrency(mintClass(mint).unitBalance(unit), unit)
                   "
@@ -75,19 +78,20 @@
                 />
               </q-item-label>
             </q-item-section>
-            <q-item-section side class="q-mx-none q-pl-none">
+            <q-item-section side>
               <q-icon
                 name="info_outline"
                 @click="showMintInfo(mint)"
                 color="grey"
-                class="q-mr-xs cursor-pointer"
+                class="cursor-pointer q-pb-sm"
+                size="1.3rem"
               />
-            </q-item-section>
-            <q-item-section side>
               <q-icon
                 name="edit"
                 @click="editMint(mint)"
                 class="cursor-pointer"
+                color="grey"
+                size="1.3rem"
               />
             </q-item-section>
           </q-item>
@@ -593,6 +597,7 @@ export default defineComponent({
     ...mapState(useP2PKStore, ["p2pkKeys"]),
     ...mapState(useMintsStore, [
       "activeMintUrl",
+      "activeUnit",
       "mints",
       "activeProofs",
       "addMintBlocking",

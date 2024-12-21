@@ -647,6 +647,8 @@ export const useWalletStore = defineStore("wallet", {
           mint: invoice.mint,
         });
 
+        useInvoicesWorkerStore().removeInvoiceFromChecker(invoice.quote);
+
         return proofs;
       } catch (error: any) {
         console.error(error);
@@ -1051,7 +1053,7 @@ export const useWalletStore = defineStore("wallet", {
       }
       return true;
     },
-    mintOnPaid: async function (quote: string, verbose = true) {
+    mintOnPaid: async function (quote: string, verbose = true, kickOffInvoiceChecker = true) {
       const mintStore = useMintsStore();
       const settingsStore = useSettingsStore();
       const invoice = this.invoiceHistory.find((i) => i.quote === quote);
@@ -1065,7 +1067,9 @@ export const useWalletStore = defineStore("wallet", {
         throw new Error("mint not found");
       }
       // add to checker before we try a websocket
-      useInvoicesWorkerStore().addInvoiceToChecker(quote);
+      if (kickOffInvoiceChecker) {
+        useInvoicesWorkerStore().addInvoiceToChecker(quote);
+      }
       if (
         !settingsStore.useWebsockets ||
         !mint.info?.nuts[17]?.supported ||
