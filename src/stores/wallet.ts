@@ -757,6 +757,8 @@ export const useWalletStore = defineStore("wallet", {
           keysetCounterIncrease += countChangeOutputs;
         }
 
+        uIStore.triggerActivityOrb();
+
         // NOTE: if the user exits the app while we're in the API call, JS will emit an error that we would catch below!
         // We have to handle that case in the catch block below
         const data = await this.wallet.meltProofs(quote, sendProofs, {
@@ -858,6 +860,7 @@ export const useWalletStore = defineStore("wallet", {
       spendable or already invalidated
       */
       const mintStore = useMintsStore();
+      const uIStore = useUiStore();
       const proofsStore = useProofsStore();
       const tokenStore = useTokensStore();
       if (proofs.length == 0) {
@@ -865,6 +868,7 @@ export const useWalletStore = defineStore("wallet", {
       }
       const enc = new TextEncoder();
       try {
+        uIStore.triggerActivityOrb();
         const proofStates = await wallet.checkProofsStates(proofs);
         const spentProofsStates = proofStates.filter(
           (p) => p.state == CheckStateEnum.SPENT
@@ -900,6 +904,7 @@ export const useWalletStore = defineStore("wallet", {
     },
     onTokenPaid: async function (historyToken: HistoryToken) {
       const sendTokensStore = useSendTokensStore();
+      const uIStore = useUiStore();
       const tokenJson = token.decode(historyToken.token);
       const activeMint = useMintsStore().activeMint().mint;
       const mintStore = useMintsStore();
@@ -937,6 +942,8 @@ export const useWalletStore = defineStore("wallet", {
         }
         const proofs = token.getProofs(tokenJson);
         const oneProof = [proofs[0]];
+        this.activeWebsocketConnections++;
+        uIStore.triggerActivityOrb();
         const unsub = await this.wallet.onProofStateUpdates(
           oneProof,
           async (proofState: ProofState) => {
@@ -958,6 +965,8 @@ export const useWalletStore = defineStore("wallet", {
       } catch (error) {
         console.error("Error in websocket subscription. Starting invoices worker.", error);
         useWorkersStore().checkTokenSpendableWorker(historyToken);
+      } finally {
+        this.activeWebsocketConnections--;
       }
     },
     checkTokenSpendable: async function (
@@ -1075,6 +1084,7 @@ export const useWalletStore = defineStore("wallet", {
       const uIStore = useUiStore();
       try {
         this.activeWebsocketConnections++;
+        uIStore.triggerActivityOrb();
         const unsub = await mintWallet.onMintQuotePaid(
           quote,
           async (mintQuoteResponse: MintQuoteResponse) => {
@@ -1103,6 +1113,7 @@ export const useWalletStore = defineStore("wallet", {
     },
     checkInvoice: async function (quote: string, verbose = true) {
       const uIStore = useUiStore();
+      uIStore.triggerActivityOrb();
       const mintStore = useMintsStore();
       const invoice = this.invoiceHistory.find((i) => i.quote === quote);
       if (!invoice) {

@@ -1,6 +1,7 @@
 <template>
   <div class="row q-col-gutter-y-md justify-center q-pt-sm q-pb-md">
     <div class="col-12 col-sm-11 col-md-8 text-center q-gutter-y-md">
+      <ActivityOrb />
       <NoMintWarnBanner v-if="mints.length == 0" />
       <BalanceView v-else :set-tab="setTab" />
       <div
@@ -200,6 +201,8 @@ import ReceiveDialog from "components/ReceiveDialog.vue";
 import QrcodeReader from "components/QrcodeReader.vue";
 import iOSPWAPrompt from "components/iOSPWAPrompt.vue";
 import AndroidPWAPrompt from "components/AndroidPWAPrompt.vue";
+import ActivityOrb from "components/ActivityOrb.vue";
+
 // pinia stores
 import { mapActions, mapState, mapWritableState } from "pinia";
 import { useMintsStore } from "src/stores/mints";
@@ -248,6 +251,7 @@ export default {
     iOSPWAPrompt,
     AndroidPWAPrompt,
     ScanIcon,
+    ActivityOrb,
   },
   data: function () {
     return {

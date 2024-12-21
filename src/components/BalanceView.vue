@@ -193,7 +193,7 @@ export default defineComponent({
     ...mapState(usePriceStore, ["bitcoinPrice"]),
     ...mapState(useWalletStore, ["activeWebsocketConnections"]),
     ...mapWritableState(useMintsStore, ["activeUnit"]),
-    ...mapWritableState(useUiStore, ["hideBalance"]),
+    ...mapWritableState(useUiStore, ["hideBalance", "activityOrb"]),
     pendingBalance: function () {
       return -this.historyTokens
         .filter((t) => t.status == "pending")
