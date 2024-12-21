@@ -12,12 +12,13 @@ interface InvoiceQuote {
 export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
   state: () => {
     return {
-      checkInterval: 5000,
+      checkInterval: 3000,
       maxLength: 50,
       // Two weeks
       maxAge: 1000 * 60 * 60 * 24 * 14,
       // Once per day
       maxInterval: 1000 * 60 * 60 * 24,
+      keepIntervalConstantForNChecks: 5,
       invoiceCheckListener: null as NodeJS.Timeout | null,
       invoiceWorkerRunning: false,
       quotes: useLocalStorage<InvoiceQuote[]>("cashu.worker.invoices.quotesQueue", []),
@@ -58,6 +59,13 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
       });
       this.startInvoiceCheckerWorker();
     },
+    dueTime(q: InvoiceQuote) {
+      if (q.checkCount > this.keepIntervalConstantForNChecks) {
+        return q.lastChecked + Math.min(this.checkInterval * (1 + q.checkCount - this.keepIntervalConstantForNChecks), this.maxInterval);
+      } else {
+        return q.lastChecked + this.checkInterval;
+      }
+    },
     async processQuotes() {
       const now = Date.now();
       this.quotes = this.quotes.filter((q) => now - q.addedAt < this.maxAge);
@@ -71,7 +79,7 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
 
       for (let i = this.quotes.length - 1; i >= 0; i--) {
         const q = this.quotes[i];
-        const dueTime = q.lastChecked + Math.min(this.checkInterval * (1 + q.checkCount), this.maxInterval);
+        const dueTime = this.dueTime(q);
         if (now > dueTime) {
           const walletStore = useWalletStore();
           try {

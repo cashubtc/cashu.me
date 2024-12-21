@@ -1,7 +1,7 @@
 <template>
   <div
     class="row justify-center q-mb-none"
-    style="position: fixed; top: 70px; left: 0; width: 100%"
+    style="position: absolute; top: 60px; left: 0; width: 100%"
   >
     <div>
       <transition
