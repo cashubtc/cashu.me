@@ -67,6 +67,7 @@ export const useNWCStore = defineStore("nwc", {
   state: () => ({
     nwcEnabled: useLocalStorage<boolean>("cashu.nwc.enabled", false),
     connections: useLocalStorage<NWCConnection[]>("cashu.nwc.connections", []),
+    seenCommandsUntil: useLocalStorage<number>("cashu.nwc.seenCommandsUntil", 0),
     supportedMethods: [
       "pay_invoice",
       "make_invoice",
@@ -187,16 +188,18 @@ export const useNWCStore = defineStore("nwc", {
       console.log("### expiry", expiry) // seconds
       // make invoice
       const walletStore = useWalletStore()
-      const quote = await walletStore.requestMint(amount / 1000)
+      const quote = await walletStore.requestMint(amount / 1000, walletStore.wallet)
       if (!quote) {
         return {
           // requesting mint invoice can fail if no mint was selected yet
           // the error will have been shown as a notification
           // TODO: make requestMint throw and return useful message
           result_type: nwcCommand.method,
-          error: { code: "INTERNAL", message: "failed to request mint invoice"}
+          error: { code: "INTERNAL", message: "failed to request mint invoice" }
         }
       }
+
+      walletStore.mintOnPaid(quote.quote, false, true)
 
       return {
         result_type: nwcCommand.method,
@@ -268,7 +271,7 @@ export const useNWCStore = defineStore("nwc", {
       if (!hash) {
         return {
           result_type: nwcCommand.method,
-          error: { code: "OTHER", message: "invoice or payment_hash required"}
+          error: { code: "OTHER", message: "invoice or payment_hash required" }
         }
       }
 
@@ -277,7 +280,7 @@ export const useNWCStore = defineStore("nwc", {
       const invoiceHistory = walletStore.invoiceHistory
 
       for (const inv of invoiceHistory) {
-        const decoded = decodeBolt11( nwcCommand.params.invoice)
+        const decoded = decodeBolt11(nwcCommand.params.invoice)
         // @ts-ignore
         const invHash = decoded.sections.find(s => s.name === "payment_hash")?.value
         if (invHash === hash) {
@@ -485,6 +488,12 @@ export const useNWCStore = defineStore("nwc", {
           console.log("### Received NWC command but NWC is disabled");
           return;
         }
+        // check if the events date is after the last seen command
+        if (event.created_at <= this.seenCommandsUntil) {
+          return;
+        }
+        this.seenCommandsUntil = event.created_at;
+
         console.log("### NWC request!");
         console.log("### event", event);
         const decryptedContent = await nip04.decrypt(
