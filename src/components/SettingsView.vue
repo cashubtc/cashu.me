@@ -835,6 +835,19 @@
             >Swap received ecash to your active mint.
           </q-item-label>
         </q-item>
+        <q-item>
+          <q-toggle
+            v-model="autoPasteEcashReceive"
+            label="Paste Ecash automatically"
+            color="primary"
+          /> </q-item
+        ><q-item class="q-pt-none">
+          <q-item-label caption
+            >Automatically paste ecash in your clipboard when you press Receive
+            > Ecash > Paste. Automatic pasting can cause UI glitches in iOS
+            Safari.
+          </q-item-label>
+        </q-item>
 
         <!-- use numeric keyboard -->
         <div class="q-py-sm q-px-xs text-left" on-left>
@@ -1314,6 +1327,7 @@ export default defineComponent({
       "checkInvoicesOnStartup",
       "enableReceiveSwaps",
       "showNfcButtonInDrawer",
+      "autoPasteEcashReceive",
     ]),
     ...mapState(useP2PKStore, ["p2pkKeys"]),
     ...mapWritableState(useP2PKStore, [

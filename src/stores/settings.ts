@@ -58,6 +58,10 @@ export const useSettingsStore = defineStore("settings", {
         "cashu.ui.showNfcButtonInDrawer",
         true
       ),
+      autoPasteEcashReceive: useLocalStorage(
+        "cashu.settings.autoPasteEcashReceive",
+        true
+      ),
     };
   },
 });

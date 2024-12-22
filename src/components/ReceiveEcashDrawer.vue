@@ -168,7 +168,10 @@ export default defineComponent({
       "activeUnit",
       "addMintBlocking",
     ]),
-    ...mapState(useSettingsStore, ["showNfcButtonInDrawer"]),
+    ...mapState(useSettingsStore, [
+      "showNfcButtonInDrawer",
+      "autoPasteEcashReceive",
+    ]),
     ...mapWritableState(useUiStore, ["showReceiveEcashDrawer"]),
     ...mapWritableState(useMintsStore, ["addMintData", "showAddMintDialog"]),
     ...mapWritableState(usePRStore, ["showPRDialog"]),
@@ -208,15 +211,18 @@ export default defineComponent({
     ]),
     isiOsSafari() {
       const userAgent = window.navigator.userAgent.toLowerCase();
-      return /iphone|ipad|ipod/.test(userAgent) && /safari/.test(userAgent);
+      const match =
+        /iphone|ipad|ipod/.test(userAgent) && /safari/.test(userAgent);
+      console.log(`User agent: ${userAgent}, is iOS Safari: ${match}`);
+      return match;
     },
     handlePasteBtn: function () {
       this.receiveData.tokensBase64 = "";
       this.showReceiveTokens = true;
       this.showReceiveEcashDrawer = false;
-      this.watchClipboardPaste = true;
-      if (!this.isiOsSafari()) {
-        // const success = this.pasteToParseDialog();
+      // if (!this.isiOsSafari()
+      if (this.autoPasteEcashReceive) {
+        this.watchClipboardPaste = true;
       }
     },
     handleLockBtn: function () {
