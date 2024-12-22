@@ -647,63 +647,65 @@
               </q-item-label>
             </q-item>
           </q-list>
-        </div>
-        <q-expansion-item
-          dense
-          dense-toggle
-          v-if="p2pkKeys.length"
-          class="text-left"
-          :label="`Click to browse ${p2pkKeys.length} keys`"
-        >
-          <q-item v-for="key in p2pkKeys" :key="key.privakey">
-            <q-item-section
-              class="q-mx-none q-pl-none"
-              style="max-width: 1.05em"
+          <q-item>
+            <q-expansion-item
+              dense
+              dense-toggle
+              v-if="p2pkKeys.length"
+              class="text-left"
+              :label="`Click to browse ${p2pkKeys.length} keys`"
             >
-              <q-icon
-                name="content_copy"
-                @click="copyText(key.publicKey)"
-                size="1.2em"
-                color="grey"
-                class="q-mr-xs cursor-pointer"
-              />
-            </q-item-section>
-            <q-item-section>
-              <q-item-label
-                caption
-                clickable
-                style="word-break: break-word; font-size: 0.65rem"
-                class="q-mx-sm"
-                @click="showP2PKKeyEntry(key.publicKey)"
-                >{{ key.publicKey }}</q-item-label
-              >
-            </q-item-section>
-            <q-item-section side>
-              <q-badge
-                v-if="key.used"
-                label="used"
-                color="primary"
-                class="q-mr-sm"
-              />
-            </q-item-section>
-            <q-item-section
-              class="q-mx-none q-pl-none"
-              style="max-width: 1.05em"
-            >
-              <q-icon
-                name="qr_code"
-                @click="showP2PKKeyEntry(key.publicKey)"
-                size="1em"
-                color="grey"
-                class="q-mr-xs cursor-pointer"
-              />
-            </q-item-section>
+              <q-item v-for="key in p2pkKeys" :key="key.privakey">
+                <q-item-section
+                  class="q-mx-none q-pl-none"
+                  style="max-width: 1.05em"
+                >
+                  <q-icon
+                    name="content_copy"
+                    @click="copyText(key.publicKey)"
+                    size="1.2em"
+                    color="grey"
+                    class="q-mr-xs cursor-pointer"
+                  />
+                </q-item-section>
+                <q-item-section>
+                  <q-item-label
+                    caption
+                    clickable
+                    style="word-break: break-word; font-size: 0.65rem"
+                    class="q-mx-sm"
+                    @click="showP2PKKeyEntry(key.publicKey)"
+                    >{{ key.publicKey }}</q-item-label
+                  >
+                </q-item-section>
+                <q-item-section side>
+                  <q-badge
+                    v-if="key.used"
+                    label="used"
+                    color="primary"
+                    class="q-mr-sm"
+                  />
+                </q-item-section>
+                <q-item-section
+                  class="q-mx-none q-pl-none"
+                  style="max-width: 1.05em"
+                >
+                  <q-icon
+                    name="qr_code"
+                    @click="showP2PKKeyEntry(key.publicKey)"
+                    size="1em"
+                    color="grey"
+                    class="q-mr-xs cursor-pointer"
+                  />
+                </q-item-section>
+              </q-item>
+            </q-expansion-item>
           </q-item>
-        </q-expansion-item>
+        </div>
 
         <q-item>
           <q-item-section>
-            <q-item-label overline class="text-weight-bold"
+            <q-item-label overline class="text-weight-bold q-pt-xl"
               >Privacy</q-item-label
             >
             <q-item-label caption>
