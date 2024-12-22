@@ -601,7 +601,8 @@
               /> </q-item
             ><q-item class="q-pt-none">
               <q-item-label caption
-                >Quickly scan NFC cards in the Receive Ecash menu.
+                >Quickly scan NFC cards in the Receive Ecash menu. This option
+                adds an NFC button the Receive Ecash menu.
               </q-item-label>
             </q-item>
           </q-list>
@@ -647,7 +648,7 @@
               </q-item-label>
             </q-item>
           </q-list>
-          <q-item>
+          <q-item v-if="p2pkKeys.length">
             <q-expansion-item
               dense
               dense-toggle
@@ -705,7 +706,7 @@
 
         <q-item>
           <q-item-section>
-            <q-item-label overline class="text-weight-bold q-pt-xl"
+            <q-item-label overline class="text-weight-bold q-pt-sm"
               >Privacy</q-item-label
             >
             <q-item-label caption>
@@ -817,7 +818,7 @@
         <!-- enable receive swaps -->
         <q-item>
           <q-item-section>
-            <q-item-label overline class="text-weight-bold"
+            <q-item-label overline class="text-weight-bold q-pt-xl"
               >Experimental</q-item-label
             >
             <q-item-label caption>
@@ -830,11 +831,14 @@
             v-model="enableReceiveSwaps"
             label="Receive swaps"
             color="primary"
-          />
+          >
+            <q-badge color="primary" label="Beta" class="q-mx-sm"></q-badge>
+          </q-toggle>
         </q-item>
         <q-item class="q-pt-none">
           <q-item-label caption
-            >Swap received ecash to your active mint.
+            >Option to swap received Ecash to your active mint in the Receive
+            Ecash dialog.
           </q-item-label>
         </q-item>
         <q-item>
@@ -845,9 +849,9 @@
           /> </q-item
         ><q-item class="q-pt-none">
           <q-item-label caption
-            >Automatically paste ecash in your clipboard when you press Receive
-            > Ecash > Paste. Automatic pasting can cause UI glitches in iOS
-            Safari.
+            >Automatically paste ecash in your clipboard when you press Receive,
+            then Ecash, then Paste. Automatic pasting can cause UI glitches in
+            iOS, turn it off if you experience issues.
           </q-item-label>
         </q-item>
 
@@ -856,7 +860,7 @@
           <q-list padding>
             <q-item>
               <q-item-section>
-                <q-item-label overline class="text-weight-bold"
+                <q-item-label overline class="text-weight-bold q-pt-lg"
                   >On-screen keyboard</q-item-label
                 >
                 <q-item-label caption
