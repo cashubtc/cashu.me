@@ -1,6 +1,7 @@
 <template>
   <div class="row q-col-gutter-y-md justify-center q-pt-sm q-pb-md">
     <div class="col-12 col-sm-11 col-md-8 text-center q-gutter-y-md">
+      <ActivityOrb />
       <NoMintWarnBanner v-if="mints.length == 0" />
       <BalanceView v-else :set-tab="setTab" />
       <div
@@ -150,10 +151,7 @@
     />
 
     <!-- INVOICE DETAILS  -->
-    <InvoiceDetailDialog
-      v-model="showInvoiceDetails"
-      :invoice-check-worker="invoiceCheckWorker"
-    />
+    <InvoiceDetailDialog v-model="showInvoiceDetails" />
 
     <!-- SEND TOKENS DIALOG  -->
     <SendTokenDialog v-model="showSendTokens" />
@@ -203,6 +201,8 @@ import ReceiveDialog from "components/ReceiveDialog.vue";
 import QrcodeReader from "components/QrcodeReader.vue";
 import iOSPWAPrompt from "components/iOSPWAPrompt.vue";
 import AndroidPWAPrompt from "components/AndroidPWAPrompt.vue";
+import ActivityOrb from "components/ActivityOrb.vue";
+
 // pinia stores
 import { mapActions, mapState, mapWritableState } from "pinia";
 import { useMintsStore } from "src/stores/mints";
@@ -222,6 +222,7 @@ import { usePRStore } from "src/stores/payment-request";
 import { useStorageStore } from "src/stores/storage";
 import ReceiveTokenDialog from "src/components/ReceiveTokenDialog.vue";
 import { useWelcomeStore } from "../stores/welcome";
+import { useInvoicesWorkerStore } from "src/stores/invoicesWorker";
 import { notifyError, notify } from "../js/notify";
 
 import {
@@ -250,6 +251,7 @@ export default {
     iOSPWAPrompt,
     AndroidPWAPrompt,
     ScanIcon,
+    ActivityOrb,
   },
   data: function () {
     return {
@@ -353,21 +355,11 @@ export default {
       "setProofs",
       "getKeysForKeyset",
     ]),
-    ...mapActions(useWorkersStore, [
-      "clearAllWorkers",
-      "invoiceCheckWorker",
-      "checkTokenSpendableWorker",
-    ]),
+    ...mapActions(useWorkersStore, ["clearAllWorkers", "invoiceCheckWorker"]),
     ...mapActions(useTokensStore, ["setTokenPaid"]),
     ...mapActions(useWalletStore, [
-      "requestMint",
       "setInvoicePaid",
       "mint",
-      "melt",
-      "checkProofsSpendable",
-      "checkTokenSpendable",
-      "checkInvoice",
-      "checkPendingInvoices",
       "checkPendingTokens",
       "decodeRequest",
       "initializeMnemonic",
@@ -385,6 +377,10 @@ export default {
     ]),
     ...mapActions(useStorageStore, ["checkLocalStorage"]),
     ...mapActions(usePRStore, ["createPaymentRequest"]),
+    ...mapActions(useInvoicesWorkerStore, [
+      "startInvoiceCheckerWorker",
+      "checkPendingInvoices",
+    ]),
     // TOKEN METHODS
     decodeToken: function (encoded_token) {
       try {
@@ -640,6 +636,15 @@ export default {
     if (this.enablePaymentRequest) {
       this.subscribeToNip17DirectMessages();
     }
+
+    // start invoice checker worker
+    this.startInvoiceCheckerWorker();
+
+    // reconnect all websockets
+    this.checkPendingInvoices();
+
+    // debug console
+    useUiStore().enableDebugConsole();
   },
 };
 </script>

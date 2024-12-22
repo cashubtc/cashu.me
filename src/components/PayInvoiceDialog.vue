@@ -72,7 +72,7 @@
             :disabled="
               payInvoiceData.blocking || payInvoiceData.meltQuote.error != ''
             "
-            @click="melt"
+            @click="handleMeltButton"
             :label="
               payInvoiceData.meltQuote.error != ''
                 ? 'Error'
@@ -279,12 +279,12 @@ export default defineComponent({
   watch: {
     activeMintUrl: async function () {
       if (this.payInvoiceData.show) {
-        await this.meltQuote();
+        await this.meltQuoteInvoiceData();
       }
     },
     activeUnit: async function () {
       if (this.payInvoiceData.show) {
-        await this.meltQuote();
+        await this.meltQuoteInvoiceData();
       }
     },
   },
@@ -318,8 +318,8 @@ export default defineComponent({
   },
   methods: {
     ...mapActions(useWalletStore, [
-      "melt",
-      "meltQuote",
+      "meltInvoiceData",
+      "meltQuoteInvoiceData",
       "decodeRequest",
       "lnurlPaySecond",
     ]),
@@ -341,6 +341,12 @@ export default defineComponent({
       navigator.clipboard.readText().then((text) => {
         this.payInvoiceData.input.request = text;
       });
+    },
+    handleMeltButton: function () {
+      if (this.payInvoiceData.blocking) {
+        throw new Error("already processing an invoice.");
+      }
+      this.meltInvoiceData();
     },
   },
   created: function () {},

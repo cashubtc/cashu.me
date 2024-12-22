@@ -82,7 +82,7 @@
           </q-btn>
 
           <q-btn
-            v-if="ndefSupported"
+            v-if="ndefSupported && showNfcButtonInDrawer"
             class="full-width custom-btn"
             @click="handleNFCBtn"
           >
@@ -117,6 +117,7 @@ import { useTokensStore } from "src/stores/tokens";
 import { useCameraStore } from "src/stores/camera";
 import { useP2PKStore } from "src/stores/p2pk";
 import { usePRStore } from "src/stores/payment-request";
+import { useSettingsStore } from "../stores/settings";
 import token from "src/js/token";
 import P2PKDialog from "./P2PKDialog.vue";
 import PRDialog from "./PaymentRequestDialog.vue";
@@ -167,10 +168,11 @@ export default defineComponent({
       "activeUnit",
       "addMintBlocking",
     ]),
-    ...mapWritableState(useUiStore, [
-      "showReceiveEcashDrawer",
+    ...mapState(useSettingsStore, [
       "showNfcButtonInDrawer",
+      "autoPasteEcashReceive",
     ]),
+    ...mapWritableState(useUiStore, ["showReceiveEcashDrawer"]),
     ...mapWritableState(useMintsStore, ["addMintData", "showAddMintDialog"]),
     ...mapWritableState(usePRStore, ["showPRDialog"]),
     ...mapState(useCameraStore, ["hasCamera"]),
@@ -209,15 +211,18 @@ export default defineComponent({
     ]),
     isiOsSafari() {
       const userAgent = window.navigator.userAgent.toLowerCase();
-      return /iphone|ipad|ipod/.test(userAgent) && /safari/.test(userAgent);
+      const match =
+        /iphone|ipad|ipod/.test(userAgent) && /safari/.test(userAgent);
+      console.log(`User agent: ${userAgent}, is iOS Safari: ${match}`);
+      return match;
     },
     handlePasteBtn: function () {
       this.receiveData.tokensBase64 = "";
       this.showReceiveTokens = true;
       this.showReceiveEcashDrawer = false;
-      this.watchClipboardPaste = true;
-      if (!this.isiOsSafari()) {
-        // const success = this.pasteToParseDialog();
+      // if (!this.isiOsSafari()
+      if (this.autoPasteEcashReceive) {
+        this.watchClipboardPaste = true;
       }
     },
     handleLockBtn: function () {

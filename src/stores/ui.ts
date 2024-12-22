@@ -25,13 +25,11 @@ export const useUiStore = defineStore("ui", {
     showReceiveDialog: false,
     showReceiveEcashDrawer: false,
     showNumericKeyboard: false,
+    activityOrb: false,
     tab: useLocalStorage("cashu.ui.tab", "history" as string),
     expandHistory: useLocalStorage("cashu.ui.expandHistory", true as boolean),
     globalMutexLock: false,
-    showNfcButtonInDrawer: useLocalStorage(
-      "cashu.ui.showNfcButtonInDrawer",
-      true as boolean
-    ),
+    showDebugConsole: useLocalStorage("cashu.ui.showDebugConsole", false),
   }),
   actions: {
     closeDialogs() {
@@ -58,6 +56,9 @@ export const useUiStore = defineStore("ui", {
     },
     unlockMutex() {
       this.globalMutexLock = false;
+    },
+    triggerActivityOrb() {
+      this.activityOrb = true
     },
     setTab(tab: string) {
       this.tab = tab;
@@ -91,6 +92,32 @@ export const useUiStore = defineStore("ui", {
       // + " " +
       // currency.toUpperCase()
     },
+    toggleDebugConsole() {
+      this.showDebugConsole = !this.showDebugConsole;
+      if (this.showDebugConsole) {
+        this.enableDebugConsole();
+      } else {
+        this.disableDebugConsole();
+      }
+    },
+    enableDebugConsole() {
+      if (!this.showDebugConsole) {
+        return;
+      }
+      // enable debug terminal
+      var script = document.createElement("script");
+      script.src = "//cdn.jsdelivr.net/npm/eruda";
+      document.body.appendChild(script);
+      script.onload = function () {
+        // @ts-ignore
+        eruda.init();
+      };
+    },
+    disableDebugConsole() {
+      // @ts-ignore
+      document.querySelector("#eruda").remove();
+    }
+
   },
   getters: {
     tickerShort() {

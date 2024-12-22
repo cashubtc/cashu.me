@@ -225,10 +225,7 @@ export default defineComponent({
     this.fetchBitcoinPriceUSD();
   },
   methods: {
-    ...mapActions(useWalletStore, [
-      "checkPendingInvoices",
-      "checkPendingTokens",
-    ]),
+    ...mapActions(useWalletStore, ["checkPendingTokens"]),
     ...mapActions(usePriceStore, ["fetchBitcoinPriceUSD"]),
     toggleUnit: function () {
       const units = this.activeMint().units;

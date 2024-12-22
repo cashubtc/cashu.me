@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import { useMintsStore } from "./mints";
+import { Mint, useMintsStore } from "./mints";
 import { useUiStore } from "./ui";
 import { useP2PKStore } from "./p2pk";
 import { useWalletStore } from "./wallet";
@@ -11,6 +11,8 @@ import {
   notify,
   notifyWarning,
 } from "../js/notify";
+import { Token } from "@cashu/cashu-ts";
+import { useSwapStore } from "./swap";
 
 export const useReceiveTokensStore = defineStore("receiveTokensStore", {
   state: () => ({
@@ -23,20 +25,21 @@ export const useReceiveTokensStore = defineStore("receiveTokensStore", {
     scanningCard: false,
   }),
   actions: {
-    decodeToken: function (encoded_token) {
+    decodeToken: function (encodedToken: string) {
       let decodedToken = undefined;
       try {
-        decodedToken = token.decode(encoded_token);
-      } catch (error) {}
+        decodedToken = token.decode(encodedToken);
+      } catch (error) { }
       return decodedToken;
     },
-    knowThisMintOfTokenJson: function (tokenJson) {
+    knowThisMintOfTokenJson: function (tokenJson: Token) {
       const mintStore = useMintsStore();
+      let uniqueIds = [...new Set(token.getProofs(tokenJson).map((p) => p.id))];
       return mintStore.mints
         .map((m) => m.url)
         .includes(token.getMint(tokenJson));
     },
-    receiveToken: async function (encodedToken) {
+    receiveToken: async function (encodedToken: string) {
       const mintStore = useMintsStore();
       const walletStore = useWalletStore();
       const receiveStore = useReceiveTokensStore();
@@ -63,7 +66,7 @@ export const useReceiveTokensStore = defineStore("receiveTokensStore", {
         await mintStore.addMint({ url: token.getMint(tokenJson) });
       }
       // redeem the token
-      await walletStore.redeem(receiveStore.receiveData.tokensBase64);
+      await walletStore.redeem();
       receiveStore.showReceiveTokens = false;
       uiStore.closeDialogs();
     },
@@ -78,6 +81,23 @@ export const useReceiveTokensStore = defineStore("receiveTokensStore", {
         console.error(error);
         return false;
       }
+    },
+    meltTokenToMint: async function (encodedToken: string, mint: Mint) {
+      const receiveStore = useReceiveTokensStore();
+      const mintStore = useMintsStore();
+      const uiStore = useUiStore();
+      const tokenJson = token.decode(encodedToken);
+      if (tokenJson == undefined) {
+        throw new Error("no tokens provided.");
+      }
+      // check if we have all mints
+      if (!this.knowThisMintOfTokenJson(tokenJson)) {
+        // add the mint
+        await mintStore.addMint({ url: token.getMint(tokenJson) });
+      }
+      await useSwapStore().meltProofsToMint(tokenJson, mint);
+      receiveStore.showReceiveTokens = false;
+      uiStore.closeDialogs();
     },
     pasteToParseDialog: function (verbose = false) {
       navigator.clipboard.readText().then((text) => {

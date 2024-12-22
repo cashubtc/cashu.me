@@ -18,6 +18,18 @@ export const useSettingsStore = defineStore("settings", {
         "cashu.settings.checkSentTokens",
         true
       ),
+      checkIncomingInvoices: useLocalStorage<boolean>(
+        "cashu.settings.checkIncomingInvoices",
+        true
+      ),
+      periodicallyCheckIncomingInvoices: useLocalStorage<boolean>(
+        "cashu.settings.periodicallyCheckIncomingInvoices",
+        true
+      ),
+      checkInvoicesOnStartup: useLocalStorage<boolean>(
+        "cashu.settings.checkInvoicesOnStartup",
+        true
+      ),
       useWebsockets: useLocalStorage<boolean>(
         "cashu.settings.useWebsockets",
         true
@@ -36,6 +48,18 @@ export const useSettingsStore = defineStore("settings", {
       ),
       useNumericKeyboard: useLocalStorage<boolean>(
         "cashu.settings.useNumericKeyboard",
+        true
+      ),
+      enableReceiveSwaps: useLocalStorage<boolean>(
+        "cashu.settings.enableReceiveSwaps",
+        true
+      ),
+      showNfcButtonInDrawer: useLocalStorage(
+        "cashu.ui.showNfcButtonInDrawer",
+        true
+      ),
+      autoPasteEcashReceive: useLocalStorage(
+        "cashu.settings.autoPasteEcashReceive",
         true
       ),
     };

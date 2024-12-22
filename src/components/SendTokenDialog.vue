@@ -585,8 +585,10 @@ export default defineComponent({
       }
       // check if entered amount is the same as the result of coinSelect(spendableProofs(activeProofs), amount)
       let spendableProofs = this.spendableProofs(this.activeProofs);
+      const mintWallet = useWalletStore().wallet;
       let selectedProofs = this.coinSelect(
         spendableProofs,
+        mintWallet,
         this.sendData.amount * this.activeUnitCurrencyMultiplyer,
         this.includeFeesInSendAmount
       );
@@ -644,10 +646,7 @@ export default defineComponent({
     },
   },
   methods: {
-    ...mapActions(useWorkersStore, [
-      "checkTokenSpendableWorker",
-      "clearAllWorkers",
-    ]),
+    ...mapActions(useWorkersStore, ["clearAllWorkers"]),
     ...mapActions(useWalletStore, [
       "send",
       "sendToLock",
@@ -655,6 +654,7 @@ export default defineComponent({
       "spendableProofs",
       "getFeesForProofs",
       "onTokenPaid",
+      "mintWallet",
     ]),
     ...mapActions(useProofsStore, ["serializeProofs"]),
     ...mapActions(useTokensStore, [
@@ -869,8 +869,10 @@ export default defineComponent({
       }
       try {
         // keep firstProofs, send scndProofs and delete them (invalidate=true)
+        const mintWallet = this.mintWallet(this.activeMintUrl, this.activeUnit);
         let { _, sendProofs } = await this.sendToLock(
           this.activeProofs,
+          mintWallet,
           sendAmount,
           this.sendData.p2pkPubkey
         );
@@ -878,15 +880,16 @@ export default defineComponent({
         this.sendData.tokens = sendProofs;
 
         this.sendData.tokensBase64 = this.serializeProofs(sendProofs);
-        this.addPendingToken({
+        const historyToken = {
           amount: -this.sendData.amount,
-          serializedProofs: this.sendData.tokensBase64,
+          token: this.sendData.tokensBase64,
           unit: this.activeUnit,
           mint: this.activeMintUrl,
-        });
+        };
+        this.addPendingToken(historyToken);
 
         if (!this.g.offline) {
-          this.onTokenPaid(this.sendData.tokensBase64);
+          this.onTokenPaid(historyToken);
         }
       } catch (error) {
         console.error(error);
@@ -908,9 +911,11 @@ export default defineComponent({
       try {
         let sendAmount =
           this.sendData.amount * this.activeUnitCurrencyMultiplyer;
+        const mintWallet = this.mintWallet(this.activeMintUrl, this.activeUnit);
         // keep firstProofs, send scndProofs and delete them (invalidate=true)
         let { _, sendProofs } = await this.send(
           this.activeProofs,
+          mintWallet,
           sendAmount,
           true,
           this.includeFeesInSendAmount
@@ -922,16 +927,17 @@ export default defineComponent({
         this.sendData.historyAmount =
           -this.sendData.amount * this.activeUnitCurrencyMultiplyer;
 
-        this.addPendingToken({
+        const historyToken = {
           amount: -sendAmount,
-          serializedProofs: this.sendData.tokensBase64,
+          token: this.sendData.tokensBase64,
           unit: this.activeUnit,
           mint: this.activeMintUrl,
           paymentRequest: this.sendData.paymentRequest,
-        });
+        };
+        this.addPendingToken(historyToken);
 
         if (!this.g.offline) {
-          this.onTokenPaid(this.sendData.tokensBase64);
+          this.onTokenPaid(historyToken);
         }
       } catch (error) {
         console.error(error);

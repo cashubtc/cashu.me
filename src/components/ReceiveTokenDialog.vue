@@ -115,7 +115,7 @@
         </div>
 
         <!-- VALID TOKEN -->
-        <div v-if="tokenDecodesCorrectly">
+        <div v-if="tokenDecodesCorrectly" class="q-mr-xl">
           <div class="row">
             <TokenInformation
               :encodedToken="receiveData.tokensBase64"
@@ -124,13 +124,14 @@
               :showP2PKCheck="true"
             />
           </div>
-          <div class="row q-pt-md">
+          <div class="row q-pt-md" v-if="!swapSelected">
             <q-btn
               @click="receiveIfDecodes"
               color="primary"
               rounded
               class="q-ml-xs q-mr-sm"
               :disabled="addMintBlocking"
+              :loading="swapBlocking"
               :label="
                 knowThisMint
                   ? addMintBlocking
@@ -139,15 +140,85 @@
                   : 'Receive'
               "
             >
+              <template v-slot:loading>
+                <q-spinner-hourglass />
+              </template>
+            </q-btn>
+            <!-- swap to trusted mint -->
+            <q-btn
+              v-if="enableReceiveSwaps && activeMintUrl && mints.length"
+              @click="swapSelected = true"
+              color="primary"
+              rounded
+              flat
+              class="q-mr-none q-pr-sm"
+            >
+              <q-icon name="swap_horiz" class="q-pr-sm" />
+              Swap
+              <q-tooltip>Swap to a trusted mint</q-tooltip>
             </q-btn>
             <q-btn
               @click="addPendingTokenToHistory(receiveData.tokensBase64)"
               color="primary"
               rounded
               flat
-              class="q-mr-sm"
+              class="q-mr-none q-pr-sm"
               >Later
               <q-tooltip>Add to history to receive later</q-tooltip>
+            </q-btn>
+          </div>
+          <!-- swap mint selection -->
+          <div class="row q-pl-md q-pt-sm" v-if="swapSelected">
+            <!-- <div v-if="activeMintUrl != tokenMint || swapBlocking"> -->
+            <div>
+              <q-icon name="arrow_downward" class="q-mr-xs" color="positive" />
+              <span
+                >Swap
+                <strong>{{
+                  formatCurrency(swapToMintAmount, tokenUnit)
+                }}</strong>
+              </span>
+            </div>
+            <!-- <div v-else>
+              <q-icon name="south" class="q-mr-xs" color="negative" />
+              <span>Can't swap to same mint</span>
+            </div> -->
+          </div>
+          <div class="row q-pt-xs" v-if="swapSelected">
+            <ChooseMint
+              :rounded="true"
+              :title="``"
+              :style="`font-family: monospace; font-size: 12px;`"
+            />
+          </div>
+          <div class="row q-pt-sm" v-if="swapSelected">
+            <q-btn
+              @click="handleSwapToTrustedMint"
+              color="primary"
+              rounded
+              class="q-pr-md"
+              :loading="swapBlocking"
+              :disabled="activeMintUrl == tokenMint"
+            >
+              <q-icon name="swap_horiz" class="q-pr-sm" />
+              Swap
+              <template v-slot:loading>
+                <q-spinner-hourglass size="xs" />
+                Swap
+              </template>
+              <q-tooltip>Swap to a trusted mint</q-tooltip>
+            </q-btn>
+            <q-btn
+              @click="swapSelected = false"
+              color="grey"
+              rounded
+              flat
+              class="q-mr-none q-pr-sm"
+              v-if="!swapBlocking"
+            >
+              <q-icon name="close" class="q-pr-sm" />
+              Cancel
+              <q-tooltip>Cancel swap</q-tooltip>
             </q-btn>
           </div>
         </div>
@@ -167,7 +238,12 @@ import { useCameraStore } from "src/stores/camera";
 import { useP2PKStore } from "src/stores/p2pk";
 import { usePRStore } from "src/stores/payment-request";
 import { usePriceStore } from "src/stores/price";
+import { useSwapStore } from "src/stores/swap";
+import { useSettingsStore } from "src/stores/settings";
 import token from "src/js/token";
+
+import ChooseMint from "src/components/ChooseMint.vue";
+import TokenInformation from "components/TokenInformation.vue";
 
 import { mapActions, mapState, mapWritableState } from "pinia";
 import {
@@ -178,8 +254,7 @@ import {
   Scan as ScanIcon,
   Nfc as NfcIcon,
 } from "lucide-vue-next";
-// import ChooseMint from "components/ChooseMint.vue";
-import TokenInformation from "components/TokenInformation.vue";
+
 import { map } from "underscore";
 import {
   notifyError,
@@ -187,6 +262,7 @@ import {
   notifyWarning,
   notify,
 } from "../js/notify";
+import MintSettings from "./MintSettings.vue";
 
 export default defineComponent({
   name: "ReceiveTokenDialog",
@@ -195,11 +271,13 @@ export default defineComponent({
     TokenInformation,
     NfcIcon,
     ScanIcon,
+    ChooseMint,
   },
   data: function () {
     return {
       showP2PKDialog: false,
       ndefSupported: "NDEFReader" in globalThis,
+      swapSelected: false,
     };
   },
   watch: {
@@ -222,15 +300,19 @@ export default defineComponent({
     ...mapState(useUiStore, ["tickerShort"]),
     ...mapState(usePriceStore, ["bitcoinPrice"]),
     ...mapState(useMintsStore, [
+      "activeMintUrl",
       "activeProofs",
       "activeUnit",
       "addMintBlocking",
+      "mints",
     ]),
+    ...mapState(useSettingsStore, ["enableReceiveSwaps"]),
     ...mapWritableState(useMintsStore, ["addMintData", "showAddMintDialog"]),
     ...mapWritableState(usePRStore, ["showPRDialog"]),
     ...mapState(useCameraStore, ["hasCamera"]),
     ...mapState(useP2PKStore, ["p2pkKeys"]),
     ...mapState(usePRStore, ["enablePaymentRequest"]),
+    ...mapState(useSwapStore, ["swapBlocking"]),
     canPasteFromClipboard: function () {
       return (
         window.isSecureContext &&
@@ -266,6 +348,17 @@ export default defineComponent({
       }
       const decodedToken = this.decodeToken(this.receiveData.tokensBase64);
       return token.getUnit(decodedToken);
+    },
+    tokenMint: function () {
+      if (!this.tokenDecodesCorrectly) {
+        return "";
+      }
+      const decodedToken = this.decodeToken(this.receiveData.tokensBase64);
+      return this.getMint(decodedToken);
+    },
+    swapToMintAmount: function () {
+      const decodedToken = this.decodeToken(this.receiveData.tokensBase64);
+      return this.tokenAmount - useSwapStore().meltToMintFees(decodedToken);
     },
   },
   methods: {
@@ -315,11 +408,19 @@ export default defineComponent({
 
       tokensStore.addPendingToken({
         amount: amount,
-        serializedProofs: token,
+        token: token,
       });
       this.showReceiveTokens = false;
       // show success notification
       this.notifySuccess("Incoming payment added to history.");
+    },
+    handleSwapToTrustedMint: async function () {
+      const mint = useMintsStore().activeMint().mint;
+      await useReceiveTokensStore().meltTokenToMint(
+        this.receiveData.tokensBase64,
+        mint
+      );
+      this.swapSelected = false;
     },
   },
 });
