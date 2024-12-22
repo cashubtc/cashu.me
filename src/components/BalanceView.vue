@@ -94,7 +94,6 @@
       <div class="col-12 cursor-pointer">
         <span class="text-weight-light" @click="setTab('mints')">
           Mint: <b>{{ activeMintLabel }}</b>
-          <q-tooltip>Configure mint(s)</q-tooltip>
         </span>
       </div>
     </div>
