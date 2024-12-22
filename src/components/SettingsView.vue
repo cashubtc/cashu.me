@@ -1313,13 +1313,13 @@ export default defineComponent({
       "checkIncomingInvoices",
       "checkInvoicesOnStartup",
       "enableReceiveSwaps",
+      "showNfcButtonInDrawer",
     ]),
     ...mapState(useP2PKStore, ["p2pkKeys"]),
     ...mapWritableState(useP2PKStore, [
       "showP2PKDialog",
       "showP2PkButtonInDrawer",
     ]),
-    ...mapWritableState(useUiStore, "showNfcButtonInDrawer"),
     ...mapWritableState(useNWCStore, ["showNWCDialog", "showNWCData"]),
     ...mapState(useMintsStore, [
       "activeMintUrl",

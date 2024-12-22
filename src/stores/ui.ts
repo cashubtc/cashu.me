@@ -29,10 +29,6 @@ export const useUiStore = defineStore("ui", {
     tab: useLocalStorage("cashu.ui.tab", "history" as string),
     expandHistory: useLocalStorage("cashu.ui.expandHistory", true as boolean),
     globalMutexLock: false,
-    showNfcButtonInDrawer: useLocalStorage(
-      "cashu.ui.showNfcButtonInDrawer",
-      true as boolean
-    ),
     showDebugConsole: useLocalStorage("cashu.ui.showDebugConsole", false),
   }),
   actions: {

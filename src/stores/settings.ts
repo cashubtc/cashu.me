@@ -54,6 +54,10 @@ export const useSettingsStore = defineStore("settings", {
         "cashu.settings.enableReceiveSwaps",
         true
       ),
+      showNfcButtonInDrawer: useLocalStorage(
+        "cashu.ui.showNfcButtonInDrawer",
+        true
+      ),
     };
   },
 });

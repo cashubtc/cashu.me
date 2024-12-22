@@ -117,6 +117,7 @@ import { useTokensStore } from "src/stores/tokens";
 import { useCameraStore } from "src/stores/camera";
 import { useP2PKStore } from "src/stores/p2pk";
 import { usePRStore } from "src/stores/payment-request";
+import { useSettingsStore } from "../stores/settings";
 import token from "src/js/token";
 import P2PKDialog from "./P2PKDialog.vue";
 import PRDialog from "./PaymentRequestDialog.vue";
@@ -167,10 +168,8 @@ export default defineComponent({
       "activeUnit",
       "addMintBlocking",
     ]),
-    ...mapWritableState(useUiStore, [
-      "showReceiveEcashDrawer",
-      "showNfcButtonInDrawer",
-    ]),
+    ...mapState(useSettingsStore, ["showNfcButtonInDrawer"]),
+    ...mapWritableState(useUiStore, ["showReceiveEcashDrawer"]),
     ...mapWritableState(useMintsStore, ["addMintData", "showAddMintDialog"]),
     ...mapWritableState(usePRStore, ["showPRDialog"]),
     ...mapState(useCameraStore, ["hasCamera"]),
