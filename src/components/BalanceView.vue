@@ -92,7 +92,7 @@
 
     <div class="row q-mt-md q-mb-none text-secondary" v-if="activeMintUrl">
       <div class="col-12 cursor-pointer">
-        <span class="text-weight-light" @click="setTab('settings')">
+        <span class="text-weight-light" @click="setTab('mints')">
           Mint: <b>{{ activeMintLabel }}</b>
           <q-tooltip>Configure mint(s)</q-tooltip>
         </span>
