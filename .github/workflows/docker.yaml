@@ -8,7 +8,24 @@ on:
     types: [released]
 
 jobs:
+
+  check-secrets:
+    runs-on: ubuntu-latest
+    outputs:
+      secrets_set: ${{ steps.check.outputs.secrets_set }}
+    steps:
+      - name: Check if secrets are set
+        run: |
+          if [ -z "${{ secrets.DOCKER_USERNAME }}" ]; then
+            echo "secrets_set=false" >> $GITHUB_OUTPUT
+          else
+            echo "secrets_set=true" >> $GITHUB_OUTPUT
+          fi
+
   build-and-push:
+    # run only when secrets are set
+    needs: check-secrets
+    if: ${{ needs.check-secrets.outputs.secrets_set == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
