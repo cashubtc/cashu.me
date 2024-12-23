@@ -2,7 +2,7 @@
   <q-btn
     rounded
     outline
-    color="primary"
+    :color="color"
     @click="toggleUnit()"
     :label="activeUnitLabelAdopted"
   />
@@ -19,6 +19,10 @@ export default defineComponent({
     balanceView: {
       type: Boolean,
       required: false,
+    },
+    color: {
+      type: String,
+      default: "primary",
     },
   },
   data: function () {

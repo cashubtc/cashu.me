@@ -1,13 +1,19 @@
 import { defineStore } from "pinia";
 import { useMintsStore } from "./mints";
 import { useLocalStorage } from "@vueuse/core";
-import { notifyApiError, notifyError, notifySuccess, notifyWarning, notify } from "../js/notify";
+import {
+  notifyApiError,
+  notifyError,
+  notifySuccess,
+  notifyWarning,
+  notify,
+} from "../js/notify";
 
 const unitTickerShortMap = {
   sat: "sats",
   usd: "USD",
   eur: "EUR",
-  msat: "msats"
+  msat: "msats",
 };
 
 export const useUiStore = defineStore("ui", {
@@ -17,12 +23,21 @@ export const useUiStore = defineStore("ui", {
     showInvoiceDetails: false,
     showSendDialog: false,
     showReceiveDialog: false,
+    showReceiveEcashDrawer: false,
+    showNumericKeyboard: false,
+    activityOrb: false,
     tab: useLocalStorage("cashu.ui.tab", "history" as string),
-    expandHistory:
-      useLocalStorage("cashu.ui.expandHistory", true as boolean),
+    expandHistory: useLocalStorage("cashu.ui.expandHistory", true as boolean),
     globalMutexLock: false,
+    showDebugConsole: useLocalStorage("cashu.ui.showDebugConsole", false),
   }),
   actions: {
+    closeDialogs() {
+      this.showInvoiceDetails = false;
+      this.showSendDialog = false;
+      this.showReceiveDialog = false;
+      this.showReceiveEcashDrawer = false;
+    },
     async lockMutex() {
       const nRetries = 10;
       const retryInterval = 500;
@@ -30,17 +45,20 @@ export const useUiStore = defineStore("ui", {
 
       while (this.globalMutexLock) {
         if (retries >= nRetries) {
-          notify("Please try again.")
+          notify("Please try again.");
           throw new Error("Failed to acquire global mutex lock");
         }
         retries++;
-        await new Promise(resolve => setTimeout(resolve, retryInterval));
+        await new Promise((resolve) => setTimeout(resolve, retryInterval));
       }
 
       this.globalMutexLock = true;
     },
     unlockMutex() {
       this.globalMutexLock = false;
+    },
+    triggerActivityOrb() {
+      this.activityOrb = true
     },
     setTab(tab: string) {
       this.tab = tab;
@@ -52,7 +70,11 @@ export const useUiStore = defineStore("ui", {
     fromMsat: function (value: number) {
       return new Intl.NumberFormat(navigator.language).format(value) + " msat";
     },
-    formatCurrency: function (value: number, currency: string, showBalance = false) {
+    formatCurrency: function (
+      value: number,
+      currency: string,
+      showBalance = false
+    ) {
       if (currency == undefined) {
         currency = "sat";
       }
@@ -70,6 +92,32 @@ export const useUiStore = defineStore("ui", {
       // + " " +
       // currency.toUpperCase()
     },
+    toggleDebugConsole() {
+      this.showDebugConsole = !this.showDebugConsole;
+      if (this.showDebugConsole) {
+        this.enableDebugConsole();
+      } else {
+        this.disableDebugConsole();
+      }
+    },
+    enableDebugConsole() {
+      if (!this.showDebugConsole) {
+        return;
+      }
+      // enable debug terminal
+      var script = document.createElement("script");
+      script.src = "//cdn.jsdelivr.net/npm/eruda";
+      document.body.appendChild(script);
+      script.onload = function () {
+        // @ts-ignore
+        eruda.init();
+      };
+    },
+    disableDebugConsole() {
+      // @ts-ignore
+      document.querySelector("#eruda").remove();
+    }
+
   },
   getters: {
     tickerShort() {

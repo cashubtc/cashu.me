@@ -1,8 +1,13 @@
 <template>
-  <div class="q-ma-lg q-pa-md" style="border: 2px solid; border-radius: 10px">
+  <q-card class="q-ma-lg bg-dark q-pa-md">
     <q-card-section>
       <div class="row items-center justify-center">
-        <q-icon class="q-pb-md" name="account_balance" size="50px" />
+        <q-icon
+          color="primary"
+          class="q-pb-md"
+          name="account_balance"
+          size="50px"
+        />
       </div>
       <div class="row items-center justify-center">
         <div class="text-h6">Join a mint</div>
@@ -29,11 +34,11 @@
           color="primary"
           class="q-px-md"
           label="Receive Ecash"
-          @click="showReceiveTokensDialog"
+          @click="handleReceiveEcash"
         />
       </div>
     </q-card-section>
-  </div>
+  </q-card>
 </template>
 <script>
 import { defineComponent, ref } from "vue";
@@ -54,7 +59,11 @@ export default defineComponent({
     activeMintUrl: String,
   },
   computed: {
-    ...mapWritableState(useUiStore, ["tab", "expandHistory"]),
+    ...mapWritableState(useUiStore, [
+      "tab",
+      "expandHistory",
+      "showReceiveEcashDrawer",
+    ]),
     ...mapWritableState(useReceiveTokensStore, [
       "showReceiveTokens",
       "receiveData",
@@ -77,9 +86,12 @@ export default defineComponent({
     },
   },
   methods: {
-    showReceiveTokensDialog: function () {
-      this.receiveData.tokensBase64 = "";
-      this.showReceiveTokens = true;
+    // showReceiveTokensDialog: function () {
+    //   this.receiveData.tokensBase64 = "";
+    //   this.showReceiveTokens = true;
+    // },
+    handleReceiveEcash: function () {
+      this.showReceiveEcashDrawer = true;
     },
     handleAddMintClick: function () {
       this.expandHistory = true;
@@ -89,3 +101,17 @@ export default defineComponent({
   },
 });
 </script>
+<style scoped>
+.q-dialog__inner {
+  height: 100%;
+  width: 100%;
+  margin: 0; /* Align dialog to cover the entire viewport */
+}
+
+.q-card {
+  border-radius: 20px;
+  display: flex;
+  flex-direction: column;
+  border: 2px solid var(--q-primary);
+}
+</style>

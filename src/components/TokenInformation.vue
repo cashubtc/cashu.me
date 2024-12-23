@@ -10,7 +10,11 @@
         <q-icon name="toll" size="xs" class="q-mr-sm" />
         <strong>{{ displayUnit }} </strong>
       </q-chip>
-      <q-chip outline class="q-pa-md">
+      <q-chip
+        outline
+        class="q-pa-md"
+        style="height: 36px; font-family: monospace"
+      >
         <q-icon name="account_balance" size="xs" class="q-mr-xs" />
         {{ tokenMintUrl }}
         <q-spinner-hourglass v-if="addMintBlocking" size="sm" class="q-ml-sm" />
@@ -39,9 +43,6 @@
         <span>{{ displayMemo }}</span>
       </div>
     </div>
-  </div>
-  <div class="row text-left q-py-none q-my-none">
-    <div class="col-12 q-px-sm"></div>
   </div>
 </template>
 <script>
@@ -123,35 +124,6 @@ export default defineComponent({
         ).length > 0
       );
     },
-    // getSecretP2PKPubkey: function (secret) {
-    //   try {
-    //     let secretObject = JSON.parse(secret);
-    //     if (secretObject[0] == "P2PK" && secretObject[1]["data"] != undefined) {
-    //       return secretObject[1]["data"];
-    //     }
-    //   } catch {}
-    //   return "";
-    // },
-    // isLocked: function (proofs) {
-    //   const secrets = proofs.map((p) => p.secret);
-    //   for (const secret of secrets) {
-    //     try {
-    //       if (this.getSecretP2PKPubkey(secret)) {
-    //         return true;
-    //       }
-    //     } catch {}
-    //   }
-    //   return false;
-    // },
-    // isLockedToUs: function (proofs) {
-    //   const secrets = proofs.map((p) => p.secret);
-    //   for (const secret of secrets) {
-    //     const pubkey = this.getSecretP2PKPubkey(secret);
-    //     if (pubkey) {
-    //       return this.haveThisKey(pubkey);
-    //     }
-    //   }
-    // },
   },
 });
 </script>

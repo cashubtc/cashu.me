@@ -191,6 +191,13 @@ window.windowMixin = {
       this.g.offline = false;
     });
 
+    // addEventListener("beforeunload", (event) => {
+    //   event.preventDefault();
+    //   var dialogText = "Are you sure about this?";
+    //   event.returnValue = dialogText;
+    //   return dialogText;
+    // });
+
     if (this.$q.localStorage.getItem("cashu.theme")) {
       document.body.setAttribute(
         "data-theme",

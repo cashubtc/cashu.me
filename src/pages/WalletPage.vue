@@ -1,6 +1,7 @@
 <template>
   <div class="row q-col-gutter-y-md justify-center q-pt-sm q-pb-md">
     <div class="col-12 col-sm-11 col-md-8 text-center q-gutter-y-md">
+      <ActivityOrb />
       <NoMintWarnBanner v-if="mints.length == 0" />
       <BalanceView v-else :set-tab="setTab" />
       <div
@@ -20,17 +21,20 @@
             Receive</q-btn
           >
         </div>
-        <div class="col-2 q-mb-md q-mx-none">
-          <q-btn
-            align="center"
-            size="lg"
-            icon="qr_code_scanner"
-            outline
-            color="primary"
-            flat
-            @click="showCamera"
-          />
-        </div>
+        <transition appear enter-active-class="animated pulse">
+          <div class="col-2 q-mb-md q-mx-none">
+            <q-btn
+              align="center"
+              size="lg"
+              outline
+              color="primary"
+              flat
+              @click="showCamera"
+            >
+              <ScanIcon size="2em" />
+            </q-btn>
+          </div>
+        </transition>
         <!-- button to showSendDialog -->
         <div class="col-5 q-mb-md">
           <q-btn
@@ -85,7 +89,7 @@
           <!-- ////////////////// HISTORY LIST ///////////////// -->
 
           <q-tab-panel name="history">
-            <HistoryTable :show-token-dialog="showTokenDialog" />
+            <HistoryTable />
           </q-tab-panel>
 
           <!-- ////////////////// INVOICE LIST ///////////////// -->
@@ -122,6 +126,7 @@
       </div>
 
       <iOSPWAPrompt />
+      <AndroidPWAPrompt />
     </div>
 
     <!-- BOTTOM LIGHTNING BUTTONS -->
@@ -146,10 +151,7 @@
     />
 
     <!-- INVOICE DETAILS  -->
-    <InvoiceDetailDialog
-      v-model="showInvoiceDetails"
-      :invoice-check-worker="invoiceCheckWorker"
-    />
+    <InvoiceDetailDialog v-model="showInvoiceDetails" />
 
     <!-- SEND TOKENS DIALOG  -->
     <SendTokenDialog v-model="showSendTokens" />
@@ -198,6 +200,9 @@ import SendDialog from "components/SendDialog.vue";
 import ReceiveDialog from "components/ReceiveDialog.vue";
 import QrcodeReader from "components/QrcodeReader.vue";
 import iOSPWAPrompt from "components/iOSPWAPrompt.vue";
+import AndroidPWAPrompt from "components/AndroidPWAPrompt.vue";
+import ActivityOrb from "components/ActivityOrb.vue";
+
 // pinia stores
 import { mapActions, mapState, mapWritableState } from "pinia";
 import { useMintsStore } from "src/stores/mints";
@@ -212,8 +217,20 @@ import { useCameraStore } from "src/stores/camera";
 import { useP2PKStore } from "src/stores/p2pk";
 import { useNWCStore } from "src/stores/nwc";
 import { useNPCStore } from "src/stores/npubcash";
-
+import { useNostrStore } from "src/stores/nostr";
+import { usePRStore } from "src/stores/payment-request";
+import { useStorageStore } from "src/stores/storage";
 import ReceiveTokenDialog from "src/components/ReceiveTokenDialog.vue";
+import { useWelcomeStore } from "../stores/welcome";
+import { useInvoicesWorkerStore } from "src/stores/invoicesWorker";
+import { notifyError, notify } from "../js/notify";
+
+import {
+  X as XIcon,
+  Banknote as BanknoteIcon,
+  Zap as ZapIcon,
+  Scan as ScanIcon,
+} from "lucide-vue-next";
 
 export default {
   mixins: [windowMixin],
@@ -232,6 +249,9 @@ export default {
     SendDialog,
     ReceiveDialog,
     iOSPWAPrompt,
+    AndroidPWAPrompt,
+    ScanIcon,
+    ActivityOrb,
   },
   data: function () {
     return {
@@ -270,13 +290,13 @@ export default {
     };
   },
   computed: {
+    ...mapState(useUiStore, ["tickerShort"]),
     ...mapWritableState(useUiStore, [
       "showInvoiceDetails",
       "tab",
       "showSendDialog",
       "showReceiveDialog",
     ]),
-    ...mapState(useUiStore, ["tickerShort"]),
     ...mapWritableState(useUiStore, ["expandHistory"]),
     ...mapWritableState(useReceiveTokensStore, [
       "showReceiveTokens",
@@ -302,6 +322,7 @@ export default {
       "tokensCheckSpendableListener",
     ]),
     ...mapState(useTokensStore, ["historyTokens"]),
+    ...mapState(usePRStore, ["enablePaymentRequest"]),
     ...mapWritableState(useCameraStore, ["camera", "hasCamera"]),
     ...mapWritableState(useP2PKStore, ["showP2PKDialog"]),
     ...mapWritableState(useNWCStore, ["showNWCDialog", "nwcEnabled"]),
@@ -334,28 +355,32 @@ export default {
       "setProofs",
       "getKeysForKeyset",
     ]),
-    ...mapActions(useWorkersStore, [
-      "clearAllWorkers",
-      "invoiceCheckWorker",
-      "checkTokenSpendableWorker",
-    ]),
+    ...mapActions(useWorkersStore, ["clearAllWorkers", "invoiceCheckWorker"]),
     ...mapActions(useTokensStore, ["setTokenPaid"]),
     ...mapActions(useWalletStore, [
-      "requestMint",
       "setInvoicePaid",
       "mint",
-      "melt",
-      "checkProofsSpendable",
-      "checkTokenSpendable",
-      "checkInvoice",
-      "checkPendingInvoices",
       "checkPendingTokens",
       "decodeRequest",
-      "generateNewMnemonic",
+      "initializeMnemonic",
     ]),
     ...mapActions(useCameraStore, ["closeCamera", "showCamera"]),
     ...mapActions(useNWCStore, ["listenToNWCCommands"]),
     ...mapActions(useNPCStore, ["generateNPCConnection", "claimAllTokens"]),
+    ...mapActions(useNostrStore, [
+      "sendNip04DirectMessage",
+      "sendNip17DirectMessage",
+      "subscribeToNip04DirectMessages",
+      "subscribeToNip17DirectMessages",
+      "sendNip17DirectMessageToNprofile",
+      "initSigner",
+    ]),
+    ...mapActions(useStorageStore, ["checkLocalStorage"]),
+    ...mapActions(usePRStore, ["createPaymentRequest"]),
+    ...mapActions(useInvoicesWorkerStore, [
+      "startInvoiceCheckerWorker",
+      "checkPendingInvoices",
+    ]),
     // TOKEN METHODS
     decodeToken: function (encoded_token) {
       try {
@@ -413,20 +438,12 @@ export default {
       this.camera.show = false;
       this.focusInput("parseDialogInput");
     },
-    showWelcomeDialog: function () {
-      if (localStorage.getItem("cashu.welcomeDialogSeen") != "seen") {
-        this.welcomeDialog.show = true;
+    showWelcomePage: function () {
+      if (!useWelcomeStore().termsAccepted) {
+        useWelcomeStore().showWelcome = true;
       }
-    },
-    setWelcomeDialogSeen: function () {
-      localStorage.setItem("cashu.welcomeDialogSeen", "seen");
-      this.welcomeDialog.show = false;
-      // switch to settings tab
-      this.setTab("mints");
-
-      // if a wallet has been restored the "cashu.activeMintUrl" is not null
-      if (!!localStorage.getItem("cashu.activeMintUrl")) {
-        window.location.reload();
+      if (useWelcomeStore().showWelcome) {
+        this.$router.push("/welcome");
       }
     },
     setTab: function (to) {
@@ -445,23 +462,6 @@ export default {
       this.invoiceData.hash = "";
       this.invoiceData.memo = "";
       this.showInvoiceDetails = true;
-    },
-
-    showInvoicInfoDialog: function (data) {
-      console.log("##### showInvoicInfoDialog");
-      this.invoiceData = _.clone(data);
-      this.showInvoiceDetails = true;
-      // kick off invoice check worker
-      this.invoiceCheckWorker();
-    },
-
-    showTokenDialog: function (tokensBase64) {
-      console.log("##### showTokenDialog");
-      this.sendData.tokens = this.getProofs(this.decodeToken(tokensBase64));
-      this.sendData.tokensBase64 = _.clone(tokensBase64);
-      this.showSendTokens = true;
-      // kick off token check worker
-      // this.checkTokenSpendableWorker(tokensBase64);
     },
     showSendTokensDialog: function () {
       console.log("##### showSendTokensDialog");
@@ -544,26 +544,10 @@ export default {
         if (event.data.type == "new_tab_opened") {
           channel.postMessage({ type: "already_running", senderId: tabId });
         } else if (event.data.type == "already_running") {
-          window.location.href = "/#/already-running";
+          this.$router.push("/already-running");
         }
       };
     },
-    // registerLocalStorageSyncHook: function () {
-    //   // receives events if other tabs change local storage
-    //   window.addEventListener("storage", (e) => {
-    //     // console.log(`Key Changed: ${e.key}`);
-    //     // console.log(`New Value: ${e.newValue}`);
-    //     // if these were the proofs, reload them
-    //     // if (e.key == "cashu.proofs") {
-    //     //   console.log("updating proofs");
-    //     //   this.setProofs(JSON.parse(e.newValue));
-    //     // }
-    //     // // if these were the activeMintUrl, reload
-    //     // if (e.key == "cashu.activeMintUrl") {
-    //     //   this.activateMintUrl(e.newValue);
-    //     // }
-    //   });
-    // },
   },
   watch: {},
 
@@ -578,6 +562,7 @@ export default {
     this.registerBroadcastChannel();
 
     let params = new URL(document.location).searchParams;
+    let hash = new URL(document.location).hash;
 
     // mint url
     if (params.get("mint")) {
@@ -594,8 +579,8 @@ export default {
     console.log("Wallet URL " + this.baseURL);
 
     // get token to receive tokens from a link
-    if (params.get("token")) {
-      let tokenBase64 = params.get("token");
+    if (params.get("token") || hash.includes("token")) {
+      let tokenBase64 = params.get("token") || hash.split("token=")[1];
       // make sure to react only to tokens not in the users history
       let seen = false;
       for (var i = 0; i < this.historyTokens.length; i++) {
@@ -606,7 +591,7 @@ export default {
       }
       if (!seen) {
         // show receive token dialog
-        this.receiveData.tokensBase64 = params.get("token");
+        this.receiveData.tokensBase64 = tokenBase64;
         this.showReceiveTokens = true;
       }
     }
@@ -626,6 +611,9 @@ export default {
 
     // startup tasks
 
+    // check local storage
+    this.checkLocalStorage();
+
     // // Local storage sync hook
     // this.registerLocalStorageSyncHook();
 
@@ -633,15 +621,30 @@ export default {
     this.registerPWAEventHook();
 
     // generate new mnemonic
-    this.generateNewMnemonic();
+    this.initializeMnemonic();
+
+    this.initSigner();
 
     // show welcome dialog
-    this.showWelcomeDialog();
+    this.showWelcomePage();
 
     // listen to NWC commands if enabled
     if (this.nwcEnabled) {
       this.listenToNWCCommands();
     }
+
+    if (this.enablePaymentRequest) {
+      this.subscribeToNip17DirectMessages();
+    }
+
+    // start invoice checker worker
+    this.startInvoiceCheckerWorker();
+
+    // reconnect all websockets
+    this.checkPendingInvoices();
+
+    // debug console
+    useUiStore().enableDebugConsole();
   },
 };
 </script>

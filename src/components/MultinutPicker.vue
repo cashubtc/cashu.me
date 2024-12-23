@@ -120,9 +120,17 @@ export default defineComponent({
       let quotesArray = [];
       for (const mintUrl of this.selectedMints) {
         console.log(`Quoting mint: ${mintUrl}`);
-        await this.activateMintUrl(mintUrl);
+        const mintWallet = useWalletStore().mintWallet(
+          mintUrl,
+          useMintsStore().activeUnit
+        );
+        // await this.activateMintUrl(mintUrl);
         this.payInvoiceData.input.amount = amountPerMint;
-        const quote = await this.meltQuote();
+        const quote = await this.meltQuote(
+          mintWallet,
+          this.payInvoiceData.input.request,
+          amountPerMint
+        );
         console.log(quote);
         quotesArray.push(quote);
       }

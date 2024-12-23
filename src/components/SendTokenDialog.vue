@@ -2,17 +2,51 @@
   <q-dialog
     v-model="showSendTokens"
     position="top"
+    :maximized="$q.screen.lt.sm"
     backdrop-filter="blur(2px) brightness(60%)"
+    transition-show="fade"
+    transition-hide="fade"
     no-backdrop-dismiss
     full-height
+    @show="onDialogShown"
   >
     <q-card class="q-pa-none q-pt-none qcard">
+      <NumericKeyboard
+        v-if="showNumericKeyboard && useNumericKeyboard"
+        :model-value="sendData.amount"
+        @update:modelValue="(val) => (sendData.amount = val)"
+        @done="sendTokens"
+      />
       <!--  enter send data -->
       <div v-if="!sendData.tokens">
         <q-card-section class="q-pa-lg q-pt-md">
-          <div class="row items-center no-wrap q-mb-sm q-pr-md q-py-lg">
+          <div class="row items-center no-wrap q-mb-sm q-pr-lg q-py-lg">
             <div class="col-9">
-              <span class="text-h6">Send Ecash</span>
+              <span class="text-h6"
+                >Send
+                {{
+                  sendData.amount
+                    ? formatCurrency(
+                        sendData.amount * activeUnitCurrencyMultiplyer,
+                        activeUnit
+                      )
+                    : "Ecash"
+                }}
+              </span>
+              <span
+                v-if="sendData.amount && bitcoinPrice && activeUnit == 'sat'"
+                class="q-ml-xs text-subtitle2 text-grey-6"
+              >
+                ({{
+                  formatCurrency(
+                    (bitcoinPrice / 100000000) *
+                      sendData.amount *
+                      activeUnitCurrencyMultiplyer,
+                    "USD",
+                    true
+                  )
+                }})
+              </span>
             </div>
             <div class="col-3" style="height: 30px">
               <transition
@@ -43,7 +77,7 @@
           </div>
           <div class="row items-center no-wrap q-my-sm q-py-none">
             <div class="col-12">
-              <ChooseMint :ticker-short="tickerShort" />
+              <ChooseMint />
             </div>
           </div>
 
@@ -108,13 +142,13 @@
                 <q-btn
                   align="center"
                   v-if="!sendData.p2pkPubkey"
-                  icon="qr_code_scanner"
                   flat
                   outline
                   color="primary"
                   round
                   @click="showCamera"
-                />
+                  ><ScanIcon size="1.5em"
+                /></q-btn>
               </div>
             </div>
           </transition>
@@ -188,7 +222,7 @@
           </div>
           <div v-else class="row q-mt-lg">
             <q-btn unelevated rounded disabled color="yellow" text-color="black"
-              >Mint balance too low</q-btn
+              >Too much</q-btn
             >
             <q-btn v-close-popup rounded flat color="grey" class="q-ml-auto"
               >Close</q-btn
@@ -215,24 +249,13 @@
             <q-btn
               v-if="showAnimatedQR"
               flat
-              style="font-size: 12px"
+              style="font-size: 10px"
               color="grey"
               class="q-ma-none"
               @click="changeSpeed"
             >
               <q-icon name="speed" style="margin-right: 8px"></q-icon>
               Speed: {{ fragmentSpeedLabel }}
-            </q-btn>
-            <q-btn
-              v-if="showAnimatedQR"
-              flat
-              style="font-size: 12px"
-              class="q-ma-none"
-              color="grey"
-              @click="changeSize"
-            >
-              <q-icon name="zoom_in" style="margin-right: 8px"></q-icon>
-              Size: {{ fragmentLengthLabel }}
             </q-btn>
             <q-badge
               :color="!isV4Token ? 'primary' : 'grey'"
@@ -241,14 +264,34 @@
               @click="toggleTokenEncoding"
               :outline="isV4Token"
             />
+            <q-btn
+              v-if="showAnimatedQR"
+              flat
+              style="font-size: 10px"
+              class="q-ma-none"
+              color="grey"
+              @click="changeSize"
+            >
+              <q-icon name="zoom_in" style="margin-right: 8px"></q-icon>
+              Size: {{ fragmentLengthLabel }}
+            </q-btn>
           </div>
           <q-card-section class="q-pa-sm">
             <div class="row justify-center">
-              <q-item-label overline class="q-mb-sm text-white"
-                >Ecash</q-item-label
+              <q-item-label
+                overline
+                class="q-mb-sm text-white"
+                style="font-size: 1rem"
+              >
+                {{
+                  sendData.historyAmount && sendData.historyAmount < 0
+                    ? "Sent"
+                    : "Received"
+                }}
+                Ecash</q-item-label
               >
             </div>
-            <div class="row justify-center q-py-md">
+            <div class="row justify-center q-pt-sm">
               <q-item-label style="font-size: 30px" class="text-weight-bold">
                 <q-spinner-dots
                   v-if="runnerActive"
@@ -259,41 +302,98 @@
                 <strong>{{ displayUnit }}</strong></q-item-label
               >
             </div>
-            <div class="row justify-center q-pt-sm">
+            <div v-if="paidFees" class="row justify-center q-pt-sm">
+              <q-item-label class="text-weight-bold">
+                Fee: {{ formatCurrency(paidFees, tokenUnit) }}
+              </q-item-label>
+            </div>
+            <div class="row justify-center q-pt-md">
               <TokenInformation
                 :encodedToken="sendData.tokensBase64"
                 :showAmount="false"
                 :showP2PKCheck="false"
               />
             </div>
+            <div
+              v-if="sendData.paymentRequest"
+              class="row justify-center q-pt-sm"
+            >
+              <SendPaymentRequest />
+            </div>
             <div class="row q-mt-lg">
               <q-btn
-                class="q-mx-xs"
+                class="q-mx-sm"
                 size="md"
                 flat
+                dense
                 @click="copyText(sendData.tokensBase64)"
                 >Copy</q-btn
               >
               <q-btn
-                class="q-mx-none"
+                class="q-mr-sm"
                 color="grey"
                 size="md"
+                dense
                 icon="link"
                 flat
-                @click="copyText(baseURL + '?token=' + sendData.tokensBase64)"
+                @click="copyText(baseURL + '#token=' + sendData.tokensBase64)"
                 ><q-tooltip>Copy link</q-tooltip></q-btn
               >
+              <q-btn
+                unelevated
+                dense
+                class="q-mx-sm"
+                v-if="
+                  hasCamera &&
+                  !sendData.paymentRequest &&
+                  sendData.historyAmount < 0
+                "
+                @click="showCamera"
+              >
+                <ScanIcon />
+              </q-btn>
+              <q-btn
+                unelevated
+                dense
+                v-if="
+                  ndefSupported &&
+                  !sendData.paymentRequest &&
+                  sendData.historyAmount < 0
+                "
+                :disabled="scanningCard"
+                :loading="scanningCard"
+                class="q-mx-sm"
+                size="md"
+                @click="writeTokensToCard"
+                flat
+              >
+                <NfcIcon />
+                <q-tooltip>{{
+                  ndefSupported ? "Flash to NFC card" : "NDEF unsupported"
+                }}</q-tooltip>
+                <template v-slot:loading>
+                  <q-spinner @click="closeCardScanner" />
+                </template>
+              </q-btn>
               <q-btn
                 class="q-mx-none"
                 color="grey"
                 icon="delete"
                 size="md"
-                @click="showDeleteDialog = true"
+                @click="
+                  showDeleteDialog = true;
+                  closeCardScanner();
+                "
                 flat
               >
                 <q-tooltip>Delete from history</q-tooltip>
               </q-btn>
-              <q-btn v-close-popup flat color="grey" class="q-ml-auto"
+              <q-btn
+                v-close-popup
+                @click="closeCardScanner"
+                flat
+                color="grey"
+                class="q-ml-auto"
                 >Close</q-btn
               >
             </div>
@@ -350,27 +450,44 @@ import { useTokensStore } from "src/stores/tokens";
 import { getShortUrl } from "src/js/wallet-helpers";
 import { useSettingsStore } from "src/stores/settings";
 import { useWorkersStore } from "src/stores/workers";
+import { usePriceStore } from "src/stores/price";
 import token from "src/js/token";
 import { Buffer } from "buffer";
 import { useCameraStore } from "src/stores/camera";
 import { useP2PKStore } from "src/stores/p2pk";
 import TokenInformation from "components/TokenInformation.vue";
-import {
-  getDecodedToken,
-  getEncodedTokenV4,
-  getEncodedToken,
-} from "@cashu/cashu-ts";
+import { getDecodedToken, getEncodedTokenV4 } from "@cashu/cashu-ts";
 
 import { mapActions, mapState, mapWritableState } from "pinia";
 import ChooseMint from "components/ChooseMint.vue";
 import { UR, UREncoder } from "@gandlaf21/bc-ur";
-
+import SendPaymentRequest from "./SendPaymentRequest.vue";
+import NumericKeyboard from "components/NumericKeyboard.vue";
+import {
+  ChevronLeft as ChevronLeftIcon,
+  Clipboard as ClipboardIcon,
+  FileText as FileTextIcon,
+  Lock as LockIcon,
+  Scan as ScanIcon,
+  Nfc as NfcIcon,
+} from "lucide-vue-next";
+import {
+  notifyError,
+  notifySuccess,
+  notify,
+  notifyWarning,
+} from "src/js/notify.ts";
+import { getEncodedTokenV3 } from "@cashu/cashu-ts/dist/lib/es5/utils";
 export default defineComponent({
   name: "SendTokenDialog",
   mixins: [windowMixin],
   components: {
     ChooseMint,
     TokenInformation,
+    SendPaymentRequest,
+    NumericKeyboard,
+    ScanIcon,
+    NfcIcon,
   },
   props: {},
   data: function () {
@@ -381,7 +498,6 @@ export default defineComponent({
       qrInterval: null,
       encoder: null,
       showDeleteDialog: false,
-
       p2pkInput: "",
 
       // parameters for animated QR
@@ -397,21 +513,25 @@ export default defineComponent({
       framentInervalSlow: 500,
       fragmentSpeedLabel: "F",
       isV4Token: false,
+      scanningCard: false,
+      ndefSupported: "NDEFReader" in globalThis,
     };
   },
   computed: {
     ...mapWritableState(useSendTokensStore, [
       "showSendTokens",
       "showLockInput",
+      "sendData",
     ]),
-    ...mapWritableState(useSendTokensStore, ["sendData"]),
     ...mapWritableState(useCameraStore, ["camera", "hasCamera"]),
     ...mapState(useUiStore, [
       "tickerShort",
       "canPasteFromClipboard",
       "globalMutexLock",
     ]),
+    ...mapWritableState(useUiStore, ["showNumericKeyboard"]),
     ...mapState(useMintsStore, [
+      "mints",
       "activeProofs",
       "activeUnit",
       "activeUnitLabel",
@@ -422,7 +542,10 @@ export default defineComponent({
     ...mapState(useSettingsStore, [
       "checkSentTokens",
       "includeFeesInSendAmount",
+      "nfcEncoding",
+      "useNumericKeyboard",
     ]),
+    ...mapState(usePriceStore, ["bitcoinPrice"]),
     ...mapState(useWorkersStore, ["tokenWorkerRunning"]),
     // TOKEN METHODS
     sumProofs: function () {
@@ -440,6 +563,9 @@ export default defineComponent({
     tokenMintUrl: function () {
       let mint = token.getMint(token.decode(this.sendData.tokensBase64));
       return mint;
+    },
+    paidFees: function () {
+      return this.sumProofs - Math.abs(this.sendData.historyAmount);
     },
     displayMemo: function () {
       return token.getMemo(token.decode(this.sendData.tokensBase64));
@@ -459,8 +585,10 @@ export default defineComponent({
       }
       // check if entered amount is the same as the result of coinSelect(spendableProofs(activeProofs), amount)
       let spendableProofs = this.spendableProofs(this.activeProofs);
+      const mintWallet = useWalletStore().wallet;
       let selectedProofs = this.coinSelect(
         spendableProofs,
+        mintWallet,
         this.sendData.amount * this.activeUnitCurrencyMultiplyer,
         this.includeFeesInSendAmount
       );
@@ -485,7 +613,7 @@ export default defineComponent({
       }
       // check if token has more than one proof
       const tokenObj = token.decode(val);
-      const proofs = tokenObj.token[0].proofs;
+      const proofs = tokenObj.proofs;
       if (!proofs.length) {
         // no proofs
         return;
@@ -503,7 +631,13 @@ export default defineComponent({
     },
     showSendTokens: function (val) {
       if (val) {
-        // this.startQrCodeLoop();
+        this.$nextTick(() => {
+          if (!this.sendData.tokensBase64.length) {
+            this.showNumericKeyboard = true;
+          } else {
+            this.showNumericKeyboard = false;
+          }
+        });
       } else {
         clearInterval(this.qrInterval);
         this.sendData.data = "";
@@ -512,16 +646,15 @@ export default defineComponent({
     },
   },
   methods: {
-    ...mapActions(useWorkersStore, [
-      "checkTokenSpendableWorker",
-      "clearAllWorkers",
-    ]),
+    ...mapActions(useWorkersStore, ["clearAllWorkers"]),
     ...mapActions(useWalletStore, [
       "send",
       "sendToLock",
       "coinSelect",
       "spendableProofs",
       "getFeesForProofs",
+      "onTokenPaid",
+      "mintWallet",
     ]),
     ...mapActions(useProofsStore, ["serializeProofs"]),
     ...mapActions(useTokensStore, [
@@ -618,10 +751,10 @@ export default defineComponent({
           this.sendData.tokensBase64 = getEncodedTokenV4(decodedToken);
         } catch {
           console.log("### Could not encode token to V4");
-          this.sendData.tokensBase64 = getEncodedToken(decodedToken);
+          this.sendData.tokensBase64 = getEncodedTokenV3(decodedToken);
         }
       } else {
-        this.sendData.tokensBase64 = getEncodedToken(decodedToken);
+        this.sendData.tokensBase64 = getEncodedTokenV3(decodedToken);
       }
     },
     deleteThisToken: function () {
@@ -629,6 +762,104 @@ export default defineComponent({
       this.showSendTokens = false;
       this.showDeleteDialog = false;
       this.clearAllWorkers();
+    },
+    writeTokensToCard: function () {
+      if (!this.scanningCard) {
+        try {
+          this.ndef = new NDEFReader();
+          this.controller = new AbortController();
+          const signal = this.controller.signal;
+          this.ndef
+            .scan({ signal })
+            .then(() => {
+              console.log("> Scan started");
+
+              this.ndef.onreadingerror = (error) => {
+                console.error(`Cannot read NDEF data! ${error}`);
+                notifyError("Cannot read data from the NFC tag");
+                this.controller.abort();
+                this.scanningCard = false;
+              };
+
+              this.ndef.onreading = ({ message, serialNumber }) => {
+                console.log(`Read card ${serialNumber}`);
+                this.controller.abort();
+                this.scanningCard = false;
+                try {
+                  let records = [];
+                  switch (this.nfcEncoding) {
+                    case "text":
+                      records = [
+                        {
+                          recordType: "text",
+                          data: `${this.sendData.tokensBase64}`,
+                        },
+                      ];
+                      break;
+                    case "weburl":
+                      records = [
+                        {
+                          recordType: "url",
+                          data: `${window.location}#token=${this.sendData.tokensBase64}`,
+                        },
+                      ];
+                      break;
+                    case "binary":
+                      throw new Error("Binary encoding not supported yet");
+                    /*
+                      const data = null;
+                      records = [
+                        {
+                          recordType: "mime",
+                          mediaType: "application/octet-stream",
+                          data: data,
+                        },
+                      ];
+                      break;
+                      */
+                    default:
+                      throw new Error(
+                        `Unknown NFC encoding: ${this.nfcEncoding}`
+                      );
+                  }
+                  this.ndef
+                    .write({ records: records }, { overwrite: true })
+                    .then(() => {
+                      console.log("Successfully flashed tokens to card!");
+                      notifySuccess("Successfully flashed tokens to card!");
+                      this.showSendTokens = false;
+                    })
+                    .catch((err) => {
+                      console.error(
+                        `NFC write failed: The card may not have enough capacity (needed ${records[0].data.length} bytes).`
+                      );
+                      notifyError(
+                        `NFC write failed: The card may not have enough capacity (needed ${records[0].data.length} bytes).`
+                      );
+                    });
+                } catch (err) {
+                  console.error(`NFC error: ${err.message}`);
+                  notifyError(`NFC error: ${err.message}`);
+                }
+              };
+              this.scanningCard = true;
+            })
+            .catch((error) => {
+              console.error(`NFC error: ${error.message}`);
+              notifyError(`NFC error: ${error.message}`);
+              this.scanningCard = false;
+            });
+          notifyWarning("This will overwrite your card!");
+        } catch (error) {
+          console.error(`NFC error: ${error.message}`);
+          notifyError(`NFC error: ${error.message}`);
+          this.scanningCard = false;
+        }
+      }
+    },
+    closeCardScanner: function () {
+      this.controller.abort();
+      this.scanningCard = false;
     },
     lockTokens: async function () {
       let sendAmount = this.sendData.amount;
@@ -638,8 +869,10 @@ export default defineComponent({
       }
       try {
         // keep firstProofs, send scndProofs and delete them (invalidate=true)
+        const mintWallet = this.mintWallet(this.activeMintUrl, this.activeUnit);
         let { _, sendProofs } = await this.sendToLock(
           this.activeProofs,
+          mintWallet,
           sendAmount,
           this.sendData.p2pkPubkey
         );
@@ -647,15 +880,16 @@ export default defineComponent({
         this.sendData.tokens = sendProofs;
 
         this.sendData.tokensBase64 = this.serializeProofs(sendProofs);
-        this.addPendingToken({
+        const historyToken = {
           amount: -this.sendData.amount,
-          serializedProofs: this.sendData.tokensBase64,
+          token: this.sendData.tokensBase64,
           unit: this.activeUnit,
           mint: this.activeMintUrl,
-        });
+        };
+        this.addPendingToken(historyToken);
 
         if (!this.g.offline) {
-          this.checkTokenSpendableWorker(this.sendData.tokensBase64);
+          this.onTokenPaid(historyToken);
         }
       } catch (error) {
         console.error(error);
@@ -665,6 +899,7 @@ export default defineComponent({
       /*
       calls send, displays token and kicks off the spendableWorker
       */
+      this.showNumericKeyboard = false;
       if (
         this.sendData.p2pkPubkey &&
         this.isValidPubkey(this.sendData.p2pkPubkey)
@@ -676,9 +911,11 @@ export default defineComponent({
       try {
         let sendAmount =
           this.sendData.amount * this.activeUnitCurrencyMultiplyer;
+        const mintWallet = this.mintWallet(this.activeMintUrl, this.activeUnit);
         // keep firstProofs, send scndProofs and delete them (invalidate=true)
         let { _, sendProofs } = await this.send(
           this.activeProofs,
+          mintWallet,
           sendAmount,
           true,
           this.includeFeesInSendAmount
@@ -686,17 +923,21 @@ export default defineComponent({
 
         // update UI
         this.sendData.tokens = sendProofs;
-
         this.sendData.tokensBase64 = this.serializeProofs(sendProofs);
-        this.addPendingToken({
+        this.sendData.historyAmount =
+          -this.sendData.amount * this.activeUnitCurrencyMultiplyer;
+
+        const historyToken = {
           amount: -sendAmount,
-          serializedProofs: this.sendData.tokensBase64,
+          token: this.sendData.tokensBase64,
           unit: this.activeUnit,
           mint: this.activeMintUrl,
-        });
+          paymentRequest: this.sendData.paymentRequest,
+        };
+        this.addPendingToken(historyToken);
 
         if (!this.g.offline) {
-          this.checkTokenSpendableWorker(this.sendData.tokensBase64);
+          this.onTokenPaid(historyToken);
         }
       } catch (error) {
         console.error(error);
