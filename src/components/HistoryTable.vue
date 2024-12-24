@@ -51,6 +51,17 @@
           <q-btn
             flat
             dense
+            icon="undo"
+            @click="receiveToken(token.token)"
+            class="cursor-pointer"
+            v-if="token.status === 'pending' && token.amount < 0"
+            style="position: absolute; right: 32px"
+          >
+            <q-tooltip>Redeem back</q-tooltip>
+          </q-btn>
+          <q-btn
+            flat
+            dense
             icon="sync"
             @click="checkTokenSpendable(token)"
             class="cursor-pointer"
