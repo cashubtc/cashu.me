@@ -825,8 +825,8 @@ export default defineComponent({
                   this.ndef
                     .write({ records: records }, { overwrite: true })
                     .then(() => {
-                      console.log("Successfully flashed tokens to card!");
-                      notifySuccess("Successfully flashed tokens to card!");
+                      console.log("Successfully flashed token to card!");
+                      notifySuccess("Successfully flashed token to card!");
                       this.showSendTokens = false;
                     })
                     .catch((err) => {
@@ -834,25 +834,26 @@ export default defineComponent({
                         `NFC write failed: The card may not have enough capacity (needed ${records[0].data.length} bytes).`
                       );
                       notifyError(
-                        `NFC write failed: The card may not have enough capacity (needed ${records[0].data.length} bytes).`
+                        `The card may not have enough capacity (needed ${records[0].data.length} bytes).`,
+                        "NFC write failed"
                       );
                     });
                 } catch (err) {
                   console.error(`NFC error: ${err.message}`);
-                  notifyError(`NFC error: ${err.message}`);
+                  notifyError(`${err.message}`, "NFC error");
                 }
               };
               this.scanningCard = true;
             })
             .catch((error) => {
               console.error(`NFC error: ${error.message}`);
-              notifyError(`NFC error: ${error.message}`);
+              notifyError(`${err.message}`, "NFC error");
               this.scanningCard = false;
             });
           notifyWarning("This will overwrite your card!");
         } catch (error) {
           console.error(`NFC error: ${error.message}`);
-          notifyError(`NFC error: ${error.message}`);
+          notifyError(`${err.message}`, "NFC error");
           this.scanningCard = false;
         }
       }
