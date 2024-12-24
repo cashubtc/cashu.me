@@ -151,7 +151,7 @@
               color="primary"
               rounded
               flat
-              class="q-mr-none q-pr-sm"
+              class="q-mr-none"
             >
               <q-icon name="swap_horiz" class="q-pr-sm" />
               Swap
@@ -162,7 +162,7 @@
               color="primary"
               rounded
               flat
-              class="q-mr-none q-pr-sm"
+              class="q-mr-none"
               >Later
               <q-tooltip>Add to history to receive later</q-tooltip>
             </q-btn>
@@ -394,7 +394,7 @@ export default defineComponent({
     },
     addPendingTokenToHistory: function (tokenStr) {
       if (this.tokenAlreadyInHistory(tokenStr)) {
-        this.notifySuccess("Ecash already in history");
+        this.notifySuccess("Ecash already in History");
         this.showReceiveTokens = false;
         return;
       }
@@ -416,7 +416,7 @@ export default defineComponent({
       });
       this.showReceiveTokens = false;
       // show success notification
-      this.notifySuccess("Incoming payment added to history.");
+      this.notifySuccess("Ecash added to History");
     },
     handleSwapToTrustedMint: async function () {
       const mint = useMintsStore().activeMint().mint;
