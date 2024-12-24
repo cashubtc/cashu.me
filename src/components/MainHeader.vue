@@ -122,10 +122,10 @@ const linksList = [
     link: "https://github.com/cashubtc/cashu.me",
   },
   {
-    title: "Telegram",
-    caption: "t.me/CashuMe",
+    title: "Matrix",
+    caption: "#cashu-me:matrix.cashu.space",
     icon: "chat",
-    link: "https://t.me/CashuMe",
+    link: "https://matrix.to/#/#cashu-me:matrix.cashu.space",
   },
   {
     title: "Twitter",
