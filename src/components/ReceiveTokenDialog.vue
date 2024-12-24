@@ -392,14 +392,16 @@ export default defineComponent({
         undefined
       );
     },
-    addPendingTokenToHistory: function (token) {
-      if (this.tokenAlreadyInHistory(token)) {
+    addPendingTokenToHistory: function (tokenStr) {
+      if (this.tokenAlreadyInHistory(tokenStr)) {
         this.notifySuccess("Ecash already in history");
         this.showReceiveTokens = false;
         return;
       }
       const tokensStore = useTokensStore();
-      const decodedToken = tokensStore.decodeToken(token);
+      const decodedToken = this.decodeToken(tokenStr);
+      const mintInToken = this.getMint(decodedToken);
+      const unitInToken = token.getUnit(decodedToken);
       // get amount from decodedToken.token.proofs[..].amount
       const amount = this.getProofs(decodedToken).reduce(
         (sum, el) => (sum += el.amount),
@@ -408,7 +410,9 @@ export default defineComponent({
 
       tokensStore.addPendingToken({
         amount: amount,
-        token: token,
+        token: tokenStr,
+        mintInToken: mintInToken,
+        unitInToken: unitInToken,
       });
       this.showReceiveTokens = false;
       // show success notification
