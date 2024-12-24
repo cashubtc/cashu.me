@@ -32,7 +32,11 @@ export const usePRStore = defineStore("payment-request", {
       const walletStore = useWalletStore();
       this.showPRKData = this.createPaymentRequest(amount, memo, mintUrl);
     },
-    createPaymentRequest: function (amount?: number, memo?: string, mintUrl?: string) {
+    createPaymentRequest: function (
+      amount?: number,
+      memo?: string,
+      mintUrl?: string
+    ) {
       const nostrStore = useNostrStore();
       const mintStore = useMintsStore();
       const tags = [["n", "17"]];
@@ -49,7 +53,11 @@ export const usePRStore = defineStore("payment-request", {
         uuid,
         amount,
         mintStore.activeUnit,
-        mintUrl?.length ? mintStore.activeMintUrl ? [mintStore.activeMintUrl] : undefined : undefined,
+        mintUrl?.length
+          ? mintStore.activeMintUrl
+            ? [mintStore.activeMintUrl]
+            : undefined
+          : undefined,
         memo
       );
       return paymentRequest.toEncodedRequest();

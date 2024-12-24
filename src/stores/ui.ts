@@ -58,7 +58,7 @@ export const useUiStore = defineStore("ui", {
       this.globalMutexLock = false;
     },
     triggerActivityOrb() {
-      this.activityOrb = true
+      this.activityOrb = true;
     },
     setTab(tab: string) {
       this.tab = tab;
@@ -116,8 +116,7 @@ export const useUiStore = defineStore("ui", {
     disableDebugConsole() {
       // @ts-ignore
       document.querySelector("#eruda").remove();
-    }
-
+    },
   },
   getters: {
     tickerShort() {
