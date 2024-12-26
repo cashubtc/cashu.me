@@ -514,7 +514,6 @@ export default defineComponent({
       fragmentSpeedLabel: "F",
       isV4Token: false,
       scanningCard: false,
-      ndefSupported: "NDEFReader" in globalThis,
     };
   },
   computed: {
@@ -528,6 +527,7 @@ export default defineComponent({
       "tickerShort",
       "canPasteFromClipboard",
       "globalMutexLock",
+      "ndefSupported",
     ]),
     ...mapWritableState(useUiStore, ["showNumericKeyboard"]),
     ...mapState(useMintsStore, [
@@ -944,11 +944,10 @@ export default defineComponent({
         console.error(error);
       }
     },
-    pasteToP2PKField: function () {
+    pasteToP2PKField: async function () {
       console.log("pasteToParseDialog");
-      navigator.clipboard.readText().then((text) => {
-        this.sendData.p2pkPubkey = text;
-      });
+      const text = await useUiStore().pasteFromClipboard();
+      this.sendData.p2pkPubkey = text.trim();
     },
   },
 });

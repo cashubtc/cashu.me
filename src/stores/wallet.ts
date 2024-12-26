@@ -527,8 +527,7 @@ export const useWalletStore = defineStore("wallet", {
           historyToken.amount = outputAmount;
           tokenStore.addPaidToken(historyToken);
         }
-
-        if (!!window.navigator.vibrate) navigator.vibrate(200);
+        useUiStore().vibrate();
         let message =
           "Received " +
           uIStore.formatCurrency(outputAmount, historyToken.unit);
@@ -801,7 +800,7 @@ export const useWalletStore = defineStore("wallet", {
           throw new Error("Invoice not paid.");
         }
         let amount_paid = amount - proofsStore.sumProofs(data.change);
-        if (!!window.navigator.vibrate) navigator.vibrate(200);
+        useUiStore().vibrate();
 
         notifySuccess(
           "Paid " +
@@ -1058,7 +1057,7 @@ export const useWalletStore = defineStore("wallet", {
         }
       }
       if (spentProofs != undefined && spentProofs.length) {
-        if (!!window.navigator.vibrate) navigator.vibrate(200);
+        useUiStore().vibrate();
         const proofStore = useProofsStore();
         notifySuccess(
           "Sent " +
@@ -1139,7 +1138,7 @@ export const useWalletStore = defineStore("wallet", {
             if (hideInvoiceDetailsOnMint) {
               uIStore.showInvoiceDetails = false;
             }
-            if (!!window.navigator.vibrate) navigator.vibrate(200);
+            useUiStore().vibrate();
             notifySuccess("Received " + uIStore.formatCurrency(invoice.amount, invoice.unit) + " via Lightning");
             unsub();
             return proofs;
@@ -1189,7 +1188,7 @@ export const useWalletStore = defineStore("wallet", {
         if (hideInvoiceDetailsOnMint) {
           uIStore.showInvoiceDetails = false;
         }
-        if (!!window.navigator.vibrate) navigator.vibrate(200);
+        useUiStore().vibrate();
         notifySuccess(
           "Received " +
           uIStore.formatCurrency(invoice.amount, invoice.unit) +
@@ -1236,7 +1235,7 @@ export const useWalletStore = defineStore("wallet", {
           const spentProofs = await this.checkProofsSpendable(proofs, mintWallet, true);
           if (spentProofs != undefined && spentProofs.length == proofs.length) {
             mintStore.removeProofs(proofs);
-            if (!!window.navigator.vibrate) navigator.vibrate(200);
+            useUiStore().vibrate();
             notifySuccess(
               "Sent " +
               uIStore.formatCurrency(

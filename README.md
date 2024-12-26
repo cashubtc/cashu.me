@@ -19,7 +19,7 @@ npm install
 ### Start the app in development mode (hot-code reloading, error reporting, etc.)
 
 ```bash
-npm run dev
+quasar dev
 ```
 
 ### Run unit tests
@@ -43,7 +43,23 @@ npm run format
 ### Build the app for production
 
 ```bash
-npm run build
+quasar build -m pwa
+```
+
+### Capacitor
+
+After updating code
+
+```
+npx cap copy android
+npx cap sync android
+npx cap open android
+```
+
+Regenerate assets:
+
+```
+npx capacitor-assets generate --android
 ```
 
 ### Customize the configuration

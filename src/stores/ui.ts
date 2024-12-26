@@ -8,6 +8,10 @@ import {
   notifyWarning,
   notify,
 } from "../js/notify";
+import { Clipboard } from "@capacitor/clipboard";
+import { Haptics, ImpactStyle } from '@capacitor/haptics';
+
+import ts from "typescript";
 
 const unitTickerShortMap = {
   sat: "sats",
@@ -116,13 +120,39 @@ export const useUiStore = defineStore("ui", {
     disableDebugConsole() {
       // @ts-ignore
       document.querySelector("#eruda").remove();
-    }
-
+    },
+    pasteFromClipboard: async function () {
+      let text = "";
+      // @ts-ignore
+      if (window?.Capacitor) {
+        const { value } = await Clipboard.read();
+        text = value;
+      } else {
+        text = await navigator.clipboard.readText();
+      }
+      return text;
+    },
+    vibrate: async function () {
+      // @ts-ignore
+      if (window.Capacitor) {
+        // Haptics.impact({ style: ImpactStyle.Light });
+        Haptics.vibrate({ duration: 200 });
+      } else {
+        navigator.vibrate(200);
+      }
+    },
   },
   getters: {
     tickerShort() {
       const unit = useMintsStore().activeUnit;
       return unitTickerShortMap[unit as keyof typeof unitTickerShortMap];
+    },
+    ndefSupported(): boolean {
+      // @ts-ignore
+      if (window.Capacitor) {
+        return false;
+      }
+      return "NDEFReader" in globalThis
     },
     canPasteFromClipboard() {
       return (
