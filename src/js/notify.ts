@@ -7,7 +7,11 @@ const errorTypes = {
   500: "negative",
 } as StatusMap;
 
-async function notifyApiError(error: Error, caption: string = "", position = "top" as QNotifyCreateOptions["position"]) {
+async function notifyApiError(
+  error: Error,
+  caption: string = "",
+  position = "top" as QNotifyCreateOptions["position"]
+) {
   try {
     Notify.create({
       timeout: 5000,
@@ -20,7 +24,7 @@ async function notifyApiError(error: Error, caption: string = "", position = "to
         {
           icon: "close",
           color: "white",
-          handler: () => { },
+          handler: () => {},
         },
       ],
     });
@@ -43,7 +47,7 @@ async function notifySuccess(
       {
         icon: "close",
         color: "white",
-        handler: () => { },
+        handler: () => {},
       },
     ],
   });
@@ -60,7 +64,7 @@ async function notifyError(message: string, caption?: string) {
       {
         icon: "close",
         color: "white",
-        handler: () => { },
+        handler: () => {},
       },
     ],
   });
@@ -82,25 +86,28 @@ async function notifyWarning(
       {
         icon: "close",
         color: "black",
-        handler: () => { },
+        handler: () => {},
       },
     ],
   });
 }
 
-async function notify(message: string) {
+async function notify(
+  message: string,
+  position = "top" as QNotifyCreateOptions["position"]
+) {
   // failure
   Notify.create({
     timeout: 5000,
     type: "null",
     color: "grey",
     message: message,
-    position: "top",
+    position: position,
     actions: [
       {
         icon: "close",
         color: "white",
-        handler: () => { },
+        handler: () => {},
       },
     ],
   });

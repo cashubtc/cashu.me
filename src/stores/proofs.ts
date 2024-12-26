@@ -1,6 +1,11 @@
 import { defineStore } from "pinia";
 import { useMintsStore, WalletProof } from "./mints";
-import { Proof, getEncodedToken, getEncodedTokenV4, Token, TokenEntry } from "@cashu/cashu-ts";
+import {
+  Proof,
+  getEncodedToken,
+  getEncodedTokenV4,
+  Token,
+} from "@cashu/cashu-ts";
 
 export const useProofsStore = defineStore("proofs", {
   state: () => ({}),
@@ -10,22 +15,33 @@ export const useProofsStore = defineStore("proofs", {
       const walletProofs = mintStore.proofsToWalletProofs(proofs);
       return walletProofs.reduce((s, t) => (s += t.amount), 0);
     },
-    setReserved: function (proofs: Proof[], reserved: boolean = true) {
+    setReserved: function (
+      proofs: Proof[],
+      reserved: boolean = true,
+      quote?: string
+    ) {
       const mintStore = useMintsStore();
       const walletProofs = mintStore.proofsToWalletProofs(proofs);
-      walletProofs.forEach((p) => (p.reserved = reserved));
-      // for each proof in mintStore.proofs with the same walletProofs.secret, set the reserved
+      // unset quote if we unset reserved
+      let proofQuote: string | undefined;
+      if (reserved && quote) {
+        proofQuote = quote;
+      } else {
+        proofQuote = undefined;
+      }
       walletProofs.forEach((p) => {
         mintStore.proofs
           .filter((pr) => pr.secret === p.secret)
-          .forEach((pr) => (pr.reserved = reserved));
-      }
-      );
+          .forEach((pr) => {
+            pr.reserved = reserved;
+            pr.quote = proofQuote;
+          });
+      });
     },
     getUnreservedProofs: function (proofs: WalletProof[]) {
       return proofs.filter((p) => !p.reserved);
     },
-    serializeProofs: function (proofs: Proof[]) {
+    serializeProofs: function (proofs: Proof[]): string {
       const mintStore = useMintsStore();
       // unique keyset IDs of proofs
       let uniqueIds = [...new Set(proofs.map((p) => p.id))];
@@ -34,19 +50,20 @@ export const useProofsStore = defineStore("proofs", {
         m.keysets.filter((k) => uniqueIds.includes(k.id))
       );
       if (keysets.length === 0) {
-        return null;
+        throw new Error("No keysets found for proofs");
       }
       // mints that have any of the keyset.id
       let mints = mintStore.mints.filter((m) =>
         m.keysets.some((k) => uniqueIds.includes(k.id))
       );
       if (mints.length === 0) {
-        return null;
+        throw new Error("No mints found for proofs");
       }
       // unit of keysets
       let unit = keysets[0].unit;
       const token = {
-        token: [{ proofs: proofs, mint: mints[0].url }],
+        mint: mints[0].url,
+        proofs: proofs,
         unit: unit,
       } as Token;
       try {
@@ -55,7 +72,6 @@ export const useProofsStore = defineStore("proofs", {
         console.log("Could not encode TokenV4, defaulting to TokenV3", e);
         return getEncodedToken(token);
       }
-
 
       // // what we put into the JSON
       // let mintsJson = mints.map((m) => [{ url: m.url, ids: m.keysets }][0]);

@@ -1,1 +1,76 @@
 // app global css in SCSS form
+
+// prevent pull to refresh on android chrome
+body {
+  overscroll-behavior-y: contain;
+}
+
+body,
+#q-app,
+.q-drawer,
+.q-layout,
+.q-header,
+.q-dialog__inner > div,
+.q-notification {
+  margin-top: var(--safe-area-inset-top);
+  // margin-top: 100px; // for testing
+}
+
+.q-dialog__inner > div {
+  border-top-left-radius: 0px;
+  border-top-right-radius: 0px;
+  border-bottom-right-radius: 20px !important;
+  border-bottom-left-radius: 20px !important;
+}
+
+.q-card {
+  border-top-left-radius: 20px;
+  border-top-right-radius: 20px;
+}
+
+.q-dialog__inner--minimized > div {
+  border-top-left-radius: 20px;
+  border-top-right-radius: 20px;
+  border-bottom-right-radius: 20px;
+  border-bottom-left-radius: 20px;
+  max-width: 650px;
+}
+
+.custom-btn {
+  background: $grey-9;
+  color: white;
+  border-radius: 8px;
+  height: 80px;
+  box-shadow: none;
+  font-size: 18px;
+}
+
+.custom-btn:hover {
+  background: $grey-8;
+}
+
+.custom-btn-text {
+  font-size: 18px !important;
+  color: white;
+  padding-top: 2px;
+}
+
+.full-width-card {
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.animated.tada {
+  animation-duration: 1s;
+}
+.animated.bounceIn {
+  animation-duration: 1s;
+}
+.animated.bounce {
+  animation-duration: 1s;
+}
+
+.q-checkbox__svg {
+  color: var(--q-dark);
+}

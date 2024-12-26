@@ -3,6 +3,7 @@ import QrScanner from "qr-scanner";
 import { URDecoder } from "@gandlaf21/bc-ur";
 import { useCameraStore } from "src/stores/camera";
 import { mapActions, mapState, mapWritableState } from "pinia";
+import { useUiStore } from "src/stores/ui";
 export default {
   emits: ["decode"],
   data(): {
@@ -62,11 +63,11 @@ export default {
         this.qrScanner?.stop();
       }
     },
-    pasteToParseDialog: function () {
-      console.log("pasteToParseDialog");
-      navigator.clipboard.readText().then((text) => {
+    pasteToParseDialog: async function () {
+      const text = await useUiStore().pasteFromClipboard();
+      if (text) {
         this.$emit("decode", text);
-      });
+      }
     },
   },
   unmounted() {
@@ -112,9 +113,10 @@ export default {
       <q-btn
         unelevated
         v-if="canPasteFromClipboard"
-        icon="content_paste"
         @click="pasteToParseDialog"
-        ><q-tooltip>Paste</q-tooltip></q-btn
+      >
+        <q-icon name="content_paste" class="q-mr-sm" />
+        Paste</q-btn
       >
       <q-btn @click="closeCamera" flat color="grey" class="q-ml-auto"
         >Close</q-btn
