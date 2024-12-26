@@ -1318,7 +1318,6 @@ export default defineComponent({
       nip46Token: "",
       nip07SignerAvailable: false,
       newRelay: "",
-      ndefSupported: "NDEFReader" in globalThis,
     };
   },
   computed: {
@@ -1355,6 +1354,7 @@ export default defineComponent({
       "seedSignerPrivateKeyNsec",
     ]),
     ...mapState(useWalletStore, ["mnemonic"]),
+    ...mapState(useUiStore, ["ndefSupported"]),
     ...mapWritableState(useNPCStore, ["npcAddress"]),
     ...mapWritableState(useNPCStore, ["npcEnabled", "automaticClaim"]),
     ...mapWritableState(useWalletStore, ["keysetCounters"]),

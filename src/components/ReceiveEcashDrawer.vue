@@ -152,7 +152,6 @@ export default defineComponent({
   data: function () {
     return {
       showP2PKDialog: false,
-      ndefSupported: "NDEFReader" in globalThis,
     };
   },
   computed: {
@@ -162,7 +161,7 @@ export default defineComponent({
       "scanningCard",
       "watchClipboardPaste",
     ]),
-    ...mapState(useUiStore, ["tickerShort"]),
+    ...mapState(useUiStore, ["tickerShort", "ndefSupported"]),
     ...mapState(useMintsStore, [
       "activeProofs",
       "activeUnit",
@@ -178,13 +177,6 @@ export default defineComponent({
     ...mapState(useCameraStore, ["hasCamera"]),
     ...mapState(useP2PKStore, ["p2pkKeys", "showP2PkButtonInDrawer"]),
     ...mapState(usePRStore, ["enablePaymentRequest"]),
-    canPasteFromClipboard: function () {
-      return (
-        window.isSecureContext &&
-        navigator.clipboard &&
-        navigator.clipboard.readText
-      );
-    },
     ...mapWritableState(useUiStore, ["showReceiveDialog"]),
     ...mapState(useCameraStore, ["lastScannedResult"]),
   },

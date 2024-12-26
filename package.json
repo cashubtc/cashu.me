@@ -17,9 +17,10 @@
     "test:ci": "vitest run"
   },
   "dependencies": {
-    "@capacitor/cli": "^6.0.0",
-    "@capacitor/clipboard": "^6.0.0",
-    "@capacitor/core": "^6.0.0",
+    "@capacitor/android": "^6.2.0",
+    "@capacitor/clipboard": "^6.0.2",
+    "@capacitor/core": "^6.2.0",
+    "@capacitor/haptics": "^6.0.2",
     "@capacitor/ios": "^6.0.0",
     "@cashu/cashu-ts": "^2.0.0-rc3",
     "@cashu/crypto": "^0.3.4",
@@ -32,6 +33,7 @@
     "@vueuse/core": "^10.9.0",
     "axios": "^1.6.8",
     "bech32": "^2.0.0",
+    "capacitor-plugin-safe-area": "^3.0.4",
     "core-js": "^3.37.0",
     "date-fns": "^3.6.0",
     "light-bolt11-decoder": "^3.1.1",
@@ -46,6 +48,8 @@
     "vue-router": "^4.3.2"
   },
   "devDependencies": {
+    "@capacitor/assets": "^3.0.5",
+    "@capacitor/cli": "^6.2.0",
     "@quasar/app-vite": "^1.9.3",
     "@types/node": "^20.12.11",
     "@types/underscore": "^1.11.15",

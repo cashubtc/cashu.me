@@ -276,7 +276,6 @@ export default defineComponent({
   data: function () {
     return {
       showP2PKDialog: false,
-      ndefSupported: "NDEFReader" in globalThis,
       swapSelected: false,
     };
   },
@@ -297,7 +296,7 @@ export default defineComponent({
       "receiveData",
       "scanningCard",
     ]),
-    ...mapState(useUiStore, ["tickerShort"]),
+    ...mapState(useUiStore, ["tickerShort", "ndefSupported"]),
     ...mapState(usePriceStore, ["bitcoinPrice"]),
     ...mapState(useMintsStore, [
       "activeMintUrl",
@@ -313,6 +312,8 @@ export default defineComponent({
     ...mapState(useP2PKStore, ["p2pkKeys"]),
     ...mapState(usePRStore, ["enablePaymentRequest"]),
     ...mapState(useSwapStore, ["swapBlocking"]),
+    ...mapWritableState(useUiStore, ["showReceiveDialog"]),
+    ...mapState(useCameraStore, ["lastScannedResult"]),
     canPasteFromClipboard: function () {
       return (
         window.isSecureContext &&
@@ -320,8 +321,6 @@ export default defineComponent({
         navigator.clipboard.readText
       );
     },
-    ...mapWritableState(useUiStore, ["showReceiveDialog"]),
-    ...mapState(useCameraStore, ["lastScannedResult"]),
     tokenDecodesCorrectly: function () {
       return this.decodeToken(this.receiveData.tokensBase64) !== undefined;
     },
