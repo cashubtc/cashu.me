@@ -276,7 +276,6 @@ export default defineComponent({
   data: function () {
     return {
       showP2PKDialog: false,
-      ndefSupported: "NDEFReader" in globalThis,
       swapSelected: false,
     };
   },
@@ -297,7 +296,7 @@ export default defineComponent({
       "receiveData",
       "scanningCard",
     ]),
-    ...mapState(useUiStore, ["tickerShort"]),
+    ...mapState(useUiStore, ["tickerShort", "ndefSupported"]),
     ...mapState(usePriceStore, ["bitcoinPrice"]),
     ...mapState(useMintsStore, [
       "activeMintUrl",

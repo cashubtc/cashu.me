@@ -514,7 +514,6 @@ export default defineComponent({
       fragmentSpeedLabel: "F",
       isV4Token: false,
       scanningCard: false,
-      ndefSupported: "NDEFReader" in globalThis,
     };
   },
   computed: {
@@ -528,6 +527,7 @@ export default defineComponent({
       "tickerShort",
       "canPasteFromClipboard",
       "globalMutexLock",
+      "ndefSupported",
     ]),
     ...mapWritableState(useUiStore, ["showNumericKeyboard"]),
     ...mapState(useMintsStore, [

@@ -152,7 +152,6 @@ export default defineComponent({
   data: function () {
     return {
       showP2PKDialog: false,
-      ndefSupported: "NDEFReader" in globalThis,
     };
   },
   computed: {
@@ -162,7 +161,7 @@ export default defineComponent({
       "scanningCard",
       "watchClipboardPaste",
     ]),
-    ...mapState(useUiStore, ["tickerShort"]),
+    ...mapState(useUiStore, ["tickerShort", "ndefSupported"]),
     ...mapState(useMintsStore, [
       "activeProofs",
       "activeUnit",

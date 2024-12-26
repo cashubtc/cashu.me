@@ -140,12 +140,19 @@ export const useUiStore = defineStore("ui", {
       } else {
         navigator.vibrate(200);
       }
-    }
+    },
   },
   getters: {
     tickerShort() {
       const unit = useMintsStore().activeUnit;
       return unitTickerShortMap[unit as keyof typeof unitTickerShortMap];
+    },
+    ndefSupported(): boolean {
+      // @ts-ignore
+      if (window.Capacitor) {
+        return false;
+      }
+      return "NDEFReader" in globalThis
     },
     canPasteFromClipboard() {
       return (
