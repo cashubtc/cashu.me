@@ -23,10 +23,16 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
       keepIntervalConstantForNChecks: 5,
       invoiceCheckListener: null as NodeJS.Timeout | null,
       invoiceWorkerRunning: false,
-      quotes: useLocalStorage<InvoiceQuote[]>("cashu.worker.invoices.quotesQueue", []),
+      quotes: useLocalStorage<InvoiceQuote[]>(
+        "cashu.worker.invoices.quotesQueue",
+        []
+      ),
       lastInvoiceCheckTime: 0,
       maxQuotesToCheckOnStartup: 10,
-      lastPendingInvoiceCheck: useLocalStorage<number>("cashu.worker.invoices.lastPendingInvoiceCheck", 0),
+      lastPendingInvoiceCheck: useLocalStorage<number>(
+        "cashu.worker.invoices.lastPendingInvoiceCheck",
+        0
+      ),
       checkPendingInvoicesInterval: 1000 * 10, // delay between bulk invoice checks
     };
   },
@@ -72,7 +78,14 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
     },
     dueTime(q: InvoiceQuote) {
       if (q.checkCount > this.keepIntervalConstantForNChecks) {
-        return q.lastChecked + Math.min(this.checkInterval * (Math.pow(2, q.checkCount - this.keepIntervalConstantForNChecks)), this.maxInterval);
+        return (
+          q.lastChecked +
+          Math.min(
+            this.checkInterval *
+              Math.pow(2, q.checkCount - this.keepIntervalConstantForNChecks),
+            this.maxInterval
+          )
+        );
       } else {
         return q.lastChecked + this.checkInterval;
       }
@@ -107,14 +120,18 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
     },
     async checkPendingInvoices() {
       if (!useSettingsStore().checkInvoicesOnStartup) return;
-      if (Date.now() < this.lastPendingInvoiceCheck + this.checkPendingInvoicesInterval) return;
+      if (
+        Date.now() <
+        this.lastPendingInvoiceCheck + this.checkPendingInvoicesInterval
+      )
+        return;
       const walletStore = useWalletStore();
-      const quotesToCheck =
-        walletStore.invoiceHistory.filter((q) =>
+      const quotesToCheck = walletStore.invoiceHistory.filter(
+        (q) =>
           q.status === "pending" &&
           q.amount > 0 &&
           Date.now() - Date.parse(q.date) < this.oneDay
-        );
+      );
       if (quotesToCheck.length > this.maxQuotesToCheckOnStartup) {
         quotesToCheck.splice(this.maxQuotesToCheckOnStartup);
       }

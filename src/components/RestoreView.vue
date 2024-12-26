@@ -170,6 +170,7 @@ import { mapActions, mapState, mapWritableState } from "pinia";
 import { useMintsStore, MintClass } from "src/stores/mints";
 import { useRestoreStore } from "src/stores/restore";
 import { useWalletStore } from "src/stores/wallet";
+import { useUiStore } from "src/stores/ui";
 import { notifyError, notifySuccess } from "src/js/notify";
 
 export default defineComponent({
@@ -203,6 +204,7 @@ export default defineComponent({
   },
   methods: {
     ...mapActions(useRestoreStore, ["restoreMint"]),
+    ...mapActions(useUiStore, ["pasteFromClipboard"]),
     mintClass(mint) {
       return new MintClass(mint);
     },
@@ -232,7 +234,7 @@ export default defineComponent({
     },
     async pasteMnemonic() {
       try {
-        const text = await navigator.clipboard.readText();
+        const text = await this.pasteFromClipboard();
         this.mnemonicToRestore = text.trim();
       } catch (error) {
         notifyError("Failed to read clipboard contents.");

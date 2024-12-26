@@ -13,6 +13,7 @@ import {
 } from "../js/notify";
 import { Token } from "@cashu/cashu-ts";
 import { useSwapStore } from "./swap";
+import { Clipboard } from "@capacitor/clipboard";
 
 export const useReceiveTokensStore = defineStore("receiveTokensStore", {
   state: () => ({
@@ -29,7 +30,7 @@ export const useReceiveTokensStore = defineStore("receiveTokensStore", {
       let decodedToken = undefined;
       try {
         decodedToken = token.decode(encodedToken);
-      } catch (error) { }
+      } catch (error) {}
       return decodedToken;
     },
     knowThisMintOfTokenJson: function (tokenJson: Token) {
@@ -99,28 +100,25 @@ export const useReceiveTokensStore = defineStore("receiveTokensStore", {
       receiveStore.showReceiveTokens = false;
       uiStore.closeDialogs();
     },
-    pasteToParseDialog: function (verbose = false) {
-      navigator.clipboard.readText().then((text) => {
-        if (this.decodeToken(text)) {
-          const tokensStore = useTokensStore();
-          const historyToken = tokensStore.tokenAlreadyInHistory(text);
-          if (
-            historyToken &&
-            (historyToken.amuont > 0 || historyToken.status === "paid")
-          ) {
-            if (verbose) {
-              notify("Token already in history.");
-            }
+    pasteToParseDialog: async function (verbose = false) {
+      const text = await useUiStore().pasteFromClipboard();
+      if (this.decodeToken(text)) {
+        const tokensStore = useTokensStore();
+        const historyToken = tokensStore.tokenAlreadyInHistory(text);
 
-            return false;
-          }
-          this.receiveData.tokensBase64 = text;
-          return true;
-        } else {
-          // notifyWarning("Invalid token");
+        if (
+          historyToken &&
+          (historyToken.amount > 0 || historyToken.status === "paid")
+        ) {
+          if (verbose) notify("Token already in history.");
           return false;
         }
-      });
+        this.receiveData.tokensBase64 = text;
+        return true;
+      } else {
+        // notifyWarning("Invalid token");
+        return false;
+      }
     },
     toggleScanner: function () {
       const receiveStore = useReceiveTokensStore();

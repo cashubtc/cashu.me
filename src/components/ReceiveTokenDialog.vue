@@ -151,7 +151,7 @@
               color="primary"
               rounded
               flat
-              class="q-mr-none q-pr-sm"
+              class="q-mr-none"
             >
               <q-icon name="swap_horiz" class="q-pr-sm" />
               Swap
@@ -162,7 +162,7 @@
               color="primary"
               rounded
               flat
-              class="q-mr-none q-pr-sm"
+              class="q-mr-none"
               >Later
               <q-tooltip>Add to history to receive later</q-tooltip>
             </q-btn>
@@ -276,7 +276,6 @@ export default defineComponent({
   data: function () {
     return {
       showP2PKDialog: false,
-      ndefSupported: "NDEFReader" in globalThis,
       swapSelected: false,
     };
   },
@@ -297,7 +296,7 @@ export default defineComponent({
       "receiveData",
       "scanningCard",
     ]),
-    ...mapState(useUiStore, ["tickerShort"]),
+    ...mapState(useUiStore, ["tickerShort", "ndefSupported"]),
     ...mapState(usePriceStore, ["bitcoinPrice"]),
     ...mapState(useMintsStore, [
       "activeMintUrl",
@@ -313,6 +312,8 @@ export default defineComponent({
     ...mapState(useP2PKStore, ["p2pkKeys"]),
     ...mapState(usePRStore, ["enablePaymentRequest"]),
     ...mapState(useSwapStore, ["swapBlocking"]),
+    ...mapWritableState(useUiStore, ["showReceiveDialog"]),
+    ...mapState(useCameraStore, ["lastScannedResult"]),
     canPasteFromClipboard: function () {
       return (
         window.isSecureContext &&
@@ -320,8 +321,6 @@ export default defineComponent({
         navigator.clipboard.readText
       );
     },
-    ...mapWritableState(useUiStore, ["showReceiveDialog"]),
-    ...mapState(useCameraStore, ["lastScannedResult"]),
     tokenDecodesCorrectly: function () {
       return this.decodeToken(this.receiveData.tokensBase64) !== undefined;
     },
@@ -392,14 +391,16 @@ export default defineComponent({
         undefined
       );
     },
-    addPendingTokenToHistory: function (token) {
-      if (this.tokenAlreadyInHistory(token)) {
-        this.notifySuccess("Ecash already in history");
+    addPendingTokenToHistory: function (tokenStr) {
+      if (this.tokenAlreadyInHistory(tokenStr)) {
+        this.notifySuccess("Ecash already in History");
         this.showReceiveTokens = false;
         return;
       }
       const tokensStore = useTokensStore();
-      const decodedToken = tokensStore.decodeToken(token);
+      const decodedToken = this.decodeToken(tokenStr);
+      const mintInToken = this.getMint(decodedToken);
+      const unitInToken = token.getUnit(decodedToken);
       // get amount from decodedToken.token.proofs[..].amount
       const amount = this.getProofs(decodedToken).reduce(
         (sum, el) => (sum += el.amount),
@@ -408,11 +409,13 @@ export default defineComponent({
 
       tokensStore.addPendingToken({
         amount: amount,
-        token: token,
+        token: tokenStr,
+        mintInToken: mintInToken,
+        unitInToken: unitInToken,
       });
       this.showReceiveTokens = false;
       // show success notification
-      this.notifySuccess("Incoming payment added to history.");
+      this.notifySuccess("Ecash added to History");
     },
     handleSwapToTrustedMint: async function () {
       const mint = useMintsStore().activeMint().mint;
