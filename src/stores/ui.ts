@@ -9,6 +9,8 @@ import {
   notify,
 } from "../js/notify";
 import { Clipboard } from "@capacitor/clipboard";
+import { Haptics, ImpactStyle } from '@capacitor/haptics';
+
 import ts from "typescript";
 
 const unitTickerShortMap = {
@@ -130,6 +132,15 @@ export const useUiStore = defineStore("ui", {
       }
       return text;
     },
+    vibrate: async function () {
+      // @ts-ignore
+      if (window.Capacitor) {
+        // Haptics.impact({ style: ImpactStyle.Light });
+        Haptics.vibrate({ duration: 200 });
+      } else {
+        navigator.vibrate(200);
+      }
+    }
   },
   getters: {
     tickerShort() {
