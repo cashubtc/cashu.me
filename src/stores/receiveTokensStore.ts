@@ -13,7 +13,7 @@ import {
 } from "../js/notify";
 import { Token } from "@cashu/cashu-ts";
 import { useSwapStore } from "./swap";
-import { Clipboard } from '@capacitor/clipboard';
+import { Clipboard } from "@capacitor/clipboard";
 
 export const useReceiveTokensStore = defineStore("receiveTokensStore", {
   state: () => ({
@@ -30,7 +30,7 @@ export const useReceiveTokensStore = defineStore("receiveTokensStore", {
       let decodedToken = undefined;
       try {
         decodedToken = token.decode(encodedToken);
-      } catch (error) { }
+      } catch (error) {}
       return decodedToken;
     },
     knowThisMintOfTokenJson: function (tokenJson: Token) {
@@ -106,7 +106,10 @@ export const useReceiveTokensStore = defineStore("receiveTokensStore", {
         const tokensStore = useTokensStore();
         const historyToken = tokensStore.tokenAlreadyInHistory(text);
 
-        if (historyToken && (historyToken.amount > 0 || historyToken.status === "paid")) {
+        if (
+          historyToken &&
+          (historyToken.amount > 0 || historyToken.status === "paid")
+        ) {
           if (verbose) notify("Token already in history.");
           return false;
         }

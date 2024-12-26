@@ -12,6 +12,7 @@
     "quasar": "quasar",
     "lint": "eslint --ext .js,.vue ./",
     "format": "prettier --write .",
+    "checkformat": "prettier --check .",
     "test": "vitest",
     "test:ci": "vitest run"
   },

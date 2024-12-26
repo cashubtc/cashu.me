@@ -9,7 +9,7 @@ import {
   notify,
 } from "../js/notify";
 import { Clipboard } from "@capacitor/clipboard";
-import { Haptics, ImpactStyle } from '@capacitor/haptics';
+import { Haptics, ImpactStyle } from "@capacitor/haptics";
 
 import ts from "typescript";
 
@@ -62,7 +62,7 @@ export const useUiStore = defineStore("ui", {
       this.globalMutexLock = false;
     },
     triggerActivityOrb() {
-      this.activityOrb = true
+      this.activityOrb = true;
     },
     setTab(tab: string) {
       this.tab = tab;
@@ -152,7 +152,7 @@ export const useUiStore = defineStore("ui", {
       if (window.Capacitor) {
         return false;
       }
-      return "NDEFReader" in globalThis
+      return "NDEFReader" in globalThis;
     },
     canPasteFromClipboard() {
       return (
