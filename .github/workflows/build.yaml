@@ -1,9 +1,9 @@
-name: Check format
+name: Check build
 
 on: [push, pull_request]
 
 jobs:
-  format-check:
+  build-check:
     runs-on: ubuntu-latest
 
     steps:
@@ -19,5 +19,7 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Run format check
-        run: npm run checkformat
+      - name: Run build check
+        run: |
+          npm run build
+          npm run build:pwa
