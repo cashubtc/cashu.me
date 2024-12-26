@@ -32,6 +32,7 @@
     "@vueuse/core": "^10.9.0",
     "axios": "^1.6.8",
     "bech32": "^2.0.0",
+    "capacitor-plugin-safe-area": "^3.0.4",
     "core-js": "^3.37.0",
     "date-fns": "^3.6.0",
     "light-bolt11-decoder": "^3.1.1",

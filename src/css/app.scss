@@ -5,6 +5,17 @@ body {
   overscroll-behavior-y: contain;
 }
 
+body,
+#q-app,
+.q-drawer,
+.q-layout,
+.q-header,
+.q-dialog__inner > div,
+.q-notification {
+  margin-top: var(--safe-area-inset-top);
+  // margin-top: 100px; // for testing
+}
+
 .q-dialog__inner > div {
   border-top-left-radius: 0px;
   border-top-right-radius: 0px;
