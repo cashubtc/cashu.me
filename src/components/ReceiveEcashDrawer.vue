@@ -178,13 +178,6 @@ export default defineComponent({
     ...mapState(useCameraStore, ["hasCamera"]),
     ...mapState(useP2PKStore, ["p2pkKeys", "showP2PkButtonInDrawer"]),
     ...mapState(usePRStore, ["enablePaymentRequest"]),
-    canPasteFromClipboard: function () {
-      return (
-        window.isSecureContext &&
-        navigator.clipboard &&
-        navigator.clipboard.readText
-      );
-    },
     ...mapWritableState(useUiStore, ["showReceiveDialog"]),
     ...mapState(useCameraStore, ["lastScannedResult"]),
   },

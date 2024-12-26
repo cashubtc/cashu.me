@@ -17,7 +17,7 @@
   },
   "dependencies": {
     "@capacitor/android": "^6.2.0",
-    "@capacitor/clipboard": "^6.0.0",
+    "@capacitor/clipboard": "^6.0.2",
     "@capacitor/core": "^6.2.0",
     "@capacitor/ios": "^6.0.0",
     "@cashu/cashu-ts": "^2.0.0-rc3",

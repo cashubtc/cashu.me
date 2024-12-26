@@ -8,6 +8,8 @@ import {
   notifyWarning,
   notify,
 } from "../js/notify";
+import { Clipboard } from "@capacitor/clipboard";
+import ts from "typescript";
 
 const unitTickerShortMap = {
   sat: "sats",
@@ -116,8 +118,18 @@ export const useUiStore = defineStore("ui", {
     disableDebugConsole() {
       // @ts-ignore
       document.querySelector("#eruda").remove();
-    }
-
+    },
+    pasteFromClipboard: async function () {
+      let text = "";
+      // @ts-ignore
+      if (window?.Capacitor) {
+        const { value } = await Clipboard.read();
+        text = value;
+      } else {
+        text = await navigator.clipboard.readText();
+      }
+      return text;
+    },
   },
   getters: {
     tickerShort() {

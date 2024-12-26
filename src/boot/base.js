@@ -1,5 +1,6 @@
 import { copyToClipboard } from "quasar";
 import { useUiStore } from "stores/ui";
+import { Clipboard } from "@capacitor/clipboard";
 
 window.LOCALE = "en";
 // window.EventHub = new Vue();
@@ -35,6 +36,16 @@ window.windowMixin = {
           position: position || "bottom",
         });
       });
+    },
+    pasteFromClipboard: async function () {
+      let text = "";
+      if (window?.Capacitor) {
+        const { value } = await Clipboard.read();
+        text = value;
+      } else {
+        text = await navigator.clipboard.readText();
+      }
+      return text;
     },
     formatCurrency: function (value, currency, showBalance = false) {
       if (currency == undefined) {
