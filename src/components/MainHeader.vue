@@ -1,5 +1,5 @@
 <template>
-  <q-header class="bg-marginal-bg">
+  <q-header class="bg-transparent">
     <q-toolbar>
       <q-btn
         flat
@@ -193,3 +193,9 @@ export default defineComponent({
   },
 });
 </script>
+<style scoped>
+.glassy-header {
+  background: rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(10px);
+}
+</style>
