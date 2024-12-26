@@ -48,18 +48,19 @@ quasar build -m pwa
 
 ### Capacitor
 
-After updating code
+After updating code, run:
 
 ```
-npx cap copy android
-npx cap sync android
-npx cap open android
+quasar build -m pwa
+npx cap copy
+npx cap sync
+npx cap open android / ios
 ```
 
 Regenerate assets:
 
 ```
-npx capacitor-assets generate --android
+npx capacitor-assets generate
 ```
 
 ### Customize the configuration
