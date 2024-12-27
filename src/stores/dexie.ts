@@ -12,13 +12,11 @@ export interface Proof {
 
 export class MySubClassedDexie extends Dexie {
   proofs!: Table<Proof>;
-  spentProofs!: Table<Proof>;
 
   constructor() {
     super('db');
     this.version(1).stores({
       proofs: '++secret, id, C, amount, reserved',
-      spentProofs: '++secret, id, C, amount, reserved',
     });
   }
 }
@@ -47,15 +45,6 @@ export const useDexieStore = defineStore("dexie", {
         });
       }
       console.log(`Migrated ${this.db.proofs.count()} proofs`);
-      // do the same with spentProofs
-      const spentProofs = localStorage.getItem("cashu.spentProofs");
-      if (spentProofs) {
-        const parsedSpentProofs = JSON.parse(spentProofs) as Proof[];
-        parsedSpentProofs.forEach((proof) => {
-          this.db.spentProofs.add(proof);
-        });
-      }
-      console.log(`Migrated ${this.db.spentProofs.count()} spent proofs`);
       this.migratedToDexie = true;
       // remove localstorage "cashu.proofs" and "cashu.spentProofs"
       localStorage.removeItem("cashu.proofs");

@@ -270,10 +270,8 @@ export const useMintsStore = defineStore("mints", {
     removeProofs(proofs: Proof[]) {
       const walletProofs = this.proofsToWalletProofs(proofs);
       const proofsTable = dexieStore.db.proofs;
-      const spentProofsTable = dexieStore.db.spentProofs;
       walletProofs.forEach((p) => {
         proofsTable.delete(p.secret);
-        spentProofsTable.add(p);
       }
       );
     },
