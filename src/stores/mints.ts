@@ -161,7 +161,7 @@ export const useMintsStore = defineStore("mints", {
     };
   },
   getters: {
-    activeBalance({ activeUnit }): number {
+    totalUnitBalance({ activeUnit }): number {
       const allUnitKeysets = this.mints
         .map((m) => m.keysets)
         .flat()
@@ -170,6 +170,11 @@ export const useMintsStore = defineStore("mints", {
         .filter((p) => allUnitKeysets.map((k) => k.id).includes(p.id))
         .reduce((sum, p) => sum + p.amount, 0);
       return balance;
+    },
+    activeBalance(): number {
+      return this.activeProofs
+        .flat()
+        .reduce((sum, el) => (sum += el.amount), 0);
     },
     activeKeysets({ activeMintUrl, activeUnit }): MintKeyset[] {
       const unitKeysets = this.mints
@@ -239,10 +244,6 @@ export const useMintsStore = defineStore("mints", {
       return this.proofs.filter((p) =>
         unitKeysets.map((k) => k.id).includes(p.id)
       );
-    },
-    activeMintBalance() {
-      // return balance of active mint in active unit
-      return this.activeMint().unitBalance(this.activeUnit);
     },
     toggleUnit: function () {
       const units = this.activeMint().units;

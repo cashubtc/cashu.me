@@ -23,10 +23,21 @@ export default defineComponent({
   },
   setup(props) {
     const displayedValue = ref(props.value);
+    // value to remember that we do not want to animate the very first update (when the component is created)
+    const initialized = ref(false);
 
     watch(
       () => props.value,
       (newValue, oldValue) => {
+        if (!initialized.value) {
+          // do not animate the very first update
+          console.log(`[AnimatedNumber]: not initialized: ${newValue}`);
+          displayedValue.value = newValue;
+          if (newValue > 0) {
+            initialized.value = true;
+          }
+          return;
+        }
         const startTime = performance.now();
         const startValue = oldValue !== undefined ? oldValue : newValue;
         const endValue = newValue;
