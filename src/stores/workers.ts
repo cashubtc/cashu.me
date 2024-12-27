@@ -3,6 +3,7 @@ import { useWalletStore } from "src/stores/wallet"; // invoiceData,
 import { useUiStore } from "src/stores/ui"; // showInvoiceDetails
 import { useSendTokensStore } from "src/stores/sendTokensStore"; // showSendTokens and sendData
 import { useSettingsStore } from "./settings";
+import { HistoryToken, useTokensStore } from "./tokens";
 export const useWorkersStore = defineStore("workers", {
   state: () => {
     return {
@@ -10,6 +11,7 @@ export const useWorkersStore = defineStore("workers", {
       tokensCheckSpendableListener: null as NodeJS.Timeout | null,
       invoiceWorkerRunning: false,
       tokenWorkerRunning: false,
+      checkInterval: 5000,
     };
   },
   getters: {},
@@ -25,9 +27,8 @@ export const useWorkersStore = defineStore("workers", {
         this.tokenWorkerRunning = false;
       }
     },
-    invoiceCheckWorker: async function () {
+    invoiceCheckWorker: async function (quote: string) {
       const walletStore = useWalletStore();
-      const uiStore = useUiStore();
       let nInterval = 0;
       this.clearAllWorkers();
       this.invoiceCheckListener = setInterval(async () => {
@@ -41,26 +42,24 @@ export const useWorkersStore = defineStore("workers", {
             this.clearAllWorkers();
           }
           console.log("### invoiceCheckWorker setInterval", nInterval);
-          console.log(walletStore.invoiceData);
 
           // this will throw an error if the invoice is pending
-          await walletStore.checkInvoice(walletStore.invoiceData.quote, false);
+          await walletStore.checkInvoice(quote, false);
 
           // only without error (invoice paid) will we reach here
           console.log("### stopping invoice check worker");
           this.clearAllWorkers();
-          uiStore.showInvoiceDetails = false;
-          // if (window.navigator.vibrate) navigator.vibrate(200);
-          // notifySuccess("Payment received", "top");
         } catch (error) {
           console.log("invoiceCheckWorker: not paid yet");
         }
-      }, 5000);
+      }, this.checkInterval);
     },
-    checkTokenSpendableWorker: async function (tokensBase64: string) {
+    checkTokenSpendableWorker: async function (historyToken: HistoryToken) {
       const settingsStore = useSettingsStore();
       if (!settingsStore.checkSentTokens) {
-        console.log("### checkTokenSpendableWorker: disabled");
+        console.log(
+          "settingsStore.checkSentTokens is disabled, not kicking off checkTokenSpendableWorker"
+        );
         return;
       }
       console.log("### kicking off checkTokenSpendableWorker");
@@ -78,10 +77,7 @@ export const useWorkersStore = defineStore("workers", {
             this.clearAllWorkers();
           }
           console.log("### checkTokenSpendableWorker setInterval", nInterval);
-          let paid = await walletStore.checkTokenSpendable(
-            tokensBase64,
-            false
-          );
+          let paid = await walletStore.checkTokenSpendable(historyToken, false);
           if (paid) {
             console.log("### stopping token check worker");
             this.clearAllWorkers();
@@ -91,7 +87,7 @@ export const useWorkersStore = defineStore("workers", {
           console.log("checkTokenSpendableWorker: some error", error);
           this.clearAllWorkers();
         }
-      }, 3000);
+      }, this.checkInterval);
     },
   },
 });

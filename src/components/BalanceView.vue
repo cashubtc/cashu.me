@@ -6,7 +6,7 @@
       <div v-if="globalMutexLock">
         <transition
           appear
-          enter-active-class="animated fadeIn"
+          enter-active-class="animated pulse"
           leave-active-class="animated fadeOut"
         >
           <q-spinner-hourglass
@@ -19,7 +19,7 @@
       <div v-else>
         <transition
           appear
-          enter-active-class="animated fadeIn"
+          enter-active-class="animated pulse"
           leave-active-class="animated fadeOut"
         >
           <ToggleUnit class="q-mt-lg q-mb-none" :balanceView="true" />
@@ -56,27 +56,27 @@
                 @click="toggleHideBalance"
               >
                 <strong>
-                  {{ formatCurrency(getTotalBalance, activeUnit) }}
+                  <AnimatedNumber
+                    :value="getTotalBalance"
+                    :format="(val) => formatCurrency(val, activeUnit)"
+                    class="q-my-none q-py-none cursor-pointer"
+                  />
                 </strong>
               </h3>
               <div v-if="bitcoinPrice">
                 <strong v-if="this.activeUnit == 'sat'">
-                  {{
-                    formatCurrency(
-                      (bitcoinPrice / 100000000) * getTotalBalance,
-                      "USD"
-                    )
-                  }}
+                  <AnimatedNumber
+                    :value="(bitcoinPrice / 100000000) * getTotalBalance"
+                    :format="(val) => formatCurrency(val, 'USD')"
+                  />
                 </strong>
                 <strong
                   v-if="this.activeUnit == 'usd' || this.activeUnit == 'eur'"
                 >
-                  {{
-                    formatCurrency(
-                      (getTotalBalance / 100 / bitcoinPrice) * 100000000,
-                      "sat"
-                    )
-                  }}
+                  <AnimatedNumber
+                    :value="(getTotalBalance / 100 / bitcoinPrice) * 100000000"
+                    :format="(val) => formatCurrency(val, 'sat')"
+                  />
                 </strong>
                 <q-tooltip>
                   {{ formatCurrency(bitcoinPrice, "USD").slice(1) }}
@@ -92,9 +92,8 @@
 
     <div class="row q-mt-md q-mb-none text-secondary" v-if="activeMintUrl">
       <div class="col-12 cursor-pointer">
-        <span class="text-weight-light" @click="setTab('settings')">
+        <span class="text-weight-light" @click="setTab('mints')">
           Mint: <b>{{ activeMintLabel }}</b>
-          <q-tooltip>Configure mint(s)</q-tooltip>
         </span>
       </div>
     </div>
@@ -103,7 +102,13 @@
       <div class="col-12">
         <span class="q-my-none q-py-none text-weight-regular">
           Balance:
-          <b>{{ formatCurrency(getActiveMintBalance, activeUnit) }} </b>
+          <b>
+            <AnimatedNumber
+              :value="getActiveMintBalance"
+              :format="(val) => formatCurrency(val, activeUnit)"
+              class="q-my-none q-py-none cursor-pointer"
+            />
+          </b>
         </span>
       </div>
     </div>
@@ -140,7 +145,7 @@ import { useUiStore } from "stores/ui";
 import { useWalletStore } from "stores/wallet";
 import { usePriceStore } from "stores/price";
 import ToggleUnit from "components/ToggleUnit.vue";
-
+import AnimatedNumber from "components/AnimatedNumber.vue";
 import axios from "axios";
 import { map } from "underscore";
 
@@ -149,6 +154,7 @@ export default defineComponent({
   mixins: [windowMixin],
   components: {
     ToggleUnit,
+    AnimatedNumber,
   },
   props: {
     setTab: Function,
@@ -218,10 +224,7 @@ export default defineComponent({
     this.fetchBitcoinPriceUSD();
   },
   methods: {
-    ...mapActions(useWalletStore, [
-      "checkPendingInvoices",
-      "checkPendingTokens",
-    ]),
+    ...mapActions(useWalletStore, ["checkPendingTokens"]),
     ...mapActions(usePriceStore, ["fetchBitcoinPriceUSD"]),
     toggleUnit: function () {
       const units = this.activeMint().units;
@@ -235,3 +238,11 @@ export default defineComponent({
   },
 });
 </script>
+<style scoped>
+.animated.pulse {
+  animation-duration: 0.5s;
+}
+.animated.fadeInDown {
+  animation-duration: 0.3s;
+}
+</style>

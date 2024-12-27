@@ -1,7 +1,7 @@
 import { defineStore } from "pinia";
 import { useLocalStorage } from "@vueuse/core";
-import { generateSecretKey, getPublicKey } from 'nostr-tools'
-import { bytesToHex } from '@noble/hashes/utils' // already an installed dependency
+import { generateSecretKey, getPublicKey } from "nostr-tools";
+import { bytesToHex } from "@noble/hashes/utils"; // already an installed dependency
 import { useWalletStore } from "./wallet";
 import { CashuMint, CashuWallet, CheckStateEnum, Proof } from "@cashu/cashu-ts";
 import { useMintsStore } from "./mints";
@@ -9,21 +9,25 @@ import { notify, notifyError, notifySuccess } from "src/js/notify";
 import { useUiStore } from "./ui";
 
 const BATCH_SIZE = 100;
-const MAX_GAP = 2;
+const MAX_GAP = 1;
 
 export const useRestoreStore = defineStore("restore", {
   state: () => ({
-    showRestoreDialog: useLocalStorage<boolean>("cashu.restore.showRestoreDialog", false),
+    showRestoreDialog: useLocalStorage<boolean>(
+      "cashu.restore.showRestoreDialog",
+      false
+    ),
     restoringState: false,
     restoringMint: "",
-    mnemonicToRestore: useLocalStorage<string>("cashu.restore.mnemonicToRestore", ""),
+    mnemonicToRestore: useLocalStorage<string>(
+      "cashu.restore.mnemonicToRestore",
+      ""
+    ),
     restoreProgress: 0,
     restoreCounter: 0,
     restoreStatus: "",
   }),
-  getters: {
-
-  },
+  getters: {},
   actions: {
     restoreMint: async function (url: string) {
       this.restoringState = true;
@@ -58,57 +62,86 @@ export const useRestoreStore = defineStore("restore", {
       let restoredSomething = false;
 
       // Calculate total steps for progress calculation
-      let totalSteps = keysets.length * MAX_GAP * 2;
-      let currentStep = 1;
+      let totalSteps = keysets.length * MAX_GAP;
+      let currentStep = 0;
 
       for (const keyset of keysets) {
         console.log(`Restoring keyset ${keyset.id} with unit ${keyset.unit}`);
         const bip39Seed = walletStore.mnemonicToSeedSync(mnemonic);
-        const wallet = new CashuWallet(mint, { bip39seed: bip39Seed, unit: keyset.unit });
+        const wallet = new CashuWallet(mint, {
+          bip39seed: bip39Seed,
+          unit: keyset.unit,
+        });
         let start = 0;
         let emptyBatchCount = 0;
         let restoreProofs: Proof[] = [];
 
         while (emptyBatchCount < MAX_GAP) {
           console.log(`Restoring proofs ${start} to ${start + BATCH_SIZE}`);
-          const proofs = (await wallet.restore(start, BATCH_SIZE, { keysetId: keyset.id })).proofs;
+          const proofs = (
+            await wallet.restore(start, BATCH_SIZE, { keysetId: keyset.id })
+          ).proofs;
           if (proofs.length === 0) {
             console.log(`No proofs found for keyset ${keyset.id}`);
             emptyBatchCount++;
           } else {
-            console.log(`> Restored ${proofs.length} proofs with sum ${proofs.reduce((s, p) => s + p.amount, 0)}`);
+            console.log(
+              `> Restored ${proofs.length} proofs with sum ${proofs.reduce(
+                (s, p) => s + p.amount,
+                0
+              )}`
+            );
             restoreProofs = restoreProofs.concat(proofs);
             emptyBatchCount = 0;
-            totalSteps += MAX_GAP * 2;
             this.restoreCounter += proofs.length;
+            totalSteps += 1;
           }
           this.restoreStatus = `Restored ${this.restoreCounter} proofs for keyset ${keyset.id}`;
           start += BATCH_SIZE;
 
           currentStep++;
           this.restoreProgress = currentStep / totalSteps;
-
         }
 
         let restoredProofs: Proof[] = [];
         for (let i = 0; i < restoreProofs.length; i += BATCH_SIZE) {
-          this.restoreStatus = `Checking proofs ${i} to ${i + BATCH_SIZE} for keyset ${keyset.id}`;
+          this.restoreStatus = `Checking proofs ${i} to ${
+            i + BATCH_SIZE
+          } for keyset ${keyset.id}`;
           const checkRestoreProofs = restoreProofs.slice(i, i + BATCH_SIZE);
-          const proofStates = await wallet.checkProofsStates(checkRestoreProofs);
-          const spentProofs = checkRestoreProofs.filter((p, i) => proofStates[i].state === CheckStateEnum.SPENT);
+          const proofStates = await wallet.checkProofsStates(
+            checkRestoreProofs
+          );
+          const spentProofs = checkRestoreProofs.filter(
+            (p, i) => proofStates[i].state === CheckStateEnum.SPENT
+          );
           const spentProofsSecrets = spentProofs.map((p) => p.secret);
-          const unspentProofs = checkRestoreProofs.filter((p) => !spentProofsSecrets.includes(p.secret));
+          const unspentProofs = checkRestoreProofs.filter(
+            (p) => !spentProofsSecrets.includes(p.secret)
+          );
           if (unspentProofs.length > 0) {
-            console.log(`Found ${unspentProofs.length} unspent proofs with sum ${unspentProofs.reduce((s, p) => s + p.amount, 0)}`);
+            console.log(
+              `Found ${
+                unspentProofs.length
+              } unspent proofs with sum ${unspentProofs.reduce(
+                (s, p) => s + p.amount,
+                0
+              )}`
+            );
           }
-          const newProofs = unspentProofs.filter((p) => !mintStore.proofs.some((pr) => pr.secret === p.secret));
+          const newProofs = unspentProofs.filter(
+            (p) => !mintStore.proofs.some((pr) => pr.secret === p.secret)
+          );
           mintStore.addProofs(newProofs);
           restoredProofs = restoredProofs.concat(newProofs);
           currentStep++;
           this.restoreProgress = currentStep / totalSteps;
         }
         const restoredAmount = restoredProofs.reduce((s, p) => s + p.amount, 0);
-        const restoredAmountStr = useUiStore().formatCurrency(restoredAmount, keyset.unit);
+        const restoredAmountStr = useUiStore().formatCurrency(
+          restoredAmount,
+          keyset.unit
+        );
         if (restoredAmount > 0) {
           notifySuccess(`Restored ${restoredAmountStr}`);
           restoredSomething = true;

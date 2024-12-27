@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8' ?>
+<resources>
+    <string name="app_name">Cashu.me</string>
+    <string name="title_activity_main">Cashu.me</string>
+    <string name="package_name">me.cashu.wallet</string>
+    <string name="custom_url_scheme">me.cashu.wallet</string>
+</resources>

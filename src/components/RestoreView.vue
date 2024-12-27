@@ -9,7 +9,8 @@
               Restore from Seed Phrase
             </q-item-label>
             <q-item-label caption>
-              Enter your seed phrase to restore your wallet.
+              Enter your seed phrase to restore your wallet. Before you restore,
+              make sure you have added all the mints that you have used before.
             </q-item-label>
             <div class="row q-pt-md">
               <div class="col-12">
@@ -34,6 +35,26 @@
                 </q-input>
               </div>
             </div>
+          </q-item-section>
+        </q-item>
+      </q-list>
+    </div>
+
+    <!-- Information about restoring mints -->
+    <div class="q-px-xs text-left" on-left>
+      <q-list padding>
+        <q-item>
+          <q-item-section>
+            <q-item-label overline class="text-weight-bold">
+              Information
+            </q-item-label>
+            <q-item-label caption>
+              The wizard will only <i>restore</i> ecash from another seed
+              phrase, you will not be able to use this seed phrase or change the
+              seed phrase of the wallet that you're currently using. This means
+              that restored ecash will not be protected by your current seed
+              phrase as long as you don't send the ecash to yourself once.
+            </q-item-label>
           </q-item-section>
         </q-item>
       </q-list>
@@ -79,7 +100,11 @@
               <q-item-label
                 class="q-mb-xs"
                 lines="1"
-                style="word-break: break-word"
+                style="
+                  word-break: break-all;
+                  overflow-wrap: break-word;
+                  white-space: normal;
+                "
               >
                 <q-icon
                   name="account_balance"
@@ -145,6 +170,7 @@ import { mapActions, mapState, mapWritableState } from "pinia";
 import { useMintsStore, MintClass } from "src/stores/mints";
 import { useRestoreStore } from "src/stores/restore";
 import { useWalletStore } from "src/stores/wallet";
+import { useUiStore } from "src/stores/ui";
 import { notifyError, notifySuccess } from "src/js/notify";
 
 export default defineComponent({
@@ -178,6 +204,7 @@ export default defineComponent({
   },
   methods: {
     ...mapActions(useRestoreStore, ["restoreMint"]),
+    ...mapActions(useUiStore, ["pasteFromClipboard"]),
     mintClass(mint) {
       return new MintClass(mint);
     },
@@ -196,15 +223,18 @@ export default defineComponent({
         return;
       }
       try {
+        this.restoreAllMintsText = "Restoring mint ...";
         await this.restoreMint(mintUrl);
       } catch (error) {
         console.error("Error restoring mint:", error);
         notifyError(`Error restoring mint: ${error.message || error}`);
+      } finally {
+        this.restoreAllMintsText = "Restore All Mints";
       }
     },
     async pasteMnemonic() {
       try {
-        const text = await navigator.clipboard.readText();
+        const text = await this.pasteFromClipboard();
         this.mnemonicToRestore = text.trim();
       } catch (error) {
         notifyError("Failed to read clipboard contents.");
@@ -222,7 +252,7 @@ export default defineComponent({
           } ...`;
           await this.restoreMint(mint.url);
         }
-        notifySuccess("All mints restored successfully.");
+        notifySuccess("Restore finished successfully");
       } catch (error) {
         console.error("Error restoring mints:", error);
         notifyError(`Error restoring mints: ${error.message || error}`);

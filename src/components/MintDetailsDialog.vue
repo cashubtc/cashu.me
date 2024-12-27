@@ -2,21 +2,28 @@
   <q-dialog
     v-model="showMintInfoDialog"
     position="top"
+    :maximized="$q.screen.lt.sm"
+    transition-show="fade"
+    transition-hide="fade"
     backdrop-filter="blur(2px) brightness(60%)"
   >
     <q-card v-if="showMintInfoData" class="q-px-lg q-pt-md q-pb-md qcard">
       <div class="text-center q-mb-md q-mt-none q-pt-none">
-        <q-responsive :ratio="1" class="q-mx-md q-mt-none q-pt-none">
+        <q-responsive :ratio="1" class="q-mx-lg q-mt-none q-pt-none">
           <vue-qrcode
             :value="showMintInfoData.url"
-            :options="{ width: 340 }"
+            :options="{ width: 300 }"
             class="rounded-borders"
           >
           </vue-qrcode>
         </q-responsive>
         <div class="row justify-center">
           <div class="row justify-center">
-            <q-chip outline class="q-pa-md q-mt-md">
+            <q-chip
+              outline
+              class="q-pa-md q-mt-md"
+              style="font-family: monospace; font-size: 0.8rem"
+            >
               <q-icon name="account_balance" size="xs" class="q-mr-xs" />
               {{ showMintInfoData.url }}
             </q-chip>
@@ -69,7 +76,7 @@
                 caption
                 v-if="showMintInfoData.info.version"
                 class="text-weight-light text-white"
-                style="font-size: 10px"
+                style="font-family: monospace; font-size: 0.7rem"
               >
                 Version: {{ showMintInfoData.info.version }}
               </q-item-label>
@@ -82,7 +89,7 @@
                 caption
                 v-if="showMintInfoData.info.nuts"
                 class="text-weight-light text-white"
-                style="font-size: 10px"
+                style="font-family: monospace; font-size: 0.7rem"
               >
                 <!-- only the keys of the info.nuts object -->
                 Nuts: {{ Object.keys(showMintInfoData.info.nuts).join(", ") }}
@@ -106,7 +113,7 @@
                 <q-item-label
                   caption
                   class="text-weight-light text-white"
-                  style="font-size: 12px"
+                  style="font-family: monospace; font-size: 0.7rem"
                 >
                   <q-icon
                     v-if="contactIcons[contactInfo.method]"

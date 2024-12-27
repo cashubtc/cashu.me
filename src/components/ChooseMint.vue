@@ -1,9 +1,9 @@
 <template>
   <div class="q-pb-md">
     <!-- title that says choose a mint -->
-    <div class="row q-mb-none">
+    <div class="row q-mb-none" v-if="title.length">
       <div class="col-12">
-        <span class="text-caption">Select a mint</span>
+        <span class="text-caption">{{ title }}</span>
       </div>
     </div>
     <div class="row q-mt-xs q-mb-none" v-if="activeMintUrl">
@@ -16,34 +16,36 @@
           :options="chooseMintOptions()"
           option-value="url"
           option-label="shorturl"
+          :rounded="rounded"
+          :style="style"
         >
           <template v-slot:option="scope">
             <q-item v-bind="scope.itemProps">
-              <q-item-section avatar>
-                <q-icon
-                  name="account_balance"
-                  size="1.2rem"
-                  color="grey"
-                  class="q-pl-md"
-                />
-              </q-item-section>
               <q-item-section>
-                <q-item-label class="text-body1 q-pa-md">{{
-                  scope.opt.shorturl
-                }}</q-item-label>
-                <!-- <q-item-label caption></q-item-label> -->
-              </q-item-section>
-              <q-item-section side>
-                <q-item-label>
-                  <div v-for="unit in scope.opt.units" :key="unit">
-                    <q-badge
-                      color="primary"
-                      :label="formatCurrency(scope.opt.balances[unit], unit)"
-                      class="q-ma-xs q-pa-sm text-weight-bold"
-                      style="float: right"
-                    />
-                  </div>
-                </q-item-label>
+                <q-item-label
+                  class="text-body1 q-pt-xs"
+                  :style="
+                    activeMintUrl === scope.opt.url ? 'font-weight: bold' : ''
+                  "
+                  >{{ scope.opt.nickname || scope.opt.shorturl }}</q-item-label
+                >
+                <q-item-label
+                  class="text-caption q-pb-xs"
+                  style="font-family: monospace; font-size: 11px"
+                >
+                  {{ scope.opt.url }}</q-item-label
+                >
+                <div>
+                  <q-badge
+                    v-for="unit in scope.opt.units"
+                    :key="unit"
+                    :color="
+                      scope.opt.url === activeMintUrl ? 'primary' : 'grey'
+                    "
+                    :label="formatCurrency(scope.opt.balances[unit], unit)"
+                    class="q-mr-xs q-mb-xs"
+                  />
+                </div>
               </q-item-section>
             </q-item>
             <q-separator />
@@ -67,17 +69,31 @@
     </div>
   </div>
 </template>
+
 <script>
 import { defineComponent } from "vue";
 import { getShortUrl } from "src/js/wallet-helpers";
-import { mapActions, mapState } from "pinia";
+import { mapActions, mapState, mapWritableState } from "pinia";
 import { useMintsStore } from "stores/mints";
 import { MintClass } from "stores/mints";
+import { title } from "process";
+
 export default defineComponent({
   name: "ChooseMint",
   mixins: [windowMixin],
   props: {
-    tickerShort: String,
+    rounded: {
+      type: Boolean,
+      default: false,
+    },
+    title: {
+      type: String,
+      default: "Select a mint",
+    },
+    style: {
+      type: String,
+      default: "",
+    },
   },
   data: function () {
     return {
@@ -92,7 +108,7 @@ export default defineComponent({
   },
   watch: {
     chosenMint: async function () {
-      await this.activateMintUrl(this.chosenMint.url);
+      this.activeMintUrl = this.chosenMint.url;
     },
   },
   computed: {
@@ -103,22 +119,11 @@ export default defineComponent({
       "proofs",
       "activeUnit",
     ]),
-    balance: function () {
+    ...mapWritableState(useMintsStore, ["activeMintUrl"]),
+    getBalance: function () {
       return this.activeProofs
         .flat()
         .reduce((sum, el) => (sum += el.amount), 0);
-    },
-    allMintKeysets: function () {
-      return [].concat(...this.mints.map((m) => m.keysets));
-    },
-    getActiveMintUrlShort: function () {
-      return getShortUrl(this.activeMintUrl);
-    },
-    getBalance: function () {
-      var balance = this.activeProofs
-        .flat()
-        .reduce((sum, el) => (sum += el.amount), 0);
-      return balance;
     },
   },
   methods: {

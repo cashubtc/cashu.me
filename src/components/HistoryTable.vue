@@ -52,7 +52,7 @@
             flat
             dense
             icon="sync"
-            @click="checkTokenSpendable(token.token)"
+            @click="checkTokenSpendable(token)"
             class="cursor-pointer"
             v-if="token.status === 'pending' && token.amount < 0"
             style="position: absolute; right: 0"
@@ -113,6 +113,7 @@ import { useReceiveTokensStore } from "src/stores/receiveTokensStore";
 import { useWalletStore } from "src/stores/wallet";
 import { useSendTokensStore } from "src/stores/sendTokensStore";
 import token from "../js/token";
+import { notify } from "src/js/notify";
 
 export default defineComponent({
   name: "HistoryTable",
@@ -174,12 +175,17 @@ export default defineComponent({
       this.showReceiveTokens = true;
     },
     showTokenDialog: function (historyToken) {
+      if (historyToken.token === undefined) {
+        notify("Old token not found");
+        return;
+      }
       const tokensBase64 = historyToken.token;
       console.log("##### showTokenDialog");
       const tokenObj = token.decode(tokensBase64);
       this.sendData.tokens = token.getProofs(tokenObj);
       this.sendData.tokensBase64 = _.clone(tokensBase64);
       this.sendData.paymentRequest = historyToken.paymentRequest;
+      this.sendData.historyAmount = historyToken.amount;
       this.showSendTokens = true;
     },
   },

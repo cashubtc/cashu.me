@@ -18,9 +18,9 @@ $themes: (
   "freedom": (
     primary: #e22156,
     secondary: #b91a45,
-    dark: #0a0a0a,
+    dark: #000,
     info: #1b1b1b,
-    marginal-bg: #2d293b,
+    marginal-bg: #000,
     marginal-text: #fff,
   ),
   "salvador": (
@@ -93,6 +93,27 @@ $themes: (
     }
   }
   [data-theme="#{$theme}"] {
+    @each $name, $color in $colors {
+      .bg-#{$name} {
+        background: $color !important;
+      }
+      .text-#{$name} {
+        color: $color !important;
+      }
+    }
+  }
+}
+
+@each $theme, $colors in $themes {
+  [data-theme="#{$theme}"] {
+    @each $name, $color in $colors {
+      @if $name == "primary" {
+        --q-primary: #{$color};
+      }
+      @if $name == "secondary" {
+        --q-secondary: #{$color};
+      }
+    }
     @each $name, $color in $colors {
       .bg-#{$name} {
         background: $color !important;

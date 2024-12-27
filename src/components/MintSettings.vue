@@ -16,9 +16,9 @@
             :active="mint.url == activeMintUrl"
             active-class="text-weight-bold text-primary"
             clickable
-            class="q-pb-xs"
+            class="q-pb-xs q-pl-xs"
           >
-            <q-item-section avatar>
+            <q-item-section avatar style="min-width: 36px; max-width: 39px">
               <q-icon
                 :color="mint.url == activeMintUrl ? 'primary' : 'grey'"
                 :name="
@@ -32,6 +32,13 @@
                 class="cursor-pointer"
               />
             </q-item-section>
+            <q-avatar
+              v-if="getMintIconUrl(mint)"
+              size="32px"
+              class="q-mr-sm q-mt-xs"
+            >
+              <img :src="getMintIconUrl(mint)" alt="Mint Icon" />
+            </q-avatar>
             <q-item-section>
               <q-item-label
                 lines="1"
@@ -40,7 +47,7 @@
                   activateMintUrl(mint.url, (verbose = false), (force = false))
                 "
                 class="cursor-pointer"
-                style="word-break: break-word"
+                style="word-break: break-all; font-weight: bold"
                 >{{ mint.nickname }}</q-item-label
               >
               <q-item-label
@@ -49,39 +56,47 @@
                   activateMintUrl(mint.url, (verbose = false), (force = false))
                 "
                 class="cursor-pointer"
-                style="word-break: break-word"
+                style="
+                  word-break: break-all;
+                  overflow-wrap: break-word;
+                  white-space: normal;
+                  font-family: monospace;
+                  font-size: 0.9em;
+                "
                 >{{ mint.url }}</q-item-label
               >
               <q-item-label>
                 <q-badge
                   v-for="unit in mintClass(mint).units"
                   :key="unit"
-                  :color="mint.url == activeMintUrl ? 'primary' : 'grey'"
+                  :color="mint.url == activeMintUrl ? 'primary' : 'grey-5'"
+                  :outline="mint.url != activeMintUrl || unit != activeUnit"
                   :label="
                     formatCurrency(mintClass(mint).unitBalance(unit), unit)
                   "
-                  class="q-mx-xs q-mb-xs"
+                  class="q-mr-xs q-mb-xs"
                 />
               </q-item-label>
             </q-item-section>
-            <q-item-section side class="q-mx-none q-pl-none">
+            <q-item-section side>
               <q-icon
                 name="info_outline"
                 @click="showMintInfo(mint)"
                 color="grey"
-                class="q-mr-xs cursor-pointer"
+                class="cursor-pointer q-pb-sm"
+                size="1.3rem"
               />
-            </q-item-section>
-            <q-item-section side>
               <q-icon
                 name="edit"
                 @click="editMint(mint)"
                 class="cursor-pointer"
+                color="grey"
+                size="1.3rem"
               />
             </q-item-section>
           </q-item>
 
-          <q-separator spaced inset="item" />
+          <q-separator spaced style="margin-left: 50px" />
         </div>
       </q-list>
     </div>
@@ -109,6 +124,7 @@
             placeholder="https://"
             ref="mintInput"
             class="q-pb-none q-mb-sm q-px-md"
+            style="font-family: monospace"
           >
             <!-- <template v-slot:hint> Enter Mint URL</template> -->
             <!-- "addMint(mintToAdd)" -->
@@ -255,11 +271,9 @@
           <q-item-section>
             <q-item-label overline>Multimint Swaps</q-item-label>
             <q-item-label caption
-              >Swap funds from one mint to another via Lightning. Note: This is
-              an experimental feature and should be used carefully. Leave room
-              for potential Lightning fees. If the incoming payment does not
-              succeed, check the incoming pending invoice manually by clicking
-              the refresh button.
+              >Swap funds between mints via Lightning. Note: Leave room for
+              potential Lightning fees. If the incoming payment does not
+              succeed, check the invoice manually.
             </q-item-label>
           </q-item-section>
         </q-item>
@@ -270,12 +284,18 @@
             outlined
             dense
             color="primary"
-            v-model="swapData.from_url"
-            :options="swapDataOptions()"
+            v-model="swapData.fromUrl"
+            :options="swapAmountDataOptions()"
             option-value="url"
-            option-label="shorturl"
+            option-label="optionLabel"
             label="From"
-            style="min-width: 200px; width: 100%"
+            style="
+              min-width: 200px;
+              width: 100%;
+              font-family: monospace;
+              font-size: 0.9em;
+            "
+            :disable="swapBlocking"
           />
         </q-item>
         <q-item>
@@ -285,12 +305,18 @@
             outlined
             dense
             color="primary"
-            v-model="swapData.to_url"
-            :options="swapDataOptions()"
+            v-model="swapData.toUrl"
+            :options="swapAmountDataOptions()"
             option-value="url"
-            option-label="shorturl"
+            option-label="optionLabel"
             label="To"
-            style="min-width: 200px; width: 100%"
+            style="
+              min-width: 200px;
+              width: 100%;
+              font-family: monospace;
+              font-size: 0.9em;
+            "
+            :disable="swapBlocking"
           />
         </q-item>
         <q-item>
@@ -302,23 +328,24 @@
             type="number"
             :label="'Amount (' + tickerShort + ')'"
             style="min-width: 200px"
+            @keydown.enter.prevent="extractAndMintAmountSwap(swapAmountData)"
+            :disable="
+              !swapData.fromUrl ||
+              !swapData.toUrl ||
+              swapData.fromUrl == swapData.toUrl ||
+              swapBlocking
+            "
           ></q-input>
           <q-btn
             class="q-ml-sm q-px-md"
             color="primary"
             rounded
-            @click="
-              mintSwap(
-                swapData.from_url.url,
-                swapData.to_url.url,
-                swapData.amount
-              )
-            "
+            @click="extractAndMintAmountSwap(swapAmountData)"
             :disable="
-              !swapData.from_url ||
-              !swapData.to_url ||
+              !swapData.fromUrl ||
+              !swapData.toUrl ||
               !(swapData.amount > 0) ||
-              swapData.from_url == swapData.to_url
+              swapData.fromUrl == swapData.toUrl
             "
             :loading="swapBlocking"
           >
@@ -338,7 +365,7 @@
       backdrop-filter="blur(2px) brightness(60%)"
     >
       <q-card class="q-pa-lg" style="max-width: 500px; width: 100%">
-        <h6 class="q-my-md">Edit mint</h6>
+        <h6 class="q-mt-none q-mb-md">Edit mint</h6>
         <q-input
           outlined
           v-model="editMintData.url"
@@ -346,6 +373,7 @@
           type="textarea"
           autogrow
           class="q-mb-xs"
+          style="font-family: monospace; font-size: 0.9em"
         ></q-input>
         <q-input
           outlined
@@ -359,6 +387,7 @@
           <q-btn
             class="float-left"
             v-close-popup
+            rounded
             color="primary"
             @click="updateMint(mintToEdit, editMintData)"
             >Update</q-btn
@@ -382,10 +411,10 @@
       backdrop-filter="blur(2px) brightness(60%)"
     >
       <q-card class="q-pa-lg">
-        <h6 class="q-my-md">Do you trust this mint?</h6>
+        <h6 class="q-mt-none q-mb-md">Do you trust this mint?</h6>
         <p>
-          A Cashu mint controls the funds you send to it. Make sure that you
-          trust the operator of this mint.
+          Before using this mint, make sure you trust it. Mints could become
+          malicious or cease operation at any time.
         </p>
         <q-input
           outlined
@@ -395,11 +424,13 @@
           type="textarea"
           autogrow
           class="q-mb-xs"
+          style="font-family: monospace; font-size: 0.9em"
         ></q-input>
         <div class="row q-mt-lg">
           <div class="col">
             <q-btn
               class="float-left"
+              rounded
               v-close-popup
               color="primary"
               icon="check"
@@ -499,6 +530,8 @@ import { useSettingsStore } from "src/stores/settings";
 import { useNostrStore } from "src/stores/nostr";
 import { useP2PKStore } from "src/stores/p2pk";
 import { useWorkersStore } from "src/stores/workers";
+import { useSwapStore } from "src/stores/swap";
+import { useUiStore } from "src/stores/ui";
 import { notifyError, notifyWarning } from "src/js/notify";
 import MintDetailsDialog from "src/components/MintDetailsDialog.vue";
 import { EventBus } from "../js/eventBus";
@@ -507,9 +540,7 @@ export default defineComponent({
   name: "MintSettings",
   mixins: [windowMixin],
   components: { MintDetailsDialog },
-  props: {
-    tickerShort: String,
-  },
+  props: {},
   setup() {
     const addMintDiv = ref(null);
 
@@ -540,11 +571,6 @@ export default defineComponent({
     return {
       discoveringMints: false,
       addingMint: false,
-      swapData: {
-        from_url: "",
-        to_url: "",
-        amount: 0,
-      },
       mintToEdit: {
         url: "",
         nickname: "",
@@ -561,18 +587,26 @@ export default defineComponent({
       addMintDialog: {
         show: false,
       },
+      swapData: {
+        fromUrl: {
+          url: "",
+          optionLabel: "",
+        },
+        toUrl: {
+          url: "",
+          optionLabel: "",
+        },
+        amount: undefined,
+      },
       showEditMintDialog: false,
-      swapBlocking: false,
     };
   },
   computed: {
-    ...mapWritableState(useSettingsStore, [
-      "getBitcoinPrice",
-      "checkSentTokens",
-    ]),
+    ...mapWritableState(useSettingsStore, ["getBitcoinPrice"]),
     ...mapState(useP2PKStore, ["p2pkKeys"]),
     ...mapState(useMintsStore, [
       "activeMintUrl",
+      "activeUnit",
       "mints",
       "activeProofs",
       "addMintBlocking",
@@ -586,6 +620,9 @@ export default defineComponent({
       "showMintInfoDialog",
       "showMintInfoData",
     ]),
+    ...mapState(useUiStore, ["tickerShort"]),
+    ...mapState(useSwapStore, ["swapAmountData"]),
+    ...mapWritableState(useSwapStore, ["swapBlocking"]),
   },
   watch: {
     // if swapBlocking is true and invoiceWorkerRunning changes to false, then swapBlocking should be set to false
@@ -610,18 +647,10 @@ export default defineComponent({
       "activateMintUrl",
       "updateMint",
     ]),
-    ...mapActions(useWalletStore, [
-      "decodeRequest",
-      "checkProofsSpendable",
-      "requestMint",
-      "melt",
-    ]),
-    ...mapActions(useWorkersStore, [
-      "clearAllWorkers",
-      "invoiceCheckWorker",
-      "checkTokenSpendableWorker",
-    ]),
+    ...mapActions(useWalletStore, ["decodeRequest", "mintOnPaid"]),
+    ...mapActions(useWorkersStore, ["clearAllWorkers"]),
     ...mapActions(useCameraStore, ["closeCamera", "showCamera"]),
+    ...mapActions(useSwapStore, ["mintAmountSwap"]),
     editMint: function (mint) {
       // copy object to avoid changing the original
       this.mintToEdit = Object.assign({}, mint);
@@ -655,6 +684,7 @@ export default defineComponent({
       this.addingMint = true;
       try {
         this.addMint(mintToAdd, verbose);
+        this.addMintData = { url: "", nickname: "" };
       } finally {
         this.addingMint = false;
       }
@@ -662,12 +692,16 @@ export default defineComponent({
     mintClass(mint) {
       return new MintClass(mint);
     },
-    swapDataOptions: function () {
+    swapAmountDataOptions: function () {
       let options = [];
       for (const [i, m] of Object.entries(this.mints)) {
+        const unitStr = "sat";
+        const unitBalance = this.mintClass(m).unitBalance(unitStr);
+        const balanceStr = useUiStore().formatCurrency(unitBalance, unitStr);
         options.push({
           url: m.url,
-          shorturl: m.nickname || getShortUrl(m.url),
+          optionLabel:
+            (m.nickname || getShortUrl(m.url)) + " (" + balanceStr + ")",
         });
       }
       return options;
@@ -679,30 +713,17 @@ export default defineComponent({
       this.mintToRemove = mintToRemove;
       this.showRemoveMintDialog = true;
     },
-    //
-    mintSwap: async function (from_url, to_url, amount) {
-      if (this.swapBlocking) {
-        notifyWarning("Swap in progress");
-        return;
-      }
-      this.swapBlocking = true;
-      try {
-        // get invoice
-        await this.activateMintUrl(to_url);
-        let invoice = await this.requestMint(amount);
-
-        // pay invoice
-        await this.activateMintUrl(from_url);
-        await this.decodeRequest(invoice.request);
-        await this.melt();
-
-        // settle invoice on other side
-        await this.activateMintUrl(to_url);
-        await this.invoiceCheckWorker();
-      } catch (e) {
-        console.error("Error swapping", e);
-        notifyError("Error swapping");
-      }
+    clearSwapData: function () {
+      this.swapData.fromUrl = "";
+      this.swapData.toUrl = "";
+      this.swapData.amount = undefined;
+    },
+    extractAndMintAmountSwap: async function (swapAmountData) {
+      swapAmountData.fromUrl = this.swapData.fromUrl.url;
+      swapAmountData.toUrl = this.swapData.toUrl.url;
+      swapAmountData.amount = this.swapData.amount;
+      await this.mintAmountSwap(swapAmountData);
+      this.clearSwapData();
     },
     fetchMintsFromNdk: async function () {
       this.discoveringMints = true;
@@ -730,6 +751,17 @@ export default defineComponent({
     showMintInfo: async function (mint) {
       this.showMintInfoData = mint;
       this.showMintInfoDialog = true;
+    },
+    getMintIconUrl: function (mint) {
+      if (mint.info) {
+        if (mint.info.icon_url) {
+          return mint.info.icon_url;
+        } else {
+          return undefined;
+        }
+      } else {
+        return undefined;
+      }
     },
   },
   created: function () {},

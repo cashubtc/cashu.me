@@ -27,7 +27,7 @@
           </q-item-section>
 
           <q-item-section>
-            <q-item-label @click="copyText(invoice.bolt11)">
+            <q-item-label @click="showInvoiceDialog(invoice)">
               Lightning
               <q-tooltip>Click to copy</q-tooltip>
             </q-item-label>
@@ -92,6 +92,7 @@ import { shortenString } from "src/js/string-utils";
 import { mapWritableState, mapActions } from "pinia";
 import { useUiStore } from "src/stores/ui";
 import { useWalletStore } from "src/stores/wallet";
+import { useInvoicesWorkerStore } from "src/stores/invoicesWorker";
 import { formatDistanceToNow, parseISO } from "date-fns";
 
 export default defineComponent({
@@ -132,16 +133,28 @@ export default defineComponent({
     },
   },
   methods: {
-    ...mapActions(useWalletStore, ["checkInvoice", "checkOutgoingInvoice"]),
+    ...mapActions(useWalletStore, [
+      "checkInvoice",
+      "mintOnPaid",
+      "checkOutgoingInvoice",
+    ]),
     shortenString: function (s) {
       return shortenString(s, 20, 10);
     },
     handlePageChange(page) {
       this.currentPage = page;
     },
-    showInvoiceDialog(invoice) {
+    showInvoiceDialog: async function (invoice) {
       this.invoiceData = invoice;
       this.showInvoiceDetails = true;
+      if (invoice.status === "pending") {
+        try {
+          await this.checkInvoice(invoice.quote, false, false);
+        } catch (e) {
+          this.mintOnPaid(invoice.quote, false, true, false);
+        }
+      }
+      // useInvoicesWorkerStore().addInvoiceToChecker(invoice.quote);
       // this.tab("invoice");
     },
     formattedDate(date_str) {

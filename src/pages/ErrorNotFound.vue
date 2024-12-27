@@ -4,17 +4,18 @@
   >
     <div>
       <div style="font-size: 30vh">404</div>
-
-      <div class="text-h3" style="opacity: 0.8">Oops. Nothing here...</div>
-
+      <div class="text-h3 q-pb-lg" style="opacity: 0.8">
+        Oops. Nothing here...
+      </div>
       <q-btn
         rounded
+        size="lg"
         class="q-mt-xl"
         color="white"
         text-color="black"
         unelevated
         to="/"
-        label="Go Home"
+        label="Go back home"
       />
     </div>
   </div>
