@@ -116,6 +116,7 @@ export const useMintsStore = defineStore("mints", {
     liveQuery(() => dexieStore.db.proofs.toArray()).subscribe({
       next: (newProofs) => {
         proofs.value = newProofs;
+        updateActiveProofs();
       },
       error: (err) => {
         console.error(err);
@@ -125,26 +126,19 @@ export const useMintsStore = defineStore("mints", {
     // Function to update activeProofs
     const updateActiveProofs = () => {
       const currentMint = mints.value.find((m) => m.url === activeMintUrl.value);
-      const unitKeysets = currentMint?.keysets?.filter((k) => k.unit === activeUnit.value);
+      if (!currentMint) {
+        activeProofs.value = [];
+        return;
+      }
 
+      const unitKeysets = currentMint?.keysets?.filter((k) => k.unit === activeUnit.value);
       if (!unitKeysets || unitKeysets.length === 0) {
         activeProofs.value = [];
         return;
       }
 
       const keysetIds = unitKeysets.map((k) => k.id);
-
-      // Fetch proofs from Dexie where 'id' is any of keysetIds
-      dexieStore.db.proofs
-        .where('id')
-        .anyOf(keysetIds)
-        .toArray()
-        .then((newActiveProofs) => {
-          activeProofs.value = newActiveProofs;
-        })
-        .catch((err) => {
-          console.error(err);
-        });
+      activeProofs.value = proofs.value.filter((p) => keysetIds.includes(p.id));
     };
 
     // Watch for changes in activeMintUrl and activeUnit
