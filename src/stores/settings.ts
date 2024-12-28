@@ -48,7 +48,7 @@ export const useSettingsStore = defineStore("settings", {
       ),
       useNumericKeyboard: useLocalStorage<boolean>(
         "cashu.settings.useNumericKeyboard",
-        true
+        false
       ),
       enableReceiveSwaps: useLocalStorage<boolean>(
         "cashu.settings.enableReceiveSwaps",
