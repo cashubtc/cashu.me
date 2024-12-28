@@ -1,8 +1,10 @@
 import { defineStore } from "pinia";
 import { useWalletStore } from "./wallet";
+import { useMintsStore } from "./mints";
 import { useLocalStorage } from "@vueuse/core";
 import { notifyError, notifySuccess } from "../js/notify";
 import { useTokensStore } from "./tokens";
+import { currentDateStr } from "src/js/utils";
 
 export const useStorageStore = defineStore("storage", {
   state: () => ({
@@ -12,6 +14,55 @@ export const useStorageStore = defineStore("storage", {
     ),
   }),
   actions: {
+    restoreFromBackup: function (backup: any) {
+      if (!backup) {
+        notifyError("Unrecognized Backup Format!");
+      } else {
+        const keys = Object.keys(backup);
+        keys.forEach((key) => {
+          if (key === "cashu.dexie.db.proofs") {
+            const proofs = JSON.parse(backup[key]);
+            useMintsStore().addProofs(proofs);
+            return;
+          }
+          localStorage.setItem(key, backup[key]);
+        });
+        notifySuccess("Backup restored");
+        window.location.reload();
+      }
+    },
+    exportWalletState: async function () {
+      var jsonToSave: any = {};
+      for (var i = 0; i < localStorage.length; i++) {
+        var k = localStorage.key(i);
+        if (!k) {
+          continue;
+        }
+        var v = localStorage.getItem(k);
+        jsonToSave[k] = v;
+      }
+      // proofs table
+      const proofs = useMintsStore().proofs;
+      jsonToSave["cashu.dexie.db.proofs"] = JSON.stringify(proofs);
+
+      var textToSave = JSON.stringify(jsonToSave);
+      var textToSaveAsBlob = new Blob([textToSave], {
+        type: "text/plain",
+      });
+      var textToSaveAsURL = window.URL.createObjectURL(textToSaveAsBlob);
+
+      const fileName = `cashu_me_backup_${currentDateStr()}.json`;
+      var downloadLink = document.createElement("a");
+      downloadLink.download = fileName;
+      downloadLink.innerHTML = "Download File";
+      downloadLink.href = textToSaveAsURL;
+      downloadLink.onclick = function () {
+        document.body.removeChild(event.target);
+      };
+      downloadLink.style.display = "none";
+      document.body.appendChild(downloadLink);
+      downloadLink.click();
+    },
     checkLocalStorage: function () {
       const needsCleanup = this.checkLocalStorageQuota();
       if (needsCleanup) {

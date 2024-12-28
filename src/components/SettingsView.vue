@@ -1234,13 +1234,7 @@
               <q-item>
                 <q-item-section>
                   <row>
-                    <q-btn
-                      dense
-                      flat
-                      outline
-                      click
-                      @click="getLocalstorageToFile"
-                    >
+                    <q-btn dense flat outline click @click="exportWalletState">
                       Export wallet data
                     </q-btn></row
                   ><row>
@@ -1276,7 +1270,6 @@ import { mapActions, mapState, mapWritableState } from "pinia";
 import { useMintsStore, MintClass } from "src/stores/mints";
 import { useWalletStore } from "src/stores/wallet";
 import { map } from "underscore";
-import { currentDateStr } from "src/js/utils";
 import { useSettingsStore } from "src/stores/settings";
 import { useNostrStore } from "src/stores/nostr";
 import { useNPCStore } from "src/stores/npubcash";
@@ -1290,6 +1283,7 @@ import { useRestoreStore } from "src/stores/restore";
 import { useDexieStore } from "../stores/dexie";
 import { useReceiveTokensStore } from "../stores/receiveTokensStore";
 import { useWelcomeStore } from "src/stores/welcome";
+import { useStorageStore } from "src/stores/storage";
 
 export default defineComponent({
   name: "SettingsView",
@@ -1442,7 +1436,6 @@ export default defineComponent({
       "removeMint",
       "activateMintUrl",
       "updateMint",
-      "restoreFromBackup",
     ]),
     ...mapActions(useWalletStore, [
       "newMnemonic",
@@ -1454,6 +1447,7 @@ export default defineComponent({
     ...mapActions(useNPCStore, ["generateNPCConnection"]),
     ...mapActions(useRestoreStore, ["restoreMint"]),
     ...mapActions(useDexieStore, ["deleteAllTables"]),
+    ...mapActions(useStorageStore, ["restoreFromBackup", "exportWalletState"]),
     generateNewMnemonic: async function () {
       this.newMnemonic();
       await this.initSigner();
@@ -1467,38 +1461,6 @@ export default defineComponent({
     },
     toggleTerminal: function () {
       useUiStore().toggleDebugConsole();
-    },
-    getLocalstorageToFile: async function () {
-      const proofs = useMintsStore().proofs;
-      // put all proofs into localstorage
-      localStorage.setItem("cashu.proofs", JSON.stringify(proofs));
-      // set cashu.dexie.migrated to false so proofs will be restored from localstorage
-      localStorage.setItem("cashu.dexie.migrated", "false");
-
-      // https://stackoverflow.com/questions/24263682/save-restore-local-storage-to-a-local-file
-      const fileName = `cashu_backup_${currentDateStr()}.json`;
-      var a = {};
-      for (var i = 0; i < localStorage.length; i++) {
-        var k = localStorage.key(i);
-        var v = localStorage.getItem(k);
-        a[k] = v;
-      }
-      var textToSave = JSON.stringify(a);
-      var textToSaveAsBlob = new Blob([textToSave], {
-        type: "text/plain",
-      });
-      var textToSaveAsURL = window.URL.createObjectURL(textToSaveAsBlob);
-
-      var downloadLink = document.createElement("a");
-      downloadLink.download = fileName;
-      downloadLink.innerHTML = "Download File";
-      downloadLink.href = textToSaveAsURL;
-      downloadLink.onclick = function () {
-        document.body.removeChild(event.target);
-      };
-      downloadLink.style.display = "none";
-      document.body.appendChild(downloadLink);
-      downloadLink.click();
     },
     unsetAllReservedProofs: async function () {
       // mark all this.proofs as reserved=false
@@ -1579,7 +1541,7 @@ export default defineComponent({
     },
     nukeWallet: async function () {
       // create a backup just in case
-      await this.getLocalstorageToFile();
+      await this.exportWalletState();
       // clear dexie tables
       this.deleteAllTables();
       localStorage.clear();
