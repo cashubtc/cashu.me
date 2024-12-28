@@ -619,7 +619,7 @@ export const useWalletStore = defineStore("wallet", {
         // first we check if the mint quote is paid
         const mintQuote = await mintWallet.checkMintQuote(invoice.quote);
         invoice.mintQuote = mintQuote;
-        console.log("### mintQuote", mintQuote);
+        console.log("### mint(): mintQuote", mintQuote);
         switch (mintQuote.state) {
           case MintQuoteState.PAID:
             break;
