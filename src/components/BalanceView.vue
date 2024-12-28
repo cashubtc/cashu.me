@@ -165,7 +165,6 @@ export default defineComponent({
       "activeProofs",
       "activeBalance",
       "mints",
-      "proofs",
       "totalUnitBalance",
       "activeUnit",
       "activeMint",

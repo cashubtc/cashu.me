@@ -296,7 +296,6 @@ export default defineComponent({
       "activeMintUrl",
       "activeProofs",
       "mints",
-      "proofs",
       "activeUnit",
       "totalUnitBalance",
       "activeBalance",

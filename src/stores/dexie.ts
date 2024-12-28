@@ -46,13 +46,11 @@ export const useDexieStore = defineStore("dexie", {
       }
       console.log(`Migrated ${this.db.proofs.count()} proofs`);
       this.migratedToDexie = true;
-      // remove localstorage "cashu.proofs" and "cashu.spentProofs"
+      // remove localstorage "cashu.proofs"
       localStorage.removeItem("cashu.proofs");
-      localStorage.removeItem("cashu.spentProofs");
     },
     deleteAllTables: function () {
       this.db.proofs.clear();
-      this.db.spentProofs.clear();
     }
   },
 });

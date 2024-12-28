@@ -310,7 +310,6 @@ export default {
       "activeProofs",
       "keys",
       "mints",
-      "proofs",
       "activeMint",
     ]),
     ...mapWritableState(useWalletStore, [
