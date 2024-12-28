@@ -15,14 +15,16 @@ export const useStorageStore = defineStore("storage", {
   }),
   actions: {
     restoreFromBackup: function (backup: any) {
+      const mintStore = useMintsStore();
       if (!backup) {
         notifyError("Unrecognized Backup Format!");
       } else {
         const keys = Object.keys(backup);
         keys.forEach((key) => {
+          // we treat some keys differently *magic*
           if (key === "cashu.dexie.db.proofs") {
             const proofs = JSON.parse(backup[key]);
-            useMintsStore().addProofs(proofs);
+            mintStore.addProofs(proofs);
             return;
           }
           localStorage.setItem(key, backup[key]);
@@ -41,7 +43,7 @@ export const useStorageStore = defineStore("storage", {
         var v = localStorage.getItem(k);
         jsonToSave[k] = v;
       }
-      // proofs table
+      // proofs table *magic*
       const proofs = useMintsStore().proofs;
       jsonToSave["cashu.dexie.db.proofs"] = JSON.stringify(proofs);
 
