@@ -1,22 +1,24 @@
 import { defineStore } from "pinia";
 import Dexie, { Table } from 'dexie';
 import { useLocalStorage } from "@vueuse/core";
+import { WalletProof } from "./mints";
 
-export interface Proof {
-  id: string
-  C: string
-  amount: number
-  reserved: boolean
-  secret: string
-}
+// export interface Proof {
+//   id: string
+//   C: string
+//   amount: number
+//   reserved: boolean
+//   secret: string
+//   quote?: string
+// }
 
 export class MySubClassedDexie extends Dexie {
-  proofs!: Table<Proof>;
+  proofs!: Table<WalletProof>;
 
   constructor() {
     super('db');
     this.version(1).stores({
-      proofs: '++secret, id, C, amount, reserved',
+      proofs: 'secret, id, C, amount, reserved, quote',
     });
   }
 }
@@ -39,7 +41,7 @@ export const useDexieStore = defineStore("dexie", {
       // get all proofs from localstorage "cashu.proofs" ad migrate them to Dexie db.proofs
       const proofs = localStorage.getItem("cashu.proofs");
       if (proofs) {
-        const parsedProofs = JSON.parse(proofs) as Proof[];
+        const parsedProofs = JSON.parse(proofs) as WalletProof[];
         parsedProofs.forEach((proof) => {
           this.db.proofs.add(proof);
         });

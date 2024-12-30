@@ -5,6 +5,10 @@ import { useLocalStorage } from "@vueuse/core";
 import { notifyError, notifySuccess } from "../js/notify";
 import { useTokensStore } from "./tokens";
 import { currentDateStr } from "src/js/utils";
+import { useProofsStore } from "./proofs";
+
+
+const proofsStore = useProofsStore();
 
 export const useStorageStore = defineStore("storage", {
   state: () => ({
@@ -14,21 +18,20 @@ export const useStorageStore = defineStore("storage", {
     ),
   }),
   actions: {
-    restoreFromBackup: function (backup: any) {
-      const mintStore = useMintsStore();
+    restoreFromBackup: async function (backup: any) {
       if (!backup) {
         notifyError("Unrecognized Backup Format!");
       } else {
         const keys = Object.keys(backup);
-        keys.forEach((key) => {
+        for (const key of keys) {
           // we treat some keys differently *magic*
           if (key === "cashu.dexie.db.proofs") {
             const proofs = JSON.parse(backup[key]);
-            mintStore.addProofs(proofs);
-            return;
+            await proofsStore.addProofs(proofs);
+          } else {
+            localStorage.setItem(key, backup[key]);
           }
-          localStorage.setItem(key, backup[key]);
-        });
+        }
         notifySuccess("Backup restored");
         window.location.reload();
       }

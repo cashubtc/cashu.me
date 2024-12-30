@@ -52,6 +52,7 @@ import { generateMnemonic, mnemonicToSeedSync } from "@scure/bip39";
 import { wordlist } from "@scure/bip39/wordlists/english";
 import { useSettingsStore } from "./settings";
 import { usePriceStore } from "./price";
+import { useDexieStore } from "./dexie";
 
 // HACK: this is a workaround so that the catch block in the melt function does not throw an error when the user exits the app
 // before the payment is completed. This is necessary because the catch block in the melt function would otherwise remove all
@@ -83,6 +84,7 @@ type KeysetCounter = {
 
 const receiveStore = useReceiveTokensStore();
 const tokenStore = useTokensStore();
+const proofsStore = useProofsStore();
 
 export const useWalletStore = defineStore("wallet", {
   state: () => {
@@ -368,11 +370,11 @@ export const useWalletStore = defineStore("wallet", {
         proofsToSend,
         { pubkey: receiverPubkey }
       );
-      const mintStore = useMintsStore();
+      const proofsStore = useProofsStore();
       // note: we do not store sendProofs in the proofs store but
       // expect from the caller to store it in the history
-      mintStore.addProofs(keepProofs);
-      mintStore.removeProofs(proofsToSend);
+      await proofsStore.addProofs(keepProofs);
+      await proofsStore.removeProofs(proofsToSend);
       return { keepProofs, sendProofs };
     },
     send: async function (
@@ -427,9 +429,9 @@ export const useWalletStore = defineStore("wallet", {
             keysetId,
             keepProofs.length + sendProofs.length
           );
-          mintStore.addProofs(keepProofs);
-          mintStore.addProofs(sendProofs);
-          mintStore.removeProofs(proofsToSend);
+          await proofsStore.addProofs(keepProofs);
+          await proofsStore.addProofs(sendProofs);
+          await proofsStore.removeProofs(proofsToSend);
         } else if (totalAmount == targetAmount) {
           keepProofs = [];
           sendProofs = proofsToSend;
@@ -437,13 +439,13 @@ export const useWalletStore = defineStore("wallet", {
           throw new Error("could not split proofs.");
         }
 
-        if (invalidate) {
-          mintStore.removeProofs(sendProofs);
-        }
-        proofsStore.setReserved(sendProofs, true);
+        // if (invalidate) {
+        //   await proofsStore.removeProofs(sendProofs);
+        // }
+        await proofsStore.setReserved(sendProofs, true);
         return { keepProofs, sendProofs };
       } catch (error: any) {
-        proofsStore.setReserved(proofsToSend, false);
+        await proofsStore.setReserved(proofsToSend, false);
         console.error(error);
         notifyApiError(error);
         this.handleOutputsHaveAlreadyBeenSignedError(keysetId, error);
@@ -519,8 +521,8 @@ export const useWalletStore = defineStore("wallet", {
         }
 
         p2pkStore.setPrivateKeyUsed(privkey);
-        mintStore.removeProofs(proofs);
-        mintStore.addProofs(proofs);
+        await proofsStore.removeProofs(proofs);
+        await proofsStore.addProofs(proofs);
 
         const outputAmount = proofs.reduce((s, t) => (s += t.amount), 0);
 
@@ -645,7 +647,7 @@ export const useWalletStore = defineStore("wallet", {
           }
         );
         this.increaseKeysetCounter(keysetId, proofs.length);
-        mintStore.addProofs(proofs);
+        await proofsStore.addProofs(proofs);
 
         // update UI
         await this.setInvoicePaid(invoice.quote);
@@ -827,7 +829,7 @@ export const useWalletStore = defineStore("wallet", {
         );
         console.log("#### pay lightning: token paid");
         // delete spent tokens from db
-        mintStore.removeProofs(sendProofs);
+        await proofsStore.removeProofs(sendProofs);
 
         // NUT-08 get change
         if (data.change != null) {
@@ -835,7 +837,7 @@ export const useWalletStore = defineStore("wallet", {
           console.log(
             "## Received change: " + proofsStore.sumProofs(changeProofs)
           );
-          mintStore.addProofs(changeProofs);
+          await proofsStore.addProofs(changeProofs);
         }
 
         tokenStore.addPaidToken({
@@ -871,7 +873,7 @@ export const useWalletStore = defineStore("wallet", {
           throw error;
         }
         // roll back proof management and keyset counter
-        proofsStore.setReserved(sendProofs, false);
+        await proofsStore.setReserved(sendProofs, false);
         this.increaseKeysetCounter(keysetId, -keysetCounterIncrease);
         this.removeOutgoingInvoiceFromHistory(quote.quote);
 
@@ -925,7 +927,7 @@ export const useWalletStore = defineStore("wallet", {
           )
         );
         if (spentProofs.length) {
-          mintStore.removeProofs(spentProofs);
+          await proofsStore.removeProofs(spentProofs);
           // update UI
           const serializedProofs = proofsStore.serializeProofs(spentProofs);
           if (serializedProofs == null) {
@@ -1252,7 +1254,8 @@ export const useWalletStore = defineStore("wallet", {
       if (!mint) {
         throw new Error("mint not found");
       }
-      const proofs: Proof[] = mintStore.proofs.filter((p) => p.quote === quote);
+      // const proofs: Proof[] = mintStore.proofs.filter((p) => p.quote === quote);
+      const proofs: Proof[] = await useDexieStore().db.proofs.where("quote").equals(quote).toArray();
       try {
         // this is an outgoing invoice, we first do a getMintQuote to check if the invoice is paid
         const mintQuote = await mintWallet.mint.checkMeltQuote(quote);
@@ -1264,7 +1267,7 @@ export const useWalletStore = defineStore("wallet", {
           throw new Error("invoice not paid yet.");
         } else if (mintQuote.state == MeltQuoteState.UNPAID) {
           // we assume that the payment failed and we unset the proofs as reserved
-          useProofsStore().setReserved(proofs, false);
+          await useProofsStore().setReserved(proofs, false);
           this.removeOutgoingInvoiceFromHistory(quote);
           notifyWarning("Lightning payment failed");
         } else if (mintQuote.state == MeltQuoteState.PAID) {
@@ -1275,7 +1278,7 @@ export const useWalletStore = defineStore("wallet", {
             true
           );
           if (spentProofs != undefined && spentProofs.length == proofs.length) {
-            mintStore.removeProofs(proofs);
+            await proofsStore.removeProofs(proofs);
             useUiStore().vibrate();
             notifySuccess(
               "Sent " +
@@ -1297,12 +1300,12 @@ export const useWalletStore = defineStore("wallet", {
       }
     },
     ////////////// UI HELPERS //////////////
-    addOutgoingPendingInvoiceToHistory: function (
+    addOutgoingPendingInvoiceToHistory: async function (
       quote: MeltQuoteResponse,
       sendProofs: Proof[]
     ) {
       const proofsStore = useProofsStore();
-      proofsStore.setReserved(sendProofs, true, quote.quote);
+      await proofsStore.setReserved(sendProofs, true, quote.quote);
       const mintStore = useMintsStore();
       this.invoiceHistory.push({
         amount: -(quote.amount + quote.fee_reserve),

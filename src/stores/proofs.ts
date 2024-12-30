@@ -1,42 +1,62 @@
 import { defineStore } from "pinia";
 import { useMintsStore, WalletProof } from "./mints";
+import { useDexieStore } from "./dexie";
 import {
   Proof,
   getEncodedToken,
   getEncodedTokenV4,
   Token,
 } from "@cashu/cashu-ts";
+const dexieStore = useDexieStore();
 
 export const useProofsStore = defineStore("proofs", {
   state: () => ({}),
   actions: {
     sumProofs: function (proofs: Proof[]) {
-      const mintStore = useMintsStore();
-      const walletProofs = mintStore.proofsToWalletProofs(proofs);
-      return walletProofs.reduce((s, t) => (s += t.amount), 0);
+      return proofs.reduce((s, t) => (s += t.amount), 0);
     },
-    setReserved: function (
+    setReserved: async function (
       proofs: Proof[],
       reserved: boolean = true,
       quote?: string
     ) {
-      const mintStore = useMintsStore();
-      const walletProofs = mintStore.proofsToWalletProofs(proofs);
-      // unset quote if we unset reserved
-      let proofQuote: string | undefined;
-      if (reserved && quote) {
-        proofQuote = quote;
-      } else {
-        proofQuote = undefined;
-      }
-      walletProofs.forEach((p) => {
-        mintStore.proofs
-          .filter((pr) => pr.secret === p.secret)
-          .forEach((pr) => {
-            pr.reserved = reserved;
-            pr.quote = proofQuote;
-          });
+      const setQuote: string | undefined = reserved ? quote : undefined;
+      await dexieStore.db.transaction("rw", dexieStore.db.proofs, () => {
+        for (const proof of proofs) {
+          dexieStore.db.proofs
+            .where("secret")
+            .equals(proof.secret)
+            .modify((pr) => {
+              pr.reserved = reserved;
+              pr.quote = setQuote;
+            });
+        }
       });
+    },
+    proofsToWalletProofs(proofs: Proof[], quote?: string): WalletProof[] {
+      return proofs.map((p) => {
+        return {
+          ...p,
+          reserved: false,
+          quote: quote,
+        } as WalletProof;
+      });
+    },
+    async addProofs(proofs: Proof[], quote?: string) {
+      const walletProofs = this.proofsToWalletProofs(proofs);
+      const proofsTable = dexieStore.db.proofs;
+      walletProofs.forEach((p) => {
+        proofsTable.add(p);
+      }
+      );
+    },
+    async removeProofs(proofs: Proof[]) {
+      const walletProofs = this.proofsToWalletProofs(proofs);
+      const proofsTable = dexieStore.db.proofs;
+      walletProofs.forEach((p) => {
+        proofsTable.delete(p.secret);
+      }
+      );
     },
     getUnreservedProofs: function (proofs: WalletProof[]) {
       return proofs.filter((p) => !p.reserved);

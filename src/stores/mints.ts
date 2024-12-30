@@ -17,7 +17,7 @@ import { useDexieStore } from "src/stores/dexie"
 import { liveQuery } from 'dexie';
 import { ref, computed, watch } from 'vue';
 
-const dexieStore = useDexieStore();
+// const dexieStore = useDexieStore();
 
 export type Mint = {
   url: string;
@@ -250,31 +250,6 @@ export const useMintsStore = defineStore("mints", {
       this.activeUnit =
         units[(units.indexOf(this.activeUnit) + 1) % units.length];
       return this.activeUnit;
-    },
-    proofsToWalletProofs(proofs: Proof[], quote?: string): WalletProof[] {
-      return proofs.map((p) => {
-        return {
-          ...p,
-          reserved: false,
-          quote: quote,
-        } as WalletProof;
-      });
-    },
-    addProofs(proofs: Proof[], quote?: string) {
-      const walletProofs = this.proofsToWalletProofs(proofs);
-      const proofsTable = dexieStore.db.proofs;
-      walletProofs.forEach((p) => {
-        proofsTable.add(p);
-      }
-      );
-    },
-    removeProofs(proofs: Proof[]) {
-      const walletProofs = this.proofsToWalletProofs(proofs);
-      const proofsTable = dexieStore.db.proofs;
-      walletProofs.forEach((p) => {
-        proofsTable.delete(p.secret);
-      }
-      );
     },
     toggleActiveUnitForMint(mint: Mint) {
       // method to set the active unit to one that is supported by `mint`
