@@ -13,11 +13,9 @@ import {
   GetInfoResponse,
 } from "@cashu/cashu-ts";
 import { useUiStore } from "./ui";
-import { useDexieStore } from "src/stores/dexie"
+import { cashuDb } from "src/stores/dexie"
 import { liveQuery } from 'dexie';
 import { ref, computed, watch } from 'vue';
-
-// const dexieStore = useDexieStore();
 
 export type Mint = {
   url: string;
@@ -95,8 +93,6 @@ type BlindSignatureAudit = {
 
 export const useMintsStore = defineStore("mints", {
   state: () => {
-    const dexieStore = useDexieStore();
-
     // State variables
     const proofs = ref<WalletProof[]>([]);
     const activeProofs = ref<WalletProof[]>([]);
@@ -113,7 +109,7 @@ export const useMintsStore = defineStore("mints", {
     const showMintInfoDialog = ref(false);
     const showMintInfoData = ref({} as Mint);
 
-    liveQuery(() => dexieStore.db.proofs.toArray()).subscribe({
+    liveQuery(() => cashuDb.proofs.toArray()).subscribe({
       next: (newProofs) => {
         proofs.value = newProofs;
         updateActiveProofs();

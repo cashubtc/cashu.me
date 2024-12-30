@@ -12,7 +12,7 @@ import { WalletProof } from "./mints";
 //   quote?: string
 // }
 
-export class MySubClassedDexie extends Dexie {
+export class CashuDexie extends Dexie {
   proofs!: Table<WalletProof>;
 
   constructor() {
@@ -23,11 +23,10 @@ export class MySubClassedDexie extends Dexie {
   }
 }
 
-export const db = new MySubClassedDexie();
+export const cashuDb = new CashuDexie();
 
 export const useDexieStore = defineStore("dexie", {
   state: () => ({
-    db: db,
     migratedToDexie: useLocalStorage<boolean>("cashu.dexie.migrated", false),
   }),
   getters: {
@@ -43,16 +42,16 @@ export const useDexieStore = defineStore("dexie", {
       if (proofs) {
         const parsedProofs = JSON.parse(proofs) as WalletProof[];
         parsedProofs.forEach((proof) => {
-          this.db.proofs.add(proof);
+          cashuDb.proofs.add(proof);
         });
       }
-      console.log(`Migrated ${this.db.proofs.count()} proofs`);
+      console.log(`Migrated ${cashuDb.proofs.count()} proofs`);
       this.migratedToDexie = true;
       // remove localstorage "cashu.proofs"
       localStorage.removeItem("cashu.proofs");
     },
     deleteAllTables: function () {
-      this.db.proofs.clear();
+      cashuDb.proofs.clear();
     }
   },
 });

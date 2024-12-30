@@ -1,13 +1,12 @@
 import { defineStore } from "pinia";
 import { useMintsStore, WalletProof } from "./mints";
-import { useDexieStore } from "./dexie";
+import { cashuDb, CashuDexie, useDexieStore } from "./dexie";
 import {
   Proof,
   getEncodedToken,
   getEncodedTokenV4,
   Token,
 } from "@cashu/cashu-ts";
-const dexieStore = useDexieStore();
 
 export const useProofsStore = defineStore("proofs", {
   state: () => ({}),
@@ -21,12 +20,12 @@ export const useProofsStore = defineStore("proofs", {
       quote?: string
     ) {
       const setQuote: string | undefined = reserved ? quote : undefined;
-      await dexieStore.db.transaction("rw", dexieStore.db.proofs, () => {
-        for (const proof of proofs) {
-          dexieStore.db.proofs
-            .where("secret")
-            .equals(proof.secret)
-            .modify((pr) => {
+      await cashuDb.transaction('rw', cashuDb.proofs, async () => {
+        for (const p of proofs) {
+          await cashuDb.proofs
+            .where('secret')
+            .equals(p.secret)
+            .modify(pr => {
               pr.reserved = reserved;
               pr.quote = setQuote;
             });
@@ -44,7 +43,7 @@ export const useProofsStore = defineStore("proofs", {
     },
     async addProofs(proofs: Proof[], quote?: string) {
       const walletProofs = this.proofsToWalletProofs(proofs);
-      const proofsTable = dexieStore.db.proofs;
+      const proofsTable = cashuDb.proofs;
       walletProofs.forEach((p) => {
         proofsTable.add(p);
       }
@@ -52,11 +51,14 @@ export const useProofsStore = defineStore("proofs", {
     },
     async removeProofs(proofs: Proof[]) {
       const walletProofs = this.proofsToWalletProofs(proofs);
-      const proofsTable = dexieStore.db.proofs;
+      const proofsTable = cashuDb.proofs;
       walletProofs.forEach((p) => {
         proofsTable.delete(p.secret);
       }
       );
+    },
+    async getProofsForQuote(quote: string): Promise<WalletProof[]> {
+      return await cashuDb.proofs.where('quote').equals(quote).toArray();
     },
     getUnreservedProofs: function (proofs: WalletProof[]) {
       return proofs.filter((p) => !p.reserved);

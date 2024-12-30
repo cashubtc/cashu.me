@@ -52,8 +52,6 @@ import { generateMnemonic, mnemonicToSeedSync } from "@scure/bip39";
 import { wordlist } from "@scure/bip39/wordlists/english";
 import { useSettingsStore } from "./settings";
 import { usePriceStore } from "./price";
-import { useDexieStore } from "./dexie";
-
 // HACK: this is a workaround so that the catch block in the melt function does not throw an error when the user exits the app
 // before the payment is completed. This is necessary because the catch block in the melt function would otherwise remove all
 // quotes from the invoiceHistory and the user would not be able to pay the invoice again after reopening the app.
@@ -1254,8 +1252,7 @@ export const useWalletStore = defineStore("wallet", {
       if (!mint) {
         throw new Error("mint not found");
       }
-      // const proofs: Proof[] = mintStore.proofs.filter((p) => p.quote === quote);
-      const proofs: Proof[] = await useDexieStore().db.proofs.where("quote").equals(quote).toArray();
+      const proofs: Proof[] = await proofsStore.getProofsForQuote(quote);
       try {
         // this is an outgoing invoice, we first do a getMintQuote to check if the invoice is paid
         const mintQuote = await mintWallet.mint.checkMeltQuote(quote);
