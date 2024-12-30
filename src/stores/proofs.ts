@@ -43,19 +43,19 @@ export const useProofsStore = defineStore("proofs", {
     },
     async addProofs(proofs: Proof[], quote?: string) {
       const walletProofs = this.proofsToWalletProofs(proofs);
-      const proofsTable = cashuDb.proofs;
-      walletProofs.forEach((p) => {
-        proofsTable.add(p);
-      }
-      );
+      await cashuDb.transaction('rw', cashuDb.proofs, async () => {
+        walletProofs.forEach(async (p) => {
+          await cashuDb.proofs.add(p);
+        });
+      });
     },
     async removeProofs(proofs: Proof[]) {
       const walletProofs = this.proofsToWalletProofs(proofs);
-      const proofsTable = cashuDb.proofs;
-      walletProofs.forEach((p) => {
-        proofsTable.delete(p.secret);
-      }
-      );
+      await cashuDb.transaction('rw', cashuDb.proofs, async () => {
+        walletProofs.forEach(async (p) => {
+          await cashuDb.proofs.delete(p.secret);
+        });
+      });
     },
     async getProofsForQuote(quote: string): Promise<WalletProof[]> {
       return await cashuDb.proofs.where('quote').equals(quote).toArray();

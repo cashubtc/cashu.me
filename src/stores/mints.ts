@@ -66,7 +66,7 @@ export class MintClass {
   unitProofs(unit: string) {
     const unitKeysets = this.unitKeysets(unit);
     return this.proofs.filter((p) =>
-      unitKeysets.map((k) => k.id).includes(p.id)
+      unitKeysets.map((k) => k.id).includes(p.id) && !p.reserved
     );
   }
 
@@ -134,7 +134,7 @@ export const useMintsStore = defineStore("mints", {
       }
 
       const keysetIds = unitKeysets.map((k) => k.id);
-      activeProofs.value = proofs.value.filter((p) => keysetIds.includes(p.id));
+      activeProofs.value = proofs.value.filter((p) => keysetIds.includes(p.id)).filter((p) => !p.reserved);
     };
 
     // Watch for changes in activeMintUrl and activeUnit
@@ -164,6 +164,7 @@ export const useMintsStore = defineStore("mints", {
         .filter((k) => k.unit === activeUnit);
       const balance = this.proofs
         .filter((p) => allUnitKeysets.map((k) => k.id).includes(p.id))
+        .filter((p) => !p.reserved)
         .reduce((sum, p) => sum + p.amount, 0);
       return balance;
     },
@@ -238,7 +239,7 @@ export const useMintsStore = defineStore("mints", {
     mintUnitProofs(mint: Mint, unit: string): WalletProof[] {
       const unitKeysets = mint.keysets.filter((k) => k.unit === unit);
       return this.proofs.filter((p) =>
-        unitKeysets.map((k) => k.id).includes(p.id)
+        unitKeysets.map((k) => k.id).includes(p.id) && !p.reserved
       );
     },
     toggleUnit: function () {

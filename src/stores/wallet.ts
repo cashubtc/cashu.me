@@ -437,10 +437,10 @@ export const useWalletStore = defineStore("wallet", {
           throw new Error("could not split proofs.");
         }
 
-        // if (invalidate) {
-        //   await proofsStore.removeProofs(sendProofs);
-        // }
         await proofsStore.setReserved(sendProofs, true);
+        if (invalidate) {
+          await proofsStore.removeProofs(sendProofs);
+        }
         return { keepProofs, sendProofs };
       } catch (error: any) {
         await proofsStore.setReserved(proofsToSend, false);
@@ -745,29 +745,9 @@ export const useWalletStore = defineStore("wallet", {
     ) {
       const uIStore = useUiStore();
       const proofsStore = useProofsStore();
-      const mintStore = useMintsStore();
       const tokenStore = useTokensStore();
 
-      console.log("#### pay lightning");
-      // if (this.payInvoiceData.invoice == null) {
-      //   throw new Error("no invoice provided.");
-      // }
-      // const invoice = this.payInvoiceData.invoice.bolt11;
-      // throw an error if the invoice is already in invoiceHistory
-      // if (
-      //   this.invoiceHistory.find(
-      //     (i) => i.bolt11 === quote.request && i.amount < 0 && i.status === "paid"
-      //   )
-      // ) {
-      //   notifyError("Invoice already paid.");
-      //   throw new Error("invoice already paid.");
-      // }
-
-      // const quote = this.payInvoiceData.meltQuote.response;
-      // if (quote == null) {
-      //   throw new Error("no quote found.");
-      // }
-
+      console.log("#### melt()");
       const amount = quote.amount + quote.fee_reserve;
       let countChangeOutputs = 0;
       const keysetId = this.getKeyset(mintWallet.mint.mintUrl, mintWallet.unit);
@@ -790,7 +770,8 @@ export const useWalletStore = defineStore("wallet", {
 
       await uIStore.lockMutex();
       try {
-        await this.addOutgoingPendingInvoiceToHistory(quote, sendProofs);
+        await this.addOutgoingPendingInvoiceToHistory(quote);
+        await proofsStore.setReserved(sendProofs, true, quote.quote);
 
         // NUT-08 blank outputs for change
         const counter = this.keysetCounter(keysetId);
@@ -817,17 +798,6 @@ export const useWalletStore = defineStore("wallet", {
         if (data.quote.state != MeltQuoteState.PAID) {
           throw new Error("Invoice not paid.");
         }
-        let amount_paid = amount - proofsStore.sumProofs(data.change);
-        useUiStore().vibrate();
-
-        notifySuccess(
-          "Paid " +
-          uIStore.formatCurrency(amount_paid, mintWallet.unit) +
-          " via Lightning"
-        );
-        console.log("#### pay lightning: token paid");
-        // delete spent tokens from db
-        await proofsStore.removeProofs(sendProofs);
 
         // NUT-08 get change
         if (data.change != null) {
@@ -838,6 +808,17 @@ export const useWalletStore = defineStore("wallet", {
           await proofsStore.addProofs(changeProofs);
         }
 
+        // delete spent tokens from db
+        await proofsStore.removeProofs(sendProofs);
+
+        let amount_paid = amount - proofsStore.sumProofs(data.change);
+        useUiStore().vibrate();
+        notifySuccess(
+          "Paid " +
+          uIStore.formatCurrency(amount_paid, mintWallet.unit) +
+          " via Lightning"
+        );
+        console.log("#### pay lightning: token paid");
         tokenStore.addPaidToken({
           amount: -amount_paid,
           token: proofsStore.serializeProofs(sendProofs),
@@ -940,7 +921,7 @@ export const useWalletStore = defineStore("wallet", {
             });
           }
         }
-        // return unspent proofs
+        // return spent proofs
         return spentProofs;
       } catch (error: any) {
         console.error(error);
@@ -1275,7 +1256,6 @@ export const useWalletStore = defineStore("wallet", {
             true
           );
           if (spentProofs != undefined && spentProofs.length == proofs.length) {
-            await proofsStore.removeProofs(proofs);
             useUiStore().vibrate();
             notifySuccess(
               "Sent " +
@@ -1299,10 +1279,7 @@ export const useWalletStore = defineStore("wallet", {
     ////////////// UI HELPERS //////////////
     addOutgoingPendingInvoiceToHistory: async function (
       quote: MeltQuoteResponse,
-      sendProofs: Proof[]
     ) {
-      const proofsStore = useProofsStore();
-      await proofsStore.setReserved(sendProofs, true, quote.quote);
       const mintStore = useMintsStore();
       this.invoiceHistory.push({
         amount: -(quote.amount + quote.fee_reserve),
