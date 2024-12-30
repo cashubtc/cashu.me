@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import Dexie, { Table } from 'dexie';
+import Dexie, { Table } from "dexie";
 import { useLocalStorage } from "@vueuse/core";
 import { WalletProof } from "./mints";
 
@@ -16,9 +16,9 @@ export class CashuDexie extends Dexie {
   proofs!: Table<WalletProof>;
 
   constructor() {
-    super('db');
+    super("db");
     this.version(1).stores({
-      proofs: 'secret, id, C, amount, reserved, quote',
+      proofs: "secret, id, C, amount, reserved, quote",
     });
   }
 }
@@ -29,8 +29,7 @@ export const useDexieStore = defineStore("dexie", {
   state: () => ({
     migratedToDexie: useLocalStorage<boolean>("cashu.dexie.migrated", false),
   }),
-  getters: {
-  },
+  getters: {},
   actions: {
     migrateToDexie: function () {
       if (this.migratedToDexie) {
@@ -52,6 +51,6 @@ export const useDexieStore = defineStore("dexie", {
     },
     deleteAllTables: function () {
       cashuDb.proofs.clear();
-    }
+    },
   },
 });

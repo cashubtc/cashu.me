@@ -13,9 +13,9 @@ import {
   GetInfoResponse,
 } from "@cashu/cashu-ts";
 import { useUiStore } from "./ui";
-import { cashuDb } from "src/stores/dexie"
-import { liveQuery } from 'dexie';
-import { ref, computed, watch } from 'vue';
+import { cashuDb } from "src/stores/dexie";
+import { liveQuery } from "dexie";
+import { ref, computed, watch } from "vue";
 
 export type Mint = {
   url: string;
@@ -65,8 +65,8 @@ export class MintClass {
 
   unitProofs(unit: string) {
     const unitKeysets = this.unitKeysets(unit);
-    return this.proofs.filter((p) =>
-      unitKeysets.map((k) => k.id).includes(p.id) && !p.reserved
+    return this.proofs.filter(
+      (p) => unitKeysets.map((k) => k.id).includes(p.id) && !p.reserved
     );
   }
 
@@ -96,13 +96,13 @@ export const useMintsStore = defineStore("mints", {
     // State variables
     const proofs = ref<WalletProof[]>([]);
     const activeProofs = ref<WalletProof[]>([]);
-    const activeUnit = useLocalStorage<string>('cashu.activeUnit', 'sat');
-    const activeMintUrl = useLocalStorage<string>('cashu.activeMintUrl', '');
+    const activeUnit = useLocalStorage<string>("cashu.activeUnit", "sat");
+    const activeMintUrl = useLocalStorage<string>("cashu.activeMintUrl", "");
     const addMintData = ref({
-      url: '',
-      nickname: '',
+      url: "",
+      nickname: "",
     });
-    const mints = useLocalStorage('cashu.mints', [] as Mint[]);
+    const mints = useLocalStorage("cashu.mints", [] as Mint[]);
     const showAddMintDialog = ref(false);
     const addMintBlocking = ref(false);
     const showRemoveMintDialog = ref(false);
@@ -121,20 +121,26 @@ export const useMintsStore = defineStore("mints", {
 
     // Function to update activeProofs
     const updateActiveProofs = () => {
-      const currentMint = mints.value.find((m) => m.url === activeMintUrl.value);
+      const currentMint = mints.value.find(
+        (m) => m.url === activeMintUrl.value
+      );
       if (!currentMint) {
         activeProofs.value = [];
         return;
       }
 
-      const unitKeysets = currentMint?.keysets?.filter((k) => k.unit === activeUnit.value);
+      const unitKeysets = currentMint?.keysets?.filter(
+        (k) => k.unit === activeUnit.value
+      );
       if (!unitKeysets || unitKeysets.length === 0) {
         activeProofs.value = [];
         return;
       }
 
       const keysetIds = unitKeysets.map((k) => k.id);
-      activeProofs.value = proofs.value.filter((p) => keysetIds.includes(p.id)).filter((p) => !p.reserved);
+      activeProofs.value = proofs.value
+        .filter((p) => keysetIds.includes(p.id))
+        .filter((p) => !p.reserved);
     };
 
     // Watch for changes in activeMintUrl and activeUnit
@@ -238,8 +244,8 @@ export const useMintsStore = defineStore("mints", {
     },
     mintUnitProofs(mint: Mint, unit: string): WalletProof[] {
       const unitKeysets = mint.keysets.filter((k) => k.unit === unit);
-      return this.proofs.filter((p) =>
-        unitKeysets.map((k) => k.id).includes(p.id) && !p.reserved
+      return this.proofs.filter(
+        (p) => unitKeysets.map((k) => k.id).includes(p.id) && !p.reserved
       );
     },
     toggleUnit: function () {
@@ -410,7 +416,7 @@ export const useMintsStore = defineStore("mints", {
         console.error(error);
         try {
           // notifyApiError(error, "Could not get mint info");
-        } catch { }
+        } catch {}
         throw error;
       }
     },
@@ -450,7 +456,7 @@ export const useMintsStore = defineStore("mints", {
         console.error(error);
         try {
           // notifyApiError(error, "Could not get mint keys");
-        } catch { }
+        } catch {}
         throw error;
       }
     },
@@ -464,7 +470,7 @@ export const useMintsStore = defineStore("mints", {
         console.error(error);
         try {
           // notifyApiError(error, "Could not get mint keysets");
-        } catch { }
+        } catch {}
         throw error;
       }
     },
@@ -487,5 +493,5 @@ export const useMintsStore = defineStore("mints", {
         throw new Error(`Mint error: ${response.error}`);
       }
     },
-  }
+  },
 });

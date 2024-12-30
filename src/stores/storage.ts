@@ -7,7 +7,6 @@ import { useTokensStore } from "./tokens";
 import { currentDateStr } from "src/js/utils";
 import { useProofsStore } from "./proofs";
 
-
 const proofsStore = useProofsStore();
 
 export const useStorageStore = defineStore("storage", {

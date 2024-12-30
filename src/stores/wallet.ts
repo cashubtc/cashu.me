@@ -815,8 +815,8 @@ export const useWalletStore = defineStore("wallet", {
         useUiStore().vibrate();
         notifySuccess(
           "Paid " +
-          uIStore.formatCurrency(amount_paid, mintWallet.unit) +
-          " via Lightning"
+            uIStore.formatCurrency(amount_paid, mintWallet.unit) +
+            " via Lightning"
         );
         console.log("#### pay lightning: token paid");
         tokenStore.addPaidToken({
@@ -1066,10 +1066,10 @@ export const useWalletStore = defineStore("wallet", {
         const proofStore = useProofsStore();
         notifySuccess(
           "Sent " +
-          uIStore.formatCurrency(
-            proofStore.sumProofs(spentProofs),
-            historyToken.unit
-          )
+            uIStore.formatCurrency(
+              proofStore.sumProofs(spentProofs),
+              historyToken.unit
+            )
         );
       } else {
         console.log("### token not paid yet");
@@ -1151,8 +1151,8 @@ export const useWalletStore = defineStore("wallet", {
             useUiStore().vibrate();
             notifySuccess(
               "Received " +
-              uIStore.formatCurrency(invoice.amount, invoice.unit) +
-              " via Lightning"
+                uIStore.formatCurrency(invoice.amount, invoice.unit) +
+                " via Lightning"
             );
             unsub();
             return proofs;
@@ -1209,8 +1209,8 @@ export const useWalletStore = defineStore("wallet", {
         useUiStore().vibrate();
         notifySuccess(
           "Received " +
-          uIStore.formatCurrency(invoice.amount, invoice.unit) +
-          " via Lightning"
+            uIStore.formatCurrency(invoice.amount, invoice.unit) +
+            " via Lightning"
         );
         return proofs;
       } catch (error) {
@@ -1259,10 +1259,10 @@ export const useWalletStore = defineStore("wallet", {
             useUiStore().vibrate();
             notifySuccess(
               "Sent " +
-              uIStore.formatCurrency(
-                useProofsStore().sumProofs(proofs),
-                invoice.unit
-              )
+                uIStore.formatCurrency(
+                  useProofsStore().sumProofs(proofs),
+                  invoice.unit
+                )
             );
           }
           // set invoice in history to paid
@@ -1278,7 +1278,7 @@ export const useWalletStore = defineStore("wallet", {
     },
     ////////////// UI HELPERS //////////////
     addOutgoingPendingInvoiceToHistory: async function (
-      quote: MeltQuoteResponse,
+      quote: MeltQuoteResponse
     ) {
       const mintStore = useMintsStore();
       this.invoiceHistory.push({
@@ -1506,7 +1506,7 @@ export const useWalletStore = defineStore("wallet", {
         this.payInvoiceData.lnurlpay.maxSendable >= amount * 1000
       ) {
         if (mintStore.activeUnit == "usd") {
-          const priceUsd = usePriceStore().bitcoinPrice
+          const priceUsd = usePriceStore().bitcoinPrice;
           if (priceUsd == 0) {
             notifyError("No price data.", "LNURL Error");
             return;
