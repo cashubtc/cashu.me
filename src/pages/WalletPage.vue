@@ -219,6 +219,8 @@ import { useNWCStore } from "src/stores/nwc";
 import { useNPCStore } from "src/stores/npubcash";
 import { useNostrStore } from "src/stores/nostr";
 import { usePRStore } from "src/stores/payment-request";
+import { useDexieStore } from "src/stores/dexie";
+
 import { useStorageStore } from "src/stores/storage";
 import ReceiveTokenDialog from "src/components/ReceiveTokenDialog.vue";
 import { useWelcomeStore } from "../stores/welcome";
@@ -308,7 +310,6 @@ export default {
       "activeProofs",
       "keys",
       "mints",
-      "proofs",
       "activeMint",
     ]),
     ...mapWritableState(useWalletStore, [
@@ -375,6 +376,7 @@ export default {
       "sendNip17DirectMessageToNprofile",
       "initSigner",
     ]),
+    ...mapActions(useDexieStore, ["migrateToDexie"]),
     ...mapActions(useStorageStore, ["checkLocalStorage"]),
     ...mapActions(usePRStore, ["createPaymentRequest"]),
     ...mapActions(useInvoicesWorkerStore, [
@@ -610,6 +612,9 @@ export default {
     );
 
     // startup tasks
+
+    // migrate to dexie
+    this.migrateToDexie();
 
     // check local storage
     this.checkLocalStorage();

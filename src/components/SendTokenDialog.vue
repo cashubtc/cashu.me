@@ -152,10 +152,7 @@
               </div>
             </div>
           </transition>
-          <div
-            v-if="activeMintBalance() >= sendData.amount"
-            class="row q-mt-lg"
-          >
+          <div v-if="activeBalance >= sendData.amount" class="row q-mt-lg">
             <q-btn
               v-if="!sendData.tokens"
               :disable="
@@ -203,7 +200,7 @@
                 v-if="
                   sendData.amount > 0 &&
                   !showLockInput &&
-                  activeMintBalance() >= sendData.amount
+                  activeBalance >= sendData.amount
                 "
                 :disable="sendData.p2pkPubkey == null || sendData.amount <= 0"
                 color="primary"
@@ -537,7 +534,7 @@ export default defineComponent({
       "activeUnitLabel",
       "activeUnitCurrencyMultiplyer",
       "activeMintUrl",
-      "activeMintBalance",
+      "activeBalance",
     ]),
     ...mapState(useSettingsStore, [
       "checkSentTokens",

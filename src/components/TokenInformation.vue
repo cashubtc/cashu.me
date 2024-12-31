@@ -71,7 +71,6 @@ export default defineComponent({
       "activeMintUrl",
       "activeProofs",
       "mints",
-      "proofs",
       "activeUnit",
       "addMintBlocking",
     ]),

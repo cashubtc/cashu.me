@@ -1,5 +1,6 @@
 import { defineStore } from "pinia";
 import { useMintsStore, WalletProof } from "./mints";
+import { cashuDb, CashuDexie, useDexieStore } from "./dexie";
 import {
   Proof,
   getEncodedToken,
@@ -11,32 +12,53 @@ export const useProofsStore = defineStore("proofs", {
   state: () => ({}),
   actions: {
     sumProofs: function (proofs: Proof[]) {
-      const mintStore = useMintsStore();
-      const walletProofs = mintStore.proofsToWalletProofs(proofs);
-      return walletProofs.reduce((s, t) => (s += t.amount), 0);
+      return proofs.reduce((s, t) => (s += t.amount), 0);
     },
-    setReserved: function (
+    setReserved: async function (
       proofs: Proof[],
       reserved: boolean = true,
       quote?: string
     ) {
-      const mintStore = useMintsStore();
-      const walletProofs = mintStore.proofsToWalletProofs(proofs);
-      // unset quote if we unset reserved
-      let proofQuote: string | undefined;
-      if (reserved && quote) {
-        proofQuote = quote;
-      } else {
-        proofQuote = undefined;
-      }
-      walletProofs.forEach((p) => {
-        mintStore.proofs
-          .filter((pr) => pr.secret === p.secret)
-          .forEach((pr) => {
-            pr.reserved = reserved;
-            pr.quote = proofQuote;
-          });
+      const setQuote: string | undefined = reserved ? quote : undefined;
+      await cashuDb.transaction("rw", cashuDb.proofs, async () => {
+        for (const p of proofs) {
+          await cashuDb.proofs
+            .where("secret")
+            .equals(p.secret)
+            .modify((pr) => {
+              pr.reserved = reserved;
+              pr.quote = setQuote;
+            });
+        }
       });
+    },
+    proofsToWalletProofs(proofs: Proof[], quote?: string): WalletProof[] {
+      return proofs.map((p) => {
+        return {
+          ...p,
+          reserved: false,
+          quote: quote,
+        } as WalletProof;
+      });
+    },
+    async addProofs(proofs: Proof[], quote?: string) {
+      const walletProofs = this.proofsToWalletProofs(proofs);
+      await cashuDb.transaction("rw", cashuDb.proofs, async () => {
+        walletProofs.forEach(async (p) => {
+          await cashuDb.proofs.add(p);
+        });
+      });
+    },
+    async removeProofs(proofs: Proof[]) {
+      const walletProofs = this.proofsToWalletProofs(proofs);
+      await cashuDb.transaction("rw", cashuDb.proofs, async () => {
+        walletProofs.forEach(async (p) => {
+          await cashuDb.proofs.delete(p.secret);
+        });
+      });
+    },
+    async getProofsForQuote(quote: string): Promise<WalletProof[]> {
+      return await cashuDb.proofs.where("quote").equals(quote).toArray();
     },
     getUnreservedProofs: function (proofs: WalletProof[]) {
       return proofs.filter((p) => !p.reserved);
