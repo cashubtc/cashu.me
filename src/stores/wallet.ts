@@ -431,11 +431,9 @@ export const useWalletStore = defineStore("wallet", {
           await proofsStore.addProofs(sendProofs);
 
           // make sure we don't delete any proofs that were returned
-          const proofsToSendNotReturned = proofsToSend.filter(
-            (p) => !sendProofs.find((s) => s.secret === p.secret)
-          ).filter(
-            (p) => !keepProofs.find((k) => k.secret === p.secret)
-          );
+          const proofsToSendNotReturned = proofsToSend
+            .filter((p) => !sendProofs.find((s) => s.secret === p.secret))
+            .filter((p) => !keepProofs.find((k) => k.secret === p.secret));
           await proofsStore.removeProofs(proofsToSendNotReturned);
         } else if (totalAmount == targetAmount) {
           keepProofs = [];
@@ -821,8 +819,8 @@ export const useWalletStore = defineStore("wallet", {
         useUiStore().vibrate();
         notifySuccess(
           "Paid " +
-          uIStore.formatCurrency(amount_paid, mintWallet.unit) +
-          " via Lightning"
+            uIStore.formatCurrency(amount_paid, mintWallet.unit) +
+            " via Lightning"
         );
         console.log("#### pay lightning: token paid");
         tokenStore.addPaidToken({
@@ -992,10 +990,10 @@ export const useWalletStore = defineStore("wallet", {
         const proofStore = useProofsStore();
         notifySuccess(
           "Sent " +
-          uIStore.formatCurrency(
-            proofStore.sumProofs(spentProofs),
-            historyToken.unit
-          )
+            uIStore.formatCurrency(
+              proofStore.sumProofs(spentProofs),
+              historyToken.unit
+            )
         );
       } else {
         console.log("### token not paid yet");
@@ -1044,8 +1042,8 @@ export const useWalletStore = defineStore("wallet", {
         useUiStore().vibrate();
         notifySuccess(
           "Received " +
-          uIStore.formatCurrency(invoice.amount, invoice.unit) +
-          " via Lightning"
+            uIStore.formatCurrency(invoice.amount, invoice.unit) +
+            " via Lightning"
         );
         return proofs;
       } catch (error) {
@@ -1094,10 +1092,10 @@ export const useWalletStore = defineStore("wallet", {
             useUiStore().vibrate();
             notifySuccess(
               "Sent " +
-              uIStore.formatCurrency(
-                useProofsStore().sumProofs(proofs),
-                invoice.unit
-              )
+                uIStore.formatCurrency(
+                  useProofsStore().sumProofs(proofs),
+                  invoice.unit
+                )
             );
           }
           // set invoice in history to paid
@@ -1250,8 +1248,8 @@ export const useWalletStore = defineStore("wallet", {
             useUiStore().vibrate();
             notifySuccess(
               "Received " +
-              uIStore.formatCurrency(invoice.amount, invoice.unit) +
-              " via Lightning"
+                uIStore.formatCurrency(invoice.amount, invoice.unit) +
+                " via Lightning"
             );
             unsub();
             return proofs;
