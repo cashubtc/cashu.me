@@ -36,7 +36,7 @@ export const useDexieStore = defineStore("dexie", {
         return;
       }
       console.log("Migrating to Dexie");
-      // get all proofs from localstorage "cashu.proofs" ad migrate them to Dexie db.proofs
+      // get all proofs from localstorage and migrate them to Dexie
       const proofs = localStorage.getItem("cashu.proofs");
       if (proofs) {
         const parsedProofs = JSON.parse(proofs) as WalletProof[];

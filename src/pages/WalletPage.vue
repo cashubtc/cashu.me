@@ -613,14 +613,14 @@ export default {
 
     // startup tasks
 
+    // debug console
+    useUiStore().enableDebugConsole();
+
     // migrate to dexie
-    this.migrateToDexie();
+    await this.migrateToDexie();
 
     // check local storage
     this.checkLocalStorage();
-
-    // // Local storage sync hook
-    // this.registerLocalStorageSyncHook();
 
     // PWA install hook
     this.registerPWAEventHook();
@@ -647,9 +647,6 @@ export default {
 
     // reconnect all websockets
     this.checkPendingInvoices();
-
-    // debug console
-    useUiStore().enableDebugConsole();
   },
 };
 </script>
