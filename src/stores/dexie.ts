@@ -2,6 +2,9 @@ import { defineStore } from "pinia";
 import Dexie, { Table } from "dexie";
 import { useLocalStorage } from "@vueuse/core";
 import { WalletProof } from "./mints";
+import { useStorageStore } from "./storage";
+import { useProofsStore } from "./proofs";
+import { notifyError, notifySuccess } from "../js/notify";
 
 // export interface Proof {
 //   id: string
@@ -31,23 +34,27 @@ export const useDexieStore = defineStore("dexie", {
   }),
   getters: {},
   actions: {
-    migrateToDexie: function () {
+    migrateToDexie: async function () {
+      const proofsStore = useProofsStore();
       if (this.migratedToDexie) {
         return;
       }
       console.log("Migrating to Dexie");
-      // get all proofs from localstorage and migrate them to Dexie
+      await useStorageStore().exportWalletState();
+      // migrate proofs from localstorage to Dexie
       const proofs = localStorage.getItem("cashu.proofs");
+      let parsedProofs: WalletProof[] = [];
       if (proofs) {
-        const parsedProofs = JSON.parse(proofs) as WalletProof[];
+        parsedProofs = JSON.parse(proofs) as WalletProof[];
         parsedProofs.forEach((proof) => {
           cashuDb.proofs.add(proof);
         });
       }
       console.log(`Migrated ${cashuDb.proofs.count()} proofs`);
       this.migratedToDexie = true;
-      // remove localstorage "cashu.proofs"
+      // remove proofs from localstorage
       localStorage.removeItem("cashu.proofs");
+      notifySuccess("Database migration complete");
     },
     deleteAllTables: function () {
       cashuDb.proofs.clear();

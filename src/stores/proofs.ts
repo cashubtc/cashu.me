@@ -14,6 +14,9 @@ export const useProofsStore = defineStore("proofs", {
     sumProofs: function (proofs: Proof[]) {
       return proofs.reduce((s, t) => (s += t.amount), 0);
     },
+    getProofs: async function (): Promise<WalletProof[]> {
+      return await cashuDb.proofs.toArray();
+    },
     setReserved: async function (
       proofs: Proof[],
       reserved: boolean = true,

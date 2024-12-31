@@ -7,8 +7,6 @@ import { useTokensStore } from "./tokens";
 import { currentDateStr } from "src/js/utils";
 import { useProofsStore } from "./proofs";
 
-const proofsStore = useProofsStore();
-
 export const useStorageStore = defineStore("storage", {
   state: () => ({
     lastLocalStorageCleanUp: useLocalStorage(
@@ -18,6 +16,7 @@ export const useStorageStore = defineStore("storage", {
   }),
   actions: {
     restoreFromBackup: async function (backup: any) {
+      const proofsStore = useProofsStore();
       if (!backup) {
         notifyError("Unrecognized Backup Format!");
       } else {
@@ -66,8 +65,9 @@ export const useStorageStore = defineStore("storage", {
       downloadLink.style.display = "none";
       document.body.appendChild(downloadLink);
       downloadLink.click();
+      notifySuccess("Wallet backup exported");
     },
-    checkLocalStorage: function () {
+    checkLocalStorage: async function () {
       const needsCleanup = this.checkLocalStorageQuota();
       if (needsCleanup) {
         this.cleanUpLocalStorage(true);
