@@ -64,7 +64,10 @@
         <div class="col-12">
           <ChooseMint />
         </div>
-        <div v-if="enoughtotalUnitBalance" class="row q-mt-lg">
+        <div
+          v-if="enoughtotalUnitBalance || globalMutexLock"
+          class="row q-mt-lg"
+        >
           <q-btn
             unelevated
             rounded

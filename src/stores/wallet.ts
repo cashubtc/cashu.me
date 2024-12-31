@@ -369,10 +369,10 @@ export const useWalletStore = defineStore("wallet", {
         { pubkey: receiverPubkey }
       );
       const proofsStore = useProofsStore();
+      await proofsStore.removeProofs(proofsToSend);
       // note: we do not store sendProofs in the proofs store but
       // expect from the caller to store it in the history
       await proofsStore.addProofs(keepProofs);
-      await proofsStore.removeProofs(proofsToSend);
       return { keepProofs, sendProofs };
     },
     send: async function (
@@ -429,7 +429,14 @@ export const useWalletStore = defineStore("wallet", {
           );
           await proofsStore.addProofs(keepProofs);
           await proofsStore.addProofs(sendProofs);
-          await proofsStore.removeProofs(proofsToSend);
+
+          // make sure we don't delete any proofs that were returned
+          const proofsToSendNotReturned = proofsToSend.filter(
+            (p) => !sendProofs.find((s) => s.secret === p.secret)
+          ).filter(
+            (p) => !keepProofs.find((k) => k.secret === p.secret)
+          );
+          await proofsStore.removeProofs(proofsToSendNotReturned);
         } else if (totalAmount == targetAmount) {
           keepProofs = [];
           sendProofs = proofsToSend;
@@ -511,6 +518,7 @@ export const useWalletStore = defineStore("wallet", {
               proofsWeHave: mintStore.mintUnitProofs(mint, historyToken.unit),
             }
           );
+          await proofsStore.addProofs(proofs);
           this.increaseKeysetCounter(keysetId, proofs.length);
         } catch (error: any) {
           console.error(error);
@@ -519,8 +527,6 @@ export const useWalletStore = defineStore("wallet", {
         }
 
         p2pkStore.setPrivateKeyUsed(privkey);
-        await proofsStore.removeProofs(proofs);
-        await proofsStore.addProofs(proofs);
 
         const outputAmount = proofs.reduce((s, t) => (s += t.amount), 0);
 
@@ -815,8 +821,8 @@ export const useWalletStore = defineStore("wallet", {
         useUiStore().vibrate();
         notifySuccess(
           "Paid " +
-            uIStore.formatCurrency(amount_paid, mintWallet.unit) +
-            " via Lightning"
+          uIStore.formatCurrency(amount_paid, mintWallet.unit) +
+          " via Lightning"
         );
         console.log("#### pay lightning: token paid");
         tokenStore.addPaidToken({
@@ -863,18 +869,6 @@ export const useWalletStore = defineStore("wallet", {
       } finally {
         uIStore.unlockMutex();
       }
-    },
-    getProofState: async function (proofs: Proof[]) {
-      const mintStore = useMintsStore();
-      const enc = new TextEncoder();
-      const Ys = proofs.map((p) =>
-        hashToCurve(enc.encode(p.secret)).toHex(true)
-      );
-      const payload = { Ys: Ys };
-      const { states } = await new CashuMint(mintStore.activeMintUrl).check(
-        payload
-      );
-      return states;
     },
     // /check
     checkProofsSpendable: async function (
@@ -927,74 +921,6 @@ export const useWalletStore = defineStore("wallet", {
         console.error(error);
         notifyApiError(error);
         throw error;
-      }
-    },
-    onTokenPaid: async function (historyToken: HistoryToken) {
-      const sendTokensStore = useSendTokensStore();
-      const uIStore = useUiStore();
-      const tokenJson = token.decode(historyToken.token);
-      const mintStore = useMintsStore();
-      const settingsStore = useSettingsStore();
-      if (!settingsStore.checkSentTokens) {
-        console.log(
-          "settingsStore.checkSentTokens is disabled, skipping token check"
-        );
-        return;
-      }
-      const mint = mintStore.mints.find((m) => m.url === historyToken.mint);
-      if (!mint) {
-        throw new Error("mint not found");
-      }
-      if (
-        !settingsStore.useWebsockets ||
-        !mint.info?.nuts[17]?.supported ||
-        !mint.info?.nuts[17]?.supported.find(
-          (s) =>
-            s.method == "bolt11" &&
-            s.unit == historyToken.unit &&
-            s.commands.indexOf("proof_state") != -1
-        )
-      ) {
-        console.log(
-          "Websockets not supported, kicking off token check worker."
-        );
-        useWorkersStore().checkTokenSpendableWorker(historyToken);
-        return;
-      }
-      try {
-        if (tokenJson == undefined) {
-          throw new Error("no tokens provided.");
-        }
-        const proofs = token.getProofs(tokenJson);
-        const oneProof = [proofs[0]];
-        this.activeWebsocketConnections++;
-        uIStore.triggerActivityOrb();
-        const unsub = await this.wallet.onProofStateUpdates(
-          oneProof,
-          async (proofState: ProofState) => {
-            console.log(`Websocket: proof state updated: ${proofState.state}`);
-            if (proofState.state == CheckStateEnum.SPENT) {
-              const tokenSpent = await this.checkTokenSpendable(historyToken);
-              if (tokenSpent) {
-                sendTokensStore.showSendTokens = false;
-                unsub();
-              }
-            }
-          },
-          async (error: any) => {
-            console.error(error);
-            notifyApiError(error);
-            throw error;
-          }
-        );
-      } catch (error) {
-        console.error(
-          "Error in websocket subscription. Starting invoices worker.",
-          error
-        );
-        useWorkersStore().checkTokenSpendableWorker(historyToken);
-      } finally {
-        this.activeWebsocketConnections--;
       }
     },
     checkTokenSpendable: async function (
@@ -1066,10 +992,10 @@ export const useWalletStore = defineStore("wallet", {
         const proofStore = useProofsStore();
         notifySuccess(
           "Sent " +
-            uIStore.formatCurrency(
-              proofStore.sumProofs(spentProofs),
-              historyToken.unit
-            )
+          uIStore.formatCurrency(
+            proofStore.sumProofs(spentProofs),
+            historyToken.unit
+          )
         );
       } else {
         console.log("### token not paid yet");
@@ -1079,6 +1005,179 @@ export const useWalletStore = defineStore("wallet", {
         return false;
       }
       return true;
+    },
+    checkInvoice: async function (
+      quote: string,
+      verbose = true,
+      hideInvoiceDetailsOnMint = true
+    ) {
+      const uIStore = useUiStore();
+      uIStore.triggerActivityOrb();
+      const mintStore = useMintsStore();
+      const invoice = this.invoiceHistory.find((i) => i.quote === quote);
+      if (!invoice) {
+        throw new Error("invoice not found");
+      }
+      const mintWallet = this.mintWallet(invoice.mint, invoice.unit);
+      const mint = mintStore.mints.find((m) => m.url === invoice.mint);
+      if (!mint) {
+        throw new Error("mint not found");
+      }
+      try {
+        // check the state first
+        const state = (await mintWallet.checkMintQuote(quote)).state;
+        if (state == MintQuoteState.ISSUED) {
+          this.setInvoicePaid(invoice.quote);
+          return;
+        }
+        if (state != MintQuoteState.PAID) {
+          console.log("### mintQuote not paid yet");
+          if (verbose) {
+            notify("Invoice still pending");
+          }
+          throw new Error(`invoice state not paid: ${state}`);
+        }
+        const proofs = await this.mint(invoice, verbose);
+        if (hideInvoiceDetailsOnMint) {
+          uIStore.showInvoiceDetails = false;
+        }
+        useUiStore().vibrate();
+        notifySuccess(
+          "Received " +
+          uIStore.formatCurrency(invoice.amount, invoice.unit) +
+          " via Lightning"
+        );
+        return proofs;
+      } catch (error) {
+        // if (verbose) {
+        //   notify("Invoice still pending");
+        // }
+        console.log("Invoice still pending", invoice.quote);
+        throw error;
+      }
+    },
+    checkOutgoingInvoice: async function (quote: string, verbose = true) {
+      const uIStore = useUiStore();
+      const mintStore = useMintsStore();
+      const invoice = this.invoiceHistory.find((i) => i.quote === quote);
+      if (!invoice) {
+        throw new Error("invoice not found");
+      }
+      const mintWallet = this.mintWallet(invoice.mint, invoice.unit);
+      const mint = mintStore.mints.find((m) => m.url === invoice.mint);
+      if (!mint) {
+        throw new Error("mint not found");
+      }
+      const proofs: Proof[] = await proofsStore.getProofsForQuote(quote);
+      try {
+        // this is an outgoing invoice, we first do a getMintQuote to check if the invoice is paid
+        const mintQuote = await mintWallet.mint.checkMeltQuote(quote);
+        if (mintQuote.state == MeltQuoteState.PENDING) {
+          console.log("### mintQuote not paid yet");
+          if (verbose) {
+            notify("Invoice still pending");
+          }
+          throw new Error("invoice not paid yet.");
+        } else if (mintQuote.state == MeltQuoteState.UNPAID) {
+          // we assume that the payment failed and we unset the proofs as reserved
+          await useProofsStore().setReserved(proofs, false);
+          this.removeOutgoingInvoiceFromHistory(quote);
+          notifyWarning("Lightning payment failed");
+        } else if (mintQuote.state == MeltQuoteState.PAID) {
+          // if the invoice is paid, we check if all proofs are spent and if so, we invalidate them and set the invoice state in the history to "paid"
+          const spentProofs = await this.checkProofsSpendable(
+            proofs,
+            mintWallet,
+            true
+          );
+          if (spentProofs != undefined && spentProofs.length == proofs.length) {
+            useUiStore().vibrate();
+            notifySuccess(
+              "Sent " +
+              uIStore.formatCurrency(
+                useProofsStore().sumProofs(proofs),
+                invoice.unit
+              )
+            );
+          }
+          // set invoice in history to paid
+          this.setInvoicePaid(quote);
+        }
+      } catch (error: any) {
+        if (verbose) {
+          notifyApiError(error);
+        }
+        console.log("Could not check quote", invoice.quote, error);
+        throw error;
+      }
+    },
+    onTokenPaid: async function (historyToken: HistoryToken) {
+      const sendTokensStore = useSendTokensStore();
+      const uIStore = useUiStore();
+      const tokenJson = token.decode(historyToken.token);
+      const mintStore = useMintsStore();
+      const settingsStore = useSettingsStore();
+      if (!settingsStore.checkSentTokens) {
+        console.log(
+          "settingsStore.checkSentTokens is disabled, skipping token check"
+        );
+        return;
+      }
+      const mint = mintStore.mints.find((m) => m.url === historyToken.mint);
+      if (!mint) {
+        throw new Error("mint not found");
+      }
+      if (
+        !settingsStore.useWebsockets ||
+        !mint.info?.nuts[17]?.supported ||
+        !mint.info?.nuts[17]?.supported.find(
+          (s) =>
+            s.method == "bolt11" &&
+            s.unit == historyToken.unit &&
+            s.commands.indexOf("proof_state") != -1
+        )
+      ) {
+        console.log(
+          "Websockets not supported, kicking off token check worker."
+        );
+        useWorkersStore().checkTokenSpendableWorker(historyToken);
+        return;
+      }
+      try {
+        if (tokenJson == undefined) {
+          throw new Error("no tokens provided.");
+        }
+        const proofs = token.getProofs(tokenJson);
+        const oneProof = [proofs[0]];
+        this.activeWebsocketConnections++;
+        uIStore.triggerActivityOrb();
+        const unsub = await this.wallet.onProofStateUpdates(
+          oneProof,
+          async (proofState: ProofState) => {
+            console.log(`Websocket: proof state updated: ${proofState.state}`);
+            if (proofState.state == CheckStateEnum.SPENT) {
+              const tokenSpent = await this.checkTokenSpendable(historyToken);
+              if (tokenSpent) {
+                sendTokensStore.showSendTokens = false;
+                unsub();
+              }
+            }
+          },
+          async (error: any) => {
+            console.error(error);
+            notifyApiError(error);
+            throw error;
+          }
+        );
+      } catch (error) {
+        console.error(
+          "Error in websocket subscription. Starting invoices worker.",
+          error
+        );
+        useWorkersStore().checkTokenSpendableWorker(historyToken);
+      } finally {
+        this.activeWebsocketConnections--;
+      }
     },
     mintOnPaid: async function (
       quote: string,
@@ -1151,8 +1250,8 @@ export const useWalletStore = defineStore("wallet", {
             useUiStore().vibrate();
             notifySuccess(
               "Received " +
-                uIStore.formatCurrency(invoice.amount, invoice.unit) +
-                " via Lightning"
+              uIStore.formatCurrency(invoice.amount, invoice.unit) +
+              " via Lightning"
             );
             unsub();
             return proofs;
@@ -1169,111 +1268,6 @@ export const useWalletStore = defineStore("wallet", {
         console.log("Error in websocket subscription", error);
       } finally {
         this.activeWebsocketConnections--;
-      }
-    },
-    checkInvoice: async function (
-      quote: string,
-      verbose = true,
-      hideInvoiceDetailsOnMint = true
-    ) {
-      const uIStore = useUiStore();
-      uIStore.triggerActivityOrb();
-      const mintStore = useMintsStore();
-      const invoice = this.invoiceHistory.find((i) => i.quote === quote);
-      if (!invoice) {
-        throw new Error("invoice not found");
-      }
-      const mintWallet = this.mintWallet(invoice.mint, invoice.unit);
-      const mint = mintStore.mints.find((m) => m.url === invoice.mint);
-      if (!mint) {
-        throw new Error("mint not found");
-      }
-      try {
-        // check the state first
-        const state = (await mintWallet.checkMintQuote(quote)).state;
-        if (state == MintQuoteState.ISSUED) {
-          this.setInvoicePaid(invoice.quote);
-          return;
-        }
-        if (state != MintQuoteState.PAID) {
-          console.log("### mintQuote not paid yet");
-          if (verbose) {
-            notify("Invoice still pending");
-          }
-          throw new Error(`invoice state not paid: ${state}`);
-        }
-        const proofs = await this.mint(invoice, verbose);
-        if (hideInvoiceDetailsOnMint) {
-          uIStore.showInvoiceDetails = false;
-        }
-        useUiStore().vibrate();
-        notifySuccess(
-          "Received " +
-            uIStore.formatCurrency(invoice.amount, invoice.unit) +
-            " via Lightning"
-        );
-        return proofs;
-      } catch (error) {
-        // if (verbose) {
-        //   notify("Invoice still pending");
-        // }
-        console.log("Invoice still pending", invoice.quote);
-        throw error;
-      }
-    },
-    checkOutgoingInvoice: async function (quote: string, verbose = true) {
-      const uIStore = useUiStore();
-      const mintStore = useMintsStore();
-      const invoice = this.invoiceHistory.find((i) => i.quote === quote);
-      if (!invoice) {
-        throw new Error("invoice not found");
-      }
-      const mintWallet = this.mintWallet(invoice.mint, invoice.unit);
-      const mint = mintStore.mints.find((m) => m.url === invoice.mint);
-      if (!mint) {
-        throw new Error("mint not found");
-      }
-      const proofs: Proof[] = await proofsStore.getProofsForQuote(quote);
-      try {
-        // this is an outgoing invoice, we first do a getMintQuote to check if the invoice is paid
-        const mintQuote = await mintWallet.mint.checkMeltQuote(quote);
-        if (mintQuote.state == MeltQuoteState.PENDING) {
-          console.log("### mintQuote not paid yet");
-          if (verbose) {
-            notify("Invoice still pending");
-          }
-          throw new Error("invoice not paid yet.");
-        } else if (mintQuote.state == MeltQuoteState.UNPAID) {
-          // we assume that the payment failed and we unset the proofs as reserved
-          await useProofsStore().setReserved(proofs, false);
-          this.removeOutgoingInvoiceFromHistory(quote);
-          notifyWarning("Lightning payment failed");
-        } else if (mintQuote.state == MeltQuoteState.PAID) {
-          // if the invoice is paid, we check if all proofs are spent and if so, we invalidate them and set the invoice state in the history to "paid"
-          const spentProofs = await this.checkProofsSpendable(
-            proofs,
-            mintWallet,
-            true
-          );
-          if (spentProofs != undefined && spentProofs.length == proofs.length) {
-            useUiStore().vibrate();
-            notifySuccess(
-              "Sent " +
-                uIStore.formatCurrency(
-                  useProofsStore().sumProofs(proofs),
-                  invoice.unit
-                )
-            );
-          }
-          // set invoice in history to paid
-          this.setInvoicePaid(quote);
-        }
-      } catch (error: any) {
-        if (verbose) {
-          notifyApiError(error);
-        }
-        console.log("Could not check quote", invoice.quote, error);
-        throw error;
       }
     },
     ////////////// UI HELPERS //////////////
