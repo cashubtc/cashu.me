@@ -40,21 +40,25 @@ export const useDexieStore = defineStore("dexie", {
         return;
       }
       console.log("Migrating to Dexie");
-      await useStorageStore().exportWalletState();
-      // migrate proofs from localstorage to Dexie
       const proofs = localStorage.getItem("cashu.proofs");
       let parsedProofs: WalletProof[] = [];
-      if (proofs) {
-        parsedProofs = JSON.parse(proofs) as WalletProof[];
-        parsedProofs.forEach((proof) => {
-          cashuDb.proofs.add(proof);
-        });
+      if (!proofs) {
+        return;
       }
-      console.log(`Migrated ${cashuDb.proofs.count()} proofs`);
+      parsedProofs = JSON.parse(proofs) as WalletProof[];
+      if (!parsedProofs) {
+        return;
+      }
+      // start migration
+      await useStorageStore().exportWalletState();
+      parsedProofs.forEach((proof) => {
+        cashuDb.proofs.add(proof);
+      });
+      console.log(`Migrated ${cashuDb.proofs.count()} proofs. Before: ${parsedProofs.length} proofs, After: ${(await proofsStore.getProofs()).length} proofs`);
+      console.log(`Proofs sum before: ${proofsStore.sumProofs(parsedProofs)}, after: ${proofsStore.sumProofs(await proofsStore.getProofs())}`);
       this.migratedToDexie = true;
       // remove proofs from localstorage
       localStorage.removeItem("cashu.proofs");
-      notifySuccess("Database migration complete");
     },
     deleteAllTables: function () {
       cashuDb.proofs.clear();
