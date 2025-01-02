@@ -54,8 +54,16 @@ export const useDexieStore = defineStore("dexie", {
       parsedProofs.forEach((proof) => {
         cashuDb.proofs.add(proof);
       });
-      console.log(`Migrated ${cashuDb.proofs.count()} proofs. Before: ${parsedProofs.length} proofs, After: ${(await proofsStore.getProofs()).length} proofs`);
-      console.log(`Proofs sum before: ${proofsStore.sumProofs(parsedProofs)}, after: ${proofsStore.sumProofs(await proofsStore.getProofs())}`);
+      console.log(
+        `Migrated ${cashuDb.proofs.count()} proofs. Before: ${
+          parsedProofs.length
+        } proofs, After: ${(await proofsStore.getProofs()).length} proofs`
+      );
+      console.log(
+        `Proofs sum before: ${proofsStore.sumProofs(
+          parsedProofs
+        )}, after: ${proofsStore.sumProofs(await proofsStore.getProofs())}`
+      );
       this.migratedToDexie = true;
       // remove proofs from localstorage
       localStorage.removeItem("cashu.proofs");
