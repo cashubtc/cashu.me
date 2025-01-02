@@ -1,4 +1,4 @@
-import { defineStore } from "pinia";
+import { defineStore, StoreDefinition } from "pinia";
 import { useLocalStorage } from "@vueuse/core";
 import { useWorkersStore } from "./workers";
 import { notifyApiError, notifyError, notifySuccess } from "src/js/notify";
@@ -16,6 +16,7 @@ import { useUiStore } from "./ui";
 import { cashuDb } from "src/stores/dexie";
 import { liveQuery } from "dexie";
 import { ref, computed, watch } from "vue";
+import { useProofsStore } from "./proofs";
 
 export type Mint = {
   url: string;
@@ -35,8 +36,8 @@ export class MintClass {
     return new CashuMint(this.mint.url);
   }
   get proofs() {
-    const mintStore = useMintsStore();
-    return mintStore.proofs.filter((p) =>
+    const proofsStore = useProofsStore();
+    return proofsStore.proofs.filter((p) =>
       this.mint.keysets.map((k) => k.id).includes(p.id)
     );
   }
@@ -63,9 +64,10 @@ export class MintClass {
     return this.mint.keysets.filter((k) => k.unit === unit);
   }
 
-  unitProofs(unit: string) {
+  unitProofs(unit: string): WalletProof[] {
+    const proofsStore = useProofsStore()
     const unitKeysets = this.unitKeysets(unit);
-    return this.proofs.filter(
+    return proofsStore.proofs.filter(
       (p) => unitKeysets.map((k) => k.id).includes(p.id) && !p.reserved
     );
   }
@@ -94,7 +96,7 @@ type BlindSignatureAudit = {
 export const useMintsStore = defineStore("mints", {
   state: () => {
     // State variables
-    const proofs = ref<WalletProof[]>([]);
+    // const proofs = ref<WalletProof[]>([]);
     const activeProofs = ref<WalletProof[]>([]);
     const activeUnit = useLocalStorage<string>("cashu.activeUnit", "sat");
     const activeMintUrl = useLocalStorage<string>("cashu.activeMintUrl", "");
@@ -109,47 +111,50 @@ export const useMintsStore = defineStore("mints", {
     const showMintInfoDialog = ref(false);
     const showMintInfoData = ref({} as Mint);
 
-    liveQuery(() => cashuDb.proofs.toArray()).subscribe({
-      next: (newProofs) => {
-        proofs.value = newProofs;
-        updateActiveProofs();
-      },
-      error: (err) => {
-        console.error(err);
-      },
-    });
+    const uiStoreGlobal: any = useUiStore();
 
-    // Function to update activeProofs
-    const updateActiveProofs = () => {
-      const currentMint = mints.value.find(
-        (m) => m.url === activeMintUrl.value
-      );
-      if (!currentMint) {
-        activeProofs.value = [];
-        return;
-      }
+    // liveQuery(() => cashuDb.proofs.toArray()).subscribe({
+    //   next: (newProofs) => {
+    //     proofs.value = newProofs;
+    //     updateActiveProofs();
+    //   },
+    //   error: (err) => {
+    //     console.error(err);
+    //   },
+    // });
 
-      const unitKeysets = currentMint?.keysets?.filter(
-        (k) => k.unit === activeUnit.value
-      );
-      if (!unitKeysets || unitKeysets.length === 0) {
-        activeProofs.value = [];
-        return;
-      }
+    // // Function to update activeProofs
+    // const updateActiveProofs = () => {
+    //   const currentMint = mints.value.find(
+    //     (m) => m.url === activeMintUrl.value
+    //   );
+    //   if (!currentMint) {
+    //     activeProofs.value = [];
+    //     return;
+    //   }
 
-      const keysetIds = unitKeysets.map((k) => k.id);
-      activeProofs.value = proofs.value
-        .filter((p) => keysetIds.includes(p.id))
-        .filter((p) => !p.reserved);
-    };
+    //   const unitKeysets = currentMint?.keysets?.filter(
+    //     (k) => k.unit === activeUnit.value
+    //   );
+    //   if (!unitKeysets || unitKeysets.length === 0) {
+    //     activeProofs.value = [];
+    //     return;
+    //   }
+
+    //   const keysetIds = unitKeysets.map((k) => k.id);
+    //   activeProofs.value = proofs.value
+    //     .filter((p) => keysetIds.includes(p.id))
+    //     .filter((p) => !p.reserved);
+    // };
 
     // Watch for changes in activeMintUrl and activeUnit
-    watch([activeMintUrl, activeUnit], () => {
-      updateActiveProofs();
+    watch([activeMintUrl, activeUnit], async () => {
+      const proofsStore = useProofsStore();
+      console.log(`watcher: activeMintUrl: ${activeMintUrl.value}, activeUnit: ${activeUnit.value}`);
+      await proofsStore.updateActiveProofs();
     });
 
     return {
-      proofs,
       activeProofs,
       activeUnit,
       activeMintUrl,
@@ -160,18 +165,21 @@ export const useMintsStore = defineStore("mints", {
       showRemoveMintDialog,
       showMintInfoDialog,
       showMintInfoData,
+      uiStoreGlobal,
     };
   },
   getters: {
     totalUnitBalance({ activeUnit }): number {
+      const proofsStore = useProofsStore();
       const allUnitKeysets = this.mints
         .map((m) => m.keysets)
         .flat()
         .filter((k) => k.unit === activeUnit);
-      const balance = this.proofs
+      const balance = proofsStore.proofs
         .filter((p) => allUnitKeysets.map((k) => k.id).includes(p.id))
         .filter((p) => !p.reserved)
         .reduce((sum, p) => sum + p.amount, 0);
+      this.uiStoreGlobal.lastBalanceCached = balance;
       return balance;
     },
     activeBalance(): number {
@@ -243,8 +251,9 @@ export const useMintsStore = defineStore("mints", {
       }
     },
     mintUnitProofs(mint: Mint, unit: string): WalletProof[] {
+      const proofsStore = useProofsStore();
       const unitKeysets = mint.keysets.filter((k) => k.unit === unit);
-      return this.proofs.filter(
+      return proofsStore.proofs.filter(
         (p) => unitKeysets.map((k) => k.id).includes(p.id) && !p.reserved
       );
     },
@@ -416,7 +425,7 @@ export const useMintsStore = defineStore("mints", {
         console.error(error);
         try {
           // notifyApiError(error, "Could not get mint info");
-        } catch {}
+        } catch { }
         throw error;
       }
     },
@@ -456,7 +465,7 @@ export const useMintsStore = defineStore("mints", {
         console.error(error);
         try {
           // notifyApiError(error, "Could not get mint keys");
-        } catch {}
+        } catch { }
         throw error;
       }
     },
@@ -470,7 +479,7 @@ export const useMintsStore = defineStore("mints", {
         console.error(error);
         try {
           // notifyApiError(error, "Could not get mint keysets");
-        } catch {}
+        } catch { }
         throw error;
       }
     },

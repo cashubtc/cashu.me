@@ -173,7 +173,7 @@ export default defineComponent({
     ...mapState(useUiStore, ["globalMutexLock"]),
     ...mapState(usePriceStore, ["bitcoinPrice"]),
     ...mapWritableState(useMintsStore, ["activeUnit"]),
-    ...mapWritableState(useUiStore, ["hideBalance"]),
+    ...mapWritableState(useUiStore, ["hideBalance", "lastBalanceCached"]),
     pendingBalance: function () {
       return -this.historyTokens
         .filter((t) => t.status == "pending")
@@ -191,6 +191,9 @@ export default defineComponent({
       return [].concat(...this.mints.map((m) => m.keysets));
     },
     getTotalBalance: function () {
+      // if (this.totalUnitBalance == 0 && this.lastBalanceCached) {
+      //   return this.lastBalanceCached;
+      // }
       return this.totalUnitBalance;
     },
     getActiveBalance: function () {

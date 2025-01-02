@@ -1,3 +1,4 @@
+import { ref } from "vue";
 import { defineStore } from "pinia";
 import { useMintsStore, WalletProof } from "./mints";
 import { cashuDb, CashuDexie, useDexieStore } from "./dexie";
@@ -7,9 +8,53 @@ import {
   getEncodedTokenV4,
   Token,
 } from "@cashu/cashu-ts";
+import { liveQuery } from "dexie";
 
 export const useProofsStore = defineStore("proofs", {
-  state: () => ({}),
+  state: () => {
+    const proofs = ref<WalletProof[]>([]);
+
+    liveQuery(() => cashuDb.proofs.toArray()).subscribe({
+      next: (newProofs) => {
+        proofs.value = newProofs;
+        updateActiveProofs();
+      },
+      error: (err) => {
+        console.error(err);
+      },
+    });
+
+    // Function to update activeProofs
+    const updateActiveProofs = async () => {
+      const mintStore = useMintsStore();
+      const currentMint = mintStore.mints.find(
+        (m) => m.url === mintStore.activeMintUrl
+      );
+      if (!currentMint) {
+        mintStore.activeProofs = [];
+        return;
+      }
+
+      const unitKeysets = currentMint?.keysets?.filter(
+        (k) => k.unit === mintStore.activeUnit
+      );
+      if (!unitKeysets || unitKeysets.length === 0) {
+        mintStore.activeProofs = [];
+        return;
+      }
+
+      const keysetIds = unitKeysets.map((k) => k.id);
+      const activeProofs = await cashuDb.proofs.where("id").anyOf(keysetIds).toArray().then((proofs) => {
+        return proofs.filter((p) => !p.reserved);
+      });
+      mintStore.activeProofs = activeProofs;
+    };
+
+    return {
+      proofs,
+      updateActiveProofs,
+    };
+  },
   actions: {
     sumProofs: function (proofs: Proof[]) {
       return proofs.reduce((s, t) => (s += t.amount), 0);

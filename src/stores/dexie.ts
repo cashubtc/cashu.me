@@ -43,10 +43,14 @@ export const useDexieStore = defineStore("dexie", {
       const proofs = localStorage.getItem("cashu.proofs");
       let parsedProofs: WalletProof[] = [];
       if (!proofs) {
+        console.log("No cashu.proofs in localStorage to migrate");
+        this.migratedToDexie = true;
         return;
       }
       parsedProofs = JSON.parse(proofs) as WalletProof[];
-      if (!parsedProofs) {
+      if (!parsedProofs.length) {
+        console.log("No proofs to migrate");
+        this.migratedToDexie = true;
         return;
       }
       // start migration
@@ -55,8 +59,7 @@ export const useDexieStore = defineStore("dexie", {
         cashuDb.proofs.add(proof);
       });
       console.log(
-        `Migrated ${cashuDb.proofs.count()} proofs. Before: ${
-          parsedProofs.length
+        `Migrated ${cashuDb.proofs.count()} proofs. Before: ${parsedProofs.length
         } proofs, After: ${(await proofsStore.getProofs()).length} proofs`
       );
       console.log(
