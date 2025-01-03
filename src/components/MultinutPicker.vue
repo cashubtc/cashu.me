@@ -6,7 +6,7 @@
         <q-item>
           <q-item-section>
             <q-item-label overline class="text-weight-bold">
-              Mutlinut payment
+              Multinut payment
             </q-item-label>
             <q-item-label caption>
               Select one or multiple mints to execute a payment from.
@@ -19,13 +19,13 @@
     <!-- List of mints with checkboxes -->
     <div class="q-pb-md q-px-xs text-left" on-left>
       <q-list padding>
-        <div v-for="mint in mints" :key="mint.url">
+        <div v-for="mint in multiMints" :key="mint.url">
           <q-item clickable class="q-pb-xs">
             <q-item-section avatar>
               <q-checkbox
                 v-model="selectedMints"
-                :val="mint.url"
-                :color="selectedMints.includes(mint.url) ? 'primary' : 'grey'"
+                :val="mint"
+                :color="selectedMints.includes(mint) ? 'primary' : 'grey'"
                 class="cursor-pointer"
               />
             </q-item-section>
@@ -71,7 +71,7 @@
         color="primary"
         :disabled="selectedMints.length === 0"
         @click="quoteSelectedMints"
-        label="Quote"
+        label="Multi-Mint Pay"
         :loading="quoteButtonLoading"
         class="q-px-lg"
       />
@@ -84,6 +84,7 @@ import { defineComponent } from "vue";
 import { mapActions, mapState, mapWritableState } from "pinia";
 import { useMintsStore, MintClass } from "src/stores/mints";
 import { useWalletStore } from "src/stores/wallet";
+import { notifyError } from "src/js/notify";
 
 export default defineComponent({
   name: "MultinutView",
@@ -95,51 +96,86 @@ export default defineComponent({
   },
   computed: {
     ...mapWritableState(useWalletStore, ["payInvoiceData"]),
-    ...mapState(useMintsStore, ["mints", "activeUnit"]),
+    ...mapState(useMintsStore, ["mints", "activeUnit", "multiMints"]),
     totalSelectedBalance() {
-      return this.selectedMints.reduce((total, mintUrl) => {
-        const mint = this.mints.find((m) => m.url === mintUrl);
-        if (mint) {
-          const mintInstance = this.mintClass(mint);
-          return total + mintInstance.unitBalance(this.activeUnit);
-        }
-        return total;
+      return this.selectedMints.reduce((total, mint) => {
+        const mintInstance = this.mintClass(mint);
+        return total + mintInstance.unitBalance(this.activeUnit);
       }, 0);
     },
   },
   methods: {
     ...mapActions(useWalletStore, ["meltQuote", "melt"]),
-    ...mapActions(useMintsStore, ["activateMintUrl"]),
+    ...mapActions(useMintsStore, ["activateMintUrl", "proofsForMintAndUnit"]),
     mintClass(mint) {
       return new MintClass(mint);
     },
+    multiMintBalance: function (selectedMints, unit) {
+      // returns:
+      // * the overall balance of all mints supporting NUT-15 for a particular method and unit
+      // * array of weights (share of how much each mint influences the overall balance)
+      const multiMints = selectedMints;
+      const mintBalances = [];
+      const overallBalance = multiMints.reduce((sum, m) => {
+        const mint = new MintClass(m);
+        const mintBalance = mint.unitBalance(unit);
+        mintBalances.push(mintBalance);
+        return sum + mintBalance;
+      }, 0);
+      const weights = mintBalances.map((b) => b / overallBalance);
+      return { overallBalance: overallBalance, weights: weights };
+    },
     quoteSelectedMints: async function () {
-      const totalQuoteAmount = this.payInvoiceData.meltQuote.response.amount;
-      const nSelectedMints = this.selectedMints.length;
-      const amountPerMint = totalQuoteAmount / nSelectedMints;
-      let quotesArray = [];
-      for (const mintUrl of this.selectedMints) {
-        console.log(`Quoting mint: ${mintUrl}`);
+      const totalQuoteAmount = this.payInvoiceData.invoice.sat;
+      const activeUnit = useMintsStore().activeUnit;
+      const { overallBalance, weights } = this.multiMintBalance(
+        this.selectedMints,
+        activeUnit
+      );
+      if (totalQuoteAmount >= overallBalance) {
+        console.error("multi-mint balance not enough to satisfy this invoice");
+        notifyError("multi-mint balance not enough to satisfy this invoice");
+        return;
+      }
+      let mintAndQuotesArray = [];
+      let carry = 0.0;
+      this.selectedMints.forEach(async (mint, i) => {
+        console.log(`Quoting mint: ${mint.url}`);
         const mintWallet = useWalletStore().mintWallet(
-          mintUrl,
+          mint.url,
           useMintsStore().activeUnit
         );
         // await this.activateMintUrl(mintUrl);
-        this.payInvoiceData.input.amount = amountPerMint;
-        const quote = await this.meltQuote(
-          mintWallet,
-          this.payInvoiceData.input.request,
-          amountPerMint
+        const partialAmountFloat = totalQuoteAmount * weights[i] + carry;
+        const partialAmount = Math.round(partialAmountFloat);
+        carry = partialAmountFloat - partialAmount;
+        if (partialAmount > 0) {
+          const quote = await this.meltQuote(
+            mintWallet,
+            this.payInvoiceData.input.request,
+            partialAmount
+          );
+          console.log(quote);
+          mintAndQuotesArray.push([mint.url, quote]);
+        }
+      });
+      try {
+        await Promise.all(
+          mintAndQuotesArray.map(([mint, quote]) => {
+            console.log("ciao");
+            const mintWallet = useWalletStore().mintWallet(
+              mint.url,
+              activeUnit
+            );
+
+            const proofs = this.proofsForMintAndUnit(activeUnit, mint);
+            return this.melt(proofs, quote, mintWallet);
+          })
         );
-        console.log(quote);
-        quotesArray.push(quote);
+      } catch (error) {
+        notifyError(`${error}`);
+        console.error(`${error}`);
       }
-      // for (let i = 0; i < nSelectedMints; i++) {
-      //   console.log(`Paying mint: ${this.selectedMints[i]}`);
-      //   await this.activateMintUrl(this.selectedMints[i]);
-      //   this.payInvoiceData.meltQuote.response = quotesArray[i];
-      //   await this.melt();
-      // }
     },
   },
 });

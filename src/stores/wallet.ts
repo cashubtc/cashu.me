@@ -138,7 +138,12 @@ export const useWalletStore = defineStore("wallet", {
           amount: undefined,
           comment: "",
           quote: "",
-        } as { request: string, amount: number | undefined, comment: string, quote: string },
+        } as {
+          request: string;
+          amount: number | undefined;
+          comment: string;
+          quote: string;
+        },
       },
     };
   },
@@ -183,7 +188,7 @@ export const useWalletStore = defineStore("wallet", {
       const wallet = new CashuWallet(mint, {
         keys: storedMint.keys,
         keysets: storedMint.keysets,
-        mintInfo: storedMint.info,
+        //mintInfo: storedMint.info,
         bip39seed: bip39Seed,
         unit: unit,
       });
@@ -708,9 +713,14 @@ export const useWalletStore = defineStore("wallet", {
         notifyApiError(error);
         throw error;
       } finally {
+        this.payInvoiceData.blocking = false;
       }
     },
-    meltQuote: async function (wallet: CashuWallet, request: string, mpp_amount: number | undefined = undefined): Promise<MeltQuoteResponse> {
+    meltQuote: async function (
+      wallet: CashuWallet,
+      request: string,
+      mpp_amount: number | undefined = undefined
+    ): Promise<MeltQuoteResponse> {
       // const payload: MeltQuotePayload = {
       //   unit: mintStore.activeUnit,
       //   request: this.payInvoiceData.input.request,
@@ -719,11 +729,13 @@ export const useWalletStore = defineStore("wallet", {
       // const data = await mintStore.activeMint().api.createMeltQuote(payload);
       // const data = await this.wallet.createMeltQuote(this.payInvoiceData.input.request, { mpp_amount: this.payInvoiceData.input.amount });
       const mintStore = useMintsStore();
-      let options = {};
+      let data;
       if (mpp_amount) {
-        options = { mpp: { amount: mpp_amount } };
+        data = await wallet.createMultiPathMeltQuote(request, mpp_amount);
+      } else {
+        data = await wallet.createMeltQuote(request);
       }
-      const data = await wallet.createMeltQuote(request, options);
+
       mintStore.assertMintError(data);
       return data;
     },
@@ -823,10 +835,18 @@ export const useWalletStore = defineStore("wallet", {
 
         // NOTE: if the user exits the app while we're in the API call, JS will emit an error that we would catch below!
         // We have to handle that case in the catch block below
-        const data = await mintWallet.meltProofs(quote, sendProofs, {
-          keysetId,
-          counter,
-        });
+        uIStore.unlockMutex(); // Momentarely release the mutex (needed for concurrent melts)
+        let data;
+        try {
+          data = await mintWallet.meltProofs(quote, sendProofs, {
+            keysetId,
+            counter,
+          });
+        } catch (error) {
+          throw error;
+        } finally {
+          await uIStore.lockMutex();
+        }
 
         if (data.quote.state != MeltQuoteState.PAID) {
           throw new Error("Invoice not paid.");
@@ -836,8 +856,8 @@ export const useWalletStore = defineStore("wallet", {
 
         notifySuccess(
           "Paid " +
-          uIStore.formatCurrency(amount_paid, mintWallet.unit) +
-          " via Lightning"
+            uIStore.formatCurrency(amount_paid, mintWallet.unit) +
+            " via Lightning"
         );
         console.log("#### pay lightning: token paid");
         // delete spent tokens from db
@@ -1097,10 +1117,10 @@ export const useWalletStore = defineStore("wallet", {
         const proofStore = useProofsStore();
         notifySuccess(
           "Sent " +
-          uIStore.formatCurrency(
-            proofStore.sumProofs(spentProofs),
-            historyToken.unit
-          )
+            uIStore.formatCurrency(
+              proofStore.sumProofs(spentProofs),
+              historyToken.unit
+            )
         );
       } else {
         console.log("### token not paid yet");
@@ -1182,8 +1202,8 @@ export const useWalletStore = defineStore("wallet", {
             useUiStore().vibrate();
             notifySuccess(
               "Received " +
-              uIStore.formatCurrency(invoice.amount, invoice.unit) +
-              " via Lightning"
+                uIStore.formatCurrency(invoice.amount, invoice.unit) +
+                " via Lightning"
             );
             unsub();
             return proofs;
@@ -1240,8 +1260,8 @@ export const useWalletStore = defineStore("wallet", {
         useUiStore().vibrate();
         notifySuccess(
           "Received " +
-          uIStore.formatCurrency(invoice.amount, invoice.unit) +
-          " via Lightning"
+            uIStore.formatCurrency(invoice.amount, invoice.unit) +
+            " via Lightning"
         );
         return proofs;
       } catch (error) {
@@ -1291,10 +1311,10 @@ export const useWalletStore = defineStore("wallet", {
             useUiStore().vibrate();
             notifySuccess(
               "Sent " +
-              uIStore.formatCurrency(
-                useProofsStore().sumProofs(proofs),
-                invoice.unit
-              )
+                uIStore.formatCurrency(
+                  useProofsStore().sumProofs(proofs),
+                  invoice.unit
+                )
             );
           }
           // set invoice in history to paid
