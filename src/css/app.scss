@@ -5,6 +5,14 @@ body {
   overscroll-behavior-y: contain;
 }
 
+// margin for top elements for ios safe area
+body,
+.q-drawer,
+.q-header,
+.q-dialog__inner > div {
+  margin-top: var(--safe-area-inset-top);
+}
+
 .q-dialog__inner > div {
   border-top-left-radius: 0px;
   border-top-right-radius: 0px;
