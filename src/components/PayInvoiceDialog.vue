@@ -328,11 +328,13 @@ export default defineComponent({
     decodeAndQuote: async function (request) {
       await this.decodeRequest(request);
     },
-    pasteToParseDialog: function () {
+    pasteToParseDialog: async function () {
       console.log("pasteToParseDialog");
-      navigator.clipboard.readText().then((text) => {
-        this.payInvoiceData.input.request = text;
-      });
+      const text = await useUiStore().pasteFromClipboard();
+      if (text) {
+        this.payInvoiceData.input.request = text.trim();
+        // await this.decodeAndQuote(text.trim());
+      }
     },
     handleMeltButton: function () {
       if (this.payInvoiceData.blocking) {

@@ -49,7 +49,6 @@ export const useWorkersStore = defineStore("workers", {
           // only without error (invoice paid) will we reach here
           console.log("### stopping invoice check worker");
           this.clearAllWorkers();
-
         } catch (error) {
           console.log("invoiceCheckWorker: not paid yet");
         }

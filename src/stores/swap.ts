@@ -12,8 +12,6 @@ import token from "src/js/token";
  * The tokens store handles everything related to tokens and proofs
  */
 
-
-
 type SwapAmountData = {
   fromUrl: string | undefined;
   toUrl: string | undefined;
@@ -53,13 +51,27 @@ export const useSwapStore = defineStore("swap", {
       try {
         // get invoice
         // await mintStore.activateMintUrl(swapAmountData.toUrl);
-        const toWallet = walletStore.mintWallet(swapAmountData.toUrl, mintStore.activeUnit);
-        const mintQuote = await walletStore.requestMint(swapAmountData.amount, toWallet);
+        const toWallet = walletStore.mintWallet(
+          swapAmountData.toUrl,
+          mintStore.activeUnit
+        );
+        const mintQuote = await walletStore.requestMint(
+          swapAmountData.amount,
+          toWallet
+        );
 
         // pay invoice
-        const fromWallet = walletStore.mintWallet(swapAmountData.fromUrl, mintStore.activeUnit);
-        const meltQuote = await walletStore.meltQuote(fromWallet, mintQuote.request);
-        const mint = mintStore.mints.find((m) => m.url === swapAmountData.fromUrl);
+        const fromWallet = walletStore.mintWallet(
+          swapAmountData.fromUrl,
+          mintStore.activeUnit
+        );
+        const meltQuote = await walletStore.meltQuote(
+          fromWallet,
+          mintQuote.request
+        );
+        const mint = mintStore.mints.find(
+          (m) => m.url === swapAmountData.fromUrl
+        );
         if (!mint) {
           throw new Error("mint not found");
         }
@@ -78,8 +90,8 @@ export const useSwapStore = defineStore("swap", {
     meltToMintFees: function (tokenJson: Token) {
       const proofsStore = useProofsStore();
       const walletStore = useWalletStore();
-      const fromMintUrl = token.getMint(tokenJson)
-      const unit = token.getUnit(tokenJson)
+      const fromMintUrl = token.getMint(tokenJson);
+      const unit = token.getUnit(tokenJson);
       const tokenAmount = proofsStore.sumProofs(token.getProofs(tokenJson));
       let meltAmount = tokenAmount - Math.max(2, tokenAmount * 0.02);
       try {
@@ -87,8 +99,7 @@ export const useSwapStore = defineStore("swap", {
         const fromWallet = walletStore.mintWallet(fromMintUrl, unit);
         const proofs = token.getProofs(tokenJson);
         meltAmount -= fromWallet.getFeesForProofs(proofs);
-      } catch (e) {
-      }
+      } catch (e) {}
       return tokenAmount - meltAmount;
     },
     meltProofsToMint: async function (tokenJson: Token, mint: Mint) {
@@ -103,15 +114,18 @@ export const useSwapStore = defineStore("swap", {
       try {
         const tokenAmount = proofsStore.sumProofs(token.getProofs(tokenJson));
         let meltAmount = tokenAmount - Math.max(2, tokenAmount * 0.02);
-        const unit = token.getUnit(tokenJson)
-        const fromMintUrl = token.getMint(tokenJson)
+        const unit = token.getUnit(tokenJson);
+        const fromMintUrl = token.getMint(tokenJson);
         const fromWallet = walletStore.mintWallet(fromMintUrl, unit);
         const toWallet = walletStore.mintWallet(mint.url, unit);
         const proofs = token.getProofs(tokenJson);
         meltAmount -= fromWallet.getFeesForProofs(proofs);
 
         const mintQuote = await walletStore.requestMint(meltAmount, toWallet);
-        const meltQuote = await walletStore.meltQuote(fromWallet, mintQuote.request);
+        const meltQuote = await walletStore.meltQuote(
+          fromWallet,
+          mintQuote.request
+        );
         await walletStore.melt(proofs, meltQuote, fromWallet);
 
         await walletStore.checkInvoice(mintQuote.quote);
@@ -121,8 +135,6 @@ export const useSwapStore = defineStore("swap", {
       } finally {
         this.swapBlocking = false;
       }
-    }
-
+    },
   },
 });
-

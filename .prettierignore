@@ -1,3 +1,5 @@
 dist
 src-capacitor
 src-cordova
+android
+ios
