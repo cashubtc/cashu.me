@@ -120,7 +120,7 @@ export const useMintsStore = defineStore("mints", {
       return this.mints.filter((m) => {
         try {
           const nut15 = m.info?.nuts[15];
-          const viableMint = nut15?.find(
+          const viableMint = nut15?.methods.find(
             (m) => m.method === "bolt11" && m.unit === activeUnit
           );
           if (viableMint) return true;

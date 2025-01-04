@@ -188,7 +188,7 @@ export const useWalletStore = defineStore("wallet", {
       const wallet = new CashuWallet(mint, {
         keys: storedMint.keys,
         keysets: storedMint.keysets,
-        //mintInfo: storedMint.info,
+        mintInfo: storedMint.info,
         bip39seed: bip39Seed,
         unit: unit,
       });

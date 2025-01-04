@@ -139,7 +139,8 @@ export default defineComponent({
       }
       let mintAndQuotesArray = [];
       let carry = 0.0;
-      this.selectedMints.forEach(async (mint, i) => {
+      let i = 0;
+      for (const mint of this.selectedMints) {
         console.log(`Quoting mint: ${mint.url}`);
         const mintWallet = useWalletStore().mintWallet(
           mint.url,
@@ -156,25 +157,26 @@ export default defineComponent({
             partialAmount
           );
           console.log(quote);
-          mintAndQuotesArray.push([mint.url, quote]);
+          mintAndQuotesArray.push([mint, quote]);
         }
-      });
+        i++;
+      }
       try {
         await Promise.all(
           mintAndQuotesArray.map(([mint, quote]) => {
-            console.log("ciao");
             const mintWallet = useWalletStore().mintWallet(
               mint.url,
               activeUnit
             );
-
-            const proofs = this.proofsForMintAndUnit(activeUnit, mint);
+            const mintClass = new MintClass(mint);
+            const proofs = this.proofsForMintAndUnit(activeUnit, mintClass);
             return this.melt(proofs, quote, mintWallet);
           })
         );
       } catch (error) {
         notifyError(`${error}`);
         console.error(`${error}`);
+        throw error;
       }
     },
   },
