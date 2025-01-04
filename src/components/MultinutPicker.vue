@@ -149,6 +149,7 @@ export default defineComponent({
         // await this.activateMintUrl(mintUrl);
         const partialAmountFloat = totalQuoteAmount * weights[i] + carry;
         const partialAmount = Math.round(partialAmountFloat);
+        console.log(`partialAmount for mint ${mint.url}: ${partialAmount}`);
         carry = partialAmountFloat - partialAmount;
         if (partialAmount > 0) {
           const quote = await this.meltQuote(
