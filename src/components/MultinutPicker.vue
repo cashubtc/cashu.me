@@ -1,81 +1,91 @@
 <template>
   <div style="max-width: 800px; margin: 0 auto">
     <!-- Mints Selection -->
-    <div class="q-px-xs text-left" on-left>
-      <q-list padding>
-        <q-item>
-          <q-item-section>
-            <q-item-label overline class="text-weight-bold">
-              Multinut payment
-            </q-item-label>
-            <q-item-label caption>
-              Select one or multiple mints to execute a payment from.
-            </q-item-label>
-          </q-item-section>
-        </q-item>
-      </q-list>
-    </div>
+    <q-expansion-item class="q-pt-lg" dense dense-toggle>
+      <template v-slot:header>
+        <div class="q-px-xs text-left" on-left>
+          <q-list padding>
+            <q-item>
+              <q-item-section>
+                <q-item-label overline class="text-weight-bold">
+                  Multinut payment
+                </q-item-label>
+                <q-item-label caption>
+                  Select one or multiple mints to execute a payment from.
+                </q-item-label>
+              </q-item-section>
+            </q-item>
+          </q-list>
+        </div>
+      </template>
 
-    <!-- List of mints with checkboxes -->
-    <div class="q-pb-md q-px-xs text-left" on-left>
-      <q-list padding>
-        <div v-for="mint in multiMints" :key="mint.url">
-          <q-item clickable class="q-pb-xs">
-            <q-item-section avatar>
-              <q-checkbox
-                v-model="selectedMints"
-                :val="mint"
-                :color="selectedMints.includes(mint) ? 'primary' : 'grey'"
-                class="cursor-pointer"
-              />
-            </q-item-section>
-            <q-item-section>
-              <q-item-label
-                lines="1"
-                class="cursor-pointer"
-                style="word-break: break-word"
-              >
-                {{ mint.nickname || mint.url }}
-              </q-item-label>
-              <q-item-label>
-                <q-badge
-                  v-for="unit in mintClass(mint).units"
-                  :key="unit"
-                  :color="selectedMints.includes(mint.url) ? 'primary' : 'grey'"
-                  :label="
-                    formatCurrency(mintClass(mint).unitBalance(unit), unit)
-                  "
-                  class="q-mx-xs q-mb-xs"
+      <!-- List of mints with checkboxes -->
+      <div class="q-pb-md q-px-xs text-left" on-left>
+        <q-list padding>
+          <div v-for="mint in multiMints" :key="mint.url">
+            <q-item clickable class="q-pb-xs">
+              <q-item-section avatar>
+                <q-checkbox
+                  v-model="selectedMints"
+                  :val="mint"
+                  :color="selectedMints.includes(mint) ? 'primary' : 'grey'"
+                  class="cursor-pointer"
                 />
+              </q-item-section>
+              <q-item-section>
+                <q-item-label
+                  lines="1"
+                  class="cursor-pointer"
+                  style="word-break: break-word"
+                >
+                  {{ mint.nickname || mint.url }}
+                </q-item-label>
+                <q-item-label>
+                  <q-badge
+                    v-for="unit in mintClass(mint).units"
+                    :key="unit"
+                    :color="
+                      selectedMints.includes(mint.url) ? 'primary' : 'grey'
+                    "
+                    :label="
+                      formatCurrency(mintClass(mint).unitBalance(unit), unit)
+                    "
+                    class="q-mx-xs q-mb-xs"
+                  />
+                </q-item-label>
+              </q-item-section>
+            </q-item>
+            <q-separator spaced />
+          </div>
+          <!-- Total Selected Balance -->
+          <q-item>
+            <q-item-section>
+              <q-item-label overline class="text-weight-bold">
+                Total Selected Balance
+              </q-item-label>
+              <q-item-label caption>
+                {{ formatCurrency(totalSelectedBalance, activeUnit) }}
               </q-item-label>
             </q-item-section>
           </q-item>
-          <q-separator spaced />
-        </div>
-        <!-- Total Selected Balance -->
-        <q-item>
-          <q-item-section>
-            <q-item-label overline class="text-weight-bold">
-              Total Selected Balance
-            </q-item-label>
-            <q-item-label caption>
-              {{ formatCurrency(totalSelectedBalance, activeUnit) }}
-            </q-item-label>
-          </q-item-section>
-        </q-item>
-      </q-list>
-      <!-- button to quote all selected mints -->
-      <q-btn
-        unelevated
-        rounded
-        color="primary"
-        :disabled="selectedMints.length === 0"
-        @click="quoteSelectedMints"
-        label="Multi-Mint Pay"
-        :loading="quoteButtonLoading"
-        class="q-px-lg"
-      />
-    </div>
+        </q-list>
+        <!-- button to quote all selected mints -->
+        <q-btn
+          unelevated
+          rounded
+          color="primary"
+          :disabled="totalSelectedBalance < payInvoiceData.invoice.sat"
+          @click="multiMeltSelectedMints"
+          label="Multi-Mint Pay"
+          :loading="multiMeltButtonLoading"
+          class="q-px-lg"
+        >
+          <template v-slot:loading>
+            <q-spinner-hourglass />
+          </template>
+        </q-btn>
+      </div>
+    </q-expansion-item>
   </div>
 </template>
 
@@ -91,7 +101,8 @@ export default defineComponent({
   mixins: [windowMixin],
   data() {
     return {
-      selectedMints: [],
+      multiMeltButtonLoading: false,
+      selectedMints: useMintsStore().multiMints,
     };
   },
   computed: {
@@ -125,7 +136,7 @@ export default defineComponent({
       const weights = mintBalances.map((b) => b / overallBalance);
       return { overallBalance: overallBalance, weights: weights };
     },
-    quoteSelectedMints: async function () {
+    multiMeltSelectedMints: async function () {
       const totalQuoteAmount = this.payInvoiceData.invoice.sat;
       const activeUnit = useMintsStore().activeUnit;
       const { overallBalance, weights } = this.multiMintBalance(
@@ -140,29 +151,30 @@ export default defineComponent({
       let mintAndQuotesArray = [];
       let carry = 0.0;
       let i = 0;
-      for (const mint of this.selectedMints) {
-        console.log(`Quoting mint: ${mint.url}`);
-        const mintWallet = useWalletStore().mintWallet(
-          mint.url,
-          useMintsStore().activeUnit
-        );
-        // await this.activateMintUrl(mintUrl);
-        const partialAmountFloat = totalQuoteAmount * weights[i] + carry;
-        const partialAmount = Math.round(partialAmountFloat);
-        console.log(`partialAmount for mint ${mint.url}: ${partialAmount}`);
-        carry = partialAmountFloat - partialAmount;
-        if (partialAmount > 0) {
-          const quote = await this.meltQuote(
-            mintWallet,
-            this.payInvoiceData.input.request,
-            partialAmount
-          );
-          console.log(quote);
-          mintAndQuotesArray.push([mint, quote]);
-        }
-        i++;
-      }
+      this.multiMeltButtonLoading = true;
       try {
+        for (const mint of this.selectedMints) {
+          console.log(`Quoting mint: ${mint.url}`);
+          const mintWallet = useWalletStore().mintWallet(
+            mint.url,
+            useMintsStore().activeUnit
+          );
+          // await this.activateMintUrl(mintUrl);
+          const partialAmountFloat = totalQuoteAmount * weights[i] + carry;
+          const partialAmount = Math.round(partialAmountFloat);
+          console.log(`partialAmount for mint ${mint.url}: ${partialAmount}`);
+          carry = partialAmountFloat - partialAmount;
+          if (partialAmount > 0) {
+            const quote = await this.meltQuote(
+              mintWallet,
+              this.payInvoiceData.input.request,
+              partialAmount
+            );
+            console.log(quote);
+            mintAndQuotesArray.push([mint, quote]);
+          }
+          i++;
+        }
         await Promise.all(
           mintAndQuotesArray.map(([mint, quote]) => {
             const mintWallet = useWalletStore().mintWallet(
@@ -178,6 +190,8 @@ export default defineComponent({
         notifyError(`${error}`);
         console.error(`${error}`);
         throw error;
+      } finally {
+        this.multiMeltButtonLoading = false;
       }
     },
   },
