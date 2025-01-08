@@ -149,7 +149,7 @@ export default defineComponent({
         return;
       }
       let mintAndQuotesArray = [];
-      let carry = 0.0;
+      let remainder = 0.0;
       let i = 0;
       this.multiMeltButtonLoading = true;
       try {
@@ -160,10 +160,10 @@ export default defineComponent({
             useMintsStore().activeUnit
           );
           // await this.activateMintUrl(mintUrl);
-          const partialAmountFloat = totalQuoteAmount * weights[i] + carry;
+          const partialAmountFloat = totalQuoteAmount * weights[i] + remainder;
           const partialAmount = Math.round(partialAmountFloat);
           console.log(`partialAmount for mint ${mint.url}: ${partialAmount}`);
-          carry = partialAmountFloat - partialAmount;
+          remainder = partialAmountFloat - partialAmount;
           if (partialAmount > 0) {
             const quote = await this.meltQuote(
               mintWallet,
