@@ -94,7 +94,8 @@ import { defineComponent } from "vue";
 import { mapActions, mapState, mapWritableState } from "pinia";
 import { useMintsStore, MintClass } from "src/stores/mints";
 import { useWalletStore } from "src/stores/wallet";
-import { notifyError } from "src/js/notify";
+import { useUiStore } from "src/stores/ui";
+import { notifyError, notifySuccess } from "src/js/notify";
 
 export default defineComponent({
   name: "MultinutView",
@@ -137,6 +138,7 @@ export default defineComponent({
       return { overallBalance: overallBalance, weights: weights };
     },
     multiMeltSelectedMints: async function () {
+      const uiStore = useUiStore();
       const totalQuoteAmount = this.payInvoiceData.invoice.sat;
       const activeUnit = useMintsStore().activeUnit;
       const { overallBalance, weights } = this.multiMintBalance(
@@ -152,6 +154,7 @@ export default defineComponent({
       let remainder = 0.0;
       let i = 0;
       this.multiMeltButtonLoading = true;
+      let data;
       try {
         for (const mint of this.selectedMints) {
           console.log(`Quoting mint: ${mint.url}`);
@@ -175,7 +178,7 @@ export default defineComponent({
           }
           i++;
         }
-        await Promise.all(
+        data = await Promise.all(
           mintAndQuotesArray.map(([mint, quote]) => {
             const mintWallet = useWalletStore().mintWallet(
               mint.url,
@@ -183,16 +186,31 @@ export default defineComponent({
             );
             const mintClass = new MintClass(mint);
             const proofs = this.proofsForMintAndUnit(activeUnit, mintClass);
-            return this.melt(proofs, quote, mintWallet);
+            return this.melt(proofs, quote, mintWallet, true);
           })
         );
       } catch (error) {
-        notifyError(`${error}`);
+        notifyError(`multi-nut payment failed: ${error}`);
         console.error(`${error}`);
         throw error;
       } finally {
         this.multiMeltButtonLoading = false;
       }
+      uiStore.vibrate();
+      const amountPaid =
+        mintAndQuotesArray.reduce(
+          (acc, q) => acc + q[1].amount + q[1].fee_reserve,
+          0
+        ) -
+        data.reduce(
+          (acc, d) => acc + d.change.reduce((acc1, p) => acc1 + p.amount, 0),
+          0
+        );
+      notifySuccess(
+        "Paid " +
+          uiStore.formatCurrency(amountPaid, activeUnit) +
+          " via Lightning"
+      );
     },
   },
 });

@@ -767,7 +767,8 @@ export const useWalletStore = defineStore("wallet", {
     melt: async function (
       proofs: WalletProof[],
       quote: MeltQuoteResponse,
-      mintWallet: CashuWallet
+      mintWallet: CashuWallet,
+      silent?: boolean
     ) {
       const uIStore = useUiStore();
       const proofsStore = useProofsStore();
@@ -810,7 +811,7 @@ export const useWalletStore = defineStore("wallet", {
         }
       } catch (error: any) {
         console.error(error);
-        notifyApiError(error, "Payment failed");
+        if (!silent) notifyApiError(error, "Payment failed");
         throw error;
       }
 
@@ -852,13 +853,14 @@ export const useWalletStore = defineStore("wallet", {
           throw new Error("Invoice not paid.");
         }
         let amount_paid = amount - proofsStore.sumProofs(data.change);
-        useUiStore().vibrate();
-
-        notifySuccess(
-          "Paid " +
-            uIStore.formatCurrency(amount_paid, mintWallet.unit) +
-            " via Lightning"
-        );
+        if (!silent) {
+          useUiStore().vibrate();
+          notifySuccess(
+            "Paid " +
+              uIStore.formatCurrency(amount_paid, mintWallet.unit) +
+              " via Lightning"
+          );
+        }
         console.log("#### pay lightning: token paid");
         // delete spent tokens from db
         mintStore.removeProofs(sendProofs);
@@ -911,7 +913,7 @@ export const useWalletStore = defineStore("wallet", {
 
         console.error(error);
         this.handleOutputsHaveAlreadyBeenSignedError(keysetId, error);
-        notifyApiError(error, "Payment failed");
+        if (!silent) notifyApiError(error, "Payment failed");
         throw error;
       } finally {
         uIStore.unlockMutex();
