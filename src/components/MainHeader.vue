@@ -194,8 +194,8 @@ export default defineComponent({
 });
 </script>
 <style scoped>
-.glassy-header {
-  background: rgba(255, 255, 255, 0.5);
-  backdrop-filter: blur(10px);
+.q-header {
+  position: relative;
+  z-index: auto;
 }
 </style>

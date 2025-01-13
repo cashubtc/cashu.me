@@ -191,9 +191,6 @@ export default defineComponent({
       return [].concat(...this.mints.map((m) => m.keysets));
     },
     getTotalBalance: function () {
-      // if (this.totalUnitBalance == 0 && this.lastBalanceCached) {
-      //   return this.lastBalanceCached;
-      // }
       return this.totalUnitBalance;
     },
     getActiveBalance: function () {
