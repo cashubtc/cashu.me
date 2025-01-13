@@ -65,7 +65,7 @@ export class MintClass {
   }
 
   unitProofs(unit: string): WalletProof[] {
-    const proofsStore = useProofsStore()
+    const proofsStore = useProofsStore();
     const unitKeysets = this.unitKeysets(unit);
     return proofsStore.proofs.filter(
       (p) => unitKeysets.map((k) => k.id).includes(p.id) && !p.reserved
@@ -113,44 +113,12 @@ export const useMintsStore = defineStore("mints", {
 
     const uiStoreGlobal: any = useUiStore();
 
-    // liveQuery(() => cashuDb.proofs.toArray()).subscribe({
-    //   next: (newProofs) => {
-    //     proofs.value = newProofs;
-    //     updateActiveProofs();
-    //   },
-    //   error: (err) => {
-    //     console.error(err);
-    //   },
-    // });
-
-    // // Function to update activeProofs
-    // const updateActiveProofs = () => {
-    //   const currentMint = mints.value.find(
-    //     (m) => m.url === activeMintUrl.value
-    //   );
-    //   if (!currentMint) {
-    //     activeProofs.value = [];
-    //     return;
-    //   }
-
-    //   const unitKeysets = currentMint?.keysets?.filter(
-    //     (k) => k.unit === activeUnit.value
-    //   );
-    //   if (!unitKeysets || unitKeysets.length === 0) {
-    //     activeProofs.value = [];
-    //     return;
-    //   }
-
-    //   const keysetIds = unitKeysets.map((k) => k.id);
-    //   activeProofs.value = proofs.value
-    //     .filter((p) => keysetIds.includes(p.id))
-    //     .filter((p) => !p.reserved);
-    // };
-
     // Watch for changes in activeMintUrl and activeUnit
     watch([activeMintUrl, activeUnit], async () => {
       const proofsStore = useProofsStore();
-      console.log(`watcher: activeMintUrl: ${activeMintUrl.value}, activeUnit: ${activeUnit.value}`);
+      console.log(
+        `watcher: activeMintUrl: ${activeMintUrl.value}, activeUnit: ${activeUnit.value}`
+      );
       await proofsStore.updateActiveProofs();
     });
 
@@ -425,7 +393,7 @@ export const useMintsStore = defineStore("mints", {
         console.error(error);
         try {
           // notifyApiError(error, "Could not get mint info");
-        } catch { }
+        } catch {}
         throw error;
       }
     },
@@ -465,7 +433,7 @@ export const useMintsStore = defineStore("mints", {
         console.error(error);
         try {
           // notifyApiError(error, "Could not get mint keys");
-        } catch { }
+        } catch {}
         throw error;
       }
     },
@@ -479,7 +447,7 @@ export const useMintsStore = defineStore("mints", {
         console.error(error);
         try {
           // notifyApiError(error, "Could not get mint keysets");
-        } catch { }
+        } catch {}
         throw error;
       }
     },

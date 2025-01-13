@@ -44,9 +44,13 @@ export const useProofsStore = defineStore("proofs", {
       }
 
       const keysetIds = unitKeysets.map((k) => k.id);
-      const activeProofs = await cashuDb.proofs.where("id").anyOf(keysetIds).toArray().then((proofs) => {
-        return proofs.filter((p) => !p.reserved);
-      });
+      const activeProofs = await cashuDb.proofs
+        .where("id")
+        .anyOf(keysetIds)
+        .toArray()
+        .then((proofs) => {
+          return proofs.filter((p) => !p.reserved);
+        });
       mintStore.activeProofs = activeProofs;
     };
 

@@ -1164,11 +1164,12 @@
                     </q-btn></row
                   ><row>
                     <q-item-label class="q-px-sm" caption
-                      >To avoid double-spending attempts, this wallet marks
-                      ecash as reserved so you don't reuse it. This button will
-                      unset all reserved tokens so they can be used again. If
-                      you do this, your wallet might include spent proofs. Press
-                      the "Remove spent proofs" button to get rid of them.
+                      >This wallet marks pending outgoing ecash as reserved (and
+                      subtracts it from your balance) to prevent double-spend
+                      attempts. This button will unset all reserved tokens so
+                      they can be used again. If you do this, your wallet might
+                      include spent proofs. Press the "Remove spent proofs"
+                      button to get rid of them.
                     </q-item-label>
                   </row>
                 </q-item-section>
@@ -1335,12 +1336,7 @@ export default defineComponent({
       "showP2PkButtonInDrawer",
     ]),
     ...mapWritableState(useNWCStore, ["showNWCDialog", "showNWCData"]),
-    ...mapState(useMintsStore, [
-      "activeMintUrl",
-      "mints",
-      "activeProofs",
-      "proofs",
-    ]),
+    ...mapState(useMintsStore, ["activeMintUrl", "mints", "activeProofs"]),
     ...mapState(useNPCStore, ["npcLoading"]),
     ...mapState(useNostrStore, [
       "pubkey",
@@ -1464,11 +1460,9 @@ export default defineComponent({
     },
     unsetAllReservedProofs: async function () {
       // mark all this.proofs as reserved=false
-      for (let proof of this.proofs) {
-        proof.reserved = false;
-        proof.quote = undefined;
-      }
-      this.notifySuccess("No reserved proofs left");
+      const proofsStore = useProofsStore();
+      await proofsStore.setReserved(await proofsStore.getProofs(), false);
+      this.notifySuccess("All reserved proofs unset");
     },
     checkActiveProofsSpendable: async function () {
       // iterate over this.activeProofs in batches of 50 and check if they are spendable

@@ -59,7 +59,8 @@ export const useDexieStore = defineStore("dexie", {
         cashuDb.proofs.add(proof);
       });
       console.log(
-        `Migrated ${cashuDb.proofs.count()} proofs. Before: ${parsedProofs.length
+        `Migrated ${cashuDb.proofs.count()} proofs. Before: ${
+          parsedProofs.length
         } proofs, After: ${(await proofsStore.getProofs()).length} proofs`
       );
       console.log(
