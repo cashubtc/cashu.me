@@ -104,7 +104,7 @@
           Balance:
           <b>
             <AnimatedNumber
-              :value="getActiveMintBalance"
+              :value="getActiveBalance"
               :format="(val) => formatCurrency(val, activeUnit)"
               class="q-my-none q-py-none cursor-pointer"
             />
@@ -163,9 +163,9 @@ export default defineComponent({
     ...mapState(useMintsStore, [
       "activeMintUrl",
       "activeProofs",
-      "mints",
-      "proofs",
       "activeBalance",
+      "mints",
+      "totalUnitBalance",
       "activeUnit",
       "activeMint",
     ]),
@@ -173,16 +173,11 @@ export default defineComponent({
     ...mapState(useUiStore, ["globalMutexLock"]),
     ...mapState(usePriceStore, ["bitcoinPrice"]),
     ...mapWritableState(useMintsStore, ["activeUnit"]),
-    ...mapWritableState(useUiStore, ["hideBalance"]),
+    ...mapWritableState(useUiStore, ["hideBalance", "lastBalanceCached"]),
     pendingBalance: function () {
       return -this.historyTokens
         .filter((t) => t.status == "pending")
         .filter((t) => t.unit == this.activeUnit)
-        .reduce((sum, el) => (sum += el.amount), 0);
-    },
-    balance: function () {
-      return this.activeProofs
-        .flat()
         .reduce((sum, el) => (sum += el.amount), 0);
     },
     balancesOptions: function () {
@@ -196,12 +191,10 @@ export default defineComponent({
       return [].concat(...this.mints.map((m) => m.keysets));
     },
     getTotalBalance: function () {
-      return this.activeBalance;
+      return this.totalUnitBalance;
     },
-    getActiveMintBalance: function () {
-      return this.activeProofs
-        .flat()
-        .reduce((sum, el) => (sum += el.amount), 0);
+    getActiveBalance: function () {
+      return this.activeBalance;
     },
     activeMintLabel: function () {
       const mintClass = this.activeMint();

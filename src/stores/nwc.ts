@@ -113,7 +113,7 @@ export const useNWCStore = defineStore("nwc", {
       return {
         result_type: "get_balance",
         result: {
-          balance: mintsStore.activeBalance * 1000,
+          balance: mintsStore.totalUnitBalance * 1000,
         },
       };
     },

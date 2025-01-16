@@ -1164,11 +1164,12 @@
                     </q-btn></row
                   ><row>
                     <q-item-label class="q-px-sm" caption
-                      >To avoid double-spending attempts, this wallet marks
-                      ecash as reserved so you don't reuse it. This button will
-                      unset all reserved tokens so they can be used again. If
-                      you do this, your wallet might include spent proofs. Press
-                      the "Remove spent proofs" button to get rid of them.
+                      >This wallet marks pending outgoing ecash as reserved (and
+                      subtracts it from your balance) to prevent double-spend
+                      attempts. This button will unset all reserved tokens so
+                      they can be used again. If you do this, your wallet might
+                      include spent proofs. Press the "Remove spent proofs"
+                      button to get rid of them.
                     </q-item-label>
                   </row>
                 </q-item-section>
@@ -1234,13 +1235,7 @@
               <q-item>
                 <q-item-section>
                   <row>
-                    <q-btn
-                      dense
-                      flat
-                      outline
-                      click
-                      @click="getLocalstorageToFile"
-                    >
+                    <q-btn dense flat outline click @click="exportWalletState">
                       Export wallet data
                     </q-btn></row
                   ><row>
@@ -1276,7 +1271,6 @@ import { mapActions, mapState, mapWritableState } from "pinia";
 import { useMintsStore, MintClass } from "src/stores/mints";
 import { useWalletStore } from "src/stores/wallet";
 import { map } from "underscore";
-import { currentDateStr } from "src/js/utils";
 import { useSettingsStore } from "src/stores/settings";
 import { useNostrStore } from "src/stores/nostr";
 import { useNPCStore } from "src/stores/npubcash";
@@ -1287,8 +1281,10 @@ import { useWorkersStore } from "src/stores/workers";
 import { useProofsStore } from "src/stores/proofs";
 import { usePRStore } from "../stores/payment-request";
 import { useRestoreStore } from "src/stores/restore";
+import { useDexieStore } from "../stores/dexie";
 import { useReceiveTokensStore } from "../stores/receiveTokensStore";
 import { useWelcomeStore } from "src/stores/welcome";
+import { useStorageStore } from "src/stores/storage";
 
 export default defineComponent({
   name: "SettingsView",
@@ -1340,12 +1336,7 @@ export default defineComponent({
       "showP2PkButtonInDrawer",
     ]),
     ...mapWritableState(useNWCStore, ["showNWCDialog", "showNWCData"]),
-    ...mapState(useMintsStore, [
-      "activeMintUrl",
-      "mints",
-      "activeProofs",
-      "proofs",
-    ]),
+    ...mapState(useMintsStore, ["activeMintUrl", "mints", "activeProofs"]),
     ...mapState(useNPCStore, ["npcLoading"]),
     ...mapState(useNostrStore, [
       "pubkey",
@@ -1441,7 +1432,6 @@ export default defineComponent({
       "removeMint",
       "activateMintUrl",
       "updateMint",
-      "restoreFromBackup",
     ]),
     ...mapActions(useWalletStore, [
       "newMnemonic",
@@ -1452,6 +1442,8 @@ export default defineComponent({
     ...mapActions(useProofsStore, ["serializeProofs"]),
     ...mapActions(useNPCStore, ["generateNPCConnection"]),
     ...mapActions(useRestoreStore, ["restoreMint"]),
+    ...mapActions(useDexieStore, ["deleteAllTables"]),
+    ...mapActions(useStorageStore, ["restoreFromBackup", "exportWalletState"]),
     generateNewMnemonic: async function () {
       this.newMnemonic();
       await this.initSigner();
@@ -1466,39 +1458,11 @@ export default defineComponent({
     toggleTerminal: function () {
       useUiStore().toggleDebugConsole();
     },
-    getLocalstorageToFile: async function () {
-      // https://stackoverflow.com/questions/24263682/save-restore-local-storage-to-a-local-file
-      const fileName = `cashu_backup_${currentDateStr()}.json`;
-      var a = {};
-      for (var i = 0; i < localStorage.length; i++) {
-        var k = localStorage.key(i);
-        var v = localStorage.getItem(k);
-        a[k] = v;
-      }
-      var textToSave = JSON.stringify(a);
-      var textToSaveAsBlob = new Blob([textToSave], {
-        type: "text/plain",
-      });
-      var textToSaveAsURL = window.URL.createObjectURL(textToSaveAsBlob);
-
-      var downloadLink = document.createElement("a");
-      downloadLink.download = fileName;
-      downloadLink.innerHTML = "Download File";
-      downloadLink.href = textToSaveAsURL;
-      downloadLink.onclick = function () {
-        document.body.removeChild(event.target);
-      };
-      downloadLink.style.display = "none";
-      document.body.appendChild(downloadLink);
-      downloadLink.click();
-    },
     unsetAllReservedProofs: async function () {
       // mark all this.proofs as reserved=false
-      for (let proof of this.proofs) {
-        proof.reserved = false;
-        proof.quote = undefined;
-      }
-      this.notifySuccess("No reserved proofs left");
+      const proofsStore = useProofsStore();
+      await proofsStore.setReserved(await proofsStore.getProofs(), false);
+      this.notifySuccess("All reserved proofs unset");
     },
     checkActiveProofsSpendable: async function () {
       // iterate over this.activeProofs in batches of 50 and check if they are spendable
@@ -1571,7 +1535,9 @@ export default defineComponent({
     },
     nukeWallet: async function () {
       // create a backup just in case
-      await this.getLocalstorageToFile();
+      await this.exportWalletState();
+      // clear dexie tables
+      this.deleteAllTables();
       localStorage.clear();
       window.location.href = "/";
     },

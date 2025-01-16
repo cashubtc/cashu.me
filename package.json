@@ -36,6 +36,7 @@
     "capacitor-plugin-safe-area": "^3.0.4",
     "core-js": "^3.37.0",
     "date-fns": "^3.6.0",
+    "dexie": "^4.0.9",
     "light-bolt11-decoder": "^3.1.1",
     "lucide-vue-next": "^0.453.0",
     "nostr-tools": "^2.5.2",
