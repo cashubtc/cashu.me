@@ -9,8 +9,8 @@
               >Backup seed phrase</q-item-label
             >
             <q-item-label caption
-              >Your seed phrase can restore your wallet. Keep it safe and
-              private.
+              >La vostra seed phrase può ripristinare il vostro portafoglio.
+              Tenetela al sicuro e privata.
             </q-item-label>
             <div class="row q-pt-md">
               <div class="col-12">
@@ -54,13 +54,13 @@
         <q-item>
           <q-item-section>
             <q-item-label overline class="text-weight-bold"
-              >Restore ecash</q-item-label
+              >Ripristina ecash</q-item-label
             >
             <q-item-label caption
-              >The restore wizard lets you recover lost ecash from a mnemonic
-              seed phrase. The seed phrase of your current wallet will remain
-              unaffected, the wizard will only allow you to <i>restore</i> ecash
-              from another seed phrase.</q-item-label
+              >La procedura guidata di ripristino consente di recuperare gli ecash persi da una seed phrase mnemonica.
+              La seed phrase del vostro portafoglio attuale rimarrà inalterata,
+              la procedura guidata vi permetterà solo di <i>ripristinare</i>
+              ecash da un'altra seed phrase.</q-item-label
             >
           </q-item-section>
         </q-item>
@@ -72,7 +72,7 @@
             rounded
             outline
             to="/restore"
-            >Restore</q-btn
+            >Ripristina</q-btn
           >
         </q-item>
       </q-list>
@@ -83,10 +83,10 @@
         <q-item>
           <q-item-section>
             <q-item-label overline class="text-weight-bold"
-              >Lightning address</q-item-label
+              >Indirizzo Lightning</q-item-label
             >
             <q-item-label caption
-              >Receive payments to your Lightning address.</q-item-label
+              >Ricevi pagamenti al tuo indirizzo Lightning.</q-item-label
             >
           </q-item-section>
         </q-item>
@@ -96,9 +96,9 @@
             <div class="row q-pt-md">
               <q-toggle v-model="npcEnabled" color="primary" />
               <q-item-section>
-                <q-item-label title>Enable</q-item-label>
+                <q-item-label title>Abilita</q-item-label>
                 <q-item-label caption>
-                  Lightning address with npub.cash
+                  Indirizzo Lightning con npub.cash
                 </q-item-label>
               </q-item-section>
             </div>
@@ -126,9 +126,9 @@
               <div class="row q-pt-md">
                 <q-toggle v-model="automaticClaim" color="primary" />
                 <q-item-section>
-                  <q-item-label title>Claim automatically</q-item-label>
+                  <q-item-label title>Rivendica automaticamente</q-item-label>
                   <q-item-label caption
-                    >Receive incoming payments automatically.
+                    >Ricevi automaticamente i pagamenti in entrata.
                   </q-item-label>
                 </q-item-section>
               </div>
@@ -136,9 +136,9 @@
           </q-item>
           <q-item>
             <q-item-section>
-              <q-item-label overline>Your nostr keys</q-item-label>
+              <q-item-label overline>Le tue chiavi nostr</q-item-label>
               <q-item-label caption
-                >Set the nostr keys for your Lightning address.</q-item-label
+                >Imposta le chiavi nostr per il tuo indirizzo Lightning.</q-item-label
               >
             </q-item-section>
           </q-item>
@@ -165,9 +165,9 @@
               class="cursor-pointer"
               style="word-break: break-word"
             >
-              <q-item-label title>Wallet seed phrase</q-item-label>
+              <q-item-label title>Seed phrase del portafoglio</q-item-label>
               <q-item-label caption
-                >Generate nostr key pair from wallet seed
+                >Genera una coppia di chiavi nostr dal seme del portafoglio
               </q-item-label>
               <q-item-label
                 caption
