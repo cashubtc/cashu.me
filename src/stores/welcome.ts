@@ -24,9 +24,9 @@ export const useWelcomeStore = defineStore("welcome", {
       "cashu.welcome.termsAccepted",
       false
     ),
-    addMintUrl: useLocalStorage<string | null>(
+    addMintUrl: useLocalStorage<string | undefined>(
       "cashu.welcome.addMintUrl",
-      null
+      undefined
     ),
   }),
   getters: {

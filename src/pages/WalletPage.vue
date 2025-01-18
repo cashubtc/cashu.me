@@ -443,7 +443,9 @@ export default {
     showWelcomePage: function (addMintUrl) {
       if (!useWelcomeStore().termsAccepted) {
         useWelcomeStore().showWelcome = true;
-        useWelcomeStore().addMintUrl = addMintUrl;
+        if (addMintUrl) {
+          useWelcomeStore().addMintUrl = addMintUrl;
+        }
       }
       if (useWelcomeStore().showWelcome) {
         this.$router.push("/welcome");
