@@ -570,8 +570,14 @@ export default {
     if (params.get("mint")) {
       let addMintUrl = params.get("mint");
       await this.setTab("mints");
-      this.showAddMintDialog = true;
       this.addMintData = { url: addMintUrl };
+
+      try {
+        await this.addMint({ url: addMintUrl }, true); // Ensure `addMint` runs
+        console.log(`Mint added successfully: ${addMintUrl}`);
+      } catch (error) {
+        console.error(`Error adding mint: ${error.message}`);
+      }
     }
     if (!localStorage.getItem("cashu.activeMintUrl")) {
       this.setTab("mints");
