@@ -8,6 +8,7 @@ export type WelcomeState = {
   currentSlide: number;
   seedPhraseValidated: boolean;
   termsAccepted: boolean;
+  addMintUrl?: string;
 };
 
 // Define the Pinia store
@@ -22,6 +23,10 @@ export const useWelcomeStore = defineStore("welcome", {
     termsAccepted: useLocalStorage<boolean>(
       "cashu.welcome.termsAccepted",
       false
+    ),
+    addMintUrl: useLocalStorage<string | null>(
+      "cashu.welcome.addMintUrl",
+      null
     ),
   }),
   getters: {
@@ -64,7 +69,11 @@ export const useWelcomeStore = defineStore("welcome", {
     closeWelcome() {
       this.showWelcome = false;
       // Redirect to home or desired route
-      window.location.href = "/";
+      if (this.addMintUrl) {
+        window.location.href = `/?mint=${this.addMintUrl}`;
+      } else {
+        window.location.href = "/";
+      }
     },
 
     /**

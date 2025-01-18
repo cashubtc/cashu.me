@@ -440,9 +440,10 @@ export default {
       this.camera.show = false;
       this.focusInput("parseDialogInput");
     },
-    showWelcomePage: function () {
+    showWelcomePage: function (addMintUrl) {
       if (!useWelcomeStore().termsAccepted) {
         useWelcomeStore().showWelcome = true;
+        useWelcomeStore().addMintUrl = addMintUrl;
       }
       if (useWelcomeStore().showWelcome) {
         this.$router.push("/welcome");
@@ -565,19 +566,14 @@ export default {
 
     let params = new URL(document.location).searchParams;
     let hash = new URL(document.location).hash;
+    let addMintUrl = null;
 
     // mint url
     if (params.get("mint")) {
-      let addMintUrl = params.get("mint");
+      addMintUrl = params.get("mint");
       await this.setTab("mints");
+      this.showAddMintDialog = true;
       this.addMintData = { url: addMintUrl };
-
-      try {
-        await this.addMint({ url: addMintUrl }, true); // Ensure `addMint` runs
-        console.log(`Mint added successfully: ${addMintUrl}`);
-      } catch (error) {
-        console.error(`Error adding mint: ${error.message}`);
-      }
     }
     if (!localStorage.getItem("cashu.activeMintUrl")) {
       this.setTab("mints");
@@ -637,7 +633,7 @@ export default {
     this.initSigner();
 
     // show welcome dialog
-    this.showWelcomePage();
+    this.showWelcomePage(addMintUrl);
 
     // listen to NWC commands if enabled
     if (this.nwcEnabled) {
