@@ -1120,14 +1120,14 @@
                   <row>
                     <!-- add a caption, not a button here -->
                     <q-item-label class="q-pb-sm"
-                      >Incremento dei contatori del keyset</q-item-label ------------------------------------------------------------------------------------------------------------------------------
+                      >Incremento dei contatori del keyset</q-item-label
                     ></row
                   >
                   <row>
                     <q-item-label class="q-px-sm" caption
-                      >Click the keyset ID to increment the derivation path
-                      counters for the keysets in your wallet. This is useful if
-                      you see the "outputs have already been signed" error.
+                      >Fare clic sull'ID del keyset per incrementare i contatori del percorso
+                      di derivazione per i keyset nel portafoglio.
+                      Questa operazione è utile se si verifica l'errore “le uscite sono già state firmate”.
                     </q-item-label>
                   </row>
                   <row class="q-pa-sm">
@@ -1162,16 +1162,16 @@
                       click
                       @click="unsetAllReservedProofs"
                     >
-                      Unset all reserved tokens
+                      Disabilita tutti i token riservati
                     </q-btn></row
                   ><row>
                     <q-item-label class="q-px-sm" caption
-                      >This wallet marks pending outgoing ecash as reserved (and
-                      subtracts it from your balance) to prevent double-spend
-                      attempts. This button will unset all reserved tokens so
-                      they can be used again. If you do this, your wallet might
-                      include spent proofs. Press the "Remove spent proofs"
-                      button to get rid of them.
+                      >Questo portafoglio contrassegna gli ecash in uscita in attesa come
+                      riservati (e li sottrae dal proprio saldo) per evitare tentativi di doppio
+                      utilizzo. Questo pulsante disattiva tutti i token riservati in modo che
+                      possano essere utilizzati di nuovo. Se si esegue questa operazione, è
+                      possibile che il portafoglio includa delle prove esaurite. Premere il
+                      pulsante “Rimuovi le prove spese” per eliminarle.
                     </q-item-label>
                   </row>
                 </q-item-section>
@@ -1180,11 +1180,11 @@
                 <q-item-section>
                   <row>
                     <q-btn dense flat outline click @click="showOnboarding">
-                      Show onboarding
+                      Mostra procedura d'ingresso
                     </q-btn></row
                   ><row>
                     <q-item-label class="q-px-sm" caption
-                      >Show the onboarding screen again.
+                      >Mostra di nuovo la schermata della procedura d'ingresso.
                     </q-item-label>
                   </row>
                 </q-item-section>
@@ -1200,17 +1200,17 @@
                       click
                       @click="confirmNuke = !confirmNuke"
                     >
-                      Reset wallet data
+                      Resetta i dati del portafoglio
                     </q-btn></row
                   ><row v-if="!confirmNuke">
                     <q-item-label class="q-px-sm" caption
-                      >Reset your wallet data. Warning: This will delete
-                      everything! Make sure you create a backup first.
+                      >Resettare i dati del portafoglio. Attenzione: Questa operazione
+                      cancellerà tutto! Assicuratevi di aver creato prima un backup.
                     </q-item-label>
                   </row>
                   <row v-if="confirmNuke">
                     <span
-                      >Are you sure you want to delete your wallet data?</span
+                      >Siete sicuri di voler cancellare i dati del vostro portafoglio?</span
                     >
                     <q-btn
                       flat
@@ -1229,7 +1229,7 @@
                         confirmNuke = false;
                         nukeWallet();
                       "
-                      >Delete wallet</q-btn
+                      >Elimina portafoglio</q-btn
                     >
                   </row>
                 </q-item-section>
@@ -1238,14 +1238,14 @@
                 <q-item-section>
                   <row>
                     <q-btn dense flat outline click @click="exportWalletState">
-                      Export wallet data
+                      Esporta i dati del portafoglio
                     </q-btn></row
                   ><row>
                     <q-item-label class="q-px-sm" caption
-                      >Download a dump of your wallet. You can restore your
-                      wallet from this file in the welcome screen of a new
-                      wallet. This file will be out of sync if you keep using
-                      your wallet after exporting it.
+                      >Scaricate un archivio del vostro portafoglio. È possibile ripristinare
+                      il portafoglio da questo file nella schermata di benvenuto di un nuovo portafoglio.
+                      Questo file non sarà più sincronizzato se si continua a utilizzare
+                      il portafoglio dopo averlo esportato.
                     </q-item-label>
                   </row>
                 </q-item-section>
