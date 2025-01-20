@@ -24,10 +24,6 @@ export const useWelcomeStore = defineStore("welcome", {
       "cashu.welcome.termsAccepted",
       false
     ),
-    addMintUrl: useLocalStorage<string | undefined>(
-      "cashu.welcome.addMintUrl",
-      undefined
-    ),
   }),
   getters: {
     // Determines if the current slide is the last one
