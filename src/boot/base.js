@@ -61,7 +61,7 @@ window.windowMixin = {
       if (currency == "eur") value = value / 100;
 
       if (currency.length !== 3) {
-        return new Intl.NumberFormat(window.LOCALE).format(value);
+        return new Intl.NumberFormat(window.LOCALE).format(value) + " " + currency.toUpperCase();
       } else {
         return new Intl.NumberFormat(window.LOCALE, {
           style: "currency",
