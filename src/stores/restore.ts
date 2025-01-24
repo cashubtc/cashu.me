@@ -9,8 +9,8 @@ import { notify, notifyError, notifySuccess } from "src/js/notify";
 import { useUiStore } from "./ui";
 import { useProofsStore } from "./proofs";
 
-const BATCH_SIZE = 100;
-const MAX_GAP = 1;
+const BATCH_SIZE = 200;
+const MAX_GAP = 2;
 
 export const useRestoreStore = defineStore("restore", {
   state: () => ({
@@ -53,6 +53,7 @@ export const useRestoreStore = defineStore("restore", {
       }
       this.restoreProgress = 0;
       const walletStore = useWalletStore();
+      const proofsStore = useProofsStore();
       const mintStore = useMintsStore();
       await mintStore.activateMintUrl(url);
 
@@ -131,7 +132,7 @@ export const useRestoreStore = defineStore("restore", {
             );
           }
           const newProofs = unspentProofs.filter(
-            (p) => !mintStore.proofs.some((pr) => pr.secret === p.secret)
+            (p) => !proofsStore.proofs.some((pr) => pr.secret === p.secret)
           );
           await useProofsStore().addProofs(newProofs);
           restoredProofs = restoredProofs.concat(newProofs);

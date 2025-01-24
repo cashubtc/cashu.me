@@ -45,7 +45,7 @@ export const useStorageStore = defineStore("storage", {
         jsonToSave[k] = v;
       }
       // proofs table *magic*
-      const proofs = await useProofsStore().getProofs()
+      const proofs = await useProofsStore().getProofs();
       jsonToSave["cashu.dexie.db.proofs"] = JSON.stringify(proofs);
 
       var textToSave = JSON.stringify(jsonToSave);
