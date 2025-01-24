@@ -107,8 +107,9 @@ export const useRestoreStore = defineStore("restore", {
 
         let restoredProofs: Proof[] = [];
         for (let i = 0; i < restoreProofs.length; i += BATCH_SIZE) {
-          this.restoreStatus = `Checking proofs ${i} to ${i + BATCH_SIZE
-            } for keyset ${keyset.id}`;
+          this.restoreStatus = `Checking proofs ${i} to ${
+            i + BATCH_SIZE
+          } for keyset ${keyset.id}`;
           const checkRestoreProofs = restoreProofs.slice(i, i + BATCH_SIZE);
           const proofStates = await wallet.checkProofsStates(
             checkRestoreProofs
@@ -122,7 +123,8 @@ export const useRestoreStore = defineStore("restore", {
           );
           if (unspentProofs.length > 0) {
             console.log(
-              `Found ${unspentProofs.length
+              `Found ${
+                unspentProofs.length
               } unspent proofs with sum ${unspentProofs.reduce(
                 (s, p) => s + p.amount,
                 0
