@@ -86,12 +86,15 @@ const proofsStore = useProofsStore();
 
 export const useWalletStore = defineStore("wallet", {
   state: () => {
+    const invoiceHistoryRef = useLocalStorage<InvoiceHistory[]>(
+      "cashu.invoiceHistory",
+      []
+    );
+    const invoiceHistory: InvoiceHistory[] = invoiceHistoryRef.value;
+
     return {
       mnemonic: useLocalStorage("cashu.mnemonic", ""),
-      invoiceHistory: useLocalStorage(
-        "cashu.invoiceHistory",
-        [] as InvoiceHistory[]
-      ),
+      invoiceHistory,
       keysetCounters: useLocalStorage(
         "cashu.keysetCounters",
         [] as KeysetCounter[]
@@ -132,7 +135,16 @@ export const useWalletStore = defineStore("wallet", {
           successAction: {},
           routes: [],
           tag: "",
-        },
+        } as {
+          domain: string;
+          callback: string;
+          minSendable: number;
+          maxSendable: number;
+          metadata: Object;
+          successAction: Object;
+          routes: Array<Object>;
+          tag: string;
+        } | null,
         lnurlauth: {},
         input: {
           request: "",
@@ -140,7 +152,7 @@ export const useWalletStore = defineStore("wallet", {
           comment: "",
           quote: "",
         } as {
-          request: string;
+          request: string | null;
           amount: number | null;
           comment: string;
           quote: string;
@@ -691,7 +703,7 @@ export const useWalletStore = defineStore("wallet", {
         }
         const payload: MeltQuotePayload = {
           unit: mintStore.activeUnit,
-          request: this.payInvoiceData.input.request,
+          request: this.payInvoiceData.input.request || "",
         };
         this.payInvoiceData.meltQuote.payload = payload;
         const data = await this.meltQuote(mintWallet, payload.request);
@@ -1275,7 +1287,7 @@ export const useWalletStore = defineStore("wallet", {
       const mintStore = useMintsStore();
       this.invoiceHistory.push({
         amount: -(quote.amount + quote.fee_reserve),
-        bolt11: this.payInvoiceData.input.request,
+        bolt11: this.payInvoiceData.input.request || "",
         quote: quote.quote,
         memo: "Outgoing invoice",
         date: currentDateStr(),
@@ -1461,12 +1473,15 @@ export const useWalletStore = defineStore("wallet", {
       }
       if (data.tag == "payRequest") {
         this.payInvoiceData.lnurlpay = data;
-        this.payInvoiceData.lnurlpay.domain = host
-          .split("https://")[1]
-          .split("/")[0];
+        if (this.payInvoiceData.lnurlpay) {
+          this.payInvoiceData.lnurlpay.domain = host
+            .split("https://")[1]
+            .split("/")[0];
+        }
         if (
+          this.payInvoiceData.lnurlpay &&
           this.payInvoiceData.lnurlpay.maxSendable ==
-          this.payInvoiceData.lnurlpay.minSendable
+            this.payInvoiceData.lnurlpay.minSendable
         ) {
           this.payInvoiceData.input.amount =
             this.payInvoiceData.lnurlpay.maxSendable / 1000;
