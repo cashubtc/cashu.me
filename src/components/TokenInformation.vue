@@ -45,7 +45,7 @@
     </div>
   </div>
 </template>
-<script>
+<script lang="ts">
 import { defineComponent } from "vue";
 import { getShortUrl } from "src/js/wallet-helpers";
 import { mapActions, mapState } from "pinia";
@@ -56,7 +56,7 @@ import formatMixin from "src/mixin/formatMixin";
 
 export default defineComponent({
   name: "TokenInformation",
-  mixins: [windowMixin, formatMixin],
+  mixins: [formatMixin],
   props: {
     encodedToken: String,
     showAmount: Boolean,
@@ -76,10 +76,19 @@ export default defineComponent({
       "addMintBlocking",
     ]),
     proofsToShow: function () {
-      return token.getProofs(token.decode(this.encodedToken));
+      const decodedToken = this.encodedToken
+        ? token.decode(this.encodedToken)
+        : null;
+      if (decodedToken) {
+        return token.getProofs(decodedToken);
+      }
+      return [];
     },
     sumProofs: function () {
-      let proofs = token.getProofs(token.decode(this.encodedToken));
+      let decodedToken = this.encodedToken
+        ? token.decode(this.encodedToken)
+        : null;
+      let proofs = decodedToken ? token.getProofs(decodedToken) : [];
       return proofs.flat().reduce((sum, el) => (sum += el.amount), 0);
     },
     displayUnit: function () {
@@ -87,39 +96,53 @@ export default defineComponent({
       return display;
     },
     tokenUnit: function () {
-      return token.getUnit(token.decode(this.encodedToken));
+      const decodedToken = this.encodedToken
+        ? token.decode(this.encodedToken)
+        : null;
+      if (decodedToken) {
+        return token.getUnit(decodedToken);
+      }
+      return "";
     },
     tokenMintUrl: function () {
-      let mint = token.getMint(token.decode(this.encodedToken));
+      const decodedToken = this.encodedToken
+        ? token.decode(this.encodedToken)
+        : null;
+      let mint = decodedToken ? token.getMint(decodedToken) : "";
       return getShortUrl(mint);
     },
     displayMemo: function () {
-      return token.getMemo(token.decode(this.encodedToken));
+      const decodedToken = this.encodedToken
+        ? token.decode(this.encodedToken)
+        : null;
+      return decodedToken ? token.getMemo(decodedToken) : "";
     },
   },
   methods: {
     ...mapActions(useP2PKStore, ["isLocked", "isLockedToUs"]),
-    getProofsMint: function (proofs) {
+    getProofsMint: function (proofs: any[]) {
       // unique keyset IDs of proofs
       let uniqueIds = [...new Set(proofs.map((p) => p.id))];
       // mints that have any of the keyset IDs
-      let mints_keysets = this.mints.filter((m) =>
+      let mints_keysets = this.mints.filter((m: { keysets: any[] }) =>
         m.keysets.some((r) => uniqueIds.indexOf(r) >= 0)
       );
       // what we put into the JSON
-      let mints = mints_keysets.map((m) => [{ url: m.url, ids: m.keysets }][0]);
+      let mints = mints_keysets.map(
+        (m: { url: any; keysets: any }) => [{ url: m.url, ids: m.keysets }][0]
+      );
       if (mints.length == 0) {
         return "";
       } else {
         return getShortUrl(mints[0].url);
       }
     },
-    mintKnownToUs: function (proofs) {
+    mintKnownToUs: function (proofs: any[]) {
       // unique keyset IDs of proofs
       let uniqueIds = [...new Set(proofs.map((p) => p.id))];
       // mints that have any of the keyset IDs
       return (
-        this.mints.filter((m) =>
+        this.mints.filter((m: { keysets: any[] }) =>
           m.keysets.some((r) => uniqueIds.indexOf(r.id) >= 0)
         ).length > 0
       );
