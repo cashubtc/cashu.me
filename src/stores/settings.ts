@@ -1,6 +1,5 @@
 import { defineStore } from "pinia";
 import { useLocalStorage } from "@vueuse/core";
-import { ref } from "vue";
 
 const defaultNostrRelays = [
   "wss://relay.damus.io",
