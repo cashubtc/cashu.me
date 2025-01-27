@@ -19,19 +19,15 @@
     </div>
   </div>
 </template>
-<script>
+<script lang="ts">
 import { defineComponent } from "vue";
 import { mapState, mapWritableState } from "pinia";
 import { useUiStore } from "stores/ui";
 import { useWalletStore } from "../stores/wallet";
 import { useReceiveTokensStore } from "src/stores/receiveTokensStore";
-import { set } from "@vueuse/core";
 
 export default defineComponent({
   name: "ActivityOrb",
-  mixins: [windowMixin],
-  components: {},
-  props: {},
   data: function () {
     return {
       enableSpinner: false,

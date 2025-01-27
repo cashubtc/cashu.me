@@ -114,10 +114,11 @@ import { useWalletStore } from "src/stores/wallet";
 import { useSendTokensStore } from "src/stores/sendTokensStore";
 import token from "../js/token";
 import { notify } from "src/js/notify";
+import mixin from "src/mixin/formatMixin";
 
 export default defineComponent({
   name: "HistoryTable",
-  mixins: [windowMixin],
+  mixins: [windowMixin, mixin],
   props: {},
   data: function () {
     return {

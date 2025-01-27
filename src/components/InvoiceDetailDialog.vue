@@ -175,10 +175,10 @@ import { useWorkersStore } from "src/stores/workers";
 import { useMintsStore } from "src/stores/mints";
 import { useSettingsStore } from "../stores/settings";
 import NumericKeyboard from "components/NumericKeyboard.vue";
-
+import formatMixin from "src/mixin/formatMixin";
 export default defineComponent({
   name: "InvoiceDetailDialog",
-  mixins: [windowMixin],
+  mixins: [windowMixin, formatMixin],
   components: {
     ChooseMint,
     VueQrcode,

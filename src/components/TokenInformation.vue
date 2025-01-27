@@ -52,10 +52,11 @@ import { mapActions, mapState } from "pinia";
 import { useMintsStore } from "stores/mints";
 import { useP2PKStore } from "src/stores/p2pk";
 import token from "src/js/token";
+import formatMixin from "src/mixin/formatMixin";
 
 export default defineComponent({
   name: "TokenInformation",
-  mixins: [windowMixin],
+  mixins: [windowMixin, formatMixin],
   props: {
     encodedToken: String,
     showAmount: Boolean,

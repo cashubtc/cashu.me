@@ -92,12 +92,11 @@ import { shortenString } from "src/js/string-utils";
 import { mapWritableState, mapActions } from "pinia";
 import { useUiStore } from "src/stores/ui";
 import { useWalletStore } from "src/stores/wallet";
-import { useInvoicesWorkerStore } from "src/stores/invoicesWorker";
 import { formatDistanceToNow, parseISO } from "date-fns";
-
+import formatMixin from "src/mixin/formatMixin";
 export default defineComponent({
   name: "InvoicesTable",
-  mixins: [windowMixin],
+  mixins: [windowMixin, formatMixin],
   props: {},
   data: function () {
     return {

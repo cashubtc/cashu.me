@@ -48,33 +48,6 @@ window.windowMixin = {
       }
       return text;
     },
-    formatCurrency: function (value, currency, showBalance = false) {
-      if (currency == undefined) {
-        currency = "sat";
-      }
-      if (useUiStore().hideBalance && !showBalance) {
-        return "****";
-      }
-      if (currency == "sat") return this.formatSat(value);
-      if (currency == "msat") return this.fromMsat(value);
-      if (currency == "usd") value = value / 100;
-      if (currency == "eur") value = value / 100;
-      return new Intl.NumberFormat(window.LOCALE, {
-        style: "currency",
-        currency: currency,
-      }).format(value);
-      // + " " +
-      // currency.toUpperCase()
-    },
-    formatSat: function (value) {
-      // convert value to integer
-      value = parseInt(value);
-      return new Intl.NumberFormat(window.LOCALE).format(value) + " sat";
-    },
-    fromMsat: function (value) {
-      value = parseInt(value);
-      return new Intl.NumberFormat(window.LOCALE).format(value) + " msat";
-    },
     notifyApiError: function (error) {
       var types = {
         400: "warning",

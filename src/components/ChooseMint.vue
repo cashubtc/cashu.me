@@ -77,10 +77,11 @@ import { mapActions, mapState, mapWritableState } from "pinia";
 import { useMintsStore } from "stores/mints";
 import { MintClass } from "stores/mints";
 import { title } from "process";
+import formatMixin from "src/mixin/formatMixin";
 
 export default defineComponent({
   name: "ChooseMint",
-  mixins: [windowMixin],
+  mixins: [formatMixin],
   props: {
     rounded: {
       type: Boolean,

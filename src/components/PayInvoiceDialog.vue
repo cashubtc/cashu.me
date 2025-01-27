@@ -257,11 +257,11 @@ import { useWalletStore } from "src/stores/wallet";
 import { useUiStore } from "src/stores/ui";
 import { useCameraStore } from "src/stores/camera";
 import { useMintsStore } from "src/stores/mints";
-import { useSettingsStore } from "src/stores/settings";
 import { usePriceStore } from "src/stores/price";
 import { mapActions, mapState, mapWritableState } from "pinia";
 import ChooseMint from "components/ChooseMint.vue";
 import ToggleUnit from "components/ToggleUnit.vue";
+import formatMixin from "src/mixin/formatMixin";
 
 // import * as bolt11Decoder from "light-bolt11-decoder";
 import * as _ from "underscore";
@@ -269,7 +269,7 @@ import { Scan as ScanIcon } from "lucide-vue-next";
 
 export default defineComponent({
   name: "PayInvoiceDialog",
-  mixins: [windowMixin],
+  mixins: [windowMixin, formatMixin],
   components: {
     ChooseMint,
     ToggleUnit,
