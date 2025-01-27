@@ -172,10 +172,11 @@ import { useRestoreStore } from "src/stores/restore";
 import { useWalletStore } from "src/stores/wallet";
 import { useUiStore } from "src/stores/ui";
 import { notifyError, notifySuccess } from "src/js/notify";
+import formatMixin from "src/mixin/formatMixin";
 
 export default defineComponent({
   name: "RestoreView",
-  mixins: [windowMixin],
+  mixins: [windowMixin, formatMixin],
   data() {
     return {
       mnemonicError: "",

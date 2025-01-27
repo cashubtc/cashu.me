@@ -524,21 +524,20 @@ import { mapActions, mapState, mapWritableState } from "pinia";
 import { useMintsStore, MintClass } from "src/stores/mints";
 import { useWalletStore } from "src/stores/wallet";
 import { useCameraStore } from "src/stores/camera";
-import { map } from "underscore";
-import { currentDateStr } from "src/js/utils";
 import { useSettingsStore } from "src/stores/settings";
 import { useNostrStore } from "src/stores/nostr";
 import { useP2PKStore } from "src/stores/p2pk";
 import { useWorkersStore } from "src/stores/workers";
 import { useSwapStore } from "src/stores/swap";
 import { useUiStore } from "src/stores/ui";
-import { notifyError, notifyWarning } from "src/js/notify";
+import { notifyError } from "src/js/notify";
 import MintDetailsDialog from "src/components/MintDetailsDialog.vue";
 import { EventBus } from "../js/eventBus";
+import formatMixin from "src/mixin/formatMixin";
 
 export default defineComponent({
   name: "MintSettings",
-  mixins: [windowMixin],
+  mixins: [windowMixin, formatMixin],
   components: { MintDetailsDialog },
   props: {},
   setup() {

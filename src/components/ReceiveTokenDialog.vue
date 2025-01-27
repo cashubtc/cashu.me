@@ -263,10 +263,11 @@ import {
   notify,
 } from "../js/notify";
 import MintSettings from "./MintSettings.vue";
+import formatMixin from "src/mixin/formatMixin";
 
 export default defineComponent({
   name: "ReceiveTokenDialog",
-  mixins: [windowMixin],
+  mixins: [windowMixin, formatMixin],
   components: {
     TokenInformation,
     NfcIcon,

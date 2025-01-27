@@ -1,5 +1,4 @@
 import { copyToClipboard } from "quasar";
-import { useUiStore } from "stores/ui";
 import { Clipboard } from "@capacitor/clipboard";
 import { SafeArea } from "capacitor-plugin-safe-area";
 
@@ -10,7 +9,6 @@ window.windowMixin = {
   data: function () {
     return {
       g: {
-        offline: !navigator.onLine,
         visibleDrawer: false,
         extensions: [],
         user: null,
@@ -47,33 +45,6 @@ window.windowMixin = {
         text = await navigator.clipboard.readText();
       }
       return text;
-    },
-    formatCurrency: function (value, currency, showBalance = false) {
-      if (currency == undefined) {
-        currency = "sat";
-      }
-      if (useUiStore().hideBalance && !showBalance) {
-        return "****";
-      }
-      if (currency == "sat") return this.formatSat(value);
-      if (currency == "msat") return this.fromMsat(value);
-      if (currency == "usd") value = value / 100;
-      if (currency == "eur") value = value / 100;
-      return new Intl.NumberFormat(window.LOCALE, {
-        style: "currency",
-        currency: currency,
-      }).format(value);
-      // + " " +
-      // currency.toUpperCase()
-    },
-    formatSat: function (value) {
-      // convert value to integer
-      value = parseInt(value);
-      return new Intl.NumberFormat(window.LOCALE).format(value) + " sat";
-    },
-    fromMsat: function (value) {
-      value = parseInt(value);
-      return new Intl.NumberFormat(window.LOCALE).format(value) + " msat";
     },
     notifyApiError: function (error) {
       var types = {
@@ -194,14 +165,6 @@ window.windowMixin = {
       this.$q.dark.set(true);
     }
     this.g.allowedThemes = window.allowedThemes ?? ["classic"];
-
-    addEventListener("offline", (event) => {
-      this.g.offline = true;
-    });
-
-    addEventListener("online", (event) => {
-      this.g.offline = false;
-    });
 
     // addEventListener("beforeunload", (event) => {
     //   event.preventDefault();
