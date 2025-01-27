@@ -70,7 +70,7 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
 import { defineComponent } from "vue";
 import { getShortUrl } from "src/js/wallet-helpers";
 import { mapActions, mapState, mapWritableState } from "pinia";
@@ -98,18 +98,21 @@ export default defineComponent({
   },
   data: function () {
     return {
-      chosenMint: null,
+      chosenMint: {
+        url: "",
+        shorturl: "",
+      },
     };
   },
   mounted() {
     this.chosenMint = {
-      url: this.activeMintUrl,
+      url: this.activeMintUrl.value,
       shorturl: getShortUrl(this.activeMintUrl),
     };
   },
   watch: {
     chosenMint: async function () {
-      this.activeMintUrl = this.chosenMint.url;
+      await this.activateMintUrl(this.chosenMint.url);
     },
   },
   computed: {

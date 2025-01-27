@@ -4,8 +4,6 @@ declare global {
   interface Window {
     LOCALE: string;
     windowMixin: any;
-    allowedThemes?: string[];
-    Capacitor?: any;
   }
 }
 
