@@ -69,18 +69,32 @@
     </div>
   </div>
 </template>
-
 <script lang="ts">
 import { defineComponent } from "vue";
 import { getShortUrl } from "src/js/wallet-helpers";
 import { mapActions, mapState, mapWritableState } from "pinia";
 import { useMintsStore } from "stores/mints";
 import { MintClass } from "stores/mints";
-import { title } from "process";
 import formatMixin from "src/mixin/formatMixin";
+
+interface ChosenMint {
+  url: string;
+  shorturl: string;
+}
 
 export default defineComponent({
   name: "ChooseMint",
+
+  setup() {
+    const mintsStore = useMintsStore();
+    const { activeMintUrl } = mintsStore;
+
+    return {
+      activeMintUrl,
+      mintsStore,
+    };
+  },
+
   mixins: [formatMixin],
   props: {
     rounded: {
@@ -98,21 +112,20 @@ export default defineComponent({
   },
   data: function () {
     return {
-      chosenMint: {
-        url: "",
-        shorturl: "",
-      },
+      chosenMint: null as ChosenMint | null,
     };
   },
   mounted() {
     this.chosenMint = {
-      url: this.activeMintUrl.value,
-      shorturl: getShortUrl(this.activeMintUrl),
+      url: this.activeMintUrl || "",
+      shorturl: getShortUrl(this.activeMintUrl || ""),
     };
   },
   watch: {
     chosenMint: async function () {
-      await this.activateMintUrl(this.chosenMint.url);
+      if (this.chosenMint) {
+        this.mintsStore.activeMintUrl = this.chosenMint.url;
+      }
     },
   },
   computed: {
@@ -126,7 +139,7 @@ export default defineComponent({
     getBalance: function () {
       return this.activeProofs
         .flat()
-        .reduce((sum, el) => (sum += el.amount), 0);
+        .reduce((sum: any, el: { amount: any }) => (sum += el.amount), 0);
     },
   },
   methods: {

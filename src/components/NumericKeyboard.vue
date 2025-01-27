@@ -77,12 +77,7 @@ export default defineComponent({
       }
     },
     closeKeyboard() {
-      this.useNumericKeyboard.value = false;
       this.showNumericKeyboard = false;
-      notify(
-        "Keyboard disabled. You can re-enable the keyboard in the settings.",
-        "bottom"
-      );
     },
     emitDone() {
       this.$emit("done");
