@@ -39,7 +39,7 @@
   </transition>
 </template>
 
-<script>
+<script lang="ts">
 import { defineComponent } from "vue";
 import { useUiStore } from "../stores/ui";
 import { mapWritableState } from "pinia";
@@ -60,7 +60,7 @@ export default defineComponent({
     ...mapWritableState(useSettingsStore, ["useNumericKeyboard"]),
   },
   methods: {
-    addDigit(digit) {
+    addDigit(digit: string) {
       const current = this.modelValue || "0";
       const newVal = current === "0" ? digit : current + digit;
       this.$emit("update:modelValue", newVal);
@@ -77,7 +77,7 @@ export default defineComponent({
       }
     },
     closeKeyboard() {
-      this.useNumericKeyboard = false;
+      this.useNumericKeyboard.value = false;
       this.showNumericKeyboard = false;
       notify(
         "Keyboard disabled. You can re-enable the keyboard in the settings.",
