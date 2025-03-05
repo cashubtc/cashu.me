@@ -327,6 +327,14 @@
                 >Copy</q-btn
               >
               <q-btn
+                class="q-mx-sm"
+                size="md"
+                flat
+                dense
+                @click="copyText(encodeToPeanut(sendData.tokensBase64))"
+                >🥜</q-btn
+              >
+              <q-btn
                 class="q-mr-sm"
                 color="grey"
                 size="md"
@@ -675,6 +683,25 @@ export default defineComponent({
     //     this.notifyError("No valid key");
     //   }
     // },
+    encodeToPeanut: function (token) {
+      return (
+        "🥜" +
+        Array.from(token)
+          .map((char) => {
+            const byteValue = char.charCodeAt(0);
+            // For byte values 0-15, use Variation Selectors (VS1-VS16): U+FE00 to U+FE0F
+            if (byteValue >= 0 && byteValue <= 15) {
+              return String.fromCodePoint(0xfe00 + byteValue);
+            }
+
+            // For byte values 16-255, use Variation Selectors Supplement (VS17-VS256): U+E0100 to U+E01EF
+            if (byteValue >= 16 && byteValue <= 255) {
+              return String.fromCodePoint(0xe0100 + (byteValue - 16));
+            }
+          })
+          .join("")
+      );
+    },
     decodeToken: function (encoded_token) {
       return token.decode(encoded_token);
     },
