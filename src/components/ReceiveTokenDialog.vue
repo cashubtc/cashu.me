@@ -321,8 +321,13 @@ export default defineComponent({
         navigator.clipboard.readText
       );
     },
+    isTokenPeanut: function () {
+      return this.receiveData.tokensBase64.match(
+        /^.([\uFE00-\uFE0F]|[\uE0100-\uE01EF]+)$/
+      );
+    },
     tokenDecodesCorrectly: function () {
-      if (this.receiveData.tokensBase64.startsWith("🥜"))
+      if (this.isTokenPeanut)
         return this.decodePeanut(this.receiveData.tokensBase64) !== undefined;
       return this.decodeToken(this.receiveData.tokensBase64) !== undefined;
     },
@@ -381,7 +386,7 @@ export default defineComponent({
     ]),
     // TOKEN METHODS
     decodePeanut: function (peanut) {
-      if (!peanut.startsWith("🥜")) return undefined;
+      if (!this.isTokenPeanut) return undefined;
       try {
         const decoded = Array.from(peanut)
           .slice(1)
