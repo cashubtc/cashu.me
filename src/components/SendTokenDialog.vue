@@ -317,88 +317,111 @@
             >
               <SendPaymentRequest />
             </div>
-            <div class="row q-mt-lg">
-              <q-btn
-                class="q-mx-sm"
-                size="md"
-                flat
-                dense
-                @click="copyText(sendData.tokensBase64)"
-                >Copy</q-btn
-              >
-              <q-btn
-                class="q-mx-sm"
-                size="md"
-                flat
-                dense
-                @click="copyText(encodeToPeanut(sendData.tokensBase64))"
-                >🥜</q-btn
-              >
-              <q-btn
-                class="q-mr-sm"
-                color="grey"
-                size="md"
-                dense
-                icon="link"
-                flat
-                @click="copyText(baseURL + '#token=' + sendData.tokensBase64)"
-                ><q-tooltip>Copy link</q-tooltip></q-btn
-              >
-              <q-btn
-                unelevated
-                dense
-                class="q-mx-sm"
-                v-if="
-                  hasCamera &&
-                  !sendData.paymentRequest &&
-                  sendData.historyAmount < 0
-                "
-                @click="showCamera"
-              >
-                <ScanIcon />
-              </q-btn>
-              <q-btn
-                unelevated
-                dense
-                v-if="
-                  ndefSupported &&
-                  !sendData.paymentRequest &&
-                  sendData.historyAmount < 0
-                "
-                :disabled="scanningCard"
-                :loading="scanningCard"
-                class="q-mx-sm"
-                size="md"
-                @click="writeTokensToCard"
-                flat
-              >
-                <NfcIcon />
-                <q-tooltip>{{
-                  ndefSupported ? "Flash to NFC card" : "NDEF unsupported"
-                }}</q-tooltip>
-                <template v-slot:loading>
-                  <q-spinner @click="closeCardScanner" />
-                </template>
-              </q-btn>
-              <q-btn
-                class="q-mx-none"
-                color="grey"
-                icon="delete"
-                size="md"
-                @click="
-                  showDeleteDialog = true;
-                  closeCardScanner();
-                "
-                flat
-              >
-                <q-tooltip>Delete from history</q-tooltip>
-              </q-btn>
+            <div class="row items-center justify-between q-mt-lg">
+              <div class="row items-center">
+                <q-btn
+                  class="q-ml-md"
+                  size="md"
+                  flat
+                  dense
+                  @click="copyText(sendData.tokensBase64)"
+                  >Copy</q-btn
+                >
+                <q-btn
+                  class="q-mx-none"
+                  size="md"
+                  flat
+                  dense
+                  @click="toggleExpandButtons"
+                >
+                  <q-icon
+                    :name="
+                      showExpandedButtons ? 'chevron_left' : 'chevron_right'
+                    "
+                  />
+                </q-btn>
+
+                <div v-if="showExpandedButtons" class="row q-gutter-sm">
+                  <q-btn
+                    class="q-mr-xs"
+                    size="md"
+                    flat
+                    dense
+                    @click="copyText(encodeToPeanut(sendData.tokensBase64))"
+                    >🥜
+                    <q-tooltip>Copy Emoji</q-tooltip>
+                  </q-btn>
+                  <q-btn
+                    class="q-mx-none"
+                    color="grey"
+                    size="md"
+                    dense
+                    icon="link"
+                    flat
+                    @click="
+                      copyText(baseURL + '#token=' + sendData.tokensBase64)
+                    "
+                    ><q-tooltip>Copy link</q-tooltip></q-btn
+                  >
+                  <q-btn
+                    unelevated
+                    dense
+                    size="sm"
+                    class="q-mx-none"
+                    v-if="
+                      hasCamera &&
+                      !sendData.paymentRequest &&
+                      sendData.historyAmount < 0
+                    "
+                    @click="showCamera"
+                  >
+                    <ScanIcon />
+                  </q-btn>
+                  <q-btn
+                    unelevated
+                    dense
+                    v-if="
+                      ndefSupported &&
+                      !sendData.paymentRequest &&
+                      sendData.historyAmount < 0
+                    "
+                    :disabled="scanningCard"
+                    :loading="scanningCard"
+                    class="q-mx-none"
+                    size="sm"
+                    @click="writeTokensToCard"
+                    flat
+                  >
+                    <NfcIcon />
+                    <q-tooltip>{{
+                      ndefSupported ? "Flash to NFC card" : "NDEF unsupported"
+                    }}</q-tooltip>
+                    <template v-slot:loading>
+                      <q-spinner @click="closeCardScanner" />
+                    </template>
+                  </q-btn>
+                  <q-btn
+                    class="q-mx-none"
+                    color="grey"
+                    dense
+                    icon="delete"
+                    size="md"
+                    @click="
+                      showDeleteDialog = true;
+                      closeCardScanner();
+                    "
+                    flat
+                  >
+                    <q-tooltip>Delete from history</q-tooltip>
+                  </q-btn>
+                </div>
+              </div>
               <q-btn
                 v-close-popup
                 @click="closeCardScanner"
                 flat
                 color="grey"
-                class="q-ml-auto"
+                class="q-ml-auto q-mr-md"
                 >Close</q-btn
               >
             </div>
@@ -519,6 +542,7 @@ export default defineComponent({
       fragmentSpeedLabel: "F",
       isV4Token: false,
       scanningCard: false,
+      showExpandedButtons: false,
     };
   },
   computed: {
@@ -716,6 +740,9 @@ export default defineComponent({
     },
     getMint: function (decoded_token) {
       return token.getMint(decoded_token);
+    },
+    toggleExpandButtons() {
+      this.showExpandedButtons = !this.showExpandedButtons;
     },
     startQrCodeLoop: async function () {
       if (this.sendData.tokensBase64.length == 0) {
