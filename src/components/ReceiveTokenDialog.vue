@@ -321,7 +321,14 @@ export default defineComponent({
         navigator.clipboard.readText
       );
     },
+    isTokenPeanut: function () {
+      return this.receiveData.tokensBase64.match(
+        /^.([\uFE00-\uFE0F]|[\uE0100-\uE01EF]+)$/
+      );
+    },
     tokenDecodesCorrectly: function () {
+      if (this.isTokenPeanut)
+        return this.decodePeanut(this.receiveData.tokensBase64) !== undefined;
       return this.decodeToken(this.receiveData.tokensBase64) !== undefined;
     },
     knowThisMint: function () {
@@ -378,6 +385,35 @@ export default defineComponent({
       "pasteToParseDialog",
     ]),
     // TOKEN METHODS
+    decodePeanut: function (peanut) {
+      if (!this.isTokenPeanut) return undefined;
+      try {
+        const decoded = Array.from(peanut)
+          .slice(1)
+          .map((char) => {
+            const codePoint = char.codePointAt(0);
+
+            // Handle Variation Selectors (VS1-VS16): U+FE00 to U+FE0F
+            if (codePoint >= 0xfe00 && codePoint <= 0xfe0f) {
+              const byteValue = codePoint - 0xfe00; // Maps FE00->0, FE01->1, ..., FE0F->15
+              return String.fromCharCode(byteValue);
+            }
+
+            // Handle Variation Selectors Supplement (VS17-VS256): U+E0100 to U+E01EF
+            if (codePoint >= 0xe0100 && codePoint <= 0xe01ef) {
+              const byteValue = codePoint - 0xe0100 + 16; // Maps E0100->16, E0101->17, ..., E01EF->255
+              return String.fromCharCode(byteValue);
+            }
+
+            throw new Error("Invalid code point: " + codePoint);
+          })
+          .join("");
+        this.receiveData.tokensBase64 = decoded;
+        return this.decodeToken(decoded);
+      } catch (error) {
+        return undefined;
+      }
+    },
     getProofs: function (decoded_token) {
       return token.getProofs(decoded_token);
     },
