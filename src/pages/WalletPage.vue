@@ -445,7 +445,9 @@ export default {
         useWelcomeStore().showWelcome = true;
       }
       if (useWelcomeStore().showWelcome) {
-        this.$router.push("/welcome");
+        const currentQuery = window.location.search;
+        const currentHash = window.location.hash;
+        this.$router.push("/welcome" + currentQuery + currentHash);
       }
     },
     setTab: function (to) {
@@ -605,11 +607,14 @@ export default {
     }
 
     // Clear all parameters from URL without refreshing the page
+    /*
     window.history.pushState(
       {},
       document.title,
       window.location.href.split("?")[0].split("#")[0]
     );
+    */
+    console.log(`hash: ${window.location.hash}`);
 
     // startup tasks
 
