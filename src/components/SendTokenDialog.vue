@@ -506,9 +506,12 @@ import {
   notifyWarning,
 } from "src/js/notify.ts";
 import { getEncodedTokenV3 } from "@cashu/cashu-ts/dist/lib/es5/utils";
+import formatMixin from "src/mixin/formatMixin";
+import onlineMixin from "src/mixin/onlineMixin";
+
 export default defineComponent({
   name: "SendTokenDialog",
-  mixins: [windowMixin],
+  mixins: [windowMixin, formatMixin, onlineMixin],
   components: {
     ChooseMint,
     TokenInformation,

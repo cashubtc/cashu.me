@@ -139,19 +139,17 @@ import { defineComponent, ref } from "vue";
 import { getShortUrl } from "src/js/wallet-helpers";
 import { mapState, mapWritableState, mapActions } from "pinia";
 import { useMintsStore } from "stores/mints";
-import { useSettingsStore } from "stores/settings";
 import { useTokensStore } from "stores/tokens";
 import { useUiStore } from "stores/ui";
 import { useWalletStore } from "stores/wallet";
 import { usePriceStore } from "stores/price";
 import ToggleUnit from "components/ToggleUnit.vue";
 import AnimatedNumber from "components/AnimatedNumber.vue";
-import axios from "axios";
-import { map } from "underscore";
+import formatMixin from "src/mixin/formatMixin";
 
 export default defineComponent({
   name: "BalanceView",
-  mixins: [windowMixin],
+  mixins: [windowMixin, formatMixin],
   components: {
     ToggleUnit,
     AnimatedNumber,

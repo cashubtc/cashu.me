@@ -16,14 +16,11 @@
     </q-toolbar>
   </q-header>
 </template>
-<script>
-import { defineComponent, ref } from "vue";
+<script lang="ts">
+import { defineComponent } from "vue";
 
 export default defineComponent({
   name: "FullscreenHeader",
-  mixins: [windowMixin],
-  props: {},
-  components: {},
   setup() {
     return {};
   },
