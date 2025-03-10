@@ -847,8 +847,8 @@ export default defineComponent({
 }
 .error-badge {
   position: absolute;
-  top: 8px; /* Adjust as needed */
-  right: 8px; /* Adjust as needed */
-  z-index: 10; /* Ensure it appears above other elements */
+  top: 8px;
+  right: 8px;
+  z-index: 10;
 }
 </style>
