@@ -24,6 +24,7 @@ export type Mint = {
   keysets: MintKeyset[];
   nickname?: string;
   info?: GetInfoResponse;
+  errored?: boolean;
   // initialize api: new CashuMint(url) on activation
 };
 
@@ -370,6 +371,7 @@ export const useMintsStore = defineStore("mints", {
         if (verbose) {
           await notifySuccess("Mint activated.");
         }
+        this.mints.filter((m) => m.url === mint.url)[0].errored = false;
         console.log("### activateMint: Mint activated: ", this.activeMintUrl);
       } catch (error: any) {
         // restore previous values because the activation errored
@@ -379,6 +381,7 @@ export const useMintsStore = defineStore("mints", {
           err_msg = err_msg + ` ${error.message}.`;
         }
         await notifyError(err_msg, "Mint activation failed");
+        this.mints.filter((m) => m.url === mint.url)[0].errored = true;
         throw error;
       } finally {
         await uIStore.unlockMutex();
@@ -393,7 +396,7 @@ export const useMintsStore = defineStore("mints", {
         console.error(error);
         try {
           // notifyApiError(error, "Could not get mint info");
-        } catch {}
+        } catch { }
         throw error;
       }
     },
@@ -433,7 +436,7 @@ export const useMintsStore = defineStore("mints", {
         console.error(error);
         try {
           // notifyApiError(error, "Could not get mint keys");
-        } catch {}
+        } catch { }
         throw error;
       }
     },
@@ -447,7 +450,7 @@ export const useMintsStore = defineStore("mints", {
         console.error(error);
         try {
           // notifyApiError(error, "Could not get mint keysets");
-        } catch {}
+        } catch { }
         throw error;
       }
     },

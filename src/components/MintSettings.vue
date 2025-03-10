@@ -4,31 +4,31 @@
     <!-- ////////////////////// SETTINGS ////////////////// -->
     <div class="q-py-md q-px-xs text-left" on-left>
       <q-list padding>
-        <q-item>
-          <q-item-section>
-            <q-item-label overline>Mints</q-item-label>
-          </q-item-section>
-        </q-item>
-
         <!-- <q-item-label header>Your mints</q-item-label> -->
-        <div v-for="mint in mints" :key="mint.url">
+        <div v-for="mint in mints" :key="mint.url" class="q-px-md">
           <q-item
             :active="mint.url == activeMintUrl"
             active-class="text-weight-bold text-primary"
             clickable
             @click="activateMintUrlInternal(mint.url)"
             class="mint-card q-mb-md cursor-pointer"
-            :class="$q.dark.isActive ? 'bg-info' : 'bg-dark'"
             :style="{
-              'border-radius': '8px',
+              'border-radius': '10px',
               border:
                 mint.url == activeMintUrl
-                  ? '2px solid var(--q-primary)'
-                  : '2px solid rgba(128, 128, 128, 0.2)',
+                  ? '1px solid var(--q-primary)'
+                  : '1px solid rgba(128, 128, 128, 0.2)',
               padding: '0px',
+              position: 'relative',
             }"
             :loading="mint.url == activatingMintUrl"
           >
+            <div v-if="mint.errored" class="error-badge">
+              <q-badge color="red" class="q-mr-xs q-mt-sm text-weight-bold">
+                Error
+                <q-icon name="error" class="q-ml-xs" />
+              </q-badge>
+            </div>
             <div class="full-width" style="position: relative">
               <transition-group
                 appear
@@ -75,6 +75,7 @@
                     >
                       <q-img
                         spinner-color="white"
+                        spinner-size="xs"
                         :src="getMintIconUrl(mint)"
                         alt="Mint Icon"
                         style="height: 34px; max-width: 34px; font-size: 12px"
@@ -105,27 +106,22 @@
                 </div>
               </div>
 
-              <div class="row justify-between q-pa-md">
+              <div class="row justify-between q-pb-md q-px-sm">
                 <div class="col">
                   <!-- Currency units with regular text styling -->
                   <div class="row q-gutter-x-sm">
                     <div
                       v-for="unit in mintClass(mint).units"
                       :key="unit"
+                      class="q-py-xs q-px-sm"
                       style="
                         border-radius: 4px;
                         background-color: #1d1d1d;
-                        padding: 8px;
                         display: inline-block;
                       "
                     >
                       <span
-                        style="
-                          color: white;
-                          font-size: 12px;
-                          font-family: monospace;
-                          font-weight: 500;
-                        "
+                        style="color: white; font-size: 14px; font-weight: 500"
                       >
                         {{
                           formatCurrency(
@@ -138,7 +134,7 @@
                   </div>
                 </div>
 
-                <div class="col-auto">
+                <div class="col-auto q-pr-sm">
                   <q-icon
                     name="info_outline"
                     @click.stop="showMintInfo(mint)"
@@ -848,5 +844,11 @@ export default defineComponent({
 .mint-card.q-loading {
   opacity: 0.5; /* Reduce opacity when loading */
   pointer-events: none;
+}
+.error-badge {
+  position: absolute;
+  top: 8px; /* Adjust as needed */
+  right: 8px; /* Adjust as needed */
+  z-index: 10; /* Ensure it appears above other elements */
 }
 </style>
