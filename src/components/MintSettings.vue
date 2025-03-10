@@ -126,7 +126,7 @@
                         {{
                           formatCurrency(
                             mintClass(mint).unitBalance(unit),
-                            unit,
+                            unit
                           )
                         }}
                       </span>
@@ -839,9 +839,7 @@ export default defineComponent({
 <style>
 .fade-enter-active,
 .fade-leave-active {
-  transition:
-    transform 1s ease,
-    opacity 1s ease;
+  transition: transform 1s ease, opacity 1s ease;
 }
 .mint-card.q-loading {
   opacity: 0.5; /* Reduce opacity when loading */
