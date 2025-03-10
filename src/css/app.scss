@@ -1,8 +1,9 @@
 // app global css in SCSS form
 
-// prevent pull to refresh on android chrome
+// prevent pull to refresh
+html,
 body {
-  overscroll-behavior-y: contain;
+  overscroll-behavior: none;
 }
 
 // margin for top elements for ios safe area
