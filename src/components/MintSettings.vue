@@ -106,7 +106,7 @@
                 </div>
               </div>
 
-              <div class="row justify-between q-pb-md q-px-sm">
+              <div class="row justify-between q-pb-md q-px-md">
                 <div class="col">
                   <!-- Currency units with regular text styling -->
                   <div class="row q-gutter-x-sm">
@@ -134,7 +134,7 @@
                   </div>
                 </div>
 
-                <div class="col-auto q-pr-sm">
+                <div class="col-auto">
                   <q-icon
                     name="info_outline"
                     @click.stop="showMintInfo(mint)"
