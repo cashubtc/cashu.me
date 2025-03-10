@@ -30,6 +30,14 @@
           </div>
           <q-card-section class="q-pa-sm">
             <div
+              v-if="showMintInfoData.errored"
+              class="row justify-center q-pa-md"
+            >
+              <q-badge color="red" label="Error" class="q-mr-xs">
+                <q-icon name="error" class="q-ml-xs" />
+              </q-badge>
+            </div>
+            <div
               v-if="showMintInfoData.info.name"
               class="row justify-center q-pt-sm"
             >
