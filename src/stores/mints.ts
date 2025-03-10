@@ -39,7 +39,7 @@ export class MintClass {
   get proofs() {
     const proofsStore = useProofsStore();
     return proofsStore.proofs.filter((p) =>
-      this.mint.keysets.map((k) => k.id).includes(p.id)
+      this.mint.keysets.map((k) => k.id).includes(p.id),
     );
   }
   get allBalances() {
@@ -69,7 +69,7 @@ export class MintClass {
     const proofsStore = useProofsStore();
     const unitKeysets = this.unitKeysets(unit);
     return proofsStore.proofs.filter(
-      (p) => unitKeysets.map((k) => k.id).includes(p.id) && !p.reserved
+      (p) => unitKeysets.map((k) => k.id).includes(p.id) && !p.reserved,
     );
   }
 
@@ -118,7 +118,7 @@ export const useMintsStore = defineStore("mints", {
     watch([activeMintUrl, activeUnit], async () => {
       const proofsStore = useProofsStore();
       console.log(
-        `watcher: activeMintUrl: ${activeMintUrl.value}, activeUnit: ${activeUnit.value}`
+        `watcher: activeMintUrl: ${activeMintUrl.value}, activeUnit: ${activeUnit.value}`,
       );
       await proofsStore.updateActiveProofs();
     });
@@ -211,7 +211,7 @@ export const useMintsStore = defineStore("mints", {
       } else {
         if (this.mints.length) {
           console.error(
-            "No active mint. This should not happen. switching to first one."
+            "No active mint. This should not happen. switching to first one.",
           );
           this.activateMintUrl(this.mints[0].url, false, true);
           return new MintClass(this.mints[0]);
@@ -223,7 +223,7 @@ export const useMintsStore = defineStore("mints", {
       const proofsStore = useProofsStore();
       const unitKeysets = mint.keysets.filter((k) => k.unit === unit);
       return proofsStore.proofs.filter(
-        (p) => unitKeysets.map((k) => k.id).includes(p.id) && !p.reserved
+        (p) => unitKeysets.map((k) => k.id).includes(p.id) && !p.reserved,
       );
     },
     toggleUnit: function () {
@@ -261,7 +261,7 @@ export const useMintsStore = defineStore("mints", {
     },
     addMint: async function (
       addMintData: { url: string; nickname?: string },
-      verbose = false
+      verbose = false,
     ): Promise<Mint> {
       let url = addMintData.url;
       this.addMintBlocking = true;
@@ -316,7 +316,7 @@ export const useMintsStore = defineStore("mints", {
       url: string,
       verbose = false,
       force = false,
-      unit: string | undefined = undefined
+      unit: string | undefined = undefined,
     ) {
       const mint = this.mints.filter((m) => m.url === url)[0];
       if (mint) {
@@ -396,7 +396,7 @@ export const useMintsStore = defineStore("mints", {
         console.error(error);
         try {
           // notifyApiError(error, "Could not get mint info");
-        } catch { }
+        } catch {}
         throw error;
       }
     },
@@ -436,7 +436,7 @@ export const useMintsStore = defineStore("mints", {
         console.error(error);
         try {
           // notifyApiError(error, "Could not get mint keys");
-        } catch { }
+        } catch {}
         throw error;
       }
     },
@@ -450,7 +450,7 @@ export const useMintsStore = defineStore("mints", {
         console.error(error);
         try {
           // notifyApiError(error, "Could not get mint keysets");
-        } catch { }
+        } catch {}
         throw error;
       }
     },
