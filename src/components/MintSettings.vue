@@ -42,13 +42,13 @@
             <q-item-section>
               <q-item-label
                 lines="1"
-                v-if="mint.nickname"
+                v-if="mint.nickname || mint.info?.name"
                 @click="
                   activateMintUrl(mint.url, (verbose = false), (force = false))
                 "
                 class="cursor-pointer"
                 style="word-break: break-all; font-weight: bold"
-                >{{ mint.nickname }}</q-item-label
+                >{{ mint.nickname || mint.info?.name }}</q-item-label
               >
               <q-item-label
                 lines="1"
