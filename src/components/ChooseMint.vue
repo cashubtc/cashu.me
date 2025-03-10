@@ -15,7 +15,7 @@
           v-model="chosenMint"
           :options="chooseMintOptions()"
           option-value="url"
-          option-label="shorturl"
+          option-label="nickname"
           :rounded="rounded"
           :style="style"
         >
@@ -101,8 +101,11 @@ export default defineComponent({
     };
   },
   mounted() {
+    const m = this.mints.find((m) => m.url === this.activeMintUrl);
+    const mint = new MintClass(m);
     this.chosenMint = {
       url: this.activeMintUrl,
+      nickname: mint.mint.nickname || mint.mint.info?.name,
       shorturl: getShortUrl(this.activeMintUrl),
     };
   },
@@ -134,9 +137,9 @@ export default defineComponent({
         const units = [...new Set(all_units)];
         const mint = new MintClass(m);
         options.push({
-          nickname: m.nickname,
-          url: m.url,
-          shorturl: m.nickname || getShortUrl(m.url),
+          nickname: mint.mint.nickname || mint.mint.info?.name,
+          url: mint.mint.url,
+          shorturl: getShortUrl(m.url),
           balances: mint.allBalances,
           units: units,
         });

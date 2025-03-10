@@ -199,7 +199,11 @@ export default defineComponent({
     activeMintLabel: function () {
       const mintClass = this.activeMint();
 
-      return mintClass.mint.nickname || getShortUrl(this.activeMintUrl);
+      return (
+        mintClass.mint.nickname ||
+        mintClass.mint.info?.name ||
+        getShortUrl(this.activeMintUrl)
+      );
     },
     getBalance: function () {
       var balance = this.activeProofs
