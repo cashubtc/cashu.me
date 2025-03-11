@@ -11,6 +11,19 @@
     :showEditMintDialog="showEditMintDialog"
     @update:showEditMintDialog="showEditMintDialog = $event"
   />
+  <AddMintDialog
+    :addMintData="addMintData"
+    :showAddMintDialog="showAddMintDialog"
+    @update:showAddMintDialog="showAddMintDialog = $event"
+    :addMintBlocking="addMintBlocking"
+    @add="addMintInternal"
+  />
+  <RemoveMintDialog
+    :mintToRemove="mintToRemove"
+    :showRemoveMintDialog="showRemoveMintDialog"
+    @update:showRemoveMintDialog="showRemoveMintDialog = $event"
+    @remove="removeMint"
+  />
   <div style="max-width: 800px; margin: 0 auto">
     <!-- ////////////////////// SETTINGS ////////////////// -->
     <div class="q-py-md q-px-xs text-left" on-left>
@@ -426,117 +439,6 @@
         </q-item>
       </q-list>
     </div>
-
-    <q-dialog
-      v-model="showAddMintDialog"
-      @keydown.enter.prevent="addMintInternal(addMintData, (verbose = true))"
-      backdrop-filter="blur(2px) brightness(60%)"
-    >
-      <q-card class="q-pa-lg">
-        <h6 class="q-mt-none q-mb-md">Do you trust this mint?</h6>
-        <p>
-          Before using this mint, make sure you trust it. Mints could become
-          malicious or cease operation at any time.
-        </p>
-        <q-input
-          outlined
-          readonly
-          v-model="addMintData.url"
-          label="Mint URL"
-          type="textarea"
-          autogrow
-          class="q-mb-xs"
-          style="font-family: monospace; font-size: 0.9em"
-        ></q-input>
-        <div class="row q-mt-lg">
-          <div class="col">
-            <q-btn
-              class="float-left"
-              rounded
-              v-close-popup
-              color="primary"
-              icon="check"
-              :loading="addMintBlocking"
-              @click="addMintInternal(addMintData, (verbose = true))"
-              >Add mint
-              <template v-slot:loading>
-                <q-spinner-hourglass />
-                Adding mint
-              </template>
-            </q-btn>
-          </div>
-          <div class="col">
-            <q-btn v-close-popup flat class="float-right" color="grey"
-              >Cancel</q-btn
-            >
-          </div>
-        </div>
-      </q-card>
-    </q-dialog>
-    <q-dialog
-      v-model="showRemoveMintDialog"
-      backdrop-filter="blur(2px) brightness(60%)"
-    >
-      <q-card class="q-pa-lg">
-        <h6 class="q-my-md">Are you sure you want to delete this mint?</h6>
-        <div v-if="mintToRemove.nickname">
-          <span class="text-weight-bold"> Nickname: </span>
-          <span class="text-weight-light"> {{ mintToRemove.nickname }}</span>
-        </div>
-        <div class="row q-my-md">
-          <div class="col">
-            <span class="text-weight-bold">Balances:</span>
-            <q-badge
-              v-for="unit in mintClass(mintToRemove).units"
-              :key="unit"
-              color="primary"
-              :label="
-                formatCurrency(mintClass(mintToRemove).unitBalance(unit), unit)
-              "
-              class="q-mx-xs"
-            />
-          </div>
-        </div>
-        <q-input
-          outlined
-          readonly
-          v-model="mintToRemove.url"
-          label="Mint URL"
-          type="textarea"
-          autogrow
-          class="q-mb-xs"
-        ></q-input>
-        <div class="row q-my-md">
-          <div class="col">
-            <span class="text-caption"
-              >Note: Because this wallet is paranoid, your ecash from this mint
-              will not be actually deleted but will remain stored on your
-              device. You will see it reappear if you re-add this mint later
-              again.</span
-            >
-          </div>
-        </div>
-        <div class="row q-mt-lg">
-          <div class="col">
-            <q-btn
-              v-close-popup
-              class="float-left"
-              color="primary"
-              @click="
-                showEditMintDialog = false;
-                removeMint(mintToRemove.url, (verbose = true));
-              "
-              >Remove mint</q-btn
-            >
-          </div>
-          <div class="col">
-            <q-btn v-close-popup flat color="grey" class="float-right"
-              >Cancel</q-btn
-            >
-          </div>
-        </div>
-      </q-card>
-    </q-dialog>
   </div>
 </template>
 <script>
@@ -558,11 +460,18 @@ import { notifyError, notifyWarning } from "src/js/notify";
 import MintDetailsDialog from "src/components/MintDetailsDialog.vue";
 import EditMintDialog from "src/components/EditMintDialog.vue";
 import { EventBus } from "../js/eventBus";
+import AddMintDialog from "src/components/AddMintDialog.vue";
+import RemoveMintDialog from "src/components/RemoveMintDialog.vue";
 
 export default defineComponent({
   name: "MintSettings",
   mixins: [windowMixin],
-  components: { MintDetailsDialog, EditMintDialog },
+  components: {
+    MintDetailsDialog,
+    EditMintDialog,
+    AddMintDialog,
+    RemoveMintDialog,
+  },
   props: {},
   setup() {
     const addMintDiv = ref(null);
