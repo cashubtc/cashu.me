@@ -88,8 +88,18 @@
         </q-carousel-slide>
       </q-carousel>
     </transition>
+    <div
+      v-if="activeMint().mint.errored"
+      class="row q-mt-md q-mb-none text-secondary"
+    >
+      <div class="col-12">
+        <q-badge color="red" class="q-mr-xs q-mt-sm text-weight-bold">
+          Mint error
+          <q-icon name="error" class="q-ml-xs" />
+        </q-badge>
+      </div>
+    </div>
     <!-- mint url -->
-
     <div class="row q-mt-md q-mb-none text-secondary" v-if="activeMintUrl">
       <div class="col-12 cursor-pointer">
         <span class="text-weight-light" @click="setTab('mints')">
