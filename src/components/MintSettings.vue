@@ -45,19 +45,26 @@
                 class="mint-loading-spinner"
               />
             </transition>
-            <div
-              v-if="mint.url != activatingMintUrl && mint.errored"
-              class="error-badge"
+            <transition
+              appear
+              enter-active-class="animated fadeIn"
+              leave-active-class="animated fadeOut"
+              name="fade"
             >
-              <q-badge
-                color="red"
-                outline
-                class="q-mr-xs q-mt-sm text-weight-bold"
+              <div
+                v-if="mint.url != activatingMintUrl && mint.errored"
+                class="error-badge"
               >
-                Error
-                <q-icon name="error" class="q-ml-xs" size="xs" />
-              </q-badge>
-            </div>
+                <q-badge
+                  color="red"
+                  outline
+                  class="q-mr-xs q-mt-sm text-weight-bold"
+                >
+                  Error
+                  <q-icon name="error" class="q-ml-xs" size="xs" />
+                </q-badge>
+              </div>
+            </transition>
             <div class="full-width" style="position: relative">
               <!-- <transition-group
                 appear
