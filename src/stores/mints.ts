@@ -25,6 +25,7 @@ export type Mint = {
   nickname?: string;
   info?: GetInfoResponse;
   errored?: boolean;
+  motd_viewed?: boolean;
   // initialize api: new CashuMint(url) on activation
 };
 
@@ -366,7 +367,9 @@ export const useMintsStore = defineStore("mints", {
       try {
         this.activeMintUrl = mint.url;
         console.log("### this.activeMintUrl", this.activeMintUrl);
-        mint.info = await this.fetchMintInfo(mint);
+        const newMintInfo = await this.fetchMintInfo(mint);
+        this.triggerMintInfoMotdChanged(newMintInfo, mint);
+        mint.info = newMintInfo;
         console.log("### activateMint: Mint info: ", mint.info);
         mint = await this.fetchMintKeys(mint);
         this.toggleActiveUnitForMint(mint);
@@ -389,6 +392,24 @@ export const useMintsStore = defineStore("mints", {
         await uIStore.unlockMutex();
       }
     },
+    checkMintInfoMotdChanged(newMintInfo: GetInfoResponse, mint: Mint) {
+      const motd = newMintInfo.motd;
+      if (motd !== this.mints.filter((m) => m.url === mint.url)[0].info?.motd) {
+        return true;
+      }
+      return false;
+    },
+    async triggerMintInfoMotdChanged(newMintInfo: GetInfoResponse, mint: Mint) {
+      if (!this.checkMintInfoMotdChanged(newMintInfo, mint)) {
+        return;
+      }
+      // set motd_viewed to false
+      this.mints.filter((m) => m.url === mint.url)[0].motd_viewed = false;
+      // set the mintinfo data
+      this.showMintInfoData = mint;
+      // open mint info dialog
+      this.showMintInfoDialog = true;
+    },
     fetchMintInfo: async function (mint: Mint) {
       try {
         const mintClass = new MintClass(mint);
@@ -398,7 +419,7 @@ export const useMintsStore = defineStore("mints", {
         console.error(error);
         try {
           // notifyApiError(error, "Could not get mint info");
-        } catch {}
+        } catch { }
         throw error;
       }
     },
@@ -438,7 +459,7 @@ export const useMintsStore = defineStore("mints", {
         console.error(error);
         try {
           // notifyApiError(error, "Could not get mint keys");
-        } catch {}
+        } catch { }
         throw error;
       }
     },
@@ -452,7 +473,7 @@ export const useMintsStore = defineStore("mints", {
         console.error(error);
         try {
           // notifyApiError(error, "Could not get mint keysets");
-        } catch {}
+        } catch { }
         throw error;
       }
     },
@@ -473,6 +494,12 @@ export const useMintsStore = defineStore("mints", {
           notifyError(response.error, "Mint error");
         }
         throw new Error(`Mint error: ${response.error}`);
+      }
+    },
+    setMintMotdViewed(mintUrl: string) {
+      const mintIndex = this.mints.findIndex(mint => mint.url === mintUrl);
+      if (mintIndex !== -1) {
+        this.mints[mintIndex].motd_viewed = true;
       }
     },
   },
