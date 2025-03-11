@@ -109,8 +109,11 @@
                     <div class="column q-gutter-y-sm">
                       <div
                         v-if="mint.nickname || mint.info?.name"
-                        class="text-weight-medium"
-                        style="font-size: 14px; line-height: 16px"
+                        style="
+                          font-size: 16px;
+                          font-weight: 600;
+                          line-height: 16px;
+                        "
                       >
                         {{ mint.nickname || mint.info?.name }}
                       </div>
