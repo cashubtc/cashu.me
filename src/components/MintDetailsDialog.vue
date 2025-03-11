@@ -13,15 +13,13 @@
       <div class="mint-content-container q-pa-md">
         <!-- Top Icons -->
         <div class="top-icons q-pt-md q-mb-lg">
-          <q-icon
-            name="close"
-            size="24px"
+          <close-icon
+            size="24"
             class="close-icon cursor-pointer text-white"
             v-close-popup
           />
-          <q-icon
-            name="qr_code"
-            size="24px"
+          <qr-code-icon
+            size="24"
             class="qr-icon cursor-pointer text-white"
             @click="showQrCode = !showQrCode"
           />
@@ -45,7 +43,7 @@
                 :src="showMintInfoData.info.profileUrl"
                 alt="Mint Profile"
               />
-              <q-icon v-else name="account_balance" size="36px" />
+              <building-icon v-else size="36" />
             </q-avatar>
             <div class="mint-name q-mb-xs">
               {{ showMintInfoData.info.name || "Mint" }}
@@ -86,30 +84,28 @@
             class="contact-item q-mb-md"
           >
             <div class="contact-icon-container">
-              <q-icon
-                v-if="contactIcons[contactInfo.method]"
-                :name="contactIcons[contactInfo.method]"
-                size="20px"
+              <mail-icon
+                v-if="contactInfo.method === 'email'"
+                size="20"
                 class="contact-icon"
               />
               <img
                 v-else-if="contactInfo.method === 'nostr'"
                 src="nostr-icon.svg"
-                class="nostr-icon"
+                class="contact-icon"
                 alt=""
               />
               <img
                 v-else-if="contactInfo.method === 'twitter'"
-                src="x logo.svg"
-                class="x-logo-icon"
+                src="/x-logo.svg"
+                class="contact-icon"
                 alt=""
               />
             </div>
             <div class="contact-text">{{ contactInfo.info }}</div>
-            <q-icon
-              name="content_copy"
+            <copy-icon
               @click="copyText(contactInfo.info)"
-              size="20px"
+              size="20"
               class="copy-icon cursor-pointer"
             />
           </div>
@@ -127,7 +123,7 @@
           <!-- URL -->
           <div class="detail-item q-mb-md">
             <div class="detail-label">
-              <q-icon name="link" size="20px" class="detail-icon" />
+              <link-icon size="20" class="detail-icon" />
               <div class="detail-name">URL</div>
             </div>
             <div class="detail-value">{{ showMintInfoData.url }}</div>
@@ -136,7 +132,7 @@
           <!-- Nuts -->
           <div class="detail-item q-mb-md" v-if="showMintInfoData.info.nuts">
             <div class="detail-label">
-              <q-icon name="settings" size="20px" class="detail-icon" />
+              <nut-icon size="20" class="detail-icon" />
               <div class="detail-name">Nuts</div>
             </div>
             <div class="detail-value">
@@ -150,7 +146,7 @@
             v-if="showMintInfoData.info.currencies"
           >
             <div class="detail-label">
-              <q-icon name="attach_money" size="20px" class="detail-icon" />
+              <currency-icon size="20" class="detail-icon" />
               <div class="detail-name">Currency</div>
             </div>
             <div class="detail-value">
@@ -161,7 +157,7 @@
           <!-- Version -->
           <div class="detail-item" v-if="showMintInfoData.info.version">
             <div class="detail-label">
-              <q-icon name="info" size="20px" class="detail-icon" />
+              <info-icon size="20" class="detail-icon" />
               <div class="detail-name">Version</div>
             </div>
             <div class="detail-value">
@@ -185,7 +181,7 @@
             rounded
             @click="$emit('edit-mint')"
           >
-            <q-icon name="edit" size="20px" class="q-mr-sm" />
+            <edit-icon size="20" class="q-mr-sm" />
             <div class="action-label">EDIT MINT</div>
           </q-btn>
 
@@ -195,7 +191,7 @@
             rounded
             @click="$emit('delete-mint')"
           >
-            <q-icon name="delete" size="20px" class="q-mr-sm" />
+            <trash-icon size="20" class="q-mr-sm" />
             <div class="action-label">DELETE MINT</div>
           </q-btn>
         </div>
@@ -209,16 +205,40 @@ import { defineComponent } from "vue";
 import { mapActions, mapState, mapWritableState } from "pinia";
 import VueQrcode from "@chenfengyuan/vue-qrcode";
 import { useMintsStore } from "src/stores/mints";
+import {
+  X as CloseIcon,
+  QrCode as QrCodeIcon,
+  Link as LinkIcon,
+  Nut as NutIcon,
+  DollarSign as CurrencyIcon,
+  Info as InfoIcon,
+  Mail as MailIcon,
+  Copy as CopyIcon,
+  Edit as EditIcon,
+  Trash as TrashIcon,
+  Building as BuildingIcon,
+} from "lucide-vue-next";
 
 export default defineComponent({
   name: "MintInfoDialog",
   components: {
     VueQrcode,
+    CloseIcon,
+    QrCodeIcon,
+    LinkIcon,
+    NutIcon,
+    CurrencyIcon,
+    InfoIcon,
+    MailIcon,
+    CopyIcon,
+    EditIcon,
+    TrashIcon,
+    BuildingIcon,
   },
   data: function () {
     return {
       contactIcons: {
-        email: "mail_outline",
+        email: "mail",
       },
       contactMethods: {
         twitter: "X",
@@ -372,6 +392,12 @@ export default defineComponent({
   display: flex;
   justify-content: center;
   margin-right: 10px;
+}
+
+.contact-icon {
+  width: 20px;
+  height: 20px;
+  color: #9e9e9e;
 }
 
 .contact-text {
