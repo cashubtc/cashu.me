@@ -1,16 +1,5 @@
 <template>
-  <MintDetailsDialog />
-  <EditMintDialog
-    :mint="mintToEdit"
-    @update:mint="
-      (updatedMint) => {
-        mintToEdit = updatedMint;
-      }
-    "
-    @remove="showRemoveMintDialogWrapper"
-    :showEditMintDialog="showEditMintDialog"
-    @update:showEditMintDialog="showEditMintDialog = $event"
-  />
+  <MintDetailsDialog @update:mintToRemove="mintToRemove = $event" />
   <AddMintDialog
     :addMintData="addMintData"
     :showAddMintDialog="showAddMintDialog"
@@ -18,12 +7,7 @@
     :addMintBlocking="addMintBlocking"
     @add="addMintInternal"
   />
-  <RemoveMintDialog
-    :mintToRemove="mintToRemove"
-    :showRemoveMintDialog="showRemoveMintDialog"
-    @update:showRemoveMintDialog="showRemoveMintDialog = $event"
-    @remove="removeMint"
-  />
+
   <div style="max-width: 800px; margin: 0 auto">
     <!-- ////////////////////// SETTINGS ////////////////// -->
     <div class="q-py-md q-px-xs text-left" on-left>
@@ -54,7 +38,7 @@
               </q-badge>
             </div>
             <div class="full-width" style="position: relative">
-              <transition-group
+              <!-- <transition-group
                 appear
                 enter-active-class="animated fadeIn"
                 leave-active-class="animated fadeOut"
@@ -88,7 +72,7 @@
                     size="2em"
                   />
                 </q-item-section>
-              </transition-group>
+              </transition-group> -->
               <div class="row items-center q-pa-md">
                 <div class="col">
                   <div class="row items-center">
@@ -162,18 +146,24 @@
                 </div>
 
                 <div class="col-auto">
+                  <!-- hourglass spinner if mint is being activated -->
+                  <transition
+                    appear
+                    enter-active-class="animated fadeIn"
+                    leave-active-class="animated fadeOut"
+                    name="fade"
+                  >
+                    <q-spinner-hourglass
+                      v-if="mint.url == activatingMintUrl"
+                      color="white"
+                      size="1.3rem"
+                    />
+                  </transition>
                   <q-icon
-                    name="info_outline"
+                    name="more_vert"
                     @click.stop="showMintInfo(mint)"
-                    color="grey"
+                    color="white"
                     class="cursor-pointer q-mr-sm"
-                    size="1.3rem"
-                  />
-                  <q-icon
-                    name="edit"
-                    @click.stop="editMint(mint)"
-                    class="cursor-pointer"
-                    color="grey"
                     size="1.3rem"
                   />
                 </div>
@@ -461,19 +451,15 @@ import { useSwapStore } from "src/stores/swap";
 import { useUiStore } from "src/stores/ui";
 import { notifyError, notifyWarning } from "src/js/notify";
 import MintDetailsDialog from "src/components/MintDetailsDialog.vue";
-import EditMintDialog from "src/components/EditMintDialog.vue";
 import { EventBus } from "../js/eventBus";
 import AddMintDialog from "src/components/AddMintDialog.vue";
-import RemoveMintDialog from "src/components/RemoveMintDialog.vue";
 
 export default defineComponent({
   name: "MintSettings",
   mixins: [windowMixin],
   components: {
     MintDetailsDialog,
-    EditMintDialog,
     AddMintDialog,
-    RemoveMintDialog,
   },
   props: {},
   setup() {
@@ -506,22 +492,6 @@ export default defineComponent({
     return {
       discoveringMints: false,
       addingMint: false,
-      mintToEdit: {
-        url: "",
-        nickname: "",
-      },
-      mintToRemove: {
-        url: "",
-        nickname: "",
-        balances: {},
-      },
-      editMintData: {
-        url: "",
-        nickname: "",
-      },
-      addMintDialog: {
-        show: false,
-      },
       swapData: {
         fromUrl: {
           url: "",
@@ -551,10 +521,8 @@ export default defineComponent({
     ...mapWritableState(useMintsStore, [
       "addMintData",
       "showAddMintDialog",
-      "showRemoveMintDialog",
       "showMintInfoDialog",
       "showMintInfoData",
-      "showEditMintDialog",
     ]),
     ...mapState(useUiStore, ["tickerShort"]),
     ...mapState(useSwapStore, ["swapAmountData"]),
@@ -597,12 +565,6 @@ export default defineComponent({
       } finally {
         this.activatingMintUrl = "";
       }
-    },
-    editMint: function (mint) {
-      // copy object to avoid changing the original
-      this.mintToEdit = Object.assign({}, mint);
-      this.editMintData = Object.assign({}, mint);
-      this.showEditMintDialog = true;
     },
     validateMintUrl: function (url) {
       try {
@@ -652,13 +614,6 @@ export default defineComponent({
         });
       }
       return options;
-    },
-    showRemoveMintDialogWrapper: function (mint) {
-      // select the mint from this.mints and add its balances
-      let mintToRemove = this.mints.find((m) => m.url == mint);
-
-      this.mintToRemove = mintToRemove;
-      this.showRemoveMintDialog = true;
     },
     clearSwapData: function () {
       this.swapData.fromUrl = "";

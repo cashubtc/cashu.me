@@ -1,4 +1,21 @@
 <template>
+  <EditMintDialog
+    :mint="mintToEdit"
+    @update:mint="
+      (updatedMint) => {
+        mintToEdit = updatedMint;
+      }
+    "
+    @remove="showRemoveMintDialogWrapper"
+    :showEditMintDialog="showEditMintDialog"
+    @update:showEditMintDialog="showEditMintDialog = $event"
+  />
+  <RemoveMintDialog
+    :mintToRemove="mintToRemove"
+    :showRemoveMintDialog="showRemoveMintDialog"
+    @update:showRemoveMintDialog="showRemoveMintDialog = $event"
+    @remove="removeMint"
+  />
   <q-dialog
     v-model="showMintInfoDialog"
     position="top"
@@ -207,6 +224,8 @@ import { defineComponent } from "vue";
 import { mapActions, mapState, mapWritableState } from "pinia";
 import VueQrcode from "@chenfengyuan/vue-qrcode";
 import { useMintsStore } from "src/stores/mints";
+import EditMintDialog from "src/components/EditMintDialog.vue";
+import RemoveMintDialog from "src/components/RemoveMintDialog.vue";
 import {
   X as CloseIcon,
   QrCode as QrCodeIcon,
@@ -236,6 +255,8 @@ export default defineComponent({
     EditIcon,
     TrashIcon,
     BuildingIcon,
+    EditMintDialog,
+    RemoveMintDialog,
   },
   data: function () {
     return {
@@ -258,6 +279,7 @@ export default defineComponent({
     ]),
   },
   methods: {
+    ...mapActions(useMintsStore, ["removeMint"]),
     shortenText: function (text, maxLength) {
       if (text.length > maxLength) {
         return text.substring(0, maxLength) + "...";
@@ -274,9 +296,12 @@ export default defineComponent({
       });
     },
     openEditMintDialog() {
+      this.mintToEdit = Object.assign({}, this.showMintInfoData);
+      this.editMintData = Object.assign({}, this.showMintInfoData);
       this.showEditMintDialog = true;
     },
     openRemoveMintDialog() {
+      this.mintToRemove = Object.assign({}, this.showMintInfoData);
       this.showRemoveMintDialog = true;
     },
   },
@@ -383,7 +408,7 @@ export default defineComponent({
   padding: 0 10px;
   font-size: 14px;
   font-weight: 600;
-  color: #white;
+  color: #ffffff;
 }
 
 /* Contact Section */
