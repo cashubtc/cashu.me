@@ -40,23 +40,21 @@
         </div>
 
         <!-- Mint Header Profile Name Section -->
-        <div class="mint-header-profile-name q-mb-lg">
+        <div class="mint-header-container q-mb-lg">
           <div class="mint-header q-pa-md q-py-lg">
-            <q-avatar size="42px" class="mint-profile-icon">
+            <q-avatar size="56px" class="mint-profile-icon q-mb-sm">
               <img
                 v-if="showMintInfoData.info.profileUrl"
                 :src="showMintInfoData.info.profileUrl"
                 alt="Mint Profile"
               />
-              <q-icon v-else name="account_balance" size="28px" />
+              <q-icon v-else name="account_balance" size="36px" />
             </q-avatar>
-            <div class="mint-details">
-              <div class="mint-name">
-                {{ showMintInfoData.info.name || "Mint" }}
-              </div>
-              <div class="mint-balance" v-if="showMintInfoData.info.balance">
-                {{ showMintInfoData.info.balance }}
-              </div>
+            <div class="mint-name q-mb-xs">
+              {{ showMintInfoData.info.name || "Mint" }}
+            </div>
+            <div class="mint-balance" v-if="showMintInfoData.info.balance">
+              {{ showMintInfoData.info.balance }}
             </div>
           </div>
 
@@ -76,147 +74,133 @@
           </div>
         </div>
 
-        <!-- Mint Contact Info Section -->
-        <div class="mint-contact-info">
-          <!-- Contact Section -->
-          <div
-            class="mint-contact-header-text q-mb-md"
-            v-if="
-              showMintInfoData.info.contact &&
-              showMintInfoData.info.contact.length > 0
-            "
-          >
-            <div class="mint-contact-header-text-child"></div>
-            <div class="right-add-on q-px-sm">Contact</div>
-            <div class="mint-contact-header-text-child"></div>
-          </div>
+        <!-- Section Divider -->
+        <div class="section-divider q-mb-md">
+          <div class="divider-line"></div>
+          <div class="divider-text">CONTACT</div>
+          <div class="divider-line"></div>
+        </div>
 
+        <!-- Contact Info Section -->
+        <div class="contact-section q-mb-lg">
           <div
-            class="mint-contact-info-1 q-mb-lg"
-            v-if="
-              showMintInfoData.info.contact &&
-              showMintInfoData.info.contact.length > 0
-            "
+            v-for="contactInfo in showMintInfoData.info.contact"
+            :key="contactInfo.method"
+            class="contact-item q-mb-md"
           >
-            <div
-              v-for="contactInfo in showMintInfoData.info.contact"
-              :key="contactInfo.method"
-              class="contact-item q-mb-sm"
-            >
+            <div class="contact-icon-container">
               <q-icon
                 v-if="contactIcons[contactInfo.method]"
                 :name="contactIcons[contactInfo.method]"
                 size="20px"
-                class="contact-icon q-mr-sm"
+                class="contact-icon"
               />
               <img
                 v-else-if="contactInfo.method === 'nostr'"
                 src="nostr-icon.svg"
-                class="nostr-icon q-mr-sm"
+                class="nostr-icon"
                 alt=""
               />
               <img
                 v-else-if="contactInfo.method === 'twitter'"
                 src="x logo.svg"
-                class="x-logo-icon q-mr-sm"
+                class="x-logo-icon"
                 alt=""
               />
-              <div class="mint-contact-text">{{ contactInfo.info }}</div>
-              <q-icon
-                name="content_copy"
-                @click="copyText(contactInfo.info)"
-                size="20px"
-                class="copy-icon cursor-pointer q-ml-sm"
-              />
             </div>
-          </div>
-
-          <!-- Mint Details Section -->
-          <div class="mint-contact-header-text q-mb-md">
-            <div class="mint-contact-header-text-child"></div>
-            <div class="right-add-on q-px-sm">Mint details</div>
-            <div class="mint-contact-header-text-child"></div>
-          </div>
-
-          <div class="mint-details-info q-mb-lg">
-            <!-- URL -->
-            <div class="mint-url q-mb-md">
-              <div class="detail-label">
-                <q-icon name="link" size="20px" class="detail-icon q-mr-sm" />
-                <div class="currency-copy">URL</div>
-              </div>
-              <div class="right-add-on-wrapper">
-                <div class="mint-detail-value">{{ showMintInfoData.url }}</div>
-              </div>
-            </div>
-
-            <!-- Nuts -->
-            <div class="mint-url q-mb-md" v-if="showMintInfoData.info.nuts">
-              <div class="detail-label">
-                <q-icon
-                  name="settings"
-                  size="20px"
-                  class="detail-icon q-mr-sm"
-                />
-                <div class="currency-copy">Nuts</div>
-              </div>
-              <div class="right-add-on-wrapper">
-                <div class="mint-detail-value">
-                  {{ Object.keys(showMintInfoData.info.nuts).join(", ") }}
-                </div>
-              </div>
-            </div>
-
-            <!-- Currency (if available) -->
-            <div
-              class="mint-url q-mb-md"
-              v-if="showMintInfoData.info.currencies"
-            >
-              <div class="detail-label">
-                <q-icon
-                  name="attach_money"
-                  size="20px"
-                  class="detail-icon q-mr-sm"
-                />
-                <div class="currency-copy">Currency</div>
-              </div>
-              <div class="right-add-on-wrapper">
-                <div class="mint-detail-value">
-                  {{ showMintInfoData.info.currencies }}
-                </div>
-              </div>
-            </div>
-
-            <!-- Version -->
-            <div class="mint-url" v-if="showMintInfoData.info.version">
-              <div class="detail-label">
-                <q-icon name="info" size="20px" class="detail-icon q-mr-sm" />
-                <div class="currency-copy">Version</div>
-              </div>
-              <div class="nutshell-version">
-                {{ showMintInfoData.info.version }}
-              </div>
-            </div>
-          </div>
-
-          <!-- Actions Section -->
-          <div class="mint-contact-header-text q-mb-md">
-            <div class="mint-contact-header-text-child"></div>
-            <div class="right-add-on q-px-sm">Actions</div>
-            <div class="mint-contact-header-text-child"></div>
+            <div class="contact-text">{{ contactInfo.info }}</div>
+            <q-icon
+              name="content_copy"
+              @click="copyText(contactInfo.info)"
+              size="20px"
+              class="copy-icon cursor-pointer"
+            />
           </div>
         </div>
 
+        <!-- Section Divider -->
+        <div class="section-divider q-mb-md">
+          <div class="divider-line"></div>
+          <div class="divider-text">MINT DETAILS</div>
+          <div class="divider-line"></div>
+        </div>
+
+        <!-- Mint Details Section -->
+        <div class="mint-details-section q-mb-lg">
+          <!-- URL -->
+          <div class="detail-item q-mb-md">
+            <div class="detail-label">
+              <q-icon name="link" size="20px" class="detail-icon" />
+              <div class="detail-name">URL</div>
+            </div>
+            <div class="detail-value">{{ showMintInfoData.url }}</div>
+          </div>
+
+          <!-- Nuts -->
+          <div class="detail-item q-mb-md" v-if="showMintInfoData.info.nuts">
+            <div class="detail-label">
+              <q-icon name="settings" size="20px" class="detail-icon" />
+              <div class="detail-name">Nuts</div>
+            </div>
+            <div class="detail-value">
+              {{ Object.keys(showMintInfoData.info.nuts).join(", ") }}
+            </div>
+          </div>
+
+          <!-- Currency (if available) -->
+          <div
+            class="detail-item q-mb-md"
+            v-if="showMintInfoData.info.currencies"
+          >
+            <div class="detail-label">
+              <q-icon name="attach_money" size="20px" class="detail-icon" />
+              <div class="detail-name">Currency</div>
+            </div>
+            <div class="detail-value">
+              {{ showMintInfoData.info.currencies }}
+            </div>
+          </div>
+
+          <!-- Version -->
+          <div class="detail-item" v-if="showMintInfoData.info.version">
+            <div class="detail-label">
+              <q-icon name="info" size="20px" class="detail-icon" />
+              <div class="detail-name">Version</div>
+            </div>
+            <div class="detail-value">
+              {{ showMintInfoData.info.version }}
+            </div>
+          </div>
+        </div>
+
+        <!-- Section Divider -->
+        <div class="section-divider q-mb-md">
+          <div class="divider-line"></div>
+          <div class="divider-text">ACTIONS</div>
+          <div class="divider-line"></div>
+        </div>
+
         <!-- Action Buttons -->
-        <div class="action-buttons q-mt-md q-mb-xl">
-          <div class="edit-mint-button q-pa-md">
-            <q-icon name="edit" size="20px" class="action-icon q-mr-sm" />
-            <div class="label">Edit mint</div>
-          </div>
-          <div class="delete-mint-button q-pa-md">
-            <q-icon name="delete" size="20px" class="action-icon q-mr-sm" />
-            <div class="label">Delete mint</div>
-          </div>
+        <div class="action-buttons q-mt-lg q-mb-xl">
+          <q-btn
+            class="edit-mint-button"
+            unelevated
+            rounded
+            @click="$emit('edit-mint')"
+          >
+            <q-icon name="edit" size="20px" class="q-mr-sm" />
+            <div class="action-label">EDIT MINT</div>
+          </q-btn>
+
+          <q-btn
+            class="delete-mint-button"
+            outline
+            rounded
+            @click="$emit('delete-mint')"
+          >
+            <q-icon name="delete" size="20px" class="q-mr-sm" />
+            <div class="action-label">DELETE MINT</div>
+          </q-btn>
         </div>
       </div>
     </div>
@@ -284,7 +268,7 @@ export default defineComponent({
 .mint-content-container {
   max-width: 400px;
   margin: 0 auto;
-  color: #fff;
+  color: white;
   font-family: Inter, sans-serif;
   height: 100%;
   overflow-y: auto;
@@ -300,257 +284,179 @@ export default defineComponent({
   justify-content: space-between;
 }
 
-/* Mint Header Profile Name Section */
-.mint-header-profile-name {
+/* Mint Header */
+.mint-header-container {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-start;
-  gap: 32px;
   width: 100%;
 }
 
 .mint-header {
-  align-self: stretch;
-  border-radius: 8px;
-  background-color: #0f0f0f;
-  border: 1px solid #181818;
+  width: 100%;
+  border-radius: 12px;
+  background-color: #121212;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 8px;
 }
 
 .mint-profile-icon {
-  position: relative;
-  object-fit: cover;
-}
-
-.mint-details {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
+  /* Removed gradient background */
 }
 
 .mint-name {
-  position: relative;
-  letter-spacing: -0.02em;
-  line-height: 32px;
-  font-weight: 600;
   font-size: 24px;
+  font-weight: 600;
+  text-align: center;
 }
 
 .mint-balance {
-  position: relative;
   font-size: 20px;
-  letter-spacing: -0.02em;
-  line-height: 28px;
   font-weight: 600;
+  text-align: center;
 }
 
 .mint-descriptions {
-  align-self: stretch;
+  width: 100%;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  justify-content: flex-start;
-  font-size: 16px;
 }
 
 .mint-description {
-  align-self: stretch;
-  position: relative;
-  line-height: 24px;
+  font-size: 16px;
   font-weight: 600;
+  line-height: 24px;
+  width: 100%;
 }
 
 .mint-description-long {
-  align-self: stretch;
-  position: relative;
   font-size: 14px;
   line-height: 20px;
-  color: #636366;
-}
-
-/* Mint Contact Info Section */
-.mint-contact-info {
-  align-self: stretch;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-  font-size: 16px;
+  color: #9e9e9e;
   width: 100%;
 }
 
-.mint-contact-header-text {
-  width: 100%;
+/* Section Divider */
+.section-divider {
   display: flex;
-  flex-direction: row;
   align-items: center;
-  justify-content: flex-start;
-  gap: 8px;
+  width: 100%;
 }
 
-.mint-contact-header-text-child {
+.divider-line {
   flex: 1;
-  position: relative;
-  border-top: 0.5px solid #48484a;
-  box-sizing: border-box;
-  height: 0.5px;
+  height: 1px;
+  background-color: #333;
 }
 
-.right-add-on {
-  position: relative;
-  line-height: 18px;
-  text-transform: uppercase;
-  font-weight: 600;
+.divider-text {
+  padding: 0 10px;
   font-size: 14px;
+  font-weight: 600;
+  color: white;
 }
 
-.mint-contact-info-1 {
-  align-self: stretch;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: flex-start;
+/* Contact Section */
+.contact-section {
   width: 100%;
 }
 
 .contact-item {
   display: flex;
-  flex-direction: row;
   align-items: center;
-  justify-content: flex-start;
   width: 100%;
 }
 
-.x-logo-icon {
-  width: 15.6px;
-  height: 16px;
+.contact-icon-container {
+  width: 24px;
+  display: flex;
+  justify-content: center;
+  margin-right: 10px;
 }
 
-.mint-contact-text {
-  position: relative;
-  line-height: 24px;
-  font-weight: 600;
+.contact-text {
   flex: 1;
+  font-size: 16px;
+  font-weight: 500;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .copy-icon {
-  color: #636366;
+  color: #9e9e9e;
+  margin-left: 10px;
 }
 
-/* Mint Details Info Section */
-.mint-details-info {
-  align-self: stretch;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: flex-start;
-  color: #636366;
+/* Mint Details Section */
+.mint-details-section {
   width: 100%;
 }
 
-.mint-url {
-  align-self: stretch;
+.detail-item {
   display: flex;
-  flex-direction: row;
-  align-items: center;
   justify-content: space-between;
+  align-items: center;
   width: 100%;
 }
 
 .detail-label {
   display: flex;
-  flex-direction: row;
   align-items: center;
-  justify-content: flex-start;
 }
 
-.currency-copy {
-  position: relative;
-  line-height: 24px;
+.detail-icon {
+  color: #9e9e9e;
+  margin-right: 10px;
+}
+
+.detail-name {
+  font-size: 16px;
   font-weight: 500;
+  color: #9e9e9e;
 }
 
-.right-add-on-wrapper {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: flex-start;
-  color: #fff;
-}
-
-.mint-detail-value {
-  position: relative;
-  line-height: 24px;
-  font-weight: 600;
-  max-width: 200px;
+.detail-value {
+  font-size: 16px;
+  font-weight: 500;
+  color: white;
+  text-align: right;
+  max-width: 60%;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.nutshell-version {
-  position: relative;
-  line-height: 24px;
-  font-weight: 600;
-  color: #fff;
-}
-
 /* Action Buttons */
 .action-buttons {
-  width: 100%;
   display: flex;
-  flex-direction: row;
-  align-items: flex-start;
-  justify-content: flex-start;
+  justify-content: space-between;
+  width: 100%;
   gap: 16px;
-  font-size: 17px;
 }
 
 .edit-mint-button {
   flex: 1;
-  border-radius: 100px;
-  background-color: #ededed;
+  background-color: white !important;
+  color: black !important;
   height: 54px;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  color: #000;
-  cursor: pointer;
+  font-weight: 600;
 }
 
 .delete-mint-button {
   flex: 1;
-  border-radius: 100px;
-  background-color: #000;
-  border: 1px solid #ff453a;
-  box-sizing: border-box;
+  border-color: #ff453a !important;
+  color: #ff453a !important;
   height: 54px;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  color: #ff453a;
-  cursor: pointer;
+  font-weight: 600;
 }
 
-.label {
-  position: relative;
-  letter-spacing: -0.43px;
-  line-height: 22px;
-  text-transform: uppercase;
-  font-weight: 600;
+.action-label {
+  font-size: 16px;
+  letter-spacing: 0.5px;
 }
 
 .qr-code-section {
