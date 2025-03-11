@@ -321,10 +321,6 @@ export default defineComponent({
   justify-content: center;
 }
 
-.mint-profile-icon {
-  /* Removed gradient background */
-}
-
 .mint-name {
   font-size: 24px;
   font-weight: 600;
