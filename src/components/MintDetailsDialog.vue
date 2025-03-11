@@ -149,7 +149,15 @@
               <link-icon size="20" color="#9E9E9E" class="detail-icon" />
               <div class="detail-name">URL</div>
             </div>
-            <div class="detail-value">{{ showMintInfoData.url }}</div>
+            <div class="detail-value flex items-center">
+              {{ showMintInfoData.url
+              }}<copy-icon
+                @click="copyText(showMintInfoData.url)"
+                size="20"
+                color="#9E9E9E"
+                class="copy-icon cursor-pointer"
+              />
+            </div>
           </div>
 
           <!-- Nuts -->
