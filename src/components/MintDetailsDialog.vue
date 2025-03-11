@@ -10,9 +10,9 @@
     seamless
   >
     <div class="fullscreen bg-black">
-      <div class="mint-content-container">
+      <div class="mint-content-container q-pa-md">
         <!-- Top Icons -->
-        <div class="top-icons">
+        <div class="top-icons q-pt-md q-mb-lg">
           <q-icon
             name="close"
             size="24px"
@@ -29,7 +29,7 @@
 
         <!-- QR Code Section (toggleable) -->
         <div v-if="showQrCode" class="qr-code-section q-mb-md">
-          <q-responsive :ratio="1" class="q-mx-lg q-mt-none q-pt-none">
+          <q-responsive :ratio="1" class="q-mx-lg">
             <vue-qrcode
               :value="showMintInfoData.url"
               :options="{ width: 300 }"
@@ -40,10 +40,15 @@
         </div>
 
         <!-- Mint Header Profile Name Section -->
-        <div class="mint-header-profile-name">
-          <div class="mint-header">
+        <div class="mint-header-profile-name q-mb-lg">
+          <div class="mint-header q-pa-md q-py-lg">
             <q-avatar size="42px" class="mint-profile-icon">
-              <q-icon name="account_balance" size="28px" />
+              <img
+                v-if="showMintInfoData.info.profileUrl"
+                :src="showMintInfoData.info.profileUrl"
+                alt="Mint Profile"
+              />
+              <q-icon v-else name="account_balance" size="28px" />
             </q-avatar>
             <div class="mint-details">
               <div class="mint-name">
@@ -55,7 +60,7 @@
             </div>
           </div>
 
-          <div class="mint-descriptions">
+          <div class="mint-descriptions q-mt-lg">
             <div
               class="mint-description"
               v-if="showMintInfoData.info.description"
@@ -63,7 +68,7 @@
               {{ showMintInfoData.info.description }}
             </div>
             <div
-              class="mint-description-long"
+              class="mint-description-long q-mt-md"
               v-if="showMintInfoData.info.description_long"
             >
               {{ showMintInfoData.info.description_long }}
@@ -75,19 +80,19 @@
         <div class="mint-contact-info">
           <!-- Contact Section -->
           <div
-            class="mint-contact-header-text"
+            class="mint-contact-header-text q-mb-md"
             v-if="
               showMintInfoData.info.contact &&
               showMintInfoData.info.contact.length > 0
             "
           >
             <div class="mint-contact-header-text-child"></div>
-            <div class="right-add-on">Contact</div>
+            <div class="right-add-on q-px-sm">Contact</div>
             <div class="mint-contact-header-text-child"></div>
           </div>
 
           <div
-            class="mint-contact-info-1"
+            class="mint-contact-info-1 q-mb-lg"
             v-if="
               showMintInfoData.info.contact &&
               showMintInfoData.info.contact.length > 0
@@ -96,24 +101,24 @@
             <div
               v-for="contactInfo in showMintInfoData.info.contact"
               :key="contactInfo.method"
-              class="contact-item"
+              class="contact-item q-mb-sm"
             >
               <q-icon
                 v-if="contactIcons[contactInfo.method]"
                 :name="contactIcons[contactInfo.method]"
                 size="20px"
-                class="contact-icon"
+                class="contact-icon q-mr-sm"
               />
               <img
                 v-else-if="contactInfo.method === 'nostr'"
                 src="nostr-icon.svg"
-                class="nostr-icon"
+                class="nostr-icon q-mr-sm"
                 alt=""
               />
               <img
                 v-else-if="contactInfo.method === 'twitter'"
                 src="x logo.svg"
-                class="x-logo-icon"
+                class="x-logo-icon q-mr-sm"
                 alt=""
               />
               <div class="mint-contact-text">{{ contactInfo.info }}</div>
@@ -121,23 +126,23 @@
                 name="content_copy"
                 @click="copyText(contactInfo.info)"
                 size="20px"
-                class="copy-icon cursor-pointer"
+                class="copy-icon cursor-pointer q-ml-sm"
               />
             </div>
           </div>
 
           <!-- Mint Details Section -->
-          <div class="mint-contact-header-text">
+          <div class="mint-contact-header-text q-mb-md">
             <div class="mint-contact-header-text-child"></div>
-            <div class="right-add-on">Mint details</div>
+            <div class="right-add-on q-px-sm">Mint details</div>
             <div class="mint-contact-header-text-child"></div>
           </div>
 
-          <div class="mint-details-info">
+          <div class="mint-details-info q-mb-lg">
             <!-- URL -->
-            <div class="mint-url">
+            <div class="mint-url q-mb-md">
               <div class="detail-label">
-                <q-icon name="link" size="20px" class="detail-icon" />
+                <q-icon name="link" size="20px" class="detail-icon q-mr-sm" />
                 <div class="currency-copy">URL</div>
               </div>
               <div class="right-add-on-wrapper">
@@ -146,9 +151,13 @@
             </div>
 
             <!-- Nuts -->
-            <div class="mint-url" v-if="showMintInfoData.info.nuts">
+            <div class="mint-url q-mb-md" v-if="showMintInfoData.info.nuts">
               <div class="detail-label">
-                <q-icon name="settings" size="20px" class="detail-icon" />
+                <q-icon
+                  name="settings"
+                  size="20px"
+                  class="detail-icon q-mr-sm"
+                />
                 <div class="currency-copy">Nuts</div>
               </div>
               <div class="right-add-on-wrapper">
@@ -159,9 +168,16 @@
             </div>
 
             <!-- Currency (if available) -->
-            <div class="mint-url" v-if="showMintInfoData.info.currencies">
+            <div
+              class="mint-url q-mb-md"
+              v-if="showMintInfoData.info.currencies"
+            >
               <div class="detail-label">
-                <q-icon name="attach_money" size="20px" class="detail-icon" />
+                <q-icon
+                  name="attach_money"
+                  size="20px"
+                  class="detail-icon q-mr-sm"
+                />
                 <div class="currency-copy">Currency</div>
               </div>
               <div class="right-add-on-wrapper">
@@ -174,7 +190,7 @@
             <!-- Version -->
             <div class="mint-url" v-if="showMintInfoData.info.version">
               <div class="detail-label">
-                <q-icon name="info" size="20px" class="detail-icon" />
+                <q-icon name="info" size="20px" class="detail-icon q-mr-sm" />
                 <div class="currency-copy">Version</div>
               </div>
               <div class="nutshell-version">
@@ -184,21 +200,21 @@
           </div>
 
           <!-- Actions Section -->
-          <div class="mint-contact-header-text">
+          <div class="mint-contact-header-text q-mb-md">
             <div class="mint-contact-header-text-child"></div>
-            <div class="right-add-on">Actions</div>
+            <div class="right-add-on q-px-sm">Actions</div>
             <div class="mint-contact-header-text-child"></div>
           </div>
         </div>
 
         <!-- Action Buttons -->
-        <div class="action-buttons">
-          <div class="edit-mint-button" @click="$emit('edit-mint')">
-            <q-icon name="edit" size="20px" class="action-icon" />
+        <div class="action-buttons q-mt-md q-mb-xl">
+          <div class="edit-mint-button q-pa-md">
+            <q-icon name="edit" size="20px" class="action-icon q-mr-sm" />
             <div class="label">Edit mint</div>
           </div>
-          <div class="delete-mint-button" @click="$emit('delete-mint')">
-            <q-icon name="delete" size="20px" class="action-icon" />
+          <div class="delete-mint-button q-pa-md">
+            <q-icon name="delete" size="20px" class="action-icon q-mr-sm" />
             <div class="label">Delete mint</div>
           </div>
         </div>
@@ -268,7 +284,6 @@ export default defineComponent({
 .mint-content-container {
   max-width: 400px;
   margin: 0 auto;
-  padding: 16px;
   color: #fff;
   font-family: Inter, sans-serif;
   height: 100%;
@@ -283,14 +298,6 @@ export default defineComponent({
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 24px;
-  padding-top: 16px;
-}
-
-.close-icon,
-.qr-icon {
-  width: 24px;
-  height: 24px;
 }
 
 /* Mint Header Profile Name Section */
@@ -301,7 +308,6 @@ export default defineComponent({
   justify-content: flex-start;
   gap: 32px;
   width: 100%;
-  margin-bottom: 32px;
 }
 
 .mint-header {
@@ -313,13 +319,10 @@ export default defineComponent({
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 16px 8px;
   gap: 8px;
 }
 
 .mint-profile-icon {
-  width: 42px;
-  height: 42px;
   position: relative;
   object-fit: cover;
 }
@@ -353,7 +356,6 @@ export default defineComponent({
   flex-direction: column;
   align-items: flex-start;
   justify-content: flex-start;
-  gap: 16px;
   font-size: 16px;
 }
 
@@ -379,7 +381,6 @@ export default defineComponent({
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-  gap: 32px;
   font-size: 16px;
   width: 100%;
 }
@@ -391,7 +392,6 @@ export default defineComponent({
   align-items: center;
   justify-content: flex-start;
   gap: 8px;
-  margin-bottom: 16px;
 }
 
 .mint-contact-header-text-child {
@@ -408,7 +408,6 @@ export default defineComponent({
   text-transform: uppercase;
   font-weight: 600;
   font-size: 14px;
-  padding: 0 8px;
 }
 
 .mint-contact-info-1 {
@@ -417,7 +416,6 @@ export default defineComponent({
   flex-direction: column;
   align-items: flex-start;
   justify-content: flex-start;
-  gap: 14px;
   width: 100%;
 }
 
@@ -426,18 +424,7 @@ export default defineComponent({
   flex-direction: row;
   align-items: center;
   justify-content: flex-start;
-  gap: 8px;
   width: 100%;
-}
-
-.contact-icon,
-.nostr-icon,
-.x-logo-icon {
-  width: 20px;
-  height: 20px;
-  position: relative;
-  overflow: hidden;
-  flex-shrink: 0;
 }
 
 .x-logo-icon {
@@ -466,7 +453,6 @@ export default defineComponent({
   flex-direction: column;
   align-items: flex-start;
   justify-content: flex-start;
-  gap: 16px;
   color: #636366;
   width: 100%;
 }
@@ -477,7 +463,6 @@ export default defineComponent({
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
   width: 100%;
 }
 
@@ -486,15 +471,6 @@ export default defineComponent({
   flex-direction: row;
   align-items: center;
   justify-content: flex-start;
-  gap: 8px;
-}
-
-.detail-icon {
-  width: 20px;
-  height: 20px;
-  position: relative;
-  overflow: hidden;
-  flex-shrink: 0;
 }
 
 .currency-copy {
@@ -537,8 +513,6 @@ export default defineComponent({
   justify-content: flex-start;
   gap: 16px;
   font-size: 17px;
-  margin-top: 16px;
-  margin-bottom: 32px;
 }
 
 .edit-mint-button {
@@ -550,8 +524,6 @@ export default defineComponent({
   flex-direction: row;
   align-items: center;
   justify-content: center;
-  padding: 16px;
-  box-sizing: border-box;
   gap: 8px;
   color: #000;
   cursor: pointer;
@@ -568,7 +540,6 @@ export default defineComponent({
   flex-direction: row;
   align-items: center;
   justify-content: center;
-  padding: 16px;
   gap: 8px;
   color: #ff453a;
   cursor: pointer;
@@ -586,7 +557,5 @@ export default defineComponent({
   width: 100%;
   display: flex;
   justify-content: center;
-  margin-top: 8px;
-  margin-bottom: 16px;
 }
 </style>
