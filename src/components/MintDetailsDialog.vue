@@ -288,7 +288,6 @@ export default defineComponent({
   max-width: 400px;
   margin: 0 auto;
   color: white;
-  font-family: Inter, sans-serif;
   height: 100%;
   overflow-y: auto;
   position: relative;
