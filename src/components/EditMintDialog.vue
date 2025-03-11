@@ -31,12 +31,6 @@
           @click="updateMintLocal"
           >Update</q-btn
         >
-        <q-btn
-          icon="delete"
-          flat
-          class="float-left item-left text-left"
-          @click="$emit('remove', mintToEdit.url)"
-        />
         <q-btn v-close-popup flat class="q-ml-auto" color="grey">Cancel</q-btn>
       </div>
     </q-card>
@@ -46,7 +40,6 @@
 <script>
 import { defineComponent, ref, watch, computed } from "vue";
 import { useMintsStore } from "src/stores/mints";
-import { mapActions } from "pinia";
 
 export default defineComponent({
   name: "EditMintDialog",
@@ -60,7 +53,6 @@ export default defineComponent({
       required: true,
     },
   },
-  emits: ["update:mint", "remove", "update:showEditMintDialog"],
   setup(props, { emit }) {
     const editMintData = ref({
       url: "",
@@ -81,11 +73,10 @@ export default defineComponent({
       { immediate: true }
     );
 
-    const { updateMint } = mapActions(useMintsStore, ["updateMint"]);
-
     const updateMintLocal = () => {
-      updateMint(mintToEdit.value, editMintData.value);
-      emit("update:mint", { ...mintToEdit.value, ...editMintData.value });
+      const mintStore = useMintsStore();
+      mintStore.updateMint(mintToEdit.value, editMintData.value);
+      mintStore.showMintInfoData = { ...editMintData.value };
       showEditMintDialogLocal.value = false;
     };
 

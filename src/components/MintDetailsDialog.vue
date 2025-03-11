@@ -1,12 +1,6 @@
 <template>
   <EditMintDialog
     :mint="mintToEdit"
-    @update:mint="
-      (updatedMint) => {
-        mintToEdit = updatedMint;
-      }
-    "
-    @remove="showRemoveMintDialogWrapper"
     :showEditMintDialog="showEditMintDialog"
     @update:showEditMintDialog="showEditMintDialog = $event"
   />

@@ -31,7 +31,24 @@
             }"
             :loading="mint.url == activatingMintUrl"
           >
-            <div v-if="mint.errored" class="error-badge">
+            <!-- hourglass spinner if mint is being activated -->
+            <transition
+              appear
+              enter-active-class="animated fadeIn"
+              leave-active-class="animated fadeOut"
+              name="fade"
+            >
+              <q-spinner-hourglass
+                v-if="mint.url == activatingMintUrl"
+                color="white"
+                size="1.3rem"
+                class="mint-loading-spinner"
+              />
+            </transition>
+            <div
+              v-if="mint.url != activatingMintUrl && mint.errored"
+              class="error-badge"
+            >
               <q-badge
                 color="red"
                 outline
@@ -150,19 +167,6 @@
                 </div>
 
                 <div class="col-auto">
-                  <!-- hourglass spinner if mint is being activated -->
-                  <transition
-                    appear
-                    enter-active-class="animated fadeIn"
-                    leave-active-class="animated fadeOut"
-                    name="fade"
-                  >
-                    <q-spinner-hourglass
-                      v-if="mint.url == activatingMintUrl"
-                      color="white"
-                      size="1.3rem"
-                    />
-                  </transition>
                   <q-icon
                     name="more_vert"
                     @click.stop="showMintInfo(mint)"
@@ -687,6 +691,12 @@ export default defineComponent({
   position: absolute;
   top: 8px;
   right: 8px;
+  z-index: 10;
+}
+.mint-loading-spinner {
+  position: absolute;
+  top: 18px;
+  right: 24px;
   z-index: 10;
 }
 </style>
