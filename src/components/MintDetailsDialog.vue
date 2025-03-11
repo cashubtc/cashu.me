@@ -43,13 +43,20 @@
         </div>
 
         <!-- QR Code Section (toggleable) -->
-        <div v-if="showQrCode" class="qr-code-section q-mb-md">
-          <vue-qrcode
-            :value="showMintInfoData.url"
-            :options="{ width: 300 }"
-            class="rounded-borders"
-          />
-        </div>
+        <transition-group
+          appear
+          enter-active-class="animated slideInDown"
+          leave-active-class="animated slideOutUp"
+          name="fade"
+        >
+          <div v-if="showQrCode" class="qr-code-section q-mb-md">
+            <vue-qrcode
+              :value="showMintInfoData.url"
+              :options="{ width: 300 }"
+              class="rounded-borders"
+            />
+          </div>
+        </transition-group>
 
         <!-- Mint Header Profile Name Section -->
         <div class="mint-header-container q-mb-lg">
@@ -87,7 +94,10 @@
         </div>
 
         <!-- Section Divider -->
-        <div class="section-divider q-mb-md">
+        <div
+          class="section-divider q-mb-md"
+          v-if="showMintInfoData.info.contact?.length > 0"
+        >
           <div class="divider-line"></div>
           <div class="divider-text">CONTACT</div>
           <div class="divider-line"></div>
@@ -320,7 +330,7 @@ export default defineComponent({
 }
 
 .mint-content-container {
-  max-width: 400px;
+  max-width: 600px;
   margin: 0 auto;
   color: white;
   height: 100%;

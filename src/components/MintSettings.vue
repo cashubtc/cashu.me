@@ -32,9 +32,13 @@
             :loading="mint.url == activatingMintUrl"
           >
             <div v-if="mint.errored" class="error-badge">
-              <q-badge color="red" class="q-mr-xs q-mt-sm text-weight-bold">
+              <q-badge
+                color="red"
+                outline
+                class="q-mr-xs q-mt-sm text-weight-bold"
+              >
                 Error
-                <q-icon name="error" class="q-ml-xs" />
+                <q-icon name="error" class="q-ml-xs" size="xs" />
               </q-badge>
             </div>
             <div class="full-width" style="position: relative">
