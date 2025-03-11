@@ -149,14 +149,11 @@
               <link-icon size="20" color="#9E9E9E" class="detail-icon" />
               <div class="detail-name">URL</div>
             </div>
-            <div class="detail-value flex items-center">
-              {{ showMintInfoData.url
-              }}<copy-icon
-                @click="copyText(showMintInfoData.url)"
-                size="20"
-                color="#9E9E9E"
-                class="copy-icon cursor-pointer"
-              />
+            <div
+              class="detail-value items-center"
+              @click="copyText(showMintInfoData.url)"
+            >
+              {{ showMintInfoData.url }}
             </div>
           </div>
 
@@ -498,7 +495,6 @@ export default defineComponent({
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-
 /* Action Buttons */
 .action-buttons {
   display: flex;
