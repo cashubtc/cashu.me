@@ -398,7 +398,7 @@ export const useMintsStore = defineStore("mints", {
         console.error(error);
         try {
           // notifyApiError(error, "Could not get mint info");
-        } catch { }
+        } catch {}
         throw error;
       }
     },
@@ -438,7 +438,7 @@ export const useMintsStore = defineStore("mints", {
         console.error(error);
         try {
           // notifyApiError(error, "Could not get mint keys");
-        } catch { }
+        } catch {}
         throw error;
       }
     },
@@ -452,7 +452,7 @@ export const useMintsStore = defineStore("mints", {
         console.error(error);
         try {
           // notifyApiError(error, "Could not get mint keysets");
-        } catch { }
+        } catch {}
         throw error;
       }
     },

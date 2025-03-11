@@ -19,7 +19,7 @@ export const useMigrationsStore = defineStore("migrations", {
   actions: {
     registerMigration(migration: Migration) {
       // Add migration if it doesn't already exist
-      if (!this.migrations.some(m => m.version === migration.version)) {
+      if (!this.migrations.some((m) => m.version === migration.version)) {
         this.migrations.push(migration);
         // Sort migrations by version
         this.migrations.sort((a, b) => a.version - b.version);
@@ -29,7 +29,7 @@ export const useMigrationsStore = defineStore("migrations", {
     async runMigrations() {
       // Get migrations that need to be run (newer than current version)
       const pendingMigrations = this.migrations.filter(
-        m => m.version > this.currentVersion
+        (m) => m.version > this.currentVersion
       );
 
       if (pendingMigrations.length === 0) {
@@ -41,7 +41,9 @@ export const useMigrationsStore = defineStore("migrations", {
 
       // Run each migration in order
       for (const migration of pendingMigrations) {
-        console.log(`Running migration ${migration.version}: ${migration.name}`);
+        console.log(
+          `Running migration ${migration.version}: ${migration.name}`
+        );
         try {
           await migration.execute();
           // Update the current version after successful migration
@@ -55,7 +57,9 @@ export const useMigrationsStore = defineStore("migrations", {
       }
 
       if (pendingMigrations.length > 0) {
-        notifySuccess(`Applied ${pendingMigrations.length} database migrations`);
+        notifySuccess(
+          `Applied ${pendingMigrations.length} database migrations`
+        );
       }
     },
 
@@ -91,7 +95,8 @@ export const useMigrationsStore = defineStore("migrations", {
       this.registerMigration({
         version: 1,
         name: "Migrate stablenuts.cash to umint.cash",
-        description: "Updates mint URL from https://stablenut.umint.cash to https://stablenut.cashu.network",
+        description:
+          "Updates mint URL from https://stablenut.umint.cash to https://stablenut.cashu.network",
         execute: async () => await this.migrateStablenutsToCash(),
       });
 
