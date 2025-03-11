@@ -373,8 +373,8 @@ export default defineComponent({
 .divider-text {
   padding: 0 10px;
   font-size: 14px;
-  font-weight: 600;
-  color: white;
+  font-weight: 500;
+  color: #9e9e9e;
 }
 
 /* Contact Section */
