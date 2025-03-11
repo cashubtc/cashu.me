@@ -39,8 +39,8 @@
           <div class="mint-header q-pa-md q-py-lg">
             <q-avatar size="56px" class="mint-profile-icon q-mb-sm">
               <img
-                v-if="showMintInfoData.info.profileUrl"
-                :src="showMintInfoData.info.profileUrl"
+                v-if="showMintInfoData.info.icon_url"
+                :src="showMintInfoData.info.icon_url"
                 alt="Mint Profile"
               />
               <building-icon v-else size="36" />
@@ -87,6 +87,7 @@
               <mail-icon
                 v-if="contactInfo.method === 'email'"
                 size="20"
+                color="#9E9E9E"
                 class="contact-icon"
               />
               <img
@@ -106,6 +107,7 @@
             <copy-icon
               @click="copyText(contactInfo.info)"
               size="20"
+              color="#9E9E9E"
               class="copy-icon cursor-pointer"
             />
           </div>
@@ -123,7 +125,7 @@
           <!-- URL -->
           <div class="detail-item q-mb-md">
             <div class="detail-label">
-              <link-icon size="20" class="detail-icon" />
+              <link-icon size="20" color="#9E9E9E" class="detail-icon" />
               <div class="detail-name">URL</div>
             </div>
             <div class="detail-value">{{ showMintInfoData.url }}</div>
@@ -132,7 +134,7 @@
           <!-- Nuts -->
           <div class="detail-item q-mb-md" v-if="showMintInfoData.info.nuts">
             <div class="detail-label">
-              <nut-icon size="20" class="detail-icon" />
+              <nut-icon size="20" color="#9E9E9E" class="detail-icon" />
               <div class="detail-name">Nuts</div>
             </div>
             <div class="detail-value">
@@ -146,7 +148,7 @@
             v-if="showMintInfoData.info.currencies"
           >
             <div class="detail-label">
-              <currency-icon size="20" class="detail-icon" />
+              <currency-icon size="20" color="#9E9E9E" class="detail-icon" />
               <div class="detail-name">Currency</div>
             </div>
             <div class="detail-value">
@@ -157,7 +159,7 @@
           <!-- Version -->
           <div class="detail-item" v-if="showMintInfoData.info.version">
             <div class="detail-label">
-              <info-icon size="20" class="detail-icon" />
+              <info-icon size="20" color="#9E9E9E" class="detail-icon" />
               <div class="detail-name">Version</div>
             </div>
             <div class="detail-value">
@@ -350,10 +352,13 @@ export default defineComponent({
 }
 
 .mint-description-long {
+  align-self: stretch;
+  position: relative;
   font-size: 14px;
   line-height: 20px;
   color: #9e9e9e;
   width: 100%;
+  font-weight: 500;
 }
 
 /* Section Divider */
@@ -397,20 +402,20 @@ export default defineComponent({
 .contact-icon {
   width: 20px;
   height: 20px;
-  color: #9e9e9e;
+  color: #636366;
 }
 
 .contact-text {
   flex: 1;
   font-size: 16px;
-  font-weight: 500;
+  font-weight: 600;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .copy-icon {
-  color: #9e9e9e;
+  color: #636366;
   margin-left: 10px;
 }
 
@@ -432,19 +437,18 @@ export default defineComponent({
 }
 
 .detail-icon {
-  color: #9e9e9e;
   margin-right: 10px;
 }
 
 .detail-name {
   font-size: 16px;
-  font-weight: 500;
+  font-weight: 600;
   color: #9e9e9e;
 }
 
 .detail-value {
   font-size: 16px;
-  font-weight: 500;
+  font-weight: 600;
   color: white;
   text-align: right;
   max-width: 60%;
