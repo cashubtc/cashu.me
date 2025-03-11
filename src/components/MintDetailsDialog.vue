@@ -29,14 +29,11 @@
 
         <!-- QR Code Section (toggleable) -->
         <div v-if="showQrCode" class="qr-code-section q-mb-md">
-          <q-responsive :ratio="1" class="q-mx-lg">
-            <vue-qrcode
-              :value="showMintInfoData.url"
-              :options="{ width: 300 }"
-              class="rounded-borders"
-            >
-            </vue-qrcode>
-          </q-responsive>
+          <vue-qrcode
+            :value="showMintInfoData.url"
+            :options="{ width: 300 }"
+            class="rounded-borders"
+          />
         </div>
 
         <!-- Mint Header Profile Name Section -->
