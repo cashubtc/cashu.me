@@ -323,7 +323,7 @@ export default defineComponent({
     },
     isTokenPeanut: function () {
       return this.receiveData.tokensBase64.match(
-        /^.([\uFE00-\uFE0F]|[\uE0100-\uE01EF]+)$/
+        /^🥜([\uFE00-\uFE0F]|[\uE0100-\uE01EF]+)$/
       );
     },
     tokenDecodesCorrectly: function () {
