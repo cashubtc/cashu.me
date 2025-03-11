@@ -1,5 +1,16 @@
 <template>
   <MintDetailsDialog />
+  <EditMintDialog
+    :mint="mintToEdit"
+    @update:mint="
+      (updatedMint) => {
+        mintToEdit = updatedMint;
+      }
+    "
+    @remove="showRemoveMintDialogWrapper"
+    :showEditMintDialog="showEditMintDialog"
+    @update:showEditMintDialog="showEditMintDialog = $event"
+  />
   <div style="max-width: 800px; margin: 0 auto">
     <!-- ////////////////////// SETTINGS ////////////////// -->
     <div class="q-py-md q-px-xs text-left" on-left>
@@ -545,12 +556,13 @@ import { useSwapStore } from "src/stores/swap";
 import { useUiStore } from "src/stores/ui";
 import { notifyError, notifyWarning } from "src/js/notify";
 import MintDetailsDialog from "src/components/MintDetailsDialog.vue";
+import EditMintDialog from "src/components/EditMintDialog.vue";
 import { EventBus } from "../js/eventBus";
 
 export default defineComponent({
   name: "MintSettings",
   mixins: [windowMixin],
-  components: { MintDetailsDialog },
+  components: { MintDetailsDialog, EditMintDialog },
   props: {},
   setup() {
     const addMintDiv = ref(null);
