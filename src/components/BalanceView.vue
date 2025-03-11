@@ -93,7 +93,7 @@
       class="row q-mt-md q-mb-none text-secondary"
     >
       <div class="col-12">
-        <q-badge color="red" class="q-mr-xs q-mt-sm text-weight-bold">
+        <q-badge outline color="red" class="q-mr-xs q-mt-sm text-weight-bold">
           Mint error
           <q-icon name="error" class="q-ml-xs" />
         </q-badge>
