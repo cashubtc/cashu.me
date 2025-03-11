@@ -533,7 +533,6 @@ export default defineComponent({
         },
         amount: undefined,
       },
-      showEditMintDialog: false,
       activatingMintUrl: "",
     };
   },
@@ -555,6 +554,7 @@ export default defineComponent({
       "showRemoveMintDialog",
       "showMintInfoDialog",
       "showMintInfoData",
+      "showEditMintDialog",
     ]),
     ...mapState(useUiStore, ["tickerShort"]),
     ...mapState(useSwapStore, ["swapAmountData"]),

@@ -181,7 +181,7 @@
             class="edit-mint-button"
             unelevated
             rounded
-            @click="$emit('edit-mint')"
+            @click="openEditMintDialog"
           >
             <edit-icon size="20" class="q-mr-sm" />
             <div class="action-label">EDIT MINT</div>
@@ -191,7 +191,7 @@
             class="delete-mint-button"
             outline
             rounded
-            @click="$emit('delete-mint')"
+            @click="openRemoveMintDialog"
           >
             <trash-icon size="20" class="q-mr-sm" />
             <div class="action-label">DELETE MINT</div>
@@ -251,7 +251,11 @@ export default defineComponent({
   },
   computed: {
     ...mapState(useMintsStore, ["showMintInfoData"]),
-    ...mapWritableState(useMintsStore, ["showMintInfoDialog"]),
+    ...mapWritableState(useMintsStore, [
+      "showMintInfoDialog",
+      "showEditMintDialog",
+      "showRemoveMintDialog",
+    ]),
   },
   methods: {
     shortenText: function (text, maxLength) {
@@ -268,6 +272,12 @@ export default defineComponent({
         position: "top",
         timeout: 1000,
       });
+    },
+    openEditMintDialog() {
+      this.showEditMintDialog = true;
+    },
+    openRemoveMintDialog() {
+      this.showRemoveMintDialog = true;
     },
   },
 });

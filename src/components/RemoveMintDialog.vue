@@ -26,7 +26,7 @@
       <q-input
         outlined
         readonly
-        :value="mintToRemove.url"
+        :model-value="mintToRemove.url"
         label="Mint URL"
         type="textarea"
         autogrow
@@ -65,6 +65,7 @@
 import { defineComponent, computed } from "vue";
 import { MintClass } from "src/stores/mints";
 import { useUiStore } from "src/stores/ui";
+import { useMintsStore } from "src/stores/mints";
 
 export default defineComponent({
   name: "RemoveMintDialog",
@@ -80,6 +81,7 @@ export default defineComponent({
   },
   emits: ["remove", "update:showRemoveMintDialog"],
   setup(props, { emit }) {
+    const mintsStore = useMintsStore();
     const showRemoveMintDialogLocal = computed({
       get: () => props.showRemoveMintDialog,
       set: (value) => emit("update:showRemoveMintDialog", value),
@@ -87,6 +89,8 @@ export default defineComponent({
 
     const removeMintLocal = () => {
       emit("remove", props.mintToRemove.url);
+      mintsStore.showMintInfoDialog = false;
+      mintsStore.showEditMintDialog = false;
     };
     const mintClass = (mint) => {
       return new MintClass(mint);

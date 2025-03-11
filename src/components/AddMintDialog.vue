@@ -13,7 +13,7 @@
       <q-input
         outlined
         readonly
-        :value="mintUrl"
+        v-model="mintUrl"
         label="Mint URL"
         type="textarea"
         autogrow

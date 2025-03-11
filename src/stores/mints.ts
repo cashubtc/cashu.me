@@ -111,6 +111,7 @@ export const useMintsStore = defineStore("mints", {
     const showRemoveMintDialog = ref(false);
     const showMintInfoDialog = ref(false);
     const showMintInfoData = ref({} as Mint);
+    const showEditMintDialog = ref(false);
 
     const uiStoreGlobal: any = useUiStore();
 
@@ -134,6 +135,7 @@ export const useMintsStore = defineStore("mints", {
       showRemoveMintDialog,
       showMintInfoDialog,
       showMintInfoData,
+      showEditMintDialog,
       uiStoreGlobal,
     };
   },
@@ -396,7 +398,7 @@ export const useMintsStore = defineStore("mints", {
         console.error(error);
         try {
           // notifyApiError(error, "Could not get mint info");
-        } catch {}
+        } catch { }
         throw error;
       }
     },
@@ -436,7 +438,7 @@ export const useMintsStore = defineStore("mints", {
         console.error(error);
         try {
           // notifyApiError(error, "Could not get mint keys");
-        } catch {}
+        } catch { }
         throw error;
       }
     },
@@ -450,7 +452,7 @@ export const useMintsStore = defineStore("mints", {
         console.error(error);
         try {
           // notifyApiError(error, "Could not get mint keysets");
-        } catch {}
+        } catch { }
         throw error;
       }
     },
