@@ -234,6 +234,8 @@ import {
   Scan as ScanIcon,
 } from "lucide-vue-next";
 
+import { useMigrationsStore } from "src/stores/migrations";
+
 export default {
   mixins: [windowMixin],
   components: {
@@ -562,6 +564,11 @@ export default {
   },
 
   created: async function () {
+    // Initialize and run migrations
+    const migrationsStore = useMigrationsStore();
+    migrationsStore.initMigrations();
+    await migrationsStore.runMigrations();
+
     // check if another tab is open
     this.registerBroadcastChannel();
 

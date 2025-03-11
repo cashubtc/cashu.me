@@ -111,6 +111,7 @@ export const useMintsStore = defineStore("mints", {
     const showRemoveMintDialog = ref(false);
     const showMintInfoDialog = ref(false);
     const showMintInfoData = ref({} as Mint);
+    const showEditMintDialog = ref(false);
 
     const uiStoreGlobal: any = useUiStore();
 
@@ -134,6 +135,7 @@ export const useMintsStore = defineStore("mints", {
       showRemoveMintDialog,
       showMintInfoDialog,
       showMintInfoData,
+      showEditMintDialog,
       uiStoreGlobal,
     };
   },

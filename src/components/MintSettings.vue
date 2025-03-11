@@ -1,5 +1,13 @@
 <template>
-  <MintDetailsDialog />
+  <MintDetailsDialog @update:mintToRemove="mintToRemove = $event" />
+  <AddMintDialog
+    :addMintData="addMintData"
+    :showAddMintDialog="showAddMintDialog"
+    @update:showAddMintDialog="showAddMintDialog = $event"
+    :addMintBlocking="addMintBlocking"
+    @add="addMintInternal"
+  />
+
   <div style="max-width: 800px; margin: 0 auto">
     <!-- ////////////////////// SETTINGS ////////////////// -->
     <div class="q-py-md q-px-xs text-left" on-left>
@@ -23,14 +31,42 @@
             }"
             :loading="mint.url == activatingMintUrl"
           >
-            <div v-if="mint.errored" class="error-badge">
-              <q-badge color="red" class="q-mr-xs q-mt-sm text-weight-bold">
-                Error
-                <q-icon name="error" class="q-ml-xs" />
-              </q-badge>
-            </div>
+            <!-- hourglass spinner if mint is being activated -->
+            <transition
+              appear
+              enter-active-class="animated fadeIn"
+              leave-active-class="animated fadeOut"
+              name="fade"
+            >
+              <q-spinner-hourglass
+                v-if="mint.url == activatingMintUrl"
+                color="white"
+                size="1.3rem"
+                class="mint-loading-spinner"
+              />
+            </transition>
+            <transition
+              appear
+              enter-active-class="animated fadeIn"
+              leave-active-class="animated fadeOut"
+              name="fade"
+            >
+              <div
+                v-if="mint.url != activatingMintUrl && mint.errored"
+                class="error-badge"
+              >
+                <q-badge
+                  color="red"
+                  outline
+                  class="q-mr-xs q-mt-sm text-weight-bold"
+                >
+                  Error
+                  <q-icon name="error" class="q-ml-xs" size="xs" />
+                </q-badge>
+              </div>
+            </transition>
             <div class="full-width" style="position: relative">
-              <transition-group
+              <!-- <transition-group
                 appear
                 enter-active-class="animated fadeIn"
                 leave-active-class="animated fadeOut"
@@ -64,7 +100,7 @@
                     size="2em"
                   />
                 </q-item-section>
-              </transition-group>
+              </transition-group> -->
               <div class="row items-center q-pa-md">
                 <div class="col">
                   <div class="row items-center">
@@ -85,8 +121,11 @@
                     <div class="column q-gutter-y-sm">
                       <div
                         v-if="mint.nickname || mint.info?.name"
-                        class="text-weight-medium"
-                        style="font-size: 14px; line-height: 16px"
+                        style="
+                          font-size: 16px;
+                          font-weight: 600;
+                          line-height: 16px;
+                        "
                       >
                         {{ mint.nickname || mint.info?.name }}
                       </div>
@@ -136,17 +175,10 @@
 
                 <div class="col-auto">
                   <q-icon
-                    name="info_outline"
+                    name="more_vert"
                     @click.stop="showMintInfo(mint)"
-                    color="grey"
+                    color="white"
                     class="cursor-pointer q-mr-sm"
-                    size="1.3rem"
-                  />
-                  <q-icon
-                    name="edit"
-                    @click.stop="editMint(mint)"
-                    class="cursor-pointer"
-                    color="grey"
                     size="1.3rem"
                   />
                 </div>
@@ -415,162 +447,6 @@
         </q-item>
       </q-list>
     </div>
-
-    <q-dialog
-      v-model="showEditMintDialog"
-      backdrop-filter="blur(2px) brightness(60%)"
-    >
-      <q-card class="q-pa-lg" style="max-width: 500px; width: 100%">
-        <h6 class="q-mt-none q-mb-md">Edit mint</h6>
-        <q-input
-          outlined
-          v-model="editMintData.url"
-          label="Mint URL"
-          type="textarea"
-          autogrow
-          class="q-mb-xs"
-          style="font-family: monospace; font-size: 0.9em"
-        ></q-input>
-        <q-input
-          outlined
-          v-model="editMintData.nickname"
-          label="Nickname"
-          type="textarea"
-          autogrow
-          class="q-mb-xs"
-        ></q-input>
-        <div class="row q-mt-lg">
-          <q-btn
-            class="float-left"
-            v-close-popup
-            rounded
-            color="primary"
-            @click="updateMint(mintToEdit, editMintData)"
-            >Update</q-btn
-          >
-          <q-btn
-            icon="delete"
-            flat
-            class="float-left item-left text-left"
-            @click="showRemoveMintDialogWrapper(mintToEdit.url)"
-          />
-          <q-btn v-close-popup flat class="q-ml-auto" color="grey"
-            >Cancel</q-btn
-          >
-        </div>
-      </q-card>
-    </q-dialog>
-
-    <q-dialog
-      v-model="showAddMintDialog"
-      @keydown.enter.prevent="addMintInternal(addMintData, (verbose = true))"
-      backdrop-filter="blur(2px) brightness(60%)"
-    >
-      <q-card class="q-pa-lg">
-        <h6 class="q-mt-none q-mb-md">Do you trust this mint?</h6>
-        <p>
-          Before using this mint, make sure you trust it. Mints could become
-          malicious or cease operation at any time.
-        </p>
-        <q-input
-          outlined
-          readonly
-          v-model="addMintData.url"
-          label="Mint URL"
-          type="textarea"
-          autogrow
-          class="q-mb-xs"
-          style="font-family: monospace; font-size: 0.9em"
-        ></q-input>
-        <div class="row q-mt-lg">
-          <div class="col">
-            <q-btn
-              class="float-left"
-              rounded
-              v-close-popup
-              color="primary"
-              icon="check"
-              :loading="addMintBlocking"
-              @click="addMintInternal(addMintData, (verbose = true))"
-              >Add mint
-              <template v-slot:loading>
-                <q-spinner-hourglass />
-                Adding mint
-              </template>
-            </q-btn>
-          </div>
-          <div class="col">
-            <q-btn v-close-popup flat class="float-right" color="grey"
-              >Cancel</q-btn
-            >
-          </div>
-        </div>
-      </q-card>
-    </q-dialog>
-    <q-dialog
-      v-model="showRemoveMintDialog"
-      backdrop-filter="blur(2px) brightness(60%)"
-    >
-      <q-card class="q-pa-lg">
-        <h6 class="q-my-md">Are you sure you want to delete this mint?</h6>
-        <div v-if="mintToRemove.nickname">
-          <span class="text-weight-bold"> Nickname: </span>
-          <span class="text-weight-light"> {{ mintToRemove.nickname }}</span>
-        </div>
-        <div class="row q-my-md">
-          <div class="col">
-            <span class="text-weight-bold">Balances:</span>
-            <q-badge
-              v-for="unit in mintClass(mintToRemove).units"
-              :key="unit"
-              color="primary"
-              :label="
-                formatCurrency(mintClass(mintToRemove).unitBalance(unit), unit)
-              "
-              class="q-mx-xs"
-            />
-          </div>
-        </div>
-        <q-input
-          outlined
-          readonly
-          v-model="mintToRemove.url"
-          label="Mint URL"
-          type="textarea"
-          autogrow
-          class="q-mb-xs"
-        ></q-input>
-        <div class="row q-my-md">
-          <div class="col">
-            <span class="text-caption"
-              >Note: Because this wallet is paranoid, your ecash from this mint
-              will not be actually deleted but will remain stored on your
-              device. You will see it reappear if you re-add this mint later
-              again.</span
-            >
-          </div>
-        </div>
-        <div class="row q-mt-lg">
-          <div class="col">
-            <q-btn
-              v-close-popup
-              class="float-left"
-              color="primary"
-              @click="
-                showEditMintDialog = false;
-                removeMint(mintToRemove.url, (verbose = true));
-              "
-              >Remove mint</q-btn
-            >
-          </div>
-          <div class="col">
-            <q-btn v-close-popup flat color="grey" class="float-right"
-              >Cancel</q-btn
-            >
-          </div>
-        </div>
-      </q-card>
-    </q-dialog>
   </div>
 </template>
 <script>
@@ -591,11 +467,15 @@ import { useUiStore } from "src/stores/ui";
 import { notifyError, notifyWarning } from "src/js/notify";
 import MintDetailsDialog from "src/components/MintDetailsDialog.vue";
 import { EventBus } from "../js/eventBus";
+import AddMintDialog from "src/components/AddMintDialog.vue";
 
 export default defineComponent({
   name: "MintSettings",
   mixins: [windowMixin],
-  components: { MintDetailsDialog },
+  components: {
+    MintDetailsDialog,
+    AddMintDialog,
+  },
   props: {},
   setup() {
     const addMintDiv = ref(null);
@@ -627,22 +507,6 @@ export default defineComponent({
     return {
       discoveringMints: false,
       addingMint: false,
-      mintToEdit: {
-        url: "",
-        nickname: "",
-      },
-      mintToRemove: {
-        url: "",
-        nickname: "",
-        balances: {},
-      },
-      editMintData: {
-        url: "",
-        nickname: "",
-      },
-      addMintDialog: {
-        show: false,
-      },
       swapData: {
         fromUrl: {
           url: "",
@@ -654,7 +518,6 @@ export default defineComponent({
         },
         amount: undefined,
       },
-      showEditMintDialog: false,
       activatingMintUrl: "",
     };
   },
@@ -673,7 +536,6 @@ export default defineComponent({
     ...mapWritableState(useMintsStore, [
       "addMintData",
       "showAddMintDialog",
-      "showRemoveMintDialog",
       "showMintInfoDialog",
       "showMintInfoData",
     ]),
@@ -718,12 +580,6 @@ export default defineComponent({
       } finally {
         this.activatingMintUrl = "";
       }
-    },
-    editMint: function (mint) {
-      // copy object to avoid changing the original
-      this.mintToEdit = Object.assign({}, mint);
-      this.editMintData = Object.assign({}, mint);
-      this.showEditMintDialog = true;
     },
     validateMintUrl: function (url) {
       try {
@@ -773,13 +629,6 @@ export default defineComponent({
         });
       }
       return options;
-    },
-    showRemoveMintDialogWrapper: function (mint) {
-      // select the mint from this.mints and add its balances
-      let mintToRemove = this.mints.find((m) => m.url == mint);
-
-      this.mintToRemove = mintToRemove;
-      this.showRemoveMintDialog = true;
     },
     clearSwapData: function () {
       this.swapData.fromUrl = "";
@@ -849,6 +698,12 @@ export default defineComponent({
   position: absolute;
   top: 8px;
   right: 8px;
+  z-index: 10;
+}
+.mint-loading-spinner {
+  position: absolute;
+  top: 18px;
+  right: 24px;
   z-index: 10;
 }
 </style>
