@@ -417,51 +417,6 @@
     </div>
 
     <q-dialog
-      v-model="showEditMintDialog"
-      backdrop-filter="blur(2px) brightness(60%)"
-    >
-      <q-card class="q-pa-lg" style="max-width: 500px; width: 100%">
-        <h6 class="q-mt-none q-mb-md">Edit mint</h6>
-        <q-input
-          outlined
-          v-model="editMintData.url"
-          label="Mint URL"
-          type="textarea"
-          autogrow
-          class="q-mb-xs"
-          style="font-family: monospace; font-size: 0.9em"
-        ></q-input>
-        <q-input
-          outlined
-          v-model="editMintData.nickname"
-          label="Nickname"
-          type="textarea"
-          autogrow
-          class="q-mb-xs"
-        ></q-input>
-        <div class="row q-mt-lg">
-          <q-btn
-            class="float-left"
-            v-close-popup
-            rounded
-            color="primary"
-            @click="updateMint(mintToEdit, editMintData)"
-            >Update</q-btn
-          >
-          <q-btn
-            icon="delete"
-            flat
-            class="float-left item-left text-left"
-            @click="showRemoveMintDialogWrapper(mintToEdit.url)"
-          />
-          <q-btn v-close-popup flat class="q-ml-auto" color="grey"
-            >Cancel</q-btn
-          >
-        </div>
-      </q-card>
-    </q-dialog>
-
-    <q-dialog
       v-model="showAddMintDialog"
       @keydown.enter.prevent="addMintInternal(addMintData, (verbose = true))"
       backdrop-filter="blur(2px) brightness(60%)"
