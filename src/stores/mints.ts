@@ -419,7 +419,7 @@ export const useMintsStore = defineStore("mints", {
         console.error(error);
         try {
           // notifyApiError(error, "Could not get mint info");
-        } catch { }
+        } catch {}
         throw error;
       }
     },
@@ -459,7 +459,7 @@ export const useMintsStore = defineStore("mints", {
         console.error(error);
         try {
           // notifyApiError(error, "Could not get mint keys");
-        } catch { }
+        } catch {}
         throw error;
       }
     },
@@ -473,7 +473,7 @@ export const useMintsStore = defineStore("mints", {
         console.error(error);
         try {
           // notifyApiError(error, "Could not get mint keysets");
-        } catch { }
+        } catch {}
         throw error;
       }
     },
@@ -497,7 +497,7 @@ export const useMintsStore = defineStore("mints", {
       }
     },
     setMintMotdViewed(mintUrl: string) {
-      const mintIndex = this.mints.findIndex(mint => mint.url === mintUrl);
+      const mintIndex = this.mints.findIndex((mint) => mint.url === mintUrl);
       if (mintIndex !== -1) {
         this.mints[mintIndex].motd_viewed = true;
       }
