@@ -19,6 +19,7 @@
     full-width
     full-height
     seamless
+    @keyup.esc="showMintInfoDialog = false"
   >
     <div class="fullscreen bg-black">
       <div class="mint-content-container q-pa-md">
@@ -74,13 +75,21 @@
 
           <div class="mint-descriptions q-mt-lg">
             <!-- MOTD Component -->
-            <mint-motd-message
-              v-if="showMintInfoData.info.motd && !showMintInfoData.motd_viewed"
-              :message="showMintInfoData.info.motd"
-              :mint-url="showMintInfoData.url"
-              :dismissed="showMintInfoData.motd_viewed"
-              @dismiss="motdDismissed = true"
-            />
+            <transition
+              appear
+              enter-active-class="animated pulse"
+              leave-active-class="animated fadeOut"
+            >
+              <mint-motd-message
+                v-if="
+                  showMintInfoData.info.motd && !showMintInfoData.motd_viewed
+                "
+                :message="showMintInfoData.info.motd"
+                :mint-url="showMintInfoData.url"
+                :dismissed="showMintInfoData.motd_viewed"
+                @dismiss="motdDismissed = true"
+              />
+            </transition>
 
             <div
               class="mint-description"
@@ -95,13 +104,19 @@
               {{ showMintInfoData.info.description_long }}
             </div>
           </div>
-          <MintMotdMessage
-            v-if="showMintInfoData.info.motd && showMintInfoData.motd_viewed"
-            :message="showMintInfoData.info.motd"
-            :mintUrl="showMintInfoData.url"
-            :dismissed="showMintInfoData.motd_viewed"
-            @dismiss="dismissMotd"
-          />
+          <transition
+            appear
+            enter-active-class="animated fadeIn"
+            leave-active-class="animated fadeOut"
+          >
+            <MintMotdMessage
+              v-if="showMintInfoData.info.motd && showMintInfoData.motd_viewed"
+              :message="showMintInfoData.info.motd"
+              :mintUrl="showMintInfoData.url"
+              :dismissed="showMintInfoData.motd_viewed"
+              @dismiss="dismissMotd"
+            />
+          </transition>
         </div>
 
         <!-- Section Divider -->
@@ -274,11 +289,6 @@
               <div class="action-label">Copy mint URL</div>
             </div>
 
-            <div class="action-button cursor-pointer" @click="refreshMint">
-              <refresh-icon size="20" color="#9E9E9E" class="action-icon" />
-              <div class="action-label">Refresh mint</div>
-            </div>
-
             <div
               class="action-button delete-button cursor-pointer"
               @click="openRemoveMintDialog"
@@ -313,7 +323,6 @@ import {
   Pencil as PencilIcon,
   Trash as TrashIcon,
   Building as BuildingIcon,
-  RefreshCw as RefreshIcon,
   Banknote as BanknoteIcon,
 } from "lucide-vue-next";
 
@@ -332,7 +341,6 @@ export default defineComponent({
     PencilIcon,
     TrashIcon,
     BuildingIcon,
-    RefreshIcon,
     BanknoteIcon,
     EditMintDialog,
     RemoveMintDialog,
@@ -436,16 +444,6 @@ export default defineComponent({
     openRemoveMintDialog() {
       this.mintToRemove = Object.assign({}, this.showMintInfoData);
       this.showRemoveMintDialog = true;
-    },
-    refreshMint() {
-      // Implement mint refresh functionality here
-      this.$q.notify({
-        message: "Refreshing mint data",
-        color: "info",
-        position: "top",
-        timeout: 1000,
-      });
-      // You might want to add actual refresh logic here
     },
   },
 });
