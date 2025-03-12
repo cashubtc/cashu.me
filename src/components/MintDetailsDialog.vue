@@ -19,6 +19,7 @@
     full-width
     full-height
     seamless
+    @keyup.esc="showMintInfoDialog = false"
   >
     <div class="fullscreen bg-black">
       <div class="mint-content-container q-pa-md">
@@ -37,20 +38,21 @@
         </div>
 
         <!-- QR Code Section (toggleable) -->
-        <transition-group
-          appear
-          enter-active-class="animated slideInDown"
-          leave-active-class="animated slideOutUp"
-          name="fade"
-        >
-          <div v-if="showQrCode" class="qr-code-section q-mb-md">
-            <vue-qrcode
-              :value="showMintInfoData.url"
-              :options="{ width: 300 }"
-              class="rounded-borders"
-            />
-          </div>
-        </transition-group>
+        <div class="qr-code-container">
+          <transition appear name="smooth-slide">
+            <div
+              v-if="showQrCode"
+              class="qr-code-section q-mb-md"
+              key="qr-code"
+            >
+              <vue-qrcode
+                :value="showMintInfoData.url"
+                :options="{ width: 300 }"
+                class="rounded-borders"
+              />
+            </div>
+          </transition>
+        </div>
 
         <!-- Mint Header Profile Name Section -->
         <div class="mint-header-container q-mb-lg">
@@ -73,13 +75,21 @@
 
           <div class="mint-descriptions q-mt-lg">
             <!-- MOTD Component -->
-            <mint-motd-message
-              v-if="showMintInfoData.info.motd && !showMintInfoData.motd_viewed"
-              :message="showMintInfoData.info.motd"
-              :mint-url="showMintInfoData.url"
-              :dismissed="showMintInfoData.motd_viewed"
-              @dismiss="motdDismissed = true"
-            />
+            <transition
+              appear
+              enter-active-class="animated pulse"
+              name="smooth-slide"
+            >
+              <mint-motd-message
+                v-if="
+                  showMintInfoData.info.motd && !showMintInfoData.motd_viewed
+                "
+                :message="showMintInfoData.info.motd"
+                :mint-url="showMintInfoData.url"
+                :dismissed="showMintInfoData.motd_viewed"
+                @dismiss="motdDismissed = true"
+              />
+            </transition>
 
             <div
               class="mint-description"
@@ -94,13 +104,15 @@
               {{ showMintInfoData.info.description_long }}
             </div>
           </div>
-          <MintMotdMessage
-            v-if="showMintInfoData.info.motd && showMintInfoData.motd_viewed"
-            :message="showMintInfoData.info.motd"
-            :mintUrl="showMintInfoData.url"
-            :dismissed="showMintInfoData.motd_viewed"
-            @dismiss="dismissMotd"
-          />
+          <transition name="smooth-slide">
+            <MintMotdMessage
+              v-if="showMintInfoData.info.motd && showMintInfoData.motd_viewed"
+              :message="showMintInfoData.info.motd"
+              :mintUrl="showMintInfoData.url"
+              :dismissed="showMintInfoData.motd_viewed"
+              @dismiss="dismissMotd"
+            />
+          </transition>
         </div>
 
         <!-- Section Divider -->
@@ -179,8 +191,31 @@
               <nut-icon size="20" color="#9E9E9E" class="detail-icon" />
               <div class="detail-name">Nuts</div>
             </div>
-            <div class="detail-value">
-              {{ Object.keys(showMintInfoData.info.nuts).join(", ") }}
+            <div
+              class="detail-value"
+              v-if="!showAllNuts"
+              @click="showAllNuts = true"
+            >
+              View all
+            </div>
+            <div class="detail-value" v-else @click="showAllNuts = false">
+              Hide
+            </div>
+          </div>
+
+          <!-- Expanded Nuts Section (when showAllNuts is true) -->
+          <div
+            class="nuts-expanded-section"
+            v-if="showAllNuts && showMintInfoData.info.nuts"
+          >
+            <div class="nuts-grid">
+              <div
+                v-for="(nutName, nutNumber) in visibleNuts"
+                :key="nutNumber"
+                class="nut-pill"
+              >
+                <div class="nut-content">{{ nutNumber }}: {{ nutName }}</div>
+              </div>
             </div>
           </div>
 
@@ -195,6 +230,20 @@
             </div>
             <div class="detail-value">
               {{ showMintInfoData.info.currencies }}
+            </div>
+          </div>
+
+          <!-- Currency Units (if available) -->
+          <div
+            class="detail-item q-mb-md"
+            v-if="mintUnits && mintUnits.length > 0"
+          >
+            <div class="detail-label">
+              <banknote-icon size="20" color="#9E9E9E" class="detail-icon" />
+              <div class="detail-name">Currency</div>
+            </div>
+            <div class="detail-value">
+              {{ mintUnits.map((unit) => unit.toUpperCase()).join(", ") }}
             </div>
           </div>
 
@@ -218,26 +267,32 @@
         </div>
 
         <!-- Action Buttons -->
-        <div class="action-buttons q-mt-lg q-mb-xl">
-          <q-btn
-            class="edit-mint-button"
-            unelevated
-            rounded
-            @click="openEditMintDialog"
-          >
-            <edit-icon size="20" class="q-mr-sm" />
-            <div class="action-label">EDIT MINT</div>
-          </q-btn>
+        <div class="action-buttons-section">
+          <div class="action-buttons-container">
+            <div
+              class="action-button cursor-pointer"
+              @click="openEditMintDialog"
+            >
+              <pencil-icon size="20" color="#9E9E9E" class="action-icon" />
+              <div class="action-label">Edit mint</div>
+            </div>
 
-          <q-btn
-            class="delete-mint-button"
-            outline
-            rounded
-            @click="openRemoveMintDialog"
-          >
-            <trash-icon size="20" class="q-mr-sm" />
-            <div class="action-label">DELETE MINT</div>
-          </q-btn>
+            <div
+              class="action-button cursor-pointer"
+              @click="copyText(showMintInfoData.url)"
+            >
+              <copy-icon size="20" color="#9E9E9E" class="action-icon" />
+              <div class="action-label">Copy mint URL</div>
+            </div>
+
+            <div
+              class="action-button delete-button cursor-pointer"
+              @click="openRemoveMintDialog"
+            >
+              <trash-icon size="20" color="#FF453A" class="action-icon" />
+              <div class="action-label">Delete mint</div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -248,7 +303,7 @@
 import { defineComponent } from "vue";
 import { mapActions, mapState, mapWritableState } from "pinia";
 import VueQrcode from "@chenfengyuan/vue-qrcode";
-import { useMintsStore } from "src/stores/mints";
+import { useMintsStore, MintClass } from "src/stores/mints";
 import EditMintDialog from "src/components/EditMintDialog.vue";
 import RemoveMintDialog from "src/components/RemoveMintDialog.vue";
 import MintMotdMessage from "src/components/MintMotdMessage.vue";
@@ -261,9 +316,10 @@ import {
   Info as InfoIcon,
   Mail as MailIcon,
   Copy as CopyIcon,
-  Edit as EditIcon,
+  Pencil as PencilIcon,
   Trash as TrashIcon,
   Building as BuildingIcon,
+  Banknote as BanknoteIcon,
 } from "lucide-vue-next";
 
 export default defineComponent({
@@ -278,9 +334,10 @@ export default defineComponent({
     InfoIcon,
     MailIcon,
     CopyIcon,
-    EditIcon,
+    PencilIcon,
     TrashIcon,
     BuildingIcon,
+    BanknoteIcon,
     EditMintDialog,
     RemoveMintDialog,
     MintMotdMessage,
@@ -295,6 +352,25 @@ export default defineComponent({
         nostr: "Nostr",
       },
       showQrCode: false,
+      showAllNuts: false,
+      nutNames: {
+        7: "Token state check",
+        8: "Overpaid Lightning fees",
+        9: "Signature restore",
+        10: "Spending conditions",
+        11: "Pay-To-Pubkey (P2PK)",
+        12: "DLEQ proofs",
+        13: "Deterministic secrets",
+        14: "Hashed Timelock Contracts",
+        15: "Partial multi-path payments",
+        16: "Animated QR codes",
+        17: "WebSocket subscriptions",
+        18: "Payment requests",
+        19: "Cached Responses",
+        20: "Signature on Mint Quote",
+        21: "Clear authentication",
+        22: "Blind authentication",
+      },
       motdDismissed: false,
     };
   },
@@ -305,6 +381,39 @@ export default defineComponent({
       "showEditMintDialog",
       "showRemoveMintDialog",
     ]),
+    filteredNutNames() {
+      // Only include nuts 7 and above
+      const filteredNuts = {};
+      Object.keys(this.nutNames).forEach((nutNumber) => {
+        if (parseInt(nutNumber) >= 7) {
+          filteredNuts[nutNumber] = this.nutNames[nutNumber];
+        }
+      });
+      return filteredNuts;
+    },
+    visibleNuts() {
+      // Return only the nuts that are both in our filtered list and supported by the mint
+      const result = {};
+      if (
+        this.showMintInfoData &&
+        this.showMintInfoData.info &&
+        this.showMintInfoData.info.nuts
+      ) {
+        Object.keys(this.filteredNutNames).forEach((nutNumber) => {
+          if (this.showMintInfoData.info.nuts[nutNumber]) {
+            result[nutNumber] = this.filteredNutNames[nutNumber];
+          }
+        });
+      }
+      return result;
+    },
+    mintUnits() {
+      if (this.showMintInfoData) {
+        const mintClassInstance = new MintClass(this.showMintInfoData);
+        return mintClassInstance.units;
+      }
+      return [];
+    },
   },
   methods: {
     ...mapActions(useMintsStore, ["removeMint"]),
@@ -514,38 +623,160 @@ export default defineComponent({
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
 /* Action Buttons */
-.action-buttons {
-  display: flex;
-  justify-content: space-between;
+.action-buttons-section {
   width: 100%;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  margin-top: 16px;
+  margin-bottom: 32px;
+}
+
+.action-buttons-container {
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  width: 100%;
+}
+
+.action-button {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
   gap: 16px;
+  padding: 8px;
+  border-radius: 8px;
+  transition: background-color 0.3s;
+  width: 100%;
+  margin-bottom: 16px;
 }
 
-.edit-mint-button {
-  flex: 1;
-  background-color: white !important;
-  color: black !important;
-  height: 54px;
-  font-weight: 600;
+.action-button:last-child {
+  margin-bottom: 0;
 }
 
-.delete-mint-button {
-  flex: 1;
-  border-color: #ff453a !important;
-  color: #ff453a !important;
-  height: 54px;
-  font-weight: 600;
+.action-button:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.action-icon {
+  min-width: 20px;
 }
 
 .action-label {
+  position: relative;
+  line-height: 24px;
+  font-weight: 500;
   font-size: 16px;
-  letter-spacing: 0.5px;
+}
+
+.delete-button {
+  color: #ff453a;
+}
+
+/* Remove old action button styles that are no longer needed */
+.edit-mint-button,
+.delete-mint-button,
+.action-buttons,
+.action-buttons-row {
+  display: none;
+}
+
+/* QR Code Container and Animation */
+.qr-code-container {
+  min-height: 0;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  overflow: hidden;
 }
 
 .qr-code-section {
   width: 100%;
   display: flex;
   justify-content: center;
+}
+
+.smooth-slide-enter-active {
+  transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  max-height: 350px;
+  margin-bottom: 16px;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.smooth-slide-leave-active {
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  max-height: 350px;
+  margin-bottom: 16px;
+  opacity: 1;
+}
+
+.smooth-slide-enter-from,
+.smooth-slide-leave-to {
+  max-height: 0;
+  margin-bottom: 0;
+  opacity: 0;
+  transform: translateY(-10px);
+  pointer-events: none;
+}
+
+.nuts-expanded-section {
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+.nuts-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.nut-pill {
+  border-radius: 4px;
+  background-color: #1d1d1d;
+  padding: 8px;
+  width: 100%;
+}
+
+.nut-content {
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 24px;
+  color: white;
+}
+
+/* Make "View all" and "Hide" text clickable */
+.detail-value[v-if="!showAllNuts"],
+.detail-value[v-else] {
+  cursor: pointer;
+  color: white;
+  font-weight: 600;
+}
+
+/* Currency Units */
+.currency-units-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.currency-unit-pill {
+  border-radius: 4px;
+  background-color: #1d1d1d;
+  padding: 4px 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: white;
+  display: inline-block;
 }
 </style>
