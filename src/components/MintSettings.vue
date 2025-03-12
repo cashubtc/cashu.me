@@ -565,6 +565,8 @@ export default defineComponent({
       "removeMint",
       "activateMintUrl",
       "updateMint",
+      "triggerMintInfoMotdChanged",
+      "fetchMintInfo",
     ]),
     ...mapActions(useWalletStore, ["decodeRequest", "mintOnPaid"]),
     ...mapActions(useWorkersStore, ["clearAllWorkers"]),
@@ -666,6 +668,9 @@ export default defineComponent({
       this.discoveringMints = false;
     },
     showMintInfo: async function (mint) {
+      const newMintInfo = await this.fetchMintInfo(mint);
+      this.triggerMintInfoMotdChanged(newMintInfo, mint);
+      this.mints.filter((m) => m.url === mint.url)[0].info = newMintInfo;
       this.showMintInfoData = mint;
       this.showMintInfoDialog = true;
     },
