@@ -741,7 +741,6 @@ export default defineComponent({
 
 .nut-pill {
   border-radius: 4px;
-  background-color: #1d1d1d;
   padding: 8px;
   width: 100%;
 }
