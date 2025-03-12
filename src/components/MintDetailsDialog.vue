@@ -202,26 +202,38 @@
         </div>
 
         <!-- Action Buttons -->
-        <div class="action-buttons q-mt-lg q-mb-xl">
-          <q-btn
-            class="edit-mint-button"
-            unelevated
-            rounded
-            @click="openEditMintDialog"
-          >
-            <edit-icon size="20" class="q-mr-sm" />
-            <div class="action-label">EDIT MINT</div>
-          </q-btn>
-
-          <q-btn
-            class="delete-mint-button"
-            outline
-            rounded
-            @click="openRemoveMintDialog"
-          >
-            <trash-icon size="20" class="q-mr-sm" />
-            <div class="action-label">DELETE MINT</div>
-          </q-btn>
+        <div class="action-buttons-section q-mt-lg q-mb-xl">
+          <div class="action-buttons-container">
+            <div class="action-buttons-row">
+              <div
+                class="action-button cursor-pointer"
+                @click="openEditMintDialog"
+              >
+                <edit-icon size="24" class="action-icon" />
+                <div class="action-label">Edit mint</div>
+              </div>
+              <div
+                class="action-button cursor-pointer"
+                @click="copyText(showMintInfoData.url)"
+              >
+                <copy-icon size="24" class="action-icon" />
+                <div class="action-label">Copy mint URL</div>
+              </div>
+            </div>
+            <div class="action-buttons-row">
+              <div class="action-button cursor-pointer" @click="refreshMint">
+                <refresh-icon size="24" class="action-icon" />
+                <div class="action-label">Refresh mint</div>
+              </div>
+              <div
+                class="action-button delete-button cursor-pointer"
+                @click="openRemoveMintDialog"
+              >
+                <trash-icon size="20" class="action-icon" />
+                <div class="action-label">Delete mint</div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -247,6 +259,7 @@ import {
   Edit as EditIcon,
   Trash as TrashIcon,
   Building as BuildingIcon,
+  RefreshCw as RefreshIcon,
 } from "lucide-vue-next";
 
 export default defineComponent({
@@ -264,6 +277,7 @@ export default defineComponent({
     EditIcon,
     TrashIcon,
     BuildingIcon,
+    RefreshIcon,
     EditMintDialog,
     RemoveMintDialog,
   },
@@ -312,6 +326,16 @@ export default defineComponent({
     openRemoveMintDialog() {
       this.mintToRemove = Object.assign({}, this.showMintInfoData);
       this.showRemoveMintDialog = true;
+    },
+    refreshMint() {
+      // Implement mint refresh functionality here
+      this.$q.notify({
+        message: "Refreshing mint data",
+        color: "info",
+        position: "top",
+        timeout: 1000,
+      });
+      // You might want to add actual refresh logic here
     },
   },
 });
@@ -495,33 +519,76 @@ export default defineComponent({
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
 /* Action Buttons */
-.action-buttons {
+.action-buttons-section {
+  width: 100%;
+  position: relative;
   display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 32px;
+}
+
+.action-buttons-container {
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 16px;
+  width: 100%;
+}
+
+.action-buttons-row {
+  align-self: stretch;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
   justify-content: space-between;
   width: 100%;
+}
+
+.action-button {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
   gap: 16px;
+  padding: 8px;
+  border-radius: 8px;
+  transition: background-color 0.3s;
 }
 
-.edit-mint-button {
-  flex: 1;
-  background-color: white !important;
-  color: black !important;
-  height: 54px;
-  font-weight: 600;
+.action-button:hover {
+  background-color: rgba(255, 255, 255, 0.1);
 }
 
-.delete-mint-button {
-  flex: 1;
-  border-color: #ff453a !important;
-  color: #ff453a !important;
-  height: 54px;
-  font-weight: 600;
+.action-icon {
+  color: white;
 }
 
 .action-label {
+  position: relative;
+  line-height: 24px;
+  font-weight: 500;
   font-size: 16px;
-  letter-spacing: 0.5px;
+}
+
+.delete-button {
+  color: #ff453a;
+}
+
+.delete-button .action-icon {
+  color: #ff453a;
+}
+
+/* Remove old action button styles that are no longer needed */
+.edit-mint-button,
+.delete-mint-button,
+.action-buttons {
+  display: none;
 }
 
 .qr-code-section {
