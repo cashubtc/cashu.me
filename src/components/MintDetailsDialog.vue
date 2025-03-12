@@ -205,6 +205,20 @@
             </div>
           </div>
 
+          <!-- Currency Units (if available) -->
+          <div
+            class="detail-item q-mb-md"
+            v-if="mintUnits && mintUnits.length > 0"
+          >
+            <div class="detail-label">
+              <banknote-icon size="20" color="#9E9E9E" class="detail-icon" />
+              <div class="detail-name">Currency</div>
+            </div>
+            <div class="detail-value">
+              {{ mintUnits.map((unit) => unit.toUpperCase()).join(", ") }}
+            </div>
+          </div>
+
           <!-- Version -->
           <div class="detail-item" v-if="showMintInfoData.info.version">
             <div class="detail-label">
@@ -266,7 +280,7 @@
 import { defineComponent } from "vue";
 import { mapActions, mapState, mapWritableState } from "pinia";
 import VueQrcode from "@chenfengyuan/vue-qrcode";
-import { useMintsStore } from "src/stores/mints";
+import { useMintsStore, MintClass } from "src/stores/mints";
 import EditMintDialog from "src/components/EditMintDialog.vue";
 import RemoveMintDialog from "src/components/RemoveMintDialog.vue";
 import {
@@ -282,6 +296,7 @@ import {
   Trash as TrashIcon,
   Building as BuildingIcon,
   RefreshCw as RefreshIcon,
+  Banknote as BanknoteIcon,
 } from "lucide-vue-next";
 
 export default defineComponent({
@@ -300,6 +315,7 @@ export default defineComponent({
     TrashIcon,
     BuildingIcon,
     RefreshIcon,
+    BanknoteIcon,
     EditMintDialog,
     RemoveMintDialog,
   },
@@ -366,6 +382,13 @@ export default defineComponent({
         });
       }
       return result;
+    },
+    mintUnits() {
+      if (this.showMintInfoData) {
+        const mintClassInstance = new MintClass(this.showMintInfoData);
+        return mintClassInstance.units;
+      }
+      return [];
     },
   },
   methods: {
@@ -690,5 +713,23 @@ export default defineComponent({
   cursor: pointer;
   color: white;
   font-weight: 600;
+}
+
+/* Currency Units */
+.currency-units-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.currency-unit-pill {
+  border-radius: 4px;
+  background-color: #1d1d1d;
+  padding: 4px 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: white;
+  display: inline-block;
 }
 </style>
