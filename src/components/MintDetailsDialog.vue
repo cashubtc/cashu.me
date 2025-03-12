@@ -78,7 +78,7 @@
             <transition
               appear
               enter-active-class="animated pulse"
-              leave-active-class="animated fadeOut"
+              name="smooth-slide"
             >
               <mint-motd-message
                 v-if="
@@ -104,11 +104,7 @@
               {{ showMintInfoData.info.description_long }}
             </div>
           </div>
-          <transition
-            appear
-            enter-active-class="animated fadeIn"
-            leave-active-class="animated fadeOut"
-          >
+          <transition name="smooth-slide">
             <MintMotdMessage
               v-if="showMintInfoData.info.motd && showMintInfoData.motd_viewed"
               :message="showMintInfoData.info.motd"
