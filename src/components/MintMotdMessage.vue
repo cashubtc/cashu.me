@@ -17,8 +17,11 @@
   </div>
   <div class="motd-dismissed q-mt-md" v-else-if="message && dismissed">
     <div class="motd-dismissed-message">
-      <info-icon size="30" class="motd-dismissed-icon q-mr-md q-ml-xs" />
-      {{ message }}
+      <info-icon size="24" class="motd-dismissed-icon q-mr-md" />
+      <div class="motd-text-container">
+        <div class="motd-title">Mint Message</div>
+        <div class="motd-message">{{ message }}</div>
+      </div>
     </div>
   </div>
 </template>
@@ -140,10 +143,12 @@ export default defineComponent({
   color: #9e9e9e;
   line-height: 16px;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
+  gap: 12px;
 }
 
 .motd-dismissed-icon {
+  flex-shrink: 0;
   color: #9e9e9e;
 }
 </style>
