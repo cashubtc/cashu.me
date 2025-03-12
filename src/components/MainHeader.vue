@@ -197,5 +197,20 @@ export default defineComponent({
 .q-header {
   position: relative;
   z-index: auto;
+  overflow-x: hidden;
+}
+
+.q-toolbar {
+  flex-wrap: nowrap;
+  min-height: 50px; /* Ensure consistent height */
+}
+
+.q-toolbar-title {
+  flex: 0 1 auto; /* Allow title to shrink */
+}
+
+/* Make badges container handle overflow properly */
+.q-toolbar > .q-badge {
+  flex-shrink: 0;
 }
 </style>
