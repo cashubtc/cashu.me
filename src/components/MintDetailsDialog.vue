@@ -37,20 +37,21 @@
         </div>
 
         <!-- QR Code Section (toggleable) -->
-        <transition-group
-          appear
-          enter-active-class="animated slideInDown"
-          leave-active-class="animated slideOutUp"
-          name="fade"
-        >
-          <div v-if="showQrCode" class="qr-code-section q-mb-md">
-            <vue-qrcode
-              :value="showMintInfoData.url"
-              :options="{ width: 300 }"
-              class="rounded-borders"
-            />
-          </div>
-        </transition-group>
+        <div class="qr-code-container">
+          <transition appear name="smooth-slide">
+            <div
+              v-if="showQrCode"
+              class="qr-code-section q-mb-md"
+              key="qr-code"
+            >
+              <vue-qrcode
+                :value="showMintInfoData.url"
+                :options="{ width: 300 }"
+                class="rounded-borders"
+              />
+            </div>
+          </transition>
+        </div>
 
         <!-- Mint Header Profile Name Section -->
         <div class="mint-header-container q-mb-lg">
@@ -675,10 +676,43 @@ export default defineComponent({
   display: none;
 }
 
+/* QR Code Container and Animation */
+.qr-code-container {
+  min-height: 0;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  overflow: hidden;
+}
+
 .qr-code-section {
   width: 100%;
   display: flex;
   justify-content: center;
+}
+
+.smooth-slide-enter-active {
+  transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  max-height: 350px;
+  margin-bottom: 16px;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.smooth-slide-leave-active {
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  max-height: 350px;
+  margin-bottom: 16px;
+  opacity: 1;
+}
+
+.smooth-slide-enter-from,
+.smooth-slide-leave-to {
+  max-height: 0;
+  margin-bottom: 0;
+  opacity: 0;
+  transform: translateY(-10px);
+  pointer-events: none;
 }
 
 .nuts-expanded-section {
