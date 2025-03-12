@@ -163,8 +163,31 @@
               <nut-icon size="20" color="#9E9E9E" class="detail-icon" />
               <div class="detail-name">Nuts</div>
             </div>
-            <div class="detail-value">
-              {{ Object.keys(showMintInfoData.info.nuts).join(", ") }}
+            <div
+              class="detail-value"
+              v-if="!showAllNuts"
+              @click="showAllNuts = true"
+            >
+              View all
+            </div>
+            <div class="detail-value" v-else @click="showAllNuts = false">
+              Hide
+            </div>
+          </div>
+
+          <!-- Expanded Nuts Section (when showAllNuts is true) -->
+          <div
+            class="nuts-expanded-section"
+            v-if="showAllNuts && showMintInfoData.info.nuts"
+          >
+            <div class="nuts-grid">
+              <div
+                v-for="(nutName, nutNumber) in visibleNuts"
+                :key="nutNumber"
+                class="nut-pill"
+              >
+                <div class="nut-content">{{ nutNumber }}: {{ nutName }}</div>
+              </div>
             </div>
           </div>
 
@@ -290,6 +313,25 @@ export default defineComponent({
         nostr: "Nostr",
       },
       showQrCode: false,
+      showAllNuts: false,
+      nutNames: {
+        7: "Token state check",
+        8: "Overpaid Lightning fees",
+        9: "Signature restore",
+        10: "Spending conditions",
+        11: "Pay-To-Pubkey (P2PK)",
+        12: "DLEQ proofs",
+        13: "Deterministic secrets",
+        14: "Hashed Timelock Contracts",
+        15: "Partial multi-path payments",
+        16: "Animated QR codes",
+        17: "WebSocket subscriptions",
+        18: "Payment requests",
+        19: "Cached Responses",
+        20: "Signature on Mint Quote",
+        21: "Clear authentication",
+        22: "Blind authentication",
+      },
     };
   },
   computed: {
@@ -299,6 +341,32 @@ export default defineComponent({
       "showEditMintDialog",
       "showRemoveMintDialog",
     ]),
+    filteredNutNames() {
+      // Only include nuts 7 and above
+      const filteredNuts = {};
+      Object.keys(this.nutNames).forEach((nutNumber) => {
+        if (parseInt(nutNumber) >= 7) {
+          filteredNuts[nutNumber] = this.nutNames[nutNumber];
+        }
+      });
+      return filteredNuts;
+    },
+    visibleNuts() {
+      // Return only the nuts that are both in our filtered list and supported by the mint
+      const result = {};
+      if (
+        this.showMintInfoData &&
+        this.showMintInfoData.info &&
+        this.showMintInfoData.info.nuts
+      ) {
+        Object.keys(this.filteredNutNames).forEach((nutNumber) => {
+          if (this.showMintInfoData.info.nuts[nutNumber]) {
+            result[nutNumber] = this.filteredNutNames[nutNumber];
+          }
+        });
+      }
+      return result;
+    },
   },
   methods: {
     ...mapActions(useMintsStore, ["removeMint"]),
@@ -588,5 +656,39 @@ export default defineComponent({
   width: 100%;
   display: flex;
   justify-content: center;
+}
+
+.nuts-expanded-section {
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+.nuts-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.nut-pill {
+  border-radius: 4px;
+  background-color: #1d1d1d;
+  padding: 8px;
+  width: 100%;
+}
+
+.nut-content {
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 24px;
+  color: white;
+}
+
+/* Make "View all" and "Hide" text clickable */
+.detail-value[v-if="!showAllNuts"],
+.detail-value[v-else] {
+  cursor: pointer;
+  color: white;
+  font-weight: 600;
 }
 </style>
