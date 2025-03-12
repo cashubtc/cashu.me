@@ -202,36 +202,35 @@
         </div>
 
         <!-- Action Buttons -->
-        <div class="action-buttons-section q-mt-lg q-mb-xl">
+        <div class="action-buttons-section">
           <div class="action-buttons-container">
-            <div class="action-buttons-row">
-              <div
-                class="action-button cursor-pointer"
-                @click="openEditMintDialog"
-              >
-                <edit-icon size="24" class="action-icon" />
-                <div class="action-label">Edit mint</div>
-              </div>
-              <div
-                class="action-button cursor-pointer"
-                @click="copyText(showMintInfoData.url)"
-              >
-                <copy-icon size="24" class="action-icon" />
-                <div class="action-label">Copy mint URL</div>
-              </div>
+            <div
+              class="action-button cursor-pointer"
+              @click="openEditMintDialog"
+            >
+              <pencil-icon size="20" color="#9E9E9E" class="action-icon" />
+              <div class="action-label">Edit mint</div>
             </div>
-            <div class="action-buttons-row">
-              <div class="action-button cursor-pointer" @click="refreshMint">
-                <refresh-icon size="24" class="action-icon" />
-                <div class="action-label">Refresh mint</div>
-              </div>
-              <div
-                class="action-button delete-button cursor-pointer"
-                @click="openRemoveMintDialog"
-              >
-                <trash-icon size="20" class="action-icon" />
-                <div class="action-label">Delete mint</div>
-              </div>
+
+            <div
+              class="action-button cursor-pointer"
+              @click="copyText(showMintInfoData.url)"
+            >
+              <copy-icon size="20" color="#9E9E9E" class="action-icon" />
+              <div class="action-label">Copy mint URL</div>
+            </div>
+
+            <div class="action-button cursor-pointer" @click="refreshMint">
+              <refresh-icon size="20" color="#9E9E9E" class="action-icon" />
+              <div class="action-label">Refresh mint</div>
+            </div>
+
+            <div
+              class="action-button delete-button cursor-pointer"
+              @click="openRemoveMintDialog"
+            >
+              <trash-icon size="20" color="#FF453A" class="action-icon" />
+              <div class="action-label">Delete mint</div>
             </div>
           </div>
         </div>
@@ -256,7 +255,7 @@ import {
   Info as InfoIcon,
   Mail as MailIcon,
   Copy as CopyIcon,
-  Edit as EditIcon,
+  Pencil as PencilIcon,
   Trash as TrashIcon,
   Building as BuildingIcon,
   RefreshCw as RefreshIcon,
@@ -274,7 +273,7 @@ export default defineComponent({
     InfoIcon,
     MailIcon,
     CopyIcon,
-    EditIcon,
+    PencilIcon,
     TrashIcon,
     BuildingIcon,
     RefreshIcon,
@@ -528,7 +527,8 @@ export default defineComponent({
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-  gap: 32px;
+  margin-top: 16px;
+  margin-bottom: 32px;
 }
 
 .action-buttons-container {
@@ -537,16 +537,6 @@ export default defineComponent({
   flex-direction: column;
   align-items: flex-start;
   justify-content: center;
-  gap: 16px;
-  width: 100%;
-}
-
-.action-buttons-row {
-  align-self: stretch;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
   width: 100%;
 }
 
@@ -559,6 +549,12 @@ export default defineComponent({
   padding: 8px;
   border-radius: 8px;
   transition: background-color 0.3s;
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+.action-button:last-child {
+  margin-bottom: 0;
 }
 
 .action-button:hover {
@@ -566,7 +562,7 @@ export default defineComponent({
 }
 
 .action-icon {
-  color: white;
+  min-width: 20px;
 }
 
 .action-label {
@@ -580,14 +576,11 @@ export default defineComponent({
   color: #ff453a;
 }
 
-.delete-button .action-icon {
-  color: #ff453a;
-}
-
 /* Remove old action button styles that are no longer needed */
 .edit-mint-button,
 .delete-mint-button,
-.action-buttons {
+.action-buttons,
+.action-buttons-row {
   display: none;
 }
 
