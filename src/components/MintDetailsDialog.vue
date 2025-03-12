@@ -21,7 +21,7 @@
     seamless
     @keyup.esc="showMintInfoDialog = false"
   >
-    <div class="fullscreen bg-black">
+    <div class="fullscreen bg-dark">
       <div class="mint-content-container q-pa-md">
         <!-- Top Icons -->
         <div class="top-icons q-pt-md q-mb-lg">
@@ -452,7 +452,6 @@ export default defineComponent({
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: #000;
   z-index: 6000;
 }
 
@@ -485,11 +484,11 @@ export default defineComponent({
 .mint-header {
   width: 100%;
   border-radius: 12px;
-  background-color: #121212;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  background-color: rgba(255, 255, 255, 0.05);
 }
 
 .mint-name {
