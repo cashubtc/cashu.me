@@ -72,6 +72,15 @@
           </div>
 
           <div class="mint-descriptions q-mt-lg">
+            <!-- MOTD Component -->
+            <mint-motd-message
+              v-if="showMintInfoData.info.motd && !showMintInfoData.motd_viewed"
+              :message="showMintInfoData.info.motd"
+              :mint-url="showMintInfoData.url"
+              :dismissed="showMintInfoData.motd_viewed"
+              @dismiss="motdDismissed = true"
+            />
+
             <div
               class="mint-description"
               v-if="showMintInfoData.info.description"
@@ -85,6 +94,13 @@
               {{ showMintInfoData.info.description_long }}
             </div>
           </div>
+          <MintMotdMessage
+            v-if="showMintInfoData.info.motd && showMintInfoData.motd_viewed"
+            :message="showMintInfoData.info.motd"
+            :mintUrl="showMintInfoData.url"
+            :dismissed="showMintInfoData.motd_viewed"
+            @dismiss="dismissMotd"
+          />
         </div>
 
         <!-- Section Divider -->
@@ -235,6 +251,7 @@ import VueQrcode from "@chenfengyuan/vue-qrcode";
 import { useMintsStore } from "src/stores/mints";
 import EditMintDialog from "src/components/EditMintDialog.vue";
 import RemoveMintDialog from "src/components/RemoveMintDialog.vue";
+import MintMotdMessage from "src/components/MintMotdMessage.vue";
 import {
   X as CloseIcon,
   QrCode as QrCodeIcon,
@@ -266,6 +283,7 @@ export default defineComponent({
     BuildingIcon,
     EditMintDialog,
     RemoveMintDialog,
+    MintMotdMessage,
   },
   data: function () {
     return {
@@ -277,6 +295,7 @@ export default defineComponent({
         nostr: "Nostr",
       },
       showQrCode: false,
+      motdDismissed: false,
     };
   },
   computed: {
