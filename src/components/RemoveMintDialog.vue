@@ -47,6 +47,7 @@
             v-close-popup
             class="float-left"
             color="primary"
+            rounded
             @click="removeMintLocal"
             >Remove mint</q-btn
           >
