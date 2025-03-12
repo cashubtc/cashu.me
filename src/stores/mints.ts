@@ -399,7 +399,7 @@ export const useMintsStore = defineStore("mints", {
       }
       return false;
     },
-    async triggerMintInfoMotdChanged(newMintInfo: GetInfoResponse, mint: Mint) {
+    triggerMintInfoMotdChanged(newMintInfo: GetInfoResponse, mint: Mint) {
       if (!this.checkMintInfoMotdChanged(newMintInfo, mint)) {
         return;
       }
