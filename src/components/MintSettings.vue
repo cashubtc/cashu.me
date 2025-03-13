@@ -196,7 +196,10 @@
           <div class="divider-line"></div>
         </div>
 
-        <div class="add-mint-description q-mb-lg text-left">
+        <div
+          class="add-mint-description q-mb-lg text-left"
+          style="color: rgba(255, 255, 255, 0.7)"
+        >
           Enter the URL of a Cashu mint to connect to it. This wallet is not
           affiliated with any mint.
         </div>
@@ -209,8 +212,7 @@
             placeholder="https://"
             @keydown.enter.prevent="sanitizeMintUrlAndShowAddDialog"
             ref="mintInput"
-            class="q-mb-md mint-input"
-            style="font-family: monospace"
+            class="q-mb-md mint-input url-input"
           />
 
           <q-input
@@ -220,37 +222,32 @@
             placeholder="Nickname (e.g. Testnet)"
             @keydown.enter.prevent="sanitizeMintUrlAndShowAddDialog"
             ref="mintNicknameInput"
-            class="q-mb-lg mint-input"
+            class="mint-input"
           />
         </div>
 
         <div class="add-mint-actions">
-          <q-btn
-            v-if="addMintData.url.length > 0"
-            rounded
-            color="primary"
-            class="action-btn"
-            :loading="addMintBlocking"
-            @click="sanitizeMintUrlAndShowAddDialog"
-          >
-            <q-icon name="add" size="20px" class="q-mr-sm" />
-            <span>Add Mint</span>
-            <template v-slot:loading>
-              <q-spinner-hourglass />
-              Adding mint
-            </template>
-          </q-btn>
+          <div class="row justify-between items-center q-mt-xs">
+            <q-btn
+              flat
+              :disable="addMintData.url.length === 0"
+              @click="
+                addMintData.url.length > 0
+                  ? sanitizeMintUrlAndShowAddDialog()
+                  : null
+              "
+              class="text-white"
+              :class="{ 'text-grey-7': addMintData.url.length === 0 }"
+            >
+              <q-icon name="add" size="20px" class="q-mr-sm" />
+              <span>Add Mint</span>
+            </q-btn>
 
-          <q-btn
-            rounded
-            color="primary"
-            class="action-btn"
-            :class="{ 'full-width': addMintData.url.length === 0 }"
-            @click="showCamera"
-          >
-            <q-icon name="qr_code" size="20px" class="q-mr-sm" />
-            <span>Scan QR Code</span>
-          </q-btn>
+            <q-btn flat @click="showCamera" class="text-white">
+              <q-icon name="qr_code" size="20px" class="q-mr-sm" />
+              <span>Scan QR Code</span>
+            </q-btn>
+          </div>
         </div>
       </div>
     </div>
@@ -706,7 +703,6 @@ export default defineComponent({
   font-size: 14px;
   line-height: 24px;
   font-weight: 500;
-  color: #9e9e9e;
   text-align: left;
   margin-bottom: 24px;
 }
@@ -719,6 +715,7 @@ export default defineComponent({
 
 .mint-input {
   width: 100%;
+  font-family: "Inter", sans-serif;
 }
 
 .mint-input .q-field__control {
@@ -726,24 +723,57 @@ export default defineComponent({
   border-radius: 100px;
 }
 
+.mint-input .q-field__native,
+.mint-input .q-field__input,
+.mint-input .q-placeholder {
+  font-family: "Inter", sans-serif;
+}
+
 .add-mint-actions {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: center;
-  gap: 16px;
+  width: 100%;
+  margin-top: 16px;
+}
+
+.action-buttons-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   width: 100%;
 }
 
-.action-btn {
-  height: 48px;
-  border-radius: 100px;
-  font-weight: 500;
-  font-size: 16px;
-  flex: 1;
+.action-button {
   display: flex;
   align-items: center;
-  justify-content: center;
+  padding: 8px;
+  border-radius: 8px;
+  transition: background-color 0.3s;
+}
+
+.action-button:first-child {
+  justify-self: start;
+}
+
+.action-button:last-child {
+  justify-self: end;
+}
+
+.action-icon {
+  margin-right: 8px;
+}
+
+.action-label {
+  line-height: 24px;
+  font-weight: 500;
+  font-size: 16px;
+  color: white;
+}
+
+.disabled-action {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.disabled-action:hover {
+  background-color: transparent;
 }
 
 .full-width {
