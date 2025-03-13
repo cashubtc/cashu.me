@@ -37,6 +37,7 @@ import {
   decodePaymentRequest,
   MintQuoteResponse,
   ProofState,
+  getEncodedTokenV4,
 } from "@cashu/cashu-ts";
 import { hashToCurve } from "@cashu/crypto/modules/common";
 // @ts-ignore
@@ -483,11 +484,48 @@ export const useWalletStore = defineStore("wallet", {
       if (proofs.length == 0) {
         throw new Error("no proofs found.");
       }
-      const inputAmount = proofs.reduce((s, t) => (s += t.amount), 0);
-      let fee = 0;
+
+      // Get mint details, create mint wallet
       let mintInToken = token.getMint(tokenJson);
       let unitInToken = token.getUnit(tokenJson);
+      const mint = mintStore.mints.find((m) => m.url === mintInToken);
+      if (!mint) {
+        throw new Error("mint not found");
+      }
+      const mintWallet = this.mintWallet(mintInToken, unitInToken);
 
+      // Check if token is partially spent
+      console.log("checking token status");
+      const enc = new TextEncoder();
+      const proofStates = await mintWallet.checkProofsStates(proofs);
+      const unspentProofsStates = proofStates.filter(
+        (p) => p.state == CheckStateEnum.UNSPENT
+      );
+      const unspentProofs = proofs.filter((p) =>
+        unspentProofsStates.find(
+          (s) => s.Y == hashToCurve(enc.encode(p.secret)).toHex(true)
+        )
+      );
+      if (!unspentProofs.length) {
+        const spentError = new Error("Error: Token already spent.");
+        notifyApiError(spentError);
+        throw spentError;
+      }
+      if (unspentProofs.length != proofs.length) {
+        console.error("token is partially spent!");
+        notifyApiError(
+          new Error("Partially spent token detected - new token generated")
+        );
+        receiveStore.receiveData.tokensBase64 = getEncodedTokenV4({
+          mint: mintInToken,
+          proofs: unspentProofs,
+        });
+        proofs = unspentProofs;
+      }
+
+      // Receive the token
+      let fee = 0;
+      const inputAmount = proofs.reduce((s, t) => (s += t.amount), 0);
       const historyToken = {
         amount: inputAmount,
         token: receiveStore.receiveData.tokensBase64,
@@ -495,11 +533,6 @@ export const useWalletStore = defineStore("wallet", {
         mint: mintInToken,
         fee: fee,
       } as HistoryToken;
-      const mintWallet = this.mintWallet(historyToken.mint, historyToken.unit);
-      const mint = mintStore.mints.find((m) => m.url === historyToken.mint);
-      if (!mint) {
-        throw new Error("mint not found");
-      }
       await uIStore.lockMutex();
       try {
         // redeem
