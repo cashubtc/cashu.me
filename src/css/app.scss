@@ -82,3 +82,17 @@ body,
 .q-checkbox__svg {
   color: var(--q-dark);
 }
+
+// Custom styling for caption labels
+.q-item__label--caption,
+.q-item__label.q-item__label--caption,
+.q-item__label.q-item__label--caption.text-caption {
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue",
+    sans-serif;
+  font-size: 14px;
+  line-height: 24px;
+  font-weight: 500;
+  text-align: left;
+  margin-bottom: 24px;
+}
