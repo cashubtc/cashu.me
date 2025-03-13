@@ -734,53 +734,7 @@ export default defineComponent({
   margin-top: 16px;
 }
 
-.action-buttons-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  width: 100%;
-}
-
-.action-button {
-  display: flex;
-  align-items: center;
-  padding: 8px;
-  border-radius: 8px;
-  transition: background-color 0.3s;
-}
-
-.action-button:first-child {
-  justify-self: start;
-}
-
-.action-button:last-child {
-  justify-self: end;
-}
-
-.action-icon {
-  margin-right: 8px;
-}
-
-.action-label {
-  line-height: 24px;
-  font-weight: 500;
-  font-size: 16px;
-  color: white;
-}
-
-.disabled-action {
-  opacity: 0.5;
-  cursor: default;
-}
-
-.disabled-action:hover {
-  background-color: transparent;
-}
-
-.full-width {
-  width: 100%;
-}
-
-/* Section Divider - similar to MintDetailsDialog */
+/* Section Divider */
 .section-divider {
   display: flex;
   align-items: center;
