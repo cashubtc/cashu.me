@@ -214,7 +214,9 @@
                 :key="nutNumber"
                 class="nut-pill"
               >
-                <div class="nut-content">{{ nutNumber }}: {{ nutName }}</div>
+                <div class="nut-content">
+                  <span class="nut-number">{{ nutNumber }}:</span> {{ nutName }}
+                </div>
               </div>
             </div>
           </div>
@@ -749,7 +751,11 @@ export default defineComponent({
   font-size: 14px;
   font-weight: 600;
   line-height: 24px;
-  color: white;
+  color: #white;
+}
+
+.nut-number {
+  color: #9e9e9e;
 }
 
 /* Make "View all" and "Hide" text clickable */
