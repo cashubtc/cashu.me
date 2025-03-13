@@ -188,7 +188,7 @@
         </div>
       </q-list>
     </div>
-    <div class="q-pt-xs q-px-xs" ref="addMintDiv">
+    <div class="q-pt-xs q-px-md" ref="addMintDiv">
       <div class="add-mint-container">
         <div class="section-divider q-mb-md">
           <div class="divider-line"></div>
@@ -696,9 +696,7 @@ export default defineComponent({
 /* Add Mint Section Styles */
 .add-mint-container {
   width: 100%;
-  max-width: 600px;
   margin: 0 auto;
-  padding: 0 16px;
   display: flex;
   flex-direction: column;
   margin-bottom: 32px;
