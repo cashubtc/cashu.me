@@ -1,7 +1,13 @@
 <template>
   <div style="max-width: 800px; margin: 0 auto">
-    <!-- ////////////////////// SETTINGS ////////////////// -->
-    <div class="q-px-xs text-left" on-left>
+    <!-- BACKUP & RESTORE SECTION -->
+    <div class="section-divider q-my-md">
+      <div class="divider-line"></div>
+      <div class="divider-text">BACKUP & RESTORE</div>
+      <div class="divider-line"></div>
+    </div>
+
+    <div class="q-py-sm q-px-xs text-left" on-left>
       <q-list padding>
         <q-item>
           <q-item-section>
@@ -77,8 +83,16 @@
         </q-item>
       </q-list>
     </div>
+
+    <!-- LIGHTNING ADDRESS SECTION -->
+    <div class="section-divider q-my-md">
+      <div class="divider-line"></div>
+      <div class="divider-text">LIGHTNING ADDRESS</div>
+      <div class="divider-line"></div>
+    </div>
+
     <!-- nostr -->
-    <div class="q-py-sm q-px-sm text-left" on-left>
+    <div class="q-py-sm q-px-xs text-left" on-left>
       <q-list padding>
         <q-item>
           <q-item-section>
@@ -134,6 +148,14 @@
               </div>
             </div>
           </q-item>
+
+          <!-- NOSTR KEYS SECTION -->
+          <div class="section-divider q-my-md">
+            <div class="divider-line"></div>
+            <div class="divider-text">NOSTR KEYS</div>
+            <div class="divider-line"></div>
+          </div>
+
           <q-item>
             <q-item-section>
               <q-item-label overline>Your nostr keys</q-item-label>
@@ -299,6 +321,13 @@
       </q-list>
     </div>
 
+    <!-- PAYMENT REQUESTS SECTION -->
+    <div class="section-divider q-my-md">
+      <div class="divider-line"></div>
+      <div class="divider-text">PAYMENT REQUESTS</div>
+      <div class="divider-line"></div>
+    </div>
+
     <!-- payment requests -->
     <div class="q-py-sm q-px-xs text-left" on-left>
       <q-item class="q-pt-lg">
@@ -334,6 +363,13 @@
           </q-item-label>
         </q-item-section>
       </q-item>
+    </div>
+
+    <!-- NOSTR WALLET CONNECT SECTION -->
+    <div class="section-divider q-my-md">
+      <div class="divider-line"></div>
+      <div class="divider-text">NOSTR WALLET CONNECT</div>
+      <div class="divider-line"></div>
     </div>
 
     <!-- ln address -->
@@ -509,6 +545,14 @@
         </div>
       </q-list>
     </div>
+
+    <!-- HARDWARE FEATURES SECTION -->
+    <div v-if="ndefSupported" class="section-divider q-my-md">
+      <div class="divider-line"></div>
+      <div class="divider-text">HARDWARE FEATURES</div>
+      <div class="divider-line"></div>
+    </div>
+
     <div class="q-py-sm q-px-xs text-left" on-left>
       <q-list padding>
         <!-- Web NFC -->
@@ -608,6 +652,13 @@
           </q-list>
         </div>
 
+        <!-- P2PK SECTION -->
+        <div class="section-divider q-my-md">
+          <div class="divider-line"></div>
+          <div class="divider-text">P2PK FEATURES</div>
+          <div class="divider-line"></div>
+        </div>
+
         <!-- P2PK -->
         <div class="q-py-sm q-px-xs text-left" on-left>
           <q-list padding>
@@ -702,6 +753,13 @@
               </q-item>
             </q-expansion-item>
           </q-item>
+        </div>
+
+        <!-- PRIVACY SECTION -->
+        <div class="section-divider q-my-md">
+          <div class="divider-line"></div>
+          <div class="divider-text">PRIVACY</div>
+          <div class="divider-line"></div>
         </div>
 
         <q-item>
@@ -815,10 +873,15 @@
           </q-item>
         </div>
 
+        <div class="section-divider q-my-md">
+          <div class="divider-line"></div>
+          <div class="divider-text">EXPERIMENTAL</div>
+          <div class="divider-line"></div>
+        </div>
         <!-- enable receive swaps -->
         <q-item>
           <q-item-section>
-            <q-item-label overline class="text-weight-bold q-pt-xl"
+            <q-item-label overline class="text-weight-bold"
               >Experimental</q-item-label
             >
             <q-item-label caption>
@@ -855,12 +918,17 @@
           </q-item-label>
         </q-item>
 
+        <div class="section-divider q-my-md">
+          <div class="divider-line"></div>
+          <div class="divider-text">APPEARANCE</div>
+          <div class="divider-line"></div>
+        </div>
         <!-- use numeric keyboard -->
         <div class="q-py-sm q-px-xs text-left" on-left>
           <q-list padding>
             <q-item>
               <q-item-section>
-                <q-item-label overline class="text-weight-bold q-pt-lg"
+                <q-item-label overline class="text-weight-bold"
                   >On-screen keyboard</q-item-label
                 >
                 <q-item-label caption
@@ -1563,13 +1631,25 @@ export default defineComponent({
   },
 });
 </script>
-<style scoped>
-.seed-phrase :deep(.q-field__control) {
-  padding: 12px 12px !important;
+<style>
+/* Section Divider */
+.section-divider {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 24px;
 }
-.seed-phrase {
-  font-size: 0.9rem;
-  font-family: monospace;
-  padding: 12px 12px !important;
+
+.divider-line {
+  flex: 1;
+  height: 1px;
+  background-color: #48484a;
+}
+
+.divider-text {
+  padding: 0 10px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #ffffff;
 }
 </style>
