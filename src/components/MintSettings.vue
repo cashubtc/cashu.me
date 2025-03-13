@@ -253,7 +253,12 @@
     </div>
 
     <!-- nostr -->
-    <div class="q-py-sm q-px-xs text-left" on-left>
+    <div class="section-divider q-mb-md">
+      <div class="divider-line"></div>
+      <div class="divider-text">DISCOVER MINTS</div>
+      <div class="divider-line"></div>
+    </div>
+    <div class="q-px-xs text-left" on-left>
       <q-list padding>
         <q-item>
           <q-item-section>
@@ -264,7 +269,7 @@
             >
           </q-item-section>
         </q-item>
-        <q-item>
+        <q-item class="q-pt-sm">
           <q-btn
             class="q-ml-sm q-px-md"
             color="primary"
@@ -331,7 +336,12 @@
       </q-list>
     </div>
 
-    <div class="q-py-sm q-px-xs text-left" on-left>
+    <div class="section-divider q-mb-md">
+      <div class="divider-line"></div>
+      <div class="divider-text">SWAP</div>
+      <div class="divider-line"></div>
+    </div>
+    <div class="q-px-xs text-left" on-left>
       <q-list padding>
         <q-item>
           <q-item-section>
@@ -343,7 +353,7 @@
             </q-item-label>
           </q-item-section>
         </q-item>
-        <q-item>
+        <q-item class="q-pt-sm">
           <q-select
             clearable
             rounded
