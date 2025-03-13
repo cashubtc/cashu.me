@@ -189,89 +189,70 @@
       </q-list>
     </div>
     <div class="q-pt-xs q-px-xs" ref="addMintDiv">
-      <q-list padding>
-        <div class="row-12 text-left">
-          <q-item>
-            <q-item-section>
-              <q-item-label overline>Add mint</q-item-label>
-              <q-item-label caption
-                >Enter the URL of a Cashu mint to connect to it. This wallet is
-                not affiliated with any mint.
-              </q-item-label>
-            </q-item-section>
-          </q-item>
+      <div class="add-mint-container">
+        <div class="section-divider q-mb-md">
+          <div class="divider-line"></div>
+          <div class="divider-text">ADD MINT</div>
+          <div class="divider-line"></div>
         </div>
-        <div class="row-12">
+
+        <div class="add-mint-description q-mb-lg text-left">
+          Enter the URL of a Cashu mint to connect to it. This wallet is not
+          affiliated with any mint.
+        </div>
+
+        <div class="add-mint-inputs">
           <q-input
-            bottom-slots
             rounded
-            dense
             outlined
-            @keydown.enter.prevent="sanitizeMintUrlAndShowAddDialog"
             v-model="addMintData.url"
             placeholder="https://"
-            ref="mintInput"
-            class="q-pb-none q-mb-sm q-px-md"
-            style="font-family: monospace"
-          >
-            <!-- <template v-slot:hint> Enter Mint URL</template> -->
-            <!-- "addMint(mintToAdd)" -->
-            <!-- <template v-slot:append>
-            <q-btn
-              round
-              dense
-              flat
-              color="primary"
-              icon="add"
-              click
-              @click="setShowAddMintDialog(true)"
-            />
-          </template> -->
-          </q-input>
-        </div>
-        <div class="row-12">
-          <q-input
-            bottom-slots
-            rounded
-            dense
-            outlined
             @keydown.enter.prevent="sanitizeMintUrlAndShowAddDialog"
-            v-model="addMintData.nickname"
-            label="Nickname (e.g. Testnet)"
-            ref="mintNicknameInput"
-            class="q-pb-sm q-px-md"
-          >
-          </q-input>
-        </div>
-        <div class="row-12">
-          <q-btn
-            v-if="addMintData.url.length == 0"
+            ref="mintInput"
+            class="q-mb-md mint-input"
+            style="font-family: monospace"
+          />
+
+          <q-input
             rounded
-            class="q-px-lg q-mt-xs"
-            color="primary"
-            @click="showCamera"
-          >
-            <q-icon size="xs" name="qr_code" class="q-pr-xs" />
-            Scan QR code
-          </q-btn>
+            outlined
+            v-model="addMintData.nickname"
+            placeholder="Nickname (e.g. Testnet)"
+            @keydown.enter.prevent="sanitizeMintUrlAndShowAddDialog"
+            ref="mintNicknameInput"
+            class="q-mb-lg mint-input"
+          />
+        </div>
+
+        <div class="add-mint-actions">
           <q-btn
             v-if="addMintData.url.length > 0"
             rounded
-            class="q-px-lg q-mt-xs"
             color="primary"
-            :disabled="addMintData.url.length == 0"
+            class="action-btn"
             :loading="addMintBlocking"
             @click="sanitizeMintUrlAndShowAddDialog"
           >
-            <q-icon size="xs" name="add" class="q-pr-xs" />
-            Add mint
+            <q-icon name="add" size="20px" class="q-mr-sm" />
+            <span>Add Mint</span>
             <template v-slot:loading>
               <q-spinner-hourglass />
               Adding mint
             </template>
           </q-btn>
+
+          <q-btn
+            rounded
+            color="primary"
+            class="action-btn"
+            :class="{ 'full-width': addMintData.url.length === 0 }"
+            @click="showCamera"
+          >
+            <q-icon name="qr_code" size="20px" class="q-mr-sm" />
+            <span>Scan QR Code</span>
+          </q-btn>
         </div>
-      </q-list>
+      </div>
     </div>
 
     <!-- nostr -->
@@ -710,5 +691,85 @@ export default defineComponent({
   top: 18px;
   right: 24px;
   z-index: 10;
+}
+
+/* Add Mint Section Styles */
+.add-mint-container {
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 0 16px;
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 32px;
+}
+
+.add-mint-description {
+  font-size: 14px;
+  line-height: 24px;
+  font-weight: 500;
+  color: #9e9e9e;
+  text-align: left;
+  margin-bottom: 24px;
+}
+
+.add-mint-inputs {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.mint-input {
+  width: 100%;
+}
+
+.mint-input .q-field__control {
+  height: 54px;
+  border-radius: 100px;
+}
+
+.add-mint-actions {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  width: 100%;
+}
+
+.action-btn {
+  height: 48px;
+  border-radius: 100px;
+  font-weight: 500;
+  font-size: 16px;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.full-width {
+  width: 100%;
+}
+
+/* Section Divider - similar to MintDetailsDialog */
+.section-divider {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 24px;
+}
+
+.divider-line {
+  flex: 1;
+  height: 1px;
+  background-color: #48484a;
+}
+
+.divider-text {
+  padding: 0 10px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #ffffff;
 }
 </style>
