@@ -2,6 +2,7 @@ import { defineStore } from "pinia";
 import { useLocalStorage } from "@vueuse/core";
 import { useMintsStore } from "./mints";
 import { notifySuccess } from "../js/notify";
+import { useUiStore } from "./ui";
 
 // Define the migration version type
 export type Migration = {
@@ -40,26 +41,26 @@ export const useMigrationsStore = defineStore("migrations", {
       console.log(`Running ${pendingMigrations.length} migrations...`);
 
       // Run each migration in order
-      for (const migration of pendingMigrations) {
-        console.log(
-          `Running migration ${migration.version}: ${migration.name}`
-        );
-        try {
-          await migration.execute();
-          // Update the current version after successful migration
-          this.currentVersion = migration.version;
-          console.log(`Migration ${migration.version} completed successfully`);
-        } catch (error) {
-          console.error(`Migration ${migration.version} failed:`, error);
-          // Stop running migrations if one fails
-          break;
+      const uIStore = useUiStore();
+      await uIStore.lockMutex();
+      try {
+        for (const migration of pendingMigrations) {
+          console.log(
+            `Running migration ${migration.version}: ${migration.name}`
+          );
+          try {
+            await migration.execute();
+            // Update the current version after successful migration
+            this.currentVersion = migration.version;
+            console.log(`Migration ${migration.version} completed successfully`);
+          } catch (error) {
+            console.error(`Migration ${migration.version} failed:`, error);
+            // Stop running migrations if one fails
+            break;
+          }
         }
-      }
-
-      if (pendingMigrations.length > 0) {
-        notifySuccess(
-          `Applied ${pendingMigrations.length} database migrations`
-        );
+      } finally {
+        await uIStore.unlockMutex();
       }
     },
 
