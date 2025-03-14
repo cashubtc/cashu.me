@@ -39,6 +39,7 @@ import {
   decodePaymentRequest,
   MintQuoteResponse,
   ProofState,
+  getEncodedTokenV4,
 } from "@cashu/cashu-ts";
 import { hashToCurve } from "@cashu/crypto/modules/common";
 // @ts-ignore
@@ -539,31 +540,21 @@ export const useWalletStore = defineStore("wallet", {
       if (proofs.length == 0) {
         throw new Error("no proofs found.");
       }
-      const inputAmount = proofs.reduce((s, t) => (s += t.amount), 0);
+
+      // Receive the token
       let fee = 0;
+      let inputAmount = proofs.reduce((s, t) => (s += t.amount), 0);
       const mintInToken = token.getMint(tokenJson);
       const unitInToken = token.getUnit(tokenJson);
-
-      const historyToken = {
-        amount: inputAmount,
-        token: receiveStore.receiveData.tokensBase64,
-        unit: unitInToken,
-        mint: mintInToken,
-        fee: fee,
-      };
-      const mintWallet = await this.mintWallet(
-        historyToken.mint,
-        historyToken.unit,
-        true
-      );
-      const mint = mintStore.mints.find((m) => m.url === historyToken.mint);
+      const mintWallet = await this.mintWallet(mintInToken, unitInToken);
+      const mint = mintStore.mints.find((m) => m.url === mintInToken);
       if (!mint) {
         throw new Error("mint not found");
       }
       await uIStore.lockMutex();
       try {
         // redeem
-        const keysetId = this.getKeyset(historyToken.mint, historyToken.unit);
+        const keysetId = this.getKeyset(mintInToken, unitInToken);
         const counter = this.keysetCounter(keysetId);
         const privkey = receiveStore.receiveData.p2pkPrivateKey;
         let proofs: Proof[];
@@ -573,20 +564,72 @@ export const useWalletStore = defineStore("wallet", {
             {
               counter,
               privkey,
-              proofsWeHave: mintStore.mintUnitProofs(mint, historyToken.unit),
+              proofsWeHave: mintStore.mintUnitProofs(mint, unitInToken),
             }
           );
           await proofsStore.addProofs(proofs);
           this.increaseKeysetCounter(keysetId, proofs.length);
         } catch (error: any) {
           console.error(error);
-          this.handleOutputsHaveAlreadyBeenSignedError(keysetId, error);
-          throw new Error("Error receiving tokens: " + error);
+          if (error.message.includes("Token already spent")) {
+            // Check if token is partially spent
+            console.log("checking token for unspent proofs");
+            const enc = new TextEncoder();
+            proofs = token.getProofs(tokenJson);
+            const proofStates = await mintWallet.checkProofsStates(proofs);
+            const unspentProofsStates = proofStates.filter(
+              (p) => p.state == CheckStateEnum.UNSPENT
+            );
+            const unspentProofs = proofs.filter((p) =>
+              unspentProofsStates.find(
+                (s) => s.Y == hashToCurve(enc.encode(p.secret)).toHex(true)
+              )
+            );
+            if (!unspentProofs.length) {
+              throw error; // really is all spent - so rethrow original error
+            }
+            // Generate new token from unspent proofs
+            if (unspentProofs.length != proofs.length) {
+              console.error("token is partially spent!");
+              notifyApiError(
+                new Error(
+                  "Partially spent token detected - new token generated"
+                )
+              );
+              receiveStore.receiveData.tokensBase64 = getEncodedTokenV4({
+                mint: mintInToken,
+                proofs: unspentProofs,
+              });
+            }
+            // Receive newly generated token
+            inputAmount = unspentProofs.reduce((s, t) => (s += t.amount), 0);
+            proofs = await mintWallet.receive(
+              receiveStore.receiveData.tokensBase64,
+              {
+                counter,
+                privkey,
+                proofsWeHave: mintStore.mintUnitProofs(mint, unitInToken),
+              }
+            );
+            await proofsStore.addProofs(proofs);
+            this.increaseKeysetCounter(keysetId, proofs.length);
+          } else {
+            this.handleOutputsHaveAlreadyBeenSignedError(keysetId, error);
+            throw new Error("Error receiving tokens: " + error);
+          }
         }
 
         p2pkStore.setPrivateKeyUsed(privkey);
 
+        // Create history token
         const outputAmount = proofs.reduce((s, t) => (s += t.amount), 0);
+        const historyToken = {
+          amount: inputAmount,
+          token: receiveStore.receiveData.tokensBase64,
+          unit: unitInToken,
+          mint: mintInToken,
+          fee: fee,
+        } as HistoryToken;
 
         // if token is already in history, set to paid, else add to history
         if (
