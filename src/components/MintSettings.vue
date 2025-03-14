@@ -656,11 +656,14 @@ export default defineComponent({
       this.discoveringMints = false;
     },
     showMintInfo: async function (mint) {
-      const newMintInfo = await this.fetchMintInfo(mint);
-      this.triggerMintInfoMotdChanged(newMintInfo, mint);
-      this.mints.filter((m) => m.url === mint.url)[0].info = newMintInfo;
       this.showMintInfoData = mint;
       this.showMintInfoDialog = true;
+
+      this.fetchMintInfo(mint).then((newMintInfo) => {
+        this.triggerMintInfoMotdChanged(newMintInfo, mint);
+        this.mints.filter((m) => m.url === mint.url)[0].info = newMintInfo;
+        this.showMintInfoData = mint;
+      });
     },
     getMintIconUrl: function (mint) {
       if (mint.info) {
