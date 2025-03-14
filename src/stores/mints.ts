@@ -393,6 +393,10 @@ export const useMintsStore = defineStore("mints", {
       }
     },
     checkMintInfoMotdChanged(newMintInfo: GetInfoResponse, mint: Mint) {
+      // if mint doesn't have info yet, we don't need to trigger the motd change
+      if (!this.mints.find((m) => m.url === mint.url)?.info) {
+        return false;
+      }
       const motd = newMintInfo.motd;
       if (motd !== this.mints.filter((m) => m.url === mint.url)[0].info?.motd) {
         return true;
