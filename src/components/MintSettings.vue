@@ -188,94 +188,77 @@
         </div>
       </q-list>
     </div>
-    <div class="q-pt-xs q-px-xs" ref="addMintDiv">
-      <q-list padding>
-        <div class="row-12 text-left">
-          <q-item>
-            <q-item-section>
-              <q-item-label overline>Add mint</q-item-label>
-              <q-item-label caption
-                >Enter the URL of a Cashu mint to connect to it. This wallet is
-                not affiliated with any mint.
-              </q-item-label>
-            </q-item-section>
-          </q-item>
+    <div class="q-pt-xs q-px-md" ref="addMintDiv">
+      <div class="add-mint-container">
+        <div class="section-divider q-mb-md">
+          <div class="divider-line"></div>
+          <div class="divider-text">ADD MINT</div>
+          <div class="divider-line"></div>
         </div>
-        <div class="row-12">
+
+        <div
+          class="add-mint-description q-mb-lg text-left"
+          style="color: rgba(255, 255, 255, 0.7)"
+        >
+          Enter the URL of a Cashu mint to connect to it. This wallet is not
+          affiliated with any mint.
+        </div>
+
+        <div class="add-mint-inputs">
           <q-input
-            bottom-slots
             rounded
-            dense
             outlined
-            @keydown.enter.prevent="sanitizeMintUrlAndShowAddDialog"
             v-model="addMintData.url"
             placeholder="https://"
-            ref="mintInput"
-            class="q-pb-none q-mb-sm q-px-md"
-            style="font-family: monospace"
-          >
-            <!-- <template v-slot:hint> Enter Mint URL</template> -->
-            <!-- "addMint(mintToAdd)" -->
-            <!-- <template v-slot:append>
-            <q-btn
-              round
-              dense
-              flat
-              color="primary"
-              icon="add"
-              click
-              @click="setShowAddMintDialog(true)"
-            />
-          </template> -->
-          </q-input>
-        </div>
-        <div class="row-12">
-          <q-input
-            bottom-slots
-            rounded
-            dense
-            outlined
             @keydown.enter.prevent="sanitizeMintUrlAndShowAddDialog"
+            ref="mintInput"
+            class="q-mb-md mint-input url-input"
+          />
+
+          <q-input
+            rounded
+            outlined
             v-model="addMintData.nickname"
-            label="Nickname (e.g. Testnet)"
+            placeholder="Nickname (e.g. Testnet)"
+            @keydown.enter.prevent="sanitizeMintUrlAndShowAddDialog"
             ref="mintNicknameInput"
-            class="q-pb-sm q-px-md"
-          >
-          </q-input>
+            class="mint-input"
+          />
         </div>
-        <div class="row-12">
-          <q-btn
-            v-if="addMintData.url.length == 0"
-            rounded
-            class="q-px-lg q-mt-xs"
-            color="primary"
-            @click="showCamera"
-          >
-            <q-icon size="xs" name="qr_code" class="q-pr-xs" />
-            Scan QR code
-          </q-btn>
-          <q-btn
-            v-if="addMintData.url.length > 0"
-            rounded
-            class="q-px-lg q-mt-xs"
-            color="primary"
-            :disabled="addMintData.url.length == 0"
-            :loading="addMintBlocking"
-            @click="sanitizeMintUrlAndShowAddDialog"
-          >
-            <q-icon size="xs" name="add" class="q-pr-xs" />
-            Add mint
-            <template v-slot:loading>
-              <q-spinner-hourglass />
-              Adding mint
-            </template>
-          </q-btn>
+
+        <div class="add-mint-actions">
+          <div class="row justify-between items-center q-mt-xs">
+            <q-btn
+              flat
+              :disable="addMintData.url.length === 0"
+              @click="
+                addMintData.url.length > 0
+                  ? sanitizeMintUrlAndShowAddDialog()
+                  : null
+              "
+              class="text-white"
+              :class="{ 'text-grey-7': addMintData.url.length === 0 }"
+            >
+              <q-icon name="add" size="20px" class="q-mr-sm" />
+              <span>Add Mint</span>
+            </q-btn>
+
+            <q-btn flat @click="showCamera" class="text-white">
+              <q-icon name="qr_code" size="20px" class="q-mr-sm" />
+              <span>Scan QR Code</span>
+            </q-btn>
+          </div>
         </div>
-      </q-list>
+      </div>
     </div>
 
     <!-- nostr -->
-    <div class="q-py-sm q-px-xs text-left" on-left>
+    <div class="section-divider q-mb-md">
+      <div class="divider-line"></div>
+      <div class="divider-text">DISCOVER MINTS</div>
+      <div class="divider-line"></div>
+    </div>
+    <div class="q-px-xs text-left" on-left>
       <q-list padding>
         <q-item>
           <q-item-section>
@@ -286,7 +269,7 @@
             >
           </q-item-section>
         </q-item>
-        <q-item>
+        <q-item class="q-pt-sm">
           <q-btn
             class="q-ml-sm q-px-md"
             color="primary"
@@ -353,7 +336,12 @@
       </q-list>
     </div>
 
-    <div class="q-py-sm q-px-xs text-left" on-left>
+    <div class="section-divider q-mb-md">
+      <div class="divider-line"></div>
+      <div class="divider-text">SWAP</div>
+      <div class="divider-line"></div>
+    </div>
+    <div class="q-px-xs text-left" on-left>
       <q-list padding>
         <q-item>
           <q-item-section>
@@ -365,7 +353,7 @@
             </q-item-label>
           </q-item-section>
         </q-item>
-        <q-item>
+        <q-item class="q-pt-sm">
           <q-select
             clearable
             rounded
@@ -710,5 +698,70 @@ export default defineComponent({
   top: 18px;
   right: 24px;
   z-index: 10;
+}
+
+/* Add Mint Section Styles */
+.add-mint-container {
+  width: 100%;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 32px;
+}
+
+.add-mint-description {
+  font-size: 14px;
+  line-height: 24px;
+  font-weight: 500;
+  text-align: left;
+  margin-bottom: 24px;
+}
+
+.add-mint-inputs {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.mint-input {
+  width: 100%;
+  font-family: "Inter", sans-serif;
+}
+
+.mint-input .q-field__control {
+  height: 54px;
+  border-radius: 100px;
+}
+
+.mint-input .q-field__native,
+.mint-input .q-field__input,
+.mint-input .q-placeholder {
+  font-family: "Inter", sans-serif;
+}
+
+.add-mint-actions {
+  width: 100%;
+  margin-top: 16px;
+}
+
+/* Section Divider */
+.section-divider {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 24px;
+}
+
+.divider-line {
+  flex: 1;
+  height: 1px;
+  background-color: #48484a;
+}
+
+.divider-text {
+  padding: 0 10px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #ffffff;
 }
 </style>
