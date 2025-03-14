@@ -52,7 +52,9 @@ export const useMigrationsStore = defineStore("migrations", {
             await migration.execute();
             // Update the current version after successful migration
             this.currentVersion = migration.version;
-            console.log(`Migration ${migration.version} completed successfully`);
+            console.log(
+              `Migration ${migration.version} completed successfully`
+            );
           } catch (error) {
             console.error(`Migration ${migration.version} failed:`, error);
             // Stop running migrations if one fails
