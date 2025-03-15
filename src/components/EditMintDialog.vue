@@ -175,11 +175,14 @@ export default defineComponent({
 
 /* Completely remove all input animations */
 :deep(.mint-input) {
-  /* Disable all transitions on the input and its children */
+  /* Disable all transitions on the input and its children except for background-color */
   * {
     transition: none !important;
     animation: none !important;
   }
+
+  /* Add a smooth transition just for the background-color */
+  transition: background-color 0.2s ease-in-out !important;
 }
 
 :deep(.mint-input .q-field__focus-target) {
@@ -190,6 +193,21 @@ export default defineComponent({
   /* Remove animation completely */
   opacity: 0 !important;
   display: none !important; /* Hide it completely */
+}
+
+/* Add subtle focus/active state - theme responsive */
+:deep(.mint-input.q-field--focused) {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* For dark mode, adjust the focus color */
+:deep(.body--dark .mint-input.q-field--focused) {
+  background-color: rgba(255, 255, 255, 0.07);
+}
+
+/* For light mode, use a darker shade for contrast */
+:deep(.body--light .mint-input.q-field--focused) {
+  background-color: rgba(0, 0, 0, 0.05);
 }
 
 /* Remove any ripple effects */
