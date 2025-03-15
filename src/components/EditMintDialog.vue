@@ -143,6 +143,7 @@ export default defineComponent({
   font-size: 24px;
   font-weight: 700;
   letter-spacing: -0.5px;
+  font-family: "Inter", sans-serif;
 }
 
 .edit-mint-content {
@@ -155,6 +156,7 @@ export default defineComponent({
   font-weight: 400;
   margin-top: 0;
   opacity: 0.7;
+  font-family: "Inter", sans-serif;
 }
 
 .input-label {
@@ -165,12 +167,14 @@ export default defineComponent({
   text-transform: uppercase;
   letter-spacing: 0.5px;
   opacity: 0.7;
+  font-family: "Inter", sans-serif;
 }
 
 .mint-input {
   border-radius: 8px;
   height: 48px;
   font-size: 16px;
+  font-family: "Inter", sans-serif;
 }
 
 /* Completely remove all input animations */
@@ -230,6 +234,14 @@ export default defineComponent({
 
 :deep(.mint-input .q-field__native) {
   padding: 12px;
+  font-family: "Inter", sans-serif;
+}
+
+/* Make sure input placeholders use Inter font */
+:deep(.mint-input .q-field__native),
+:deep(.mint-input .q-field__input),
+:deep(.mint-input .q-placeholder) {
+  font-family: "Inter", sans-serif;
 }
 
 .action-buttons {
@@ -243,6 +255,7 @@ export default defineComponent({
   font-weight: 600;
   padding: 8px 16px;
   border-radius: 8px;
+  font-family: "Inter", sans-serif;
 }
 
 .update-btn {
@@ -250,6 +263,7 @@ export default defineComponent({
   padding: 8px 20px;
   border-radius: 8px;
   transition: all 0.2s ease;
+  font-family: "Inter", sans-serif;
 }
 
 .update-btn:hover {
