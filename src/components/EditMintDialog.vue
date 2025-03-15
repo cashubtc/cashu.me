@@ -10,14 +10,6 @@
       <div class="edit-mint-header q-pa-md">
         <div class="edit-mint-title-row">
           <h4 class="edit-mint-title q-my-none">Edit Mint</h4>
-          <q-btn
-            flat
-            round
-            dense
-            icon="close"
-            v-close-popup
-            class="close-btn"
-          />
         </div>
       </div>
 
@@ -50,6 +42,7 @@
 
         <div class="action-buttons">
           <q-btn flat class="cancel-btn" v-close-popup> Cancel </q-btn>
+          <q-spacer></q-spacer>
           <q-btn
             color="primary"
             class="update-btn"
@@ -246,8 +239,7 @@ export default defineComponent({
 
 .action-buttons {
   display: flex;
-  justify-content: flex-end;
-  gap: 12px;
+  justify-content: space-between;
   margin-top: 32px;
 }
 
