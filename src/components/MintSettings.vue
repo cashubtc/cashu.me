@@ -1,193 +1,264 @@
 <template>
-  <MintDetailsDialog />
+  <MintDetailsDialog @update:mintToRemove="mintToRemove = $event" />
+  <AddMintDialog
+    :addMintData="addMintData"
+    :showAddMintDialog="showAddMintDialog"
+    @update:showAddMintDialog="showAddMintDialog = $event"
+    :addMintBlocking="addMintBlocking"
+    @add="addMintInternal"
+  />
+
   <div style="max-width: 800px; margin: 0 auto">
     <!-- ////////////////////// SETTINGS ////////////////// -->
     <div class="q-py-md q-px-xs text-left" on-left>
       <q-list padding>
-        <q-item>
-          <q-item-section>
-            <q-item-label overline>Mints</q-item-label>
-          </q-item-section>
-        </q-item>
-
         <!-- <q-item-label header>Your mints</q-item-label> -->
-        <div v-for="mint in mints" :key="mint.url">
+        <div v-for="mint in mints" :key="mint.url" class="q-px-md">
           <q-item
             :active="mint.url == activeMintUrl"
             active-class="text-weight-bold text-primary"
             clickable
-            class="q-pb-xs q-pl-xs"
+            @click="activateMintUrlInternal(mint.url)"
+            class="mint-card q-mb-md cursor-pointer"
+            :style="{
+              'border-radius': '10px',
+              border:
+                mint.url == activeMintUrl
+                  ? '1px solid var(--q-primary)'
+                  : '1px solid rgba(128, 128, 128, 0.2)',
+              padding: '0px',
+              position: 'relative',
+            }"
+            :loading="mint.url == activatingMintUrl"
           >
-            <q-item-section avatar style="min-width: 36px; max-width: 39px">
-              <q-icon
-                :color="mint.url == activeMintUrl ? 'primary' : 'grey'"
-                :name="
-                  mint.url == activeMintUrl
-                    ? 'check_circle'
-                    : 'radio_button_unchecked'
-                "
-                @click="
-                  activateMintUrl(mint.url, (verbose = false), (force = true))
-                "
-                class="cursor-pointer"
-              />
-            </q-item-section>
-            <q-avatar
-              v-if="getMintIconUrl(mint)"
-              size="32px"
-              class="q-mr-sm q-mt-xs"
+            <!-- hourglass spinner if mint is being activated -->
+            <transition
+              appear
+              enter-active-class="animated fadeIn"
+              leave-active-class="animated fadeOut"
+              name="fade"
             >
-              <img :src="getMintIconUrl(mint)" alt="Mint Icon" />
-            </q-avatar>
-            <q-item-section>
-              <q-item-label
-                lines="1"
-                v-if="mint.nickname"
-                @click="
-                  activateMintUrl(mint.url, (verbose = false), (force = false))
-                "
-                class="cursor-pointer"
-                style="word-break: break-all; font-weight: bold"
-                >{{ mint.nickname }}</q-item-label
+              <q-spinner-hourglass
+                v-if="mint.url == activatingMintUrl"
+                color="white"
+                size="1.3rem"
+                class="mint-loading-spinner"
+              />
+            </transition>
+            <transition
+              appear
+              enter-active-class="animated fadeIn"
+              leave-active-class="animated fadeOut"
+              name="fade"
+            >
+              <div
+                v-if="mint.url != activatingMintUrl && mint.errored"
+                class="error-badge"
               >
-              <q-item-label
-                lines="1"
-                @click="
-                  activateMintUrl(mint.url, (verbose = false), (force = false))
-                "
-                class="cursor-pointer"
-                style="
-                  word-break: break-all;
-                  overflow-wrap: break-word;
-                  white-space: normal;
-                  font-family: monospace;
-                  font-size: 0.9em;
-                "
-                >{{ mint.url }}</q-item-label
-              >
-              <q-item-label>
                 <q-badge
-                  v-for="unit in mintClass(mint).units"
-                  :key="unit"
-                  :color="mint.url == activeMintUrl ? 'primary' : 'grey-5'"
-                  :outline="mint.url != activeMintUrl || unit != activeUnit"
-                  :label="
-                    formatCurrency(mintClass(mint).unitBalance(unit), unit)
+                  color="red"
+                  outline
+                  class="q-mr-xs q-mt-sm text-weight-bold"
+                >
+                  Error
+                  <q-icon name="error" class="q-ml-xs" size="xs" />
+                </q-badge>
+              </div>
+            </transition>
+            <div class="full-width" style="position: relative">
+              <!-- <transition-group
+                appear
+                enter-active-class="animated fadeIn"
+                leave-active-class="animated fadeOut"
+                name="fade"
+              >
+                <q-item-section
+                  v-if="mint.url == activatingMintUrl"
+                  style="
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    z-index: 1; /* Ensure spinner is on top */
+                    background-color: rgba(
+                      15,
+                      15,
+                      15,
+                      0.8
+                    ); /* Semi-transparent background */
+                    border-radius: 8px; /* Match q-item's border-radius */
+                    padding: 0px;
                   "
-                  class="q-mr-xs q-mb-xs"
-                />
-              </q-item-label>
-            </q-item-section>
-            <q-item-section side>
-              <q-icon
-                name="info_outline"
-                @click="showMintInfo(mint)"
-                color="grey"
-                class="cursor-pointer q-pb-sm"
-                size="1.3rem"
-              />
-              <q-icon
-                name="edit"
-                @click="editMint(mint)"
-                class="cursor-pointer"
-                color="grey"
-                size="1.3rem"
-              />
-            </q-item-section>
-          </q-item>
+                >
+                  <q-spinner-hourglass
+                    class="q-my-auto"
+                    color="white"
+                    size="2em"
+                  />
+                </q-item-section>
+              </transition-group> -->
+              <div class="row items-center q-pa-md">
+                <div class="col">
+                  <div class="row items-center">
+                    <q-avatar
+                      v-if="getMintIconUrl(mint)"
+                      size="34px"
+                      class="q-mr-sm"
+                    >
+                      <q-img
+                        spinner-color="white"
+                        spinner-size="xs"
+                        :src="getMintIconUrl(mint)"
+                        alt="Mint Icon"
+                        style="height: 34px; max-width: 34px; font-size: 12px"
+                      />
+                    </q-avatar>
 
-          <q-separator spaced style="margin-left: 50px" />
+                    <div class="column q-gutter-y-sm">
+                      <div
+                        v-if="mint.nickname || mint.info?.name"
+                        style="
+                          font-size: 16px;
+                          font-weight: 600;
+                          line-height: 16px;
+                        "
+                      >
+                        {{ mint.nickname || mint.info?.name }}
+                      </div>
+                      <div
+                        class="text-grey-6"
+                        style="
+                          font-size: 12px;
+                          line-height: 16px;
+                          font-family: monospace;
+                          margin-top: 4px;
+                        "
+                      >
+                        {{ mint.url }}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="row justify-between q-pb-md q-px-md">
+                <div class="col">
+                  <!-- Currency units with regular text styling -->
+                  <div class="row q-gutter-x-sm">
+                    <div
+                      v-for="unit in mintClass(mint).units"
+                      :key="unit"
+                      class="q-py-xs q-px-sm"
+                      style="
+                        border-radius: 4px;
+                        background-color: #1d1d1d;
+                        display: inline-block;
+                      "
+                    >
+                      <span
+                        style="color: white; font-size: 14px; font-weight: 500"
+                      >
+                        {{
+                          formatCurrency(
+                            mintClass(mint).unitBalance(unit),
+                            unit
+                          )
+                        }}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="col-auto">
+                  <q-icon
+                    name="more_vert"
+                    @click.stop="showMintInfo(mint)"
+                    color="white"
+                    class="cursor-pointer q-mr-sm"
+                    size="1.3rem"
+                  />
+                </div>
+              </div>
+            </div>
+          </q-item>
         </div>
       </q-list>
     </div>
-    <div class="q-pt-xs q-px-xs" ref="addMintDiv">
-      <q-list padding>
-        <div class="row-12 text-left">
-          <q-item>
-            <q-item-section>
-              <q-item-label overline>Add mint</q-item-label>
-              <q-item-label caption
-                >Enter the URL of a Cashu mint to connect to it. This wallet is
-                not affiliated with any mint.
-              </q-item-label>
-            </q-item-section>
-          </q-item>
+    <div class="q-pt-xs q-px-md" ref="addMintDiv">
+      <div class="add-mint-container">
+        <div class="section-divider q-mb-md">
+          <div class="divider-line"></div>
+          <div class="divider-text">ADD MINT</div>
+          <div class="divider-line"></div>
         </div>
-        <div class="row-12">
+
+        <div
+          class="add-mint-description q-mb-lg text-left"
+          style="color: rgba(255, 255, 255, 0.7)"
+        >
+          Enter the URL of a Cashu mint to connect to it. This wallet is not
+          affiliated with any mint.
+        </div>
+
+        <div class="add-mint-inputs">
           <q-input
-            bottom-slots
             rounded
-            dense
             outlined
-            @keydown.enter.prevent="sanitizeMintUrlAndShowAddDialog"
             v-model="addMintData.url"
             placeholder="https://"
-            ref="mintInput"
-            class="q-pb-none q-mb-sm q-px-md"
-            style="font-family: monospace"
-          >
-            <!-- <template v-slot:hint> Enter Mint URL</template> -->
-            <!-- "addMint(mintToAdd)" -->
-            <!-- <template v-slot:append>
-            <q-btn
-              round
-              dense
-              flat
-              color="primary"
-              icon="add"
-              click
-              @click="setShowAddMintDialog(true)"
-            />
-          </template> -->
-          </q-input>
-        </div>
-        <div class="row-12">
-          <q-input
-            bottom-slots
-            rounded
-            dense
-            outlined
             @keydown.enter.prevent="sanitizeMintUrlAndShowAddDialog"
+            ref="mintInput"
+            class="q-mb-md mint-input url-input"
+          />
+
+          <q-input
+            rounded
+            outlined
             v-model="addMintData.nickname"
-            label="Nickname (e.g. Testnet)"
+            placeholder="Nickname (e.g. Testnet)"
+            @keydown.enter.prevent="sanitizeMintUrlAndShowAddDialog"
             ref="mintNicknameInput"
-            class="q-pb-sm q-px-md"
-          >
-          </q-input>
+            class="mint-input"
+          />
         </div>
-        <div class="row-12">
-          <q-btn
-            v-if="addMintData.url.length == 0"
-            rounded
-            class="q-px-lg q-mt-xs"
-            color="primary"
-            @click="showCamera"
-          >
-            <q-icon size="xs" name="qr_code" class="q-pr-xs" />
-            Scan QR code
-          </q-btn>
-          <q-btn
-            v-if="addMintData.url.length > 0"
-            rounded
-            class="q-px-lg q-mt-xs"
-            color="primary"
-            :disabled="addMintData.url.length == 0"
-            :loading="addMintBlocking"
-            @click="sanitizeMintUrlAndShowAddDialog"
-          >
-            <q-icon size="xs" name="add" class="q-pr-xs" />
-            Add mint
-            <template v-slot:loading>
-              <q-spinner-hourglass />
-              Adding mint
-            </template>
-          </q-btn>
+
+        <div class="add-mint-actions">
+          <div class="row justify-between items-center q-mt-xs">
+            <q-btn
+              flat
+              :disable="addMintData.url.length === 0"
+              @click="
+                addMintData.url.length > 0
+                  ? sanitizeMintUrlAndShowAddDialog()
+                  : null
+              "
+              class="text-white"
+              :class="{ 'text-grey-7': addMintData.url.length === 0 }"
+            >
+              <q-icon name="add" size="20px" class="q-mr-sm" />
+              <span>Add Mint</span>
+            </q-btn>
+
+            <q-btn flat @click="showCamera" class="text-white">
+              <q-icon name="qr_code" size="20px" class="q-mr-sm" />
+              <span>Scan QR Code</span>
+            </q-btn>
+          </div>
         </div>
-      </q-list>
+      </div>
     </div>
 
     <!-- nostr -->
-    <div class="q-py-sm q-px-xs text-left" on-left>
+    <div class="section-divider q-mb-md">
+      <div class="divider-line"></div>
+      <div class="divider-text">DISCOVER MINTS</div>
+      <div class="divider-line"></div>
+    </div>
+    <div class="q-px-xs text-left" on-left>
       <q-list padding>
         <q-item>
           <q-item-section>
@@ -198,17 +269,7 @@
             >
           </q-item-section>
         </q-item>
-        <q-item v-if="false">
-          <q-btn
-            class="q-ml-sm q-px-md"
-            color="primary"
-            rounded
-            outline
-            @click="initNdk"
-            >Link to extension</q-btn
-          >
-        </q-item>
-        <q-item>
+        <q-item class="q-pt-sm">
           <q-btn
             class="q-ml-sm q-px-md"
             color="primary"
@@ -275,7 +336,12 @@
       </q-list>
     </div>
 
-    <div class="q-py-sm q-px-xs text-left" on-left>
+    <div class="section-divider q-mb-md">
+      <div class="divider-line"></div>
+      <div class="divider-text">SWAP</div>
+      <div class="divider-line"></div>
+    </div>
+    <div class="q-px-xs text-left" on-left>
       <q-list padding>
         <q-item>
           <q-item-section>
@@ -287,7 +353,7 @@
             </q-item-label>
           </q-item-section>
         </q-item>
-        <q-item>
+        <q-item class="q-pt-sm">
           <q-select
             clearable
             rounded
@@ -369,162 +435,6 @@
         </q-item>
       </q-list>
     </div>
-
-    <q-dialog
-      v-model="showEditMintDialog"
-      backdrop-filter="blur(2px) brightness(60%)"
-    >
-      <q-card class="q-pa-lg" style="max-width: 500px; width: 100%">
-        <h6 class="q-mt-none q-mb-md">Edit mint</h6>
-        <q-input
-          outlined
-          v-model="editMintData.url"
-          label="Mint URL"
-          type="textarea"
-          autogrow
-          class="q-mb-xs"
-          style="font-family: monospace; font-size: 0.9em"
-        ></q-input>
-        <q-input
-          outlined
-          v-model="editMintData.nickname"
-          label="Nickname"
-          type="textarea"
-          autogrow
-          class="q-mb-xs"
-        ></q-input>
-        <div class="row q-mt-lg">
-          <q-btn
-            class="float-left"
-            v-close-popup
-            rounded
-            color="primary"
-            @click="updateMint(mintToEdit, editMintData)"
-            >Update</q-btn
-          >
-          <q-btn
-            icon="delete"
-            flat
-            class="float-left item-left text-left"
-            @click="showRemoveMintDialogWrapper(mintToEdit.url)"
-          />
-          <q-btn v-close-popup flat class="q-ml-auto" color="grey"
-            >Cancel</q-btn
-          >
-        </div>
-      </q-card>
-    </q-dialog>
-
-    <q-dialog
-      v-model="showAddMintDialog"
-      @keydown.enter.prevent="addMintInternal(addMintData, (verbose = true))"
-      backdrop-filter="blur(2px) brightness(60%)"
-    >
-      <q-card class="q-pa-lg">
-        <h6 class="q-mt-none q-mb-md">Do you trust this mint?</h6>
-        <p>
-          Before using this mint, make sure you trust it. Mints could become
-          malicious or cease operation at any time.
-        </p>
-        <q-input
-          outlined
-          readonly
-          v-model="addMintData.url"
-          label="Mint URL"
-          type="textarea"
-          autogrow
-          class="q-mb-xs"
-          style="font-family: monospace; font-size: 0.9em"
-        ></q-input>
-        <div class="row q-mt-lg">
-          <div class="col">
-            <q-btn
-              class="float-left"
-              rounded
-              v-close-popup
-              color="primary"
-              icon="check"
-              :loading="addMintBlocking"
-              @click="addMintInternal(addMintData, (verbose = true))"
-              >Add mint
-              <template v-slot:loading>
-                <q-spinner-hourglass />
-                Adding mint
-              </template>
-            </q-btn>
-          </div>
-          <div class="col">
-            <q-btn v-close-popup flat class="float-right" color="grey"
-              >Cancel</q-btn
-            >
-          </div>
-        </div>
-      </q-card>
-    </q-dialog>
-    <q-dialog
-      v-model="showRemoveMintDialog"
-      backdrop-filter="blur(2px) brightness(60%)"
-    >
-      <q-card class="q-pa-lg">
-        <h6 class="q-my-md">Are you sure you want to delete this mint?</h6>
-        <div v-if="mintToRemove.nickname">
-          <span class="text-weight-bold"> Nickname: </span>
-          <span class="text-weight-light"> {{ mintToRemove.nickname }}</span>
-        </div>
-        <div class="row q-my-md">
-          <div class="col">
-            <span class="text-weight-bold">Balances:</span>
-            <q-badge
-              v-for="unit in mintClass(mintToRemove).units"
-              :key="unit"
-              color="primary"
-              :label="
-                formatCurrency(mintClass(mintToRemove).unitBalance(unit), unit)
-              "
-              class="q-mx-xs"
-            />
-          </div>
-        </div>
-        <q-input
-          outlined
-          readonly
-          v-model="mintToRemove.url"
-          label="Mint URL"
-          type="textarea"
-          autogrow
-          class="q-mb-xs"
-        ></q-input>
-        <div class="row q-my-md">
-          <div class="col">
-            <span class="text-caption"
-              >Note: Because this wallet is paranoid, your ecash from this mint
-              will not be actually deleted but will remain stored on your
-              device. You will see it reappear if you re-add this mint later
-              again.</span
-            >
-          </div>
-        </div>
-        <div class="row q-mt-lg">
-          <div class="col">
-            <q-btn
-              v-close-popup
-              class="float-left"
-              color="primary"
-              @click="
-                showEditMintDialog = false;
-                removeMint(mintToRemove.url, (verbose = true));
-              "
-              >Remove mint</q-btn
-            >
-          </div>
-          <div class="col">
-            <q-btn v-close-popup flat color="grey" class="float-right"
-              >Cancel</q-btn
-            >
-          </div>
-        </div>
-      </q-card>
-    </q-dialog>
   </div>
 </template>
 <script>
@@ -545,11 +455,15 @@ import { useUiStore } from "src/stores/ui";
 import { notifyError, notifyWarning } from "src/js/notify";
 import MintDetailsDialog from "src/components/MintDetailsDialog.vue";
 import { EventBus } from "../js/eventBus";
+import AddMintDialog from "src/components/AddMintDialog.vue";
 
 export default defineComponent({
   name: "MintSettings",
   mixins: [windowMixin],
-  components: { MintDetailsDialog },
+  components: {
+    MintDetailsDialog,
+    AddMintDialog,
+  },
   props: {},
   setup() {
     const addMintDiv = ref(null);
@@ -581,22 +495,6 @@ export default defineComponent({
     return {
       discoveringMints: false,
       addingMint: false,
-      mintToEdit: {
-        url: "",
-        nickname: "",
-      },
-      mintToRemove: {
-        url: "",
-        nickname: "",
-        balances: {},
-      },
-      editMintData: {
-        url: "",
-        nickname: "",
-      },
-      addMintDialog: {
-        show: false,
-      },
       swapData: {
         fromUrl: {
           url: "",
@@ -608,7 +506,7 @@ export default defineComponent({
         },
         amount: undefined,
       },
-      showEditMintDialog: false,
+      activatingMintUrl: "",
     };
   },
   computed: {
@@ -626,7 +524,6 @@ export default defineComponent({
     ...mapWritableState(useMintsStore, [
       "addMintData",
       "showAddMintDialog",
-      "showRemoveMintDialog",
       "showMintInfoDialog",
       "showMintInfoData",
     ]),
@@ -656,16 +553,23 @@ export default defineComponent({
       "removeMint",
       "activateMintUrl",
       "updateMint",
+      "triggerMintInfoMotdChanged",
+      "fetchMintInfo",
     ]),
     ...mapActions(useWalletStore, ["decodeRequest", "mintOnPaid"]),
     ...mapActions(useWorkersStore, ["clearAllWorkers"]),
     ...mapActions(useCameraStore, ["closeCamera", "showCamera"]),
     ...mapActions(useSwapStore, ["mintAmountSwap"]),
-    editMint: function (mint) {
-      // copy object to avoid changing the original
-      this.mintToEdit = Object.assign({}, mint);
-      this.editMintData = Object.assign({}, mint);
-      this.showEditMintDialog = true;
+    activateMintUrlInternal: async function (mintUrl) {
+      this.activatingMintUrl = mintUrl;
+      console.log(`Activating mint ${this.activatingMintUrl}`);
+      try {
+        await this.activateMintUrl(mintUrl, false, true);
+      } catch (e) {
+        console.log("#### Error activating mint:", e);
+      } finally {
+        this.activatingMintUrl = "";
+      }
     },
     validateMintUrl: function (url) {
       try {
@@ -716,13 +620,6 @@ export default defineComponent({
       }
       return options;
     },
-    showRemoveMintDialogWrapper: function (mint) {
-      // select the mint from this.mints and add its balances
-      let mintToRemove = this.mints.find((m) => m.url == mint);
-
-      this.mintToRemove = mintToRemove;
-      this.showRemoveMintDialog = true;
-    },
     clearSwapData: function () {
       this.swapData.fromUrl = "";
       this.swapData.toUrl = "";
@@ -734,52 +631,6 @@ export default defineComponent({
       swapAmountData.amount = this.swapData.amount;
       await this.mintAmountSwap(swapAmountData);
       this.clearSwapData();
-    },
-    enable_terminal: function () {
-      // enable debug terminal
-      var script = document.createElement("script");
-      script.src = "//cdn.jsdelivr.net/npm/eruda";
-      document.body.appendChild(script);
-      script.onload = function () {
-        eruda.init();
-      };
-    },
-    getLocalstorageToFile: async function () {
-      // https://stackoverflow.com/questions/24263682/save-restore-local-storage-to-a-local-file
-      const fileName = `cashu_backup_${currentDateStr()}.json`;
-      var a = {};
-      for (var i = 0; i < localStorage.length; i++) {
-        var k = localStorage.key(i);
-        var v = localStorage.getItem(k);
-        a[k] = v;
-      }
-      var textToSave = JSON.stringify(a);
-      var textToSaveAsBlob = new Blob([textToSave], {
-        type: "text/plain",
-      });
-      var textToSaveAsURL = window.URL.createObjectURL(textToSaveAsBlob);
-
-      var downloadLink = document.createElement("a");
-      downloadLink.download = fileName;
-      downloadLink.innerHTML = "Download File";
-      downloadLink.href = textToSaveAsURL;
-      downloadLink.onclick = function () {
-        document.body.removeChild(event.target);
-      };
-      downloadLink.style.display = "none";
-      document.body.appendChild(downloadLink);
-      downloadLink.click();
-    },
-    toggleGetBitcoinPrice: function () {
-      this.getBitcoinPrice = !this.getBitcoinPrice;
-    },
-    initNdk: async function () {
-      await this.initNdkReadOnly();
-      console.log(await this.getUserPubkey());
-      // console.log("### fetch events");
-      // console.log(await this.fetchEventsFromUser());
-      // console.log("### fetch mints");
-      // console.log(await this.fetchMints());
     },
     fetchMintsFromNdk: async function () {
       this.discoveringMints = true;
@@ -807,6 +658,12 @@ export default defineComponent({
     showMintInfo: async function (mint) {
       this.showMintInfoData = mint;
       this.showMintInfoDialog = true;
+
+      this.fetchMintInfo(mint).then((newMintInfo) => {
+        this.triggerMintInfoMotdChanged(newMintInfo, mint);
+        this.mints.filter((m) => m.url === mint.url)[0].info = newMintInfo;
+        this.showMintInfoData = mint;
+      });
     },
     getMintIconUrl: function (mint) {
       if (mint.info) {
@@ -823,3 +680,91 @@ export default defineComponent({
   created: function () {},
 });
 </script>
+
+<style>
+.fade-enter-active,
+.fade-leave-active {
+  transition: transform 1s ease, opacity 1s ease;
+}
+.mint-card.q-loading {
+  opacity: 0.5; /* Reduce opacity when loading */
+  pointer-events: none;
+}
+.error-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 10;
+}
+.mint-loading-spinner {
+  position: absolute;
+  top: 18px;
+  right: 24px;
+  z-index: 10;
+}
+
+/* Add Mint Section Styles */
+.add-mint-container {
+  width: 100%;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 32px;
+}
+
+.add-mint-description {
+  font-size: 14px;
+  line-height: 24px;
+  font-weight: 500;
+  text-align: left;
+  margin-bottom: 24px;
+}
+
+.add-mint-inputs {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.mint-input {
+  width: 100%;
+  font-family: "Inter", sans-serif;
+}
+
+.mint-input .q-field__control {
+  height: 54px;
+  border-radius: 100px;
+}
+
+.mint-input .q-field__native,
+.mint-input .q-field__input,
+.mint-input .q-placeholder {
+  font-family: "Inter", sans-serif;
+}
+
+.add-mint-actions {
+  width: 100%;
+  margin-top: 16px;
+}
+
+/* Section Divider */
+.section-divider {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 24px;
+}
+
+.divider-line {
+  flex: 1;
+  height: 1px;
+  background-color: #48484a;
+}
+
+.divider-text {
+  padding: 0 10px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #ffffff;
+}
+</style>

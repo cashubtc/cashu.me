@@ -67,7 +67,10 @@
         <div class="col-12">
           <MultinutPicker />
         </div>
-        <div v-if="enoughActiveBalance" class="row q-mt-lg">
+        <div
+          v-if="enoughtotalUnitBalance || globalMutexLock"
+          class="row q-mt-lg"
+        >
           <q-btn
             unelevated
             rounded
@@ -288,10 +291,9 @@ export default defineComponent({
       "activeMintUrl",
       "activeProofs",
       "mints",
-      "proofs",
       "activeUnit",
+      "totalUnitBalance",
       "activeBalance",
-      "activeMintBalance",
     ]),
     ...mapState(usePriceStore, ["bitcoinPrice"]),
     canPasteFromClipboard: function () {
@@ -301,10 +303,9 @@ export default defineComponent({
         navigator.clipboard.readText
       );
     },
-    enoughActiveBalance: function () {
+    enoughtotalUnitBalance: function () {
       return (
-        this.activeMintBalance() >=
-        this.payInvoiceData.meltQuote.response.amount
+        this.activeBalance >= this.payInvoiceData.meltQuote.response.amount
       );
     },
   },
@@ -318,7 +319,7 @@ export default defineComponent({
     ...mapActions(useCameraStore, ["closeCamera", "showCamera"]),
     canPay: function () {
       if (!this.payInvoiceData.invoice) return false;
-      return payInvoiceData.meltQuote.response.amount <= this.activeBalance;
+      return payInvoiceData.meltQuote.response.amount <= this.totalUnitBalance;
     },
     closeParseDialog: function () {
       setTimeout(() => {

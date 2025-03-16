@@ -1,7 +1,13 @@
 <template>
   <div style="max-width: 800px; margin: 0 auto">
-    <!-- ////////////////////// SETTINGS ////////////////// -->
-    <div class="q-px-xs text-left" on-left>
+    <!-- BACKUP & RESTORE SECTION -->
+    <div class="section-divider q-my-md">
+      <div class="divider-line"></div>
+      <div class="divider-text">BACKUP & RESTORE</div>
+      <div class="divider-line"></div>
+    </div>
+
+    <div class="q-py-sm q-px-xs text-left" on-left>
       <q-list padding>
         <q-item>
           <q-item-section>
@@ -77,8 +83,16 @@
         </q-item>
       </q-list>
     </div>
+
+    <!-- LIGHTNING ADDRESS SECTION -->
+    <div class="section-divider q-my-md">
+      <div class="divider-line"></div>
+      <div class="divider-text">LIGHTNING ADDRESS</div>
+      <div class="divider-line"></div>
+    </div>
+
     <!-- nostr -->
-    <div class="q-py-sm q-px-sm text-left" on-left>
+    <div class="q-py-sm q-px-xs text-left" on-left>
       <q-list padding>
         <q-item>
           <q-item-section>
@@ -134,6 +148,14 @@
               </div>
             </div>
           </q-item>
+
+          <!-- NOSTR KEYS SECTION -->
+          <div class="section-divider q-my-md">
+            <div class="divider-line"></div>
+            <div class="divider-text">NOSTR KEYS</div>
+            <div class="divider-line"></div>
+          </div>
+
           <q-item>
             <q-item-section>
               <q-item-label overline>Your nostr keys</q-item-label>
@@ -299,6 +321,13 @@
       </q-list>
     </div>
 
+    <!-- PAYMENT REQUESTS SECTION -->
+    <div class="section-divider q-my-md">
+      <div class="divider-line"></div>
+      <div class="divider-text">PAYMENT REQUESTS</div>
+      <div class="divider-line"></div>
+    </div>
+
     <!-- payment requests -->
     <div class="q-py-sm q-px-xs text-left" on-left>
       <q-item class="q-pt-lg">
@@ -334,6 +363,13 @@
           </q-item-label>
         </q-item-section>
       </q-item>
+    </div>
+
+    <!-- NOSTR WALLET CONNECT SECTION -->
+    <div class="section-divider q-my-md">
+      <div class="divider-line"></div>
+      <div class="divider-text">NOSTR WALLET CONNECT</div>
+      <div class="divider-line"></div>
     </div>
 
     <!-- ln address -->
@@ -509,6 +545,14 @@
         </div>
       </q-list>
     </div>
+
+    <!-- HARDWARE FEATURES SECTION -->
+    <div v-if="ndefSupported" class="section-divider q-my-md">
+      <div class="divider-line"></div>
+      <div class="divider-text">HARDWARE FEATURES</div>
+      <div class="divider-line"></div>
+    </div>
+
     <div class="q-py-sm q-px-xs text-left" on-left>
       <q-list padding>
         <!-- Web NFC -->
@@ -608,6 +652,13 @@
           </q-list>
         </div>
 
+        <!-- P2PK SECTION -->
+        <div class="section-divider q-my-md">
+          <div class="divider-line"></div>
+          <div class="divider-text">P2PK FEATURES</div>
+          <div class="divider-line"></div>
+        </div>
+
         <!-- P2PK -->
         <div class="q-py-sm q-px-xs text-left" on-left>
           <q-list padding>
@@ -702,6 +753,13 @@
               </q-item>
             </q-expansion-item>
           </q-item>
+        </div>
+
+        <!-- PRIVACY SECTION -->
+        <div class="section-divider q-my-md">
+          <div class="divider-line"></div>
+          <div class="divider-text">PRIVACY</div>
+          <div class="divider-line"></div>
         </div>
 
         <q-item>
@@ -815,10 +873,15 @@
           </q-item>
         </div>
 
+        <div class="section-divider q-my-md">
+          <div class="divider-line"></div>
+          <div class="divider-text">EXPERIMENTAL</div>
+          <div class="divider-line"></div>
+        </div>
         <!-- enable receive swaps -->
         <q-item>
           <q-item-section>
-            <q-item-label overline class="text-weight-bold q-pt-xl"
+            <q-item-label overline class="text-weight-bold"
               >Experimental</q-item-label
             >
             <q-item-label caption>
@@ -855,12 +918,17 @@
           </q-item-label>
         </q-item>
 
+        <div class="section-divider q-my-md">
+          <div class="divider-line"></div>
+          <div class="divider-text">APPEARANCE</div>
+          <div class="divider-line"></div>
+        </div>
         <!-- use numeric keyboard -->
         <div class="q-py-sm q-px-xs text-left" on-left>
           <q-list padding>
             <q-item>
               <q-item-section>
-                <q-item-label overline class="text-weight-bold q-pt-lg"
+                <q-item-label overline class="text-weight-bold"
                   >On-screen keyboard</q-item-label
                 >
                 <q-item-label caption
@@ -1164,11 +1232,12 @@
                     </q-btn></row
                   ><row>
                     <q-item-label class="q-px-sm" caption
-                      >To avoid double-spending attempts, this wallet marks
-                      ecash as reserved so you don't reuse it. This button will
-                      unset all reserved tokens so they can be used again. If
-                      you do this, your wallet might include spent proofs. Press
-                      the "Remove spent proofs" button to get rid of them.
+                      >This wallet marks pending outgoing ecash as reserved (and
+                      subtracts it from your balance) to prevent double-spend
+                      attempts. This button will unset all reserved tokens so
+                      they can be used again. If you do this, your wallet might
+                      include spent proofs. Press the "Remove spent proofs"
+                      button to get rid of them.
                     </q-item-label>
                   </row>
                 </q-item-section>
@@ -1234,13 +1303,7 @@
               <q-item>
                 <q-item-section>
                   <row>
-                    <q-btn
-                      dense
-                      flat
-                      outline
-                      click
-                      @click="getLocalstorageToFile"
-                    >
+                    <q-btn dense flat outline click @click="exportWalletState">
                       Export wallet data
                     </q-btn></row
                   ><row>
@@ -1276,7 +1339,6 @@ import { mapActions, mapState, mapWritableState } from "pinia";
 import { useMintsStore, MintClass } from "src/stores/mints";
 import { useWalletStore } from "src/stores/wallet";
 import { map } from "underscore";
-import { currentDateStr } from "src/js/utils";
 import { useSettingsStore } from "src/stores/settings";
 import { useNostrStore } from "src/stores/nostr";
 import { useNPCStore } from "src/stores/npubcash";
@@ -1287,8 +1349,10 @@ import { useWorkersStore } from "src/stores/workers";
 import { useProofsStore } from "src/stores/proofs";
 import { usePRStore } from "../stores/payment-request";
 import { useRestoreStore } from "src/stores/restore";
+import { useDexieStore } from "../stores/dexie";
 import { useReceiveTokensStore } from "../stores/receiveTokensStore";
 import { useWelcomeStore } from "src/stores/welcome";
+import { useStorageStore } from "src/stores/storage";
 
 export default defineComponent({
   name: "SettingsView",
@@ -1340,12 +1404,7 @@ export default defineComponent({
       "showP2PkButtonInDrawer",
     ]),
     ...mapWritableState(useNWCStore, ["showNWCDialog", "showNWCData"]),
-    ...mapState(useMintsStore, [
-      "activeMintUrl",
-      "mints",
-      "activeProofs",
-      "proofs",
-    ]),
+    ...mapState(useMintsStore, ["activeMintUrl", "mints", "activeProofs"]),
     ...mapState(useNPCStore, ["npcLoading"]),
     ...mapState(useNostrStore, [
       "pubkey",
@@ -1441,7 +1500,6 @@ export default defineComponent({
       "removeMint",
       "activateMintUrl",
       "updateMint",
-      "restoreFromBackup",
     ]),
     ...mapActions(useWalletStore, [
       "newMnemonic",
@@ -1452,6 +1510,8 @@ export default defineComponent({
     ...mapActions(useProofsStore, ["serializeProofs"]),
     ...mapActions(useNPCStore, ["generateNPCConnection"]),
     ...mapActions(useRestoreStore, ["restoreMint"]),
+    ...mapActions(useDexieStore, ["deleteAllTables"]),
+    ...mapActions(useStorageStore, ["restoreFromBackup", "exportWalletState"]),
     generateNewMnemonic: async function () {
       this.newMnemonic();
       await this.initSigner();
@@ -1466,39 +1526,11 @@ export default defineComponent({
     toggleTerminal: function () {
       useUiStore().toggleDebugConsole();
     },
-    getLocalstorageToFile: async function () {
-      // https://stackoverflow.com/questions/24263682/save-restore-local-storage-to-a-local-file
-      const fileName = `cashu_backup_${currentDateStr()}.json`;
-      var a = {};
-      for (var i = 0; i < localStorage.length; i++) {
-        var k = localStorage.key(i);
-        var v = localStorage.getItem(k);
-        a[k] = v;
-      }
-      var textToSave = JSON.stringify(a);
-      var textToSaveAsBlob = new Blob([textToSave], {
-        type: "text/plain",
-      });
-      var textToSaveAsURL = window.URL.createObjectURL(textToSaveAsBlob);
-
-      var downloadLink = document.createElement("a");
-      downloadLink.download = fileName;
-      downloadLink.innerHTML = "Download File";
-      downloadLink.href = textToSaveAsURL;
-      downloadLink.onclick = function () {
-        document.body.removeChild(event.target);
-      };
-      downloadLink.style.display = "none";
-      document.body.appendChild(downloadLink);
-      downloadLink.click();
-    },
     unsetAllReservedProofs: async function () {
       // mark all this.proofs as reserved=false
-      for (let proof of this.proofs) {
-        proof.reserved = false;
-        proof.quote = undefined;
-      }
-      this.notifySuccess("No reserved proofs left");
+      const proofsStore = useProofsStore();
+      await proofsStore.setReserved(await proofsStore.getProofs(), false);
+      this.notifySuccess("All reserved proofs unset");
     },
     checkActiveProofsSpendable: async function () {
       // iterate over this.activeProofs in batches of 50 and check if they are spendable
@@ -1571,7 +1603,9 @@ export default defineComponent({
     },
     nukeWallet: async function () {
       // create a backup just in case
-      await this.getLocalstorageToFile();
+      await this.exportWalletState();
+      // clear dexie tables
+      this.deleteAllTables();
       localStorage.clear();
       window.location.href = "/";
     },
@@ -1597,13 +1631,25 @@ export default defineComponent({
   },
 });
 </script>
-<style scoped>
-.seed-phrase :deep(.q-field__control) {
-  padding: 12px 12px !important;
+<style>
+/* Section Divider */
+.section-divider {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 24px;
 }
-.seed-phrase {
-  font-size: 0.9rem;
-  font-family: monospace;
-  padding: 12px 12px !important;
+
+.divider-line {
+  flex: 1;
+  height: 1px;
+  background-color: #48484a;
+}
+
+.divider-text {
+  padding: 0 10px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #ffffff;
 }
 </style>
