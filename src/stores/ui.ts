@@ -149,10 +149,11 @@ export const useUiStore = defineStore("ui", {
       return unitTickerShortMap[unit as keyof typeof unitTickerShortMap];
     },
     ndefSupported(): boolean {
+      /*
       // @ts-ignore
       if (window.Capacitor) {
         return false;
-      }
+      }*/
       return "NDEFReader" in globalThis;
     },
     canPasteFromClipboard() {
