@@ -88,8 +88,18 @@
         </q-carousel-slide>
       </q-carousel>
     </transition>
+    <div
+      v-if="activeMint().mint.errored"
+      class="row q-mt-md q-mb-none text-secondary"
+    >
+      <div class="col-12">
+        <q-badge outline color="red" class="q-mr-xs q-mt-sm text-weight-bold">
+          Mint error
+          <q-icon name="error" class="q-ml-xs" />
+        </q-badge>
+      </div>
+    </div>
     <!-- mint url -->
-
     <div class="row q-mt-md q-mb-none text-secondary" v-if="activeMintUrl">
       <div class="col-12 cursor-pointer">
         <span class="text-weight-light" @click="setTab('mints')">
@@ -104,7 +114,7 @@
           Balance:
           <b>
             <AnimatedNumber
-              :value="getActiveMintBalance"
+              :value="getActiveBalance"
               :format="(val) => formatCurrency(val, activeUnit)"
               class="q-my-none q-py-none cursor-pointer"
             />
@@ -163,9 +173,9 @@ export default defineComponent({
     ...mapState(useMintsStore, [
       "activeMintUrl",
       "activeProofs",
-      "mints",
-      "proofs",
       "activeBalance",
+      "mints",
+      "totalUnitBalance",
       "activeUnit",
       "activeMint",
     ]),
@@ -173,16 +183,11 @@ export default defineComponent({
     ...mapState(useUiStore, ["globalMutexLock"]),
     ...mapState(usePriceStore, ["bitcoinPrice"]),
     ...mapWritableState(useMintsStore, ["activeUnit"]),
-    ...mapWritableState(useUiStore, ["hideBalance"]),
+    ...mapWritableState(useUiStore, ["hideBalance", "lastBalanceCached"]),
     pendingBalance: function () {
       return -this.historyTokens
         .filter((t) => t.status == "pending")
         .filter((t) => t.unit == this.activeUnit)
-        .reduce((sum, el) => (sum += el.amount), 0);
-    },
-    balance: function () {
-      return this.activeProofs
-        .flat()
         .reduce((sum, el) => (sum += el.amount), 0);
     },
     balancesOptions: function () {
@@ -196,17 +201,19 @@ export default defineComponent({
       return [].concat(...this.mints.map((m) => m.keysets));
     },
     getTotalBalance: function () {
-      return this.activeBalance;
+      return this.totalUnitBalance;
     },
-    getActiveMintBalance: function () {
-      return this.activeProofs
-        .flat()
-        .reduce((sum, el) => (sum += el.amount), 0);
+    getActiveBalance: function () {
+      return this.activeBalance;
     },
     activeMintLabel: function () {
       const mintClass = this.activeMint();
 
-      return mintClass.mint.nickname || getShortUrl(this.activeMintUrl);
+      return (
+        mintClass.mint.nickname ||
+        mintClass.mint.info?.name ||
+        getShortUrl(this.activeMintUrl)
+      );
     },
     getBalance: function () {
       var balance = this.activeProofs

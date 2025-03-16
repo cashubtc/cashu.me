@@ -322,7 +322,13 @@ export default defineComponent({
       );
     },
     tokenDecodesCorrectly: function () {
-      return this.decodeToken(this.receiveData.tokensBase64) !== undefined;
+      // Try decoding token directly
+      if (this.decodeToken(this.receiveData.tokensBase64) !== undefined) {
+        return true;
+      }
+
+      // Fall back to peanut check
+      return this.decodePeanut(this.receiveData.tokensBase64) !== undefined;
     },
     knowThisMint: function () {
       const tokenJson = this.decodeToken(this.receiveData.tokensBase64);
@@ -378,6 +384,51 @@ export default defineComponent({
       "pasteToParseDialog",
     ]),
     // TOKEN METHODS
+    decodePeanut: function (peanut) {
+      try {
+        let decoded = [];
+        const chars = Array.from(peanut);
+        if (!chars.length) return undefined;
+        const fromVariationSelector = function (char) {
+          const codePoint = char.codePointAt(0);
+
+          // Handle Variation Selectors (VS1-VS16): U+FE00 to U+FE0F
+          if (codePoint >= 0xfe00 && codePoint <= 0xfe0f) {
+            // Maps FE00->0, FE01->1, ..., FE0F->15
+            const byteValue = codePoint - 0xfe00;
+            return String.fromCharCode(byteValue);
+          }
+
+          // Handle Variation Selectors Supplement (VS17-VS256): U+E0100 to U+E01EF
+          if (codePoint >= 0xe0100 && codePoint <= 0xe01ef) {
+            // Maps E0100->16, E0101->17, ..., E01EF->255
+            const byteValue = codePoint - 0xe0100 + 16;
+            return String.fromCharCode(byteValue);
+          }
+
+          // No Variation Selector
+          return null;
+        };
+        // Check all input chars for peanut data
+        for (const char of chars) {
+          let byte = fromVariationSelector(char);
+          if (byte === null && decoded.length > 0) {
+            break;
+          } else if (byte === null) {
+            continue;
+          }
+          decoded.push(byte); // got some
+        }
+        // Switch out token if we found peanut data
+        decoded = decoded.join("");
+        if (decoded) {
+          this.receiveData.tokensBase64 = decoded;
+        }
+        return this.decodeToken(decoded);
+      } catch (error) {
+        return undefined;
+      }
+    },
     getProofs: function (decoded_token) {
       return token.getProofs(decoded_token);
     },

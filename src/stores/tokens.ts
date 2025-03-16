@@ -22,7 +22,6 @@ export type HistoryToken = {
 export const useTokensStore = defineStore("tokens", {
   state: () => ({
     historyTokens: useLocalStorage("cashu.historyTokens", [] as HistoryToken[]),
-    proofs: useLocalStorage("cashu.proofs", [] as Proof[]),
   }),
   actions: {
     /**
