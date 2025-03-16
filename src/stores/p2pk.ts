@@ -52,6 +52,27 @@ export const useP2PKStore = defineStore("p2pk", {
         this.showP2PKDialog = true;
       }
     },
+    importNsec: async function () {
+      const nsec = (await prompt("Enter your nsec")) as string;
+      if (!nsec || !nsec.startsWith("nsec1")) {
+        console.log("input was not an nsec");
+        return;
+      }
+      let sk = nip19.decode(nsec).data as Uint8Array; // `sk` is a Uint8Array
+      let pk = "02" + getPublicKey(sk); // `pk` is a hex string
+      let skHex = bytesToHex(sk);
+      if (this.haveThisKey(pk)) {
+        console.log("nsec already exists in p2pk keystore");
+        return;
+      }
+      const keyPair: P2PKKey = {
+        publicKey: pk,
+        privateKey: skHex,
+        used: false,
+        usedCount: 0,
+      };
+      this.p2pkKeys = this.p2pkKeys.concat(keyPair);
+    },
     generateKeypair: function () {
       let sk = generateSecretKey(); // `sk` is a Uint8Array
       let pk = "02" + getPublicKey(sk); // `pk` is a hex string
