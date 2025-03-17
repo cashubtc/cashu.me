@@ -149,10 +149,9 @@ export const useUiStore = defineStore("ui", {
       return unitTickerShortMap[unit as keyof typeof unitTickerShortMap];
     },
     ndefSupported(): boolean {
-    
       //console.log(`window.Capacitor.getPlatform() = ${window.Capacitor.getPlatform()}`)
       // @ts-ignore
-      if (window.Capacitor.getPlatform() !== 'web') {
+      if (window.Capacitor.getPlatform() !== "web") {
         return false;
       }
       return "NDEFReader" in globalThis;
