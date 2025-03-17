@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 import { useLocalStorage } from "@vueuse/core";
-import { generateSecretKey, getPublicKey } from "nostr-tools";
+import { generateSecretKey, getPublicKey, nip19 } from "nostr-tools";
 import { bytesToHex } from "@noble/hashes/utils"; // already an installed dependency
 import { WalletProof } from "stores/mints";
 import token from "src/js/token";
@@ -27,7 +27,18 @@ export const useP2PKStore = defineStore("p2pk", {
     haveThisKey: function (key: string) {
       return this.p2pkKeys.filter((m) => m.publicKey == key).length > 0;
     },
+    maybeConvertNpub: function (key: string) {
+      // Check and convert npub to P2PK
+      if (key && key.startsWith("npub1")) {
+        const { type, data } = nip19.decode(key);
+        if (type === "npub" && data.length === 64) {
+          key = "02" + data;
+        }
+      }
+      return key;
+    },
     isValidPubkey: function (key: string) {
+      key = this.maybeConvertNpub(key);
       return key && key.length == 66;
     },
     setPrivateKeyUsed: function (key: string) {

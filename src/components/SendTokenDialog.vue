@@ -691,7 +691,7 @@ export default defineComponent({
       "setTokenPaid",
       "deleteToken",
     ]),
-    ...mapActions(useP2PKStore, ["isValidPubkey"]),
+    ...mapActions(useP2PKStore, ["isValidPubkey", "maybeConvertNpub"]),
     ...mapActions(useCameraStore, ["closeCamera", "showCamera"]),
     ...mapActions(useMintsStore, ["toggleUnit"]),
     // decodeP2PKQR: function (res) {
@@ -952,6 +952,9 @@ export default defineComponent({
       calls send, displays token and kicks off the spendableWorker
       */
       this.showNumericKeyboard = false;
+      this.sendData.p2pkPubkey = this.maybeConvertNpub(
+        this.sendData.p2pkPubkey
+      );
       if (
         this.sendData.p2pkPubkey &&
         this.isValidPubkey(this.sendData.p2pkPubkey)
