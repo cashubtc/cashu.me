@@ -1148,13 +1148,12 @@
           <q-list padding>
             <q-item>
               <q-item-section>
-                <q-item-label overline class="text-weight-bold"
-                  >Language</q-item-label
-                >
-                <q-item-label caption
-                  >Please choose your preferred language from the list
-                  below.</q-item-label
-                >
+                <q-item-label overline class="text-weight-bold">{{
+                  $t("Settings.language.title")
+                }}</q-item-label>
+                <q-item-label caption>{{
+                  $t("Settings.language.description")
+                }}</q-item-label>
               </q-item-section>
             </q-item>
             <q-item>
