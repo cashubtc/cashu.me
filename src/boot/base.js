@@ -25,6 +25,9 @@ window.windowMixin = {
       document.body.setAttribute("data-theme", newValue);
       this.$q.localStorage.set("cashu.theme", newValue);
     },
+    changeLanguage: function (e) {
+      this.$q.localStorage.set("cashu.language", e.target.value);
+    },
     toggleDarkMode: function () {
       this.$q.dark.toggle();
       this.$q.localStorage.set("cashu.darkMode", this.$q.dark.isActive);
@@ -217,6 +220,11 @@ window.windowMixin = {
       );
     } else {
       this.changeColor("monochrome");
+    }
+
+    const language = this.$q.localStorage.getItem("cashu.language");
+    if (language) {
+      this.$i18n.locale = language;
     }
 
     // only for iOS
