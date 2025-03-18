@@ -1092,7 +1092,7 @@
               </q-item-section>
             </q-item>
             <q-item>
-              <select v-model="$i18n.locale">
+              <select v-model="$i18n.locale" @change="changeLanguage">
                 <option
                   v-for="locale in $i18n.availableLocales"
                   :key="`locale-${locale}`"
