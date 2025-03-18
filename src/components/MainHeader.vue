@@ -73,7 +73,7 @@
 
   <q-drawer v-model="leftDrawerOpen" bordered>
     <q-list>
-      <q-item-label header>Settings </q-item-label>
+      <q-item-label header>{{ $t("MainHeader.header.title") }}</q-item-label>
       <q-item clickable to="/settings">
         <q-item-section avatar>
           <q-icon name="settings" />
