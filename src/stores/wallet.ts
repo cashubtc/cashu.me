@@ -363,10 +363,11 @@ export const useWalletStore = defineStore("wallet", {
         amount,
         true
       );
+      const keysetId = this.getKeyset(wallet.mint.mintUrl, wallet.unit);
       const { keep: keepProofs, send: sendProofs } = await wallet.send(
         amount,
         proofsToSend,
-        { pubkey: receiverPubkey }
+        { keysetId, pubkey: receiverPubkey }
       );
       const proofsStore = useProofsStore();
       await proofsStore.removeProofs(proofsToSend);
@@ -421,7 +422,7 @@ export const useWalletStore = defineStore("wallet", {
           ({ keep: keepProofs, send: sendProofs } = await wallet.send(
             targetAmount,
             proofsToSend,
-            { counter, proofsWeHave: spendableProofs }
+            { counter, keysetId, proofsWeHave: spendableProofs }
           ));
           this.increaseKeysetCounter(
             keysetId,
@@ -513,6 +514,7 @@ export const useWalletStore = defineStore("wallet", {
             {
               counter,
               privkey,
+              keysetId,
               proofsWeHave: mintStore.mintUnitProofs(mint, historyToken.unit),
             }
           );
