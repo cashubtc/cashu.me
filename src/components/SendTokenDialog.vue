@@ -914,11 +914,9 @@ export default defineComponent({
       this.scanningCard = false;
     },
     lockTokens: async function () {
-      let sendAmount = this.sendData.amount;
-      // if unit is USD, multiply by 100
-      if (this.activeUnit === "usd" || this.activeUnit == "eur") {
-        sendAmount = sendAmount * 100;
-      }
+      let sendAmount = Math.floor(
+        this.sendData.amount * this.activeUnitCurrencyMultiplyer
+      );
       try {
         // keep firstProofs, send scndProofs and delete them (invalidate=true)
         const mintWallet = this.mintWallet(this.activeMintUrl, this.activeUnit);
@@ -964,8 +962,9 @@ export default defineComponent({
       }
 
       try {
-        let sendAmount =
-          this.sendData.amount * this.activeUnitCurrencyMultiplyer;
+        let sendAmount = Math.floor(
+          this.sendData.amount * this.activeUnitCurrencyMultiplyer
+        );
         const mintWallet = this.mintWallet(this.activeMintUrl, this.activeUnit);
         // keep firstProofs, send scndProofs and delete them (invalidate=true)
         let { _, sendProofs } = await this.send(
