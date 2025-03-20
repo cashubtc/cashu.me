@@ -191,9 +191,11 @@ export default defineComponent({
         this.paymentRequestAmount = undefined;
         this.amountLabel = this.amountLabelDefault;
       } else {
-        this.paymentRequestAmount = amount * this.activeUnitCurrencyMultiplyer;
+        this.paymentRequestAmount = Math.floor(
+          amount * this.activeUnitCurrencyMultiplyer
+        );
         this.amountLabel = useUiStore().formatCurrency(
-          amount * this.activeUnitCurrencyMultiplyer,
+          Math.floor(amount * this.activeUnitCurrencyMultiplyer),
           this.activeUnit
         );
       }

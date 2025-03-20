@@ -618,7 +618,7 @@ export default defineComponent({
       let selectedProofs = this.coinSelect(
         spendableProofs,
         mintWallet,
-        this.sendData.amount * this.activeUnitCurrencyMultiplyer,
+        Math.floor(this.sendData.amount * this.activeUnitCurrencyMultiplyer),
         this.includeFeesInSendAmount
       );
       const feesToAdd = this.includeFeesInSendAmount
@@ -629,7 +629,8 @@ export default defineComponent({
         .reduce((sum, el) => (sum += el.amount), 0);
       return (
         sumSelectedProofs ==
-        this.sendData.amount * this.activeUnitCurrencyMultiplyer + feesToAdd
+        Math.floor(this.sendData.amount * this.activeUnitCurrencyMultiplyer) +
+          feesToAdd
       );
     },
   },
@@ -978,8 +979,9 @@ export default defineComponent({
         // update UI
         this.sendData.tokens = sendProofs;
         this.sendData.tokensBase64 = this.serializeProofs(sendProofs);
-        this.sendData.historyAmount =
-          -this.sendData.amount * this.activeUnitCurrencyMultiplyer;
+        this.sendData.historyAmount = -Math.floor(
+          this.sendData.amount * this.activeUnitCurrencyMultiplyer
+        );
 
         const historyToken = {
           amount: -sendAmount,
