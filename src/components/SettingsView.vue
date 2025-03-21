@@ -1077,6 +1077,33 @@
           </q-list>
         </div>
 
+        <!-- language picker -->
+        <div class="q-py-sm q-px-xs text-left" on-left>
+          <q-list padding>
+            <q-item>
+              <q-item-section>
+                <q-item-label overline class="text-weight-bold">{{
+                  $t("Settings.language.title")
+                }}</q-item-label>
+                <q-item-label caption>{{
+                  $t("Settings.language.description")
+                }}</q-item-label>
+              </q-item-section>
+            </q-item>
+            <q-item>
+              <select v-model="$i18n.locale" @change="changeLanguage">
+                <option
+                  v-for="locale in $i18n.availableLocales"
+                  :key="`locale-${locale}`"
+                  :value="locale"
+                >
+                  {{ locale }}
+                </option>
+              </select>
+            </q-item>
+          </q-list>
+        </div>
+
         <q-expansion-item
           class="q-pt-lg"
           dense
