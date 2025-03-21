@@ -844,6 +844,7 @@ export default defineComponent({
                         {
                           recordType: "text",
                           data: `${this.sendData.tokensBase64}`,
+                          lang: "en",
                         },
                       ];
                       break;
@@ -873,12 +874,12 @@ export default defineComponent({
                         `Unknown NFC encoding: ${this.nfcEncoding}`
                       );
                   }
+                  notifySuccess("Writing to NFC card...");
                   this.ndef
                     .write({ records: records }, { overwrite: true })
                     .then(() => {
                       console.log("Successfully flashed token to card!");
                       notifySuccess("Successfully flashed token to card!");
-                      this.showSendTokens = false;
                     })
                     .catch((err) => {
                       console.error(
@@ -901,7 +902,6 @@ export default defineComponent({
               notifyError(`${err.message}`, "NFC error");
               this.scanningCard = false;
             });
-          notifyWarning("This will overwrite your card!");
         } catch (error) {
           console.error(`NFC error: ${error.message}`);
           notifyError(`${err.message}`, "NFC error");
