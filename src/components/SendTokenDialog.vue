@@ -171,6 +171,26 @@
                 <q-spinner-hourglass />
               </template>
             </q-btn>
+            <q-btn
+              v-if="true"
+              unelevated
+              dense
+              :disabled="scanningCard"
+              :loading="scanningCard"
+              class="q-ml-md"
+              @click="toggleRequestScanner"
+              flat
+            >
+              <NfcIcon />
+              <q-tooltip>{{
+                ndefSupported
+                  ? "Read payment request via NFC"
+                  : "NDEF unsupported"
+              }}</q-tooltip>
+              <template v-slot:loading>
+                <q-spinner @click="closeCardScanner" />
+              </template>
+            </q-btn>
             <div
               v-if="sendData.p2pkPubkey && isValidPubkey(sendData.p2pkPubkey)"
               class="row"
@@ -541,7 +561,6 @@ export default defineComponent({
       framentInervalSlow: 500,
       fragmentSpeedLabel: "F",
       isV4Token: false,
-      scanningCard: false,
       showExpandedButtons: false,
     };
   },
@@ -552,6 +571,7 @@ export default defineComponent({
       "sendData",
     ]),
     ...mapWritableState(useCameraStore, ["camera", "hasCamera"]),
+    ...mapState(useSendTokensStore, ["scanningCard"]),
     ...mapState(useUiStore, [
       "tickerShort",
       "canPasteFromClipboard",
@@ -675,6 +695,11 @@ export default defineComponent({
     },
   },
   methods: {
+    ...mapActions(useSendTokensStore, [
+      "closeCardScanner",
+      "writeTokensToCard",
+      "toggleRequestScanner",
+    ]),
     ...mapActions(useWorkersStore, ["clearAllWorkers"]),
     ...mapActions(useWalletStore, [
       "send",
@@ -813,105 +838,6 @@ export default defineComponent({
       this.showSendTokens = false;
       this.showDeleteDialog = false;
       this.clearAllWorkers();
-    },
-    writeTokensToCard: function () {
-      if (!this.scanningCard) {
-        try {
-          this.ndef = new NDEFReader();
-          this.controller = new AbortController();
-          const signal = this.controller.signal;
-          this.ndef
-            .scan({ signal })
-            .then(() => {
-              console.log("> Scan started");
-
-              this.ndef.onreadingerror = (error) => {
-                console.error(`Cannot read NDEF data! ${error}`);
-                notifyError("Cannot read data from the NFC tag");
-                this.controller.abort();
-                this.scanningCard = false;
-              };
-
-              this.ndef.onreading = ({ message, serialNumber }) => {
-                console.log(`Read card ${serialNumber}`);
-                this.controller.abort();
-                this.scanningCard = false;
-                try {
-                  let records = [];
-                  switch (this.nfcEncoding) {
-                    case "text":
-                      records = [
-                        {
-                          recordType: "text",
-                          data: `${this.sendData.tokensBase64}`,
-                          lang: "en",
-                        },
-                      ];
-                      break;
-                    case "weburl":
-                      records = [
-                        {
-                          recordType: "url",
-                          data: `${window.location}#token=${this.sendData.tokensBase64}`,
-                        },
-                      ];
-                      break;
-                    case "binary":
-                      throw new Error("Binary encoding not supported yet");
-                    /*
-                      const data = null;
-                      records = [
-                        {
-                          recordType: "mime",
-                          mediaType: "application/octet-stream",
-                          data: data,
-                        },
-                      ];
-                      break;
-                      */
-                    default:
-                      throw new Error(
-                        `Unknown NFC encoding: ${this.nfcEncoding}`
-                      );
-                  }
-                  notifySuccess("Writing to NFC card...");
-                  this.ndef
-                    .write({ records: records }, { overwrite: true })
-                    .then(() => {
-                      console.log("Successfully flashed token to card!");
-                      notifySuccess("Successfully flashed token to card!");
-                    })
-                    .catch((err) => {
-                      console.error(
-                        `NFC write failed: The card may not have enough capacity (needed ${records[0].data.length} bytes).`
-                      );
-                      notifyError(
-                        `The card may not have enough capacity (needed ${records[0].data.length} bytes).`,
-                        "NFC write failed"
-                      );
-                    });
-                } catch (err) {
-                  console.error(`NFC error: ${err.message}`);
-                  notifyError(`${err.message}`, "NFC error");
-                }
-              };
-              this.scanningCard = true;
-            })
-            .catch((error) => {
-              console.error(`NFC error: ${error.message}`);
-              notifyError(`${err.message}`, "NFC error");
-              this.scanningCard = false;
-            });
-        } catch (error) {
-          console.error(`NFC error: ${error.message}`);
-          notifyError(`${err.message}`, "NFC error");
-          this.scanningCard = false;
-        }
-      }
-    },
-    closeCardScanner: function () {
-      this.controller.abort();
-      this.scanningCard = false;
     },
     lockTokens: async function () {
       let sendAmount = Math.floor(
