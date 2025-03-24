@@ -91,6 +91,7 @@ import {
   Zap as ZapIcon,
   Scan as ScanIcon,
   Coins as CoinsIcon,
+  Nfc as NfcIcon,
 } from "lucide-vue-next";
 import { notifyWarning } from "src/js/notify";
 
