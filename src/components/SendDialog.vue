@@ -43,7 +43,7 @@
           <q-btn
             v-if="ndefSupported"
             class="full-width custom-btn"
-            @click="toggleRequestScanner"
+            @click="handleNFCBtn"
           >
             <div class="row items-center full-width">
               <div class="icon-background q-mr-md">
@@ -51,7 +51,10 @@
                 <NfcIcon v-else />
               </div>
               <div class="text-left">
-                <div class="text-weight-bold custom-btn-text">ECASH NFC</div>
+                <div class="text-weight-bold custom-btn-text">
+                  NFC
+                  {{ scanningCard ? "Scanning..." : "" }}
+                </div>
               </div>
             </div>
           </q-btn>
@@ -138,7 +141,7 @@ export default defineComponent({
   },
   methods: {
     ...mapActions(useCameraStore, ["closeCamera", "showCamera"]),
-    ...mapActions(useSendTokensStore, ["toggleSendScanner"]),
+    ...mapActions(useSendTokensStore, ["toggleRequestScanner"]),
     showParseDialog: function () {
       if (!this.canMakePayments) {
         notifyWarning("No mints available");
@@ -172,6 +175,9 @@ export default defineComponent({
       this.showSendDialog = false;
       this.showSendTokens = true;
       this.showLockInput = false;
+    },
+    handleNFCBtn: function () {
+      this.toggleRequestScanner();
     },
   },
   created: function () {},
