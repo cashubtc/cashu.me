@@ -102,6 +102,7 @@ export default defineComponent({
     CoinsIcon,
     ZapIcon,
     ScanIcon,
+    NfcIcon,
   },
   mixins: [windowMixin],
   props: {},
