@@ -40,6 +40,22 @@
             </div>
           </q-btn>
 
+          <q-btn
+            v-if="ndefSupported"
+            class="full-width custom-btn"
+            @click="toggleRequestScanner"
+          >
+            <div class="row items-center full-width">
+              <div class="icon-background q-mr-md">
+                <q-spinner v-if="scanningCard" size="sm" />
+                <NfcIcon v-else />
+              </div>
+              <div class="text-left">
+                <div class="text-weight-bold custom-btn-text">ECASH NFC</div>
+              </div>
+            </div>
+          </q-btn>
+
           <q-btn class="full-width custom-btn" @click="showParseDialog">
             <div class="row items-center full-width">
               <div class="icon-background q-mr-md">
@@ -98,6 +114,7 @@ export default defineComponent({
       "tab",
       "showSendDialog",
       "showReceiveDialog",
+      "ndefSupported",
     ]),
     ...mapWritableState(useWalletStore, [
       "invoiceHistory",
@@ -109,6 +126,7 @@ export default defineComponent({
       "showSendTokens",
       "sendData",
       "showLockInput",
+      "scanningCard",
     ]),
     canMakePayments: function () {
       if (!this.mints.length) {
@@ -120,6 +138,7 @@ export default defineComponent({
   },
   methods: {
     ...mapActions(useCameraStore, ["closeCamera", "showCamera"]),
+    ...mapActions(useSendTokensStore, ["toggleSendScanner"]),
     showParseDialog: function () {
       if (!this.canMakePayments) {
         notifyWarning("No mints available");

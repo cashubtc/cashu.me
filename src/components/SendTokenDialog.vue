@@ -171,26 +171,6 @@
                 <q-spinner-hourglass />
               </template>
             </q-btn>
-            <q-btn
-              v-if="true"
-              unelevated
-              dense
-              :disabled="scanningCard"
-              :loading="scanningCard"
-              class="q-ml-md"
-              @click="toggleRequestScanner"
-              flat
-            >
-              <NfcIcon />
-              <q-tooltip>{{
-                ndefSupported
-                  ? "Read payment request via NFC"
-                  : "NDEF unsupported"
-              }}</q-tooltip>
-              <template v-slot:loading>
-                <q-spinner @click="closeCardScanner" />
-              </template>
-            </q-btn>
             <div
               v-if="sendData.p2pkPubkey && isValidPubkey(sendData.p2pkPubkey)"
               class="row"
@@ -698,7 +678,6 @@ export default defineComponent({
     ...mapActions(useSendTokensStore, [
       "closeCardScanner",
       "writeTokensToCard",
-      "toggleRequestScanner",
     ]),
     ...mapActions(useWorkersStore, ["clearAllWorkers"]),
     ...mapActions(useWalletStore, [
