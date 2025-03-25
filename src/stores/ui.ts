@@ -34,6 +34,7 @@ export const useUiStore = defineStore("ui", {
     expandHistory: useLocalStorage("cashu.ui.expandHistory", true as boolean),
     globalMutexLock: false,
     showDebugConsole: useLocalStorage("cashu.ui.showDebugConsole", false),
+    lastBalanceCached: useLocalStorage("cashu.ui.lastBalanceCached", 0),
   }),
   actions: {
     closeDialogs() {
@@ -148,8 +149,9 @@ export const useUiStore = defineStore("ui", {
       return unitTickerShortMap[unit as keyof typeof unitTickerShortMap];
     },
     ndefSupported(): boolean {
+      //console.log(`window.Capacitor.getPlatform() = ${window.Capacitor.getPlatform()}`)
       // @ts-ignore
-      if (window.Capacitor) {
+      if (window.Capacitor.getPlatform() !== "web") {
         return false;
       }
       return "NDEFReader" in globalThis;

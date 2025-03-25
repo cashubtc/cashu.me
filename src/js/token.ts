@@ -1,5 +1,6 @@
 import { type Token, getDecodedToken } from "@cashu/cashu-ts";
 import { useMintsStore, WalletProof } from "src/stores/mints";
+import { useProofsStore } from "src/stores/proofs";
 export default { decode, getProofs, getMint, getUnit, getMemo };
 
 /**
@@ -18,8 +19,7 @@ function getProofs(decoded_token: Token): WalletProof[] {
     throw new Error("Token format wrong");
   }
   const proofs = decoded_token.proofs.flat();
-  const mintStore = useMintsStore();
-  return mintStore.proofsToWalletProofs(proofs);
+  return useProofsStore().proofsToWalletProofs(proofs);
 }
 
 function getMint(decoded_token: Token) {

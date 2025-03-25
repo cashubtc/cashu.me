@@ -12,7 +12,12 @@ import { useSendTokensStore } from "./sendTokensStore";
 import { useNostrStore } from "./nostr";
 import { useTokensStore } from "./tokens";
 import token from "src/js/token";
-import { notify, notifyError, notifySuccess } from "src/js/notify";
+import {
+  notify,
+  notifyError,
+  notifySuccess,
+  notifyWarning,
+} from "src/js/notify";
 import { useLocalStorage } from "@vueuse/core";
 import { v4 as uuidv4 } from "uuid";
 
@@ -82,6 +87,18 @@ export const usePRStore = defineStore("payment-request", {
           notifyError("We do not know the mint in the payment request");
           throw new Error(
             `We do not know the mint in the payment request: ${request.mints}`
+          );
+        }
+      }
+
+      // activate the unit in the payment request
+      if (request.unit) {
+        // if the activeMint() supports this unit, set it
+        if (mintsStore.activeMint().units.find((u) => u == request.unit)) {
+          mintsStore.activeUnit = request.unit;
+        } else {
+          notifyWarning(
+            `The mint does not support the unit in the payment request: ${request.unit}`
           );
         }
       }
