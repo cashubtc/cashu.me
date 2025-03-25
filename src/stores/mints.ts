@@ -229,6 +229,9 @@ export const useMintsStore = defineStore("mints", {
         (p) => unitKeysets.map((k) => k.id).includes(p.id) && !p.reserved
       );
     },
+    mintUnitKeysets(mint: Mint, unit: string): MintKeyset[] {
+      return mint.keysets.filter((k) => k.unit === unit);
+    },
     toggleUnit: function () {
       const units = this.activeMint().units;
       this.activeUnit =
