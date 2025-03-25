@@ -691,7 +691,7 @@ export default defineComponent({
       "setTokenPaid",
       "deleteToken",
     ]),
-    ...mapActions(useP2PKStore, ["isValidPubkey"]),
+    ...mapActions(useP2PKStore, ["isValidPubkey", "maybeConvertNpub"]),
     ...mapActions(useCameraStore, ["closeCamera", "showCamera"]),
     ...mapActions(useMintsStore, ["toggleUnit"]),
     // decodeP2PKQR: function (res) {
@@ -844,6 +844,7 @@ export default defineComponent({
                         {
                           recordType: "text",
                           data: `${this.sendData.tokensBase64}`,
+                          lang: "en",
                         },
                       ];
                       break;
@@ -873,12 +874,12 @@ export default defineComponent({
                         `Unknown NFC encoding: ${this.nfcEncoding}`
                       );
                   }
+                  notifySuccess("Writing to NFC card...");
                   this.ndef
                     .write({ records: records }, { overwrite: true })
                     .then(() => {
                       console.log("Successfully flashed token to card!");
                       notifySuccess("Successfully flashed token to card!");
-                      this.showSendTokens = false;
                     })
                     .catch((err) => {
                       console.error(
@@ -901,7 +902,6 @@ export default defineComponent({
               notifyError(`${err.message}`, "NFC error");
               this.scanningCard = false;
             });
-          notifyWarning("This will overwrite your card!");
         } catch (error) {
           console.error(`NFC error: ${error.message}`);
           notifyError(`${err.message}`, "NFC error");
@@ -914,11 +914,9 @@ export default defineComponent({
       this.scanningCard = false;
     },
     lockTokens: async function () {
-      let sendAmount = this.sendData.amount;
-      // if unit is USD, multiply by 100
-      if (this.activeUnit === "usd" || this.activeUnit == "eur") {
-        sendAmount = sendAmount * 100;
-      }
+      let sendAmount = Math.floor(
+        this.sendData.amount * this.activeUnitCurrencyMultiplyer
+      );
       try {
         // keep firstProofs, send scndProofs and delete them (invalidate=true)
         const mintWallet = this.mintWallet(this.activeMintUrl, this.activeUnit);
@@ -952,6 +950,9 @@ export default defineComponent({
       calls send, displays token and kicks off the spendableWorker
       */
       this.showNumericKeyboard = false;
+      this.sendData.p2pkPubkey = this.maybeConvertNpub(
+        this.sendData.p2pkPubkey
+      );
       if (
         this.sendData.p2pkPubkey &&
         this.isValidPubkey(this.sendData.p2pkPubkey)
@@ -961,8 +962,9 @@ export default defineComponent({
       }
 
       try {
-        let sendAmount =
-          this.sendData.amount * this.activeUnitCurrencyMultiplyer;
+        let sendAmount = Math.floor(
+          this.sendData.amount * this.activeUnitCurrencyMultiplyer
+        );
         const mintWallet = this.mintWallet(this.activeMintUrl, this.activeUnit);
         // keep firstProofs, send scndProofs and delete them (invalidate=true)
         let { _, sendProofs } = await this.send(

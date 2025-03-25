@@ -675,7 +675,7 @@
                 >
               </q-item-section>
             </q-item>
-            <q-item>
+            <q-item style="display: inline-block">
               <q-btn
                 class="q-ml-sm q-px-md"
                 color="primary"
@@ -684,6 +684,17 @@
                 outline
                 @click="generateKeypair"
                 >Generate key</q-btn
+              >
+            </q-item>
+            <q-item style="display: inline-block">
+              <q-btn
+                class="q-ml-sm q-px-md"
+                color="primary"
+                size="sm"
+                rounded
+                outline
+                @click="importNsec"
+                >Import nsec</q-btn
               >
             </q-item>
             <q-item>
@@ -1494,7 +1505,11 @@ export default defineComponent({
       "unsubscribeNWC",
       "getConnectionString",
     ]),
-    ...mapActions(useP2PKStore, ["generateKeypair", "showKeyDetails"]),
+    ...mapActions(useP2PKStore, [
+      "importNsec",
+      "generateKeypair",
+      "showKeyDetails",
+    ]),
     ...mapActions(useMintsStore, [
       "addMint",
       "removeMint",
