@@ -40,6 +40,25 @@
             </div>
           </q-btn>
 
+          <q-btn
+            v-if="ndefSupported"
+            class="full-width custom-btn"
+            @click="handleNFCBtn"
+          >
+            <div class="row items-center full-width">
+              <div class="icon-background q-mr-md">
+                <q-spinner v-if="scanningCard" size="sm" />
+                <NfcIcon v-else />
+              </div>
+              <div class="text-left">
+                <div class="text-weight-bold custom-btn-text">
+                  NFC
+                  {{ scanningCard ? "Scanning..." : "" }}
+                </div>
+              </div>
+            </div>
+          </q-btn>
+
           <q-btn class="full-width custom-btn" @click="showParseDialog">
             <div class="row items-center full-width">
               <div class="icon-background q-mr-md">
@@ -72,6 +91,7 @@ import {
   Zap as ZapIcon,
   Scan as ScanIcon,
   Coins as CoinsIcon,
+  Nfc as NfcIcon,
 } from "lucide-vue-next";
 import { notifyWarning } from "src/js/notify";
 
@@ -82,6 +102,7 @@ export default defineComponent({
     CoinsIcon,
     ZapIcon,
     ScanIcon,
+    NfcIcon,
   },
   mixins: [windowMixin],
   props: {},
@@ -98,6 +119,7 @@ export default defineComponent({
       "tab",
       "showSendDialog",
       "showReceiveDialog",
+      "ndefSupported",
     ]),
     ...mapWritableState(useWalletStore, [
       "invoiceHistory",
@@ -109,6 +131,7 @@ export default defineComponent({
       "showSendTokens",
       "sendData",
       "showLockInput",
+      "scanningCard",
     ]),
     canMakePayments: function () {
       if (!this.mints.length) {
@@ -120,6 +143,7 @@ export default defineComponent({
   },
   methods: {
     ...mapActions(useCameraStore, ["closeCamera", "showCamera"]),
+    ...mapActions(useSendTokensStore, ["toggleRequestScanner"]),
     showParseDialog: function () {
       if (!this.canMakePayments) {
         notifyWarning("No mints available");
@@ -153,6 +177,9 @@ export default defineComponent({
       this.showSendDialog = false;
       this.showSendTokens = true;
       this.showLockInput = false;
+    },
+    handleNFCBtn: function () {
+      this.toggleRequestScanner();
     },
   },
   created: function () {},
