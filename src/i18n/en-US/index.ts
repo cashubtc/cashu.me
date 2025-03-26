@@ -108,4 +108,19 @@ export default {
       },
     },
   },
+  BalanceView: {
+    mintUrl: {
+      label: "Mint",
+    },
+    mintBalance: {
+      label: "Balance",
+    },
+    mintError: {
+      label: "Mint error",
+    },
+    pending: {
+      label: "Pending",
+      tooltip: "Check all pending tokens",
+    },
+  },
 };
