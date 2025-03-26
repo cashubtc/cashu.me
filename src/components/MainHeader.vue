@@ -23,7 +23,7 @@
           text-color="black"
           class="q-mr-sm"
         >
-          <span>Offline</span>
+          <span>{{ $t("MainHeader.offline.warning.text") }}</span>
         </q-badge>
       </transition>
       <q-badge
@@ -32,7 +32,7 @@
         text-color="black"
         class="q-mr-sm"
       >
-        <span>Staging – don't use with real funds!</span>
+        <span>{{ $t("MainHeader.staging.warning.text") }}</span>
       </q-badge>
       <!-- <q-badge color="yellow" text-color="black" class="q-mr-sm">
         <span v-if="!isStaging()">Beta</span>
@@ -46,7 +46,7 @@
           class="q-mr-sm"
           @click="reload"
         >
-          Reload in {{ countdown }}
+          {{ $t("MainHeader.reload.warning.text", { countdown }) }}
           <q-spinner
             v-if="countdown > 0"
             size="0.8em"
@@ -73,27 +73,41 @@
 
   <q-drawer v-model="leftDrawerOpen" bordered>
     <q-list>
-      <q-item-label header>{{ $t("MainHeader.header.title") }}</q-item-label>
+      <q-item-label header>{{
+        $t("MainHeader.menu.settings.title")
+      }}</q-item-label>
       <q-item clickable to="/settings">
         <q-item-section avatar>
           <q-icon name="settings" />
         </q-item-section>
         <q-item-section>
-          <q-item-label>Settings</q-item-label>
-          <q-item-label caption>Wallet configuration</q-item-label>
+          <q-item-label>{{
+            $t("MainHeader.menu.settings.settings.title")
+          }}</q-item-label>
+          <q-item-label caption>{{
+            $t("MainHeader.menu.settings.settings.caption")
+          }}</q-item-label>
         </q-item-section>
       </q-item>
-      <q-item-label header>Terms </q-item-label>
+      <q-item-label header>{{
+        $t("MainHeader.menu.terms.title")
+      }}</q-item-label>
       <q-item clickable to="/terms">
         <q-item-section avatar>
           <q-icon name="gavel" />
         </q-item-section>
         <q-item-section>
-          <q-item-label>Terms</q-item-label>
-          <q-item-label caption>Terms of Service</q-item-label>
+          <q-item-label>{{
+            $t("MainHeader.menu.terms.terms.title")
+          }}</q-item-label>
+          <q-item-label caption>{{
+            $t("MainHeader.menu.terms.terms.caption")
+          }}</q-item-label>
         </q-item-section>
       </q-item>
-      <q-item-label header>Links </q-item-label>
+      <q-item-label header>{{
+        $t("MainHeader.menu.links.title")
+      }}</q-item-label>
       <EssentialLink
         v-for="link in essentialLinks"
         :key="link.title"
@@ -107,39 +121,7 @@
 import { defineComponent, ref } from "vue";
 import EssentialLink from "components/EssentialLink.vue";
 import { useUiStore } from "src/stores/ui";
-
-const linksList = [
-  {
-    title: "Cashu.space",
-    caption: "cashu.space",
-    icon: "web",
-    link: "https://cashu.space",
-  },
-  {
-    title: "Github",
-    caption: "github.com/cashubtc",
-    icon: "code",
-    link: "https://github.com/cashubtc/cashu.me",
-  },
-  {
-    title: "Telegram",
-    caption: "t.me/CashuMe",
-    icon: "chat",
-    link: "https://t.me/CashuMe",
-  },
-  {
-    title: "Twitter",
-    caption: "@CashuBTC",
-    icon: "rss_feed",
-    link: "https://twitter.com/CashuBTC",
-  },
-  {
-    title: "Donate",
-    caption: "Support Cashu",
-    icon: "favorite",
-    link: "https://docs.cashu.space/contribute",
-  },
-];
+import { useI18n } from "vue-i18n";
 
 export default defineComponent({
   name: "MainHeader",
@@ -150,8 +132,42 @@ export default defineComponent({
   setup() {
     const leftDrawerOpen = ref(false);
     const uiStore = useUiStore();
+    const { t } = useI18n();
     const countdown = ref(0);
     let countdownInterval;
+
+    const essentialLinks = [
+      {
+        title: t("MainHeader.menu.links.cashuSpace.title"),
+        caption: t("MainHeader.menu.links.cashuSpace.caption"),
+        icon: "web",
+        link: "https://cashu.space",
+      },
+      {
+        title: t("MainHeader.menu.links.github.title"),
+        caption: t("MainHeader.menu.links.github.caption"),
+        icon: "code",
+        link: "https://github.com/cashubtc/cashu.me",
+      },
+      {
+        title: t("MainHeader.menu.links.telegram.title"),
+        caption: t("MainHeader.menu.links.telegram.caption"),
+        icon: "chat",
+        link: "https://t.me/CashuMe",
+      },
+      {
+        title: t("MainHeader.menu.links.twitter.title"),
+        caption: t("MainHeader.menu.links.twitter.caption"),
+        icon: "rss_feed",
+        link: "https://twitter.com/CashuBTC",
+      },
+      {
+        title: t("MainHeader.menu.links.donate.title"),
+        caption: t("MainHeader.menu.links.donate.caption"),
+        icon: "favorite",
+        link: "https://docs.cashu.space/contribute",
+      },
+    ];
 
     const toggleLeftDrawer = () => {
       leftDrawerOpen.value = !leftDrawerOpen.value;
@@ -182,7 +198,7 @@ export default defineComponent({
     };
 
     return {
-      essentialLinks: linksList,
+      essentialLinks,
       leftDrawerOpen,
       toggleLeftDrawer,
       isStaging,
