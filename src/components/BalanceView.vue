@@ -94,7 +94,7 @@
     >
       <div class="col-12">
         <q-badge outline color="red" class="q-mr-xs q-mt-sm text-weight-bold">
-          Mint error
+          {{ $t("BalanceView.mintError.label") }}
           <q-icon name="error" class="q-ml-xs" />
         </q-badge>
       </div>
@@ -103,7 +103,7 @@
     <div class="row q-mt-md q-mb-none text-secondary" v-if="activeMintUrl">
       <div class="col-12 cursor-pointer">
         <span class="text-weight-light" @click="setTab('mints')">
-          Mint: <b>{{ activeMintLabel }}</b>
+          {{ $t("BalanceView.mintUrl.label") }}: <b>{{ activeMintLabel }}</b>
         </span>
       </div>
     </div>
@@ -111,7 +111,7 @@
     <div class="row q-mb-none text-secondary" v-if="mints.length > 1">
       <div class="col-12">
         <span class="q-my-none q-py-none text-weight-regular">
-          Balance:
+          {{ $t("BalanceView.mintBalance.label") }}:
           <b>
             <AnimatedNumber
               :value="getActiveBalance"
@@ -135,9 +135,10 @@
         outline
         class="q-mx-none q-mt-xs q-pr-sm cursor-pointer"
         @click="checkPendingTokens()"
-        ><q-icon name="history" size="1rem" class="q-mx-xs" /> Pending:
+        ><q-icon name="history" size="1rem" class="q-mx-xs" />
+        {{ $t("BalanceView.pending.label") }}:
         {{ formatCurrency(pendingBalance, this.activeUnit) }}
-        <q-tooltip>Check all pending tokens</q-tooltip>
+        <q-tooltip>{{ $t("BalanceView.pending.tooltip") }}</q-tooltip>
       </q-btn>
     </div>
   </div>
