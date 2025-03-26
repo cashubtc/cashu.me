@@ -1164,6 +1164,7 @@
                 rounded
                 outlined
                 dense
+                style="min-width: 200px"
               />
             </q-item>
           </q-list>
