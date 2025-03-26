@@ -1,7 +1,12 @@
 export default {
   MainHeader: {
-    header: {
-      title: "Configuración",
+    menu: {
+      settings: {
+        title: "Configuración",
+        settings: {
+          title: "Configuración",
+        },
+      },
     },
   },
   Settings: {
