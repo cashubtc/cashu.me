@@ -14,7 +14,7 @@
         text-color="black"
         unelevated
         to="/"
-        :label="$t('AlreadyRunning.actions.retry.text')"
+        :label="$t('AlreadyRunning.actions.retry.label')"
       />
     </div>
   </div>
