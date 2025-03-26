@@ -22,7 +22,7 @@
           rounded
           color="primary"
           class="q-px-md"
-          :label="$t('NoMintWarnBanner.actions.addMint.text')"
+          :label="$t('NoMintWarnBanner.actions.addMint.label')"
           @click="handleAddMintClick"
         />
       </div>
@@ -32,7 +32,7 @@
           rounded
           color="primary"
           class="q-px-md"
-          :label="$t('NoMintWarnBanner.actions.receive.text')"
+          :label="$t('NoMintWarnBanner.actions.receive.label')"
           @click="handleReceiveEcash"
         />
       </div>

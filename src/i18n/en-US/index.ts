@@ -67,20 +67,20 @@ export default {
       "You haven't joined any Cashu mint yet. Add a mint URL in the settings or receive ecash from a new mint to get started.",
     actions: {
       addMint: {
-        text: "Add mint",
+        label: "Add mint",
       },
       receive: {
-        text: "Receive Ecash",
+        label: "Receive Ecash",
       },
     },
   },
   WalletPage: {
     actions: {
       send: {
-        text: "Send",
+        label: "Send",
       },
       receive: {
-        text: "Receive",
+        label: "Receive",
       },
     },
     tabs: {
@@ -104,7 +104,16 @@ export default {
     text: "Another tab is already running. Close this tab and try again.",
     actions: {
       retry: {
-        text: "Retry",
+        label: "Retry",
+      },
+    },
+  },
+  ErrorNotFound: {
+    title: "404",
+    text: "Oops. Nothing here…",
+    actions: {
+      home: {
+        label: "Go back home",
       },
     },
   },

@@ -18,7 +18,7 @@
             size="1.2rem"
           >
             <q-icon name="south_west" size="1.2rem" class="q-mr-xs" />
-            {{ $t("WalletPage.actions.receive.text") }}</q-btn
+            {{ $t("WalletPage.actions.receive.label") }}</q-btn
           >
         </div>
         <transition appear enter-active-class="animated pulse">
@@ -47,7 +47,7 @@
             size="1.2rem"
           >
             <q-icon name="north_east" size="1.2rem" class="q-mr-xs" />
-            {{ $t("WalletPage.actions.send.text") }}</q-btn
+            {{ $t("WalletPage.actions.send.label") }}</q-btn
           >
         </div>
         <ReceiveDialog v-model="showReceiveDialog" />
