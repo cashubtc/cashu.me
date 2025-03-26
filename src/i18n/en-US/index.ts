@@ -61,4 +61,17 @@ export default {
       description: "Please choose your preferred language from the list below.",
     },
   },
+  NoMintWarnBanner: {
+    title: "Join a mint",
+    subtitle:
+      "You haven't joined any Cashu mint yet. Add a mint URL in the settings or receive ecash from a new mint to get started.",
+    actions: {
+      addMint: {
+        text: "Add mint",
+      },
+      receive: {
+        text: "Receive Ecash",
+      },
+    },
+  },
 };
