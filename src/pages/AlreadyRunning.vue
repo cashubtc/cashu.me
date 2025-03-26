@@ -3,9 +3,9 @@
     class="fullscreen bg-dark text-white text-center q-pa-md flex flex-center"
   >
     <div>
-      <div class="text-h3">Nope.</div>
+      <div class="text-h3">{{ $t("AlreadyRunning.title") }}</div>
       <div class="text-h5 q-ma-lg text-grey">
-        Another tab is already running. Close this tab and try again.
+        {{ $t("AlreadyRunning.text") }}
       </div>
       <q-btn
         rounded
@@ -14,7 +14,7 @@
         text-color="black"
         unelevated
         to="/"
-        label="Retry"
+        :label="$t('AlreadyRunning.actions.retry.text')"
       />
     </div>
   </div>
