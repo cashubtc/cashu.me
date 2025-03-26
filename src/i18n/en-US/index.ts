@@ -99,4 +99,13 @@ export default {
       tooltip: "Install Cashu",
     },
   },
+  AlreadyRunning: {
+    title: "Nope.",
+    text: "Another tab is already running. Close this tab and try again.",
+    actions: {
+      retry: {
+        text: "Retry",
+      },
+    },
+  },
 };
