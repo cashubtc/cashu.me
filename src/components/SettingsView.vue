@@ -1157,15 +1157,14 @@
               </q-item-section>
             </q-item>
             <q-item>
-              <select v-model="$i18n.locale" @change="changeLanguage">
-                <option
-                  v-for="locale in $i18n.availableLocales"
-                  :key="`locale-${locale}`"
-                  :value="locale"
-                >
-                  {{ locale }}
-                </option>
-              </select>
+              <q-select
+                v-model="$i18n.locale"
+                @change="changeLanguage"
+                :options="$i18n.availableLocales"
+                rounded
+                outlined
+                dense
+              />
             </q-item>
           </q-list>
         </div>
