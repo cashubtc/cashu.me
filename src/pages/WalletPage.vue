@@ -18,7 +18,7 @@
             size="1.2rem"
           >
             <q-icon name="south_west" size="1.2rem" class="q-mr-xs" />
-            Receive</q-btn
+            {{ $t("WalletPage.actions.receive.text") }}</q-btn
           >
         </div>
         <transition appear enter-active-class="animated pulse">
@@ -47,7 +47,7 @@
             size="1.2rem"
           >
             <q-icon name="north_east" size="1.2rem" class="q-mr-xs" />
-            Send</q-btn
+            {{ $t("WalletPage.actions.send.text") }}</q-btn
           >
         </div>
         <ReceiveDialog v-model="showReceiveDialog" />
@@ -71,14 +71,22 @@
           no-caps
           :class="$q.dark.isActive ? 'bg-dark' : 'bg-white'"
         >
-          <q-tab name="history" class="text-secondary" label="History"></q-tab>
+          <q-tab
+            name="history"
+            class="text-secondary"
+            :label="$t('WalletPage.tabs.history.label')"
+          ></q-tab>
           <q-tab
             name="invoices"
             class="text-secondary"
-            label="Invoices"
+            :label="$t('WalletPage.tabs.invoices.label')"
           ></q-tab>
           <!-- <q-tab name="tokens" label="Tokens"></q-tab> -->
-          <q-tab name="mints" class="text-secondary" label="Mints"></q-tab>
+          <q-tab
+            name="mints"
+            class="text-secondary"
+            :label="$t('WalletPage.tabs.mints.label')"
+          ></q-tab>
         </q-tabs>
 
         <q-tab-panels
@@ -119,7 +127,10 @@
               "
               color="primary"
               @click="triggerPwaInstall()"
-              ><b>Install</b><q-tooltip>Install Cashu</q-tooltip></q-btn
+              ><b>{{ $t("WalletPage.install.text") }}</b
+              ><q-tooltip>{{
+                $t("WalletPage.install.tooltip")
+              }}</q-tooltip></q-btn
             >
           </div>
         </div>

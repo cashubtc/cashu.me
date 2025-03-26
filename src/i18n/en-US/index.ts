@@ -31,7 +31,7 @@ export default {
         },
         twitter: {
           title: "Twitter",
-          caption: "@CashuBTC",
+          caption: "{'@'}CashuBTC",
         },
         donate: {
           title: "Donate",
@@ -72,6 +72,31 @@ export default {
       receive: {
         text: "Receive Ecash",
       },
+    },
+  },
+  WalletPage: {
+    actions: {
+      send: {
+        text: "Send",
+      },
+      receive: {
+        text: "Receive",
+      },
+    },
+    tabs: {
+      history: {
+        label: "History",
+      },
+      invoices: {
+        label: "Invoices",
+      },
+      mints: {
+        label: "Mints",
+      },
+    },
+    install: {
+      text: "Install",
+      tooltip: "Install Cashu",
     },
   },
 };
