@@ -60,6 +60,13 @@ export default {
       },
     },
   },
+  FullscreenHeader: {
+    actions: {
+      back: {
+        label: "Wallet",
+      },
+    },
+  },
   Settings: {
     language: {
       title: "Language",
