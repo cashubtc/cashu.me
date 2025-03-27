@@ -223,11 +223,6 @@ export default {
   WelcomeSlide3: {
     title: "Your Seed Phrase",
     text: "Store your seed phrase in a password manager or on paper. Your seed phrase is the only way to recover your funds if you lose access to this device.",
-    actions: {
-      more: {
-        label: "Click to learn more",
-      },
-    },
     inputs: {
       seed_phrase: {
         label: "Seed Phrase",
@@ -236,6 +231,19 @@ export default {
       },
       checkbox: {
         label: "I have written it down",
+      },
+    },
+  },
+  WelcomeSlide4: {
+    title: "Terms",
+    actions: {
+      more: {
+        label: "Read Terms of Service",
+      },
+    },
+    inputs: {
+      checkbox: {
+        label: "I've read and accept these terms and conditions",
       },
     },
   },

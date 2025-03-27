@@ -2,8 +2,11 @@
   <div class="q-pa-md flex flex-center">
     <div class="text-center">
       <q-icon name="gavel" size="4em" color="primary" />
-      <h2 class="text-center q-mt-xl">Terms</h2>
-      <q-expansion-item label="Read Terms of Service" class="q-mt-sm">
+      <h2 class="text-center q-mt-xl">{{ $t("WelcomeSlide4.title") }}</h2>
+      <q-expansion-item
+        :label="$t('WelcomeSlide4.actions.more.label')"
+        class="q-mt-sm"
+      >
         <div
           class="text-left q-mt-sm"
           style="
@@ -321,7 +324,7 @@
       </q-expansion-item>
       <q-checkbox
         v-model="welcomeStore.termsAccepted"
-        label="I've read and accept these terms and conditions"
+        :label="$t('WelcomeSlide4.inputs.checkbox.label')"
         class="q-mt-md"
       />
     </div>
