@@ -246,4 +246,46 @@ export default {
       },
     },
   },
+  RestoreView: {
+    seed_phrase: {
+      label: "Restore from Seed Phrase",
+      caption:
+        "Enter your seed phrase to restore your wallet. Before you restore, make sure you have added all the mints that you have used before.",
+      inputs: {
+        seed_phrase: {
+          label: "Seed phrase",
+          caption: "You can see your seed phrase in the settings.",
+        },
+      },
+    },
+    information: {
+      label: "Information",
+      caption:
+        "The wizard will only restore ecash from another seed phrase, you will not be able to use this seed phrase or change the seed phrase of the wallet that you're currently using. This means that restored ecash will not be protected by your current seed phrase as long as you don't send the ecash to yourself once.",
+    },
+    restore_mints: {
+      label: "Restore Mints",
+      caption:
+        'Select the mint to restore. You can add more mints in the main screen under "Mints" and restore them here.',
+    },
+    actions: {
+      paste: {
+        error: "Failed to read clipboard contents.",
+      },
+      validate: {
+        error: "Mnemonic should be at least 12 words.",
+      },
+      restore: {
+        label: "Restore",
+        in_progress: "Restoring mint …",
+        error: "Error restoring mint: { error }",
+      },
+      restore_all_mints: {
+        label: "Restore All Mints1",
+        in_progress: "Restoring mint { index } of { length } …",
+        success: "Restore finished successfully",
+        error: "Error restoring mints: { error }",
+      },
+    },
+  },
 };
