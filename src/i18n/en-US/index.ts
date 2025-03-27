@@ -281,11 +281,22 @@ export default {
         error: "Error restoring mint: { error }",
       },
       restore_all_mints: {
-        label: "Restore All Mints1",
+        label: "Restore All Mints",
         in_progress: "Restoring mint { index } of { length } …",
         success: "Restore finished successfully",
         error: "Error restoring mints: { error }",
       },
     },
+  },
+  restore: {
+    mnemonic_error_text: "Please enter a mnemonic",
+    restore_mint_error_text: "Error restoring mint: { error }",
+    prepare_info_text: "Preparing restore process …",
+    restored_proofs_for_keyset_info_text:
+      "Restored { restoreCounter } proofs for keyset { keysetId }",
+    checking_proofs_for_keyset_info_text:
+      "Checking proofs { startIndex } to { endIndex } for keyset { keysetId }",
+    no_proofs_info_text: "No proofs found to restore",
+    restored_amount_success_text: "Restored { amount }",
   },
 };
