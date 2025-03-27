@@ -12,9 +12,7 @@
       </transition>
       <h2 class="q-mt-md">{{ $t("WelcomeSlide1.title") }}</h2>
       <div class="text-left">
-        <p class="q-mt-sm">
-          {{ $t("WelcomeSlide1.main") }}
-        </p>
+        <p class="q-mt-sm">{{ $t("WelcomeSlide1.text") }}</p>
         <q-expansion-item
           dense
           dense-toggle
