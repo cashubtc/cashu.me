@@ -132,11 +132,23 @@ export default {
       tooltip: "Check all pending tokens",
     },
   },
+  WelcomePage: {
+    actions: {
+      previous: {
+        label: "Previous",
+      },
+      next: {
+        label: "Next",
+      },
+    },
+  },
   WelcomeSlide1: {
     title: "Welcome to Cashu",
     main: "Cashu.me is a free and open-source Bitcoin wallet that uses ecash to keep your funds secure and private.",
-    more: {
-      label: "Click to learn more",
+    actions: {
+      more: {
+        label: "Click to learn more",
+      },
     },
     p1: {
       text: "Cashu is a free and open-source ecash protocol for Bitcoin. You can learn more about it at { link }.",

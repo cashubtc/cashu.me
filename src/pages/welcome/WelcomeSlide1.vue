@@ -19,7 +19,7 @@
           dense
           dense-toggle
           class="text-left q-mt-lg"
-          :label="$t('WelcomeSlide1.more.label')"
+          :label="$t('WelcomeSlide1.actions.more.label')"
         >
           <i18n-t keypath="WelcomeSlide1.p1.text" tag="p" class="q-mt-md">
             <template v-slot:link>
