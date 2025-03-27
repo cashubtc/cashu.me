@@ -193,7 +193,7 @@ export default {
         step2: {
           item: "2. { icon } { text }",
           text: "Press { buttonText }",
-          buttonText: "Add to Home screen",
+          buttonText: "@:iOSPWAPrompt.buttonText",
         },
       },
       outro: {
@@ -206,5 +206,9 @@ export default {
         text: "You are using Cashu as a PWA. Close any other open browser windows and use the app from your home screen.",
       },
     },
+  },
+  iOSPWAPrompt: {
+    text: "Tap { icon } and { buttonText }",
+    buttonText: "Add to Home Screen",
   },
 };
