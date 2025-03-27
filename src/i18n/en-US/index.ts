@@ -1,4 +1,9 @@
 export default {
+  global: {
+    copy_to_clipboard: {
+      success: "Copied to clipboard!",
+    },
+  },
   MainHeader: {
     menu: {
       settings: {
@@ -144,7 +149,7 @@ export default {
   },
   WelcomeSlide1: {
     title: "Welcome to Cashu",
-    main: "Cashu.me is a free and open-source Bitcoin wallet that uses ecash to keep your funds secure and private.",
+    text: "Cashu.me is a free and open-source Bitcoin wallet that uses ecash to keep your funds secure and private.",
     actions: {
       more: {
         label: "Click to learn more",
@@ -214,5 +219,24 @@ export default {
   AndroidPWAPrompt: {
     text: "Tap { icon } and { buttonText }",
     buttonText: "Add to Home Screen",
+  },
+  WelcomeSlide3: {
+    title: "Your Seed Phrase",
+    text: "Store your seed phrase in a password manager or on paper. Your seed phrase is the only way to recover your funds if you lose access to this device.",
+    actions: {
+      more: {
+        label: "Click to learn more",
+      },
+    },
+    inputs: {
+      seed_phrase: {
+        label: "Seed Phrase",
+        caption: "You can see your seed phrase in the settings.",
+        copy_to_clipboard_success: "@:global.copy_to_clipboard.success",
+      },
+      checkbox: {
+        label: "I have written it down",
+      },
+    },
   },
 };
