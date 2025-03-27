@@ -34,7 +34,7 @@
         <q-btn
           flat
           icon="arrow_left"
-          label="Previous"
+          :label="$t('WelcomePage.actions.previous.label')"
           v-if="welcomeStore.canGoPrev"
           @click="welcomeStore.goToPrevSlide"
         />
@@ -42,7 +42,7 @@
         <q-btn
           flat
           icon="arrow_right"
-          label="Next"
+          :label="$t('WelcomePage.actions.next.label')"
           :disable="!welcomeStore.canProceed"
           @click="welcomeStore.goToNextSlide"
         />
