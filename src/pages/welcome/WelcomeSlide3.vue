@@ -3,19 +3,15 @@
   <div class="q-pa-md flex flex-center">
     <div class="text-center">
       <q-icon name="vpn_key" size="4em" color="primary" />
-      <h2 class="q-mt-xl">Your Seed Phrase</h2>
-      <p class="q-mt-sm">
-        Store your seed phrase in a password manager or on paper. Your seed
-        phrase is the only way to recover your funds if you lose access to this
-        device.
-      </p>
+      <h2 class="q-mt-xl">{{ $t("WelcomeSlide3.title") }}</h2>
+      <p class="q-mt-sm">{{ $t("WelcomeSlide3.text") }}</p>
       <q-input
         v-model="hiddenMnemonic"
         outlined
         readonly
         autogrow
         class="q-mt-md q-pa-md seed-phrase"
-        label="Seed Phrase"
+        :label="$t('WelcomeSlide3.inputs.seed_phrase.label')"
         dense
       >
         <template v-slot:append>
@@ -31,16 +27,21 @@
             dense
             icon="content_copy"
             class="cursor-pointer q-mt-md"
-            @click="copyText(walletStore.mnemonic)"
+            @click="
+              copyText(
+                walletStore.mnemonic,
+                $t('WelcomeSlide3.inputs.seed_phrase.copy_to_clipboard_success')
+              )
+            "
           ></q-btn>
         </template>
       </q-input>
       <p class="q-mt-none" style="font-size: 0.8rem; color: grey">
-        You can see your seed phrase in the settings.
+        {{ $t("WelcomeSlide3.inputs.seed_phrase.caption") }}
       </p>
       <q-checkbox
         v-model="welcomeStore.seedPhraseValidated"
-        label="I have written it down"
+        :label="$t('WelcomeSlide3.inputs.checkbox.label')"
         class="q-mt-sm"
         style="font-size: 1rem"
       />
