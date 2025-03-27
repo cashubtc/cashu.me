@@ -166,4 +166,45 @@ export default {
       text: "This wallet is in beta. We hold no responsibility for people losing access to funds. Use at your own risk! This code is open-source and licensed under the MIT license.",
     },
   },
+  WelcomeSlide2: {
+    title: "Install PWA",
+    instruction: {
+      intro: {
+        text: "For the best experience, use this wallet with your device's native web browser to install it as a Progressive Web App. Do this right now.",
+      },
+      android: {
+        title: "Android (Chrome)",
+        step1: {
+          item: "1. { icon } { text }",
+          text: "Tap the menu (top right)",
+        },
+        step2: {
+          item: "2. { icon } { text }",
+          text: "Press { buttonText }",
+          buttonText: "Add to Home screen",
+        },
+      },
+      ios: {
+        title: "iOS (Safari)",
+        step1: {
+          item: "1. { icon } { text }",
+          text: "Tap share (bottom)",
+        },
+        step2: {
+          item: "2. { icon } { text }",
+          text: "Press { buttonText }",
+          buttonText: "Add to Home screen",
+        },
+      },
+      outro: {
+        text: "Once you installed this app on your device, close this browser window and use the app from your home screen.",
+      },
+    },
+    pwa: {
+      success: {
+        title: "Success!",
+        text: "You are using Cashu as a PWA. Close any other open browser windows and use the app from your home screen.",
+      },
+    },
+  },
 };
