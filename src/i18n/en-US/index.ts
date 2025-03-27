@@ -227,7 +227,6 @@ export default {
       seed_phrase: {
         label: "Seed Phrase",
         caption: "You can see your seed phrase in the settings.",
-        copy_to_clipboard_success: "@:global.copy_to_clipboard.success",
       },
       checkbox: {
         label: "I have written it down",

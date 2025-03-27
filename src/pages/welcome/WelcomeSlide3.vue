@@ -27,12 +27,7 @@
             dense
             icon="content_copy"
             class="cursor-pointer q-mt-md"
-            @click="
-              copyText(
-                walletStore.mnemonic,
-                $t('WelcomeSlide3.inputs.seed_phrase.copy_to_clipboard_success')
-              )
-            "
+            @click="copyText(walletStore.mnemonic)"
           ></q-btn>
         </template>
       </q-input>
