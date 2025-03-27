@@ -181,7 +181,7 @@ export default {
         step2: {
           item: "2. { icon } { text }",
           text: "Press { buttonText }",
-          buttonText: "Add to Home screen",
+          buttonText: "@:AndroidPWAPrompt.buttonText",
         },
       },
       ios: {
@@ -208,6 +208,10 @@ export default {
     },
   },
   iOSPWAPrompt: {
+    text: "Tap { icon } and { buttonText }",
+    buttonText: "Add to Home Screen",
+  },
+  AndroidPWAPrompt: {
     text: "Tap { icon } and { buttonText }",
     buttonText: "Add to Home Screen",
   },
