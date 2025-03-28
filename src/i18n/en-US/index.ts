@@ -295,6 +295,26 @@ export default {
       },
     },
   },
+  MintSettings: {
+    add: {
+      title: "Add mint",
+      description:
+        "Enter the URL of a Cashu mint to connect to it. This wallet is not affiliated with any mint.",
+      inputs: {
+        nickname: {
+          placeholder: "Nickname (e.g. Testnet)",
+        },
+      },
+      actions: {
+        add: {
+          label: "Add mint",
+        },
+        scan: {
+          label: "Scan QR Code",
+        },
+      },
+    },
+  },
   restore: {
     mnemonic_error_text: "Please enter a mnemonic",
     restore_mint_error_text: "Error restoring mint: { error }",
