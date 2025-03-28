@@ -256,18 +256,21 @@
     <!-- nostr -->
     <div class="section-divider q-mb-md">
       <div class="divider-line"></div>
-      <div class="divider-text">DISCOVER MINTS</div>
+      <div class="divider-text">
+        {{ $t("MintSettings.discover.title") }}
+      </div>
       <div class="divider-line"></div>
     </div>
     <div class="q-px-xs text-left" on-left>
       <q-list padding>
         <q-item>
           <q-item-section>
-            <q-item-label overline>Discover</q-item-label>
-            <q-item-label caption
-              >Discover mints other users have recommended on
-              nostr.</q-item-label
+            <q-item-label overline>
+              {{ $t("MintSettings.discover.overline") }}</q-item-label
             >
+            <q-item-label caption>{{
+              $t("MintSettings.discover.caption")
+            }}</q-item-label>
           </q-item-section>
         </q-item>
         <q-item class="q-pt-sm">
@@ -278,10 +281,10 @@
             outline
             :loading="discoveringMints"
             @click="fetchMintsFromNdk"
-            >Discover mints
+            >{{ $t("MintSettings.discover.actions.discover.label") }}
             <template v-slot:loading>
               <q-spinner-hourglass class="on-left" />
-              Loading...
+              {{ $t("MintSettings.discover.actions.discover.in_progress") }}
             </template>
           </q-btn>
         </q-item>
@@ -289,18 +292,26 @@
           <!-- for each entry in mintRecommendations, display the url and the count how often it was recommended -->
           <q-item>
             <q-item-section>
-              <q-item-label overline
-                >Found {{ mintRecommendations.length }} mints</q-item-label
+              <q-item-label overline>
+                {{
+                  $t("MintSettings.discover.recommendations.overline", {
+                    length: mintRecommendations.length,
+                  })
+                }}</q-item-label
               >
               <q-item-label caption
-                >These mints were recommended by other Nostr users. Read reviews
-                at
-                <a
-                  href="https://bitcoinmints.com"
-                  target="_blank"
-                  class="text-primary"
-                  >bitcoinmints.com</a
-                >. Be careful and do your own research before using a mint.
+                ><i18n-t
+                  keypath="MintSettings.discover.recommendations.caption"
+                >
+                  <template v-slot:link>
+                    <a
+                      href="https://bitcoinmints.com"
+                      target="_blank"
+                      class="text-primary"
+                      >bitcoinmints.com</a
+                    >
+                  </template>
+                </i18n-t>
               </q-item-label>
             </q-item-section>
           </q-item>
@@ -308,7 +319,9 @@
             dense
             dense-toggle
             class="text-left"
-            label="Click to browse mints"
+            :label="
+              $t('MintSettings.discover.recommendations.actions.browse.label')
+            "
           >
             <q-item v-for="mint in mintRecommendations" :key="mint.url">
               <q-item-section
@@ -586,7 +599,9 @@ export default defineComponent({
         this.addMintData.url = "https://" + this.addMintData.url;
       }
       if (!this.validateMintUrl(this.addMintData.url)) {
-        notifyError("Invalid URL");
+        notifyError(
+          this.$i18n.t("MintSettings.add.actions.add.error_invalid_url")
+        );
         return;
       }
       let urlObj = new URL(this.addMintData.url);
@@ -649,9 +664,15 @@ export default defineComponent({
         tries++;
       }
       if (mintUrls.length == 0) {
-        this.notifyError("No mints found");
+        this.notifyError(
+          this.$i18n.t("MintSettings.discover.actions.discover.error_no_mints")
+        );
       } else {
-        this.notifySuccess("Found " + mintUrls.length + " mints");
+        this.notifySuccess(
+          this.$i18n.t("MintSettings.discover.actions.discover.success", {
+            length: mintUrls.length,
+          })
+        );
       }
       console.log(mintUrls);
       this.discoveringMints = false;

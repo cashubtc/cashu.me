@@ -308,9 +308,33 @@ export default {
       actions: {
         add: {
           label: "Add mint",
+          error_invalid_url: "Invalid URL",
         },
         scan: {
           label: "Scan QR Code",
+        },
+      },
+    },
+    discover: {
+      title: "Discover mints",
+      overline: "Discover",
+      caption: "Discover mints other users have recommended on nostr.",
+      actions: {
+        discover: {
+          label: "Discover mints",
+          in_progress: "Loading…",
+          error_no_mints: "No mints found",
+          success: "Found { length } mints",
+        },
+      },
+      recommendations: {
+        overline: "Found { length } mints",
+        caption:
+          "These mints were recommended by other Nostr users. Read reviews at { link }. Be careful and do your own research before using a mint.",
+        actions: {
+          browse: {
+            label: "Click to browse mints",
+          },
         },
       },
     },
