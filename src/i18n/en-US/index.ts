@@ -362,6 +362,21 @@ export default {
       },
     },
   },
+  QrcodeReader: {
+    progress: {
+      text: "{ percentage }{ addon }",
+      percentage: "{ percentage }%",
+      keep_scanning_text: " - Keep scanning",
+    },
+    actions: {
+      paste: {
+        label: "Paste",
+      },
+      close: {
+        label: "Close",
+      },
+    },
+  },
   restore: {
     mnemonic_error_text: "Please enter a mnemonic",
     restore_mint_error_text: "Error restoring mint: { error }",
