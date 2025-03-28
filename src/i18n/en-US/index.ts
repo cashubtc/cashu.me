@@ -338,6 +338,29 @@ export default {
         },
       },
     },
+    swap: {
+      title: "Swap",
+      overline: "Multimint Swaps",
+      caption:
+        "Swap funds between mints via Lightning. Note: Leave room for potential Lightning fees. If the incoming payment does not succeed, check the invoice manually.",
+      inputs: {
+        from: {
+          label: "From",
+        },
+        to: {
+          label: "To",
+        },
+        amount: {
+          label: "Amount ({ ticker }))",
+        },
+      },
+      actions: {
+        swap: {
+          label: "Swap",
+          in_progress: "Swap",
+        },
+      },
+    },
   },
   restore: {
     mnemonic_error_text: "Please enter a mnemonic",
