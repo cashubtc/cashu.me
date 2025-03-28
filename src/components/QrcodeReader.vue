@@ -4,6 +4,7 @@ import { URDecoder } from "@gandlaf21/bc-ur";
 import { useCameraStore } from "src/stores/camera";
 import { mapActions, mapState, mapWritableState } from "pinia";
 import { useUiStore } from "src/stores/ui";
+
 export default {
   emits: ["decode"],
   data(): {
@@ -99,9 +100,15 @@ export default {
                 style="font-size: 1rem; padding: 5px"
                 class="text-weight-bold"
                 :label="
-                  Math.round(urDecoderProgress * 100) +
-                  '%' +
-                  (urDecoderProgress > 0.9 ? ' - Keep scanning' : '')
+                  $t('QrcodeReader.progress.text', {
+                    percentage: $t('QrcodeReader.progress.percentage', {
+                      percentage: Math.round(urDecoderProgress * 100),
+                    }),
+                    addon:
+                      urDecoderProgress > 0.9
+                        ? $t('QrcodeReader.progress.keep_scanning_text')
+                        : '',
+                  })
                 "
               />
             </div>
@@ -116,11 +123,11 @@ export default {
         @click="pasteToParseDialog"
       >
         <q-icon name="content_paste" class="q-mr-sm" />
-        Paste</q-btn
+        {{ $t("QrcodeReader.actions.paste.label") }}</q-btn
       >
-      <q-btn @click="closeCamera" flat color="grey" class="q-ml-auto"
-        >Close</q-btn
-      >
+      <q-btn @click="closeCamera" flat color="grey" class="q-ml-auto">{{
+        $t("QrcodeReader.actions.close.label")
+      }}</q-btn>
     </div>
   </q-card>
 </template>
