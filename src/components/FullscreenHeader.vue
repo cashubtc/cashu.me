@@ -10,7 +10,9 @@
         color="primary"
         aria-label="Menu"
         no-caps
-        ><span class="q-mx-md text-weight-bold">Wallet</span>
+        ><span class="q-mx-md text-weight-bold">
+          {{ $t("FullscreenHeader.actions.back.label") }}
+        </span>
       </q-btn>
       <!-- <q-toolbar-title> </q-toolbar-title> -->
     </q-toolbar>

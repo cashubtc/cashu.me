@@ -3,9 +3,9 @@
     class="fullscreen bg-dark text-white text-center q-pa-md flex flex-center"
   >
     <div>
-      <div style="font-size: 30vh">404</div>
+      <div style="font-size: 30vh">{{ $t("ErrorNotFound.title") }}</div>
       <div class="text-h3 q-pb-lg" style="opacity: 0.8">
-        Oops. Nothing here...
+        {{ $t("ErrorNotFound.text") }}
       </div>
       <q-btn
         rounded
@@ -15,7 +15,7 @@
         text-color="black"
         unelevated
         to="/"
-        label="Go back home"
+        :label="$t('ErrorNotFound.actions.home.label')"
       />
     </div>
   </div>
