@@ -192,7 +192,9 @@
       <div class="add-mint-container">
         <div class="section-divider q-mb-md">
           <div class="divider-line"></div>
-          <div class="divider-text">ADD MINT</div>
+          <div class="divider-text">
+            {{ $t("MintSettings.add.title") }}
+          </div>
           <div class="divider-line"></div>
         </div>
 
@@ -200,8 +202,7 @@
           class="add-mint-description q-mb-lg text-left"
           style="color: rgba(255, 255, 255, 0.7)"
         >
-          Enter the URL of a Cashu mint to connect to it. This wallet is not
-          affiliated with any mint.
+          {{ $t("MintSettings.add.description") }}
         </div>
 
         <div class="add-mint-inputs">
@@ -219,7 +220,7 @@
             rounded
             outlined
             v-model="addMintData.nickname"
-            placeholder="Nickname (e.g. Testnet)"
+            :placeholder="$t('MintSettings.add.inputs.nickname.placeholder')"
             @keydown.enter.prevent="sanitizeMintUrlAndShowAddDialog"
             ref="mintNicknameInput"
             class="mint-input"
@@ -240,12 +241,12 @@
               :class="{ 'text-grey-7': addMintData.url.length === 0 }"
             >
               <q-icon name="add" size="20px" class="q-mr-sm" />
-              <span>Add Mint</span>
+              <span>{{ $t("MintSettings.add.actions.add.label") }}</span>
             </q-btn>
 
             <q-btn flat @click="showCamera" class="text-white">
               <q-icon name="qr_code" size="20px" class="q-mr-sm" />
-              <span>Scan QR Code</span>
+              <span>{{ $t("MintSettings.add.actions.scan.label") }}</span>
             </q-btn>
           </div>
         </div>
@@ -766,5 +767,6 @@ export default defineComponent({
   font-size: 14px;
   font-weight: 600;
   color: #ffffff;
+  text-transform: uppercase;
 }
 </style>
