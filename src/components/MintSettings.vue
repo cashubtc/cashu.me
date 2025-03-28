@@ -352,18 +352,20 @@
 
     <div class="section-divider q-mb-md">
       <div class="divider-line"></div>
-      <div class="divider-text">SWAP</div>
+      <div class="divider-text">
+        {{ $t("MintSettings.swap.title") }}
+      </div>
       <div class="divider-line"></div>
     </div>
     <div class="q-px-xs text-left" on-left>
       <q-list padding>
         <q-item>
           <q-item-section>
-            <q-item-label overline>Multimint Swaps</q-item-label>
-            <q-item-label caption
-              >Swap funds between mints via Lightning. Note: Leave room for
-              potential Lightning fees. If the incoming payment does not
-              succeed, check the invoice manually.
+            <q-item-label overline>
+              {{ $t("MintSettings.swap.overline") }}</q-item-label
+            >
+            <q-item-label caption>
+              {{ $t("MintSettings.swap.caption") }}
             </q-item-label>
           </q-item-section>
         </q-item>
@@ -378,7 +380,7 @@
             :options="swapAmountDataOptions()"
             option-value="url"
             option-label="optionLabel"
-            label="From"
+            :label="$t('MintSettings.swap.inputs.from.label')"
             style="
               min-width: 200px;
               width: 100%;
@@ -399,7 +401,7 @@
             :options="swapAmountDataOptions()"
             option-value="url"
             option-label="optionLabel"
-            label="To"
+            :label="$t('MintSettings.swap.inputs.to.label')"
             style="
               min-width: 200px;
               width: 100%;
@@ -416,7 +418,11 @@
             dense
             v-model.number="swapData.amount"
             type="number"
-            :label="'Amount (' + tickerShort + ')'"
+            :label="
+              $t('MintSettings.swap.inputs.amount.label', {
+                ticker: tickerShort,
+              })
+            "
             style="min-width: 200px"
             @keydown.enter.prevent="extractAndMintAmountSwap(swapAmountData)"
             :disable="
@@ -440,10 +446,10 @@
             :loading="swapBlocking"
           >
             <q-icon size="xs" name="swap_horiz" class="q-pr-xs" />
-            Swap
+            {{ $t("MintSettings.swap.actions.swap.label") }}
             <template v-slot:loading>
               <q-spinner-hourglass size="xs" />
-              Swap
+              {{ $t("MintSettings.swap.actions.swap.in_progress") }}
             </template>
           </q-btn>
         </q-item>
