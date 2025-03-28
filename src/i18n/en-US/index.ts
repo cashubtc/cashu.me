@@ -373,4 +373,9 @@ export default {
     no_proofs_info_text: "No proofs found to restore",
     restored_amount_success_text: "Restored { amount }",
   },
+  swap: {
+    in_progress_warning_text: "Swap in progress",
+    invalid_swap_data_error_text: "Invalid swap data",
+    swap_error_text: "Error swapping",
+  },
 };
