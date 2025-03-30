@@ -178,10 +178,12 @@ export const usePRStore = defineStore("payment-request", {
         return;
       }
       const proofs = token.getProofs(decodedToken);
+      const unit = token.getUnit(decodedToken);
+      const mint = token.getMint(decodedToken);
       const paymentPayload: PaymentRequestPayload = {
         id: request.id,
-        mint: request.mints ? request.mints[0] : "",
-        unit: request.unit || "",
+        mint: mint,
+        unit: unit,
         proofs: proofs,
       };
       const paymentPayloadString = JSON.stringify(paymentPayload);
