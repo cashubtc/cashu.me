@@ -20,7 +20,7 @@
     <div v-else-if="error" class="q-mx-md text-bold">{{ error }}</div>
     <div v-else-if="mintInfo" class="mint-info">
       <!-- Warning Box -->
-      <div class="q-mb-xl">
+      <div style="margin-bottom: 32px">
         <MintAuditWarningBox
           :mint="mintInfo"
           :swaps="mintSwaps"
