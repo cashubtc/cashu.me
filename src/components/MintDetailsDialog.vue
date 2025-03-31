@@ -261,6 +261,19 @@
           </div>
         </div>
 
+        <!-- Section Divider for Audit Info -->
+        <div class="section-divider q-mb-md">
+          <div class="divider-line"></div>
+          <div class="divider-text">AUDIT INFO</div>
+          <div class="divider-line"></div>
+        </div>
+
+        <!-- Mint Audit Info Section -->
+        <MintAuditInfo
+          v-if="showMintInfoData.url"
+          :mintUrl="showMintInfoData.url"
+        />
+
         <!-- Section Divider -->
         <div class="section-divider q-mb-md">
           <div class="divider-line"></div>
@@ -309,6 +322,7 @@ import { useMintsStore, MintClass } from "src/stores/mints";
 import EditMintDialog from "src/components/EditMintDialog.vue";
 import RemoveMintDialog from "src/components/RemoveMintDialog.vue";
 import MintMotdMessage from "src/components/MintMotdMessage.vue";
+import MintAuditInfo from "src/components/MintAuditInfo.vue";
 import {
   X as CloseIcon,
   QrCode as QrCodeIcon,
@@ -343,6 +357,7 @@ export default defineComponent({
     EditMintDialog,
     RemoveMintDialog,
     MintMotdMessage,
+    MintAuditInfo,
   },
   data: function () {
     return {
