@@ -17,15 +17,11 @@
         audited.
       </span>
     </div>
-    <div v-else-if="error" class="q-mx-md text-bold">{{ error }}</div>
+    <div v-else-if="error" class="q-mx-sm text-bold">Error: {{ error }}</div>
     <div v-else-if="mintInfo" class="mint-info">
       <!-- Warning Box -->
       <div style="margin-bottom: 32px">
-        <MintAuditWarningBox
-          :mint="mintInfo"
-          :swaps="mintSwaps"
-          :could-fetch-info="couldFetchInfo"
-        />
+        <MintAuditWarningBox :mint="mintInfo" :swaps="mintSwaps" />
       </div>
       <!-- statistics -->
       <div class="q-pb-none">
@@ -181,15 +177,6 @@ export default {
         if (!this.mintInfo) {
           this.mintNotAudited = true;
           throw new Error(`This mint is not being audited yet.`);
-        }
-
-        // Try to fetch mint info directly from mint to check if it's reachable
-        try {
-          await fetch(this.mintUrl + "/v1/info");
-          this.couldFetchInfo = true;
-        } catch (error) {
-          console.error("Error fetching mint info directly:", error);
-          this.couldFetchInfo = false;
         }
       } catch (err) {
         console.error("Error fetching mint info:", err);
