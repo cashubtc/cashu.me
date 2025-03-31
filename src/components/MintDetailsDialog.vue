@@ -272,6 +272,7 @@
         <MintAuditInfo
           v-if="showMintInfoData.url"
           :mintUrl="showMintInfoData.url"
+          @close="showMintInfoDialog = false"
         />
 
         <!-- Section Divider -->
@@ -766,7 +767,7 @@ export default defineComponent({
   font-size: 14px;
   font-weight: 600;
   line-height: 24px;
-  color: #white;
+  color: white;
 }
 
 .nut-number {

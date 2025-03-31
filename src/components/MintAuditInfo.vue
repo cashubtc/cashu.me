@@ -1,10 +1,10 @@
 <template>
   <div class="q-mt-lg q-mb-lg">
-    <div class="text-caption q-ml-sm" v-if="loading">
+    <div class="text-caption q-mx-sm" v-if="loading">
       <q-spinner-hourglass color="grey" size="20px" class="q-mr-sm" />
       Loading audit info...
     </div>
-    <div v-else-if="mintNotAudited">
+    <div v-else-if="mintNotAudited" class="q-mx-sm">
       <q-icon
         name="info_outline"
         color="grey"
@@ -12,12 +12,18 @@
         class="q-mr-sm"
         style="padding-bottom: 2px; margin-bottom: 2px"
       />
-      <span class="text-bold">This mint is not being audited yet.</span>
+      <span class="text-bold">This mint has not been audited yet.</span>
       <br />
-      <span class="text-caption q-ml-sm">
-        Visit
-        <a :href="auditUrl">audit.8333.space</a> and donate ecash to get it
-        audited.
+      <span class="text-caption">
+        To learn more about the auditor or support a future audit, visit
+        <a :href="auditUrl">audit.8333.space</a> or click
+        <span
+          class="text-bold cursor-pointer text-primary"
+          @click="getAuditorPaymentRequestsAndHandle"
+        >
+          here
+        </span>
+        to donate ecash and help initiate an audit of this mint.
       </span>
     </div>
     <div v-else-if="error" class="q-mx-sm text-bold">Error: {{ error }}</div>
@@ -63,15 +69,28 @@
 
       <!-- Disclaimer -->
       <div class="q-mt-md text-grey-6 text-caption">
-        Audit info are provided by independent third parties and assess the
-        reliability of a mint over time. Audit results do not guarantee the
-        safety of a mint. Always make sure you trust the mint operator before
-        using it.
+        Audit data is provided by independent third parties to help assess a
+        mint’s reliability over time. However, these results are informational
+        only and do not guarantee the safety, solvency, or trustworthiness of
+        any mint. Always conduct your own research and ensure you trust the mint
+        operator before using their services.
       </div>
-      <!-- grey text with info icon where we got the audit info from -->
+      <!-- Donate ecash to the auditor -->
       <div class="q-mt-md text-grey-6 text-caption">
-        Audit info provided by
-        <a :href="auditUrl">{{ auditUrlShort }}</a>
+        Audit information is made available by
+        <a :href="auditUrl">{{ auditUrlShort }}</a
+        >. The current balance held by the auditor for this mint is
+        <span class="text-bold">{{ mintInfo.balance }} sats</span>, with a total
+        of
+        <span class="text-bold">{{ mintInfo.sum_donations }} sats</span>
+        donated so far. To support continued auditing, you can
+        <span
+          class="text-bold cursor-pointer text-primary"
+          @click="getAuditorPaymentRequestsAndHandle"
+        >
+          press here
+        </span>
+        to donate ecash to the auditor.
       </div>
     </div>
   </div>
@@ -109,7 +128,8 @@ interface SwapEventRead {
 
 import MintAuditWarningBox from "./MintAuditWarningBox.vue";
 import MintAuditSwapsBarChart from "./MintAuditSwapsBarChart.vue";
-
+import { useWalletStore } from "../stores/wallet";
+import { useMintsStore } from "../stores/mints";
 export default {
   name: "MintAuditInfo",
   components: {
@@ -217,6 +237,23 @@ export default {
       } catch (err) {
         console.error("Error fetching mint swaps:", err);
         throw err;
+      }
+    },
+    async getAuditorPaymentRequestsAndHandle() {
+      const walletStore = useWalletStore();
+      const mintStore = useMintsStore();
+      try {
+        const response = await fetch(`${this.baseUrl}/pr`);
+        const paymentRequestString = await response.text();
+        const paymentRequest = paymentRequestString.replace(/"/g, "");
+        console.log("# AuditorPaymentRequests", paymentRequest);
+        await mintStore.activateMintUrl(this.mintUrl);
+        await mintStore.activateUnit("sat");
+        await walletStore.decodeRequest(paymentRequest);
+        // close the mint info dialog
+        this.$emit("close");
+      } catch (err) {
+        console.error("Error fetching auditor payment requests:", err);
       }
     },
     async loadMoreSwaps() {
