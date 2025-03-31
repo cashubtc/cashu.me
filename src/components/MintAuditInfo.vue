@@ -1,6 +1,9 @@
 <template>
   <div class="q-mt-lg q-mb-lg">
-    <div v-if="loading">Loading mint data...</div>
+    <div class="text-caption q-ml-sm" v-if="loading">
+      <q-spinner-hourglass color="grey" size="20px" class="q-mr-sm" />
+      Loading audit info...
+    </div>
     <div v-else-if="mintNotAudited">
       <q-icon
         name="info_outline"
@@ -21,7 +24,13 @@
     <div v-else-if="mintInfo" class="mint-info">
       <!-- Warning Box -->
       <div style="margin-bottom: 32px">
-        <MintAuditWarningBox :mint="mintInfo" :swaps="mintSwaps" />
+        <transition
+          appear
+          enter-active-class="animated pulse"
+          name="smooth-slide"
+        >
+          <MintAuditWarningBox :mint="mintInfo" :swaps="mintSwaps" />
+        </transition>
       </div>
       <!-- statistics -->
       <div class="q-pb-none">
@@ -153,6 +162,7 @@ export default {
   },
   async mounted() {
     try {
+      this.loading = true;
       await this.getMintInfo();
       if (this.mintInfo && this.mintInfo.id) {
         await this.getMintSwaps(this.mintInfo.id);
@@ -166,11 +176,14 @@ export default {
   methods: {
     async getMintInfo() {
       try {
-        const response = await fetch(`${this.baseUrl}/mints/`);
+        const response = await fetch(
+          `${this.baseUrl}/mints/?limit=1000&skip=0`
+        );
         if (!response.ok) {
           throw new Error(`API error: ${response.status}`);
         }
         this.mints = (await response.json()) as MintRead[];
+        console.log("# MintAuditInfo", this.mints);
         this.mintInfo =
           this.mints.find((mint) => mint.url === this.mintUrl) || null;
 
