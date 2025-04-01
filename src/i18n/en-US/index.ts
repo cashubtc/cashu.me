@@ -559,6 +559,25 @@ export default {
       },
     },
   },
+  P2PKDialog: {
+    p2pk: {
+      caption: "P2PK Key",
+      description: "Receive ecash locked to this key",
+      used_warning_text:
+        "Warning: This key was used before. Use a new key for better privacy.",
+    },
+    actions: {
+      copy: {
+        label: "@:global.actions.copy.label",
+      },
+      close: {
+        label: "@:global.actions.close.label",
+      },
+      create_new_key: {
+        label: "Generate new key",
+      },
+    },
+  },
   restore: {
     mnemonic_error_text: "Please enter a mnemonic",
     restore_mint_error_text: "Error restoring mint: { error }",
