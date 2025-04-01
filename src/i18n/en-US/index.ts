@@ -390,6 +390,20 @@ export default {
       },
     },
   },
+  ReceiveDialog: {
+    title: "Receive",
+    actions: {
+      ecash: {
+        label: "Ecash",
+        error_no_mints: "No mints available",
+      },
+      lightning: {
+        label: "Lightning",
+        error_no_mints:
+          "You need to connect to a mint to receive via Lightning",
+      },
+    },
+  },
   restore: {
     mnemonic_error_text: "Please enter a mnemonic",
     restore_mint_error_text: "Error restoring mint: { error }",
