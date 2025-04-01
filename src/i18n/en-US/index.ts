@@ -618,6 +618,23 @@ export default {
       },
     },
   },
+  NWCDialog: {
+    nwc: {
+      caption: "Nostr Wallet Connect",
+      description:
+        "Control your wallet remotely with NWC. Press the QR code to link your wallet with a compatible app.",
+      warning_text:
+        "Warning: anyone with access to this connection string can initiate payments from your wallet. Do not share!",
+    },
+    actions: {
+      copy: {
+        label: "@:global.actions.copy.label",
+      },
+      close: {
+        label: "@:global.actions.close.label",
+      },
+    },
+  },
   restore: {
     mnemonic_error_text: "Please enter a mnemonic",
     restore_mint_error_text: "Error restoring mint: { error }",
