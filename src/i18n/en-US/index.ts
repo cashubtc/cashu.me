@@ -377,6 +377,19 @@ export default {
       },
     },
   },
+  SendDialog: {
+    title: "Send",
+    actions: {
+      ecash: {
+        label: "Ecash",
+        error_no_mints: "No mints available",
+      },
+      lightning: {
+        label: "Lightning",
+        error_no_mints: "No mints available",
+      },
+    },
+  },
   restore: {
     mnemonic_error_text: "Please enter a mnemonic",
     restore_mint_error_text: "Error restoring mint: { error }",
