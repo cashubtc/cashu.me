@@ -1,5 +1,5 @@
 <template>
-  <div v-if="sendData.paymentRequest" class="q-pa-none q-ma-none q-mt-md">
+  <div v-if="sendData.paymentRequest" class="q-pa-none q-ma-none q-mt-sm">
     <div class="q-mb-md text-center">
       <q-btn
         rounded
@@ -13,7 +13,7 @@
         Pay via {{ getPaymentRequestTransportType(sendData.paymentRequest) }}
       </q-btn>
     </div>
-    <div class="q-mb-md text-center">
+    <div class="text-center">
       <pre
         class="q-mt-md q-mb-md text-center"
         style="

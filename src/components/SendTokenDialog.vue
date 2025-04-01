@@ -315,6 +315,22 @@
             </div>
             <div class="row justify-center q-pt-sm">
               <q-item-label style="font-size: 30px" class="text-weight-bold">
+                <q-icon
+                  :name="
+                    sendData.historyToken.amount >= 0
+                      ? 'call_received'
+                      : 'call_made'
+                  "
+                  :color="
+                    sendData.historyToken.status === 'paid'
+                      ? sendData.historyToken.amount >= 0
+                        ? 'green'
+                        : 'red'
+                      : ''
+                  "
+                  class="q-mr-xs q-mb-xs"
+                  size="sm"
+                />
                 <strong>{{ displayUnit }}</strong></q-item-label
               >
             </div>
@@ -323,6 +339,16 @@
                 Fee: {{ formatCurrency(paidFees, tokenUnit) }}
               </q-item-label>
             </div>
+            <!-- tada animation -->
+            <div
+              v-if="
+                sendData.historyToken.amount &&
+                sendData.historyToken.amount < 0 &&
+                sendData.historyToken.status === 'paid'
+              "
+              class="row justify-center"
+            ></div>
+
             <div class="row justify-center q-pt-md">
               <TokenInformation
                 :encodedToken="sendData.tokensBase64"
@@ -331,7 +357,10 @@
               />
             </div>
             <div
-              v-if="sendData.paymentRequest"
+              v-if="
+                sendData.paymentRequest &&
+                sendData.historyToken.status === 'pending'
+              "
               class="row justify-center q-pt-sm"
             >
               <SendPaymentRequest />
