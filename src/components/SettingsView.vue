@@ -1143,8 +1143,8 @@
           </q-list>
         </div>
 
-        <!-- language picker -->
-        <div class="q-py-sm q-px-xs text-left" on-left>
+        <!-- language picker: hidden for till i18n integration is finished -->
+        <div class="q-py-sm q-px-xs text-left hidden" on-left>
           <q-list padding>
             <q-item>
               <q-item-section>
