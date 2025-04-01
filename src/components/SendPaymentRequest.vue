@@ -14,17 +14,20 @@
       </q-btn>
     </div>
     <div class="text-center">
-      <pre
+      <span
         class="q-mt-md q-mb-md text-center"
         style="
+          display: block;
+          font-family: monospace;
           white-space: pre-wrap;
           word-wrap: break-word;
           max-width: 350px;
           margin: 0 auto;
+          font-size: 13px;
         "
       >
-Pay to {{ getPaymentRequestTarget(sendData.paymentRequest) }}
-      </pre>
+        Pay to {{ getPaymentRequestTarget(sendData.paymentRequest) }}
+      </span>
     </div>
   </div>
 </template>
