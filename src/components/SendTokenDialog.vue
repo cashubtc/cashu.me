@@ -715,6 +715,26 @@ export default defineComponent({
             this.showNumericKeyboard = false;
           }
         });
+
+        if (
+          this.sendData.historyToken &&
+          this.sendData.historyToken.amount < 0 &&
+          this.sendData.historyToken.status === "pending"
+        ) {
+          if (!this.checkSentTokens) {
+            console.log(
+              "settingsStore.checkSentTokens is disabled, skipping token check"
+            );
+            return;
+          }
+          const unspent = this.checkTokenSpendable(
+            this.sendData.historyToken,
+            false
+          );
+          if (!unspent) {
+            this.sendData.historyToken.status = "paid";
+          }
+        }
       } else {
         clearInterval(this.qrInterval);
         this.sendData.data = "";
@@ -732,6 +752,7 @@ export default defineComponent({
       "getFeesForProofs",
       "onTokenPaid",
       "mintWallet",
+      "checkTokenSpendable",
     ]),
     ...mapActions(useProofsStore, ["serializeProofs"]),
     ...mapActions(useTokensStore, [
@@ -1037,6 +1058,7 @@ export default defineComponent({
           paymentRequest: this.sendData.paymentRequest,
         };
         this.addPendingToken(historyToken);
+        this.sendData.historyToken = historyToken;
 
         if (!this.g.offline) {
           this.onTokenPaid(historyToken);
