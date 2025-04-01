@@ -49,7 +49,7 @@
           @click="newKeys"
         >
           <q-icon name="refresh" class="q-pr-sm" size="xs" />
-          {{ $t("P2PKDialog.actions.create_new_key.label") }}</q-btn
+          {{ $t("P2PKDialog.actions.new_key.label") }}</q-btn
         >
         <div class="row q-mt-lg">
           <q-btn
