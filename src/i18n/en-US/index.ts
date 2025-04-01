@@ -403,6 +403,36 @@ export default {
       },
     },
   },
+  InvoiceDetailDialog: {
+    title: "Create Invoice",
+    inputs: {
+      amount: {
+        label: "Amount ({ ticker }) *",
+      },
+    },
+    actions: {
+      close: {
+        label: "@:global.actions.close.label",
+      },
+      create: {
+        label: "Create Invoice",
+        label_blocked: "Creating invoice…",
+        in_progress: "Creating",
+      },
+    },
+    invoice: {
+      caption: "Lightning invoice",
+      status_paid_text: "Paid!",
+      actions: {
+        close: {
+          label: "@:global.actions.close.label",
+        },
+        copy: {
+          label: "@:global.actions.copy.label",
+        },
+      },
+    },
+  },
   SendDialog: {
     title: "Send",
     actions: {
