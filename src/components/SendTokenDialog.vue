@@ -364,6 +364,7 @@
             <div
               v-if="
                 sendData.paymentRequest &&
+                sendData.historyToken.amount < 0 &&
                 sendData.historyToken.status === 'pending'
               "
               class="row justify-center q-pt-sm"
@@ -1065,6 +1066,7 @@ export default defineComponent({
           unit: this.activeUnit,
           mint: this.activeMintUrl,
           paymentRequest: this.sendData.paymentRequest,
+          status: "pending",
         };
         this.addPendingToken(historyToken);
         this.sendData.historyToken = historyToken;
