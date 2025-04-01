@@ -22,7 +22,7 @@
         <q-card-section class="q-pa-lg q-pt-md">
           <div class="row items-center no-wrap q-mb-sm q-pr-lg q-py-lg">
             <div class="col-9">
-              <span class="text-h6"
+              <span v-if="!sendData.paymentRequest" class="text-h6"
                 >Send
                 {{
                   sendData.amount
@@ -32,6 +32,21 @@
                       )
                     : "Ecash"
                 }}
+              </span>
+              <span v-if="sendData.paymentRequest" class="text-h6"
+                >Pay request
+                <span
+                  v-if="sendData.paymentRequest.amount"
+                  class="text-primary text-weight-bold"
+                >
+                  of
+                  {{
+                    formatCurrency(
+                      sendData.paymentRequest.amount,
+                      sendData.paymentRequest.unit
+                    )
+                  }}
+                </span>
               </span>
               <span
                 v-if="sendData.amount && bitcoinPrice && activeUnit == 'sat'"
@@ -93,6 +108,11 @@
             autofocus
             class="q-mb-lg"
             @keyup.enter="sendTokens"
+            :disable="
+              sendData.paymentRequest &&
+              sendData.amount &&
+              sendData.paymentRequest.amount == sendData.amount
+            "
           >
             <q-btn
               flat
@@ -241,6 +261,13 @@
               >
               </vue-qrcode>
             </q-responsive>
+            <div style="height: 2px">
+              <q-linear-progress
+                v-if="runnerActive"
+                indeterminate
+                color="primary"
+              />
+            </div>
           </div>
           <div class="q-pb-xs q-ba-none q-gutter-sm">
             <q-btn
@@ -281,8 +308,11 @@
                 style="font-size: 1rem"
               >
                 {{
-                  sendData.historyAmount && sendData.historyAmount < 0
-                    ? "Sent"
+                  sendData.historyToken.amount &&
+                  sendData.historyToken.amount < 0
+                    ? sendData.historyToken.status === "paid"
+                      ? "Sent"
+                      : "Pending"
                     : "Received"
                 }}
                 Ecash</q-item-label
@@ -290,11 +320,21 @@
             </div>
             <div class="row justify-center q-pt-sm">
               <q-item-label style="font-size: 30px" class="text-weight-bold">
-                <q-spinner-dots
-                  v-if="runnerActive"
-                  color="primary"
-                  size="0.8em"
-                  class="q-mr-md"
+                <q-icon
+                  :name="
+                    sendData.historyToken.amount >= 0
+                      ? 'call_received'
+                      : 'call_made'
+                  "
+                  :color="
+                    sendData.historyToken.status === 'paid'
+                      ? sendData.historyToken.amount >= 0
+                        ? 'green'
+                        : 'red'
+                      : ''
+                  "
+                  class="q-mr-xs q-mb-xs"
+                  size="sm"
                 />
                 <strong>{{ displayUnit }}</strong></q-item-label
               >
@@ -304,6 +344,16 @@
                 Fee: {{ formatCurrency(paidFees, tokenUnit) }}
               </q-item-label>
             </div>
+            <!-- tada animation -->
+            <div
+              v-if="
+                sendData.historyToken.amount &&
+                sendData.historyToken.amount < 0 &&
+                sendData.historyToken.status === 'paid'
+              "
+              class="row justify-center"
+            ></div>
+
             <div class="row justify-center q-pt-md">
               <TokenInformation
                 :encodedToken="sendData.tokensBase64"
@@ -312,7 +362,11 @@
               />
             </div>
             <div
-              v-if="sendData.paymentRequest"
+              v-if="
+                sendData.paymentRequest &&
+                sendData.historyToken.amount < 0 &&
+                sendData.historyToken.status === 'pending'
+              "
               class="row justify-center q-pt-sm"
             >
               <SendPaymentRequest />
@@ -661,16 +715,40 @@ export default defineComponent({
     showSendTokens: function (val) {
       if (val) {
         this.$nextTick(() => {
+          // if we're entering the amount etc, show the keyboard
           if (!this.sendData.tokensBase64.length) {
             this.showNumericKeyboard = true;
           } else {
             this.showNumericKeyboard = false;
           }
         });
+
+        // if we open the dialog from the history, let's check the
+        if (
+          this.sendData.historyToken &&
+          this.sendData.historyToken.amount < 0 &&
+          this.sendData.historyToken.status === "pending"
+        ) {
+          if (!this.checkSentTokens) {
+            console.log(
+              "settingsStore.checkSentTokens is disabled, skipping token check"
+            );
+            return;
+          }
+          const unspent = this.checkTokenSpendable(
+            this.sendData.historyToken,
+            false
+          );
+          if (!unspent) {
+            this.sendData.historyToken.status = "paid";
+          }
+        }
       } else {
         clearInterval(this.qrInterval);
         this.sendData.data = "";
         this.sendData.tokensBase64 = "";
+        this.sendData.historyToken = null;
+        this.sendData.paymentRequest = null;
       }
     },
   },
@@ -688,6 +766,7 @@ export default defineComponent({
       "getFeesForProofs",
       "onTokenPaid",
       "mintWallet",
+      "checkTokenSpendable",
     ]),
     ...mapActions(useProofsStore, ["serializeProofs"]),
     ...mapActions(useTokensStore, [
@@ -892,8 +971,10 @@ export default defineComponent({
           unit: this.activeUnit,
           mint: this.activeMintUrl,
           paymentRequest: this.sendData.paymentRequest,
+          status: "pending",
         };
         this.addPendingToken(historyToken);
+        this.sendData.historyToken = historyToken;
 
         if (!this.g.offline) {
           this.onTokenPaid(historyToken);

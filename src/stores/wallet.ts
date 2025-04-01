@@ -180,6 +180,7 @@ export const useWalletStore = defineStore("wallet", {
       if (!storedMint) {
         throw new Error("mint not found");
       }
+      const unitKeysets = mints.mintUnitKeysets(storedMint, unit);
       const mint = new CashuMint(url);
       if (this.mnemonic == "") {
         this.mnemonic = generateMnemonic(wordlist);
@@ -188,7 +189,7 @@ export const useWalletStore = defineStore("wallet", {
       const bip39Seed = mnemonicToSeedSync(mnemonic);
       const wallet = new CashuWallet(mint, {
         keys: storedMint.keys,
-        keysets: storedMint.keysets,
+        keysets: unitKeysets,
         mintInfo: storedMint.info,
         bip39seed: bip39Seed,
         unit: unit,
@@ -514,7 +515,6 @@ export const useWalletStore = defineStore("wallet", {
             {
               counter,
               privkey,
-              keysetId,
               proofsWeHave: mintStore.mintUnitProofs(mint, historyToken.unit),
             }
           );
@@ -1144,6 +1144,7 @@ export const useWalletStore = defineStore("wallet", {
         return;
       }
       try {
+        console.log("onTokenPaid kicking off websocket");
         if (tokenJson == undefined) {
           throw new Error("no tokens provided.");
         }
