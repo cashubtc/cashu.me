@@ -22,7 +22,7 @@
         <q-card-section class="q-pa-lg q-pt-md">
           <div class="row items-center no-wrap q-mb-sm q-pr-lg q-py-lg">
             <div class="col-9">
-              <span class="text-h6"
+              <span v-if="!sendData.paymentRequest" class="text-h6"
                 >Send
                 {{
                   sendData.amount
@@ -32,6 +32,21 @@
                       )
                     : "Ecash"
                 }}
+              </span>
+              <span v-if="sendData.paymentRequest" class="text-h6"
+                >Pay request
+                <span
+                  v-if="sendData.paymentRequest.amount"
+                  class="text-primary text-weight-bold"
+                >
+                  of
+                  {{
+                    formatCurrency(
+                      sendData.paymentRequest.amount,
+                      sendData.paymentRequest.unit
+                    )
+                  }}
+                </span>
               </span>
               <span
                 v-if="sendData.amount && bitcoinPrice && activeUnit == 'sat'"
@@ -241,6 +256,13 @@
               >
               </vue-qrcode>
             </q-responsive>
+            <div style="height: 2px">
+              <q-linear-progress
+                v-if="runnerActive"
+                indeterminate
+                color="primary"
+              />
+            </div>
           </div>
           <div class="q-pb-xs q-ba-none q-gutter-sm">
             <q-btn
@@ -281,8 +303,11 @@
                 style="font-size: 1rem"
               >
                 {{
-                  sendData.historyAmount && sendData.historyAmount < 0
-                    ? "Sent"
+                  sendData.historyToken.amount &&
+                  sendData.historyToken.amount < 0
+                    ? sendData.historyToken.status === "paid"
+                      ? "Sent"
+                      : "Pending"
                     : "Received"
                 }}
                 Ecash</q-item-label
@@ -290,12 +315,6 @@
             </div>
             <div class="row justify-center q-pt-sm">
               <q-item-label style="font-size: 30px" class="text-weight-bold">
-                <q-spinner-dots
-                  v-if="runnerActive"
-                  color="primary"
-                  size="0.8em"
-                  class="q-mr-md"
-                />
                 <strong>{{ displayUnit }}</strong></q-item-label
               >
             </div>
