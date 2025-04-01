@@ -606,6 +606,18 @@ export default {
       },
     },
   },
+  NumericKeyboard: {
+    actions: {
+      close: {
+        label: "@:global.actions.close.label",
+        closed_info_text:
+          "Keyboard disabled. You can re-enable the keyboard in the settings.",
+      },
+      enter: {
+        label: "Enter",
+      },
+    },
+  },
   restore: {
     mnemonic_error_text: "Please enter a mnemonic",
     restore_mint_error_text: "Error restoring mint: { error }",
