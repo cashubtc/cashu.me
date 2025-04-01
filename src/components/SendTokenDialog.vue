@@ -108,6 +108,10 @@
             autofocus
             class="q-mb-lg"
             @keyup.enter="sendTokens"
+            :disable="
+              sendData.paymentRequest &&
+              sendData.paymentRequest.amount == sendData.amount
+            "
           >
             <q-btn
               flat
