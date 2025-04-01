@@ -709,6 +709,7 @@ export default defineComponent({
     showSendTokens: function (val) {
       if (val) {
         this.$nextTick(() => {
+          // if we're entering the amount etc, show the keyboard
           if (!this.sendData.tokensBase64.length) {
             this.showNumericKeyboard = true;
           } else {
@@ -716,6 +717,7 @@ export default defineComponent({
           }
         });
 
+        // if we open the dialog from the history, let's check the
         if (
           this.sendData.historyToken &&
           this.sendData.historyToken.amount < 0 &&
@@ -739,6 +741,8 @@ export default defineComponent({
         clearInterval(this.qrInterval);
         this.sendData.data = "";
         this.sendData.tokensBase64 = "";
+        this.sendData.historyToken = null;
+        this.sendData.paymentRequest = null;
       }
     },
   },
