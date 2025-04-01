@@ -1144,6 +1144,7 @@ export const useWalletStore = defineStore("wallet", {
         return;
       }
       try {
+        console.log("onTokenPaid kicking off websocket");
         if (tokenJson == undefined) {
           throw new Error("no tokens provided.");
         }
