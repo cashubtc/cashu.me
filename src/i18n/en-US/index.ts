@@ -3,6 +3,17 @@ export default {
     copy_to_clipboard: {
       success: "Copied to clipboard!",
     },
+    actions: {
+      paste: {
+        label: "Paste",
+      },
+      close: {
+        label: "Close",
+      },
+      scan: {
+        label: "Scan",
+      },
+    },
   },
   MainHeader: {
     menu: {
@@ -370,10 +381,10 @@ export default {
     },
     actions: {
       paste: {
-        label: "Paste",
+        label: "@:global.actions.paste.label",
       },
       close: {
-        label: "Close",
+        label: "@:global.actions.close.label",
       },
     },
   },
@@ -408,10 +419,10 @@ export default {
     title: "Receive Ecash",
     actions: {
       paste: {
-        label: "Paste",
+        label: "@:global.actions.paste.label",
       },
       scan: {
-        label: "Scan",
+        label: "@:global.actions.scan.label",
       },
       request: {
         label: "Request",
@@ -422,6 +433,63 @@ export default {
       nfc: {
         label: "NFC",
         scanning_text: "Scanning…",
+      },
+    },
+  },
+  ReceiveTokenDialog: {
+    title: "Receive { value }",
+    title_ecash_text: "Ecash",
+    inputs: {
+      tokensBase64: {
+        label: "Paste Cashu token",
+      },
+    },
+    errors: {
+      invalid_token: {
+        label: "Invalid token",
+      },
+    },
+    actions: {
+      paste: {
+        label: "@:global.actions.paste.label",
+      },
+      close: {
+        label: "@:global.actions.close.label",
+      },
+      scan: {
+        label: "@:global.actions.scan.label",
+      },
+      receive: {
+        label: "Receive",
+        label_known_mint: "@:ReceiveTokenDialog.actions.receive.label",
+        label_adding_mint: "Adding mint…",
+      },
+      swap: {
+        label: "Swap",
+        tooltip_text: "Swap to a trusted mint",
+        caption: "Swap { value }",
+      },
+      cancel_swap: {
+        label: "Cancel",
+        tooltip_text: "Cancel swap",
+      },
+      confirm_swap: {
+        label: "@:ReceiveTokenDialog.actions.swap.label",
+        tooltip_text: "@:ReceiveTokenDialog.actions.swap.tooltip_text",
+        in_progress: "@:ReceiveTokenDialog.actions.confirm_swap.label",
+      },
+      later: {
+        label: "Later",
+        tooltip_text: "Add to history to receive later",
+        already_in_history_success_text: "Ecash already in History",
+        added_to_history_success_text: "Ecash added to History",
+      },
+      nfc: {
+        label: "NFC",
+        tooltips: {
+          ndef_supported_text: "Read from NFC card",
+          ndef_unsupported_text: "NDEF unsupported",
+        },
       },
     },
   },
