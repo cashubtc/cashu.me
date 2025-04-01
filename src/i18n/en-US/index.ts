@@ -665,6 +665,11 @@ export default {
       },
     },
   },
+  ChooseMint: {
+    title: "Select a mint",
+    badge_mint_error_text: "Error",
+    badge_option_mint_error_text: "@:ChooseMint.badge_mint_error_text",
+  },
   restore: {
     mnemonic_error_text: "Please enter a mnemonic",
     restore_mint_error_text: "Error restoring mint: { error }",
