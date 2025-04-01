@@ -4,14 +4,29 @@ export default {
       success: "Copied to clipboard!",
     },
     actions: {
-      paste: {
-        label: "Paste",
+      copy: {
+        label: "Copy",
       },
       close: {
         label: "Close",
       },
+      lock: {
+        label: "Lock",
+      },
+      paste: {
+        label: "Paste",
+      },
+      receive: {
+        label: "Receive",
+      },
       scan: {
         label: "Scan",
+      },
+      send: {
+        label: "Send",
+      },
+      swap: {
+        label: "Swap",
       },
     },
   },
@@ -100,10 +115,10 @@ export default {
   WalletPage: {
     actions: {
       send: {
-        label: "Send",
+        label: "@:global.actions.send.label",
       },
       receive: {
-        label: "Receive",
+        label: "@:global.actions.receive.label",
       },
     },
     tabs: {
@@ -367,8 +382,8 @@ export default {
       },
       actions: {
         swap: {
-          label: "Swap",
-          in_progress: "Swap",
+          label: "@:global.actions.swap.label",
+          in_progress: "@:MintSettings.swap.actions.swap.label",
         },
       },
     },
@@ -401,6 +416,57 @@ export default {
       },
     },
   },
+  SendTokenDialog: {
+    title: "Send { value }",
+    title_ecash_text: "Ecash",
+    badge_offline_text: "Offline",
+    inputs: {
+      amount: {
+        label: "Amount ({ ticker }) *",
+        invalid_too_much_error_text: "Too much",
+      },
+      p2pk_pubkey: {
+        label: "Receiver public key",
+        label_invalid: "Receiver public key",
+      },
+    },
+    actions: {
+      close: {
+        label: "@:global.actions.close.label",
+      },
+      close_card_scanner: {
+        label: "@:global.actions.close.label",
+      },
+      copy_emoji: {
+        label: "🥜",
+        tooltip_text: "Copy Emoji",
+      },
+      copy_tokens: {
+        label: "@:global.actions.copy.label",
+      },
+      copy_link: {
+        tooltip_text: "Copy link",
+      },
+      lock: {
+        label: "@:global.actions.lock.label",
+      },
+      paste_p2pk_pubkey: {
+        tooltip_text: "@:global.actions.paste.label",
+      },
+      send: {
+        label: "@:global.actions.send.label",
+      },
+      delete: {
+        tooltip_text: "Delete from history",
+      },
+      write_tokens_to_card: {
+        tooltips: {
+          ndef_supported_text: "Flash to NFC card",
+          ndef_unsupported_text: "NDEF unsupported",
+        },
+      },
+    },
+  },
   ReceiveDialog: {
     title: "Receive",
     actions: {
@@ -428,7 +494,7 @@ export default {
         label: "Request",
       },
       lock: {
-        label: "Lock",
+        label: "@:global.actions.lock.label",
       },
       nfc: {
         label: "NFC",
@@ -440,7 +506,7 @@ export default {
     title: "Receive { value }",
     title_ecash_text: "Ecash",
     inputs: {
-      tokensBase64: {
+      tokens_base64: {
         label: "Paste Cashu token",
       },
     },
@@ -460,12 +526,12 @@ export default {
         label: "@:global.actions.scan.label",
       },
       receive: {
-        label: "Receive",
+        label: "@:global.actions.receive.label",
         label_known_mint: "@:ReceiveTokenDialog.actions.receive.label",
         label_adding_mint: "Adding mint…",
       },
       swap: {
-        label: "Swap",
+        label: "@:global.actions.swap.label",
         tooltip_text: "Swap to a trusted mint",
         caption: "Swap { value }",
       },

@@ -49,7 +49,7 @@
             outlined
             spellcheck="false"
             v-model="receiveData.tokensBase64"
-            :label="$t('ReceiveTokenDialog.inputs.tokensBase64.label')"
+            :label="$t('ReceiveTokenDialog.inputs.tokens_base64.label')"
             type="textarea"
             autofocus
             class="q-mb-lg cashub-nowrap"
