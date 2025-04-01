@@ -665,6 +665,9 @@ export default {
       },
     },
   },
+  MintMotdMessage: {
+    title: "Mint Message",
+  },
   MintDetailsDialog: {
     contact: {
       title: "Contact",
