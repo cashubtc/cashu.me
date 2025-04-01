@@ -665,6 +665,49 @@ export default {
       },
     },
   },
+  MintDetailsDialog: {
+    contact: {
+      title: "Contact",
+    },
+    details: {
+      title: "Mint details",
+      url: {
+        label: "URL",
+      },
+      nuts: {
+        label: "Nuts",
+        actions: {
+          show: {
+            label: "View all",
+          },
+          hide: {
+            label: "Hide",
+          },
+        },
+      },
+      currency: {
+        label: "Currency",
+      },
+      currencies: {
+        label: "@:MintDetailsDialog.details.currency.label",
+      },
+      version: {
+        label: "Version",
+      },
+    },
+    actions: {
+      title: "Actions",
+      copy_mint_url: {
+        label: "Copy mint URL",
+      },
+      delete: {
+        label: "Delete mint",
+      },
+      edit: {
+        label: "Edit mint",
+      },
+    },
+  },
   ChooseMint: {
     title: "Select a mint",
     badge_mint_error_text: "Error",
