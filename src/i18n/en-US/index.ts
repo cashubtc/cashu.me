@@ -404,6 +404,27 @@ export default {
       },
     },
   },
+  ReceiveEcashDrawer: {
+    title: "Receive Ecash",
+    actions: {
+      paste: {
+        label: "Paste",
+      },
+      scan: {
+        label: "Scan",
+      },
+      request: {
+        label: "Request",
+      },
+      lock: {
+        label: "Lock",
+      },
+      nfc: {
+        label: "NFC",
+        scanning_text: "Scanning…",
+      },
+    },
+  },
   restore: {
     mnemonic_error_text: "Please enter a mnemonic",
     restore_mint_error_text: "Error restoring mint: { error }",
