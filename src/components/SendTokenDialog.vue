@@ -110,6 +110,7 @@
             @keyup.enter="sendTokens"
             :disable="
               sendData.paymentRequest &&
+              sendData.amount &&
               sendData.paymentRequest.amount == sendData.amount
             "
           >
