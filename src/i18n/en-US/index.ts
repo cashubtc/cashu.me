@@ -573,8 +573,36 @@ export default {
       close: {
         label: "@:global.actions.close.label",
       },
-      create_new_key: {
+      new_key: {
         label: "Generate new key",
+      },
+    },
+  },
+  PaymentRequestDialog: {
+    payment_request: {
+      caption: "Payment Request",
+      description: "Receive payments via Nostr",
+    },
+    actions: {
+      copy: {
+        label: "@:global.actions.copy.label",
+      },
+      close: {
+        label: "@:global.actions.close.label",
+      },
+      new_request: {
+        label: "New request",
+      },
+      add_amount: {
+        label: "Add amount",
+      },
+      use_active_mint: {
+        label: "Any mint",
+      },
+    },
+    inputs: {
+      amount: {
+        placeholder: "Enter amount",
       },
     },
   },
