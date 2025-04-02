@@ -261,6 +261,20 @@
           </div>
         </div>
 
+        <!-- Section Divider for Audit Info -->
+        <div v-if="settings.auditorEnabled" class="section-divider q-mb-md">
+          <div class="divider-line"></div>
+          <div class="divider-text">AUDIT INFO</div>
+          <div class="divider-line"></div>
+        </div>
+
+        <!-- Mint Audit Info Section -->
+        <MintAuditInfo
+          v-if="settings.auditorEnabled && showMintInfoData.url"
+          :mintUrl="showMintInfoData.url"
+          @close="showMintInfoDialog = false"
+        />
+
         <!-- Section Divider -->
         <div class="section-divider q-mb-md">
           <div class="divider-line"></div>
@@ -306,9 +320,11 @@ import { defineComponent } from "vue";
 import { mapActions, mapState, mapWritableState } from "pinia";
 import VueQrcode from "@chenfengyuan/vue-qrcode";
 import { useMintsStore, MintClass } from "src/stores/mints";
+import { useSettingsStore } from "src/stores/settings";
 import EditMintDialog from "src/components/EditMintDialog.vue";
 import RemoveMintDialog from "src/components/RemoveMintDialog.vue";
 import MintMotdMessage from "src/components/MintMotdMessage.vue";
+import MintAuditInfo from "src/components/MintAuditInfo.vue";
 import {
   X as CloseIcon,
   QrCode as QrCodeIcon,
@@ -343,6 +359,7 @@ export default defineComponent({
     EditMintDialog,
     RemoveMintDialog,
     MintMotdMessage,
+    MintAuditInfo,
   },
   data: function () {
     return {
@@ -374,6 +391,7 @@ export default defineComponent({
         22: "Blind authentication",
       },
       motdDismissed: false,
+      settings: useSettingsStore(),
     };
   },
   computed: {
@@ -751,7 +769,7 @@ export default defineComponent({
   font-size: 14px;
   font-weight: 600;
   line-height: 24px;
-  color: #white;
+  color: white;
 }
 
 .nut-number {

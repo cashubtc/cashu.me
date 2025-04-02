@@ -128,7 +128,7 @@
                     <q-icon
                       name="content_copy"
                       @click="copyText(npcAddress)"
-                      size="0.8em"
+                      size="xs"
                       color="grey"
                       class="q-mr-sm cursor-pointer"
                     >
@@ -337,7 +337,7 @@
           >
           <q-item-label caption
             >Payment requests allow you to receive payments via nostr. If you
-            enable this, your wallet will subscribe to your nostr
+            enable this, your wallet will subscribe to your nostr relays.
             relays.</q-item-label
           >
         </q-item-section>
@@ -424,7 +424,7 @@
               <q-icon
                 name="content_copy"
                 @click="copyText(getConnectionString(connection))"
-                size="1.3em"
+                size="xs"
                 color="grey"
                 class="q-mr-sm cursor-pointer"
                 ><q-tooltip>Copy connection string</q-tooltip></q-icon
@@ -518,7 +518,7 @@
                 <q-icon
                   name="content_copy"
                   @click="copyText(relay)"
-                  size="1.1em"
+                  size="xs"
                   color="grey"
                   class="q-mr-sm cursor-pointer"
                   ><q-tooltip>Copy relay</q-tooltip></q-icon
@@ -823,7 +823,6 @@
               label="Check all invoices"
               color="primary"
             >
-              <q-badge color="primary" label="Beta" class="q-mx-sm"></q-badge>
             </q-toggle>
           </q-item>
           <q-item class="q-pt-none">
@@ -856,7 +855,7 @@
               v-model="useWebsockets"
               label="Use WebSockets"
               color="primary"
-              ><q-badge color="primary" label="Beta" class="q-mx-sm"></q-badge>
+            >
             </q-toggle> </q-item
           ><q-item
             class="q-pt-none"
@@ -929,11 +928,78 @@
           </q-item-label>
         </q-item>
 
+        <!-- auditor settings -->
+        <q-item>
+          <q-toggle
+            v-model="auditorEnabled"
+            label="Enable auditor"
+            color="primary"
+          >
+            <q-badge color="primary" label="Beta" class="q-mx-sm"></q-badge>
+          </q-toggle>
+        </q-item>
+        <q-item class="q-pt-none">
+          <q-item-label caption
+            >If enabled, the wallet will display auditor information in the mint
+            details dialog. The auditor is a third party service that monitors
+            the reliability of mints.
+          </q-item-label>
+        </q-item>
+        <div class="row q-mx-md">
+          <div class="col-12">
+            <q-input
+              v-model="auditorUrl"
+              label="Auditor URL"
+              color="primary"
+              outlined
+              dense
+              rounded
+              :disable="!auditorEnabled"
+            >
+              <template v-slot:append>
+                <q-btn
+                  dense
+                  flat
+                  icon="content_copy"
+                  @click="copyText(auditorUrl)"
+                  size="sm"
+                  color="grey"
+                />
+              </template>
+            </q-input>
+          </div>
+        </div>
+        <div class="row q-mx-md q-mt-md">
+          <div class="col-12">
+            <q-input
+              v-model="auditorApiUrl"
+              label="Auditor API URL"
+              color="primary"
+              outlined
+              dense
+              rounded
+              :disable="!auditorEnabled"
+            >
+              <template v-slot:append>
+                <q-btn
+                  dense
+                  flat
+                  icon="content_copy"
+                  @click="copyText(auditorApiUrl)"
+                  size="sm"
+                  color="grey"
+                />
+              </template>
+            </q-input>
+          </div>
+        </div>
+
         <div class="section-divider q-my-md">
           <div class="divider-line"></div>
           <div class="divider-text">APPEARANCE</div>
           <div class="divider-line"></div>
         </div>
+
         <!-- use numeric keyboard -->
         <div class="q-py-sm q-px-xs text-left" on-left>
           <q-list padding>
@@ -1408,6 +1474,9 @@ export default defineComponent({
       "enableReceiveSwaps",
       "showNfcButtonInDrawer",
       "autoPasteEcashReceive",
+      "auditorEnabled",
+      "auditorUrl",
+      "auditorApiUrl",
     ]),
     ...mapState(useP2PKStore, ["p2pkKeys"]),
     ...mapWritableState(useP2PKStore, [
