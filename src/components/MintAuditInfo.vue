@@ -130,6 +130,9 @@ import MintAuditWarningBox from "./MintAuditWarningBox.vue";
 import MintAuditSwapsBarChart from "./MintAuditSwapsBarChart.vue";
 import { useWalletStore } from "../stores/wallet";
 import { useMintsStore } from "../stores/mints";
+import { useSettingsStore } from "../stores/settings";
+import { getShortUrl } from "../js/wallet-helpers";
+
 export default {
   name: "MintAuditInfo",
   components: {
@@ -143,10 +146,11 @@ export default {
     },
   },
   data() {
+    const settingsStore = useSettingsStore();
     return {
-      baseUrl: "https://api.audit.8333.space",
-      auditUrl: "https://audit.8333.space",
-      auditUrlShort: "audit.8333.space",
+      auditorApiUrl: settingsStore.auditorApiUrl,
+      auditUrl: settingsStore.auditorUrl,
+      auditUrlShort: getShortUrl(settingsStore.auditorUrl),
       mintNotAudited: false,
       loading: true,
       error: null,
@@ -197,7 +201,7 @@ export default {
     async getMintInfo() {
       try {
         const response = await fetch(
-          `${this.baseUrl}/mints/?limit=1000&skip=0`
+          `${this.auditorApiUrl}/mints/?limit=1000&skip=0`
         );
         if (!response.ok) {
           throw new Error(`API error: ${response.status}`);
@@ -219,7 +223,7 @@ export default {
     async getMintSwaps(mintId: number, skip = 0, limit = 100) {
       try {
         const response = await fetch(
-          `${this.baseUrl}/swaps/mint/${mintId}?skip=${skip}&limit=${limit}`
+          `${this.auditorApiUrl}/swaps/mint/${mintId}?skip=${skip}&limit=${limit}`
         );
         if (!response.ok) {
           throw new Error(`API error: ${response.status}`);
@@ -243,7 +247,7 @@ export default {
       const walletStore = useWalletStore();
       const mintStore = useMintsStore();
       try {
-        const response = await fetch(`${this.baseUrl}/pr`);
+        const response = await fetch(`${this.auditorApiUrl}/pr`);
         const paymentRequestString = await response.text();
         const paymentRequest = paymentRequestString.replace(/"/g, "");
         console.log("# AuditorPaymentRequests", paymentRequest);

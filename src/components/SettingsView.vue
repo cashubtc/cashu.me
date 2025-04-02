@@ -128,7 +128,7 @@
                     <q-icon
                       name="content_copy"
                       @click="copyText(npcAddress)"
-                      size="0.8em"
+                      size="xs"
                       color="grey"
                       class="q-mr-sm cursor-pointer"
                     >
@@ -337,7 +337,7 @@
           >
           <q-item-label caption
             >Payment requests allow you to receive payments via nostr. If you
-            enable this, your wallet will subscribe to your nostr
+            enable this, your wallet will subscribe to your nostr relays.
             relays.</q-item-label
           >
         </q-item-section>
@@ -424,7 +424,7 @@
               <q-icon
                 name="content_copy"
                 @click="copyText(getConnectionString(connection))"
-                size="1.3em"
+                size="xs"
                 color="grey"
                 class="q-mr-sm cursor-pointer"
                 ><q-tooltip>Copy connection string</q-tooltip></q-icon
@@ -518,7 +518,7 @@
                 <q-icon
                   name="content_copy"
                   @click="copyText(relay)"
-                  size="1.1em"
+                  size="xs"
                   color="grey"
                   class="q-mr-sm cursor-pointer"
                   ><q-tooltip>Copy relay</q-tooltip></q-icon
@@ -928,6 +928,68 @@
             iOS, turn it off if you experience issues.
           </q-item-label>
         </q-item>
+        <!-- auditor settings: enable auditor toggle, auditor url, auditor api url -->
+        <q-item>
+          <q-toggle
+            v-model="auditorEnabled"
+            label="Enable auditor"
+            color="primary"
+          />
+        </q-item>
+        <q-item>
+          <q-item-label caption
+            >If enabled, you will see auditor information in the mint settings
+            view.
+          </q-item-label>
+        </q-item>
+        <div class="row q-mx-md">
+          <div class="col-12">
+            <q-input
+              v-model="auditorUrl"
+              label="Auditor URL"
+              color="primary"
+              outlined
+              dense
+              rounded
+              :disable="!auditorEnabled"
+            >
+              <template v-slot:append>
+                <q-btn
+                  dense
+                  flat
+                  icon="content_copy"
+                  @click="copyText(auditorUrl)"
+                  size="sm"
+                  color="grey"
+                />
+              </template>
+            </q-input>
+          </div>
+        </div>
+        <div class="row q-mx-md q-mt-md">
+          <div class="col-12">
+            <q-input
+              v-model="auditorApiUrl"
+              label="Auditor API URL"
+              color="primary"
+              outlined
+              dense
+              rounded
+              :disable="!auditorEnabled"
+            >
+              <template v-slot:append>
+                <q-btn
+                  dense
+                  flat
+                  icon="content_copy"
+                  @click="copyText(auditorApiUrl)"
+                  size="sm"
+                  color="grey"
+                />
+              </template>
+            </q-input>
+          </div>
+        </div>
 
         <div class="section-divider q-my-md">
           <div class="divider-line"></div>
@@ -1408,6 +1470,9 @@ export default defineComponent({
       "enableReceiveSwaps",
       "showNfcButtonInDrawer",
       "autoPasteEcashReceive",
+      "auditorEnabled",
+      "auditorUrl",
+      "auditorApiUrl",
     ]),
     ...mapState(useP2PKStore, ["p2pkKeys"]),
     ...mapWritableState(useP2PKStore, [
