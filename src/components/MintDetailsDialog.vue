@@ -262,7 +262,7 @@
         </div>
 
         <!-- Section Divider for Audit Info -->
-        <div class="section-divider q-mb-md">
+        <div v-if="settings.auditorEnabled" class="section-divider q-mb-md">
           <div class="divider-line"></div>
           <div class="divider-text">AUDIT INFO</div>
           <div class="divider-line"></div>
@@ -270,7 +270,7 @@
 
         <!-- Mint Audit Info Section -->
         <MintAuditInfo
-          v-if="showMintInfoData.url"
+          v-if="settings.auditorEnabled && showMintInfoData.url"
           :mintUrl="showMintInfoData.url"
           @close="showMintInfoDialog = false"
         />
