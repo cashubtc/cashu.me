@@ -320,6 +320,7 @@ import { defineComponent } from "vue";
 import { mapActions, mapState, mapWritableState } from "pinia";
 import VueQrcode from "@chenfengyuan/vue-qrcode";
 import { useMintsStore, MintClass } from "src/stores/mints";
+import { useSettingsStore } from "src/stores/settings";
 import EditMintDialog from "src/components/EditMintDialog.vue";
 import RemoveMintDialog from "src/components/RemoveMintDialog.vue";
 import MintMotdMessage from "src/components/MintMotdMessage.vue";
@@ -390,6 +391,7 @@ export default defineComponent({
         22: "Blind authentication",
       },
       motdDismissed: false,
+      settings: useSettingsStore(),
     };
   },
   computed: {
