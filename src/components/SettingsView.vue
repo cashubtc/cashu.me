@@ -823,7 +823,6 @@
               label="Check all invoices"
               color="primary"
             >
-              <q-badge color="primary" label="Beta" class="q-mx-sm"></q-badge>
             </q-toggle>
           </q-item>
           <q-item class="q-pt-none">
@@ -856,7 +855,7 @@
               v-model="useWebsockets"
               label="Use WebSockets"
               color="primary"
-              ><q-badge color="primary" label="Beta" class="q-mx-sm"></q-badge>
+            >
             </q-toggle> </q-item
           ><q-item
             class="q-pt-none"
@@ -928,18 +927,22 @@
             iOS, turn it off if you experience issues.
           </q-item-label>
         </q-item>
-        <!-- auditor settings: enable auditor toggle, auditor url, auditor api url -->
+
+        <!-- auditor settings -->
         <q-item>
           <q-toggle
             v-model="auditorEnabled"
             label="Enable auditor"
             color="primary"
-          />
+          >
+            <q-badge color="primary" label="Beta" class="q-mx-sm"></q-badge>
+          </q-toggle>
         </q-item>
-        <q-item>
+        <q-item class="q-pt-none">
           <q-item-label caption
-            >If enabled, you will see auditor information in the mint settings
-            view.
+            >If enabled, the wallet will display auditor information in the mint
+            details dialog. The auditor is a third party service that monitors
+            the reliability of mints.
           </q-item-label>
         </q-item>
         <div class="row q-mx-md">
@@ -996,6 +999,7 @@
           <div class="divider-text">APPEARANCE</div>
           <div class="divider-line"></div>
         </div>
+
         <!-- use numeric keyboard -->
         <div class="q-py-sm q-px-xs text-left" on-left>
           <q-list padding>

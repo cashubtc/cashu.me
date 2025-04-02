@@ -201,16 +201,13 @@ export default {
     async getMintInfo() {
       try {
         const response = await fetch(
-          `${this.auditorApiUrl}/mints/?limit=1000&skip=0`
+          `${this.auditorApiUrl}/mints/url?url=${this.mintUrl}`
         );
         if (!response.ok) {
           throw new Error(`API error: ${response.status}`);
         }
-        this.mints = (await response.json()) as MintRead[];
-        console.log("# MintAuditInfo", this.mints);
-        this.mintInfo =
-          this.mints.find((mint) => mint.url === this.mintUrl) || null;
-
+        this.mintInfo = (await response.json()) as MintRead;
+        console.log("# MintAuditInfo", this.mintInfo);
         if (!this.mintInfo) {
           this.mintNotAudited = true;
           throw new Error(`This mint is not being audited yet.`);
@@ -247,8 +244,11 @@ export default {
       const walletStore = useWalletStore();
       const mintStore = useMintsStore();
       try {
-        const response = await fetch(`${this.auditorApiUrl}/pr`);
-        const paymentRequestString = await response.text();
+        const response = await fetch(
+          `${this.auditorApiUrl}/pr?url=${this.mintUrl}`
+        );
+        const paymentRequestResponse = await response.json();
+        const paymentRequestString = paymentRequestResponse.pr;
         const paymentRequest = paymentRequestString.replace(/"/g, "");
         console.log("# AuditorPaymentRequests", paymentRequest);
         await mintStore.activateMintUrl(this.mintUrl);
