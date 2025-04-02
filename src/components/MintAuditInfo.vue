@@ -204,6 +204,10 @@ export default {
           `${this.auditorApiUrl}/mints/url?url=${this.mintUrl}`
         );
         if (!response.ok) {
+          if (response.status === 404) {
+            this.mintNotAudited = true;
+            throw new Error(`This mint is not being audited yet.`);
+          }
           throw new Error(`API error: ${response.status}`);
         }
         this.mintInfo = (await response.json()) as MintRead;
