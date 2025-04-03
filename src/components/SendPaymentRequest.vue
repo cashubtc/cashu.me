@@ -2,6 +2,7 @@
   <div v-if="sendData.paymentRequest" class="q-pa-none q-ma-none q-mt-sm">
     <div class="q-mb-md text-center">
       <q-btn
+        v-if="getPaymentRequestTransportType(sendData.paymentRequest) !== 'NFC'"
         rounded
         dense
         color="primary"
@@ -11,6 +12,27 @@
         <q-icon v-if="!loading" name="send" class="q-pr-xs" />
         <q-spinner-hourglass v-else size="1em" class="q-mr-md" />
         Pay via {{ getPaymentRequestTransportType(sendData.paymentRequest) }}
+      </q-btn>
+      <q-btn
+        v-if="
+          ndefSupported &&
+          getPaymentRequestTransportType(sendData.paymentRequest) === 'NFC'
+        "
+        :disabled="scanningCard"
+        :loading="scanningCard"
+        class="q-px-md"
+        size="sm"
+        @click="writeTokensToCard"
+        flat
+      >
+        <q-icon name="send" class="q-pr-xs" />
+        Pay via NFC
+        <q-tooltip>{{
+          ndefSupported ? "Flash to NFC terminal" : "NDEF unsupported"
+        }}</q-tooltip>
+        <template v-slot:loading>
+          <q-spinner @click="closeCardScanner" />
+        </template>
       </q-btn>
     </div>
     <div class="text-center">
@@ -40,6 +62,7 @@ import { useP2PKStore } from "src/stores/p2pk";
 import { useSendTokensStore } from "src/stores/sendTokensStore";
 import { usePRStore } from "src/stores/payment-request";
 import { PaymentRequest, PaymentRequestTransportType } from "@cashu/cashu-ts";
+import { useSettingsStore } from "src/stores/settings";
 
 export default defineComponent({
   name: "SendPaymentRequest",
@@ -58,10 +81,16 @@ export default defineComponent({
       "sendData",
     ]),
     ...mapState(useMintsStore, ["activeMintUrl", "mints"]),
+    ...mapState(useSettingsStore, ["ndefSupported"]),
+    ...mapState(useSendTokensStore, ["scanningCard"]),
   },
   methods: {
     ...mapActions(useP2PKStore, ["isLocked", "isLockedToUs"]),
     ...mapActions(usePRStore, ["parseAndPayPaymentRequest"]),
+    ...mapActions(useSendTokensStore, [
+      "writeTokensToCard",
+      "closeCardScanner",
+    ]),
     clickPaymentRequest: async function () {
       this.loading = true;
       try {
@@ -88,6 +117,9 @@ export default defineComponent({
         }
         if (transport.type == PaymentRequestTransportType.POST) {
           return "HTTP";
+        }
+        if (transport.type == "ndef") {
+          return "NFC";
         }
       }
     },
