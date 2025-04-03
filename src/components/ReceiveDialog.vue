@@ -13,7 +13,7 @@
           <XIcon />
         </q-btn>
         <div class="col text-center">
-          <span class="text-h6">Receive</span>
+          <span class="text-h6">{{ $t("ReceiveDialog.title") }}</span>
         </div>
         <q-btn
           flat
@@ -38,7 +38,9 @@
                 <CoinsIcon />
               </div>
               <div class="text-left">
-                <div class="text-weight-bold custom-btn-text">ECASH</div>
+                <div class="text-weight-bold custom-btn-text">
+                  {{ $t("ReceiveDialog.actions.ecash.label") }}
+                </div>
               </div>
             </div>
           </q-btn>
@@ -49,7 +51,9 @@
                 <ZapIcon />
               </div>
               <div class="text-left">
-                <div class="text-weight-bold custom-btn-text">LIGHTNING</div>
+                <div class="text-weight-bold custom-btn-text">
+                  {{ $t("ReceiveDialog.actions.lightning.label") }}
+                </div>
               </div>
             </div>
           </q-btn>
@@ -132,7 +136,9 @@ export default defineComponent({
     },
     showInvoiceCreateDialog: async function () {
       if (!this.canReceivePayments) {
-        notifyWarning("You need to connect to a mint to receive via Lightning");
+        notifyWarning(
+          this.$i18n.t("ReceiveDialog.actions.lightning.error_no_mints")
+        );
         this.showReceiveDialog = false;
         return;
       }

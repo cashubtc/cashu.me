@@ -1143,6 +1143,33 @@
           </q-list>
         </div>
 
+        <!-- language picker: hidden for till i18n integration is finished -->
+        <div class="q-py-sm q-px-xs text-left hidden" on-left>
+          <q-list padding>
+            <q-item>
+              <q-item-section>
+                <q-item-label overline class="text-weight-bold">{{
+                  $t("Settings.language.title")
+                }}</q-item-label>
+                <q-item-label caption>{{
+                  $t("Settings.language.description")
+                }}</q-item-label>
+              </q-item-section>
+            </q-item>
+            <q-item>
+              <q-select
+                v-model="$i18n.locale"
+                @change="changeLanguage"
+                :options="$i18n.availableLocales"
+                rounded
+                outlined
+                dense
+                style="min-width: 200px"
+              />
+            </q-item>
+          </q-list>
+        </div>
+
         <q-expansion-item
           class="q-pt-lg"
           dense
