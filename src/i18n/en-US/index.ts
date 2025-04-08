@@ -1,3 +1,5 @@
+import { title } from "process";
+
 export default {
   global: {
     copy_to_clipboard: {
@@ -12,6 +14,9 @@ export default {
       },
       close: {
         label: "Close",
+      },
+      enter: {
+        label: "Enter",
       },
       lock: {
         label: "Lock",
@@ -647,7 +652,7 @@ export default {
           "Keyboard disabled. You can re-enable the keyboard in the settings.",
       },
       enter: {
-        label: "Enter",
+        label: "@:global.actions.enter.label",
       },
     },
   },
@@ -781,6 +786,69 @@ export default {
       },
       cancel: {
         label: "@:global.actions.cancel.label",
+      },
+    },
+  },
+  PayInvoiceDialog: {
+    input_data: {
+      title: "Pay Lightning",
+      inputs: {
+        invoice_data: {
+          label: "Lightning invoice or address",
+        },
+      },
+      actions: {
+        close: {
+          label: "@:global.actions.close.label",
+        },
+        enter: {
+          label: "@:global.actions.enter.label",
+        },
+        paste: {
+          label: "@:global.actions.paste.label",
+        },
+        scan: {
+          label: "@:global.actions.scan.label",
+        },
+      },
+    },
+    lnurlpay: {
+      amount_exact_label: "{ payee } is requesting { value } { ticker }",
+      amount_range_label:
+        "{ payee } is requesting{br}between { min } and { max } { ticker }",
+      inputs: {
+        amount: {
+          label: "Amount ({ ticker }) *",
+        },
+        comment: {
+          label: "Comment (optional)",
+        },
+      },
+      actions: {
+        close: {
+          label: "@:global.actions.close.label",
+        },
+        send: {
+          label: "@:global.actions.send.label",
+        },
+      },
+    },
+    invoice: {
+      title: "Pay { value }",
+      memo: {
+        label: "Memo",
+      },
+      processing_info_text: "Processing…",
+      balance_too_low_warning_text: "Balance too low",
+      actions: {
+        close: {
+          label: "@:global.actions.close.label",
+        },
+        pay: {
+          label: "Pay",
+          in_progress: "@:PayInvoiceDialog.invoice.processing_info_text",
+          error: "Error",
+        },
       },
     },
   },
