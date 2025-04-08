@@ -36,6 +36,9 @@ export default {
       swap: {
         label: "Swap",
       },
+      update: {
+        label: "Update",
+      },
     },
   },
   MainHeader: {
@@ -849,6 +852,25 @@ export default {
           in_progress: "@:PayInvoiceDialog.invoice.processing_info_text",
           error: "Error",
         },
+      },
+    },
+  },
+  EditMintDialog: {
+    title: "Edit mint",
+    inputs: {
+      nickname: {
+        label: "Nickname",
+      },
+      url: {
+        label: "Mint URL",
+      },
+    },
+    actions: {
+      cancel: {
+        label: "@:global.actions.cancel.label",
+      },
+      update: {
+        label: "@:global.actions.update.label",
       },
     },
   },
