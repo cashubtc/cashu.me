@@ -4,14 +4,18 @@
     backdrop-filter="blur(2px) brightness(60%)"
   >
     <q-card class="q-pa-lg">
-      <h6 class="q-my-md">Are you sure you want to delete this mint?</h6>
+      <h6 class="q-my-md">{{ $t("RemoveMintDialog.title") }}</h6>
       <div v-if="mintToRemove.nickname">
-        <span class="text-weight-bold"> Nickname: </span>
+        <span class="text-weight-bold"
+          >{{ $t("RemoveMintDialog.nickname.label") }}:
+        </span>
         <span class="text-weight-light"> {{ mintToRemove.nickname }}</span>
       </div>
       <div class="row q-my-md">
         <div class="col">
-          <span class="text-weight-bold">Balances:</span>
+          <span class="text-weight-bold"
+            >{{ $t("RemoveMintDialog.balances.label") }}:</span
+          >
           <q-badge
             v-for="unit in mintClass(mintToRemove).units"
             :key="unit"
@@ -27,18 +31,16 @@
         outlined
         readonly
         :model-value="mintToRemove.url"
-        label="Mint URL"
+        :label="$t('RemoveMintDialog.inputs.url.label')"
         type="textarea"
         autogrow
         class="q-mb-xs"
       ></q-input>
       <div class="row q-my-md">
         <div class="col">
-          <span class="text-caption"
-            >Note: Because this wallet is paranoid, your ecash from this mint
-            will not be actually deleted but will remain stored on your device.
-            You will see it reappear if you re-add this mint later again.</span
-          >
+          <span class="text-caption">{{
+            $t("RemoveMintDialog.warning_text")
+          }}</span>
         </div>
       </div>
       <div class="row q-mt-lg">
@@ -49,13 +51,13 @@
             color="primary"
             rounded
             @click="removeMintLocal"
-            >Remove mint</q-btn
+            >{{ $t("RemoveMintDialog.actions.confirm.label") }}</q-btn
           >
         </div>
         <div class="col">
-          <q-btn v-close-popup flat color="grey" class="float-right"
-            >Cancel</q-btn
-          >
+          <q-btn v-close-popup flat color="grey" class="float-right">{{
+            $t("RemoveMintDialog.actions.cancel.label")
+          }}</q-btn>
         </div>
       </div>
     </q-card>

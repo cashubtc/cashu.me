@@ -4,6 +4,9 @@ export default {
       success: "Copied to clipboard!",
     },
     actions: {
+      cancel: {
+        label: "Cancel",
+      },
       copy: {
         label: "Copy",
       },
@@ -566,7 +569,7 @@ export default {
         caption: "Swap { value }",
       },
       cancel_swap: {
-        label: "Cancel",
+        label: "@:global.actions.cancel.label",
         tooltip_text: "Cancel swap",
       },
       confirm_swap: {
@@ -754,6 +757,30 @@ export default {
       },
       show_all: {
         label: "Show all",
+      },
+    },
+  },
+  RemoveMintDialog: {
+    title: "Are you sure you want to delete this mint?",
+    nickname: {
+      label: "Nickname",
+    },
+    balances: {
+      label: "Balances",
+    },
+    warning_text:
+      "Note: Because this wallet is paranoid, your ecash from this mint will not be actually deleted but will remain stored on your device. You will see it reappear if you re-add this mint later again.",
+    inputs: {
+      url: {
+        label: "Mint URL",
+      },
+    },
+    actions: {
+      confirm: {
+        label: "Remove mint",
+      },
+      cancel: {
+        label: "@:global.actions.cancel.label",
       },
     },
   },
