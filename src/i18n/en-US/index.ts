@@ -716,6 +716,28 @@ export default {
     badge_mint_error_text: "Error",
     badge_option_mint_error_text: "@:ChooseMint.badge_mint_error_text",
   },
+  HistoryTable: {
+    empty_text: "No history yet",
+    token: {
+      type_label: "Ecash",
+      date_label: "{ value } ago",
+    },
+    actions: {
+      check_status: {
+        tooltip_text: "Check status",
+      },
+      receive: {
+        tooltip_text: "Receive",
+      },
+      filter_pending: {
+        label: "Filter pending",
+      },
+      show_all: {
+        label: "Show all",
+      },
+    },
+    old_token_not_found_error_text: "Old token not found",
+  },
   restore: {
     mnemonic_error_text: "Please enter a mnemonic",
     restore_mint_error_text: "Error restoring mint: { error }",

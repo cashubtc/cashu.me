@@ -40,10 +40,14 @@
             <!-- {{
               token.token.slice(0, 10) + "..." + token.token.slice(-8)
             }} -->
-            Ecash
+            {{ $t("HistoryTable.token.type_label") }}
           </q-item-label>
-          <q-item-label caption
-            >{{ formattedDate(token.date) }} ago</q-item-label
+          <q-item-label caption>
+            {{
+              $t("HistoryTable.token.date_label", {
+                value: formattedDate(token.date),
+              })
+            }}</q-item-label
           >
         </q-item-section>
 
@@ -57,7 +61,9 @@
             v-if="token.status === 'pending' && token.amount < 0"
             style="position: absolute; right: 0"
           >
-            <q-tooltip>Check status</q-tooltip>
+            <q-tooltip>{{
+              $t("HistoryTable.actions.check_status.tooltip_text")
+            }}</q-tooltip>
           </q-btn>
           <q-btn
             flat
@@ -68,7 +74,9 @@
             v-if="token.status === 'pending' && token.amount > 0"
             style="position: absolute; right: 0"
           >
-            <q-tooltip>Receive</q-tooltip>
+            <q-tooltip>{{
+              $t("HistoryTable.actions.receive.tooltip_text")
+            }}</q-tooltip>
           </q-btn>
         </q-item-section>
       </q-item>
@@ -80,13 +88,21 @@
         dense
         @click="filterPending = !filterPending"
         :color="filterPending ? 'primary' : 'grey'"
-        :label="filterPending ? 'Show all' : 'Filter pending'"
+        :label="
+          $t(
+            filterPending
+              ? 'HistoryTable.actions.show_all.label'
+              : 'HistoryTable.actions.filter_pending.label'
+          )
+        "
         class="q-ml-sm q-px-md"
         size="sm"
       />
     </div>
     <div v-if="paginatedTokens.length === 0" class="text-center q-mt-lg">
-      <q-item-label caption class="text-primary">No history yet</q-item-label>
+      <q-item-label caption class="text-primary">{{
+        $t("HistoryTable.empty_text")
+      }}</q-item-label>
     </div>
     <div v-else-if="maxPages > 1" class="text-center q-mt-lg">
       <div style="display: flex; justify-content: center">
@@ -176,7 +192,7 @@ export default defineComponent({
     },
     showTokenDialog: function (historyToken) {
       if (historyToken.token === undefined) {
-        notify("Old token not found");
+        notify(this.$i18n.t("HistoryTable.old_token_not_found_error_text"));
         return;
       }
       const tokensBase64 = historyToken.token;
