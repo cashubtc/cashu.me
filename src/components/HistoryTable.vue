@@ -40,11 +40,11 @@
             <!-- {{
               token.token.slice(0, 10) + "..." + token.token.slice(-8)
             }} -->
-            {{ $t("HistoryTable.token.type_label") }}
+            {{ $t("HistoryTable.row.type_label") }}
           </q-item-label>
           <q-item-label caption>
             {{
-              $t("HistoryTable.token.date_label", {
+              $t("HistoryTable.row.date_label", {
                 value: formattedDate(token.date),
               })
             }}</q-item-label

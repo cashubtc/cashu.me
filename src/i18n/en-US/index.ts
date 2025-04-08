@@ -718,7 +718,7 @@ export default {
   },
   HistoryTable: {
     empty_text: "No history yet",
-    token: {
+    row: {
       type_label: "Ecash",
       date_label: "{ value } ago",
     },
@@ -737,6 +737,25 @@ export default {
       },
     },
     old_token_not_found_error_text: "Old token not found",
+  },
+  InvoiceTable: {
+    empty_text: "No invoices yet",
+    row: {
+      type_label: "Lightning",
+      type_tooltip_text: "Click to copy",
+      date_label: "{ value } ago",
+    },
+    actions: {
+      check_status: {
+        tooltip_text: "Check status",
+      },
+      filter_pending: {
+        label: "Filter pending",
+      },
+      show_all: {
+        label: "Show all",
+      },
+    },
   },
   restore: {
     mnemonic_error_text: "Please enter a mnemonic",
