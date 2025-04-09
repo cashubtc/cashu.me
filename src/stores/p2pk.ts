@@ -96,14 +96,49 @@ export const useP2PKStore = defineStore("p2pk", {
       };
       this.p2pkKeys = this.p2pkKeys.concat(keyPair);
     },
-    getSecretP2PKPubkey: function (secret: string) {
+    getSecretP2PKPubkey: function (secret: string): string {
       try {
         let secretObject = JSON.parse(secret);
-        if (secretObject[0] == "P2PK" && secretObject[1]["data"] != undefined) {
-          return secretObject[1]["data"];
+        if (secretObject[0] != "P2PK" || secretObject[1]["data"] == undefined) {
+          console.log("not p2pk locked");
+          return ""; // not p2pk locked
         }
+        // Get all the p2pk secret data
+        const now = Math.floor(Date.now() / 1000); // unix TS
+        const { data, tags } = secretObject[1];
+        const locktimeTag = tags && tags.find((tag) => tag[0] === "locktime");
+        const locktime = locktimeTag ? parseInt(locktimeTag[1], 10) : Infinity; // Permanent lock if not set
+        const refundTag = tags && tags.find((tag) => tag[0] === "refund");
+        const refundKeys =
+          refundTag && refundTag.length > 1 ? refundTag.slice(1) : [];
+        const pubkeysTag = tags && tags.find((tag) => tag[0] === "pubkeys");
+        const pubkeys =
+          pubkeysTag && pubkeysTag.length > 1 ? pubkeysTag.slice(1) : [];
+        const n_sigsTag = tags && tags.find((tag) => tag[0] === "n_sigs");
+        const n_sigs = n_sigsTag ? parseInt(n_sigsTag[1], 10) : undefined;
+        // If locktime is in the future, return first owned additional 'pubkeys'
+        // match if multisig ('n_sigs'), otherwise return the main key ('data')
+        if (locktime > now) {
+          console.log("p2pk token - locktime is active");
+          if (n_sigs && n_sigs >= 1) {
+            for (const pk of pubkeys) {
+              if (this.haveThisKey(pk)) return pk;
+            }
+          }
+          return data; // Main lock key (shows locked state)
+        }
+        // If locktime expired, return first owned 'refund' key match or
+        // or just return the first refund key to show token is locked
+        if (refundKeys.length > 0) {
+          console.log("p2pk token - locked to refund keys");
+          for (const pk of refundKeys) {
+            if (this.haveThisKey(pk)) return pk;
+          }
+          return refundKeys[0]; // First refund key (shows locked state)
+        }
+        console.log("p2pk token - lock has expired");
       } catch {}
-      return "";
+      return ""; // Token is not locked / secret is not P2PK
     },
     isLocked: function (proofs: WalletProof[]) {
       const secrets = proofs.map((p) => p.secret);
