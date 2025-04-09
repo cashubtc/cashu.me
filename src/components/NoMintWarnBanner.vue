@@ -22,7 +22,7 @@
           rounded
           color="primary"
           class="q-px-md"
-          :label="$t('NoMintWarnBanner.actions.addMint.label')"
+          :label="$t('NoMintWarnBanner.actions.add_mint.label')"
           @click="handleAddMintClick"
         />
       </div>

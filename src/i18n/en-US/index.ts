@@ -6,6 +6,9 @@ export default {
       success: "Copied to clipboard!",
     },
     actions: {
+      add_mint: {
+        label: "Add mint",
+      },
       cancel: {
         label: "Cancel",
       },
@@ -115,8 +118,8 @@ export default {
     subtitle:
       "You haven't joined any Cashu mint yet. Add a mint URL in the settings or receive ecash from a new mint to get started.",
     actions: {
-      addMint: {
-        label: "Add mint",
+      add_mint: {
+        label: "@:global.actions.add_mint.label",
       },
       receive: {
         label: "Receive Ecash",
@@ -343,8 +346,8 @@ export default {
         },
       },
       actions: {
-        add: {
-          label: "Add mint",
+        add_mint: {
+          label: "@:global.actions.add_mint.label",
           error_invalid_url: "Invalid URL",
         },
         scan: {
@@ -871,6 +874,25 @@ export default {
       },
       update: {
         label: "@:global.actions.update.label",
+      },
+    },
+  },
+  AddMintDialog: {
+    title: "Do you trust this mint?",
+    description:
+      "Before using this mint, make sure you trust it. Mints could become malicious or cease operation at any time.",
+    inputs: {
+      url: {
+        label: "Mint URL",
+      },
+    },
+    actions: {
+      cancel: {
+        label: "@:global.actions.cancel.label",
+      },
+      add_mint: {
+        label: "@:global.actions.add_mint.label",
+        in_progress: "Adding mint",
       },
     },
   },

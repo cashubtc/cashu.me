@@ -241,7 +241,7 @@
               :class="{ 'text-grey-7': addMintData.url.length === 0 }"
             >
               <q-icon name="add" size="20px" class="q-mr-sm" />
-              <span>{{ $t("MintSettings.add.actions.add.label") }}</span>
+              <span>{{ $t("MintSettings.add.actions.add_mint.label") }}</span>
             </q-btn>
 
             <q-btn flat @click="showCamera" class="text-white">
@@ -606,7 +606,7 @@ export default defineComponent({
       }
       if (!this.validateMintUrl(this.addMintData.url)) {
         notifyError(
-          this.$i18n.t("MintSettings.add.actions.add.error_invalid_url")
+          this.$i18n.t("MintSettings.add.actions.add_mint.error_invalid_url")
         );
         return;
       }
