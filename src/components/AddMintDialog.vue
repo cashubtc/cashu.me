@@ -13,7 +13,7 @@
         outlined
         readonly
         v-model="mintUrl"
-        :label="$t('AddMintDialog.inputs.url.label')"
+        :label="$t('AddMintDialog.inputs.mint_url.label')"
         type="textarea"
         autogrow
         class="q-mb-xs"

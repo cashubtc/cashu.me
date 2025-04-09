@@ -8,7 +8,7 @@
       <q-input
         outlined
         v-model="editMintData.url"
-        :label="$t('EditMintDialog.inputs.url.label')"
+        :label="$t('EditMintDialog.inputs.mint_url.label')"
         type="textarea"
         autogrow
         class="q-mb-xs"

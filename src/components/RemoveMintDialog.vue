@@ -31,7 +31,7 @@
         outlined
         readonly
         :model-value="mintToRemove.url"
-        :label="$t('RemoveMintDialog.inputs.url.label')"
+        :label="$t('RemoveMintDialog.inputs.mint_url.label')"
         type="textarea"
         autogrow
         class="q-mb-xs"

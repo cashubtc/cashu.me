@@ -43,6 +43,11 @@ export default {
         label: "Update",
       },
     },
+    inputs: {
+      mint_url: {
+        label: "Mint URL",
+      },
+    },
   },
   MainHeader: {
     menu: {
@@ -782,8 +787,8 @@ export default {
     warning_text:
       "Note: Because this wallet is paranoid, your ecash from this mint will not be actually deleted but will remain stored on your device. You will see it reappear if you re-add this mint later again.",
     inputs: {
-      url: {
-        label: "Mint URL",
+      mint_url: {
+        label: "@:global.inputs.mint_url.label",
       },
     },
     actions: {
@@ -864,8 +869,8 @@ export default {
       nickname: {
         label: "Nickname",
       },
-      url: {
-        label: "Mint URL",
+      mint_url: {
+        label: "@:global.inputs.mint_url.label",
       },
     },
     actions: {
@@ -882,8 +887,8 @@ export default {
     description:
       "Before using this mint, make sure you trust it. Mints could become malicious or cease operation at any time.",
     inputs: {
-      url: {
-        label: "Mint URL",
+      mint_url: {
+        label: "@:global.inputs.mint_url.label",
       },
     },
     actions: {
