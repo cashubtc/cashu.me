@@ -148,14 +148,16 @@ export default defineComponent({
       this.invoiceData = invoice;
       this.showInvoiceDetails = true;
       if (invoice.status === "pending") {
-        try {
-          await this.checkInvoice(invoice.quote, false, false);
-        } catch (e) {
-          this.mintOnPaid(invoice.quote, false, true, false);
+        if (invoice.amount > 0) {
+          try {
+            await this.checkInvoice(invoice.quote, false, false);
+          } catch (e) {
+            this.mintOnPaid(invoice.quote, false, true, false);
+          }
+        } else {
+          this.checkOutgoingInvoice(invoice.quote, true);
         }
       }
-      // useInvoicesWorkerStore().addInvoiceToChecker(invoice.quote);
-      // this.tab("invoice");
     },
     formattedDate(date_str) {
       const date = parseISO(date_str); // Convert string to date object
