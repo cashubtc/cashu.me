@@ -73,6 +73,7 @@ export type InvoiceHistory = Invoice & {
   mint: string;
   unit: string;
   mintQuote?: MintQuoteResponse;
+  meltQuote?: MeltQuoteResponse;
 };
 
 type KeysetCounter = {
@@ -832,7 +833,7 @@ export const useWalletStore = defineStore("wallet", {
           mint: mintWallet.mint.mintUrl,
         });
 
-        this.updateInvoiceInHistory(quote, {
+        this.updateOutgoingInvoiceInHistory(quote, {
           status: "paid",
           amount: -amount_paid,
         });
@@ -855,6 +856,8 @@ export const useWalletStore = defineStore("wallet", {
           console.log(
             "### melt: error, but quote is paid or pending. not rolling back."
           );
+          this.payInvoiceData.show = false;
+          notify("Payment pending. Refresh invoice manually.");
           throw error;
         }
         // roll back proof management and keyset counter
@@ -1071,19 +1074,20 @@ export const useWalletStore = defineStore("wallet", {
       const proofs: Proof[] = await proofsStore.getProofsForQuote(quote);
       try {
         // this is an outgoing invoice, we first do a getMintQuote to check if the invoice is paid
-        const mintQuote = await mintWallet.mint.checkMeltQuote(quote);
-        if (mintQuote.state == MeltQuoteState.PENDING) {
+        const meltQuote = await mintWallet.mint.checkMeltQuote(quote);
+        this.updateOutgoingInvoiceInHistory(meltQuote);
+        if (meltQuote.state == MeltQuoteState.PENDING) {
           console.log("### mintQuote not paid yet");
           if (verbose) {
             notify("Invoice still pending");
           }
           throw new Error("invoice not paid yet.");
-        } else if (mintQuote.state == MeltQuoteState.UNPAID) {
+        } else if (meltQuote.state == MeltQuoteState.UNPAID) {
           // we assume that the payment failed and we unset the proofs as reserved
           await useProofsStore().setReserved(proofs, false);
           this.removeOutgoingInvoiceFromHistory(quote);
           notifyWarning("Lightning payment failed");
-        } else if (mintQuote.state == MeltQuoteState.PAID) {
+        } else if (meltQuote.state == MeltQuoteState.PAID) {
           // if the invoice is paid, we check if all proofs are spent and if so, we invalidate them and set the invoice state in the history to "paid"
           const spentProofs = await this.checkProofsSpendable(
             proofs,
@@ -1285,6 +1289,7 @@ export const useWalletStore = defineStore("wallet", {
         status: "pending",
         mint: mintStore.activeMintUrl,
         unit: mintStore.activeUnit,
+        meltQuote: quote,
       });
     },
     removeOutgoingInvoiceFromHistory: function (quote: string) {
@@ -1293,7 +1298,7 @@ export const useWalletStore = defineStore("wallet", {
         this.invoiceHistory.splice(index, 1);
       }
     },
-    updateInvoiceInHistory: function (
+    updateOutgoingInvoiceInHistory: function (
       quote: MeltQuoteResponse,
       options?: { status?: "pending" | "paid"; amount?: number }
     ) {
@@ -1307,6 +1312,7 @@ export const useWalletStore = defineStore("wallet", {
             if (options.amount) {
               i.amount = options.amount;
             }
+            i.meltQuote = quote;
           }
         });
     },
