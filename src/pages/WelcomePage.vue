@@ -54,7 +54,7 @@
 <script>
 import { onMounted, ref } from "vue";
 import { useWelcomeStore } from "src/stores/welcome";
-import { useMintsStore } from "src/stores/mints";
+import { useStorageStore } from "src/stores/storage";
 import WelcomeSlide1 from "./welcome/WelcomeSlide1.vue";
 import WelcomeSlide2 from "./welcome/WelcomeSlide2.vue";
 import WelcomeSlide3 from "./welcome/WelcomeSlide3.vue";
@@ -70,7 +70,7 @@ export default {
   },
   setup() {
     const welcomeStore = useWelcomeStore();
-    const mintsStore = useMintsStore();
+    const storageStore = useStorageStore();
     const fileUpload = ref(null);
 
     const onChangeFileUpload = () => {
@@ -82,7 +82,7 @@ export default {
       const reader = new FileReader();
       reader.onload = (f) => {
         const backup = JSON.parse(f.target.result);
-        mintsStore.restoreFromBackup(backup);
+        storageStore.restoreFromBackup(backup);
       };
       reader.readAsText(file);
     };

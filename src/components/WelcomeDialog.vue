@@ -99,8 +99,8 @@
 <script>
 import { defineComponent } from "vue";
 import { mapActions, mapState } from "pinia";
-import { useMintsStore } from "stores/mints";
 import { useWalletStore } from "src/stores/wallet";
+import { useStorageStore } from "src/stores/storage";
 
 export default defineComponent({
   name: "WelcomeDialog",
@@ -120,7 +120,7 @@ export default defineComponent({
     ...mapState(useWalletStore, ["mnemonic"]),
   },
   methods: {
-    ...mapActions(useMintsStore, ["restoreFromBackup"]),
+    ...mapActions(useStorageStore, ["restoreFromBackup"]),
     readFile(file) {
       let reader = new FileReader();
       reader.onload = (f) => {
