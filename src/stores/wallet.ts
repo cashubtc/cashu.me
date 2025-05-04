@@ -724,7 +724,10 @@ export const useWalletStore = defineStore("wallet", {
       const mintStore = useMintsStore();
       let data;
       if (mpp_amount) {
-        data = await wallet.createMultiPathMeltQuote(request, mpp_amount);
+        data = await wallet.createMultiPathMeltQuote(
+          request,
+          mpp_amount * 1000
+        );
       } else {
         data = await wallet.createMeltQuote(request);
       }
