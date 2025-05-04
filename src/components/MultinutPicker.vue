@@ -185,7 +185,7 @@ export default defineComponent({
               activeUnit
             );
             const mintClass = new MintClass(mint);
-            const proofs = mintClass.unitProofs(activeUnit)
+            const proofs = mintClass.unitProofs(activeUnit);
             return this.melt(proofs, quote, mintWallet, true);
           })
         );
