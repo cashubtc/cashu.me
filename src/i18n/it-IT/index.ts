@@ -135,7 +135,7 @@ export default {
       },
       restore_ecash: {
         title: "Ripristina ecash",
-        description: "La procedura guidata di ripristino ti consente di recuperare ecash perso da una frase seed mnemonica. La frase seed del tuo portafoglio attuale rimarrà invariata, la procedura guidata ti consentirà solo di <i>ripristinare</i> ecash da un'altra frase seed.",
+        description: "La procedura guidata di ripristino consente di recuperare ecash perso da una frase mnemonica. La frase seed del tuo portafoglio attuale rimarrà inalterata, la procedura guidata ti consentirà solo di ripristinare ecash da un'altra frase seed.",
         button: "Ripristina"
       }
     },

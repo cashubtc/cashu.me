@@ -134,8 +134,8 @@ export default {
         seed_phrase_label: "Phrase de départ",
       },
       restore_ecash: {
-        title: "Restaurer l'ecash",
-        description: "L'assistant de restauration vous permet de récupérer l'ecash perdu à partir d'une phrase mnémonique. La phrase de départ de votre portefeuille actuel restera inchangée, l'assistant vous permettra uniquement de <i>restaurer</i> l'ecash à partir d'une autre phrase de départ.",
+        title: "Restaurer ecash",
+        description: "L'assistant de restauration vous permet de récupérer l'ecash perdu à partir d'une phrase mnémonique. La phrase de départ de votre portefeuille actuel ne sera pas affectée, l'assistant vous permettra uniquement de restaurer l'ecash à partir d'une autre phrase de départ.",
         button: "Restaurer"
       }
     },

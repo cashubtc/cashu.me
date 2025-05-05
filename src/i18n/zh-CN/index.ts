@@ -135,7 +135,7 @@ export default {
       },
       restore_ecash: {
         title: "恢复 ecash",
-        description: "恢复向导允许您从助记符种子短语中恢复丢失的 ecash。您当前钱包的种子短语不会受到影响，该向导仅允许您从另一个种子短语中<i>恢复</i> ecash。",
+        description: "恢复向导允许您从助记符种子短语中恢复丢失的 ecash。您当前钱包的种子短语不会受到影响，该向导仅允许您从另一个种子短语中 恢复 ecash。",
         button: "恢复"
       }
     },

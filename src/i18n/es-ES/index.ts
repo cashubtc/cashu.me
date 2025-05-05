@@ -135,7 +135,7 @@ export default {
       },
       restore_ecash: {
         title: "Restaurar ecash",
-        description: "El asistente de restauración te permite recuperar ecash perdido desde una frase semilla mnemónica. La frase semilla de tu billetera actual no se verá afectada, el asistente solo te permitirá <i>restaurar</i> ecash desde otra frase semilla.",
+        description: "El asistente de restauración te permite recuperar ecash perdido desde una frase semilla mnemónica. La frase semilla de tu billetera actual no se verá afectada, el asistente solo te permitirá restaurar ecash desde otra frase semilla.",
         button: "Restaurar"
       }
     },

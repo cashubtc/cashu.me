@@ -135,7 +135,7 @@ export default {
       },
       restore_ecash: {
         title: "Återställ ecash",
-        description: "Återställningsguiden låter dig återställa förlorad ecash från en mnemonisk återställningsfras. Din nuvarande plånboks återställningsfras förblir opåverkad, guiden tillåter dig endast att <i>återställa</i> ecash från en annan återställningsfras.",
+        description: "Återställningsguiden låter dig återställa förlorad ecash från en mnemonisk återställningsfras. Din nuvarande plånboks återställningsfras kommer inte att påverkas, guiden tillåter dig endast att återställa ecash från en annan återställningsfras.",
         button: "Återställ"
       }
     },

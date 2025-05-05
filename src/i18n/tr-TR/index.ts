@@ -135,7 +135,7 @@ export default {
       },
       restore_ecash: {
         title: "Ecash'i geri yükle",
-        description: "Geri yükleme sihirbazı, kayıp ecash'inizi anımsatıcı kurtarma kelimelerinden kurtarmanızı sağlar. Mevcut cüzdanınızın kurtarma kelimeleri etkilenmeyecektir, sihirbaz yalnızca başka bir kurtarma kelimesinden ecash'i <i>geri yüklemenizi</i> sağlayacaktır.",
+        description: "Geri yükleme sihirbazı, kayıp ecash'inizi anımsatıcı kurtarma kelimelerinden kurtarmanıza olanak tanır. Mevcut cüzdanınızın kurtarma kelimeleri etkilenmeyecektir, sihirbaz yalnızca başka bir kurtarma kelimesinden ecash'i geri yüklemenizi sağlayacaktır.",
         button: "Geri Yükle"
       }
     },

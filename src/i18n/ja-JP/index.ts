@@ -135,7 +135,7 @@ export default {
       },
       restore_ecash: {
         title: "ecashを復元",
-        description: "復元ウィザードを使用すると、ニーモニックシードフレーズから失われたecashを回復できます。現在のウォレットのシードフレーズは影響を受けず、ウィザードでは別のシードフレーズからecashを<i>復元</i>することのみが可能です。",
+        description: "復元ウィザードを使用すると、ニーモニックシードフレーズから失われたecashを回復できます。現在のウォレットのシードフレーズは影響を受けず、ウィザードでは別のシードフレーズからecashを復元することのみが可能です。",
         button: "復元"
       }
     },
@@ -646,7 +646,7 @@ export default {
           label: "へ",
         },
         amount: {
-          label: "金額 ({ ticker }))",
+          label: "金額 ({ ticker })",
         },
       },
       actions: {

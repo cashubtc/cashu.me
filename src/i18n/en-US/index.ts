@@ -135,7 +135,7 @@ export default {
       },
       restore_ecash: {
         title: "Restore ecash",
-        description: "The restore wizard lets you recover lost ecash from a mnemonic seed phrase. The seed phrase of your current wallet will remain unaffected, the wizard will only allow you to <i>restore</i> ecash from another seed phrase.",
+        description: "The restore wizard lets you recover lost ecash from a mnemonic seed phrase. The seed phrase of your current wallet will remain unaffected, the wizard will only allow you to restore ecash from another seed phrase.",
         button: "Restore"
       }
     },

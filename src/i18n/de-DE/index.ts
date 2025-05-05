@@ -135,7 +135,7 @@ export default {
       },
       restore_ecash: {
         title: "Ecash wiederherstellen",
-        description: "Der Wiederherstellungsassistent ermöglicht es Ihnen, verlorenen Ecash aus einer mnemonischen Seed-Phrase wiederherzustellen. Die Seed-Phrase Ihrer aktuellen Wallet bleibt unberührt, der Assistent ermöglicht Ihnen nur, Ecash von einer anderen Seed-Phrase zu <i>restaurieren</i>.",
+        description: "Der Wiederherstellungs-Assistent ermöglicht es Ihnen, verlorenes Ecash von einer mnemonischen Seed-Phrase wiederherzustellen. Die Seed-Phrase Ihrer aktuellen Wallet bleibt unverändert, der Assistent erlaubt es Ihnen lediglich, Ecash von einer anderen Seed-Phrase zu restaurieren.",
         button: "Wiederherstellen"
       }
     },

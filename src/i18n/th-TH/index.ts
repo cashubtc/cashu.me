@@ -135,7 +135,7 @@ export default {
       },
       restore_ecash: {
         title: "Återställ ecash",
-        description: "Återställningsguiden låter dig återställa förlorad ecash från en mnemnisk seed-fras. Seed-frasen för din nuvarande plånbok påverkas inte, guiden låter dig bara <i>återställa</i> ecash från en annan seed-fras.",
+        description: "Återställningsguiden låter dig återställa förlorad ecash från en mnemonic seed-fras. Din nuvarande plånboks seed-fras kommer inte att påverkas, guiden låter dig bara återställa ecash från en annan seed-fras.",
         button: "Återställ"
       }
     },
