@@ -369,7 +369,11 @@ export default {
     ]),
     ...mapActions(useCameraStore, ["closeCamera", "showCamera"]),
     ...mapActions(useNWCStore, ["listenToNWCCommands"]),
-    ...mapActions(useNPCStore, ["generateNPCConnection", "claimAllTokens"]),
+    ...mapActions(useNPCStore, [
+      "generateNPCConnection",
+      "claimAllTokens",
+      "getLatestQuotes",
+    ]),
     ...mapActions(useNostrStore, [
       "sendNip04DirectMessage",
       "sendNip17DirectMessage",
@@ -561,6 +565,7 @@ export default {
     // generate NPC connection
     this.generateNPCConnection();
     this.claimAllTokens();
+    this.getLatestQuotes();
   },
 
   created: async function () {

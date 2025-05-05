@@ -13,11 +13,14 @@ import {
   notifyWarning,
   notify,
 } from "../js/notify";
-import { Proof } from "@cashu/cashu-ts";
+import { MintQuoteState, Proof } from "@cashu/cashu-ts";
 import token from "../js/token";
 import { WalletProof, useMintsStore } from "./mints";
 import { useTokensStore } from "../stores/tokens";
 import { useNostrStore } from "../stores/nostr";
+import { useInvoicesWorkerStore } from "./invoicesWorker";
+import { currentDateStr } from "src/js/utils";
+import { date } from "quasar";
 // type NPCConnection = {
 //   walletPublicKey: string,
 //   walletPrivateKey: string,
@@ -41,6 +44,29 @@ type NPCClaim = {
     token: string;
   };
 };
+
+type NPCQuote = {
+  created_at: number;
+  paid_at: number;
+  mint_url: string;
+  quote_id: string;
+  amount: number;
+  state: "PAID";
+};
+
+type NPCQuoteResponse =
+  | {
+      error: true;
+      message: string;
+    }
+  | {
+      error: false;
+      data: {
+        quotes: NPCQuote[];
+      };
+      metadata: { limit: number; total: number; since?: number };
+    };
+
 type NPCWithdrawl = {
   id: number;
   claim_ids: number[];
@@ -62,11 +88,12 @@ const NIP98Kind = 27235;
 export const useNPCStore = defineStore("npc", {
   state: () => ({
     npcEnabled: useLocalStorage<boolean>("cashu.npc.enabled", false),
+    npcLastCheck: useLocalStorage<number>("cashu.npc.lastCheck", null),
     automaticClaim: useLocalStorage<boolean>("cashu.npc.automaticClaim", true),
     // npcConnections: useLocalStorage<NPCConnection[]>("cashu.npc.connections", []),
     npcAddress: useLocalStorage<string>("cashu.npc.address", ""),
-    npcDomain: useLocalStorage<string>("cashu.npc.domain", "npub.cash"),
-    baseURL: useLocalStorage<string>("cashu.npc.baseURL", "https://npub.cash"),
+    npcDomain: useLocalStorage<string>("cashu.npc.domain", "npubx.cash"),
+    baseURL: useLocalStorage<string>("cashu.npc.baseURL", "https://npubx.cash"),
     npcLoading: false,
     // ndk: new NDK(),
     // signer: {} as NDKPrivateKeySigner,
@@ -155,6 +182,58 @@ export const useNPCStore = defineStore("npc", {
           npub: "",
           username: "",
         };
+      }
+    },
+    getLatestQuotes: async function () {
+      if (!this.npcEnabled) {
+        return;
+      }
+      const invoiceStore = useInvoicesWorkerStore();
+      const walletStore = useWalletStore();
+      const since = this.npcLastCheck ? `?since=${this.npcLastCheck}` : "";
+
+      const quoteUrl = `${this.baseURL}/api/v2/wallet/quotes`;
+      const authHeader = await this.generateNip98Event(quoteUrl, "GET");
+      try {
+        const response = await fetch(quoteUrl + since, {
+          headers: {
+            Authorization: `Nostr ${authHeader}`,
+          },
+        });
+        const resData: NPCQuoteResponse = await response.json();
+        if (resData.error) {
+          return;
+        }
+        resData.data.quotes.forEach((quote) => {
+          if (
+            walletStore.invoiceHistory.find((i) => i.quote === quote.quote_id)
+          ) {
+            return;
+          }
+          walletStore.invoiceHistory.push({
+            mint: quote.mint_url,
+            memo: "123",
+            bolt11: "12345",
+            amount: quote.amount,
+            quote: quote.quote_id,
+            date: date.formatDate(
+              new Date(quote.created_at * 1000),
+              "YYYY-MM-DD HH:mm:ss"
+            ),
+            status: "pending",
+            unit: "sat",
+            mintQuote: {
+              request: "12345",
+              quote: quote.quote_id,
+              state: MintQuoteState.PAID,
+              expiry: 9999999999,
+            },
+          });
+        });
+        // this.npcLastCheck = Math.floor(Date.now() / 1000);
+      } catch (e) {
+        console.error(e);
+        return;
       }
     },
     claimAllTokens: async function () {
