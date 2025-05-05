@@ -261,7 +261,10 @@ export const useNWCStore = defineStore("nwc", {
       // created_at = unix timestamp of date
       // settled_at = unix timestamp of date if status == "paid" else null
 
-      const transactions = transactionsHistory.map(this.mapToNwcTransaction);
+      // According to the NWC spec (NIP47): "Transactions are returned in descending order of creation time."
+      const transactions = transactionsHistory
+        .map(this.mapToNwcTransaction)
+        .sort((a, b) => b.created_at - a.created_at);
 
       return {
         result_type: "list_transactions",

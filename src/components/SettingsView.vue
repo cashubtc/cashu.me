@@ -1551,7 +1551,7 @@ export default defineComponent({
       if (this.hideMnemonic) {
         return this.mnemonic
           .split(" ")
-          .map((w) => "*".repeat(w.length))
+          .map((w) => "*".repeat(6))
           .join(" ");
       } else {
         return this.mnemonic;

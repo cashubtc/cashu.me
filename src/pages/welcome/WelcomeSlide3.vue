@@ -63,7 +63,7 @@ export default {
       if (hideMnemonic.value) {
         return walletStore.mnemonic
           .split(" ")
-          .map((w) => "*".repeat(w.length))
+          .map((w) => "*".repeat(6))
           .join(" ");
       }
       return walletStore.mnemonic;

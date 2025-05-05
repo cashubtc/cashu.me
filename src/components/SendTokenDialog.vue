@@ -1046,6 +1046,7 @@ export default defineComponent({
           mint: this.activeMintUrl,
         };
         this.addPendingToken(historyToken);
+        this.sendData.historyToken = historyToken;
 
         if (!this.g.offline) {
           this.onTokenPaid(historyToken);
