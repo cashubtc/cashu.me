@@ -1,44 +1,44 @@
 export default {
   global: {
     copy_to_clipboard: {
-      success: "Kopierat till urklipp!",
+      success: "คัดลอกไปยังคลิปบอร์ดแล้ว!",
     },
     actions: {
       add_mint: {
-        label: "Lägg till mint",
+        label: "เพิ่ม Mint",
       },
       cancel: {
-        label: "Avbryt",
+        label: "ยกเลิก",
       },
       copy: {
-        label: "Kopiera",
+        label: "คัดลอก",
       },
       close: {
-        label: "Stäng",
+        label: "ปิด",
       },
       enter: {
-        label: "Ange",
+        label: "ป้อน",
       },
       lock: {
-        label: "Lås",
+        label: "ล็อก",
       },
       paste: {
-        label: "Klistra in",
+        label: "วาง",
       },
       receive: {
-        label: "Ta emot",
+        label: "รับ",
       },
       scan: {
-        label: "Skanna",
+        label: "สแกน",
       },
       send: {
-        label: "Skicka",
+        label: "ส่ง",
       },
       swap: {
-        label: "Växla",
+        label: "แลกเปลี่ยน",
       },
       update: {
-        label: "Uppdatera",
+        label: "อัปเดต",
       },
     },
     inputs: {
@@ -50,21 +50,21 @@ export default {
   MainHeader: {
     menu: {
       settings: {
-        title: "Inställningar",
+        title: "การตั้งค่า",
         settings: {
-          title: "Inställningar",
-          caption: "Plånbokens konfiguration",
+          title: "การตั้งค่า",
+          caption: "การกำหนดค่า Wallet",
         },
       },
       terms: {
-        title: "Villkor",
+        title: "เงื่อนไข",
         terms: {
-          title: "Villkor",
-          caption: "Användarvillkor",
+          title: "เงื่อนไข",
+          caption: "ข้อกำหนดในการให้บริการ",
         },
       },
       links: {
-        title: "Länkar",
+        title: "ลิงก์",
         cashuSpace: {
           title: "Cashu.space",
           caption: "cashu.space",
@@ -82,229 +82,229 @@ export default {
           caption: "{'@'}CashuBTC",
         },
         donate: {
-          title: "Donera",
-          caption: "Stöd Cashu",
+          title: "บริจาค",
+          caption: "สนับสนุน Cashu",
         },
       },
     },
     offline: {
       warning: {
-        text: "Offline",
+        text: "ออฟไลน์",
       },
     },
     reload: {
       warning: {
-        text: "Laddar om om { countdown }",
+        text: "โหลดใหม่ใน { countdown }",
       },
     },
     staging: {
       warning: {
-        text: "Staging – använd inte med riktiga pengar!",
+        text: "กำลังทดสอบ – ห้ามใช้กับเงินจริง!",
       },
     },
   },
   FullscreenHeader: {
     actions: {
       back: {
-        label: "Plånbok",
+        label: "Wallet",
       },
     },
   },
   Settings: {
     language: {
-      title: "Språk",
-      description: "Välj önskat språk från listan nedan.",
+      title: "ภาษา",
+      description: "โปรดเลือกภาษาที่คุณต้องการจากรายการด้านล่าง",
     },
     sections: {
-      backup_restore: "SÄKERHETSKOPIERING & ÅTERSTÄLLNING",
-      lightning_address: "LIGHTNING ADRESS",
-      nostr_keys: "NOSTR NYCKLAR",
-      payment_requests: "BETALNINGSFÖRFRÅGNINGAR",
+      backup_restore: "สำรองข้อมูล & กู้คืน",
+      lightning_address: "ที่อยู่ LIGHTNING",
+      nostr_keys: "คีย์ NOSTR",
+      payment_requests: "คำขอชำระเงิน",
       nostr_wallet_connect: "NOSTR WALLET CONNECT",
-      hardware_features: "HARDWARE FUNKTIONER",
-      p2pk_features: "P2PK FUNKTIONER",
-      privacy: "INTEGRITET",
-      experimental: "EXPERIMENTELLT",
-      appearance: "UTSEENDE"
+      hardware_features: "คุณสมบัติฮาร์ดแวร์",
+      p2pk_features: "คุณสมบัติ P2PK",
+      privacy: "ความเป็นส่วนตัว",
+      experimental: "ทดลอง",
+      appearance: "รูปลักษณ์"
     },
     backup_restore: {
       backup_seed: {
-        title: "Säkerhetskopiera seed-fras",
-        description: "Din seed-fras kan återställa din plånbok. Håll den säker och privat.",
-        seed_phrase_label: "Seed-fras",
+        title: "สำรองวลีกู้คืน",
+        description: "วลีกู้คืนของคุณสามารถกู้คืน Wallet ของคุณได้ เก็บไว้ให้ปลอดภัยและเป็นส่วนตัว",
+        seed_phrase_label: "วลีกู้คืน",
       },
       restore_ecash: {
-        title: "Återställ ecash",
-        description: "Återställningsguiden låter dig återställa förlorad ecash från en mnemonic seed-fras. Din nuvarande plånboks seed-fras kommer inte att påverkas, guiden låter dig bara återställa ecash från en annan seed-fras.",
-        button: "Återställ"
+        title: "กู้คืน ecash",
+        description: "วิซาร์ดการกู้คืนช่วยให้คุณกู้คืน ecash ที่สูญหายจากวลีกู้คืนแบบ Mnemonic ได้ วลีกู้คืนของ Wallet ปัจจุบันของคุณจะไม่ได้รับผลกระทบ วิซาร์ดจะอนุญาตให้คุณ <i>กู้คืน</i> ecash จากวลีกู้คืนอื่นเท่านั้น",
+        button: "กู้คืน"
       }
     },
     lightning_address: {
-      title: "Lightning adress",
-      description: "Ta emot betalningar till din Lightning adress.",
+      title: "ที่อยู่ Lightning",
+      description: "รับการชำระเงินไปยังที่อยู่ Lightning ของคุณ",
       enable: {
-        toggle: "Aktivera",
-        description: "Lightning adress med npub.cash"
+        toggle: "เปิดใช้งาน",
+        description: "ที่อยู่ Lightning กับ npub.cash"
       },
       address: {
-        copy_tooltip: "Kopiera Lightning adress"
+        copy_tooltip: "คัดลอกที่อยู่ Lightning"
       },
       automatic_claim: {
-        toggle: "Kräv automatiskt",
-        description: "Ta emot inkommande betalningar automatiskt."
+        toggle: "รับอัตโนมัติ",
+        description: "รับการชำระเงินขาเข้าโดยอัตโนมัติ"
       }
     },
     nostr_keys: {
-      title: "Dina Nostr-nycklar",
-      description: "Ställ in Nostr-nycklarna för din Lightning-adress.",
+      title: "คีย์ Nostr ของคุณ",
+      description: "ตั้งค่าคีย์ nostr สำหรับที่อยู่ Lightning ของคุณ",
       wallet_seed: {
-        title: "Plånbokens seed-fras",
-        description: "Generera Nostr-nyckelpar från plånbokens seed",
-        copy_nsec: "Kopiera nsec"
+        title: "วลีกู้คืน Wallet",
+        description: "สร้างคู่คีย์ nostr จากวลีกู้คืน Wallet",
+        copy_nsec: "คัดลอก nsec"
       },
       nsec_bunker: {
         title: "Nsec Bunker",
-        description: "Använd en NIP-46 bunker",
-        delete_tooltip: "Radera anslutning"
+        description: "ใช้ NIP-46 bunker",
+        delete_tooltip: "ลบการเชื่อมต่อ"
       },
       use_nsec: {
-        title: "Använd din nsec",
-        description: "Denna metod är farlig och rekommenderas inte",
-        delete_tooltip: "Radera nsec"
+        title: "ใช้ nsec ของคุณ",
+        description: "วิธีนี้อันตรายและไม่แนะนำ",
+        delete_tooltip: "ลบ nsec"
       },
       signing_extension: {
-        title: "Signeringsutökning",
-        description: "Använd en NIP-07 signeringsutökning",
-        not_found: "Ingen NIP-07 signeringsutökning hittades"
+        title: "ส่วนขยายการลงนาม",
+        description: "ใช้ส่วนขยายการลงนาม NIP-07",
+        not_found: "ไม่พบส่วนขยายการลงนาม NIP-07"
       }
     },
     payment_requests: {
-      title: "Betalningsförfrågningar",
-      description: "Betalningsförfrågningar låter dig ta emot betalningar via nostr. Om du aktiverar detta kommer din plånbok att prenumerera på dina nostr-relays.",
-      enable_toggle: "Aktivera betalningsförfrågningar",
+      title: "คำขอชำระเงิน",
+      description: "คำขอชำระเงินช่วยให้คุณรับการชำระเงินผ่าน nostr ได้ หากเปิดใช้งาน Wallet ของคุณจะสมัครสมาชิก Nostr relays ของคุณ",
+      enable_toggle: "เปิดใช้งานคำขอชำระเงิน",
       claim_automatically: {
-        toggle: "Kräv automatiskt",
-        description: "Ta emot inkommande betalningar automatiskt."
+        toggle: "รับอัตโนมัติ",
+        description: "รับการชำระเงินขาเข้าโดยอัตโนมัติ"
       }
     },
     nostr_wallet_connect: {
       title: "Nostr Wallet Connect (NWC)",
-      description: "Använd NWC för att styra din plånbok från vilken annan applikation som helst.",
-      enable_toggle: "Aktivera NWC",
-      payments_note: "Du kan endast använda NWC för betalningar från ditt Bitcoin-saldo. Betalningar kommer att göras från din aktiva mint.",
+      description: "ใช้ NWC เพื่อควบคุม Wallet ของคุณจากแอปพลิเคชันอื่นใด",
+      enable_toggle: "เปิดใช้งาน NWC",
+      payments_note: "คุณสามารถใช้ NWC สำหรับการชำระเงินจากยอดคงเหลือ Bitcoin ของคุณเท่านั้น การชำระเงินจะทำจาก Mint ที่เปิดใช้งานของคุณ",
       connection: {
-        copy_tooltip: "Kopiera anslutningssträng",
-        qr_tooltip: "Visa QR-kod",
-        allowance_label: "Tillåtet kvar (sat)"
+        copy_tooltip: "คัดลอกสตริงการเชื่อมต่อ",
+        qr_tooltip: "แสดงรหัส QR",
+        allowance_label: "ยอดคงเหลือที่เหลือ (sat)"
       },
       relays: {
-        expand_label: "Klicka för att redigera relays",
+        expand_label: "คลิกเพื่อแก้ไข relays",
         add: {
-          title: "Lägg till relay",
-          description: "Nostr Wallet Connect använder nostr-relays för att ansluta din plånbok till andra applikationer."
+          title: "เพิ่ม relay",
+          description: "Nostr Wallet Connect ใช้ Nostr relays เพื่อเชื่อมต่อ Wallet ของคุณกับแอปพลิเคชันอื่น"
         },
         list: {
           title: "Relays",
-          description: "Din plånbok kommer att ansluta till dessa relays.",
-          copy_tooltip: "Kopiera relay",
-          remove_tooltip: "Ta bort relay"
+          description: "Wallet ของคุณจะเชื่อมต่อกับ relays เหล่านี้",
+          copy_tooltip: "คัดลอก relay",
+          remove_tooltip: "ลบ relay"
         }
       }
     },
     hardware_features: {
       webnfc: {
         title: "WebNFC",
-        description: "Välj kodning för att skriva till NFC-kort",
+        description: "เลือกการเข้ารหัสสำหรับการเขียนลงในการ์ด NFC",
         text: {
-          title: "Text",
-          description: "Lagra token som klartext"
+          title: "ข้อความ",
+          description: "เก็บ token ในรูปแบบข้อความธรรมดา"
         },
         weburl: {
           title: "URL",
-          description: "Lagra URL till denna plånbok med token"
+          description: "เก็บ URL ไปยัง Wallet นี้พร้อม token"
         },
         binary: {
-          title: "Rå binär",
-          description: "Råa byte istället för Base64. Gör token ~33% kortare."
+          title: "ไบนารีดิบ",
+          description: "ไบต์ดิบแทน Base64 ทำให้ token สั้นลงประมาณ 33%"
         },
         quick_access: {
-          toggle: "Snabbåtkomst till NFC",
-          description: "Skanna snabbt NFC-kort i menyn 'Ta emot Ecash'. Detta alternativ lägger till en NFC-knapp i menyn 'Ta emot Ecash'."
+          toggle: "เข้าถึง NFC ด่วน",
+          description: "สแกนการ์ด NFC ได้อย่างรวดเร็วในเมนู รับ Ecash ตัวเลือกนี้จะเพิ่มปุ่ม NFC ในเมนู รับ Ecash"
         }
       }
     },
     p2pk_features: {
       title: "P2PK",
-      description: "Generera ett nyckelpar för att ta emot P2PK-låst ecash. Varning: Denna funktion är experimentell. Använd endast med små belopp. Om du förlorar dina privata nycklar kommer ingen att kunna låsa upp den ecash som är låst till den längre.",
-      generate_button: "Generera nyckel",
-      import_button: "Importera nsec",
+      description: "สร้างคู่คีย์เพื่อรับ ecash ที่ล็อกด้วย P2PK คำเตือน: คุณสมบัตินี้เป็นการทดลอง ใช้เฉพาะกับจำนวนเล็กน้อยเท่านั้น หากคุณทำคีย์ส่วนตัวของคุณหาย จะไม่มีใครสามารถปลดล็อก ecash ที่ล็อกด้วยคีย์นั้นได้อีกต่อไป",
+      generate_button: "สร้างคีย์",
+      import_button: "นำเข้า nsec",
       quick_access: {
-        toggle: "Snabbåtkomst till lås",
-        description: "Använd detta för att snabbt visa din P2PK-låsnyckel i menyn 'Ta emot Ecash'."
+        toggle: "เข้าถึงล็อกด่วน",
+        description: "ใช้สิ่งนี้เพื่อแสดงคีย์ล็อก P2PK ของคุณอย่างรวดเร็วในเมนูรับ ecash"
       },
       keys_expansion: {
-        label: "Klicka för att bläddra bland {count} nycklar",
-        used_badge: "använd"
+        label: "คลิกเพื่อเรียกดู {count} คีย์",
+        used_badge: "ใช้แล้ว"
       }
     },
     privacy: {
-      title: "Integritet",
-      description: "Dessa inställningar påverkar din integritet.",
+      title: "ความเป็นส่วนตัว",
+      description: "การตั้งค่าเหล่านี้ส่งผลต่อความเป็นส่วนตัวของคุณ",
       check_incoming: {
-        toggle: "Kontrollera inkommande faktura",
-        description: "Om aktiverad kommer plånboken att kontrollera den senaste fakturan i bakgrunden. Detta ökar plånbokens responsivitet vilket gör fingeravtryckning enklare. Du kan manuellt kontrollera obetalda fakturor i fliken Fakturor."
+        toggle: "ตรวจสอบใบแจ้งหนี้ขาเข้า",
+        description: "หากเปิดใช้งาน Wallet จะตรวจสอบใบแจ้งหนี้ล่าสุดในเบื้องหลัง ซึ่งช่วยเพิ่มความสามารถในการตอบสนองของ Wallet ทำให้การสร้างรอยนิ้วมือทำได้ง่ายขึ้น คุณสามารถตรวจสอบใบแจ้งหนี้ที่ยังไม่ได้ชำระด้วยตนเองได้ในแท็บใบแจ้งหนี้"
       },
       check_startup: {
-        toggle: "Kontrollera väntande fakturor vid start",
-        description: "Om aktiverad kommer plånboken att kontrollera väntande fakturor från de senaste 24 timmarna vid start."
+        toggle: "ตรวจสอบใบแจ้งหนี้ที่รอดำเนินการเมื่อเริ่มต้น",
+        description: "หากเปิดใช้งาน Wallet จะตรวจสอบใบแจ้งหนี้ที่รอดำเนินการในช่วง 24 ชั่วโมงที่ผ่านมาเมื่อเริ่มต้น"
       },
       check_all: {
-        toggle: "Kontrollera alla fakturor",
-        description: "Om aktiverad kommer plånboken periodvis att kontrollera obetalda fakturor i bakgrunden i upp till två veckor. Detta ökar plånbokens online-aktivitet vilket gör fingeravtryckning enklare. Du kan manuellt kontrollera obetalda fakturor i fliken Fakturor."
+        toggle: "ตรวจสอบใบแจ้งหนี้ทั้งหมด",
+        description: "หากเปิดใช้งาน Wallet จะตรวจสอบใบแจ้งหนี้ที่ยังไม่ได้ชำระเป็นระยะๆ ในเบื้องหลังเป็นเวลาสูงสุดสองสัปดาห์ ซึ่งช่วยเพิ่มกิจกรรมออนไลน์ของ Wallet ทำให้การสร้างรอยนิ้วมือทำได้ง่ายขึ้น คุณสามารถตรวจสอบใบแจ้งหนี้ที่ยังไม่ได้ชำระด้วยตนเองได้ในแท็บใบแจ้งหนี้"
       },
       check_sent: {
-        toggle: "Kontrollera skickad ecash",
-        description: "Om aktiverad kommer plånboken att använda periodiska bakgrundskontroller för att avgöra om skickade token har lösts in. Detta ökar plånbokens online-aktivitet vilket gör fingeravtryckning enklare."
+        toggle: "ตรวจสอบ ecash ที่ส่ง",
+        description: "หากเปิดใช้งาน Wallet จะใช้การตรวจสอบเบื้องหลังเป็นระยะๆ เพื่อพิจารณาว่าโทเค็นที่ส่งถูกแลกแล้วหรือไม่ ซึ่งเพิ่มกิจกรรมออนไลน์ของ Wallet ทำให้การสร้างรอยนิ้วมือทำได้ง่ายขึ้น"
       },
       websockets: {
-        toggle: "Använd WebSockets",
-        description: "Om aktiverad kommer plånboken att använda långlivade WebSocket-anslutningar för att ta emot uppdateringar om betalda fakturor och spenderade token från mints. Detta ökar plånbokens responsivitet men gör också fingeravtryckning enklare."
+        toggle: "ใช้ WebSockets",
+        description: "หากเปิดใช้งาน Wallet จะใช้การเชื่อมต่อ WebSocket ที่มีอายุยืนยาวเพื่อรับการอัปเดตเกี่ยวกับใบแจ้งหนี้ที่ชำระแล้วและโทเค็นที่ใช้จ่ายจาก Mints ซึ่งเพิ่มความสามารถในการตอบสนองของ Wallet แต่ก็ทำให้การสร้างรอยนิ้วมือทำได้ง่ายขึ้นเช่นกัน"
       },
       bitcoin_price: {
-        toggle: "Hämta växelkurs från Coinbase",
-        description: "Om aktiverad kommer den aktuella Bitcoin-växelkursen att hämtas från coinbase.com och ditt konverterade saldo visas."
+        toggle: "รับอัตราแลกเปลี่ยนจาก Coinbase",
+        description: "หากเปิดใช้งาน จะดึงอัตราแลกเปลี่ยน Bitcoin ปัจจุบันจาก coinbase.com และแสดงยอดคงเหลือที่แปลงแล้วของคุณ"
       }
     },
     experimental: {
-      title: "Experimentellt",
-      description: "Dessa funktioner är experimentella.",
+      title: "ทดลอง",
+      description: "คุณสมบัติเหล่านี้เป็นคุณสมบัติทดลอง",
       receive_swaps: {
-        toggle: "Ta emot swaps",
-        badge: "Beta",
-        description: "Möjlighet att växla mottagen Ecash till din aktiva mint i dialogrutan 'Ta emot Ecash'."
+        toggle: "รับ swaps",
+        badge: "เบต้า",
+        description: "ตัวเลือกในการแลกเปลี่ยน Ecash ที่ได้รับไปยัง Mint ที่เปิดใช้งานของคุณในกล่องโต้ตอบ รับ Ecash"
       },
       auto_paste: {
-        toggle: "Klistra in Ecash automatiskt",
-        description: "Klistra automatiskt in ecash från ditt urklipp när du trycker på 'Ta emot', sedan 'Ecash', sedan 'Klistra in'. Automatisk inklistring kan orsaka UI-problem i iOS, stäng av det om du upplever problem."
+        toggle: "วาง Ecash โดยอัตโนมัติ",
+        description: "วาง ecash ในคลิปบอร์ดของคุณโดยอัตโนมัติเมื่อคุณกด รับ, จากนั้น Ecash, จากนั้น วาง การวางอัตโนมัติอาจทำให้เกิดความผิดปกติของ UI ใน iOS ให้ปิดหากคุณประสบปัญหา"
       },
       auditor: {
-        toggle: "Aktivera granskare",
-        badge: "Beta",
-        description: "Om aktiverad visar plånboken granskarens information i dialogrutan 'Mintdetaljer'. Granskaren är en tredjepartstjänst som övervakar mints tillförlitlighet.",
-        url_label: "Granskarens URL",
-        api_url_label: "Granskarens API URL"
+        toggle: "เปิดใช้งานผู้ตรวจสอบ",
+        badge: "เบต้า",
+        description: "หากเปิดใช้งาน Wallet จะแสดงข้อมูลผู้ตรวจสอบในกล่องโต้ตอบรายละเอียด Mint ผู้ตรวจสอบคือบริการบุคคลที่สามที่ตรวจสอบความน่าเชื่อถือของ Mints",
+        url_label: "URL ผู้ตรวจสอบ",
+        api_url_label: "URL API ผู้ตรวจสอบ"
       }
     },
     appearance: {
       keyboard: {
-        title: "Skärmtangentbord",
-        description: "Använd det numeriska tangentbordet för att ange belopp.",
-        toggle: "Använd numeriskt tangentbord",
-        toggle_description: "Om aktiverad kommer det numeriska tangentbordet att användas för att ange belopp."
+        title: "แป้นพิมพ์บนหน้าจอ",
+        description: "ใช้แป้นพิมพ์ตัวเลขสำหรับการป้อนจำนวนเงิน",
+        toggle: "ใช้แป้นพิมพ์ตัวเลข",
+        toggle_description: "หากเปิดใช้งาน จะใช้แป้นพิมพ์ตัวเลขสำหรับการป้อนจำนวนเงิน"
       },
       theme: {
-        title: "Utseende",
-        description: "Ändra hur din plånbok ser ut.",
+        title: "รูปลักษณ์",
+        description: "เปลี่ยนรูปลักษณ์ของ Wallet ของคุณ",
         tooltips: {
           mono: "mono",
           cyber: "cyber",
@@ -319,65 +319,65 @@ export default {
       }
     },
     advanced: {
-      title: "Avancerat",
+      title: "ขั้นสูง",
       developer: {
-        title: "Utvecklarinställningar",
-        description: "Följande inställningar är för utveckling och felsökning.",
+        title: "การตั้งค่าสำหรับนักพัฒนา",
+        description: "การตั้งค่าต่อไปนี้มีไว้สำหรับการพัฒนาและการดีบั๊ก",
         new_seed: {
-          button: "Generera ny seed-fras",
-          description: "Detta genererar en ny seed-fras. Du måste skicka hela ditt saldo till dig själv för att kunna återställa det med en ny seed.",
-          confirm_question: "Är du säker på att du vill generera en ny seed-fras?",
-          cancel: "Avbryt",
-          confirm: "Bekräfta"
+          button: "สร้างวลีสำหรับกู้คืนใหม่",
+          description: "สิ่งนี้จะสร้างวลีสำหรับกู้คืนใหม่ คุณต้องส่งยอดเงินทั้งหมดของคุณไปให้ตัวเองเพื่อที่จะกู้คืนด้วยวลีสำหรับกู้คืนใหม่ได้",
+          confirm_question: "คุณแน่ใจหรือไม่ว่าต้องการสร้างวลีสำหรับกู้คืนใหม่?",
+          cancel: "ยกเลิก",
+          confirm: "ยืนยัน"
         },
         remove_spent: {
-          button: "Ta bort spenderade bevis",
-          description: "Kontrollera om ecash-token från dina aktiva mints är spenderade och ta bort de spenderade från din plånbok. Använd detta endast om din plånbok har fastnat."
+          button: "ลบหลักฐานที่ใช้แล้ว",
+          description: "ตรวจสอบว่าโทเค็น ecash จาก mints ที่เปิดใช้งานของคุณถูกใช้ไปแล้วหรือไม่ และลบโทเค็นที่ใช้แล้วออกจาก Wallet ของคุณ ใช้สิ่งนี้เฉพาะเมื่อ Wallet ของคุณติดค้าง",
         },
         debug_console: {
-          button: "Växla debug-konsol",
-          description: "Öppna Javascript debug terminal. Klistra aldrig in något i denna terminal som du inte förstår. En tjuv kan försöka lura dig att klistra in skadlig kod här."
+          button: "สลับคอนโซลดีบั๊ก",
+          description: "เปิดเทอร์มินัลดีบั๊ก Javascript ห้ามวางสิ่งใดๆ ลงในเทอร์มินัลนี้ที่คุณไม่เข้าใจ ขโมยอาจพยายามหลอกให้คุณวางโค้ดที่เป็นอันตรายที่นี่",
         },
         export_proofs: {
-          button: "Exportera aktiva bevis",
-          description: "Kopiera hela ditt saldo från den aktiva minten som en Cashu-token till ditt urklipp. Detta kommer endast att exportera token från den valda minten och enheten. För en fullständig export, välj en annan mint och enhet och exportera igen."
+          button: "ส่งออกหลักฐานที่ใช้งานอยู่",
+          description: "คัดลอกยอดคงเหลือทั้งหมดของคุณจาก mint ที่เปิดใช้งานเป็นโทเค็น Cashu ไปยังคลิปบอร์ดของคุณ นี่จะส่งออกเฉพาะโทเค็นจาก mint และหน่วยที่เลือก สำหรับการส่งออกทั้งหมด ให้เลือก mint และหน่วยอื่นแล้วส่งออกอีกครั้ง",
         },
         keyset_counters: {
-          title: "Öka keyset-räknare",
-          description: "Klicka på keyset-ID för att öka derivation path-räknarna för keysets i din plånbok. Detta är användbart om du ser felet \"outputs have already been signed\"."
+          title: "เพิ่มเคาน์เตอร์ keyset",
+          description: "คลิกที่ Keyset ID เพื่อเพิ่มเคาน์เตอร์ derivation path สำหรับ keysets ใน Wallet ของคุณ สิ่งนี้มีประโยชน์หากคุณเห็นข้อผิดพลาด \"outputs have already been signed\"",
         },
         unset_reserved: {
-          button: "Frigör alla reserverade token",
-          description: "Denna plånbok markerar väntande utgående ecash som reserverat (och drar av det från ditt saldo) för att förhindra double-spend-försök. Denna knapp frigör alla reserverade token så att de kan användas igen. Om du gör detta kan din plånbok inkludera spenderade bevis. Tryck på knappen \"Ta bort spenderade bevis\" för att bli av med dem."
+          button: "ยกเลิกการสำรองโทเค็นทั้งหมด",
+          description: "Wallet นี้จะทำเครื่องหมาย ecash ขาออกที่รอดำเนินการว่าถูกสำรอง (และหักออกจากยอดคงเหลือของคุณ) เพื่อป้องกันความพยายามในการใช้จ่ายซ้ำ ปุ่มนี้จะยกเลิกการสำรองโทเค็นทั้งหมดเพื่อให้สามารถใช้ได้อีกครั้ง หากคุณทำเช่นนี้ Wallet ของคุณอาจมีหลักฐานที่ใช้แล้ว กดปุ่ม \"ลบหลักฐานที่ใช้แล้ว\" เพื่อกำจัดออกไป",
         },
         show_onboarding: {
-          button: "Visa introduktion",
-          description: "Visa introduktionsskärmen igen."
+          button: "แสดงหน้าแนะนำ",
+          description: "แสดงหน้าจอแนะนำอีกครั้ง",
         },
         reset_wallet: {
-          button: "Återställ plånboksdata",
-          description: "Återställ dina plånboksdata. Varning: Detta kommer att radera allt! Se till att du skapar en säkerhetskopia först.",
-          confirm_question: "Är du säker på att du vill radera dina plånboksdata?",
-          cancel: "Avbryt",
-          confirm: "Radera plånbok"
+          button: "รีเซ็ตข้อมูล Wallet",
+          description: "รีเซ็ตข้อมูล Wallet ของคุณ คำเตือน: สิ่งนี้จะลบทุกอย่าง! ตรวจสอบให้แน่ใจว่าคุณสร้างการสำรองข้อมูลก่อน",
+          confirm_question: "คุณแน่ใจหรือไม่ว่าต้องการลบข้อมูล Wallet ของคุณ?",
+          cancel: "ยกเลิก",
+          confirm: "ลบ Wallet",
         },
         export_wallet: {
-          button: "Exportera plånboksdata",
-          description: "Ladda ner en dump av din plånbok. Du kan återställa din plånbok från denna fil på välkomstskärmen för en ny plånbok. Denna fil kommer att vara osynkroniserad om du fortsätter att använda din plånbok efter exporten."
-        }
-      }
-    }
+          button: "ส่งออกข้อมูล Wallet",
+          description: "ดาวน์โหลดข้อมูล Wallet ของคุณ คุณสามารถกู้คืน Wallet ของคุณจากไฟล์นี้บนหน้าจอต้อนรับของ Wallet ใหม่ ไฟล์นี้จะไม่ตรงกันหากคุณยังคงใช้ Wallet ของคุณหลังจากส่งออก",
+        },
+      },
+    },
   },
   NoMintWarnBanner: {
-    title: "Gå med i en mint",
+    title: "เข้าร่วม Mint",
     subtitle:
-      "Du har inte gått med i någon Cashu mint än. Lägg till en mint URL i inställningarna eller ta emot ecash från en ny mint för att komma igång.",
+      "คุณยังไม่ได้เข้าร่วม Cashu mint ใด ๆ เพิ่ม URL ของ mint ในการตั้งค่าหรือรับ ecash จาก mint ใหม่เพื่อเริ่มต้น",
     actions: {
       add_mint: {
         label: "@:global.actions.add_mint.label",
       },
       receive: {
-        label: "Ta emot Ecash",
+        label: "รับ Ecash",
       },
     },
   },
@@ -392,35 +392,35 @@ export default {
     },
     tabs: {
       history: {
-        label: "Historik",
+        label: "ประวัติ",
       },
       invoices: {
-        label: "Fakturor",
+        label: "ใบแจ้งหนี้",
       },
       mints: {
         label: "Mints",
       },
     },
     install: {
-      text: "Installera",
-      tooltip: "Installera Cashu",
+      text: "ติดตั้ง",
+      tooltip: "ติดตั้ง Cashu",
     },
   },
   AlreadyRunning: {
-    title: "Nej.",
-    text: "En annan flik körs redan. Stäng denna flik och försök igen.",
+    title: "ไม่.",
+    text: "มีแท็บอื่นกำลังทำงานอยู่แล้ว ปิดแท็บนี้แล้วลองอีกครั้ง",
     actions: {
       retry: {
-        label: "Försök igen",
+        label: "ลองใหม่",
       },
     },
   },
   ErrorNotFound: {
     title: "404",
-    text: "Oops. Ingenting här…",
+    text: "อุ๊บส์. ไม่มีอะไรที่นี่…",
     actions: {
       home: {
-        label: "Gå tillbaka hem",
+        label: "กลับหน้าหลัก",
       },
     },
   },
@@ -429,65 +429,65 @@ export default {
       label: "Mint",
     },
     mintBalance: {
-      label: "Saldo",
+      label: "ยอดเงินคงเหลือ",
     },
     mintError: {
-      label: "Mint-fel",
+      label: "ข้อผิดพลาด Mint",
     },
     pending: {
-      label: "Väntar",
-      tooltip: "Kontrollera alla väntande token",
+      label: "รอดำเนินการ",
+      tooltip: "ตรวจสอบโทเค็นที่รอดำเนินการทั้งหมด",
     },
   },
   WelcomePage: {
     actions: {
       previous: {
-        label: "Föregående",
+        label: "ก่อนหน้า",
       },
       next: {
-        label: "Nästa",
+        label: "ถัดไป",
       },
     },
   },
   WelcomeSlide1: {
-    title: "Välkommen till Cashu",
-    text: "Cashu.me är en gratis och öppen källkod Bitcoin-plånbok som använder ecash för att hålla dina pengar säkra och privata.",
+    title: "ยินดีต้อนรับสู่ Cashu",
+    text: "Cashu.me คือ Wallet Bitcoin ที่ฟรีและเป็นโอเพนซอร์ส ซึ่งใช้ ecash เพื่อรักษาความปลอดภัยและความเป็นส่วนตัวของเงินของคุณ",
     actions: {
       more: {
-        label: "Klicka för att lära dig mer",
+        label: "คลิกเพื่อเรียนรู้เพิ่มเติม",
       },
     },
     p1: {
-      text: "Cashu är ett gratis och öppen källkod ecash-protokoll för Bitcoin. Du kan lära dig mer om det på { link }.",
+      text: "Cashu เป็นโปรโตคอล ecash ที่ฟรีและเป็นโอเพนซอร์สสำหรับ Bitcoin คุณสามารถเรียนรู้เพิ่มเติมได้ที่ { link }",
       link: {
         text: "cashu.space",
       },
     },
     p2: {
-      text: "Denna plånbok är inte kopplad till någon mint. För att använda denna plånbok måste du ansluta till en eller flera Cashu mints som du litar på.",
+      text: "Wallet นี้ไม่มีส่วนเกี่ยวข้องกับ Mint ใด ๆ ในการใช้ Wallet นี้ คุณต้องเชื่อมต่อกับ Mint Cashu ที่คุณเชื่อถืออย่างน้อยหนึ่งแห่ง",
     },
     p3: {
-      text: "Denna plånbok lagrar ecash som bara du har tillgång till. Om du raderar din webbläsardata utan en seed-fras säkerhetskopia, kommer du att förlora dina token.",
+      text: "Wallet นี้จัดเก็บ ecash ที่มีเพียงคุณเท่านั้นที่เข้าถึงได้ หากคุณลบข้อมูลเบราว์เซอร์ของคุณโดยไม่มีการสำรองวลีสำหรับกู้คืน คุณจะสูญเสียโทเค็นของคุณ",
     },
     p4: {
-      text: "Denna plånbok är i beta. Vi tar inget ansvar för personer som förlorar tillgång till pengar. Använd på egen risk! Denna kod är öppen källkod och licensierad under MIT-licensen.",
+      text: "Wallet นี้อยู่ในช่วงเบต้า เราไม่รับผิดชอบต่อบุคคลที่สูญเสียการเข้าถึงเงินทุน ใช้งานด้วยความเสี่ยงของคุณเอง! รหัสนี้เป็นโอเพนซอร์สและได้รับอนุญาตภายใต้ใบอนุญาต MIT",
     },
   },
   WelcomeSlide2: {
-    title: "Installera PWA",
+    title: "ติดตั้ง PWA",
     instruction: {
       intro: {
-        text: "För bästa upplevelse, använd denna plånbok med din enhets inbyggda webbläsare för att installera den som en Progressive Web App. Gör detta nu.",
+        text: "เพื่อประสบการณ์ที่ดีที่สุด ใช้ Wallet นี้กับเว็บเบราว์เซอร์พื้นฐานของอุปกรณ์ของคุณเพื่อติดตั้งเป็น Progressive Web App ทำสิ่งนี้ทันที",
       },
       android: {
         title: "Android (Chrome)",
         step1: {
           item: "1. { icon } { text }",
-          text: "Tryck på menyn (uppe till höger)",
+          text: "แตะเมนู (มุมขวาบน)",
         },
         step2: {
           item: "2. { icon } { text }",
-          text: "Tryck på { buttonText }",
+          text: "กด { buttonText }",
           buttonText: "@:AndroidPWAPrompt.buttonText",
         },
       },
@@ -495,158 +495,158 @@ export default {
         title: "iOS (Safari)",
         step1: {
           item: "1. { icon } { text }",
-          text: "Tryck på dela (längst ner)",
+          text: "แตะ แชร์ (ด้านล่าง)",
         },
         step2: {
           item: "2. { icon } { text }",
-          text: "Tryck på { buttonText }",
+          text: "กด { buttonText }",
           buttonText: "@:iOSPWAPrompt.buttonText",
         },
       },
       outro: {
-        text: "När du har installerat denna app på din enhet, stäng detta webbläsarfönster och använd appen från din hemskärm.",
+        text: "เมื่อคุณติดตั้งแอปนี้บนอุปกรณ์ของคุณแล้ว ให้ปิดหน้าต่างเบราว์เซอร์นี้และใช้แอปจากหน้าจอหลักของคุณ",
       },
     },
     pwa: {
       success: {
-        title: "Lyckades!",
-        text: "Du använder Cashu som en PWA. Stäng alla andra öppna webbläsarfönster och använd appen från din hemskärm.",
+        title: "สำเร็จ!",
+        text: "คุณกำลังใช้ Cashu เป็น PWA ปิดหน้าต่างเบราว์เซอร์อื่นที่เปิดอยู่และใช้แอปจากหน้าจอหลักของคุณ",
       },
     },
   },
   iOSPWAPrompt: {
-    text: "Tryck på { icon } och { buttonText }",
-    buttonText: "Lägg till på hemskärmen",
+    text: "แตะ { icon } และ { buttonText }",
+    buttonText: "เพิ่มไปยังหน้าจอหลัก",
   },
   AndroidPWAPrompt: {
-    text: "Tryck på { icon } och { buttonText }",
-    buttonText: "Lägg till på startskärmen",
+    text: "แตะ { icon } และ { buttonText }",
+    buttonText: "เพิ่มไปยังหน้าจอหลัก",
   },
   WelcomeSlide3: {
-    title: "Din Seed-fras",
-    text: "Lagra din seed-fras i en lösenordshanterare eller på papper. Din seed-fras är det enda sättet att återställa dina pengar om du förlorar åtkomst till denna enhet.",
+    title: "วลีสำหรับกู้คืนของคุณ",
+    text: "จัดเก็บวลีสำหรับกู้คืนของคุณไว้ในตัวจัดการรหัสผ่านหรือบนกระดาษ วลีสำหรับกู้คืนของคุณเป็นวิธีเดียวที่จะกู้คืนเงินทุนของคุณได้หากคุณสูญเสียการเข้าถึงอุปกรณ์นี้",
     inputs: {
       seed_phrase: {
-        label: "Seed-fras",
-        caption: "Du kan se din seed-fras i inställningarna.",
+        label: "วลีสำหรับกู้คืน",
+        caption: "คุณสามารถดูวลีสำหรับกู้คืนของคุณได้ในการตั้งค่า",
       },
       checkbox: {
-        label: "Jag har skrivit ner den",
+        label: "ฉันได้จดไว้แล้ว",
       },
     },
   },
   WelcomeSlide4: {
-    title: "Villkor",
+    title: "เงื่อนไข",
     actions: {
       more: {
-        label: "Läs Användarvillkor",
+        label: "อ่านข้อกำหนดในการให้บริการ",
       },
     },
     inputs: {
       checkbox: {
-        label: "Jag har läst och accepterar dessa villkor",
+        label: "ฉันได้อ่านและยอมรับข้อกำหนดและเงื่อนไขเหล่านี้",
       },
     },
   },
   RestoreView: {
     seed_phrase: {
-      label: "Återställ från Seed-fras",
+      label: "กู้คืนจากวลีสำหรับกู้คืน",
       caption:
-        "Ange din seed-fras för att återställa din plånbok. Innan du återställer, se till att du har lagt till alla mints som du har använt tidigare.",
+        "ป้อนวลีสำหรับกู้คืนของคุณเพื่อกู้คืน Wallet ของคุณ ก่อนที่จะกู้คืน ตรวจสอบให้แน่ใจว่าคุณได้เพิ่ม Mint ทั้งหมดที่คุณเคยใช้มาก่อน",
       inputs: {
         seed_phrase: {
-          label: "Seed-fras",
-          caption: "Du kan se din seed-fras i inställningarna.",
+          label: "วลีสำหรับกู้คืน",
+          caption: "คุณสามารถดูวลีสำหรับกู้คืนของคุณได้ในการตั้งค่า",
         },
       },
     },
     information: {
-      label: "Information",
+      label: "ข้อมูล",
       caption:
-        "Assistenten kommer endast att återställa ecash från en annan seed-fras, du kommer inte att kunna använda denna seed-fras eller ändra seed-frasen för plånboken du använder för närvarande. Detta innebär att återställd ecash inte kommer att skyddas av din nuvarande seed-fras så länge du inte skickar ecash till dig själv en gång.",
+        "วิซาร์ดจะกู้คืน ecash จากวลีสำหรับกู้คืนอื่นเท่านั้น คุณจะไม่สามารถใช้วลีสำหรับกู้คืนนี้หรือเปลี่ยนวลีสำหรับกู้คืนของ Wallet ที่คุณกำลังใช้อยู่ได้ ซึ่งหมายความว่า ecash ที่กู้คืนจะไม่ได้รับการป้องกันโดยวลีสำหรับกู้คืนปัจจุบันของคุณ ตราบใดที่คุณยังไม่ได้ส่ง ecash ให้ตัวเองหนึ่งครั้ง",
     },
     restore_mints: {
-      label: "Återställ Mints",
+      label: "กู้คืน Mints",
       caption:
-        'Välj minten att återställa. Du kan lägga till fler mints i huvudskärmen under "Mints" och återställa dem här.',
+        'เลือก Mint ที่จะกู้คืน คุณสามารถเพิ่ม Mint เพิ่มเติมในหน้าจอหลักภายใต้ "Mints" และกู้คืนได้ที่นี่',
     },
     actions: {
       paste: {
-        error: "Misslyckades att läsa urklippets innehåll.",
+        error: "อ่านเนื้อหาในคลิปบอร์ดไม่สำเร็จ",
       },
       validate: {
-        error: "Mnemonisk fras bör vara minst 12 ord lång.",
+        error: "Mnemonic ควรมีอย่างน้อย 12 คำ",
       },
       restore: {
-        label: "Återställ",
-        in_progress: "Återställer mint…",
-        error: "Fel vid återställning av mint: { error }",
+        label: "กู้คืน",
+        in_progress: "กำลังกู้คืน Mint…",
+        error: "ข้อผิดพลาดในการกู้คืน Mint: { error }",
       },
       restore_all_mints: {
-        label: "Återställ alla Mints",
-        in_progress: "Återställer mint { index } av { length }…",
-        success: "Återställning slutförd framgångsrikt",
-        error: "Fel vid återställning av mints: { error }",
+        label: "กู้คืน Mints ทั้งหมด",
+        in_progress: "กำลังกู้คืน Mint { index } จาก { length }…",
+        success: "กู้คืนสำเร็จ",
+        error: "ข้อผิดพลาดในการกู้คืน Mints: { error }",
       },
     },
   },
   MintSettings: {
     add: {
-      title: "Lägg till mint",
+      title: "เพิ่ม Mint",
       description:
-        "Ange URL:en till en Cashu mint för att ansluta till den. Denna plånbok är inte kopplad till någon mint.",
+        "ป้อน URL ของ Cashu mint เพื่อเชื่อมต่อ Wallet นี้ไม่มีส่วนเกี่ยวข้องกับ Mint ใดๆ",
       inputs: {
         nickname: {
-          placeholder: "Smeknamn (t.ex. Testnet)",
+          placeholder: "ชื่อเล่น (เช่น Testnet)",
         },
       },
       actions: {
         add_mint: {
           label: "@:global.actions.add_mint.label",
-          error_invalid_url: "Ogiltig URL",
+          error_invalid_url: "URL ไม่ถูกต้อง",
         },
         scan: {
-          label: "Skanna QR-kod",
+          label: "สแกนรหัส QR",
         },
       },
     },
     discover: {
-      title: "Upptäck mints",
-      overline: "Upptäck",
-      caption: "Upptäck mints som andra användare har rekommenderat på nostr.",
+      title: "สำรวจ Mints",
+      overline: "สำรวจ",
+      caption: "สำรวจ Mints ที่ผู้ใช้คนอื่นแนะนำบน nostr",
       actions: {
         discover: {
-          label: "Upptäck mints",
-          in_progress: "Laddar…",
-          error_no_mints: "Inga mints hittades",
-          success: "{ length } mints hittades",
+          label: "สำรวจ Mints",
+          in_progress: "กำลังโหลด…",
+          error_no_mints: "ไม่พบ Mints",
+          success: "พบ { length } Mints",
         },
       },
       recommendations: {
-        overline: "{ length } mints hittades",
+        overline: "พบ { length } Mints",
         caption:
-          "Dessa mints rekommenderades av andra Nostr-användare. Läs recensioner på { link }. Var försiktig och gör din egen forskning innan du använder en mint.",
+          "Mints เหล่านี้ถูกแนะนำโดยผู้ใช้ Nostr คนอื่น ๆ อ่านรีวิวได้ที่ { link } โปรดใช้ความระมัดระวังและทำการวิจัยของคุณเองก่อนใช้ Mint",
         actions: {
           browse: {
-            label: "Klicka för att bläddra bland mints",
+            label: "คลิกเพื่อเรียกดู Mints",
           },
         },
       },
     },
     swap: {
-      title: "Växla",
-      overline: "Multimint-växlingar",
+      title: "แลกเปลี่ยน",
+      overline: "การแลกเปลี่ยนระหว่าง Mints",
       caption:
-        "Växla pengar mellan mints via Lightning. Notera: Lämna utrymme för potentiella Lightning-avgifter. Om den inkommande betalningen inte lyckas, kontrollera fakturan manuellt.",
+        "แลกเปลี่ยนเงินระหว่าง Mints ผ่าน Lightning หมายเหตุ: เผื่อค่าธรรมเนียม Lightning ที่อาจเกิดขึ้น หากการชำระเงินขาเข้าไม่สำเร็จ ให้ตรวจสอบใบแจ้งหนี้ด้วยตนเอง",
       inputs: {
         from: {
-          label: "Från",
+          label: "จาก",
         },
         to: {
-          label: "Till",
+          label: "ถึง",
         },
         amount: {
-          label: "Belopp ({ ticker }))",
+          label: "จำนวน ({ ticker }) )",
         },
       },
       actions: {
@@ -661,7 +661,7 @@ export default {
     progress: {
       text: "{ percentage }{ addon }",
       percentage: "{ percentage }%",
-      keep_scanning_text: " - Fortsätt skanna",
+      keep_scanning_text: " - สแกนต่อไป",
     },
     actions: {
       paste: {
@@ -673,10 +673,10 @@ export default {
     },
   },
   InvoiceDetailDialog: {
-    title: "Skapa faktura",
+    title: "สร้างใบแจ้งหนี้",
     inputs: {
       amount: {
-        label: "Belopp ({ ticker }) *",
+        label: "จำนวน ({ ticker }) *",
       },
     },
     actions: {
@@ -684,14 +684,14 @@ export default {
         label: "@:global.actions.close.label",
       },
       create: {
-        label: "Skapa faktura",
-        label_blocked: "Skapar faktura…",
-        in_progress: "Skapar",
+        label: "สร้างใบแจ้งหนี้",
+        label_blocked: "กำลังสร้างใบแจ้งหนี้…",
+        in_progress: "กำลังสร้าง",
       },
     },
     invoice: {
-      caption: "Lightning-faktura",
-      status_paid_text: "Betald!",
+      caption: "ใบแจ้งหนี้ Lightning",
+      status_paid_text: "ชำระแล้ว!",
       actions: {
         close: {
           label: "@:global.actions.close.label",
@@ -703,30 +703,30 @@ export default {
     },
   },
   SendDialog: {
-    title: "Skicka",
+    title: "ส่ง",
     actions: {
       ecash: {
         label: "Ecash",
-        error_no_mints: "Inga mints tillgängliga",
+        error_no_mints: "ไม่มี Mints ให้เลือก",
       },
       lightning: {
         label: "Lightning",
-        error_no_mints: "Inga mints tillgängliga",
+        error_no_mints: "ไม่มี Mints ให้เลือก",
       },
     },
   },
   SendTokenDialog: {
-    title: "Skicka { value }",
+    title: "ส่ง { value }",
     title_ecash_text: "Ecash",
-    badge_offline_text: "Offline",
+    badge_offline_text: "ออฟไลน์",
     inputs: {
       amount: {
-        label: "Belopp ({ ticker }) *",
-        invalid_too_much_error_text: "För mycket",
+        label: "จำนวน ({ ticker }) *",
+        invalid_too_much_error_text: "มากเกินไป",
       },
       p2pk_pubkey: {
-        label: "Mottagarens publika nyckel",
-        label_invalid: "Mottagarens publika nyckel",
+        label: "คีย์สาธารณะของผู้รับ",
+        label_invalid: "คีย์สาธารณะของผู้รับ",
       },
     },
     actions: {
@@ -738,13 +738,13 @@ export default {
       },
       copy_emoji: {
         label: "🥜",
-        tooltip_text: "Kopiera Emoji",
+        tooltip_text: "คัดลอก Emoji",
       },
       copy_tokens: {
         label: "@:global.actions.copy.label",
       },
       copy_link: {
-        tooltip_text: "Kopiera länk",
+        tooltip_text: "คัดลอกลิงก์",
       },
       lock: {
         label: "@:global.actions.lock.label",
@@ -756,32 +756,32 @@ export default {
         label: "@:global.actions.send.label",
       },
       delete: {
-        tooltip_text: "Radera från historik",
+        tooltip_text: "ลบออกจากประวัติ",
       },
       write_tokens_to_card: {
         tooltips: {
-          ndef_supported_text: "Skriv till NFC-kort",
-          ndef_unsupported_text: "NDEF stöds inte",
+          ndef_supported_text: "แฟลชไปยังการ์ด NFC",
+          ndef_unsupported_text: "ไม่รองรับ NDEF",
         },
       },
     },
   },
   ReceiveDialog: {
-    title: "Ta emot",
+    title: "รับ",
     actions: {
       ecash: {
         label: "Ecash",
-        error_no_mints: "Inga mints tillgängliga",
+        error_no_mints: "ไม่มี Mints ให้เลือก",
       },
       lightning: {
         label: "Lightning",
         error_no_mints:
-          "Du måste ansluta till en mint för att ta emot via Lightning",
+          "คุณต้องเชื่อมต่อกับ Mint เพื่อรับผ่าน Lightning",
       },
     },
   },
   ReceiveEcashDrawer: {
-    title: "Ta emot Ecash",
+    title: "รับ Ecash",
     actions: {
       paste: {
         label: "@:global.actions.paste.label",
@@ -790,28 +790,28 @@ export default {
         label: "@:global.actions.scan.label",
       },
       request: {
-        label: "Begär",
+        label: "ขอ",
       },
       lock: {
         label: "@:global.actions.lock.label",
       },
       nfc: {
         label: "NFC",
-        scanning_text: "Skannar…",
+        scanning_text: "กำลังสแกน…",
       },
     },
   },
   ReceiveTokenDialog: {
-    title: "Ta emot { value }",
+    title: "รับ { value }",
     title_ecash_text: "Ecash",
     inputs: {
       tokens_base64: {
-        label: "Klistra in Cashu token",
+        label: "วางโทเค็น Cashu",
       },
     },
     errors: {
       invalid_token: {
-        label: "Ogiltig token",
+        label: "โทเค็นไม่ถูกต้อง",
       },
     },
     actions: {
@@ -827,16 +827,16 @@ export default {
       receive: {
         label: "@:global.actions.receive.label",
         label_known_mint: "@:ReceiveTokenDialog.actions.receive.label",
-        label_adding_mint: "Lägger till mint…",
+        label_adding_mint: "กำลังเพิ่ม Mint…",
       },
       swap: {
         label: "@:global.actions.swap.label",
-        tooltip_text: "Växla till en betrodd mint",
-        caption: "Växla { value }",
+        tooltip_text: "แลกเปลี่ยนไปยัง Mint ที่เชื่อถือได้",
+        caption: "แลกเปลี่ยน { value }",
       },
       cancel_swap: {
         label: "@:global.actions.cancel.label",
-        tooltip_text: "Avbryt växling",
+        tooltip_text: "ยกเลิกการแลกเปลี่ยน",
       },
       confirm_swap: {
         label: "@:ReceiveTokenDialog.actions.swap.label",
@@ -844,26 +844,26 @@ export default {
         in_progress: "@:ReceiveTokenDialog.actions.confirm_swap.label",
       },
       later: {
-        label: "Senare",
-        tooltip_text: "Lägg till historik för att ta emot senare",
-        already_in_history_success_text: "Ecash redan i historiken",
-        added_to_history_success_text: "Ecash tillagd i historiken",
+        label: "ภายหลัง",
+        tooltip_text: "เพิ่มไปยังประวัติเพื่อรับภายหลัง",
+        already_in_history_success_text: "Ecash อยู่ในประวัติแล้ว",
+        added_to_history_success_text: "เพิ่ม Ecash ในประวัติแล้ว",
       },
       nfc: {
         label: "NFC",
         tooltips: {
-          ndef_supported_text: "Läs från NFC-kort",
-          ndef_unsupported_text: "NDEF stöds inte",
+          ndef_supported_text: "อ่านจากการ์ด NFC",
+          ndef_unsupported_text: "ไม่รองรับ NDEF",
         },
       },
     },
   },
   P2PKDialog: {
     p2pk: {
-      caption: "P2PK-nyckel",
-      description: "Ta emot ecash låst till denna nyckel",
+      caption: "คีย์ P2PK",
+      description: "รับ ecash ที่ล็อกด้วยคีย์นี้",
       used_warning_text:
-        "Varning: Denna nyckel har använts tidigare. Använd en ny nyckel för bättre integritet.",
+        "คำเตือน: คีย์นี้เคยถูกใช้มาก่อน ใช้คีย์ใหม่เพื่อความเป็นส่วนตัวที่ดีขึ้น",
     },
     actions: {
       copy: {
@@ -873,14 +873,14 @@ export default {
         label: "@:global.actions.close.label",
       },
       new_key: {
-        label: "Generera ny nyckel",
+        label: "สร้างคีย์ใหม่",
       },
     },
   },
   PaymentRequestDialog: {
     payment_request: {
-      caption: "Betalningsförfrågan",
-      description: "Ta emot betalningar via Nostr",
+      caption: "คำขอชำระเงิน",
+      description: "รับการชำระเงินผ่าน Nostr",
     },
     actions: {
       copy: {
@@ -890,18 +890,18 @@ export default {
         label: "@:global.actions.close.label",
       },
       new_request: {
-        label: "Ny förfrågan",
+        label: "คำขอใหม่",
       },
       add_amount: {
-        label: "Lägg till belopp",
+        label: "เพิ่มจำนวนเงิน",
       },
       use_active_mint: {
-        label: "Vilken mint som helst",
+        label: "Mint ใดก็ได้",
       },
     },
     inputs: {
       amount: {
-        placeholder: "Ange belopp",
+        placeholder: "ป้อนจำนวนเงิน",
       },
     },
   },
@@ -910,7 +910,7 @@ export default {
       close: {
         label: "@:global.actions.close.label",
         closed_info_text:
-          "Tangentbord inaktiverat. Du kan återaktivera tangentbordet i inställningarna.",
+          "ปิดใช้งานแป้นพิมพ์แล้ว คุณสามารถเปิดใช้งานแป้นพิมพ์ได้อีกครั้งในการตั้งค่า",
       },
       enter: {
         label: "@:global.actions.enter.label",
@@ -921,9 +921,9 @@ export default {
     nwc: {
       caption: "Nostr Wallet Connect",
       description:
-        "Styr din plånbok på distans med NWC. Tryck på QR-koden för att länka din plånbok med en kompatibel app.",
+        "ควบคุม Wallet ของคุณจากระยะไกลด้วย NWC กดที่รหัส QR เพื่อเชื่อมโยง Wallet ของคุณกับแอปพลิเคชันที่เข้ากันได้",
       warning_text:
-        "Varning: vem som helst med åtkomst till denna anslutningssträng kan initiera betalningar från din plånbok. Dela inte!",
+        "คำเตือน: ใครก็ตามที่เข้าถึงสตริงการเชื่อมต่อนี้สามารถเริ่มการชำระเงินจาก Wallet ของคุณได้ ห้ามแบ่งปัน!",
     },
     actions: {
       copy: {
@@ -935,14 +935,14 @@ export default {
     },
   },
   MintMotdMessage: {
-    title: "Meddelande från Mint",
+    title: "ข้อความจาก Mint",
   },
   MintDetailsDialog: {
     contact: {
-      title: "Kontakt",
+      title: "ติดต่อ",
     },
     details: {
-      title: "Mintdetaljer",
+      title: "รายละเอียด Mint",
       url: {
         label: "URL",
       },
@@ -950,92 +950,92 @@ export default {
         label: "Nuts",
         actions: {
           show: {
-            label: "Visa alla",
+            label: "แสดงทั้งหมด",
           },
           hide: {
-            label: "Dölj",
+            label: "ซ่อน",
           },
         },
       },
       currency: {
-        label: "Valuta",
+        label: "สกุลเงิน",
       },
       currencies: {
         label: "@:MintDetailsDialog.details.currency.label",
       },
       version: {
-        label: "Version",
+        label: "เวอร์ชัน",
       },
     },
     actions: {
-      title: "Åtgärder",
+      title: "การดำเนินการ",
       copy_mint_url: {
-        label: "Kopiera mint URL",
+        label: "คัดลอก Mint URL",
       },
       delete: {
-        label: "Radera mint",
+        label: "ลบ Mint",
       },
       edit: {
-        label: "Redigera mint",
+        label: "แก้ไข Mint",
       },
     },
   },
   ChooseMint: {
-    title: "Välj en mint",
-    badge_mint_error_text: "Fel",
+    title: "เลือก Mint",
+    badge_mint_error_text: "ข้อผิดพลาด",
     badge_option_mint_error_text: "@:ChooseMint.badge_mint_error_text",
   },
   HistoryTable: {
-    empty_text: "Ingen historik ännu",
+    empty_text: "ยังไม่มีประวัติ",
     row: {
       type_label: "Ecash",
-      date_label: "{ value } sedan",
+      date_label: "{ value } ที่ผ่านมา",
     },
     actions: {
       check_status: {
-        tooltip_text: "Kontrollera status",
+        tooltip_text: "ตรวจสอบสถานะ",
       },
       receive: {
-        tooltip_text: "Ta emot",
+        tooltip_text: "รับ",
       },
       filter_pending: {
-        label: "Filtrera väntande",
+        label: "กรองที่รอดำเนินการ",
       },
       show_all: {
-        label: "Visa alla",
+        label: "แสดงทั้งหมด",
       },
     },
-    old_token_not_found_error_text: "Gammal token hittades inte",
+    old_token_not_found_error_text: "ไม่พบโทเค็นเก่า",
   },
   InvoiceTable: {
-    empty_text: "Inga fakturor ännu",
+    empty_text: "ยังไม่มีใบแจ้งหนี้",
     row: {
       type_label: "Lightning",
-      type_tooltip_text: "Klicka för att kopiera",
-      date_label: "{ value } sedan",
+      type_tooltip_text: "คลิกเพื่อคัดลอก",
+      date_label: "{ value } ที่ผ่านมา",
     },
     actions: {
       check_status: {
-        tooltip_text: "Kontrollera status",
+        tooltip_text: "ตรวจสอบสถานะ",
       },
       filter_pending: {
-        label: "Filtrera väntande",
+        label: "กรองที่รอดำเนินการ",
       },
       show_all: {
-        label: "Visa alla",
+        label: "แสดงทั้งหมด",
       },
     },
   },
   RemoveMintDialog: {
-    title: "Är du säker på att du vill radera denna mint?",
+    title: "คุณแน่ใจหรือไม่ว่าต้องการลบ Mint นี้?",
     nickname: {
-      label: "Smeknamn",
+      label: "ชื่อเล่น",
     },
     balances: {
-      label: "Saldon",
+      label: "ยอดเงินคงเหลือ",
     },
     warning_text:
-      "Obs: Eftersom denna plånbok är paranoid kommer din ecash från denna mint inte att raderas permanent utan kommer att förbli lagrad på din enhet. Du kommer att se den dyka upp igen om du lägger till minten igen senare.",
+      "หมายเหตุ: เนื่องจาก Wallet นี้มีความระมัดระวังสูง ecash ของคุณจาก Mint นี้จะไม่ถูกลบจริง แต่จะยังคงเก็บไว้ในอุปกรณ์ของคุณ คุณจะเห็นมันปรากฏขึ้นอีกครั้งหากคุณเพิ่ม Mint นี้อีกครั้งในภายหลัง",
     inputs: {
       mint_url: {
         label: "@:global.inputs.mint_url.label",
@@ -1043,7 +1043,7 @@ export default {
     },
     actions: {
       confirm: {
-        label: "Radera mint",
+        label: "ลบ Mint",
       },
       cancel: {
         label: "@:global.actions.cancel.label",
@@ -1052,10 +1052,10 @@ export default {
   },
   PayInvoiceDialog: {
     input_data: {
-      title: "Betala Lightning",
+      title: "ชำระเงิน Lightning",
       inputs: {
         invoice_data: {
-          label: "Lightning-faktura eller adress",
+          label: "ใบแจ้งหนี้หรือที่อยู่ Lightning",
         },
       },
       actions: {
@@ -1074,15 +1074,15 @@ export default {
       },
     },
     lnurlpay: {
-      amount_exact_label: "{ payee } begär { value } { ticker }",
+      amount_exact_label: "{ payee } กำลังขอ { value } { ticker }",
       amount_range_label:
-        "{ payee } begär{br}mellan { min } och { max } { ticker }",
+        "{ payee } กำลังขอ{br}ระหว่าง { min } และ { max } { ticker }",
       inputs: {
         amount: {
-          label: "Belopp ({ ticker }) *",
+          label: "จำนวน ({ ticker }) *",
         },
         comment: {
-          label: "Kommentar (valfritt)",
+          label: "ความคิดเห็น (ไม่บังคับ)",
         },
       },
       actions: {
@@ -1095,29 +1095,29 @@ export default {
       },
     },
     invoice: {
-      title: "Betala { value }",
+      title: "ชำระเงิน { value }",
       memo: {
-        label: "Memo",
+        label: "บันทึก",
       },
-      processing_info_text: "Bearbetar…",
-      balance_too_low_warning_text: "Saldot för lågt",
+      processing_info_text: "กำลังประมวลผล…",
+      balance_too_low_warning_text: "ยอดเงินคงเหลือต่ำเกินไป",
       actions: {
         close: {
           label: "@:global.actions.close.label",
         },
         pay: {
-          label: "Betala",
+          label: "ชำระเงิน",
           in_progress: "@:PayInvoiceDialog.invoice.processing_info_text",
-          error: "Fel",
+          error: "ข้อผิดพลาด",
         },
       },
     },
   },
   EditMintDialog: {
-    title: "Redigera mint",
+    title: "แก้ไข Mint",
     inputs: {
       nickname: {
-        label: "Smeknamn",
+        label: "ชื่อเล่น",
       },
       mint_url: {
         label: "@:global.inputs.mint_url.label",
@@ -1133,9 +1133,9 @@ export default {
     },
   },
   AddMintDialog: {
-    title: "Litar du på denna mint?",
+    title: "คุณเชื่อถือ Mint นี้หรือไม่?",
     description:
-      "Innan du använder denna mint, se till att du litar på den. Mints kan bli skadliga eller upphöra med sin verksamhet när som helst.",
+      "ก่อนที่จะใช้ Mint นี้ ตรวจสอบให้แน่ใจว่าคุณเชื่อถือได้ Mints อาจกลายเป็นอันตรายหรือหยุดดำเนินการได้ทุกเมื่อ",
     inputs: {
       mint_url: {
         label: "@:global.inputs.mint_url.label",
@@ -1147,24 +1147,24 @@ export default {
       },
       add_mint: {
         label: "@:global.actions.add_mint.label",
-        in_progress: "Lägger till mint",
+        in_progress: "กำลังเพิ่ม Mint",
       },
     },
   },
   restore: {
-    mnemonic_error_text: "Ange en mnemonisk fras",
-    restore_mint_error_text: "Fel vid återställning av mint: { error }",
-    prepare_info_text: "Förbereder återställningsprocess…",
+    mnemonic_error_text: "โปรดป้อน mnemonic",
+    restore_mint_error_text: "ข้อผิดพลาดในการกู้คืน Mint: { error }",
+    prepare_info_text: "กำลังเตรียมกระบวนการกู้คืน…",
     restored_proofs_for_keyset_info_text:
-      "{ restoreCounter } bevis återställda för keyset { keysetId }",
+      "กู้คืน { restoreCounter } proofs สำหรับ keyset { keysetId }",
     checking_proofs_for_keyset_info_text:
-      "Kontrollerar bevis { startIndex } till { endIndex } för keyset { keysetId }",
-    no_proofs_info_text: "Inga bevis att återställa hittades",
-    restored_amount_success_text: "{ amount } återställt",
+      "กำลังตรวจสอบ proofs { startIndex } ถึง { endIndex } สำหรับ keyset { keysetId }",
+    no_proofs_info_text: "ไม่พบ proofs ที่จะกู้คืน",
+    restored_amount_success_text: "กู้คืน { amount }",
   },
   swap: {
-    in_progress_warning_text: "Växling pågår",
-    invalid_swap_data_error_text: "Ogiltig växlingsdata",
-    swap_error_text: "Fel vid växling",
+    in_progress_warning_text: "กำลังดำเนินการแลกเปลี่ยน",
+    invalid_swap_data_error_text: "ข้อมูลการแลกเปลี่ยนไม่ถูกต้อง",
+    swap_error_text: "ข้อผิดพลาดในการแลกเปลี่ยน",
   },
 };
