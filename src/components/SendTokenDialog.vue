@@ -20,8 +20,8 @@
       <!--  enter send data -->
       <div v-if="!sendData.tokens">
         <q-card-section class="q-pa-lg q-pt-md">
-          <div class="row items-center no-wrap q-mb-sm q-pr-lg q-py-lg">
-            <div class="col-9">
+          <div class="row items-center no-wrap q-mb-sm q-py-lg">
+            <div class="col-8">
               <span v-if="!sendData.paymentRequest" class="text-h6"
                 >{{
                   $t("SendTokenDialog.title", {
@@ -64,7 +64,7 @@
                 }})
               </span>
             </div>
-            <div class="col-3" style="height: 30px">
+            <div class="col-4 text-right" style="height: 30px">
               <transition
                 appear
                 enter-active-class="animated fadeIn"
@@ -77,7 +77,7 @@
                   outline
                   rounded
                   color="grey"
-                  class="q-mr-auto q-pl-sm q-ml-md q-pr-sm q-my-xs q-mt-xs"
+                  class="float-right"
                   size="lg"
                 >
                   <q-icon
