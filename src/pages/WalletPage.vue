@@ -11,9 +11,8 @@
           <q-btn
             rounded
             dense
-            class="q-px-md"
+            class="q-px-md wallet-action-btn"
             color="primary"
-            style="width: 140px"
             @click="showReceiveDialog = true"
             size="1.2rem"
           >
@@ -40,8 +39,7 @@
           <q-btn
             rounded
             dense
-            class="q-px-md"
-            style="width: 140px"
+            class="q-px-md wallet-action-btn"
             color="primary"
             @click="showSendDialog = true"
             size="1.2rem"
@@ -189,6 +187,17 @@
 
 .keypad .btn-confirm {
   grid-area: 1 / 4 / 5 / 4;
+}
+
+.wallet-action-btn {
+  min-width: 140px;
+  width: auto;
+}
+
+/* Apply equal widths to wallet action buttons after render */
+.equal-width-buttons {
+  display: flex;
+  justify-content: space-between;
 }
 </style>
 <script>
@@ -565,6 +574,28 @@ export default {
         }
       };
     },
+    equalizeButtonWidths: function () {
+      this.$nextTick(() => {
+        const actionBtns = document.querySelectorAll(".wallet-action-btn");
+        if (actionBtns.length >= 2) {
+          // Reset widths first
+          actionBtns.forEach((btn) => {
+            btn.style.width = "auto";
+          });
+
+          // Get the maximum width
+          let maxWidth = 0;
+          actionBtns.forEach((btn) => {
+            maxWidth = Math.max(maxWidth, btn.offsetWidth);
+          });
+
+          // Apply the maximum width to all buttons
+          actionBtns.forEach((btn) => {
+            btn.style.width = `${maxWidth}px`;
+          });
+        }
+      });
+    },
   },
   watch: {},
 
@@ -572,6 +603,15 @@ export default {
     // generate NPC connection
     this.generateNPCConnection();
     this.claimAllTokens();
+    // Ensure wallet action buttons have equal width
+    this.$nextTick(this.equalizeButtonWidths);
+    // Add window resize listener to handle responsive layouts
+    window.addEventListener("resize", this.equalizeButtonWidths);
+  },
+
+  beforeUnmount: function () {
+    // Remove event listener when component is destroyed
+    window.removeEventListener("resize", this.equalizeButtonWidths);
   },
 
   created: async function () {
