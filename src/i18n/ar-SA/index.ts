@@ -47,6 +47,28 @@ export default {
       },
     },
   },
+  wallet: {
+    notifications: {
+      balance_too_low: "الرصيد منخفض جدًا",
+      received: "تم استلام {amount}",
+      fee: " (رسوم: {fee})",
+      could_not_request_mint: "لا يمكن طلب الإنشاء",
+      invoice_still_pending: "الفاتورة لا تزال معلقة",
+      paid_lightning: "تم دفع {amount} عبر شبكة لايتنينج",
+      payment_pending_refresh: "الدفع معلق. قم بتحديث الفاتورة يدويًا.",
+      sent: "تم إرسال {amount}",
+      token_still_pending: "الرمز لا يزال معلقًا",
+      received_lightning: "تم استلام {amount} عبر شبكة لايتنينج",
+      lightning_payment_failed: "فشل الدفع عبر لايتنينج",
+      failed_to_decode_invoice: "فشل فك ترميز الفاتورة",
+      invalid_lnurl: "LNURL غير صالح",
+      lnurl_error: "خطأ في LNURL",
+      no_amount: "لا يوجد مبلغ",
+      no_lnurl_data: "لا توجد بيانات LNURL",
+      no_price_data: "لا توجد بيانات سعرية.",
+      please_try_again: "يرجى المحاولة مرة أخرى."
+    }
+  },
   MainHeader: {
     menu: {
       settings: {

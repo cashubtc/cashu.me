@@ -152,7 +152,7 @@
                     <div
                       v-for="unit in mintClass(mint).units"
                       :key="unit"
-                      class="q-py-xs q-px-sm"
+                      class="q-py-xs q-px-sm q-my-xs"
                       style="
                         border-radius: 4px;
                         background-color: #1d1d1d;

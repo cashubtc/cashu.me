@@ -47,6 +47,28 @@ export default {
       },
     },
   },
+  wallet: {
+    notifications: {
+      balance_too_low: "Saldot är för lågt",
+      received: "Mottaget {amount}",
+      fee: " (avgift: {fee})",
+      could_not_request_mint: "Kunde inte begära prägling",
+      invoice_still_pending: "Fakturan väntar fortfarande",
+      paid_lightning: "Betalat {amount} via Lightning",
+      payment_pending_refresh: "Betalning väntar. Uppdatera fakturan manuellt.",
+      sent: "Skickat {amount}",
+      token_still_pending: "Token väntar fortfarande",
+      received_lightning: "Mottaget {amount} via Lightning",
+      lightning_payment_failed: "Lightning-betalning misslyckades",
+      failed_to_decode_invoice: "Kunde inte avkoda fakturan",
+      invalid_lnurl: "Ogiltig LNURL",
+      lnurl_error: "LNURL-fel",
+      no_amount: "Inget belopp",
+      no_lnurl_data: "Ingen LNURL-data",
+      no_price_data: "Ingen prisdata.",
+      please_try_again: "Försök igen."
+    }
+  },
   MainHeader: {
     menu: {
       settings: {
@@ -646,7 +668,7 @@ export default {
           label: "Till",
         },
         amount: {
-          label: "Belopp ({ ticker }))",
+          label: "Belopp ({ ticker })",
         },
       },
       actions: {

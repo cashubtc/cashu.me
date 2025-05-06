@@ -47,6 +47,28 @@ export default {
       },
     },
   },
+  wallet: {
+    notifications: {
+      balance_too_low: "残高が不足しています",
+      received: "{amount}を受け取りました",
+      fee: " (手数料: {fee})",
+      could_not_request_mint: "ミントをリクエストできませんでした",
+      invoice_still_pending: "請求書はまだ処理中です",
+      paid_lightning: "Lightningで{amount}を支払いました",
+      payment_pending_refresh: "支払いは保留中です。請求書を手動で更新してください。",
+      sent: "{amount}を送信しました",
+      token_still_pending: "トークンはまだ処理中です",
+      received_lightning: "Lightningで{amount}を受け取りました",
+      lightning_payment_failed: "Lightning支払いに失敗しました",
+      failed_to_decode_invoice: "請求書をデコードできませんでした",
+      invalid_lnurl: "無効なLNURL",
+      lnurl_error: "LNURLエラー",
+      no_amount: "金額がありません",
+      no_lnurl_data: "LNURLデータがありません",
+      no_price_data: "価格データがありません。",
+      please_try_again: "もう一度お試しください。"
+    }
+  },
   MainHeader: {
     menu: {
       settings: {

@@ -47,6 +47,28 @@ export default {
       },
     },
   },
+  wallet: {
+    notifications: {
+      balance_too_low: "Il saldo è troppo basso",
+      received: "Ricevuto {amount}",
+      fee: " (commissione: {fee})",
+      could_not_request_mint: "Impossibile richiedere coniazione",
+      invoice_still_pending: "Fattura ancora in attesa",
+      paid_lightning: "Pagato {amount} tramite Lightning",
+      payment_pending_refresh: "Pagamento in attesa. Aggiorna la fattura manualmente.",
+      sent: "Inviato {amount}",
+      token_still_pending: "Token ancora in attesa",
+      received_lightning: "Ricevuto {amount} tramite Lightning",
+      lightning_payment_failed: "Pagamento Lightning fallito",
+      failed_to_decode_invoice: "Impossibile decodificare la fattura",
+      invalid_lnurl: "LNURL non valido",
+      lnurl_error: "Errore LNURL",
+      no_amount: "Nessun importo",
+      no_lnurl_data: "Nessun dato LNURL",
+      no_price_data: "Nessun dato di prezzo.",
+      please_try_again: "Si prega di riprovare."
+    }
+  },
   MainHeader: {
     menu: {
       settings: {

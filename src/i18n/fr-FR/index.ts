@@ -47,6 +47,28 @@ export default {
       },
     },
   },
+  wallet: {
+    notifications: {
+      balance_too_low: "Le solde est trop bas",
+      received: "Reçu {amount}",
+      fee: " (frais: {fee})",
+      could_not_request_mint: "Impossible de demander à la Mint",
+      invoice_still_pending: "Facture toujours en attente",
+      paid_lightning: "Payé {amount} via Lightning",
+      payment_pending_refresh: "Paiement en attente. Rafraîchissez la facture manuellement.",
+      sent: "Envoyé {amount}",
+      token_still_pending: "Token toujours en attente",
+      received_lightning: "Reçu {amount} via Lightning",
+      lightning_payment_failed: "Paiement Lightning échoué",
+      failed_to_decode_invoice: "Impossible de décoder la facture",
+      invalid_lnurl: "LNURL invalide",
+      lnurl_error: "Erreur LNURL",
+      no_amount: "Pas de montant",
+      no_lnurl_data: "Pas de données LNURL",
+      no_price_data: "Pas de données de prix.",
+      please_try_again: "Veuillez réessayer."
+    }
+  },
   MainHeader: {
     menu: {
       settings: {

@@ -47,6 +47,28 @@ export default {
       },
     },
   },
+  wallet: {
+    notifications: {
+      balance_too_low: "余额不足",
+      received: "已收到 {amount}",
+      fee: " (手续费: {fee})",
+      could_not_request_mint: "无法请求铸造",
+      invoice_still_pending: "发票仍在处理中",
+      paid_lightning: "通过闪电网络支付了 {amount}",
+      payment_pending_refresh: "付款正在处理。请手动刷新发票。",
+      sent: "已发送 {amount}",
+      token_still_pending: "代币仍在处理中",
+      received_lightning: "通过闪电网络收到 {amount}",
+      lightning_payment_failed: "闪电网络支付失败",
+      failed_to_decode_invoice: "无法解码发票",
+      invalid_lnurl: "无效的LNURL",
+      lnurl_error: "LNURL错误",
+      no_amount: "没有金额",
+      no_lnurl_data: "没有LNURL数据",
+      no_price_data: "没有价格数据。",
+      please_try_again: "请重试。"
+    }
+  },
   MainHeader: {
     menu: {
       settings: {
