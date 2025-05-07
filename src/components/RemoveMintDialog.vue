@@ -1,61 +1,81 @@
 <template>
   <q-dialog
     v-model="showRemoveMintDialogLocal"
-    backdrop-filter="blur(2px) brightness(60%)"
+    backdrop-filter="blur(4px) brightness(50%)"
+    transition-show="fade"
+    transition-hide="fade"
   >
-    <q-card class="q-pa-lg">
-      <h6 class="q-my-md">Are you sure you want to delete this mint?</h6>
-      <div v-if="mintToRemove.nickname">
-        <span class="text-weight-bold"> Nickname: </span>
-        <span class="text-weight-light"> {{ mintToRemove.nickname }}</span>
-      </div>
-      <div class="row q-my-md">
-        <div class="col">
-          <span class="text-weight-bold">Balances:</span>
-          <q-badge
-            v-for="unit in mintClass(mintToRemove).units"
-            :key="unit"
-            color="primary"
-            :label="
-              formatCurrency(mintClass(mintToRemove).unitBalance(unit), unit)
-            "
-            class="q-mx-xs"
-          />
+    <q-card class="remove-mint-dialog">
+      <!-- Header Section -->
+      <div class="remove-mint-header q-pa-md">
+        <div class="remove-mint-title-row">
+          <h4 class="remove-mint-title q-my-none">Delete Mint</h4>
         </div>
       </div>
-      <q-input
-        outlined
-        readonly
-        :model-value="mintToRemove.url"
-        label="Mint URL"
-        type="textarea"
-        autogrow
-        class="q-mb-xs"
-      ></q-input>
-      <div class="row q-my-md">
-        <div class="col">
-          <span class="text-caption"
-            >Note: Because this wallet is paranoid, your ecash from this mint
+
+      <!-- Content Section -->
+      <div class="remove-mint-content q-px-md q-pb-md">
+        <p class="remove-mint-description q-mb-lg">
+          Are you sure you want to delete this mint?
+        </p>
+
+        <div class="q-mb-lg">
+          <div v-if="mintToRemove.nickname" class="q-mb-md">
+            <label class="input-label">Nickname</label>
+            <div class="mint-data-display">{{ mintToRemove.nickname }}</div>
+          </div>
+
+          <div class="q-mb-md">
+            <label class="input-label">Balances</label>
+            <div class="mint-data-display">
+              <q-badge
+                v-for="unit in mintClass(mintToRemove).units"
+                :key="unit"
+                color="primary"
+                :label="
+                  formatCurrency(
+                    mintClass(mintToRemove).unitBalance(unit),
+                    unit
+                  )
+                "
+                class="q-mr-sm"
+              />
+            </div>
+          </div>
+
+          <label class="input-label">Mint URL</label>
+          <q-input
+            outlined
+            readonly
+            :model-value="mintToRemove.url"
+            dense
+            class="mint-input"
+            filled
+            type="textarea"
+            autogrow
+            style="font-family: monospace; font-size: 0.9em"
+          ></q-input>
+        </div>
+
+        <div class="q-mb-lg">
+          <span class="remove-mint-description">
+            Note: Because this wallet is paranoid, your ecash from this mint
             will not be actually deleted but will remain stored on your device.
-            You will see it reappear if you re-add this mint later again.</span
-          >
+            You will see it reappear if you re-add this mint later again.
+          </span>
         </div>
-      </div>
-      <div class="row q-mt-lg">
-        <div class="col">
+
+        <div class="action-buttons">
+          <q-btn flat class="cancel-btn" v-close-popup> Cancel </q-btn>
+          <q-spacer></q-spacer>
           <q-btn
-            v-close-popup
-            class="float-left"
-            color="primary"
-            rounded
+            color="negative"
+            class="remove-btn"
             @click="removeMintLocal"
-            >Remove mint</q-btn
+            v-close-popup
           >
-        </div>
-        <div class="col">
-          <q-btn v-close-popup flat color="grey" class="float-right"
-            >Cancel</q-btn
-          >
+            Delete Mint
+          </q-btn>
         </div>
       </div>
     </q-card>
@@ -109,3 +129,176 @@ export default defineComponent({
   },
 });
 </script>
+
+<style scoped>
+.remove-mint-dialog {
+  width: 100%;
+  max-width: 450px;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.remove-mint-header {
+  position: relative;
+  padding-top: 20px;
+}
+
+.remove-mint-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.remove-mint-title {
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  font-family: "Inter", sans-serif;
+}
+
+.remove-mint-content {
+  padding-top: 0;
+}
+
+.remove-mint-description {
+  font-size: 15px;
+  line-height: 1.5;
+  font-weight: 400;
+  margin-top: 0;
+  opacity: 0.7;
+  font-family: "Inter", sans-serif;
+}
+
+.input-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  opacity: 0.7;
+  font-family: "Inter", sans-serif;
+}
+
+.mint-data-display {
+  padding: 12px;
+  background-color: rgba(0, 0, 0, 0.03);
+  border-radius: 8px;
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  font-family: "Inter", sans-serif;
+}
+
+.body--dark .mint-data-display {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.mint-input {
+  border-radius: 8px;
+  font-size: 16px;
+  font-family: "Inter", sans-serif;
+}
+
+.mint-note {
+  background-color: rgba(0, 0, 0, 0.03);
+  padding: 12px;
+  border-radius: 8px;
+  font-family: "Inter", sans-serif;
+}
+
+.body--dark .mint-note {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* Completely remove all input animations */
+:deep(.mint-input) {
+  /* Disable all transitions on the input and its children except for background-color */
+  * {
+    transition: none !important;
+    animation: none !important;
+  }
+
+  /* Add a smooth transition just for the background-color */
+  transition: background-color 0.2s ease-in-out !important;
+}
+
+:deep(.mint-input .q-field__focus-target) {
+  border-radius: 8px;
+}
+
+:deep(.mint-input .q-focus-helper) {
+  /* Remove animation completely */
+  opacity: 0 !important;
+  display: none !important; /* Hide it completely */
+}
+
+/* Add subtle focus/active state - theme responsive */
+:deep(.mint-input.q-field--focused) {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* For dark mode, adjust the focus color */
+:deep(.body--dark .mint-input.q-field--focused) {
+  background-color: rgba(255, 255, 255, 0.07);
+}
+
+/* For light mode, use a darker shade for contrast */
+:deep(.body--light .mint-input.q-field--focused) {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+/* Remove any ripple effects */
+:deep(.mint-input .q-ripple) {
+  display: none !important;
+}
+
+/* Remove any before/after pseudo-elements that might animate */
+:deep(.mint-input .q-field__control:before),
+:deep(.mint-input .q-field__control:after) {
+  display: none !important;
+}
+
+/* Ensure no border animations */
+:deep(.mint-input .q-field__control) {
+  border-radius: 8px;
+  transition: none !important;
+}
+
+:deep(.mint-input .q-field__native) {
+  padding: 12px;
+  font-family: "Inter", sans-serif;
+}
+
+/* Make sure input placeholders use Inter font */
+:deep(.mint-input .q-field__native),
+:deep(.mint-input .q-field__input),
+:deep(.mint-input .q-placeholder) {
+  font-family: "Inter", sans-serif;
+}
+
+.action-buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 32px;
+}
+
+.cancel-btn {
+  font-weight: 600;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-family: "Inter", sans-serif;
+}
+
+.remove-btn {
+  font-weight: 700;
+  padding: 8px 20px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  font-family: "Inter", sans-serif;
+}
+
+.remove-btn:hover {
+  transform: translateY(-1px);
+}
+</style>
