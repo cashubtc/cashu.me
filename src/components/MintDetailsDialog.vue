@@ -121,7 +121,9 @@
           v-if="showMintInfoData.info.contact?.length > 0"
         >
           <div class="divider-line"></div>
-          <div class="divider-text">CONTACT</div>
+          <div class="divider-text">
+            {{ $t("MintDetailsDialog.contact.title") }}
+          </div>
           <div class="divider-line"></div>
         </div>
 
@@ -165,7 +167,9 @@
         <!-- Section Divider -->
         <div class="section-divider q-mb-md">
           <div class="divider-line"></div>
-          <div class="divider-text">MINT DETAILS</div>
+          <div class="divider-text">
+            {{ $t("MintDetailsDialog.details.title") }}
+          </div>
           <div class="divider-line"></div>
         </div>
 
@@ -175,7 +179,9 @@
           <div class="detail-item q-mb-md">
             <div class="detail-label">
               <link-icon size="20" color="#9E9E9E" class="detail-icon" />
-              <div class="detail-name">URL</div>
+              <div class="detail-name">
+                {{ $t("MintDetailsDialog.details.url.label") }}
+              </div>
             </div>
             <div
               class="detail-value items-center"
@@ -189,17 +195,19 @@
           <div class="detail-item q-mb-md" v-if="showMintInfoData.info.nuts">
             <div class="detail-label">
               <nut-icon size="20" color="#9E9E9E" class="detail-icon" />
-              <div class="detail-name">Nuts</div>
+              <div class="detail-name">
+                {{ $t("MintDetailsDialog.details.nuts.label") }}
+              </div>
             </div>
             <div
               class="detail-value"
               v-if="!showAllNuts"
               @click="showAllNuts = true"
             >
-              View all
+              {{ $t("MintDetailsDialog.details.nuts.actions.show.label") }}
             </div>
             <div class="detail-value" v-else @click="showAllNuts = false">
-              Hide
+              {{ $t("MintDetailsDialog.details.nuts.actions.hide.label") }}
             </div>
           </div>
 
@@ -228,7 +236,9 @@
           >
             <div class="detail-label">
               <currency-icon size="20" color="#9E9E9E" class="detail-icon" />
-              <div class="detail-name">Currency</div>
+              <div class="detail-name">
+                {{ $t("MintDetailsDialog.details.currency.label") }}
+              </div>
             </div>
             <div class="detail-value">
               {{ showMintInfoData.info.currencies }}
@@ -242,7 +252,9 @@
           >
             <div class="detail-label">
               <banknote-icon size="20" color="#9E9E9E" class="detail-icon" />
-              <div class="detail-name">Currency</div>
+              <div class="detail-name">
+                {{ $t("MintDetailsDialog.details.currencies.label") }}
+              </div>
             </div>
             <div class="detail-value">
               {{ mintUnits.map((unit) => unit.toUpperCase()).join(", ") }}
@@ -253,7 +265,9 @@
           <div class="detail-item" v-if="showMintInfoData.info.version">
             <div class="detail-label">
               <info-icon size="20" color="#9E9E9E" class="detail-icon" />
-              <div class="detail-name">Version</div>
+              <div class="detail-name">
+                {{ $t("MintDetailsDialog.details.version.label") }}
+              </div>
             </div>
             <div class="detail-value">
               {{ showMintInfoData.info.version }}
@@ -278,7 +292,9 @@
         <!-- Section Divider -->
         <div class="section-divider q-mb-md">
           <div class="divider-line"></div>
-          <div class="divider-text">ACTIONS</div>
+          <div class="divider-text">
+            {{ $t("MintDetailsDialog.actions.title") }}
+          </div>
           <div class="divider-line"></div>
         </div>
 
@@ -290,7 +306,9 @@
               @click="openEditMintDialog"
             >
               <pencil-icon size="20" color="#9E9E9E" class="action-icon" />
-              <div class="action-label">Edit mint</div>
+              <div class="action-label">
+                {{ $t("MintDetailsDialog.actions.edit.label") }}
+              </div>
             </div>
 
             <div
@@ -298,7 +316,9 @@
               @click="copyText(showMintInfoData.url)"
             >
               <copy-icon size="20" color="#9E9E9E" class="action-icon" />
-              <div class="action-label">Copy mint URL</div>
+              <div class="action-label">
+                {{ $t("MintDetailsDialog.actions.copy_mint_url.label") }}
+              </div>
             </div>
 
             <div
@@ -306,7 +326,9 @@
               @click="openRemoveMintDialog"
             >
               <trash-icon size="20" color="#FF453A" class="action-icon" />
-              <div class="action-label">Delete mint</div>
+              <div class="action-label">
+                {{ $t("MintDetailsDialog.actions.delete.label") }}
+              </div>
             </div>
           </div>
         </div>
@@ -446,7 +468,7 @@ export default defineComponent({
     copyText(text) {
       navigator.clipboard.writeText(text);
       this.$q.notify({
-        message: "Copied to clipboard",
+        message: this.$i18n.t("global.copy_to_clipboard.success"),
         color: "positive",
         position: "top",
         timeout: 1000,
@@ -565,6 +587,7 @@ export default defineComponent({
   font-size: 14px;
   font-weight: 600;
   color: #ffffff;
+  text-transform: uppercase;
 }
 
 /* Contact Section */

@@ -21,8 +21,9 @@
                 overline
                 class="q-mb-sm q-pt-md text-white"
                 style="font-size: 1rem"
-              >
-                Payment Request</q-item-label
+                >{{
+                  $t("PaymentRequestDialog.payment_request.caption")
+                }}</q-item-label
               >
             </div>
             <div class="row justify-center q-pt-sm">
@@ -30,7 +31,9 @@
                 caption
                 class="text-weight-light text-white"
                 style="font-size: 14px"
-                >Receive payments via Nostr</q-item-label
+                >{{
+                  $t("PaymentRequestDialog.payment_request.description")
+                }}</q-item-label
               >
             </div>
           </q-card-section>
@@ -73,7 +76,9 @@
                   ref="amountInput"
                   v-model="amountInputValue"
                   type="number"
-                  placeholder="Enter amount"
+                  :placeholder="
+                    $t('PaymentRequestDialog.inputs.amount.placeholder')
+                  "
                   @blur="finishEditingAmount"
                   @keyup.enter="finishEditingAmount"
                 ></q-input>
@@ -90,13 +95,19 @@
           @click="newRequest"
         >
           <q-icon name="refresh" class="q-pr-sm" size="xs" />
-          New request</q-btn
+          {{ $t("PaymentRequestDialog.actions.new_request.label") }}</q-btn
         >
         <div class="row q-mt-lg">
-          <q-btn class="q-mx-xs" size="md" flat @click="copyText(showPRKData)"
-            >Copy</q-btn
+          <q-btn
+            class="q-mx-xs"
+            size="md"
+            flat
+            @click="copyText(showPRKData)"
+            >{{ $t("PaymentRequestDialog.actions.copy.label") }}</q-btn
           >
-          <q-btn v-close-popup flat color="grey" class="q-ml-auto">Close</q-btn>
+          <q-btn v-close-popup flat color="grey" class="q-ml-auto">{{
+            $t("PaymentRequestDialog.actions.close.label")
+          }}</q-btn>
         </div>
       </div>
     </q-card>
@@ -122,13 +133,18 @@ export default defineComponent({
     ToggleUnit,
   },
   data() {
+    const amountLabelDefault = this.$i18n.t(
+      "PaymentRequestDialog.actions.add_amount.label"
+    );
     return {
       paymentRequestAmount: undefined,
       isEditingAmount: false,
       amountInputValue: "",
-      amountLabelDefault: "Add amount",
-      amountLabel: "Add amount",
-      defaultAnyMint: "Any Mint",
+      amountLabelDefault,
+      amountLabel: amountLabelDefault,
+      defaultAnyMint: this.$i18n.t(
+        "PaymentRequestDialog.actions.use_active_mint.label"
+      ),
       chosenMintUrl: undefined,
       memo: "",
     };

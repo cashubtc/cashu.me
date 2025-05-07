@@ -17,17 +17,16 @@
         <div class="row justify-center">
           <q-card-section class="q-pa-sm">
             <div class="row justify-center">
-              <q-item-label overline class="q-mb-sm q-pt-md text-white">
-                P2PK Key</q-item-label
-              >
+              <q-item-label overline class="q-mb-sm q-pt-md text-white">{{
+                $t("P2PKDialog.p2pk.caption")
+              }}</q-item-label>
             </div>
             <div v-if="showP2PKData.used" class="row justify-center q-pt-sm">
               <q-item-label
                 caption
                 class="text-weight-bold text-warning"
                 style="font-size: 14px"
-                >Warning: This key was used before. Use a new key for better
-                privacy.</q-item-label
+                >{{ $t("P2PKDialog.p2pk.used_warning_text") }}</q-item-label
               >
             </div>
             <div v-else class="row justify-center q-pt-sm">
@@ -35,7 +34,7 @@
                 caption
                 class="text-weight-light text-white"
                 style="font-size: 14px"
-                >Receive ecash locked to this key</q-item-label
+                >{{ $t("P2PKDialog.p2pk.description") }}</q-item-label
               >
             </div>
           </q-card-section>
@@ -50,7 +49,7 @@
           @click="newKeys"
         >
           <q-icon name="refresh" class="q-pr-sm" size="xs" />
-          Generate new key</q-btn
+          {{ $t("P2PKDialog.actions.new_key.label") }}</q-btn
         >
         <div class="row q-mt-lg">
           <q-btn
@@ -58,9 +57,11 @@
             size="md"
             flat
             @click="copyText(showP2PKData.publicKey)"
-            >Copy</q-btn
+            >{{ $t("P2PKDialog.actions.copy.label") }}</q-btn
           >
-          <q-btn v-close-popup flat color="grey" class="q-ml-auto">Close</q-btn>
+          <q-btn v-close-popup flat color="grey" class="q-ml-auto">{{
+            $t("P2PKDialog.actions.close.label")
+          }}</q-btn>
         </div>
       </div>
     </q-card>

@@ -52,6 +52,7 @@ import { generateMnemonic, mnemonicToSeedSync } from "@scure/bip39";
 import { wordlist } from "@scure/bip39/wordlists/english";
 import { useSettingsStore } from "./settings";
 import { usePriceStore } from "./price";
+import { useI18n } from "vue-i18n";
 // HACK: this is a workaround so that the catch block in the melt function does not throw an error when the user exits the app
 // before the payment is completed. This is necessary because the catch block in the melt function would otherwise remove all
 // quotes from the invoiceHistory and the user would not be able to pay the invoice again after reopening the app.
@@ -87,7 +88,9 @@ const proofsStore = useProofsStore();
 
 export const useWalletStore = defineStore("wallet", {
   state: () => {
+    const { t } = useI18n();
     return {
+      t: t,
       mnemonic: useLocalStorage("cashu.mnemonic", ""),
       invoiceHistory: useLocalStorage(
         "cashu.invoiceHistory",
@@ -339,7 +342,7 @@ export const useWalletStore = defineStore("wallet", {
         const balance = mintStore.activeBalance;
         const unit = mintStore.activeUnit;
         notifyWarning(
-          "Balance is too low",
+          this.t("wallet.notifications.balance_too_low"),
           `${uIStore.formatCurrency(
             balance,
             unit
@@ -467,7 +470,7 @@ export const useWalletStore = defineStore("wallet", {
      */
     redeem: async function () {
       /*
-      Receives a token that is prepared in the receiveToken – it is not yet in the history
+      Receives a token that is prepared in the receiveToken – it is not yet in the history
       */
       const uIStore = useUiStore();
       const mintStore = useMintsStore();
@@ -556,11 +559,13 @@ export const useWalletStore = defineStore("wallet", {
           tokenStore.addPaidToken(historyToken);
         }
         useUiStore().vibrate();
-        let message =
-          "Received " + uIStore.formatCurrency(outputAmount, historyToken.unit);
+        let message = this.t("wallet.notifications.received", {
+          amount: uIStore.formatCurrency(outputAmount, historyToken.unit)
+        });
         if (fee > 0) {
-          message +=
-            " (fee: " + uIStore.formatCurrency(fee, historyToken.unit) + ")";
+          message += this.t("wallet.notifications.fee", {
+            fee: uIStore.formatCurrency(fee, historyToken.unit)
+          });
         }
         notifySuccess(message);
       } catch (error: any) {
@@ -604,7 +609,7 @@ export const useWalletStore = defineStore("wallet", {
         return data;
       } catch (error: any) {
         console.error(error);
-        notifyApiError(error, "Could not request mint");
+        notifyApiError(error, this.t("wallet.notifications.could_not_request_mint"));
         throw error;
       } finally {
       }
@@ -632,7 +637,7 @@ export const useWalletStore = defineStore("wallet", {
             break;
           case MintQuoteState.UNPAID:
             if (verbose) {
-              notify("Invoice still pending");
+              notify(this.t("wallet.notifications.invoice_still_pending"));
             }
             throw new Error("invoice pending.");
           case MintQuoteState.ISSUED:
@@ -821,9 +826,9 @@ export const useWalletStore = defineStore("wallet", {
         let amount_paid = amount - proofsStore.sumProofs(data.change);
         useUiStore().vibrate();
         notifySuccess(
-          "Paid " +
-            uIStore.formatCurrency(amount_paid, mintWallet.unit) +
-            " via Lightning"
+          this.t("wallet.notifications.paid_lightning", {
+            amount: uIStore.formatCurrency(amount_paid, mintWallet.unit)
+          })
         );
         console.log("#### pay lightning: token paid");
         tokenStore.addPaidToken({
@@ -857,7 +862,7 @@ export const useWalletStore = defineStore("wallet", {
             "### melt: error, but quote is paid or pending. not rolling back."
           );
           this.payInvoiceData.show = false;
-          notify("Payment pending. Refresh invoice manually.");
+          notify(this.t("wallet.notifications.payment_pending_refresh"));
           throw error;
         }
         // roll back proof management and keyset counter
@@ -994,16 +999,17 @@ export const useWalletStore = defineStore("wallet", {
         useUiStore().vibrate();
         const proofStore = useProofsStore();
         notifySuccess(
-          "Sent " +
-            uIStore.formatCurrency(
+          this.t("wallet.notifications.sent", {
+            amount: uIStore.formatCurrency(
               proofStore.sumProofs(spentProofs),
               historyToken.unit
             )
+          })
         );
       } else {
         console.log("### token not paid yet");
         if (verbose) {
-          notify("Token still pending");
+          notify(this.t("wallet.notifications.token_still_pending"));
         }
         return false;
       }
@@ -1030,13 +1036,13 @@ export const useWalletStore = defineStore("wallet", {
         // check the state first
         const state = (await mintWallet.checkMintQuote(quote)).state;
         if (state == MintQuoteState.ISSUED) {
-          this.setInvoicePaid(invoice.quote);
+          this.setInvoicePaid(quote);
           return;
         }
         if (state != MintQuoteState.PAID) {
           console.log("### mintQuote not paid yet");
           if (verbose) {
-            notify("Invoice still pending");
+            notify(this.t("wallet.notifications.invoice_still_pending"));
           }
           throw new Error(`invoice state not paid: ${state}`);
         }
@@ -1046,9 +1052,9 @@ export const useWalletStore = defineStore("wallet", {
         }
         useUiStore().vibrate();
         notifySuccess(
-          "Received " +
-            uIStore.formatCurrency(invoice.amount, invoice.unit) +
-            " via Lightning"
+          this.t("wallet.notifications.received_lightning", {
+            amount: uIStore.formatCurrency(invoice.amount, invoice.unit)
+          })
         );
         return proofs;
       } catch (error) {
@@ -1079,14 +1085,14 @@ export const useWalletStore = defineStore("wallet", {
         if (meltQuote.state == MeltQuoteState.PENDING) {
           console.log("### mintQuote not paid yet");
           if (verbose) {
-            notify("Invoice still pending");
+            notify(this.t("wallet.notifications.invoice_still_pending"));
           }
           throw new Error("invoice not paid yet.");
         } else if (meltQuote.state == MeltQuoteState.UNPAID) {
           // we assume that the payment failed and we unset the proofs as reserved
           await useProofsStore().setReserved(proofs, false);
           this.removeOutgoingInvoiceFromHistory(quote);
-          notifyWarning("Lightning payment failed");
+          notifyWarning(this.t("wallet.notifications.lightning_payment_failed"));
         } else if (meltQuote.state == MeltQuoteState.PAID) {
           // if the invoice is paid, we check if all proofs are spent and if so, we invalidate them and set the invoice state in the history to "paid"
           const spentProofs = await this.checkProofsSpendable(
@@ -1097,11 +1103,12 @@ export const useWalletStore = defineStore("wallet", {
           if (spentProofs != undefined && spentProofs.length == proofs.length) {
             useUiStore().vibrate();
             notifySuccess(
-              "Sent " +
-                uIStore.formatCurrency(
+              this.t("wallet.notifications.sent", {
+                amount: uIStore.formatCurrency(
                   useProofsStore().sumProofs(proofs),
                   invoice.unit
                 )
+              })
             );
           }
           // set invoice in history to paid
@@ -1254,9 +1261,9 @@ export const useWalletStore = defineStore("wallet", {
             }
             useUiStore().vibrate();
             notifySuccess(
-              "Received " +
-                uIStore.formatCurrency(invoice.amount, invoice.unit) +
-                " via Lightning"
+              this.t("wallet.notifications.received_lightning", {
+                amount: uIStore.formatCurrency(invoice.amount, invoice.unit)
+              })
             );
             unsub();
             return proofs;
@@ -1338,7 +1345,7 @@ export const useWalletStore = defineStore("wallet", {
       try {
         invoice = bolt11Decoder.decode(this.payInvoiceData.input.request);
       } catch (error) {
-        notifyWarning("Failed to decode invoice", undefined, 3000);
+        notifyWarning(this.t("wallet.notifications.failed_to_decode_invoice"), undefined, 3000);
         this.payInvoiceData.show = false;
         throw error;
       }
@@ -1465,7 +1472,7 @@ export const useWalletStore = defineStore("wallet", {
         data = resp.data;
       }
       if (host == undefined) {
-        notifyError("Invalid LNURL", "LNURL Error");
+        notifyError(this.t("wallet.notifications.invalid_lnurl"), this.t("wallet.notifications.lnurl_error"));
         return;
       }
       if (data.tag == "payRequest") {
@@ -1494,11 +1501,11 @@ export const useWalletStore = defineStore("wallet", {
       const mintStore = useMintsStore();
       let amount = this.payInvoiceData.input.amount;
       if (amount == null) {
-        notifyError("No amount", "LNURL Error");
+        notifyError(this.t("wallet.notifications.no_amount"), this.t("wallet.notifications.lnurl_error"));
         return;
       }
       if (this.payInvoiceData.lnurlpay == null) {
-        notifyError("No LNURL data", "LNURL Error");
+        notifyError(this.t("wallet.notifications.no_lnurl_data"), this.t("wallet.notifications.lnurl_error"));
         return;
       }
       if (
@@ -1509,7 +1516,7 @@ export const useWalletStore = defineStore("wallet", {
         if (mintStore.activeUnit == "usd") {
           const priceUsd = usePriceStore().bitcoinPrice;
           if (priceUsd == 0) {
-            notifyError("No price data.", "LNURL Error");
+            notifyError(this.t("wallet.notifications.no_price_data"), this.t("wallet.notifications.lnurl_error"));
             return;
           }
           const satPrice = 1 / (priceUsd / 1e8);
@@ -1521,7 +1528,7 @@ export const useWalletStore = defineStore("wallet", {
         );
         // check http error
         if (data.status == "ERROR") {
-          notifyError(data.reason, "LNURL Error");
+          notifyError(data.reason, this.t("wallet.notifications.lnurl_error"));
           return;
         }
         await this.decodeRequest(data.pr);
@@ -1539,7 +1546,7 @@ export const useWalletStore = defineStore("wallet", {
     ) {
       if (error.message.includes("outputs have already been signed")) {
         this.increaseKeysetCounter(keysetId, 10);
-        notify("Please try again.");
+        notify(this.t("wallet.notifications.please_try_again"));
         return true;
       }
       return false;

@@ -28,12 +28,16 @@
 
           <q-item-section>
             <q-item-label @click="showInvoiceDialog(invoice)">
-              Lightning
-              <q-tooltip>Click to copy</q-tooltip>
+              {{ $t("InvoiceTable.row.type_label") }}
+              <q-tooltip>{{
+                $t("InvoiceTable.row.type_tooltip_text")
+              }}</q-tooltip>
             </q-item-label>
-            <q-item-label caption
-              >{{ formattedDate(invoice.date) }} ago</q-item-label
-            >
+            <q-item-label caption>{{
+              $t("InvoiceTable.row.date_label", {
+                value: formattedDate(invoice.date),
+              })
+            }}</q-item-label>
           </q-item-section>
           <q-item-section side top>
             <q-btn
@@ -49,7 +53,9 @@
               v-if="invoice.status === 'pending'"
               style="position: absolute; right: 0"
             >
-              <q-tooltip>Check status</q-tooltip>
+              <q-tooltip>{{
+                $t("InvoiceTable.actions.check_status.tooltip_text")
+              }}</q-tooltip>
             </q-btn>
           </q-item-section>
         </q-item>
@@ -61,15 +67,21 @@
           dense
           @click="filterPending = !filterPending"
           :color="filterPending ? 'primary' : 'grey'"
-          :label="filterPending ? 'Show all' : 'Filter pending'"
+          :label="
+            $t(
+              filterPending
+                ? 'InvoiceTable.actions.show_all.label'
+                : 'InvoiceTable.actions.filter_pending.label'
+            )
+          "
           class="q-ml-sm q-px-md"
           size="sm"
         />
       </div>
       <div v-if="paginatedInvoices.length === 0" class="text-center q-mt-lg">
-        <q-item-label caption class="text-primary"
-          >No invoices yet</q-item-label
-        >
+        <q-item-label caption class="text-primary">{{
+          $t("InvoiceTable.empty_text")
+        }}</q-item-label>
       </div>
       <div v-else-if="maxPages > 1" class="text-center q-mt-lg">
         <div style="display: flex; justify-content: center">
