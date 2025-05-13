@@ -47,6 +47,46 @@ export default {
       },
     },
   },
+  wallet: {
+    notifications: {
+      balance_too_low: "ยอดคงเหลือน้อยเกินไป",
+      received: "ได้รับ {amount}",
+      fee: " (ค่าธรรมเนียม: {fee})",
+      could_not_request_mint: "ไม่สามารถขอ mint ได้",
+      invoice_still_pending: "ใบแจ้งหนี้ยังอยู่ระหว่างดำเนินการ",
+      paid_lightning: "จ่าย {amount} ผ่าน Lightning",
+      payment_pending_refresh: "การชำระเงินอยู่ระหว่างดำเนินการ รีเฟรชใบแจ้งหนี้ด้วยตนเอง",
+      sent: "ส่ง {amount}",
+      token_still_pending: "โทเค็นยังอยู่ระหว่างดำเนินการ",
+      received_lightning: "ได้รับ {amount} ผ่าน Lightning",
+      lightning_payment_failed: "การชำระเงิน Lightning ล้มเหลว",
+      failed_to_decode_invoice: "ไม่สามารถถอดรหัสใบแจ้งหนี้",
+      invalid_lnurl: "LNURL ไม่ถูกต้อง",
+      lnurl_error: "ข้อผิดพลาด LNURL",
+      no_amount: "ไม่มียอดเงิน",
+      no_lnurl_data: "ไม่มีข้อมูล LNURL",
+      no_price_data: "ไม่มีข้อมูลราคา",
+      please_try_again: "โปรดลองอีกครั้ง",
+    },
+    mint: {
+      notifications: {
+        already_added: "เพิ่ม Mint แล้ว",
+        added: "เพิ่ม Mint แล้ว",
+        not_found: "ไม่พบ Mint",
+        activation_failed: "การเปิดใช้งาน Mint ล้มเหลว",
+        no_active_mint: "ไม่มี Mint ที่ใช้งานอยู่",
+        unit_activation_failed: "การเปิดใช้งานหน่วยล้มเหลว",
+        unit_not_supported: "หน่วยไม่รองรับโดย Mint",
+        activated: "เปิดใช้งาน Mint แล้ว",
+        could_not_connect: "ไม่สามารถเชื่อมต่อกับ Mint ได้",
+        could_not_get_info: "ไม่สามารถดึงข้อมูล Mint ได้",
+        could_not_get_keys: "ไม่สามารถดึงคีย์ Mint ได้",
+        could_not_get_keysets: "ไม่สามารถดึงชุดคีย์ Mint ได้",
+        removed: "ลบ Mint แล้ว",
+        error: "ข้อผิดพลาด Mint",
+      },
+    },
+  },
   MainHeader: {
     menu: {
       settings: {
@@ -160,8 +200,8 @@ export default {
       title: "คีย์ Nostr ของคุณ",
       description: "ตั้งค่าคีย์ nostr สำหรับที่อยู่ Lightning ของคุณ",
       wallet_seed: {
-        title: "วลีกู้คืน Wallet",
-        description: "สร้างคู่คีย์ nostr จากวลีกู้คืน Wallet",
+        title: "วลีสำหรับกู้คืน Wallet",
+        description: "สร้างคู่คีย์ nostr จากวลีสำหรับกู้คืน Wallet",
         copy_nsec: "คัดลอก nsec",
       },
       nsec_bunker: {
