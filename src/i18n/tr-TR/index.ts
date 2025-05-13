@@ -55,7 +55,8 @@ export default {
       could_not_request_mint: "Nane isteği yapılamadı",
       invoice_still_pending: "Fatura hala beklemede",
       paid_lightning: "Lightning üzerinden {amount} ödendi",
-      payment_pending_refresh: "Ödeme beklemede. Faturayı manuel olarak yenileyin.",
+      payment_pending_refresh:
+        "Ödeme beklemede. Faturayı manuel olarak yenileyin.",
       sent: "{amount} gönderildi",
       token_still_pending: "Token hala beklemede",
       received_lightning: "Lightning üzerinden {amount} alındı",

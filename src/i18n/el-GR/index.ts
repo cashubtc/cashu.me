@@ -55,7 +55,8 @@ export default {
       could_not_request_mint: "Δεν ήταν δυνατή η αίτηση στο mint",
       invoice_still_pending: "Το τιμολόγιο εκκρεμεί ακόμα",
       paid_lightning: "Πληρώθηκε {amount} μέσω Lightning",
-      payment_pending_refresh: "Πληρωμή σε εκκρεμότητα. Ανανεώστε το τιμολόγιο χειροκίνητα.",
+      payment_pending_refresh:
+        "Πληρωμή σε εκκρεμότητα. Ανανεώστε το τιμολόγιο χειροκίνητα.",
       sent: "Στάλθηκε {amount}",
       token_still_pending: "Το token εκκρεμεί ακόμα",
       received_lightning: "Λήφθηκε {amount} μέσω Lightning",

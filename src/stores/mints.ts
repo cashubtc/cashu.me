@@ -440,7 +440,7 @@ export const useMintsStore = defineStore("mints", {
         console.error(error);
         try {
           // notifyApiError(error, this.t("wallet.mint.notifications.could_not_get_info"));
-        } catch { }
+        } catch {}
         throw error;
       }
     },
@@ -480,7 +480,7 @@ export const useMintsStore = defineStore("mints", {
         console.error(error);
         try {
           // notifyApiError(error, this.t("wallet.mint.notifications.could_not_get_keys"));
-        } catch { }
+        } catch {}
         throw error;
       }
     },
@@ -494,7 +494,7 @@ export const useMintsStore = defineStore("mints", {
         console.error(error);
         try {
           // notifyApiError(error, this.t("wallet.mint.notifications.could_not_get_keysets"));
-        } catch { }
+        } catch {}
         throw error;
       }
     },
@@ -512,7 +512,10 @@ export const useMintsStore = defineStore("mints", {
     assertMintError: function (response: { error?: any }, verbose = true) {
       if (response.error != null) {
         if (verbose) {
-          notifyError(response.error, this.t("wallet.mint.notifications.error"));
+          notifyError(
+            response.error,
+            this.t("wallet.mint.notifications.error")
+          );
         }
         throw new Error(`Mint error: ${response.error}`);
       }

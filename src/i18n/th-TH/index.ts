@@ -55,7 +55,8 @@ export default {
       could_not_request_mint: "ไม่สามารถขอ mint ได้",
       invoice_still_pending: "ใบแจ้งหนี้ยังอยู่ระหว่างดำเนินการ",
       paid_lightning: "จ่าย {amount} ผ่าน Lightning",
-      payment_pending_refresh: "การชำระเงินอยู่ระหว่างดำเนินการ รีเฟรชใบแจ้งหนี้ด้วยตนเอง",
+      payment_pending_refresh:
+        "การชำระเงินอยู่ระหว่างดำเนินการ รีเฟรชใบแจ้งหนี้ด้วยตนเอง",
       sent: "ส่ง {amount}",
       token_still_pending: "โทเค็นยังอยู่ระหว่างดำเนินการ",
       received_lightning: "ได้รับ {amount} ผ่าน Lightning",
