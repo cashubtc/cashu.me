@@ -39,14 +39,16 @@
           @click="welcomeStore.goToPrevSlide"
         />
         <!-- language selector -->
-        <div class="q-ml-md" v-if="!welcomeStore.canGoPrev">
+        <div
+          class="q-ml-md"
+          v-if="!welcomeStore.canGoPrev"
+          style="position: relative; top: -5px"
+        >
           <q-select
             v-model="selectedLanguage"
             :options="languageOptions"
-            rounded
-            flat
-            dense
             emit-value
+            dense
             map-options
             @update:model-value="changeLanguage"
             style="max-width: 200px; max-height: 20px"
