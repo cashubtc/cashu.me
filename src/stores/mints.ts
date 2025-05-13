@@ -17,6 +17,7 @@ import { cashuDb } from "src/stores/dexie";
 import { liveQuery } from "dexie";
 import { ref, computed, watch } from "vue";
 import { useProofsStore } from "./proofs";
+import { useI18n } from "vue-i18n";
 
 export type Mint = {
   url: string;
@@ -115,6 +116,7 @@ export const useMintsStore = defineStore("mints", {
     const showEditMintDialog = ref(false);
 
     const uiStoreGlobal: any = useUiStore();
+    const { t } = useI18n();
 
     // Watch for changes in activeMintUrl and activeUnit
     watch([activeMintUrl, activeUnit], async () => {
@@ -138,6 +140,7 @@ export const useMintsStore = defineStore("mints", {
       showMintInfoData,
       showEditMintDialog,
       uiStoreGlobal,
+      t,
     };
   },
   getters: {
@@ -300,13 +303,13 @@ export const useMintsStore = defineStore("mints", {
         } else {
           // we already have this mint
           if (verbose) {
-            notifySuccess("Mint already added");
+            notifySuccess(this.t("wallet.mint.notifications.already_added"));
           }
           return mintToAdd;
         }
         await this.activateMint(mintToAdd, false, true);
         if (verbose) {
-          await notifySuccess("Mint added");
+          await notifySuccess(this.t("wallet.mint.notifications.added"));
         }
         return mintToAdd;
       } catch (error) {
@@ -331,7 +334,10 @@ export const useMintsStore = defineStore("mints", {
           await this.activateUnit(unit, verbose);
         }
       } else {
-        notifyError("Mint not found", "Mint activation failed");
+        notifyError(
+          this.t("wallet.mint.notifications.not_found"),
+          this.t("wallet.mint.notifications.activation_failed")
+        );
       }
     },
     activateUnit: async function (unit: string, verbose = false) {
@@ -342,14 +348,20 @@ export const useMintsStore = defineStore("mints", {
       await uIStore.lockMutex();
       const mint = this.mints.find((m) => m.url === this.activeMintUrl);
       if (!mint) {
-        notifyError("No active mint", "Unit activation failed");
+        notifyError(
+          this.t("wallet.mint.notifications.no_active_mint"),
+          this.t("wallet.mint.notifications.unit_activation_failed")
+        );
         return;
       }
       const mintClass = new MintClass(mint);
       if (mintClass.units.includes(unit)) {
         this.activeUnit = unit;
       } else {
-        notifyError("Unit not supported by mint", "Unit activation failed");
+        notifyError(
+          this.t("wallet.mint.notifications.unit_not_supported"),
+          this.t("wallet.mint.notifications.unit_activation_failed")
+        );
       }
       await uIStore.unlockMutex();
       const worker = useWorkersStore();
@@ -377,18 +389,21 @@ export const useMintsStore = defineStore("mints", {
         mint = await this.fetchMintKeys(mint);
         this.toggleActiveUnitForMint(mint);
         if (verbose) {
-          await notifySuccess("Mint activated.");
+          await notifySuccess(this.t("wallet.mint.notifications.activated"));
         }
         this.mints.filter((m) => m.url === mint.url)[0].errored = false;
         console.log("### activateMint: Mint activated: ", this.activeMintUrl);
       } catch (error: any) {
         // restore previous values because the activation errored
         // this.activeMintUrl = previousUrl;
-        let err_msg = "Could not connect to mint.";
+        let err_msg = this.t("wallet.mint.notifications.could_not_connect");
         if (error.message.length) {
           err_msg = err_msg + ` ${error.message}.`;
         }
-        await notifyError(err_msg, "Mint activation failed");
+        await notifyError(
+          err_msg,
+          this.t("wallet.mint.notifications.activation_failed")
+        );
         this.mints.filter((m) => m.url === mint.url)[0].errored = true;
         throw error;
       } finally {
@@ -425,8 +440,8 @@ export const useMintsStore = defineStore("mints", {
       } catch (error: any) {
         console.error(error);
         try {
-          // notifyApiError(error, "Could not get mint info");
-        } catch {}
+          // notifyApiError(error, this.t("wallet.mint.notifications.could_not_get_info"));
+        } catch { }
         throw error;
       }
     },
@@ -465,8 +480,8 @@ export const useMintsStore = defineStore("mints", {
       } catch (error: any) {
         console.error(error);
         try {
-          // notifyApiError(error, "Could not get mint keys");
-        } catch {}
+          // notifyApiError(error, this.t("wallet.mint.notifications.could_not_get_keys"));
+        } catch { }
         throw error;
       }
     },
@@ -479,8 +494,8 @@ export const useMintsStore = defineStore("mints", {
       } catch (error: any) {
         console.error(error);
         try {
-          // notifyApiError(error, "Could not get mint keysets");
-        } catch {}
+          // notifyApiError(error, this.t("wallet.mint.notifications.could_not_get_keysets"));
+        } catch { }
         throw error;
       }
     },
@@ -493,12 +508,12 @@ export const useMintsStore = defineStore("mints", {
       if (this.mints.length > 0) {
         await this.activateMint(this.mints[0], false);
       }
-      notifySuccess("Mint removed");
+      notifySuccess(this.t("wallet.mint.notifications.removed"));
     },
     assertMintError: function (response: { error?: any }, verbose = true) {
       if (response.error != null) {
         if (verbose) {
-          notifyError(response.error, "Mint error");
+          notifyError(response.error, this.t("wallet.mint.notifications.error"));
         }
         throw new Error(`Mint error: ${response.error}`);
       }
