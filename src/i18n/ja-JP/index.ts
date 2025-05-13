@@ -69,6 +69,24 @@ export default {
       no_price_data: "価格データがありません。",
       please_try_again: "もう一度お試しください。",
     },
+    mint: {
+      notifications: {
+        already_added: "ミントはすでに追加されています",
+        added: "ミントが追加されました",
+        not_found: "ミントが見つかりません",
+        activation_failed: "ミントの有効化に失敗しました",
+        no_active_mint: "アクティブなミントがありません",
+        unit_activation_failed: "単位の有効化に失敗しました",
+        unit_not_supported: "この単位はミントでサポートされていません",
+        activated: "ミントが有効化されました",
+        could_not_connect: "ミントに接続できませんでした",
+        could_not_get_info: "ミント情報を取得できませんでした",
+        could_not_get_keys: "ミントキーを取得できませんでした",
+        could_not_get_keysets: "ミントキーセットを取得できませんでした",
+        removed: "ミントが削除されました",
+        error: "ミントエラー",
+      },
+    },
   },
   MainHeader: {
     menu: {
