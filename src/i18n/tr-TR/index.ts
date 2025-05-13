@@ -47,6 +47,46 @@ export default {
       },
     },
   },
+  wallet: {
+    notifications: {
+      balance_too_low: "Bakiye çok düşük",
+      received: "{amount} alındı",
+      fee: " (ücret: {fee})",
+      could_not_request_mint: "Nane isteği yapılamadı",
+      invoice_still_pending: "Fatura hala beklemede",
+      paid_lightning: "Lightning üzerinden {amount} ödendi",
+      payment_pending_refresh: "Ödeme beklemede. Faturayı manuel olarak yenileyin.",
+      sent: "{amount} gönderildi",
+      token_still_pending: "Token hala beklemede",
+      received_lightning: "Lightning üzerinden {amount} alındı",
+      lightning_payment_failed: "Lightning ödemesi başarısız oldu",
+      failed_to_decode_invoice: "Fatura çözülemedi",
+      invalid_lnurl: "Geçersiz LNURL",
+      lnurl_error: "LNURL hatası",
+      no_amount: "Tutar yok",
+      no_lnurl_data: "LNURL verisi yok",
+      no_price_data: "Fiyat verisi yok.",
+      please_try_again: "Lütfen tekrar deneyin.",
+    },
+    mint: {
+      notifications: {
+        already_added: "Nane zaten eklenmiş",
+        added: "Nane eklendi",
+        not_found: "Nane bulunamadı",
+        activation_failed: "Nane etkinleştirmesi başarısız oldu",
+        no_active_mint: "Aktif nane yok",
+        unit_activation_failed: "Birim etkinleştirmesi başarısız oldu",
+        unit_not_supported: "Birim nane tarafından desteklenmiyor",
+        activated: "Nane etkinleştirildi",
+        could_not_connect: "Naneye bağlanılamadı",
+        could_not_get_info: "Nane bilgisi alınamadı",
+        could_not_get_keys: "Nane anahtarları alınamadı",
+        could_not_get_keysets: "Nane anahtar setleri alınamadı",
+        removed: "Nane kaldırıldı",
+        error: "Nane hatası",
+      },
+    },
+  },
   MainHeader: {
     menu: {
       settings: {
@@ -677,7 +717,7 @@ export default {
           label: "Kime",
         },
         amount: {
-          label: "Miktar ({ ticker }))",
+          label: "Miktar ({ ticker })",
         },
       },
       actions: {
