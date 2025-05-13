@@ -69,6 +69,24 @@ export default {
       no_price_data: "Sin datos de precio.",
       please_try_again: "Por favor, inténtelo de nuevo.",
     },
+    mint: {
+      notifications: {
+        already_added: "Mint ya añadido",
+        added: "Mint añadido",
+        not_found: "Mint no encontrado",
+        activation_failed: "Fallo en la activación del mint",
+        no_active_mint: "No hay mint activo",
+        unit_activation_failed: "Fallo en la activación de la unidad",
+        unit_not_supported: "Unidad no soportada por el mint",
+        activated: "Mint activado",
+        could_not_connect: "No se pudo conectar al mint",
+        could_not_get_info: "No se pudo obtener información del mint",
+        could_not_get_keys: "No se pudieron obtener las claves del mint",
+        could_not_get_keysets: "No se pudieron obtener los keysets del mint",
+        removed: "Mint eliminado",
+        error: "Error del mint",
+      },
+    },
   },
   MainHeader: {
     menu: {
