@@ -68,6 +68,24 @@ export default {
       no_price_data: "لا توجد بيانات سعرية.",
       please_try_again: "يرجى المحاولة مرة أخرى.",
     },
+    mint: {
+      notifications: {
+        already_added: "تمت إضافة الـ Mint بالفعل",
+        added: "تمت إضافة الـ Mint",
+        not_found: "لم يتم العثور على الـ Mint",
+        activation_failed: "فشل تنشيط الـ Mint",
+        no_active_mint: "لا يوجد Mint نشط",
+        unit_activation_failed: "فشل تنشيط الوحدة",
+        unit_not_supported: "الوحدة غير مدعومة من قبل الـ Mint",
+        activated: "تم تنشيط الـ Mint",
+        could_not_connect: "تعذر الاتصال بالـ Mint",
+        could_not_get_info: "تعذر الحصول على معلومات الـ Mint",
+        could_not_get_keys: "تعذر الحصول على مفاتيح الـ Mint",
+        could_not_get_keysets: "تعذر الحصول على مجموعات مفاتيح الـ Mint",
+        removed: "تمت إزالة الـ Mint",
+        error: "خطأ في الـ Mint",
+      },
+    },
   },
   MainHeader: {
     menu: {
