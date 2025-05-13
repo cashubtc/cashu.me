@@ -68,6 +68,24 @@ export default {
       no_price_data: "Ingen prisdata.",
       please_try_again: "Försök igen.",
     },
+    mint: {
+      notifications: {
+        already_added: "Mint redan tillagd",
+        added: "Mint tillagd",
+        not_found: "Mint hittades inte",
+        activation_failed: "Aktivering av mint misslyckades",
+        no_active_mint: "Ingen aktiv mint",
+        unit_activation_failed: "Aktivering av enhet misslyckades",
+        unit_not_supported: "Enheten stöds inte av mint",
+        activated: "Mint aktiverad",
+        could_not_connect: "Kunde inte ansluta till mint",
+        could_not_get_info: "Kunde inte hämta mint-information",
+        could_not_get_keys: "Kunde inte hämta mint-nycklar",
+        could_not_get_keysets: "Kunde inte hämta mint-nyckeluppsättningar",
+        removed: "Mint borttagen",
+        error: "Mint-fel",
+      },
+    },
   },
   MainHeader: {
     menu: {
