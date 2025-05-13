@@ -68,6 +68,24 @@ export default {
       no_price_data: "没有价格数据。",
       please_try_again: "请重试。",
     },
+    mint: {
+      notifications: {
+        already_added: "Mint 已添加",
+        added: "Mint 已添加",
+        not_found: "未找到 Mint",
+        activation_failed: "Mint 激活失败",
+        no_active_mint: "没有激活的 Mint",
+        unit_activation_failed: "单位激活失败",
+        unit_not_supported: "Mint 不支持该单位",
+        activated: "Mint 已激活",
+        could_not_connect: "无法连接到 Mint",
+        could_not_get_info: "无法获取 Mint 信息",
+        could_not_get_keys: "无法获取 Mint 密钥",
+        could_not_get_keysets: "无法获取 Mint 密钥集",
+        removed: "Mint 已移除",
+        error: "Mint 错误",
+      },
+    },
   },
   MainHeader: {
     menu: {
@@ -282,7 +300,7 @@ export default {
       check_incoming: {
         toggle: "检查收到的发票",
         description:
-          "如果启用，钱包会在后台检查最新的发票。这增加了钱包的响应速度，但也使指纹识别更容易。您可以在“发票”标签中手动检查未付款的发票。",
+          "如果启用，钱包会在后台检查最新的发票。这增加了钱包的响应速度，但也使指纹识别更容易。您可以在"发票"标签中手动检查未付款的发票。",
       },
       check_startup: {
         toggle: "启动时检查待处理发票",
@@ -291,7 +309,7 @@ export default {
       check_all: {
         toggle: "检查所有发票",
         description:
-          "如果启用，钱包会在后台定期检查未付款的发票，最长可达两周。这增加了钱包的在线活动，从而使指纹识别更容易。您可以在“发票”标签中手动检查未付款的发票。",
+          "如果启用，钱包会在后台定期检查未付款的发票，最长可达两周。这增加了钱包的在线活动，从而使指纹识别更容易。您可以在"发票"标签中手动检查未付款的发票。",
       },
       check_sent: {
         toggle: "检查已发送的 ecash",
@@ -316,12 +334,12 @@ export default {
         toggle: "接收 swaps",
         badge: "测试版",
         description:
-          "在“接收 Ecash”对话框中，选择将接收到的 Ecash 兑换为您的激活 Mint。",
+          "在"接收 Ecash"对话框中，选择将接收到的 Ecash 兑换为您的激活 Mint。",
       },
       auto_paste: {
         toggle: "自动粘贴 Ecash",
         description:
-          "当您按“接收”，然后“Ecash”，然后“粘贴”时，自动粘贴剪贴板中的 ecash。自动粘贴可能会导致 iOS 中的 UI 故障，如果您遇到问题，请关闭此功能。",
+          "当您按"接收"，然后"Ecash"，然后"粘贴"时，自动粘贴剪贴板中的 ecash。自动粘贴可能会导致 iOS 中的 UI 故障，如果您遇到问题，请关闭此功能。",
       },
       auditor: {
         toggle: "启用审计器",
@@ -386,12 +404,12 @@ export default {
         keyset_counters: {
           title: "增加 keyset 计数器",
           description:
-            "点击 keyset ID 以增加您钱包中 keysets 的 derivation path 计数器。如果您看到“输出已被签名”错误，这将很有用。",
+            "点击 keyset ID 以增加您钱包中 keysets 的 derivation path 计数器。如果您看到"输出已被签名"错误，这将很有用。",
         },
         unset_reserved: {
           button: "取消所有保留的 token",
           description:
-            "此钱包会将待处理的传出 ecash 标记为已保留（并从您的余额中扣除），以防止双重支付尝试。此按钮将取消所有保留的 token，以便可以再次使用它们。如果您执行此操作，您的钱包可能会包含已花费的证明。按“删除已花费的证明”按钮以清除它们。",
+            "此钱包会将待处理的传出 ecash 标记为已保留（并从您的余额中扣除），以防止双重支付尝试。此按钮将取消所有保留的 token，以便可以再次使用它们。如果您执行此操作，您的钱包可能会包含已花费的证明。按"删除已花费的证明"按钮以清除它们。",
         },
         show_onboarding: {
           button: "显示入门指南",
@@ -613,7 +631,7 @@ export default {
     restore_mints: {
       label: "恢复 Mints",
       caption:
-        "选择要恢复的 Mint。您可以在主屏幕的“Mints”下添加更多 Mint 并在此处恢复它们。",
+        "选择要恢复的 Mint。您可以在主屏幕的"Mints"下添加更多 Mint 并在此处恢复它们。",
     },
     actions: {
       paste: {
