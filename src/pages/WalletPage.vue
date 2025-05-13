@@ -5,9 +5,9 @@
       <NoMintWarnBanner v-if="mints.length == 0" />
       <BalanceView v-else :set-tab="setTab" />
       <div
-        class="row items-center justify-center no-wrap q-mb-none q-mx-none q-px-none q-pt-lg q-pb-md"
+        class="row items-center justify-center no-wrap q-mb-none q-mx-none q-px-none q-pt-lg q-pb-md position-relative"
       >
-        <div class="col-5 q-mb-md">
+        <div class="col-7 q-mb-md">
           <q-btn
             rounded
             dense
@@ -21,22 +21,17 @@
             </div>
           </q-btn>
         </div>
+
         <transition appear enter-active-class="animated pulse">
-          <div class="col-2 q-mb-md q-mx-none">
-            <q-btn
-              align="center"
-              size="lg"
-              outline
-              color="primary"
-              flat
-              @click="showCamera"
-            >
+          <div class="scan-button-container">
+            <q-btn size="lg" outline color="primary" flat @click="showCamera">
               <ScanIcon size="2em" />
             </q-btn>
           </div>
         </transition>
+
         <!-- button to showSendDialog -->
-        <div class="col-5 q-mb-md">
+        <div class="col-7 q-mb-md">
           <q-btn
             rounded
             dense
@@ -208,6 +203,12 @@
 .equal-width-buttons {
   display: flex;
   justify-content: space-between;
+}
+
+.scan-button-container {
+  position: absolute;
+  z-index: 1;
+  padding-bottom: 15px;
 }
 </style>
 <script>
