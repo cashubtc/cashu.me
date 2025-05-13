@@ -5,10 +5,14 @@
       class="pwa-prompt q-pa-md q-mx-auto text-center"
     >
       <div class="pwa-prompt-content">
-        <span
-          >Tap <q-icon name="ios_share" size="sm" /> and
-          <strong>Add to Home Screen</strong></span
-        >
+        <i18n-t keypath="iOSPWAPrompt.text" tag="span">
+          <template v-slot:icon>
+            <q-icon name="ios_share" size="sm" />
+          </template>
+          <template v-slot:buttonText>
+            <strong>{{ $t("iOSPWAPrompt.buttonText") }}</strong>
+          </template>
+        </i18n-t>
         <q-btn
           flat
           icon="close"

@@ -9,38 +9,73 @@
       <h2 class="q-mt-xl">Install PWA</h2>
       <div class="text-left" v-if="!isPWA()">
         <p class="q-mt-md instruction">
-          For the best experience, use this wallet with your device's native web
-          browser to install it as a Progressive Web App. Do this right now.
+          {{ $t("WelcomeSlide2.instruction.intro.text") }}
         </p>
-        <h6>Android (Chrome)</h6>
+        <h6>{{ $t("WelcomeSlide2.instruction.android.title") }}</h6>
         <p class="sub-instruction">
-          1. <q-icon name="more_vert" size="1.5em" class="q-pr-xs" />
-          <span>Tap the menu (top right) </span><br />
-          2.
-          <q-icon name="mobile_friendly" size="1.2em" class="q-pr-xs" /> Press
-          <strong>Add to Home screen</strong>
+          <i18n-t keypath="WelcomeSlide2.instruction.android.step1.item">
+            <template v-slot:icon>
+              <q-icon name="more_vert" size="1.5em" class="q-pr-xs" />
+            </template>
+            <template v-slot:text>
+              <span>{{
+                $t("WelcomeSlide2.instruction.android.step1.text")
+              }}</span>
+            </template>
+          </i18n-t>
+          <br />
+          <i18n-t keypath="WelcomeSlide2.instruction.android.step2.item">
+            <template v-slot:icon>
+              <q-icon name="mobile_friendly" size="1.2em" class="q-pr-xs" />
+            </template>
+            <template v-slot:text>
+              <i18n-t keypath="WelcomeSlide2.instruction.android.step2.text">
+                <template v-slot:buttonText>
+                  <strong>{{
+                    $t("WelcomeSlide2.instruction.android.step2.buttonText")
+                  }}</strong>
+                </template>
+              </i18n-t>
+            </template>
+          </i18n-t>
         </p>
-        <h6>iOS (Safari)</h6>
+        <h6>{{ $t("WelcomeSlide2.instruction.ios.title") }}</h6>
         <p class="sub-instruction">
-          1. <q-icon name="ios_share" size="1.2em" class="q-pr-xs" />
-          <span>Tap share (bottom) </span> <br />
-          2.
-          <q-icon name="add_box_outline" size="1.2em" class="q-pr-xs" /> Press
-          <strong>Add to Home screen</strong>
+          <i18n-t keypath="WelcomeSlide2.instruction.ios.step1.item">
+            <template v-slot:icon>
+              <q-icon name="ios_share" size="1.2em" class="q-pr-xs" />
+            </template>
+            <template v-slot:text>
+              <span>{{ $t("WelcomeSlide2.instruction.ios.step1.text") }}</span>
+            </template>
+          </i18n-t>
+          <br />
+          <i18n-t keypath="WelcomeSlide2.instruction.ios.step2.item">
+            <template v-slot:icon>
+              <q-icon name="add_box_outline" size="1.2em" class="q-pr-xs" />
+            </template>
+            <template v-slot:text>
+              <i18n-t keypath="WelcomeSlide2.instruction.ios.step2.text">
+                <template v-slot:buttonText>
+                  <strong>{{
+                    $t("WelcomeSlide2.instruction.ios.step2.buttonText")
+                  }}</strong>
+                </template>
+              </i18n-t>
+            </template>
+          </i18n-t>
         </p>
         <p>
-          Once you installed this app on your device, close this browser window
-          and use the app from your home screen.
+          {{ $t("WelcomeSlide2.instruction.outro.text") }}
         </p>
       </div>
 
       <div class="text-center" v-if="isPWA()">
         <transition appear enter-active-class="animated tada">
-          <h3 class="q-mt-lg">Success!</h3>
+          <h3 class="q-mt-lg">{{ $t("WelcomeSlide2.pwa.success.title") }}</h3>
         </transition>
         <p class="q-mt-md">
-          You are using Cashu as a PWA. Close any other open browser windows and
-          use the app from your home screen.
+          {{ $t("WelcomeSlide2.pwa.success.text") }}
         </p>
       </div>
     </div>

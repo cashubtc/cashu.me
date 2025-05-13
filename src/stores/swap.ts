@@ -7,6 +7,7 @@ import { useWalletStore } from "./wallet";
 import { useProofsStore } from "./proofs";
 import { notifyError, notifyWarning } from "../js/notify";
 import token from "src/js/token";
+import { i18n } from "../boot/i18n";
 
 /**
  * The tokens store handles everything related to tokens and proofs
@@ -40,11 +41,11 @@ export const useSwapStore = defineStore("swap", {
       const walletStore = useWalletStore();
       const mintStore = useMintsStore();
       if (this.swapBlocking) {
-        notifyWarning("Swap in progress");
+        notifyWarning(i18n.global.t("swap.in_progress_warning_text"));
         return;
       }
       if (!swapAmountData.fromUrl || !swapAmountData.toUrl) {
-        notifyError("Invalid swap data");
+        notifyError(i18n.global.t("swap.invalid_swap_data_error_text"));
         return;
       }
       this.swapBlocking = true;
@@ -82,7 +83,7 @@ export const useSwapStore = defineStore("swap", {
         await walletStore.checkInvoice(mintQuote.quote);
       } catch (e) {
         console.error("Error swapping", e);
-        notifyError("Error swapping");
+        notifyError(i18n.global.t("swap.swap_error_text"));
       } finally {
         this.swapBlocking = false;
       }
@@ -106,7 +107,7 @@ export const useSwapStore = defineStore("swap", {
       const proofsStore = useProofsStore();
       const walletStore = useWalletStore();
       if (this.swapBlocking) {
-        notifyWarning("Swap in progress");
+        notifyWarning(i18n.global.t("swap.in_progress_warning_text"));
         return;
       }
 
@@ -131,7 +132,7 @@ export const useSwapStore = defineStore("swap", {
         await walletStore.checkInvoice(mintQuote.quote);
       } catch (e) {
         console.error("Error swapping", e);
-        notifyError("Error swapping");
+        notifyError(i18n.global.t("swap.swap_error_text"));
       } finally {
         this.swapBlocking = false;
       }

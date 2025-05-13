@@ -13,7 +13,7 @@
           <ChevronLeftIcon />
         </q-btn>
         <div class="col text-center">
-          <span class="text-h6">Receive Ecash</span>
+          <span class="text-h6">{{ $t("ReceiveEcashDrawer.title") }}</span>
         </div>
         <q-btn
           flat
@@ -35,7 +35,9 @@
                 <ClipboardIcon />
               </div>
               <div class="text-left">
-                <div class="text-weight-bold custom-btn-text">PASTE</div>
+                <div class="text-weight-bold custom-btn-text">
+                  {{ $t("ReceiveEcashDrawer.actions.paste.label") }}
+                </div>
               </div>
             </div>
           </q-btn>
@@ -46,7 +48,9 @@
                 <ScanIcon />
               </div>
               <div class="text-left">
-                <div class="text-weight-bold custom-btn-text">SCAN</div>
+                <div class="text-weight-bold custom-btn-text">
+                  {{ $t("ReceiveEcashDrawer.actions.scan.label") }}
+                </div>
               </div>
             </div>
           </q-btn>
@@ -61,7 +65,9 @@
                 <FileTextIcon />
               </div>
               <div class="text-left">
-                <div class="text-weight-bold custom-btn-text">REQUEST</div>
+                <div class="text-weight-bold custom-btn-text">
+                  {{ $t("ReceiveEcashDrawer.actions.request.label") }}
+                </div>
               </div>
             </div>
           </q-btn>
@@ -76,7 +82,9 @@
                 <LockIcon />
               </div>
               <div class="text-left">
-                <div class="text-weight-bold custom-btn-text">LOCK</div>
+                <div class="text-weight-bold custom-btn-text">
+                  {{ $t("ReceiveEcashDrawer.actions.lock.label") }}
+                </div>
               </div>
             </div>
           </q-btn>
@@ -93,8 +101,12 @@
               </div>
               <div class="text-left">
                 <div class="text-weight-bold custom-btn-text">
-                  NFC
-                  {{ scanningCard ? "Scanning..." : "" }}
+                  {{ $t("ReceiveEcashDrawer.actions.nfc.label") }}
+                  {{
+                    scanningCard
+                      ? $t("ReceiveEcashDrawer.actions.nfc.scanning_text")
+                      : ""
+                  }}
                 </div>
               </div>
             </div>
