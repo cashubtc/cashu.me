@@ -14,10 +14,11 @@
             class="q-px-md wallet-action-btn"
             color="primary"
             @click="showReceiveDialog = true"
-            size="1.2rem"
           >
-            <q-icon name="south_west" size="1.2rem" class="q-mr-xs" />
-            {{ $t("WalletPage.actions.receive.label") }}
+            <div class="button-content">
+              <q-icon name="south_west" size="1.2rem" class="q-mr-xs" />
+              <span>{{ $t("WalletPage.actions.receive.label") }}</span>
+            </div>
           </q-btn>
         </div>
         <transition appear enter-active-class="animated pulse">
@@ -42,11 +43,12 @@
             class="q-px-md wallet-action-btn"
             color="primary"
             @click="showSendDialog = true"
-            size="1.2rem"
           >
-            <q-icon name="north_east" size="1.2rem" class="q-mr-xs" />
-            {{ $t("WalletPage.actions.send.label") }}</q-btn
-          >
+            <div class="button-content">
+              <q-icon name="north_east" size="1.2rem" class="q-mr-xs" />
+              <span>{{ $t("WalletPage.actions.send.label") }}</span>
+            </div>
+          </q-btn>
         </div>
         <ReceiveDialog v-model="showReceiveDialog" />
         <SendDialog v-model="showSendDialog" />
@@ -192,6 +194,14 @@
 .wallet-action-btn {
   min-width: 140px;
   width: auto;
+  white-space: nowrap;
+  font-size: 1.2rem;
+}
+
+.button-content {
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
 }
 
 /* Apply equal widths to wallet action buttons after render */
