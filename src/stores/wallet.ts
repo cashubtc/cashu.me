@@ -560,11 +560,11 @@ export const useWalletStore = defineStore("wallet", {
         }
         useUiStore().vibrate();
         let message = this.t("wallet.notifications.received", {
-          amount: uIStore.formatCurrency(outputAmount, historyToken.unit)
+          amount: uIStore.formatCurrency(outputAmount, historyToken.unit),
         });
         if (fee > 0) {
           message += this.t("wallet.notifications.fee", {
-            fee: uIStore.formatCurrency(fee, historyToken.unit)
+            fee: uIStore.formatCurrency(fee, historyToken.unit),
           });
         }
         notifySuccess(message);
@@ -609,7 +609,10 @@ export const useWalletStore = defineStore("wallet", {
         return data;
       } catch (error: any) {
         console.error(error);
-        notifyApiError(error, this.t("wallet.notifications.could_not_request_mint"));
+        notifyApiError(
+          error,
+          this.t("wallet.notifications.could_not_request_mint")
+        );
         throw error;
       } finally {
       }
@@ -827,7 +830,7 @@ export const useWalletStore = defineStore("wallet", {
         useUiStore().vibrate();
         notifySuccess(
           this.t("wallet.notifications.paid_lightning", {
-            amount: uIStore.formatCurrency(amount_paid, mintWallet.unit)
+            amount: uIStore.formatCurrency(amount_paid, mintWallet.unit),
           })
         );
         console.log("#### pay lightning: token paid");
@@ -1003,7 +1006,7 @@ export const useWalletStore = defineStore("wallet", {
             amount: uIStore.formatCurrency(
               proofStore.sumProofs(spentProofs),
               historyToken.unit
-            )
+            ),
           })
         );
       } else {
@@ -1053,7 +1056,7 @@ export const useWalletStore = defineStore("wallet", {
         useUiStore().vibrate();
         notifySuccess(
           this.t("wallet.notifications.received_lightning", {
-            amount: uIStore.formatCurrency(invoice.amount, invoice.unit)
+            amount: uIStore.formatCurrency(invoice.amount, invoice.unit),
           })
         );
         return proofs;
@@ -1092,7 +1095,9 @@ export const useWalletStore = defineStore("wallet", {
           // we assume that the payment failed and we unset the proofs as reserved
           await useProofsStore().setReserved(proofs, false);
           this.removeOutgoingInvoiceFromHistory(quote);
-          notifyWarning(this.t("wallet.notifications.lightning_payment_failed"));
+          notifyWarning(
+            this.t("wallet.notifications.lightning_payment_failed")
+          );
         } else if (meltQuote.state == MeltQuoteState.PAID) {
           // if the invoice is paid, we check if all proofs are spent and if so, we invalidate them and set the invoice state in the history to "paid"
           const spentProofs = await this.checkProofsSpendable(
@@ -1107,7 +1112,7 @@ export const useWalletStore = defineStore("wallet", {
                 amount: uIStore.formatCurrency(
                   useProofsStore().sumProofs(proofs),
                   invoice.unit
-                )
+                ),
               })
             );
           }
@@ -1262,7 +1267,7 @@ export const useWalletStore = defineStore("wallet", {
             useUiStore().vibrate();
             notifySuccess(
               this.t("wallet.notifications.received_lightning", {
-                amount: uIStore.formatCurrency(invoice.amount, invoice.unit)
+                amount: uIStore.formatCurrency(invoice.amount, invoice.unit),
               })
             );
             unsub();
@@ -1345,7 +1350,11 @@ export const useWalletStore = defineStore("wallet", {
       try {
         invoice = bolt11Decoder.decode(this.payInvoiceData.input.request);
       } catch (error) {
-        notifyWarning(this.t("wallet.notifications.failed_to_decode_invoice"), undefined, 3000);
+        notifyWarning(
+          this.t("wallet.notifications.failed_to_decode_invoice"),
+          undefined,
+          3000
+        );
         this.payInvoiceData.show = false;
         throw error;
       }
@@ -1472,7 +1481,10 @@ export const useWalletStore = defineStore("wallet", {
         data = resp.data;
       }
       if (host == undefined) {
-        notifyError(this.t("wallet.notifications.invalid_lnurl"), this.t("wallet.notifications.lnurl_error"));
+        notifyError(
+          this.t("wallet.notifications.invalid_lnurl"),
+          this.t("wallet.notifications.lnurl_error")
+        );
         return;
       }
       if (data.tag == "payRequest") {
@@ -1501,11 +1513,17 @@ export const useWalletStore = defineStore("wallet", {
       const mintStore = useMintsStore();
       let amount = this.payInvoiceData.input.amount;
       if (amount == null) {
-        notifyError(this.t("wallet.notifications.no_amount"), this.t("wallet.notifications.lnurl_error"));
+        notifyError(
+          this.t("wallet.notifications.no_amount"),
+          this.t("wallet.notifications.lnurl_error")
+        );
         return;
       }
       if (this.payInvoiceData.lnurlpay == null) {
-        notifyError(this.t("wallet.notifications.no_lnurl_data"), this.t("wallet.notifications.lnurl_error"));
+        notifyError(
+          this.t("wallet.notifications.no_lnurl_data"),
+          this.t("wallet.notifications.lnurl_error")
+        );
         return;
       }
       if (
@@ -1516,7 +1534,10 @@ export const useWalletStore = defineStore("wallet", {
         if (mintStore.activeUnit == "usd") {
           const priceUsd = usePriceStore().bitcoinPrice;
           if (priceUsd == 0) {
-            notifyError(this.t("wallet.notifications.no_price_data"), this.t("wallet.notifications.lnurl_error"));
+            notifyError(
+              this.t("wallet.notifications.no_price_data"),
+              this.t("wallet.notifications.lnurl_error")
+            );
             return;
           }
           const satPrice = 1 / (priceUsd / 1e8);

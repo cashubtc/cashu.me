@@ -125,91 +125,98 @@ export default {
       p2pk_features: "P2PK ÖZELLİKLERİ",
       privacy: "GİZLİLİK",
       experimental: "DENEYSEL",
-      appearance: "GÖRÜNÜM"
+      appearance: "GÖRÜNÜM",
     },
     backup_restore: {
       backup_seed: {
         title: "Kurtarma kelimelerini yedekle",
-        description: "Kurtarma kelimeleriniz cüzdanınızı geri yükleyebilir. Güvenli ve gizli tutun.",
+        description:
+          "Kurtarma kelimeleriniz cüzdanınızı geri yükleyebilir. Güvenli ve gizli tutun.",
         seed_phrase_label: "Kurtarma kelimeleri",
       },
       restore_ecash: {
         title: "Ecash'i geri yükle",
-        description: "Geri yükleme sihirbazı, kayıp ecash'inizi anımsatıcı kurtarma kelimelerinden kurtarmanıza olanak tanır. Mevcut cüzdanınızın kurtarma kelimeleri etkilenmeyecektir, sihirbaz yalnızca başka bir kurtarma kelimesinden ecash'i geri yüklemenizi sağlayacaktır.",
-        button: "Geri Yükle"
-      }
+        description:
+          "Geri yükleme sihirbazı, kayıp ecash'inizi anımsatıcı kurtarma kelimelerinden kurtarmanıza olanak tanır. Mevcut cüzdanınızın kurtarma kelimeleri etkilenmeyecektir, sihirbaz yalnızca başka bir kurtarma kelimesinden ecash'i geri yüklemenizi sağlayacaktır.",
+        button: "Geri Yükle",
+      },
     },
     lightning_address: {
       title: "Lightning adresi",
       description: "Lightning adresinize ödeme alın.",
       enable: {
         toggle: "Etkinleştir",
-        description: "npub.cash ile Lightning adresi"
+        description: "npub.cash ile Lightning adresi",
       },
       address: {
-        copy_tooltip: "Lightning adresini kopyala"
+        copy_tooltip: "Lightning adresini kopyala",
       },
       automatic_claim: {
         toggle: "Otomatik olarak talep et",
-        description: "Gelen ödemeleri otomatik olarak alın."
-      }
+        description: "Gelen ödemeleri otomatik olarak alın.",
+      },
     },
     nostr_keys: {
       title: "Nostr anahtarlarınız",
       description: "Lightning adresiniz için nostr anahtarlarını ayarlayın.",
       wallet_seed: {
         title: "Cüzdan kurtarma kelimeleri",
-        description: "Cüzdan kurtarma kelimelerinden nostr anahtar çifti oluştur",
-        copy_nsec: "nsec'i kopyala"
+        description:
+          "Cüzdan kurtarma kelimelerinden nostr anahtar çifti oluştur",
+        copy_nsec: "nsec'i kopyala",
       },
       nsec_bunker: {
         title: "Nsec Bunker",
         description: "Bir NIP-46 bunker kullanın",
-        delete_tooltip: "Bağlantıyı sil"
+        delete_tooltip: "Bağlantıyı sil",
       },
       use_nsec: {
         title: "nsec'inizi kullanın",
         description: "Bu yöntem tehlikelidir ve önerilmez",
-        delete_tooltip: "nsec'i sil"
+        delete_tooltip: "nsec'i sil",
       },
       signing_extension: {
         title: "İmzalama uzantısı",
         description: "Bir NIP-07 imzalama uzantısı kullanın",
-        not_found: "NIP-07 imzalama uzantısı bulunamadı"
-      }
+        not_found: "NIP-07 imzalama uzantısı bulunamadı",
+      },
     },
     payment_requests: {
       title: "Ödeme talepleri",
-      description: "Ödeme talepleri, nostr aracılığıyla ödeme almanıza olanak tanır. Bunu etkinleştirirseniz, cüzdanınız nostr rölelerinize abone olacaktır.",
+      description:
+        "Ödeme talepleri, nostr aracılığıyla ödeme almanıza olanak tanır. Bunu etkinleştirirseniz, cüzdanınız nostr rölelerinize abone olacaktır.",
       enable_toggle: "Ödeme Taleplerini Etkinleştir",
       claim_automatically: {
         toggle: "Otomatik olarak talep et",
-        description: "Gelen ödemeleri otomatik olarak alın."
-      }
+        description: "Gelen ödemeleri otomatik olarak alın.",
+      },
     },
     nostr_wallet_connect: {
       title: "Nostr Cüzdan Bağlantısı (NWC)",
-      description: "NWC'yi kullanarak cüzdanınızı başka herhangi bir uygulamadan kontrol edin.",
+      description:
+        "NWC'yi kullanarak cüzdanınızı başka herhangi bir uygulamadan kontrol edin.",
       enable_toggle: "NWC'yi Etkinleştir",
-      payments_note: "NWC'yi yalnızca Bitcoin bakiyenizden ödemeler için kullanabilirsiniz. Ödemeler etkin nanenizden yapılacaktır.",
+      payments_note:
+        "NWC'yi yalnızca Bitcoin bakiyenizden ödemeler için kullanabilirsiniz. Ödemeler etkin nanenizden yapılacaktır.",
       connection: {
         copy_tooltip: "Bağlantı dizesini kopyala",
         qr_tooltip: "QR kodunu göster",
-        allowance_label: "Kalan ödenek (sat)"
+        allowance_label: "Kalan ödenek (sat)",
       },
       relays: {
         expand_label: "Röleleri düzenlemek için tıklayın",
         add: {
           title: "Röle ekle",
-          description: "Nostr Cüzdan Bağlantısı, cüzdanınızı diğer uygulamalara bağlamak için nostr rölelerini kullanır."
+          description:
+            "Nostr Cüzdan Bağlantısı, cüzdanınızı diğer uygulamalara bağlamak için nostr rölelerini kullanır.",
         },
         list: {
           title: "Röleler",
           description: "Cüzdanınız bu rölelere bağlanacaktır.",
           copy_tooltip: "Röleyi kopyala",
-          remove_tooltip: "Röleyi kaldır"
-        }
-      }
+          remove_tooltip: "Röleyi kaldır",
+        },
+      },
     },
     hardware_features: {
       webnfc: {
@@ -217,63 +224,73 @@ export default {
         description: "NFC kartlarına yazmak için kodlamayı seçin",
         text: {
           title: "Metin",
-          description: "Token'ı düz metin olarak sakla"
+          description: "Token'ı düz metin olarak sakla",
         },
         weburl: {
           title: "URL",
-          description: "Bu cüzdanın URL'sini token ile sakla"
+          description: "Bu cüzdanın URL'sini token ile sakla",
         },
         binary: {
           title: "Ham İkilik",
-          description: "Base64 yerine ham baytlar. Token'ları yaklaşık %33 daha kısa yapar."
+          description:
+            "Base64 yerine ham baytlar. Token'ları yaklaşık %33 daha kısa yapar.",
         },
         quick_access: {
           toggle: "NFC'ye hızlı erişim",
-          description: "Ecash Al menüsünde NFC kartlarını hızlıca tarayın. Bu seçenek Ecash Al menüsüne bir NFC düğmesi ekler."
-        }
-      }
+          description:
+            "Ecash Al menüsünde NFC kartlarını hızlıca tarayın. Bu seçenek Ecash Al menüsüne bir NFC düğmesi ekler.",
+        },
+      },
     },
     p2pk_features: {
       title: "P2PK",
-      description: "P2PK kilitli ecash almak için bir anahtar çifti oluşturun. Uyarı: Bu özellik deneyseldir. Yalnızca küçük miktarlarla kullanın. Özel anahtarlarınızı kaybederseniz, artık kimse ona kilitlenmiş ecash'in kilidini açamaz.",
+      description:
+        "P2PK kilitli ecash almak için bir anahtar çifti oluşturun. Uyarı: Bu özellik deneyseldir. Yalnızca küçük miktarlarla kullanın. Özel anahtarlarınızı kaybederseniz, artık kimse ona kilitlenmiş ecash'in kilidini açamaz.",
       generate_button: "Anahtar oluştur",
       import_button: "nsec'i içe aktar",
       quick_access: {
         toggle: "Kilitlemeye hızlı erişim",
-        description: "Bunu, P2PK kilitleme anahtarınızı ecash alma menüsünde hızlıca göstermek için kullanın."
+        description:
+          "Bunu, P2PK kilitleme anahtarınızı ecash alma menüsünde hızlıca göstermek için kullanın.",
       },
       keys_expansion: {
         label: "{count} anahtara göz atmak için tıklayın",
-        used_badge: "kullanıldı"
-      }
+        used_badge: "kullanıldı",
+      },
     },
     privacy: {
       title: "Gizlilik",
       description: "Bu ayarlar gizliliğinizi etkiler.",
       check_incoming: {
         toggle: "Gelen faturayı kontrol et",
-        description: "Etkinleştirilirse, cüzdan arka planda en son faturayı kontrol edecektir. Bu, parmak izi almayı kolaylaştıran cüzdanın tepkiselliğini artırır. Ödenmemiş faturaları Faturalar sekmesinde manuel olarak kontrol edebilirsiniz."
+        description:
+          "Etkinleştirilirse, cüzdan arka planda en son faturayı kontrol edecektir. Bu, parmak izi almayı kolaylaştıran cüzdanın tepkiselliğini artırır. Ödenmemiş faturaları Faturalar sekmesinde manuel olarak kontrol edebilirsiniz.",
       },
       check_startup: {
         toggle: "Başlangıçta bekleyen faturaları kontrol et",
-        description: "Etkinleştirilirse, cüzdan başlangıçta son 24 saat içindeki bekleyen faturaları kontrol edecektir."
+        description:
+          "Etkinleştirilirse, cüzdan başlangıçta son 24 saat içindeki bekleyen faturaları kontrol edecektir.",
       },
       check_all: {
         toggle: "Tüm faturaları kontrol et",
-        description: "Etkinleştirilirse, cüzdan iki haftaya kadar ödenmemiş faturaları arka planda periyodik olarak kontrol edecektir. Bu, parmak izi almayı kolaylaştıran cüzdanın çevrimiçi aktivitesini artırır. Ödenmemiş faturaları Faturalar sekmesinde manuel olarak kontrol edebilirsiniz."
+        description:
+          "Etkinleştirilirse, cüzdan iki haftaya kadar ödenmemiş faturaları arka planda periyodik olarak kontrol edecektir. Bu, parmak izi almayı kolaylaştıran cüzdanın çevrimiçi aktivitesini artırır. Ödenmemiş faturaları Faturalar sekmesinde manuel olarak kontrol edebilirsiniz.",
       },
       check_sent: {
         toggle: "Gönderilen ecash'i kontrol et",
-        description: "Etkinleştirilirse, cüzdan gönderilen token'ların kullanılıp kullanılmadığını belirlemek için periyodik arka plan kontrollerini kullanacaktır. Bu, parmak izi almayı kolaylaştıran cüzdanın çevrimiçi aktivitesini artırır."
+        description:
+          "Etkinleştirilirse, cüzdan gönderilen token'ların kullanılıp kullanılmadığını belirlemek için periyodik arka plan kontrollerini kullanacaktır. Bu, parmak izi almayı kolaylaştıran cüzdanın çevrimiçi aktivitesini artırır.",
       },
       websockets: {
         toggle: "WebSockets kullan",
-        description: "Etkinleştirilirse, cüzdan ödenen faturalar ve nane'lerden harcanan token'larla ilgili güncellemeleri almak için uzun ömürlü WebSocket bağlantıları kullanacaktır. Bu, cüzdanın tepkiselliğini artırır ancak parmak izi almayı da kolaylaştırır."
+        description:
+          "Etkinleştirilirse, cüzdan ödenen faturalar ve nane'lerden harcanan token'larla ilgili güncellemeleri almak için uzun ömürlü WebSocket bağlantıları kullanacaktır. Bu, cüzdanın tepkiselliğini artırır ancak parmak izi almayı da kolaylaştırır.",
       },
       bitcoin_price: {
         toggle: "Döviz kurunu Coinbase'den al",
-        description: "Etkinleştirilirse, güncel Bitcoin döviz kuru coinbase.com'dan alınacak ve dönüştürülmüş bakiyeniz görüntülenecektir."
-      }
+        description:
+          "Etkinleştirilirse, güncel Bitcoin döviz kuru coinbase.com'dan alınacak ve dönüştürülmüş bakiyeniz görüntülenecektir.",
+      },
     },
     experimental: {
       title: "Deneysel",
@@ -281,26 +298,30 @@ export default {
       receive_swaps: {
         toggle: "Takasları al",
         badge: "Beta",
-        description: "Ecash Al iletişim kutusunda alınan Ecash'i etkin nanenizle takas etme seçeneği."
+        description:
+          "Ecash Al iletişim kutusunda alınan Ecash'i etkin nanenizle takas etme seçeneği.",
       },
       auto_paste: {
         toggle: "Ecash'i otomatik yapıştır",
-        description: "Al, sonra Ecash, sonra Yapıştır düğmesine bastığınızda panonuzdaki ecash'i otomatik olarak yapıştırın. Otomatik yapıştırma iOS'ta UI hatalarına neden olabilir, sorun yaşıyorsanız kapatın."
+        description:
+          "Al, sonra Ecash, sonra Yapıştır düğmesine bastığınızda panonuzdaki ecash'i otomatik olarak yapıştırın. Otomatik yapıştırma iOS'ta UI hatalarına neden olabilir, sorun yaşıyorsanız kapatın.",
       },
       auditor: {
         toggle: "Denetleyiciyi etkinleştir",
         badge: "Beta",
-        description: "Etkinleştirilirse, cüzdan nane detayları iletişim kutusunda denetleyici bilgilerini görüntüler. Denetleyici, nane'lerin güvenilirliğini izleyen üçüncü taraf bir hizmettir.",
+        description:
+          "Etkinleştirilirse, cüzdan nane detayları iletişim kutusunda denetleyici bilgilerini görüntüler. Denetleyici, nane'lerin güvenilirliğini izleyen üçüncü taraf bir hizmettir.",
         url_label: "Denetleyici URL'si",
-        api_url_label: "Denetleyici API URL'si"
-      }
+        api_url_label: "Denetleyici API URL'si",
+      },
     },
     appearance: {
       keyboard: {
         title: "Ekran klavyesi",
         description: "Miktarları girmek için sayısal klavyeyi kullanın.",
         toggle: "Sayısal klavye kullan",
-        toggle_description: "Etkinleştirilirse, miktarları girmek için sayısal klavye kullanılacaktır."
+        toggle_description:
+          "Etkinleştirilirse, miktarları girmek için sayısal klavye kullanılacaktır.",
       },
       theme: {
         title: "Görünüm",
@@ -314,9 +335,9 @@ export default {
           mint: "nane",
           nut: "ceviz",
           blu: "mavi",
-          flamingo: "flamingo"
-        }
-      }
+          flamingo: "flamingo",
+        },
+      },
     },
     advanced: {
       title: "Gelişmiş",
@@ -325,48 +346,58 @@ export default {
         description: "Aşağıdaki ayarlar geliştirme ve hata ayıklama içindir.",
         new_seed: {
           button: "Yeni kurtarma kelimeleri oluştur",
-          description: "Bu, yeni bir kurtarma kelimesi oluşturacaktır. Yeni bir kurtarma kelimesiyle geri yükleyebilmek için tüm bakiyenizi kendinize göndermelisiniz.",
-          confirm_question: "Yeni bir kurtarma kelimesi oluşturmak istediğinizden emin misiniz?",
+          description:
+            "Bu, yeni bir kurtarma kelimesi oluşturacaktır. Yeni bir kurtarma kelimesiyle geri yükleyebilmek için tüm bakiyenizi kendinize göndermelisiniz.",
+          confirm_question:
+            "Yeni bir kurtarma kelimesi oluşturmak istediğinizden emin misiniz?",
           cancel: "İptal",
-          confirm: "Onayla"
+          confirm: "Onayla",
         },
         remove_spent: {
           button: "Harcanmış kanıtları kaldır",
-          description: "Etkin nane'lerinizden ecash token'larının harcanıp harcanmadığını kontrol edin ve harcananları cüzdanınızdan kaldırın. Bunu yalnızca cüzdanınız takılı kalırsa kullanın."
+          description:
+            "Etkin nane'lerinizden ecash token'larının harcanıp harcanmadığını kontrol edin ve harcananları cüzdanınızdan kaldırın. Bunu yalnızca cüzdanınız takılı kalırsa kullanın.",
         },
         debug_console: {
           button: "Hata Ayıklama Konsolunu Aç/Kapat",
-          description: "Javascript hata ayıklama terminalini açın. Anlamadığınız hiçbir şeyi bu terminale yapıştırmayın. Bir hırsız sizi buraya kötü amaçlı kod yapıştırmaya kandırmaya çalışabilir."
+          description:
+            "Javascript hata ayıklama terminalini açın. Anlamadığınız hiçbir şeyi bu terminale yapıştırmayın. Bir hırsız sizi buraya kötü amaçlı kod yapıştırmaya kandırmaya çalışabilir.",
         },
         export_proofs: {
           button: "Aktif kanıtları dışa aktar",
-          description: "Aktif nane'den tüm bakiyenizi bir Cashu token'ı olarak panonuza kopyalayın. Bu yalnızca seçilen nane ve birimin token'larını dışa aktaracaktır. Tam bir dışa aktarma için farklı bir nane ve birim seçin ve tekrar dışa aktarın."
+          description:
+            "Aktif nane'den tüm bakiyenizi bir Cashu token'ı olarak panonuza kopyalayın. Bu yalnızca seçilen nane ve birimin token'larını dışa aktaracaktır. Tam bir dışa aktarma için farklı bir nane ve birim seçin ve tekrar dışa aktarın.",
         },
         keyset_counters: {
           title: "Anahtar kümesi sayaçlarını artır",
-          description: "Cüzdanınızdaki anahtar kümeleri için türetme yolu sayaçlarını artırmak için anahtar kümesi kimliğine tıklayın. Bu, \"çıktılar zaten imzalandı\" hatasını görüyorsanız yararlıdır."
+          description:
+            'Cüzdanınızdaki anahtar kümeleri için türetme yolu sayaçlarını artırmak için anahtar kümesi kimliğine tıklayın. Bu, "çıktılar zaten imzalandı" hatasını görüyorsanız yararlıdır.',
         },
         unset_reserved: {
           button: "Tüm ayrılmış token'ları kaldır",
-          description: "Bu cüzdan, çifte harcama girişimlerini önlemek için bekleyen giden ecash'i ayrılmış olarak işaretler (ve bakiyenizden düşer). Bu düğme tüm ayrılmış token'ları kaldıracaktır, böylece tekrar kullanılabilirler. Bunu yaparsanız, cüzdanınız harcanmış kanıtlar içerebilir. Onlardan kurtulmak için \"Harcanmış kanıtları kaldır\" düğmesine basın."
+          description:
+            "Bu cüzdan, çifte harcama girişimlerini önlemek için bekleyen giden ecash'i ayrılmış olarak işaretler (ve bakiyenizden düşer). Bu düğme tüm ayrılmış token'ları kaldıracaktır, böylece tekrar kullanılabilirler. Bunu yaparsanız, cüzdanınız harcanmış kanıtlar içerebilir. Onlardan kurtulmak için \"Harcanmış kanıtları kaldır\" düğmesine basın.",
         },
         show_onboarding: {
           button: "Başlangıç ekranını göster",
-          description: "Başlangıç ekranını tekrar gösterin."
+          description: "Başlangıç ekranını tekrar gösterin.",
         },
         reset_wallet: {
           button: "Cüzdan verilerini sıfırla",
-          description: "Cüzdan verilerinizi sıfırlayın. Uyarı: Bu her şeyi siler! Önce bir yedek oluşturduğunuzdan emin olun.",
-          confirm_question: "Cüzdan verilerinizi silmek istediğinizden emin misiniz?",
+          description:
+            "Cüzdan verilerinizi sıfırlayın. Uyarı: Bu her şeyi siler! Önce bir yedek oluşturduğunuzdan emin olun.",
+          confirm_question:
+            "Cüzdan verilerinizi silmek istediğinizden emin misiniz?",
           cancel: "İptal",
-          confirm: "Cüzdanı sil"
+          confirm: "Cüzdanı sil",
         },
         export_wallet: {
           button: "Cüzdan verilerini dışa aktar",
-          description: "Cüzdanınızın bir dökümünü indirin. Yeni bir cüzdanın karşılama ekranından bu dosyadan cüzdanınızı geri yükleyebilirsiniz. Bu dosya, dışa aktardıktan sonra cüzdanınızı kullanmaya devam ederseniz senkronize olmayacaktır."
-        }
-      }
-    }
+          description:
+            "Cüzdanınızın bir dökümünü indirin. Yeni bir cüzdanın karşılama ekranından bu dosyadan cüzdanınızı geri yükleyebilirsiniz. Bu dosya, dışa aktardıktan sonra cüzdanınızı kullanmaya devam ederseniz senkronize olmayacaktır.",
+        },
+      },
+    },
   },
   NoMintWarnBanner: {
     title: "Bir nane'ye katılın",

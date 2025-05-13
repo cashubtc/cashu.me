@@ -55,7 +55,8 @@ export default {
       could_not_request_mint: "Impossibile richiedere coniazione",
       invoice_still_pending: "Fattura ancora in attesa",
       paid_lightning: "Pagato {amount} tramite Lightning",
-      payment_pending_refresh: "Pagamento in attesa. Aggiorna la fattura manualmente.",
+      payment_pending_refresh:
+        "Pagamento in attesa. Aggiorna la fattura manualmente.",
       sent: "Inviato {amount}",
       token_still_pending: "Token ancora in attesa",
       received_lightning: "Ricevuto {amount} tramite Lightning",
@@ -66,8 +67,8 @@ export default {
       no_amount: "Nessun importo",
       no_lnurl_data: "Nessun dato LNURL",
       no_price_data: "Nessun dato di prezzo.",
-      please_try_again: "Si prega di riprovare."
-    }
+      please_try_again: "Si prega di riprovare.",
+    },
   },
   MainHeader: {
     menu: {
@@ -147,34 +148,36 @@ export default {
       p2pk_features: "FUNZIONALITÀ P2PK",
       privacy: "PRIVACY",
       experimental: "SPERIMENTALE",
-      appearance: "ASPETTO"
+      appearance: "ASPETTO",
     },
     backup_restore: {
       backup_seed: {
         title: "Backup frase seed",
-        description: "La tua frase seed può ripristinare il tuo portafoglio. Conservala al sicuro e privata.",
+        description:
+          "La tua frase seed può ripristinare il tuo portafoglio. Conservala al sicuro e privata.",
         seed_phrase_label: "Frase seed",
       },
       restore_ecash: {
         title: "Ripristina ecash",
-        description: "La procedura guidata di ripristino consente di recuperare ecash perso da una frase mnemonica. La frase seed del tuo portafoglio attuale rimarrà inalterata, la procedura guidata ti consentirà solo di ripristinare ecash da un'altra frase seed.",
-        button: "Ripristina"
-      }
+        description:
+          "La procedura guidata di ripristino consente di recuperare ecash perso da una frase mnemonica. La frase seed del tuo portafoglio attuale rimarrà inalterata, la procedura guidata ti consentirà solo di ripristinare ecash da un'altra frase seed.",
+        button: "Ripristina",
+      },
     },
     lightning_address: {
       title: "Indirizzo Lightning",
       description: "Ricevi pagamenti al tuo indirizzo Lightning.",
       enable: {
         toggle: "Abilita",
-        description: "Indirizzo Lightning con npub.cash"
+        description: "Indirizzo Lightning con npub.cash",
       },
       address: {
-        copy_tooltip: "Copia indirizzo Lightning"
+        copy_tooltip: "Copia indirizzo Lightning",
       },
       automatic_claim: {
         toggle: "Richiedi automaticamente",
-        description: "Ricevi pagamenti in entrata automaticamente."
-      }
+        description: "Ricevi pagamenti in entrata automaticamente.",
+      },
     },
     nostr_keys: {
       title: "Le tue chiavi nostr",
@@ -182,56 +185,60 @@ export default {
       wallet_seed: {
         title: "Frase seed del portafoglio",
         description: "Genera coppia di chiavi nostr dalla seed del portafoglio",
-        copy_nsec: "Copia nsec"
+        copy_nsec: "Copia nsec",
       },
       nsec_bunker: {
         title: "Nsec Bunker",
         description: "Usa un bunker NIP-46",
-        delete_tooltip: "Elimina connessione"
+        delete_tooltip: "Elimina connessione",
       },
       use_nsec: {
         title: "Usa la tua nsec",
         description: "Questo metodo è pericoloso e non raccomandato",
-        delete_tooltip: "Elimina nsec"
+        delete_tooltip: "Elimina nsec",
       },
       signing_extension: {
         title: "Estensione di firma",
         description: "Usa un'estensione di firma NIP-07",
-        not_found: "Nessuna estensione di firma NIP-07 trovata"
-      }
+        not_found: "Nessuna estensione di firma NIP-07 trovata",
+      },
     },
     payment_requests: {
       title: "Richieste di pagamento",
-      description: "Le richieste di pagamento ti permettono di ricevere pagamenti via nostr. Se abiliti questa opzione, il tuo portafoglio si iscriverà ai tuoi relay nostr.",
+      description:
+        "Le richieste di pagamento ti permettono di ricevere pagamenti via nostr. Se abiliti questa opzione, il tuo portafoglio si iscriverà ai tuoi relay nostr.",
       enable_toggle: "Abilita Richieste di Pagamento",
       claim_automatically: {
         toggle: "Richiedi automaticamente",
-        description: "Ricevi pagamenti in entrata automaticamente."
-      }
+        description: "Ricevi pagamenti in entrata automaticamente.",
+      },
     },
     nostr_wallet_connect: {
       title: "Nostr Wallet Connect (NWC)",
-      description: "Usa NWC per controllare il tuo portafoglio da qualsiasi altra applicazione.",
+      description:
+        "Usa NWC per controllare il tuo portafoglio da qualsiasi altra applicazione.",
       enable_toggle: "Abilita NWC",
-      payments_note: "Puoi usare NWC solo per pagamenti dal tuo saldo Bitcoin. I pagamenti verranno effettuati dal tuo mint attivo.",
+      payments_note:
+        "Puoi usare NWC solo per pagamenti dal tuo saldo Bitcoin. I pagamenti verranno effettuati dal tuo mint attivo.",
       connection: {
         copy_tooltip: "Copia stringa di connessione",
         qr_tooltip: "Mostra codice QR",
-        allowance_label: "Limite rimasto (sat)"
+        allowance_label: "Limite rimasto (sat)",
       },
       relays: {
         expand_label: "Clicca per modificare i relay",
         add: {
           title: "Aggiungi relay",
-          description: "Nostr Wallet Connect usa relay nostr per connettere il tuo portafoglio ad altre applicazioni."
+          description:
+            "Nostr Wallet Connect usa relay nostr per connettere il tuo portafoglio ad altre applicazioni.",
         },
         list: {
           title: "Relay",
           description: "Il tuo portafoglio si connetterà a questi relay.",
           copy_tooltip: "Copia relay",
-          remove_tooltip: "Rimuovi relay"
-        }
-      }
+          remove_tooltip: "Rimuovi relay",
+        },
+      },
     },
     hardware_features: {
       webnfc: {
@@ -239,63 +246,73 @@ export default {
         description: "Scegli la codifica per scrivere su schede NFC",
         text: {
           title: "Testo",
-          description: "Memorizza token in testo semplice"
+          description: "Memorizza token in testo semplice",
         },
         weburl: {
           title: "URL",
-          description: "Memorizza URL a questo portafoglio con token"
+          description: "Memorizza URL a questo portafoglio con token",
         },
         binary: {
           title: "Binario grezzo",
-          description: "Byte grezzi invece di Base64. Rende i token ~33% più corti."
+          description:
+            "Byte grezzi invece di Base64. Rende i token ~33% più corti.",
         },
         quick_access: {
           toggle: "Accesso rapido NFC",
-          description: "Scansiona rapidamente schede NFC nel menu Ricevi Ecash. Questa opzione aggiunge un pulsante NFC al menu Ricevi Ecash."
-        }
-      }
+          description:
+            "Scansiona rapidamente schede NFC nel menu Ricevi Ecash. Questa opzione aggiunge un pulsante NFC al menu Ricevi Ecash.",
+        },
+      },
     },
     p2pk_features: {
       title: "P2PK",
-      description: "Genera una coppia di chiavi per ricevere ecash bloccato con P2PK. Attenzione: Questa funzionalità è sperimentale. Usare solo con piccole somme. Se perdi le tue chiavi private, nessuno sarà più in grado di sbloccare l'ecash ad esse associato.",
+      description:
+        "Genera una coppia di chiavi per ricevere ecash bloccato con P2PK. Attenzione: Questa funzionalità è sperimentale. Usare solo con piccole somme. Se perdi le tue chiavi private, nessuno sarà più in grado di sbloccare l'ecash ad esse associato.",
       generate_button: "Genera chiave",
       import_button: "Importa nsec",
       quick_access: {
         toggle: "Accesso rapido al blocco",
-        description: "Usa questo per mostrare rapidamente la tua chiave di blocco P2PK nel menu ricevi ecash."
+        description:
+          "Usa questo per mostrare rapidamente la tua chiave di blocco P2PK nel menu ricevi ecash.",
       },
       keys_expansion: {
         label: "Clicca per sfogliare {count} chiavi",
-        used_badge: "usata"
-      }
+        used_badge: "usata",
+      },
     },
     privacy: {
       title: "Privacy",
       description: "Queste impostazioni influenzano la tua privacy.",
       check_incoming: {
         toggle: "Verifica fattura in entrata",
-        description: "Se abilitato, il portafoglio verificherà l'ultima fattura in background. Questo aumenta la reattività del portafoglio, rendendo più facile il fingerprinting. Puoi verificare manualmente le fatture non pagate nella scheda Fatture."
+        description:
+          "Se abilitato, il portafoglio verificherà l'ultima fattura in background. Questo aumenta la reattività del portafoglio, rendendo più facile il fingerprinting. Puoi verificare manualmente le fatture non pagate nella scheda Fatture.",
       },
       check_startup: {
         toggle: "Verifica fatture pendenti all'avvio",
-        description: "Se abilitato, il portafoglio verificherà le fatture pendenti delle ultime 24 ore all'avvio."
+        description:
+          "Se abilitato, il portafoglio verificherà le fatture pendenti delle ultime 24 ore all'avvio.",
       },
       check_all: {
         toggle: "Verifica tutte le fatture",
-        description: "Se abilitato, il portafoglio verificherà periodicamente le fatture non pagate in background per un massimo di due settimane. Questo aumenta l'attività online del portafoglio, rendendo più facile il fingerprinting. Puoi verificare manualmente le fatture non pagate nella scheda Fatture."
+        description:
+          "Se abilitato, il portafoglio verificherà periodicamente le fatture non pagate in background per un massimo di due settimane. Questo aumenta l'attività online del portafoglio, rendendo più facile il fingerprinting. Puoi verificare manualmente le fatture non pagate nella scheda Fatture.",
       },
       check_sent: {
         toggle: "Verifica ecash inviato",
-        description: "Se abilitato, il portafoglio userà controlli periodici in background per determinare se i token inviati sono stati riscattati. Questo aumenta l'attività online del portafoglio, rendendo più facile il fingerprinting."
+        description:
+          "Se abilitato, il portafoglio userà controlli periodici in background per determinare se i token inviati sono stati riscattati. Questo aumenta l'attività online del portafoglio, rendendo più facile il fingerprinting.",
       },
       websockets: {
         toggle: "Usa WebSockets",
-        description: "Se abilitato, il portafoglio userà connessioni WebSocket a lunga durata per ricevere aggiornamenti su fatture pagate e token spesi dai mints. Questo aumenta la reattività del portafoglio ma rende anche più facile il fingerprinting."
+        description:
+          "Se abilitato, il portafoglio userà connessioni WebSocket a lunga durata per ricevere aggiornamenti su fatture pagate e token spesi dai mints. Questo aumenta la reattività del portafoglio ma rende anche più facile il fingerprinting.",
       },
       bitcoin_price: {
         toggle: "Ottieni tasso di cambio da Coinbase",
-        description: "Se abilitato, il tasso di cambio attuale di Bitcoin verrà recuperato da coinbase.com e verrà visualizzato il tuo saldo convertito."
-      }
+        description:
+          "Se abilitato, il tasso di cambio attuale di Bitcoin verrà recuperato da coinbase.com e verrà visualizzato il tuo saldo convertito.",
+      },
     },
     experimental: {
       title: "Sperimentale",
@@ -303,26 +320,30 @@ export default {
       receive_swaps: {
         toggle: "Ricevi scambi",
         badge: "Beta",
-        description: "Opzione per scambiare Ecash ricevuto al tuo mint attivo nella finestra di dialogo Ricevi Ecash."
+        description:
+          "Opzione per scambiare Ecash ricevuto al tuo mint attivo nella finestra di dialogo Ricevi Ecash.",
       },
       auto_paste: {
         toggle: "Incolla Ecash automaticamente",
-        description: "Incolla automaticamente ecash nei tuoi appunti quando premi Ricevi, poi Ecash, poi Incolla. L'incollaggio automatico può causare problemi all'interfaccia utente su iOS, disattivalo se riscontri problemi."
+        description:
+          "Incolla automaticamente ecash nei tuoi appunti quando premi Ricevi, poi Ecash, poi Incolla. L'incollaggio automatico può causare problemi all'interfaccia utente su iOS, disattivalo se riscontri problemi.",
       },
       auditor: {
         toggle: "Abilita revisore",
         badge: "Beta",
-        description: "Se abilitato, il portafoglio mostrerà le informazioni del revisore nella finestra di dialogo dei dettagli del mint. Il revisore è un servizio di terze parti che monitora l'affidabilità dei mints.",
+        description:
+          "Se abilitato, il portafoglio mostrerà le informazioni del revisore nella finestra di dialogo dei dettagli del mint. Il revisore è un servizio di terze parti che monitora l'affidabilità dei mints.",
         url_label: "URL Revisore",
-        api_url_label: "URL API Revisore"
-      }
+        api_url_label: "URL API Revisore",
+      },
     },
     appearance: {
       keyboard: {
         title: "Tastiera su schermo",
         description: "Usa la tastiera numerica per inserire importi.",
         toggle: "Usa tastiera numerica",
-        toggle_description: "Se abilitato, verrà utilizzata la tastiera numerica per inserire gli importi."
+        toggle_description:
+          "Se abilitato, verrà utilizzata la tastiera numerica per inserire gli importi.",
       },
       theme: {
         title: "Aspetto",
@@ -336,9 +357,9 @@ export default {
           mint: "mint",
           nut: "nut",
           blu: "blu",
-          flamingo: "flamingo"
-        }
-      }
+          flamingo: "flamingo",
+        },
+      },
     },
     advanced: {
       title: "Avanzato",
@@ -347,48 +368,58 @@ export default {
         description: "Le seguenti impostazioni sono per sviluppo e debug.",
         new_seed: {
           button: "Genera nuova frase seed",
-          description: "Questo genererà una nuova frase seed. Devi inviare l'intero saldo a te stesso per poterlo ripristinare con una nuova seed.",
-          confirm_question: "Sei sicuro di voler generare una nuova frase seed?",
+          description:
+            "Questo genererà una nuova frase seed. Devi inviare l'intero saldo a te stesso per poterlo ripristinare con una nuova seed.",
+          confirm_question:
+            "Sei sicuro di voler generare una nuova frase seed?",
           cancel: "Annulla",
-          confirm: "Conferma"
+          confirm: "Conferma",
         },
         remove_spent: {
           button: "Rimuovi prove spese",
-          description: "Verifica se i token ecash dai tuoi mints attivi sono spesi e rimuovi quelli spesi dal tuo portafoglio. Usalo solo se il tuo portafoglio è bloccato."
+          description:
+            "Verifica se i token ecash dai tuoi mints attivi sono spesi e rimuovi quelli spesi dal tuo portafoglio. Usalo solo se il tuo portafoglio è bloccato.",
         },
         debug_console: {
           button: "Attiva/disattiva Console di Debug",
-          description: "Apri il terminale di debug Javascript. Non incollare mai nulla in questo terminale che non capisci. Un ladro potrebbe provare a ingannarti facendoti incollare codice malevolo qui."
+          description:
+            "Apri il terminale di debug Javascript. Non incollare mai nulla in questo terminale che non capisci. Un ladro potrebbe provare a ingannarti facendoti incollare codice malevolo qui.",
         },
         export_proofs: {
           button: "Esporta prove attive",
-          description: "Copia l'intero saldo dal mint attivo come token Cashu nei tuoi appunti. Questo esporterà solo i token dal mint e unità selezionati. Per un'esportazione completa, seleziona un mint e un'unità diversi ed esporta di nuovo."
+          description:
+            "Copia l'intero saldo dal mint attivo come token Cashu nei tuoi appunti. Questo esporterà solo i token dal mint e unità selezionati. Per un'esportazione completa, seleziona un mint e un'unità diversi ed esporta di nuovo.",
         },
         keyset_counters: {
           title: "Incrementa contatori keyset",
-          description: "Clicca l'ID del keyset per incrementare i contatori del percorso di derivazione per i keyset nel tuo portafoglio. Questo è utile se vedi l'errore \"le uscite sono già state firmate\"."
+          description:
+            "Clicca l'ID del keyset per incrementare i contatori del percorso di derivazione per i keyset nel tuo portafoglio. Questo è utile se vedi l'errore \"le uscite sono già state firmate\".",
         },
         unset_reserved: {
           button: "Annulla prenotazione tutti i token riservati",
-          description: "Questo portafoglio marca l'ecash in uscita pendente come riservato (e lo sottrae dal tuo saldo) per prevenire tentativi di doppia spesa. Questo pulsante annullerà la prenotazione di tutti i token riservati così potranno essere usati di nuovo. Se fai questo, il tuo portafoglio potrebbe includere prove spese. Premi il pulsante \"Rimuovi prove spese\" per eliminarle."
+          description:
+            'Questo portafoglio marca l\'ecash in uscita pendente come riservato (e lo sottrae dal tuo saldo) per prevenire tentativi di doppia spesa. Questo pulsante annullerà la prenotazione di tutti i token riservati così potranno essere usati di nuovo. Se fai questo, il tuo portafoglio potrebbe includere prove spese. Premi il pulsante "Rimuovi prove spese" per eliminarle.',
         },
         show_onboarding: {
           button: "Mostra onboarding",
-          description: "Mostra di nuovo la schermata di onboarding."
+          description: "Mostra di nuovo la schermata di onboarding.",
         },
         reset_wallet: {
           button: "Resetta dati portafoglio",
-          description: "Resetta i dati del tuo portafoglio. Attenzione: Questo eliminerà tutto! Assicurati di creare prima un backup.",
-          confirm_question: "Sei sicuro di voler eliminare i dati del tuo portafoglio?",
+          description:
+            "Resetta i dati del tuo portafoglio. Attenzione: Questo eliminerà tutto! Assicurati di creare prima un backup.",
+          confirm_question:
+            "Sei sicuro di voler eliminare i dati del tuo portafoglio?",
           cancel: "Annulla",
-          confirm: "Elimina portafoglio"
+          confirm: "Elimina portafoglio",
         },
         export_wallet: {
           button: "Esporta dati portafoglio",
-          description: "Scarica un dump del tuo portafoglio. Puoi ripristinare il tuo portafoglio da questo file nella schermata di benvenuto di un nuovo portafoglio. Questo file non sarà sincronizzato se continui a usare il tuo portafoglio dopo averlo esportato."
-        }
-      }
-    }
+          description:
+            "Scarica un dump del tuo portafoglio. Puoi ripristinare il tuo portafoglio da questo file nella schermata di benvenuto di un nuovo portafoglio. Questo file non sarà sincronizzato se continui a usare il tuo portafoglio dopo averlo esportato.",
+        },
+      },
+    },
   },
   NoMintWarnBanner: {
     title: "Unisciti a un mint",
@@ -797,8 +828,7 @@ export default {
       },
       lightning: {
         label: "Lightning",
-        error_no_mints:
-          "Devi connetterti a un mint per ricevere via Lightning",
+        error_no_mints: "Devi connetterti a un mint per ricevere via Lightning",
       },
     },
   },

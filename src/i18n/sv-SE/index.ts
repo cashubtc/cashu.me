@@ -66,8 +66,8 @@ export default {
       no_amount: "Inget belopp",
       no_lnurl_data: "Ingen LNURL-data",
       no_price_data: "Ingen prisdata.",
-      please_try_again: "Försök igen."
-    }
+      please_try_again: "Försök igen.",
+    },
   },
   MainHeader: {
     menu: {
@@ -147,91 +147,98 @@ export default {
       p2pk_features: "P2PK FUNKTIONER",
       privacy: "INTEGRITET",
       experimental: "EXPERIMENTELLA",
-      appearance: "UTSEENDE"
+      appearance: "UTSEENDE",
     },
     backup_restore: {
       backup_seed: {
         title: "Säkerhetskopiera återställningsfras",
-        description: "Din återställningsfras kan återställa din plånbok. Håll den säker och privat.",
+        description:
+          "Din återställningsfras kan återställa din plånbok. Håll den säker och privat.",
         seed_phrase_label: "Återställningsfras",
       },
       restore_ecash: {
         title: "Återställ ecash",
-        description: "Återställningsguiden låter dig återställa förlorad ecash från en mnemonisk återställningsfras. Din nuvarande plånboks återställningsfras kommer inte att påverkas, guiden tillåter dig endast att återställa ecash från en annan återställningsfras.",
-        button: "Återställ"
-      }
+        description:
+          "Återställningsguiden låter dig återställa förlorad ecash från en mnemonisk återställningsfras. Din nuvarande plånboks återställningsfras kommer inte att påverkas, guiden tillåter dig endast att återställa ecash från en annan återställningsfras.",
+        button: "Återställ",
+      },
     },
     lightning_address: {
       title: "Lightning-adress",
       description: "Ta emot betalningar till din Lightning-adress.",
       enable: {
         toggle: "Aktivera",
-        description: "Lightning-adress med npub.cash"
+        description: "Lightning-adress med npub.cash",
       },
       address: {
-        copy_tooltip: "Kopiera Lightning-adress"
+        copy_tooltip: "Kopiera Lightning-adress",
       },
       automatic_claim: {
         toggle: "Hämta automatiskt",
-        description: "Ta emot inkommande betalningar automatiskt."
-      }
+        description: "Ta emot inkommande betalningar automatiskt.",
+      },
     },
     nostr_keys: {
       title: "Dina nostr-nycklar",
       description: "Ställ in nostr-nycklarna för din Lightning-adress.",
       wallet_seed: {
         title: "Plånbokens återställningsfras",
-        description: "Generera nostr nyckelpar från plånbokens återställningsfras",
-        copy_nsec: "Kopiera nsec"
+        description:
+          "Generera nostr nyckelpar från plånbokens återställningsfras",
+        copy_nsec: "Kopiera nsec",
       },
       nsec_bunker: {
         title: "Nsec Bunker",
         description: "Använd en NIP-46 bunker",
-        delete_tooltip: "Radera anslutning"
+        delete_tooltip: "Radera anslutning",
       },
       use_nsec: {
         title: "Använd din nsec",
         description: "Denna metod är farlig och rekommenderas inte",
-        delete_tooltip: "Radera nsec"
+        delete_tooltip: "Radera nsec",
       },
       signing_extension: {
         title: "Signeringsutökning",
         description: "Använd en NIP-07 signeringsutökning",
-        not_found: "Ingen NIP-07 signeringsutökning hittades"
-      }
+        not_found: "Ingen NIP-07 signeringsutökning hittades",
+      },
     },
     payment_requests: {
       title: "Betalningsförfrågningar",
-      description: "Betalningsförfrågningar gör det möjligt att ta emot betalningar via nostr. Om du aktiverar detta prenumererar din plånbok på dina nostr-reläer.",
+      description:
+        "Betalningsförfrågningar gör det möjligt att ta emot betalningar via nostr. Om du aktiverar detta prenumererar din plånbok på dina nostr-reläer.",
       enable_toggle: "Aktivera betalningsförfrågningar",
       claim_automatically: {
         toggle: "Hämta automatiskt",
-        description: "Ta emot inkommande betalningar automatiskt."
-      }
+        description: "Ta emot inkommande betalningar automatiskt.",
+      },
     },
     nostr_wallet_connect: {
       title: "Nostr Plånboksanslutning (NWC)",
-      description: "Använd NWC för att styra din plånbok från valfri annan applikation.",
+      description:
+        "Använd NWC för att styra din plånbok från valfri annan applikation.",
       enable_toggle: "Aktivera NWC",
-      payments_note: "Du kan endast använda NWC för betalningar från ditt Bitcoin-saldo. Betalningar kommer att göras från din aktiva mint.",
+      payments_note:
+        "Du kan endast använda NWC för betalningar från ditt Bitcoin-saldo. Betalningar kommer att göras från din aktiva mint.",
       connection: {
         copy_tooltip: "Kopiera anslutningssträng",
         qr_tooltip: "Visa QR-kod",
-        allowance_label: "Tillåtelse kvar (sat)"
+        allowance_label: "Tillåtelse kvar (sat)",
       },
       relays: {
         expand_label: "Klicka för att redigera reläer",
         add: {
           title: "Lägg till relä",
-          description: "Nostr Plånboksanslutning använder nostr-reläer för att ansluta din plånbok till andra applikationer."
+          description:
+            "Nostr Plånboksanslutning använder nostr-reläer för att ansluta din plånbok till andra applikationer.",
         },
         list: {
           title: "Reläer",
           description: "Din plånbok kommer att ansluta till dessa reläer.",
           copy_tooltip: "Kopiera relä",
-          remove_tooltip: "Ta bort relä"
-        }
-      }
+          remove_tooltip: "Ta bort relä",
+        },
+      },
     },
     hardware_features: {
       webnfc: {
@@ -239,63 +246,72 @@ export default {
         description: "Välj kodning för att skriva till NFC-kort",
         text: {
           title: "Text",
-          description: "Spara token i klartext"
+          description: "Spara token i klartext",
         },
         weburl: {
           title: "URL",
-          description: "Spara URL till denna plånbok med token"
+          description: "Spara URL till denna plånbok med token",
         },
         binary: {
           title: "Rå binär",
-          description: "Råa byte istället för Base64. Ger ~33% kortare tokens."
+          description: "Råa byte istället för Base64. Ger ~33% kortare tokens.",
         },
         quick_access: {
           toggle: "Snabb åtkomst till NFC",
-          description: "Skanna snabbt NFC-kort i Ta emot Ecash-menyn. Detta alternativ lägger till en NFC-knapp i Ta emot Ecash-menyn."
-        }
-      }
+          description:
+            "Skanna snabbt NFC-kort i Ta emot Ecash-menyn. Detta alternativ lägger till en NFC-knapp i Ta emot Ecash-menyn.",
+        },
+      },
     },
     p2pk_features: {
       title: "P2PK",
-      description: "Generera ett nyckelpar för att ta emot P2PK-låst ecash. Varning: Denna funktion är experimentell. Använd endast med små belopp. Om du förlorar dina privata nycklar kommer ingen att kunna låsa upp ecash som är låst till den längre.",
+      description:
+        "Generera ett nyckelpar för att ta emot P2PK-låst ecash. Varning: Denna funktion är experimentell. Använd endast med små belopp. Om du förlorar dina privata nycklar kommer ingen att kunna låsa upp ecash som är låst till den längre.",
       generate_button: "Generera nyckel",
       import_button: "Importera nsec",
       quick_access: {
         toggle: "Snabb åtkomst till lås",
-        description: "Använd detta för att snabbt visa din P2PK låsningsnyckel i menyn för att ta emot ecash."
+        description:
+          "Använd detta för att snabbt visa din P2PK låsningsnyckel i menyn för att ta emot ecash.",
       },
       keys_expansion: {
         label: "Klicka för att bläddra bland {count} nycklar",
-        used_badge: "använd"
-      }
+        used_badge: "använd",
+      },
     },
     privacy: {
       title: "Integritet",
       description: "Dessa inställningar påverkar din integritet.",
       check_incoming: {
         toggle: "Kontrollera inkommande faktura",
-        description: "Om aktiverat kommer plånboken att kontrollera den senaste fakturan i bakgrunden. Detta ökar plånbokens responsivitet vilket gör fingeravtryckning enklare. Du kan manuellt kontrollera obetalda fakturor under fliken Fakturor."
+        description:
+          "Om aktiverat kommer plånboken att kontrollera den senaste fakturan i bakgrunden. Detta ökar plånbokens responsivitet vilket gör fingeravtryckning enklare. Du kan manuellt kontrollera obetalda fakturor under fliken Fakturor.",
       },
       check_startup: {
         toggle: "Kontrollera väntande fakturor vid start",
-        description: "Om aktiverat kommer plånboken att kontrollera väntande fakturor från de senaste 24 timmarna vid start."
+        description:
+          "Om aktiverat kommer plånboken att kontrollera väntande fakturor från de senaste 24 timmarna vid start.",
       },
       check_all: {
         toggle: "Kontrollera alla fakturor",
-        description: "Om aktiverat kommer plånboken periodvis att kontrollera obetalda fakturor i bakgrunden i upp till två veckor. Detta ökar plånbokens online-aktivitet vilket gör fingeravtryckning enklare. Du kan manuellt kontrollera obetalda fakturor under fliken Fakturor."
+        description:
+          "Om aktiverat kommer plånboken periodvis att kontrollera obetalda fakturor i bakgrunden i upp till två veckor. Detta ökar plånbokens online-aktivitet vilket gör fingeravtryckning enklare. Du kan manuellt kontrollera obetalda fakturor under fliken Fakturor.",
       },
       check_sent: {
         toggle: "Kontrollera skickad ecash",
-        description: "Om aktiverat kommer plånboken att använda periodiska bakgrundskontroller för att avgöra om skickade tokens har lösts in. Detta ökar plånbokens online-aktivitet vilket gör fingeravtryckning enklare."
+        description:
+          "Om aktiverat kommer plånboken att använda periodiska bakgrundskontroller för att avgöra om skickade tokens har lösts in. Detta ökar plånbokens online-aktivitet vilket gör fingeravtryckning enklare.",
       },
       websockets: {
         toggle: "Använd WebSockets",
-        description: "Om aktiverat kommer plånboken att använda långlivade WebSocket-anslutningar för att ta emot uppdateringar om betalda fakturor och spenderade tokens från mints. Detta ökar plånbokens responsivitet men gör också fingeravtryckning enklare."
+        description:
+          "Om aktiverat kommer plånboken att använda långlivade WebSocket-anslutningar för att ta emot uppdateringar om betalda fakturor och spenderade tokens från mints. Detta ökar plånbokens responsivitet men gör också fingeravtryckning enklare.",
       },
       bitcoin_price: {
         toggle: "Hämta växelkurs från Coinbase",
-        description: "Om aktiverat kommer aktuell Bitcoin-växelkurs att hämtas från coinbase.com och ditt konverterade saldo kommer att visas."
-      }
+        description:
+          "Om aktiverat kommer aktuell Bitcoin-växelkurs att hämtas från coinbase.com och ditt konverterade saldo kommer att visas.",
+      },
     },
     experimental: {
       title: "Experimentella",
@@ -303,26 +319,30 @@ export default {
       receive_swaps: {
         toggle: "Ta emot byten",
         badge: "Beta",
-        description: "Möjlighet att byta mottagen Ecash till din aktiva mint i dialogrutan Ta emot Ecash."
+        description:
+          "Möjlighet att byta mottagen Ecash till din aktiva mint i dialogrutan Ta emot Ecash.",
       },
       auto_paste: {
         toggle: "Klistra in Ecash automatiskt",
-        description: "Klistra in ecash från ditt urklipp automatiskt när du trycker på Ta emot, sedan Ecash, sedan Klistra in. Automatisk inklistring kan orsaka UI-problem i iOS, stäng av det om du upplever problem."
+        description:
+          "Klistra in ecash från ditt urklipp automatiskt när du trycker på Ta emot, sedan Ecash, sedan Klistra in. Automatisk inklistring kan orsaka UI-problem i iOS, stäng av det om du upplever problem.",
       },
       auditor: {
         toggle: "Aktivera revisor",
         badge: "Beta",
-        description: "Om aktiverat kommer plånboken att visa revisorsinformation i dialogrutan för mintdetaljer. Revisorn är en tredjepartstjänst som övervakar mints pålitlighet.",
+        description:
+          "Om aktiverat kommer plånboken att visa revisorsinformation i dialogrutan för mintdetaljer. Revisorn är en tredjepartstjänst som övervakar mints pålitlighet.",
         url_label: "Revisor URL",
-        api_url_label: "Revisor API URL"
-      }
+        api_url_label: "Revisor API URL",
+      },
     },
     appearance: {
       keyboard: {
         title: "Skärmtangentbord",
         description: "Använd det numeriska tangentbordet för att ange belopp.",
         toggle: "Använd numeriskt tangentbord",
-        toggle_description: "Om aktiverat kommer det numeriska tangentbordet att användas för att ange belopp."
+        toggle_description:
+          "Om aktiverat kommer det numeriska tangentbordet att användas för att ange belopp.",
       },
       theme: {
         title: "Utseende",
@@ -336,9 +356,9 @@ export default {
           mint: "mint",
           nut: "nöt",
           blu: "blå",
-          flamingo: "flamingo"
-        }
-      }
+          flamingo: "flamingo",
+        },
+      },
     },
     advanced: {
       title: "Avancerade",
@@ -347,48 +367,58 @@ export default {
         description: "Följande inställningar är för utveckling och felsökning.",
         new_seed: {
           button: "Generera ny återställningsfras",
-          description: "Detta kommer att generera en ny återställningsfras. Du måste skicka hela ditt saldo till dig själv för att kunna återställa det med en ny återställningsfras.",
-          confirm_question: "Är du säker på att du vill generera en ny återställningsfras?",
+          description:
+            "Detta kommer att generera en ny återställningsfras. Du måste skicka hela ditt saldo till dig själv för att kunna återställa det med en ny återställningsfras.",
+          confirm_question:
+            "Är du säker på att du vill generera en ny återställningsfras?",
           cancel: "Avbryt",
-          confirm: "Bekräfta"
+          confirm: "Bekräfta",
         },
         remove_spent: {
           button: "Ta bort spenderade proofs",
-          description: "Kontrollera om ecash-tokens från dina aktiva mints är spenderade och ta bort de spenderade från din plånbok. Använd detta endast om din plånbok har fastnat."
+          description:
+            "Kontrollera om ecash-tokens från dina aktiva mints är spenderade och ta bort de spenderade från din plånbok. Använd detta endast om din plånbok har fastnat.",
         },
         debug_console: {
           button: "Visa/dölj debugkonsol",
-          description: "Öppna Javascript debugterminalen. Klistra aldrig in något i den här terminalen som du inte förstår. En tjuv kan försöka lura dig att klistra in skadlig kod här."
+          description:
+            "Öppna Javascript debugterminalen. Klistra aldrig in något i den här terminalen som du inte förstår. En tjuv kan försöka lura dig att klistra in skadlig kod här.",
         },
         export_proofs: {
           button: "Exportera aktiva proofs",
-          description: "Kopiera hela ditt saldo från den aktiva minten som en Cashu-token till ditt urklipp. Detta exporterar endast tokens från den valda minten och enheten. För en fullständig export, välj en annan mint och enhet och exportera igen."
+          description:
+            "Kopiera hela ditt saldo från den aktiva minten som en Cashu-token till ditt urklipp. Detta exporterar endast tokens från den valda minten och enheten. För en fullständig export, välj en annan mint och enhet och exportera igen.",
         },
         keyset_counters: {
           title: "Öka keyset-räknare",
-          description: "Klicka på keyset-ID för att öka härledningsvägsräknarna för keysets i din plånbok. Detta är användbart om du ser felet \"outputs have already been signed\"."
+          description:
+            'Klicka på keyset-ID för att öka härledningsvägsräknarna för keysets i din plånbok. Detta är användbart om du ser felet "outputs have already been signed".',
         },
         unset_reserved: {
           button: "Avboka alla reserverade tokens",
-          description: "Denna plånbok markerar väntande utgående ecash som reserverad (och drar av den från ditt saldo) för att förhindra försök till dubbelspending. Den här knappen kommer att avboka alla reserverade tokens så att de kan användas igen. Om du gör detta kan din plånbok inkludera spenderade proofs. Tryck på knappen \"Ta bort spenderade proofs\" för att bli av med dem."
+          description:
+            'Denna plånbok markerar väntande utgående ecash som reserverad (och drar av den från ditt saldo) för att förhindra försök till dubbelspending. Den här knappen kommer att avboka alla reserverade tokens så att de kan användas igen. Om du gör detta kan din plånbok inkludera spenderade proofs. Tryck på knappen "Ta bort spenderade proofs" för att bli av med dem.',
         },
         show_onboarding: {
           button: "Visa introduktion",
-          description: "Visa introduktionsskärmen igen."
+          description: "Visa introduktionsskärmen igen.",
         },
         reset_wallet: {
           button: "Återställ plånboksdata",
-          description: "Återställ dina plånboksdata. Varning: Detta kommer att radera allt! Se till att du skapar en säkerhetskopia först.",
-          confirm_question: "Är du säker på att du vill radera din plånboksdata?",
+          description:
+            "Återställ dina plånboksdata. Varning: Detta kommer att radera allt! Se till att du skapar en säkerhetskopia först.",
+          confirm_question:
+            "Är du säker på att du vill radera din plånboksdata?",
           cancel: "Avbryt",
-          confirm: "Radera plånbok"
+          confirm: "Radera plånbok",
         },
         export_wallet: {
           button: "Exportera plånboksdata",
-          description: "Ladda ner en dump av din plånbok. Du kan återställa din plånbok från den här filen i välkomstskärmen på en ny plånbok. Den här filen kommer att vara osynkroniserad om du fortsätter att använda din plånbok efter att ha exporterat den."
-        }
-      }
-    }
+          description:
+            "Ladda ner en dump av din plånbok. Du kan återställa din plånbok från den här filen i välkomstskärmen på en ny plånbok. Den här filen kommer att vara osynkroniserad om du fortsätter att använda din plånbok efter att ha exporterat den.",
+        },
+      },
+    },
   },
   NoMintWarnBanner: {
     title: "Gå med i en mint",

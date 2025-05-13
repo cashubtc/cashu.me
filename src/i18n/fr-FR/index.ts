@@ -55,7 +55,8 @@ export default {
       could_not_request_mint: "Impossible de demander à la Mint",
       invoice_still_pending: "Facture toujours en attente",
       paid_lightning: "Payé {amount} via Lightning",
-      payment_pending_refresh: "Paiement en attente. Rafraîchissez la facture manuellement.",
+      payment_pending_refresh:
+        "Paiement en attente. Rafraîchissez la facture manuellement.",
       sent: "Envoyé {amount}",
       token_still_pending: "Token toujours en attente",
       received_lightning: "Reçu {amount} via Lightning",
@@ -66,8 +67,8 @@ export default {
       no_amount: "Pas de montant",
       no_lnurl_data: "Pas de données LNURL",
       no_price_data: "Pas de données de prix.",
-      please_try_again: "Veuillez réessayer."
-    }
+      please_try_again: "Veuillez réessayer.",
+    },
   },
   MainHeader: {
     menu: {
@@ -135,7 +136,8 @@ export default {
   Settings: {
     language: {
       title: "Langue",
-      description: "Veuillez choisir votre langue préférée dans la liste ci-dessous.",
+      description:
+        "Veuillez choisir votre langue préférée dans la liste ci-dessous.",
     },
     sections: {
       backup_restore: "SAUVEGARDE & RESTAURATION",
@@ -147,91 +149,98 @@ export default {
       p2pk_features: "FONCTIONNALITÉS P2PK",
       privacy: "CONFIDENTIALITÉ",
       experimental: "EXPÉRIMENTAL",
-      appearance: "APPARENCE"
+      appearance: "APPARENCE",
     },
     backup_restore: {
       backup_seed: {
         title: "Sauvegarder la phrase de départ",
-        description: "Votre phrase de départ peut restaurer votre portefeuille. Gardez-la en sécurité et privée.",
+        description:
+          "Votre phrase de départ peut restaurer votre portefeuille. Gardez-la en sécurité et privée.",
         seed_phrase_label: "Phrase de départ",
       },
       restore_ecash: {
         title: "Restaurer ecash",
-        description: "L'assistant de restauration vous permet de récupérer l'ecash perdu à partir d'une phrase mnémonique. La phrase de départ de votre portefeuille actuel ne sera pas affectée, l'assistant vous permettra uniquement de restaurer l'ecash à partir d'une autre phrase de départ.",
-        button: "Restaurer"
-      }
+        description:
+          "L'assistant de restauration vous permet de récupérer l'ecash perdu à partir d'une phrase mnémonique. La phrase de départ de votre portefeuille actuel ne sera pas affectée, l'assistant vous permettra uniquement de restaurer l'ecash à partir d'une autre phrase de départ.",
+        button: "Restaurer",
+      },
     },
     lightning_address: {
       title: "Adresse Lightning",
       description: "Recevez des paiements sur votre adresse Lightning.",
       enable: {
         toggle: "Activer",
-        description: "Adresse Lightning avec npub.cash"
+        description: "Adresse Lightning avec npub.cash",
       },
       address: {
-        copy_tooltip: "Copier l'adresse Lightning"
+        copy_tooltip: "Copier l'adresse Lightning",
       },
       automatic_claim: {
         toggle: "Réclamer automatiquement",
-        description: "Recevez les paiements entrants automatiquement."
-      }
+        description: "Recevez les paiements entrants automatiquement.",
+      },
     },
     nostr_keys: {
       title: "Vos clés Nostr",
       description: "Définissez les clés nostr pour votre adresse Lightning.",
       wallet_seed: {
         title: "Phrase de départ du portefeuille",
-        description: "Générer une paire de clés nostr à partir de la phrase de départ du portefeuille",
-        copy_nsec: "Copier nsec"
+        description:
+          "Générer une paire de clés nostr à partir de la phrase de départ du portefeuille",
+        copy_nsec: "Copier nsec",
       },
       nsec_bunker: {
         title: "Nsec Bunker",
         description: "Utiliser un bunker NIP-46",
-        delete_tooltip: "Supprimer la connexion"
+        delete_tooltip: "Supprimer la connexion",
       },
       use_nsec: {
         title: "Utiliser votre nsec",
         description: "Cette méthode est dangereuse et non recommandée",
-        delete_tooltip: "Supprimer nsec"
+        delete_tooltip: "Supprimer nsec",
       },
       signing_extension: {
         title: "Extension de signature",
         description: "Utiliser une extension de signature NIP-07",
-        not_found: "Aucune extension de signature NIP-07 trouvée"
-      }
+        not_found: "Aucune extension de signature NIP-07 trouvée",
+      },
     },
     payment_requests: {
       title: "Demandes de paiement",
-      description: "Les demandes de paiement vous permettent de recevoir des paiements via nostr. Si vous activez cela, votre portefeuille s'abonnera à vos relais nostr.",
+      description:
+        "Les demandes de paiement vous permettent de recevoir des paiements via nostr. Si vous activez cela, votre portefeuille s'abonnera à vos relais nostr.",
       enable_toggle: "Activer les demandes de paiement",
       claim_automatically: {
         toggle: "Réclamer automatiquement",
-        description: "Recevez les paiements entrants automatiquement."
-      }
+        description: "Recevez les paiements entrants automatiquement.",
+      },
     },
     nostr_wallet_connect: {
       title: "Nostr Wallet Connect (NWC)",
-      description: "Utilisez NWC pour contrôler votre portefeuille depuis n'importe quelle autre application.",
+      description:
+        "Utilisez NWC pour contrôler votre portefeuille depuis n'importe quelle autre application.",
       enable_toggle: "Activer NWC",
-      payments_note: "Vous ne pouvez utiliser NWC que pour les paiements à partir de votre solde Bitcoin. Les paiements seront effectués à partir de votre mint active.",
+      payments_note:
+        "Vous ne pouvez utiliser NWC que pour les paiements à partir de votre solde Bitcoin. Les paiements seront effectués à partir de votre mint active.",
       connection: {
         copy_tooltip: "Copier la chaîne de connexion",
         qr_tooltip: "Afficher le code QR",
-        allowance_label: "Montant restant (sat)"
+        allowance_label: "Montant restant (sat)",
       },
       relays: {
         expand_label: "Cliquez pour modifier les relais",
         add: {
           title: "Ajouter un relais",
-          description: "Nostr Wallet Connect utilise les relais nostr pour connecter votre portefeuille à d'autres applications."
+          description:
+            "Nostr Wallet Connect utilise les relais nostr pour connecter votre portefeuille à d'autres applications.",
         },
         list: {
           title: "Relais",
           description: "Votre portefeuille se connectera à ces relais.",
           copy_tooltip: "Copier le relais",
-          remove_tooltip: "Supprimer le relais"
-        }
-      }
+          remove_tooltip: "Supprimer le relais",
+        },
+      },
     },
     hardware_features: {
       webnfc: {
@@ -239,63 +248,73 @@ export default {
         description: "Choisissez l'encodage pour l'écriture sur les cartes NFC",
         text: {
           title: "Texte",
-          description: "Stocker le jeton en texte brut"
+          description: "Stocker le jeton en texte brut",
         },
         weburl: {
           title: "URL",
-          description: "Stocker l'URL de ce portefeuille avec le jeton"
+          description: "Stocker l'URL de ce portefeuille avec le jeton",
         },
         binary: {
           title: "Binaire brut",
-          description: "Octets bruts au lieu de Base64. Rend les jetons ~33% plus courts."
+          description:
+            "Octets bruts au lieu de Base64. Rend les jetons ~33% plus courts.",
         },
         quick_access: {
           toggle: "Accès rapide à la NFC",
-          description: "Scannez rapidement les cartes NFC dans le menu Recevoir Ecash. Cette option ajoute un bouton NFC au menu Recevoir Ecash."
-        }
-      }
+          description:
+            "Scannez rapidement les cartes NFC dans le menu Recevoir Ecash. Cette option ajoute un bouton NFC au menu Recevoir Ecash.",
+        },
+      },
     },
     p2pk_features: {
       title: "P2PK",
-      description: "Générez une paire de clés pour recevoir de l'ecash verrouillé P2PK. Attention : Cette fonctionnalité est expérimentale. N'utilisez qu'avec de petits montants. Si vous perdez vos clés privées, personne ne pourra plus déverrouiller l'ecash qui y est verrouillé.",
+      description:
+        "Générez une paire de clés pour recevoir de l'ecash verrouillé P2PK. Attention : Cette fonctionnalité est expérimentale. N'utilisez qu'avec de petits montants. Si vous perdez vos clés privées, personne ne pourra plus déverrouiller l'ecash qui y est verrouillé.",
       generate_button: "Générer une clé",
       import_button: "Importer nsec",
       quick_access: {
         toggle: "Accès rapide au verrouillage",
-        description: "Utilisez ceci pour afficher rapidement votre clé de verrouillage P2PK dans le menu Recevoir Ecash."
+        description:
+          "Utilisez ceci pour afficher rapidement votre clé de verrouillage P2PK dans le menu Recevoir Ecash.",
       },
       keys_expansion: {
         label: "Cliquez pour parcourir {count} clés",
-        used_badge: "utilisée"
-      }
+        used_badge: "utilisée",
+      },
     },
     privacy: {
       title: "Confidentialité",
       description: "Ces paramètres affectent votre confidentialité.",
       check_incoming: {
         toggle: "Vérifier la facture entrante",
-        description: "Si activé, le portefeuille vérifiera la dernière facture en arrière-plan. Cela augmente la réactivité du portefeuille, ce qui rend le fingerprinting plus facile. Vous pouvez vérifier manuellement les factures impayées dans l'onglet Factures."
+        description:
+          "Si activé, le portefeuille vérifiera la dernière facture en arrière-plan. Cela augmente la réactivité du portefeuille, ce qui rend le fingerprinting plus facile. Vous pouvez vérifier manuellement les factures impayées dans l'onglet Factures.",
       },
       check_startup: {
         toggle: "Vérifier les factures en attente au démarrage",
-        description: "Si activé, le portefeuille vérifiera les factures en attente des dernières 24 heures au démarrage."
+        description:
+          "Si activé, le portefeuille vérifiera les factures en attente des dernières 24 heures au démarrage.",
       },
       check_all: {
         toggle: "Vérifier toutes les factures",
-        description: "Si activé, le portefeuille vérifiera périodiquement les factures impayées en arrière-plan pendant jusqu'à deux semaines. Cela augmente l'activité en ligne du portefeuille, ce qui rend le fingerprinting plus facile. Vous pouvez vérifier manuellement les factures impayées dans l'onglet Factures."
+        description:
+          "Si activé, le portefeuille vérifiera périodiquement les factures impayées en arrière-plan pendant jusqu'à deux semaines. Cela augmente l'activité en ligne du portefeuille, ce qui rend le fingerprinting plus facile. Vous pouvez vérifier manuellement les factures impayées dans l'onglet Factures.",
       },
       check_sent: {
         toggle: "Vérifier l'ecash envoyé",
-        description: "Si activé, le portefeuille utilisera des vérifications périodiques en arrière-plan pour déterminer si les jetons envoyés ont été utilisés. Cela augmente l'activité en ligne du portefeuille, ce qui rend le fingerprinting plus facile."
+        description:
+          "Si activé, le portefeuille utilisera des vérifications périodiques en arrière-plan pour déterminer si les jetons envoyés ont été utilisés. Cela augmente l'activité en ligne du portefeuille, ce qui rend le fingerprinting plus facile.",
       },
       websockets: {
         toggle: "Utiliser les WebSockets",
-        description: "Si activé, le portefeuille utilisera des connexions WebSocket de longue durée pour recevoir des mises à jour sur les factures payées et les jetons dépensés des mints. Cela augmente la réactivité du portefeuille mais rend également le fingerprinting plus facile."
+        description:
+          "Si activé, le portefeuille utilisera des connexions WebSocket de longue durée pour recevoir des mises à jour sur les factures payées et les jetons dépensés des mints. Cela augmente la réactivité du portefeuille mais rend également le fingerprinting plus facile.",
       },
       bitcoin_price: {
         toggle: "Obtenir le taux de change de Coinbase",
-        description: "Si activé, le taux de change actuel du Bitcoin sera récupéré de coinbase.com et votre solde converti sera affiché."
-      }
+        description:
+          "Si activé, le taux de change actuel du Bitcoin sera récupéré de coinbase.com et votre solde converti sera affiché.",
+      },
     },
     experimental: {
       title: "Expérimental",
@@ -303,26 +322,30 @@ export default {
       receive_swaps: {
         toggle: "Recevoir des échanges",
         badge: "Bêta",
-        description: "Option pour échanger l'Ecash reçu vers votre mint active dans la boîte de dialogue Recevoir Ecash."
+        description:
+          "Option pour échanger l'Ecash reçu vers votre mint active dans la boîte de dialogue Recevoir Ecash.",
       },
       auto_paste: {
         toggle: "Coller l'Ecash automatiquement",
-        description: "Coller automatiquement l'ecash dans votre presse-papiers lorsque vous appuyez sur Recevoir, puis Ecash, puis Coller. Le collage automatique peut causer des problèmes d'interface utilisateur dans iOS, désactivez-le si vous rencontrez des problèmes."
+        description:
+          "Coller automatiquement l'ecash dans votre presse-papiers lorsque vous appuyez sur Recevoir, puis Ecash, puis Coller. Le collage automatique peut causer des problèmes d'interface utilisateur dans iOS, désactivez-le si vous rencontrez des problèmes.",
       },
       auditor: {
         toggle: "Activer l'auditeur",
         badge: "Bêta",
-        description: "Si activé, le portefeuille affichera les informations de l'auditeur dans la boîte de dialogue des détails de la mint. L'auditeur est un service tiers qui surveille la fiabilité des mints.",
+        description:
+          "Si activé, le portefeuille affichera les informations de l'auditeur dans la boîte de dialogue des détails de la mint. L'auditeur est un service tiers qui surveille la fiabilité des mints.",
         url_label: "URL de l'auditeur",
-        api_url_label: "URL de l'API de l'auditeur"
-      }
+        api_url_label: "URL de l'API de l'auditeur",
+      },
     },
     appearance: {
       keyboard: {
         title: "Clavier à l'écran",
         description: "Utilisez le clavier numérique pour saisir les montants.",
         toggle: "Utiliser le clavier numérique",
-        toggle_description: "Si activé, le clavier numérique sera utilisé pour saisir les montants."
+        toggle_description:
+          "Si activé, le clavier numérique sera utilisé pour saisir les montants.",
       },
       theme: {
         title: "Apparence",
@@ -336,59 +359,70 @@ export default {
           mint: "mint",
           nut: "nut",
           blu: "blu",
-          flamingo: "flamingo"
-        }
-      }
+          flamingo: "flamingo",
+        },
+      },
     },
     advanced: {
       title: "Avancé",
       developer: {
         title: "Paramètres développeur",
-        description: "Les paramètres suivants sont pour le développement et le débogage.",
+        description:
+          "Les paramètres suivants sont pour le développement et le débogage.",
         new_seed: {
           button: "Générer une nouvelle phrase de départ",
-          description: "Cela générera une nouvelle phrase de départ. Vous devez vous envoyer votre solde entier pour pouvoir le restaurer avec une nouvelle phrase de départ.",
-          confirm_question: "Êtes-vous sûr de vouloir générer une nouvelle phrase de départ ?",
+          description:
+            "Cela générera une nouvelle phrase de départ. Vous devez vous envoyer votre solde entier pour pouvoir le restaurer avec une nouvelle phrase de départ.",
+          confirm_question:
+            "Êtes-vous sûr de vouloir générer une nouvelle phrase de départ ?",
           cancel: "Annuler",
-          confirm: "Confirmer"
+          confirm: "Confirmer",
         },
         remove_spent: {
           button: "Supprimer les preuves dépensées",
-          description: "Vérifiez si les jetons ecash de vos mints actives sont dépensés et supprimez les jetons dépensés de votre portefeuille. N'utilisez ceci que si votre portefeuille est bloqué."
+          description:
+            "Vérifiez si les jetons ecash de vos mints actives sont dépensés et supprimez les jetons dépensés de votre portefeuille. N'utilisez ceci que si votre portefeuille est bloqué.",
         },
         debug_console: {
           button: "Basculer la console de débogage",
-          description: "Ouvrez le terminal de débogage Javascript. Ne collez jamais rien dans ce terminal que vous ne comprenez pas. Un voleur pourrait essayer de vous piéger en y collant du code malveillant."
+          description:
+            "Ouvrez le terminal de débogage Javascript. Ne collez jamais rien dans ce terminal que vous ne comprenez pas. Un voleur pourrait essayer de vous piéger en y collant du code malveillant.",
         },
         export_proofs: {
           button: "Exporter les preuves actives",
-          description: "Copiez votre solde entier de la mint active en tant que jeton Cashu dans votre presse-papiers. Cela n'exportera que les jetons de la mint et de l'unité sélectionnées. Pour un export complet, sélectionnez une mint et une unité différentes et exportez à nouveau."
+          description:
+            "Copiez votre solde entier de la mint active en tant que jeton Cashu dans votre presse-papiers. Cela n'exportera que les jetons de la mint et de l'unité sélectionnées. Pour un export complet, sélectionnez une mint et une unité différentes et exportez à nouveau.",
         },
         keyset_counters: {
           title: "Incrémenter les compteurs de keyset",
-          description: "Cliquez sur l'ID du keyset pour incrémenter les compteurs du chemin de dérivation pour les keysets de votre portefeuille. Ceci est utile si vous voyez l'erreur \"les sorties ont déjà été signées\"."
+          description:
+            "Cliquez sur l'ID du keyset pour incrémenter les compteurs du chemin de dérivation pour les keysets de votre portefeuille. Ceci est utile si vous voyez l'erreur \"les sorties ont déjà été signées\".",
         },
         unset_reserved: {
           button: "Annuler la réservation de tous les jetons réservés",
-          description: "Ce portefeuille marque l'ecash sortant en attente comme réservé (et le soustrait de votre solde) pour éviter les tentatives de double dépense. Ce bouton annulera la réservation de tous les jetons réservés afin qu'ils puissent être utilisés à nouveau. Si vous faites cela, votre portefeuille pourrait inclure des preuves dépensées. Appuyez sur le bouton \"Supprimer les preuves dépensées\" pour vous en débarrasser."
+          description:
+            "Ce portefeuille marque l'ecash sortant en attente comme réservé (et le soustrait de votre solde) pour éviter les tentatives de double dépense. Ce bouton annulera la réservation de tous les jetons réservés afin qu'ils puissent être utilisés à nouveau. Si vous faites cela, votre portefeuille pourrait inclure des preuves dépensées. Appuyez sur le bouton \"Supprimer les preuves dépensées\" pour vous en débarrasser.",
         },
         show_onboarding: {
           button: "Afficher l'accueil",
-          description: "Afficher à nouveau l'écran d'accueil."
+          description: "Afficher à nouveau l'écran d'accueil.",
         },
         reset_wallet: {
           button: "Réinitialiser les données du portefeuille",
-          description: "Réinitialisez les données de votre portefeuille. Attention : Cela supprimera tout ! Assurez-vous de faire une sauvegarde d'abord.",
-          confirm_question: "Êtes-vous sûr de vouloir supprimer les données de votre portefeuille ?",
+          description:
+            "Réinitialisez les données de votre portefeuille. Attention : Cela supprimera tout ! Assurez-vous de faire une sauvegarde d'abord.",
+          confirm_question:
+            "Êtes-vous sûr de vouloir supprimer les données de votre portefeuille ?",
           cancel: "Annuler",
-          confirm: "Supprimer le portefeuille"
+          confirm: "Supprimer le portefeuille",
         },
         export_wallet: {
           button: "Exporter les données du portefeuille",
-          description: "Téléchargez un dump de votre portefeuille. Vous pouvez restaurer votre portefeuille à partir de ce fichier sur l'écran d'accueil d'un nouveau portefeuille. Ce fichier sera désynchronisé si vous continuez à utiliser votre portefeuille après l'exportation."
-        }
-      }
-    }
+          description:
+            "Téléchargez un dump de votre portefeuille. Vous pouvez restaurer votre portefeuille à partir de ce fichier sur l'écran d'accueil d'un nouveau portefeuille. Ce fichier sera désynchronisé si vous continuez à utiliser votre portefeuille après l'exportation.",
+        },
+      },
+    },
   },
   NoMintWarnBanner: {
     title: "Rejoindre une mint",
@@ -578,7 +612,8 @@ export default {
       inputs: {
         seed_phrase: {
           label: "Phrase de départ",
-          caption: "Vous pouvez voir votre phrase de départ dans les paramètres.",
+          caption:
+            "Vous pouvez voir votre phrase de départ dans les paramètres.",
         },
       },
     },
@@ -635,7 +670,8 @@ export default {
     discover: {
       title: "Découvrir les mints",
       overline: "Découvrir",
-      caption: "Découvrez les mints que d'autres utilisateurs ont recommandées sur nostr.",
+      caption:
+        "Découvrez les mints que d'autres utilisateurs ont recommandées sur nostr.",
       actions: {
         discover: {
           label: "Découvrir les mints",
@@ -1175,7 +1211,8 @@ export default {
   },
   restore: {
     mnemonic_error_text: "Veuillez entrer un mnémonique",
-    restore_mint_error_text: "Erreur lors de la restauration de la mint : { error }",
+    restore_mint_error_text:
+      "Erreur lors de la restauration de la mint : { error }",
     prepare_info_text: "Préparation du processus de restauration…",
     restored_proofs_for_keyset_info_text:
       "{ restoreCounter } preuves restaurées pour le keyset { keysetId }",

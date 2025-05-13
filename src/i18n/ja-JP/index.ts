@@ -55,7 +55,8 @@ export default {
       could_not_request_mint: "ミントをリクエストできませんでした",
       invoice_still_pending: "請求書はまだ処理中です",
       paid_lightning: "Lightningで{amount}を支払いました",
-      payment_pending_refresh: "支払いは保留中です。請求書を手動で更新してください。",
+      payment_pending_refresh:
+        "支払いは保留中です。請求書を手動で更新してください。",
       sent: "{amount}を送信しました",
       token_still_pending: "トークンはまだ処理中です",
       received_lightning: "Lightningで{amount}を受け取りました",
@@ -66,8 +67,8 @@ export default {
       no_amount: "金額がありません",
       no_lnurl_data: "LNURLデータがありません",
       no_price_data: "価格データがありません。",
-      please_try_again: "もう一度お試しください。"
-    }
+      please_try_again: "もう一度お試しください。",
+    },
   },
   MainHeader: {
     menu: {
@@ -147,34 +148,36 @@ export default {
       p2pk_features: "P2PK機能",
       privacy: "プライバシー",
       experimental: "実験的な機能",
-      appearance: "外観"
+      appearance: "外観",
     },
     backup_restore: {
       backup_seed: {
         title: "シードフレーズをバックアップ",
-        description: "シードフレーズでウォレットを復元できます。安全に保管してください。",
+        description:
+          "シードフレーズでウォレットを復元できます。安全に保管してください。",
         seed_phrase_label: "シードフレーズ",
       },
       restore_ecash: {
         title: "ecashを復元",
-        description: "復元ウィザードを使用すると、ニーモニックシードフレーズから失われたecashを回復できます。現在のウォレットのシードフレーズは影響を受けず、ウィザードでは別のシードフレーズからecashを復元することのみが可能です。",
-        button: "復元"
-      }
+        description:
+          "復元ウィザードを使用すると、ニーモニックシードフレーズから失われたecashを回復できます。現在のウォレットのシードフレーズは影響を受けず、ウィザードでは別のシードフレーズからecashを復元することのみが可能です。",
+        button: "復元",
+      },
     },
     lightning_address: {
       title: "ライトニングアドレス",
       description: "Lightningアドレスで支払いを受け取ります。",
       enable: {
         toggle: "有効にする",
-        description: "npub.cash付きLightningアドレス"
+        description: "npub.cash付きLightningアドレス",
       },
       address: {
-        copy_tooltip: "Lightningアドレスをコピー"
+        copy_tooltip: "Lightningアドレスをコピー",
       },
       automatic_claim: {
         toggle: "自動的に請求",
-        description: "着信支払いを自動的に受け取ります。"
-      }
+        description: "着信支払いを自動的に受け取ります。",
+      },
     },
     nostr_keys: {
       title: "あなたのnostrキー",
@@ -182,56 +185,60 @@ export default {
       wallet_seed: {
         title: "ウォレットシードフレーズ",
         description: "ウォレットシードからnostrキーペアを生成",
-        copy_nsec: "nsecをコピー"
+        copy_nsec: "nsecをコピー",
       },
       nsec_bunker: {
         title: "Nsec Bunker",
         description: "NIP-46バンカーを使用",
-        delete_tooltip: "接続を削除"
+        delete_tooltip: "接続を削除",
       },
       use_nsec: {
         title: "nsecを使用",
         description: "この方法は危険であり推奨されません",
-        delete_tooltip: "nsecを削除"
+        delete_tooltip: "nsecを削除",
       },
       signing_extension: {
         title: "署名拡張機能",
         description: "NIP-07署名拡張機能を使用",
-        not_found: "NIP-07署名拡張機能が見つかりません"
-      }
+        not_found: "NIP-07署名拡張機能が見つかりません",
+      },
     },
     payment_requests: {
       title: "支払いリクエスト",
-      description: "支払いリクエストを使用すると、nostr経由で支払いを受け取ることができます。これを有効にすると、ウォレットはあなたのnostrリレーに購読します。",
+      description:
+        "支払いリクエストを使用すると、nostr経由で支払いを受け取ることができます。これを有効にすると、ウォレットはあなたのnostrリレーに購読します。",
       enable_toggle: "支払いリクエストを有効にする",
       claim_automatically: {
         toggle: "自動的に請求",
-        description: "着信支払いを自動的に受け取ります。"
-      }
+        description: "着信支払いを自動的に受け取ります。",
+      },
     },
     nostr_wallet_connect: {
       title: "Nostrウォレットコネクト (NWC)",
-      description: "NWCを使用して、他のどのアプリケーションからでもウォレットを制御できます。",
+      description:
+        "NWCを使用して、他のどのアプリケーションからでもウォレットを制御できます。",
       enable_toggle: "NWCを有効にする",
-      payments_note: "NWCはBitcoin残高からの支払いにのみ使用できます。支払いはアクティブなミントから行われます。",
+      payments_note:
+        "NWCはBitcoin残高からの支払いにのみ使用できます。支払いはアクティブなミントから行われます。",
       connection: {
         copy_tooltip: "接続文字列をコピー",
         qr_tooltip: "QRコードを表示",
-        allowance_label: "残りアローワンス (sat)"
+        allowance_label: "残りアローワンス (sat)",
       },
       relays: {
         expand_label: "リレーを編集するにはクリック",
         add: {
           title: "リレーを追加",
-          description: "Nostrウォレットコネクトは、ウォレットを他のアプリケーションに接続するためにnostrリレーを使用します。"
+          description:
+            "Nostrウォレットコネクトは、ウォレットを他のアプリケーションに接続するためにnostrリレーを使用します。",
         },
         list: {
           title: "リレー",
           description: "ウォレットはこれらのリレーに接続します。",
           copy_tooltip: "リレーをコピー",
-          remove_tooltip: "リレーを削除"
-        }
-      }
+          remove_tooltip: "リレーを削除",
+        },
+      },
     },
     hardware_features: {
       webnfc: {
@@ -239,63 +246,73 @@ export default {
         description: "NFCカードへの書き込みエンコーディングを選択",
         text: {
           title: "テキスト",
-          description: "トークンをプレーンテキストで保存"
+          description: "トークンをプレーンテキストで保存",
         },
         weburl: {
           title: "URL",
-          description: "トークン付きでこのウォレットへのURLを保存"
+          description: "トークン付きでこのウォレットへのURLを保存",
         },
         binary: {
           title: "生のバイナリ",
-          description: "Base64の代わりに生のバイト。トークンが約33%短くなります。"
+          description:
+            "Base64の代わりに生のバイト。トークンが約33%短くなります。",
         },
         quick_access: {
           toggle: "NFCへのクイックアクセス",
-          description: "Ecash受信メニューでNFCカードをすばやくスキャンします。このオプションは、Ecash受信メニューにNFCボタンを追加します。"
-        }
-      }
+          description:
+            "Ecash受信メニューでNFCカードをすばやくスキャンします。このオプションは、Ecash受信メニューにNFCボタンを追加します。",
+        },
+      },
     },
     p2pk_features: {
       title: "P2PK",
-      description: "このキーにロックされたecashを受け取るためのキーペアを生成します。警告: この機能は実験的です。少額のみに使用してください。秘密鍵を紛失した場合、誰にもそれにロックされたecashのロックを解除できなくなります。",
+      description:
+        "このキーにロックされたecashを受け取るためのキーペアを生成します。警告: この機能は実験的です。少額のみに使用してください。秘密鍵を紛失した場合、誰にもそれにロックされたecashのロックを解除できなくなります。",
       generate_button: "キーを生成",
       import_button: "nsecをインポート",
       quick_access: {
         toggle: "ロックへのクイックアクセス",
-        description: "これを使用して、ecash受信メニューでP2PKロックキーをすばやく表示します。"
+        description:
+          "これを使用して、ecash受信メニューでP2PKロックキーをすばやく表示します。",
       },
       keys_expansion: {
         label: "{count}個のキーをブラウズするにはクリック",
-        used_badge: "使用済み"
-      }
+        used_badge: "使用済み",
+      },
     },
     privacy: {
       title: "プライバシー",
       description: "これらの設定はプライバシーに影響します。",
       check_incoming: {
         toggle: "着信請求書をチェック",
-        description: "有効にすると、ウォレットはバックグラウンドで最新の請求書をチェックします。これによりウォレットの応答性が向上し、フィンガープリンティングが容易になります。未払い請求書は請求書タブで手動で確認できます。"
+        description:
+          "有効にすると、ウォレットはバックグラウンドで最新の請求書をチェックします。これによりウォレットの応答性が向上し、フィンガープリンティングが容易になります。未払い請求書は請求書タブで手動で確認できます。",
       },
       check_startup: {
         toggle: "起動時に保留中の請求書をチェック",
-        description: "有効にすると、ウォレットは起動時に過去24時間の保留中の請求書をチェックします。"
+        description:
+          "有効にすると、ウォレットは起動時に過去24時間の保留中の請求書をチェックします。",
       },
       check_all: {
         toggle: "すべての請求書をチェック",
-        description: "有効にすると、ウォレットは最大2週間、未払い請求書をバックグラウンドで定期的にチェックします。これによりウォレットのオンラインアクティビティが増加し、フィンガープリンティングが容易になります。未払い請求書は請求書タブで手動で確認できます。"
+        description:
+          "有効にすると、ウォレットは最大2週間、未払い請求書をバックグラウンドで定期的にチェックします。これによりウォレットのオンラインアクティビティが増加し、フィンガープリンティングが容易になります。未払い請求書は請求書タブで手動で確認できます。",
       },
       check_sent: {
         toggle: "送信されたecashをチェック",
-        description: "有効にすると、ウォレットは定期的なバックグラウンドチェックを使用して、送信されたトークンが償還されたかどうかを判断します。これによりウォレットのオンラインアクティビティが増加し、フィンガープリンティングが容易になります。"
+        description:
+          "有効にすると、ウォレットは定期的なバックグラウンドチェックを使用して、送信されたトークンが償還されたかどうかを判断します。これによりウォレットのオンラインアクティビティが増加し、フィンガープリンティングが容易になります。",
       },
       websockets: {
         toggle: "WebSocketsを使用",
-        description: "有効にすると、ウォレットは長期間のWebSocket接続を使用して、ミントから支払われた請求書や使用済みトークンに関する更新を受け取ります。これによりウォレットの応答性は向上しますが、フィンガープリンティングも容易になります。"
+        description:
+          "有効にすると、ウォレットは長期間のWebSocket接続を使用して、ミントから支払われた請求書や使用済みトークンに関する更新を受け取ります。これによりウォレットの応答性は向上しますが、フィンガープリンティングも容易になります。",
       },
       bitcoin_price: {
         toggle: "Coinbaseから為替レートを取得",
-        description: "有効にすると、現在のBitcoin為替レートがcoinbase.comから取得され、換算された残高が表示されます。"
-      }
+        description:
+          "有効にすると、現在のBitcoin為替レートがcoinbase.comから取得され、換算された残高が表示されます。",
+      },
     },
     experimental: {
       title: "実験的な機能",
@@ -303,26 +320,30 @@ export default {
       receive_swaps: {
         toggle: "スワップを受け取る",
         badge: "ベータ",
-        description: "Ecash受信ダイアログで、受信したEcashをアクティブなミントにスワップするオプション。"
+        description:
+          "Ecash受信ダイアログで、受信したEcashをアクティブなミントにスワップするオプション。",
       },
       auto_paste: {
         toggle: "Ecashを自動的に貼り付け",
-        description: "受信、Ecash、貼り付けを押すと、クリップボードのecashを自動的に貼り付けます。自動貼り付けはiOSでUIグリッチを引き起こす可能性があります。問題が発生した場合はオフにしてください。"
+        description:
+          "受信、Ecash、貼り付けを押すと、クリップボードのecashを自動的に貼り付けます。自動貼り付けはiOSでUIグリッチを引き起こす可能性があります。問題が発生した場合はオフにしてください。",
       },
       auditor: {
         toggle: "監査人を有効にする",
         badge: "ベータ",
-        description: "有効にすると、ウォレットはミントの詳細ダイアログに監査人情報を表示します。監査人はミントの信頼性を監視するサードパーティサービスです。",
+        description:
+          "有効にすると、ウォレットはミントの詳細ダイアログに監査人情報を表示します。監査人はミントの信頼性を監視するサードパーティサービスです。",
         url_label: "監査人URL",
-        api_url_label: "監査人API URL"
-      }
+        api_url_label: "監査人API URL",
+      },
     },
     appearance: {
       keyboard: {
         title: "オンスクリーンキーボード",
         description: "金額入力に数字キーボードを使用します。",
         toggle: "数字キーボードを使用",
-        toggle_description: "有効にすると、金額入力に数字キーボードが使用されます。"
+        toggle_description:
+          "有効にすると、金額入力に数字キーボードが使用されます。",
       },
       theme: {
         title: "外観",
@@ -336,9 +357,9 @@ export default {
           mint: "ミント",
           nut: "ナッツ",
           blu: "ブルー",
-          flamingo: "フラミンゴ"
-        }
-      }
+          flamingo: "フラミンゴ",
+        },
+      },
     },
     advanced: {
       title: "高度な設定",
@@ -347,30 +368,36 @@ export default {
         description: "以下の設定は開発およびデバッグ用です。",
         new_seed: {
           button: "新しいシードフレーズを生成",
-          description: "これにより新しいシードフレーズが生成されます。新しいシードで復元できるように、すべての残高を自分自身に送金する必要があります。",
+          description:
+            "これにより新しいシードフレーズが生成されます。新しいシードで復元できるように、すべての残高を自分自身に送金する必要があります。",
           confirm_question: "新しいシードフレーズを生成してもよろしいですか？",
           cancel: "キャンセル",
-          confirm: "確認"
+          confirm: "確認",
         },
         remove_spent: {
           button: "使用済み証明書を削除",
-          description: "アクティブなミントからのecashトークンが使用されているかチェックし、使用済みのものをウォレットから削除します。ウォレットが詰まった場合にのみ使用してください。",
+          description:
+            "アクティブなミントからのecashトークンが使用されているかチェックし、使用済みのものをウォレットから削除します。ウォレットが詰まった場合にのみ使用してください。",
         },
         debug_console: {
           button: "デバッグコンソールを切り替え",
-          description: "Javascriptデバッグターミナルを開きます。理解できないものをこのターミナルに貼り付けないでください。泥棒が悪意のあるコードを貼り付けさせようとする可能性があります。",
+          description:
+            "Javascriptデバッグターミナルを開きます。理解できないものをこのターミナルに貼り付けないでください。泥棒が悪意のあるコードを貼り付けさせようとする可能性があります。",
         },
         export_proofs: {
           button: "アクティブな証明書をエクスポート",
-          description: "アクティブなミントからの全残高をCashuトークンとしてクリップボードにコピーします。これは選択したミントと単位のトークンのみをエクスポートします。完全なエクスポートを行うには、別のミントと単位を選択して再度エクスポートしてください。",
+          description:
+            "アクティブなミントからの全残高をCashuトークンとしてクリップボードにコピーします。これは選択したミントと単位のトークンのみをエクスポートします。完全なエクスポートを行うには、別のミントと単位を選択して再度エクスポートしてください。",
         },
         keyset_counters: {
           title: "キーセットカウンターをインクリメント",
-          description: "キーセットIDをクリックして、ウォレット内のキーセットの導出パスカウンターをインクリメントします。「出力はすでに署名されています」というエラーが表示される場合に便利です。",
+          description:
+            "キーセットIDをクリックして、ウォレット内のキーセットの導出パスカウンターをインクリメントします。「出力はすでに署名されています」というエラーが表示される場合に便利です。",
         },
         unset_reserved: {
           button: "すべての予約済みトークンを解除",
-          description: "このウォレットは、二重支払いを防ぐために、保留中の出金ecashを予約済みとしてマークします（そして残高から差し引きます）。このボタンはすべての予約済みトークンを解除し、再び使用できるようにします。これを行うと、ウォレットに消費済みの証明書が含まれる可能性があります。「消費済み証明書を削除」ボタンを押してそれらを取り除いてください。",
+          description:
+            "このウォレットは、二重支払いを防ぐために、保留中の出金ecashを予約済みとしてマークします（そして残高から差し引きます）。このボタンはすべての予約済みトークンを解除し、再び使用できるようにします。これを行うと、ウォレットに消費済みの証明書が含まれる可能性があります。「消費済み証明書を削除」ボタンを押してそれらを取り除いてください。",
         },
         show_onboarding: {
           button: "オンボーディングを表示",
@@ -378,14 +405,16 @@ export default {
         },
         reset_wallet: {
           button: "ウォレットデータをリセット",
-          description: "ウォレットデータをリセットします。警告: これによりすべてが削除されます！まずバックアップを作成してください。",
+          description:
+            "ウォレットデータをリセットします。警告: これによりすべてが削除されます！まずバックアップを作成してください。",
           confirm_question: "ウォレットデータを削除してもよろしいですか？",
           cancel: "キャンセル",
           confirm: "ウォレットを削除",
         },
         export_wallet: {
           button: "ウォレットデータをエクスポート",
-          description: "ウォレットのダンプをダウンロードします。新しいウォレットのウェルカム画面でこのファイルからウォレットを復元できます。このファイルは、エクスポート後にウォレットを使い続けると同期がずれます。",
+          description:
+            "ウォレットのダンプをダウンロードします。新しいウォレットのウェルカム画面でこのファイルからウォレットを復元できます。このファイルは、エクスポート後にウォレットを使い続けると同期がずれます。",
         },
       },
     },
@@ -590,7 +619,7 @@ export default {
     restore_mints: {
       label: "ミントを復元",
       caption:
-        '復元するミントを選択します。メイン画面の「ミント」でさらにミントを追加し、ここで復元できます。',
+        "復元するミントを選択します。メイン画面の「ミント」でさらにミントを追加し、ここで復元できます。",
     },
     actions: {
       paste: {
@@ -1096,7 +1125,8 @@ export default {
       },
     },
     lnurlpay: {
-      amount_exact_label: "{ payee }が{ value } { ticker }をリクエストしています",
+      amount_exact_label:
+        "{ payee }が{ value } { ticker }をリクエストしています",
       amount_range_label:
         "{ payee }が{ min }から{ max } { ticker }の間をリクエストしています",
       inputs: {

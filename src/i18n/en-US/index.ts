@@ -66,8 +66,8 @@ export default {
       no_amount: "No amount",
       no_lnurl_data: "No LNURL data",
       no_price_data: "No price data.",
-      please_try_again: "Please try again."
-    }
+      please_try_again: "Please try again.",
+    },
   },
   MainHeader: {
     menu: {
@@ -147,34 +147,36 @@ export default {
       p2pk_features: "P2PK FEATURES",
       privacy: "PRIVACY",
       experimental: "EXPERIMENTAL",
-      appearance: "APPEARANCE"
+      appearance: "APPEARANCE",
     },
     backup_restore: {
       backup_seed: {
         title: "Backup seed phrase",
-        description: "Your seed phrase can restore your wallet. Keep it safe and private.",
+        description:
+          "Your seed phrase can restore your wallet. Keep it safe and private.",
         seed_phrase_label: "Seed phrase",
       },
       restore_ecash: {
         title: "Restore ecash",
-        description: "The restore wizard lets you recover lost ecash from a mnemonic seed phrase. The seed phrase of your current wallet will remain unaffected, the wizard will only allow you to restore ecash from another seed phrase.",
-        button: "Restore"
-      }
+        description:
+          "The restore wizard lets you recover lost ecash from a mnemonic seed phrase. The seed phrase of your current wallet will remain unaffected, the wizard will only allow you to restore ecash from another seed phrase.",
+        button: "Restore",
+      },
     },
     lightning_address: {
       title: "Lightning address",
       description: "Receive payments to your Lightning address.",
       enable: {
         toggle: "Enable",
-        description: "Lightning address with npub.cash"
+        description: "Lightning address with npub.cash",
       },
       address: {
-        copy_tooltip: "Copy Lightning address"
+        copy_tooltip: "Copy Lightning address",
       },
       automatic_claim: {
         toggle: "Claim automatically",
-        description: "Receive incoming payments automatically."
-      }
+        description: "Receive incoming payments automatically.",
+      },
     },
     nostr_keys: {
       title: "Your nostr keys",
@@ -182,56 +184,59 @@ export default {
       wallet_seed: {
         title: "Wallet seed phrase",
         description: "Generate nostr key pair from wallet seed",
-        copy_nsec: "Copy nsec"
+        copy_nsec: "Copy nsec",
       },
       nsec_bunker: {
         title: "Nsec Bunker",
         description: "Use a NIP-46 bunker",
-        delete_tooltip: "Delete connection"
+        delete_tooltip: "Delete connection",
       },
       use_nsec: {
         title: "Use your nsec",
         description: "This method is dangerous and not recommended",
-        delete_tooltip: "Delete nsec"
+        delete_tooltip: "Delete nsec",
       },
       signing_extension: {
         title: "Signing extension",
         description: "Use a NIP-07 signing extension",
-        not_found: "No NIP-07 signing extension found"
-      }
+        not_found: "No NIP-07 signing extension found",
+      },
     },
     payment_requests: {
       title: "Payment requests",
-      description: "Payment requests allow you to receive payments via nostr. If you enable this, your wallet will subscribe to your nostr relays.",
+      description:
+        "Payment requests allow you to receive payments via nostr. If you enable this, your wallet will subscribe to your nostr relays.",
       enable_toggle: "Enable Payment Requests",
       claim_automatically: {
         toggle: "Claim automatically",
-        description: "Receive incoming payments automatically."
-      }
+        description: "Receive incoming payments automatically.",
+      },
     },
     nostr_wallet_connect: {
       title: "Nostr Wallet Connect (NWC)",
       description: "Use NWC to control your wallet from any other application.",
       enable_toggle: "Enable NWC",
-      payments_note: "You can only use NWC for payments from your Bitcoin balance. Payments will be made from your active mint.",
+      payments_note:
+        "You can only use NWC for payments from your Bitcoin balance. Payments will be made from your active mint.",
       connection: {
         copy_tooltip: "Copy connection string",
         qr_tooltip: "Show QR code",
-        allowance_label: "Allowance left (sat)"
+        allowance_label: "Allowance left (sat)",
       },
       relays: {
         expand_label: "Click to edit relays",
         add: {
           title: "Add relay",
-          description: "Nostr Wallet Connect uses nostr relays to connect your wallet to other applications."
+          description:
+            "Nostr Wallet Connect uses nostr relays to connect your wallet to other applications.",
         },
         list: {
           title: "Relays",
           description: "Your wallet will connect to these relays.",
           copy_tooltip: "Copy relay",
-          remove_tooltip: "Remove relay"
-        }
-      }
+          remove_tooltip: "Remove relay",
+        },
+      },
     },
     hardware_features: {
       webnfc: {
@@ -239,63 +244,73 @@ export default {
         description: "Choose the encoding for writing to NFC cards",
         text: {
           title: "Text",
-          description: "Store token in plain text"
+          description: "Store token in plain text",
         },
         weburl: {
           title: "URL",
-          description: "Store URL to this wallet with token"
+          description: "Store URL to this wallet with token",
         },
         binary: {
           title: "Raw Binary",
-          description: "Raw bytes instead of Base64. Makes ~33% shorter tokens."
+          description:
+            "Raw bytes instead of Base64. Makes ~33% shorter tokens.",
         },
         quick_access: {
           toggle: "Quick access to NFC",
-          description: "Quickly scan NFC cards in the Receive Ecash menu. This option adds an NFC button the Receive Ecash menu."
-        }
-      }
+          description:
+            "Quickly scan NFC cards in the Receive Ecash menu. This option adds an NFC button the Receive Ecash menu.",
+        },
+      },
     },
     p2pk_features: {
       title: "P2PK",
-      description: "Generate a key pair to receive P2PK-locked ecash. Warning: This feature is experimental. Only use with small amounts. If you lose your private keys, nobody will be able to unlock the ecash locked to it anymore.",
+      description:
+        "Generate a key pair to receive P2PK-locked ecash. Warning: This feature is experimental. Only use with small amounts. If you lose your private keys, nobody will be able to unlock the ecash locked to it anymore.",
       generate_button: "Generate key",
       import_button: "Import nsec",
       quick_access: {
         toggle: "Quick access to lock",
-        description: "Use this to quickly show your P2PK locking key in the receive ecash menu."
+        description:
+          "Use this to quickly show your P2PK locking key in the receive ecash menu.",
       },
       keys_expansion: {
         label: "Click to browse {count} keys",
-        used_badge: "used"
-      }
+        used_badge: "used",
+      },
     },
     privacy: {
       title: "Privacy",
       description: "These settings affect your privacy.",
       check_incoming: {
         toggle: "Check incoming invoice",
-        description: "If enabled, the wallet will check the latest invoice in the background. This increases the wallet's responsiveness which makes fingerprinting easier. You can manually check unpaid invoices in the Invoices tab."
+        description:
+          "If enabled, the wallet will check the latest invoice in the background. This increases the wallet's responsiveness which makes fingerprinting easier. You can manually check unpaid invoices in the Invoices tab.",
       },
       check_startup: {
         toggle: "Check pending invoices on startup",
-        description: "If enabled, the wallet will check pending invoices from the last 24 hours on startup."
+        description:
+          "If enabled, the wallet will check pending invoices from the last 24 hours on startup.",
       },
       check_all: {
         toggle: "Check all invoices",
-        description: "If enabled, the wallet will periodically check unpaid invoices in the background for up to two weeks. This increases the wallet's online activity which makes fingerprinting easier. You can manually check unpaid invoices in the Invoices tab."
+        description:
+          "If enabled, the wallet will periodically check unpaid invoices in the background for up to two weeks. This increases the wallet's online activity which makes fingerprinting easier. You can manually check unpaid invoices in the Invoices tab.",
       },
       check_sent: {
         toggle: "Check sent ecash",
-        description: "If enabled, the wallet will use periodic background checks to determine if sent tokens have been redeemed. This increases the wallet's online activity which makes fingerprinting easier."
+        description:
+          "If enabled, the wallet will use periodic background checks to determine if sent tokens have been redeemed. This increases the wallet's online activity which makes fingerprinting easier.",
       },
       websockets: {
         toggle: "Use WebSockets",
-        description: "If enabled, the wallet will use long-lived WebSocket connections to receive updates on paid invoices and spent tokens from mints. This increases the wallet's responsiveness but also makes fingerprinting easier."
+        description:
+          "If enabled, the wallet will use long-lived WebSocket connections to receive updates on paid invoices and spent tokens from mints. This increases the wallet's responsiveness but also makes fingerprinting easier.",
       },
       bitcoin_price: {
         toggle: "Get exchange rate from Coinbase",
-        description: "If enabled, the current Bitcoin exchange rate will be fetched from coinbase.com and your converted balance will be displayed."
-      }
+        description:
+          "If enabled, the current Bitcoin exchange rate will be fetched from coinbase.com and your converted balance will be displayed.",
+      },
     },
     experimental: {
       title: "Experimental",
@@ -303,26 +318,30 @@ export default {
       receive_swaps: {
         toggle: "Receive swaps",
         badge: "Beta",
-        description: "Option to swap received Ecash to your active mint in the Receive Ecash dialog."
+        description:
+          "Option to swap received Ecash to your active mint in the Receive Ecash dialog.",
       },
       auto_paste: {
         toggle: "Paste Ecash automatically",
-        description: "Automatically paste ecash in your clipboard when you press Receive, then Ecash, then Paste. Automatic pasting can cause UI glitches in iOS, turn it off if you experience issues."
+        description:
+          "Automatically paste ecash in your clipboard when you press Receive, then Ecash, then Paste. Automatic pasting can cause UI glitches in iOS, turn it off if you experience issues.",
       },
       auditor: {
         toggle: "Enable auditor",
         badge: "Beta",
-        description: "If enabled, the wallet will display auditor information in the mint details dialog. The auditor is a third party service that monitors the reliability of mints.",
+        description:
+          "If enabled, the wallet will display auditor information in the mint details dialog. The auditor is a third party service that monitors the reliability of mints.",
         url_label: "Auditor URL",
-        api_url_label: "Auditor API URL"
-      }
+        api_url_label: "Auditor API URL",
+      },
     },
     appearance: {
       keyboard: {
         title: "On-screen keyboard",
         description: "Use the numeric keyboard for entering amounts.",
         toggle: "Use numeric keyboard",
-        toggle_description: "If enabled, the numeric keyboard will be used for entering amounts."
+        toggle_description:
+          "If enabled, the numeric keyboard will be used for entering amounts.",
       },
       theme: {
         title: "Appearance",
@@ -336,59 +355,69 @@ export default {
           mint: "mint",
           nut: "nut",
           blu: "blu",
-          flamingo: "flamingo"
-        }
-      }
+          flamingo: "flamingo",
+        },
+      },
     },
     advanced: {
       title: "Advanced",
       developer: {
         title: "Developer settings",
-        description: "The following settings are for development and debugging.",
+        description:
+          "The following settings are for development and debugging.",
         new_seed: {
           button: "Generate new seed phrase",
-          description: "This will generate a new seed phrase. You must send your entire balance to yourself in order to be able to restore it with a new seed.",
-          confirm_question: "Are you sure you want to generate a new seed phrase?",
+          description:
+            "This will generate a new seed phrase. You must send your entire balance to yourself in order to be able to restore it with a new seed.",
+          confirm_question:
+            "Are you sure you want to generate a new seed phrase?",
           cancel: "Cancel",
-          confirm: "Confirm"
+          confirm: "Confirm",
         },
         remove_spent: {
           button: "Remove spent proofs",
-          description: "Check if the ecash tokens from your active mints are spent and remove the spent ones from your wallet. Only use this if your wallet is stuck."
+          description:
+            "Check if the ecash tokens from your active mints are spent and remove the spent ones from your wallet. Only use this if your wallet is stuck.",
         },
         debug_console: {
           button: "Toggle Debug Console",
-          description: "Open the Javascript debug terminal. Never paste anything into this terminal that you don't understand. A thief might try to trick you into pasting malicious code here."
+          description:
+            "Open the Javascript debug terminal. Never paste anything into this terminal that you don't understand. A thief might try to trick you into pasting malicious code here.",
         },
         export_proofs: {
           button: "Export active proofs",
-          description: "Copy your entire balance from the active mint as a Cashu token into your clipboard. This will only export the tokens from the selected mint and unit. For a full export, select a different mint and unit and export again."
+          description:
+            "Copy your entire balance from the active mint as a Cashu token into your clipboard. This will only export the tokens from the selected mint and unit. For a full export, select a different mint and unit and export again.",
         },
         keyset_counters: {
           title: "Increment keyset counters",
-          description: "Click the keyset ID to increment the derivation path counters for the keysets in your wallet. This is useful if you see the \"outputs have already been signed\" error."
+          description:
+            'Click the keyset ID to increment the derivation path counters for the keysets in your wallet. This is useful if you see the "outputs have already been signed" error.',
         },
         unset_reserved: {
           button: "Unset all reserved tokens",
-          description: "This wallet marks pending outgoing ecash as reserved (and subtracts it from your balance) to prevent double-spend attempts. This button will unset all reserved tokens so they can be used again. If you do this, your wallet might include spent proofs. Press the \"Remove spent proofs\" button to get rid of them."
+          description:
+            'This wallet marks pending outgoing ecash as reserved (and subtracts it from your balance) to prevent double-spend attempts. This button will unset all reserved tokens so they can be used again. If you do this, your wallet might include spent proofs. Press the "Remove spent proofs" button to get rid of them.',
         },
         show_onboarding: {
           button: "Show onboarding",
-          description: "Show the onboarding screen again."
+          description: "Show the onboarding screen again.",
         },
         reset_wallet: {
           button: "Reset wallet data",
-          description: "Reset your wallet data. Warning: This will delete everything! Make sure you create a backup first.",
+          description:
+            "Reset your wallet data. Warning: This will delete everything! Make sure you create a backup first.",
           confirm_question: "Are you sure you want to delete your wallet data?",
           cancel: "Cancel",
-          confirm: "Delete wallet"
+          confirm: "Delete wallet",
         },
         export_wallet: {
           button: "Export wallet data",
-          description: "Download a dump of your wallet. You can restore your wallet from this file in the welcome screen of a new wallet. This file will be out of sync if you keep using your wallet after exporting it."
-        }
-      }
-    }
+          description:
+            "Download a dump of your wallet. You can restore your wallet from this file in the welcome screen of a new wallet. This file will be out of sync if you keep using your wallet after exporting it.",
+        },
+      },
+    },
   },
   NoMintWarnBanner: {
     title: "Join a mint",

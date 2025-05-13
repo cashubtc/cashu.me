@@ -55,7 +55,8 @@ export default {
       could_not_request_mint: "Mint konnte nicht angefordert werden",
       invoice_still_pending: "Rechnung noch ausstehend",
       paid_lightning: "{amount} über Lightning bezahlt",
-      payment_pending_refresh: "Zahlung ausstehend. Rechnung manuell aktualisieren.",
+      payment_pending_refresh:
+        "Zahlung ausstehend. Rechnung manuell aktualisieren.",
       sent: "{amount} gesendet",
       token_still_pending: "Token noch ausstehend",
       received_lightning: "{amount} über Lightning empfangen",
@@ -66,8 +67,8 @@ export default {
       no_amount: "Kein Betrag",
       no_lnurl_data: "Keine LNURL-Daten",
       no_price_data: "Keine Preisdaten.",
-      please_try_again: "Bitte versuchen Sie es erneut."
-    }
+      please_try_again: "Bitte versuchen Sie es erneut.",
+    },
   },
   MainHeader: {
     menu: {
@@ -135,7 +136,8 @@ export default {
   Settings: {
     language: {
       title: "Sprache",
-      description: "Bitte wählen Sie Ihre bevorzugte Sprache aus der Liste unten.",
+      description:
+        "Bitte wählen Sie Ihre bevorzugte Sprache aus der Liste unten.",
     },
     sections: {
       backup_restore: "SICHERUNG & WIEDERHERSTELLUNG",
@@ -147,155 +149,173 @@ export default {
       p2pk_features: "P2PK FUNKTIONEN",
       privacy: "DATENSCHUTZ",
       experimental: "EXPERIMENTELL",
-      appearance: "AUSSEHEN"
+      appearance: "AUSSEHEN",
     },
     backup_restore: {
       backup_seed: {
         title: "Seed-Phrase sichern",
-        description: "Ihre Seed-Phrase kann Ihre Wallet wiederherstellen. Bewahren Sie sie sicher und privat auf.",
+        description:
+          "Ihre Seed-Phrase kann Ihre Wallet wiederherstellen. Bewahren Sie sie sicher und privat auf.",
         seed_phrase_label: "Seed-Phrase",
       },
       restore_ecash: {
         title: "Ecash wiederherstellen",
-        description: "Der Wiederherstellungs-Assistent ermöglicht es Ihnen, verlorenes Ecash von einer mnemonischen Seed-Phrase wiederherzustellen. Die Seed-Phrase Ihrer aktuellen Wallet bleibt unverändert, der Assistent erlaubt es Ihnen lediglich, Ecash von einer anderen Seed-Phrase zu restaurieren.",
-        button: "Wiederherstellen"
-      }
+        description:
+          "Der Wiederherstellungs-Assistent ermöglicht es Ihnen, verlorenes Ecash von einer mnemonischen Seed-Phrase wiederherzustellen. Die Seed-Phrase Ihrer aktuellen Wallet bleibt unverändert, der Assistent erlaubt es Ihnen lediglich, Ecash von einer anderen Seed-Phrase zu restaurieren.",
+        button: "Wiederherstellen",
+      },
     },
     lightning_address: {
       title: "Lightning Adresse",
       description: "Zahlungen an Ihre Lightning Adresse empfangen.",
       enable: {
         toggle: "Aktivieren",
-        description: "Lightning Adresse mit npub.cash"
+        description: "Lightning Adresse mit npub.cash",
       },
       address: {
-        copy_tooltip: "Lightning Adresse kopieren"
+        copy_tooltip: "Lightning Adresse kopieren",
       },
       automatic_claim: {
         toggle: "Automatisch beanspruchen",
-        description: "Eingehende Zahlungen automatisch empfangen."
-      }
+        description: "Eingehende Zahlungen automatisch empfangen.",
+      },
     },
     nostr_keys: {
       title: "Ihre Nostr-Schlüssel",
-      description: "Legen Sie die Nostr-Schlüssel für Ihre Lightning-Adresse fest.",
+      description:
+        "Legen Sie die Nostr-Schlüssel für Ihre Lightning-Adresse fest.",
       wallet_seed: {
         title: "Wallet Seed-Phrase",
         description: "Nostr-Schlüsselpaar aus Wallet-Seed generieren",
-        copy_nsec: "Nsec kopieren"
+        copy_nsec: "Nsec kopieren",
       },
       nsec_bunker: {
         title: "Nsec Bunker",
         description: "Einen NIP-46 Bunker verwenden",
-        delete_tooltip: "Verbindung löschen"
+        delete_tooltip: "Verbindung löschen",
       },
       use_nsec: {
         title: "Ihren Nsec verwenden",
         description: "Diese Methode ist gefährlich und wird nicht empfohlen",
-        delete_tooltip: "Nsec löschen"
+        delete_tooltip: "Nsec löschen",
       },
       signing_extension: {
         title: "Signaturerweiterung",
         description: "Eine NIP-07 Signaturerweiterung verwenden",
-        not_found: "Keine NIP-07 Signaturerweiterung gefunden"
-      }
+        not_found: "Keine NIP-07 Signaturerweiterung gefunden",
+      },
     },
     payment_requests: {
       title: "Zahlungsanforderungen",
-      description: "Zahlungsanforderungen ermöglichen es Ihnen, Zahlungen über Nostr zu empfangen. Wenn Sie dies aktivieren, abonniert Ihre Wallet Ihre Nostr-Relays.",
+      description:
+        "Zahlungsanforderungen ermöglichen es Ihnen, Zahlungen über Nostr zu empfangen. Wenn Sie dies aktivieren, abonniert Ihre Wallet Ihre Nostr-Relays.",
       enable_toggle: "Zahlungsanforderungen aktivieren",
       claim_automatically: {
         toggle: "Automatisch beanspruchen",
-        description: "Eingehende Zahlungen automatisch empfangen."
-      }
+        description: "Eingehende Zahlungen automatisch empfangen.",
+      },
     },
     nostr_wallet_connect: {
       title: "Nostr Wallet Connect (NWC)",
-      description: "Verwenden Sie NWC, um Ihre Wallet von jeder anderen Anwendung aus zu steuern.",
+      description:
+        "Verwenden Sie NWC, um Ihre Wallet von jeder anderen Anwendung aus zu steuern.",
       enable_toggle: "NWC aktivieren",
-      payments_note: "Sie können NWC nur für Zahlungen von Ihrem Bitcoin-Guthaben verwenden. Zahlungen werden von Ihrer aktiven Mint vorgenommen.",
+      payments_note:
+        "Sie können NWC nur für Zahlungen von Ihrem Bitcoin-Guthaben verwenden. Zahlungen werden von Ihrer aktiven Mint vorgenommen.",
       connection: {
         copy_tooltip: "Verbindungsstring kopieren",
         qr_tooltip: "QR-Code anzeigen",
-        allowance_label: "Restliches Guthaben (sat)"
+        allowance_label: "Restliches Guthaben (sat)",
       },
       relays: {
         expand_label: "Klicken, um Relays zu bearbeiten",
         add: {
           title: "Relay hinzufügen",
-          description: "Nostr Wallet Connect verwendet Nostr-Relays, um Ihre Wallet mit anderen Anwendungen zu verbinden."
+          description:
+            "Nostr Wallet Connect verwendet Nostr-Relays, um Ihre Wallet mit anderen Anwendungen zu verbinden.",
         },
         list: {
           title: "Relays",
           description: "Ihre Wallet wird sich mit diesen Relays verbinden.",
           copy_tooltip: "Relay kopieren",
-          remove_tooltip: "Relay entfernen"
-        }
-      }
+          remove_tooltip: "Relay entfernen",
+        },
+      },
     },
     hardware_features: {
       webnfc: {
         title: "WebNFC",
-        description: "Wählen Sie die Kodierung für das Schreiben auf NFC-Karten",
+        description:
+          "Wählen Sie die Kodierung für das Schreiben auf NFC-Karten",
         text: {
           title: "Text",
-          description: "Token als Klartext speichern"
+          description: "Token als Klartext speichern",
         },
         weburl: {
           title: "URL",
-          description: "URL zu dieser Wallet mit Token speichern"
+          description: "URL zu dieser Wallet mit Token speichern",
         },
         binary: {
           title: "Rohdaten (Binary)",
-          description: "Rohe Bytes anstelle von Base64. Macht Token ~33% kürzer."
+          description:
+            "Rohe Bytes anstelle von Base64. Macht Token ~33% kürzer.",
         },
         quick_access: {
           toggle: "Schnellzugriff auf NFC",
-          description: "Schnelles Scannen von NFC-Karten im Ecash empfangen-Menü. Diese Option fügt einen NFC-Button zum Ecash empfangen-Menü hinzu."
-        }
-      }
+          description:
+            "Schnelles Scannen von NFC-Karten im Ecash empfangen-Menü. Diese Option fügt einen NFC-Button zum Ecash empfangen-Menü hinzu.",
+        },
+      },
     },
     p2pk_features: {
       title: "P2PK",
-      description: "Generieren Sie ein Schlüsselpaar, um P2PK-gesperrten Ecash zu erhalten. Warnung: Diese Funktion ist experimentell. Nur mit kleinen Beträgen verwenden. Wenn Sie Ihre privaten Schlüssel verlieren, kann niemand mehr den darauf gesperrten Ecash freischalten.",
+      description:
+        "Generieren Sie ein Schlüsselpaar, um P2PK-gesperrten Ecash zu erhalten. Warnung: Diese Funktion ist experimentell. Nur mit kleinen Beträgen verwenden. Wenn Sie Ihre privaten Schlüssel verlieren, kann niemand mehr den darauf gesperrten Ecash freischalten.",
       generate_button: "Schlüssel generieren",
       import_button: "Nsec importieren",
       quick_access: {
         toggle: "Schnellzugriff auf Sperre",
-        description: "Verwenden Sie dies, um Ihren P2PK-Sperrschlüssel schnell im Ecash empfangen-Menü anzuzeigen."
+        description:
+          "Verwenden Sie dies, um Ihren P2PK-Sperrschlüssel schnell im Ecash empfangen-Menü anzuzeigen.",
       },
       keys_expansion: {
         label: "Klicken, um {count} Schlüssel zu durchsuchen",
-        used_badge: "verwendet"
-      }
+        used_badge: "verwendet",
+      },
     },
     privacy: {
       title: "Datenschutz",
       description: "Diese Einstellungen beeinflussen Ihren Datenschutz.",
       check_incoming: {
         toggle: "Eingehende Rechnung prüfen",
-        description: "Wenn aktiviert, prüft die Wallet die neueste Rechnung im Hintergrund. Dies erhöht die Reaktionsfähigkeit der Wallet, was das Fingerprinting erleichtert. Sie können unbezahlte Rechnungen manuell im Reiter 'Rechnungen' prüfen."
+        description:
+          "Wenn aktiviert, prüft die Wallet die neueste Rechnung im Hintergrund. Dies erhöht die Reaktionsfähigkeit der Wallet, was das Fingerprinting erleichtert. Sie können unbezahlte Rechnungen manuell im Reiter 'Rechnungen' prüfen.",
       },
       check_startup: {
         toggle: "Ausstehende Rechnungen beim Start prüfen",
-        description: "Wenn aktiviert, prüft die Wallet beim Start ausstehende Rechnungen der letzten 24 Stunden."
+        description:
+          "Wenn aktiviert, prüft die Wallet beim Start ausstehende Rechnungen der letzten 24 Stunden.",
       },
       check_all: {
         toggle: "Alle Rechnungen prüfen",
-        description: "Wenn aktiviert, prüft die Wallet unbezahlte Rechnungen im Hintergrund für bis zu zwei Wochen. Dies erhöht die Online-Aktivität der Wallet, was das Fingerprinting erleichtert. Sie können unbezahlte Rechnungen manuell im Reiter 'Rechnungen' prüfen."
+        description:
+          "Wenn aktiviert, prüft die Wallet unbezahlte Rechnungen im Hintergrund für bis zu zwei Wochen. Dies erhöht die Online-Aktivität der Wallet, was das Fingerprinting erleichtert. Sie können unbezahlte Rechnungen manuell im Reiter 'Rechnungen' prüfen.",
       },
       check_sent: {
         toggle: "Gesendeten Ecash prüfen",
-        description: "Wenn aktiviert, verwendet die Wallet periodische Hintergrundprüfungen, um festzustellen, ob gesendete Token eingelöst wurden. Dies erhöht die Online-Aktivität der Wallet, was das Fingerprinting erleichtert."
+        description:
+          "Wenn aktiviert, verwendet die Wallet periodische Hintergrundprüfungen, um festzustellen, ob gesendete Token eingelöst wurden. Dies erhöht die Online-Aktivität der Wallet, was das Fingerprinting erleichtert.",
       },
       websockets: {
         toggle: "WebSockets verwenden",
-        description: "Wenn aktiviert, verwendet die Wallet langlebige WebSocket-Verbindungen, um Updates zu bezahlten Rechnungen und ausgegebenen Token von Mints zu erhalten. Dies erhöht die Reaktionsfähigkeit der Wallet, macht aber auch das Fingerprinting einfacher."
+        description:
+          "Wenn aktiviert, verwendet die Wallet langlebige WebSocket-Verbindungen, um Updates zu bezahlten Rechnungen und ausgegebenen Token von Mints zu erhalten. Dies erhöht die Reaktionsfähigkeit der Wallet, macht aber auch das Fingerprinting einfacher.",
       },
       bitcoin_price: {
         toggle: "Wechselkurs von Coinbase abrufen",
-        description: "Wenn aktiviert, wird der aktuelle Bitcoin-Wechselkurs von coinbase.com abgerufen und Ihr umgerechnetes Guthaben angezeigt."
-      }
+        description:
+          "Wenn aktiviert, wird der aktuelle Bitcoin-Wechselkurs von coinbase.com abgerufen und Ihr umgerechnetes Guthaben angezeigt.",
+      },
     },
     experimental: {
       title: "Experimentell",
@@ -303,26 +323,31 @@ export default {
       receive_swaps: {
         toggle: "Swaps empfangen",
         badge: "Beta",
-        description: "Option, empfangenen Ecash in Ihrer aktiven Mint im Dialog 'Ecash empfangen' zu tauschen."
+        description:
+          "Option, empfangenen Ecash in Ihrer aktiven Mint im Dialog 'Ecash empfangen' zu tauschen.",
       },
       auto_paste: {
         toggle: "Ecash automatisch einfügen",
-        description: "Fügt Ecash automatisch aus Ihrer Zwischenablage ein, wenn Sie auf 'Empfangen', dann 'Ecash', dann 'Einfügen' drücken. Automatisches Einfügen kann auf iOS zu UI-Fehlern führen. Deaktivieren Sie dies, wenn Sie Probleme haben."
+        description:
+          "Fügt Ecash automatisch aus Ihrer Zwischenablage ein, wenn Sie auf 'Empfangen', dann 'Ecash', dann 'Einfügen' drücken. Automatisches Einfügen kann auf iOS zu UI-Fehlern führen. Deaktivieren Sie dies, wenn Sie Probleme haben.",
       },
       auditor: {
         toggle: "Auditor aktivieren",
         badge: "Beta",
-        description: "Wenn aktiviert, zeigt die Wallet Auditor-Informationen im Dialog 'Mint-Details' an. Der Auditor ist ein Drittanbieter-Service, der die Zuverlässigkeit von Mints überwacht.",
+        description:
+          "Wenn aktiviert, zeigt die Wallet Auditor-Informationen im Dialog 'Mint-Details' an. Der Auditor ist ein Drittanbieter-Service, der die Zuverlässigkeit von Mints überwacht.",
         url_label: "Auditor URL",
-        api_url_label: "Auditor API URL"
-      }
+        api_url_label: "Auditor API URL",
+      },
     },
     appearance: {
       keyboard: {
         title: "Bildschirmtastatur",
-        description: "Verwenden Sie die Zifferntastatur zur Eingabe von Beträgen.",
+        description:
+          "Verwenden Sie die Zifferntastatur zur Eingabe von Beträgen.",
         toggle: "Numerische Tastatur verwenden",
-        toggle_description: "Wenn aktiviert, wird die numerische Tastatur zur Eingabe von Beträgen verwendet."
+        toggle_description:
+          "Wenn aktiviert, wird die numerische Tastatur zur Eingabe von Beträgen verwendet.",
       },
       theme: {
         title: "Aussehen",
@@ -336,59 +361,70 @@ export default {
           mint: "mint",
           nut: "nut",
           blu: "blu",
-          flamingo: "flamingo"
-        }
-      }
+          flamingo: "flamingo",
+        },
+      },
     },
     advanced: {
       title: "Erweitert",
       developer: {
         title: "Entwickler-Einstellungen",
-        description: "Die folgenden Einstellungen sind für Entwicklung und Debugging.",
+        description:
+          "Die folgenden Einstellungen sind für Entwicklung und Debugging.",
         new_seed: {
           button: "Neue Seed-Phrase generieren",
-          description: "Dies generiert eine neue Seed-Phrase. Sie müssen Ihr gesamtes Guthaben an sich selbst senden, um es mit einer neuen Seed wiederherstellen zu können.",
-          confirm_question: "Sind Sie sicher, dass Sie eine neue Seed-Phrase generieren möchten?",
+          description:
+            "Dies generiert eine neue Seed-Phrase. Sie müssen Ihr gesamtes Guthaben an sich selbst senden, um es mit einer neuen Seed wiederherstellen zu können.",
+          confirm_question:
+            "Sind Sie sicher, dass Sie eine neue Seed-Phrase generieren möchten?",
           cancel: "Abbrechen",
-          confirm: "Bestätigen"
+          confirm: "Bestätigen",
         },
         remove_spent: {
           button: "Ausgegebene Nachweise entfernen",
-          description: "Überprüfen Sie, ob die Ecash-Token von Ihren aktiven Mints ausgegeben wurden und entfernen Sie die ausgegebenen aus Ihrer Wallet. Verwenden Sie dies nur, wenn Ihre Wallet festhängt."
+          description:
+            "Überprüfen Sie, ob die Ecash-Token von Ihren aktiven Mints ausgegeben wurden und entfernen Sie die ausgegebenen aus Ihrer Wallet. Verwenden Sie dies nur, wenn Ihre Wallet festhängt.",
         },
         debug_console: {
           button: "Debug-Konsole umschalten",
-          description: "Öffnen Sie das Javascript-Debug-Terminal. Fügen Sie niemals etwas in dieses Terminal ein, das Sie nicht verstehen. Ein Dieb könnte versuchen, Sie dazu zu bringen, bösartigen Code hier einzufügen."
+          description:
+            "Öffnen Sie das Javascript-Debug-Terminal. Fügen Sie niemals etwas in dieses Terminal ein, das Sie nicht verstehen. Ein Dieb könnte versuchen, Sie dazu zu bringen, bösartigen Code hier einzufügen.",
         },
         export_proofs: {
           button: "Aktive Nachweise exportieren",
-          description: "Kopieren Sie Ihr gesamtes Guthaben von der aktiven Mint als Cashu-Token in Ihre Zwischenablage. Dies exportiert nur die Token der ausgewählten Mint und Einheit. Für einen vollständigen Export wählen Sie eine andere Mint und Einheit und exportieren Sie erneut."
+          description:
+            "Kopieren Sie Ihr gesamtes Guthaben von der aktiven Mint als Cashu-Token in Ihre Zwischenablage. Dies exportiert nur die Token der ausgewählten Mint und Einheit. Für einen vollständigen Export wählen Sie eine andere Mint und Einheit und exportieren Sie erneut.",
         },
         keyset_counters: {
           title: "Keyset-Zähler erhöhen",
-          description: "Klicken Sie auf die Keyset-ID, um die Ableitungspfad-Zähler für die Keysets in Ihrer Wallet zu erhöhen. Dies ist nützlich, wenn Sie die Fehlermeldung \"outputs have already been signed\" sehen."
+          description:
+            'Klicken Sie auf die Keyset-ID, um die Ableitungspfad-Zähler für die Keysets in Ihrer Wallet zu erhöhen. Dies ist nützlich, wenn Sie die Fehlermeldung "outputs have already been signed" sehen.',
         },
         unset_reserved: {
           button: "Alle reservierten Token freigeben",
-          description: "Diese Wallet markiert ausstehenden ausgehenden Ecash als reserviert (und zieht es von Ihrem Guthaben ab), um Double-Spend-Versuche zu verhindern. Dieser Button gibt alle reservierten Token frei, damit sie wieder verwendet werden können. Wenn Sie dies tun, könnte Ihre Wallet ausgegebene Nachweise enthalten. Drücken Sie auf den Button \"Ausgegebene Nachweise entfernen\", um sie loszuwerden."
+          description:
+            'Diese Wallet markiert ausstehenden ausgehenden Ecash als reserviert (und zieht es von Ihrem Guthaben ab), um Double-Spend-Versuche zu verhindern. Dieser Button gibt alle reservierten Token frei, damit sie wieder verwendet werden können. Wenn Sie dies tun, könnte Ihre Wallet ausgegebene Nachweise enthalten. Drücken Sie auf den Button "Ausgegebene Nachweise entfernen", um sie loszuwerden.',
         },
         show_onboarding: {
           button: "Onboarding anzeigen",
-          description: "Zeigen Sie den Onboarding-Bildschirm erneut an."
+          description: "Zeigen Sie den Onboarding-Bildschirm erneut an.",
         },
         reset_wallet: {
           button: "Wallet-Daten zurücksetzen",
-          description: "Setzen Sie Ihre Wallet-Daten zurück. Warnung: Dies löscht alles! Stellen Sie sicher, dass Sie vorher eine Sicherung erstellen.",
-          confirm_question: "Sind Sie sicher, dass Sie Ihre Wallet-Daten löschen möchten?",
+          description:
+            "Setzen Sie Ihre Wallet-Daten zurück. Warnung: Dies löscht alles! Stellen Sie sicher, dass Sie vorher eine Sicherung erstellen.",
+          confirm_question:
+            "Sind Sie sicher, dass Sie Ihre Wallet-Daten löschen möchten?",
           cancel: "Abbrechen",
-          confirm: "Wallet löschen"
+          confirm: "Wallet löschen",
         },
         export_wallet: {
           button: "Wallet-Daten exportieren",
-          description: "Laden Sie einen Dump Ihrer Wallet herunter. Sie können Ihre Wallet aus dieser Datei auf dem Willkommensbildschirm einer neuen Wallet wiederherstellen. Diese Datei ist nicht synchron, wenn Sie Ihre Wallet nach dem Export weiter verwenden."
-        }
-      }
-    }
+          description:
+            "Laden Sie einen Dump Ihrer Wallet herunter. Sie können Ihre Wallet aus dieser Datei auf dem Willkommensbildschirm einer neuen Wallet wiederherstellen. Diese Datei ist nicht synchron, wenn Sie Ihre Wallet nach dem Export weiter verwenden.",
+        },
+      },
+    },
   },
   NoMintWarnBanner: {
     title: "Einer Mint beitreten",
@@ -635,7 +671,8 @@ export default {
     discover: {
       title: "Mints entdecken",
       overline: "Entdecken",
-      caption: "Entdecken Sie Mints, die andere Benutzer auf Nostr empfohlen haben.",
+      caption:
+        "Entdecken Sie Mints, die andere Benutzer auf Nostr empfohlen haben.",
       actions: {
         discover: {
           label: "Mints entdecken",

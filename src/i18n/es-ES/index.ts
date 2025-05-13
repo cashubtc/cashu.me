@@ -55,7 +55,8 @@ export default {
       could_not_request_mint: "No se pudo solicitar acuñación",
       invoice_still_pending: "Factura aún pendiente",
       paid_lightning: "Pagado {amount} a través de Lightning",
-      payment_pending_refresh: "Pago pendiente. Actualice la factura manualmente.",
+      payment_pending_refresh:
+        "Pago pendiente. Actualice la factura manualmente.",
       sent: "Enviado {amount}",
       token_still_pending: "Token aún pendiente",
       received_lightning: "Recibido {amount} a través de Lightning",
@@ -66,8 +67,8 @@ export default {
       no_amount: "Sin cantidad",
       no_lnurl_data: "Sin datos LNURL",
       no_price_data: "Sin datos de precio.",
-      please_try_again: "Por favor, inténtelo de nuevo."
-    }
+      please_try_again: "Por favor, inténtelo de nuevo.",
+    },
   },
   MainHeader: {
     menu: {
@@ -147,91 +148,98 @@ export default {
       p2pk_features: "CARACTERÍSTICAS P2PK",
       privacy: "PRIVACIDAD",
       experimental: "EXPERIMENTAL",
-      appearance: "APARIENCIA"
+      appearance: "APARIENCIA",
     },
     backup_restore: {
       backup_seed: {
         title: "Frase semilla de respaldo",
-        description: "Tu frase semilla puede restaurar tu billetera. Mantenla segura y privada.",
+        description:
+          "Tu frase semilla puede restaurar tu billetera. Mantenla segura y privada.",
         seed_phrase_label: "Frase semilla",
       },
       restore_ecash: {
         title: "Restaurar ecash",
-        description: "El asistente de restauración te permite recuperar ecash perdido desde una frase semilla mnemónica. La frase semilla de tu billetera actual no se verá afectada, el asistente solo te permitirá restaurar ecash desde otra frase semilla.",
-        button: "Restaurar"
-      }
+        description:
+          "El asistente de restauración te permite recuperar ecash perdido desde una frase semilla mnemónica. La frase semilla de tu billetera actual no se verá afectada, el asistente solo te permitirá restaurar ecash desde otra frase semilla.",
+        button: "Restaurar",
+      },
     },
     lightning_address: {
       title: "Dirección Lightning",
       description: "Recibe pagos a tu dirección Lightning.",
       enable: {
         toggle: "Habilitar",
-        description: "Dirección Lightning con npub.cash"
+        description: "Dirección Lightning con npub.cash",
       },
       address: {
-        copy_tooltip: "Copiar dirección Lightning"
+        copy_tooltip: "Copiar dirección Lightning",
       },
       automatic_claim: {
         toggle: "Reclamar automáticamente",
-        description: "Recibir pagos entrantes automáticamente."
-      }
+        description: "Recibir pagos entrantes automáticamente.",
+      },
     },
     nostr_keys: {
       title: "Tus claves nostr",
       description: "Establece las claves nostr para tu dirección Lightning.",
       wallet_seed: {
         title: "Frase semilla de la billetera",
-        description: "Generar par de claves nostr desde la semilla de la billetera",
-        copy_nsec: "Copiar nsec"
+        description:
+          "Generar par de claves nostr desde la semilla de la billetera",
+        copy_nsec: "Copiar nsec",
       },
       nsec_bunker: {
         title: "Nsec Bunker",
         description: "Usar un bunker NIP-46",
-        delete_tooltip: "Eliminar conexión"
+        delete_tooltip: "Eliminar conexión",
       },
       use_nsec: {
         title: "Usa tu nsec",
         description: "Este método es peligroso y no se recomienda",
-        delete_tooltip: "Eliminar nsec"
+        delete_tooltip: "Eliminar nsec",
       },
       signing_extension: {
         title: "Extensión de firma",
         description: "Usar una extensión de firma NIP-07",
-        not_found: "No se encontró ninguna extensión de firma NIP-07"
-      }
+        not_found: "No se encontró ninguna extensión de firma NIP-07",
+      },
     },
     payment_requests: {
       title: "Solicitudes de pago",
-      description: "Las solicitudes de pago te permiten recibir pagos vía nostr. Si habilitas esto, tu billetera se suscribirá a tus relays nostr.",
+      description:
+        "Las solicitudes de pago te permiten recibir pagos vía nostr. Si habilitas esto, tu billetera se suscribirá a tus relays nostr.",
       enable_toggle: "Habilitar Solicitudes de Pago",
       claim_automatically: {
         toggle: "Reclamar automáticamente",
-        description: "Recibir pagos entrantes automáticamente."
-      }
+        description: "Recibir pagos entrantes automáticamente.",
+      },
     },
     nostr_wallet_connect: {
       title: "Nostr Wallet Connect (NWC)",
-      description: "Usa NWC para controlar tu billetera desde cualquier otra aplicación.",
+      description:
+        "Usa NWC para controlar tu billetera desde cualquier otra aplicación.",
       enable_toggle: "Habilitar NWC",
-      payments_note: "Solo puedes usar NWC para pagos desde tu saldo de Bitcoin. Los pagos se realizarán desde tu mint activo.",
+      payments_note:
+        "Solo puedes usar NWC para pagos desde tu saldo de Bitcoin. Los pagos se realizarán desde tu mint activo.",
       connection: {
         copy_tooltip: "Copiar cadena de conexión",
         qr_tooltip: "Mostrar código QR",
-        allowance_label: "Límite restante (sat)"
+        allowance_label: "Límite restante (sat)",
       },
       relays: {
         expand_label: "Haz clic para editar relays",
         add: {
           title: "Añadir relay",
-          description: "Nostr Wallet Connect usa relays nostr para conectar tu billetera a otras aplicaciones."
+          description:
+            "Nostr Wallet Connect usa relays nostr para conectar tu billetera a otras aplicaciones.",
         },
         list: {
           title: "Relays",
           description: "Tu billetera se conectará a estos relays.",
           copy_tooltip: "Copiar relay",
-          remove_tooltip: "Eliminar relay"
-        }
-      }
+          remove_tooltip: "Eliminar relay",
+        },
+      },
     },
     hardware_features: {
       webnfc: {
@@ -239,63 +247,73 @@ export default {
         description: "Elige la codificación para escribir en tarjetas NFC",
         text: {
           title: "Texto",
-          description: "Almacenar token en texto plano"
+          description: "Almacenar token en texto plano",
         },
         weburl: {
           title: "URL",
-          description: "Almacenar URL a esta billetera con el token"
+          description: "Almacenar URL a esta billetera con el token",
         },
         binary: {
           title: "Binario crudo",
-          description: "Bytes crudos en lugar de Base64. Hace los tokens ~33% más cortos."
+          description:
+            "Bytes crudos en lugar de Base64. Hace los tokens ~33% más cortos.",
         },
         quick_access: {
           toggle: "Acceso rápido a NFC",
-          description: "Escanea rápidamente tarjetas NFC en el menú Recibir Ecash. Esta opción añade un botón NFC al menú Recibir Ecash."
-        }
-      }
+          description:
+            "Escanea rápidamente tarjetas NFC en el menú Recibir Ecash. Esta opción añade un botón NFC al menú Recibir Ecash.",
+        },
+      },
     },
     p2pk_features: {
       title: "P2PK",
-      description: "Genera un par de claves para recibir ecash bloqueado con P2PK. Advertencia: Esta característica es experimental. Úsala solo con cantidades pequeñas. Si pierdes tus claves privadas, nadie podrá desbloquear el ecash bloqueado con ellas.",
+      description:
+        "Genera un par de claves para recibir ecash bloqueado con P2PK. Advertencia: Esta característica es experimental. Úsala solo con cantidades pequeñas. Si pierdes tus claves privadas, nadie podrá desbloquear el ecash bloqueado con ellas.",
       generate_button: "Generar clave",
       import_button: "Importar nsec",
       quick_access: {
         toggle: "Acceso rápido para bloquear",
-        description: "Usa esto para mostrar rápidamente tu clave de bloqueo P2PK en el menú recibir ecash."
+        description:
+          "Usa esto para mostrar rápidamente tu clave de bloqueo P2PK en el menú recibir ecash.",
       },
       keys_expansion: {
         label: "Haz clic para ver {count} claves",
-        used_badge: "usada"
-      }
+        used_badge: "usada",
+      },
     },
     privacy: {
       title: "Privacidad",
       description: "Estas configuraciones afectan tu privacidad.",
       check_incoming: {
         toggle: "Verificar factura entrante",
-        description: "Si está habilitado, la billetera verificará la última factura en segundo plano. Esto aumenta la capacidad de respuesta de la billetera, lo que facilita la toma de huellas digitales. Puedes verificar manualmente las facturas no pagadas en la pestaña Facturas."
+        description:
+          "Si está habilitado, la billetera verificará la última factura en segundo plano. Esto aumenta la capacidad de respuesta de la billetera, lo que facilita la toma de huellas digitales. Puedes verificar manualmente las facturas no pagadas en la pestaña Facturas.",
       },
       check_startup: {
         toggle: "Verificar facturas pendientes al inicio",
-        description: "Si está habilitado, la billetera verificará las facturas pendientes de las últimas 24 horas al inicio."
+        description:
+          "Si está habilitado, la billetera verificará las facturas pendientes de las últimas 24 horas al inicio.",
       },
       check_all: {
         toggle: "Verificar todas las facturas",
-        description: "Si está habilitado, la billetera verificará periódicamente las facturas no pagadas en segundo plano durante hasta dos semanas. Esto aumenta la actividad en línea de la billetera, lo que facilita la toma de huellas digitales. Puedes verificar manualmente las facturas no pagadas en la pestaña Facturas."
+        description:
+          "Si está habilitado, la billetera verificará periódicamente las facturas no pagadas en segundo plano durante hasta dos semanas. Esto aumenta la actividad en línea de la billetera, lo que facilita la toma de huellas digitales. Puedes verificar manualmente las facturas no pagadas en la pestaña Facturas.",
       },
       check_sent: {
         toggle: "Verificar ecash enviado",
-        description: "Si está habilitado, la billetera usará verificaciones periódicas en segundo plano para determinar si los tokens enviados han sido canjeados. Esto aumenta la actividad en línea de la billetera, lo que facilita la toma de huellas digitales."
+        description:
+          "Si está habilitado, la billetera usará verificaciones periódicas en segundo plano para determinar si los tokens enviados han sido canjeados. Esto aumenta la actividad en línea de la billetera, lo que facilita la toma de huellas digitales.",
       },
       websockets: {
         toggle: "Usar WebSockets",
-        description: "Si está habilitado, la billetera usará conexiones WebSocket de larga duración para recibir actualizaciones sobre facturas pagadas y tokens gastados de los mints. Esto aumenta la capacidad de respuesta de la billetera pero también facilita la toma de huellas digitales."
+        description:
+          "Si está habilitado, la billetera usará conexiones WebSocket de larga duración para recibir actualizaciones sobre facturas pagadas y tokens gastados de los mints. Esto aumenta la capacidad de respuesta de la billetera pero también facilita la toma de huellas digitales.",
       },
       bitcoin_price: {
         toggle: "Obtener tasa de cambio de Coinbase",
-        description: "Si está habilitado, se obtendrá la tasa de cambio actual de Bitcoin de coinbase.com y se mostrará tu saldo convertido."
-      }
+        description:
+          "Si está habilitado, se obtendrá la tasa de cambio actual de Bitcoin de coinbase.com y se mostrará tu saldo convertido.",
+      },
     },
     experimental: {
       title: "Experimental",
@@ -303,26 +321,30 @@ export default {
       receive_swaps: {
         toggle: "Recibir intercambios",
         badge: "Beta",
-        description: "Opción para intercambiar Ecash recibido a tu mint activo en el diálogo Recibir Ecash."
+        description:
+          "Opción para intercambiar Ecash recibido a tu mint activo en el diálogo Recibir Ecash.",
       },
       auto_paste: {
         toggle: "Pegar Ecash automáticamente",
-        description: "Pega automáticamente ecash de tu portapapeles cuando presionas Recibir, luego Ecash, luego Pegar. El pegado automático puede causar fallos en la interfaz de usuario en iOS, desactívalo si experimentas problemas."
+        description:
+          "Pega automáticamente ecash de tu portapapeles cuando presionas Recibir, luego Ecash, luego Pegar. El pegado automático puede causar fallos en la interfaz de usuario en iOS, desactívalo si experimentas problemas.",
       },
       auditor: {
         toggle: "Habilitar auditor",
         badge: "Beta",
-        description: "Si está habilitado, la billetera mostrará información del auditor en el diálogo de detalles del mint. El auditor es un servicio de terceros que monitorea la fiabilidad de los mints.",
+        description:
+          "Si está habilitado, la billetera mostrará información del auditor en el diálogo de detalles del mint. El auditor es un servicio de terceros que monitorea la fiabilidad de los mints.",
         url_label: "URL del Auditor",
-        api_url_label: "URL API del Auditor"
-      }
+        api_url_label: "URL API del Auditor",
+      },
     },
     appearance: {
       keyboard: {
         title: "Teclado en pantalla",
         description: "Usa el teclado numérico para ingresar cantidades.",
         toggle: "Usar teclado numérico",
-        toggle_description: "Si está habilitado, se usará el teclado numérico para ingresar cantidades."
+        toggle_description:
+          "Si está habilitado, se usará el teclado numérico para ingresar cantidades.",
       },
       theme: {
         title: "Apariencia",
@@ -336,59 +358,70 @@ export default {
           mint: "mint",
           nut: "nuez",
           blu: "azul",
-          flamingo: "flamenco"
-        }
-      }
+          flamingo: "flamenco",
+        },
+      },
     },
     advanced: {
       title: "Avanzado",
       developer: {
         title: "Configuración de desarrollador",
-        description: "Las siguientes configuraciones son para desarrollo y depuración.",
+        description:
+          "Las siguientes configuraciones son para desarrollo y depuración.",
         new_seed: {
           button: "Generar nueva frase semilla",
-          description: "Esto generará una nueva frase semilla. Debes enviar tu saldo completo a ti mismo para poder restaurarlo con una nueva semilla.",
-          confirm_question: "¿Estás seguro de que quieres generar una nueva frase semilla?",
+          description:
+            "Esto generará una nueva frase semilla. Debes enviar tu saldo completo a ti mismo para poder restaurarlo con una nueva semilla.",
+          confirm_question:
+            "¿Estás seguro de que quieres generar una nueva frase semilla?",
           cancel: "Cancelar",
-          confirm: "Confirmar"
+          confirm: "Confirmar",
         },
         remove_spent: {
           button: "Eliminar pruebas gastadas",
-          description: "Verifica si los tokens ecash de tus mints activos están gastados y elimina los gastados de tu billetera. Solo usa esto si tu billetera está bloqueada."
+          description:
+            "Verifica si los tokens ecash de tus mints activos están gastados y elimina los gastados de tu billetera. Solo usa esto si tu billetera está bloqueada.",
         },
         debug_console: {
           button: "Alternar Consola de Depuración",
-          description: "Abre la terminal de depuración de Javascript. Nunca pegues nada en esta terminal que no entiendas. Un ladrón podría intentar engañarte para que pegues código malicioso aquí."
+          description:
+            "Abre la terminal de depuración de Javascript. Nunca pegues nada en esta terminal que no entiendas. Un ladrón podría intentar engañarte para que pegues código malicioso aquí.",
         },
         export_proofs: {
           button: "Exportar pruebas activas",
-          description: "Copia tu saldo completo del mint activo como un token Cashu en tu portapapeles. Esto solo exportará los tokens del mint y unidad seleccionados. Para una exportación completa, selecciona un mint y unidad diferente y exporta de nuevo."
+          description:
+            "Copia tu saldo completo del mint activo como un token Cashu en tu portapapeles. Esto solo exportará los tokens del mint y unidad seleccionados. Para una exportación completa, selecciona un mint y unidad diferente y exporta de nuevo.",
         },
         keyset_counters: {
           title: "Incrementar contadores de keyset",
-          description: "Haz clic en el ID del keyset para incrementar los contadores de la ruta de derivación para los keysets en tu billetera. Esto es útil si ves el error \"las salidas ya han sido firmadas\"."
+          description:
+            'Haz clic en el ID del keyset para incrementar los contadores de la ruta de derivación para los keysets en tu billetera. Esto es útil si ves el error "las salidas ya han sido firmadas".',
         },
         unset_reserved: {
           button: "Desmarcar todos los tokens reservados",
-          description: "Esta billetera marca el ecash saliente pendiente como reservado (y lo resta de tu saldo) para prevenir intentos de doble gasto. Este botón desmarcará todos los tokens reservados para que puedan usarse de nuevo. Si haces esto, tu billetera podría incluir pruebas gastadas. Presiona el botón \"Eliminar pruebas gastadas\" para deshacerte de ellas."
+          description:
+            'Esta billetera marca el ecash saliente pendiente como reservado (y lo resta de tu saldo) para prevenir intentos de doble gasto. Este botón desmarcará todos los tokens reservados para que puedan usarse de nuevo. Si haces esto, tu billetera podría incluir pruebas gastadas. Presiona el botón "Eliminar pruebas gastadas" para deshacerte de ellas.',
         },
         show_onboarding: {
           button: "Mostrar bienvenida",
-          description: "Mostrar la pantalla de bienvenida de nuevo."
+          description: "Mostrar la pantalla de bienvenida de nuevo.",
         },
         reset_wallet: {
           button: "Restablecer datos de la billetera",
-          description: "Restablece los datos de tu billetera. Advertencia: ¡Esto borrará todo! Asegúrate de crear una copia de seguridad primero.",
-          confirm_question: "¿Estás seguro de que quieres eliminar los datos de tu billetera?",
+          description:
+            "Restablece los datos de tu billetera. Advertencia: ¡Esto borrará todo! Asegúrate de crear una copia de seguridad primero.",
+          confirm_question:
+            "¿Estás seguro de que quieres eliminar los datos de tu billetera?",
           cancel: "Cancelar",
-          confirm: "Eliminar billetera"
+          confirm: "Eliminar billetera",
         },
         export_wallet: {
           button: "Exportar datos de la billetera",
-          description: "Descarga un volcado de tu billetera. Puedes restaurar tu billetera desde este archivo en la pantalla de bienvenida de una nueva billetera. Este archivo estará desactualizado si sigues usando tu billetera después de exportarlo."
-        }
-      }
-    }
+          description:
+            "Descarga un volcado de tu billetera. Puedes restaurar tu billetera desde este archivo en la pantalla de bienvenida de una nueva billetera. Este archivo estará desactualizado si sigues usando tu billetera después de exportarlo.",
+        },
+      },
+    },
   },
   NoMintWarnBanner: {
     title: "Únete a un mint",
