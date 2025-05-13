@@ -7,7 +7,10 @@
       <div
         class="row items-center justify-center no-wrap q-mb-none q-mx-none q-px-none q-pt-lg q-pb-md position-relative"
       >
-        <div class="col-6 q-mb-md q-pr-lg">
+        <div
+          class="col-6 q-mb-md flex justify-center items-center"
+          style="margin-right: 10%"
+        >
           <q-btn
             rounded
             dense
@@ -31,7 +34,7 @@
         </transition>
 
         <!-- button to showSendDialog -->
-        <div class="col-6 q-mb-md q-pl-lg">
+        <div class="col-6 q-mb-md flex justify-center items-center">
           <q-btn
             rounded
             dense
