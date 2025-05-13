@@ -17,8 +17,8 @@
             size="1.2rem"
           >
             <q-icon name="south_west" size="1.2rem" class="q-mr-xs" />
-            {{ $t("WalletPage.actions.receive.label") }}</q-btn
-          >
+            {{ $t("WalletPage.actions.receive.label") }}
+          </q-btn>
         </div>
         <transition appear enter-active-class="animated pulse">
           <div class="col-2 q-mb-md q-mx-none">

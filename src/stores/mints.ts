@@ -18,6 +18,7 @@ import { liveQuery } from "dexie";
 import { ref, computed, watch } from "vue";
 import { useProofsStore } from "./proofs";
 import { useI18n } from "vue-i18n";
+import { i18n } from "src/boot/i18n";
 
 export type Mint = {
   url: string;
@@ -98,8 +99,7 @@ type BlindSignatureAudit = {
 
 export const useMintsStore = defineStore("mints", {
   state: () => {
-    // State variables
-    // const proofs = ref<WalletProof[]>([]);
+    const t = i18n.global.t;
     const activeProofs = ref<WalletProof[]>([]);
     const activeUnit = useLocalStorage<string>("cashu.activeUnit", "sat");
     const activeMintUrl = useLocalStorage<string>("cashu.activeMintUrl", "");
@@ -116,7 +116,6 @@ export const useMintsStore = defineStore("mints", {
     const showEditMintDialog = ref(false);
 
     const uiStoreGlobal: any = useUiStore();
-    const { t } = useI18n();
 
     // Watch for changes in activeMintUrl and activeUnit
     watch([activeMintUrl, activeUnit], async () => {
@@ -128,6 +127,7 @@ export const useMintsStore = defineStore("mints", {
     });
 
     return {
+      t,
       activeProofs,
       activeUnit,
       activeMintUrl,
@@ -140,7 +140,6 @@ export const useMintsStore = defineStore("mints", {
       showMintInfoData,
       showEditMintDialog,
       uiStoreGlobal,
-      t,
     };
   },
   getters: {

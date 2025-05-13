@@ -1373,8 +1373,8 @@ export const useWalletStore = defineStore("wallet", {
       _.each(invoice.sections, (tag) => {
         if (_.isObject(tag) && _.has(tag, "name")) {
           if (tag.name === "amount") {
-            cleanInvoice.msat = tag.value;
-            cleanInvoice.sat = tag.value / 1000;
+            cleanInvoice.msat = parseInt(tag.value, 10);
+            cleanInvoice.sat = parseInt(tag.value, 10) / 1000;
             cleanInvoice.fsat = cleanInvoice.sat;
           } else if (tag.name === "payment_hash") {
             cleanInvoice.hash = tag.value;

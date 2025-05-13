@@ -29,6 +29,7 @@
             icon="check"
             :loading="addMintBlocking"
             @click="addMintLocal"
+            style="width: calc(75%)"
             >{{ $t("AddMintDialog.actions.add_mint.label") }}
             <template v-slot:loading>
               <q-spinner-hourglass />
