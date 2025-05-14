@@ -88,12 +88,19 @@ const NIP98Kind = 27235;
 export const useNPCStore = defineStore("npc", {
   state: () => ({
     npcEnabled: useLocalStorage<boolean>("cashu.npc.enabled", false),
+    npcV2Enabled: useLocalStorage<boolean>("cashu.npc.v2Enabled", false),
     npcLastCheck: useLocalStorage<number>("cashu.npc.lastCheck", null),
     automaticClaim: useLocalStorage<boolean>("cashu.npc.automaticClaim", true),
     // npcConnections: useLocalStorage<NPCConnection[]>("cashu.npc.connections", []),
     npcAddress: useLocalStorage<string>("cashu.npc.address", ""),
-    npcDomain: useLocalStorage<string>("cashu.npc.domain", "npubx.cash"),
-    baseURL: useLocalStorage<string>("cashu.npc.baseURL", "https://npubx.cash"),
+    npcV2Address: useLocalStorage<string>("cashu.npc.v2Address", ""),
+    npcDomain: useLocalStorage<string>("cashu.npc.domain", "npub.cash"),
+    npcV2Domain: useLocalStorage<string>("cashu.npc.v2Domain", "npubx.cash"),
+    baseURL: useLocalStorage<string>("cashu.npc.baseURL", "https://npub.cash"),
+    v2BaseURL: useLocalStorage<string>(
+      "cashu.npc.v2BaseURL",
+      "https://npubx.cash"
+    ),
     npcLoading: false,
     // ndk: new NDK(),
     // signer: {} as NDKPrivateKeySigner,
@@ -141,6 +148,16 @@ export const useNPCStore = defineStore("npc", {
         this.npcLoading = false;
       }
     },
+    generateNPCV2Connection: async function () {
+      const nostrStore = useNostrStore();
+      if (!nostrStore.pubkey) {
+        return;
+      }
+      const walletPublicKeyHex = nostrStore.pubkey;
+      this.v2BaseURL = `https://${this.npcV2Domain}`;
+      this.npcV2Address =
+        nip19.npubEncode(walletPublicKeyHex) + "@" + this.npcV2Domain;
+    },
     generateNip98Event: async function (
       url: string,
       method: string,
@@ -185,14 +202,13 @@ export const useNPCStore = defineStore("npc", {
       }
     },
     getLatestQuotes: async function () {
-      if (!this.npcEnabled) {
+      if (!this.npcV2Enabled) {
         return;
       }
-      const invoiceStore = useInvoicesWorkerStore();
       const walletStore = useWalletStore();
       const since = this.npcLastCheck ? `?since=${this.npcLastCheck}` : "";
 
-      const quoteUrl = `${this.baseURL}/api/v2/wallet/quotes`;
+      const quoteUrl = `${this.v2BaseURL}/api/v2/wallet/quotes`;
       const authHeader = await this.generateNip98Event(quoteUrl, "GET");
       try {
         const response = await fetch(quoteUrl + since, {
