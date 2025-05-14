@@ -49,8 +49,7 @@
                     <q-badge
                       color="red"
                       class="q-mr-xs q-mt-sm text-weight-bold"
-                    >
-                      Error
+                      >{{ $t("ChooseMint.badge_option_mint_error_text") }}
                       <q-icon name="error" class="q-ml-xs" />
                     </q-badge>
                   </div>
@@ -74,7 +73,7 @@
                 color="red"
                 class="q-mr-xs text-weight-bold"
               >
-                Error
+                {{ $t("ChooseMint.badge_mint_error_text") }}
                 <q-icon name="error" class="q-ml-xs" />
               </q-badge>
               <q-badge
@@ -96,6 +95,7 @@ import { getShortUrl } from "src/js/wallet-helpers";
 import { mapActions, mapState, mapWritableState } from "pinia";
 import { useMintsStore } from "stores/mints";
 import { MintClass } from "stores/mints";
+import { i18n } from "../boot/i18n";
 import { title } from "process";
 
 export default defineComponent({
@@ -108,7 +108,7 @@ export default defineComponent({
     },
     title: {
       type: String,
-      default: "Select a mint",
+      default: i18n.global.t("ChooseMint.title"),
     },
     style: {
       type: String,

@@ -4,11 +4,11 @@
     backdrop-filter="blur(2px) brightness(60%)"
   >
     <q-card class="q-pa-lg" style="max-width: 500px; width: 100%">
-      <h6 class="q-mt-none q-mb-md">Edit mint</h6>
+      <h6 class="q-mt-none q-mb-md">{{ $t("EditMintDialog.title") }}</h6>
       <q-input
         outlined
         v-model="editMintData.url"
-        label="Mint URL"
+        :label="$t('EditMintDialog.inputs.mint_url.label')"
         type="textarea"
         autogrow
         class="q-mb-xs"
@@ -17,7 +17,7 @@
       <q-input
         outlined
         v-model="editMintData.nickname"
-        label="Nickname"
+        :label="$t('EditMintDialog.inputs.nickname.label')"
         type="textarea"
         autogrow
         class="q-mb-xs"
@@ -29,9 +29,11 @@
           rounded
           color="primary"
           @click="updateMintLocal"
-          >Update</q-btn
+          >{{ $t("EditMintDialog.actions.update.label") }}</q-btn
         >
-        <q-btn v-close-popup flat class="q-ml-auto" color="grey">Cancel</q-btn>
+        <q-btn v-close-popup flat class="q-ml-auto" color="grey">{{
+          $t("EditMintDialog.actions.cancel.label")
+        }}</q-btn>
       </div>
     </q-card>
   </q-dialog>

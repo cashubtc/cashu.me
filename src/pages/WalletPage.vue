@@ -5,50 +5,48 @@
       <NoMintWarnBanner v-if="mints.length == 0" />
       <BalanceView v-else :set-tab="setTab" />
       <div
-        class="row items-center justify-center no-wrap q-mb-none q-mx-none q-px-none q-pt-lg q-pb-md"
+        class="row items-center justify-center no-wrap q-mb-none q-mx-none q-px-none q-pt-lg q-pb-md position-relative"
       >
-        <div class="col-5 q-mb-md">
+        <div
+          class="col-6 q-mb-md flex justify-center items-center"
+          style="margin-right: 10%"
+        >
           <q-btn
             rounded
             dense
-            class="q-px-md"
+            class="q-px-md wallet-action-btn"
             color="primary"
-            style="width: 140px"
             @click="showReceiveDialog = true"
-            size="1.2rem"
           >
-            <q-icon name="south_west" size="1.2rem" class="q-mr-xs" />
-            Receive</q-btn
-          >
+            <div class="button-content">
+              <q-icon name="south_west" size="1.2rem" class="q-mr-xs" />
+              <span>{{ $t("WalletPage.actions.receive.label") }}</span>
+            </div>
+          </q-btn>
         </div>
+
         <transition appear enter-active-class="animated pulse">
-          <div class="col-2 q-mb-md q-mx-none">
-            <q-btn
-              align="center"
-              size="lg"
-              outline
-              color="primary"
-              flat
-              @click="showCamera"
-            >
+          <div class="scan-button-container">
+            <q-btn size="lg" outline color="primary" flat @click="showCamera">
               <ScanIcon size="2em" />
             </q-btn>
           </div>
         </transition>
+
         <!-- button to showSendDialog -->
-        <div class="col-5 q-mb-md">
+        <div class="col-6 q-mb-md flex justify-center items-center">
           <q-btn
             rounded
             dense
-            class="q-px-md"
-            style="width: 140px"
+            class="q-px-md wallet-action-btn"
             color="primary"
             @click="showSendDialog = true"
-            size="1.2rem"
           >
-            <q-icon name="north_east" size="1.2rem" class="q-mr-xs" />
-            Send</q-btn
-          >
+            <div class="button-content">
+              <q-icon name="north_east" size="1.2rem" class="q-mr-xs" />
+              <span>{{ $t("WalletPage.actions.send.label") }}</span>
+            </div>
+          </q-btn>
         </div>
         <ReceiveDialog v-model="showReceiveDialog" />
         <SendDialog v-model="showSendDialog" />
@@ -71,14 +69,22 @@
           no-caps
           :class="$q.dark.isActive ? 'bg-dark' : 'bg-white'"
         >
-          <q-tab name="history" class="text-secondary" label="History"></q-tab>
+          <q-tab
+            name="history"
+            class="text-secondary"
+            :label="$t('WalletPage.tabs.history.label')"
+          ></q-tab>
           <q-tab
             name="invoices"
             class="text-secondary"
-            label="Invoices"
+            :label="$t('WalletPage.tabs.invoices.label')"
           ></q-tab>
           <!-- <q-tab name="tokens" label="Tokens"></q-tab> -->
-          <q-tab name="mints" class="text-secondary" label="Mints"></q-tab>
+          <q-tab
+            name="mints"
+            class="text-secondary"
+            :label="$t('WalletPage.tabs.mints.label')"
+          ></q-tab>
         </q-tabs>
 
         <q-tab-panels
@@ -119,7 +125,10 @@
               "
               color="primary"
               @click="triggerPwaInstall()"
-              ><b>Install</b><q-tooltip>Install Cashu</q-tooltip></q-btn
+              ><b>{{ $t("WalletPage.install.text") }}</b
+              ><q-tooltip>{{
+                $t("WalletPage.install.tooltip")
+              }}</q-tooltip></q-btn
             >
           </div>
         </div>
@@ -178,6 +187,31 @@
 
 .keypad .btn-confirm {
   grid-area: 1 / 4 / 5 / 4;
+}
+
+.wallet-action-btn {
+  min-width: 140px;
+  width: auto;
+  white-space: nowrap;
+  font-size: 1.2rem;
+}
+
+.button-content {
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+}
+
+/* Apply equal widths to wallet action buttons after render */
+.equal-width-buttons {
+  display: flex;
+  justify-content: space-between;
+}
+
+.scan-button-container {
+  position: absolute;
+  z-index: 1;
+  padding-bottom: 15px;
 }
 </style>
 <script>
@@ -554,6 +588,28 @@ export default {
         }
       };
     },
+    equalizeButtonWidths: function () {
+      this.$nextTick(() => {
+        const actionBtns = document.querySelectorAll(".wallet-action-btn");
+        if (actionBtns.length >= 2) {
+          // Reset widths first
+          actionBtns.forEach((btn) => {
+            btn.style.width = "auto";
+          });
+
+          // Get the maximum width
+          let maxWidth = 0;
+          actionBtns.forEach((btn) => {
+            maxWidth = Math.max(maxWidth, btn.offsetWidth);
+          });
+
+          // Apply the maximum width to all buttons
+          actionBtns.forEach((btn) => {
+            btn.style.width = `${maxWidth}px`;
+          });
+        }
+      });
+    },
   },
   watch: {},
 
@@ -561,6 +617,15 @@ export default {
     // generate NPC connection
     this.generateNPCConnection();
     this.claimAllTokens();
+    // Ensure wallet action buttons have equal width
+    this.$nextTick(this.equalizeButtonWidths);
+    // Add window resize listener to handle responsive layouts
+    window.addEventListener("resize", this.equalizeButtonWidths);
+  },
+
+  beforeUnmount: function () {
+    // Remove event listener when component is destroyed
+    window.removeEventListener("resize", this.equalizeButtonWidths);
   },
 
   created: async function () {

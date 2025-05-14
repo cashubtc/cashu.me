@@ -26,8 +26,7 @@
                 overline
                 class="q-mb-sm q-pt-md text-white"
                 style="font-size: 14px"
-              >
-                Nostr Wallet Connect</q-item-label
+                >{{ $t("NWCDialog.nwc.caption") }}</q-item-label
               >
             </div>
             <div class="row justify-center q-pt-md">
@@ -36,12 +35,10 @@
                 class="text-weight-light text-white"
                 style="font-size: 12px"
               >
-                Control your wallet remotely with NWC. Press the QR code to link
-                your wallet with a compatible app.
+                {{ $t("NWCDialog.nwc.description") }}
               </q-item-label>
               <q-item-label caption class="text-weight-bold text-white q-pt-md">
-                Warning: anyone with access to this connection string can
-                initiate payments from your wallet. Do not share!
+                {{ $t("NWCDialog.nwc.warning_text") }}
               </q-item-label>
             </div>
           </q-card-section>
@@ -52,9 +49,11 @@
             size="md"
             flat
             @click="copyText(showNWCData.connectionString)"
-            >Copy</q-btn
+            >{{ $t("NWCDialog.actions.copy.label") }}</q-btn
           >
-          <q-btn v-close-popup flat color="grey" class="q-ml-auto">Close</q-btn>
+          <q-btn v-close-popup flat color="grey" class="q-ml-auto">{{
+            $t("NWCDialog.actions.close.label")
+          }}</q-btn>
         </div>
       </div>
     </q-card>

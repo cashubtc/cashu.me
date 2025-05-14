@@ -5,16 +5,15 @@
     backdrop-filter="blur(2px) brightness(60%)"
   >
     <q-card class="q-pa-lg">
-      <h6 class="q-mt-none q-mb-md">Do you trust this mint?</h6>
+      <h6 class="q-mt-none q-mb-md">{{ $t("AddMintDialog.title") }}</h6>
       <p>
-        Before using this mint, make sure you trust it. Mints could become
-        malicious or cease operation at any time.
+        {{ $t("AddMintDialog.description") }}
       </p>
       <q-input
         outlined
         readonly
         v-model="mintUrl"
-        label="Mint URL"
+        :label="$t('AddMintDialog.inputs.mint_url.label')"
         type="textarea"
         autogrow
         class="q-mb-xs"
@@ -30,17 +29,18 @@
             icon="check"
             :loading="addMintBlocking"
             @click="addMintLocal"
-            >Add mint
+            style="width: calc(75%)"
+            >{{ $t("AddMintDialog.actions.add_mint.label") }}
             <template v-slot:loading>
               <q-spinner-hourglass />
-              Adding mint
-            </template>
+              {{ $t("AddMintDialog.actions.add_mint.in_progress") }}</template
+            >
           </q-btn>
         </div>
         <div class="col">
-          <q-btn v-close-popup flat class="float-right" color="grey"
-            >Cancel</q-btn
-          >
+          <q-btn v-close-popup flat class="float-right" color="grey">{{
+            $t("AddMintDialog.actions.cancel.label")
+          }}</q-btn>
         </div>
       </div>
     </q-card>

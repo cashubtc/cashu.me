@@ -119,15 +119,15 @@ export const usePRStore = defineStore("payment-request", {
         sendTokenStore.showSendTokens = true;
       }
     },
-    parseAndPayPaymentRequest(request: PaymentRequest, tokenStr: string) {
+    async parseAndPayPaymentRequest(request: PaymentRequest, tokenStr: string) {
       const transports: PaymentRequestTransport[] = request.transport;
       for (const transport of transports) {
         if (transport.type == PaymentRequestTransportType.NOSTR) {
-          this.payNostrPaymentRequest(request, transport, tokenStr);
+          await this.payNostrPaymentRequest(request, transport, tokenStr);
           return;
         }
         if (transport.type == PaymentRequestTransportType.POST) {
-          this.payPostPaymentRequest(request, transport, tokenStr);
+          await this.payPostPaymentRequest(request, transport, tokenStr);
           return;
         }
       }
@@ -178,10 +178,12 @@ export const usePRStore = defineStore("payment-request", {
         return;
       }
       const proofs = token.getProofs(decodedToken);
+      const unit = token.getUnit(decodedToken);
+      const mint = token.getMint(decodedToken);
       const paymentPayload: PaymentRequestPayload = {
         id: request.id,
-        mint: request.mints ? request.mints[0] : "",
-        unit: request.unit || "",
+        mint: mint,
+        unit: unit,
         proofs: proofs,
       };
       const paymentPayloadString = JSON.stringify(paymentPayload);
@@ -193,6 +195,11 @@ export const usePRStore = defineStore("payment-request", {
           method: "POST",
           body: paymentPayloadString,
         });
+        if (!response.ok) {
+          console.error("Error paying payment request:", response.statusText);
+          notifyError("Could not pay request");
+          return;
+        }
         notifySuccess("Payment sent");
       } catch (error) {
         console.error("Error paying payment request:", error);
