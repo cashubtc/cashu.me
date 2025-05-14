@@ -146,6 +146,34 @@
                   </q-item-label>
                 </q-item-section>
               </div>
+              <div class="col-12">
+                <div class="row q-pt-md">
+                  <q-toggle v-model="npcV2Enabled" color="primary" />
+                  <q-item-section>
+                    <q-item-label title
+                      >Experimental: Enable npub.cash v2</q-item-label
+                    >
+                    <q-item-label caption
+                      >Use the experimental version 2 of npub.cash
+                    </q-item-label>
+                  </q-item-section>
+                </div>
+              </div>
+              <div class="col-12 q-pt-md" v-if="npcV2Enabled">
+                <q-input outlined v-model="npcV2Address" dense rounded readonly>
+                  <template v-slot:append>
+                    <q-icon
+                      name="content_copy"
+                      @click="copyText(npcV2Address)"
+                      size="xs"
+                      color="grey"
+                      class="q-mr-sm cursor-pointer"
+                    >
+                      <q-tooltip>Copy Lightning address</q-tooltip>
+                    </q-icon>
+                  </template>
+                </q-input>
+              </div>
             </div>
           </q-item>
 
@@ -1494,8 +1522,12 @@ export default defineComponent({
     ]),
     ...mapState(useWalletStore, ["mnemonic"]),
     ...mapState(useUiStore, ["ndefSupported"]),
-    ...mapWritableState(useNPCStore, ["npcAddress"]),
-    ...mapWritableState(useNPCStore, ["npcEnabled", "automaticClaim"]),
+    ...mapWritableState(useNPCStore, ["npcAddress", "npcV2Address"]),
+    ...mapWritableState(useNPCStore, [
+      "npcEnabled",
+      "automaticClaim",
+      "npcV2Enabled",
+    ]),
     ...mapWritableState(useWalletStore, ["keysetCounters"]),
     ...mapWritableState(useMintsStore, [
       "addMintData",
@@ -1555,6 +1587,14 @@ export default defineComponent({
         this.npcAddress = "";
       }
     },
+    npcV2Enabled: async function () {
+      if (this.npcEnabled) {
+        await this.initSigner();
+        await this.generateNPCV2Connection();
+      } else {
+        this.npcAddress = "";
+      }
+    },
   },
   methods: {
     ...mapActions(useNostrStore, [
@@ -1592,7 +1632,10 @@ export default defineComponent({
       "increaseKeysetCounter",
     ]),
     ...mapActions(useProofsStore, ["serializeProofs"]),
-    ...mapActions(useNPCStore, ["generateNPCConnection"]),
+    ...mapActions(useNPCStore, [
+      "generateNPCConnection",
+      "generateNPCV2Connection",
+    ]),
     ...mapActions(useRestoreStore, ["restoreMint"]),
     ...mapActions(useDexieStore, ["deleteAllTables"]),
     ...mapActions(useStorageStore, ["restoreFromBackup", "exportWalletState"]),
