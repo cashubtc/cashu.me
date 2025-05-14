@@ -1564,6 +1564,12 @@
                 </q-item-section>
               </q-item>
             </div>
+            <q-item>
+              <q-toggle v-model="savageMode" label="Savage Mode" color="red" />
+            </q-item>
+            <q-item class="q-pt-none">
+              <q-item-label caption> Use with caution! </q-item-label>
+            </q-item>
           </div>
         </q-expansion-item>
       </q-list>
@@ -1645,6 +1651,7 @@ export default defineComponent({
       nip46Token: "",
       nip07SignerAvailable: false,
       newRelay: "",
+      savageMode: false,
     };
   },
   computed: {
