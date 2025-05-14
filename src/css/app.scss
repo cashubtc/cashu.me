@@ -82,3 +82,13 @@ body,
 .q-checkbox__svg {
   color: var(--q-dark);
 }
+
+@font-face {
+  font-family: "ProclamateLight";
+  src: url("src/fonts/proclamate_light.woff") format("woff");
+  font-weight: normal;
+  font-style: normal;
+}
+.savage-mode {
+  font-family: "ProclamateLight", sans-serif !important;
+}

@@ -1748,6 +1748,13 @@ export default defineComponent({
         this.npcAddress = "";
       }
     },
+    savageMode(newVal) {
+      if (newVal) {
+        document.body.classList.add("savage-mode");
+      } else {
+        document.body.classList.remove("savage-mode");
+      }
+    },
   },
   methods: {
     ...mapActions(useNostrStore, [
@@ -1919,6 +1926,9 @@ export default defineComponent({
     console.log("Nip07 signer available", this.nip07SignerAvailable);
     // Set the initial selected language based on the current locale
     this.selectedLanguage = this.$i18n.locale;
+    if (this.savageMode) {
+      document.body.classList.add("savage-mode");
+    }
   },
 });
 </script>
