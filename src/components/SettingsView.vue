@@ -1702,26 +1702,32 @@ export default defineComponent({
     handleSeedClick: async function () {
       await this.initWalletSeedPrivateKeySigner();
       await this.generateNPCConnection();
+      await this.generateNPCV2Connection();
     },
     handleExtensionClick: async function () {
       await this.initNip07Signer();
       await this.generateNPCConnection();
+      await this.generateNPCV2Connection();
     },
     handleBunkerClick: async function () {
       await this.initNip46Signer();
       await this.generateNPCConnection();
+      await this.generateNPCV2Connection();
     },
     handleNsecClick: async function () {
       await this.initPrivateKeySigner();
       await this.generateNPCConnection();
+      await this.generateNPCV2Connection();
     },
     handleResetPrivateKeySigner: async function () {
       await this.resetPrivateKeySigner();
       await this.generateNPCConnection();
+      await this.generateNPCV2Connection();
     },
     handleResetNip46Signer: async function () {
       await this.resetNip46Signer();
       await this.generateNPCConnection();
+      await this.generateNPCV2Connection();
     },
     showOnboarding: function () {
       const welcomeStore = useWelcomeStore();
