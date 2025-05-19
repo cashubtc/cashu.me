@@ -1458,6 +1458,7 @@ import { useDexieStore } from "../stores/dexie";
 import { useReceiveTokensStore } from "../stores/receiveTokensStore";
 import { useWelcomeStore } from "src/stores/welcome";
 import { useStorageStore } from "src/stores/storage";
+import { useNPCV2Store } from "src/stores/npcv2";
 
 export default defineComponent({
   name: "SettingsView",
@@ -1522,11 +1523,15 @@ export default defineComponent({
     ]),
     ...mapState(useWalletStore, ["mnemonic"]),
     ...mapState(useUiStore, ["ndefSupported"]),
-    ...mapWritableState(useNPCStore, ["npcAddress", "npcV2Address"]),
+    ...mapWritableState(useNPCV2Store, [
+      "npcV2Loading",
+      "npcV2Enabled",
+      "npcV2Address",
+    ]),
     ...mapWritableState(useNPCStore, [
+      "npcAddress",
       "npcEnabled",
       "automaticClaim",
-      "npcV2Enabled",
     ]),
     ...mapWritableState(useWalletStore, ["keysetCounters"]),
     ...mapWritableState(useMintsStore, [
@@ -1588,11 +1593,11 @@ export default defineComponent({
       }
     },
     npcV2Enabled: async function () {
-      if (this.npcEnabled) {
+      if (this.npcV2Enabled) {
         await this.initSigner();
         await this.generateNPCV2Connection();
       } else {
-        this.npcAddress = "";
+        this.npcV2Address = "";
       }
     },
   },
@@ -1632,10 +1637,8 @@ export default defineComponent({
       "increaseKeysetCounter",
     ]),
     ...mapActions(useProofsStore, ["serializeProofs"]),
-    ...mapActions(useNPCStore, [
-      "generateNPCConnection",
-      "generateNPCV2Connection",
-    ]),
+    ...mapActions(useNPCStore, ["generateNPCConnection"]),
+    ...mapActions(useNPCV2Store, ["generateNPCV2Connection"]),
     ...mapActions(useRestoreStore, ["restoreMint"]),
     ...mapActions(useDexieStore, ["deleteAllTables"]),
     ...mapActions(useStorageStore, ["restoreFromBackup", "exportWalletState"]),

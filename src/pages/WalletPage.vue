@@ -217,6 +217,7 @@ import { useCameraStore } from "src/stores/camera";
 import { useP2PKStore } from "src/stores/p2pk";
 import { useNWCStore } from "src/stores/nwc";
 import { useNPCStore } from "src/stores/npubcash";
+import { useNPCV2Store } from "src/stores/npcv2";
 import { useNostrStore } from "src/stores/nostr";
 import { usePRStore } from "src/stores/payment-request";
 import { useDexieStore } from "src/stores/dexie";
@@ -369,9 +370,9 @@ export default {
     ]),
     ...mapActions(useCameraStore, ["closeCamera", "showCamera"]),
     ...mapActions(useNWCStore, ["listenToNWCCommands"]),
-    ...mapActions(useNPCStore, [
-      "generateNPCConnection",
-      "claimAllTokens",
+    ...mapActions(useNPCStore, ["generateNPCConnection", "claimAllTokens"]),
+    ...mapActions(useNPCV2Store, [
+      "generateNPCV2Connection",
       "getLatestQuotes",
     ]),
     ...mapActions(useNostrStore, [
@@ -565,6 +566,7 @@ export default {
     // generate NPC connection
     this.generateNPCConnection();
     this.claimAllTokens();
+    this.generateNPCV2Connection();
     this.getLatestQuotes();
   },
 

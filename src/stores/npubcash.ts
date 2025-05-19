@@ -62,7 +62,7 @@ type NPCQuoteResponse =
   | {
       error: false;
       data: {
-        quotes: NPCQuote[];
+        quote: NPCQuote[];
       };
       metadata: { limit: number; total: number; since?: number };
     };
@@ -157,6 +157,12 @@ export const useNPCStore = defineStore("npc", {
       this.v2BaseURL = `https://${this.npcV2Domain}`;
       this.npcV2Address =
         nip19.npubEncode(walletPublicKeyHex) + "@" + this.npcV2Domain;
+      try {
+        const info = await this.getV2Info();
+        console.log("v2: ", info);
+      } catch (e) {
+        console.log(e);
+      }
     },
     generateNip98Event: async function (
       url: string,
@@ -201,6 +207,31 @@ export const useNPCStore = defineStore("npc", {
         };
       }
     },
+    getV2Info: async function (): Promise<NPCInfo> {
+      const authHeader = await this.generateNip98Event(
+        `${this.v2BaseURL}/api/v2/user/info`,
+        "GET"
+      );
+      try {
+        const response = await fetch(`${this.v2BaseURL}/api/v2/user/info`, {
+          method: "GET",
+          headers: {
+            Authorization: `Nostr ${authHeader}`,
+          },
+        });
+        const info: NPCInfo = await response.json();
+        console.log(info);
+        return info;
+      } catch (e) {
+        console.error(e);
+        return {
+          mintUrl: "",
+          npub: "",
+          username: "",
+        };
+      }
+    },
+
     getLatestQuotes: async function () {
       if (!this.npcV2Enabled) {
         return;
