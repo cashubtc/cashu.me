@@ -1,30 +1,12 @@
 import { defineStore } from "pinia";
-import NDK, { NDKEvent, NDKPrivateKeySigner } from "@nostr-dev-kit/ndk";
+import NDK, { NDKEvent } from "@nostr-dev-kit/ndk";
 import { useLocalStorage } from "@vueuse/core";
-import { bytesToHex } from "@noble/hashes/utils"; // already an installed dependency
-import { generateSecretKey, getPublicKey } from "nostr-tools";
 import { nip19 } from "nostr-tools";
 import { useWalletStore } from "./wallet";
-import { useReceiveTokensStore } from "./receiveTokensStore";
-import {
-  notifyApiError,
-  notifyError,
-  notifySuccess,
-  notifyWarning,
-  notify,
-} from "../js/notify";
-import { MintQuoteState, Proof } from "@cashu/cashu-ts";
-import token from "../js/token";
-import { WalletProof, useMintsStore } from "./mints";
-import { useTokensStore } from "../stores/tokens";
+import { notifyApiError, notifyError, notifySuccess } from "../js/notify";
+import { MintQuoteState } from "@cashu/cashu-ts";
 import { useNostrStore } from "../stores/nostr";
-import { useInvoicesWorkerStore } from "./invoicesWorker";
-import { currentDateStr } from "src/js/utils";
 import { date } from "quasar";
-// type NPCConnection = {
-//   walletPublicKey: string,
-//   walletPrivateKey: string,
-// }
 
 type NPCV2InfoReponse =
   | {
@@ -46,10 +28,13 @@ type NPCV2InfoReponse =
 type NPCQuote = {
   created_at: number;
   paid_at: number;
+  expires_at: number;
   mint_url: string;
   quote_id: string;
+  request: string;
   amount: number;
   state: "PAID";
+  locked: boolean;
 };
 
 type NPCQuoteResponse =
@@ -64,14 +49,6 @@ type NPCQuoteResponse =
       };
       metadata: { limit: number; total: number; since?: number };
     };
-
-type NPCWithdrawl = {
-  id: number;
-  claim_ids: number[];
-  created_at: number;
-  pubkey: string;
-  amount: number;
-};
 
 const NIP98Kind = 27235;
 
@@ -92,7 +69,6 @@ export const useNPCV2Store = defineStore("npcV2", {
   getters: {},
   actions: {
     generateNPCV2Connection: async function () {
-      console.log("Hello from npc v2");
       const nostrStore = useNostrStore();
       if (!nostrStore.pubkey) {
         return;
@@ -105,7 +81,6 @@ export const useNPCV2Store = defineStore("npcV2", {
       try {
         const previousAddress = this.npcV2Address;
         const info = await this.getV2Info();
-        console.log("Got info: ", info);
         if (info.name) {
           const usernameAddress = info.name + "@" + this.npcV2Domain;
           if (previousAddress !== usernameAddress) {
@@ -192,16 +167,20 @@ export const useNPCV2Store = defineStore("npcV2", {
         if (resData.error) {
           return;
         }
+        let latestQuoteTime: number | undefined = undefined;
         resData.data.quotes.forEach((quote) => {
           if (
             walletStore.invoiceHistory.find((i) => i.quote === quote.quote_id)
           ) {
             return;
           }
+          if (!latestQuoteTime || latestQuoteTime < quote.paid_at) {
+            latestQuoteTime = quote.paid_at;
+          }
           walletStore.invoiceHistory.push({
             mint: quote.mint_url,
-            memo: "123",
-            bolt11: "12345",
+            memo: "",
+            bolt11: quote.request,
             amount: quote.amount,
             quote: quote.quote_id,
             date: date.formatDate(
@@ -211,14 +190,16 @@ export const useNPCV2Store = defineStore("npcV2", {
             status: "pending",
             unit: "sat",
             mintQuote: {
-              request: "12345",
+              request: quote.request,
               quote: quote.quote_id,
               state: MintQuoteState.PAID,
-              expiry: 9999999999,
+              expiry: quote.expires_at,
             },
           });
         });
-        // this.npcLastCheck = Math.floor(Date.now() / 1000);
+        if (latestQuoteTime) {
+          this.npcV2LastCheck = latestQuoteTime;
+        }
       } catch (e) {
         console.error(e);
         return;
