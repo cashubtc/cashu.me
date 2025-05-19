@@ -376,6 +376,11 @@ export default {
           flamingo: "flamingo",
         },
       },
+      bip177: {
+        title: "Bitcoin symbol",
+        description: "Use ₿ symbol instead of sats.",
+        toggle: "Use ₿",
+      },
     },
     advanced: {
       title: "Advanced",
