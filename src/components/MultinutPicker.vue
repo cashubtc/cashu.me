@@ -8,10 +8,10 @@
             <q-item>
               <q-item-section>
                 <q-item-label overline class="text-weight-bold">
-                  Multinut payment
+                  {{ $t('multinut.payment') }}
                 </q-item-label>
                 <q-item-label caption>
-                  Select one or multiple mints to execute a payment from.
+                  {{ $t('multinut.selectMints') }}
                 </q-item-label>
               </q-item-section>
             </q-item>
@@ -61,7 +61,7 @@
           <q-item>
             <q-item-section>
               <q-item-label overline class="text-weight-bold">
-                Total Selected Balance
+                {{ $t('multinut.totalSelectedBalance') }}
               </q-item-label>
               <q-item-label caption>
                 {{ formatCurrency(totalSelectedBalance, activeUnit) }}
@@ -76,7 +76,7 @@
           color="primary"
           :disabled="totalSelectedBalance < payInvoiceData.invoice.sat"
           @click="multiMeltSelectedMints"
-          label="Multi-Mint Pay"
+          :label="$t('multinut.multiMintPay')"
           :loading="multiMeltButtonLoading"
           class="q-px-lg"
         >
@@ -147,7 +147,7 @@ export default defineComponent({
       );
       if (totalQuoteAmount >= overallBalance) {
         console.error("multi-mint balance not enough to satisfy this invoice");
-        notifyError("multi-mint balance not enough to satisfy this invoice");
+        notifyError($t('multinut.balanceNotEnough'));
         return;
       }
       let mintAndQuotesArray = [];
@@ -207,9 +207,9 @@ export default defineComponent({
           0
         );
       notifySuccess(
-        "Paid " +
-          uiStore.formatCurrency(amountPaid, activeUnit) +
-          " via Lightning"
+        $t('multinut.paid', {
+          amount: uiStore.formatCurrency(amountPaid, activeUnit),
+        })
       );
     },
   },
