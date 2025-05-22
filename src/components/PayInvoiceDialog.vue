@@ -22,14 +22,17 @@
               "
             >
               <h6 class="q-my-none inline-block">
-                Pay
-                {{
-                  formatCurrency(
-                    payInvoiceData.meltQuote.response.amount,
-                    activeUnit,
-                    true
-                  )
-                }}
+                <i18n-t keypath="PayInvoiceDialog.invoice.title">
+                  <template v-slot:value>
+                    {{
+                      formatCurrency(
+                        payInvoiceData.meltQuote.response.amount,
+                        activeUnit,
+                        true
+                      )
+                    }}
+                  </template>
+                </i18n-t>
               </h6>
               <span
                 v-if="bitcoinPrice && activeUnit == 'sat'"
@@ -51,14 +54,18 @@
             >
               {{ payInvoiceData.meltQuote.error }}
             </h6>
-            <h6 v-else class="q-my-none">Processing...</h6>
+            <h6 v-else class="q-my-none">
+              {{ $t("PayInvoiceDialog.invoice.processing_info_text") }}
+            </h6>
           </div>
           <div class="col-2">
             <ToggleUnit class="q-mt-md" />
           </div>
         </div>
         <p class="text-wrap">
-          <strong v-if="payInvoiceData.invoice.description">Memo:</strong>
+          <strong v-if="payInvoiceData.invoice.description"
+            >{{ $t("PayInvoiceDialog.invoice.memo.label") }}:</strong
+          >
           {{ payInvoiceData.invoice.description }}<br />
         </p>
         <div class="col-12">
@@ -81,10 +88,10 @@
             @click="handleMeltButton"
             :label="
               payInvoiceData.meltQuote.error != ''
-                ? 'Error'
+                ? $t('PayInvoiceDialog.invoice.actions.pay.error')
                 : !payInvoiceData.blocking
-                ? 'Pay'
-                : 'Processing...'
+                ? $t('PayInvoiceDialog.invoice.actions.pay.label')
+                : $t('PayInvoiceDialog.invoice.actions.pay.in_progress')
             "
             :loading="globalMutexLock && !payInvoiceData.blocking"
             class="q-px-lg"
@@ -93,13 +100,24 @@
               <q-spinner-hourglass />
             </template>
           </q-btn>
-          <q-btn v-close-popup flat color="grey" class="q-ml-auto">Close</q-btn>
+          <q-btn v-close-popup flat color="grey" class="q-ml-auto">{{
+            $t("PayInvoiceDialog.invoice.actions.close.label")
+          }}</q-btn>
         </div>
         <div v-else class="row q-mt-lg">
-          <q-btn unelevated rounded disabled color="yellow" text-color="black"
-            >Balance too low</q-btn
+          <q-btn
+            unelevated
+            rounded
+            disabled
+            color="yellow"
+            text-color="black"
+            >{{
+              $t("PayInvoiceDialog.invoice.balance_too_low_warning_text")
+            }}</q-btn
           >
-          <q-btn v-close-popup flat color="grey" class="q-ml-auto">Close</q-btn>
+          <q-btn v-close-popup flat color="grey" class="q-ml-auto">{{
+            $t("PayInvoiceDialog.invoice.actions.close.label")
+          }}</q-btn>
         </div>
       </div>
       <div v-else-if="payInvoiceData.lnurlpay">
@@ -111,21 +129,39 @@
             "
             class="q-my-none text-h6 text-center"
           >
-            <b>{{ payInvoiceData.lnurlpay.domain }}</b> is requesting
-            {{ payInvoiceData.lnurlpay.maxSendable / 1000 }}
-            {{ tickerShort }}
+            <i18n-t keypath="PayInvoiceDialog.lnurlpay.amount_exact_label">
+              <template v-slot:payee>
+                <b>{{ payInvoiceData.lnurlpay.domain }}</b>
+              </template>
+              <template v-slot:value>
+                {{ payInvoiceData.lnurlpay.maxSendable / 1000 }}
+              </template>
+              <template v-slot:ticker>
+                {{ tickerShort }}
+              </template>
+            </i18n-t>
           </p>
           <p v-else class="q-my-none text-h6 text-center">
-            <b>{{
-              payInvoiceData.lnurlpay.targetUser ||
-              payInvoiceData.lnurlpay.domain
-            }}</b>
-            is requesting <br />
-            between
-            <b>{{ payInvoiceData.lnurlpay.minSendable / 1000 }}</b>
-            and
-            <b>{{ payInvoiceData.lnurlpay.maxSendable / 1000 }}</b>
-            {{ tickerShort }}
+            <i18n-t keypath="PayInvoiceDialog.lnurlpay.amount_range_label">
+              <template v-slot:payee>
+                <b>{{
+                  payInvoiceData.lnurlpay.targetUser ||
+                  payInvoiceData.lnurlpay.domain
+                }}</b>
+              </template>
+              <template v-slot:br>
+                <br />
+              </template>
+              <template v-slot:min>
+                <b>{{ payInvoiceData.lnurlpay.minSendable / 1000 }}</b>
+              </template>
+              <template v-slot:max>
+                <b>{{ payInvoiceData.lnurlpay.maxSendable / 1000 }}</b>
+              </template>
+              <template v-slot:ticker>
+                {{ tickerShort }}
+              </template>
+            </i18n-t>
           </p>
           <q-separator class="q-my-sm"></q-separator>
           <div class="row" v-if="payInvoiceData.lnurlpay.description">
@@ -144,7 +180,11 @@
                 autofocus
                 v-model.number="payInvoiceData.input.amount"
                 type="number"
-                :label="'MPP Amount (' + tickerShort + ') *'"
+                :label="
+                  $t('PayInvoiceDialog.lnurlpay.inputs.amount.label', {
+                    ticker: tickerShort,
+                  })
+                "
                 :min="payInvoiceData.lnurlpay.minSendable / 1000"
                 :max="payInvoiceData.lnurlpay.maxSendable / 1000"
                 :readonly="
@@ -163,23 +203,27 @@
                 dense
                 v-model="payInvoiceData.input.comment"
                 _type="payInvoiceData.lnurlpay.commentAllowed > 64 ? 'textarea' : 'text'"
-                label="Comment (optional)"
+                :label="$t('PayInvoiceDialog.lnurlpay.inputs.comment.label')"
                 :maxlength="payInvoiceData.lnurlpay.commentAllowed"
               ></q-input>
             </div>
           </div>
           <div class="row q-mt-lg">
-            <q-btn unelevated color="primary" type="submit">Send</q-btn>
-            <q-btn v-close-popup flat color="grey" class="q-ml-auto"
-              >Close</q-btn
-            >
+            <q-btn unelevated color="primary" type="submit">{{
+              $t("PayInvoiceDialog.lnurlpay.actions.send.label")
+            }}</q-btn>
+            <q-btn v-close-popup flat color="grey" class="q-ml-auto">{{
+              $t("PayInvoiceDialog.lnurlpay.actions.close.label")
+            }}</q-btn>
           </div>
         </q-form>
       </div>
       <div v-else>
         <div class="row items-center no-wrap q-mb-xl">
           <div class="col-10">
-            <span class="text-h6">Pay Lightning</span>
+            <span class="text-h6">{{
+              $t("PayInvoiceDialog.input_data.title")
+            }}</span>
           </div>
         </div>
         <q-form
@@ -195,7 +239,7 @@
             spellcheck="false"
             v-model.trim="payInvoiceData.input.request"
             type="textarea"
-            label="Lightning invoice or address"
+            :label="$t('PayInvoiceDialog.input_data.inputs.invoice_data.label')"
             autofocus
             @keyup.enter="decodeAndQuote(payInvoiceData.input.request)"
           >
@@ -214,14 +258,18 @@
               class="q-mr-sm"
               v-if="payInvoiceData.input.request != ''"
               type="submit"
-              >Enter</q-btn
+              >{{
+                $t("PayInvoiceDialog.input_data.actions.enter.label")
+              }}</q-btn
             >
             <q-btn
               unelevated
               dense
               v-if="canPasteFromClipboard && payInvoiceData.input.request == ''"
               @click="pasteToParseDialog"
-              ><q-icon name="content_paste" class="q-pr-sm" />Paste</q-btn
+              ><q-icon name="content_paste" class="q-pr-sm" />{{
+                $t("PayInvoiceDialog.input_data.actions.paste.label")
+              }}</q-btn
             >
             <q-btn
               unelevated
@@ -230,11 +278,13 @@
               @click="showCamera"
             >
               <ScanIcon />
-              <span class="q-pl-sm">Scan</span>
+              <span class="q-pl-sm">{{
+                $t("PayInvoiceDialog.input_data.actions.scan.label")
+              }}</span>
             </q-btn>
-            <q-btn v-close-popup flat rounded color="grey" class="q-ml-auto"
-              >Close</q-btn
-            >
+            <q-btn v-close-popup flat rounded color="grey" class="q-ml-auto">{{
+              $t("PayInvoiceDialog.input_data.actions.close.label")
+            }}</q-btn>
           </div>
         </q-form>
       </div>

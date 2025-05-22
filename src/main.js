@@ -4,5 +4,3 @@ import registerIcons from "./icons";
 
 const app = createApp(App);
 registerIcons(app);
-// ... other app configurations
-app.mount("#app");

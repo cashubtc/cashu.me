@@ -34,15 +34,31 @@
         <q-btn
           flat
           icon="arrow_left"
-          label="Previous"
+          :label="$t('WelcomePage.actions.previous.label')"
           v-if="welcomeStore.canGoPrev"
           @click="welcomeStore.goToPrevSlide"
         />
+        <!-- language selector -->
+        <div
+          class="q-ml-md"
+          v-if="!welcomeStore.canGoPrev"
+          style="position: relative; top: -5px"
+        >
+          <q-select
+            v-model="selectedLanguage"
+            :options="languageOptions"
+            emit-value
+            dense
+            map-options
+            @update:model-value="changeLanguage"
+            style="max-width: 200px; max-height: 20px"
+          />
+        </div>
         <q-space />
         <q-btn
           flat
           icon="arrow_right"
-          label="Next"
+          :label="$t('WelcomePage.actions.next.label')"
           :disable="!welcomeStore.canProceed"
           @click="welcomeStore.goToNextSlide"
         />
@@ -67,6 +83,42 @@ export default {
     WelcomeSlide2,
     WelcomeSlide3,
     WelcomeSlide4,
+  },
+  data() {
+    return {
+      selectedLanguage: "",
+      languageOptions: [
+        { label: "English", value: "en-US" },
+        { label: "Español", value: "es-ES" },
+        { label: "Italiano", value: "it-IT" },
+        { label: "Deutsch", value: "de-DE" },
+        { label: "Français", value: "fr-FR" },
+        { label: "Svenska", value: "sv-SE" },
+        { label: "Ελληνικά", value: "el-GR" },
+        { label: "Türkçe", value: "tr-TR" },
+        { label: "ไทย", value: "th-TH" },
+        { label: "العربية", value: "ar-SA" },
+        { label: "中文", value: "zh-CN" },
+        { label: "日本語", value: "ja-JP" },
+      ],
+    };
+  },
+  methods: {
+    changeLanguage(locale) {
+      // Set the i18n locale
+      this.$i18n.locale = locale;
+
+      // Store the selected language in localStorage
+      localStorage.setItem("cashu.language", locale);
+    },
+  },
+  created() {
+    // Set the initial selected language based on the current locale or from storage
+    this.selectedLanguage =
+      localStorage.getItem("cashu.language") ||
+      this.$i18n.locale ||
+      navigator.language ||
+      "en-US";
   },
   setup() {
     const welcomeStore = useWelcomeStore();

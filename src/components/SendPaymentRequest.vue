@@ -1,5 +1,5 @@
 <template>
-  <div v-if="sendData.paymentRequest" class="q-pa-none q-ma-none q-mt-md">
+  <div v-if="sendData.paymentRequest" class="q-pa-none q-ma-none q-mt-sm">
     <div class="q-mb-md text-center">
       <q-btn
         rounded
@@ -8,21 +8,26 @@
         class="q-px-md"
         @click="clickPaymentRequest"
       >
-        <q-icon name="send" class="q-pr-xs" />
+        <q-icon v-if="!loading" name="send" class="q-pr-xs" />
+        <q-spinner-hourglass v-else size="1em" class="q-mr-md" />
         Pay via {{ getPaymentRequestTransportType(sendData.paymentRequest) }}
       </q-btn>
     </div>
-    <div class="q-mb-md text-center">
-      <pre
+    <div class="text-center">
+      <span
         class="q-mt-md q-mb-md text-center"
         style="
+          display: block;
+          font-family: monospace;
           white-space: pre-wrap;
           word-wrap: break-word;
           max-width: 350px;
           margin: 0 auto;
+          font-size: 13px;
         "
-        >{{ getPaymentRequestTarget(sendData.paymentRequest) }}
-      </pre>
+      >
+        Pay to {{ getPaymentRequestTarget(sendData.paymentRequest) }}
+      </span>
     </div>
   </div>
 </template>
@@ -41,7 +46,9 @@ export default defineComponent({
   mixins: [windowMixin],
   props: {},
   data: function () {
-    return {};
+    return {
+      loading: false,
+    };
   },
   watch: {},
   computed: {
@@ -55,11 +62,19 @@ export default defineComponent({
   methods: {
     ...mapActions(useP2PKStore, ["isLocked", "isLockedToUs"]),
     ...mapActions(usePRStore, ["parseAndPayPaymentRequest"]),
-    clickPaymentRequest: function () {
-      this.parseAndPayPaymentRequest(
-        this.sendData.paymentRequest,
-        this.sendData.tokensBase64
-      );
+    clickPaymentRequest: async function () {
+      this.loading = true;
+      try {
+        await this.parseAndPayPaymentRequest(
+          this.sendData.paymentRequest,
+          this.sendData.tokensBase64
+        );
+      } catch (error) {
+        console.error(error);
+        notifyError("Error paying payment request");
+      } finally {
+        this.loading = false;
+      }
     },
     getPaymentRequestTransportType: function (request) {
       if (!request || !request.transport) {
