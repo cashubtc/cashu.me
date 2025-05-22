@@ -8,10 +8,10 @@
             <q-item>
               <q-item-section>
                 <q-item-label overline class="text-weight-bold">
-                  {{ $t('multinut.payment') }}
+                  {{ $t("MultinutPicker.payment") }}
                 </q-item-label>
                 <q-item-label caption>
-                  {{ $t('multinut.selectMints') }}
+                  {{ $t("MultinutPicker.selectMints") }}
                 </q-item-label>
               </q-item-section>
             </q-item>
@@ -61,7 +61,7 @@
           <q-item>
             <q-item-section>
               <q-item-label overline class="text-weight-bold">
-                {{ $t('multinut.totalSelectedBalance') }}
+                {{ $t("MultinutPicker.totalSelectedBalance") }}
               </q-item-label>
               <q-item-label caption>
                 {{ formatCurrency(totalSelectedBalance, activeUnit) }}
@@ -76,7 +76,7 @@
           color="primary"
           :disabled="totalSelectedBalance < payInvoiceData.invoice.sat"
           @click="multiMeltSelectedMints"
-          :label="$t('multinut.multiMintPay')"
+          :label="$t('MultinutPicker.multiMintPay')"
           :loading="multiMeltButtonLoading"
           class="q-px-lg"
         >
@@ -147,7 +147,7 @@ export default defineComponent({
       );
       if (totalQuoteAmount >= overallBalance) {
         console.error("multi-mint balance not enough to satisfy this invoice");
-        notifyError($t('multinut.balanceNotEnough'));
+        notifyError($t("MultinutPicker.balanceNotEnough"));
         return;
       }
       let mintAndQuotesArray = [];
@@ -162,7 +162,6 @@ export default defineComponent({
             mint.url,
             useMintsStore().activeUnit
           );
-          // await this.activateMintUrl(mintUrl);
           const partialAmountFloat = totalQuoteAmount * weights[i] + remainder;
           const partialAmount = Math.round(partialAmountFloat);
           console.log(`partialAmount for mint ${mint.url}: ${partialAmount}`);
@@ -190,7 +189,7 @@ export default defineComponent({
           })
         );
       } catch (error) {
-        notifyError(`multi-nut payment failed: ${error}`);
+        notifyError($t("MultinutPicker.failed", { error: error }));
         console.error(`${error}`);
         throw error;
       } finally {
@@ -207,7 +206,7 @@ export default defineComponent({
           0
         );
       notifySuccess(
-        $t('multinut.paid', {
+        $t("MultinutPicker.paid", {
           amount: uiStore.formatCurrency(amountPaid, activeUnit),
         })
       );
