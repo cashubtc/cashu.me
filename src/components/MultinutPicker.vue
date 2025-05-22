@@ -20,7 +20,11 @@
       </template>
 
       <!-- List of mints with checkboxes -->
-      <div class="q-pb-md q-px-xs text-left" on-left>
+      <div
+        style="max-height: 200px; overflow-y: auto"
+        class="q-pb-md q-px-xs text-left"
+        on-left
+      >
         <q-list padding>
           <div v-for="mint in multiMints" :key="mint.url">
             <q-item clickable class="q-pb-xs">
