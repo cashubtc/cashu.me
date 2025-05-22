@@ -10,12 +10,11 @@
         />
       </div>
       <div class="row items-center justify-center">
-        <div class="text-h6">Join a mint</div>
+        <div class="text-h6">{{ $t("NoMintWarnBanner.title") }}</div>
       </div>
       <div class="row items-center justify-center">
         <div class="text-subtitle2">
-          You haven't joined any Cashu mint yet. Add a mint URL in the settings
-          or receive ecash from a new mint to get started.
+          {{ $t("NoMintWarnBanner.subtitle") }}
         </div>
       </div>
       <div class="row items-center justify-center q-pt-lg">
@@ -23,7 +22,7 @@
           rounded
           color="primary"
           class="q-px-md"
-          label="Add mint"
+          :label="$t('NoMintWarnBanner.actions.add_mint.label')"
           @click="handleAddMintClick"
         />
       </div>
@@ -33,7 +32,7 @@
           rounded
           color="primary"
           class="q-px-md"
-          label="Receive Ecash"
+          :label="$t('NoMintWarnBanner.actions.receive.label')"
           @click="handleReceiveEcash"
         />
       </div>

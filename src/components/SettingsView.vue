@@ -1,16 +1,23 @@
 <template>
   <div style="max-width: 800px; margin: 0 auto">
-    <!-- ////////////////////// SETTINGS ////////////////// -->
-    <div class="q-px-xs text-left" on-left>
+    <!-- BACKUP & RESTORE SECTION -->
+    <div class="section-divider q-my-md">
+      <div class="divider-line"></div>
+      <div class="divider-text">
+        {{ $t("Settings.sections.backup_restore") }}
+      </div>
+      <div class="divider-line"></div>
+    </div>
+
+    <div class="q-py-sm q-px-xs text-left" on-left>
       <q-list padding>
         <q-item>
           <q-item-section>
-            <q-item-label overline class="text-weight-bold"
-              >Backup seed phrase</q-item-label
-            >
+            <q-item-label overline class="text-weight-bold">{{
+              $t("Settings.backup_restore.backup_seed.title")
+            }}</q-item-label>
             <q-item-label caption
-              >Your seed phrase can restore your wallet. Keep it safe and
-              private.
+              >{{ $t("Settings.backup_restore.backup_seed.description") }}
             </q-item-label>
             <div class="row q-pt-md">
               <div class="col-12">
@@ -18,7 +25,9 @@
                   outlined
                   readonly
                   v-model="hiddenMnemonic"
-                  label="Seed phrase"
+                  :label="
+                    $t('Settings.backup_restore.backup_seed.seed_phrase_label')
+                  "
                   class="seed-phrase"
                   autogrow
                 >
@@ -53,15 +62,12 @@
       <q-list padding>
         <q-item>
           <q-item-section>
-            <q-item-label overline class="text-weight-bold"
-              >Restore ecash</q-item-label
-            >
-            <q-item-label caption
-              >The restore wizard lets you recover lost ecash from a mnemonic
-              seed phrase. The seed phrase of your current wallet will remain
-              unaffected, the wizard will only allow you to <i>restore</i> ecash
-              from another seed phrase.</q-item-label
-            >
+            <q-item-label overline class="text-weight-bold">{{
+              $t("Settings.backup_restore.restore_ecash.title")
+            }}</q-item-label>
+            <q-item-label caption>
+              {{ $t("Settings.backup_restore.restore_ecash.description") }}
+            </q-item-label>
           </q-item-section>
         </q-item>
         <q-item>
@@ -72,22 +78,31 @@
             rounded
             outline
             to="/restore"
-            >Restore</q-btn
+            >{{ $t("Settings.backup_restore.restore_ecash.button") }}</q-btn
           >
         </q-item>
       </q-list>
     </div>
+
+    <!-- LIGHTNING ADDRESS SECTION -->
+    <div class="section-divider q-my-md">
+      <div class="divider-line"></div>
+      <div class="divider-text">
+        {{ $t("Settings.sections.lightning_address") }}
+      </div>
+      <div class="divider-line"></div>
+    </div>
     <!-- nostr -->
-    <div class="q-py-sm q-px-sm text-left" on-left>
+    <div class="q-py-sm q-px-xs text-left" on-left>
       <q-list padding>
         <q-item>
           <q-item-section>
-            <q-item-label overline class="text-weight-bold"
-              >Lightning address</q-item-label
-            >
-            <q-item-label caption
-              >Receive payments to your Lightning address.</q-item-label
-            >
+            <q-item-label overline class="text-weight-bold">{{
+              $t("Settings.lightning_address.title")
+            }}</q-item-label>
+            <q-item-label caption>{{
+              $t("Settings.lightning_address.description")
+            }}</q-item-label>
           </q-item-section>
         </q-item>
         <q-item class="q-px-md">
@@ -96,9 +111,11 @@
             <div class="row q-pt-md">
               <q-toggle v-model="npcEnabled" color="primary" />
               <q-item-section>
-                <q-item-label title>Enable</q-item-label>
+                <q-item-label title>{{
+                  $t("Settings.lightning_address.enable.toggle")
+                }}</q-item-label>
                 <q-item-label caption>
-                  Lightning address with npub.cash
+                  {{ $t("Settings.lightning_address.enable.description") }}
                 </q-item-label>
               </q-item-section>
             </div>
@@ -114,11 +131,13 @@
                     <q-icon
                       name="content_copy"
                       @click="copyText(npcAddress)"
-                      size="0.8em"
+                      size="xs"
                       color="grey"
                       class="q-mr-sm cursor-pointer"
                     >
-                      <q-tooltip>Copy Lightning address</q-tooltip>
+                      <q-tooltip>{{
+                        $t("Settings.lightning_address.address.copy_tooltip")
+                      }}</q-tooltip>
                     </q-icon>
                   </template>
                 </q-input>
@@ -126,20 +145,38 @@
               <div class="row q-pt-md">
                 <q-toggle v-model="automaticClaim" color="primary" />
                 <q-item-section>
-                  <q-item-label title>Claim automatically</q-item-label>
+                  <q-item-label title>{{
+                    $t("Settings.lightning_address.automatic_claim.toggle")
+                  }}</q-item-label>
                   <q-item-label caption
-                    >Receive incoming payments automatically.
+                    >{{
+                      $t(
+                        "Settings.lightning_address.automatic_claim.description"
+                      )
+                    }}
                   </q-item-label>
                 </q-item-section>
               </div>
             </div>
           </q-item>
+
+          <!-- NOSTR KEYS SECTION -->
+          <div class="section-divider q-my-md">
+            <div class="divider-line"></div>
+            <div class="divider-text">
+              {{ $t("Settings.sections.nostr_keys") }}
+            </div>
+            <div class="divider-line"></div>
+          </div>
+
           <q-item>
             <q-item-section>
-              <q-item-label overline>Your nostr keys</q-item-label>
-              <q-item-label caption
-                >Set the nostr keys for your Lightning address.</q-item-label
-              >
+              <q-item-label overline>{{
+                $t("Settings.nostr_keys.title")
+              }}</q-item-label>
+              <q-item-label caption>{{
+                $t("Settings.nostr_keys.description")
+              }}</q-item-label>
             </q-item-section>
           </q-item>
           <!-- initWalletSeedPrivateKeySigner -->
@@ -165,9 +202,11 @@
               class="cursor-pointer"
               style="word-break: break-word"
             >
-              <q-item-label title>Wallet seed phrase</q-item-label>
+              <q-item-label title>{{
+                $t("Settings.nostr_keys.wallet_seed.title")
+              }}</q-item-label>
               <q-item-label caption
-                >Generate nostr key pair from wallet seed
+                >{{ $t("Settings.nostr_keys.wallet_seed.description") }}
               </q-item-label>
               <q-item-label
                 caption
@@ -185,7 +224,7 @@
                     color="grey"
                     class="q-mr-xs"
                   ></q-icon
-                  >Copy nsec
+                  >{{ $t("Settings.nostr_keys.wallet_seed.copy_nsec") }}
                 </q-badge>
               </q-item-label>
             </q-item-section>
@@ -214,15 +253,21 @@
               class="cursor-pointer"
               style="word-break: break-word"
             >
-              <q-item-label title>Nsec Bunker</q-item-label>
-              <q-item-label caption>Use a NIP-46 bunker </q-item-label>
+              <q-item-label title>{{
+                $t("Settings.nostr_keys.nsec_bunker.title")
+              }}</q-item-label>
+              <q-item-label caption
+                >{{ $t("Settings.nostr_keys.nsec_bunker.description") }}
+              </q-item-label>
             </q-item-section>
             <q-item-section side v-if="signerType === 'NIP46'">
               <q-icon
                 name="delete_outline"
                 @click="handleResetNip46Signer"
                 class="cursor-pointer"
-                ><q-tooltip>Delete connection</q-tooltip>
+                ><q-tooltip>{{
+                  $t("Settings.nostr_keys.nsec_bunker.delete_tooltip")
+                }}</q-tooltip>
               </q-icon>
             </q-item-section>
           </q-item>
@@ -248,9 +293,11 @@
               class="cursor-pointer"
               style="word-break: break-word"
             >
-              <q-item-label title>Use your nsec</q-item-label>
+              <q-item-label title>{{
+                $t("Settings.nostr_keys.use_nsec.title")
+              }}</q-item-label>
               <q-item-label caption
-                >This method is dangerous and not recommended
+                >{{ $t("Settings.nostr_keys.use_nsec.description") }}
               </q-item-label>
             </q-item-section>
             <q-item-section side v-if="signerType === 'PRIVATEKEY'">
@@ -258,7 +305,9 @@
                 name="delete_outline"
                 @click="handleResetPrivateKeySigner"
                 class="cursor-pointer"
-                ><q-tooltip>Delete nsec</q-tooltip></q-icon
+                ><q-tooltip>{{
+                  $t("Settings.nostr_keys.use_nsec.delete_tooltip")
+                }}</q-tooltip></q-icon
               >
             </q-item-section>
           </q-item>
@@ -286,12 +335,14 @@
               class="cursor-pointer"
               style="word-break: break-word"
             >
-              <q-item-label title>Signing extension</q-item-label>
+              <q-item-label title>{{
+                $t("Settings.nostr_keys.signing_extension.title")
+              }}</q-item-label>
               <q-item-label caption v-if="nip07SignerAvailable"
-                >Use a NIP-07 signing extension
+                >{{ $t("Settings.nostr_keys.signing_extension.description") }}
               </q-item-label>
               <q-item-label caption v-else
-                >No NIP-07 signing extension found
+                >{{ $t("Settings.nostr_keys.signing_extension.not_found") }}
               </q-item-label>
             </q-item-section>
           </q-item>
@@ -299,24 +350,31 @@
       </q-list>
     </div>
 
+    <!-- PAYMENT REQUESTS SECTION -->
+    <div class="section-divider q-my-md">
+      <div class="divider-line"></div>
+      <div class="divider-text">
+        {{ $t("Settings.sections.payment_requests") }}
+      </div>
+      <div class="divider-line"></div>
+    </div>
+
     <!-- payment requests -->
     <div class="q-py-sm q-px-xs text-left" on-left>
       <q-item class="q-pt-lg">
         <q-item-section>
-          <q-item-label overline class="text-weight-bold"
-            >Payment requests</q-item-label
-          >
-          <q-item-label caption
-            >Payment requests allow you to receive payments via nostr. If you
-            enable this, your wallet will subscribe to your nostr
-            relays.</q-item-label
-          >
+          <q-item-label overline class="text-weight-bold">{{
+            $t("Settings.payment_requests.title")
+          }}</q-item-label>
+          <q-item-label caption>{{
+            $t("Settings.payment_requests.description")
+          }}</q-item-label>
         </q-item-section>
       </q-item>
       <q-item>
         <q-toggle
           v-model="enablePaymentRequest"
-          label="Enable Payment Requests"
+          :label="$t('Settings.payment_requests.enable_toggle')"
           color="primary"
         />
       </q-item>
@@ -328,12 +386,25 @@
           color="primary"
         />
         <q-item-section>
-          <q-item-label title>Claim automatically</q-item-label>
+          <q-item-label title>{{
+            $t("Settings.payment_requests.claim_automatically.toggle")
+          }}</q-item-label>
           <q-item-label caption
-            >Receive incoming payments automatically.
+            >{{
+              $t("Settings.payment_requests.claim_automatically.description")
+            }}
           </q-item-label>
         </q-item-section>
       </q-item>
+    </div>
+
+    <!-- NOSTR WALLET CONNECT SECTION -->
+    <div class="section-divider q-my-md">
+      <div class="divider-line"></div>
+      <div class="divider-text">
+        {{ $t("Settings.sections.nostr_wallet_connect") }}
+      </div>
+      <div class="divider-line"></div>
     </div>
 
     <!-- ln address -->
@@ -343,18 +414,21 @@
 
         <q-item class="q-pt-lg">
           <q-item-section>
-            <q-item-label overline class="text-weight-bold"
-              >Nostr Wallet Connect (NWC)</q-item-label
-            >
-            <q-item-label caption
-              >Use NWC to control your wallet from any other
-              application.</q-item-label
-            >
+            <q-item-label overline class="text-weight-bold">{{
+              $t("Settings.nostr_wallet_connect.title")
+            }}</q-item-label>
+            <q-item-label caption>{{
+              $t("Settings.nostr_wallet_connect.description")
+            }}</q-item-label>
           </q-item-section>
         </q-item>
         <!-- use a q-toggle to turn nwc on and off -->
         <q-item>
-          <q-toggle v-model="enableNwc" label="Enable NWC" color="primary" />
+          <q-toggle
+            v-model="enableNwc"
+            :label="$t('Settings.nostr_wallet_connect.enable_toggle')"
+            color="primary"
+          />
         </q-item>
         <!-- <q-item>
           <q-btn
@@ -371,8 +445,7 @@
           <q-item-section>
             <!-- <q-item-label overline>Connections</q-item-label> -->
             <q-item-label caption
-              >You can only use NWC for payments from your Bitcoin balance.
-              Payments will be made from your active mint.
+              >{{ $t("Settings.nostr_wallet_connect.payments_note") }}
             </q-item-label>
           </q-item-section>
         </q-item>
@@ -388,10 +461,12 @@
               <q-icon
                 name="content_copy"
                 @click="copyText(getConnectionString(connection))"
-                size="1.3em"
+                size="xs"
                 color="grey"
                 class="q-mr-sm cursor-pointer"
-                ><q-tooltip>Copy connection string</q-tooltip></q-icon
+                ><q-tooltip>{{
+                  $t("Settings.nostr_wallet_connect.connection.copy_tooltip")
+                }}</q-tooltip></q-icon
               >
             </q-item-section>
             <q-item-section
@@ -405,7 +480,9 @@
                 color="grey"
                 class="q-mr-sm cursor-pointer"
               >
-                <q-tooltip>Show QR code</q-tooltip>
+                <q-tooltip>{{
+                  $t("Settings.nostr_wallet_connect.connection.qr_tooltip")
+                }}</q-tooltip>
               </q-icon>
             </q-item-section>
             <q-item-section style="max-width: 10rem">
@@ -423,7 +500,9 @@
                 rounded
                 dense
                 v-model="connection.allowanceLeft"
-                label="Allowance left (sat)"
+                :label="
+                  $t('Settings.nostr_wallet_connect.connection.allowance_label')
+                "
               >
               </q-input>
             </q-item-section>
@@ -433,14 +512,17 @@
             dense
             dense-toggle
             class="text-left"
-            label="Click to edit relays"
+            :label="$t('Settings.nostr_wallet_connect.relays.expand_label')"
           >
             <q-item>
               <q-item-section>
-                <q-item-label overline>Add relay</q-item-label>
+                <q-item-label overline>{{
+                  $t("Settings.nostr_wallet_connect.relays.add.title")
+                }}</q-item-label>
                 <q-item-label caption
-                  >Nostr Wallet Connect uses nostr relays to connect your wallet
-                  to other applications.
+                  >{{
+                    $t("Settings.nostr_wallet_connect.relays.add.description")
+                  }}
                 </q-item-label>
               </q-item-section>
             </q-item>
@@ -451,7 +533,7 @@
                   rounded
                   dense
                   v-model="newRelay"
-                  label="Relay"
+                  :label="$t('Settings.nostr_wallet_connect.relays.list.title')"
                   append
                 >
                   <template v-slot:append>
@@ -468,9 +550,13 @@
             </q-item>
             <q-item>
               <q-item-section>
-                <q-item-label overline>Relays</q-item-label>
+                <q-item-label overline>{{
+                  $t("Settings.nostr_wallet_connect.relays.list.title")
+                }}</q-item-label>
                 <q-item-label caption
-                  >Your wallet will connect to these relays.
+                  >{{
+                    $t("Settings.nostr_wallet_connect.relays.list.description")
+                  }}
                 </q-item-label>
               </q-item-section>
             </q-item>
@@ -482,10 +568,12 @@
                 <q-icon
                   name="content_copy"
                   @click="copyText(relay)"
-                  size="1.1em"
+                  size="xs"
                   color="grey"
                   class="q-mr-sm cursor-pointer"
-                  ><q-tooltip>Copy relay</q-tooltip></q-icon
+                  ><q-tooltip>{{
+                    $t("Settings.nostr_wallet_connect.relays.list.copy_tooltip")
+                  }}</q-tooltip></q-icon
                 >
               </q-item-section>
               <q-item-section
@@ -498,7 +586,11 @@
                   size="1.3em"
                   color="grey"
                   class="q-mr-sm cursor-pointer"
-                  ><q-tooltip>Remove relay</q-tooltip></q-icon
+                  ><q-tooltip>{{
+                    $t(
+                      "Settings.nostr_wallet_connect.relays.list.remove_tooltip"
+                    )
+                  }}</q-tooltip></q-icon
                 >
               </q-item-section>
               <q-item-section style="max-width: 10rem" class="cursor-pointer">
@@ -509,6 +601,16 @@
         </div>
       </q-list>
     </div>
+
+    <!-- HARDWARE FEATURES SECTION -->
+    <div v-if="ndefSupported" class="section-divider q-my-md">
+      <div class="divider-line"></div>
+      <div class="divider-text">
+        {{ $t("Settings.sections.hardware_features") }}
+      </div>
+      <div class="divider-line"></div>
+    </div>
+
     <div class="q-py-sm q-px-xs text-left" on-left>
       <q-list padding>
         <!-- Web NFC -->
@@ -516,11 +618,11 @@
           <q-list padding>
             <q-item>
               <q-item-section>
-                <q-item-label overline class="text-weight-bold"
-                  >WebNFC</q-item-label
-                >
+                <q-item-label overline class="text-weight-bold">{{
+                  $t("Settings.hardware_features.webnfc.title")
+                }}</q-item-label>
                 <q-item-label caption>
-                  Choose the encoding for writing to NFC cards
+                  {{ $t("Settings.hardware_features.webnfc.description") }}
                 </q-item-label>
               </q-item-section>
             </q-item>
@@ -541,8 +643,12 @@
                 class="cursor-pointer"
                 style="word-break: break-word"
               >
-                <q-item-label title>Text</q-item-label>
-                <q-item-label caption> Store token in plain text </q-item-label>
+                <q-item-label title>{{
+                  $t("Settings.hardware_features.webnfc.text.title")
+                }}</q-item-label>
+                <q-item-label caption>
+                  {{ $t("Settings.hardware_features.webnfc.text.description") }}
+                </q-item-label>
               </q-item-section>
             </q-item>
             <q-item clickable @click="nfcEncoding = 'weburl'">
@@ -562,9 +668,13 @@
                 class="cursor-pointer"
                 style="word-break: break-word"
               >
-                <q-item-label title>URL</q-item-label>
+                <q-item-label title>{{
+                  $t("Settings.hardware_features.webnfc.weburl.title")
+                }}</q-item-label>
                 <q-item-label caption>
-                  Store URL to this wallet with token
+                  {{
+                    $t("Settings.hardware_features.webnfc.weburl.description")
+                  }}
                 </q-item-label>
               </q-item-section>
             </q-item>
@@ -586,9 +696,9 @@
                 />
               </q-item-section>
               <q-item-section>
-                <q-item-label title>Raw Binary</q-item-label>
+                <q-item-label title>{{ $t("Settings.hardware_features.webnfc.binary.title") }}</q-item-label>
                 <q-item-label caption>
-                  Raw bytes instead of Base64. Makes ~33% shorter tokens.
+                  {{ $t("Settings.hardware_features.webnfc.binary.description") }}
                 </q-item-label>
               </q-item-section>
             </q-item>
@@ -596,16 +706,30 @@
             <q-item>
               <q-toggle
                 v-model="showNfcButtonInDrawer"
-                label="Quick access to NFC"
+                :label="
+                  $t('Settings.hardware_features.webnfc.quick_access.toggle')
+                "
                 color="primary"
               /> </q-item
             ><q-item class="q-pt-none">
               <q-item-label caption
-                >Quickly scan NFC cards in the Receive Ecash menu. This option
-                adds an NFC button the Receive Ecash menu.
+                >{{
+                  $t(
+                    "Settings.hardware_features.webnfc.quick_access.description"
+                  )
+                }}
               </q-item-label>
             </q-item>
           </q-list>
+        </div>
+
+        <!-- P2PK SECTION -->
+        <div class="section-divider q-my-md">
+          <div class="divider-line"></div>
+          <div class="divider-text">
+            {{ $t("Settings.sections.p2pk_features") }}
+          </div>
+          <div class="divider-line"></div>
         </div>
 
         <!-- P2PK -->
@@ -613,18 +737,15 @@
           <q-list padding>
             <q-item>
               <q-item-section>
-                <q-item-label overline class="text-weight-bold"
-                  >P2PK</q-item-label
-                >
-                <q-item-label caption
-                  >Generate a key pair to receive P2PK-locked ecash. Warning:
-                  This feature is experimental. Only use with small amounts. If
-                  you lose your private keys, nobody will be able to unlock the
-                  ecash locked to it anymore.</q-item-label
-                >
+                <q-item-label overline class="text-weight-bold">{{
+                  $t("Settings.p2pk_features.title")
+                }}</q-item-label>
+                <q-item-label caption>{{
+                  $t("Settings.p2pk_features.description")
+                }}</q-item-label>
               </q-item-section>
             </q-item>
-            <q-item>
+            <q-item style="display: inline-block">
               <q-btn
                 class="q-ml-sm q-px-md"
                 color="primary"
@@ -632,19 +753,29 @@
                 rounded
                 outline
                 @click="generateKeypair"
-                >Generate key</q-btn
+                >{{ $t("Settings.p2pk_features.generate_button") }}</q-btn
+              >
+            </q-item>
+            <q-item style="display: inline-block">
+              <q-btn
+                class="q-ml-sm q-px-md"
+                color="primary"
+                size="sm"
+                rounded
+                outline
+                @click="importNsec"
+                >{{ $t("Settings.p2pk_features.import_button") }}</q-btn
               >
             </q-item>
             <q-item>
               <q-toggle
                 v-model="showP2PkButtonInDrawer"
-                label="Quick access to lock"
+                :label="$t('Settings.p2pk_features.quick_access.toggle')"
                 color="primary"
               /> </q-item
             ><q-item class="q-pt-none">
               <q-item-label caption
-                >Use this to quickly show your P2PK locking key in the receive
-                ecash menu.
+                >{{ $t("Settings.p2pk_features.quick_access.description") }}
               </q-item-label>
             </q-item>
           </q-list>
@@ -654,7 +785,11 @@
               dense-toggle
               v-if="p2pkKeys.length"
               class="text-left"
-              :label="`Click to browse ${p2pkKeys.length} keys`"
+              :label="
+                $t('Settings.p2pk_features.keys_expansion.label', {
+                  count: p2pkKeys.length,
+                })
+              "
             >
               <q-item v-for="key in p2pkKeys" :key="key.privakey">
                 <q-item-section
@@ -682,7 +817,9 @@
                 <q-item-section side>
                   <q-badge
                     v-if="key.used"
-                    label="used"
+                    :label="
+                      $t('Settings.p2pk_features.keys_expansion.used_badge')
+                    "
                     color="primary"
                     class="q-mr-sm"
                   />
@@ -704,13 +841,20 @@
           </q-item>
         </div>
 
+        <!-- PRIVACY SECTION -->
+        <div class="section-divider q-my-md">
+          <div class="divider-line"></div>
+          <div class="divider-text">{{ $t("Settings.sections.privacy") }}</div>
+          <div class="divider-line"></div>
+        </div>
+
         <q-item>
           <q-item-section>
-            <q-item-label overline class="text-weight-bold q-pt-sm"
-              >Privacy</q-item-label
-            >
+            <q-item-label overline class="text-weight-bold q-pt-sm">{{
+              $t("Settings.privacy.title")
+            }}</q-item-label>
             <q-item-label caption>
-              These settings affect your privacy.
+              {{ $t("Settings.privacy.description") }}
             </q-item-label>
           </q-item-section>
         </q-item>
@@ -719,50 +863,42 @@
           <q-item>
             <q-toggle
               v-model="checkIncomingInvoices"
-              label="Check incoming invoice"
+              :label="$t('Settings.privacy.check_incoming.toggle')"
               color="primary"
             >
             </q-toggle>
           </q-item>
           <q-item class="q-pt-none">
             <q-item-label caption
-              >If enabled, the wallet will check the latest invoice in the
-              background. This increases the wallet's responsiveness which makes
-              fingerprinting easier. You can manually check unpaid invoices in
-              the Invoices tab.
+              >{{ $t("Settings.privacy.check_incoming.description") }}
             </q-item-label>
           </q-item>
           <!-- check pending invoices on startup -->
           <q-item>
             <q-toggle
               v-model="checkInvoicesOnStartup"
-              label="Check pending invoices on startup"
+              :label="$t('Settings.privacy.check_startup.toggle')"
               color="primary"
             >
             </q-toggle>
           </q-item>
           <q-item class="q-pt-none">
             <q-item-label caption
-              >If enabled, the wallet will check pending invoices from the last
-              24 hours on startup.
+              >{{ $t("Settings.privacy.check_startup.description") }}
             </q-item-label>
           </q-item>
           <!-- periodically check incoming invoices -->
           <q-item>
             <q-toggle
               v-model="periodicallyCheckIncomingInvoices"
-              label="Check all invoices"
+              :label="$t('Settings.privacy.check_all.toggle')"
               color="primary"
             >
-              <q-badge color="primary" label="Beta" class="q-mx-sm"></q-badge>
             </q-toggle>
           </q-item>
           <q-item class="q-pt-none">
             <q-item-label caption
-              >If enabled, the wallet will periodically check unpaid invoices in
-              the background for up to two weeks. This increases the wallet's
-              online activity which makes fingerprinting easier. You can
-              manually check unpaid invoices in the Invoices tab.
+              >{{ $t("Settings.privacy.check_all.description") }}
             </q-item-label>
           </q-item>
 
@@ -770,14 +906,12 @@
           <q-item>
             <q-toggle
               v-model="checkSentTokens"
-              label="Check sent ecash"
+              :label="$t('Settings.privacy.check_sent.toggle')"
               color="primary"
             /> </q-item
           ><q-item class="q-pt-none">
             <q-item-label caption
-              >If enabled, the wallet will use periodic background checks to
-              determine if sent tokens have been redeemed. This increases the
-              wallet's online activity which makes fingerprinting easier.
+              >{{ $t("Settings.privacy.check_sent.description") }}
             </q-item-label>
           </q-item>
           <!-- websockets -->
@@ -785,99 +919,178 @@
             <q-toggle
               v-if="checkIncomingInvoices || checkSentTokens"
               v-model="useWebsockets"
-              label="Use WebSockets"
+              :label="$t('Settings.privacy.websockets.toggle')"
               color="primary"
-              ><q-badge color="primary" label="Beta" class="q-mx-sm"></q-badge>
+            >
             </q-toggle> </q-item
           ><q-item
             class="q-pt-none"
             v-if="checkIncomingInvoices || checkSentTokens"
           >
             <q-item-label caption
-              >If enabled, the wallet will use long-lived WebSocket connections
-              to receive updates on paid invoices and spent tokens from mints.
-              This increases the wallet's responsiveness but also makes
-              fingerprinting easier.
+              >{{ $t("Settings.privacy.websockets.description") }}
             </q-item-label>
           </q-item>
           <!-- price check setting -->
           <q-item>
             <q-toggle
               v-model="getBitcoinPrice"
-              label="Get exchange rate from Coinbase"
+              :label="$t('Settings.privacy.bitcoin_price.toggle')"
               color="primary"
             /> </q-item
           ><q-item class="q-pt-none">
             <q-item-label caption
-              >If enabled, the current Bitcoin exchange rate will be fetched
-              from coinbase.com and your converted balance will be displayed.
+              >{{ $t("Settings.privacy.bitcoin_price.description") }}
             </q-item-label>
           </q-item>
         </div>
 
+        <div class="section-divider q-my-md">
+          <div class="divider-line"></div>
+          <div class="divider-text">
+            {{ $t("Settings.sections.experimental") }}
+          </div>
+          <div class="divider-line"></div>
+        </div>
         <!-- enable receive swaps -->
         <q-item>
           <q-item-section>
-            <q-item-label overline class="text-weight-bold q-pt-xl"
-              >Experimental</q-item-label
-            >
+            <q-item-label overline class="text-weight-bold">{{
+              $t("Settings.experimental.title")
+            }}</q-item-label>
             <q-item-label caption>
-              These features are experimental.
+              {{ $t("Settings.experimental.description") }}
             </q-item-label>
           </q-item-section>
         </q-item>
         <q-item>
           <q-toggle
             v-model="enableReceiveSwaps"
-            label="Receive swaps"
+            :label="$t('Settings.experimental.receive_swaps.toggle')"
             color="primary"
           >
-            <q-badge color="primary" label="Beta" class="q-mx-sm"></q-badge>
+            <q-badge
+              color="primary"
+              :label="$t('Settings.experimental.receive_swaps.badge')"
+              class="q-mx-sm"
+            ></q-badge>
           </q-toggle>
         </q-item>
         <q-item class="q-pt-none">
           <q-item-label caption
-            >Option to swap received Ecash to your active mint in the Receive
-            Ecash dialog.
+            >{{ $t("Settings.experimental.receive_swaps.description") }}
           </q-item-label>
         </q-item>
         <q-item>
           <q-toggle
             v-model="autoPasteEcashReceive"
-            label="Paste Ecash automatically"
+            :label="$t('Settings.experimental.auto_paste.toggle')"
             color="primary"
           /> </q-item
         ><q-item class="q-pt-none">
           <q-item-label caption
-            >Automatically paste ecash in your clipboard when you press Receive,
-            then Ecash, then Paste. Automatic pasting can cause UI glitches in
-            iOS, turn it off if you experience issues.
+            >{{ $t("Settings.experimental.auto_paste.description") }}
           </q-item-label>
         </q-item>
+
+        <!-- auditor settings -->
+        <q-item>
+          <q-toggle
+            v-model="auditorEnabled"
+            :label="$t('Settings.experimental.auditor.toggle')"
+            color="primary"
+          >
+            <q-badge
+              color="primary"
+              :label="$t('Settings.experimental.auditor.badge')"
+              class="q-mx-sm"
+            ></q-badge>
+          </q-toggle>
+        </q-item>
+        <q-item class="q-pt-none">
+          <q-item-label caption
+            >{{ $t("Settings.experimental.auditor.description") }}
+          </q-item-label>
+        </q-item>
+        <div class="row q-mx-md">
+          <div class="col-12">
+            <q-input
+              v-model="auditorUrl"
+              :label="$t('Settings.experimental.auditor.url_label')"
+              color="primary"
+              outlined
+              dense
+              rounded
+              :disable="!auditorEnabled"
+            >
+              <template v-slot:append>
+                <q-btn
+                  dense
+                  flat
+                  icon="content_copy"
+                  @click="copyText(auditorUrl)"
+                  size="sm"
+                  color="grey"
+                />
+              </template>
+            </q-input>
+          </div>
+        </div>
+        <div class="row q-mx-md q-mt-md">
+          <div class="col-12">
+            <q-input
+              v-model="auditorApiUrl"
+              :label="$t('Settings.experimental.auditor.api_url_label')"
+              color="primary"
+              outlined
+              dense
+              rounded
+              :disable="!auditorEnabled"
+            >
+              <template v-slot:append>
+                <q-btn
+                  dense
+                  flat
+                  icon="content_copy"
+                  @click="copyText(auditorApiUrl)"
+                  size="sm"
+                  color="grey"
+                />
+              </template>
+            </q-input>
+          </div>
+        </div>
+
+        <div class="section-divider q-my-md">
+          <div class="divider-line"></div>
+          <div class="divider-text">
+            {{ $t("Settings.sections.appearance") }}
+          </div>
+          <div class="divider-line"></div>
+        </div>
 
         <!-- use numeric keyboard -->
         <div class="q-py-sm q-px-xs text-left" on-left>
           <q-list padding>
             <q-item>
               <q-item-section>
-                <q-item-label overline class="text-weight-bold q-pt-lg"
-                  >On-screen keyboard</q-item-label
-                >
-                <q-item-label caption
-                  >Use the numeric keyboard for entering amounts.</q-item-label
-                >
+                <q-item-label overline class="text-weight-bold">{{
+                  $t("Settings.appearance.keyboard.title")
+                }}</q-item-label>
+                <q-item-label caption>{{
+                  $t("Settings.appearance.keyboard.description")
+                }}</q-item-label>
               </q-item-section>
             </q-item>
             <q-item>
               <q-toggle
                 v-model="useNumericKeyboard"
-                label="Use numeric keyboard"
+                :label="$t('Settings.appearance.keyboard.toggle')"
                 color="primary"
               /> </q-item
             ><q-item class="q-pt-none">
               <q-item-label caption
-                >If enabled, the numeric keyboard will be used for entering
-                amounts.
+                >{{ $t("Settings.appearance.keyboard.toggle_description") }}
               </q-item-label>
             </q-item>
           </q-list>
@@ -888,11 +1101,11 @@
           <q-list padding>
             <q-item>
               <q-item-section>
-                <q-item-label overline class="text-weight-bold"
-                  >Appearance</q-item-label
-                >
+                <q-item-label overline class="text-weight-bold">{{
+                  $t("Settings.appearance.theme.title")
+                }}</q-item-label>
                 <q-item-label caption
-                  >Change how your wallet looks.
+                  >{{ $t("Settings.appearance.theme.description") }}
                 </q-item-label>
                 <!-- <div class="row q-py-md">
               <q-btn dense flat rounded @click="toggleDarkMode" size="md"
@@ -911,7 +1124,9 @@
                     icon="format_color_fill"
                     color="grey"
                     size="md"
-                    ><q-tooltip>mono</q-tooltip>
+                    ><q-tooltip>{{
+                      $t("Settings.appearance.theme.tooltips.mono")
+                    }}</q-tooltip>
                   </q-btn>
                   <q-btn
                     v-if="themes.includes('cyber')"
@@ -921,7 +1136,9 @@
                     icon="format_color_fill"
                     color="green"
                     size="md"
-                    ><q-tooltip>cyber</q-tooltip>
+                    ><q-tooltip>{{
+                      $t("Settings.appearance.theme.tooltips.cyber")
+                    }}</q-tooltip>
                   </q-btn>
                   <q-btn
                     v-if="themes.includes('freedom')"
@@ -931,7 +1148,9 @@
                     icon="format_color_fill"
                     color="pink-13"
                     size="md"
-                    ><q-tooltip>freedom</q-tooltip>
+                    ><q-tooltip>{{
+                      $t("Settings.appearance.theme.tooltips.freedom")
+                    }}</q-tooltip>
                   </q-btn>
                   <q-btn
                     v-if="themes.includes('classic')"
@@ -941,7 +1160,9 @@
                     icon="format_color_fill"
                     color="deep-purple"
                     size="md"
-                    ><q-tooltip>nostr</q-tooltip>
+                    ><q-tooltip>{{
+                      $t("Settings.appearance.theme.tooltips.nostr")
+                    }}</q-tooltip>
                   </q-btn>
                   <q-btn
                     v-if="themes.includes('bitcoin')"
@@ -951,7 +1172,9 @@
                     icon="format_color_fill"
                     color="orange"
                     size="md"
-                    ><q-tooltip>bitcoin</q-tooltip>
+                    ><q-tooltip>{{
+                      $t("Settings.appearance.theme.tooltips.bitcoin")
+                    }}</q-tooltip>
                   </q-btn>
                   <q-btn
                     v-if="themes.includes('mint')"
@@ -961,7 +1184,9 @@
                     icon="format_color_fill"
                     color="light-green-9"
                     size="md"
-                    ><q-tooltip>mint</q-tooltip> </q-btn
+                    ><q-tooltip>{{
+                      $t("Settings.appearance.theme.tooltips.mint")
+                    }}</q-tooltip> </q-btn
                   ><q-btn
                     v-if="themes.includes('autumn')"
                     dense
@@ -970,7 +1195,9 @@
                     icon="format_color_fill"
                     color="brown"
                     size="md"
-                    ><q-tooltip>nut</q-tooltip>
+                    ><q-tooltip>{{
+                      $t("Settings.appearance.theme.tooltips.nut")
+                    }}</q-tooltip>
                   </q-btn>
                   <q-btn
                     v-if="themes.includes('salvador')"
@@ -980,7 +1207,9 @@
                     icon="format_color_fill"
                     color="blue-10"
                     size="md"
-                    ><q-tooltip>blu</q-tooltip>
+                    ><q-tooltip>{{
+                      $t("Settings.appearance.theme.tooltips.blu")
+                    }}</q-tooltip>
                   </q-btn>
                   <q-btn
                     v-if="themes.includes('flamingo')"
@@ -990,9 +1219,48 @@
                     icon="format_color_fill"
                     color="pink-3"
                     size="md"
-                    ><q-tooltip>flamingo</q-tooltip>
+                    ><q-tooltip>{{
+                      $t("Settings.appearance.theme.tooltips.flamingo")
+                    }}</q-tooltip>
                   </q-btn>
                 </div>
+              </q-item-section>
+            </q-item>
+          </q-list>
+        </div>
+
+        <!-- language picker: hidden for till i18n integration is finished -->
+        <!-- LANGUAGE SECTION -->
+        <div class="section-divider q-my-md">
+          <div class="divider-line"></div>
+          <div class="divider-text">{{ $t("Settings.language.title") }}</div>
+          <div class="divider-line"></div>
+        </div>
+
+        <div class="q-py-sm q-px-xs text-left" on-left>
+          <q-list padding>
+            <q-item>
+              <q-item-section>
+                <q-item-label overline class="text-weight-bold">{{
+                  $t("Settings.language.title")
+                }}</q-item-label>
+                <q-item-label caption>{{
+                  $t("Settings.language.description")
+                }}</q-item-label>
+              </q-item-section>
+            </q-item>
+            <q-item>
+              <q-item-section>
+                <q-select
+                  v-model="selectedLanguage"
+                  :options="languageOptions"
+                  rounded
+                  outlined
+                  dense
+                  emit-value
+                  map-options
+                  @update:model-value="changeLanguage"
+                />
               </q-item-section>
             </q-item>
           </q-list>
@@ -1003,16 +1271,17 @@
           dense
           dense-toggle
           icon="code"
-          label="Advanced"
+          :label="$t('Settings.advanced.title')"
         >
           <div>
             <q-item class="q-pt-lg">
               <q-item-section>
-                <q-item-label overline>Developer settings</q-item-label>
-                <q-item-label caption
-                  >The following settings are for development and
-                  debugging.</q-item-label
-                >
+                <q-item-label overline>{{
+                  $t("Settings.advanced.developer.title")
+                }}</q-item-label>
+                <q-item-label caption>{{
+                  $t("Settings.advanced.developer.description")
+                }}</q-item-label>
               </q-item-section>
             </q-item>
             <div>
@@ -1025,19 +1294,27 @@
                         flat
                         dense
                         @click="confirmMnemonic = !confirmMnemonic"
-                        >Generate new seed phrase</q-btn
+                        >{{
+                          $t("Settings.advanced.developer.new_seed.button")
+                        }}</q-btn
                       >
                       <row>
                         <q-item-label class="q-px-sm" caption
-                          >This will generate a new seed phrase. You must send
-                          your entire balance to yourself in order to be able to
-                          restore it with a new seed.
+                          >{{
+                            $t(
+                              "Settings.advanced.developer.new_seed.description"
+                            )
+                          }}
                         </q-item-label>
                       </row>
                     </div>
                     <div class="col-12" v-if="confirmMnemonic">
                       <span
-                        >Are you sure you want to generate a new seed phrase?
+                        >{{
+                          $t(
+                            "Settings.advanced.developer.new_seed.confirm_question"
+                          )
+                        }}
                       </span>
                       <q-btn
                         flat
@@ -1045,7 +1322,9 @@
                         class="q-ml-sm"
                         color="warning"
                         @click="confirmMnemonic = false"
-                        >Cancel</q-btn
+                        >{{
+                          $t("Settings.advanced.developer.new_seed.cancel")
+                        }}</q-btn
                       >
                       <q-btn
                         flat
@@ -1056,7 +1335,9 @@
                           confirmMnemonic = false;
                           generateNewMnemonic();
                         "
-                        >Confirm</q-btn
+                        >{{
+                          $t("Settings.advanced.developer.new_seed.confirm")
+                        }}</q-btn
                       >
                     </div>
                   </div>
@@ -1071,13 +1352,17 @@
                       outline
                       click
                       @click="checkActiveProofsSpendable"
-                      >Remove spent proofs</q-btn
+                      >{{
+                        $t("Settings.advanced.developer.remove_spent.button")
+                      }}</q-btn
                     ></row
                   ><row>
                     <q-item-label class="q-px-sm" caption
-                      >Check if the ecash tokens from your active mints are
-                      spent and remove the spent ones from your wallet. Only use
-                      this if your wallet is stuck.
+                      >{{
+                        $t(
+                          "Settings.advanced.developer.remove_spent.description"
+                        )
+                      }}
                     </q-item-label>
                   </row>
                 </q-item-section>
@@ -1086,13 +1371,17 @@
                 <q-item-section>
                   <row>
                     <q-btn dense flat outline click @click="toggleTerminal">
-                      Toggle Debug Console
-                    </q-btn> </row
+                      {{
+                        $t("Settings.advanced.developer.debug_console.button")
+                      }}
+                    </q-btn></row
                   ><row>
                     <q-item-label class="q-px-sm" caption
-                      >Open the Javascript debug terminal. Never paste anything
-                      into this terminal that you don't understand. A thief
-                      might try to trick you into pasting malicious code here.
+                      >{{
+                        $t(
+                          "Settings.advanced.developer.debug_console.description"
+                        )
+                      }}
                     </q-item-label>
                   </row>
                 </q-item-section>
@@ -1101,14 +1390,17 @@
                 <q-item-section>
                   <row>
                     <q-btn dense flat outline click @click="exportActiveProofs">
-                      Export active proofs
+                      {{
+                        $t("Settings.advanced.developer.export_proofs.button")
+                      }}
                     </q-btn></row
                   ><row>
                     <q-item-label class="q-px-sm" caption
-                      >Copy your entire balance from the active mint as a Cashu
-                      token into your clipboard. This will only export the
-                      tokens from the selected mint and unit. For a full export,
-                      select a different mint and unit and export again.
+                      >{{
+                        $t(
+                          "Settings.advanced.developer.export_proofs.description"
+                        )
+                      }}
                     </q-item-label>
                   </row>
                 </q-item-section>
@@ -1117,15 +1409,17 @@
                 <q-item-section>
                   <row>
                     <!-- add a caption, not a button here -->
-                    <q-item-label class="q-pb-sm"
-                      >Increment keyset counters</q-item-label
-                    ></row
+                    <q-item-label class="q-pb-sm">{{
+                      $t("Settings.advanced.developer.keyset_counters.title")
+                    }}</q-item-label></row
                   >
                   <row>
                     <q-item-label class="q-px-sm" caption
-                      >Click the keyset ID to increment the derivation path
-                      counters for the keysets in your wallet. This is useful if
-                      you see the "outputs have already been signed" error.
+                      >{{
+                        $t(
+                          "Settings.advanced.developer.keyset_counters.description"
+                        )
+                      }}
                     </q-item-label>
                   </row>
                   <row class="q-pa-sm">
@@ -1160,15 +1454,17 @@
                       click
                       @click="unsetAllReservedProofs"
                     >
-                      Unset all reserved tokens
+                      {{
+                        $t("Settings.advanced.developer.unset_reserved.button")
+                      }}
                     </q-btn></row
                   ><row>
                     <q-item-label class="q-px-sm" caption
-                      >To avoid double-spending attempts, this wallet marks
-                      ecash as reserved so you don't reuse it. This button will
-                      unset all reserved tokens so they can be used again. If
-                      you do this, your wallet might include spent proofs. Press
-                      the "Remove spent proofs" button to get rid of them.
+                      >{{
+                        $t(
+                          "Settings.advanced.developer.unset_reserved.description"
+                        )
+                      }}
                     </q-item-label>
                   </row>
                 </q-item-section>
@@ -1177,11 +1473,17 @@
                 <q-item-section>
                   <row>
                     <q-btn dense flat outline click @click="showOnboarding">
-                      Show onboarding
+                      {{
+                        $t("Settings.advanced.developer.show_onboarding.button")
+                      }}
                     </q-btn></row
                   ><row>
                     <q-item-label class="q-px-sm" caption
-                      >Show the onboarding screen again.
+                      >{{
+                        $t(
+                          "Settings.advanced.developer.show_onboarding.description"
+                        )
+                      }}
                     </q-item-label>
                   </row>
                 </q-item-section>
@@ -1197,25 +1499,34 @@
                       click
                       @click="confirmNuke = !confirmNuke"
                     >
-                      Reset wallet data
+                      {{
+                        $t("Settings.advanced.developer.reset_wallet.button")
+                      }}
                     </q-btn></row
                   ><row v-if="!confirmNuke">
                     <q-item-label class="q-px-sm" caption
-                      >Reset your wallet data. Warning: This will delete
-                      everything! Make sure you create a backup first.
+                      >{{
+                        $t(
+                          "Settings.advanced.developer.reset_wallet.description"
+                        )
+                      }}
                     </q-item-label>
                   </row>
                   <row v-if="confirmNuke">
-                    <span
-                      >Are you sure you want to delete your wallet data?</span
-                    >
+                    <span>{{
+                      $t(
+                        "Settings.advanced.developer.reset_wallet.confirm_question"
+                      )
+                    }}</span>
                     <q-btn
                       flat
                       dense
                       class="q-ml-sm"
                       color="primary"
                       @click="confirmNuke = false"
-                      >Cancel</q-btn
+                      >{{
+                        $t("Settings.advanced.developer.reset_wallet.cancel")
+                      }}</q-btn
                     >
                     <q-btn
                       flat
@@ -1226,7 +1537,9 @@
                         confirmNuke = false;
                         nukeWallet();
                       "
-                      >Delete wallet</q-btn
+                      >{{
+                        $t("Settings.advanced.developer.reset_wallet.confirm")
+                      }}</q-btn
                     >
                   </row>
                 </q-item-section>
@@ -1234,21 +1547,18 @@
               <q-item>
                 <q-item-section>
                   <row>
-                    <q-btn
-                      dense
-                      flat
-                      outline
-                      click
-                      @click="getLocalstorageToFile"
-                    >
-                      Export wallet data
+                    <q-btn dense flat outline click @click="exportWalletState">
+                      {{
+                        $t("Settings.advanced.developer.export_wallet.button")
+                      }}
                     </q-btn></row
                   ><row>
                     <q-item-label class="q-px-sm" caption
-                      >Download a dump of your wallet. You can restore your
-                      wallet from this file in the welcome screen of a new
-                      wallet. This file will be out of sync if you keep using
-                      your wallet after exporting it.
+                      >{{
+                        $t(
+                          "Settings.advanced.developer.export_wallet.description"
+                        )
+                      }}
                     </q-item-label>
                   </row>
                 </q-item-section>
@@ -1276,7 +1586,6 @@ import { mapActions, mapState, mapWritableState } from "pinia";
 import { useMintsStore, MintClass } from "src/stores/mints";
 import { useWalletStore } from "src/stores/wallet";
 import { map } from "underscore";
-import { currentDateStr } from "src/js/utils";
 import { useSettingsStore } from "src/stores/settings";
 import { useNostrStore } from "src/stores/nostr";
 import { useNPCStore } from "src/stores/npubcash";
@@ -1287,8 +1596,11 @@ import { useWorkersStore } from "src/stores/workers";
 import { useProofsStore } from "src/stores/proofs";
 import { usePRStore } from "../stores/payment-request";
 import { useRestoreStore } from "src/stores/restore";
+import { useDexieStore } from "../stores/dexie";
 import { useReceiveTokensStore } from "../stores/receiveTokensStore";
 import { useWelcomeStore } from "src/stores/welcome";
+import { useStorageStore } from "src/stores/storage";
+import { useI18n } from "vue-i18n";
 
 export default defineComponent({
   name: "SettingsView",
@@ -1310,6 +1622,21 @@ export default defineComponent({
         "freedom",
         "cyber",
         "flamingo",
+      ],
+      selectedLanguage: navigator.language || "en-US",
+      languageOptions: [
+        { label: "English", value: "en-US" },
+        { label: "Español", value: "es-ES" },
+        { label: "Italiano", value: "it-IT" },
+        { label: "Deutsch", value: "de-DE" },
+        { label: "Français", value: "fr-FR" },
+        { label: "Svenska", value: "sv-SE" },
+        { label: "Ελληνικά", value: "el-GR" },
+        { label: "Türkçe", value: "tr-TR" },
+        { label: "ไทย", value: "th-TH" },
+        { label: "العربية", value: "ar-SA" },
+        { label: "中文", value: "zh-CN" },
+        { label: "日本語", value: "ja-JP" },
       ],
       discoveringMints: false,
       hideMnemonic: true,
@@ -1333,6 +1660,9 @@ export default defineComponent({
       "enableReceiveSwaps",
       "showNfcButtonInDrawer",
       "autoPasteEcashReceive",
+      "auditorEnabled",
+      "auditorUrl",
+      "auditorApiUrl",
     ]),
     ...mapState(useP2PKStore, ["p2pkKeys"]),
     ...mapWritableState(useP2PKStore, [
@@ -1340,12 +1670,7 @@ export default defineComponent({
       "showP2PkButtonInDrawer",
     ]),
     ...mapWritableState(useNWCStore, ["showNWCDialog", "showNWCData"]),
-    ...mapState(useMintsStore, [
-      "activeMintUrl",
-      "mints",
-      "activeProofs",
-      "proofs",
-    ]),
+    ...mapState(useMintsStore, ["activeMintUrl", "mints", "activeProofs"]),
     ...mapState(useNPCStore, ["npcLoading"]),
     ...mapState(useNostrStore, [
       "pubkey",
@@ -1385,7 +1710,7 @@ export default defineComponent({
       if (this.hideMnemonic) {
         return this.mnemonic
           .split(" ")
-          .map((w) => "*".repeat(w.length))
+          .map((w) => "*".repeat(6))
           .join(" ");
       } else {
         return this.mnemonic;
@@ -1435,13 +1760,16 @@ export default defineComponent({
       "unsubscribeNWC",
       "getConnectionString",
     ]),
-    ...mapActions(useP2PKStore, ["generateKeypair", "showKeyDetails"]),
+    ...mapActions(useP2PKStore, [
+      "importNsec",
+      "generateKeypair",
+      "showKeyDetails",
+    ]),
     ...mapActions(useMintsStore, [
       "addMint",
       "removeMint",
       "activateMintUrl",
       "updateMint",
-      "restoreFromBackup",
     ]),
     ...mapActions(useWalletStore, [
       "newMnemonic",
@@ -1452,6 +1780,8 @@ export default defineComponent({
     ...mapActions(useProofsStore, ["serializeProofs"]),
     ...mapActions(useNPCStore, ["generateNPCConnection"]),
     ...mapActions(useRestoreStore, ["restoreMint"]),
+    ...mapActions(useDexieStore, ["deleteAllTables"]),
+    ...mapActions(useStorageStore, ["restoreFromBackup", "exportWalletState"]),
     generateNewMnemonic: async function () {
       this.newMnemonic();
       await this.initSigner();
@@ -1466,39 +1796,11 @@ export default defineComponent({
     toggleTerminal: function () {
       useUiStore().toggleDebugConsole();
     },
-    getLocalstorageToFile: async function () {
-      // https://stackoverflow.com/questions/24263682/save-restore-local-storage-to-a-local-file
-      const fileName = `cashu_backup_${currentDateStr()}.json`;
-      var a = {};
-      for (var i = 0; i < localStorage.length; i++) {
-        var k = localStorage.key(i);
-        var v = localStorage.getItem(k);
-        a[k] = v;
-      }
-      var textToSave = JSON.stringify(a);
-      var textToSaveAsBlob = new Blob([textToSave], {
-        type: "text/plain",
-      });
-      var textToSaveAsURL = window.URL.createObjectURL(textToSaveAsBlob);
-
-      var downloadLink = document.createElement("a");
-      downloadLink.download = fileName;
-      downloadLink.innerHTML = "Download File";
-      downloadLink.href = textToSaveAsURL;
-      downloadLink.onclick = function () {
-        document.body.removeChild(event.target);
-      };
-      downloadLink.style.display = "none";
-      document.body.appendChild(downloadLink);
-      downloadLink.click();
-    },
     unsetAllReservedProofs: async function () {
       // mark all this.proofs as reserved=false
-      for (let proof of this.proofs) {
-        proof.reserved = false;
-        proof.quote = undefined;
-      }
-      this.notifySuccess("No reserved proofs left");
+      const proofsStore = useProofsStore();
+      await proofsStore.setReserved(await proofsStore.getProofs(), false);
+      this.notifySuccess("All reserved proofs unset");
     },
     checkActiveProofsSpendable: async function () {
       // iterate over this.activeProofs in batches of 50 and check if they are spendable
@@ -1571,7 +1873,9 @@ export default defineComponent({
     },
     nukeWallet: async function () {
       // create a backup just in case
-      await this.getLocalstorageToFile();
+      await this.exportWalletState();
+      // clear dexie tables
+      this.deleteAllTables();
       localStorage.clear();
       window.location.href = "/";
     },
@@ -1590,20 +1894,46 @@ export default defineComponent({
     removeRelay: function (relay) {
       this.relays = this.relays.filter((r) => r !== relay);
     },
+    changeLanguage(locale) {
+      // Set the i18n locale
+      this.$i18n.locale = locale;
+
+      // Store the selected language in localStorage
+      localStorage.setItem("cashu.language", locale);
+
+      // // Reload the page to apply the language change
+      // setTimeout(() => {
+      //   window.location.reload();
+      // }, 300);
+    },
   },
   created: async function () {
     this.nip07SignerAvailable = await this.checkNip07Signer();
     console.log("Nip07 signer available", this.nip07SignerAvailable);
+    // Set the initial selected language based on the current locale
+    this.selectedLanguage = this.$i18n.locale;
   },
 });
 </script>
-<style scoped>
-.seed-phrase :deep(.q-field__control) {
-  padding: 12px 12px !important;
+<style>
+/* Section Divider */
+.section-divider {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 24px;
 }
-.seed-phrase {
-  font-size: 0.9rem;
-  font-family: monospace;
-  padding: 12px 12px !important;
+
+.divider-line {
+  flex: 1;
+  height: 1px;
+  background-color: #48484a;
+}
+
+.divider-text {
+  padding: 0 10px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #ffffff;
 }
 </style>

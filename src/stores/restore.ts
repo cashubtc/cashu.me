@@ -7,9 +7,11 @@ import { CashuMint, CashuWallet, CheckStateEnum, Proof } from "@cashu/cashu-ts";
 import { useMintsStore } from "./mints";
 import { notify, notifyError, notifySuccess } from "src/js/notify";
 import { useUiStore } from "./ui";
+import { useProofsStore } from "./proofs";
+import { i18n } from "../boot/i18n";
 
-const BATCH_SIZE = 100;
-const MAX_GAP = 1;
+const BATCH_SIZE = 200;
+const MAX_GAP = 2;
 
 export const useRestoreStore = defineStore("restore", {
   state: () => ({
@@ -38,7 +40,9 @@ export const useRestoreStore = defineStore("restore", {
       try {
         await this._restoreMint(url);
       } catch (error) {
-        notifyError(`Error restoring mint: ${error}`);
+        notifyError(
+          i18n.global.t("restore.restore_mint_error_text", { error })
+        );
       } finally {
         this.restoringState = false;
         this.restoringMint = "";
@@ -47,16 +51,17 @@ export const useRestoreStore = defineStore("restore", {
     },
     _restoreMint: async function (url: string) {
       if (this.mnemonicToRestore.length === 0) {
-        notifyError("Please enter a mnemonic");
+        notifyError(i18n.global.t("restore.mnemonic_error_text"));
         return;
       }
       this.restoreProgress = 0;
       const walletStore = useWalletStore();
+      const proofsStore = useProofsStore();
       const mintStore = useMintsStore();
       await mintStore.activateMintUrl(url);
 
       const mnemonic = this.mnemonicToRestore;
-      this.restoreStatus = `Preparing restore process...`;
+      this.restoreStatus = i18n.global.t("restore.prepare_info_text");
       const mint = new CashuMint(url);
       const keysets = (await mint.getKeySets()).keysets;
       let restoredSomething = false;
@@ -96,7 +101,13 @@ export const useRestoreStore = defineStore("restore", {
             this.restoreCounter += proofs.length;
             totalSteps += 1;
           }
-          this.restoreStatus = `Restored ${this.restoreCounter} proofs for keyset ${keyset.id}`;
+          this.restoreStatus = i18n.global.t(
+            "restore.restored_proofs_for_keyset_info_text",
+            {
+              restoreCounter: this.restoreCounter,
+              keysetId: keyset.id,
+            }
+          );
           start += BATCH_SIZE;
 
           currentStep++;
@@ -105,9 +116,14 @@ export const useRestoreStore = defineStore("restore", {
 
         let restoredProofs: Proof[] = [];
         for (let i = 0; i < restoreProofs.length; i += BATCH_SIZE) {
-          this.restoreStatus = `Checking proofs ${i} to ${
-            i + BATCH_SIZE
-          } for keyset ${keyset.id}`;
+          this.restoreStatus = i18n.global.t(
+            "restore.checking_proofs_for_keyset_info_text",
+            {
+              startIndex: i,
+              endIndex: i + BATCH_SIZE,
+              keysetId: keyset.id,
+            }
+          );
           const checkRestoreProofs = restoreProofs.slice(i, i + BATCH_SIZE);
           const proofStates = await wallet.checkProofsStates(
             checkRestoreProofs
@@ -130,9 +146,9 @@ export const useRestoreStore = defineStore("restore", {
             );
           }
           const newProofs = unspentProofs.filter(
-            (p) => !mintStore.proofs.some((pr) => pr.secret === p.secret)
+            (p) => !proofsStore.proofs.some((pr) => pr.secret === p.secret)
           );
-          mintStore.addProofs(newProofs);
+          await useProofsStore().addProofs(newProofs);
           restoredProofs = restoredProofs.concat(newProofs);
           currentStep++;
           this.restoreProgress = currentStep / totalSteps;
@@ -143,12 +159,16 @@ export const useRestoreStore = defineStore("restore", {
           keyset.unit
         );
         if (restoredAmount > 0) {
-          notifySuccess(`Restored ${restoredAmountStr}`);
+          notifySuccess(
+            i18n.global.t("restore.restored_amount_success_text", {
+              amount: restoredAmountStr,
+            })
+          );
           restoredSomething = true;
         }
       }
       if (!restoredSomething) {
-        notify("No proofs found to restore");
+        notify(i18n.global.t("restore.no_proofs_info_text"));
       }
     },
   },

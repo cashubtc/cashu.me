@@ -8,20 +8,25 @@
     no-backdrop-dismiss
   >
     <q-card v-model="showReceiveTokens" class="q-pa-lg qcard q-card-top">
-      <q-btn v-close-popup rounded flat color="grey" class="close-btn-position"
-        >Close</q-btn
+      <q-btn
+        v-close-popup
+        rounded
+        flat
+        color="grey"
+        class="close-btn-position"
+        >{{ $t("ReceiveTokenDialog.actions.close.label") }}</q-btn
       >
       <div>
         <div class="row items-center no-wrap q-mb-sm q-mb-sm q-py-lg">
           <div class="col-9">
-            <span class="text-h6"
-              >Receive
-              {{
-                tokenAmount && tokenUnit
-                  ? formatCurrency(tokenAmount, tokenUnit)
-                  : "Ecash"
-              }}</span
-            >
+            <span class="text-h6">{{
+              $t("ReceiveTokenDialog.title", {
+                value:
+                  tokenAmount && tokenUnit
+                    ? formatCurrency(tokenAmount, tokenUnit)
+                    : $t("ReceiveTokenDialog.title_ecash_text"),
+              })
+            }}</span>
             <span
               v-if="
                 tokenAmount && tokenUnit && tokenUnit == 'sat' && bitcoinPrice
@@ -44,7 +49,7 @@
             outlined
             spellcheck="false"
             v-model="receiveData.tokensBase64"
-            label="Paste Cashu token"
+            :label="$t('ReceiveTokenDialog.inputs.tokens_base64.label')"
             type="textarea"
             autofocus
             class="q-mb-lg cashub-nowrap"
@@ -70,7 +75,7 @@
           rounded
           unelevated
           class="q-ml-xs q-mr-sm"
-          label="Invalid token"
+          :label="$t('ReceiveTokenDialog.errors.invalid_token.label')"
         ></q-btn>
 
         <!-- EMPTY INPUT -->
@@ -82,7 +87,9 @@
             v-if="canPasteFromClipboard"
             @click="pasteToParseDialog(true)"
           >
-            <q-icon name="content_paste" class="q-pr-sm" />Paste</q-btn
+            <q-icon name="content_paste" class="q-pr-sm" />{{
+              $t("ReceiveTokenDialog.actions.paste.label")
+            }}</q-btn
           >
           <q-btn
             unelevated
@@ -92,7 +99,9 @@
             @click="showCamera"
           >
             <ScanIcon size="1.5em" />
-            <span class="q-pl-sm">Scan</span>
+            <span class="q-pl-sm">{{
+              $t("ReceiveTokenDialog.actions.scan.label")
+            }}</span>
           </q-btn>
           <q-btn
             unelevated
@@ -105,12 +114,18 @@
           >
             <NfcIcon class="q-pr-xs" />
             <q-tooltip>{{
-              ndefSupported ? "Read from NFC card" : "NDEF unsupported"
+              ndefSupported
+                ? $t(
+                    "ReceiveTokenDialog.actions.nfc.tooltips.ndef_supported_text"
+                  )
+                : $t(
+                    "ReceiveTokenDialog.actions.nfc.tooltips.ndef_unsupported_text"
+                  )
             }}</q-tooltip>
             <template v-slot:loading>
               <q-spinner @click="toggleScanner"> </q-spinner>
             </template>
-            NFC
+            {{ $t("ReceiveTokenDialog.actions.nfc.label") }}
           </q-btn>
         </div>
 
@@ -135,9 +150,9 @@
               :label="
                 knowThisMint
                   ? addMintBlocking
-                    ? 'Adding mint ...'
-                    : 'Receive'
-                  : 'Receive'
+                    ? $t('ReceiveTokenDialog.actions.receive.label_adding_mint')
+                    : $t('ReceiveTokenDialog.actions.receive.label_known_mint')
+                  : $t('ReceiveTokenDialog.actions.receive.label')
               "
             >
               <template v-slot:loading>
@@ -154,8 +169,10 @@
               class="q-mr-none"
             >
               <q-icon name="swap_horiz" class="q-pr-sm" />
-              Swap
-              <q-tooltip>Swap to a trusted mint</q-tooltip>
+              {{ $t("ReceiveTokenDialog.actions.swap.label") }}
+              <q-tooltip>{{
+                $t("ReceiveTokenDialog.actions.swap.tooltip_text")
+              }}</q-tooltip>
             </q-btn>
             <q-btn
               @click="addPendingTokenToHistory(receiveData.tokensBase64)"
@@ -163,8 +180,10 @@
               rounded
               flat
               class="q-mr-none"
-              >Later
-              <q-tooltip>Add to history to receive later</q-tooltip>
+              >{{ $t("ReceiveTokenDialog.actions.later.label") }}
+              <q-tooltip>{{
+                $t("ReceiveTokenDialog.actions.later.tooltip_text")
+              }}</q-tooltip>
             </q-btn>
           </div>
           <!-- swap mint selection -->
@@ -172,12 +191,16 @@
             <!-- <div v-if="activeMintUrl != tokenMint || swapBlocking"> -->
             <div>
               <q-icon name="arrow_downward" class="q-mr-xs" color="positive" />
-              <span
-                >Swap
-                <strong>{{
-                  formatCurrency(swapToMintAmount, tokenUnit)
-                }}</strong>
-              </span>
+              <i18n-t
+                keypath="ReceiveTokenDialog.actions.swap.caption"
+                tag="span"
+              >
+                <template v-slot:value>
+                  <strong>{{
+                    formatCurrency(swapToMintAmount, tokenUnit)
+                  }}</strong>
+                </template>
+              </i18n-t>
             </div>
             <!-- <div v-else>
               <q-icon name="south" class="q-mr-xs" color="negative" />
@@ -201,12 +224,14 @@
               :disabled="activeMintUrl == tokenMint"
             >
               <q-icon name="swap_horiz" class="q-pr-sm" />
-              Swap
+              {{ $t("ReceiveTokenDialog.actions.confirm_swap.label") }}
               <template v-slot:loading>
                 <q-spinner-hourglass size="xs" />
-                Swap
+                {{ $t("ReceiveTokenDialog.actions.confirm_swap.in_progress") }}
               </template>
-              <q-tooltip>Swap to a trusted mint</q-tooltip>
+              <q-tooltip>{{
+                $t("ReceiveTokenDialog.actions.confirm_swap.tooltip_text")
+              }}</q-tooltip>
             </q-btn>
             <q-btn
               @click="swapSelected = false"
@@ -217,8 +242,10 @@
               v-if="!swapBlocking"
             >
               <q-icon name="close" class="q-pr-sm" />
-              Cancel
-              <q-tooltip>Cancel swap</q-tooltip>
+              {{ $t("ReceiveTokenDialog.actions.cancel_swap.label") }}
+              <q-tooltip>{{
+                $t("ReceiveTokenDialog.actions.cancel_swap.tooltip_text")
+              }}</q-tooltip>
             </q-btn>
           </div>
         </div>
@@ -322,7 +349,13 @@ export default defineComponent({
       );
     },
     tokenDecodesCorrectly: function () {
-      return this.decodeToken(this.receiveData.tokensBase64) !== undefined;
+      // Try decoding token directly
+      if (this.decodeToken(this.receiveData.tokensBase64) !== undefined) {
+        return true;
+      }
+
+      // Fall back to peanut check
+      return this.decodePeanut(this.receiveData.tokensBase64) !== undefined;
     },
     knowThisMint: function () {
       const tokenJson = this.decodeToken(this.receiveData.tokensBase64);
@@ -378,6 +411,51 @@ export default defineComponent({
       "pasteToParseDialog",
     ]),
     // TOKEN METHODS
+    decodePeanut: function (peanut) {
+      try {
+        let decoded = [];
+        const chars = Array.from(peanut);
+        if (!chars.length) return undefined;
+        const fromVariationSelector = function (char) {
+          const codePoint = char.codePointAt(0);
+
+          // Handle Variation Selectors (VS1-VS16): U+FE00 to U+FE0F
+          if (codePoint >= 0xfe00 && codePoint <= 0xfe0f) {
+            // Maps FE00->0, FE01->1, ..., FE0F->15
+            const byteValue = codePoint - 0xfe00;
+            return String.fromCharCode(byteValue);
+          }
+
+          // Handle Variation Selectors Supplement (VS17-VS256): U+E0100 to U+E01EF
+          if (codePoint >= 0xe0100 && codePoint <= 0xe01ef) {
+            // Maps E0100->16, E0101->17, ..., E01EF->255
+            const byteValue = codePoint - 0xe0100 + 16;
+            return String.fromCharCode(byteValue);
+          }
+
+          // No Variation Selector
+          return null;
+        };
+        // Check all input chars for peanut data
+        for (const char of chars) {
+          let byte = fromVariationSelector(char);
+          if (byte === null && decoded.length > 0) {
+            break;
+          } else if (byte === null) {
+            continue;
+          }
+          decoded.push(byte); // got some
+        }
+        // Switch out token if we found peanut data
+        decoded = decoded.join("");
+        if (decoded) {
+          this.receiveData.tokensBase64 = decoded;
+        }
+        return this.decodeToken(decoded);
+      } catch (error) {
+        return undefined;
+      }
+    },
     getProofs: function (decoded_token) {
       return token.getProofs(decoded_token);
     },
@@ -393,7 +471,11 @@ export default defineComponent({
     },
     addPendingTokenToHistory: function (tokenStr) {
       if (this.tokenAlreadyInHistory(tokenStr)) {
-        this.notifySuccess("Ecash already in History");
+        this.notifySuccess(
+          this.$i18n.t(
+            "ReceiveTokenDialog.actions.later.already_in_history_success_text"
+          )
+        );
         this.showReceiveTokens = false;
         return;
       }
@@ -415,7 +497,11 @@ export default defineComponent({
       });
       this.showReceiveTokens = false;
       // show success notification
-      this.notifySuccess("Ecash added to History");
+      this.notifySuccess(
+        this.$i18n.t(
+          "ReceiveTokenDialog.actions.later.added_to_history_success_text"
+        )
+      );
     },
     handleSwapToTrustedMint: async function () {
       const mint = useMintsStore().activeMint().mint;

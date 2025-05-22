@@ -15,7 +15,7 @@
           v-model="chosenMint"
           :options="chooseMintOptions()"
           option-value="url"
-          option-label="shorturl"
+          option-label="nickname"
           :rounded="rounded"
           :style="style"
         >
@@ -45,6 +45,14 @@
                     :label="formatCurrency(scope.opt.balances[unit], unit)"
                     class="q-mr-xs q-mb-xs"
                   />
+                  <div v-if="scope.opt.errored" class="error-badge">
+                    <q-badge
+                      color="red"
+                      class="q-mr-xs q-mt-sm text-weight-bold"
+                      >{{ $t("ChooseMint.badge_option_mint_error_text") }}
+                      <q-icon name="error" class="q-ml-xs" />
+                    </q-badge>
+                  </div>
                 </div>
               </q-item-section>
             </q-item>
@@ -59,11 +67,22 @@
             />
           </template>
           <template v-slot:append>
-            <q-badge
-              color="primary"
-              :label="formatCurrency(getBalance, activeUnit)"
-              class="q-ma-xs q-pa-sm text-weight-bold"
-          /></template>
+            <div class="row items-center">
+              <q-badge
+                v-if="chosenMint?.errored"
+                color="red"
+                class="q-mr-xs text-weight-bold"
+              >
+                {{ $t("ChooseMint.badge_mint_error_text") }}
+                <q-icon name="error" class="q-ml-xs" />
+              </q-badge>
+              <q-badge
+                color="primary"
+                :label="formatCurrency(getBalance, activeUnit)"
+                class="q-ma-xs q-pa-sm text-weight-bold"
+              />
+            </div>
+          </template>
         </q-select>
       </div>
     </div>
@@ -76,6 +95,7 @@ import { getShortUrl } from "src/js/wallet-helpers";
 import { mapActions, mapState, mapWritableState } from "pinia";
 import { useMintsStore } from "stores/mints";
 import { MintClass } from "stores/mints";
+import { i18n } from "../boot/i18n";
 import { title } from "process";
 
 export default defineComponent({
@@ -88,7 +108,7 @@ export default defineComponent({
     },
     title: {
       type: String,
-      default: "Select a mint",
+      default: i18n.global.t("ChooseMint.title"),
     },
     style: {
       type: String,
@@ -101,9 +121,13 @@ export default defineComponent({
     };
   },
   mounted() {
+    const m = this.mints.find((m) => m.url === this.activeMintUrl);
+    const mint = new MintClass(m);
     this.chosenMint = {
       url: this.activeMintUrl,
+      nickname: mint.mint.nickname || mint.mint.info?.name,
       shorturl: getShortUrl(this.activeMintUrl),
+      errored: mint.mint.errored,
     };
   },
   watch: {
@@ -116,7 +140,6 @@ export default defineComponent({
       "activeMintUrl",
       "activeProofs",
       "mints",
-      "proofs",
       "activeUnit",
     ]),
     ...mapWritableState(useMintsStore, ["activeMintUrl"]),
@@ -135,10 +158,11 @@ export default defineComponent({
         const units = [...new Set(all_units)];
         const mint = new MintClass(m);
         options.push({
-          nickname: m.nickname,
-          url: m.url,
-          shorturl: m.nickname || getShortUrl(m.url),
+          nickname: mint.mint.nickname || mint.mint.info?.name,
+          url: mint.mint.url,
+          shorturl: getShortUrl(m.url),
           balances: mint.allBalances,
+          errored: mint.mint.errored,
           units: units,
         });
       }

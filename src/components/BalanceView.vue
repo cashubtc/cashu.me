@@ -88,12 +88,22 @@
         </q-carousel-slide>
       </q-carousel>
     </transition>
+    <div
+      v-if="activeMint().mint.errored"
+      class="row q-mt-md q-mb-none text-secondary"
+    >
+      <div class="col-12">
+        <q-badge outline color="red" class="q-mr-xs q-mt-sm text-weight-bold">
+          {{ $t("BalanceView.mintError.label") }}
+          <q-icon name="error" class="q-ml-xs" />
+        </q-badge>
+      </div>
+    </div>
     <!-- mint url -->
-
     <div class="row q-mt-md q-mb-none text-secondary" v-if="activeMintUrl">
       <div class="col-12 cursor-pointer">
         <span class="text-weight-light" @click="setTab('mints')">
-          Mint: <b>{{ activeMintLabel }}</b>
+          {{ $t("BalanceView.mintUrl.label") }}: <b>{{ activeMintLabel }}</b>
         </span>
       </div>
     </div>
@@ -101,10 +111,10 @@
     <div class="row q-mb-none text-secondary" v-if="mints.length > 1">
       <div class="col-12">
         <span class="q-my-none q-py-none text-weight-regular">
-          Balance:
+          {{ $t("BalanceView.mintBalance.label") }}:
           <b>
             <AnimatedNumber
-              :value="getActiveMintBalance"
+              :value="getActiveBalance"
               :format="(val) => formatCurrency(val, activeUnit)"
               class="q-my-none q-py-none cursor-pointer"
             />
@@ -125,9 +135,10 @@
         outline
         class="q-mx-none q-mt-xs q-pr-sm cursor-pointer"
         @click="checkPendingTokens()"
-        ><q-icon name="history" size="1rem" class="q-mx-xs" /> Pending:
+        ><q-icon name="history" size="1rem" class="q-mx-xs" />
+        {{ $t("BalanceView.pending.label") }}:
         {{ formatCurrency(pendingBalance, this.activeUnit) }}
-        <q-tooltip>Check all pending tokens</q-tooltip>
+        <q-tooltip>{{ $t("BalanceView.pending.tooltip") }}</q-tooltip>
       </q-btn>
     </div>
   </div>
@@ -163,9 +174,9 @@ export default defineComponent({
     ...mapState(useMintsStore, [
       "activeMintUrl",
       "activeProofs",
-      "mints",
-      "proofs",
       "activeBalance",
+      "mints",
+      "totalUnitBalance",
       "activeUnit",
       "activeMint",
     ]),
@@ -173,16 +184,11 @@ export default defineComponent({
     ...mapState(useUiStore, ["globalMutexLock"]),
     ...mapState(usePriceStore, ["bitcoinPrice"]),
     ...mapWritableState(useMintsStore, ["activeUnit"]),
-    ...mapWritableState(useUiStore, ["hideBalance"]),
+    ...mapWritableState(useUiStore, ["hideBalance", "lastBalanceCached"]),
     pendingBalance: function () {
       return -this.historyTokens
         .filter((t) => t.status == "pending")
         .filter((t) => t.unit == this.activeUnit)
-        .reduce((sum, el) => (sum += el.amount), 0);
-    },
-    balance: function () {
-      return this.activeProofs
-        .flat()
         .reduce((sum, el) => (sum += el.amount), 0);
     },
     balancesOptions: function () {
@@ -196,17 +202,19 @@ export default defineComponent({
       return [].concat(...this.mints.map((m) => m.keysets));
     },
     getTotalBalance: function () {
-      return this.activeBalance;
+      return this.totalUnitBalance;
     },
-    getActiveMintBalance: function () {
-      return this.activeProofs
-        .flat()
-        .reduce((sum, el) => (sum += el.amount), 0);
+    getActiveBalance: function () {
+      return this.activeBalance;
     },
     activeMintLabel: function () {
       const mintClass = this.activeMint();
 
-      return mintClass.mint.nickname || getShortUrl(this.activeMintUrl);
+      return (
+        mintClass.mint.nickname ||
+        mintClass.mint.info?.name ||
+        getShortUrl(this.activeMintUrl)
+      );
     },
     getBalance: function () {
       var balance = this.activeProofs

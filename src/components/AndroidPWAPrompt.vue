@@ -6,10 +6,14 @@
       class="pwa-prompt android-pwa-prompt q-pa-md text-center"
     >
       <div class="pwa-prompt-content">
-        <span>
-          Tap <q-icon name="more_vert" size="sm" /> and
-          <strong>Add to Home screen</strong>
-        </span>
+        <i18n-t keypath="AndroidPWAPrompt.text" tag="span">
+          <template v-slot:icon>
+            <q-icon name="more_vert" size="sm" />
+          </template>
+          <template v-slot:buttonText>
+            <strong>{{ $t("AndroidPWAPrompt.buttonText") }}</strong>
+          </template>
+        </i18n-t>
         <q-btn
           flat
           icon="close"

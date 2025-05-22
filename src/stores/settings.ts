@@ -62,6 +62,18 @@ export const useSettingsStore = defineStore("settings", {
         "cashu.settings.autoPasteEcashReceive",
         true
       ),
+      auditorEnabled: useLocalStorage<boolean>(
+        "cashu.settings.auditorEnabled",
+        false
+      ),
+      auditorUrl: useLocalStorage<string>(
+        "cashu.settings.auditorUrl",
+        "https://audit.8333.space"
+      ),
+      auditorApiUrl: useLocalStorage<string>(
+        "cashu.settings.auditorApiUrl",
+        "https://api.audit.8333.space"
+      ),
     };
   },
 });

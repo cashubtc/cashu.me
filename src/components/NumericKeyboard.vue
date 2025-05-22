@@ -31,9 +31,13 @@
         <q-btn flat dense class="text-h5" @click="backspace">
           <q-icon name="backspace" size="sm" />
         </q-btn>
-        <q-btn flat dense @click="closeKeyboard">Close</q-btn>
+        <q-btn flat dense @click="closeKeyboard">{{
+          $t("NumericKeyboard.actions.close.label")
+        }}</q-btn>
         <br />
-        <q-btn flat dense @click="emitDone">Enter</q-btn>
+        <q-btn flat dense @click="emitDone">{{
+          $t("NumericKeyboard.actions.enter.label")
+        }}</q-btn>
       </div>
     </q-card>
   </transition>
@@ -80,7 +84,7 @@ export default defineComponent({
       this.useNumericKeyboard = false;
       this.showNumericKeyboard = false;
       notify(
-        "Keyboard disabled. You can re-enable the keyboard in the settings.",
+        this.$i18n.t("NumericKeyboard.actions.close.closed_info_text"),
         "bottom"
       );
     },

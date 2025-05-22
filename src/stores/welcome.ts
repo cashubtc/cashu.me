@@ -64,7 +64,8 @@ export const useWelcomeStore = defineStore("welcome", {
     closeWelcome() {
       this.showWelcome = false;
       // Redirect to home or desired route
-      window.location.href = "/";
+      window.location.href =
+        "/" + window.location.search + window.location.hash;
     },
 
     /**
@@ -122,6 +123,7 @@ export const useWelcomeStore = defineStore("welcome", {
         }
       }
       // Optionally, handle edge cases or emit events
+      console.log(`href: ${window.location.href}`);
     },
   },
 });

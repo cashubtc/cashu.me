@@ -21,7 +21,7 @@
       <div v-if="!invoiceData.bolt11">
         <div class="row items-center no-wrap q-mb-sm q-pr-md q-py-lg">
           <div class="col-10">
-            <span class="text-h6">Create Invoice</span>
+            <span class="text-h6">{{ $t("InvoiceDetailDialog.title") }}</span>
           </div>
         </div>
         <div class="row items-center no-wrap q-my-sm q-py-none">
@@ -34,7 +34,11 @@
           outlined
           type="number"
           v-model.number="invoiceData.amount"
-          :label="'Amount (' + tickerShort + ') *'"
+          :label="
+            $t('InvoiceDetailDialog.inputs.amount.label', {
+              ticker: tickerShort,
+            })
+          "
           mask="#"
           fill-mask="0"
           reverse-fill-mask
@@ -57,19 +61,19 @@
             :disable="!(invoiceData.amount > 0) || createInvoiceButtonBlocked"
             :label="
               createInvoiceButtonBlocked
-                ? 'Creating invoice...'
-                : 'Create Invoice'
+                ? $t('InvoiceDetailDialog.actions.create.label_blocked')
+                : $t('InvoiceDetailDialog.actions.create.label')
             "
             :loading="globalMutexLock"
           >
             <template v-slot:loading>
               <q-spinner-hourglass />
-              Creating
+              {{ $t("InvoiceDetailDialog.actions.create.in_progress") }}
             </template>
           </q-btn>
-          <q-btn v-close-popup rounded flat color="grey" class="q-ml-auto"
-            >Close</q-btn
-          >
+          <q-btn v-close-popup rounded flat color="grey" class="q-ml-auto">{{
+            $t("InvoiceDetailDialog.actions.close.label")
+          }}</q-btn>
         </div>
       </div>
 
@@ -93,8 +97,7 @@
                 overline
                 class="q-mb-sm q-pt-md text-white"
                 style="font-size: 1rem"
-              >
-                Lightning invoice</q-item-label
+                >{{ $t("InvoiceDetailDialog.invoice.caption") }}</q-item-label
               >
             </div>
             <div class="row justify-center q-py-md">
@@ -141,7 +144,7 @@
                     size="1.5rem"
                     color="positive"
                     class="q-mr-sm q-mb-xs"
-                  />Paid!
+                  />{{ $t("InvoiceDetailDialog.invoice.status_paid_text") }}
                 </span>
               </transition>
             </div>
@@ -154,9 +157,11 @@
             size="md"
             flat
             @click="copyText(invoiceData.bolt11)"
-            >Copy</q-btn
+            >{{ $t("InvoiceDetailDialog.invoice.actions.copy.label") }}</q-btn
           >
-          <q-btn v-close-popup flat color="grey" class="q-ml-auto">Close</q-btn>
+          <q-btn v-close-popup flat color="grey" class="q-ml-auto">{{
+            $t("InvoiceDetailDialog.invoice.actions.close.label")
+          }}</q-btn>
         </div>
       </div>
     </q-card>
