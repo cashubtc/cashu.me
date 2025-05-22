@@ -147,7 +147,7 @@ export default defineComponent({
       );
       if (totalQuoteAmount >= overallBalance) {
         console.error("multi-mint balance not enough to satisfy this invoice");
-        notifyError($t("MultinutPicker.balanceNotEnough"));
+        notifyError(this.$i18n.t("MultinutPicker.balanceNotEnough"));
         return;
       }
       let mintAndQuotesArray = [];
@@ -177,6 +177,9 @@ export default defineComponent({
           }
           i++;
         }
+        console.log(
+          `mintAndQuotesArray: ${JSON.stringify(mintAndQuotesArray)}`
+        );
         data = await Promise.all(
           mintAndQuotesArray.map(([mint, quote]) => {
             const mintWallet = useWalletStore().mintWallet(
@@ -189,7 +192,7 @@ export default defineComponent({
           })
         );
       } catch (error) {
-        notifyError($t("MultinutPicker.failed", { error: error }));
+        notifyError(this.$i18n.t("MultinutPicker.failed", { error: error }));
         console.error(`${error}`);
         throw error;
       } finally {
@@ -206,7 +209,7 @@ export default defineComponent({
           0
         );
       notifySuccess(
-        $t("MultinutPicker.paid", {
+        this.$i18n.t("MultinutPicker.paid", {
           amount: uiStore.formatCurrency(amountPaid, activeUnit),
         })
       );
