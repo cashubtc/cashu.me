@@ -469,6 +469,9 @@ export default {
       mints: {
         label: "Mints",
       },
+      buckets: {
+        label: "Buckets",
+      },
     },
     install: {
       text: "Install",
@@ -1218,6 +1221,21 @@ export default {
         label: "@:global.actions.add_mint.label",
         in_progress: "Adding mint",
       },
+    },
+  },
+  BucketManager: {
+    actions: {
+      add: "Add bucket",
+      delete: "Delete",
+    },
+    inputs: {
+      name: "Name",
+      color: "Color",
+      description: "Description",
+      goal: "Goal (sat)",
+    },
+    delete_confirm: {
+      title: "Delete bucket?",
     },
   },
   restore: {
