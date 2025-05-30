@@ -139,6 +139,17 @@
               :showP2PKCheck="true"
             />
           </div>
+          <div class="row q-pt-sm">
+            <q-select
+              v-model="receiveData.bucketId"
+              :options="bucketOptions"
+              emit-value
+              map-options
+              outlined
+              dense
+              :label="$t('BucketManager.inputs.name')"
+            />
+          </div>
           <div class="row q-pt-md" v-if="!swapSelected">
             <q-btn
               @click="receiveIfDecodes"
@@ -272,6 +283,8 @@ import token from "src/js/token";
 import ChooseMint from "src/components/ChooseMint.vue";
 import TokenInformation from "components/TokenInformation.vue";
 
+import { useBucketsStore, DEFAULT_BUCKET_ID } from "src/stores/buckets";
+
 import { mapActions, mapState, mapWritableState } from "pinia";
 import {
   ChevronLeft as ChevronLeftIcon,
@@ -315,6 +328,14 @@ export default defineComponent({
         });
       }
     },
+    bucketList: {
+      handler(newList) {
+        if (!newList.find((b) => b.id === this.receiveData.bucketId)) {
+          this.receiveData.bucketId = DEFAULT_BUCKET_ID;
+        }
+      },
+      deep: true,
+    },
   },
   computed: {
     ...mapWritableState(useReceiveTokensStore, [
@@ -341,6 +362,10 @@ export default defineComponent({
     ...mapState(useSwapStore, ["swapBlocking"]),
     ...mapWritableState(useUiStore, ["showReceiveDialog"]),
     ...mapState(useCameraStore, ["lastScannedResult"]),
+    ...mapState(useBucketsStore, ["bucketList"]),
+    bucketOptions() {
+      return this.bucketList.map((b) => ({ label: b.name, value: b.id }));
+    },
     canPasteFromClipboard: function () {
       return (
         window.isSecureContext &&

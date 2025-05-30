@@ -880,6 +880,9 @@ export default {
       tokens_base64: {
         label: "Paste Cashu token",
       },
+      bucket: {
+        label: "Bucket",
+      },
     },
     errors: {
       invalid_token: {

@@ -878,6 +878,9 @@ export default {
       tokens_base64: {
         label: "Klistra in Cashu token",
       },
+      bucket: {
+        label: "Bucket",
+      },
     },
     errors: {
       invalid_token: {

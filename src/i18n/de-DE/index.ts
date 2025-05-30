@@ -885,6 +885,9 @@ export default {
       tokens_base64: {
         label: "Cashu Token einfügen",
       },
+      bucket: {
+        label: "Bucket",
+      },
     },
     errors: {
       invalid_token: {

@@ -877,6 +877,9 @@ export default {
       tokens_base64: {
         label: "Cashuトークンを貼り付け",
       },
+      bucket: {
+        label: "Bucket",
+      },
     },
     errors: {
       invalid_token: {
