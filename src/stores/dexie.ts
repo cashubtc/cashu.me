@@ -23,6 +23,20 @@ export class CashuDexie extends Dexie {
     this.version(1).stores({
       proofs: "secret, id, C, amount, reserved, quote",
     });
+    this.version(2)
+      .stores({
+        proofs: "secret, id, C, amount, reserved, quote, bucketId",
+      })
+      .upgrade(async (tx) => {
+        await tx
+          .table("proofs")
+          .toCollection()
+          .modify((proof: any) => {
+            if (proof.bucketId === undefined) {
+              proof.bucketId = "unassigned";
+            }
+          });
+      });
   }
 }
 

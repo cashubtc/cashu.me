@@ -84,25 +84,30 @@ export const useProofsStore = defineStore("proofs", {
         }
       });
     },
-    proofsToWalletProofs(proofs: Proof[], quote?: string): WalletProof[] {
+    proofsToWalletProofs(
+      proofs: Proof[],
+      quote?: string,
+      bucketId: string = "unassigned"
+    ): WalletProof[] {
       return proofs.map((p) => {
         return {
           ...p,
           reserved: false,
           quote: quote,
+          bucketId,
         } as WalletProof;
       });
     },
-    async addProofs(proofs: Proof[], quote?: string) {
-      const walletProofs = this.proofsToWalletProofs(proofs);
+    async addProofs(proofs: Proof[], quote?: string, bucketId: string = "unassigned") {
+      const walletProofs = this.proofsToWalletProofs(proofs, quote, bucketId);
       await cashuDb.transaction("rw", cashuDb.proofs, async () => {
         walletProofs.forEach(async (p) => {
           await cashuDb.proofs.add(p);
         });
       });
     },
-    async removeProofs(proofs: Proof[]) {
-      const walletProofs = this.proofsToWalletProofs(proofs);
+    async removeProofs(proofs: Proof[], bucketId: string = "unassigned") {
+      const walletProofs = this.proofsToWalletProofs(proofs, undefined, bucketId);
       await cashuDb.transaction("rw", cashuDb.proofs, async () => {
         walletProofs.forEach(async (p) => {
           await cashuDb.proofs.delete(p.secret);
