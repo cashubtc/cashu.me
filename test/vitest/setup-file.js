@@ -1,1 +1,11 @@
-// This file will be run before each test file
+import 'fake-indexeddb/auto'
+import { vi, beforeEach } from 'vitest'
+import { createPinia, setActivePinia } from 'pinia'
+
+vi.mock('quasar', () => ({
+  Notify: { create: vi.fn() },
+}))
+
+beforeEach(() => {
+  setActivePinia(createPinia())
+})
