@@ -83,7 +83,11 @@ export class MintClass {
 }
 
 // type that extends type Proof with reserved boolean
-export type WalletProof = Proof & { reserved: boolean; quote?: string };
+export type WalletProof = Proof & {
+  reserved: boolean;
+  quote?: string;
+  bucketId?: string;
+};
 
 export type Balances = {
   [unit: string]: number;
