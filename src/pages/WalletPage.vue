@@ -94,6 +94,11 @@
             class="text-secondary"
             :label="$t('WalletPage.tabs.mints.label')"
           ></q-tab>
+          <q-tab
+            name="buckets"
+            class="text-secondary"
+            :label="$t('WalletPage.tabs.buckets.label')"
+          ></q-tab>
         </q-tabs>
 
         <q-tab-panels
@@ -117,6 +122,9 @@
 
           <q-tab-panel name="mints" class="q-px-sm">
             <MintSettings />
+          </q-tab-panel>
+          <q-tab-panel name="buckets" class="q-px-sm">
+            <BucketManager />
           </q-tab-panel>
         </q-tab-panels>
       </q-expansion-item>
@@ -246,6 +254,7 @@ import QrcodeReader from "components/QrcodeReader.vue";
 import iOSPWAPrompt from "components/iOSPWAPrompt.vue";
 import AndroidPWAPrompt from "components/AndroidPWAPrompt.vue";
 import ActivityOrb from "components/ActivityOrb.vue";
+import BucketManager from "components/BucketManager.vue";
 
 // pinia stores
 import { mapActions, mapState, mapWritableState } from "pinia";
@@ -300,6 +309,7 @@ export default {
     AndroidPWAPrompt,
     ScanIcon,
     ActivityOrb,
+    BucketManager,
   },
   data: function () {
     return {
@@ -545,13 +555,13 @@ export default {
         this.deferredPWAInstallPrompt = e;
         console.log(
           `'beforeinstallprompt' event was fired.`,
-          this.getPwaDisplayMode()
+          this.getPwaDisplayMode(),
         );
       });
     },
     getPwaDisplayMode: function () {
       const isStandalone = window.matchMedia(
-        "(display-mode: standalone)"
+        "(display-mode: standalone)",
       ).matches;
       if (document.referrer.startsWith("android-app://")) {
         return "twa";
@@ -580,7 +590,7 @@ export default {
         sessionStorage.setItem(
           "tabId",
           Math.random().toString(36).substring(2) +
-            new Date().getTime().toString(36)
+            new Date().getTime().toString(36),
         );
       }
       const tabId = sessionStorage.getItem("tabId");

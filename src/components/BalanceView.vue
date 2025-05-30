@@ -129,6 +129,27 @@
       </div>
     </div>
   </div>
+  <div
+    v-for="bucket in bucketList"
+    :key="bucket.id"
+    class="row q-mt-xs q-mb-none text-secondary"
+  >
+    <div class="col-12">
+      <span class="q-my-none q-py-none text-weight-regular">
+        {{ bucket.name }}:
+        <b>{{ formatCurrency(bucketBalances[bucket.id] || 0, activeUnit) }}</b>
+        <span v-if="bucket.goal"
+          >/ {{ formatCurrency(bucket.goal, activeUnit) }}</span
+        >
+      </span>
+      <q-linear-progress
+        v-if="bucket.goal"
+        :value="Math.min(bucketBalances[bucket.id] / bucket.goal, 1)"
+        color="primary"
+        class="q-mt-xs"
+      />
+    </div>
+  </div>
   <!-- pending -->
   <div class="row q-mt-xs q-mb-none" v-if="pendingBalance > 0">
     <div class="col-12">
@@ -162,6 +183,7 @@ import { useTokensStore } from "stores/tokens";
 import { useUiStore } from "stores/ui";
 import { useWalletStore } from "stores/wallet";
 import { usePriceStore } from "stores/price";
+import { useBucketsStore } from "stores/buckets";
 import ToggleUnit from "components/ToggleUnit.vue";
 import AnimatedNumber from "components/AnimatedNumber.vue";
 import axios from "axios";
@@ -190,6 +212,7 @@ export default defineComponent({
     ...mapState(useTokensStore, ["historyTokens"]),
     ...mapState(useUiStore, ["globalMutexLock"]),
     ...mapState(usePriceStore, ["bitcoinPrice"]),
+    ...mapState(useBucketsStore, ["bucketList", "bucketBalances"]),
     ...mapWritableState(useMintsStore, ["activeUnit"]),
     ...mapWritableState(useUiStore, ["hideBalance", "lastBalanceCached"]),
     pendingBalance: function () {
