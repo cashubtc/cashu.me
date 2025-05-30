@@ -96,6 +96,13 @@ export default {
           caption: "Wallet configuration",
         },
       },
+      buckets: {
+        title: "Buckets",
+        buckets: {
+          title: "Buckets",
+          caption: "Manage buckets",
+        },
+      },
       terms: {
         title: "Terms",
         terms: {
