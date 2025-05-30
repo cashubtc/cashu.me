@@ -3,6 +3,8 @@ import { useLocalStorage } from "@vueuse/core";
 import { v4 as uuidv4 } from "uuid";
 import { cashuDb } from "./dexie";
 import { useProofsStore } from "./proofs";
+import { ref, watch } from "vue";
+import { notifySuccess } from "src/js/notify";
 
 export type Bucket = {
   id: string;
@@ -16,11 +18,35 @@ export const DEFAULT_BUCKET_ID = "unassigned";
 export const DEFAULT_BUCKET_NAME = "Unassigned";
 
 export const useBucketsStore = defineStore("buckets", {
-  state: () => ({
-    buckets: useLocalStorage<Bucket[]>("cashu.buckets", [
+  state: () => {
+    const buckets = useLocalStorage<Bucket[]>("cashu.buckets", [
       { id: DEFAULT_BUCKET_ID, name: DEFAULT_BUCKET_NAME },
-    ]),
-  }),
+    ]);
+    const proofsStore = useProofsStore();
+    const notifiedGoals = ref<Record<string, boolean>>({});
+
+    watch(
+      () => proofsStore.proofs,
+      () => {
+        buckets.value.forEach((bucket) => {
+          if (!bucket.goal) return;
+          const sum = proofsStore.proofs
+            .filter((p) => p.bucketId === bucket.id && !p.reserved)
+            .reduce((s, p) => s + p.amount, 0);
+          if (sum >= bucket.goal && !notifiedGoals.value[bucket.id]) {
+            notifySuccess(`Bucket ${bucket.name} goal reached!`);
+            notifiedGoals.value[bucket.id] = true;
+          }
+        });
+      },
+      { deep: true }
+    );
+
+    return {
+      buckets,
+      notifiedGoals,
+    };
+  },
   getters: {
     bucketList(state): Bucket[] {
       // ensure default bucket always exists
