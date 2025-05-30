@@ -1235,7 +1235,7 @@ export default {
   },
   BucketManager: {
     actions: {
-      add: "Add bucket",
+      add: "Create new Bucket",
       delete: "Delete",
     },
     inputs: {
