@@ -883,6 +883,9 @@ export default {
       tokens_base64: {
         label: "Επικολλήστε το token Cashu",
       },
+      bucket: {
+        label: "Bucket",
+      },
     },
     errors: {
       invalid_token: {

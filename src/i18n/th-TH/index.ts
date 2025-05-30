@@ -875,6 +875,9 @@ export default {
       tokens_base64: {
         label: "วางโทเค็น Cashu",
       },
+      bucket: {
+        label: "Bucket",
+      },
     },
     errors: {
       invalid_token: {
