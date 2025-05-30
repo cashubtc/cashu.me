@@ -89,7 +89,7 @@
           }}</q-item-label>
         </q-item-section>
       </q-item>
-      <q-item clickable to="/buckets">
+      <q-item clickable @click="gotoBuckets">
         <q-item-section avatar>
           <q-icon name="inventory_2" />
         </q-item-section>
@@ -132,6 +132,7 @@
 
 <script>
 import { defineComponent, ref } from "vue";
+import { useRouter } from "vue-router";
 import EssentialLink from "components/EssentialLink.vue";
 import { useUiStore } from "src/stores/ui";
 import { useI18n } from "vue-i18n";
@@ -146,6 +147,7 @@ export default defineComponent({
     const leftDrawerOpen = ref(false);
     const uiStore = useUiStore();
     const { t } = useI18n();
+    const router = useRouter();
     const countdown = ref(0);
     let countdownInterval;
 
@@ -210,6 +212,11 @@ export default defineComponent({
       }, 1000);
     };
 
+    const gotoBuckets = () => {
+      router.push("/buckets");
+      leftDrawerOpen.value = false;
+    };
+
     return {
       essentialLinks,
       leftDrawerOpen,
@@ -218,6 +225,7 @@ export default defineComponent({
       reload,
       countdown,
       uiStore,
+      gotoBuckets,
     };
   },
 });
