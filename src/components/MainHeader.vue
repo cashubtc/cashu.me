@@ -89,6 +89,19 @@
           }}</q-item-label>
         </q-item-section>
       </q-item>
+      <q-item clickable to="/buckets">
+        <q-item-section avatar>
+          <q-icon name="inventory_2" />
+        </q-item-section>
+        <q-item-section>
+          <q-item-label>{{
+            $t("MainHeader.menu.buckets.buckets.title")
+          }}</q-item-label>
+          <q-item-label caption>{{
+            $t("MainHeader.menu.buckets.buckets.caption")
+          }}</q-item-label>
+        </q-item-section>
+      </q-item>
       <q-item-label header>{{
         $t("MainHeader.menu.terms.title")
       }}</q-item-label>
