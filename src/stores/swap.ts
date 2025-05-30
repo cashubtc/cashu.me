@@ -4,6 +4,7 @@ import { defineStore } from "pinia";
 import { PaymentRequest, Proof, Token } from "@cashu/cashu-ts";
 import { Mint, useMintsStore } from "./mints";
 import { useWalletStore } from "./wallet";
+import { DEFAULT_BUCKET_ID } from "./buckets";
 import { useProofsStore } from "./proofs";
 import { notifyError, notifyWarning } from "../js/notify";
 import token from "src/js/token";
@@ -54,33 +55,34 @@ export const useSwapStore = defineStore("swap", {
         // await mintStore.activateMintUrl(swapAmountData.toUrl);
         const toWallet = walletStore.mintWallet(
           swapAmountData.toUrl,
-          mintStore.activeUnit
+          mintStore.activeUnit,
         );
         const mintQuote = await walletStore.requestMint(
           swapAmountData.amount,
-          toWallet
+          toWallet,
         );
 
         // pay invoice
         const fromWallet = walletStore.mintWallet(
           swapAmountData.fromUrl,
-          mintStore.activeUnit
+          mintStore.activeUnit,
         );
         const meltQuote = await walletStore.meltQuote(
           fromWallet,
-          mintQuote.request
+          mintQuote.request,
         );
         const mint = mintStore.mints.find(
-          (m) => m.url === swapAmountData.fromUrl
+          (m) => m.url === swapAmountData.fromUrl,
         );
         if (!mint) {
           throw new Error("mint not found");
         }
         const mintProofs = mintStore.mintUnitProofs(mint, fromWallet.unit);
+        const bucketId = mintProofs[0]?.bucketId ?? DEFAULT_BUCKET_ID;
         await walletStore.melt(mintProofs, meltQuote, fromWallet);
 
         // settle invoice on other side
-        await walletStore.checkInvoice(mintQuote.quote);
+        await walletStore.checkInvoice(mintQuote.quote, true, true, bucketId);
       } catch (e) {
         console.error("Error swapping", e);
         notifyError(i18n.global.t("swap.swap_error_text"));
@@ -125,11 +127,12 @@ export const useSwapStore = defineStore("swap", {
         const mintQuote = await walletStore.requestMint(meltAmount, toWallet);
         const meltQuote = await walletStore.meltQuote(
           fromWallet,
-          mintQuote.request
+          mintQuote.request,
         );
         await walletStore.melt(proofs, meltQuote, fromWallet);
 
-        await walletStore.checkInvoice(mintQuote.quote);
+        const bucketId = proofs[0]?.bucketId ?? DEFAULT_BUCKET_ID;
+        await walletStore.checkInvoice(mintQuote.quote, true, true, bucketId);
       } catch (e) {
         console.error("Error swapping", e);
         notifyError(i18n.global.t("swap.swap_error_text"));
