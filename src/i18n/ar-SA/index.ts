@@ -874,6 +874,9 @@ export default {
       tokens_base64: {
         label: "لصق رمز Cashu",
       },
+      bucket: {
+        label: "Bucket",
+      },
     },
     errors: {
       invalid_token: {

@@ -884,6 +884,9 @@ export default {
       tokens_base64: {
         label: "Coller le jeton Cashu",
       },
+      bucket: {
+        label: "Bucket",
+      },
     },
     errors: {
       invalid_token: {

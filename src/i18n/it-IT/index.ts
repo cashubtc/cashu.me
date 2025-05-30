@@ -878,6 +878,9 @@ export default {
       tokens_base64: {
         label: "Incolla token Cashu",
       },
+      bucket: {
+        label: "Bucket",
+      },
     },
     errors: {
       invalid_token: {
