@@ -11,11 +11,13 @@ export const useCreatorsStore = defineStore("creators", {
   state: () => ({
     searchResults: [] as CreatorProfile[],
     searching: false,
+    error: "",
   }),
   actions: {
     async searchCreators(query: string) {
       const nostrStore = useNostrStore();
       this.searchResults = [];
+      this.error = "";
       if (!query) {
         return;
       }
@@ -28,9 +30,14 @@ export const useCreatorsStore = defineStore("creators", {
           pubkey = typeof decoded.data === "string" ? (decoded.data as string) : "";
         } catch (e) {
           console.error(e);
+          this.error = "Invalid npub";
           this.searching = false;
           return;
         }
+      } else if (!/^[0-9a-fA-F]{64}$/.test(pubkey)) {
+        this.error = "Invalid pubkey";
+        this.searching = false;
+        return;
       }
       try {
         const user = nostrStore.ndk.getUser({ pubkey });

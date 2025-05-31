@@ -17,6 +17,9 @@
     <div v-if="searching" class="q-mt-md flex flex-center">
       <q-spinner-dots color="primary" />
     </div>
+    <div v-else-if="error" class="q-mt-md text-negative text-bold">
+      {{ error }}
+    </div>
 
     <q-list v-if="searchResults.length" class="q-mt-md">
       <q-item v-for="creator in searchResults" :key="creator.pubkey">
@@ -45,7 +48,7 @@ export default defineComponent({
   name: "FindCreatorsView",
   setup() {
     const creatorsStore = useCreatorsStore();
-    const { searchResults, searching } = storeToRefs(creatorsStore);
+    const { searchResults, searching, error } = storeToRefs(creatorsStore);
     const searchInput = ref("");
 
     const triggerSearch = () => {
@@ -70,6 +73,7 @@ export default defineComponent({
       triggerSearch,
       searchResults,
       searching,
+      error,
     };
   },
 });
