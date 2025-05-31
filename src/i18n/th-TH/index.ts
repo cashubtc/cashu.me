@@ -795,6 +795,12 @@ export default {
       p2pk_pubkey: {
         label: "คีย์สาธารณะของผู้รับ",
         label_invalid: "คีย์สาธารณะของผู้รับ",
+locktime: {
+        label: "Unlock time",
+      },
+      refund_pubkey: {
+        label: "Refund public key",
+      },
       },
     },
     actions: {
@@ -884,6 +890,9 @@ export default {
     },
     errors: {
       invalid_token: {
+timelock: {
+      unlock_date_label: "Unlocks { value }",
+    },
         label: "โทเค็นไม่ถูกต้อง",
       },
     },

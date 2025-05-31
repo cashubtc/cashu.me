@@ -170,11 +170,11 @@
                   "
                   @keyup.enter="lockTokens"
                 ></q-input>
-              </div>
-              <div class="col-4 q-mx-md">
-                <q-btn
-                  unelevated
-                  v-if="canPasteFromClipboard && !sendData.p2pkPubkey"
+            </div>
+            <div class="col-4 q-mx-md">
+              <q-btn
+                unelevated
+                v-if="canPasteFromClipboard && !sendData.p2pkPubkey"
                   icon="content_paste"
                   @click="pasteToP2PKField"
                   ><q-tooltip>{{
@@ -183,17 +183,34 @@
                 >
                 <q-btn
                   align="center"
-                  v-if="!sendData.p2pkPubkey"
-                  flat
-                  outline
-                  color="primary"
-                  round
-                  @click="showCamera"
-                  ><ScanIcon size="1.5em"
-                /></q-btn>
-              </div>
+                v-if="!sendData.p2pkPubkey"
+                flat
+                outline
+                color="primary"
+                round
+                @click="showCamera"
+                ><ScanIcon size="1.5em"
+              /></q-btn>
             </div>
-          </transition>
+          </div>
+          <div v-if="showLockInput" class="row q-mt-md">
+            <q-input
+              v-model="locktimeInput"
+              type="datetime-local"
+              :label="$t('SendTokenDialog.inputs.locktime.label')"
+              outlined
+              dense
+              class="col-12 q-mb-sm"
+            />
+            <q-input
+              v-model="sendData.refundPubkey"
+              :label="$t('SendTokenDialog.inputs.refund_pubkey.label')"
+              outlined
+              dense
+              class="col-12"
+            />
+          </div>
+        </transition>
           <div v-if="activeBalance >= sendData.amount" class="row q-mt-lg">
             <q-btn
               v-if="!sendData.tokens"
@@ -625,6 +642,7 @@ export default defineComponent({
       encoder: null,
       showDeleteDialog: false,
       p2pkInput: "",
+      locktimeInput: "",
 
       // parameters for animated QR
       currentFragmentLength: 150,
@@ -799,6 +817,13 @@ export default defineComponent({
         this.sendData.tokensBase64 = "";
         this.sendData.historyToken = null;
         this.sendData.paymentRequest = null;
+      }
+    },
+    locktimeInput(val) {
+      if (val) {
+        this.sendData.locktime = Math.floor(new Date(val).getTime() / 1000);
+      } else {
+        this.sendData.locktime = null;
       }
     },
   },
@@ -1064,12 +1089,20 @@ export default defineComponent({
         const proofsForBucket = this.activeProofs.filter(
           (p) => p.bucketId === bucketId
         );
+        this.sendData.p2pkPubkey = this.maybeConvertNpub(
+          this.sendData.p2pkPubkey
+        );
+        this.sendData.refundPubkey = this.maybeConvertNpub(
+          this.sendData.refundPubkey
+        );
         let { _, sendProofs } = await this.sendToLock(
           proofsForBucket,
           mintWallet,
           sendAmount,
           this.sendData.p2pkPubkey,
-          bucketId
+          bucketId,
+          this.sendData.locktime || undefined,
+          this.sendData.refundPubkey || undefined,
         );
         // update UI
         this.sendData.tokens = sendProofs;

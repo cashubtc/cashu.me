@@ -805,6 +805,12 @@ export default {
         label: "Öffentlicher Schlüssel des Empfängers",
         label_invalid: "Öffentlicher Schlüssel des Empfängers",
       },
+      locktime: {
+        label: "Unlock time",
+      },
+      refund_pubkey: {
+        label: "Refund public key",
+      },
     },
     actions: {
       close: {
@@ -891,6 +897,9 @@ export default {
       label: {
         label: "Label",
       },
+    },
+    timelock: {
+      unlock_date_label: "Unlocks { value }",
     },
     errors: {
       invalid_token: {

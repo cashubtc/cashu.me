@@ -803,6 +803,12 @@ export default {
       p2pk_pubkey: {
         label: "Clé publique du destinataire",
         label_invalid: "Clé publique du destinataire",
+locktime: {
+        label: "Unlock time",
+      },
+      refund_pubkey: {
+        label: "Refund public key",
+      },
       },
     },
     actions: {
@@ -893,6 +899,9 @@ export default {
     },
     errors: {
       invalid_token: {
+timelock: {
+      unlock_date_label: "Unlocks { value }",
+    },
         label: "Jeton invalide",
       },
     },

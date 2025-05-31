@@ -807,6 +807,12 @@ export default {
         label: "Receiver public key",
         label_invalid: "Receiver public key",
       },
+      locktime: {
+        label: "Unlock time",
+      },
+      refund_pubkey: {
+        label: "Refund public key",
+      },
     },
     actions: {
       close: {
@@ -893,6 +899,9 @@ export default {
       label: {
         label: "Label",
       },
+    },
+    timelock: {
+      unlock_date_label: "Unlocks { value }",
     },
     errors: {
       invalid_token: {
