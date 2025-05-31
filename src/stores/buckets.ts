@@ -3,6 +3,7 @@ import { useLocalStorage } from "@vueuse/core";
 import { v4 as uuidv4 } from "uuid";
 import { cashuDb } from "./dexie";
 import { useProofsStore } from "./proofs";
+import { useTokensStore } from "./tokens";
 import { ref, watch } from "vue";
 import { notifySuccess } from "src/js/notify";
 
@@ -113,6 +114,11 @@ export const useBucketsStore = defineStore("buckets", {
               bucketId: DEFAULT_BUCKET_ID,
             });
           }
+        });
+        const tokensStore = useTokensStore();
+        tokensStore.changeHistoryTokenBucket({
+          oldBucketId: id,
+          newBucketId: DEFAULT_BUCKET_ID,
         });
       }
       this.buckets.splice(index, 1);

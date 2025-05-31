@@ -179,6 +179,38 @@ export const useTokensStore = defineStore("tokens", {
         this.historyTokens.splice(index, 1);
       }
     },
+    changeHistoryTokenBucket({
+      secrets,
+      oldBucketId,
+      newBucketId,
+    }: {
+      secrets?: string[];
+      oldBucketId?: string;
+      newBucketId: string;
+    }) {
+      this.historyTokens.forEach((ht) => {
+        let update = false;
+        if (oldBucketId && ht.bucketId === oldBucketId) {
+          update = true;
+        }
+        if (!update && secrets && secrets.length) {
+          try {
+            const tokenJson = token.decode(ht.token);
+            if (tokenJson) {
+              const proofs = token.getProofs(tokenJson);
+              if (proofs.some((p) => secrets.includes(p.secret))) {
+                update = true;
+              }
+            }
+          } catch (e) {
+            console.warn("Could not decode token", e);
+          }
+        }
+        if (update) {
+          ht.bucketId = newBucketId;
+        }
+      });
+    },
     tokenAlreadyInHistory(tokenStr: string): HistoryToken | undefined {
       return this.historyTokens.find((t) => t.token === tokenStr);
     },
