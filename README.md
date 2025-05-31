@@ -74,6 +74,16 @@ In the send dialog choose **Lock** and fill the receiver key, unlock time and
 optional refund key. When a locked token is pasted into the receive dialog the
 unlock date is displayed.
 
+### Timelocked P2PK Tokens
+
+Use the **Lock** option in the Send dialog to create a token tied to a public key. Enter the receiver key, set a lock time (timestamp) and optionally a refund key for recovery. The mint must advertise support for NUT-11 and NUT-10 which can be verified via its `/info` endpoint.
+
+Example workflow:
+
+1. Check `/info` on your mint for `nut_supports` entries `11` and `10`.
+2. Open **Send**, choose **Lock** and provide the recipient key, lock time and refund key.
+3. Share the resulting token string. The recipient pastes it into **Receive** to see the unlock date.
+
 ### Reverse proxy
 
 For Quasar Vue Router with history mode, add this fallback URL to allow refreshes: https://router.vuejs.org/guide/essentials/history-mode.html#HTML5-Mode
