@@ -1263,7 +1263,7 @@ export default {
     inputs: {
       search: {
         label: "Search creators",
-        placeholder: "npub, hex public key or name",
+        placeholder: "npub or hex public key",
       },
     },
   },
