@@ -89,6 +89,19 @@
           }}</q-item-label>
         </q-item-section>
       </q-item>
+      <q-item clickable @click="gotoFindCreators">
+        <q-item-section avatar>
+          <q-icon name="search" />
+        </q-item-section>
+        <q-item-section>
+          <q-item-label>{{
+            $t("MainHeader.menu.findCreators.findCreators.title")
+          }}</q-item-label>
+          <q-item-label caption>{{
+            $t("MainHeader.menu.findCreators.findCreators.caption")
+          }}</q-item-label>
+        </q-item-section>
+      </q-item>
       <q-item clickable @click="gotoBuckets">
         <q-item-section avatar>
           <q-icon name="inventory_2" />
@@ -217,6 +230,11 @@ export default defineComponent({
       leftDrawerOpen.value = false;
     };
 
+    const gotoFindCreators = () => {
+      router.push("/find-creators");
+      leftDrawerOpen.value = false;
+    };
+
     return {
       essentialLinks,
       leftDrawerOpen,
@@ -226,6 +244,7 @@ export default defineComponent({
       countdown,
       uiStore,
       gotoBuckets,
+      gotoFindCreators,
     };
   },
 });
