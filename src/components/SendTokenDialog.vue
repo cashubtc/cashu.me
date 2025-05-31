@@ -152,7 +152,7 @@
             enter-active-class="animated fadeIn"
             leave-active-class="animated fadeOut"
           >
-            <template v-if="showLockInput">
+            <div v-if="showLockInput">
               <div class="row items-center no-wrap">
                 <div :class="!sendData.p2pkPubkey ? 'col-8' : 'col-12'">
                   <q-input
@@ -211,7 +211,7 @@
               class="col-12"
             />
             </div>
-            </template>
+            </div>
           </transition>
           <div v-if="activeBalance >= sendData.amount" class="row q-mt-lg">
             <q-btn
