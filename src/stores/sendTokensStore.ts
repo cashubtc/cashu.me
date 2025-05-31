@@ -1,6 +1,7 @@
 import { defineStore } from "pinia";
 import { decodePaymentRequest, PaymentRequest } from "@cashu/cashu-ts";
 import { HistoryToken } from "./tokens";
+import { DEFAULT_BUCKET_ID } from "./buckets";
 
 export const useSendTokensStore = defineStore("sendTokensStore", {
   state: () => ({
@@ -15,6 +16,7 @@ export const useSendTokensStore = defineStore("sendTokensStore", {
       p2pkPubkey: "",
       paymentRequest: undefined,
       historyToken: undefined,
+      bucketId: DEFAULT_BUCKET_ID,
     } as {
       amount: number | null;
       historyAmount: number | null;
@@ -24,6 +26,7 @@ export const useSendTokensStore = defineStore("sendTokensStore", {
       p2pkPubkey: string;
       paymentRequest?: PaymentRequest;
       historyToken: HistoryToken | undefined;
+      bucketId?: string;
     },
   }),
   actions: {
@@ -36,6 +39,7 @@ export const useSendTokensStore = defineStore("sendTokensStore", {
       this.sendData.p2pkPubkey = "";
       this.sendData.paymentRequest = undefined;
       this.sendData.historyToken = undefined;
+      this.sendData.bucketId = DEFAULT_BUCKET_ID;
     },
   },
 });

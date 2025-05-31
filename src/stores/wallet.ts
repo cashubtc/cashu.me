@@ -111,6 +111,7 @@ export const useWalletStore = defineStore("wallet", {
         blocking: false,
         bolt11: "",
         show: false,
+        bucketId: DEFAULT_BUCKET_ID,
         meltQuote: {
           payload: {
             unit: "",
@@ -739,7 +740,7 @@ export const useWalletStore = defineStore("wallet", {
       mintStore.assertMintError(data);
       return data;
     },
-    meltInvoiceData: async function () {
+    meltInvoiceData: async function (bucketId: string = DEFAULT_BUCKET_ID) {
       if (this.payInvoiceData.invoice == null) {
         throw new Error("no invoice provided.");
       }
@@ -762,7 +763,10 @@ export const useWalletStore = defineStore("wallet", {
         mintStore.activeMintUrl,
         mintStore.activeUnit,
       );
-      return await this.melt(mintStore.activeProofs, quote, mintWallet);
+      const proofs = mintStore.activeProofs.filter(
+        (p) => p.bucketId === bucketId,
+      );
+      return await this.melt(proofs, quote, mintWallet);
     },
     melt: async function (
       proofs: WalletProof[],

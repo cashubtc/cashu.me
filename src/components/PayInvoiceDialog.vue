@@ -71,6 +71,17 @@
         <div class="col-12">
           <ChooseMint />
         </div>
+        <div class="col-12 q-mt-sm">
+          <q-select
+            v-model="payInvoiceData.bucketId"
+            :options="bucketOptions"
+            emit-value
+            map-options
+            outlined
+            dense
+            :label="$t('BucketManager.inputs.name')"
+          />
+        </div>
         <div
           v-if="enoughtotalUnitBalance || globalMutexLock"
           class="row q-mt-lg"
@@ -310,6 +321,7 @@ import { useMintsStore } from "src/stores/mints";
 import { useSettingsStore } from "src/stores/settings";
 import { usePriceStore } from "src/stores/price";
 import { mapActions, mapState, mapWritableState } from "pinia";
+import { useBucketsStore, DEFAULT_BUCKET_ID } from "src/stores/buckets";
 import ChooseMint from "components/ChooseMint.vue";
 import ToggleUnit from "components/ToggleUnit.vue";
 
@@ -344,7 +356,7 @@ export default defineComponent({
   computed: {
     ...mapState(useUiStore, ["tickerShort", "globalMutexLock"]),
     ...mapWritableState(useCameraStore, ["camera", "hasCamera"]),
-    ...mapState(useWalletStore, ["payInvoiceData"]),
+    ...mapWritableState(useWalletStore, ["payInvoiceData"]),
     ...mapState(useMintsStore, [
       "activeMintUrl",
       "activeProofs",
@@ -354,6 +366,10 @@ export default defineComponent({
       "activeBalance",
     ]),
     ...mapState(usePriceStore, ["bitcoinPrice"]),
+    ...mapState(useBucketsStore, ["bucketList"]),
+    bucketOptions() {
+      return this.bucketList.map((b) => ({ label: b.name, value: b.id }));
+    },
     canPasteFromClipboard: function () {
       return (
         window.isSecureContext &&
@@ -399,7 +415,7 @@ export default defineComponent({
       if (this.payInvoiceData.blocking) {
         throw new Error("already processing an invoice.");
       }
-      this.meltInvoiceData();
+      this.meltInvoiceData(this.payInvoiceData.bucketId);
     },
   },
   created: function () {},

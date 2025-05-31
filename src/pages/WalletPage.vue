@@ -269,6 +269,7 @@ import ReceiveTokenDialog from "src/components/ReceiveTokenDialog.vue";
 import { useWelcomeStore } from "../stores/welcome";
 import { useInvoicesWorkerStore } from "src/stores/invoicesWorker";
 import { notifyError, notify } from "../js/notify";
+import { DEFAULT_BUCKET_ID } from "src/stores/buckets";
 
 import {
   X as XIcon,
@@ -482,6 +483,7 @@ export default {
       this.payInvoiceData.lnurlauth = null;
       this.payInvoiceData.input.request = "";
       this.payInvoiceData.input.comment = "";
+      this.payInvoiceData.bucketId = DEFAULT_BUCKET_ID;
       this.payInvoiceData.input.paymentChecker = null;
       this.camera.show = false;
       this.focusInput("parseDialogInput");
