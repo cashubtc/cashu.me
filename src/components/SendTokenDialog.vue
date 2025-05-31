@@ -152,11 +152,12 @@
             enter-active-class="animated fadeIn"
             leave-active-class="animated fadeOut"
           >
-            <div v-if="showLockInput" class="row items-center no-wrap">
-              <div :class="!sendData.p2pkPubkey ? 'col-8' : 'col-12'">
-                <q-input
-                  v-model="sendData.p2pkPubkey"
-                  :label="
+            <template v-if="showLockInput">
+              <div class="row items-center no-wrap">
+                <div :class="!sendData.p2pkPubkey ? 'col-8' : 'col-12'">
+                  <q-input
+                    v-model="sendData.p2pkPubkey"
+                    :label="
                     sendData.p2pkPubkey && !isValidPubkey(sendData.p2pkPubkey)
                       ? $t('SendTokenDialog.inputs.p2pk_pubkey.label_invalid')
                       : $t('SendTokenDialog.inputs.p2pk_pubkey.label')
@@ -170,11 +171,11 @@
                   "
                   @keyup.enter="lockTokens"
                 ></q-input>
-            </div>
-            <div class="col-4 q-mx-md">
-              <q-btn
-                unelevated
-                v-if="canPasteFromClipboard && !sendData.p2pkPubkey"
+              </div>
+              <div class="col-4 q-mx-md">
+                <q-btn
+                  unelevated
+                  v-if="canPasteFromClipboard && !sendData.p2pkPubkey"
                   icon="content_paste"
                   @click="pasteToP2PKField"
                   ><q-tooltip>{{
@@ -190,14 +191,14 @@
                 round
                 @click="showCamera"
                 ><ScanIcon size="1.5em"
-              /></q-btn>
+                /></q-btn>
+              </div>
             </div>
-          </div>
-          <div v-if="showLockInput" class="row q-mt-md">
-            <q-input
-              v-model="locktimeInput"
-              type="datetime-local"
-              :label="$t('SendTokenDialog.inputs.locktime.label')"
+            <div class="row q-mt-md">
+              <q-input
+                v-model="locktimeInput"
+                type="datetime-local"
+                :label="$t('SendTokenDialog.inputs.locktime.label')"
               outlined
               dense
               class="col-12 q-mb-sm"
@@ -209,8 +210,9 @@
               dense
               class="col-12"
             />
-          </div>
-        </transition>
+            </div>
+            </template>
+          </transition>
           <div v-if="activeBalance >= sendData.amount" class="row q-mt-lg">
             <q-btn
               v-if="!sendData.tokens"
