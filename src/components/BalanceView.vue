@@ -129,19 +129,21 @@
     class="row q-mt-xs q-mb-none text-secondary"
   >
     <div class="col-12">
-      <span class="q-my-none q-py-none text-weight-regular">
-        {{ bucket.name }}:
-        <b>{{ formatCurrency(bucketBalances[bucket.id] || 0, activeUnit) }}</b>
-        <span v-if="bucket.goal"
-          >/ {{ formatCurrency(bucket.goal, activeUnit) }}</span
-        >
-      </span>
-      <q-linear-progress
-        v-if="bucket.goal"
-        :value="Math.min(bucketBalances[bucket.id] / bucket.goal, 1)"
-        color="primary"
-        class="q-mt-xs"
-      />
+      <router-link :to="`/buckets/${bucket.id}`" class="text-secondary">
+        <span class="q-my-none q-py-none text-weight-regular">
+          {{ bucket.name }}:
+          <b>{{ formatCurrency(bucketBalances[bucket.id] || 0, activeUnit) }}</b>
+          <span v-if="bucket.goal"
+            >/ {{ formatCurrency(bucket.goal, activeUnit) }}</span
+          >
+        </span>
+        <q-linear-progress
+          v-if="bucket.goal"
+          :value="Math.min(bucketBalances[bucket.id] / bucket.goal, 1)"
+          color="primary"
+          class="q-mt-xs"
+        />
+      </router-link>
     </div>
   </div>
   <!-- pending -->
