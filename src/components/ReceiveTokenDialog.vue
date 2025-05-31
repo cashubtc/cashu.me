@@ -140,15 +140,15 @@
             />
           </div>
           <div class="row q-pt-sm">
-          <q-select
-              v-model="receiveData.bucketId"
-              :options="bucketOptions"
-              emit-value
-              map-options
-              outlined
-              dense
-              :label="$t('BucketManager.inputs.name')"
-            />
+              <q-select
+                v-model="receiveData.bucketId"
+                :options="bucketOptions"
+                emit-value
+                map-options
+                outlined
+                dense
+                :label="$t('ReceiveTokenDialog.inputs.bucket.label')"
+              />
           <q-input
             v-model="receiveData.label"
             outlined
