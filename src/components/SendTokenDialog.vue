@@ -94,12 +94,25 @@
             </div>
           </div>
           <div class="row items-center no-wrap q-my-sm q-py-none">
-            <div class="col-12">
-              <ChooseMint />
-            </div>
+          <div class="col-12">
+            <ChooseMint />
           </div>
+        </div>
+        <div class="row q-my-sm">
+          <div class="col-12">
+            <q-select
+              v-model="sendData.bucketId"
+              :options="bucketOptions"
+              emit-value
+              map-options
+              outlined
+              dense
+              :label="$t('BucketManager.inputs.name')"
+            />
+          </div>
+        </div>
 
-          <q-input
+        <q-input
             type="number"
             v-model.number="sendData.amount"
             :label="
@@ -569,7 +582,7 @@ import { useCameraStore } from "src/stores/camera";
 import { useP2PKStore } from "src/stores/p2pk";
 import TokenInformation from "components/TokenInformation.vue";
 import { getDecodedToken, getEncodedTokenV4 } from "@cashu/cashu-ts";
-import { DEFAULT_BUCKET_ID } from "src/stores/buckets";
+import { DEFAULT_BUCKET_ID, useBucketsStore } from "src/stores/buckets";
 
 import { mapActions, mapState, mapWritableState } from "pinia";
 import ChooseMint from "components/ChooseMint.vue";
@@ -661,6 +674,10 @@ export default defineComponent({
     ]),
     ...mapState(usePriceStore, ["bitcoinPrice"]),
     ...mapState(useWorkersStore, ["tokenWorkerRunning"]),
+    ...mapState(useBucketsStore, ["bucketList"]),
+    bucketOptions() {
+      return this.bucketList.map((b) => ({ label: b.name, value: b.id }));
+    },
     // TOKEN METHODS
     sumProofs: function () {
       let proofs = token.getProofs(token.decode(this.sendData.tokensBase64));
@@ -698,7 +715,9 @@ export default defineComponent({
         return false;
       }
       // check if entered amount is the same as the result of coinSelect(spendableProofs(activeProofs), amount)
-      let spendableProofs = this.spendableProofs(this.activeProofs);
+      let spendableProofs = this.spendableProofs(
+        this.activeProofs.filter((p) => p.bucketId === this.sendData.bucketId)
+      );
       const mintWallet = useWalletStore().wallet;
       let selectedProofs = this.coinSelect(
         spendableProofs,
@@ -1041,17 +1060,21 @@ export default defineComponent({
       try {
         // keep firstProofs, send scndProofs and delete them (invalidate=true)
         const mintWallet = this.mintWallet(this.activeMintUrl, this.activeUnit);
+        const bucketId = this.sendData.bucketId;
+        const proofsForBucket = this.activeProofs.filter(
+          (p) => p.bucketId === bucketId
+        );
         let { _, sendProofs } = await this.sendToLock(
-          this.activeProofs,
+          proofsForBucket,
           mintWallet,
           sendAmount,
-          this.sendData.p2pkPubkey
+          this.sendData.p2pkPubkey,
+          bucketId
         );
         // update UI
         this.sendData.tokens = sendProofs;
 
         this.sendData.tokensBase64 = this.serializeProofs(sendProofs);
-        const bucketId = sendProofs[0]?.bucketId ?? DEFAULT_BUCKET_ID;
         const historyToken = {
           amount: -this.sendData.amount,
           token: this.sendData.tokensBase64,
@@ -1092,12 +1115,17 @@ export default defineComponent({
         );
         const mintWallet = this.mintWallet(this.activeMintUrl, this.activeUnit);
         // keep firstProofs, send scndProofs and delete them (invalidate=true)
+        const bucketId = this.sendData.bucketId;
+        const proofsForBucket = this.activeProofs.filter(
+          (p) => p.bucketId === bucketId
+        );
         let { _, sendProofs } = await this.send(
-          this.activeProofs,
+          proofsForBucket,
           mintWallet,
           sendAmount,
           true,
-          this.includeFeesInSendAmount
+          this.includeFeesInSendAmount,
+          bucketId
         );
 
         // update UI
@@ -1106,7 +1134,6 @@ export default defineComponent({
         this.sendData.historyAmount =
           -this.sendData.amount * this.activeUnitCurrencyMultiplyer;
 
-        const bucketId = sendProofs[0]?.bucketId ?? DEFAULT_BUCKET_ID;
         const historyToken = {
           amount: -sendAmount,
           token: this.sendData.tokensBase64,
