@@ -10,13 +10,24 @@
     </div>
 
     <q-list bordered>
-      <q-item v-for="proof in bucketProofs" :key="proof.secret">
+      <q-item v-for="group in groupedProofs" :key="group.key">
         <q-item-section side>
-          <q-checkbox v-model="selectedSecrets" :val="proof.secret"/>
+          <q-checkbox
+            :model-value="group.secrets.every(s => selectedSecrets.includes(s))"
+            @update:model-value="val => toggleGroup(group, val)"
+          />
+        </q-item-section>
+        <q-item-section avatar>
+          <q-icon name="circle" :style="{ color: group.color }" />
         </q-item-section>
         <q-item-section>
-          <q-item-label>{{ formatCurrency(proof.amount, activeUnit) }}</q-item-label>
-          <q-item-label caption>{{ proof.secret.slice(0,8) }}...</q-item-label>
+          <q-item-label class="text-weight-bold">{{ group.label || '(No label)' }}</q-item-label>
+          <q-item-label caption>
+            {{ formatCurrency(group.total, activeUnit) }}
+          </q-item-label>
+        </q-item-section>
+        <q-item-section side v-if="group.tokens.length">
+          <q-btn flat dense icon="edit" @click.stop="openEditGroup(group)" />
         </q-item-section>
       </q-item>
     </q-list>
@@ -41,6 +52,27 @@
     </div>
 
     <SendTokenDialog v-model="showSendTokens" />
+    <q-dialog v-model="editDialog.show">
+      <q-card class="q-pa-md" style="max-width: 400px">
+        <h6 class="q-mt-none q-mb-md">Edit token</h6>
+        <q-input
+          v-model="editDialog.label"
+          outlined
+          label="Label"
+        />
+        <q-input
+          v-model="editDialog.color"
+          outlined
+          type="color"
+          class="q-mt-md"
+          label="Color"
+        />
+        <div class="row q-mt-md">
+          <q-btn color="primary" rounded @click="saveEdit">Update</q-btn>
+          <q-btn flat rounded color="grey" class="q-ml-auto" v-close-popup>Cancel</q-btn>
+        </div>
+      </q-card>
+    </q-dialog>
     <div class="q-mt-lg">
       <HistoryTable :bucket-id="bucketId" />
     </div>
@@ -57,6 +89,7 @@ import { useMintsStore } from 'stores/mints';
 import { useUiStore } from 'stores/ui';
 import { storeToRefs } from 'pinia';
 import { useSendTokensStore } from 'stores/sendTokensStore';
+import { useTokensStore, HistoryToken } from 'stores/tokens';
 import SendTokenDialog from 'components/SendTokenDialog.vue';
 import HistoryTable from 'components/HistoryTable.vue';
 
@@ -66,6 +99,7 @@ const proofsStore = useProofsStore();
 const mintsStore = useMintsStore();
 const uiStore = useUiStore();
 const sendTokensStore = useSendTokensStore();
+const tokensStore = useTokensStore();
 
 const bucketId = route.params.id as string;
 const bucket = computed(() => bucketsStore.bucketList.find(b => b.id === bucketId));
@@ -76,6 +110,50 @@ const showSendTokens = storeToRefs(sendTokensStore).showSendTokens;
 
 const selectedSecrets = ref<string[]>([]);
 const targetBucketId = ref<string | null>(null);
+const editDialog = ref({
+  show: false,
+  label: '',
+  color: '#1976d2',
+  originalLabel: '',
+});
+
+type ProofGroup = {
+  key: string;
+  label: string;
+  color: string;
+  secrets: string[];
+  total: number;
+  tokens: HistoryToken[];
+};
+
+const groupedProofs = computed<ProofGroup[]>(() => {
+  const groups: Record<string, ProofGroup> = {};
+  const historyByLabel: Record<string, HistoryToken[]> = {};
+  tokensStore.historyTokens
+    .filter(t => t.bucketId === bucketId)
+    .forEach(t => {
+      const lbl = t.label ?? '';
+      if (!historyByLabel[lbl]) historyByLabel[lbl] = [];
+      historyByLabel[lbl].push(t);
+    });
+  bucketProofs.value.forEach(p => {
+    const lbl = p.label ?? '';
+    if (!groups[lbl]) {
+      const color = historyByLabel[lbl]?.[0]?.color ?? '#1976d2';
+      groups[lbl] = {
+        key: lbl || 'nolabel',
+        label: lbl,
+        color,
+        secrets: [],
+        total: 0,
+        tokens: historyByLabel[lbl] || [],
+      };
+    }
+    groups[lbl].secrets.push(p.secret);
+    groups[lbl].total += p.amount;
+  });
+  return Object.values(groups);
+});
 
 const bucketOptions = computed(() =>
   bucketsStore.bucketList
@@ -85,6 +163,35 @@ const bucketOptions = computed(() =>
 
 function formatCurrency(amount:number, unit:string){
   return uiStore.formatCurrency(amount, unit);
+}
+
+function toggleGroup(group: ProofGroup, val: boolean){
+  if(val){
+    const add = group.secrets.filter(s => !selectedSecrets.value.includes(s));
+    selectedSecrets.value.push(...add);
+  } else {
+    selectedSecrets.value = selectedSecrets.value.filter(s => !group.secrets.includes(s));
+  }
+}
+
+function openEditGroup(group: ProofGroup){
+  editDialog.value.show = true;
+  editDialog.value.label = group.label;
+  editDialog.value.color = group.color;
+  editDialog.value.originalLabel = group.label;
+}
+
+function saveEdit(){
+  const tokens = tokensStore.historyTokens.filter(
+    t => t.bucketId === bucketId && (t.label ?? '') === editDialog.value.originalLabel
+  );
+  tokens.forEach(t => {
+    tokensStore.editHistoryToken(t.token, {
+      newLabel: editDialog.value.label,
+      newColor: editDialog.value.color,
+    });
+  });
+  editDialog.value.show = false;
 }
 
 async function moveSelected(){
