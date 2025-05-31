@@ -76,6 +76,16 @@
       <q-item-label header>{{
         $t("MainHeader.menu.settings.title")
       }}</q-item-label>
+      <q-item clickable @click="gotoWallet">
+        <q-item-section avatar>
+          <q-icon name="account_balance_wallet" />
+        </q-item-section>
+        <q-item-section>
+          <q-item-label>
+            {{ $t("FullscreenHeader.actions.back.label") }}
+          </q-item-label>
+        </q-item-section>
+      </q-item>
       <q-item clickable to="/settings">
         <q-item-section avatar>
           <q-icon name="settings" />
@@ -235,6 +245,11 @@ export default defineComponent({
       leftDrawerOpen.value = false;
     };
 
+    const gotoWallet = () => {
+      router.push("/wallet");
+      leftDrawerOpen.value = false;
+    };
+
     return {
       essentialLinks,
       leftDrawerOpen,
@@ -245,6 +260,7 @@ export default defineComponent({
       uiStore,
       gotoBuckets,
       gotoFindCreators,
+      gotoWallet,
     };
   },
 });
