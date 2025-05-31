@@ -19,9 +19,11 @@
               bucket.description
             }}</q-item-label>
             <q-item-label caption>
-              {{ formatCurrency(bucketBalances[bucket.id] || 0, activeUnit) }}
+              {{
+                formatCurrency(bucketBalances[bucket.id] || 0, activeUnit.value)
+              }}
               <span v-if="bucket.goal"
-                >/ {{ formatCurrency(bucket.goal, activeUnit) }}</span
+                >/ {{ formatCurrency(bucket.goal, activeUnit.value) }}</span
               >
             </q-item-label>
             <q-linear-progress
@@ -119,7 +121,7 @@
 import { defineComponent, ref, computed } from "vue";
 import { useBucketsStore, DEFAULT_BUCKET_ID } from "stores/buckets";
 import { useMintsStore } from "stores/mints";
-import { mapState } from "pinia";
+import { storeToRefs } from "pinia";
 import { useUiStore } from "stores/ui";
 
 export default defineComponent({
@@ -145,7 +147,8 @@ export default defineComponent({
       return uiStore.formatCurrency(amount, unit);
     };
 
-    const activeUnit = mapState(useMintsStore, ["activeUnit"]).activeUnit;
+    const mintsStore = useMintsStore();
+    const { activeUnit } = storeToRefs(mintsStore);
 
     const openAdd = () => {
       editId.value = null;
