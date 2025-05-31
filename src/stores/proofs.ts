@@ -3,6 +3,7 @@ import { defineStore } from "pinia";
 import { useMintsStore, WalletProof } from "./mints";
 import { cashuDb, CashuDexie, useDexieStore } from "./dexie";
 import { useBucketsStore } from "./buckets";
+import { useTokensStore } from "./tokens";
 import {
   Proof,
   getEncodedToken,
@@ -193,6 +194,11 @@ export const useProofsStore = defineStore("proofs", {
             .equals(secret)
             .modify({ bucketId });
         }
+      });
+      const tokensStore = useTokensStore();
+      tokensStore.changeHistoryTokenBucket({
+        secrets,
+        newBucketId: bucketId,
       });
     },
     async updateProofLabels(secrets: string[], label: string) {

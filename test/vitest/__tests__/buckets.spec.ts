@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import { useBucketsStore, DEFAULT_BUCKET_ID, DEFAULT_BUCKET_NAME } from '../../../src/stores/buckets'
 import { useProofsStore } from '../../../src/stores/proofs'
+import { useTokensStore } from '../../../src/stores/tokens'
 import { cashuDb } from '../../../src/stores/dexie'
 
 beforeEach(async () => {
@@ -35,12 +36,16 @@ describe('Buckets store', () => {
   it('deletes bucket and reassigns proofs', async () => {
     const buckets = useBucketsStore()
     const proofs = useProofsStore()
+    const tokens = useTokensStore()
     const bucket = buckets.addBucket({ name: 'Temp' })
 
     await proofs.addProofs([
       { id: 'a', amount: 1, C: 'c1', secret: 's1' },
       { id: 'a', amount: 2, C: 'c2', secret: 's2' },
     ], undefined, bucket.id)
+
+    tokens.addPaidToken({ amount: 3, token: 't1', mint: 'm', unit: 'sat', bucketId: bucket.id })
+    tokens.addPaidToken({ amount: 1, token: 't2', mint: 'm', unit: 'sat' })
 
     let stored = await cashuDb.proofs.toArray()
     expect(stored.every(p => p.bucketId === bucket.id)).toBe(true)
@@ -50,6 +55,8 @@ describe('Buckets store', () => {
 
     stored = await cashuDb.proofs.toArray()
     expect(stored.every(p => p.bucketId === DEFAULT_BUCKET_ID)).toBe(true)
+    expect(tokens.historyTokens.find(t => t.token === 't1')?.bucketId).toBe(DEFAULT_BUCKET_ID)
+    expect(tokens.historyTokens.find(t => t.token === 't2')?.bucketId).toBe(DEFAULT_BUCKET_ID)
   })
 
   it('prevents deleting default bucket', async () => {
