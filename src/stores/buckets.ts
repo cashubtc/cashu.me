@@ -15,7 +15,7 @@ export type Bucket = {
 };
 
 export const DEFAULT_BUCKET_ID = "unassigned";
-export const DEFAULT_BUCKET_NAME = "Unassigned";
+export const DEFAULT_BUCKET_NAME = "Default";
 
 export const useBucketsStore = defineStore("buckets", {
   state: () => {
