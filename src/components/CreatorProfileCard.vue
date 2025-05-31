@@ -1,12 +1,20 @@
 <template>
   <q-card class="q-pa-md q-mb-md qcard">
     <q-card-section class="row items-center no-wrap">
-      <q-avatar v-if="creator.profile?.picture">
-        <img :src="creator.profile.picture" />
+      <q-avatar
+        v-if="creator.profile?.picture"
+        size="56px"
+        class="creator-avatar"
+      >
+        <img :src="creator.profile.picture" alt="Creator image" />
       </q-avatar>
       <div class="q-ml-sm">
         <div class="text-subtitle1">
-          {{ creator.profile?.display_name || creator.profile?.name || creator.pubkey }}
+          {{
+            creator.profile?.display_name ||
+            creator.profile?.name ||
+            creator.pubkey
+          }}
         </div>
         <div class="text-caption">{{ creator.pubkey }}</div>
       </div>
@@ -37,3 +45,13 @@ export default defineComponent({
   },
 });
 </script>
+
+<style scoped>
+.creator-avatar {
+  border: 2px solid var(--q-primary);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+.creator-avatar img {
+  object-fit: cover;
+}
+</style>
