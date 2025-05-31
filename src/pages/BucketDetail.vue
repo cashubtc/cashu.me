@@ -41,6 +41,9 @@
     </div>
 
     <SendTokenDialog v-model="showSendTokens" />
+    <div class="q-mt-lg">
+      <HistoryTable :bucket-id="bucketId" />
+    </div>
   </div>
   <div v-else class="q-pa-md">{{ $t('BucketDetail.not_found') }}</div>
 </template>
@@ -55,6 +58,7 @@ import { useUiStore } from 'stores/ui';
 import { storeToRefs } from 'pinia';
 import { useSendTokensStore } from 'stores/sendTokensStore';
 import SendTokenDialog from 'components/SendTokenDialog.vue';
+import HistoryTable from 'components/HistoryTable.vue';
 
 const route = useRoute();
 const bucketsStore = useBucketsStore();

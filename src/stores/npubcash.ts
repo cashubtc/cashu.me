@@ -18,6 +18,7 @@ import token from "../js/token";
 import { WalletProof, useMintsStore } from "./mints";
 import { useTokensStore } from "../stores/tokens";
 import { useNostrStore } from "../stores/nostr";
+import { DEFAULT_BUCKET_ID } from "./buckets";
 // type NPCConnection = {
 //   walletPublicKey: string,
 //   walletPrivateKey: string,
@@ -218,6 +219,7 @@ export const useNPCStore = defineStore("npc", {
         mint: mintUrl,
         unit: unit,
         label: "",
+        bucketId: DEFAULT_BUCKET_ID,
       });
       receiveStore.showReceiveTokens = false;
     },

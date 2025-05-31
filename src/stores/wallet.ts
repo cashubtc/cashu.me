@@ -504,6 +504,7 @@ export const useWalletStore = defineStore("wallet", {
         mint: mintInToken,
         label: receiveStore.receiveData.label ?? "",
         fee: fee,
+        bucketId,
       } as HistoryToken;
       const mintWallet = this.mintWallet(historyToken.mint, historyToken.unit);
       const mint = mintStore.mints.find((m) => m.url === historyToken.mint);
@@ -679,6 +680,7 @@ export const useWalletStore = defineStore("wallet", {
           unit: invoice.unit,
           mint: invoice.mint,
           label: "",
+          bucketId,
         });
         useInvoicesWorkerStore().removeInvoiceFromChecker(invoice.quote);
 
@@ -850,6 +852,7 @@ export const useWalletStore = defineStore("wallet", {
           unit: mintWallet.unit,
           mint: mintWallet.mint.mintUrl,
           label: "",
+          bucketId,
         });
 
         this.updateOutgoingInvoiceInHistory(quote, {
@@ -916,16 +919,17 @@ export const useWalletStore = defineStore("wallet", {
         const spentProofsStates = proofStates.filter(
           (p) => p.state == CheckStateEnum.SPENT,
         );
-        const spentProofs = proofs.filter((p) =>
-          spentProofsStates.find(
-            (s) => s.Y == hashToCurve(enc.encode(p.secret)).toHex(true),
-          ),
-        );
-        if (spentProofs.length) {
-          await proofsStore.removeProofs(spentProofs);
-          // update UI
-          const serializedProofs = proofsStore.serializeProofs(spentProofs);
-          if (serializedProofs == null) {
+      const spentProofs = proofs.filter((p) =>
+        spentProofsStates.find(
+          (s) => s.Y == hashToCurve(enc.encode(p.secret)).toHex(true),
+        ),
+      );
+      const bucketId = (proofs[0] as any)?.bucketId ?? DEFAULT_BUCKET_ID;
+      if (spentProofs.length) {
+        await proofsStore.removeProofs(spentProofs);
+        // update UI
+        const serializedProofs = proofsStore.serializeProofs(spentProofs);
+        if (serializedProofs == null) {
             throw new Error("could not serialize proofs.");
           }
           if (update_history) {
@@ -935,6 +939,7 @@ export const useWalletStore = defineStore("wallet", {
               unit: wallet.unit,
               mint: wallet.mint.mintUrl,
               label: "",
+              bucketId,
             });
           }
         }
@@ -1007,6 +1012,7 @@ export const useWalletStore = defineStore("wallet", {
               unit: historyToken2.unit,
               mint: historyToken2.mint,
               label: historyToken2.label ?? "",
+              bucketId: historyToken2.bucketId,
             });
           }
         }

@@ -137,7 +137,12 @@ import { notify } from "src/js/notify";
 export default defineComponent({
   name: "HistoryTable",
   mixins: [windowMixin],
-  props: {},
+  props: {
+    bucketId: {
+      type: String,
+      default: null,
+    },
+  },
   data: function () {
     return {
       currentPage: 1,
@@ -147,6 +152,9 @@ export default defineComponent({
   },
   watch: {
     filterPending: function () {
+      this.currentPage = 1;
+    },
+    bucketId() {
       this.currentPage = 1;
     },
   },
@@ -161,20 +169,26 @@ export default defineComponent({
       "sendData",
       "showLockInput",
     ]),
+    filteredTokens() {
+      if (this.bucketId) {
+        return this.historyTokens.filter((t) => t.bucketId === this.bucketId);
+      }
+      return this.historyTokens;
+    },
     maxPages() {
-      return Math.ceil(this.historyTokens.length / this.pageSize);
+      return Math.ceil(this.filteredTokens.length / this.pageSize);
     },
     paginatedTokens() {
       const start = (this.currentPage - 1) * this.pageSize;
       const end = start + this.pageSize;
       if (this.filterPending) {
-        return this.historyTokens
+        return this.filteredTokens
           .filter((historyToken) => historyToken.status === "pending")
           .slice()
           .reverse()
           .slice(start, end);
       }
-      return this.historyTokens.slice().reverse().slice(start, end);
+      return this.filteredTokens.slice().reverse().slice(start, end);
     },
   },
   methods: {
