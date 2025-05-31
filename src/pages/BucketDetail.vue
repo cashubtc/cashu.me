@@ -45,7 +45,7 @@
   <div v-else class="q-pa-md">{{ $t('BucketDetail.not_found') }}</div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import { useBucketsStore, DEFAULT_BUCKET_ID } from 'stores/buckets';
