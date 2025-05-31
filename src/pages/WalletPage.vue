@@ -496,6 +496,11 @@ export default {
         this.$router.push("/welcome" + currentQuery + currentHash);
       }
     },
+    setWelcomeDialogSeen: function () {
+      // mark the welcome dialog as seen and close it
+      const welcomeStore = useWelcomeStore();
+      welcomeStore.closeWelcome();
+    },
     setTab: function (to) {
       this.tab = to;
     },
