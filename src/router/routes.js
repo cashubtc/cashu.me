@@ -1,10 +1,14 @@
 const routes = [
   {
-    path: "/",
+    path: "/wallet",
     component: () => import("layouts/MainLayout.vue"),
     children: [
       { path: "", component: () => import("src/pages/WalletPage.vue") },
     ],
+  },
+  {
+    path: "/",
+    redirect: "/wallet",
   },
   {
     path: "/settings",
