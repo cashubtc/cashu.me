@@ -527,6 +527,7 @@ export default defineComponent({
         mint: mintInToken,
         unit: unitInToken,
         label: this.receiveData.label,
+        bucketId: this.receiveData.bucketId,
       });
       this.showReceiveTokens = false;
       // show success notification

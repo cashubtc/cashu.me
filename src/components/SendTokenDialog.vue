@@ -569,6 +569,7 @@ import { useCameraStore } from "src/stores/camera";
 import { useP2PKStore } from "src/stores/p2pk";
 import TokenInformation from "components/TokenInformation.vue";
 import { getDecodedToken, getEncodedTokenV4 } from "@cashu/cashu-ts";
+import { DEFAULT_BUCKET_ID } from "src/stores/buckets";
 
 import { mapActions, mapState, mapWritableState } from "pinia";
 import ChooseMint from "components/ChooseMint.vue";
@@ -1050,12 +1051,14 @@ export default defineComponent({
         this.sendData.tokens = sendProofs;
 
         this.sendData.tokensBase64 = this.serializeProofs(sendProofs);
+        const bucketId = sendProofs[0]?.bucketId ?? DEFAULT_BUCKET_ID;
         const historyToken = {
           amount: -this.sendData.amount,
           token: this.sendData.tokensBase64,
           unit: this.activeUnit,
           mint: this.activeMintUrl,
           label: "",
+          bucketId,
         };
         this.addPendingToken(historyToken);
         this.sendData.historyToken = historyToken;
@@ -1103,6 +1106,7 @@ export default defineComponent({
         this.sendData.historyAmount =
           -this.sendData.amount * this.activeUnitCurrencyMultiplyer;
 
+        const bucketId = sendProofs[0]?.bucketId ?? DEFAULT_BUCKET_ID;
         const historyToken = {
           amount: -sendAmount,
           token: this.sendData.tokensBase64,
@@ -1111,6 +1115,7 @@ export default defineComponent({
           paymentRequest: this.sendData.paymentRequest,
           status: "pending",
           label: "",
+          bucketId,
         };
         this.addPendingToken(historyToken);
         this.sendData.historyToken = historyToken;

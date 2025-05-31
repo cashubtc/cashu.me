@@ -37,6 +37,7 @@ import { useSendTokensStore } from "./sendTokensStore";
 import { usePRStore } from "./payment-request";
 import token from "../js/token";
 import { HistoryToken } from "./tokens";
+import { DEFAULT_BUCKET_ID } from "./buckets";
 
 type MintRecommendation = {
   url: string;
@@ -593,6 +594,7 @@ export const useNostrStore = defineStore("nostr", {
         mint: token.getMint(decodedToken),
         unit: token.getUnit(decodedToken),
         label: "",
+        bucketId: DEFAULT_BUCKET_ID,
       });
       receiveStore.showReceiveTokens = false;
       // show success notification

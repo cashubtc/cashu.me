@@ -3,6 +3,7 @@ import { date } from "quasar";
 import { defineStore } from "pinia";
 import { PaymentRequest, Proof, Token } from "@cashu/cashu-ts";
 import token from "src/js/token";
+import { DEFAULT_BUCKET_ID } from "./buckets";
 
 /**
  * The tokens store handles everything related to tokens and proofs
@@ -18,6 +19,7 @@ export type HistoryToken = {
   label?: string;
   paymentRequest?: PaymentRequest;
   fee?: number;
+  bucketId: string;
 };
 
 export const useTokensStore = defineStore("tokens", {
@@ -36,6 +38,7 @@ export const useTokensStore = defineStore("tokens", {
       fee,
       paymentRequest,
       label,
+      bucketId = DEFAULT_BUCKET_ID,
     }: {
       amount: number;
       token: string;
@@ -44,6 +47,7 @@ export const useTokensStore = defineStore("tokens", {
       fee?: number;
       paymentRequest?: PaymentRequest;
       label?: string;
+      bucketId?: string;
     }) {
       this.historyTokens.push({
         status: "paid",
@@ -55,6 +59,7 @@ export const useTokensStore = defineStore("tokens", {
         label,
         fee,
         paymentRequest,
+        bucketId,
       } as HistoryToken);
     },
     addPendingToken({
@@ -65,6 +70,7 @@ export const useTokensStore = defineStore("tokens", {
       fee,
       paymentRequest,
       label,
+      bucketId = DEFAULT_BUCKET_ID,
     }: {
       amount: number;
       token: string;
@@ -73,6 +79,7 @@ export const useTokensStore = defineStore("tokens", {
       fee?: number;
       paymentRequest?: PaymentRequest;
       label?: string;
+      bucketId?: string;
     }) {
       this.historyTokens.push({
         status: "pending",
@@ -84,6 +91,7 @@ export const useTokensStore = defineStore("tokens", {
         label,
         fee,
         paymentRequest,
+        bucketId,
       });
     },
     editHistoryToken(
