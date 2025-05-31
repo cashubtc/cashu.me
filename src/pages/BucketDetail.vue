@@ -26,7 +26,7 @@
         dense outlined
         v-model="targetBucket"
         :options="bucketOptions"
-        :label="bucketSelectLabel"
+        :label="$t('BucketDetail.inputs.target_bucket.label')"
         emit-value map-options
         class="q-mb-md"
       />
@@ -42,7 +42,7 @@
 
     <SendTokenDialog v-model="showSendTokens" />
   </div>
-  <div v-else class="q-pa-md">Bucket not found.</div>
+  <div v-else class="q-pa-md">{{ $t('BucketDetail.not_found') }}</div>
 </template>
 
 <script setup>
@@ -72,7 +72,6 @@ const showSendTokens = storeToRefs(sendTokensStore).showSendTokens;
 
 const selected = ref<string[]>([]);
 const targetBucket = ref(DEFAULT_BUCKET_ID);
-const bucketSelectLabel = 'Move to bucket';
 
 const bucketOptions = computed(() =>
   bucketsStore.bucketList

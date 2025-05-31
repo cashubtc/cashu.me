@@ -1222,6 +1222,16 @@ export default {
       },
     },
   },
+  BucketDetail: {
+    move: "Move tokens",
+    send: "Send tokens",
+    inputs: {
+      target_bucket: {
+        label: "Move to bucket",
+      },
+    },
+    not_found: "Bucket not found.",
+  },
   restore: {
     mnemonic_error_text: "الرجاء إدخال كلمة تذكيرية",
     restore_mint_error_text: "خطأ في استعادة mint: { error }",

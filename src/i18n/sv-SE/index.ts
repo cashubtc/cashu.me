@@ -1227,6 +1227,16 @@ export default {
       },
     },
   },
+  BucketDetail: {
+    move: "Move tokens",
+    send: "Send tokens",
+    inputs: {
+      target_bucket: {
+        label: "Move to bucket",
+      },
+    },
+    not_found: "Bucket not found.",
+  },
   restore: {
     mnemonic_error_text: "Ange en mnemonisk fras",
     restore_mint_error_text: "Fel vid återställning av mint: { error }",
