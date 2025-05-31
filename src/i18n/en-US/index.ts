@@ -1090,8 +1090,8 @@ export default {
         label: "Show all",
       },
       edit_label: {
-        tooltip_text: "Edit label",
-        title: "Edit label",
+        tooltip_text: "Edit token",
+        title: "Edit token",
       },
     },
     old_token_not_found_error_text: "Old token not found",

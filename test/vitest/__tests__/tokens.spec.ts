@@ -15,4 +15,11 @@ describe('Tokens store', () => {
     store.editHistoryToken('t1', { newLabel: 'new name' })
     expect(store.historyTokens[0].label).toBe('new name')
   })
+
+  it('edits token color', () => {
+    const store = useTokensStore()
+    store.addPaidToken({ amount: 1, token: 't2', mint: 'm1', unit: 'sat' })
+    store.editHistoryToken('t2', { newColor: '#ff0000' })
+    expect(store.historyTokens[0].color).toBe('#ff0000')
+  })
 })
