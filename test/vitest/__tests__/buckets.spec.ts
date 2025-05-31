@@ -78,4 +78,42 @@ describe('Buckets store', () => {
     expect(negative).toBeUndefined()
     expect(buckets.bucketList.length).toBe(count)
   })
+
+  it('moves proofs and keeps token metadata', async () => {
+    const buckets = useBucketsStore()
+    const proofsStore = useProofsStore()
+    const tokensStore = useTokensStore()
+
+    const bucket1 = buckets.addBucket({ name: 'Bucket 1' })!
+    const bucket2 = buckets.addBucket({ name: 'Bucket 2' })!
+
+    const proof = {
+      id: 'I2yN+iRYfkzT',
+      amount: 1,
+      C: '02e4dbbf0ff428a58d6c66c19c624adecc1784c7e55986a4ef44843936a3c8f359',
+      secret: 'fGYZsJUc0MfSZ+VXFjwDesl6BRqnp6dRnViPd6/M2CI=',
+    }
+
+    await proofsStore.addProofs([proof], undefined, bucket1.id)
+
+    const tokenStr =
+      'cashuAeyJ0b2tlbiI6W3sicHJvb2ZzIjpbeyJpZCI6IkkyeU4raVJZZmt6VCIsImFtb3VudCI6MSwiQyI6IjAyZTRkYmJmMGZmNDI4YTU4ZDZjNjZjMTljNjI0YWRlY2MxNzg0YzdlNTU5ODZhNGVmNDQ4NDM5MzZhM2M4ZjM1OSIsInNlY3JldCI6ImZHWVpzSlVjME1mU1orVlhGandEZXNsNkJScW5wNmRSblZpUGQ2L00yQ0k9In1dLCJtaW50IjoiaHR0cHM6Ly84MzMzLnNwYWNlOjMzMzgifV19'
+
+    tokensStore.addPaidToken({
+      amount: 1,
+      token: tokenStr,
+      mint: 'https://8333.space:3338',
+      unit: 'sat',
+      label: 'My label',
+      color: '#00ff00',
+      bucketId: bucket1.id,
+    })
+
+    await proofsStore.moveProofs([proof.secret], bucket2.id)
+
+    const ht = tokensStore.historyTokens[0]
+    expect(ht.bucketId).toBe(bucket2.id)
+    expect(ht.label).toBe('My label')
+    expect(ht.color).toBe('#00ff00')
+  })
 })
