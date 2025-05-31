@@ -8,6 +8,9 @@
         v-ripple
         class="q-px-md"
       >
+        <q-item-section avatar>
+          <q-icon name="circle" :style="{ color: token.color || 'grey' }" />
+        </q-item-section>
         <q-item-section
           side
           @click="showTokenDialog(token)"
@@ -138,6 +141,13 @@
           outlined
           :label="$t('ReceiveTokenDialog.inputs.label.label')"
         />
+        <q-input
+          v-model="editDialog.color"
+          outlined
+          type="color"
+          class="q-mt-md"
+          :label="$t('BucketManager.inputs.color')"
+        />
         <div class="row q-mt-md">
           <q-btn color="primary" rounded @click="saveLabel">{{
             $t('global.actions.update.label')
@@ -180,6 +190,7 @@ export default defineComponent({
       editDialog: {
         show: false,
         label: '',
+        color: '#1976d2',
         token: null,
       },
     };
@@ -260,12 +271,14 @@ export default defineComponent({
     openEditLabel(token) {
       this.editDialog.token = token;
       this.editDialog.label = token.label || '';
+      this.editDialog.color = token.color || '#1976d2';
       this.editDialog.show = true;
     },
     saveLabel() {
       if (!this.editDialog.token) return;
       this.editHistoryToken(this.editDialog.token.token, {
         newLabel: this.editDialog.label,
+        newColor: this.editDialog.color,
       });
       this.editDialog.show = false;
     },

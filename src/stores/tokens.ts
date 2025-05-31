@@ -18,6 +18,7 @@ export type HistoryToken = {
   mint: string;
   unit: string;
   label?: string;
+  color?: string;
   paymentRequest?: PaymentRequest;
   fee?: number;
   bucketId: string;
@@ -39,6 +40,7 @@ export const useTokensStore = defineStore("tokens", {
       fee,
       paymentRequest,
       label,
+      color,
       bucketId = DEFAULT_BUCKET_ID,
     }: {
       amount: number;
@@ -48,6 +50,7 @@ export const useTokensStore = defineStore("tokens", {
       fee?: number;
       paymentRequest?: PaymentRequest;
       label?: string;
+      color?: string;
       bucketId?: string;
     }) {
       this.historyTokens.push({
@@ -58,6 +61,7 @@ export const useTokensStore = defineStore("tokens", {
         mint,
         unit,
         label,
+        color: color ?? "#1976d2",
         fee,
         paymentRequest,
         bucketId,
@@ -71,6 +75,7 @@ export const useTokensStore = defineStore("tokens", {
       fee,
       paymentRequest,
       label,
+      color,
       bucketId = DEFAULT_BUCKET_ID,
     }: {
       amount: number;
@@ -80,6 +85,7 @@ export const useTokensStore = defineStore("tokens", {
       fee?: number;
       paymentRequest?: PaymentRequest;
       label?: string;
+      color?: string;
       bucketId?: string;
     }) {
       this.historyTokens.push({
@@ -90,6 +96,7 @@ export const useTokensStore = defineStore("tokens", {
         mint,
         unit,
         label,
+        color: color ?? "#1976d2",
         fee,
         paymentRequest,
         bucketId,
@@ -104,6 +111,7 @@ export const useTokensStore = defineStore("tokens", {
         newToken?: string;
         newFee?: number;
         newLabel?: string;
+        newColor?: string;
       }
     ): HistoryToken | undefined {
       const index = this.historyTokens.findIndex(
@@ -146,6 +154,9 @@ export const useTokensStore = defineStore("tokens", {
             } catch (e) {
               console.warn("Could not update proof labels", e);
             }
+          }
+          if (options.newColor !== undefined) {
+            this.historyTokens[index].color = options.newColor;
           }
         }
 
