@@ -1248,9 +1248,14 @@ export default {
       title: "Delete bucket?",
     },
   },
+  BucketDetail: {
+    move: "Move tokens",
+    send: "Send tokens"
+  },
   restore: {
     mnemonic_error_text: "Please enter a mnemonic",
     restore_mint_error_text: "Error restoring mint: { error }",
+  },
     prepare_info_text: "Preparing restore process …",
     restored_proofs_for_keyset_info_text:
       "Restored { restoreCounter } proofs for keyset { keysetId }",

@@ -172,5 +172,12 @@ export const useProofsStore = defineStore("proofs", {
       let mints = mints_keysets.map((m) => [{ url: m.url, ids: m.keysets }][0]);
       return mints[0];
     },
+    async moveProofs(secrets: string[], bucketId: string) {
+      await cashuDb.transaction("rw", cashuDb.proofs, async () => {
+        for (const secret of secrets) {
+          await cashuDb.proofs.where("secret").equals(secret).modify({ bucketId });
+        }
+      });
+    },
   },
 });

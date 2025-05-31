@@ -3,6 +3,8 @@
     <q-list padding>
       <div v-for="bucket in bucketList" :key="bucket.id" class="q-mb-md">
         <q-item
+          clickable
+          :to="`/buckets/${bucket.id}`"
           :style="{
             border: '1px solid rgba(128,128,128,0.2)',
             'border-radius': '10px',
@@ -34,13 +36,13 @@
             />
           </q-item-section>
           <q-item-section side v-if="bucket.id !== DEFAULT_BUCKET_ID">
-            <q-btn icon="edit" flat round size="sm" @click="openEdit(bucket)" />
+            <q-btn icon="edit" flat round size="sm" @click.stop="openEdit(bucket)" />
             <q-btn
               icon="delete"
               flat
               round
               size="sm"
-              @click="openDelete(bucket.id)"
+              @click.stop="openDelete(bucket.id)"
             />
           </q-item-section>
         </q-item>
