@@ -99,7 +99,7 @@ export const useNostrStore = defineStore("nostr", {
     ),
   }),
   getters: {
-    seedSignerPrivateKeyNsec: (state) => {
+    seedSignerPrivateKeyNsecComputed: (state) => {
       const sk = hexToBytes(state.seedSignerPrivateKey);
       return nip19.nsecEncode(sk);
     },

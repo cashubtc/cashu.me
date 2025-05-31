@@ -210,11 +210,11 @@
               </q-item-label>
               <q-item-label
                 caption
-                v-if="signerType === 'SEED' && seedSignerPrivateKeyNsec"
+                v-if="signerType === 'SEED' && seedSignerPrivateKeyNsecComputed"
               >
                 <q-badge
                   class="cursor-pointer q-mt-xs"
-                  @click="copyText(seedSignerPrivateKeyNsec)"
+                  @click="copyText(seedSignerPrivateKeyNsecComputed)"
                   outline
                   color="grey"
                 >
@@ -1676,7 +1676,7 @@ export default defineComponent({
       "pubkey",
       "mintRecommendations",
       "signerType",
-      "seedSignerPrivateKeyNsec",
+      "seedSignerPrivateKeyNsecComputed",
     ]),
     ...mapState(useWalletStore, ["mnemonic"]),
     ...mapState(useUiStore, ["ndefSupported"]),
