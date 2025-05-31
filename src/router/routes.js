@@ -12,6 +12,13 @@ const routes = [
     children: [{ path: "", component: () => import("src/pages/Settings.vue") }],
   },
   {
+    path: "/find-creators",
+    component: () => import("layouts/FullscreenLayout.vue"),
+    children: [
+      { path: "", component: () => import("src/pages/FindCreators.vue") },
+    ],
+  },
+  {
     path: "/buckets",
     component: () => import("layouts/FullscreenLayout.vue"),
     children: [{ path: "", component: () => import("src/pages/Buckets.vue") }],

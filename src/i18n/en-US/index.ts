@@ -96,6 +96,13 @@ export default {
           caption: "Wallet configuration",
         },
       },
+      findCreators: {
+        title: "Find Creators",
+        findCreators: {
+          title: "Find Creators",
+          caption: "Discover creators",
+        },
+      },
       buckets: {
         title: "Buckets",
         buckets: {
