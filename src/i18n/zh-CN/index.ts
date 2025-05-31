@@ -872,6 +872,9 @@ export default {
       bucket: {
         label: "Bucket",
       },
+      label: {
+        label: "Label",
+      },
     },
     errors: {
       invalid_token: {

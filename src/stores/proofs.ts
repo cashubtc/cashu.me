@@ -87,7 +87,8 @@ export const useProofsStore = defineStore("proofs", {
     proofsToWalletProofs(
       proofs: Proof[],
       quote?: string,
-      bucketId: string = "unassigned"
+      bucketId: string = "unassigned",
+      label: string = ""
     ): WalletProof[] {
       return proofs.map((p) => {
         return {
@@ -95,11 +96,17 @@ export const useProofsStore = defineStore("proofs", {
           reserved: false,
           quote: quote,
           bucketId,
+          label,
         } as WalletProof;
       });
     },
-    async addProofs(proofs: Proof[], quote?: string, bucketId: string = "unassigned") {
-      const walletProofs = this.proofsToWalletProofs(proofs, quote, bucketId);
+    async addProofs(
+      proofs: Proof[],
+      quote?: string,
+      bucketId: string = "unassigned",
+      label: string = ""
+    ) {
+      const walletProofs = this.proofsToWalletProofs(proofs, quote, bucketId, label);
       await cashuDb.transaction("rw", cashuDb.proofs, async () => {
         walletProofs.forEach(async (p) => {
           await cashuDb.proofs.add(p);

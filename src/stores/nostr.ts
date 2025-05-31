@@ -592,6 +592,7 @@ export const useNostrStore = defineStore("nostr", {
         token: tokenStr,
         mint: token.getMint(decodedToken),
         unit: token.getUnit(decodedToken),
+        label: "",
       });
       receiveStore.showReceiveTokens = false;
       // show success notification

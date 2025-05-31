@@ -15,6 +15,7 @@ export type HistoryToken = {
   token: string;
   mint: string;
   unit: string;
+  label?: string;
   paymentRequest?: PaymentRequest;
   fee?: number;
 };
@@ -34,6 +35,7 @@ export const useTokensStore = defineStore("tokens", {
       unit,
       fee,
       paymentRequest,
+      label,
     }: {
       amount: number;
       token: string;
@@ -41,6 +43,7 @@ export const useTokensStore = defineStore("tokens", {
       unit: string;
       fee?: number;
       paymentRequest?: PaymentRequest;
+      label?: string;
     }) {
       this.historyTokens.push({
         status: "paid",
@@ -49,6 +52,7 @@ export const useTokensStore = defineStore("tokens", {
         token,
         mint,
         unit,
+        label,
         fee,
         paymentRequest,
       } as HistoryToken);
@@ -60,6 +64,7 @@ export const useTokensStore = defineStore("tokens", {
       unit,
       fee,
       paymentRequest,
+      label,
     }: {
       amount: number;
       token: string;
@@ -67,6 +72,7 @@ export const useTokensStore = defineStore("tokens", {
       unit: string;
       fee?: number;
       paymentRequest?: PaymentRequest;
+      label?: string;
     }) {
       this.historyTokens.push({
         status: "pending",
@@ -75,6 +81,7 @@ export const useTokensStore = defineStore("tokens", {
         token: token,
         mint,
         unit,
+        label,
         fee,
         paymentRequest,
       });

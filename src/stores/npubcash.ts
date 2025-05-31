@@ -217,6 +217,7 @@ export const useNPCStore = defineStore("npc", {
         token: tokenStr,
         mint: mintUrl,
         unit: unit,
+        label: "",
       });
       receiveStore.showReceiveTokens = false;
     },

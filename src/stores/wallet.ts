@@ -380,7 +380,7 @@ export const useWalletStore = defineStore("wallet", {
       await proofsStore.removeProofs(proofsToSend);
       // note: we do not store sendProofs in the proofs store but
       // expect from the caller to store it in the history
-      await proofsStore.addProofs(keepProofs, undefined, bucketId);
+      await proofsStore.addProofs(keepProofs, undefined, bucketId, "");
       return { keepProofs, sendProofs };
     },
     send: async function (
@@ -436,8 +436,8 @@ export const useWalletStore = defineStore("wallet", {
             keysetId,
             keepProofs.length + sendProofs.length,
           );
-          await proofsStore.addProofs(keepProofs, undefined, bucketId);
-          await proofsStore.addProofs(sendProofs, undefined, bucketId);
+          await proofsStore.addProofs(keepProofs, undefined, bucketId, "");
+          await proofsStore.addProofs(sendProofs, undefined, bucketId, "");
 
           // make sure we don't delete any proofs that were returned
           const proofsToSendNotReturned = proofsToSend
@@ -502,6 +502,7 @@ export const useWalletStore = defineStore("wallet", {
         token: receiveStore.receiveData.tokensBase64,
         unit: unitInToken,
         mint: mintInToken,
+        label: receiveStore.receiveData.label ?? "",
         fee: fee,
       } as HistoryToken;
       const mintWallet = this.mintWallet(historyToken.mint, historyToken.unit);
@@ -525,7 +526,7 @@ export const useWalletStore = defineStore("wallet", {
               proofsWeHave: mintStore.mintUnitProofs(mint, historyToken.unit),
             },
           );
-          await proofsStore.addProofs(proofs, undefined, bucketId);
+          await proofsStore.addProofs(proofs, undefined, bucketId, receiveStore.receiveData.label ?? "");
           this.increaseKeysetCounter(keysetId, proofs.length);
         } catch (error: any) {
           console.error(error);
@@ -667,7 +668,7 @@ export const useWalletStore = defineStore("wallet", {
           },
         );
         this.increaseKeysetCounter(keysetId, proofs.length);
-        await proofsStore.addProofs(proofs, undefined, bucketId);
+        await proofsStore.addProofs(proofs, undefined, bucketId, "");
 
         // update UI
         await this.setInvoicePaid(invoice.quote);
@@ -677,6 +678,7 @@ export const useWalletStore = defineStore("wallet", {
           token: serializedProofs,
           unit: invoice.unit,
           mint: invoice.mint,
+          label: "",
         });
         useInvoicesWorkerStore().removeInvoiceFromChecker(invoice.quote);
 
@@ -828,7 +830,7 @@ export const useWalletStore = defineStore("wallet", {
           console.log(
             "## Received change: " + proofsStore.sumProofs(changeProofs),
           );
-          await proofsStore.addProofs(changeProofs, undefined, bucketId);
+          await proofsStore.addProofs(changeProofs, undefined, bucketId, "");
         }
 
         // delete spent tokens from db
@@ -847,6 +849,7 @@ export const useWalletStore = defineStore("wallet", {
           token: proofsStore.serializeProofs(sendProofs),
           unit: mintWallet.unit,
           mint: mintWallet.mint.mintUrl,
+          label: "",
         });
 
         this.updateOutgoingInvoiceInHistory(quote, {
@@ -931,6 +934,7 @@ export const useWalletStore = defineStore("wallet", {
               token: serializedProofs,
               unit: wallet.unit,
               mint: wallet.mint.mintUrl,
+              label: "",
             });
           }
         }
@@ -1002,6 +1006,7 @@ export const useWalletStore = defineStore("wallet", {
               token: serializedUnspentProofs,
               unit: historyToken2.unit,
               mint: historyToken2.mint,
+              label: historyToken2.label ?? "",
             });
           }
         }
