@@ -2,6 +2,7 @@ import { ref } from "vue";
 import { defineStore } from "pinia";
 import { useMintsStore, WalletProof } from "./mints";
 import { cashuDb, CashuDexie, useDexieStore } from "./dexie";
+import { useBucketsStore } from "./buckets";
 import {
   Proof,
   getEncodedToken,
@@ -180,9 +181,17 @@ export const useProofsStore = defineStore("proofs", {
       return mints[0];
     },
     async moveProofs(secrets: string[], bucketId: string) {
+      const bucketsStore = useBucketsStore();
+      const bucketExists = bucketsStore.bucketList.find((b) => b.id === bucketId);
+      if (!bucketExists) {
+        throw new Error(`Bucket not found: ${bucketId}`);
+      }
       await cashuDb.transaction("rw", cashuDb.proofs, async () => {
         for (const secret of secrets) {
-          await cashuDb.proofs.where("secret").equals(secret).modify({ bucketId });
+          await cashuDb.proofs
+            .where("secret")
+            .equals(secret)
+            .modify({ bucketId });
         }
       });
     },
