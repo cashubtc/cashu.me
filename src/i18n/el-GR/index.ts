@@ -1232,6 +1232,16 @@ export default {
       },
     },
   },
+  BucketDetail: {
+    move: "Move tokens",
+    send: "Send tokens",
+    inputs: {
+      target_bucket: {
+        label: "Move to bucket",
+      },
+    },
+    not_found: "Bucket not found.",
+  },
   restore: {
     mnemonic_error_text: "Παρακαλώ εισαγάγετε ένα μνημονικό",
     restore_mint_error_text: "Σφάλμα κατά την επαναφορά του mint: { error }",

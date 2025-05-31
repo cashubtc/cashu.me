@@ -1227,6 +1227,16 @@ export default {
       },
     },
   },
+  BucketDetail: {
+    move: "Move tokens",
+    send: "Send tokens",
+    inputs: {
+      target_bucket: {
+        label: "Move to bucket",
+      },
+    },
+    not_found: "Bucket not found.",
+  },
   restore: {
     mnemonic_error_text: "ニーモニックを入力してください",
     restore_mint_error_text: "ミントの復元エラー: { error }",
