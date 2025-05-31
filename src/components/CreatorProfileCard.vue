@@ -6,13 +6,17 @@
       </q-avatar>
       <div class="q-ml-sm">
         <div class="text-subtitle1">
-          {{ creator.profile?.display_name || creator.profile?.name || creator.pubkey }}
+          {{
+            creator.profile?.display_name ||
+            creator.profile?.name ||
+            creator.pubkey
+          }}
         </div>
         <div class="text-caption">{{ creator.pubkey }}</div>
       </div>
     </q-card-section>
     <q-card-section v-if="creator.profile?.about">
-      <div>{{ creator.profile.about }}</div>
+      <div>{{ truncatedAbout }}</div>
     </q-card-section>
     <q-card-section v-if="creator.profile?.lud16">
       <div class="row items-center">
@@ -24,7 +28,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { defineComponent, computed } from "vue";
 import { CreatorProfile } from "stores/creators";
 
 export default defineComponent({
@@ -34,6 +38,18 @@ export default defineComponent({
       type: Object as () => CreatorProfile,
       required: true,
     },
+  },
+  setup(props) {
+    const MAX_LENGTH = 160;
+    const truncatedAbout = computed(() => {
+      const about = props.creator.profile?.about || "";
+      return about.length > MAX_LENGTH
+        ? about.slice(0, MAX_LENGTH) + "…"
+        : about;
+    });
+    return {
+      truncatedAbout,
+    };
   },
 });
 </script>
