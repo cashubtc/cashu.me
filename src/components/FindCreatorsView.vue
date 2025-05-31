@@ -21,31 +21,27 @@
       {{ error }}
     </div>
 
-    <q-list v-if="searchResults.length" class="q-mt-md">
-      <q-item v-for="creator in searchResults" :key="creator.pubkey">
-        <q-item-section avatar v-if="creator.profile?.picture">
-          <q-avatar>
-            <img :src="creator.profile.picture" />
-          </q-avatar>
-        </q-item-section>
-        <q-item-section>
-          <q-item-label>
-            {{ creator.profile?.display_name || creator.profile?.name || creator.pubkey }}
-          </q-item-label>
-          <q-item-label caption>{{ creator.pubkey }}</q-item-label>
-        </q-item-section>
-      </q-item>
-    </q-list>
+    <div v-if="searchResults.length" class="q-mt-md">
+      <creator-profile-card
+        v-for="creator in searchResults"
+        :key="creator.pubkey"
+        :creator="creator"
+      />
+    </div>
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent, ref, watch } from "vue";
 import { useCreatorsStore } from "stores/creators";
+import CreatorProfileCard from "components/CreatorProfileCard.vue";
 import { storeToRefs } from "pinia";
 
 export default defineComponent({
   name: "FindCreatorsView",
+  components: {
+    CreatorProfileCard,
+  },
   setup() {
     const creatorsStore = useCreatorsStore();
     const { searchResults, searching, error } = storeToRefs(creatorsStore);
