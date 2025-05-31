@@ -2,50 +2,67 @@
   <div style="max-width: 800px; margin: 0 auto">
     <q-list padding>
       <div v-for="bucket in bucketList" :key="bucket.id" class="q-mb-md">
-        <q-item
-          clickable
+        <router-link
           :to="`/buckets/${bucket.id}`"
-          :style="{
-            border: '1px solid rgba(128,128,128,0.2)',
-            'border-radius': '10px',
-          }"
+          style="text-decoration: none; display: block"
+          class="text-dark"
         >
-          <q-item-section avatar>
-            <q-icon name="circle" :style="{ color: bucket.color || 'grey' }" />
-          </q-item-section>
-          <q-item-section>
-            <q-item-label class="text-weight-bold">{{
-              bucket.name
-            }}</q-item-label>
-            <q-item-label caption v-if="bucket.description">{{
-              bucket.description
-            }}</q-item-label>
-            <q-item-label caption>
-              {{
-                formatCurrency(bucketBalances[bucket.id] || 0, activeUnit.value)
-              }}
-              <span v-if="bucket.goal"
-                >/ {{ formatCurrency(bucket.goal, activeUnit.value) }}</span
-              >
-            </q-item-label>
-            <q-linear-progress
-              v-if="bucket.goal"
-              color="primary"
-              :value="Math.min(bucketBalances[bucket.id] / bucket.goal, 1)"
-              class="q-mt-xs"
-            />
-          </q-item-section>
-          <q-item-section side v-if="bucket.id !== DEFAULT_BUCKET_ID">
-            <q-btn icon="edit" flat round size="sm" @click.stop="openEdit(bucket)" />
-            <q-btn
-              icon="delete"
-              flat
-              round
-              size="sm"
-              @click.stop="openDelete(bucket.id)"
-            />
-          </q-item-section>
-        </q-item>
+          <q-item
+            clickable
+            :style="{
+              border: '1px solid rgba(128,128,128,0.2)',
+              'border-radius': '10px',
+            }"
+          >
+            <q-item-section avatar>
+              <q-icon
+                name="circle"
+                :style="{ color: bucket.color || 'grey' }"
+              />
+            </q-item-section>
+            <q-item-section>
+              <q-item-label class="text-weight-bold">{{
+                bucket.name
+              }}</q-item-label>
+              <q-item-label caption v-if="bucket.description">{{
+                bucket.description
+              }}</q-item-label>
+              <q-item-label caption>
+                {{
+                  formatCurrency(
+                    bucketBalances[bucket.id] || 0,
+                    activeUnit.value,
+                  )
+                }}
+                <span v-if="bucket.goal"
+                  >/ {{ formatCurrency(bucket.goal, activeUnit.value) }}</span
+                >
+              </q-item-label>
+              <q-linear-progress
+                v-if="bucket.goal"
+                color="primary"
+                :value="Math.min(bucketBalances[bucket.id] / bucket.goal, 1)"
+                class="q-mt-xs"
+              />
+            </q-item-section>
+            <q-item-section side v-if="bucket.id !== DEFAULT_BUCKET_ID">
+              <q-btn
+                icon="edit"
+                flat
+                round
+                size="sm"
+                @click.stop="openEdit(bucket)"
+              />
+              <q-btn
+                icon="delete"
+                flat
+                round
+                size="sm"
+                @click.stop="openDelete(bucket.id)"
+              />
+            </q-item-section>
+          </q-item>
+        </router-link>
       </div>
       <q-item>
         <q-item-section>
