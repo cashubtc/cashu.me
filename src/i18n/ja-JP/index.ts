@@ -796,6 +796,12 @@ export default {
       p2pk_pubkey: {
         label: "受信者の公開鍵",
         label_invalid: "受信者の公開鍵",
+locktime: {
+        label: "Unlock time",
+      },
+      refund_pubkey: {
+        label: "Refund public key",
+      },
       },
     },
     actions: {
@@ -886,6 +892,9 @@ export default {
     },
     errors: {
       invalid_token: {
+timelock: {
+      unlock_date_label: "Unlocks { value }",
+    },
         label: "無効なトークン",
       },
     },

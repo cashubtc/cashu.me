@@ -800,6 +800,12 @@ export default {
       p2pk_pubkey: {
         label: "Clave pública del receptor",
         label_invalid: "Clave pública del receptor inválida",
+locktime: {
+        label: "Unlock time",
+      },
+      refund_pubkey: {
+        label: "Refund public key",
+      },
       },
     },
     actions: {
@@ -890,6 +896,9 @@ export default {
     },
     errors: {
       invalid_token: {
+timelock: {
+      unlock_date_label: "Unlocks { value }",
+    },
         label: "Token inválido",
       },
     },

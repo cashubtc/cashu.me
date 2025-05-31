@@ -798,6 +798,12 @@ export default {
       p2pk_pubkey: {
         label: "Chiave pubblica ricevitore",
         label_invalid: "Chiave pubblica ricevitore non valida",
+locktime: {
+        label: "Unlock time",
+      },
+      refund_pubkey: {
+        label: "Refund public key",
+      },
       },
     },
     actions: {
@@ -887,6 +893,9 @@ export default {
     },
     errors: {
       invalid_token: {
+timelock: {
+      unlock_date_label: "Unlocks { value }",
+    },
         label: "Token non valido",
       },
     },

@@ -789,6 +789,12 @@ export default {
       p2pk_pubkey: {
         label: "接收者公钥",
         label_invalid: "接收者公钥",
+locktime: {
+        label: "Unlock time",
+      },
+      refund_pubkey: {
+        label: "Refund public key",
+      },
       },
     },
     actions: {
@@ -878,6 +884,9 @@ export default {
     },
     errors: {
       invalid_token: {
+timelock: {
+      unlock_date_label: "Unlocks { value }",
+    },
         label: "无效的 token",
       },
     },

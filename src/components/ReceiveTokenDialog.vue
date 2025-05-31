@@ -138,6 +138,18 @@
               :showMintCheck="true"
               :showP2PKCheck="true"
             />
+            <q-chip
+              v-if="unlockDate"
+              outline
+              icon="timer"
+              class="q-ml-sm"
+            >
+              {{
+                $t('ReceiveTokenDialog.timelock.unlock_date_label', {
+                  value: unlockDate,
+                })
+              }}
+            </q-chip>
           </div>
           <div class="row q-pt-sm">
           <q-select
@@ -286,6 +298,7 @@ import { usePriceStore } from "src/stores/price";
 import { useSwapStore } from "src/stores/swap";
 import { useSettingsStore } from "src/stores/settings";
 import token from "src/js/token";
+import { date } from "quasar";
 
 import ChooseMint from "src/components/ChooseMint.vue";
 import TokenInformation from "components/TokenInformation.vue";
@@ -420,6 +433,11 @@ export default defineComponent({
       const decodedToken = this.decodeToken(this.receiveData.tokensBase64);
       return this.getMint(decodedToken);
     },
+    unlockDate: function () {
+      const ts = this.getTokenLocktime(this.receiveData.tokensBase64);
+      if (!ts) return "";
+      return date.formatDate(new Date(ts * 1000), "YYYY-MM-DD HH:mm");
+    },
     swapToMintAmount: function () {
       const decodedToken = this.decodeToken(this.receiveData.tokensBase64);
       return this.tokenAmount - useSwapStore().meltToMintFees(decodedToken);
@@ -433,6 +451,7 @@ export default defineComponent({
       "getPrivateKeyForP2PKEncodedToken",
       "generateKeypair",
       "showLastKey",
+      "getTokenLocktime",
     ]),
     ...mapActions(useMintsStore, ["addMint"]),
     ...mapActions(useReceiveTokensStore, [

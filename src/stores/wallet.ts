@@ -363,6 +363,8 @@ export const useWalletStore = defineStore("wallet", {
       amount: number,
       receiverPubkey: string,
       bucketId: string = DEFAULT_BUCKET_ID,
+      locktime?: number,
+      refundPubkey?: string,
     ) {
       const spendableProofs = this.spendableProofs(proofs, amount);
       const proofsToSend = this.coinSelect(
@@ -375,7 +377,7 @@ export const useWalletStore = defineStore("wallet", {
       const { keep: keepProofs, send: sendProofs } = await wallet.send(
         amount,
         proofsToSend,
-        { keysetId, pubkey: receiverPubkey },
+        { keysetId, pubkey: receiverPubkey, locktime, refund: refundPubkey },
       );
       const proofsStore = useProofsStore();
       await proofsStore.removeProofs(proofsToSend);

@@ -67,6 +67,13 @@ npx capacitor-assets generate
 
 See [Configuring quasar.config.js](https://v2.quasar.dev/quasar-cli-webpack/quasar-config-js).
 
+### Timelocks
+
+Tokens can be locked to a pubkey with an optional unlock time and refund pubkey.
+In the send dialog choose **Lock** and fill the receiver key, unlock time and
+optional refund key. When a locked token is pasted into the receive dialog the
+unlock date is displayed.
+
 ### Reverse proxy
 
 For Quasar Vue Router with history mode, add this fallback URL to allow refreshes: https://router.vuejs.org/guide/essentials/history-mode.html#HTML5-Mode

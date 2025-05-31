@@ -96,18 +96,20 @@ export const useP2PKStore = defineStore("p2pk", {
       };
       this.p2pkKeys = this.p2pkKeys.concat(keyPair);
     },
-    getSecretP2PKPubkey: function (secret: string): string {
+    getSecretP2PKPubkey: function (
+      secret: string,
+    ): { pubkey: string; locktime?: number } {
       try {
         let secretObject = JSON.parse(secret);
         if (secretObject[0] != "P2PK" || secretObject[1]["data"] == undefined) {
           console.log("not p2pk locked");
-          return ""; // not p2pk locked
+          return { pubkey: "", locktime: undefined }; // not p2pk locked
         }
         // Get all the p2pk secret data
         const now = Math.floor(Date.now() / 1000); // unix TS
         const { data, tags } = secretObject[1];
         const locktimeTag = tags && tags.find((tag) => tag[0] === "locktime");
-        const locktime = locktimeTag ? parseInt(locktimeTag[1], 10) : Infinity; // Permanent lock if not set
+        const locktime = locktimeTag ? parseInt(locktimeTag[1], 10) : undefined; // Permanent lock if not set
         const refundTag = tags && tags.find((tag) => tag[0] === "refund");
         const refundKeys =
           refundTag && refundTag.length > 1 ? refundTag.slice(1) : [];
@@ -122,29 +124,29 @@ export const useP2PKStore = defineStore("p2pk", {
           console.log("p2pk token - locktime is active");
           if (n_sigs && n_sigs >= 1) {
             for (const pk of pubkeys) {
-              if (this.haveThisKey(pk)) return pk;
+              if (this.haveThisKey(pk)) return { pubkey: pk, locktime };
             }
           }
-          return data; // Main lock key (shows locked state)
+          return { pubkey: data, locktime };
         }
         // If locktime expired, return first owned 'refund' key match or
         // or just return the first refund key to show token is locked
         if (refundKeys.length > 0) {
           console.log("p2pk token - locked to refund keys");
           for (const pk of refundKeys) {
-            if (this.haveThisKey(pk)) return pk;
+            if (this.haveThisKey(pk)) return { pubkey: pk, locktime };
           }
-          return refundKeys[0]; // First refund key (shows locked state)
+          return { pubkey: refundKeys[0], locktime };
         }
         console.log("p2pk token - lock has expired");
       } catch {}
-      return ""; // Token is not locked / secret is not P2PK
+      return { pubkey: "", locktime: undefined }; // Token is not locked / secret is not P2PK
     },
     isLocked: function (proofs: WalletProof[]) {
       const secrets = proofs.map((p) => p.secret);
       for (const secret of secrets) {
         try {
-          if (this.getSecretP2PKPubkey(secret)) {
+          if (this.getSecretP2PKPubkey(secret).pubkey) {
             return true;
           }
         } catch {}
@@ -154,7 +156,7 @@ export const useP2PKStore = defineStore("p2pk", {
     isLockedToUs: function (proofs: WalletProof[]) {
       const secrets = proofs.map((p) => p.secret);
       for (const secret of secrets) {
-        const pubkey = this.getSecretP2PKPubkey(secret);
+        const { pubkey } = this.getSecretP2PKPubkey(secret);
         if (pubkey) {
           return this.haveThisKey(pubkey);
         }
@@ -172,7 +174,7 @@ export const useP2PKStore = defineStore("p2pk", {
 
       const secrets = proofs.map((p) => p.secret);
       for (const secret of secrets) {
-        const pubkey = this.getSecretP2PKPubkey(secret);
+        const { pubkey } = this.getSecretP2PKPubkey(secret);
         if (pubkey && this.haveThisKey(pubkey)) {
           // NOTE: we assume all tokens are locked to the same key here!
           return this.p2pkKeys.filter((m) => m.publicKey == pubkey)[0]
@@ -180,6 +182,20 @@ export const useP2PKStore = defineStore("p2pk", {
         }
       }
       return "";
+    },
+    getTokenLocktime: function (encodedToken: string): number | undefined {
+      const decodedToken = token.decode(encodedToken);
+      if (!decodedToken) {
+        return undefined;
+      }
+      const proofs = token.getProofs(decodedToken);
+      const times = proofs
+        .map((p) => this.getSecretP2PKPubkey(p.secret).locktime)
+        .filter((t) => t !== undefined) as number[];
+      if (!times.length) {
+        return undefined;
+      }
+      return Math.max(...times);
     },
   },
 });
