@@ -1089,6 +1089,10 @@ export default {
       show_all: {
         label: "Show all",
       },
+      edit_label: {
+        tooltip_text: "Edit label",
+        title: "Edit label",
+      },
     },
     old_token_not_found_error_text: "Old token not found",
   },

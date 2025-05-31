@@ -54,7 +54,18 @@
           </q-item-label>
         </q-item-section>
 
-        <q-item-section side top>
+        <q-item-section side top class="q-gutter-xs">
+          <q-btn
+            flat
+            dense
+            icon="edit"
+            @click.stop="openEditLabel(token)"
+            class="cursor-pointer"
+          >
+            <q-tooltip>{{
+              $t('HistoryTable.actions.edit_label.tooltip_text')
+            }}</q-tooltip>
+          </q-btn>
           <q-btn
             flat
             dense
@@ -62,7 +73,6 @@
             @click="checkTokenSpendable(token)"
             class="cursor-pointer"
             v-if="token.status === 'pending' && token.amount < 0"
-            style="position: absolute; right: 0"
           >
             <q-tooltip>{{
               $t("HistoryTable.actions.check_status.tooltip_text")
@@ -75,7 +85,6 @@
             @click="receiveToken(token.token)"
             class="cursor-pointer"
             v-if="token.status === 'pending' && token.amount > 0"
-            style="position: absolute; right: 0"
           >
             <q-tooltip>{{
               $t("HistoryTable.actions.receive.tooltip_text")
@@ -119,6 +128,26 @@
         />
       </div>
     </div>
+    <q-dialog v-model="editDialog.show">
+      <q-card class="q-pa-md" style="max-width: 400px">
+        <h6 class="q-mt-none q-mb-md">{{
+          $t('HistoryTable.actions.edit_label.title')
+        }}</h6>
+        <q-input
+          v-model="editDialog.label"
+          outlined
+          :label="$t('ReceiveTokenDialog.inputs.label.label')"
+        />
+        <div class="row q-mt-md">
+          <q-btn color="primary" rounded @click="saveLabel">{{
+            $t('global.actions.update.label')
+          }}</q-btn>
+          <q-btn flat rounded color="grey" class="q-ml-auto" v-close-popup>{{
+            $t('global.actions.cancel.label')
+          }}</q-btn>
+        </div>
+      </q-card>
+    </q-dialog>
   </div>
 </template>
 <script>
@@ -148,6 +177,11 @@ export default defineComponent({
       currentPage: 1,
       pageSize: 5,
       filterPending: false,
+      editDialog: {
+        show: false,
+        label: '',
+        token: null,
+      },
     };
   },
   watch: {
@@ -193,6 +227,7 @@ export default defineComponent({
   },
   methods: {
     ...mapActions(useWalletStore, ["checkTokenSpendable"]),
+    ...mapActions(useTokensStore, ["editHistoryToken"]),
     formattedDate(date_str) {
       const date = parseISO(date_str); // Convert string to date object
       return formatDistanceToNow(date, { addSuffix: false }); // "6 hours ago"
@@ -221,6 +256,18 @@ export default defineComponent({
       this.sendData.historyAmount = historyToken.amount;
       this.sendData.historyToken = historyToken;
       this.showSendTokens = true;
+    },
+    openEditLabel(token) {
+      this.editDialog.token = token;
+      this.editDialog.label = token.label || '';
+      this.editDialog.show = true;
+    },
+    saveLabel() {
+      if (!this.editDialog.token) return;
+      this.editHistoryToken(this.editDialog.token.token, {
+        newLabel: this.editDialog.label,
+      });
+      this.editDialog.show = false;
     },
   },
   created: function () {},
