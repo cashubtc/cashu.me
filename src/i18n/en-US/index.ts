@@ -37,6 +37,9 @@ export default {
       swap: {
         label: "Swap",
       },
+      search: {
+        label: "Search",
+      },
       update: {
         label: "Update",
       },
@@ -1253,6 +1256,14 @@ export default {
       add_mint: {
         label: "@:global.actions.add_mint.label",
         in_progress: "Adding mint",
+      },
+    },
+  },
+  FindCreators: {
+    inputs: {
+      search: {
+        label: "Search creators",
+        placeholder: "npub, hex public key or name",
       },
     },
   },
