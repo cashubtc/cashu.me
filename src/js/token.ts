@@ -19,7 +19,7 @@ function getProofs(decoded_token: Token): WalletProof[] {
     throw new Error("Token format wrong");
   }
   const proofs = decoded_token.proofs.flat();
-  return useProofsStore().proofsToWalletProofs(proofs);
+  return useProofsStore().proofsToWalletProofs(proofs, undefined, "unassigned", "");
 }
 
 function getMint(decoded_token: Token) {

@@ -27,6 +27,7 @@ export type HistoryToken = {
   token?: string;
   mint: string;
   unit: string;
+  label?: string;
   paymentRequest?: PaymentRequest;
   fee?: number;
 };

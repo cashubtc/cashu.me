@@ -37,6 +37,20 @@ export class CashuDexie extends Dexie {
             }
           });
       });
+    this.version(3)
+      .stores({
+        proofs: "secret, id, C, amount, reserved, quote, bucketId, label",
+      })
+      .upgrade(async (tx) => {
+        await tx
+          .table("proofs")
+          .toCollection()
+          .modify((proof: any) => {
+            if (proof.label === undefined) {
+              proof.label = "";
+            }
+          });
+      });
   }
 }
 

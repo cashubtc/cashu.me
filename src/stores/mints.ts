@@ -87,6 +87,7 @@ export type WalletProof = Proof & {
   reserved: boolean;
   quote?: string;
   bucketId?: string;
+  label?: string;
 };
 
 export type Balances = {

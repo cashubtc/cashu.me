@@ -140,7 +140,7 @@
             />
           </div>
           <div class="row q-pt-sm">
-            <q-select
+          <q-select
               v-model="receiveData.bucketId"
               :options="bucketOptions"
               emit-value
@@ -149,6 +149,13 @@
               dense
               :label="$t('BucketManager.inputs.name')"
             />
+          <q-input
+            v-model="receiveData.label"
+            outlined
+            dense
+            class="q-mt-sm"
+            :label="$t('ReceiveTokenDialog.inputs.label.label')"
+          />
           </div>
           <div class="row q-pt-md" v-if="!swapSelected">
             <q-btn
@@ -517,8 +524,9 @@ export default defineComponent({
       tokensStore.addPendingToken({
         amount: amount,
         token: tokenStr,
-        mintInToken: mintInToken,
-        unitInToken: unitInToken,
+        mint: mintInToken,
+        unit: unitInToken,
+        label: this.receiveData.label,
       });
       this.showReceiveTokens = false;
       // show success notification

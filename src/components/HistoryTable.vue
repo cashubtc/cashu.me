@@ -47,8 +47,11 @@
               $t("HistoryTable.row.date_label", {
                 value: formattedDate(token.date),
               })
-            }}</q-item-label
-          >
+            }}
+          </q-item-label>
+          <q-item-label caption v-if="token.label">
+            {{ token.label }}
+          </q-item-label>
         </q-item-section>
 
         <q-item-section side top>

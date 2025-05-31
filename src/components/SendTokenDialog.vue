@@ -1055,6 +1055,7 @@ export default defineComponent({
           token: this.sendData.tokensBase64,
           unit: this.activeUnit,
           mint: this.activeMintUrl,
+          label: "",
         };
         this.addPendingToken(historyToken);
         this.sendData.historyToken = historyToken;
@@ -1109,6 +1110,7 @@ export default defineComponent({
           mint: this.activeMintUrl,
           paymentRequest: this.sendData.paymentRequest,
           status: "pending",
+          label: "",
         };
         this.addPendingToken(historyToken);
         this.sendData.historyToken = historyToken;
