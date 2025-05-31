@@ -76,7 +76,19 @@ export const useBucketsStore = defineStore("buckets", {
     },
   },
   actions: {
-    addBucket(bucket: Omit<Bucket, "id">): Bucket {
+    addBucket(bucket: Omit<Bucket, "id">): Bucket | undefined {
+      // basic validation
+      if (!bucket.name || bucket.name.trim().length === 0) {
+        return;
+      }
+      if (
+        typeof bucket.goal === "number" &&
+        bucket.goal !== null &&
+        bucket.goal < 0
+      ) {
+        return;
+      }
+
       const newBucket: Bucket = { id: uuidv4(), ...bucket };
       this.buckets.push(newBucket);
       return newBucket;

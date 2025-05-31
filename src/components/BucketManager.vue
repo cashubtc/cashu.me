@@ -77,12 +77,14 @@
   <q-dialog v-model="showForm">
     <q-card class="q-pa-lg" style="max-width: 500px">
       <h6 class="q-mt-none q-mb-md">{{ formTitle }}</h6>
-      <q-input
-        v-model="form.name"
-        outlined
-        :label="$t('BucketManager.inputs.name')"
-        class="q-mb-sm"
-      />
+      <q-form ref="bucketForm">
+        <q-input
+          v-model="form.name"
+          outlined
+          :rules="nameRules"
+          :label="$t('BucketManager.inputs.name')"
+          class="q-mb-sm"
+        />
       <q-input
         v-model="form.color"
         outlined
@@ -98,21 +100,23 @@
         autogrow
         class="q-mb-sm"
       />
-      <q-input
-        v-model.number="form.goal"
-        outlined
-        :label="$t('BucketManager.inputs.goal')"
-        type="number"
-        class="q-mb-sm"
-      />
-      <div class="row q-mt-md">
-        <q-btn color="primary" rounded @click="saveBucket">{{
-          $t("global.actions.update.label")
-        }}</q-btn>
-        <q-btn flat rounded color="grey" class="q-ml-auto" v-close-popup>{{
-          $t("global.actions.cancel.label")
-        }}</q-btn>
-      </div>
+        <q-input
+          v-model.number="form.goal"
+          outlined
+          :rules="goalRules"
+          :label="$t('BucketManager.inputs.goal')"
+          type="number"
+          class="q-mb-sm"
+        />
+        <div class="row q-mt-md">
+          <q-btn color="primary" rounded @click="saveBucket">{{
+            $t("global.actions.update.label")
+          }}</q-btn>
+          <q-btn flat rounded color="grey" class="q-ml-auto" v-close-popup>{{
+            $t("global.actions.cancel.label")
+          }}</q-btn>
+        </div>
+      </q-form>
     </q-card>
   </q-dialog>
 
@@ -138,17 +142,21 @@
 
 <script>
 import { defineComponent, ref, computed } from "vue";
+import { useI18n } from "vue-i18n";
 import { useBucketsStore, DEFAULT_BUCKET_ID } from "stores/buckets";
 import { useMintsStore } from "stores/mints";
 import { storeToRefs } from "pinia";
 import { useUiStore } from "stores/ui";
+import { notifyError } from "src/js/notify";
 
 export default defineComponent({
   name: "BucketManager",
   setup() {
     const bucketsStore = useBucketsStore();
     const uiStore = useUiStore();
+    const { t } = useI18n();
     const showForm = ref(false);
+    const bucketForm = ref(null);
     const showDelete = ref(false);
     const editId = ref(null);
     const deleteId = ref(null);
@@ -186,7 +194,19 @@ export default defineComponent({
       showForm.value = true;
     };
 
-    const saveBucket = () => {
+    const nameRules = [
+      (val) => !!val || t('BucketManager.validation.name'),
+    ];
+
+    const goalRules = [
+      (val) => val === null || val === undefined || val >= 0 || t('BucketManager.validation.goal'),
+    ];
+
+    const saveBucket = async () => {
+      if (!(await bucketForm.value.validate())) {
+        notifyError(t('BucketManager.validation.error'));
+        return;
+      }
       if (editId.value) {
         bucketsStore.editBucket(editId.value, { ...form.value });
       } else {
@@ -213,6 +233,9 @@ export default defineComponent({
       showForm,
       showDelete,
       form,
+      bucketForm,
+      nameRules,
+      goalRules,
       formTitle: computed(() => (editId.value ? "Edit Bucket" : "Add Bucket")),
       openAdd,
       openEdit,

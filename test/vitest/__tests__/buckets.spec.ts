@@ -58,4 +58,17 @@ describe('Buckets store', () => {
     await buckets.deleteBucket(DEFAULT_BUCKET_ID)
     expect(buckets.bucketList.length).toBe(count)
   })
+
+  it('rejects invalid bucket data', () => {
+    const buckets = useBucketsStore()
+    const count = buckets.bucketList.length
+
+    const empty = buckets.addBucket({ name: '' })
+    expect(empty).toBeUndefined()
+    expect(buckets.bucketList.length).toBe(count)
+
+    const negative = buckets.addBucket({ name: 'bad', goal: -5 })
+    expect(negative).toBeUndefined()
+    expect(buckets.bucketList.length).toBe(count)
+  })
 })

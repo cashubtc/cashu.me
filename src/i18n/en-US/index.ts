@@ -1251,6 +1251,11 @@ export default {
       description: "Description",
       goal: "Goal (sat)",
     },
+    validation: {
+      name: "Name is required",
+      goal: "Goal must be positive",
+      error: "Please correct the errors before saving",
+    },
     delete_confirm: {
       title: "Delete bucket?",
     },
