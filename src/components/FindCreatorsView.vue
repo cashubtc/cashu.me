@@ -36,7 +36,7 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
 import { defineComponent, ref, watch } from "vue";
 import { useCreatorsStore } from "stores/creators";
 import { storeToRefs } from "pinia";
