@@ -803,6 +803,17 @@ export default defineComponent({
     ...mapActions(useP2PKStore, ["isValidPubkey", "maybeConvertNpub"]),
     ...mapActions(useCameraStore, ["closeCamera", "showCamera"]),
     ...mapActions(useMintsStore, ["toggleUnit"]),
+    onDialogShown() {
+      this.$nextTick(() => {
+        const input = this.$el.querySelector('input');
+        if (input) {
+          input.focus();
+        }
+        if (this.useNumericKeyboard && !this.sendData.tokensBase64.length) {
+          this.showNumericKeyboard = true;
+        }
+      });
+    },
     // decodeP2PKQR: function (res) {
     //   console.log("### SendToken qr", res);
     //   this.camera.data = res;
