@@ -51,14 +51,14 @@
                 flat
                 round
                 size="sm"
-                @click.stop="openEdit(bucket)"
+                @click.stop.prevent="openEdit(bucket)"
               />
               <q-btn
                 icon="delete"
                 flat
                 round
                 size="sm"
-                @click.stop="openDelete(bucket.id)"
+                @click.stop.prevent="openDelete(bucket.id)"
               />
             </q-item-section>
           </q-item>

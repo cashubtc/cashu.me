@@ -186,5 +186,12 @@ export const useProofsStore = defineStore("proofs", {
         }
       });
     },
+    async updateProofLabels(secrets: string[], label: string) {
+      await cashuDb.transaction("rw", cashuDb.proofs, async () => {
+        for (const secret of secrets) {
+          await cashuDb.proofs.where("secret").equals(secret).modify({ label });
+        }
+      });
+    },
   },
 });

@@ -4,6 +4,7 @@ import { defineStore } from "pinia";
 import { PaymentRequest, Proof, Token } from "@cashu/cashu-ts";
 import token from "src/js/token";
 import { DEFAULT_BUCKET_ID } from "./buckets";
+import { useProofsStore } from "./proofs";
 
 /**
  * The tokens store handles everything related to tokens and proofs
@@ -102,6 +103,7 @@ export const useTokensStore = defineStore("tokens", {
         newStatus?: "paid" | "pending";
         newToken?: string;
         newFee?: number;
+        newLabel?: string;
       }
     ): HistoryToken | undefined {
       const index = this.historyTokens.findIndex(
@@ -128,6 +130,22 @@ export const useTokensStore = defineStore("tokens", {
           }
           if (options.newFee) {
             this.historyTokens[index].fee = options.newFee;
+          }
+          if (options.newLabel !== undefined) {
+            this.historyTokens[index].label = options.newLabel;
+            try {
+              const tokenJson = token.decode(this.historyTokens[index].token);
+              if (tokenJson) {
+                const proofs = token.getProofs(tokenJson);
+                const proofsStore = useProofsStore();
+                proofsStore.updateProofLabels(
+                  proofs.map((p) => p.secret),
+                  options.newLabel
+                );
+              }
+            } catch (e) {
+              console.warn("Could not update proof labels", e);
+            }
           }
         }
 
