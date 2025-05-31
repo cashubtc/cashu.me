@@ -385,6 +385,9 @@ export default defineComponent({
   },
   data: function () {
     return {
+      mintToEdit: {},
+      mintToRemove: {},
+      editMintData: {},
       contactIcons: {
         email: "mail",
       },
