@@ -226,8 +226,10 @@ function onDragStart(ev: DragEvent, group: ProofGroup){
   const secrets = selectedSecrets.value.length
     ? selectedSecrets.value
     : group.secrets;
-  ev.dataTransfer?.setData('text/plain', JSON.stringify(secrets));
-  ev.dataTransfer?.effectAllowed = 'move';
+  if (ev.dataTransfer) {
+    ev.dataTransfer.setData('text/plain', JSON.stringify(secrets));
+    ev.dataTransfer.effectAllowed = 'move';
+  }
 }
 
 function openEditGroup(group: ProofGroup){
