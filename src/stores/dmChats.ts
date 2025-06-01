@@ -1,6 +1,7 @@
 import { defineStore } from "pinia";
 import { useLocalStorage } from "@vueuse/core";
 import type { NDKEvent } from "@nostr-dev-kit/ndk";
+import { sanitizeMessage } from "../js/message-utils";
 
 export type DMMessage = {
   id: string;
@@ -30,7 +31,7 @@ export const useDmChatsStore = defineStore("dmChats", {
       const msg: DMMessage = {
         id: event.id,
         pubkey: event.pubkey,
-        content: event.content,
+        content: sanitizeMessage(event.content),
         created_at: event.created_at,
         outgoing: false,
       };
@@ -45,7 +46,7 @@ export const useDmChatsStore = defineStore("dmChats", {
       const msg: DMMessage = {
         id: event.id,
         pubkey: recipient,
-        content: event.content,
+        content: sanitizeMessage(event.content),
         created_at: event.created_at,
         outgoing: true,
       };
