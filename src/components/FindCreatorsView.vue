@@ -63,7 +63,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, watch } from "vue";
+import { defineComponent, ref, watch, onMounted } from "vue";
 import { useCreatorsStore } from "stores/creators";
 import CreatorProfileCard from "components/CreatorProfileCard.vue";
 import DonateDialog from "components/DonateDialog.vue";
@@ -99,6 +99,10 @@ export default defineComponent({
     const messageCreator = ref<any>(null);
     const selectedBucketId = ref<string>("");
     const selectedLocked = ref(false);
+
+    onMounted(() => {
+      creatorsStore.loadFeaturedCreators();
+    });
 
     const triggerSearch = () => {
       if (searchInput.value.trim()) {
