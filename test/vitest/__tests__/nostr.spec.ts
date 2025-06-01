@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { useNostrStore } from "../../../src/stores/nostr";
+import { NDKEvent } from "@nostr-dev-kit/ndk";
 
 vi.mock("@nostr-dev-kit/ndk", () => {
   class NDKEvent {
@@ -88,12 +89,23 @@ beforeEach(() => {
 });
 
 describe("sendNip17DirectMessage", () => {
-  it("returns signed event", async () => {
+  it("returns signed event when published", async () => {
     const store = useNostrStore();
     const ev = await store.sendNip17DirectMessage("r", "m");
-    expect(ev.sig).toBeDefined();
+    expect(ev).not.toBeNull();
+    expect(ev!.sig).toBeDefined();
     const used = encryptMock.mock.calls[0][0];
     const parsed = JSON.parse(used);
     expect(parsed.sig).toBeDefined();
+  });
+
+  it("returns null when publish fails", async () => {
+    const store = useNostrStore();
+    const publishSpy = vi
+      .spyOn(NDKEvent.prototype, "publish")
+      .mockRejectedValue(new Error("fail"));
+    const ev = await store.sendNip17DirectMessage("r", "m");
+    expect(ev).toBeNull();
+    publishSpy.mockRestore();
   });
 });

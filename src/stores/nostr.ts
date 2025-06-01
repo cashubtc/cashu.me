@@ -408,12 +408,13 @@ export const useNostrStore = defineStore("nostr", {
     sendNip17DirectMessageToNprofile: async function (
       nprofile: string,
       message: string
-    ) {
+    ): Promise<NDKEvent | null> {
       const result = nip19.decode(nprofile);
       const pubkey: string = (result.data as ProfilePointer).pubkey;
-      const relays: string[] | undefined = (result.data as ProfilePointer)
-        .relays;
-      this.sendNip17DirectMessage(pubkey, message, relays);
+      const relays: string[] | undefined = (
+        result.data as ProfilePointer
+      ).relays;
+      return await this.sendNip17DirectMessage(pubkey, message, relays);
     },
     randomTimeUpTo2DaysInThePast: function () {
       return Math.floor(Date.now() / 1000) - Math.floor(Math.random() * 172800);
@@ -422,7 +423,7 @@ export const useNostrStore = defineStore("nostr", {
       recipient: string,
       message: string,
       relays?: string[]
-    ) {
+    ): Promise<NDKEvent | null> {
       await this.walletSeedGenerateKeyPair();
       const randomPrivateKey = generateSecretKey();
       const randomPublicKey = getPublicKey(randomPrivateKey);
@@ -472,9 +473,11 @@ export const useNostrStore = defineStore("nostr", {
       wrapEvent.id = wrapEvent.getEventHash();
       wrapEvent.sig = await wrapEvent.sign();
 
+      let published = false;
       try {
         randomNdk.connect();
         await wrapEvent.publish();
+        published = true;
         try {
           const chatStore = useDmChatsStore();
           chatStore.addOutgoing(dmEvent);
@@ -485,7 +488,7 @@ export const useNostrStore = defineStore("nostr", {
         console.error(e);
         notifyError("Could not publish NIP-17 event");
       }
-      return dmEvent;
+      return published ? dmEvent : null;
     },
     subscribeToNip17DirectMessages: async function () {
       await this.walletSeedGenerateKeyPair();
