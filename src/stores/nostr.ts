@@ -340,6 +340,7 @@ export const useNostrStore = defineStore("nostr", {
       recipient: string,
       message: string
     ) {
+      await this.walletSeedGenerateKeyPair();
       const ndk = new NDK({ signer: this.seedSigner });
       const event = new NDKEvent(ndk);
       event.kind = NDKKind.EncryptedDirectMessage;
