@@ -1351,6 +1351,7 @@ export default {
       color: "Color",
       description: "Description",
       goal: "Goal (sat)",
+      creator_pubkey: "Creator pubkey",
     },
     tooltips: {
       description: "Buckets are for categorizing tokens",
@@ -1368,6 +1369,7 @@ export default {
     move: "Move tokens",
     send: "Send tokens",
     export: "Export bucket",
+    send_to_creator: "Send to creator",
     locked_tokens_heading: "Locked tokens",
     inputs: {
       target_bucket: {

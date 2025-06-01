@@ -14,6 +14,7 @@ export type Bucket = {
   color?: string;
   description?: string;
   goal?: number;
+  creatorPubkey?: string;
 };
 
 export type BucketRule = {

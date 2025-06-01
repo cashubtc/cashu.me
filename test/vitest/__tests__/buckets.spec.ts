@@ -22,6 +22,13 @@ describe('Buckets store', () => {
     expect(buckets.bucketList.find(b => b.id === bucket.id)?.name).toBe('Test bucket')
   })
 
+  it('stores creator pubkey', () => {
+    const buckets = useBucketsStore()
+    const bucket = buckets.addBucket({ name: 'Creator', creatorPubkey: 'pubkey' })!
+    expect(bucket.creatorPubkey).toBe('pubkey')
+    expect(buckets.bucketList.find(b => b.id === bucket.id)?.creatorPubkey).toBe('pubkey')
+  })
+
   it('edits bucket and protects default', () => {
     const buckets = useBucketsStore()
     const bucket = buckets.addBucket({ name: 'Old' })
