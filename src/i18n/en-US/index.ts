@@ -854,6 +854,9 @@ export default {
       refund_pubkey: {
         label: "Refund public key",
       },
+      memo: {
+        label: "Message",
+      },
     },
     actions: {
       close: {
