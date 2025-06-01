@@ -9,39 +9,40 @@
       <!-- Header Section -->
       <div class="edit-mint-header q-pa-md">
         <div class="edit-mint-title-row">
-          <h4 class="edit-mint-title q-my-none">Edit Mint</h4>
+          <h4 class="edit-mint-title q-my-none">{{ $t("EditMintDialog.title") }}</h4>
         </div>
       </div>
 
       <!-- Content Section -->
       <div class="edit-mint-content q-px-md q-pb-md">
-        <p class="edit-mint-description q-mb-lg">
-          You can edit the mint's nickname to personalize it or change its URL
-          if necessary.
-        </p>
-
         <div class="q-mb-lg">
-          <label class="input-label">Mint URL</label>
+          <label class="input-label">{{ $t('EditMintDialog.inputs.mint_url.label') }}</label>
           <q-input
             v-model="editMintData.url"
             dense
             class="mint-input q-mb-md"
             filled
+            type="textarea"
+            autogrow
             style="font-family: monospace; font-size: 0.9em"
           ></q-input>
 
-          <label class="input-label">Nickname</label>
+          <label class="input-label">{{ $t('EditMintDialog.inputs.nickname.label') }}</label>
           <q-input
             v-model="editMintData.nickname"
             dense
             class="mint-input"
             filled
+            type="textarea"
+            autogrow
             placeholder="e.g. Testnet"
           ></q-input>
         </div>
 
         <div class="action-buttons">
-          <q-btn flat class="cancel-btn" v-close-popup> Cancel </q-btn>
+          <q-btn flat class="cancel-btn" v-close-popup> 
+            {{ $t("EditMintDialog.actions.cancel.label") }}
+          </q-btn>
           <q-spacer></q-spacer>
           <q-btn
             color="primary"
@@ -49,7 +50,7 @@
             @click="updateMintLocal"
             v-close-popup
           >
-            Update
+            {{ $t("EditMintDialog.actions.update.label") }}
           </q-btn>
         </div>
       </div>

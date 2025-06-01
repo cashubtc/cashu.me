@@ -10,19 +10,18 @@
       <!-- Header Section -->
       <div class="add-mint-header q-pa-md">
         <div class="add-mint-title-row">
-          <h4 class="add-mint-title q-my-none">Add Mint</h4>
+          <h4 class="add-mint-title q-my-none">{{ $t("AddMintDialog.title") }}</h4>
         </div>
       </div>
 
       <!-- Content Section -->
       <div class="add-mint-content q-px-md q-pb-md">
         <p class="add-mint-description q-mb-lg">
-          Enter the mint URL and an optional nickname to add a new mint to your
-          wallet.
+          {{ $t("AddMintDialog.description") }}
         </p>
 
         <div class="q-mb-lg">
-          <label class="input-label">Mint URL</label>
+          <label class="input-label">{{ $t('AddMintDialog.inputs.mint_url.label') }}</label>
           <q-input
             outlined
             readonly
@@ -34,20 +33,26 @@
             autogrow
             style="font-family: monospace; font-size: 0.9em"
           ></q-input>
-
-          <!-- Your other form fields here -->
         </div>
 
         <div class="action-buttons">
-          <q-btn flat class="cancel-btn" v-close-popup> Cancel </q-btn>
+          <q-btn flat class="cancel-btn" v-close-popup> 
+            {{ $t("AddMintDialog.actions.cancel.label") }}
+          </q-btn>
           <q-spacer></q-spacer>
           <q-btn
             color="primary"
             class="add-btn"
             @click="addMintLocal"
             v-close-popup
+            :loading="addMintBlocking"
+            icon="check"
           >
-            Add Mint
+            {{ $t("AddMintDialog.actions.add_mint.label") }}
+            <template v-slot:loading>
+              <q-spinner-hourglass />
+              {{ $t("AddMintDialog.actions.add_mint.in_progress") }}
+            </template>
           </q-btn>
         </div>
       </div>

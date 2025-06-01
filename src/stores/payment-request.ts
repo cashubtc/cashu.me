@@ -12,7 +12,12 @@ import { useSendTokensStore } from "./sendTokensStore";
 import { useNostrStore } from "./nostr";
 import { useTokensStore } from "./tokens";
 import token from "src/js/token";
-import { notify, notifyError, notifySuccess } from "src/js/notify";
+import {
+  notify,
+  notifyError,
+  notifySuccess,
+  notifyWarning,
+} from "src/js/notify";
 import { useLocalStorage } from "@vueuse/core";
 import { v4 as uuidv4 } from "uuid";
 
@@ -86,6 +91,18 @@ export const usePRStore = defineStore("payment-request", {
         }
       }
 
+      // activate the unit in the payment request
+      if (request.unit) {
+        // if the activeMint() supports this unit, set it
+        if (mintsStore.activeMint().units.find((u) => u == request.unit)) {
+          mintsStore.activeUnit = request.unit;
+        } else {
+          notifyWarning(
+            `The mint does not support the unit in the payment request: ${request.unit}`
+          );
+        }
+      }
+
       const sendTokenStore = useSendTokensStore();
       if (!sendTokenStore.showSendTokens) {
         // if the sendtokendialog is not currently open, clear all data and then show the send dialog
@@ -102,15 +119,15 @@ export const usePRStore = defineStore("payment-request", {
         sendTokenStore.showSendTokens = true;
       }
     },
-    parseAndPayPaymentRequest(request: PaymentRequest, tokenStr: string) {
+    async parseAndPayPaymentRequest(request: PaymentRequest, tokenStr: string) {
       const transports: PaymentRequestTransport[] = request.transport;
       for (const transport of transports) {
         if (transport.type == PaymentRequestTransportType.NOSTR) {
-          this.payNostrPaymentRequest(request, transport, tokenStr);
+          await this.payNostrPaymentRequest(request, transport, tokenStr);
           return;
         }
         if (transport.type == PaymentRequestTransportType.POST) {
-          this.payPostPaymentRequest(request, transport, tokenStr);
+          await this.payPostPaymentRequest(request, transport, tokenStr);
           return;
         }
       }
@@ -161,10 +178,12 @@ export const usePRStore = defineStore("payment-request", {
         return;
       }
       const proofs = token.getProofs(decodedToken);
+      const unit = token.getUnit(decodedToken);
+      const mint = token.getMint(decodedToken);
       const paymentPayload: PaymentRequestPayload = {
         id: request.id,
-        mint: request.mints ? request.mints[0] : "",
-        unit: request.unit || "",
+        mint: mint,
+        unit: unit,
         proofs: proofs,
       };
       const paymentPayloadString = JSON.stringify(paymentPayload);
@@ -176,6 +195,11 @@ export const usePRStore = defineStore("payment-request", {
           method: "POST",
           body: paymentPayloadString,
         });
+        if (!response.ok) {
+          console.error("Error paying payment request:", response.statusText);
+          notifyError("Could not pay request");
+          return;
+        }
         notifySuccess("Payment sent");
       } catch (error) {
         console.error("Error paying payment request:", error);
