@@ -1,6 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { useNostrStore } from "../../../src/stores/nostr";
-import { NDKEvent } from "@nostr-dev-kit/ndk";
 
 vi.mock("@nostr-dev-kit/ndk", () => {
   class NDKEvent {
@@ -61,6 +60,7 @@ vi.mock("@nostr-dev-kit/ndk", () => {
 });
 
 const encryptMock = vi.fn((content: string) => content);
+let publishSuccess = true;
 vi.mock("nostr-tools", () => ({
   nip04: {},
   nip19: { decode: vi.fn(), nsecEncode: vi.fn(), nprofileEncode: vi.fn() },
@@ -72,6 +72,16 @@ vi.mock("nostr-tools", () => ({
   },
   generateSecretKey: () => new Uint8Array(32).fill(1),
   getPublicKey: () => "pubkey",
+  SimplePool: class {
+    publish() {
+      return {
+        on: (event: string, cb: Function) => {
+          if (event === "ok" && publishSuccess) cb({ url: "r" });
+          if (event === "failed" && !publishSuccess) cb("fail");
+        },
+      };
+    }
+  },
 }));
 
 vi.mock("@noble/hashes/utils", () => ({
@@ -86,12 +96,20 @@ vi.mock("../../../src/stores/wallet", () => ({
 beforeEach(() => {
   encryptMock.mockClear();
   localStorage.clear();
+  vi.useFakeTimers();
+});
+
+afterEach(() => {
+  vi.runAllTimers();
+  vi.useRealTimers();
 });
 
 describe("sendNip17DirectMessage", () => {
   it("returns signed event when published", async () => {
     const store = useNostrStore();
-    const ev = await store.sendNip17DirectMessage("r", "m");
+    const promise = store.sendNip17DirectMessage("r", "m");
+    vi.runAllTimers();
+    const ev = await promise;
     expect(ev).not.toBeNull();
     expect(ev!.sig).toBeDefined();
     const used = encryptMock.mock.calls[0][0];
@@ -101,11 +119,11 @@ describe("sendNip17DirectMessage", () => {
 
   it("returns null when publish fails", async () => {
     const store = useNostrStore();
-    const publishSpy = vi
-      .spyOn(NDKEvent.prototype, "publish")
-      .mockRejectedValue(new Error("fail"));
-    const ev = await store.sendNip17DirectMessage("r", "m");
+    publishSuccess = false;
+    const promise = store.sendNip17DirectMessage("r", "m");
+    vi.runAllTimers();
+    const ev = await promise;
     expect(ev).toBeNull();
-    publishSpy.mockRestore();
+    publishSuccess = true;
   });
 });
