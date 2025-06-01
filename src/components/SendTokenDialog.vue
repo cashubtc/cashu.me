@@ -868,6 +868,13 @@ export default defineComponent({
         this.sendData.locktime = null;
       }
     },
+    "sendData.bucketId": function (val) {
+      const bucket = this.bucketList.find((b) => b.id === val);
+      if (bucket && bucket.creatorPubkey) {
+        this.sendData.p2pkPubkey = bucket.creatorPubkey;
+        this.showLockInput = true;
+      }
+    },
   },
   methods: {
     ...mapActions(useWorkersStore, ["clearAllWorkers"]),
