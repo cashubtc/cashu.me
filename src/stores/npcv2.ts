@@ -102,40 +102,16 @@ export const useNPCV2Store = defineStore("npcV2", {
         this.npcV2Loading = false;
       }
     },
-    generateNip98Event: async function (
-      url: string,
-      method: string
-    ): Promise<string> {
-      const nostrStore = useNostrStore();
-      await nostrStore.initSignerIfNotSet();
-      const nip98Event = new NDKEvent(new NDK());
-      nip98Event.kind = NIP98Kind;
-      nip98Event.content = "";
-      nip98Event.tags = [
-        ["u", url],
-        ["method", method],
-      ];
-      await nip98Event.sign(nostrStore.signer);
-      const eventString = JSON.stringify(nip98Event.rawEvent());
-      return btoa(eventString);
-    },
     getV2Info: async function (): Promise<{
       name?: string;
       mintUrl: string;
       lock_quote: boolean;
       pubkey: string;
     }> {
-      const authHeader = await this.generateNip98Event(
-        `${this.npcV2BaseURL}/api/v2/user/info`,
-        "GET"
-      );
       try {
-        const response = await fetch(`${this.npcV2BaseURL}/api/v2/user/info`, {
-          method: "GET",
-          headers: {
-            Authorization: `Nostr ${authHeader}`,
-          },
-        });
+        const response = await this.sendAuthedRequest(
+          `${this.npcV2BaseURL}/api/v2/user/info`
+        );
         const info: NPCV2InfoReponse = await response.json();
         if (info.error) {
           notifyError(info.message);
@@ -152,7 +128,6 @@ export const useNPCV2Store = defineStore("npcV2", {
         };
       }
     },
-
     changeMintUrl: async function (mintUrl: string) {
       const mintstore = useMintsStore();
       if (!mintstore.mints.find((m) => m.url === mintUrl)) {
@@ -161,17 +136,17 @@ export const useNPCV2Store = defineStore("npcV2", {
         );
         return;
       }
-      const changeMintUrl = `${this.npcV2BaseURL}/api/v2/user/mint`;
-      const authHeader = await this.generateNip98Event(changeMintUrl, "PATCH");
       try {
-        const res = await fetch(changeMintUrl, {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Nostr ${authHeader}`,
-          },
-          method: "PATCH",
-          body: JSON.stringify({ mint_url: mintUrl }),
-        });
+        const res = await this.sendAuthedRequest(
+          `${this.npcV2BaseURL}/api/v2/user/mint`,
+          {
+            headers: {
+              "Content-Type": "application/json",
+            },
+            method: "PATCH",
+            body: JSON.stringify({ mint_url: mintUrl }),
+          }
+        );
         const data = await res.json();
         if (data.error) {
           throw new Error(data.message);
@@ -187,7 +162,6 @@ export const useNPCV2Store = defineStore("npcV2", {
         }
       }
     },
-
     getLatestQuotes: async function () {
       if (!this.npcV2Enabled) {
         return;
@@ -196,13 +170,12 @@ export const useNPCV2Store = defineStore("npcV2", {
       const since = this.npcV2LastCheck ? `?since=${this.npcV2LastCheck}` : "";
 
       const quoteUrl = `${this.npcV2BaseURL}/api/v2/wallet/quotes`;
-      const authHeader = await this.generateNip98Event(quoteUrl, "GET");
       try {
-        const response = await fetch(quoteUrl + since, {
-          headers: {
-            Authorization: `Nostr ${authHeader}`,
-          },
-        });
+        const response = await this.sendAuthedRequest(
+          quoteUrl + since,
+          undefined,
+          quoteUrl
+        );
         const resData: NPCQuoteResponse = await response.json();
         if (resData.error) {
           return;
@@ -244,6 +217,37 @@ export const useNPCV2Store = defineStore("npcV2", {
         console.error(e);
         return;
       }
+    },
+    sendAuthedRequest: async function (
+      url: string,
+      opts?: RequestInit,
+      authUrl?: string
+    ) {
+      const authHeader = await this.generateNip98Event(
+        authUrl || url,
+        opts?.method || "GET"
+      );
+      return fetch(url, {
+        ...opts,
+        headers: { ...opts?.headers, authorization: `Nostr ${authHeader}` },
+      });
+    },
+    generateNip98Event: async function (
+      url: string,
+      method: string
+    ): Promise<string> {
+      const nostrStore = useNostrStore();
+      await nostrStore.initSignerIfNotSet();
+      const nip98Event = new NDKEvent(new NDK());
+      nip98Event.kind = NIP98Kind;
+      nip98Event.content = "";
+      nip98Event.tags = [
+        ["u", url],
+        ["method", method],
+      ];
+      await nip98Event.sign(nostrStore.signer);
+      const eventString = JSON.stringify(nip98Event.rawEvent());
+      return btoa(eventString);
     },
   },
 });
