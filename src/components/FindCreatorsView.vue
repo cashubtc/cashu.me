@@ -102,6 +102,8 @@ export default defineComponent({
     const handleDonate = ({ bucketId, locked }: { bucketId: string; locked: boolean }) => {
       selectedBucketId.value = bucketId;
       selectedLocked.value = locked;
+      sendTokensStore.recipientPubkey = donateCreator.value.pubkey;
+      sendTokensStore.sendViaNostr = true;
       showDonateDialog.value = false;
       showActionDialog.value = true;
     };

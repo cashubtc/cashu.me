@@ -596,6 +596,7 @@ import { getShortUrl } from "src/js/wallet-helpers";
 import { useSettingsStore } from "src/stores/settings";
 import { useWorkersStore } from "src/stores/workers";
 import { usePriceStore } from "src/stores/price";
+import { useNostrStore } from "src/stores/nostr";
 import token from "src/js/token";
 import { Buffer } from "buffer";
 import { useCameraStore } from "src/stores/camera";
@@ -669,6 +670,8 @@ export default defineComponent({
       "showSendTokens",
       "showLockInput",
       "sendData",
+      "recipientPubkey",
+      "sendViaNostr",
     ]),
     ...mapWritableState(useCameraStore, ["camera", "hasCamera"]),
     ...mapState(useUiStore, [
@@ -820,6 +823,8 @@ export default defineComponent({
         this.sendData.tokensBase64 = "";
         this.sendData.historyToken = null;
         this.sendData.paymentRequest = null;
+        this.recipientPubkey = "";
+        this.sendViaNostr = false;
       }
     },
     locktimeInput(val) {
@@ -1111,6 +1116,21 @@ export default defineComponent({
         this.sendData.tokens = sendProofs;
 
         this.sendData.tokensBase64 = this.serializeProofs(sendProofs);
+        if (this.sendViaNostr && this.recipientPubkey) {
+          try {
+            await useNostrStore().sendNip17DirectMessage(
+              this.recipientPubkey,
+              this.sendData.tokensBase64,
+            );
+            notifySuccess("Sent token via Nostr");
+          } catch (e) {
+            console.error(e);
+            notifyError("Failed to send Nostr DM");
+          } finally {
+            this.recipientPubkey = "";
+            this.sendViaNostr = false;
+          }
+        }
         useLockedTokensStore().addLockedToken({
           amount: sendAmount,
           token: this.sendData.tokensBase64,
@@ -1130,13 +1150,14 @@ export default defineComponent({
         this.addPendingToken(historyToken);
         this.sendData.historyToken = historyToken;
 
-        if (!this.g.offline) {
-          this.onTokenPaid(historyToken);
-        }
-      } catch (error) {
-        console.error(error);
+      if (!this.g.offline) {
+        this.onTokenPaid(historyToken);
       }
-    },
+    } catch (error) {
+      console.error(error);
+      notifyError("Failed to send tokens");
+    }
+  },
     sendTokens: async function () {
       /*
       calls send, displays token and kicks off the spendableWorker
@@ -1175,6 +1196,21 @@ export default defineComponent({
         // update UI
         this.sendData.tokens = sendProofs;
         this.sendData.tokensBase64 = this.serializeProofs(sendProofs);
+        if (this.sendViaNostr && this.recipientPubkey) {
+          try {
+            await useNostrStore().sendNip17DirectMessage(
+              this.recipientPubkey,
+              this.sendData.tokensBase64,
+            );
+            notifySuccess("Sent token via Nostr");
+          } catch (e) {
+            console.error(e);
+            notifyError("Failed to send Nostr DM");
+          } finally {
+            this.recipientPubkey = "";
+            this.sendViaNostr = false;
+          }
+        }
         this.sendData.historyAmount =
           -this.sendData.amount * this.activeUnitCurrencyMultiplyer;
 
@@ -1191,13 +1227,14 @@ export default defineComponent({
         this.addPendingToken(historyToken);
         this.sendData.historyToken = historyToken;
 
-        if (!this.g.offline) {
-          this.onTokenPaid(historyToken);
-        }
-      } catch (error) {
-        console.error(error);
+      if (!this.g.offline) {
+        this.onTokenPaid(historyToken);
       }
-    },
+    } catch (error) {
+      console.error(error);
+      notifyError("Failed to send tokens");
+    }
+  },
     pasteToP2PKField: async function () {
       console.log("pasteToParseDialog");
       const text = await useUiStore().pasteFromClipboard();
