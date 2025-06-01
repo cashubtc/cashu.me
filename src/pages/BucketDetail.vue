@@ -51,7 +51,7 @@
       </div>
     </div>
 
-    <SendTokenDialog v-model="showSendTokens" />
+    <SendTokenDialog />
     <q-dialog v-model="editDialog.show">
       <q-card class="q-pa-md" style="max-width: 400px">
         <h6 class="q-mt-none q-mb-md">Edit token</h6>

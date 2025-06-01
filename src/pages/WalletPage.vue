@@ -171,7 +171,7 @@
     <InvoiceDetailDialog v-model="showInvoiceDetails" />
 
     <!-- SEND TOKENS DIALOG  -->
-    <SendTokenDialog v-model="showSendTokens" />
+    <SendTokenDialog />
 
     <!-- RECEIVE TOKENS DIALOG  -->
     <ReceiveTokenDialog v-model="showReceiveTokens" />
