@@ -432,6 +432,7 @@ export const useNostrStore = defineStore("nostr", {
       dmEvent.tags = [["p", recipient]];
       dmEvent.created_at = Math.floor(Date.now() / 1000);
       dmEvent.pubkey = this.seedSignerPublicKey;
+      await dmEvent.sign(this.seedSigner);
       dmEvent.id = dmEvent.getEventHash();
       const dmEventString = JSON.stringify(await dmEvent.toNostrEvent());
 
@@ -477,6 +478,7 @@ export const useNostrStore = defineStore("nostr", {
         console.error(e);
         notifyError("Could not publish NIP-17 event");
       }
+      return dmEvent;
     },
     subscribeToNip17DirectMessages: async function () {
       await this.walletSeedGenerateKeyPair();
