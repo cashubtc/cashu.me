@@ -267,6 +267,48 @@ export const useNostrStore = defineStore("nostr", {
       const filter: NDKFilter = { kinds: [1], authors: [this.pubkey] };
       return await this.ndk.fetchEvents(filter);
     },
+
+    fetchFollowerCount: async function (pubkey: string): Promise<number> {
+      await this.initNdkReadOnly();
+      const filter: NDKFilter = { kinds: [3], "#p": [pubkey] };
+      const events = await this.ndk.fetchEvents(filter);
+      const authors = new Set<string>();
+      events.forEach((ev) => authors.add(ev.pubkey));
+      return authors.size;
+    },
+
+    fetchFollowingCount: async function (pubkey: string): Promise<number> {
+      await this.initNdkReadOnly();
+      const filter: NDKFilter = { kinds: [3], authors: [pubkey] };
+      const events = await this.ndk.fetchEvents(filter);
+      let latest: NDKEvent | undefined;
+      events.forEach((ev) => {
+        if (!latest || ev.created_at > (latest.created_at || 0)) {
+          latest = ev;
+        }
+      });
+      if (!latest) return 0;
+      const following = new Set<string>();
+      latest.tags.forEach((tag: NDKTag) => {
+        if (tag[0] === "p" && tag[1]) {
+          following.add(tag[1] as string);
+        }
+      });
+      return following.size;
+    },
+
+    fetchJoinDate: async function (pubkey: string): Promise<number | null> {
+      await this.initNdkReadOnly();
+      const filter: NDKFilter = { kinds: [0, 1], authors: [pubkey] };
+      const events = await this.ndk.fetchEvents(filter);
+      let earliest: number | null = null;
+      events.forEach((ev) => {
+        if (earliest === null || ev.created_at < earliest) {
+          earliest = ev.created_at;
+        }
+      });
+      return earliest;
+    },
     fetchMints: async function () {
       const filter: NDKFilter = { kinds: [38000 as NDKKind], limit: 2000 };
       const events = await this.ndk.fetchEvents(filter);

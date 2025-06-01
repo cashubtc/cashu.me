@@ -5,6 +5,9 @@ import { nip19 } from "nostr-tools";
 export interface CreatorProfile {
   pubkey: string;
   profile: any;
+  followers: number;
+  following: number;
+  joined: number | null;
 }
 
 export const useCreatorsStore = defineStore("creators", {
@@ -42,7 +45,16 @@ export const useCreatorsStore = defineStore("creators", {
       try {
         const user = nostrStore.ndk.getUser({ pubkey });
         await user.fetchProfile();
-        this.searchResults.push({ pubkey, profile: user.profile });
+        const followers = await nostrStore.fetchFollowerCount(pubkey);
+        const following = await nostrStore.fetchFollowingCount(pubkey);
+        const joined = await nostrStore.fetchJoinDate(pubkey);
+        this.searchResults.push({
+          pubkey,
+          profile: user.profile,
+          followers,
+          following,
+          joined,
+        });
       } catch (e) {
         console.error(e);
       } finally {
