@@ -362,8 +362,19 @@ export const useNWCStore = defineStore("nwc", {
       conn: NWCConnection
     ) {
       // parse command to JSON object {method: 'pay_invoice', params: {invoice: '1234'}}
-      let nwcCommand: NWCCommand = JSON.parse(command);
+      let nwcCommand: NWCCommand;
       let result: NWCResult | NWCError;
+      try {
+        nwcCommand = JSON.parse(command);
+      } catch (e) {
+        console.log("### failed to parse NWC command", command);
+        result = {
+          result_type: "parse_error",
+          error: { code: "OTHER", message: "Failed to parse command" },
+        } as NWCError;
+        await this.replyNWC(result, event, conn);
+        return;
+      }
       console.log("### nwcCommand", nwcCommand);
       // parse "get_info" without params
       if (nwcCommand.method == "get_info") {
