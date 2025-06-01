@@ -35,6 +35,11 @@
     <q-card-section class="text-caption" v-if="joinedDateFormatted">
       {{ $t('FindCreators.labels.joined') }}: {{ joinedDateFormatted }}
     </q-card-section>
+    <q-card-actions align="right">
+      <q-btn color="primary" flat @click="$emit('donate', creator)">
+        {{ $t('FindCreators.actions.donate.label') }}
+      </q-btn>
+    </q-card-actions>
   </q-card>
 </template>
 
@@ -51,6 +56,7 @@ export default defineComponent({
       required: true,
     },
   },
+  emits: ["donate"],
   setup(props) {
     const MAX_LENGTH = 160;
     const truncatedAbout = computed(() => {

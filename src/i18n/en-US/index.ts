@@ -1275,6 +1275,11 @@ export default {
       following: "Following",
       joined: "Joined",
     },
+    actions: {
+      donate: {
+        label: "Donate",
+      },
+    },
   },
   BucketManager: {
     actions: {
