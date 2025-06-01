@@ -32,7 +32,14 @@
           </q-item-label>
         </q-item-section>
         <q-item-section side v-if="group.tokens.length">
-          <q-btn flat dense icon="edit" @click.stop="openEditGroup(group)" />
+          <q-btn
+            flat
+            dense
+            icon="edit"
+            @click.stop="openEditGroup(group)"
+            aria-label="Edit"
+            title="Edit"
+          />
         </q-item-section>
       </q-item>
     </q-list>

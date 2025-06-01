@@ -39,6 +39,8 @@
                       color="primary"
                       class="cursor-pointer q-mt-md"
                       @click="toggleMnemonicVisibility"
+                      aria-label="Toggle visibility"
+                      title="Toggle visibility"
                     ></q-btn>
                     <q-btn
                       flat
@@ -47,6 +49,8 @@
                       color="primary"
                       class="cursor-pointer q-mt-md"
                       @click="copyText(mnemonic)"
+                      :aria-label="$t('global.actions.copy.label')"
+                      :title="$t('global.actions.copy.label')"
                     ></q-btn>
                   </template>
                 </q-input>
@@ -134,6 +138,8 @@
                       size="xs"
                       color="grey"
                       class="q-mr-sm cursor-pointer"
+                      :aria-label="$t('Settings.lightning_address.address.copy_tooltip')"
+                      :title="$t('Settings.lightning_address.address.copy_tooltip')"
                     >
                       <q-tooltip>{{
                         $t("Settings.lightning_address.address.copy_tooltip")
@@ -464,6 +470,8 @@
                 size="xs"
                 color="grey"
                 class="q-mr-sm cursor-pointer"
+                :aria-label="$t('Settings.nostr_wallet_connect.connection.copy_tooltip')"
+                :title="$t('Settings.nostr_wallet_connect.connection.copy_tooltip')"
                 ><q-tooltip>{{
                   $t("Settings.nostr_wallet_connect.connection.copy_tooltip")
                 }}</q-tooltip></q-icon
@@ -479,6 +487,8 @@
                 size="1.3em"
                 color="grey"
                 class="q-mr-sm cursor-pointer"
+                :aria-label="$t('Settings.nostr_wallet_connect.connection.qr_tooltip')"
+                :title="$t('Settings.nostr_wallet_connect.connection.qr_tooltip')"
               >
                 <q-tooltip>{{
                   $t("Settings.nostr_wallet_connect.connection.qr_tooltip")
@@ -1124,6 +1134,8 @@
                     icon="format_color_fill"
                     color="grey"
                     size="md"
+                    :aria-label="$t('Settings.appearance.theme.tooltips.mono')"
+                    :title="$t('Settings.appearance.theme.tooltips.mono')"
                     ><q-tooltip>{{
                       $t("Settings.appearance.theme.tooltips.mono")
                     }}</q-tooltip>
@@ -1136,6 +1148,8 @@
                     icon="format_color_fill"
                     color="green"
                     size="md"
+                    :aria-label="$t('Settings.appearance.theme.tooltips.cyber')"
+                    :title="$t('Settings.appearance.theme.tooltips.cyber')"
                     ><q-tooltip>{{
                       $t("Settings.appearance.theme.tooltips.cyber")
                     }}</q-tooltip>
@@ -1148,6 +1162,8 @@
                     icon="format_color_fill"
                     color="pink-13"
                     size="md"
+                    :aria-label="$t('Settings.appearance.theme.tooltips.freedom')"
+                    :title="$t('Settings.appearance.theme.tooltips.freedom')"
                     ><q-tooltip>{{
                       $t("Settings.appearance.theme.tooltips.freedom")
                     }}</q-tooltip>
@@ -1160,6 +1176,8 @@
                     icon="format_color_fill"
                     color="deep-purple"
                     size="md"
+                    :aria-label="$t('Settings.appearance.theme.tooltips.nostr')"
+                    :title="$t('Settings.appearance.theme.tooltips.nostr')"
                     ><q-tooltip>{{
                       $t("Settings.appearance.theme.tooltips.nostr")
                     }}</q-tooltip>
@@ -1172,6 +1190,8 @@
                     icon="format_color_fill"
                     color="orange"
                     size="md"
+                    :aria-label="$t('Settings.appearance.theme.tooltips.bitcoin')"
+                    :title="$t('Settings.appearance.theme.tooltips.bitcoin')"
                     ><q-tooltip>{{
                       $t("Settings.appearance.theme.tooltips.bitcoin")
                     }}</q-tooltip>
@@ -1184,6 +1204,10 @@
                     icon="format_color_fill"
                     color="light-green-9"
                     size="md"
+                    :aria-label="$t('Settings.appearance.theme.tooltips.mint')"
+                    :title="$t('Settings.appearance.theme.tooltips.mint')"
+                    :aria-label="$t('Settings.appearance.theme.tooltips.mint')"
+                    :title="$t('Settings.appearance.theme.tooltips.mint')"
                     ><q-tooltip>{{
                       $t("Settings.appearance.theme.tooltips.mint")
                     }}</q-tooltip> </q-btn
@@ -1195,6 +1219,8 @@
                     icon="format_color_fill"
                     color="brown"
                     size="md"
+                    :aria-label="$t('Settings.appearance.theme.tooltips.nut')"
+                    :title="$t('Settings.appearance.theme.tooltips.nut')"
                     ><q-tooltip>{{
                       $t("Settings.appearance.theme.tooltips.nut")
                     }}</q-tooltip>
@@ -1207,6 +1233,8 @@
                     icon="format_color_fill"
                     color="blue-10"
                     size="md"
+                    :aria-label="$t('Settings.appearance.theme.tooltips.blu')"
+                    :title="$t('Settings.appearance.theme.tooltips.blu')"
                     ><q-tooltip>{{
                       $t("Settings.appearance.theme.tooltips.blu")
                     }}</q-tooltip>
@@ -1219,6 +1247,8 @@
                     icon="format_color_fill"
                     color="pink-3"
                     size="md"
+                    :aria-label="$t('Settings.appearance.theme.tooltips.flamingo')"
+                    :title="$t('Settings.appearance.theme.tooltips.flamingo')"
                     ><q-tooltip>{{
                       $t("Settings.appearance.theme.tooltips.flamingo")
                     }}</q-tooltip>

@@ -180,6 +180,8 @@
                   v-if="canPasteFromClipboard && !sendData.p2pkPubkey"
                   icon="content_paste"
                   @click="pasteToP2PKField"
+                  :aria-label="$t('SendTokenDialog.actions.paste_p2pk_pubkey.tooltip_text')"
+                  :title="$t('SendTokenDialog.actions.paste_p2pk_pubkey.tooltip_text')"
                   ><q-tooltip>{{
                     $t("SendTokenDialog.actions.paste_p2pk_pubkey.tooltip_text")
                   }}</q-tooltip></q-btn
@@ -192,6 +194,8 @@
                 color="primary"
                 round
                 @click="showCamera"
+                :aria-label="$t('global.actions.scan.label')"
+                :title="$t('global.actions.scan.label')"
                 ><ScanIcon size="1.5em"
                 /></q-btn>
               </div>
@@ -467,6 +471,8 @@
                     @click="
                       copyText(baseURL + '#token=' + sendData.tokensBase64)
                     "
+                    :aria-label="$t('SendTokenDialog.actions.copy_link.tooltip_text')"
+                    :title="$t('SendTokenDialog.actions.copy_link.tooltip_text')"
                     ><q-tooltip>{{
                       $t("SendTokenDialog.actions.copy_link.tooltip_text")
                     }}</q-tooltip></q-btn
@@ -482,6 +488,8 @@
                       sendData.historyAmount < 0
                     "
                     @click="showCamera"
+                    :aria-label="$t('global.actions.scan.label')"
+                    :title="$t('global.actions.scan.label')"
                   >
                     <ScanIcon />
                   </q-btn>
@@ -499,6 +507,16 @@
                     size="sm"
                     @click="writeTokensToCard"
                     flat
+                    :aria-label="
+                      ndefSupported
+                        ? $t('SendTokenDialog.actions.write_tokens_to_card.tooltips.ndef_supported_text')
+                        : $t('SendTokenDialog.actions.write_tokens_to_card.tooltips.ndef_unsupported_text')
+                    "
+                    :title="
+                      ndefSupported
+                        ? $t('SendTokenDialog.actions.write_tokens_to_card.tooltips.ndef_supported_text')
+                        : $t('SendTokenDialog.actions.write_tokens_to_card.tooltips.ndef_unsupported_text')
+                    "
                   >
                     <NfcIcon />
                     <q-tooltip>{{
@@ -525,6 +543,8 @@
                       closeCardScanner();
                     "
                     flat
+                    :aria-label="$t('SendTokenDialog.actions.delete.tooltip_text')"
+                    :title="$t('SendTokenDialog.actions.delete.tooltip_text')"
                   >
                     <q-tooltip>{{
                       $t("SendTokenDialog.actions.delete.tooltip_text")

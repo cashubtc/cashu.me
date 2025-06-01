@@ -20,6 +20,8 @@
           @click="closePrompt"
           size="sm"
           class="close-btn q-px-sm"
+          :aria-label="$t('global.actions.close.label')"
+          :title="$t('global.actions.close.label')"
         />
       </div>
 

@@ -29,6 +29,8 @@
             icon="visibility"
             class="cursor-pointer q-mt-md"
             @click="toggleMnemonicVisibility"
+            aria-label="Toggle visibility"
+            title="Toggle visibility"
           ></q-btn>
           <q-btn
             flat
@@ -36,6 +38,8 @@
             icon="content_copy"
             class="cursor-pointer q-mt-md"
             @click="copyText(walletStore.mnemonic)"
+            :aria-label="$t('global.actions.copy.label')"
+            :title="$t('global.actions.copy.label')"
           ></q-btn>
         </template>
       </q-input>
