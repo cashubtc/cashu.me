@@ -356,6 +356,12 @@ export default defineComponent({
       },
       deep: true,
     },
+    "receiveData.tokensBase64"() {
+      this.applyBucketRules();
+    },
+    "receiveData.label"() {
+      this.applyBucketRules();
+    },
   },
   computed: {
     ...mapWritableState(useReceiveTokensStore, [
@@ -519,6 +525,20 @@ export default defineComponent({
         tokensStore.historyTokens.find((t) => t.token === tokenStr) !==
         undefined
       );
+    },
+    applyBucketRules() {
+      if (!this.receiveData.tokensBase64) return;
+      if (this.receiveData.bucketId !== DEFAULT_BUCKET_ID) return;
+      const decodedToken = this.decodeToken(this.receiveData.tokensBase64);
+      if (!decodedToken) return;
+      const mint = this.getMint(decodedToken);
+      const bucket = useBucketsStore().autoBucketFor(
+        mint,
+        this.receiveData.label
+      );
+      if (bucket) {
+        this.receiveData.bucketId = bucket;
+      }
     },
     addPendingTokenToHistory: function (tokenStr) {
       if (this.tokenAlreadyInHistory(tokenStr)) {

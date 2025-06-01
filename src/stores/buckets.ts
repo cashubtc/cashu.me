@@ -16,6 +16,13 @@ export type Bucket = {
   goal?: number;
 };
 
+export type BucketRule = {
+  id: string;
+  bucketId: string;
+  mint?: string;
+  memo?: string;
+};
+
 export const DEFAULT_BUCKET_ID = "unassigned";
 export const DEFAULT_BUCKET_NAME = "Default";
 
@@ -32,6 +39,10 @@ export const useBucketsStore = defineStore("buckets", {
     ]);
     const proofsStore = useProofsStore();
     const notifiedGoals = ref<Record<string, boolean>>({});
+    const autoAssignRules = useLocalStorage<BucketRule[]>(
+      "cashu.bucketRules",
+      []
+    );
 
     ensureDefaultBucket(buckets);
 
@@ -55,6 +66,7 @@ export const useBucketsStore = defineStore("buckets", {
     return {
       buckets,
       notifiedGoals,
+      autoAssignRules,
     };
   },
   getters: {
@@ -93,6 +105,16 @@ export const useBucketsStore = defineStore("buckets", {
       });
       return balances;
     },
+    autoBucketFor: (state) =>
+      (mint?: string, memo?: string): string | undefined => {
+        return state.autoAssignRules.find((r) => {
+          const mintMatch = r.mint ? r.mint === mint : true;
+          const memoMatch = r.memo
+            ? r.memo.toLowerCase() === (memo ?? "").toLowerCase()
+            : true;
+          return mintMatch && memoMatch;
+        })?.bucketId;
+      },
   },
   actions: {
     addBucket(bucket: Omit<Bucket, "id">): Bucket | undefined {
@@ -140,6 +162,26 @@ export const useBucketsStore = defineStore("buckets", {
         });
       }
       this.buckets.splice(index, 1);
+      this.autoAssignRules = this.autoAssignRules.filter(
+        (r) => r.bucketId !== id
+      );
+    },
+    addAutoRule(rule: Omit<BucketRule, "id">): BucketRule | undefined {
+      if (!rule.bucketId) return;
+      if (!this.buckets.find((b) => b.id === rule.bucketId)) return;
+      if (!rule.mint && !rule.memo) return;
+      const newRule: BucketRule = { id: uuidv4(), ...rule };
+      this.autoAssignRules.push(newRule);
+      return newRule;
+    },
+    deleteAutoRule(id: string) {
+      const idx = this.autoAssignRules.findIndex((r) => r.id === id);
+      if (idx >= 0) this.autoAssignRules.splice(idx, 1);
+    },
+    editAutoRule(id: string, updates: Partial<Omit<BucketRule, "id">>) {
+      const idx = this.autoAssignRules.findIndex((r) => r.id === id);
+      if (idx === -1) return;
+      this.autoAssignRules[idx] = { ...this.autoAssignRules[idx], ...updates };
     },
   },
 });

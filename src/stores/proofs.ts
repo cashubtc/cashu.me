@@ -2,7 +2,7 @@ import { ref } from "vue";
 import { defineStore } from "pinia";
 import { useMintsStore, WalletProof } from "./mints";
 import { cashuDb, CashuDexie, useDexieStore } from "./dexie";
-import { useBucketsStore } from "./buckets";
+import { useBucketsStore, DEFAULT_BUCKET_ID } from "./buckets";
 import { useTokensStore } from "./tokens";
 import {
   Proof,
@@ -108,7 +108,27 @@ export const useProofsStore = defineStore("proofs", {
       bucketId: string = "unassigned",
       label: string = ""
     ) {
-      const walletProofs = this.proofsToWalletProofs(proofs, quote, bucketId, label);
+      const bucketsStore = useBucketsStore();
+      const mintsStore = useMintsStore();
+      if (bucketId === DEFAULT_BUCKET_ID) {
+        let mintUrl: string | undefined;
+        if (proofs.length) {
+          const m = mintsStore.mints.find((mint) =>
+            mint.keysets.some((k) => k.id === proofs[0].id)
+          );
+          mintUrl = m?.url;
+        }
+        const auto = bucketsStore.autoBucketFor(mintUrl, label);
+        if (auto) {
+          bucketId = auto;
+        }
+      }
+      const walletProofs = this.proofsToWalletProofs(
+        proofs,
+        quote,
+        bucketId,
+        label
+      );
       await cashuDb.transaction("rw", cashuDb.proofs, async () => {
         walletProofs.forEach(async (p) => {
           await cashuDb.proofs.add(p);
