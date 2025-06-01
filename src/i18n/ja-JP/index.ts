@@ -1242,6 +1242,11 @@ timelock: {
       },
     },
   },
+  BucketManager: {
+    tooltips: {
+      description: "\u30D0\u30B1\u30C3\u30C8\u306F\u30C8\u30FC\u30AF\u30F3\u3092\u5206\u985E\u3059\u308B\u305F\u3081\u306E\u3082\u306E\u3067\u3059",
+    },
+  },
   BucketDetail: {
     move: "Move tokens",
     send: "Send tokens",

@@ -1242,6 +1242,11 @@ timelock: {
       },
     },
   },
+  BucketManager: {
+    tooltips: {
+      description: "I bucket servono per categorizzare i token",
+    },
+  },
   BucketDetail: {
     move: "Move tokens",
     send: "Send tokens",

@@ -1244,6 +1244,11 @@ timelock: {
       },
     },
   },
+  BucketManager: {
+    tooltips: {
+      description: "Bucket'lar tokenleri kategorize etmek i\u00e7in kullan\u0131l\u0131r",
+    },
+  },
   BucketDetail: {
     move: "Move tokens",
     send: "Send tokens",

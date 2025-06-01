@@ -1248,6 +1248,11 @@ timelock: {
       },
     },
   },
+  BucketManager: {
+    tooltips: {
+      description: "Les compartiments servent \u00e0 cat\u00e9goriser les jetons",
+    },
+  },
   BucketDetail: {
     move: "Move tokens",
     send: "Send tokens",

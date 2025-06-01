@@ -1247,6 +1247,11 @@ timelock: {
       },
     },
   },
+  BucketManager: {
+    tooltips: {
+      description: "Τα buckets χρησιμοποιούνται για την κατηγοριοποίηση των token",
+    },
+  },
   BucketDetail: {
     move: "Move tokens",
     send: "Send tokens",
