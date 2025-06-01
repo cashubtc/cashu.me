@@ -2,9 +2,9 @@ import { defineStore } from "pinia";
 import { useLocalStorage } from "@vueuse/core";
 
 const defaultNostrRelays = [
-  "wss://relay.damus.io",
-  "wss://relay.8333.space/",
-  "wss://nos.lol",
+  "wss://relay.f7z.io/",
+  "wss://relay.primal.net/",
+  "wss://relay.nostr.band/",
 ];
 
 export const useSettingsStore = defineStore("settings", {
