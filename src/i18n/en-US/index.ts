@@ -1280,6 +1280,15 @@ export default {
         label: "Donate",
       },
     },
+    choose_action: {
+      title: "Select token",
+      existing: "Existing Token",
+      new: "Create New",
+    },
+  },
+  ChooseExistingTokenDialog: {
+    title: "Choose token",
+    empty: "No pending tokens in this bucket",
   },
   BucketManager: {
     actions: {
