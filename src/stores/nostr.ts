@@ -147,6 +147,8 @@ export const useNostrStore = defineStore("nostr", {
     setSigner: async function (signer: NDKSigner) {
       this.signer = signer;
       this.ndk = new NDK({ signer: signer, explicitRelayUrls: this.relays });
+      this.ndk.connect();
+      this.connected = true;
     },
     signDummyEvent: async function (): Promise<NDKEvent> {
       const ndkEvent = new NDKEvent();
