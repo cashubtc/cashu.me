@@ -45,8 +45,8 @@ body,
 }
 
 .custom-btn {
-  background: $grey-9;
-  color: white;
+  background: var(--custom-btn-bg);
+  color: var(--custom-btn-text);
   border-radius: 8px;
   height: 80px;
   box-shadow: none;
@@ -59,7 +59,7 @@ body,
 
 .custom-btn-text {
   font-size: 18px !important;
-  color: white;
+  color: var(--custom-btn-text);
   padding-top: 2px;
 }
 
@@ -81,4 +81,24 @@ body,
 
 .q-checkbox__svg {
   color: var(--q-dark);
+}
+
+/* theme-based variables */
+:root {
+  --icon-bg-dark: var(--q-color-grey-10);
+  --icon-bg-light: var(--q-color-grey-3);
+  --custom-btn-dark: var(--q-color-grey-9);
+  --custom-btn-light: var(--q-color-grey-2);
+}
+
+body.body--dark {
+  --icon-bg-color: var(--icon-bg-dark);
+  --custom-btn-bg: var(--custom-btn-dark);
+  --custom-btn-text: white;
+}
+
+body.body--light {
+  --icon-bg-color: var(--icon-bg-light);
+  --custom-btn-bg: var(--custom-btn-light);
+  --custom-btn-text: black;
 }

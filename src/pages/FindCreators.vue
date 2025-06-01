@@ -1,5 +1,7 @@
 <template>
-  <div class="bg-dark text-white text-center q-pa-md flex flex-center">
+  <div
+    :class="[$q.dark.isActive ? 'bg-dark text-white' : 'bg-white text-dark', 'text-center q-pa-md flex flex-center']"
+  >
     <FindCreatorsView />
   </div>
 </template>
