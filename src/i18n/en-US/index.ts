@@ -1299,12 +1299,23 @@ export default {
   BucketDetail: {
     move: "Move tokens",
     send: "Send tokens",
+    locked_tokens_heading: "Locked tokens",
     inputs: {
       target_bucket: {
         label: "Move to bucket",
       },
     },
     not_found: "Bucket not found.",
+  },
+  LockedTokensTable: {
+    empty_text: "No locked tokens",
+    row: {
+      date_label: "{ value } ago",
+      unlock_label: "Unlocks { value }",
+    },
+    actions: {
+      copy: { tooltip_text: "Copy" },
+    },
   },
   restore: {
     mnemonic_error_text: "Please enter a mnemonic",

@@ -73,6 +73,7 @@
         </div>
       </q-card>
     </q-dialog>
+    <LockedTokensTable :bucket-id="bucketId" class="q-mt-lg" />
     <div class="q-mt-lg">
       <HistoryTable :bucket-id="bucketId" />
     </div>
@@ -90,8 +91,10 @@ import { useUiStore } from 'stores/ui';
 import { storeToRefs } from 'pinia';
 import { useSendTokensStore } from 'stores/sendTokensStore';
 import { useTokensStore, HistoryToken } from 'stores/tokens';
+import { useLockedTokensStore } from 'stores/lockedTokens';
 import SendTokenDialog from 'components/SendTokenDialog.vue';
 import HistoryTable from 'components/HistoryTable.vue';
+import LockedTokensTable from 'components/LockedTokensTable.vue';
 import { notifyError } from 'src/js/notify';
 
 const route = useRoute();
@@ -101,11 +104,13 @@ const mintsStore = useMintsStore();
 const uiStore = useUiStore();
 const sendTokensStore = useSendTokensStore();
 const tokensStore = useTokensStore();
+const lockedTokensStore = useLockedTokensStore();
 
 const bucketId = route.params.id as string;
 const bucket = computed(() => bucketsStore.bucketList.find(b => b.id === bucketId));
 const bucketProofs = computed(() => proofsStore.proofs.filter(p => p.bucketId === bucketId && !p.reserved));
 const bucketBalance = computed(() => bucketProofs.value.reduce((s,p)=>s+p.amount,0));
+const bucketLockedTokens = computed(() => lockedTokensStore.tokensByBucket(bucketId));
 const { activeUnit } = storeToRefs(mintsStore);
 const showSendTokens = storeToRefs(sendTokensStore).showSendTokens;
 

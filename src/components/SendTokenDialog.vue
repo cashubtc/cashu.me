@@ -591,6 +591,7 @@ import { useUiStore } from "src/stores/ui";
 import { useProofsStore } from "src/stores/proofs";
 import { useMintsStore } from "src/stores/mints";
 import { useTokensStore } from "src/stores/tokens";
+import { useLockedTokensStore } from "src/stores/lockedTokens";
 import { getShortUrl } from "src/js/wallet-helpers";
 import { useSettingsStore } from "src/stores/settings";
 import { useWorkersStore } from "src/stores/workers";
@@ -1110,6 +1111,14 @@ export default defineComponent({
         this.sendData.tokens = sendProofs;
 
         this.sendData.tokensBase64 = this.serializeProofs(sendProofs);
+        useLockedTokensStore().addLockedToken({
+          amount: sendAmount,
+          token: this.sendData.tokensBase64,
+          pubkey: this.sendData.p2pkPubkey,
+          locktime: this.sendData.locktime || undefined,
+          refundPubkey: this.sendData.refundPubkey || undefined,
+          bucketId,
+        });
         const historyToken = {
           amount: -this.sendData.amount,
           token: this.sendData.tokensBase64,
