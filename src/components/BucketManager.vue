@@ -1,7 +1,13 @@
 <template>
   <div style="max-width: 800px; margin: 0 auto">
     <q-list padding>
-      <div v-for="bucket in bucketList" :key="bucket.id" class="q-mb-md">
+      <div
+        v-for="bucket in bucketList"
+        :key="bucket.id"
+        class="q-mb-md"
+        @dragover.prevent
+        @drop="handleDrop($event, bucket.id)"
+      >
         <router-link
           :to="`/buckets/${bucket.id}`"
           style="text-decoration: none; display: block"
@@ -145,6 +151,7 @@ import { defineComponent, ref, computed } from "vue";
 import { useI18n } from "vue-i18n";
 import { useBucketsStore, DEFAULT_BUCKET_ID } from "stores/buckets";
 import { useMintsStore } from "stores/mints";
+import { useProofsStore } from "stores/proofs";
 import { storeToRefs } from "pinia";
 import { useUiStore } from "stores/ui";
 import { notifyError } from "src/js/notify";
@@ -202,6 +209,23 @@ export default defineComponent({
       (val) => val === null || val === undefined || val >= 0 || t('BucketManager.validation.goal'),
     ];
 
+    const proofsStore = useProofsStore();
+
+    const handleDrop = async (ev, id) => {
+      ev.preventDefault();
+      const data = ev.dataTransfer?.getData('text/plain');
+      if (!data) return;
+      let secrets;
+      try {
+        secrets = JSON.parse(data);
+      } catch (e) {
+        secrets = data.split(',');
+      }
+      if (Array.isArray(secrets) && secrets.length) {
+        await proofsStore.moveProofs(secrets, id);
+      }
+    };
+
     const saveBucket = async () => {
       if (!(await bucketForm.value.validate())) {
         notifyError(t('BucketManager.validation.error'));
@@ -243,6 +267,7 @@ export default defineComponent({
       openDelete,
       deleteBucket,
       formatCurrency,
+      handleDrop,
     };
   },
 });
