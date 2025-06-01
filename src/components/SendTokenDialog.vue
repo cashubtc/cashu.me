@@ -113,6 +113,7 @@
         </div>
 
         <q-input
+            ref="amountInput"
             type="number"
             v-model.number="sendData.amount"
             :label="
@@ -861,9 +862,8 @@ export default defineComponent({
     ...mapActions(useMintsStore, ["toggleUnit"]),
     onDialogShown() {
       this.$nextTick(() => {
-        const input = this.$el.querySelector('input');
-        if (input) {
-          input.focus();
+        if (this.$refs.amountInput) {
+          this.$refs.amountInput.focus();
         }
         if (this.useNumericKeyboard && !this.sendData.tokensBase64.length) {
           this.showNumericKeyboard = true;

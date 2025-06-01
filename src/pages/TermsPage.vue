@@ -8,7 +8,7 @@
 </template>
 
 <script>
-import { onMounted, ref } from "vue";
+import { ref } from "vue";
 import WelcomeSlide4 from "./welcome/WelcomeSlide4.vue";
 
 export default {
@@ -17,8 +17,6 @@ export default {
     WelcomeSlide4,
   },
   setup() {
-    onMounted(() => {});
-
     return {};
   },
 };
