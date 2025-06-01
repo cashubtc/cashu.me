@@ -16,14 +16,20 @@
                 <q-input
                   outlined
                   v-model="mnemonicToRestore"
-                  :label="
-                    $t('RestoreView.seed_phrase.inputs.seed_phrase.label')
-                  "
                   autogrow
                   type="textarea"
                   :error="mnemonicError !== ''"
                   :error-message="mnemonicError"
                 >
+                  <template #label>
+                    <div class="row items-center no-wrap">
+                      <span>{{ $t('RestoreView.seed_phrase.inputs.seed_phrase.label') }}</span>
+                      <InfoTooltip
+                        class="q-ml-xs"
+                        :text="$t('RestoreView.seed_phrase.inputs.seed_phrase.tooltip')"
+                      />
+                    </div>
+                  </template>
                   <template v-slot:append>
                     <q-btn
                       flat

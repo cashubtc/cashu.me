@@ -6,11 +6,20 @@
       outlined
       v-model="targetBucketId"
       :options="bucketOptions"
-      :label="$t('BucketDetail.inputs.target_bucket.label')"
       emit-value
       map-options
       class="q-mb-md"
-    />
+    >
+      <template #label>
+        <div class="row items-center no-wrap">
+          <span>{{ $t('BucketDetail.inputs.target_bucket.label') }}</span>
+          <InfoTooltip
+            class="q-ml-xs"
+            :text="$t('BucketDetail.inputs.target_bucket.tooltip')"
+          />
+        </div>
+      </template>
+    </q-select>
     <q-btn
       color="primary"
       :disable="!selectedSecrets.length || !targetBucketId"

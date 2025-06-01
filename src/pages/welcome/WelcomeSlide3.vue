@@ -11,9 +11,17 @@
         readonly
         autogrow
         class="q-mt-md q-pa-md seed-phrase"
-        :label="$t('WelcomeSlide3.inputs.seed_phrase.label')"
         dense
       >
+        <template #label>
+          <div class="row items-center no-wrap">
+            <span>{{ $t('WelcomeSlide3.inputs.seed_phrase.label') }}</span>
+            <InfoTooltip
+              class="q-ml-xs"
+              :text="$t('WelcomeSlide3.tooltips.seed_phrase')"
+            />
+          </div>
+        </template>
         <template v-slot:append>
           <q-btn
             flat

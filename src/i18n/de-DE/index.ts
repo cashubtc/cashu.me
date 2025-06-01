@@ -1240,6 +1240,10 @@ export default {
         label: "@:global.inputs.mint_url.label",
       },
     },
+    tooltips: {
+      mint_url: "Basis-URL der Mint",
+      nickname: "Bezeichner für diese Mint",
+    },
     actions: {
       cancel: {
         label: "@:global.actions.cancel.label",
@@ -1257,6 +1261,9 @@ export default {
       mint_url: {
         label: "@:global.inputs.mint_url.label",
       },
+    },
+    tooltips: {
+      mint_url: "URL der hinzuzufügenden Mint",
     },
     actions: {
       cancel: {
@@ -1280,6 +1287,9 @@ export default {
       target_bucket: {
         label: "Move to bucket",
       },
+    },
+    tooltips: {
+      target_bucket: "Wähle einen Bucket für die Tokens",
     },
     not_found: "Bucket not found.",
   },

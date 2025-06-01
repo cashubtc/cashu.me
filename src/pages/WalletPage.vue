@@ -27,10 +27,14 @@
 
         <transition appear enter-active-class="animated pulse">
           <div class="scan-button-container">
-            <q-btn size="lg" outline color="primary" flat @click="showCamera">
-              <ScanIcon size="2em" />
-            </q-btn>
-          </div>
+          <q-btn size="lg" outline color="primary" flat @click="showCamera">
+            <ScanIcon size="2em" />
+          </q-btn>
+          <InfoTooltip
+            class="q-mt-sm"
+            :text="$t('WalletPage.actions.scan.tooltip')"
+          />
+        </div>
         </transition>
 
         <!-- button to showSendDialog -->

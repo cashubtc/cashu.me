@@ -39,13 +39,24 @@
 
     <div class="q-mt-lg">
       <q-select
-        dense outlined
+        dense
+        outlined
         v-model="targetBucketId"
         :options="bucketOptions"
-        :label="$t('BucketDetail.inputs.target_bucket.label')"
-        emit-value map-options
+        emit-value
+        map-options
         class="q-mb-md"
-      />
+      >
+        <template #label>
+          <div class="row items-center no-wrap">
+            <span>{{ $t('BucketDetail.inputs.target_bucket.label') }}</span>
+            <InfoTooltip
+              class="q-ml-xs"
+              :text="$t('BucketDetail.inputs.target_bucket.tooltip')"
+            />
+          </div>
+        </template>
+      </q-select>
       <div class="row q-gutter-sm">
         <q-btn color="primary" :disable="!selectedSecrets.length" @click="moveSelected">
           {{ $t('BucketDetail.move') }}
