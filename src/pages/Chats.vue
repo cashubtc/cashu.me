@@ -5,7 +5,7 @@
         <div class="text-h6 q-mb-sm">{{ shorten(pubkey) }}</div>
         <q-item v-for="msg in messages" :key="msg.id">
           <q-item-section>
-            <q-item-label>{{ msg.content }}</q-item-label>
+            <q-item-label>{{ sanitizeMessage(msg.content) }}</q-item-label>
             <q-item-label caption>{{ formatDate(msg.created_at) }} - {{ msg.outgoing ? 'out' : 'in' }}</q-item-label>
           </q-item-section>
         </q-item>
@@ -18,6 +18,7 @@
 import { defineComponent } from 'vue';
 import { useDmChatsStore } from 'src/stores/dmChats';
 import { storeToRefs } from 'pinia';
+import { sanitizeMessage } from 'src/js/message-utils';
 
 export default defineComponent({
   name: 'ChatsPage',
@@ -27,7 +28,7 @@ export default defineComponent({
     const { chats } = storeToRefs(store);
     const shorten = (p) => p.slice(0, 8) + '...' + p.slice(-4);
     const formatDate = (ts) => new Date(ts * 1000).toLocaleString();
-    return { chats, shorten, formatDate };
+    return { chats, shorten, formatDate, sanitizeMessage }; 
   }
 });
 </script>
