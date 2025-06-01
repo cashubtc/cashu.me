@@ -136,6 +136,14 @@
           }}</q-item-label>
         </q-item-section>
       </q-item>
+      <q-item clickable @click="gotoChats">
+        <q-item-section avatar>
+          <q-icon name="chat" />
+        </q-item-section>
+        <q-item-section>
+          <q-item-label>Chats</q-item-label>
+        </q-item-section>
+      </q-item>
       <q-item-label header>{{
         $t("MainHeader.menu.terms.title")
       }}</q-item-label>
@@ -272,6 +280,11 @@ export default defineComponent({
       leftDrawerOpen.value = false;
     };
 
+    const gotoChats = () => {
+      router.push("/chats");
+      leftDrawerOpen.value = false;
+    };
+
     const gotoWallet = () => {
       router.push("/wallet");
       leftDrawerOpen.value = false;
@@ -287,6 +300,7 @@ export default defineComponent({
       uiStore,
       gotoBuckets,
       gotoFindCreators,
+      gotoChats,
       gotoWallet,
     };
   },

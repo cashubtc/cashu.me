@@ -28,6 +28,11 @@ const routes = [
     children: [{ path: "", component: () => import("src/pages/Buckets.vue") }],
   },
   {
+    path: "/chats",
+    component: () => import("layouts/MainLayout.vue"),
+    children: [{ path: "", component: () => import("src/pages/Chats.vue") }],
+  },
+  {
     path: "/buckets/:id",
     component: () => import("layouts/FullscreenLayout.vue"),
     children: [{ path: "", component: () => import("src/pages/BucketDetail.vue") }],

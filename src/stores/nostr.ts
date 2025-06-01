@@ -38,6 +38,8 @@ import { usePRStore } from "./payment-request";
 import token from "../js/token";
 import { HistoryToken } from "./tokens";
 import { DEFAULT_BUCKET_ID } from "./buckets";
+import { useDmChatsStore } from "./dmChats";
+import { useRouter } from "vue-router";
 
 type MintRecommendation = {
   url: string;
@@ -473,6 +475,12 @@ export const useNostrStore = defineStore("nostr", {
       try {
         randomNdk.connect();
         await wrapEvent.publish();
+        try {
+          const chatStore = useDmChatsStore();
+          chatStore.addOutgoing(dmEvent);
+          const router = useRouter();
+          router.push("/chats");
+        } catch {}
       } catch (e) {
         console.error(e);
         notifyError("Could not publish NIP-17 event");
@@ -547,6 +555,10 @@ export const useNostrStore = defineStore("nostr", {
           nip17DirectMessageEvents.add(dmEvent);
           this.lastEventTimestamp = Math.floor(Date.now() / 1000);
           this.parseMessageForEcash(content);
+          try {
+            const chatStore = useDmChatsStore();
+            chatStore.addIncoming(dmEvent);
+          } catch {}
         });
       });
       try {
