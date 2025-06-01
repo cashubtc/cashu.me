@@ -7,6 +7,8 @@ export const useSendTokensStore = defineStore("sendTokensStore", {
   state: () => ({
     showSendTokens: false,
     showLockInput: false,
+    recipientPubkey: "",
+    sendViaNostr: false,
     sendData: {
       amount: null,
       historyAmount: null,
@@ -46,6 +48,8 @@ export const useSendTokensStore = defineStore("sendTokensStore", {
       this.sendData.paymentRequest = undefined;
       this.sendData.historyToken = undefined;
       this.sendData.bucketId = DEFAULT_BUCKET_ID;
+      this.recipientPubkey = "";
+      this.sendViaNostr = false;
     },
   },
 });
