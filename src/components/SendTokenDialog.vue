@@ -563,6 +563,16 @@
                 }}</q-btn
               >
             </div>
+            <div class="row q-mt-lg">
+              <q-btn
+                v-close-popup
+                rounded
+                flat
+                color="grey"
+                class="q-ml-auto"
+                >{{ $t("SendTokenDialog.actions.close.label") }}</q-btn
+              >
+            </div>
           </q-card-section>
         </q-card-section>
       </div>
