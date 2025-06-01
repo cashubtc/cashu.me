@@ -68,6 +68,17 @@
         :disable="uiStore.globalMutexLock && countdown === 0"
       >
       </q-btn>
+      <q-btn
+        flat
+        dense
+        round
+        size="0.8em"
+        :icon="$q.dark.isActive ? 'wb_sunny' : 'brightness_3'"
+        color="primary"
+        aria-label="Toggle Dark Mode"
+        @click="toggleDarkMode"
+        class="q-ml-sm"
+      />
     </q-toolbar>
   </q-header>
 
