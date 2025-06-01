@@ -8,20 +8,38 @@
       <q-input
         outlined
         v-model="editMintData.url"
-        :label="$t('EditMintDialog.inputs.mint_url.label')"
         type="textarea"
         autogrow
         class="q-mb-xs"
         style="font-family: monospace; font-size: 0.9em"
-      ></q-input>
+      >
+        <template #label>
+          <div class="row items-center no-wrap">
+            <span>{{ $t('EditMintDialog.inputs.mint_url.label') }}</span>
+            <InfoTooltip
+              class="q-ml-xs"
+              :text="$t('EditMintDialog.tooltips.mint_url')"
+            />
+          </div>
+        </template>
+      </q-input>
       <q-input
         outlined
         v-model="editMintData.nickname"
-        :label="$t('EditMintDialog.inputs.nickname.label')"
         type="textarea"
         autogrow
         class="q-mb-xs"
-      ></q-input>
+      >
+        <template #label>
+          <div class="row items-center no-wrap">
+            <span>{{ $t('EditMintDialog.inputs.nickname.label') }}</span>
+            <InfoTooltip
+              class="q-ml-xs"
+              :text="$t('EditMintDialog.tooltips.nickname')"
+            />
+          </div>
+        </template>
+      </q-input>
       <div class="row q-mt-lg">
         <q-btn
           class="float-left"

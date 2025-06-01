@@ -5,10 +5,18 @@
       outlined
       dense
       v-model="searchInput"
-      :label="$t('FindCreators.inputs.search.label')"
       :placeholder="$t('FindCreators.inputs.search.placeholder')"
       @keydown.enter.prevent="triggerSearch"
     >
+      <template #label>
+        <div class="row items-center no-wrap">
+          <span>{{ $t('FindCreators.inputs.search.label') }}</span>
+          <InfoTooltip
+            class="q-ml-xs"
+            :text="$t('FindCreators.inputs.search.tooltip')"
+          />
+        </div>
+      </template>
       <template v-slot:append>
         <q-icon name="search" class="cursor-pointer" @click="triggerSearch" />
       </template>

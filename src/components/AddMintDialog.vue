@@ -13,12 +13,21 @@
         outlined
         readonly
         v-model="mintUrl"
-        :label="$t('AddMintDialog.inputs.mint_url.label')"
         type="textarea"
         autogrow
         class="q-mb-xs"
         style="font-family: monospace; font-size: 0.9em"
-      ></q-input>
+      >
+        <template #label>
+          <div class="row items-center no-wrap">
+            <span>{{ $t('AddMintDialog.inputs.mint_url.label') }}</span>
+            <InfoTooltip
+              class="q-ml-xs"
+              :text="$t('AddMintDialog.tooltips.mint_url')"
+            />
+          </div>
+        </template>
+      </q-input>
       <div class="row q-mt-lg">
         <div class="col">
           <q-btn

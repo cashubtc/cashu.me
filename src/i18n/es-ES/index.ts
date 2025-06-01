@@ -468,6 +468,9 @@ export default {
       receive: {
         label: "@:global.actions.receive.label",
       },
+      scan: {
+        tooltip: "Scan a QR code",
+      },
     },
     tabs: {
       history: {
@@ -611,6 +614,7 @@ export default {
       seed_phrase: {
         label: "Frase Semilla",
         caption: "Puedes ver tu frase semilla en la configuración.",
+        tooltip: "This phrase restores your wallet. Keep it private",
       },
       checkbox: {
         label: "La he anotado",
@@ -655,6 +659,7 @@ export default {
         seed_phrase: {
           label: "Frase semilla",
           caption: "Puedes ver tu frase semilla en la configuración.",
+          tooltip: "Enter the 12-word recovery phrase",
         },
       },
     },
@@ -1236,6 +1241,10 @@ timelock: {
         label: "@:global.inputs.mint_url.label",
       },
     },
+    tooltips: {
+      mint_url: "Update the mint's base URL",
+      nickname: "Friendly name for this mint",
+    },
     actions: {
       cancel: {
         label: "@:global.actions.cancel.label",
@@ -1253,6 +1262,9 @@ timelock: {
       mint_url: {
         label: "@:global.inputs.mint_url.label",
       },
+    },
+    tooltips: {
+      mint_url: "URL of the mint you want to add",
     },
     actions: {
       cancel: {
@@ -1276,6 +1288,9 @@ timelock: {
       target_bucket: {
         label: "Move to bucket",
       },
+    },
+    tooltips: {
+      target_bucket: "Choose a bucket to receive the selected tokens",
     },
     not_found: "Bucket not found.",
   },
