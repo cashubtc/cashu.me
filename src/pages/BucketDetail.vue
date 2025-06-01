@@ -10,7 +10,12 @@
     </div>
 
     <q-list bordered>
-      <q-item v-for="group in groupedProofs" :key="group.key">
+      <q-item
+        v-for="group in groupedProofs"
+        :key="group.key"
+        draggable="true"
+        @dragstart="onDragStart($event, group)"
+      >
         <q-item-section side>
           <q-checkbox
             :model-value="group.secrets.every(s => selectedSecrets.includes(s))"
@@ -178,6 +183,14 @@ function toggleGroup(group: ProofGroup, val: boolean){
   } else {
     selectedSecrets.value = selectedSecrets.value.filter(s => !group.secrets.includes(s));
   }
+}
+
+function onDragStart(ev: DragEvent, group: ProofGroup){
+  const secrets = selectedSecrets.value.length
+    ? selectedSecrets.value
+    : group.secrets;
+  ev.dataTransfer?.setData('text/plain', JSON.stringify(secrets));
+  ev.dataTransfer?.effectAllowed = 'move';
 }
 
 function openEditGroup(group: ProofGroup){
