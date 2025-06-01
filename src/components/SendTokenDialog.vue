@@ -142,12 +142,13 @@
               :label="activeUnitLabel"
             />
           </q-input>
-          <!-- <q-input
-                filled
-                dense
-                v-model.trim="sendData.memo"
-                label="Memo"
-                ></q-input> -->
+          <q-input
+            v-if="sendViaNostr"
+            filled
+            dense
+            v-model.trim="sendData.memo"
+            :label="$t('SendTokenDialog.inputs.memo.label')"
+          />
           <transition
             appear
             enter-active-class="animated fadeIn"
@@ -1149,9 +1150,12 @@ export default defineComponent({
                 console.error(e);
               }
             }
+            const dmContent = this.sendData.memo
+              ? `${this.sendData.memo}\n${this.sendData.tokensBase64}`
+              : this.sendData.tokensBase64;
             const ev = await useNostrStore().sendNip04DirectMessage(
               recipient,
-              this.sendData.tokensBase64,
+              dmContent,
             );
             if (ev) {
               useDmChatsStore().addOutgoing(ev);
@@ -1177,6 +1181,7 @@ export default defineComponent({
           } finally {
             this.recipientPubkey = "";
             this.sendViaNostr = false;
+            this.sendData.memo = "";
           }
         }
         useLockedTokensStore().addLockedToken({
@@ -1273,9 +1278,12 @@ export default defineComponent({
                 console.error(e);
               }
             }
+            const dmContent2 = this.sendData.memo
+              ? `${this.sendData.memo}\n${this.sendData.tokensBase64}`
+              : this.sendData.tokensBase64;
             const ev = await useNostrStore().sendNip04DirectMessage(
               recipient,
-              this.sendData.tokensBase64,
+              dmContent2,
             );
             if (ev) {
               useDmChatsStore().addOutgoing(ev);
@@ -1301,6 +1309,7 @@ export default defineComponent({
           } finally {
             this.recipientPubkey = "";
             this.sendViaNostr = false;
+            this.sendData.memo = "";
           }
         }
         this.sendData.historyAmount =
