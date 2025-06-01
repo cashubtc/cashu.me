@@ -357,27 +357,32 @@ export const useNostrStore = defineStore("nostr", {
 
       const pool = new SimplePool();
       const nostrEvent = await event.toNostrEvent();
-      const pub = pool.publish(this.relays, nostrEvent);
+      const pubs = pool.publish(this.relays, nostrEvent);
 
       let published = false;
 
-      pub.on("ok", (relay: any) => {
-        console.log(`Relay ${relay.url} accepted event`);
-        published = true;
-      });
-      pub.on("failed", (reason: any) => {
-        console.error(`Publish failed: ${reason}`);
-      });
-      pub.on("seen", (relay: any) => {
-        console.log(`Relay ${relay.url} already had event`);
-      });
+      const pubArray = Array.isArray(pubs) ? pubs : [pubs];
+      for (const pub of pubArray) {
+        pub.on("ok", (relay: any) => {
+          console.log(`Relay ${relay.url} accepted event`);
+          published = true;
+        });
+        pub.on("failed", (reason: any) => {
+          console.error(`Publish failed: ${reason}`);
+        });
+        pub.on("seen", (relay: any) => {
+          console.log(`Relay ${relay.url} already had event`);
+        });
+      }
 
       await new Promise((resolve) => setTimeout(resolve, 3000));
 
       if (published) {
         notifySuccess("NIP-04 event published");
+        return event;
       } else {
         notifyError("Could not publish NIP-04 event");
+        return null;
       }
     },
     subscribeToNip04DirectMessages: async function () {
@@ -492,20 +497,23 @@ export const useNostrStore = defineStore("nostr", {
 
       const pool = new SimplePool();
       const nostrEvent = await wrapEvent.toNostrEvent();
-      const pub = pool.publish(relays ?? this.relays, nostrEvent);
+      const pubs = pool.publish(relays ?? this.relays, nostrEvent);
 
       let published = false;
 
-      pub.on("ok", (relay: any) => {
-        console.log(`Relay ${relay.url} accepted event`);
-        published = true;
-      });
-      pub.on("failed", (reason: any) => {
-        console.error(`Publish failed: ${reason}`);
-      });
-      pub.on("seen", (relay: any) => {
-        console.log(`Relay ${relay.url} already had event`);
-      });
+      const pubArray = Array.isArray(pubs) ? pubs : [pubs];
+      for (const pub of pubArray) {
+        pub.on("ok", (relay: any) => {
+          console.log(`Relay ${relay.url} accepted event`);
+          published = true;
+        });
+        pub.on("failed", (reason: any) => {
+          console.error(`Publish failed: ${reason}`);
+        });
+        pub.on("seen", (relay: any) => {
+          console.log(`Relay ${relay.url} already had event`);
+        });
+      }
 
       await new Promise((resolve) => setTimeout(resolve, 3000));
 
