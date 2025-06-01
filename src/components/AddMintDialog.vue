@@ -5,23 +5,31 @@
     backdrop-filter="blur(4px) brightness(50%)"
     transition-show="fade"
     transition-hide="fade"
+    scrollable
   >
     <q-card class="add-mint-dialog">
       <!-- Header Section -->
-      <div class="add-mint-header q-pa-md">
+      <q-card-section class="add-mint-header q-pa-md">
         <div class="add-mint-title-row">
-          <h4 class="add-mint-title q-my-none">{{ $t("AddMintDialog.title") }}</h4>
+          <h4 class="add-mint-title q-my-none">
+            {{ $t("AddMintDialog.title") }}
+          </h4>
         </div>
-      </div>
+      </q-card-section>
 
-      <!-- Content Section -->
-      <div class="add-mint-content q-px-md q-pb-md">
+      <!-- Scrollable Content Section -->
+      <q-card-section
+        class="add-mint-content q-px-md scroll"
+        style="max-height: 60vh"
+      >
         <p class="add-mint-description q-mb-lg">
           {{ $t("AddMintDialog.description") }}
         </p>
 
         <div class="q-mb-lg">
-          <label class="input-label">{{ $t('AddMintDialog.inputs.mint_url.label') }}</label>
+          <label class="input-label">{{
+            $t("AddMintDialog.inputs.mint_url.label")
+          }}</label>
           <q-input
             outlined
             readonly
@@ -35,36 +43,72 @@
           ></q-input>
         </div>
 
-        <div class="action-buttons">
-          <q-btn flat class="cancel-btn" v-close-popup> 
-            {{ $t("AddMintDialog.actions.cancel.label") }}
-          </q-btn>
-          <q-spacer></q-spacer>
-          <q-btn
-            color="primary"
-            class="add-btn"
-            @click="addMintLocal"
-            v-close-popup
-            :loading="addMintBlocking"
-            icon="check"
-          >
-            {{ $t("AddMintDialog.actions.add_mint.label") }}
-            <template v-slot:loading>
-              <q-spinner-hourglass />
-              {{ $t("AddMintDialog.actions.add_mint.in_progress") }}
-            </template>
-          </q-btn>
+        <!-- Audit Info Section -->
+        <div v-if="mintUrl" class="q-mb-lg">
+          <div class="audit-info-section">
+            <q-btn
+              flat
+              class="audit-info-btn"
+              @click="showAuditInfo = !showAuditInfo"
+            >
+              <info-icon size="16" class="q-mr-xs" />
+              {{
+                showAuditInfo ? "Hide Mint Audit Info" : "View Mint Audit Info"
+              }}
+            </q-btn>
+
+            <!-- Audit Info Component -->
+            <transition
+              enter-active-class="animated fadeIn"
+              leave-active-class="animated fadeOut"
+            >
+              <MintAuditInfo
+                v-if="showAuditInfo"
+                :mintUrl="mintUrl"
+                class="q-mt-md"
+              />
+            </transition>
+          </div>
         </div>
-      </div>
+      </q-card-section>
+
+      <!-- Fixed Action Buttons Section -->
+      <q-card-actions class="action-buttons flex q-pa-md">
+        <q-btn flat class="cancel-btn" v-close-popup>
+          {{ $t("AddMintDialog.actions.cancel.label") }}
+        </q-btn>
+        <q-spacer></q-spacer>
+        <q-btn
+          color="primary"
+          class="add-btn"
+          @click="addMintLocal"
+          v-close-popup
+          :loading="addMintBlocking"
+          icon="check"
+        >
+          {{ $t("AddMintDialog.actions.add_mint.label") }}
+          <template v-slot:loading>
+            <q-spinner-hourglass />
+            {{ $t("AddMintDialog.actions.add_mint.in_progress") }}
+          </template>
+        </q-btn>
+      </q-card-actions>
     </q-card>
   </q-dialog>
 </template>
 
 <script>
-import { defineComponent, computed } from "vue";
+import { defineComponent, computed, ref } from "vue";
+import { useSettingsStore } from "src/stores/settings";
+import MintAuditInfo from "./MintAuditInfo.vue";
+import { Info as InfoIcon } from "lucide-vue-next";
 
 export default defineComponent({
   name: "AddMintDialog",
+  components: {
+    MintAuditInfo,
+    InfoIcon,
+  },
   props: {
     addMintData: {
       type: Object,
@@ -81,6 +125,9 @@ export default defineComponent({
   },
   emits: ["add", "update:showAddMintDialog"],
   setup(props, { emit }) {
+    const settings = useSettingsStore();
+    const showAuditInfo = ref(false);
+
     const showAddMintDialogLocal = computed({
       get: () => props.showAddMintDialog,
       set: (value) => emit("update:showAddMintDialog", value),
@@ -96,6 +143,8 @@ export default defineComponent({
       addMintLocal,
       showAddMintDialogLocal,
       mintUrl,
+      settings,
+      showAuditInfo,
     };
   },
 });
@@ -105,13 +154,17 @@ export default defineComponent({
 .add-mint-dialog {
   width: 100%;
   max-width: 450px;
+  max-height: 80vh;
   border-radius: 16px;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 .add-mint-header {
   position: relative;
   padding-top: 20px;
+  flex-shrink: 0;
 }
 
 .add-mint-title-row {
@@ -129,6 +182,8 @@ export default defineComponent({
 
 .add-mint-content {
   padding-top: 0;
+  flex: 1;
+  overflow-y: auto;
 }
 
 .add-mint-description {
