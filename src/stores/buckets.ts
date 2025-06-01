@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from "uuid";
 import { cashuDb } from "./dexie";
 import { useProofsStore } from "./proofs";
 import { useTokensStore } from "./tokens";
+import { useLockedTokensStore } from "./lockedTokens";
 import { ref, watch } from "vue";
 import { notifySuccess } from "src/js/notify";
 
@@ -72,6 +73,22 @@ export const useBucketsStore = defineStore("buckets", {
         balances[bucket.id] = proofsStore.proofs
           .filter((p) => p.bucketId === bucket.id && !p.reserved)
           .reduce((sum, p) => sum + p.amount, 0);
+      });
+      return balances;
+    },
+    lockedBucketBalance: () => (bucketId: string): number => {
+      const ltStore = useLockedTokensStore();
+      return ltStore.lockedTokens
+        .filter((t) => t.bucketId === bucketId)
+        .reduce((sum, t) => sum + t.amount, 0);
+    },
+    lockedBucketBalances(): Record<string, number> {
+      const ltStore = useLockedTokensStore();
+      const balances: Record<string, number> = {};
+      this.bucketList.forEach((bucket) => {
+        balances[bucket.id] = ltStore.lockedTokens
+          .filter((t) => t.bucketId === bucket.id)
+          .reduce((sum, t) => sum + t.amount, 0);
       });
       return balances;
     },
