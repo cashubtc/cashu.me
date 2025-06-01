@@ -357,37 +357,12 @@ export const useNostrStore = defineStore("nostr", {
 
       const pool = new SimplePool();
       const nostrEvent = await event.toNostrEvent();
-      let pubs;
       try {
-        pubs = await pool.publish(this.relays, nostrEvent);
-      } catch (e) {
-        console.error(e);
-        notifyError("Could not publish NIP-04 event");
-        return null;
-      }
-
-      let published = false;
-
-      const pubArray = Array.isArray(pubs) ? pubs : [pubs];
-      for (const pub of pubArray) {
-        pub.on("ok", (relay: any) => {
-          console.log(`Relay ${relay.url} accepted event`);
-          published = true;
-        });
-        pub.on("failed", (reason: any) => {
-          console.error(`Publish failed: ${reason}`);
-        });
-        pub.on("seen", (relay: any) => {
-          console.log(`Relay ${relay.url} already had event`);
-        });
-      }
-
-      await new Promise((resolve) => setTimeout(resolve, 3000));
-
-      if (published) {
+        await pool.publish(this.relays, nostrEvent);
         notifySuccess("NIP-04 event published");
         return event;
-      } else {
+      } catch (e) {
+        console.error(e);
         notifyError("Could not publish NIP-04 event");
         return null;
       }
@@ -504,46 +479,19 @@ export const useNostrStore = defineStore("nostr", {
 
       const pool = new SimplePool();
       const nostrEvent = await wrapEvent.toNostrEvent();
-      let pubs;
       try {
-        pubs = await pool.publish(relays ?? this.relays, nostrEvent);
+        await pool.publish(relays ?? this.relays, nostrEvent);
+        const chatStore = useDmChatsStore();
+        chatStore.addOutgoing(dmEvent);
+        const router = useRouter();
+        router.push("/chats");
+        notifySuccess("NIP-17 event published");
+        return dmEvent;
       } catch (e) {
         console.error(e);
         notifyError("Could not publish NIP-17 event");
         return null;
       }
-
-      let published = false;
-
-      const pubArray = Array.isArray(pubs) ? pubs : [pubs];
-      for (const pub of pubArray) {
-        pub.on("ok", (relay: any) => {
-          console.log(`Relay ${relay.url} accepted event`);
-          published = true;
-        });
-        pub.on("failed", (reason: any) => {
-          console.error(`Publish failed: ${reason}`);
-        });
-        pub.on("seen", (relay: any) => {
-          console.log(`Relay ${relay.url} already had event`);
-        });
-      }
-
-      await new Promise((resolve) => setTimeout(resolve, 3000));
-
-      try {
-        const chatStore = useDmChatsStore();
-        chatStore.addOutgoing(dmEvent);
-        const router = useRouter();
-        router.push("/chats");
-      } catch {}
-
-      if (!published) {
-        notifyError("Could not publish NIP-17 event");
-        return null;
-      }
-
-      return dmEvent;
     },
     subscribeToNip17DirectMessages: async function () {
       await this.walletSeedGenerateKeyPair();

@@ -75,14 +75,10 @@ vi.mock("nostr-tools", () => ({
   getPublicKey: () => "pubkey",
   SimplePool: class {
     publish() {
-      return [
-        {
-          on: (event: string, cb: Function) => {
-            if (event === "ok" && publishSuccess) cb({ url: "r" });
-            if (event === "failed" && !publishSuccess) cb("fail");
-          },
-        },
-      ];
+      if (publishSuccess) {
+        return [];
+      }
+      throw new Error("fail");
     }
   },
 }));
