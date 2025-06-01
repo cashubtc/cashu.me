@@ -27,6 +27,7 @@
         :key="creator.pubkey"
         :creator="creator"
         @donate="openDonateDialog(creator)"
+        @message="openMessageDialog(creator)"
       />
     </div>
     <DonateDialog v-model="showDonateDialog" @confirm="handleDonate" />
@@ -46,6 +47,10 @@
       @selected="handleTokenSelect"
       @back="backToAction"
     />
+    <SendMessageDialog
+      v-model="showMessageDialog"
+      @send="sendMessage"
+    />
   </div>
 </template>
 
@@ -55,8 +60,13 @@ import { useCreatorsStore } from "stores/creators";
 import CreatorProfileCard from "components/CreatorProfileCard.vue";
 import DonateDialog from "components/DonateDialog.vue";
 import ChooseExistingTokenDialog from "components/ChooseExistingTokenDialog.vue";
+import SendMessageDialog from "components/SendMessageDialog.vue";
 import { storeToRefs } from "pinia";
 import { useSendTokensStore } from "stores/sendTokensStore";
+import { useNostrStore } from "stores/nostr";
+import { useDmChatsStore } from "stores/dmChats";
+import { Dialog } from "quasar";
+import { useI18n } from "vue-i18n";
 
 export default defineComponent({
   name: "FindCreatorsView",
@@ -64,16 +74,20 @@ export default defineComponent({
     CreatorProfileCard,
     DonateDialog,
     ChooseExistingTokenDialog,
+    SendMessageDialog,
   },
   setup() {
     const creatorsStore = useCreatorsStore();
     const { searchResults, searching, error } = storeToRefs(creatorsStore);
     const searchInput = ref("");
     const sendTokensStore = useSendTokensStore();
+    const { t } = useI18n();
     const showDonateDialog = ref(false);
     const showActionDialog = ref(false);
     const showExistingDialog = ref(false);
+    const showMessageDialog = ref(false);
     const donateCreator = ref<any>(null);
+    const messageCreator = ref<any>(null);
     const selectedBucketId = ref<string>("");
     const selectedLocked = ref(false);
 
@@ -97,6 +111,11 @@ export default defineComponent({
     const openDonateDialog = (creator: any) => {
       donateCreator.value = creator;
       showDonateDialog.value = true;
+    };
+
+    const openMessageDialog = (creator: any) => {
+      messageCreator.value = creator;
+      showMessageDialog.value = true;
     };
 
     const handleDonate = ({ bucketId, locked }: { bucketId: string; locked: boolean }) => {
@@ -146,6 +165,32 @@ export default defineComponent({
       sendTokensStore.showSendTokens = true;
     };
 
+    const sendMessage = async (msg: string) => {
+      if (!messageCreator.value) return;
+      showMessageDialog.value = false;
+      try {
+        const ev = await useNostrStore().sendNip17DirectMessage(
+          messageCreator.value.pubkey,
+          msg
+        );
+        if (ev) {
+          useDmChatsStore().addOutgoing(ev);
+          Dialog.create({
+            message: t("wallet.notifications.nostr_dm_sent") as string,
+          });
+        } else {
+          Dialog.create({
+            message: t("wallet.notifications.nostr_dm_failed") as string,
+          });
+        }
+      } catch (e) {
+        console.error(e);
+        Dialog.create({
+          message: t("wallet.notifications.nostr_dm_failed") as string,
+        });
+      }
+    };
+
     return {
       searchInput,
       triggerSearch,
@@ -163,6 +208,9 @@ export default defineComponent({
       backToBucket,
       backToAction,
       handleTokenSelect,
+      showMessageDialog,
+      openMessageDialog,
+      sendMessage,
     };
   },
 });
