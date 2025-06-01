@@ -160,6 +160,18 @@ body.body--dark .q-field--error {
   }
 }
 
+body.body--light {
+  .bg-dark {
+    background: white !important;
+  }
+  .text-white {
+    color: black !important;
+  }
+  .bg-grey-10 {
+    background: var(--q-color-grey-3) !important;
+  }
+}
+
 .qcard {
   width: 500px;
 }

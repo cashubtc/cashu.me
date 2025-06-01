@@ -570,8 +570,8 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .custom-btn {
-  background: $grey-9;
-  color: white;
+  background: var(--custom-btn-bg);
+  color: var(--custom-btn-text);
   border-radius: 8px;
   height: 60px;
   box-shadow: none;
@@ -590,7 +590,7 @@ export default defineComponent({
 }
 
 .icon-background {
-  background-color: $grey-10;
+  background-color: var(--icon-bg-color);
   border-radius: 8px;
   padding: 8px;
   display: flex;

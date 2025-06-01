@@ -7,7 +7,7 @@
     transition-hide="slide-down"
     backdrop-filter="blur(2px) brightness(60%)"
   >
-    <q-card class="bg-grey-10 text-white full-width-card q-pb-lg">
+    <q-card :class="[cardClass, 'full-width-card q-pb-lg']">
       <q-card-section class="row items-center q-pb-sm">
         <q-btn flat round dense v-close-popup class="q-ml-sm" color="primary">
           <XIcon />
@@ -31,7 +31,7 @@
         <div class="q-gutter-y-md">
           <q-btn class="full-width custom-btn" @click="showSendTokensDialog">
             <div class="row items-center full-width">
-              <div class="icon-background q-mr-md">
+              <div class="icon-background q-mr-md" :style="{ backgroundColor: iconBgColor }">
                 <CoinsIcon />
               </div>
               <div class="text-left">
@@ -44,7 +44,7 @@
 
           <q-btn class="full-width custom-btn" @click="showParseDialog">
             <div class="row items-center full-width">
-              <div class="icon-background q-mr-md">
+              <div class="icon-background q-mr-md" :style="{ backgroundColor: iconBgColor }">
                 <ZapIcon />
               </div>
               <div class="text-left">
@@ -121,6 +121,16 @@ export default defineComponent({
         return true;
       }
     },
+    cardClass: function () {
+      return this.$q.dark.isActive
+        ? "bg-grey-10 text-white"
+        : "bg-white text-dark";
+    },
+    iconBgColor: function () {
+      return this.$q.dark.isActive
+        ? 'var(--q-color-grey-10)'
+        : 'var(--q-color-grey-2)';
+    },
   },
   methods: {
     ...mapActions(useCameraStore, ["closeCamera", "showCamera"]),
@@ -174,7 +184,7 @@ export default defineComponent({
 }
 
 .icon-background {
-  background-color: $grey-10;
+  background-color: var(--icon-bg-color);
   border-radius: 8px;
   padding: 8px;
   display: flex;
