@@ -1312,6 +1312,8 @@ export default {
     row: {
       date_label: "{ value } ago",
       unlock_label: "Unlocks { value }",
+      receiver_label: "Receiver { value }",
+      refund_label: "Refund { value }",
     },
     actions: {
       copy: { tooltip_text: "Copy" },
