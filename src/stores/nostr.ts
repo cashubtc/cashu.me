@@ -340,20 +340,23 @@ export const useNostrStore = defineStore("nostr", {
       recipient: string,
       message: string
     ) {
-      const randomPrivateKey = generateSecretKey();
-      const randomPublicKey = getPublicKey(randomPrivateKey);
-      // const randomPrivateKey = hexToBytes(this.seedSignerPrivateKey);
-      // const randomPublicKey = this.pubkey;
       const ndk = new NDK({
         explicitRelayUrls: this.relays,
-        signer: new NDKPrivateKeySigner(bytesToHex(randomPrivateKey)),
+        signer: this.seedSigner,
       });
       const event = new NDKEvent(ndk);
       ndk.connect();
       event.kind = NDKKind.EncryptedDirectMessage;
-      event.content = await nip04.encrypt(randomPrivateKey, recipient, message);
-      event.tags = [["p", recipient]];
-      await event.sign();
+      event.content = await nip04.encrypt(
+        this.seedSignerPrivateKey,
+        recipient,
+        message
+      );
+      event.tags = [
+        ["p", recipient],
+        ["p", this.seedSignerPublicKey],
+      ];
+      await event.sign(this.seedSigner);
       try {
         await event.publish();
         notifySuccess("NIP-04 event published");
