@@ -67,6 +67,7 @@ import { useNostrStore } from "stores/nostr";
 import { useDmChatsStore } from "stores/dmChats";
 import { Dialog } from "quasar";
 import { useI18n } from "vue-i18n";
+import { nip19, ProfilePointer } from "nostr-tools";
 
 export default defineComponent({
   name: "FindCreatorsView",
@@ -169,8 +170,20 @@ export default defineComponent({
       if (!messageCreator.value) return;
       showMessageDialog.value = false;
       try {
-        const ev = await useNostrStore().sendNip17DirectMessage(
-          messageCreator.value.pubkey,
+        let recipient = messageCreator.value.pubkey;
+        if (recipient.startsWith("npub") || recipient.startsWith("nprofile")) {
+          try {
+            const decoded = nip19.decode(recipient);
+            recipient =
+              decoded.type === "npub"
+                ? (decoded.data as string)
+                : (decoded.data as ProfilePointer).pubkey;
+          } catch (e) {
+            console.error(e);
+          }
+        }
+        const ev = await useNostrStore().sendNip04DirectMessage(
+          recipient,
           msg
         );
         if (ev) {
