@@ -353,7 +353,7 @@ export const useNostrStore = defineStore("nostr", {
       event.kind = NDKKind.EncryptedDirectMessage;
       event.content = await nip04.encrypt(randomPrivateKey, recipient, message);
       event.tags = [["p", recipient]];
-      event.sign();
+      await event.sign();
       try {
         await event.publish();
         notifySuccess("NIP-04 event published");
