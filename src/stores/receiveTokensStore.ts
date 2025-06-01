@@ -16,6 +16,11 @@ import { useSwapStore } from "./swap";
 import { Clipboard } from "@capacitor/clipboard";
 import { DEFAULT_BUCKET_ID } from "./buckets";
 
+function isValidTokenString(tokenStr: string): boolean {
+  const prefixRegex = /^cashu[A-B][0-9A-Za-z]+$/;
+  return prefixRegex.test(tokenStr);
+}
+
 export const useReceiveTokensStore = defineStore("receiveTokensStore", {
   state: () => ({
     showReceiveTokens: false,
@@ -30,10 +35,22 @@ export const useReceiveTokensStore = defineStore("receiveTokensStore", {
   }),
   actions: {
     decodeToken: function (encodedToken: string) {
+      if (!isValidTokenString(encodedToken)) {
+        console.error("Invalid token string");
+        return undefined;
+      }
       let decodedToken = undefined;
       try {
         decodedToken = token.decode(encodedToken);
-      } catch (error) {}
+        const proofs = token.getProofs(decodedToken);
+        if (!proofs || proofs.length === 0) {
+          console.error("Decoded token contains no proofs");
+          return undefined;
+        }
+      } catch (error) {
+        console.error(error);
+        return undefined;
+      }
       return decodedToken;
     },
     knowThisMintOfTokenJson: function (tokenJson: Token) {
@@ -63,7 +80,7 @@ export const useReceiveTokensStore = defineStore("receiveTokensStore", {
           receiveStore.receiveData.tokensBase64,
         );
 
-      const tokenJson = token.decode(receiveStore.receiveData.tokensBase64);
+      const tokenJson = this.decodeToken(receiveStore.receiveData.tokensBase64);
       if (tokenJson == undefined) {
         throw new Error("no tokens provided.");
       }
@@ -96,7 +113,7 @@ export const useReceiveTokensStore = defineStore("receiveTokensStore", {
       const receiveStore = useReceiveTokensStore();
       const mintStore = useMintsStore();
       const uiStore = useUiStore();
-      const tokenJson = token.decode(encodedToken);
+      const tokenJson = this.decodeToken(encodedToken);
       if (tokenJson == undefined) {
         throw new Error("no tokens provided.");
       }
