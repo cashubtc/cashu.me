@@ -1336,6 +1336,9 @@ export default {
       description: "Description",
       goal: "Goal (sat)",
     },
+    tooltips: {
+      description: "Buckets are for categorizing tokens",
+    },
     validation: {
       name: "Name is required",
       goal: "Goal must be positive",

@@ -108,11 +108,20 @@
         <q-input
           v-model="form.description"
           outlined
-          :label="$t('BucketManager.inputs.description')"
           type="textarea"
           autogrow
           class="q-mb-sm"
-        />
+        >
+          <template #label>
+            <div class="row items-center no-wrap">
+              <span>{{ $t('BucketManager.inputs.description') }}</span>
+              <InfoTooltip
+                class="q-ml-xs"
+                :text="$t('BucketManager.tooltips.description')"
+              />
+            </div>
+          </template>
+        </q-input>
         <q-input
           v-model.number="form.goal"
           outlined

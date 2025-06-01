@@ -1268,6 +1268,11 @@ export default {
       },
     },
   },
+  BucketManager: {
+    tooltips: {
+      description: "Buckets dienen zur Kategorisierung von Token",
+    },
+  },
   BucketDetail: {
     move: "Move tokens",
     send: "Send tokens",
