@@ -134,6 +134,12 @@
           type="number"
           class="q-mb-sm"
         />
+        <q-input
+          v-model="form.creatorPubkey"
+          outlined
+          :label="$t('BucketManager.inputs.creator_pubkey')"
+          class="q-mb-sm"
+        />
         <div class="row q-mt-md">
           <q-btn color="primary" rounded @click="saveBucket">{{
             $t("global.actions.update.label")
@@ -192,6 +198,7 @@ export default defineComponent({
       color: "#1976d2",
       description: "",
       goal: null,
+      creatorPubkey: "",
     });
 
     const bucketList = computed(() => bucketsStore.bucketList);
@@ -206,7 +213,7 @@ export default defineComponent({
 
     const openAdd = () => {
       editId.value = null;
-      form.value = { name: "", color: "#1976d2", description: "", goal: null };
+      form.value = { name: "", color: "#1976d2", description: "", goal: null, creatorPubkey: "" };
       showForm.value = true;
     };
 
@@ -217,6 +224,7 @@ export default defineComponent({
         color: bucket.color,
         description: bucket.description,
         goal: bucket.goal,
+        creatorPubkey: bucket.creatorPubkey || "",
       };
       showForm.value = true;
     };

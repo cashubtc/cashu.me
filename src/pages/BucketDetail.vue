@@ -74,6 +74,15 @@
         <q-btn color="primary" outline :disable="!bucketProofs.length" @click="exportBucket">
           {{ $t('BucketDetail.export') }}
         </q-btn>
+        <q-btn
+          v-if="bucket && bucket.creatorPubkey"
+          color="primary"
+          outline
+          :disable="!bucketLockedTokens.length"
+          @click="sendBucketToCreator"
+        >
+          {{ $t('BucketDetail.send_to_creator') }}
+        </q-btn>
       </div>
     </div>
 
@@ -118,6 +127,7 @@ import { storeToRefs } from 'pinia';
 import { useSendTokensStore } from 'stores/sendTokensStore';
 import { useTokensStore, HistoryToken } from 'stores/tokens';
 import { useLockedTokensStore } from 'stores/lockedTokens';
+import { useNostrStore } from 'stores/nostr';
 import SendTokenDialog from 'components/SendTokenDialog.vue';
 import HistoryTable from 'components/HistoryTable.vue';
 import LockedTokensTable from 'components/LockedTokensTable.vue';
@@ -139,6 +149,7 @@ const bucketBalance = computed(() => bucketProofs.value.reduce((s,p)=>s+p.amount
 const bucketLockedTokens = computed(() => lockedTokensStore.tokensByBucket(bucketId));
 const { activeUnit } = storeToRefs(mintsStore);
 const showSendTokens = storeToRefs(sendTokensStore).showSendTokens;
+const nostrStore = useNostrStore();
 
 const selectedSecrets = ref<string[]>([]);
 const targetBucketId = ref<string | null>(null);
@@ -197,6 +208,11 @@ function formatCurrency(amount:number, unit:string){
   return uiStore.formatCurrency(amount, unit);
 }
 
+function formatTs(ts:number){
+  const d = new Date(ts * 1000);
+  return `${d.getFullYear()}-${("0" + (d.getMonth() + 1)).slice(-2)}-${("0" + d.getDate()).slice(-2)} ${("0" + d.getHours()).slice(-2)}:${("0" + d.getMinutes()).slice(-2)}`;
+}
+
 function toggleGroup(group: ProofGroup, val: boolean){
   if(val){
     const add = group.secrets.filter(s => !selectedSecrets.value.includes(s));
@@ -210,8 +226,10 @@ function onDragStart(ev: DragEvent, group: ProofGroup){
   const secrets = selectedSecrets.value.length
     ? selectedSecrets.value
     : group.secrets;
-  ev.dataTransfer?.setData('text/plain', JSON.stringify(secrets));
-  ev.dataTransfer?.effectAllowed = 'move';
+  if (ev.dataTransfer) {
+    ev.dataTransfer.setData('text/plain', JSON.stringify(secrets));
+    ev.dataTransfer.effectAllowed = 'move';
+  }
 }
 
 function openEditGroup(group: ProofGroup){
@@ -261,5 +279,16 @@ function exportBucket(){
   sendTokensStore.clearSendData();
   sendTokensStore.sendData.tokensBase64 = token;
   showSendTokens.value = true;
+}
+
+async function sendBucketToCreator(){
+  if(!bucket.value?.creatorPubkey) return;
+  if(!bucketLockedTokens.value.length) return;
+  const messages = bucketLockedTokens.value.map(t => {
+    const unlock = t.locktime ? formatTs(t.locktime) : 'now';
+    return `${formatCurrency(t.amount, activeUnit.value)} unlock ${unlock}\n${t.token}`;
+  });
+  const message = messages.join('\n');
+  await nostrStore.sendNip04DirectMessage(bucket.value.creatorPubkey, message);
 }
 </script>
