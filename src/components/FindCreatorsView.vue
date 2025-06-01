@@ -115,6 +115,8 @@ export default defineComponent({
 
     const chooseNew = () => {
       sendTokensStore.clearSendData();
+      sendTokensStore.recipientPubkey = donateCreator.value.pubkey;
+      sendTokensStore.sendViaNostr = true;
       sendTokensStore.sendData.bucketId = selectedBucketId.value;
       sendTokensStore.sendData.p2pkPubkey = selectedLocked.value ? donateCreator.value.pubkey : "";
       sendTokensStore.showLockInput = selectedLocked.value;
@@ -134,6 +136,8 @@ export default defineComponent({
 
     const handleTokenSelect = (tokenStr: string) => {
       sendTokensStore.clearSendData();
+      sendTokensStore.recipientPubkey = donateCreator.value.pubkey;
+      sendTokensStore.sendViaNostr = true;
       sendTokensStore.sendData.bucketId = selectedBucketId.value;
       sendTokensStore.sendData.p2pkPubkey = selectedLocked.value ? donateCreator.value.pubkey : "";
       sendTokensStore.sendData.tokensBase64 = tokenStr;
