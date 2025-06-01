@@ -68,6 +68,8 @@ export default {
       no_lnurl_data: "LNURL verisi yok",
       no_price_data: "Fiyat verisi yok.",
       please_try_again: "Lütfen tekrar deneyin.",
+      nostr_dm_sent: "Nostr DM gönderildi",
+      nostr_dm_failed: "Nostr DM gönderilemedi",
     },
     mint: {
       notifications: {

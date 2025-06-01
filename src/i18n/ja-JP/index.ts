@@ -68,6 +68,8 @@ export default {
       no_lnurl_data: "LNURLデータがありません",
       no_price_data: "価格データがありません。",
       please_try_again: "もう一度お試しください。",
+      nostr_dm_sent: "Nostr DMを送信しました",
+      nostr_dm_failed: "Nostr DMの送信に失敗しました",
     },
     mint: {
       notifications: {

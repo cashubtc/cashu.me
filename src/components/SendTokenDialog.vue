@@ -625,6 +625,8 @@ import {
   notify,
   notifyWarning,
 } from "src/js/notify.ts";
+import { Dialog } from "quasar";
+import { useDmChatsStore } from "src/stores/dmChats";
 import { getEncodedTokenV3 } from "@cashu/cashu-ts/dist/lib/es5/utils";
 export default defineComponent({
   name: "SendTokenDialog",
@@ -1136,14 +1138,31 @@ export default defineComponent({
         this.sendData.tokensBase64 = this.serializeProofs(sendProofs);
         if (this.sendViaNostr && this.recipientPubkey) {
           try {
-            await useNostrStore().sendNip17DirectMessage(
+            const ev = await useNostrStore().sendNip17DirectMessage(
               this.recipientPubkey,
               this.sendData.tokensBase64,
             );
-            notifySuccess("Sent token via Nostr");
+            if (ev) {
+              useDmChatsStore().addOutgoing(ev);
+              Dialog.create({
+                message: this.$t(
+                  "wallet.notifications.nostr_dm_sent"
+                ) as string,
+              });
+            } else {
+              Dialog.create({
+                message: this.$t(
+                  "wallet.notifications.nostr_dm_failed"
+                ) as string,
+              });
+            }
           } catch (e) {
             console.error(e);
-            notifyError("Failed to send Nostr DM");
+            Dialog.create({
+              message: this.$t(
+                "wallet.notifications.nostr_dm_failed"
+              ) as string,
+            });
           } finally {
             this.recipientPubkey = "";
             this.sendViaNostr = false;
@@ -1235,14 +1254,31 @@ export default defineComponent({
         this.sendData.tokensBase64 = this.serializeProofs(sendProofs);
         if (this.sendViaNostr && this.recipientPubkey) {
           try {
-            await useNostrStore().sendNip17DirectMessage(
+            const ev = await useNostrStore().sendNip17DirectMessage(
               this.recipientPubkey,
               this.sendData.tokensBase64,
             );
-            notifySuccess("Sent token via Nostr");
+            if (ev) {
+              useDmChatsStore().addOutgoing(ev);
+              Dialog.create({
+                message: this.$t(
+                  "wallet.notifications.nostr_dm_sent"
+                ) as string,
+              });
+            } else {
+              Dialog.create({
+                message: this.$t(
+                  "wallet.notifications.nostr_dm_failed"
+                ) as string,
+              });
+            }
           } catch (e) {
             console.error(e);
-            notifyError("Failed to send Nostr DM");
+            Dialog.create({
+              message: this.$t(
+                "wallet.notifications.nostr_dm_failed"
+              ) as string,
+            });
           } finally {
             this.recipientPubkey = "";
             this.sendViaNostr = false;
