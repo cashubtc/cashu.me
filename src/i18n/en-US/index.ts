@@ -195,6 +195,10 @@ export default {
         toggle: "Claim automatically",
         description: "Receive incoming payments automatically.",
       },
+      npc_v2: {
+        choose_mint_title: "Choose mint for npub.cash v2",
+        choose_mint_placeholder: "Select a mint...",
+      },
     },
     nostr_keys: {
       title: "Your nostr keys",

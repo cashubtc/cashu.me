@@ -196,26 +196,23 @@
                   class="q-pt-sm"
                 >
                 </q-input>
-                <q-input
-                  v-model="computedNewNpcMintUrl"
-                  class="q-pt-sm"
-                  label="New mint url..."
-                  color="primary"
-                  outlined
-                  dense
-                  rounded
-                >
-                  <template v-slot:append>
-                    <q-btn
-                      dense
-                      flat
-                      icon="check"
-                      @click="updateNpcMintUrl(computedNewNpcMintUrl)"
-                      size="sm"
-                      color="grey"
-                    />
-                  </template>
-                </q-input>
+                <div class="q-pt-sm">
+                  <ChooseMint
+                    v-model="npcV2Mint"
+                    :title="
+                      $t('Settings.lightning_address.npc_v2.choose_mint_title')
+                    "
+                    :placeholder="
+                      $t(
+                        'Settings.lightning_address.npc_v2.choose_mint_placeholder'
+                      )
+                    "
+                    :show-balances="false"
+                    :dense="true"
+                    :rounded="true"
+                    :require-active-mint="false"
+                  />
+                </div>
               </div>
             </div>
           </q-item>
@@ -1640,6 +1637,7 @@
 import { defineComponent } from "vue";
 import P2PKDialog from "./P2PKDialog.vue";
 import NWCDialog from "./NWCDialog.vue";
+import ChooseMint from "./ChooseMint.vue";
 
 import { getShortUrl } from "src/js/wallet-helpers";
 import { mapActions, mapState, mapWritableState } from "pinia";
@@ -1669,6 +1667,7 @@ export default defineComponent({
   components: {
     P2PKDialog,
     NWCDialog,
+    ChooseMint,
   },
   props: {},
   data: function () {
@@ -1706,18 +1705,9 @@ export default defineComponent({
       nip46Token: "",
       nip07SignerAvailable: false,
       newRelay: "",
-      newNpcMintUl: "",
     };
   },
   computed: {
-    computedNewNpcMintUrl: {
-      get() {
-        return this.$data.newNpcMintUrl;
-      },
-      set(value) {
-        this.$data.newNpcMintUrl = value;
-      },
-    },
     ...mapWritableState(useSettingsStore, [
       "getBitcoinPrice",
       "checkSentTokens",
@@ -1828,6 +1818,11 @@ export default defineComponent({
         this.npcV2Address = "";
       }
     },
+    npcV2Mint: async function (newMintUrl, oldMintUrl) {
+      if (this.npcV2Enabled && newMintUrl && newMintUrl !== oldMintUrl) {
+        await this.changeMintUrl(newMintUrl);
+      }
+    },
   },
   methods: {
     ...mapActions(useNostrStore, [
@@ -1883,10 +1878,6 @@ export default defineComponent({
     },
     toggleTerminal: function () {
       useUiStore().toggleDebugConsole();
-    },
-    updateNpcMintUrl: async function (mintUrl) {
-      await this.changeMintUrl(mintUrl);
-      this.computedNewNpcMintUrl = "";
     },
     unsetAllReservedProofs: async function () {
       // mark all this.proofs as reserved=false
