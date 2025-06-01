@@ -17,16 +17,16 @@
         class="flex-1"
       >
         <q-carousel-slide :name="0">
-          <WelcomeSlide1 />
+          <WelcomeSlidePrivacy />
         </q-carousel-slide>
         <q-carousel-slide :name="1">
-          <WelcomeSlide2 />
+          <WelcomeSlideMints />
         </q-carousel-slide>
         <q-carousel-slide :name="2">
-          <WelcomeSlide3 />
+          <WelcomeSlideProofs />
         </q-carousel-slide>
         <q-carousel-slide :name="3">
-          <WelcomeSlide4 />
+          <WelcomeSlideBuckets />
         </q-carousel-slide>
       </q-carousel>
 
@@ -62,6 +62,12 @@
           :disable="!welcomeStore.canProceed"
           @click="welcomeStore.goToNextSlide"
         />
+        <q-btn
+          flat
+          icon="close"
+          :label="$t('WelcomePage.actions.skip.label')"
+          @click="welcomeStore.skipTutorial"
+        />
       </div>
     </q-card>
   </q-dialog>
@@ -71,18 +77,18 @@
 import { onMounted, ref } from "vue";
 import { useWelcomeStore } from "src/stores/welcome";
 import { useStorageStore } from "src/stores/storage";
-import WelcomeSlide1 from "./welcome/WelcomeSlide1.vue";
-import WelcomeSlide2 from "./welcome/WelcomeSlide2.vue";
-import WelcomeSlide3 from "./welcome/WelcomeSlide3.vue";
-import WelcomeSlide4 from "./welcome/WelcomeSlide4.vue";
+import WelcomeSlidePrivacy from "./welcome/WelcomeSlidePrivacy.vue";
+import WelcomeSlideMints from "./welcome/WelcomeSlideMints.vue";
+import WelcomeSlideProofs from "./welcome/WelcomeSlideProofs.vue";
+import WelcomeSlideBuckets from "./welcome/WelcomeSlideBuckets.vue";
 
 export default {
   name: "WelcomePage",
   components: {
-    WelcomeSlide1,
-    WelcomeSlide2,
-    WelcomeSlide3,
-    WelcomeSlide4,
+    WelcomeSlidePrivacy,
+    WelcomeSlideMints,
+    WelcomeSlideProofs,
+    WelcomeSlideBuckets,
   },
   data() {
     return {

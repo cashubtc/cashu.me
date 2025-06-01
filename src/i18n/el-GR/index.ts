@@ -528,6 +528,9 @@ export default {
       next: {
         label: "Επόμενο",
       },
+      skip: {
+        label: "Παράλειψη",
+      },
     },
   },
   WelcomeSlide1: {
@@ -628,6 +631,22 @@ export default {
         label: "Έχω διαβάσει και αποδέχομαι αυτούς τους όρους και προϋποθέσεις",
       },
     },
+  },
+  WelcomeSlidePrivacy: {
+    title: "Cashu και ιδιωτικότητα",
+    text: "Το Cashu χρησιμοποιεί τυφλά token ώστε τα mints να μην μπορούν να παρακολουθήσουν τις πληρωμές σας.",
+  },
+  WelcomeSlideMints: {
+    title: "Mints",
+    text: "Προσθέστε ένα mint για να αρχίσετε να λαμβάνετε token.",
+  },
+  WelcomeSlideProofs: {
+    title: "Αποδείξεις",
+    text: "Οι αποδείξεις είναι τα token που μπορείτε να στέλνετε και να λαμβάνετε.",
+  },
+  WelcomeSlideBuckets: {
+    title: "Κάδοι",
+    text: "Χρησιμοποιήστε κάδους για να οργανώσετε τα token σας.",
   },
   RestoreView: {
     seed_phrase: {

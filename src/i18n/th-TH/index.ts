@@ -521,6 +521,9 @@ export default {
       next: {
         label: "ถัดไป",
       },
+      skip: {
+        label: "ข้าม",
+      },
     },
   },
   WelcomeSlide1: {
@@ -621,6 +624,22 @@ export default {
         label: "ฉันได้อ่านและยอมรับข้อกำหนดและเงื่อนไขเหล่านี้",
       },
     },
+  },
+  WelcomeSlidePrivacy: {
+    title: "Cashu และความเป็นส่วนตัว",
+    text: "Cashu ใช้โทเค็นแบบปิดบังเพื่อให้ mint ไม่สามารถติดตามการชำระเงินของคุณได้",
+  },
+  WelcomeSlideMints: {
+    title: "มินต์",
+    text: "เพิ่มมินต์เพื่อเริ่มรับโทเค็น",
+  },
+  WelcomeSlideProofs: {
+    title: "พรูฟ",
+    text: "พรูฟคือโทเค็นที่คุณสามารถส่งและรับได้",
+  },
+  WelcomeSlideBuckets: {
+    title: "บัคเก็ต",
+    text: "ใช้บัคเก็ตเพื่อจัดระเบียบโทเค็นของคุณ",
   },
   RestoreView: {
     seed_phrase: {

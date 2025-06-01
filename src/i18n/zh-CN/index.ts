@@ -516,6 +516,9 @@ export default {
       next: {
         label: "下一步",
       },
+      skip: {
+        label: "跳过",
+      },
     },
   },
   WelcomeSlide1: {
@@ -616,6 +619,22 @@ export default {
         label: "我已阅读并接受这些条款和条件",
       },
     },
+  },
+  WelcomeSlidePrivacy: {
+    title: "Cashu 与隐私",
+    text: "Cashu 使用盲化代币，因此铸币厂无法追踪您的支付。",
+  },
+  WelcomeSlideMints: {
+    title: "铸币厂",
+    text: "添加一个铸币厂以开始接收代币。",
+  },
+  WelcomeSlideProofs: {
+    title: "凭证",
+    text: "凭证是您可以发送和接收的代币。",
+  },
+  WelcomeSlideBuckets: {
+    title: "桶",
+    text: "使用桶来组织您的代币。",
   },
   RestoreView: {
     seed_phrase: {

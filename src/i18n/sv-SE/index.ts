@@ -523,6 +523,9 @@ export default {
       next: {
         label: "Nästa",
       },
+      skip: {
+        label: "Hoppa över",
+      },
     },
   },
   WelcomeSlide1: {
@@ -623,6 +626,22 @@ export default {
         label: "Jag har läst och accepterar dessa villkor",
       },
     },
+  },
+  WelcomeSlidePrivacy: {
+    title: "Cashu och integritet",
+    text: "Cashu använder blinda token så att mintar inte kan spåra dina betalningar.",
+  },
+  WelcomeSlideMints: {
+    title: "Mintar",
+    text: "Lägg till en mint för att börja ta emot token.",
+  },
+  WelcomeSlideProofs: {
+    title: "Bevis",
+    text: "Bevisen är de token du kan skicka och ta emot.",
+  },
+  WelcomeSlideBuckets: {
+    title: "Hinkar",
+    text: "Använd hinkar för att organisera dina token.",
   },
   RestoreView: {
     seed_phrase: {

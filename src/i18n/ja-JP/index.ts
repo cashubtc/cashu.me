@@ -522,6 +522,9 @@ export default {
       next: {
         label: "次へ",
       },
+      skip: {
+        label: "スキップ",
+      },
     },
   },
   WelcomeSlide1: {
@@ -622,6 +625,22 @@ export default {
         label: "これらの規約と条件を読み、同意します",
       },
     },
+  },
+  WelcomeSlidePrivacy: {
+    title: "Cashu とプライバシー",
+    text: "Cashu は盲化トークンを使用するため、ミントはあなたの支払いを追跡できません。",
+  },
+  WelcomeSlideMints: {
+    title: "ミント",
+    text: "トークンを受け取るにはミントを追加してください。",
+  },
+  WelcomeSlideProofs: {
+    title: "証明書",
+    text: "証明書は送受信できるトークンのことです。",
+  },
+  WelcomeSlideBuckets: {
+    title: "バケツ",
+    text: "バケツを使ってトークンを整理しましょう。",
   },
   RestoreView: {
     seed_phrase: {

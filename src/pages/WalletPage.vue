@@ -489,9 +489,6 @@ export default {
       this.focusInput("parseDialogInput");
     },
     showWelcomePage: function () {
-      if (!useWelcomeStore().termsAccepted) {
-        useWelcomeStore().showWelcome = true;
-      }
       if (useWelcomeStore().showWelcome) {
         const currentQuery = window.location.search;
         const currentHash = window.location.hash;
