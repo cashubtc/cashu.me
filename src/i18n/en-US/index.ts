@@ -819,8 +819,8 @@ export default {
         invalid_too_much_error_text: "Too much",
       },
       p2pk_pubkey: {
-        label: "Receiver public key",
-        label_invalid: "Receiver public key",
+        label: "Receiver public key (npub = DM)",
+        label_invalid: "Receiver public key (npub = DM)",
       },
       locktime: {
         label: "Unlock time",

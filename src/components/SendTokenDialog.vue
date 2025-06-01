@@ -601,6 +601,7 @@ import token from "src/js/token";
 import { Buffer } from "buffer";
 import { useCameraStore } from "src/stores/camera";
 import { useP2PKStore } from "src/stores/p2pk";
+import { nip19, ProfilePointer } from "nostr-tools";
 import TokenInformation from "components/TokenInformation.vue";
 import { getDecodedToken, getEncodedTokenV4 } from "@cashu/cashu-ts";
 import { DEFAULT_BUCKET_ID, useBucketsStore } from "src/stores/buckets";
@@ -1097,6 +1098,23 @@ export default defineComponent({
         const proofsForBucket = this.activeProofs.filter(
           (p) => p.bucketId === bucketId
         );
+        const p2pkInput = this.sendData.p2pkPubkey;
+        if (
+          p2pkInput &&
+          (p2pkInput.startsWith("npub1") || p2pkInput.startsWith("nprofile1"))
+        ) {
+          try {
+            const decoded = nip19.decode(p2pkInput);
+            if (decoded.type === "npub") {
+              this.recipientPubkey = decoded.data as string;
+            } else if (decoded.type === "nprofile") {
+              this.recipientPubkey = (decoded.data as ProfilePointer).pubkey;
+            }
+            this.sendViaNostr = true;
+          } catch (e) {
+            console.error(e);
+          }
+        }
         this.sendData.p2pkPubkey = this.maybeConvertNpub(
           this.sendData.p2pkPubkey
         );
@@ -1163,15 +1181,34 @@ export default defineComponent({
       calls send, displays token and kicks off the spendableWorker
       */
       this.showNumericKeyboard = false;
-      this.sendData.p2pkPubkey = this.maybeConvertNpub(
-        this.sendData.p2pkPubkey
-      );
+      const p2pkInput = this.sendData.p2pkPubkey;
+      let nostrDm = false;
       if (
-        this.sendData.p2pkPubkey &&
-        this.isValidPubkey(this.sendData.p2pkPubkey)
+        p2pkInput &&
+        (p2pkInput.startsWith("npub1") || p2pkInput.startsWith("nprofile1"))
       ) {
-        await this.lockTokens();
-        return;
+        try {
+          const decoded = nip19.decode(p2pkInput);
+          if (decoded.type === "npub") {
+            this.recipientPubkey = decoded.data as string;
+          } else if (decoded.type === "nprofile") {
+            this.recipientPubkey = (decoded.data as ProfilePointer).pubkey;
+          }
+          this.sendViaNostr = true;
+          nostrDm = true;
+        } catch (e) {
+          console.error(e);
+        }
+      }
+      if (!nostrDm) {
+        this.sendData.p2pkPubkey = this.maybeConvertNpub(this.sendData.p2pkPubkey);
+        if (
+          this.sendData.p2pkPubkey &&
+          this.isValidPubkey(this.sendData.p2pkPubkey)
+        ) {
+          await this.lockTokens();
+          return;
+        }
       }
 
       try {
