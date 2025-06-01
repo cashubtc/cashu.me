@@ -71,6 +71,13 @@
           }}</q-btn>
         </q-item-section>
       </q-item>
+      <q-item>
+        <q-item-section>
+          <router-link to="/move-proofs" style="text-decoration: none">
+            <q-btn color="primary" outline>{{ $t("BucketDetail.move") }}</q-btn>
+          </router-link>
+        </q-item-section>
+      </q-item>
     </q-list>
   </div>
 
@@ -85,21 +92,21 @@
           :label="$t('BucketManager.inputs.name')"
           class="q-mb-sm"
         />
-      <q-input
-        v-model="form.color"
-        outlined
-        :label="$t('BucketManager.inputs.color')"
-        class="q-mb-sm"
-        type="color"
-      />
-      <q-input
-        v-model="form.description"
-        outlined
-        :label="$t('BucketManager.inputs.description')"
-        type="textarea"
-        autogrow
-        class="q-mb-sm"
-      />
+        <q-input
+          v-model="form.color"
+          outlined
+          :label="$t('BucketManager.inputs.color')"
+          class="q-mb-sm"
+          type="color"
+        />
+        <q-input
+          v-model="form.description"
+          outlined
+          :label="$t('BucketManager.inputs.description')"
+          type="textarea"
+          autogrow
+          class="q-mb-sm"
+        />
         <q-input
           v-model.number="form.goal"
           outlined
@@ -194,17 +201,19 @@ export default defineComponent({
       showForm.value = true;
     };
 
-    const nameRules = [
-      (val) => !!val || t('BucketManager.validation.name'),
-    ];
+    const nameRules = [(val) => !!val || t("BucketManager.validation.name")];
 
     const goalRules = [
-      (val) => val === null || val === undefined || val >= 0 || t('BucketManager.validation.goal'),
+      (val) =>
+        val === null ||
+        val === undefined ||
+        val >= 0 ||
+        t("BucketManager.validation.goal"),
     ];
 
     const saveBucket = async () => {
       if (!(await bucketForm.value.validate())) {
-        notifyError(t('BucketManager.validation.error'));
+        notifyError(t("BucketManager.validation.error"));
         return;
       }
       if (editId.value) {

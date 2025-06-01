@@ -1337,6 +1337,10 @@ export default {
     },
     not_found: "Bucket not found.",
   },
+  MoveProofs: {
+    title: "Move tokens",
+    empty: "No tokens",
+  },
   LockedTokensTable: {
     empty_text: "No locked tokens",
     row: {

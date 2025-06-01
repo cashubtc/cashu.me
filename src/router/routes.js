@@ -28,6 +28,13 @@ const routes = [
     children: [{ path: "", component: () => import("src/pages/Buckets.vue") }],
   },
   {
+    path: "/move-proofs",
+    component: () => import("layouts/FullscreenLayout.vue"),
+    children: [
+      { path: "", component: () => import("src/pages/MoveProofs.vue") },
+    ],
+  },
+  {
     path: "/chats",
     component: () => import("layouts/MainLayout.vue"),
     children: [{ path: "", component: () => import("src/pages/Chats.vue") }],
@@ -35,7 +42,9 @@ const routes = [
   {
     path: "/buckets/:id",
     component: () => import("layouts/FullscreenLayout.vue"),
-    children: [{ path: "", component: () => import("src/pages/BucketDetail.vue") }],
+    children: [
+      { path: "", component: () => import("src/pages/BucketDetail.vue") },
+    ],
   },
   {
     path: "/restore",
@@ -66,7 +75,9 @@ const routes = [
   {
     path: "/about",
     component: () => import("layouts/FullscreenLayout.vue"),
-    children: [{ path: "", component: () => import("src/pages/AboutPage.vue") }],
+    children: [
+      { path: "", component: () => import("src/pages/AboutPage.vue") },
+    ],
   },
 
   // Always leave this as last one,
