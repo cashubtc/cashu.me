@@ -2,6 +2,12 @@ import { defineStore } from "pinia";
 import { useNostrStore } from "./nostr";
 import { nip19 } from "nostr-tools";
 
+export const FEATURED_CREATORS = [
+  "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+];
+
 export interface CreatorProfile {
   pubkey: string;
   profile: any;
@@ -60,6 +66,33 @@ export const useCreatorsStore = defineStore("creators", {
       } finally {
         this.searching = false;
       }
+    },
+
+    async loadFeaturedCreators() {
+      const nostrStore = useNostrStore();
+      this.searchResults = [];
+      this.error = "";
+      this.searching = true;
+      await nostrStore.initNdkReadOnly();
+      for (const pubkey of FEATURED_CREATORS) {
+        try {
+          const user = nostrStore.ndk.getUser({ pubkey });
+          await user.fetchProfile();
+          const followers = await nostrStore.fetchFollowerCount(pubkey);
+          const following = await nostrStore.fetchFollowingCount(pubkey);
+          const joined = await nostrStore.fetchJoinDate(pubkey);
+          this.searchResults.push({
+            pubkey,
+            profile: user.profile,
+            followers,
+            following,
+            joined,
+          });
+        } catch (e) {
+          console.error(e);
+        }
+      }
+      this.searching = false;
     },
   },
 });

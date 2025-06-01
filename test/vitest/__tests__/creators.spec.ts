@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { useCreatorsStore } from "../../../src/stores/creators";
+import { useCreatorsStore, FEATURED_CREATORS } from "../../../src/stores/creators";
 
 const fetchProfile = vi.fn();
 const userProfile = { name: "Alice" };
@@ -67,5 +67,13 @@ describe("Creators store", () => {
 
     expect(creators.searchResults.length).toBe(0);
     expect(creators.error).toBe("Invalid pubkey");
+  });
+
+  it("loads featured creators", async () => {
+    const creators = useCreatorsStore();
+    await creators.loadFeaturedCreators();
+
+    expect(creators.error).toBe("");
+    expect(creators.searchResults.length).toBe(FEATURED_CREATORS.length);
   });
 });
