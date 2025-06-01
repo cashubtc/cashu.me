@@ -75,12 +75,14 @@ vi.mock("nostr-tools", () => ({
   getPublicKey: () => "pubkey",
   SimplePool: class {
     publish() {
-      return {
-        on: (event: string, cb: Function) => {
-          if (event === "ok" && publishSuccess) cb({ url: "r" });
-          if (event === "failed" && !publishSuccess) cb("fail");
+      return [
+        {
+          on: (event: string, cb: Function) => {
+            if (event === "ok" && publishSuccess) cb({ url: "r" });
+            if (event === "failed" && !publishSuccess) cb("fail");
+          },
         },
-      };
+      ];
     }
   },
 }));
@@ -117,7 +119,6 @@ afterEach(() => {
 describe("sendNip04DirectMessage", () => {
   it("returns signed event when published", async () => {
     const store = useNostrStore();
-    await store.walletSeedGenerateKeyPair();
     const promise = store.sendNip04DirectMessage("r", "m");
     vi.runAllTimers();
     const ev = await promise;
@@ -130,12 +131,20 @@ describe("sendNip04DirectMessage", () => {
 
   it("constructs event with correct kind and tags", async () => {
     const store = useNostrStore();
-    await store.walletSeedGenerateKeyPair();
     const ev = await store.sendNip04DirectMessage("receiver", "msg");
     vi.runAllTimers();
     expect(ev!.kind).toBe(NDKKind.EncryptedDirectMessage);
     expect(ev!.tags).toContainEqual(["p", "receiver"]);
     expect(ev!.tags).toContainEqual(["p", store.seedSignerPublicKey]);
+  });
+
+  it("generates keypair if not set", async () => {
+    const store = useNostrStore();
+    expect(store.seedSignerPrivateKey).toBe("");
+    const ev = await store.sendNip04DirectMessage("receiver", "msg");
+    vi.runAllTimers();
+    expect(ev).not.toBeNull();
+    expect(store.seedSignerPrivateKey).not.toBe("");
   });
 
   it("returns null when publish fails", async () => {
