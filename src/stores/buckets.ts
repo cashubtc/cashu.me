@@ -19,6 +19,12 @@ export type Bucket = {
 export const DEFAULT_BUCKET_ID = "unassigned";
 export const DEFAULT_BUCKET_NAME = "Default";
 
+function ensureDefaultBucket(buckets: { value: Bucket[] }) {
+  if (!buckets.value.find((b) => b.id === DEFAULT_BUCKET_ID)) {
+    buckets.value.unshift({ id: DEFAULT_BUCKET_ID, name: DEFAULT_BUCKET_NAME });
+  }
+}
+
 export const useBucketsStore = defineStore("buckets", {
   state: () => {
     const buckets = useLocalStorage<Bucket[]>("cashu.buckets", [
@@ -26,6 +32,8 @@ export const useBucketsStore = defineStore("buckets", {
     ]);
     const proofsStore = useProofsStore();
     const notifiedGoals = ref<Record<string, boolean>>({});
+
+    ensureDefaultBucket(buckets);
 
     watch(
       () => proofsStore.proofs,
@@ -51,13 +59,6 @@ export const useBucketsStore = defineStore("buckets", {
   },
   getters: {
     bucketList(state): Bucket[] {
-      // ensure default bucket always exists
-      if (!state.buckets.find((b) => b.id === DEFAULT_BUCKET_ID)) {
-        state.buckets.unshift({
-          id: DEFAULT_BUCKET_ID,
-          name: DEFAULT_BUCKET_NAME,
-        });
-      }
       return state.buckets;
     },
     bucketBalance: () => (bucketId: string): number => {
