@@ -527,6 +527,9 @@ export default {
       next: {
         label: "Suivant",
       },
+      skip: {
+        label: "Passer",
+      },
     },
   },
   WelcomeSlide1: {
@@ -627,6 +630,22 @@ export default {
         label: "J'ai lu et j'accepte ces termes et conditions",
       },
     },
+  },
+  WelcomeSlidePrivacy: {
+    title: "Cashu et confidentialité",
+    text: "Cashu utilise des tokens aveugles pour que les mints ne puissent pas suivre vos paiements.",
+  },
+  WelcomeSlideMints: {
+    title: "Mints",
+    text: "Ajoutez un mint pour commencer à recevoir des tokens.",
+  },
+  WelcomeSlideProofs: {
+    title: "Preuves",
+    text: "Les preuves sont les tokens que vous pouvez envoyer et recevoir.",
+  },
+  WelcomeSlideBuckets: {
+    title: "Compartiments",
+    text: "Utilisez les compartiments pour organiser vos tokens.",
   },
   RestoreView: {
     seed_phrase: {

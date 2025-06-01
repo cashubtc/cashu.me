@@ -520,6 +520,9 @@ export default {
       next: {
         label: "التالي",
       },
+      skip: {
+        label: "تخطي",
+      },
     },
   },
   WelcomeSlide1: {
@@ -620,6 +623,22 @@ export default {
         label: "لقد قرأت وأقبل هذه الشروط والأحكام",
       },
     },
+  },
+  WelcomeSlidePrivacy: {
+    title: "كاشو والخصوصية",
+    text: "يستخدم كاشو رموزاً معماة حتى لا يتمكن المِنت من تتبع مدفوعاتك.",
+  },
+  WelcomeSlideMints: {
+    title: "المِنتات",
+    text: "أضف مِنتاً لبدء استلام الرموز.",
+  },
+  WelcomeSlideProofs: {
+    title: "الإثباتات",
+    text: "الإثباتات هي الرموز التي يمكنك إرسالها واستلامها.",
+  },
+  WelcomeSlideBuckets: {
+    title: "السلال",
+    text: "استخدم السلال لتنظيم رموزك.",
   },
   RestoreView: {
     seed_phrase: {

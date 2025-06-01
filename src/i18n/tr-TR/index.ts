@@ -525,6 +525,9 @@ export default {
       next: {
         label: "Sonraki",
       },
+      skip: {
+        label: "Atla",
+      },
     },
   },
   WelcomeSlide1: {
@@ -625,6 +628,22 @@ export default {
         label: "Bu şartları ve koşulları okudum ve kabul ediyorum",
       },
     },
+  },
+  WelcomeSlidePrivacy: {
+    title: "Cashu ve gizlilik",
+    text: "Cashu, mintlerin ödemelerinizi takip edememesi için kör tokenler kullanır.",
+  },
+  WelcomeSlideMints: {
+    title: "Mintler",
+    text: "Token almaya başlamak için bir mint ekleyin.",
+  },
+  WelcomeSlideProofs: {
+    title: "Kanıtlar",
+    text: "Kanıtlar gönderip alabileceğiniz tokenlerdir.",
+  },
+  WelcomeSlideBuckets: {
+    title: "Kovalar",
+    text: "Tokenlerinizi düzenlemek için kovaları kullanın.",
   },
   RestoreView: {
     seed_phrase: {

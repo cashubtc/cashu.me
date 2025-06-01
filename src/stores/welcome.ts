@@ -26,23 +26,10 @@ export const useWelcomeStore = defineStore("welcome", {
   }),
   getters: {
     // Determines if the current slide is the last one
-    isLastSlide: (state) => state.currentSlide === 3, // Adjust if you have more slides
+    isLastSlide: (state) => state.currentSlide === 3,
 
     // Determines if the user can proceed to the next slide
-    canProceed: (state) => {
-      switch (state.currentSlide) {
-        case 0:
-          return true;
-        case 1:
-          return true; // Assuming no validation for PWA install
-        case 2:
-          return state.seedPhraseValidated;
-        case 3:
-          return state.termsAccepted;
-        default:
-          return false;
-      }
-    },
+    canProceed: () => true,
 
     // Determines if the user can navigate to the previous slide
     canGoPrev: (state) => state.currentSlide > 0,
@@ -54,7 +41,7 @@ export const useWelcomeStore = defineStore("welcome", {
      */
     initializeWelcome() {
       if (!this.showWelcome) {
-        window.location.href = "/";
+        window.location.href = "/wallet";
       }
     },
 
@@ -63,9 +50,8 @@ export const useWelcomeStore = defineStore("welcome", {
      */
     closeWelcome() {
       this.showWelcome = false;
-      // Redirect to home or desired route
-      window.location.href =
-        "/" + window.location.search + window.location.hash;
+      // Redirect to wallet
+      window.location.href = "/wallet";
     },
 
     /**
@@ -98,6 +84,13 @@ export const useWelcomeStore = defineStore("welcome", {
       this.currentSlide = 0;
       this.termsAccepted = false;
       this.seedPhraseValidated = false;
+    },
+
+    /**
+     * Skip the tutorial and close the welcome dialog.
+     */
+    skipTutorial() {
+      this.closeWelcome();
     },
 
     /**
