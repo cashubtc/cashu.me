@@ -116,4 +116,24 @@ describe('Buckets store', () => {
     expect(ht.label).toBe('My label')
     expect(ht.color).toBe('#00ff00')
   })
+
+  it('clears notifiedGoals when goal lowered below balance', async () => {
+    const buckets = useBucketsStore()
+    const proofs = useProofsStore()
+
+    const bucket = buckets.addBucket({ name: 'Goal', goal: 5 })!
+
+    await proofs.addProofs([
+      { id: 'a', amount: 3, C: 'c1', secret: 's1' },
+      { id: 'a', amount: 4, C: 'c2', secret: 's2' },
+    ], undefined, bucket.id)
+
+    await new Promise(r => setTimeout(r, 0))
+    expect(buckets.notifiedGoals[bucket.id]).toBe(true)
+
+    buckets.editBucket(bucket.id, { goal: 2 })
+    await new Promise(r => setTimeout(r, 0))
+
+    expect(buckets.notifiedGoals[bucket.id]).toBe(false)
+  })
 })

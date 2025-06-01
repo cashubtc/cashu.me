@@ -63,6 +63,24 @@ export const useBucketsStore = defineStore("buckets", {
       { deep: true }
     );
 
+    watch(
+      buckets,
+      (newBuckets, oldBuckets) => {
+        newBuckets.forEach((bucket) => {
+          if (bucket.goal === undefined || bucket.goal === null) return;
+          const previous = oldBuckets.find((b) => b.id === bucket.id);
+          if (!previous || previous.goal === bucket.goal) return;
+          const sum = proofsStore.proofs
+            .filter((p) => p.bucketId === bucket.id && !p.reserved)
+            .reduce((s, p) => s + p.amount, 0);
+          if (bucket.goal <= sum) {
+            notifiedGoals.value[bucket.id] = false;
+          }
+        });
+      },
+      { deep: true }
+    );
+
     return {
       buckets,
       notifiedGoals,
