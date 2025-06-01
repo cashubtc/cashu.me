@@ -743,15 +743,14 @@ export default defineComponent({
         return false;
       }
       // check if entered amount is the same as the result of coinSelect(spendableProofs(activeProofs), amount)
-      let spendableProofs = this.spendableProofs(
-        this.activeProofs.filter((p) => p.bucketId === this.sendData.bucketId)
-      );
+      let spendableProofs = this.spendableProofs(this.activeProofs);
       const mintWallet = useWalletStore().wallet;
       let selectedProofs = this.coinSelect(
         spendableProofs,
         mintWallet,
         this.sendData.amount * this.activeUnitCurrencyMultiplyer,
-        this.includeFeesInSendAmount
+        this.includeFeesInSendAmount,
+        this.sendData.bucketId
       );
       const feesToAdd = this.includeFeesInSendAmount
         ? this.getFeesForProofs(selectedProofs)
@@ -1247,13 +1246,9 @@ export default defineComponent({
           this.sendData.amount * this.activeUnitCurrencyMultiplyer
         );
         const mintWallet = this.mintWallet(this.activeMintUrl, this.activeUnit);
-        // keep firstProofs, send scndProofs and delete them (invalidate=true)
         const bucketId = this.sendData.bucketId;
-        const proofsForBucket = this.activeProofs.filter(
-          (p) => p.bucketId === bucketId
-        );
         let { _, sendProofs } = await this.send(
-          proofsForBucket,
+          this.activeProofs,
           mintWallet,
           sendAmount,
           true,

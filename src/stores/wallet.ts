@@ -320,20 +320,45 @@ export const useWalletStore = defineStore("wallet", {
       wallet: CashuWallet,
       amount: number,
       includeFees: boolean = false,
+      preferredBucketId?: string,
     ): WalletProof[] {
       if (proofs.reduce((s, t) => (s += t.amount), 0) < amount) {
         // there are not enough proofs to pay the amount
         return [];
       }
-      const { send: selectedProofs, keep: _ } = wallet.selectProofsToSend(
-        proofs,
-        amount,
-        includeFees,
-      );
-      const selectedWalletProofs = selectedProofs.map((p) => {
-        return { ...p, reserved: false } as WalletProof;
-      });
-      return selectedWalletProofs;
+
+      let orderedProofs = [...proofs];
+
+      if (preferredBucketId) {
+        orderedProofs.sort((a, b) => {
+          const aPref = a.bucketId === preferredBucketId ? 0 : 1;
+          const bPref = b.bucketId === preferredBucketId ? 0 : 1;
+          if (aPref !== bPref) {
+            return aPref - bPref;
+          }
+          return b.amount - a.amount;
+        });
+      }
+
+      let sum = 0;
+      let selectedProofs: WalletProof[] = [];
+      for (const proof of orderedProofs) {
+        selectedProofs.push(proof);
+        sum += proof.amount;
+        const fees = includeFees ? wallet.getFeesForProofs(selectedProofs) : 0;
+        if (sum >= amount + fees) {
+          break;
+        }
+      }
+
+      const finalFees = includeFees
+        ? wallet.getFeesForProofs(selectedProofs)
+        : 0;
+      if (sum < amount + finalFees) {
+        return [];
+      }
+
+      return selectedProofs.map((p) => ({ ...p, reserved: false } as WalletProof));
     },
     spendableProofs: function (proofs: WalletProof[], amount: number) {
       const uIStore = useUiStore();
@@ -378,6 +403,7 @@ export const useWalletStore = defineStore("wallet", {
         wallet,
         amount,
         true,
+        bucketId,
       );
       const keysetId = this.getKeyset(wallet.mint.mintUrl, wallet.unit);
       const { keep: keepProofs, send: sendProofs } = await wallet.send(
@@ -420,6 +446,7 @@ export const useWalletStore = defineStore("wallet", {
           wallet,
           amount,
           includeFees,
+          bucketId,
         );
         const totalAmount = proofsToSend.reduce((s, t) => (s += t.amount), 0);
         const fees = includeFees ? wallet.getFeesForProofs(proofsToSend) : 0;
@@ -435,6 +462,7 @@ export const useWalletStore = defineStore("wallet", {
             wallet,
             targetAmount,
             true,
+            bucketId,
           );
           ({ keep: keepProofs, send: sendProofs } = await wallet.send(
             targetAmount,
