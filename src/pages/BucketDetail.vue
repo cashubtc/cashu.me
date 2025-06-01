@@ -53,6 +53,9 @@
         <q-btn color="primary" outline :disable="!selectedSecrets.length" @click="sendSelected">
           {{ $t('BucketDetail.send') }}
         </q-btn>
+        <q-btn color="primary" outline :disable="!bucketProofs.length" @click="exportBucket">
+          {{ $t('BucketDetail.export') }}
+        </q-btn>
       </div>
     </div>
 
@@ -230,6 +233,13 @@ async function moveSelected(){
 function sendSelected(){
   const proofs = bucketProofs.value.filter(p => selectedSecrets.value.includes(p.secret));
   const token = proofsStore.serializeProofs(proofs);
+  sendTokensStore.clearSendData();
+  sendTokensStore.sendData.tokensBase64 = token;
+  showSendTokens.value = true;
+}
+
+function exportBucket(){
+  const token = proofsStore.serializeProofs(bucketProofs.value);
   sendTokensStore.clearSendData();
   sendTokensStore.sendData.tokensBase64 = token;
   showSendTokens.value = true;
