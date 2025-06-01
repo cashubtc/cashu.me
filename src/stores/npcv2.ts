@@ -7,6 +7,7 @@ import { notifyApiError, notifyError, notifySuccess } from "../js/notify";
 import { MintQuoteState } from "@cashu/cashu-ts";
 import { useNostrStore } from "../stores/nostr";
 import { date } from "quasar";
+import { useMintsStore } from "./mints";
 
 type NPCV2InfoReponse =
   | {
@@ -57,6 +58,7 @@ export const useNPCV2Store = defineStore("npcV2", {
     npcV2Enabled: useLocalStorage<boolean>("cashu.npc.v2.enabled", false),
     npcV2LastCheck: useLocalStorage<number>("cashu.npc.v2.lastCheck", null),
     npcV2Address: useLocalStorage<string>("cashu.npc.v2.address", ""),
+    npcV2Mint: useLocalStorage<string>("cashu.npc.v2.mint", null),
     npcV2Domain: useLocalStorage<string>("cashu.npc.v2.domain", "npubx.cash"),
     npcV2BaseURL: useLocalStorage<string>(
       "cashu.npc.v2.baseURL",
@@ -87,6 +89,9 @@ export const useNPCV2Store = defineStore("npcV2", {
             notifySuccess(`Logged in as ${info.name}`);
           }
           this.npcV2Address = usernameAddress;
+        }
+        if (info.mintUrl) {
+          this.npcV2Mint = info.mintUrl;
         }
       } catch (e) {
         if (e instanceof Error) {
@@ -145,6 +150,41 @@ export const useNPCV2Store = defineStore("npcV2", {
           pubkey: "",
           lock_quote: false,
         };
+      }
+    },
+
+    changeMintUrl: async function (mintUrl: string) {
+      const mintstore = useMintsStore();
+      if (!mintstore.mints.find((m) => m.url === mintUrl)) {
+        notifyError(
+          `Please make sure ${mintUrl} is added to your wallet first!`
+        );
+        return;
+      }
+      const changeMintUrl = `${this.npcV2BaseURL}/api/v2/user/mint`;
+      const authHeader = await this.generateNip98Event(changeMintUrl, "PATCH");
+      try {
+        const res = await fetch(changeMintUrl, {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Nostr ${authHeader}`,
+          },
+          method: "PATCH",
+          body: JSON.stringify({ mint_url: mintUrl }),
+        });
+        const data = await res.json();
+        if (data.error) {
+          throw new Error(data.message);
+        }
+        this.npcV2Mint = data.data.user.mintUrl;
+        notifySuccess(`Updated npub.cash mint to ${mintUrl}`);
+      } catch (e) {
+        console.log(e);
+        if (e instanceof Error) {
+          notifyError(e.message);
+        } else {
+          notifyError("Something went wrong!");
+        }
       }
     },
 
