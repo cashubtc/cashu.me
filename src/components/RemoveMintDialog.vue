@@ -9,7 +9,9 @@
       <!-- Header Section -->
       <div class="remove-mint-header q-pa-md">
         <div class="remove-mint-title-row">
-          <h4 class="remove-mint-title q-my-none">{{ $t("RemoveMintDialog.title") }}</h4>
+          <h4 class="remove-mint-title q-my-none">
+            {{ $t("RemoveMintDialog.title") }}
+          </h4>
         </div>
       </div>
 
@@ -17,12 +19,16 @@
       <div class="remove-mint-content q-px-md q-pb-md">
         <div class="q-mb-lg">
           <div v-if="mintToRemove.nickname" class="q-mb-md">
-            <label class="input-label">{{ $t("RemoveMintDialog.nickname.label") }}</label>
+            <label class="input-label">{{
+              $t("RemoveMintDialog.nickname.label")
+            }}</label>
             <div class="mint-data-display">{{ mintToRemove.nickname }}</div>
           </div>
 
           <div class="q-mb-md">
-            <label class="input-label">{{ $t("RemoveMintDialog.balances.label") }}</label>
+            <label class="input-label">{{
+              $t("RemoveMintDialog.balances.label")
+            }}</label>
             <div class="mint-data-display">
               <q-badge
                 v-for="unit in mintClass(mintToRemove).units"
@@ -39,7 +45,9 @@
             </div>
           </div>
 
-          <label class="input-label">{{ $t('RemoveMintDialog.inputs.mint_url.label') }}</label>
+          <label class="input-label">{{
+            $t("RemoveMintDialog.inputs.mint_url.label")
+          }}</label>
           <q-input
             outlined
             readonly
@@ -60,7 +68,7 @@
         </div>
 
         <div class="action-buttons">
-          <q-btn flat class="cancel-btn" v-close-popup> 
+          <q-btn flat class="cancel-btn" v-close-popup>
             {{ $t("RemoveMintDialog.actions.cancel.label") }}
           </q-btn>
           <q-spacer></q-spacer>

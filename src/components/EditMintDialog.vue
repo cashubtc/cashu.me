@@ -9,14 +9,18 @@
       <!-- Header Section -->
       <div class="edit-mint-header q-pa-md">
         <div class="edit-mint-title-row">
-          <h4 class="edit-mint-title q-my-none">{{ $t("EditMintDialog.title") }}</h4>
+          <h4 class="edit-mint-title q-my-none">
+            {{ $t("EditMintDialog.title") }}
+          </h4>
         </div>
       </div>
 
       <!-- Content Section -->
       <div class="edit-mint-content q-px-md q-pb-md">
         <div class="q-mb-lg">
-          <label class="input-label">{{ $t('EditMintDialog.inputs.mint_url.label') }}</label>
+          <label class="input-label">{{
+            $t("EditMintDialog.inputs.mint_url.label")
+          }}</label>
           <q-input
             v-model="editMintData.url"
             dense
@@ -27,7 +31,9 @@
             style="font-family: monospace; font-size: 0.9em"
           ></q-input>
 
-          <label class="input-label">{{ $t('EditMintDialog.inputs.nickname.label') }}</label>
+          <label class="input-label">{{
+            $t("EditMintDialog.inputs.nickname.label")
+          }}</label>
           <q-input
             v-model="editMintData.nickname"
             dense
@@ -40,7 +46,7 @@
         </div>
 
         <div class="action-buttons">
-          <q-btn flat class="cancel-btn" v-close-popup> 
+          <q-btn flat class="cancel-btn" v-close-popup>
             {{ $t("EditMintDialog.actions.cancel.label") }}
           </q-btn>
           <q-spacer></q-spacer>
