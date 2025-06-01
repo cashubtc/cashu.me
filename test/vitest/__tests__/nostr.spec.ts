@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { useNostrStore } from "../../../src/stores/nostr";
+import { NDKKind } from "@nostr-dev-kit/ndk";
 
 vi.mock("@nostr-dev-kit/ndk", () => {
   class NDKEvent {
@@ -51,7 +52,7 @@ vi.mock("@nostr-dev-kit/ndk", () => {
     NDKFilter: class {},
     NDKPrivateKeySigner,
     NostrEvent: class {},
-    NDKKind: {},
+    NDKKind: { EncryptedDirectMessage: 4 },
     NDKRelaySet: class {},
     NDKRelay: class {},
     NDKTag: class {},
@@ -93,9 +94,18 @@ vi.mock("../../../src/stores/wallet", () => ({
   useWalletStore: () => ({ seed: new Uint8Array(32).fill(2) }),
 }));
 
+const notifySuccess = vi.fn();
+const notifyError = vi.fn();
+vi.mock("../../../src/js/notify", () => ({
+  notifySuccess,
+  notifyError,
+}));
+
 beforeEach(() => {
   encryptMock.mockClear();
   localStorage.clear();
+  notifySuccess.mockClear();
+  notifyError.mockClear();
   vi.useFakeTimers();
 });
 
@@ -107,6 +117,7 @@ afterEach(() => {
 describe("sendNip04DirectMessage", () => {
   it("returns signed event when published", async () => {
     const store = useNostrStore();
+    await store.walletSeedGenerateKeyPair();
     const promise = store.sendNip04DirectMessage("r", "m");
     vi.runAllTimers();
     const ev = await promise;
@@ -117,6 +128,16 @@ describe("sendNip04DirectMessage", () => {
     expect(parsed.sig).toBeDefined();
   });
 
+  it("constructs event with correct kind and tags", async () => {
+    const store = useNostrStore();
+    await store.walletSeedGenerateKeyPair();
+    const ev = await store.sendNip04DirectMessage("receiver", "msg");
+    vi.runAllTimers();
+    expect(ev!.kind).toBe(NDKKind.EncryptedDirectMessage);
+    expect(ev!.tags).toContainEqual(["p", "receiver"]);
+    expect(ev!.tags).toContainEqual(["p", store.seedSignerPublicKey]);
+  });
+
   it("returns null when publish fails", async () => {
     const store = useNostrStore();
     publishSuccess = false;
@@ -124,6 +145,7 @@ describe("sendNip04DirectMessage", () => {
     vi.runAllTimers();
     const ev = await promise;
     expect(ev).toBeNull();
+    expect(notifyError).toHaveBeenCalled();
     publishSuccess = true;
   });
 });
