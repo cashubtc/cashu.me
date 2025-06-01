@@ -30,6 +30,9 @@
 <script lang="ts">
 import { defineComponent, computed, ref } from 'vue';
 import { useBucketsStore, DEFAULT_BUCKET_ID } from 'stores/buckets';
+import { useMintsStore } from 'stores/mints';
+import { useUiStore } from 'stores/ui';
+import { storeToRefs } from 'pinia';
 
 export default defineComponent({
   name: 'DonateDialog',
@@ -39,6 +42,11 @@ export default defineComponent({
   emits: ['update:modelValue', 'confirm'],
   setup(props, { emit }) {
     const bucketsStore = useBucketsStore();
+    const mintsStore = useMintsStore();
+    const uiStore = useUiStore();
+    const { bucketList, bucketBalances } = storeToRefs(bucketsStore);
+    const { activeUnit } = storeToRefs(mintsStore);
+
     const bucketId = ref<string>(DEFAULT_BUCKET_ID);
     const locked = ref<'normal' | 'locked'>('normal');
 
@@ -48,7 +56,13 @@ export default defineComponent({
     });
 
     const bucketOptions = computed(() =>
-      bucketsStore.bucketList.map(b => ({ label: b.name, value: b.id }))
+      bucketList.value.map(b => ({
+        label: `${b.name} (${uiStore.formatCurrency(
+          bucketBalances.value[b.id] ?? 0,
+          activeUnit.value
+        )})`,
+        value: b.id,
+      }))
     );
 
     const lockOptions = [
