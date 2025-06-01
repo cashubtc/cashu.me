@@ -174,6 +174,38 @@
                   </template>
                 </q-input>
               </div>
+              <div class="col-12 q-pt-md" v-if="npcV2Enabled">
+                <q-item-label caption>npub.cash v2 mint</q-item-label>
+                <q-input
+                  outlined
+                  v-model="npcV2Mint"
+                  dense
+                  rounded
+                  readonly
+                  class="q-pt-sm"
+                >
+                </q-input>
+                <q-input
+                  v-model="computedNewNpcMintUrl"
+                  class="q-pt-sm"
+                  label="New mint url..."
+                  color="primary"
+                  outlined
+                  dense
+                  rounded
+                >
+                  <template v-slot:append>
+                    <q-btn
+                      dense
+                      flat
+                      icon="check"
+                      @click="updateNpcMintUrl(computedNewNpcMintUrl)"
+                      size="sm"
+                      color="grey"
+                    />
+                  </template>
+                </q-input>
+              </div>
             </div>
           </q-item>
 
@@ -1488,9 +1520,18 @@ export default defineComponent({
       nip46Token: "",
       nip07SignerAvailable: false,
       newRelay: "",
+      newNpcMintUl: "",
     };
   },
   computed: {
+    computedNewNpcMintUrl: {
+      get() {
+        return this.$data.newNpcMintUrl;
+      },
+      set(value) {
+        this.$data.newNpcMintUrl = value;
+      },
+    },
     ...mapWritableState(useSettingsStore, [
       "getBitcoinPrice",
       "checkSentTokens",
@@ -1527,6 +1568,7 @@ export default defineComponent({
       "npcV2Loading",
       "npcV2Enabled",
       "npcV2Address",
+      "npcV2Mint",
     ]),
     ...mapWritableState(useNPCStore, [
       "npcAddress",
@@ -1638,7 +1680,7 @@ export default defineComponent({
     ]),
     ...mapActions(useProofsStore, ["serializeProofs"]),
     ...mapActions(useNPCStore, ["generateNPCConnection"]),
-    ...mapActions(useNPCV2Store, ["generateNPCV2Connection"]),
+    ...mapActions(useNPCV2Store, ["generateNPCV2Connection", "changeMintUrl"]),
     ...mapActions(useRestoreStore, ["restoreMint"]),
     ...mapActions(useDexieStore, ["deleteAllTables"]),
     ...mapActions(useStorageStore, ["restoreFromBackup", "exportWalletState"]),
@@ -1655,6 +1697,10 @@ export default defineComponent({
     },
     toggleTerminal: function () {
       useUiStore().toggleDebugConsole();
+    },
+    updateNpcMintUrl: async function (mintUrl) {
+      await this.changeMintUrl(mintUrl);
+      this.computedNewNpcMintUrl = "";
     },
     unsetAllReservedProofs: async function () {
       // mark all this.proofs as reserved=false
