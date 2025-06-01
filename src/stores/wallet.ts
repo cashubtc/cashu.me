@@ -53,7 +53,7 @@ import { generateMnemonic, mnemonicToSeedSync } from "@scure/bip39";
 import { wordlist } from "@scure/bip39/wordlists/english";
 import { useSettingsStore } from "./settings";
 import { usePriceStore } from "./price";
-import { useI18n } from "vue-i18n";
+import { i18n } from "src/boot/i18n";
 // HACK: this is a workaround so that the catch block in the melt function does not throw an error when the user exits the app
 // before the payment is completed. This is necessary because the catch block in the melt function would otherwise remove all
 // quotes from the invoiceHistory and the user would not be able to pay the invoice again after reopening the app.
@@ -89,7 +89,7 @@ const proofsStore = useProofsStore();
 
 export const useWalletStore = defineStore("wallet", {
   state: () => {
-    const { t } = useI18n();
+    const t = i18n.global.t;
     return {
       t: t,
       mnemonic: useLocalStorage("cashu.mnemonic", ""),
