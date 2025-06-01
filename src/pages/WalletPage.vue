@@ -730,7 +730,7 @@ export default {
     } else {
       await this.initSigner();
       this.notifyWarning(
-        this.$t("settings.nostr.signing_extension.not_found") as string
+        this.$t("settings.nostr.signing_extension.not_found")
       );
     }
 
