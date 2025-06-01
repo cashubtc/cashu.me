@@ -1,0 +1,99 @@
+import { describe, it, expect, beforeEach, vi } from "vitest";
+import { useNostrStore } from "../../../src/stores/nostr";
+
+vi.mock("@nostr-dev-kit/ndk", () => {
+  class NDKEvent {
+    kind: number | undefined;
+    content: any;
+    tags: any[] = [];
+    created_at: number | undefined;
+    pubkey = "";
+    sig: string | undefined;
+    id = "";
+    constructor(public ndk?: any) {}
+    getEventHash() {
+      return "hash";
+    }
+    async sign(_s?: any) {
+      this.sig = "signature";
+      return this.sig;
+    }
+    async toNostrEvent() {
+      return {
+        kind: this.kind,
+        content: this.content,
+        tags: this.tags,
+        created_at: this.created_at,
+        pubkey: this.pubkey,
+        id: this.id,
+        sig: this.sig,
+      };
+    }
+    async publish() {}
+  }
+  class NDKPrivateKeySigner {
+    constructor(privateKey: string) {
+      this.privateKey = privateKey;
+    }
+  }
+  class NDK {
+    constructor(opts: any) {
+      this.opts = opts;
+    }
+    connect() {}
+  }
+  return {
+    default: NDK,
+    NDKEvent,
+    NDKSigner: class {},
+    NDKNip07Signer: class {},
+    NDKNip46Signer: class {},
+    NDKFilter: class {},
+    NDKPrivateKeySigner,
+    NostrEvent: class {},
+    NDKKind: {},
+    NDKRelaySet: class {},
+    NDKRelay: class {},
+    NDKTag: class {},
+    ProfilePointer: class {},
+  };
+});
+
+const encryptMock = vi.fn((content: string) => content);
+vi.mock("nostr-tools", () => ({
+  nip04: {},
+  nip19: { decode: vi.fn(), nsecEncode: vi.fn(), nprofileEncode: vi.fn() },
+  nip44: {
+    v2: {
+      encrypt: encryptMock,
+      utils: { getConversationKey: vi.fn(() => "k") },
+    },
+  },
+  generateSecretKey: () => new Uint8Array(32).fill(1),
+  getPublicKey: () => "pubkey",
+}));
+
+vi.mock("@noble/hashes/utils", () => ({
+  bytesToHex: (b: Uint8Array) => Buffer.from(b).toString("hex"),
+  hexToBytes: (h: string) => Uint8Array.from(Buffer.from(h, "hex")),
+}));
+
+vi.mock("../../../src/stores/wallet", () => ({
+  useWalletStore: () => ({ seed: new Uint8Array(32).fill(2) }),
+}));
+
+beforeEach(() => {
+  encryptMock.mockClear();
+  localStorage.clear();
+});
+
+describe("sendNip17DirectMessage", () => {
+  it("returns signed event", async () => {
+    const store = useNostrStore();
+    const ev = await store.sendNip17DirectMessage("r", "m");
+    expect(ev.sig).toBeDefined();
+    const used = encryptMock.mock.calls[0][0];
+    const parsed = JSON.parse(used);
+    expect(parsed.sig).toBeDefined();
+  });
+});
