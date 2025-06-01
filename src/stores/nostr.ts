@@ -175,20 +175,17 @@ export const useNostrStore = defineStore("nostr", {
     },
     initNip07Signer: async function () {
       const signer = new NDKNip07Signer();
-      signer.user().then(async (user) => {
-        if (!!user.npub) {
-          console.log(
-            "Permission granted to read their public key:",
-            user.npub
-          );
-          const me = this.ndk.getUser({
-            npub: user.npub,
-          });
-          this.signerType = SignerType.NIP07;
-          await this.setSigner(signer);
-          this.setPubkey(user.pubkey);
-        }
-      });
+      const user = await signer.user();
+      if (user?.npub) {
+        console.log(
+          "Permission granted to read their public key:",
+          user.npub
+        );
+        this.signerType = SignerType.NIP07;
+        await this.setSigner(signer);
+        this.ndk.getUser({ npub: user.npub });
+        this.setPubkey(user.pubkey);
+      }
       await signer.blockUntilReady();
     },
     initNip46Signer: async function (nip46Token?: string) {
