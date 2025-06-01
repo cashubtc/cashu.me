@@ -30,6 +30,22 @@
       />
     </div>
     <DonateDialog v-model="showDonateDialog" @confirm="handleDonate" />
+    <q-dialog v-model="showActionDialog" persistent>
+      <q-card class="q-pa-md qcard" style="min-width: 300px">
+        <q-card-section class="text-h6">{{ $t('FindCreators.choose_action.title') }}</q-card-section>
+        <q-card-actions vertical>
+          <q-btn flat color="primary" @click="chooseExisting">{{ $t('FindCreators.choose_action.existing') }}</q-btn>
+          <q-btn flat color="primary" @click="chooseNew">{{ $t('FindCreators.choose_action.new') }}</q-btn>
+          <q-btn flat color="primary" @click="backToBucket">{{ $t('global.actions.cancel.label') }}</q-btn>
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
+    <ChooseExistingTokenDialog
+      v-model="showExistingDialog"
+      :bucket-id="selectedBucketId"
+      @selected="handleTokenSelect"
+      @back="backToAction"
+    />
   </div>
 </template>
 
@@ -38,6 +54,7 @@ import { defineComponent, ref, watch } from "vue";
 import { useCreatorsStore } from "stores/creators";
 import CreatorProfileCard from "components/CreatorProfileCard.vue";
 import DonateDialog from "components/DonateDialog.vue";
+import ChooseExistingTokenDialog from "components/ChooseExistingTokenDialog.vue";
 import { storeToRefs } from "pinia";
 import { useSendTokensStore } from "stores/sendTokensStore";
 
@@ -46,6 +63,7 @@ export default defineComponent({
   components: {
     CreatorProfileCard,
     DonateDialog,
+    ChooseExistingTokenDialog,
   },
   setup() {
     const creatorsStore = useCreatorsStore();
@@ -53,7 +71,11 @@ export default defineComponent({
     const searchInput = ref("");
     const sendTokensStore = useSendTokensStore();
     const showDonateDialog = ref(false);
+    const showActionDialog = ref(false);
+    const showExistingDialog = ref(false);
     const donateCreator = ref<any>(null);
+    const selectedBucketId = ref<string>("");
+    const selectedLocked = ref(false);
 
     const triggerSearch = () => {
       if (searchInput.value.trim()) {
@@ -78,11 +100,43 @@ export default defineComponent({
     };
 
     const handleDonate = ({ bucketId, locked }: { bucketId: string; locked: boolean }) => {
-      sendTokensStore.clearSendData();
-      sendTokensStore.sendData.bucketId = bucketId;
-      sendTokensStore.sendData.p2pkPubkey = locked ? donateCreator.value.pubkey : "";
-      sendTokensStore.showLockInput = locked;
+      selectedBucketId.value = bucketId;
+      selectedLocked.value = locked;
       showDonateDialog.value = false;
+      showActionDialog.value = true;
+    };
+
+    const chooseExisting = () => {
+      showActionDialog.value = false;
+      showExistingDialog.value = true;
+    };
+
+    const chooseNew = () => {
+      sendTokensStore.clearSendData();
+      sendTokensStore.sendData.bucketId = selectedBucketId.value;
+      sendTokensStore.sendData.p2pkPubkey = selectedLocked.value ? donateCreator.value.pubkey : "";
+      sendTokensStore.showLockInput = selectedLocked.value;
+      showActionDialog.value = false;
+      sendTokensStore.showSendTokens = true;
+    };
+
+    const backToBucket = () => {
+      showActionDialog.value = false;
+      showDonateDialog.value = true;
+    };
+
+    const backToAction = () => {
+      showExistingDialog.value = false;
+      showActionDialog.value = true;
+    };
+
+    const handleTokenSelect = (tokenStr: string) => {
+      sendTokensStore.clearSendData();
+      sendTokensStore.sendData.bucketId = selectedBucketId.value;
+      sendTokensStore.sendData.p2pkPubkey = selectedLocked.value ? donateCreator.value.pubkey : "";
+      sendTokensStore.sendData.tokensBase64 = tokenStr;
+      sendTokensStore.showLockInput = selectedLocked.value;
+      showExistingDialog.value = false;
       sendTokensStore.showSendTokens = true;
     };
 
@@ -93,8 +147,16 @@ export default defineComponent({
       searching,
       error,
       showDonateDialog,
+      showActionDialog,
+      showExistingDialog,
+      selectedBucketId,
       openDonateDialog,
       handleDonate,
+      chooseExisting,
+      chooseNew,
+      backToBucket,
+      backToAction,
+      handleTokenSelect,
     };
   },
 });
