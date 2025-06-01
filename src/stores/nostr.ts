@@ -357,7 +357,14 @@ export const useNostrStore = defineStore("nostr", {
 
       const pool = new SimplePool();
       const nostrEvent = await event.toNostrEvent();
-      const pubs = pool.publish(this.relays, nostrEvent);
+      let pubs;
+      try {
+        pubs = await pool.publish(this.relays, nostrEvent);
+      } catch (e) {
+        console.error(e);
+        notifyError("Could not publish NIP-04 event");
+        return null;
+      }
 
       let published = false;
 
@@ -497,7 +504,14 @@ export const useNostrStore = defineStore("nostr", {
 
       const pool = new SimplePool();
       const nostrEvent = await wrapEvent.toNostrEvent();
-      const pubs = pool.publish(relays ?? this.relays, nostrEvent);
+      let pubs;
+      try {
+        pubs = await pool.publish(relays ?? this.relays, nostrEvent);
+      } catch (e) {
+        console.error(e);
+        notifyError("Could not publish NIP-17 event");
+        return null;
+      }
 
       let published = false;
 
