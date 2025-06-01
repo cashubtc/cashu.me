@@ -9,7 +9,16 @@
   >
     <q-card :class="[cardClass, 'full-width-card q-pb-lg']">
       <q-card-section class="row items-center q-pb-sm">
-        <q-btn flat round dense v-close-popup class="q-ml-sm" color="primary">
+        <q-btn
+          flat
+          round
+          dense
+          v-close-popup
+          class="q-ml-sm"
+          color="primary"
+          :aria-label="$t('global.actions.close.label')"
+          :title="$t('global.actions.close.label')"
+        >
           <XIcon />
         </q-btn>
         <div class="col text-center">
@@ -22,6 +31,8 @@
           class="q-mr-sm"
           @click="showCamera"
           color="primary"
+          :aria-label="$t('global.actions.scan.label')"
+          :title="$t('global.actions.scan.label')"
         >
           <ScanIcon />
         </q-btn>

@@ -64,6 +64,8 @@
             icon="edit"
             @click.stop="openEditLabel(token)"
             class="cursor-pointer"
+            :aria-label="$t('HistoryTable.actions.edit_label.tooltip_text')"
+            :title="$t('HistoryTable.actions.edit_label.tooltip_text')"
           >
             <q-tooltip>{{
               $t('HistoryTable.actions.edit_label.tooltip_text')
@@ -76,6 +78,8 @@
             @click="checkTokenSpendable(token)"
             class="cursor-pointer"
             v-if="token.status === 'pending' && token.amount < 0"
+            :aria-label="$t('HistoryTable.actions.check_status.tooltip_text')"
+            :title="$t('HistoryTable.actions.check_status.tooltip_text')"
           >
             <q-tooltip>{{
               $t("HistoryTable.actions.check_status.tooltip_text")
@@ -88,6 +92,8 @@
             @click="receiveToken(token.token)"
             class="cursor-pointer"
             v-if="token.status === 'pending' && token.amount > 0"
+            :aria-label="$t('HistoryTable.actions.receive.tooltip_text')"
+            :title="$t('HistoryTable.actions.receive.tooltip_text')"
           >
             <q-tooltip>{{
               $t("HistoryTable.actions.receive.tooltip_text")

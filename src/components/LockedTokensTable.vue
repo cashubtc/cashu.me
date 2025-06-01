@@ -42,7 +42,14 @@
           </q-item-label>
         </q-item-section>
         <q-item-section side>
-          <q-btn flat dense icon="content_copy" @click="copyText(token.token)">
+          <q-btn
+            flat
+            dense
+            icon="content_copy"
+            @click="copyText(token.token)"
+            :aria-label="$t('LockedTokensTable.actions.copy.tooltip_text')"
+            :title="$t('LockedTokensTable.actions.copy.tooltip_text')"
+          >
             <q-tooltip>{{
               $t("LockedTokensTable.actions.copy.tooltip_text")
             }}</q-tooltip>

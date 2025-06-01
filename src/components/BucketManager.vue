@@ -58,6 +58,8 @@
                 round
                 size="sm"
                 @click.stop.prevent="openEdit(bucket)"
+                aria-label="Edit"
+                title="Edit"
               />
               <q-btn
                 icon="delete"
@@ -65,6 +67,8 @@
                 round
                 size="sm"
                 @click.stop.prevent="openDelete(bucket.id)"
+                :aria-label="$t('BucketManager.actions.delete')"
+                :title="$t('BucketManager.actions.delete')"
               />
             </q-item-section>
           </q-item>

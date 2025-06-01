@@ -52,6 +52,8 @@
               class="cursor-pointer"
               v-if="invoice.status === 'pending'"
               style="position: absolute; right: 0"
+              :aria-label="$t('InvoiceTable.actions.check_status.tooltip_text')"
+              :title="$t('InvoiceTable.actions.check_status.tooltip_text')"
             >
               <q-tooltip>{{
                 $t("InvoiceTable.actions.check_status.tooltip_text")
