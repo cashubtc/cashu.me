@@ -103,6 +103,10 @@ export default {
           caption: "شروط الخدمة",
         },
       },
+      about: {
+        title: "About",
+        about: { title: "About", caption: "About this app" },
+      },
       links: {
         title: "روابط",
         cashuSpace: {
@@ -1251,6 +1255,10 @@ timelock: {
       "التحقق من البراهين من { startIndex } إلى { endIndex } لمجموعة المفاتيح { keysetId }",
     no_proofs_info_text: "لم يتم العثور على براهين للاستعادة",
     restored_amount_success_text: "تم استعادة { amount }",
+  },
+  AboutPage: {
+    title: "About Cashu.me",
+    video_placeholder: "Video coming soon",
   },
   swap: {
     in_progress_warning_text: "التبديل قيد التقدم",

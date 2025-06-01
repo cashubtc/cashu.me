@@ -104,6 +104,10 @@ export default {
           caption: "利用規約",
         },
       },
+      about: {
+        title: "About",
+        about: { title: "About", caption: "About this app" },
+      },
       links: {
         title: "リンク集",
         cashuSpace: {
@@ -1256,6 +1260,10 @@ timelock: {
       "{ keysetId }キーセットの{ startIndex }から{ endIndex }までの証明書を確認中",
     no_proofs_info_text: "復元する証明書が見つかりませんでした",
     restored_amount_success_text: "{ amount }復元しました",
+  },
+  AboutPage: {
+    title: "About Cashu.me",
+    video_placeholder: "Video coming soon",
   },
   swap: {
     in_progress_warning_text: "スワップ進行中",

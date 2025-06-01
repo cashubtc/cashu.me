@@ -104,6 +104,10 @@ export default {
           caption: "Όροι Παροχής Υπηρεσιών",
         },
       },
+      about: {
+        title: "About",
+        about: { title: "About", caption: "About this app" },
+      },
       links: {
         title: "Σύνδεσμοι",
         cashuSpace: {
@@ -1261,6 +1265,10 @@ timelock: {
       "Έλεγχος αποδείξεων { startIndex } έως { endIndex } για το keyset { keysetId }",
     no_proofs_info_text: "Δεν βρέθηκαν αποδείξεις για επαναφορά",
     restored_amount_success_text: "Επαναφέρθηκε { amount }",
+  },
+  AboutPage: {
+    title: "About Cashu.me",
+    video_placeholder: "Video coming soon",
   },
   swap: {
     in_progress_warning_text: "Η ανταλλαγή βρίσκεται σε εξέλιξη",

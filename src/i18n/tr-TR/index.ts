@@ -104,6 +104,10 @@ export default {
           caption: "Hizmet Şartları",
         },
       },
+      about: {
+        title: "About",
+        about: { title: "About", caption: "About this app" },
+      },
       links: {
         title: "Bağlantılar",
         cashuSpace: {
@@ -1258,6 +1262,10 @@ timelock: {
       "{ keysetId } anahtar kümesi için { startIndex } ila { endIndex } kanıtları kontrol ediliyor",
     no_proofs_info_text: "Geri yüklenecek kanıt bulunamadı",
     restored_amount_success_text: "{ amount } geri yüklendi",
+  },
+  AboutPage: {
+    title: "About Cashu.me",
+    video_placeholder: "Video coming soon",
   },
   swap: {
     in_progress_warning_text: "Takas devam ediyor",

@@ -104,6 +104,10 @@ export default {
           caption: "Nutzungsbedingungen",
         },
       },
+      about: {
+        title: "About",
+        about: { title: "About", caption: "About this app" },
+      },
       links: {
         title: "Links",
         cashuSpace: {
@@ -1263,6 +1267,10 @@ export default {
       "Prüfe Nachweise { startIndex } bis { endIndex } für Keyset { keysetId }",
     no_proofs_info_text: "Keine Nachweise zum Wiederherstellen gefunden",
     restored_amount_success_text: "{ amount } wiederhergestellt",
+  },
+  AboutPage: {
+    title: "About Cashu.me",
+    video_placeholder: "Video coming soon",
   },
   swap: {
     in_progress_warning_text: "Swap läuft",
