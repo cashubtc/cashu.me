@@ -13,7 +13,7 @@ import NDK, {
   NDKTag,
   ProfilePointer,
 } from "@nostr-dev-kit/ndk";
-import { nip04, nip19, nip44 } from "nostr-tools";
+import { nip04, nip19, nip44, SimplePool } from "nostr-tools";
 import { bytesToHex, hexToBytes } from "@noble/hashes/utils"; // already an installed dependency
 import { useWalletStore } from "./wallet";
 import { generateSecretKey, getPublicKey } from "nostr-tools";
@@ -340,12 +340,8 @@ export const useNostrStore = defineStore("nostr", {
       recipient: string,
       message: string
     ) {
-      const ndk = new NDK({
-        explicitRelayUrls: this.relays,
-        signer: this.seedSigner,
-      });
+      const ndk = new NDK({ signer: this.seedSigner });
       const event = new NDKEvent(ndk);
-      ndk.connect();
       event.kind = NDKKind.EncryptedDirectMessage;
       event.content = await nip04.encrypt(
         this.seedSignerPrivateKey,
@@ -357,11 +353,29 @@ export const useNostrStore = defineStore("nostr", {
         ["p", this.seedSignerPublicKey],
       ];
       await event.sign(this.seedSigner);
-      try {
-        await event.publish();
+
+      const pool = new SimplePool();
+      const nostrEvent = await event.toNostrEvent();
+      const pub = pool.publish(this.relays, nostrEvent);
+
+      let published = false;
+
+      pub.on("ok", (relay: any) => {
+        console.log(`Relay ${relay.url} accepted event`);
+        published = true;
+      });
+      pub.on("failed", (reason: any) => {
+        console.error(`Publish failed: ${reason}`);
+      });
+      pub.on("seen", (relay: any) => {
+        console.log(`Relay ${relay.url} already had event`);
+      });
+
+      await new Promise((resolve) => setTimeout(resolve, 3000));
+
+      if (published) {
         notifySuccess("NIP-04 event published");
-      } catch (e) {
-        console.error(e);
+      } else {
         notifyError("Could not publish NIP-04 event");
       }
     },
@@ -458,7 +472,6 @@ export const useNostrStore = defineStore("nostr", {
       const sealEventString = JSON.stringify(await sealEvent.toNostrEvent());
 
       const randomNdk = new NDK({
-        explicitRelayUrls: relays ?? this.relays,
         signer: new NDKPrivateKeySigner(bytesToHex(randomPrivateKey)),
       });
       const wrapEvent = new NDKEvent(randomNdk);
@@ -476,22 +489,38 @@ export const useNostrStore = defineStore("nostr", {
       wrapEvent.id = wrapEvent.getEventHash();
       wrapEvent.sig = await wrapEvent.sign();
 
+      const pool = new SimplePool();
+      const nostrEvent = await wrapEvent.toNostrEvent();
+      const pub = pool.publish(relays ?? this.relays, nostrEvent);
+
       let published = false;
-      try {
-        randomNdk.connect();
-        await wrapEvent.publish();
+
+      pub.on("ok", (relay: any) => {
+        console.log(`Relay ${relay.url} accepted event`);
         published = true;
-        try {
-          const chatStore = useDmChatsStore();
-          chatStore.addOutgoing(dmEvent);
-          const router = useRouter();
-          router.push("/chats");
-        } catch {}
-      } catch (e) {
-        console.error(e);
+      });
+      pub.on("failed", (reason: any) => {
+        console.error(`Publish failed: ${reason}`);
+      });
+      pub.on("seen", (relay: any) => {
+        console.log(`Relay ${relay.url} already had event`);
+      });
+
+      await new Promise((resolve) => setTimeout(resolve, 3000));
+
+      try {
+        const chatStore = useDmChatsStore();
+        chatStore.addOutgoing(dmEvent);
+        const router = useRouter();
+        router.push("/chats");
+      } catch {}
+
+      if (!published) {
         notifyError("Could not publish NIP-17 event");
+        return null;
       }
-      return published ? dmEvent : null;
+
+      return dmEvent;
     },
     subscribeToNip17DirectMessages: async function () {
       await this.walletSeedGenerateKeyPair();
