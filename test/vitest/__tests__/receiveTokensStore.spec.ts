@@ -27,4 +27,10 @@ describe("receiveTokensStore.decodeToken", () => {
     const store = useReceiveTokensStore();
     expect(store.decodeToken("cashuAinvalid")).toBeUndefined();
   });
+
+  it("decodes token with surrounding whitespace", () => {
+    const store = useReceiveTokensStore();
+    const decoded = store.decodeToken(`  ${VALID_TOKEN}\n`);
+    expect(decoded?.mint).toBe("https://8333.space:3338");
+  });
 });
