@@ -1282,6 +1282,9 @@ export default {
       donate: {
         label: "Donate",
       },
+      message: {
+        label: "Message",
+      },
     },
     choose_action: {
       title: "Select token",
@@ -1292,6 +1295,16 @@ export default {
   ChooseExistingTokenDialog: {
     title: "Choose token",
     empty: "No pending tokens in this bucket",
+  },
+  SendMessageDialog: {
+    title: "Send message",
+    inputs: {
+      message: { label: "Message" },
+    },
+    actions: {
+      cancel: { label: "@:global.actions.cancel.label" },
+      send: { label: "@:global.actions.send.label" },
+    },
   },
   BucketManager: {
     actions: {
