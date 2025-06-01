@@ -4,7 +4,7 @@
       <info-icon size="24" class="motd-icon" />
       <div class="motd-text-container">
         <div class="motd-header">
-          <div class="motd-title">Mint Message</div>
+          <div class="motd-title">{{ $t("MintMotdMessage.title") }}</div>
           <x-icon
             size="18"
             class="motd-close-icon cursor-pointer"
@@ -19,7 +19,7 @@
     <div class="motd-dismissed-message">
       <info-icon size="24" class="motd-dismissed-icon q-mr-md" />
       <div class="motd-text-container">
-        <div class="motd-title">Mint Message</div>
+        <div class="motd-title">{{ $t("MintMotdMessage.title") }}</div>
         <div class="motd-message">{{ message }}</div>
       </div>
     </div>

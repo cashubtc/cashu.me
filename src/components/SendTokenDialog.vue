@@ -20,17 +20,18 @@
       <!--  enter send data -->
       <div v-if="!sendData.tokens">
         <q-card-section class="q-pa-lg q-pt-md">
-          <div class="row items-center no-wrap q-mb-sm q-pr-lg q-py-lg">
-            <div class="col-9">
+          <div class="row items-center no-wrap q-mb-sm q-py-lg">
+            <div class="col-8">
               <span v-if="!sendData.paymentRequest" class="text-h6"
-                >Send
-                {{
-                  sendData.amount
-                    ? formatCurrency(
-                        sendData.amount * activeUnitCurrencyMultiplyer,
-                        activeUnit
-                      )
-                    : "Ecash"
+                >{{
+                  $t("SendTokenDialog.title", {
+                    value: sendData.amount
+                      ? formatCurrency(
+                          sendData.amount * activeUnitCurrencyMultiplyer,
+                          activeUnit
+                        )
+                      : $t("SendTokenDialog.title_ecash_text"),
+                  })
                 }}
               </span>
               <span v-if="sendData.paymentRequest" class="text-h6"
@@ -63,7 +64,7 @@
                 }})
               </span>
             </div>
-            <div class="col-3" style="height: 30px">
+            <div class="col-4 text-right" style="height: 30px">
               <transition
                 appear
                 enter-active-class="animated fadeIn"
@@ -76,7 +77,7 @@
                   outline
                   rounded
                   color="grey"
-                  class="q-mr-auto q-pl-sm q-ml-md q-pr-sm q-my-xs q-mt-xs"
+                  class="float-right"
                   size="lg"
                 >
                   <q-icon
@@ -85,7 +86,9 @@
                     class="q-mr-sm"
                     size="sm"
                   />
-                  <span class="text-subtitle2 text-weight-medium">Offline</span>
+                  <span class="text-subtitle2 text-weight-medium">{{
+                    $t("SendTokenDialog.badge_offline_text")
+                  }}</span>
                 </q-badge>
               </transition>
             </div>
@@ -99,7 +102,11 @@
           <q-input
             type="number"
             v-model.number="sendData.amount"
-            :label="'Amount (' + tickerShort + ') *'"
+            :label="
+              $t('SendTokenDialog.inputs.amount.label', {
+                ticker: tickerShort,
+              })
+            "
             mask="#"
             fill-mask="0"
             reverse-fill-mask
@@ -138,8 +145,8 @@
                   v-model="sendData.p2pkPubkey"
                   :label="
                     sendData.p2pkPubkey && !isValidPubkey(sendData.p2pkPubkey)
-                      ? 'Invalid public key'
-                      : 'Receiver public key'
+                      ? $t('SendTokenDialog.inputs.p2pk_pubkey.label_invalid')
+                      : $t('SendTokenDialog.inputs.p2pk_pubkey.label')
                   "
                   outlined
                   clearable
@@ -157,7 +164,9 @@
                   v-if="canPasteFromClipboard && !sendData.p2pkPubkey"
                   icon="content_paste"
                   @click="pasteToP2PKField"
-                  ><q-tooltip>Paste</q-tooltip></q-btn
+                  ><q-tooltip>{{
+                    $t("SendTokenDialog.actions.paste_p2pk_pubkey.tooltip_text")
+                  }}</q-tooltip></q-btn
                 >
                 <q-btn
                   align="center"
@@ -186,7 +195,7 @@
               rounded
               type="submit"
               :loading="globalMutexLock"
-              >Send
+              >{{ $t("SendTokenDialog.actions.send.label") }}
               <template v-slot:loading>
                 <q-spinner-hourglass />
               </template>
@@ -230,20 +239,27 @@
                 @click="showLockInput = true"
               >
                 <!-- <q-icon size="xs" class="q-mr-xs" name="lock" />  -->
-                Lock</q-btn
+                {{ $t("SendTokenDialog.actions.lock.label") }}</q-btn
               >
             </transition>
-            <q-btn v-close-popup rounded flat color="grey" class="q-ml-auto"
-              >Close</q-btn
-            >
+            <q-btn v-close-popup rounded flat color="grey" class="q-ml-auto">{{
+              $t("SendTokenDialog.actions.close.label")
+            }}</q-btn>
           </div>
           <div v-else class="row q-mt-lg">
-            <q-btn unelevated rounded disabled color="yellow" text-color="black"
-              >Too much</q-btn
+            <q-btn
+              unelevated
+              rounded
+              disabled
+              color="yellow"
+              text-color="black"
+              >{{
+                $t("SendTokenDialog.inputs.amount.invalid_too_much_error_text")
+              }}</q-btn
             >
-            <q-btn v-close-popup rounded flat color="grey" class="q-ml-auto"
-              >Close</q-btn
-            >
+            <q-btn v-close-popup rounded flat color="grey" class="q-ml-auto">{{
+              $t("SendTokenDialog.actions.close.label")
+            }}</q-btn>
           </div>
         </q-card-section>
       </div>
@@ -379,7 +395,7 @@
                   flat
                   dense
                   @click="copyText(sendData.tokensBase64)"
-                  >Copy</q-btn
+                  >{{ $t("SendTokenDialog.actions.copy_tokens.label") }}</q-btn
                 >
                 <q-btn
                   class="q-mx-none"
@@ -402,8 +418,10 @@
                     flat
                     dense
                     @click="copyText(encodeToPeanut(sendData.tokensBase64))"
-                    >🥜
-                    <q-tooltip>Copy Emoji</q-tooltip>
+                    >{{ $t("SendTokenDialog.actions.copy_emoji.label") }}
+                    <q-tooltip>{{
+                      $t("SendTokenDialog.actions.copy_emoji.tooltip_text")
+                    }}</q-tooltip>
                   </q-btn>
                   <q-btn
                     class="q-mx-none"
@@ -415,7 +433,9 @@
                     @click="
                       copyText(baseURL + '#token=' + sendData.tokensBase64)
                     "
-                    ><q-tooltip>Copy link</q-tooltip></q-btn
+                    ><q-tooltip>{{
+                      $t("SendTokenDialog.actions.copy_link.tooltip_text")
+                    }}</q-tooltip></q-btn
                   >
                   <q-btn
                     unelevated
@@ -448,7 +468,13 @@
                   >
                     <NfcIcon />
                     <q-tooltip>{{
-                      ndefSupported ? "Flash to NFC card" : "NDEF unsupported"
+                      ndefSupported
+                        ? $t(
+                            "SendTokenDialog.actions.write_tokens_to_card.tooltips.ndef_supported_text"
+                          )
+                        : $t(
+                            "SendTokenDialog.actions.write_tokens_to_card.tooltips.ndef_unsupported_text"
+                          )
                     }}</q-tooltip>
                     <template v-slot:loading>
                       <q-spinner @click="closeCardScanner" />
@@ -466,7 +492,9 @@
                     "
                     flat
                   >
-                    <q-tooltip>Delete from history</q-tooltip>
+                    <q-tooltip>{{
+                      $t("SendTokenDialog.actions.delete.tooltip_text")
+                    }}</q-tooltip>
                   </q-btn>
                 </div>
               </div>
@@ -476,7 +504,9 @@
                 flat
                 color="grey"
                 class="q-ml-auto q-mr-md"
-                >Close</q-btn
+                >{{
+                  $t("SendTokenDialog.actions.close_card_scanner.label")
+                }}</q-btn
               >
             </div>
           </q-card-section>
@@ -1016,6 +1046,7 @@ export default defineComponent({
           mint: this.activeMintUrl,
         };
         this.addPendingToken(historyToken);
+        this.sendData.historyToken = historyToken;
 
         if (!this.g.offline) {
           this.onTokenPaid(historyToken);

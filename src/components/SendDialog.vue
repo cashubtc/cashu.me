@@ -13,7 +13,7 @@
           <XIcon />
         </q-btn>
         <div class="col text-center">
-          <span class="text-h6">Send</span>
+          <span class="text-h6">{{ $t("SendDialog.title") }}</span>
         </div>
         <q-btn
           flat
@@ -35,7 +35,9 @@
                 <CoinsIcon />
               </div>
               <div class="text-left">
-                <div class="text-weight-bold custom-btn-text">ECASH</div>
+                <div class="text-weight-bold custom-btn-text">
+                  {{ $t("SendDialog.actions.ecash.label") }}
+                </div>
               </div>
             </div>
           </q-btn>
@@ -46,7 +48,9 @@
                 <ZapIcon />
               </div>
               <div class="text-left">
-                <div class="text-weight-bold custom-btn-text">LIGHTNING</div>
+                <div class="text-weight-bold custom-btn-text">
+                  {{ $t("SendDialog.actions.lightning.label") }}
+                </div>
               </div>
             </div>
           </q-btn>
@@ -122,7 +126,9 @@ export default defineComponent({
     ...mapActions(useCameraStore, ["closeCamera", "showCamera"]),
     showParseDialog: function () {
       if (!this.canMakePayments) {
-        notifyWarning("No mints available");
+        notifyWarning(
+          this.$i18n.t("SendDialog.actions.lightning.error_no_mints")
+        );
         this.showSendDialog = false;
         return;
       }
@@ -140,7 +146,7 @@ export default defineComponent({
     showSendTokensDialog: function () {
       console.log("##### showSendTokensDialog");
       if (!this.canMakePayments) {
-        notifyWarning("No mints available");
+        notifyWarning(this.$i18n.t("SendDialog.actions.ecash.error_no_mints"));
         this.showSendDialog = false;
         return;
       }

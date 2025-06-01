@@ -152,7 +152,7 @@
                     <div
                       v-for="unit in mintClass(mint).units"
                       :key="unit"
-                      class="q-py-xs q-px-sm"
+                      class="q-py-xs q-px-sm q-my-xs"
                       style="
                         border-radius: 4px;
                         background-color: #1d1d1d;
@@ -192,7 +192,9 @@
       <div class="add-mint-container">
         <div class="section-divider q-mb-md">
           <div class="divider-line"></div>
-          <div class="divider-text">ADD MINT</div>
+          <div class="divider-text">
+            {{ $t("MintSettings.add.title") }}
+          </div>
           <div class="divider-line"></div>
         </div>
 
@@ -200,8 +202,7 @@
           class="add-mint-description q-mb-lg text-left"
           style="color: rgba(255, 255, 255, 0.7)"
         >
-          Enter the URL of a Cashu mint to connect to it. This wallet is not
-          affiliated with any mint.
+          {{ $t("MintSettings.add.description") }}
         </div>
 
         <div class="add-mint-inputs">
@@ -219,7 +220,7 @@
             rounded
             outlined
             v-model="addMintData.nickname"
-            placeholder="Nickname (e.g. Testnet)"
+            :placeholder="$t('MintSettings.add.inputs.nickname.placeholder')"
             @keydown.enter.prevent="sanitizeMintUrlAndShowAddDialog"
             ref="mintNicknameInput"
             class="mint-input"
@@ -240,12 +241,12 @@
               :class="{ 'text-grey-7': addMintData.url.length === 0 }"
             >
               <q-icon name="add" size="20px" class="q-mr-sm" />
-              <span>Add Mint</span>
+              <span>{{ $t("MintSettings.add.actions.add_mint.label") }}</span>
             </q-btn>
 
             <q-btn flat @click="showCamera" class="text-white">
               <q-icon name="qr_code" size="20px" class="q-mr-sm" />
-              <span>Scan QR Code</span>
+              <span>{{ $t("MintSettings.add.actions.scan.label") }}</span>
             </q-btn>
           </div>
         </div>
@@ -255,18 +256,21 @@
     <!-- nostr -->
     <div class="section-divider q-mb-md">
       <div class="divider-line"></div>
-      <div class="divider-text">DISCOVER MINTS</div>
+      <div class="divider-text">
+        {{ $t("MintSettings.discover.title") }}
+      </div>
       <div class="divider-line"></div>
     </div>
     <div class="q-px-xs text-left" on-left>
       <q-list padding>
         <q-item>
           <q-item-section>
-            <q-item-label overline>Discover</q-item-label>
-            <q-item-label caption
-              >Discover mints other users have recommended on
-              nostr.</q-item-label
+            <q-item-label overline>
+              {{ $t("MintSettings.discover.overline") }}</q-item-label
             >
+            <q-item-label caption>{{
+              $t("MintSettings.discover.caption")
+            }}</q-item-label>
           </q-item-section>
         </q-item>
         <q-item class="q-pt-sm">
@@ -277,10 +281,10 @@
             outline
             :loading="discoveringMints"
             @click="fetchMintsFromNdk"
-            >Discover mints
+            >{{ $t("MintSettings.discover.actions.discover.label") }}
             <template v-slot:loading>
               <q-spinner-hourglass class="on-left" />
-              Loading...
+              {{ $t("MintSettings.discover.actions.discover.in_progress") }}
             </template>
           </q-btn>
         </q-item>
@@ -288,18 +292,26 @@
           <!-- for each entry in mintRecommendations, display the url and the count how often it was recommended -->
           <q-item>
             <q-item-section>
-              <q-item-label overline
-                >Found {{ mintRecommendations.length }} mints</q-item-label
+              <q-item-label overline>
+                {{
+                  $t("MintSettings.discover.recommendations.overline", {
+                    length: mintRecommendations.length,
+                  })
+                }}</q-item-label
               >
               <q-item-label caption
-                >These mints were recommended by other Nostr users. Read reviews
-                at
-                <a
-                  href="https://bitcoinmints.com"
-                  target="_blank"
-                  class="text-primary"
-                  >bitcoinmints.com</a
-                >. Be careful and do your own research before using a mint.
+                ><i18n-t
+                  keypath="MintSettings.discover.recommendations.caption"
+                >
+                  <template v-slot:link>
+                    <a
+                      href="https://bitcoinmints.com"
+                      target="_blank"
+                      class="text-primary"
+                      >bitcoinmints.com</a
+                    >
+                  </template>
+                </i18n-t>
               </q-item-label>
             </q-item-section>
           </q-item>
@@ -307,7 +319,9 @@
             dense
             dense-toggle
             class="text-left"
-            label="Click to browse mints"
+            :label="
+              $t('MintSettings.discover.recommendations.actions.browse.label')
+            "
           >
             <q-item v-for="mint in mintRecommendations" :key="mint.url">
               <q-item-section
@@ -338,18 +352,20 @@
 
     <div class="section-divider q-mb-md">
       <div class="divider-line"></div>
-      <div class="divider-text">SWAP</div>
+      <div class="divider-text">
+        {{ $t("MintSettings.swap.title") }}
+      </div>
       <div class="divider-line"></div>
     </div>
     <div class="q-px-xs text-left" on-left>
       <q-list padding>
         <q-item>
           <q-item-section>
-            <q-item-label overline>Multimint Swaps</q-item-label>
-            <q-item-label caption
-              >Swap funds between mints via Lightning. Note: Leave room for
-              potential Lightning fees. If the incoming payment does not
-              succeed, check the invoice manually.
+            <q-item-label overline>
+              {{ $t("MintSettings.swap.overline") }}</q-item-label
+            >
+            <q-item-label caption>
+              {{ $t("MintSettings.swap.caption") }}
             </q-item-label>
           </q-item-section>
         </q-item>
@@ -364,7 +380,7 @@
             :options="swapAmountDataOptions()"
             option-value="url"
             option-label="optionLabel"
-            label="From"
+            :label="$t('MintSettings.swap.inputs.from.label')"
             style="
               min-width: 200px;
               width: 100%;
@@ -385,7 +401,7 @@
             :options="swapAmountDataOptions()"
             option-value="url"
             option-label="optionLabel"
-            label="To"
+            :label="$t('MintSettings.swap.inputs.to.label')"
             style="
               min-width: 200px;
               width: 100%;
@@ -402,7 +418,11 @@
             dense
             v-model.number="swapData.amount"
             type="number"
-            :label="'Amount (' + tickerShort + ')'"
+            :label="
+              $t('MintSettings.swap.inputs.amount.label', {
+                ticker: tickerShort,
+              })
+            "
             style="min-width: 200px"
             @keydown.enter.prevent="extractAndMintAmountSwap(swapAmountData)"
             :disable="
@@ -426,10 +446,10 @@
             :loading="swapBlocking"
           >
             <q-icon size="xs" name="swap_horiz" class="q-pr-xs" />
-            Swap
+            {{ $t("MintSettings.swap.actions.swap.label") }}
             <template v-slot:loading>
               <q-spinner-hourglass size="xs" />
-              Swap
+              {{ $t("MintSettings.swap.actions.swap.in_progress") }}
             </template>
           </q-btn>
         </q-item>
@@ -585,7 +605,9 @@ export default defineComponent({
         this.addMintData.url = "https://" + this.addMintData.url;
       }
       if (!this.validateMintUrl(this.addMintData.url)) {
-        notifyError("Invalid URL");
+        notifyError(
+          this.$i18n.t("MintSettings.add.actions.add_mint.error_invalid_url")
+        );
         return;
       }
       let urlObj = new URL(this.addMintData.url);
@@ -648,9 +670,15 @@ export default defineComponent({
         tries++;
       }
       if (mintUrls.length == 0) {
-        this.notifyError("No mints found");
+        this.notifyError(
+          this.$i18n.t("MintSettings.discover.actions.discover.error_no_mints")
+        );
       } else {
-        this.notifySuccess("Found " + mintUrls.length + " mints");
+        this.notifySuccess(
+          this.$i18n.t("MintSettings.discover.actions.discover.success", {
+            length: mintUrls.length,
+          })
+        );
       }
       console.log(mintUrls);
       this.discoveringMints = false;
@@ -766,5 +794,6 @@ export default defineComponent({
   font-size: 14px;
   font-weight: 600;
   color: #ffffff;
+  text-transform: uppercase;
 }
 </style>

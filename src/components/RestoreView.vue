@@ -6,18 +6,19 @@
         <q-item>
           <q-item-section>
             <q-item-label overline class="text-weight-bold">
-              Restore from Seed Phrase
+              {{ $t("RestoreView.seed_phrase.label") }}
             </q-item-label>
             <q-item-label caption>
-              Enter your seed phrase to restore your wallet. Before you restore,
-              make sure you have added all the mints that you have used before.
+              {{ $t("RestoreView.seed_phrase.caption") }}
             </q-item-label>
             <div class="row q-pt-md">
               <div class="col-12">
                 <q-input
                   outlined
                   v-model="mnemonicToRestore"
-                  label="Seed phrase"
+                  :label="
+                    $t('RestoreView.seed_phrase.inputs.seed_phrase.label')
+                  "
                   autogrow
                   type="textarea"
                   :error="mnemonicError !== ''"
@@ -46,14 +47,10 @@
         <q-item>
           <q-item-section>
             <q-item-label overline class="text-weight-bold">
-              Information
+              {{ $t("RestoreView.information.label") }}
             </q-item-label>
             <q-item-label caption>
-              The wizard will only <i>restore</i> ecash from another seed
-              phrase, you will not be able to use this seed phrase or change the
-              seed phrase of the wallet that you're currently using. This means
-              that restored ecash will not be protected by your current seed
-              phrase as long as you don't send the ecash to yourself once.
+              {{ $t("RestoreView.information.caption") }}
             </q-item-label>
           </q-item-section>
         </q-item>
@@ -66,11 +63,10 @@
         <q-item>
           <q-item-section>
             <q-item-label overline class="text-weight-bold">
-              Restore Mints
+              {{ $t("RestoreView.restore_mints.label") }}
             </q-item-label>
             <q-item-label caption>
-              Select the mint to restore. You can add more mints in the main
-              screen under "Mints" and restore them here.
+              {{ $t("RestoreView.restore_mints.caption") }}
             </q-item-label>
           </q-item-section>
         </q-item>
@@ -152,9 +148,8 @@
                 @click="restoreMintForMint(mint.url)"
                 :disabled="!isMnemonicValid || restoringState"
                 :loading="restoringMint === mint.url"
-              >
-                Restore
-              </q-btn>
+                :label="$t('RestoreView.actions.restore.label')"
+              />
             </q-item-section>
           </q-item>
           <q-separator spaced />
@@ -179,7 +174,9 @@ export default defineComponent({
   data() {
     return {
       mnemonicError: "",
-      restoreAllMintsText: "Restore All Mints",
+      restoreAllMintsText: this.$i18n.t(
+        "RestoreView.actions.restore_all_mints.label"
+      ),
     };
   },
   computed: {
@@ -212,7 +209,7 @@ export default defineComponent({
       // Simple validation: check if mnemonicToRestore has at least 12 words
       const words = this.mnemonicToRestore.trim().split(/\s+/);
       if (words.length < 12) {
-        this.mnemonicError = "Mnemonic should be at least 12 words.";
+        this.mnemonicError = this.$i18n.t("RestoreView.actions.validate.error");
         return false;
       }
       this.mnemonicError = "";
@@ -223,13 +220,21 @@ export default defineComponent({
         return;
       }
       try {
-        this.restoreAllMintsText = "Restoring mint ...";
+        this.restoreAllMintsText = this.$i18n.t(
+          "RestoreView.actions.restore.in_progress"
+        );
         await this.restoreMint(mintUrl);
       } catch (error) {
         console.error("Error restoring mint:", error);
-        notifyError(`Error restoring mint: ${error.message || error}`);
+        notifyError(
+          this.$i18n.t("RestoreView.actions.restore.error", {
+            error: error.message || error,
+          })
+        );
       } finally {
-        this.restoreAllMintsText = "Restore All Mints";
+        this.restoreAllMintsText = this.$i18n.t(
+          "RestoreView.actions.restore_all_mints.label"
+        );
       }
     },
     async pasteMnemonic() {
@@ -237,7 +242,7 @@ export default defineComponent({
         const text = await this.pasteFromClipboard();
         this.mnemonicToRestore = text.trim();
       } catch (error) {
-        notifyError("Failed to read clipboard contents.");
+        notifyError(this.$i18n.t("RestoreView.actions.paste.error"));
       }
     },
     async restoreAllMints() {
@@ -247,17 +252,29 @@ export default defineComponent({
       }
       try {
         for (const mint of this.mints) {
-          this.restoreAllMintsText = `Restoring mint ${++i} of ${
-            this.mints.length
-          } ...`;
+          this.restoreAllMintsText = this.$i18n.t(
+            "RestoreView.actions.restore_all_mints.in_progress",
+            {
+              index: ++i,
+              length: this.mints.length,
+            }
+          );
           await this.restoreMint(mint.url);
         }
-        notifySuccess("Restore finished successfully");
+        notifySuccess(
+          this.$i18n.t("RestoreView.actions.restore_all_mints.success")
+        );
       } catch (error) {
         console.error("Error restoring mints:", error);
-        notifyError(`Error restoring mints: ${error.message || error}`);
+        notifyError(
+          this.$i18n.t("RestoreView.actions.restore_all_mints.error", {
+            error: error.message || error,
+          })
+        );
       } finally {
-        this.restoreAllMintsText = "Restore All Mints";
+        this.restoreAllMintsText = this.$i18n.t(
+          "RestoreView.actions.restore_all_mints.label"
+        );
       }
     },
   },
