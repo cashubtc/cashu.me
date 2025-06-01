@@ -68,6 +68,8 @@ export default {
       no_lnurl_data: "Sin datos LNURL",
       no_price_data: "Sin datos de precio.",
       please_try_again: "Por favor, inténtelo de nuevo.",
+      nostr_dm_sent: "DM de Nostr enviado",
+      nostr_dm_failed: "Fallo al enviar DM de Nostr",
     },
     mint: {
       notifications: {

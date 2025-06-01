@@ -67,6 +67,8 @@ export default {
       no_lnurl_data: "Ingen LNURL-data",
       no_price_data: "Ingen prisdata.",
       please_try_again: "Försök igen.",
+      nostr_dm_sent: "Nostr-DM skickat",
+      nostr_dm_failed: "Kunde inte skicka Nostr-DM",
     },
     mint: {
       notifications: {

@@ -68,6 +68,8 @@ export default {
       no_lnurl_data: "Δεν υπάρχουν δεδομένα LNURL",
       no_price_data: "Δεν υπάρχουν δεδομένα τιμής.",
       please_try_again: "Παρακαλώ προσπαθήστε ξανά.",
+      nostr_dm_sent: "Το Nostr DM στάλθηκε",
+      nostr_dm_failed: "Αποτυχία αποστολής Nostr DM",
     },
     mint: {
       notifications: {

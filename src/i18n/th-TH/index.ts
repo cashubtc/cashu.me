@@ -68,6 +68,8 @@ export default {
       no_lnurl_data: "ไม่มีข้อมูล LNURL",
       no_price_data: "ไม่มีข้อมูลราคา",
       please_try_again: "โปรดลองอีกครั้ง",
+      nostr_dm_sent: "ส่ง Nostr DM แล้ว",
+      nostr_dm_failed: "ส่ง Nostr DM ไม่สำเร็จ",
     },
     mint: {
       notifications: {

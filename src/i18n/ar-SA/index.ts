@@ -67,6 +67,8 @@ export default {
       no_lnurl_data: "لا توجد بيانات LNURL",
       no_price_data: "لا توجد بيانات سعرية.",
       please_try_again: "يرجى المحاولة مرة أخرى.",
+      nostr_dm_sent: "تم إرسال رسالة Nostr",
+      nostr_dm_failed: "فشل إرسال رسالة Nostr",
     },
     mint: {
       notifications: {
