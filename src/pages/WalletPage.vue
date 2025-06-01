@@ -5,25 +5,20 @@
       <NoMintWarnBanner v-if="mints.length == 0" />
       <BalanceView v-else :set-tab="setTab" />
       <div
-        class="row items-center justify-center no-wrap q-mb-none q-mx-none q-px-none q-pt-lg q-pb-md position-relative"
+        class="wallet-actions row items-center justify-center no-wrap q-mb-none q-mx-none q-px-none q-pt-lg q-pb-md position-relative"
       >
-        <div
-          class="col-6 q-mb-md flex justify-center items-center"
-          style="margin-right: 10%"
+        <q-btn
+          rounded
+          dense
+          class="q-px-md wallet-action-btn q-mb-md"
+          color="primary"
+          @click="showReceiveDialog = true"
         >
-          <q-btn
-            rounded
-            dense
-            class="q-px-md wallet-action-btn"
-            color="primary"
-            @click="showReceiveDialog = true"
-          >
-            <div class="button-content">
-              <q-icon name="south_west" size="1.2rem" class="q-mr-xs" />
-              <span>{{ $t("WalletPage.actions.receive.label") }}</span>
-            </div>
-          </q-btn>
-        </div>
+          <div class="button-content">
+            <q-icon name="south_west" size="1.2rem" class="q-mr-xs" />
+            <span>{{ $t("WalletPage.actions.receive.label") }}</span>
+          </div>
+        </q-btn>
 
         <transition appear enter-active-class="animated pulse">
           <div class="scan-button-container">
@@ -38,20 +33,18 @@
         </transition>
 
         <!-- button to showSendDialog -->
-        <div class="col-6 q-mb-md flex justify-center items-center">
-          <q-btn
-            rounded
-            dense
-            class="q-px-md wallet-action-btn"
-            color="primary"
-            @click="showSendDialog = true"
-          >
-            <div class="button-content">
-              <q-icon name="north_east" size="1.2rem" class="q-mr-xs" />
-              <span>{{ $t("WalletPage.actions.send.label") }}</span>
-            </div>
-          </q-btn>
-        </div>
+        <q-btn
+          rounded
+          dense
+          class="q-px-md wallet-action-btn q-mb-md"
+          color="primary"
+          @click="showSendDialog = true"
+        >
+          <div class="button-content">
+            <q-icon name="north_east" size="1.2rem" class="q-mr-xs" />
+            <span>{{ $t("WalletPage.actions.send.label") }}</span>
+          </div>
+        </q-btn>
         <ReceiveDialog v-model="showReceiveDialog" />
         <SendDialog v-model="showSendDialog" />
       </div>
@@ -201,9 +194,13 @@
   grid-area: 1 / 4 / 5 / 4;
 }
 
+.wallet-actions {
+  display: flex;
+  gap: 1rem;
+}
+
 .wallet-action-btn {
-  min-width: 140px;
-  width: auto;
+  flex: 1;
   white-space: nowrap;
   font-size: 1.2rem;
 }
@@ -214,11 +211,7 @@
   white-space: nowrap;
 }
 
-/* Apply equal widths to wallet action buttons after render */
-.equal-width-buttons {
-  display: flex;
-  justify-content: space-between;
-}
+
 
 .scan-button-container {
   position: absolute;
@@ -606,28 +599,6 @@ export default {
         }
       };
     },
-    equalizeButtonWidths: function () {
-      this.$nextTick(() => {
-        const actionBtns = document.querySelectorAll(".wallet-action-btn");
-        if (actionBtns.length >= 2) {
-          // Reset widths first
-          actionBtns.forEach((btn) => {
-            btn.style.width = "auto";
-          });
-
-          // Get the maximum width
-          let maxWidth = 0;
-          actionBtns.forEach((btn) => {
-            maxWidth = Math.max(maxWidth, btn.offsetWidth);
-          });
-
-          // Apply the maximum width to all buttons
-          actionBtns.forEach((btn) => {
-            btn.style.width = `${maxWidth}px`;
-          });
-        }
-      });
-    },
   },
   watch: {},
 
@@ -635,15 +606,6 @@ export default {
     // generate NPC connection
     this.generateNPCConnection();
     this.claimAllTokens();
-    // Ensure wallet action buttons have equal width
-    this.$nextTick(this.equalizeButtonWidths);
-    // Add window resize listener to handle responsive layouts
-    window.addEventListener("resize", this.equalizeButtonWidths);
-  },
-
-  beforeUnmount: function () {
-    // Remove event listener when component is destroyed
-    window.removeEventListener("resize", this.equalizeButtonWidths);
   },
 
   created: async function () {
