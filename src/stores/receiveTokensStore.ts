@@ -17,7 +17,9 @@ import { Clipboard } from "@capacitor/clipboard";
 import { DEFAULT_BUCKET_ID } from "./buckets";
 
 function isValidTokenString(tokenStr: string): boolean {
-  const prefixRegex = /^cashu[A-B][0-9A-Za-z]+$/;
+  // allow any Cashu token prefix (e.g. cashuA, cashuB, ...)
+  // and accept base64/base64url characters in the body
+  const prefixRegex = /^cashu[A-Za-z0-9][A-Za-z0-9_\-+=\/]*$/;
   return prefixRegex.test(tokenStr);
 }
 
