@@ -62,7 +62,7 @@ vi.mock("@nostr-dev-kit/ndk", () => {
 const encryptMock = vi.fn((content: string) => content);
 let publishSuccess = true;
 vi.mock("nostr-tools", () => ({
-  nip04: {},
+  nip04: { encrypt: encryptMock },
   nip19: { decode: vi.fn(), nsecEncode: vi.fn(), nprofileEncode: vi.fn() },
   nip44: {
     v2: {
@@ -104,10 +104,10 @@ afterEach(() => {
   vi.useRealTimers();
 });
 
-describe("sendNip17DirectMessage", () => {
+describe("sendNip04DirectMessage", () => {
   it("returns signed event when published", async () => {
     const store = useNostrStore();
-    const promise = store.sendNip17DirectMessage("r", "m");
+    const promise = store.sendNip04DirectMessage("r", "m");
     vi.runAllTimers();
     const ev = await promise;
     expect(ev).not.toBeNull();
@@ -120,7 +120,7 @@ describe("sendNip17DirectMessage", () => {
   it("returns null when publish fails", async () => {
     const store = useNostrStore();
     publishSuccess = false;
-    const promise = store.sendNip17DirectMessage("r", "m");
+    const promise = store.sendNip04DirectMessage("r", "m");
     vi.runAllTimers();
     const ev = await promise;
     expect(ev).toBeNull();

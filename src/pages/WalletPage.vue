@@ -417,10 +417,8 @@ export default {
     ...mapActions(useNPCStore, ["generateNPCConnection", "claimAllTokens"]),
     ...mapActions(useNostrStore, [
       "sendNip04DirectMessage",
-      "sendNip17DirectMessage",
       "subscribeToNip04DirectMessages",
       "subscribeToNip17DirectMessages",
-      "sendNip17DirectMessageToNprofile",
       "initSigner",
       "checkNip07Signer",
       "initNip07Signer",

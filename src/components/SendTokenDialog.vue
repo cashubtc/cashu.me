@@ -1138,8 +1138,20 @@ export default defineComponent({
         this.sendData.tokensBase64 = this.serializeProofs(sendProofs);
         if (this.sendViaNostr && this.recipientPubkey) {
           try {
-            const ev = await useNostrStore().sendNip17DirectMessage(
-              this.recipientPubkey,
+            let recipient = this.recipientPubkey;
+            if (recipient.startsWith("npub") || recipient.startsWith("nprofile")) {
+              try {
+                const decoded = nip19.decode(recipient);
+                recipient =
+                  decoded.type === "npub"
+                    ? (decoded.data as string)
+                    : (decoded.data as ProfilePointer).pubkey;
+              } catch (e) {
+                console.error(e);
+              }
+            }
+            const ev = await useNostrStore().sendNip04DirectMessage(
+              recipient,
               this.sendData.tokensBase64,
             );
             if (ev) {
@@ -1254,8 +1266,20 @@ export default defineComponent({
         this.sendData.tokensBase64 = this.serializeProofs(sendProofs);
         if (this.sendViaNostr && this.recipientPubkey) {
           try {
-            const ev = await useNostrStore().sendNip17DirectMessage(
-              this.recipientPubkey,
+            let recipient = this.recipientPubkey;
+            if (recipient.startsWith("npub") || recipient.startsWith("nprofile")) {
+              try {
+                const decoded = nip19.decode(recipient);
+                recipient =
+                  decoded.type === "npub"
+                    ? (decoded.data as string)
+                    : (decoded.data as ProfilePointer).pubkey;
+              } catch (e) {
+                console.error(e);
+              }
+            }
+            const ev = await useNostrStore().sendNip04DirectMessage(
+              recipient,
               this.sendData.tokensBase64,
             );
             if (ev) {
