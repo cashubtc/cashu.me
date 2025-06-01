@@ -70,6 +70,7 @@ export default {
       no_lnurl_data: "No LNURL data",
       no_price_data: "No price data.",
       please_try_again: "Please try again.",
+      lock_not_supported: "Mint does not support locking (NUT-10/11)",
     },
     mint: {
       notifications: {

@@ -366,6 +366,12 @@ export const useWalletStore = defineStore("wallet", {
       locktime?: number,
       refundPubkey?: string,
     ) {
+      const mintStore = useMintsStore();
+      const nutSupport = mintStore.activeInfo?.nut_supports || [];
+      if (!(nutSupport.includes(10) && nutSupport.includes(11))) {
+        notifyError(this.t("wallet.notifications.lock_not_supported"));
+        throw new Error("Mint does not support timelocks or P2PK");
+      }
       const spendableProofs = this.spendableProofs(proofs, amount);
       const proofsToSend = this.coinSelect(
         spendableProofs,
@@ -530,7 +536,12 @@ export const useWalletStore = defineStore("wallet", {
               proofsWeHave: mintStore.mintUnitProofs(mint, historyToken.unit),
             },
           );
-          await proofsStore.addProofs(proofs, undefined, bucketId, receiveStore.receiveData.label ?? "");
+          await proofsStore.addProofs(
+            proofs,
+            undefined,
+            bucketId,
+            receiveStore.receiveData.label ?? "",
+          );
           this.increaseKeysetCounter(keysetId, proofs.length);
         } catch (error: any) {
           console.error(error);
@@ -925,17 +936,17 @@ export const useWalletStore = defineStore("wallet", {
         const spentProofsStates = proofStates.filter(
           (p) => p.state == CheckStateEnum.SPENT,
         );
-      const spentProofs = proofs.filter((p) =>
-        spentProofsStates.find(
-          (s) => s.Y == hashToCurve(enc.encode(p.secret)).toHex(true),
-        ),
-      );
-      const bucketId = (proofs[0] as any)?.bucketId ?? DEFAULT_BUCKET_ID;
-      if (spentProofs.length) {
-        await proofsStore.removeProofs(spentProofs);
-        // update UI
-        const serializedProofs = proofsStore.serializeProofs(spentProofs);
-        if (serializedProofs == null) {
+        const spentProofs = proofs.filter((p) =>
+          spentProofsStates.find(
+            (s) => s.Y == hashToCurve(enc.encode(p.secret)).toHex(true),
+          ),
+        );
+        const bucketId = (proofs[0] as any)?.bucketId ?? DEFAULT_BUCKET_ID;
+        if (spentProofs.length) {
+          await proofsStore.removeProofs(spentProofs);
+          // update UI
+          const serializedProofs = proofsStore.serializeProofs(spentProofs);
+          if (serializedProofs == null) {
             throw new Error("could not serialize proofs.");
           }
           if (update_history) {

@@ -77,6 +77,7 @@ unlock date is displayed.
 ### Timelocked P2PK Tokens
 
 Use the **Lock** option in the Send dialog to create a token tied to a public key. Enter the receiver key, set a lock time (timestamp) and optionally a refund key for recovery. The mint must advertise support for NUT-11 and NUT-10 which can be verified via its `/info` endpoint.
+The wallet checks this automatically and will refuse to lock tokens if the mint lacks these NUTs.
 
 Example workflow:
 
