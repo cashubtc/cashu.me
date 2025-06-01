@@ -624,7 +624,7 @@ export const useNostrStore = defineStore("nostr", {
       const receiveStore = useReceiveTokensStore();
       const words = message.split(" ");
       const tokens = words.filter((word) => {
-        return word.startsWith("cashuA") || word.startsWith("cashuB");
+        return word.startsWith("cashu");
       });
       for (const tokenStr of tokens) {
         receiveStore.receiveData.tokensBase64 = tokenStr;

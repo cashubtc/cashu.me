@@ -1508,7 +1508,7 @@ export const useWalletStore = defineStore("wallet", {
       ) {
         this.payInvoiceData.input.request = req;
         await this.lnurlPayFirst(this.payInvoiceData.input.request);
-      } else if (req.startsWith("cashuA") || req.startsWith("cashuB")) {
+      } else if (req.startsWith("cashu")) {
         // parse cashu tokens from a pasted token
         receiveStore.receiveData.tokensBase64 = req;
         this.handleCashuToken();
