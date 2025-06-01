@@ -268,7 +268,7 @@ import { useStorageStore } from "src/stores/storage";
 import ReceiveTokenDialog from "src/components/ReceiveTokenDialog.vue";
 import { useWelcomeStore } from "../stores/welcome";
 import { useInvoicesWorkerStore } from "src/stores/invoicesWorker";
-import { notifyError, notify } from "../js/notify";
+import { notifyError, notify, notifyWarning } from "../js/notify";
 import { DEFAULT_BUCKET_ID } from "src/stores/buckets";
 
 import {
@@ -422,6 +422,8 @@ export default {
       "subscribeToNip17DirectMessages",
       "sendNip17DirectMessageToNprofile",
       "initSigner",
+      "checkNip07Signer",
+      "initNip07Signer",
     ]),
     ...mapActions(useDexieStore, ["migrateToDexie"]),
     ...mapActions(useStorageStore, ["checkLocalStorage"]),
@@ -722,7 +724,15 @@ export default {
     // generate new mnemonic
     this.initializeMnemonic();
 
-    this.initSigner();
+    const hasExt = await this.checkNip07Signer();
+    if (hasExt) {
+      await this.initNip07Signer();
+    } else {
+      await this.initSigner();
+      this.notifyWarning(
+        this.$t("settings.nostr.signing_extension.not_found") as string
+      );
+    }
 
     // show welcome dialog
     this.showWelcomePage();

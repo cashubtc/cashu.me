@@ -129,3 +129,7 @@ host.com {
     file_server
 }
 ```
+
+### NIP-07 Login
+
+If a NIP-07 compatible signing extension is installed in the browser (for example [nos2x](https://github.com/fiatjaf/nos2x)), the wallet will automatically detect it on startup and log in using that extension.
