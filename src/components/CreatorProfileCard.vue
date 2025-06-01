@@ -28,12 +28,20 @@
         <span>{{ creator.profile.lud16 }}</span>
       </div>
     </q-card-section>
+    <q-card-section class="text-caption" v-if="creator.followers !== undefined">
+      {{ $t('FindCreators.labels.followers') }}: {{ creator.followers }} |
+      {{ $t('FindCreators.labels.following') }}: {{ creator.following }}
+    </q-card-section>
+    <q-card-section class="text-caption" v-if="joinedDateFormatted">
+      {{ $t('FindCreators.labels.joined') }}: {{ joinedDateFormatted }}
+    </q-card-section>
   </q-card>
 </template>
 
 <script lang="ts">
 import { defineComponent, computed } from "vue";
 import { CreatorProfile } from "stores/creators";
+import { date } from "quasar";
 
 export default defineComponent({
   name: "CreatorProfileCard",
@@ -51,8 +59,16 @@ export default defineComponent({
         ? about.slice(0, MAX_LENGTH) + "…"
         : about;
     });
+    const joinedDateFormatted = computed(() => {
+      if (!props.creator.joined) return "";
+      return date.formatDate(
+        new Date(props.creator.joined * 1000),
+        "YYYY-MM-DD"
+      );
+    });
     return {
       truncatedAbout,
+      joinedDateFormatted,
     };
   },
 });

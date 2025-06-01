@@ -7,6 +7,9 @@ const getUserMock = vi.fn(() => ({ fetchProfile, profile: userProfile }));
 const nostrStoreMock = {
   initNdkReadOnly: vi.fn(),
   ndk: { getUser: getUserMock },
+  fetchFollowerCount: vi.fn().mockResolvedValue(10),
+  fetchFollowingCount: vi.fn().mockResolvedValue(5),
+  fetchJoinDate: vi.fn().mockResolvedValue(123456),
 };
 
 vi.mock("../../../src/stores/nostr", () => ({
@@ -33,6 +36,9 @@ describe("Creators store", () => {
     expect(creators.searchResults.length).toBe(1);
     expect(creators.searchResults[0].pubkey).toBe("f".repeat(64));
     expect(creators.searchResults[0].profile).toEqual(userProfile);
+    expect(creators.searchResults[0].followers).toBe(10);
+    expect(creators.searchResults[0].following).toBe(5);
+    expect(creators.searchResults[0].joined).toBe(123456);
   });
 
   it("populates searchResults for hex pubkey", async () => {

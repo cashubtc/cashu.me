@@ -1266,6 +1266,11 @@ export default {
         placeholder: "npub or hex public key",
       },
     },
+    labels: {
+      followers: "Followers",
+      following: "Following",
+      joined: "Joined",
+    },
   },
   BucketManager: {
     actions: {
