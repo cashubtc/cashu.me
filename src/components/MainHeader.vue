@@ -153,6 +153,22 @@
         </q-item-section>
       </q-item>
       <q-item-label header>{{
+        $t("MainHeader.menu.about.title")
+      }}</q-item-label>
+      <q-item clickable to="/about">
+        <q-item-section avatar>
+          <q-icon name="info" />
+        </q-item-section>
+        <q-item-section>
+          <q-item-label>{{
+            $t("MainHeader.menu.about.about.title")
+          }}</q-item-label>
+          <q-item-label caption>{{
+            $t("MainHeader.menu.about.about.caption")
+          }}</q-item-label>
+        </q-item-section>
+      </q-item>
+      <q-item-label header>{{
         $t("MainHeader.menu.links.title")
       }}</q-item-label>
       <EssentialLink

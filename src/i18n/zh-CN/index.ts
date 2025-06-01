@@ -103,6 +103,10 @@ export default {
           caption: "服务条款",
         },
       },
+      about: {
+        title: "About",
+        about: { title: "About", caption: "About this app" },
+      },
       links: {
         title: "链接",
         cashuSpace: {
@@ -1246,6 +1250,10 @@ timelock: {
       "正在检查 keyset { keysetId } 的证明 { startIndex } 到 { endIndex }",
     no_proofs_info_text: "未找到要恢复的证明",
     restored_amount_success_text: "已恢复 { amount }",
+  },
+  AboutPage: {
+    title: "About Cashu.me",
+    video_placeholder: "Video coming soon",
   },
   swap: {
     in_progress_warning_text: "兑换进行中",

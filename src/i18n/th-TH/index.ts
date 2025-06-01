@@ -104,6 +104,10 @@ export default {
           caption: "ข้อกำหนดในการให้บริการ",
         },
       },
+      about: {
+        title: "About",
+        about: { title: "About", caption: "About this app" },
+      },
       links: {
         title: "ลิงก์",
         cashuSpace: {
@@ -1253,6 +1257,10 @@ timelock: {
       "กำลังตรวจสอบ proofs { startIndex } ถึง { endIndex } สำหรับ keyset { keysetId }",
     no_proofs_info_text: "ไม่พบ proofs ที่จะกู้คืน",
     restored_amount_success_text: "กู้คืน { amount }",
+  },
+  AboutPage: {
+    title: "About Cashu.me",
+    video_placeholder: "Video coming soon",
   },
   swap: {
     in_progress_warning_text: "กำลังดำเนินการแลกเปลี่ยน",

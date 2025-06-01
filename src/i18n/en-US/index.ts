@@ -120,6 +120,10 @@ export default {
           caption: "Terms of Service",
         },
       },
+      about: {
+        title: "About",
+        about: { title: "About", caption: "About this app" },
+      },
       links: {
         title: "Links",
         cashuSpace: {
@@ -1307,6 +1311,10 @@ export default {
       "Checking proofs { startIndex } to { endIndex } for keyset { keysetId }",
     no_proofs_info_text: "No proofs found to restore",
     restored_amount_success_text: "Restored { amount }",
+  },
+  AboutPage: {
+    title: "About Cashu.me",
+    video_placeholder: "Video coming soon",
   },
   swap: {
     in_progress_warning_text: "Swap in progress",

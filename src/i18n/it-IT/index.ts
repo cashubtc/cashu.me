@@ -104,6 +104,10 @@ export default {
           caption: "Termini di Servizio",
         },
       },
+      about: {
+        title: "About",
+        about: { title: "About", caption: "About this app" },
+      },
       links: {
         title: "Link",
         cashuSpace: {
@@ -1256,6 +1260,10 @@ timelock: {
       "Verifica prove da { startIndex } a { endIndex } per keyset { keysetId }",
     no_proofs_info_text: "Nessuna prova trovata da ripristinare",
     restored_amount_success_text: "Ripristinato { amount }",
+  },
+  AboutPage: {
+    title: "About Cashu.me",
+    video_placeholder: "Video coming soon",
   },
   swap: {
     in_progress_warning_text: "Scambio in corso",

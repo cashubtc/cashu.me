@@ -103,6 +103,10 @@ export default {
           caption: "Användarvillkor",
         },
       },
+      about: {
+        title: "About",
+        about: { title: "About", caption: "About this app" },
+      },
       links: {
         title: "Länkar",
         cashuSpace: {
@@ -1256,6 +1260,10 @@ timelock: {
       "Kontrollerar proofs { startIndex } till { endIndex } för keyset { keysetId }",
     no_proofs_info_text: "Inga proofs hittades att återställa",
     restored_amount_success_text: "Återställde { amount }",
+  },
+  AboutPage: {
+    title: "About Cashu.me",
+    video_placeholder: "Video coming soon",
   },
   swap: {
     in_progress_warning_text: "Byte pågår",
