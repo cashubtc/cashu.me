@@ -5,13 +5,33 @@
         <div class="text-h6">{{ $t('CreatorHub.dashboard.add_tier') }}</div>
       </q-card-section>
       <q-card-section class="q-pt-none">
-        <q-input v-model="localTier.name" label="Title" outlined dense class="q-mb-sm" />
-        <q-input v-model.number="localTier.price" type="number" label="Cost (sats)" outlined dense class="q-mb-sm" />
+        <q-input
+          v-model="localTier.name"
+          :label="$t('CreatorHub.dashboard.inputs.title.label')"
+          outlined
+          dense
+          class="q-mb-sm"
+        />
+        <q-input
+          v-model.number="localTier.price"
+          type="number"
+          :label="$t('CreatorHub.dashboard.inputs.price.label')"
+          outlined
+          dense
+          class="q-mb-sm"
+        >
+          <template #hint>
+            <div v-if="bitcoinPrice">
+              ~{{ formatCurrency((bitcoinPrice / 100000000) * localTier.price, 'USD') }} /
+              {{ formatCurrency((bitcoinPrice / 100000000) * localTier.price, 'EUR') }}
+            </div>
+          </template>
+        </q-input>
         <q-input
           v-model="localTier.description"
           type="textarea"
           autogrow
-          label="Description (Markdown)"
+          :label="$t('CreatorHub.dashboard.inputs.description.label')"
           outlined
           dense
           class="q-mb-sm"
@@ -20,7 +40,7 @@
           v-model="localTier.welcomeMessage"
           type="textarea"
           autogrow
-          label="Welcome Message"
+          :label="$t('CreatorHub.dashboard.welcome_message')"
           outlined
           dense
           class="q-mb-sm"
@@ -37,6 +57,8 @@
 <script lang="ts">
 import { defineComponent, computed, reactive, watch } from 'vue';
 import { Tier } from 'stores/creatorHub';
+import { usePriceStore } from 'stores/price';
+import { useUiStore } from 'stores/ui';
 
 export default defineComponent({
   name: 'AddTierDialog',
@@ -52,6 +74,9 @@ export default defineComponent({
   },
   emits: ['update:modelValue', 'save'],
   setup(props, { emit }) {
+    const priceStore = usePriceStore();
+    const uiStore = useUiStore();
+
     const showLocal = computed({
       get: () => props.modelValue,
       set: (val) => emit('update:modelValue', val),
@@ -71,7 +96,12 @@ export default defineComponent({
       emit('save', { ...localTier });
     };
 
-    return { showLocal, localTier, save };
+    const bitcoinPrice = computed(() => priceStore.bitcoinPrice);
+
+    const formatCurrency = (amount: number, unit: string) =>
+      uiStore.formatCurrency(amount, unit);
+
+    return { showLocal, localTier, save, bitcoinPrice, formatCurrency };
   },
 });
 </script>

@@ -1307,6 +1307,17 @@ timelock: {
       add_tier: "Add Tier",
       save_tier: "Save Tier",
       delete_tier: "Delete Tier",
+      inputs: {
+        title: {
+          label: "Title",
+        },
+        price: {
+          label: "Cost (sats)",
+        },
+        description: {
+          label: "Description (Markdown)",
+        },
+      },
       welcome_message: "Welcome Message",
       currency_labels: {
         usd: "USD",
