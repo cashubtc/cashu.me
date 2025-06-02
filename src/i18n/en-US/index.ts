@@ -1352,8 +1352,13 @@ export default {
   },
   DonateDialog: {
     inputs: {
-      preset: "Donation preset"
-    }
+      preset: "Donation months",
+      type: "Donation type",
+      amount: "Amount",
+    },
+    helper: {
+      months: "Number of months (0 = one-time)",
+    },
   },
   BucketManager: {
     actions: {
