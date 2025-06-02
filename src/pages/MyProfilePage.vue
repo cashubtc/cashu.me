@@ -25,7 +25,7 @@
             ({{ formatFiat(tier.price) }})
           </span>
         </div>
-        <div class="text-caption" v-html="renderMarkdown(tier.perks)"></div>
+        <div class="text-caption" v-html="renderMarkdown(tier.description)"></div>
         <q-btn
           color="primary"
           dense

@@ -8,7 +8,7 @@ export interface Tier {
   id: string;
   name: string;
   price: number;
-  perks: string;
+  description: string;
   welcomeMessage?: string;
 }
 
@@ -51,7 +51,7 @@ export const useCreatorHubStore = defineStore("creatorHub", {
         id,
         name: tier.name || "",
         price: tier.price || 0,
-        perks: tier.perks || "",
+        description: (tier as any).description || (tier as any).perks || "",
         welcomeMessage: tier.welcomeMessage || "",
       };
       this.tiers[id] = newTier;
@@ -86,9 +86,15 @@ export const useCreatorHubStore = defineStore("creatorHub", {
       const events = await nostr.ndk.fetchEvents(filter);
       events.forEach((ev) => {
         try {
-          const tier = JSON.parse(ev.content) as Tier;
-          const id = tier.id || (ev.tagValue("d") as string) || ev.id;
-          tier.id = id;
+          const data = JSON.parse(ev.content) as any;
+          const id = data.id || (ev.tagValue("d") as string) || ev.id;
+          const tier: Tier = {
+            id,
+            name: data.name || "",
+            price: data.price || 0,
+            description: data.description || data.perks || "",
+            welcomeMessage: data.welcomeMessage || "",
+          };
           this.tiers[id] = tier;
         } catch (e) {
           console.error(e);
