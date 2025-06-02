@@ -1,10 +1,10 @@
 $themes: (
   "classic": (
-    primary: #935af5,
-    secondary: #b45af5,
-    dark: #1f2234,
-    info: #333646,
-    marginal-bg: #1f2234,
+    primary: #7E22CE,
+    secondary: #4B5563,
+    dark: #1F2937,
+    info: #374151,
+    marginal-bg: #1F2937,
     marginal-text: #fff,
   ),
   "bitcoin": (
@@ -153,6 +153,10 @@ body.body--dark .q-table--dark {
   background: transparent;
 }
 
+body.body--dark {
+  background: #1F2937;
+}
+
 body.body--dark .q-field--error {
   .text-negative,
   .q-field__messages {
@@ -161,6 +165,7 @@ body.body--dark .q-field--error {
 }
 
 body.body--light {
+  background: #F9FAFB;
   .bg-dark {
     background: white !important;
   }
@@ -246,15 +251,13 @@ video {
 }
 
 .q-card {
-  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.2), 0 2px 2px rgba(0, 0, 0, 0.14),
-    0 3px 1px -2px rgba(0, 0, 0, 0.12);
-  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  border-radius: 8px;
   vertical-align: top;
 }
 
 .shadow-2 {
-  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.2), 0 2px 2px rgba(0, 0, 0, 0.14),
-    0 3px 1px -2px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 ::-webkit-scrollbar {

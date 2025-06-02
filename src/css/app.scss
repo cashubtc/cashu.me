@@ -21,23 +21,24 @@ body,
   margin-top: var(--safe-area-inset-top);
 }
 
+
 .q-dialog__inner > div {
   border-top-left-radius: 0px;
   border-top-right-radius: 0px;
-  border-bottom-right-radius: 20px !important;
-  border-bottom-left-radius: 20px !important;
+  border-bottom-right-radius: 8px !important;
+  border-bottom-left-radius: 8px !important;
 }
 
 .q-card {
-  border-top-left-radius: 20px;
-  border-top-right-radius: 20px;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
 }
 
 .q-dialog__inner--minimized > div {
-  border-top-left-radius: 20px;
-  border-top-right-radius: 20px;
-  border-bottom-right-radius: 20px;
-  border-bottom-left-radius: 20px;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+  border-bottom-right-radius: 8px;
+  border-bottom-left-radius: 8px;
   max-width: 650px;
 }
 
