@@ -100,6 +100,7 @@ export const useNostrStore = defineStore("nostr", {
       "cashu.ndk.nip17EventIdsWeHaveSeen",
       []
     ),
+    profiles: useLocalStorage<Record<string, any>>("cashu.ndk.profiles", {}),
   }),
   getters: {
     seedSignerPrivateKeyNsecComputed: (state) => {
@@ -163,6 +164,21 @@ export const useNostrStore = defineStore("nostr", {
     setPubkey: function (pubkey: string) {
       console.log("Setting pubkey to", pubkey);
       this.pubkey = pubkey;
+    },
+    getProfile: async function (pubkey: string): Promise<any> {
+      if (this.profiles[pubkey]) {
+        return this.profiles[pubkey];
+      }
+      await this.initNdkReadOnly();
+      try {
+        const user = this.ndk.getUser({ pubkey });
+        await user.fetchProfile();
+        this.profiles[pubkey] = user.profile;
+        return user.profile;
+      } catch (e) {
+        console.error(e);
+        return null;
+      }
     },
     checkNip07Signer: async function (): Promise<boolean> {
       const signer = new NDKNip07Signer();
