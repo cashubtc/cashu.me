@@ -109,6 +109,13 @@ export default {
           caption: "Discover creators",
         },
       },
+      creatorHub: {
+        title: "Creator Hub",
+        creatorHub: {
+          title: "Creator Hub",
+          caption: "Manage your tiers",
+        },
+      },
       buckets: {
         title: "Buckets",
         buckets: {
