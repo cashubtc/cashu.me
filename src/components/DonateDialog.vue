@@ -18,6 +18,16 @@
           inline
           class="q-mt-md"
         />
+        <q-select
+          v-model="preset"
+          :options="presetOptions"
+          emit-value
+          map-options
+          outlined
+          dense
+          class="q-mt-md"
+          :label="$t('DonateDialog.inputs.preset')"
+        />
       </q-card-section>
       <q-card-actions align="right">
         <q-btn flat color="primary" @click="cancel">{{ $t('global.actions.cancel.label') }}</q-btn>
@@ -33,22 +43,26 @@ import { useBucketsStore, DEFAULT_BUCKET_ID } from 'stores/buckets';
 import { useMintsStore } from 'stores/mints';
 import { useUiStore } from 'stores/ui';
 import { storeToRefs } from 'pinia';
+import { useDonationPresetsStore } from 'stores/donationPresets';
 
 export default defineComponent({
   name: 'DonateDialog',
   props: {
     modelValue: Boolean,
+    creatorPubkey: { type: String, default: '' }
   },
   emits: ['update:modelValue', 'confirm'],
   setup(props, { emit }) {
     const bucketsStore = useBucketsStore();
     const mintsStore = useMintsStore();
     const uiStore = useUiStore();
+    const donationStore = useDonationPresetsStore();
     const { bucketList, bucketBalances } = storeToRefs(bucketsStore);
     const { activeUnit } = storeToRefs(mintsStore);
 
     const bucketId = ref<string>(DEFAULT_BUCKET_ID);
     const locked = ref<'normal' | 'locked'>('normal');
+    const preset = ref<number>(donationStore.presets[0]?.months || 3);
 
     const model = computed({
       get: () => props.modelValue,
@@ -70,15 +84,25 @@ export default defineComponent({
       { label: 'P2PK Lock', value: 'locked' },
     ];
 
+    const presetOptions = computed(() =>
+      donationStore.presets.map(p => ({ label: `${p.months}m`, value: p.months }))
+    );
+
     const cancel = () => {
       emit('update:modelValue', false);
     };
 
-    const confirm = () => {
-      emit('confirm', { bucketId: bucketId.value, locked: locked.value === 'locked' });
+    const confirm = async () => {
+      await donationStore.createDonationPreset(
+        preset.value,
+        1,
+        props.creatorPubkey,
+        bucketId.value
+      );
+      emit('update:modelValue', false);
     };
 
-    return { model, bucketId, locked, bucketOptions, lockOptions, cancel, confirm };
+    return { model, bucketId, locked, preset, bucketOptions, lockOptions, presetOptions, cancel, confirm };
   },
 });
 </script>
