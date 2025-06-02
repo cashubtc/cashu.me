@@ -1,17 +1,21 @@
 <template>
-  <div :class="[$q.dark.isActive ? 'bg-dark text-white' : 'bg-white text-dark', 'q-pa-md']">
-    <q-list bordered>
+  <q-page :class="[$q.dark.isActive ? 'bg-dark text-white' : 'bg-white text-dark']" class="column full-height">
+    <q-toolbar class="q-pa-sm border-bottom" style="border-bottom: 1px solid rgba(0,0,0,0.1)">
+      <q-toolbar-title class="text-h6">Chats</q-toolbar-title>
+    </q-toolbar>
+    <q-list bordered class="col scroll-area">
       <q-item v-for="pubkey in pubkeys" :key="pubkey" clickable @click="openChat(pubkey)">
         <q-item-section avatar>
           <q-avatar v-if="profiles[pubkey]?.picture" :src="profiles[pubkey].picture" />
         </q-item-section>
         <q-item-section>
           <q-item-label class="text-subtitle1">{{ displayName(pubkey) }}</q-item-label>
-          <q-item-label caption>{{ lastMessageTime(pubkey) }}</q-item-label>
+          <q-item-label caption>{{ lastMessageSnippet(pubkey) }}</q-item-label>
+          <q-item-label caption class="ellipsis">{{ lastMessageTime(pubkey) }}</q-item-label>
         </q-item-section>
       </q-item>
     </q-list>
-  </div>
+  </q-page>
 </template>
 
 <script lang="ts">
@@ -20,6 +24,7 @@ import { useRouter } from 'vue-router';
 import { useDmChatsStore } from 'stores/dmChats';
 import { useNostrStore } from 'stores/nostr';
 import { storeToRefs } from 'pinia';
+import { sanitizeMessage } from 'src/js/message-utils';
 
 export default defineComponent({
   name: 'ChatsPage',
@@ -56,11 +61,31 @@ export default defineComponent({
       return new Date(ts * 1000).toLocaleString();
     };
 
+    const lastMessageSnippet = (pk: string) => {
+      const msgs = chats.value[pk];
+      if (!msgs || !msgs.length) return '';
+      return sanitizeMessage(msgs[msgs.length - 1].content).slice(0, 40);
+    };
+
     const openChat = (pk: string) => {
       router.push(`/chats/${pk}`);
     };
 
-    return { chats, pubkeys, profiles, displayName, lastMessageTime, openChat };
+    return {
+      chats,
+      pubkeys,
+      profiles,
+      displayName,
+      lastMessageTime,
+      lastMessageSnippet,
+      openChat,
+    };
   },
 });
 </script>
+
+<style scoped>
+.scroll-area {
+  overflow-y: auto;
+}
+</style>

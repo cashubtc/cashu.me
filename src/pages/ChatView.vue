@@ -1,11 +1,9 @@
 <template>
-  <div
-    :class="[$q.dark.isActive ? 'bg-dark text-white' : 'bg-white text-dark', 'full-height flex column']"
+  <q-page
+    :class="[$q.dark.isActive ? 'bg-dark text-white' : 'bg-white text-dark']"
+    class="flex column full-height"
   >
-    <div
-      class="q-pa-sm row items-center text-h6 border-bottom"
-      style="border-bottom: 1px solid rgba(0,0,0,0.1)"
-    >
+    <q-toolbar class="border-bottom q-pa-sm" style="border-bottom: 1px solid rgba(0,0,0,0.1)">
       <q-btn
         flat
         dense
@@ -16,9 +14,12 @@
         aria-label="Go back"
         class="q-mr-sm"
       />
-      <span>{{ displayName }}</span>
-    </div>
-    <div class="q-pa-md scroll" style="flex: 1; overflow-y: auto" ref="scrollArea">
+      <q-avatar v-if="avatar" size="md" class="q-mr-sm">
+        <img :src="avatar" />
+      </q-avatar>
+      <q-toolbar-title class="text-h6">{{ displayName }}</q-toolbar-title>
+    </q-toolbar>
+    <div class="q-pa-md scroll-area col" ref="scrollArea">
       <q-chat-message
         v-for="msg in messages"
         :key="msg.id"
@@ -30,18 +31,26 @@
       />
       <div ref="bottomMarker"></div>
     </div>
-    <div class="q-pa-sm row items-center">
+    <div class="q-pa-sm row no-wrap items-center">
       <q-input
         v-model="newMessage"
         dense
         outlined
-        class="col-grow q-mr-sm"
+        class="col q-mr-sm"
         placeholder="Type a message"
+        autofocus
         @keyup.enter="sendMessage"
       />
-      <q-btn flat icon="send" color="primary" @click="sendMessage" />
+      <q-btn
+        flat
+        round
+        icon="send"
+        color="primary"
+        @click="sendMessage"
+        :disable="!newMessage.trim()"
+      />
     </div>
-  </div>
+  </q-page>
 </template>
 
 <script lang="ts">
@@ -129,7 +138,7 @@ export default defineComponent({
 </script>
 
 <style scoped>
-.scroll {
+.scroll-area {
   overflow-y: auto;
 }
 .border-bottom {
