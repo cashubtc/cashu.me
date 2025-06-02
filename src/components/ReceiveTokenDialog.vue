@@ -150,6 +150,30 @@
                 })
               }}
             </q-chip>
+            <q-chip
+              v-if="receiverPubkey"
+              outline
+              icon="person"
+              class="q-ml-sm"
+            >
+              {{
+                $t('LockedTokensTable.row.receiver_label', {
+                  value: shortenString(pubkeyNpub(receiverPubkey), 15, 6),
+                })
+              }}
+            </q-chip>
+            <q-chip
+              v-if="refundPubkey"
+              outline
+              icon="undo"
+              class="q-ml-sm"
+            >
+              {{
+                $t('LockedTokensTable.row.refund_label', {
+                  value: shortenString(pubkeyNpub(refundPubkey), 15, 6),
+                })
+              }}
+            </q-chip>
           </div>
           <div class="row q-pt-sm">
               <q-select
@@ -299,6 +323,8 @@ import { useSwapStore } from "src/stores/swap";
 import { useSettingsStore } from "src/stores/settings";
 import token from "src/js/token";
 import { date } from "quasar";
+import { shortenString } from "src/js/string-utils";
+import { nip19 } from "nostr-tools";
 
 import ChooseMint from "src/components/ChooseMint.vue";
 import TokenInformation from "components/TokenInformation.vue";
@@ -439,6 +465,18 @@ export default defineComponent({
       const decodedToken = this.decodeToken(this.receiveData.tokensBase64);
       return this.getMint(decodedToken);
     },
+    receiverPubkey: function () {
+      if (!this.tokenDecodesCorrectly) {
+        return "";
+      }
+      return this.getTokenPubkey(this.receiveData.tokensBase64) || "";
+    },
+    refundPubkey: function () {
+      if (!this.tokenDecodesCorrectly) {
+        return "";
+      }
+      return this.getTokenRefundPubkey(this.receiveData.tokensBase64) || "";
+    },
     unlockDate: function () {
       const ts = this.getTokenLocktime(this.receiveData.tokensBase64);
       if (!ts) return "";
@@ -458,6 +496,8 @@ export default defineComponent({
       "generateKeypair",
       "showLastKey",
       "getTokenLocktime",
+      "getTokenPubkey",
+      "getTokenRefundPubkey",
     ]),
     ...mapActions(useMintsStore, ["addMint"]),
     ...mapActions(useReceiveTokensStore, [
@@ -467,6 +507,7 @@ export default defineComponent({
       "toggleScanner",
       "pasteToParseDialog",
     ]),
+    shortenString,
     // TOKEN METHODS
     decodePeanut: function (peanut) {
       try {
@@ -583,6 +624,14 @@ export default defineComponent({
         mint
       );
       this.swapSelected = false;
+    },
+    pubkeyNpub(hex) {
+      try {
+        if (!hex) return "";
+        return nip19.npubEncode(hex);
+      } catch (e) {
+        return hex;
+      }
     },
   },
 });

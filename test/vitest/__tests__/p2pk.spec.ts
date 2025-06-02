@@ -50,4 +50,19 @@ describe('P2PK store', () => {
     await walletStore.sendToLock([{ secret: 's', amount: 1, id: 'a', C: 'c' } as any], wallet, 1, 'pk', 'b', 123, 'r')
     expect(wallet.send).toHaveBeenCalledWith(1, [{ secret: 's', amount: 1, id: 'a', C: 'c' }], { keysetId: 'kid', pubkey: 'pk', locktime: 123, refund: 'r' })
   })
+
+  it('extracts pubkeys from encoded token', () => {
+    const p2pk = useP2PKStore()
+    const locktime = Math.floor(Date.now() / 1000) + 1000
+    const secret = JSON.stringify([
+      'P2PK',
+      { data: '02aa', tags: [['locktime', String(locktime)], ['refund', '02bb']] }
+    ])
+    const tokenObj = {
+      token: [{ proofs: [{ id: 'a', amount: 1, C: 'c', secret }], mint: 'm' }]
+    }
+    const encoded = 'cashuA' + Buffer.from(JSON.stringify(tokenObj)).toString('base64')
+    expect(p2pk.getTokenPubkey(encoded)).toBe('02aa')
+    expect(p2pk.getTokenRefundPubkey(encoded)).toBe('02bb')
+  })
 })
