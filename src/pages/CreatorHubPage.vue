@@ -6,14 +6,44 @@
     ]"
   >
     <div class="text-h5 q-mb-md">Creator Hub</div>
-    <div class="text-subtitle1 q-mb-sm">Core Goals for the Creator Hub</div>
-    <ul>
-      <li>
-        Creator Empowerment: Provide tools for creators to easily showcase their
-        work and set up monetization tiers.
-      </li>
-    </ul>
+
+    <div v-if="!loggedIn" class="q-mt-md">
+      <q-btn color="primary" to="/creator/login">Login</q-btn>
+    </div>
+
+    <div v-else>
+      <div v-for="tier in tiers" :key="tier.id" class="q-mb-md">
+        <q-card>
+          <q-card-section>
+            <div class="text-subtitle1">
+              {{ tier.name }} - {{ tier.price }} sats
+            </div>
+            <div class="text-caption" v-html="renderMarkdown(tier.perks)"></div>
+          </q-card-section>
+        </q-card>
+      </div>
+      <q-btn color="primary" to="/creator/dashboard">Edit Tiers</q-btn>
+    </div>
   </q-page>
 </template>
 
-<script setup lang="ts"></script>
+<script lang="ts">
+import { defineComponent, computed } from 'vue';
+import { useCreatorHubStore } from 'stores/creatorHub';
+import { marked } from 'marked';
+
+export default defineComponent({
+  name: 'CreatorHubPage',
+  setup() {
+    const store = useCreatorHubStore();
+    const tiers = computed(() => store.getTierArray());
+    const loggedIn = computed(() => !!store.loggedInNpub);
+
+    function renderMarkdown(text: string): string {
+      return marked.parse(text || '');
+    }
+
+    return { tiers, loggedIn, renderMarkdown };
+  }
+});
+</script>
