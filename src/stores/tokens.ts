@@ -3,6 +3,7 @@ import { date } from "quasar";
 import { defineStore } from "pinia";
 import { PaymentRequest, Proof, Token } from "@cashu/cashu-ts";
 import token from "src/js/token";
+import { DEFAULT_COLOR } from "src/js/constants";
 import { DEFAULT_BUCKET_ID } from "./buckets";
 import { useProofsStore } from "./proofs";
 
@@ -61,7 +62,7 @@ export const useTokensStore = defineStore("tokens", {
         mint,
         unit,
         label,
-        color: color ?? "#1976d2",
+        color: color ?? DEFAULT_COLOR,
         fee,
         paymentRequest,
         bucketId,
@@ -96,7 +97,7 @@ export const useTokensStore = defineStore("tokens", {
         mint,
         unit,
         label,
-        color: color ?? "#1976d2",
+        color: color ?? DEFAULT_COLOR,
         fee,
         paymentRequest,
         bucketId,

@@ -178,6 +178,7 @@ import { useWalletStore } from "src/stores/wallet";
 import { useSendTokensStore } from "src/stores/sendTokensStore";
 import token from "../js/token";
 import { notify } from "src/js/notify";
+import { DEFAULT_COLOR } from "src/js/constants";
 
 export default defineComponent({
   name: "HistoryTable",
@@ -196,7 +197,7 @@ export default defineComponent({
       editDialog: {
         show: false,
         label: '',
-        color: '#1976d2',
+        color: DEFAULT_COLOR,
         token: null,
       },
     };
@@ -277,7 +278,7 @@ export default defineComponent({
     openEditLabel(token) {
       this.editDialog.token = token;
       this.editDialog.label = token.label || '';
-      this.editDialog.color = token.color || '#1976d2';
+      this.editDialog.color = token.color || DEFAULT_COLOR;
       this.editDialog.show = true;
     },
     saveLabel() {
