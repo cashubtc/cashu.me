@@ -23,6 +23,13 @@ const routes = [
     ],
   },
   {
+    path: "/creator-hub",
+    component: () => import("layouts/FullscreenLayout.vue"),
+    children: [
+      { path: "", component: () => import("src/pages/CreatorHubPage.vue") },
+    ],
+  },
+  {
     path: "/creator/login",
     component: () => import("layouts/FullscreenLayout.vue"),
     children: [
