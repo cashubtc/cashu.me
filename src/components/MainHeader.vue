@@ -114,12 +114,25 @@
         <q-item-section avatar>
           <q-icon name="search" />
         </q-item-section>
-        <q-item-section>
+      <q-item-section>
           <q-item-label>{{
             $t("MainHeader.menu.findCreators.findCreators.title")
           }}</q-item-label>
           <q-item-label caption>{{
             $t("MainHeader.menu.findCreators.findCreators.caption")
+          }}</q-item-label>
+        </q-item-section>
+      </q-item>
+      <q-item clickable @click="gotoCreatorHub">
+        <q-item-section avatar>
+          <q-icon name="hub" />
+        </q-item-section>
+        <q-item-section>
+          <q-item-label>{{
+            $t("MainHeader.menu.creatorHub.creatorHub.title")
+          }}</q-item-label>
+          <q-item-label caption>{{
+            $t("MainHeader.menu.creatorHub.creatorHub.caption")
           }}</q-item-label>
         </q-item-section>
       </q-item>
@@ -280,6 +293,11 @@ export default defineComponent({
       leftDrawerOpen.value = false;
     };
 
+    const gotoCreatorHub = () => {
+      router.push("/creator-hub");
+      leftDrawerOpen.value = false;
+    };
+
     const gotoChats = () => {
       router.push("/chats");
       leftDrawerOpen.value = false;
@@ -300,6 +318,7 @@ export default defineComponent({
       uiStore,
       gotoBuckets,
       gotoFindCreators,
+      gotoCreatorHub,
       gotoChats,
       gotoWallet,
     };
