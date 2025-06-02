@@ -18,7 +18,7 @@
             <div class="text-subtitle1">
               {{ tier.name }} - {{ tier.price }} sats
             </div>
-            <div class="text-caption" v-html="renderMarkdown(tier.perks)"></div>
+            <div class="text-caption" v-html="renderMarkdown(tier.description)"></div>
           </q-card-section>
         </q-card>
       </div>

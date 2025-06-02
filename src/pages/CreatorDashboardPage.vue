@@ -15,77 +15,88 @@
 
     <div class="q-mt-lg">
       <div class="text-h6">{{ $t('CreatorHub.dashboard.manage_tiers') }}</div>
+      <AddTierDialog
+        v-model="showAddTierDialog"
+        :tier="newTier"
+        @save="saveNewTier"
+      />
       <div
         v-for="tier in tiers"
         :key="tier.id"
-        class="q-mt-md q-pa-sm bg-grey-2"
-      >
-        <q-input
-          :id="`tier-name-${tier.id}`"
-          v-model="tier.name"
-          label="Tier Name"
-          dense
-          class="q-mt-sm"
-        />
-        <q-input
-          v-model.number="tier.price"
-          label="Price (sats)"
-          type="number"
-          dense
-          class="q-mt-sm"
-        >
-          <template #hint>
-            <div v-if="bitcoinPrice">
-              ~{{ formatCurrency((bitcoinPrice / 100000000) * tier.price, 'USD') }}
-              /
-              {{ formatCurrency((bitcoinPrice / 100000000) * tier.price, 'EUR') }}
-            </div>
-          </template>
-        </q-input>
-        <q-input
-          v-model="tier.perks"
-          label="Perks (Markdown)"
-          type="textarea"
-          autogrow
-          dense
-          class="q-mt-sm"
-        />
-        <q-input
-          v-model="tier.welcomeMessage"
-          label="Welcome Message"
-          type="textarea"
-          autogrow
-          dense
-          class="q-mt-sm"
-        />
-        <q-input
-          v-model="tier.id"
-          label="ID (optional)"
-          dense
-          class="q-mt-sm"
-        />
-        <div class="row q-gutter-sm q-mt-sm">
-          <q-btn
-            color="primary"
-            flat
-            @click="saveTier(tier)"
-            >Save Tier</q-btn
-          >
-          <q-btn
-            color="negative"
-            flat
-            @click="removeTier(tier.id)"
-            >Delete Tier</q-btn
-          >
-        </div>
-      </div>
-      <q-btn
-        color="primary"
-        flat
         class="q-mt-md"
-        @click="addTier"
-        >{{ $t('CreatorHub.dashboard.add_tier') }}</q-btn
       >
+        <q-card>
+          <q-card-section>
+            <q-input
+              :id="`tier-name-${tier.id}`"
+              v-model="tier.name"
+              label="Title"
+              dense
+              outlined
+              class="q-mt-sm"
+            />
+            <q-input
+              v-model.number="tier.price"
+              label="Cost (sats)"
+              type="number"
+              dense
+              outlined
+              class="q-mt-sm"
+            >
+              <template #hint>
+                <div v-if="bitcoinPrice">
+                  ~{{ formatCurrency((bitcoinPrice / 100000000) * tier.price, 'USD') }}
+                  /
+                  {{ formatCurrency((bitcoinPrice / 100000000) * tier.price, 'EUR') }}
+                </div>
+              </template>
+            </q-input>
+            <q-input
+              v-model="tier.description"
+              label="Description (Markdown)"
+              type="textarea"
+              autogrow
+              dense
+              outlined
+              class="q-mt-sm"
+            />
+            <q-input
+              v-model="tier.welcomeMessage"
+              label="Welcome Message"
+              type="textarea"
+              autogrow
+              dense
+              outlined
+              class="q-mt-sm"
+            />
+            <q-input
+              v-model="tier.id"
+              label="ID (optional)"
+              dense
+              outlined
+              class="q-mt-sm"
+            />
+          </q-card-section>
+          <q-card-actions align="right">
+            <q-btn
+              color="primary"
+              flat
+              @click="saveTier(tier)"
+              >{{ $t('CreatorHub.dashboard.save_tier') }}</q-btn
+            >
+            <q-btn
+              color="negative"
+              flat
+              @click="removeTier(tier.id)"
+              >{{ $t('CreatorHub.dashboard.delete_tier') }}</q-btn
+            >
+          </q-card-actions>
+        </q-card>
+      </div>
+      <div class="row q-gutter-sm q-mt-md">
+        <q-btn color="primary" flat @click="openAddTier">{{ $t('CreatorHub.dashboard.add_tier') }}</q-btn>
+        <q-btn color="primary" flat @click="saveAllTiers">{{ $t('CreatorHub.dashboard.save_tier') }}</q-btn>
+      </div>
     </div>
   </div>
 </template>
@@ -96,9 +107,9 @@ import {
   ref,
   onMounted,
   computed,
-  nextTick,
 } from 'vue';
 import { useCreatorHubStore, Tier } from 'stores/creatorHub';
+import AddTierDialog from 'components/AddTierDialog.vue';
 import { useNostrStore } from 'stores/nostr';
 import { useRouter } from 'vue-router';
 import { usePriceStore } from 'stores/price';
@@ -107,6 +118,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 export default defineComponent({
   name: 'CreatorDashboardPage',
+  components: { AddTierDialog },
   setup() {
     const store = useCreatorHubStore();
     const nostr = useNostrStore();
@@ -134,12 +146,27 @@ export default defineComponent({
       await store.updateProfile(profile.value);
     };
 
-    const addTier = async () => {
-      const id = uuidv4();
-      store.addTier({ id, name: '', price: 0, perks: '', welcomeMessage: '' });
-      await nextTick();
-      const el = document.getElementById(`tier-name-${id}`);
-      if (el) (el as HTMLInputElement).focus();
+    const showAddTierDialog = ref(false);
+    const newTier = ref<Partial<Tier>>({});
+
+    const openAddTier = () => {
+      newTier.value = {
+        id: uuidv4(),
+        name: '',
+        price: 0,
+        description: '',
+        welcomeMessage: '',
+      };
+      showAddTierDialog.value = true;
+    };
+
+    const saveNewTier = (tier: Partial<Tier>) => {
+      showAddTierDialog.value = false;
+      store.addTier(tier);
+    };
+
+    const saveAllTiers = () => {
+      tiers.value.forEach((t) => saveTier(t));
     };
 
     const removeTier = (id: string) => {
@@ -162,7 +189,11 @@ export default defineComponent({
       formatCurrency,
       logout,
       saveProfile,
-      addTier,
+      openAddTier,
+      showAddTierDialog,
+      newTier,
+      saveNewTier,
+      saveAllTiers,
       removeTier,
       saveTier,
     };
