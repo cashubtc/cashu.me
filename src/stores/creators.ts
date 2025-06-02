@@ -6,6 +6,12 @@ export const FEATURED_CREATORS = [
   "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
   "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
   "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+  "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+  "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+  "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+  "1111111111111111111111111111111111111111111111111111111111111111",
+  "2222222222222222222222222222222222222222222222222222222222222222",
+  "3333333333333333333333333333333333333333333333333333333333333333",
 ];
 
 export interface CreatorProfile {
