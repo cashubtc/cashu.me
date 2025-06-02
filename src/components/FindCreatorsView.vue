@@ -64,6 +64,7 @@
 
 <script lang="ts">
 import { defineComponent, ref, watch, onMounted } from "vue";
+import { useRouter } from "vue-router";
 import { useCreatorsStore } from "stores/creators";
 import CreatorProfileCard from "components/CreatorProfileCard.vue";
 import DonateDialog from "components/DonateDialog.vue";
@@ -90,6 +91,7 @@ export default defineComponent({
     const { searchResults, searching, error } = storeToRefs(creatorsStore);
     const searchInput = ref("");
     const sendTokensStore = useSendTokensStore();
+    const router = useRouter();
     const { t } = useI18n();
     const showDonateDialog = ref(false);
     const showActionDialog = ref(false);
@@ -202,7 +204,8 @@ export default defineComponent({
           useDmChatsStore().addOutgoing(ev);
           Dialog.create({
             message: t("wallet.notifications.nostr_dm_sent") as string,
-          });
+            ok: { label: t("FindCreators.actions.back_to_search") as string },
+          }).onOk(() => router.push("/find-creators"));
         } else {
           Dialog.create({
             message: t("wallet.notifications.nostr_dm_failed") as string,

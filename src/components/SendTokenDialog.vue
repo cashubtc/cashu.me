@@ -1239,6 +1239,15 @@ export default defineComponent({
         };
         this.addPendingToken(historyToken);
         this.sendData.historyToken = historyToken;
+        Dialog.create({
+          message: this.$t(
+            "FindCreators.notifications.donation_sent"
+          ) as string,
+          ok: { label: this.$t("FindCreators.actions.back_to_search") as string },
+        }).onOk(() => {
+          this.showSendTokens = false;
+          this.$router.push("/find-creators");
+        });
 
       if (!this.g.offline) {
         this.onTokenPaid(historyToken);
