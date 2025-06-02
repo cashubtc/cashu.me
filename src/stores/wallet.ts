@@ -75,6 +75,7 @@ export type InvoiceHistory = Invoice & {
   unit: string;
   mintQuote?: MintQuoteResponse;
   meltQuote?: MeltQuoteResponse;
+  label?: string; // Add label field for custom naming
 };
 
 type KeysetCounter = {
@@ -620,7 +621,6 @@ export const useWalletStore = defineStore("wallet", {
     mint: async function (invoice: InvoiceHistory, verbose: boolean = true) {
       const proofsStore = useProofsStore();
       const mintStore = useMintsStore();
-      const tokenStore = useTokensStore();
       const uIStore = useUiStore();
       const keysetId = this.getKeyset(invoice.mint, invoice.unit);
       const mintWallet = this.mintWallet(invoice.mint, invoice.unit);
@@ -664,13 +664,6 @@ export const useWalletStore = defineStore("wallet", {
 
         // update UI
         await this.setInvoicePaid(invoice.quote);
-        const serializedProofs = proofsStore.serializeProofs(proofs);
-        tokenStore.addPaidToken({
-          amount: invoice.amount,
-          token: serializedProofs,
-          unit: invoice.unit,
-          mint: invoice.mint,
-        });
         useInvoicesWorkerStore().removeInvoiceFromChecker(invoice.quote);
 
         return proofs;
@@ -760,7 +753,6 @@ export const useWalletStore = defineStore("wallet", {
     ) {
       const uIStore = useUiStore();
       const proofsStore = useProofsStore();
-      const tokenStore = useTokensStore();
 
       console.log("#### melt()");
       const amount = quote.amount + quote.fee_reserve;
@@ -834,12 +826,6 @@ export const useWalletStore = defineStore("wallet", {
           })
         );
         console.log("#### pay lightning: token paid");
-        tokenStore.addPaidToken({
-          amount: -amount_paid,
-          token: proofsStore.serializeProofs(sendProofs),
-          unit: mintWallet.unit,
-          mint: mintWallet.mint.mintUrl,
-        });
 
         this.updateOutgoingInvoiceInHistory(quote, {
           status: "paid",
