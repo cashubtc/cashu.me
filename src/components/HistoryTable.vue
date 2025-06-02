@@ -6,87 +6,92 @@
         :key="getTransactionKey(transaction)"
         clickable
         v-ripple
-        class="q-px-md"
+        class="q-px-md q-py-md"
       >
-        <!-- Amount Section -->
-        <q-item-section
-          side
-          @click="showTransactionDialog(transaction)"
-          style="width: 140px"
-          class="q-pr-none items-center"
-        >
-          <q-item-label class="text-weight-bold">
-            <q-icon
-              :name="transaction.amount >= 0 ? 'call_received' : 'call_made'"
-              :color="
-                transaction.status === 'paid'
-                  ? transaction.amount >= 0
-                    ? 'green'
-                    : 'red'
-                  : ''
-              "
-              class="q-mr-xs"
-              size="xs"
+        <!-- Icon Section -->
+        <q-item-section avatar class="q-pr-md" style="min-width: 40px">
+          <q-avatar size="32px" class="icon-background">
+            <CoinsIcon
+              v-if="isEcashTransaction(transaction)"
+              class="transaction-icon"
             />
-            <span> {{ formatCurrency(transaction.amount, transaction.unit) }} </span>
-          </q-item-label>
+            <ZapIcon v-else class="transaction-icon" />
+          </q-avatar>
         </q-item-section>
 
-        <!-- Transaction Details Section -->
-        <q-item-section
-          class="items-center q-pl-lg"
-          @click="showTransactionDialog(transaction)"
-          style="width: 300px"
-        >
-          <q-item-label class="row items-center">
-            <!-- Transaction type icon -->
-            <q-icon
-              :name="getTransactionIcon(transaction)"
-              :color="getTransactionIconColor(transaction)"
-              size="sm"
-              class="q-mr-sm"
-            />
-            <!-- Editable label -->
-            <span
-              v-if="!transaction.editingLabel"
-              @dblclick="startEditingLabel(transaction)"
-              class="cursor-pointer transaction-label"
-              :title="$t('HistoryTable.label.edit_hint')"
-            >
-              {{ getTransactionLabel(transaction) }}
-            </span>
-            <q-input
-              v-else
-              v-model="transaction.tempLabel"
-              @blur="finishEditingLabel(transaction)"
-              @keyup.enter="finishEditingLabel(transaction)"
-              @keyup.esc="cancelEditingLabel(transaction)"
-              :placeholder="getDefaultLabel(transaction)"
-              dense
-              outlined
-              autofocus
-              style="max-width: 150px"
-            />
+        <!-- Main Content Section -->
+        <q-item-section @click="showTransactionDialog(transaction)">
+          <q-item-label class="row items-center justify-between">
+            <!-- Transaction Label -->
+            <div class="col text-left">
+              <span
+                v-if="!transaction.editingLabel"
+                @dblclick="startEditingLabel(transaction)"
+                class="cursor-pointer transaction-label text-weight-medium"
+                :title="$t('HistoryTable.label.edit_hint')"
+              >
+                {{ getTransactionLabel(transaction) }}
+              </span>
+              <q-input
+                v-else
+                v-model="transaction.tempLabel"
+                @blur="finishEditingLabel(transaction)"
+                @keyup.enter="finishEditingLabel(transaction)"
+                @keyup.esc="cancelEditingLabel(transaction)"
+                :placeholder="getDefaultLabel(transaction)"
+                dense
+                outlined
+                autofocus
+                style="max-width: 150px"
+              />
+            </div>
+
+            <!-- Amount -->
+            <div class="text-right">
+              <div
+                class="amount-text"
+                :class="{
+                  'text-green':
+                    transaction.amount >= 0 && transaction.status !== 'pending',
+                  'text-weight-bold': transaction.status !== 'pending',
+                  'text-grey-6': transaction.status === 'pending',
+                }"
+              >
+                <span v-if="transaction.amount >= 0">+</span
+                >{{ formatCurrency(transaction.amount, transaction.unit) }}
+              </div>
+            </div>
           </q-item-label>
-          <q-item-label caption>
-            {{
-              $t("HistoryTable.row.date_label", {
-                value: formattedDate(transaction.date),
-              })
-            }}
+
+          <q-item-label caption class="row items-center justify-between">
+            <!-- Date -->
+            <div class="text-grey-6">
+              {{
+                $t("HistoryTable.row.date_label", {
+                  value: formattedDate(transaction.date),
+                })
+              }}
+            </div>
+
+            <!-- Status or empty space for consistent height -->
+            <div class="text-grey-6 text-caption">
+              <span v-if="transaction.status === 'pending'">Pending</span>
+              <span v-else>&nbsp;</span>
+            </div>
           </q-item-label>
         </q-item-section>
 
         <!-- Actions Section -->
-        <q-item-section side top>
+        <q-item-section side top style="min-width: 40px">
           <q-btn
             flat
             dense
+            round
             icon="sync"
             @click="checkTransactionStatus(transaction)"
             class="cursor-pointer"
             v-if="transaction.status === 'pending'"
-            style="position: absolute; right: 0"
+            size="sm"
           >
             <q-tooltip>{{
               $t("HistoryTable.actions.check_status.tooltip_text")
@@ -95,11 +100,16 @@
           <q-btn
             flat
             dense
+            round
             icon="arrow_circle_down"
             @click="receiveToken(transaction.token)"
             class="cursor-pointer"
-            v-if="isEcashTransaction(transaction) && transaction.status === 'pending' && transaction.amount > 0"
-            style="position: absolute; right: 0"
+            v-if="
+              isEcashTransaction(transaction) &&
+              transaction.status === 'pending' &&
+              transaction.amount > 0
+            "
+            size="sm"
           >
             <q-tooltip>{{
               $t("HistoryTable.actions.receive.tooltip_text")
@@ -108,7 +118,7 @@
         </q-item-section>
       </q-item>
     </q-list>
-    
+
     <!-- Filter Controls -->
     <div class="text-center q-mt-lg">
       <q-btn
@@ -128,14 +138,14 @@
         size="sm"
       />
     </div>
-    
+
     <!-- Empty State -->
     <div v-if="paginatedTransactions.length === 0" class="text-center q-mt-lg">
       <q-item-label caption class="text-primary">{{
         $t("HistoryTable.empty_text")
       }}</q-item-label>
     </div>
-    
+
     <!-- Pagination -->
     <div v-else-if="maxPages > 1" class="text-center q-mt-lg">
       <div style="display: flex; justify-content: center">
@@ -164,9 +174,14 @@ import { useSendTokensStore } from "src/stores/sendTokensStore";
 import { useUiStore } from "src/stores/ui";
 import token from "../js/token";
 import { notify } from "src/js/notify";
+import { Coins as CoinsIcon, Zap as ZapIcon } from "lucide-vue-next";
 
 export default defineComponent({
   name: "HistoryTable",
+  components: {
+    CoinsIcon,
+    ZapIcon,
+  },
   mixins: [windowMixin],
   props: {},
   data: function () {
@@ -194,118 +209,121 @@ export default defineComponent({
       "showLockInput",
     ]),
     ...mapWritableState(useUiStore, ["showInvoiceDetails"]),
-    ...mapWritableState(useWalletStore, [
-      "invoiceData",
-      "payInvoiceData",
-    ]),
-    
+    ...mapWritableState(useWalletStore, ["invoiceData", "payInvoiceData"]),
+
     // Unified transactions combining both tokens and invoices
     unifiedTransactions() {
       const transactions = [];
-      
+
       // Add token transactions (ecash)
-      this.historyTokens.forEach(token => {
+      this.historyTokens.forEach((token) => {
         transactions.push({
           ...token,
-          type: 'ecash',
+          type: "ecash",
           id: `token-${token.token}`,
           label: token.label, // Use existing label or undefined
           editingLabel: false,
-          tempLabel: '',
+          tempLabel: "",
         });
       });
-      
+
       // Add invoice transactions (lightning)
-      this.invoiceHistory.forEach(invoice => {
+      this.invoiceHistory.forEach((invoice) => {
         transactions.push({
           ...invoice,
-          type: 'lightning',
+          type: "lightning",
           id: `invoice-${invoice.quote}`,
           label: invoice.label, // Use existing label or undefined
           editingLabel: false,
-          tempLabel: '',
+          tempLabel: "",
         });
       });
-      
+
       // Sort by date (newest first)
       return transactions.sort((a, b) => new Date(b.date) - new Date(a.date));
     },
-    
-    maxPages() {
-      return Math.ceil(this.unifiedTransactions.length / this.pageSize);
+
+    // Filter transactions first, then paginate
+    filteredTransactions() {
+      if (this.filterPending) {
+        return this.unifiedTransactions.filter(
+          (transaction) => transaction.status === "pending"
+        );
+      }
+      return this.unifiedTransactions;
     },
-    
+
+    maxPages() {
+      return Math.ceil(this.filteredTransactions.length / this.pageSize);
+    },
+
     paginatedTransactions() {
       const start = (this.currentPage - 1) * this.pageSize;
       const end = start + this.pageSize;
-      
-      if (this.filterPending) {
-        return this.unifiedTransactions
-          .filter((transaction) => transaction.status === "pending")
-          .slice(start, end);
-      }
-      
-      return this.unifiedTransactions.slice(start, end);
+      return this.filteredTransactions.slice(start, end);
     },
   },
   methods: {
     ...mapActions(useWalletStore, [
-      "checkTokenSpendable", 
-      "checkInvoice", 
-      "checkOutgoingInvoice"
+      "checkTokenSpendable",
+      "checkInvoice",
+      "checkOutgoingInvoice",
     ]),
-    
+
     formattedDate(date_str) {
       const date = parseISO(date_str);
       return formatDistanceToNow(date, { addSuffix: false });
     },
-    
+
     shortenString: function (s) {
       return shortenString(s, 20, 10);
     },
-    
+
     handlePageChange(page) {
       this.currentPage = page;
     },
-    
+
     receiveToken(tokenStr) {
       this.receiveData.tokensBase64 = tokenStr;
       this.showReceiveTokens = true;
     },
-    
+
     getTransactionKey(transaction) {
       return transaction.id;
     },
-    
+
     isEcashTransaction(transaction) {
-      return transaction.type === 'ecash';
+      return transaction.type === "ecash";
     },
-    
+
     isLightningTransaction(transaction) {
-      return transaction.type === 'lightning';
+      return transaction.type === "lightning";
     },
-    
+
     getTransactionIcon(transaction) {
-      return transaction.type === 'lightning' ? 'flash_on' : 'account_balance_wallet';
+      return transaction.type === "lightning"
+        ? "flash_on"
+        : "account_balance_wallet";
     },
-    
+
     getTransactionIconColor(transaction) {
-      return transaction.type === 'lightning' ? 'orange' : 'blue';
+      return transaction.type === "lightning" ? "orange" : "blue";
     },
-    
+
     getDefaultLabel(transaction) {
-      return transaction.type === 'lightning' ? 'Lightning' : 'Ecash';
+      return transaction.type === "lightning" ? "Lightning" : "Ecash";
     },
-    
+
     getTransactionLabel(transaction) {
       return transaction.label || this.getDefaultLabel(transaction);
     },
-    
+
     startEditingLabel(transaction) {
       transaction.editingLabel = true;
-      transaction.tempLabel = transaction.label || this.getDefaultLabel(transaction);
+      transaction.tempLabel =
+        transaction.label || this.getDefaultLabel(transaction);
     },
-    
+
     finishEditingLabel(transaction) {
       if (transaction.tempLabel.trim()) {
         transaction.label = transaction.tempLabel.trim();
@@ -314,35 +332,39 @@ export default defineComponent({
         transaction.label = undefined; // Use default
       }
       transaction.editingLabel = false;
-      transaction.tempLabel = '';
+      transaction.tempLabel = "";
     },
-    
+
     cancelEditingLabel(transaction) {
       transaction.editingLabel = false;
-      transaction.tempLabel = '';
+      transaction.tempLabel = "";
     },
-    
+
     saveTransactionLabel(transaction) {
       // Save the label to the appropriate store
-      if (transaction.type === 'ecash') {
+      if (transaction.type === "ecash") {
         // Update token in historyTokens
-        const tokenIndex = this.historyTokens.findIndex(t => t.token === transaction.token);
+        const tokenIndex = this.historyTokens.findIndex(
+          (t) => t.token === transaction.token
+        );
         if (tokenIndex !== -1) {
           this.historyTokens[tokenIndex].label = transaction.label;
         }
-      } else if (transaction.type === 'lightning') {
+      } else if (transaction.type === "lightning") {
         // Update invoice in invoiceHistory
-        const invoiceIndex = this.invoiceHistory.findIndex(i => i.quote === transaction.quote);
+        const invoiceIndex = this.invoiceHistory.findIndex(
+          (i) => i.quote === transaction.quote
+        );
         if (invoiceIndex !== -1) {
           this.invoiceHistory[invoiceIndex].label = transaction.label;
         }
       }
     },
-    
+
     checkTransactionStatus(transaction) {
-      if (transaction.type === 'ecash') {
+      if (transaction.type === "ecash") {
         this.checkTokenSpendable(transaction);
-      } else if (transaction.type === 'lightning') {
+      } else if (transaction.type === "lightning") {
         if (transaction.amount > 0) {
           this.checkInvoice(transaction.quote, true);
         } else {
@@ -350,15 +372,15 @@ export default defineComponent({
         }
       }
     },
-    
+
     showTransactionDialog(transaction) {
-      if (transaction.type === 'ecash') {
+      if (transaction.type === "ecash") {
         this.showTokenDialog(transaction);
-      } else if (transaction.type === 'lightning') {
+      } else if (transaction.type === "lightning") {
         this.showInvoiceDialog(transaction);
       }
     },
-    
+
     showTokenDialog: function (historyToken) {
       if (historyToken.token === undefined) {
         notify(this.$i18n.t("HistoryTable.old_token_not_found_error_text"));
@@ -374,7 +396,7 @@ export default defineComponent({
       this.sendData.historyToken = historyToken;
       this.showSendTokens = true;
     },
-    
+
     showInvoiceDialog: async function (invoice) {
       this.invoiceData = invoice;
       this.showInvoiceDetails = true;
@@ -398,11 +420,26 @@ export default defineComponent({
 <style scoped>
 .transaction-label {
   border-radius: 4px;
-  padding: 2px 6px;
   transition: background-color 0.2s ease;
 }
 
 .transaction-label:hover {
   background-color: rgba(0, 0, 0, 0.04);
+}
+
+.icon-background {
+  background-color: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.transaction-icon {
+  width: 18px;
+  height: 18px;
+  color: currentColor;
+}
+
+.amount-text {
+  font-size: 1rem;
+  line-height: 1.2;
 }
 </style>
