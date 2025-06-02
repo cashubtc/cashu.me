@@ -66,4 +66,19 @@ describe('CreatorHub store', () => {
     expect(signMock).toHaveBeenCalledWith(nostrStoreMock.signer)
     expect(publishMock).toHaveBeenCalled()
   })
+
+  it('removeTier publishes deletion event', async () => {
+    const store = useCreatorHubStore()
+    store.tiers['id1'] = { id: 'id1', name: 'T', price: 1, description: '', welcomeMessage: '' }
+    await store.removeTier('id1')
+    expect(store.tiers['id1']).toBeUndefined()
+    expect(nostrStoreMock.initSignerIfNotSet).toHaveBeenCalled()
+    expect(createdEvents).toHaveLength(1)
+    const ev = createdEvents[0]
+    expect(ev.kind).toBe(38100)
+    expect(ev.tags).toEqual([[ 'd', 'id1' ]])
+    expect(ev.content).toBe('')
+    expect(signMock).toHaveBeenCalledWith(nostrStoreMock.signer)
+    expect(publishMock).toHaveBeenCalled()
+  })
 })
