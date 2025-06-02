@@ -40,6 +40,11 @@ const routes = [
     children: [{ path: "", component: () => import("src/pages/Chats.vue") }],
   },
   {
+    path: "/chats/:pubkey",
+    component: () => import("layouts/MainLayout.vue"),
+    children: [{ path: "", component: () => import("src/pages/ChatView.vue") }],
+  },
+  {
     path: "/buckets/:id",
     component: () => import("layouts/FullscreenLayout.vue"),
     children: [
