@@ -200,7 +200,7 @@ window.windowMixin = {
     } else {
       this.$q.dark.set(true);
     }
-    this.g.allowedThemes = window.allowedThemes ?? ["classic"];
+    this.g.allowedThemes = window.allowedThemes ?? ["nostr"];
 
     addEventListener("offline", (event) => {
       this.g.offline = true;
@@ -223,7 +223,7 @@ window.windowMixin = {
         this.$q.localStorage.getItem("cashu.theme")
       );
     } else {
-      this.changeColor("classic");
+      this.changeColor("nostr");
     }
 
     const language = this.$q.localStorage.getItem("cashu.language");
