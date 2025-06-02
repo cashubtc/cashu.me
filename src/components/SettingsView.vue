@@ -1206,8 +1206,6 @@
                     size="md"
                     :aria-label="$t('Settings.appearance.theme.tooltips.mint')"
                     :title="$t('Settings.appearance.theme.tooltips.mint')"
-                    :aria-label="$t('Settings.appearance.theme.tooltips.mint')"
-                    :title="$t('Settings.appearance.theme.tooltips.mint')"
                     ><q-tooltip>{{
                       $t("Settings.appearance.theme.tooltips.mint")
                     }}</q-tooltip> </q-btn
