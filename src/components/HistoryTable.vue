@@ -63,7 +63,10 @@
             </div>
           </q-item-label>
 
-          <q-item-label caption class="row items-center justify-between">
+          <q-item-label
+            caption
+            class="q-mt-none row items-center justify-between"
+          >
             <!-- Date -->
             <div class="text-grey-6">
               {{
@@ -444,6 +447,7 @@ export default defineComponent({
 <style scoped>
 .transaction-label {
   border-radius: 4px;
+  font-size: 1rem;
   transition: background-color 0.2s ease;
 }
 
@@ -457,8 +461,8 @@ export default defineComponent({
 }
 
 .transaction-icon {
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
   color: currentColor;
 }
 
