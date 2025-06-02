@@ -70,6 +70,7 @@ describe("Creators store", () => {
   });
 
   it("loads featured creators", async () => {
+    (nip19.decode as any).mockReturnValue({ data: "f".repeat(64) });
     const creators = useCreatorsStore();
     await creators.loadFeaturedCreators();
 
