@@ -28,22 +28,22 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, computed } from 'vue';
-import { useCreatorHubStore } from 'stores/creatorHub';
-import { marked } from 'marked';
+import { defineComponent, computed } from "vue";
+import { useCreatorHubStore } from "stores/creatorHub";
+import { renderMarkdown as renderMarkdownFn } from "src/js/simple-markdown";
 
 export default defineComponent({
-  name: 'CreatorHubPage',
+  name: "CreatorHubPage",
   setup() {
     const store = useCreatorHubStore();
     const tiers = computed(() => store.getTierArray());
     const loggedIn = computed(() => !!store.loggedInNpub);
 
     function renderMarkdown(text: string): string {
-      return marked.parse(text || '');
+      return renderMarkdownFn(text || "");
     }
 
     return { tiers, loggedIn, renderMarkdown };
-  }
+  },
 });
 </script>

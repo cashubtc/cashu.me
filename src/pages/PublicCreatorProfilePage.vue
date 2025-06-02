@@ -1,16 +1,23 @@
 <template>
-  <div :class="[$q.dark.isActive ? 'bg-dark text-white' : 'bg-white text-dark', 'q-pa-md']">
+  <div
+    :class="[
+      $q.dark.isActive ? 'bg-dark text-white' : 'bg-white text-dark',
+      'q-pa-md',
+    ]"
+  >
     <div class="q-mb-md">
-      <q-btn flat color="primary" to="/find-creators">{{ $t('CreatorHub.profile.back') }}</q-btn>
+      <q-btn flat color="primary" to="/find-creators">{{
+        $t("CreatorHub.profile.back")
+      }}</q-btn>
     </div>
     <div class="text-h5 q-mb-md">{{ profile.display_name || pubkey }}</div>
     <div v-if="profile.picture" class="q-mb-md">
-      <img :src="profile.picture" style="max-width:150px" />
+      <img :src="profile.picture" style="max-width: 150px" />
     </div>
     <div v-if="profile.about" class="q-mb-md">{{ profile.about }}</div>
 
     <div v-if="tiers.length">
-      <div class="text-h6 q-mb-sm">{{ $t('CreatorHub.profile.tiers') }}</div>
+      <div class="text-h6 q-mb-sm">{{ $t("CreatorHub.profile.tiers") }}</div>
       <div v-for="tier in tiers" :key="tier.id" class="q-mb-md">
         <div class="text-subtitle1">
           {{ tier.name }} - {{ tier.price }} sats
@@ -24,7 +31,7 @@
           dense
           class="q-mt-sm"
           @click="supportTier(tier)"
-          >{{ $t('CreatorHub.profile.support') }}</q-btn
+          >{{ $t("CreatorHub.profile.support") }}</q-btn
         >
       </div>
     </div>
@@ -32,16 +39,16 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, onMounted, computed } from 'vue';
-import { useRoute } from 'vue-router';
-import { useNostrStore } from 'stores/nostr';
-import { useCreatorHubStore, Tier } from 'stores/creatorHub';
-import { usePriceStore } from 'stores/price';
-import { useUiStore } from 'stores/ui';
-import { marked } from 'marked';
+import { defineComponent, ref, onMounted, computed } from "vue";
+import { useRoute } from "vue-router";
+import { useNostrStore } from "stores/nostr";
+import { useCreatorHubStore, Tier } from "stores/creatorHub";
+import { usePriceStore } from "stores/price";
+import { useUiStore } from "stores/ui";
+import { renderMarkdown as renderMarkdownFn } from "src/js/simple-markdown";
 
 export default defineComponent({
-  name: 'PublicCreatorProfilePage',
+  name: "PublicCreatorProfilePage",
   setup() {
     const route = useRoute();
     const nostr = useNostrStore();
@@ -57,19 +64,22 @@ export default defineComponent({
       if (p) profile.value = { ...p };
     });
     function renderMarkdown(text: string): string {
-      return marked.parse(text || '');
+      return renderMarkdownFn(text || "");
     }
 
     function formatFiat(sats: number): string {
-      if (!priceStore.bitcoinPrice) return '';
+      if (!priceStore.bitcoinPrice) return "";
       const value = (priceStore.bitcoinPrice / 100000000) * sats;
-      return uiStore.formatCurrency(value, 'USD', true);
+      return uiStore.formatCurrency(value, "USD", true);
     }
 
     async function supportTier(tier: Tier) {
       if (tier.welcomeMessage) {
         try {
-          await useNostrStore().sendNip04DirectMessage(pubkey, tier.welcomeMessage);
+          await useNostrStore().sendNip04DirectMessage(
+            pubkey,
+            tier.welcomeMessage,
+          );
         } catch (e) {
           console.error(e);
         }
@@ -85,6 +95,6 @@ export default defineComponent({
       formatFiat,
       supportTier,
     };
-  }
+  },
 });
 </script>
