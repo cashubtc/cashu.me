@@ -1,5 +1,5 @@
 <template>
-  <div style="max-width: 1200px; margin: 0 auto">
+  <div class="creators-container">
     <q-input
       rounded
       outlined
@@ -282,6 +282,11 @@ export default defineComponent({
 </script>
 
 <style scoped>
+.creators-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+}
 .creators-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));

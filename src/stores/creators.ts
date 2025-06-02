@@ -3,15 +3,16 @@ import { useNostrStore } from "./nostr";
 import { nip19 } from "nostr-tools";
 
 export const FEATURED_CREATORS = [
-  "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-  "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
-  "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
-  "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
-  "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
-  "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
-  "1111111111111111111111111111111111111111111111111111111111111111",
-  "2222222222222222222222222222222222222222222222222222222222222222",
-  "3333333333333333333333333333333333333333333333333333333333333333",
+  "npub1aljmhjp5tqrw3m60ra7t3u8uqq223d6rdg9q0h76a8djd9m4hmvsmlj82m",
+  "npub1sg6plzptd64u62a878hep2kev88swjh3tw00gjsfl8f237lmu63q0uf63m",
+  "npub1qny3tkh0acurzla8x3zy4nhrjz5zd8l9sy9jys09umwng00manysew95gx",
+  "npub1cj8znuztfqkvq89pl8hceph0svvvqk0qay6nydgk9uyq7fhpfsgsqwrz4u",
+  "npub1a2cww4kn9wqte4ry70vyfwqyqvpswksna27rtxd8vty6c74era8sdcw83a",
+  "npub1s05p3ha7en49dv8429tkk07nnfa9pcwczkf5x5qrdraqshxdje9sq6eyhe",
+  "npub180cvv07tjdrrgpa0j7j7tmnyl2yr6yr7l8j4s3evf6u64th6gkwsyjh6w6",
+  "npub1dergggklka99wwrs92yz8wdjs952h2ux2ha2ed598ngwu9w7a6fsh9xzpc",
+  "npub1s5yq6wadwrxde4lhfs56gn64hwzuhnfa6r9mj476r5s4hkunzgzqrs6q7z",
+  "npub1spdnfacgsd7lk0nlqkq443tkq4jx9z6c6ksvaquuewmw7d3qltpslcq6j7",
 ];
 
 export interface CreatorProfile {
@@ -80,7 +81,22 @@ export const useCreatorsStore = defineStore("creators", {
       this.error = "";
       this.searching = true;
       await nostrStore.initNdkReadOnly();
-      for (const pubkey of FEATURED_CREATORS) {
+
+      for (const entry of FEATURED_CREATORS) {
+        let pubkey = entry;
+        if (entry.startsWith("npub") || entry.startsWith("nprofile")) {
+          try {
+            const decoded = nip19.decode(entry);
+            if (typeof decoded.data === "string") {
+              pubkey = decoded.data as string;
+            } else if (typeof decoded.data === "object" && (decoded.data as any).pubkey) {
+              pubkey = (decoded.data as any).pubkey as string;
+            }
+          } catch (e) {
+            console.error("Failed to decode", entry, e);
+            continue;
+          }
+        }
         try {
           const user = nostrStore.ndk.getUser({ pubkey });
           await user.fetchProfile();
