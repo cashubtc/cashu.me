@@ -10,7 +10,7 @@
     >
       <template #label>
         <div class="row items-center no-wrap">
-          <span>{{ $t('FindCreators.inputs.search.label') }}</span>
+          <span>{{ $t("FindCreators.inputs.search.label") }}</span>
           <InfoTooltip
             class="q-ml-xs"
             :text="$t('FindCreators.inputs.search.tooltip')"
@@ -41,11 +41,19 @@
     <DonateDialog v-model="showDonateDialog" @confirm="handleDonate" />
     <q-dialog v-model="showActionDialog" persistent>
       <q-card class="q-pa-md qcard" style="min-width: 300px">
-        <q-card-section class="text-h6">{{ $t('FindCreators.choose_action.title') }}</q-card-section>
+        <q-card-section class="text-h6">{{
+          $t("FindCreators.choose_action.title")
+        }}</q-card-section>
         <q-card-actions vertical>
-          <q-btn flat color="primary" @click="chooseExisting">{{ $t('FindCreators.choose_action.existing') }}</q-btn>
-          <q-btn flat color="primary" @click="chooseNew">{{ $t('FindCreators.choose_action.new') }}</q-btn>
-          <q-btn flat color="primary" @click="backToBucket">{{ $t('global.actions.cancel.label') }}</q-btn>
+          <q-btn flat color="primary" @click="chooseExisting">{{
+            $t("FindCreators.choose_action.existing")
+          }}</q-btn>
+          <q-btn flat color="primary" @click="chooseNew">{{
+            $t("FindCreators.choose_action.new")
+          }}</q-btn>
+          <q-btn flat color="primary" @click="backToBucket">{{
+            $t("global.actions.cancel.label")
+          }}</q-btn>
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -55,10 +63,7 @@
       @selected="handleTokenSelect"
       @back="backToAction"
     />
-    <SendMessageDialog
-      v-model="showMessageDialog"
-      @send="sendMessage"
-    />
+    <SendMessageDialog v-model="showMessageDialog" @send="sendMessage" />
   </div>
 </template>
 
@@ -72,6 +77,7 @@ import ChooseExistingTokenDialog from "components/ChooseExistingTokenDialog.vue"
 import SendMessageDialog from "components/SendMessageDialog.vue";
 import { storeToRefs } from "pinia";
 import { useSendTokensStore } from "stores/sendTokensStore";
+import { useDonationPresetsStore } from "stores/donationPresets";
 import { useNostrStore } from "stores/nostr";
 import { useDmChatsStore } from "stores/dmChats";
 import { Dialog } from "quasar";
@@ -91,6 +97,7 @@ export default defineComponent({
     const { searchResults, searching, error } = storeToRefs(creatorsStore);
     const searchInput = ref("");
     const sendTokensStore = useSendTokensStore();
+    const donationStore = useDonationPresetsStore();
     const router = useRouter();
     const { t } = useI18n();
     const showDonateDialog = ref(false);
@@ -133,13 +140,42 @@ export default defineComponent({
       showMessageDialog.value = true;
     };
 
-    const handleDonate = ({ bucketId, locked }: { bucketId: string; locked: boolean }) => {
+    const handleDonate = async ({
+      bucketId,
+      locked,
+      type,
+      amount,
+      months,
+    }: {
+      bucketId: string;
+      locked: boolean;
+      type: string;
+      amount: number;
+      months: number;
+    }) => {
       selectedBucketId.value = bucketId;
       selectedLocked.value = locked;
-      sendTokensStore.recipientPubkey = donateCreator.value.pubkey;
-      sendTokensStore.sendViaNostr = true;
-      showDonateDialog.value = false;
-      showActionDialog.value = true;
+      if (type === "one-time") {
+        sendTokensStore.clearSendData();
+        sendTokensStore.recipientPubkey = donateCreator.value.pubkey;
+        sendTokensStore.sendViaNostr = true;
+        sendTokensStore.sendData.bucketId = bucketId;
+        sendTokensStore.sendData.amount = amount;
+        sendTokensStore.sendData.p2pkPubkey = locked
+          ? donateCreator.value.pubkey
+          : "";
+        sendTokensStore.showLockInput = locked;
+        showDonateDialog.value = false;
+        sendTokensStore.showSendTokens = true;
+      } else {
+        await donationStore.createDonationPreset(
+          months,
+          amount,
+          donateCreator.value.pubkey,
+          bucketId,
+        );
+        showDonateDialog.value = false;
+      }
     };
 
     const chooseExisting = () => {
@@ -152,7 +188,9 @@ export default defineComponent({
       sendTokensStore.recipientPubkey = donateCreator.value.pubkey;
       sendTokensStore.sendViaNostr = true;
       sendTokensStore.sendData.bucketId = selectedBucketId.value;
-      sendTokensStore.sendData.p2pkPubkey = selectedLocked.value ? donateCreator.value.pubkey : "";
+      sendTokensStore.sendData.p2pkPubkey = selectedLocked.value
+        ? donateCreator.value.pubkey
+        : "";
       sendTokensStore.showLockInput = selectedLocked.value;
       showActionDialog.value = false;
       sendTokensStore.showSendTokens = true;
@@ -173,7 +211,9 @@ export default defineComponent({
       sendTokensStore.recipientPubkey = donateCreator.value.pubkey;
       sendTokensStore.sendViaNostr = true;
       sendTokensStore.sendData.bucketId = selectedBucketId.value;
-      sendTokensStore.sendData.p2pkPubkey = selectedLocked.value ? donateCreator.value.pubkey : "";
+      sendTokensStore.sendData.p2pkPubkey = selectedLocked.value
+        ? donateCreator.value.pubkey
+        : "";
       sendTokensStore.sendData.tokensBase64 = tokenStr;
       sendTokensStore.showLockInput = selectedLocked.value;
       showExistingDialog.value = false;
@@ -196,10 +236,7 @@ export default defineComponent({
             console.error(e);
           }
         }
-        const ev = await useNostrStore().sendNip04DirectMessage(
-          recipient,
-          msg
-        );
+        const ev = await useNostrStore().sendNip04DirectMessage(recipient, msg);
         if (ev) {
           useDmChatsStore().addOutgoing(ev);
           Dialog.create({
