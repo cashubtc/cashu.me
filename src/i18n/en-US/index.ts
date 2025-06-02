@@ -116,6 +116,10 @@ export default {
           caption: "Manage your tiers",
         },
       },
+      myProfile: {
+        title: "My Profile",
+        myProfile: { title: "My Profile", caption: "View your profile" },
+      },
       buckets: {
         title: "Buckets",
         buckets: {
@@ -1444,7 +1448,8 @@ export default {
       nip07: "Login with Nostr Extension",
       nsec: "nsec",
       nsec_button: "Login with nsec",
-      nsec_warning: "Entering your nsec in a web app is dangerous. Use NIP-07 if possible.",
+      nsec_warning:
+        "Entering your nsec in a web app is dangerous. Use NIP-07 if possible.",
     },
     dashboard: {
       title: "Creator Dashboard",

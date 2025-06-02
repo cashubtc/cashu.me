@@ -114,7 +114,7 @@
         <q-item-section avatar>
           <q-icon name="search" />
         </q-item-section>
-      <q-item-section>
+        <q-item-section>
           <q-item-label>{{
             $t("MainHeader.menu.findCreators.findCreators.title")
           }}</q-item-label>
@@ -133,6 +133,19 @@
           }}</q-item-label>
           <q-item-label caption>{{
             $t("MainHeader.menu.creatorHub.creatorHub.caption")
+          }}</q-item-label>
+        </q-item-section>
+      </q-item>
+      <q-item clickable @click="gotoMyProfile">
+        <q-item-section avatar>
+          <q-icon name="person" />
+        </q-item-section>
+        <q-item-section>
+          <q-item-label>{{
+            $t("MainHeader.menu.myProfile.myProfile.title")
+          }}</q-item-label>
+          <q-item-label caption>{{
+            $t("MainHeader.menu.myProfile.myProfile.caption")
           }}</q-item-label>
         </q-item-section>
       </q-item>
@@ -298,6 +311,11 @@ export default defineComponent({
       leftDrawerOpen.value = false;
     };
 
+    const gotoMyProfile = () => {
+      router.push("/my-profile");
+      leftDrawerOpen.value = false;
+    };
+
     const gotoChats = () => {
       router.push("/chats");
       leftDrawerOpen.value = false;
@@ -319,6 +337,7 @@ export default defineComponent({
       gotoBuckets,
       gotoFindCreators,
       gotoCreatorHub,
+      gotoMyProfile,
       gotoChats,
       gotoWallet,
     };
