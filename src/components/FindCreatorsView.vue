@@ -1,5 +1,5 @@
 <template>
-  <div style="max-width: 800px; margin: 0 auto">
+  <div style="max-width: 1200px; margin: 0 auto">
     <q-input
       rounded
       outlined
@@ -29,7 +29,7 @@
       {{ error }}
     </div>
 
-    <div v-if="searchResults.length" class="q-mt-md">
+    <div v-if="searchResults.length" class="q-mt-md creators-grid">
       <creator-profile-card
         v-for="creator in searchResults"
         :key="creator.pubkey"
@@ -240,3 +240,12 @@ export default defineComponent({
   },
 });
 </script>
+
+<style scoped>
+.creators-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+  justify-items: center;
+}
+</style>

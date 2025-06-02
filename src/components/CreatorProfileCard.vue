@@ -1,5 +1,5 @@
 <template>
-  <q-card class="q-pa-md q-mb-md qcard">
+  <q-card class="q-pa-md q-mb-md qcard creator-card">
     <q-card-section class="row items-center no-wrap">
       <q-avatar
         v-if="creator.profile?.picture"
@@ -90,5 +90,9 @@ export default defineComponent({
 }
 .creator-avatar img {
   object-fit: cover;
+}
+.creator-card.qcard {
+  width: 100%;
+  max-width: 280px;
 }
 </style>
