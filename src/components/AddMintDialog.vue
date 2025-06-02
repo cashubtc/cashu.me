@@ -5,10 +5,14 @@
     backdrop-filter="blur(2px) brightness(60%)"
   >
     <q-card class="q-pa-lg">
-      <h6 class="q-mt-none q-mb-md">{{ $t("AddMintDialog.title") }}</h6>
-      <p>
-        {{ $t("AddMintDialog.description") }}
-      </p>
+      <h6 class="q-mt-none q-mb-sm">{{ $t("AddMintDialog.title") }}</h6>
+      <div class="row items-center q-mb-md">
+        <p class="q-mr-xs q-mb-none">{{ $t("AddMintDialog.description") }}</p>
+        <HelpPopup
+          text="A mint issues ecash tokens. Only add mints you trust."
+          :close-label="$t('global.actions.close.label')"
+        />
+      </div>
       <q-input
         outlined
         readonly
@@ -28,6 +32,7 @@
           </div>
         </template>
       </q-input>
+      <div class="text-caption text-grey q-mb-sm">Enter the base URL of the mint.</div>
       <div class="row q-mt-lg">
         <div class="col">
           <q-btn
