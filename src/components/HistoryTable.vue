@@ -10,7 +10,7 @@
       >
         <!-- Icon Section -->
         <q-item-section avatar class="q-pr-md" style="min-width: 40px">
-          <q-avatar size="32px" class="icon-background">
+          <q-avatar size="32px">
             <CoinsIcon
               v-if="isEcashTransaction(transaction)"
               class="transaction-icon"
@@ -24,26 +24,9 @@
           <q-item-label class="row items-center justify-between">
             <!-- Transaction Label -->
             <div class="col text-left">
-              <span
-                v-if="!transaction.editingLabel"
-                @dblclick="startEditingLabel(transaction)"
-                class="cursor-pointer transaction-label text-weight-medium"
-                :title="$t('HistoryTable.label.edit_hint')"
-              >
+              <span class="transaction-label text-weight-medium">
                 {{ getTransactionLabel(transaction) }}
               </span>
-              <q-input
-                v-else
-                v-model="transaction.tempLabel"
-                @blur="finishEditingLabel(transaction)"
-                @keyup.enter="finishEditingLabel(transaction)"
-                @keyup.esc="cancelEditingLabel(transaction)"
-                :placeholder="getDefaultLabel(transaction)"
-                dense
-                outlined
-                autofocus
-                style="max-width: 150px"
-              />
             </div>
 
             <!-- Amount -->
@@ -311,49 +294,6 @@ export default defineComponent({
       return transaction.label || this.getDefaultLabel(transaction);
     },
 
-    startEditingLabel(transaction) {
-      transaction.editingLabel = true;
-      transaction.tempLabel =
-        transaction.label || this.getDefaultLabel(transaction);
-    },
-
-    finishEditingLabel(transaction) {
-      if (transaction.tempLabel.trim()) {
-        transaction.label = transaction.tempLabel.trim();
-        this.saveTransactionLabel(transaction);
-      } else {
-        transaction.label = undefined; // Use default
-      }
-      transaction.editingLabel = false;
-      transaction.tempLabel = "";
-    },
-
-    cancelEditingLabel(transaction) {
-      transaction.editingLabel = false;
-      transaction.tempLabel = "";
-    },
-
-    saveTransactionLabel(transaction) {
-      // Save the label to the appropriate store
-      if (transaction.type === "ecash") {
-        // Update token in historyTokens
-        const tokenIndex = this.historyTokens.findIndex(
-          (t) => t.token === transaction.token
-        );
-        if (tokenIndex !== -1) {
-          this.historyTokens[tokenIndex].label = transaction.label;
-        }
-      } else if (transaction.type === "lightning") {
-        // Update invoice in invoiceHistory
-        const invoiceIndex = this.invoiceHistory.findIndex(
-          (i) => i.quote === transaction.quote
-        );
-        if (invoiceIndex !== -1) {
-          this.invoiceHistory[invoiceIndex].label = transaction.label;
-        }
-      }
-    },
-
     checkTransactionStatus(transaction) {
       if (transaction.type === "ecash") {
         this.checkTokenSpendable(transaction);
@@ -417,8 +357,6 @@ export default defineComponent({
           type: "ecash",
           id: `token-${token.token}`,
           label: token.label,
-          editingLabel: false,
-          tempLabel: "",
         });
       });
 
@@ -429,8 +367,6 @@ export default defineComponent({
           type: "lightning",
           id: `invoice-${invoice.quote}`,
           label: invoice.label,
-          editingLabel: false,
-          tempLabel: "",
         });
       });
 
@@ -453,11 +389,6 @@ export default defineComponent({
 
 .transaction-label:hover {
   background-color: rgba(0, 0, 0, 0.04);
-}
-
-.icon-background {
-  background-color: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .transaction-icon {
