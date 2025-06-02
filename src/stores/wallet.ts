@@ -75,6 +75,7 @@ export type InvoiceHistory = Invoice & {
   unit: string;
   mintQuote?: MintQuoteResponse;
   meltQuote?: MeltQuoteResponse;
+  label?: string; // Add label field for custom naming
 };
 
 type KeysetCounter = {

@@ -74,11 +74,6 @@
             class="text-secondary"
             :label="$t('WalletPage.tabs.history.label')"
           ></q-tab>
-          <q-tab
-            name="invoices"
-            class="text-secondary"
-            :label="$t('WalletPage.tabs.invoices.label')"
-          ></q-tab>
           <!-- <q-tab name="tokens" label="Tokens"></q-tab> -->
           <q-tab
             name="mints"
@@ -92,16 +87,10 @@
           v-model="tab"
           animated
         >
-          <!-- ////////////////// HISTORY LIST ///////////////// -->
+          <!-- ////////////////// UNIFIED HISTORY LIST ///////////////// -->
 
           <q-tab-panel name="history">
             <HistoryTable />
-          </q-tab-panel>
-
-          <!-- ////////////////// INVOICE LIST ///////////////// -->
-
-          <q-tab-panel name="invoices">
-            <InvoicesTable />
           </q-tab-panel>
 
           <!-- ////////////////////// SETTINGS ////////////////// -->
@@ -223,7 +212,6 @@ import token from "src/js/token";
 // Vue components
 import BalanceView from "components/BalanceView.vue";
 import MintSettings from "components/MintSettings.vue";
-import InvoicesTable from "components/InvoicesTable.vue";
 import HistoryTable from "components/HistoryTable.vue";
 import NoMintWarnBanner from "components/NoMintWarnBanner.vue";
 import WelcomeDialog from "components/WelcomeDialog.vue";
@@ -275,7 +263,6 @@ export default {
   components: {
     BalanceView,
     MintSettings,
-    InvoicesTable,
     HistoryTable,
     NoMintWarnBanner,
     WelcomeDialog,
