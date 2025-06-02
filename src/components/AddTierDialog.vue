@@ -5,10 +5,26 @@
         <div class="text-h6">{{ $t('CreatorHub.dashboard.add_tier') }}</div>
       </q-card-section>
       <q-card-section class="q-pt-none">
-        <q-input v-model="tier.name" label="Title" outlined dense class="q-mb-sm" />
-        <q-input v-model.number="tier.price" type="number" label="Cost (sats)" outlined dense class="q-mb-sm" />
-        <q-input v-model="tier.description" type="textarea" autogrow label="Description (Markdown)" outlined dense class="q-mb-sm" />
-        <q-input v-model="tier.welcomeMessage" type="textarea" autogrow label="Welcome Message" outlined dense class="q-mb-sm" />
+        <q-input v-model="localTier.name" label="Title" outlined dense class="q-mb-sm" />
+        <q-input v-model.number="localTier.price" type="number" label="Cost (sats)" outlined dense class="q-mb-sm" />
+        <q-input
+          v-model="localTier.description"
+          type="textarea"
+          autogrow
+          label="Description (Markdown)"
+          outlined
+          dense
+          class="q-mb-sm"
+        />
+        <q-input
+          v-model="localTier.welcomeMessage"
+          type="textarea"
+          autogrow
+          label="Welcome Message"
+          outlined
+          dense
+          class="q-mb-sm"
+        />
       </q-card-section>
       <q-card-actions align="between" class="q-pt-none">
         <q-btn flat color="primary" @click="save">{{ $t('CreatorHub.dashboard.save_tier') }}</q-btn>
@@ -19,7 +35,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, computed } from 'vue';
+import { defineComponent, computed, reactive, watch } from 'vue';
 import { Tier } from 'stores/creatorHub';
 
 export default defineComponent({
@@ -41,11 +57,21 @@ export default defineComponent({
       set: (val) => emit('update:modelValue', val),
     });
 
+    const localTier = reactive<Partial<Tier>>({ ...props.tier });
+
+    watch(
+      () => props.tier,
+      (val) => {
+        Object.assign(localTier, val);
+      },
+      { immediate: true, deep: true }
+    );
+
     const save = () => {
-      emit('save', props.tier);
+      emit('save', { ...localTier });
     };
 
-    return { showLocal, tier: props.tier, save };
+    return { showLocal, localTier, save };
   },
 });
 </script>
