@@ -12,19 +12,33 @@
     <div v-if="tiers.length">
       <div class="text-h6 q-mb-sm">{{ $t('CreatorHub.profile.tiers') }}</div>
       <div v-for="tier in tiers" :key="tier.id" class="q-mb-md">
-        <div class="text-subtitle1">{{ tier.name }} - {{ tier.price }} sats</div>
-        <div class="text-caption">{{ tier.perks }}</div>
-        <q-btn color="primary" dense class="q-mt-sm">{{ $t('CreatorHub.profile.support') }}</q-btn>
+        <div class="text-subtitle1">
+          {{ tier.name }} - {{ tier.price }} sats
+          <span v-if="bitcoinPrice" class="text-caption">
+            ({{ formatFiat(tier.price) }})
+          </span>
+        </div>
+        <div class="text-caption" v-html="renderMarkdown(tier.perks)"></div>
+        <q-btn
+          color="primary"
+          dense
+          class="q-mt-sm"
+          @click="supportTier(tier)"
+          >{{ $t('CreatorHub.profile.support') }}</q-btn
+        >
       </div>
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, onMounted } from 'vue';
+import { defineComponent, ref, onMounted, computed } from 'vue';
 import { useRoute } from 'vue-router';
 import { useNostrStore } from 'stores/nostr';
-import { useCreatorHubStore } from 'stores/creatorHub';
+import { useCreatorHubStore, Tier } from 'stores/creatorHub';
+import { usePriceStore } from 'stores/price';
+import { useUiStore } from 'stores/ui';
+import { marked } from 'marked';
 
 export default defineComponent({
   name: 'PublicCreatorProfilePage',
@@ -32,6 +46,9 @@ export default defineComponent({
     const route = useRoute();
     const nostr = useNostrStore();
     const hub = useCreatorHubStore();
+    const priceStore = usePriceStore();
+    const uiStore = useUiStore();
+    const bitcoinPrice = computed(() => priceStore.bitcoinPrice);
     const pubkey = route.params.npubOrVanityName as string;
     const profile = ref<any>({});
     const tiers = ref(hub.getTierArray());
@@ -39,7 +56,35 @@ export default defineComponent({
       const p = await nostr.getProfile(pubkey);
       if (p) profile.value = { ...p };
     });
-    return { pubkey, profile, tiers };
+    function renderMarkdown(text: string): string {
+      return marked.parse(text || '');
+    }
+
+    function formatFiat(sats: number): string {
+      if (!priceStore.bitcoinPrice) return '';
+      const value = (priceStore.bitcoinPrice / 100000000) * sats;
+      return uiStore.formatCurrency(value, 'USD', true);
+    }
+
+    async function supportTier(tier: Tier) {
+      if (tier.welcomeMessage) {
+        try {
+          await useNostrStore().sendNip04DirectMessage(pubkey, tier.welcomeMessage);
+        } catch (e) {
+          console.error(e);
+        }
+      }
+    }
+
+    return {
+      pubkey,
+      profile,
+      tiers,
+      bitcoinPrice,
+      renderMarkdown,
+      formatFiat,
+      supportTier,
+    };
   }
 });
 </script>
