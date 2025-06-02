@@ -1350,6 +1350,11 @@ export default {
       send: { label: "@:global.actions.send.label" },
     },
   },
+  DonateDialog: {
+    inputs: {
+      preset: "Donation preset"
+    }
+  },
   BucketManager: {
     actions: {
       add: "Create new Bucket",
