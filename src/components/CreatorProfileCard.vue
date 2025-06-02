@@ -1,5 +1,5 @@
 <template>
-  <q-card class="q-pa-md q-mb-md qcard creator-card">
+  <q-card class="q-pa-md q-mb-md qcard creator-card shadow-2 rounded-borders">
     <q-card-section class="row items-center no-wrap">
       <q-avatar
         v-if="creator.profile?.picture"
@@ -9,14 +9,14 @@
         <img :src="creator.profile.picture" alt="Creator image" />
       </q-avatar>
       <div class="q-ml-sm">
-        <div class="text-subtitle1">
+        <div class="text-subtitle1 ellipsis">
           {{
             creator.profile?.display_name ||
             creator.profile?.name ||
-            creator.pubkey
+            shortPubkey
           }}
         </div>
-        <div class="text-caption">{{ creator.pubkey }}</div>
+        <div class="text-caption">{{ shortPubkey }}</div>
       </div>
     </q-card-section>
     <q-card-section v-if="creator.profile?.about">
@@ -62,6 +62,11 @@ export default defineComponent({
   emits: ["donate", "message"],
   setup(props) {
     const MAX_LENGTH = 160;
+    const shortPubkey = computed(() =>
+      props.creator.pubkey.length > 16
+        ? `${props.creator.pubkey.slice(0, 8)}…${props.creator.pubkey.slice(-8)}`
+        : props.creator.pubkey,
+    );
     const truncatedAbout = computed(() => {
       const about = props.creator.profile?.about || "";
       return about.length > MAX_LENGTH
@@ -78,6 +83,7 @@ export default defineComponent({
     return {
       truncatedAbout,
       joinedDateFormatted,
+      shortPubkey,
     };
   },
 });
@@ -94,5 +100,11 @@ export default defineComponent({
 .creator-card.qcard {
   width: 100%;
   max-width: 280px;
+  border-radius: 8px;
+}
+.ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 </style>

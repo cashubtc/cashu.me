@@ -22,11 +22,21 @@
       </template>
     </q-input>
 
+    <div class="text-h5 q-mt-md q-mb-sm text-center">
+      Featured Creators
+    </div>
+
     <div v-if="searching" class="q-mt-md flex flex-center">
       <q-spinner-dots color="primary" />
     </div>
     <div v-else-if="error" class="q-mt-md text-negative text-bold">
       {{ error }}
+    </div>
+    <div
+      v-else-if="!searching && !searchResults.length"
+      class="q-mt-md text-grey text-center"
+    >
+      No creators found
     </div>
 
     <div v-if="searchResults.length" class="q-mt-md creators-grid">
@@ -286,6 +296,7 @@ export default defineComponent({
   max-width: 1400px;
   margin: 0 auto;
   width: 100%;
+  padding: 16px;
 }
 .creators-grid {
   display: grid;
