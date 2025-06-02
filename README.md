@@ -1,136 +1,112 @@
-# Cashu (cashu)
+# Fundstr
 
-Cashu Wallet
+**The Patreon of Nostr**  
+Support your favorite Nostr creators with private, instant Bitcoin Lightning payments powered by Cashu ecash.
 
-## One-liner build & run
+Fundstr is both a wallet and a platform designed to empower the creator economy on Nostr. It helps users discover, support and engage with creators while letting those creators receive funding directly and privately using Cashu.
 
-```
-docker-compose up -d
-```
+Think Patreon, but built for the Nostr ecosystem and leveraging the privacy and efficiency of Cashu.
 
-access at http://localhost:3000 or serve it behind a reverse proxy.
+## Vision: A Decentralized Creator Economy
+- Creators can share their work, build communities and earn sustainable income directly from their audience, free from intermediaries and censorship.
+- Supporters can discover inspiring creators and fund their work with micropayments or recurring support while keeping their privacy.
 
-## Install the dependencies
+## How It Works
+### For Supporters
+1. **Discover** – Browse a wide range of Nostr creators such as writers, artists, developers or podcasters.
+2. **Explore Profiles** – Learn about creators, see their work and check their funding goals.
+3. **Support with Cashu**
+   - Make one-time donations.
+   - Set up recurring pledges by sending P2PK-locked tokens to the creator, optionally with timelocks matching pledge periods. The app helps manage these tokens.
+   - Choose predefined tiers with special benefits.
+   - Use Token Buckets to organize funds for different creators or goals.
+4. **Engage** – Access exclusive content or chat with creators using Nostr DMs (future feature).
+5. **Stay Private** – All Cashu payments provide enhanced privacy.
 
-```bash
-npm install
-```
+### For Creators
+1. **Create Your Profile** – Link your Nostr identity, describe your work and set funding goals.
+2. **Define Support Tiers** – Offer multiple levels of support with unique perks (e.g. exclusive notes, early access, or direct messages).
+3. **Receive Cashu Directly** – Funding goes instantly and privately to your Fundstr wallet. Supporters can send P2PK locked tokens for pledges.
+4. **Manage Your Hub** – A future dashboard for tracking supporters, funding and content.
+5. **Build Your Community** – Connect with supporters using integrated Nostr DMs.
 
-### Start the app in development mode (hot-code reloading, error reporting, etc.)
+## Key Features
+- **Seamless Cashu Wallet** – Mint, send and receive ecash.
+- **Token Buckets** – Organize tokens into named categories with descriptions, colors and goals. Auto-assign incoming tokens based on mint URL or memo rules and move tokens between buckets as needed.
+- **Advanced Token Management**
+  - P2PK (Pay-to-PubKey) support.
+  - Timelocked tokens for pledge-style recurring support with optional refund keys.
+  - View and manage locked tokens with unlock dates and refund information.
+- **Nostr Identity Integration** – Log in with your existing npub.
+- **Creator Discovery** – Find creators by category, search or Nostr social graphs.
+- **Creator Profiles** – Dedicated pages for creators and their funding needs.
+- **Tiered Support System** – Multiple support levels with unique benefits.
+- **Direct Cashu Donations & Pledges** – One-time or recurring support using P2PK and timelocks.
+- **Nostr Direct Messages** – NIP-04 encrypted chat with creators and other users.
+- **Privacy-Preserving** – Chaumian ecash via Cashu.
+- **Cross-Platform** – Web App, PWA and native Android/iOS.
+- **npub.cash Integration** – Option to receive funds via a Lightning Address.
+- **Nostr Wallet Connect (NWC)** – Planned/experimental automation for recurring support.
 
-```bash
-quasar dev
-```
+## Technology Stack
+- **Frontend**: Quasar Framework (Vue.js 3)
+- **Mobile/Desktop**: Capacitor
+- **State Management**: Pinia
+- **Cashu Protocol**: `@cashu/cashu-ts`
+- **Nostr Protocol**: Nostr Dev Kit (NDK), `nip04` for encryption
+- **Storage**: Dexie.js (IndexedDB)
 
-### Run unit tests
+## Current Status
+Fundstr is currently in Alpha/Beta.
 
-```bash
-npm test
-```
+**What's Working**
+- Core Cashu wallet functionality (send, receive, mint management)
+- Token Buckets (creation, management, auto-assignment rules)
+- P2PK and timelocking of tokens
+- Basic Nostr identity integration
+- Nostr Direct Messages (NIP-04 chat)
+- Initial creator hub and donation presets
 
-### Lint the files
+**Focus of Current Development**
+- Enhancing creator profile management and display
+- Improving discovery mechanisms
+- Developing robust support tier definition
+- Streamlining pledge flows (making P2PK/timelock usage intuitive)
+- Exploring user-friendly recurring support options
 
-```bash
-npm run lint
-```
+## Getting Started
+### 1. Access Fundstr
+- **Web/PWA**: visit your Fundstr URL
+- **Android/iOS**: use the store link or build instructions
 
-### Format the files
+### 2. For Supporters
+1. Set up your wallet and load it with ecash from a compatible mint.
+2. Optionally create Token Buckets for organization.
+3. Browse or search for creators.
+4. Visit a creator's profile and choose a tier, donation or recurring pledge.
+5. Follow prompts to send Cashu ecash.
+6. Chat with creators or other users via Nostr DMs.
 
-```bash
-npm run format
-```
+### 3. For Creators
+1. Go to the **Creator Hub** section.
+2. Set up your profile and link your npub.
+3. Define support tiers and benefits.
+4. Share your Fundstr profile with your audience.
+5. Communicate with supporters through Nostr DMs.
 
-### Build the app for production
+## Roadmap & Future Ideas
+- Advanced creator discovery with search, filters and Nostr recommendations
+- Content gating and delivery using Nostr (tagged or encrypted notes, token-gated chats)
+- Creator dashboards with analytics
+- Notifications for supporters and content updates
+- Deeper NWC integration
+- Community features like comments and badges
+- Decentralized creator registration via Nostr
 
-```bash
-quasar build -m pwa
-```
+## Contributing
+Contributions are welcome! Open an issue or pull request to discuss your ideas. Bug reports and feature requests are encouraged. Help with translation and documentation is always appreciated.
 
-### Capacitor
+## License
+This project is licensed under the [MIT License](LICENSE.md).
 
-After updating code, run:
-
-```
-quasar build -m pwa
-npx cap copy
-npx cap sync
-npx cap open android / ios
-```
-
-Regenerate assets:
-
-```
-npx capacitor-assets generate
-```
-
-### Customize the configuration
-
-See [Configuring quasar.config.js](https://v2.quasar.dev/quasar-cli-webpack/quasar-config-js).
-
-### Timelocks
-
-Tokens can be locked to a pubkey with an optional unlock time and refund pubkey.
-In the send dialog choose **Lock** and fill the receiver key, unlock time and
-optional refund key. When a locked token is pasted into the receive dialog the
-unlock date is displayed.
-
-### Timelocked P2PK Tokens
-
-Use the **Lock** option in the Send dialog to create a token tied to a public key. Enter the receiver key, set a lock time (timestamp) and optionally a refund key for recovery. The mint must advertise support for NUT-11 and NUT-10 which can be verified via its `/info` endpoint.
-The wallet checks this automatically and will refuse to lock tokens if the mint lacks these NUTs.
-
-Example workflow:
-
-1. Check `/info` on your mint for `nut_supports` entries `11` and `10`.
-2. Open **Send**, choose **Lock** and provide the recipient key, lock time and refund key.
-3. Share the resulting token string. The recipient pastes it into **Receive** to see the unlock date.
-
-### Reverse proxy
-
-For Quasar Vue Router with history mode, add this fallback URL to allow refreshes: https://router.vuejs.org/guide/essentials/history-mode.html#HTML5-Mode
-
-More info: https://stackoverflow.com/questions/36399319/vue-router-return-404-when-revisit-to-the-url
-
-`Caddyfile`:
-
-```
-# CORS snippet by https://kalnytskyi.com/posts/setup-cors-caddy-2/
-(cors) {
-  @cors_preflight method OPTIONS
-  @cors header Origin {args.0}
-
-  handle @cors_preflight {
-    header Access-Control-Allow-Origin "{args.0}"
-    header Access-Control-Allow-Methods "GET, POST, PUT, PATCH, DELETE"
-    header Access-Control-Allow-Headers "Content-Type"
-    header Access-Control-Max-Age "3600"
-    respond "" 204
-  }
-
-  handle @cors {
-    header Access-Control-Allow-Origin "{args.0}"
-    header Access-Control-Expose-Headers "Link"
-  }
-}
-host.com {
-    import cors *
-    encode gzip
-
-    header /service-worker.js {
-            Service-Worker-Allowed "/"
-            Cache-Control "no-cache"
-    }
-
-    # SPA root
-    root * /usr/share/caddy/cashu.me/
-
-    # quasar vue router fallback history mode
-    try_files {path} /index.html
-
-    file_server
-}
-```
-
-### NIP-07 Login
-
-If a NIP-07 compatible signing extension is installed in the browser (for example [nos2x](https://github.com/fiatjaf/nos2x)), the wallet will automatically detect it on startup and log in using that extension.
+Join us in building the future of creator funding on Nostr!
