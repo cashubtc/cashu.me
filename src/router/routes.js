@@ -47,6 +47,16 @@ const routes = [
     ],
   },
   {
+    path: "/my-profile",
+    component: () => import("layouts/FullscreenLayout.vue"),
+    children: [
+      {
+        path: "",
+        component: () => import("src/pages/MyProfilePage.vue"),
+      },
+    ],
+  },
+  {
     path: "/creators/:npubOrVanityName",
     component: () => import("layouts/FullscreenLayout.vue"),
     children: [
