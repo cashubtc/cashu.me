@@ -1310,6 +1310,11 @@ export default {
   },
   CreatorHub: {
     dashboard: {
+      title: "Creator Dashboard",
+      logout: "Logout",
+      edit_profile: "Edit Profile",
+      manage_tiers: "Manage Tiers",
+      add_tier: "Add Tier",
       save_tier: "Save Tier",
       delete_tier: "Delete Tier",
       welcome_message: "Welcome Message",
