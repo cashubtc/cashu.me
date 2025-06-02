@@ -1281,6 +1281,17 @@ timelock: {
     title: "About Cashu.me",
     video_placeholder: "Video coming soon",
   },
+  CreatorHub: {
+    dashboard: {
+      save_tier: "Save Tier",
+      delete_tier: "Delete Tier",
+      welcome_message: "Welcome Message",
+      currency_labels: {
+        usd: "USD",
+        eur: "EUR",
+      },
+    },
+  },
   swap: {
     in_progress_warning_text: "兑换进行中",
     invalid_swap_data_error_text: "无效的兑换数据",

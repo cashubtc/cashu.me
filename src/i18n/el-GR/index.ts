@@ -1311,6 +1311,17 @@ timelock: {
     title: "About Cashu.me",
     video_placeholder: "Video coming soon",
   },
+  CreatorHub: {
+    dashboard: {
+      save_tier: "Save Tier",
+      delete_tier: "Delete Tier",
+      welcome_message: "Welcome Message",
+      currency_labels: {
+        usd: "USD",
+        eur: "EUR",
+      },
+    },
+  },
   swap: {
     in_progress_warning_text: "Η ανταλλαγή βρίσκεται σε εξέλιξη",
     invalid_swap_data_error_text: "Μη έγκυρα δεδομένα ανταλλαγής",
