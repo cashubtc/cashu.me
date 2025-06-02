@@ -189,11 +189,28 @@ export default defineComponent({
       currentPage: 1,
       pageSize: 5,
       filterPending: false,
+      cachedUnifiedTransactions: [],
     };
   },
   watch: {
     filterPending: function () {
       this.currentPage = 1;
+    },
+    // Watch for any changes in historyTokens (additions, updates, deletions)
+    historyTokens: {
+      handler: function () {
+        this.updateUnifiedTransactions();
+      },
+      deep: true,
+      immediate: true,
+    },
+    // Watch for any changes in invoiceHistory (additions, updates, deletions)
+    invoiceHistory: {
+      handler: function () {
+        this.updateUnifiedTransactions();
+      },
+      deep: true,
+      immediate: true,
     },
   },
   computed: {
@@ -211,36 +228,9 @@ export default defineComponent({
     ...mapWritableState(useUiStore, ["showInvoiceDetails"]),
     ...mapWritableState(useWalletStore, ["invoiceData", "payInvoiceData"]),
 
-    // Unified transactions combining both tokens and invoices
+    // Use cached unified transactions for better performance
     unifiedTransactions() {
-      const transactions = [];
-
-      // Add token transactions (ecash)
-      this.historyTokens.forEach((token) => {
-        transactions.push({
-          ...token,
-          type: "ecash",
-          id: `token-${token.token}`,
-          label: token.label, // Use existing label or undefined
-          editingLabel: false,
-          tempLabel: "",
-        });
-      });
-
-      // Add invoice transactions (lightning)
-      this.invoiceHistory.forEach((invoice) => {
-        transactions.push({
-          ...invoice,
-          type: "lightning",
-          id: `invoice-${invoice.quote}`,
-          label: invoice.label, // Use existing label or undefined
-          editingLabel: false,
-          tempLabel: "",
-        });
-      });
-
-      // Sort by date (newest first)
-      return transactions.sort((a, b) => new Date(b.date) - new Date(a.date));
+      return this.cachedUnifiedTransactions;
     },
 
     // Filter transactions first, then paginate
@@ -411,6 +401,40 @@ export default defineComponent({
           this.checkOutgoingInvoice(invoice.quote, true);
         }
       }
+    },
+
+    // Efficiently update and sort unified transactions only when needed
+    updateUnifiedTransactions() {
+      const transactions = [];
+
+      // Add token transactions (ecash)
+      this.historyTokens.forEach((token) => {
+        transactions.push({
+          ...token,
+          type: "ecash",
+          id: `token-${token.token}`,
+          label: token.label,
+          editingLabel: false,
+          tempLabel: "",
+        });
+      });
+
+      // Add invoice transactions (lightning)
+      this.invoiceHistory.forEach((invoice) => {
+        transactions.push({
+          ...invoice,
+          type: "lightning",
+          id: `invoice-${invoice.quote}`,
+          label: invoice.label,
+          editingLabel: false,
+          tempLabel: "",
+        });
+      });
+
+      // Sort by date (newest first) and cache the result
+      this.cachedUnifiedTransactions = transactions.sort(
+        (a, b) => new Date(b.date) - new Date(a.date)
+      );
     },
   },
   created: function () {},
