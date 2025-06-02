@@ -1320,11 +1320,18 @@ export default {
       message: {
         label: "Message",
       },
+      back_to_search: {
+        label: "Back to search",
+      },
     },
     choose_action: {
       title: "Select token",
       existing: "Existing Token",
       new: "Create New",
+    },
+    notifications: {
+      donation_sent: "Donation sent",
+      message_sent: "Message sent",
     },
   },
   ChooseExistingTokenDialog: {
