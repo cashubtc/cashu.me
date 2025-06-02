@@ -137,10 +137,9 @@ export default defineComponent({
     const addTier = async () => {
       const id = uuidv4();
       store.addTier({ id, name: '', price: 0, perks: '', welcomeMessage: '' });
-      await nextTick(() => {
-        const el = document.getElementById(`tier-name-${id}`);
-        if (el) (el as HTMLInputElement).focus();
-      });
+      await nextTick();
+      const el = document.getElementById(`tier-name-${id}`);
+      if (el) (el as HTMLInputElement).focus();
     };
 
     const removeTier = (id: string) => {
