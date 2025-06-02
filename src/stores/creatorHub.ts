@@ -101,8 +101,17 @@ export const useCreatorHubStore = defineStore("creatorHub", {
         }
       });
     },
-    removeTier(id: string) {
+    async removeTier(id: string) {
       delete this.tiers[id];
+
+      const nostr = useNostrStore();
+      await nostr.initSignerIfNotSet();
+      const ev = new NDKEvent(nostr.ndk);
+      ev.kind = CREATOR_TIER_KIND as unknown as NDKKind;
+      ev.tags = [["d", id]];
+      ev.content = "";
+      await ev.sign(nostr.signer);
+      await ev.publish();
     },
     getTierArray(): Tier[] {
       return Object.values(this.tiers);
