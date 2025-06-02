@@ -946,6 +946,8 @@ export default {
     },
     timelock: {
       unlock_date_label: "Unlocks { value }",
+      receiver_label: "Receiver { value }",
+      refund_label: "Refund { value }",
     },
     errors: {
       invalid_token: {
