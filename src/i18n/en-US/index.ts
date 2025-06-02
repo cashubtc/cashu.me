@@ -1426,6 +1426,27 @@ export default {
     title: "About Cashu.me",
     video_placeholder: "Video coming soon",
   },
+  CreatorHub: {
+    login: {
+      title: "Creator Login",
+      nip07: "Login with Nostr Extension",
+      nsec: "nsec",
+      nsec_button: "Login with nsec",
+      nsec_warning: "Entering your nsec in a web app is dangerous. Use NIP-07 if possible.",
+    },
+    dashboard: {
+      title: "Creator Dashboard",
+      logout: "Logout",
+      edit_profile: "Edit Profile",
+      manage_tiers: "Manage Tiers",
+      add_tier: "Add Tier",
+    },
+    profile: {
+      back: "Back",
+      tiers: "Donation Tiers",
+      support: "Support",
+    },
+  },
   swap: {
     in_progress_warning_text: "Swap in progress",
     invalid_swap_data_error_text: "Invalid swap data",

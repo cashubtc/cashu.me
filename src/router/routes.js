@@ -23,6 +23,33 @@ const routes = [
     ],
   },
   {
+    path: "/creator/login",
+    component: () => import("layouts/FullscreenLayout.vue"),
+    children: [
+      { path: "", component: () => import("src/pages/CreatorLoginPage.vue") },
+    ],
+  },
+  {
+    path: "/creator/dashboard",
+    component: () => import("layouts/FullscreenLayout.vue"),
+    children: [
+      {
+        path: "",
+        component: () => import("src/pages/CreatorDashboardPage.vue"),
+      },
+    ],
+  },
+  {
+    path: "/creators/:npubOrVanityName",
+    component: () => import("layouts/FullscreenLayout.vue"),
+    children: [
+      {
+        path: "",
+        component: () => import("src/pages/PublicCreatorProfilePage.vue"),
+      },
+    ],
+  },
+  {
     path: "/buckets",
     component: () => import("layouts/FullscreenLayout.vue"),
     children: [{ path: "", component: () => import("src/pages/Buckets.vue") }],
