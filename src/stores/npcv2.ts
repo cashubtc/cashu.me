@@ -11,20 +11,20 @@ import { useMintsStore } from "./mints";
 
 type NPCV2InfoReponse =
   | {
-      error: true;
-      message: string;
-    }
+    error: true;
+    message: string;
+  }
   | {
-      error: false;
-      data: {
-        user: {
-          lock_quote: boolean;
-          mintUrl: string;
-          name?: string;
-          pubkey: string;
-        };
+    error: false;
+    data: {
+      user: {
+        lock_quote: boolean;
+        mintUrl: string;
+        name?: string;
+        pubkey: string;
       };
     };
+  };
 
 type NPCQuote = {
   created_at: number;
@@ -34,22 +34,22 @@ type NPCQuote = {
   quote_id: string;
   request: string;
   amount: number;
-  state: "PAID";
+  state: string;
   locked: boolean;
 };
 
 type NPCQuoteResponse =
   | {
-      error: true;
-      message: string;
-    }
+    error: true;
+    message: string;
+  }
   | {
-      error: false;
-      data: {
-        quotes: NPCQuote[];
-      };
-      metadata: { limit: number; total: number; since?: number };
+    error: false;
+    data: {
+      quotes: NPCQuote[];
     };
+    metadata: { limit: number; total: number; since?: number };
+  };
 
 const NIP98Kind = 27235;
 
@@ -181,16 +181,16 @@ export const useNPCV2Store = defineStore("npcV2", {
           return;
         }
         let latestQuoteTime: number | undefined = undefined;
-        resData.data.quotes.forEach((quote) => {
+        resData.data.quotes.forEach(async (quote) => {
           if (
             walletStore.invoiceHistory.find((i) => i.quote === quote.quote_id)
           ) {
             return;
           }
-          if (!latestQuoteTime || latestQuoteTime < quote.paid_at) {
-            latestQuoteTime = quote.paid_at;
+          if (!latestQuoteTime || latestQuoteTime < quote.created_at) {
+            latestQuoteTime = quote.created_at;
           }
-          walletStore.invoiceHistory.push({
+          await walletStore.invoiceHistory.push({
             mint: quote.mint_url,
             memo: "",
             bolt11: quote.request,
@@ -209,6 +209,8 @@ export const useNPCV2Store = defineStore("npcV2", {
               expiry: quote.expires_at,
             },
           });
+          await walletStore.mintOnPaid(quote.quote_id);
+
         });
         if (latestQuoteTime) {
           this.npcV2LastCheck = latestQuoteTime;
