@@ -132,6 +132,7 @@ import SendTokenDialog from 'components/SendTokenDialog.vue';
 import HistoryTable from 'components/HistoryTable.vue';
 import LockedTokensTable from 'components/LockedTokensTable.vue';
 import { notifyError } from 'src/js/notify';
+import { DEFAULT_COLOR } from 'src/js/constants';
 
 const route = useRoute();
 const bucketsStore = useBucketsStore();
@@ -156,7 +157,7 @@ const targetBucketId = ref<string | null>(null);
 const editDialog = ref({
   show: false,
   label: '',
-  color: '#1976d2',
+  color: DEFAULT_COLOR,
   originalLabel: '',
 });
 
@@ -182,7 +183,7 @@ const groupedProofs = computed<ProofGroup[]>(() => {
   bucketProofs.value.forEach(p => {
     const lbl = p.label ?? '';
     if (!groups[lbl]) {
-      const color = historyByLabel[lbl]?.[0]?.color ?? '#1976d2';
+      const color = historyByLabel[lbl]?.[0]?.color ?? DEFAULT_COLOR;
       groups[lbl] = {
         key: lbl || 'nolabel',
         label: lbl,

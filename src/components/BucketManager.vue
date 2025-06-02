@@ -181,6 +181,7 @@ import { useProofsStore } from "stores/proofs";
 import { storeToRefs } from "pinia";
 import { useUiStore } from "stores/ui";
 import { notifyError } from "src/js/notify";
+import { DEFAULT_COLOR } from "src/js/constants";
 
 export default defineComponent({
   name: "BucketManager",
@@ -195,7 +196,7 @@ export default defineComponent({
     const deleteId = ref(null);
     const form = ref({
       name: "",
-      color: "#1976d2",
+      color: DEFAULT_COLOR,
       description: "",
       goal: null,
       creatorPubkey: "",
@@ -213,7 +214,7 @@ export default defineComponent({
 
     const openAdd = () => {
       editId.value = null;
-      form.value = { name: "", color: "#1976d2", description: "", goal: null, creatorPubkey: "" };
+      form.value = { name: "", color: DEFAULT_COLOR, description: "", goal: null, creatorPubkey: "" };
       showForm.value = true;
     };
 
