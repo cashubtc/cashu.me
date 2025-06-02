@@ -2,7 +2,13 @@
   <q-dialog v-model="showLocal" persistent backdrop-filter="blur(2px) brightness(60%)">
     <q-card class="q-pa-md" style="min-width:350px">
       <q-card-section>
-        <div class="text-h6">{{ $t('CreatorHub.dashboard.add_tier') }}</div>
+        <div class="row items-center">
+          <div class="text-h6 q-mr-xs">{{ $t('CreatorHub.dashboard.add_tier') }}</div>
+          <HelpPopup
+            text="Create a tier with a price and optional welcome message for your supporters."
+            :close-label="$t('global.actions.close.label')"
+          />
+        </div>
       </q-card-section>
       <q-card-section class="q-pt-none">
         <q-input v-model="localTier.name" label="Title" outlined dense class="q-mb-sm" />
@@ -16,6 +22,7 @@
           dense
           class="q-mb-sm"
         />
+        <div class="text-caption text-grey q-mb-sm">Markdown formatting is supported.</div>
         <q-input
           v-model="localTier.welcomeMessage"
           type="textarea"
