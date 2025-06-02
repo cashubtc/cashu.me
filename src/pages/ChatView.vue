@@ -2,8 +2,21 @@
   <div
     :class="[$q.dark.isActive ? 'bg-dark text-white' : 'bg-white text-dark', 'full-height flex column']"
   >
-    <div class="q-pa-sm text-h6 border-bottom" style="border-bottom: 1px solid rgba(0,0,0,0.1)">
-      {{ displayName }}
+    <div
+      class="q-pa-sm row items-center text-h6 border-bottom"
+      style="border-bottom: 1px solid rgba(0,0,0,0.1)"
+    >
+      <q-btn
+        flat
+        dense
+        round
+        icon="arrow_back"
+        color="primary"
+        @click="goBack"
+        aria-label="Go back"
+        class="q-mr-sm"
+      />
+      <span>{{ displayName }}</span>
     </div>
     <div class="q-pa-md scroll" style="flex: 1; overflow-y: auto" ref="scrollArea">
       <q-chat-message
@@ -84,6 +97,10 @@ export default defineComponent({
       }
     };
 
+    const goBack = () => {
+      router.push('/chats');
+    };
+
     const displayName = computed(() => {
       return (
         profile.value?.display_name ||
@@ -105,6 +122,7 @@ export default defineComponent({
       sanitizeMessage,
       formatDate,
       bottomMarker,
+      goBack,
     };
   },
 });
