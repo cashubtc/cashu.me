@@ -83,7 +83,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, watch, onMounted } from "vue";
+import { defineComponent, ref, watch, onMounted, onBeforeUnmount } from "vue";
 import { useRouter } from "vue-router";
 import { useCreatorsStore } from "stores/creators";
 import CreatorProfileCard from "components/CreatorProfileCard.vue";
@@ -146,6 +146,8 @@ export default defineComponent({
         creatorsStore.searchCreators(val);
       }, 500);
     });
+
+    onBeforeUnmount(() => clearTimeout(debounceTimeout));
 
     const openDonateDialog = (creator: any) => {
       donateCreator.value = creator;
