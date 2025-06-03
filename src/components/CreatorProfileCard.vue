@@ -4,8 +4,8 @@
       <q-avatar size="56px" class="creator-avatar">
         <template v-if="loaded">
           <img
-            v-if="creator.profile?.picture"
-            :src="creator.profile.picture"
+            v-if="profile?.picture"
+            :src="profile.picture"
             alt="Creator image"
           />
           <div v-else class="placeholder-avatar text-white flex flex-center">
@@ -17,8 +17,8 @@
       <div class="q-ml-sm">
         <div class="text-subtitle1 ellipsis">
           {{
-            creator.profile?.display_name ||
-            creator.profile?.name ||
+            profile?.display_name ||
+            profile?.name ||
             shortPubkey
           }}
         </div>
@@ -26,7 +26,7 @@
       </div>
     </q-card-section>
     <q-card-section>
-      <template v-if="loaded && creator.profile?.about">
+      <template v-if="loaded && profile?.about">
         <div class="truncated-text">{{ truncatedAbout }}</div>
       </template>
       <template v-else-if="!loaded">
@@ -34,10 +34,10 @@
         <q-skeleton type="text" width="80%" />
       </template>
     </q-card-section>
-    <q-card-section v-if="creator.profile?.lud16">
+    <q-card-section v-if="profile?.lud16">
       <div class="row items-center">
         <q-icon name="bolt" size="xs" class="q-mr-xs" />
-        <span>{{ creator.profile.lud16 }}</span>
+        <span>{{ profile.lud16 }}</span>
       </div>
     </q-card-section>
     <q-card-section class="text-caption">
@@ -101,19 +101,25 @@ export default defineComponent({
     const card = ref<HTMLElement | null>(null);
     let observer: IntersectionObserver | null = null;
 
+    const profile = ref(props.creator.profile);
+    const followers = ref(props.creator.followers);
+    const following = ref(props.creator.following);
+    const joined = ref(props.creator.joined);
+
     const loadProfile = async () => {
       if (loaded.value) return;
       try {
-        const [profile, followers, following, joined] = await Promise.all([
-          nostr.getProfile(props.creator.pubkey),
-          nostr.fetchFollowerCount(props.creator.pubkey),
-          nostr.fetchFollowingCount(props.creator.pubkey),
-          nostr.fetchJoinDate(props.creator.pubkey),
-        ]);
-        props.creator.profile = profile;
-        props.creator.followers = followers;
-        props.creator.following = following;
-        props.creator.joined = joined;
+        const [profileData, followersCount, followingCount, joinedDate] =
+          await Promise.all([
+            nostr.getProfile(props.creator.pubkey),
+            nostr.fetchFollowerCount(props.creator.pubkey),
+            nostr.fetchFollowingCount(props.creator.pubkey),
+            nostr.fetchJoinDate(props.creator.pubkey),
+          ]);
+        profile.value = profileData;
+        followers.value = followersCount;
+        following.value = followingCount;
+        joined.value = joinedDate;
         loaded.value = true;
       } catch (e) {
         console.error(e);
@@ -142,8 +148,8 @@ export default defineComponent({
     );
     const initials = computed(() => {
       const name =
-        props.creator.profile?.display_name ||
-        props.creator.profile?.name ||
+        profile.value?.display_name ||
+        profile.value?.name ||
         "";
       if (!name) return "?";
       return name
@@ -155,17 +161,17 @@ export default defineComponent({
     });
     const profileLink = computed(() => `/creators/${props.creator.pubkey}`);
     const truncatedAbout = computed(() => {
-      const about = props.creator.profile?.about || "";
+      const about = profile.value?.about || "";
       return about.length > MAX_LENGTH
         ? about.slice(0, MAX_LENGTH) + "…"
         : about;
     });
     const joinedDateFormatted = computed(() => {
-      if (props.creator.joined === null || props.creator.joined === undefined) {
+      if (joined.value === null || joined.value === undefined) {
         return "";
       }
       return date.formatDate(
-        new Date(props.creator.joined * 1000),
+        new Date(joined.value * 1000),
         "YYYY-MM-DD",
       );
     });
@@ -174,6 +180,10 @@ export default defineComponent({
       joinedDateFormatted,
       shortPubkey,
       profileLink,
+      profile,
+      followers,
+      following,
+      joined,
       initials,
       loaded,
       card,
