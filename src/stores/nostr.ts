@@ -350,6 +350,12 @@ export const useNostrStore = defineStore("nostr", {
           earliest = ev.created_at;
         }
       });
+      if (earliest !== null) {
+        const now = Math.floor(Date.now() / 1000);
+        if (earliest > now) {
+          earliest = null;
+        }
+      }
       return earliest;
     },
     fetchMints: async function () {
