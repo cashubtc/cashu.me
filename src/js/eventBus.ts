@@ -1,21 +1,26 @@
 import { reactive } from "vue";
 
-export const EventBus = reactive({
-  events: {},
+type EventCallback = (payload?: unknown) => void;
+interface EventMap {
+  [event: string]: EventCallback[];
+}
 
-  on(event, callback) {
+export const EventBus = reactive({
+  events: {} as EventMap,
+
+  on(event: string, callback: EventCallback): void {
     if (!this.events[event]) {
       this.events[event] = [];
     }
     this.events[event].push(callback);
   },
 
-  off(event, callback) {
+  off(event: string, callback: EventCallback): void {
     if (!this.events[event]) return;
     this.events[event] = this.events[event].filter((cb) => cb !== callback);
   },
 
-  emit(event, payload) {
+  emit(event: string, payload?: unknown): void {
     console.log("eventBus emit", event, payload);
     if (!this.events[event]) return;
     this.events[event].forEach((callback) => callback(payload));
