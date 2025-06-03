@@ -340,7 +340,10 @@
 <script>
 import { defineComponent } from "vue";
 import { mapActions, mapState, mapWritableState } from "pinia";
-import VueQrcode from "@chenfengyuan/vue-qrcode";
+import { defineAsyncComponent } from "vue";
+const VueQrcode = defineAsyncComponent(() =>
+  import("@chenfengyuan/vue-qrcode")
+);
 import { useMintsStore, MintClass } from "src/stores/mints";
 import { useSettingsStore } from "src/stores/settings";
 import EditMintDialog from "src/components/EditMintDialog.vue";
