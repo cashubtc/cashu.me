@@ -17,6 +17,10 @@ export const useDmChatsStore = defineStore("dmChats", {
       "cashu.dmChats",
       {} as Record<string, DMMessage[]>
     ),
+    unreadCounts: useLocalStorage<Record<string, number>>(
+      "cashu.dmChats.unread",
+      {} as Record<string, number>
+    ),
   }),
   actions: {
     loadChats() {
@@ -24,6 +28,12 @@ export const useDmChatsStore = defineStore("dmChats", {
       if (stored) {
         try {
           this.chats = JSON.parse(stored);
+        } catch {}
+      }
+      const storedUnread = localStorage.getItem("cashu.dmChats.unread");
+      if (storedUnread) {
+        try {
+          this.unreadCounts = JSON.parse(storedUnread);
         } catch {}
       }
     },
@@ -39,6 +49,8 @@ export const useDmChatsStore = defineStore("dmChats", {
         this.chats[event.pubkey] = [];
       }
       this.chats[event.pubkey].push(msg);
+      this.unreadCounts[event.pubkey] =
+        (this.unreadCounts[event.pubkey] || 0) + 1;
     },
     addOutgoing(event: NDKEvent) {
       const recipientTag = event.tags?.find((t) => t[0] === "p");
@@ -54,6 +66,9 @@ export const useDmChatsStore = defineStore("dmChats", {
         this.chats[recipient] = [];
       }
       this.chats[recipient].push(msg);
+    },
+    markChatRead(pubkey: string) {
+      this.unreadCounts[pubkey] = 0;
     },
   },
 });
