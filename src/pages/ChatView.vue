@@ -96,6 +96,7 @@ export default defineComponent({
 
     onMounted(async () => {
       await loadProfile();
+      dmStore.markChatRead(pubkey);
       scrollToBottom();
       dmStore.markChatRead(pubkey);
     });

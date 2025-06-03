@@ -3,18 +3,22 @@
     <q-toolbar class="q-pa-sm border-bottom" style="border-bottom: 1px solid rgba(0,0,0,0.1)">
       <q-toolbar-title class="text-h6">Chats</q-toolbar-title>
     </q-toolbar>
-    <q-list bordered class="col scroll-area">
-      <q-item v-for="pubkey in pubkeys" :key="pubkey" clickable @click="openChat(pubkey)">
-        <q-item-section avatar>
-          <q-avatar v-if="profiles[pubkey]?.picture" :src="profiles[pubkey].picture" />
-        </q-item-section>
-        <q-item-section>
-          <q-item-label class="text-subtitle1">{{ displayName(pubkey) }}</q-item-label>
-          <q-item-label caption>{{ lastMessageSnippet(pubkey) }}</q-item-label>
-          <q-item-label caption class="ellipsis">{{ lastMessageTime(pubkey) }}</q-item-label>
-        </q-item-section>
-      </q-item>
-    </q-list>
+    <q-virtual-scroll
+      class="col scroll-area"
+      :items="pubkeys"
+      :virtual-scroll-item-size="72"
+    >
+      <template #default="{ item }">
+        <chat-list-item
+          :pubkey="item"
+          :profile="profiles[item]"
+          :snippet="lastMessageSnippet(item)"
+          :timestamp="lastMessageTimestamp(item)"
+          :unread="unreadCounts[item] || 0"
+          @click="openChat(item)"
+        />
+      </template>
+    </q-virtual-scroll>
   </q-page>
 </template>
 
@@ -25,13 +29,15 @@ import { useDmChatsStore } from 'stores/dmChats';
 import { useNostrStore } from 'stores/nostr';
 import { storeToRefs } from 'pinia';
 import { sanitizeMessage } from 'src/js/message-utils';
+import ChatListItem from 'components/ChatListItem.vue';
 
 export default defineComponent({
   name: 'ChatsPage',
+  components: { ChatListItem },
   setup() {
     const store = useDmChatsStore();
     store.loadChats();
-    const { chats } = storeToRefs(store);
+    const { chats, unreadCounts } = storeToRefs(store);
     const router = useRouter();
     const nostrStore = useNostrStore();
     const profiles = ref<Record<string, any>>({});
@@ -54,11 +60,10 @@ export default defineComponent({
       profiles.value[pk]?.name ||
       pk.slice(0, 8) + '...' + pk.slice(-4);
 
-    const lastMessageTime = (pk: string) => {
+    const lastMessageTimestamp = (pk: string) => {
       const msgs = chats.value[pk];
-      if (!msgs || !msgs.length) return '';
-      const ts = msgs[msgs.length - 1].created_at;
-      return new Date(ts * 1000).toLocaleString();
+      if (!msgs || !msgs.length) return 0;
+      return msgs[msgs.length - 1].created_at;
     };
 
     const lastMessageSnippet = (pk: string) => {
@@ -76,8 +81,9 @@ export default defineComponent({
       pubkeys,
       profiles,
       displayName,
-      lastMessageTime,
+      lastMessageTimestamp,
       lastMessageSnippet,
+      unreadCounts,
       openChat,
     };
   },
