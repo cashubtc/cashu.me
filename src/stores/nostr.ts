@@ -39,6 +39,7 @@ import token from "../js/token";
 import { HistoryToken } from "./tokens";
 import { DEFAULT_BUCKET_ID } from "./buckets";
 import { useDmChatsStore } from "./dmChats";
+import { cashuDb } from "./dexie";
 import { useRouter } from "vue-router";
 
 type MintRecommendation = {
@@ -49,6 +50,11 @@ type MintRecommendation = {
 type NostrEventLog = {
   id: string;
   created_at: number;
+};
+
+type CachedProfile = {
+  profile: any;
+  fetchedAt: number;
 };
 
 export enum SignerType {
@@ -100,7 +106,7 @@ export const useNostrStore = defineStore("nostr", {
       "cashu.ndk.nip17EventIdsWeHaveSeen",
       []
     ),
-    profiles: useLocalStorage<Record<string, any>>("cashu.ndk.profiles", {}),
+    profiles: useLocalStorage<Record<string, { profile: any; fetchedAt: number }>>("cashu.ndk.profiles", {}),
   }),
   getters: {
     seedSignerPrivateKeyNsecComputed: (state) => {
@@ -169,18 +175,35 @@ export const useNostrStore = defineStore("nostr", {
       this.pubkey = pubkey;
     },
     getProfile: async function (pubkey: string): Promise<any> {
-      if (this.profiles[pubkey]) {
-        return this.profiles[pubkey];
+      const now = Math.floor(Date.now() / 1000);
+      let cached = this.profiles[pubkey] as CachedProfile | undefined;
+
+      if (!cached) {
+        const dbEntry = await cashuDb.profiles.get(pubkey);
+        if (dbEntry) {
+          this.profiles[pubkey] = {
+            profile: dbEntry.profile,
+            fetchedAt: dbEntry.fetchedAt,
+          };
+          cached = this.profiles[pubkey] as CachedProfile;
+        }
       }
+
+      if (cached && now - cached.fetchedAt < 24 * 60 * 60) {
+        return cached.profile;
+      }
+
       await this.initNdkReadOnly();
       try {
         const user = this.ndk.getUser({ pubkey });
         await user.fetchProfile();
-        this.profiles[pubkey] = user.profile;
+        const entry: CachedProfile = { profile: user.profile, fetchedAt: now };
+        this.profiles[pubkey] = entry;
+        await cashuDb.profiles.put({ pubkey, ...entry });
         return user.profile;
       } catch (e) {
         console.error(e);
-        return null;
+        return cached ? cached.profile : null;
       }
     },
     checkNip07Signer: async function (): Promise<boolean> {
