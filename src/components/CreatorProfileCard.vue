@@ -4,9 +4,10 @@
       <q-avatar size="56px" class="creator-avatar">
         <template v-if="loaded">
           <img
-            v-if="profile?.picture"
+            v-if="profile?.picture && !imageError"
             :src="profile.picture"
             alt="Creator image"
+            @error="imageError = true"
           />
           <div v-else class="placeholder-avatar text-white flex flex-center">
             {{ initials }}
@@ -80,6 +81,7 @@ import {
   ref,
   onMounted,
   onBeforeUnmount,
+  watch,
 } from "vue";
 import { CreatorProfile } from "stores/creators";
 import { date } from "quasar";
@@ -105,6 +107,7 @@ export default defineComponent({
     const followers = ref(props.creator.followers);
     const following = ref(props.creator.following);
     const joined = ref(props.creator.joined);
+    const imageError = ref(false);
 
     const loadProfile = async () => {
       if (loaded.value) return;
@@ -141,6 +144,12 @@ export default defineComponent({
     onBeforeUnmount(() => {
       observer && observer.disconnect();
     });
+    watch(
+      () => profile.value?.picture,
+      () => {
+        imageError.value = false;
+      },
+    );
     const shortPubkey = computed(() =>
       props.creator.pubkey.length > 16
         ? `${props.creator.pubkey.slice(0, 8)}…${props.creator.pubkey.slice(-8)}`
@@ -187,6 +196,7 @@ export default defineComponent({
       initials,
       loaded,
       card,
+      imageError,
     };
   },
 });
