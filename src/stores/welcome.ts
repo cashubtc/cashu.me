@@ -3,7 +3,6 @@ import { defineStore } from "pinia";
 import { useLocalStorage } from "@vueuse/core";
 import { STORAGE_KEYS } from "../js/storageKeys";
 import { computed } from "vue";
-import router from "src/router";
 
 export type WelcomeState = {
   showWelcome: boolean;
@@ -43,7 +42,7 @@ export const useWelcomeStore = defineStore("welcome", {
      */
     initializeWelcome() {
       if (!this.showWelcome) {
-        router.push("/wallet");
+        window.location.href = "/wallet";
       }
     },
 
@@ -52,8 +51,8 @@ export const useWelcomeStore = defineStore("welcome", {
      */
     closeWelcome() {
       this.showWelcome = false;
-      // Redirect to wallet without full page reload
-      router.push("/wallet");
+      // Redirect to wallet
+      window.location.href = "/wallet";
     },
 
     /**
