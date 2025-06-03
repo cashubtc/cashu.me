@@ -346,8 +346,8 @@ export default defineComponent({
 </script>
 <style scoped>
 .q-header {
-  position: relative;
-  z-index: auto;
+  position: sticky; /* or fixed */
+  z-index: 1000; /* ensures header stays above page content */
   overflow-x: hidden;
 }
 
