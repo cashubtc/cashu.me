@@ -124,6 +124,9 @@ export const useNostrStore = defineStore("nostr", {
   },
   actions: {
     initNdkReadOnly: function () {
+      if (this.connected) {
+        return;
+      }
       this.ndk = new NDK({ explicitRelayUrls: this.relays });
       this.ndk.connect();
       this.connected = true;
