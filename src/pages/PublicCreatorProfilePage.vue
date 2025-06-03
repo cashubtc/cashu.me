@@ -20,7 +20,7 @@
       <div class="text-h6 q-mb-sm">{{ $t("CreatorHub.profile.tiers") }}</div>
       <div v-for="tier in tiers" :key="tier.id" class="q-mb-md">
         <div class="text-subtitle1">
-          {{ tier.name }} - {{ tier.price }} sats
+          {{ tier.name }} - {{ tier.price }} sats/month
           <span v-if="bitcoinPrice" class="text-caption">
             ({{ formatFiat(tier.price) }})
           </span>

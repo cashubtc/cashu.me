@@ -16,7 +16,7 @@
         <q-card>
           <q-card-section>
             <div class="text-subtitle1">
-              {{ tier.name }} - {{ tier.price }} sats
+              {{ tier.name }} - {{ tier.price }} sats/month
             </div>
             <div class="text-caption" v-html="renderMarkdown(tier.description)"></div>
           </q-card-section>

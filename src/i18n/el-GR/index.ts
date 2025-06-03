@@ -1325,7 +1325,7 @@ timelock: {
           label: "Title",
         },
         price: {
-          label: "Cost (sats)",
+          label: "Cost / month (sats)",
         },
         description: {
           label: "Description (Markdown)",
