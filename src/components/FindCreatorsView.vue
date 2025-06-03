@@ -136,10 +136,12 @@ export default defineComponent({
 
     let debounceTimeout: number | undefined;
     watch(searchInput, (val) => {
-      if (!val) {
+      clearTimeout(debounceTimeout);
+      if (val === "") {
+        creatorsStore.error = "";
+        creatorsStore.loadFeaturedCreators();
         return;
       }
-      clearTimeout(debounceTimeout);
       debounceTimeout = window.setTimeout(() => {
         creatorsStore.searchCreators(val);
       }, 500);
