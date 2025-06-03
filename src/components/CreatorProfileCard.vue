@@ -13,24 +13,33 @@
             {{ initials }}
           </div>
         </template>
-        <q-skeleton v-else type="circle" size="56px" />
+        <q-skeleton v-else-if="loading" type="circle" size="56px" />
+        <div v-else class="placeholder-avatar text-white flex flex-center">
+          {{ initials }}
+        </div>
       </q-avatar>
       <div class="q-ml-sm">
         <div class="text-subtitle1 ellipsis">
-          {{
-            profile?.display_name ||
-            profile?.name ||
-            shortPubkey
-          }}
+          <template v-if="!loading">
+            {{
+              profile?.display_name ||
+              profile?.name ||
+              shortPubkey
+            }}
+          </template>
+          <q-skeleton v-else type="text" width="120px" />
         </div>
-        <div class="text-caption ellipsis">{{ shortPubkey }}</div>
+        <div class="text-caption ellipsis">
+          <template v-if="!loading">{{ shortPubkey }}</template>
+          <q-skeleton v-else type="text" width="60%" />
+        </div>
       </div>
     </q-card-section>
     <q-card-section>
       <template v-if="loaded && profile?.about">
         <div class="truncated-text">{{ truncatedAbout }}</div>
       </template>
-      <template v-else-if="!loaded">
+      <template v-else-if="loading">
         <q-skeleton type="text" width="90%" class="q-mb-xs" />
         <q-skeleton type="text" width="80%" />
       </template>
@@ -45,7 +54,7 @@
       <template v-if="loaded">
         {{ $t("FindCreators.labels.view_profile_stats") }}
       </template>
-      <template v-else>
+      <template v-else-if="loading">
         <q-skeleton type="text" width="60%" />
       </template>
     </q-card-section>
@@ -53,7 +62,7 @@
       <template v-if="loaded && joinedDateFormatted">
         {{ $t("FindCreators.labels.joined") }}: {{ joinedDateFormatted }}
       </template>
-      <template v-else-if="!loaded">
+      <template v-else-if="loading">
         <q-skeleton type="text" width="40%" />
       </template>
     </q-card-section>
@@ -100,6 +109,7 @@ export default defineComponent({
     const nostr = useNostrStore();
     const MAX_LENGTH = 160;
     const loaded = ref(!!props.creator.profile);
+    const loading = ref(!loaded.value);
     const card = ref<HTMLElement | null>(null);
     let observer: IntersectionObserver | null = null;
 
@@ -111,6 +121,7 @@ export default defineComponent({
 
     const loadProfile = async () => {
       if (loaded.value) return;
+      loading.value = true;
       try {
         const [profileData, followersCount, followingCount, joinedDate] =
           await Promise.all([
@@ -126,6 +137,8 @@ export default defineComponent({
         loaded.value = true;
       } catch (e) {
         console.error(e);
+      } finally {
+        loading.value = false;
       }
     };
 
@@ -194,6 +207,7 @@ export default defineComponent({
       following,
       joined,
       initials,
+      loading,
       loaded,
       card,
       imageError,
