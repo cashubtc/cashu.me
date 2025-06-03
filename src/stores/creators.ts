@@ -43,7 +43,8 @@ export const useCreatorsStore = defineStore("creators", {
       if (pubkey.startsWith("npub")) {
         try {
           const decoded = nip19.decode(pubkey);
-          pubkey = typeof decoded.data === "string" ? (decoded.data as string) : "";
+          pubkey =
+            typeof decoded.data === "string" ? (decoded.data as string) : "";
         } catch (e) {
           console.error(e);
           this.error = "Invalid npub";
@@ -82,6 +83,7 @@ export const useCreatorsStore = defineStore("creators", {
       this.searching = true;
       await nostrStore.initNdkReadOnly();
 
+      const pubkeys: string[] = [];
       for (const entry of FEATURED_CREATORS) {
         let pubkey = entry;
         if (entry.startsWith("npub") || entry.startsWith("nprofile")) {
@@ -89,7 +91,10 @@ export const useCreatorsStore = defineStore("creators", {
             const decoded = nip19.decode(entry);
             if (typeof decoded.data === "string") {
               pubkey = decoded.data as string;
-            } else if (typeof decoded.data === "object" && (decoded.data as any).pubkey) {
+            } else if (
+              typeof decoded.data === "object" &&
+              (decoded.data as any).pubkey
+            ) {
               pubkey = (decoded.data as any).pubkey as string;
             }
           } catch (e) {
@@ -97,24 +102,44 @@ export const useCreatorsStore = defineStore("creators", {
             continue;
           }
         }
-        try {
-          const user = nostrStore.ndk.getUser({ pubkey });
-          await user.fetchProfile();
-          const followers = await nostrStore.fetchFollowerCount(pubkey);
-          const following = await nostrStore.fetchFollowingCount(pubkey);
-          const joined = await nostrStore.fetchJoinDate(pubkey);
-          this.searchResults.push({
-            pubkey,
-            profile: user.profile,
-            followers,
-            following,
-            joined,
-          });
-        } catch (e) {
-          console.error(e);
-        }
+        pubkeys.push(pubkey);
       }
-      this.searching = false;
+
+      try {
+        const results = await Promise.all(
+          pubkeys.map(async (pubkey) => {
+            try {
+              const user = nostrStore.ndk.getUser({ pubkey });
+              const [_, followers, following, joined] = await Promise.all([
+                user.fetchProfile(),
+                nostrStore.fetchFollowerCount(pubkey),
+                nostrStore.fetchFollowingCount(pubkey),
+                nostrStore.fetchJoinDate(pubkey),
+              ]);
+              return {
+                pubkey,
+                profile: user.profile,
+                followers,
+                following,
+                joined,
+              } as CreatorProfile;
+            } catch (e) {
+              console.error(e);
+              return null;
+            }
+          }),
+        );
+
+        results.forEach((res) => {
+          if (res) {
+            this.searchResults.push(res);
+          }
+        });
+      } catch (e) {
+        console.error(e);
+      } finally {
+        this.searching = false;
+      }
     },
   },
 });
