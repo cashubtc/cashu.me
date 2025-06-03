@@ -6,6 +6,7 @@
       </q-toolbar>
     </q-header>
     <q-virtual-scroll
+      v-if="pubkeys.length > 0"
       class="col scroll-area"
       :items="pubkeys"
       :virtual-scroll-item-size="72"
@@ -21,6 +22,9 @@
         />
       </template>
     </q-virtual-scroll>
+    <div v-else class="q-pa-md text-center">
+      No chats yet. Start a conversation with a creator!
+    </div>
   </q-page>
 </template>
 

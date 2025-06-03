@@ -2,24 +2,31 @@
   <q-item clickable class="chat-list-item" @click="handleClick">
     <q-item-section avatar>
       <q-avatar size="48px">
-        <template v-if="profile?.picture">
+        <template v-if="loaded && profile?.picture">
           <img :src="profile.picture" />
         </template>
-        <template v-else>
+        <template v-else-if="loaded">
           <div class="placeholder text-white text-body1">{{ initials }}</div>
         </template>
+        <q-skeleton v-else type="circle" size="48px" />
       </q-avatar>
     </q-item-section>
 
     <q-item-section class="full-width">
       <div class="row items-center no-wrap">
-        <span :class="['text-subtitle1 ellipsis', { 'text-weight-bold': unread > 0 }]">
-          {{ displayName }}
-        </span>
-        <span class="timestamp text-caption q-ml-auto">{{ timeAgo }}</span>
+        <template v-if="loaded">
+          <span :class="['text-subtitle1 ellipsis', { 'text-weight-bold': unread > 0 }]">
+            {{ displayName }}
+          </span>
+          <span class="timestamp text-caption q-ml-auto">{{ timeAgo }}</span>
+        </template>
+        <template v-else>
+          <q-skeleton type="text" width="60%" />
+        </template>
       </div>
       <div :class="['text-caption ellipsis', { 'text-weight-bold': unread > 0 }]">
-        {{ snippet }}
+        <template v-if="loaded">{{ snippet }}</template>
+        <template v-else><q-skeleton type="text" width="80%" /></template>
       </div>
     </q-item-section>
 
@@ -60,6 +67,10 @@ export default defineComponent({
       return letters.join('').toUpperCase();
     });
 
+    const loaded = computed(() => {
+      return Object.keys(props.profile || {}).length > 0;
+    });
+
     const timeAgo = computed(() => {
       if (!props.timestamp) return '';
       return formatDistanceToNow(props.timestamp * 1000, { addSuffix: true });
@@ -69,7 +80,7 @@ export default defineComponent({
       emit('click', props.pubkey);
     };
 
-    return { displayName, initials, timeAgo, handleClick };
+    return { displayName, initials, timeAgo, handleClick, loaded };
   },
 });
 </script>
