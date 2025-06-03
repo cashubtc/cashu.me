@@ -449,6 +449,10 @@ export const useNostrStore = defineStore("nostr", {
               nip04DirectMessageEvents.add(event);
               this.lastEventTimestamp = Math.floor(Date.now() / 1000);
               this.parseMessageForEcash(content);
+              try {
+                const chatStore = useDmChatsStore();
+                chatStore.addIncoming(event);
+              } catch {}
             });
         });
       });

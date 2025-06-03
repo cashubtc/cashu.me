@@ -707,6 +707,9 @@ export default {
       this.subscribeToNip17DirectMessages();
     }
 
+    // also listen for NIP-04 direct messages
+    this.subscribeToNip04DirectMessages();
+
     // start invoice checker worker
     this.startInvoiceCheckerWorker();
 
