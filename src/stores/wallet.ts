@@ -86,10 +86,6 @@ type KeysetCounter = {
   counter: number;
 };
 
-const receiveStore = useReceiveTokensStore();
-const tokenStore = useTokensStore();
-const proofsStore = useProofsStore();
-
 export const useWalletStore = defineStore("wallet", {
   state: () => {
     const t = i18n.global.t;
@@ -1050,7 +1046,7 @@ export const useWalletStore = defineStore("wallet", {
     },
     handleCashuToken: function () {
       this.payInvoiceData.show = false;
-      receiveStore.showReceiveTokens = true;
+      useReceiveTokensStore().showReceiveTokens = true;
     },
     handleP2PK: function (req: string) {
       const sendTokenStore = useSendTokensStore();
@@ -1094,12 +1090,12 @@ export const useWalletStore = defineStore("wallet", {
         await this.lnurlPayFirst(this.payInvoiceData.input.request);
       } else if (req.startsWith("cashu")) {
         // parse cashu tokens from a pasted token
-        receiveStore.receiveData.tokensBase64 = req;
+        useReceiveTokensStore().receiveData.tokensBase64 = req;
         this.handleCashuToken();
       } else if (req.indexOf("token=cashu") !== -1) {
         // parse cashu tokens from a URL like https://example.com#token=cashu...
         const token = req.slice(req.indexOf("token=cashu") + 6);
-        receiveStore.receiveData.tokensBase64 = token;
+        useReceiveTokensStore().receiveData.tokensBase64 = token;
         this.handleCashuToken();
       } else if (p2pkStore.isValidPubkey(req)) {
         this.handleP2PK(req);
