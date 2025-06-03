@@ -89,11 +89,15 @@ export default defineComponent({
       });
     };
 
-    watch(messages, scrollToBottom);
+    watch(messages, () => {
+      scrollToBottom();
+      dmStore.markChatRead(pubkey);
+    });
 
     onMounted(async () => {
       await loadProfile();
       scrollToBottom();
+      dmStore.markChatRead(pubkey);
     });
 
     const sendMessage = async () => {
