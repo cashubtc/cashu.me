@@ -3,12 +3,13 @@
     :class="[$q.dark.isActive ? 'bg-dark text-white' : 'bg-white text-dark']"
     class="flex column full-height"
   >
-    <q-toolbar class="border-bottom q-pa-sm" style="border-bottom: 1px solid rgba(0,0,0,0.1)">
-      <q-btn
-        flat
-        dense
-        round
-        icon="arrow_back"
+    <q-header elevated reveal class="border-bottom" style="border-bottom: 1px solid rgba(0,0,0,0.1)">
+      <q-toolbar class="q-pa-sm">
+        <q-btn
+          flat
+          dense
+          round
+          icon="arrow_back"
         color="primary"
         @click="goBack"
         aria-label="Go back"
@@ -18,7 +19,8 @@
         <img :src="avatar" />
       </q-avatar>
       <q-toolbar-title class="text-h6">{{ displayName }}</q-toolbar-title>
-    </q-toolbar>
+      </q-toolbar>
+    </q-header>
     <div class="q-pa-md scroll-area col" ref="scrollArea">
       <q-chat-message
         v-for="msg in messages"
