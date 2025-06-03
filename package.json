@@ -65,6 +65,7 @@
     "eslint": "^8.57.0",
     "eslint-config-prettier": "^8.10.0",
     "eslint-plugin-vue": "^9.26.0",
+    "happy-dom": "^17.6.1",
     "prettier": "^2.8.8",
     "typescript": "^5.4.5",
     "vite-jsconfig-paths": "^2.0.1",
