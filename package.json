@@ -67,14 +67,15 @@
     "eslint-plugin-vue": "^9.26.0",
     "prettier": "^2.8.8",
     "typescript": "^5.4.5",
+    "vite-jsconfig-paths": "^2.0.1",
+    "vitest": "^1.5.0",
     "workbox-build": "^6.6.1",
     "workbox-cacheable-response": "^6.6.1",
     "workbox-core": "^6.6.1",
     "workbox-expiration": "^6.6.1",
     "workbox-precaching": "^6.6.1",
     "workbox-routing": "^6.6.1",
-    "workbox-strategies": "^6.6.1",
-    "vitest": "^1.5.0"
+    "workbox-strategies": "^6.6.1"
   },
   "engines": {
     "node": ">=16.11.0",
