@@ -1,30 +1,36 @@
 import { defineStore } from "pinia";
 import NDK, { NDKEvent } from "@nostr-dev-kit/ndk";
-import { useLocalStorage } from "@vueuse/core";
+import { useLocalStorage, useRafFn } from "@vueuse/core";
 import { nip19 } from "nostr-tools";
 import { useWalletStore } from "./wallet";
 import { notifyApiError, notifyError, notifySuccess } from "../js/notify";
-import { MintQuoteState } from "@cashu/cashu-ts";
+import { MintQuoteState, Proof } from "@cashu/cashu-ts";
 import { useNostrStore } from "../stores/nostr";
 import { date } from "quasar";
 import { useMintsStore } from "./mints";
 
+type NPCUser = {
+  lock_quote: boolean;
+  mintUrl: string;
+  name?: string;
+  pubkey: string;
+};
+
 type NPCV2InfoReponse =
   | {
-    error: true;
-    message: string;
-  }
+      error: true;
+      message: string;
+    }
   | {
-    error: false;
-    data: {
-      user: {
-        lock_quote: boolean;
-        mintUrl: string;
-        name?: string;
-        pubkey: string;
+      error: false;
+      data: {
+        user: NPCUser;
       };
     };
-  };
+
+type NPCV2UsernameReponse =
+  | { error: true; message: string }
+  | { error: false; data: { user: NPCUser } };
 
 type NPCQuote = {
   created_at: number;
@@ -40,16 +46,18 @@ type NPCQuote = {
 
 type NPCQuoteResponse =
   | {
-    error: true;
-    message: string;
-  }
+      error: true;
+      message: string;
+    }
   | {
-    error: false;
-    data: {
-      quotes: NPCQuote[];
+      error: false;
+      data: {
+        quotes: NPCQuote[];
+      };
+      metadata: { limit: number; total: number; since?: number };
     };
-    metadata: { limit: number; total: number; since?: number };
-  };
+
+type UsernameQuote = { username: string; creq: string };
 
 const NIP98Kind = 27235;
 
@@ -233,6 +241,52 @@ export const useNPCV2Store = defineStore("npcV2", {
       } catch (e) {
         console.error(e);
         return;
+      }
+    },
+    getUsernameQuote: async function (
+      username: string
+    ): Promise<UsernameQuote> {
+      const res = await this.sendAuthedRequest(
+        `${this.npcV2BaseURL}/api/v2/user/username`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username }),
+        }
+      );
+      const data = (await res.json()) as NPCV2UsernameReponse;
+      if (data.error) {
+        if (res.status === 402) {
+          const paymentHeader = res.headers.get("X-Cashu");
+          if (!paymentHeader) {
+            throw new Error("Unexpected reply without payment request");
+          }
+          return { username, creq: paymentHeader };
+        }
+        throw new Error(data.message);
+      }
+      throw new Error("Unexpected reply without payment request");
+    },
+    setUsername: async function (username: string, token: string) {
+      try {
+        const res = await this.sendAuthedRequest(
+          `${this.npcV2BaseURL}/api/v2/user/username`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "X-Cashu": token },
+            body: JSON.stringify({ username }),
+          }
+        );
+        const data = (await res.json()) as NPCV2UsernameReponse;
+        if (data.error) {
+          throw new Error(data.message);
+        }
+        this.npcV2Address = `${data.data.user.name}@${this.npcV2Domain}`;
+      } catch (e) {
+        console.log(e);
+        if (e instanceof Error) {
+          notifyError(e.message);
+        }
       }
     },
     sendAuthedRequest: async function (
