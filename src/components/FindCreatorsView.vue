@@ -39,15 +39,20 @@
       No creators found
     </div>
 
-    <div v-if="searchResults.length" class="q-mt-md creators-grid">
-      <creator-profile-card
-        v-for="creator in searchResults"
-        :key="creator.pubkey"
-        :creator="creator"
-        @donate="openDonateDialog(creator)"
-        @message="openMessageDialog(creator)"
-      />
-    </div>
+    <q-virtual-scroll
+      v-if="searchResults.length"
+      class="q-mt-md creators-grid"
+      :items="searchResults"
+      :virtual-scroll-item-size="340"
+    >
+      <template #default="{ item }">
+        <creator-profile-card
+          :creator="item"
+          @donate="openDonateDialog(item)"
+          @message="openMessageDialog(item)"
+        />
+      </template>
+    </q-virtual-scroll>
     <DonateDialog v-model="showDonateDialog" @confirm="handleDonate" />
     <q-dialog v-model="showActionDialog" persistent>
       <q-card class="q-pa-md qcard" style="min-width: 300px">

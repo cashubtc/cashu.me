@@ -1,15 +1,18 @@
 <template>
-  <q-card class="q-pa-md q-mb-md qcard creator-card shadow-2 rounded-borders">
+  <q-card ref="card" class="q-pa-md q-mb-md qcard creator-card shadow-2 rounded-borders">
     <q-card-section class="row items-center no-wrap">
       <q-avatar size="56px" class="creator-avatar">
-        <img
-          v-if="creator.profile?.picture"
-          :src="creator.profile.picture"
-          alt="Creator image"
-        />
-        <div v-else class="placeholder-avatar text-white flex flex-center">
-          {{ initials }}
-        </div>
+        <template v-if="loaded">
+          <img
+            v-if="creator.profile?.picture"
+            :src="creator.profile.picture"
+            alt="Creator image"
+          />
+          <div v-else class="placeholder-avatar text-white flex flex-center">
+            {{ initials }}
+          </div>
+        </template>
+        <q-skeleton v-else type="circle" size="56px" />
       </q-avatar>
       <div class="q-ml-sm">
         <div class="text-subtitle1 ellipsis">
@@ -22,8 +25,14 @@
         <div class="text-caption ellipsis">{{ shortPubkey }}</div>
       </div>
     </q-card-section>
-    <q-card-section v-if="creator.profile?.about">
-      <div class="truncated-text">{{ truncatedAbout }}</div>
+    <q-card-section>
+      <template v-if="loaded && creator.profile?.about">
+        <div class="truncated-text">{{ truncatedAbout }}</div>
+      </template>
+      <template v-else-if="!loaded">
+        <q-skeleton type="text" width="90%" class="q-mb-xs" />
+        <q-skeleton type="text" width="80%" />
+      </template>
     </q-card-section>
     <q-card-section v-if="creator.profile?.lud16">
       <div class="row items-center">
@@ -32,10 +41,20 @@
       </div>
     </q-card-section>
     <q-card-section class="text-caption">
-      {{ $t("FindCreators.labels.view_profile_stats") }}
+      <template v-if="loaded">
+        {{ $t("FindCreators.labels.view_profile_stats") }}
+      </template>
+      <template v-else>
+        <q-skeleton type="text" width="60%" />
+      </template>
     </q-card-section>
-    <q-card-section class="text-caption" v-if="joinedDateFormatted">
-      {{ $t("FindCreators.labels.joined") }}: {{ joinedDateFormatted }}
+    <q-card-section class="text-caption">
+      <template v-if="loaded && joinedDateFormatted">
+        {{ $t("FindCreators.labels.joined") }}: {{ joinedDateFormatted }}
+      </template>
+      <template v-else-if="!loaded">
+        <q-skeleton type="text" width="40%" />
+      </template>
     </q-card-section>
     <q-card-actions class="q-mt-sm">
       <q-btn color="primary" unelevated class="full-width" :to="profileLink">
@@ -55,9 +74,16 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, computed } from "vue";
+import {
+  defineComponent,
+  computed,
+  ref,
+  onMounted,
+  onBeforeUnmount,
+} from "vue";
 import { CreatorProfile } from "stores/creators";
 import { date } from "quasar";
+import { useNostrStore } from "stores/nostr";
 
 export default defineComponent({
   name: "CreatorProfileCard",
@@ -69,7 +95,46 @@ export default defineComponent({
   },
   emits: ["donate", "message"],
   setup(props) {
+    const nostr = useNostrStore();
     const MAX_LENGTH = 160;
+    const loaded = ref(!!props.creator.profile);
+    const card = ref<HTMLElement | null>(null);
+    let observer: IntersectionObserver | null = null;
+
+    const loadProfile = async () => {
+      if (loaded.value) return;
+      try {
+        const [profile, followers, following, joined] = await Promise.all([
+          nostr.getProfile(props.creator.pubkey),
+          nostr.fetchFollowerCount(props.creator.pubkey),
+          nostr.fetchFollowingCount(props.creator.pubkey),
+          nostr.fetchJoinDate(props.creator.pubkey),
+        ]);
+        props.creator.profile = profile;
+        props.creator.followers = followers;
+        props.creator.following = following;
+        props.creator.joined = joined;
+        loaded.value = true;
+      } catch (e) {
+        console.error(e);
+      }
+    };
+
+    onMounted(() => {
+      observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            loadProfile();
+            observer && observer.disconnect();
+          }
+        });
+      }, { threshold: 0.1 });
+      if (card.value) observer.observe(card.value);
+    });
+
+    onBeforeUnmount(() => {
+      observer && observer.disconnect();
+    });
     const shortPubkey = computed(() =>
       props.creator.pubkey.length > 16
         ? `${props.creator.pubkey.slice(0, 8)}…${props.creator.pubkey.slice(-8)}`
@@ -110,6 +175,8 @@ export default defineComponent({
       shortPubkey,
       profileLink,
       initials,
+      loaded,
+      card,
     };
   },
 });
