@@ -103,7 +103,9 @@ export default defineComponent({
         : about;
     });
     const joinedDateFormatted = computed(() => {
-      if (!props.creator.joined) return "";
+      if (props.creator.joined === null || props.creator.joined === undefined) {
+        return "";
+      }
       return date.formatDate(
         new Date(props.creator.joined * 1000),
         "YYYY-MM-DD"
