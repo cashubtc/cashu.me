@@ -1,5 +1,6 @@
 import { defineStore } from "pinia";
 import { useLocalStorage } from "@vueuse/core";
+import { STORAGE_KEYS } from "../js/storageKeys";
 
 const defaultNostrRelays = [
   "wss://relay.f7z.io/",
@@ -11,67 +12,67 @@ export const useSettingsStore = defineStore("settings", {
   state: () => {
     return {
       getBitcoinPrice: useLocalStorage<boolean>(
-        "cashu.settings.getBitcoinPrice",
+        STORAGE_KEYS.SETTINGS_GET_BITCOIN_PRICE,
         false
       ),
       checkSentTokens: useLocalStorage<boolean>(
-        "cashu.settings.checkSentTokens",
+        STORAGE_KEYS.SETTINGS_CHECK_SENT_TOKENS,
         true
       ),
       checkIncomingInvoices: useLocalStorage<boolean>(
-        "cashu.settings.checkIncomingInvoices",
+        STORAGE_KEYS.SETTINGS_CHECK_INCOMING_INVOICES,
         true
       ),
       periodicallyCheckIncomingInvoices: useLocalStorage<boolean>(
-        "cashu.settings.periodicallyCheckIncomingInvoices",
+        STORAGE_KEYS.SETTINGS_PERIODICALLY_CHECK_INCOMING_INVOICES,
         true
       ),
       checkInvoicesOnStartup: useLocalStorage<boolean>(
-        "cashu.settings.checkInvoicesOnStartup",
+        STORAGE_KEYS.SETTINGS_CHECK_INVOICES_ON_STARTUP,
         true
       ),
       useWebsockets: useLocalStorage<boolean>(
-        "cashu.settings.useWebsockets",
+        STORAGE_KEYS.SETTINGS_USE_WEBSOCKETS,
         true
       ),
       defaultNostrRelays: useLocalStorage<string[]>(
-        "cashu.settings.defaultNostrRelays",
+        STORAGE_KEYS.SETTINGS_DEFAULT_NOSTR_RELAYS,
         defaultNostrRelays
       ),
       includeFeesInSendAmount: useLocalStorage<boolean>(
-        "cashu.settings.includeFeesInSendAmount",
+        STORAGE_KEYS.SETTINGS_INCLUDE_FEES_IN_SEND_AMOUNT,
         false
       ),
       nfcEncoding: useLocalStorage<string>(
-        "cashu.settings.nfcEncoding",
+        STORAGE_KEYS.SETTINGS_NFC_ENCODING,
         "weburl"
       ),
       useNumericKeyboard: useLocalStorage<boolean>(
-        "cashu.settings.useNumericKeyboard",
+        STORAGE_KEYS.SETTINGS_USE_NUMERIC_KEYBOARD,
         false
       ),
       enableReceiveSwaps: useLocalStorage<boolean>(
-        "cashu.settings.enableReceiveSwaps",
+        STORAGE_KEYS.SETTINGS_ENABLE_RECEIVE_SWAPS,
         false
       ),
       showNfcButtonInDrawer: useLocalStorage(
-        "cashu.ui.showNfcButtonInDrawer",
+        STORAGE_KEYS.UI_SHOW_NFC_BUTTON_IN_DRAWER,
         true
       ),
       autoPasteEcashReceive: useLocalStorage(
-        "cashu.settings.autoPasteEcashReceive",
+        STORAGE_KEYS.SETTINGS_AUTO_PASTE_ECASH_RECEIVE,
         true
       ),
       auditorEnabled: useLocalStorage<boolean>(
-        "cashu.settings.auditorEnabled",
+        STORAGE_KEYS.SETTINGS_AUDITOR_ENABLED,
         false
       ),
       auditorUrl: useLocalStorage<string>(
-        "cashu.settings.auditorUrl",
+        STORAGE_KEYS.SETTINGS_AUDITOR_URL,
         "https://audit.8333.space"
       ),
       auditorApiUrl: useLocalStorage<string>(
-        "cashu.settings.auditorApiUrl",
+        STORAGE_KEYS.SETTINGS_AUDITOR_API_URL,
         "https://api.audit.8333.space"
       ),
     };

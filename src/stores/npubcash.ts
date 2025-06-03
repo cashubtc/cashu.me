@@ -1,6 +1,7 @@
 import { defineStore } from "pinia";
 import NDK, { NDKEvent, NDKPrivateKeySigner } from "@nostr-dev-kit/ndk";
 import { useLocalStorage } from "@vueuse/core";
+import { STORAGE_KEYS } from "../js/storageKeys";
 import { bytesToHex } from "@noble/hashes/utils"; // already an installed dependency
 import { generateSecretKey, getPublicKey } from "nostr-tools";
 import { nip19 } from "nostr-tools";
@@ -62,12 +63,12 @@ const NIP98Kind = 27235;
 
 export const useNPCStore = defineStore("npc", {
   state: () => ({
-    npcEnabled: useLocalStorage<boolean>("cashu.npc.enabled", false),
-    automaticClaim: useLocalStorage<boolean>("cashu.npc.automaticClaim", true),
+    npcEnabled: useLocalStorage<boolean>(STORAGE_KEYS.NPC_ENABLED, false),
+    automaticClaim: useLocalStorage<boolean>(STORAGE_KEYS.NPC_AUTOMATIC_CLAIM, true),
     // npcConnections: useLocalStorage<NPCConnection[]>("cashu.npc.connections", []),
-    npcAddress: useLocalStorage<string>("cashu.npc.address", ""),
-    npcDomain: useLocalStorage<string>("cashu.npc.domain", "npub.cash"),
-    baseURL: useLocalStorage<string>("cashu.npc.baseURL", "https://npub.cash"),
+    npcAddress: useLocalStorage<string>(STORAGE_KEYS.NPC_ADDRESS, ""),
+    npcDomain: useLocalStorage<string>(STORAGE_KEYS.NPC_DOMAIN, "npub.cash"),
+    baseURL: useLocalStorage<string>(STORAGE_KEYS.NPC_BASE_URL, "https://npub.cash"),
     npcLoading: false,
     // ndk: new NDK(),
     // signer: {} as NDKPrivateKeySigner,

@@ -1,5 +1,6 @@
 import { defineStore } from "pinia";
 import { useLocalStorage } from "@vueuse/core";
+import { STORAGE_KEYS } from "../js/storageKeys";
 import { generateSecretKey, getPublicKey } from "nostr-tools";
 import { bytesToHex } from "@noble/hashes/utils"; // already an installed dependency
 import { useWalletStore } from "./wallet";
@@ -16,13 +17,13 @@ const MAX_GAP = 2;
 export const useRestoreStore = defineStore("restore", {
   state: () => ({
     showRestoreDialog: useLocalStorage<boolean>(
-      "cashu.restore.showRestoreDialog",
+      STORAGE_KEYS.RESTORE_SHOW_RESTORE_DIALOG,
       false
     ),
     restoringState: false,
     restoringMint: "",
     mnemonicToRestore: useLocalStorage<string>(
-      "cashu.restore.mnemonicToRestore",
+      STORAGE_KEYS.RESTORE_MNEMONIC_TO_RESTORE,
       ""
     ),
     restoreProgress: 0,

@@ -1,5 +1,6 @@
 import { defineStore } from "pinia";
 import { useLocalStorage } from "@vueuse/core";
+import { STORAGE_KEYS } from "../js/storageKeys";
 import { useWalletStore } from "./wallet";
 import { useMintsStore } from "./mints";
 import { useProofsStore } from "./proofs";
@@ -19,7 +20,7 @@ const DEFAULT_PRESETS: DonationPreset[] = [
 export const useDonationPresetsStore = defineStore("donationPresets", {
   state: () => ({
     presets: useLocalStorage<DonationPreset[]>(
-      "cashu.donationPresets",
+      STORAGE_KEYS.DONATION_PRESETS,
       DEFAULT_PRESETS,
     ),
   }),

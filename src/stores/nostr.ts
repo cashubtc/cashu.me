@@ -18,6 +18,7 @@ import { bytesToHex, hexToBytes } from "@noble/hashes/utils"; // already an inst
 import { useWalletStore } from "./wallet";
 import { generateSecretKey, getPublicKey } from "nostr-tools";
 import { useLocalStorage } from "@vueuse/core";
+import { STORAGE_KEYS } from "../js/storageKeys";
 import { useSettingsStore } from "./settings";
 import { useReceiveTokensStore } from "./receiveTokensStore";
 import {
@@ -67,26 +68,26 @@ export enum SignerType {
 export const useNostrStore = defineStore("nostr", {
   state: () => ({
     connected: false,
-    pubkey: useLocalStorage<string>("cashu.ndk.pubkey", ""),
+    pubkey: useLocalStorage<string>(STORAGE_KEYS.NDK_PUBKEY, ""),
     relays: useSettingsStore().defaultNostrRelays,
     ndk: {} as NDK,
     signerType: useLocalStorage<SignerType>(
-      "cashu.ndk.signerType",
+      STORAGE_KEYS.NDK_SIGNER_TYPE,
       SignerType.SEED
     ),
     nip07signer: {} as NDKNip07Signer,
-    nip46Token: useLocalStorage<string>("cashu.ndk.nip46Token", ""),
+    nip46Token: useLocalStorage<string>(STORAGE_KEYS.NDK_NIP46_TOKEN, ""),
     nip46signer: {} as NDKNip46Signer,
     privateKeySignerPrivateKey: useLocalStorage<string>(
-      "cashu.ndk.privateKeySignerPrivateKey",
+      STORAGE_KEYS.NDK_PRIVATEKEY_SIGNER_PRIVATEKEY,
       ""
     ),
     seedSignerPrivateKey: useLocalStorage<string>(
-      "cashu.ndk.seedSignerPrivateKey",
+      STORAGE_KEYS.NDK_SEED_SIGNER_PRIVATEKEY,
       ""
     ),
     seedSignerPublicKey: useLocalStorage<string>(
-      "cashu.ndk.seedSignerPublicKey",
+      STORAGE_KEYS.NDK_SEED_SIGNER_PUBLICKEY,
       ""
     ),
     seedSigner: {} as NDKPrivateKeySigner,
@@ -94,19 +95,19 @@ export const useNostrStore = defineStore("nostr", {
     privateKeySigner: {} as NDKPrivateKeySigner,
     signer: {} as NDKSigner,
     mintRecommendations: useLocalStorage<MintRecommendation[]>(
-      "cashu.ndk.mintRecommendations",
+      STORAGE_KEYS.NDK_MINT_RECOMMENDATIONS,
       []
     ),
     initialized: false,
     lastEventTimestamp: useLocalStorage<number>(
-      "cashu.ndk.lastEventTimestamp",
+      STORAGE_KEYS.NDK_LAST_EVENT_TIMESTAMP,
       0
     ),
     nip17EventIdsWeHaveSeen: useLocalStorage<NostrEventLog[]>(
-      "cashu.ndk.nip17EventIdsWeHaveSeen",
+      STORAGE_KEYS.NDK_NIP17_EVENT_IDS_WE_HAVE_SEEN,
       []
     ),
-    profiles: useLocalStorage<Record<string, { profile: any; fetchedAt: number }>>("cashu.ndk.profiles", {}),
+    profiles: useLocalStorage<Record<string, { profile: any; fetchedAt: number }>>(STORAGE_KEYS.NDK_PROFILES, {}),
   }),
   getters: {
     seedSignerPrivateKeyNsecComputed: (state) => {

@@ -1,6 +1,7 @@
 import { defineStore } from "pinia";
 import { useMintsStore } from "./mints";
 import { useLocalStorage } from "@vueuse/core";
+import { STORAGE_KEYS } from "../js/storageKeys";
 import {
   notifyApiError,
   notifyError,
@@ -22,7 +23,7 @@ const unitTickerShortMap = {
 
 export const useUiStore = defineStore("ui", {
   state: () => ({
-    hideBalance: useLocalStorage<boolean>("cashu.ui.hideBalance", false),
+    hideBalance: useLocalStorage<boolean>(STORAGE_KEYS.UI_HIDE_BALANCE, false),
     tickerLong: "Satoshis",
     showInvoiceDetails: false,
     showSendDialog: false,
@@ -30,11 +31,11 @@ export const useUiStore = defineStore("ui", {
     showReceiveEcashDrawer: false,
     showNumericKeyboard: false,
     activityOrb: false,
-    tab: useLocalStorage("cashu.ui.tab", "history" as string),
-    expandHistory: useLocalStorage("cashu.ui.expandHistory", true as boolean),
+    tab: useLocalStorage(STORAGE_KEYS.UI_TAB, "history" as string),
+    expandHistory: useLocalStorage(STORAGE_KEYS.UI_EXPAND_HISTORY, true as boolean),
     globalMutexLock: false,
-    showDebugConsole: useLocalStorage("cashu.ui.showDebugConsole", false),
-    lastBalanceCached: useLocalStorage("cashu.ui.lastBalanceCached", 0),
+    showDebugConsole: useLocalStorage(STORAGE_KEYS.UI_SHOW_DEBUG_CONSOLE, false),
+    lastBalanceCached: useLocalStorage(STORAGE_KEYS.UI_LAST_BALANCE_CACHED, 0),
   }),
   actions: {
     closeDialogs() {

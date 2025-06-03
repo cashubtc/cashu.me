@@ -1,5 +1,6 @@
 import { defineStore } from "pinia";
 import { useLocalStorage } from "@vueuse/core";
+import { STORAGE_KEYS } from "../js/storageKeys";
 import { v4 as uuidv4 } from "uuid";
 
 export type LockedToken = {
@@ -15,7 +16,7 @@ export type LockedToken = {
 
 export const useLockedTokensStore = defineStore("lockedTokens", {
   state: () => ({
-    lockedTokens: useLocalStorage<LockedToken[]>("cashu.lockedTokens", []),
+    lockedTokens: useLocalStorage<LockedToken[]>(STORAGE_KEYS.LOCKED_TOKENS, []),
   }),
   getters: {
     tokensByBucket: (state) => (bucketId: string) =>

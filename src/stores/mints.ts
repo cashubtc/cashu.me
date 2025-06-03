@@ -1,5 +1,6 @@
 import { defineStore, StoreDefinition } from "pinia";
 import { useLocalStorage } from "@vueuse/core";
+import { STORAGE_KEYS } from "../js/storageKeys";
 import { useWorkersStore } from "./workers";
 import {
   notifyApiError,
@@ -111,13 +112,13 @@ export const useMintsStore = defineStore("mints", {
   state: () => {
     const t = i18n.global.t;
     const activeProofs = ref<WalletProof[]>([]);
-    const activeUnit = useLocalStorage<string>("cashu.activeUnit", "sat");
-    const activeMintUrl = useLocalStorage<string>("cashu.activeMintUrl", "");
+    const activeUnit = useLocalStorage<string>(STORAGE_KEYS.ACTIVE_UNIT, "sat");
+    const activeMintUrl = useLocalStorage<string>(STORAGE_KEYS.ACTIVE_MINT_URL, "");
     const addMintData = ref({
       url: "",
       nickname: "",
     });
-    const mints = useLocalStorage("cashu.mints", [] as Mint[]);
+    const mints = useLocalStorage(STORAGE_KEYS.MINTS, [] as Mint[]);
     const showAddMintDialog = ref(false);
     const addMintBlocking = ref(false);
     const showRemoveMintDialog = ref(false);

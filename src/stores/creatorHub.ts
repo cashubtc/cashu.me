@@ -1,5 +1,6 @@
 import { defineStore } from "pinia";
 import { useLocalStorage } from "@vueuse/core";
+import { STORAGE_KEYS } from "../js/storageKeys";
 import { NDKEvent, NDKKind, NDKFilter } from "@nostr-dev-kit/ndk";
 import { useNostrStore } from "./nostr";
 import { v4 as uuidv4 } from "uuid";
@@ -17,8 +18,11 @@ const CREATOR_TIER_KIND = 38100;
 
 export const useCreatorHubStore = defineStore("creatorHub", {
   state: () => ({
-    loggedInNpub: useLocalStorage<string>("creatorHub.loggedInNpub", ""),
-    tiers: useLocalStorage<Record<string, Tier>>("creatorHub.tiers", {}),
+    loggedInNpub: useLocalStorage<string>(
+      STORAGE_KEYS.CREATOR_HUB_LOGGED_IN_NPUB,
+      ""
+    ),
+    tiers: useLocalStorage<Record<string, Tier>>(STORAGE_KEYS.CREATOR_HUB_TIERS, {}),
   }),
   actions: {
     async loginWithNip07() {

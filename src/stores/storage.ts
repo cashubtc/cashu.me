@@ -2,6 +2,7 @@ import { defineStore } from "pinia";
 import { useWalletStore } from "./wallet";
 import { useMintsStore } from "./mints";
 import { useLocalStorage } from "@vueuse/core";
+import { STORAGE_KEYS } from "../js/storageKeys";
 import { notifyError, notifySuccess } from "../js/ui-utils";
 import { useTokensStore } from "./tokens";
 import { currentDateStr } from "src/js/utils";
@@ -11,7 +12,7 @@ import { useBucketsStore } from "./buckets";
 export const useStorageStore = defineStore("storage", {
   state: () => ({
     lastLocalStorageCleanUp: useLocalStorage(
-      "cashu.lastLocalStorageCleanUp",
+      STORAGE_KEYS.LAST_LOCAL_STORAGE_CLEANUP,
       new Date(),
     ),
   }),
@@ -25,10 +26,10 @@ export const useStorageStore = defineStore("storage", {
         const keys = Object.keys(backup);
         for (const key of keys) {
           // we treat some keys differently *magic*
-          if (key === "cashu.dexie.db.proofs") {
+          if (key === STORAGE_KEYS.DEXIE_PROOFS_BACKUP) {
             const proofs = JSON.parse(backup[key]);
             await proofsStore.addProofs(proofs);
-          } else if (key === "cashu.buckets") {
+          } else if (key === STORAGE_KEYS.BUCKETS) {
             bucketsStore.buckets = JSON.parse(backup[key]);
           } else {
             localStorage.setItem(key, backup[key]);
@@ -50,7 +51,7 @@ export const useStorageStore = defineStore("storage", {
       }
       // proofs table *magic*
       const proofs = await useProofsStore().getProofs();
-      jsonToSave["cashu.dexie.db.proofs"] = JSON.stringify(proofs);
+      jsonToSave[STORAGE_KEYS.DEXIE_PROOFS_BACKUP] = JSON.stringify(proofs);
 
       var textToSave = JSON.stringify(jsonToSave);
       var textToSaveAsBlob = new Blob([textToSave], {
@@ -86,8 +87,8 @@ export const useStorageStore = defineStore("storage", {
       console.log(`Local storage size: ${localStorageSize} bytes`);
       let data = new Array(10240).join("x");
       try {
-        localStorage.setItem("cashu.test", data);
-        localStorage.removeItem("cashu.test");
+        localStorage.setItem(STORAGE_KEYS.STORAGE_TEST, data);
+        localStorage.removeItem(STORAGE_KEYS.STORAGE_TEST);
         return false;
       } catch (e) {
         console.log("Local storage quota exceeded");
@@ -115,7 +116,7 @@ export const useStorageStore = defineStore("storage", {
       const localStorageSizeBefore = JSON.stringify(localStorage).length;
 
       // delete cashu.spentProofs from local storage
-      localStorage.removeItem("cashu.spentProofs");
+      localStorage.removeItem(STORAGE_KEYS.SPENT_PROOFS);
 
       // from all paid invoices in this.invoiceHistory, delete the oldest so that only max 100 remain
       const max_history = 200;

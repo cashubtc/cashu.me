@@ -9,6 +9,7 @@ import NDK, {
   NDKSubscription,
 } from "@nostr-dev-kit/ndk";
 import { useLocalStorage } from "@vueuse/core";
+import { STORAGE_KEYS } from "../js/storageKeys";
 import { bytesToHex } from "@noble/hashes/utils"; // already an installed dependency
 import { nip04, generateSecretKey, getPublicKey } from "nostr-tools";
 import { useMintsStore } from "./mints";
@@ -65,10 +66,10 @@ const NWCKind = {
 
 export const useNWCStore = defineStore("nwc", {
   state: () => ({
-    nwcEnabled: useLocalStorage<boolean>("cashu.nwc.enabled", false),
-    connections: useLocalStorage<NWCConnection[]>("cashu.nwc.connections", []),
+    nwcEnabled: useLocalStorage<boolean>(STORAGE_KEYS.NWC_ENABLED, false),
+    connections: useLocalStorage<NWCConnection[]>(STORAGE_KEYS.NWC_CONNECTIONS, []),
     seenCommandsUntil: useLocalStorage<number>(
-      "cashu.nwc.seenCommandsUntil",
+      STORAGE_KEYS.NWC_SEEN_COMMANDS_UNTIL,
       0
     ),
     supportedMethods: [
@@ -80,7 +81,7 @@ export const useNWCStore = defineStore("nwc", {
       "lookup_invoice",
     ],
     relays: useLocalStorage<string[]>(
-      "cashu.nwc.relays",
+      STORAGE_KEYS.NWC_RELAYS,
       useSettingsStore().defaultNostrRelays
     ),
     blocking: false,

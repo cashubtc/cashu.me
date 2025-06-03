@@ -1,6 +1,7 @@
 import { defineStore } from "pinia";
 import { useSettingsStore } from "./settings";
 import { useLocalStorage } from "@vueuse/core";
+import { STORAGE_KEYS } from "../js/storageKeys";
 import {
   notifyApiError,
   notifyError,
@@ -19,9 +20,9 @@ const unitTickerShortMap = {
 
 export const usePriceStore = defineStore("price", {
   state: () => ({
-    bitcoinPrice: useLocalStorage("cashu.price.bitcoinPrice", 0 as number),
+    bitcoinPrice: useLocalStorage(STORAGE_KEYS.PRICE_BITCOIN_PRICE, 0 as number),
     bitcoinPriceLastUpdated: useLocalStorage(
-      "cashu.price.bitcoinPriceLastUpdated",
+      STORAGE_KEYS.PRICE_BITCOIN_PRICE_LAST_UPDATED,
       0 as number
     ),
     bitcoinPriceMinRefreshInterval: 60_000,

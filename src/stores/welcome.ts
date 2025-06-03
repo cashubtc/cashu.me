@@ -1,6 +1,7 @@
 // src/stores/welcome.ts
 import { defineStore } from "pinia";
 import { useLocalStorage } from "@vueuse/core";
+import { STORAGE_KEYS } from "../js/storageKeys";
 import { computed } from "vue";
 import router from "src/router";
 
@@ -14,14 +15,14 @@ export type WelcomeState = {
 // Define the Pinia store
 export const useWelcomeStore = defineStore("welcome", {
   state: (): WelcomeState => ({
-    showWelcome: useLocalStorage<boolean>("cashu.welcome.showWelcome", true),
-    currentSlide: useLocalStorage<number>("cashu.welcome.currentSlide", 0),
+    showWelcome: useLocalStorage<boolean>(STORAGE_KEYS.WELCOME_SHOW_WELCOME, true),
+    currentSlide: useLocalStorage<number>(STORAGE_KEYS.WELCOME_CURRENT_SLIDE, 0),
     seedPhraseValidated: useLocalStorage<boolean>(
-      "cashu.welcome.seedPhraseValidated",
+      STORAGE_KEYS.WELCOME_SEED_PHRASE_VALIDATED,
       false
     ),
     termsAccepted: useLocalStorage<boolean>(
-      "cashu.welcome.termsAccepted",
+      STORAGE_KEYS.WELCOME_TERMS_ACCEPTED,
       false
     ),
   }),

@@ -2,6 +2,7 @@ import { defineStore } from "pinia";
 import { currentDateStr } from "src/js/utils";
 import { useMintsStore, WalletProof, MintClass, Mint } from "./mints";
 import { useLocalStorage } from "@vueuse/core";
+import { STORAGE_KEYS } from "../js/storageKeys";
 import { useProofsStore } from "./proofs";
 import { HistoryToken, useTokensStore } from "./tokens";
 import { useReceiveTokensStore } from "./receiveTokensStore";
@@ -91,17 +92,17 @@ export const useWalletStore = defineStore("wallet", {
     const t = i18n.global.t;
     return {
       t: t,
-      mnemonic: useLocalStorage("cashu.mnemonic", ""),
+      mnemonic: useLocalStorage(STORAGE_KEYS.MNEMONIC, ""),
       invoiceHistory: useLocalStorage(
-        "cashu.invoiceHistory",
+        STORAGE_KEYS.INVOICE_HISTORY,
         [] as InvoiceHistory[],
       ),
       keysetCounters: useLocalStorage(
-        "cashu.keysetCounters",
+        STORAGE_KEYS.KEYSET_COUNTERS,
         [] as KeysetCounter[],
       ),
       oldMnemonicCounters: useLocalStorage(
-        "cashu.oldMnemonicCounters",
+        STORAGE_KEYS.OLD_MNEMONIC_COUNTERS,
         [] as { mnemonic: string; keysetCounters: KeysetCounter[] }[],
       ),
       invoiceData: {} as InvoiceHistory,

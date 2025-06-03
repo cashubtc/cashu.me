@@ -1,4 +1,5 @@
 import { useLocalStorage } from "@vueuse/core";
+import { STORAGE_KEYS } from "../js/storageKeys";
 import { date } from "quasar";
 import { defineStore } from "pinia";
 import { PaymentRequest, Proof, Token } from "@cashu/cashu-ts";
@@ -27,7 +28,10 @@ export type HistoryToken = {
 
 export const useTokensStore = defineStore("tokens", {
   state: () => ({
-    historyTokens: useLocalStorage("cashu.historyTokens", [] as HistoryToken[]),
+    historyTokens: useLocalStorage(
+      STORAGE_KEYS.HISTORY_TOKENS,
+      [] as HistoryToken[]
+    ),
   }),
   actions: {
     /**
