@@ -1169,10 +1169,10 @@
                     }}</q-tooltip>
                   </q-btn>
                   <q-btn
-                    v-if="themes.includes('classic')"
+                    v-if="themes.includes('nostr')"
                     dense
                     flat
-                    @click="changeColor('classic')"
+                    @click="changeColor('nostr')"
                     icon="format_color_fill"
                     color="deep-purple"
                     size="md"
@@ -1642,7 +1642,7 @@ export default defineComponent({
     return {
       themes: [
         "monochrome",
-        "classic",
+        "nostr",
         "bitcoin",
         "mint",
         "autumn",
