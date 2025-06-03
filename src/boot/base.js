@@ -1,4 +1,5 @@
 import { LocalStorage, Dark } from "quasar";
+import { boot } from "quasar/wrappers";
 import { SafeArea } from "capacitor-plugin-safe-area";
 import {
   changeColor,
@@ -17,10 +18,11 @@ import {
   notify,
 } from "src/js/ui-utils";
 
-window.LOCALE = "en";
-// window.EventHub = new Vue();
+export default boot(() => {
+  window.LOCALE = "en";
+  // window.EventHub = new Vue();
 
-window.windowMixin = {
+  const windowMixin = {
   data: function () {
     return {
       g: {
@@ -113,4 +115,7 @@ window.windowMixin = {
       });
     }
   },
-};
+  };
+
+  window.windowMixin = windowMixin;
+});
