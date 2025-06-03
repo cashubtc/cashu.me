@@ -1,8 +1,10 @@
 <template>
   <q-page :class="[$q.dark.isActive ? 'bg-dark text-white' : 'bg-white text-dark']" class="column full-height">
-    <q-toolbar class="q-pa-sm border-bottom" style="border-bottom: 1px solid rgba(0,0,0,0.1)">
-      <q-toolbar-title class="text-h6">Chats</q-toolbar-title>
-    </q-toolbar>
+    <q-header elevated reveal class="border-bottom" style="border-bottom: 1px solid rgba(0,0,0,0.1)">
+      <q-toolbar class="q-pa-sm">
+        <q-toolbar-title class="text-h6">Chats</q-toolbar-title>
+      </q-toolbar>
+    </q-header>
     <q-virtual-scroll
       class="col scroll-area"
       :items="pubkeys"
