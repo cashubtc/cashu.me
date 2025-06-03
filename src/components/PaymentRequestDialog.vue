@@ -117,7 +117,10 @@
 <script>
 import { defineComponent } from "vue";
 import { mapActions, mapState, mapWritableState } from "pinia";
-import VueQrcode from "@chenfengyuan/vue-qrcode";
+import { defineAsyncComponent } from "vue";
+const VueQrcode = defineAsyncComponent(() =>
+  import("@chenfengyuan/vue-qrcode")
+);
 
 import { usePRStore } from "src/stores/payment-request";
 import { useMintsStore } from "../stores/mints";

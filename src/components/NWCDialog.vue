@@ -62,7 +62,10 @@
 <script>
 import { defineComponent } from "vue";
 import { mapActions, mapState, mapWritableState } from "pinia";
-import VueQrcode from "@chenfengyuan/vue-qrcode";
+import { defineAsyncComponent } from "vue";
+const VueQrcode = defineAsyncComponent(() =>
+  import("@chenfengyuan/vue-qrcode")
+);
 
 import { useNWCStore } from "src/stores/nwc";
 
