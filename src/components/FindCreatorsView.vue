@@ -1,5 +1,12 @@
 <template>
-  <div class="creators-container">
+  <q-page
+    class="creators-page q-pa-md"
+    :class="$q.dark.isActive ? 'bg-dark text-white' : 'bg-grey-2 text-dark'"
+  >
+    <div
+      class="creators-container"
+      :class="$q.dark.isActive ? 'bg-grey-10 text-white' : 'bg-white text-dark'"
+    >
     <q-input
       rounded
       outlined
@@ -43,7 +50,7 @@
       v-if="searchResults.length"
       class="q-mt-md creators-grid"
       :items="searchResults"
-      :virtual-scroll-item-size="340"
+      :virtual-scroll-item-size="360"
     >
       <template #default="{ item }">
         <creator-profile-card
@@ -79,7 +86,8 @@
       @back="backToAction"
     />
     <SendMessageDialog v-model="showMessageDialog" @send="sendMessage" />
-  </div>
+    </div>
+  </q-page>
 </template>
 
 <script lang="ts">
@@ -301,16 +309,20 @@ export default defineComponent({
 </script>
 
 <style scoped>
+.creators-page {
+  min-height: 100%;
+}
 .creators-container {
   max-width: 1400px;
   margin: 0 auto;
   width: 100%;
   padding: 16px;
+  border-radius: 8px;
 }
 .creators-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 24px;
   justify-items: center;
 }
 </style>
