@@ -51,19 +51,35 @@
       </div>
     </q-card-section>
     <q-card-section class="text-caption">
-      <template v-if="loaded">
-        {{ $t("FindCreators.labels.view_profile_stats") }}
-      </template>
-      <template v-else-if="loading">
-        <q-skeleton type="text" width="60%" />
-      </template>
-    </q-card-section>
-    <q-card-section class="text-caption">
       <template v-if="loaded && joinedDateFormatted">
         {{ $t("FindCreators.labels.joined") }}: {{ joinedDateFormatted }}
       </template>
       <template v-else-if="loading">
         <q-skeleton type="text" width="40%" />
+      </template>
+    </q-card-section>
+    <q-card-section class="text-caption">
+      <template v-if="loaded">
+        {{ $t('FindCreators.labels.followers') }}: {{ followers }}
+      </template>
+      <template v-else-if="loading">
+        <q-skeleton type="text" width="40%" />
+      </template>
+    </q-card-section>
+    <q-card-section class="text-caption">
+      <template v-if="loaded">
+        {{ $t('FindCreators.labels.following') }}: {{ following }}
+      </template>
+      <template v-else-if="loading">
+        <q-skeleton type="text" width="40%" />
+      </template>
+    </q-card-section>
+    <q-card-section class="text-caption">
+      <template v-if="loaded">
+        {{ $t("FindCreators.labels.view_profile_stats") }}
+      </template>
+      <template v-else-if="loading">
+        <q-skeleton type="text" width="60%" />
       </template>
     </q-card-section>
     <q-card-actions class="q-mt-sm">
