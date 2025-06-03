@@ -6,6 +6,12 @@ import { useStorageStore } from "./storage";
 import { useProofsStore } from "./proofs";
 import { notifyError, notifySuccess } from "../js/notify";
 
+export interface CachedProfileDexie {
+  pubkey: string;
+  profile: any;
+  fetchedAt: number;
+}
+
 // export interface Proof {
 //   id: string
 //   C: string
@@ -17,6 +23,7 @@ import { notifyError, notifySuccess } from "../js/notify";
 
 export class CashuDexie extends Dexie {
   proofs!: Table<WalletProof>;
+  profiles!: Table<CachedProfileDexie>;
 
   constructor() {
     super("db");
@@ -51,6 +58,10 @@ export class CashuDexie extends Dexie {
             }
           });
       });
+    this.version(4).stores({
+      proofs: "secret, id, C, amount, reserved, quote, bucketId, label",
+      profiles: "pubkey",
+    });
   }
 }
 
