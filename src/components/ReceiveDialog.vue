@@ -89,7 +89,7 @@ import {
   notifySuccess,
   notify,
   notifyWarning,
-} from "src/js/notify.ts";
+} from "src/js/ui-utils.ts";
 import {
   X as XIcon,
   Coins as CoinsIcon,

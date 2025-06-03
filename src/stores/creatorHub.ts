@@ -3,7 +3,7 @@ import { useLocalStorage } from "@vueuse/core";
 import { NDKEvent, NDKKind, NDKFilter } from "@nostr-dev-kit/ndk";
 import { useNostrStore } from "./nostr";
 import { v4 as uuidv4 } from "uuid";
-import { notifySuccess } from "src/js/notify";
+import { notifySuccess } from "src/js/ui-utils";
 
 export interface Tier {
   id: string;

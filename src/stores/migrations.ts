@@ -1,7 +1,7 @@
 import { defineStore } from "pinia";
 import { useLocalStorage } from "@vueuse/core";
 import { useMintsStore } from "./mints";
-import { notifySuccess } from "../js/notify";
+import { notifySuccess } from "../js/ui-utils";
 import { useUiStore } from "./ui";
 
 // Define the migration version type

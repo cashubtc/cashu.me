@@ -32,7 +32,7 @@ import {
   notifySuccess,
   notifyWarning,
   notify,
-} from "../js/notify";
+} from "../js/ui-utils";
 import { useSendTokensStore } from "./sendTokensStore";
 import { usePRStore } from "./payment-request";
 import token from "../js/token";

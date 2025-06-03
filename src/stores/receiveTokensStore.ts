@@ -10,7 +10,7 @@ import {
   notifySuccess,
   notify,
   notifyWarning,
-} from "../js/notify";
+} from "../js/ui-utils";
 import { Token } from "@cashu/cashu-ts";
 import { useSwapStore } from "./swap";
 import { Clipboard } from "@capacitor/clipboard";

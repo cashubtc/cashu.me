@@ -17,7 +17,7 @@ import {
   notifyError,
   notifySuccess,
   notifyWarning,
-} from "src/js/notify";
+} from "src/js/ui-utils";
 import { useLocalStorage } from "@vueuse/core";
 import { v4 as uuidv4 } from "uuid";
 

@@ -656,7 +656,7 @@ import {
   notifySuccess,
   notify,
   notifyWarning,
-} from "src/js/notify.ts";
+} from "src/js/ui-utils.ts";
 import { Dialog } from "quasar";
 import { useDmChatsStore } from "src/stores/dmChats";
 import { getEncodedTokenV3 } from "@cashu/cashu-ts/dist/lib/es5/utils";

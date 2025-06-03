@@ -347,7 +347,7 @@ import {
   notifySuccess,
   notifyWarning,
   notify,
-} from "../js/notify";
+} from "../js/ui-utils";
 import MintSettings from "./MintSettings.vue";
 
 export default defineComponent({

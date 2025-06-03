@@ -146,7 +146,7 @@ import {
 // import ChooseMint from "components/ChooseMint.vue";
 import TokenInformation from "components/TokenInformation.vue";
 import { map } from "underscore";
-import { notifyError, notifySuccess, notify } from "../js/notify";
+import { notifyError, notifySuccess, notify } from "../js/ui-utils";
 
 export default defineComponent({
   name: "ReceiveTokenDialog",

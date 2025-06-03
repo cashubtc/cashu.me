@@ -5,7 +5,7 @@ import { bytesToHex } from "@noble/hashes/utils"; // already an installed depend
 import { useWalletStore } from "./wallet";
 import { CashuMint, CashuWallet, CheckStateEnum, Proof } from "@cashu/cashu-ts";
 import { useMintsStore } from "./mints";
-import { notify, notifyError, notifySuccess } from "src/js/notify";
+import { notify, notifyError, notifySuccess } from "src/js/ui-utils";
 import { useUiStore } from "./ui";
 import { useProofsStore } from "./proofs";
 import { i18n } from "../boot/i18n";

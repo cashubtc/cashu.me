@@ -4,7 +4,7 @@ import { useLocalStorage } from "@vueuse/core";
 import { WalletProof } from "./mints";
 import { useStorageStore } from "./storage";
 import { useProofsStore } from "./proofs";
-import { notifyError, notifySuccess } from "../js/notify";
+import { notifyError, notifySuccess } from "../js/ui-utils";
 
 export interface CachedProfileDexie {
   pubkey: string;

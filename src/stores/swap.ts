@@ -6,7 +6,7 @@ import { Mint, useMintsStore } from "./mints";
 import { useWalletStore } from "./wallet";
 import { DEFAULT_BUCKET_ID } from "./buckets";
 import { useProofsStore } from "./proofs";
-import { notifyError, notifyWarning } from "../js/notify";
+import { notifyError, notifyWarning } from "../js/ui-utils";
 import token from "src/js/token";
 import { i18n } from "../boot/i18n";
 

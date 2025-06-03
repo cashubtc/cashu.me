@@ -7,7 +7,7 @@ import {
   notifySuccess,
   notifyWarning,
   notify,
-} from "../js/notify";
+} from "../js/ui-utils";
 import { Clipboard } from "@capacitor/clipboard";
 import { Haptics, ImpactStyle } from "@capacitor/haptics";
 

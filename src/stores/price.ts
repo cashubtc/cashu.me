@@ -7,7 +7,7 @@ import {
   notifySuccess,
   notifyWarning,
   notify,
-} from "../js/notify";
+} from "../js/ui-utils";
 import axios from "axios";
 
 const unitTickerShortMap = {

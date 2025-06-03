@@ -472,7 +472,7 @@ import { useP2PKStore } from "src/stores/p2pk";
 import { useWorkersStore } from "src/stores/workers";
 import { useSwapStore } from "src/stores/swap";
 import { useUiStore } from "src/stores/ui";
-import { notifyError, notifyWarning } from "src/js/notify";
+import { notifyError, notifyWarning } from "src/js/ui-utils";
 import MintDetailsDialog from "src/components/MintDetailsDialog.vue";
 import { EventBus } from "../js/eventBus";
 import AddMintDialog from "src/components/AddMintDialog.vue";
