@@ -1325,6 +1325,7 @@ export default {
       followers: "Followers",
       following: "Following",
       joined: "Joined",
+      view_profile_stats: "View profile for stats",
     },
     actions: {
       donate: {

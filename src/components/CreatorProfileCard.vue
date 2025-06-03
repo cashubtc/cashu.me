@@ -7,10 +7,7 @@
           :src="creator.profile.picture"
           alt="Creator image"
         />
-        <div
-          v-else
-          class="placeholder-avatar text-white flex flex-center"
-        >
+        <div v-else class="placeholder-avatar text-white flex flex-center">
           {{ initials }}
         </div>
       </q-avatar>
@@ -34,30 +31,24 @@
         <span>{{ creator.profile.lud16 }}</span>
       </div>
     </q-card-section>
-    <q-card-section class="text-caption" v-if="creator.followers !== undefined">
-      {{ $t('FindCreators.labels.followers') }}: {{ creator.followers }} |
-      {{ $t('FindCreators.labels.following') }}: {{ creator.following }}
+    <q-card-section class="text-caption">
+      {{ $t("FindCreators.labels.view_profile_stats") }}
     </q-card-section>
     <q-card-section class="text-caption" v-if="joinedDateFormatted">
-      {{ $t('FindCreators.labels.joined') }}: {{ joinedDateFormatted }}
+      {{ $t("FindCreators.labels.joined") }}: {{ joinedDateFormatted }}
     </q-card-section>
     <q-card-actions class="q-mt-sm">
-      <q-btn
-        color="primary"
-        unelevated
-        class="full-width"
-        :to="profileLink"
-      >
+      <q-btn color="primary" unelevated class="full-width" :to="profileLink">
         <q-icon name="chevron_right" size="16px" class="q-mr-xs" />
-        {{ $t('FindCreators.actions.view_profile.label') }}
+        {{ $t("FindCreators.actions.view_profile.label") }}
       </q-btn>
     </q-card-actions>
     <q-card-actions align="right" class="q-gutter-sm">
       <q-btn color="primary" flat @click="$emit('donate', creator)">
-        {{ $t('FindCreators.actions.donate.label') }}
+        {{ $t("FindCreators.actions.donate.label") }}
       </q-btn>
       <q-btn color="primary" flat @click="$emit('message', creator)">
-        {{ $t('FindCreators.actions.message.label') }}
+        {{ $t("FindCreators.actions.message.label") }}
       </q-btn>
     </q-card-actions>
   </q-card>
@@ -86,7 +77,9 @@ export default defineComponent({
     );
     const initials = computed(() => {
       const name =
-        props.creator.profile?.display_name || props.creator.profile?.name || "";
+        props.creator.profile?.display_name ||
+        props.creator.profile?.name ||
+        "";
       if (!name) return "?";
       return name
         .split(" ")
@@ -108,7 +101,7 @@ export default defineComponent({
       }
       return date.formatDate(
         new Date(props.creator.joined * 1000),
-        "YYYY-MM-DD"
+        "YYYY-MM-DD",
       );
     });
     return {

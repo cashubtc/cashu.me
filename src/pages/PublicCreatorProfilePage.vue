@@ -15,6 +15,10 @@
       <img :src="profile.picture" style="max-width: 150px" />
     </div>
     <div v-if="profile.about" class="q-mb-md">{{ profile.about }}</div>
+    <div v-if="followers !== null" class="text-caption q-mb-md">
+      {{ $t("FindCreators.labels.followers") }}: {{ followers }} |
+      {{ $t("FindCreators.labels.following") }}: {{ following }}
+    </div>
 
     <div v-if="tiers.length">
       <div class="text-h6 q-mb-sm">{{ $t("CreatorHub.profile.tiers") }}</div>
@@ -25,7 +29,10 @@
             ({{ formatFiat(tier.price) }})
           </span>
         </div>
-        <div class="text-caption" v-html="renderMarkdown(tier.description)"></div>
+        <div
+          class="text-caption"
+          v-html="renderMarkdown(tier.description)"
+        ></div>
         <q-btn
           color="primary"
           dense
@@ -59,9 +66,13 @@ export default defineComponent({
     const pubkey = route.params.npubOrVanityName as string;
     const profile = ref<any>({});
     const tiers = ref(hub.getTierArray());
+    const followers = ref<number | null>(null);
+    const following = ref<number | null>(null);
     onMounted(async () => {
       const p = await nostr.getProfile(pubkey);
       if (p) profile.value = { ...p };
+      followers.value = await nostr.fetchFollowerCount(pubkey);
+      following.value = await nostr.fetchFollowingCount(pubkey);
     });
     function renderMarkdown(text: string): string {
       return renderMarkdownFn(text || "");
@@ -90,6 +101,8 @@ export default defineComponent({
       pubkey,
       profile,
       tiers,
+      followers,
+      following,
       bitcoinPrice,
       renderMarkdown,
       formatFiat,
