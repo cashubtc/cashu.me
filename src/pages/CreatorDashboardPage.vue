@@ -37,7 +37,7 @@
             />
             <q-input
               v-model.number="editedTiers[tier.id].price"
-              label="Cost (sats)"
+              label="Cost / month (sats)"
               type="number"
               dense
               outlined
