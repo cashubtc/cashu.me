@@ -6,7 +6,7 @@ import {
   notifyError,
   notifySuccess,
   notifyWarning,
-} from "src/js/notify";
+} from "src/js/ui-utils";
 import {
   CashuMint,
   MintKeys,

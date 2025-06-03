@@ -48,7 +48,7 @@ import { defineComponent } from "vue";
 import { useUiStore } from "../stores/ui";
 import { mapWritableState } from "pinia";
 import { useSettingsStore } from "../stores/settings";
-import { notify } from "src/js/notify";
+import { notify } from "src/js/ui-utils";
 
 export default defineComponent({
   name: "NumericKeyboard",

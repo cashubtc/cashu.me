@@ -2,7 +2,7 @@ import { defineStore } from "pinia";
 import { useWalletStore } from "./wallet";
 import { useMintsStore } from "./mints";
 import { useLocalStorage } from "@vueuse/core";
-import { notifyError, notifySuccess } from "../js/notify";
+import { notifyError, notifySuccess } from "../js/ui-utils";
 import { useTokensStore } from "./tokens";
 import { currentDateStr } from "src/js/utils";
 import { useProofsStore } from "./proofs";

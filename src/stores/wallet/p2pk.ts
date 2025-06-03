@@ -2,7 +2,7 @@ import { CashuWallet, Proof } from '@cashu/cashu-ts';
 import { WalletProof } from '../mints';
 import { useMintsStore } from '../mints';
 import { DEFAULT_BUCKET_ID } from '../buckets';
-import { notifyError } from 'src/js/notify';
+import { notifyError } from 'src/js/ui-utils';
 import { useProofsStore } from '../proofs';
 
 /**

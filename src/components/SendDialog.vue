@@ -88,7 +88,7 @@ import {
   Scan as ScanIcon,
   Coins as CoinsIcon,
 } from "lucide-vue-next";
-import { notifyWarning } from "src/js/notify";
+import { notifyWarning } from "src/js/ui-utils";
 
 export default defineComponent({
   name: "SendDialog",

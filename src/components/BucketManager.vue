@@ -180,7 +180,7 @@ import { useMintsStore } from "stores/mints";
 import { useProofsStore } from "stores/proofs";
 import { storeToRefs } from "pinia";
 import { useUiStore } from "stores/ui";
-import { notifyError } from "src/js/notify";
+import { notifyError } from "src/js/ui-utils";
 import { DEFAULT_COLOR } from "src/js/constants";
 
 export default defineComponent({

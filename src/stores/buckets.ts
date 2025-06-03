@@ -6,7 +6,7 @@ import { useProofsStore } from "./proofs";
 import { useTokensStore } from "./tokens";
 import { useLockedTokensStore } from "./lockedTokens";
 import { ref, watch } from "vue";
-import { notifySuccess } from "src/js/notify";
+import { notifySuccess } from "src/js/ui-utils";
 
 export type Bucket = {
   id: string;

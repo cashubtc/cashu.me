@@ -12,7 +12,7 @@ import {
   notifySuccess,
   notifyWarning,
   notify,
-} from "../js/notify";
+} from "../js/ui-utils";
 import { Proof } from "@cashu/cashu-ts";
 import token from "../js/token";
 import { WalletProof, useMintsStore } from "./mints";

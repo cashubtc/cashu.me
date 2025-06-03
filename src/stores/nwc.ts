@@ -14,7 +14,7 @@ import { nip04, generateSecretKey, getPublicKey } from "nostr-tools";
 import { useMintsStore } from "./mints";
 import { useWalletStore, InvoiceHistory } from "./wallet";
 import { useProofsStore } from "./proofs";
-import { notify, notifyError, notifyWarning } from "../js/notify";
+import { notify, notifyError, notifyWarning } from "../js/ui-utils";
 import { useSettingsStore } from "./settings";
 import { decode as decodeBolt11 } from "light-bolt11-decoder";
 

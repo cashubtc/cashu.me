@@ -5,7 +5,7 @@ import { useUiStore } from '../ui';
 import { useTokensStore } from '../tokens';
 import { DEFAULT_BUCKET_ID } from '../buckets';
 import { currentDateStr } from 'src/js/utils';
-import { notifyApiError, notify, notifySuccess } from 'src/js/notify';
+import { notifyApiError, notify, notifySuccess } from 'src/js/ui-utils';
 import { useInvoicesWorkerStore } from '../invoicesWorker';
 import { HistoryToken } from '../tokens';
 

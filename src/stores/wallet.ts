@@ -24,7 +24,7 @@ import {
   notifySuccess,
   notifyWarning,
   notify,
-} from "src/js/notify";
+} from "src/js/ui-utils";
 import {
   CashuMint,
   CashuWallet,
