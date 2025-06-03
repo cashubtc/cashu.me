@@ -29,14 +29,14 @@
           <q-card-section>
             <q-input
               :id="`tier-name-${tier.id}`"
-              v-model="tier.name"
+              v-model="editedTiers[tier.id].name"
               label="Title"
               dense
               outlined
               class="q-mt-sm"
             />
             <q-input
-              v-model.number="tier.price"
+              v-model.number="editedTiers[tier.id].price"
               label="Cost (sats)"
               type="number"
               dense
@@ -45,14 +45,14 @@
             >
               <template #hint>
                 <div v-if="bitcoinPrice">
-                  ~{{ formatCurrency((bitcoinPrice / 100000000) * tier.price, 'USD') }}
+                  ~{{ formatCurrency((bitcoinPrice / 100000000) * editedTiers[tier.id].price, 'USD') }}
                   /
-                  {{ formatCurrency((bitcoinPrice / 100000000) * tier.price, 'EUR') }}
+                  {{ formatCurrency((bitcoinPrice / 100000000) * editedTiers[tier.id].price, 'EUR') }}
                 </div>
               </template>
             </q-input>
             <q-input
-              v-model="tier.description"
+              v-model="editedTiers[tier.id].description"
               label="Description (Markdown)"
               type="textarea"
               autogrow
@@ -61,7 +61,7 @@
               class="q-mt-sm"
             />
             <q-input
-              v-model="tier.welcomeMessage"
+              v-model="editedTiers[tier.id].welcomeMessage"
               label="Welcome Message"
               type="textarea"
               autogrow
@@ -70,7 +70,7 @@
               class="q-mt-sm"
             />
             <q-input
-              v-model="tier.id"
+              v-model="editedTiers[tier.id].id"
               label="ID (optional)"
               dense
               outlined
@@ -83,6 +83,14 @@
               flat
               @click="saveTier(tier)"
               >{{ $t('CreatorHub.dashboard.save_tier') }}</q-btn
+            >
+            <q-btn
+              outline
+              color="primary"
+              class="q-mr-sm"
+              :style="{ borderRadius: '8px' }"
+              @click="cancelEdit(tier.id)"
+              >{{ $t('global.actions.cancel.label') }}</q-btn
             >
             <q-btn
               color="negative"
@@ -107,6 +115,7 @@ import {
   ref,
   onMounted,
   computed,
+  watch,
 } from 'vue';
 import { useCreatorHubStore, Tier } from 'stores/creatorHub';
 import AddTierDialog from 'components/AddTierDialog.vue';
@@ -127,6 +136,20 @@ export default defineComponent({
     const uiStore = useUiStore();
     const profile = ref<any>({ display_name: '', picture: '', about: '' });
     const tiers = computed<Tier[]>(() => store.getTierArray());
+
+    const editedTiers = ref<Record<string, Tier>>({});
+
+    watch(
+      () => store.tiers,
+      (val) => {
+        const obj: Record<string, Tier> = {};
+        Object.values(val).forEach((t) => {
+          obj[t.id] = { ...t };
+        });
+        editedTiers.value = obj;
+      },
+      { immediate: true, deep: true }
+    );
 
     onMounted(async () => {
       if (!store.loggedInNpub) {
@@ -174,7 +197,22 @@ export default defineComponent({
     };
 
     const saveTier = (tier: Tier) => {
-      store.updateTier(tier.id, { ...tier });
+      const data = editedTiers.value[tier.id];
+      if (data) {
+        store.updateTier(tier.id, { ...data });
+      }
+    };
+
+    const cancelEdit = (id: string) => {
+      const tier = store.tiers[id];
+      if (tier) {
+        editedTiers.value[id] = { ...tier };
+      } else {
+        delete editedTiers.value[id];
+        if (newTier.value.id === id) {
+          showAddTierDialog.value = false;
+        }
+      }
     };
 
     const bitcoinPrice = computed(() => priceStore.bitcoinPrice);
@@ -196,6 +234,8 @@ export default defineComponent({
       saveAllTiers,
       removeTier,
       saveTier,
+      editedTiers,
+      cancelEdit,
     };
   }
 });
