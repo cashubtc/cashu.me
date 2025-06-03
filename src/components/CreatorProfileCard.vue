@@ -1,12 +1,18 @@
 <template>
   <q-card class="q-pa-md q-mb-md qcard creator-card shadow-2 rounded-borders">
     <q-card-section class="row items-center no-wrap">
-      <q-avatar
-        v-if="creator.profile?.picture"
-        size="56px"
-        class="creator-avatar"
-      >
-        <img :src="creator.profile.picture" alt="Creator image" />
+      <q-avatar size="56px" class="creator-avatar">
+        <img
+          v-if="creator.profile?.picture"
+          :src="creator.profile.picture"
+          alt="Creator image"
+        />
+        <div
+          v-else
+          class="placeholder-avatar text-white flex flex-center"
+        >
+          {{ initials }}
+        </div>
       </q-avatar>
       <div class="q-ml-sm">
         <div class="text-subtitle1 ellipsis">
@@ -16,11 +22,11 @@
             shortPubkey
           }}
         </div>
-        <div class="text-caption">{{ shortPubkey }}</div>
+        <div class="text-caption ellipsis">{{ shortPubkey }}</div>
       </div>
     </q-card-section>
     <q-card-section v-if="creator.profile?.about">
-      <div>{{ truncatedAbout }}</div>
+      <div class="truncated-text">{{ truncatedAbout }}</div>
     </q-card-section>
     <q-card-section v-if="creator.profile?.lud16">
       <div class="row items-center">
@@ -35,7 +41,18 @@
     <q-card-section class="text-caption" v-if="joinedDateFormatted">
       {{ $t('FindCreators.labels.joined') }}: {{ joinedDateFormatted }}
     </q-card-section>
-    <q-card-actions align="right">
+    <q-card-actions class="q-mt-sm">
+      <q-btn
+        color="primary"
+        unelevated
+        class="full-width"
+        :to="profileLink"
+      >
+        <q-icon name="chevron_right" size="16px" class="q-mr-xs" />
+        {{ $t('FindCreators.actions.view_profile.label') }}
+      </q-btn>
+    </q-card-actions>
+    <q-card-actions align="right" class="q-gutter-sm">
       <q-btn color="primary" flat @click="$emit('donate', creator)">
         {{ $t('FindCreators.actions.donate.label') }}
       </q-btn>
@@ -67,6 +84,18 @@ export default defineComponent({
         ? `${props.creator.pubkey.slice(0, 8)}…${props.creator.pubkey.slice(-8)}`
         : props.creator.pubkey,
     );
+    const initials = computed(() => {
+      const name =
+        props.creator.profile?.display_name || props.creator.profile?.name || "";
+      if (!name) return "?";
+      return name
+        .split(" ")
+        .map((p) => p.charAt(0))
+        .join("")
+        .slice(0, 2)
+        .toUpperCase();
+    });
+    const profileLink = computed(() => `/creators/${props.creator.pubkey}`);
     const truncatedAbout = computed(() => {
       const about = props.creator.profile?.about || "";
       return about.length > MAX_LENGTH
@@ -84,6 +113,8 @@ export default defineComponent({
       truncatedAbout,
       joinedDateFormatted,
       shortPubkey,
+      profileLink,
+      initials,
     };
   },
 });
@@ -101,10 +132,28 @@ export default defineComponent({
   width: 100%;
   max-width: 280px;
   border-radius: 8px;
+  overflow: hidden;
 }
 .ellipsis {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+.placeholder-avatar {
+  background: #9ca3af;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.truncated-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
 }
 </style>

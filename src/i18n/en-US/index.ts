@@ -1333,6 +1333,9 @@ export default {
       message: {
         label: "Message",
       },
+      view_profile: {
+        label: "View Profile",
+      },
       back_to_search: {
         label: "Back to search",
       },
