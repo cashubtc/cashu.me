@@ -19,15 +19,16 @@ import {
   notifyWarning,
 } from "src/js/ui-utils";
 import { useLocalStorage } from "@vueuse/core";
+import { STORAGE_KEYS } from "../js/storageKeys";
 import { v4 as uuidv4 } from "uuid";
 
 export const usePRStore = defineStore("payment-request", {
   state: () => ({
     showPRDialog: false,
     showPRKData: "" as string,
-    enablePaymentRequest: useLocalStorage<boolean>("cashu.pr.enable", false),
+    enablePaymentRequest: useLocalStorage<boolean>(STORAGE_KEYS.PR_ENABLE, false),
     receivePaymentRequestsAutomatically: useLocalStorage<boolean>(
-      "cashu.pr.receive",
+      STORAGE_KEYS.PR_RECEIVE,
       false
     ),
   }),

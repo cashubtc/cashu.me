@@ -1,5 +1,6 @@
 import { defineStore } from "pinia";
 import { useLocalStorage } from "@vueuse/core";
+import { STORAGE_KEYS } from "../js/storageKeys";
 import { v4 as uuidv4 } from "uuid";
 import { cashuDb } from "./dexie";
 import { useProofsStore } from "./proofs";
@@ -35,13 +36,13 @@ function ensureDefaultBucket(buckets: { value: Bucket[] }) {
 
 export const useBucketsStore = defineStore("buckets", {
   state: () => {
-    const buckets = useLocalStorage<Bucket[]>("cashu.buckets", [
+    const buckets = useLocalStorage<Bucket[]>(STORAGE_KEYS.BUCKETS, [
       { id: DEFAULT_BUCKET_ID, name: DEFAULT_BUCKET_NAME },
     ]);
     const proofsStore = useProofsStore();
     const notifiedGoals = ref<Record<string, boolean>>({});
     const autoAssignRules = useLocalStorage<BucketRule[]>(
-      "cashu.bucketRules",
+      STORAGE_KEYS.BUCKET_RULES,
       []
     );
 

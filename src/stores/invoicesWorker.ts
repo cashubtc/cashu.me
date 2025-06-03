@@ -1,6 +1,7 @@
 import { defineStore } from "pinia";
 import { useWalletStore } from "./wallet";
 import { useLocalStorage } from "@vueuse/core";
+import { STORAGE_KEYS } from "../js/storageKeys";
 import { useSettingsStore } from "./settings";
 interface InvoiceQuote {
   quote: string;
@@ -24,13 +25,13 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
       invoiceCheckListener: null as NodeJS.Timeout | null,
       invoiceWorkerRunning: false,
       quotes: useLocalStorage<InvoiceQuote[]>(
-        "cashu.worker.invoices.quotesQueue",
+        STORAGE_KEYS.WORKER_INVOICE_QUOTES_QUEUE,
         []
       ),
       lastInvoiceCheckTime: 0,
       maxQuotesToCheckOnStartup: 10,
       lastPendingInvoiceCheck: useLocalStorage<number>(
-        "cashu.worker.invoices.lastPendingInvoiceCheck",
+        STORAGE_KEYS.WORKER_LAST_PENDING_INVOICE_CHECK,
         0
       ),
       checkPendingInvoicesInterval: 1000 * 10, // delay between bulk invoice checks

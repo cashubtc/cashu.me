@@ -1,5 +1,6 @@
 import { defineStore } from "pinia";
 import { useLocalStorage } from "@vueuse/core";
+import { STORAGE_KEYS } from "../js/storageKeys";
 import { useMintsStore } from "./mints";
 import { notifySuccess } from "../js/ui-utils";
 import { useUiStore } from "./ui";
@@ -14,7 +15,7 @@ export type Migration = {
 
 export const useMigrationsStore = defineStore("migrations", {
   state: () => ({
-    currentVersion: useLocalStorage<number>("cashu.migrations.version", 0),
+    currentVersion: useLocalStorage<number>(STORAGE_KEYS.MIGRATIONS_VERSION, 0),
     migrations: [] as Migration[],
   }),
   actions: {

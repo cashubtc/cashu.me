@@ -1,6 +1,7 @@
 import { defineStore } from "pinia";
 import Dexie, { Table } from "dexie";
 import { useLocalStorage } from "@vueuse/core";
+import { STORAGE_KEYS } from "../js/storageKeys";
 import { WalletProof } from "./mints";
 import { useStorageStore } from "./storage";
 import { useProofsStore } from "./proofs";
@@ -69,7 +70,7 @@ export const cashuDb = new CashuDexie();
 
 export const useDexieStore = defineStore("dexie", {
   state: () => ({
-    migratedToDexie: useLocalStorage<boolean>("cashu.dexie.migrated", false),
+    migratedToDexie: useLocalStorage<boolean>(STORAGE_KEYS.DEXIE_MIGRATED, false),
   }),
   getters: {},
   actions: {
@@ -79,7 +80,7 @@ export const useDexieStore = defineStore("dexie", {
         return;
       }
       console.log("Migrating to Dexie");
-      const proofs = localStorage.getItem("cashu.proofs");
+      const proofs = localStorage.getItem(STORAGE_KEYS.PROOFS);
       let parsedProofs: WalletProof[] = [];
       if (!proofs) {
         console.log("No cashu.proofs in localStorage to migrate");
@@ -109,7 +110,7 @@ export const useDexieStore = defineStore("dexie", {
       );
       this.migratedToDexie = true;
       // remove proofs from localstorage
-      localStorage.removeItem("cashu.proofs");
+      localStorage.removeItem(STORAGE_KEYS.PROOFS);
     },
     deleteAllTables: function () {
       cashuDb.proofs.clear();

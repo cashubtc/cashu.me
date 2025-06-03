@@ -1,5 +1,6 @@
 import { defineStore } from "pinia";
 import { useLocalStorage } from "@vueuse/core";
+import { STORAGE_KEYS } from "../js/storageKeys";
 import type { NDKEvent } from "@nostr-dev-kit/ndk";
 import { sanitizeMessage } from "../js/message-utils";
 
@@ -14,23 +15,23 @@ export type DMMessage = {
 export const useDmChatsStore = defineStore("dmChats", {
   state: () => ({
     chats: useLocalStorage<Record<string, DMMessage[]>>(
-      "cashu.dmChats",
+      STORAGE_KEYS.DM_CHATS,
       {} as Record<string, DMMessage[]>
     ),
     unreadCounts: useLocalStorage<Record<string, number>>(
-      "cashu.dmChats.unread",
+      STORAGE_KEYS.DM_CHATS_UNREAD,
       {} as Record<string, number>
     ),
   }),
   actions: {
     loadChats() {
-      const stored = localStorage.getItem("cashu.dmChats");
+      const stored = localStorage.getItem(STORAGE_KEYS.DM_CHATS);
       if (stored) {
         try {
           this.chats = JSON.parse(stored);
         } catch {}
       }
-      const storedUnread = localStorage.getItem("cashu.dmChats.unread");
+      const storedUnread = localStorage.getItem(STORAGE_KEYS.DM_CHATS_UNREAD);
       if (storedUnread) {
         try {
           this.unreadCounts = JSON.parse(storedUnread);

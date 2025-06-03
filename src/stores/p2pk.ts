@@ -1,5 +1,6 @@
 import { defineStore } from "pinia";
 import { useLocalStorage } from "@vueuse/core";
+import { STORAGE_KEYS } from "../js/storageKeys";
 import { generateSecretKey, getPublicKey, nip19 } from "nostr-tools";
 import { bytesToHex } from "@noble/hashes/utils"; // already an installed dependency
 import { WalletProof } from "stores/mints";
@@ -14,9 +15,9 @@ type P2PKKey = {
 
 export const useP2PKStore = defineStore("p2pk", {
   state: () => ({
-    p2pkKeys: useLocalStorage<P2PKKey[]>("cashu.P2PKKeys", []),
+    p2pkKeys: useLocalStorage<P2PKKey[]>(STORAGE_KEYS.P2PK_KEYS, []),
     showP2PkButtonInDrawer: useLocalStorage<boolean>(
-      "cashu.p2pk.showP2PkButtonInDrawer",
+      STORAGE_KEYS.P2PK_SHOW_BUTTON_IN_DRAWER,
       false
     ),
     showP2PKDialog: false,
