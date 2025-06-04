@@ -1,11 +1,7 @@
 <template>
-  <div></div>
+  <FindCreatorsView />
 </template>
 
-<script setup>
-import { onMounted } from 'vue'
-
-onMounted(() => {
-  window.location.href = '/find-creators.html'
-})
+<script setup lang="ts">
+import FindCreatorsView from 'components/FindCreatorsView.vue'
 </script>
