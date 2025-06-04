@@ -10,6 +10,8 @@ import { bytesToHex } from "@noble/hashes/utils";
 import { v4 as uuidv4 } from "uuid";
 import { useSettingsStore } from "./settings";
 import { sanitizeMessage } from "src/js/message-utils";
+import type { NDKEvent, NDKFilter } from "@nostr-dev-kit/ndk";
+import { NDKKind } from "@nostr-dev-kit/ndk";
 
 export type MessengerMessage = {
   id: string;
@@ -28,6 +30,7 @@ export const useMessengerStore = defineStore("messenger", {
       "cashu.messenger.conversations",
       {} as Record<string, MessengerMessage[]>,
     ),
+    started: false,
   }),
   actions: {
     loadIdentity() {
@@ -88,6 +91,25 @@ export const useMessengerStore = defineStore("messenger", {
         this.conversations[event.pubkey] = [];
       }
       this.conversations[event.pubkey].push(msg);
+    },
+
+    async start() {
+      if (this.started) {
+        return;
+      }
+      this.loadIdentity();
+      const nostr = useNostrStore();
+      await nostr.initNdkReadOnly();
+      const filter: NDKFilter = {
+        kinds: [NDKKind.EncryptedDirectMessage],
+        "#p": [this.pubKey],
+      };
+      const sub = nostr.ndk.subscribe(filter, { closeOnEose: false, groupable: false });
+      sub.on("event", async (ev: NDKEvent) => {
+        const raw = await ev.toNostrEvent();
+        await this.addIncomingMessage(raw as NostrEvent);
+      });
+      this.started = true;
     },
   },
 });
