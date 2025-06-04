@@ -58,11 +58,15 @@
             background-color: #fdfdff; /* Slightly off-white */
             transition: all 0.2s ease-in-out;
             display: flex;
-            align-items: flex-start;
-            gap: 1rem;
+            flex-direction: column; /* Ensure actions container is below info */
+            gap: 0.5rem; /* Reduced gap for tighter layout within card */
         }
-        .creator-card {
+        .creator-card { /* Specific to featured creator cards */
              box-shadow: 0 4px 6px -1px rgba(0,0,0,0.07), 0 2px 4px -1px rgba(0,0,0,0.04);
+             position: relative; /* Needed for group-hover to work reliably with nested elements */
+        }
+        .result-item { /* Specific to search result items */
+            position: relative;
         }
         .result-item:hover, .creator-card:hover {
             background-color: #f0f5ff; /* Lighter blue hover */
@@ -70,7 +74,13 @@
             transform: translateY(-2px);
             box-shadow: 0 8px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);
         }
-        .result-item img.avatar, .creator-card img.avatar {
+        .profile-header { /* New container for avatar and main info */
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            width: 100%;
+        }
+        .profile-header img.avatar { /* Adjusted from .result-item img.avatar */
             width: 50px;
             height: 50px;
             border-radius: 50%;
@@ -78,28 +88,68 @@
             border: 2px solid #e2e8f0; /* Tailwind gray-300 */
             flex-shrink: 0;
         }
-        .result-item .info, .creator-card .info {
+        .profile-header .info { /* Adjusted from .result-item .info */
             flex-grow: 1;
             min-width: 0;
         }
-        .result-item .info h3, .creator-card .info h3 {
+        .profile-header .info h3 { /* Adjusted */
             font-size: 1.125rem; /* Tailwind text-lg */
             font-weight: 600; /* Tailwind font-semibold */
             color: #2d3748; /* Tailwind gray-800 */
             word-break: break-word;
             margin-bottom: 0.25rem;
         }
-        .result-item .info p, .creator-card .info p {
+        .profile-header .info p { /* Adjusted */
             font-size: 0.875rem; /* Tailwind text-sm */
             color: #4a5568; /* Tailwind gray-700 */
             margin-top: 0.1rem;
             word-break: break-word;
             line-height: 1.4;
         }
-        .result-item .info .nip05, .creator-card .info .nip05 {
+        .profile-header .info .nip05 { /* Adjusted */
             font-weight: 500;
             color: #3182ce; /* Tailwind blue-600 */
         }
+        .creator-actions { /* Container for Message/Donate buttons */
+            opacity: 0; /* Hidden by default */
+            transition: opacity 0.3s ease-in-out;
+            padding-top: 0.5rem; /* Space above buttons */
+            display: flex;
+            gap: 0.5rem; /* Space between buttons */
+            width: 100%; /* Take full width of the card for alignment */
+            justify-content: flex-start; /* Align buttons to the start */
+        }
+        .creator-card:hover .creator-actions, .result-item:hover .creator-actions {
+            opacity: 1; /* Show on hover */
+        }
+        .action-button {
+            padding: 0.375rem 0.75rem; /* Tailwind py-1.5 px-3 */
+            font-size: 0.75rem; /* Tailwind text-xs */
+            font-weight: 600; /* Tailwind font-semibold */
+            border-radius: 0.375rem; /* Tailwind rounded-md */
+            color: white;
+            transition: background-color 0.2s;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        }
+        .view-button {
+            background-color: #a0aec0; /* Tailwind gray-500 */
+        }
+        .view-button:hover {
+            background-color: #718096; /* Tailwind gray-600 */
+        }
+        .message-button {
+            background-color: #4299e1; /* Tailwind blue-500 */
+        }
+        .message-button:hover {
+            background-color: #3182ce; /* Tailwind blue-600 */
+        }
+        .donate-button {
+            background-color: #48bb78; /* Tailwind green-500 */
+        }
+        .donate-button:hover {
+            background-color: #38a169; /* Tailwind green-600 */
+        }
+
         .status-message {
             text-align: center;
             color: #718096; /* Tailwind gray-600 */
@@ -448,7 +498,12 @@
 
             profiles.forEach(profile => {
                 const cardElement = document.createElement(isFeatured ? 'div' : 'li');
-                cardElement.className = isFeatured ? 'creator-card' : 'result-item';
+                cardElement.className = `${isFeatured ? 'creator-card' : 'result-item'} group`; // Added 'group' class here
+
+                // Container for avatar and main info
+                const profileHeaderDiv = document.createElement('div');
+                profileHeaderDiv.className = 'profile-header';
+
 
                 const avatarImg = document.createElement('img');
                 avatarImg.className = 'avatar';
@@ -500,9 +555,57 @@
                     lud16Element.innerHTML = `<strong>LN:</strong> ${profile.lud16}`;
                     infoDiv.appendChild(lud16Element);
                 }
+                
+                profileHeaderDiv.appendChild(avatarImg);
+                profileHeaderDiv.appendChild(infoDiv);
+                cardElement.appendChild(profileHeaderDiv);
 
-                cardElement.appendChild(avatarImg);
-                cardElement.appendChild(infoDiv);
+
+                // Action Buttons Container
+                const actionsContainer = document.createElement('div');
+                actionsContainer.className = 'creator-actions'; // Styles will make it appear on hover
+                
+                const viewButton = document.createElement('button');
+                viewButton.className = 'action-button view-button';
+                viewButton.textContent = 'View';
+                viewButton.onclick = (e) => {
+                    e.stopPropagation();
+                    // In a real app, this would navigate to the profile page
+                    // For now, just an alert and log
+                    alert(`View profile: ${profile.name || npub}`);
+                    console.log('View profile clicked for pubkey:', profile.pubkey);
+                    // Example navigation (if you had a router):
+                    // window.location.href = `/profile/${npub}`; 
+                };
+
+                const messageButton = document.createElement('button');
+                messageButton.className = 'action-button message-button';
+                messageButton.textContent = 'Message';
+                messageButton.onclick = (e) => {
+                    e.stopPropagation();
+                    alert(`Message ${profile.name || npub}`);
+                    console.log('Message clicked for pubkey:', profile.pubkey);
+                };
+
+                const donateButton = document.createElement('button');
+                donateButton.className = 'action-button donate-button';
+                donateButton.textContent = 'Donate';
+                donateButton.onclick = (e) => {
+                    e.stopPropagation();
+                    if (profile.lud16) {
+                        alert(`Opening wallet for: ${profile.lud16}`);
+                        window.open(`lightning:${profile.lud16}`);
+                    } else {
+                        alert(`No Lightning Address (lud16) found for ${profile.name || npub} to donate.`);
+                    }
+                    console.log('Donate clicked for pubkey:', profile.pubkey, 'LUD16:', profile.lud16);
+                };
+                
+                actionsContainer.appendChild(viewButton); // Add View button first
+                actionsContainer.appendChild(messageButton);
+                actionsContainer.appendChild(donateButton);
+                cardElement.appendChild(actionsContainer); 
+
                 targetElement.appendChild(cardElement);
             });
         }
