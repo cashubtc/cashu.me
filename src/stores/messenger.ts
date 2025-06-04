@@ -10,8 +10,6 @@ import { bytesToHex } from "@noble/hashes/utils";
 import { v4 as uuidv4 } from "uuid";
 import { useSettingsStore } from "./settings";
 import { sanitizeMessage } from "src/js/message-utils";
-import type { NDKEvent, NDKFilter } from "@nostr-dev-kit/ndk";
-import { NDKKind } from "@nostr-dev-kit/ndk";
 
 export type MessengerMessage = {
   id: string;
@@ -99,17 +97,19 @@ export const useMessengerStore = defineStore("messenger", {
       }
       this.loadIdentity();
       const nostr = useNostrStore();
-      await nostr.initNdkReadOnly();
-      const filter: NDKFilter = {
-        kinds: [NDKKind.EncryptedDirectMessage],
-        "#p": [this.pubKey],
-      };
-      const sub = nostr.ndk.subscribe(filter, { closeOnEose: false, groupable: false });
-      sub.on("event", async (ev: NDKEvent) => {
-        const raw = await ev.toNostrEvent();
-        await this.addIncomingMessage(raw as NostrEvent);
-      });
+      await nostr.subscribeToNip04DirectMessagesCallback(
+        this.privKey,
+        this.pubKey,
+        async (ev, _decrypted) => {
+          await this.addIncomingMessage(ev as NostrEvent);
+        },
+      );
       this.started = true;
+    },
+
+    isConnected(): boolean {
+      const nostr = useNostrStore();
+      return nostr.connected;
     },
   },
 });
