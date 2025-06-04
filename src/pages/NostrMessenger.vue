@@ -55,7 +55,7 @@ const selectConversation = (pubkey: string) => {
 };
 
 const startChat = (pubkey: string) => {
-  if (!messenger.conversations[pubkey]) messenger.conversations[pubkey] = [];
+  messenger.createConversation(pubkey);
   selected.value = pubkey;
 };
 

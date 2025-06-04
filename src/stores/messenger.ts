@@ -123,6 +123,29 @@ export const useMessengerStore = defineStore("messenger", {
       const nostr = useNostrStore();
       return nostr.connected;
     },
+
+    connect(relays: string[]) {
+      const nostr = useNostrStore();
+      this.relays = relays as any;
+      nostr.relays = relays as any;
+      nostr.initNdkReadOnly();
+    },
+
+    disconnect() {
+      const nostr = useNostrStore();
+      if (nostr.ndk && (nostr.ndk as any).pool) {
+        for (const relay of (nostr.ndk as any).pool.relays.values()) {
+          relay.disconnect && relay.disconnect();
+        }
+      }
+      nostr.connected = false;
+    },
+
+    createConversation(pubkey: string) {
+      if (!this.conversations[pubkey]) {
+        this.conversations[pubkey] = [];
+      }
+    },
   },
 });
 
