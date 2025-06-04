@@ -5,7 +5,6 @@ body {
   font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
     Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue",
     sans-serif;
-  overflow: hidden; /* Prevent body scroll, manage scrolling in panes */
 }
 
 // prevent pull to refresh
@@ -101,58 +100,3 @@ body.body--light {
   --custom-btn-bg: var(--custom-btn-light);
   --custom-btn-text: black;
 }
-
-/* Utility heights accounting for a 4rem header */
-.h-screen-minus-header {
-  height: calc(100vh - 4rem);
-}
-
-/* Layout helpers for chat page */
-.sidebar {
-  width: 320px;
-  min-width: 300px;
-}
-
-.main-chat-area {
-  flex-grow: 1;
-}
-
-/* Custom Scrollbars */
-.custom-scrollbar::-webkit-scrollbar {
-  display: initial;
-  width: 6px;
-  height: 6px;
-}
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: #e5e7eb; /* Tailwind gray-200 */
-  border-radius: 10px;
-}
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #9ca3af; /* Tailwind gray-400 */
-  border-radius: 10px;
-}
-.custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #6b7280; /* Tailwind gray-500 */
-}
-
-/* Chat bubble base styles */
-.chat-bubble-sent {
-  background-color: #4f46e5; /* Tailwind indigo-600 */
-  color: white;
-  align-self: flex-end;
-  border-radius: 1.25rem 1.25rem 0.25rem 1.25rem;
-}
-.chat-bubble-received {
-  background-color: #e5e7eb; /* Tailwind gray-200 */
-  color: #1f2937; /* Tailwind gray-800 */
-  align-self: flex-start;
-  border-radius: 1.25rem 1.25rem 1.25rem 0.25rem;
-}
-
-/*
-// For consistent focus on Quasar inputs if needed, though Quasar has its own focus styling
-.q-field--focused .q-field__control:after {
-  // Example: box-shadow: 0 0 0 2px #a78bfa;
-  // border-color: #8b5cf6;
-}
-*/
