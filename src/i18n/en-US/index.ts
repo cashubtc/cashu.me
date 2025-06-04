@@ -202,7 +202,8 @@ export default {
     },
     nostr_keys: {
       title: "Your nostr keys",
-      description: "Your nostr keys will be used to determine your Lightning address.",
+      description:
+        "Your nostr keys will be used to determine your Lightning address.",
       wallet_seed: {
         title: "Wallet seed phrase",
         description: "Generate nostr key pair from wallet seed",
