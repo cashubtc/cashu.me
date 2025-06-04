@@ -89,6 +89,13 @@ const routes = [
     children: [{ path: "", component: () => import("src/pages/ChatView.vue") }],
   },
   {
+    path: "/nostr-messenger",
+    component: () => import("layouts/MainLayout.vue"),
+    children: [
+      { path: "", component: () => import("src/pages/NostrMessenger.vue") },
+    ],
+  },
+  {
     path: "/buckets/:id",
     component: () => import("layouts/FullscreenLayout.vue"),
     children: [
