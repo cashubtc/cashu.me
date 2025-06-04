@@ -11,20 +11,20 @@ import { useMintsStore } from "./mints";
 
 type NPCV2InfoReponse =
   | {
-      error: true;
-      message: string;
-    }
+    error: true;
+    message: string;
+  }
   | {
-      error: false;
-      data: {
-        user: {
-          lock_quote: boolean;
-          mintUrl: string;
-          name?: string;
-          pubkey: string;
-        };
+    error: false;
+    data: {
+      user: {
+        lock_quote: boolean;
+        mintUrl: string;
+        name?: string;
+        pubkey: string;
       };
     };
+  };
 
 type NPCQuote = {
   created_at: number;
@@ -40,16 +40,16 @@ type NPCQuote = {
 
 type NPCQuoteResponse =
   | {
-      error: true;
-      message: string;
-    }
+    error: true;
+    message: string;
+  }
   | {
-      error: false;
-      data: {
-        quotes: NPCQuote[];
-      };
-      metadata: { limit: number; total: number; since?: number };
+    error: false;
+    data: {
+      quotes: NPCQuote[];
     };
+    metadata: { limit: number; total: number; since?: number };
+  };
 
 const NIP98Kind = 27235;
 
@@ -204,6 +204,7 @@ export const useNPCV2Store = defineStore("npcV2", {
             latestQuoteTime = quote.created_at;
           }
           await walletStore.invoiceHistory.push({
+            label: "Zap",
             mint: quote.mint_url,
             memo: "",
             bolt11: quote.request,

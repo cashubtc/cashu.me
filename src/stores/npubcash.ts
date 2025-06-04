@@ -205,6 +205,7 @@ export const useNPCStore = defineStore("npc", {
       const mintUrl = token.getMint(decodedToken);
       const unit = token.getUnit(decodedToken);
       tokensStore.addPendingToken({
+        label: "Zaps",
         amount: amount,
         token: tokenStr,
         mint: mintUrl,
