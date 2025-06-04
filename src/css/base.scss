@@ -263,8 +263,3 @@ video {
 ::-webkit-scrollbar {
   display: none;
 }
-
-/* Allow scrollbars when explicitly requested */
-.custom-scrollbar::-webkit-scrollbar {
-  display: initial;
-}
