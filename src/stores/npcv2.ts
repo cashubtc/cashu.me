@@ -56,10 +56,14 @@ const NIP98Kind = 27235;
 export const useNPCV2Store = defineStore("npcV2", {
   state: () => ({
     npcV2Enabled: useLocalStorage<boolean>("cashu.npc.v2.enabled", false),
+    npcV2ClaimAutomatically: useLocalStorage<boolean>(
+      "cashu.npc.v2.claimAutomatically",
+      true
+    ),
     npcV2LastCheck: useLocalStorage<number>("cashu.npc.v2.lastCheck", null),
     npcV2Address: useLocalStorage<string>("cashu.npc.v2.address", ""),
     npcV2Mint: useLocalStorage<string>("cashu.npc.v2.mint", null),
-    npcV2Domain: useLocalStorage<string>("cashu.npc.v2.domain", "npubx.cash"),
+    npcV2Domain: "",
     npcV2BaseURL: useLocalStorage<string>(
       "cashu.npc.v2.baseURL",
       "https://npubx.cash"
@@ -71,12 +75,16 @@ export const useNPCV2Store = defineStore("npcV2", {
   getters: {},
   actions: {
     generateNPCV2Connection: async function () {
+      if (!this.npcV2Enabled) {
+        return;
+      }
       const nostrStore = useNostrStore();
+      const mintsStore = useMintsStore();
       if (!nostrStore.pubkey) {
         return;
       }
       const walletPublicKeyHex = nostrStore.pubkey;
-      this.npcV2BaseURL = `https://${this.npcV2Domain}`;
+      this.npcV2Domain = new URL(this.npcV2BaseURL).hostname;
       this.npcV2Address =
         nip19.npubEncode(walletPublicKeyHex) + "@" + this.npcV2Domain;
       this.npcV2Loading = true;
@@ -90,7 +98,12 @@ export const useNPCV2Store = defineStore("npcV2", {
           }
           this.npcV2Address = usernameAddress;
         }
-        if (info.mintUrl) {
+        if (mintsStore.mints.map((m) => m.url).includes(info.mintUrl)) {
+          this.npcV2Mint = info.mintUrl;
+        } else if (mintsStore.activeMintUrl) {
+          await this.changeMintUrl(mintsStore.activeMintUrl);
+        } else {
+          await mintsStore.addMint({ url: info.mintUrl });
           this.npcV2Mint = info.mintUrl;
         }
       } catch (e) {
@@ -132,7 +145,8 @@ export const useNPCV2Store = defineStore("npcV2", {
       const mintstore = useMintsStore();
       if (!mintstore.mints.find((m) => m.url === mintUrl)) {
         notifyError(
-          `Please make sure ${mintUrl} is added to your wallet first!`
+          `Please make sure ${mintUrl} is added to your wallet first!`,
+          "Could not update npubx.cash mint"
         );
         return;
       }
@@ -152,7 +166,6 @@ export const useNPCV2Store = defineStore("npcV2", {
           throw new Error(data.message);
         }
         this.npcV2Mint = data.data.user.mintUrl;
-        notifySuccess(`Updated npub.cash mint to ${mintUrl}`);
       } catch (e) {
         console.log(e);
         if (e instanceof Error) {
@@ -209,8 +222,9 @@ export const useNPCV2Store = defineStore("npcV2", {
               expiry: quote.expires_at,
             },
           });
-          await walletStore.mintOnPaid(quote.quote_id);
-
+          if (this.npcV2ClaimAutomatically) {
+            await walletStore.mintOnPaid(quote.quote_id);
+          }
         });
         if (latestQuoteTime) {
           this.npcV2LastCheck = latestQuoteTime;

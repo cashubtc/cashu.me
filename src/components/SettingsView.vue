@@ -157,63 +157,6 @@
                   </q-item-label>
                 </q-item-section>
               </div>
-              <div class="col-12">
-                <div class="row q-pt-md">
-                  <q-toggle v-model="npcV2Enabled" color="primary" />
-                  <q-item-section>
-                    <q-item-label title
-                      >Experimental: Enable npub.cash v2</q-item-label
-                    >
-                    <q-item-label caption
-                      >Use the experimental version 2 of npub.cash
-                    </q-item-label>
-                  </q-item-section>
-                </div>
-              </div>
-              <div class="col-12 q-pt-md" v-if="npcV2Enabled">
-                <q-input outlined v-model="npcV2Address" dense rounded readonly>
-                  <template v-slot:append>
-                    <q-icon
-                      name="content_copy"
-                      @click="copyText(npcV2Address)"
-                      size="xs"
-                      color="grey"
-                      class="q-mr-sm cursor-pointer"
-                    >
-                      <q-tooltip>Copy Lightning address</q-tooltip>
-                    </q-icon>
-                  </template>
-                </q-input>
-              </div>
-              <div class="col-12 q-pt-md" v-if="npcV2Enabled">
-                <q-item-label caption>npub.cash v2 mint</q-item-label>
-                <q-input
-                  outlined
-                  v-model="npcV2Mint"
-                  dense
-                  rounded
-                  readonly
-                  class="q-pt-sm"
-                >
-                </q-input>
-                <div class="q-pt-sm">
-                  <ChooseMint
-                    v-model="npcV2Mint"
-                    :title="
-                      $t('Settings.lightning_address.npc_v2.choose_mint_title')
-                    "
-                    :placeholder="
-                      $t(
-                        'Settings.lightning_address.npc_v2.choose_mint_placeholder'
-                      )
-                    "
-                    :show-balances="false"
-                    :dense="true"
-                    :rounded="true"
-                    :require-active-mint="false"
-                  />
-                </div>
-              </div>
             </div>
           </q-item>
 
@@ -1064,57 +1007,140 @@
             ></q-badge>
           </q-toggle>
         </q-item>
-        <q-item class="q-pt-none">
-          <q-item-label caption
-            >{{ $t("Settings.experimental.auditor.description") }}
-          </q-item-label>
-        </q-item>
-        <div class="row q-mx-md">
-          <div class="col-12">
-            <q-input
-              v-model="auditorUrl"
-              :label="$t('Settings.experimental.auditor.url_label')"
-              color="primary"
-              outlined
-              dense
-              rounded
-              :disable="!auditorEnabled"
-            >
-              <template v-slot:append>
-                <q-btn
-                  dense
-                  flat
-                  icon="content_copy"
-                  @click="copyText(auditorUrl)"
-                  size="sm"
-                  color="grey"
-                />
-              </template>
-            </q-input>
+        <div v-if="auditorEnabled">
+          <q-item class="q-pt-none">
+            <q-item-label caption
+              >{{ $t("Settings.experimental.auditor.description") }}
+            </q-item-label>
+          </q-item>
+          <div class="row q-mx-md">
+            <div class="col-12">
+              <q-input
+                v-model="auditorUrl"
+                :label="$t('Settings.experimental.auditor.url_label')"
+                color="primary"
+                outlined
+                dense
+                rounded
+                :disable="!auditorEnabled"
+              >
+                <template v-slot:append>
+                  <q-btn
+                    dense
+                    flat
+                    icon="content_copy"
+                    @click="copyText(auditorUrl)"
+                    size="sm"
+                    color="grey"
+                  />
+                </template>
+              </q-input>
+            </div>
+          </div>
+          <div class="row q-mx-md q-mt-md">
+            <div class="col-12">
+              <q-input
+                v-model="auditorApiUrl"
+                :label="$t('Settings.experimental.auditor.api_url_label')"
+                color="primary"
+                outlined
+                dense
+                rounded
+                :disable="!auditorEnabled"
+              >
+                <template v-slot:append>
+                  <q-btn
+                    dense
+                    flat
+                    icon="content_copy"
+                    @click="copyText(auditorApiUrl)"
+                    size="sm"
+                    color="grey"
+                  />
+                </template>
+              </q-input>
+            </div>
           </div>
         </div>
+        <!-- npcv2 settings -->
         <div class="row q-mx-md q-mt-md">
           <div class="col-12">
-            <q-input
-              v-model="auditorApiUrl"
-              :label="$t('Settings.experimental.auditor.api_url_label')"
-              color="primary"
-              outlined
-              dense
-              rounded
-              :disable="!auditorEnabled"
-            >
-              <template v-slot:append>
-                <q-btn
-                  dense
-                  flat
-                  icon="content_copy"
-                  @click="copyText(auditorApiUrl)"
-                  size="sm"
-                  color="grey"
+            <div class="row q-pt-md">
+              <q-toggle
+                v-model="npcV2Enabled"
+                label="Use npubx.cash"
+                color="primary"
+              >
+                <q-badge
+                  color="primary"
+                  :label="$t('Settings.experimental.receive_swaps.badge')"
+                  class="q-mx-sm"
+                ></q-badge>
+              </q-toggle>
+            </div>
+          </div>
+        </div>
+        <div v-if="npcV2Enabled">
+          <div class="row q-mx-md q-mt-md">
+            <div class="col-12">
+              <q-input outlined v-model="npcV2Address" dense rounded readonly>
+                <template v-slot:append>
+                  <q-icon
+                    name="content_copy"
+                    @click="copyText(npcV2Address)"
+                    size="xs"
+                    color="grey"
+                    class="q-mr-sm cursor-pointer"
+                  >
+                    <q-tooltip>Copy Lightning address</q-tooltip>
+                  </q-icon>
+                </template>
+              </q-input>
+            </div>
+          </div>
+          <div class="row q-mx-md">
+            <div class="col-12 q-pt-md">
+              <q-item-label caption>npub.cash v2 mint</q-item-label>
+              <q-input
+                outlined
+                v-model="npcV2Mint"
+                dense
+                rounded
+                readonly
+                class="q-pt-sm"
+              >
+              </q-input>
+              <div class="q-pt-sm">
+                <ChooseMint
+                  v-model="npcV2Mint"
+                  :title="
+                    $t('Settings.lightning_address.npc_v2.choose_mint_title')
+                  "
+                  :placeholder="
+                    $t(
+                      'Settings.lightning_address.npc_v2.choose_mint_placeholder'
+                    )
+                  "
+                  :show-balances="false"
+                  :dense="true"
+                  :rounded="true"
+                  :require-active-mint="false"
                 />
-              </template>
-            </q-input>
+              </div>
+            </div>
+            <div class="row q-pt-md">
+              <q-toggle v-model="npcV2ClaimAutomatically" color="primary" />
+              <q-item-section>
+                <q-item-label title>{{
+                  $t("Settings.lightning_address.automatic_claim.toggle")
+                }}</q-item-label>
+                <q-item-label caption
+                  >{{
+                    $t("Settings.lightning_address.automatic_claim.description")
+                  }}
+                </q-item-label>
+              </q-item-section>
+            </div>
           </div>
         </div>
 
@@ -1745,6 +1771,7 @@ export default defineComponent({
       "npcV2Enabled",
       "npcV2Address",
       "npcV2Mint",
+      "npcV2ClaimAutomatically",
     ]),
     ...mapWritableState(useNPCStore, [
       "npcAddress",
