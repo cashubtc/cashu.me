@@ -1,5 +1,6 @@
 import { defineStore } from "pinia";
 import { useLocalStorage } from "@vueuse/core";
+import { watch } from "vue";
 import {
   generateSecretKey,
   getPublicKey,
@@ -33,6 +34,7 @@ export const useMessengerStore = defineStore("messenger", {
       [] as MessengerMessage[],
     ),
     started: false,
+    watchInitialized: false,
   }),
   getters: {
     connected(): boolean {
@@ -104,6 +106,19 @@ export const useMessengerStore = defineStore("messenger", {
     },
 
     async start() {
+      if (!this.watchInitialized) {
+        watch(
+          () => [this.pubKey, this.relays],
+          () => {
+            if (this.started) {
+              this.started = false;
+              this.start();
+            }
+          },
+          { deep: true },
+        );
+        this.watchInitialized = true;
+      }
       if (this.started) {
         return;
       }
