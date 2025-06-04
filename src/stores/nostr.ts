@@ -480,6 +480,26 @@ export const useNostrStore = defineStore("nostr", {
         console.error("Error fetching contact events:", error);
       }
     },
+    subscribeToNip04DirectMessagesCallback: async function (
+      privKey: string,
+      pubKey: string,
+      cb: (event: NostrEvent, decrypted: string) => void,
+    ) {
+      await this.initNdkReadOnly();
+      const filter: NDKFilter = {
+        kinds: [NDKKind.EncryptedDirectMessage],
+        "#p": [pubKey],
+      };
+      const sub = this.ndk.subscribe(filter, {
+        closeOnEose: false,
+        groupable: false,
+      });
+      sub.on("event", async (ev: NDKEvent) => {
+        const decrypted = await nip04.decrypt(privKey, ev.pubkey, ev.content);
+        const raw = await ev.toNostrEvent();
+        cb(raw, decrypted);
+      });
+    },
     sendNip17DirectMessageToNprofile: async function (
       nprofile: string,
       message: string
