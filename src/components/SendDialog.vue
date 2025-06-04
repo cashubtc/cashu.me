@@ -134,7 +134,7 @@ export default defineComponent({
     },
     cardClass: function () {
       return this.$q.dark.isActive
-        ? "bg-grey-10 text-white"
+        ? "bg-gray-100 text-white"
         : "bg-white text-dark";
     },
     iconBgColor: function () {

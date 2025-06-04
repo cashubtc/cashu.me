@@ -1,11 +1,11 @@
 <template>
   <q-page
     class="creators-page q-pa-md"
-    :class="$q.dark.isActive ? 'bg-dark text-white' : 'bg-grey-2 text-dark'"
+    :class="$q.dark.isActive ? 'bg-dark text-white' : 'bg-gray-100 text-dark'"
   >
     <div
       class="creators-container"
-      :class="$q.dark.isActive ? 'bg-grey-10 text-white' : 'bg-white text-dark'"
+      :class="$q.dark.isActive ? 'bg-gray-50 text-white' : 'bg-white text-dark'"
     >
     <q-input
       rounded

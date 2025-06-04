@@ -100,3 +100,36 @@ body.body--light {
   --custom-btn-bg: var(--custom-btn-light);
   --custom-btn-text: black;
 }
+
+/* utility background classes */
+.bg-gray-50 {
+  background-color: #f9fafb !important;
+}
+
+.bg-gray-100 {
+  background-color: #f3f4f6 !important;
+}
+
+.accent-purple {
+  background-color: #7e22ce !important;
+  color: #ffffff !important;
+}
+
+.chat-bubble-sent {
+  @extend .accent-purple;
+  align-self: flex-end;
+  padding: 6px 12px;
+  border-radius: 16px;
+  max-width: 70%;
+  word-break: break-word;
+}
+
+.chat-bubble-received {
+  @extend .bg-gray-100;
+  align-self: flex-start;
+  color: #000 !important;
+  padding: 6px 12px;
+  border-radius: 16px;
+  max-width: 70%;
+  word-break: break-word;
+}
