@@ -11,6 +11,22 @@
         @click="toggleLeftDrawer"
         :disable="uiStore.globalMutexLock"
       />
+      <q-btn
+        v-if="showBackButton"
+        flat
+        dense
+        rounded
+        icon="arrow_back_ios_new"
+        to="/wallet"
+        color="primary"
+        aria-label="Back to wallet"
+        no-caps
+        class="q-ml-sm"
+      >
+        <span class="q-mx-md text-weight-bold">
+          {{ $t("FullscreenHeader.actions.back.label") }}
+        </span>
+      </q-btn>
       <q-toolbar-title></q-toolbar-title>
       <transition
         appear
@@ -215,7 +231,7 @@
 </template>
 
 <script>
-import { defineComponent, ref } from "vue";
+import { defineComponent, ref, computed } from "vue";
 import { useRouter } from "vue-router";
 import EssentialLink from "components/EssentialLink.vue";
 import { useUiStore } from "src/stores/ui";
@@ -232,6 +248,9 @@ export default defineComponent({
     const uiStore = useUiStore();
     const { t } = useI18n();
     const router = useRouter();
+    const showBackButton = computed(
+      () => router.currentRoute.value.path !== "/wallet"
+    );
     const countdown = ref(0);
     let countdownInterval;
 
@@ -340,6 +359,7 @@ export default defineComponent({
       gotoMyProfile,
       gotoChats,
       gotoWallet,
+      showBackButton,
     };
   },
 });
@@ -347,6 +367,7 @@ export default defineComponent({
 <style scoped>
 .q-header {
   position: sticky; /* or fixed */
+  top: 0;
   z-index: 1000; /* ensures header stays above page content */
   overflow-x: hidden;
 }
