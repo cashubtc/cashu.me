@@ -7,14 +7,11 @@
       <div
         class="row items-center justify-center no-wrap q-mb-none q-mx-none q-px-none q-pt-lg q-pb-md position-relative"
       >
-        <div
-          class="col-6 q-mb-md flex justify-center items-center"
-          style="margin-right: 10%"
-        >
+        <div class="col-6 q-mb-md flex justify-center items-center">
           <q-btn
             rounded
             dense
-            class="q-px-md wallet-action-btn"
+            class="q-px-md q-mr-md wallet-action-btn"
             color="primary"
             @click="showReceiveDialog = true"
           >
@@ -38,7 +35,7 @@
           <q-btn
             rounded
             dense
-            class="q-px-md wallet-action-btn"
+            class="q-px-md q-ml-md wallet-action-btn"
             color="primary"
             @click="showSendDialog = true"
           >
