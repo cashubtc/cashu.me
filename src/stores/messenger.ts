@@ -28,6 +28,10 @@ export const useMessengerStore = defineStore("messenger", {
       "cashu.messenger.conversations",
       {} as Record<string, MessengerMessage[]>,
     ),
+    eventLog: useLocalStorage<MessengerMessage[]>(
+      "cashu.messenger.eventLog",
+      [] as MessengerMessage[],
+    ),
     started: false,
   }),
   actions: {
@@ -69,6 +73,7 @@ export const useMessengerStore = defineStore("messenger", {
       };
       if (!this.conversations[pubkey]) this.conversations[pubkey] = [];
       this.conversations[pubkey].push(msg);
+      this.eventLog.push(msg);
     },
     async addIncomingMessage(event: NostrEvent) {
       this.loadIdentity();
@@ -89,6 +94,7 @@ export const useMessengerStore = defineStore("messenger", {
         this.conversations[event.pubkey] = [];
       }
       this.conversations[event.pubkey].push(msg);
+      this.eventLog.push(msg);
     },
 
     async start() {

@@ -12,7 +12,7 @@
         <MessageInput @send="sendMessage" />
       </div>
     </div>
-    <EventLog class="q-mt-md" />
+    <EventLog class="q-mt-md" :events="eventLog" />
   </q-page>
 </template>
 
@@ -34,6 +34,7 @@ onMounted(() => {
 
 const selected = ref('');
 const messages = computed(() => messenger.conversations[selected.value] || []);
+const eventLog = computed(() => messenger.eventLog);
 
 const selectConversation = (pubkey: string) => {
   selected.value = pubkey;
