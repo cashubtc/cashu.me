@@ -55,6 +55,7 @@ const save = () => {
   messenger.privKey = privKey.value;
   messenger.pubKey = pubKey.value;
   messenger.relays = relays.value as any;
+  messenger.start();
   showDialog.value = false;
 };
 </script>
