@@ -17,7 +17,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref } from 'vue';
+import { computed, ref, onMounted } from 'vue';
 import { useMessengerStore } from 'src/stores/messenger';
 
 import NostrIdentityManager from 'components/NostrIdentityManager.vue';
@@ -28,6 +28,9 @@ import EventLog from 'components/EventLog.vue';
 
 const messenger = useMessengerStore();
 messenger.loadIdentity();
+onMounted(() => {
+  messenger.start();
+});
 
 const selected = ref('');
 const messages = computed(() => messenger.conversations[selected.value] || []);
