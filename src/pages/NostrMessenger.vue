@@ -3,7 +3,15 @@
     class="column full-height"
     :class="[$q.dark.isActive ? 'bg-dark text-white' : 'bg-white text-dark', 'q-pa-md']"
   >
-    <div class="text-h5 q-mb-md">Nostr Messenger</div>
+    <div class="text-h5 q-mb-md">
+      Nostr Messenger
+      <q-badge
+        :color="messenger.connected ? 'positive' : 'negative'"
+        class="q-ml-sm"
+      >
+        {{ messenger.connected ? 'Online' : 'Offline' }}
+      </q-badge>
+    </div>
     <NostrIdentityManager class="q-mb-md" />
     <div class="row col-grow">
       <ConversationList @select="selectConversation" />
