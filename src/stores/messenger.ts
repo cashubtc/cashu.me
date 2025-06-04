@@ -34,6 +34,12 @@ export const useMessengerStore = defineStore("messenger", {
     ),
     started: false,
   }),
+  getters: {
+    connected(): boolean {
+      const nostr = useNostrStore();
+      return nostr.connected;
+    },
+  },
   actions: {
     loadIdentity() {
       if (!this.privKey) {
