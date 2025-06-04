@@ -336,7 +336,7 @@ export default defineComponent({
     };
 
     const gotoChats = () => {
-      router.push("/chats");
+      router.push("/nostr-messenger");
       leftDrawerOpen.value = false;
     };
 
