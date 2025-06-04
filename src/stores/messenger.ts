@@ -3,12 +3,9 @@ import { useLocalStorage } from "@vueuse/core";
 import {
   generateSecretKey,
   getPublicKey,
-  SimplePool,
-  nip04,
-  getEventHash,
-  signEvent,
   Event as NostrEvent,
 } from "nostr-tools";
+import { useNostrStore } from "./nostr";
 import { bytesToHex } from "@noble/hashes/utils";
 import { v4 as uuidv4 } from "uuid";
 import { useSettingsStore } from "./settings";
@@ -27,12 +24,10 @@ export const useMessengerStore = defineStore("messenger", {
     privKey: useLocalStorage<string>("cashu.messenger.privKey", ""),
     pubKey: useLocalStorage<string>("cashu.messenger.pubKey", ""),
     relays: useSettingsStore().defaultNostrRelays,
-    pool: {} as SimplePool,
     conversations: useLocalStorage<Record<string, MessengerMessage[]>>(
       "cashu.messenger.conversations",
       {} as Record<string, MessengerMessage[]>,
     ),
-    connected: false,
   }),
   actions: {
     loadIdentity() {
@@ -44,29 +39,19 @@ export const useMessengerStore = defineStore("messenger", {
         this.pubKey = getPublicKey(this.privKey);
       }
     },
-    connectRelays() {
-      if (this.connected) return;
-      this.pool = new SimplePool();
-      this.connected = true;
-    },
     async sendDm(recipient: string, message: string) {
       this.loadIdentity();
-      this.connectRelays();
-      const encrypted = await nip04.encrypt(this.privKey, recipient, message);
-      const event: NostrEvent = {
-        kind: 4,
-        pubkey: this.pubKey,
-        created_at: Math.floor(Date.now() / 1000),
-        tags: [["p", recipient]],
-        content: encrypted,
-        id: "",
-        sig: "",
-      };
-      event.id = getEventHash(event);
-      event.sig = signEvent(event, this.privKey);
-      await this.pool.publish(this.relays, event);
-      this.addOutgoingMessage(recipient, message, event.created_at, event.id);
-      return event;
+      const nostr = useNostrStore();
+      const ev = await nostr.sendNip04DirectMessage(
+        recipient,
+        message,
+        this.privKey,
+        this.pubKey,
+      );
+      if (ev) {
+        this.addOutgoingMessage(recipient, message, ev.created_at, ev.id);
+      }
+      return ev as any;
     },
     addOutgoingMessage(
       pubkey: string,
@@ -86,7 +71,8 @@ export const useMessengerStore = defineStore("messenger", {
     },
     async addIncomingMessage(event: NostrEvent) {
       this.loadIdentity();
-      const decrypted = await nip04.decrypt(
+      const nostr = useNostrStore();
+      const decrypted = await nostr.decryptNip04(
         this.privKey,
         event.pubkey,
         event.content,

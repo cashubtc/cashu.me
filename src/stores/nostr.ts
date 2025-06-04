@@ -384,24 +384,42 @@ export const useNostrStore = defineStore("nostr", {
       this.mintRecommendations = mintUrlsCounted;
       return mintUrlsCounted;
     },
+    encryptNip04: async function (
+      privKey: string,
+      recipient: string,
+      message: string,
+    ): Promise<string> {
+      return await nip04.encrypt(privKey, recipient, message);
+    },
+    decryptNip04: async function (
+      privKey: string,
+      sender: string,
+      content: string,
+    ): Promise<string> {
+      return await nip04.decrypt(privKey, sender, content);
+    },
     sendNip04DirectMessage: async function (
       recipient: string,
-      message: string
+      message: string,
+      privKey?: string,
+      pubKey?: string,
     ) {
       await this.walletSeedGenerateKeyPair();
-      const ndk = new NDK({ signer: this.seedSigner });
+      const key = privKey || this.seedSignerPrivateKey;
+      const signer = privKey
+        ? new NDKPrivateKeySigner(privKey)
+        : this.seedSigner;
+      const senderPubkey = pubKey ||
+        (privKey ? getPublicKey(hexToBytes(privKey)) : this.seedSignerPublicKey);
+      const ndk = new NDK({ signer });
       const event = new NDKEvent(ndk);
       event.kind = NDKKind.EncryptedDirectMessage;
-      event.content = await nip04.encrypt(
-        this.seedSignerPrivateKey,
-        recipient,
-        message
-      );
+      event.content = await nip04.encrypt(key, recipient, message);
       event.tags = [
         ["p", recipient],
-        ["p", this.seedSignerPublicKey],
+        ["p", senderPubkey],
       ];
-      await event.sign(this.seedSigner);
+      await event.sign(signer);
 
       const pool = new SimplePool();
       const nostrEvent = await event.toNostrEvent();
