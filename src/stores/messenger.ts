@@ -29,6 +29,10 @@ export const useMessengerStore = defineStore("messenger", {
       "cashu.messenger.conversations",
       {} as Record<string, MessengerMessage[]>,
     ),
+    unreadCounts: useLocalStorage<Record<string, number>>(
+      "cashu.messenger.unread",
+      {} as Record<string, number>,
+    ),
     eventLog: useLocalStorage<MessengerMessage[]>(
       "cashu.messenger.eventLog",
       [] as MessengerMessage[],
@@ -102,6 +106,7 @@ export const useMessengerStore = defineStore("messenger", {
         this.conversations[event.pubkey] = [];
       }
       this.conversations[event.pubkey].push(msg);
+      this.unreadCounts[event.pubkey] = (this.unreadCounts[event.pubkey] || 0) + 1;
       this.eventLog.push(msg);
     },
 
@@ -160,6 +165,13 @@ export const useMessengerStore = defineStore("messenger", {
       if (!this.conversations[pubkey]) {
         this.conversations[pubkey] = [];
       }
+      if (this.unreadCounts[pubkey] === undefined) {
+        this.unreadCounts[pubkey] = 0;
+      }
+    },
+
+    markRead(pubkey: string) {
+      this.unreadCounts[pubkey] = 0;
     },
   },
 });
