@@ -138,8 +138,12 @@
                       size="xs"
                       color="grey"
                       class="q-mr-sm cursor-pointer"
-                      :aria-label="$t('Settings.lightning_address.address.copy_tooltip')"
-                      :title="$t('Settings.lightning_address.address.copy_tooltip')"
+                      :aria-label="
+                        $t('Settings.lightning_address.address.copy_tooltip')
+                      "
+                      :title="
+                        $t('Settings.lightning_address.address.copy_tooltip')
+                      "
                     >
                       <q-tooltip>{{
                         $t("Settings.lightning_address.address.copy_tooltip")
@@ -157,7 +161,7 @@
                   <q-item-label caption
                     >{{
                       $t(
-                        "Settings.lightning_address.automatic_claim.description"
+                        "Settings.lightning_address.automatic_claim.description",
                       )
                     }}
                   </q-item-label>
@@ -356,6 +360,104 @@
       </q-list>
     </div>
 
+    <!-- NOSTR RELAYS SECTION -->
+    <div class="section-divider q-my-md">
+      <div class="divider-line"></div>
+      <div class="divider-text">
+        {{ $t("Settings.sections.nostr_relays") }}
+      </div>
+      <div class="divider-line"></div>
+    </div>
+
+    <div class="q-py-sm q-px-xs text-left" on-left>
+      <q-list padding>
+        <q-expansion-item
+          dense
+          dense-toggle
+          class="text-left"
+          :label="$t('Settings.nostr_relays.expand_label')"
+        >
+          <q-item>
+            <q-item-section>
+              <q-item-label overline>{{
+                $t("Settings.nostr_relays.add.title")
+              }}</q-item-label>
+              <q-item-label caption>{{
+                $t("Settings.nostr_relays.add.description")
+              }}</q-item-label>
+            </q-item-section>
+          </q-item>
+          <q-item>
+            <q-item-section>
+              <q-input
+                outlined
+                rounded
+                dense
+                v-model="newNostrRelay"
+                :label="$t('Settings.nostr_relays.list.title')"
+                append
+              >
+                <template v-slot:append>
+                  <q-btn
+                    flat
+                    dense
+                    icon="add"
+                    color="primary"
+                    @click="addNostrRelay"
+                  ></q-btn>
+                </template>
+              </q-input>
+            </q-item-section>
+          </q-item>
+          <q-item>
+            <q-item-section>
+              <q-item-label overline>{{
+                $t("Settings.nostr_relays.list.title")
+              }}</q-item-label>
+              <q-item-label caption>{{
+                $t("Settings.nostr_relays.list.description")
+              }}</q-item-label>
+            </q-item-section>
+          </q-item>
+          <q-item v-for="relay in defaultNostrRelays" :key="relay" clickable>
+            <q-item-section
+              class="q-mx-none q-pl-none"
+              style="max-width: 1.2em"
+            >
+              <q-icon
+                name="content_copy"
+                @click="copyText(relay)"
+                size="xs"
+                color="grey"
+                class="q-mr-sm cursor-pointer"
+                ><q-tooltip>{{
+                  $t("Settings.nostr_relays.list.copy_tooltip")
+                }}</q-tooltip></q-icon
+              >
+            </q-item-section>
+            <q-item-section
+              class="q-mx-none q-pl-none"
+              style="max-width: 1.5em"
+            >
+              <q-icon
+                name="delete_outline"
+                @click="removeNostrRelay(relay)"
+                size="1.3em"
+                color="grey"
+                class="q-mr-sm cursor-pointer"
+                ><q-tooltip>{{
+                  $t("Settings.nostr_relays.list.remove_tooltip")
+                }}</q-tooltip></q-icon
+              >
+            </q-item-section>
+            <q-item-section style="max-width: 10rem" class="cursor-pointer">
+              <q-item-label caption>{{ relay }} </q-item-label>
+            </q-item-section>
+          </q-item>
+        </q-expansion-item>
+      </q-list>
+    </div>
+
     <!-- PAYMENT REQUESTS SECTION -->
     <div class="section-divider q-my-md">
       <div class="divider-line"></div>
@@ -470,8 +572,12 @@
                 size="xs"
                 color="grey"
                 class="q-mr-sm cursor-pointer"
-                :aria-label="$t('Settings.nostr_wallet_connect.connection.copy_tooltip')"
-                :title="$t('Settings.nostr_wallet_connect.connection.copy_tooltip')"
+                :aria-label="
+                  $t('Settings.nostr_wallet_connect.connection.copy_tooltip')
+                "
+                :title="
+                  $t('Settings.nostr_wallet_connect.connection.copy_tooltip')
+                "
                 ><q-tooltip>{{
                   $t("Settings.nostr_wallet_connect.connection.copy_tooltip")
                 }}</q-tooltip></q-icon
@@ -487,8 +593,12 @@
                 size="1.3em"
                 color="grey"
                 class="q-mr-sm cursor-pointer"
-                :aria-label="$t('Settings.nostr_wallet_connect.connection.qr_tooltip')"
-                :title="$t('Settings.nostr_wallet_connect.connection.qr_tooltip')"
+                :aria-label="
+                  $t('Settings.nostr_wallet_connect.connection.qr_tooltip')
+                "
+                :title="
+                  $t('Settings.nostr_wallet_connect.connection.qr_tooltip')
+                "
               >
                 <q-tooltip>{{
                   $t("Settings.nostr_wallet_connect.connection.qr_tooltip")
@@ -598,7 +708,7 @@
                   class="q-mr-sm cursor-pointer"
                   ><q-tooltip>{{
                     $t(
-                      "Settings.nostr_wallet_connect.relays.list.remove_tooltip"
+                      "Settings.nostr_wallet_connect.relays.list.remove_tooltip",
                     )
                   }}</q-tooltip></q-icon
                 >
@@ -725,7 +835,7 @@
               <q-item-label caption
                 >{{
                   $t(
-                    "Settings.hardware_features.webnfc.quick_access.description"
+                    "Settings.hardware_features.webnfc.quick_access.description",
                   )
                 }}
               </q-item-label>
@@ -1162,7 +1272,9 @@
                     icon="format_color_fill"
                     color="pink-13"
                     size="md"
-                    :aria-label="$t('Settings.appearance.theme.tooltips.freedom')"
+                    :aria-label="
+                      $t('Settings.appearance.theme.tooltips.freedom')
+                    "
                     :title="$t('Settings.appearance.theme.tooltips.freedom')"
                     ><q-tooltip>{{
                       $t("Settings.appearance.theme.tooltips.freedom")
@@ -1190,7 +1302,9 @@
                     icon="format_color_fill"
                     color="orange"
                     size="md"
-                    :aria-label="$t('Settings.appearance.theme.tooltips.bitcoin')"
+                    :aria-label="
+                      $t('Settings.appearance.theme.tooltips.bitcoin')
+                    "
                     :title="$t('Settings.appearance.theme.tooltips.bitcoin')"
                     ><q-tooltip>{{
                       $t("Settings.appearance.theme.tooltips.bitcoin")
@@ -1245,7 +1359,9 @@
                     icon="format_color_fill"
                     color="pink-3"
                     size="md"
-                    :aria-label="$t('Settings.appearance.theme.tooltips.flamingo')"
+                    :aria-label="
+                      $t('Settings.appearance.theme.tooltips.flamingo')
+                    "
                     :title="$t('Settings.appearance.theme.tooltips.flamingo')"
                     ><q-tooltip>{{
                       $t("Settings.appearance.theme.tooltips.flamingo")
@@ -1330,7 +1446,7 @@
                         <q-item-label class="q-px-sm" caption
                           >{{
                             $t(
-                              "Settings.advanced.developer.new_seed.description"
+                              "Settings.advanced.developer.new_seed.description",
                             )
                           }}
                         </q-item-label>
@@ -1340,7 +1456,7 @@
                       <span
                         >{{
                           $t(
-                            "Settings.advanced.developer.new_seed.confirm_question"
+                            "Settings.advanced.developer.new_seed.confirm_question",
                           )
                         }}
                       </span>
@@ -1388,7 +1504,7 @@
                     <q-item-label class="q-px-sm" caption
                       >{{
                         $t(
-                          "Settings.advanced.developer.remove_spent.description"
+                          "Settings.advanced.developer.remove_spent.description",
                         )
                       }}
                     </q-item-label>
@@ -1407,7 +1523,7 @@
                     <q-item-label class="q-px-sm" caption
                       >{{
                         $t(
-                          "Settings.advanced.developer.debug_console.description"
+                          "Settings.advanced.developer.debug_console.description",
                         )
                       }}
                     </q-item-label>
@@ -1426,7 +1542,7 @@
                     <q-item-label class="q-px-sm" caption
                       >{{
                         $t(
-                          "Settings.advanced.developer.export_proofs.description"
+                          "Settings.advanced.developer.export_proofs.description",
                         )
                       }}
                     </q-item-label>
@@ -1445,7 +1561,7 @@
                     <q-item-label class="q-px-sm" caption
                       >{{
                         $t(
-                          "Settings.advanced.developer.keyset_counters.description"
+                          "Settings.advanced.developer.keyset_counters.description",
                         )
                       }}
                     </q-item-label>
@@ -1490,7 +1606,7 @@
                     <q-item-label class="q-px-sm" caption
                       >{{
                         $t(
-                          "Settings.advanced.developer.unset_reserved.description"
+                          "Settings.advanced.developer.unset_reserved.description",
                         )
                       }}
                     </q-item-label>
@@ -1509,7 +1625,7 @@
                     <q-item-label class="q-px-sm" caption
                       >{{
                         $t(
-                          "Settings.advanced.developer.show_onboarding.description"
+                          "Settings.advanced.developer.show_onboarding.description",
                         )
                       }}
                     </q-item-label>
@@ -1535,7 +1651,7 @@
                     <q-item-label class="q-px-sm" caption
                       >{{
                         $t(
-                          "Settings.advanced.developer.reset_wallet.description"
+                          "Settings.advanced.developer.reset_wallet.description",
                         )
                       }}
                     </q-item-label>
@@ -1543,7 +1659,7 @@
                   <row v-if="confirmNuke">
                     <span>{{
                       $t(
-                        "Settings.advanced.developer.reset_wallet.confirm_question"
+                        "Settings.advanced.developer.reset_wallet.confirm_question",
                       )
                     }}</span>
                     <q-btn
@@ -1584,7 +1700,7 @@
                     <q-item-label class="q-px-sm" caption
                       >{{
                         $t(
-                          "Settings.advanced.developer.export_wallet.description"
+                          "Settings.advanced.developer.export_wallet.description",
                         )
                       }}
                     </q-item-label>
@@ -1673,6 +1789,7 @@ export default defineComponent({
       nip46Token: "",
       nip07SignerAvailable: false,
       newRelay: "",
+      newNostrRelay: "",
     };
   },
   computed: {
@@ -1691,6 +1808,7 @@ export default defineComponent({
       "auditorEnabled",
       "auditorUrl",
       "auditorApiUrl",
+      "defaultNostrRelays",
     ]),
     ...mapState(useP2PKStore, ["p2pkKeys"]),
     ...mapWritableState(useP2PKStore, [
@@ -1728,7 +1846,7 @@ export default defineComponent({
       for (let mint of mints) {
         const mintIds = mint.keysets.map((keyset) => keyset.id);
         const keysetCounterThisMint = this.keysetCounters.filter((entry) =>
-          mintIds.includes(entry.id)
+          mintIds.includes(entry.id),
         );
         keysetCountersByMint[mint.url] = keysetCounterThisMint;
       }
@@ -1834,7 +1952,7 @@ export default defineComponent({
       // iterate over this.activeProofs in batches of 50 and check if they are spendable
       let wallet = useWalletStore().mintWallet(
         this.activeMintUrl,
-        this.activeUnit
+        this.activeUnit,
       );
       let proofs = this.activeProofs.flat();
       console.log("Checking proofs", proofs);
@@ -1921,6 +2039,22 @@ export default defineComponent({
     },
     removeRelay: function (relay) {
       this.relays = this.relays.filter((r) => r !== relay);
+    },
+    addNostrRelay: function () {
+      if (this.newNostrRelay) {
+        this.newNostrRelay = this.newNostrRelay.trim();
+        if (this.defaultNostrRelays.includes(this.newNostrRelay)) {
+          this.notifyWarning("Relay already added");
+        } else {
+          this.defaultNostrRelays.push(this.newNostrRelay);
+          this.newNostrRelay = "";
+        }
+      }
+    },
+    removeNostrRelay: function (relay) {
+      this.defaultNostrRelays = this.defaultNostrRelays.filter(
+        (r) => r !== relay,
+      );
     },
     changeLanguage(locale) {
       // Set the i18n locale
