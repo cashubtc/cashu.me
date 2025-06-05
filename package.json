@@ -68,7 +68,6 @@
     "happy-dom": "^17.4.4",
     "prettier": "^2.8.8",
     "typescript": "^5.4.5",
-    "vite": "^2.9.16",
     "vite-jsconfig-paths": "^2.0.1",
     "vitest": "^3.1.1",
     "workbox-build": "^6.6.1",
