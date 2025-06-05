@@ -143,7 +143,6 @@
             />
           </q-input>
           <q-input
-            v-if="sendViaNostr"
             filled
             dense
             v-model.trim="sendData.memo"

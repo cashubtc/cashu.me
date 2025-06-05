@@ -592,13 +592,8 @@
                 donateButton.textContent = 'Donate';
                 donateButton.onclick = (e) => {
                     e.stopPropagation();
-                    if (profile.lud16) {
-                        alert(`Opening wallet for: ${profile.lud16}`);
-                        window.open(`lightning:${profile.lud16}`);
-                    } else {
-                        alert(`No Lightning Address (lud16) found for ${profile.name || npub} to donate.`);
-                    }
-                    console.log('Donate clicked for pubkey:', profile.pubkey, 'LUD16:', profile.lud16);
+                    window.parent.postMessage({ type: 'donate', pubkey: profile.pubkey }, '*');
+                    console.log('Donate clicked for pubkey:', profile.pubkey);
                 };
                 
                 actionsContainer.appendChild(viewButton); // Add View button first
