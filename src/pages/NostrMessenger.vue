@@ -3,7 +3,14 @@
     class="row full-height"
     :class="[$q.dark.isActive ? 'bg-dark text-white' : 'bg-white text-dark']"
   >
-    <q-drawer v-model="drawer" side="left" show-if-above bordered :width="300" class="q-pa-md">
+    <q-drawer
+      v-model="drawer"
+      side="left"
+      show-if-above
+      bordered
+      :width="300"
+      class="q-pa-md"
+    >
       <NostrIdentityManager class="q-mb-md" />
       <RelayManager class="q-mb-md" />
       <NewChat class="q-mb-md" @start="startChat" />
@@ -11,15 +18,38 @@
     </q-drawer>
 
     <div class="col column q-pa-md">
-      <div class="text-h5 q-mb-md">
-        Nostr Messenger
-        <q-badge
-          :color="messenger.connected ? 'positive' : 'negative'"
-          class="q-ml-sm"
-        >
-          {{ messenger.connected ? 'Online' : 'Offline' }}
-        </q-badge>
-      </div>
+      <q-header elevated class="q-mb-md bg-transparent">
+        <q-toolbar>
+          <q-btn
+            flat
+            dense
+            round
+            icon="arrow_back"
+            color="primary"
+            aria-label="Go back"
+            @click="goBack"
+          />
+          <q-btn
+            flat
+            dense
+            round
+            icon="menu"
+            color="primary"
+            aria-label="Toggle navigation"
+            class="q-ml-sm"
+            @click="drawer = !drawer"
+          />
+          <q-toolbar-title class="text-h6">
+            Nostr Messenger
+            <q-badge
+              :color="messenger.connected ? 'positive' : 'negative'"
+              class="q-ml-sm"
+            >
+              {{ messenger.connected ? 'Online' : 'Offline' }}
+            </q-badge>
+          </q-toolbar-title>
+        </q-toolbar>
+      </q-header>
       <ActiveChatHeader :pubkey="selected" />
       <MessageList :messages="messages" class="col" />
       <MessageInput @send="sendMessage" />
@@ -30,6 +60,7 @@
 
 <script lang="ts" setup>
 import { computed, ref, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
 import { useMessengerStore } from 'src/stores/messenger';
 
 import NostrIdentityManager from 'components/NostrIdentityManager.vue';
@@ -46,6 +77,8 @@ messenger.loadIdentity();
 onMounted(() => {
   messenger.start();
 });
+
+const router = useRouter();
 
 const drawer = ref(true);
 const selected = ref('');
@@ -66,5 +99,9 @@ const startChat = (pubkey: string) => {
 const sendMessage = (text: string) => {
   if (!selected.value) return;
   messenger.sendDm(selected.value, text);
+};
+
+const goBack = () => {
+  router.push('/wallet');
 };
 </script>
