@@ -4,34 +4,40 @@ import { useLocalStorage } from "@vueuse/core";
 import { nip19 } from "nostr-tools";
 import { useWalletStore } from "./wallet";
 import { notifyApiError, notifyError, notifySuccess } from "../js/notify";
-import { MintQuoteState } from "@cashu/cashu-ts";
+import { MintQuoteState, Proof } from "@cashu/cashu-ts";
 import { useNostrStore } from "../stores/nostr";
 import { date } from "quasar";
 import { useMintsStore } from "./mints";
 
+type NPCUser = {
+  lockQuote: boolean;
+  mintUrl: string;
+  name?: string;
+  pubkey: string;
+};
+
 type NPCV2InfoReponse =
   | {
-    error: true;
-    message: string;
-  }
+      error: true;
+      message: string;
+    }
   | {
-    error: false;
-    data: {
-      user: {
-        lock_quote: boolean;
-        mintUrl: string;
-        name?: string;
-        pubkey: string;
+      error: false;
+      data: {
+        user: NPCUser;
       };
     };
-  };
+
+type NPCV2UsernameReponse =
+  | { error: true; message: string }
+  | { error: false; data: { user: NPCUser } };
 
 type NPCQuote = {
-  created_at: number;
-  paid_at: number;
-  expires_at: number;
-  mint_url: string;
-  quote_id: string;
+  createdAt: number;
+  paidAt: number;
+  expiresAt: number;
+  mintUrl: string;
+  quoteId: string;
   request: string;
   amount: number;
   state: string;
@@ -40,16 +46,18 @@ type NPCQuote = {
 
 type NPCQuoteResponse =
   | {
-    error: true;
-    message: string;
-  }
+      error: true;
+      message: string;
+    }
   | {
-    error: false;
-    data: {
-      quotes: NPCQuote[];
+      error: false;
+      data: {
+        quotes: NPCQuote[];
+      };
+      metadata: { limit: number; total: number; since?: number };
     };
-    metadata: { limit: number; total: number; since?: number };
-  };
+
+type UsernameQuote = { username: string; creq: string };
 
 const NIP98Kind = 27235;
 
@@ -118,7 +126,7 @@ export const useNPCV2Store = defineStore("npcV2", {
     getV2Info: async function (): Promise<{
       name?: string;
       mintUrl: string;
-      lock_quote: boolean;
+      lockQuote: boolean;
       pubkey: string;
     }> {
       try {
@@ -137,7 +145,7 @@ export const useNPCV2Store = defineStore("npcV2", {
           mintUrl: "",
           name: "",
           pubkey: "",
-          lock_quote: false,
+          lockQuote: false,
         };
       }
     },
@@ -196,35 +204,35 @@ export const useNPCV2Store = defineStore("npcV2", {
         let latestQuoteTime: number | undefined = undefined;
         resData.data.quotes.forEach(async (quote) => {
           if (
-            walletStore.invoiceHistory.find((i) => i.quote === quote.quote_id)
+            walletStore.invoiceHistory.find((i) => i.quote === quote.quoteId)
           ) {
             return;
           }
-          if (!latestQuoteTime || latestQuoteTime < quote.created_at) {
-            latestQuoteTime = quote.created_at;
+          if (!latestQuoteTime || latestQuoteTime < quote.createdAt) {
+            latestQuoteTime = quote.createdAt;
           }
           await walletStore.invoiceHistory.push({
             label: "Zap",
-            mint: quote.mint_url,
+            mint: quote.mintUrl,
             memo: "",
             bolt11: quote.request,
             amount: quote.amount,
-            quote: quote.quote_id,
+            quote: quote.quoteId,
             date: date.formatDate(
-              new Date(quote.created_at * 1000),
+              new Date(quote.createdAt * 1000),
               "YYYY-MM-DD HH:mm:ss"
             ),
             status: "pending",
             unit: "sat",
             mintQuote: {
               request: quote.request,
-              quote: quote.quote_id,
+              quote: quote.quoteId,
               state: MintQuoteState.PAID,
-              expiry: quote.expires_at,
+              expiry: quote.expiresAt,
             },
           });
           if (this.npcV2ClaimAutomatically) {
-            await walletStore.mintOnPaid(quote.quote_id);
+            await walletStore.mintOnPaid(quote.quoteId);
           }
         });
         if (latestQuoteTime) {
@@ -233,6 +241,52 @@ export const useNPCV2Store = defineStore("npcV2", {
       } catch (e) {
         console.error(e);
         return;
+      }
+    },
+    getUsernameQuote: async function (
+      username: string
+    ): Promise<UsernameQuote> {
+      const res = await this.sendAuthedRequest(
+        `${this.npcV2BaseURL}/api/v2/user/username`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username }),
+        }
+      );
+      const data = (await res.json()) as NPCV2UsernameReponse;
+      if (data.error) {
+        if (res.status === 402) {
+          const paymentHeader = res.headers.get("X-Cashu");
+          if (!paymentHeader) {
+            throw new Error("Unexpected reply without payment request");
+          }
+          return { username, creq: paymentHeader };
+        }
+        throw new Error(data.message);
+      }
+      throw new Error("Unexpected reply without payment request");
+    },
+    setUsername: async function (username: string, token: string) {
+      try {
+        const res = await this.sendAuthedRequest(
+          `${this.npcV2BaseURL}/api/v2/user/username`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "X-Cashu": token },
+            body: JSON.stringify({ username }),
+          }
+        );
+        const data = (await res.json()) as NPCV2UsernameReponse;
+        if (data.error) {
+          throw new Error(data.message);
+        }
+        this.npcV2Address = `${data.data.user.name}@${this.npcV2Domain}`;
+      } catch (e) {
+        console.log(e);
+        if (e instanceof Error) {
+          notifyError(e.message);
+        }
       }
     },
     sendAuthedRequest: async function (
