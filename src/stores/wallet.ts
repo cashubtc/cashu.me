@@ -75,6 +75,7 @@ export type InvoiceHistory = Invoice & {
   unit: string;
   mintQuote?: MintQuoteResponse;
   meltQuote?: MeltQuoteResponse;
+  label?: string; // Add label field for custom naming
 };
 
 type KeysetCounter = {
@@ -602,11 +603,11 @@ export const useWalletStore = defineStore("wallet", {
         this.invoiceData.status = "pending";
         this.invoiceData.mint = mintWallet.mint.mintUrl;
         this.invoiceData.unit = mintWallet.unit;
-        this.invoiceData.mintQuote = data;
+        this.invoiceData.mintQuote = data as MintQuoteResponse;
         this.invoiceHistory.push({
           ...this.invoiceData,
         });
-        return data;
+        return data as MintQuoteResponse;
       } catch (error: any) {
         console.error(error);
         notifyApiError(
@@ -620,7 +621,6 @@ export const useWalletStore = defineStore("wallet", {
     mint: async function (invoice: InvoiceHistory, verbose: boolean = true) {
       const proofsStore = useProofsStore();
       const mintStore = useMintsStore();
-      const tokenStore = useTokensStore();
       const uIStore = useUiStore();
       const keysetId = this.getKeyset(invoice.mint, invoice.unit);
       const mintWallet = this.mintWallet(invoice.mint, invoice.unit);
@@ -633,7 +633,7 @@ export const useWalletStore = defineStore("wallet", {
       try {
         // first we check if the mint quote is paid
         const mintQuote = await mintWallet.checkMintQuote(invoice.quote);
-        invoice.mintQuote = mintQuote;
+        invoice.mintQuote = mintQuote as MintQuoteResponse;
         console.log("### mint(): mintQuote", mintQuote);
         switch (mintQuote.state) {
           case MintQuoteState.PAID:
@@ -664,13 +664,6 @@ export const useWalletStore = defineStore("wallet", {
 
         // update UI
         await this.setInvoicePaid(invoice.quote);
-        const serializedProofs = proofsStore.serializeProofs(proofs);
-        tokenStore.addPaidToken({
-          amount: invoice.amount,
-          token: serializedProofs,
-          unit: invoice.unit,
-          mint: invoice.mint,
-        });
         useInvoicesWorkerStore().removeInvoiceFromChecker(invoice.quote);
 
         return proofs;
@@ -770,7 +763,6 @@ export const useWalletStore = defineStore("wallet", {
     ) {
       const uIStore = useUiStore();
       const proofsStore = useProofsStore();
-      const tokenStore = useTokensStore();
 
       console.log("#### melt()");
       const amount = quote.amount + quote.fee_reserve;
@@ -854,12 +846,6 @@ export const useWalletStore = defineStore("wallet", {
           );
         }
         console.log("#### pay lightning: token paid");
-        tokenStore.addPaidToken({
-          amount: -amount_paid,
-          token: proofsStore.serializeProofs(sendProofs),
-          unit: mintWallet.unit,
-          mint: mintWallet.mint.mintUrl,
-        });
 
         this.updateOutgoingInvoiceInHistory(quote, {
           status: "paid",
@@ -1104,7 +1090,7 @@ export const useWalletStore = defineStore("wallet", {
       try {
         // this is an outgoing invoice, we first do a getMintQuote to check if the invoice is paid
         const meltQuote = await mintWallet.mint.checkMeltQuote(quote);
-        this.updateOutgoingInvoiceInHistory(meltQuote);
+        this.updateOutgoingInvoiceInHistory(meltQuote as MeltQuoteResponse);
         if (meltQuote.state == MeltQuoteState.PENDING) {
           console.log("### mintQuote not paid yet");
           if (verbose) {

@@ -12,6 +12,7 @@ import { Clipboard } from "@capacitor/clipboard";
 import { Haptics, ImpactStyle } from "@capacitor/haptics";
 
 import ts from "typescript";
+import { useSettingsStore } from "./settings";
 
 const unitTickerShortMap = {
   sat: "sats",
@@ -146,7 +147,11 @@ export const useUiStore = defineStore("ui", {
   getters: {
     tickerShort() {
       const unit = useMintsStore().activeUnit;
-      return unitTickerShortMap[unit as keyof typeof unitTickerShortMap];
+      if (unit == "sat" && useSettingsStore().bip177BitcoinSymbol) {
+        return "₿";
+      } else {
+        return unitTickerShortMap[unit as keyof typeof unitTickerShortMap];
+      }
     },
     ndefSupported(): boolean {
       //console.log(`window.Capacitor.getPlatform() = ${window.Capacitor.getPlatform()}`)

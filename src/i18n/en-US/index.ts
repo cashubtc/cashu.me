@@ -195,10 +195,15 @@ export default {
         toggle: "Claim automatically",
         description: "Receive incoming payments automatically.",
       },
+      npc_v2: {
+        choose_mint_title: "Choose mint for npub.cash v2",
+        choose_mint_placeholder: "Select a mint...",
+      },
     },
     nostr_keys: {
       title: "Your nostr keys",
-      description: "Set the nostr keys for your Lightning address.",
+      description:
+        "Your nostr keys will be used to determine your Lightning address.",
       wallet_seed: {
         title: "Wallet seed phrase",
         description: "Generate nostr key pair from wallet seed",
@@ -375,6 +380,11 @@ export default {
           blu: "blu",
           flamingo: "flamingo",
         },
+      },
+      bip177: {
+        title: "Bitcoin symbol",
+        description: "Use ₿ symbol instead of sats.",
+        toggle: "Use ₿ symbol",
       },
     },
     advanced: {

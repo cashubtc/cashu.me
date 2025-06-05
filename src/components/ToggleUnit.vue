@@ -35,11 +35,8 @@ export default defineComponent({
   computed: {
     ...mapState(useMintsStore, ["activeUnit", "activeUnitLabel"]),
     activeUnitLabelAdopted: function () {
-      if (!this.balanceView) {
-        return this.activeUnitLabel;
-      }
-      // if the toggle is in the balance view, we want to show BTC instead of SAT
-      if (this.activeUnitLabel === "SAT") {
+      // we want to show BTC instead of SAT
+      if (this.activeUnit === "sat") {
         return "BTC";
       } else {
         return this.activeUnitLabel;

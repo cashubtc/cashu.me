@@ -53,10 +53,46 @@
         </q-list>
 
         <q-list padding>
-          <div v-for="mint in multiMints" :key="mint.url">
-            <q-item clickable class="q-pb-xs" @click="toggleMint(mint)">
+          <div
+            v-for="mint in multiMints"
+            :key="mint.url"
+            v-show="!isPaymentInProgress || isSelected(mint)"
+          >
+            <q-item
+              clickable
+              class="q-pb-xs"
+              @click="!isPaymentInProgress && toggleMint(mint)"
+              :class="{ 'cursor-not-allowed': isPaymentInProgress }"
+            >
               <q-item-section avatar>
+                <!-- Show state indicator during payment, checkbox otherwise -->
+                <div
+                  v-if="isPaymentInProgress && isSelected(mint)"
+                  class="state-indicator"
+                >
+                  <q-spinner
+                    v-if="
+                      mintStates[mint.url] === 'requesting' ||
+                      mintStates[mint.url] === 'paying'
+                    "
+                    color="primary"
+                    size="24px"
+                  />
+                  <q-icon
+                    v-else-if="mintStates[mint.url] === 'success'"
+                    name="check_circle"
+                    color="positive"
+                    size="24px"
+                  />
+                  <q-icon
+                    v-else-if="mintStates[mint.url] === 'error'"
+                    name="error"
+                    color="negative"
+                    size="24px"
+                  />
+                </div>
                 <q-checkbox
+                  v-else
                   :model-value="isSelected(mint)"
                   @update:model-value="toggleMint(mint)"
                   :color="isSelected(mint) ? 'primary' : 'grey'"
@@ -68,8 +104,20 @@
                   lines="1"
                   class="cursor-pointer"
                   style="word-break: break-word"
+                  :class="{ 'cursor-not-allowed': isPaymentInProgress }"
                 >
                   {{ mint.nickname || getShortUrl(mint.url) }}
+                  <!-- State text during payment -->
+                  <span
+                    v-if="
+                      isPaymentInProgress &&
+                      isSelected(mint) &&
+                      mintStates[mint.url]
+                    "
+                    class="text-caption text-grey-6 q-ml-sm"
+                  >
+                    ({{ getStateText(mintStates[mint.url]) }})
+                  </span>
                 </q-item-label>
                 <q-item-label>
                   <q-badge
@@ -142,6 +190,9 @@ export default defineComponent({
       multiMeltButtonLoading: false,
       selectedMints: [],
       showMultinutPaymentDialog: false,
+      // State tracking for each mint during payment
+      mintStates: {}, // { mintUrl: 'requesting' | 'paying' | 'success' | 'error' }
+      isPaymentInProgress: false,
     };
   },
   computed: {
@@ -184,12 +235,36 @@ export default defineComponent({
         this.selectedMints.push(mint);
       }
     },
+    getStateText(state) {
+      switch (state) {
+        case "requesting":
+          return "Requesting quote...";
+        case "paying":
+          return "Processing payment...";
+        case "success":
+          return "Success";
+        case "error":
+          return "Failed";
+        default:
+          return "";
+      }
+    },
+    setMintState(mintUrl, state) {
+      // Use Vue 3 compatible reactivity
+      this.mintStates = { ...this.mintStates, [mintUrl]: state };
+    },
+    clearMintStates() {
+      this.mintStates = {};
+      this.isPaymentInProgress = false;
+    },
     openMultinutDialog() {
       this.selectedMints = [...useMintsStore().multiMints];
       this.showMultinutPaymentDialog = true;
+      this.clearMintStates(); // Clear any previous states
     },
     closeMultinutDialog() {
       this.showMultinutPaymentDialog = false;
+      this.clearMintStates(); // Clear states when dialog closes
       // Re-open the PayInvoiceDialog
       this.$emit("return-to-pay-dialog");
     },
@@ -220,14 +295,23 @@ export default defineComponent({
         return;
       }
 
+      // Start payment process
+      this.isPaymentInProgress = true;
+      this.multiMeltButtonLoading = true;
+
+      // Clear previous states
+      this.clearMintStates();
+
       let mintAndQuotesArray = [];
       let remainder = 0.0;
       let i = 0;
-      this.multiMeltButtonLoading = true;
       let data;
 
       try {
+        // Phase 1: Request quotes from all selected mints
         for (const mint of this.selectedMints) {
+          this.setMintState(mint.url, "requesting");
+
           console.log(`Quoting mint: ${mint.url}`);
           const mintWallet = useWalletStore().mintWallet(
             mint.url,
@@ -240,31 +324,57 @@ export default defineComponent({
           remainder = partialAmountFloat - partialAmount;
 
           if (partialAmount > 0) {
-            const quote = await this.meltQuote(
-              mintWallet,
-              this.payInvoiceData.input.request,
-              partialAmount
-            );
-            console.log(quote);
-            mintAndQuotesArray.push([mint, quote]);
+            try {
+              const quote = await this.meltQuote(
+                mintWallet,
+                this.payInvoiceData.input.request,
+                partialAmount
+              );
+              console.log(quote);
+              mintAndQuotesArray.push([mint, quote]);
+
+              // Move to paying state
+              this.setMintState(mint.url, "paying");
+            } catch (error) {
+              console.error(`Quote failed for mint ${mint.url}:`, error);
+              this.setMintState(mint.url, "error");
+              throw error;
+            }
           }
           i++;
         }
 
+        // Phase 2: Execute payments
         data = await Promise.all(
-          mintAndQuotesArray.map(([mint, quote]) => {
-            const mintWallet = useWalletStore().mintWallet(
-              mint.url,
-              activeUnit
-            );
-            const mintClass = new MintClass(mint);
-            const proofs = mintClass.unitProofs(activeUnit);
-            return this.melt(proofs, quote, mintWallet, true);
+          mintAndQuotesArray.map(async ([mint, quote]) => {
+            try {
+              const mintWallet = useWalletStore().mintWallet(
+                mint.url,
+                activeUnit
+              );
+              const mintClass = new MintClass(mint);
+              const proofs = mintClass.unitProofs(activeUnit);
+              const result = await this.melt(proofs, quote, mintWallet, true);
+
+              // Mark as success
+              this.setMintState(mint.url, "success");
+              return result;
+            } catch (error) {
+              console.error(`Payment failed for mint ${mint.url}:`, error);
+              this.setMintState(mint.url, "error");
+              throw error;
+            }
           })
         );
       } catch (error) {
         notifyError(`Multi-nut payment failed: ${error}`);
         console.error(`${error}`);
+
+        // Reset states on error so user can try again
+        setTimeout(() => {
+          this.clearMintStates();
+        }, 3000); // Show error states for 3 seconds before clearing
+
         throw error;
       } finally {
         this.multiMeltButtonLoading = false;
@@ -288,8 +398,11 @@ export default defineComponent({
       );
 
       // Close the dialog after successful payment
-      this.showMultinutPaymentDialog = false;
-      this.payInvoiceData.show = false;
+      setTimeout(() => {
+        this.showMultinutPaymentDialog = false;
+        this.payInvoiceData.show = false;
+        this.clearMintStates();
+      }, 2000); // Show success states for 2 seconds before closing
     },
   },
 });
@@ -299,5 +412,18 @@ export default defineComponent({
 .qcard {
   border-top-left-radius: 20px;
   border-top-right-radius: 20px;
+}
+
+.state-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+}
+
+.cursor-not-allowed {
+  cursor: not-allowed !important;
+  opacity: 0.7;
 }
 </style>
