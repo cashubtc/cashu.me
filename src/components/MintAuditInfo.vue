@@ -294,7 +294,7 @@ export default {
 }
 
 .stat-card {
-  background-color: #1e1e1e;
+  background-color: var(--panel-bg-color);
   color: white;
   min-height: 100px;
   border-radius: 8px;
@@ -306,7 +306,7 @@ export default {
 
 .text-subtitle1 {
   font-size: 14px;
-  color: #9e9e9e;
+  color: var(--muted-color);
   margin-bottom: 8px;
 }
 
@@ -318,7 +318,7 @@ export default {
 
 .text-caption {
   font-size: 12px;
-  color: #9e9e9e;
+  color: var(--muted-color);
 }
 
 .row {

@@ -570,7 +570,7 @@ export default defineComponent({
   position: relative;
   font-size: 14px;
   line-height: 20px;
-  color: #9e9e9e;
+  color: var(--muted-color);
   width: 100%;
   font-weight: 500;
 }
@@ -585,7 +585,7 @@ export default defineComponent({
 .divider-line {
   flex: 1;
   height: 1px;
-  background-color: #333;
+  background-color: var(--divider-color);
 }
 
 .divider-text {
@@ -616,7 +616,7 @@ export default defineComponent({
 .contact-icon {
   width: 20px;
   height: 20px;
-  color: #636366;
+  color: var(--muted-color);
 }
 
 .contact-text {
@@ -629,7 +629,7 @@ export default defineComponent({
 }
 
 .copy-icon {
-  color: #636366;
+  color: var(--muted-color);
   margin-left: 10px;
 }
 
@@ -657,7 +657,7 @@ export default defineComponent({
 .detail-name {
   font-size: 16px;
   font-weight: 600;
-  color: #9e9e9e;
+  color: var(--muted-color);
 }
 
 .detail-value {
@@ -801,7 +801,7 @@ export default defineComponent({
 }
 
 .nut-number {
-  color: #9e9e9e;
+  color: var(--muted-color);
 }
 
 /* Make "View all" and "Hide" text clickable */
@@ -822,7 +822,7 @@ export default defineComponent({
 
 .currency-unit-pill {
   border-radius: 4px;
-  background-color: #1d1d1d;
+  background-color: var(--panel-bg-color);
   padding: 4px 8px;
   font-size: 14px;
   font-weight: 600;

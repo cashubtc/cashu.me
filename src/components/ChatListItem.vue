@@ -88,7 +88,7 @@ export default defineComponent({
   border-bottom: 1px solid rgba(0, 0, 0, 0.1);
 }
 .placeholder {
-  background: #9ca3af;
+  background: var(--divider-color);
   width: 100%;
   height: 100%;
   border-radius: 50%;

@@ -140,7 +140,7 @@ export default defineComponent({
 
 .motd-dismissed-message {
   font-size: 14px;
-  color: #9e9e9e;
+  color: var(--muted-color);
   line-height: 16px;
   display: flex;
   align-items: flex-start;
@@ -149,6 +149,6 @@ export default defineComponent({
 
 .motd-dismissed-icon {
   flex-shrink: 0;
-  color: #9e9e9e;
+  color: var(--muted-color);
 }
 </style>

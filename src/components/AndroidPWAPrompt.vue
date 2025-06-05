@@ -100,7 +100,7 @@ export default defineComponent({
   align-items: center;
   background-color: black;
   padding: 10px;
-  border: 1px solid #ccc;
+  border: 1px solid var(--divider-color);
   border-radius: 8px;
 }
 

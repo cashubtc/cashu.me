@@ -446,7 +446,7 @@ export default defineComponent({
 
 <style scoped>
 .bar-chart-container {
-  background-color: #1e1e1e;
+  background-color: var(--panel-bg-color);
   border-radius: 8px;
   padding-bottom: 6px;
   padding-top: 20px;
@@ -471,7 +471,7 @@ export default defineComponent({
   display: flex;
   align-items: flex-end;
   height: 40px;
-  background-color: #2d2d2d;
+  background-color: var(--panel-bg-color);
   border-radius: 4px;
   padding: 4px;
   position: relative;
@@ -504,7 +504,7 @@ export default defineComponent({
 .time-tick {
   position: absolute;
   transform: translateX(-50%);
-  color: #888;
+  color: var(--muted-color);
   font-size: 10px;
   white-space: nowrap;
 }
@@ -523,7 +523,7 @@ export default defineComponent({
 
 .bar.placeholder {
   background-color: transparent;
-  border: 1px solid #444;
+  border: 1px solid var(--divider-color);
 }
 
 .bar.placeholder:hover {
