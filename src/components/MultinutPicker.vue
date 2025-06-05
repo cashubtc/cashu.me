@@ -8,10 +8,10 @@
             <q-item>
               <q-item-section>
                 <q-item-label overline class="text-weight-bold">
-                  Multinut payment
+                  {{ $t("MultinutPicker.payment") }}
                 </q-item-label>
                 <q-item-label caption>
-                  Select one or multiple mints to execute a payment from.
+                  {{ $t("MultinutPicker.selectMints") }}
                 </q-item-label>
               </q-item-section>
             </q-item>
@@ -20,7 +20,11 @@
       </template>
 
       <!-- List of mints with checkboxes -->
-      <div class="q-pb-md q-px-xs text-left" on-left>
+      <div
+        style="max-height: 200px; overflow-y: auto"
+        class="q-pb-md q-px-xs text-left"
+        on-left
+      >
         <q-list padding>
           <div v-for="mint in multiMints" :key="mint.url">
             <q-item clickable class="q-pb-xs">
@@ -61,7 +65,7 @@
           <q-item>
             <q-item-section>
               <q-item-label overline class="text-weight-bold">
-                Total Selected Balance
+                {{ $t("MultinutPicker.totalSelectedBalance") }}
               </q-item-label>
               <q-item-label caption>
                 {{ formatCurrency(totalSelectedBalance, activeUnit) }}
@@ -76,7 +80,7 @@
           color="primary"
           :disabled="totalSelectedBalance < payInvoiceData.invoice.sat"
           @click="multiMeltSelectedMints"
-          label="Multi-Mint Pay"
+          :label="$t('MultinutPicker.multiMintPay')"
           :loading="multiMeltButtonLoading"
           class="q-px-lg"
         >
@@ -147,7 +151,7 @@ export default defineComponent({
       );
       if (totalQuoteAmount >= overallBalance) {
         console.error("multi-mint balance not enough to satisfy this invoice");
-        notifyError("multi-mint balance not enough to satisfy this invoice");
+        notifyError(this.$i18n.t("MultinutPicker.balanceNotEnough"));
         return;
       }
       let mintAndQuotesArray = [];
@@ -162,7 +166,6 @@ export default defineComponent({
             mint.url,
             useMintsStore().activeUnit
           );
-          // await this.activateMintUrl(mintUrl);
           const partialAmountFloat = totalQuoteAmount * weights[i] + remainder;
           const partialAmount = Math.round(partialAmountFloat);
           console.log(`partialAmount for mint ${mint.url}: ${partialAmount}`);
@@ -178,6 +181,9 @@ export default defineComponent({
           }
           i++;
         }
+        console.log(
+          `mintAndQuotesArray: ${JSON.stringify(mintAndQuotesArray)}`
+        );
         data = await Promise.all(
           mintAndQuotesArray.map(([mint, quote]) => {
             const mintWallet = useWalletStore().mintWallet(
@@ -185,12 +191,12 @@ export default defineComponent({
               activeUnit
             );
             const mintClass = new MintClass(mint);
-            const proofs = mintClass.unitProofs(activeUnit)
+            const proofs = mintClass.unitProofs(activeUnit);
             return this.melt(proofs, quote, mintWallet, true);
           })
         );
       } catch (error) {
-        notifyError(`multi-nut payment failed: ${error}`);
+        notifyError(this.$i18n.t("MultinutPicker.failed", { error: error }));
         console.error(`${error}`);
         throw error;
       } finally {
@@ -207,9 +213,9 @@ export default defineComponent({
           0
         );
       notifySuccess(
-        "Paid " +
-          uiStore.formatCurrency(amountPaid, activeUnit) +
-          " via Lightning"
+        this.$i18n.t("MultinutPicker.paid", {
+          amount: uiStore.formatCurrency(amountPaid, activeUnit),
+        })
       );
     },
   },

@@ -149,6 +149,15 @@ export const useMintsStore = defineStore("mints", {
     multiMints({ activeUnit }) {
       return this.mints.filter((m) => {
         try {
+          const version = m.info?.version;
+          if (!version) return false;
+
+          const regex = /^(Nutshell)\/(\d+)\.(\d+)\.(\d+)/; // Regex to match "Nutshell/version"
+          const match = version.match(regex);
+          console.log(`multiMint match: ${JSON.stringify(match)}`);
+          if (match[1] !== "Nutshell") return false;
+          if (parseInt(match[2]) === 0 && parseInt(match[3]) < 17) return false; // If < 0.17.* then not viable
+
           const nut15 = m.info?.nuts[15];
           const viableMint = nut15?.methods.find(
             (m) => m.method === "bolt11" && m.unit === activeUnit
@@ -542,6 +551,5 @@ export const useMintsStore = defineStore("mints", {
         throw new Error(`Mint error: ${response.error}`);
       }
     },
-
   },
 });

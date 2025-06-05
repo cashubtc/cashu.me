@@ -47,6 +47,15 @@ export default {
       },
     },
   },
+  MultinutPicker: {
+    payment: "Multinut payment",
+    selectMints: "Select one or multiple mints to execute a payment from.",
+    totalSelectedBalance: "Total Selected Balance",
+    multiMintPay: "Multi-Mint Pay",
+    balanceNotEnough: "Multi-mint balance not enough to satisfy this invoice",
+    failed: "Failed to process: {error}",
+    paid: "Paid {amount} via Lightning",
+  },
   wallet: {
     notifications: {
       balance_too_low: "Balance is too low",
