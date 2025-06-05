@@ -6,7 +6,10 @@
         <span class="text-caption">{{ title }}</span>
       </div>
     </div>
-    <div class="row q-mt-xs q-mb-none" v-if="activeMintUrl">
+    <div
+      class="row q-mt-xs q-mb-none"
+      v-if="activeMintUrl || !requireActiveMint"
+    >
       <div class="col-12 cursor-pointer">
         <q-select
           outlined
@@ -18,6 +21,8 @@
           option-label="nickname"
           :rounded="rounded"
           :style="style"
+          :dense="dense"
+          :placeholder="placeholder"
         >
           <template v-slot:option="scope">
             <q-item v-bind="scope.itemProps">
@@ -35,7 +40,7 @@
                 >
                   {{ scope.opt.url }}</q-item-label
                 >
-                <div>
+                <div v-if="showBalances">
                   <q-badge
                     v-for="unit in scope.opt.units"
                     :key="unit"
@@ -66,7 +71,7 @@
               class="q-mr-none q-mb-none"
             />
           </template>
-          <template v-slot:append>
+          <template v-slot:append v-if="showBalances">
             <div class="row items-center">
               <q-badge
                 v-if="chosenMint?.errored"
@@ -96,13 +101,16 @@ import { mapActions, mapState, mapWritableState } from "pinia";
 import { useMintsStore } from "stores/mints";
 import { MintClass } from "stores/mints";
 import { i18n } from "../boot/i18n";
-import { title } from "process";
 
 export default defineComponent({
   name: "ChooseMint",
   mixins: [windowMixin],
   props: {
     rounded: {
+      type: Boolean,
+      default: false,
+    },
+    dense: {
       type: Boolean,
       default: false,
     },
@@ -114,25 +122,55 @@ export default defineComponent({
       type: String,
       default: "",
     },
+    placeholder: {
+      type: String,
+      default: "",
+    },
+    showBalances: {
+      type: Boolean,
+      default: true,
+    },
+    requireActiveMint: {
+      type: Boolean,
+      default: true,
+    },
+    // When provided, this will be used instead of activeMintUrl
+    modelValue: {
+      type: String,
+      default: null,
+    },
   },
+  emits: ["update:modelValue"],
   data: function () {
     return {
       chosenMint: null,
     };
   },
   mounted() {
-    const m = this.mints.find((m) => m.url === this.activeMintUrl);
-    const mint = new MintClass(m);
-    this.chosenMint = {
-      url: this.activeMintUrl,
-      nickname: mint.mint.nickname || mint.mint.info?.name,
-      shorturl: getShortUrl(this.activeMintUrl),
-      errored: mint.mint.errored,
-    };
+    this.initializeChosenMint();
   },
   watch: {
     chosenMint: async function () {
-      this.activeMintUrl = this.chosenMint.url;
+      if (this.modelValue !== null) {
+        // Emit the selected mint URL when using v-model
+        this.$emit("update:modelValue", this.chosenMint?.url || "");
+      } else {
+        // Use the original behavior when not using v-model
+        this.activeMintUrl = this.chosenMint?.url || "";
+      }
+    },
+    modelValue: {
+      handler() {
+        this.initializeChosenMint();
+      },
+      immediate: true,
+    },
+    activeMintUrl: {
+      handler() {
+        if (this.modelValue === null) {
+          this.initializeChosenMint();
+        }
+      },
     },
   },
   computed: {
@@ -151,6 +189,22 @@ export default defineComponent({
   },
   methods: {
     ...mapActions(useMintsStore, ["activateMintUrl"]),
+    initializeChosenMint() {
+      const targetUrl =
+        this.modelValue !== null ? this.modelValue : this.activeMintUrl;
+      if (targetUrl) {
+        const m = this.mints.find((m) => m.url === targetUrl);
+        if (m) {
+          const mint = new MintClass(m);
+          this.chosenMint = {
+            url: targetUrl,
+            nickname: mint.mint.nickname || mint.mint.info?.name,
+            shorturl: getShortUrl(targetUrl),
+            errored: mint.mint.errored,
+          };
+        }
+      }
+    },
     chooseMintOptions: function () {
       let options = [];
       for (const [i, m] of Object.entries(this.mints)) {
