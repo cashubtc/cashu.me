@@ -7,85 +7,83 @@
       class="creators-container"
       :class="$q.dark.isActive ? 'bg-gray-50 text-white' : 'bg-white text-dark'"
     >
-    <q-input
-      rounded
-      outlined
-      dense
-      v-model="searchInput"
-      :placeholder="$t('FindCreators.inputs.search.placeholder')"
-      @keydown.enter.prevent="triggerSearch"
-    >
-      <template #label>
-        <div class="row items-center no-wrap">
-          <span>{{ $t("FindCreators.inputs.search.label") }}</span>
-          <InfoTooltip
-            class="q-ml-xs"
-            :text="$t('FindCreators.inputs.search.tooltip')"
+      <q-input
+        rounded
+        outlined
+        dense
+        v-model="searchInput"
+        :placeholder="$t('FindCreators.inputs.search.placeholder')"
+        @keydown.enter.prevent="triggerSearch"
+      >
+        <template #label>
+          <div class="row items-center no-wrap">
+            <span>{{ $t("FindCreators.inputs.search.label") }}</span>
+            <InfoTooltip
+              class="q-ml-xs"
+              :text="$t('FindCreators.inputs.search.tooltip')"
+            />
+          </div>
+        </template>
+        <template v-slot:append>
+          <q-icon name="search" class="cursor-pointer" @click="triggerSearch" />
+        </template>
+      </q-input>
+
+      <div class="text-h5 q-mt-md q-mb-sm text-center">Featured Creators</div>
+
+      <div v-if="searching" class="q-mt-md flex flex-center">
+        <q-spinner-dots color="primary" />
+      </div>
+      <div v-else-if="error" class="q-mt-md text-negative text-bold">
+        {{ error }}
+      </div>
+      <div
+        v-else-if="!searching && !searchResults.length"
+        class="q-mt-md text-grey text-center"
+      >
+        No creators found
+      </div>
+
+      <q-virtual-scroll
+        v-if="searchResults.length"
+        class="q-mt-md creators-grid"
+        :items="searchResults"
+        :virtual-scroll-item-size="360"
+      >
+        <template #default="{ item }">
+          <creator-profile-card
+            :creator="item"
+            @donate="openDonateDialog(item)"
+            @message="openMessageDialog(item)"
           />
-        </div>
-      </template>
-      <template v-slot:append>
-        <q-icon name="search" class="cursor-pointer" @click="triggerSearch" />
-      </template>
-    </q-input>
-
-    <div class="text-h5 q-mt-md q-mb-sm text-center">
-      Featured Creators
-    </div>
-
-    <div v-if="searching" class="q-mt-md flex flex-center">
-      <q-spinner-dots color="primary" />
-    </div>
-    <div v-else-if="error" class="q-mt-md text-negative text-bold">
-      {{ error }}
-    </div>
-    <div
-      v-else-if="!searching && !searchResults.length"
-      class="q-mt-md text-grey text-center"
-    >
-      No creators found
-    </div>
-
-    <q-virtual-scroll
-      v-if="searchResults.length"
-      class="q-mt-md creators-grid"
-      :items="searchResults"
-      :virtual-scroll-item-size="360"
-    >
-      <template #default="{ item }">
-        <creator-profile-card
-          :creator="item"
-          @donate="openDonateDialog(item)"
-          @message="openMessageDialog(item)"
-        />
-      </template>
-    </q-virtual-scroll>
-    <DonateDialog v-model="showDonateDialog" @confirm="handleDonate" />
-    <q-dialog v-model="showActionDialog" persistent>
-      <q-card class="q-pa-md qcard" style="min-width: 300px">
-        <q-card-section class="text-h6">{{
-          $t("FindCreators.choose_action.title")
-        }}</q-card-section>
-        <q-card-actions vertical>
-          <q-btn flat color="primary" @click="chooseExisting">{{
-            $t("FindCreators.choose_action.existing")
-          }}</q-btn>
-          <q-btn flat color="primary" @click="chooseNew">{{
-            $t("FindCreators.choose_action.new")
-          }}</q-btn>
-          <q-btn flat color="primary" @click="backToBucket">{{
-            $t("global.actions.cancel.label")
-          }}</q-btn>
-        </q-card-actions>
-      </q-card>
-    </q-dialog>
-    <ChooseExistingTokenDialog
-      v-model="showExistingDialog"
-      :bucket-id="selectedBucketId"
-      @selected="handleTokenSelect"
-      @back="backToAction"
-    />
-    <SendMessageDialog v-model="showMessageDialog" @send="sendMessage" />
+        </template>
+      </q-virtual-scroll>
+      <DonateDialog v-model="showDonateDialog" @confirm="handleDonate" />
+      <q-dialog v-model="showActionDialog" persistent>
+        <q-card class="q-pa-md qcard" style="min-width: 300px">
+          <q-card-section class="text-h6">{{
+            $t("FindCreators.choose_action.title")
+          }}</q-card-section>
+          <q-card-actions vertical>
+            <q-btn flat color="primary" @click="chooseExisting">{{
+              $t("FindCreators.choose_action.existing")
+            }}</q-btn>
+            <q-btn flat color="primary" @click="chooseNew">{{
+              $t("FindCreators.choose_action.new")
+            }}</q-btn>
+            <q-btn flat color="primary" @click="backToBucket">{{
+              $t("global.actions.cancel.label")
+            }}</q-btn>
+          </q-card-actions>
+        </q-card>
+      </q-dialog>
+      <ChooseExistingTokenDialog
+        v-model="showExistingDialog"
+        :bucket-id="selectedBucketId"
+        @selected="handleTokenSelect"
+        @back="backToAction"
+      />
+      <SendMessageDialog v-model="showMessageDialog" @send="sendMessage" />
     </div>
   </q-page>
 </template>
@@ -105,7 +103,6 @@ import { useNostrStore } from "stores/nostr";
 import { useDmChatsStore } from "stores/dmChats";
 import { Dialog } from "quasar";
 import { useI18n } from "vue-i18n";
-import { nip19, ProfilePointer } from "nostr-tools";
 
 export default defineComponent({
   name: "FindCreatorsView",
@@ -199,7 +196,7 @@ export default defineComponent({
           months,
           amount,
           donateCreator.value.pubkey,
-          bucketId,
+          bucketId
         );
         showDonateDialog.value = false;
       }
@@ -251,19 +248,10 @@ export default defineComponent({
       if (!messageCreator.value) return;
       showMessageDialog.value = false;
       try {
-        let recipient = messageCreator.value.pubkey;
-        if (recipient.startsWith("npub") || recipient.startsWith("nprofile")) {
-          try {
-            const decoded = nip19.decode(recipient);
-            recipient =
-              decoded.type === "npub"
-                ? (decoded.data as string)
-                : (decoded.data as ProfilePointer).pubkey;
-          } catch (e) {
-            console.error(e);
-          }
-        }
-        const ev = await useNostrStore().sendNip04DirectMessage(recipient, msg);
+        const ev = await useNostrStore().sendNip04DirectMessage(
+          messageCreator.value.pubkey,
+          msg
+        );
         if (ev) {
           useDmChatsStore().addOutgoing(ev);
           Dialog.create({
