@@ -160,7 +160,8 @@
                       "
                     >
                       <span
-                        style="color: white; font-size: 14px; font-weight: 500"
+                        class="text-white"
+                        style="font-size: 14px; font-weight: 500"
                       >
                         {{
                           formatCurrency(
@@ -199,8 +200,7 @@
         </div>
 
         <div
-          class="add-mint-description q-mb-lg text-left"
-          style="color: rgba(255, 255, 255, 0.7)"
+          class="add-mint-description q-mb-lg text-left text-grey-6"
         >
           {{ $t("MintSettings.add.description") }}
         </div>
