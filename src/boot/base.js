@@ -77,7 +77,13 @@ window.windowMixin = {
       // convert value to integer
       value = parseInt(value);
       if (useSettingsStore().bip177BitcoinSymbol) {
-        return "₿" + new Intl.NumberFormat(window.LOCALE).format(value);
+        if (value >= 0) {
+          return "₿" + new Intl.NumberFormat(window.LOCALE).format(value);
+        } else {
+          return (
+            "-₿" + new Intl.NumberFormat(window.LOCALE).format(Math.abs(value))
+          );
+        }
       }
       return new Intl.NumberFormat(window.LOCALE).format(value) + " sat";
     },

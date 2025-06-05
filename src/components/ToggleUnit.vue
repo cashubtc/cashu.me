@@ -39,7 +39,7 @@ export default defineComponent({
         return this.activeUnitLabel;
       }
       // if the toggle is in the balance view, we want to show BTC instead of SAT
-      if (this.activeUnitLabel === "SAT") {
+      if (this.activeUnit === "sat") {
         return "BTC";
       } else {
         return this.activeUnitLabel;

@@ -379,7 +379,7 @@ export default {
       bip177: {
         title: "Bitcoin symbol",
         description: "Use ₿ symbol instead of sats.",
-        toggle: "Use ₿",
+        toggle: "Use ₿ symbol",
       },
     },
     advanced: {
