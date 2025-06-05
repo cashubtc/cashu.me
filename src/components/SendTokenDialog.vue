@@ -589,7 +589,6 @@ import {
   notify,
   notifyWarning,
 } from "src/js/notify.ts";
-// import { getEncodedTokenV3 } from "@cashu/cashu-ts/utils";
 export default defineComponent({
   name: "SendTokenDialog",
   mixins: [windowMixin],
@@ -911,10 +910,14 @@ export default defineComponent({
           this.sendData.tokensBase64 = getEncodedTokenV4(decodedToken);
         } catch {
           console.log("### Could not encode token to V4");
-          //this.sendData.tokensBase64 = getEncodedTokenV3(decodedToken);
+          this.sendData.tokensBase64 = getEncodedToken(decodedToken, {
+            version: 3,
+          });
         }
       } else {
-        //this.sendData.tokensBase64 = getEncodedTokenV3(decodedToken);
+        this.sendData.tokensBase64 = getEncodedToken(decodedToken, {
+          version: 3,
+        });
       }
     },
     deleteThisToken: function () {

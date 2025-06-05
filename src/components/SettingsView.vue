@@ -1007,57 +1007,140 @@
             ></q-badge>
           </q-toggle>
         </q-item>
-        <q-item class="q-pt-none">
-          <q-item-label caption
-            >{{ $t("Settings.experimental.auditor.description") }}
-          </q-item-label>
-        </q-item>
-        <div class="row q-mx-md">
-          <div class="col-12">
-            <q-input
-              v-model="auditorUrl"
-              :label="$t('Settings.experimental.auditor.url_label')"
-              color="primary"
-              outlined
-              dense
-              rounded
-              :disable="!auditorEnabled"
-            >
-              <template v-slot:append>
-                <q-btn
-                  dense
-                  flat
-                  icon="content_copy"
-                  @click="copyText(auditorUrl)"
-                  size="sm"
-                  color="grey"
-                />
-              </template>
-            </q-input>
+        <div v-if="auditorEnabled">
+          <q-item class="q-pt-none">
+            <q-item-label caption
+              >{{ $t("Settings.experimental.auditor.description") }}
+            </q-item-label>
+          </q-item>
+          <div class="row q-mx-md">
+            <div class="col-12">
+              <q-input
+                v-model="auditorUrl"
+                :label="$t('Settings.experimental.auditor.url_label')"
+                color="primary"
+                outlined
+                dense
+                rounded
+                :disable="!auditorEnabled"
+              >
+                <template v-slot:append>
+                  <q-btn
+                    dense
+                    flat
+                    icon="content_copy"
+                    @click="copyText(auditorUrl)"
+                    size="sm"
+                    color="grey"
+                  />
+                </template>
+              </q-input>
+            </div>
+          </div>
+          <div class="row q-mx-md q-mt-md">
+            <div class="col-12">
+              <q-input
+                v-model="auditorApiUrl"
+                :label="$t('Settings.experimental.auditor.api_url_label')"
+                color="primary"
+                outlined
+                dense
+                rounded
+                :disable="!auditorEnabled"
+              >
+                <template v-slot:append>
+                  <q-btn
+                    dense
+                    flat
+                    icon="content_copy"
+                    @click="copyText(auditorApiUrl)"
+                    size="sm"
+                    color="grey"
+                  />
+                </template>
+              </q-input>
+            </div>
           </div>
         </div>
+        <!-- npcv2 settings -->
         <div class="row q-mx-md q-mt-md">
           <div class="col-12">
-            <q-input
-              v-model="auditorApiUrl"
-              :label="$t('Settings.experimental.auditor.api_url_label')"
-              color="primary"
-              outlined
-              dense
-              rounded
-              :disable="!auditorEnabled"
-            >
-              <template v-slot:append>
-                <q-btn
-                  dense
-                  flat
-                  icon="content_copy"
-                  @click="copyText(auditorApiUrl)"
-                  size="sm"
-                  color="grey"
+            <div class="row q-pt-md">
+              <q-toggle
+                v-model="npcV2Enabled"
+                label="Use npubx.cash"
+                color="primary"
+              >
+                <q-badge
+                  color="primary"
+                  :label="$t('Settings.experimental.receive_swaps.badge')"
+                  class="q-mx-sm"
+                ></q-badge>
+              </q-toggle>
+            </div>
+          </div>
+        </div>
+        <div v-if="npcV2Enabled">
+          <div class="row q-mx-md q-mt-md">
+            <div class="col-12">
+              <q-input outlined v-model="npcV2Address" dense rounded readonly>
+                <template v-slot:append>
+                  <q-icon
+                    name="content_copy"
+                    @click="copyText(npcV2Address)"
+                    size="xs"
+                    color="grey"
+                    class="q-mr-sm cursor-pointer"
+                  >
+                    <q-tooltip>Copy Lightning address</q-tooltip>
+                  </q-icon>
+                </template>
+              </q-input>
+            </div>
+          </div>
+          <div class="row q-mx-md">
+            <div class="col-12 q-pt-md">
+              <q-item-label caption>npub.cash v2 mint</q-item-label>
+              <q-input
+                outlined
+                v-model="npcV2Mint"
+                dense
+                rounded
+                readonly
+                class="q-pt-sm"
+              >
+              </q-input>
+              <div class="q-pt-sm">
+                <ChooseMint
+                  v-model="npcV2Mint"
+                  :title="
+                    $t('Settings.lightning_address.npc_v2.choose_mint_title')
+                  "
+                  :placeholder="
+                    $t(
+                      'Settings.lightning_address.npc_v2.choose_mint_placeholder'
+                    )
+                  "
+                  :show-balances="false"
+                  :dense="true"
+                  :rounded="true"
+                  :require-active-mint="false"
                 />
-              </template>
-            </q-input>
+              </div>
+            </div>
+            <div class="row q-pt-md">
+              <q-toggle v-model="npcV2ClaimAutomatically" color="primary" />
+              <q-item-section>
+                <q-item-label title>{{
+                  $t("Settings.lightning_address.automatic_claim.toggle")
+                }}</q-item-label>
+                <q-item-label caption
+                  >{{
+                    $t("Settings.lightning_address.automatic_claim.description")
+                  }}
+                </q-item-label>
+              </q-item-section>
+            </div>
           </div>
         </div>
 
@@ -1092,6 +1175,29 @@
               <q-item-label caption
                 >{{ $t("Settings.appearance.keyboard.toggle_description") }}
               </q-item-label>
+            </q-item>
+          </q-list>
+        </div>
+
+        <!-- bip177 -->
+        <div class="q-py-sm q-px-xs text-left" on-left>
+          <q-list padding>
+            <q-item>
+              <q-item-section>
+                <q-item-label overline class="text-weight-bold">{{
+                  $t("Settings.appearance.bip177.title")
+                }}</q-item-label>
+                <q-item-label caption>{{
+                  $t("Settings.appearance.bip177.description")
+                }}</q-item-label>
+              </q-item-section>
+            </q-item>
+            <q-item>
+              <q-toggle
+                v-model="bip177BitcoinSymbol"
+                :label="$t('Settings.appearance.bip177.toggle')"
+                color="primary"
+              />
             </q-item>
           </q-list>
         </div>
@@ -1265,6 +1371,8 @@
             </q-item>
           </q-list>
         </div>
+
+        <!-- developer settings -->
 
         <q-expansion-item
           class="q-pt-lg"
@@ -1580,6 +1688,7 @@
 import { defineComponent } from "vue";
 import P2PKDialog from "./P2PKDialog.vue";
 import NWCDialog from "./NWCDialog.vue";
+import ChooseMint from "./ChooseMint.vue";
 
 import { getShortUrl } from "src/js/wallet-helpers";
 import { mapActions, mapState, mapWritableState } from "pinia";
@@ -1600,6 +1709,7 @@ import { useDexieStore } from "../stores/dexie";
 import { useReceiveTokensStore } from "../stores/receiveTokensStore";
 import { useWelcomeStore } from "src/stores/welcome";
 import { useStorageStore } from "src/stores/storage";
+import { useNPCV2Store } from "src/stores/npcv2";
 import { useI18n } from "vue-i18n";
 
 export default defineComponent({
@@ -1608,6 +1718,7 @@ export default defineComponent({
   components: {
     P2PKDialog,
     NWCDialog,
+    ChooseMint,
   },
   props: {},
   data: function () {
@@ -1663,6 +1774,7 @@ export default defineComponent({
       "auditorEnabled",
       "auditorUrl",
       "auditorApiUrl",
+      "bip177BitcoinSymbol",
     ]),
     ...mapState(useP2PKStore, ["p2pkKeys"]),
     ...mapWritableState(useP2PKStore, [
@@ -1680,8 +1792,18 @@ export default defineComponent({
     ]),
     ...mapState(useWalletStore, ["mnemonic"]),
     ...mapState(useUiStore, ["ndefSupported"]),
-    ...mapWritableState(useNPCStore, ["npcAddress"]),
-    ...mapWritableState(useNPCStore, ["npcEnabled", "automaticClaim"]),
+    ...mapWritableState(useNPCV2Store, [
+      "npcV2Loading",
+      "npcV2Enabled",
+      "npcV2Address",
+      "npcV2Mint",
+      "npcV2ClaimAutomatically",
+    ]),
+    ...mapWritableState(useNPCStore, [
+      "npcAddress",
+      "npcEnabled",
+      "automaticClaim",
+    ]),
     ...mapWritableState(useWalletStore, ["keysetCounters"]),
     ...mapWritableState(useMintsStore, [
       "addMintData",
@@ -1741,6 +1863,19 @@ export default defineComponent({
         this.npcAddress = "";
       }
     },
+    npcV2Enabled: async function () {
+      if (this.npcV2Enabled) {
+        await this.initSigner();
+        await this.generateNPCV2Connection();
+      } else {
+        this.npcV2Address = "";
+      }
+    },
+    npcV2Mint: async function (newMintUrl, oldMintUrl) {
+      if (this.npcV2Enabled && newMintUrl && newMintUrl !== oldMintUrl) {
+        await this.changeMintUrl(newMintUrl);
+      }
+    },
   },
   methods: {
     ...mapActions(useNostrStore, [
@@ -1779,6 +1914,7 @@ export default defineComponent({
     ]),
     ...mapActions(useProofsStore, ["serializeProofs"]),
     ...mapActions(useNPCStore, ["generateNPCConnection"]),
+    ...mapActions(useNPCV2Store, ["generateNPCV2Connection", "changeMintUrl"]),
     ...mapActions(useRestoreStore, ["restoreMint"]),
     ...mapActions(useDexieStore, ["deleteAllTables"]),
     ...mapActions(useStorageStore, ["restoreFromBackup", "exportWalletState"]),
@@ -1845,26 +1981,32 @@ export default defineComponent({
     handleSeedClick: async function () {
       await this.initWalletSeedPrivateKeySigner();
       await this.generateNPCConnection();
+      await this.generateNPCV2Connection();
     },
     handleExtensionClick: async function () {
       await this.initNip07Signer();
       await this.generateNPCConnection();
+      await this.generateNPCV2Connection();
     },
     handleBunkerClick: async function () {
       await this.initNip46Signer();
       await this.generateNPCConnection();
+      await this.generateNPCV2Connection();
     },
     handleNsecClick: async function () {
       await this.initPrivateKeySigner();
       await this.generateNPCConnection();
+      await this.generateNPCV2Connection();
     },
     handleResetPrivateKeySigner: async function () {
       await this.resetPrivateKeySigner();
       await this.generateNPCConnection();
+      await this.generateNPCV2Connection();
     },
     handleResetNip46Signer: async function () {
       await this.resetNip46Signer();
       await this.generateNPCConnection();
+      await this.generateNPCV2Connection();
     },
     showOnboarding: function () {
       const welcomeStore = useWelcomeStore();

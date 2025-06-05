@@ -74,6 +74,10 @@ export const useSettingsStore = defineStore("settings", {
         "cashu.settings.auditorApiUrl",
         "https://api.audit.8333.space"
       ),
+      bip177BitcoinSymbol: useLocalStorage<boolean>(
+        "cashu.settings.bip177",
+        false
+      ),
     };
   },
 });

@@ -7,14 +7,11 @@
       <div
         class="row items-center justify-center no-wrap q-mb-none q-mx-none q-px-none q-pt-lg q-pb-md position-relative"
       >
-        <div
-          class="col-6 q-mb-md flex justify-center items-center"
-          style="margin-right: 10%"
-        >
+        <div class="col-6 q-mb-md flex justify-center items-center">
           <q-btn
             rounded
             dense
-            class="q-px-md wallet-action-btn"
+            class="q-px-md q-mr-md wallet-action-btn"
             color="primary"
             @click="showReceiveDialog = true"
           >
@@ -38,7 +35,7 @@
           <q-btn
             rounded
             dense
-            class="q-px-md wallet-action-btn"
+            class="q-px-md q-ml-md wallet-action-btn"
             color="primary"
             @click="showSendDialog = true"
           >
@@ -74,11 +71,6 @@
             class="text-secondary"
             :label="$t('WalletPage.tabs.history.label')"
           ></q-tab>
-          <q-tab
-            name="invoices"
-            class="text-secondary"
-            :label="$t('WalletPage.tabs.invoices.label')"
-          ></q-tab>
           <!-- <q-tab name="tokens" label="Tokens"></q-tab> -->
           <q-tab
             name="mints"
@@ -92,16 +84,10 @@
           v-model="tab"
           animated
         >
-          <!-- ////////////////// HISTORY LIST ///////////////// -->
+          <!-- ////////////////// UNIFIED HISTORY LIST ///////////////// -->
 
           <q-tab-panel name="history">
             <HistoryTable />
-          </q-tab-panel>
-
-          <!-- ////////////////// INVOICE LIST ///////////////// -->
-
-          <q-tab-panel name="invoices">
-            <InvoicesTable />
           </q-tab-panel>
 
           <!-- ////////////////////// SETTINGS ////////////////// -->
@@ -223,7 +209,6 @@ import token from "src/js/token";
 // Vue components
 import BalanceView from "components/BalanceView.vue";
 import MintSettings from "components/MintSettings.vue";
-import InvoicesTable from "components/InvoicesTable.vue";
 import HistoryTable from "components/HistoryTable.vue";
 import NoMintWarnBanner from "components/NoMintWarnBanner.vue";
 import WelcomeDialog from "components/WelcomeDialog.vue";
@@ -251,6 +236,7 @@ import { useCameraStore } from "src/stores/camera";
 import { useP2PKStore } from "src/stores/p2pk";
 import { useNWCStore } from "src/stores/nwc";
 import { useNPCStore } from "src/stores/npubcash";
+import { useNPCV2Store } from "src/stores/npcv2";
 import { useNostrStore } from "src/stores/nostr";
 import { usePRStore } from "src/stores/payment-request";
 import { useDexieStore } from "src/stores/dexie";
@@ -275,7 +261,6 @@ export default {
   components: {
     BalanceView,
     MintSettings,
-    InvoicesTable,
     HistoryTable,
     NoMintWarnBanner,
     WelcomeDialog,
@@ -404,6 +389,10 @@ export default {
     ...mapActions(useCameraStore, ["closeCamera", "showCamera"]),
     ...mapActions(useNWCStore, ["listenToNWCCommands"]),
     ...mapActions(useNPCStore, ["generateNPCConnection", "claimAllTokens"]),
+    ...mapActions(useNPCV2Store, [
+      "generateNPCV2Connection",
+      "getLatestQuotes",
+    ]),
     ...mapActions(useNostrStore, [
       "sendNip04DirectMessage",
       "sendNip17DirectMessage",
@@ -617,6 +606,8 @@ export default {
     // generate NPC connection
     this.generateNPCConnection();
     this.claimAllTokens();
+    this.generateNPCV2Connection();
+    this.getLatestQuotes();
     // Ensure wallet action buttons have equal width
     this.$nextTick(this.equalizeButtonWidths);
     // Add window resize listener to handle responsive layouts

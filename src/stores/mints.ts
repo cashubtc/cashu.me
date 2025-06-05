@@ -19,6 +19,7 @@ import { ref, computed, watch } from "vue";
 import { useProofsStore } from "./proofs";
 import { useI18n } from "vue-i18n";
 import { i18n } from "src/boot/i18n";
+import { useSettingsStore } from "./settings";
 
 export type Mint = {
   url: string;
@@ -116,6 +117,7 @@ export const useMintsStore = defineStore("mints", {
     const showEditMintDialog = ref(false);
 
     const uiStoreGlobal: any = useUiStore();
+    const settingsStoreGlobal: any = useSettingsStore();
 
     // Watch for changes in activeMintUrl and activeUnit
     watch([activeMintUrl, activeUnit], async () => {
@@ -140,6 +142,7 @@ export const useMintsStore = defineStore("mints", {
       showMintInfoData,
       showEditMintDialog,
       uiStoreGlobal,
+      settingsStoreGlobal,
     };
   },
   getters: {
@@ -211,7 +214,11 @@ export const useMintsStore = defineStore("mints", {
     },
     activeUnitLabel({ activeUnit }): string {
       if (activeUnit == "sat") {
-        return "SAT";
+        if (this.settingsStoreGlobal.bip177BitcoinSymbol) {
+          return "₿";
+        } else {
+          return "SAT";
+        }
       } else if (activeUnit == "usd") {
         return "USD";
       } else if (activeUnit == "eur") {
