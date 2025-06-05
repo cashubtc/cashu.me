@@ -32,11 +32,10 @@
             <!-- Amount -->
             <div class="text-right">
               <div
-                class="amount-text"
+                class="amount-text text-weight-bold"
                 :class="{
-                  'text-green':
+                  'text-amount-positive':
                     transaction.amount >= 0 && transaction.status !== 'pending',
-                  'text-weight-bold': transaction.status !== 'pending',
                   'text-grey-6': transaction.status === 'pending',
                 }"
               >
@@ -394,11 +393,15 @@ export default defineComponent({
 .transaction-icon {
   width: 20px;
   height: 20px;
-  color: currentColor;
+  color: var(--q-primary);
 }
 
 .amount-text {
   font-size: 1rem;
   line-height: 1.2;
+}
+
+.text-amount-positive {
+  color: hsl(120, 88%, 58%);
 }
 </style>

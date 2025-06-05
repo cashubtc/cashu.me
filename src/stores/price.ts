@@ -10,13 +10,6 @@ import {
 } from "../js/notify";
 import axios from "axios";
 
-const unitTickerShortMap = {
-  sat: "sats",
-  usd: "USD",
-  eur: "EUR",
-  msat: "msats",
-};
-
 export const usePriceStore = defineStore("price", {
   state: () => ({
     bitcoinPrice: useLocalStorage("cashu.price.bitcoinPrice", 0 as number),

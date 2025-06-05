@@ -1096,6 +1096,29 @@
           </q-list>
         </div>
 
+        <!-- bip177 -->
+        <div class="q-py-sm q-px-xs text-left" on-left>
+          <q-list padding>
+            <q-item>
+              <q-item-section>
+                <q-item-label overline class="text-weight-bold">{{
+                  $t("Settings.appearance.bip177.title")
+                }}</q-item-label>
+                <q-item-label caption>{{
+                  $t("Settings.appearance.bip177.description")
+                }}</q-item-label>
+              </q-item-section>
+            </q-item>
+            <q-item>
+              <q-toggle
+                v-model="bip177BitcoinSymbol"
+                :label="$t('Settings.appearance.bip177.toggle')"
+                color="primary"
+              />
+            </q-item>
+          </q-list>
+        </div>
+
         <!-- theme -->
         <div class="q-py-mb q-px-xs text-left" on-left>
           <q-list padding>
@@ -1265,6 +1288,8 @@
             </q-item>
           </q-list>
         </div>
+
+        <!-- developer settings -->
 
         <q-expansion-item
           class="q-pt-lg"
@@ -1663,6 +1688,7 @@ export default defineComponent({
       "auditorEnabled",
       "auditorUrl",
       "auditorApiUrl",
+      "bip177BitcoinSymbol",
     ]),
     ...mapState(useP2PKStore, ["p2pkKeys"]),
     ...mapWritableState(useP2PKStore, [
