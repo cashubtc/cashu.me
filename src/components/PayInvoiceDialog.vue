@@ -71,9 +71,6 @@
         <div class="col-12">
           <ChooseMint />
         </div>
-        <div class="col-12">
-          <MultinutPicker />
-        </div>
         <div
           v-if="enoughtotalUnitBalance || globalMutexLock"
           class="row q-mt-lg"
@@ -100,6 +97,16 @@
               <q-spinner-hourglass />
             </template>
           </q-btn>
+          <q-btn
+            v-if="hasMultinutSupport"
+            unelevated
+            rounded
+            color="secondary"
+            :disabled="!hasMultinutSupport"
+            @click="openMultinutDialog"
+            label="Multinut"
+            class="q-px-lg q-ml-sm"
+          />
           <q-btn v-close-popup flat color="grey" class="q-ml-auto">{{
             $t("PayInvoiceDialog.invoice.actions.close.label")
           }}</q-btn>
@@ -290,6 +297,12 @@
       </div>
     </q-card>
   </q-dialog>
+
+  <!-- Multinut Payment Dialog -->
+  <MultinutPaymentDialog
+    ref="multinutDialog"
+    @return-to-pay-dialog="handleReturnToPayDialog"
+  />
 </template>
 <script>
 import { defineComponent } from "vue";
@@ -302,7 +315,7 @@ import { usePriceStore } from "src/stores/price";
 import { mapActions, mapState, mapWritableState } from "pinia";
 import ChooseMint from "components/ChooseMint.vue";
 import ToggleUnit from "components/ToggleUnit.vue";
-import MultinutPicker from "./MultinutPicker.vue";
+import MultinutPaymentDialog from "./MultinutPaymentDialog.vue";
 
 import * as _ from "underscore";
 import { Scan as ScanIcon } from "lucide-vue-next";
@@ -313,7 +326,7 @@ export default defineComponent({
   components: {
     ChooseMint,
     ToggleUnit,
-    MultinutPicker,
+    MultinutPaymentDialog,
     ScanIcon,
   },
   props: {},
@@ -343,6 +356,7 @@ export default defineComponent({
       "activeUnit",
       "totalUnitBalance",
       "activeBalance",
+      "multiMints",
     ]),
     ...mapState(usePriceStore, ["bitcoinPrice"]),
     canPasteFromClipboard: function () {
@@ -355,6 +369,11 @@ export default defineComponent({
     enoughtotalUnitBalance: function () {
       return (
         this.activeBalance >= this.payInvoiceData.meltQuote.response.amount
+      );
+    },
+    hasMultinutSupport: function () {
+      return (
+        this.multiMints && this.payInvoiceData.meltQuote.response.amount > 0
       );
     },
   },
@@ -391,6 +410,13 @@ export default defineComponent({
         throw new Error("already processing an invoice.");
       }
       this.meltInvoiceData();
+    },
+    openMultinutDialog: function () {
+      this.payInvoiceData.show = false;
+      this.$refs.multinutDialog.openMultinutDialog();
+    },
+    handleReturnToPayDialog: function () {
+      this.payInvoiceData.show = true;
     },
   },
   created: function () {},
