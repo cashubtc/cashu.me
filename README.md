@@ -122,6 +122,13 @@ npm run dev
 ## Contributing
 Contributions are welcome! Open an issue or pull request to discuss your ideas. Bug reports and feature requests are encouraged. Help with translation and documentation is always appreciated.
 
+Before submitting a pull request, install dependencies and run the test suite:
+
+```bash
+npm install
+npm test
+```
+
 ## License
 This project is licensed under the [MIT License](LICENSE.md).
 
