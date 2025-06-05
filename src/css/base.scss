@@ -263,3 +263,11 @@ video {
 ::-webkit-scrollbar {
   display: none;
 }
+
+body.body--dark .divider-text {
+  color: #ffffff;
+}
+
+body.body--light .divider-text {
+  color: #000000;
+}
