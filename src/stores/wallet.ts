@@ -723,13 +723,6 @@ export const useWalletStore = defineStore("wallet", {
       request: string,
       mpp_amount: number | undefined = undefined
     ): Promise<MeltQuoteResponse> {
-      // const payload: MeltQuotePayload = {
-      //   unit: mintStore.activeUnit,
-      //   request: this.payInvoiceData.input.request,
-      // };
-      // this.payInvoiceData.meltQuote.payload = payload;
-      // const data = await mintStore.activeMint().api.createMeltQuote(payload);
-      // const data = await this.wallet.createMeltQuote(this.payInvoiceData.input.request, { mpp_amount: this.payInvoiceData.input.amount });
       const mintStore = useMintsStore();
       let data;
       if (mpp_amount) {
