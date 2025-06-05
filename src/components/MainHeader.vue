@@ -248,9 +248,7 @@ export default defineComponent({
     const uiStore = useUiStore();
     const { t } = useI18n();
     const router = useRouter();
-    const showBackButton = computed(
-      () => router.currentRoute.value.path !== "/wallet"
-    );
+    const showBackButton = computed(() => true);
     const countdown = ref(0);
     let countdownInterval;
 
