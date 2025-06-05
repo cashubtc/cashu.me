@@ -846,11 +846,13 @@ export const useWalletStore = defineStore("wallet", {
 
         let amount_paid = amount - proofsStore.sumProofs(data.change);
         useUiStore().vibrate();
-        notifySuccess(
-          this.t("wallet.notifications.paid_lightning", {
-            amount: uIStore.formatCurrency(amount_paid, mintWallet.unit),
-          })
-        );
+        if (!silent) {
+          notifySuccess(
+            this.t("wallet.notifications.paid_lightning", {
+              amount: uIStore.formatCurrency(amount_paid, mintWallet.unit),
+            })
+          );
+        }
         console.log("#### pay lightning: token paid");
         tokenStore.addPaidToken({
           amount: -amount_paid,
