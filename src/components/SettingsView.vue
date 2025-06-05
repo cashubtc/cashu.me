@@ -2096,6 +2096,5 @@ export default defineComponent({
   padding: 0 10px;
   font-size: 14px;
   font-weight: 600;
-  color: #ffffff;
 }
 </style>
