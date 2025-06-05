@@ -106,7 +106,9 @@ export const useNostrStore = defineStore("nostr", {
       "cashu.ndk.nip17EventIdsWeHaveSeen",
       []
     ),
-    profiles: useLocalStorage<Record<string, { profile: any; fetchedAt: number }>>("cashu.ndk.profiles", {}),
+    profiles: useLocalStorage<
+      Record<string, { profile: any; fetchedAt: number }>
+    >("cashu.ndk.profiles", {}),
   }),
   getters: {
     seedSignerPrivateKeyNsecComputed: (state) => {
@@ -174,7 +176,27 @@ export const useNostrStore = defineStore("nostr", {
       console.log("Setting pubkey to", pubkey);
       this.pubkey = pubkey;
     },
+    resolvePubkey: function (pk: string): string {
+      if (/^[0-9a-fA-F]{64}$/.test(pk)) {
+        return pk.toLowerCase();
+      }
+      try {
+        const decoded = nip19.decode(pk);
+        if (decoded.type === "npub") {
+          return typeof decoded.data === "string"
+            ? (decoded.data as string)
+            : pk;
+        }
+        if (decoded.type === "nprofile") {
+          return (decoded.data as ProfilePointer).pubkey;
+        }
+      } catch (e) {
+        console.error("Failed to decode pubkey", pk, e);
+      }
+      return pk;
+    },
     getProfile: async function (pubkey: string): Promise<any> {
+      pubkey = this.resolvePubkey(pubkey);
       const now = Math.floor(Date.now() / 1000);
       let cached = this.profiles[pubkey] as CachedProfile | undefined;
 
@@ -219,10 +241,7 @@ export const useNostrStore = defineStore("nostr", {
       const signer = new NDKNip07Signer();
       const user = await signer.user();
       if (user?.npub) {
-        console.log(
-          "Permission granted to read their public key:",
-          user.npub
-        );
+        console.log("Permission granted to read their public key:", user.npub);
         this.signerType = SignerType.NIP07;
         await this.setSigner(signer);
         this.ndk.getUser({ npub: user.npub });
@@ -312,6 +331,7 @@ export const useNostrStore = defineStore("nostr", {
     },
 
     fetchFollowerCount: async function (pubkey: string): Promise<number> {
+      pubkey = this.resolvePubkey(pubkey);
       await this.initNdkReadOnly();
       const filter: NDKFilter = { kinds: [3], "#p": [pubkey] };
       const events = await this.ndk.fetchEvents(filter);
@@ -321,6 +341,7 @@ export const useNostrStore = defineStore("nostr", {
     },
 
     fetchFollowingCount: async function (pubkey: string): Promise<number> {
+      pubkey = this.resolvePubkey(pubkey);
       await this.initNdkReadOnly();
       const filter: NDKFilter = { kinds: [3], authors: [pubkey] };
       const events = await this.ndk.fetchEvents(filter);
@@ -341,6 +362,7 @@ export const useNostrStore = defineStore("nostr", {
     },
 
     fetchJoinDate: async function (pubkey: string): Promise<number | null> {
+      pubkey = this.resolvePubkey(pubkey);
       await this.initNdkReadOnly();
       const filter: NDKFilter = { kinds: [0, 1], authors: [pubkey] };
       const events = await this.ndk.fetchEvents(filter);
@@ -387,14 +409,14 @@ export const useNostrStore = defineStore("nostr", {
     encryptNip04: async function (
       privKey: string,
       recipient: string,
-      message: string,
+      message: string
     ): Promise<string> {
       return await nip04.encrypt(privKey, recipient, message);
     },
     decryptNip04: async function (
       privKey: string,
       sender: string,
-      content: string,
+      content: string
     ): Promise<string> {
       return await nip04.decrypt(privKey, sender, content);
     },
@@ -402,15 +424,22 @@ export const useNostrStore = defineStore("nostr", {
       recipient: string,
       message: string,
       privKey?: string,
-      pubKey?: string,
+      pubKey?: string
     ) {
+      recipient = this.resolvePubkey(recipient);
+      if (pubKey) {
+        pubKey = this.resolvePubkey(pubKey);
+      }
       await this.walletSeedGenerateKeyPair();
       const key = privKey || this.seedSignerPrivateKey;
       const signer = privKey
         ? new NDKPrivateKeySigner(privKey)
         : this.seedSigner;
-      const senderPubkey = pubKey ||
-        (privKey ? getPublicKey(hexToBytes(privKey)) : this.seedSignerPublicKey);
+      const senderPubkey =
+        pubKey ||
+        (privKey
+          ? getPublicKey(hexToBytes(privKey))
+          : this.seedSignerPublicKey);
       const ndk = new NDK({ signer });
       const event = new NDKEvent(ndk);
       event.kind = NDKKind.EncryptedDirectMessage;
@@ -483,8 +512,9 @@ export const useNostrStore = defineStore("nostr", {
     subscribeToNip04DirectMessagesCallback: async function (
       privKey: string,
       pubKey: string,
-      cb: (event: NostrEvent, decrypted: string) => void,
+      cb: (event: NostrEvent, decrypted: string) => void
     ) {
+      pubKey = this.resolvePubkey(pubKey);
       await this.initNdkReadOnly();
       const filter: NDKFilter = {
         kinds: [NDKKind.EncryptedDirectMessage],
@@ -506,9 +536,8 @@ export const useNostrStore = defineStore("nostr", {
     ): Promise<NDKEvent | null> {
       const result = nip19.decode(nprofile);
       const pubkey: string = (result.data as ProfilePointer).pubkey;
-      const relays: string[] | undefined = (
-        result.data as ProfilePointer
-      ).relays;
+      const relays: string[] | undefined = (result.data as ProfilePointer)
+        .relays;
       return await this.sendNip17DirectMessage(pubkey, message, relays);
     },
     randomTimeUpTo2DaysInThePast: function () {
@@ -519,6 +548,7 @@ export const useNostrStore = defineStore("nostr", {
       message: string,
       relays?: string[]
     ): Promise<NDKEvent | null> {
+      recipient = this.resolvePubkey(recipient);
       await this.walletSeedGenerateKeyPair();
       const randomPrivateKey = generateSecretKey();
       const randomPublicKey = getPublicKey(randomPrivateKey);
