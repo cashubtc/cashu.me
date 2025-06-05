@@ -3,23 +3,15 @@
     class="row full-height"
     :class="[$q.dark.isActive ? 'bg-dark text-white' : 'bg-white text-dark']"
   >
-    <q-drawer
-      v-model="drawer"
-      side="left"
-      show-if-above
-      bordered
-      :width="300"
-      class="q-pa-md"
-    >
-      <NostrIdentityManager class="q-mb-md" />
-      <RelayManager class="q-mb-md" />
-      <NewChat class="q-mb-md" @start="startChat" />
-      <ConversationList @select="selectConversation" />
-    </q-drawer>
-
-    <div class="col column q-pa-md">
-      <q-header elevated class="q-mb-md bg-transparent">
-        <q-toolbar>
+      <q-drawer
+        v-model="drawer"
+        side="left"
+        show-if-above
+        bordered
+        :width="300"
+        class="q-pa-md"
+      >
+        <div class="row items-center q-mb-md">
           <q-btn
             flat
             dense
@@ -39,16 +31,26 @@
             class="q-ml-sm"
             @click="drawer = !drawer"
           />
-          <q-toolbar-title class="text-h6">
-            Nostr Messenger
-            <q-badge
-              :color="messenger.connected ? 'positive' : 'negative'"
-              class="q-ml-sm"
-            >
-              {{ messenger.connected ? 'Online' : 'Offline' }}
-            </q-badge>
-          </q-toolbar-title>
-        </q-toolbar>
+        </div>
+        <NostrIdentityManager class="q-mb-md" />
+        <RelayManager class="q-mb-md" />
+        <NewChat class="q-mb-md" @start="startChat" />
+        <ConversationList @select="selectConversation" />
+      </q-drawer>
+
+    <div class="col column q-pa-md">
+        <q-header elevated class="q-mb-md bg-transparent">
+          <q-toolbar>
+            <q-toolbar-title class="text-h6">
+              Nostr Messenger
+              <q-badge
+                :color="messenger.connected ? 'positive' : 'negative'"
+                class="q-ml-sm"
+              >
+                {{ messenger.connected ? 'Online' : 'Offline' }}
+              </q-badge>
+            </q-toolbar-title>
+          </q-toolbar>
       </q-header>
       <ActiveChatHeader :pubkey="selected" />
       <MessageList :messages="messages" class="col" />
