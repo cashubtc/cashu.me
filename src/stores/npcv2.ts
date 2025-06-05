@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 import NDK, { NDKEvent } from "@nostr-dev-kit/ndk";
-import { useLocalStorage, useRafFn } from "@vueuse/core";
+import { useLocalStorage } from "@vueuse/core";
 import { nip19 } from "nostr-tools";
 import { useWalletStore } from "./wallet";
 import { notifyApiError, notifyError, notifySuccess } from "../js/notify";
@@ -10,7 +10,7 @@ import { date } from "quasar";
 import { useMintsStore } from "./mints";
 
 type NPCUser = {
-  lock_quote: boolean;
+  lockQuote: boolean;
   mintUrl: string;
   name?: string;
   pubkey: string;
@@ -33,11 +33,11 @@ type NPCV2UsernameReponse =
   | { error: false; data: { user: NPCUser } };
 
 type NPCQuote = {
-  created_at: number;
-  paid_at: number;
-  expires_at: number;
-  mint_url: string;
-  quote_id: string;
+  createdAt: number;
+  paidAt: number;
+  expiresAt: number;
+  mintUrl: string;
+  quoteId: string;
   request: string;
   amount: number;
   state: string;
@@ -126,7 +126,7 @@ export const useNPCV2Store = defineStore("npcV2", {
     getV2Info: async function (): Promise<{
       name?: string;
       mintUrl: string;
-      lock_quote: boolean;
+      lockQuote: boolean;
       pubkey: string;
     }> {
       try {
@@ -145,7 +145,7 @@ export const useNPCV2Store = defineStore("npcV2", {
           mintUrl: "",
           name: "",
           pubkey: "",
-          lock_quote: false,
+          lockQuote: false,
         };
       }
     },
@@ -204,35 +204,35 @@ export const useNPCV2Store = defineStore("npcV2", {
         let latestQuoteTime: number | undefined = undefined;
         resData.data.quotes.forEach(async (quote) => {
           if (
-            walletStore.invoiceHistory.find((i) => i.quote === quote.quote_id)
+            walletStore.invoiceHistory.find((i) => i.quote === quote.quoteId)
           ) {
             return;
           }
-          if (!latestQuoteTime || latestQuoteTime < quote.created_at) {
-            latestQuoteTime = quote.created_at;
+          if (!latestQuoteTime || latestQuoteTime < quote.createdAt) {
+            latestQuoteTime = quote.createdAt;
           }
           await walletStore.invoiceHistory.push({
             label: "Zap",
-            mint: quote.mint_url,
+            mint: quote.mintUrl,
             memo: "",
             bolt11: quote.request,
             amount: quote.amount,
-            quote: quote.quote_id,
+            quote: quote.quoteId,
             date: date.formatDate(
-              new Date(quote.created_at * 1000),
+              new Date(quote.createdAt * 1000),
               "YYYY-MM-DD HH:mm:ss"
             ),
             status: "pending",
             unit: "sat",
             mintQuote: {
               request: quote.request,
-              quote: quote.quote_id,
+              quote: quote.quoteId,
               state: MintQuoteState.PAID,
-              expiry: quote.expires_at,
+              expiry: quote.expiresAt,
             },
           });
           if (this.npcV2ClaimAutomatically) {
-            await walletStore.mintOnPaid(quote.quote_id);
+            await walletStore.mintOnPaid(quote.quoteId);
           }
         });
         if (latestQuoteTime) {
