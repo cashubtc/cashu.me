@@ -583,8 +583,8 @@
                 messageButton.textContent = 'Message';
                 messageButton.onclick = (e) => {
                     e.stopPropagation();
-                    alert(`Message ${profile.name || npub}`);
-                    console.log('Message clicked for pubkey:', profile.pubkey);
+                    // Navigate the parent application to the chat view
+                    window.parent.location.href = `/chats/${profile.pubkey}`;
                 };
 
                 const donateButton = document.createElement('button');
