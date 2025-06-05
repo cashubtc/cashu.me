@@ -16,6 +16,16 @@
     </div>
     <div v-if="profile.about" class="q-mb-md">{{ profile.about }}</div>
 
+    <div class="q-mb-md text-caption">
+      <div><strong>npub:</strong> {{ pubkey }}</div>
+      <div>
+        <strong>Wallet balance:</strong>
+        {{ walletBalanceFormatted }}
+      </div>
+      <div><strong>Buckets:</strong> {{ bucketCount }}</div>
+      <div><strong>Tiers:</strong> {{ tiers.length }}</div>
+    </div>
+
     <div v-if="tiers.length">
       <div class="text-h6 q-mb-sm">{{ $t("CreatorHub.profile.tiers") }}</div>
       <div v-for="tier in tiers" :key="tier.id" class="q-mb-md">
@@ -44,6 +54,8 @@ import { useNostrStore } from "stores/nostr";
 import { useCreatorHubStore, Tier } from "stores/creatorHub";
 import { usePriceStore } from "stores/price";
 import { useUiStore } from "stores/ui";
+import { useMintsStore } from "stores/mints";
+import { useBucketsStore } from "stores/buckets";
 import { renderMarkdown as renderMarkdownFn } from "src/js/simple-markdown";
 
 export default defineComponent({
@@ -53,10 +65,18 @@ export default defineComponent({
     const hub = useCreatorHubStore();
     const priceStore = usePriceStore();
     const uiStore = useUiStore();
+    const mints = useMintsStore();
+    const buckets = useBucketsStore();
     const bitcoinPrice = computed(() => priceStore.bitcoinPrice);
     const pubkey = computed(() => hub.loggedInNpub || nostr.pubkey);
     const profile = ref<any>({});
     const tiers = ref(hub.getTierArray());
+    const walletBalance = computed(() => mints.activeBalance);
+    const activeUnit = computed(() => mints.activeUnit);
+    const bucketCount = computed(() => buckets.bucketList.length);
+    const walletBalanceFormatted = computed(() =>
+      uiStore.formatCurrency(walletBalance.value, activeUnit.value)
+    );
 
     onMounted(async () => {
       if (!pubkey.value) return;
@@ -92,6 +112,10 @@ export default defineComponent({
       profile,
       tiers,
       bitcoinPrice,
+      walletBalance,
+      activeUnit,
+      bucketCount,
+      walletBalanceFormatted,
       renderMarkdown,
       formatFiat,
       supportTier,
