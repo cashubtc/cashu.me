@@ -322,26 +322,33 @@ export default defineComponent({
       this.isPaymentInProgress = true;
       this.multiMeltButtonLoading = true;
 
-      let mintAndQuotesArray = [];
+      let mintsToQuotes = [];
+      let mintsToAmounts = [];
       let remainder = 0.0;
       let i = 0;
       let data;
 
       try {
-        // Phase 1: Request quotes from all selected mints
-        mintAndQuotesArray = await Promise.all(
-          this.selectedMints.map(async (mint, i) => {
+        // Phase 1: Calculate amount for each Mint
+        for (const mint of this.selectedMints) {
+          const partialAmountFloat = totalQuoteAmount * weights[i] + remainder;
+          const partialAmount = Math.round(partialAmountFloat);
+          console.log(`partialAmount for mint ${mint.url}: ${partialAmount}`);
+          remainder = partialAmountFloat - partialAmount;
+
+          mintsToAmounts.push([mint, partialAmount]);
+        }
+
+        // Phase 2: Request quotes from all selected mints
+        mintsToQuotes = await Promise.all(
+          mintsToAmounts.map(async ([mint, partialAmount], i) => {
+            this.setMintState(mint.url, "requesting");
+
             console.log(`Quoting mint: ${mint.url}`);
             const mintWallet = useWalletStore().mintWallet(
               mint.url,
               useMintsStore().activeUnit
             );
-
-            const partialAmountFloat =
-              totalQuoteAmount * weights[i] + remainder;
-            const partialAmount = Math.round(partialAmountFloat);
-            console.log(`partialAmount for mint ${mint.url}: ${partialAmount}`);
-            remainder = partialAmountFloat - partialAmount;
 
             if (partialAmount > 0) {
               try {
@@ -364,11 +371,11 @@ export default defineComponent({
         );
 
         // Filter out null values (for mints with partialAmount <= 0)
-        mintAndQuotesArray = mintAndQuotesArray.filter((item) => item !== null);
+        mintsToQuotes = mintsToQuotes.filter((item) => item !== null);
 
-        // Phase 2: Execute payments
+        // Phase 3: Execute payments
         data = await Promise.all(
-          mintAndQuotesArray.map(async ([mint, quote]) => {
+          mintsToQuotes.map(async ([mint, quote]) => {
             try {
               // Move to paying state
               this.setMintState(mint.url, "paying");
@@ -406,7 +413,7 @@ export default defineComponent({
 
       uiStore.vibrate();
       const amountPaid =
-        mintAndQuotesArray.reduce(
+        mintsToQuotes.reduce(
           (acc, q) => acc + q[1].amount + q[1].fee_reserve,
           0
         ) -
