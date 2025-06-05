@@ -32,7 +32,7 @@ function onMessage(ev: MessageEvent) {
   }
 }
 
-function handleDonate({ bucketId, locked, type, amount, months }: any) {
+function handleDonate({ bucketId, locked, type, amount, months, message }: any) {
   if (!selectedPubkey.value) return;
   if (type === 'one-time') {
     sendTokensStore.clearSendData();
@@ -40,6 +40,7 @@ function handleDonate({ bucketId, locked, type, amount, months }: any) {
     sendTokensStore.sendViaNostr = true;
     sendTokensStore.sendData.bucketId = bucketId;
     sendTokensStore.sendData.amount = amount;
+    sendTokensStore.sendData.memo = message;
     sendTokensStore.sendData.p2pkPubkey = locked ? selectedPubkey.value : '';
     sendTokensStore.showLockInput = locked;
     showDonateDialog.value = false;

@@ -22,6 +22,13 @@
           :label="$t('DonateDialog.inputs.amount')"
           class="q-mt-sm"
         />
+        <q-input
+          v-model.trim="message"
+          dense
+          outlined
+          :label="$t('DonateDialog.inputs.message')"
+          class="q-mt-sm"
+        />
         <q-select
           v-model="type"
           :options="typeOptions"
@@ -90,6 +97,7 @@ export default defineComponent({
     const locked = ref<"normal" | "locked">("normal");
     const type = ref<"one-time" | "schedule">("one-time");
     const amount = ref<number>(0);
+    const message = ref<string>("");
     const preset = ref<number>(donationStore.presets[0]?.months || 0);
 
     const model = computed({
@@ -135,6 +143,7 @@ export default defineComponent({
         type: type.value,
         amount: amount.value,
         months: preset.value,
+        message: message.value,
       });
       emit("update:modelValue", false);
     };
@@ -145,6 +154,7 @@ export default defineComponent({
       locked,
       type,
       amount,
+      message,
       preset,
       bucketOptions,
       typeOptions,

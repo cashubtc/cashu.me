@@ -170,12 +170,14 @@ export default defineComponent({
       type,
       amount,
       months,
+      message,
     }: {
       bucketId: string;
       locked: boolean;
       type: string;
       amount: number;
       months: number;
+      message: string;
     }) => {
       selectedBucketId.value = bucketId;
       selectedLocked.value = locked;
@@ -185,6 +187,7 @@ export default defineComponent({
         sendTokensStore.sendViaNostr = true;
         sendTokensStore.sendData.bucketId = bucketId;
         sendTokensStore.sendData.amount = amount;
+        sendTokensStore.sendData.memo = message;
         sendTokensStore.sendData.p2pkPubkey = locked
           ? donateCreator.value.pubkey
           : "";
