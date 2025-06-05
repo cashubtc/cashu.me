@@ -2,7 +2,7 @@ import { copyToClipboard } from "quasar";
 import { useUiStore } from "stores/ui";
 import { Clipboard } from "@capacitor/clipboard";
 import { SafeArea } from "capacitor-plugin-safe-area";
-
+import { useSettingsStore } from "stores/settings";
 window.LOCALE = "en";
 // window.EventHub = new Vue();
 
@@ -76,6 +76,15 @@ window.windowMixin = {
     formatSat: function (value) {
       // convert value to integer
       value = parseInt(value);
+      if (useSettingsStore().bip177BitcoinSymbol) {
+        if (value >= 0) {
+          return "₿" + new Intl.NumberFormat(window.LOCALE).format(value);
+        } else {
+          return (
+            "-₿" + new Intl.NumberFormat(window.LOCALE).format(Math.abs(value))
+          );
+        }
+      }
       return new Intl.NumberFormat(window.LOCALE).format(value) + " sat";
     },
     fromMsat: function (value) {
