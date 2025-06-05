@@ -402,9 +402,6 @@ export default defineComponent({
           " via Lightning"
       );
 
-      // add invoice to history
-      useInvoiceStore().addInvoice(this.payInvoiceData);
-
       // Close the dialog after successful payment
       setTimeout(() => {
         this.showMultinutPaymentDialog = false;
