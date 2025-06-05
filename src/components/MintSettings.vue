@@ -155,7 +155,7 @@
                       class="q-py-xs q-px-sm q-my-xs"
                       style="
                         border-radius: 4px;
-                        background-color: #1d1d1d;
+                        background-color: var(--panel-bg-color);
                         display: inline-block;
                       "
                     >
@@ -786,7 +786,7 @@ export default defineComponent({
 .divider-line {
   flex: 1;
   height: 1px;
-  background-color: #48484a;
+  background-color: var(--divider-color);
 }
 
 .divider-text {

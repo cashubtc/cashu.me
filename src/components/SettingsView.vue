@@ -2089,7 +2089,7 @@ export default defineComponent({
 .divider-line {
   flex: 1;
   height: 1px;
-  background-color: #48484a;
+  background-color: var(--divider-color);
 }
 
 .divider-text {

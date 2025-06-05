@@ -87,18 +87,30 @@ body,
   --icon-bg-light: var(--q-color-grey-3);
   --custom-btn-dark: var(--q-color-grey-9);
   --custom-btn-light: var(--q-color-grey-2);
+  --divider-dark: var(--q-color-grey-8);
+  --divider-light: var(--q-color-grey-4);
+  --muted-dark: var(--q-color-grey-5);
+  --muted-light: var(--q-color-grey-6);
+  --panel-dark: var(--q-color-grey-9);
+  --panel-light: var(--q-color-grey-2);
 }
 
 body.body--dark {
   --icon-bg-color: var(--icon-bg-dark);
   --custom-btn-bg: var(--custom-btn-dark);
   --custom-btn-text: white;
+  --divider-color: var(--divider-dark);
+  --muted-color: var(--muted-dark);
+  --panel-bg-color: var(--panel-dark);
 }
 
 body.body--light {
   --icon-bg-color: var(--icon-bg-light);
   --custom-btn-bg: var(--custom-btn-light);
   --custom-btn-text: black;
+  --divider-color: var(--divider-light);
+  --muted-color: var(--muted-light);
+  --panel-bg-color: var(--panel-light);
 }
 
 /* utility background classes */
