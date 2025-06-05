@@ -844,12 +844,6 @@ export const useWalletStore = defineStore("wallet", {
           );
         }
         console.log("#### pay lightning: token paid");
-        tokenStore.addPaidToken({
-          amount: -amount_paid,
-          token: proofsStore.serializeProofs(sendProofs),
-          unit: mintWallet.unit,
-          mint: mintWallet.mint.mintUrl,
-        });
 
         // NUT-08 get change
         if (data.change != null) {
