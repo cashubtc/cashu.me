@@ -98,7 +98,7 @@
     </q-toolbar>
   </q-header>
 
-  <q-drawer v-model="leftDrawerOpen" bordered>
+  <q-drawer v-model="leftDrawerOpen" side="right" bordered>
     <q-list>
       <q-item-label header>{{
         $t("MainHeader.menu.settings.title")
@@ -248,9 +248,7 @@ export default defineComponent({
     const uiStore = useUiStore();
     const { t } = useI18n();
     const router = useRouter();
-    const showBackButton = computed(
-      () => router.currentRoute.value.path !== "/wallet"
-    );
+    const showBackButton = computed(() => true);
     const countdown = ref(0);
     let countdownInterval;
 

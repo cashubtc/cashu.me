@@ -1,5 +1,6 @@
 <template>
   <q-layout view="lHh Lpr lFf">
+    <MainHeader />
     <q-page-container>
       <router-view />
     </q-page-container>
@@ -7,11 +8,14 @@
 </template>
 
 <script>
-import { defineComponent, ref } from "vue";
+import { defineComponent } from "vue";
+import MainHeader from "components/MainHeader.vue";
 
 export default defineComponent({
   name: "BlankLayout",
   mixins: [windowMixin],
-  components: {},
+  components: {
+    MainHeader,
+  },
 });
 </script>
