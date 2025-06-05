@@ -378,7 +378,7 @@ export default defineComponent({
         0
       );
       return (
-        this.multiMints.length > 0 &&
+        this.multiMints.length > 1 &&
         this.payInvoiceData.meltQuote.response.amount > 0 &&
         totalMultinutBalance >= this.payInvoiceData.meltQuote.response.amount
       );

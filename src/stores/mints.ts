@@ -162,7 +162,8 @@ export const useMintsStore = defineStore("mints", {
           const viableMint = nut15?.methods.find(
             (m) => m.method === "bolt11" && m.unit === activeUnit
           );
-          if (nut15 && viableMint) return true;
+          const balance = new MintClass(m).unitBalance(activeUnit);
+          if (nut15 && viableMint && balance > 0) return true;
           else return false;
         } catch (e) {
           console.error(`${e}`);
