@@ -196,6 +196,7 @@ export default {
       nostr_keys: "NOSTR KEYS",
       payment_requests: "PAYMENT REQUESTS",
       nostr_wallet_connect: "NOSTR WALLET CONNECT",
+      nostr_relays: "NOSTR RELAYS",
       hardware_features: "HARDWARE FEATURES",
       p2pk_features: "P2PK FEATURES",
       privacy: "PRIVACY",
@@ -289,6 +290,19 @@ export default {
           copy_tooltip: "Copy relay",
           remove_tooltip: "Remove relay",
         },
+      },
+    },
+    nostr_relays: {
+      expand_label: "Click to edit relays",
+      add: {
+        title: "Add relay",
+        description: "Add nostr relay URLs your wallet should connect to.",
+      },
+      list: {
+        title: "Relays",
+        description: "Your wallet will connect to these relays.",
+        copy_tooltip: "Copy relay",
+        remove_tooltip: "Remove relay",
       },
     },
     hardware_features: {
