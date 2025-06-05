@@ -10,7 +10,7 @@
         <q-btn
           rounded
           dense
-          class="q-px-md wallet-action-btn q-mb-md"
+          class="q-px-sm wallet-action-btn q-mb-md"
           color="primary"
           @click="showReceiveDialog = true"
         >
@@ -36,7 +36,7 @@
         <q-btn
           rounded
           dense
-          class="q-px-md wallet-action-btn q-mb-md"
+          class="q-px-sm wallet-action-btn q-mb-md"
           color="primary"
           @click="showSendDialog = true"
         >
@@ -202,7 +202,7 @@
 .wallet-action-btn {
   flex: 1;
   white-space: nowrap;
-  font-size: 1.2rem;
+  font-size: 1rem;
 }
 
 .button-content {
