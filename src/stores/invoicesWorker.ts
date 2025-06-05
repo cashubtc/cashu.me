@@ -82,7 +82,7 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
           q.lastChecked +
           Math.min(
             this.checkInterval *
-              Math.pow(2, q.checkCount - this.keepIntervalConstantForNChecks),
+            Math.pow(2, q.checkCount - this.keepIntervalConstantForNChecks),
             this.maxInterval
           )
         );
@@ -138,8 +138,12 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
       this.lastPendingInvoiceCheck = Date.now();
       console.log(`Checking ${quotesToCheck.length} quotes`);
       for (const q of quotesToCheck) {
-        console.log(`Checking quote ${q.quote}`);
-        walletStore.mintOnPaid(q.quote, false, false);
+        try {
+          console.log(`Checking quote ${q.quote}`);
+          walletStore.mintOnPaid(q.quote, false, false);
+        } catch (error) {
+          console.error(error);
+        }
       }
     },
   },

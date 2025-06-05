@@ -18,15 +18,15 @@ type NPCUser = {
 
 type NPCV2InfoReponse =
   | {
-      error: true;
-      message: string;
-    }
+    error: true;
+    message: string;
+  }
   | {
-      error: false;
-      data: {
-        user: NPCUser;
-      };
+    error: false;
+    data: {
+      user: NPCUser;
     };
+  };
 
 type NPCV2UsernameReponse =
   | { error: true; message: string }
@@ -46,16 +46,16 @@ type NPCQuote = {
 
 type NPCQuoteResponse =
   | {
-      error: true;
-      message: string;
-    }
+    error: true;
+    message: string;
+  }
   | {
-      error: false;
-      data: {
-        quotes: NPCQuote[];
-      };
-      metadata: { limit: number; total: number; since?: number };
+    error: false;
+    data: {
+      quotes: NPCQuote[];
     };
+    metadata: { limit: number; total: number; since?: number };
+  };
 
 type UsernameQuote = { username: string; creq: string };
 
@@ -229,6 +229,8 @@ export const useNPCV2Store = defineStore("npcV2", {
               quote: quote.quoteId,
               state: MintQuoteState.PAID,
               expiry: quote.expiresAt,
+              amount: quote.amount,
+              unit: "sat",
             },
           });
           if (this.npcV2ClaimAutomatically) {
