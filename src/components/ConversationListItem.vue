@@ -65,7 +65,8 @@ export default defineComponent({
       return letters.join('').toUpperCase();
     });
 
-    const loaded = computed(() => Object.keys(props.profile || {}).length > 0);
+    // consider profile fetched once the key exists, even if it has no fields
+    const loaded = computed(() => props.profile !== undefined);
 
     const timeAgo = computed(() => {
       if (!props.timestamp) return '';

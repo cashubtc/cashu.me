@@ -67,9 +67,7 @@ export default defineComponent({
       return letters.join('').toUpperCase();
     });
 
-    const loaded = computed(() => {
-      return Object.keys(props.profile || {}).length > 0;
-    });
+    const loaded = computed(() => props.profile !== undefined);
 
     const timeAgo = computed(() => {
       if (!props.timestamp) return '';

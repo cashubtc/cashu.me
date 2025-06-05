@@ -76,15 +76,18 @@ export const useMessengerStore = defineStore("messenger", {
       created_at?: number,
       id?: string,
     ) {
+      const messageId = id || uuidv4();
+      if (this.eventLog.some((m) => m.id === messageId)) return;
       const msg: MessengerMessage = {
-        id: id || uuidv4(),
+        id: messageId,
         pubkey,
         content: sanitizeMessage(content),
         created_at: created_at ?? Math.floor(Date.now() / 1000),
         outgoing: true,
       };
       if (!this.conversations[pubkey]) this.conversations[pubkey] = [];
-      this.conversations[pubkey].push(msg);
+      if (!this.conversations[pubkey].some((m) => m.id === messageId))
+        this.conversations[pubkey].push(msg);
       this.eventLog.push(msg);
     },
     async addIncomingMessage(event: NostrEvent) {
@@ -95,6 +98,7 @@ export const useMessengerStore = defineStore("messenger", {
         event.pubkey,
         event.content,
       );
+      if (this.eventLog.some((m) => m.id === event.id)) return;
       const msg: MessengerMessage = {
         id: event.id,
         pubkey: event.pubkey,
@@ -105,8 +109,10 @@ export const useMessengerStore = defineStore("messenger", {
       if (!this.conversations[event.pubkey]) {
         this.conversations[event.pubkey] = [];
       }
-      this.conversations[event.pubkey].push(msg);
-      this.unreadCounts[event.pubkey] = (this.unreadCounts[event.pubkey] || 0) + 1;
+      if (!this.conversations[event.pubkey].some((m) => m.id === event.id))
+        this.conversations[event.pubkey].push(msg);
+      this.unreadCounts[event.pubkey] =
+        (this.unreadCounts[event.pubkey] || 0) + 1;
       this.eventLog.push(msg);
     },
 
