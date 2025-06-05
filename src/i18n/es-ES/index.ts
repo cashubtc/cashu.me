@@ -47,6 +47,17 @@ export default {
       },
     },
   },
+  MultinutPicker: {
+    payment: "Pago Multinut",
+    selectMints:
+      "Seleccione una o varias casas de moneda para ejecutar un pago.",
+    totalSelectedBalance: "Saldo Total Seleccionado",
+    multiMintPay: "Pago Multi-Mint",
+    balanceNotEnough:
+      "El saldo de multi-mint no es suficiente para satisfacer esta factura",
+    failed: "Error al procesar: {error}",
+    paid: "Pagado {amount} a través de Lightning",
+  },
   wallet: {
     notifications: {
       balance_too_low: "El saldo es demasiado bajo",

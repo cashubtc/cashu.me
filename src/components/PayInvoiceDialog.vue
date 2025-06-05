@@ -97,6 +97,16 @@
               <q-spinner-hourglass />
             </template>
           </q-btn>
+          <q-btn
+            v-if="hasMultinutSupport && multinutEnabled"
+            unelevated
+            rounded
+            outline
+            :disabled="!hasMultinutSupport"
+            @click="openMultinutDialog"
+            label="Multimint"
+            class="q-px-lg q-ml-sm"
+          />
           <q-btn v-close-popup flat color="grey" class="q-ml-auto">{{
             $t("PayInvoiceDialog.invoice.actions.close.label")
           }}</q-btn>
@@ -284,36 +294,29 @@
             }}</q-btn>
           </div>
         </q-form>
-        <!-- <div v-else>
-            <q-responsive :ratio="1">
-              <qrcode-stream
-                @decode="decodeQR"
-                class="rounded-borders"
-              ></qrcode-stream>
-            </q-responsive>
-            <div class="row q-mt-lg">
-              <q-btn @click="closeCamera" flat color="grey" class="q-ml-auto">
-                Close
-              </q-btn>
-            </div>
-          </div> -->
       </div>
     </q-card>
   </q-dialog>
+
+  <!-- Multinut Payment Dialog -->
+  <MultinutPaymentDialog
+    ref="multinutDialog"
+    @return-to-pay-dialog="handleReturnToPayDialog"
+  />
 </template>
 <script>
 import { defineComponent } from "vue";
 import { useWalletStore } from "src/stores/wallet";
 import { useUiStore } from "src/stores/ui";
 import { useCameraStore } from "src/stores/camera";
-import { useMintsStore } from "src/stores/mints";
+import { useMintsStore, MintClass } from "src/stores/mints";
 import { useSettingsStore } from "src/stores/settings";
 import { usePriceStore } from "src/stores/price";
 import { mapActions, mapState, mapWritableState } from "pinia";
 import ChooseMint from "components/ChooseMint.vue";
 import ToggleUnit from "components/ToggleUnit.vue";
+import MultinutPaymentDialog from "./MultinutPaymentDialog.vue";
 
-// import * as bolt11Decoder from "light-bolt11-decoder";
 import * as _ from "underscore";
 import { Scan as ScanIcon } from "lucide-vue-next";
 
@@ -323,6 +326,7 @@ export default defineComponent({
   components: {
     ChooseMint,
     ToggleUnit,
+    MultinutPaymentDialog,
     ScanIcon,
   },
   props: {},
@@ -343,6 +347,7 @@ export default defineComponent({
   },
   computed: {
     ...mapState(useUiStore, ["tickerShort", "globalMutexLock"]),
+    ...mapState(useSettingsStore, ["multinutEnabled"]),
     ...mapWritableState(useCameraStore, ["camera", "hasCamera"]),
     ...mapState(useWalletStore, ["payInvoiceData"]),
     ...mapState(useMintsStore, [
@@ -352,6 +357,7 @@ export default defineComponent({
       "activeUnit",
       "totalUnitBalance",
       "activeBalance",
+      "multiMints",
     ]),
     ...mapState(usePriceStore, ["bitcoinPrice"]),
     canPasteFromClipboard: function () {
@@ -364,6 +370,17 @@ export default defineComponent({
     enoughtotalUnitBalance: function () {
       return (
         this.activeBalance >= this.payInvoiceData.meltQuote.response.amount
+      );
+    },
+    hasMultinutSupport: function () {
+      const totalMultinutBalance = this.multiMints.reduce(
+        (acc, mint) => acc + new MintClass(mint).unitBalance(this.activeUnit),
+        0
+      );
+      return (
+        this.multiMints.length > 1 &&
+        this.payInvoiceData.meltQuote.response.amount > 0 &&
+        totalMultinutBalance >= this.payInvoiceData.meltQuote.response.amount
       );
     },
   },
@@ -400,6 +417,13 @@ export default defineComponent({
         throw new Error("already processing an invoice.");
       }
       this.meltInvoiceData();
+    },
+    openMultinutDialog: function () {
+      this.payInvoiceData.show = false;
+      this.$refs.multinutDialog.openMultinutDialog();
+    },
+    handleReturnToPayDialog: function () {
+      this.payInvoiceData.show = true;
     },
   },
   created: function () {},

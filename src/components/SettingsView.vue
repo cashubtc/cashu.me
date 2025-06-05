@@ -1144,6 +1144,28 @@
           </div>
         </div>
 
+        <!-- multinut settings -->
+        <div class="row q-mx-md q-mt-md">
+          <div class="col-12">
+            <div class="row q-pt-md">
+              <q-toggle
+                v-model="multinutEnabled"
+                label="Use Multinut"
+                color="primary"
+              >
+                <q-badge
+                  color="primary"
+                  :label="$t('Settings.experimental.receive_swaps.badge')"
+                  class="q-mx-sm"
+                ></q-badge>
+                <q-item-label caption>
+                  {{ $t("Settings.experimental.multinut.description") }}
+                </q-item-label>
+              </q-toggle>
+            </div>
+          </div>
+        </div>
+
         <div class="section-divider q-my-md">
           <div class="divider-line"></div>
           <div class="divider-text">
@@ -1775,6 +1797,7 @@ export default defineComponent({
       "auditorUrl",
       "auditorApiUrl",
       "bip177BitcoinSymbol",
+      "multinutEnabled",
     ]),
     ...mapState(useP2PKStore, ["p2pkKeys"]),
     ...mapWritableState(useP2PKStore, [

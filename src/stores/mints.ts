@@ -29,6 +29,7 @@ export type Mint = {
   info?: GetInfoResponse;
   errored?: boolean;
   motd_viewed?: boolean;
+  multinutSelected?: boolean;
   // initialize api: new CashuMint(url) on activation
 };
 
@@ -146,6 +147,30 @@ export const useMintsStore = defineStore("mints", {
     };
   },
   getters: {
+    multiMints({ activeUnit }) {
+      return this.mints.filter((m) => {
+        try {
+          const version = m.info?.version;
+          if (!version) return false;
+
+          const regex = /^(Nutshell)\/(\d+)\.(\d+)\.(\d+)/; // Regex to match "Nutshell/version"
+          const match = version.match(regex);
+          if (!match || match[1] !== "Nutshell") return false;
+          if (parseInt(match[2]) === 0 && parseInt(match[3]) < 17) return false; // If < 0.17.* then not viable
+
+          const nut15 = m.info?.nuts[15];
+          const viableMint = nut15?.methods.find(
+            (m) => m.method === "bolt11" && m.unit === activeUnit
+          );
+          const balance = new MintClass(m).unitBalance(activeUnit);
+          if (nut15 && viableMint && balance > 0) return true;
+          else return false;
+        } catch (e) {
+          console.error(`${e}`);
+          return false;
+        }
+      });
+    },
     totalUnitBalance({ activeUnit }): number {
       const proofsStore = useProofsStore();
       const allUnitKeysets = this.mints
@@ -260,6 +285,12 @@ export const useMintsStore = defineStore("mints", {
     updateMint(oldMint: Mint, newMint: Mint) {
       const index = this.mints.findIndex((m) => m.url === oldMint.url);
       this.mints[index] = newMint;
+    },
+    updateMintMultinutSelection(mintUrl: string, selected: boolean) {
+      const mint = this.mints.find((m) => m.url === mintUrl);
+      if (mint) {
+        mint.multinutSelected = selected;
+      }
     },
     getKeysForKeyset: async function (keyset_id: string): Promise<MintKeys> {
       const mint = this.mints.find((m) => m.url === this.activeMintUrl);
@@ -525,12 +556,6 @@ export const useMintsStore = defineStore("mints", {
           );
         }
         throw new Error(`Mint error: ${response.error}`);
-      }
-    },
-    setMintMotdViewed(mintUrl: string) {
-      const mintIndex = this.mints.findIndex((mint) => mint.url === mintUrl);
-      if (mintIndex !== -1) {
-        this.mints[mintIndex].motd_viewed = true;
       }
     },
   },

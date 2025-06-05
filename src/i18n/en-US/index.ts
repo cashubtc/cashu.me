@@ -47,6 +47,15 @@ export default {
       },
     },
   },
+  MultinutPicker: {
+    payment: "Multinut payment",
+    selectMints: "Select one or multiple mints to execute a payment from.",
+    totalSelectedBalance: "Total Selected Balance",
+    multiMintPay: "Multi-Mint Pay",
+    balanceNotEnough: "Multi-mint balance not enough to satisfy this invoice",
+    failed: "Failed to process: {error}",
+    paid: "Paid {amount} via Lightning",
+  },
   wallet: {
     notifications: {
       balance_too_low: "Balance is too low",
@@ -356,6 +365,11 @@ export default {
           "If enabled, the wallet will display auditor information in the mint details dialog. The auditor is a third party service that monitors the reliability of mints.",
         url_label: "Auditor URL",
         api_url_label: "Auditor API URL",
+      },
+      multinut: {
+        toggle: "Enable Multinut",
+        description:
+          "If enabled, the wallet will use Multinut to pay invoices from multiple mints at once.",
       },
     },
     appearance: {

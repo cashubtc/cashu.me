@@ -78,6 +78,10 @@ export const useSettingsStore = defineStore("settings", {
         "cashu.settings.bip177",
         false
       ),
+      multinutEnabled: useLocalStorage<boolean>(
+        "cashu.settings.multinutEnabled",
+        false
+      ),
     };
   },
 });
