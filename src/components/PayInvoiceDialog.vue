@@ -98,13 +98,13 @@
             </template>
           </q-btn>
           <q-btn
-            v-if="hasMultinutSupport"
+            v-if="hasMultinutSupport && multinutEnabled"
             unelevated
             rounded
-            color="secondary"
+            outline
             :disabled="!hasMultinutSupport"
             @click="openMultinutDialog"
-            label="Multinut"
+            label="Multimint"
             class="q-px-lg q-ml-sm"
           />
           <q-btn v-close-popup flat color="grey" class="q-ml-auto">{{
@@ -309,7 +309,7 @@ import { defineComponent } from "vue";
 import { useWalletStore } from "src/stores/wallet";
 import { useUiStore } from "src/stores/ui";
 import { useCameraStore } from "src/stores/camera";
-import { useMintsStore } from "src/stores/mints";
+import { useMintsStore, MintClass } from "src/stores/mints";
 import { useSettingsStore } from "src/stores/settings";
 import { usePriceStore } from "src/stores/price";
 import { mapActions, mapState, mapWritableState } from "pinia";
@@ -347,6 +347,7 @@ export default defineComponent({
   },
   computed: {
     ...mapState(useUiStore, ["tickerShort", "globalMutexLock"]),
+    ...mapState(useSettingsStore, ["multinutEnabled"]),
     ...mapWritableState(useCameraStore, ["camera", "hasCamera"]),
     ...mapState(useWalletStore, ["payInvoiceData"]),
     ...mapState(useMintsStore, [
@@ -372,8 +373,14 @@ export default defineComponent({
       );
     },
     hasMultinutSupport: function () {
+      const totalMultinutBalance = this.multiMints.reduce(
+        (acc, mint) => acc + new MintClass(mint).unitBalance(this.activeUnit),
+        0
+      );
       return (
-        this.multiMints && this.payInvoiceData.meltQuote.response.amount > 0
+        this.multiMints.length > 0 &&
+        this.payInvoiceData.meltQuote.response.amount > 0 &&
+        totalMultinutBalance >= this.payInvoiceData.meltQuote.response.amount
       );
     },
   },

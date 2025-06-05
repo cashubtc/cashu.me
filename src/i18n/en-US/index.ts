@@ -366,6 +366,11 @@ export default {
         url_label: "Auditor URL",
         api_url_label: "Auditor API URL",
       },
+      multinut: {
+        toggle: "Enable Multinut",
+        description:
+          "If enabled, the wallet will use Multinut to pay invoices from multiple mints at once.",
+      },
     },
     appearance: {
       keyboard: {

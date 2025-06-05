@@ -157,7 +157,7 @@
           :disabled="!canExecutePayment"
           @click="executeMultinutPayment"
           :loading="multiMeltButtonLoading"
-          label="Multi-Mint Pay"
+          label="Pay Multinut"
           class="q-px-lg"
         >
           <template v-slot:loading>
@@ -238,9 +238,9 @@ export default defineComponent({
     getStateText(state) {
       switch (state) {
         case "requesting":
-          return "Requesting quote...";
+          return "Requesting...";
         case "paying":
-          return "Processing payment...";
+          return "Paying...";
         case "success":
           return "Success";
         case "error":
@@ -295,12 +295,12 @@ export default defineComponent({
         return;
       }
 
+      // Clear previous states
+      this.clearMintStates();
+
       // Start payment process
       this.isPaymentInProgress = true;
       this.multiMeltButtonLoading = true;
-
-      // Clear previous states
-      this.clearMintStates();
 
       let mintAndQuotesArray = [];
       let remainder = 0.0;
