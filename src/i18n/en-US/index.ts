@@ -1384,6 +1384,7 @@ export default {
       preset: "Donation months",
       type: "Donation type",
       amount: "Amount",
+      message: "Message",
     },
     helper: {
       months: "Number of months (0 = one-time)",
