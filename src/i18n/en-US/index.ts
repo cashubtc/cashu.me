@@ -54,7 +54,7 @@ export default {
     multiMintPay: "Multi-Mint Pay",
     balanceNotEnough: "Multi-mint balance not enough to satisfy this invoice",
     failed: "Failed to process: {error}",
-    paid: "Paid {amount} via Lightning"
+    paid: "Paid {amount} via Lightning",
   },
   wallet: {
     notifications: {
