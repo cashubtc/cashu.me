@@ -395,7 +395,6 @@ export const useWalletStore = defineStore("wallet", {
 
       if invalidate, scndProofs (the one to send) are invalidated
       */
-      const mintStore = useMintsStore();
       const proofsStore = useProofsStore();
       const uIStore = useUiStore();
       let proofsToSend: WalletProof[] = [];
@@ -787,7 +786,7 @@ export const useWalletStore = defineStore("wallet", {
 
       await uIStore.lockMutex();
       try {
-        await this.addOutgoingPendingInvoiceToHistory(quote);
+        await this.addOutgoingPendingInvoiceToHistory(quote, mintWallet.mint.mintUrl, mintWallet.unit);
         await proofsStore.setReserved(sendProofs, true, quote.quote);
 
         // NUT-08 blank outputs for change
@@ -1295,7 +1294,9 @@ export const useWalletStore = defineStore("wallet", {
     },
     ////////////// UI HELPERS //////////////
     addOutgoingPendingInvoiceToHistory: async function (
-      quote: MeltQuoteResponse
+      quote: MeltQuoteResponse,
+      mint: string,
+      unit: string
     ) {
       const mintStore = useMintsStore();
       this.invoiceHistory.push({
@@ -1305,8 +1306,8 @@ export const useWalletStore = defineStore("wallet", {
         memo: "Outgoing invoice",
         date: currentDateStr(),
         status: "pending",
-        mint: mintStore.activeMintUrl,
-        unit: mintStore.activeUnit,
+        mint: mint,
+        unit: unit,
         meltQuote: quote,
       });
     },

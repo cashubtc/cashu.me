@@ -309,45 +309,50 @@ export default defineComponent({
 
       try {
         // Phase 1: Request quotes from all selected mints
-        for (const mint of this.selectedMints) {
-          this.setMintState(mint.url, "requesting");
+        mintAndQuotesArray = await Promise.all(
+          this.selectedMints.map(async (mint, i) => {
+            this.setMintState(mint.url, "requesting");
 
-          console.log(`Quoting mint: ${mint.url}`);
-          const mintWallet = useWalletStore().mintWallet(
-            mint.url,
-            useMintsStore().activeUnit
-          );
+            console.log(`Quoting mint: ${mint.url}`);
+            const mintWallet = useWalletStore().mintWallet(
+              mint.url,
+              useMintsStore().activeUnit
+            );
 
-          const partialAmountFloat = totalQuoteAmount * weights[i] + remainder;
-          const partialAmount = Math.round(partialAmountFloat);
-          console.log(`partialAmount for mint ${mint.url}: ${partialAmount}`);
-          remainder = partialAmountFloat - partialAmount;
+            const partialAmountFloat =
+              totalQuoteAmount * weights[i] + remainder;
+            const partialAmount = Math.round(partialAmountFloat);
+            console.log(`partialAmount for mint ${mint.url}: ${partialAmount}`);
+            remainder = partialAmountFloat - partialAmount;
 
-          if (partialAmount > 0) {
-            try {
-              const quote = await this.meltQuote(
-                mintWallet,
-                this.payInvoiceData.input.request,
-                partialAmount
-              );
-              console.log(quote);
-              mintAndQuotesArray.push([mint, quote]);
-
-              // Move to paying state
-              this.setMintState(mint.url, "paying");
-            } catch (error) {
-              console.error(`Quote failed for mint ${mint.url}:`, error);
-              this.setMintState(mint.url, "error");
-              throw error;
+            if (partialAmount > 0) {
+              try {
+                const quote = await this.meltQuote(
+                  mintWallet,
+                  this.payInvoiceData.input.request,
+                  partialAmount
+                );
+                console.log(quote);
+                return [mint, quote];
+              } catch (error) {
+                console.error(`Quote failed for mint ${mint.url}:`, error);
+                this.setMintState(mint.url, "error");
+                throw error;
+              }
             }
-          }
-          i++;
-        }
+            return null;
+          })
+        );
+
+        // Filter out null values (for mints with partialAmount <= 0)
+        mintAndQuotesArray = mintAndQuotesArray.filter((item) => item !== null);
 
         // Phase 2: Execute payments
         data = await Promise.all(
           mintAndQuotesArray.map(async ([mint, quote]) => {
             try {
+              // Move to paying state
+              this.setMintState(mint.url, "paying");
               const mintWallet = useWalletStore().mintWallet(
                 mint.url,
                 activeUnit
@@ -396,6 +401,9 @@ export default defineComponent({
           uiStore.formatCurrency(amountPaid, activeUnit) +
           " via Lightning"
       );
+
+      // add invoice to history
+      useInvoiceStore().addInvoice(this.payInvoiceData);
 
       // Close the dialog after successful payment
       setTimeout(() => {

@@ -154,7 +154,6 @@ export const useMintsStore = defineStore("mints", {
 
           const regex = /^(Nutshell)\/(\d+)\.(\d+)\.(\d+)/; // Regex to match "Nutshell/version"
           const match = version.match(regex);
-          console.log(`multiMint match: ${JSON.stringify(match)}`);
           if (match[1] !== "Nutshell") return false;
           if (parseInt(match[2]) === 0 && parseInt(match[3]) < 17) return false; // If < 0.17.* then not viable
 
@@ -472,7 +471,7 @@ export const useMintsStore = defineStore("mints", {
         console.error(error);
         try {
           // notifyApiError(error, this.t("wallet.mint.notifications.could_not_get_info"));
-        } catch {}
+        } catch { }
         throw error;
       }
     },
@@ -512,7 +511,7 @@ export const useMintsStore = defineStore("mints", {
         console.error(error);
         try {
           // notifyApiError(error, this.t("wallet.mint.notifications.could_not_get_keys"));
-        } catch {}
+        } catch { }
         throw error;
       }
     },
@@ -526,7 +525,7 @@ export const useMintsStore = defineStore("mints", {
         console.error(error);
         try {
           // notifyApiError(error, this.t("wallet.mint.notifications.could_not_get_keysets"));
-        } catch {}
+        } catch { }
         throw error;
       }
     },
