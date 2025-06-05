@@ -83,6 +83,8 @@ onMounted(() => {
 const router = useRouter();
 const { toggleDarkMode } = (window as any).windowMixin.methods;
 
+const { toggleDarkMode } = window.windowMixin.methods;
+
 const drawer = ref(true);
 const selected = ref('');
 const messages = computed(() => messenger.conversations[selected.value] || []);
