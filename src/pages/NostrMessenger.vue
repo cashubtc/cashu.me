@@ -20,6 +20,7 @@
           {{ messenger.connected ? 'Online' : 'Offline' }}
         </q-badge>
       </div>
+      <ActiveChatHeader :pubkey="selected" />
       <MessageList :messages="messages" class="col" />
       <MessageInput @send="sendMessage" />
       <EventLog class="q-mt-md" :events="eventLog" />
@@ -35,6 +36,7 @@ import NostrIdentityManager from 'components/NostrIdentityManager.vue';
 import RelayManager from 'components/RelayManager.vue';
 import NewChat from 'components/NewChat.vue';
 import ConversationList from 'components/ConversationList.vue';
+import ActiveChatHeader from 'components/ActiveChatHeader.vue';
 import MessageList from 'components/MessageList.vue';
 import MessageInput from 'components/MessageInput.vue';
 import EventLog from 'components/EventLog.vue';
@@ -52,11 +54,13 @@ const eventLog = computed(() => messenger.eventLog);
 
 const selectConversation = (pubkey: string) => {
   selected.value = pubkey;
+  messenger.markRead(pubkey);
 };
 
 const startChat = (pubkey: string) => {
   messenger.createConversation(pubkey);
   selected.value = pubkey;
+  messenger.markRead(pubkey);
 };
 
 const sendMessage = (text: string) => {
