@@ -81,6 +81,7 @@ onMounted(() => {
 });
 
 const router = useRouter();
+const { toggleDarkMode } = (window as any).windowMixin.methods;
 
 const drawer = ref(true);
 const selected = ref('');
