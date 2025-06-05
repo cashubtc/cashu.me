@@ -98,7 +98,7 @@
     </q-toolbar>
   </q-header>
 
-  <q-drawer v-model="leftDrawerOpen" bordered>
+  <q-drawer v-model="leftDrawerOpen" side="right" bordered>
     <q-list>
       <q-item-label header>{{
         $t("MainHeader.menu.settings.title")
