@@ -103,6 +103,22 @@ Fundstr is currently in Alpha/Beta.
 - Community features like comments and badges
 - Decentralized creator registration via Nostr
 
+## Development
+
+This project uses **npm** as its package manager.
+
+Install dependencies:
+
+```bash
+npm install
+```
+
+Start a development server:
+
+```bash
+npm run dev
+```
+
 ## Contributing
 Contributions are welcome! Open an issue or pull request to discuss your ideas. Bug reports and feature requests are encouraged. Help with translation and documentation is always appreciated.
 
