@@ -198,11 +198,12 @@
 
 .wallet-actions {
   display: flex;
-  gap: 1rem;
+  gap: 1.5rem;
 }
 
 .wallet-action-btn {
-  flex: 1;
+  flex: 0 0 auto;
+  min-width: 7rem;
   white-space: nowrap;
   font-size: 0.8rem;
 }
