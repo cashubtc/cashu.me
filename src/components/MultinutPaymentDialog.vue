@@ -311,8 +311,6 @@ export default defineComponent({
         // Phase 1: Request quotes from all selected mints
         mintAndQuotesArray = await Promise.all(
           this.selectedMints.map(async (mint, i) => {
-            this.setMintState(mint.url, "requesting");
-
             console.log(`Quoting mint: ${mint.url}`);
             const mintWallet = useWalletStore().mintWallet(
               mint.url,
@@ -327,6 +325,7 @@ export default defineComponent({
 
             if (partialAmount > 0) {
               try {
+                this.setMintState(mint.url, "requesting");
                 const quote = await this.meltQuote(
                   mintWallet,
                   this.payInvoiceData.input.request,
