@@ -5,13 +5,12 @@
       <NoMintWarnBanner v-if="mints.length == 0" />
       <BalanceView v-else :set-tab="setTab" />
       <div
-        class="wallet-actions row items-center justify-center no-wrap q-mb-none q-mx-none q-px-none q-pt-lg q-pb-md position-relative"
+        class="wallet-actions row items-center justify-around q-gutter-x-xl q-pt-lg q-pb-md"
       >
         <q-btn
           rounded
-          dense
-          size="sm"
-          class="q-px-sm wallet-action-btn q-mb-md"
+          padding="md lg"
+          class="wallet-action-btn q-mb-md text-subtitle2"
           color="primary"
           @click="showReceiveDialog = true"
         >
@@ -23,22 +22,21 @@
 
         <transition appear enter-active-class="animated pulse">
           <div class="scan-button-container">
-          <q-btn size="lg" outline color="primary" flat @click="showCamera">
-            <ScanIcon size="2em" />
-          </q-btn>
-          <InfoTooltip
-            class="q-mt-sm"
-            :text="$t('WalletPage.actions.scan.tooltip')"
-          />
-        </div>
+            <q-btn size="lg" outline color="primary" flat @click="showCamera">
+              <ScanIcon size="2em" />
+            </q-btn>
+            <InfoTooltip
+              class="q-mt-sm"
+              :text="$t('WalletPage.actions.scan.tooltip')"
+            />
+          </div>
         </transition>
 
         <!-- button to showSendDialog -->
         <q-btn
           rounded
-          dense
-          size="sm"
-          class="q-px-sm wallet-action-btn q-mb-md"
+          padding="md lg"
+          class="wallet-action-btn q-mb-md text-subtitle2"
           color="primary"
           @click="showSendDialog = true"
         >
@@ -198,7 +196,7 @@
 
 .wallet-actions {
   display: flex;
-  gap: 1.5rem;
+  gap: 2rem;
 }
 
 .wallet-action-btn {
@@ -217,9 +215,11 @@
 
 
 .scan-button-container {
-  position: absolute;
-  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   padding-bottom: 15px;
+  z-index: 1;
 }
 </style>
 <script>
