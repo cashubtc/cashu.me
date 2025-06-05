@@ -9,7 +9,7 @@
       >
         <q-btn
           rounded
-          padding="md lg"
+          padding="lg xl"
           class="wallet-action-btn q-mb-md text-subtitle2"
           color="primary"
           @click="showReceiveDialog = true"
@@ -23,7 +23,7 @@
         <transition appear enter-active-class="animated pulse">
           <div class="scan-button-container">
             <q-btn size="lg" outline color="primary" flat @click="showCamera">
-              <ScanIcon size="2em" />
+              <ScanIcon size="2.5em" />
             </q-btn>
             <InfoTooltip
               class="q-mt-sm"
@@ -35,7 +35,7 @@
         <!-- button to showSendDialog -->
         <q-btn
           rounded
-          padding="md lg"
+          padding="lg xl"
           class="wallet-action-btn q-mb-md text-subtitle2"
           color="primary"
           @click="showSendDialog = true"
@@ -201,9 +201,9 @@
 
 .wallet-action-btn {
   flex: 0 0 auto;
-  min-width: 7rem;
+  min-width: 8rem;
   white-space: nowrap;
-  font-size: 0.8rem;
+  font-size: 0.9rem;
 }
 
 .button-content {
