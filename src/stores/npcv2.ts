@@ -229,6 +229,8 @@ export const useNPCV2Store = defineStore("npcV2", {
               quote: quote.quoteId,
               state: MintQuoteState.PAID,
               expiry: quote.expiresAt,
+              amount: quote.amount,
+              unit: "sat",
             },
           });
           if (this.npcV2ClaimAutomatically) {

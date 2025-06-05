@@ -603,11 +603,11 @@ export const useWalletStore = defineStore("wallet", {
         this.invoiceData.status = "pending";
         this.invoiceData.mint = mintWallet.mint.mintUrl;
         this.invoiceData.unit = mintWallet.unit;
-        this.invoiceData.mintQuote = data;
+        this.invoiceData.mintQuote = data as MintQuoteResponse;
         this.invoiceHistory.push({
           ...this.invoiceData,
         });
-        return data;
+        return data as MintQuoteResponse;
       } catch (error: any) {
         console.error(error);
         notifyApiError(
@@ -633,7 +633,7 @@ export const useWalletStore = defineStore("wallet", {
       try {
         // first we check if the mint quote is paid
         const mintQuote = await mintWallet.checkMintQuote(invoice.quote);
-        invoice.mintQuote = mintQuote;
+        invoice.mintQuote = mintQuote as MintQuoteResponse;
         console.log("### mint(): mintQuote", mintQuote);
         switch (mintQuote.state) {
           case MintQuoteState.PAID:
@@ -1070,7 +1070,7 @@ export const useWalletStore = defineStore("wallet", {
       try {
         // this is an outgoing invoice, we first do a getMintQuote to check if the invoice is paid
         const meltQuote = await mintWallet.mint.checkMeltQuote(quote);
-        this.updateOutgoingInvoiceInHistory(meltQuote);
+        this.updateOutgoingInvoiceInHistory(meltQuote as MeltQuoteResponse);
         if (meltQuote.state == MeltQuoteState.PENDING) {
           console.log("### mintQuote not paid yet");
           if (verbose) {
