@@ -786,7 +786,11 @@ export const useWalletStore = defineStore("wallet", {
 
       await uIStore.lockMutex();
       try {
-        await this.addOutgoingPendingInvoiceToHistory(quote, mintWallet.mint.mintUrl, mintWallet.unit);
+        await this.addOutgoingPendingInvoiceToHistory(
+          quote,
+          mintWallet.mint.mintUrl,
+          mintWallet.unit
+        );
         await proofsStore.setReserved(sendProofs, true, quote.quote);
 
         // NUT-08 blank outputs for change

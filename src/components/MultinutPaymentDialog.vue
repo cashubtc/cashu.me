@@ -215,7 +215,10 @@ export default defineComponent({
   },
   methods: {
     ...mapActions(useWalletStore, ["meltQuote", "melt"]),
-    ...mapActions(useMintsStore, ["activateMintUrl"]),
+    ...mapActions(useMintsStore, [
+      "activateMintUrl",
+      "updateMintMultinutSelection",
+    ]),
     mintClass(mint) {
       return new MintClass(mint);
     },
@@ -231,8 +234,10 @@ export default defineComponent({
       );
       if (index >= 0) {
         this.selectedMints.splice(index, 1);
+        this.updateMintMultinutSelection(mint.url, false);
       } else {
         this.selectedMints.push(mint);
+        this.updateMintMultinutSelection(mint.url, true);
       }
     },
     getStateText(state) {
@@ -258,7 +263,17 @@ export default defineComponent({
       this.isPaymentInProgress = false;
     },
     openMultinutDialog() {
-      this.selectedMints = [...useMintsStore().multiMints];
+      const mintsStore = useMintsStore();
+      const previouslySelectedMints = mintsStore.multiMints.filter(
+        (mint) => mint.multinutSelected === true
+      );
+
+      // If no mints were previously selected, default to selecting all available mints
+      this.selectedMints =
+        previouslySelectedMints.length > 0
+          ? [...previouslySelectedMints]
+          : [...mintsStore.multiMints];
+
       this.showMultinutPaymentDialog = true;
       this.clearMintStates(); // Clear any previous states
     },
@@ -282,8 +297,13 @@ export default defineComponent({
     },
     executeMultinutPayment: async function () {
       const uiStore = useUiStore();
+      //
       const totalQuoteAmount = this.payInvoiceData.meltQuote.response.amount;
       const activeUnit = useMintsStore().activeUnit;
+      // update selected mints
+      this.selectedMints.forEach((mint) => {
+        this.updateMintMultinutSelection(mint.url, true);
+      });
       const { overallBalance, weights } = this.multiMintBalance(
         this.selectedMints,
         activeUnit

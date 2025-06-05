@@ -29,6 +29,7 @@ export type Mint = {
   info?: GetInfoResponse;
   errored?: boolean;
   motd_viewed?: boolean;
+  multinutSelected?: boolean;
   // initialize api: new CashuMint(url) on activation
 };
 
@@ -154,7 +155,7 @@ export const useMintsStore = defineStore("mints", {
 
           const regex = /^(Nutshell)\/(\d+)\.(\d+)\.(\d+)/; // Regex to match "Nutshell/version"
           const match = version.match(regex);
-          if (match[1] !== "Nutshell") return false;
+          if (!match || match[1] !== "Nutshell") return false;
           if (parseInt(match[2]) === 0 && parseInt(match[3]) < 17) return false; // If < 0.17.* then not viable
 
           const nut15 = m.info?.nuts[15];
@@ -284,6 +285,12 @@ export const useMintsStore = defineStore("mints", {
     updateMint(oldMint: Mint, newMint: Mint) {
       const index = this.mints.findIndex((m) => m.url === oldMint.url);
       this.mints[index] = newMint;
+    },
+    updateMintMultinutSelection(mintUrl: string, selected: boolean) {
+      const mint = this.mints.find((m) => m.url === mintUrl);
+      if (mint) {
+        mint.multinutSelected = selected;
+      }
     },
     getKeysForKeyset: async function (keyset_id: string): Promise<MintKeys> {
       const mint = this.mints.find((m) => m.url === this.activeMintUrl);
@@ -471,7 +478,7 @@ export const useMintsStore = defineStore("mints", {
         console.error(error);
         try {
           // notifyApiError(error, this.t("wallet.mint.notifications.could_not_get_info"));
-        } catch { }
+        } catch {}
         throw error;
       }
     },
@@ -511,7 +518,7 @@ export const useMintsStore = defineStore("mints", {
         console.error(error);
         try {
           // notifyApiError(error, this.t("wallet.mint.notifications.could_not_get_keys"));
-        } catch { }
+        } catch {}
         throw error;
       }
     },
@@ -525,7 +532,7 @@ export const useMintsStore = defineStore("mints", {
         console.error(error);
         try {
           // notifyApiError(error, this.t("wallet.mint.notifications.could_not_get_keysets"));
-        } catch { }
+        } catch {}
         throw error;
       }
     },
