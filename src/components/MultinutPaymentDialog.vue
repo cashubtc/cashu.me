@@ -157,7 +157,7 @@
           :disabled="!canExecutePayment"
           @click="executeMultinutPayment"
           :loading="multiMeltButtonLoading"
-          label="Pay Multinut"
+          label="Pay Multi"
           class="q-px-lg"
         >
           <template v-slot:loading>

@@ -104,7 +104,7 @@
             outline
             :disabled="!hasMultinutSupport"
             @click="openMultinutDialog"
-            label="Multimint"
+            label="Multi"
             class="q-px-lg q-ml-sm"
           />
           <q-btn v-close-popup flat color="grey" class="q-ml-auto">{{
