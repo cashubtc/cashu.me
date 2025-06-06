@@ -12,6 +12,59 @@ export interface CachedProfileDexie {
   fetchedAt: number;
 }
 
+export interface CreatorTierDefinition {
+  creatorNpub: string;
+  tiers: {
+    id: string;
+    name: string;
+    price_sats: number;
+    description: string;
+    benefits: string[];
+  }[];
+  eventId: string;
+  updatedAt: number;
+}
+
+export interface SubscriptionInterval {
+  intervalKey: string;
+  lockedTokenId: string;
+  unlockTs: number;
+  refundUnlockTs: number;
+  status: "pending" | "unlockable" | "claimed" | "expired";
+  tokenString: string;
+}
+
+export interface Subscription {
+  id: string;
+  creatorNpub: string;
+  tierId: string;
+  creatorP2PK: string;
+  subscriberRefundP2PK: string;
+  mintUrl: string;
+  amountPerInterval: number;
+  frequency: "monthly" | "weekly";
+  startDate: number;
+  commitmentLength: number;
+  intervals: SubscriptionInterval[];
+  status: "active" | "pending_renewal" | "cancelled" | "completed";
+  createdAt: number;
+  updatedAt: number;
+}
+
+export interface LockedToken {
+  id: string;
+  tokenString: string;
+  owner: "subscriber" | "creator";
+  subscriberNpub?: string;
+  creatorNpub?: string;
+  tierId: string;
+  intervalKey: string;
+  unlockTs: number;
+  refundUnlockTs: number;
+  status: "pending" | "unlockable" | "claimed" | "expired";
+  subscriptionEventId: string | null;
+}
+
 // export interface Proof {
 //   id: string
 //   C: string
@@ -24,9 +77,12 @@ export interface CachedProfileDexie {
 export class CashuDexie extends Dexie {
   proofs!: Table<WalletProof>;
   profiles!: Table<CachedProfileDexie>;
+  creatorsTierDefinitions!: Table<CreatorTierDefinition, string>;
+  subscriptions!: Table<Subscription, string>;
+  lockedTokens!: Table<LockedToken, string>;
 
   constructor() {
-    super("db");
+    super("cashuDatabase");
     this.version(1).stores({
       proofs: "secret, id, C, amount, reserved, quote",
     });
@@ -61,6 +117,15 @@ export class CashuDexie extends Dexie {
     this.version(4).stores({
       proofs: "secret, id, C, amount, reserved, quote, bucketId, label",
       profiles: "pubkey",
+    });
+    this.version(5).stores({
+      proofs: "secret, id, C, amount, reserved, quote, bucketId, label",
+      profiles: "pubkey",
+      creatorsTierDefinitions: "&creatorNpub, eventId, updatedAt",
+      subscriptions:
+        "&id, creatorNpub, tierId, status, createdAt, updatedAt",
+      lockedTokens:
+        "&id, owner, tierId, intervalKey, unlockTs, refundUnlockTs, status, subscriptionEventId",
     });
   }
 }
