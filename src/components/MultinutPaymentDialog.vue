@@ -52,7 +52,7 @@
           </q-item>
         </q-list>
 
-        <q-list padding>
+        <q-list padding style="max-height: 400px; overflow-y: auto">
           <div
             v-for="mint in multiMints"
             :key="mint.url"
