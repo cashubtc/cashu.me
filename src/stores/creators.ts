@@ -1,6 +1,22 @@
 import { defineStore } from "pinia";
-import { useNostrStore } from "./nostr";
+import { db } from "./dexie";
+import {
+  useNostrStore,
+  getEventHash,
+  signEvent,
+  publishEvent,
+  subscribeToNostr,
+} from "./nostr";
 import { nip19 } from "nostr-tools";
+import { Event as NostrEvent } from "nostr-tools";
+
+interface Tier {
+  id: string;
+  name: string;
+  price_sats: number;
+  description: string;
+  benefits: string[];
+}
 
 export const FEATURED_CREATORS = [
   "npub1aljmhjp5tqrw3m60ra7t3u8uqq223d6rdg9q0h76a8djd9m4hmvsmlj82m",
@@ -28,6 +44,7 @@ export const useCreatorsStore = defineStore("creators", {
     searchResults: [] as CreatorProfile[],
     searching: false,
     error: "",
+    tiersMap: {} as Record<string, Tier[]>,
   }),
   actions: {
     async searchCreators(query: string) {
@@ -140,6 +157,54 @@ export const useCreatorsStore = defineStore("creators", {
       } finally {
         this.searching = false;
       }
+    },
+
+    async fetchTierDefinitions(creatorNpub: string) {
+      const cached = await db.creatorsTierDefinitions.get(creatorNpub);
+      if (cached) {
+        this.tiersMap[creatorNpub] = cached.tiers;
+      }
+      const filter = { authors: [creatorNpub], kinds: [30000], '#d': ['tiers'] };
+      subscribeToNostr(filter, async (event) => {
+        try {
+          const tiersArray: Tier[] = JSON.parse(event.content);
+          this.tiersMap[creatorNpub] = tiersArray;
+          await db.creatorsTierDefinitions.put({
+            creatorNpub,
+            tiers: tiersArray,
+            eventId: event.id!,
+            updatedAt: event.created_at,
+          });
+        } catch (e) {
+          console.error('Error parsing tier definitions JSON:', e);
+        }
+      });
+    },
+
+    async publishTierDefinitions(tiersArray: Tier[]) {
+      const creatorNpub = this.currentUserNpub;
+      const created_at = Math.floor(Date.now() / 1000);
+      const content = JSON.stringify(tiersArray);
+
+      const event: Partial<NostrEvent> = {
+        pubkey: creatorNpub,
+        created_at,
+        kind: 30000,
+        tags: [['d', 'tiers']],
+        content,
+      };
+      event.id = getEventHash(event as any);
+      event.sig = await signEvent(event as any, this.currentUserPrivkey);
+      await publishEvent(event as any);
+
+      await db.creatorsTierDefinitions.put({
+        creatorNpub,
+        tiers: tiersArray,
+        eventId: event.id!,
+        updatedAt: created_at,
+      });
+
+      this.tiersMap[creatorNpub] = tiersArray;
     },
   },
 });
