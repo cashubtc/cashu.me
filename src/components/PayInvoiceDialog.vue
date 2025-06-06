@@ -122,6 +122,16 @@
               $t("PayInvoiceDialog.invoice.balance_too_low_warning_text")
             }}</q-btn
           >
+          <q-btn
+            v-if="hasMultinutSupport && multinutEnabled"
+            unelevated
+            rounded
+            outline
+            :disabled="!hasMultinutSupport"
+            @click="openMultinutDialog"
+            label="Multimint"
+            class="q-px-lg q-ml-sm"
+          />
           <q-btn v-close-popup flat color="grey" class="q-ml-auto">{{
             $t("PayInvoiceDialog.invoice.actions.close.label")
           }}</q-btn>
