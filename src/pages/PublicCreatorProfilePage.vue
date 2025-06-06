@@ -23,14 +23,24 @@
     <div>
       <div class="text-h6 q-mb-sm">{{ $t("CreatorHub.profile.tiers") }}</div>
       <div v-if="!tiers.length">Creator has no subscription tiers</div>
-      <div v-else>
-        <div v-for="t in tiers" :key="t.id" class="q-pa-sm q-my-sm bg-grey-2">
-          <div class="text-h6">{{ t.name }} — {{ t.price_sats }} sats/month</div>
-          <div class="text-body1">{{ t.description }}</div>
-          <ul>
-            <li v-for="benefit in t.benefits" :key="benefit">{{ benefit }}</li>
-          </ul>
-        </div>
+      <div v-else class="q-gutter-md">
+        <q-card v-for="t in tiers" :key="t.id" flat bordered>
+          <q-card-section class="bg-grey-2">
+            <div class="row items-center justify-between">
+              <div class="text-subtitle1">{{ t.name }}</div>
+              <div class="text-subtitle2">
+                {{ t.price_sats }} sats/month
+                <span v-if="bitcoinPrice"> ({{ formatFiat(t.price_sats) }})</span>
+              </div>
+            </div>
+          </q-card-section>
+          <q-card-section>
+            <div class="text-body1 q-mb-sm">{{ t.description }}</div>
+            <ul class="q-pl-md">
+              <li v-for="benefit in t.benefits" :key="benefit">{{ benefit }}</li>
+            </ul>
+          </q-card-section>
+        </q-card>
       </div>
     </div>
   </div>

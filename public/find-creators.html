@@ -570,12 +570,7 @@
                 viewButton.textContent = 'View';
                 viewButton.onclick = (e) => {
                     e.stopPropagation();
-                    // In a real app, this would navigate to the profile page
-                    // For now, just an alert and log
-                    alert(`View profile: ${profile.name || npub}`);
-                    console.log('View profile clicked for pubkey:', profile.pubkey);
-                    // Example navigation (if you had a router):
-                    // window.location.href = `/profile/${npub}`; 
+                    window.parent.postMessage({ type: 'viewProfile', pubkey: profile.pubkey }, '*');
                 };
 
                 const messageButton = document.createElement('button');
