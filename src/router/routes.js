@@ -57,7 +57,7 @@ const routes = [
     ],
   },
   {
-    path: "/creator/:npubHex",
+    path: "/creator/:npub",
     name: "PublicCreatorProfile",
     component: () => import("src/pages/PublicCreatorProfilePage.vue"),
   },
