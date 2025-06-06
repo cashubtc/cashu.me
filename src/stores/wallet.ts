@@ -848,7 +848,9 @@ export const useWalletStore = defineStore("wallet", {
             })
           );
         }
-        console.log(`#### pay lightning: ${amount_paid} ${mintWallet.unit} paid`);
+        console.log(
+          `#### pay lightning: ${amount_paid} ${mintWallet.unit} paid`
+        );
 
         this.updateOutgoingInvoiceInHistory(quote, {
           status: "paid",
