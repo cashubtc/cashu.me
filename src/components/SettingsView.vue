@@ -2076,7 +2076,9 @@ export default defineComponent({
     this.nip07SignerAvailable = await this.checkNip07Signer();
     console.log("Nip07 signer available", this.nip07SignerAvailable);
     // Set the initial selected language based on the current locale
-    this.selectedLanguage = this.$i18n.locale;
+    this.selectedLanguage =
+      this.languageOptions.find((option) => option.value === this.$i18n.locale)
+        ?.label || "Language";
   },
 });
 </script>

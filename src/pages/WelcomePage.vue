@@ -115,10 +115,9 @@ export default {
   created() {
     // Set the initial selected language based on the current locale or from storage
     this.selectedLanguage =
-      localStorage.getItem("cashu.language") ||
-      this.$i18n.locale ||
-      navigator.language ||
-      "en-US";
+      this.languageOptions.find(
+        (option) => option.value === this.$i18n.locale || navigator.language
+      )?.label || "Language";
   },
   setup() {
     const welcomeStore = useWelcomeStore();
