@@ -26,13 +26,13 @@
         Creator has no subscription tiers
       </div>
       <div v-else>
-        <q-card v-for="t in tiers" :key="t.id" flat bordered class="q-mb-md">
+        <q-card v-for="t in tiers" :key="t.id" flat bordered class="q-mb-md tier-card">
           <q-card-section class="row items-center justify-between bg-grey-2">
             <div class="text-subtitle1">{{ t.name }}</div>
             <div class="text-subtitle2">
-              {{ t.price_sats }} sats/month
+              {{ getPrice(t) }} sats/month
               <span v-if="priceStore.bitcoinPrice">
-                ({{ formatFiat(t.price_sats) }})
+                ({{ formatFiat(getPrice(t)) }})
               </span>
             </div>
           </q-card-section>
@@ -41,8 +41,8 @@
             <ul class="q-pl-md q-mb-none">
               <li v-for="benefit in t.benefits" :key="benefit">{{ benefit }}</li>
             </ul>
-            <div class="q-mt-md text-right">
-              <q-btn label="Support" color="primary" />
+            <div class="q-mt-md text-right subscribe-container">
+              <q-btn label="Subscribe" color="primary" class="subscribe-btn" />
             </div>
           </q-card-section>
         </q-card>
@@ -91,6 +91,10 @@ export default defineComponent({
       return uiStore.formatCurrency(value, "USD", true);
     }
 
+    function getPrice(t: any): number {
+      return t.price_sats ?? t.price ?? 0;
+    }
+
     return {
       creatorNpub,
       profile,
@@ -101,7 +105,18 @@ export default defineComponent({
       priceStore,
       renderMarkdown,
       formatFiat,
+      getPrice,
     };
   },
 });
 </script>
+
+<style scoped>
+.tier-card .subscribe-btn {
+  display: none;
+}
+
+.tier-card:hover .subscribe-btn {
+  display: inline-flex;
+}
+</style>
