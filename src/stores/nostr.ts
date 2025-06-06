@@ -13,7 +13,14 @@ import NDK, {
   NDKTag,
   ProfilePointer,
 } from "@nostr-dev-kit/ndk";
-import { nip04, nip19, nip44, SimplePool } from "nostr-tools";
+import {
+  nip04,
+  nip19,
+  nip44,
+  SimplePool,
+  getEventHash as ntGetEventHash,
+  finalizeEvent,
+} from "nostr-tools";
 import { bytesToHex, hexToBytes } from "@noble/hashes/utils"; // already an installed dependency
 import { useWalletStore } from "./wallet";
 import { generateSecretKey, getPublicKey } from "nostr-tools";
@@ -785,3 +792,49 @@ export const useNostrStore = defineStore("nostr", {
     },
   },
 });
+
+export function getEventHash(event: NostrEvent): string {
+  try {
+    return ntGetEventHash(event);
+  } catch (e) {
+    console.error("Failed to hash event", e);
+    throw e;
+  }
+}
+
+export async function signEvent(
+  event: NostrEvent,
+  privkey: string,
+): Promise<string> {
+  try {
+    const signed = finalizeEvent(event as any, hexToBytes(privkey));
+    Object.assign(event, signed);
+    return event.sig as string;
+  } catch (e) {
+    console.error("Failed to sign event", e);
+    throw e;
+  }
+}
+
+export async function publishEvent(event: NostrEvent): Promise<void> {
+  const relays = useSettingsStore().defaultNostrRelays;
+  const pool = new SimplePool();
+  try {
+    await Promise.any(pool.publish(relays, event));
+  } catch (e) {
+    console.error("Failed to publish event", e);
+  }
+}
+
+export function subscribeToNostr(
+  filter: any,
+  cb: (ev: NostrEvent) => void,
+) {
+  const relays = useSettingsStore().defaultNostrRelays;
+  const pool = new SimplePool();
+  try {
+    pool.subscribeMany(relays, [filter], { onevent: cb });
+  } catch (e) {
+    console.error("Failed to subscribe", e);
+  }
+}
