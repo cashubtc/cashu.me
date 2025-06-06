@@ -337,6 +337,7 @@ export default defineComponent({
           remainder = partialAmountFloat - partialAmount;
 
           mintsToAmounts.push([mint, partialAmount]);
+          i++;
         }
 
         // Phase 2: Request quotes from all selected mints
