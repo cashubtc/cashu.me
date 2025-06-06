@@ -1,28 +1,31 @@
 <template>
   <q-page
-    :class="[
-      $q.dark.isActive ? 'bg-dark text-white' : 'bg-white text-dark',
-      'q-pa-md',
-    ]"
+    class="q-pa-md flex flex-center"
+    :class="$q.dark.isActive ? 'bg-dark text-white' : 'bg-white text-dark'"
   >
-    <div class="text-h5 q-mb-md">Creator Hub</div>
+    <div style="width:100%;max-width:500px;">
+      <div class="text-h5 text-center q-mb-lg">Creator Hub</div>
 
-    <div v-if="!loggedIn" class="q-mt-md">
-      <q-btn color="primary" to="/creator/login">Login</q-btn>
-    </div>
-
-    <div v-else>
-      <div v-for="tier in tiers" :key="tier.id" class="q-mb-md">
-        <q-card>
-          <q-card-section>
-            <div class="text-subtitle1">
-              {{ tier.name }} - {{ tier.price }} sats/month
-            </div>
-            <div class="text-caption" v-html="renderMarkdown(tier.description)"></div>
-          </q-card-section>
-        </q-card>
+      <div v-if="!loggedIn" class="text-center q-my-xl">
+        <q-btn color="primary" to="/creator/login" rounded unelevated label="Login" />
       </div>
-      <q-btn color="primary" to="/creator/dashboard">Edit Tiers</q-btn>
+
+      <div v-else>
+        <div v-for="tier in tiers" :key="tier.id" class="q-mb-md">
+          <q-card flat bordered>
+            <q-card-section>
+              <div class="row items-center justify-between">
+                <div class="text-subtitle1">{{ tier.name }}</div>
+                <div class="text-subtitle2 text-primary">{{ tier.price }} sats/month</div>
+              </div>
+              <div class="q-mt-sm" v-html="renderMarkdown(tier.description)" />
+            </q-card-section>
+          </q-card>
+        </div>
+        <div class="text-center q-mt-md">
+          <q-btn color="primary" to="/creator/dashboard" rounded unelevated label="Edit Tiers" />
+        </div>
+      </div>
     </div>
   </q-page>
 </template>
