@@ -343,8 +343,6 @@ export default defineComponent({
         // Phase 2: Request quotes from all selected mints
         mintsToQuotes = await Promise.all(
           mintsToAmounts.map(async ([mint, partialAmount], i) => {
-            this.setMintState(mint.url, "requesting");
-
             console.log(`Quoting mint: ${mint.url}`);
             const mintWallet = useWalletStore().mintWallet(
               mint.url,
