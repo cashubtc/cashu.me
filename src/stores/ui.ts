@@ -76,7 +76,8 @@ export const useUiStore = defineStore("ui", {
           return "₿" + new Intl.NumberFormat(navigator.language).format(value);
         } else {
           return (
-            "-₿" + new Intl.NumberFormat(navigator.language).format(Math.abs(value))
+            "-₿" +
+            new Intl.NumberFormat(navigator.language).format(Math.abs(value))
           );
         }
       }
