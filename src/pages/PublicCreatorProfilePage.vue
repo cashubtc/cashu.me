@@ -64,18 +64,18 @@ export default defineComponent({
   name: "PublicCreatorProfilePage",
   setup() {
     const route = useRoute();
+    const creatorNpub = route.params.npub as string;
     const creators = useCreatorsStore();
     const nostr = useNostrStore();
     const priceStore = usePriceStore();
     const uiStore = useUiStore();
     const bitcoinPrice = computed(() => priceStore.bitcoinPrice);
-    const creatorNpub = route.params.npubHex as string;
     const profile = ref<any>({});
     const tiers = computed(() => creators.tiersMap[creatorNpub] || []);
     const followers = ref<number | null>(null);
     const following = ref<number | null>(null);
     onMounted(async () => {
-      creators.fetchTierDefinitions(creatorNpub);
+      await creators.fetchTierDefinitions(creatorNpub);
       const p = await nostr.getProfile(creatorNpub);
       if (p) profile.value = { ...p };
       followers.value = await nostr.fetchFollowerCount(creatorNpub);
