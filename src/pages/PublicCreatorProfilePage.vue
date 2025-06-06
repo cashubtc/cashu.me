@@ -22,23 +22,28 @@
 
     <div>
       <div class="text-h6 q-mb-sm">{{ $t("CreatorHub.profile.tiers") }}</div>
-      <div v-if="!tiers.length">Creator has no subscription tiers</div>
-      <div v-else class="q-gutter-md">
-        <q-card v-for="t in tiers" :key="t.id" flat bordered>
-          <q-card-section class="bg-grey-2">
-            <div class="row items-center justify-between">
-              <div class="text-subtitle1">{{ t.name }}</div>
-              <div class="text-subtitle2">
-                {{ t.price_sats }} sats/month
-                <span v-if="bitcoinPrice"> ({{ formatFiat(t.price_sats) }})</span>
-              </div>
+      <div v-if="!tiers.length" class="text-body1 q-mb-md">
+        Creator has no subscription tiers
+      </div>
+      <div v-else>
+        <q-card v-for="t in tiers" :key="t.id" flat bordered class="q-mb-md">
+          <q-card-section class="row items-center justify-between bg-grey-2">
+            <div class="text-subtitle1">{{ t.name }}</div>
+            <div class="text-subtitle2">
+              {{ t.price_sats }} sats/month
+              <span v-if="priceStore.bitcoinPrice">
+                ({{ formatFiat(t.price_sats) }})
+              </span>
             </div>
           </q-card-section>
           <q-card-section>
             <div class="text-body1 q-mb-sm">{{ t.description }}</div>
-            <ul class="q-pl-md">
+            <ul class="q-pl-md q-mb-none">
               <li v-for="benefit in t.benefits" :key="benefit">{{ benefit }}</li>
             </ul>
+            <div class="q-mt-md text-right">
+              <q-btn label="Support" color="primary" />
+            </div>
           </q-card-section>
         </q-card>
       </div>
@@ -47,24 +52,24 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, onMounted, computed } from "vue";
-import { useRoute } from "vue-router";
-import { useNostrStore } from "stores/nostr";
-import { useCreatorsStore } from "stores/creators";
-import { usePriceStore } from "stores/price";
-import { useUiStore } from "stores/ui";
-import { renderMarkdown as renderMarkdownFn } from "src/js/simple-markdown";
+import { defineComponent, ref, onMounted, computed } from 'vue';
+import { useRoute } from 'vue-router';
+import { useCreatorsStore } from 'stores/creators';
+import { useNostrStore } from 'stores/nostr';
+import { usePriceStore } from 'stores/price';
+import { useUiStore } from 'stores/ui';
+import { renderMarkdown as renderMarkdownFn } from 'src/js/simple-markdown';
 
 export default defineComponent({
   name: "PublicCreatorProfilePage",
   setup() {
     const route = useRoute();
-    const nostr = useNostrStore();
     const creators = useCreatorsStore();
+    const nostr = useNostrStore();
     const priceStore = usePriceStore();
     const uiStore = useUiStore();
     const bitcoinPrice = computed(() => priceStore.bitcoinPrice);
-    const creatorNpub = route.params.npub as string;
+    const creatorNpub = route.params.npubHex as string;
     const profile = ref<any>({});
     const tiers = computed(() => creators.tiersMap[creatorNpub] || []);
     const followers = ref<number | null>(null);
@@ -93,6 +98,7 @@ export default defineComponent({
       followers,
       following,
       bitcoinPrice,
+      priceStore,
       renderMarkdown,
       formatFiat,
     };
