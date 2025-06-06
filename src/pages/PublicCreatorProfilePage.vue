@@ -64,7 +64,7 @@ export default defineComponent({
     const priceStore = usePriceStore();
     const uiStore = useUiStore();
     const bitcoinPrice = computed(() => priceStore.bitcoinPrice);
-    const creatorNpub = route.params.npubOrVanityName as string;
+    const creatorNpub = route.params.npub as string;
     const profile = ref<any>({});
     const tiers = computed(() => creators.tiersMap[creatorNpub] || []);
     const followers = ref<number | null>(null);

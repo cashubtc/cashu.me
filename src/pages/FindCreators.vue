@@ -8,33 +8,56 @@
     />
     <DonateDialog v-model="showDonateDialog" @confirm="handleDonate" />
     <SendTokenDialog />
+    <QDialog v-model="showTierDialog">
+      <QCard>
+        <QCardSection>
+          <div v-if="!tiers.length">Creator has no subscription tiers</div>
+          <div v-else>
+            <div v-for="t in tiers" :key="t.id" class="q-mb-md">
+              <div>{{ t.name }} — {{ t.price_sats }} sat/month</div>
+              <div>{{ t.description }}</div>
+              <ul>
+                <li v-for="b in t.benefits" :key="b">{{ b }}</li>
+              </ul>
+            </div>
+          </div>
+        </QCardSection>
+        <QCardSection class="text-right">
+          <QBtn flat label="Close" @click="showTierDialog = false" />
+        </QCardSection>
+      </QCard>
+    </QDialog>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount } from 'vue';
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
 import DonateDialog from 'components/DonateDialog.vue';
 import SendTokenDialog from 'components/SendTokenDialog.vue';
 import { useSendTokensStore } from 'stores/sendTokensStore';
 import { useDonationPresetsStore } from 'stores/donationPresets';
-import { useRouter } from 'vue-router';
 import { useCreatorsStore } from 'stores/creators';
+import { QDialog, QCard, QCardSection, QBtn } from 'quasar';
 
 const iframeEl = ref<HTMLIFrameElement | null>(null);
 const showDonateDialog = ref(false);
 const selectedPubkey = ref('');
+const showTierDialog = ref(false);
+const dialogPubkey = ref('');
 
 const sendTokensStore = useSendTokensStore();
 const donationStore = useDonationPresetsStore();
-const router = useRouter();
 const creators = useCreatorsStore();
+const tiers = computed(() => creators.tiersMap[dialogPubkey.value] || []);
 
-function onMessage(ev: MessageEvent) {
+async function onMessage(ev: MessageEvent) {
   if (ev.data && ev.data.type === 'donate' && ev.data.pubkey) {
     selectedPubkey.value = ev.data.pubkey;
     showDonateDialog.value = true;
   } else if (ev.data && ev.data.type === 'viewProfile' && ev.data.pubkey) {
-    goToCreatorProfile(ev.data.pubkey);
+    await creators.fetchTierDefinitions(ev.data.pubkey);
+    dialogPubkey.value = ev.data.pubkey;
+    showTierDialog.value = true;
   }
 }
 
@@ -60,11 +83,6 @@ function handleDonate({ bucketId, locked, type, amount, months, message }: any) 
     );
     showDonateDialog.value = false;
   }
-}
-
-function goToCreatorProfile(npub: string) {
-  creators.fetchTierDefinitions(npub);
-  router.push(`/creators/${npub}`);
 }
 
 onMounted(() => {
