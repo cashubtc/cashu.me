@@ -38,6 +38,7 @@ import { useSendTokensStore } from 'stores/sendTokensStore';
 import { useDonationPresetsStore } from 'stores/donationPresets';
 import { useCreatorsStore } from 'stores/creators';
 import { QDialog, QCard, QCardSection, QBtn } from 'quasar';
+import { nip19 } from 'nostr-tools';
 
 const iframeEl = ref<HTMLIFrameElement | null>(null);
 const showDonateDialog = ref(false);
@@ -50,13 +51,23 @@ const donationStore = useDonationPresetsStore();
 const creators = useCreatorsStore();
 const tiers = computed(() => creators.tiersMap[dialogPubkey.value] || []);
 
+function bech32ToHex(pubkey: string): string {
+  try {
+    const decoded = nip19.decode(pubkey);
+    return typeof decoded.data === 'string' ? decoded.data : pubkey;
+  } catch {
+    return pubkey;
+  }
+}
+
 async function onMessage(ev: MessageEvent) {
   if (ev.data && ev.data.type === 'donate' && ev.data.pubkey) {
     selectedPubkey.value = ev.data.pubkey;
     showDonateDialog.value = true;
   } else if (ev.data && ev.data.type === 'viewProfile' && ev.data.pubkey) {
-    await creators.fetchTierDefinitions(ev.data.pubkey);
-    dialogPubkey.value = ev.data.pubkey;
+    const rawHex = bech32ToHex(ev.data.pubkey);
+    await creators.fetchTierDefinitions(rawHex);
+    dialogPubkey.value = rawHex;
     showTierDialog.value = true;
   }
 }
