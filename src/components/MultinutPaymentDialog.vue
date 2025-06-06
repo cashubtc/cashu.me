@@ -132,6 +132,36 @@
                 </q-item-label>
               </q-item-section>
             </q-item>
+
+            <!-- Payment Distribution Slider for Selected Mints -->
+            <div
+              v-if="isSelected(mint) && !isPaymentInProgress"
+              class="q-px-md"
+            >
+              <div class="row items-center q-gutter-md">
+                <div class="col-2 text-caption text-grey-6">
+                  {{ formatCurrency(getPartialAmount(mint), activeUnit) }}
+                </div>
+                <div class="col">
+                  <q-slider
+                    :model-value="getMintProportion(mint)"
+                    @update:model-value="
+                      (value) => updateMintProportion(mint, value)
+                    "
+                    :min="0"
+                    :max="100"
+                    :step="1"
+                    color="primary"
+                    :disable="selectedMints.length <= 1"
+                    label
+                    :label-value="`${getMintProportion(mint).toFixed(1)}%`"
+                    label-always
+                    class="mint-slider"
+                  />
+                </div>
+              </div>
+            </div>
+
             <q-separator spaced />
           </div>
           <!-- Total Selected Balance -->
@@ -193,6 +223,8 @@ export default defineComponent({
       // State tracking for each mint during payment
       mintStates: {}, // { mintUrl: 'requesting' | 'paying' | 'success' | 'error' }
       isPaymentInProgress: false,
+      // Custom proportions for each mint (percentage 0-100)
+      mintProportions: {}, // { mintUrl: percentage }
     };
   },
   computed: {
@@ -235,10 +267,107 @@ export default defineComponent({
       if (index >= 0) {
         this.selectedMints.splice(index, 1);
         this.updateMintMultinutSelection(mint.url, false);
+        // Remove from proportions
+        delete this.mintProportions[mint.url];
       } else {
         this.selectedMints.push(mint);
         this.updateMintMultinutSelection(mint.url, true);
       }
+      // Recalculate proportions when selection changes
+      this.initializeMintProportions();
+    },
+    initializeMintProportions() {
+      if (this.selectedMints.length === 0) {
+        this.mintProportions = {};
+        return;
+      }
+
+      // Calculate default proportions based on balance weights
+      const { weights } = this.multiMintBalance(
+        this.selectedMints,
+        this.activeUnit
+      );
+      const newProportions = {};
+
+      this.selectedMints.forEach((mint, index) => {
+        newProportions[mint.url] = weights[index] * 100; // Convert to percentage
+      });
+
+      this.mintProportions = { ...newProportions };
+    },
+    getMintProportion(mint) {
+      return this.mintProportions[mint.url] || 0;
+    },
+    updateMintProportion(mint, newPercentage) {
+      if (this.selectedMints.length <= 1) return;
+
+      const oldPercentage = this.mintProportions[mint.url] || 0;
+      const difference = newPercentage - oldPercentage;
+
+      // Update the changed mint
+      this.mintProportions = {
+        ...this.mintProportions,
+        [mint.url]: newPercentage,
+      };
+
+      // Redistribute the difference among other selected mints
+      const otherMints = this.selectedMints.filter((m) => m.url !== mint.url);
+      const totalOtherPercentage = otherMints.reduce(
+        (sum, m) => sum + (this.mintProportions[m.url] || 0),
+        0
+      );
+
+      if (totalOtherPercentage > 0) {
+        // Proportionally adjust other mints
+        otherMints.forEach((otherMint) => {
+          const currentPercentage = this.mintProportions[otherMint.url] || 0;
+          const weight = currentPercentage / totalOtherPercentage;
+          const adjustment = difference * weight;
+          const newValue = Math.max(0, currentPercentage - adjustment);
+
+          this.mintProportions = {
+            ...this.mintProportions,
+            [otherMint.url]: newValue,
+          };
+        });
+      } else {
+        // If other mints have 0%, distribute evenly
+        const remainingPercentage = 100 - newPercentage;
+        const perMint = remainingPercentage / otherMints.length;
+
+        otherMints.forEach((otherMint) => {
+          this.mintProportions = {
+            ...this.mintProportions,
+            [otherMint.url]: perMint,
+          };
+        });
+      }
+
+      // Ensure total is exactly 100%
+      this.normalizeMintProportions();
+    },
+    normalizeMintProportions() {
+      const total = this.selectedMints.reduce(
+        (sum, mint) => sum + (this.mintProportions[mint.url] || 0),
+        0
+      );
+
+      if (total > 0 && total !== 100) {
+        const factor = 100 / total;
+        const normalizedProportions = {};
+
+        this.selectedMints.forEach((mint) => {
+          normalizedProportions[mint.url] =
+            (this.mintProportions[mint.url] || 0) * factor;
+        });
+
+        this.mintProportions = { ...normalizedProportions };
+      }
+    },
+    getPartialAmount(mint) {
+      const totalAmount = this.payInvoiceData.meltQuote.response.amount;
+      const percentage = this.mintProportions[mint.url] || 0;
+      return Math.round(totalAmount * (percentage / 100));
     },
     getStateText(state) {
       switch (state) {
@@ -276,6 +405,7 @@ export default defineComponent({
 
       this.showMultinutPaymentDialog = true;
       this.clearMintStates(); // Clear any previous states
+      this.initializeMintProportions(); // Initialize proportions based on balance
     },
     closeMultinutDialog() {
       this.showMultinutPaymentDialog = false;
@@ -304,16 +434,6 @@ export default defineComponent({
       this.selectedMints.forEach((mint) => {
         this.updateMintMultinutSelection(mint.url, true);
       });
-      const { overallBalance, weights } = this.multiMintBalance(
-        this.selectedMints,
-        activeUnit
-      );
-
-      if (totalQuoteAmount > overallBalance) {
-        console.error("multi-mint balance not enough to satisfy this invoice");
-        notifyError("Multi-mint balance not enough to satisfy this invoice");
-        return;
-      }
 
       // Clear previous states
       this.clearMintStates();
@@ -325,16 +445,14 @@ export default defineComponent({
       let mintsToQuotes = [];
       let mintsToAmounts = [];
       let remainder = 0.0;
-      let i = 0;
       let data;
 
       try {
-        // Phase 1: Calculate amount for each Mint
+        // Phase 1: Calculate amount for each Mint using custom proportions
         for (const mint of this.selectedMints) {
-          const partialAmountFloat = totalQuoteAmount * weights[i] + remainder;
-          const partialAmount = Math.round(partialAmountFloat);
+          const partialAmount = this.getPartialAmount(mint);
           console.log(`partialAmount for mint ${mint.url}: ${partialAmount}`);
-          remainder = partialAmountFloat - partialAmount;
+
           if (partialAmount > 0) {
             mintsToAmounts.push([mint, partialAmount]);
           } else {
@@ -343,7 +461,6 @@ export default defineComponent({
               (m) => m.url !== mint.url
             );
           }
-          i++;
         }
 
         // Phase 2: Request quotes from all selected mints
@@ -460,5 +577,9 @@ export default defineComponent({
 .cursor-not-allowed {
   cursor: not-allowed !important;
   opacity: 0.7;
+}
+
+.mint-slider {
+  margin: 8px 0;
 }
 </style>
