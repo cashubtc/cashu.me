@@ -164,12 +164,18 @@ export const useCreatorsStore = defineStore("creators", {
     async fetchTierDefinitions(creatorNpub: string) {
       const cached = await db.creatorsTierDefinitions.get(creatorNpub);
       if (cached) {
-        this.tiersMap[creatorNpub] = cached.tiers;
+        this.tiersMap[creatorNpub] = cached.tiers.map((t: any) => ({
+          ...t,
+          price_sats: t.price_sats ?? t.price ?? 0,
+        }));
       }
       const filter = { authors: [creatorNpub], kinds: [30000], '#d': ['tiers'] };
       subscribeToNostr(filter, async (event) => {
         try {
-          const tiersArray: Tier[] = JSON.parse(event.content);
+          const tiersArray: Tier[] = JSON.parse(event.content).map((t: any) => ({
+            ...t,
+            price_sats: t.price_sats ?? t.price ?? 0,
+          }));
           this.tiersMap[creatorNpub] = tiersArray;
           await db.creatorsTierDefinitions.put({
             creatorNpub,

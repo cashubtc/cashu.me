@@ -18,17 +18,20 @@
         <QCardSection>
           <div v-if="!tiers.length" class="text-center">Creator has no subscription tiers</div>
           <div v-else>
-            <QCard v-for="t in tiers" :key="t.id" flat bordered class="q-mb-md">
+            <QCard v-for="t in tiers" :key="t.id" flat bordered class="q-mb-md tier-card">
               <QCardSection>
                 <div class="row items-center justify-between">
                   <div class="text-subtitle1">{{ t.name }}</div>
-                  <div class="text-subtitle2 text-primary">{{ t.price_sats }} sat/month</div>
+                  <div class="text-subtitle2 text-primary">{{ getPrice(t) }} sats/month</div>
                 </div>
                 <div class="q-mt-sm">{{ t.description }}</div>
                 <ul class="q-pl-md q-mt-xs text-caption">
                   <li v-for="b in t.benefits" :key="b">{{ b }}</li>
                 </ul>
               </QCardSection>
+              <QCardActions align="right" class="subscribe-container">
+                <QBtn label="Subscribe" color="primary" class="subscribe-btn" />
+              </QCardActions>
             </QCard>
           </div>
         </QCardSection>
@@ -44,7 +47,7 @@ import SendTokenDialog from 'components/SendTokenDialog.vue';
 import { useSendTokensStore } from 'stores/sendTokensStore';
 import { useDonationPresetsStore } from 'stores/donationPresets';
 import { useCreatorsStore } from 'stores/creators';
-import { QDialog, QCard, QCardSection, QBtn, QSeparator } from 'quasar';
+import { QDialog, QCard, QCardSection, QCardActions, QBtn, QSeparator } from 'quasar';
 import { nip19 } from 'nostr-tools';
 
 const iframeEl = ref<HTMLIFrameElement | null>(null);
@@ -57,6 +60,10 @@ const sendTokensStore = useSendTokensStore();
 const donationStore = useDonationPresetsStore();
 const creators = useCreatorsStore();
 const tiers = computed(() => creators.tiersMap[dialogPubkey.value] || []);
+
+function getPrice(t: any): number {
+  return t.price_sats ?? t.price ?? 0;
+}
 
 function bech32ToHex(pubkey: string): string {
   try {
@@ -128,5 +135,13 @@ onBeforeUnmount(() => {
 .tier-dialog {
   width: 100%;
   max-width: 500px;
+}
+
+.tier-card .subscribe-btn {
+  display: none;
+}
+
+.tier-card:hover .subscribe-btn {
+  display: inline-flex;
 }
 </style>
