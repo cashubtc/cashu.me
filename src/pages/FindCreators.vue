@@ -13,16 +13,22 @@
         <QCardSection>
           <div v-if="!tiers.length">Creator has no subscription tiers</div>
           <div v-else>
-            <div v-for="t in tiers" :key="t.id" class="q-mb-md">
-              <div>{{ t.name }} — {{ t.price_sats }} sat/month</div>
-              <div>{{ t.description }}</div>
-              <ul>
+            <div
+              v-for="t in tiers"
+              :key="t.id"
+              class="q-pa-sm q-mb-sm bg-grey-2"
+            >
+              <div class="text-h6">
+                {{ t.name }} — {{ t.price_sats }} sat/month
+              </div>
+              <div class="text-body1">{{ t.description }}</div>
+              <ul class="q-pl-md q-mt-xs">
                 <li v-for="b in t.benefits" :key="b">{{ b }}</li>
               </ul>
             </div>
           </div>
         </QCardSection>
-        <QCardSection class="text-right">
+        <QCardSection align="right">
           <QBtn flat label="Close" @click="showTierDialog = false" />
         </QCardSection>
       </QCard>
