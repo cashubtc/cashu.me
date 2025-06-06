@@ -183,23 +183,27 @@ export default defineComponent({
       showAddTierDialog.value = true;
     };
 
-    const saveNewTier = (tier: Partial<Tier>) => {
+    const saveNewTier = async (tier: Partial<Tier>) => {
       showAddTierDialog.value = false;
       store.addTier(tier);
+      await store.publishTierDefinitions();
     };
 
-    const saveAllTiers = () => {
+    const saveAllTiers = async () => {
       tiers.value.forEach((t) => saveTier(t));
+      await store.publishTierDefinitions();
     };
 
-    const removeTier = (id: string) => {
+    const removeTier = async (id: string) => {
       store.removeTier(id);
+      await store.publishTierDefinitions();
     };
 
-    const saveTier = (tier: Tier) => {
+    const saveTier = async (tier: Tier) => {
       const data = editedTiers.value[tier.id];
       if (data) {
         store.updateTier(tier.id, { ...data });
+        await store.publishTierDefinitions();
       }
     };
 
