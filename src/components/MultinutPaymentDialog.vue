@@ -337,6 +337,11 @@ export default defineComponent({
           remainder = partialAmountFloat - partialAmount;
           if (partialAmount > 0) {
             mintsToAmounts.push([mint, partialAmount]);
+          } else {
+            // remove from selectedMints so we don't show progress in the UI
+            this.selectedMints = this.selectedMints.filter(
+              (m) => m.url !== mint.url
+            );
           }
           i++;
         }
