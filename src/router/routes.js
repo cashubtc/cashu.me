@@ -57,14 +57,9 @@ const routes = [
     ],
   },
   {
-    path: "/creators/:npubOrVanityName",
-    component: () => import("layouts/FullscreenLayout.vue"),
-    children: [
-      {
-        path: "",
-        component: () => import("src/pages/PublicCreatorProfilePage.vue"),
-      },
-    ],
+    path: "/creator/:npub",
+    name: "PublicCreatorProfile",
+    component: () => import("src/pages/PublicCreatorProfilePage.vue"),
   },
   {
     path: "/buckets",
