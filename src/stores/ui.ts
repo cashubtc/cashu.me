@@ -71,6 +71,16 @@ export const useUiStore = defineStore("ui", {
     },
     formatSat: function (value: number) {
       // convert value to integer
+      if (useSettingsStore().bip177BitcoinSymbol) {
+        if (value >= 0) {
+          return "₿" + new Intl.NumberFormat(navigator.language).format(value);
+        } else {
+          return (
+            "-₿" +
+            new Intl.NumberFormat(navigator.language).format(Math.abs(value))
+          );
+        }
+      }
       return new Intl.NumberFormat(navigator.language).format(value) + " sat";
     },
     fromMsat: function (value: number) {
