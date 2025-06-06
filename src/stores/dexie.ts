@@ -131,6 +131,7 @@ export class CashuDexie extends Dexie {
 }
 
 export const cashuDb = new CashuDexie();
+export const db = cashuDb;
 
 export const useDexieStore = defineStore("dexie", {
   state: () => ({
