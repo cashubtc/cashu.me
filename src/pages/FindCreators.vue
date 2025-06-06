@@ -17,6 +17,8 @@ import DonateDialog from 'components/DonateDialog.vue';
 import SendTokenDialog from 'components/SendTokenDialog.vue';
 import { useSendTokensStore } from 'stores/sendTokensStore';
 import { useDonationPresetsStore } from 'stores/donationPresets';
+import { useRouter } from 'vue-router';
+import { useCreatorsStore } from 'stores/creators';
 
 const iframeEl = ref<HTMLIFrameElement | null>(null);
 const showDonateDialog = ref(false);
@@ -24,11 +26,15 @@ const selectedPubkey = ref('');
 
 const sendTokensStore = useSendTokensStore();
 const donationStore = useDonationPresetsStore();
+const router = useRouter();
+const creators = useCreatorsStore();
 
 function onMessage(ev: MessageEvent) {
   if (ev.data && ev.data.type === 'donate' && ev.data.pubkey) {
     selectedPubkey.value = ev.data.pubkey;
     showDonateDialog.value = true;
+  } else if (ev.data && ev.data.type === 'viewProfile' && ev.data.pubkey) {
+    goToCreatorProfile(ev.data.pubkey);
   }
 }
 
@@ -54,6 +60,11 @@ function handleDonate({ bucketId, locked, type, amount, months, message }: any) 
     );
     showDonateDialog.value = false;
   }
+}
+
+function goToCreatorProfile(npub: string) {
+  creators.fetchTierDefinitions(npub);
+  router.push(`/creators/${npub}`);
 }
 
 onMounted(() => {
