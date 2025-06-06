@@ -45,6 +45,8 @@ export const useCreatorsStore = defineStore("creators", {
     searching: false,
     error: "",
     tiersMap: {} as Record<string, Tier[]>,
+    currentUserNpub: "",
+    currentUserPrivkey: "",
   }),
   actions: {
     async searchCreators(query: string) {
