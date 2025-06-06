@@ -37,7 +37,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
+import { ref, computed, onMounted, onBeforeUnmount, nextTick } from 'vue';
 import DonateDialog from 'components/DonateDialog.vue';
 import SendTokenDialog from 'components/SendTokenDialog.vue';
 import { useSendTokensStore } from 'stores/sendTokensStore';
@@ -71,9 +71,9 @@ async function onMessage(ev: MessageEvent) {
     selectedPubkey.value = ev.data.pubkey;
     showDonateDialog.value = true;
   } else if (ev.data && ev.data.type === 'viewProfile' && ev.data.pubkey) {
-    const rawHex = bech32ToHex(ev.data.pubkey);
-    await creators.fetchTierDefinitions(rawHex);
-    dialogPubkey.value = rawHex;
+    await creators.fetchTierDefinitions(ev.data.pubkey);
+    dialogPubkey.value = ev.data.pubkey;
+    await nextTick();
     showTierDialog.value = true;
   }
 }
