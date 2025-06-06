@@ -2,6 +2,7 @@ import { defineStore } from "pinia";
 import { useLocalStorage } from "@vueuse/core";
 import { NDKEvent, NDKKind, NDKFilter } from "@nostr-dev-kit/ndk";
 import { useNostrStore } from "./nostr";
+import { db } from "./dexie";
 import { v4 as uuidv4 } from "uuid";
 import { notifySuccess } from "src/js/notify";
 
@@ -13,7 +14,7 @@ export interface Tier {
   welcomeMessage?: string;
 }
 
-const CREATOR_TIER_KIND = 38100;
+const TIER_DEFINITIONS_KIND = 30000;
 
 export const useCreatorHubStore = defineStore("creatorHub", {
   state: () => ({
@@ -56,24 +57,15 @@ export const useCreatorHubStore = defineStore("creatorHub", {
         welcomeMessage: tier.welcomeMessage || "",
       };
       this.tiers[id] = newTier;
-      this.saveTier(newTier);
     },
     updateTier(id: string, updates: Partial<Tier>) {
       const existing = this.tiers[id];
       if (!existing) return;
       this.tiers[id] = { ...existing, ...updates };
-      this.saveTier(this.tiers[id]);
     },
-    async saveTier(tier: Tier) {
-      const nostr = useNostrStore();
-      await nostr.initSignerIfNotSet();
-      const ev = new NDKEvent(nostr.ndk);
-      ev.kind = CREATOR_TIER_KIND as unknown as NDKKind;
-      ev.tags = [["d", tier.id]];
-      ev.content = JSON.stringify(tier);
-      await ev.sign(nostr.signer);
-      await ev.publish();
-      notifySuccess("Tier saved");
+    async saveTier(_tier: Tier) {
+      // previously published each tier individually; now no-op for backwards
+      // compatibility with existing component logic
     },
     async loadTiersFromNostr(pubkey?: string) {
       const nostr = useNostrStore();
@@ -81,23 +73,20 @@ export const useCreatorHubStore = defineStore("creatorHub", {
       const author = pubkey || this.loggedInNpub || nostr.pubkey;
       if (!author) return;
       const filter: NDKFilter = {
-        kinds: [CREATOR_TIER_KIND as unknown as NDKKind],
+        kinds: [TIER_DEFINITIONS_KIND as unknown as NDKKind],
         authors: [author],
-        limit: 200,
+        "#d": ["tiers"],
+        limit: 1,
       };
       const events = await nostr.ndk.fetchEvents(filter);
       events.forEach((ev) => {
         try {
-          const data = JSON.parse(ev.content) as any;
-          const id = data.id || (ev.tagValue("d") as string) || ev.id;
-          const tier: Tier = {
-            id,
-            name: data.name || "",
-            price: data.price || 0,
-            description: data.description || data.perks || "",
-            welcomeMessage: data.welcomeMessage || "",
-          };
-          this.tiers[id] = tier;
+          const data: Tier[] = JSON.parse(ev.content);
+          const obj: Record<string, Tier> = {};
+          data.forEach((t) => {
+            obj[t.id] = t;
+          });
+          this.tiers = obj as any;
         } catch (e) {
           console.error(e);
         }
@@ -105,15 +94,28 @@ export const useCreatorHubStore = defineStore("creatorHub", {
     },
     async removeTier(id: string) {
       delete this.tiers[id];
+    },
 
+    async publishTierDefinitions() {
+      const tiersArray = this.getTierArray();
       const nostr = useNostrStore();
       await nostr.initSignerIfNotSet();
       const ev = new NDKEvent(nostr.ndk);
-      ev.kind = CREATOR_TIER_KIND as unknown as NDKKind;
-      ev.tags = [["d", id]];
-      ev.content = "";
+      ev.kind = TIER_DEFINITIONS_KIND as unknown as NDKKind;
+      ev.tags = [["d", "tiers"]];
+      ev.created_at = Math.floor(Date.now() / 1000);
+      ev.content = JSON.stringify(tiersArray);
       await ev.sign(nostr.signer);
       await ev.publish();
+
+      await db.creatorsTierDefinitions.put({
+        creatorNpub: nostr.pubkey,
+        tiers: tiersArray as any,
+        eventId: ev.id!,
+        updatedAt: ev.created_at!,
+      });
+
+      notifySuccess("Tiers published");
     },
     getTierArray(): Tier[] {
       return Object.values(this.tiers);
