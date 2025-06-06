@@ -124,6 +124,7 @@ import { useRouter } from 'vue-router';
 import { usePriceStore } from 'stores/price';
 import { useUiStore } from 'stores/ui';
 import { v4 as uuidv4 } from 'uuid';
+import { notifySuccess } from 'src/js/notify';
 
 export default defineComponent({
   name: 'CreatorDashboardPage',
@@ -167,6 +168,7 @@ export default defineComponent({
 
     const saveProfile = async () => {
       await store.updateProfile(profile.value);
+      notifySuccess('Profile saved');
     };
 
     const showAddTierDialog = ref(false);
@@ -187,16 +189,19 @@ export default defineComponent({
       showAddTierDialog.value = false;
       store.addTier(tier);
       await store.publishTierDefinitions();
+      notifySuccess('Tier added');
     };
 
     const saveAllTiers = async () => {
       tiers.value.forEach((t) => saveTier(t));
       await store.publishTierDefinitions();
+      notifySuccess('All tiers saved');
     };
 
     const removeTier = async (id: string) => {
       store.removeTier(id);
       await store.publishTierDefinitions();
+      notifySuccess('Tier removed');
     };
 
     const saveTier = async (tier: Tier) => {
@@ -204,6 +209,7 @@ export default defineComponent({
       if (data) {
         store.updateTier(tier.id, { ...data });
         await store.publishTierDefinitions();
+        notifySuccess('Tier updated');
       }
     };
 

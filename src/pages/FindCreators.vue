@@ -9,27 +9,28 @@
     <DonateDialog v-model="showDonateDialog" @confirm="handleDonate" />
     <SendTokenDialog />
     <QDialog v-model="showTierDialog">
-      <QCard>
-        <QCardSection>
-          <div v-if="!tiers.length">Creator has no subscription tiers</div>
-          <div v-else>
-            <div
-              v-for="t in tiers"
-              :key="t.id"
-              class="q-pa-sm q-mb-sm bg-grey-2"
-            >
-              <div class="text-h6">
-                {{ t.name }} — {{ t.price_sats }} sat/month
-              </div>
-              <div class="text-body1">{{ t.description }}</div>
-              <ul class="q-pl-md q-mt-xs">
-                <li v-for="b in t.benefits" :key="b">{{ b }}</li>
-              </ul>
-            </div>
-          </div>
+      <QCard class="tier-dialog">
+        <QCardSection class="row items-center justify-between">
+          <div class="text-h6">Subscription Tiers</div>
+          <QBtn dense flat icon="close" @click="showTierDialog = false" />
         </QCardSection>
-        <QCardSection align="right">
-          <QBtn flat label="Close" @click="showTierDialog = false" />
+        <QSeparator />
+        <QCardSection>
+          <div v-if="!tiers.length" class="text-center">Creator has no subscription tiers</div>
+          <div v-else>
+            <QCard v-for="t in tiers" :key="t.id" flat bordered class="q-mb-md">
+              <QCardSection>
+                <div class="row items-center justify-between">
+                  <div class="text-subtitle1">{{ t.name }}</div>
+                  <div class="text-subtitle2 text-primary">{{ t.price_sats }} sat/month</div>
+                </div>
+                <div class="q-mt-sm">{{ t.description }}</div>
+                <ul class="q-pl-md q-mt-xs text-caption">
+                  <li v-for="b in t.benefits" :key="b">{{ b }}</li>
+                </ul>
+              </QCardSection>
+            </QCard>
+          </div>
         </QCardSection>
       </QCard>
     </QDialog>
@@ -43,7 +44,7 @@ import SendTokenDialog from 'components/SendTokenDialog.vue';
 import { useSendTokensStore } from 'stores/sendTokensStore';
 import { useDonationPresetsStore } from 'stores/donationPresets';
 import { useCreatorsStore } from 'stores/creators';
-import { QDialog, QCard, QCardSection, QBtn } from 'quasar';
+import { QDialog, QCard, QCardSection, QBtn, QSeparator } from 'quasar';
 import { nip19 } from 'nostr-tools';
 
 const iframeEl = ref<HTMLIFrameElement | null>(null);
@@ -122,5 +123,10 @@ onBeforeUnmount(() => {
   border: none;
   width: 100%;
   height: 100%;
+}
+
+.tier-dialog {
+  width: 100%;
+  max-width: 500px;
 }
 </style>
