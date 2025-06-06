@@ -335,37 +335,37 @@ export default defineComponent({
           const partialAmount = Math.round(partialAmountFloat);
           console.log(`partialAmount for mint ${mint.url}: ${partialAmount}`);
           remainder = partialAmountFloat - partialAmount;
-
-          mintsToAmounts.push([mint, partialAmount]);
+          if (partialAmount > 0) {
+            mintsToAmounts.push([mint, partialAmount]);
+          }
           i++;
         }
 
         // Phase 2: Request quotes from all selected mints
         mintsToQuotes = await Promise.all(
           mintsToAmounts.map(async ([mint, partialAmount], i) => {
+            if (partialAmount <= 0) {
+              return null;
+            }
             console.log(`Quoting mint: ${mint.url}`);
             const mintWallet = useWalletStore().mintWallet(
               mint.url,
               useMintsStore().activeUnit
             );
-
-            if (partialAmount > 0) {
-              try {
-                this.setMintState(mint.url, "requesting");
-                const quote = await this.meltQuote(
-                  mintWallet,
-                  this.payInvoiceData.input.request,
-                  partialAmount
-                );
-                console.log(quote);
-                return [mint, quote];
-              } catch (error) {
-                console.error(`Quote failed for mint ${mint.url}:`, error);
-                this.setMintState(mint.url, "error");
-                throw error;
-              }
+            try {
+              this.setMintState(mint.url, "requesting");
+              const quote = await this.meltQuote(
+                mintWallet,
+                this.payInvoiceData.input.request,
+                partialAmount
+              );
+              console.log(quote);
+              return [mint, quote];
+            } catch (error) {
+              console.error(`Quote failed for mint ${mint.url}:`, error);
+              this.setMintState(mint.url, "error");
+              throw error;
             }
-            return null;
           })
         );
 
