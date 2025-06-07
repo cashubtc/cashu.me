@@ -11,6 +11,7 @@ export type DonationPreset = {
 };
 
 const DEFAULT_PRESETS: DonationPreset[] = [
+  { months: 1 },
   { months: 3 },
   { months: 6 },
   { months: 12 },

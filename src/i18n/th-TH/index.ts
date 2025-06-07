@@ -16,6 +16,9 @@ export default {
       close: {
         label: "ปิด",
       },
+      ok: {
+        label: "OK",
+      },
       enter: {
         label: "ป้อน",
       },
