@@ -110,13 +110,13 @@ async function onMessage(ev: MessageEvent) {
   }
 }
 
-function openSubscribe(t: any) {
+function openSubscribe(tier: any) {
   const nutSupport = mintsStore.activeInfo?.nut_supports || [];
   if (!(nutSupport.includes(10) && nutSupport.includes(11))) {
     notifyError(t('wallet.notifications.lock_not_supported'));
     return;
   }
-  selectedTier.value = t;
+  selectedTier.value = tier;
   showSubscribeDialog.value = true;
 }
 
