@@ -44,6 +44,13 @@
             <div class="q-mt-md text-right subscribe-container">
               <q-btn label="Subscribe" color="primary" class="subscribe-btn" />
             </div>
+            <PaywalledContent
+              :creator-npub="creatorNpub"
+              :tier-id="t.id"
+              class="q-mt-md"
+            >
+              <div>Protected content visible to subscribers.</div>
+            </PaywalledContent>
           </q-card-section>
         </q-card>
       </div>
@@ -59,9 +66,11 @@ import { useNostrStore } from 'stores/nostr';
 import { usePriceStore } from 'stores/price';
 import { useUiStore } from 'stores/ui';
 import { renderMarkdown as renderMarkdownFn } from 'src/js/simple-markdown';
+import PaywalledContent from 'components/PaywalledContent.vue';
 
 export default defineComponent({
   name: "PublicCreatorProfilePage",
+  components: { PaywalledContent },
   setup() {
     const route = useRoute();
     const creatorNpub = route.params.npub as string;
