@@ -11,27 +11,6 @@
         :width="300"
         class="q-pa-md"
       >
-        <div class="row items-center q-mb-md">
-          <q-btn
-            flat
-            dense
-            round
-            icon="arrow_back"
-            color="primary"
-            aria-label="Go back"
-            @click="goBack"
-          />
-          <q-btn
-            flat
-            dense
-            round
-            icon="menu"
-            color="primary"
-            aria-label="Toggle navigation"
-            class="q-ml-sm"
-            @click="drawer = !drawer"
-          />
-        </div>
         <NostrIdentityManager class="q-mb-md" />
         <RelayManager class="q-mb-md" />
         <NewChat class="q-mb-md" @start="startChat" />
@@ -41,6 +20,26 @@
     <div class="col column q-pa-md">
         <q-header elevated class="q-mb-md bg-transparent">
           <q-toolbar>
+            <q-btn
+              flat
+              dense
+              round
+              icon="arrow_back"
+              color="primary"
+              aria-label="Go back"
+              class="q-mr-sm"
+              @click="goBack"
+            />
+            <q-btn
+              flat
+              dense
+              round
+              icon="menu"
+              color="primary"
+              aria-label="Toggle navigation"
+              class="q-mr-sm"
+              @click="drawer = !drawer"
+            />
             <q-toolbar-title class="text-h6">
               Nostr Messenger
               <q-badge
