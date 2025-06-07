@@ -125,31 +125,31 @@ function openSubscribe(tier: any) {
 
 async function confirmSubscribe({ months, amount, startDate }: any) {
   if (!dialogPubkey.value) return;
-  const token = await donationStore.createDonationPreset(
+  const tokens = await donationStore.createDonationPreset(
     months,
     amount,
     dialogPubkey.value,
     selectedTier.value.id,
     startDate,
   );
-  if (token) {
+  if (!months || months <= 0) {
     lockedStore.addLockedToken({
       amount,
-      token,
+      token: tokens,
       pubkey: dialogPubkey.value,
       bucketId: selectedTier.value.id,
     });
-    let supporterName = nostr.pubkey;
-    try {
-      const prof = await nostr.getProfile(nostr.pubkey);
-      supporterName =
-        prof?.display_name || prof?.name || prof?.username || nostr.pubkey;
-    } catch {}
-    await nostr.sendNip04DirectMessage(
-      dialogPubkey.value,
-      `${supporterName} just subscribed to ${selectedTier.value.name}. Here is your receipt:\n${token}`,
-    );
   }
+  let supporterName = nostr.pubkey;
+  try {
+    const prof = await nostr.getProfile(nostr.pubkey);
+    supporterName =
+      prof?.display_name || prof?.name || prof?.username || nostr.pubkey;
+  } catch {}
+  await nostr.sendNip04DirectMessage(
+    dialogPubkey.value,
+    `${supporterName} just subscribed to ${selectedTier.value.name}. Here is your receipt:\n${tokens}`,
+  );
   showSubscribeDialog.value = false;
   showTierDialog.value = false;
 }
