@@ -1,6 +1,6 @@
 <template>
   <div class="q-pa-md">
-    <h5 class="q-my-none q-mb-md">{{ $t("MoveProofs.title") }}</h5>
+    <h5 class="q-my-none q-mb-md">{{ $t("MoveTokens.title") }}</h5>
     <q-select
       dense
       outlined
@@ -51,7 +51,7 @@
             </q-item-section>
           </q-item>
           <q-item v-if="!proofsByBucket[bucket.id].length">
-            <q-item-section>{{ $t("MoveProofs.empty") }}</q-item-section>
+            <q-item-section>{{ $t("MoveTokens.empty") }}</q-item-section>
           </q-item>
         </q-list>
       </q-expansion-item>

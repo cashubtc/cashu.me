@@ -1,5 +1,6 @@
 <template>
   <div style="max-width: 800px; margin: 0 auto">
+    <div class="text-body2 q-mb-md">{{ $t('BucketManager.helper.intro') }}</div>
     <q-list padding>
       <div
         v-for="bucket in bucketList"
@@ -13,13 +14,7 @@
           style="text-decoration: none; display: block"
           class="text-dark"
         >
-          <q-item
-            clickable
-            :style="{
-              border: '1px solid rgba(128,128,128,0.2)',
-              'border-radius': '10px',
-            }"
-          >
+          <q-item clickable class="q-card q-pa-md">
             <q-item-section avatar>
               <q-icon
                 name="circle"
@@ -60,7 +55,9 @@
                 @click.stop.prevent="openEdit(bucket)"
                 aria-label="Edit"
                 title="Edit"
-              />
+              >
+                <q-tooltip>{{ $t('BucketManager.tooltips.edit_button') }}</q-tooltip>
+              </q-btn>
               <q-btn
                 icon="delete"
                 flat
@@ -69,22 +66,28 @@
                 @click.stop.prevent="openDelete(bucket.id)"
                 :aria-label="$t('BucketManager.actions.delete')"
                 :title="$t('BucketManager.actions.delete')"
-              />
+              >
+                <q-tooltip>{{ $t('BucketManager.tooltips.delete_button') }}</q-tooltip>
+              </q-btn>
             </q-item-section>
           </q-item>
         </router-link>
       </div>
       <q-item>
         <q-item-section>
-          <q-btn color="primary" icon="add" outline @click="openAdd">{{
-            $t("BucketManager.actions.add")
-          }}</q-btn>
+          <q-btn color="primary" icon="add" outline @click="openAdd">
+            {{ $t("BucketManager.actions.add") }}
+            <q-tooltip>{{ $t('BucketManager.tooltips.add_button') }}</q-tooltip>
+          </q-btn>
         </q-item-section>
       </q-item>
       <q-item>
         <q-item-section>
-          <router-link to="/move-proofs" style="text-decoration: none">
-            <q-btn color="primary" outline>{{ $t("BucketDetail.move") }}</q-btn>
+          <router-link to="/move-tokens" style="text-decoration: none">
+            <q-btn color="primary" outline>
+              {{ $t("BucketDetail.move") }}
+              <q-tooltip>{{ $t('BucketManager.tooltips.move_button') }}</q-tooltip>
+            </q-btn>
           </router-link>
         </q-item-section>
       </q-item>
@@ -130,16 +133,34 @@
           v-model.number="form.goal"
           outlined
           :rules="goalRules"
-          :label="$t('BucketManager.inputs.goal')"
           type="number"
           class="q-mb-sm"
-        />
+        >
+          <template #label>
+            <div class="row items-center no-wrap">
+              <span>{{ $t('BucketManager.inputs.goal') }}</span>
+              <InfoTooltip
+                class="q-ml-xs"
+                :text="$t('BucketManager.tooltips.goal')"
+              />
+            </div>
+          </template>
+        </q-input>
         <q-input
           v-model="form.creatorPubkey"
           outlined
-          :label="$t('BucketManager.inputs.creator_pubkey')"
           class="q-mb-sm"
-        />
+        >
+          <template #label>
+            <div class="row items-center no-wrap">
+              <span>{{ $t('BucketManager.inputs.creator_pubkey') }}</span>
+              <InfoTooltip
+                class="q-ml-xs"
+                :text="$t('BucketManager.tooltips.creator_pubkey')"
+              />
+            </div>
+          </template>
+        </q-input>
         <div class="row q-mt-md">
           <q-btn color="primary" rounded @click="saveBucket">{{
             $t("global.actions.update.label")
