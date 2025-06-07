@@ -129,17 +129,17 @@ export default defineComponent({
     };
 
     const confirmSubscribe = async ({ months, amount, startDate }: any) => {
-      const token = await donationStore.createDonationPreset(
+      const tokens = await donationStore.createDonationPreset(
         months,
         amount,
         creatorNpub,
         selectedTier.value.id,
         startDate,
       );
-      if (token) {
+      if (!months || months <= 0) {
         lockedStore.addLockedToken({
           amount,
-          token,
+          token: tokens,
           pubkey: creatorNpub,
           bucketId: selectedTier.value.id,
         });
@@ -150,12 +150,10 @@ export default defineComponent({
         supporterName =
           prof?.display_name || prof?.name || prof?.username || nostr.pubkey;
       } catch {}
-      if (token) {
-        await nostr.sendNip04DirectMessage(
-          creatorNpub,
-          `${supporterName} just subscribed to ${selectedTier.value.name}. Here is your receipt:\n${token}`,
-        );
-      }
+      await nostr.sendNip04DirectMessage(
+        creatorNpub,
+        `${supporterName} just subscribed to ${selectedTier.value.name}. Here is your receipt:\n${tokens}`,
+      );
       showSubscribeDialog.value = false;
     };
     function renderMarkdown(text: string): string {
