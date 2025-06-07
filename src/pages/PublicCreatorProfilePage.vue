@@ -55,6 +55,13 @@
                 @click="openSubscribe(t)"
               />
             </div>
+            <PaywalledContent
+              :creator-npub="creatorNpub"
+              :tier-id="t.id"
+              class="q-mt-md"
+            >
+              <div>Protected content visible to subscribers.</div>
+            </PaywalledContent>
           </q-card-section>
         </q-card>
       </div>
@@ -74,9 +81,11 @@ import { useUiStore } from 'stores/ui';
 import SubscribeDialog from 'components/SubscribeDialog.vue';
 import { DEFAULT_BUCKET_ID } from 'stores/buckets';
 import { renderMarkdown as renderMarkdownFn } from 'src/js/simple-markdown';
+import PaywalledContent from 'components/PaywalledContent.vue';
 
 export default defineComponent({
   name: "PublicCreatorProfilePage",
+  components: { PaywalledContent },
   setup() {
     const route = useRoute();
     const creatorNpub = route.params.npub as string;
