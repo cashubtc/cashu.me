@@ -386,6 +386,7 @@ export default {
           nut: "nut",
           blu: "blu",
           flamingo: "flamingo",
+          modern: "modern",
         },
       },
     },
