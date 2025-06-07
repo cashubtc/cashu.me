@@ -64,4 +64,16 @@ describe("Donation presets", () => {
     expect(spy.mock.calls[0][2]).toBe(5);
     expect(token).toBe("tok");
   });
+
+  it("uses provided startDate for locktimes", async () => {
+    const store = useDonationPresetsStore();
+    const wallet = useWalletStore();
+    const spy = wallet.sendToLock as any;
+    const start = 1000;
+    await store.createDonationPreset(3, 1, "pk", "b", start);
+    expect(spy).toHaveBeenCalledTimes(3);
+    expect(spy.mock.calls[0][5]).toBe(start);
+    expect(spy.mock.calls[1][5]).toBe(start + 30 * 24 * 60 * 60);
+    expect(spy.mock.calls[2][5]).toBe(start + 2 * 30 * 24 * 60 * 60);
+  });
 });

@@ -128,12 +128,13 @@ export default defineComponent({
       showSubscribeDialog.value = true;
     };
 
-    const confirmSubscribe = async ({ months, amount }: any) => {
+    const confirmSubscribe = async ({ months, amount, startDate }: any) => {
       const token = await donationStore.createDonationPreset(
         months,
         amount,
         creatorNpub,
         selectedTier.value.id,
+        startDate,
       );
       if (token) {
         lockedStore.addLockedToken({

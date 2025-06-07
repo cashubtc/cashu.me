@@ -23,6 +23,14 @@
           class="q-mt-md"
           :label="$t('DonateDialog.inputs.preset')"
         />
+        <q-input
+          v-model="startDate"
+          type="date"
+          outlined
+          dense
+          class="q-mt-md"
+          label="Start Date"
+        />
       </q-card-section>
       <q-card-actions align="right">
         <q-btn flat color="primary" @click="cancel">{{
@@ -52,6 +60,7 @@ export default defineComponent({
     const donationStore = useDonationPresetsStore();
     const months = ref(donationStore.presets[0]?.months || 0);
     const amount = ref(0);
+    const startDate = ref('');
 
     watch(
       () => props.tier,
@@ -80,7 +89,14 @@ export default defineComponent({
     };
 
     const confirm = () => {
-      emit('confirm', { months: months.value, amount: amount.value });
+      const ts = startDate.value
+        ? Math.floor(new Date(startDate.value).getTime() / 1000)
+        : undefined;
+      emit('confirm', {
+        months: months.value,
+        amount: amount.value,
+        startDate: ts,
+      });
       emit('update:modelValue', false);
     };
 
@@ -89,6 +105,7 @@ export default defineComponent({
       amount,
       months,
       presetOptions,
+      startDate,
       cancel,
       confirm,
     };

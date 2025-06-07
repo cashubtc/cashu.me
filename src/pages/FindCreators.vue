@@ -123,13 +123,14 @@ function openSubscribe(tier: any) {
   showSubscribeDialog.value = true;
 }
 
-async function confirmSubscribe({ months, amount }: any) {
+async function confirmSubscribe({ months, amount, startDate }: any) {
   if (!dialogPubkey.value) return;
   const token = await donationStore.createDonationPreset(
     months,
     amount,
     dialogPubkey.value,
     selectedTier.value.id,
+    startDate,
   );
   if (token) {
     lockedStore.addLockedToken({

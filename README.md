@@ -84,8 +84,9 @@ Fundstr is currently in Alpha/Beta.
 2. Optionally create Token Buckets for organization.
 3. Browse or search for creators.
 4. Visit a creator's profile and choose a tier, donation or recurring pledge.
-5. Follow prompts to send Cashu ecash.
-6. Chat with creators or other users via Nostr DMs.
+5. (Optional) Pick a start date if you want your subscription to begin later.
+6. Follow prompts to send Cashu ecash.
+7. Chat with creators or other users via Nostr DMs.
 
 ### 3. For Creators
 1. Go to the **Creator Hub** section.
