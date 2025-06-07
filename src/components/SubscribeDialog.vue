@@ -5,6 +5,15 @@
         Subscribe to {{ tier?.name }}
       </q-card-section>
       <q-card-section>
+        <q-select
+          v-model="bucketId"
+          :options="bucketOptions"
+          emit-value
+          map-options
+          outlined
+          dense
+          :label="$t('BucketManager.inputs.name')"
+        />
         <q-input
           v-model.number="amount"
           type="number"
@@ -52,6 +61,10 @@
 <script lang="ts">
 import { defineComponent, computed, ref, watch } from "vue";
 import { useDonationPresetsStore } from "stores/donationPresets";
+import { useBucketsStore, DEFAULT_BUCKET_ID } from "stores/buckets";
+import { useMintsStore } from "stores/mints";
+import { useUiStore } from "stores/ui";
+import { storeToRefs } from "pinia";
 
 export default defineComponent({
   name: "SubscribeDialog",
@@ -63,8 +76,15 @@ export default defineComponent({
   emits: ["update:modelValue", "confirm"],
   setup(props, { emit }) {
     const donationStore = useDonationPresetsStore();
+    const bucketsStore = useBucketsStore();
+    const mintsStore = useMintsStore();
+    const uiStore = useUiStore();
+    const { bucketList, bucketBalances } = storeToRefs(bucketsStore);
+    const { activeUnit } = storeToRefs(mintsStore);
+
     const months = ref(donationStore.presets[0]?.months || 0);
     const amount = ref(0);
+    const bucketId = ref<string>(DEFAULT_BUCKET_ID);
     const today = new Date().toISOString().slice(0, 10);
     const startDate = ref(today);
     const total = computed(() => amount.value * months.value);
@@ -84,6 +104,16 @@ export default defineComponent({
       set: (v: boolean) => emit("update:modelValue", v),
     });
 
+    const bucketOptions = computed(() =>
+      bucketList.value.map((b) => ({
+        label: `${b.name} (${uiStore.formatCurrency(
+          bucketBalances.value[b.id] ?? 0,
+          activeUnit.value,
+        )})`,
+        value: b.id,
+      }))
+    );
+
     const presetOptions = computed(() =>
       donationStore.presets.map((p) => ({
         label: `${p.months}m`,
@@ -101,6 +131,7 @@ export default defineComponent({
       }
       const ts = Math.floor(new Date(startDate.value).getTime() / 1000);
       emit("confirm", {
+        bucketId: bucketId.value,
         months: months.value,
         amount: amount.value,
         startDate: ts,
@@ -111,6 +142,8 @@ export default defineComponent({
 
     return {
       model,
+      bucketId,
+      bucketOptions,
       amount,
       months,
       presetOptions,

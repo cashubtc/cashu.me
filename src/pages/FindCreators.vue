@@ -62,9 +62,8 @@ import { useLockedTokensStore } from 'stores/lockedTokens';
 import { useCreatorsStore } from 'stores/creators';
 import { useNostrStore } from 'stores/nostr';
 import { useMintsStore } from 'stores/mints';
-import { notifyError } from 'src/js/notify';
+import { notifyError, notifySuccess } from 'src/js/notify';
 import { useI18n } from 'vue-i18n';
-import { DEFAULT_BUCKET_ID } from 'stores/buckets';
 import { QDialog, QCard, QCardSection, QCardActions, QBtn, QSeparator } from 'quasar';
 import { nip19 } from 'nostr-tools';
 
@@ -123,35 +122,40 @@ function openSubscribe(tier: any) {
   showSubscribeDialog.value = true;
 }
 
-async function confirmSubscribe({ months, amount, startDate, total }: any) {
+async function confirmSubscribe({ bucketId, months, amount, startDate, total }: any) {
   if (!dialogPubkey.value) return;
-  const tokens = await donationStore.createDonationPreset(
-    months,
-    amount,
-    dialogPubkey.value,
-    selectedTier.value.id,
-    startDate,
-  );
-  if (months === undefined || months <= 0) {
-    lockedStore.addLockedToken({
-      amount,
-      token: tokens,
-      pubkey: dialogPubkey.value,
-      bucketId: selectedTier.value.id,
-    });
-  }
-  let supporterName = nostr.pubkey;
   try {
-    const prof = await nostr.getProfile(nostr.pubkey);
-    supporterName =
-      prof?.display_name || prof?.name || prof?.username || nostr.pubkey;
-  } catch {}
-  await nostr.sendNip04DirectMessage(
-    dialogPubkey.value,
-    `${supporterName} just subscribed to ${selectedTier.value.name} for ${total} sats. Here is your receipt:\n${tokens}`,
-  );
-  showSubscribeDialog.value = false;
-  showTierDialog.value = false;
+    const tokens = await donationStore.createDonationPreset(
+      months,
+      amount,
+      dialogPubkey.value,
+      bucketId,
+      startDate,
+    );
+    if (months === undefined || months <= 0) {
+      lockedStore.addLockedToken({
+        amount,
+        token: tokens,
+        pubkey: dialogPubkey.value,
+        bucketId,
+      });
+    }
+    let supporterName = nostr.pubkey;
+    try {
+      const prof = await nostr.getProfile(nostr.pubkey);
+      supporterName =
+        prof?.display_name || prof?.name || prof?.username || nostr.pubkey;
+    } catch {}
+    await nostr.sendNip04DirectMessage(
+      dialogPubkey.value,
+      `${supporterName} just subscribed to ${selectedTier.value.name} for ${total} sats. Here is your receipt:\n${tokens}`,
+    );
+    notifySuccess(t('FindCreators.notifications.subscription_success'));
+    showSubscribeDialog.value = false;
+    showTierDialog.value = false;
+  } catch (e: any) {
+    notifyError(e.message);
+  }
 }
 
 function handleDonate({ bucketId, locked, type, amount, months, message }: any) {
