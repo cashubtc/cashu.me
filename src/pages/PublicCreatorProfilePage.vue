@@ -79,9 +79,8 @@ import { useLockedTokensStore } from 'stores/lockedTokens';
 import { usePriceStore } from 'stores/price';
 import { useUiStore } from 'stores/ui';
 import SubscribeDialog from 'components/SubscribeDialog.vue';
-import { DEFAULT_BUCKET_ID } from 'stores/buckets';
 import { useMintsStore } from 'stores/mints';
-import { notifyError } from 'src/js/notify';
+import { notifyError, notifySuccess } from 'src/js/notify';
 import { useI18n } from 'vue-i18n';
 import { renderMarkdown as renderMarkdownFn } from 'src/js/simple-markdown';
 import PaywalledContent from 'components/PaywalledContent.vue';
@@ -128,33 +127,38 @@ export default defineComponent({
       showSubscribeDialog.value = true;
     };
 
-    const confirmSubscribe = async ({ months, amount, startDate, total }: any) => {
-      const tokens = await donationStore.createDonationPreset(
-        months,
-        amount,
-        creatorNpub,
-        selectedTier.value.id,
-        startDate,
-      );
-      if (months === undefined || months <= 0) {
-        lockedStore.addLockedToken({
-          amount,
-          token: tokens,
-          pubkey: creatorNpub,
-          bucketId: selectedTier.value.id,
-        });
-      }
-      let supporterName = nostr.pubkey;
+    const confirmSubscribe = async ({ bucketId, months, amount, startDate, total }: any) => {
       try {
-        const prof = await nostr.getProfile(nostr.pubkey);
-        supporterName =
-          prof?.display_name || prof?.name || prof?.username || nostr.pubkey;
-      } catch {}
-      await nostr.sendNip04DirectMessage(
-        creatorNpub,
-        `${supporterName} just subscribed to ${selectedTier.value.name} for ${total} sats. Here is your receipt:\n${tokens}`,
-      );
-      showSubscribeDialog.value = false;
+        const tokens = await donationStore.createDonationPreset(
+          months,
+          amount,
+          creatorNpub,
+          bucketId,
+          startDate,
+        );
+        if (months === undefined || months <= 0) {
+          lockedStore.addLockedToken({
+            amount,
+            token: tokens,
+            pubkey: creatorNpub,
+            bucketId,
+          });
+        }
+        let supporterName = nostr.pubkey;
+        try {
+          const prof = await nostr.getProfile(nostr.pubkey);
+          supporterName =
+            prof?.display_name || prof?.name || prof?.username || nostr.pubkey;
+        } catch {}
+        await nostr.sendNip04DirectMessage(
+          creatorNpub,
+          `${supporterName} just subscribed to ${selectedTier.value.name} for ${total} sats. Here is your receipt:\n${tokens}`,
+        );
+        notifySuccess(t('FindCreators.notifications.subscription_success'));
+        showSubscribeDialog.value = false;
+      } catch (e: any) {
+        notifyError(e.message);
+      }
     };
     function renderMarkdown(text: string): string {
       return renderMarkdownFn(text || "");

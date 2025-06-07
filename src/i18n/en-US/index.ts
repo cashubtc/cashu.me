@@ -1367,6 +1367,7 @@ export default {
     notifications: {
       donation_sent: "Donation sent",
       message_sent: "Message sent",
+      subscription_success: "Subscription successful",
     },
   },
   ChooseExistingTokenDialog: {
