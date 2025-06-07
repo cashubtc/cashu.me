@@ -381,6 +381,7 @@ export default {
           nut: "nöt",
           blu: "blå",
           flamingo: "flamingo",
+          modern: "modern",
         },
       },
     },

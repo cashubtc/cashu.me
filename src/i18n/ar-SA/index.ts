@@ -380,6 +380,7 @@ export default {
           nut: "جوز",
           blu: "أزرق",
           flamingo: "فلامينجو",
+          modern: "modern",
         },
       },
     },

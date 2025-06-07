@@ -63,15 +63,23 @@ $themes: (
     marginal-bg: #000,
     marginal-text: rgb(255, 255, 255),
   ),
-  "cyber": (
-    primary: #00ff00,
-    secondary: #00ff00,
-    dark: #000,
-    info: #1b1b1b,
-    marginal-bg: #000,
-    marginal-text: rgb(255, 255, 255),
-  ),
-);
+    "cyber": (
+      primary: #00ff00,
+      secondary: #00ff00,
+      dark: #000,
+      info: #1b1b1b,
+      marginal-bg: #000,
+      marginal-text: rgb(255, 255, 255),
+    ),
+    "modern": (
+      primary: #a1c2e3,
+      secondary: #f3b6c4,
+      dark: #2f3e46,
+      info: #36454f,
+      marginal-bg: #2f3e46,
+      marginal-text: #fff,
+    ),
+  );
 @each $theme, $colors in $themes {
   @each $name, $color in $colors {
     @if $name== "dark" {

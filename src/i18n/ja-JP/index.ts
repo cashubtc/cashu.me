@@ -382,6 +382,7 @@ export default {
           nut: "ナッツ",
           blu: "ブルー",
           flamingo: "フラミンゴ",
+          modern: "modern",
         },
       },
     },
