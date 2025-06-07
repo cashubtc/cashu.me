@@ -132,7 +132,7 @@ async function confirmSubscribe({ months, amount, startDate, total }: any) {
     selectedTier.value.id,
     startDate,
   );
-  if (!months || months <= 0) {
+  if (months === undefined || months <= 0) {
     lockedStore.addLockedToken({
       amount,
       token: tokens,
