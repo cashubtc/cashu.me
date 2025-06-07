@@ -1,13 +1,8 @@
 import { defineStore } from "pinia";
 import { useLocalStorage } from "@vueuse/core";
 import { watch } from "vue";
-import {
-  generateSecretKey,
-  getPublicKey,
-  Event as NostrEvent,
-} from "nostr-tools";
+import { Event as NostrEvent } from "nostr-tools";
 import { useNostrStore } from "./nostr";
-import { bytesToHex } from "@noble/hashes/utils";
 import { v4 as uuidv4 } from "uuid";
 import { useSettingsStore } from "./settings";
 import { sanitizeMessage } from "src/js/message-utils";
@@ -22,8 +17,6 @@ export type MessengerMessage = {
 
 export const useMessengerStore = defineStore("messenger", {
   state: () => ({
-    privKey: useLocalStorage<string>("cashu.messenger.privKey", ""),
-    pubKey: useLocalStorage<string>("cashu.messenger.pubKey", ""),
     relays: useSettingsStore().defaultNostrRelays,
     conversations: useLocalStorage<Record<string, MessengerMessage[]>>(
       "cashu.messenger.conversations",
@@ -48,22 +41,21 @@ export const useMessengerStore = defineStore("messenger", {
   },
   actions: {
     loadIdentity() {
-      if (!this.privKey) {
-        const sk = generateSecretKey();
-        this.privKey = bytesToHex(sk);
-        this.pubKey = getPublicKey(sk);
-      } else if (!this.pubKey) {
-        this.pubKey = getPublicKey(this.privKey);
+      const nostr = useNostrStore();
+      if (!nostr.seedSignerPrivateKey && !nostr.privateKeySignerPrivateKey) {
+        nostr.walletSeedGenerateKeyPair();
       }
     },
     async sendDm(recipient: string, message: string) {
       this.loadIdentity();
       const nostr = useNostrStore();
+      const privKey =
+        nostr.privateKeySignerPrivateKey || nostr.seedSignerPrivateKey;
       const { success, event } = await nostr.sendNip04DirectMessage(
         recipient,
         message,
-        this.privKey,
-        this.pubKey
+        privKey,
+        nostr.pubkey
       );
       if (success && event) {
         this.addOutgoingMessage(recipient, message, event.created_at, event.id);
@@ -93,8 +85,10 @@ export const useMessengerStore = defineStore("messenger", {
     async addIncomingMessage(event: NostrEvent) {
       this.loadIdentity();
       const nostr = useNostrStore();
+      const privKey =
+        nostr.privateKeySignerPrivateKey || nostr.seedSignerPrivateKey;
       const decrypted = await nostr.decryptNip04(
-        this.privKey,
+        privKey,
         event.pubkey,
         event.content
       );
@@ -119,7 +113,7 @@ export const useMessengerStore = defineStore("messenger", {
     async start() {
       if (!this.watchInitialized) {
         watch(
-          () => [this.pubKey, this.relays],
+          () => [useNostrStore().pubkey, this.relays],
           () => {
             if (this.started) {
               this.started = false;
@@ -135,9 +129,11 @@ export const useMessengerStore = defineStore("messenger", {
       }
       this.loadIdentity();
       const nostr = useNostrStore();
+      const privKey =
+        nostr.privateKeySignerPrivateKey || nostr.seedSignerPrivateKey;
       await nostr.subscribeToNip04DirectMessagesCallback(
-        this.privKey,
-        this.pubKey,
+        privKey,
+        nostr.pubkey,
         async (ev, _decrypted) => {
           await this.addIncomingMessage(ev as NostrEvent);
         }
