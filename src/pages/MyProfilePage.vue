@@ -17,8 +17,35 @@
     <div v-if="profile.about" class="q-mb-md">{{ profile.about }}</div>
 
     <div class="q-mb-md text-caption">
-      <div><strong>npub:</strong> {{ pubkey }}</div>
-      <div>
+      <div class="row items-center q-gutter-x-sm">
+        <div><strong>npub:</strong> {{ pubkey }}</div>
+        <q-btn
+          v-if="pubkey"
+          flat
+          dense
+          icon="content_copy"
+          @click="copyText(pubkey)"
+        />
+      </div>
+      <div v-if="seedSignerPrivateKeyNsecComputed" class="row items-center q-gutter-x-sm q-mt-xs">
+        <div><strong>nsec:</strong> {{ seedSignerPrivateKeyNsecComputed }}</div>
+        <q-btn
+          flat
+          dense
+          icon="content_copy"
+          @click="copyText(seedSignerPrivateKeyNsecComputed)"
+        />
+      </div>
+      <div v-if="privateKeySignerPrivateKey" class="row items-center q-gutter-x-sm q-mt-xs">
+        <div><strong>hex:</strong> {{ privateKeySignerPrivateKey }}</div>
+        <q-btn
+          flat
+          dense
+          icon="content_copy"
+          @click="copyText(privateKeySignerPrivateKey)"
+        />
+      </div>
+      <div class="q-mt-sm">
         <strong>Wallet balance:</strong>
         {{ walletBalanceFormatted }}
       </div>
@@ -50,6 +77,9 @@
 
 <script lang="ts">
 import { defineComponent, ref, onMounted, computed } from "vue";
+import { storeToRefs } from "pinia";
+import { useQuasar, copyToClipboard } from "quasar";
+import { useI18n } from "vue-i18n";
 import { useNostrStore } from "stores/nostr";
 import { useCreatorHubStore, Tier } from "stores/creatorHub";
 import { usePriceStore } from "stores/price";
@@ -61,14 +91,18 @@ import { renderMarkdown as renderMarkdownFn } from "src/js/simple-markdown";
 export default defineComponent({
   name: "MyProfilePage",
   setup() {
+    const $q = useQuasar();
+    const { t } = useI18n();
+
     const nostr = useNostrStore();
+    const { pubkey, seedSignerPrivateKeyNsecComputed, privateKeySignerPrivateKey } =
+      storeToRefs(nostr);
     const hub = useCreatorHubStore();
     const priceStore = usePriceStore();
     const uiStore = useUiStore();
     const mints = useMintsStore();
     const buckets = useBucketsStore();
     const bitcoinPrice = computed(() => priceStore.bitcoinPrice);
-    const pubkey = computed(() => hub.loggedInNpub || nostr.pubkey);
     const profile = ref<any>({});
     const tiers = ref(hub.getTierArray());
     const walletBalance = computed(() => mints.activeBalance);
@@ -107,8 +141,19 @@ export default defineComponent({
       }
     }
 
+    function copyText(text: string) {
+      copyToClipboard(text).then(() => {
+        $q.notify({
+          message: t("global.copy_to_clipboard.success"),
+          position: "bottom",
+        });
+      });
+    }
+
     return {
       pubkey,
+      seedSignerPrivateKeyNsecComputed,
+      privateKeySignerPrivateKey,
       profile,
       tiers,
       bitcoinPrice,
@@ -118,6 +163,7 @@ export default defineComponent({
       walletBalanceFormatted,
       renderMarkdown,
       formatFiat,
+      copyText,
       supportTier,
     };
   },
