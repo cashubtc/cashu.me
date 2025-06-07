@@ -1,6 +1,6 @@
 <template>
   <div style="max-width: 800px; margin: 0 auto">
-    <div class="text-body2 q-mb-md">{{ $t('BucketManager.helper.intro') }}</div>
+    <div class="text-body2 q-mb-md">{{ $t("BucketManager.helper.intro") }}</div>
     <q-list padding>
       <div
         v-for="bucket in bucketList"
@@ -16,10 +16,15 @@
         >
           <q-item clickable class="q-card q-pa-md">
             <q-item-section avatar>
-              <q-icon
-                name="circle"
-                :style="{ color: bucket.color || 'grey' }"
-              />
+              <q-avatar
+                size="32px"
+                :style="{
+                  backgroundColor: bucket.color || DEFAULT_COLOR,
+                  color: 'white',
+                }"
+              >
+                {{ bucket.name.charAt(0).toUpperCase() }}
+              </q-avatar>
             </q-item-section>
             <q-item-section>
               <q-item-label class="text-weight-bold">{{
@@ -28,23 +33,26 @@
               <q-item-label caption v-if="bucket.description">{{
                 bucket.description
               }}</q-item-label>
-              <q-item-label caption>
-                {{
-                  formatCurrency(
-                    bucketBalances[bucket.id] || 0,
-                    activeUnit.value,
-                  )
-                }}
-                <span v-if="bucket.goal"
-                  >/ {{ formatCurrency(bucket.goal, activeUnit.value) }}</span
-                >
+              <q-item-label caption class="row items-center no-wrap">
+                <span>
+                  {{
+                    formatCurrency(
+                      bucketBalances[bucket.id] || 0,
+                      activeUnit.value
+                    )
+                  }}
+                  <span v-if="bucket.goal">
+                    / {{ formatCurrency(bucket.goal, activeUnit.value) }}
+                  </span>
+                </span>
+                <q-linear-progress
+                  v-if="bucket.goal"
+                  color="primary"
+                  :value="Math.min(bucketBalances[bucket.id] / bucket.goal, 1)"
+                  style="width: 50px; height: 4px"
+                  class="q-ml-sm"
+                />
               </q-item-label>
-              <q-linear-progress
-                v-if="bucket.goal"
-                color="primary"
-                :value="Math.min(bucketBalances[bucket.id] / bucket.goal, 1)"
-                class="q-mt-xs"
-              />
             </q-item-section>
             <q-item-section side v-if="bucket.id !== DEFAULT_BUCKET_ID">
               <q-btn
@@ -55,9 +63,11 @@
                 @click.stop.prevent="openEdit(bucket)"
                 aria-label="Edit"
                 title="Edit"
-              >
-                <q-tooltip>{{ $t('BucketManager.tooltips.edit_button') }}</q-tooltip>
-              </q-btn>
+              />
+              <InfoTooltip
+                class="q-ml-xs"
+                :text="$t('BucketManager.tooltips.edit_button')"
+              />
               <q-btn
                 icon="delete"
                 flat
@@ -66,9 +76,11 @@
                 @click.stop.prevent="openDelete(bucket.id)"
                 :aria-label="$t('BucketManager.actions.delete')"
                 :title="$t('BucketManager.actions.delete')"
-              >
-                <q-tooltip>{{ $t('BucketManager.tooltips.delete_button') }}</q-tooltip>
-              </q-btn>
+              />
+              <InfoTooltip
+                class="q-ml-xs"
+                :text="$t('BucketManager.tooltips.delete_button')"
+              />
             </q-item-section>
           </q-item>
         </router-link>
@@ -77,7 +89,7 @@
         <q-item-section>
           <q-btn color="primary" icon="add" outline @click="openAdd">
             {{ $t("BucketManager.actions.add") }}
-            <q-tooltip>{{ $t('BucketManager.tooltips.add_button') }}</q-tooltip>
+            <q-tooltip>{{ $t("BucketManager.tooltips.add_button") }}</q-tooltip>
           </q-btn>
         </q-item-section>
       </q-item>
@@ -86,7 +98,9 @@
           <router-link to="/move-tokens" style="text-decoration: none">
             <q-btn color="primary" outline>
               {{ $t("BucketDetail.move") }}
-              <q-tooltip>{{ $t('BucketManager.tooltips.move_button') }}</q-tooltip>
+              <q-tooltip>{{
+                $t("BucketManager.tooltips.move_button")
+              }}</q-tooltip>
             </q-btn>
           </router-link>
         </q-item-section>
@@ -121,7 +135,7 @@
         >
           <template #label>
             <div class="row items-center no-wrap">
-              <span>{{ $t('BucketManager.inputs.description') }}</span>
+              <span>{{ $t("BucketManager.inputs.description") }}</span>
               <InfoTooltip
                 class="q-ml-xs"
                 :text="$t('BucketManager.tooltips.description')"
@@ -138,7 +152,7 @@
         >
           <template #label>
             <div class="row items-center no-wrap">
-              <span>{{ $t('BucketManager.inputs.goal') }}</span>
+              <span>{{ $t("BucketManager.inputs.goal") }}</span>
               <InfoTooltip
                 class="q-ml-xs"
                 :text="$t('BucketManager.tooltips.goal')"
@@ -146,14 +160,10 @@
             </div>
           </template>
         </q-input>
-        <q-input
-          v-model="form.creatorPubkey"
-          outlined
-          class="q-mb-sm"
-        >
+        <q-input v-model="form.creatorPubkey" outlined class="q-mb-sm">
           <template #label>
             <div class="row items-center no-wrap">
-              <span>{{ $t('BucketManager.inputs.creator_pubkey') }}</span>
+              <span>{{ $t("BucketManager.inputs.creator_pubkey") }}</span>
               <InfoTooltip
                 class="q-ml-xs"
                 :text="$t('BucketManager.tooltips.creator_pubkey')"
@@ -235,7 +245,13 @@ export default defineComponent({
 
     const openAdd = () => {
       editId.value = null;
-      form.value = { name: "", color: DEFAULT_COLOR, description: "", goal: null, creatorPubkey: "" };
+      form.value = {
+        name: "",
+        color: DEFAULT_COLOR,
+        description: "",
+        goal: null,
+        creatorPubkey: "",
+      };
       showForm.value = true;
     };
 
@@ -265,13 +281,13 @@ export default defineComponent({
 
     const handleDrop = async (ev, id) => {
       ev.preventDefault();
-      const data = ev.dataTransfer?.getData('text/plain');
+      const data = ev.dataTransfer?.getData("text/plain");
       if (!data) return;
       let secrets;
       try {
         secrets = JSON.parse(data);
       } catch (e) {
-        secrets = data.split(',');
+        secrets = data.split(",");
       }
       if (Array.isArray(secrets) && secrets.length) {
         await proofsStore.moveProofs(secrets, id);
@@ -320,6 +336,7 @@ export default defineComponent({
       deleteBucket,
       formatCurrency,
       handleDrop,
+      DEFAULT_COLOR,
     };
   },
 });
