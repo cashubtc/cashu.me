@@ -1290,6 +1290,11 @@ timelock: {
     },
     not_found: "Bucket not found.",
   },
+  MoveTokens: {
+    title: "Move tokens",
+    empty: "No tokens",
+    helper: "Move tokens between buckets to organize them.",
+  },
   restore: {
     mnemonic_error_text: "الرجاء إدخال كلمة تذكيرية",
     restore_mint_error_text: "خطأ في استعادة mint: { error }",

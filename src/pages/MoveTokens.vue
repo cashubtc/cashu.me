@@ -1,6 +1,7 @@
 <template>
   <div class="q-pa-md">
-    <h5 class="q-my-none q-mb-md">{{ $t("MoveTokens.title") }}</h5>
+    <h5 class="q-my-none q-mb-none">{{ $t("MoveTokens.title") }}</h5>
+    <div class="text-body2 q-mb-md">{{ $t('MoveTokens.helper') }}</div>
     <q-select
       dense
       outlined
