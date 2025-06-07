@@ -1300,6 +1300,11 @@ timelock: {
     },
     not_found: "Bucket not found.",
   },
+  MoveTokens: {
+    title: "Move tokens",
+    empty: "No tokens",
+    helper: "Move tokens between buckets to organize them.",
+  },
   restore: {
     mnemonic_error_text: "Παρακαλώ εισαγάγετε ένα μνημονικό",
     restore_mint_error_text: "Σφάλμα κατά την επαναφορά του mint: { error }",

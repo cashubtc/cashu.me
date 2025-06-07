@@ -1280,6 +1280,11 @@ timelock: {
     },
     not_found: "Bucket not found.",
   },
+  MoveTokens: {
+    title: "Move tokens",
+    empty: "No tokens",
+    helper: "Move tokens between buckets to organize them.",
+  },
   restore: {
     mnemonic_error_text: "Ange en mnemonisk fras",
     restore_mint_error_text: "Fel vid återställning av mint: { error }",

@@ -1448,6 +1448,7 @@ export default {
   MoveTokens: {
     title: "Move tokens",
     empty: "No tokens",
+    helper: "Move tokens between buckets to organize them.",
   },
   LockedTokensTable: {
     empty_text: "No locked tokens",
