@@ -128,7 +128,7 @@ export default defineComponent({
       showSubscribeDialog.value = true;
     };
 
-    const confirmSubscribe = async ({ months, amount, startDate }: any) => {
+    const confirmSubscribe = async ({ months, amount, startDate, total }: any) => {
       const tokens = await donationStore.createDonationPreset(
         months,
         amount,
@@ -152,7 +152,7 @@ export default defineComponent({
       } catch {}
       await nostr.sendNip04DirectMessage(
         creatorNpub,
-        `${supporterName} just subscribed to ${selectedTier.value.name}. Here is your receipt:\n${tokens}`,
+        `${supporterName} just subscribed to ${selectedTier.value.name} for ${total} sats. Here is your receipt:\n${tokens}`,
       );
       showSubscribeDialog.value = false;
     };

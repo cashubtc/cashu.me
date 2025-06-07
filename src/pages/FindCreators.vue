@@ -123,7 +123,7 @@ function openSubscribe(tier: any) {
   showSubscribeDialog.value = true;
 }
 
-async function confirmSubscribe({ months, amount, startDate }: any) {
+async function confirmSubscribe({ months, amount, startDate, total }: any) {
   if (!dialogPubkey.value) return;
   const tokens = await donationStore.createDonationPreset(
     months,
@@ -148,7 +148,7 @@ async function confirmSubscribe({ months, amount, startDate }: any) {
   } catch {}
   await nostr.sendNip04DirectMessage(
     dialogPubkey.value,
-    `${supporterName} just subscribed to ${selectedTier.value.name}. Here is your receipt:\n${tokens}`,
+    `${supporterName} just subscribed to ${selectedTier.value.name} for ${total} sats. Here is your receipt:\n${tokens}`,
   );
   showSubscribeDialog.value = false;
   showTierDialog.value = false;
