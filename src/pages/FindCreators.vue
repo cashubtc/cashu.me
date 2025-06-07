@@ -7,6 +7,12 @@
       title="Find Creators"
     />
     <DonateDialog v-model="showDonateDialog" @confirm="handleDonate" />
+    <SubscribeDialog
+      v-model="showSubscribeDialog"
+      :tier="selectedTier"
+      :supporter-pubkey="nostr.pubkey"
+      @confirm="confirmSubscribe"
+    />
     <SendTokenDialog />
     <QDialog v-model="showTierDialog">
       <QCard class="tier-dialog">
@@ -30,7 +36,12 @@
                 </ul>
               </QCardSection>
               <QCardActions align="right" class="subscribe-container">
-                <QBtn label="Subscribe" color="primary" class="subscribe-btn" />
+                <QBtn
+                  label="Subscribe"
+                  color="primary"
+                  class="subscribe-btn"
+                  @click="openSubscribe(t)"
+                />
               </QCardActions>
             </QCard>
           </div>
@@ -43,10 +54,14 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onBeforeUnmount, nextTick } from 'vue';
 import DonateDialog from 'components/DonateDialog.vue';
+import SubscribeDialog from 'components/SubscribeDialog.vue';
 import SendTokenDialog from 'components/SendTokenDialog.vue';
 import { useSendTokensStore } from 'stores/sendTokensStore';
 import { useDonationPresetsStore } from 'stores/donationPresets';
+import { useLockedTokensStore } from 'stores/lockedTokens';
 import { useCreatorsStore } from 'stores/creators';
+import { useNostrStore } from 'stores/nostr';
+import { DEFAULT_BUCKET_ID } from 'stores/buckets';
 import { QDialog, QCard, QCardSection, QCardActions, QBtn, QSeparator } from 'quasar';
 import { nip19 } from 'nostr-tools';
 
@@ -58,8 +73,12 @@ const dialogPubkey = ref('');
 
 const sendTokensStore = useSendTokensStore();
 const donationStore = useDonationPresetsStore();
+const lockedStore = useLockedTokensStore();
 const creators = useCreatorsStore();
+const nostr = useNostrStore();
 const tiers = computed(() => creators.tiersMap[dialogPubkey.value] || []);
+const showSubscribeDialog = ref(false);
+const selectedTier = ref<any>(null);
 
 function getPrice(t: any): number {
   return t.price_sats ?? t.price ?? 0;
@@ -84,6 +103,40 @@ async function onMessage(ev: MessageEvent) {
     await nextTick();
     showTierDialog.value = true;
   }
+}
+
+function openSubscribe(t: any) {
+  selectedTier.value = t;
+  showSubscribeDialog.value = true;
+}
+
+async function confirmSubscribe({ months, amount }: any) {
+  if (!dialogPubkey.value) return;
+  const token = await donationStore.createDonationPreset(
+    months,
+    amount,
+    dialogPubkey.value,
+  );
+  if (token) {
+    lockedStore.addLockedToken({
+      amount,
+      token,
+      pubkey: dialogPubkey.value,
+      bucketId: DEFAULT_BUCKET_ID,
+    });
+    let supporterName = nostr.pubkey;
+    try {
+      const prof = await nostr.getProfile(nostr.pubkey);
+      supporterName =
+        prof?.display_name || prof?.name || prof?.username || nostr.pubkey;
+    } catch {}
+    await nostr.sendNip04DirectMessage(
+      dialogPubkey.value,
+      `${supporterName} just subscribed to ${selectedTier.value.name}. Here is your receipt:\n${token}`,
+    );
+  }
+  showSubscribeDialog.value = false;
+  showTierDialog.value = false;
 }
 
 function handleDonate({ bucketId, locked, type, amount, months, message }: any) {
