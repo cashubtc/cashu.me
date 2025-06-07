@@ -64,7 +64,7 @@ import { useNostrStore } from 'stores/nostr';
 import { useMintsStore } from 'stores/mints';
 import { notifyError, notifySuccess } from 'src/js/notify';
 import { useI18n } from 'vue-i18n';
-import { QDialog, QCard, QCardSection, QCardActions, QBtn, QSeparator } from 'quasar';
+import { QDialog, QCard, QCardSection, QCardActions, QBtn, QSeparator, Loading } from 'quasar';
 import { nip19 } from 'nostr-tools';
 
 const iframeEl = ref<HTMLIFrameElement | null>(null);
@@ -124,6 +124,7 @@ function openSubscribe(tier: any) {
 
 async function confirmSubscribe({ bucketId, months, amount, startDate, total }: any) {
   if (!dialogPubkey.value) return;
+  Loading.show({ message: 'Loading...' });
   try {
     const tokens = await donationStore.createDonationPreset(
       months,
@@ -146,15 +147,21 @@ async function confirmSubscribe({ bucketId, months, amount, startDate, total }: 
       supporterName =
         prof?.display_name || prof?.name || prof?.username || nostr.pubkey;
     } catch {}
-    await nostr.sendNip04DirectMessage(
+    const ev = await nostr.sendNip04DirectMessage(
       dialogPubkey.value,
       `${supporterName} just subscribed to ${selectedTier.value.name} for ${total} sats. Here is your receipt:\n${tokens}`,
     );
-    notifySuccess(t('FindCreators.notifications.subscription_success'));
+    if (ev) {
+      notifySuccess(t('FindCreators.notifications.subscription_success'));
+    } else {
+      notifyError('Failed to send direct message');
+    }
     showSubscribeDialog.value = false;
     showTierDialog.value = false;
   } catch (e: any) {
     notifyError(e.message);
+  } finally {
+    Loading.hide();
   }
 }
 

@@ -82,6 +82,7 @@ import SubscribeDialog from 'components/SubscribeDialog.vue';
 import { useMintsStore } from 'stores/mints';
 import { notifyError, notifySuccess } from 'src/js/notify';
 import { useI18n } from 'vue-i18n';
+import { Loading } from 'quasar';
 import { renderMarkdown as renderMarkdownFn } from 'src/js/simple-markdown';
 import PaywalledContent from 'components/PaywalledContent.vue';
 
@@ -128,6 +129,7 @@ export default defineComponent({
     };
 
     const confirmSubscribe = async ({ bucketId, months, amount, startDate, total }: any) => {
+      Loading.show({ message: 'Loading...' });
       try {
         const tokens = await donationStore.createDonationPreset(
           months,
@@ -150,14 +152,20 @@ export default defineComponent({
           supporterName =
             prof?.display_name || prof?.name || prof?.username || nostr.pubkey;
         } catch {}
-        await nostr.sendNip04DirectMessage(
+        const ev = await nostr.sendNip04DirectMessage(
           creatorNpub,
           `${supporterName} just subscribed to ${selectedTier.value.name} for ${total} sats. Here is your receipt:\n${tokens}`,
         );
-        notifySuccess(t('FindCreators.notifications.subscription_success'));
+        if (ev) {
+          notifySuccess(t('FindCreators.notifications.subscription_success'));
+        } else {
+          notifyError('Failed to send direct message');
+        }
         showSubscribeDialog.value = false;
       } catch (e: any) {
         notifyError(e.message);
+      } finally {
+        Loading.hide();
       }
     };
     function renderMarkdown(text: string): string {
