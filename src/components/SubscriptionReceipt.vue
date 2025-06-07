@@ -3,7 +3,13 @@
     <q-card class="q-pa-md qcard" style="min-width:300px">
       <q-card-section class="text-h6">{{ $t('SubscriptionReceipt.title') }}</q-card-section>
       <q-card-section>
-        <q-input v-model="token" readonly type="textarea" autogrow style="font-family: monospace" />
+        <q-input
+          :model-value="token"
+          readonly
+          type="textarea"
+          autogrow
+          style="font-family: monospace"
+        />
       </q-card-section>
       <q-card-actions align="right">
         <q-btn flat color="primary" @click="copyToken">{{ $t('global.actions.copy.label') }}</q-btn>
