@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { shallowMount } from '@vue/test-utils'
-import MoveProofs from '../../src/pages/MoveProofs.vue'
+import MoveTokens from '../../src/pages/MoveTokens.vue'
 
 const moveProofsMock = vi.fn()
 
@@ -33,9 +33,9 @@ beforeEach(() => {
   moveProofsMock.mockReset()
 })
 
-describe('MoveProofs component', () => {
+describe('MoveTokens component', () => {
   it('toggles token selection', () => {
-    const wrapper = shallowMount(MoveProofs)
+    const wrapper = shallowMount(MoveTokens)
     const vm: any = wrapper.vm
 
     vm.toggleProof('s1', true)
@@ -46,7 +46,7 @@ describe('MoveProofs component', () => {
   })
 
   it('moves selected tokens', async () => {
-    const wrapper = shallowMount(MoveProofs)
+    const wrapper = shallowMount(MoveTokens)
     const vm: any = wrapper.vm
     vm.selectedSecrets = ['a', 'b']
     vm.targetBucketId = 'b2'

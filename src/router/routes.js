@@ -67,10 +67,10 @@ const routes = [
     children: [{ path: "", component: () => import("src/pages/Buckets.vue") }],
   },
   {
-    path: "/move-proofs",
+    path: "/move-tokens",
     component: () => import("layouts/FullscreenLayout.vue"),
     children: [
-      { path: "", component: () => import("src/pages/MoveProofs.vue") },
+      { path: "", component: () => import("src/pages/MoveTokens.vue") },
     ],
   },
   {

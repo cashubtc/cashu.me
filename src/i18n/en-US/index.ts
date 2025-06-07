@@ -1394,6 +1394,7 @@ export default {
     actions: {
       add: "Create new Bucket",
       delete: "Delete",
+      edit: "Edit"
     },
     inputs: {
       name: "Name",
@@ -1404,6 +1405,16 @@ export default {
     },
     tooltips: {
       description: "Buckets are for categorizing tokens",
+      goal: "Set a target amount for this bucket",
+      creator_pubkey: "Nostr pubkey to receive locked tokens",
+      add_button: "Add a new bucket",
+      edit_button: "Edit this bucket",
+      delete_button: "Remove this bucket",
+      move_button: "Move tokens between buckets"
+    },
+    helper: {
+      intro:
+        "Buckets let you organize tokens. Drag tokens into a bucket or use the 'Move tokens' button."
     },
     validation: {
       name: "Name is required",
@@ -1430,7 +1441,7 @@ export default {
     },
     not_found: "Bucket not found.",
   },
-  MoveProofs: {
+  MoveTokens: {
     title: "Move tokens",
     empty: "No tokens",
   },
