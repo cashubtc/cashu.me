@@ -1367,6 +1367,20 @@
                       $t("Settings.appearance.theme.tooltips.flamingo")
                     }}</q-tooltip>
                   </q-btn>
+                  <q-btn
+                    v-if="themes.includes('modern')"
+                    dense
+                    flat
+                    @click="changeColor('modern')"
+                    icon="format_color_fill"
+                    color="blue-4"
+                    size="md"
+                    :aria-label="$t('Settings.appearance.theme.tooltips.modern')"
+                    :title="$t('Settings.appearance.theme.tooltips.modern')"
+                    ><q-tooltip>{{
+                      $t('Settings.appearance.theme.tooltips.modern')
+                    }}</q-tooltip>
+                  </q-btn>
                 </div>
               </q-item-section>
             </q-item>
@@ -1766,6 +1780,7 @@ export default defineComponent({
         "freedom",
         "cyber",
         "flamingo",
+        "modern",
       ],
       selectedLanguage: navigator.language || "en-US",
       languageOptions: [

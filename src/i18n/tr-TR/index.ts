@@ -383,6 +383,7 @@ export default {
           nut: "ceviz",
           blu: "mavi",
           flamingo: "flamingo",
+          modern: "modern",
         },
       },
     },

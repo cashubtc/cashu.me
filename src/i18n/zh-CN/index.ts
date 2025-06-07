@@ -376,6 +376,7 @@ export default {
           nut: "坚果",
           blu: "蓝色",
           flamingo: "火烈鸟",
+          modern: "modern",
         },
       },
     },
