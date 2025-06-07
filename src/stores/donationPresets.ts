@@ -18,12 +18,16 @@ const DEFAULT_PRESETS: DonationPreset[] = [
 ];
 
 export const useDonationPresetsStore = defineStore("donationPresets", {
-  state: () => ({
-    presets: useLocalStorage<DonationPreset[]>(
+  state: () => {
+    const presets = useLocalStorage<DonationPreset[]>(
       "cashu.donationPresets",
       DEFAULT_PRESETS
-    ),
-  }),
+    );
+    if (!presets.value.find((p) => p.months === 1)) {
+      presets.value.unshift({ months: 1 });
+    }
+    return { presets };
+  },
   actions: {
     async createDonationPreset(
       months: number | undefined,

@@ -40,6 +40,7 @@ describe("Donation presets", () => {
   it("has default presets", () => {
     const store = useDonationPresetsStore();
     expect(store.presets.length).toBe(4);
+    expect(store.presets[0].months).toBe(1);
   });
 
   it("calls sendToLock with sequential locktimes", async () => {
