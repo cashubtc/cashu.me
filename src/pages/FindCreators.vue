@@ -23,13 +23,23 @@
         </QCardSection>
         <QSeparator />
         <QCardSection>
-          <div v-if="!tiers.length" class="text-center">Creator has no subscription tiers</div>
+          <div v-if="!tiers.length" class="text-center">
+            Creator has no subscription tiers
+          </div>
           <div v-else>
-            <QCard v-for="t in tiers" :key="t.id" flat bordered class="q-mb-md tier-card">
+            <QCard
+              v-for="t in tiers"
+              :key="t.id"
+              flat
+              bordered
+              class="q-mb-md tier-card"
+            >
               <QCardSection>
                 <div class="row items-center justify-between">
                   <div class="text-subtitle1">{{ t.name }}</div>
-                  <div class="text-subtitle2 text-primary">{{ getPrice(t) }} sats/month</div>
+                  <div class="text-subtitle2 text-primary">
+                    {{ getPrice(t) }} sats/month
+                  </div>
                 </div>
                 <div class="q-mt-sm">{{ t.description }}</div>
                 <ul class="q-pl-md q-mt-xs text-caption">
@@ -53,27 +63,35 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onBeforeUnmount, nextTick } from 'vue';
-import DonateDialog from 'components/DonateDialog.vue';
-import SubscribeDialog from 'components/SubscribeDialog.vue';
-import SubscriptionReceipt from 'components/SubscriptionReceipt.vue';
-import SendTokenDialog from 'components/SendTokenDialog.vue';
-import { useSendTokensStore } from 'stores/sendTokensStore';
-import { useDonationPresetsStore } from 'stores/donationPresets';
-import { useLockedTokensStore } from 'stores/lockedTokens';
-import { useCreatorsStore } from 'stores/creators';
-import { useNostrStore } from 'stores/nostr';
-import { useMintsStore } from 'stores/mints';
-import { notifyError, notifySuccess } from 'src/js/notify';
-import { useI18n } from 'vue-i18n';
-import { QDialog, QCard, QCardSection, QCardActions, QBtn, QSeparator, Loading } from 'quasar';
-import { nip19 } from 'nostr-tools';
+import { ref, computed, onMounted, onBeforeUnmount, nextTick } from "vue";
+import DonateDialog from "components/DonateDialog.vue";
+import SubscribeDialog from "components/SubscribeDialog.vue";
+import SubscriptionReceipt from "components/SubscriptionReceipt.vue";
+import SendTokenDialog from "components/SendTokenDialog.vue";
+import { useSendTokensStore } from "stores/sendTokensStore";
+import { useDonationPresetsStore } from "stores/donationPresets";
+import { useLockedTokensStore } from "stores/lockedTokens";
+import { useCreatorsStore } from "stores/creators";
+import { useNostrStore } from "stores/nostr";
+import { useMintsStore } from "stores/mints";
+import { notifyError, notifySuccess } from "src/js/notify";
+import { useI18n } from "vue-i18n";
+import {
+  QDialog,
+  QCard,
+  QCardSection,
+  QCardActions,
+  QBtn,
+  QSeparator,
+  Loading,
+} from "quasar";
+import { nip19 } from "nostr-tools";
 
 const iframeEl = ref<HTMLIFrameElement | null>(null);
 const showDonateDialog = ref(false);
-const selectedPubkey = ref('');
+const selectedPubkey = ref("");
 const showTierDialog = ref(false);
-const dialogPubkey = ref('');
+const dialogPubkey = ref("");
 
 const sendTokensStore = useSendTokensStore();
 const donationStore = useDonationPresetsStore();
@@ -85,7 +103,7 @@ const { t } = useI18n();
 const tiers = computed(() => creators.tiersMap[dialogPubkey.value] || []);
 const showSubscribeDialog = ref(false);
 const showReceiptDialog = ref(false);
-const receiptToken = ref('');
+const receiptToken = ref("");
 const selectedTier = ref<any>(null);
 
 function getPrice(t: any): number {
@@ -95,17 +113,17 @@ function getPrice(t: any): number {
 function bech32ToHex(pubkey: string): string {
   try {
     const decoded = nip19.decode(pubkey);
-    return typeof decoded.data === 'string' ? decoded.data : pubkey;
+    return typeof decoded.data === "string" ? decoded.data : pubkey;
   } catch {
     return pubkey;
   }
 }
 
 async function onMessage(ev: MessageEvent) {
-  if (ev.data && ev.data.type === 'donate' && ev.data.pubkey) {
+  if (ev.data && ev.data.type === "donate" && ev.data.pubkey) {
     selectedPubkey.value = ev.data.pubkey;
     showDonateDialog.value = true;
-  } else if (ev.data && ev.data.type === 'viewProfile' && ev.data.pubkey) {
+  } else if (ev.data && ev.data.type === "viewProfile" && ev.data.pubkey) {
     await creators.fetchTierDefinitions(ev.data.pubkey);
     dialogPubkey.value = ev.data.pubkey;
     await nextTick();
@@ -119,23 +137,29 @@ function openSubscribe(tier: any) {
     ? info.nut_supports
     : Object.keys(info.nuts || {}).map((n) => Number(n));
   if (!(nuts.includes(10) && nuts.includes(11))) {
-    notifyError(t('wallet.notifications.lock_not_supported'));
+    notifyError(t("wallet.notifications.lock_not_supported"));
     return;
   }
   selectedTier.value = tier;
   showSubscribeDialog.value = true;
 }
 
-async function confirmSubscribe({ bucketId, months, amount, startDate, total }: any) {
+async function confirmSubscribe({
+  bucketId,
+  months,
+  amount,
+  startDate,
+  total,
+}: any) {
   if (!dialogPubkey.value) return;
-  Loading.show({ message: 'Loading...' });
+  Loading.show({ message: "Loading..." });
   try {
     const tokens = await donationStore.createDonationPreset(
       months,
       amount,
       dialogPubkey.value,
       bucketId,
-      startDate,
+      startDate
     );
     if (months === undefined || months <= 0) {
       lockedStore.addLockedToken({
@@ -151,14 +175,14 @@ async function confirmSubscribe({ bucketId, months, amount, startDate, total }: 
       supporterName =
         prof?.display_name || prof?.name || prof?.username || nostr.pubkey;
     } catch {}
-    const ev = await nostr.sendNip04DirectMessage(
+    const { success } = await nostr.sendNip04DirectMessage(
       dialogPubkey.value,
-      `${supporterName} just subscribed to ${selectedTier.value.name} for ${total} sats. Here is your receipt:\n${tokens}`,
+      `${supporterName} just subscribed to ${selectedTier.value.name} for ${total} sats. Here is your receipt:\n${tokens}`
     );
-    if (ev) {
-      notifySuccess(t('FindCreators.notifications.subscription_success'));
+    if (success) {
+      notifySuccess(t("FindCreators.notifications.subscription_success"));
     } else {
-      notifyError('Failed to send direct message');
+      notifyWarning(t("wallet.notifications.nostr_dm_failed"));
     }
     receiptToken.value = tokens;
     showReceiptDialog.value = true;
@@ -171,16 +195,23 @@ async function confirmSubscribe({ bucketId, months, amount, startDate, total }: 
   }
 }
 
-function handleDonate({ bucketId, locked, type, amount, months, message }: any) {
+function handleDonate({
+  bucketId,
+  locked,
+  type,
+  amount,
+  months,
+  message,
+}: any) {
   if (!selectedPubkey.value) return;
-  if (type === 'one-time') {
+  if (type === "one-time") {
     sendTokensStore.clearSendData();
     sendTokensStore.recipientPubkey = selectedPubkey.value;
     sendTokensStore.sendViaNostr = true;
     sendTokensStore.sendData.bucketId = bucketId;
     sendTokensStore.sendData.amount = amount;
     sendTokensStore.sendData.memo = message;
-    sendTokensStore.sendData.p2pkPubkey = locked ? selectedPubkey.value : '';
+    sendTokensStore.sendData.p2pkPubkey = locked ? selectedPubkey.value : "";
     sendTokensStore.showLockInput = locked;
     showDonateDialog.value = false;
     sendTokensStore.showSendTokens = true;
@@ -189,18 +220,18 @@ function handleDonate({ bucketId, locked, type, amount, months, message }: any) 
       months,
       amount,
       selectedPubkey.value,
-      bucketId,
+      bucketId
     );
     showDonateDialog.value = false;
   }
 }
 
 onMounted(() => {
-  window.addEventListener('message', onMessage);
+  window.addEventListener("message", onMessage);
 });
 
 onBeforeUnmount(() => {
-  window.removeEventListener('message', onMessage);
+  window.removeEventListener("message", onMessage);
 });
 </script>
 

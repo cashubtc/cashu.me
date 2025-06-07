@@ -432,7 +432,7 @@ export const useNostrStore = defineStore("nostr", {
       message: string,
       privKey?: string,
       pubKey?: string
-    ) {
+    ): Promise<{ success: boolean; event: NDKEvent | null }> {
       recipient = this.resolvePubkey(recipient);
       if (pubKey) {
         pubKey = this.resolvePubkey(pubKey);
@@ -462,11 +462,11 @@ export const useNostrStore = defineStore("nostr", {
       try {
         await pool.publish(this.relays, nostrEvent);
         notifySuccess("NIP-04 event published");
-        return event;
+        return { success: true, event };
       } catch (e) {
         console.error(e);
         notifyError("Could not publish NIP-04 event");
-        return null;
+        return { success: false, event: null };
       }
     },
     subscribeToNip04DirectMessages: async function () {
@@ -804,7 +804,7 @@ export function getEventHash(event: NostrEvent): string {
 
 export async function signEvent(
   event: NostrEvent,
-  privkey: string,
+  privkey: string
 ): Promise<string> {
   try {
     const signed = finalizeEvent(event as any, hexToBytes(privkey));
@@ -826,10 +826,7 @@ export async function publishEvent(event: NostrEvent): Promise<void> {
   }
 }
 
-export function subscribeToNostr(
-  filter: any,
-  cb: (ev: NostrEvent) => void,
-) {
+export function subscribeToNostr(filter: any, cb: (ev: NostrEvent) => void) {
   const relays = useSettingsStore().defaultNostrRelays;
   const pool = new SimplePool();
   try {

@@ -117,9 +117,10 @@ describe("sendNip04DirectMessage", () => {
     const store = useNostrStore();
     const promise = store.sendNip04DirectMessage("r", "m");
     vi.runAllTimers();
-    const ev = await promise;
-    expect(ev).not.toBeNull();
-    expect(ev!.sig).toBeDefined();
+    const res = await promise;
+    expect(res.success).toBe(true);
+    expect(res.event).not.toBeNull();
+    expect(res.event!.sig).toBeDefined();
     const used = encryptMock.mock.calls[0][0];
     const parsed = JSON.parse(used);
     expect(parsed.sig).toBeDefined();
@@ -127,19 +128,20 @@ describe("sendNip04DirectMessage", () => {
 
   it("constructs event with correct kind and tags", async () => {
     const store = useNostrStore();
-    const ev = await store.sendNip04DirectMessage("receiver", "msg");
+    const res = await store.sendNip04DirectMessage("receiver", "msg");
     vi.runAllTimers();
-    expect(ev!.kind).toBe(NDKKind.EncryptedDirectMessage);
-    expect(ev!.tags).toContainEqual(["p", "receiver"]);
-    expect(ev!.tags).toContainEqual(["p", store.seedSignerPublicKey]);
+    expect(res.event!.kind).toBe(NDKKind.EncryptedDirectMessage);
+    expect(res.event!.tags).toContainEqual(["p", "receiver"]);
+    expect(res.event!.tags).toContainEqual(["p", store.seedSignerPublicKey]);
   });
 
   it("generates keypair if not set", async () => {
     const store = useNostrStore();
     expect(store.seedSignerPrivateKey).toBe("");
-    const ev = await store.sendNip04DirectMessage("receiver", "msg");
+    const res = await store.sendNip04DirectMessage("receiver", "msg");
     vi.runAllTimers();
-    expect(ev).not.toBeNull();
+    expect(res.success).toBe(true);
+    expect(res.event).not.toBeNull();
     expect(store.seedSignerPrivateKey).not.toBe("");
   });
 
@@ -148,8 +150,9 @@ describe("sendNip04DirectMessage", () => {
     publishSuccess = false;
     const promise = store.sendNip04DirectMessage("r", "m");
     vi.runAllTimers();
-    const ev = await promise;
-    expect(ev).toBeNull();
+    const res = await promise;
+    expect(res.success).toBe(false);
+    expect(res.event).toBeNull();
     expect(notifyError).toHaveBeenCalled();
     publishSuccess = true;
   });

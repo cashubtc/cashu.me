@@ -33,7 +33,13 @@
         Creator has no subscription tiers
       </div>
       <div v-else>
-        <q-card v-for="t in tiers" :key="t.id" flat bordered class="q-mb-md tier-card">
+        <q-card
+          v-for="t in tiers"
+          :key="t.id"
+          flat
+          bordered
+          class="q-mb-md tier-card"
+        >
           <q-card-section class="row items-center justify-between bg-grey-2">
             <div class="text-subtitle1">{{ t.name }}</div>
             <div class="text-subtitle2">
@@ -46,7 +52,9 @@
           <q-card-section>
             <div class="text-body1 q-mb-sm">{{ t.description }}</div>
             <ul class="q-pl-md q-mb-none">
-              <li v-for="benefit in t.benefits" :key="benefit">{{ benefit }}</li>
+              <li v-for="benefit in t.benefits" :key="benefit">
+                {{ benefit }}
+              </li>
             </ul>
             <div class="q-mt-md text-right subscribe-container">
               <q-btn
@@ -71,22 +79,22 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, onMounted, computed } from 'vue';
-import { useRoute } from 'vue-router';
-import { useCreatorsStore } from 'stores/creators';
-import { useNostrStore } from 'stores/nostr';
-import { useDonationPresetsStore } from 'stores/donationPresets';
-import { useLockedTokensStore } from 'stores/lockedTokens';
-import { usePriceStore } from 'stores/price';
-import { useUiStore } from 'stores/ui';
-import SubscribeDialog from 'components/SubscribeDialog.vue';
-import SubscriptionReceipt from 'components/SubscriptionReceipt.vue';
-import { useMintsStore } from 'stores/mints';
-import { notifyError, notifySuccess } from 'src/js/notify';
-import { useI18n } from 'vue-i18n';
-import { Loading } from 'quasar';
-import { renderMarkdown as renderMarkdownFn } from 'src/js/simple-markdown';
-import PaywalledContent from 'components/PaywalledContent.vue';
+import { defineComponent, ref, onMounted, computed } from "vue";
+import { useRoute } from "vue-router";
+import { useCreatorsStore } from "stores/creators";
+import { useNostrStore } from "stores/nostr";
+import { useDonationPresetsStore } from "stores/donationPresets";
+import { useLockedTokensStore } from "stores/lockedTokens";
+import { usePriceStore } from "stores/price";
+import { useUiStore } from "stores/ui";
+import SubscribeDialog from "components/SubscribeDialog.vue";
+import SubscriptionReceipt from "components/SubscriptionReceipt.vue";
+import { useMintsStore } from "stores/mints";
+import { notifyError, notifySuccess } from "src/js/notify";
+import { useI18n } from "vue-i18n";
+import { Loading } from "quasar";
+import { renderMarkdown as renderMarkdownFn } from "src/js/simple-markdown";
+import PaywalledContent from "components/PaywalledContent.vue";
 
 export default defineComponent({
   name: "PublicCreatorProfilePage",
@@ -107,7 +115,7 @@ export default defineComponent({
     const tiers = computed(() => creators.tiersMap[creatorNpub] || []);
     const showSubscribeDialog = ref(false);
     const showReceiptDialog = ref(false);
-    const receiptToken = ref('');
+    const receiptToken = ref("");
     const selectedTier = ref<any>(null);
     const followers = ref<number | null>(null);
     const following = ref<number | null>(null);
@@ -125,22 +133,28 @@ export default defineComponent({
         ? info.nut_supports
         : Object.keys(info.nuts || {}).map((n) => Number(n));
       if (!(nuts.includes(10) && nuts.includes(11))) {
-        notifyError(t('wallet.notifications.lock_not_supported'));
+        notifyError(t("wallet.notifications.lock_not_supported"));
         return;
       }
       selectedTier.value = tier;
       showSubscribeDialog.value = true;
     };
 
-    const confirmSubscribe = async ({ bucketId, months, amount, startDate, total }: any) => {
-      Loading.show({ message: 'Loading...' });
+    const confirmSubscribe = async ({
+      bucketId,
+      months,
+      amount,
+      startDate,
+      total,
+    }: any) => {
+      Loading.show({ message: "Loading..." });
       try {
         const tokens = await donationStore.createDonationPreset(
           months,
           amount,
           creatorNpub,
           bucketId,
-          startDate,
+          startDate
         );
         if (months === undefined || months <= 0) {
           lockedStore.addLockedToken({
@@ -156,14 +170,14 @@ export default defineComponent({
           supporterName =
             prof?.display_name || prof?.name || prof?.username || nostr.pubkey;
         } catch {}
-        const ev = await nostr.sendNip04DirectMessage(
+        const { success } = await nostr.sendNip04DirectMessage(
           creatorNpub,
-          `${supporterName} just subscribed to ${selectedTier.value.name} for ${total} sats. Here is your receipt:\n${tokens}`,
+          `${supporterName} just subscribed to ${selectedTier.value.name} for ${total} sats. Here is your receipt:\n${tokens}`
         );
-        if (ev) {
-          notifySuccess(t('FindCreators.notifications.subscription_success'));
+        if (success) {
+          notifySuccess(t("FindCreators.notifications.subscription_success"));
         } else {
-          notifyError('Failed to send direct message');
+          notifyWarning(t("wallet.notifications.nostr_dm_failed"));
         }
         receiptToken.value = tokens;
         showReceiptDialog.value = true;
