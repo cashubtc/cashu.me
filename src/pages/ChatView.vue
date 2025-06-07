@@ -3,22 +3,27 @@
     :class="[$q.dark.isActive ? 'bg-dark text-white' : 'bg-white text-dark']"
     class="flex column full-height"
   >
-    <q-header elevated reveal class="border-bottom" style="border-bottom: 1px solid rgba(0,0,0,0.1)">
+    <q-header
+      elevated
+      reveal
+      class="border-bottom"
+      style="border-bottom: 1px solid rgba(0, 0, 0, 0.1)"
+    >
       <q-toolbar class="q-pa-sm">
         <q-btn
           flat
           dense
           round
           icon="arrow_back"
-        color="primary"
-        @click="goBack"
-        aria-label="Go back"
-        class="q-mr-sm"
-      />
-      <q-avatar v-if="avatar" size="md" class="q-mr-sm">
-        <img :src="avatar" />
-      </q-avatar>
-      <q-toolbar-title class="text-h6">{{ displayName }}</q-toolbar-title>
+          color="primary"
+          @click="goBack"
+          aria-label="Go back"
+          class="q-mr-sm"
+        />
+        <q-avatar v-if="avatar" size="md" class="q-mr-sm">
+          <img :src="avatar" />
+        </q-avatar>
+        <q-toolbar-title class="text-h6">{{ displayName }}</q-toolbar-title>
       </q-toolbar>
     </q-header>
     <div class="q-pa-md scroll-area col" ref="scrollArea">
@@ -56,15 +61,22 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, computed, watch, onMounted, nextTick } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
-import { useDmChatsStore } from 'stores/dmChats';
-import { storeToRefs } from 'pinia';
-import { useNostrStore } from 'stores/nostr';
-import { sanitizeMessage } from 'src/js/message-utils';
+import {
+  defineComponent,
+  ref,
+  computed,
+  watch,
+  onMounted,
+  nextTick,
+} from "vue";
+import { useRoute, useRouter } from "vue-router";
+import { useDmChatsStore } from "stores/dmChats";
+import { storeToRefs } from "pinia";
+import { useNostrStore } from "stores/nostr";
+import { sanitizeMessage } from "src/js/message-utils";
 
 export default defineComponent({
-  name: 'ChatView',
+  name: "ChatView",
   setup() {
     const route = useRoute();
     const router = useRouter();
@@ -74,7 +86,7 @@ export default defineComponent({
     const { chats } = storeToRefs(dmStore);
     const nostrStore = useNostrStore();
     const profile = ref<any>(null);
-    const newMessage = ref('');
+    const newMessage = ref("");
     const bottomMarker = ref<HTMLElement | null>(null);
 
     const messages = computed(() => chats.value[pubkey] || []);
@@ -86,7 +98,7 @@ export default defineComponent({
     const scrollToBottom = () => {
       nextTick(() => {
         if (bottomMarker.value) {
-          bottomMarker.value.scrollIntoView({ behavior: 'smooth' });
+          bottomMarker.value.scrollIntoView({ behavior: "smooth" });
         }
       });
     };
@@ -106,26 +118,29 @@ export default defineComponent({
     const sendMessage = async () => {
       const content = newMessage.value.trim();
       if (!content) return;
-      const ev = await nostrStore.sendNip04DirectMessage(pubkey, content);
-      if (ev) {
-        dmStore.addOutgoing(ev);
-        newMessage.value = '';
+      const { success, event } = await nostrStore.sendNip04DirectMessage(
+        pubkey,
+        content
+      );
+      if (success && event) {
+        dmStore.addOutgoing(event);
+        newMessage.value = "";
       }
     };
 
     const goBack = () => {
-      router.push('/chats');
+      router.push("/chats");
     };
 
     const displayName = computed(() => {
       return (
         profile.value?.display_name ||
         profile.value?.name ||
-        pubkey.slice(0, 8) + '...' + pubkey.slice(-4)
+        pubkey.slice(0, 8) + "..." + pubkey.slice(-4)
       );
     });
 
-    const avatar = computed(() => profile.value?.picture || '');
+    const avatar = computed(() => profile.value?.picture || "");
 
     const formatDate = (ts: number) => new Date(ts * 1000).toLocaleString();
 

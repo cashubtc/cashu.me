@@ -27,15 +27,15 @@ export const useMessengerStore = defineStore("messenger", {
     relays: useSettingsStore().defaultNostrRelays,
     conversations: useLocalStorage<Record<string, MessengerMessage[]>>(
       "cashu.messenger.conversations",
-      {} as Record<string, MessengerMessage[]>,
+      {} as Record<string, MessengerMessage[]>
     ),
     unreadCounts: useLocalStorage<Record<string, number>>(
       "cashu.messenger.unread",
-      {} as Record<string, number>,
+      {} as Record<string, number>
     ),
     eventLog: useLocalStorage<MessengerMessage[]>(
       "cashu.messenger.eventLog",
-      [] as MessengerMessage[],
+      [] as MessengerMessage[]
     ),
     started: false,
     watchInitialized: false,
@@ -59,22 +59,22 @@ export const useMessengerStore = defineStore("messenger", {
     async sendDm(recipient: string, message: string) {
       this.loadIdentity();
       const nostr = useNostrStore();
-      const ev = await nostr.sendNip04DirectMessage(
+      const { success, event } = await nostr.sendNip04DirectMessage(
         recipient,
         message,
         this.privKey,
-        this.pubKey,
+        this.pubKey
       );
-      if (ev) {
-        this.addOutgoingMessage(recipient, message, ev.created_at, ev.id);
+      if (success && event) {
+        this.addOutgoingMessage(recipient, message, event.created_at, event.id);
       }
-      return ev as any;
+      return { success, event } as any;
     },
     addOutgoingMessage(
       pubkey: string,
       content: string,
       created_at?: number,
-      id?: string,
+      id?: string
     ) {
       const messageId = id || uuidv4();
       if (this.eventLog.some((m) => m.id === messageId)) return;
@@ -96,7 +96,7 @@ export const useMessengerStore = defineStore("messenger", {
       const decrypted = await nostr.decryptNip04(
         this.privKey,
         event.pubkey,
-        event.content,
+        event.content
       );
       if (this.eventLog.some((m) => m.id === event.id)) return;
       const msg: MessengerMessage = {
@@ -126,7 +126,7 @@ export const useMessengerStore = defineStore("messenger", {
               this.start();
             }
           },
-          { deep: true },
+          { deep: true }
         );
         this.watchInitialized = true;
       }
@@ -140,7 +140,7 @@ export const useMessengerStore = defineStore("messenger", {
         this.pubKey,
         async (ev, _decrypted) => {
           await this.addIncomingMessage(ev as NostrEvent);
-        },
+        }
       );
       this.started = true;
     },
@@ -181,4 +181,3 @@ export const useMessengerStore = defineStore("messenger", {
     },
   },
 });
-

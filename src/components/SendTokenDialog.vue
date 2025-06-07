@@ -94,25 +94,25 @@
             </div>
           </div>
           <div class="row items-center no-wrap q-my-sm q-py-none">
-          <div class="col-12">
-            <ChooseMint />
+            <div class="col-12">
+              <ChooseMint />
+            </div>
           </div>
-        </div>
-        <div class="row q-my-sm">
-          <div class="col-12">
-            <q-select
-              v-model="sendData.bucketId"
-              :options="bucketOptions"
-              emit-value
-              map-options
-              outlined
-              dense
-              :label="$t('BucketManager.inputs.name')"
-            />
+          <div class="row q-my-sm">
+            <div class="col-12">
+              <q-select
+                v-model="sendData.bucketId"
+                :options="bucketOptions"
+                emit-value
+                map-options
+                outlined
+                dense
+                :label="$t('BucketManager.inputs.name')"
+              />
+            </div>
           </div>
-        </div>
 
-        <q-input
+          <q-input
             ref="amountInput"
             type="number"
             v-model.number="sendData.amount"
@@ -159,63 +159,73 @@
                   <q-input
                     v-model="sendData.p2pkPubkey"
                     :label="
-                    sendData.p2pkPubkey && !isValidPubkey(sendData.p2pkPubkey)
-                      ? $t('SendTokenDialog.inputs.p2pk_pubkey.label_invalid')
-                      : $t('SendTokenDialog.inputs.p2pk_pubkey.label')
-                  "
+                      sendData.p2pkPubkey && !isValidPubkey(sendData.p2pkPubkey)
+                        ? $t('SendTokenDialog.inputs.p2pk_pubkey.label_invalid')
+                        : $t('SendTokenDialog.inputs.p2pk_pubkey.label')
+                    "
+                    outlined
+                    clearable
+                    :color="
+                      sendData.p2pkPubkey && !isValidPubkey(sendData.p2pkPubkey)
+                        ? 'red'
+                        : ''
+                    "
+                    @keyup.enter="lockTokens"
+                  ></q-input>
+                </div>
+                <div class="col-4 q-mx-md">
+                  <q-btn
+                    unelevated
+                    v-if="canPasteFromClipboard && !sendData.p2pkPubkey"
+                    icon="content_paste"
+                    @click="pasteToP2PKField"
+                    :aria-label="
+                      $t(
+                        'SendTokenDialog.actions.paste_p2pk_pubkey.tooltip_text'
+                      )
+                    "
+                    :title="
+                      $t(
+                        'SendTokenDialog.actions.paste_p2pk_pubkey.tooltip_text'
+                      )
+                    "
+                    ><q-tooltip>{{
+                      $t(
+                        "SendTokenDialog.actions.paste_p2pk_pubkey.tooltip_text"
+                      )
+                    }}</q-tooltip></q-btn
+                  >
+                  <q-btn
+                    align="center"
+                    v-if="!sendData.p2pkPubkey"
+                    flat
+                    outline
+                    color="primary"
+                    round
+                    @click="showCamera"
+                    :aria-label="$t('global.actions.scan.label')"
+                    :title="$t('global.actions.scan.label')"
+                    ><ScanIcon size="1.5em"
+                  /></q-btn>
+                </div>
+              </div>
+              <div class="row q-mt-md">
+                <q-input
+                  v-model="locktimeInput"
+                  type="datetime-local"
+                  :label="$t('SendTokenDialog.inputs.locktime.label')"
                   outlined
-                  clearable
-                  :color="
-                    sendData.p2pkPubkey && !isValidPubkey(sendData.p2pkPubkey)
-                      ? 'red'
-                      : ''
-                  "
-                  @keyup.enter="lockTokens"
-                ></q-input>
+                  dense
+                  class="col-12 q-mb-sm"
+                />
+                <q-input
+                  v-model="sendData.refundPubkey"
+                  :label="$t('SendTokenDialog.inputs.refund_pubkey.label')"
+                  outlined
+                  dense
+                  class="col-12"
+                />
               </div>
-              <div class="col-4 q-mx-md">
-                <q-btn
-                  unelevated
-                  v-if="canPasteFromClipboard && !sendData.p2pkPubkey"
-                  icon="content_paste"
-                  @click="pasteToP2PKField"
-                  :aria-label="$t('SendTokenDialog.actions.paste_p2pk_pubkey.tooltip_text')"
-                  :title="$t('SendTokenDialog.actions.paste_p2pk_pubkey.tooltip_text')"
-                  ><q-tooltip>{{
-                    $t("SendTokenDialog.actions.paste_p2pk_pubkey.tooltip_text")
-                  }}</q-tooltip></q-btn
-                >
-                <q-btn
-                  align="center"
-                v-if="!sendData.p2pkPubkey"
-                flat
-                outline
-                color="primary"
-                round
-                @click="showCamera"
-                :aria-label="$t('global.actions.scan.label')"
-                :title="$t('global.actions.scan.label')"
-                ><ScanIcon size="1.5em"
-                /></q-btn>
-              </div>
-            </div>
-            <div class="row q-mt-md">
-              <q-input
-                v-model="locktimeInput"
-                type="datetime-local"
-                :label="$t('SendTokenDialog.inputs.locktime.label')"
-              outlined
-              dense
-              class="col-12 q-mb-sm"
-            />
-            <q-input
-              v-model="sendData.refundPubkey"
-              :label="$t('SendTokenDialog.inputs.refund_pubkey.label')"
-              outlined
-              dense
-              class="col-12"
-            />
-            </div>
             </div>
           </transition>
           <div v-if="activeBalance >= sendData.amount" class="row q-mt-lg">
@@ -470,8 +480,12 @@
                     @click="
                       copyText(baseURL + '#token=' + sendData.tokensBase64)
                     "
-                    :aria-label="$t('SendTokenDialog.actions.copy_link.tooltip_text')"
-                    :title="$t('SendTokenDialog.actions.copy_link.tooltip_text')"
+                    :aria-label="
+                      $t('SendTokenDialog.actions.copy_link.tooltip_text')
+                    "
+                    :title="
+                      $t('SendTokenDialog.actions.copy_link.tooltip_text')
+                    "
                     ><q-tooltip>{{
                       $t("SendTokenDialog.actions.copy_link.tooltip_text")
                     }}</q-tooltip></q-btn
@@ -508,13 +522,21 @@
                     flat
                     :aria-label="
                       ndefSupported
-                        ? $t('SendTokenDialog.actions.write_tokens_to_card.tooltips.ndef_supported_text')
-                        : $t('SendTokenDialog.actions.write_tokens_to_card.tooltips.ndef_unsupported_text')
+                        ? $t(
+                            'SendTokenDialog.actions.write_tokens_to_card.tooltips.ndef_supported_text'
+                          )
+                        : $t(
+                            'SendTokenDialog.actions.write_tokens_to_card.tooltips.ndef_unsupported_text'
+                          )
                     "
                     :title="
                       ndefSupported
-                        ? $t('SendTokenDialog.actions.write_tokens_to_card.tooltips.ndef_supported_text')
-                        : $t('SendTokenDialog.actions.write_tokens_to_card.tooltips.ndef_unsupported_text')
+                        ? $t(
+                            'SendTokenDialog.actions.write_tokens_to_card.tooltips.ndef_supported_text'
+                          )
+                        : $t(
+                            'SendTokenDialog.actions.write_tokens_to_card.tooltips.ndef_unsupported_text'
+                          )
                     "
                   >
                     <NfcIcon />
@@ -542,7 +564,9 @@
                       closeCardScanner();
                     "
                     flat
-                    :aria-label="$t('SendTokenDialog.actions.delete.tooltip_text')"
+                    :aria-label="
+                      $t('SendTokenDialog.actions.delete.tooltip_text')
+                    "
                     :title="$t('SendTokenDialog.actions.delete.tooltip_text')"
                   >
                     <q-tooltip>{{
@@ -1166,7 +1190,7 @@ export default defineComponent({
           this.sendData.p2pkPubkey,
           bucketId,
           this.sendData.locktime || undefined,
-          this.sendData.refundPubkey || undefined,
+          this.sendData.refundPubkey || undefined
         );
         // update UI
         this.sendData.tokens = sendProofs;
@@ -1175,7 +1199,10 @@ export default defineComponent({
         if (this.sendViaNostr && this.recipientPubkey) {
           try {
             let recipient = this.recipientPubkey;
-            if (recipient.startsWith("npub") || recipient.startsWith("nprofile")) {
+            if (
+              recipient.startsWith("npub") ||
+              recipient.startsWith("nprofile")
+            ) {
               try {
                 const decoded = nip19.decode(recipient);
                 recipient =
@@ -1189,12 +1216,13 @@ export default defineComponent({
             const dmContent = this.sendData.memo
               ? `${this.sendData.memo}\n${this.sendData.tokensBase64}`
               : this.sendData.tokensBase64;
-            const ev = await useNostrStore().sendNip04DirectMessage(
-              recipient,
-              dmContent,
-            );
-            if (ev) {
-              useDmChatsStore().addOutgoing(ev);
+            const { success, event } =
+              await useNostrStore().sendNip04DirectMessage(
+                recipient,
+                dmContent
+              );
+            if (success && event) {
+              useDmChatsStore().addOutgoing(event);
               Dialog.create({
                 message: this.$t(
                   "wallet.notifications.nostr_dm_sent"
@@ -1242,20 +1270,22 @@ export default defineComponent({
           message: this.$t(
             "FindCreators.notifications.donation_sent"
           ) as string,
-          ok: { label: this.$t("FindCreators.actions.back_to_search") as string },
+          ok: {
+            label: this.$t("FindCreators.actions.back_to_search") as string,
+          },
         }).onOk(() => {
           this.showSendTokens = false;
           this.$router.push("/find-creators");
         });
 
-      if (!this.g.offline) {
-        this.onTokenPaid(historyToken);
+        if (!this.g.offline) {
+          this.onTokenPaid(historyToken);
+        }
+      } catch (error) {
+        console.error(error);
+        notifyError("Failed to send tokens");
       }
-    } catch (error) {
-      console.error(error);
-      notifyError("Failed to send tokens");
-    }
-  },
+    },
     sendTokens: async function () {
       /*
       calls send, displays token and kicks off the spendableWorker
@@ -1281,7 +1311,9 @@ export default defineComponent({
         }
       }
       if (!nostrDm) {
-        this.sendData.p2pkPubkey = this.maybeConvertNpub(this.sendData.p2pkPubkey);
+        this.sendData.p2pkPubkey = this.maybeConvertNpub(
+          this.sendData.p2pkPubkey
+        );
         if (
           this.sendData.p2pkPubkey &&
           this.isValidPubkey(this.sendData.p2pkPubkey)
@@ -1312,7 +1344,10 @@ export default defineComponent({
         if (this.sendViaNostr && this.recipientPubkey) {
           try {
             let recipient = this.recipientPubkey;
-            if (recipient.startsWith("npub") || recipient.startsWith("nprofile")) {
+            if (
+              recipient.startsWith("npub") ||
+              recipient.startsWith("nprofile")
+            ) {
               try {
                 const decoded = nip19.decode(recipient);
                 recipient =
@@ -1326,12 +1361,13 @@ export default defineComponent({
             const dmContent2 = this.sendData.memo
               ? `${this.sendData.memo}\n${this.sendData.tokensBase64}`
               : this.sendData.tokensBase64;
-            const ev = await useNostrStore().sendNip04DirectMessage(
-              recipient,
-              dmContent2,
-            );
-            if (ev) {
-              useDmChatsStore().addOutgoing(ev);
+            const { success, event } =
+              await useNostrStore().sendNip04DirectMessage(
+                recipient,
+                dmContent2
+              );
+            if (success && event) {
+              useDmChatsStore().addOutgoing(event);
               Dialog.create({
                 message: this.$t(
                   "wallet.notifications.nostr_dm_sent"
@@ -1373,14 +1409,14 @@ export default defineComponent({
         this.addPendingToken(historyToken);
         this.sendData.historyToken = historyToken;
 
-      if (!this.g.offline) {
-        this.onTokenPaid(historyToken);
+        if (!this.g.offline) {
+          this.onTokenPaid(historyToken);
+        }
+      } catch (error) {
+        console.error(error);
+        notifyError("Failed to send tokens");
       }
-    } catch (error) {
-      console.error(error);
-      notifyError("Failed to send tokens");
-    }
-  },
+    },
     pasteToP2PKField: async function () {
       console.log("pasteToParseDialog");
       const text = await useUiStore().pasteFromClipboard();
