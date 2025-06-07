@@ -1270,6 +1270,11 @@ timelock: {
     },
     not_found: "Bucket not found.",
   },
+  MoveTokens: {
+    title: "Move tokens",
+    empty: "No tokens",
+    helper: "Move tokens between buckets to organize them.",
+  },
   restore: {
     mnemonic_error_text: "请输入助记符",
     restore_mint_error_text: "恢复 Mint 错误: { error }",

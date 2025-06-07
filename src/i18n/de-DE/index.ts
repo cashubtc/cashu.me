@@ -1297,6 +1297,11 @@ export default {
     },
     not_found: "Bucket not found.",
   },
+  MoveTokens: {
+    title: "Move tokens",
+    empty: "No tokens",
+    helper: "Move tokens between buckets to organize them.",
+  },
   restore: {
     mnemonic_error_text: "Bitte geben Sie ein Mnemonisch ein",
     restore_mint_error_text: "Fehler beim Wiederherstellen der Mint: { error }",
