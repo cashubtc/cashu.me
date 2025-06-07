@@ -187,6 +187,14 @@
           <q-item-label>Chats</q-item-label>
         </q-item-section>
       </q-item>
+      <q-item v-if="needsNostrLogin" clickable @click="gotoNostrLogin">
+        <q-item-section avatar>
+          <q-icon name="vpn_key" />
+        </q-item-section>
+        <q-item-section>
+          <q-item-label>Setup Nostr Identity</q-item-label>
+        </q-item-section>
+      </q-item>
       <q-item-label header>{{
         $t("MainHeader.menu.terms.title")
       }}</q-item-label>
@@ -236,6 +244,7 @@ import { defineComponent, ref, computed } from "vue";
 import { useRouter } from "vue-router";
 import EssentialLink from "components/EssentialLink.vue";
 import { useUiStore } from "src/stores/ui";
+import { useNostrStore } from "src/stores/nostr";
 import { useI18n } from "vue-i18n";
 
 export default defineComponent({
@@ -249,6 +258,8 @@ export default defineComponent({
     const uiStore = useUiStore();
     const { t } = useI18n();
     const router = useRouter();
+    const nostrStore = useNostrStore();
+    const needsNostrLogin = computed(() => !nostrStore.privateKeySignerPrivateKey);
     const showBackButton = computed(() => true);
     const countdown = ref(0);
     let countdownInterval;
@@ -339,6 +350,11 @@ export default defineComponent({
       leftDrawerOpen.value = false;
     };
 
+    const gotoNostrLogin = () => {
+      router.push("/nostr-login");
+      leftDrawerOpen.value = false;
+    };
+
     const gotoWallet = () => {
       router.push("/wallet");
       leftDrawerOpen.value = false;
@@ -357,8 +373,10 @@ export default defineComponent({
       gotoCreatorHub,
       gotoMyProfile,
       gotoChats,
+      gotoNostrLogin,
       gotoWallet,
       showBackButton,
+      needsNostrLogin,
     };
   },
 });
