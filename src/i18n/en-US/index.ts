@@ -37,6 +37,9 @@ export default {
       send: {
         label: "Send",
       },
+      save: {
+        label: "Save",
+      },
       swap: {
         label: "Swap",
       },
@@ -1071,6 +1074,14 @@ export default {
     inputs: {
       amount: {
         placeholder: "Enter amount",
+      },
+    },
+  },
+  SubscriptionReceipt: {
+    title: "Subscription Receipt",
+    actions: {
+      save: {
+        label: "@:global.actions.save.label",
       },
     },
   },

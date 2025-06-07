@@ -13,6 +13,7 @@
       :supporter-pubkey="nostr.pubkey"
       @confirm="confirmSubscribe"
     />
+    <SubscriptionReceipt v-model="showReceiptDialog" :token="receiptToken" />
     <SendTokenDialog />
     <QDialog v-model="showTierDialog">
       <QCard class="tier-dialog">
@@ -55,6 +56,7 @@
 import { ref, computed, onMounted, onBeforeUnmount, nextTick } from 'vue';
 import DonateDialog from 'components/DonateDialog.vue';
 import SubscribeDialog from 'components/SubscribeDialog.vue';
+import SubscriptionReceipt from 'components/SubscriptionReceipt.vue';
 import SendTokenDialog from 'components/SendTokenDialog.vue';
 import { useSendTokensStore } from 'stores/sendTokensStore';
 import { useDonationPresetsStore } from 'stores/donationPresets';
@@ -82,6 +84,8 @@ const mintsStore = useMintsStore();
 const { t } = useI18n();
 const tiers = computed(() => creators.tiersMap[dialogPubkey.value] || []);
 const showSubscribeDialog = ref(false);
+const showReceiptDialog = ref(false);
+const receiptToken = ref('');
 const selectedTier = ref<any>(null);
 
 function getPrice(t: any): number {
@@ -156,6 +160,8 @@ async function confirmSubscribe({ bucketId, months, amount, startDate, total }: 
     } else {
       notifyError('Failed to send direct message');
     }
+    receiptToken.value = tokens;
+    showReceiptDialog.value = true;
     showSubscribeDialog.value = false;
     showTierDialog.value = false;
   } catch (e: any) {
