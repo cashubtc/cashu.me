@@ -30,6 +30,7 @@ export const useDonationPresetsStore = defineStore("donationPresets", {
       amount: number,
       pubkey: string,
       bucketId: string = DEFAULT_BUCKET_ID,
+      startDate?: number,
     ): Promise<string | void> {
       const walletStore = useWalletStore();
       const proofsStore = useProofsStore();
@@ -52,9 +53,10 @@ export const useDonationPresetsStore = defineStore("donationPresets", {
         return proofsStore.serializeProofs(sendProofs);
       }
 
+      const base =
+        startDate ?? Math.floor(Date.now() / 1000) + 30 * 24 * 60 * 60;
       for (let i = 0; i < months; i++) {
-        const locktime =
-          Math.floor(Date.now() / 1000) + (i + 1) * 30 * 24 * 60 * 60;
+        const locktime = base + i * 30 * 24 * 60 * 60;
         const { sendProofs } = await walletStore.sendToLock(
           proofs,
           wallet,
