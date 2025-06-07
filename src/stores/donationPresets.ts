@@ -21,7 +21,7 @@ export const useDonationPresetsStore = defineStore("donationPresets", {
   state: () => ({
     presets: useLocalStorage<DonationPreset[]>(
       "cashu.donationPresets",
-      DEFAULT_PRESETS,
+      DEFAULT_PRESETS
     ),
   }),
   actions: {
@@ -30,7 +30,7 @@ export const useDonationPresetsStore = defineStore("donationPresets", {
       amount: number,
       pubkey: string,
       bucketId: string = DEFAULT_BUCKET_ID,
-      startDate?: number,
+      startDate?: number
     ): Promise<string> {
       const walletStore = useWalletStore();
       const proofsStore = useProofsStore();
@@ -39,7 +39,7 @@ export const useDonationPresetsStore = defineStore("donationPresets", {
 
       const wallet = walletStore.wallet;
       const proofs = mintsStore.activeProofs.filter(
-        (p) => p.bucketId === bucketId,
+        (p) => p.bucketId === bucketId
       );
 
       if (!months || months <= 0) {
@@ -48,14 +48,13 @@ export const useDonationPresetsStore = defineStore("donationPresets", {
           wallet,
           amount,
           pubkey,
-          bucketId,
+          bucketId
         );
         return proofsStore.serializeProofs(sendProofs);
       }
 
       const tokens: string[] = [];
-      const base =
-        startDate ?? Math.floor(Date.now() / 1000) + 30 * 24 * 60 * 60;
+      const base = startDate ?? Math.floor(Date.now() / 1000);
       for (let i = 0; i < months; i++) {
         const locktime = base + i * 30 * 24 * 60 * 60;
         const { sendProofs } = await walletStore.sendToLock(
@@ -64,7 +63,7 @@ export const useDonationPresetsStore = defineStore("donationPresets", {
           amount,
           pubkey,
           bucketId,
-          locktime,
+          locktime
         );
         const token = proofsStore.serializeProofs(sendProofs);
         tokens.push(token);
