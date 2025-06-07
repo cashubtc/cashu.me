@@ -16,6 +16,9 @@ export default {
       close: {
         label: "Chiudi",
       },
+      ok: {
+        label: "OK",
+      },
       enter: {
         label: "Invio",
       },

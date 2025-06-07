@@ -16,6 +16,9 @@ export default {
       close: {
         label: "关闭",
       },
+      ok: {
+        label: "OK",
+      },
       enter: {
         label: "输入",
       },

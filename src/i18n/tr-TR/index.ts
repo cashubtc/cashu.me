@@ -16,6 +16,9 @@ export default {
       close: {
         label: "Kapat",
       },
+      ok: {
+        label: "OK",
+      },
       enter: {
         label: "Gir",
       },

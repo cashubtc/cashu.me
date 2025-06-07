@@ -16,6 +16,9 @@ export default {
       close: {
         label: "閉じる",
       },
+      ok: {
+        label: "OK",
+      },
       enter: {
         label: "入力",
       },

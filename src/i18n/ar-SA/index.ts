@@ -16,6 +16,9 @@ export default {
       close: {
         label: "إغلاق",
       },
+      ok: {
+        label: "OK",
+      },
       enter: {
         label: "إدخال",
       },

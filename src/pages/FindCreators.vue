@@ -61,6 +61,9 @@ import { useDonationPresetsStore } from 'stores/donationPresets';
 import { useLockedTokensStore } from 'stores/lockedTokens';
 import { useCreatorsStore } from 'stores/creators';
 import { useNostrStore } from 'stores/nostr';
+import { useMintsStore } from 'stores/mints';
+import { notifyError } from 'src/js/notify';
+import { useI18n } from 'vue-i18n';
 import { DEFAULT_BUCKET_ID } from 'stores/buckets';
 import { QDialog, QCard, QCardSection, QCardActions, QBtn, QSeparator } from 'quasar';
 import { nip19 } from 'nostr-tools';
@@ -76,6 +79,8 @@ const donationStore = useDonationPresetsStore();
 const lockedStore = useLockedTokensStore();
 const creators = useCreatorsStore();
 const nostr = useNostrStore();
+const mintsStore = useMintsStore();
+const { t } = useI18n();
 const tiers = computed(() => creators.tiersMap[dialogPubkey.value] || []);
 const showSubscribeDialog = ref(false);
 const selectedTier = ref<any>(null);
@@ -106,6 +111,11 @@ async function onMessage(ev: MessageEvent) {
 }
 
 function openSubscribe(t: any) {
+  const nutSupport = mintsStore.activeInfo?.nut_supports || [];
+  if (!(nutSupport.includes(10) && nutSupport.includes(11))) {
+    notifyError(t('wallet.notifications.lock_not_supported'));
+    return;
+  }
   selectedTier.value = t;
   showSubscribeDialog.value = true;
 }

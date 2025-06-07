@@ -16,6 +16,9 @@ export default {
       close: {
         label: "Κλείσιμο",
       },
+      ok: {
+        label: "OK",
+      },
       enter: {
         label: "Είσοδος",
       },

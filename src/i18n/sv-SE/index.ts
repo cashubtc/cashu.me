@@ -16,6 +16,9 @@ export default {
       close: {
         label: "Stäng",
       },
+      ok: {
+        label: "OK",
+      },
       enter: {
         label: "Ange",
       },

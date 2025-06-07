@@ -80,6 +80,9 @@ import { usePriceStore } from 'stores/price';
 import { useUiStore } from 'stores/ui';
 import SubscribeDialog from 'components/SubscribeDialog.vue';
 import { DEFAULT_BUCKET_ID } from 'stores/buckets';
+import { useMintsStore } from 'stores/mints';
+import { notifyError } from 'src/js/notify';
+import { useI18n } from 'vue-i18n';
 import { renderMarkdown as renderMarkdownFn } from 'src/js/simple-markdown';
 import PaywalledContent from 'components/PaywalledContent.vue';
 
@@ -95,6 +98,8 @@ export default defineComponent({
     const lockedStore = useLockedTokensStore();
     const priceStore = usePriceStore();
     const uiStore = useUiStore();
+    const mintsStore = useMintsStore();
+    const { t } = useI18n();
     const bitcoinPrice = computed(() => priceStore.bitcoinPrice);
     const profile = ref<any>({});
     const tiers = computed(() => creators.tiersMap[creatorNpub] || []);
@@ -111,6 +116,11 @@ export default defineComponent({
     });
 
     const openSubscribe = (tier: any) => {
+      const nutSupport = mintsStore.activeInfo?.nut_supports || [];
+      if (!(nutSupport.includes(10) && nutSupport.includes(11))) {
+        notifyError(t('wallet.notifications.lock_not_supported'));
+        return;
+      }
       selectedTier.value = tier;
       showSubscribeDialog.value = true;
     };
