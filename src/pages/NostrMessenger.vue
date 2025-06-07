@@ -40,7 +40,7 @@
               class="q-mr-sm"
               @click="drawer = !drawer"
             />
-            <q-toolbar-title class="text-h6">
+            <q-toolbar-title class="text-h6 ellipsis">
               Nostr Messenger
               <q-badge
                 :color="messenger.connected ? 'positive' : 'negative'"
@@ -107,3 +107,8 @@ const goBack = () => {
   router.push('/wallet');
 };
 </script>
+<style scoped>
+.q-toolbar {
+  flex-wrap: nowrap;
+}
+</style>
