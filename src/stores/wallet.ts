@@ -392,8 +392,11 @@ export const useWalletStore = defineStore("wallet", {
       refundPubkey?: string,
     ) {
       const mintStore = useMintsStore();
-      const nutSupport = mintStore.activeInfo?.nut_supports || [];
-      if (!(nutSupport.includes(10) && nutSupport.includes(11))) {
+      const info = mintStore.activeInfo || {};
+      const nuts = Array.isArray(info.nut_supports)
+        ? info.nut_supports
+        : Object.keys(info.nuts || {}).map((n) => Number(n));
+      if (!(nuts.includes(10) && nuts.includes(11))) {
         notifyError(this.t("wallet.notifications.lock_not_supported"));
         throw new Error("Mint does not support timelocks or P2PK");
       }
