@@ -130,13 +130,14 @@ export default defineComponent({
         months,
         amount,
         creatorNpub,
+        selectedTier.value.id,
       );
       if (token) {
         lockedStore.addLockedToken({
           amount,
           token,
           pubkey: creatorNpub,
-          bucketId: DEFAULT_BUCKET_ID,
+          bucketId: selectedTier.value.id,
         });
       }
       let supporterName = nostr.pubkey;

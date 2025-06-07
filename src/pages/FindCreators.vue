@@ -126,13 +126,14 @@ async function confirmSubscribe({ months, amount }: any) {
     months,
     amount,
     dialogPubkey.value,
+    selectedTier.value.id,
   );
   if (token) {
     lockedStore.addLockedToken({
       amount,
       token,
       pubkey: dialogPubkey.value,
-      bucketId: DEFAULT_BUCKET_ID,
+      bucketId: selectedTier.value.id,
     });
     let supporterName = nostr.pubkey;
     try {
