@@ -38,9 +38,15 @@ export const useDonationPresetsStore = defineStore("donationPresets", {
       const lockedStore = useLockedTokensStore();
 
       const wallet = walletStore.wallet;
-      const proofs = mintsStore.activeProofs.filter(
+      let proofs = mintsStore.activeProofs.filter(
         (p) => p.bucketId === bucketId
       );
+
+      const totalAmount = !months || months <= 0 ? amount : amount * months;
+      const available = proofs.reduce((s, p) => s + p.amount, 0);
+      if (available < totalAmount) {
+        throw new Error('Insufficient balance');
+      }
 
       if (!months || months <= 0) {
         const { sendProofs } = await walletStore.sendToLock(
@@ -74,6 +80,9 @@ export const useDonationPresetsStore = defineStore("donationPresets", {
           locktime,
           bucketId,
         });
+        proofs = mintsStore.activeProofs.filter(
+          (p) => p.bucketId === bucketId
+        );
       }
       return tokens.join("\n");
     },
