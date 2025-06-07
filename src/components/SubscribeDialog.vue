@@ -33,6 +33,9 @@
           :min="today"
           required
         />
+        <div class="q-mt-md text-right">
+          Total: {{ total }} sats
+        </div>
       </q-card-section>
       <q-card-actions align="right">
         <q-btn flat color="primary" @click="cancel">{{
@@ -64,6 +67,7 @@ export default defineComponent({
     const amount = ref(0);
     const today = new Date().toISOString().slice(0, 10);
     const startDate = ref(today);
+    const total = computed(() => amount.value * months.value);
 
     watch(
       () => props.tier,
@@ -100,6 +104,7 @@ export default defineComponent({
         months: months.value,
         amount: amount.value,
         startDate: ts,
+        total: total.value,
       });
       emit("update:modelValue", false);
     };
@@ -111,6 +116,7 @@ export default defineComponent({
       presetOptions,
       startDate,
       today,
+      total,
       cancel,
       confirm,
     };
