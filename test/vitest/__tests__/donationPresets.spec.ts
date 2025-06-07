@@ -39,7 +39,7 @@ vi.mock("../../../src/stores/mints", () => ({
 describe("Donation presets", () => {
   it("has default presets", () => {
     const store = useDonationPresetsStore();
-    expect(store.presets.length).toBe(3);
+    expect(store.presets.length).toBe(4);
   });
 
   it("calls sendToLock with sequential locktimes", async () => {
