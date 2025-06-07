@@ -21,6 +21,7 @@
       :supporter-pubkey="nostr.pubkey"
       @confirm="confirmSubscribe"
     />
+    <SubscriptionReceipt v-model="showReceiptDialog" :token="receiptToken" />
     <div v-if="followers !== null" class="text-caption q-mb-md">
       {{ $t("FindCreators.labels.followers") }}: {{ followers }} |
       {{ $t("FindCreators.labels.following") }}: {{ following }}
@@ -79,6 +80,7 @@ import { useLockedTokensStore } from 'stores/lockedTokens';
 import { usePriceStore } from 'stores/price';
 import { useUiStore } from 'stores/ui';
 import SubscribeDialog from 'components/SubscribeDialog.vue';
+import SubscriptionReceipt from 'components/SubscriptionReceipt.vue';
 import { useMintsStore } from 'stores/mints';
 import { notifyError, notifySuccess } from 'src/js/notify';
 import { useI18n } from 'vue-i18n';
@@ -88,7 +90,7 @@ import PaywalledContent from 'components/PaywalledContent.vue';
 
 export default defineComponent({
   name: "PublicCreatorProfilePage",
-  components: { PaywalledContent },
+  components: { PaywalledContent, SubscriptionReceipt },
   setup() {
     const route = useRoute();
     const creatorNpub = route.params.npub as string;
@@ -104,6 +106,8 @@ export default defineComponent({
     const profile = ref<any>({});
     const tiers = computed(() => creators.tiersMap[creatorNpub] || []);
     const showSubscribeDialog = ref(false);
+    const showReceiptDialog = ref(false);
+    const receiptToken = ref('');
     const selectedTier = ref<any>(null);
     const followers = ref<number | null>(null);
     const following = ref<number | null>(null);
@@ -161,6 +165,8 @@ export default defineComponent({
         } else {
           notifyError('Failed to send direct message');
         }
+        receiptToken.value = tokens;
+        showReceiptDialog.value = true;
         showSubscribeDialog.value = false;
       } catch (e: any) {
         notifyError(e.message);
@@ -187,6 +193,8 @@ export default defineComponent({
       profile,
       tiers,
       showSubscribeDialog,
+      showReceiptDialog,
+      receiptToken,
       selectedTier,
       followers,
       following,
