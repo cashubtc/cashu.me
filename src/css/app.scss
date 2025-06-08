@@ -21,7 +21,6 @@ body,
   margin-top: var(--safe-area-inset-top);
 }
 
-
 .q-dialog__inner > div {
   border-top-left-radius: 0px;
   border-top-right-radius: 0px;
@@ -127,21 +126,24 @@ body.body--light {
   color: #ffffff !important;
 }
 
-.chat-bubble-sent {
-  @extend .accent-purple;
-  align-self: flex-end;
-  padding: 6px 12px;
-  border-radius: 16px;
+.sent,
+.received {
+  padding: 16px;
+  border-radius: 12px;
   max-width: 70%;
   word-break: break-word;
 }
 
-.chat-bubble-received {
+.sent {
+  @extend .accent-purple;
+}
+
+.received {
   @extend .bg-gray-100;
-  align-self: flex-start;
   color: #000 !important;
-  padding: 6px 12px;
-  border-radius: 16px;
-  max-width: 70%;
-  word-break: break-word;
+}
+
+body.body--dark .received {
+  background-color: var(--q-color-grey-8) !important;
+  color: #ffffff !important;
 }
