@@ -30,6 +30,8 @@
     <div class="col column q-pa-md">
       <q-header elevated class="q-mb-md bg-transparent">
         <q-toolbar>
+          <q-btn flat round dense icon="arrow_back" @click="goBack" />
+          <q-btn flat round dense icon="menu" @click="toggleDrawer" class="q-ml-sm" />
           <q-toolbar-title class="text-h6 ellipsis">
             Nostr Messenger
             <q-badge
@@ -59,6 +61,7 @@
 
 <script lang="ts" setup>
 import { computed, ref, onMounted, watch } from "vue";
+import { useRouter } from "vue-router";
 import { useLocalStorage } from "@vueuse/core";
 import { useMessengerStore } from "src/stores/messenger";
 
@@ -76,6 +79,20 @@ messenger.loadIdentity();
 onMounted(() => {
   messenger.start();
 });
+
+const router = useRouter();
+
+const goBack = () => {
+  if (window.history.length > 1) {
+    router.back();
+  } else {
+    router.push('/wallet');
+  }
+};
+
+const toggleDrawer = () => {
+  drawer.value = !drawer.value;
+};
 
 const drawer = computed({
   get: () => messenger.drawerOpen,
