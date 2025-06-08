@@ -445,17 +445,37 @@ export const useNostrStore = defineStore("nostr", {
       return mintUrlsCounted;
     },
     encryptNip04: async function (
-      privKey: string,
+      privKey: string | undefined,
       recipient: string,
       message: string
     ): Promise<string> {
+      if (
+        (!privKey || privKey.length === 0) &&
+        (this.signerType === SignerType.NIP07 || this.signerType === SignerType.NIP46) &&
+        (window as any)?.nostr?.nip04?.encrypt
+      ) {
+        return await (window as any).nostr.nip04.encrypt(recipient, message);
+      }
+      if (!privKey) {
+        throw new Error("No private key for encryption");
+      }
       return await nip04.encrypt(privKey, recipient, message);
     },
     decryptNip04: async function (
-      privKey: string,
+      privKey: string | undefined,
       sender: string,
       content: string
     ): Promise<string> {
+      if (
+        (!privKey || privKey.length === 0) &&
+        (this.signerType === SignerType.NIP07 || this.signerType === SignerType.NIP46) &&
+        (window as any)?.nostr?.nip04?.decrypt
+      ) {
+        return await (window as any).nostr.nip04.decrypt(sender, content);
+      }
+      if (!privKey) {
+        throw new Error("No private key for decryption");
+      }
       return await nip04.decrypt(privKey, sender, content);
     },
     sendNip04DirectMessage: async function (
@@ -469,8 +489,11 @@ export const useNostrStore = defineStore("nostr", {
         pubKey = this.resolvePubkey(pubKey);
       }
       await this.initSignerIfNotSet();
+      const external =
+        this.signerType === SignerType.NIP07 ||
+        this.signerType === SignerType.NIP46;
       const key = privKey || this.privKeyHex;
-      if (!key) {
+      if (!key && !external) {
         notifyError("No private key available for messaging");
         return { success: false, event: null };
       }
@@ -483,7 +506,7 @@ export const useNostrStore = defineStore("nostr", {
       const ndk = new NDK({ signer });
       const event = new NDKEvent(ndk);
       event.kind = NDKKind.EncryptedDirectMessage;
-      event.content = await nip04.encrypt(key, recipient, message);
+      event.content = await this.encryptNip04(key, recipient, message);
       event.tags = [
         ["p", recipient],
         ["p", senderPubkey],
@@ -526,10 +549,8 @@ export const useNostrStore = defineStore("nostr", {
         );
         sub.on("event", (event: NDKEvent) => {
           console.log("event");
-          if (!privKey) return;
-          nip04
-            .decrypt(privKey, event.pubkey, event.content)
-            .then((content) => {
+          this.decryptNip04(privKey, event.pubkey, event.content).then(
+            (content) => {
               console.log("NIP-04 DM from", event.pubkey);
               console.log("Content:", content);
               nip04DirectMessageEvents.add(event);
@@ -539,7 +560,8 @@ export const useNostrStore = defineStore("nostr", {
                 const chatStore = useDmChatsStore();
                 chatStore.addIncoming(event);
               } catch {}
-            });
+            }
+          );
         });
       });
       try {
@@ -549,7 +571,7 @@ export const useNostrStore = defineStore("nostr", {
       }
     },
     subscribeToNip04DirectMessagesCallback: async function (
-      privKey: string,
+      privKey: string | undefined,
       pubKey: string,
       cb: (event: NostrEvent, decrypted: string) => void,
       since?: number
@@ -572,7 +594,11 @@ export const useNostrStore = defineStore("nostr", {
         groupable: false,
       });
       sub.on("event", async (ev: NDKEvent) => {
-        const decrypted = await nip04.decrypt(privKey, ev.pubkey, ev.content);
+        const decrypted = await this.decryptNip04(
+          privKey,
+          ev.pubkey,
+          ev.content
+        );
         const raw = await ev.toNostrEvent();
         this.lastEventTimestamp = Math.floor(Date.now() / 1000);
         cb(raw, decrypted);

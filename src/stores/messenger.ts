@@ -2,7 +2,7 @@ import { defineStore } from "pinia";
 import { useLocalStorage } from "@vueuse/core";
 import { watch } from "vue";
 import { Event as NostrEvent } from "nostr-tools";
-import { useNostrStore } from "./nostr";
+import { useNostrStore, SignerType } from "./nostr";
 import { v4 as uuidv4 } from "uuid";
 import { useSettingsStore } from "./settings";
 import { sanitizeMessage } from "src/js/message-utils";
@@ -50,8 +50,14 @@ export const useMessengerStore = defineStore("messenger", {
     async sendDm(recipient: string, message: string) {
       await this.loadIdentity();
       const nostr = useNostrStore();
-      const privKey = nostr.privKeyHex;
-      if (!privKey) return { success: false, event: null } as any;
+      let privKey: string | undefined = undefined;
+      if (
+        nostr.signerType !== "NIP07" &&
+        nostr.signerType !== "NIP46"
+      ) {
+        privKey = nostr.privKeyHex;
+        if (!privKey) return { success: false, event: null } as any;
+      }
       const { success, event } = await nostr.sendNip04DirectMessage(
         recipient,
         message,
@@ -86,8 +92,14 @@ export const useMessengerStore = defineStore("messenger", {
     async addIncomingMessage(event: NostrEvent) {
       await this.loadIdentity();
       const nostr = useNostrStore();
-      const privKey = nostr.privKeyHex;
-      if (!privKey) return;
+      let privKey: string | undefined = undefined;
+      if (
+        nostr.signerType !== SignerType.NIP07 &&
+        nostr.signerType !== SignerType.NIP46
+      ) {
+        privKey = nostr.privKeyHex;
+        if (!privKey) return;
+      }
       const decrypted = await nostr.decryptNip04(
         privKey,
         event.pubkey,
@@ -134,10 +146,16 @@ export const useMessengerStore = defineStore("messenger", {
       }
       await this.loadIdentity();
       const nostr = useNostrStore();
-      const privKey = nostr.privKeyHex;
-      if (!privKey) {
-        notifyError('No private key set. Please configure your Nostr identity.');
-        return;
+      let privKey: string | undefined = undefined;
+      if (
+        nostr.signerType !== SignerType.NIP07 &&
+        nostr.signerType !== SignerType.NIP46
+      ) {
+        privKey = nostr.privKeyHex;
+        if (!privKey) {
+          notifyError('No private key set. Please configure your Nostr identity.');
+          return;
+        }
       }
       const since = this.eventLog.reduce(
         (max, m) => (m.created_at > max ? m.created_at : max),
