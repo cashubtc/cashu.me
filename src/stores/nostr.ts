@@ -136,6 +136,9 @@ export const useNostrStore = defineStore("nostr", {
       };
       return nip19.nprofileEncode(profile);
     },
+    privKeyHex: (state) => {
+      return state.privateKeySignerPrivateKey || state.seedSignerPrivateKey;
+    },
   },
   actions: {
     initNdkReadOnly: function () {

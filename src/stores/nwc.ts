@@ -17,10 +17,10 @@ import { useProofsStore } from "./proofs";
 import { notify, notifyError, notifyWarning } from "../js/notify";
 import { useSettingsStore } from "./settings";
 import { decode as decodeBolt11 } from "light-bolt11-decoder";
+import { useNostrStore } from "./nostr";
 
 type NWCConnection = {
   walletPublicKey: string;
-  walletPrivateKey: string;
   connectionSecret: string;
   connectionPublicKey: string;
   allowanceLeft: number;
@@ -342,8 +342,9 @@ export const useNWCStore = defineStore("nwc", {
       let replyEvent = new NDKEvent(event.ndk);
       replyEvent.kind = 23195;
       console.log("### replying with", JSON.stringify(result));
+      const nostr = useNostrStore();
       replyEvent.content = await nip04.encrypt(
-        conn.walletPrivateKey,
+        nostr.privKeyHex,
         event.author.pubkey,
         JSON.stringify(result)
       );
@@ -415,26 +416,25 @@ export const useNWCStore = defineStore("nwc", {
       await this.replyNWC(result, event, conn);
     },
     getConnectionString: function (connection: NWCConnection) {
+      const nostr = useNostrStore();
       const walletPublicKeyHex = connection.walletPublicKey;
       const connectionSecretHex = connection.connectionSecret;
-      return `nostr+walletconnect://${walletPublicKeyHex}?relay=${this.relays.join(
+      return `nostr+walletconnect://${walletPublicKeyHex}?relay=${nostr.relays.join(
         "&relay="
       )}&secret=${connectionSecretHex}`;
     },
     generateNWCConnection: async function () {
+      const nostr = useNostrStore();
+      await nostr.initSignerIfNotSet();
+      this.relays = nostr.relays as any;
       let conn: NWCConnection;
       // NOTE: we only support one connection for now
       if (!this.connections.length) {
-        const sk = generateSecretKey(); // `sk` is a Uint8Array
-        const walletPublicKeyHex = getPublicKey(sk); // `pk` is a hex string
-        const walletPrivateKeyHex = bytesToHex(sk);
-
         const connectionSecret = generateSecretKey();
         const connectionPublicKeyHex = getPublicKey(connectionSecret);
         const connectionSecretHex = bytesToHex(connectionSecret);
         conn = {
-          walletPublicKey: walletPublicKeyHex,
-          walletPrivateKey: walletPrivateKeyHex,
+          walletPublicKey: nostr.pubkey,
           connectionSecret: connectionSecretHex,
           connectionPublicKey: connectionPublicKeyHex,
           allowanceLeft: 1000,
@@ -442,13 +442,14 @@ export const useNWCStore = defineStore("nwc", {
         this.connections = this.connections.concat(conn);
       } else {
         conn = this.connections[0];
+        conn.walletPublicKey = nostr.pubkey;
       }
 
-      const walletSigner = new NDKPrivateKeySigner(conn.walletPrivateKey);
+      const walletSigner = nostr.signer;
       // close and delete all old subscriptions
       this.unsubscribeNWC();
       this.ndk = new NDK({
-        explicitRelayUrls: this.relays,
+        explicitRelayUrls: nostr.relays,
         signer: walletSigner,
       });
       this.ndk.connect();
@@ -492,7 +493,8 @@ export const useNWCStore = defineStore("nwc", {
         "#p": [conn.walletPublicKey],
       } as NDKFilter;
       const sub = this.ndk.subscribe(filter);
-      console.log("### subscribing to NWC on relays: ", this.relays);
+      const nostr = useNostrStore();
+      console.log("### subscribing to NWC on relays: ", nostr.relays);
       this.subscriptions.push(sub);
 
       sub.on("eose", () =>
