@@ -164,7 +164,8 @@
                         : $t('SendTokenDialog.inputs.p2pk_pubkey.label')
                     "
                     outlined
-                    clearable
+                    :clearable="!isCreatorP2PK"
+                    :readonly="isCreatorP2PK"
                     :color="
                       sendData.p2pkPubkey && !isValidPubkey(sendData.p2pkPubkey)
                         ? 'red'
@@ -173,7 +174,7 @@
                     @keyup.enter="lockTokens"
                   ></q-input>
                 </div>
-                <div class="col-4 q-mx-md">
+                <div class="col-4 q-mx-md" v-if="!isCreatorP2PK">
                   <q-btn
                     unelevated
                     v-if="canPasteFromClipboard && !sendData.p2pkPubkey"
@@ -759,6 +760,15 @@ export default defineComponent({
     ...mapState(useBucketsStore, ["bucketList"]),
     bucketOptions() {
       return this.bucketList.map((b) => ({ label: b.name, value: b.id }));
+    },
+    isCreatorP2PK() {
+      const bucket = this.bucketList.find(
+        (b) => b.id === this.sendData.bucketId
+      );
+      return (
+        !!bucket?.creatorPubkey &&
+        bucket.creatorPubkey === this.sendData.p2pkPubkey
+      );
     },
     // TOKEN METHODS
     sumProofs: function () {
