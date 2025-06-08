@@ -7,6 +7,7 @@ export type LockedToken = {
   amount: number;
   token: string;
   pubkey: string;
+  label?: string;
   locktime?: number;
   refundPubkey?: string;
   bucketId: string;
@@ -32,11 +33,17 @@ export const useLockedTokensStore = defineStore("lockedTokens", {
       },
   },
   actions: {
-    addLockedToken(data: Omit<LockedToken, "id" | "date"> & { date?: string }) {
+    addLockedToken(
+      data: Omit<LockedToken, "id" | "date" | "label"> & {
+        date?: string;
+        label?: string;
+      }
+    ) {
       const token: LockedToken = {
         id: uuidv4(),
         date: data.date || new Date().toISOString(),
         ...data,
+        label: data.label ?? "Locked tokens",
       };
       this.lockedTokens.push(token);
       return token;

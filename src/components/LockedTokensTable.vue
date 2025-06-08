@@ -12,6 +12,7 @@
           <q-item-label class="text-weight-bold">
             {{ formatCurrency(token.amount, activeUnit) }}
           </q-item-label>
+          <q-item-label caption>{{ token.label || 'Locked tokens' }}</q-item-label>
           <q-item-label caption>
             {{
               $t("LockedTokensTable.row.receiver_label", {

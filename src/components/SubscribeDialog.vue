@@ -6,6 +6,7 @@
       </q-card-section>
       <q-card-section>
         <q-select
+          v-if="showBucketSelect"
           v-model="bucketId"
           :options="bucketOptions"
           emit-value
@@ -72,6 +73,7 @@ export default defineComponent({
     modelValue: Boolean,
     tier: { type: Object, required: true },
     supporterPubkey: { type: String, default: "" },
+    creatorPubkey: { type: String, default: "" },
   },
   emits: ["update:modelValue", "confirm"],
   setup(props, { emit }) {
@@ -121,6 +123,38 @@ export default defineComponent({
       }))
     );
 
+    const showBucketSelect = computed(() => !props.creatorPubkey);
+
+    const selectCreatorBucket = () => {
+      if (!props.creatorPubkey) return;
+      const existing = bucketList.value.find(
+        (b) => b.creatorPubkey === props.creatorPubkey
+      );
+      if (existing) {
+        bucketId.value = existing.id;
+      } else {
+        const created = bucketsStore.addBucket({
+          name: props.creatorPubkey.slice(0, 8),
+          creatorPubkey: props.creatorPubkey,
+        });
+        if (created) bucketId.value = created.id;
+      }
+    };
+
+    watch(
+      () => props.modelValue,
+      (val) => {
+        if (val) selectCreatorBucket();
+      }
+    );
+
+    watch(
+      () => props.creatorPubkey,
+      () => {
+        if (props.modelValue) selectCreatorBucket();
+      }
+    );
+
     const cancel = () => {
       emit("update:modelValue", false);
     };
@@ -144,6 +178,7 @@ export default defineComponent({
       model,
       bucketId,
       bucketOptions,
+      showBucketSelect,
       amount,
       months,
       presetOptions,

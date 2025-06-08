@@ -19,6 +19,7 @@
       v-model="showSubscribeDialog"
       :tier="selectedTier"
       :supporter-pubkey="nostr.pubkey"
+      :creator-pubkey="creatorNpub"
       @confirm="confirmSubscribe"
     />
     <SubscriptionReceipt v-model="showReceiptDialog" :receipts="receiptList" />
@@ -148,7 +149,6 @@ export default defineComponent({
     };
 
     const confirmSubscribe = async ({
-      bucketId,
       months,
       amount,
       startDate,
@@ -160,7 +160,7 @@ export default defineComponent({
           months,
           amount,
           creatorNpub,
-          bucketId,
+          undefined,
           startDate,
           true
         )) as any[];
