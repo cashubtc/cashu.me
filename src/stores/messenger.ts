@@ -162,18 +162,13 @@ export const useMessengerStore = defineStore("messenger", {
     connect(relays: string[]) {
       const nostr = useNostrStore();
       this.relays = relays as any;
-      nostr.relays = relays as any;
-      nostr.initNdkReadOnly();
+      // Reconnect the nostr store with the updated relays
+      nostr.connect(relays as any);
     },
 
     disconnect() {
       const nostr = useNostrStore();
-      if (nostr.ndk && (nostr.ndk as any).pool) {
-        for (const relay of (nostr.ndk as any).pool.relays.values()) {
-          relay.disconnect && relay.disconnect();
-        }
-      }
-      nostr.connected = false;
+      nostr.disconnect();
     },
 
     createConversation(pubkey: string) {
