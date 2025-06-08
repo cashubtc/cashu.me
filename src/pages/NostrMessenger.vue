@@ -60,7 +60,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, onMounted } from 'vue';
+import { computed, ref, onMounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useMessengerStore } from 'src/stores/messenger';
 
@@ -87,15 +87,25 @@ const selected = ref('');
 const messages = computed(() => messenger.conversations[selected.value] || []);
 const eventLog = computed(() => messenger.eventLog);
 
+watch(
+  selected,
+  (val) => {
+    messenger.setCurrentConversation(val);
+  },
+  { immediate: true }
+);
+
 const selectConversation = (pubkey: string) => {
   selected.value = pubkey;
   messenger.markRead(pubkey);
+  messenger.setCurrentConversation(pubkey);
 };
 
 const startChat = (pubkey: string) => {
   messenger.createConversation(pubkey);
   selected.value = pubkey;
   messenger.markRead(pubkey);
+  messenger.setCurrentConversation(pubkey);
 };
 
 const sendMessage = (text: string) => {

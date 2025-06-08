@@ -28,6 +28,12 @@ vi.mock('../../../src/js/message-utils', () => ({
   sanitizeMessage: vi.fn((s: string) => s)
 }))
 
+var notifySpy: any
+vi.mock('../../../src/js/notify', () => {
+  notifySpy = vi.fn()
+  return { notifySuccess: notifySpy }
+})
+
 import { useMessengerStore } from '../../../src/stores/messenger'
 import { useNostrStore } from '../../../src/stores/nostr'
 

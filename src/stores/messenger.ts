@@ -6,6 +6,7 @@ import { useNostrStore } from "./nostr";
 import { v4 as uuidv4 } from "uuid";
 import { useSettingsStore } from "./settings";
 import { sanitizeMessage } from "src/js/message-utils";
+import { notifySuccess } from "src/js/notify";
 
 export type MessengerMessage = {
   id: string;
@@ -30,6 +31,7 @@ export const useMessengerStore = defineStore("messenger", {
       "cashu.messenger.eventLog",
       [] as MessengerMessage[]
     ),
+    currentConversation: "",
     started: false,
     watchInitialized: false,
   }),
@@ -108,6 +110,10 @@ export const useMessengerStore = defineStore("messenger", {
       this.unreadCounts[event.pubkey] =
         (this.unreadCounts[event.pubkey] || 0) + 1;
       this.eventLog.push(msg);
+      if (this.currentConversation !== event.pubkey) {
+        const snippet = msg.content.slice(0, 40);
+        notifySuccess(snippet);
+      }
     },
 
     async start() {
@@ -174,6 +180,10 @@ export const useMessengerStore = defineStore("messenger", {
 
     markRead(pubkey: string) {
       this.unreadCounts[pubkey] = 0;
+    },
+
+    setCurrentConversation(pubkey: string) {
+      this.currentConversation = pubkey;
     },
   },
 });
