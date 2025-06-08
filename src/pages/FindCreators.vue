@@ -87,6 +87,7 @@ import {
   Loading,
 } from "quasar";
 import { nip19 } from "nostr-tools";
+import { receiptsToDmText } from "src/js/receipt-utils";
 
 const iframeEl = ref<HTMLIFrameElement | null>(null);
 const showDonateDialog = ref(false);
@@ -174,13 +175,7 @@ async function confirmSubscribe({
       supporterName =
         prof?.display_name || prof?.name || prof?.username || nostr.pubkey;
     } catch {}
-    const messages = receipts.map((r) => {
-      const date = r.locktime
-        ? formatTs(r.locktime)
-        : new Date(r.date).toISOString();
-      return `${r.amount} sats from ${supporterName} on ${date} (ref ${r.id})\n${r.token}`;
-    });
-    const dmMessage = messages.join("\n");
+    const dmMessage = receiptsToDmText(receipts, supporterName);
     const { success, event } = await nostr.sendNip04DirectMessage(
       dialogPubkey.value,
       dmMessage
