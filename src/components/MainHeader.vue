@@ -251,7 +251,14 @@
 </template>
 
 <script>
-import { defineComponent, ref, computed, onMounted, onUnmounted } from "vue";
+import {
+  defineComponent,
+  ref,
+  computed,
+  onMounted,
+  onUnmounted,
+  getCurrentInstance,
+} from "vue";
 import { useRouter, useRoute } from "vue-router";
 import EssentialLink from "components/EssentialLink.vue";
 import { useUiStore } from "src/stores/ui";
@@ -266,6 +273,7 @@ export default defineComponent({
     EssentialLink,
   },
   setup() {
+    const vm = getCurrentInstance()?.proxy;
     const leftDrawerOpen = ref(false);
     const uiStore = useUiStore();
     const { t } = useI18n();
@@ -344,9 +352,12 @@ export default defineComponent({
 
     const reload = () => {
       if (countdown.value > 0) {
-        uiStore.unlockMutex();
-        clearInterval(countdownInterval);
-        countdown.value = 0;
+        try {
+          clearInterval(countdownInterval);
+          countdown.value = 0;
+        } finally {
+          uiStore.unlockMutex();
+        }
         return;
       }
       if (uiStore.globalMutexLock) return;
@@ -356,8 +367,12 @@ export default defineComponent({
         countdown.value--;
         if (countdown.value === 0) {
           clearInterval(countdownInterval);
-          uiStore.unlockMutex();
-          location.reload();
+          vm?.notifyRefreshed("Reloading…");
+          try {
+            location.reload();
+          } finally {
+            uiStore.unlockMutex();
+          }
         }
       }, 1000);
     };
