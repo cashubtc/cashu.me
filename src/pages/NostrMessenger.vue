@@ -31,7 +31,6 @@
       <q-header elevated class="q-mb-md bg-transparent">
         <q-toolbar>
           <q-btn flat round dense icon="arrow_back" @click="goBack" />
-          <q-btn flat round dense icon="menu" @click="toggleDrawer" class="q-ml-sm" />
           <q-toolbar-title class="text-h6 ellipsis">
             Nostr Messenger
             <q-badge
@@ -90,9 +89,6 @@ const goBack = () => {
   }
 };
 
-const toggleDrawer = () => {
-  drawer.value = !drawer.value;
-};
 
 const drawer = computed({
   get: () => messenger.drawerOpen,
