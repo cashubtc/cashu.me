@@ -10,7 +10,7 @@
         {{ $t("CreatorHub.profile.back") }}
       </q-btn>
     </div>
-    <div class="text-h5 q-mb-md">{{ profile.display_name || pubkey }}</div>
+    <div class="text-h5 q-mb-md">{{ profile.display_name || npub }}</div>
     <div v-if="profile.picture" class="q-mb-md">
       <img :src="profile.picture" style="max-width: 150px" />
     </div>
@@ -18,13 +18,13 @@
 
     <div class="q-mb-md text-caption">
       <div class="row items-center q-gutter-x-sm">
-        <div><strong>npub:</strong> {{ pubkey }}</div>
+        <div><strong>npub:</strong> {{ npub }}</div>
         <q-btn
-          v-if="pubkey"
+          v-if="npub"
           flat
           dense
           icon="content_copy"
-          @click="copyText(pubkey)"
+          @click="copyText(npub)"
         />
       </div>
       <div v-if="seedSignerPrivateKeyNsecComputed" class="row items-center q-gutter-x-sm q-mt-xs">
@@ -95,8 +95,11 @@ export default defineComponent({
     const { t } = useI18n();
 
     const nostr = useNostrStore();
-    const { pubkey, seedSignerPrivateKeyNsecComputed, privateKeySignerPrivateKey } =
-      storeToRefs(nostr);
+    const {
+      npub,
+      seedSignerPrivateKeyNsecComputed,
+      privateKeySignerPrivateKey,
+    } = storeToRefs(nostr);
     const hub = useCreatorHubStore();
     const priceStore = usePriceStore();
     const uiStore = useUiStore();
@@ -113,8 +116,8 @@ export default defineComponent({
     );
 
     onMounted(async () => {
-      if (!pubkey.value) return;
-      const p = await nostr.getProfile(pubkey.value);
+      if (!npub.value) return;
+      const p = await nostr.getProfile(npub.value);
       if (p) profile.value = { ...p };
     });
 
@@ -132,7 +135,7 @@ export default defineComponent({
       if (tier.welcomeMessage) {
         try {
           await useNostrStore().sendNip04DirectMessage(
-            pubkey.value,
+            npub.value,
             tier.welcomeMessage,
           );
         } catch (e) {
@@ -151,7 +154,7 @@ export default defineComponent({
     }
 
     return {
-      pubkey,
+      npub,
       seedSignerPrivateKeyNsecComputed,
       privateKeySignerPrivateKey,
       profile,

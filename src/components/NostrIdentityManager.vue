@@ -35,10 +35,8 @@ import { useNostrStore } from 'src/stores/nostr';
 const nostr = useNostrStore();
 
 const showDialog = ref(false);
-const privKey = ref(
-  nostr.privateKeySignerPrivateKey || nostr.seedSignerPrivateKey
-);
-const pubKey = ref(nostr.pubkey);
+const privKey = ref(nostr.activePrivateKeyNsec);
+const pubKey = ref(nostr.npub);
 const relayInput = ref('');
 const relays = ref<string[]>([...nostr.relays]);
 
@@ -56,7 +54,7 @@ const removeRelay = (index: number) => {
 const save = async () => {
   nostr.relays = relays.value as any;
   await nostr.initPrivateKeySigner(privKey.value as any);
-  pubKey.value = nostr.pubkey;
+  pubKey.value = nostr.npub;
   showDialog.value = false;
 };
 </script>
