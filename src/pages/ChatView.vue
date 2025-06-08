@@ -151,7 +151,7 @@ export default defineComponent({
     };
 
     const goBack = () => {
-      router.push("/chats");
+      router.back();
     };
 
     return {

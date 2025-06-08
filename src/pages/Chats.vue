@@ -2,6 +2,14 @@
   <q-page :class="[$q.dark.isActive ? 'bg-dark text-white' : 'bg-white text-dark']" class="column full-height">
     <q-header elevated reveal class="border-bottom" style="border-bottom: 1px solid rgba(0,0,0,0.1)">
       <q-toolbar class="q-pa-sm">
+        <q-btn
+          flat
+          round
+          dense
+          icon="menu"
+          @click="openDrawer"
+          class="q-mr-sm"
+        />
         <q-btn flat round dense icon="arrow_back" @click="goBack" class="q-mr-sm" />
         <q-toolbar-title class="text-h6">Chats</q-toolbar-title>
       </q-toolbar>
@@ -50,7 +58,11 @@ export default defineComponent({
     const profiles = ref<Record<string, any>>({});
 
     const goBack = () => {
-      router.push('/wallet');
+      router.back();
+    };
+
+    const openDrawer = () => {
+      window.dispatchEvent(new Event('toggle-left-drawer'));
     };
 
     const loadProfiles = async () => {
@@ -96,6 +108,7 @@ export default defineComponent({
       lastMessageSnippet,
       unreadCounts,
       openChat,
+      openDrawer,
       goBack,
     };
   },
