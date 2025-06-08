@@ -340,12 +340,11 @@ export const useWalletStore = defineStore("wallet", {
       const mintStore = useMintsStore();
       const spendableProofs = proofsStore.getUnreservedProofs(proofs);
       if (proofsStore.sumProofs(spendableProofs) < amount) {
-        const balance = mintStore.activeBalance;
         const unit = mintStore.activeUnit;
         notifyWarning(
           this.t("wallet.notifications.balance_too_low"),
           `${uIStore.formatCurrency(
-            balance,
+            proofsStore.sumProofs(spendableProofs),
             unit
           )} is not enough to pay ${uIStore.formatCurrency(amount, unit)}.`
         );

@@ -10,7 +10,7 @@
     full-height
   >
     <q-card class="q-pa-lg q-pt-xl qcard">
-      <div class="row items-center no-wrap q-mb-lg">
+      <div class="row items-center no-wrap q-mb-md">
         <div class="col-10">
           <h5 class="q-my-none">Multinut Payment</h5>
           <p class="q-my-xs text-grey-6">
@@ -60,151 +60,191 @@
           >
             <q-item
               clickable
-              class="q-pb-xs"
+              class="mint-card q-mb-md cursor-pointer"
               @click="!isPaymentInProgress && toggleMint(mint)"
               :class="{ 'cursor-not-allowed': isPaymentInProgress }"
+              :style="{
+                'border-radius': '10px',
+                border: isSelected(mint)
+                  ? '1px solid var(--q-primary)'
+                  : '1px solid rgba(128, 128, 128, 0.2)',
+                padding: '0px',
+                position: 'relative',
+              }"
             >
-              <q-item-section avatar>
-                <!-- Show state indicator during payment, checkbox otherwise -->
-                <div
-                  v-if="isPaymentInProgress && isSelected(mint)"
-                  class="state-indicator"
-                >
-                  <q-spinner
-                    v-if="
-                      mintStates[mint.url] === 'requesting' ||
-                      mintStates[mint.url] === 'paying'
-                    "
-                    color="primary"
-                    size="24px"
-                  />
-                  <q-icon
-                    v-else-if="mintStates[mint.url] === 'success'"
-                    name="check_circle"
-                    color="positive"
-                    size="24px"
-                  />
-                  <q-icon
-                    v-else-if="mintStates[mint.url] === 'error'"
-                    name="error"
-                    color="negative"
-                    size="24px"
-                  />
-                </div>
-                <q-checkbox
-                  v-else
-                  :model-value="isSelected(mint)"
-                  @update:model-value="toggleMint(mint)"
-                  :color="isSelected(mint) ? 'primary' : 'grey'"
-                  class="cursor-pointer"
-                />
-              </q-item-section>
-              <q-item-section>
-                <q-item-label
-                  lines="1"
-                  class="cursor-pointer"
-                  style="word-break: break-word"
-                  :class="{ 'cursor-not-allowed': isPaymentInProgress }"
-                >
-                  {{ mint.nickname || getShortUrl(mint.url) }}
-                  <!-- State text during payment -->
-                  <span
-                    v-if="
-                      isPaymentInProgress &&
-                      isSelected(mint) &&
-                      mintStates[mint.url]
-                    "
-                    class="text-caption text-grey-6 q-ml-sm"
-                  >
-                    ({{ getStateText(mintStates[mint.url]) }})
-                  </span>
-                </q-item-label>
-                <q-item-label>
-                  <q-badge
-                    v-for="unit in mintClass(mint).units"
-                    :key="unit"
-                    :color="isSelected(mint) ? 'primary' : 'grey'"
-                    :label="
-                      formatCurrency(mintClass(mint).unitBalance(unit), unit)
-                    "
-                    class="q-mx-xs q-mb-xs"
-                  />
-                </q-item-label>
-              </q-item-section>
-            </q-item>
+              <div class="full-width" style="position: relative">
+                <div class="row items-center q-pa-md">
+                  <div class="col-auto q-mr-md">
+                    <!-- Show state indicator during payment, checkbox otherwise -->
+                    <div
+                      v-if="isPaymentInProgress && isSelected(mint)"
+                      class="state-indicator"
+                    >
+                      <q-spinner
+                        v-if="
+                          mintStates[mint.url] === 'requesting' ||
+                          mintStates[mint.url] === 'paying'
+                        "
+                        color="primary"
+                        size="24px"
+                      />
+                      <q-icon
+                        v-else-if="mintStates[mint.url] === 'success'"
+                        name="check_circle"
+                        color="positive"
+                        size="24px"
+                      />
+                      <q-icon
+                        v-else-if="mintStates[mint.url] === 'error'"
+                        name="error"
+                        color="negative"
+                        size="24px"
+                      />
+                    </div>
+                    <q-checkbox
+                      v-else
+                      :model-value="isSelected(mint)"
+                      @update:model-value="toggleMint(mint)"
+                      :color="isSelected(mint) ? 'primary' : 'grey'"
+                      class="cursor-pointer"
+                    />
+                  </div>
 
-            <!-- Payment Distribution Slider for Selected Mints -->
-            <div
-              v-if="isSelected(mint) && !isPaymentInProgress"
-              class="q-px-md"
-            >
-              <div class="row items-center q-gutter-md">
-                <div class="col-2 text-caption text-grey-6">
-                  {{ formatCurrency(getPartialAmount(mint), activeUnit) }}
+                  <div class="col">
+                    <div class="row items-center">
+                      <q-avatar
+                        v-if="getMintIconUrl(mint)"
+                        size="34px"
+                        class="q-mr-sm"
+                      >
+                        <q-img
+                          spinner-color="white"
+                          spinner-size="xs"
+                          :src="getMintIconUrl(mint)"
+                          alt="Mint Icon"
+                          style="height: 34px; max-width: 34px; font-size: 12px"
+                        />
+                      </q-avatar>
+
+                      <div class="column q-gutter-y-sm">
+                        <div
+                          v-if="mint.nickname || mint.info?.name"
+                          style="
+                            font-size: 16px;
+                            font-weight: 600;
+                            line-height: 16px;
+                          "
+                          :class="{ 'cursor-not-allowed': isPaymentInProgress }"
+                        >
+                          {{ mint.nickname || mint.info?.name }}
+                          <!-- State text during payment -->
+                          <span
+                            v-if="
+                              isPaymentInProgress &&
+                              isSelected(mint) &&
+                              mintStates[mint.url]
+                            "
+                            class="text-caption text-grey-6 q-ml-sm"
+                          >
+                            ({{ getStateText(mintStates[mint.url]) }})
+                          </span>
+                        </div>
+                        <div
+                          class="text-grey-6"
+                          style="
+                            font-size: 12px;
+                            line-height: 16px;
+                            font-family: monospace;
+                            margin-top: 4px;
+                            word-break: break-word;
+                          "
+                          :class="{ 'cursor-not-allowed': isPaymentInProgress }"
+                        >
+                          {{ getShortUrl(mint.url) }}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <div class="col">
-                  <q-slider
-                    :model-value="getMintProportion(mint)"
-                    @update:model-value="
-                      (value) => updateMintProportion(mint, value)
-                    "
-                    :min="0"
-                    :max="getMaxPercentageForMint(mint)"
-                    :step="1"
-                    color="primary"
-                    :disable="selectedMints.length <= 1"
-                    label
-                    :label-value="`${getMintProportion(mint).toFixed(1)}%`"
-                    label-always
-                    class="mint-slider"
-                  />
+
+                <div
+                  class="row justify-between q-pb-sm q-px-md"
+                  v-if="!isSelected(mint)"
+                >
+                  <div class="col">
+                    <!-- Currency units with regular text styling -->
+                    <div class="row q-gutter-x-sm">
+                      <span
+                        style="color: white; font-size: 12px; font-weight: 500"
+                      >
+                        {{
+                          formatCurrency(
+                            mintClass(mint).unitBalance(this.activeUnit),
+                            this.activeUnit
+                          )
+                        }}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Payment Distribution Slider for Selected Mints -->
+                <div
+                  v-if="isSelected(mint) && !isPaymentInProgress"
+                  class="q-px-md q-pb-md"
+                >
+                  <div class="row items-center q-gutter-sm no-wrap">
+                    <!-- Allocation Badge -->
+                    <div class="col-auto">
+                      <div
+                        class="q-py-xs q-px-sm"
+                        style="
+                          border-radius: 4px;
+                          display: inline-block;
+                          min-width: 50px;
+                          text-align: center;
+                        "
+                      >
+                        <span
+                          style="
+                            color: white;
+                            font-size: 14px;
+                            font-weight: 500;
+                          "
+                        >
+                          {{
+                            formatCurrency(getPartialAmount(mint), activeUnit)
+                          }}
+                        </span>
+                      </div>
+                    </div>
+
+                    <!-- Slider -->
+                    <div class="col" style="min-width: 0; overflow: hidden">
+                      <q-slider
+                        :model-value="getMintProportion(mint)"
+                        @update:model-value="
+                          (value) => updateMintProportion(mint, value)
+                        "
+                        :min="0"
+                        :max="getMaxPercentageForMint(mint)"
+                        :step="1"
+                        color="primary"
+                        :disable="selectedMints.length <= 1"
+                        class="mint-slider-compact q-px-md"
+                      />
+                    </div>
+                    <!-- badge with total balance -->
+                    <div class="col-auto">
+                      <q-badge color="primary" class="q-px-sm">
+                        {{ formatCurrency(totalSelectedBalance, activeUnit) }}
+                      </q-badge>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
-
-            <q-separator spaced />
+            </q-item>
           </div>
-          <!-- Total Selected Balance -->
-          <q-item>
-            <q-item-section>
-              <q-item-label overline class="text-weight-bold">
-                Total Selected Balance
-              </q-item-label>
-              <q-item-label caption>
-                {{ formatCurrency(totalSelectedBalance, activeUnit) }}
-              </q-item-label>
-            </q-item-section>
-          </q-item>
-
-          <!-- Total Distribution Amount -->
-          <q-item v-if="selectedMints.length > 0">
-            <q-item-section>
-              <q-item-label overline class="text-weight-bold">
-                Total Distribution
-              </q-item-label>
-              <q-item-label caption>
-                {{ formatCurrency(totalDistributedAmount, activeUnit) }}
-                <span
-                  v-if="
-                    totalDistributedAmount ===
-                    payInvoiceData.meltQuote.response.amount
-                  "
-                  class="text-positive q-ml-sm"
-                >
-                  ✓ Exact match
-                </span>
-                <span v-else class="text-negative q-ml-sm">
-                  ⚠ Mismatch ({{
-                    formatCurrency(
-                      payInvoiceData.meltQuote.response.amount -
-                        totalDistributedAmount,
-                      activeUnit
-                    )
-                  }})
-                </span>
-              </q-item-label>
-            </q-item-section>
-          </q-item>
         </q-list>
       </div>
 
@@ -387,6 +427,17 @@ export default defineComponent({
       const totalAmount = this.payInvoiceData.meltQuote.response.amount;
       const mintBalance = this.mintClass(mint).unitBalance(this.activeUnit);
       return Math.min(100, (mintBalance / totalAmount) * 100);
+    },
+    getMintIconUrl(mint) {
+      if (mint.info) {
+        if (mint.info.icon_url) {
+          return mint.info.icon_url;
+        } else {
+          return undefined;
+        }
+      } else {
+        return undefined;
+      }
     },
     updateMintProportion(mint, newPercentage) {
       if (this.selectedMints.length <= 1) return;
@@ -917,7 +968,42 @@ export default defineComponent({
   opacity: 0.7;
 }
 
-.mint-slider {
+.mint-slider-compact {
   margin: 8px 0;
+}
+
+.mint-card {
+  transition: all 0.2s ease;
+}
+
+.mint-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.mint-card.cursor-not-allowed:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+/* Responsive adjustments for smaller screens */
+@media (max-width: 600px) {
+  .mint-slider-compact {
+    margin: 4px 0;
+  }
+
+  .mint-slider-compact .q-slider__label {
+    font-size: 10px;
+  }
+}
+
+/* Ensure no horizontal overflow */
+.no-wrap {
+  flex-wrap: nowrap !important;
+}
+
+.col[style*="min-width: 0"] {
+  flex-shrink: 1;
+  min-width: 0 !important;
 }
 </style>
