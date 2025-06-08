@@ -627,7 +627,7 @@ export const useNostrStore = defineStore("nostr", {
         const chatStore = useDmChatsStore();
         chatStore.addOutgoing(dmEvent);
         const router = useRouter();
-        router.push("/chats");
+        router.push("/nostr-messenger");
         notifySuccess("NIP-17 event published");
         return dmEvent;
       } catch (e) {
