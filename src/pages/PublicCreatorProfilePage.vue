@@ -96,6 +96,7 @@ import { useI18n } from "vue-i18n";
 import { Loading } from "quasar";
 import { renderMarkdown as renderMarkdownFn } from "src/js/simple-markdown";
 import PaywalledContent from "components/PaywalledContent.vue";
+import { receiptsToDmText } from "src/js/receipt-utils";
 
 export default defineComponent({
   name: "PublicCreatorProfilePage",
@@ -169,13 +170,7 @@ export default defineComponent({
           supporterName =
             prof?.display_name || prof?.name || prof?.username || nostr.pubkey;
         } catch {}
-        const messages = receipts.map((r) => {
-          const date = r.locktime
-            ? formatTs(r.locktime)
-            : new Date(r.date).toISOString();
-          return `${r.amount} sats from ${supporterName} on ${date} (ref ${r.id})\n${r.token}`;
-        });
-        const dmMessage = messages.join("\n");
+        const dmMessage = receiptsToDmText(receipts, supporterName);
         const { success, event } = await nostr.sendNip04DirectMessage(
           creatorNpub,
           dmMessage
