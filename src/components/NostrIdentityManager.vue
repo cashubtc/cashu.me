@@ -30,15 +30,17 @@
 
 <script lang="ts" setup>
 import { ref } from 'vue';
-import { useMessengerStore } from 'src/stores/messenger';
+import { useNostrStore } from 'src/stores/nostr';
 
-const messenger = useMessengerStore();
+const nostr = useNostrStore();
 
 const showDialog = ref(false);
-const privKey = ref(messenger.privKey);
-const pubKey = ref(messenger.pubKey);
+const privKey = ref(
+  nostr.privateKeySignerPrivateKey || nostr.seedSignerPrivateKey
+);
+const pubKey = ref(nostr.pubkey);
 const relayInput = ref('');
-const relays = ref<string[]>([...messenger.relays]);
+const relays = ref<string[]>([...nostr.relays]);
 
 const addRelay = () => {
   if (relayInput.value.trim()) {
@@ -51,11 +53,10 @@ const removeRelay = (index: number) => {
   relays.value.splice(index, 1);
 };
 
-const save = () => {
-  messenger.privKey = privKey.value;
-  messenger.pubKey = pubKey.value;
-  messenger.relays = relays.value as any;
-  messenger.start();
+const save = async () => {
+  nostr.relays = relays.value as any;
+  await nostr.initPrivateKeySigner(privKey.value as any);
+  pubKey.value = nostr.pubkey;
   showDialog.value = false;
 };
 </script>
