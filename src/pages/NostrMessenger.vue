@@ -5,29 +5,32 @@
     @touchstart="onTouchStart"
     @touchend="onTouchEnd"
   >
-    <q-drawer
-      v-model="drawer"
-      side="left"
-      show-if-above
-      bordered
-      :width="300"
-      class="q-pa-md"
-    >
-      <NostrIdentityManager class="q-mb-md" />
-      <q-expansion-item
-        class="q-mb-md"
-        dense
-        dense-toggle
-        label="Relays"
-        v-model="showRelays"
+    <q-responsive>
+      <q-drawer
+        v-model="drawer"
+        side="left"
+        show-if-above
+        :breakpoint="600"
+        bordered
+        :width="300"
+        :class="$q.screen.gt.xs ? 'q-pa-lg' : 'q-pa-md'"
       >
-        <RelayManager class="q-mb-md" />
-      </q-expansion-item>
-      <NewChat class="q-mb-md" @start="startChat" />
-      <ConversationList @select="selectConversation" />
-    </q-drawer>
+        <NostrIdentityManager class="q-mb-md" />
+        <q-expansion-item
+          class="q-mb-md"
+          dense
+          dense-toggle
+          label="Relays"
+          v-model="showRelays"
+        >
+          <RelayManager class="q-mb-md" />
+        </q-expansion-item>
+        <NewChat class="q-mb-md" @start="startChat" />
+        <ConversationList @select="selectConversation" />
+      </q-drawer>
+    </q-responsive>
 
-    <div class="col column q-pa-md">
+    <div :class="['col column', $q.screen.gt.xs ? 'q-pa-lg' : 'q-pa-md']">
       <q-header elevated class="q-mb-md bg-transparent">
         <q-toolbar>
           <q-btn flat round dense icon="arrow_back" @click="goBack" />
