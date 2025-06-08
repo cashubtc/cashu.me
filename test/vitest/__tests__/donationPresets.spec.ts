@@ -19,18 +19,19 @@ vi.mock("../../../src/stores/wallet", () => ({
 vi.mock("../../../src/stores/proofs", () => ({
   useProofsStore: () => ({
     serializeProofs: vi.fn(() => "tok"),
+    updateActiveProofs: vi.fn(),
   }),
 }));
 
 vi.mock("../../../src/stores/lockedTokens", () => ({
   useLockedTokensStore: () => ({
-    addLockedToken: vi.fn(),
+    addLockedToken: vi.fn((d: any) => ({ id: "id", date: "d", ...d })),
   }),
 }));
 
 vi.mock("../../../src/stores/mints", () => ({
   useMintsStore: () => ({
-    activeProofs: [],
+    activeProofs: [{ amount: 10, bucketId: "b" }],
     activeMintUrl: "m",
     activeUnit: "sat",
   }),
@@ -76,5 +77,26 @@ describe("Donation presets", () => {
     expect(spy.mock.calls[0][5]).toBe(start);
     expect(spy.mock.calls[1][5]).toBe(start + 30 * 24 * 60 * 60);
     expect(spy.mock.calls[2][5]).toBe(start + 2 * 30 * 24 * 60 * 60);
+  });
+
+  it("returns locked token data when detailed is true", async () => {
+    const store = useDonationPresetsStore();
+    const locked = useLockedTokensStore();
+    (locked.addLockedToken as any).mockImplementation((d: any) => ({
+      id: "id" + (locked.addLockedToken as any).mock.calls.length,
+      date: "d",
+      ...d,
+    }));
+    const res = (await store.createDonationPreset(
+      2,
+      1,
+      "pk",
+      "b",
+      undefined,
+      true
+    )) as any[];
+    expect(Array.isArray(res)).toBe(true);
+    expect(res.length).toBe(2);
+    expect(res[0].id).toBeDefined();
   });
 });
