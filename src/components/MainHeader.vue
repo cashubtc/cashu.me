@@ -251,7 +251,7 @@
 </template>
 
 <script>
-import { defineComponent, ref, computed } from "vue";
+import { defineComponent, ref, computed, onMounted, onUnmounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import EssentialLink from "components/EssentialLink.vue";
 import { useUiStore } from "src/stores/ui";
@@ -325,6 +325,14 @@ export default defineComponent({
     const toggleLeftDrawer = () => {
       leftDrawerOpen.value = !leftDrawerOpen.value;
     };
+
+    onMounted(() => {
+      window.addEventListener("toggle-left-drawer", toggleLeftDrawer);
+    });
+
+    onUnmounted(() => {
+      window.removeEventListener("toggle-left-drawer", toggleLeftDrawer);
+    });
 
     const toggleMessengerDrawer = () => {
       messenger.toggleDrawer();
