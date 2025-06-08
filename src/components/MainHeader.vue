@@ -28,6 +28,17 @@
         </span>
       </q-btn>
       <q-toolbar-title></q-toolbar-title>
+      <q-btn
+        v-if="isMessengerPage"
+        flat
+        dense
+        round
+        icon="menu"
+        color="primary"
+        aria-label="Toggle Chat Menu"
+        @click="toggleMessengerDrawer"
+        class="q-mr-sm"
+      />
       <transition
         appear
         enter-active-class="animated wobble"
@@ -245,6 +256,7 @@ import { useRouter, useRoute } from "vue-router";
 import EssentialLink from "components/EssentialLink.vue";
 import { useUiStore } from "src/stores/ui";
 import { useNostrStore } from "src/stores/nostr";
+import { useMessengerStore } from "src/stores/messenger";
 import { useI18n } from "vue-i18n";
 
 export default defineComponent({
@@ -260,15 +272,16 @@ export default defineComponent({
     const router = useRouter();
     const route = useRoute();
     const nostrStore = useNostrStore();
+    const messenger = useMessengerStore();
     const needsNostrLogin = computed(
       () => !nostrStore.privateKeySignerPrivateKey
     );
-    const isChatPage = computed(
+    const isMessengerPage = computed(
       () =>
         route.path.startsWith("/nostr-messenger") ||
         route.path.startsWith("/chats")
     );
-    const showBackButton = computed(() => isChatPage.value);
+    const showBackButton = computed(() => isMessengerPage.value);
     const backRoute = computed(() => {
       if (route.path.startsWith("/chats/")) return "/chats";
       return "/wallet";
@@ -311,6 +324,10 @@ export default defineComponent({
 
     const toggleLeftDrawer = () => {
       leftDrawerOpen.value = !leftDrawerOpen.value;
+    };
+
+    const toggleMessengerDrawer = () => {
+      messenger.toggleDrawer();
     };
 
     const isStaging = () => {
@@ -390,6 +407,8 @@ export default defineComponent({
       showBackButton,
       backRoute,
       needsNostrLogin,
+      toggleMessengerDrawer,
+      isMessengerPage,
     };
   },
 });

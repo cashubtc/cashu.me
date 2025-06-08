@@ -32,6 +32,7 @@ export const useMessengerStore = defineStore("messenger", {
       [] as MessengerMessage[]
     ),
     currentConversation: "",
+    drawerOpen: useLocalStorage<boolean>("cashu.messenger.drawerOpen", true),
     started: false,
     watchInitialized: false,
   }),
@@ -184,6 +185,14 @@ export const useMessengerStore = defineStore("messenger", {
 
     setCurrentConversation(pubkey: string) {
       this.currentConversation = pubkey;
+    },
+
+    toggleDrawer() {
+      this.drawerOpen = !this.drawerOpen;
+    },
+
+    setDrawer(open: boolean) {
+      this.drawerOpen = open;
     },
   },
 });
