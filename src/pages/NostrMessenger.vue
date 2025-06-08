@@ -13,7 +13,7 @@
         :breakpoint="600"
         bordered
         :width="300"
-        :class="$q.screen.gt.xs ? 'q-pa-lg' : 'q-pa-md'"
+        :class="$q.screen.gt.xs ? 'q-pa-lg column' : 'q-pa-md column'"
       >
         <NostrIdentityManager class="q-mb-md" />
         <q-expansion-item
@@ -26,7 +26,9 @@
           <RelayManager class="q-mb-md" />
         </q-expansion-item>
         <NewChat class="q-mb-md" @start="startChat" />
-        <ConversationList @select="selectConversation" />
+        <q-scroll-area class="col" style="min-height: 0">
+          <ConversationList @select="selectConversation" />
+        </q-scroll-area>
       </q-drawer>
     </q-responsive>
 
@@ -88,10 +90,9 @@ const goBack = () => {
   if (window.history.length > 1) {
     router.back();
   } else {
-    router.push('/wallet');
+    router.push("/wallet");
   }
 };
-
 
 const drawer = computed({
   get: () => messenger.drawerOpen,
@@ -104,17 +105,14 @@ const showEventLog = useLocalStorage<boolean>(
   "cashu.messenger.showEventLog",
   false,
 );
-const showRelays = useLocalStorage<boolean>(
-  "cashu.messenger.showRelays",
-  true,
-);
+const showRelays = useLocalStorage<boolean>("cashu.messenger.showRelays", true);
 
 watch(
   selected,
   (val) => {
     messenger.setCurrentConversation(val);
   },
-  { immediate: true }
+  { immediate: true },
 );
 
 const selectConversation = (pubkey: string) => {
