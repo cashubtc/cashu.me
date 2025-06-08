@@ -265,6 +265,7 @@ import { useUiStore } from "src/stores/ui";
 import { useNostrStore } from "src/stores/nostr";
 import { useMessengerStore } from "src/stores/messenger";
 import { useI18n } from "vue-i18n";
+import { useQuasar } from "quasar";
 
 export default defineComponent({
   name: "MainHeader",
@@ -281,6 +282,11 @@ export default defineComponent({
     const route = useRoute();
     const nostrStore = useNostrStore();
     const messenger = useMessengerStore();
+    const $q = useQuasar();
+    const toggleDarkMode = () => {
+      $q.dark.toggle();
+      $q.localStorage.set('cashu.darkMode', $q.dark.isActive);
+    };
     const needsNostrLogin = computed(
       () => !nostrStore.privateKeySignerPrivateKey
     );
@@ -432,6 +438,7 @@ export default defineComponent({
       needsNostrLogin,
       toggleMessengerDrawer,
       isMessengerPage,
+      toggleDarkMode,
     };
   },
 });
