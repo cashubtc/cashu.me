@@ -17,9 +17,9 @@
         dense
         rounded
         icon="arrow_back_ios_new"
-        to="/wallet"
+        :to="backRoute"
         color="primary"
-        aria-label="Back to wallet"
+        aria-label="Back"
         no-caps
         class="q-ml-sm"
       >
@@ -241,7 +241,7 @@
 
 <script>
 import { defineComponent, ref, computed } from "vue";
-import { useRouter } from "vue-router";
+import { useRouter, useRoute } from "vue-router";
 import EssentialLink from "components/EssentialLink.vue";
 import { useUiStore } from "src/stores/ui";
 import { useNostrStore } from "src/stores/nostr";
@@ -258,9 +258,21 @@ export default defineComponent({
     const uiStore = useUiStore();
     const { t } = useI18n();
     const router = useRouter();
+    const route = useRoute();
     const nostrStore = useNostrStore();
-    const needsNostrLogin = computed(() => !nostrStore.privateKeySignerPrivateKey);
-    const showBackButton = computed(() => true);
+    const needsNostrLogin = computed(
+      () => !nostrStore.privateKeySignerPrivateKey
+    );
+    const isChatPage = computed(
+      () =>
+        route.path.startsWith("/nostr-messenger") ||
+        route.path.startsWith("/chats")
+    );
+    const showBackButton = computed(() => isChatPage.value);
+    const backRoute = computed(() => {
+      if (route.path.startsWith("/chats/")) return "/chats";
+      return "/wallet";
+    });
     const countdown = ref(0);
     let countdownInterval;
 
@@ -376,6 +388,7 @@ export default defineComponent({
       gotoNostrLogin,
       gotoWallet,
       showBackButton,
+      backRoute,
       needsNostrLogin,
     };
   },
