@@ -58,6 +58,7 @@ import { useRouter } from 'vue-router';
 import { useNostrStore } from 'src/stores/nostr';
 import { useMessengerStore } from 'src/stores/messenger';
 import { useSendTokensStore } from 'src/stores/sendTokensStore';
+import { nip19 } from 'nostr-tools';
 
 const props = defineProps<{ pubkey: string }>();
 const nostr = useNostrStore();
@@ -84,11 +85,13 @@ watch(
 const displayName = computed(() => {
   if (!props.pubkey) return '';
   const p: any = profile.value;
-  return (
-    p?.display_name ||
-    p?.name ||
-    props.pubkey.slice(0, 8) + '...' + props.pubkey.slice(-4)
-  );
+  if (p?.display_name) return p.display_name;
+  if (p?.name) return p.name;
+  try {
+    return nip19.npubEncode(nostr.resolvePubkey(props.pubkey));
+  } catch (e) {
+    return props.pubkey.slice(0, 8) + '...' + props.pubkey.slice(-4);
+  }
 });
 
 const initials = computed(() => {
