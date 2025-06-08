@@ -17,6 +17,7 @@
 <script lang="ts" setup>
 import { ref, watch } from 'vue';
 import { useMessengerStore } from 'src/stores/messenger';
+import { notifySuccess, notifyError } from 'src/js/notify';
 
 const messenger = useMessengerStore();
 
@@ -29,15 +30,25 @@ watch(
   },
 );
 
-const connect = () => {
+const connect = async () => {
   const relays = relayText.value
     .split(/\n|\r/)
     .map((r) => r.trim())
     .filter((r) => r.length);
-  messenger.connect(relays);
+  try {
+    await Promise.resolve(messenger.connect(relays));
+    notifySuccess('Connected to relays');
+  } catch (err: any) {
+    notifyError(err?.message || 'Failed to connect');
+  }
 };
 
-const disconnect = () => {
-  messenger.disconnect();
+const disconnect = async () => {
+  try {
+    await Promise.resolve(messenger.disconnect());
+    notifySuccess('Disconnected from relays');
+  } catch (err: any) {
+    notifyError(err?.message || 'Failed to disconnect');
+  }
 };
 </script>
