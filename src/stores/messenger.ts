@@ -139,12 +139,17 @@ export const useMessengerStore = defineStore("messenger", {
         notifyError('No private key set. Please configure your Nostr identity.');
         return;
       }
+      const since = this.eventLog.reduce(
+        (max, m) => (m.created_at > max ? m.created_at : max),
+        0
+      );
       await nostr.subscribeToNip04DirectMessagesCallback(
         privKey,
         nostr.pubkey,
         async (ev, _decrypted) => {
           await this.addIncomingMessage(ev as NostrEvent);
-        }
+        },
+        since
       );
       this.started = true;
     },
