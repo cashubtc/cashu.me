@@ -11,6 +11,7 @@
       v-model="showSubscribeDialog"
       :tier="selectedTier"
       :supporter-pubkey="nostr.pubkey"
+      :creator-pubkey="dialogPubkey.value"
       @confirm="confirmSubscribe"
     />
     <SubscriptionReceipt v-model="showReceiptDialog" :receipts="receiptList" />
@@ -152,7 +153,6 @@ function openSubscribe(tier: any) {
 }
 
 async function confirmSubscribe({
-  bucketId,
   months,
   amount,
   startDate,
@@ -165,7 +165,7 @@ async function confirmSubscribe({
       months,
       amount,
       dialogPubkey.value,
-      bucketId,
+      undefined,
       startDate,
       true
     )) as any[];
