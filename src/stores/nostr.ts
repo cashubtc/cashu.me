@@ -530,13 +530,21 @@ export const useNostrStore = defineStore("nostr", {
     subscribeToNip04DirectMessagesCallback: async function (
       privKey: string,
       pubKey: string,
-      cb: (event: NostrEvent, decrypted: string) => void
+      cb: (event: NostrEvent, decrypted: string) => void,
+      since?: number
     ) {
       pubKey = this.resolvePubkey(pubKey);
       await this.initNdkReadOnly();
+      if (since === undefined) {
+        if (!this.lastEventTimestamp) {
+          this.lastEventTimestamp = Math.floor(Date.now() / 1000);
+        }
+        since = this.lastEventTimestamp;
+      }
       const filter: NDKFilter = {
         kinds: [NDKKind.EncryptedDirectMessage],
         "#p": [pubKey],
+        since,
       };
       const sub = this.ndk.subscribe(filter, {
         closeOnEose: false,
@@ -545,6 +553,7 @@ export const useNostrStore = defineStore("nostr", {
       sub.on("event", async (ev: NDKEvent) => {
         const decrypted = await nip04.decrypt(privKey, ev.pubkey, ev.content);
         const raw = await ev.toNostrEvent();
+        this.lastEventTimestamp = Math.floor(Date.now() / 1000);
         cb(raw, decrypted);
       });
     },

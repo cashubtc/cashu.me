@@ -8,7 +8,7 @@ var walletGen: any
 vi.mock('../../../src/stores/nostr', () => {
   sendDm = vi.fn(async () => ({ success: true, event: { id: '1', created_at: 0 } }))
   decryptDm = vi.fn(async () => 'msg')
-  subscribe = vi.fn(async (_priv: string, _pub: string, cb: any) => { cb && cb({} as any, '') })
+  subscribe = vi.fn(async (_priv: string, _pub: string, cb: any, _since?: number) => { cb && cb({} as any, '') })
   walletGen = vi.fn()
   const store = {
     sendNip04DirectMessage: sendDm,
@@ -70,6 +70,7 @@ describe('messenger store', () => {
     const args = subscribe.mock.calls[0]
     expect(args[0]).toBe('priv')
     expect(args[1]).toBe('pub')
+    expect(args[3]).toBe(0)
   })
 
   it('notifies when starting without privkey', async () => {
