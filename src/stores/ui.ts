@@ -36,6 +36,10 @@ export const useUiStore = defineStore("ui", {
     globalMutexLock: false,
     showDebugConsole: useLocalStorage("cashu.ui.showDebugConsole", false),
     lastBalanceCached: useLocalStorage("cashu.ui.lastBalanceCached", 0),
+    multinutExperimentalWarningDismissed: useLocalStorage(
+      "cashu.ui.multinutExperimentalWarningDismissed",
+      false
+    ),
   }),
   actions: {
     closeDialogs() {

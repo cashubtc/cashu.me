@@ -39,10 +39,45 @@
               Pay using multiple mints
             </div>
           </div>
+
+          <!-- Experimental Warning -->
+          <transition
+            appear
+            enter-active-class="animated pulse"
+            name="smooth-slide"
+          >
+            <div
+              v-if="
+                !multinutExperimentalWarningDismissed && !isPaymentInProgress
+              "
+              class="experimental-warning q-mt-lg"
+            >
+              <div class="warning-content q-pa-md">
+                <div class="warning-title q-mb-xs">Experimental Feature</div>
+                <div class="warning-text q-mb-md">
+                  This feature is highly experimental and may not work as
+                  expected. Make sure you don't try to pay an invoice that has
+                  already been paid before. You could lose funds.
+                </div>
+                <q-btn
+                  flat
+                  color="warning"
+                  @click="dismissExperimentalWarning"
+                  class="warning-dismiss-btn"
+                >
+                  I understand
+                </q-btn>
+              </div>
+            </div>
+          </transition>
         </div>
+
         <!-- Mint Selection Section -->
         <div class="mint-selection-section q-mb-lg">
-          <div class="mint-selection-description q-mb-md">
+          <div
+            class="mint-selection-description q-mb-md"
+            v-if="multinutExperimentalWarningDismissed"
+          >
             Select funds from multiple mints to execute the payment.
           </div>
 
@@ -272,6 +307,7 @@ export default defineComponent({
   },
   computed: {
     ...mapWritableState(useWalletStore, ["payInvoiceData"]),
+    ...mapWritableState(useUiStore, ["multinutExperimentalWarningDismissed"]),
     ...mapState(useMintsStore, ["mints", "activeUnit", "multiMints"]),
     totalSelectedBalance() {
       return this.selectedMints.reduce((total, mint) => {
@@ -946,6 +982,9 @@ export default defineComponent({
         this.clearMintStates();
       }, 2000); // Show success states for 2 seconds before closing
     },
+    dismissExperimentalWarning() {
+      this.multinutExperimentalWarningDismissed = true;
+    },
   },
 });
 </script>
@@ -1243,5 +1282,64 @@ export default defineComponent({
 /* Remove old styles that are no longer needed */
 .qcard {
   display: none;
+}
+
+/* Experimental Warning */
+.experimental-warning {
+  width: 100%;
+}
+
+.warning-content {
+  background-color: rgba(255, 193, 7, 0.1);
+  border: 1px solid rgba(255, 193, 7, 0.3);
+  border-radius: 12px;
+  text-align: center;
+}
+
+.warning-icon {
+  display: flex;
+  justify-content: center;
+}
+
+.warning-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #ffc107;
+}
+
+.warning-text {
+  font-size: 14px;
+  line-height: 20px;
+  color: #ffffff;
+  font-weight: 500;
+}
+
+.warning-dismiss-btn {
+  font-weight: 600;
+}
+
+/* Smooth slide animation for warning */
+.smooth-slide-enter-active {
+  transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  max-height: 200px;
+  margin-bottom: 16px;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.smooth-slide-leave-active {
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  max-height: 200px;
+  margin-bottom: 16px;
+  opacity: 1;
+}
+
+.smooth-slide-enter-from,
+.smooth-slide-leave-to {
+  max-height: 0;
+  margin-bottom: 0;
+  opacity: 0;
+  transform: translateY(-10px);
+  pointer-events: none;
 }
 </style>

@@ -340,7 +340,7 @@ export const useWalletStore = defineStore("wallet", {
       const mintStore = useMintsStore();
       const spendableProofs = proofsStore.getUnreservedProofs(proofs);
       if (proofsStore.sumProofs(spendableProofs) < amount) {
-        throw Error(this.t("wallet.notifications.balance_too_low"),);
+        throw Error(this.t("wallet.notifications.balance_too_low"));
       }
       return spendableProofs;
     },
