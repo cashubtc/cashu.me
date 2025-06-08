@@ -8,7 +8,7 @@
             <tr>
               <th class="text-left">Amount</th>
               <th class="text-left">Date</th>
-              <th class="text-left">Ref</th>
+              <th class="text-left">Token</th>
               <th class="text-right"></th>
             </tr>
           </thead>
@@ -16,7 +16,24 @@
             <tr v-for="r in receipts" :key="r.id">
               <td>{{ r.amount }}</td>
               <td>{{ formatDate(r) }}</td>
-              <td class="text-no-wrap">{{ r.id }}</td>
+              <td class="text-no-wrap">
+                <div class="row items-center no-wrap">
+                  <span>{{ r.token.slice(0, 16) }}<span v-if="r.token.length > 16">…</span></span>
+                  <q-btn
+                    flat
+                    dense
+                    size="sm"
+                    :icon="expanded[r.id] ? 'expand_less' : 'expand_more'"
+                    class="q-ml-xs"
+                    @click.stop="toggle(r.id)"
+                  />
+                </div>
+                <q-slide-transition>
+                  <div v-if="expanded[r.id]" class="text-caption q-mt-xs token-full">
+                    {{ r.token }}
+                  </div>
+                </q-slide-transition>
+              </td>
               <td class="text-right">
                 <q-btn flat color="primary" size="sm" @click="copyToken(r.token)">
                   {{ $t('global.actions.copy.label') }}
@@ -53,6 +70,11 @@ export default defineComponent({
     },
   },
   emits: ['update:modelValue'],
+  data() {
+    return {
+      expanded: {} as Record<string, boolean>,
+    };
+  },
   computed: {
     model: {
       get(): boolean {
@@ -79,6 +101,9 @@ export default defineComponent({
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
     },
+    toggle(id: string) {
+      this.$set(this.expanded, id, !this.expanded[id]);
+    },
     formatDate(r: any) {
       if (r.locktime) {
         const d = new Date(r.locktime * 1000);
@@ -95,5 +120,10 @@ export default defineComponent({
 </script>
 
 <style scoped>
+.token-full {
+  word-break: break-all;
+  font-family: monospace;
+  font-size: 0.9em;
+}
 </style>
 
