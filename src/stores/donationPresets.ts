@@ -84,9 +84,8 @@ export const useDonationPresetsStore = defineStore("donationPresets", {
           locktime,
           bucketId,
         });
-        proofs = mintsStore.activeProofs.filter(
-          (p) => p.bucketId === bucketId
-        );
+        await proofsStore.updateActiveProofs();
+        proofs = mintsStore.activeProofs.filter((p) => p.bucketId === bucketId);
       }
       return tokens.join("\n");
     },
