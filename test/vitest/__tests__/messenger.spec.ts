@@ -15,12 +15,18 @@ vi.mock('../../../src/stores/nostr', () => {
     decryptNip04: decryptDm,
     subscribeToNip04DirectMessagesCallback: subscribe,
     walletSeedGenerateKeyPair: walletGen,
+    initSignerIfNotSet: vi.fn(),
     privateKeySignerPrivateKey: 'priv',
     seedSignerPrivateKey: '',
     pubkey: 'pub',
     connected: true,
     relays: [] as string[],
   }
+  Object.defineProperty(store, 'privKeyHex', {
+    get() {
+      return store.privateKeySignerPrivateKey
+    }
+  })
   return { useNostrStore: () => store }
 })
 
@@ -29,9 +35,11 @@ vi.mock('../../../src/js/message-utils', () => ({
 }))
 
 var notifySpy: any
+var notifyErrorSpy: any
 vi.mock('../../../src/js/notify', () => {
   notifySpy = vi.fn()
-  return { notifySuccess: notifySpy }
+  notifyErrorSpy = vi.fn()
+  return { notifySuccess: notifySpy, notifyError: notifyErrorSpy }
 })
 
 import { useMessengerStore } from '../../../src/stores/messenger'
@@ -62,5 +70,13 @@ describe('messenger store', () => {
     const args = subscribe.mock.calls[0]
     expect(args[0]).toBe('priv')
     expect(args[1]).toBe('pub')
+  })
+
+  it('notifies when starting without privkey', async () => {
+    const messenger = useMessengerStore()
+    const nostr = useNostrStore()
+    nostr.privateKeySignerPrivateKey = ''
+    await messenger.start()
+    expect(notifyErrorSpy).toHaveBeenCalled()
   })
 })

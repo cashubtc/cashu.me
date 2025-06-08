@@ -6,7 +6,7 @@ import { useNostrStore } from "./nostr";
 import { v4 as uuidv4 } from "uuid";
 import { useSettingsStore } from "./settings";
 import { sanitizeMessage } from "src/js/message-utils";
-import { notifySuccess } from "src/js/notify";
+import { notifySuccess, notifyError } from "src/js/notify";
 
 export type MessengerMessage = {
   id: string;
@@ -135,7 +135,10 @@ export const useMessengerStore = defineStore("messenger", {
       await this.loadIdentity();
       const nostr = useNostrStore();
       const privKey = nostr.privKeyHex;
-      if (!privKey) return;
+      if (!privKey) {
+        notifyError('No private key set. Please configure your Nostr identity.');
+        return;
+      }
       await nostr.subscribeToNip04DirectMessagesCallback(
         privKey,
         nostr.pubkey,
