@@ -36,13 +36,22 @@
       <ActiveChatHeader :pubkey="selected" />
       <MessageList :messages="messages" class="col" />
       <MessageInput @send="sendMessage" />
-      <EventLog class="q-mt-md" :events="eventLog" />
+      <q-expansion-item
+        class="q-mt-md"
+        dense
+        dense-toggle
+        label="Event Log"
+        v-model="showEventLog"
+      >
+        <EventLog :events="eventLog" />
+      </q-expansion-item>
     </div>
   </q-page>
 </template>
 
 <script lang="ts" setup>
 import { computed, ref, onMounted, watch } from "vue";
+import { useLocalStorage } from "@vueuse/core";
 import { useMessengerStore } from "src/stores/messenger";
 
 import NostrIdentityManager from "components/NostrIdentityManager.vue";
@@ -67,6 +76,10 @@ const drawer = computed({
 const selected = ref("");
 const messages = computed(() => messenger.conversations[selected.value] || []);
 const eventLog = computed(() => messenger.eventLog);
+const showEventLog = useLocalStorage<boolean>(
+  "cashu.messenger.showEventLog",
+  false,
+);
 
 watch(
   selected,
