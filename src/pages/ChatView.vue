@@ -10,16 +10,6 @@
       style="border-bottom: 1px solid rgba(0, 0, 0, 0.1)"
     >
       <q-toolbar class="q-pa-sm">
-        <q-btn
-          flat
-          dense
-          round
-          icon="arrow_back"
-          color="primary"
-          @click="goBack"
-          aria-label="Go back"
-          class="q-mr-sm"
-        />
         <q-avatar v-if="avatar" size="md" class="q-mr-sm">
           <img :src="avatar" />
         </q-avatar>
@@ -69,7 +59,7 @@ import {
   onMounted,
   nextTick,
 } from "vue";
-import { useRoute, useRouter } from "vue-router";
+import { useRoute } from "vue-router";
 import { useDmChatsStore } from "stores/dmChats";
 import { storeToRefs } from "pinia";
 import { useNostrStore } from "stores/nostr";
@@ -79,7 +69,6 @@ export default defineComponent({
   name: "ChatView",
   setup() {
     const route = useRoute();
-    const router = useRouter();
     const pubkey = route.params.pubkey as string;
     const dmStore = useDmChatsStore();
     dmStore.loadChats();
@@ -128,10 +117,6 @@ export default defineComponent({
       }
     };
 
-    const goBack = () => {
-      router.push("/chats");
-    };
-
     const displayName = computed(() => {
       return (
         profile.value?.display_name ||
@@ -153,7 +138,6 @@ export default defineComponent({
       sanitizeMessage,
       formatDate,
       bottomMarker,
-      goBack,
     };
   },
 });
