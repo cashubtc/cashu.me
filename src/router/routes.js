@@ -74,6 +74,13 @@ const routes = [
     ],
   },
   {
+    path: "/subscriptions",
+    component: () => import("layouts/FullscreenLayout.vue"),
+    children: [
+      { path: "", component: () => import("src/pages/SubscriptionsOverview.vue") },
+    ],
+  },
+  {
     path: "/nostr-messenger",
     component: () => import("layouts/MainLayout.vue"),
     children: [

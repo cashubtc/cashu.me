@@ -190,6 +190,19 @@
           }}</q-item-label>
         </q-item-section>
       </q-item>
+      <q-item clickable @click="gotoSubscriptions">
+        <q-item-section avatar>
+          <q-icon name="auto_awesome_motion" />
+        </q-item-section>
+        <q-item-section>
+          <q-item-label>{{
+            $t("MainHeader.menu.subscriptions.subscriptions.title")
+          }}</q-item-label>
+          <q-item-label caption>{{
+            $t("MainHeader.menu.subscriptions.subscriptions.caption")
+          }}</q-item-label>
+        </q-item-section>
+      </q-item>
       <q-item clickable @click="gotoChats">
         <q-item-section avatar>
           <q-icon name="chat" />
@@ -398,6 +411,11 @@ export default defineComponent({
       leftDrawerOpen.value = false;
     };
 
+    const gotoSubscriptions = () => {
+      router.push("/subscriptions");
+      leftDrawerOpen.value = false;
+    };
+
     const gotoChats = () => {
       router.push("/nostr-messenger");
       leftDrawerOpen.value = false;
@@ -425,6 +443,7 @@ export default defineComponent({
       gotoFindCreators,
       gotoCreatorHub,
       gotoMyProfile,
+      gotoSubscriptions,
       gotoChats,
       gotoNostrLogin,
       gotoWallet,
