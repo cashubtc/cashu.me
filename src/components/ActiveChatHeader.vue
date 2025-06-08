@@ -24,18 +24,19 @@
           <span v-else>{{ initials }}</span>
         </q-avatar>
         <div class="text-h6 ellipsis">{{ displayName }}</div>
-        <q-btn flat round dense icon="more_vert" class="q-ml-xs">
-          <q-menu auto-close>
-            <q-list style="min-width: 120px">
-              <q-item clickable v-close-popup @click="viewProfile">
-                <q-item-section>View Profile</q-item-section>
-              </q-item>
-              <q-item clickable v-close-popup @click="clearChat">
-                <q-item-section>Clear Chat</q-item-section>
-              </q-item>
-            </q-list>
-          </q-menu>
-        </q-btn>
+        <q-btn
+          flat
+          round
+          dense
+          icon="more_vert"
+          class="q-ml-xs"
+          @click="showProfileDialog = true"
+        />
+        <ProfileInfoDialog
+          v-model="showProfileDialog"
+          :pubkey="props.pubkey"
+          @clear-chat="clearChat"
+        />
       </template>
       <template v-else>
         <div class="text-grey-6">Select a conversation to start chatting.</div>
@@ -54,11 +55,11 @@
 <script lang="ts" setup>
 import { ref, watch, computed } from 'vue';
 import { useQuasar } from 'quasar';
-import { useRouter } from 'vue-router';
 import { useNostrStore } from 'src/stores/nostr';
 import { useMessengerStore } from 'src/stores/messenger';
 import { useSendTokensStore } from 'src/stores/sendTokensStore';
 import { nip19 } from 'nostr-tools';
+import ProfileInfoDialog from './ProfileInfoDialog.vue';
 
 const props = defineProps<{ pubkey: string }>();
 const nostr = useNostrStore();
@@ -105,7 +106,7 @@ const initials = computed(() => {
 });
 
 const sendTokensStore = useSendTokensStore();
-const router = useRouter();
+const showProfileDialog = ref(false);
 
 function openSendTokenDialog() {
   if (!props.pubkey) return;
@@ -115,10 +116,6 @@ function openSendTokenDialog() {
   sendTokensStore.showSendTokens = true;
 }
 
-function viewProfile() {
-  if (!props.pubkey) return;
-  router.push(`/creator/${props.pubkey}`);
-}
 
 function clearChat() {
   if (!props.pubkey) return;
