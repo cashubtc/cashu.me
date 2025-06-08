@@ -156,6 +156,27 @@ export const useNostrStore = defineStore("nostr", {
       this.ndk.connect();
       this.connected = true;
     },
+    disconnect: function () {
+      if (this.ndk && (this.ndk as any).pool) {
+        for (const relay of (this.ndk as any).pool.relays.values()) {
+          relay.disconnect && relay.disconnect();
+        }
+      }
+      this.connected = false;
+    },
+    connect: function (relays?: string[]) {
+      if (relays) {
+        this.relays = relays as any;
+      }
+      this.disconnect();
+      const opts: any = { explicitRelayUrls: this.relays };
+      if (this.signer) {
+        opts.signer = this.signer;
+      }
+      this.ndk = new NDK(opts);
+      this.ndk.connect();
+      this.connected = true;
+    },
     initSignerIfNotSet: async function () {
       if (!this.initialized) {
         await this.initSigner();
