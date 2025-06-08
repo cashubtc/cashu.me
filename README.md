@@ -48,6 +48,16 @@ Think Patreon, but built for the Nostr ecosystem and leveraging the privacy and 
 - **npub.cash Integration** – Option to receive funds via a Lightning Address.
 - **Nostr Wallet Connect (NWC)** – Planned/experimental automation for recurring support.
 
+### Nostr Messenger
+The app includes a built-in Nostr messenger for private chat.
+
+1. Open **Nostr Messenger** from the menu.
+2. Click **Identity / Relays** in the side drawer.
+3. Paste your Nostr **Private Key** and add relay URLs.
+4. Press **Save**, then use **Connect** under *Relays*.
+5. The messenger connects to the relays defined in Settings and shows an
+   **Online/Offline** badge in the header.
+
 ## Technology Stack
 - **Frontend**: Quasar Framework (Vue.js 3)
 - **Mobile/Desktop**: Capacitor
