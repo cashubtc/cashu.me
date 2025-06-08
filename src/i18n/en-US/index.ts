@@ -133,6 +133,13 @@ export default {
           caption: "Manage buckets",
         },
       },
+      subscriptions: {
+        title: "Subscriptions",
+        subscriptions: {
+          title: "Subscriptions",
+          caption: "Overview of your subscriptions",
+        },
+      },
       terms: {
         title: "Terms",
         terms: {
@@ -1461,6 +1468,16 @@ export default {
     title: "Move tokens",
     empty: "No tokens",
     helper: "Move tokens between buckets to organize them.",
+  },
+  SubscriptionsOverview: {
+    title: "Subscriptions",
+    columns: {
+      creator: "Creator",
+      total: "Total",
+      next_unlock: "Next unlock",
+      remaining: "Months left",
+    },
+    empty: "No subscriptions",
   },
   LockedTokensTable: {
     empty_text: "No locked tokens",
