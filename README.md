@@ -57,8 +57,6 @@ The app includes a built-in Nostr messenger for private chat.
 4. Press **Save**, then use **Connect** under *Relays*.
 5. The messenger connects to the relays defined in Settings and shows an
    **Online/Offline** badge in the header.
-6. Cashu tokens sent in chat appear with a **Redeem** button so you can add them
-   to your wallet directly.
 
 ## Technology Stack
 - **Frontend**: Quasar Framework (Vue.js 3)
