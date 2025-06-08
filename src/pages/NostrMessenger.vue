@@ -2,6 +2,8 @@
   <q-page
     class="row full-height"
     :class="[$q.dark.isActive ? 'bg-dark text-white' : 'bg-white text-dark']"
+    @touchstart="onTouchStart"
+    @touchend="onTouchEnd"
   >
     <q-drawer
       v-model="drawer"
@@ -58,7 +60,10 @@ onMounted(() => {
   messenger.start();
 });
 
-const drawer = ref(true);
+const drawer = computed({
+  get: () => messenger.drawerOpen,
+  set: (val) => messenger.setDrawer(val),
+});
 const selected = ref("");
 const messages = computed(() => messenger.conversations[selected.value] || []);
 const eventLog = computed(() => messenger.eventLog);
@@ -87,6 +92,17 @@ const startChat = (pubkey: string) => {
 const sendMessage = (text: string) => {
   if (!selected.value) return;
   messenger.sendDm(selected.value, text);
+};
+
+let touchStartX = 0;
+const onTouchStart = (e: TouchEvent) => {
+  touchStartX = e.touches[0].clientX;
+};
+
+const onTouchEnd = (e: TouchEvent) => {
+  const dx = e.changedTouches[0].clientX - touchStartX;
+  if (dx > 50) messenger.setDrawer(true);
+  if (dx < -50) messenger.setDrawer(false);
 };
 </script>
 <style scoped>
