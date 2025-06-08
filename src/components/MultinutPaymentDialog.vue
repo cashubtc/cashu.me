@@ -59,7 +59,7 @@
             v-show="!isPaymentInProgress || isSelected(mint)"
           >
             <q-item
-              clickable
+              :clickable="!isPaymentInProgress && !isSelected(mint)"
               class="mint-card q-mb-md cursor-pointer"
               @click="!isPaymentInProgress && toggleMint(mint)"
               :class="{ 'cursor-not-allowed': isPaymentInProgress }"
@@ -137,17 +137,6 @@
                           :class="{ 'cursor-not-allowed': isPaymentInProgress }"
                         >
                           {{ mint.nickname || mint.info?.name }}
-                          <!-- State text during payment -->
-                          <span
-                            v-if="
-                              isPaymentInProgress &&
-                              isSelected(mint) &&
-                              mintStates[mint.url]
-                            "
-                            class="text-caption text-grey-6 q-ml-sm"
-                          >
-                            ({{ getStateText(mintStates[mint.url]) }})
-                          </span>
                         </div>
                         <div
                           class="text-grey-6"
@@ -161,6 +150,30 @@
                           :class="{ 'cursor-not-allowed': isPaymentInProgress }"
                         >
                           {{ getShortUrl(mint.url) }}
+                        </div>
+
+                        <!-- Payment State Progress Bar -->
+                        <div
+                          v-if="
+                            isPaymentInProgress &&
+                            isSelected(mint) &&
+                            mintStates[mint.url]
+                          "
+                          class="q-mt-xs"
+                        >
+                          <q-linear-progress
+                            :value="getStateProgress(mintStates[mint.url])"
+                            :color="getStateColor(mintStates[mint.url])"
+                            size="4px"
+                            rounded
+                            class="payment-progress"
+                          />
+                          <div
+                            class="text-caption text-grey-6 q-mt-xs"
+                            style="font-size: 10px"
+                          >
+                            {{ getStateText(mintStates[mint.url]) }}
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -753,6 +766,34 @@ export default defineComponent({
           return "";
       }
     },
+    getStateColor(state) {
+      switch (state) {
+        case "requesting":
+          return "warning";
+        case "paying":
+          return "primary";
+        case "success":
+          return "positive";
+        case "error":
+          return "negative";
+        default:
+          return "grey";
+      }
+    },
+    getStateProgress(state) {
+      switch (state) {
+        case "requesting":
+          return 0.3; // Low progress - just started
+        case "paying":
+          return 0.7; // Middle progress - actively paying
+        case "success":
+          return 1.0; // Full progress - completed
+        case "error":
+          return 0.1; // Minimal progress - failed
+        default:
+          return 0;
+      }
+    },
     setMintState(mintUrl, state) {
       // Use Vue 3 compatible reactivity
       this.mintStates = { ...this.mintStates, [mintUrl]: state };
@@ -908,7 +949,7 @@ export default defineComponent({
           })
         );
       } catch (error) {
-        notifyError(`Multi-nut payment failed: ${error}`);
+        // notifyError(`Multi-nut payment failed: ${error}`);
         console.error(`${error}`);
 
         // Reset states on error so user can try again
@@ -1005,5 +1046,14 @@ export default defineComponent({
 .col[style*="min-width: 0"] {
   flex-shrink: 1;
   min-width: 0 !important;
+}
+
+.payment-progress {
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.payment-progress .q-linear-progress__track {
+  background-color: rgba(255, 255, 255, 0.1);
 }
 </style>
