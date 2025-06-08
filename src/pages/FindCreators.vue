@@ -74,7 +74,8 @@ import { useLockedTokensStore } from "stores/lockedTokens";
 import { useCreatorsStore } from "stores/creators";
 import { useNostrStore } from "stores/nostr";
 import { useMintsStore } from "stores/mints";
-import { notifyError, notifySuccess } from "src/js/notify";
+import { notifyError, notifySuccess, notifyWarning } from "src/js/notify";
+import { useDmChatsStore } from "stores/dmChats";
 import { useI18n } from "vue-i18n";
 import {
   QDialog,
@@ -119,6 +120,11 @@ function bech32ToHex(pubkey: string): string {
   }
 }
 
+function formatTs(ts: number): string {
+  const d = new Date(ts * 1000);
+  return `${d.getFullYear()}-${("0" + (d.getMonth() + 1)).slice(-2)}-${("0" + d.getDate()).slice(-2)} ${("0" + d.getHours()).slice(-2)}:${("0" + d.getMinutes()).slice(-2)}`;
+}
+
 async function onMessage(ev: MessageEvent) {
   if (ev.data && ev.data.type === "donate" && ev.data.pubkey) {
     selectedPubkey.value = ev.data.pubkey;
@@ -154,37 +160,39 @@ async function confirmSubscribe({
   if (!dialogPubkey.value) return;
   Loading.show({ message: "Loading..." });
   try {
-    const tokens = await donationStore.createDonationPreset(
+    const receipts = (await donationStore.createDonationPreset(
       months,
       amount,
       dialogPubkey.value,
       bucketId,
-      startDate
-    );
-    if (months === undefined || months <= 0) {
-      lockedStore.addLockedToken({
-        amount,
-        token: tokens,
-        pubkey: dialogPubkey.value,
-        bucketId,
-      });
-    }
+      startDate,
+      true
+    )) as any[];
+    const tokenString = receipts.map((r) => r.token).join("\n");
     let supporterName = nostr.pubkey;
     try {
       const prof = await nostr.getProfile(nostr.pubkey);
       supporterName =
         prof?.display_name || prof?.name || prof?.username || nostr.pubkey;
     } catch {}
-    const { success } = await nostr.sendNip04DirectMessage(
+    const messages = receipts.map((r) => {
+      const date = r.locktime
+        ? formatTs(r.locktime)
+        : new Date(r.date).toISOString();
+      return `${r.amount} sats from ${supporterName} on ${date} (ref ${r.id})\n${r.token}`;
+    });
+    const dmMessage = messages.join("\n");
+    const { success, event } = await nostr.sendNip04DirectMessage(
       dialogPubkey.value,
-      `${supporterName} just subscribed to ${selectedTier.value.name} for ${total} sats. Here is your receipt:\n${tokens}`
+      dmMessage
     );
     if (success) {
       notifySuccess(t("FindCreators.notifications.subscription_success"));
+      if (event) useDmChatsStore().addOutgoing(event);
     } else {
       notifyWarning(t("wallet.notifications.nostr_dm_failed"));
     }
-    receiptToken.value = tokens;
+    receiptToken.value = tokenString;
     showReceiptDialog.value = true;
     showSubscribeDialog.value = false;
     showTierDialog.value = false;
