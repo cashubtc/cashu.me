@@ -166,29 +166,29 @@
                           <div class="mint-url">
                             {{ getShortUrl(mint.url) }}
                           </div>
-
-                          <!-- Payment State Progress Bar -->
-                          <div
-                            v-if="
-                              isPaymentInProgress &&
-                              isSelected(mint) &&
-                              mintStates[mint.url]
-                            "
-                            class="q-mt-xs"
-                          >
-                            <q-linear-progress
-                              :value="getStateProgress(mintStates[mint.url])"
-                              :color="getStateColor(mintStates[mint.url])"
-                              size="4px"
-                              rounded
-                              class="payment-progress"
-                            />
-                            <div class="payment-state-text q-mt-xs">
-                              {{ getStateText(mintStates[mint.url]) }}
-                            </div>
-                          </div>
                         </div>
                       </div>
+                    </div>
+                  </div>
+
+                  <!-- Payment State Progress Bar - Full Width -->
+                  <div
+                    v-if="
+                      isPaymentInProgress &&
+                      isSelected(mint) &&
+                      mintStates[mint.url]
+                    "
+                    class="payment-progress-section q-mt-md"
+                  >
+                    <q-linear-progress
+                      :value="getStateProgress(mintStates[mint.url])"
+                      :color="getStateColor(mintStates[mint.url])"
+                      size="4px"
+                      rounded
+                      class="payment-progress"
+                    />
+                    <div class="payment-state-text q-mt-xs">
+                      {{ getStateText(mintStates[mint.url]) }}
                     </div>
                   </div>
 
@@ -1216,9 +1216,14 @@ export default defineComponent({
 }
 
 /* Payment Progress */
+.payment-progress-section {
+  width: 100%;
+}
+
 .payment-progress {
   border-radius: 2px;
   overflow: hidden;
+  width: 100%;
 }
 
 .payment-progress .q-linear-progress__track {
@@ -1229,6 +1234,7 @@ export default defineComponent({
   font-size: 10px;
   color: #9e9e9e;
   font-weight: 500;
+  text-align: left;
 }
 
 /* Action Buttons Section */
