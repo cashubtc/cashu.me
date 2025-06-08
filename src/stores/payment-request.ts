@@ -48,7 +48,7 @@ export const usePRStore = defineStore("payment-request", {
       const transport = [
         {
           type: PaymentRequestTransportType.NOSTR,
-          target: nostrStore.seedSignerNprofile,
+          target: nostrStore.nprofile,
           tags: tags,
         },
       ] as PaymentRequestTransport[];

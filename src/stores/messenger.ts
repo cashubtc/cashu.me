@@ -43,17 +43,15 @@ export const useMessengerStore = defineStore("messenger", {
     },
   },
   actions: {
-    loadIdentity() {
+    async loadIdentity() {
       const nostr = useNostrStore();
-      if (!nostr.seedSignerPrivateKey && !nostr.privateKeySignerPrivateKey) {
-        nostr.walletSeedGenerateKeyPair();
-      }
+      await nostr.initSignerIfNotSet();
     },
     async sendDm(recipient: string, message: string) {
-      this.loadIdentity();
+      await this.loadIdentity();
       const nostr = useNostrStore();
-      const privKey =
-        nostr.privateKeySignerPrivateKey || nostr.seedSignerPrivateKey;
+      const privKey = nostr.privKeyHex;
+      if (!privKey) return { success: false, event: null } as any;
       const { success, event } = await nostr.sendNip04DirectMessage(
         recipient,
         message,
@@ -86,10 +84,10 @@ export const useMessengerStore = defineStore("messenger", {
       this.eventLog.push(msg);
     },
     async addIncomingMessage(event: NostrEvent) {
-      this.loadIdentity();
+      await this.loadIdentity();
       const nostr = useNostrStore();
-      const privKey =
-        nostr.privateKeySignerPrivateKey || nostr.seedSignerPrivateKey;
+      const privKey = nostr.privKeyHex;
+      if (!privKey) return;
       const decrypted = await nostr.decryptNip04(
         privKey,
         event.pubkey,
@@ -134,10 +132,10 @@ export const useMessengerStore = defineStore("messenger", {
       if (this.started) {
         return;
       }
-      this.loadIdentity();
+      await this.loadIdentity();
       const nostr = useNostrStore();
-      const privKey =
-        nostr.privateKeySignerPrivateKey || nostr.seedSignerPrivateKey;
+      const privKey = nostr.privKeyHex;
+      if (!privKey) return;
       await nostr.subscribeToNip04DirectMessagesCallback(
         privKey,
         nostr.pubkey,
