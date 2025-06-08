@@ -149,7 +149,7 @@
                       (value) => updateMintProportion(mint, value)
                     "
                     :min="0"
-                    :max="100"
+                    :max="getMaxPercentageForMint(mint)"
                     :step="1"
                     color="primary"
                     :disable="selectedMints.length <= 1"
@@ -282,32 +282,97 @@ export default defineComponent({
         return;
       }
 
-      // Calculate default proportions based on balance weights
+      const totalAmount = this.payInvoiceData.meltQuote.response.amount;
+
+      // Calculate default proportions based on balance weights, but respect capacity constraints
       const { weights } = this.multiMintBalance(
         this.selectedMints,
         this.activeUnit
       );
       const newProportions = {};
 
+      // First pass: calculate ideal proportions
       this.selectedMints.forEach((mint, index) => {
-        newProportions[mint.url] = weights[index] * 100; // Convert to percentage
+        const idealPercentage = weights[index] * 100;
+        const maxPercentage = this.getMaxPercentageForMint(mint);
+        newProportions[mint.url] = Math.min(idealPercentage, maxPercentage);
       });
+
+      // Check if we need to redistribute due to capacity constraints
+      const totalAllocated = Object.values(newProportions).reduce(
+        (sum, percentage) => sum + percentage,
+        0
+      );
+
+      if (totalAllocated < 100) {
+        // We have remaining capacity to distribute
+        const remaining = 100 - totalAllocated;
+        const mintsWithCapacity = this.selectedMints.filter((mint) => {
+          const maxPercentage = this.getMaxPercentageForMint(mint);
+          return newProportions[mint.url] < maxPercentage;
+        });
+
+        if (mintsWithCapacity.length > 0) {
+          // Distribute remaining proportionally among mints with available capacity
+          const totalAvailableCapacity = mintsWithCapacity.reduce(
+            (sum, mint) => {
+              const maxPercentage = this.getMaxPercentageForMint(mint);
+              return sum + (maxPercentage - newProportions[mint.url]);
+            },
+            0
+          );
+
+          if (totalAvailableCapacity > 0) {
+            mintsWithCapacity.forEach((mint) => {
+              const maxPercentage = this.getMaxPercentageForMint(mint);
+              const availableCapacity =
+                maxPercentage - newProportions[mint.url];
+              const proportion = availableCapacity / totalAvailableCapacity;
+              const additional = Math.min(
+                availableCapacity,
+                remaining * proportion
+              );
+              newProportions[mint.url] += additional;
+            });
+          }
+        }
+      }
 
       this.mintProportions = { ...newProportions };
     },
     getMintProportion(mint) {
       return this.mintProportions[mint.url] || 0;
     },
+    getMaxPercentageForMint(mint) {
+      const totalAmount = this.payInvoiceData.meltQuote.response.amount;
+      const mintBalance = this.mintClass(mint).unitBalance(this.activeUnit);
+      return Math.min(100, (mintBalance / totalAmount) * 100);
+    },
     updateMintProportion(mint, newPercentage) {
       if (this.selectedMints.length <= 1) return;
 
+      const totalAmount = this.payInvoiceData.meltQuote.response.amount;
+      const mintBalance = this.mintClass(mint).unitBalance(this.activeUnit);
+
+      // Calculate the maximum percentage this mint can handle based on its balance
+      const maxPercentageForMint = Math.min(
+        100,
+        (mintBalance / totalAmount) * 100
+      );
+
+      // Constrain the new percentage to not exceed the mint's capacity
+      const constrainedPercentage = Math.min(
+        newPercentage,
+        maxPercentageForMint
+      );
+
       const oldPercentage = this.mintProportions[mint.url] || 0;
-      const difference = newPercentage - oldPercentage;
+      const difference = constrainedPercentage - oldPercentage;
 
       // Update the changed mint
       this.mintProportions = {
         ...this.mintProportions,
-        [mint.url]: newPercentage,
+        [mint.url]: constrainedPercentage,
       };
 
       // Redistribute the difference among other selected mints
@@ -317,52 +382,201 @@ export default defineComponent({
         0
       );
 
-      if (totalOtherPercentage > 0) {
-        // Proportionally adjust other mints
-        otherMints.forEach((otherMint) => {
-          const currentPercentage = this.mintProportions[otherMint.url] || 0;
-          const weight = currentPercentage / totalOtherPercentage;
-          const adjustment = difference * weight;
-          const newValue = Math.max(0, currentPercentage - adjustment);
+      if (totalOtherPercentage > 0 && otherMints.length > 0) {
+        // Proportionally adjust other mints, respecting their balance constraints
+        let remainingDifference = difference;
+
+        // Sort other mints by their available capacity (descending)
+        const mintsWithCapacity = otherMints
+          .map((otherMint) => {
+            const balance = this.mintClass(otherMint).unitBalance(
+              this.activeUnit
+            );
+            const maxPercentage = Math.min(100, (balance / totalAmount) * 100);
+            const currentPercentage = this.mintProportions[otherMint.url] || 0;
+            const availableCapacity = maxPercentage - currentPercentage;
+            return {
+              mint: otherMint,
+              currentPercentage,
+              maxPercentage,
+              availableCapacity,
+              balance,
+            };
+          })
+          .sort((a, b) => b.availableCapacity - a.availableCapacity);
+
+        // Distribute the difference, respecting capacity constraints
+        for (const mintInfo of mintsWithCapacity) {
+          if (Math.abs(remainingDifference) < 0.01) break; // Stop if difference is negligible
+
+          const weight = mintInfo.currentPercentage / totalOtherPercentage;
+          let adjustment = difference * weight;
+
+          // If reducing (difference is positive), we need to reduce others
+          if (difference > 0) {
+            // Can't reduce below 0
+            adjustment = Math.min(adjustment, mintInfo.currentPercentage);
+          } else {
+            // If increasing others (difference is negative), respect capacity
+            adjustment = Math.max(adjustment, -mintInfo.availableCapacity);
+          }
+
+          const newValue = Math.max(
+            0,
+            Math.min(
+              mintInfo.maxPercentage,
+              mintInfo.currentPercentage - adjustment
+            )
+          );
 
           this.mintProportions = {
             ...this.mintProportions,
-            [otherMint.url]: newValue,
+            [mintInfo.mint.url]: newValue,
           };
-        });
-      } else {
-        // If other mints have 0%, distribute evenly
-        const remainingPercentage = 100 - newPercentage;
-        const perMint = remainingPercentage / otherMints.length;
 
-        otherMints.forEach((otherMint) => {
-          this.mintProportions = {
-            ...this.mintProportions,
-            [otherMint.url]: perMint,
-          };
+          remainingDifference -= mintInfo.currentPercentage - newValue;
+        }
+      } else if (otherMints.length > 0) {
+        // If other mints have 0%, distribute evenly respecting capacity
+        const remainingPercentage = 100 - constrainedPercentage;
+        const mintsWithCapacity = otherMints.map((otherMint) => {
+          const balance = this.mintClass(otherMint).unitBalance(
+            this.activeUnit
+          );
+          const maxPercentage = Math.min(100, (balance / totalAmount) * 100);
+          return { mint: otherMint, maxPercentage, balance };
         });
+
+        const totalMaxCapacity = mintsWithCapacity.reduce(
+          (sum, m) => sum + m.maxPercentage,
+          0
+        );
+
+        if (totalMaxCapacity > 0) {
+          mintsWithCapacity.forEach((mintInfo) => {
+            const proportion = mintInfo.maxPercentage / totalMaxCapacity;
+            const allocatedPercentage = Math.min(
+              mintInfo.maxPercentage,
+              remainingPercentage * proportion
+            );
+
+            this.mintProportions = {
+              ...this.mintProportions,
+              [mintInfo.mint.url]: allocatedPercentage,
+            };
+          });
+        }
       }
 
-      // Ensure total is exactly 100%
+      // Ensure total is exactly 100% (with capacity constraints)
       this.normalizeMintProportions();
     },
     normalizeMintProportions() {
+      const totalAmount = this.payInvoiceData.meltQuote.response.amount;
       const total = this.selectedMints.reduce(
         (sum, mint) => sum + (this.mintProportions[mint.url] || 0),
         0
       );
 
-      if (total > 0 && total !== 100) {
+      if (total > 0 && Math.abs(total - 100) > 0.01) {
+        // Check if we can scale proportionally while respecting constraints
         const factor = 100 / total;
         const normalizedProportions = {};
+        let canScale = true;
 
-        this.selectedMints.forEach((mint) => {
-          normalizedProportions[mint.url] =
-            (this.mintProportions[mint.url] || 0) * factor;
-        });
+        // First check if scaling would violate any constraints
+        for (const mint of this.selectedMints) {
+          const currentPercentage = this.mintProportions[mint.url] || 0;
+          const scaledPercentage = currentPercentage * factor;
+          const mintBalance = this.mintClass(mint).unitBalance(this.activeUnit);
+          const maxPercentageForMint = Math.min(
+            100,
+            (mintBalance / totalAmount) * 100
+          );
 
-        this.mintProportions = { ...normalizedProportions };
+          if (scaledPercentage > maxPercentageForMint) {
+            canScale = false;
+            break;
+          }
+        }
+
+        if (canScale) {
+          // Safe to scale proportionally
+          this.selectedMints.forEach((mint) => {
+            normalizedProportions[mint.url] =
+              (this.mintProportions[mint.url] || 0) * factor;
+          });
+          this.mintProportions = { ...normalizedProportions };
+        } else {
+          // Need to redistribute respecting constraints
+          this.redistributeWithConstraints();
+        }
       }
+    },
+    redistributeWithConstraints() {
+      const totalAmount = this.payInvoiceData.meltQuote.response.amount;
+      const newProportions = {};
+
+      // Calculate available capacity for each mint
+      const mintsWithCapacity = this.selectedMints.map((mint) => {
+        const balance = this.mintClass(mint).unitBalance(this.activeUnit);
+        const maxPercentage = Math.min(100, (balance / totalAmount) * 100);
+        const currentPercentage = this.mintProportions[mint.url] || 0;
+        return {
+          mint,
+          balance,
+          maxPercentage,
+          currentPercentage,
+        };
+      });
+
+      // Start with current proportions, then adjust
+      let totalAllocated = 0;
+      const finalProportions = {};
+
+      // First pass: allocate up to max capacity or current percentage, whichever is lower
+      mintsWithCapacity.forEach((mintInfo) => {
+        const allocated = Math.min(
+          mintInfo.maxPercentage,
+          mintInfo.currentPercentage
+        );
+        finalProportions[mintInfo.mint.url] = allocated;
+        totalAllocated += allocated;
+      });
+
+      // Second pass: distribute remaining percentage to mints with available capacity
+      let remaining = 100 - totalAllocated;
+      while (remaining > 0.01) {
+        const availableMints = mintsWithCapacity.filter(
+          (mintInfo) =>
+            finalProportions[mintInfo.mint.url] < mintInfo.maxPercentage
+        );
+
+        if (availableMints.length === 0) break;
+
+        const totalAvailableCapacity = availableMints.reduce(
+          (sum, mintInfo) =>
+            sum +
+            (mintInfo.maxPercentage - finalProportions[mintInfo.mint.url]),
+          0
+        );
+
+        if (totalAvailableCapacity <= 0) break;
+
+        availableMints.forEach((mintInfo) => {
+          const availableCapacity =
+            mintInfo.maxPercentage - finalProportions[mintInfo.mint.url];
+          const proportion = availableCapacity / totalAvailableCapacity;
+          const toAllocate = Math.min(
+            availableCapacity,
+            remaining * proportion
+          );
+          finalProportions[mintInfo.mint.url] += toAllocate;
+          remaining -= toAllocate;
+        });
+      }
+
+      this.mintProportions = { ...finalProportions };
     },
     getPartialAmount(mint) {
       const totalAmount = this.payInvoiceData.meltQuote.response.amount;
