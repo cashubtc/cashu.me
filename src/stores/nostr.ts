@@ -437,6 +437,22 @@ export const useNostrStore = defineStore("nostr", {
       }
       return earliest;
     },
+
+    fetchMostRecentPost: async function (
+      pubkey: string
+    ): Promise<string | null> {
+      pubkey = this.resolvePubkey(pubkey);
+      await this.initNdkReadOnly();
+      const filter: NDKFilter = { kinds: [1], authors: [pubkey], limit: 1 };
+      const events = await this.ndk.fetchEvents(filter);
+      let latest: NDKEvent | null = null;
+      events.forEach((ev) => {
+        if (!latest || ev.created_at > (latest.created_at || 0)) {
+          latest = ev as NDKEvent;
+        }
+      });
+      return latest ? (latest.content as string) : null;
+    },
     fetchMints: async function () {
       const filter: NDKFilter = { kinds: [38000 as NDKKind], limit: 2000 };
       const events = await this.ndk.fetchEvents(filter);
