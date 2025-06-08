@@ -45,6 +45,8 @@
 import { defineComponent, computed } from 'vue';
 import { QBadge } from 'quasar';
 import { useMessengerStore } from 'src/stores/messenger';
+import { useNostrStore } from 'src/stores/nostr';
+import { nip19 } from 'nostr-tools';
 import { formatDistanceToNow } from 'date-fns';
 
 export default defineComponent({
@@ -59,16 +61,19 @@ export default defineComponent({
   emits: ['click'],
   setup(props, { emit }) {
     const messenger = useMessengerStore();
+    const nostr = useNostrStore();
     const unreadCount = computed(
       () => messenger.unreadCounts[props.pubkey] || 0
     );
     const displayName = computed(() => {
       const p: any = props.profile;
-      return (
-        p?.display_name ||
-        p?.name ||
-        props.pubkey.slice(0, 8) + '...' + props.pubkey.slice(-4)
-      );
+      if (p?.display_name) return p.display_name;
+      if (p?.name) return p.name;
+      try {
+        return nip19.npubEncode(nostr.resolvePubkey(props.pubkey));
+      } catch (e) {
+        return props.pubkey.slice(0, 8) + '...' + props.pubkey.slice(-4);
+      }
     });
 
     const initials = computed(() => {
