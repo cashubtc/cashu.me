@@ -13,7 +13,7 @@
       :supporter-pubkey="nostr.pubkey"
       @confirm="confirmSubscribe"
     />
-    <SubscriptionReceipt v-model="showReceiptDialog" :token="receiptToken" />
+    <SubscriptionReceipt v-model="showReceiptDialog" :receipts="receiptList" />
     <SendTokenDialog />
     <QDialog v-model="showTierDialog">
       <QCard class="tier-dialog">
@@ -104,7 +104,7 @@ const { t } = useI18n();
 const tiers = computed(() => creators.tiersMap[dialogPubkey.value] || []);
 const showSubscribeDialog = ref(false);
 const showReceiptDialog = ref(false);
-const receiptToken = ref("");
+const receiptList = ref<any[]>([]);
 const selectedTier = ref<any>(null);
 
 function getPrice(t: any): number {
@@ -168,7 +168,6 @@ async function confirmSubscribe({
       startDate,
       true
     )) as any[];
-    const tokenString = receipts.map((r) => r.token).join("\n");
     let supporterName = nostr.pubkey;
     try {
       const prof = await nostr.getProfile(nostr.pubkey);
@@ -192,7 +191,7 @@ async function confirmSubscribe({
     } else {
       notifyWarning(t("wallet.notifications.nostr_dm_failed"));
     }
-    receiptToken.value = tokenString;
+    receiptList.value = receipts;
     showReceiptDialog.value = true;
     showSubscribeDialog.value = false;
     showTierDialog.value = false;

@@ -1,19 +1,38 @@
 <template>
   <q-dialog v-model="model" persistent backdrop-filter="blur(2px) brightness(60%)">
-    <q-card class="q-pa-md qcard" style="min-width:300px">
+    <q-card class="q-pa-md qcard" style="min-width:300px; max-width:500px">
       <q-card-section class="text-h6">{{ $t('SubscriptionReceipt.title') }}</q-card-section>
-      <q-card-section>
-        <q-input
-          :model-value="token"
-          readonly
-          type="textarea"
-          autogrow
-          style="font-family: monospace"
-        />
+      <q-card-section style="max-height:300px; overflow-y:auto">
+        <q-markup-table dense flat>
+          <thead>
+            <tr>
+              <th class="text-left">Amount</th>
+              <th class="text-left">Date</th>
+              <th class="text-left">Ref</th>
+              <th class="text-right"></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="r in receipts" :key="r.id">
+              <td>{{ r.amount }}</td>
+              <td>{{ formatDate(r) }}</td>
+              <td class="text-no-wrap">{{ r.id }}</td>
+              <td class="text-right">
+                <q-btn flat color="primary" size="sm" @click="copyToken(r.token)">
+                  {{ $t('global.actions.copy.label') }}
+                </q-btn>
+                <q-btn flat color="primary" size="sm" @click="saveToken(r.token)">
+                  {{ $t('SubscriptionReceipt.actions.save.label') }}
+                </q-btn>
+              </td>
+            </tr>
+            <tr v-if="!receipts.length">
+              <td colspan="4" class="text-center text-grey">No receipts</td>
+            </tr>
+          </tbody>
+        </q-markup-table>
       </q-card-section>
       <q-card-actions align="right">
-        <q-btn flat color="primary" @click="copyToken">{{ $t('global.actions.copy.label') }}</q-btn>
-        <q-btn flat color="primary" @click="saveToken">{{ $t('SubscriptionReceipt.actions.save.label') }}</q-btn>
         <q-btn v-close-popup flat color="grey">{{ $t('global.actions.close.label') }}</q-btn>
       </q-card-actions>
     </q-card>
@@ -28,8 +47,8 @@ export default defineComponent({
   mixins: [windowMixin],
   props: {
     modelValue: Boolean,
-    token: {
-      type: String,
+    receipts: {
+      type: Array,
       required: true,
     },
   },
@@ -45,11 +64,11 @@ export default defineComponent({
     },
   },
   methods: {
-    copyToken() {
-      this.copyText(this.token);
+    copyToken(token: string) {
+      this.copyText(token);
     },
-    saveToken() {
-      const blob = new Blob([this.token], { type: 'text/plain' });
+    saveToken(token: string) {
+      const blob = new Blob([token], { type: 'text/plain' });
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
@@ -59,6 +78,17 @@ export default defineComponent({
       link.click();
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
+    },
+    formatDate(r: any) {
+      if (r.locktime) {
+        const d = new Date(r.locktime * 1000);
+        return `${d.getFullYear()}-${('0' + (d.getMonth() + 1)).slice(-2)}-${('0' + d.getDate()).slice(-2)} ${('0' + d.getHours()).slice(-2)}:${('0' + d.getMinutes()).slice(-2)}`;
+      }
+      try {
+        return new Date(r.date).toISOString();
+      } catch {
+        return r.date;
+      }
     },
   },
 });

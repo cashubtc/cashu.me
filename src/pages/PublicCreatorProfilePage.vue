@@ -21,7 +21,7 @@
       :supporter-pubkey="nostr.pubkey"
       @confirm="confirmSubscribe"
     />
-    <SubscriptionReceipt v-model="showReceiptDialog" :token="receiptToken" />
+    <SubscriptionReceipt v-model="showReceiptDialog" :receipts="receiptList" />
     <div v-if="followers !== null" class="text-caption q-mb-md">
       {{ $t("FindCreators.labels.followers") }}: {{ followers }} |
       {{ $t("FindCreators.labels.following") }}: {{ following }}
@@ -116,7 +116,7 @@ export default defineComponent({
     const tiers = computed(() => creators.tiersMap[creatorNpub] || []);
     const showSubscribeDialog = ref(false);
     const showReceiptDialog = ref(false);
-    const receiptToken = ref("");
+    const receiptList = ref<any[]>([]);
     const selectedTier = ref<any>(null);
     const followers = ref<number | null>(null);
     const following = ref<number | null>(null);
@@ -163,7 +163,6 @@ export default defineComponent({
           startDate,
           true
         )) as any[];
-        const tokenString = receipts.map((r) => r.token).join("\n");
         let supporterName = nostr.pubkey;
         try {
           const prof = await nostr.getProfile(nostr.pubkey);
@@ -187,7 +186,7 @@ export default defineComponent({
         } else {
           notifyWarning(t("wallet.notifications.nostr_dm_failed"));
         }
-        receiptToken.value = tokenString;
+        receiptList.value = receipts;
         showReceiptDialog.value = true;
         showSubscribeDialog.value = false;
       } catch (e: any) {
@@ -216,7 +215,7 @@ export default defineComponent({
       tiers,
       showSubscribeDialog,
       showReceiptDialog,
-      receiptToken,
+      receiptList,
       selectedTier,
       followers,
       following,
