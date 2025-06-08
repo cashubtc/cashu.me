@@ -90,7 +90,8 @@ import { useUiStore } from "stores/ui";
 import SubscribeDialog from "components/SubscribeDialog.vue";
 import SubscriptionReceipt from "components/SubscriptionReceipt.vue";
 import { useMintsStore } from "stores/mints";
-import { notifyError, notifySuccess } from "src/js/notify";
+import { notifyError, notifySuccess, notifyWarning } from "src/js/notify";
+import { useDmChatsStore } from "stores/dmChats";
 import { useI18n } from "vue-i18n";
 import { Loading } from "quasar";
 import { renderMarkdown as renderMarkdownFn } from "src/js/simple-markdown";
@@ -140,6 +141,11 @@ export default defineComponent({
       showSubscribeDialog.value = true;
     };
 
+    const formatTs = (ts: number) => {
+      const d = new Date(ts * 1000);
+      return `${d.getFullYear()}-${("0" + (d.getMonth() + 1)).slice(-2)}-${("0" + d.getDate()).slice(-2)} ${("0" + d.getHours()).slice(-2)}:${("0" + d.getMinutes()).slice(-2)}`;
+    };
+
     const confirmSubscribe = async ({
       bucketId,
       months,
@@ -149,37 +155,39 @@ export default defineComponent({
     }: any) => {
       Loading.show({ message: "Loading..." });
       try {
-        const tokens = await donationStore.createDonationPreset(
+        const receipts = (await donationStore.createDonationPreset(
           months,
           amount,
           creatorNpub,
           bucketId,
-          startDate
-        );
-        if (months === undefined || months <= 0) {
-          lockedStore.addLockedToken({
-            amount,
-            token: tokens,
-            pubkey: creatorNpub,
-            bucketId,
-          });
-        }
+          startDate,
+          true
+        )) as any[];
+        const tokenString = receipts.map((r) => r.token).join("\n");
         let supporterName = nostr.pubkey;
         try {
           const prof = await nostr.getProfile(nostr.pubkey);
           supporterName =
             prof?.display_name || prof?.name || prof?.username || nostr.pubkey;
         } catch {}
-        const { success } = await nostr.sendNip04DirectMessage(
+        const messages = receipts.map((r) => {
+          const date = r.locktime
+            ? formatTs(r.locktime)
+            : new Date(r.date).toISOString();
+          return `${r.amount} sats from ${supporterName} on ${date} (ref ${r.id})\n${r.token}`;
+        });
+        const dmMessage = messages.join("\n");
+        const { success, event } = await nostr.sendNip04DirectMessage(
           creatorNpub,
-          `${supporterName} just subscribed to ${selectedTier.value.name} for ${total} sats. Here is your receipt:\n${tokens}`
+          dmMessage
         );
         if (success) {
           notifySuccess(t("FindCreators.notifications.subscription_success"));
+          if (event) useDmChatsStore().addOutgoing(event);
         } else {
           notifyWarning(t("wallet.notifications.nostr_dm_failed"));
         }
-        receiptToken.value = tokens;
+        receiptToken.value = tokenString;
         showReceiptDialog.value = true;
         showSubscribeDialog.value = false;
       } catch (e: any) {
