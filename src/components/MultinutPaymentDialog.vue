@@ -175,6 +175,36 @@
               </q-item-label>
             </q-item-section>
           </q-item>
+
+          <!-- Total Distribution Amount -->
+          <q-item v-if="selectedMints.length > 0">
+            <q-item-section>
+              <q-item-label overline class="text-weight-bold">
+                Total Distribution
+              </q-item-label>
+              <q-item-label caption>
+                {{ formatCurrency(totalDistributedAmount, activeUnit) }}
+                <span
+                  v-if="
+                    totalDistributedAmount ===
+                    payInvoiceData.meltQuote.response.amount
+                  "
+                  class="text-positive q-ml-sm"
+                >
+                  ✓ Exact match
+                </span>
+                <span v-else class="text-negative q-ml-sm">
+                  ⚠ Mismatch ({{
+                    formatCurrency(
+                      payInvoiceData.meltQuote.response.amount -
+                        totalDistributedAmount,
+                      activeUnit
+                    )
+                  }})
+                </span>
+              </q-item-label>
+            </q-item-section>
+          </q-item>
         </q-list>
       </div>
 
@@ -241,7 +271,17 @@ export default defineComponent({
         this.selectedMints.length > 0 &&
         this.totalSelectedBalance >=
           this.payInvoiceData.meltQuote.response.amount &&
+        this.totalDistributedAmount ===
+          this.payInvoiceData.meltQuote.response.amount &&
         !this.multiMeltButtonLoading
+      );
+    },
+    totalDistributedAmount() {
+      if (this.selectedMints.length === 0) return 0;
+      const partialAmounts = this.getPartialAmounts();
+      return Object.values(partialAmounts).reduce(
+        (sum, amount) => sum + amount,
+        0
       );
     },
   },
@@ -579,9 +619,74 @@ export default defineComponent({
       this.mintProportions = { ...finalProportions };
     },
     getPartialAmount(mint) {
+      const partialAmounts = this.getPartialAmounts();
+      return partialAmounts[mint.url] || 0;
+    },
+    getPartialAmounts() {
       const totalAmount = this.payInvoiceData.meltQuote.response.amount;
-      const percentage = this.mintProportions[mint.url] || 0;
-      return Math.round(totalAmount * (percentage / 100));
+      const partialAmounts = {};
+      let calculatedTotal = 0;
+
+      // First pass: calculate amounts based on percentages
+      this.selectedMints.forEach((mint) => {
+        const percentage = this.mintProportions[mint.url] || 0;
+        const amount = Math.round(totalAmount * (percentage / 100));
+        partialAmounts[mint.url] = amount;
+        calculatedTotal += amount;
+      });
+
+      // Fix rounding errors by adjusting the largest allocation
+      const difference = totalAmount - calculatedTotal;
+      if (difference !== 0 && this.selectedMints.length > 0) {
+        // Find the mint with the largest allocation to adjust
+        let largestMint = null;
+        let largestAmount = 0;
+
+        this.selectedMints.forEach((mint) => {
+          if (partialAmounts[mint.url] > largestAmount) {
+            largestAmount = partialAmounts[mint.url];
+            largestMint = mint;
+          }
+        });
+
+        if (largestMint) {
+          partialAmounts[largestMint.url] += difference;
+
+          // Ensure we don't exceed the mint's balance
+          const mintBalance = this.mintClass(largestMint).unitBalance(
+            this.activeUnit
+          );
+          if (partialAmounts[largestMint.url] > mintBalance) {
+            // If the largest mint can't handle the adjustment, distribute the difference
+            partialAmounts[largestMint.url] = mintBalance;
+            const remainingDifference =
+              difference - (mintBalance - largestAmount);
+
+            // Find other mints that can handle the remaining difference
+            const otherMints = this.selectedMints.filter(
+              (m) => m.url !== largestMint.url
+            );
+            for (const mint of otherMints) {
+              const mintBalance = this.mintClass(mint).unitBalance(
+                this.activeUnit
+              );
+              const currentAmount = partialAmounts[mint.url];
+              const canTake = Math.min(
+                remainingDifference,
+                mintBalance - currentAmount
+              );
+
+              if (canTake > 0) {
+                partialAmounts[mint.url] += canTake;
+                remainingDifference -= canTake;
+                if (remainingDifference === 0) break;
+              }
+            }
+          }
+        }
+      }
+
+      return partialAmounts;
     },
     getStateText(state) {
       switch (state) {
@@ -675,6 +780,25 @@ export default defineComponent({
               (m) => m.url !== mint.url
             );
           }
+        }
+
+        // Verify total amounts match exactly
+        const totalCalculated = mintsToAmounts.reduce(
+          (sum, [mint, amount]) => sum + amount,
+          0
+        );
+        console.log(
+          `Total calculated: ${totalCalculated}, Expected: ${totalQuoteAmount}`
+        );
+
+        if (totalCalculated !== totalQuoteAmount) {
+          console.error(
+            `Amount mismatch: calculated ${totalCalculated}, expected ${totalQuoteAmount}`
+          );
+          notifyError(
+            `Amount calculation error: ${totalCalculated} vs ${totalQuoteAmount}`
+          );
+          return;
         }
 
         // Phase 2: Request quotes from all selected mints
