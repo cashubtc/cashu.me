@@ -290,16 +290,11 @@ export default defineComponent({
     const needsNostrLogin = computed(
       () => !nostrStore.privateKeySignerPrivateKey
     );
-    const isMessengerPage = computed(
-      () =>
-        route.path.startsWith("/nostr-messenger") ||
-        route.path.startsWith("/chats")
+    const isMessengerPage = computed(() =>
+      route.path.startsWith("/nostr-messenger")
     );
     const showBackButton = computed(() => isMessengerPage.value);
-    const backRoute = computed(() => {
-      if (route.path.startsWith("/chats/")) return "/chats";
-      return "/wallet";
-    });
+    const backRoute = computed(() => "/wallet");
     const countdown = ref(0);
     let countdownInterval;
 

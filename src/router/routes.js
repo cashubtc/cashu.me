@@ -74,16 +74,6 @@ const routes = [
     ],
   },
   {
-    path: "/chats",
-    component: () => import("layouts/MainLayout.vue"),
-    children: [{ path: "", component: () => import("src/pages/Chats.vue") }],
-  },
-  {
-    path: "/chats/:pubkey",
-    component: () => import("layouts/MainLayout.vue"),
-    children: [{ path: "", component: () => import("src/pages/ChatView.vue") }],
-  },
-  {
     path: "/nostr-messenger",
     component: () => import("layouts/MainLayout.vue"),
     children: [

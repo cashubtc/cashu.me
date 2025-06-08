@@ -578,8 +578,8 @@
                 messageButton.textContent = 'Message';
                 messageButton.onclick = (e) => {
                     e.stopPropagation();
-                    // Navigate the parent application to the chat view
-                    window.parent.location.href = `/chats/${profile.pubkey}`;
+                    // Navigate the parent application to the messenger view
+                    window.parent.location.href = `/nostr-messenger`;
                 };
 
                 const donateButton = document.createElement('button');
