@@ -14,7 +14,15 @@
       class="q-pa-md"
     >
       <NostrIdentityManager class="q-mb-md" />
-      <RelayManager class="q-mb-md" />
+      <q-expansion-item
+        class="q-mb-md"
+        dense
+        dense-toggle
+        label="Relays"
+        v-model="showRelays"
+      >
+        <RelayManager class="q-mb-md" />
+      </q-expansion-item>
       <NewChat class="q-mb-md" @start="startChat" />
       <ConversationList @select="selectConversation" />
     </q-drawer>
@@ -79,6 +87,10 @@ const eventLog = computed(() => messenger.eventLog);
 const showEventLog = useLocalStorage<boolean>(
   "cashu.messenger.showEventLog",
   false,
+);
+const showRelays = useLocalStorage<boolean>(
+  "cashu.messenger.showRelays",
+  true,
 );
 
 watch(
