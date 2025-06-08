@@ -4,7 +4,10 @@
     :class="message.outgoing ? 'items-end' : 'items-start'"
   >
     <div :class="message.outgoing ? 'sent' : 'received'">
-      {{ message.content }}
+      <template v-for="(part, idx) in parts" :key="idx">
+        <span v-if="part.type === 'text'">{{ part.value }}</span>
+        <TokenBubble v-else :token="part.value" />
+      </template>
     </div>
     <div
       class="text-caption q-mt-xs row items-center"
@@ -28,6 +31,7 @@
 
 <script lang="ts" setup>
 import { computed } from "vue";
+import TokenBubble from "./TokenBubble.vue";
 import { mdiCheck, mdiCheckAll } from "@quasar/extras/mdi-v6";
 import type { MessengerMessage } from "src/stores/messenger";
 
@@ -45,6 +49,28 @@ const isoTime = computed(() =>
 const deliveryIcon = computed(() =>
   props.deliveryStatus === "delivered" ? mdiCheckAll : mdiCheck
 );
+
+const tokenRegex = /(cashu[A-Za-z0-9]+)/g;
+const parts = computed(() => {
+  const segments: { type: 'text' | 'token'; value: string }[] = [];
+  const text = props.message.content;
+  let last = 0;
+  for (const match of text.matchAll(tokenRegex)) {
+    const idx = match.index || 0;
+    if (idx > last) {
+      segments.push({ type: 'text', value: text.slice(last, idx) });
+    }
+    segments.push({ type: 'token', value: match[0] });
+    last = idx + match[0].length;
+  }
+  if (last < text.length) {
+    segments.push({ type: 'text', value: text.slice(last) });
+  }
+  if (segments.length === 0) {
+    segments.push({ type: 'text', value: text });
+  }
+  return segments;
+});
 </script>
 
 <style scoped>
