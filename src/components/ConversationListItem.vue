@@ -1,5 +1,9 @@
 <template>
-  <q-item clickable class="conversation-item" @click="handleClick">
+  <q-item
+    clickable
+    class="conversation-item"
+    @click="handleClick"
+  >
     <q-item-section avatar>
       <q-avatar size="48px">
         <template v-if="loaded && profile?.picture">
@@ -15,40 +19,49 @@
     <q-item-section class="full-width">
       <div class="row items-center no-wrap">
         <template v-if="loaded">
-          <span :class="['text-subtitle1 ellipsis', { 'text-weight-bold': unread > 0 }]">{{ displayName }}</span>
+          <span
+            :class="['text-subtitle1 ellipsis', { 'text-weight-bold': unreadCount > 0 }]"
+            >{{ displayName }}</span
+          >
           <span class="timestamp text-caption q-ml-auto">{{ timeAgo }}</span>
         </template>
         <template v-else>
           <q-skeleton type="text" width="60%" />
         </template>
       </div>
-      <div :class="['text-caption ellipsis', { 'text-weight-bold': unread > 0 }]">
+      <div :class="['text-caption ellipsis', { 'text-weight-bold': unreadCount > 0 }]">
         <template v-if="loaded">{{ snippet }}</template>
         <template v-else><q-skeleton type="text" width="80%" /></template>
       </div>
     </q-item-section>
 
-    <q-item-section side v-if="unread > 0">
-      <q-badge color="primary" rounded>{{ unread }}</q-badge>
+    <q-item-section side v-if="unreadCount > 0">
+      <q-badge color="primary" rounded>{{ unreadCount }}</q-badge>
     </q-item-section>
   </q-item>
 </template>
 
 <script lang="ts"> 
 import { defineComponent, computed } from 'vue';
+import { QBadge } from 'quasar';
+import { useMessengerStore } from 'src/stores/messenger';
 import { formatDistanceToNow } from 'date-fns';
 
 export default defineComponent({
   name: 'ConversationListItem',
+  components: { QBadge },
   props: {
     pubkey: { type: String, required: true },
     profile: { type: Object as () => any, default: () => ({}) },
     snippet: { type: String, default: '' },
     timestamp: { type: Number, default: 0 },
-    unread: { type: Number, default: 0 }
   },
   emits: ['click'],
   setup(props, { emit }) {
+    const messenger = useMessengerStore();
+    const unreadCount = computed(
+      () => messenger.unreadCounts[props.pubkey] || 0
+    );
     const displayName = computed(() => {
       const p: any = props.profile;
       return (
@@ -75,7 +88,14 @@ export default defineComponent({
 
     const handleClick = () => emit('click', props.pubkey);
 
-    return { displayName, initials, timeAgo, handleClick, loaded };
+    return {
+      displayName,
+      initials,
+      timeAgo,
+      handleClick,
+      loaded,
+      unreadCount,
+    };
   }
 });
 </script>
@@ -83,6 +103,12 @@ export default defineComponent({
 <style scoped>
 .conversation-item {
   border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+.conversation-item:hover {
+  background: rgba(0, 0, 0, 0.03);
+}
+.conversation-item:focus {
+  border-left: 2px solid var(--q-primary);
 }
 .placeholder {
   background: var(--divider-color);
