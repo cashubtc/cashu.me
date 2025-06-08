@@ -136,6 +136,25 @@ export const useNostrStore = defineStore("nostr", {
       };
       return nip19.nprofileEncode(profile);
     },
+    npub: (state) => {
+      try {
+        return nip19.npubEncode(state.pubkey);
+      } catch (e) {
+        return state.pubkey;
+      }
+    },
+    activePrivateKeyNsec: (state) => {
+      const keyHex =
+        state.signerType === SignerType.PRIVATEKEY
+          ? state.privateKeySignerPrivateKey
+          : state.seedSignerPrivateKey;
+      if (!keyHex) return "";
+      try {
+        return nip19.nsecEncode(hexToBytes(keyHex));
+      } catch (e) {
+        return "";
+      }
+    },
     privKeyHex: (state) => {
       switch (state.signerType) {
         case SignerType.PRIVATEKEY:
