@@ -1,6 +1,5 @@
 <template>
   <div>
-    <div class="text-subtitle1 q-mb-sm">Relays</div>
     <q-input
       v-model="relayText"
       type="textarea"
