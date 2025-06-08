@@ -2,6 +2,14 @@
   <div class="q-pa-sm row items-center justify-between">
     <div class="row items-center">
       <q-btn
+        flat
+        round
+        dense
+        icon="payments"
+        class="q-mr-sm"
+        @click="openSendTokenDialog"
+      />
+      <q-btn
         v-if="$q.screen.lt.sm"
         flat
         round
@@ -11,10 +19,23 @@
         @click="messenger.toggleDrawer()"
       />
       <template v-if="pubkey">
-        <q-avatar v-if="profile?.picture" size="md" class="q-mr-sm">
-          <img :src="profile.picture" />
+        <q-avatar size="md" class="q-mr-sm">
+          <img v-if="profile?.picture" :src="profile.picture" />
+          <span v-else>{{ initials }}</span>
         </q-avatar>
         <div class="text-h6 ellipsis">{{ displayName }}</div>
+        <q-btn flat round dense icon="more_vert" class="q-ml-xs">
+          <q-menu auto-close>
+            <q-list style="min-width: 120px">
+              <q-item clickable v-close-popup @click="viewProfile">
+                <q-item-section>View Profile</q-item-section>
+              </q-item>
+              <q-item clickable v-close-popup @click="clearChat">
+                <q-item-section>Clear Chat</q-item-section>
+              </q-item>
+            </q-list>
+          </q-menu>
+        </q-btn>
       </template>
       <template v-else>
         <div class="text-grey-6">Select a conversation to start chatting.</div>
@@ -33,8 +54,10 @@
 <script lang="ts" setup>
 import { ref, watch, computed } from 'vue';
 import { useQuasar } from 'quasar';
+import { useRouter } from 'vue-router';
 import { useNostrStore } from 'src/stores/nostr';
 import { useMessengerStore } from 'src/stores/messenger';
+import { useSendTokensStore } from 'src/stores/sendTokensStore';
 
 const props = defineProps<{ pubkey: string }>();
 const nostr = useNostrStore();
@@ -67,5 +90,37 @@ const displayName = computed(() => {
     props.pubkey.slice(0, 8) + '...' + props.pubkey.slice(-4)
   );
 });
+
+const initials = computed(() => {
+  const name = displayName.value.trim();
+  if (!name) return '';
+  const parts = name.split(' ');
+  if (parts.length >= 2) {
+    return (parts[0][0] + parts[1][0]).toUpperCase();
+  }
+  return name.slice(0, 2).toUpperCase();
+});
+
+const sendTokensStore = useSendTokensStore();
+const router = useRouter();
+
+function openSendTokenDialog() {
+  if (!props.pubkey) return;
+  sendTokensStore.clearSendData();
+  sendTokensStore.recipientPubkey = props.pubkey;
+  sendTokensStore.sendViaNostr = true;
+  sendTokensStore.showSendTokens = true;
+}
+
+function viewProfile() {
+  if (!props.pubkey) return;
+  router.push(`/creator/${props.pubkey}`);
+}
+
+function clearChat() {
+  if (!props.pubkey) return;
+  messenger.conversations[props.pubkey] = [];
+  messenger.unreadCounts[props.pubkey] = 0;
+}
 </script>
 
