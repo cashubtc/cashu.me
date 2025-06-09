@@ -167,7 +167,12 @@ async function confirmSubscribe({
       dialogPubkey.value,
       undefined,
       startDate,
-      true
+      true,
+      {
+        tierName: selectedTier.value?.name,
+        benefits: selectedTier.value?.benefits || [],
+        frequency: 'monthly',
+      }
     )) as any[];
     let supporterName = nostr.pubkey;
     try {

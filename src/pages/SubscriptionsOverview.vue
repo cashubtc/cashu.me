@@ -263,6 +263,7 @@ import { useUiStore } from 'stores/ui';
 import { useNostrStore } from 'stores/nostr';
 import { useMessengerStore } from 'stores/messenger';
 import { useDonationPresetsStore } from 'stores/donationPresets';
+import { useSubscriptionsStore } from 'stores/subscriptions';
 import { useRouter } from 'vue-router';
 import { useQuasar, copyToClipboard } from 'quasar';
 import { nip19 } from 'nostr-tools';
@@ -299,26 +300,27 @@ function formatTs(ts: number): string {
   return `${d.getFullYear()}-${('0' + (d.getMonth() + 1)).slice(-2)}-${('0' + d.getDate()).slice(-2)}`;
 }
 
-const groups = computed<Record<string, LockedToken[]>>(() => {
-  const map: Record<string, LockedToken[]> = {};
-  lockedStore.lockedTokens.forEach((t) => {
-    const bucket = bucketsStore.bucketList.find((b) => b.id === t.bucketId);
-    const pubkey = bucket?.creatorPubkey || t.pubkey;
-    if (!map[pubkey]) map[pubkey] = [];
-    map[pubkey].push(t);
-  });
-  return map;
-});
+const subscriptionsStore = useSubscriptionsStore();
 
 const rows = computed(() => {
   const now = Math.floor(Date.now() / 1000);
-  return Object.entries(groups.value).map(([creator, tokens]) => {
+  return subscriptionsStore.subscriptions.map((sub) => {
+    const tokens: LockedToken[] = sub.intervals.map((i) => ({
+      id: i.lockedTokenId,
+      amount: sub.amountPerInterval,
+      token: i.tokenString,
+      pubkey: sub.creatorNpub,
+      locktime: i.unlockTs,
+      bucketId: sub.tierId,
+      refundPubkey: '',
+      date: '',
+    }));
     const total = tokens.reduce((sum, t) => sum + t.amount, 0);
     const future = tokens.filter((t) => t.locktime && t.locktime > now);
     const nextUnlock = future.sort((a, b) => a.locktime! - b.locktime!)[0]?.locktime || null;
     const monthsLeft = future.length;
-    const monthly = tokens[0]?.amount || 0;
-    const start = tokens.reduce((m, t) => (t.locktime && (!m || t.locktime < m) ? t.locktime : m), null as number | null);
+    const monthly = sub.amountPerInterval;
+    const start = sub.startDate || null;
     const progress = tokens.length ? 1 - monthsLeft / tokens.length : 0;
     const totalMonths = tokens.length;
     const end =
@@ -327,14 +329,11 @@ const rows = computed(() => {
         : null;
     const unlocked = tokens.filter((t) => !t.locktime || t.locktime <= now).length;
     const status = monthsLeft > 0 ? 'active' : 'expired';
-    const bucketNames = [...new Set(
-      tokens
-        .map((t) => bucketsStore.bucketList.find((b) => b.id === t.bucketId)?.name)
-        .filter(Boolean)
-    )].join(", ");
+    const bucket = bucketsStore.bucketList.find((b) => b.id === sub.tierId);
+    const bucketName = bucket?.name || '';
     return {
-      creator,
-      bucketName: bucketNames,
+      creator: sub.creatorNpub,
+      bucketName,
       total,
       monthly,
       start,
@@ -346,6 +345,10 @@ const rows = computed(() => {
       hasUnlocked: unlocked > 0,
       status,
       tokens,
+      tierName: (sub as any).tierName,
+      benefits: (sub as any).benefits || [],
+      frequency: sub.frequency,
+      tokensRemaining: monthsLeft,
     };
   });
 });
@@ -475,7 +478,13 @@ function extendSubscription(pubkey: string) {
         row.monthly,
         pubkey,
         row.tokens[0]?.bucketId,
-        startDate
+        startDate,
+        false,
+        {
+          tierName: row.tierName,
+          benefits: row.benefits,
+          frequency: row.frequency,
+        }
       );
       notifySuccess(t('SubscriptionsOverview.notifications.extend_success'));
     } catch (e: any) {
@@ -505,7 +514,8 @@ function copyToken(token: string) {
 }
 
 function updateProfiles() {
-  Object.keys(groups.value).forEach(async (pk) => {
+  subscriptionsStore.subscriptions.forEach(async (sub) => {
+    const pk = sub.creatorNpub;
     if (!profiles.value[pk]) {
       const p = await nostr.getProfile(pk);
       if (p) profiles.value[pk] = p;
@@ -514,11 +524,18 @@ function updateProfiles() {
 }
 
 onMounted(updateProfiles);
-watch(groups, updateProfiles);
+watch(
+  () => subscriptionsStore.subscriptions,
+  updateProfiles
+);
 
 const columns = computed(() => [
   { name: "creator", label: t("SubscriptionsOverview.columns.creator"), field: "creator", sortable: true },
   { name: "bucket", label: t("SubscriptionsOverview.columns.bucket"), field: "bucketName", sortable: true },
+  { name: "tierName", label: t("SubscriptionsOverview.columns.tierName"), field: "tierName", sortable: true },
+  { name: "benefits", label: t("SubscriptionsOverview.columns.benefits"), field: "benefits" },
+  { name: "frequency", label: t("SubscriptionsOverview.columns.frequency"), field: "frequency", sortable: true },
+  { name: "tokensRemaining", label: t("SubscriptionsOverview.columns.tokensRemaining"), field: "tokensRemaining", align: "right", sortable: true },
   { name: "monthly", label: t("SubscriptionsOverview.columns.monthly"), field: "monthly", align: "right", sortable: true },
   { name: "total", label: t("SubscriptionsOverview.columns.total"), field: "total", align: "right", sortable: true },
   { name: "start", label: t("SubscriptionsOverview.columns.start"), field: "start", sortable: true },
