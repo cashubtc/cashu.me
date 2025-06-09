@@ -37,7 +37,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, defineExpose } from 'vue';
+import { ref, computed } from 'vue';
 import { useBucketsStore } from 'src/stores/buckets';
 import { useMessengerStore } from 'src/stores/messenger';
 
