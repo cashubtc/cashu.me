@@ -32,8 +32,8 @@
 <script lang="ts" setup>
 import { computed, watch, onMounted, ref } from 'vue';
 import { storeToRefs } from 'pinia';
-import { useMessengerStore } from '@/stores/messenger';
-import { useNostrStore } from '@/stores/nostr';
+import { useMessengerStore } from 'src/stores/messenger';
+import { useNostrStore } from 'src/stores/nostr';
 import ConversationListItem from './ConversationListItem.vue';
 
 const emit = defineEmits(['select']);
