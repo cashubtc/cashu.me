@@ -75,32 +75,90 @@
 
     <!-- List of mints with restore buttons and balance badges -->
     <div class="q-pb-md q-px-xs text-left" on-left>
-      <q-btn
-        class="q-ml-sm q-px-md"
-        color="primary"
-        size="md"
-        rounded
-        dense
-        outline
-        @click="restoreAllMints"
-        :disabled="!isMnemonicValid || restoringState"
-      >
-        <q-spinner-hourglass size="sm" v-if="restoringState" class="q-mr-sm" />
-        {{ restoreAllMintsText }}
-      </q-btn>
+      <!-- Select All/Deselect All Buttons -->
+      <div v-if="mints.length > 0" class="selection-buttons q-px-sm q-pb-md">
+        <q-btn
+          flat
+          dense
+          size="md"
+          color="primary"
+          @click="selectAllMints"
+          :disabled="allSelected"
+          class="q-mr-md q-px-md"
+        >
+          {{ $t("RestoreView.actions.select_all.label") }}
+        </q-btn>
+        <q-btn
+          flat
+          dense
+          size="md"
+          color="grey"
+          @click="deselectAllMints"
+          :disabled="!anySelected"
+          class="q-px-md"
+        >
+          {{ $t("RestoreView.actions.deselect_all.label") }}
+        </q-btn>
+      </div>
+
+      <!-- Restore Selected Mints Button (Prominent) -->
+      <div v-if="anySelected" class="text-center q-pb-md">
+        <q-btn
+          color="primary"
+          size="md"
+          rounded
+          @click="restoreSelectedMints"
+          :disabled="!isMnemonicValid || restoringState"
+          :loading="restoringState"
+          class="q-px-xl"
+        >
+          <q-icon name="restore" class="q-mr-sm" />
+          {{
+            $t("RestoreView.actions.restore_selected_mints.label", {
+              count: selectedMintsCount,
+            })
+          }}
+        </q-btn>
+      </div>
+
+      <!-- Legacy Restore All Button (smaller, less prominent) -->
+      <div v-if="!anySelected && mints.length > 0" class="q-pb-md">
+        <q-btn
+          class="q-ml-sm q-px-md"
+          color="secondary"
+          size="md"
+          rounded
+          dense
+          outline
+          @click="restoreAllMints"
+          :disabled="!isMnemonicValid || restoringState"
+        >
+          <q-spinner-hourglass
+            size="sm"
+            v-if="restoringState"
+            class="q-mr-sm"
+          />
+          {{ restoreAllMintsText }}
+        </q-btn>
+      </div>
 
       <!-- Mints List with Card Design -->
       <div class="q-pt-md">
         <div v-for="mint in mints" :key="mint.url" class="q-px-md q-mb-md">
           <q-item
             clickable
-            @click="restoreMintForMint(mint.url)"
+            @click="toggleMintSelection(mint.url)"
             class="mint-card cursor-pointer"
             :style="{
               'border-radius': '10px',
-              border: '1px solid rgba(128, 128, 128, 0.2)',
+              border: selectedMints.has(mint.url)
+                ? '1px solid var(--q-primary)'
+                : '1px solid rgba(128, 128, 128, 0.2)',
               padding: '0px',
               position: 'relative',
+              'background-color': selectedMints.has(mint.url)
+                ? 'rgba(var(--q-primary-rgb), 0.1)'
+                : 'transparent',
             }"
             :disable="!isMnemonicValid || restoringState"
           >
@@ -121,6 +179,17 @@
 
             <div class="full-width" style="position: relative">
               <div class="row items-center q-pa-md">
+                <!-- Checkbox Section -->
+                <q-item-section avatar>
+                  <q-checkbox
+                    :model-value="selectedMints.has(mint.url)"
+                    @update:model-value="toggleMintSelection(mint.url)"
+                    @click.stop
+                    color="primary"
+                    class="clickable-checkbox"
+                  />
+                </q-item-section>
+
                 <div class="col">
                   <div class="row items-center">
                     <!-- Mint Avatar -->
@@ -210,17 +279,21 @@
 
                 <div class="col-auto">
                   <q-btn
-                    color="primary"
+                    color="secondary"
                     size="sm"
                     rounded
                     dense
-                    outline
+                    flat
                     @click.stop="restoreMintForMint(mint.url)"
                     :disabled="!isMnemonicValid || restoringState"
                     :loading="restoringMint === mint.url"
-                    :label="$t('RestoreView.actions.restore.label')"
-                    class="q-px-md"
-                  />
+                    icon="restore"
+                    class="q-px-sm"
+                  >
+                    <q-tooltip>{{
+                      $t("RestoreView.actions.restore.label")
+                    }}</q-tooltip>
+                  </q-btn>
                 </div>
               </div>
             </div>
@@ -259,6 +332,7 @@ export default defineComponent({
       restoreAllMintsText: this.$i18n.t(
         "RestoreView.actions.restore_all_mints.label"
       ),
+      selectedMints: new Set(), // Track selected mint URLs
     };
   },
   computed: {
@@ -280,6 +354,18 @@ export default defineComponent({
       const words = this.mnemonicToRestore.trim().split(/\s+/);
       return words.length >= 12;
     },
+    allSelected() {
+      return (
+        this.mints.length > 0 &&
+        this.mints.every((mint) => this.selectedMints.has(mint.url))
+      );
+    },
+    anySelected() {
+      return this.selectedMints.size > 0;
+    },
+    selectedMintsCount() {
+      return this.selectedMints.size;
+    },
   },
   methods: {
     ...mapActions(useRestoreStore, ["restoreMint"]),
@@ -300,6 +386,64 @@ export default defineComponent({
     },
     formatCurrency(amount, unit) {
       return useUiStore().formatCurrency(amount, unit);
+    },
+    toggleMintSelection(mintUrl) {
+      if (this.selectedMints.has(mintUrl)) {
+        this.selectedMints.delete(mintUrl);
+      } else {
+        this.selectedMints.add(mintUrl);
+      }
+    },
+    selectAllMints() {
+      this.mints.forEach((mint) => {
+        this.selectedMints.add(mint.url);
+      });
+    },
+    deselectAllMints() {
+      this.selectedMints.clear();
+    },
+    async restoreSelectedMints() {
+      if (this.selectedMintsCount === 0) {
+        return;
+      }
+
+      if (!this.validateMnemonic()) {
+        return;
+      }
+
+      const selectedMintUrls = Array.from(this.selectedMints);
+      let i = 0;
+
+      try {
+        for (const mintUrl of selectedMintUrls) {
+          this.restoreAllMintsText = this.$i18n.t(
+            "RestoreView.actions.restore_selected_mints.in_progress",
+            {
+              index: ++i,
+              length: selectedMintUrls.length,
+            }
+          );
+          await this.restoreMint(mintUrl);
+        }
+        notifySuccess(
+          this.$i18n.t("RestoreView.actions.restore_selected_mints.success", {
+            count: selectedMintUrls.length,
+          })
+        );
+        // Clear selections after successful restore
+        this.deselectAllMints();
+      } catch (error) {
+        console.error("Error restoring selected mints:", error);
+        notifyError(
+          this.$i18n.t("RestoreView.actions.restore_selected_mints.error", {
+            error: error.message || error,
+          })
+        );
+      } finally {
+        this.restoreAllMintsText = this.$i18n.t(
+          "RestoreView.actions.restore_all_mints.label"
+        );
+      }
     },
     validateMnemonic() {
       // Simple validation: check if mnemonicToRestore has at least 12 words
@@ -397,5 +541,17 @@ export default defineComponent({
 
 .mint-card:hover {
   border-color: rgba(128, 128, 128, 0.4) !important;
+}
+
+/* Selection buttons styling */
+.selection-buttons {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+/* Clickable checkbox */
+.clickable-checkbox {
+  cursor: pointer;
 }
 </style>

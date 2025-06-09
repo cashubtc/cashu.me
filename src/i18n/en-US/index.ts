@@ -680,6 +680,12 @@ export default {
       validate: {
         error: "Mnemonic should be at least 12 words.",
       },
+      select_all: {
+        label: "Select All",
+      },
+      deselect_all: {
+        label: "Deselect All",
+      },
       restore: {
         label: "Restore",
         in_progress: "Restoring mint …",
@@ -690,6 +696,12 @@ export default {
         in_progress: "Restoring mint { index } of { length } …",
         success: "Restore finished successfully",
         error: "Error restoring mints: { error }",
+      },
+      restore_selected_mints: {
+        label: "Restore Selected Mints ({count})",
+        in_progress: "Restoring mint { index } of { length } …",
+        success: "Successfully restored {count} mint(s)",
+        error: "Error restoring selected mints: { error }",
       },
     },
     nostr_mints: {
