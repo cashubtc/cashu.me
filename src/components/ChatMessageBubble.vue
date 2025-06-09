@@ -3,7 +3,7 @@
     class="q-my-xs flex column"
     :class="message.outgoing ? 'items-end' : 'items-start'"
   >
-    <div :class="message.outgoing ? 'sent' : 'received'">
+    <div :class="message.outgoing ? 'sent' : 'received'" :style="bubbleStyle">
       {{ message.content }}
     </div>
     <div
@@ -28,6 +28,7 @@
 
 <script lang="ts" setup>
 import { computed } from "vue";
+import { useQuasar } from "quasar";
 import { mdiCheck, mdiCheckAll } from "@quasar/extras/mdi-v6";
 import type { MessengerMessage } from "src/stores/messenger";
 
@@ -35,6 +36,19 @@ const props = defineProps<{
   message: MessengerMessage;
   deliveryStatus?: "sent" | "delivered";
 }>();
+
+const $q = useQuasar();
+
+const receivedStyle = computed(() => ({
+  backgroundColor: $q.dark.isActive
+    ? 'var(--q-color-grey-8)'
+    : 'var(--q-color-grey-2)',
+  color: $q.dark.isActive ? '#ffffff' : '#000000'
+}));
+
+const bubbleStyle = computed(() => (
+  props.message.outgoing ? {} : receivedStyle.value
+));
 
 const time = computed(() =>
   new Date(props.message.created_at * 1000).toLocaleString()
@@ -64,10 +78,5 @@ const deliveryIcon = computed(() =>
 .received {
   background-color: var(--q-color-grey-2);
   color: #000000;
-}
-
-body.body--dark .received {
-  background-color: var(--q-color-grey-8);
-  color: #ffffff;
 }
 </style>
