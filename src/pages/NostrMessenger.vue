@@ -48,9 +48,13 @@
         </q-toolbar>
       </q-header>
       <ActiveChatHeader :pubkey="selected" />
-      <MessageList :messages="messages" class="col" />
-      <MessageInput @send="sendMessage" @sendToken="openSendTokenDialog" />
-    </div>
+        <MessageList :messages="messages" class="col" />
+        <MessageInput @send="sendMessage" @sendToken="openSendTokenDialog" />
+        <ChatSendTokenDialog
+          ref="chatSendTokenDialogRef"
+          :recipient="selected"
+        />
+      </div>
   </q-page>
 </template>
 
@@ -67,10 +71,9 @@ import ConversationList from "components/ConversationList.vue";
 import ActiveChatHeader from "components/ActiveChatHeader.vue";
 import MessageList from "components/MessageList.vue";
 import MessageInput from "components/MessageInput.vue";
-import { useSendTokensStore } from "src/stores/sendTokensStore";
+import ChatSendTokenDialog from "components/ChatSendTokenDialog.vue";
 
 const messenger = useMessengerStore();
-const sendTokensStore = useSendTokensStore();
 messenger.loadIdentity();
 onMounted(() => {
   messenger.start();
@@ -91,6 +94,7 @@ const drawer = computed({
   set: (val) => messenger.setDrawer(val),
 });
 const selected = ref("");
+const chatSendTokenDialogRef = ref<InstanceType<typeof ChatSendTokenDialog> | null>(null);
 const messages = computed(() => messenger.conversations[selected.value] || []);
 const showRelays = useLocalStorage<boolean>("cashu.messenger.showRelays", true);
 
@@ -122,10 +126,7 @@ const sendMessage = (text: string) => {
 
 function openSendTokenDialog() {
   if (!selected.value) return;
-  sendTokensStore.clearSendData();
-  sendTokensStore.recipientPubkey = selected.value;
-  sendTokensStore.sendViaNostr = true;
-  sendTokensStore.showSendTokens = true;
+  (chatSendTokenDialogRef.value as any)?.show();
 }
 
 let touchStartX = 0;
