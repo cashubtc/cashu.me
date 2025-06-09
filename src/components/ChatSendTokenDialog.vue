@@ -3,6 +3,9 @@
     <q-card class="q-pa-md qcard" style="min-width: 300px">
       <q-card-section class="text-h6">Send Tokens</q-card-section>
       <q-card-section>
+        <div class="text-caption q-mb-sm">
+          Balance: {{ formattedTotalBalance }}
+        </div>
         <q-select
           v-model="bucketId"
           :options="bucketOptions"
@@ -38,13 +41,21 @@
 
 <script lang="ts" setup>
 import { ref, computed } from 'vue';
+import { storeToRefs } from 'pinia';
 import { useBucketsStore } from 'src/stores/buckets';
 import { useMessengerStore } from 'src/stores/messenger';
+import { useMintsStore } from 'src/stores/mints';
+import { useUiStore } from 'src/stores/ui';
 
 const props = defineProps<{ recipient: string }>();
 
 const bucketsStore = useBucketsStore();
+const mintsStore = useMintsStore();
+const uiStore = useUiStore();
 const messenger = useMessengerStore();
+
+const { bucketList, bucketBalances } = storeToRefs(bucketsStore);
+const { activeUnit } = storeToRefs(mintsStore);
 
 const show = ref(false);
 const amount = ref<number | null>(null);
@@ -52,13 +63,27 @@ const memo = ref('');
 const bucketId = ref('');
 
 const bucketOptions = computed(() =>
-  bucketsStore.bucketList.map((b) => ({ label: b.name, value: b.id }))
+  bucketList.value.map((b) => ({
+    label: `${b.name} (${uiStore.formatCurrency(
+      bucketBalances.value[b.id] ?? 0,
+      activeUnit.value,
+    )})`,
+    value: b.id,
+  }))
+);
+
+const totalBalance = computed(() =>
+  Object.values(bucketBalances.value).reduce((sum, v) => sum + v, 0)
+);
+
+const formattedTotalBalance = computed(() =>
+  uiStore.formatCurrency(totalBalance.value, activeUnit.value)
 );
 
 function reset() {
   amount.value = null;
   memo.value = '';
-  bucketId.value = bucketsStore.bucketList[0]?.id || '';
+  bucketId.value = bucketList.value[0]?.id || '';
 }
 
 function showDialog() {
