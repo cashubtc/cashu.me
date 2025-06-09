@@ -1,6 +1,6 @@
 <template>
   <q-page
-    class="row full-height"
+    class="row full-height no-horizontal-scroll"
     :class="[$q.dark.isActive ? 'bg-dark text-white' : 'bg-white text-dark']"
     @touchstart="onTouchStart"
     @touchend="onTouchEnd"

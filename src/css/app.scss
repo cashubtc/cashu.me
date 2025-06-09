@@ -147,3 +147,9 @@ body.body--dark .received {
   background-color: var(--q-color-grey-8) !important;
   color: #ffffff !important;
 }
+
+
+.no-horizontal-scroll {
+  overflow-x: hidden;
+}
+
