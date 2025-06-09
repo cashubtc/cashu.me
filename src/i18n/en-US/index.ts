@@ -1478,6 +1478,10 @@ export default {
     columns: {
       creator: "Creator",
       bucket: "Bucket",
+      tierName: "Tier",
+      benefits: "Benefits",
+      frequency: "Frequency",
+      tokensRemaining: "Remaining",
       monthly: "Monthly",
       total: "Total",
       start: "Start",

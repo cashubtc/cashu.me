@@ -4,6 +4,7 @@ import { useWalletStore } from "./wallet";
 import { useMintsStore } from "./mints";
 import { useProofsStore } from "./proofs";
 import { useLockedTokensStore, LockedToken } from "./lockedTokens";
+import { useSubscriptionsStore } from "./subscriptions";
 import { DEFAULT_BUCKET_ID } from "./buckets";
 
 export type DonationPreset = {
@@ -40,12 +41,14 @@ export const useDonationPresetsStore = defineStore("donationPresets", {
       pubkey: string,
       bucketId: string = DEFAULT_BUCKET_ID,
       startDate?: number,
-      detailed = false
+      detailed = false,
+      subscription?: { tierName?: string; benefits?: string[]; frequency?: 'monthly' | 'weekly' }
     ): Promise<string | LockedToken[]> {
       const walletStore = useWalletStore();
       const proofsStore = useProofsStore();
       const mintsStore = useMintsStore();
       const lockedStore = useLockedTokensStore();
+      const subscriptionsStore = useSubscriptionsStore();
 
       const wallet = walletStore.wallet;
       let proofs = mintsStore.activeProofs.filter(
@@ -98,6 +101,33 @@ export const useDonationPresetsStore = defineStore("donationPresets", {
         tokens.push(locked);
         await proofsStore.updateActiveProofs();
         proofs = mintsStore.activeProofs.filter((p) => p.bucketId === bucketId);
+      }
+
+      if (subscription) {
+        await subscriptionsStore.addSubscription({
+          creatorNpub: pubkey,
+          tierId: bucketId,
+          creatorP2PK: '',
+          subscriberRefundP2PK: '',
+          mintUrl: '',
+          amountPerInterval: amount,
+          frequency: subscription.frequency || 'monthly',
+          startDate: base,
+          commitmentLength: months,
+          intervals: tokens.map((t, idx) => ({
+            intervalKey: String(idx),
+            lockedTokenId: t.id,
+            unlockTs: t.locktime || 0,
+            refundUnlockTs: 0,
+            status: 'pending',
+            tokenString: t.token,
+          })),
+          status: 'active',
+          createdAt: 0,
+          updatedAt: 0,
+          ...(subscription.tierName ? { tierName: subscription.tierName } : {}),
+          ...(subscription.benefits ? { benefits: subscription.benefits } : {}),
+        } as any);
       }
       return detailed ? tokens : tokens.map((t) => t.token).join("\n");
     },
