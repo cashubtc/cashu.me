@@ -1166,6 +1166,29 @@
           </div>
         </div>
 
+        <!-- nostr mint backup settings -->
+        <div class="row q-mx-md q-mt-md">
+          <div class="col-12">
+            <div class="row q-pt-md">
+              <q-toggle
+                v-model="nostrMintBackupEnabled"
+                label="Backup mint list on Nostr"
+                color="primary"
+                @update:model-value="onNostrMintBackupToggle"
+              >
+                <q-badge
+                  color="primary"
+                  :label="$t('Settings.experimental.receive_swaps.badge')"
+                  class="q-mx-sm"
+                ></q-badge>
+              </q-toggle>
+            </div>
+            <q-item-label caption class="q-px-md">
+              {{ $t("Settings.experimental.nostr_mint_backup.description") }}
+            </q-item-label>
+          </div>
+        </div>
+
         <div class="section-divider q-my-md">
           <div class="divider-line"></div>
           <div class="divider-text">
@@ -1732,6 +1755,7 @@ import { useReceiveTokensStore } from "../stores/receiveTokensStore";
 import { useWelcomeStore } from "src/stores/welcome";
 import { useStorageStore } from "src/stores/storage";
 import { useNPCV2Store } from "src/stores/npcv2";
+import { useNostrMintBackupStore } from "src/stores/nostrMintBackup";
 import { useI18n } from "vue-i18n";
 
 export default defineComponent({
@@ -1798,6 +1822,7 @@ export default defineComponent({
       "auditorApiUrl",
       "bip177BitcoinSymbol",
       "multinutEnabled",
+      "nostrMintBackupEnabled",
     ]),
     ...mapState(useP2PKStore, ["p2pkKeys"]),
     ...mapWritableState(useP2PKStore, [
@@ -2058,6 +2083,24 @@ export default defineComponent({
     },
     removeRelay: function (relay) {
       this.relays = this.relays.filter((r) => r !== relay);
+    },
+    onNostrMintBackupToggle: async function (enabled) {
+      const nostrMintBackupStore = useNostrMintBackupStore();
+      
+      if (enabled) {
+        try {
+          await nostrMintBackupStore.enableBackup();
+          this.notifySuccess("Nostr mint backup enabled");
+        } catch (error) {
+          console.error("Failed to enable Nostr mint backup:", error);
+          this.notifyError("Failed to enable Nostr mint backup");
+          // Revert the toggle
+          this.nostrMintBackupEnabled = false;
+        }
+      } else {
+        nostrMintBackupStore.disableBackup();
+        this.notifySuccess("Nostr mint backup disabled");
+      }
     },
     changeLanguage(locale) {
       // Set the i18n locale

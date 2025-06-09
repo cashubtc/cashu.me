@@ -156,6 +156,12 @@
         </div>
       </q-list>
     </div>
+
+    <!-- Nostr Mint Restore Component -->
+    <NostrMintRestore
+      :mnemonic="mnemonicToRestore"
+      :is-mnemonic-valid="isMnemonicValid"
+    />
   </div>
 </template>
 
@@ -167,10 +173,14 @@ import { useRestoreStore } from "src/stores/restore";
 import { useWalletStore } from "src/stores/wallet";
 import { useUiStore } from "src/stores/ui";
 import { notifyError, notifySuccess } from "src/js/notify";
+import NostrMintRestore from "./NostrMintRestore.vue";
 
 export default defineComponent({
   name: "RestoreView",
   mixins: [windowMixin],
+  components: {
+    NostrMintRestore,
+  },
   data() {
     return {
       mnemonicError: "",
