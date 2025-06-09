@@ -100,6 +100,24 @@
         >
           {{ $t('SubscriptionsOverview.message') }}
         </q-btn>
+        <q-btn
+          flat
+          dense
+          size="sm"
+          class="q-ml-xs"
+          @click="extendSubscription(props.row.creator)"
+        >
+          {{ $t('SubscriptionsOverview.extend') }}
+        </q-btn>
+        <q-btn
+          flat
+          dense
+          size="sm"
+          class="q-ml-xs"
+          @click="cancelSubscription(props.row.creator)"
+        >
+          {{ $t('SubscriptionsOverview.cancel') }}
+        </q-btn>
       </template>
       <template #no-data>
         <div class="text-center q-pa-md">
@@ -200,6 +218,7 @@ import { useMintsStore } from 'stores/mints';
 import { useUiStore } from 'stores/ui';
 import { useNostrStore } from 'stores/nostr';
 import { useMessengerStore } from 'stores/messenger';
+import { useDonationPresetsStore } from 'stores/donationPresets';
 import { useRouter } from 'vue-router';
 import { useQuasar, copyToClipboard } from 'quasar';
 import { nip19 } from 'nostr-tools';
@@ -320,6 +339,65 @@ async function confirmMessage() {
   } else {
     notifyError(t("wallet.notifications.nostr_dm_failed"));
   }
+}
+
+function cancelSubscription(pubkey: string) {
+  const row = rows.value.find((r) => r.creator === pubkey);
+  if (!row) return;
+  $q.dialog({
+    title: t('SubscriptionsOverview.cancel_confirm_title'),
+    message: t('SubscriptionsOverview.cancel_confirm_text'),
+    cancel: true,
+    persistent: true,
+  }).onOk(() => {
+    try {
+      const now = Math.floor(Date.now() / 1000);
+      row.tokens
+        .filter((t) => t.locktime && t.locktime > now)
+        .forEach((t) => lockedStore.deleteLockedToken(t.id));
+      notifySuccess(t('SubscriptionsOverview.notifications.cancel_success'));
+    } catch (e: any) {
+      notifyError(e.message);
+    }
+  });
+}
+
+function extendSubscription(pubkey: string) {
+  const row = rows.value.find((r) => r.creator === pubkey);
+  if (!row) return;
+  $q.dialog({
+    title: t('SubscriptionsOverview.extend_dialog_title'),
+    message: t('SubscriptionsOverview.extend_dialog_text'),
+    prompt: {
+      model: 1,
+      type: 'number',
+      min: 1,
+    },
+    cancel: true,
+    persistent: true,
+  }).onOk(async (months: number) => {
+    if (!months || months <= 0) return;
+    const donationStore = useDonationPresetsStore();
+    const future = row.tokens
+      .filter((t) => t.locktime)
+      .sort((a, b) => (a.locktime || 0) - (b.locktime || 0));
+    const lastLock = future.length
+      ? future[future.length - 1].locktime!
+      : Math.floor(Date.now() / 1000);
+    const startDate = lastLock + 30 * 24 * 60 * 60;
+    try {
+      await donationStore.createDonationPreset(
+        months,
+        row.monthly,
+        pubkey,
+        row.tokens[0]?.bucketId,
+        startDate
+      );
+      notifySuccess(t('SubscriptionsOverview.notifications.extend_success'));
+    } catch (e: any) {
+      notifyError(e.message);
+    }
+  });
 }
 
 function copyToken(token: string) {
