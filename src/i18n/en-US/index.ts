@@ -1471,13 +1471,23 @@ export default {
   },
   SubscriptionsOverview: {
     title: "Subscriptions",
+    summary: {
+      monthly: "Monthly outflow",
+      total: "Total locked",
+    },
     columns: {
       creator: "Creator",
+      monthly: "Monthly",
       total: "Total",
+      start: "Start",
       next_unlock: "Next unlock",
       remaining: "Months left",
+      actions: "Actions",
     },
     empty: "No subscriptions",
+    discover: "Discover creators",
+    view: "View",
+    message: "Message",
   },
   LockedTokensTable: {
     empty_text: "No locked tokens",
