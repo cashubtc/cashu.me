@@ -1496,6 +1496,7 @@ export default {
     view: "View",
     message: "Message",
     extend: "Extend",
+    export: "Export",
     cancel: "Cancel",
     cancel_confirm_title: "Cancel subscription",
     cancel_confirm_text: "Delete all future locked tokens?",
