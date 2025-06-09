@@ -8,6 +8,7 @@
         {{ $t("AlreadyRunning.text") }}
       </div>
       <q-btn
+        aria-label="Retry"
         rounded
         class="q-mt-md"
         color="white"

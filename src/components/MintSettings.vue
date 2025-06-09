@@ -230,6 +230,7 @@
         <div class="add-mint-actions">
           <div class="row justify-between items-center q-mt-xs">
             <q-btn
+              aria-label="Add mint"
               flat
               :disable="addMintData.url.length === 0"
               @click="
@@ -244,7 +245,7 @@
               <span>{{ $t("MintSettings.add.actions.add_mint.label") }}</span>
             </q-btn>
 
-            <q-btn flat @click="showCamera" class="text-white">
+            <q-btn aria-label="Scan" flat @click="showCamera" class="text-white">
               <q-icon name="qr_code" size="20px" class="q-mr-sm" />
               <span>{{ $t("MintSettings.add.actions.scan.label") }}</span>
             </q-btn>
@@ -275,6 +276,7 @@
         </q-item>
         <q-item class="q-pt-sm">
           <q-btn
+            aria-label="Discover mints"
             class="q-ml-sm q-px-md"
             color="primary"
             rounded
@@ -433,6 +435,7 @@
             "
           ></q-input>
           <q-btn
+            aria-label="Swap"
             class="q-ml-sm q-px-md"
             color="primary"
             rounded

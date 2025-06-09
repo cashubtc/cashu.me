@@ -16,6 +16,7 @@
       >
         <template v-slot:append>
           <q-btn
+            aria-label="Toggle mnemonic visibility"
             flat
             dense
             icon="visibility"
@@ -23,6 +24,7 @@
             @click="toggleMnemonicVisibility"
           ></q-btn>
           <q-btn
+            aria-label="Copy mnemonic"
             flat
             dense
             icon="content_copy"

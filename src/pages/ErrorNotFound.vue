@@ -8,6 +8,7 @@
         {{ $t("ErrorNotFound.text") }}
       </div>
       <q-btn
+        aria-label="Home"
         rounded
         size="lg"
         class="q-mt-xl"

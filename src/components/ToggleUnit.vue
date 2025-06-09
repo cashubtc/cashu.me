@@ -1,5 +1,6 @@
 <template>
   <q-btn
+    aria-label="Toggle unit"
     rounded
     outline
     :color="color"

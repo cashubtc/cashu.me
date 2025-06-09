@@ -127,6 +127,7 @@
   <div class="row q-mt-xs q-mb-none" v-if="pendingBalance > 0">
     <div class="col-12">
       <q-btn
+        aria-label="Check pending tokens"
         name="history"
         size="sm"
         align="between"

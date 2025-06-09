@@ -22,6 +22,7 @@
       <div class="row q-mt-lg">
         <div class="col">
           <q-btn
+            aria-label="Add mint"
             class="float-left"
             rounded
             v-close-popup
@@ -38,7 +39,7 @@
           </q-btn>
         </div>
         <div class="col">
-          <q-btn v-close-popup flat class="float-right" color="grey">{{
+          <q-btn aria-label="Cancel" v-close-popup flat class="float-right" color="grey">{{
             $t("AddMintDialog.actions.cancel.label")
           }}</q-btn>
         </div>

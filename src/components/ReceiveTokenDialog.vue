@@ -9,6 +9,7 @@
   >
     <q-card v-model="showReceiveTokens" class="q-pa-lg qcard q-card-top">
       <q-btn
+        aria-label="Close"
         v-close-popup
         rounded
         flat
@@ -68,6 +69,7 @@
       <div class="row">
         <!-- if !tokenDecodesCorrectly, display error -->
         <q-btn
+          aria-label="Invalid token"
           v-if="receiveData.tokensBase64.length && !tokenDecodesCorrectly"
           disabled
           color="yellow"
@@ -81,6 +83,7 @@
         <!-- EMPTY INPUT -->
         <div v-if="!receiveData.tokensBase64.length">
           <q-btn
+            aria-label="Paste"
             unelevated
             dense
             class="q-mr-sm"
@@ -92,6 +95,7 @@
             }}</q-btn
           >
           <q-btn
+            aria-label="Scan"
             unelevated
             dense
             class="q-mx-sm"
@@ -104,6 +108,7 @@
             }}</span>
           </q-btn>
           <q-btn
+            aria-label="NFC scan"
             unelevated
             dense
             class="q-mx-sm"
@@ -141,6 +146,7 @@
           </div>
           <div class="row q-pt-md" v-if="!swapSelected">
             <q-btn
+              aria-label="Receive tokens"
               @click="receiveIfDecodes"
               color="primary"
               rounded
@@ -161,6 +167,7 @@
             </q-btn>
             <!-- swap to trusted mint -->
             <q-btn
+              aria-label="Swap"
               v-if="enableReceiveSwaps && activeMintUrl && mints.length"
               @click="swapSelected = true"
               color="primary"
@@ -175,6 +182,7 @@
               }}</q-tooltip>
             </q-btn>
             <q-btn
+              aria-label="Receive later"
               @click="addPendingTokenToHistory(receiveData.tokensBase64)"
               color="primary"
               rounded
@@ -216,6 +224,7 @@
           </div>
           <div class="row q-pt-sm" v-if="swapSelected">
             <q-btn
+              aria-label="Confirm swap"
               @click="handleSwapToTrustedMint"
               color="primary"
               rounded
@@ -234,6 +243,7 @@
               }}</q-tooltip>
             </q-btn>
             <q-btn
+              aria-label="Cancel swap"
               @click="swapSelected = false"
               color="grey"
               rounded
