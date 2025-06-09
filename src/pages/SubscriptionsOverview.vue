@@ -24,14 +24,22 @@
           <q-avatar size="32px" v-if="profiles[props.row.creator]?.picture">
             <img :src="profiles[props.row.creator].picture" />
           </q-avatar>
-          <span class="q-ml-sm">
-            {{
-              profiles[props.row.creator]?.display_name ||
-              profiles[props.row.creator]?.name ||
-              shortenString(pubkeyNpub(props.row.creator), 15, 6)
-            }}
-          </span>
+          <div class="q-ml-sm">
+            <div>
+              {{
+                profiles[props.row.creator]?.display_name ||
+                profiles[props.row.creator]?.name ||
+                shortenString(pubkeyNpub(props.row.creator), 15, 6)
+              }}
+            </div>
+            <div class="text-caption">
+              {{ props.row.bucketName }}
+            </div>
+          </div>
         </div>
+      </template>
+      <template #body-cell-bucket="props">
+        {{ props.row.bucketName || '-' }}
       </template>
       <template #body-cell-monthly="props">
         {{ formatCurrency(props.row.monthly) }}
@@ -191,12 +199,27 @@ const rows = computed(() => {
   return Object.entries(groups.value).map(([creator, tokens]) => {
     const total = tokens.reduce((sum, t) => sum + t.amount, 0);
     const future = tokens.filter((t) => t.locktime && t.locktime > now);
-    const nextUnlock = future.sort((a, b) => (a.locktime! - b.locktime!))[0]?.locktime || null;
+    const nextUnlock = future.sort((a, b) => a.locktime! - b.locktime!)[0]?.locktime || null;
     const monthsLeft = future.length;
     const monthly = tokens[0]?.amount || 0;
     const start = tokens.reduce((m, t) => (t.locktime && (!m || t.locktime < m) ? t.locktime : m), null as number | null);
     const progress = tokens.length ? 1 - monthsLeft / tokens.length : 0;
-    return { creator, total, monthly, start, nextUnlock, monthsLeft, progress, tokens };
+    const bucketNames = [...new Set(
+      tokens
+        .map((t) => bucketsStore.bucketList.find((b) => b.id === t.bucketId)?.name)
+        .filter(Boolean)
+    )].join(", ");
+    return {
+      creator,
+      bucketName: bucketNames,
+      total,
+      monthly,
+      start,
+      nextUnlock,
+      monthsLeft,
+      progress,
+      tokens,
+    };
   });
 });
 
@@ -249,6 +272,7 @@ watch(groups, updateProfiles);
 
 const columns = computed(() => [
   { name: "creator", label: t("SubscriptionsOverview.columns.creator"), field: "creator" },
+  { name: "bucket", label: t("SubscriptionsOverview.columns.bucket"), field: "bucketName" },
   { name: "monthly", label: t("SubscriptionsOverview.columns.monthly"), field: "monthly", align: "right" },
   { name: "total", label: t("SubscriptionsOverview.columns.total"), field: "total", align: "right" },
   { name: "start", label: t("SubscriptionsOverview.columns.start"), field: "start" },
