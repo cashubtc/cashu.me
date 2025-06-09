@@ -1349,4 +1349,7 @@ export default {
     invalid_swap_data_error_text: "Ungültige Swap-Daten",
     swap_error_text: "Fehler beim Tauschen",
   },
+  SubscriptionsOverview: {
+    export_csv: "Export CSV",
+  },
 };

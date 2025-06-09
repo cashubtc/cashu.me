@@ -158,9 +158,18 @@
           dense
           size="sm"
           class="q-ml-xs"
-          @click="exportTokens(props.row.creator)"
+          @click="shareTokens(props.row.creator)"
         >
           {{ $t('SubscriptionsOverview.export') }}
+        </q-btn>
+        <q-btn
+          flat
+          dense
+          size="sm"
+          class="q-ml-xs"
+          @click="exportTokens(props.row.creator)"
+        >
+          {{ $t('SubscriptionsOverview.export_csv') }}
         </q-btn>
         <q-btn
           flat
@@ -502,7 +511,7 @@ function extendSubscription(pubkey: string) {
   });
 }
 
-function exportTokens(pubkey: string) {
+function shareTokens(pubkey: string) {
   const row = rows.value.find((r) => r.creator === pubkey);
   if (!row) return;
   const proofs = row.tokens.flatMap((t) => {
@@ -514,6 +523,23 @@ function exportTokens(pubkey: string) {
   sendTokensStore.clearSendData();
   sendTokensStore.sendData.tokensBase64 = tokenStr;
   sendTokensStore.showSendTokens = true;
+}
+
+function exportTokens(pubkey: string) {
+  const row = rows.value.find((r) => r.creator === pubkey);
+  if (!row) return;
+  const lines = ["amount,unlock_time,token"];
+  row.tokens.forEach((t) => {
+    lines.push(`${t.amount},${t.locktime || ''},${t.token}`);
+  });
+  const csv = lines.join('\n');
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `tokens_${pubkey}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
 }
 
 function copyToken(token: string) {

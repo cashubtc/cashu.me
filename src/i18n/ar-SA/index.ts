@@ -1342,4 +1342,7 @@ timelock: {
     invalid_swap_data_error_text: "بيانات تبديل غير صالحة",
     swap_error_text: "خطأ في التبديل",
   },
+  SubscriptionsOverview: {
+    export_csv: "Export CSV",
+  },
 };

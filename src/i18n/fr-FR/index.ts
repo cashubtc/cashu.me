@@ -1339,4 +1339,7 @@ timelock: {
     invalid_swap_data_error_text: "Données d'échange invalides",
     swap_error_text: "Erreur lors de l'échange",
   },
+  SubscriptionsOverview: {
+    export_csv: "Export CSV",
+  },
 };

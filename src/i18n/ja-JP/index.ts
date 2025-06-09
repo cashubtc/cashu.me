@@ -1332,4 +1332,7 @@ timelock: {
     invalid_swap_data_error_text: "無効なスワップデータ",
     swap_error_text: "スワップエラー",
   },
+  SubscriptionsOverview: {
+    export_csv: "Export CSV",
+  },
 };

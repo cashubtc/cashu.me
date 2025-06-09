@@ -1352,4 +1352,7 @@ timelock: {
     invalid_swap_data_error_text: "Μη έγκυρα δεδομένα ανταλλαγής",
     swap_error_text: "Σφάλμα κατά την ανταλλαγή",
   },
+  SubscriptionsOverview: {
+    export_csv: "Export CSV",
+  },
 };
