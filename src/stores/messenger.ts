@@ -7,6 +7,10 @@ import { v4 as uuidv4 } from "uuid";
 import { useSettingsStore } from "./settings";
 import { sanitizeMessage } from "src/js/message-utils";
 import { notifySuccess, notifyError } from "src/js/notify";
+import { useWalletStore } from "./wallet";
+import { useMintsStore } from "./mints";
+import { useProofsStore } from "./proofs";
+import { useTokensStore } from "./tokens";
 
 export type MessengerMessage = {
   id: string;
@@ -68,6 +72,60 @@ export const useMessengerStore = defineStore("messenger", {
         this.addOutgoingMessage(recipient, message, event.created_at, event.id);
       }
       return { success, event } as any;
+    },
+    async sendToken(
+      recipient: string,
+      amount: number,
+      bucketId: string,
+      memo?: string,
+    ) {
+      try {
+        const wallet = useWalletStore();
+        const mints = useMintsStore();
+        const proofsStore = useProofsStore();
+        const settings = useSettingsStore();
+        const tokens = useTokensStore();
+
+        const sendAmount = Math.floor(
+          amount * mints.activeUnitCurrencyMultiplyer,
+        );
+
+        const mintWallet = wallet.mintWallet(
+          mints.activeMintUrl,
+          mints.activeUnit,
+        );
+        const proofsForBucket = mints.activeProofs.filter(
+          (p) => p.bucketId === bucketId,
+        );
+
+        const { sendProofs } = await wallet.send(
+          proofsForBucket,
+          mintWallet,
+          sendAmount,
+          true,
+          settings.includeFeesInSendAmount,
+          bucketId,
+        );
+
+        const tokenStr = proofsStore.serializeProofs(sendProofs);
+        const content = memo ? `${memo}\n${tokenStr}` : tokenStr;
+
+        const { success } = await this.sendDm(recipient, content);
+        if (success) {
+          tokens.addPendingToken({
+            amount: -sendAmount,
+            token: tokenStr,
+            unit: mints.activeUnit,
+            mint: mints.activeMintUrl,
+            bucketId,
+          });
+        }
+        return success;
+      } catch (e) {
+        console.error(e);
+        notifyError("Failed to send token");
+        return false;
+      }
     },
     addOutgoingMessage(
       pubkey: string,
