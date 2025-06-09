@@ -11,24 +11,39 @@
         {{ formatCurrency(totalLocked) }}
       </div>
     </div>
-    <q-input
-      v-model="tableFilter"
-      dense
-      debounce="300"
-      class="q-mb-md"
-      :placeholder="$t('global.actions.search.label')"
-    />
     <q-table
       flat
       bordered
       dense
-      :rows="rows"
+      :rows="filteredRows"
       :columns="columns"
       row-key="creator"
       :rows-per-page-options="[5, 10, 20, 0]"
-      :filter="tableFilter"
+      :filter="filter"
+      :pagination="pagination"
       :sort-method="customSort"
     >
+      <template #top-right>
+        <q-input
+          v-model="filter"
+          dense
+          debounce="300"
+          class="q-mr-md"
+          :placeholder="$t('global.actions.search.label')"
+        />
+        <q-select
+          v-model="statusFilter"
+          dense
+          emit-value
+          map-options
+          clearable
+          :options="[
+            { label: $t('SubscriptionsOverview.status.active'), value: 'active' },
+            { label: $t('SubscriptionsOverview.status.expired'), value: 'expired' }
+          ]"
+          :placeholder="$t('SubscriptionsOverview.filter.status')"
+        />
+      </template>
       <template #body-cell-creator="props">
         <div class="row items-center">
           <q-avatar size="32px" v-if="profiles[props.row.creator]?.picture">
@@ -349,7 +364,19 @@ const selectedCreator = ref("");
 const showMessageDialog = ref(false);
 const messageText = ref("");
 const messageRecipient = ref("");
-const tableFilter = ref("");
+const filter = ref("");
+const statusFilter = ref<string | null>(null);
+const pagination = ref({ page: 1, rowsPerPage: 10 });
+
+const filteredRows = computed(() => {
+  const term = filter.value.toLowerCase();
+  return rows.value.filter((r) => {
+    const matchesStatus = !statusFilter.value || r.status === statusFilter.value;
+    const rowString = JSON.stringify(r).toLowerCase();
+    const matchesFilter = !term || rowString.includes(term);
+    return matchesStatus && matchesFilter;
+  });
+});
 
 function customSort(rows: any[], sortBy: string, descending: boolean) {
   return rows.sort((a, b) => {
@@ -490,17 +517,17 @@ onMounted(updateProfiles);
 watch(groups, updateProfiles);
 
 const columns = computed(() => [
-  { name: "creator", label: t("SubscriptionsOverview.columns.creator"), field: "creator" },
-  { name: "bucket", label: t("SubscriptionsOverview.columns.bucket"), field: "bucketName" },
-  { name: "monthly", label: t("SubscriptionsOverview.columns.monthly"), field: "monthly", align: "right" },
-  { name: "total", label: t("SubscriptionsOverview.columns.total"), field: "total", align: "right" },
-  { name: "start", label: t("SubscriptionsOverview.columns.start"), field: "start" },
-  { name: "end", label: t("SubscriptionsOverview.columns.end"), field: "end" },
-  { name: "totalMonths", label: t("SubscriptionsOverview.columns.total_months"), field: "totalMonths", align: "right" },
-  { name: "next_unlock", label: t("SubscriptionsOverview.columns.next_unlock"), field: "nextUnlock" },
-  { name: "status", label: t("SubscriptionsOverview.columns.status"), field: "status" },
-  { name: "remaining", label: t("SubscriptionsOverview.columns.remaining"), field: "monthsLeft", align: "right" },
-  { name: "actions", label: t("SubscriptionsOverview.columns.actions"), field: "creator" },
+  { name: "creator", label: t("SubscriptionsOverview.columns.creator"), field: "creator", sortable: true },
+  { name: "bucket", label: t("SubscriptionsOverview.columns.bucket"), field: "bucketName", sortable: true },
+  { name: "monthly", label: t("SubscriptionsOverview.columns.monthly"), field: "monthly", align: "right", sortable: true },
+  { name: "total", label: t("SubscriptionsOverview.columns.total"), field: "total", align: "right", sortable: true },
+  { name: "start", label: t("SubscriptionsOverview.columns.start"), field: "start", sortable: true },
+  { name: "end", label: t("SubscriptionsOverview.columns.end"), field: "end", sortable: true },
+  { name: "totalMonths", label: t("SubscriptionsOverview.columns.total_months"), field: "totalMonths", align: "right", sortable: true },
+  { name: "next_unlock", label: t("SubscriptionsOverview.columns.next_unlock"), field: "nextUnlock", sortable: true },
+  { name: "status", label: t("SubscriptionsOverview.columns.status"), field: "status", sortable: true },
+  { name: "remaining", label: t("SubscriptionsOverview.columns.remaining"), field: "monthsLeft", align: "right", sortable: true },
+  { name: "actions", label: t("SubscriptionsOverview.columns.actions"), field: "creator", sortable: true },
 ]);
 </script>
 
