@@ -1332,4 +1332,7 @@ timelock: {
     invalid_swap_data_error_text: "Ogiltig bytesdata",
     swap_error_text: "Fel vid byte",
   },
+  SubscriptionsOverview: {
+    export_csv: "Export CSV",
+  },
 };

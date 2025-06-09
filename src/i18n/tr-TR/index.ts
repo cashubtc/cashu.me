@@ -1334,4 +1334,7 @@ timelock: {
     invalid_swap_data_error_text: "Geçersiz takas verisi",
     swap_error_text: "Takas hatası",
   },
+  SubscriptionsOverview: {
+    export_csv: "Export CSV",
+  },
 };

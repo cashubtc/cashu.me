@@ -1322,4 +1322,7 @@ timelock: {
     invalid_swap_data_error_text: "无效的兑换数据",
     swap_error_text: "兑换错误",
   },
+  SubscriptionsOverview: {
+    export_csv: "Export CSV",
+  },
 };

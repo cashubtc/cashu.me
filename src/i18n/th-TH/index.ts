@@ -1329,4 +1329,7 @@ timelock: {
     invalid_swap_data_error_text: "ข้อมูลการแลกเปลี่ยนไม่ถูกต้อง",
     swap_error_text: "ข้อผิดพลาดในการแลกเปลี่ยน",
   },
+  SubscriptionsOverview: {
+    export_csv: "Export CSV",
+  },
 };

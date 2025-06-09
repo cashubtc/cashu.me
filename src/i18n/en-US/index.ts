@@ -1503,6 +1503,7 @@ export default {
     message: "Message",
     extend: "Extend",
     export: "Export",
+    export_csv: "Export CSV",
     cancel: "Cancel",
     cancel_confirm_title: "Cancel subscription",
     cancel_confirm_text: "Delete all future locked tokens?",
