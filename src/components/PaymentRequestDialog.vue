@@ -55,7 +55,13 @@
                 <q-icon name="account_balance" size="xs" class="q-mr-sm" />
                 {{ getShortUrl(chosenMintUrl) }}
               </q-chip>
-              <div @click="toggleUnit" class="q-mt-xs q-ml-sm">
+              <div
+                @click="toggleUnit"
+                @keyup.enter="toggleUnit"
+                tabindex="0"
+                role="button"
+                class="q-mt-xs q-ml-sm"
+              >
                 <ToggleUnit class="q-py-none" color="white" />
               </div>
             </div>

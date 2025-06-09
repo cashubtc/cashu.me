@@ -1,5 +1,12 @@
 <template>
-  <span @click="$emit('click')">{{ formattedValue }}</span>
+  <span
+    @click="$emit('click')"
+    @keyup.enter="$emit('click')"
+    tabindex="0"
+    role="button"
+  >
+    {{ formattedValue }}
+  </span>
 </template>
 
 <script lang="ts">
