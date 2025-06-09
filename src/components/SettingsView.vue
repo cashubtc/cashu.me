@@ -348,6 +348,84 @@
           </q-item>
         </div>
       </q-list>
+      <q-expansion-item
+        dense
+        dense-toggle
+        class="text-left"
+        :label="$t('Settings.nostr_wallet_connect.relays.expand_label')"
+      >
+        <q-item>
+          <q-item-section>
+            <q-item-label overline>{{
+              $t("Settings.nostr_wallet_connect.relays.add.title")
+            }}</q-item-label>
+            <q-item-label caption
+              >{{ $t("Settings.nostr_wallet_connect.relays.add.description") }}
+            </q-item-label>
+          </q-item-section>
+        </q-item>
+        <q-item>
+          <q-item-section>
+            <q-input
+              outlined
+              rounded
+              dense
+              v-model="newRelay"
+              :label="$t('Settings.nostr_wallet_connect.relays.list.title')"
+              append
+            >
+              <template v-slot:append>
+                <q-btn
+                  flat
+                  dense
+                  icon="add"
+                  color="primary"
+                  @click="addRelay"
+                ></q-btn>
+              </template>
+            </q-input>
+          </q-item-section>
+        </q-item>
+        <q-item>
+          <q-item-section>
+            <q-item-label overline>{{
+              $t("Settings.nostr_wallet_connect.relays.list.title")
+            }}</q-item-label>
+            <q-item-label caption
+              >{{ $t("Settings.nostr_wallet_connect.relays.list.description") }}
+            </q-item-label>
+          </q-item-section>
+        </q-item>
+        <q-item v-for="relay in relays" :key="relay" clickable>
+          <q-item-section class="q-mx-none q-pl-none" style="max-width: 1.2em">
+            <q-icon
+              name="content_copy"
+              @click="copyText(relay)"
+              size="xs"
+              color="grey"
+              class="q-mr-sm cursor-pointer"
+              ><q-tooltip>{{
+                $t("Settings.nostr_wallet_connect.relays.list.copy_tooltip")
+              }}</q-tooltip></q-icon
+            >
+          </q-item-section>
+          <q-item-section class="q-mx-none q-pl-none" style="max-width: 1.5em">
+            <q-icon
+              name="delete_outline"
+              @click="removeRelay(relay)"
+              size="1.3em"
+              color="grey"
+              class="q-mr-sm cursor-pointer"
+              ><q-tooltip>{{
+                $t("Settings.nostr_wallet_connect.relays.list.remove_tooltip")
+              }}</q-tooltip></q-icon
+            >
+          </q-item-section>
+          <q-item-section style="max-width: 10rem" class="cursor-pointer">
+            <q-item-label caption>{{ relay }} </q-item-label>
+          </q-item-section>
+        </q-item>
+      </q-expansion-item>
     </div>
 
     <!-- PAYMENT REQUESTS SECTION -->
@@ -507,97 +585,6 @@
               </q-input>
             </q-item-section>
           </q-item>
-
-          <q-expansion-item
-            dense
-            dense-toggle
-            class="text-left"
-            :label="$t('Settings.nostr_wallet_connect.relays.expand_label')"
-          >
-            <q-item>
-              <q-item-section>
-                <q-item-label overline>{{
-                  $t("Settings.nostr_wallet_connect.relays.add.title")
-                }}</q-item-label>
-                <q-item-label caption
-                  >{{
-                    $t("Settings.nostr_wallet_connect.relays.add.description")
-                  }}
-                </q-item-label>
-              </q-item-section>
-            </q-item>
-            <q-item>
-              <q-item-section>
-                <q-input
-                  outlined
-                  rounded
-                  dense
-                  v-model="newRelay"
-                  :label="$t('Settings.nostr_wallet_connect.relays.list.title')"
-                  append
-                >
-                  <template v-slot:append>
-                    <q-btn
-                      flat
-                      dense
-                      icon="add"
-                      color="primary"
-                      @click="addRelay"
-                    ></q-btn>
-                  </template>
-                </q-input>
-              </q-item-section>
-            </q-item>
-            <q-item>
-              <q-item-section>
-                <q-item-label overline>{{
-                  $t("Settings.nostr_wallet_connect.relays.list.title")
-                }}</q-item-label>
-                <q-item-label caption
-                  >{{
-                    $t("Settings.nostr_wallet_connect.relays.list.description")
-                  }}
-                </q-item-label>
-              </q-item-section>
-            </q-item>
-            <q-item v-for="relay in relays" :key="relay" clickable>
-              <q-item-section
-                class="q-mx-none q-pl-none"
-                style="max-width: 1.2em"
-              >
-                <q-icon
-                  name="content_copy"
-                  @click="copyText(relay)"
-                  size="xs"
-                  color="grey"
-                  class="q-mr-sm cursor-pointer"
-                  ><q-tooltip>{{
-                    $t("Settings.nostr_wallet_connect.relays.list.copy_tooltip")
-                  }}</q-tooltip></q-icon
-                >
-              </q-item-section>
-              <q-item-section
-                class="q-mx-none q-pl-none"
-                style="max-width: 1.5em"
-              >
-                <q-icon
-                  name="delete_outline"
-                  @click="removeRelay(relay)"
-                  size="1.3em"
-                  color="grey"
-                  class="q-mr-sm cursor-pointer"
-                  ><q-tooltip>{{
-                    $t(
-                      "Settings.nostr_wallet_connect.relays.list.remove_tooltip"
-                    )
-                  }}</q-tooltip></q-icon
-                >
-              </q-item-section>
-              <q-item-section style="max-width: 10rem" class="cursor-pointer">
-                <q-item-label caption>{{ relay }} </q-item-label>
-              </q-item-section>
-            </q-item>
-          </q-expansion-item>
         </div>
       </q-list>
     </div>

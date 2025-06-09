@@ -75,6 +75,31 @@
 
     <!-- List of mints with restore buttons and balance badges -->
     <div class="q-pb-md q-px-xs text-left" on-left>
+      <!-- Restore Selected Mints Button (Primary Action) -->
+      <div
+        v-if="mints.length > 0"
+        class="primary-action-section q-px-sm q-pb-md"
+      >
+        <q-btn
+          color="primary"
+          size="md"
+          rounded
+          @click="restoreSelectedMints"
+          :disabled="
+            !isMnemonicValid || restoringState || selectedMintsCount === 0
+          "
+          :loading="restoringState"
+          class="q-px-lg"
+        >
+          <q-icon name="restore" class="q-mr-sm" />
+          {{
+            $t("RestoreView.actions.restore_selected_mints.label", {
+              count: selectedMintsCount,
+            })
+          }}
+        </q-btn>
+      </div>
+
       <!-- Select All/Deselect All Buttons -->
       <div v-if="mints.length > 0" class="selection-buttons q-px-sm q-pb-md">
         <q-btn
@@ -98,47 +123,6 @@
           class="q-px-md"
         >
           {{ $t("RestoreView.actions.deselect_all.label") }}
-        </q-btn>
-      </div>
-
-      <!-- Restore Selected Mints Button (Prominent) -->
-      <div v-if="anySelected" class="text-center q-pb-md">
-        <q-btn
-          color="primary"
-          size="md"
-          rounded
-          @click="restoreSelectedMints"
-          :disabled="!isMnemonicValid || restoringState"
-          :loading="restoringState"
-          class="q-px-xl"
-        >
-          <q-icon name="restore" class="q-mr-sm" />
-          {{
-            $t("RestoreView.actions.restore_selected_mints.label", {
-              count: selectedMintsCount,
-            })
-          }}
-        </q-btn>
-      </div>
-
-      <!-- Legacy Restore All Button (smaller, less prominent) -->
-      <div v-if="!anySelected && mints.length > 0" class="q-pb-md">
-        <q-btn
-          class="q-ml-sm q-px-md"
-          color="secondary"
-          size="md"
-          rounded
-          dense
-          outline
-          @click="restoreAllMints"
-          :disabled="!isMnemonicValid || restoringState"
-        >
-          <q-spinner-hourglass
-            size="sm"
-            v-if="restoringState"
-            class="q-mr-sm"
-          />
-          {{ restoreAllMintsText }}
         </q-btn>
       </div>
 
@@ -545,6 +529,20 @@ export default defineComponent({
 
 /* Selection buttons styling */
 .selection-buttons {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+/* Primary action section */
+.primary-action-section {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+/* Fallback action section */
+.fallback-action-section {
   display: flex;
   align-items: center;
   justify-content: flex-start;

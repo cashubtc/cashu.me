@@ -73,7 +73,7 @@ export const useNostrMintBackupStore = defineStore("nostrMintBackup", {
     },
 
     // Get conversation key for encryption
-    conversationKey: (state): string | null => {
+    conversationKey: (state): Uint8Array | null => {
       if (!state.mintBackupPrivateKey || !state.mintBackupPublicKey) return null;
       return nip44.v2.utils.getConversationKey(state.mintBackupPrivateKey, state.mintBackupPublicKey);
     },

@@ -32,25 +32,30 @@
         <q-icon name="search" class="q-mr-sm" />
         {{ $t("RestoreView.nostr_mints.search_button") }}
       </q-btn>
-
-      <!-- Refresh Button (shown after first search) -->
-      <q-btn
-        v-if="hasSearched"
-        class="q-ml-sm q-px-md"
-        color="grey"
-        size="md"
-        rounded
-        dense
-        flat
-        @click="searchForMints"
-        :disabled="!isMnemonicValid || searchInProgress"
-      >
-        <q-icon name="refresh" />
-      </q-btn>
     </div>
 
     <!-- Discovered Mints List -->
     <div v-if="availableMints.length > 0" class="q-px-xs">
+      <!-- Add Selected Button (Primary Action) -->
+      <div class="primary-action-section q-px-sm q-pb-md">
+        <q-btn
+          color="primary"
+          size="md"
+          rounded
+          @click="addSelectedMints"
+          :loading="addingMints"
+          :disabled="addingMints || selectedMints.length === 0"
+          class="q-px-lg"
+        >
+          <q-icon name="add" class="q-mr-sm" />
+          {{
+            $t("RestoreView.nostr_mints.add_selected", {
+              count: selectedMints.length,
+            })
+          }}
+        </q-btn>
+      </div>
+
       <!-- Select All/Deselect All -->
       <div class="selection-buttons q-px-sm q-pb-md">
         <q-btn
@@ -89,8 +94,9 @@
         >
           <q-item-section avatar>
             <q-checkbox
-              v-model="mint.selected"
-              @click="toggleMintSelection(mint.url)"
+              :model-value="mint.selected"
+              @update:model-value="toggleMintSelection(mint.url)"
+              @click.stop
               color="primary"
               class="clickable-checkbox"
             />
@@ -155,28 +161,6 @@
           </q-item-section>
         </q-item>
       </q-list>
-
-      <!-- Add Selected Button -->
-      <div
-        class="add-selected-section q-px-sm q-pt-lg q-pb-md"
-        v-if="selectedMints.length > 0"
-      >
-        <q-btn
-          class="q-px-md"
-          color="primary"
-          size="md"
-          rounded
-          @click="addSelectedMints"
-          :loading="addingMints"
-          :disabled="addingMints"
-        >
-          {{
-            $t("RestoreView.nostr_mints.add_selected", {
-              count: selectedMints.length,
-            })
-          }}
-        </q-btn>
-      </div>
     </div>
 
     <!-- Empty State -->
@@ -423,6 +407,13 @@ export default defineComponent({
   justify-content: flex-start;
 }
 
+/* Primary action section */
+.primary-action-section {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
 /* Mint item styling */
 .mint-item {
   text-align: left;
@@ -457,13 +448,6 @@ export default defineComponent({
 /* Clickable checkbox */
 .clickable-checkbox {
   cursor: pointer;
-}
-
-/* Add selected button section */
-.add-selected-section {
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  margin-top: 0.5rem;
-  text-align: left;
 }
 
 /* Ensure all text aligns to the left */
