@@ -1,6 +1,6 @@
 <template>
   <q-page
-    class="row full-height"
+    class="row full-height no-horizontal-scroll"
     :class="[$q.dark.isActive ? 'bg-dark text-white' : 'bg-white text-dark']"
     @touchstart="onTouchStart"
     @touchend="onTouchEnd"
@@ -49,7 +49,7 @@
       </q-header>
       <ActiveChatHeader :pubkey="selected" />
       <MessageList :messages="messages" class="col" />
-      <MessageInput @send="sendMessage" />
+      <MessageInput @send="sendMessage" @sendToken="openSendTokenDialog" />
       <q-expansion-item
         class="q-mt-md"
         dense
@@ -77,8 +77,10 @@ import ActiveChatHeader from "components/ActiveChatHeader.vue";
 import MessageList from "components/MessageList.vue";
 import MessageInput from "components/MessageInput.vue";
 import EventLog from "components/EventLog.vue";
+import { useSendTokensStore } from "src/stores/sendTokensStore";
 
 const messenger = useMessengerStore();
+const sendTokensStore = useSendTokensStore();
 messenger.loadIdentity();
 onMounted(() => {
   messenger.start();
@@ -132,6 +134,14 @@ const sendMessage = (text: string) => {
   if (!selected.value) return;
   messenger.sendDm(selected.value, text);
 };
+
+function openSendTokenDialog() {
+  if (!selected.value) return;
+  sendTokensStore.clearSendData();
+  sendTokensStore.recipientPubkey = selected.value;
+  sendTokensStore.sendViaNostr = true;
+  sendTokensStore.showSendTokens = true;
+}
 
 let touchStartX = 0;
 const onTouchStart = (e: TouchEvent) => {
