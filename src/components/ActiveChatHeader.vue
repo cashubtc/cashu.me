@@ -41,15 +41,19 @@
       <template v-else>
         <div class="text-grey-6">Select a conversation to start chatting.</div>
       </template>
-    </div>
-    <q-btn
-      flat
-      dense
-      round
-      :icon="$q.dark.isActive ? 'wb_sunny' : 'brightness_3'"
-      @click="$q.dark.toggle()"
-    />
   </div>
+  <q-btn
+    flat
+    dense
+    round
+    :icon="$q.dark.isActive ? 'wb_sunny' : 'brightness_3'"
+    @click="$q.dark.toggle()"
+  />
+  <ChatSendTokenDialog
+    ref="chatSendTokenDialogRef"
+    :recipient="props.pubkey"
+  />
+</div>
 </template>
 
 <script lang="ts" setup>
@@ -57,7 +61,7 @@ import { ref, watch, computed } from 'vue';
 import { useQuasar } from 'quasar';
 import { useNostrStore } from 'src/stores/nostr';
 import { useMessengerStore } from 'src/stores/messenger';
-import { useSendTokensStore } from 'src/stores/sendTokensStore';
+import ChatSendTokenDialog from './ChatSendTokenDialog.vue';
 import { nip19 } from 'nostr-tools';
 import ProfileInfoDialog from './ProfileInfoDialog.vue';
 
@@ -105,15 +109,12 @@ const initials = computed(() => {
   return name.slice(0, 2).toUpperCase();
 });
 
-const sendTokensStore = useSendTokensStore();
+const chatSendTokenDialogRef = ref<InstanceType<typeof ChatSendTokenDialog> | null>(null);
 const showProfileDialog = ref(false);
 
 function openSendTokenDialog() {
   if (!props.pubkey) return;
-  sendTokensStore.clearSendData();
-  sendTokensStore.recipientPubkey = props.pubkey;
-  sendTokensStore.sendViaNostr = true;
-  sendTokensStore.showSendTokens = true;
+  (chatSendTokenDialogRef.value as any)?.show();
 }
 
 
