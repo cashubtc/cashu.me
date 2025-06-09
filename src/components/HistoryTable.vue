@@ -122,6 +122,17 @@
         class="q-ml-sm q-px-md"
         size="sm"
       />
+      <q-btn
+        v-if="filterPending"
+        rounded
+        outline
+        dense
+        @click="filterPendingEcash = !filterPendingEcash"
+        :color="filterPendingEcash ? 'primary' : 'grey'"
+        label="Ecash Only"
+        class="q-ml-sm q-px-md"
+        size="sm"
+      />
     </div>
 
     <!-- Empty State -->
@@ -174,11 +185,19 @@ export default defineComponent({
       currentPage: 1,
       pageSize: 5,
       filterPending: false,
+      filterPendingEcash: false,
       cachedUnifiedTransactions: [],
     };
   },
   watch: {
     filterPending: function () {
+      this.currentPage = 1;
+      // Reset ecash filter when pending filter is turned off
+      if (!this.filterPending) {
+        this.filterPendingEcash = false;
+      }
+    },
+    filterPendingEcash: function () {
       this.currentPage = 1;
     },
     // Watch for any changes in historyTokens (additions, updates, deletions)
@@ -220,6 +239,12 @@ export default defineComponent({
 
     // Filter transactions first, then paginate
     filteredTransactions() {
+      if (this.filterPendingEcash) {
+        return this.unifiedTransactions.filter(
+          (transaction) =>
+            transaction.status === "pending" && transaction.type === "ecash"
+        );
+      }
       if (this.filterPending) {
         return this.unifiedTransactions.filter(
           (transaction) => transaction.status === "pending"
