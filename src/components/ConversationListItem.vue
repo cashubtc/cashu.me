@@ -21,7 +21,7 @@
         <template v-if="loaded">
           <span
             :class="['text-subtitle1 ellipsis', { 'text-weight-bold': unreadCount > 0 }]"
-            >{{ showRaw ? pubkey : displayName }}</span
+            >{{ showRaw ? props.pubkey : displayName }}</span
           >
           <span class="timestamp text-caption q-ml-auto">{{ timeAgo }}</span>
           <q-btn
@@ -116,7 +116,7 @@ export default defineComponent({
       loaded,
       unreadCount,
       showRaw,
-      pubkey: props.pubkey,
+      props,
     };
   }
 });
