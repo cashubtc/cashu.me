@@ -14,6 +14,7 @@
           </template>
         </i18n-t>
         <q-btn
+          aria-label="Close"
           flat
           icon="close"
           @click="closePrompt"

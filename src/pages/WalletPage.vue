@@ -12,6 +12,7 @@
           style="margin-right: 10%"
         >
           <q-btn
+            aria-label="Receive"
             rounded
             dense
             class="q-px-md wallet-action-btn"
@@ -27,7 +28,14 @@
 
         <transition appear enter-active-class="animated pulse">
           <div class="scan-button-container">
-            <q-btn size="lg" outline color="primary" flat @click="showCamera">
+            <q-btn
+              size="lg"
+              outline
+              color="primary"
+              flat
+              aria-label="Scan invoice"
+              @click="showCamera"
+            >
               <ScanIcon size="2em" />
             </q-btn>
           </div>
@@ -36,6 +44,7 @@
         <!-- button to showSendDialog -->
         <div class="col-6 q-mb-md flex justify-center items-center">
           <q-btn
+            aria-label="Send"
             rounded
             dense
             class="q-px-md wallet-action-btn"
@@ -116,6 +125,7 @@
         <div class="row q-pt-sm">
           <div class="col-12 q-pt-xs">
             <q-btn
+              aria-label="Install app"
               class="q-mx-xs q-px-sm q-my-sm"
               outline
               size="0.6rem"

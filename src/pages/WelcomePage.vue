@@ -32,6 +32,7 @@
 
       <div class="q-pa-md flex justify-between">
         <q-btn
+          aria-label="Previous"
           flat
           icon="arrow_left"
           :label="$t('WelcomePage.actions.previous.label')"
@@ -56,6 +57,7 @@
         </div>
         <q-space />
         <q-btn
+          aria-label="Next"
           flat
           icon="arrow_right"
           :label="$t('WelcomePage.actions.next.label')"
