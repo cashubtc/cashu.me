@@ -102,7 +102,13 @@
     <!-- mint url -->
     <div class="row q-mt-md q-mb-none text-secondary" v-if="activeMintUrl">
       <div class="col-12 cursor-pointer">
-        <span class="text-weight-light" @click="setTab('mints')">
+        <span
+          class="text-weight-light"
+          @click="setTab('mints')"
+          @keyup.enter="setTab('mints')"
+          tabindex="0"
+          role="button"
+        >
           {{ $t("BalanceView.mintUrl.label") }}: <b>{{ activeMintLabel }}</b>
         </span>
       </div>

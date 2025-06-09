@@ -203,10 +203,20 @@
               class="detail-value"
               v-if="!showAllNuts"
               @click="showAllNuts = true"
+              @keyup.enter="showAllNuts = true"
+              tabindex="0"
+              role="button"
             >
               {{ $t("MintDetailsDialog.details.nuts.actions.show.label") }}
             </div>
-            <div class="detail-value" v-else @click="showAllNuts = false">
+            <div
+              class="detail-value"
+              v-else
+              @click="showAllNuts = false"
+              @keyup.enter="showAllNuts = false"
+              tabindex="0"
+              role="button"
+            >
               {{ $t("MintDetailsDialog.details.nuts.actions.hide.label") }}
             </div>
           </div>
