@@ -1,3 +1,4 @@
+import { debug } from "src/js/logger";
 import { defineStore } from "pinia";
 import { useLocalStorage } from "@vueuse/core";
 import { generateSecretKey, getPublicKey } from "nostr-tools";
@@ -71,7 +72,7 @@ export const useRestoreStore = defineStore("restore", {
       let currentStep = 0;
 
       for (const keyset of keysets) {
-        console.log(`Restoring keyset ${keyset.id} with unit ${keyset.unit}`);
+        debug(`Restoring keyset ${keyset.id} with unit ${keyset.unit}`);
         const bip39Seed = walletStore.mnemonicToSeedSync(mnemonic);
         const wallet = new CashuWallet(mint, {
           bip39seed: bip39Seed,
@@ -82,15 +83,15 @@ export const useRestoreStore = defineStore("restore", {
         let restoreProofs: Proof[] = [];
 
         while (emptyBatchCount < MAX_GAP) {
-          console.log(`Restoring proofs ${start} to ${start + BATCH_SIZE}`);
+          debug(`Restoring proofs ${start} to ${start + BATCH_SIZE}`);
           const proofs = (
             await wallet.restore(start, BATCH_SIZE, { keysetId: keyset.id })
           ).proofs;
           if (proofs.length === 0) {
-            console.log(`No proofs found for keyset ${keyset.id}`);
+            debug(`No proofs found for keyset ${keyset.id}`);
             emptyBatchCount++;
           } else {
-            console.log(
+            debug(
               `> Restored ${proofs.length} proofs with sum ${proofs.reduce(
                 (s, p) => s + p.amount,
                 0
@@ -136,7 +137,7 @@ export const useRestoreStore = defineStore("restore", {
             (p) => !spentProofsSecrets.includes(p.secret)
           );
           if (unspentProofs.length > 0) {
-            console.log(
+            debug(
               `Found ${
                 unspentProofs.length
               } unspent proofs with sum ${unspentProofs.reduce(

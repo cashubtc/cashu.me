@@ -76,6 +76,7 @@
 </template>
 
 <script>
+import { debug } from "src/js/logger";
 import { defineComponent } from "vue";
 import { useReceiveTokensStore } from "src/stores/receiveTokensStore";
 import { mapActions, mapState, mapWritableState } from "pinia";
@@ -163,7 +164,7 @@ export default defineComponent({
         this.showReceiveDialog = false;
         return;
       }
-      console.log("##### showInvoiceCreateDialog");
+      debug("##### showInvoiceCreateDialog");
       this.invoiceData.amount = "";
       this.invoiceData.bolt11 = "";
       this.invoiceData.hash = "";

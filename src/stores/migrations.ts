@@ -1,3 +1,4 @@
+import { debug } from "src/js/logger";
 import { defineStore } from "pinia";
 import { useLocalStorage } from "@vueuse/core";
 import { useMintsStore } from "./mints";
@@ -34,25 +35,25 @@ export const useMigrationsStore = defineStore("migrations", {
       );
 
       if (pendingMigrations.length === 0) {
-        console.log("No migrations to run");
+        debug("No migrations to run");
         return;
       }
 
-      console.log(`Running ${pendingMigrations.length} migrations...`);
+      debug(`Running ${pendingMigrations.length} migrations...`);
 
       // Run each migration in order
       const uIStore = useUiStore();
       await uIStore.lockMutex();
       try {
         for (const migration of pendingMigrations) {
-          console.log(
+          debug(
             `Running migration ${migration.version}: ${migration.name}`
           );
           try {
             await migration.execute();
             // Update the current version after successful migration
             this.currentVersion = migration.version;
-            console.log(
+            debug(
               `Migration ${migration.version} completed successfully`
             );
           } catch (error) {
@@ -73,7 +74,7 @@ export const useMigrationsStore = defineStore("migrations", {
 
       for (let i = 0; i < mintStore.mints.length; i++) {
         if (mintStore.mints[i].url === "https://stablenut.umint.cash") {
-          console.log("Updating mint URL from stablenuts.cash to umint.cash");
+          debug("Updating mint URL from stablenuts.cash to umint.cash");
           mintStore.mints[i].url = "https://stablenut.cashu.network";
 
           // If this was the active mint, update the active mint URL as well
@@ -86,9 +87,9 @@ export const useMigrationsStore = defineStore("migrations", {
       }
 
       if (updated) {
-        console.log("Successfully updated mint URL");
+        debug("Successfully updated mint URL");
       } else {
-        console.log("No stablenuts.cash mint found to update");
+        debug("No stablenuts.cash mint found to update");
       }
     },
 

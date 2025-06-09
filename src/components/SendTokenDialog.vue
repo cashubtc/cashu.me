@@ -641,6 +641,7 @@
 </template>
 <script lang="ts">
 import { defineComponent } from "vue";
+import { debug } from "src/js/logger";
 import { useSendTokensStore } from "src/stores/sendTokensStore";
 import { useWalletStore } from "src/stores/wallet";
 import { useUiStore } from "src/stores/ui";
@@ -871,7 +872,7 @@ export default defineComponent({
           this.sendData.historyToken.status === "pending"
         ) {
           if (!this.checkSentTokens) {
-            console.log(
+            debug(
               "settingsStore.checkSentTokens is disabled, skipping token check"
             );
             return;
@@ -941,7 +942,7 @@ export default defineComponent({
       });
     },
     // decodeP2PKQR: function (res) {
-    //   console.log("### SendToken qr", res);
+    //   debug("### SendToken qr", res);
     //   this.camera.data = res;
     //   this.camera.show = false;
     //   // this.decodeRequest(res);
@@ -1018,7 +1019,7 @@ export default defineComponent({
         this.currentFragmentInterval = this.fragmentIntervalMedium;
         this.fragmentSpeedLabel = "M";
       }
-      console.log(
+      debug(
         "### this.currentFragmentInterval",
         this.currentFragmentInterval
       );
@@ -1036,7 +1037,7 @@ export default defineComponent({
         this.currentFragmentLength = this.fragmentLengthMedium;
         this.fragmentLengthLabel = "M";
       }
-      console.log("### this.currentFragmentLength", this.currentFragmentLength);
+      debug("### this.currentFragmentLength", this.currentFragmentLength);
       this.startQrCodeLoop();
     },
     toggleTokenEncoding: function () {
@@ -1047,7 +1048,7 @@ export default defineComponent({
         try {
           this.sendData.tokensBase64 = getEncodedTokenV4(decodedToken);
         } catch {
-          console.log("### Could not encode token to V4");
+          debug("### Could not encode token to V4");
           this.sendData.tokensBase64 = getEncodedTokenV3(decodedToken);
         }
       } else {
@@ -1069,7 +1070,7 @@ export default defineComponent({
           this.ndef
             .scan({ signal })
             .then(() => {
-              console.log("> Scan started");
+              debug("> Scan started");
 
               this.ndef.onreadingerror = (error) => {
                 console.error(`Cannot read NDEF data! ${error}`);
@@ -1079,7 +1080,7 @@ export default defineComponent({
               };
 
               this.ndef.onreading = ({ message, serialNumber }) => {
-                console.log(`Read card ${serialNumber}`);
+                debug(`Read card ${serialNumber}`);
                 this.controller.abort();
                 this.scanningCard = false;
                 try {
@@ -1124,7 +1125,7 @@ export default defineComponent({
                   this.ndef
                     .write({ records: records }, { overwrite: true })
                     .then(() => {
-                      console.log("Successfully flashed token to card!");
+                      debug("Successfully flashed token to card!");
                       notifySuccess("Successfully flashed token to card!");
                     })
                     .catch((err) => {
@@ -1428,7 +1429,7 @@ export default defineComponent({
       }
     },
     pasteToP2PKField: async function () {
-      console.log("pasteToParseDialog");
+      debug("pasteToParseDialog");
       const text = await useUiStore().pasteFromClipboard();
       this.sendData.p2pkPubkey = text.trim();
     },

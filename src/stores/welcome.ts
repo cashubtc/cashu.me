@@ -1,3 +1,4 @@
+import { debug } from "src/js/logger";
 // src/stores/welcome.ts
 import { defineStore } from "pinia";
 import { useLocalStorage } from "@vueuse/core";
@@ -117,7 +118,7 @@ export const useWelcomeStore = defineStore("welcome", {
         }
       }
       // Optionally, handle edge cases or emit events
-      console.log(`href: ${window.location.href}`);
+      debug(`href: ${window.location.href}`);
     },
   },
 });

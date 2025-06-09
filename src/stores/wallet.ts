@@ -1,3 +1,4 @@
+import { debug } from "src/js/logger";
 import { defineStore } from "pinia";
 import { currentDateStr } from "src/js/utils";
 import { useMintsStore, WalletProof, MintClass, Mint } from "./mints";
@@ -688,7 +689,7 @@ export const useWalletStore = defineStore("wallet", {
         // first we check if the mint quote is paid
         const mintQuote = await mintWallet.checkMintQuote(invoice.quote);
         invoice.mintQuote = mintQuote;
-        console.log("### mint(): mintQuote", mintQuote);
+        debug("### mint(): mintQuote", mintQuote);
         switch (mintQuote.state) {
           case MintQuoteState.PAID:
             break;
@@ -821,7 +822,7 @@ export const useWalletStore = defineStore("wallet", {
       const proofsStore = useProofsStore();
       const tokenStore = useTokensStore();
 
-      console.log("#### melt()");
+      debug("#### melt()");
       const amount = quote.amount + quote.fee_reserve;
       let countChangeOutputs = 0;
       const keysetId = this.getKeyset(mintWallet.mint.mintUrl, mintWallet.unit);
@@ -877,7 +878,7 @@ export const useWalletStore = defineStore("wallet", {
         // NUT-08 get change
         if (data.change != null) {
           const changeProofs = data.change;
-          console.log(
+          debug(
             "## Received change: " + proofsStore.sumProofs(changeProofs),
           );
           await proofsStore.addProofs(changeProofs, undefined, bucketId, "");
@@ -893,7 +894,7 @@ export const useWalletStore = defineStore("wallet", {
             amount: uIStore.formatCurrency(amount_paid, mintWallet.unit),
           }),
         );
-        console.log("#### pay lightning: token paid");
+        debug("#### pay lightning: token paid");
         tokenStore.addPaidToken({
           amount: -amount_paid,
           token: proofsStore.serializeProofs(sendProofs),
@@ -923,7 +924,7 @@ export const useWalletStore = defineStore("wallet", {
           mintQuote.state == MeltQuoteState.PAID ||
           mintQuote.state == MeltQuoteState.PENDING
         ) {
-          console.log(
+          debug(
             "### melt: error, but quote is paid or pending. not rolling back.",
           );
           this.payInvoiceData.show = false;
@@ -1077,7 +1078,7 @@ export const useWalletStore = defineStore("wallet", {
           }),
         );
       } else {
-        console.log("### token not paid yet");
+        debug("### token not paid yet");
         if (verbose) {
           notify(this.t("wallet.notifications.token_still_pending"));
         }
@@ -1111,7 +1112,7 @@ export const useWalletStore = defineStore("wallet", {
           return;
         }
         if (state != MintQuoteState.PAID) {
-          console.log("### mintQuote not paid yet");
+          debug("### mintQuote not paid yet");
           if (verbose) {
             notify(this.t("wallet.notifications.invoice_still_pending"));
           }
@@ -1132,7 +1133,7 @@ export const useWalletStore = defineStore("wallet", {
         // if (verbose) {
         //   notify("Invoice still pending");
         // }
-        console.log("Invoice still pending", invoice.quote);
+        debug("Invoice still pending", invoice.quote);
         throw error;
       }
     },
@@ -1154,7 +1155,7 @@ export const useWalletStore = defineStore("wallet", {
         const meltQuote = await mintWallet.mint.checkMeltQuote(quote);
         this.updateOutgoingInvoiceInHistory(meltQuote);
         if (meltQuote.state == MeltQuoteState.PENDING) {
-          console.log("### mintQuote not paid yet");
+          debug("### mintQuote not paid yet");
           if (verbose) {
             notify(this.t("wallet.notifications.invoice_still_pending"));
           }
@@ -1191,7 +1192,7 @@ export const useWalletStore = defineStore("wallet", {
         if (verbose) {
           notifyApiError(error);
         }
-        console.log("Could not check quote", invoice.quote, error);
+        debug("Could not check quote", invoice.quote, error);
         throw error;
       }
     },
@@ -1202,7 +1203,7 @@ export const useWalletStore = defineStore("wallet", {
       const mintStore = useMintsStore();
       const settingsStore = useSettingsStore();
       if (!settingsStore.checkSentTokens) {
-        console.log(
+        debug(
           "settingsStore.checkSentTokens is disabled, skipping token check",
         );
         return;
@@ -1221,14 +1222,14 @@ export const useWalletStore = defineStore("wallet", {
             s.commands.indexOf("proof_state") != -1,
         )
       ) {
-        console.log(
+        debug(
           "Websockets not supported, kicking off token check worker.",
         );
         useWorkersStore().checkTokenSpendableWorker(historyToken);
         return;
       }
       try {
-        console.log("onTokenPaid kicking off websocket");
+        debug("onTokenPaid kicking off websocket");
         if (tokenJson == undefined) {
           throw new Error("no tokens provided.");
         }
@@ -1239,7 +1240,7 @@ export const useWalletStore = defineStore("wallet", {
         const unsub = await this.wallet.onProofStateUpdates(
           oneProof,
           async (proofState: ProofState) => {
-            console.log(`Websocket: proof state updated: ${proofState.state}`);
+            debug(`Websocket: proof state updated: ${proofState.state}`);
             if (proofState.state == CheckStateEnum.SPENT) {
               const tokenSpent = await this.checkTokenSpendable(historyToken);
               if (tokenSpent) {
@@ -1273,7 +1274,7 @@ export const useWalletStore = defineStore("wallet", {
       const mintStore = useMintsStore();
       const settingsStore = useSettingsStore();
       if (!settingsStore.checkIncomingInvoices) {
-        console.log(
+        debug(
           "settingsStore.checkIncomingInvoices is disabled, skipping invoice check",
         );
         return;
@@ -1291,10 +1292,10 @@ export const useWalletStore = defineStore("wallet", {
       // add to checker before we try a websocket
       if (kickOffInvoiceChecker) {
         if (useSettingsStore().periodicallyCheckIncomingInvoices) {
-          console.log(`Adding quote ${quote} to long-polling checker.`);
+          debug(`Adding quote ${quote} to long-polling checker.`);
           useInvoicesWorkerStore().addInvoiceToChecker(quote);
         } else if (useSettingsStore().checkIncomingInvoices) {
-          console.log(`Adding quote ${quote} to old worker checker.`);
+          debug(`Adding quote ${quote} to old worker checker.`);
           useWorkersStore().invoiceCheckWorker(quote);
         }
       }
@@ -1309,7 +1310,7 @@ export const useWalletStore = defineStore("wallet", {
             s.commands.indexOf("bolt11_mint_quote") != -1,
         )
       ) {
-        console.log("Websockets not supported.");
+        debug("Websockets not supported.");
         return;
       }
       const uIStore = useUiStore();
@@ -1319,7 +1320,7 @@ export const useWalletStore = defineStore("wallet", {
         const unsub = await mintWallet.onMintQuotePaid(
           quote,
           async (mintQuoteResponse: MintQuoteResponse) => {
-            console.log("Websocket: mint quote paid.");
+            debug("Websocket: mint quote paid.");
             let proofs;
             try {
               proofs = await this.mint(invoice, false);
@@ -1345,12 +1346,12 @@ export const useWalletStore = defineStore("wallet", {
             if (verbose) {
               notifyApiError(error);
             }
-            console.log("Invoice still pending", invoice.quote);
+            debug("Invoice still pending", invoice.quote);
             throw error;
           },
         );
       } catch (error) {
-        console.log("Error in websocket subscription", error);
+        debug("Error in websocket subscription", error);
       } finally {
         this.activeWebsocketConnections--;
       }
@@ -1406,7 +1407,7 @@ export const useWalletStore = defineStore("wallet", {
           break;
         }
         if (t.status === "pending" && t.amount < 0 && t.token) {
-          console.log("### checkPendingTokens", t.token);
+          debug("### checkPendingTokens", t.token);
           this.checkTokenSpendable(t, verbose);
           i += 1;
         }

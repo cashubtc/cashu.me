@@ -223,6 +223,7 @@
 }
 </style>
 <script>
+import { debug } from "src/js/logger";
 import { date } from "quasar";
 import * as _ from "underscore";
 import { shortenString } from "src/js/string-utils";
@@ -510,7 +511,7 @@ export default {
     },
     /////////////////////////////////// WALLET ///////////////////////////////////
     showInvoiceCreateDialog: async function () {
-      console.log("##### showInvoiceCreateDialog");
+      debug("##### showInvoiceCreateDialog");
       this.invoiceData.amount = "";
       this.invoiceData.bolt11 = "";
       this.invoiceData.hash = "";
@@ -518,7 +519,7 @@ export default {
       this.showInvoiceDetails = true;
     },
     showSendTokensDialog: function () {
-      console.log("##### showSendTokensDialog");
+      debug("##### showSendTokensDialog");
       this.sendData.tokens = "";
       this.sendData.tokensBase64 = "";
       this.sendData.amount = null;
@@ -547,7 +548,7 @@ export default {
         // e.preventDefault()
         // Stash the event so it can be triggered later.
         this.deferredPWAInstallPrompt = e;
-        console.log(
+        debug(
           `'beforeinstallprompt' event was fired.`,
           this.getPwaDisplayMode(),
         );
@@ -571,10 +572,10 @@ export default {
       // Wait for the user to respond to the prompt
       this.deferredPWAInstallPrompt.userChoice.then((choiceResult) => {
         if (choiceResult.outcome === "accepted") {
-          console.log("User accepted the install prompt");
+          debug("User accepted the install prompt");
           this.setWelcomeDialogSeen();
         } else {
-          console.log("User dismissed the install prompt");
+          debug("User dismissed the install prompt");
         }
       });
     },
@@ -591,7 +592,7 @@ export default {
       const channel = new BroadcastChannel("app_channel");
       channel.postMessage({ type: "new_tab_opened", senderId: tabId });
       channel.onmessage = async (event) => {
-        // console.log("Received message in tab " + tabId, event.data);
+        // debug("Received message in tab " + tabId, event.data);
         if (event.data.senderId === tabId) {
           return; // Ignore the message if it comes from the same tab
         }
@@ -634,8 +635,8 @@ export default {
       this.setTab("mints");
     }
 
-    console.log("Mint URL " + this.activeMintUrl);
-    console.log("Wallet URL " + this.baseURL);
+    debug("Mint URL " + this.activeMintUrl);
+    debug("Wallet URL " + this.baseURL);
 
     // get token to receive tokens from a link
     if (params.get("token") || hash.includes("token")) {
@@ -669,7 +670,7 @@ export default {
       window.location.href.split("?")[0].split("#")[0]
     );
     */
-    console.log(`hash: ${window.location.hash}`);
+    debug(`hash: ${window.location.hash}`);
 
     // startup tasks
 

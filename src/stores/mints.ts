@@ -1,3 +1,4 @@
+import { debug } from "src/js/logger";
 import { defineStore, StoreDefinition } from "pinia";
 import { useLocalStorage } from "@vueuse/core";
 import { useWorkersStore } from "./workers";
@@ -130,7 +131,7 @@ export const useMintsStore = defineStore("mints", {
     // Watch for changes in activeMintUrl and activeUnit
     watch([activeMintUrl, activeUnit], async () => {
       const proofsStore = useProofsStore();
-      console.log(
+      debug(
         `watcher: activeMintUrl: ${activeMintUrl.value}, activeUnit: ${activeUnit.value}`,
       );
       await proofsStore.updateActiveProofs();
@@ -410,18 +411,18 @@ export const useMintsStore = defineStore("mints", {
       await uIStore.lockMutex();
       try {
         this.activeMintUrl = mint.url;
-        console.log("### this.activeMintUrl", this.activeMintUrl);
+        debug("### this.activeMintUrl", this.activeMintUrl);
         const newMintInfo = await this.fetchMintInfo(mint);
         this.triggerMintInfoMotdChanged(newMintInfo, mint);
         mint.info = newMintInfo;
-        console.log("### activateMint: Mint info: ", mint.info);
+        debug("### activateMint: Mint info: ", mint.info);
         mint = await this.fetchMintKeys(mint);
         this.toggleActiveUnitForMint(mint);
         if (verbose) {
           await notifySuccess(this.t("wallet.mint.notifications.activated"));
         }
         this.mints.filter((m) => m.url === mint.url)[0].errored = false;
-        console.log("### activateMint: Mint activated: ", this.activeMintUrl);
+        debug("### activateMint: Mint activated: ", this.activeMintUrl);
       } catch (error: any) {
         // restore previous values because the activation errored
         // this.activeMintUrl = previousUrl;

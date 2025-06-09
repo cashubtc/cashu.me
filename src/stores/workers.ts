@@ -1,3 +1,4 @@
+import { debug } from "src/js/logger";
 import { defineStore } from "pinia";
 import { useWalletStore } from "src/stores/wallet"; // invoiceData,
 import { useUiStore } from "src/stores/ui"; // showInvoiceDetails
@@ -38,31 +39,31 @@ export const useWorkersStore = defineStore("workers", {
 
           // exit loop after 1m
           if (nInterval > 12) {
-            console.log("### stopping invoice check worker");
+            debug("### stopping invoice check worker");
             this.clearAllWorkers();
           }
-          console.log("### invoiceCheckWorker setInterval", nInterval);
+          debug("### invoiceCheckWorker setInterval", nInterval);
 
           // this will throw an error if the invoice is pending
           await walletStore.checkInvoice(quote, false);
 
           // only without error (invoice paid) will we reach here
-          console.log("### stopping invoice check worker");
+          debug("### stopping invoice check worker");
           this.clearAllWorkers();
         } catch (error) {
-          console.log("invoiceCheckWorker: not paid yet");
+          debug("invoiceCheckWorker: not paid yet");
         }
       }, this.checkInterval);
     },
     checkTokenSpendableWorker: async function (historyToken: HistoryToken) {
       const settingsStore = useSettingsStore();
       if (!settingsStore.checkSentTokens) {
-        console.log(
+        debug(
           "settingsStore.checkSentTokens is disabled, not kicking off checkTokenSpendableWorker"
         );
         return;
       }
-      console.log("### kicking off checkTokenSpendableWorker");
+      debug("### kicking off checkTokenSpendableWorker");
       this.tokenWorkerRunning = true;
       const walletStore = useWalletStore();
       const sendTokensStore = useSendTokensStore();
@@ -73,18 +74,18 @@ export const useWorkersStore = defineStore("workers", {
           nInterval += 1;
           // exit loop after 30s
           if (nInterval > 10) {
-            console.log("### stopping token check worker");
+            debug("### stopping token check worker");
             this.clearAllWorkers();
           }
-          console.log("### checkTokenSpendableWorker setInterval", nInterval);
+          debug("### checkTokenSpendableWorker setInterval", nInterval);
           let paid = await walletStore.checkTokenSpendable(historyToken, false);
           if (paid) {
-            console.log("### stopping token check worker");
+            debug("### stopping token check worker");
             this.clearAllWorkers();
             sendTokensStore.showSendTokens = false;
           }
         } catch (error) {
-          console.log("checkTokenSpendableWorker: some error", error);
+          debug("checkTokenSpendableWorker: some error", error);
           this.clearAllWorkers();
         }
       }, this.checkInterval);

@@ -313,6 +313,7 @@
   </q-dialog>
 </template>
 <script>
+import { debug } from "src/js/logger";
 import { defineComponent } from "vue";
 import { useWalletStore } from "src/stores/wallet";
 import { useUiStore } from "src/stores/ui";
@@ -404,7 +405,7 @@ export default defineComponent({
       await this.decodeRequest(request);
     },
     pasteToParseDialog: async function () {
-      console.log("pasteToParseDialog");
+      debug("pasteToParseDialog");
       const text = await useUiStore().pasteFromClipboard();
       if (text) {
         this.payInvoiceData.input.request = text.trim();

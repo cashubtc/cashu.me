@@ -1,3 +1,4 @@
+import { debug } from "src/js/logger";
 import { defineStore } from "pinia";
 import Dexie, { Table } from "dexie";
 import { useLocalStorage } from "@vueuse/core";
@@ -144,17 +145,17 @@ export const useDexieStore = defineStore("dexie", {
       if (this.migratedToDexie) {
         return;
       }
-      console.log("Migrating to Dexie");
+      debug("Migrating to Dexie");
       const proofs = localStorage.getItem("cashu.proofs");
       let parsedProofs: WalletProof[] = [];
       if (!proofs) {
-        console.log("No cashu.proofs in localStorage to migrate");
+        debug("No cashu.proofs in localStorage to migrate");
         this.migratedToDexie = true;
         return;
       }
       parsedProofs = JSON.parse(proofs) as WalletProof[];
       if (!parsedProofs.length) {
-        console.log("No proofs to migrate");
+        debug("No proofs to migrate");
         this.migratedToDexie = true;
         return;
       }
@@ -163,12 +164,12 @@ export const useDexieStore = defineStore("dexie", {
       parsedProofs.forEach((proof) => {
         cashuDb.proofs.add(proof);
       });
-      console.log(
+      debug(
         `Migrated ${cashuDb.proofs.count()} proofs. Before: ${
           parsedProofs.length
         } proofs, After: ${(await proofsStore.getProofs()).length} proofs`
       );
-      console.log(
+      debug(
         `Proofs sum before: ${proofsStore.sumProofs(
           parsedProofs
         )}, after: ${proofsStore.sumProofs(await proofsStore.getProofs())}`

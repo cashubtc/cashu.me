@@ -1,3 +1,4 @@
+import { debug } from "src/js/logger";
 import { ref } from "vue";
 import { defineStore } from "pinia";
 import { useMintsStore, WalletProof } from "./mints";
@@ -177,7 +178,7 @@ export const useProofsStore = defineStore("proofs", {
       try {
         return getEncodedTokenV4(token);
       } catch (e) {
-        console.log("Could not encode TokenV4, defaulting to TokenV3", e);
+        debug("Could not encode TokenV4, defaulting to TokenV3", e);
         return getEncodedToken(token);
       }
 

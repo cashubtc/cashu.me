@@ -1735,6 +1735,7 @@
   <NWCDialog v-model="showNWCDialog" />
 </template>
 <script>
+import { debug } from "src/js/logger";
 import { defineComponent } from "vue";
 import P2PKDialog from "./P2PKDialog.vue";
 import NWCDialog from "./NWCDialog.vue";
@@ -1970,18 +1971,18 @@ export default defineComponent({
         this.activeUnit,
       );
       let proofs = this.activeProofs.flat();
-      console.log("Checking proofs", proofs);
+      debug("Checking proofs", proofs);
       let allSpentProofs = [];
       let batch_size = 50;
       for (let i = 0; i < proofs.length; i += batch_size) {
-        console.log("Checking proofs", i, i + batch_size);
+        debug("Checking proofs", i, i + batch_size);
         let batch = proofs.slice(i, i + batch_size);
         let spent = await this.checkProofsSpendable(batch, wallet, true);
         allSpentProofs.push(spent);
       }
       let spentProofs = allSpentProofs.flat();
       if (spentProofs.length > 0) {
-        console.log("Spent proofs", spentProofs);
+        debug("Spent proofs", spentProofs);
         this.notifySuccess("Removed " + spentProofs.length + " spent proofs");
       } else {
         this.notifySuccess("No spent proofs found");
@@ -2086,7 +2087,7 @@ export default defineComponent({
   },
   created: async function () {
     this.nip07SignerAvailable = await this.checkNip07Signer();
-    console.log("Nip07 signer available", this.nip07SignerAvailable);
+    debug("Nip07 signer available", this.nip07SignerAvailable);
     // Set the initial selected language based on the current locale
     this.selectedLanguage = this.$i18n.locale;
   },

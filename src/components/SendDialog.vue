@@ -72,6 +72,7 @@
 </template>
 
 <script>
+import { debug } from "src/js/logger";
 import { defineComponent } from "vue";
 import { useReceiveTokensStore } from "src/stores/receiveTokensStore";
 import { mapActions, mapState, mapWritableState } from "pinia";
@@ -165,7 +166,7 @@ export default defineComponent({
       this.showSendDialog = false;
     },
     showSendTokensDialog: function () {
-      console.log("##### showSendTokensDialog");
+      debug("##### showSendTokensDialog");
       if (!this.canMakePayments) {
         notifyWarning(this.$i18n.t("SendDialog.actions.ecash.error_no_mints"));
         this.showSendDialog = false;

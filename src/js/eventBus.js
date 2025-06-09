@@ -1,3 +1,4 @@
+import { debug } from "src/js/logger";
 import { reactive } from "vue";
 
 export const EventBus = reactive({
@@ -16,7 +17,7 @@ export const EventBus = reactive({
   },
 
   emit(event, payload) {
-    console.log("eventBus emit", event, payload);
+    debug("eventBus emit", event, payload);
     if (!this.events[event]) return;
     this.events[event].forEach((callback) => callback(payload));
   },
