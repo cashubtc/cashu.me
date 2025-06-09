@@ -97,8 +97,9 @@
 </template>
 
 <script lang="ts">
-interface MintRead {
 import { debug } from "src/js/logger";
+
+interface MintRead {
   id: number;
   url: string;
   info?: string;
