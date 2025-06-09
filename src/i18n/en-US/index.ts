@@ -1477,6 +1477,7 @@ export default {
     },
     columns: {
       creator: "Creator",
+      bucket: "Bucket",
       monthly: "Monthly",
       total: "Total",
       start: "Start",
