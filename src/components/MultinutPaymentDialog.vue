@@ -35,7 +35,10 @@
                 )
               }}
             </div>
-            <div class="multinut-description q-mt-sm">
+            <div
+              v-if="!isPaymentInProgress"
+              class="multinut-description q-mt-sm"
+            >
               Pay using multiple mints
             </div>
           </div>
@@ -76,7 +79,7 @@
         <div class="mint-selection-section q-mb-lg">
           <div
             class="mint-selection-description q-mb-md"
-            v-if="multinutExperimentalWarningDismissed"
+            v-if="multinutExperimentalWarningDismissed && !isPaymentInProgress"
           >
             Select funds from multiple mints to execute the payment.
           </div>
