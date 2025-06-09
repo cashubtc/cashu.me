@@ -168,6 +168,7 @@
   </q-dialog>
 </template>
 <script>
+import { debug } from "src/js/logger";
 import { defineComponent } from "vue";
 import { mapActions, mapState, mapWritableState } from "pinia";
 import { defineAsyncComponent } from "vue";
@@ -270,7 +271,7 @@ export default defineComponent({
         );
         await this.mintOnPaid(mintQuote.quote);
       } catch (e) {
-        console.log("#### requestMintButton", e);
+        debug("#### requestMintButton", e);
       } finally {
         this.createInvoiceButtonBlocked = false;
       }

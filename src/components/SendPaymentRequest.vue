@@ -33,6 +33,7 @@
 </template>
 
 <script>
+import { debug } from "src/js/logger";
 import { defineComponent } from "vue";
 import { mapActions, mapState, mapWritableState } from "pinia";
 import { useMintsStore } from "stores/mints";
@@ -80,7 +81,7 @@ export default defineComponent({
       if (!request || !request.transport) {
         return "Unknown";
       }
-      console.log(`### getPaymentRequestTransportType: ${request}`);
+      debug(`### getPaymentRequestTransportType: ${request}`);
       const transports = request.transport;
       for (const transport of transports) {
         if (transport.type == PaymentRequestTransportType.NOSTR) {
@@ -95,7 +96,7 @@ export default defineComponent({
       if (!request || !request.transport) {
         return "Unknown";
       }
-      console.log(`### getPaymentRequestDestination: ${request}`);
+      debug(`### getPaymentRequestDestination: ${request}`);
       const transports = request.transport;
       for (const transport of transports) {
         if (transport.type == PaymentRequestTransportType.NOSTR) {

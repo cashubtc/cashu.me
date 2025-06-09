@@ -80,11 +80,9 @@ export const useNPCStore = defineStore("npc", {
         return;
       }
       const walletPublicKeyHex = nostrStore.pubkey;
-      console.log(
         "Lightning address for wallet:",
         nip19.npubEncode(walletPublicKeyHex) + "@" + this.npcDomain
       );
-      console.log("npub:", nip19.npubEncode(walletPublicKeyHex));
       this.baseURL = `https://${this.npcDomain}`;
       const previousAddress = this.npcAddress;
       this.npcAddress =
@@ -101,7 +99,6 @@ export const useNPCStore = defineStore("npc", {
           return;
         }
         // log info
-        console.log(info);
         if (info.username) {
           const usernameAddress = info.username + "@" + this.npcDomain;
           if (previousAddress !== usernameAddress) {
@@ -164,7 +161,6 @@ export const useNPCStore = defineStore("npc", {
       }
       const receiveStore = useReceiveTokensStore();
       const npubCashBalance = await this.getBalance();
-      console.log("npub.cash balance: " + npubCashBalance);
       if (npubCashBalance > 0) {
         notifySuccess(`You have ${npubCashBalance} sats on npub.cash`);
         const token = await this.getClaim();

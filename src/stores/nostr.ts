@@ -1,3 +1,4 @@
+import { debug } from "src/js/logger";
 import { defineStore } from "pinia";
 import NDK, {
   NDKEvent,
@@ -224,13 +225,13 @@ export const useNostrStore = defineStore("nostr", {
       ndkEvent.kind = 1;
       ndkEvent.content = "Hello, world!";
       const sig = await ndkEvent.sign(this.signer);
-      console.log(`nostr signature: ${sig})`);
+      debug(`nostr signature: ${sig})`);
       const eventString = JSON.stringify(ndkEvent.rawEvent());
-      console.log(`nostr event: ${eventString}`);
+      debug(`nostr event: ${eventString}`);
       return ndkEvent;
     },
     setPubkey: function (pubkey: string) {
-      console.log("Setting pubkey to", pubkey);
+      debug("Setting pubkey to", pubkey);
       this.pubkey = pubkey;
     },
     resolvePubkey: function (pk: string): string {
@@ -298,7 +299,7 @@ export const useNostrStore = defineStore("nostr", {
       const signer = new NDKNip07Signer();
       const user = await signer.user();
       if (user?.npub) {
-        console.log("Permission granted to read their public key:", user.npub);
+        debug("Permission granted to read their public key:", user.npub);
         this.signerType = SignerType.NIP07;
         await this.setSigner(signer);
         this.ndk.getUser({ npub: user.npub });
@@ -570,7 +571,7 @@ export const useNostrStore = defineStore("nostr", {
         if (!this.lastEventTimestamp) {
           this.lastEventTimestamp = Math.floor(Date.now() / 1000);
         }
-        console.log(
+        debug(
           `### Subscribing to NIP-04 direct messages to ${pubKey} since ${this.lastEventTimestamp}`
         );
         this.ndk.connect();
@@ -583,11 +584,11 @@ export const useNostrStore = defineStore("nostr", {
           { closeOnEose: false, groupable: false }
         );
         sub.on("event", (event: NDKEvent) => {
-          console.log("event");
+          debug("event");
           this.decryptNip04(privKey, event.pubkey, event.content).then(
             (content) => {
-              console.log("NIP-04 DM from", event.pubkey);
-              console.log("Content:", content);
+              debug("NIP-04 DM from", event.pubkey);
+              debug("Content:", content);
               nip04DirectMessageEvents.add(event);
               this.lastEventTimestamp = Math.floor(Date.now() / 1000);
               this.parseMessageForEcash(content);
@@ -738,7 +739,7 @@ export const useNostrStore = defineStore("nostr", {
           this.lastEventTimestamp = Math.floor(Date.now() / 1000);
         }
         const since = this.lastEventTimestamp - 172800; // last 2 days
-        console.log(
+        debug(
           `### Subscribing to NIP-17 direct messages to ${pubKey} since ${since}`
         );
         this.ndk.connect();
@@ -757,10 +758,10 @@ export const useNostrStore = defineStore("nostr", {
             created_at: wrapEvent.created_at,
           } as NostrEventLog;
           if (this.nip17EventIdsWeHaveSeen.find((e) => e.id === wrapEvent.id)) {
-            // console.log(`### Already seen NIP-17 event ${wrapEvent.id} (time: ${wrapEvent.created_at})`);
+            // debug(`### Already seen NIP-17 event ${wrapEvent.id} (time: ${wrapEvent.created_at})`);
             return;
           } else {
-            console.log(`### New event ${wrapEvent.id}`);
+            debug(`### New event ${wrapEvent.id}`);
             this.nip17EventIdsWeHaveSeen.push(eventLog);
             // remove all events older than 10 days to keep the list small
             const fourDaysAgo =
@@ -786,8 +787,8 @@ export const useNostrStore = defineStore("nostr", {
             );
             dmEvent = JSON.parse(dmEventString) as NDKEvent;
             content = dmEvent.content;
-            console.log("### NIP-17 DM from", dmEvent.pubkey);
-            console.log("Content:", content);
+            debug("### NIP-17 DM from", dmEvent.pubkey);
+            debug("Content:", content);
           } catch (e) {
             console.error(e);
             return;
@@ -829,7 +830,7 @@ export const useNostrStore = defineStore("nostr", {
 
           const tokenInHistory = tokensStore.tokenAlreadyInHistory(tokenStr);
           if (tokenInHistory && tokenInHistory.amount > 0) {
-            console.log("### incoming token already in history");
+            debug("### incoming token already in history");
             return;
           }
           await this.addPendingTokenToHistory(tokenStr, false);
@@ -849,11 +850,11 @@ export const useNostrStore = defineStore("nostr", {
           return;
         }
       } catch (e) {
-        // console.log("### parsing message for ecash failed");
+        // debug("### parsing message for ecash failed");
         return;
       }
 
-      console.log("### parsing message for ecash", message);
+      debug("### parsing message for ecash", message);
       const receiveStore = useReceiveTokensStore();
       const words = message.split(" ");
       const tokens = words.filter((word) => {

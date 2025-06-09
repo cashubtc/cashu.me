@@ -1,3 +1,4 @@
+import { debug } from "src/js/logger";
 import { defineStore } from "pinia";
 import NDK, {
   NDKEvent,
@@ -93,7 +94,7 @@ export const useNWCStore = defineStore("nwc", {
   actions: {
     // ––––---------- NWC Command Handlers ––––----------
     handleGetInfo: async function (nwcCommand: NWCCommand) {
-      console.log("### get_info", nwcCommand.method);
+      debug("### get_info", nwcCommand.method);
       return {
         result_type: "get_info",
         result: {
@@ -109,7 +110,7 @@ export const useNWCStore = defineStore("nwc", {
     },
     handleGetBalance: async function (nwcCommand: NWCCommand) {
       const mintsStore = useMintsStore();
-      console.log("### get_balance", nwcCommand.method);
+      debug("### get_balance", nwcCommand.method);
       return {
         result_type: "get_balance",
         result: {
@@ -120,9 +121,9 @@ export const useNWCStore = defineStore("nwc", {
     handlePayInvoice: async function (nwcCommand: NWCCommand) {
       const invoice = nwcCommand.params.invoice;
       const amountMsat = nwcCommand.params.amount;
-      console.log("### pay_invoice", nwcCommand.method);
-      console.log("### invoice", invoice);
-      console.log("### amountMsat", amountMsat);
+      debug("### pay_invoice", nwcCommand.method);
+      debug("### invoice", invoice);
+      debug("### amountMsat", amountMsat);
       // pay invoice
       const walletStore = useWalletStore();
       const proofsStore = useProofsStore();
@@ -130,7 +131,7 @@ export const useNWCStore = defineStore("nwc", {
       try {
         await walletStore.decodeRequest(invoice);
       } catch (e) {
-        console.log("### error decoding invoice", e);
+        debug("### error decoding invoice", e);
         return {
           result_type: nwcCommand.method,
           error: { code: "INTERNAL", message: "Invalid invoice" },
@@ -186,10 +187,10 @@ export const useNWCStore = defineStore("nwc", {
     },
     handleMakeInvoice: async function (nwcCommand: NWCCommand) {
       const { amount, description, expiry } = nwcCommand.params;
-      console.log("### make_invoice");
-      console.log("### amount", amount); // msats
-      console.log("### description", description);
-      console.log("### expiry", expiry); // seconds
+      debug("### make_invoice");
+      debug("### amount", amount); // msats
+      debug("### description", description);
+      debug("### expiry", expiry); // seconds
       // make invoice
       const walletStore = useWalletStore();
       const quote = await walletStore.requestMint(
@@ -222,7 +223,7 @@ export const useNWCStore = defineStore("nwc", {
       };
     },
     handleListTransactions: async function (nwcCommand: NWCCommand) {
-      console.log("### list_transactions", nwcCommand.method);
+      debug("### list_transactions", nwcCommand.method);
       const walletStore = useWalletStore();
       const from = nwcCommand.params.from || 0;
       const until = nwcCommand.params.until || Math.floor(Date.now() / 1000);
@@ -288,7 +289,7 @@ export const useNWCStore = defineStore("nwc", {
         };
       }
 
-      console.log("### lookup_invoice");
+      debug("### lookup_invoice");
       const walletStore = useWalletStore();
       const invoiceHistory = walletStore.invoiceHistory;
 
@@ -341,7 +342,7 @@ export const useNWCStore = defineStore("nwc", {
       // reply to NWC with result
       let replyEvent = new NDKEvent(event.ndk);
       replyEvent.kind = 23195;
-      console.log("### replying with", JSON.stringify(result));
+      debug("### replying with", JSON.stringify(result));
       const nostr = useNostrStore();
       replyEvent.content = await nip04.encrypt(
         nostr.privKeyHex,
@@ -352,8 +353,8 @@ export const useNWCStore = defineStore("nwc", {
         ["p", event.author.pubkey],
         ["e", event.id],
       ];
-      console.log("### replyEvent", replyEvent);
-      console.log("### replying to", event.id);
+      debug("### replyEvent", replyEvent);
+      debug("### replying to", event.id);
       // await this.ndk.publish(replyEvent);
       await replyEvent.publish();
     },
@@ -368,7 +369,7 @@ export const useNWCStore = defineStore("nwc", {
       try {
         nwcCommand = JSON.parse(command);
       } catch (e) {
-        console.log("### failed to parse NWC command", command);
+        debug("### failed to parse NWC command", command);
         result = {
           result_type: "parse_error",
           error: { code: "OTHER", message: "Failed to parse command" },
@@ -376,7 +377,7 @@ export const useNWCStore = defineStore("nwc", {
         await this.replyNWC(result, event, conn);
         return;
       }
-      console.log("### nwcCommand", nwcCommand);
+      debug("### nwcCommand", nwcCommand);
       // parse "get_info" without params
       if (nwcCommand.method == "get_info") {
         result = await this.handleGetInfo(nwcCommand);
@@ -407,7 +408,7 @@ export const useNWCStore = defineStore("nwc", {
       } else if (nwcCommand.method === "lookup_invoice") {
         result = await this.handleLookupInvoice(nwcCommand);
       } else {
-        console.log("### method not supported", nwcCommand.method);
+        debug("### method not supported", nwcCommand.method);
         result = {
           result_type: nwcCommand.method,
           error: { code: "NOT_IMPLEMENTED", message: "Method not supported" },
@@ -467,13 +468,13 @@ export const useNWCStore = defineStore("nwc", {
         let eventsInfoEvent = await this.ndk.fetchEvents(filterInfoEvent);
         if (eventsInfoEvent.size === 0) {
           await nip47InfoEvent.publish();
-          console.log("### published nip47InfoEvent", nip47InfoEvent);
+          debug("### published nip47InfoEvent", nip47InfoEvent);
         } else {
-          console.log("### nip47InfoEvent already published");
+          debug("### nip47InfoEvent already published");
         }
       } catch (e) {
-        console.log("### could not publish nip47InfoEvent", nip47InfoEvent);
-        console.log("### error", e);
+        debug("### could not publish nip47InfoEvent", nip47InfoEvent);
+        debug("### error", e);
       }
     },
     listenToNWCCommands: async function () {
@@ -494,27 +495,27 @@ export const useNWCStore = defineStore("nwc", {
       } as NDKFilter;
       const sub = this.ndk.subscribe(filter);
       const nostr = useNostrStore();
-      console.log("### subscribing to NWC on relays: ", nostr.relays);
+      debug("### subscribing to NWC on relays: ", nostr.relays);
       this.subscriptions.push(sub);
 
       sub.on("eose", () =>
-        console.log("All relays have reached the end of the event stream")
+        debug("All relays have reached the end of the event stream")
       );
-      sub.on("close", () => console.log("Subscription closed"));
+      sub.on("close", () => debug("Subscription closed"));
 
       sub.on("event", async (event) => {
-        // console.log("### event", event)
-        // console.log('### event.kind', event.kind)
-        // console.log('### event.id', event.id)
-        // console.log('### event.author.pubkey', event.author.pubkey)
-        // console.log("### event.tagValue('p')", event.tagValue("p"))
-        // console.log("### event.tagValue('e')", event.tagValue("e"))
-        // console.log("### event.content", event.content)
+        // debug("### event", event)
+        // debug('### event.kind', event.kind)
+        // debug('### event.id', event.id)
+        // debug('### event.author.pubkey', event.author.pubkey)
+        // debug("### event.tagValue('p')", event.tagValue("p"))
+        // debug("### event.tagValue('e')", event.tagValue("e"))
+        // debug("### event.content", event.content)
         if (event.kind != NWCKind.NWCRequest) {
           return; // ignore non-NWC events
         }
         if (!this.nwcEnabled) {
-          console.log("### Received NWC command but NWC is disabled");
+          debug("### Received NWC command but NWC is disabled");
           return;
         }
         // check if the events date is after the last seen command
@@ -523,19 +524,19 @@ export const useNWCStore = defineStore("nwc", {
         }
         this.seenCommandsUntil = event.created_at;
 
-        console.log("### NWC request!");
-        console.log("### event", event);
+        debug("### NWC request!");
+        debug("### event", event);
         const decryptedContent = await nip04.decrypt(
           conn.connectionSecret,
           conn.walletPublicKey,
           event.content
         );
-        // console.log("### decryptedContent", decryptedContent)
+        // debug("### decryptedContent", decryptedContent)
         await this.parseNWCCommand(decryptedContent, event, conn);
       });
     },
     unsubscribeNWC: function () {
-      console.log("### unsubscribing from NWC");
+      debug("### unsubscribing from NWC");
       for (let sub of this.subscriptions) {
         sub.stop();
       }

@@ -10,6 +10,7 @@ import {
 } from "../js/notify";
 import axios from "axios";
 
+import { debug } from "src/js/logger";
 const unitTickerShortMap = {
   sat: "sats",
   usd: "USD",
@@ -31,14 +32,14 @@ export const usePriceStore = defineStore("price", {
       if (!useSettingsStore().getBitcoinPrice) {
         this.bitcoinPrice = 0;
         this.bitcoinPriceLastUpdated = 0;
-        console.log("Not fetching bitcoin price, disabled in settings");
+        debug("Not fetching bitcoin price, disabled in settings");
         return;
       }
       if (
         Date.now() - this.bitcoinPriceLastUpdated <
         this.bitcoinPriceMinRefreshInterval
       ) {
-        console.log(
+        debug(
           `Not fetching bitcoin price, last updated ${
             Date.now() - this.bitcoinPriceLastUpdated
           }ms ago: ${this.bitcoinPrice}`

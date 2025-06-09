@@ -1,3 +1,4 @@
+import { debug } from "src/js/logger";
 import { defineStore } from "pinia";
 import { useWalletStore } from "./wallet";
 import {
@@ -68,9 +69,9 @@ export const usePRStore = defineStore("payment-request", {
       return paymentRequest.toEncodedRequest();
     },
     async decodePaymentRequest(pr: string) {
-      console.log("decodePaymentRequest", pr);
+      debug("decodePaymentRequest", pr);
       const request: PaymentRequest = decodePaymentRequest(pr);
-      console.log("decodePaymentRequest", request);
+      debug("decodePaymentRequest", request);
       const mintsStore = useMintsStore();
       // activate the mint in the payment request
       if (request.mints && request.mints.length > 0) {
@@ -137,8 +138,8 @@ export const usePRStore = defineStore("payment-request", {
       transport: PaymentRequestTransport,
       tokenStr: string
     ) {
-      console.log("payNostrPaymentRequest", request, tokenStr);
-      console.log("transport", transport);
+      debug("payNostrPaymentRequest", request, tokenStr);
+      debug("transport", transport);
       const nostrStore = useNostrStore();
       const decodedToken = token.decode(tokenStr);
       if (!decodedToken) {
@@ -170,7 +171,7 @@ export const usePRStore = defineStore("payment-request", {
       transport: PaymentRequestTransport,
       tokenStr: string
     ) {
-      console.log("payPostPaymentRequest", request, tokenStr);
+      debug("payPostPaymentRequest", request, tokenStr);
       // get the endpoint from the transport target and make an HTTP POST request with the paymentPayload as the body
       const decodedToken = token.decode(tokenStr);
       if (!decodedToken) {

@@ -167,6 +167,7 @@
   </div>
 </template>
 <script>
+import { debug } from "src/js/logger";
 import * as _ from "underscore";
 import { defineComponent } from "vue";
 import { shortenString } from "src/js/string-utils";
@@ -266,7 +267,7 @@ export default defineComponent({
         return;
       }
       const tokensBase64 = historyToken.token;
-      console.log("##### showTokenDialog");
+      debug("##### showTokenDialog");
       const tokenObj = token.decode(tokensBase64);
       this.sendData.tokens = token.getProofs(tokenObj);
       this.sendData.tokensBase64 = _.clone(tokensBase64);

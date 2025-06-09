@@ -458,6 +458,7 @@
   </div>
 </template>
 <script>
+import { debug } from "src/js/logger";
 import { ref, defineComponent, onMounted, onBeforeUnmount } from "vue";
 import { getShortUrl } from "src/js/wallet-helpers";
 import { mapActions, mapState, mapWritableState } from "pinia";
@@ -582,11 +583,11 @@ export default defineComponent({
     ...mapActions(useSwapStore, ["mintAmountSwap"]),
     activateMintUrlInternal: async function (mintUrl) {
       this.activatingMintUrl = mintUrl;
-      console.log(`Activating mint ${this.activatingMintUrl}`);
+      debug(`Activating mint ${this.activatingMintUrl}`);
       try {
         await this.activateMintUrl(mintUrl, false, true);
       } catch (e) {
-        console.log("#### Error activating mint:", e);
+        debug("#### Error activating mint:", e);
       } finally {
         this.activatingMintUrl = "";
       }
@@ -657,7 +658,7 @@ export default defineComponent({
     fetchMintsFromNdk: async function () {
       this.discoveringMints = true;
       await this.initNdkReadOnly();
-      console.log("### fetch mints");
+      debug("### fetch mints");
       let maxTries = 5;
       let tries = 0;
       let mintUrls = [];
@@ -665,7 +666,7 @@ export default defineComponent({
         try {
           mintUrls = await this.fetchMints();
         } catch (e) {
-          console.log("Error fetching mints", e);
+          debug("Error fetching mints", e);
         }
         tries++;
       }
@@ -680,7 +681,7 @@ export default defineComponent({
           })
         );
       }
-      console.log(mintUrls);
+      debug(mintUrls);
       this.discoveringMints = false;
     },
     showMintInfo: async function (mint) {

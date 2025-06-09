@@ -1,3 +1,4 @@
+import { debug } from "src/js/logger";
 import { defineStore } from "pinia";
 import { useWalletStore } from "./wallet";
 import { useLocalStorage } from "@vueuse/core";
@@ -136,9 +137,9 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
         quotesToCheck.splice(this.maxQuotesToCheckOnStartup);
       }
       this.lastPendingInvoiceCheck = Date.now();
-      console.log(`Checking ${quotesToCheck.length} quotes`);
+      debug(`Checking ${quotesToCheck.length} quotes`);
       for (const q of quotesToCheck) {
-        console.log(`Checking quote ${q.quote}`);
+        debug(`Checking quote ${q.quote}`);
         walletStore.mintOnPaid(q.quote, false, false);
       }
     },

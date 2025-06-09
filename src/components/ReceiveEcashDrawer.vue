@@ -120,6 +120,7 @@
 </template>
 
 <script>
+import { debug } from "src/js/logger";
 import { defineComponent } from "vue";
 import { useReceiveTokensStore } from "src/stores/receiveTokensStore";
 import { useWalletStore } from "src/stores/wallet";
@@ -227,7 +228,7 @@ export default defineComponent({
       const userAgent = window.navigator.userAgent.toLowerCase();
       const match =
         /iphone|ipad|ipod/.test(userAgent) && /safari/.test(userAgent);
-      console.log(`User agent: ${userAgent}, is iOS Safari: ${match}`);
+      debug(`User agent: ${userAgent}, is iOS Safari: ${match}`);
       return match;
     },
     handlePasteBtn: function () {
@@ -259,7 +260,7 @@ export default defineComponent({
       this.toggleScanner();
     },
     handleQrCodeDecode(result) {
-      console.log("QR code decoded:", result);
+      debug("QR code decoded:", result);
       // Handle the decoded QR code result here
       this.closeCamera();
       // You might want to process the result here

@@ -98,6 +98,7 @@
 
 <script lang="ts">
 interface MintRead {
+import { debug } from "src/js/logger";
   id: number;
   url: string;
   info?: string;
@@ -211,7 +212,7 @@ export default {
           throw new Error(`API error: ${response.status}`);
         }
         this.mintInfo = (await response.json()) as MintRead;
-        console.log("# MintAuditInfo", this.mintInfo);
+        debug("# MintAuditInfo", this.mintInfo);
         if (!this.mintInfo) {
           this.mintNotAudited = true;
           throw new Error(`This mint is not being audited yet.`);
@@ -254,7 +255,7 @@ export default {
         const paymentRequestResponse = await response.json();
         const paymentRequestString = paymentRequestResponse.pr;
         const paymentRequest = paymentRequestString.replace(/"/g, "");
-        console.log("# AuditorPaymentRequests", paymentRequest);
+        debug("# AuditorPaymentRequests", paymentRequest);
         await mintStore.activateMintUrl(this.mintUrl);
         await mintStore.activateUnit("sat");
         await walletStore.decodeRequest(paymentRequest);

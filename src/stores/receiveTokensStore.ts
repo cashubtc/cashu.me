@@ -1,3 +1,4 @@
+import { debug } from "src/js/logger";
 import { defineStore } from "pinia";
 import { Mint, useMintsStore } from "./mints";
 import { useUiStore } from "./ui";
@@ -71,7 +72,7 @@ export const useReceiveTokensStore = defineStore("receiveTokensStore", {
       const walletStore = useWalletStore();
       const receiveStore = useReceiveTokensStore();
       const uiStore = useUiStore();
-      console.log("### receive tokens", receiveStore.receiveData.tokensBase64);
+      debug("### receive tokens", receiveStore.receiveData.tokensBase64);
 
       if (receiveStore.receiveData.tokensBase64.length == 0) {
         throw new Error("no tokens provided.");
@@ -161,7 +162,7 @@ export const useReceiveTokensStore = defineStore("receiveTokensStore", {
           this.ndef
             .scan({ signal })
             .then(() => {
-              console.log("> Scan started");
+              debug("> Scan started");
 
               this.ndef.addEventListener("readingerror", () => {
                 console.error("Cannot read data from the NFC tag.");

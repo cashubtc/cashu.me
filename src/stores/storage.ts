@@ -1,3 +1,4 @@
+import { debug } from "src/js/logger";
 import { defineStore } from "pinia";
 import { useWalletStore } from "./wallet";
 import { useMintsStore } from "./mints";
@@ -83,14 +84,14 @@ export const useStorageStore = defineStore("storage", {
       // determine if the user might have exceeded the local storage quota
       // store 10kb of data in local storage to check if it fails
       const localStorageSize = JSON.stringify(localStorage).length;
-      console.log(`Local storage size: ${localStorageSize} bytes`);
+      debug(`Local storage size: ${localStorageSize} bytes`);
       let data = new Array(10240).join("x");
       try {
         localStorage.setItem("cashu.test", data);
         localStorage.removeItem("cashu.test");
         return false;
       } catch (e) {
-        console.log("Local storage quota exceeded");
+        debug("Local storage quota exceeded");
         notifyError(
           "Local storage quota exceeded. Clean up your local storage.",
         );
@@ -105,7 +106,7 @@ export const useStorageStore = defineStore("storage", {
         isNaN(new Date(lastCleanUp).getTime()) ||
         new Date().getTime() - new Date(lastCleanUp).getTime() > cleanUpInterval
       ) {
-        console.log(`Last clean up: ${lastCleanUp}, cleaning up local storage`);
+        debug(`Last clean up: ${lastCleanUp}, cleaning up local storage`);
         this.cleanUpLocalStorage();
       }
     },
@@ -157,7 +158,7 @@ export const useStorageStore = defineStore("storage", {
       const localStorageSizeAfter = JSON.stringify(localStorage).length;
       const localStorageSizeDiff =
         localStorageSizeBefore - localStorageSizeAfter;
-      console.log(`Cleaned up ${localStorageSizeDiff} bytes of local storage`);
+      debug(`Cleaned up ${localStorageSizeDiff} bytes of local storage`);
       if (localStorageSizeDiff > 0 && verbose) {
         notifySuccess(`Cleaned up ${localStorageSizeDiff} bytes`);
       }
