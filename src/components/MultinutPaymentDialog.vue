@@ -96,39 +96,21 @@
                 :class="{
                   'mint-card-selected': isSelected(mint),
                   'cursor-not-allowed': isPaymentInProgress,
+                  'mint-card-success':
+                    isPaymentInProgress &&
+                    isSelected(mint) &&
+                    mintStates[mint.url] === 'success',
+                  'mint-card-error':
+                    isPaymentInProgress &&
+                    isSelected(mint) &&
+                    mintStates[mint.url] === 'error',
                 }"
               >
                 <div class="mint-card-content q-pa-md">
                   <div class="row items-center">
                     <div class="col-auto q-mr-md">
-                      <!-- Show state indicator during payment, checkbox otherwise -->
-                      <div
-                        v-if="isPaymentInProgress && isSelected(mint)"
-                        class="state-indicator"
-                      >
-                        <q-spinner
-                          v-if="
-                            mintStates[mint.url] === 'requesting' ||
-                            mintStates[mint.url] === 'paying'
-                          "
-                          color="primary"
-                          size="24px"
-                        />
-                        <q-icon
-                          v-else-if="mintStates[mint.url] === 'success'"
-                          name="check_circle"
-                          color="positive"
-                          size="24px"
-                        />
-                        <q-icon
-                          v-else-if="mintStates[mint.url] === 'error'"
-                          name="error"
-                          color="negative"
-                          size="24px"
-                        />
-                      </div>
                       <q-checkbox
-                        v-else
+                        v-if="!isPaymentInProgress"
                         :model-value="isSelected(mint)"
                         @update:model-value="toggleMint(mint)"
                         :color="isSelected(mint) ? 'primary' : 'grey'"
@@ -169,6 +151,32 @@
                         </div>
                       </div>
                     </div>
+                    <!-- Show state indicator during payment, checkbox otherwise -->
+                    <div
+                      v-if="isPaymentInProgress && isSelected(mint)"
+                      class="col-auto state-indicator"
+                    >
+                      <q-spinner
+                        v-if="
+                          mintStates[mint.url] === 'requesting' ||
+                          mintStates[mint.url] === 'paying'
+                        "
+                        color="primary"
+                        size="24px"
+                      />
+                      <q-icon
+                        v-else-if="mintStates[mint.url] === 'success'"
+                        name="check_circle"
+                        color="positive"
+                        size="24px"
+                      />
+                      <q-icon
+                        v-else-if="mintStates[mint.url] === 'error'"
+                        name="error"
+                        color="negative"
+                        size="24px"
+                      />
+                    </div>
                   </div>
 
                   <!-- Payment State Progress Bar - Full Width -->
@@ -178,7 +186,7 @@
                       isSelected(mint) &&
                       mintStates[mint.url]
                     "
-                    class="payment-progress-section q-mt-md"
+                    class="payment-progress-section q-mt-md q-px-md"
                   >
                     <q-linear-progress
                       :value="getStateProgress(mintStates[mint.url])"
@@ -1125,6 +1133,16 @@ export default defineComponent({
 .mint-card-selected {
   border-color: var(--q-primary) !important;
   background-color: rgba(25, 118, 210, 0.1) !important;
+}
+
+.mint-card-success {
+  border-color: var(--q-positive) !important;
+  background-color: rgba(76, 175, 80, 0.1) !important;
+}
+
+.mint-card-error {
+  border-color: var(--q-negative) !important;
+  background-color: rgba(244, 67, 54, 0.1) !important;
 }
 
 .mint-card-content {

@@ -293,7 +293,6 @@ export default {
           amount: 0,
           comment: "",
         },
-        paymentChecker: null,
         camera: {
           show: false,
           camera: "auto",
@@ -461,7 +460,6 @@ export default {
       this.payInvoiceData.lnurlauth = null;
       this.payInvoiceData.input.request = "";
       this.payInvoiceData.input.comment = "";
-      this.payInvoiceData.input.paymentChecker = null;
       this.camera.show = false;
       this.focusInput("parseDialogInput");
     },
