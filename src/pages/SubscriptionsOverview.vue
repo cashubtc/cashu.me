@@ -131,6 +131,15 @@
           dense
           size="sm"
           class="q-ml-xs"
+          :to="`/creator/${pubkeyNpub(props.row.creator)}`"
+        >
+          {{ $t('FindCreators.actions.view_profile') }}
+        </q-btn>
+        <q-btn
+          flat
+          dense
+          size="sm"
+          class="q-ml-xs"
           @click="sendMessage(props.row.creator)"
         >
           {{ $t('SubscriptionsOverview.message') }}
