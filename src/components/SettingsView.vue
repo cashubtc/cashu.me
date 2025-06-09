@@ -1172,7 +1172,7 @@
             <div class="row q-pt-md">
               <q-toggle
                 v-model="nostrMintBackupEnabled"
-                label="Backup mint list on Nostr"
+                :label="$t('Settings.experimental.nostr_mint_backup.toggle')"
                 color="primary"
                 @update:model-value="onNostrMintBackupToggle"
               >
@@ -2086,20 +2086,32 @@ export default defineComponent({
     },
     onNostrMintBackupToggle: async function (enabled) {
       const nostrMintBackupStore = useNostrMintBackupStore();
-      
+
       if (enabled) {
         try {
           await nostrMintBackupStore.enableBackup();
-          this.notifySuccess("Nostr mint backup enabled");
+          this.notifySuccess(
+            this.$t(
+              "Settings.experimental.nostr_mint_backup.notifications.enabled"
+            )
+          );
         } catch (error) {
           console.error("Failed to enable Nostr mint backup:", error);
-          this.notifyError("Failed to enable Nostr mint backup");
+          this.notifyError(
+            this.$t(
+              "Settings.experimental.nostr_mint_backup.notifications.failed"
+            )
+          );
           // Revert the toggle
           this.nostrMintBackupEnabled = false;
         }
       } else {
         nostrMintBackupStore.disableBackup();
-        this.notifySuccess("Nostr mint backup disabled");
+        this.notifySuccess(
+          this.$t(
+            "Settings.experimental.nostr_mint_backup.notifications.disabled"
+          )
+        );
       }
     },
     changeLanguage(locale) {

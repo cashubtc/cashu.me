@@ -371,6 +371,16 @@ export default {
         description:
           "If enabled, the wallet will use Multinut to pay invoices from multiple mints at once.",
       },
+      nostr_mint_backup: {
+        toggle: "Backup mint list on Nostr",
+        description:
+          "If enabled, your mint list will be automatically backed up to Nostr relays using your configured Nostr keys. This allows you to restore your mint list across devices.",
+        notifications: {
+          enabled: "Nostr mint backup enabled",
+          disabled: "Nostr mint backup disabled",
+          failed: "Failed to enable Nostr mint backup",
+        },
+      },
     },
     appearance: {
       keyboard: {
@@ -681,6 +691,23 @@ export default {
         success: "Restore finished successfully",
         error: "Error restoring mints: { error }",
       },
+    },
+    nostr_mints: {
+      label: "Restore Mints from Nostr",
+      caption:
+        "Search for mint backups stored on Nostr relays using your seed phrase. This will help you discover mints you previously used.",
+      search_button: "Search for Mint Backups",
+      select_all: "Select All",
+      deselect_all: "Deselect All",
+      backed_up: "Backed up",
+      already_added: "Already Added",
+      add_selected: "Add Selected ({count})",
+      no_backups_found: "No mint backups found",
+      no_backups_hint:
+        "Make sure Nostr mint backup is enabled in settings to automatically backup your mint list.",
+      invalid_mnemonic: "Please enter a valid seed phrase before searching.",
+      search_error: "Failed to search for mint backups.",
+      add_error: "Failed to add selected mints.",
     },
   },
   MintSettings: {
