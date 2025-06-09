@@ -2,7 +2,13 @@
   <div class="row no-wrap items-center q-pa-sm">
     <q-input v-model="text" class="col" dense outlined @keyup.enter="send">
       <template v-slot:append>
-        <q-btn flat round icon="account-balance-wallet" @click="sendToken" />
+        <q-btn
+          flat
+          round
+          icon="account-balance-wallet"
+          color="primary"
+          @click="sendToken"
+        />
         <q-btn
           flat
           round
