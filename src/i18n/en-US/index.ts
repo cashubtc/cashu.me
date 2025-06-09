@@ -1481,6 +1481,8 @@ export default {
       monthly: "Monthly",
       total: "Total",
       start: "Start",
+      end: "Ends",
+      total_months: "Total months",
       next_unlock: "Next unlock",
       status: "Status",
       remaining: "Months left",

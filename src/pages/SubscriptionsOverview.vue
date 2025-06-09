@@ -11,6 +11,13 @@
         {{ formatCurrency(totalLocked) }}
       </div>
     </div>
+    <q-input
+      v-model="tableFilter"
+      dense
+      debounce="300"
+      class="q-mb-md"
+      :placeholder="$t('global.actions.search.label')"
+    />
     <q-table
       flat
       bordered
@@ -18,6 +25,9 @@
       :rows="rows"
       :columns="columns"
       row-key="creator"
+      :rows-per-page-options="[5, 10, 20, 0]"
+      :filter="tableFilter"
+      :sort-method="customSort"
     >
       <template #body-cell-creator="props">
         <div class="row items-center">
@@ -50,6 +60,12 @@
       <template #body-cell-start="props">
         {{ props.row.start ? formatTs(props.row.start) : '-' }}
       </template>
+      <template #body-cell-end="props">
+        {{ props.row.end ? formatTs(props.row.end) : '-' }}
+      </template>
+      <template #body-cell-totalMonths="props">
+        {{ props.row.totalMonths }}
+      </template>
       <template #body-cell-next_unlock="props">
         {{ props.row.nextUnlock ? formatTs(props.row.nextUnlock) : '-' }}
       </template>
@@ -77,8 +93,12 @@
           <q-linear-progress
             rounded
             size="8px"
+            class="progress"
+            :class="props.row.status === 'active' ? 'active-bar' : 'expired-bar'"
             :value="props.row.progress"
-            style="width: 80px"
+            :label="Math.round(props.row.progress * 100) + '%'"
+            :color="props.row.status === 'active' ? 'positive' : 'negative'"
+            track-color="grey-4"
           />
         </div>
       </template>
@@ -270,6 +290,11 @@ const rows = computed(() => {
     const monthly = tokens[0]?.amount || 0;
     const start = tokens.reduce((m, t) => (t.locktime && (!m || t.locktime < m) ? t.locktime : m), null as number | null);
     const progress = tokens.length ? 1 - monthsLeft / tokens.length : 0;
+    const totalMonths = tokens.length;
+    const end =
+      start && totalMonths
+        ? start + (totalMonths - 1) * 30 * 24 * 60 * 60
+        : null;
     const unlocked = tokens.filter((t) => !t.locktime || t.locktime <= now).length;
     const status = monthsLeft > 0 ? 'active' : 'expired';
     const bucketNames = [...new Set(
@@ -286,6 +311,8 @@ const rows = computed(() => {
       nextUnlock,
       monthsLeft,
       progress,
+      totalMonths,
+      end,
       hasUnlocked: unlocked > 0,
       status,
       tokens,
@@ -307,6 +334,21 @@ const selectedCreator = ref("");
 const showMessageDialog = ref(false);
 const messageText = ref("");
 const messageRecipient = ref("");
+const tableFilter = ref("");
+
+function customSort(rows: any[], sortBy: string, descending: boolean) {
+  return rows.sort((a, b) => {
+    const x = a[sortBy];
+    const y = b[sortBy];
+    let result = 0;
+    if (typeof x === 'number' && typeof y === 'number') {
+      result = x - y;
+    } else {
+      result = String(x).localeCompare(String(y));
+    }
+    return descending ? -result : result;
+  });
+}
 
 const creatorTokens = computed(() => {
   const row = rows.value.find((r) => r.creator === selectedCreator.value);
@@ -424,6 +466,8 @@ const columns = computed(() => [
   { name: "monthly", label: t("SubscriptionsOverview.columns.monthly"), field: "monthly", align: "right" },
   { name: "total", label: t("SubscriptionsOverview.columns.total"), field: "total", align: "right" },
   { name: "start", label: t("SubscriptionsOverview.columns.start"), field: "start" },
+  { name: "end", label: t("SubscriptionsOverview.columns.end"), field: "end" },
+  { name: "totalMonths", label: t("SubscriptionsOverview.columns.total_months"), field: "totalMonths", align: "right" },
   { name: "next_unlock", label: t("SubscriptionsOverview.columns.next_unlock"), field: "nextUnlock" },
   { name: "status", label: t("SubscriptionsOverview.columns.status"), field: "status" },
   { name: "remaining", label: t("SubscriptionsOverview.columns.remaining"), field: "monthsLeft", align: "right" },
@@ -432,5 +476,26 @@ const columns = computed(() => [
 </script>
 
 <style scoped>
+.progress {
+  width: 80px;
+}
+
+.q-table {
+  margin-bottom: 16px;
+}
+
+@media (min-width: 600px) {
+  .q-pa-md {
+    padding: 24px;
+  }
+}
+
+.active-bar {
+  --q-color-positive: #4caf50;
+}
+
+.expired-bar {
+  --q-color-negative: #f44336;
+}
 </style>
 
