@@ -2,13 +2,9 @@
   <div class="row no-wrap items-center q-pa-sm">
     <q-input v-model="text" class="col" dense outlined @keyup.enter="send">
       <template v-slot:append>
-        <q-btn
-          flat
-          round
-          icon="account-balance-wallet"
-          color="primary"
-          @click="sendToken"
-        />
+        <q-btn flat round color="primary" @click="sendToken">
+          <NutIcon />
+        </q-btn>
         <q-btn
           flat
           round
@@ -25,6 +21,7 @@
 
 <script lang="ts" setup>
 import { ref } from 'vue';
+import { Nut as NutIcon } from 'lucide-vue-next';
 
 const emit = defineEmits(['send', 'sendToken']);
 const text = ref('');
