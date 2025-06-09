@@ -16,12 +16,13 @@
         v-for="item in filtered"
         :key="item.pubkey"
         :pubkey="item.pubkey"
-        :profile="profiles[item.pubkey]"
-        :snippet="item.snippet"
-        :timestamp="item.timestamp"
+        :lastMsg="item.lastMsg"
         @click="select(item.pubkey)"
       />
-      <div v-if="sorted.length === 0" class="q-pa-md text-caption text-grey-7">
+      <div
+        v-if="uniqueConversations.length === 0"
+        class="q-pa-md text-caption text-grey-7"
+      >
         No active conversations.
       </div>
     </q-list>
@@ -29,55 +30,49 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, reactive, watch, onMounted, ref } from 'vue';
-import { useMessengerStore } from 'src/stores/messenger';
-import { useNostrStore } from 'src/stores/nostr';
+import { computed, watch, onMounted, ref } from 'vue';
+import { storeToRefs } from 'pinia';
+import { useMessengerStore } from '@/stores/messenger';
+import { useNostrStore } from '@/stores/nostr';
 import ConversationListItem from './ConversationListItem.vue';
 
 const emit = defineEmits(['select']);
 const messenger = useMessengerStore();
 const nostr = useNostrStore();
-
-const profiles = reactive<Record<string, any>>({});
-const conversations = computed(() => messenger.conversations);
+const { conversations } = storeToRefs(messenger);
 const filterQuery = ref('');
 
-const sorted = computed(() => {
-  const entries = Object.entries(conversations.value);
-  return entries
-    .map(([pubkey, msgs]) => {
-      const last = msgs[msgs.length - 1];
-      return {
-        pubkey,
-        snippet: last ? last.content.slice(0, 30) : '',
-        timestamp: last ? last.created_at : 0,
-      };
-    })
+const uniqueConversations = computed(() => {
+  return Object.entries(conversations.value)
+    .map(([pubkey, msgs]) => ({
+      pubkey,
+      lastMsg: msgs[msgs.length - 1],
+      timestamp: msgs[msgs.length - 1]?.created_at,
+    }))
     .sort((a, b) => b.timestamp - a.timestamp);
 });
 
 const filtered = computed(() => {
   const q = filterQuery.value.toLowerCase();
-  if (!q) return sorted.value;
-  return sorted.value.filter(({ pubkey }) => {
-    const profile = profiles[pubkey];
-    const name = profile?.display_name || profile?.name || pubkey;
-    return (
-      name.toLowerCase().includes(q) || pubkey.toLowerCase().includes(q)
-    );
+  if (!q) return uniqueConversations.value;
+  return uniqueConversations.value.filter(({ pubkey }) => {
+    const entry: any = (nostr.profiles as any)[pubkey];
+    const profile = entry?.profile ?? entry ?? {};
+    const name = profile.display_name || profile.name || profile.displayName || pubkey;
+    return name.toLowerCase().includes(q) || pubkey.toLowerCase().includes(q);
   });
 });
 
 const loadProfiles = async () => {
-  for (const { pubkey } of sorted.value) {
-    if (!profiles[pubkey]) {
-      profiles[pubkey] = await nostr.getProfile(pubkey);
+  for (const { pubkey } of uniqueConversations.value) {
+    if (!(nostr.profiles as any)[pubkey]) {
+      await nostr.getProfile(pubkey);
     }
   }
 };
 
 onMounted(loadProfiles);
-watch(sorted, loadProfiles);
+watch(uniqueConversations, loadProfiles);
 
 const select = (pubkey: string) => emit('select', pubkey);
 </script>

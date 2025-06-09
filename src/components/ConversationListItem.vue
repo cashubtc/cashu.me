@@ -21,9 +21,18 @@
         <template v-if="loaded">
           <span
             :class="['text-subtitle1 ellipsis', { 'text-weight-bold': unreadCount > 0 }]"
-            >{{ displayName }}</span
+            >{{ showRaw ? pubkey : displayName }}</span
           >
           <span class="timestamp text-caption q-ml-auto">{{ timeAgo }}</span>
+          <q-btn
+            flat
+            dense
+            round
+            icon="visibility"
+            class="q-ml-xs"
+            @click.stop="showRaw = !showRaw"
+            aria-label="Toggle pubkey"
+          />
         </template>
         <template v-else>
           <q-skeleton type="text" width="60%" />
@@ -42,11 +51,10 @@
 </template>
 
 <script lang="ts"> 
-import { defineComponent, computed } from 'vue';
+import { defineComponent, computed, ref } from 'vue';
 import { QBadge } from 'quasar';
 import { useMessengerStore } from 'src/stores/messenger';
 import { useNostrStore } from 'src/stores/nostr';
-import { nip19 } from 'nostr-tools';
 import { formatDistanceToNow } from 'date-fns';
 
 export default defineComponent({
@@ -54,9 +62,7 @@ export default defineComponent({
   components: { QBadge },
   props: {
     pubkey: { type: String, required: true },
-    profile: { type: Object as () => any, default: () => ({}) },
-    snippet: { type: String, default: '' },
-    timestamp: { type: Number, default: 0 },
+    lastMsg: { type: Object as () => any, default: () => ({}) },
   },
   emits: ['click'],
   setup(props, { emit }) {
@@ -65,16 +71,20 @@ export default defineComponent({
     const unreadCount = computed(
       () => messenger.unreadCounts[props.pubkey] || 0
     );
-    const displayName = computed(() => {
-      const p: any = props.profile;
-      if (p?.display_name) return p.display_name;
-      if (p?.name) return p.name;
-      try {
-        return nip19.npubEncode(nostr.resolvePubkey(props.pubkey));
-      } catch (e) {
-        return props.pubkey.slice(0, 8) + '...' + props.pubkey.slice(-4);
-      }
+    const profile = computed(() => {
+      const entry: any = (nostr.profiles as any)[props.pubkey];
+      return entry?.profile ?? entry ?? {};
     });
+    const displayName = computed(() => {
+      const p: any = profile.value;
+      return (
+        p?.name ||
+        p?.displayName ||
+        p?.display_name ||
+        props.pubkey.slice(0, 8) + "…"
+      );
+    });
+    const showRaw = ref(false);
 
     const initials = computed(() => {
       const name = displayName.value;
@@ -84,22 +94,29 @@ export default defineComponent({
     });
 
     // consider profile fetched once the key exists, even if it has no fields
-    const loaded = computed(() => props.profile !== undefined);
+    const loaded = computed(() => profile.value !== undefined);
 
     const timeAgo = computed(() => {
-      if (!props.timestamp) return '';
-      return formatDistanceToNow(props.timestamp * 1000, { addSuffix: true });
+      const ts = props.lastMsg?.created_at;
+      if (!ts) return '';
+      return formatDistanceToNow(ts * 1000, { addSuffix: true });
     });
+
+    const snippet = computed(() => props.lastMsg?.content?.slice(0, 30) || '');
 
     const handleClick = () => emit('click', props.pubkey);
 
     return {
+      profile,
       displayName,
       initials,
       timeAgo,
+      snippet,
       handleClick,
       loaded,
       unreadCount,
+      showRaw,
+      pubkey: props.pubkey,
     };
   }
 });
