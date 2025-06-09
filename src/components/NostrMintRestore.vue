@@ -85,6 +85,7 @@
           clickable
           @click="toggleMintSelection(mint.url)"
           class="mint-item"
+          :class="{ 'mint-item-selected': mint.selected }"
         >
           <q-item-section avatar>
             <q-checkbox
@@ -95,20 +96,62 @@
             />
           </q-item-section>
           <q-item-section class="text-left">
-            <q-item-label lines="1" class="text-weight-medium text-left">
-              {{ getShortUrl(mint.url) }}
-            </q-item-label>
-            <q-item-label
-              caption
-              lines="2"
-              class="text-grey-6 text-left mint-url"
-            >
-              {{ mint.url }}
-            </q-item-label>
-            <q-item-label caption class="text-grey-5 q-pt-xs text-left">
-              {{ $t("RestoreView.nostr_mints.backed_up") }}:
-              {{ formatDate(mint.timestamp) }}
-            </q-item-label>
+            <div class="row items-center">
+              <!-- Mint Avatar -->
+              <q-avatar
+                v-if="getMintIconUrl(mint.url)"
+                size="34px"
+                class="q-mr-sm"
+              >
+                <q-img
+                  spinner-color="white"
+                  spinner-size="xs"
+                  :src="getMintIconUrl(mint.url)"
+                  alt="Mint Icon"
+                  style="height: 34px; max-width: 34px; font-size: 12px"
+                />
+              </q-avatar>
+
+              <!-- Loading spinner for mint info -->
+              <q-spinner-dots
+                v-else-if="isFetchingMintInfo(mint.url)"
+                size="34px"
+                color="grey-5"
+                class="q-mr-sm"
+              />
+
+              <div class="column q-gutter-y-sm">
+                <!-- Mint Name -->
+                <q-item-label
+                  lines="1"
+                  class="text-weight-medium text-left"
+                  style="font-size: 16px; font-weight: 600; line-height: 16px"
+                >
+                  {{ getMintDisplayName(mint.url) }}
+                </q-item-label>
+
+                <!-- Mint URL -->
+                <q-item-label
+                  caption
+                  lines="2"
+                  class="text-grey-6 text-left mint-url"
+                  style="
+                    font-size: 12px;
+                    line-height: 16px;
+                    font-family: monospace;
+                    margin-top: 4px;
+                  "
+                >
+                  {{ mint.url }}
+                </q-item-label>
+
+                <!-- Backup timestamp -->
+                <q-item-label caption class="text-grey-5 q-pt-xs text-left">
+                  {{ $t("RestoreView.nostr_mints.backed_up") }}:
+                  {{ formatDate(mint.timestamp) }}
+                </q-item-label>
+              </div>
+            </div>
           </q-item-section>
         </q-item>
       </q-list>
@@ -156,7 +199,7 @@
 import { defineComponent } from "vue";
 import { mapState, mapActions } from "pinia";
 import { useNostrMintBackupStore } from "src/stores/nostrMintBackup";
-import { useMintsStore } from "src/stores/mints";
+import { useMintsStore, MintClass } from "src/stores/mints";
 import { getShortUrl } from "src/js/wallet-helpers";
 import { notifyError } from "src/js/notify";
 import { date } from "quasar";
@@ -177,6 +220,8 @@ export default defineComponent({
     return {
       hasSearched: false,
       addingMints: false,
+      mintInfoCache: new Map(), // Cache for mint info to avoid duplicate requests
+      fetchingMintInfo: new Set(), // Track which mints are currently being fetched
     };
   },
   computed: {
@@ -204,6 +249,17 @@ export default defineComponent({
 
     anySelected() {
       return this.availableMints.some((mint) => mint.selected);
+    },
+  },
+  watch: {
+    // Watch for changes in discovered mints and fetch their info
+    discoveredMints: {
+      handler(newMints) {
+        if (newMints && newMints.length > 0) {
+          this.fetchMintInfoForDiscoveredMints();
+        }
+      },
+      immediate: true,
     },
   },
   methods: {
@@ -261,11 +317,90 @@ export default defineComponent({
     formatDate(timestamp) {
       return date.formatDate(timestamp * 1000, "MMM DD, YYYY");
     },
+
+    // Fetch mint information for all discovered mints in the background
+    async fetchMintInfoForDiscoveredMints() {
+      const availableMints = this.availableMints;
+
+      // Fetch mint info for each mint in parallel, but don't block the UI
+      availableMints.forEach(async (mint) => {
+        if (
+          !this.mintInfoCache.has(mint.url) &&
+          !this.fetchingMintInfo.has(mint.url)
+        ) {
+          this.fetchingMintInfo.add(mint.url);
+
+          try {
+            const mintInfo = await this.fetchMintInfo(mint.url);
+            this.mintInfoCache.set(mint.url, mintInfo);
+
+            // Force reactivity by triggering a re-render
+            this.$forceUpdate();
+          } catch (error) {
+            console.error(`Failed to fetch mint info for ${mint.url}:`, error);
+            // Set empty info to avoid retrying
+            this.mintInfoCache.set(mint.url, null);
+          } finally {
+            this.fetchingMintInfo.delete(mint.url);
+          }
+        }
+      });
+    },
+
+    // Fetch mint information using cashu-ts
+    async fetchMintInfo(mintUrl) {
+      try {
+        // Create a temporary mint object for the MintClass
+        const tempMint = {
+          url: mintUrl,
+          keys: [],
+          keysets: [],
+        };
+
+        const mintClass = new MintClass(tempMint);
+        const mintInfo = await mintClass.api.getInfo();
+        return mintInfo;
+      } catch (error) {
+        console.error(`Error fetching mint info for ${mintUrl}:`, error);
+        throw error;
+      }
+    },
+
+    // Get mint info from cache
+    getMintInfo(mintUrl) {
+      return this.mintInfoCache.get(mintUrl);
+    },
+
+    // Get mint icon URL
+    getMintIconUrl(mintUrl) {
+      const mintInfo = this.getMintInfo(mintUrl);
+      if (mintInfo && mintInfo.icon_url) {
+        return mintInfo.icon_url;
+      }
+      return null;
+    },
+
+    // Get mint display name
+    getMintDisplayName(mintUrl) {
+      const mintInfo = this.getMintInfo(mintUrl);
+      if (mintInfo && mintInfo.name) {
+        return mintInfo.name;
+      }
+      return this.getShortUrl(mintUrl);
+    },
+
+    // Check if mint info is being fetched
+    isFetchingMintInfo(mintUrl) {
+      return this.fetchingMintInfo.has(mintUrl);
+    },
   },
 
   beforeUnmount() {
     // Clear discovered mints when component is destroyed
     this.clearDiscoveredMints();
+    // Clear cache
+    this.mintInfoCache.clear();
+    this.fetchingMintInfo.clear();
   },
 });
 </script>
@@ -291,6 +426,23 @@ export default defineComponent({
 /* Mint item styling */
 .mint-item {
   text-align: left;
+  border-radius: 10px;
+  border: 1px solid rgba(128, 128, 128, 0.2);
+  margin-bottom: 8px;
+  padding: 8px;
+}
+
+.mint-item:hover {
+  border-color: rgba(128, 128, 128, 0.4);
+}
+
+.mint-item.selected {
+  border-color: var(--q-primary);
+}
+
+.mint-item-selected {
+  border-color: var(--q-primary) !important;
+  background-color: rgba(var(--q-primary-rgb), 0.1);
 }
 
 /* Mint URL styling - using monospace font like in MintSettings */

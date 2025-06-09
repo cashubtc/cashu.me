@@ -4,6 +4,7 @@ import NDK, { NDKEvent, NDKPrivateKeySigner, NDKFilter } from "@nostr-dev-kit/nd
 import { nip44 } from "nostr-tools";
 import { bytesToHex, hexToBytes } from "@noble/hashes/utils";
 import { generateSecretKey, getPublicKey } from "nostr-tools";
+import { mnemonicToSeedSync } from "@scure/bip39";
 import { useSettingsStore } from "./settings";
 import { useMintsStore } from "./mints";
 import { useWalletStore } from "./wallet";
@@ -27,14 +28,14 @@ export const useNostrMintBackupStore = defineStore("nostrMintBackup", {
   state: () => ({
     // Last backup timestamp
     lastBackupTimestamp: useLocalStorage<number>("cashu.nostrMintBackup.lastBackupTimestamp", 0),
-    
+
     // Discovered mints from nostr
     discoveredMints: [] as DiscoveredMint[],
-    
+
     // Loading states
     backupInProgress: false,
     searchInProgress: false,
-    
+
     // Derived private key for mint backups
     mintBackupPrivateKey: useLocalStorage<string>("cashu.nostrMintBackup.privateKey", ""),
     mintBackupPublicKey: useLocalStorage<string>("cashu.nostrMintBackup.publicKey", ""),
@@ -57,16 +58,16 @@ export const useNostrMintBackupStore = defineStore("nostrMintBackup", {
     needsBackup: (state): boolean => {
       const settingsStore = useSettingsStore();
       if (!settingsStore.nostrMintBackupEnabled) return false;
-      
+
       const mintsStore = useMintsStore();
       const currentMints = mintsStore.mints.map(mint => mint.url).sort();
-      
+
       // If no mints, no backup needed
       if (currentMints.length === 0) return false;
-      
+
       // If never backed up, need backup
       if (state.lastBackupTimestamp === 0) return true;
-      
+
       // Check if mints have changed (this is a simple check, you might want to store the last backed up mints)
       return true; // For now, always allow backup
     },
@@ -82,7 +83,7 @@ export const useNostrMintBackupStore = defineStore("nostrMintBackup", {
     // Initialize backup keys from wallet seed
     async initializeBackupKeys(): Promise<void> {
       const walletStore = useWalletStore();
-      
+
       // Derive a deterministic private key from wallet seed for mint backup
       // We add a domain separator to avoid key reuse
       const seed = walletStore.seed;
@@ -90,32 +91,30 @@ export const useNostrMintBackupStore = defineStore("nostrMintBackup", {
       const combinedData = new Uint8Array(seed.length + domainSeparator.length);
       combinedData.set(seed);
       combinedData.set(domainSeparator, seed.length);
-      
+
       // Use first 32 bytes as private key
       const privateKeyBytes = combinedData.slice(0, 32);
       const privateKeyHex = bytesToHex(privateKeyBytes);
       const publicKeyHex = getPublicKey(privateKeyBytes);
-      
+
       this.mintBackupPrivateKey = privateKeyHex;
       this.mintBackupPublicKey = publicKeyHex;
     },
 
     // Initialize backup keys from custom mnemonic (for restore)
-    async initializeBackupKeysFromMnemonic(mnemonic: string): Promise<void> {
-      const walletStore = useWalletStore();
-      
+    async initializeBackupKeysFromMnemonic(mnemonic: string): Promise<{ privateKeyHex: string; publicKeyHex: string }> {
       // Derive seed from mnemonic
-      const seed = walletStore.mnemonicToSeedSync(mnemonic);
+      const seed = mnemonicToSeedSync(mnemonic);
       const domainSeparator = new TextEncoder().encode("cashu-mint-backup");
       const combinedData = new Uint8Array(seed.length + domainSeparator.length);
       combinedData.set(seed);
       combinedData.set(domainSeparator, seed.length);
-      
+
       // Use first 32 bytes as private key
       const privateKeyBytes = combinedData.slice(0, 32);
       const privateKeyHex = bytesToHex(privateKeyBytes);
       const publicKeyHex = getPublicKey(privateKeyBytes);
-      
+
       return { privateKeyHex, publicKeyHex };
     },
 
@@ -142,9 +141,9 @@ export const useNostrMintBackupStore = defineStore("nostrMintBackup", {
 
         const settingsStore = useSettingsStore();
         const mintsStore = useMintsStore();
-        
+
         const currentMints = mintsStore.mints.map(mint => mint.url);
-        
+
         if (currentMints.length === 0) {
           console.log("No mints to backup");
           return;
@@ -207,7 +206,7 @@ export const useNostrMintBackupStore = defineStore("nostrMintBackup", {
 
       try {
         const settingsStore = useSettingsStore();
-        
+
         // Derive keys from provided mnemonic
         const { publicKeyHex } = await this.initializeBackupKeysFromMnemonic(mnemonic);
 
@@ -237,9 +236,9 @@ export const useNostrMintBackupStore = defineStore("nostrMintBackup", {
             const { privateKeyHex } = await this.initializeBackupKeysFromMnemonic(mnemonic);
             const conversationKey = nip44.v2.utils.getConversationKey(privateKeyHex, publicKeyHex);
             const decryptedContent = nip44.v2.decrypt(event.content, conversationKey);
-            
+
             const backupData: MintBackupData = JSON.parse(decryptedContent);
-            
+
             // Add discovered mints
             for (const mintUrl of backupData.mints) {
               const existingMint = allDiscoveredMints.find(m => m.url === mintUrl);
@@ -262,7 +261,7 @@ export const useNostrMintBackupStore = defineStore("nostrMintBackup", {
         allDiscoveredMints.sort((a, b) => b.timestamp - a.timestamp);
 
         this.discoveredMints = allDiscoveredMints;
-        
+
         if (allDiscoveredMints.length > 0) {
           notify(`Found ${allDiscoveredMints.length} mint(s) in Nostr backups`);
         } else {
@@ -346,10 +345,10 @@ export const useNostrMintBackupStore = defineStore("nostrMintBackup", {
     async enableBackup(): Promise<void> {
       const settingsStore = useSettingsStore();
       settingsStore.nostrMintBackupEnabled = true;
-      
+
       // Initialize backup keys
       await this.initializeBackupKeys();
-      
+
       // Perform initial backup if needed
       if (this.needsBackup) {
         await this.backupMintsToNostr();
@@ -367,7 +366,7 @@ export const useNostrMintBackupStore = defineStore("nostrMintBackup", {
       const settingsStore = useSettingsStore();
       const wasEnabled = settingsStore.nostrMintBackupEnabled;
       settingsStore.nostrMintBackupEnabled = true;
-      
+
       try {
         await this.backupMintsToNostr();
       } finally {
