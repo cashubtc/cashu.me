@@ -104,7 +104,7 @@ export const useNostrMintBackupStore = defineStore("nostrMintBackup", {
     // Initialize backup keys from custom mnemonic (for restore)
     async initializeBackupKeysFromMnemonic(mnemonic: string): Promise<{ privateKeyHex: string; publicKeyHex: string }> {
       // Derive seed from mnemonic
-      const seed = mnemonicToSeedSync(mnemonic);
+      const seed: Uint8Array = mnemonicToSeedSync(mnemonic);
       const domainSeparator = new TextEncoder().encode("cashu-mint-backup");
       const combinedData = new Uint8Array(seed.length + domainSeparator.length);
       combinedData.set(seed);
