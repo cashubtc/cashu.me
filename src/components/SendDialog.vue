@@ -139,7 +139,6 @@ export default defineComponent({
       this.payInvoiceData.lnurlauth = null;
       this.payInvoiceData.input.request = "";
       this.payInvoiceData.input.comment = "";
-      this.payInvoiceData.input.paymentChecker = null;
       this.camera.show = false;
       this.showSendDialog = false;
     },

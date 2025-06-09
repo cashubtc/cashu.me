@@ -98,7 +98,9 @@
             </template>
           </q-btn>
           <q-btn
-            v-if="hasMultinutSupport && multinutEnabled"
+            v-if="
+              !payInvoiceData.blocking && hasMultinutSupport && multinutEnabled
+            "
             unelevated
             rounded
             outline
@@ -122,16 +124,6 @@
               $t("PayInvoiceDialog.invoice.balance_too_low_warning_text")
             }}</q-btn
           >
-          <q-btn
-            v-if="hasMultinutSupport && multinutEnabled"
-            unelevated
-            rounded
-            outline
-            :disabled="!hasMultinutSupport"
-            @click="openMultinutDialog"
-            label="Multi"
-            class="q-px-lg q-ml-sm"
-          />
           <q-btn v-close-popup flat color="grey" class="q-ml-auto">{{
             $t("PayInvoiceDialog.invoice.actions.close.label")
           }}</q-btn>
@@ -404,13 +396,13 @@ export default defineComponent({
     ...mapActions(useCameraStore, ["closeCamera", "showCamera"]),
     canPay: function () {
       if (!this.payInvoiceData.invoice) return false;
-      return payInvoiceData.meltQuote.response.amount <= this.totalUnitBalance;
+      return (
+        this.payInvoiceData.meltQuote.response.amount +
+          this.payInvoiceData.meltQuote.response.fee_reserve <=
+        this.totalUnitBalance
+      );
     },
-    closeParseDialog: function () {
-      setTimeout(() => {
-        clearInterval(this.payInvoiceData.paymentChecker);
-      }, 10000);
-    },
+    closeParseDialog: function () {},
     decodeAndQuote: async function (request) {
       await this.decodeRequest(request);
     },
