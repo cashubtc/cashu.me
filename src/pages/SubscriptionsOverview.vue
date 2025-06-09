@@ -53,6 +53,24 @@
       <template #body-cell-next_unlock="props">
         {{ props.row.nextUnlock ? formatTs(props.row.nextUnlock) : '-' }}
       </template>
+      <template #body-cell-status="props">
+        <div class="row items-center">
+          <q-badge
+            :color="props.row.status === 'active' ? 'positive' : 'negative'"
+            class="q-mr-xs"
+          >
+            {{
+              $t(`SubscriptionsOverview.status.${props.row.status}`)
+            }}
+          </q-badge>
+          <q-badge
+            v-if="props.row.hasUnlocked"
+            color="primary"
+          >
+            {{ $t('SubscriptionsOverview.status.unlocked') }}
+          </q-badge>
+        </div>
+      </template>
       <template #body-cell-remaining="props">
         <div class="row items-center">
           <span class="q-mr-sm">{{ props.row.monthsLeft }}</span>
@@ -143,6 +161,33 @@
         </q-card-actions>
       </q-card>
     </q-dialog>
+    <q-dialog v-model="showMessageDialog">
+      <q-card style="min-width:300px">
+        <q-card-section class="text-h6">
+          {{ $t('SubscriptionsOverview.message') }}
+        </q-card-section>
+        <q-card-section>
+          <q-input
+            v-model="messageText"
+            type="textarea"
+            autofocus
+          />
+        </q-card-section>
+        <q-card-actions align="right">
+          <q-btn flat v-close-popup color="grey">
+            {{ $t('global.actions.cancel.label') }}
+          </q-btn>
+          <q-btn
+            flat
+            color="primary"
+            :disable="!messageText.trim()"
+            @click="confirmMessage"
+          >
+            {{ $t('global.actions.send.label') }}
+          </q-btn>
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
   </div>
 </template>
 
@@ -154,6 +199,8 @@ import { useBucketsStore } from 'stores/buckets';
 import { useMintsStore } from 'stores/mints';
 import { useUiStore } from 'stores/ui';
 import { useNostrStore } from 'stores/nostr';
+import { useMessengerStore } from 'stores/messenger';
+import { useRouter } from 'vue-router';
 import { useQuasar, copyToClipboard } from 'quasar';
 import { nip19 } from 'nostr-tools';
 import { shortenString } from 'src/js/string-utils';
@@ -204,6 +251,8 @@ const rows = computed(() => {
     const monthly = tokens[0]?.amount || 0;
     const start = tokens.reduce((m, t) => (t.locktime && (!m || t.locktime < m) ? t.locktime : m), null as number | null);
     const progress = tokens.length ? 1 - monthsLeft / tokens.length : 0;
+    const unlocked = tokens.filter((t) => !t.locktime || t.locktime <= now).length;
+    const status = monthsLeft > 0 ? 'active' : 'expired';
     const bucketNames = [...new Set(
       tokens
         .map((t) => bucketsStore.bucketList.find((b) => b.id === t.bucketId)?.name)
@@ -218,6 +267,8 @@ const rows = computed(() => {
       nextUnlock,
       monthsLeft,
       progress,
+      hasUnlocked: unlocked > 0,
+      status,
       tokens,
     };
   });
@@ -228,10 +279,15 @@ const monthlyTotal = computed(() => rows.value.reduce((s, r) => s + r.monthly, 0
 
 const profiles = ref<Record<string, any>>({});
 const nostr = useNostrStore();
+const messenger = useMessengerStore();
+const router = useRouter();
 const $q = useQuasar();
 const { t } = useI18n();
 const showDialog = ref(false);
 const selectedCreator = ref("");
+const showMessageDialog = ref(false);
+const messageText = ref("");
+const messageRecipient = ref("");
 
 const creatorTokens = computed(() => {
   const row = rows.value.find((r) => r.creator === selectedCreator.value);
@@ -243,10 +299,24 @@ function openDetails(pubkey: string) {
   showDialog.value = true;
 }
 
-async function sendMessage(pubkey: string) {
-  const { success } = await nostr.sendNip04DirectMessage(pubkey, "");
+function sendMessage(pubkey: string) {
+  messageRecipient.value = pubkey;
+  messageText.value = "";
+  showMessageDialog.value = true;
+}
+
+async function confirmMessage() {
+  const text = messageText.value.trim();
+  const recipient = messageRecipient.value;
+  showMessageDialog.value = false;
+  if (!text || !recipient) return;
+  const { success } = await messenger.sendDm(recipient, text);
   if (success) {
     notifySuccess(t("wallet.notifications.nostr_dm_sent"));
+    messenger.createConversation(recipient);
+    messenger.setCurrentConversation(recipient);
+    messenger.markRead(recipient);
+    router.push("/nostr-messenger");
   } else {
     notifyError(t("wallet.notifications.nostr_dm_failed"));
   }
@@ -277,6 +347,7 @@ const columns = computed(() => [
   { name: "total", label: t("SubscriptionsOverview.columns.total"), field: "total", align: "right" },
   { name: "start", label: t("SubscriptionsOverview.columns.start"), field: "start" },
   { name: "next_unlock", label: t("SubscriptionsOverview.columns.next_unlock"), field: "nextUnlock" },
+  { name: "status", label: t("SubscriptionsOverview.columns.status"), field: "status" },
   { name: "remaining", label: t("SubscriptionsOverview.columns.remaining"), field: "monthsLeft", align: "right" },
   { name: "actions", label: t("SubscriptionsOverview.columns.actions"), field: "creator" },
 ]);
