@@ -134,6 +134,15 @@
           dense
           size="sm"
           class="q-ml-xs"
+          @click="exportTokens(props.row.creator)"
+        >
+          {{ $t('SubscriptionsOverview.export') }}
+        </q-btn>
+        <q-btn
+          flat
+          dense
+          size="sm"
+          class="q-ml-xs"
           @click="cancelSubscription(props.row.creator)"
         >
           {{ $t('SubscriptionsOverview.cancel') }}
@@ -245,11 +254,17 @@ import { nip19 } from 'nostr-tools';
 import { shortenString } from 'src/js/string-utils';
 import { useI18n } from 'vue-i18n';
 import { notifySuccess, notifyError } from 'src/js/notify';
+import type { Proof } from '@cashu/cashu-ts';
+import { useProofsStore } from 'stores/proofs';
+import { useSendTokensStore } from 'stores/sendTokensStore';
+import token from 'src/js/token';
 
 const lockedStore = useLockedTokensStore();
 const bucketsStore = useBucketsStore();
 const mintsStore = useMintsStore();
 const uiStore = useUiStore();
+const proofsStore = useProofsStore();
+const sendTokensStore = useSendTokensStore();
 const { activeUnit } = storeToRefs(mintsStore);
 
 function pubkeyNpub(hex: string): string {
@@ -440,6 +455,20 @@ function extendSubscription(pubkey: string) {
       notifyError(e.message);
     }
   });
+}
+
+function exportTokens(pubkey: string) {
+  const row = rows.value.find((r) => r.creator === pubkey);
+  if (!row) return;
+  const proofs = row.tokens.flatMap((t) => {
+    const decoded = token.decode(t.token);
+    return decoded ? (token.getProofs(decoded) as Proof[]) : [];
+  });
+  if (!proofs.length) return;
+  const tokenStr = proofsStore.serializeProofs(proofs);
+  sendTokensStore.clearSendData();
+  sendTokensStore.sendData.tokensBase64 = tokenStr;
+  sendTokensStore.showSendTokens = true;
 }
 
 function copyToken(token: string) {
