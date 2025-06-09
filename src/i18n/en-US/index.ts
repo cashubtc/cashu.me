@@ -1495,6 +1495,16 @@ export default {
     discover: "Discover creators",
     view: "View",
     message: "Message",
+    extend: "Extend",
+    cancel: "Cancel",
+    cancel_confirm_title: "Cancel subscription",
+    cancel_confirm_text: "Delete all future locked tokens?",
+    extend_dialog_title: "Extend subscription",
+    extend_dialog_text: "Number of additional months",
+    notifications: {
+      cancel_success: "Subscription canceled",
+      extend_success: "Subscription extended",
+    },
   },
   LockedTokensTable: {
     empty_text: "No locked tokens",
