@@ -47,7 +47,8 @@ import token from "../js/token";
 import { HistoryToken } from "./tokens";
 import { DEFAULT_BUCKET_ID } from "./buckets";
 import { useDmChatsStore } from "./dmChats";
-import { cashuDb } from "./dexie";
+import { cashuDb, type LockedToken } from "./dexie";
+import { v4 as uuidv4 } from "uuid";
 import { useRouter } from "vue-router";
 
 type MintRecommendation = {
@@ -591,7 +592,7 @@ export const useNostrStore = defineStore("nostr", {
               debug("Content:", content);
               nip04DirectMessageEvents.add(event);
               this.lastEventTimestamp = Math.floor(Date.now() / 1000);
-              this.parseMessageForEcash(content);
+              this.parseMessageForEcash(content, event.pubkey);
               try {
                 const chatStore = useDmChatsStore();
                 chatStore.addIncoming(event);
@@ -795,7 +796,7 @@ export const useNostrStore = defineStore("nostr", {
           }
           nip17DirectMessageEvents.add(dmEvent);
           this.lastEventTimestamp = Math.floor(Date.now() / 1000);
-          this.parseMessageForEcash(content);
+          this.parseMessageForEcash(content, dmEvent.pubkey);
           try {
             const chatStore = useDmChatsStore();
             chatStore.addIncoming(dmEvent);
@@ -808,11 +809,11 @@ export const useNostrStore = defineStore("nostr", {
         console.error("Error fetching contact events:", error);
       }
     },
-    parseMessageForEcash: async function (message: string) {
+    parseMessageForEcash: async function (message: string, sender?: string) {
       // first check if the message can be converted to a json and then to a PaymentRequestPayload
       try {
-        const payload = JSON.parse(message) as PaymentRequestPayload;
-        if (payload) {
+        const payload = JSON.parse(message) as any;
+        if (payload && payload.proofs) {
           const receiveStore = useReceiveTokensStore();
           const prStore = usePRStore();
           const sendTokensStore = useSendTokensStore();
@@ -847,6 +848,28 @@ export const useNostrStore = defineStore("nostr", {
             prStore.showPRDialog = false;
             receiveStore.showReceiveTokens = true;
           }
+          return;
+        }
+
+        // check for locked token format
+        if (payload && payload.token && payload.referenceId) {
+          const entry: LockedToken = {
+            id: uuidv4(),
+            tokenString: payload.token,
+            owner: "creator",
+            creatorNpub: this.pubkey,
+            subscriberNpub: sender,
+            tierId: payload.bucketId,
+            intervalKey: payload.referenceId,
+            unlockTs: payload.unlockTime || 0,
+            refundUnlockTs: 0,
+            status:
+              payload.unlockTime && payload.unlockTime > Math.floor(Date.now() / 1000)
+                ? "pending"
+                : "unlockable",
+            subscriptionEventId: null,
+          };
+          await cashuDb.lockedTokens.put(entry);
           return;
         }
       } catch (e) {

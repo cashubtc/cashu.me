@@ -108,9 +108,15 @@ export const useMessengerStore = defineStore("messenger", {
         );
 
         const tokenStr = proofsStore.serializeProofs(sendProofs);
-        const content = memo ? `${memo}\n${tokenStr}` : tokenStr;
+        const payload = {
+          token: tokenStr,
+          amount: sendAmount,
+          unlockTime: null,
+          bucketId,
+          referenceId: uuidv4(),
+        };
 
-        const { success } = await this.sendDm(recipient, content);
+        const { success } = await this.sendDm(recipient, JSON.stringify(payload));
         if (success) {
           tokens.addPendingToken({
             amount: -sendAmount,

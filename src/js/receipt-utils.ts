@@ -14,12 +14,18 @@ export function formatTimestamp(ts: number): string {
   return `${d.getFullYear()}-${("0" + (d.getMonth() + 1)).slice(-2)}-${("0" + d.getDate()).slice(-2)} ${("0" + d.getHours()).slice(-2)}:${("0" + d.getMinutes()).slice(-2)}`;
 }
 
-export function receiptToDmText(receipt: Receipt, supporterName?: string): string {
-  const date = receipt.locktime
-    ? formatTimestamp(receipt.locktime)
-    : new Date(receipt.date).toISOString();
-  const name = supporterName ? `from ${supporterName} ` : "";
-  return `${receipt.amount} sats ${name}on ${date} (ref ${receipt.id})\n${receipt.token}`;
+export function receiptToDmText(
+  receipt: Receipt,
+  supporterName?: string,
+): string {
+  const payload = {
+    token: receipt.token,
+    amount: receipt.amount,
+    unlockTime: receipt.locktime ?? null,
+    bucketId: receipt.bucketId,
+    referenceId: receipt.id,
+  };
+  return JSON.stringify(payload);
 }
 
 export function receiptsToDmText(receipts: Array<Receipt>, supporterName?: string): string {

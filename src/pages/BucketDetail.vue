@@ -109,6 +109,7 @@
       </q-card>
     </q-dialog>
     <LockedTokensTable :bucket-id="bucketId" class="q-mt-lg" />
+    <CreatorLockedTokensTable :bucket-id="bucketId" class="q-mt-lg" />
     <div class="q-mt-lg">
       <HistoryTable :bucket-id="bucketId" />
     </div>
@@ -131,6 +132,7 @@ import { useNostrStore } from 'stores/nostr';
 import SendTokenDialog from 'components/SendTokenDialog.vue';
 import HistoryTable from 'components/HistoryTable.vue';
 import LockedTokensTable from 'components/LockedTokensTable.vue';
+import CreatorLockedTokensTable from 'components/CreatorLockedTokensTable.vue';
 import { notifyError } from 'src/js/notify';
 import { DEFAULT_COLOR } from 'src/js/constants';
 
@@ -285,11 +287,18 @@ function exportBucket(){
 async function sendBucketToCreator(){
   if(!bucket.value?.creatorPubkey) return;
   if(!bucketLockedTokens.value.length) return;
-  const messages = bucketLockedTokens.value.map(t => {
-    const unlock = t.locktime ? formatTs(t.locktime) : 'now';
-    return `${formatCurrency(t.amount, activeUnit.value)} unlock ${unlock}\n${t.token}`;
-  });
-  const message = messages.join('\n');
-  await nostrStore.sendNip04DirectMessage(bucket.value.creatorPubkey, message);
+  for(const t of bucketLockedTokens.value){
+    const payload = {
+      token: t.token,
+      amount: t.amount,
+      unlockTime: t.locktime ?? null,
+      bucketId: t.bucketId,
+      referenceId: t.id,
+    };
+    await nostrStore.sendNip04DirectMessage(
+      bucket.value.creatorPubkey,
+      JSON.stringify(payload)
+    );
+  }
 }
 </script>
