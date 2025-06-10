@@ -55,6 +55,7 @@ export interface Subscription {
 export interface LockedToken {
   id: string;
   tokenString: string;
+  amount: number;
   owner: "subscriber" | "creator";
   subscriberNpub?: string;
   creatorNpub?: string;
@@ -64,6 +65,7 @@ export interface LockedToken {
   refundUnlockTs: number;
   status: "pending" | "unlockable" | "claimed" | "expired";
   subscriptionEventId: string | null;
+  label?: string;
 }
 
 // export interface Proof {
