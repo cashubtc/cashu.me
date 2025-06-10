@@ -39,7 +39,6 @@ import {
   decodePaymentRequest,
   MintQuoteResponse,
   ProofState,
-  getSignedProofs,
 } from "@cashu/cashu-ts";
 import { hashToCurve } from "@cashu/crypto/modules/common";
 // @ts-ignore
@@ -56,7 +55,6 @@ import { wordlist } from "@scure/bip39/wordlists/english";
 import { useSettingsStore } from "./settings";
 import { usePriceStore } from "./price";
 import { i18n } from "src/boot/i18n";
-import { useNostrStore } from "./nostr";
 // HACK: this is a workaround so that the catch block in the melt function does not throw an error when the user exits the app
 // before the payment is completed. This is necessary because the catch block in the melt function would otherwise remove all
 // quotes from the invoiceHistory and the user would not be able to pay the invoice again after reopening the app.
@@ -232,20 +230,6 @@ export const useWalletStore = defineStore("wallet", {
       } else {
         const newCounter = { id, counter: by } as KeysetCounter;
         this.keysetCounters.push(newCounter);
-      }
-    },
-    signP2PKIfNeeded: function <T extends Proof>(proofs: T[]): T[] {
-      if (!proofs.some((p) => typeof p.secret === "string" && p.secret.startsWith("P2PK:"))) {
-        return proofs;
-      }
-      const privKey = useNostrStore().privKeyHex;
-      if (!privKey) return proofs;
-      try {
-        const signed = getSignedProofs(proofs as unknown as Proof[], privKey);
-        return proofs.map((p, idx) => ({ ...(p as any), ...(signed[idx] as any) })) as T[];
-      } catch (e) {
-        console.error(e);
-        return proofs;
       }
     },
     getKeyset(
@@ -468,7 +452,6 @@ export const useWalletStore = defineStore("wallet", {
           includeFees,
           bucketId,
         );
-        proofsToSend = this.signP2PKIfNeeded(proofsToSend);
         const totalAmount = proofsToSend.reduce((s, t) => (s += t.amount), 0);
         const fees = includeFees ? wallet.getFeesForProofs(proofsToSend) : 0;
         const targetAmount = amount + fees;
@@ -485,7 +468,6 @@ export const useWalletStore = defineStore("wallet", {
             true,
             bucketId,
           );
-          proofsToSend = this.signP2PKIfNeeded(proofsToSend);
           ({ keep: keepProofs, send: sendProofs } = await wallet.send(
             targetAmount,
             proofsToSend,
@@ -505,7 +487,7 @@ export const useWalletStore = defineStore("wallet", {
           await proofsStore.removeProofs(proofsToSendNotReturned);
         } else if (totalAmount == targetAmount) {
           keepProofs = [];
-          sendProofs = this.signP2PKIfNeeded(proofsToSend);
+          sendProofs = proofsToSend;
         } else {
           throw new Error("could not split proofs.");
         }
@@ -884,7 +866,6 @@ export const useWalletStore = defineStore("wallet", {
 
         // NOTE: if the user exits the app while we're in the API call, JS will emit an error that we would catch below!
         // We have to handle that case in the catch block below
-        sendProofs = this.signP2PKIfNeeded(sendProofs);
         const data = await mintWallet.meltProofs(quote, sendProofs, {
           keysetId,
           counter,
