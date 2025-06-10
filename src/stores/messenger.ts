@@ -11,6 +11,10 @@ import { useWalletStore } from "./wallet";
 import { useMintsStore } from "./mints";
 import { useProofsStore } from "./proofs";
 import { useTokensStore } from "./tokens";
+import { useReceiveTokensStore } from "./receiveTokensStore";
+import { useBucketsStore } from "./buckets";
+import { useLockedTokensStore } from "./lockedTokens";
+import token from "src/js/token";
 
 export type MessengerMessage = {
   id: string;
@@ -169,6 +173,47 @@ export const useMessengerStore = defineStore("messenger", {
         event.pubkey,
         event.content
       );
+      try {
+        const payload = JSON.parse(decrypted);
+        if (payload && payload.token) {
+          const tokensStore = useTokensStore();
+          const decoded = tokensStore.decodeToken(payload.token);
+          if (decoded) {
+            const proofs = token.getProofs(decoded);
+            if (proofs.some((p) => p.secret.startsWith("P2PK:"))) {
+              const buckets = useBucketsStore();
+              let bucket = buckets.bucketList.find(
+                (b) => b.name === "Subscriptions"
+              );
+              if (!bucket) {
+                bucket = buckets.addBucket({ name: "Subscriptions" });
+              }
+              if (bucket) {
+                const amount =
+                  payload.amount !== undefined
+                    ? payload.amount
+                    : proofs.reduce((s, p) => s + p.amount, 0);
+                useLockedTokensStore().addLockedToken({
+                  amount,
+                  token: payload.token,
+                  pubkey: event.pubkey,
+                  locktime: payload.unlockTime || undefined,
+                  bucketId: bucket.id,
+                });
+              }
+              // don't auto-receive locked tokens
+            } else {
+              const receiveStore = useReceiveTokensStore();
+              receiveStore.receiveData.tokensBase64 = payload.token;
+              receiveStore.receiveData.bucketId = payload.bucketId ?? receiveStore.receiveData.bucketId;
+              await receiveStore.receiveToken(
+                payload.token,
+                receiveStore.receiveData.bucketId
+              );
+            }
+          }
+        }
+      } catch {}
       if (this.eventLog.some((m) => m.id === event.id)) return;
       const msg: MessengerMessage = {
         id: event.id,
