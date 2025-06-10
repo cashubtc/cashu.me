@@ -2,11 +2,14 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { useDonationPresetsStore } from "../../../src/stores/donationPresets";
 import { useWalletStore } from "../../../src/stores/wallet";
 import { useProofsStore } from "../../../src/stores/proofs";
-import { useLockedTokensStore } from "../../../src/stores/lockedTokens";
+import { useDexieLockedTokensStore } from "../../../src/stores/lockedTokensDexie";
+import { cashuDb } from "../../../src/stores/dexie";
 import { useMintsStore } from "../../../src/stores/mints";
 
-beforeEach(() => {
+beforeEach(async () => {
   localStorage.clear();
+  await cashuDb.delete();
+  await cashuDb.open();
 });
 
 vi.mock("../../../src/stores/wallet", () => ({
@@ -23,9 +26,9 @@ vi.mock("../../../src/stores/proofs", () => ({
   }),
 }));
 
-vi.mock("../../../src/stores/lockedTokens", () => ({
-  useLockedTokensStore: () => ({
-    addLockedToken: vi.fn((d: any) => ({ id: "id", date: "d", ...d })),
+vi.mock("../../../src/stores/lockedTokensDexie", () => ({
+  useDexieLockedTokensStore: () => ({
+    addLockedToken: vi.fn(async (d: any) => ({ id: "id", ...d })),
   }),
 }));
 
@@ -81,7 +84,7 @@ describe("Donation presets", () => {
 
   it("returns locked token data when detailed is true", async () => {
     const store = useDonationPresetsStore();
-    const locked = useLockedTokensStore();
+    const locked = useDexieLockedTokensStore();
     (locked.addLockedToken as any).mockImplementation((d: any) => ({
       id: "id" + (locked.addLockedToken as any).mock.calls.length,
       date: "d",

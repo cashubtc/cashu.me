@@ -85,7 +85,6 @@ import { useRoute } from "vue-router";
 import { useCreatorsStore } from "stores/creators";
 import { useNostrStore } from "stores/nostr";
 import { useDonationPresetsStore } from "stores/donationPresets";
-import { useLockedTokensStore } from "stores/lockedTokens";
 import { usePriceStore } from "stores/price";
 import { useUiStore } from "stores/ui";
 import SubscribeDialog from "components/SubscribeDialog.vue";
@@ -108,7 +107,6 @@ export default defineComponent({
     const creators = useCreatorsStore();
     const nostr = useNostrStore();
     const donationStore = useDonationPresetsStore();
-    const lockedStore = useLockedTokensStore();
     const priceStore = usePriceStore();
     const uiStore = useUiStore();
     const mintsStore = useMintsStore();

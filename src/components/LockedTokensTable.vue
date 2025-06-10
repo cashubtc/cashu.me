@@ -81,7 +81,7 @@ import { defineComponent } from "vue";
 import { mapState } from "pinia";
 import { formatDistanceToNow, parseISO } from "date-fns";
 import { shortenString } from "src/js/string-utils";
-import { useLockedTokensStore } from "stores/lockedTokens";
+import { useDexieLockedTokensStore } from "stores/lockedTokensDexie";
 import { useMintsStore } from "stores/mints";
 import { nip19 } from "nostr-tools";
 
@@ -95,10 +95,10 @@ export default defineComponent({
     return { currentPage: 1, pageSize: 5 };
   },
   computed: {
-    ...mapState(useLockedTokensStore, ["lockedTokens"]),
+    ...mapState(useDexieLockedTokensStore, ["lockedTokens"]),
     ...mapState(useMintsStore, ["activeUnit"]),
     filteredTokens() {
-      return this.lockedTokens.filter((t) => t.bucketId === this.bucketId);
+      return this.lockedTokens.filter((t) => t.tierId === this.bucketId);
     },
     maxPages() {
       return Math.ceil(this.filteredTokens.length / this.pageSize);
