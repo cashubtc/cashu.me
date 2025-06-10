@@ -3,7 +3,6 @@ import { cashuDb } from './dexie'
 import { useWalletStore } from './wallet'
 import { useReceiveTokensStore } from './receiveTokensStore'
 import { useSettingsStore } from './settings'
-import { useP2PKStore } from './p2pk'
 
 export const useLockedTokensRedeemWorker = defineStore('lockedTokensRedeemWorker', {
   state: () => ({
@@ -34,15 +33,11 @@ export const useLockedTokensRedeemWorker = defineStore('lockedTokensRedeemWorker
       if (!entries.length) return
       const wallet = useWalletStore()
       const receiveStore = useReceiveTokensStore()
-      const p2pkStore = useP2PKStore()
       for (const entry of entries) {
         try {
           receiveStore.receiveData.tokensBase64 = entry.tokenString
           receiveStore.receiveData.bucketId = entry.tierId
-          receiveStore.receiveData.p2pkPrivateKey =
-            p2pkStore.getPrivateKeyForP2PKEncodedToken(entry.tokenString)
           await wallet.redeem(entry.tierId)
-          receiveStore.receiveData.p2pkPrivateKey = ''
           await cashuDb.lockedTokens.delete(entry.id)
         } catch (e) {
           console.error('Failed to auto-redeem locked token', e)
