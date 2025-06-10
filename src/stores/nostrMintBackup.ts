@@ -1,14 +1,16 @@
 import { defineStore } from "pinia";
 import { useLocalStorage } from "@vueuse/core";
-import NDK, { NDKEvent, NDKPrivateKeySigner, NDKFilter } from "@nostr-dev-kit/ndk";
-import { nip44 } from "nostr-tools";
-import { bytesToHex, hexToBytes } from "@noble/hashes/utils";
-import { generateSecretKey, getPublicKey } from "nostr-tools";
+import { bytesToHex } from "@noble/hashes/utils";
+import { sha256 } from "@noble/hashes/sha256";
+import { getPublicKey } from "nostr-tools";
 import { mnemonicToSeedSync } from "@scure/bip39";
-import { useSettingsStore } from "./settings";
-import { useMintsStore } from "./mints";
+import NDK, { NDKEvent, NDKFilter, NDKPrivateKeySigner } from "@nostr-dev-kit/ndk";
+import { nip44 } from "nostr-tools";
 import { useWalletStore } from "./wallet";
-import { notifyError, notifySuccess, notify } from "src/js/notify";
+import { useMintsStore } from "./mints";
+import { useNostrStore } from "./nostr";
+import { notify, notifyError, notifySuccess } from "../js/notify";
+import { useSettingsStore } from "./settings";
 
 // NIP kind for mint backup events
 const MINT_BACKUP_KIND = 30078;
@@ -92,8 +94,8 @@ export const useNostrMintBackupStore = defineStore("nostrMintBackup", {
       combinedData.set(seed);
       combinedData.set(domainSeparator, seed.length);
 
-      // Use first 32 bytes as private key
-      const privateKeyBytes = combinedData.slice(0, 32);
+      // Use sha256 of combined data as private key
+      const privateKeyBytes = sha256(combinedData);
       const privateKeyHex = bytesToHex(privateKeyBytes);
       const publicKeyHex = getPublicKey(privateKeyBytes);
 
@@ -110,8 +112,8 @@ export const useNostrMintBackupStore = defineStore("nostrMintBackup", {
       combinedData.set(seed);
       combinedData.set(domainSeparator, seed.length);
 
-      // Use first 32 bytes as private key
-      const privateKeyBytes = combinedData.slice(0, 32);
+      // Use sha256 of combined data as private key
+      const privateKeyBytes = sha256(combinedData);
       const privateKeyHex = bytesToHex(privateKeyBytes);
       const publicKeyHex = getPublicKey(privateKeyBytes);
 
