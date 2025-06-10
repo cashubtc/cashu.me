@@ -475,7 +475,7 @@
 <script setup lang="ts">
 import { computed, ref, onMounted, onUnmounted, watch } from 'vue';
 import { storeToRefs } from 'pinia';
-import { useDexieLockedTokensStore, type LockedToken } from 'stores/lockedTokensDexie';
+import { useLockedTokensStore, type LockedToken } from 'stores/lockedTokens';
 import { useBucketsStore } from 'stores/buckets';
 import { useMintsStore } from 'stores/mints';
 import { useUiStore } from 'stores/ui';
@@ -495,7 +495,7 @@ import { useProofsStore } from 'stores/proofs';
 import { useSendTokensStore } from 'stores/sendTokensStore';
 import token from 'src/js/token';
 
-const lockedStore = useDexieLockedTokensStore();
+const lockedStore = useLockedTokensStore();
 const bucketsStore = useBucketsStore();
 const mintsStore = useMintsStore();
 const uiStore = useUiStore();

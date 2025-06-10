@@ -127,7 +127,7 @@ import { useUiStore } from 'stores/ui';
 import { storeToRefs } from 'pinia';
 import { useSendTokensStore } from 'stores/sendTokensStore';
 import { useTokensStore, HistoryToken } from 'stores/tokens';
-import { useDexieLockedTokensStore } from 'stores/lockedTokensDexie';
+import { useLockedTokensStore } from 'stores/lockedTokens';
 import { useNostrStore } from 'stores/nostr';
 import SendTokenDialog from 'components/SendTokenDialog.vue';
 import HistoryTable from 'components/HistoryTable.vue';
@@ -143,15 +143,13 @@ const mintsStore = useMintsStore();
 const uiStore = useUiStore();
 const sendTokensStore = useSendTokensStore();
 const tokensStore = useTokensStore();
-const lockedTokensStore = useDexieLockedTokensStore();
+const lockedTokensStore = useLockedTokensStore();
 
 const bucketId = route.params.id as string;
 const bucket = computed(() => bucketsStore.bucketList.find(b => b.id === bucketId));
 const bucketProofs = computed(() => proofsStore.proofs.filter(p => p.bucketId === bucketId && !p.reserved));
 const bucketBalance = computed(() => bucketProofs.value.reduce((s,p)=>s+p.amount,0));
-const bucketLockedTokens = computed(() =>
-  lockedTokensStore.lockedTokens.filter((t) => t.tierId === bucketId)
-);
+const bucketLockedTokens = computed(() => lockedTokensStore.tokensByBucket(bucketId));
 const { activeUnit } = storeToRefs(mintsStore);
 const showSendTokens = storeToRefs(sendTokensStore).showSendTokens;
 const nostrStore = useNostrStore();
