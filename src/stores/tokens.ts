@@ -215,9 +215,33 @@ export const useTokensStore = defineStore("tokens", {
     tokenAlreadyInHistory(tokenStr: string): HistoryToken | undefined {
       return this.historyTokens.find((t) => t.token === tokenStr);
     },
+    decodeToken(encodedToken: string): Token | undefined {
+      encodedToken = encodedToken.trim();
+      if (!isValidTokenString(encodedToken)) {
+        console.error("Invalid token string");
+        return undefined;
+      }
+      try {
+        const decoded = token.decode(encodedToken);
+        const proofs = token.getProofs(decoded);
+        if (!proofs || proofs.length === 0) {
+          console.error("Decoded token contains no proofs");
+          return undefined;
+        }
+        return decoded;
+      } catch (e) {
+        console.error(e);
+        return undefined;
+      }
+    },
   },
 });
 
 function currentDateStr() {
   return date.formatDate(new Date(), "YYYY-MM-DD HH:mm:ss");
+}
+
+function isValidTokenString(tokenStr: string): boolean {
+  const prefixRegex = /^cashu[A-Za-z0-9][A-Za-z0-9_\-+=\/]*$/;
+  return prefixRegex.test(tokenStr);
 }
