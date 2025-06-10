@@ -3,8 +3,7 @@ import { useLocalStorage } from "@vueuse/core";
 import { useWalletStore } from "./wallet";
 import { useMintsStore } from "./mints";
 import { useProofsStore } from "./proofs";
-import { useDexieLockedTokensStore } from "./lockedTokensDexie";
-import type { LockedToken } from "./dexie";
+import { useLockedTokensStore, LockedToken } from "./lockedTokens";
 import { useSubscriptionsStore } from "./subscriptions";
 import { DEFAULT_BUCKET_ID } from "./buckets";
 
@@ -48,7 +47,7 @@ export const useDonationPresetsStore = defineStore("donationPresets", {
       const walletStore = useWalletStore();
       const proofsStore = useProofsStore();
       const mintsStore = useMintsStore();
-      const lockedStore = useDexieLockedTokensStore();
+      const lockedStore = useLockedTokensStore();
       const subscriptionsStore = useSubscriptionsStore();
 
       const wallet = walletStore.wallet;
@@ -73,17 +72,11 @@ export const useDonationPresetsStore = defineStore("donationPresets", {
         const token = proofsStore.serializeProofs(sendProofs);
         if (detailed) {
           return [
-            await lockedStore.addLockedToken({
-              tokenString: token,
+            lockedStore.addLockedToken({
               amount,
-              owner: 'creator',
-              creatorNpub: pubkey,
-              tierId: bucketId,
-              intervalKey: '',
-              unlockTs: 0,
-              refundUnlockTs: 0,
-              status: 'unlockable',
-              subscriptionEventId: null,
+              token,
+              pubkey,
+              bucketId,
               label: subscription?.tierName
                 ? `Subscription: ${subscription.tierName}`
                 : undefined,
@@ -106,17 +99,12 @@ export const useDonationPresetsStore = defineStore("donationPresets", {
           locktime
         );
         const token = proofsStore.serializeProofs(sendProofs);
-        const locked = await lockedStore.addLockedToken({
-          tokenString: token,
+        const locked = lockedStore.addLockedToken({
           amount,
-          owner: 'creator',
-          creatorNpub: pubkey,
-          tierId: bucketId,
-          intervalKey: String(i),
-          unlockTs: locktime,
-          refundUnlockTs: 0,
-          status: 'pending',
-          subscriptionEventId: null,
+          token,
+          pubkey,
+          locktime,
+          bucketId,
           label: subscription?.tierName
             ? `Subscription: ${subscription.tierName}`
             : undefined,
@@ -140,10 +128,10 @@ export const useDonationPresetsStore = defineStore("donationPresets", {
           intervals: tokens.map((t, idx) => ({
             intervalKey: String(idx),
             lockedTokenId: t.id,
-            unlockTs: t.unlockTs || 0,
+            unlockTs: t.locktime || 0,
             refundUnlockTs: 0,
             status: 'pending',
-            tokenString: t.tokenString,
+            tokenString: t.token,
           })),
           status: 'active',
           createdAt: 0,
@@ -152,7 +140,7 @@ export const useDonationPresetsStore = defineStore("donationPresets", {
           ...(subscription.benefits ? { benefits: subscription.benefits } : {}),
         } as any);
       }
-      return detailed ? tokens : tokens.map((t) => t.tokenString).join("\n");
+      return detailed ? tokens : tokens.map((t) => t.token).join("\n");
     },
   },
 });

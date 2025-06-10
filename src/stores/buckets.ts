@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from "uuid";
 import { cashuDb } from "./dexie";
 import { useProofsStore } from "./proofs";
 import { useTokensStore } from "./tokens";
+import { useLockedTokensStore } from "./lockedTokens";
 import { ref, watch } from "vue";
 import { notifySuccess } from "src/js/notify";
 
@@ -107,6 +108,22 @@ export const useBucketsStore = defineStore("buckets", {
       });
       return balances;
     },
+    lockedBucketBalance: () => (bucketId: string): number => {
+      const ltStore = useLockedTokensStore();
+      return ltStore.lockedTokens
+        .filter((t) => t.bucketId === bucketId)
+        .reduce((sum, t) => sum + t.amount, 0);
+    },
+    lockedBucketBalances(): Record<string, number> {
+      const ltStore = useLockedTokensStore();
+      const balances: Record<string, number> = {};
+      this.bucketList.forEach((bucket) => {
+        balances[bucket.id] = ltStore.lockedTokens
+          .filter((t) => t.bucketId === bucket.id)
+          .reduce((sum, t) => sum + t.amount, 0);
+      });
+      return balances;
+    },
     autoBucketFor: (state) =>
       (mint?: string, memo?: string): string | undefined => {
         return state.autoAssignRules.find((r) => {
@@ -184,26 +201,6 @@ export const useBucketsStore = defineStore("buckets", {
       const idx = this.autoAssignRules.findIndex((r) => r.id === id);
       if (idx === -1) return;
       this.autoAssignRules[idx] = { ...this.autoAssignRules[idx], ...updates };
-    },
-
-    async lockedBucketBalance(bucketId: string): Promise<number> {
-      const tokens = await cashuDb.lockedTokens
-        .where('tierId')
-        .equals(bucketId)
-        .toArray();
-      return tokens.reduce((sum, t) => sum + t.amount, 0);
-    },
-
-    async lockedBucketBalances(): Promise<Record<string, number>> {
-      const balances: Record<string, number> = {};
-      const tokens = await cashuDb.lockedTokens.toArray();
-      tokens.forEach((t) => {
-        balances[t.tierId] = (balances[t.tierId] || 0) + t.amount;
-      });
-      this.bucketList.forEach((b) => {
-        if (balances[b.id] === undefined) balances[b.id] = 0;
-      });
-      return balances;
     },
   },
 });
