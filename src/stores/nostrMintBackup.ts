@@ -39,8 +39,8 @@ export const useNostrMintBackupStore = defineStore("nostrMintBackup", {
     searchInProgress: false,
 
     // Derived private key for mint backups
-    mintBackupPrivateKey: useLocalStorage<string>("cashu.nostrMintBackup.privateKey", ""),
-    mintBackupPublicKey: useLocalStorage<string>("cashu.nostrMintBackup.publicKey", ""),
+    mintBackupPrivateKey: "",
+    mintBackupPublicKey: "",
   }),
 
   getters: {
@@ -85,20 +85,8 @@ export const useNostrMintBackupStore = defineStore("nostrMintBackup", {
     // Initialize backup keys from wallet seed
     async initializeBackupKeys(): Promise<void> {
       const walletStore = useWalletStore();
-
       // Derive a deterministic private key from wallet seed for mint backup
-      // We add a domain separator to avoid key reuse
-      const seed = walletStore.seed;
-      const domainSeparator = new TextEncoder().encode("cashu-mint-backup");
-      const combinedData = new Uint8Array(seed.length + domainSeparator.length);
-      combinedData.set(seed);
-      combinedData.set(domainSeparator, seed.length);
-
-      // Use sha256 of combined data as private key
-      const privateKeyBytes = sha256(combinedData);
-      const privateKeyHex = bytesToHex(privateKeyBytes);
-      const publicKeyHex = getPublicKey(privateKeyBytes);
-
+      const { privateKeyHex, publicKeyHex } = await this.initializeBackupKeysFromMnemonic(walletStore.mnemonic);
       this.mintBackupPrivateKey = privateKeyHex;
       this.mintBackupPublicKey = publicKeyHex;
     },
@@ -121,7 +109,7 @@ export const useNostrMintBackupStore = defineStore("nostrMintBackup", {
     },
 
     // Create and publish mint backup event
-    async backupMintsToNostr(): Promise<void> {
+    async backupMintsToNostr(verbose: boolean = false): Promise<void> {
       const settingsStore = useSettingsStore();
       if (!settingsStore.nostrMintBackupEnabled) {
         console.log("Nostr mint backup is disabled");
@@ -188,7 +176,9 @@ export const useNostrMintBackupStore = defineStore("nostrMintBackup", {
         await event.publish();
 
         this.lastBackupTimestamp = backupData.timestamp;
-        notifySuccess("Mint list backed up to Nostr successfully");
+        if (verbose) {
+          notifySuccess("Mint list backed up to Nostr successfully");
+        }
 
         console.log("Mint backup published to Nostr:", event.id);
 
@@ -353,7 +343,7 @@ export const useNostrMintBackupStore = defineStore("nostrMintBackup", {
 
       // Perform initial backup if needed
       if (this.needsBackup) {
-        await this.backupMintsToNostr();
+        await this.backupMintsToNostr(true);
       }
     },
 
@@ -370,7 +360,7 @@ export const useNostrMintBackupStore = defineStore("nostrMintBackup", {
       settingsStore.nostrMintBackupEnabled = true;
 
       try {
-        await this.backupMintsToNostr();
+        await this.backupMintsToNostr(true);
       } finally {
         settingsStore.nostrMintBackupEnabled = wasEnabled;
       }

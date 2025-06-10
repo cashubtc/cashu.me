@@ -482,7 +482,7 @@ export const useMintsStore = defineStore("mints", {
         console.error(error);
         try {
           // notifyApiError(error, this.t("wallet.mint.notifications.could_not_get_info"));
-        } catch {}
+        } catch { }
         throw error;
       }
     },
@@ -522,7 +522,7 @@ export const useMintsStore = defineStore("mints", {
         console.error(error);
         try {
           // notifyApiError(error, this.t("wallet.mint.notifications.could_not_get_keys"));
-        } catch {}
+        } catch { }
         throw error;
       }
     },
@@ -536,7 +536,7 @@ export const useMintsStore = defineStore("mints", {
         console.error(error);
         try {
           // notifyApiError(error, this.t("wallet.mint.notifications.could_not_get_keysets"));
-        } catch {}
+        } catch { }
         throw error;
       }
     },
@@ -572,7 +572,7 @@ export const useMintsStore = defineStore("mints", {
         // Dynamic import to avoid circular dependency
         const { useNostrMintBackupStore } = await import("./nostrMintBackup");
         const nostrMintBackupStore = useNostrMintBackupStore();
-        
+
         if (nostrMintBackupStore.enabled && nostrMintBackupStore.needsBackup) {
           // Use a timeout to avoid blocking the UI
           setTimeout(async () => {
