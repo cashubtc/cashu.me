@@ -1,6 +1,17 @@
 <template>
   <div class="q-pa-xs" style="max-width: 500px; margin: 0 auto">
-    <h6 class="q-mt-none q-mb-md">Creator Locked Tokens</h6>
+    <div class="row items-center q-mb-md">
+      <h6 class="q-mt-none">Creator Locked Tokens</h6>
+      <q-space />
+      <q-btn
+        flat
+        dense
+        size="sm"
+        icon="file_download"
+        label="Export"
+        @click="exportTokens"
+      />
+    </div>
     <q-list bordered>
       <q-item v-for="token in paginatedTokens" :key="token.id">
         <q-item-section avatar>
@@ -42,60 +53,90 @@
   </div>
 </template>
 <script>
-import { defineComponent } from 'vue'
-import { mapState } from 'pinia'
-import { formatDistanceToNow, parseISO } from 'date-fns'
-import { useDexieLockedTokensStore } from 'stores/lockedTokensDexie'
-import { useMintsStore } from 'stores/mints'
-import { useReceiveTokensStore } from 'stores/receiveTokensStore'
-import { useWalletStore } from 'stores/wallet'
-import { useNostrStore } from 'stores/nostr'
-import { useUiStore } from 'stores/ui'
+import { defineComponent } from "vue";
+import { mapState } from "pinia";
+import { formatDistanceToNow, parseISO } from "date-fns";
+import { useDexieLockedTokensStore } from "stores/lockedTokensDexie";
+import { useMintsStore } from "stores/mints";
+import { useReceiveTokensStore } from "stores/receiveTokensStore";
+import { useWalletStore } from "stores/wallet";
+import { useNostrStore } from "stores/nostr";
+import { useUiStore } from "stores/ui";
 
 export default defineComponent({
-  name: 'CreatorLockedTokensTable',
+  name: "CreatorLockedTokensTable",
   props: { bucketId: { type: String, required: true } },
-  data() { return { currentPage: 1, pageSize: 5 } },
+  data() {
+    return { currentPage: 1, pageSize: 5 };
+  },
   computed: {
-    ...mapState(useDexieLockedTokensStore, ['lockedTokens']),
-    ...mapState(useMintsStore, ['activeUnit']),
+    ...mapState(useDexieLockedTokensStore, ["lockedTokens"]),
+    ...mapState(useMintsStore, ["activeUnit"]),
     filteredTokens() {
-      const nostrPubkey = useNostrStore().pubkey
+      const nostrPubkey = useNostrStore().pubkey;
       return this.lockedTokens.filter(
-        t => t.owner === 'creator' && t.creatorNpub === nostrPubkey && t.tierId === this.bucketId
-      )
+        (t) =>
+          t.owner === "creator" &&
+          t.creatorNpub === nostrPubkey &&
+          t.tierId === this.bucketId
+      );
     },
-    maxPages() { return Math.ceil(this.filteredTokens.length / this.pageSize) },
+    maxPages() {
+      return Math.ceil(this.filteredTokens.length / this.pageSize);
+    },
     paginatedTokens() {
-      const start = (this.currentPage - 1) * this.pageSize
-      const end = start + this.pageSize
-      return this.filteredTokens.slice().reverse().slice(start, end)
-    }
+      const start = (this.currentPage - 1) * this.pageSize;
+      const end = start + this.pageSize;
+      return this.filteredTokens.slice().reverse().slice(start, end);
+    },
   },
   methods: {
     formattedDate(dateStr) {
-      const date = parseISO(dateStr)
-      return formatDistanceToNow(date, { addSuffix: false })
+      const date = parseISO(dateStr);
+      return formatDistanceToNow(date, { addSuffix: false });
     },
     formatTs(ts) {
-      const d = new Date(ts * 1000)
-      return `${d.getFullYear()}-${('0' + (d.getMonth() + 1)).slice(-2)}-${('0' + d.getDate()).slice(-2)} ${('0' + d.getHours()).slice(-2)}:${('0' + d.getMinutes()).slice(-2)}`
+      const d = new Date(ts * 1000);
+      return `${d.getFullYear()}-${("0" + (d.getMonth() + 1)).slice(-2)}-${(
+        "0" + d.getDate()
+      ).slice(-2)} ${("0" + d.getHours()).slice(-2)}:${(
+        "0" + d.getMinutes()
+      ).slice(-2)}`;
     },
     formatCurrency(amount, unit) {
-      return useUiStore().formatCurrency(amount, unit)
+      return useUiStore().formatCurrency(amount, unit);
     },
     canRedeem(token) {
-      const now = Math.floor(Date.now() / 1000)
-      return !token.unlockTs || token.unlockTs <= now
+      const now = Math.floor(Date.now() / 1000);
+      return !token.unlockTs || token.unlockTs <= now;
     },
     async redeem(token) {
-      const receiveStore = useReceiveTokensStore()
-      const wallet = useWalletStore()
-      receiveStore.receiveData.tokensBase64 = token.tokenString
-      receiveStore.receiveData.bucketId = token.tierId
-      await wallet.redeem(token.tierId)
-      await useDexieLockedTokensStore().deleteLockedToken(token.id)
-    }
-  }
-})
+      const receiveStore = useReceiveTokensStore();
+      const wallet = useWalletStore();
+      receiveStore.receiveData.tokensBase64 = token.tokenString;
+      receiveStore.receiveData.bucketId = token.tierId;
+      await wallet.redeem(token.tierId);
+      await useDexieLockedTokensStore().deleteLockedToken(token.id);
+    },
+    exportTokens() {
+      const data = this.filteredTokens.map((t) => ({
+        reference_id: t.intervalKey,
+        unlock_time: t.unlockTs,
+        amount: t.amount,
+        token: t.tokenString,
+      }));
+      const json = JSON.stringify(data, null, 2);
+      const blob = new Blob([json], { type: "application/json" });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "locked_tokens.json";
+      link.style.display = "none";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    },
+  },
+});
 </script>
