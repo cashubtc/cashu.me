@@ -1,6 +1,7 @@
 import { defineStore } from "pinia";
 import { useLocalStorage } from "@vueuse/core";
 import type { NDKEvent } from "@nostr-dev-kit/ndk";
+import { v4 as uuidv4 } from "uuid";
 import { sanitizeMessage } from "../js/message-utils";
 
 export type DMMessage = {
@@ -66,6 +67,19 @@ export const useDmChatsStore = defineStore("dmChats", {
         this.chats[recipient] = [];
       }
       this.chats[recipient].push(msg);
+    },
+    addMessage(pubkey: string, content: string, outgoing: boolean) {
+      const msg: DMMessage = {
+        id: uuidv4(),
+        pubkey,
+        content: sanitizeMessage(content),
+        created_at: Math.floor(Date.now() / 1000),
+        outgoing,
+      };
+      if (!this.chats[pubkey]) {
+        this.chats[pubkey] = [];
+      }
+      this.chats[pubkey].push(msg);
     },
     markChatRead(pubkey: string) {
       this.unreadCounts[pubkey] = 0;
