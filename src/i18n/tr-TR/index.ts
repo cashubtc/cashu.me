@@ -356,6 +356,11 @@ export default {
         description:
           "Al, sonra Ecash, sonra Yapıştır düğmesine bastığınızda panonuzdaki ecash'i otomatik olarak yapıştırın. Otomatik yapıştırma iOS'ta UI hatalarına neden olabilir, sorun yaşıyorsanız kapatın.",
       },
+      auto_redeem_locked: {
+        toggle: "Kilitli tokenları otomatik kullan",
+        description:
+          "Etkinleştirilirse, cüzdan kilidi açıldığında tokenları otomatik olarak kullanır.",
+      },
       auditor: {
         toggle: "Denetleyiciyi etkinleştir",
         badge: "Beta",

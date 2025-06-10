@@ -358,6 +358,11 @@ export default {
         description:
           "Fügt Ecash automatisch aus Ihrer Zwischenablage ein, wenn Sie auf 'Empfangen', dann 'Ecash', dann 'Einfügen' drücken. Automatisches Einfügen kann auf iOS zu UI-Fehlern führen. Deaktivieren Sie dies, wenn Sie Probleme haben.",
       },
+      auto_redeem_locked: {
+        toggle: "Gesperrte Tokens automatisch einlösen",
+        description:
+          "Wenn aktiviert, wird die Wallet gesperrte Tokens automatisch einlösen, sobald sie freigeschaltet sind.",
+      },
       auditor: {
         toggle: "Auditor aktivieren",
         badge: "Beta",

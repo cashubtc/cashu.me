@@ -356,6 +356,11 @@ export default {
         description:
           "Pega automáticamente ecash de tu portapapeles cuando presionas Recibir, luego Ecash, luego Pegar. El pegado automático puede causar fallos en la interfaz de usuario en iOS, desactívalo si experimentas problemas.",
       },
+      auto_redeem_locked: {
+        toggle: "Canjear tokens bloqueados automáticamente",
+        description:
+          "Si está habilitado, la billetera canjeará automáticamente los tokens bloqueados una vez que se puedan canjear.",
+      },
       auditor: {
         toggle: "Habilitar auditor",
         badge: "Beta",

@@ -62,6 +62,10 @@ export const useSettingsStore = defineStore("settings", {
         "cashu.settings.autoPasteEcashReceive",
         true
       ),
+      autoRedeemLockedTokens: useLocalStorage(
+        "cashu.settings.autoRedeemLockedTokens",
+        true
+      ),
       auditorEnabled: useLocalStorage<boolean>(
         "cashu.settings.auditorEnabled",
         false

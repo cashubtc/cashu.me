@@ -357,6 +357,11 @@ export default {
         description:
           "Coller automatiquement l'ecash dans votre presse-papiers lorsque vous appuyez sur Recevoir, puis Ecash, puis Coller. Le collage automatique peut causer des problèmes d'interface utilisateur dans iOS, désactivez-le si vous rencontrez des problèmes.",
       },
+      auto_redeem_locked: {
+        toggle: "Récupérer automatiquement les tokens verrouillés",
+        description:
+          "Si activé, le portefeuille récupérera automatiquement les tokens verrouillés dès qu'ils seront déverrouillés.",
+      },
       auditor: {
         toggle: "Activer l'auditeur",
         badge: "Bêta",

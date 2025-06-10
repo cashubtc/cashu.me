@@ -406,6 +406,11 @@ export default {
         description:
           "Automatically paste ecash in your clipboard when you press Receive, then Ecash, then Paste. Automatic pasting can cause UI glitches in iOS, turn it off if you experience issues.",
       },
+      auto_redeem_locked: {
+        toggle: "Redeem locked tokens automatically",
+        description:
+          "If enabled, the wallet will automatically redeem locked tokens once they become redeemable.",
+      },
       auditor: {
         toggle: "Enable auditor",
         badge: "Beta",
