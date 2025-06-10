@@ -1224,9 +1224,14 @@ export default defineComponent({
                 console.error(e);
               }
             }
-            const dmContent = this.sendData.memo
-              ? `${this.sendData.memo}\n${this.sendData.tokensBase64}`
-              : this.sendData.tokensBase64;
+            const payload = {
+              token: this.sendData.tokensBase64,
+              amount: this.sendData.amount * this.activeUnitCurrencyMultiplyer,
+              unlockTime: this.sendData.locktime || null,
+              bucketId: this.sendData.bucketId,
+              referenceId: this.sendData.historyToken?.id || '',
+            };
+            const dmContent = JSON.stringify(payload);
             const { success, event } =
               await useNostrStore().sendNip04DirectMessage(
                 recipient,
@@ -1369,9 +1374,14 @@ export default defineComponent({
                 console.error(e);
               }
             }
-            const dmContent2 = this.sendData.memo
-              ? `${this.sendData.memo}\n${this.sendData.tokensBase64}`
-              : this.sendData.tokensBase64;
+            const payload2 = {
+              token: this.sendData.tokensBase64,
+              amount: this.sendData.amount * this.activeUnitCurrencyMultiplyer,
+              unlockTime: this.sendData.locktime || null,
+              bucketId: this.sendData.bucketId,
+              referenceId: this.sendData.historyToken?.id || '',
+            };
+            const dmContent2 = JSON.stringify(payload2);
             const { success, event } =
               await useNostrStore().sendNip04DirectMessage(
                 recipient,
