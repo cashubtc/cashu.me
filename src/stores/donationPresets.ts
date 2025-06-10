@@ -5,6 +5,7 @@ import { useMintsStore } from "./mints";
 import { useProofsStore } from "./proofs";
 import { useLockedTokensStore, LockedToken } from "./lockedTokens";
 import { useSubscriptionsStore } from "./subscriptions";
+import { useP2PKStore } from "./p2pk";
 import { DEFAULT_BUCKET_ID } from "./buckets";
 
 export type DonationPreset = {
@@ -49,6 +50,9 @@ export const useDonationPresetsStore = defineStore("donationPresets", {
       const mintsStore = useMintsStore();
       const lockedStore = useLockedTokensStore();
       const subscriptionsStore = useSubscriptionsStore();
+      const p2pkStore = useP2PKStore();
+
+      const convertedPubkey = p2pkStore.maybeConvertNpub(pubkey);
 
       const wallet = walletStore.wallet;
       let proofs = mintsStore.activeProofs.filter(
@@ -66,7 +70,7 @@ export const useDonationPresetsStore = defineStore("donationPresets", {
           proofs,
           wallet,
           amount,
-          pubkey,
+          convertedPubkey,
           bucketId
         );
         const token = proofsStore.serializeProofs(sendProofs);
@@ -75,7 +79,7 @@ export const useDonationPresetsStore = defineStore("donationPresets", {
             lockedStore.addLockedToken({
               amount,
               token,
-              pubkey,
+              pubkey: convertedPubkey,
               bucketId,
               label: subscription?.tierName
                 ? `Subscription: ${subscription.tierName}`
@@ -94,7 +98,7 @@ export const useDonationPresetsStore = defineStore("donationPresets", {
           proofs,
           wallet,
           amount,
-          pubkey,
+          convertedPubkey,
           bucketId,
           locktime
         );
@@ -102,7 +106,7 @@ export const useDonationPresetsStore = defineStore("donationPresets", {
         const locked = lockedStore.addLockedToken({
           amount,
           token,
-          pubkey,
+          pubkey: convertedPubkey,
           locktime,
           bucketId,
           label: subscription?.tierName
