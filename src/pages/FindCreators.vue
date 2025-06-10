@@ -88,7 +88,7 @@ import {
   Loading,
 } from "quasar";
 import { nip19 } from "nostr-tools";
-import { receiptsToDmText } from "src/js/receipt-utils";
+import { receiptToDmText } from "src/js/receipt-utils";
 
 const iframeEl = ref<HTMLIFrameElement | null>(null);
 const showDonateDialog = ref(false);
@@ -153,6 +153,7 @@ function openSubscribe(tier: any) {
 }
 
 async function confirmSubscribe({
+  bucketId,
   months,
   amount,
   startDate,
@@ -165,7 +166,7 @@ async function confirmSubscribe({
       months,
       amount,
       dialogPubkey.value,
-      undefined,
+      bucketId,
       startDate,
       true,
       {
@@ -180,14 +181,18 @@ async function confirmSubscribe({
       supporterName =
         prof?.display_name || prof?.name || prof?.username || nostr.pubkey;
     } catch {}
-    const dmMessage = receiptsToDmText(receipts, supporterName);
-    const { success, event } = await nostr.sendNip04DirectMessage(
-      dialogPubkey.value,
-      dmMessage
-    );
-    if (success) {
-      notifySuccess(t("FindCreators.notifications.subscription_success"));
+    let dmSuccess = true;
+    for (const r of receipts) {
+      const dmMessage = receiptToDmText(r, supporterName);
+      const { success, event } = await nostr.sendNip04DirectMessage(
+        dialogPubkey.value,
+        dmMessage
+      );
       if (event) useDmChatsStore().addOutgoing(event);
+      if (!success) dmSuccess = false;
+    }
+    if (dmSuccess) {
+      notifySuccess(t("FindCreators.notifications.subscription_success"));
     } else {
       notifyWarning(t("wallet.notifications.nostr_dm_failed"));
     }
