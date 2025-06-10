@@ -568,7 +568,7 @@ const columns = computed(() => [
   { name: "creator", label: t("SubscriptionsOverview.columns.creator"), field: "creator", sortable: true },
   { name: "bucket", label: t("SubscriptionsOverview.columns.bucket"), field: "bucketName", sortable: true },
   { name: "tierName", label: t("SubscriptionsOverview.columns.tierName"), field: "tierName", sortable: true },
-  { name: "benefits", label: t("SubscriptionsOverview.columns.benefits"), field: "benefits" },
+  { name: "benefits", label: t("SubscriptionsOverview.columns.benefits"), field: "benefits", sortable: true },
   { name: "frequency", label: t("SubscriptionsOverview.columns.frequency"), field: "frequency", sortable: true },
   { name: "tokensRemaining", label: t("SubscriptionsOverview.columns.tokensRemaining"), field: "tokensRemaining", align: "right", sortable: true },
   { name: "monthly", label: t("SubscriptionsOverview.columns.monthly"), field: "monthly", align: "right", sortable: true },
