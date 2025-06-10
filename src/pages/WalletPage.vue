@@ -269,6 +269,7 @@ import { useStorageStore } from "src/stores/storage";
 import ReceiveTokenDialog from "src/components/ReceiveTokenDialog.vue";
 import { useWelcomeStore } from "../stores/welcome";
 import { useInvoicesWorkerStore } from "src/stores/invoicesWorker";
+import { useLockedTokensRedeemWorker } from "src/stores/lockedTokensRedeemWorker";
 import { notifyError, notify, notifyWarning } from "../js/notify";
 import { DEFAULT_BUCKET_ID } from "src/stores/buckets";
 
@@ -431,6 +432,7 @@ export default {
       "startInvoiceCheckerWorker",
       "checkPendingInvoices",
     ]),
+    ...mapActions(useLockedTokensRedeemWorker, ["startLockedTokensRedeemWorker"]),
     // TOKEN METHODS
     decodeToken: function (encoded_token) {
       try {
@@ -716,6 +718,9 @@ export default {
 
     // start invoice checker worker
     this.startInvoiceCheckerWorker();
+
+    // start locked tokens auto redeem worker
+    this.startLockedTokensRedeemWorker();
 
     // reconnect all websockets
     this.checkPendingInvoices();

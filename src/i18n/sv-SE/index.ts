@@ -354,6 +354,11 @@ export default {
         description:
           "Klistra in ecash från ditt urklipp automatiskt när du trycker på Ta emot, sedan Ecash, sedan Klistra in. Automatisk inklistring kan orsaka UI-problem i iOS, stäng av det om du upplever problem.",
       },
+      auto_redeem_locked: {
+        toggle: "Lös in låsta tokens automatiskt",
+        description:
+          "Om aktiverat löser plånboken automatiskt in låsta tokens när de kan lösas in.",
+      },
       auditor: {
         toggle: "Aktivera revisor",
         badge: "Beta",

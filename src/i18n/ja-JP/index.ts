@@ -355,6 +355,11 @@ export default {
         description:
           "受信、Ecash、貼り付けを押すと、クリップボードのecashを自動的に貼り付けます。自動貼り付けはiOSでUIグリッチを引き起こす可能性があります。問題が発生した場合はオフにしてください。",
       },
+      auto_redeem_locked: {
+        toggle: "ロックされたトークンを自動的に引き出す",
+        description:
+          "有効にすると、ロックされたトークンが解除され次第、自動的に引き出します。",
+      },
       auditor: {
         toggle: "監査人を有効にする",
         badge: "ベータ",

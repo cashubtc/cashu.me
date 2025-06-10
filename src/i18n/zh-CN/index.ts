@@ -350,6 +350,11 @@ export default {
         description:
           "当您按“接收”，然后“Ecash”，然后“粘贴”时，自动粘贴剪贴板中的 ecash。自动粘贴可能会导致 iOS 中的 UI 故障，如果您遇到问题，请关闭此功能。",
       },
+      auto_redeem_locked: {
+        toggle: "自动兑换锁定的代币",
+        description:
+          "如果启用，钱包将在代币解锁后自动兑换它们。",
+      },
       auditor: {
         toggle: "启用审计器",
         badge: "测试版",

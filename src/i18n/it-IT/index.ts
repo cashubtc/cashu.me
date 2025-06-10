@@ -355,6 +355,11 @@ export default {
         description:
           "Incolla automaticamente ecash nei tuoi appunti quando premi Ricevi, poi Ecash, poi Incolla. L'incollaggio automatico può causare problemi all'interfaccia utente su iOS, disattivalo se riscontri problemi.",
       },
+      auto_redeem_locked: {
+        toggle: "Riscatta automaticamente i token bloccati",
+        description:
+          "Se abilitato, il portafoglio riscatterà automaticamente i token bloccati non appena saranno sbloccati.",
+      },
       auditor: {
         toggle: "Abilita revisore",
         badge: "Beta",

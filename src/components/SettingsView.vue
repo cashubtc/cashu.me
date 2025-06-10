@@ -1112,6 +1112,18 @@
             >{{ $t("Settings.experimental.auto_paste.description") }}
           </q-item-label>
         </q-item>
+        <q-item>
+          <q-toggle
+            v-model="autoRedeemLockedTokens"
+            :label="$t('Settings.experimental.auto_redeem_locked.toggle')"
+            color="primary"
+          />
+        </q-item>
+        <q-item class="q-pt-none">
+          <q-item-label caption>
+            {{ $t('Settings.experimental.auto_redeem_locked.description') }}
+          </q-item-label>
+        </q-item>
 
         <!-- auditor settings -->
         <q-item>
@@ -1821,6 +1833,7 @@ export default defineComponent({
       "enableReceiveSwaps",
       "showNfcButtonInDrawer",
       "autoPasteEcashReceive",
+      "autoRedeemLockedTokens",
       "auditorEnabled",
       "auditorUrl",
       "auditorApiUrl",
