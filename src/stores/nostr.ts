@@ -897,6 +897,30 @@ export const useNostrStore = defineStore("nostr", {
           return;
         }
       } catch (e) {
+        // try old "amount sats ... token" format
+        const m = message.match(/(\d+)\s*sats.*?(cashu[A-Za-z0-9]+)/i);
+        if (m) {
+          const amount = parseInt(m[1]);
+          const tokenStr = m[2];
+          const entry: LockedToken = {
+            id: uuidv4(),
+            tokenString: tokenStr,
+            amount: isNaN(amount) ? 0 : amount,
+            owner: "creator",
+            creatorNpub: this.pubkey,
+            subscriberNpub: sender,
+            tierId: "",
+            intervalKey: "",
+            unlockTs: 0,
+            refundUnlockTs: 0,
+            status: "unlockable",
+            subscriptionEventId: null,
+            label: "Locked tokens",
+          };
+          await cashuDb.lockedTokens.put(entry);
+          notifyWarning("Received token in old format. Some data may be missing.");
+          return;
+        }
         // debug("### parsing message for ecash failed");
         return;
       }
