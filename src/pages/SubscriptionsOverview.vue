@@ -66,6 +66,18 @@
       <template #body-cell-bucket="props">
         {{ props.row.bucketName || '-' }}
       </template>
+      <template #body-cell-benefits="props">
+        <template v-if="Array.isArray(props.row.benefits)">
+          <ul class="q-my-none q-pl-none">
+            <li v-for="(benefit, idx) in props.row.benefits" :key="idx">
+              {{ benefit }}
+            </li>
+          </ul>
+        </template>
+        <template v-else>
+          {{ props.row.benefits }}
+        </template>
+      </template>
       <template #body-cell-monthly="props">
         {{ formatCurrency(props.row.monthly) }}
       </template>
