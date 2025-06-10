@@ -72,7 +72,15 @@ export const useDonationPresetsStore = defineStore("donationPresets", {
         const token = proofsStore.serializeProofs(sendProofs);
         if (detailed) {
           return [
-            lockedStore.addLockedToken({ amount, token, pubkey, bucketId }),
+            lockedStore.addLockedToken({
+              amount,
+              token,
+              pubkey,
+              bucketId,
+              label: subscription?.tierName
+                ? `Subscription: ${subscription.tierName}`
+                : undefined,
+            }),
           ];
         }
         return token;
@@ -97,6 +105,9 @@ export const useDonationPresetsStore = defineStore("donationPresets", {
           pubkey,
           locktime,
           bucketId,
+          label: subscription?.tierName
+            ? `Subscription: ${subscription.tierName}`
+            : undefined,
         });
         tokens.push(locked);
         await proofsStore.updateActiveProofs();

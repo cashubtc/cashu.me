@@ -97,7 +97,7 @@ import { useI18n } from "vue-i18n";
 import { Loading } from "quasar";
 import { renderMarkdown as renderMarkdownFn } from "src/js/simple-markdown";
 import PaywalledContent from "components/PaywalledContent.vue";
-import { receiptsToDmText } from "src/js/receipt-utils";
+import { receiptToDmText } from "src/js/receipt-utils";
 
 export default defineComponent({
   name: "PublicCreatorProfilePage",
@@ -149,6 +149,7 @@ export default defineComponent({
     };
 
     const confirmSubscribe = async ({
+      bucketId,
       months,
       amount,
       startDate,
@@ -160,7 +161,7 @@ export default defineComponent({
           months,
           amount,
           creatorNpub,
-          undefined,
+          bucketId,
           startDate,
           true,
           {
@@ -175,14 +176,18 @@ export default defineComponent({
           supporterName =
             prof?.display_name || prof?.name || prof?.username || nostr.pubkey;
         } catch {}
-        const dmMessage = receiptsToDmText(receipts, supporterName);
-        const { success, event } = await nostr.sendNip04DirectMessage(
-          creatorNpub,
-          dmMessage
-        );
-        if (success) {
-          notifySuccess(t("FindCreators.notifications.subscription_success"));
+        let dmSuccess = true;
+        for (const r of receipts) {
+          const dmMessage = receiptToDmText(r, supporterName);
+          const { success, event } = await nostr.sendNip04DirectMessage(
+            creatorNpub,
+            dmMessage
+          );
           if (event) useDmChatsStore().addOutgoing(event);
+          if (!success) dmSuccess = false;
+        }
+        if (dmSuccess) {
+          notifySuccess(t("FindCreators.notifications.subscription_success"));
         } else {
           notifyWarning(t("wallet.notifications.nostr_dm_failed"));
         }
