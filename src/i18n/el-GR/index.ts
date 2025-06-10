@@ -161,6 +161,7 @@ export default {
       backup_restore: "ΑΝΤΙΓΡΑΦΟ ΑΣΦΑΛΕΙΑΣ & ΕΠΑΝΑΦΟΡΑ",
       lightning_address: "ΔΙΕΥΘΥΝΣΗ LIGHTNING",
       nostr_keys: "ΚΛΕΙΔΙΑ NOSTR",
+      nostr: "NOSTR",
       payment_requests: "ΑΙΤΗΜΑΤΑ ΠΛΗΡΩΜΗΣ",
       nostr_wallet_connect: "NOSTR WALLET CONNECT",
       hardware_features: "ΧΑΡΑΚΤΗΡΙΣΤΙΚΑ ΥΛΙΚΟΥ",
@@ -221,6 +222,23 @@ export default {
         title: "Επέκταση υπογραφής",
         description: "Χρήση επέκτασης υπογραφής NIP-07",
         not_found: "Δεν βρέθηκε επέκταση υπογραφής NIP-07",
+      },
+    },
+    nostr: {
+      title: "NOSTR",
+      relays: {
+        expand_label: "Κάντε κλικ για να επεξεργαστείτε τα relays",
+        add: {
+          title: "Προσθήκη relay",
+          description:
+            "Το πορτοφόλι σας χρησιμοποιεί αυτά τα relays για λειτουργίες nostr όπως αιτήματα πληρωμής, nostr wallet connect και αντίγραφα ασφαλείας.",
+        },
+        list: {
+          title: "Relays",
+          description: "Το πορτοφόλι σας θα συνδεθεί σε αυτά τα relays.",
+          copy_tooltip: "Αντιγραφή relay",
+          remove_tooltip: "Κατάργηση relay",
+        },
       },
     },
     payment_requests: {

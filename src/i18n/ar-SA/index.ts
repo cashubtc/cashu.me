@@ -159,6 +159,7 @@ export default {
       backup_restore: "النسخ الاحتياطي والاستعادة",
       lightning_address: "عنوان LIGHTNING",
       nostr_keys: "مفاتيح NOSTR",
+      nostr: "NOSTR",
       payment_requests: "طلبات الدفع",
       nostr_wallet_connect: "اتصال محفظة NOSTR",
       hardware_features: "ميزات الأجهزة",
@@ -218,6 +219,23 @@ export default {
         title: "ملحق التوقيع",
         description: "استخدام ملحق التوقيع NIP-07",
         not_found: "لم يتم العثور على ملحق التوقيع NIP-07",
+      },
+    },
+    nostr: {
+      title: "NOSTR",
+      relays: {
+        expand_label: "انقر لتعديل المرحلات",
+        add: {
+          title: "إضافة مُرحِل",
+          description:
+            "تستخدم محفظتك هذه المُرحِلات لعمليات nostr مثل طلبات الدفع وربط محفظة nostr والنسخ الاحتياطية.",
+        },
+        list: {
+          title: "المُرحِلات",
+          description: "ستتصل محفظتك بهذه المُرحِلات.",
+          copy_tooltip: "نسخ المُرحِل",
+          remove_tooltip: "إزالة المُرحِل",
+        },
       },
     },
     payment_requests: {

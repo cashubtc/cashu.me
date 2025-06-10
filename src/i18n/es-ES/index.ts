@@ -171,6 +171,7 @@ export default {
       backup_restore: "COPIA DE SEGURIDAD Y RESTAURACIÓN",
       lightning_address: "DIRECCIÓN LIGHTNING",
       nostr_keys: "CLAVES NOSTR",
+      nostr: "NOSTR",
       payment_requests: "SOLICITUDES DE PAGO",
       nostr_wallet_connect: "NOSTR WALLET CONNECT",
       hardware_features: "CARACTERÍSTICAS DE HARDWARE",
@@ -235,6 +236,23 @@ export default {
         title: "Extensión de firma",
         description: "Usar una extensión de firma NIP-07",
         not_found: "No se encontró ninguna extensión de firma NIP-07",
+      },
+    },
+    nostr: {
+      title: "NOSTR",
+      relays: {
+        expand_label: "Haga clic para editar relays",
+        add: {
+          title: "Agregar relay",
+          description:
+            "Su billetera usa estos relays para operaciones de nostr como solicitudes de pago, nostr wallet connect y respaldos.",
+        },
+        list: {
+          title: "Relays",
+          description: "Su billetera se conectará a estos relays.",
+          copy_tooltip: "Copiar relay",
+          remove_tooltip: "Eliminar relay",
+        },
       },
     },
     payment_requests: {

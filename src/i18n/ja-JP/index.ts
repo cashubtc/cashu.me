@@ -160,6 +160,7 @@ export default {
       backup_restore: "バックアップと復元",
       lightning_address: "ライトニングアドレス",
       nostr_keys: "ノストルキー",
+      nostr: "NOSTR",
       payment_requests: "支払いリクエスト",
       nostr_wallet_connect: "ノストルウォレットコネクト",
       hardware_features: "ハードウェア機能",
@@ -219,6 +220,23 @@ export default {
         title: "署名拡張機能",
         description: "NIP-07署名拡張機能を使用",
         not_found: "NIP-07署名拡張機能が見つかりません",
+      },
+    },
+    nostr: {
+      title: "NOSTR",
+      relays: {
+        expand_label: "クリックしてリレーを編集",
+        add: {
+          title: "リレーを追加",
+          description:
+            "あなたのウォレットは、支払い要求、nostr wallet connect、バックアップなどのnostr操作にこれらのリレーを使用します。",
+        },
+        list: {
+          title: "リレー",
+          description: "あなたのウォレットはこれらのリレーに接続します。",
+          copy_tooltip: "リレーをコピー",
+          remove_tooltip: "リレーを削除",
+        },
       },
     },
     payment_requests: {

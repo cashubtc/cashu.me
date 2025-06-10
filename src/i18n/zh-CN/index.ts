@@ -159,6 +159,7 @@ export default {
       backup_restore: "备份与恢复",
       lightning_address: "LIGHTNING 地址",
       nostr_keys: "NOSTR 密钥",
+      nostr: "NOSTR",
       payment_requests: "支付请求",
       nostr_wallet_connect: "NOSTR 钱包连接",
       hardware_features: "硬件功能",
@@ -217,6 +218,23 @@ export default {
         title: "签名扩展",
         description: "使用 NIP-07 签名扩展",
         not_found: "未找到 NIP-07 签名扩展",
+      },
+    },
+    nostr: {
+      title: "NOSTR",
+      relays: {
+        expand_label: "点击编辑中继",
+        add: {
+          title: "添加中继",
+          description:
+            "您的钱包使用这些中继进行nostr操作，例如付款请求、nostr钱包连接和备份。",
+        },
+        list: {
+          title: "中继",
+          description: "您的钱包将连接到这些中继。",
+          copy_tooltip: "复制中继",
+          remove_tooltip: "删除中继",
+        },
       },
     },
     payment_requests: {
