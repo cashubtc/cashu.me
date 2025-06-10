@@ -1,7 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 var sendDm: any
-var createFmt: any
 var walletSend: any
 var walletMintWallet: any
 var serializeProofs: any
@@ -53,13 +52,9 @@ vi.mock('../../../src/stores/tokens', () => {
   return { useTokensStore: () => ({ addPendingToken: addPending }) }
 })
 
-vi.mock('../../../src/js/message-utils', () => {
-  createFmt = vi.fn(() => 'FMT')
-  return {
-    sanitizeMessage: vi.fn((s: string) => s),
-    createFormattedTokenMessage: createFmt,
-  }
-})
+vi.mock('../../../src/js/message-utils', () => ({
+  sanitizeMessage: vi.fn((s: string) => s)
+}))
 
 import { useMessengerStore } from '../../../src/stores/messenger'
 
@@ -75,8 +70,7 @@ describe('messenger.sendToken', () => {
     expect(success).toBe(true)
     expect(walletMintWallet).toHaveBeenCalledWith('mint', 'sat')
     expect(walletSend).toHaveBeenCalled()
-    expect(createFmt).toHaveBeenCalledWith('TOKEN', 1, 'note', null)
-    expect(sendDm).toHaveBeenCalledWith('receiver', 'FMT', 'priv', 'pub')
+    expect(sendDm).toHaveBeenCalledWith('receiver', 'note\nTOKEN', 'priv', 'pub')
     expect(addPending).toHaveBeenCalledWith({
       amount: -1,
       token: 'TOKEN',

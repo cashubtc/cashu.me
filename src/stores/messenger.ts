@@ -5,17 +5,12 @@ import { Event as NostrEvent } from "nostr-tools";
 import { useNostrStore, SignerType } from "./nostr";
 import { v4 as uuidv4 } from "uuid";
 import { useSettingsStore } from "./settings";
-import {
-  sanitizeMessage,
-  createFormattedTokenMessage,
-  parseFormattedTokenMessage,
-} from "src/js/message-utils";
+import { sanitizeMessage } from "src/js/message-utils";
 import { notifySuccess, notifyError } from "src/js/notify";
 import { useWalletStore } from "./wallet";
 import { useMintsStore } from "./mints";
 import { useProofsStore } from "./proofs";
 import { useTokensStore } from "./tokens";
-import { useDmChatsStore } from "./dmChats";
 import { useReceiveTokensStore } from "./receiveTokensStore";
 import { useBucketsStore } from "./buckets";
 import { useLockedTokensStore } from "./lockedTokens";
@@ -117,14 +112,15 @@ export const useMessengerStore = defineStore("messenger", {
         );
 
         const tokenStr = proofsStore.serializeProofs(sendProofs);
-        const message = createFormattedTokenMessage(
-          tokenStr,
-          sendAmount,
-          memo,
-          null,
-        );
+        const payload = {
+          token: tokenStr,
+          amount: sendAmount,
+          unlockTime: null,
+          bucketId,
+          referenceId: uuidv4(),
+        };
 
-        const { success } = await this.sendDm(recipient, message);
+        const { success } = await this.sendDm(recipient, JSON.stringify(payload));
         if (success) {
           tokens.addPendingToken({
             amount: -sendAmount,
@@ -133,7 +129,6 @@ export const useMessengerStore = defineStore("messenger", {
             mint: mints.activeMintUrl,
             bucketId,
           });
-          useDmChatsStore().addMessage(recipient, message, true);
         }
         return success;
       } catch (e) {
@@ -179,7 +174,7 @@ export const useMessengerStore = defineStore("messenger", {
         event.content
       );
       try {
-        const payload = parseFormattedTokenMessage(decrypted);
+        const payload = JSON.parse(decrypted);
         if (payload && payload.token) {
           const tokensStore = useTokensStore();
           const decoded = tokensStore.decodeToken(payload.token);
