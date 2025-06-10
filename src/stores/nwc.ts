@@ -16,6 +16,7 @@ import { useWalletStore, InvoiceHistory } from "./wallet";
 import { useProofsStore } from "./proofs";
 import { notify, notifyError, notifyWarning } from "../js/notify";
 import { useSettingsStore } from "./settings";
+import { useNostrStore } from "./nostr";
 import { decode as decodeBolt11 } from "light-bolt11-decoder";
 
 type NWCConnection = {
@@ -79,10 +80,6 @@ export const useNWCStore = defineStore("nwc", {
       "list_transactions",
       "lookup_invoice",
     ],
-    relays: useLocalStorage<string[]>(
-      "cashu.nwc.relays",
-      useSettingsStore().defaultNostrRelays
-    ),
     blocking: false,
     ndk: new NDK(),
     subscriptions: [] as NDKSubscription[],
@@ -197,10 +194,10 @@ export const useNWCStore = defineStore("nwc", {
         walletStore.wallet
       );
       if (!quote) {
+        // requesting mint invoice can fail if no mint was selected yet
+        // the error will have been shown as a notification
+        // TODO: make requestMint throw and return useful message
         return {
-          // requesting mint invoice can fail if no mint was selected yet
-          // the error will have been shown as a notification
-          // TODO: make requestMint throw and return useful message
           result_type: nwcCommand.method,
           error: {
             code: "INTERNAL",
@@ -406,7 +403,8 @@ export const useNWCStore = defineStore("nwc", {
     getConnectionString: function (connection: NWCConnection) {
       const walletPublicKeyHex = connection.walletPublicKey;
       const connectionSecretHex = connection.connectionSecret;
-      return `nostr+walletconnect://${walletPublicKeyHex}?relay=${this.relays.join(
+      const nostrStore = useNostrStore();
+      return `nostr+walletconnect://${walletPublicKeyHex}?relay=${nostrStore.relays.join(
         "&relay="
       )}&secret=${connectionSecretHex}`;
     },
@@ -436,8 +434,9 @@ export const useNWCStore = defineStore("nwc", {
       const walletSigner = new NDKPrivateKeySigner(conn.walletPrivateKey);
       // close and delete all old subscriptions
       this.unsubscribeNWC();
+      const nostrStore = useNostrStore();
       this.ndk = new NDK({
-        explicitRelayUrls: this.relays,
+        explicitRelayUrls: nostrStore.relays,
         signer: walletSigner,
       });
       this.ndk.connect();
@@ -481,7 +480,8 @@ export const useNWCStore = defineStore("nwc", {
         "#p": [conn.walletPublicKey],
       } as NDKFilter;
       const sub = this.ndk.subscribe(filter);
-      console.log("### subscribing to NWC on relays: ", this.relays);
+      const nostrStore = useNostrStore();
+      console.log("### subscribing to NWC on relays: ", nostrStore.relays);
       this.subscriptions.push(sub);
 
       sub.on("eose", () =>

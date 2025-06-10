@@ -164,7 +164,7 @@
           <div class="section-divider q-my-md">
             <div class="divider-line"></div>
             <div class="divider-text">
-              {{ $t("Settings.sections.nostr_keys") }}
+              {{ $t("Settings.sections.nostr.title") }}
             </div>
             <div class="divider-line"></div>
           </div>
@@ -352,15 +352,15 @@
         dense
         dense-toggle
         class="text-left"
-        :label="$t('Settings.nostr_wallet_connect.relays.expand_label')"
+        :label="$t('Settings.sections.nostr.relays.expand_label')"
       >
         <q-item>
           <q-item-section>
             <q-item-label overline>{{
-              $t("Settings.nostr_wallet_connect.relays.add.title")
+              $t("Settings.sections.nostr.relays.add.title")
             }}</q-item-label>
             <q-item-label caption
-              >{{ $t("Settings.nostr_wallet_connect.relays.add.description") }}
+              >{{ $t("Settings.sections.nostr.relays.add.description") }}
             </q-item-label>
           </q-item-section>
         </q-item>
@@ -371,7 +371,7 @@
               rounded
               dense
               v-model="newRelay"
-              :label="$t('Settings.nostr_wallet_connect.relays.list.title')"
+              :label="$t('Settings.sections.nostr.relays.list.title')"
               append
             >
               <template v-slot:append>
@@ -389,10 +389,10 @@
         <q-item>
           <q-item-section>
             <q-item-label overline>{{
-              $t("Settings.nostr_wallet_connect.relays.list.title")
+              $t("Settings.sections.nostr.relays.list.title")
             }}</q-item-label>
             <q-item-label caption
-              >{{ $t("Settings.nostr_wallet_connect.relays.list.description") }}
+              >{{ $t("Settings.sections.nostr.relays.list.description") }}
             </q-item-label>
           </q-item-section>
         </q-item>
@@ -405,7 +405,7 @@
               color="grey"
               class="q-mr-sm cursor-pointer"
               ><q-tooltip>{{
-                $t("Settings.nostr_wallet_connect.relays.list.copy_tooltip")
+                $t("Settings.sections.nostr.relays.list.copy_tooltip")
               }}</q-tooltip></q-icon
             >
           </q-item-section>
@@ -417,7 +417,7 @@
               color="grey"
               class="q-mr-sm cursor-pointer"
               ><q-tooltip>{{
-                $t("Settings.nostr_wallet_connect.relays.list.remove_tooltip")
+                $t("Settings.sections.nostr.relays.list.remove_tooltip")
               }}</q-tooltip></q-icon
             >
           </q-item-section>
@@ -1816,7 +1816,13 @@ export default defineComponent({
       "showP2PKDialog",
       "showP2PkButtonInDrawer",
     ]),
-    ...mapWritableState(useNWCStore, ["showNWCDialog", "showNWCData"]),
+    ...mapWritableState(useNWCStore, [
+      "nwcEnabled",
+      "connections",
+      "showNWCDialog",
+      "showNWCData",
+    ]),
+    ...mapWritableState(useNostrStore, ["relays"]),
     ...mapState(useMintsStore, ["activeMintUrl", "mints", "activeProofs"]),
     ...mapState(useNPCStore, ["npcLoading"]),
     ...mapState(useNostrStore, [
@@ -1845,7 +1851,6 @@ export default defineComponent({
       "showAddMintDialog",
       "showRemoveMintDialog",
     ]),
-    ...mapWritableState(useNWCStore, ["nwcEnabled", "connections", "relays"]),
     ...mapWritableState(usePRStore, [
       "enablePaymentRequest",
       "receivePaymentRequestsAutomatically",

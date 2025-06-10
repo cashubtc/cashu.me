@@ -59,7 +59,10 @@ export const useNostrStore = defineStore("nostr", {
   state: () => ({
     connected: false,
     pubkey: useLocalStorage<string>("cashu.ndk.pubkey", ""),
-    relays: useSettingsStore().defaultNostrRelays,
+    relays: useLocalStorage<string[]>(
+      "cashu.nostr.relays",
+      useSettingsStore().defaultNostrRelays
+    ),
     ndk: {} as NDK,
     signerType: useLocalStorage<SignerType>(
       "cashu.ndk.signerType",

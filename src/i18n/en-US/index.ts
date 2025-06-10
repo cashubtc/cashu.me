@@ -168,6 +168,23 @@ export default {
       backup_restore: "BACKUP & RESTORE",
       lightning_address: "LIGHTNING ADDRESS",
       nostr_keys: "NOSTR KEYS",
+      nostr: {
+        title: "NOSTR",
+        relays: {
+          expand_label: "Click to edit relays",
+          add: {
+            title: "Add relay",
+            description:
+              "Your wallet uses these relays for nostr operations such as payment requests, nostr wallet connect, and backups.",
+          },
+          list: {
+            title: "Relays",
+            description: "Your wallet will connect to these relays.",
+            copy_tooltip: "Copy relay",
+            remove_tooltip: "Remove relay",
+          },
+        },
+      },
       payment_requests: "PAYMENT REQUESTS",
       nostr_wallet_connect: "NOSTR WALLET CONNECT",
       hardware_features: "HARDWARE FEATURES",
@@ -254,20 +271,6 @@ export default {
         copy_tooltip: "Copy connection string",
         qr_tooltip: "Show QR code",
         allowance_label: "Allowance left (sat)",
-      },
-      relays: {
-        expand_label: "Click to edit relays",
-        add: {
-          title: "Add relay",
-          description:
-            "Nostr Wallet Connect uses nostr relays to connect your wallet to other applications.",
-        },
-        list: {
-          title: "Relays",
-          description: "Your wallet will connect to these relays.",
-          copy_tooltip: "Copy relay",
-          remove_tooltip: "Remove relay",
-        },
       },
     },
     hardware_features: {
