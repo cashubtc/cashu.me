@@ -1518,6 +1518,9 @@ export default {
       cancel_success: "Subscription canceled",
       extend_success: "Subscription extended",
     },
+    row: {
+      next_unlock_label: "Next unlock in { value }",
+    },
   },
   LockedTokensTable: {
     empty_text: "No locked tokens",
