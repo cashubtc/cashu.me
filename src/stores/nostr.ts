@@ -810,6 +810,7 @@ export const useNostrStore = defineStore("nostr", {
       }
     },
     parseMessageForEcash: async function (message: string, sender?: string) {
+      if (sender && sender === this.pubkey) return;
       // first check if the message can be converted to a json and then to a PaymentRequestPayload
       try {
         const payload = JSON.parse(message) as any;
@@ -853,9 +854,31 @@ export const useNostrStore = defineStore("nostr", {
 
         // check for locked token format
         if (payload && payload.token && payload.referenceId) {
+          const buckets = useBucketsStore();
+          if (!buckets.bucketList.find((b) => b.id === payload.bucketId)) {
+            buckets.buckets.push({
+              id: payload.bucketId,
+              name: payload.bucketId.slice(0, 8),
+              creatorPubkey: sender,
+            });
+          }
+
+          let amount = payload.amount;
+          if (amount === undefined) {
+            try {
+              const decoded = token.decode(payload.token);
+              amount = decoded
+                ? token
+                    .getProofs(decoded)
+                    .reduce((s, p) => (s += p.amount), 0)
+                : 0;
+            } catch {}
+          }
+
           const entry: LockedToken = {
             id: uuidv4(),
             tokenString: payload.token,
+            amount: amount || 0,
             owner: "creator",
             creatorNpub: this.pubkey,
             subscriberNpub: sender,
@@ -868,6 +891,7 @@ export const useNostrStore = defineStore("nostr", {
                 ? "pending"
                 : "unlockable",
             subscriptionEventId: null,
+            label: "Locked tokens",
           };
           await cashuDb.lockedTokens.put(entry);
           return;
