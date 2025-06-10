@@ -39,6 +39,8 @@ import {
   decodePaymentRequest,
   MintQuoteResponse,
   ProofState,
+  useNostrStore,
+  getSignedProofs,
 } from "@cashu/cashu-ts";
 import { hashToCurve } from "@cashu/crypto/modules/common";
 // @ts-ignore
@@ -443,7 +445,31 @@ export const useWalletStore = defineStore("wallet", {
       const keysetId = this.getKeyset(wallet.mint.mintUrl, wallet.unit);
       await uIStore.lockMutex();
       try {
-        const spendableProofs = this.spendableProofs(proofs, amount);
+        let signedProofs = proofs;
+        const p2pkProofs = proofs.filter((p) => p.secret.startsWith("P2PK:"));
+        if (p2pkProofs.length > 0) {
+          const nostr = useNostrStore();
+          const privKey = (nostr as any).privateKey || (nostr as any).privKeyHex;
+          if (!privKey) {
+            throw new Error("No Nostr private key available");
+          }
+          const privateKeys: Record<string, string> = {};
+          p2pkProofs.forEach((p) => {
+            privateKeys[p.id] = privKey;
+          });
+          const signed = getSignedProofs(
+            signedProofs.map((p) => ({
+              id: p.id,
+              amount: p.amount,
+              secret: p.secret,
+              C: p.C,
+            })),
+            privKey,
+          );
+          signedProofs = signedProofs.map((p, i) => ({ ...p, ...signed[i] }));
+        }
+
+        const spendableProofs = this.spendableProofs(signedProofs, amount);
 
         proofsToSend = this.coinSelect(
           spendableProofs,
