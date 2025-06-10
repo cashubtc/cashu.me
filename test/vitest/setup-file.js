@@ -1,3 +1,4 @@
+import 'happy-dom'
 import 'fake-indexeddb/auto'
 import { vi, beforeEach } from 'vitest'
 import { createPinia, setActivePinia } from 'pinia'
