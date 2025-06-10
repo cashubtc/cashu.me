@@ -13,7 +13,7 @@
 
 <script lang="ts">
 import { defineComponent, computed } from 'vue';
-import { useLockedTokensStore } from 'stores/lockedTokens';
+import { useDexieLockedTokensStore } from 'stores/lockedTokensDexie';
 
 export default defineComponent({
   name: 'PaywalledContent',
@@ -22,10 +22,16 @@ export default defineComponent({
     tierId: { type: String, required: true },
   },
   setup(props) {
-    const store = useLockedTokensStore();
-    const validTokens = computed(() =>
-      store.validTokensForTier(props.creatorNpub, props.tierId)
-    );
+    const store = useDexieLockedTokensStore();
+    const validTokens = computed(() => {
+      const now = Math.floor(Date.now() / 1000);
+      return store.lockedTokens.filter(
+        (t) =>
+          t.tierId === props.tierId &&
+          t.creatorNpub === props.creatorNpub &&
+          (!t.unlockTs || t.unlockTs <= now)
+      );
+    });
     const hasAccess = computed(() => validTokens.value.length > 0);
     return { hasAccess };
   },

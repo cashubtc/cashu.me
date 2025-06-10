@@ -71,7 +71,6 @@ import SubscriptionReceipt from "components/SubscriptionReceipt.vue";
 import SendTokenDialog from "components/SendTokenDialog.vue";
 import { useSendTokensStore } from "stores/sendTokensStore";
 import { useDonationPresetsStore } from "stores/donationPresets";
-import { useLockedTokensStore } from "stores/lockedTokens";
 import { useCreatorsStore } from "stores/creators";
 import { useNostrStore } from "stores/nostr";
 import { useMintsStore } from "stores/mints";
@@ -98,7 +97,6 @@ const dialogPubkey = ref("");
 
 const sendTokensStore = useSendTokensStore();
 const donationStore = useDonationPresetsStore();
-const lockedStore = useLockedTokensStore();
 const creators = useCreatorsStore();
 const nostr = useNostrStore();
 const mintsStore = useMintsStore();

@@ -648,7 +648,7 @@ import { useUiStore } from "src/stores/ui";
 import { useProofsStore } from "src/stores/proofs";
 import { useMintsStore } from "src/stores/mints";
 import { useTokensStore } from "src/stores/tokens";
-import { useLockedTokensStore } from "src/stores/lockedTokens";
+import { useDexieLockedTokensStore } from "src/stores/lockedTokensDexie";
 import { getShortUrl } from "src/js/wallet-helpers";
 import { useSettingsStore } from "src/stores/settings";
 import { useWorkersStore } from "src/stores/workers";
@@ -1264,13 +1264,22 @@ export default defineComponent({
             this.sendData.memo = "";
           }
         }
-        useLockedTokensStore().addLockedToken({
+        useDexieLockedTokensStore().addLockedToken({
+          tokenString: this.sendData.tokensBase64,
           amount: sendAmount,
-          token: this.sendData.tokensBase64,
-          pubkey: this.sendData.p2pkPubkey,
-          locktime: this.sendData.locktime || undefined,
-          refundPubkey: this.sendData.refundPubkey || undefined,
-          bucketId,
+          owner: 'creator',
+          creatorNpub: this.sendData.p2pkPubkey,
+          tierId: bucketId,
+          intervalKey: '',
+          unlockTs: this.sendData.locktime || 0,
+          refundUnlockTs: 0,
+          status:
+            this.sendData.locktime &&
+            this.sendData.locktime > Math.floor(Date.now() / 1000)
+              ? 'pending'
+              : 'unlockable',
+          subscriptionEventId: null,
+          label: this.sendData.memo || undefined,
         });
         const historyToken = {
           amount: -this.sendData.amount,
