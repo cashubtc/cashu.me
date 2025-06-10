@@ -1354,5 +1354,6 @@ timelock: {
   },
   SubscriptionsOverview: {
     export_csv: "Export CSV",
+    filter: { status: "Φιλτράρισμα κατά κατάσταση" },
   },
 };

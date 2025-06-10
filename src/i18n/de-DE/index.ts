@@ -1351,5 +1351,6 @@ export default {
   },
   SubscriptionsOverview: {
     export_csv: "Export CSV",
+    filter: { status: "Nach Status filtern" },
   },
 };

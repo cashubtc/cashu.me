@@ -1344,5 +1344,6 @@ timelock: {
   },
   SubscriptionsOverview: {
     export_csv: "Export CSV",
+    filter: { status: "تصفية حسب الحالة" },
   },
 };
