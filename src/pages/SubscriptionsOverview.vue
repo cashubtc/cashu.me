@@ -86,7 +86,17 @@
               :label="Math.round(row.progress * 100) + '%'"
               :color="row.status === 'active' ? 'positive' : 'negative'"
               track-color="grey-4"
-            />
+            >
+              <q-tooltip>
+                {{
+                  row.countdown
+                    ? $t('SubscriptionsOverview.row.next_unlock_label', {
+                        value: row.countdown
+                      })
+                    : '-' 
+                }}
+              </q-tooltip>
+            </q-linear-progress>
           </q-card-section>
           <q-card-actions align="right" class="q-gutter-xs">
             <q-btn flat dense size="sm" @click="openDetails(row.creator)">
@@ -295,7 +305,17 @@
             :label="Math.round(props.row.progress * 100) + '%'"
             :color="props.row.status === 'active' ? 'positive' : 'negative'"
             track-color="grey-4"
-          />
+          >
+            <q-tooltip>
+              {{
+                props.row.countdown
+                  ? $t('SubscriptionsOverview.row.next_unlock_label', {
+                      value: props.row.countdown
+                    })
+                  : '-'
+              }}
+            </q-tooltip>
+          </q-linear-progress>
         </div>
       </template>
       <template #body-cell-actions="props">
@@ -453,7 +473,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, onMounted, watch } from 'vue';
+import { computed, ref, onMounted, onUnmounted, watch } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useLockedTokensStore, type LockedToken } from 'stores/lockedTokens';
 import { useBucketsStore } from 'stores/buckets';
@@ -466,6 +486,7 @@ import { useSubscriptionsStore } from 'stores/subscriptions';
 import { useRouter } from 'vue-router';
 import { useQuasar, copyToClipboard } from 'quasar';
 import { nip19 } from 'nostr-tools';
+import { formatDistanceToNow } from 'date-fns';
 import { shortenString } from 'src/js/string-utils';
 import { useI18n } from 'vue-i18n';
 import { notifySuccess, notifyError } from 'src/js/notify';
@@ -501,8 +522,17 @@ function formatTs(ts: number): string {
 
 const subscriptionsStore = useSubscriptionsStore();
 
+const now = ref(Date.now());
+let nowTimer: any;
+onMounted(() => {
+  nowTimer = setInterval(() => {
+    now.value = Date.now();
+  }, 1000);
+});
+onUnmounted(() => clearInterval(nowTimer));
+
 const rows = computed(() => {
-  const now = Math.floor(Date.now() / 1000);
+  const nowSec = Math.floor(now.value / 1000);
   return subscriptionsStore.subscriptions.map((sub) => {
     const tokens: LockedToken[] = sub.intervals.map((i) => ({
       id: i.lockedTokenId,
@@ -515,8 +545,9 @@ const rows = computed(() => {
       date: '',
     }));
     const total = tokens.reduce((sum, t) => sum + t.amount, 0);
-    const future = tokens.filter((t) => t.locktime && t.locktime > now);
+    const future = tokens.filter((t) => t.locktime && t.locktime > nowSec);
     const nextUnlock = future.sort((a, b) => a.locktime! - b.locktime!)[0]?.locktime || null;
+    const countdown = nextUnlock ? formatDistanceToNow(nextUnlock * 1000) : '';
     const monthsLeft = future.length;
     const monthly = sub.amountPerInterval;
     const start = sub.startDate || null;
@@ -526,7 +557,7 @@ const rows = computed(() => {
       start && totalMonths
         ? start + (totalMonths - 1) * 30 * 24 * 60 * 60
         : null;
-    const unlocked = tokens.filter((t) => !t.locktime || t.locktime <= now).length;
+    const unlocked = tokens.filter((t) => !t.locktime || t.locktime <= nowSec).length;
     const status = monthsLeft > 0 ? 'active' : 'expired';
     const bucket = bucketsStore.bucketList.find((b) => b.id === sub.tierId);
     const bucketName = bucket?.name || '';
@@ -537,6 +568,7 @@ const rows = computed(() => {
       monthly,
       start,
       nextUnlock,
+      countdown,
       monthsLeft,
       progress,
       totalMonths,
