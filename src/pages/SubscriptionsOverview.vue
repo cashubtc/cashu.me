@@ -11,7 +11,153 @@
         {{ formatCurrency(totalLocked) }}
       </div>
     </div>
+    <div v-if="isSmallScreen">
+      <div class="row q-col-gutter-sm q-mb-md">
+        <q-input
+          v-model="filter"
+          dense
+          debounce="300"
+          class="col"
+          :placeholder="$t('global.actions.search.label')"
+        />
+        <q-select
+          v-model="statusFilter"
+          dense
+          emit-value
+          map-options
+          clearable
+          class="col"
+          :options="[
+            { label: $t('SubscriptionsOverview.status.active'), value: 'active' },
+            { label: $t('SubscriptionsOverview.status.expired'), value: 'expired' }
+          ]"
+          :placeholder="$t('SubscriptionsOverview.filter.status')"
+        />
+        <q-select
+          v-model="bucketFilter"
+          dense
+          emit-value
+          map-options
+          clearable
+          class="col"
+          :options="bucketsStore.bucketList.map((b) => ({ label: b.name, value: b.name }))"
+          :placeholder="$t('SubscriptionsOverview.filter.bucket')"
+        />
+        <q-select
+          v-model="frequencyFilter"
+          dense
+          emit-value
+          map-options
+          clearable
+          class="col"
+          :options="[
+            { label: 'monthly', value: 'monthly' },
+            { label: 'weekly', value: 'weekly' }
+          ]"
+          :placeholder="$t('SubscriptionsOverview.filter.frequency')"
+        />
+      </div>
+      <div v-for="row in filteredRows" :key="row.creator" class="q-mb-md">
+        <q-card flat bordered>
+          <q-card-section class="row items-center">
+            <q-avatar size="32px" v-if="profiles[row.creator]?.picture">
+              <img :src="profiles[row.creator].picture" />
+            </q-avatar>
+            <div class="q-ml-sm">
+              <div>
+                {{
+                  profiles[row.creator]?.display_name ||
+                  profiles[row.creator]?.name ||
+                  shortenString(pubkeyNpub(row.creator), 15, 6)
+                }}
+              </div>
+              <div class="text-caption">
+                {{ row.tierName }}
+              </div>
+            </div>
+          </q-card-section>
+          <q-card-section class="q-pt-none">
+            <q-linear-progress
+              rounded
+              size="8px"
+              class="mobile-progress"
+              :class="row.status === 'active' ? 'active-bar' : 'expired-bar'"
+              :value="row.progress"
+              :label="Math.round(row.progress * 100) + '%'"
+              :color="row.status === 'active' ? 'positive' : 'negative'"
+              track-color="grey-4"
+            />
+          </q-card-section>
+          <q-card-actions align="right" class="q-gutter-xs">
+            <q-btn flat dense size="sm" @click="openDetails(row.creator)">
+              {{ $t('SubscriptionsOverview.view') }}
+            </q-btn>
+            <q-btn
+              flat
+              dense
+              size="sm"
+              class="q-ml-xs"
+              :to="`/creator/${pubkeyNpub(row.creator)}`"
+            >
+              {{ $t('FindCreators.actions.view_profile') }}
+            </q-btn>
+            <q-btn
+              flat
+              dense
+              size="sm"
+              class="q-ml-xs"
+              @click="sendMessage(row.creator)"
+            >
+              {{ $t('SubscriptionsOverview.message') }}
+            </q-btn>
+            <q-btn
+              flat
+              dense
+              size="sm"
+              class="q-ml-xs"
+              @click="extendSubscription(row.creator)"
+            >
+              {{ $t('SubscriptionsOverview.extend') }}
+            </q-btn>
+            <q-btn
+              flat
+              dense
+              size="sm"
+              class="q-ml-xs"
+              @click="shareTokens(row.creator)"
+            >
+              {{ $t('SubscriptionsOverview.export') }}
+            </q-btn>
+            <q-btn
+              flat
+              dense
+              size="sm"
+              class="q-ml-xs"
+              @click="exportTokens(row.creator)"
+            >
+              {{ $t('SubscriptionsOverview.export_csv') }}
+            </q-btn>
+            <q-btn
+              flat
+              dense
+              size="sm"
+              class="q-ml-xs"
+              @click="cancelSubscription(row.creator)"
+            >
+              {{ $t('SubscriptionsOverview.cancel') }}
+            </q-btn>
+          </q-card-actions>
+        </q-card>
+      </div>
+      <div v-if="!filteredRows.length" class="text-center q-pa-md">
+        {{ $t('SubscriptionsOverview.empty') }}
+        <q-btn flat color="primary" to="/find-creators" class="q-ml-md">
+          {{ $t('SubscriptionsOverview.discover') }}
+        </q-btn>
+      </div>
+    </div>
     <q-table
+      v-else
       flat
       bordered
       dense
@@ -414,6 +560,7 @@ const nostr = useNostrStore();
 const messenger = useMessengerStore();
 const router = useRouter();
 const $q = useQuasar();
+const isSmallScreen = computed(() => $q.screen.lt.md);
 const { t } = useI18n();
 const showDialog = ref(false);
 const selectedCreator = ref("");
@@ -643,6 +790,10 @@ const columns = computed(() => [
 
 .expired-bar {
   --q-color-negative: #f44336;
+}
+
+.mobile-progress {
+  width: 100%;
 }
 </style>
 
