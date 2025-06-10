@@ -38,6 +38,7 @@ Think Patreon, but built for the Nostr ecosystem and leveraging the privacy and 
   - Timelocked tokens for pledge-style recurring support with optional refund keys.
   - View and manage locked tokens with unlock dates and refund information.
 - **Nostr Identity Integration** – Log in with your existing npub.
+  - If your private key is available (via NIP-07 or imported nsec), Fundstr automatically saves the corresponding 66-char key pair for P2PK locking.
 - **Creator Discovery** – Find creators by category, search or Nostr social graphs.
 - **Creator Profiles** – Dedicated pages for creators and their funding needs.
 - **Tiered Support System** – Multiple support levels with unique benefits.

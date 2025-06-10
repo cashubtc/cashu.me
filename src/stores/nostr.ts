@@ -50,6 +50,7 @@ import { useDmChatsStore } from "./dmChats";
 import { cashuDb, type LockedToken } from "./dexie";
 import { v4 as uuidv4 } from "uuid";
 import { useRouter } from "vue-router";
+import { useP2PKStore } from "./p2pk";
 
 type MintRecommendation = {
   url: string;
@@ -234,6 +235,24 @@ export const useNostrStore = defineStore("nostr", {
     setPubkey: function (pubkey: string) {
       debug("Setting pubkey to", pubkey);
       this.pubkey = pubkey;
+      try {
+        const privKey = this.privKeyHex;
+        if (privKey && privKey.length) {
+          const p2pkStore = useP2PKStore();
+          const pk66 = "02" + getPublicKey(hexToBytes(privKey));
+          if (!p2pkStore.haveThisKey(pk66)) {
+            const keyPair = {
+              publicKey: pk66,
+              privateKey: privKey,
+              used: false,
+              usedCount: 0,
+            };
+            p2pkStore.p2pkKeys = p2pkStore.p2pkKeys.concat(keyPair);
+          }
+        }
+      } catch (e) {
+        console.error(e);
+      }
     },
     resolvePubkey: function (pk: string): string {
       if (/^[0-9a-fA-F]{64}$/.test(pk)) {
