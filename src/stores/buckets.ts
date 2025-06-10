@@ -134,6 +134,9 @@ export const useBucketsStore = defineStore("buckets", {
           return mintMatch && memoMatch;
         })?.bucketId;
       },
+    getBucketByLabel: (state) => (label: string): Bucket | undefined => {
+      return state.buckets.find(b => b.name === label);
+    },
   },
   actions: {
     addBucket(bucket: Omit<Bucket, "id">): Bucket | undefined {

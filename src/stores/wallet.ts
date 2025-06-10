@@ -1,6 +1,7 @@
 import { debug } from "src/js/logger";
 import { defineStore } from "pinia";
 import { currentDateStr } from "src/js/utils";
+import { useNostrStore } from './nostr';
 import { useMintsStore, WalletProof, MintClass, Mint } from "./mints";
 import { useLocalStorage } from "@vueuse/core";
 import { useProofsStore } from "./proofs";
@@ -439,21 +440,31 @@ export const useWalletStore = defineStore("wallet", {
       const mintStore = useMintsStore();
       const proofsStore = useProofsStore();
       const uIStore = useUiStore();
-      let proofsToSend: WalletProof[] = [];
+      let proofsToSwap: WalletProof[] = [];
       const keysetId = this.getKeyset(wallet.mint.mintUrl, wallet.unit);
       await uIStore.lockMutex();
       try {
         const spendableProofs = this.spendableProofs(proofs, amount);
 
-        proofsToSend = this.coinSelect(
+        proofsToSwap = this.coinSelect(
           spendableProofs,
           wallet,
           amount,
           includeFees,
           bucketId,
         );
-        const totalAmount = proofsToSend.reduce((s, t) => (s += t.amount), 0);
-        const fees = includeFees ? wallet.getFeesForProofs(proofsToSend) : 0;
+
+        // Check if proofs are P2PK-locked and sign them if necessary
+        if (proofsToSwap.length > 0 && proofsToSwap[0].secret.startsWith('P2PK:')) {
+          const nostrStore = useNostrStore();
+          if (!nostrStore.privateKey) {
+            throw new Error('Nostr private key not available for signing P2PK proofs.');
+          }
+          proofsToSwap = await wallet.getSignedProofs(proofsToSwap, nostrStore.privateKey);
+        }
+
+        const totalAmount = proofsToSwap.reduce((s, t) => (s += t.amount), 0);
+        const fees = includeFees ? wallet.getFeesForProofs(proofsToSwap) : 0;
         const targetAmount = amount + fees;
 
         let keepProofs: Proof[] = [];
@@ -461,17 +472,21 @@ export const useWalletStore = defineStore("wallet", {
 
         if (totalAmount != targetAmount) {
           const counter = this.keysetCounter(keysetId);
-          proofsToSend = this.coinSelect(
-            spendableProofs,
+          // Use proofsToSwap in coinSelect if it was P2PK, otherwise use original spendableProofs for selection before potential send
+          const proofsForSendOperation = proofsToSwap[0]?.secret.startsWith('P2PK:') ? proofsToSwap : spendableProofs;
+
+          const selectedProofsForSend = this.coinSelect(
+            proofsForSendOperation, // use potentially signed proofs if P2PK path was taken
             wallet,
             targetAmount,
-            true,
+            true, // fees are included for send operation
             bucketId,
           );
+
           ({ keep: keepProofs, send: sendProofs } = await wallet.send(
             targetAmount,
-            proofsToSend,
-            { counter, keysetId, proofsWeHave: spendableProofs },
+            selectedProofsForSend, // use the selected proofs for the send operation
+            { counter, keysetId, proofsWeHave: spendableProofs }, // proofsWeHave should still be original spendable for context
           ));
           this.increaseKeysetCounter(
             keysetId,
@@ -481,13 +496,15 @@ export const useWalletStore = defineStore("wallet", {
           await proofsStore.addProofs(sendProofs, undefined, bucketId, "");
 
           // make sure we don't delete any proofs that were returned
-          const proofsToSendNotReturned = proofsToSend
+          // compare against selectedProofsForSend as those were the ones intended for the operation
+          const proofsToSendNotReturned = selectedProofsForSend
             .filter((p) => !sendProofs.find((s) => s.secret === p.secret))
             .filter((p) => !keepProofs.find((k) => k.secret === p.secret));
           await proofsStore.removeProofs(proofsToSendNotReturned);
+
         } else if (totalAmount == targetAmount) {
           keepProofs = [];
-          sendProofs = proofsToSend;
+          sendProofs = proofsToSwap; // these are the proofs selected and potentially signed
         } else {
           throw new Error("could not split proofs.");
         }
@@ -498,7 +515,7 @@ export const useWalletStore = defineStore("wallet", {
         }
         return { keepProofs, sendProofs };
       } catch (error: any) {
-        await proofsStore.setReserved(proofsToSend, false);
+        await proofsStore.setReserved(proofsToSwap, false);
         console.error(error);
         notifyApiError(error);
         this.handleOutputsHaveAlreadyBeenSignedError(keysetId, error);
