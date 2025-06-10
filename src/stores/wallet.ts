@@ -39,8 +39,10 @@ import {
   decodePaymentRequest,
   MintQuoteResponse,
   ProofState,
+  getSignedProofs,
 } from "@cashu/cashu-ts";
 import { hashToCurve } from "@cashu/crypto/modules/common";
+import { useNostrStore } from "./nostr";
 // @ts-ignore
 import * as bolt11Decoder from "light-bolt11-decoder";
 import { bech32 } from "bech32";
@@ -468,10 +470,25 @@ export const useWalletStore = defineStore("wallet", {
             true,
             bucketId,
           );
+
+          // P2PK signing for send
+          let sendOptions: any = { counter, keysetId, proofsWeHave: spendableProofs };
+          if (proofsToSend.some((p) => p.secret.startsWith("P2PK:"))) {
+            const signCallback = async (proofsToSign: Proof[]) => {
+              const nostrPrivateKey = useNostrStore().privateKey;
+              if (!nostrPrivateKey) {
+                console.error("Nostr private key not available for P2PK signing.");
+                throw new Error("Nostr private key not available for P2PK signing.");
+              }
+              return getSignedProofs(proofsToSign, nostrPrivateKey);
+            };
+            sendOptions.sign = signCallback;
+          }
+
           ({ keep: keepProofs, send: sendProofs } = await wallet.send(
             targetAmount,
             proofsToSend,
-            { counter, keysetId, proofsWeHave: spendableProofs },
+            sendOptions,
           ));
           this.increaseKeysetCounter(
             keysetId,
@@ -848,6 +865,18 @@ export const useWalletStore = defineStore("wallet", {
       try {
         await this.addOutgoingPendingInvoiceToHistory(quote);
         await proofsStore.setReserved(sendProofs, true, quote.quote);
+
+        // P2PK signing for melt
+        if (sendProofs.some((p) => p.secret.startsWith("P2PK:"))){
+          const nostrPrivateKey = useNostrStore().privateKey;
+          if (nostrPrivateKey) {
+            sendProofs = await getSignedProofs(sendProofs, nostrPrivateKey);
+          } else {
+            console.warn("P2PK proof found but Nostr private key not available for signing.");
+            // Optionally, throw an error or notify the user
+            // throw new Error("Nostr private key not available for P2PK signing.");
+          }
+        }
 
         // NUT-08 blank outputs for change
         const counter = this.keysetCounter(keysetId);
