@@ -1324,5 +1324,6 @@ timelock: {
   },
   SubscriptionsOverview: {
     export_csv: "Export CSV",
+    filter: { status: "按状态筛选" },
   },
 };

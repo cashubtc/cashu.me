@@ -1336,5 +1336,6 @@ timelock: {
   },
   SubscriptionsOverview: {
     export_csv: "Export CSV",
+    filter: { status: "Duruma göre filtrele" },
   },
 };
