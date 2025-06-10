@@ -1334,6 +1334,10 @@ timelock: {
   },
   SubscriptionsOverview: {
     export_csv: "Export CSV",
-    filter: { status: "ステータスでフィルタ" },
+    filter: {
+      status: "ステータスでフィルタ",
+      bucket: "バケットでフィルタ",
+      frequency: "頻度でフィルタ",
+    },
   },
 };

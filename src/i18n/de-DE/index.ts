@@ -1351,6 +1351,10 @@ export default {
   },
   SubscriptionsOverview: {
     export_csv: "Export CSV",
-    filter: { status: "Nach Status filtern" },
+    filter: {
+      status: "Nach Status filtern",
+      bucket: "Nach Bucket filtern",
+      frequency: "Nach Frequenz filtern",
+    },
   },
 };

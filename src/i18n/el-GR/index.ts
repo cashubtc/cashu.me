@@ -1354,6 +1354,10 @@ timelock: {
   },
   SubscriptionsOverview: {
     export_csv: "Export CSV",
-    filter: { status: "Φιλτράρισμα κατά κατάσταση" },
+    filter: {
+      status: "Φιλτράρισμα κατά κατάσταση",
+      bucket: "Φιλτράρισμα ανά κάδο",
+      frequency: "Φιλτράρισμα ανά συχνότητα",
+    },
   },
 };

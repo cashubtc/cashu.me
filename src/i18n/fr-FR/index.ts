@@ -1341,6 +1341,10 @@ timelock: {
   },
   SubscriptionsOverview: {
     export_csv: "Export CSV",
-    filter: { status: "Filtrer par statut" },
+    filter: {
+      status: "Filtrer par statut",
+      bucket: "Filtrer par bucket",
+      frequency: "Filtrer par fréquence",
+    },
   },
 };
