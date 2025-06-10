@@ -1336,6 +1336,10 @@ timelock: {
   },
   SubscriptionsOverview: {
     export_csv: "Export CSV",
-    filter: { status: "Duruma göre filtrele" },
+    filter: {
+      status: "Duruma göre filtrele",
+      bucket: "Buckete göre filtrele",
+      frequency: "Sıklığa göre filtrele",
+    },
   },
 };

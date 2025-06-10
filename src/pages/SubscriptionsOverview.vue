@@ -43,6 +43,29 @@
           ]"
           :placeholder="$t('SubscriptionsOverview.filter.status')"
         />
+        <q-select
+          v-model="bucketFilter"
+          dense
+          emit-value
+          map-options
+          clearable
+          :options="bucketsStore.bucketList.map((b) => ({ label: b.name, value: b.name }))"
+          class="q-ml-md"
+          :placeholder="$t('SubscriptionsOverview.filter.bucket')"
+        />
+        <q-select
+          v-model="frequencyFilter"
+          dense
+          emit-value
+          map-options
+          clearable
+          :options="[
+            { label: 'monthly', value: 'monthly' },
+            { label: 'weekly', value: 'weekly' }
+          ]"
+          class="q-ml-md"
+          :placeholder="$t('SubscriptionsOverview.filter.frequency')"
+        />
       </template>
       <template #body-cell-creator="props">
         <div class="row items-center">
@@ -399,15 +422,19 @@ const messageText = ref("");
 const messageRecipient = ref("");
 const filter = ref("");
 const statusFilter = ref<string | null>(null);
+const bucketFilter = ref<string | null>(null);
+const frequencyFilter = ref<string | null>(null);
 const pagination = ref({ page: 1, rowsPerPage: 10 });
 
 const filteredRows = computed(() => {
   const term = filter.value.toLowerCase();
   return rows.value.filter((r) => {
     const matchesStatus = !statusFilter.value || r.status === statusFilter.value;
+    const matchesBucket = !bucketFilter.value || r.bucketName === bucketFilter.value;
+    const matchesFrequency = !frequencyFilter.value || r.frequency === frequencyFilter.value;
     const rowString = JSON.stringify(r).toLowerCase();
     const matchesFilter = !term || rowString.includes(term);
-    return matchesStatus && matchesFilter;
+    return matchesStatus && matchesBucket && matchesFrequency && matchesFilter;
   });
 });
 
