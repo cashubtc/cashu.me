@@ -94,7 +94,7 @@ export const useDonationPresetsStore = defineStore("donationPresets", {
       const base = startDate ?? Math.floor(Date.now() / 1000);
       for (let i = 0; i < months; i++) {
         const locktime = base + i * 30 * 24 * 60 * 60;
-        const { sendProofs } = await walletStore.sendToLock(
+        const { locked } = await walletStore.sendToLock(
           proofs,
           wallet,
           amount,
@@ -102,17 +102,6 @@ export const useDonationPresetsStore = defineStore("donationPresets", {
           bucketId,
           locktime
         );
-        const token = proofsStore.serializeProofs(sendProofs);
-        const locked = lockedStore.addLockedToken({
-          amount,
-          token,
-          pubkey: convertedPubkey,
-          locktime,
-          bucketId,
-          label: subscription?.tierName
-            ? `Subscription: ${subscription.tierName}`
-            : undefined,
-        });
         tokens.push(locked);
         await proofsStore.updateActiveProofs();
         proofs = mintsStore.activeProofs.filter((p) => p.bucketId === bucketId);
