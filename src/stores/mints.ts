@@ -20,6 +20,7 @@ import { useProofsStore } from "./proofs";
 import { useI18n } from "vue-i18n";
 import { i18n } from "src/boot/i18n";
 import { useSettingsStore } from "./settings";
+import { useNostrMintBackupStore } from "./nostrMintBackup";
 
 export type Mint = {
   url: string;
@@ -569,18 +570,14 @@ export const useMintsStore = defineStore("mints", {
     // Trigger Nostr backup when mints change
     triggerNostrBackup: async function () {
       try {
-        // Dynamic import to avoid circular dependency
-        const { useNostrMintBackupStore } = await import("./nostrMintBackup");
         const nostrMintBackupStore = useNostrMintBackupStore();
 
         if (nostrMintBackupStore.enabled && nostrMintBackupStore.needsBackup) {
-          // Use a timeout to avoid blocking the UI
           setTimeout(async () => {
             try {
               await nostrMintBackupStore.backupMintsToNostr();
             } catch (error) {
               console.error("Failed to backup mints to Nostr:", error);
-              // Don't notify user of backup errors to avoid spam
             }
           }, 1000);
         }
