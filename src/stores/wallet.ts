@@ -12,7 +12,8 @@ import { useSendTokensStore } from "src/stores/sendTokensStore";
 import { usePRStore } from "./payment-request";
 import { useWorkersStore } from "./workers";
 import { useInvoicesWorkerStore } from "./invoicesWorker";
-import { DEFAULT_BUCKET_ID } from "./buckets";
+import { DEFAULT_BUCKET_ID, useBucketsStore } from "./buckets";
+import { useLockedTokensStore } from "./lockedTokens";
 
 import * as _ from "underscore";
 import token from "src/js/token";
@@ -435,6 +436,19 @@ export const useWalletStore = defineStore("wallet", {
       await proofsStore.removeProofs(proofsToSend);
       // note: we do not store sendProofs in the proofs store but
       // expect from the caller to store it in the history
+      // --- NEW: persist locked proofs to creator bucket ---
+      const bucketsStore = useBucketsStore();
+      const lockedStore = useLockedTokensStore();
+      const creatorBucketId = bucketsStore.ensureCreatorBucket(receiverPubkey);
+
+      const tokenStr = useProofsStore().serializeProofs(sendProofs);
+      lockedStore.addLockedToken({
+        amount,
+        token: tokenStr,
+        pubkey: receiverPubkey,
+        bucketId: creatorBucketId,
+        locktime,
+      });
       await proofsStore.addProofs(keepProofs, undefined, bucketId, "");
       return { keepProofs, sendProofs };
     },

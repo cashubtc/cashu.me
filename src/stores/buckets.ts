@@ -136,6 +136,21 @@ export const useBucketsStore = defineStore("buckets", {
       },
   },
   actions: {
+    /** Ensure we have (or create) a bucket dedicated to a creator npub */
+    ensureCreatorBucket(creatorPubkey: string): string {
+      const existing = this.buckets.find(
+        (b) => b.creatorPubkey === creatorPubkey
+      );
+      if (existing) return existing.id;
+
+      const id = uuidv4();
+      this.buckets.push({
+        id,
+        name: creatorPubkey.slice(0, 8), // short label
+        creatorPubkey,
+      });
+      return id;
+    },
     addBucket(bucket: Omit<Bucket, "id">): Bucket | undefined {
       // basic validation
       if (!bucket.name || bucket.name.trim().length === 0) {
