@@ -4,7 +4,11 @@ import { bytesToHex } from "@noble/hashes/utils";
 import { sha256 } from "@noble/hashes/sha256";
 import { getPublicKey } from "nostr-tools";
 import { mnemonicToSeedSync } from "@scure/bip39";
-import NDK, { NDKEvent, NDKFilter, NDKPrivateKeySigner } from "@nostr-dev-kit/ndk";
+import NDK, {
+  NDKEvent,
+  NDKFilter,
+  NDKPrivateKeySigner,
+} from "@nostr-dev-kit/ndk";
 import { nip44 } from "nostr-tools";
 import { useWalletStore } from "./wallet";
 import { useMintsStore } from "./mints";
@@ -29,7 +33,10 @@ type DiscoveredMint = {
 export const useNostrMintBackupStore = defineStore("nostrMintBackup", {
   state: () => ({
     // Last backup timestamp
-    lastBackupTimestamp: useLocalStorage<number>("cashu.nostrMintBackup.lastBackupTimestamp", 0),
+    lastBackupTimestamp: useLocalStorage<number>(
+      "cashu.nostrMintBackup.lastBackupTimestamp",
+      0
+    ),
 
     // Discovered mints from nostr
     discoveredMints: [] as DiscoveredMint[],
@@ -53,7 +60,7 @@ export const useNostrMintBackupStore = defineStore("nostrMintBackup", {
     // Get the current mint URLs
     currentMintUrls: (): string[] => {
       const mintsStore = useMintsStore();
-      return mintsStore.mints.map(mint => mint.url);
+      return mintsStore.mints.map((mint) => mint.url);
     },
 
     // Check if backup is needed (mints have changed since last backup)
@@ -62,7 +69,7 @@ export const useNostrMintBackupStore = defineStore("nostrMintBackup", {
       if (!settingsStore.nostrMintBackupEnabled) return false;
 
       const mintsStore = useMintsStore();
-      const currentMints = mintsStore.mints.map(mint => mint.url).sort();
+      const currentMints = mintsStore.mints.map((mint) => mint.url).sort();
 
       // If no mints, no backup needed
       if (currentMints.length === 0) return false;
@@ -76,8 +83,12 @@ export const useNostrMintBackupStore = defineStore("nostrMintBackup", {
 
     // Get conversation key for encryption
     conversationKey: (state): Uint8Array | null => {
-      if (!state.mintBackupPrivateKey || !state.mintBackupPublicKey) return null;
-      return nip44.v2.utils.getConversationKey(state.mintBackupPrivateKey, state.mintBackupPublicKey);
+      if (!state.mintBackupPrivateKey || !state.mintBackupPublicKey)
+        return null;
+      return nip44.v2.utils.getConversationKey(
+        state.mintBackupPrivateKey,
+        state.mintBackupPublicKey
+      );
     },
   },
 
@@ -86,13 +97,16 @@ export const useNostrMintBackupStore = defineStore("nostrMintBackup", {
     async initializeBackupKeys(): Promise<void> {
       const walletStore = useWalletStore();
       // Derive a deterministic private key from wallet seed for mint backup
-      const { privateKeyHex, publicKeyHex } = await this.initializeBackupKeysFromMnemonic(walletStore.mnemonic);
+      const { privateKeyHex, publicKeyHex } =
+        await this.initializeBackupKeysFromMnemonic(walletStore.mnemonic);
       this.mintBackupPrivateKey = privateKeyHex;
       this.mintBackupPublicKey = publicKeyHex;
     },
 
     // Initialize backup keys from custom mnemonic (for restore)
-    async initializeBackupKeysFromMnemonic(mnemonic: string): Promise<{ privateKeyHex: string; publicKeyHex: string }> {
+    async initializeBackupKeysFromMnemonic(
+      mnemonic: string
+    ): Promise<{ privateKeyHex: string; publicKeyHex: string }> {
       // Derive seed from mnemonic
       const seed: Uint8Array = mnemonicToSeedSync(mnemonic);
       const domainSeparator = new TextEncoder().encode("cashu-mint-backup");
@@ -132,7 +146,7 @@ export const useNostrMintBackupStore = defineStore("nostrMintBackup", {
         const settingsStore = useSettingsStore();
         const mintsStore = useMintsStore();
 
-        const currentMints = mintsStore.mints.map(mint => mint.url);
+        const currentMints = mintsStore.mints.map((mint) => mint.url);
 
         if (currentMints.length === 0) {
           console.log("No mints to backup");
@@ -150,7 +164,10 @@ export const useNostrMintBackupStore = defineStore("nostrMintBackup", {
           this.mintBackupPrivateKey,
           this.mintBackupPublicKey
         );
-        const encryptedContent = nip44.v2.encrypt(JSON.stringify(backupData), conversationKey);
+        const encryptedContent = nip44.v2.encrypt(
+          JSON.stringify(backupData),
+          conversationKey
+        );
 
         // Create NDK instance
         const ndk = new NDK({
@@ -165,7 +182,7 @@ export const useNostrMintBackupStore = defineStore("nostrMintBackup", {
         event.kind = MINT_BACKUP_KIND;
         event.content = encryptedContent;
         event.tags = [
-          ["d", "mint-list"],  // replaceable event identifier
+          ["d", "mint-list"], // replaceable event identifier
           ["client", "cashu.me"],
         ];
         event.created_at = backupData.timestamp;
@@ -181,10 +198,11 @@ export const useNostrMintBackupStore = defineStore("nostrMintBackup", {
         }
 
         console.log("Mint backup published to Nostr:", event.id);
-
       } catch (error) {
         console.error("Failed to backup mints to Nostr:", error);
-        notifyError("Failed to backup mint list to Nostr: " + (error as Error).message);
+        notifyError(
+          "Failed to backup mint list to Nostr: " + (error as Error).message
+        );
         throw error;
       } finally {
         this.backupInProgress = false;
@@ -200,7 +218,9 @@ export const useNostrMintBackupStore = defineStore("nostrMintBackup", {
         const settingsStore = useSettingsStore();
 
         // Derive keys from provided mnemonic
-        const { publicKeyHex } = await this.initializeBackupKeysFromMnemonic(mnemonic);
+        const { publicKeyHex } = await this.initializeBackupKeysFromMnemonic(
+          mnemonic
+        );
 
         // Create read-only NDK instance
         const ndk = new NDK({
@@ -225,15 +245,24 @@ export const useNostrMintBackupStore = defineStore("nostrMintBackup", {
         for (const event of events) {
           try {
             // Decrypt event content
-            const { privateKeyHex } = await this.initializeBackupKeysFromMnemonic(mnemonic);
-            const conversationKey = nip44.v2.utils.getConversationKey(privateKeyHex, publicKeyHex);
-            const decryptedContent = nip44.v2.decrypt(event.content, conversationKey);
+            const { privateKeyHex } =
+              await this.initializeBackupKeysFromMnemonic(mnemonic);
+            const conversationKey = nip44.v2.utils.getConversationKey(
+              privateKeyHex,
+              publicKeyHex
+            );
+            const decryptedContent = nip44.v2.decrypt(
+              event.content,
+              conversationKey
+            );
 
             const backupData: MintBackupData = JSON.parse(decryptedContent);
 
             // Add discovered mints
             for (const mintUrl of backupData.mints) {
-              const existingMint = allDiscoveredMints.find(m => m.url === mintUrl);
+              const existingMint = allDiscoveredMints.find(
+                (m) => m.url === mintUrl
+              );
               if (!existingMint) {
                 allDiscoveredMints.push({
                   url: mintUrl,
@@ -261,10 +290,11 @@ export const useNostrMintBackupStore = defineStore("nostrMintBackup", {
         }
 
         return allDiscoveredMints;
-
       } catch (error) {
         console.error("Failed to search mints on Nostr:", error);
-        notifyError("Failed to search for mint backups: " + (error as Error).message);
+        notifyError(
+          "Failed to search for mint backups: " + (error as Error).message
+        );
         throw error;
       } finally {
         this.searchInProgress = false;
@@ -272,7 +302,9 @@ export const useNostrMintBackupStore = defineStore("nostrMintBackup", {
     },
 
     // Add selected mints to the wallet
-    async addSelectedMintsToWallet(selectedMints: DiscoveredMint[]): Promise<void> {
+    async addSelectedMintsToWallet(
+      selectedMints: DiscoveredMint[]
+    ): Promise<void> {
       const mintsStore = useMintsStore();
 
       try {
@@ -283,7 +315,7 @@ export const useNostrMintBackupStore = defineStore("nostrMintBackup", {
 
           try {
             // Check if mint already exists
-            const existing = mintsStore.mints.find(m => m.url === mint.url);
+            const existing = mintsStore.mints.find((m) => m.url === mint.url);
             if (existing) {
               console.log(`Mint ${mint.url} already exists, skipping`);
               continue;
@@ -294,7 +326,9 @@ export const useNostrMintBackupStore = defineStore("nostrMintBackup", {
             addedCount++;
           } catch (error) {
             console.error(`Failed to add mint ${mint.url}:`, error);
-            notifyError(`Failed to add mint ${mint.url}: ${(error as Error).message}`);
+            notifyError(
+              `Failed to add mint ${mint.url}: ${(error as Error).message}`
+            );
           }
         }
 
@@ -303,17 +337,18 @@ export const useNostrMintBackupStore = defineStore("nostrMintBackup", {
         } else {
           notify("No new mints were added");
         }
-
       } catch (error) {
         console.error("Failed to add selected mints:", error);
-        notifyError("Failed to add selected mints: " + (error as Error).message);
+        notifyError(
+          "Failed to add selected mints: " + (error as Error).message
+        );
         throw error;
       }
     },
 
     // Toggle selection of a discovered mint
     toggleMintSelection(mintUrl: string): void {
-      const mint = this.discoveredMints.find(m => m.url === mintUrl);
+      const mint = this.discoveredMints.find((m) => m.url === mintUrl);
       if (mint) {
         mint.selected = !mint.selected;
       }
@@ -321,14 +356,14 @@ export const useNostrMintBackupStore = defineStore("nostrMintBackup", {
 
     // Select all discovered mints
     selectAllMints(): void {
-      this.discoveredMints.forEach(mint => {
+      this.discoveredMints.forEach((mint) => {
         mint.selected = true;
       });
     },
 
     // Deselect all discovered mints
     deselectAllMints(): void {
-      this.discoveredMints.forEach(mint => {
+      this.discoveredMints.forEach((mint) => {
         mint.selected = false;
       });
     },
