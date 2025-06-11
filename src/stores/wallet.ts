@@ -14,6 +14,7 @@ import { useWorkersStore } from "./workers";
 import { useInvoicesWorkerStore } from "./invoicesWorker";
 import { DEFAULT_BUCKET_ID, useBucketsStore } from "./buckets";
 import { useLockedTokensStore } from "./lockedTokens";
+import { ensureCompressed } from "src/utils/ecash";
 
 import * as _ from "underscore";
 import token from "src/js/token";
@@ -430,7 +431,12 @@ export const useWalletStore = defineStore("wallet", {
       const { keep: keepProofs, send: sendProofs } = await wallet.send(
         amount,
         proofsToSend,
-        { keysetId, pubkey: receiverPubkey, locktime, refund: refundPubkey },
+        {
+          keysetId,
+          pubkey: ensureCompressed(receiverPubkey),
+          locktime,
+          refund: refundPubkey,
+        },
       );
       const proofsStore = useProofsStore();
       await proofsStore.removeProofs(proofsToSend);
@@ -442,15 +448,16 @@ export const useWalletStore = defineStore("wallet", {
       const creatorBucketId = bucketsStore.ensureCreatorBucket(receiverPubkey);
 
       const tokenStr = useProofsStore().serializeProofs(sendProofs);
-      lockedStore.addLockedToken({
+      const locked = lockedStore.addLockedToken({
         amount,
         token: tokenStr,
         pubkey: receiverPubkey,
         bucketId: creatorBucketId,
         locktime,
+        refundPubkey,
       });
       await proofsStore.addProofs(keepProofs, undefined, bucketId, "");
-      return { keepProofs, sendProofs };
+      return { keepProofs, sendProofs, locked };
     },
     send: async function (
       proofs: WalletProof[],
@@ -561,7 +568,18 @@ export const useWalletStore = defineStore("wallet", {
       if (tokenJson == undefined) {
         throw new Error("no tokens provided.");
       }
-      let proofs = token.getProofs(tokenJson);
+      let proofs = token
+        .getProofs(tokenJson)
+        .map((p) => {
+          try {
+            const obj = JSON.parse(p.secret);
+            if (Array.isArray(obj) && obj[0] === "P2PK" && obj[1]?.data) {
+              obj[1].data = ensureCompressed(obj[1].data);
+              p.secret = JSON.stringify(obj);
+            }
+          } catch {}
+          return p;
+        });
       if (proofs.length == 0) {
         throw new Error("no proofs found.");
       }
