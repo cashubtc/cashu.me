@@ -41,8 +41,8 @@ import {
   decodePaymentRequest,
   MintQuoteResponse,
   ProofState,
-  getSignedProofs,
 } from "@cashu/cashu-ts";
+import { getSignedProofs } from "@cashu/crypto/modules/client/NUT11";
 import { hashToCurve } from "@cashu/crypto/modules/common";
 // @ts-ignore
 import * as bolt11Decoder from "light-bolt11-decoder";
