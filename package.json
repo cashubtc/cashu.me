@@ -75,7 +75,8 @@
     "workbox-precaching": "^6.6.1",
     "workbox-routing": "^6.6.1",
     "workbox-strategies": "^6.6.1",
-    "vitest": "^1.5.0"
+    "vitest": "^1.5.0",
+    "fake-indexeddb": "*"
   },
   "engines": {
     "node": ">=16.11.0",
