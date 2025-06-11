@@ -5,6 +5,10 @@ import { useUiStore } from "src/stores/ui"; // showInvoiceDetails
 import { useSendTokensStore } from "src/stores/sendTokensStore"; // showSendTokens and sendData
 import { useSettingsStore } from "./settings";
 import { HistoryToken, useTokensStore } from "./tokens";
+import { sha256 } from "@noble/hashes/sha256";
+import { bytesToHex } from "@noble/hashes/utils";
+import { Proof } from "@cashu/cashu-ts";
+import { useNostrStore, SignerType } from "./nostr";
 export const useWorkersStore = defineStore("workers", {
   state: () => {
     return {
@@ -54,6 +58,31 @@ export const useWorkersStore = defineStore("workers", {
           debug("invoiceCheckWorker: not paid yet");
         }
       }, this.checkInterval);
+    },
+    signWithRemote: async function (proofs: Proof[]): Promise<Proof[]> {
+      const nostr = useNostrStore();
+      await nostr.initSignerIfNotSet();
+      if (
+        nostr.signerType !== SignerType.NIP07 &&
+        nostr.signerType !== SignerType.NIP46
+      ) {
+        return proofs;
+      }
+
+      const signSchnorr =
+        (nostr.signer as any)?.signSchnorr || (window as any)?.nostr?.signSchnorr;
+      if (!signSchnorr) throw new Error("Remote signer lacks signSchnorr");
+
+      return Promise.all(
+        proofs.map(async (p) => {
+          if (typeof p.secret === "string" && p.secret.startsWith('["P2PK"')) {
+            const h = sha256(new TextEncoder().encode(p.secret));
+            const sig = await signSchnorr(bytesToHex(h));
+            return { ...p, witness: { signatures: [sig] } } as Proof;
+          }
+          return p;
+        })
+      );
     },
     checkTokenSpendableWorker: async function (historyToken: HistoryToken) {
       const settingsStore = useSettingsStore();
