@@ -1,18 +1,16 @@
-import * as nobleSecp256k1 from "@noble/secp256k1";
+import { secp256k1 } from '@noble/curves/secp256k1';
+const Point = secp256k1.ProjectivePoint;
 
 /**
- * Ensure a public key hex string is compressed.
- * Returns the compressed representation or throws
- * if the input is invalid.
+ * Ensure a hex pubkey is 33-byte SEC-compressed (66 hex chars 02/03…).
+ * Accepts raw 32-byte hex or already-compressed hex.
  */
-export function ensureCompressed(pubkey: string): string {
-  if (!pubkey) throw new Error("invalid pubkey");
-  if (
-    pubkey.length === 66 &&
-    (pubkey.startsWith("02") || pubkey.startsWith("03"))
-  ) {
-    return pubkey;
+export function ensureCompressed(hex: string): string {
+  hex = hex.toLowerCase().replace(/^0x/, '');
+  if (/^(02|03)[0-9a-f]{64}$/.test(hex)) return hex;      // already good
+  if (/^[0-9a-f]{64}$/.test(hex)) {
+    try { return Point.fromHex('02' + hex).toRawBytes(true).toString('hex'); }
+    catch { return Point.fromHex('03' + hex).toRawBytes(true).toString('hex'); }
   }
-  const point = nobleSecp256k1.Point.fromHex(pubkey);
-  return point.toHex(true);
+  throw new Error(`invalid pubkey format: ${hex}`);
 }
