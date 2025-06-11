@@ -146,21 +146,6 @@
             }"
             :disable="!isMnemonicValid || restoringState"
           >
-            <!-- Loading spinner if mint is being restored -->
-            <transition
-              appear
-              enter-active-class="animated fadeIn"
-              leave-active-class="animated fadeOut"
-              name="fade"
-            >
-              <q-spinner-hourglass
-                v-if="restoringMint === mint.url"
-                color="white"
-                size="1.3rem"
-                class="mint-loading-spinner"
-              />
-            </transition>
-
             <div class="full-width" style="position: relative">
               <div class="row items-center q-pa-md">
                 <!-- Checkbox Section -->
