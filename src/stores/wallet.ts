@@ -42,6 +42,7 @@ import {
   decodePaymentRequest,
   MintQuoteResponse,
   ProofState,
+  getEncodedToken,
 } from "@cashu/cashu-ts";
 import { getSignedProofs } from "@cashu/crypto/modules/client/NUT11";
 import { hashToCurve } from "@cashu/crypto/modules/common";
@@ -606,31 +607,45 @@ export const useWalletStore = defineStore("wallet", {
         let privkey =
           receiveStore.receiveData.p2pkPrivateKey || nostrStore.activePrivkeyHex;
 
-        // If no local key, try remote signer for every P2PK proof
-        if (
-          !privkey &&
-          proofs.some(
-            (p) => typeof p.secret === "string" && p.secret.startsWith('["P2PK"')
-          )
-        ) {
-          proofs = await useWorkersStore().signWithRemote(proofs);
+        /* ---------- P2PK remote-sign fall-back ------------ */
+        const needsSig = proofs.some(
+          (p) => typeof p.secret === "string" && p.secret.startsWith('["P2PK"')
+        );
+
+        let remoteSigned = false;
+        if (!privkey && needsSig) {
+          const signed = await useWorkersStore().signWithRemote(proofs);
+          // did we actually get any witness back?
+          if (
+            signed.some(
+              (p) => (p as any).witness?.signatures?.length > 0
+            )
+          ) {
+            proofs = signed;
+            remoteSigned = true;
+          }
         }
 
-        if (
-          !privkey &&
-          proofs.some(
-            (p) => typeof p.secret === "string" && p.secret.startsWith('["P2PK"')
-          )
-        ) {
+        if (!privkey && needsSig && !remoteSigned) {
           throw new Error(
             "No private key or remote signer available for P2PK unlock"
           );
         }
 
+        /* Re-encode token if we mutated proofs with a witness */
+        const tokenToRedeem =
+          remoteSigned
+            ? getEncodedToken({
+                mint: mintInToken,
+                unit: unitInToken,
+                proofs,
+              })
+            : receiveStore.receiveData.tokensBase64;
+
         let receivedProofs: Proof[];
         try {
           receivedProofs = await mintWallet.receive(
-            receiveStore.receiveData.tokensBase64,
+            tokenToRedeem,
             {
               counter,
               privkey,
