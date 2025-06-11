@@ -3,6 +3,8 @@ import { cashuDb } from './dexie'
 import { useWalletStore } from './wallet'
 import { useReceiveTokensStore } from './receiveTokensStore'
 import { useSettingsStore } from './settings'
+import token from 'src/js/token'
+import { ensureCompressed } from 'src/utils/ecash'
 
 export const useLockedTokensRedeemWorker = defineStore('lockedTokensRedeemWorker', {
   state: () => ({
@@ -35,6 +37,15 @@ export const useLockedTokensRedeemWorker = defineStore('lockedTokensRedeemWorker
       const receiveStore = useReceiveTokensStore()
       for (const entry of entries) {
         try {
+          const decoded = token.decode(entry.tokenString)
+          // normalise secret before redeem
+          decoded.proofs.forEach(p => {
+            if (typeof p.secret === 'string' && p.secret.startsWith('["P2PK"')) {
+              const s = JSON.parse(p.secret)
+              if (s[1]?.data) s[1].data = ensureCompressed(s[1].data)
+              p.secret = JSON.stringify(s)
+            }
+          })
           receiveStore.receiveData.tokensBase64 = entry.tokenString
           receiveStore.receiveData.bucketId = entry.tierId
           await wallet.redeem(entry.tierId)

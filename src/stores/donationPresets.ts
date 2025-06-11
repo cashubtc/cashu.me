@@ -3,7 +3,7 @@ import { useLocalStorage } from "@vueuse/core";
 import { useWalletStore } from "./wallet";
 import { useMintsStore } from "./mints";
 import { useProofsStore } from "./proofs";
-import { useLockedTokensStore, LockedToken } from "./lockedTokens";
+import { LockedToken } from "./lockedTokens";
 import { useSubscriptionsStore } from "./subscriptions";
 import { useP2PKStore } from "./p2pk";
 import { DEFAULT_BUCKET_ID } from "./buckets";
@@ -48,7 +48,6 @@ export const useDonationPresetsStore = defineStore("donationPresets", {
       const walletStore = useWalletStore();
       const proofsStore = useProofsStore();
       const mintsStore = useMintsStore();
-      const lockedStore = useLockedTokensStore();
       const subscriptionsStore = useSubscriptionsStore();
       const p2pkStore = useP2PKStore();
 
@@ -65,32 +64,19 @@ export const useDonationPresetsStore = defineStore("donationPresets", {
         throw new Error('Insufficient balance');
       }
 
+      const tokens: LockedToken[] = [];
+
       if (!months || months <= 0) {
-        const { sendProofs } = await walletStore.sendToLock(
+        const { locked } = await walletStore.sendToLock(
           proofs,
           wallet,
           amount,
           convertedPubkey,
           bucketId
         );
-        const token = proofsStore.serializeProofs(sendProofs);
-        if (detailed) {
-          return [
-            lockedStore.addLockedToken({
-              amount,
-              token,
-              pubkey: convertedPubkey,
-              bucketId,
-              label: subscription?.tierName
-                ? `Subscription: ${subscription.tierName}`
-                : undefined,
-            }),
-          ];
-        }
-        return token;
+        tokens.push(locked);
+        return detailed ? tokens : locked.token;
       }
-
-      const tokens: LockedToken[] = [];
       const base = startDate ?? Math.floor(Date.now() / 1000);
       for (let i = 0; i < months; i++) {
         const locktime = base + i * 30 * 24 * 60 * 60;
