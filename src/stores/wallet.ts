@@ -459,6 +459,7 @@ export const useWalletStore = defineStore("wallet", {
         locktime,
       });
       await proofsStore.addProofs(keepProofs, undefined, bucketId, "");
+      useSignerStore().reset();
       return { keepProofs, sendProofs, locked };
     },
     send: async function (
@@ -519,7 +520,9 @@ export const useWalletStore = defineStore("wallet", {
             keepProofs.length + sendProofs.length,
           );
           await proofsStore.addProofs(keepProofs, undefined, bucketId, "");
+          useSignerStore().reset();
           await proofsStore.addProofs(sendProofs, undefined, bucketId, "");
+          useSignerStore().reset();
 
           // make sure we don't delete any proofs that were returned
           const proofsToSendNotReturned = proofsToSend
@@ -675,6 +678,7 @@ export const useWalletStore = defineStore("wallet", {
             bucketId,
             receiveStore.receiveData.label ?? "",
           );
+          useSignerStore().reset();
           this.increaseKeysetCounter(keysetId, receivedProofs.length);
         } catch (error: any) {
           console.error(error);
@@ -825,6 +829,7 @@ export const useWalletStore = defineStore("wallet", {
         );
         this.increaseKeysetCounter(keysetId, proofs.length);
         await proofsStore.addProofs(proofs, undefined, bucketId, "");
+        useSignerStore().reset();
 
         // update UI
         await this.setInvoicePaid(invoice.quote);
@@ -992,6 +997,7 @@ export const useWalletStore = defineStore("wallet", {
             "## Received change: " + proofsStore.sumProofs(changeProofs),
           );
           await proofsStore.addProofs(changeProofs, undefined, bucketId, "");
+          useSignerStore().reset();
         }
 
         // delete spent tokens from db
