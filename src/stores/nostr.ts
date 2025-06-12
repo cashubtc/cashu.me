@@ -23,6 +23,7 @@ import {
   finalizeEvent,
 } from "nostr-tools";
 import { bytesToHex, hexToBytes } from "@noble/hashes/utils"; // already an installed dependency
+import { ensureCompressed } from "src/utils/ecash";
 import { useWalletStore } from "./wallet";
 import { generateSecretKey, getPublicKey } from "nostr-tools";
 import { useLocalStorage } from "@vueuse/core";
@@ -239,7 +240,8 @@ export const useNostrStore = defineStore("nostr", {
         const privKey = this.privKeyHex;
         if (privKey && privKey.length) {
           const p2pkStore = useP2PKStore();
-          const pk66 = "02" + getPublicKey(hexToBytes(privKey));
+          // ensureCompressed() so P2PK keys are always in SEC form
+          const pk66 = ensureCompressed("02" + getPublicKey(hexToBytes(privKey)));
           if (!p2pkStore.haveThisKey(pk66)) {
             const keyPair = {
               publicKey: pk66,
