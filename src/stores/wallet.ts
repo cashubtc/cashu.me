@@ -553,7 +553,9 @@ export const useWalletStore = defineStore("wallet", {
      *
      * @param {array} proofs
      */
-    redeem: async function (bucketId: string = DEFAULT_BUCKET_ID) {
+    attemptRedeem: async function (
+      bucketId: string = DEFAULT_BUCKET_ID,
+    ): Promise<boolean> {
       /*
       Receives a token that is prepared in the receiveToken – it is not yet in the history
       */
@@ -640,7 +642,7 @@ export const useWalletStore = defineStore("wallet", {
             dlg.onDismiss(() => resolve(false));
           });
           if (ok) {
-            return await this.redeem(bucketId);
+            return false;
           }
           throw new Error(
             "No private key or remote signer available for P2PK unlock"
@@ -718,6 +720,7 @@ export const useWalletStore = defineStore("wallet", {
           });
         }
         notifySuccess(message);
+        return true;
       } catch (error: any) {
         console.error(error);
         notifyApiError(error);
@@ -726,6 +729,13 @@ export const useWalletStore = defineStore("wallet", {
         uIStore.unlockMutex();
       }
       // }
+    },
+
+    redeem: async function (bucketId: string = DEFAULT_BUCKET_ID) {
+      while (true) {
+        const res = await this.attemptRedeem(bucketId);
+        if (res) break;
+      }
     },
 
     // /mint
