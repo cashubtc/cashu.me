@@ -21,6 +21,8 @@
 <script lang="ts" setup>
 import { ref } from 'vue';
 import { useSignerStore } from 'src/stores/signer';
+import { nip19 } from 'nostr-tools';
+import { notifyError } from 'src/js/notify';
 
 const props = defineProps<{ dialogRef?: any }>();
 const emit = defineEmits(['ok', 'hide']);
@@ -32,8 +34,18 @@ const signer = useSignerStore();
 const nsec = ref('');
 
 function chooseLocal() {
+  const key = nsec.value.trim();
+  try {
+    const decoded = nip19.decode(key);
+    if (decoded.type !== 'nsec') {
+      throw new Error('invalid type');
+    }
+  } catch (e) {
+    notifyError('Invalid nsec');
+    return;
+  }
   signer.method = 'local';
-  signer.nsec = nsec.value;
+  signer.nsec = key;
   emit('ok');
   dialogRef && dialogRef.hide();
 }
