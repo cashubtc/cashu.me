@@ -14,6 +14,7 @@ export const useLockedTokensRedeemWorker = defineStore('lockedTokensRedeemWorker
   actions: {
     startLockedTokensRedeemWorker() {
       if (this.worker) return
+      window.addEventListener('message', this.handleMessage)
       this.worker = setInterval(() => this.processTokens(), this.checkInterval)
       // run immediately
       this.processTokens()
@@ -22,6 +23,12 @@ export const useLockedTokensRedeemWorker = defineStore('lockedTokensRedeemWorker
       if (this.worker) {
         clearInterval(this.worker)
         this.worker = null
+      }
+      window.removeEventListener('message', this.handleMessage)
+    },
+    handleMessage(event: MessageEvent) {
+      if (event.data?.type === 'retry-locked-token') {
+        this.processTokens()
       }
     },
     async processTokens() {
@@ -48,8 +55,22 @@ export const useLockedTokensRedeemWorker = defineStore('lockedTokensRedeemWorker
           })
           receiveStore.receiveData.tokensBase64 = entry.tokenString
           receiveStore.receiveData.bucketId = entry.tierId
-          await wallet.redeem(entry.tierId)
-          await cashuDb.lockedTokens.delete(entry.id)
+          try {
+            await wallet.redeem(entry.tierId)
+            await cashuDb.lockedTokens.delete(entry.id)
+          } catch (err: any) {
+            if (
+              typeof err?.message === 'string' &&
+              err.message.includes('No private key or remote signer')
+            ) {
+              postMessage({
+                type: 'locked-token-missing-signer',
+                tokenId: entry.id,
+              })
+            } else {
+              throw err
+            }
+          }
         } catch (e) {
           console.error('Failed to auto-redeem locked token', e)
         }
