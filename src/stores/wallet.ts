@@ -50,7 +50,7 @@ import { hashToCurve } from "@cashu/crypto/modules/common";
 import * as bolt11Decoder from "light-bolt11-decoder";
 import { bech32 } from "bech32";
 import axios from "axios";
-import { date } from "quasar";
+import { date, Dialog } from "quasar";
 
 // bip39 requires Buffer
 // import { Buffer } from 'buffer';
@@ -61,6 +61,8 @@ import { useSettingsStore } from "./settings";
 import { usePriceStore } from "./price";
 import { i18n } from "src/boot/i18n";
 import { useNostrStore } from "./nostr";
+import { useSignerStore } from "./signer";
+import MissingSignerModal from "src/components/MissingSignerModal.vue";
 // HACK: this is a workaround so that the catch block in the melt function does not throw an error when the user exits the app
 // before the payment is completed. This is necessary because the catch block in the melt function would otherwise remove all
 // quotes from the invoiceHistory and the user would not be able to pay the invoice again after reopening the app.
@@ -627,6 +629,19 @@ export const useWalletStore = defineStore("wallet", {
         }
 
         if (!privkey && needsSig && !remoteSigned) {
+          const signerStore = useSignerStore();
+          signerStore.reset();
+          const dlg = Dialog.create({
+            component: MissingSignerModal,
+          });
+          const ok = await new Promise<boolean>((resolve) => {
+            dlg.onOk(() => resolve(true));
+            dlg.onCancel(() => resolve(false));
+            dlg.onDismiss(() => resolve(false));
+          });
+          if (ok) {
+            return await this.redeem(bucketId);
+          }
           throw new Error(
             "No private key or remote signer available for P2PK unlock"
           );
