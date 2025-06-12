@@ -38,11 +38,7 @@ export const useP2PKStore = defineStore("p2pk", {
           key = "02" + data;
         }
       }
-      try {
-        return ensureCompressed(key);
-      } catch {
-        return key;
-      }
+      return ensureCompressed(key);
     },
     isValidPubkey: function (key: string) {
       try {
