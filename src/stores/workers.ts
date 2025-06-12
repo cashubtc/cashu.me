@@ -9,6 +9,9 @@ import { sha256 } from "@noble/hashes/sha256";
 import { bytesToHex } from "@noble/hashes/utils";
 import { Proof } from "@cashu/cashu-ts";
 import { useNostrStore, SignerType } from "./nostr";
+import { useSignerStore } from "./signer";
+import { schnorr } from "@noble/curves/secp256k1";
+import { nip19 } from "nostr-tools";
 export const useWorkersStore = defineStore("workers", {
   state: () => {
     return {
@@ -60,22 +63,38 @@ export const useWorkersStore = defineStore("workers", {
       }, this.checkInterval);
     },
     signWithRemote: async function (proofs: Proof[]): Promise<Proof[]> {
+      const signerStore = useSignerStore();
       const nostr = useNostrStore();
-      await nostr.initSignerIfNotSet();
-      if (
-        nostr.signerType !== SignerType.NIP07 &&
-        nostr.signerType !== SignerType.NIP46
-      ) {
+
+      let method = signerStore.method;
+      if (method === 'nip07') {
+        await nostr.initNip07Signer();
+      } else if (method === 'nip46') {
+        await nostr.initNip46Signer();
+      } else if (!method) {
+        await nostr.initSignerIfNotSet();
+        if (nostr.signerType === SignerType.NIP07) method = 'nip07';
+        else if (nostr.signerType === SignerType.NIP46) method = 'nip46';
+      }
+
+      let signSchnorr: ((h: string) => Promise<string>) | undefined;
+      if (method === 'local' && signerStore.nsec) {
+        const key = nip19.decode(signerStore.nsec).data as Uint8Array;
+        signSchnorr = async (h: string) => schnorr.sign(h, key);
+      } else if (method === 'nip07') {
+        signSchnorr =
+          (window as any)?.nostr?.signSchnorr || (nostr.signer as any)?.signSchnorr;
+      } else if (method === 'nip46') {
+        signSchnorr = (nostr.signer as any)?.signSchnorr;
+      }
+
+      if (!signSchnorr) {
         return proofs;
       }
 
-      const signSchnorr =
-        (nostr.signer as any)?.signSchnorr || (window as any)?.nostr?.signSchnorr;
-      if (!signSchnorr) throw new Error("Remote signer lacks signSchnorr");
-
       return Promise.all(
         proofs.map(async (p) => {
-          if (typeof p.secret === "string" && p.secret.startsWith('["P2PK"')) {
+          if (typeof p.secret === 'string' && p.secret.startsWith('["P2PK"')) {
             const h = sha256(new TextEncoder().encode(p.secret));
             const sig = await signSchnorr(bytesToHex(h));
             return { ...p, witness: { signatures: [sig] } } as Proof;
