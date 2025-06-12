@@ -126,12 +126,11 @@
                 class="q-mr-sm"
               />
 
-              <div class="column q-gutter-y-sm">
+              <div class="mint-info-container">
                 <!-- Mint Name -->
                 <q-item-label
                   lines="1"
-                  class="text-weight-medium text-left"
-                  style="font-size: 16px; font-weight: 600; line-height: 16px"
+                  class="text-weight-medium text-left mint-name"
                 >
                   {{ getMintDisplayName(mint.url) }}
                 </q-item-label>
@@ -141,12 +140,6 @@
                   caption
                   lines="2"
                   class="text-grey-6 text-left mint-url"
-                  style="
-                    font-size: 12px;
-                    line-height: 16px;
-                    font-family: monospace;
-                    margin-top: 4px;
-                  "
                 >
                   {{ mint.url }}
                 </q-item-label>
@@ -390,6 +383,8 @@ export default defineComponent({
 </script>
 
 <style scoped>
+@import "src/css/mintlist.css";
+
 .discovered-mints-list {
   max-height: 400px;
   overflow-y: auto;
@@ -400,21 +395,7 @@ export default defineComponent({
   margin-top: 1rem;
 }
 
-/* Selection buttons styling */
-.selection-buttons {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-}
-
-/* Primary action section */
-.primary-action-section {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-}
-
-/* Mint item styling */
+/* Mint item styling - specific to NostrMintRestore */
 .mint-item {
   text-align: left;
   border-radius: 10px;
@@ -431,18 +412,18 @@ export default defineComponent({
   border-color: var(--q-primary);
 }
 
-.mint-item-selected {
-  border-color: var(--q-primary) !important;
-  background-color: rgba(var(--q-primary-rgb), 0.1);
+/* Selection buttons styling */
+.selection-buttons {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
 }
 
-/* Mint URL styling - using monospace font like in MintSettings */
-.mint-url {
-  font-family: monospace !important;
-  font-size: 0.9em !important;
-  word-break: break-all;
-  overflow-wrap: break-word;
-  white-space: normal;
+/* Primary action section */
+.primary-action-section {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
 }
 
 /* Clickable checkbox */

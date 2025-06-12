@@ -141,14 +141,14 @@
                           />
                         </q-avatar>
 
-                        <div class="column q-gutter-y-sm">
+                        <div class="mint-info-container">
                           <div
                             v-if="mint.nickname || mint.info?.name"
                             class="mint-name"
                           >
                             {{ mint.nickname || mint.info?.name }}
                           </div>
-                          <div class="mint-url">
+                          <div class="text-grey-6 mint-url">
                             {{ getShortUrl(mint.url) }}
                           </div>
                         </div>
@@ -208,13 +208,15 @@
                     v-if="!isSelected(mint)"
                     class="mint-balance-section q-mt-md"
                   >
-                    <div class="mint-balance-badge">
-                      {{
-                        formatCurrency(
-                          mintClass(mint).unitBalance(this.activeUnit),
-                          this.activeUnit
-                        )
-                      }}
+                    <div class="currency-unit-badge">
+                      <span class="currency-unit-text">
+                        {{
+                          formatCurrency(
+                            mintClass(mint).unitBalance(this.activeUnit),
+                            this.activeUnit
+                          )
+                        }}
+                      </span>
                     </div>
                   </div>
 
@@ -1001,6 +1003,8 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
+@import "src/css/mintlist.css";
+
 .fullscreen {
   position: fixed;
   top: 0;
@@ -1026,7 +1030,7 @@ export default defineComponent({
   display: flex;
   flex-direction: row;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: flex-start;
 }
 
 .close-icon {
@@ -1118,19 +1122,17 @@ export default defineComponent({
   width: 100%;
 }
 
+/* MultinutPaymentDialog specific mint card styles */
 .mint-card {
   width: 100%;
   border-radius: 12px;
-  border: 1px solid rgba(128, 128, 128, 0.2);
   background-color: rgba(255, 255, 255, 0.02);
   transition: all 0.2s ease;
-  position: relative;
 }
 
 .mint-card:hover:not(.cursor-not-allowed) {
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  border-color: rgba(128, 128, 128, 0.4);
 }
 
 .mint-card-selected {
@@ -1152,24 +1154,6 @@ export default defineComponent({
   width: 100%;
 }
 
-.mint-name {
-  font-size: 16px;
-  font-weight: 600;
-  line-height: 16px;
-  color: white;
-  text-align: left;
-}
-
-.mint-url {
-  font-size: 12px;
-  line-height: 16px;
-  font-family: monospace;
-  margin-top: 4px;
-  color: #9e9e9e;
-  word-break: break-word;
-  text-align: left;
-}
-
 .state-indicator {
   display: flex;
   align-items: center;
@@ -1188,16 +1172,6 @@ export default defineComponent({
   display: flex;
   justify-content: flex-end;
   width: 100%;
-}
-
-.mint-balance-badge {
-  background-color: #1d1d1d;
-  border-radius: 4px;
-  padding: 4px 8px;
-  font-size: 14px;
-  font-weight: 500;
-  color: white;
-  display: inline-block;
 }
 
 .mint-slider-section {

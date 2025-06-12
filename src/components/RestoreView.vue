@@ -176,28 +176,16 @@
                       />
                     </q-avatar>
 
-                    <div class="column q-gutter-y-sm">
+                    <div class="mint-info-container">
                       <!-- Mint Name -->
                       <div
                         v-if="mint.nickname || mint.info?.name"
-                        style="
-                          font-size: 16px;
-                          font-weight: 600;
-                          line-height: 16px;
-                        "
+                        class="mint-name"
                       >
                         {{ mint.nickname || mint.info?.name }}
                       </div>
                       <!-- Mint URL -->
-                      <div
-                        class="text-grey-6"
-                        style="
-                          font-size: 12px;
-                          line-height: 16px;
-                          font-family: monospace;
-                          margin-top: 4px;
-                        "
-                      >
+                      <div class="text-grey-6 mint-url">
                         {{ mint.url }}
                       </div>
                     </div>
@@ -213,16 +201,9 @@
                     <div
                       v-for="unit in mintClass(mint).units"
                       :key="unit"
-                      class="q-py-xs q-px-sm q-my-xs"
-                      style="
-                        border-radius: 4px;
-                        background-color: #1d1d1d;
-                        display: inline-block;
-                      "
+                      class="currency-unit-badge"
                     >
-                      <span
-                        style="color: white; font-size: 14px; font-weight: 500"
-                      >
+                      <span class="currency-unit-text">
                         {{
                           formatCurrency(
                             mintClass(mint).unitBalance(unit),
@@ -491,50 +472,12 @@ export default defineComponent({
 </script>
 
 <style>
-.fade-enter-active,
-.fade-leave-active {
-  transition: transform 1s ease, opacity 1s ease;
-}
+@import "src/css/mintlist.css";
 
-.mint-card.q-loading {
-  opacity: 0.5; /* Reduce opacity when loading */
-  pointer-events: none;
-}
-
-.mint-loading-spinner {
-  position: absolute;
-  top: 18px;
-  right: 24px;
-  z-index: 10;
-}
-
-.mint-card:hover {
-  border-color: rgba(128, 128, 128, 0.4) !important;
-}
-
-/* Selection buttons styling */
-.selection-buttons {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-}
-
-/* Primary action section */
-.primary-action-section {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-}
-
-/* Fallback action section */
+/* Fallback action section - specific to RestoreView */
 .fallback-action-section {
   display: flex;
   align-items: center;
   justify-content: flex-start;
-}
-
-/* Clickable checkbox */
-.clickable-checkbox {
-  cursor: pointer;
 }
 </style>
