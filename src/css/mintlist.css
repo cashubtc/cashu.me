@@ -1,0 +1,123 @@
+/* Shared styles for mint list items across MintSettings, RestoreView, and NostrMintRestore */
+
+/* Common mint card styling */
+.mint-card {
+  border-radius: 10px;
+  border: 1px solid rgba(128, 128, 128, 0.2);
+  padding: 0px;
+  position: relative;
+  transition: border-color 0.2s ease;
+}
+
+.mint-card:hover {
+  border-color: rgba(128, 128, 128, 0.4) !important;
+}
+
+.mint-card.q-loading {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+/* Mint information container */
+.mint-info-container {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  /* This is crucial for text wrapping */
+  flex: 1;
+}
+
+/* Mint name styling with proper text wrapping */
+.mint-name {
+  text-align: left;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 20px;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  white-space: normal;
+  max-width: 100%;
+}
+
+/* Mint URL styling with proper text wrapping */
+.mint-url {
+  text-align: left;
+  font-size: 12px;
+  line-height: 16px;
+  font-family: monospace !important;
+  margin-top: 4px;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  word-break: break-all;
+  /* For URLs, break-all is better */
+  white-space: normal;
+  max-width: 100%;
+}
+
+/* Currency unit badges */
+.currency-unit-badge {
+  border-radius: 4px;
+  background-color: #1d1d1d;
+  display: inline-block;
+  padding: 4px 8px;
+  margin: 4px 4px 4px 0;
+}
+
+.currency-unit-text {
+  color: white;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* Loading spinner positioning */
+.mint-loading-spinner {
+  position: absolute;
+  top: 18px;
+  right: 24px;
+  z-index: 10;
+}
+
+/* Error badge positioning */
+.error-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 10;
+}
+
+/* Transition animations */
+.fade-enter-active,
+.fade-leave-active {
+  transition: transform 1s ease, opacity 1s ease;
+}
+
+/* Selection buttons styling */
+.selection-buttons {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+/* Primary action section */
+.primary-action-section {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+/* Clickable checkbox */
+.clickable-checkbox {
+  cursor: pointer;
+}
+
+/* Mint item selected state */
+.mint-item-selected {
+  border-color: var(--q-primary) !important;
+  background-color: rgba(var(--q-primary-rgb), 0.1);
+}
+
+/* Ensure text alignment is consistent */
+.text-left {
+  text-align: left !important;
+}

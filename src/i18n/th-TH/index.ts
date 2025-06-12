@@ -160,6 +160,7 @@ export default {
       backup_restore: "สำรองข้อมูล & กู้คืน",
       lightning_address: "ที่อยู่ LIGHTNING",
       nostr_keys: "คีย์ NOSTR",
+      nostr: "NOSTR",
       payment_requests: "คำขอชำระเงิน",
       nostr_wallet_connect: "NOSTR WALLET CONNECT",
       hardware_features: "คุณสมบัติฮาร์ดแวร์",
@@ -219,6 +220,23 @@ export default {
         title: "ส่วนขยายการลงนาม",
         description: "ใช้ส่วนขยายการลงนาม NIP-07",
         not_found: "ไม่พบส่วนขยายการลงนาม NIP-07",
+      },
+    },
+    nostr: {
+      title: "NOSTR",
+      relays: {
+        expand_label: "คลิกเพื่อแก้ไขรีเลย์",
+        add: {
+          title: "เพิ่มรีเลย์",
+          description:
+            "กระเป๋าเงินของคุณใช้รีเลย์เหล่านี้สำหรับการดำเนินงาน nostr เช่น คำขอชำระเงิน nostr wallet connect และการสำรองข้อมูล",
+        },
+        list: {
+          title: "รีเลย์",
+          description: "กระเป๋าเงินของคุณจะเชื่อมต่อกับรีเลย์เหล่านี้",
+          copy_tooltip: "คัดลอกรีเลย์",
+          remove_tooltip: "ลบรีเลย์",
+        },
       },
     },
     payment_requests: {

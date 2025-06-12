@@ -161,6 +161,7 @@ export default {
       backup_restore: "SAUVEGARDE & RESTAURATION",
       lightning_address: "ADRESSE LIGHTNING",
       nostr_keys: "CLÉS NOSTR",
+      nostr: "NOSTR",
       payment_requests: "DEMANDES DE PAIEMENT",
       nostr_wallet_connect: "NOSTR WALLET CONNECT",
       hardware_features: "FONCTIONNALITÉS MATÉRIELLES",
@@ -221,6 +222,23 @@ export default {
         title: "Extension de signature",
         description: "Utiliser une extension de signature NIP-07",
         not_found: "Aucune extension de signature NIP-07 trouvée",
+      },
+    },
+    nostr: {
+      title: "NOSTR",
+      relays: {
+        expand_label: "Cliquez pour modifier les relais",
+        add: {
+          title: "Ajouter un relais",
+          description:
+            "Votre portefeuille utilise ces relais pour les opérations nostr telles que les demandes de paiement, nostr wallet connect et les sauvegardes.",
+        },
+        list: {
+          title: "Relais",
+          description: "Votre portefeuille se connectera à ces relais.",
+          copy_tooltip: "Copier le relais",
+          remove_tooltip: "Supprimer le relais",
+        },
       },
     },
     payment_requests: {

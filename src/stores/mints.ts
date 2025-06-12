@@ -20,6 +20,7 @@ import { useProofsStore } from "./proofs";
 import { useI18n } from "vue-i18n";
 import { i18n } from "src/boot/i18n";
 import { useSettingsStore } from "./settings";
+import { useNostrMintBackupStore } from "./nostrMintBackup";
 
 export type Mint = {
   url: string;
@@ -348,6 +349,10 @@ export const useMintsStore = defineStore("mints", {
         if (verbose) {
           await notifySuccess(this.t("wallet.mint.notifications.added"));
         }
+
+        // Trigger Nostr backup if enabled
+        this.triggerNostrBackup();
+
         return mintToAdd;
       } catch (error) {
         // activation failed, we remove the mint again from local storage
@@ -546,6 +551,9 @@ export const useMintsStore = defineStore("mints", {
         await this.activateMint(this.mints[0], false);
       }
       notifySuccess(this.t("wallet.mint.notifications.removed"));
+
+      // Trigger Nostr backup if enabled
+      this.triggerNostrBackup();
     },
     assertMintError: function (response: { error?: any }, verbose = true) {
       if (response.error != null) {
@@ -556,6 +564,25 @@ export const useMintsStore = defineStore("mints", {
           );
         }
         throw new Error(`Mint error: ${response.error}`);
+      }
+    },
+
+    // Trigger Nostr backup when mints change
+    triggerNostrBackup: async function () {
+      try {
+        const nostrMintBackupStore = useNostrMintBackupStore();
+
+        if (nostrMintBackupStore.enabled && nostrMintBackupStore.needsBackup) {
+          setTimeout(async () => {
+            try {
+              await nostrMintBackupStore.backupMintsToNostr();
+            } catch (error) {
+              console.error("Failed to backup mints to Nostr:", error);
+            }
+          }, 1000);
+        }
+      } catch (error) {
+        console.error("Failed to trigger Nostr backup:", error);
       }
     },
   },

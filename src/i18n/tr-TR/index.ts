@@ -160,6 +160,7 @@ export default {
       backup_restore: "YEDEKLE & GERİ YÜKLE",
       lightning_address: "LIGHTNING ADRESİ",
       nostr_keys: "NOSTR ANAHTARLARI",
+      nostr: "NOSTR",
       payment_requests: "ÖDEME TALEPLERİ",
       nostr_wallet_connect: "NOSTR CÜZDAN BAĞLANTISI",
       hardware_features: "DONANIM ÖZELLİKLERİ",
@@ -220,6 +221,23 @@ export default {
         title: "İmzalama uzantısı",
         description: "Bir NIP-07 imzalama uzantısı kullanın",
         not_found: "NIP-07 imzalama uzantısı bulunamadı",
+      },
+    },
+    nostr: {
+      title: "NOSTR",
+      relays: {
+        expand_label: "Röleleri düzenlemek için tıklayın",
+        add: {
+          title: "Röle ekle",
+          description:
+            "Cüzdanınız ödeme istekleri, nostr cüzdan bağlantısı ve yedeklemeler gibi nostr işlemleri için bu röleleri kullanır.",
+        },
+        list: {
+          title: "Röleler",
+          description: "Cüzdanınız bu rölelere bağlanacak.",
+          copy_tooltip: "Röleyi kopyala",
+          remove_tooltip: "Röleyi kaldır",
+        },
       },
     },
     payment_requests: {

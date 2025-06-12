@@ -160,6 +160,7 @@ export default {
       backup_restore: "BACKUP E RIPRISTINO",
       lightning_address: "INDIRIZZO LIGHTNING",
       nostr_keys: "CHIAVI NOSTR",
+      nostr: "NOSTR",
       payment_requests: "RICHIESTE DI PAGAMENTO",
       nostr_wallet_connect: "NOSTR WALLET CONNECT",
       hardware_features: "FUNZIONALITÀ HARDWARE",
@@ -219,6 +220,23 @@ export default {
         title: "Estensione di firma",
         description: "Usa un'estensione di firma NIP-07",
         not_found: "Nessuna estensione di firma NIP-07 trovata",
+      },
+    },
+    nostr: {
+      title: "NOSTR",
+      relays: {
+        expand_label: "Clicca per modificare i relay",
+        add: {
+          title: "Aggiungi relay",
+          description:
+            "Il tuo portafoglio utilizza questi relay per le operazioni nostr come richieste di pagamento, nostr wallet connect e backup.",
+        },
+        list: {
+          title: "Relay",
+          description: "Il tuo portafoglio si connetterà a questi relay.",
+          copy_tooltip: "Copia relay",
+          remove_tooltip: "Rimuovi relay",
+        },
       },
     },
     payment_requests: {

@@ -82,6 +82,10 @@ export const useSettingsStore = defineStore("settings", {
         "cashu.settings.multinutEnabled",
         false
       ),
+      nostrMintBackupEnabled: useLocalStorage<boolean>(
+        "cashu.settings.nostrMintBackupEnabled",
+        false
+      ),
     };
   },
 });

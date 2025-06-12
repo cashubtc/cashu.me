@@ -159,6 +159,7 @@ export default {
       backup_restore: "SÄKERHETSKOPIERING & ÅTERSTÄLLNING",
       lightning_address: "LIGHTNING ADRESS",
       nostr_keys: "NOSTR NYCKLAR",
+      nostr: "NOSTR",
       payment_requests: "BETALNINGSFÖRFRÅGNINGAR",
       nostr_wallet_connect: "NOSTR PLÅNBOKSANSLUTNING",
       hardware_features: "MASKINVARA FUNKTIONER",
@@ -219,6 +220,23 @@ export default {
         title: "Signeringsutökning",
         description: "Använd en NIP-07 signeringsutökning",
         not_found: "Ingen NIP-07 signeringsutökning hittades",
+      },
+    },
+    nostr: {
+      title: "NOSTR",
+      relays: {
+        expand_label: "Klicka för att redigera reläer",
+        add: {
+          title: "Lägg till relä",
+          description:
+            "Din plånbok använder dessa reläer för nostr-operationer som betalningsförfrågningar, nostr wallet connect och säkerhetskopior.",
+        },
+        list: {
+          title: "Reläer",
+          description: "Din plånbok kommer att ansluta till dessa reläer.",
+          copy_tooltip: "Kopiera relä",
+          remove_tooltip: "Ta bort relä",
+        },
       },
     },
     payment_requests: {
