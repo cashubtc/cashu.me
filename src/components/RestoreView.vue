@@ -480,4 +480,11 @@ export default defineComponent({
   align-items: center;
   justify-content: flex-start;
 }
+
+/* Primary action section */
+.primary-action-section {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
 </style>
