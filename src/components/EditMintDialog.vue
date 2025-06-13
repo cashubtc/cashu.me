@@ -105,7 +105,6 @@ export default defineComponent({
     const updateMintLocal = () => {
       const mintStore = useMintsStore();
       mintStore.updateMint(mintToEdit.value, editMintData.value);
-      mintStore.showMintInfoData = { ...editMintData.value };
       showEditMintDialogLocal.value = false;
     };
 

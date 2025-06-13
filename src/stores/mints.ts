@@ -115,7 +115,6 @@ export const useMintsStore = defineStore("mints", {
     const addMintBlocking = ref(false);
     const showRemoveMintDialog = ref(false);
     const showMintInfoDialog = ref(false);
-    const showMintInfoData = ref({} as Mint);
     const showEditMintDialog = ref(false);
 
     const uiStoreGlobal: any = useUiStore();
@@ -141,7 +140,6 @@ export const useMintsStore = defineStore("mints", {
       addMintBlocking,
       showRemoveMintDialog,
       showMintInfoDialog,
-      showMintInfoData,
       showEditMintDialog,
       uiStoreGlobal,
       settingsStoreGlobal,
@@ -469,10 +467,9 @@ export const useMintsStore = defineStore("mints", {
       }
       // set motd_viewed to false
       this.mints.filter((m) => m.url === mint.url)[0].motdDismissed = false;
-      // set the mintinfo data
-      this.showMintInfoData = mint;
-      // open mint info dialog
-      this.showMintInfoDialog = true;
+
+      // Navigate to mint details page with mint URL as query parameter
+      window.location.href = `/mintdetails?mintUrl=${encodeURIComponent(mint.url)}`;
     },
     fetchMintInfo: async function (mint: Mint) {
       try {
@@ -483,7 +480,7 @@ export const useMintsStore = defineStore("mints", {
         console.error(error);
         try {
           // notifyApiError(error, this.t("wallet.mint.notifications.could_not_get_info"));
-        } catch {}
+        } catch { }
         throw error;
       }
     },
@@ -523,7 +520,7 @@ export const useMintsStore = defineStore("mints", {
         console.error(error);
         try {
           // notifyApiError(error, this.t("wallet.mint.notifications.could_not_get_keys"));
-        } catch {}
+        } catch { }
         throw error;
       }
     },
@@ -537,7 +534,7 @@ export const useMintsStore = defineStore("mints", {
         console.error(error);
         try {
           // notifyApiError(error, this.t("wallet.mint.notifications.could_not_get_keysets"));
-        } catch {}
+        } catch { }
         throw error;
       }
     },
