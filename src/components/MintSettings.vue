@@ -132,7 +132,7 @@
                 </div>
               </div>
 
-              <div class="row justify-between q-pb-md q-px-md">
+              <div class="row justify-between q-pb-md q-pl-lg q-pr-md">
                 <div class="col">
                   <!-- Currency units with regular text styling -->
                   <div class="row q-gutter-x-sm">
