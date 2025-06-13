@@ -82,11 +82,11 @@
             >
               <mint-motd-message
                 v-if="
-                  showMintInfoData.info.motd && !showMintInfoData.motd_viewed
+                  showMintInfoData.info.motd && !showMintInfoData.motdDismissed
                 "
                 :message="showMintInfoData.info.motd"
                 :mint-url="showMintInfoData.url"
-                :dismissed="showMintInfoData.motd_viewed"
+                :dismissed="showMintInfoData.motdDismissed"
                 @dismiss="motdDismissed = true"
               />
             </transition>
@@ -106,10 +106,12 @@
           </div>
           <transition name="smooth-slide">
             <MintMotdMessage
-              v-if="showMintInfoData.info.motd && showMintInfoData.motd_viewed"
+              v-if="
+                showMintInfoData.info.motd && showMintInfoData.motdDismissed
+              "
               :message="showMintInfoData.info.motd"
               :mintUrl="showMintInfoData.url"
-              :dismissed="showMintInfoData.motd_viewed"
+              :dismissed="showMintInfoData.motdDismissed"
               @dismiss="dismissMotd"
             />
           </transition>

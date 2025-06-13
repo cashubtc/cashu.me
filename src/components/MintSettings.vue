@@ -1,5 +1,4 @@
 <template>
-  <MintDetailsDialog @update:mintToRemove="mintToRemove = $event" />
   <AddMintDialog
     :addMintData="addMintData"
     :showAddMintDialog="showAddMintDialog"
@@ -454,7 +453,6 @@ import { useWorkersStore } from "src/stores/workers";
 import { useSwapStore } from "src/stores/swap";
 import { useUiStore } from "src/stores/ui";
 import { notifyError, notifyWarning } from "src/js/notify";
-import MintDetailsDialog from "src/components/MintDetailsDialog.vue";
 import { EventBus } from "../js/eventBus";
 import AddMintDialog from "src/components/AddMintDialog.vue";
 
@@ -462,7 +460,6 @@ export default defineComponent({
   name: "MintSettings",
   mixins: [windowMixin],
   components: {
-    MintDetailsDialog,
     AddMintDialog,
   },
   props: {},
@@ -525,8 +522,6 @@ export default defineComponent({
     ...mapWritableState(useMintsStore, [
       "addMintData",
       "showAddMintDialog",
-      "showMintInfoDialog",
-      "showMintInfoData",
     ]),
     ...mapState(useUiStore, ["tickerShort"]),
     ...mapState(useSwapStore, ["swapAmountData"]),
@@ -665,13 +660,19 @@ export default defineComponent({
       this.discoveringMints = false;
     },
     showMintInfo: async function (mint) {
-      this.showMintInfoData = mint;
-      this.showMintInfoDialog = true;
-
-      this.fetchMintInfo(mint).then((newMintInfo) => {
+      // Fetch fresh mint info before navigating
+      try {
+        const newMintInfo = await this.fetchMintInfo(mint);
         this.triggerMintInfoMotdChanged(newMintInfo, mint);
         this.mints.filter((m) => m.url === mint.url)[0].info = newMintInfo;
-        this.showMintInfoData = mint;
+      } catch (error) {
+        console.log("Failed to fetch mint info:", error);
+      }
+      
+      // Navigate to mint details page with mint URL as query parameter
+      this.$router.push({
+        path: "/mintdetails",
+        query: { mintUrl: mint.url },
       });
     },
     getMintIconUrl: function (mint) {

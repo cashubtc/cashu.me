@@ -29,7 +29,7 @@ export type Mint = {
   nickname?: string;
   info?: GetInfoResponse;
   errored?: boolean;
-  motd_viewed?: boolean;
+  motdDismissed?: boolean;
   multinutSelected?: boolean;
   // initialize api: new CashuMint(url) on activation
 };
@@ -468,7 +468,7 @@ export const useMintsStore = defineStore("mints", {
         return;
       }
       // set motd_viewed to false
-      this.mints.filter((m) => m.url === mint.url)[0].motd_viewed = false;
+      this.mints.filter((m) => m.url === mint.url)[0].motdDismissed = false;
       // set the mintinfo data
       this.showMintInfoData = mint;
       // open mint info dialog
@@ -483,7 +483,7 @@ export const useMintsStore = defineStore("mints", {
         console.error(error);
         try {
           // notifyApiError(error, this.t("wallet.mint.notifications.could_not_get_info"));
-        } catch {}
+        } catch { }
         throw error;
       }
     },
@@ -523,7 +523,7 @@ export const useMintsStore = defineStore("mints", {
         console.error(error);
         try {
           // notifyApiError(error, this.t("wallet.mint.notifications.could_not_get_keys"));
-        } catch {}
+        } catch { }
         throw error;
       }
     },
@@ -537,7 +537,7 @@ export const useMintsStore = defineStore("mints", {
         console.error(error);
         try {
           // notifyApiError(error, this.t("wallet.mint.notifications.could_not_get_keysets"));
-        } catch {}
+        } catch { }
         throw error;
       }
     },
