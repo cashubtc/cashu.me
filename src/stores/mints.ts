@@ -483,7 +483,7 @@ export const useMintsStore = defineStore("mints", {
         console.error(error);
         try {
           // notifyApiError(error, this.t("wallet.mint.notifications.could_not_get_info"));
-        } catch { }
+        } catch {}
         throw error;
       }
     },
@@ -523,7 +523,7 @@ export const useMintsStore = defineStore("mints", {
         console.error(error);
         try {
           // notifyApiError(error, this.t("wallet.mint.notifications.could_not_get_keys"));
-        } catch { }
+        } catch {}
         throw error;
       }
     },
@@ -537,7 +537,7 @@ export const useMintsStore = defineStore("mints", {
         console.error(error);
         try {
           // notifyApiError(error, this.t("wallet.mint.notifications.could_not_get_keysets"));
-        } catch { }
+        } catch {}
         throw error;
       }
     },

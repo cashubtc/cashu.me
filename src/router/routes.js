@@ -14,7 +14,9 @@ const routes = [
   {
     path: "/mintdetails",
     component: () => import("layouts/FullscreenLayout.vue"),
-    children: [{ path: "", component: () => import("src/pages/MintDetailsPage.vue") }],
+    children: [
+      { path: "", component: () => import("src/pages/MintDetailsPage.vue") },
+    ],
   },
   {
     path: "/restore",

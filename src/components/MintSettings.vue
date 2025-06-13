@@ -519,10 +519,7 @@ export default defineComponent({
     ]),
     ...mapState(useNostrStore, ["pubkey", "mintRecommendations"]),
     ...mapState(useWorkersStore, ["invoiceWorkerRunning"]),
-    ...mapWritableState(useMintsStore, [
-      "addMintData",
-      "showAddMintDialog",
-    ]),
+    ...mapWritableState(useMintsStore, ["addMintData", "showAddMintDialog"]),
     ...mapState(useUiStore, ["tickerShort"]),
     ...mapState(useSwapStore, ["swapAmountData"]),
     ...mapWritableState(useSwapStore, ["swapBlocking"]),
@@ -668,7 +665,7 @@ export default defineComponent({
       } catch (error) {
         console.log("Failed to fetch mint info:", error);
       }
-      
+
       // Navigate to mint details page with mint URL as query parameter
       this.$router.push({
         path: "/mintdetails",

@@ -116,9 +116,9 @@ export default defineComponent({
       emit("remove", props.mintToRemove.url);
       mintsStore.showMintInfoDialog = false;
       mintsStore.showEditMintDialog = false;
-      
+
       // If we're on the mint details page, navigate back to home
-      if (window.location.pathname === '/mintdetails') {
+      if (window.location.pathname === "/mintdetails") {
         window.history.back();
       }
     };
