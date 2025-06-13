@@ -23,8 +23,8 @@
               'border-radius': '10px',
               border:
                 mint.url == activeMintUrl
-                  ? '1px solid var(--q-primary)'
-                  : '1px solid rgba(128, 128, 128, 0.2)',
+                  ? '1px solid var(--q-primary) !important'
+                  : '1px solid rgba(128, 128, 128, 0.2) !important',
               padding: '0px',
               position: 'relative',
             }"
@@ -65,41 +65,6 @@
               </div>
             </transition>
             <div class="full-width" style="position: relative">
-              <!-- <transition-group
-                appear
-                enter-active-class="animated fadeIn"
-                leave-active-class="animated fadeOut"
-                name="fade"
-              >
-                <q-item-section
-                  v-if="mint.url == activatingMintUrl"
-                  style="
-                    position: absolute;
-                    top: 0;
-                    left: 0;
-                    width: 100%;
-                    height: 100%;
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                    z-index: 1; /* Ensure spinner is on top */
-                    background-color: rgba(
-                      15,
-                      15,
-                      15,
-                      0.8
-                    ); /* Semi-transparent background */
-                    border-radius: 8px; /* Match q-item's border-radius */
-                    padding: 0px;
-                  "
-                >
-                  <q-spinner-hourglass
-                    class="q-my-auto"
-                    color="white"
-                    size="2em"
-                  />
-                </q-item-section>
-              </transition-group> -->
               <div class="row items-center q-pa-md">
                 <div class="col">
                   <div class="row items-center">
@@ -658,12 +623,15 @@ export default defineComponent({
     },
     showMintInfo: async function (mint) {
       // Fetch fresh mint info before navigating
+      this.activatingMintUrl = mint.url;
       try {
         const newMintInfo = await this.fetchMintInfo(mint);
         this.triggerMintInfoMotdChanged(newMintInfo, mint);
         this.mints.filter((m) => m.url === mint.url)[0].info = newMintInfo;
       } catch (error) {
         console.log("Failed to fetch mint info:", error);
+      } finally {
+        this.activatingMintUrl = "";
       }
 
       // Navigate to mint details page with mint URL as query parameter
