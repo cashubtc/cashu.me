@@ -24,7 +24,11 @@ quasar dev
 
 ### Run unit tests
 
+Install dependencies first so the test packages are available, then run the
+tests:
+
 ```bash
+npm install
 npm test
 ```
 
