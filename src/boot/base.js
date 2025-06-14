@@ -26,7 +26,8 @@ window.windowMixin = {
       this.$q.localStorage.set("cashu.theme", newValue);
     },
     changeLanguage: function (e) {
-      this.$q.localStorage.set("cashu.language", e.target.value);
+      const value = e.target.value === "en" ? "en-US" : e.target.value;
+      this.$q.localStorage.set("cashu.language", value);
     },
     toggleDarkMode: function () {
       this.$q.dark.toggle();
@@ -228,7 +229,7 @@ window.windowMixin = {
 
     const language = this.$q.localStorage.getItem("cashu.language");
     if (language) {
-      this.$i18n.locale = language;
+      this.$i18n.locale = language === "en" ? "en-US" : language;
     }
 
     // only for iOS
