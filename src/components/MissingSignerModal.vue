@@ -26,7 +26,8 @@ import { notifyError } from 'src/js/notify';
 
 const props = defineProps<{ dialogRef?: any }>();
 const emit = defineEmits(['ok', 'hide']);
-const dialogRef = props.dialogRef;
+// Ensure dialogRef is always a Vue ref to avoid warnings
+const dialogRef = props.dialogRef ?? ref(null);
 function onDialogHide() {
   emit('hide');
 }
@@ -47,16 +48,16 @@ function chooseLocal() {
   signer.method = 'local';
   signer.nsec = key;
   emit('ok');
-  dialogRef && dialogRef.hide();
+  dialogRef.value?.hide();
 }
 function chooseNip07() {
   signer.method = 'nip07';
   emit('ok');
-  dialogRef && dialogRef.hide();
+  dialogRef.value?.hide();
 }
 function chooseNip46() {
   signer.method = 'nip46';
   emit('ok');
-  dialogRef && dialogRef.hide();
+  dialogRef.value?.hide();
 }
 </script>
