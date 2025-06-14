@@ -45,7 +45,8 @@ export const useUiStore = defineStore("ui", {
       this.showReceiveEcashDrawer = false;
     },
     async lockMutex() {
-      const nRetries = 10;
+      // allow longer operations to finish by waiting up to 30s
+      const nRetries = 60;
       const retryInterval = 500;
       let retries = 0;
 

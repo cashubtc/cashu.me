@@ -132,7 +132,11 @@ export const useWorkersStore = defineStore("workers", {
             this.clearAllWorkers();
             sendTokensStore.showSendTokens = false;
           }
-        } catch (error) {
+        } catch (error: any) {
+          if (error?.message?.includes("Failed to acquire global mutex lock")) {
+            debug("checkTokenSpendableWorker: mutex locked, retrying later");
+            return;
+          }
           debug("checkTokenSpendableWorker: some error", error);
           this.clearAllWorkers();
         }
