@@ -220,10 +220,6 @@ export default defineComponent({
       "toggleScanner",
       "pasteToParseDialog",
     ]),
-    ...mapWritableState(useReceiveTokensStore, [
-      "showReceiveTokens",
-      "receiveData",
-    ]),
     isiOsSafari() {
       const userAgent = window.navigator.userAgent.toLowerCase();
       const match =
