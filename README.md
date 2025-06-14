@@ -25,6 +25,7 @@ quasar dev
 ### Run unit tests
 
 ```bash
+npm install
 npm test
 ```
 
