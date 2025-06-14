@@ -1,9 +1,12 @@
 name: build
 
-on: [push, pull_request]
+on:
+  push:
+  pull_request:
 
 jobs:
-  build-check:
+  build:
+    # This key *must* be "build" to match your branch protection
     runs-on: ubuntu-latest
 
     steps:
@@ -19,7 +22,7 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Run build check
+      - name: Run build & PWA build
         run: |
           npm run build
           npm run build:pwa
