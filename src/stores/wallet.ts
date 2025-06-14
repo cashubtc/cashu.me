@@ -614,6 +614,9 @@ export const useWalletStore = defineStore("wallet", {
       if (!mint) {
         throw new Error("mint not found");
       }
+      if (!proofs.every((p) => mint.keysets.some((k) => k.id === p.id))) {
+        throw new Error("Keyset mismatch for token proofs");
+      }
       await uIStore.lockMutex();
       try {
         // redeem
@@ -666,6 +669,8 @@ export const useWalletStore = defineStore("wallet", {
               proofs,
             })
           : receiveStore.receiveData.tokensBase64;
+
+        debug("redeem: sending proofs", proofs);
 
         let receivedProofs: Proof[];
         try {

@@ -3,8 +3,10 @@ import { cashuDb } from "./dexie";
 import { useWalletStore } from "./wallet";
 import { useReceiveTokensStore } from "./receiveTokensStore";
 import { useSettingsStore } from "./settings";
+import { useMintsStore } from "./mints";
 import token from "src/js/token";
 import { ensureCompressed } from "src/utils/ecash";
+import { debug } from "src/js/logger";
 
 export const useLockedTokensRedeemWorker = defineStore(
   "lockedTokensRedeemWorker",
@@ -47,9 +49,34 @@ export const useLockedTokensRedeemWorker = defineStore(
         if (!entries.length) return;
         const wallet = useWalletStore();
         const receiveStore = useReceiveTokensStore();
+        const mintStore = useMintsStore();
         for (const entry of entries) {
           try {
             const decoded = token.decode(entry.tokenString);
+            if (!decoded) {
+              console.error("Invalid token stored", entry.id);
+              await cashuDb.lockedTokens.delete(entry.id);
+              continue;
+            }
+            const mintUrl = token.getMint(decoded);
+            const unit = token.getUnit(decoded);
+            const proofs = token.getProofs(decoded);
+            const mint = mintStore.mints.find((m) => m.url === mintUrl);
+            if (
+              !mint ||
+              !proofs.every((p) => mint.keysets.some((k) => k.id === p.id))
+            ) {
+              console.error("Mint or keyset mismatch for locked token", entry.id);
+              await cashuDb.lockedTokens.delete(entry.id);
+              continue;
+            }
+            const mintWallet = wallet.mintWallet(mintUrl, unit);
+            const spent = await wallet.checkProofsSpendable(proofs, mintWallet);
+            if (spent && spent.length === proofs.length) {
+              await cashuDb.lockedTokens.delete(entry.id);
+              continue;
+            }
+
             // normalise secret before redeem
             decoded.proofs.forEach((p) => {
               if (
@@ -63,6 +90,7 @@ export const useLockedTokensRedeemWorker = defineStore(
             });
             receiveStore.receiveData.tokensBase64 = entry.tokenString;
             receiveStore.receiveData.bucketId = entry.tierId;
+            debug("locked token redeem: sending proofs", proofs);
             try {
               await wallet.redeem(entry.tierId);
               await cashuDb.lockedTokens.delete(entry.id);
