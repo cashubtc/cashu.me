@@ -1599,4 +1599,11 @@ export default {
     invalid_swap_data_error_text: "Invalid swap data",
     swap_error_text: "Error swapping",
   },
+  settings: {
+    nostr: {
+      signing_extension: {
+        not_found: "No NIP-07 signing extension found",
+      },
+    },
+  },
 };

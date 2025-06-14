@@ -1358,6 +1358,13 @@ export default {
     invalid_swap_data_error_text: "Μη έγκυρα δεδομένα ανταλλαγής",
     swap_error_text: "Σφάλμα κατά την ανταλλαγή",
   },
+  settings: {
+    nostr: {
+      signing_extension: {
+        not_found: "Δεν βρέθηκε επέκταση υπογραφής NIP-07",
+      },
+    },
+  },
   SubscriptionsOverview: {
     export_csv: "Export CSV",
     filter: {

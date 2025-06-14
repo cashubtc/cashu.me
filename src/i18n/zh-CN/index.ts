@@ -1327,6 +1327,13 @@ export default {
     invalid_swap_data_error_text: "无效的兑换数据",
     swap_error_text: "兑换错误",
   },
+  settings: {
+    nostr: {
+      signing_extension: {
+        not_found: "未找到 NIP-07 签名扩展",
+      },
+    },
+  },
   SubscriptionsOverview: {
     export_csv: "Export CSV",
     filter: {

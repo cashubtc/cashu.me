@@ -1340,6 +1340,13 @@ export default {
     invalid_swap_data_error_text: "Geçersiz takas verisi",
     swap_error_text: "Takas hatası",
   },
+  settings: {
+    nostr: {
+      signing_extension: {
+        not_found: "NIP-07 imzalama uzantısı bulunamadı",
+      },
+    },
+  },
   SubscriptionsOverview: {
     export_csv: "Export CSV",
     filter: {

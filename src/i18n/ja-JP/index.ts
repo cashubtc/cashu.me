@@ -1338,6 +1338,13 @@ export default {
     invalid_swap_data_error_text: "無効なスワップデータ",
     swap_error_text: "スワップエラー",
   },
+  settings: {
+    nostr: {
+      signing_extension: {
+        not_found: "NIP-07署名拡張機能が見つかりません",
+      },
+    },
+  },
   SubscriptionsOverview: {
     export_csv: "Export CSV",
     filter: {
