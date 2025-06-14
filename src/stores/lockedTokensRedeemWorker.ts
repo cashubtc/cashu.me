@@ -66,7 +66,10 @@ export const useLockedTokensRedeemWorker = defineStore(
               !mint ||
               !proofs.every((p) => mint.keysets.some((k) => k.id === p.id))
             ) {
-              console.error("Mint or keyset mismatch for locked token", entry.id);
+              console.error(
+                "Mint or keyset mismatch for locked token",
+                entry.id
+              );
               await cashuDb.lockedTokens.delete(entry.id);
               continue;
             }
