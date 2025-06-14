@@ -245,7 +245,12 @@
               <span>{{ $t("MintSettings.add.actions.add_mint.label") }}</span>
             </q-btn>
 
-            <q-btn aria-label="Scan" flat @click="showCamera" class="text-white">
+            <q-btn
+              aria-label="Scan"
+              flat
+              @click="showCamera"
+              class="text-white"
+            >
               <q-icon name="qr_code" size="20px" class="q-mr-sm" />
               <span>{{ $t("MintSettings.add.actions.scan.label") }}</span>
             </q-btn>
