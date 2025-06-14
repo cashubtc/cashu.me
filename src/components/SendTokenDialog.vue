@@ -640,7 +640,7 @@
   </q-dialog>
 </template>
 <script lang="ts">
-import { defineComponent } from "vue";
+import { defineComponent, defineAsyncComponent } from "vue";
 import { debug } from "src/js/logger";
 import { useSendTokensStore } from "src/stores/sendTokensStore";
 import { useWalletStore } from "src/stores/wallet";
@@ -684,6 +684,10 @@ import {
 } from "src/js/notify.ts";
 import { Dialog } from "quasar";
 import { useDmChatsStore } from "src/stores/dmChats";
+
+const VueQrcode = defineAsyncComponent(
+  () => import("@chenfengyuan/vue-qrcode")
+);
 export default defineComponent({
   name: "SendTokenDialog",
   mixins: [windowMixin],
@@ -694,6 +698,7 @@ export default defineComponent({
     NumericKeyboard,
     ScanIcon,
     NfcIcon,
+    VueQrcode,
   },
   props: {},
   data: function () {
