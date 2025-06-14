@@ -1337,6 +1337,13 @@ export default {
     invalid_swap_data_error_text: "Ogiltig bytesdata",
     swap_error_text: "Fel vid byte",
   },
+  settings: {
+    nostr: {
+      signing_extension: {
+        not_found: "Ingen NIP-07 signeringsutökning hittades",
+      },
+    },
+  },
   SubscriptionsOverview: {
     export_csv: "Export CSV",
     filter: {

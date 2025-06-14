@@ -1348,6 +1348,13 @@ export default {
     invalid_swap_data_error_text: "بيانات تبديل غير صالحة",
     swap_error_text: "خطأ في التبديل",
   },
+  settings: {
+    nostr: {
+      signing_extension: {
+        not_found: "لم يتم العثور على ملحق التوقيع NIP-07",
+      },
+    },
+  },
   SubscriptionsOverview: {
     export_csv: "Export CSV",
     filter: {

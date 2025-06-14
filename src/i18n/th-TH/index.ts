@@ -1335,6 +1335,13 @@ export default {
     invalid_swap_data_error_text: "ข้อมูลการแลกเปลี่ยนไม่ถูกต้อง",
     swap_error_text: "ข้อผิดพลาดในการแลกเปลี่ยน",
   },
+  settings: {
+    nostr: {
+      signing_extension: {
+        not_found: "ไม่พบส่วนขยายการลงนาม NIP-07",
+      },
+    },
+  },
   SubscriptionsOverview: {
     export_csv: "Export CSV",
     filter: {

@@ -1345,6 +1345,13 @@ export default {
     invalid_swap_data_error_text: "Données d'échange invalides",
     swap_error_text: "Erreur lors de l'échange",
   },
+  settings: {
+    nostr: {
+      signing_extension: {
+        not_found: "Aucune extension de signature NIP-07 trouvée",
+      },
+    },
+  },
   SubscriptionsOverview: {
     export_csv: "Export CSV",
     filter: {
