@@ -45,6 +45,7 @@ export const useUiStore = defineStore("ui", {
       this.showReceiveEcashDrawer = false;
     },
     async lockMutex() {
+      debug("Attempting to acquire global mutex lock");
       // allow longer operations to finish by waiting up to 30s
       const nRetries = 60;
       const retryInterval = 500;
@@ -60,9 +61,11 @@ export const useUiStore = defineStore("ui", {
       }
 
       this.globalMutexLock = true;
+      debug("Global mutex lock acquired");
     },
     unlockMutex() {
       this.globalMutexLock = false;
+      debug("Global mutex lock released");
     },
     triggerActivityOrb() {
       this.activityOrb = true;
