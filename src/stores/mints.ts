@@ -376,24 +376,27 @@ export const useMintsStore = defineStore("mints", {
       }
       const uIStore = useUiStore();
       await uIStore.lockMutex();
-      const mint = this.mints.find((m) => m.url === this.activeMintUrl);
-      if (!mint) {
-        notifyError(
-          this.t("wallet.mint.notifications.no_active_mint"),
-          this.t("wallet.mint.notifications.unit_activation_failed")
-        );
-        return;
+      try {
+        const mint = this.mints.find((m) => m.url === this.activeMintUrl);
+        if (!mint) {
+          notifyError(
+            this.t("wallet.mint.notifications.no_active_mint"),
+            this.t("wallet.mint.notifications.unit_activation_failed")
+          );
+          return;
+        }
+        const mintClass = new MintClass(mint);
+        if (mintClass.units.includes(unit)) {
+          this.activeUnit = unit;
+        } else {
+          notifyError(
+            this.t("wallet.mint.notifications.unit_not_supported"),
+            this.t("wallet.mint.notifications.unit_activation_failed")
+          );
+        }
+      } finally {
+        await uIStore.unlockMutex();
       }
-      const mintClass = new MintClass(mint);
-      if (mintClass.units.includes(unit)) {
-        this.activeUnit = unit;
-      } else {
-        notifyError(
-          this.t("wallet.mint.notifications.unit_not_supported"),
-          this.t("wallet.mint.notifications.unit_activation_failed")
-        );
-      }
-      await uIStore.unlockMutex();
       const worker = useWorkersStore();
       worker.clearAllWorkers();
     },
