@@ -39,9 +39,14 @@
           </q-btn>
         </div>
         <div class="col">
-          <q-btn aria-label="Cancel" v-close-popup flat class="float-right" color="grey">{{
-            $t("AddMintDialog.actions.cancel.label")
-          }}</q-btn>
+          <q-btn
+            aria-label="Cancel"
+            v-close-popup
+            flat
+            class="float-right"
+            color="grey"
+            >{{ $t("AddMintDialog.actions.cancel.label") }}</q-btn
+          >
         </div>
       </div>
     </q-card>
