@@ -76,7 +76,10 @@
     "workbox-expiration": "^6.6.1",
     "workbox-precaching": "^6.6.1",
     "workbox-routing": "^6.6.1",
-    "workbox-strategies": "^6.6.1"
+    "workbox-strategies": "^6.6.1",
+    "vitest": "^3.2.3",
+    "happy-dom": "^18.0.1",
+    "vite-jsconfig-paths": "^2.0.1"
   },
   "engines": {
     "node": ">=16.11.0",
