@@ -1,13 +1,14 @@
 <template>
-  <q-dialog
-    v-model="showReceiveDialog"
-    position="bottom"
-    :maximized="$q.screen.lt.sm"
-    transition-show="slide-up"
-    transition-hide="slide-down"
-    backdrop-filter="blur(2px) brightness(60%)"
-  >
-    <q-card :class="[cardClass, 'full-width-card q-pb-lg']">
+  <div>
+    <q-dialog
+      v-model="showReceiveDialog"
+      position="bottom"
+      :maximized="$q.screen.lt.sm"
+      transition-show="slide-up"
+      transition-hide="slide-down"
+      backdrop-filter="blur(2px) brightness(60%)"
+    >
+      <q-card :class="[cardClass, 'full-width-card q-pb-lg']">
       <q-card-section class="row items-center q-pb-sm">
         <q-btn
           flat
@@ -71,8 +72,9 @@
         </div>
       </q-card-section>
     </q-card>
-  </q-dialog>
-  <ReceiveEcashDrawer />
+    </q-dialog>
+    <ReceiveEcashDrawer />
+  </div>
 </template>
 
 <script>
@@ -108,7 +110,13 @@ export default defineComponent({
     ReceiveEcashDrawer,
   },
   mixins: [windowMixin],
-  props: {},
+  props: {
+    modelValue: {
+      type: Boolean,
+      default: false,
+    },
+  },
+  emits: ["update:modelValue"],
   data: function () {
     return {
       currentPage: 1,
@@ -143,6 +151,17 @@ export default defineComponent({
       return this.$q.dark.isActive
         ? 'var(--q-color-grey-10)'
         : 'var(--q-color-grey-2)';
+    },
+  },
+  watch: {
+    modelValue: {
+      immediate: true,
+      handler(newVal) {
+        this.showReceiveDialog = newVal;
+      },
+    },
+    showReceiveDialog(newVal) {
+      this.$emit("update:modelValue", newVal);
     },
   },
   methods: {
