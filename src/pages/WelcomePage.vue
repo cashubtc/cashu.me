@@ -111,6 +111,9 @@ export default {
   },
   methods: {
     changeLanguage(locale) {
+      if (locale === "en") {
+        locale = "en-US";
+      }
       // Set the i18n locale
       this.$i18n.locale = locale;
 
@@ -120,11 +123,9 @@ export default {
   },
   created() {
     // Set the initial selected language based on the current locale or from storage
-    this.selectedLanguage =
-      localStorage.getItem("cashu.language") ||
-      this.$i18n.locale ||
-      navigator.language ||
-      "en-US";
+    const stored = localStorage.getItem("cashu.language");
+    const initLocale = stored || this.$i18n.locale || navigator.language || "en-US";
+    this.selectedLanguage = initLocale === "en" ? "en-US" : initLocale;
   },
   setup() {
     const welcomeStore = useWelcomeStore();

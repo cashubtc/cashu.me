@@ -2086,6 +2086,9 @@ export default defineComponent({
       );
     },
     changeLanguage(locale) {
+      if (locale === "en") {
+        locale = "en-US";
+      }
       // Set the i18n locale
       this.$i18n.locale = locale;
 
@@ -2102,7 +2105,8 @@ export default defineComponent({
     this.nip07SignerAvailable = await this.checkNip07Signer();
     debug("Nip07 signer available", this.nip07SignerAvailable);
     // Set the initial selected language based on the current locale
-    this.selectedLanguage = this.$i18n.locale;
+    const currentLocale = this.$i18n.locale === "en" ? "en-US" : this.$i18n.locale;
+    this.selectedLanguage = currentLocale;
   },
 });
 </script>
