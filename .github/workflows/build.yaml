@@ -1,4 +1,4 @@
-name: Check build
+name: build
 
 on: [push, pull_request]
 
