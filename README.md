@@ -8,11 +8,14 @@ Fundstr is both a wallet and a platform designed to empower the creator economy 
 Think Patreon, but built for the Nostr ecosystem and leveraging the privacy and efficiency of Cashu.
 
 ## Vision: A Decentralized Creator Economy
+
 - Creators can share their work, build communities and earn sustainable income directly from their audience, free from intermediaries and censorship.
 - Supporters can discover inspiring creators and fund their work with micropayments or recurring support while keeping their privacy.
 
 ## How It Works
+
 ### For Supporters
+
 1. **Discover** – Browse a wide range of Nostr creators such as writers, artists, developers or podcasters.
 2. **Explore Profiles** – Learn about creators, see their work and check their funding goals.
 3. **Support with Cashu**
@@ -24,6 +27,7 @@ Think Patreon, but built for the Nostr ecosystem and leveraging the privacy and 
 5. **Stay Private** – All Cashu payments provide enhanced privacy.
 
 ### For Creators
+
 1. **Create Your Profile** – Link your Nostr identity, describe your work and set funding goals.
 2. **Define Support Tiers** – Offer multiple levels of support with unique perks (e.g. exclusive notes, early access, or direct messages).
 3. **Receive Cashu Directly** – Funding goes instantly and privately to your Fundstr wallet. Supporters can send P2PK locked tokens for pledges.
@@ -31,6 +35,7 @@ Think Patreon, but built for the Nostr ecosystem and leveraging the privacy and 
 5. **Build Your Community** – Connect with supporters using integrated Nostr DMs.
 
 ## Key Features
+
 - **Seamless Cashu Wallet** – Mint, send and receive ecash.
 - **Token Buckets** – Organize tokens into named categories with descriptions, colors and goals. Auto-assign incoming tokens based on mint URL or memo rules and move tokens between buckets as needed.
 - **Advanced Token Management**
@@ -50,16 +55,18 @@ Think Patreon, but built for the Nostr ecosystem and leveraging the privacy and 
 - **Nostr Wallet Connect (NWC)** – Planned/experimental automation for recurring support.
 
 ### Nostr Messenger
+
 The app includes a built-in Nostr messenger for private chat.
 
 1. Open **Nostr Messenger** from the menu.
 2. Click **Identity / Relays** in the side drawer.
 3. Paste your Nostr **Private Key** and add relay URLs.
-4. Press **Save**, then use **Connect** under *Relays*.
+4. Press **Save**, then use **Connect** under _Relays_.
 5. The messenger connects to the relays defined in Settings and shows an
    **Online/Offline** badge in the header.
 
 ## Technology Stack
+
 - **Frontend**: Quasar Framework (Vue.js 3)
 - **Mobile/Desktop**: Capacitor
 - **State Management**: Pinia
@@ -68,9 +75,11 @@ The app includes a built-in Nostr messenger for private chat.
 - **Storage**: Dexie.js (IndexedDB)
 
 ## Current Status
+
 Fundstr is currently in Alpha/Beta.
 
 **What's Working**
+
 - Core Cashu wallet functionality (send, receive, mint management)
 - Token Buckets (creation, management, auto-assignment rules)
 - P2PK and timelocking of tokens
@@ -79,6 +88,7 @@ Fundstr is currently in Alpha/Beta.
 - Initial creator hub and donation presets
 
 **Focus of Current Development**
+
 - Enhancing creator profile management and display
 - Improving discovery mechanisms
 - Developing robust support tier definition
@@ -86,11 +96,14 @@ Fundstr is currently in Alpha/Beta.
 - Exploring user-friendly recurring support options
 
 ## Getting Started
+
 ### 1. Access Fundstr
+
 - **Web/PWA**: visit your Fundstr URL
 - **Android/iOS**: use the store link or build instructions
 
 ### 2. For Supporters
+
 1. Set up your wallet and load it with ecash from a compatible mint.
 2. Optionally create Token Buckets for organization.
 3. Browse or search for creators.
@@ -100,6 +113,7 @@ Fundstr is currently in Alpha/Beta.
 7. Chat with creators or other users via Nostr DMs.
 
 ### 3. For Creators
+
 1. Go to the **Creator Hub** section.
 2. Set up your profile and link your npub.
 3. Define support tiers and benefits.
@@ -107,6 +121,7 @@ Fundstr is currently in Alpha/Beta.
 5. Communicate with supporters through Nostr DMs.
 
 ## Roadmap & Future Ideas
+
 - Advanced creator discovery with search, filters and Nostr recommendations
 - Content gating and delivery using Nostr (tagged or encrypted notes, token-gated chats)
 - Creator dashboards with analytics
@@ -132,6 +147,7 @@ npm run dev
 ```
 
 ## Contributing
+
 Contributions are welcome! Open an issue or pull request to discuss your ideas. Bug reports and feature requests are encouraged. Help with translation and documentation is always appreciated.
 
 Before submitting a pull request, install dependencies and run the test suite:
@@ -142,6 +158,7 @@ npm test
 ```
 
 ## License
+
 This project is licensed under the [MIT License](LICENSE.md).
 
 Join us in building the future of creator funding on Nostr!

@@ -212,8 +212,6 @@
   white-space: nowrap;
 }
 
-
-
 .scan-button-container {
   display: flex;
   flex-direction: column;
@@ -434,7 +432,9 @@ export default {
       "startInvoiceCheckerWorker",
       "checkPendingInvoices",
     ]),
-    ...mapActions(useLockedTokensRedeemWorker, ["startLockedTokensRedeemWorker"]),
+    ...mapActions(useLockedTokensRedeemWorker, [
+      "startLockedTokensRedeemWorker",
+    ]),
     // TOKEN METHODS
     decodeToken: function (encoded_token) {
       try {
@@ -554,13 +554,13 @@ export default {
         this.deferredPWAInstallPrompt = e;
         debug(
           `'beforeinstallprompt' event was fired.`,
-          this.getPwaDisplayMode(),
+          this.getPwaDisplayMode()
         );
       });
     },
     getPwaDisplayMode: function () {
       const isStandalone = window.matchMedia(
-        "(display-mode: standalone)",
+        "(display-mode: standalone)"
       ).matches;
       if (document.referrer.startsWith("android-app://")) {
         return "twa";
@@ -589,7 +589,7 @@ export default {
         sessionStorage.setItem(
           "tabId",
           Math.random().toString(36).substring(2) +
-            new Date().getTime().toString(36),
+            new Date().getTime().toString(36)
         );
       }
       const tabId = sessionStorage.getItem("tabId");
@@ -626,11 +626,11 @@ export default {
   },
 
   unmounted: function () {
-    window.removeEventListener('message', this.handleLockedTokenMessage);
+    window.removeEventListener("message", this.handleLockedTokenMessage);
   },
 
   created: async function () {
-    window.addEventListener('message', this.handleLockedTokenMessage);
+    window.addEventListener("message", this.handleLockedTokenMessage);
     // Initialize and run migrations
     const migrationsStore = useMigrationsStore();
     migrationsStore.initMigrations();
@@ -712,9 +712,7 @@ export default {
       await this.initNip07Signer();
     } else {
       await this.initSigner();
-      this.notifyWarning(
-        this.$t("settings.nostr.signing_extension.not_found")
-      );
+      this.notifyWarning(this.$t("settings.nostr.signing_extension.not_found"));
     }
 
     // show welcome dialog

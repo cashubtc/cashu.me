@@ -125,8 +125,7 @@ export class CashuDexie extends Dexie {
       proofs: "secret, id, C, amount, reserved, quote, bucketId, label",
       profiles: "pubkey",
       creatorsTierDefinitions: "&creatorNpub, eventId, updatedAt",
-      subscriptions:
-        "&id, creatorNpub, tierId, status, createdAt, updatedAt",
+      subscriptions: "&id, creatorNpub, tierId, status, createdAt, updatedAt",
       lockedTokens:
         "&id, owner, tierId, intervalKey, unlockTs, refundUnlockTs, status, subscriptionEventId",
     });

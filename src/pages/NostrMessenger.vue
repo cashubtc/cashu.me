@@ -48,13 +48,10 @@
         </q-toolbar>
       </q-header>
       <ActiveChatHeader :pubkey="selected" />
-        <MessageList :messages="messages" class="col" />
-        <MessageInput @send="sendMessage" @sendToken="openSendTokenDialog" />
-        <ChatSendTokenDialog
-          ref="chatSendTokenDialogRef"
-          :recipient="selected"
-        />
-      </div>
+      <MessageList :messages="messages" class="col" />
+      <MessageInput @send="sendMessage" @sendToken="openSendTokenDialog" />
+      <ChatSendTokenDialog ref="chatSendTokenDialogRef" :recipient="selected" />
+    </div>
   </q-page>
 </template>
 
@@ -94,7 +91,9 @@ const drawer = computed({
   set: (val) => messenger.setDrawer(val),
 });
 const selected = ref("");
-const chatSendTokenDialogRef = ref<InstanceType<typeof ChatSendTokenDialog> | null>(null);
+const chatSendTokenDialogRef = ref<InstanceType<
+  typeof ChatSendTokenDialog
+> | null>(null);
 const messages = computed(() => messenger.conversations[selected.value] || []);
 const showRelays = useLocalStorage<boolean>("cashu.messenger.showRelays", true);
 
@@ -103,7 +102,7 @@ watch(
   (val) => {
     messenger.setCurrentConversation(val);
   },
-  { immediate: true },
+  { immediate: true }
 );
 
 const selectConversation = (pubkey: string) => {

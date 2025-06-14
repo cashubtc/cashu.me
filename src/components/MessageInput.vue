@@ -20,22 +20,21 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue';
-import { Nut as NutIcon } from 'lucide-vue-next';
+import { ref } from "vue";
+import { Nut as NutIcon } from "lucide-vue-next";
 
-const emit = defineEmits(['send', 'sendToken']);
-const text = ref('');
+const emit = defineEmits(["send", "sendToken"]);
+const text = ref("");
 
 const send = () => {
   const m = text.value.trim();
   if (m) {
-    emit('send', m);
-    text.value = '';
+    emit("send", m);
+    text.value = "";
   }
 };
 
 const sendToken = () => {
-  emit('sendToken');
+  emit("sendToken");
 };
-
 </script>

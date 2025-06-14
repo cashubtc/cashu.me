@@ -1,10 +1,10 @@
 $themes: (
   "nostr": (
-    primary: #7E22CE,
-    secondary: #4B5563,
-    dark: #1F2937,
+    primary: #7e22ce,
+    secondary: #4b5563,
+    dark: #1f2937,
     info: #374151,
-    marginal-bg: #1F2937,
+    marginal-bg: #1f2937,
     marginal-text: #fff,
   ),
   "bitcoin": (
@@ -63,23 +63,23 @@ $themes: (
     marginal-bg: #000,
     marginal-text: rgb(255, 255, 255),
   ),
-    "cyber": (
-      primary: #00ff00,
-      secondary: #00ff00,
-      dark: #000,
-      info: #1b1b1b,
-      marginal-bg: #000,
-      marginal-text: rgb(255, 255, 255),
-    ),
-    "modern": (
-      primary: #a1c2e3,
-      secondary: #f3b6c4,
-      dark: #2f3e46,
-      info: #36454f,
-      marginal-bg: #2f3e46,
-      marginal-text: #fff,
-    ),
-  );
+  "cyber": (
+    primary: #00ff00,
+    secondary: #00ff00,
+    dark: #000,
+    info: #1b1b1b,
+    marginal-bg: #000,
+    marginal-text: rgb(255, 255, 255),
+  ),
+  "modern": (
+    primary: #a1c2e3,
+    secondary: #f3b6c4,
+    dark: #2f3e46,
+    info: #36454f,
+    marginal-bg: #2f3e46,
+    marginal-text: #fff,
+  ),
+);
 @each $theme, $colors in $themes {
   @each $name, $color in $colors {
     @if $name== "dark" {
@@ -162,7 +162,7 @@ body.body--dark .q-table--dark {
 }
 
 body.body--dark {
-  background: #1F2937;
+  background: #1f2937;
 }
 
 body.body--dark .q-field--error {
@@ -173,7 +173,7 @@ body.body--dark .q-field--error {
 }
 
 body.body--light {
-  background: #F9FAFB;
+  background: #f9fafb;
   .bg-dark {
     background: white !important;
   }

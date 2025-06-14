@@ -31,7 +31,10 @@
         <div class="q-gutter-y-md">
           <q-btn class="full-width custom-btn" @click="handlePasteBtn">
             <div class="row items-center full-width">
-              <div class="icon-background q-mr-md" :style="{ backgroundColor: iconBgColor }">
+              <div
+                class="icon-background q-mr-md"
+                :style="{ backgroundColor: iconBgColor }"
+              >
                 <ClipboardIcon />
               </div>
               <div class="text-left">
@@ -44,7 +47,10 @@
 
           <q-btn class="full-width custom-btn" @click="showCamera">
             <div class="row items-center full-width">
-              <div class="icon-background q-mr-md" :style="{ backgroundColor: iconBgColor }">
+              <div
+                class="icon-background q-mr-md"
+                :style="{ backgroundColor: iconBgColor }"
+              >
                 <ScanIcon />
               </div>
               <div class="text-left">
@@ -61,7 +67,10 @@
             @click="handlePaymentRequestBtn"
           >
             <div class="row items-center full-width">
-              <div class="icon-background q-mr-md" :style="{ backgroundColor: iconBgColor }">
+              <div
+                class="icon-background q-mr-md"
+                :style="{ backgroundColor: iconBgColor }"
+              >
                 <FileTextIcon />
               </div>
               <div class="text-left">
@@ -78,7 +87,10 @@
             @click="handleLockBtn"
           >
             <div class="row items-center full-width">
-              <div class="icon-background q-mr-md" :style="{ backgroundColor: iconBgColor }">
+              <div
+                class="icon-background q-mr-md"
+                :style="{ backgroundColor: iconBgColor }"
+              >
                 <LockIcon />
               </div>
               <div class="text-left">
@@ -95,7 +107,10 @@
             @click="handleNFCBtn"
           >
             <div class="row items-center full-width">
-              <div class="icon-background q-mr-md" :style="{ backgroundColor: iconBgColor }">
+              <div
+                class="icon-background q-mr-md"
+                :style="{ backgroundColor: iconBgColor }"
+              >
                 <q-spinner v-if="scanningCard" size="sm" />
                 <NfcIcon v-else />
               </div>
@@ -199,8 +214,8 @@ export default defineComponent({
     },
     iconBgColor: function () {
       return this.$q.dark.isActive
-        ? 'var(--q-color-grey-10)'
-        : 'var(--q-color-grey-2)';
+        ? "var(--q-color-grey-10)"
+        : "var(--q-color-grey-2)";
     },
   },
   methods: {

@@ -23,10 +23,16 @@
                 >
                   <template #label>
                     <div class="row items-center no-wrap">
-                      <span>{{ $t('RestoreView.seed_phrase.inputs.seed_phrase.label') }}</span>
+                      <span>{{
+                        $t("RestoreView.seed_phrase.inputs.seed_phrase.label")
+                      }}</span>
                       <InfoTooltip
                         class="q-ml-xs"
-                        :text="$t('RestoreView.seed_phrase.inputs.seed_phrase.tooltip')"
+                        :text="
+                          $t(
+                            'RestoreView.seed_phrase.inputs.seed_phrase.tooltip'
+                          )
+                        "
                       />
                     </div>
                   </template>

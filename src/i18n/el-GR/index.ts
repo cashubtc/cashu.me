@@ -841,12 +841,12 @@ export default {
       p2pk_pubkey: {
         label: "Δημόσιο κλειδί παραλήπτη",
         label_invalid: "Μη έγκυρο δημόσιο κλειδί παραλήπτη",
-locktime: {
-        label: "Unlock time",
-      },
-      refund_pubkey: {
-        label: "Refund public key",
-      },
+        locktime: {
+          label: "Unlock time",
+        },
+        refund_pubkey: {
+          label: "Refund public key",
+        },
       },
     },
     actions: {
@@ -937,9 +937,9 @@ locktime: {
     },
     errors: {
       invalid_token: {
-timelock: {
-      unlock_date_label: "Unlocks { value }",
-    },
+        timelock: {
+          unlock_date_label: "Unlocks { value }",
+        },
         label: "Μη έγκυρο token",
       },
     },
@@ -1289,7 +1289,8 @@ timelock: {
   },
   BucketManager: {
     tooltips: {
-      description: "Τα buckets χρησιμοποιούνται για την κατηγοριοποίηση των token",
+      description:
+        "Τα buckets χρησιμοποιούνται για την κατηγοριοποίηση των token",
     },
   },
   BucketDetail: {

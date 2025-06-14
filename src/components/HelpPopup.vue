@@ -21,10 +21,10 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue';
+import { ref } from "vue";
 const props = defineProps({
-  text: { type: String, default: '' },
-  closeLabel: { type: String, default: 'Close' }
+  text: { type: String, default: "" },
+  closeLabel: { type: String, default: "Close" },
 });
 const show = ref(false);
 </script>

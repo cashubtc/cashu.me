@@ -41,29 +41,29 @@
       <template v-else>
         <div class="text-grey-6">Select a conversation to start chatting.</div>
       </template>
+    </div>
+    <q-btn
+      flat
+      dense
+      round
+      :icon="$q.dark.isActive ? 'wb_sunny' : 'brightness_3'"
+      @click="$q.dark.toggle()"
+    />
+    <ChatSendTokenDialog
+      ref="chatSendTokenDialogRef"
+      :recipient="props.pubkey"
+    />
   </div>
-  <q-btn
-    flat
-    dense
-    round
-    :icon="$q.dark.isActive ? 'wb_sunny' : 'brightness_3'"
-    @click="$q.dark.toggle()"
-  />
-  <ChatSendTokenDialog
-    ref="chatSendTokenDialogRef"
-    :recipient="props.pubkey"
-  />
-</div>
 </template>
 
 <script lang="ts" setup>
-import { ref, watch, computed } from 'vue';
-import { useQuasar } from 'quasar';
-import { useNostrStore } from 'src/stores/nostr';
-import { useMessengerStore } from 'src/stores/messenger';
-import ChatSendTokenDialog from './ChatSendTokenDialog.vue';
-import { nip19 } from 'nostr-tools';
-import ProfileInfoDialog from './ProfileInfoDialog.vue';
+import { ref, watch, computed } from "vue";
+import { useQuasar } from "quasar";
+import { useNostrStore } from "src/stores/nostr";
+import { useMessengerStore } from "src/stores/messenger";
+import ChatSendTokenDialog from "./ChatSendTokenDialog.vue";
+import { nip19 } from "nostr-tools";
+import ProfileInfoDialog from "./ProfileInfoDialog.vue";
 
 const props = defineProps<{ pubkey: string }>();
 const nostr = useNostrStore();
@@ -88,28 +88,30 @@ watch(
 );
 
 const displayName = computed(() => {
-  if (!props.pubkey) return '';
+  if (!props.pubkey) return "";
   const p: any = profile.value;
   if (p?.display_name) return p.display_name;
   if (p?.name) return p.name;
   try {
     return nip19.npubEncode(nostr.resolvePubkey(props.pubkey));
   } catch (e) {
-    return props.pubkey.slice(0, 8) + '...' + props.pubkey.slice(-4);
+    return props.pubkey.slice(0, 8) + "..." + props.pubkey.slice(-4);
   }
 });
 
 const initials = computed(() => {
   const name = displayName.value.trim();
-  if (!name) return '';
-  const parts = name.split(' ');
+  if (!name) return "";
+  const parts = name.split(" ");
   if (parts.length >= 2) {
     return (parts[0][0] + parts[1][0]).toUpperCase();
   }
   return name.slice(0, 2).toUpperCase();
 });
 
-const chatSendTokenDialogRef = ref<InstanceType<typeof ChatSendTokenDialog> | null>(null);
+const chatSendTokenDialogRef = ref<InstanceType<
+  typeof ChatSendTokenDialog
+> | null>(null);
 const showProfileDialog = ref(false);
 
 function openSendTokenDialog() {
@@ -117,11 +119,9 @@ function openSendTokenDialog() {
   (chatSendTokenDialogRef.value as any)?.show();
 }
 
-
 function clearChat() {
   if (!props.pubkey) return;
   messenger.conversations[props.pubkey] = [];
   messenger.unreadCounts[props.pubkey] = 0;
 }
 </script>
-

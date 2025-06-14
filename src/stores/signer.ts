@@ -1,16 +1,16 @@
-import { defineStore } from 'pinia';
+import { defineStore } from "pinia";
 
-export type SignerMethod = 'local' | 'nip07' | 'nip46' | null;
+export type SignerMethod = "local" | "nip07" | "nip46" | null;
 
-export const useSignerStore = defineStore('signer', {
+export const useSignerStore = defineStore("signer", {
   state: () => ({
     method: null as SignerMethod,
-    nsec: '',
+    nsec: "",
   }),
   actions: {
     reset() {
       this.method = null;
-      this.nsec = '';
+      this.nsec = "";
     },
   },
 });

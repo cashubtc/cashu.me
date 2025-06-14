@@ -22,7 +22,6 @@ vi.mock("../../../src/stores/proofs", () => ({
   }),
 }));
 
-
 vi.mock("../../../src/stores/mints", () => ({
   useMintsStore: () => ({
     activeProofs: [{ amount: 10, bucketId: "b" }],

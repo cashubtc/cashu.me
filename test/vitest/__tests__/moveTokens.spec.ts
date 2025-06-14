@@ -1,59 +1,59 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { shallowMount } from '@vue/test-utils'
-import MoveTokens from '../../src/pages/MoveTokens.vue'
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { shallowMount } from "@vue/test-utils";
+import MoveTokens from "../../src/pages/MoveTokens.vue";
 
-const moveProofsMock = vi.fn()
+const moveProofsMock = vi.fn();
 
-vi.mock('../../src/stores/proofs', () => ({
-  useProofsStore: () => ({ proofs: [], moveProofs: moveProofsMock })
-}))
+vi.mock("../../src/stores/proofs", () => ({
+  useProofsStore: () => ({ proofs: [], moveProofs: moveProofsMock }),
+}));
 
-vi.mock('../../src/stores/buckets', () => ({
+vi.mock("../../src/stores/buckets", () => ({
   useBucketsStore: () => ({
     bucketList: [
-      { id: 'b1', name: 'Bucket 1' },
-      { id: 'b2', name: 'Bucket 2' },
+      { id: "b1", name: "Bucket 1" },
+      { id: "b2", name: "Bucket 2" },
     ],
   }),
-}))
+}));
 
-vi.mock('../../src/stores/mints', () => ({
-  useMintsStore: () => ({ activeUnit: 'sat' })
-}))
+vi.mock("../../src/stores/mints", () => ({
+  useMintsStore: () => ({ activeUnit: "sat" }),
+}));
 
-vi.mock('../../src/stores/ui', () => ({
-  useUiStore: () => ({ formatCurrency: (a: number) => String(a) })
-}))
+vi.mock("../../src/stores/ui", () => ({
+  useUiStore: () => ({ formatCurrency: (a: number) => String(a) }),
+}));
 
-vi.mock('../../src/js/notify', () => ({
+vi.mock("../../src/js/notify", () => ({
   notifyError: vi.fn(),
-}))
+}));
 
 beforeEach(() => {
-  moveProofsMock.mockReset()
-})
+  moveProofsMock.mockReset();
+});
 
-describe('MoveTokens component', () => {
-  it('toggles token selection', () => {
-    const wrapper = shallowMount(MoveTokens)
-    const vm: any = wrapper.vm
+describe("MoveTokens component", () => {
+  it("toggles token selection", () => {
+    const wrapper = shallowMount(MoveTokens);
+    const vm: any = wrapper.vm;
 
-    vm.toggleProof('s1', true)
-    expect(vm.selectedSecrets).toContain('s1')
+    vm.toggleProof("s1", true);
+    expect(vm.selectedSecrets).toContain("s1");
 
-    vm.toggleProof('s1', false)
-    expect(vm.selectedSecrets).not.toContain('s1')
-  })
+    vm.toggleProof("s1", false);
+    expect(vm.selectedSecrets).not.toContain("s1");
+  });
 
-  it('moves selected tokens', async () => {
-    const wrapper = shallowMount(MoveTokens)
-    const vm: any = wrapper.vm
-    vm.selectedSecrets = ['a', 'b']
-    vm.targetBucketId = 'b2'
+  it("moves selected tokens", async () => {
+    const wrapper = shallowMount(MoveTokens);
+    const vm: any = wrapper.vm;
+    vm.selectedSecrets = ["a", "b"];
+    vm.targetBucketId = "b2";
 
-    await vm.moveSelected()
+    await vm.moveSelected();
 
-    expect(moveProofsMock).toHaveBeenCalledWith(['a', 'b'], 'b2')
-    expect(vm.selectedSecrets.length).toBe(0)
-  })
-})
+    expect(moveProofsMock).toHaveBeenCalledWith(["a", "b"], "b2");
+    expect(vm.selectedSecrets.length).toBe(0);
+  });
+});

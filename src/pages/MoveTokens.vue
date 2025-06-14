@@ -1,7 +1,7 @@
 <template>
   <div class="q-pa-md">
     <h5 class="q-my-none q-mb-none">{{ $t("MoveTokens.title") }}</h5>
-    <div class="text-body2 q-mb-md">{{ $t('MoveTokens.helper') }}</div>
+    <div class="text-body2 q-mb-md">{{ $t("MoveTokens.helper") }}</div>
     <q-select
       dense
       outlined
@@ -13,7 +13,7 @@
     >
       <template #label>
         <div class="row items-center no-wrap">
-          <span>{{ $t('BucketDetail.inputs.target_bucket.label') }}</span>
+          <span>{{ $t("BucketDetail.inputs.target_bucket.label") }}</span>
           <InfoTooltip
             class="q-ml-xs"
             :text="$t('BucketDetail.inputs.target_bucket.tooltip')"
@@ -81,7 +81,7 @@ const proofsByBucket = computed<Record<string, WalletProof[]>>(() => {
   const map: Record<string, WalletProof[]> = {};
   bucketList.value.forEach((b) => {
     map[b.id] = proofsStore.proofs.filter(
-      (p) => p.bucketId === b.id && !p.reserved,
+      (p) => p.bucketId === b.id && !p.reserved
     );
   });
   return map;
@@ -100,7 +100,7 @@ function toggleProof(secret: string, val: boolean) {
 }
 
 const bucketOptions = computed(() =>
-  bucketsStore.bucketList.map((b) => ({ label: b.name, value: b.id })),
+  bucketsStore.bucketList.map((b) => ({ label: b.name, value: b.id }))
 );
 
 function formatCurrency(amount: number, unit: string) {
@@ -113,7 +113,7 @@ async function moveSelected() {
     return;
   }
   const bucketExists = bucketsStore.bucketList.find(
-    (b) => b.id === targetBucketId.value,
+    (b) => b.id === targetBucketId.value
   );
   if (!bucketExists) {
     notifyError(`Bucket not found: ${targetBucketId.value}`);

@@ -81,9 +81,9 @@ export const useNPCStore = defineStore("npc", {
       }
       const walletPublicKeyHex = nostrStore.pubkey;
       notifySuccess(
-        `Lightning address for wallet: ${
-          nip19.npubEncode(walletPublicKeyHex)
-        }@${this.npcDomain}`
+        `Lightning address for wallet: ${nip19.npubEncode(
+          walletPublicKeyHex
+        )}@${this.npcDomain}`
       );
       this.baseURL = `https://${this.npcDomain}`;
       const previousAddress = this.npcAddress;

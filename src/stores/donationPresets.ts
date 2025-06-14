@@ -43,7 +43,11 @@ export const useDonationPresetsStore = defineStore("donationPresets", {
       bucketId: string = DEFAULT_BUCKET_ID,
       startDate?: number,
       detailed = false,
-      subscription?: { tierName?: string; benefits?: string[]; frequency?: 'monthly' | 'weekly' }
+      subscription?: {
+        tierName?: string;
+        benefits?: string[];
+        frequency?: "monthly" | "weekly";
+      }
     ): Promise<string | LockedToken[]> {
       const walletStore = useWalletStore();
       const proofsStore = useProofsStore();
@@ -61,7 +65,7 @@ export const useDonationPresetsStore = defineStore("donationPresets", {
       const totalAmount = !months || months <= 0 ? amount : amount * months;
       const available = proofs.reduce((s, p) => s + p.amount, 0);
       if (available < totalAmount) {
-        throw new Error('Insufficient balance');
+        throw new Error("Insufficient balance");
       }
 
       const tokens: LockedToken[] = [];
@@ -97,11 +101,11 @@ export const useDonationPresetsStore = defineStore("donationPresets", {
         await subscriptionsStore.addSubscription({
           creatorNpub: pubkey,
           tierId: bucketId,
-          creatorP2PK: '',
-          subscriberRefundP2PK: '',
-          mintUrl: '',
+          creatorP2PK: "",
+          subscriberRefundP2PK: "",
+          mintUrl: "",
           amountPerInterval: amount,
-          frequency: subscription.frequency || 'monthly',
+          frequency: subscription.frequency || "monthly",
           startDate: base,
           commitmentLength: months,
           intervals: tokens.map((t, idx) => ({
@@ -109,10 +113,10 @@ export const useDonationPresetsStore = defineStore("donationPresets", {
             lockedTokenId: t.id,
             unlockTs: t.locktime || 0,
             refundUnlockTs: 0,
-            status: 'pending',
+            status: "pending",
             tokenString: t.token,
           })),
-          status: 'active',
+          status: "active",
           createdAt: 0,
           updatedAt: 0,
           ...(subscription.tierName ? { tierName: subscription.tierName } : {}),

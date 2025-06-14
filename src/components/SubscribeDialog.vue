@@ -43,9 +43,7 @@
           :min="today"
           required
         />
-        <div class="q-mt-md text-right">
-          Total: {{ total }} sats
-        </div>
+        <div class="q-mt-md text-right">Total: {{ total }} sats</div>
       </q-card-section>
       <q-card-actions align="right">
         <q-btn flat color="primary" @click="cancel">{{
@@ -110,7 +108,7 @@ export default defineComponent({
       bucketList.value.map((b) => ({
         label: `${b.name} (${uiStore.formatCurrency(
           bucketBalances.value[b.id] ?? 0,
-          activeUnit.value,
+          activeUnit.value
         )})`,
         value: b.id,
       }))

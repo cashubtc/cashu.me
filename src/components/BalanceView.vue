@@ -132,7 +132,9 @@
       <router-link :to="`/buckets/${bucket.id}`" class="text-secondary">
         <span class="q-my-none q-py-none text-weight-regular">
           {{ bucket.name }}:
-          <b>{{ formatCurrency(bucketBalances[bucket.id] || 0, activeUnit) }}</b>
+          <b>{{
+            formatCurrency(bucketBalances[bucket.id] || 0, activeUnit)
+          }}</b>
           <span v-if="bucket.goal"
             >/ {{ formatCurrency(bucket.goal, activeUnit) }}</span
           >

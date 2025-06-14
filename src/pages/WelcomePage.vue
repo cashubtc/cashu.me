@@ -124,7 +124,8 @@ export default {
   created() {
     // Set the initial selected language based on the current locale or from storage
     const stored = localStorage.getItem("cashu.language");
-    const initLocale = stored || this.$i18n.locale || navigator.language || "en-US";
+    const initLocale =
+      stored || this.$i18n.locale || navigator.language || "en-US";
     this.selectedLanguage = initLocale === "en" ? "en-US" : initLocale;
   },
   setup() {

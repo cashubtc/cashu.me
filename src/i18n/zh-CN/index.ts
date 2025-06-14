@@ -352,8 +352,7 @@ export default {
       },
       auto_redeem_locked: {
         toggle: "自动兑换锁定的代币",
-        description:
-          "如果启用，钱包将在代币解锁后自动兑换它们。",
+        description: "如果启用，钱包将在代币解锁后自动兑换它们。",
       },
       auditor: {
         toggle: "启用审计器",
@@ -823,12 +822,12 @@ export default {
       p2pk_pubkey: {
         label: "接收者公钥",
         label_invalid: "接收者公钥",
-locktime: {
-        label: "Unlock time",
-      },
-      refund_pubkey: {
-        label: "Refund public key",
-      },
+        locktime: {
+          label: "Unlock time",
+        },
+        refund_pubkey: {
+          label: "Refund public key",
+        },
       },
     },
     actions: {
@@ -918,9 +917,9 @@ locktime: {
     },
     errors: {
       invalid_token: {
-timelock: {
-      unlock_date_label: "Unlocks { value }",
-    },
+        timelock: {
+          unlock_date_label: "Unlocks { value }",
+        },
         label: "无效的 token",
       },
     },
@@ -1262,7 +1261,8 @@ timelock: {
   },
   BucketManager: {
     tooltips: {
-      description: "\u6876\u7528\u4e8e\u5bf9\u4ee3\u5e01\u8fdb\u884c\u5206\u7c7b",
+      description:
+        "\u6876\u7528\u4e8e\u5bf9\u4ee3\u5e01\u8fdb\u884c\u5206\u7c7b",
     },
   },
   BucketDetail: {

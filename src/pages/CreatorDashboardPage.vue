@@ -1,30 +1,48 @@
 <template>
-  <div :class="[$q.dark.isActive ? 'bg-dark text-white' : 'bg-white text-dark', 'q-pa-md']">
+  <div
+    :class="[
+      $q.dark.isActive ? 'bg-dark text-white' : 'bg-white text-dark',
+      'q-pa-md',
+    ]"
+  >
     <div class="row items-center justify-between">
-      <div class="text-h5">{{ $t('CreatorHub.dashboard.title') }}</div>
-      <q-btn flat color="primary" @click="logout">{{ $t('CreatorHub.dashboard.logout') }}</q-btn>
+      <div class="text-h5">{{ $t("CreatorHub.dashboard.title") }}</div>
+      <q-btn flat color="primary" @click="logout">{{
+        $t("CreatorHub.dashboard.logout")
+      }}</q-btn>
     </div>
 
     <div class="q-mt-md">
-      <div class="text-h6">{{ $t('CreatorHub.dashboard.edit_profile') }}</div>
-      <q-input v-model="profile.display_name" label="Display Name" class="q-mt-sm" />
-      <q-input v-model="profile.picture" label="Profile Picture URL" class="q-mt-sm" />
-      <q-input v-model="profile.about" type="textarea" label="Bio" class="q-mt-sm" />
-      <q-btn color="primary" flat class="q-mt-sm" @click="saveProfile">{{ $t('global.actions.update.label') }}</q-btn>
+      <div class="text-h6">{{ $t("CreatorHub.dashboard.edit_profile") }}</div>
+      <q-input
+        v-model="profile.display_name"
+        label="Display Name"
+        class="q-mt-sm"
+      />
+      <q-input
+        v-model="profile.picture"
+        label="Profile Picture URL"
+        class="q-mt-sm"
+      />
+      <q-input
+        v-model="profile.about"
+        type="textarea"
+        label="Bio"
+        class="q-mt-sm"
+      />
+      <q-btn color="primary" flat class="q-mt-sm" @click="saveProfile">{{
+        $t("global.actions.update.label")
+      }}</q-btn>
     </div>
 
     <div class="q-mt-lg">
-      <div class="text-h6">{{ $t('CreatorHub.dashboard.manage_tiers') }}</div>
+      <div class="text-h6">{{ $t("CreatorHub.dashboard.manage_tiers") }}</div>
       <AddTierDialog
         v-model="showAddTierDialog"
         :tier="newTier"
         @save="saveNewTier"
       />
-      <div
-        v-for="tier in tiers"
-        :key="tier.id"
-        class="q-mt-md"
-      >
+      <div v-for="tier in tiers" :key="tier.id" class="q-mt-md">
         <q-card>
           <q-card-section>
             <q-input
@@ -45,9 +63,19 @@
             >
               <template #hint>
                 <div v-if="bitcoinPrice">
-                  ~{{ formatCurrency((bitcoinPrice / 100000000) * editedTiers[tier.id].price, 'USD') }}
+                  ~{{
+                    formatCurrency(
+                      (bitcoinPrice / 100000000) * editedTiers[tier.id].price,
+                      "USD"
+                    )
+                  }}
                   /
-                  {{ formatCurrency((bitcoinPrice / 100000000) * editedTiers[tier.id].price, 'EUR') }}
+                  {{
+                    formatCurrency(
+                      (bitcoinPrice / 100000000) * editedTiers[tier.id].price,
+                      "EUR"
+                    )
+                  }}
                 </div>
               </template>
             </q-input>
@@ -78,56 +106,48 @@
             />
           </q-card-section>
           <q-card-actions align="right">
-            <q-btn
-              color="primary"
-              flat
-              @click="saveTier(tier)"
-              >{{ $t('CreatorHub.dashboard.save_tier') }}</q-btn
-            >
+            <q-btn color="primary" flat @click="saveTier(tier)">{{
+              $t("CreatorHub.dashboard.save_tier")
+            }}</q-btn>
             <q-btn
               outline
               color="primary"
               class="q-mr-sm"
               :style="{ borderRadius: '8px' }"
               @click="cancelEdit(tier.id)"
-              >{{ $t('global.actions.cancel.label') }}</q-btn
+              >{{ $t("global.actions.cancel.label") }}</q-btn
             >
-            <q-btn
-              color="negative"
-              flat
-              @click="removeTier(tier.id)"
-              >{{ $t('CreatorHub.dashboard.delete_tier') }}</q-btn
-            >
+            <q-btn color="negative" flat @click="removeTier(tier.id)">{{
+              $t("CreatorHub.dashboard.delete_tier")
+            }}</q-btn>
           </q-card-actions>
         </q-card>
       </div>
       <div class="row q-gutter-sm q-mt-md">
-        <q-btn color="primary" flat @click="openAddTier">{{ $t('CreatorHub.dashboard.add_tier') }}</q-btn>
-        <q-btn color="primary" flat @click="saveAllTiers">{{ $t('CreatorHub.dashboard.save_tier') }}</q-btn>
+        <q-btn color="primary" flat @click="openAddTier">{{
+          $t("CreatorHub.dashboard.add_tier")
+        }}</q-btn>
+        <q-btn color="primary" flat @click="saveAllTiers">{{
+          $t("CreatorHub.dashboard.save_tier")
+        }}</q-btn>
       </div>
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import {
-  defineComponent,
-  ref,
-  onMounted,
-  computed,
-  watch,
-} from 'vue';
-import { useCreatorHubStore, Tier } from 'stores/creatorHub';
-import AddTierDialog from 'components/AddTierDialog.vue';
-import { useNostrStore } from 'stores/nostr';
-import { useRouter } from 'vue-router';
-import { usePriceStore } from 'stores/price';
-import { useUiStore } from 'stores/ui';
-import { v4 as uuidv4 } from 'uuid';
-import { notifySuccess } from 'src/js/notify';
+import { defineComponent, ref, onMounted, computed, watch } from "vue";
+import { useCreatorHubStore, Tier } from "stores/creatorHub";
+import AddTierDialog from "components/AddTierDialog.vue";
+import { useNostrStore } from "stores/nostr";
+import { useRouter } from "vue-router";
+import { usePriceStore } from "stores/price";
+import { useUiStore } from "stores/ui";
+import { v4 as uuidv4 } from "uuid";
+import { notifySuccess } from "src/js/notify";
 
 export default defineComponent({
-  name: 'CreatorDashboardPage',
+  name: "CreatorDashboardPage",
   components: { AddTierDialog },
   setup() {
     const store = useCreatorHubStore();
@@ -135,7 +155,7 @@ export default defineComponent({
     const router = useRouter();
     const priceStore = usePriceStore();
     const uiStore = useUiStore();
-    const profile = ref<any>({ display_name: '', picture: '', about: '' });
+    const profile = ref<any>({ display_name: "", picture: "", about: "" });
     const tiers = computed<Tier[]>(() => store.getTierArray());
 
     const editedTiers = ref<Record<string, Tier>>({});
@@ -154,7 +174,7 @@ export default defineComponent({
 
     onMounted(async () => {
       if (!store.loggedInNpub) {
-        router.push('/creator/login');
+        router.push("/creator/login");
         return;
       }
       const p = await nostr.getProfile(store.loggedInNpub);
@@ -163,12 +183,12 @@ export default defineComponent({
 
     const logout = () => {
       store.logout();
-      router.push('/creator/login');
+      router.push("/creator/login");
     };
 
     const saveProfile = async () => {
       await store.updateProfile(profile.value);
-      notifySuccess('Profile saved');
+      notifySuccess("Profile saved");
     };
 
     const showAddTierDialog = ref(false);
@@ -177,10 +197,10 @@ export default defineComponent({
     const openAddTier = () => {
       newTier.value = {
         id: uuidv4(),
-        name: '',
+        name: "",
         price: 0,
-        description: '',
-        welcomeMessage: '',
+        description: "",
+        welcomeMessage: "",
       };
       showAddTierDialog.value = true;
     };
@@ -189,19 +209,19 @@ export default defineComponent({
       showAddTierDialog.value = false;
       store.addTier(tier);
       await store.publishTierDefinitions();
-      notifySuccess('Tier added');
+      notifySuccess("Tier added");
     };
 
     const saveAllTiers = async () => {
       tiers.value.forEach((t) => saveTier(t));
       await store.publishTierDefinitions();
-      notifySuccess('All tiers saved');
+      notifySuccess("All tiers saved");
     };
 
     const removeTier = async (id: string) => {
       store.removeTier(id);
       await store.publishTierDefinitions();
-      notifySuccess('Tier removed');
+      notifySuccess("Tier removed");
     };
 
     const saveTier = async (tier: Tier) => {
@@ -209,7 +229,7 @@ export default defineComponent({
       if (data) {
         store.updateTier(tier.id, { ...data });
         await store.publishTierDefinitions();
-        notifySuccess('Tier updated');
+        notifySuccess("Tier updated");
       }
     };
 
@@ -247,6 +267,6 @@ export default defineComponent({
       editedTiers,
       cancelEdit,
     };
-  }
+  },
 });
 </script>

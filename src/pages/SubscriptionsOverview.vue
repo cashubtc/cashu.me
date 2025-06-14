@@ -1,13 +1,13 @@
 <template>
   <div class="q-pa-md">
-    <h5 class="q-my-none q-mb-md">{{ $t('SubscriptionsOverview.title') }}</h5>
+    <h5 class="q-my-none q-mb-md">{{ $t("SubscriptionsOverview.title") }}</h5>
     <div class="row items-center q-mb-md">
       <div class="col">
-        {{ $t('SubscriptionsOverview.summary.monthly') }}:
+        {{ $t("SubscriptionsOverview.summary.monthly") }}:
         {{ formatCurrency(monthlyTotal) }}
       </div>
       <div class="col text-right">
-        {{ $t('SubscriptionsOverview.summary.total') }}:
+        {{ $t("SubscriptionsOverview.summary.total") }}:
         {{ formatCurrency(totalLocked) }}
       </div>
     </div>
@@ -28,8 +28,14 @@
           clearable
           class="col"
           :options="[
-            { label: $t('SubscriptionsOverview.status.active'), value: 'active' },
-            { label: $t('SubscriptionsOverview.status.expired'), value: 'expired' }
+            {
+              label: $t('SubscriptionsOverview.status.active'),
+              value: 'active',
+            },
+            {
+              label: $t('SubscriptionsOverview.status.expired'),
+              value: 'expired',
+            },
           ]"
           :placeholder="$t('SubscriptionsOverview.filter.status')"
         />
@@ -40,7 +46,12 @@
           map-options
           clearable
           class="col"
-          :options="bucketsStore.bucketList.map((b) => ({ label: b.name, value: b.name }))"
+          :options="
+            bucketsStore.bucketList.map((b) => ({
+              label: b.name,
+              value: b.name,
+            }))
+          "
           :placeholder="$t('SubscriptionsOverview.filter.bucket')"
         />
         <q-select
@@ -52,7 +63,7 @@
           class="col"
           :options="[
             { label: 'monthly', value: 'monthly' },
-            { label: 'weekly', value: 'weekly' }
+            { label: 'weekly', value: 'weekly' },
           ]"
           :placeholder="$t('SubscriptionsOverview.filter.frequency')"
         />
@@ -90,17 +101,17 @@
               <q-tooltip>
                 {{
                   row.countdown
-                    ? $t('SubscriptionsOverview.row.next_unlock_label', {
-                        value: row.countdown
+                    ? $t("SubscriptionsOverview.row.next_unlock_label", {
+                        value: row.countdown,
                       })
-                    : '-' 
+                    : "-"
                 }}
               </q-tooltip>
             </q-linear-progress>
           </q-card-section>
           <q-card-actions align="right" class="q-gutter-xs">
             <q-btn flat dense size="sm" @click="openDetails(row.creator)">
-              {{ $t('SubscriptionsOverview.view') }}
+              {{ $t("SubscriptionsOverview.view") }}
             </q-btn>
             <q-btn
               flat
@@ -109,7 +120,7 @@
               class="q-ml-xs"
               :to="`/creator/${pubkeyNpub(row.creator)}`"
             >
-              {{ $t('FindCreators.actions.view_profile') }}
+              {{ $t("FindCreators.actions.view_profile") }}
             </q-btn>
             <q-btn
               flat
@@ -118,7 +129,7 @@
               class="q-ml-xs"
               @click="sendMessage(row.creator)"
             >
-              {{ $t('SubscriptionsOverview.message') }}
+              {{ $t("SubscriptionsOverview.message") }}
             </q-btn>
             <q-btn
               flat
@@ -127,7 +138,7 @@
               class="q-ml-xs"
               @click="extendSubscription(row.creator)"
             >
-              {{ $t('SubscriptionsOverview.extend') }}
+              {{ $t("SubscriptionsOverview.extend") }}
             </q-btn>
             <q-btn
               flat
@@ -136,7 +147,7 @@
               class="q-ml-xs"
               @click="shareTokens(row.creator)"
             >
-              {{ $t('SubscriptionsOverview.export') }}
+              {{ $t("SubscriptionsOverview.export") }}
             </q-btn>
             <q-btn
               flat
@@ -145,7 +156,7 @@
               class="q-ml-xs"
               @click="exportTokens(row.creator)"
             >
-              {{ $t('SubscriptionsOverview.export_csv') }}
+              {{ $t("SubscriptionsOverview.export_csv") }}
             </q-btn>
             <q-btn
               flat
@@ -154,15 +165,15 @@
               class="q-ml-xs"
               @click="cancelSubscription(row.creator)"
             >
-              {{ $t('SubscriptionsOverview.cancel') }}
+              {{ $t("SubscriptionsOverview.cancel") }}
             </q-btn>
           </q-card-actions>
         </q-card>
       </div>
       <div v-if="!filteredRows.length" class="text-center q-pa-md">
-        {{ $t('SubscriptionsOverview.empty') }}
+        {{ $t("SubscriptionsOverview.empty") }}
         <q-btn flat color="primary" to="/find-creators" class="q-ml-md">
-          {{ $t('SubscriptionsOverview.discover') }}
+          {{ $t("SubscriptionsOverview.discover") }}
         </q-btn>
       </div>
     </div>
@@ -194,8 +205,14 @@
           map-options
           clearable
           :options="[
-            { label: $t('SubscriptionsOverview.status.active'), value: 'active' },
-            { label: $t('SubscriptionsOverview.status.expired'), value: 'expired' }
+            {
+              label: $t('SubscriptionsOverview.status.active'),
+              value: 'active',
+            },
+            {
+              label: $t('SubscriptionsOverview.status.expired'),
+              value: 'expired',
+            },
           ]"
           :placeholder="$t('SubscriptionsOverview.filter.status')"
         />
@@ -205,7 +222,12 @@
           emit-value
           map-options
           clearable
-          :options="bucketsStore.bucketList.map((b) => ({ label: b.name, value: b.name }))"
+          :options="
+            bucketsStore.bucketList.map((b) => ({
+              label: b.name,
+              value: b.name,
+            }))
+          "
           class="q-ml-md"
           :placeholder="$t('SubscriptionsOverview.filter.bucket')"
         />
@@ -217,7 +239,7 @@
           clearable
           :options="[
             { label: 'monthly', value: 'monthly' },
-            { label: 'weekly', value: 'weekly' }
+            { label: 'weekly', value: 'weekly' },
           ]"
           class="q-ml-md"
           :placeholder="$t('SubscriptionsOverview.filter.frequency')"
@@ -243,7 +265,7 @@
         </div>
       </template>
       <template #body-cell-bucket="props">
-        {{ props.row.bucketName || '-' }}
+        {{ props.row.bucketName || "-" }}
       </template>
       <template #body-cell-benefits="props">
         <template v-if="Array.isArray(props.row.benefits)">
@@ -264,16 +286,16 @@
         {{ formatCurrency(props.row.total) }}
       </template>
       <template #body-cell-start="props">
-        {{ props.row.start ? formatTs(props.row.start) : '-' }}
+        {{ props.row.start ? formatTs(props.row.start) : "-" }}
       </template>
       <template #body-cell-end="props">
-        {{ props.row.end ? formatTs(props.row.end) : '-' }}
+        {{ props.row.end ? formatTs(props.row.end) : "-" }}
       </template>
       <template #body-cell-totalMonths="props">
         {{ props.row.totalMonths }}
       </template>
       <template #body-cell-next_unlock="props">
-        {{ props.row.nextUnlock ? formatTs(props.row.nextUnlock) : '-' }}
+        {{ props.row.nextUnlock ? formatTs(props.row.nextUnlock) : "-" }}
       </template>
       <template #body-cell-status="props">
         <div class="row items-center">
@@ -281,15 +303,10 @@
             :color="props.row.status === 'active' ? 'positive' : 'negative'"
             class="q-mr-xs"
           >
-            {{
-              $t(`SubscriptionsOverview.status.${props.row.status}`)
-            }}
+            {{ $t(`SubscriptionsOverview.status.${props.row.status}`) }}
           </q-badge>
-          <q-badge
-            v-if="props.row.hasUnlocked"
-            color="primary"
-          >
-            {{ $t('SubscriptionsOverview.status.unlocked') }}
+          <q-badge v-if="props.row.hasUnlocked" color="primary">
+            {{ $t("SubscriptionsOverview.status.unlocked") }}
           </q-badge>
         </div>
       </template>
@@ -300,7 +317,9 @@
             rounded
             size="8px"
             class="progress"
-            :class="props.row.status === 'active' ? 'active-bar' : 'expired-bar'"
+            :class="
+              props.row.status === 'active' ? 'active-bar' : 'expired-bar'
+            "
             :value="props.row.progress"
             :label="Math.round(props.row.progress * 100) + '%'"
             :color="props.row.status === 'active' ? 'positive' : 'negative'"
@@ -309,23 +328,18 @@
             <q-tooltip>
               {{
                 props.row.countdown
-                  ? $t('SubscriptionsOverview.row.next_unlock_label', {
-                      value: props.row.countdown
+                  ? $t("SubscriptionsOverview.row.next_unlock_label", {
+                      value: props.row.countdown,
                     })
-                  : '-'
+                  : "-"
               }}
             </q-tooltip>
           </q-linear-progress>
         </div>
       </template>
       <template #body-cell-actions="props">
-        <q-btn
-          flat
-          dense
-          size="sm"
-          @click="openDetails(props.row.creator)"
-        >
-          {{ $t('SubscriptionsOverview.view') }}
+        <q-btn flat dense size="sm" @click="openDetails(props.row.creator)">
+          {{ $t("SubscriptionsOverview.view") }}
         </q-btn>
         <q-btn
           flat
@@ -334,7 +348,7 @@
           class="q-ml-xs"
           :to="`/creator/${pubkeyNpub(props.row.creator)}`"
         >
-          {{ $t('FindCreators.actions.view_profile') }}
+          {{ $t("FindCreators.actions.view_profile") }}
         </q-btn>
         <q-btn
           flat
@@ -343,7 +357,7 @@
           class="q-ml-xs"
           @click="sendMessage(props.row.creator)"
         >
-          {{ $t('SubscriptionsOverview.message') }}
+          {{ $t("SubscriptionsOverview.message") }}
         </q-btn>
         <q-btn
           flat
@@ -352,7 +366,7 @@
           class="q-ml-xs"
           @click="extendSubscription(props.row.creator)"
         >
-          {{ $t('SubscriptionsOverview.extend') }}
+          {{ $t("SubscriptionsOverview.extend") }}
         </q-btn>
         <q-btn
           flat
@@ -361,7 +375,7 @@
           class="q-ml-xs"
           @click="shareTokens(props.row.creator)"
         >
-          {{ $t('SubscriptionsOverview.export') }}
+          {{ $t("SubscriptionsOverview.export") }}
         </q-btn>
         <q-btn
           flat
@@ -370,7 +384,7 @@
           class="q-ml-xs"
           @click="exportTokens(props.row.creator)"
         >
-          {{ $t('SubscriptionsOverview.export_csv') }}
+          {{ $t("SubscriptionsOverview.export_csv") }}
         </q-btn>
         <q-btn
           flat
@@ -379,25 +393,20 @@
           class="q-ml-xs"
           @click="cancelSubscription(props.row.creator)"
         >
-          {{ $t('SubscriptionsOverview.cancel') }}
+          {{ $t("SubscriptionsOverview.cancel") }}
         </q-btn>
       </template>
       <template #no-data>
         <div class="text-center q-pa-md">
-          {{ $t('SubscriptionsOverview.empty') }}
-          <q-btn
-            flat
-            color="primary"
-            to="/find-creators"
-            class="q-ml-md"
-          >
-            {{ $t('SubscriptionsOverview.discover') }}
+          {{ $t("SubscriptionsOverview.empty") }}
+          <q-btn flat color="primary" to="/find-creators" class="q-ml-md">
+            {{ $t("SubscriptionsOverview.discover") }}
           </q-btn>
         </div>
       </template>
     </q-table>
     <q-dialog v-model="showDialog">
-      <q-card style="min-width:300px">
+      <q-card style="min-width: 300px">
         <q-card-section>
           <div class="text-h6">
             {{
@@ -415,7 +424,7 @@
                   {{ formatCurrency(t.amount) }}
                 </q-item-label>
                 <q-item-label caption>
-                  {{ t.locktime ? formatTs(t.locktime) : '-' }}
+                  {{ t.locktime ? formatTs(t.locktime) : "-" }}
                 </q-item-label>
               </q-item-section>
               <q-item-section side>
@@ -432,31 +441,27 @@
             v-if="creatorTokens.length === 0"
             class="text-center q-pa-md text-caption"
           >
-            {{ $t('LockedTokensTable.empty_text') }}
+            {{ $t("LockedTokensTable.empty_text") }}
           </div>
         </q-card-section>
         <q-card-actions align="right">
           <q-btn flat color="primary" v-close-popup>
-            {{ $t('global.actions.close.label') }}
+            {{ $t("global.actions.close.label") }}
           </q-btn>
         </q-card-actions>
       </q-card>
     </q-dialog>
     <q-dialog v-model="showMessageDialog">
-      <q-card style="min-width:300px">
+      <q-card style="min-width: 300px">
         <q-card-section class="text-h6">
-          {{ $t('SubscriptionsOverview.message') }}
+          {{ $t("SubscriptionsOverview.message") }}
         </q-card-section>
         <q-card-section>
-          <q-input
-            v-model="messageText"
-            type="textarea"
-            autofocus
-          />
+          <q-input v-model="messageText" type="textarea" autofocus />
         </q-card-section>
         <q-card-actions align="right">
           <q-btn flat v-close-popup color="grey">
-            {{ $t('global.actions.cancel.label') }}
+            {{ $t("global.actions.cancel.label") }}
           </q-btn>
           <q-btn
             flat
@@ -464,7 +469,7 @@
             :disable="!messageText.trim()"
             @click="confirmMessage"
           >
-            {{ $t('global.actions.send.label') }}
+            {{ $t("global.actions.send.label") }}
           </q-btn>
         </q-card-actions>
       </q-card>
@@ -473,27 +478,27 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, onMounted, onUnmounted, watch } from 'vue';
-import { storeToRefs } from 'pinia';
-import { useLockedTokensStore, type LockedToken } from 'stores/lockedTokens';
-import { useBucketsStore } from 'stores/buckets';
-import { useMintsStore } from 'stores/mints';
-import { useUiStore } from 'stores/ui';
-import { useNostrStore } from 'stores/nostr';
-import { useMessengerStore } from 'stores/messenger';
-import { useDonationPresetsStore } from 'stores/donationPresets';
-import { useSubscriptionsStore } from 'stores/subscriptions';
-import { useRouter } from 'vue-router';
-import { useQuasar, copyToClipboard } from 'quasar';
-import { nip19 } from 'nostr-tools';
-import { formatDistanceToNow } from 'date-fns';
-import { shortenString } from 'src/js/string-utils';
-import { useI18n } from 'vue-i18n';
-import { notifySuccess, notifyError } from 'src/js/notify';
-import type { Proof } from '@cashu/cashu-ts';
-import { useProofsStore } from 'stores/proofs';
-import { useSendTokensStore } from 'stores/sendTokensStore';
-import token from 'src/js/token';
+import { computed, ref, onMounted, onUnmounted, watch } from "vue";
+import { storeToRefs } from "pinia";
+import { useLockedTokensStore, type LockedToken } from "stores/lockedTokens";
+import { useBucketsStore } from "stores/buckets";
+import { useMintsStore } from "stores/mints";
+import { useUiStore } from "stores/ui";
+import { useNostrStore } from "stores/nostr";
+import { useMessengerStore } from "stores/messenger";
+import { useDonationPresetsStore } from "stores/donationPresets";
+import { useSubscriptionsStore } from "stores/subscriptions";
+import { useRouter } from "vue-router";
+import { useQuasar, copyToClipboard } from "quasar";
+import { nip19 } from "nostr-tools";
+import { formatDistanceToNow } from "date-fns";
+import { shortenString } from "src/js/string-utils";
+import { useI18n } from "vue-i18n";
+import { notifySuccess, notifyError } from "src/js/notify";
+import type { Proof } from "@cashu/cashu-ts";
+import { useProofsStore } from "stores/proofs";
+import { useSendTokensStore } from "stores/sendTokensStore";
+import token from "src/js/token";
 
 const lockedStore = useLockedTokensStore();
 const bucketsStore = useBucketsStore();
@@ -517,7 +522,9 @@ function formatCurrency(amount: number): string {
 
 function formatTs(ts: number): string {
   const d = new Date(ts * 1000);
-  return `${d.getFullYear()}-${('0' + (d.getMonth() + 1)).slice(-2)}-${('0' + d.getDate()).slice(-2)}`;
+  return `${d.getFullYear()}-${("0" + (d.getMonth() + 1)).slice(-2)}-${(
+    "0" + d.getDate()
+  ).slice(-2)}`;
 }
 
 const subscriptionsStore = useSubscriptionsStore();
@@ -541,13 +548,14 @@ const rows = computed(() => {
       pubkey: sub.creatorNpub,
       locktime: i.unlockTs,
       bucketId: sub.tierId,
-      refundPubkey: '',
-      date: '',
+      refundPubkey: "",
+      date: "",
     }));
     const total = tokens.reduce((sum, t) => sum + t.amount, 0);
     const future = tokens.filter((t) => t.locktime && t.locktime > nowSec);
-    const nextUnlock = future.sort((a, b) => a.locktime! - b.locktime!)[0]?.locktime || null;
-    const countdown = nextUnlock ? formatDistanceToNow(nextUnlock * 1000) : '';
+    const nextUnlock =
+      future.sort((a, b) => a.locktime! - b.locktime!)[0]?.locktime || null;
+    const countdown = nextUnlock ? formatDistanceToNow(nextUnlock * 1000) : "";
     const monthsLeft = future.length;
     const monthly = sub.amountPerInterval;
     const start = sub.startDate || null;
@@ -557,10 +565,12 @@ const rows = computed(() => {
       start && totalMonths
         ? start + (totalMonths - 1) * 30 * 24 * 60 * 60
         : null;
-    const unlocked = tokens.filter((t) => !t.locktime || t.locktime <= nowSec).length;
-    const status = monthsLeft > 0 ? 'active' : 'expired';
+    const unlocked = tokens.filter(
+      (t) => !t.locktime || t.locktime <= nowSec
+    ).length;
+    const status = monthsLeft > 0 ? "active" : "expired";
     const bucket = bucketsStore.bucketList.find((b) => b.id === sub.tierId);
-    const bucketName = bucket?.name || '';
+    const bucketName = bucket?.name || "";
     return {
       creator: sub.creatorNpub,
       bucketName,
@@ -585,7 +595,9 @@ const rows = computed(() => {
 });
 
 const totalLocked = computed(() => rows.value.reduce((s, r) => s + r.total, 0));
-const monthlyTotal = computed(() => rows.value.reduce((s, r) => s + r.monthly, 0));
+const monthlyTotal = computed(() =>
+  rows.value.reduce((s, r) => s + r.monthly, 0)
+);
 
 const profiles = ref<Record<string, any>>({});
 const nostr = useNostrStore();
@@ -608,9 +620,12 @@ const pagination = ref({ page: 1, rowsPerPage: 10 });
 const filteredRows = computed(() => {
   const term = filter.value.toLowerCase();
   return rows.value.filter((r) => {
-    const matchesStatus = !statusFilter.value || r.status === statusFilter.value;
-    const matchesBucket = !bucketFilter.value || r.bucketName === bucketFilter.value;
-    const matchesFrequency = !frequencyFilter.value || r.frequency === frequencyFilter.value;
+    const matchesStatus =
+      !statusFilter.value || r.status === statusFilter.value;
+    const matchesBucket =
+      !bucketFilter.value || r.bucketName === bucketFilter.value;
+    const matchesFrequency =
+      !frequencyFilter.value || r.frequency === frequencyFilter.value;
     const rowString = JSON.stringify(r).toLowerCase();
     const matchesFilter = !term || rowString.includes(term);
     return matchesStatus && matchesBucket && matchesFrequency && matchesFilter;
@@ -622,7 +637,7 @@ function customSort(rows: any[], sortBy: string, descending: boolean) {
     const x = a[sortBy];
     const y = b[sortBy];
     let result = 0;
-    if (typeof x === 'number' && typeof y === 'number') {
+    if (typeof x === "number" && typeof y === "number") {
       result = x - y;
     } else {
       result = String(x).localeCompare(String(y));
@@ -668,8 +683,8 @@ function cancelSubscription(pubkey: string) {
   const row = rows.value.find((r) => r.creator === pubkey);
   if (!row) return;
   $q.dialog({
-    title: t('SubscriptionsOverview.cancel_confirm_title'),
-    message: t('SubscriptionsOverview.cancel_confirm_text'),
+    title: t("SubscriptionsOverview.cancel_confirm_title"),
+    message: t("SubscriptionsOverview.cancel_confirm_text"),
     cancel: true,
     persistent: true,
   }).onOk(() => {
@@ -678,7 +693,7 @@ function cancelSubscription(pubkey: string) {
       row.tokens
         .filter((t) => t.locktime && t.locktime > now)
         .forEach((t) => lockedStore.deleteLockedToken(t.id));
-      notifySuccess(t('SubscriptionsOverview.notifications.cancel_success'));
+      notifySuccess(t("SubscriptionsOverview.notifications.cancel_success"));
     } catch (e: any) {
       notifyError(e.message);
     }
@@ -689,11 +704,11 @@ function extendSubscription(pubkey: string) {
   const row = rows.value.find((r) => r.creator === pubkey);
   if (!row) return;
   $q.dialog({
-    title: t('SubscriptionsOverview.extend_dialog_title'),
-    message: t('SubscriptionsOverview.extend_dialog_text'),
+    title: t("SubscriptionsOverview.extend_dialog_title"),
+    message: t("SubscriptionsOverview.extend_dialog_text"),
     prompt: {
       model: 1,
-      type: 'number',
+      type: "number",
       min: 1,
     },
     cancel: true,
@@ -722,7 +737,7 @@ function extendSubscription(pubkey: string) {
           frequency: row.frequency,
         }
       );
-      notifySuccess(t('SubscriptionsOverview.notifications.extend_success'));
+      notifySuccess(t("SubscriptionsOverview.notifications.extend_success"));
     } catch (e: any) {
       notifyError(e.message);
     }
@@ -748,12 +763,12 @@ function exportTokens(pubkey: string) {
   if (!row) return;
   const lines = ["amount,unlock_time,token"];
   row.tokens.forEach((t) => {
-    lines.push(`${t.amount},${t.locktime || ''},${t.token}`);
+    lines.push(`${t.amount},${t.locktime || ""},${t.token}`);
   });
-  const csv = lines.join('\n');
-  const blob = new Blob([csv], { type: 'text/csv' });
+  const csv = lines.join("\n");
+  const blob = new Blob([csv], { type: "text/csv" });
   const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
+  const a = document.createElement("a");
   a.href = url;
   a.download = `tokens_${pubkey}.csv`;
   a.click();
@@ -762,7 +777,10 @@ function exportTokens(pubkey: string) {
 
 function copyToken(token: string) {
   copyToClipboard(token).then(() => {
-    $q.notify({ message: t("global.copy_to_clipboard.success"), position: "bottom" });
+    $q.notify({
+      message: t("global.copy_to_clipboard.success"),
+      position: "bottom",
+    });
   });
 }
 
@@ -777,27 +795,104 @@ function updateProfiles() {
 }
 
 onMounted(updateProfiles);
-watch(
-  () => subscriptionsStore.subscriptions,
-  updateProfiles
-);
+watch(() => subscriptionsStore.subscriptions, updateProfiles);
 
 const columns = computed(() => [
-  { name: "creator", label: t("SubscriptionsOverview.columns.creator"), field: "creator", sortable: true },
-  { name: "bucket", label: t("SubscriptionsOverview.columns.bucket"), field: "bucketName", sortable: true },
-  { name: "tierName", label: t("SubscriptionsOverview.columns.tierName"), field: "tierName", sortable: true },
-  { name: "benefits", label: t("SubscriptionsOverview.columns.benefits"), field: "benefits", sortable: true },
-  { name: "frequency", label: t("SubscriptionsOverview.columns.frequency"), field: "frequency", sortable: true },
-  { name: "tokensRemaining", label: t("SubscriptionsOverview.columns.tokensRemaining"), field: "tokensRemaining", align: "right", sortable: true },
-  { name: "monthly", label: t("SubscriptionsOverview.columns.monthly"), field: "monthly", align: "right", sortable: true },
-  { name: "total", label: t("SubscriptionsOverview.columns.total"), field: "total", align: "right", sortable: true },
-  { name: "start", label: t("SubscriptionsOverview.columns.start"), field: "start", sortable: true },
-  { name: "end", label: t("SubscriptionsOverview.columns.end"), field: "end", sortable: true },
-  { name: "totalMonths", label: t("SubscriptionsOverview.columns.total_months"), field: "totalMonths", align: "right", sortable: true },
-  { name: "next_unlock", label: t("SubscriptionsOverview.columns.next_unlock"), field: "nextUnlock", sortable: true },
-  { name: "status", label: t("SubscriptionsOverview.columns.status"), field: "status", sortable: true },
-  { name: "remaining", label: t("SubscriptionsOverview.columns.remaining"), field: "monthsLeft", align: "right", sortable: true },
-  { name: "actions", label: t("SubscriptionsOverview.columns.actions"), field: "creator", sortable: true },
+  {
+    name: "creator",
+    label: t("SubscriptionsOverview.columns.creator"),
+    field: "creator",
+    sortable: true,
+  },
+  {
+    name: "bucket",
+    label: t("SubscriptionsOverview.columns.bucket"),
+    field: "bucketName",
+    sortable: true,
+  },
+  {
+    name: "tierName",
+    label: t("SubscriptionsOverview.columns.tierName"),
+    field: "tierName",
+    sortable: true,
+  },
+  {
+    name: "benefits",
+    label: t("SubscriptionsOverview.columns.benefits"),
+    field: "benefits",
+    sortable: true,
+  },
+  {
+    name: "frequency",
+    label: t("SubscriptionsOverview.columns.frequency"),
+    field: "frequency",
+    sortable: true,
+  },
+  {
+    name: "tokensRemaining",
+    label: t("SubscriptionsOverview.columns.tokensRemaining"),
+    field: "tokensRemaining",
+    align: "right",
+    sortable: true,
+  },
+  {
+    name: "monthly",
+    label: t("SubscriptionsOverview.columns.monthly"),
+    field: "monthly",
+    align: "right",
+    sortable: true,
+  },
+  {
+    name: "total",
+    label: t("SubscriptionsOverview.columns.total"),
+    field: "total",
+    align: "right",
+    sortable: true,
+  },
+  {
+    name: "start",
+    label: t("SubscriptionsOverview.columns.start"),
+    field: "start",
+    sortable: true,
+  },
+  {
+    name: "end",
+    label: t("SubscriptionsOverview.columns.end"),
+    field: "end",
+    sortable: true,
+  },
+  {
+    name: "totalMonths",
+    label: t("SubscriptionsOverview.columns.total_months"),
+    field: "totalMonths",
+    align: "right",
+    sortable: true,
+  },
+  {
+    name: "next_unlock",
+    label: t("SubscriptionsOverview.columns.next_unlock"),
+    field: "nextUnlock",
+    sortable: true,
+  },
+  {
+    name: "status",
+    label: t("SubscriptionsOverview.columns.status"),
+    field: "status",
+    sortable: true,
+  },
+  {
+    name: "remaining",
+    label: t("SubscriptionsOverview.columns.remaining"),
+    field: "monthsLeft",
+    align: "right",
+    sortable: true,
+  },
+  {
+    name: "actions",
+    label: t("SubscriptionsOverview.columns.actions"),
+    field: "creator",
+    sortable: true,
+  },
 ]);
 </script>
 
@@ -828,4 +923,3 @@ const columns = computed(() => [
   width: 100%;
 }
 </style>
-

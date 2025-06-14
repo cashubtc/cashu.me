@@ -9,69 +9,78 @@
       backdrop-filter="blur(2px) brightness(60%)"
     >
       <q-card :class="[cardClass, 'full-width-card q-pb-lg']">
-      <q-card-section class="row items-center q-pb-sm">
-        <q-btn
-          flat
-          round
-          dense
-          v-close-popup
-          class="q-ml-sm"
-          color="primary"
-          :aria-label="$t('global.actions.close.label')"
-          :title="$t('global.actions.close.label')"
-        >
-          <XIcon />
-        </q-btn>
-        <div class="col text-center">
-          <span class="text-h6">{{ $t("ReceiveDialog.title") }}</span>
-        </div>
-        <q-btn
-          flat
-          round
-          dense
-          class="q-mr-sm"
-          @click="showCamera"
-          color="primary"
-          :aria-label="$t('global.actions.scan.label')"
-          :title="$t('global.actions.scan.label')"
-        >
-          <ScanIcon />
-        </q-btn>
-      </q-card-section>
-
-      <q-card-section class="q-pa-md">
-        <div class="q-gutter-y-md">
+        <q-card-section class="row items-center q-pb-sm">
           <q-btn
-            class="full-width custom-btn"
-            @click="toggleReceiveEcashDrawer"
+            flat
+            round
+            dense
+            v-close-popup
+            class="q-ml-sm"
+            color="primary"
+            :aria-label="$t('global.actions.close.label')"
+            :title="$t('global.actions.close.label')"
           >
-            <div class="row items-center full-width">
-              <div class="icon-background q-mr-md" :style="{ backgroundColor: iconBgColor }">
-                <CoinsIcon />
-              </div>
-              <div class="text-left">
-                <div class="text-weight-bold custom-btn-text">
-                  {{ $t("ReceiveDialog.actions.ecash.label") }}
-                </div>
-              </div>
-            </div>
+            <XIcon />
           </q-btn>
+          <div class="col text-center">
+            <span class="text-h6">{{ $t("ReceiveDialog.title") }}</span>
+          </div>
+          <q-btn
+            flat
+            round
+            dense
+            class="q-mr-sm"
+            @click="showCamera"
+            color="primary"
+            :aria-label="$t('global.actions.scan.label')"
+            :title="$t('global.actions.scan.label')"
+          >
+            <ScanIcon />
+          </q-btn>
+        </q-card-section>
 
-          <q-btn class="full-width custom-btn" @click="showInvoiceCreateDialog">
-            <div class="row items-center full-width">
-              <div class="icon-background q-mr-md" :style="{ backgroundColor: iconBgColor }">
-                <ZapIcon />
-              </div>
-              <div class="text-left">
-                <div class="text-weight-bold custom-btn-text">
-                  {{ $t("ReceiveDialog.actions.lightning.label") }}
+        <q-card-section class="q-pa-md">
+          <div class="q-gutter-y-md">
+            <q-btn
+              class="full-width custom-btn"
+              @click="toggleReceiveEcashDrawer"
+            >
+              <div class="row items-center full-width">
+                <div
+                  class="icon-background q-mr-md"
+                  :style="{ backgroundColor: iconBgColor }"
+                >
+                  <CoinsIcon />
+                </div>
+                <div class="text-left">
+                  <div class="text-weight-bold custom-btn-text">
+                    {{ $t("ReceiveDialog.actions.ecash.label") }}
+                  </div>
                 </div>
               </div>
-            </div>
-          </q-btn>
-        </div>
-      </q-card-section>
-    </q-card>
+            </q-btn>
+
+            <q-btn
+              class="full-width custom-btn"
+              @click="showInvoiceCreateDialog"
+            >
+              <div class="row items-center full-width">
+                <div
+                  class="icon-background q-mr-md"
+                  :style="{ backgroundColor: iconBgColor }"
+                >
+                  <ZapIcon />
+                </div>
+                <div class="text-left">
+                  <div class="text-weight-bold custom-btn-text">
+                    {{ $t("ReceiveDialog.actions.lightning.label") }}
+                  </div>
+                </div>
+              </div>
+            </q-btn>
+          </div>
+        </q-card-section>
+      </q-card>
     </q-dialog>
     <ReceiveEcashDrawer />
   </div>
@@ -149,8 +158,8 @@ export default defineComponent({
     },
     iconBgColor: function () {
       return this.$q.dark.isActive
-        ? 'var(--q-color-grey-10)'
-        : 'var(--q-color-grey-2)';
+        ? "var(--q-color-grey-10)"
+        : "var(--q-color-grey-2)";
     },
   },
   watch: {

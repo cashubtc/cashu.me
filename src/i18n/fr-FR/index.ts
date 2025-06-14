@@ -837,12 +837,12 @@ export default {
       p2pk_pubkey: {
         label: "Clé publique du destinataire",
         label_invalid: "Clé publique du destinataire",
-locktime: {
-        label: "Unlock time",
-      },
-      refund_pubkey: {
-        label: "Refund public key",
-      },
+        locktime: {
+          label: "Unlock time",
+        },
+        refund_pubkey: {
+          label: "Refund public key",
+        },
       },
     },
     actions: {
@@ -933,9 +933,9 @@ locktime: {
     },
     errors: {
       invalid_token: {
-timelock: {
-      unlock_date_label: "Unlocks { value }",
-    },
+        timelock: {
+          unlock_date_label: "Unlocks { value }",
+        },
         label: "Jeton invalide",
       },
     },
@@ -1278,7 +1278,8 @@ timelock: {
   },
   BucketManager: {
     tooltips: {
-      description: "Les compartiments servent \u00e0 cat\u00e9goriser les jetons",
+      description:
+        "Les compartiments servent \u00e0 cat\u00e9goriser les jetons",
     },
   },
   BucketDetail: {

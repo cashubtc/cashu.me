@@ -68,7 +68,7 @@
             :title="$t('HistoryTable.actions.edit_label.tooltip_text')"
           >
             <q-tooltip>{{
-              $t('HistoryTable.actions.edit_label.tooltip_text')
+              $t("HistoryTable.actions.edit_label.tooltip_text")
             }}</q-tooltip>
           </q-btn>
           <q-btn
@@ -139,9 +139,9 @@
     </div>
     <q-dialog v-model="editDialog.show">
       <q-card class="q-pa-md" style="max-width: 400px">
-        <h6 class="q-mt-none q-mb-md">{{
-          $t('HistoryTable.actions.edit_label.title')
-        }}</h6>
+        <h6 class="q-mt-none q-mb-md">
+          {{ $t("HistoryTable.actions.edit_label.title") }}
+        </h6>
         <q-input
           v-model="editDialog.label"
           outlined
@@ -156,10 +156,10 @@
         />
         <div class="row q-mt-md">
           <q-btn color="primary" rounded @click="saveLabel">{{
-            $t('global.actions.update.label')
+            $t("global.actions.update.label")
           }}</q-btn>
           <q-btn flat rounded color="grey" class="q-ml-auto" v-close-popup>{{
-            $t('global.actions.cancel.label')
+            $t("global.actions.cancel.label")
           }}</q-btn>
         </div>
       </q-card>
@@ -197,7 +197,7 @@ export default defineComponent({
       filterPending: false,
       editDialog: {
         show: false,
-        label: '',
+        label: "",
         color: DEFAULT_COLOR,
         token: null,
       },
@@ -278,7 +278,7 @@ export default defineComponent({
     },
     openEditLabel(token) {
       this.editDialog.token = token;
-      this.editDialog.label = token.label || '';
+      this.editDialog.label = token.label || "";
       this.editDialog.color = token.color || DEFAULT_COLOR;
       this.editDialog.show = true;
     },

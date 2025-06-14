@@ -1,5 +1,5 @@
 export default function jsconfigPaths() {
   return {
-    name: 'vite-jsconfig-paths-stub'
+    name: "vite-jsconfig-paths-stub",
   };
 }

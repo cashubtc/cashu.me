@@ -30,17 +30,17 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, watch, onMounted, ref } from 'vue';
-import { storeToRefs } from 'pinia';
-import { useMessengerStore } from 'src/stores/messenger';
-import { useNostrStore } from 'src/stores/nostr';
-import ConversationListItem from './ConversationListItem.vue';
+import { computed, watch, onMounted, ref } from "vue";
+import { storeToRefs } from "pinia";
+import { useMessengerStore } from "src/stores/messenger";
+import { useNostrStore } from "src/stores/nostr";
+import ConversationListItem from "./ConversationListItem.vue";
 
-const emit = defineEmits(['select']);
+const emit = defineEmits(["select"]);
 const messenger = useMessengerStore();
 const nostr = useNostrStore();
 const { conversations } = storeToRefs(messenger);
-const filterQuery = ref('');
+const filterQuery = ref("");
 
 const uniqueConversations = computed(() => {
   return Object.entries(conversations.value)
@@ -58,7 +58,8 @@ const filtered = computed(() => {
   return uniqueConversations.value.filter(({ pubkey }) => {
     const entry: any = (nostr.profiles as any)[pubkey];
     const profile = entry?.profile ?? entry ?? {};
-    const name = profile.display_name || profile.name || profile.displayName || pubkey;
+    const name =
+      profile.display_name || profile.name || profile.displayName || pubkey;
     return name.toLowerCase().includes(q) || pubkey.toLowerCase().includes(q);
   });
 });
@@ -74,6 +75,5 @@ const loadProfiles = async () => {
 onMounted(loadProfiles);
 watch(uniqueConversations, loadProfiles);
 
-const select = (pubkey: string) => emit('select', pubkey);
+const select = (pubkey: string) => emit("select", pubkey);
 </script>
-

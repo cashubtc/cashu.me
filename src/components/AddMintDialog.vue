@@ -24,7 +24,7 @@
       >
         <template #label>
           <div class="row items-center no-wrap">
-            <span>{{ $t('AddMintDialog.inputs.mint_url.label') }}</span>
+            <span>{{ $t("AddMintDialog.inputs.mint_url.label") }}</span>
             <InfoTooltip
               class="q-ml-xs"
               :text="$t('AddMintDialog.tooltips.mint_url')"
@@ -32,7 +32,9 @@
           </div>
         </template>
       </q-input>
-      <div class="text-caption text-grey q-mb-sm">Enter the base URL of the mint.</div>
+      <div class="text-caption text-grey q-mb-sm">
+        Enter the base URL of the mint.
+      </div>
       <div class="row q-mt-lg">
         <div class="col">
           <q-btn

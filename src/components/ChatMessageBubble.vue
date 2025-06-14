@@ -41,14 +41,14 @@ const $q = useQuasar();
 
 const receivedStyle = computed(() => ({
   backgroundColor: $q.dark.isActive
-    ? 'var(--q-color-grey-8)'
-    : 'var(--q-color-grey-2)',
-  color: $q.dark.isActive ? '#ffffff' : '#000000'
+    ? "var(--q-color-grey-8)"
+    : "var(--q-color-grey-2)",
+  color: $q.dark.isActive ? "#ffffff" : "#000000",
 }));
 
-const bubbleStyle = computed(() => (
+const bubbleStyle = computed(() =>
   props.message.outgoing ? {} : receivedStyle.value
-));
+);
 
 const time = computed(() =>
   new Date(props.message.created_at * 1000).toLocaleString()

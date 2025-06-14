@@ -830,12 +830,12 @@ export default {
       p2pk_pubkey: {
         label: "受信者の公開鍵",
         label_invalid: "受信者の公開鍵",
-locktime: {
-        label: "Unlock time",
-      },
-      refund_pubkey: {
-        label: "Refund public key",
-      },
+        locktime: {
+          label: "Unlock time",
+        },
+        refund_pubkey: {
+          label: "Refund public key",
+        },
       },
     },
     actions: {
@@ -926,9 +926,9 @@ locktime: {
     },
     errors: {
       invalid_token: {
-timelock: {
-      unlock_date_label: "Unlocks { value }",
-    },
+        timelock: {
+          unlock_date_label: "Unlocks { value }",
+        },
         label: "無効なトークン",
       },
     },
@@ -1272,7 +1272,8 @@ timelock: {
   },
   BucketManager: {
     tooltips: {
-      description: "\u30D0\u30B1\u30C3\u30C8\u306F\u30C8\u30FC\u30AF\u30F3\u3092\u5206\u985E\u3059\u308B\u305F\u3081\u306E\u3082\u306E\u3067\u3059",
+      description:
+        "\u30D0\u30B1\u30C3\u30C8\u306F\u30C8\u30FC\u30AF\u30F3\u3092\u5206\u985E\u3059\u308B\u305F\u3081\u306E\u3082\u306E\u3067\u3059",
     },
   },
   BucketDetail: {

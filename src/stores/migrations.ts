@@ -46,16 +46,12 @@ export const useMigrationsStore = defineStore("migrations", {
       await uIStore.lockMutex();
       try {
         for (const migration of pendingMigrations) {
-          debug(
-            `Running migration ${migration.version}: ${migration.name}`
-          );
+          debug(`Running migration ${migration.version}: ${migration.name}`);
           try {
             await migration.execute();
             // Update the current version after successful migration
             this.currentVersion = migration.version;
-            debug(
-              `Migration ${migration.version} completed successfully`
-            );
+            debug(`Migration ${migration.version} completed successfully`);
           } catch (error) {
             console.error(`Migration ${migration.version} failed:`, error);
             // Stop running migrations if one fails

@@ -1,46 +1,65 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest'
-import { useSendTokensStore } from '../../src/stores/sendTokensStore'
-import { useWalletStore } from '../../src/stores/wallet'
-import { useProofsStore } from '../../src/stores/proofs'
-import { useP2PKStore } from '../../src/stores/p2pk'
+import { describe, it, expect, beforeEach, vi } from "vitest";
+import { useSendTokensStore } from "../../src/stores/sendTokensStore";
+import { useWalletStore } from "../../src/stores/wallet";
+import { useProofsStore } from "../../src/stores/proofs";
+import { useP2PKStore } from "../../src/stores/p2pk";
 
 beforeEach(() => {
-  localStorage.clear()
-})
+  localStorage.clear();
+});
 
-describe('Timelock', () => {
-  it('stores locktime in sendData', () => {
-    const store = useSendTokensStore()
-    store.sendData.locktime = 123
-    store.sendData.refundPubkey = 'abc'
-    expect(store.sendData.locktime).toBe(123)
-    expect(store.sendData.refundPubkey).toBe('abc')
-  })
+describe("Timelock", () => {
+  it("stores locktime in sendData", () => {
+    const store = useSendTokensStore();
+    store.sendData.locktime = 123;
+    store.sendData.refundPubkey = "abc";
+    expect(store.sendData.locktime).toBe(123);
+    expect(store.sendData.refundPubkey).toBe("abc");
+  });
 
-  it('forwards locktime in sendToLock', async () => {
-    const walletStore = useWalletStore()
-    const proofsStore = useProofsStore()
-    vi.spyOn(proofsStore, 'removeProofs').mockResolvedValue()
-    vi.spyOn(proofsStore, 'addProofs').mockResolvedValue()
+  it("forwards locktime in sendToLock", async () => {
+    const walletStore = useWalletStore();
+    const proofsStore = useProofsStore();
+    vi.spyOn(proofsStore, "removeProofs").mockResolvedValue();
+    vi.spyOn(proofsStore, "addProofs").mockResolvedValue();
 
-    walletStore.spendableProofs = vi.fn(() => [{ secret: 's', amount: 1, id: 'a', C: 'c' } as any])
-    walletStore.coinSelect = vi.fn(() => [{ secret: 's', amount: 1, id: 'a', C: 'c' } as any])
-    walletStore.getKeyset = vi.fn(() => 'kid')
+    walletStore.spendableProofs = vi.fn(() => [
+      { secret: "s", amount: 1, id: "a", C: "c" } as any,
+    ]);
+    walletStore.coinSelect = vi.fn(() => [
+      { secret: "s", amount: 1, id: "a", C: "c" } as any,
+    ]);
+    walletStore.getKeyset = vi.fn(() => "kid");
     const wallet = {
-      mint: { mintUrl: 'm' },
-      unit: 'sat',
-      send: vi.fn(async (_a, _p, opts) => ({ keep: [], send: [] }))
-    } as any
+      mint: { mintUrl: "m" },
+      unit: "sat",
+      send: vi.fn(async (_a, _p, opts) => ({ keep: [], send: [] })),
+    } as any;
 
-    await walletStore.sendToLock([{ secret: 's', amount: 1, id: 'a', C: 'c' } as any], wallet, 1, 'pk', 'b', 99, 'r')
-    expect(wallet.send).toHaveBeenCalledWith(1, [{ secret: 's', amount: 1, id: 'a', C: 'c' }], { keysetId: 'kid', pubkey: 'pk', locktime: 99, refund: 'r' })
-  })
+    await walletStore.sendToLock(
+      [{ secret: "s", amount: 1, id: "a", C: "c" } as any],
+      wallet,
+      1,
+      "pk",
+      "b",
+      99,
+      "r"
+    );
+    expect(wallet.send).toHaveBeenCalledWith(
+      1,
+      [{ secret: "s", amount: 1, id: "a", C: "c" }],
+      { keysetId: "kid", pubkey: "pk", locktime: 99, refund: "r" }
+    );
+  });
 
-  it('extracts locktime from secret', () => {
-    const p2pk = useP2PKStore()
-    const locktime = 1700000000
-    const secret = JSON.stringify(["P2PK",{data:"02aa",tags:[["locktime",String(locktime)]]}])
-    const info = p2pk.getSecretP2PKPubkey(secret)
-    expect(info.locktime).toBe(locktime)
-  })
-})
+  it("extracts locktime from secret", () => {
+    const p2pk = useP2PKStore();
+    const locktime = 1700000000;
+    const secret = JSON.stringify([
+      "P2PK",
+      { data: "02aa", tags: [["locktime", String(locktime)]] },
+    ]);
+    const info = p2pk.getSecretP2PKPubkey(secret);
+    expect(info.locktime).toBe(locktime);
+  });
+});

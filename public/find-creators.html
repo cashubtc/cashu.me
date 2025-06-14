@@ -1,672 +1,855 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Nostr User Search & Featured Creators</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- nostr-tools CDN -->
     <script src="https://unpkg.com/nostr-tools@1.17.0/lib/nostr.bundle.js"></script>
     <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f7fafc; /* Tailwind gray-100 */
-            color: #2d3748; /* Tailwind gray-800 */
-        }
-        .container {
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 1rem;
-        }
-        .search-container, .featured-creators-container {
-            margin: 2rem auto;
-            padding: 2rem;
-            background-color: white;
-            border-radius: 0.75rem; /* Tailwind rounded-xl */
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* Tailwind shadow-lg */
-        }
-        .search-input {
-            width: 100%;
-            padding: 0.875rem 1.25rem; /* Increased padding */
-            border: 1px solid #e2e8f0; /* Tailwind gray-300 */
-            border-radius: 0.5rem; /* Tailwind rounded-lg */
-            font-size: 1rem;
-            transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-            color: #2d3748; /* Tailwind gray-800 */
-        }
-        .search-input:focus {
-            outline: none;
-            border-color: #4299e1; /* Tailwind blue-500 */
-            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.5); /* Tailwind ring-blue-500 ring-opacity-50 */
-        }
-        .results-list, .featured-creators-grid {
-            margin-top: 1.5rem;
-            list-style: none;
-            padding: 0;
-        }
-        .featured-creators-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); /* Responsive grid */
-            gap: 1.5rem;
-        }
-        .result-item, .creator-card {
-            padding: 1.25rem;
-            border: 1px solid #e2e8f0; /* Tailwind gray-300 */
-            border-radius: 0.75rem; /* Tailwind rounded-xl */
-            margin-bottom: 1rem;
-            background-color: #fdfdff; /* Slightly off-white */
-            transition: all 0.2s ease-in-out;
-            display: flex;
-            flex-direction: column; /* Ensure actions container is below info */
-            gap: 0.5rem; /* Reduced gap for tighter layout within card */
-        }
-        .creator-card { /* Specific to featured creator cards */
-             box-shadow: 0 4px 6px -1px rgba(0,0,0,0.07), 0 2px 4px -1px rgba(0,0,0,0.04);
-             position: relative; /* Needed for group-hover to work reliably with nested elements */
-        }
-        .result-item { /* Specific to search result items */
-            position: relative;
-        }
-        .result-item:hover, .creator-card:hover {
-            background-color: #f0f5ff; /* Lighter blue hover */
-            border-color: #bee3f8; /* Tailwind blue-200 */
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);
-        }
-        .profile-header { /* New container for avatar and main info */
-            display: flex;
-            align-items: flex-start;
-            gap: 1rem;
-            width: 100%;
-        }
-        .profile-header img.avatar { /* Adjusted from .result-item img.avatar */
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 2px solid #e2e8f0; /* Tailwind gray-300 */
-            flex-shrink: 0;
-        }
-        .profile-header .info { /* Adjusted from .result-item .info */
-            flex-grow: 1;
-            min-width: 0;
-        }
-        .profile-header .info h3 { /* Adjusted */
-            font-size: 1.125rem; /* Tailwind text-lg */
-            font-weight: 600; /* Tailwind font-semibold */
-            color: #2d3748; /* Tailwind gray-800 */
-            word-break: break-word;
-            margin-bottom: 0.25rem;
-        }
-        .profile-header .info p { /* Adjusted */
-            font-size: 0.875rem; /* Tailwind text-sm */
-            color: #4a5568; /* Tailwind gray-700 */
-            margin-top: 0.1rem;
-            word-break: break-word;
-            line-height: 1.4;
-        }
-        .profile-header .info .nip05 { /* Adjusted */
-            font-weight: 500;
-            color: #3182ce; /* Tailwind blue-600 */
-        }
-        .creator-actions { /* Container for Message/Donate buttons */
-            opacity: 0; /* Hidden by default */
-            transition: opacity 0.3s ease-in-out;
-            padding-top: 0.5rem; /* Space above buttons */
-            display: flex;
-            gap: 0.5rem; /* Space between buttons */
-            width: 100%; /* Take full width of the card for alignment */
-            justify-content: flex-start; /* Align buttons to the start */
-        }
-        .creator-card:hover .creator-actions, .result-item:hover .creator-actions {
-            opacity: 1; /* Show on hover */
-        }
-        .action-button {
-            padding: 0.375rem 0.75rem; /* Tailwind py-1.5 px-3 */
-            font-size: 0.75rem; /* Tailwind text-xs */
-            font-weight: 600; /* Tailwind font-semibold */
-            border-radius: 0.375rem; /* Tailwind rounded-md */
-            color: white;
-            transition: background-color 0.2s;
-            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-        }
-        .view-button {
-            background-color: #a0aec0; /* Tailwind gray-500 */
-        }
-        .view-button:hover {
-            background-color: #718096; /* Tailwind gray-600 */
-        }
-        .message-button {
-            background-color: #4299e1; /* Tailwind blue-500 */
-        }
-        .message-button:hover {
-            background-color: #3182ce; /* Tailwind blue-600 */
-        }
-        .donate-button {
-            background-color: #48bb78; /* Tailwind green-500 */
-        }
-        .donate-button:hover {
-            background-color: #38a169; /* Tailwind green-600 */
-        }
+      body {
+        font-family: "Inter", sans-serif;
+        background-color: #f7fafc; /* Tailwind gray-100 */
+        color: #2d3748; /* Tailwind gray-800 */
+      }
+      .container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 1rem;
+      }
+      .search-container,
+      .featured-creators-container {
+        margin: 2rem auto;
+        padding: 2rem;
+        background-color: white;
+        border-radius: 0.75rem; /* Tailwind rounded-xl */
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+          0 4px 6px -2px rgba(0, 0, 0, 0.05); /* Tailwind shadow-lg */
+      }
+      .search-input {
+        width: 100%;
+        padding: 0.875rem 1.25rem; /* Increased padding */
+        border: 1px solid #e2e8f0; /* Tailwind gray-300 */
+        border-radius: 0.5rem; /* Tailwind rounded-lg */
+        font-size: 1rem;
+        transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        color: #2d3748; /* Tailwind gray-800 */
+      }
+      .search-input:focus {
+        outline: none;
+        border-color: #4299e1; /* Tailwind blue-500 */
+        box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.5); /* Tailwind ring-blue-500 ring-opacity-50 */
+      }
+      .results-list,
+      .featured-creators-grid {
+        margin-top: 1.5rem;
+        list-style: none;
+        padding: 0;
+      }
+      .featured-creators-grid {
+        display: grid;
+        grid-template-columns: repeat(
+          auto-fill,
+          minmax(280px, 1fr)
+        ); /* Responsive grid */
+        gap: 1.5rem;
+      }
+      .result-item,
+      .creator-card {
+        padding: 1.25rem;
+        border: 1px solid #e2e8f0; /* Tailwind gray-300 */
+        border-radius: 0.75rem; /* Tailwind rounded-xl */
+        margin-bottom: 1rem;
+        background-color: #fdfdff; /* Slightly off-white */
+        transition: all 0.2s ease-in-out;
+        display: flex;
+        flex-direction: column; /* Ensure actions container is below info */
+        gap: 0.5rem; /* Reduced gap for tighter layout within card */
+      }
+      .creator-card {
+        /* Specific to featured creator cards */
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.07),
+          0 2px 4px -1px rgba(0, 0, 0, 0.04);
+        position: relative; /* Needed for group-hover to work reliably with nested elements */
+      }
+      .result-item {
+        /* Specific to search result items */
+        position: relative;
+      }
+      .result-item:hover,
+      .creator-card:hover {
+        background-color: #f0f5ff; /* Lighter blue hover */
+        border-color: #bee3f8; /* Tailwind blue-200 */
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px -5px rgba(0, 0, 0, 0.1),
+          0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      }
+      .profile-header {
+        /* New container for avatar and main info */
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        width: 100%;
+      }
+      .profile-header img.avatar {
+        /* Adjusted from .result-item img.avatar */
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid #e2e8f0; /* Tailwind gray-300 */
+        flex-shrink: 0;
+      }
+      .profile-header .info {
+        /* Adjusted from .result-item .info */
+        flex-grow: 1;
+        min-width: 0;
+      }
+      .profile-header .info h3 {
+        /* Adjusted */
+        font-size: 1.125rem; /* Tailwind text-lg */
+        font-weight: 600; /* Tailwind font-semibold */
+        color: #2d3748; /* Tailwind gray-800 */
+        word-break: break-word;
+        margin-bottom: 0.25rem;
+      }
+      .profile-header .info p {
+        /* Adjusted */
+        font-size: 0.875rem; /* Tailwind text-sm */
+        color: #4a5568; /* Tailwind gray-700 */
+        margin-top: 0.1rem;
+        word-break: break-word;
+        line-height: 1.4;
+      }
+      .profile-header .info .nip05 {
+        /* Adjusted */
+        font-weight: 500;
+        color: #3182ce; /* Tailwind blue-600 */
+      }
+      .creator-actions {
+        /* Container for Message/Donate buttons */
+        opacity: 0; /* Hidden by default */
+        transition: opacity 0.3s ease-in-out;
+        padding-top: 0.5rem; /* Space above buttons */
+        display: flex;
+        gap: 0.5rem; /* Space between buttons */
+        width: 100%; /* Take full width of the card for alignment */
+        justify-content: flex-start; /* Align buttons to the start */
+      }
+      .creator-card:hover .creator-actions,
+      .result-item:hover .creator-actions {
+        opacity: 1; /* Show on hover */
+      }
+      .action-button {
+        padding: 0.375rem 0.75rem; /* Tailwind py-1.5 px-3 */
+        font-size: 0.75rem; /* Tailwind text-xs */
+        font-weight: 600; /* Tailwind font-semibold */
+        border-radius: 0.375rem; /* Tailwind rounded-md */
+        color: white;
+        transition: background-color 0.2s;
+        box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      }
+      .view-button {
+        background-color: #a0aec0; /* Tailwind gray-500 */
+      }
+      .view-button:hover {
+        background-color: #718096; /* Tailwind gray-600 */
+      }
+      .message-button {
+        background-color: #4299e1; /* Tailwind blue-500 */
+      }
+      .message-button:hover {
+        background-color: #3182ce; /* Tailwind blue-600 */
+      }
+      .donate-button {
+        background-color: #48bb78; /* Tailwind green-500 */
+      }
+      .donate-button:hover {
+        background-color: #38a169; /* Tailwind green-600 */
+      }
 
-        .status-message {
-            text-align: center;
-            color: #718096; /* Tailwind gray-600 */
-            padding: 1.5rem;
-            font-style: italic;
+      .status-message {
+        text-align: center;
+        color: #718096; /* Tailwind gray-600 */
+        padding: 1.5rem;
+        font-style: italic;
+      }
+      .loader {
+        display: none;
+        margin: 1.5rem auto;
+        border: 4px solid #e2e8f0; /* Tailwind gray-300 */
+        border-top: 4px solid #4299e1; /* Tailwind blue-500 */
+        border-radius: 50%;
+        width: 36px; /* Slightly larger loader */
+        height: 36px;
+        animation: spin 1s linear infinite;
+      }
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
         }
-        .loader {
-            display: none;
-            margin: 1.5rem auto;
-            border: 4px solid #e2e8f0; /* Tailwind gray-300 */
-            border-top: 4px solid #4299e1; /* Tailwind blue-500 */
-            border-radius: 50%;
-            width: 36px; /* Slightly larger loader */
-            height: 36px;
-            animation: spin 1s linear infinite;
+        100% {
+          transform: rotate(360deg);
         }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        .relay-info {
-            font-size: 0.8rem;
-            color: #718096; /* Tailwind gray-600 */
-            text-align: center;
-            margin-top: 1.5rem;
-            padding: 0.75rem;
-            background-color: #edf2f7; /* Tailwind gray-200 */
-            border-radius: 0.5rem; /* Tailwind rounded-lg */
-        }
-        .copy-button {
-            background-color: #edf2f7; /* Tailwind gray-200 */
-            color: #4a5568; /* Tailwind gray-700 */
-            padding: 0.25rem 0.6rem;
-            font-size: 0.75rem;
-            border-radius: 0.375rem; /* Tailwind rounded-md */
-            cursor: pointer;
-            margin-left: 0.5rem;
-            border: 1px solid #cbd5e0; /* Tailwind gray-400 */
-            transition: background-color 0.2s;
-        }
-        .copy-button:hover {
-            background-color: #e2e8f0; /* Tailwind gray-300 */
-        }
-        .section-title {
-            font-size: 1.5rem; /* Tailwind text-2xl */
-            font-weight: 700; /* Tailwind font-bold */
-            color: #2d3748; /* Tailwind gray-800 */
-            margin-bottom: 1.5rem;
-            text-align: center;
-            padding-bottom: 0.5rem;
-            border-bottom: 2px solid #e2e8f0; /* Tailwind gray-300 */
-        }
+      }
+      .relay-info {
+        font-size: 0.8rem;
+        color: #718096; /* Tailwind gray-600 */
+        text-align: center;
+        margin-top: 1.5rem;
+        padding: 0.75rem;
+        background-color: #edf2f7; /* Tailwind gray-200 */
+        border-radius: 0.5rem; /* Tailwind rounded-lg */
+      }
+      .copy-button {
+        background-color: #edf2f7; /* Tailwind gray-200 */
+        color: #4a5568; /* Tailwind gray-700 */
+        padding: 0.25rem 0.6rem;
+        font-size: 0.75rem;
+        border-radius: 0.375rem; /* Tailwind rounded-md */
+        cursor: pointer;
+        margin-left: 0.5rem;
+        border: 1px solid #cbd5e0; /* Tailwind gray-400 */
+        transition: background-color 0.2s;
+      }
+      .copy-button:hover {
+        background-color: #e2e8f0; /* Tailwind gray-300 */
+      }
+      .section-title {
+        font-size: 1.5rem; /* Tailwind text-2xl */
+        font-weight: 700; /* Tailwind font-bold */
+        color: #2d3748; /* Tailwind gray-800 */
+        margin-bottom: 1.5rem;
+        text-align: center;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid #e2e8f0; /* Tailwind gray-300 */
+      }
     </style>
-</head>
-<body class="bg-gray-100">
-
+  </head>
+  <body class="bg-gray-100">
     <div class="container">
-        <!-- Search Section Moved to the Top -->
-        <div class="search-container">
-            <h1 class="section-title">Nostr User Search</h1>
-            <p class="text-sm text-center text-gray-600 mb-6">
-                Search by name, npub, or NIP-05 identifier (e.g., user@domain.com).
-            </p>
-            <input type="text" id="searchInput" class="search-input" placeholder="Search Nostr profiles...">
-            <div id="loader" class="loader"></div>
-            <ul id="resultsList" class="results-list"></ul>
-            <p id="statusMessage" class="status-message hidden"></p>
-        </div>
+      <!-- Search Section Moved to the Top -->
+      <div class="search-container">
+        <h1 class="section-title">Nostr User Search</h1>
+        <p class="text-sm text-center text-gray-600 mb-6">
+          Search by name, npub, or NIP-05 identifier (e.g., user@domain.com).
+        </p>
+        <input
+          type="text"
+          id="searchInput"
+          class="search-input"
+          placeholder="Search Nostr profiles..."
+        />
+        <div id="loader" class="loader"></div>
+        <ul id="resultsList" class="results-list"></ul>
+        <p id="statusMessage" class="status-message hidden"></p>
+      </div>
 
-        <!-- Featured Creators Section -->
-        <div class="featured-creators-container">
-            <h2 class="section-title">Featured Creators</h2>
-            <div id="featuredCreatorsLoader" class="loader" style="display: block;"></div>
-            <div id="featuredCreatorsGrid" class="featured-creators-grid">
-                <!-- Featured creators will be appended here -->
-            </div>
-            <p id="featuredStatusMessage" class="status-message hidden"></p>
+      <!-- Featured Creators Section -->
+      <div class="featured-creators-container">
+        <h2 class="section-title">Featured Creators</h2>
+        <div
+          id="featuredCreatorsLoader"
+          class="loader"
+          style="display: block"
+        ></div>
+        <div id="featuredCreatorsGrid" class="featured-creators-grid">
+          <!-- Featured creators will be appended here -->
         </div>
+        <p id="featuredStatusMessage" class="status-message hidden"></p>
+      </div>
 
-        <div class="relay-info">
-            Connecting to: <span id="relayList"></span>
-            <p>Note: Results depend on relay availability and NIP-50 support. For a comprehensive experience like Primal, a backend indexing service is typically used.</p>
-        </div>
+      <div class="relay-info">
+        Connecting to: <span id="relayList"></span>
+        <p>
+          Note: Results depend on relay availability and NIP-50 support. For a
+          comprehensive experience like Primal, a backend indexing service is
+          typically used.
+        </p>
+      </div>
     </div>
 
     <script>
-        // --- Nostr Tools ---
-        if (!window.NostrTools) {
-            document.getElementById('statusMessage').textContent = 'Error: nostr-tools library not loaded.';
-            document.getElementById('statusMessage').classList.remove('hidden');
-        }
-        const { SimplePool, nip19, utils } = window.NostrTools;
+      // --- Nostr Tools ---
+      if (!window.NostrTools) {
+        document.getElementById("statusMessage").textContent =
+          "Error: nostr-tools library not loaded.";
+        document.getElementById("statusMessage").classList.remove("hidden");
+      }
+      const { SimplePool, nip19, utils } = window.NostrTools;
 
-        // --- Configuration ---
-        const RELAYS = [
-            'wss://relay.damus.io',
-            'wss://relay.primal.net',
-            'wss://nos.lol',
-            'wss://nostr.wine',
-            'wss://purplepag.es',
-            'wss://relay.nostr.band'
-        ];
-        document.getElementById('relayList').textContent = RELAYS.join(', ');
-        
-        const GLOBAL_SEARCH_TIMEOUT_MS = 10000; 
+      // --- Configuration ---
+      const RELAYS = [
+        "wss://relay.damus.io",
+        "wss://relay.primal.net",
+        "wss://nos.lol",
+        "wss://nostr.wine",
+        "wss://purplepag.es",
+        "wss://relay.nostr.band",
+      ];
+      document.getElementById("relayList").textContent = RELAYS.join(", ");
 
-        const pool = new SimplePool({ eoseSubTimeout: 8000 });
-        let currentSearchSub = null;
-        let foundSearchProfiles = new Map();
+      const GLOBAL_SEARCH_TIMEOUT_MS = 10000;
 
-        const FEATURED_NPUBS = [
-            "npub1aljmhjp5tqrw3m60ra7t3u8uqq223d6rdg9q0h76a8djd9m4hmvsmlj82m",
-            "npub1sg6plzptd64u62a878hep2kev88swjh3tw00gjsfl8f237lmu63q0uf63m",
-            "npub1qny3tkh0acurzla8x3zy4nhrjz5zd8l9sy9jys09umwng00manysew95gx",
-            "npub1cj8znuztfqkvq89pl8hceph0svvvqk0qay6nydgk9uyq7fhpfsgsqwrz4u",
-            "npub1a2cww4kn9wqte4ry70vyfwqyqvpswksna27rtxd8vty6c74era8sdcw83a",
-            "npub1s05p3ha7en49dv8429tkk07nnfa9pcwczkf5x5qrdraqshxdje9sq6eyhe",
-            "npub180cvv07tjdrrgpa0j7j7tmnyl2yr6yr7l8j4s3evf6u64th6gkwsyjh6w6",
-            "npub1dergggklka99wwrs92yz8wdjs952h2ux2ha2ed598ngwu9w7a6fsh9xzpc",
-            "npub1s5yq6wadwrxde4lhfs56gn64hwzuhnfa6r9mj476r5s4hkunzgzqrs6q7z",
-            "npub1spdnfacgsd7lk0nlqkq443tkq4jx9z6c6ksvaquuewmw7d3qltpslcq6j7"
-        ];
-        let featuredProfilesData = new Map();
+      const pool = new SimplePool({ eoseSubTimeout: 8000 });
+      let currentSearchSub = null;
+      let foundSearchProfiles = new Map();
 
+      const FEATURED_NPUBS = [
+        "npub1aljmhjp5tqrw3m60ra7t3u8uqq223d6rdg9q0h76a8djd9m4hmvsmlj82m",
+        "npub1sg6plzptd64u62a878hep2kev88swjh3tw00gjsfl8f237lmu63q0uf63m",
+        "npub1qny3tkh0acurzla8x3zy4nhrjz5zd8l9sy9jys09umwng00manysew95gx",
+        "npub1cj8znuztfqkvq89pl8hceph0svvvqk0qay6nydgk9uyq7fhpfsgsqwrz4u",
+        "npub1a2cww4kn9wqte4ry70vyfwqyqvpswksna27rtxd8vty6c74era8sdcw83a",
+        "npub1s05p3ha7en49dv8429tkk07nnfa9pcwczkf5x5qrdraqshxdje9sq6eyhe",
+        "npub180cvv07tjdrrgpa0j7j7tmnyl2yr6yr7l8j4s3evf6u64th6gkwsyjh6w6",
+        "npub1dergggklka99wwrs92yz8wdjs952h2ux2ha2ed598ngwu9w7a6fsh9xzpc",
+        "npub1s5yq6wadwrxde4lhfs56gn64hwzuhnfa6r9mj476r5s4hkunzgzqrs6q7z",
+        "npub1spdnfacgsd7lk0nlqkq443tkq4jx9z6c6ksvaquuewmw7d3qltpslcq6j7",
+      ];
+      let featuredProfilesData = new Map();
 
-        // --- DOM Elements ---
-        const searchInputElement = document.getElementById('searchInput');
-        const resultsListElement = document.getElementById('resultsList');
-        const statusMessageElement = document.getElementById('statusMessage');
-        const loaderElement = document.getElementById('loader');
+      // --- DOM Elements ---
+      const searchInputElement = document.getElementById("searchInput");
+      const resultsListElement = document.getElementById("resultsList");
+      const statusMessageElement = document.getElementById("statusMessage");
+      const loaderElement = document.getElementById("loader");
 
-        const featuredCreatorsGridElement = document.getElementById('featuredCreatorsGrid');
-        const featuredCreatorsLoaderElement = document.getElementById('featuredCreatorsLoader');
-        const featuredStatusMessageElement = document.getElementById('featuredStatusMessage');
+      const featuredCreatorsGridElement = document.getElementById(
+        "featuredCreatorsGrid"
+      );
+      const featuredCreatorsLoaderElement = document.getElementById(
+        "featuredCreatorsLoader"
+      );
+      const featuredStatusMessageElement = document.getElementById(
+        "featuredStatusMessage"
+      );
 
+      // --- Debounce Function ---
+      function debounce(func, delay) {
+        let timeoutId;
+        return function (...args) {
+          clearTimeout(timeoutId);
+          timeoutId = setTimeout(() => {
+            func.apply(this, args);
+          }, delay);
+        };
+      }
 
-        // --- Debounce Function ---
-        function debounce(func, delay) {
-            let timeoutId;
-            return function(...args) {
-                clearTimeout(timeoutId);
-                timeoutId = setTimeout(() => {
-                    func.apply(this, args);
-                }, delay);
-            };
-        }
+      // --- NIP-05 Identifier Regex ---
+      const nip05Regex = /^([a-zA-Z0-9_.-]+)@([a-zA-Z0-9.-]+\.[a-zA-Z]{2,})$/;
 
-        // --- NIP-05 Identifier Regex ---
-        const nip05Regex = /^([a-zA-Z0-9_.-]+)@([a-zA-Z0-9.-]+\.[a-zA-Z]{2,})$/;
+      // --- Main Search Function ---
+      async function handleSearch(query) {
+        const cleanQuery = query.trim();
 
-        // --- Main Search Function ---
-        async function handleSearch(query) {
-            const cleanQuery = query.trim();
-
-            if (currentSearchSub && currentSearchSub.localTimeoutId) {
-                 clearTimeout(currentSearchSub.localTimeoutId);
-            }
-
-            if (currentSearchSub) {
-                currentSearchSub.unsub();
-                currentSearchSub = null;
-            }
-
-            resultsListElement.innerHTML = '';
-            foundSearchProfiles.clear();
-            statusMessageElement.classList.add('hidden');
-            loaderElement.style.display = 'block';
-
-            if (!cleanQuery) {
-                loaderElement.style.display = 'none';
-                return;
-            }
-
-            statusMessageElement.textContent = 'Searching...';
-            statusMessageElement.classList.remove('hidden');
-
-            try {
-                if (cleanQuery.startsWith('npub1')) {
-                    const decoded = nip19.decode(cleanQuery);
-                    if (decoded.type === 'npub' && decoded.data) {
-                        await fetchAndDisplayProfiles([decoded.data], resultsListElement, foundSearchProfiles, loaderElement, statusMessageElement, false);
-                        return;
-                    }
-                }
-            } catch (e) { console.warn('Not an npub:', e.message); }
-
-            if (cleanQuery.length === 64 && /^[0-9a-fA-F]+$/.test(cleanQuery)) {
-                await fetchAndDisplayProfiles([cleanQuery.toLowerCase()], resultsListElement, foundSearchProfiles, loaderElement, statusMessageElement, false);
-                return;
-            }
-
-            const nip05Match = cleanQuery.match(nip05Regex);
-            if (nip05Match) {
-                const localPart = nip05Match[1];
-                const domain = nip05Match[2];
-                statusMessageElement.textContent = `Resolving NIP-05: ${cleanQuery}...`;
-                try {
-                    const url = `https://${domain}/.well-known/nostr.json?name=${encodeURIComponent(localPart)}`;
-                    const response = await fetch(url);
-                    if (!response.ok) throw new Error(`NIP-05 HTTP error! Status: ${response.status}`);
-                    const data = await response.json();
-                    if (data.names && data.names[localPart]) {
-                        await fetchAndDisplayProfiles([data.names[localPart]], resultsListElement, foundSearchProfiles, loaderElement, statusMessageElement, false);
-                    } else {
-                        throw new Error('NIP-05 identifier not found in response.');
-                    }
-                } catch (e) {
-                    console.error('NIP-05 lookup failed:', e);
-                    statusMessageElement.textContent = `NIP-05 lookup for ${cleanQuery} failed: ${e.message}`;
-                    loaderElement.style.display = 'none';
-                }
-                return;
-            }
-
-            statusMessageElement.textContent = `Searching relays for "${cleanQuery}"... (NIP-50)`;
-            const filter = { kinds: [0], search: cleanQuery, limit: 25 };
-            subscribeAndProcess(filter, resultsListElement, foundSearchProfiles, loaderElement, statusMessageElement, false, (sub, timeoutId) => {
-                 currentSearchSub = sub;
-                 if (sub) sub.localTimeoutId = timeoutId; 
-            }, GLOBAL_SEARCH_TIMEOUT_MS);
+        if (currentSearchSub && currentSearchSub.localTimeoutId) {
+          clearTimeout(currentSearchSub.localTimeoutId);
         }
 
-        // --- Generic Profile Fetching and Display Logic ---
-        async function fetchAndDisplayProfiles(pubkeys, targetElement, profileMap, loader, statusMsgEl, isFeatured) {
-            if (pubkeys.length === 0) {
-                if (loader) loader.style.display = 'none';
-                if (statusMsgEl) {
-                    statusMsgEl.textContent = isFeatured ? 'No featured creators to load.' : 'No pubkey provided for search.';
-                    statusMsgEl.classList.remove('hidden');
-                }
-                return;
-            }
-            
-            const filter = { kinds: [0], authors: pubkeys, limit: pubkeys.length };
-            
-            subscribeAndProcess(filter, targetElement, profileMap, loader, statusMsgEl, isFeatured, (sub, timeoutId) => {
-                if (!isFeatured) {
-                    currentSearchSub = sub;
-                    if (sub) sub.localTimeoutId = timeoutId;
-                }
-            }, GLOBAL_SEARCH_TIMEOUT_MS);
-        }
-        
-        function subscribeAndProcess(filter, targetElement, profileMap, loaderEl, statusMsgEl, isFeaturedList, setSubCallback, timeoutDuration) {
-            console.log(`subscribeAndProcess called for ${isFeaturedList ? 'featured' : 'search'}. Timeout duration:`, timeoutDuration); 
-            if (!timeoutDuration || typeof timeoutDuration !== 'number') {
-                console.error("Invalid timeoutDuration provided to subscribeAndProcess:", timeoutDuration);
-                timeoutDuration = GLOBAL_SEARCH_TIMEOUT_MS; 
-            }
-
-            if (loaderEl) loaderEl.style.display = 'block';
-            if (statusMsgEl) {
-                 statusMsgEl.textContent = isFeaturedList ? 'Loading featured creators...' : 'Searching...';
-                 statusMsgEl.classList.remove('hidden');
-            }
-
-            let eoseCount = 0;
-            let activeRelays = new Set();
-            let localSubTimeoutId = null; 
-
-            const sub = pool.sub([...RELAYS], [filter]);
-            
-            const finalize = () => {
-                if (localSubTimeoutId) { 
-                    clearTimeout(localSubTimeoutId);
-                    localSubTimeoutId = null; 
-                }
-                if (sub && typeof sub.unsub === 'function') {
-                    try {
-                        sub.unsub();
-                    } catch (e) {
-                        console.warn("Error during sub.unsub():", e);
-                    }
-                }
-                
-                if (setSubCallback && !isFeaturedList) {
-                     setSubCallback(null, null); 
-                }
-
-                if (loaderEl) loaderEl.style.display = 'none';
-                if (profileMap.size === 0) {
-                    if (statusMsgEl) {
-                        statusMsgEl.textContent = isFeaturedList ? 'Could not load featured creators.' : 'No profiles found.';
-                        statusMsgEl.classList.remove('hidden');
-                    }
-                } else {
-                    if (statusMsgEl) statusMsgEl.classList.add('hidden');
-                }
-                console.log(`${isFeaturedList ? 'Featured creators' : 'Search'} finalized. Found ${profileMap.size} profiles.`);
-            };
-            
-            if (setSubCallback) setSubCallback(sub, localSubTimeoutId);
-
-            sub.on('event', event => {
-              try {
-                if (event.kind === 0) {
-                    const profileData = JSON.parse(event.content);
-                    const existing = profileMap.get(event.pubkey);
-                    if (!existing || event.created_at > existing.event.created_at) {
-                        profileMap.set(event.pubkey, {
-                            pubkey: event.pubkey,
-                            name: profileData.name || profileData.display_name || profileData.username || '',
-                            nip05: profileData.nip05 || '',
-                            picture: profileData.picture || '',
-                            about: profileData.about || '',
-                            lud16: profileData.lud16 || '',
-                            event
-                        });
-                        renderProfiles(Array.from(profileMap.values()), targetElement, isFeaturedList);
-                    }
-                }
-              } catch (e) { console.error('Error in subscription event handler:', e); }
-            });
-
-            sub.on('eose', (relay) => {
-              try {
-                const relayUrl = relay && relay.url ? relay.url : 'unknown relay';
-                if (relay && relay.url) activeRelays.add(relay.url);
-                else console.warn('EOSE received without a valid relay object or relay.url:', relay);
-                
-                eoseCount++;
-                console.log(`EOSE from ${relayUrl} for ${isFeaturedList ? 'featured' : 'search'}. Total EOSEs: ${eoseCount}/${RELAYS.length}`);
-                if (eoseCount >= RELAYS.length) {
-                     console.log(`All ${RELAYS.length} relays have emitted EOSE for ${isFeaturedList ? 'featured' : 'search'}.`);
-                    finalize();
-                }
-              } catch (e) { console.error('Error in subscription EOSE handler:', e); }
-            });
-            
-            localSubTimeoutId = setTimeout(() => { 
-                console.log(`Subscription timeout for ${isFeaturedList ? 'featured creators' : 'search'}.`);
-                finalize();
-            }, timeoutDuration); 
+        if (currentSearchSub) {
+          currentSearchSub.unsub();
+          currentSearchSub = null;
         }
 
+        resultsListElement.innerHTML = "";
+        foundSearchProfiles.clear();
+        statusMessageElement.classList.add("hidden");
+        loaderElement.style.display = "block";
 
-        // --- Render Profiles (Generic for Search and Featured) ---
-        function renderProfiles(profiles, targetElement, isFeatured) {
-            targetElement.innerHTML = ''; 
+        if (!cleanQuery) {
+          loaderElement.style.display = "none";
+          return;
+        }
 
-            if (profiles.length === 0 && (isFeatured || searchInputElement.value.trim() !== '')) {
-                return;
+        statusMessageElement.textContent = "Searching...";
+        statusMessageElement.classList.remove("hidden");
+
+        try {
+          if (cleanQuery.startsWith("npub1")) {
+            const decoded = nip19.decode(cleanQuery);
+            if (decoded.type === "npub" && decoded.data) {
+              await fetchAndDisplayProfiles(
+                [decoded.data],
+                resultsListElement,
+                foundSearchProfiles,
+                loaderElement,
+                statusMessageElement,
+                false
+              );
+              return;
             }
-            
-            profiles.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
-
-            profiles.forEach(profile => {
-                const cardElement = document.createElement(isFeatured ? 'div' : 'li');
-                cardElement.className = `${isFeatured ? 'creator-card' : 'result-item'} group`; // Added 'group' class here
-
-                // Container for avatar and main info
-                const profileHeaderDiv = document.createElement('div');
-                profileHeaderDiv.className = 'profile-header';
-
-
-                const avatarImg = document.createElement('img');
-                avatarImg.className = 'avatar';
-                const avatarLetter = (profile.name || profile.username || 'N')[0]?.toUpperCase();
-                avatarImg.src = profile.picture || `https://placehold.co/50x50/A0AEC0/FFFFFF?text=${avatarLetter}`; 
-                avatarImg.alt = profile.name || 'Nostr User';
-                avatarImg.onerror = function() { this.src = `https://placehold.co/50x50/A0AEC0/FFFFFF?text=${avatarLetter}`; };
-
-                const infoDiv = document.createElement('div');
-                infoDiv.className = 'info';
-
-                const nameElement = document.createElement('h3');
-                nameElement.textContent = profile.name || (profile.nip05 ? (profile.nip05.startsWith('_@') ? profile.nip05.substring(2) : profile.nip05) : 'Unnamed User');
-
-                const npub = nip19.npubEncode(profile.pubkey);
-                const npubShort = `${npub.substring(0, 10)}...${npub.substring(npub.length - 5)}`;
-                const npubElement = document.createElement('p');
-                npubElement.innerHTML = `<strong>Npub:</strong> ${npubShort}`;
-                npubElement.title = npub;
-
-                const copyNpubButton = document.createElement('button');
-                copyNpubButton.textContent = 'Copy';
-                copyNpubButton.className = 'copy-button';
-                copyNpubButton.onclick = (e) => {
-                    e.stopPropagation();
-                    copyToClipboard(npub, copyNpubButton);
-                };
-                npubElement.appendChild(copyNpubButton);
-
-                infoDiv.appendChild(nameElement);
-                infoDiv.appendChild(npubElement);
-
-                if (profile.nip05) {
-                    const nip05Element = document.createElement('p');
-                    nip05Element.innerHTML = `<strong>NIP-05:</strong> <span class="nip05">${profile.nip05}</span>`;
-                    infoDiv.appendChild(nip05Element);
-                }
-                
-                if (profile.about) {
-                    const aboutElement = document.createElement('p');
-                    const aboutText = profile.about.length > (isFeatured ? 80 : 150) ? profile.about.substring(0, (isFeatured ? 80 : 150)) + '...' : profile.about;
-                    aboutElement.innerHTML = `<em>${escapeHtml(aboutText)}</em>`;
-                    aboutElement.title = profile.about;
-                    infoDiv.appendChild(aboutElement);
-                }
-                
-                if (profile.lud16) {
-                    const lud16Element = document.createElement('p');
-                    lud16Element.innerHTML = `<strong>LN:</strong> ${profile.lud16}`;
-                    infoDiv.appendChild(lud16Element);
-                }
-                
-                profileHeaderDiv.appendChild(avatarImg);
-                profileHeaderDiv.appendChild(infoDiv);
-                cardElement.appendChild(profileHeaderDiv);
-
-
-                // Action Buttons Container
-                const actionsContainer = document.createElement('div');
-                actionsContainer.className = 'creator-actions'; // Styles will make it appear on hover
-                
-                const viewButton = document.createElement('button');
-                viewButton.className = 'action-button view-button';
-                viewButton.textContent = 'View';
-                viewButton.onclick = (e) => {
-                    e.stopPropagation();
-                    window.parent.postMessage({ type: 'viewProfile', pubkey: profile.pubkey }, '*');
-                };
-
-                const messageButton = document.createElement('button');
-                messageButton.className = 'action-button message-button';
-                messageButton.textContent = 'Message';
-                messageButton.onclick = (e) => {
-                    e.stopPropagation();
-                    // Navigate the parent application to the messenger view
-                    window.parent.location.href = `/nostr-messenger`;
-                };
-
-                const donateButton = document.createElement('button');
-                donateButton.className = 'action-button donate-button';
-                donateButton.textContent = 'Donate';
-                donateButton.onclick = (e) => {
-                    e.stopPropagation();
-                    window.parent.postMessage({ type: 'donate', pubkey: profile.pubkey }, '*');
-                    console.log('Donate clicked for pubkey:', profile.pubkey);
-                };
-                
-                actionsContainer.appendChild(viewButton); // Add View button first
-                actionsContainer.appendChild(messageButton);
-                actionsContainer.appendChild(donateButton);
-                cardElement.appendChild(actionsContainer); 
-
-                targetElement.appendChild(cardElement);
-            });
-        }
-        
-        function escapeHtml(unsafe) {
-            if (unsafe === null || unsafe === undefined) return '';
-            return unsafe
-                 .replace(/&/g, "&amp;")
-                 .replace(/</g, "&lt;")
-                 .replace(/>/g, "&gt;")
-                 .replace(/"/g, "&quot;")
-                 .replace(/'/g, "&#039;");
+          }
+        } catch (e) {
+          console.warn("Not an npub:", e.message);
         }
 
-        function copyToClipboard(text, buttonElement) {
-            const textArea = document.createElement("textarea");
-            textArea.value = text;
-            document.body.appendChild(textArea);
-            textArea.select();
-            try {
-                document.execCommand('copy');
-                if(buttonElement) {
-                    const originalText = buttonElement.textContent;
-                    buttonElement.textContent = 'Copied!';
-                    setTimeout(() => { buttonElement.textContent = originalText; }, 2000);
-                }
-            } catch (err) {
-                console.error('Failed to copy text: ', err);
-                if(buttonElement) {
-                     const originalText = buttonElement.textContent;
-                    buttonElement.textContent = 'Error!';
-                    setTimeout(() => { buttonElement.textContent = originalText; }, 2000);
-                }
-            }
-            document.body.removeChild(textArea);
+        if (cleanQuery.length === 64 && /^[0-9a-fA-F]+$/.test(cleanQuery)) {
+          await fetchAndDisplayProfiles(
+            [cleanQuery.toLowerCase()],
+            resultsListElement,
+            foundSearchProfiles,
+            loaderElement,
+            statusMessageElement,
+            false
+          );
+          return;
         }
 
-        // --- Load Featured Creators on Page Load ---
-        document.addEventListener('DOMContentLoaded', () => {
-            const featuredPubkeysHex = FEATURED_NPUBS.map(npub => {
-                try {
-                    return nip19.decode(npub).data;
-                } catch (e) {
-                    console.warn(`Invalid featured npub: ${npub}`, e);
-                    return null;
-                }
-            }).filter(hex => hex !== null);
-
-            if (featuredPubkeysHex.length > 0) {
-                fetchAndDisplayProfiles(featuredPubkeysHex, featuredCreatorsGridElement, featuredProfilesData, featuredCreatorsLoaderElement, featuredStatusMessageElement, true);
+        const nip05Match = cleanQuery.match(nip05Regex);
+        if (nip05Match) {
+          const localPart = nip05Match[1];
+          const domain = nip05Match[2];
+          statusMessageElement.textContent = `Resolving NIP-05: ${cleanQuery}...`;
+          try {
+            const url = `https://${domain}/.well-known/nostr.json?name=${encodeURIComponent(
+              localPart
+            )}`;
+            const response = await fetch(url);
+            if (!response.ok)
+              throw new Error(`NIP-05 HTTP error! Status: ${response.status}`);
+            const data = await response.json();
+            if (data.names && data.names[localPart]) {
+              await fetchAndDisplayProfiles(
+                [data.names[localPart]],
+                resultsListElement,
+                foundSearchProfiles,
+                loaderElement,
+                statusMessageElement,
+                false
+              );
             } else {
-                featuredCreatorsLoaderElement.style.display = 'none';
-                featuredStatusMessageElement.textContent = 'No valid featured creators configured.';
-                featuredStatusMessageElement.classList.remove('hidden');
+              throw new Error("NIP-05 identifier not found in response.");
             }
-        });
+          } catch (e) {
+            console.error("NIP-05 lookup failed:", e);
+            statusMessageElement.textContent = `NIP-05 lookup for ${cleanQuery} failed: ${e.message}`;
+            loaderElement.style.display = "none";
+          }
+          return;
+        }
 
-        // --- Event Listener for Search Input ---
-        const debouncedSearchHandler = debounce(handleSearch, 500);
-        searchInputElement.addEventListener('input', (event) => {
-            debouncedSearchHandler(event.target.value);
-        });
+        statusMessageElement.textContent = `Searching relays for "${cleanQuery}"... (NIP-50)`;
+        const filter = { kinds: [0], search: cleanQuery, limit: 25 };
+        subscribeAndProcess(
+          filter,
+          resultsListElement,
+          foundSearchProfiles,
+          loaderElement,
+          statusMessageElement,
+          false,
+          (sub, timeoutId) => {
+            currentSearchSub = sub;
+            if (sub) sub.localTimeoutId = timeoutId;
+          },
+          GLOBAL_SEARCH_TIMEOUT_MS
+        );
+      }
 
-        // Gracefully close connections when the page is about to be unloaded
-        window.addEventListener('beforeunload', () => {
-            if (currentSearchSub) {
-                currentSearchSub.unsub();
+      // --- Generic Profile Fetching and Display Logic ---
+      async function fetchAndDisplayProfiles(
+        pubkeys,
+        targetElement,
+        profileMap,
+        loader,
+        statusMsgEl,
+        isFeatured
+      ) {
+        if (pubkeys.length === 0) {
+          if (loader) loader.style.display = "none";
+          if (statusMsgEl) {
+            statusMsgEl.textContent = isFeatured
+              ? "No featured creators to load."
+              : "No pubkey provided for search.";
+            statusMsgEl.classList.remove("hidden");
+          }
+          return;
+        }
+
+        const filter = { kinds: [0], authors: pubkeys, limit: pubkeys.length };
+
+        subscribeAndProcess(
+          filter,
+          targetElement,
+          profileMap,
+          loader,
+          statusMsgEl,
+          isFeatured,
+          (sub, timeoutId) => {
+            if (!isFeatured) {
+              currentSearchSub = sub;
+              if (sub) sub.localTimeoutId = timeoutId;
             }
-            pool.close([...RELAYS]);
+          },
+          GLOBAL_SEARCH_TIMEOUT_MS
+        );
+      }
+
+      function subscribeAndProcess(
+        filter,
+        targetElement,
+        profileMap,
+        loaderEl,
+        statusMsgEl,
+        isFeaturedList,
+        setSubCallback,
+        timeoutDuration
+      ) {
+        console.log(
+          `subscribeAndProcess called for ${
+            isFeaturedList ? "featured" : "search"
+          }. Timeout duration:`,
+          timeoutDuration
+        );
+        if (!timeoutDuration || typeof timeoutDuration !== "number") {
+          console.error(
+            "Invalid timeoutDuration provided to subscribeAndProcess:",
+            timeoutDuration
+          );
+          timeoutDuration = GLOBAL_SEARCH_TIMEOUT_MS;
+        }
+
+        if (loaderEl) loaderEl.style.display = "block";
+        if (statusMsgEl) {
+          statusMsgEl.textContent = isFeaturedList
+            ? "Loading featured creators..."
+            : "Searching...";
+          statusMsgEl.classList.remove("hidden");
+        }
+
+        let eoseCount = 0;
+        let activeRelays = new Set();
+        let localSubTimeoutId = null;
+
+        const sub = pool.sub([...RELAYS], [filter]);
+
+        const finalize = () => {
+          if (localSubTimeoutId) {
+            clearTimeout(localSubTimeoutId);
+            localSubTimeoutId = null;
+          }
+          if (sub && typeof sub.unsub === "function") {
+            try {
+              sub.unsub();
+            } catch (e) {
+              console.warn("Error during sub.unsub():", e);
+            }
+          }
+
+          if (setSubCallback && !isFeaturedList) {
+            setSubCallback(null, null);
+          }
+
+          if (loaderEl) loaderEl.style.display = "none";
+          if (profileMap.size === 0) {
+            if (statusMsgEl) {
+              statusMsgEl.textContent = isFeaturedList
+                ? "Could not load featured creators."
+                : "No profiles found.";
+              statusMsgEl.classList.remove("hidden");
+            }
+          } else {
+            if (statusMsgEl) statusMsgEl.classList.add("hidden");
+          }
+          console.log(
+            `${
+              isFeaturedList ? "Featured creators" : "Search"
+            } finalized. Found ${profileMap.size} profiles.`
+          );
+        };
+
+        if (setSubCallback) setSubCallback(sub, localSubTimeoutId);
+
+        sub.on("event", (event) => {
+          try {
+            if (event.kind === 0) {
+              const profileData = JSON.parse(event.content);
+              const existing = profileMap.get(event.pubkey);
+              if (!existing || event.created_at > existing.event.created_at) {
+                profileMap.set(event.pubkey, {
+                  pubkey: event.pubkey,
+                  name:
+                    profileData.name ||
+                    profileData.display_name ||
+                    profileData.username ||
+                    "",
+                  nip05: profileData.nip05 || "",
+                  picture: profileData.picture || "",
+                  about: profileData.about || "",
+                  lud16: profileData.lud16 || "",
+                  event,
+                });
+                renderProfiles(
+                  Array.from(profileMap.values()),
+                  targetElement,
+                  isFeaturedList
+                );
+              }
+            }
+          } catch (e) {
+            console.error("Error in subscription event handler:", e);
+          }
         });
 
+        sub.on("eose", (relay) => {
+          try {
+            const relayUrl = relay && relay.url ? relay.url : "unknown relay";
+            if (relay && relay.url) activeRelays.add(relay.url);
+            else
+              console.warn(
+                "EOSE received without a valid relay object or relay.url:",
+                relay
+              );
+
+            eoseCount++;
+            console.log(
+              `EOSE from ${relayUrl} for ${
+                isFeaturedList ? "featured" : "search"
+              }. Total EOSEs: ${eoseCount}/${RELAYS.length}`
+            );
+            if (eoseCount >= RELAYS.length) {
+              console.log(
+                `All ${RELAYS.length} relays have emitted EOSE for ${
+                  isFeaturedList ? "featured" : "search"
+                }.`
+              );
+              finalize();
+            }
+          } catch (e) {
+            console.error("Error in subscription EOSE handler:", e);
+          }
+        });
+
+        localSubTimeoutId = setTimeout(() => {
+          console.log(
+            `Subscription timeout for ${
+              isFeaturedList ? "featured creators" : "search"
+            }.`
+          );
+          finalize();
+        }, timeoutDuration);
+      }
+
+      // --- Render Profiles (Generic for Search and Featured) ---
+      function renderProfiles(profiles, targetElement, isFeatured) {
+        targetElement.innerHTML = "";
+
+        if (
+          profiles.length === 0 &&
+          (isFeatured || searchInputElement.value.trim() !== "")
+        ) {
+          return;
+        }
+
+        profiles.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
+
+        profiles.forEach((profile) => {
+          const cardElement = document.createElement(isFeatured ? "div" : "li");
+          cardElement.className = `${
+            isFeatured ? "creator-card" : "result-item"
+          } group`; // Added 'group' class here
+
+          // Container for avatar and main info
+          const profileHeaderDiv = document.createElement("div");
+          profileHeaderDiv.className = "profile-header";
+
+          const avatarImg = document.createElement("img");
+          avatarImg.className = "avatar";
+          const avatarLetter = (profile.name ||
+            profile.username ||
+            "N")[0]?.toUpperCase();
+          avatarImg.src =
+            profile.picture ||
+            `https://placehold.co/50x50/A0AEC0/FFFFFF?text=${avatarLetter}`;
+          avatarImg.alt = profile.name || "Nostr User";
+          avatarImg.onerror = function () {
+            this.src = `https://placehold.co/50x50/A0AEC0/FFFFFF?text=${avatarLetter}`;
+          };
+
+          const infoDiv = document.createElement("div");
+          infoDiv.className = "info";
+
+          const nameElement = document.createElement("h3");
+          nameElement.textContent =
+            profile.name ||
+            (profile.nip05
+              ? profile.nip05.startsWith("_@")
+                ? profile.nip05.substring(2)
+                : profile.nip05
+              : "Unnamed User");
+
+          const npub = nip19.npubEncode(profile.pubkey);
+          const npubShort = `${npub.substring(0, 10)}...${npub.substring(
+            npub.length - 5
+          )}`;
+          const npubElement = document.createElement("p");
+          npubElement.innerHTML = `<strong>Npub:</strong> ${npubShort}`;
+          npubElement.title = npub;
+
+          const copyNpubButton = document.createElement("button");
+          copyNpubButton.textContent = "Copy";
+          copyNpubButton.className = "copy-button";
+          copyNpubButton.onclick = (e) => {
+            e.stopPropagation();
+            copyToClipboard(npub, copyNpubButton);
+          };
+          npubElement.appendChild(copyNpubButton);
+
+          infoDiv.appendChild(nameElement);
+          infoDiv.appendChild(npubElement);
+
+          if (profile.nip05) {
+            const nip05Element = document.createElement("p");
+            nip05Element.innerHTML = `<strong>NIP-05:</strong> <span class="nip05">${profile.nip05}</span>`;
+            infoDiv.appendChild(nip05Element);
+          }
+
+          if (profile.about) {
+            const aboutElement = document.createElement("p");
+            const aboutText =
+              profile.about.length > (isFeatured ? 80 : 150)
+                ? profile.about.substring(0, isFeatured ? 80 : 150) + "..."
+                : profile.about;
+            aboutElement.innerHTML = `<em>${escapeHtml(aboutText)}</em>`;
+            aboutElement.title = profile.about;
+            infoDiv.appendChild(aboutElement);
+          }
+
+          if (profile.lud16) {
+            const lud16Element = document.createElement("p");
+            lud16Element.innerHTML = `<strong>LN:</strong> ${profile.lud16}`;
+            infoDiv.appendChild(lud16Element);
+          }
+
+          profileHeaderDiv.appendChild(avatarImg);
+          profileHeaderDiv.appendChild(infoDiv);
+          cardElement.appendChild(profileHeaderDiv);
+
+          // Action Buttons Container
+          const actionsContainer = document.createElement("div");
+          actionsContainer.className = "creator-actions"; // Styles will make it appear on hover
+
+          const viewButton = document.createElement("button");
+          viewButton.className = "action-button view-button";
+          viewButton.textContent = "View";
+          viewButton.onclick = (e) => {
+            e.stopPropagation();
+            window.parent.postMessage(
+              { type: "viewProfile", pubkey: profile.pubkey },
+              "*"
+            );
+          };
+
+          const messageButton = document.createElement("button");
+          messageButton.className = "action-button message-button";
+          messageButton.textContent = "Message";
+          messageButton.onclick = (e) => {
+            e.stopPropagation();
+            // Navigate the parent application to the messenger view
+            window.parent.location.href = `/nostr-messenger`;
+          };
+
+          const donateButton = document.createElement("button");
+          donateButton.className = "action-button donate-button";
+          donateButton.textContent = "Donate";
+          donateButton.onclick = (e) => {
+            e.stopPropagation();
+            window.parent.postMessage(
+              { type: "donate", pubkey: profile.pubkey },
+              "*"
+            );
+            console.log("Donate clicked for pubkey:", profile.pubkey);
+          };
+
+          actionsContainer.appendChild(viewButton); // Add View button first
+          actionsContainer.appendChild(messageButton);
+          actionsContainer.appendChild(donateButton);
+          cardElement.appendChild(actionsContainer);
+
+          targetElement.appendChild(cardElement);
+        });
+      }
+
+      function escapeHtml(unsafe) {
+        if (unsafe === null || unsafe === undefined) return "";
+        return unsafe
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#039;");
+      }
+
+      function copyToClipboard(text, buttonElement) {
+        const textArea = document.createElement("textarea");
+        textArea.value = text;
+        document.body.appendChild(textArea);
+        textArea.select();
+        try {
+          document.execCommand("copy");
+          if (buttonElement) {
+            const originalText = buttonElement.textContent;
+            buttonElement.textContent = "Copied!";
+            setTimeout(() => {
+              buttonElement.textContent = originalText;
+            }, 2000);
+          }
+        } catch (err) {
+          console.error("Failed to copy text: ", err);
+          if (buttonElement) {
+            const originalText = buttonElement.textContent;
+            buttonElement.textContent = "Error!";
+            setTimeout(() => {
+              buttonElement.textContent = originalText;
+            }, 2000);
+          }
+        }
+        document.body.removeChild(textArea);
+      }
+
+      // --- Load Featured Creators on Page Load ---
+      document.addEventListener("DOMContentLoaded", () => {
+        const featuredPubkeysHex = FEATURED_NPUBS.map((npub) => {
+          try {
+            return nip19.decode(npub).data;
+          } catch (e) {
+            console.warn(`Invalid featured npub: ${npub}`, e);
+            return null;
+          }
+        }).filter((hex) => hex !== null);
+
+        if (featuredPubkeysHex.length > 0) {
+          fetchAndDisplayProfiles(
+            featuredPubkeysHex,
+            featuredCreatorsGridElement,
+            featuredProfilesData,
+            featuredCreatorsLoaderElement,
+            featuredStatusMessageElement,
+            true
+          );
+        } else {
+          featuredCreatorsLoaderElement.style.display = "none";
+          featuredStatusMessageElement.textContent =
+            "No valid featured creators configured.";
+          featuredStatusMessageElement.classList.remove("hidden");
+        }
+      });
+
+      // --- Event Listener for Search Input ---
+      const debouncedSearchHandler = debounce(handleSearch, 500);
+      searchInputElement.addEventListener("input", (event) => {
+        debouncedSearchHandler(event.target.value);
+      });
+
+      // Gracefully close connections when the page is about to be unloaded
+      window.addEventListener("beforeunload", () => {
+        if (currentSearchSub) {
+          currentSearchSub.unsub();
+        }
+        pool.close([...RELAYS]);
+      });
     </script>
-</body>
+  </body>
 </html>

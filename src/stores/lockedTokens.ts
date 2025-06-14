@@ -21,16 +21,15 @@ export const useLockedTokensStore = defineStore("lockedTokens", {
   getters: {
     tokensByBucket: (state) => (bucketId: string) =>
       state.lockedTokens.filter((t) => t.bucketId === bucketId),
-    validTokensForTier:
-      (state) => (creatorPubkey: string, tierId: string) => {
-        const now = Math.floor(Date.now() / 1000);
-        return state.lockedTokens.filter(
-          (t) =>
-            t.bucketId === tierId &&
-            t.pubkey === creatorPubkey &&
-            (!t.locktime || t.locktime <= now)
-        );
-      },
+    validTokensForTier: (state) => (creatorPubkey: string, tierId: string) => {
+      const now = Math.floor(Date.now() / 1000);
+      return state.lockedTokens.filter(
+        (t) =>
+          t.bucketId === tierId &&
+          t.pubkey === creatorPubkey &&
+          (!t.locktime || t.locktime <= now)
+      );
+    },
   },
   actions: {
     addLockedToken(

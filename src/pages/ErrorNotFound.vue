@@ -1,6 +1,9 @@
 <template>
   <div
-    :class="[$q.dark.isActive ? 'bg-dark text-white' : 'bg-white text-dark', 'fullscreen text-center q-pa-md flex flex-center']"
+    :class="[
+      $q.dark.isActive ? 'bg-dark text-white' : 'bg-white text-dark',
+      'fullscreen text-center q-pa-md flex flex-center',
+    ]"
   >
     <div>
       <div style="font-size: 30vh">{{ $t("ErrorNotFound.title") }}</div>

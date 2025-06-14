@@ -145,7 +145,11 @@ export default defineComponent({
 
     const formatTs = (ts: number) => {
       const d = new Date(ts * 1000);
-      return `${d.getFullYear()}-${("0" + (d.getMonth() + 1)).slice(-2)}-${("0" + d.getDate()).slice(-2)} ${("0" + d.getHours()).slice(-2)}:${("0" + d.getMinutes()).slice(-2)}`;
+      return `${d.getFullYear()}-${("0" + (d.getMonth() + 1)).slice(-2)}-${(
+        "0" + d.getDate()
+      ).slice(-2)} ${("0" + d.getHours()).slice(-2)}:${(
+        "0" + d.getMinutes()
+      ).slice(-2)}`;
     };
 
     const confirmSubscribe = async ({
@@ -167,7 +171,7 @@ export default defineComponent({
           {
             tierName: selectedTier.value?.name,
             benefits: selectedTier.value?.benefits || [],
-            frequency: 'monthly',
+            frequency: "monthly",
           }
         )) as any[];
         let supporterName = nostr.pubkey;

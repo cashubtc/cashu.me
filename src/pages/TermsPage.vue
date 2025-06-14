@@ -1,6 +1,10 @@
 <!-- src/components/WelcomePage.vue -->
 <template>
-  <q-card :class="$q.dark.isActive ? 'bg-dark text-white' : 'bg-white text-dark'" class="q-pa-none" style="height: 100%">
+  <q-card
+    :class="$q.dark.isActive ? 'bg-dark text-white' : 'bg-white text-dark'"
+    class="q-pa-none"
+    style="height: 100%"
+  >
     <WelcomeSlide4 />
   </q-card>
   <q-dialog persistent transition-show="slide-up" transition-hide="fadeOut">

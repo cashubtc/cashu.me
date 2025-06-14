@@ -660,7 +660,11 @@ import { useCameraStore } from "src/stores/camera";
 import { useP2PKStore } from "src/stores/p2pk";
 import { nip19, ProfilePointer } from "nostr-tools";
 import TokenInformation from "components/TokenInformation.vue";
-import { getDecodedToken, getEncodedTokenV4, getEncodedToken } from "@cashu/cashu-ts";
+import {
+  getDecodedToken,
+  getEncodedTokenV4,
+  getEncodedToken,
+} from "@cashu/cashu-ts";
 import { DEFAULT_BUCKET_ID, useBucketsStore } from "src/stores/buckets";
 
 import { mapActions, mapState, mapWritableState } from "pinia";
@@ -1023,10 +1027,7 @@ export default defineComponent({
         this.currentFragmentInterval = this.fragmentIntervalMedium;
         this.fragmentSpeedLabel = "M";
       }
-      debug(
-        "### this.currentFragmentInterval",
-        this.currentFragmentInterval
-      );
+      debug("### this.currentFragmentInterval", this.currentFragmentInterval);
       this.startQrCodeLoop();
     },
     changeSize: function () {
@@ -1053,10 +1054,14 @@ export default defineComponent({
           this.sendData.tokensBase64 = getEncodedTokenV4(decodedToken);
         } catch {
           debug("### Could not encode token to V4");
-          this.sendData.tokensBase64 = getEncodedToken(decodedToken, { version: 3 });
+          this.sendData.tokensBase64 = getEncodedToken(decodedToken, {
+            version: 3,
+          });
         }
       } else {
-        this.sendData.tokensBase64 = getEncodedToken(decodedToken, { version: 3 });
+        this.sendData.tokensBase64 = getEncodedToken(decodedToken, {
+          version: 3,
+        });
       }
     },
     deleteThisToken: function () {
@@ -1233,7 +1238,7 @@ export default defineComponent({
               amount: this.sendData.amount * this.activeUnitCurrencyMultiplyer,
               unlockTime: this.sendData.locktime || null,
               bucketId: this.sendData.bucketId,
-              referenceId: this.sendData.historyToken?.id || '',
+              referenceId: this.sendData.historyToken?.id || "",
             };
             const dmContent = JSON.stringify(payload);
             const { success, event } =
@@ -1383,7 +1388,7 @@ export default defineComponent({
               amount: this.sendData.amount * this.activeUnitCurrencyMultiplyer,
               unlockTime: this.sendData.locktime || null,
               bucketId: this.sendData.bucketId,
-              referenceId: this.sendData.historyToken?.id || '',
+              referenceId: this.sendData.historyToken?.id || "",
             };
             const dmContent2 = JSON.stringify(payload2);
             const { success, event } =

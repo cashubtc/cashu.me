@@ -137,7 +137,11 @@ export const useProofsStore = defineStore("proofs", {
       });
     },
     async removeProofs(proofs: Proof[], bucketId: string = "unassigned") {
-      const walletProofs = this.proofsToWalletProofs(proofs, undefined, bucketId);
+      const walletProofs = this.proofsToWalletProofs(
+        proofs,
+        undefined,
+        bucketId
+      );
       await cashuDb.transaction("rw", cashuDb.proofs, async () => {
         walletProofs.forEach(async (p) => {
           await cashuDb.proofs.delete(p.secret);
@@ -204,7 +208,9 @@ export const useProofsStore = defineStore("proofs", {
     },
     async moveProofs(secrets: string[], bucketId: string) {
       const bucketsStore = useBucketsStore();
-      const bucketExists = bucketsStore.bucketList.find((b) => b.id === bucketId);
+      const bucketExists = bucketsStore.bucketList.find(
+        (b) => b.id === bucketId
+      );
       if (!bucketExists) {
         throw new Error(`Bucket not found: ${bucketId}`);
       }

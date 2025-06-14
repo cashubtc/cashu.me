@@ -42,7 +42,10 @@
         <div class="q-gutter-y-md">
           <q-btn class="full-width custom-btn" @click="showSendTokensDialog">
             <div class="row items-center full-width">
-              <div class="icon-background q-mr-md" :style="{ backgroundColor: iconBgColor }">
+              <div
+                class="icon-background q-mr-md"
+                :style="{ backgroundColor: iconBgColor }"
+              >
                 <CoinsIcon />
               </div>
               <div class="text-left">
@@ -55,7 +58,10 @@
 
           <q-btn class="full-width custom-btn" @click="showParseDialog">
             <div class="row items-center full-width">
-              <div class="icon-background q-mr-md" :style="{ backgroundColor: iconBgColor }">
+              <div
+                class="icon-background q-mr-md"
+                :style="{ backgroundColor: iconBgColor }"
+              >
                 <ZapIcon />
               </div>
               <div class="text-left">
@@ -140,8 +146,8 @@ export default defineComponent({
     },
     iconBgColor: function () {
       return this.$q.dark.isActive
-        ? 'var(--q-color-grey-10)'
-        : 'var(--q-color-grey-2)';
+        ? "var(--q-color-grey-10)"
+        : "var(--q-color-grey-2)";
     },
   },
   methods: {

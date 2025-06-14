@@ -1,9 +1,5 @@
 <template>
-  <q-item
-    clickable
-    class="conversation-item"
-    @click="handleClick"
-  >
+  <q-item clickable class="conversation-item" @click="handleClick">
     <q-item-section avatar>
       <q-avatar size="48px">
         <template v-if="loaded && profile?.picture">
@@ -20,7 +16,10 @@
       <div class="row items-center no-wrap">
         <template v-if="loaded">
           <span
-            :class="['text-subtitle1 ellipsis', { 'text-weight-bold': unreadCount > 0 }]"
+            :class="[
+              'text-subtitle1 ellipsis',
+              { 'text-weight-bold': unreadCount > 0 },
+            ]"
             >{{ showRaw ? props.pubkey : displayName }}</span
           >
           <span class="timestamp text-caption q-ml-auto">{{ timeAgo }}</span>
@@ -38,7 +37,12 @@
           <q-skeleton type="text" width="60%" />
         </template>
       </div>
-      <div :class="['text-caption ellipsis', { 'text-weight-bold': unreadCount > 0 }]">
+      <div
+        :class="[
+          'text-caption ellipsis',
+          { 'text-weight-bold': unreadCount > 0 },
+        ]"
+      >
         <template v-if="loaded">{{ snippet }}</template>
         <template v-else><q-skeleton type="text" width="80%" /></template>
       </div>
@@ -50,21 +54,21 @@
   </q-item>
 </template>
 
-<script lang="ts"> 
-import { defineComponent, computed, ref } from 'vue';
-import { QBadge } from 'quasar';
-import { useMessengerStore } from 'src/stores/messenger';
-import { useNostrStore } from 'src/stores/nostr';
-import { formatDistanceToNow } from 'date-fns';
+<script lang="ts">
+import { defineComponent, computed, ref } from "vue";
+import { QBadge } from "quasar";
+import { useMessengerStore } from "src/stores/messenger";
+import { useNostrStore } from "src/stores/nostr";
+import { formatDistanceToNow } from "date-fns";
 
 export default defineComponent({
-  name: 'ConversationListItem',
+  name: "ConversationListItem",
   components: { QBadge },
   props: {
     pubkey: { type: String, required: true },
     lastMsg: { type: Object as () => any, default: () => ({}) },
   },
-  emits: ['click'],
+  emits: ["click"],
   setup(props, { emit }) {
     const messenger = useMessengerStore();
     const nostr = useNostrStore();
@@ -90,7 +94,7 @@ export default defineComponent({
       const name = displayName.value;
       const words = name.split(/\s+/).filter(Boolean);
       const letters = words.slice(0, 2).map((w) => w[0]);
-      return letters.join('').toUpperCase();
+      return letters.join("").toUpperCase();
     });
 
     // consider profile fetched once the key exists, even if it has no fields
@@ -98,13 +102,13 @@ export default defineComponent({
 
     const timeAgo = computed(() => {
       const ts = props.lastMsg?.created_at;
-      if (!ts) return '';
+      if (!ts) return "";
       return formatDistanceToNow(ts * 1000, { addSuffix: true });
     });
 
-    const snippet = computed(() => props.lastMsg?.content?.slice(0, 30) || '');
+    const snippet = computed(() => props.lastMsg?.content?.slice(0, 30) || "");
 
-    const handleClick = () => emit('click', props.pubkey);
+    const handleClick = () => emit("click", props.pubkey);
 
     return {
       profile,
@@ -118,7 +122,7 @@ export default defineComponent({
       showRaw,
       props,
     };
-  }
+  },
 });
 </script>
 
@@ -145,4 +149,3 @@ export default defineComponent({
   white-space: nowrap;
 }
 </style>
-

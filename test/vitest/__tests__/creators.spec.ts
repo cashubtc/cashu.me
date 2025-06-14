@@ -1,5 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { useCreatorsStore, FEATURED_CREATORS } from "../../../src/stores/creators";
+import {
+  useCreatorsStore,
+  FEATURED_CREATORS,
+} from "../../../src/stores/creators";
 
 const fetchProfile = vi.fn();
 const userProfile = { name: "Alice" };

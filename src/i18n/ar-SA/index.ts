@@ -833,12 +833,12 @@ export default {
       p2pk_pubkey: {
         label: "المفتاح العام للمستلم",
         label_invalid: "المفتاح العام للمستلم",
-locktime: {
-        label: "Unlock time",
-      },
-      refund_pubkey: {
-        label: "Refund public key",
-      },
+        locktime: {
+          label: "Unlock time",
+        },
+        refund_pubkey: {
+          label: "Refund public key",
+        },
       },
     },
     actions: {
@@ -928,9 +928,9 @@ locktime: {
     },
     errors: {
       invalid_token: {
-timelock: {
-      unlock_date_label: "Unlocks { value }",
-    },
+        timelock: {
+          unlock_date_label: "Unlocks { value }",
+        },
         label: "رمز غير صالح",
       },
     },
@@ -1279,7 +1279,8 @@ timelock: {
   },
   BucketManager: {
     tooltips: {
-      description: "\u062A\u064F\u0633\u062A\u062E\u062F\u0645 \u0627\u0644\u062D\u0627\u0648\u064A\u0627\u062A \u0644\u062A\u0635\u0646\u064A\u0641 \u0627\u0644\u062A\u0648\u0643\u0646\u0627\u062A",
+      description:
+        "\u062A\u064F\u0633\u062A\u062E\u062F\u0645 \u0627\u0644\u062D\u0627\u0648\u064A\u0627\u062A \u0644\u062A\u0635\u0646\u064A\u0641 \u0627\u0644\u062A\u0648\u0643\u0646\u0627\u062A",
     },
   },
   BucketDetail: {

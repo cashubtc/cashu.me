@@ -27,7 +27,10 @@
           @click="copyText(npub)"
         />
       </div>
-      <div v-if="seedSignerPrivateKeyNsecComputed" class="row items-center q-gutter-x-sm q-mt-xs">
+      <div
+        v-if="seedSignerPrivateKeyNsecComputed"
+        class="row items-center q-gutter-x-sm q-mt-xs"
+      >
         <div><strong>nsec:</strong> {{ seedSignerPrivateKeyNsecComputed }}</div>
         <q-btn
           flat
@@ -36,7 +39,10 @@
           @click="copyText(seedSignerPrivateKeyNsecComputed)"
         />
       </div>
-      <div v-if="privateKeySignerPrivateKey" class="row items-center q-gutter-x-sm q-mt-xs">
+      <div
+        v-if="privateKeySignerPrivateKey"
+        class="row items-center q-gutter-x-sm q-mt-xs"
+      >
         <div><strong>hex:</strong> {{ privateKeySignerPrivateKey }}</div>
         <q-btn
           flat
@@ -62,7 +68,10 @@
             ({{ formatFiat(tier.price) }})
           </span>
         </div>
-        <div class="text-caption" v-html="renderMarkdown(tier.description)"></div>
+        <div
+          class="text-caption"
+          v-html="renderMarkdown(tier.description)"
+        ></div>
         <q-btn
           color="primary"
           dense
@@ -136,7 +145,7 @@ export default defineComponent({
         try {
           await useNostrStore().sendNip04DirectMessage(
             npub.value,
-            tier.welcomeMessage,
+            tier.welcomeMessage
           );
         } catch (e) {
           console.error(e);

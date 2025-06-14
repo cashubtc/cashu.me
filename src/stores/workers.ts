@@ -67,24 +67,25 @@ export const useWorkersStore = defineStore("workers", {
       const nostr = useNostrStore();
 
       let method = signerStore.method;
-      if (method === 'nip07') {
+      if (method === "nip07") {
         await nostr.initNip07Signer();
-      } else if (method === 'nip46') {
+      } else if (method === "nip46") {
         await nostr.initNip46Signer();
       } else if (!method) {
         await nostr.initSignerIfNotSet();
-        if (nostr.signerType === SignerType.NIP07) method = 'nip07';
-        else if (nostr.signerType === SignerType.NIP46) method = 'nip46';
+        if (nostr.signerType === SignerType.NIP07) method = "nip07";
+        else if (nostr.signerType === SignerType.NIP46) method = "nip46";
       }
 
       let signSchnorr: ((h: string) => Promise<string>) | undefined;
-      if (method === 'local' && signerStore.nsec) {
+      if (method === "local" && signerStore.nsec) {
         const key = nip19.decode(signerStore.nsec).data as Uint8Array;
         signSchnorr = async (h: string) => schnorr.sign(h, key);
-      } else if (method === 'nip07') {
+      } else if (method === "nip07") {
         signSchnorr =
-          (window as any)?.nostr?.signSchnorr || (nostr.signer as any)?.signSchnorr;
-      } else if (method === 'nip46') {
+          (window as any)?.nostr?.signSchnorr ||
+          (nostr.signer as any)?.signSchnorr;
+      } else if (method === "nip46") {
         signSchnorr = (nostr.signer as any)?.signSchnorr;
       }
 
@@ -94,7 +95,7 @@ export const useWorkersStore = defineStore("workers", {
 
       return Promise.all(
         proofs.map(async (p) => {
-          if (typeof p.secret === 'string' && p.secret.startsWith('["P2PK"')) {
+          if (typeof p.secret === "string" && p.secret.startsWith('["P2PK"')) {
             const h = sha256(new TextEncoder().encode(p.secret));
             const sig = await signSchnorr(bytesToHex(h));
             return { ...p, witness: { signatures: [sig] } } as Proof;

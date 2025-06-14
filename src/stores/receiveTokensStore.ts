@@ -66,7 +66,7 @@ export const useReceiveTokensStore = defineStore("receiveTokensStore", {
     },
     receiveToken: async function (
       encodedToken: string,
-      bucketId: string = DEFAULT_BUCKET_ID,
+      bucketId: string = DEFAULT_BUCKET_ID
     ) {
       const mintStore = useMintsStore();
       const walletStore = useWalletStore();
@@ -81,7 +81,7 @@ export const useReceiveTokensStore = defineStore("receiveTokensStore", {
       // get the private key for the token we want to receive if it is locked with P2PK
       receiveStore.receiveData.p2pkPrivateKey =
         useP2PKStore().getPrivateKeyForP2PKEncodedToken(
-          receiveStore.receiveData.tokensBase64,
+          receiveStore.receiveData.tokensBase64
         );
 
       const tokenJson = this.decodeToken(receiveStore.receiveData.tokensBase64);
@@ -104,7 +104,7 @@ export const useReceiveTokensStore = defineStore("receiveTokensStore", {
         if (decodedToken) {
           await this.receiveToken(
             this.receiveData.tokensBase64,
-            this.receiveData.bucketId,
+            this.receiveData.bucketId
           );
           return true;
         }
@@ -183,7 +183,7 @@ export const useReceiveTokensStore = defineStore("receiveTokensStore", {
                         const text = new TextDecoder().decode(record.data);
                         if (!text.startsWith("cashu")) {
                           throw new Error(
-                            "text does not contain a cashu token",
+                            "text does not contain a cashu token"
                           );
                         }
                         tokenStr = text;
@@ -204,12 +204,12 @@ export const useReceiveTokensStore = defineStore("receiveTokensStore", {
                         const prefix = String.fromCharCode(...data.slice(0, 4));
                         if (prefix !== "craw") {
                           throw new Error(
-                            "binary data does not contain a cashu token",
+                            "binary data does not contain a cashu token"
                           );
                         }
                         // TODO: decode the binary token from data
                         throw new Error(
-                          "binary token parsing not implemented yet",
+                          "binary token parsing not implemented yet"
                         );
                         break;
                       default:
@@ -230,7 +230,7 @@ export const useReceiveTokensStore = defineStore("receiveTokensStore", {
                   }
                   this.controller.abort();
                   this.scanningCard = false;
-                },
+                }
               );
               this.scanningCard = true;
             })

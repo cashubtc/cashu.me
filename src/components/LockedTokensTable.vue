@@ -12,7 +12,9 @@
           <q-item-label class="text-weight-bold">
             {{ formatCurrency(token.amount, activeUnit) }}
           </q-item-label>
-          <q-item-label caption>{{ token.label || 'Locked tokens' }}</q-item-label>
+          <q-item-label caption>{{
+            token.label || "Locked tokens"
+          }}</q-item-label>
           <q-item-label caption>
             {{
               $t("LockedTokensTable.row.receiver_label", {
@@ -117,7 +119,11 @@ export default defineComponent({
     },
     formatTs(ts) {
       const d = new Date(ts * 1000);
-      return `${d.getFullYear()}-${("0" + (d.getMonth() + 1)).slice(-2)}-${("0" + d.getDate()).slice(-2)} ${("0" + d.getHours()).slice(-2)}:${("0" + d.getMinutes()).slice(-2)}`;
+      return `${d.getFullYear()}-${("0" + (d.getMonth() + 1)).slice(-2)}-${(
+        "0" + d.getDate()
+      ).slice(-2)} ${("0" + d.getHours()).slice(-2)}:${(
+        "0" + d.getMinutes()
+      ).slice(-2)}`;
     },
     pubkeyNpub(hex) {
       try {

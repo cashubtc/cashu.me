@@ -12,11 +12,11 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, computed } from 'vue';
-import { useLockedTokensStore } from 'stores/lockedTokens';
+import { defineComponent, computed } from "vue";
+import { useLockedTokensStore } from "stores/lockedTokens";
 
 export default defineComponent({
-  name: 'PaywalledContent',
+  name: "PaywalledContent",
   props: {
     creatorNpub: { type: String, required: true },
     tierId: { type: String, required: true },

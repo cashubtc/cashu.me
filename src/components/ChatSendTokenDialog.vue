@@ -23,29 +23,25 @@
           dense
           class="q-mt-md"
         />
-        <q-input
-          v-model="memo"
-          label="Memo"
-          outlined
-          dense
-          class="q-mt-md"
-        />
+        <q-input v-model="memo" label="Memo" outlined dense class="q-mt-md" />
       </q-card-section>
       <q-card-actions align="right">
         <q-btn flat color="primary" @click="cancel">Cancel</q-btn>
-        <q-btn flat color="primary" :disable="!amount" @click="confirm">Send</q-btn>
+        <q-btn flat color="primary" :disable="!amount" @click="confirm"
+          >Send</q-btn
+        >
       </q-card-actions>
     </q-card>
   </q-dialog>
 </template>
 
 <script lang="ts" setup>
-import { ref, computed } from 'vue';
-import { storeToRefs } from 'pinia';
-import { useBucketsStore } from 'src/stores/buckets';
-import { useMessengerStore } from 'src/stores/messenger';
-import { useMintsStore } from 'src/stores/mints';
-import { useUiStore } from 'src/stores/ui';
+import { ref, computed } from "vue";
+import { storeToRefs } from "pinia";
+import { useBucketsStore } from "src/stores/buckets";
+import { useMessengerStore } from "src/stores/messenger";
+import { useMintsStore } from "src/stores/mints";
+import { useUiStore } from "src/stores/ui";
 
 const props = defineProps<{ recipient: string }>();
 
@@ -59,14 +55,14 @@ const { activeUnit } = storeToRefs(mintsStore);
 
 const show = ref(false);
 const amount = ref<number | null>(null);
-const memo = ref('');
-const bucketId = ref('');
+const memo = ref("");
+const bucketId = ref("");
 
 const bucketOptions = computed(() =>
   bucketList.value.map((b) => ({
     label: `${b.name} (${uiStore.formatCurrency(
       bucketBalances.value[b.id] ?? 0,
-      activeUnit.value,
+      activeUnit.value
     )})`,
     value: b.id,
   }))
@@ -82,8 +78,8 @@ const formattedTotalBalance = computed(() =>
 
 function reset() {
   amount.value = null;
-  memo.value = '';
-  bucketId.value = bucketList.value[0]?.id || '';
+  memo.value = "";
+  bucketId.value = bucketList.value[0]?.id || "";
 }
 
 function showDialog() {
@@ -115,4 +111,3 @@ async function confirm() {
   hideDialog();
 }
 </script>
-

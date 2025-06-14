@@ -138,60 +138,45 @@
               :showMintCheck="true"
               :showP2PKCheck="true"
             />
-            <q-chip
-              v-if="unlockDate"
-              outline
-              icon="timer"
-              class="q-ml-sm"
-            >
+            <q-chip v-if="unlockDate" outline icon="timer" class="q-ml-sm">
               {{
-                $t('ReceiveTokenDialog.timelock.unlock_date_label', {
+                $t("ReceiveTokenDialog.timelock.unlock_date_label", {
                   value: unlockDate,
                 })
               }}
             </q-chip>
-            <q-chip
-              v-if="receiverPubkey"
-              outline
-              icon="person"
-              class="q-ml-sm"
-            >
+            <q-chip v-if="receiverPubkey" outline icon="person" class="q-ml-sm">
               {{
-                $t('LockedTokensTable.row.receiver_label', {
+                $t("LockedTokensTable.row.receiver_label", {
                   value: shortenString(pubkeyNpub(receiverPubkey), 15, 6),
                 })
               }}
             </q-chip>
-            <q-chip
-              v-if="refundPubkey"
-              outline
-              icon="undo"
-              class="q-ml-sm"
-            >
+            <q-chip v-if="refundPubkey" outline icon="undo" class="q-ml-sm">
               {{
-                $t('LockedTokensTable.row.refund_label', {
+                $t("LockedTokensTable.row.refund_label", {
                   value: shortenString(pubkeyNpub(refundPubkey), 15, 6),
                 })
               }}
             </q-chip>
           </div>
           <div class="row q-pt-sm">
-              <q-select
-                v-model="receiveData.bucketId"
-                :options="bucketOptions"
-                emit-value
-                map-options
-                outlined
-                dense
-                :label="$t('ReceiveTokenDialog.inputs.bucket.label')"
-              />
-          <q-input
-            v-model="receiveData.label"
-            outlined
-            dense
-            class="q-mt-sm"
-            :label="$t('ReceiveTokenDialog.inputs.label.label')"
-          />
+            <q-select
+              v-model="receiveData.bucketId"
+              :options="bucketOptions"
+              emit-value
+              map-options
+              outlined
+              dense
+              :label="$t('ReceiveTokenDialog.inputs.bucket.label')"
+            />
+            <q-input
+              v-model="receiveData.label"
+              outlined
+              dense
+              class="q-mt-sm"
+              :label="$t('ReceiveTokenDialog.inputs.label.label')"
+            />
           </div>
           <div class="row q-pt-md" v-if="!swapSelected">
             <q-btn

@@ -829,12 +829,12 @@ export default {
       p2pk_pubkey: {
         label: "คีย์สาธารณะของผู้รับ",
         label_invalid: "คีย์สาธารณะของผู้รับ",
-locktime: {
-        label: "Unlock time",
-      },
-      refund_pubkey: {
-        label: "Refund public key",
-      },
+        locktime: {
+          label: "Unlock time",
+        },
+        refund_pubkey: {
+          label: "Refund public key",
+        },
       },
     },
     actions: {
@@ -924,9 +924,9 @@ locktime: {
     },
     errors: {
       invalid_token: {
-timelock: {
-      unlock_date_label: "Unlocks { value }",
-    },
+        timelock: {
+          unlock_date_label: "Unlocks { value }",
+        },
         label: "โทเค็นไม่ถูกต้อง",
       },
     },
@@ -1269,7 +1269,8 @@ timelock: {
   },
   BucketManager: {
     tooltips: {
-      description: "\u0e1a\u0e31\u0e04\u0e40\u0e01\u0e47\u0e15\u0e43\u0e0a\u0e49\u0e2a\u0e33\u0e2b\u0e23\u0e31\u0e1a\u0e01\u0e32\u0e23\u0e08\u0e31\u0e14\u0e2b\u0e21\u0e27\u0e14\u0e42\u0e17\u0e40\u0e04\u0e19",
+      description:
+        "\u0e1a\u0e31\u0e04\u0e40\u0e01\u0e47\u0e15\u0e43\u0e0a\u0e49\u0e2a\u0e33\u0e2b\u0e23\u0e31\u0e1a\u0e01\u0e32\u0e23\u0e08\u0e31\u0e14\u0e2b\u0e21\u0e27\u0e14\u0e42\u0e17\u0e40\u0e04\u0e19",
     },
   },
   BucketDetail: {

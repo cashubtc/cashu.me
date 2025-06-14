@@ -833,12 +833,12 @@ export default {
       p2pk_pubkey: {
         label: "Alıcının genel anahtarı",
         label_invalid: "Alıcının genel anahtarı",
-locktime: {
-        label: "Unlock time",
-      },
-      refund_pubkey: {
-        label: "Refund public key",
-      },
+        locktime: {
+          label: "Unlock time",
+        },
+        refund_pubkey: {
+          label: "Refund public key",
+        },
       },
     },
     actions: {
@@ -929,9 +929,9 @@ locktime: {
     },
     errors: {
       invalid_token: {
-timelock: {
-      unlock_date_label: "Unlocks { value }",
-    },
+        timelock: {
+          unlock_date_label: "Unlocks { value }",
+        },
         label: "Geçersiz token",
       },
     },
@@ -1274,7 +1274,8 @@ timelock: {
   },
   BucketManager: {
     tooltips: {
-      description: "Bucket'lar tokenleri kategorize etmek i\u00e7in kullan\u0131l\u0131r",
+      description:
+        "Bucket'lar tokenleri kategorize etmek i\u00e7in kullan\u0131l\u0131r",
     },
   },
   BucketDetail: {

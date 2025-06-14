@@ -124,7 +124,11 @@ function bech32ToHex(pubkey: string): string {
 
 function formatTs(ts: number): string {
   const d = new Date(ts * 1000);
-  return `${d.getFullYear()}-${("0" + (d.getMonth() + 1)).slice(-2)}-${("0" + d.getDate()).slice(-2)} ${("0" + d.getHours()).slice(-2)}:${("0" + d.getMinutes()).slice(-2)}`;
+  return `${d.getFullYear()}-${("0" + (d.getMonth() + 1)).slice(-2)}-${(
+    "0" + d.getDate()
+  ).slice(-2)} ${("0" + d.getHours()).slice(-2)}:${("0" + d.getMinutes()).slice(
+    -2
+  )}`;
 }
 
 async function onMessage(ev: MessageEvent) {
@@ -172,7 +176,7 @@ async function confirmSubscribe({
       {
         tierName: selectedTier.value?.name,
         benefits: selectedTier.value?.benefits || [],
-        frequency: 'monthly',
+        frequency: "monthly",
       }
     )) as any[];
     let supporterName = nostr.pubkey;

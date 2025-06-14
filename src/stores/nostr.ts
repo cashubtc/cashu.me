@@ -241,7 +241,9 @@ export const useNostrStore = defineStore("nostr", {
         if (privKey && privKey.length) {
           const p2pkStore = useP2PKStore();
           // ensureCompressed() so P2PK keys are always in SEC form
-          const pk66 = ensureCompressed("02" + getPublicKey(hexToBytes(privKey)));
+          const pk66 = ensureCompressed(
+            "02" + getPublicKey(hexToBytes(privKey))
+          );
           if (!p2pkStore.haveThisKey(pk66)) {
             const keyPair = {
               publicKey: pk66,
@@ -509,7 +511,8 @@ export const useNostrStore = defineStore("nostr", {
     ): Promise<string> {
       if (
         (!privKey || privKey.length === 0) &&
-        (this.signerType === SignerType.NIP07 || this.signerType === SignerType.NIP46) &&
+        (this.signerType === SignerType.NIP07 ||
+          this.signerType === SignerType.NIP46) &&
         (window as any)?.nostr?.nip04?.encrypt
       ) {
         return await (window as any).nostr.nip04.encrypt(recipient, message);
@@ -526,7 +529,8 @@ export const useNostrStore = defineStore("nostr", {
     ): Promise<string> {
       if (
         (!privKey || privKey.length === 0) &&
-        (this.signerType === SignerType.NIP07 || this.signerType === SignerType.NIP46) &&
+        (this.signerType === SignerType.NIP07 ||
+          this.signerType === SignerType.NIP46) &&
         (window as any)?.nostr?.nip04?.decrypt
       ) {
         return await (window as any).nostr.nip04.decrypt(sender, content);
@@ -557,10 +561,7 @@ export const useNostrStore = defineStore("nostr", {
       }
       const signer = privKey ? new NDKPrivateKeySigner(privKey) : this.signer;
       const senderPubkey =
-        pubKey ||
-        (privKey
-          ? getPublicKey(hexToBytes(privKey))
-          : this.pubkey);
+        pubKey || (privKey ? getPublicKey(hexToBytes(privKey)) : this.pubkey);
       const ndk = new NDK({ signer });
       const event = new NDKEvent(ndk);
       event.kind = NDKKind.EncryptedDirectMessage;
@@ -802,10 +803,7 @@ export const useNostrStore = defineStore("nostr", {
             const sealEvent = JSON.parse(wappedContent) as NostrEvent;
             const dmEventString = nip44.v2.decrypt(
               sealEvent.content,
-              nip44.v2.utils.getConversationKey(
-                privKey || "",
-                sealEvent.pubkey
-              )
+              nip44.v2.utils.getConversationKey(privKey || "", sealEvent.pubkey)
             );
             dmEvent = JSON.parse(dmEventString) as NDKEvent;
             content = dmEvent.content;
@@ -889,9 +887,7 @@ export const useNostrStore = defineStore("nostr", {
             try {
               const decoded = token.decode(payload.token);
               amount = decoded
-                ? token
-                    .getProofs(decoded)
-                    .reduce((s, p) => (s += p.amount), 0)
+                ? token.getProofs(decoded).reduce((s, p) => (s += p.amount), 0)
                 : 0;
             } catch {}
           }
@@ -908,7 +904,8 @@ export const useNostrStore = defineStore("nostr", {
             unlockTs: payload.unlockTime || 0,
             refundUnlockTs: 0,
             status:
-              payload.unlockTime && payload.unlockTime > Math.floor(Date.now() / 1000)
+              payload.unlockTime &&
+              payload.unlockTime > Math.floor(Date.now() / 1000)
                 ? "pending"
                 : "unlockable",
             subscriptionEventId: null,

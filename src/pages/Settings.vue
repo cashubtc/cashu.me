@@ -1,6 +1,9 @@
 <template>
   <div
-    :class="[$q.dark.isActive ? 'bg-dark text-white' : 'bg-white text-dark', 'text-center q-pa-md flex flex-center']"
+    :class="[
+      $q.dark.isActive ? 'bg-dark text-white' : 'bg-white text-dark',
+      'text-center q-pa-md flex flex-center',
+    ]"
   >
     <SettingsView />
   </div>

@@ -199,9 +199,7 @@
           <div class="divider-line"></div>
         </div>
 
-        <div
-          class="add-mint-description q-mb-lg text-left text-grey-6"
-        >
+        <div class="add-mint-description q-mb-lg text-left text-grey-6">
           {{ $t("MintSettings.add.description") }}
         </div>
 

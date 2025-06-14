@@ -92,12 +92,14 @@ export const useBucketsStore = defineStore("buckets", {
     bucketList(state): Bucket[] {
       return state.buckets;
     },
-    bucketBalance: () => (bucketId: string): number => {
-      const proofsStore = useProofsStore();
-      return proofsStore.proofs
-        .filter((p) => p.bucketId === bucketId && !p.reserved)
-        .reduce((sum, p) => sum + p.amount, 0);
-    },
+    bucketBalance:
+      () =>
+      (bucketId: string): number => {
+        const proofsStore = useProofsStore();
+        return proofsStore.proofs
+          .filter((p) => p.bucketId === bucketId && !p.reserved)
+          .reduce((sum, p) => sum + p.amount, 0);
+      },
     bucketBalances(): Record<string, number> {
       const proofsStore = useProofsStore();
       const balances: Record<string, number> = {};
@@ -108,12 +110,14 @@ export const useBucketsStore = defineStore("buckets", {
       });
       return balances;
     },
-    lockedBucketBalance: () => (bucketId: string): number => {
-      const ltStore = useLockedTokensStore();
-      return ltStore.lockedTokens
-        .filter((t) => t.bucketId === bucketId)
-        .reduce((sum, t) => sum + t.amount, 0);
-    },
+    lockedBucketBalance:
+      () =>
+      (bucketId: string): number => {
+        const ltStore = useLockedTokensStore();
+        return ltStore.lockedTokens
+          .filter((t) => t.bucketId === bucketId)
+          .reduce((sum, t) => sum + t.amount, 0);
+      },
     lockedBucketBalances(): Record<string, number> {
       const ltStore = useLockedTokensStore();
       const balances: Record<string, number> = {};
@@ -124,7 +128,8 @@ export const useBucketsStore = defineStore("buckets", {
       });
       return balances;
     },
-    autoBucketFor: (state) =>
+    autoBucketFor:
+      (state) =>
       (mint?: string, memo?: string): string | undefined => {
         return state.autoAssignRules.find((r) => {
           const mintMatch = r.mint ? r.mint === mint : true;

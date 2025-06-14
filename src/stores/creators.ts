@@ -146,7 +146,7 @@ export const useCreatorsStore = defineStore("creators", {
               console.error(e);
               return null;
             }
-          }),
+          })
         );
 
         results.forEach((res) => {
@@ -169,13 +169,19 @@ export const useCreatorsStore = defineStore("creators", {
           price_sats: t.price_sats ?? t.price ?? 0,
         }));
       }
-      const filter = { authors: [creatorNpub], kinds: [30000], '#d': ['tiers'] };
+      const filter = {
+        authors: [creatorNpub],
+        kinds: [30000],
+        "#d": ["tiers"],
+      };
       subscribeToNostr(filter, async (event) => {
         try {
-          const tiersArray: Tier[] = JSON.parse(event.content).map((t: any) => ({
-            ...t,
-            price_sats: t.price_sats ?? t.price ?? 0,
-          }));
+          const tiersArray: Tier[] = JSON.parse(event.content).map(
+            (t: any) => ({
+              ...t,
+              price_sats: t.price_sats ?? t.price ?? 0,
+            })
+          );
           this.tiersMap[creatorNpub] = tiersArray;
           await db.creatorsTierDefinitions.put({
             creatorNpub,
@@ -184,7 +190,7 @@ export const useCreatorsStore = defineStore("creators", {
             updatedAt: event.created_at,
           });
         } catch (e) {
-          console.error('Error parsing tier definitions JSON:', e);
+          console.error("Error parsing tier definitions JSON:", e);
         }
       });
     },
@@ -198,7 +204,7 @@ export const useCreatorsStore = defineStore("creators", {
         pubkey: creatorNpub,
         created_at,
         kind: 30000,
-        tags: [['d', 'tiers']],
+        tags: [["d", "tiers"]],
         content,
       };
       event.id = getEventHash(event as any);

@@ -59,10 +59,7 @@ export const useMessengerStore = defineStore("messenger", {
       await this.loadIdentity();
       const nostr = useNostrStore();
       let privKey: string | undefined = undefined;
-      if (
-        nostr.signerType !== "NIP07" &&
-        nostr.signerType !== "NIP46"
-      ) {
+      if (nostr.signerType !== "NIP07" && nostr.signerType !== "NIP46") {
         privKey = nostr.privKeyHex;
         if (!privKey) return { success: false, event: null } as any;
       }
@@ -81,7 +78,7 @@ export const useMessengerStore = defineStore("messenger", {
       recipient: string,
       amount: number,
       bucketId: string,
-      memo?: string,
+      memo?: string
     ) {
       try {
         const wallet = useWalletStore();
@@ -91,15 +88,15 @@ export const useMessengerStore = defineStore("messenger", {
         const tokens = useTokensStore();
 
         const sendAmount = Math.floor(
-          amount * mints.activeUnitCurrencyMultiplyer,
+          amount * mints.activeUnitCurrencyMultiplyer
         );
 
         const mintWallet = wallet.mintWallet(
           mints.activeMintUrl,
-          mints.activeUnit,
+          mints.activeUnit
         );
         const proofsForBucket = mints.activeProofs.filter(
-          (p) => p.bucketId === bucketId,
+          (p) => p.bucketId === bucketId
         );
 
         const { sendProofs } = await wallet.send(
@@ -108,7 +105,7 @@ export const useMessengerStore = defineStore("messenger", {
           sendAmount,
           true,
           settings.includeFeesInSendAmount,
-          bucketId,
+          bucketId
         );
 
         const tokenStr = proofsStore.serializeProofs(sendProofs);
@@ -120,7 +117,10 @@ export const useMessengerStore = defineStore("messenger", {
           referenceId: uuidv4(),
         };
 
-        const { success } = await this.sendDm(recipient, JSON.stringify(payload));
+        const { success } = await this.sendDm(
+          recipient,
+          JSON.stringify(payload)
+        );
         if (success) {
           tokens.addPendingToken({
             amount: -sendAmount,
@@ -205,7 +205,8 @@ export const useMessengerStore = defineStore("messenger", {
             } else {
               const receiveStore = useReceiveTokensStore();
               receiveStore.receiveData.tokensBase64 = payload.token;
-              receiveStore.receiveData.bucketId = payload.bucketId ?? receiveStore.receiveData.bucketId;
+              receiveStore.receiveData.bucketId =
+                payload.bucketId ?? receiveStore.receiveData.bucketId;
               await receiveStore.receiveToken(
                 payload.token,
                 receiveStore.receiveData.bucketId
@@ -262,7 +263,9 @@ export const useMessengerStore = defineStore("messenger", {
       ) {
         privKey = nostr.privKeyHex;
         if (!privKey) {
-          notifyError('No private key set. Please configure your Nostr identity.');
+          notifyError(
+            "No private key set. Please configure your Nostr identity."
+          );
           return;
         }
       }

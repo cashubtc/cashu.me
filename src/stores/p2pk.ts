@@ -104,9 +104,11 @@ export const useP2PKStore = defineStore("p2pk", {
       };
       this.p2pkKeys = this.p2pkKeys.concat(keyPair);
     },
-    getSecretP2PKInfo: function (
-      secret: string,
-    ): { pubkey: string; locktime?: number; refundKeys: string[] } {
+    getSecretP2PKInfo: function (secret: string): {
+      pubkey: string;
+      locktime?: number;
+      refundKeys: string[];
+    } {
       try {
         let secretObject = JSON.parse(secret);
         if (secretObject[0] != "P2PK" || secretObject[1]["data"] == undefined) {
@@ -174,9 +176,10 @@ export const useP2PKStore = defineStore("p2pk", {
       } catch {}
       return { pubkey: "", locktime: undefined, refundKeys: [] }; // Token is not locked / secret is not P2PK
     },
-    getSecretP2PKPubkey: function (
-      secret: string,
-    ): { pubkey: string; locktime?: number } {
+    getSecretP2PKPubkey: function (secret: string): {
+      pubkey: string;
+      locktime?: number;
+    } {
       const { pubkey, locktime } = this.getSecretP2PKInfo(secret);
       return { pubkey, locktime };
     },

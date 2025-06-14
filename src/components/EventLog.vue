@@ -18,8 +18,8 @@
 </template>
 
 <script lang="ts" setup>
-import { computed } from 'vue';
-import { useNostrStore } from 'src/stores/nostr';
+import { computed } from "vue";
+import { useNostrStore } from "src/stores/nostr";
 
 interface LogEvent {
   id: string;

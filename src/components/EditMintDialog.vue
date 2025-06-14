@@ -15,7 +15,7 @@
       >
         <template #label>
           <div class="row items-center no-wrap">
-            <span>{{ $t('EditMintDialog.inputs.mint_url.label') }}</span>
+            <span>{{ $t("EditMintDialog.inputs.mint_url.label") }}</span>
             <InfoTooltip
               class="q-ml-xs"
               :text="$t('EditMintDialog.tooltips.mint_url')"
@@ -32,7 +32,7 @@
       >
         <template #label>
           <div class="row items-center no-wrap">
-            <span>{{ $t('EditMintDialog.inputs.nickname.label') }}</span>
+            <span>{{ $t("EditMintDialog.inputs.nickname.label") }}</span>
             <InfoTooltip
               class="q-ml-xs"
               :text="$t('EditMintDialog.tooltips.nickname')"

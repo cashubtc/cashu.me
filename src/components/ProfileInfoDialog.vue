@@ -1,6 +1,10 @@
 <template>
-  <q-dialog v-model="showLocal" persistent backdrop-filter="blur(2px) brightness(60%)">
-    <q-card style="min-width:350px">
+  <q-dialog
+    v-model="showLocal"
+    persistent
+    backdrop-filter="blur(2px) brightness(60%)"
+  >
+    <q-card style="min-width: 350px">
       <q-card-section class="row items-center q-gutter-sm">
         <q-avatar size="64px">
           <template v-if="profile?.picture">
@@ -12,7 +16,9 @@
         </q-avatar>
         <div class="column">
           <div class="text-h6">{{ displayName }}</div>
-          <div v-if="joinedText" class="text-caption">Joined {{ joinedText }}</div>
+          <div v-if="joinedText" class="text-caption">
+            Joined {{ joinedText }}
+          </div>
         </div>
       </q-card-section>
       <q-card-section v-if="profile?.about" class="text-body2">
@@ -28,7 +34,9 @@
       <q-card-section v-if="tiers.length">
         <div class="text-subtitle1 q-mb-sm">Tiers</div>
         <div v-for="t in tiers" :key="t.id" class="q-mb-sm">
-          <div class="text-body1">{{ t.name }} - {{ t.price_sats }} sats/month</div>
+          <div class="text-body1">
+            {{ t.name }} - {{ t.price_sats }} sats/month
+          </div>
           <div class="text-caption">{{ t.description }}</div>
         </div>
       </q-card-section>
@@ -41,17 +49,17 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, watch } from 'vue';
-import { useNostrStore } from 'src/stores/nostr';
-import { useCreatorsStore } from 'src/stores/creators';
-import { nip19 } from 'nostr-tools';
+import { ref, computed, watch } from "vue";
+import { useNostrStore } from "src/stores/nostr";
+import { useCreatorsStore } from "src/stores/creators";
+import { nip19 } from "nostr-tools";
 
 const props = defineProps<{ modelValue: boolean; pubkey: string }>();
-const emit = defineEmits(['update:modelValue', 'clear-chat']);
+const emit = defineEmits(["update:modelValue", "clear-chat"]);
 
 const showLocal = computed({
   get: () => props.modelValue,
-  set: (v: boolean) => emit('update:modelValue', v),
+  set: (v: boolean) => emit("update:modelValue", v),
 });
 
 const nostr = useNostrStore();
@@ -84,21 +92,21 @@ watch(
 );
 
 const displayName = computed(() => {
-  if (!props.pubkey) return '';
+  if (!props.pubkey) return "";
   const p: any = profile.value;
   if (p?.display_name) return p.display_name;
   if (p?.name) return p.name;
   try {
     return nip19.npubEncode(nostr.resolvePubkey(props.pubkey));
   } catch (e) {
-    return props.pubkey.slice(0, 8) + '...' + props.pubkey.slice(-4);
+    return props.pubkey.slice(0, 8) + "..." + props.pubkey.slice(-4);
   }
 });
 
 const initials = computed(() => {
   const name = displayName.value.trim();
-  if (!name) return '';
-  const parts = name.split(' ');
+  if (!name) return "";
+  const parts = name.split(" ");
   if (parts.length >= 2) {
     return (parts[0][0] + parts[1][0]).toUpperCase();
   }
@@ -106,13 +114,13 @@ const initials = computed(() => {
 });
 
 const joinedText = computed(() => {
-  if (!joined.value) return '';
+  if (!joined.value) return "";
   const d = new Date(joined.value * 1000);
   return d.toLocaleDateString();
 });
 
 function handleClear() {
-  emit('clear-chat');
+  emit("clear-chat");
 }
 </script>
 
@@ -127,4 +135,3 @@ function handleClear() {
   border-radius: 50%;
 }
 </style>
-

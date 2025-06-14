@@ -1,22 +1,21 @@
 <template>
   <q-page class="bg-dark text-white q-pa-md">
-    <div class="text-h5 q-mb-md">{{ $t('AboutPage.title') }}</div>
+    <div class="text-h5 q-mb-md">{{ $t("AboutPage.title") }}</div>
     <p>
-      Cashu.me is a free and open-source Bitcoin wallet built on the Cashu
-      ecash protocol. It aims to provide privacy and ease of use for everyone.
+      Cashu.me is a free and open-source Bitcoin wallet built on the Cashu ecash
+      protocol. It aims to provide privacy and ease of use for everyone.
     </p>
     <p>
       The project embraces the values of the Nostr ecosystem: openness,
       censorship resistance and user empowerment.
     </p>
     <div class="video-placeholder q-my-xl flex flex-center">
-      {{ $t('AboutPage.video_placeholder') }}
+      {{ $t("AboutPage.video_placeholder") }}
     </div>
   </q-page>
 </template>
 
-<script setup>
-</script>
+<script setup></script>
 
 <style scoped>
 .video-placeholder {

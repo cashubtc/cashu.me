@@ -298,7 +298,7 @@ export default defineComponent({
     const $q = useQuasar();
     const toggleDarkMode = () => {
       $q.dark.toggle();
-      $q.localStorage.set('cashu.darkMode', $q.dark.isActive);
+      $q.localStorage.set("cashu.darkMode", $q.dark.isActive);
     };
     const needsNostrLogin = computed(
       () => !nostrStore.privateKeySignerPrivateKey

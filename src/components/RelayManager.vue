@@ -15,19 +15,19 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, watch } from 'vue';
-import { useMessengerStore } from 'src/stores/messenger';
-import { notifySuccess, notifyError } from 'src/js/notify';
+import { ref, watch } from "vue";
+import { useMessengerStore } from "src/stores/messenger";
+import { notifySuccess, notifyError } from "src/js/notify";
 
 const messenger = useMessengerStore();
 
-const relayText = ref(messenger.relays.join('\n'));
+const relayText = ref(messenger.relays.join("\n"));
 
 watch(
   () => messenger.relays,
   (r) => {
-    relayText.value = r.join('\n');
-  },
+    relayText.value = r.join("\n");
+  }
 );
 
 const connect = async () => {
@@ -37,18 +37,18 @@ const connect = async () => {
     .filter((r) => r.length);
   try {
     await Promise.resolve(messenger.connect(relays));
-    notifySuccess('Connected to relays');
+    notifySuccess("Connected to relays");
   } catch (err: any) {
-    notifyError(err?.message || 'Failed to connect');
+    notifyError(err?.message || "Failed to connect");
   }
 };
 
 const disconnect = async () => {
   try {
     await Promise.resolve(messenger.disconnect());
-    notifySuccess('Disconnected from relays');
+    notifySuccess("Disconnected from relays");
   } catch (err: any) {
-    notifyError(err?.message || 'Failed to disconnect');
+    notifyError(err?.message || "Failed to disconnect");
   }
 };
 </script>
