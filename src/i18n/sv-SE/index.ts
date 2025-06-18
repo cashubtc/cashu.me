@@ -834,6 +834,9 @@ export default {
       copy_link: {
         tooltip_text: "Kopiera länk",
       },
+      share: {
+        tooltip_text: "Dela ecash",
+      },
       lock: {
         label: "@:global.actions.lock.label",
       },

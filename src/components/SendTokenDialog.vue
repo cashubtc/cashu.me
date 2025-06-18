@@ -438,6 +438,20 @@
                     }}</q-tooltip></q-btn
                   >
                   <q-btn
+                    v-if="webShareSupported"
+                    class="q-mx-none"
+                    color="grey"
+                    size="md"
+                    dense
+                    flat
+                    @click="shareToken"
+                  >
+                    <ShareIcon size="18" />
+                    <q-tooltip>{{
+                      $t("SendTokenDialog.actions.share.tooltip_text")
+                    }}</q-tooltip>
+                  </q-btn>
+                  <q-btn
                     unelevated
                     dense
                     size="sm"
@@ -582,6 +596,7 @@ import {
   Lock as LockIcon,
   Scan as ScanIcon,
   Nfc as NfcIcon,
+  Share as ShareIcon,
 } from "lucide-vue-next";
 import {
   notifyError,
@@ -599,6 +614,7 @@ export default defineComponent({
     NumericKeyboard,
     ScanIcon,
     NfcIcon,
+    ShareIcon,
   },
   props: {},
   data: function () {
@@ -640,6 +656,7 @@ export default defineComponent({
       "canPasteFromClipboard",
       "globalMutexLock",
       "ndefSupported",
+      "webShareSupported",
     ]),
     ...mapWritableState(useUiStore, ["showNumericKeyboard"]),
     ...mapState(useMintsStore, [
@@ -1116,6 +1133,25 @@ export default defineComponent({
       console.log("pasteToParseDialog");
       const text = await useUiStore().pasteFromClipboard();
       this.sendData.p2pkPubkey = text.trim();
+    },
+    shareToken: async function () {
+      if (!this.webShareSupported) {
+        console.log("Web Share API not supported");
+        return;
+      }
+
+      const shareData = {
+        text: `cashu:${this.sendData.tokensBase64}`,
+      };
+
+      try {
+        await navigator.share(shareData);
+        console.log("Token shared successfully");
+      } catch (error) {
+        if (error.name !== "AbortError") {
+          console.error("Error sharing token:", error);
+        }
+      }
     },
   },
 });

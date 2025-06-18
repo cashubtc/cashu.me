@@ -435,7 +435,7 @@ export default {
         unset_reserved: {
           button: "Tüm ayrılmış token'ları kaldır",
           description:
-            "Bu cüzdan, çifte harcama girişimlerini önlemek için bekleyen giden ecash'i ayrılmış olarak işaretler (ve bakiyenizden düşer). Bu düğme tüm ayrılmış token'ları kaldıracaktır, böylece tekrar kullanılabilirler. Bunu yaparsanız, cüzdanınız harcanmış kanıtlar içerebilir. Onlardan kurtulmak için \"Harcanmış kanıtları kaldır\" düğmesine basın.",
+            "Bu cüzdan, çifte harcama girişimlerini önlemek için bekleyen giden ecash'i ayrılmış olarak işaretler (ve bakiyenizden düşer). Bu düğme tüm ayrılmış token'ları kaldıracaktır, böylece tekrar kullanılabilirler. Bunu yaparsanız, cüzdanınız harcanmış kanıtlar içerebilir. Onlardan kurtulmak için Harcanmış kanıtları kaldır düğmesine basın.",
         },
         show_onboarding: {
           button: "Başlangıç ekranını göster",
@@ -835,6 +835,9 @@ export default {
       },
       copy_link: {
         tooltip_text: "Bağlantıyı kopyala",
+      },
+      share: {
+        tooltip_text: "Ecash'ını paylaş",
       },
       lock: {
         label: "@:global.actions.lock.label",
