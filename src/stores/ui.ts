@@ -183,7 +183,7 @@ export const useUiStore = defineStore("ui", {
       );
     },
     webShareSupported(): boolean {
-      return 'share' in navigator;
+      return "share" in navigator;
     },
   },
 });
