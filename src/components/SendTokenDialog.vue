@@ -1335,17 +1335,18 @@ export default defineComponent({
           console.error(e);
         }
       }
-      if (!nostrDm) {
-        this.sendData.p2pkPubkey = this.maybeConvertNpub(
-          this.sendData.p2pkPubkey
-        );
-        if (
-          this.sendData.p2pkPubkey &&
-          this.isValidPubkey(this.sendData.p2pkPubkey)
-        ) {
-          await this.lockTokens();
+
+      if (this.showLockInput || (p2pkInput && p2pkInput.trim() !== "")) {
+        if (!p2pkInput || p2pkInput.trim() === "") {
+          notifyWarning("A public key is required for a locked token.");
           return;
         }
+        if (!this.isValidPubkey(p2pkInput)) {
+          notifyError("The entered public key or npub is not valid.");
+          return;
+        }
+        await this.lockTokens();
+        return;
       }
 
       try {
