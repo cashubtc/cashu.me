@@ -553,12 +553,33 @@ export const useWalletStore = defineStore("wallet", {
       } catch (error: any) {
         await proofsStore.setReserved(proofsToSend, false);
         console.error(error);
-        notifyApiError(error);
+
+        // ADD THIS NEW LOGIC BLOCK
+        if (error.message && error.message.includes("Token already spent")) {
+          notifyError(
+            "Selected proofs have already been spent. Correcting local state.",
+            "Balance Out of Sync"
+          );
+          // Call the new reconciliation function with the proofs that failed
+          await this.reconcileSpentProofs(proofsToSend);
+        } else {
+          notifyApiError(error, "Payment failed"); // Keep original error notification for other cases
+        }
+
         this.handleOutputsHaveAlreadyBeenSignedError(keysetId, error);
         throw error;
       } finally {
         uIStore.unlockMutex();
       }
+    },
+    reconcileSpentProofs: async function (proofs: Proof[]) {
+      console.log("Reconciling spent proofs from local state.");
+      const proofsStore = useProofsStore();
+      await proofsStore.removeProofs(proofs);
+      notifyWarning(
+        "Your balance was out of sync and has been corrected.",
+        "State Corrected"
+      );
     },
     /**
      *
