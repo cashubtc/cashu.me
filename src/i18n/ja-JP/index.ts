@@ -833,6 +833,9 @@ export default {
       copy_link: {
         tooltip_text: "リンクをコピー",
       },
+      share: {
+        tooltip_text: "ecashトークンを共有",
+      },
       lock: {
         label: "@:global.actions.lock.label",
       },

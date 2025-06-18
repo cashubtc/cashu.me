@@ -839,6 +839,9 @@ export default {
       copy_link: {
         tooltip_text: "Αντιγραφή συνδέσμου",
       },
+      share: {
+        tooltip_text: "Κοινοποίηση ecash",
+      },
       lock: {
         label: "@:global.actions.lock.label",
       },

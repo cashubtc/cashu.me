@@ -835,6 +835,9 @@ export default {
       copy_link: {
         tooltip_text: "Copia link",
       },
+      share: {
+        tooltip_text: "Condividi ecash",
+      },
       lock: {
         label: "@:global.actions.lock.label",
       },

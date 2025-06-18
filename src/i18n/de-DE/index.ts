@@ -841,6 +841,9 @@ export default {
       copy_link: {
         tooltip_text: "Link kopieren",
       },
+      share: {
+        tooltip_text: "Ecash teilen",
+      },
       lock: {
         label: "@:global.actions.lock.label",
       },

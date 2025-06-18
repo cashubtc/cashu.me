@@ -182,5 +182,8 @@ export const useUiStore = defineStore("ui", {
         navigator.clipboard.readText
       );
     },
+    webShareSupported(): boolean {
+      return 'share' in navigator;
+    },
   },
 });
