@@ -1141,7 +1141,6 @@ export default defineComponent({
       }
 
       const shareData = {
-        title: "Cashu Ecash",
         text: `cashu:${this.sendData.tokensBase64}`,
       };
 
