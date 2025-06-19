@@ -71,12 +71,14 @@ interface NutzapProfile {
 export async function fetchNutzapProfile(
   npubOrHex: string
 ): Promise<NutzapProfile | null> {
+  const nostr = useNostrStore();
+  await nostr.initNdkReadOnly();
   const hex = npubOrHex.startsWith("npub")
-    ? ndk.utils.hexFromBech32
-      ? ndk.utils.hexFromBech32(npubOrHex)
-      : (ndk.utils.nip19.decode(npubOrHex).data as string)
+    ? nostr.ndk.utils.hexFromBech32
+      ? nostr.ndk.utils.hexFromBech32(npubOrHex)
+      : (nostr.ndk.utils.nip19.decode(npubOrHex).data as string)
     : npubOrHex;
-  const sub = ndk.subscribe({
+  const sub = nostr.ndk.subscribe({
     kinds: [10019],
     authors: [hex],
     limit: 1,
@@ -108,14 +110,16 @@ export async function publishNutzap(opts: {
   receiverHex: string;
   relayHints?: string[];
 }) {
+  const nostr = useNostrStore();
+  await nostr.initSignerIfNotSet();
   const ev: NostrEvent = {
     kind: 9321,
     content: opts.content,
     tags: [["p", opts.receiverHex]],
     created_at: Math.floor(Date.now() / 1000),
   } as NostrEvent;
-  const signed = await ndk.sign(ev);
-  await ndk.publish(
+  const signed = await nostr.ndk.sign(ev);
+  await nostr.ndk.publish(
     signed,
     opts.relayHints?.length ? opts.relayHints : undefined
   );
@@ -127,7 +131,9 @@ export function subscribeToNutzaps(
   myHex: string,
   onZap: (ev: NostrEvent) => void
 ): NDKSubscription {
-  const sub = ndk.subscribe({
+  const nostr = useNostrStore();
+  nostr.initNdkReadOnly();
+  const sub = nostr.ndk.subscribe({
     kinds: [9321],
     "#p": [myHex],
   });
