@@ -129,6 +129,25 @@ export class CashuDexie extends Dexie {
       lockedTokens:
         "&id, owner, tierId, intervalKey, unlockTs, refundUnlockTs, status, subscriptionEventId",
     });
+    this.version(6)
+      .stores({
+        proofs: "secret, id, C, amount, reserved, quote, bucketId, label",
+        profiles: "pubkey",
+        creatorsTierDefinitions: "&creatorNpub, eventId, updatedAt",
+        subscriptions: "&id, creatorNpub, tierId, status, createdAt, updatedAt",
+        lockedTokens:
+          "&id, tokenString, owner, tierId, intervalKey, unlockTs, refundUnlockTs, status, subscriptionEventId",
+      })
+      .upgrade(async (tx) => {
+        await tx
+          .table("lockedTokens")
+          .toCollection()
+          .modify((entry: any) => {
+            if (entry.tokenString === undefined && entry.token) {
+              entry.tokenString = entry.token;
+            }
+          });
+      });
   }
 }
 
