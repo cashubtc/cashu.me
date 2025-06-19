@@ -1,6 +1,7 @@
 import { defineStore } from "pinia";
 import { useLocalStorage } from "@vueuse/core";
 import { v4 as uuidv4 } from "uuid";
+import { cashuDb } from "./dexie";
 
 export type LockedToken = {
   id: string;
@@ -46,6 +47,10 @@ export const useLockedTokensStore = defineStore("lockedTokens", {
       };
       this.lockedTokens.push(token);
       return token;
+    },
+    async addMany(tokens: LockedToken[]) {
+      this.lockedTokens.push(...tokens);
+      await cashuDb.lockedTokens.bulkAdd(tokens);
     },
     deleteLockedToken(id: string) {
       const idx = this.lockedTokens.findIndex((t) => t.id === id);
