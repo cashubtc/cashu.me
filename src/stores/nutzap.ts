@@ -50,7 +50,7 @@ export const useNutzapStore = defineStore("nutzap", {
           const mint = wallet.findSpendableMint(amount, trustedMints);
           if (!mint) throw new Error("Insufficient balance in recipient-trusted mints");
 
-          const { proofs } = await p2pk.lockToPubKey({
+          const { token } = await p2pk.lockToPubKey({
             mintUrl: mint.url,
             amount,
             pubKey: p2pkPubkey,
@@ -59,7 +59,7 @@ export const useNutzapStore = defineStore("nutzap", {
 
           // store locally for UI (buckets flow)
           lockedTokens.push({
-            proofs,
+            token,
             mintUrl: mint.url,
             timelock: unlockDate,
             receiver: npub,
@@ -67,7 +67,7 @@ export const useNutzapStore = defineStore("nutzap", {
 
           // Publish Nutzap (one event per period)
           await publishNutzap({
-            content: proofs, // ← token string per NUT-11
+            content: token, // ← token string per NUT-11
             receiverHex: profile.hexPub,
             relayHints: profile.relays,
           });
