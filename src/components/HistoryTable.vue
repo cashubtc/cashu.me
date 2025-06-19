@@ -75,7 +75,7 @@
             :icon="transaction.longPressActive ? 'arrow_circle_down' : 'sync'"
             @click="
               transaction.longPressActive
-                ? receiveToken(transaction.token)
+                ? handleLongPress(transaction)
                 : checkTransactionStatus(transaction)
             "
             @mousedown="startLongPress(transaction)"
@@ -260,13 +260,18 @@ export default defineComponent({
       "checkOutgoingInvoice",
     ]),
 
+    handleLongPress(transaction) {
+      if (this.isEcashTransaction(transaction)) {
+        transaction.longPressActive = false;
+        this.receiveToken(transaction.token);
+      }
+    },
+
     startLongPress(transaction) {
       if (this.isEcashTransaction(transaction)) {
-        if (transaction.longPressActive === undefined) {
-          transaction.longPressActive = false;
-        }
+        transaction.longPressActive = false;
         this.longPressTimeout = setTimeout(() => {
-          transaction.longPressActive = !transaction.longPressActive;
+          transaction.longPressActive = true;
         }, 1000); // 1 second long press
       }
     },
