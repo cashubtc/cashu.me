@@ -110,7 +110,10 @@ export async function publishNutzap(opts: {
     created_at: Math.floor(Date.now() / 1000),
   } as NostrEvent;
   const signed = await ndk.sign(ev);
-  await ndk.publish(signed, opts.relayHints);
+  await ndk.publish(
+    signed,
+    opts.relayHints?.length ? opts.relayHints : undefined
+  );
   return signed.id;
 }
 
