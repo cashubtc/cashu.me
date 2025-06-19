@@ -47,7 +47,7 @@ export const useNutzapStore = defineStore("nutzap", {
 
         for (let i = 0; i < months; i++) {
           const unlockDate = dayjs().add(i, "month").startOf("day").unix();
-          const mint = wallet.pickMint(amount, trustedMints);
+          const mint = wallet.findSpendableMint(amount, trustedMints);
           if (!mint) throw new Error("Insufficient balance in recipient-trusted mints");
 
           const { proofs } = await p2pk.lockToPubKey({
