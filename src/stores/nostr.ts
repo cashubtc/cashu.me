@@ -76,10 +76,10 @@ export async function fetchNutzapProfile(
     hex = npubOrHex.toLowerCase();
   } else {
     try {
-      if (ndk.utils.hexFromBech32) {
-        hex = ndk.utils.hexFromBech32(npubOrHex) as string;
+      if ((ndk as any).utils?.hexFromBech32) {
+        hex = (ndk as any).utils.hexFromBech32(npubOrHex) as string;
       } else {
-        hex = ndk.utils.nip19.decode(npubOrHex).data as string;
+        hex = nip19.decode(npubOrHex).data as string;
       }
     } catch {
       hex = npubOrHex;
