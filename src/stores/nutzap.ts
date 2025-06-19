@@ -2,6 +2,7 @@ import { defineStore } from "pinia";
 import { useWalletStore } from "./wallet";
 import { useP2PKStore } from "./p2pk";
 import { useLockedTokensStore } from "./lockedTokens";
+import { cashuDb } from "./dexie";
 import {
   fetchNutzapProfile,
   publishNutzap,
@@ -97,6 +98,16 @@ export const useNutzapStore = defineStore("nutzap", {
 
       const tokenString = event.content.trim();
       await p2pk.claimLockedToken(tokenString); // verifies, swaps, updates proofs store
+
+      // delete any matching locked token entries from dexie
+      const matches = await cashuDb.lockedTokens
+        .filter(
+          (t) => t.tokenString === tokenString || t.intervalKey === event.id
+        )
+        .toArray();
+      for (const match of matches) {
+        await cashuDb.lockedTokens.delete(match.id);
+      }
 
       // Optionally: send receipt (kind:9322) here …
 
