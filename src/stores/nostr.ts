@@ -13,6 +13,7 @@ import NDK, {
   NDKRelay,
   NDKTag,
   ProfilePointer,
+  NDKSubscription,
 } from "@nostr-dev-kit/ndk";
 import {
   nip04,
@@ -134,11 +135,13 @@ export async function publishNutzap(opts: {
 export function subscribeToNutzaps(
   myHex: string,
   onZap: (ev: NostrEvent) => void
-) {
-  ndk.subscribe({
+): NDKSubscription {
+  const sub = ndk.subscribe({
     kinds: [9321],
     "#p": [myHex],
-  }).on("event", onZap);
+  });
+  sub.on("event", onZap);
+  return sub;
 }
 
 type MintRecommendation = {
