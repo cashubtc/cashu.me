@@ -93,6 +93,7 @@ import SubscriptionReceipt from "components/SubscriptionReceipt.vue";
 import { useMintsStore } from "stores/mints";
 import { notifyError, notifySuccess, notifyWarning } from "src/js/notify";
 import { useDmChatsStore } from "stores/dmChats";
+import { useNutzapStore } from "stores/nutzap";
 import { useI18n } from "vue-i18n";
 import { Loading } from "quasar";
 import { renderMarkdown as renderMarkdownFn } from "src/js/simple-markdown";
@@ -112,6 +113,7 @@ export default defineComponent({
     const priceStore = usePriceStore();
     const uiStore = useUiStore();
     const mintsStore = useMintsStore();
+    const nutzap = useNutzapStore();
     const { t } = useI18n();
     const bitcoinPrice = computed(() => priceStore.bitcoinPrice);
     const profile = ref<any>({});
@@ -181,6 +183,12 @@ export default defineComponent({
           );
           if (event) useDmChatsStore().addOutgoing(event);
           if (!success) dmSuccess = false;
+          await nutzap.send({
+            npub: creatorNpub,
+            months: 1,
+            amount: r.amount,
+            startDate: r.locktime,
+          });
         }
         if (dmSuccess) {
           notifySuccess(t("FindCreators.notifications.subscription_success"));
