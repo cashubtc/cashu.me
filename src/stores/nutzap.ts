@@ -43,7 +43,13 @@ export const useNutzapStore = defineStore("nutzap", {
         const { p2pkPubkey, trustedMints } = profile;
         const wallet = useWalletStore();
         const p2pk = useP2PKStore();
-        const lockedTokens = [] as any[];
+        interface LockedTokenPayload {
+          token: string;
+          mintUrl: string;
+          timelock: number;
+          receiver: string;
+        }
+        const lockedTokens: LockedTokenPayload[] = [];
 
         for (let i = 0; i < months; i++) {
           const unlockDate = dayjs().add(i, "month").startOf("day").unix();
