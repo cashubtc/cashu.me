@@ -77,6 +77,7 @@ import { useNostrStore } from "stores/nostr";
 import { useMintsStore } from "stores/mints";
 import { notifyError, notifySuccess, notifyWarning } from "src/js/notify";
 import { useDmChatsStore } from "stores/dmChats";
+import { useNutzapStore } from "stores/nutzap";
 import { useI18n } from "vue-i18n";
 import {
   QDialog,
@@ -102,6 +103,7 @@ const lockedStore = useLockedTokensStore();
 const creators = useCreatorsStore();
 const nostr = useNostrStore();
 const mintsStore = useMintsStore();
+const nutzap = useNutzapStore();
 const { t } = useI18n();
 const tiers = computed(() => creators.tiersMap[dialogPubkey.value] || []);
 const showSubscribeDialog = ref(false);
@@ -186,6 +188,12 @@ async function confirmSubscribe({
       );
       if (event) useDmChatsStore().addOutgoing(event);
       if (!success) dmSuccess = false;
+      await nutzap.send({
+        npub: dialogPubkey.value,
+        months: 1,
+        amount: r.amount,
+        startDate: r.locktime,
+      });
     }
     if (dmSuccess) {
       notifySuccess(t("FindCreators.notifications.subscription_success"));
