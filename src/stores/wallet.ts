@@ -240,6 +240,34 @@ export const useWalletStore = defineStore("wallet", {
         this.keysetCounters.push(newCounter);
       }
     },
+    findSpendableMint: function (
+      amount: number,
+      preferred: string[] = []
+    ): Mint | null {
+      const mintsStore = useMintsStore();
+      const unit = mintsStore.activeUnit;
+      const checked = new Set<string>();
+
+      for (const url of preferred) {
+        const mint = mintsStore.mints.find((m) => m.url === url);
+        if (!mint) continue;
+        checked.add(url);
+        const mintClass = new MintClass(mint);
+        if (mintClass.unitBalance(unit) >= amount) {
+          return mint;
+        }
+      }
+
+      for (const mint of mintsStore.mints) {
+        if (checked.has(mint.url)) continue;
+        const mintClass = new MintClass(mint);
+        if (mintClass.unitBalance(unit) >= amount) {
+          return mint;
+        }
+      }
+
+      return null;
+    },
     signP2PKIfNeeded: function <T extends Proof>(proofs: T[]): T[] {
       if (
         !proofs.some(
