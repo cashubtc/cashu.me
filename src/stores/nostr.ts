@@ -53,6 +53,78 @@ import { v4 as uuidv4 } from "uuid";
 import { useRouter } from "vue-router";
 import { useP2PKStore } from "./p2pk";
 
+// --- Nutzap helpers (NIP-61) ----------------------------------------------
+
+import type { NostrEvent } from "@nostr-dev-kit/ndk";
+
+interface NutzapProfile {
+  hexPub: string;
+  p2pkPubkey: string;
+  trustedMints: string[];
+  relays: string[];
+}
+
+/**
+ * Fetches the receiver’s ‘kind:10019’ Nutzap profile.
+ */
+export async function fetchNutzapProfile(
+  npubOrHex: string
+): Promise<NutzapProfile | null> {
+  const hex = ndk.utils.note.npubToHex(npubOrHex);
+  const sub = ndk.subscribe({
+    kinds: [10019],
+    authors: [hex],
+    limit: 1,
+  });
+
+  return new Promise((resolve) => {
+    sub.on("event", (ev: NostrEvent) => {
+      const p2pkPubkey = ev.tags.find((t) => t[0] === "pubkey")?.[1];
+      const mints = ev.tags.filter((t) => t[0] === "mint").map((t) => t[1]);
+      if (p2pkPubkey) {
+        resolve({
+          hexPub: hex,
+          p2pkPubkey,
+          trustedMints: mints,
+          relays: ev.tags.filter((t) => t[0] === "relay").map((t) => t[1]),
+        });
+      } else resolve(null);
+      sub.stop();
+    });
+
+    // timeout after 10 s
+    setTimeout(() => (sub.stop(), resolve(null)), 10_000);
+  });
+}
+
+/** Publishes a ‘kind:9321’ Nutzap event. */
+export async function publishNutzap(opts: {
+  content: string;
+  receiverHex: string;
+  relayHints?: string[];
+}) {
+  const ev: NostrEvent = {
+    kind: 9321,
+    content: opts.content,
+    tags: [["p", opts.receiverHex]],
+    created_at: Math.floor(Date.now() / 1000),
+  } as NostrEvent;
+  const signed = await ndk.sign(ev);
+  await ndk.publish(signed, opts.relayHints);
+  return signed.id;
+}
+
+/** Listens for incoming Nutzaps that reference my pubkey via ‘p’ tag. */
+export function subscribeToNutzaps(
+  myHex: string,
+  onZap: (ev: NostrEvent) => void
+) {
+  ndk.subscribe({
+    kinds: [9321],
+    "#p": [myHex],
+  }).on("event", onZap);
+}
+
 type MintRecommendation = {
   url: string;
   count: number;
