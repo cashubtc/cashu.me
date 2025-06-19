@@ -7,7 +7,7 @@ import {
   publishNutzap,
   subscribeToNutzaps,
 } from "./nostr";
-import type { NostrEvent } from "@nostr-dev-kit/ndk";
+import type { NostrEvent, NDKSubscription } from "@nostr-dev-kit/ndk";
 import dayjs from "dayjs";
 
 interface SendParams {
@@ -21,12 +21,13 @@ export const useNutzapStore = defineStore("nutzap", {
     incoming: [] as NostrEvent[], // raw kind:9321 events waiting to be claimed
     loading: false,
     error: null as string | null,
+    subscription: null as NDKSubscription | null,
   }),
 
   actions: {
     /** Called once on app start (e.g. from MainLayout.vue) */
     initListener(myHex: string) {
-      subscribeToNutzaps(myHex, (ev: NostrEvent) => {
+      this.subscription = subscribeToNutzaps(myHex, (ev: NostrEvent) => {
         this.incoming.push(ev);
       });
     },
