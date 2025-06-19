@@ -71,20 +71,11 @@ interface NutzapProfile {
 export async function fetchNutzapProfile(
   npubOrHex: string
 ): Promise<NutzapProfile | null> {
-  let hex: string;
-  if (/^[0-9a-fA-F]{64}$/.test(npubOrHex)) {
-    hex = npubOrHex.toLowerCase();
-  } else {
-    try {
-      if ((ndk as any).utils?.hexFromBech32) {
-        hex = (ndk as any).utils.hexFromBech32(npubOrHex) as string;
-      } else {
-        hex = nip19.decode(npubOrHex).data as string;
-      }
-    } catch {
-      hex = npubOrHex;
-    }
-  }
+  const hex = npubOrHex.startsWith("npub")
+    ? ndk.utils.hexFromBech32
+      ? ndk.utils.hexFromBech32(npubOrHex)
+      : (ndk.utils.nip19.decode(npubOrHex).data as string)
+    : npubOrHex;
   const sub = ndk.subscribe({
     kinds: [10019],
     authors: [hex],
