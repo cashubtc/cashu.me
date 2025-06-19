@@ -17,6 +17,7 @@
       </div>
 
       <div v-else>
+        <NutzapNotification class="q-mb-md" />
         <div v-for="tier in tiers" :key="tier.id" class="q-mb-md">
           <q-card flat bordered>
             <q-card-section>
@@ -48,9 +49,11 @@
 import { defineComponent, computed } from "vue";
 import { useCreatorHubStore } from "stores/creatorHub";
 import { renderMarkdown as renderMarkdownFn } from "src/js/simple-markdown";
+import NutzapNotification from "components/NutzapNotification.vue";
 
 export default defineComponent({
   name: "CreatorHubPage",
+  components: { NutzapNotification },
   setup() {
     const store = useCreatorHubStore();
     const tiers = computed(() => store.getTierArray());

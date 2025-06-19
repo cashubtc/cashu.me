@@ -12,6 +12,8 @@
       }}</q-btn>
     </div>
 
+    <NutzapNotification class="q-mt-md" />
+
     <div class="q-mt-md">
       <div class="text-h6">{{ $t("CreatorHub.dashboard.edit_profile") }}</div>
       <q-input
@@ -139,6 +141,7 @@
 import { defineComponent, ref, onMounted, computed, watch } from "vue";
 import { useCreatorHubStore, Tier } from "stores/creatorHub";
 import AddTierDialog from "components/AddTierDialog.vue";
+import NutzapNotification from "components/NutzapNotification.vue";
 import { useNostrStore } from "stores/nostr";
 import { useRouter } from "vue-router";
 import { usePriceStore } from "stores/price";
@@ -148,7 +151,7 @@ import { notifySuccess } from "src/js/notify";
 
 export default defineComponent({
   name: "CreatorDashboardPage",
-  components: { AddTierDialog },
+  components: { AddTierDialog, NutzapNotification },
   setup() {
     const store = useCreatorHubStore();
     const nostr = useNostrStore();
