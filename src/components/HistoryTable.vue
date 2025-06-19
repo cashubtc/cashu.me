@@ -73,10 +73,13 @@
             dense
             round
             :icon="transaction.longPressActive ? 'arrow_circle_down' : 'sync'"
-            @click="transaction.longPressActive ? receiveToken(transaction.token) : checkTransactionStatus(transaction)"
+            @click="
+              transaction.longPressActive
+                ? receiveToken(transaction.token)
+                : checkTransactionStatus(transaction)
+            "
             @mousedown="startLongPress(transaction)"
             @mouseup="endLongPress(transaction)"
-            @mouseleave="endLongPress(transaction)"
             class="cursor-pointer"
             v-if="transaction.status === 'pending'"
             size="sm"
@@ -85,23 +88,6 @@
               transaction.longPressActive
                 ? $t("HistoryTable.actions.receive.tooltip_text")
                 : $t("HistoryTable.actions.check_status.tooltip_text")
-            }}</q-tooltip>
-          </q-btn>
-          <q-btn
-            flat
-            dense
-            round
-            icon="arrow_circle_down"
-            @click="receiveToken(transaction.token)"
-            class="cursor-pointer"
-            v-if="
-              isEcashTransaction(transaction) &&
-              transaction.status === 'pending'
-            "
-            size="sm"
-          >
-            <q-tooltip>{{
-              $t("HistoryTable.actions.receive.tooltip_text")
             }}</q-tooltip>
           </q-btn>
         </q-item-section>
@@ -182,26 +168,6 @@ export default defineComponent({
     CoinsIcon,
     ZapIcon,
   },
-  methods: {
-    ...mapActions(useWalletStore, [
-      "checkTokenSpendable",
-      "checkInvoice",
-      "checkOutgoingInvoice",
-    ]),
-
-    startLongPress(transaction) {
-      if (this.isEcashTransaction(transaction)) {
-        transaction.longPressActive = false;
-        this.longPressTimeout = setTimeout(() => {
-          transaction.longPressActive = true;
-        }, 1000); // 1 second long press
-      }
-    },
-
-    endLongPress(transaction) {
-      clearTimeout(this.longPressTimeout);
-      transaction.longPressActive = false;
-    },
   mixins: [windowMixin],
   props: {},
   data: function () {
@@ -293,6 +259,21 @@ export default defineComponent({
       "checkInvoice",
       "checkOutgoingInvoice",
     ]),
+
+    startLongPress(transaction) {
+      if (this.isEcashTransaction(transaction)) {
+        if (transaction.longPressActive === undefined) {
+          transaction.longPressActive = false;
+        }
+        this.longPressTimeout = setTimeout(() => {
+          transaction.longPressActive = !transaction.longPressActive;
+        }, 1000); // 1 second long press
+      }
+    },
+
+    endLongPress(transaction) {
+      clearTimeout(this.longPressTimeout);
+    },
 
     formattedDate(date_str) {
       const date = parseISO(date_str);
