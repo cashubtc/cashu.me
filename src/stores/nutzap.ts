@@ -156,7 +156,7 @@ export const useNutzapStore = defineStore("nutzap", {
 
       // delete any matching locked token entries from dexie
       await cashuDb.lockedTokens
-        .where("tokenString")
+        .where('tokenString')
         .equals(tokenString)
         .delete();
 
