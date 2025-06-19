@@ -15,6 +15,7 @@ interface SendParams {
   npub: string; // receiver's npub (Bech32)
   amount: number; // sats per period
   months: number; // number of periods
+  startDate: number; // unix timestamp for first unlock
 }
 
 export const useNutzapStore = defineStore("nutzap", {
@@ -34,7 +35,7 @@ export const useNutzapStore = defineStore("nutzap", {
     },
 
     /** High-level entry from UI – fan pledges to creator */
-    async send({ npub, amount, months }: SendParams) {
+    async send({ npub, amount, months, startDate }: SendParams) {
       try {
         this.loading = true;
         const profile = await fetchNutzapProfile(npub);
@@ -45,7 +46,7 @@ export const useNutzapStore = defineStore("nutzap", {
         const wallet = useWalletStore();
         const p2pk = useP2PKStore();
         interface LockedTokenPayload {
-          token: string;
+          tokenString: string;
           mintUrl: string;
           timelock: number;
           receiver: string;
@@ -53,7 +54,10 @@ export const useNutzapStore = defineStore("nutzap", {
         const lockedTokens: LockedTokenPayload[] = [];
 
         for (let i = 0; i < months; i++) {
-          const unlockDate = dayjs().add(i, "month").startOf("day").unix();
+          const unlockDate = dayjs(startDate)
+            .add(i, "month")
+            .startOf("day")
+            .unix();
           const mint = wallet.findSpendableMint(amount, trustedMints);
           if (!mint) throw new Error("Insufficient balance in recipient-trusted mints");
 
@@ -66,7 +70,7 @@ export const useNutzapStore = defineStore("nutzap", {
 
           // store locally for UI (buckets flow)
           lockedTokens.push({
-            token,
+            tokenString: token,
             mintUrl: mint.url,
             timelock: unlockDate,
             receiver: npub,
@@ -101,7 +105,7 @@ export const useNutzapStore = defineStore("nutzap", {
 
       // delete any matching locked token entries from dexie
       await cashuDb.lockedTokens
-        .where("token")
+        .where("tokenString")
         .equals(tokenString)
         .delete();
 
