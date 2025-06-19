@@ -131,14 +131,6 @@ export default defineComponent({
     });
 
     const openSubscribe = (tier: any) => {
-      const info = mintsStore.activeInfo || {};
-      const nuts = Array.isArray(info.nut_supports)
-        ? info.nut_supports
-        : Object.keys(info.nuts || {}).map((n) => Number(n));
-      if (!(nuts.includes(10) && nuts.includes(11))) {
-        notifyError(t("wallet.notifications.lock_not_supported"));
-        return;
-      }
       selectedTier.value = tier;
       showSubscribeDialog.value = true;
     };
