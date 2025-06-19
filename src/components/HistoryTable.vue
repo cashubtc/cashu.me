@@ -91,8 +91,7 @@
             class="cursor-pointer"
             v-if="
               isEcashTransaction(transaction) &&
-              transaction.status === 'pending' &&
-              transaction.amount > 0
+              transaction.status === 'pending'
             "
             size="sm"
           >
