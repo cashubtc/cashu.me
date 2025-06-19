@@ -58,4 +58,28 @@ describe("LockedTokens store", () => {
     expect(tokens.length).toBe(1);
     expect(tokens[0].id).toBe(t1.id);
   });
+
+  it("adds many tokens", async () => {
+    const store = useLockedTokensStore();
+    const tokens = [
+      {
+        id: "a",
+        amount: 1,
+        token: "x",
+        pubkey: "pk1",
+        bucketId: "b1",
+        date: new Date().toISOString(),
+      },
+      {
+        id: "b",
+        amount: 2,
+        token: "y",
+        pubkey: "pk2",
+        bucketId: "b2",
+        date: new Date().toISOString(),
+      },
+    ];
+    await store.addMany(tokens);
+    expect(store.lockedTokens.length).toBe(2);
+  });
 });
