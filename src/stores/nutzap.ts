@@ -100,14 +100,10 @@ export const useNutzapStore = defineStore("nutzap", {
       await p2pk.claimLockedToken(tokenString); // verifies, swaps, updates proofs store
 
       // delete any matching locked token entries from dexie
-      const matches = await cashuDb.lockedTokens
-        .filter(
-          (t) => t.tokenString === tokenString || t.intervalKey === event.id
-        )
-        .toArray();
-      for (const match of matches) {
-        await cashuDb.lockedTokens.delete(match.id);
-      }
+      await cashuDb.lockedTokens
+        .where("token")
+        .equals(tokenString)
+        .delete();
 
       // Optionally: send receipt (kind:9322) here …
 
