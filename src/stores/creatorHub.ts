@@ -1,7 +1,13 @@
 import { defineStore } from "pinia";
 import { useLocalStorage } from "@vueuse/core";
 import { NDKEvent, NDKKind, NDKFilter } from "@nostr-dev-kit/ndk";
-import { useNostrStore } from "./nostr";
+import {
+  useNostrStore,
+  fetchNutzapProfile,
+  publishNutzapProfile,
+} from "./nostr";
+import { useP2PKStore } from "./p2pk";
+import { useMintsStore } from "./mints";
 import { db } from "./dexie";
 import { v4 as uuidv4 } from "uuid";
 import { notifySuccess } from "src/js/notify";
@@ -15,6 +21,31 @@ export interface Tier {
 }
 
 const TIER_DEFINITIONS_KIND = 30000;
+
+export async function maybeRepublishNutzapProfile() {
+  const nostrStore = useNostrStore();
+  const current = await fetchNutzapProfile(nostrStore.pubkey);
+  const desiredMints = useMintsStore()
+    .mints.map((m) => m.url)
+    .sort()
+    .join(",");
+  const desiredP2PK = useP2PKStore().firstKey?.publicKey;
+
+  if (!desiredP2PK) return;
+
+  const hasDiff =
+    !current ||
+    current.p2pkPubkey !== desiredP2PK ||
+    current.trustedMints.sort().join(",") !== desiredMints;
+
+  if (hasDiff) {
+    await publishNutzapProfile({
+      p2pkPub: desiredP2PK,
+      mints: useMintsStore().mints.map((m) => m.url),
+      relays: nostrStore.relays,
+    });
+  }
+}
 
 export const useCreatorHubStore = defineStore("creatorHub", {
   state: () => ({
@@ -57,6 +88,7 @@ export const useCreatorHubStore = defineStore("creatorHub", {
         welcomeMessage: tier.welcomeMessage || "",
       };
       this.tiers[id] = newTier;
+      maybeRepublishNutzapProfile();
     },
     updateTier(id: string, updates: Partial<Tier>) {
       const existing = this.tiers[id];
@@ -94,6 +126,7 @@ export const useCreatorHubStore = defineStore("creatorHub", {
     },
     async removeTier(id: string) {
       delete this.tiers[id];
+      await maybeRepublishNutzapProfile();
     },
 
     async publishTierDefinitions() {

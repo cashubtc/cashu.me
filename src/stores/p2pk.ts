@@ -12,6 +12,7 @@ import { useMintsStore } from "./mints";
 import { useTokensStore } from "./tokens";
 import { DEFAULT_BUCKET_ID } from "./buckets";
 import { cashuDb } from "./dexie";
+import { maybeRepublishNutzapProfile } from "./creatorHub";
 
 type P2PKKey = {
   publicKey: string;
@@ -30,7 +31,9 @@ export const useP2PKStore = defineStore("p2pk", {
     showP2PKDialog: false,
     showP2PKData: {} as P2PKKey,
   }),
-  getters: {},
+  getters: {
+    firstKey: (state) => state.p2pkKeys[0] || null,
+  },
   actions: {
     haveThisKey: function (key: string) {
       return this.p2pkKeys.filter((m) => m.publicKey == key).length > 0;
@@ -96,6 +99,7 @@ export const useP2PKStore = defineStore("p2pk", {
         usedCount: 0,
       };
       this.p2pkKeys = this.p2pkKeys.concat(keyPair);
+      maybeRepublishNutzapProfile();
     },
     generateKeypair: function () {
       let sk = generateSecretKey(); // `sk` is a Uint8Array
@@ -109,6 +113,7 @@ export const useP2PKStore = defineStore("p2pk", {
         usedCount: 0,
       };
       this.p2pkKeys = this.p2pkKeys.concat(keyPair);
+      maybeRepublishNutzapProfile();
     },
     getSecretP2PKInfo: function (secret: string): {
       pubkey: string;

@@ -24,6 +24,7 @@ import { liveQuery } from "dexie";
 import { ref, computed, watch } from "vue";
 import { useProofsStore } from "./proofs";
 import { useI18n } from "vue-i18n";
+import { maybeRepublishNutzapProfile } from "./creatorHub";
 import { i18n } from "src/boot/i18n";
 
 export type Mint = {
@@ -341,6 +342,7 @@ export const useMintsStore = defineStore("mints", {
         if (verbose) {
           await notifySuccess(this.t("wallet.mint.notifications.added"));
         }
+        await maybeRepublishNutzapProfile();
         return mintToAdd;
       } catch (error) {
         // activation failed, we remove the mint again from local storage
@@ -542,6 +544,7 @@ export const useMintsStore = defineStore("mints", {
         await this.activateMint(this.mints[0], false);
       }
       notifySuccess(this.t("wallet.mint.notifications.removed"));
+      await maybeRepublishNutzapProfile();
     },
     assertMintError: function (response: { error?: any }, verbose = true) {
       if (response.error != null) {

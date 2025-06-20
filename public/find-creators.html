@@ -595,13 +595,9 @@
 
         sub.on("eose", (relay) => {
           try {
-            const relayUrl = relay && relay.url ? relay.url : "unknown relay";
-            if (relay && relay.url) activeRelays.add(relay.url);
-            else
-              console.warn(
-                "EOSE received without a valid relay object or relay.url:",
-                relay
-              );
+            if (!relay || !relay.url) return;
+            const relayUrl = relay.url;
+            activeRelays.add(relayUrl);
 
             eoseCount++;
             console.log(
