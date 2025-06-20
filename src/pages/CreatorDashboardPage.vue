@@ -289,7 +289,7 @@ export default defineComponent({
         notifySuccess("Nutzap profile published ✔");
         needsProfile.value = false;
       } catch (e: any) {
-        notifyError("Relays rejected event", String(e));
+        notifyError("Relays rejected event", e?.message ?? String(e));
       }
     }
 
