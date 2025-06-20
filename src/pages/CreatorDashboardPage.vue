@@ -276,6 +276,11 @@ export default defineComponent({
       }
       try {
         await nostr.initSignerIfNotSet();
+      } catch (e) {
+        notifyError("You declined the Nostr signer popup");
+        return;
+      }
+      try {
         await publishNutzapProfile({
           p2pkPub: first.publicKey,
           mints: mintsStore.mints.map((m) => m.url),
@@ -284,7 +289,7 @@ export default defineComponent({
         notifySuccess("Nutzap profile published ✔");
         needsProfile.value = false;
       } catch (e: any) {
-        notifyError("Publishing failed", String(e));
+        notifyError("Relays rejected event", String(e));
       }
     }
 
