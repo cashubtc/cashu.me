@@ -69,7 +69,7 @@ export default defineComponent({
   name: "SubscribeDialog",
   props: {
     modelValue: Boolean,
-    tier: { type: Object, required: true },
+    tier: { type: Object, required: false },
     supporterPubkey: { type: String, default: "" },
     creatorPubkey: { type: String, default: "" },
   },
@@ -96,7 +96,7 @@ export default defineComponent({
           amount.value = t.price_sats ?? t.price ?? 0;
         }
       },
-      { immediate: true, deep: true }
+      { immediate: true, deep: true },
     );
 
     const model = computed({
@@ -108,17 +108,17 @@ export default defineComponent({
       bucketList.value.map((b) => ({
         label: `${b.name} (${uiStore.formatCurrency(
           bucketBalances.value[b.id] ?? 0,
-          activeUnit.value
+          activeUnit.value,
         )})`,
         value: b.id,
-      }))
+      })),
     );
 
     const presetOptions = computed(() =>
       donationStore.presets.map((p) => ({
         label: `${p.months}m`,
         value: p.months,
-      }))
+      })),
     );
 
     const showBucketSelect = computed(() => !props.creatorPubkey);
@@ -126,7 +126,7 @@ export default defineComponent({
     const selectCreatorBucket = () => {
       if (!props.creatorPubkey) return;
       const existing = bucketList.value.find(
-        (b) => b.creatorPubkey === props.creatorPubkey
+        (b) => b.creatorPubkey === props.creatorPubkey,
       );
       if (existing) {
         bucketId.value = existing.id;
@@ -143,14 +143,14 @@ export default defineComponent({
       () => props.modelValue,
       (val) => {
         if (val) selectCreatorBucket();
-      }
+      },
     );
 
     watch(
       () => props.creatorPubkey,
       () => {
         if (props.modelValue) selectCreatorBucket();
-      }
+      },
     );
 
     const cancel = () => {
