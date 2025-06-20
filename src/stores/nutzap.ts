@@ -14,6 +14,15 @@ import {
 import type { NostrEvent, NDKSubscription } from "@nostr-dev-kit/ndk";
 import dayjs from "dayjs";
 
+export function calcUnlock(base: number, i: number): number {
+  const baseDate = new Date(base * 1000);
+  baseDate.setUTCHours(0, 0, 0, 0);
+  let ts = Math.floor(baseDate.getTime() / 1000);
+  const min = Math.floor(Date.now() / 1000) + 30 * 60;
+  if (ts < min) ts = min;
+  return dayjs.unix(ts).add(i, "month").unix();
+}
+
 interface SendParams {
   npub: string; // receiver's npub (Bech32)
   amount: number; // sats per period
@@ -104,10 +113,7 @@ export const useNutzapStore = defineStore("nutzap", {
         const lockedTokens: LockedTokenPayload[] = [];
 
         for (let i = 0; i < months; i++) {
-          const unlockDate = dayjs(startDate)
-            .add(i, "month")
-            .add(10, "minute")
-            .unix();
+          const unlockDate = calcUnlock(startDate, i);
           const mint = wallet.findSpendableMint(amount, trustedMints);
           if (!mint)
             throw new Error("Insufficient balance in recipient-trusted mints");
