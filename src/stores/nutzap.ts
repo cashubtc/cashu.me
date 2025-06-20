@@ -106,7 +106,7 @@ export const useNutzapStore = defineStore("nutzap", {
         for (let i = 0; i < months; i++) {
           const unlockDate = dayjs(startDate)
             .add(i, "month")
-            .startOf("day")
+            .add(10, "minute")
             .unix();
           const mint = wallet.findSpendableMint(amount, trustedMints);
           if (!mint)
