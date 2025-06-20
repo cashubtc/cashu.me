@@ -13,14 +13,13 @@ import {
 } from "./nostr";
 import type { NostrEvent, NDKSubscription } from "@nostr-dev-kit/ndk";
 import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+dayjs.extend(utc);
 
 export function calcUnlock(base: number, i: number): number {
-  const baseDate = new Date(base * 1000);
-  baseDate.setUTCHours(0, 0, 0, 0);
-  let ts = Math.floor(baseDate.getTime() / 1000);
-  const min = Math.floor(Date.now() / 1000) + 30 * 60;
-  if (ts < min) ts = min;
-  return dayjs.unix(ts).add(i, "month").unix();
+  const first = dayjs.unix(base).utc().startOf("day").add(30, "minute");
+  const now = dayjs().add(30, "minute");
+  return (first.isAfter(now) ? first : now).add(i, "month").unix();
 }
 
 interface SendParams {
