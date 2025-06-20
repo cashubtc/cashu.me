@@ -2,6 +2,8 @@ import { copyToClipboard } from "quasar";
 import { useUiStore } from "stores/ui";
 import { Clipboard } from "@capacitor/clipboard";
 import { SafeArea } from "capacitor-plugin-safe-area";
+import { boot } from "quasar/wrappers";
+import { notifySuccess, notifyError } from "src/js/notify";
 
 window.LOCALE = "en";
 // window.EventHub = new Vue();
@@ -34,17 +36,21 @@ window.windowMixin = {
       this.$q.localStorage.set("cashu.darkMode", this.$q.dark.isActive);
     },
     copyText: function (text, message, position) {
-      let notify = this.$q.notify;
-      let i18n = this.$i18n;
-      copyToClipboard(text).then(function () {
-        notify({
-          message:
-            message ||
-            (i18n && i18n.t("global.copy_to_clipboard.success")) ||
-            "Copied to clipboard!",
-          position: position || "bottom",
+      const t = this.$t || (this.$i18n ? this.$i18n.t : (s) => s);
+      copyToClipboard(text)
+        .then(() => {
+          this.$q.notify({
+            message: message || t('global.copy_to_clipboard.success'),
+            position: position || 'bottom',
+          });
+        })
+        .catch(() => {
+          this.$q.notify({
+            type: 'negative',
+            message: 'Failed to copy',
+            position: position || 'bottom',
+          });
         });
-      });
     },
     pasteFromClipboard: async function () {
       let text = "";
@@ -256,3 +262,18 @@ window.windowMixin = {
     }
   },
 };
+
+export default boot(({ app }) => {
+  const i18n = app.config.globalProperties.$i18n;
+  const t = i18n ? i18n.t : (s) => s;
+
+  window.copyText = (text, message) => {
+    copyToClipboard(text)
+      .then(() => {
+        notifySuccess(message || t('global.copy_to_clipboard.success'));
+      })
+      .catch(() => {
+        notifyError('Failed to copy');
+      });
+  };
+});
