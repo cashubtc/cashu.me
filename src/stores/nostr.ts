@@ -56,9 +56,6 @@ import { useP2PKStore } from "./p2pk";
 
 // --- Nutzap helpers (NIP-61) ----------------------------------------------
 
-// shared NDK instance
-let ndk: NDK | undefined = undefined;
-
 import type { NostrEvent } from "@nostr-dev-kit/ndk";
 
 interface NutzapProfile {
@@ -68,11 +65,7 @@ interface NutzapProfile {
   relays: string[];
 }
 
-function urlsToRelaySet(urls?: string[]): NDKRelaySet | undefined {
-  if (!ndk) {
-    console.error('Cannot create RelaySet: NDK is not initialized.');
-    return undefined;
-  }
+function urlsToRelaySet(ndk: NDK, urls?: string[]): NDKRelaySet | undefined {
   if (!urls?.length) return undefined;
 
   const set = new NDKRelaySet();
@@ -145,23 +138,19 @@ export async function publishNutzapProfile(opts: {
 }) {
   const nostr = useNostrStore();
   await nostr.initSignerIfNotSet();
-  await nostr.ensureNdkConnected(opts.relays);
-  if (!ndk) {
-    notifyError('Cannot publish profile: Nostr service is not connected.');
-    return null as any;
-  }
+  nostr.ensureNdkConnected(opts.relays);
   const tags: NDKTag[] = [["pubkey", opts.p2pkPub]];
   for (const url of opts.mints) tags.push(["mint", url]);
   if (opts.relays)
     for (const r of opts.relays) tags.push(["relay", r]);
 
-  const ev = new NDKEvent(ndk);
+  const ev = new NDKEvent(nostr.ndk);
   ev.kind = 10019;
   ev.content = "";
   ev.tags = tags;
   ev.created_at = Math.floor(Date.now() / 1000);
   await ev.sign();
-  const relaySet = urlsToRelaySet(opts.relays);
+  const relaySet = urlsToRelaySet(nostr.ndk, opts.relays);
   try {
     await ev.publish(relaySet);
   } catch (e: any) {
@@ -179,18 +168,14 @@ export async function publishNutzap(opts: {
 }) {
   const nostr = useNostrStore();
   await nostr.initSignerIfNotSet();
-  await nostr.ensureNdkConnected(opts.relayHints);
-  if (!ndk) {
-    notifyError('Cannot publish nutzap: Nostr service is not connected.');
-    return null as any;
-  }
-  const ev = new NDKEvent(ndk);
+  nostr.ensureNdkConnected(opts.relayHints);
+  const ev = new NDKEvent(nostr.ndk);
   ev.kind = 9321;
   ev.content = opts.content;
   ev.tags = [["p", opts.receiverHex]];
   ev.created_at = Math.floor(Date.now() / 1000);
   await ev.sign();
-  const relaySet = urlsToRelaySet(opts.relayHints);
+  const relaySet = urlsToRelaySet(nostr.ndk, opts.relayHints);
   try {
     await ev.publish(relaySet);
   } catch (e: any) {
@@ -201,13 +186,13 @@ export async function publishNutzap(opts: {
 }
 
 /** Listens for incoming Nutzaps that reference my pubkey via ‘p’ tag. */
-export async function subscribeToNutzaps(
+export function subscribeToNutzaps(
   myHex: string,
   onZap: (ev: NostrEvent) => void
 ): NDKSubscription {
   const nostr = useNostrStore();
-  await nostr.initNdkReadOnly();
-  const sub = ndk!.subscribe({
+  nostr.initNdkReadOnly();
+  const sub = nostr.ndk.subscribe({
     kinds: [9321],
     "#p": [myHex],
   });
@@ -242,7 +227,7 @@ export const useNostrStore = defineStore("nostr", {
     connected: false,
     pubkey: useLocalStorage<string>("cashu.ndk.pubkey", ""),
     relays: useSettingsStore().defaultNostrRelays,
-    ndk: undefined as unknown as NDK,
+    ndk: {} as NDK,
     signerType: useLocalStorage<SignerType>(
       "cashu.ndk.signerType",
       SignerType.SEED
@@ -333,26 +318,23 @@ export const useNostrStore = defineStore("nostr", {
     },
   },
   actions: {
-    initNdkReadOnly: async function () {
-      if (this.connected && ndk) {
+    initNdkReadOnly: function () {
+      if (this.connected) {
         return;
       }
-      ndk = new NDK({ explicitRelayUrls: this.relays });
-      this.ndk = ndk as NDK;
-      await ndk.connect();
+      this.ndk = new NDK({ explicitRelayUrls: this.relays });
+      this.ndk.connect();
       this.connected = true;
     },
     disconnect: function () {
-      if (ndk && (ndk as any).pool) {
-        for (const relay of (ndk as any).pool.relays.values()) {
+      if (this.ndk && (this.ndk as any).pool) {
+        for (const relay of (this.ndk as any).pool.relays.values()) {
           relay.disconnect && relay.disconnect();
         }
       }
       this.connected = false;
-      ndk = undefined;
-      this.ndk = undefined as unknown as NDK;
     },
-    connect: async function (relays?: string[]) {
+    connect: function (relays?: string[]) {
       if (relays) {
         this.relays = relays as any;
       }
@@ -361,29 +343,29 @@ export const useNostrStore = defineStore("nostr", {
       if (this.signer) {
         opts.signer = this.signer;
       }
-      ndk = new NDK(opts);
-      this.ndk = ndk as NDK;
-      await ndk.connect();
+      this.ndk = new NDK(opts);
+      this.ndk.connect();
       this.connected = true;
     },
-    ensureNdkConnected: async function (relays?: string[]) {
-      if (!ndk) {
-        await this.connect(relays);
-      } else if (!this.connected) {
-        await ndk.connect();
+    ensureNdkConnected: function (relays?: string[]) {
+      // 1. bootstrap NDK if missing
+      if (!this.ndk) {
+        this.connect(relays);
+      }
+      // 2. still not connected? connect() might be async
+      if (!this.connected) {
+        this.ndk?.connect();
         this.connected = true;
-      } else if (ndk.pool?.stats().disconnected > 0) {
-        await ndk.connect();
       }
       if (relays?.length) {
-        const added = urlsToRelaySet(relays);
+        const added = urlsToRelaySet(this.ndk, relays);
         if (added) {
-          await ndk!.connect();
+          this.ndk.connect();
         }
       }
     },
     initSignerIfNotSet: async function () {
-      if (!this.signer || !ndk) {
+      if (!this.signer || !this.ndk) {
         this.initialized = false; // force re-initialisation
       }
       if (!this.initialized) {
@@ -404,9 +386,8 @@ export const useNostrStore = defineStore("nostr", {
     },
     setSigner: async function (signer: NDKSigner) {
       this.signer = signer;
-      ndk = new NDK({ signer: signer, explicitRelayUrls: this.relays });
-      this.ndk = ndk as NDK;
-      await ndk.connect();
+      this.ndk = new NDK({ signer: signer, explicitRelayUrls: this.relays });
+      this.ndk.connect();
       this.connected = true;
     },
     signDummyEvent: async function (): Promise<NDKEvent> {

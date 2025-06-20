@@ -1483,7 +1483,7 @@
                           $t("Settings.advanced.developer.new_seed.button")
                         }}</q-btn
                       >
-                      <div class="row">
+                      <row>
                         <q-item-label class="q-px-sm" caption
                           >{{
                             $t(
@@ -1491,7 +1491,7 @@
                             )
                           }}
                         </q-item-label>
-                      </div>
+                      </row>
                     </div>
                     <div class="col-12" v-if="confirmMnemonic">
                       <span
@@ -1530,7 +1530,7 @@
               </q-item>
               <q-item>
                 <q-item-section>
-                  <div class="row">
+                  <row>
                     <q-btn
                       dense
                       flat
@@ -1540,8 +1540,8 @@
                       >{{
                         $t("Settings.advanced.developer.remove_spent.button")
                       }}</q-btn
-                    ></div
-                  ><div class="row">
+                    ></row
+                  ><row>
                     <q-item-label class="q-px-sm" caption
                       >{{
                         $t(
@@ -1549,18 +1549,18 @@
                         )
                       }}
                     </q-item-label>
-                  </div>
+                  </row>
                 </q-item-section>
               </q-item>
               <q-item>
                 <q-item-section>
-                  <div class="row">
+                  <row>
                     <q-btn dense flat outline click @click="toggleTerminal">
                       {{
                         $t("Settings.advanced.developer.debug_console.button")
                       }}
-                    </q-btn></div
-                  ><div class="row">
+                    </q-btn></row
+                  ><row>
                     <q-item-label class="q-px-sm" caption
                       >{{
                         $t(
@@ -1568,18 +1568,18 @@
                         )
                       }}
                     </q-item-label>
-                  </div>
+                  </row>
                 </q-item-section>
               </q-item>
               <q-item>
                 <q-item-section>
-                  <div class="row">
+                  <row>
                     <q-btn dense flat outline click @click="exportActiveProofs">
                       {{
                         $t("Settings.advanced.developer.export_proofs.button")
                       }}
-                    </q-btn></div
-                  ><div class="row">
+                    </q-btn></row
+                  ><row>
                     <q-item-label class="q-px-sm" caption
                       >{{
                         $t(
@@ -1587,18 +1587,18 @@
                         )
                       }}
                     </q-item-label>
-                  </div>
+                  </row>
                 </q-item-section>
               </q-item>
               <q-item>
                 <q-item-section>
-                  <div class="row">
+                  <row>
                     <!-- add a caption, not a button here -->
                     <q-item-label class="q-pb-sm">{{
                       $t("Settings.advanced.developer.keyset_counters.title")
-                    }}</q-item-label></div
+                    }}</q-item-label></row
                   >
-                  <div class="row">
+                  <row>
                     <q-item-label class="q-px-sm" caption
                       >{{
                         $t(
@@ -1606,9 +1606,9 @@
                         )
                       }}
                     </q-item-label>
-                  </div>
-                  <div class="row" class="q-pa-sm">
-                    <div class="row"
+                  </row>
+                  <row class="q-pa-sm">
+                    <row
                       class="q-px-sm"
                       v-for="(mintCounter, mintUrl) in keysetCountersByMint"
                       :key="mintUrl"
@@ -1625,13 +1625,13 @@
                         @click="increaseKeysetCounter(counter.id, 1)"
                         >{{ counter.id }} - counter: {{ counter.counter }}
                       </q-btn>
-                    </div>
-                  </div>
+                    </row>
+                  </row>
                 </q-item-section>
               </q-item>
               <q-item>
                 <q-item-section>
-                  <div class="row">
+                  <row>
                     <q-btn
                       dense
                       flat
@@ -1642,8 +1642,8 @@
                       {{
                         $t("Settings.advanced.developer.unset_reserved.button")
                       }}
-                    </q-btn></div
-                  ><div class="row">
+                    </q-btn></row
+                  ><row>
                     <q-item-label class="q-px-sm" caption
                       >{{
                         $t(
@@ -1651,18 +1651,18 @@
                         )
                       }}
                     </q-item-label>
-                  </div>
+                  </row>
                 </q-item-section>
               </q-item>
               <q-item>
                 <q-item-section>
-                  <div class="row">
+                  <row>
                     <q-btn dense flat outline click @click="showOnboarding">
                       {{
                         $t("Settings.advanced.developer.show_onboarding.button")
                       }}
-                    </q-btn></div
-                  ><div class="row">
+                    </q-btn></row
+                  ><row>
                     <q-item-label class="q-px-sm" caption
                       >{{
                         $t(
@@ -1670,12 +1670,12 @@
                         )
                       }}
                     </q-item-label>
-                  </div>
+                  </row>
                 </q-item-section>
               </q-item>
               <q-item>
                 <q-item-section>
-                  <div class="row">
+                  <row>
                     <q-btn
                       v-if="!confirmNuke"
                       dense
@@ -1687,8 +1687,8 @@
                       {{
                         $t("Settings.advanced.developer.reset_wallet.button")
                       }}
-                    </q-btn></div
-                  ><div class="row" v-if="!confirmNuke">
+                    </q-btn></row
+                  ><row v-if="!confirmNuke">
                     <q-item-label class="q-px-sm" caption
                       >{{
                         $t(
@@ -1696,8 +1696,8 @@
                         )
                       }}
                     </q-item-label>
-                  </div>
-                  <div class="row" v-if="confirmNuke">
+                  </row>
+                  <row v-if="confirmNuke">
                     <span>{{
                       $t(
                         "Settings.advanced.developer.reset_wallet.confirm_question"
@@ -1726,18 +1726,18 @@
                         $t("Settings.advanced.developer.reset_wallet.confirm")
                       }}</q-btn
                     >
-                  </div>
+                  </row>
                 </q-item-section>
               </q-item>
               <q-item>
                 <q-item-section>
-                  <div class="row">
+                  <row>
                     <q-btn dense flat outline click @click="exportWalletState">
                       {{
                         $t("Settings.advanced.developer.export_wallet.button")
                       }}
-                    </q-btn></div
-                  ><div class="row">
+                    </q-btn></row
+                  ><row>
                     <q-item-label class="q-px-sm" caption
                       >{{
                         $t(
@@ -1745,7 +1745,7 @@
                         )
                       }}
                     </q-item-label>
-                  </div>
+                  </row>
                 </q-item-section>
               </q-item>
             </div>
