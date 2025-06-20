@@ -70,15 +70,25 @@ function urlsToRelaySet(ndk: NDK, urls?: string[]): NDKRelaySet | undefined {
 
   const set = new NDKRelaySet();
   for (const u of urls) {
-    // ensure relay object exists in pool
-    let relay = ndk.pool.relays.get(u);
-    if (!relay) {
-      relay = new NDKRelay(u);
-      ndk.pool.addRelay(relay); // read & write by default
+    let relay: NDKRelay | undefined;
+    try {
+      relay = ndk.pool.relays.get(u);
+      if (!relay) {
+        relay = new NDKRelay(u);
+        ndk.pool.addRelay(relay);
+      }
+    } catch (e) {
+      console.error("Failed to construct relay", u, e);
+      continue;
     }
+
+    relay.write = true;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (relay as any).setWrite?.(true);
     set.addRelay(relay);
   }
-  return set;
+
+  return set.relays.size ? set : undefined;
 }
 
 /**
@@ -128,6 +138,7 @@ export async function publishNutzapProfile(opts: {
 }) {
   const nostr = useNostrStore();
   await nostr.initSignerIfNotSet();
+  nostr.ensureNdkConnected(opts.relays);
   const tags: NDKTag[] = [["pubkey", opts.p2pkPub]];
   for (const url of opts.mints) tags.push(["mint", url]);
   if (opts.relays)
@@ -140,7 +151,12 @@ export async function publishNutzapProfile(opts: {
   ev.created_at = Math.floor(Date.now() / 1000);
   await ev.sign();
   const relaySet = urlsToRelaySet(nostr.ndk, opts.relays);
-  await ev.publish(relaySet);
+  try {
+    await ev.publish(relaySet);
+  } catch (e: any) {
+    notifyError(e?.message ?? String(e));
+    throw e;
+  }
   return ev.id!;
 }
 
@@ -152,6 +168,7 @@ export async function publishNutzap(opts: {
 }) {
   const nostr = useNostrStore();
   await nostr.initSignerIfNotSet();
+  nostr.ensureNdkConnected(opts.relayHints);
   const ev = new NDKEvent(nostr.ndk);
   ev.kind = 9321;
   ev.content = opts.content;
@@ -159,7 +176,12 @@ export async function publishNutzap(opts: {
   ev.created_at = Math.floor(Date.now() / 1000);
   await ev.sign();
   const relaySet = urlsToRelaySet(nostr.ndk, opts.relayHints);
-  await ev.publish(relaySet);
+  try {
+    await ev.publish(relaySet);
+  } catch (e: any) {
+    notifyError(e?.message ?? String(e));
+    throw e;
+  }
   return ev.id!;
 }
 
@@ -324,6 +346,19 @@ export const useNostrStore = defineStore("nostr", {
       this.ndk = new NDK(opts);
       this.ndk.connect();
       this.connected = true;
+    },
+    ensureNdkConnected: function (relays?: string[]) {
+      if (!this.connected) {
+        this.connect(relays);
+        return;
+      }
+
+      if (relays?.length) {
+        const added = urlsToRelaySet(this.ndk, relays);
+        if (added) {
+          this.ndk.connect();
+        }
+      }
     },
     initSignerIfNotSet: async function () {
       if (!this.initialized) {
