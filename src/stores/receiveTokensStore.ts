@@ -97,16 +97,11 @@ export const useReceiveTokensStore = defineStore("receiveTokensStore", {
       // redeem the token
       try {
         await walletStore.redeem(bucketId);
+      } finally {
         await cashuDb.lockedTokens
           .where("tokenString")
           .equals(receiveStore.receiveData.tokensBase64)
           .delete();
-      } catch (error) {
-        await cashuDb.lockedTokens
-          .where("tokenString")
-          .equals(receiveStore.receiveData.tokensBase64)
-          .delete();
-        throw error;
       }
       receiveStore.showReceiveTokens = false;
       uiStore.closeDialogs();
