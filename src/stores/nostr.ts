@@ -104,6 +104,33 @@ export async function fetchNutzapProfile(
   });
 }
 
+/** Publishes a ‘kind:10019’ Nutzap profile event. */
+export async function publishNutzapProfile(opts: {
+  p2pkPub: string;
+  mints: string[];
+  relays?: string[];
+}) {
+  const nostr = useNostrStore();
+  await nostr.initSignerIfNotSet();
+  const tags: NDKTag[] = [["pubkey", opts.p2pkPub]];
+  for (const url of opts.mints) tags.push(["mint", url]);
+  if (opts.relays)
+    for (const r of opts.relays) tags.push(["relay", r]);
+
+  const ev: NostrEvent = {
+    kind: 10019,
+    content: "",
+    tags,
+    created_at: Math.floor(Date.now() / 1000),
+  } as NostrEvent;
+  const signed = await nostr.ndk.sign(ev);
+  await nostr.ndk.publish(
+    signed,
+    opts.relays && opts.relays.length ? opts.relays : undefined
+  );
+  return signed.id;
+}
+
 /** Publishes a ‘kind:9321’ Nutzap event. */
 export async function publishNutzap(opts: {
   content: string;
