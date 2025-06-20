@@ -348,11 +348,15 @@ export const useNostrStore = defineStore("nostr", {
       this.connected = true;
     },
     ensureNdkConnected: function (relays?: string[]) {
-      if (!this.connected) {
+      // 1. bootstrap NDK if missing
+      if (!this.ndk) {
         this.connect(relays);
-        return;
       }
-
+      // 2. still not connected? connect() might be async
+      if (!this.connected) {
+        this.ndk?.connect();
+        this.connected = true;
+      }
       if (relays?.length) {
         const added = urlsToRelaySet(this.ndk, relays);
         if (added) {
@@ -361,6 +365,9 @@ export const useNostrStore = defineStore("nostr", {
       }
     },
     initSignerIfNotSet: async function () {
+      if (!this.signer || !this.ndk) {
+        this.initialized = false; // force re-initialisation
+      }
       if (!this.initialized) {
         await this.initSigner();
       }

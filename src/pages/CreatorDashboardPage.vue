@@ -19,15 +19,7 @@
           subscribe to your tiers.
         </div>
         <q-btn
-          v-if="hasP2PK"
-          color="white"
-          text-color="orange"
-          label="Publish now"
-          @click="doPublish"
-          class="q-ml-md"
-        />
-        <q-btn
-          v-else
+          v-if="!hasP2PK"
           color="white"
           text-color="orange"
           label="Generate P2PK key"
@@ -36,6 +28,19 @@
         />
       </div>
     </q-banner>
+
+    <!-- NEW: profile composer ------------------------------------- -->
+    <q-card class="q-mt-md q-mb-md" flat bordered>
+      <q-card-section>
+        <div class="text-h6">Nutzap receiving profile</div>
+        <q-input v-model="profilePub" label="P2PK pubkey (hex, start with 02…)" dense />
+        <q-input v-model="profileMints" label="Trusted mints (comma-separated URLs)" dense />
+        <q-input v-model="profileRelays" label="Relay hints (comma-separated wss://…)" dense />
+      </q-card-section>
+      <q-card-actions align="right">
+        <q-btn color="primary" :disable="!canSaveNutzap" @click="publishProfile">Publish now</q-btn>
+      </q-card-actions>
+    </q-card>
 
     <NutzapNotification class="q-mt-md" />
 
@@ -192,6 +197,14 @@ export default defineComponent({
     const profile = ref<any>({ display_name: "", picture: "", about: "" });
     const needsProfile = ref(false);
 
+    const profilePub = ref("");
+    const profileMints = ref("");
+    const profileRelays = ref("");
+
+    const canSaveNutzap = computed(
+      () => profilePub.value.startsWith("02") && profileMints.value.length > 0
+    );
+
     const p2pkStore = useP2PKStore();
     const mintsStore = useMintsStore();
     const hasP2PK = computed(() => p2pkStore.p2pkKeys.length > 0);
@@ -293,6 +306,29 @@ export default defineComponent({
       }
     }
 
+    async function publishProfile() {
+      try {
+        await nostr.initSignerIfNotSet();
+      } catch (e) {
+        notifyError("You declined the Nostr signer popup");
+        return;
+      }
+      try {
+        await publishNutzapProfile({
+          p2pkPub: profilePub.value,
+          mints: profileMints.value.split(",").map((s) => s.trim()),
+          relays: profileRelays.value
+            .split(",")
+            .map((s) => s.trim())
+            .filter(Boolean),
+        });
+        notifySuccess("Nutzap profile published ✔");
+        needsProfile.value = false;
+      } catch (e: any) {
+        notifyError(e);
+      }
+    }
+
     function generateP2PK() {
       p2pkStore.generateKeypair();
     }
@@ -343,6 +379,11 @@ export default defineComponent({
       generateP2PK,
       editedTiers,
       cancelEdit,
+      profilePub,
+      profileMints,
+      profileRelays,
+      canSaveNutzap,
+      publishProfile,
     };
   },
 });
