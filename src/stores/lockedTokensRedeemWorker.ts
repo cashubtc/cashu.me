@@ -21,7 +21,7 @@ export const useLockedTokensRedeemWorker = defineStore(
         window.addEventListener("message", this.handleMessage);
         this.worker = setInterval(
           () => this.processTokens(),
-          this.checkInterval
+          this.checkInterval,
         );
         // run immediately
         this.processTokens();
@@ -55,7 +55,10 @@ export const useLockedTokensRedeemWorker = defineStore(
             const decoded = token.decode(entry.tokenString);
             if (!decoded) {
               console.error("Invalid token stored", entry.id);
-              await cashuDb.lockedTokens.delete(entry.id);
+              await cashuDb.lockedTokens
+                .where("tokenString")
+                .equals(entry.tokenString)
+                .delete();
               continue;
             }
             const mintUrl = token.getMint(decoded);
@@ -68,15 +71,21 @@ export const useLockedTokensRedeemWorker = defineStore(
             ) {
               console.error(
                 "Mint or keyset mismatch for locked token",
-                entry.id
+                entry.id,
               );
-              await cashuDb.lockedTokens.delete(entry.id);
+              await cashuDb.lockedTokens
+                .where("tokenString")
+                .equals(entry.tokenString)
+                .delete();
               continue;
             }
             const mintWallet = wallet.mintWallet(mintUrl, unit);
             const spent = await wallet.checkProofsSpendable(proofs, mintWallet);
             if (spent && spent.length === proofs.length) {
-              await cashuDb.lockedTokens.delete(entry.id);
+              await cashuDb.lockedTokens
+                .where("tokenString")
+                .equals(entry.tokenString)
+                .delete();
               continue;
             }
 
@@ -96,7 +105,10 @@ export const useLockedTokensRedeemWorker = defineStore(
             debug("locked token redeem: sending proofs", proofs);
             try {
               await wallet.redeem(entry.tierId);
-              await cashuDb.lockedTokens.delete(entry.id);
+              await cashuDb.lockedTokens
+                .where("tokenString")
+                .equals(entry.tokenString)
+                .delete();
             } catch (err: any) {
               if (
                 typeof err?.message === "string" &&
@@ -116,5 +128,5 @@ export const useLockedTokensRedeemWorker = defineStore(
         }
       },
     },
-  }
+  },
 );

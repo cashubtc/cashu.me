@@ -46,6 +46,7 @@ import { defineComponent } from "vue";
 import { mapState } from "pinia";
 import { formatDistanceToNow, parseISO } from "date-fns";
 import { useDexieLockedTokensStore } from "stores/lockedTokensDexie";
+import { cashuDb } from "stores/dexie";
 import { useMintsStore } from "stores/mints";
 import { useReceiveTokensStore } from "stores/receiveTokensStore";
 import { useWalletStore } from "stores/wallet";
@@ -67,7 +68,7 @@ export default defineComponent({
         (t) =>
           t.owner === "creator" &&
           t.creatorNpub === nostrPubkey &&
-          t.tierId === this.bucketId
+          t.tierId === this.bucketId,
       );
     },
     maxPages() {
@@ -105,7 +106,10 @@ export default defineComponent({
       receiveStore.receiveData.tokensBase64 = token.tokenString;
       receiveStore.receiveData.bucketId = token.tierId;
       await wallet.redeem(token.tierId);
-      await useDexieLockedTokensStore().deleteLockedToken(token.id);
+      await cashuDb.lockedTokens
+        .where("tokenString")
+        .equals(token.tokenString)
+        .delete();
     },
   },
 });
