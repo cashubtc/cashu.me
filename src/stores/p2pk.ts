@@ -303,14 +303,14 @@ export const useP2PKStore = defineStore("p2pk", {
       const bucketId = entry?.tierId ?? DEFAULT_BUCKET_ID;
       const label = entry?.label ?? "";
 
-      const privkey = this.getPrivateKeyForP2PKEncodedToken(encodedToken);
-      if (!privkey) {
-        throw new Error("no private key found for locked token");
+      const p2pkPriv = this.getPrivateKeyForP2PKEncodedToken(encodedToken);
+      if (!p2pkPriv) {
+        throw new Error("no P2PK private key found for locked token");
       }
 
       const receivedProofs = await wallet.receive(encodedToken, {
         counter,
-        privkey,
+        privkey: p2pkPriv,
         proofsWeHave: mintsStore.mintUnitProofs(mint, unit),
       });
 
