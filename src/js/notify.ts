@@ -53,10 +53,11 @@ async function notifySuccess(
   });
 }
 
-async function notifyError(message: string, caption?: any) {
+async function notifyError(msg: any, caption?: any) {
   Notify.create({
     color: "red",
-    message: message,
+    message:
+      typeof msg === "string" ? msg : msg?.message ?? JSON.stringify(msg),
     caption: caption !== undefined ? String(caption) : undefined,
     position: "top",
     progress: true,
