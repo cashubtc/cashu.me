@@ -626,7 +626,12 @@ export const useNostrStore = defineStore("nostr", {
       if (!privKey) {
         throw new Error("No private key for decryption");
       }
-      return await nip04.decrypt(privKey, sender, content);
+      try {
+        return await nip04.decrypt(privKey, sender, content);
+      } catch (e) {
+        const key = nip44.v2.utils.getConversationKey(privKey, sender);
+        return await nip44.v2.decrypt(content, key);
+      }
     },
     sendNip04DirectMessage: async function (
       recipient: string,
