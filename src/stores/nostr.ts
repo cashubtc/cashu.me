@@ -117,18 +117,14 @@ export async function publishNutzapProfile(opts: {
   if (opts.relays)
     for (const r of opts.relays) tags.push(["relay", r]);
 
-  const ev: NostrEvent = {
-    kind: 10019,
-    content: "",
-    tags,
-    created_at: Math.floor(Date.now() / 1000),
-  } as NostrEvent;
-  const signed = await nostr.ndk.sign(ev);
-  await nostr.ndk.publish(
-    signed,
-    opts.relays && opts.relays.length ? opts.relays : undefined
-  );
-  return signed.id;
+  const ev = new NDKEvent(nostr.ndk);
+  ev.kind = 10019;
+  ev.content = "";
+  ev.tags = tags;
+  ev.created_at = Math.floor(Date.now() / 1000);
+  await ev.sign();
+  await ev.publish(opts.relays?.length ? opts.relays : undefined);
+  return ev.id!;
 }
 
 /** Publishes a ‘kind:9321’ Nutzap event. */
@@ -139,18 +135,14 @@ export async function publishNutzap(opts: {
 }) {
   const nostr = useNostrStore();
   await nostr.initSignerIfNotSet();
-  const ev: NostrEvent = {
-    kind: 9321,
-    content: opts.content,
-    tags: [["p", opts.receiverHex]],
-    created_at: Math.floor(Date.now() / 1000),
-  } as NostrEvent;
-  const signed = await nostr.ndk.sign(ev);
-  await nostr.ndk.publish(
-    signed,
-    opts.relayHints?.length ? opts.relayHints : undefined
-  );
-  return signed.id;
+  const ev = new NDKEvent(nostr.ndk);
+  ev.kind = 9321;
+  ev.content = opts.content;
+  ev.tags = [["p", opts.receiverHex]];
+  ev.created_at = Math.floor(Date.now() / 1000);
+  await ev.sign();
+  await ev.publish(opts.relayHints?.length ? opts.relayHints : undefined);
+  return ev.id!;
 }
 
 /** Listens for incoming Nutzaps that reference my pubkey via ‘p’ tag. */
