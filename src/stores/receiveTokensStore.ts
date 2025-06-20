@@ -95,11 +95,19 @@ export const useReceiveTokensStore = defineStore("receiveTokensStore", {
         await mintStore.addMint({ url: token.getMint(tokenJson) });
       }
       // redeem the token
-      await walletStore.redeem(bucketId);
-      await cashuDb.lockedTokens
-        .where("tokenString")
-        .equals(receiveStore.receiveData.tokensBase64)
-        .delete();
+      try {
+        await walletStore.redeem(bucketId);
+        await cashuDb.lockedTokens
+          .where("tokenString")
+          .equals(receiveStore.receiveData.tokensBase64)
+          .delete();
+      } catch (error) {
+        await cashuDb.lockedTokens
+          .where("tokenString")
+          .equals(receiveStore.receiveData.tokensBase64)
+          .delete();
+        throw error;
+      }
       receiveStore.showReceiveTokens = false;
       uiStore.closeDialogs();
     },
