@@ -53,11 +53,11 @@ async function notifySuccess(
   });
 }
 
-async function notifyError(message: string, caption?: string) {
+async function notifyError(message: string, caption?: any) {
   Notify.create({
     color: "red",
     message: message,
-    caption,
+    caption: caption !== undefined ? String(caption) : undefined,
     position: "top",
     progress: true,
     actions: [

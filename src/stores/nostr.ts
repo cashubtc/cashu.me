@@ -65,6 +65,16 @@ interface NutzapProfile {
   relays: string[];
 }
 
+function urlsToRelaySet(ndk: NDK, urls?: string[]): NDKRelaySet | undefined {
+  if (!urls?.length) return undefined;
+  const set = new NDKRelaySet();
+  urls.forEach((u) => {
+    const r = ndk.getRelay(u);
+    if (r) set.addRelay(r);
+  });
+  return set;
+}
+
 /**
  * Fetches the receiver’s ‘kind:10019’ Nutzap profile.
  */
@@ -123,7 +133,8 @@ export async function publishNutzapProfile(opts: {
   ev.tags = tags;
   ev.created_at = Math.floor(Date.now() / 1000);
   await ev.sign();
-  await ev.publish(opts.relays?.length ? opts.relays : undefined);
+  const relaySet = urlsToRelaySet(nostr.ndk, opts.relays);
+  await ev.publish(relaySet);
   return ev.id!;
 }
 
@@ -141,7 +152,8 @@ export async function publishNutzap(opts: {
   ev.tags = [["p", opts.receiverHex]];
   ev.created_at = Math.floor(Date.now() / 1000);
   await ev.sign();
-  await ev.publish(opts.relayHints?.length ? opts.relayHints : undefined);
+  const relaySet = urlsToRelaySet(nostr.ndk, opts.relayHints);
+  await ev.publish(relaySet);
   return ev.id!;
 }
 
