@@ -887,6 +887,19 @@
                 >{{ $t("Settings.p2pk_features.import_button") }}</q-btn
               >
             </q-item>
+            <q-item style="display: inline-block">
+              <q-btn
+                class="q-ml-sm q-px-md"
+                color="primary"
+                size="sm"
+                rounded
+                outline
+                @click="publishMyNutzapProfile"
+                >{{
+                  $t("Settings.p2pk_features.publish_profile_button")
+                }}</q-btn
+              >
+            </q-item>
             <q-item>
               <q-toggle
                 v-model="showP2PkButtonInDrawer"
@@ -1760,7 +1773,10 @@ import { useMintsStore, MintClass } from "src/stores/mints";
 import { useWalletStore } from "src/stores/wallet";
 import { map } from "underscore";
 import { useSettingsStore } from "src/stores/settings";
-import { useNostrStore } from "src/stores/nostr";
+import {
+  useNostrStore,
+  publishNutzapProfile as publishNutzapProfileFn,
+} from "src/stores/nostr";
 import { useNPCStore } from "src/stores/npubcash";
 import { useP2PKStore } from "src/stores/p2pk";
 import { useNWCStore } from "src/stores/nwc";
@@ -2018,6 +2034,22 @@ export default defineComponent({
       // export active proofs
       const token = await this.serializeProofs(this.activeProofs);
       this.copyText(token);
+    },
+    publishMyNutzapProfile: async function () {
+      try {
+        if (!this.p2pkKeys.length) {
+          this.notifyError("No P2PK key available");
+          return;
+        }
+        await publishNutzapProfileFn({
+          p2pkPub: this.p2pkKeys[0].publicKey,
+          mints: this.mints.map((m) => m.url),
+          relays: this.defaultNostrRelays,
+        });
+        this.notifySuccess("Nutzap profile published");
+      } catch (e) {
+        this.notifyError(e.message || "Failed to publish Nutzap profile");
+      }
     },
     handleSeedClick: async function () {
       await this.initWalletSeedPrivateKeySigner();
