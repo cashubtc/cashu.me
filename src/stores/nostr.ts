@@ -621,7 +621,12 @@ export const useNostrStore = defineStore("nostr", {
           this.signerType === SignerType.NIP46) &&
         (window as any)?.nostr?.nip04?.decrypt
       ) {
-        return await (window as any).nostr.nip04.decrypt(sender, content);
+        try {
+          return await (window as any).nostr.nip04.decrypt(sender, content);
+        } catch (e) {
+          const shared = await (window as any).nostr.getSharedSecret(sender);
+          return await nip44.v2.decrypt(content, shared);
+        }
       }
       if (!privKey) {
         throw new Error("No private key for decryption");
