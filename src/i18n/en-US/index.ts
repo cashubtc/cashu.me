@@ -348,6 +348,7 @@ export default {
         "Generate a key pair to receive P2PK-locked ecash. Warning: This feature is experimental. Only use with small amounts. If you lose your private keys, nobody will be able to unlock the ecash locked to it anymore.",
       generate_button: "Generate key",
       import_button: "Import nsec",
+      publish_profile_button: "Publish Nutzap profile",
       quick_access: {
         toggle: "Quick access to lock",
         description:
