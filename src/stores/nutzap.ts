@@ -138,6 +138,7 @@ export const useNutzapStore = defineStore("nutzap", {
         // Persist into bucket store for progress UI
         const buckets = useLockedTokensStore();
         await buckets.addMany(lockedTokens as any);
+        return lockedTokens;
       } catch (e: any) {
         this.error = e.message;
         throw e;

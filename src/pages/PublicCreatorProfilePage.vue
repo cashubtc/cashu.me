@@ -84,21 +84,17 @@ import { defineComponent, ref, onMounted, computed } from "vue";
 import { useRoute } from "vue-router";
 import { useCreatorsStore } from "stores/creators";
 import { useNostrStore } from "stores/nostr";
-import { useDonationPresetsStore } from "stores/donationPresets";
-import { useLockedTokensStore } from "stores/lockedTokens";
+
 import { usePriceStore } from "stores/price";
 import { useUiStore } from "stores/ui";
 import SubscribeDialog from "components/SubscribeDialog.vue";
 import SubscriptionReceipt from "components/SubscriptionReceipt.vue";
-import { useMintsStore } from "stores/mints";
-import { notifyError, notifySuccess, notifyWarning } from "src/js/notify";
-import { useDmChatsStore } from "stores/dmChats";
+import { notifyError, notifySuccess } from "src/js/notify";
 import { useNutzapStore } from "stores/nutzap";
 import { useI18n } from "vue-i18n";
 import { Loading } from "quasar";
 import { renderMarkdown as renderMarkdownFn } from "src/js/simple-markdown";
 import PaywalledContent from "components/PaywalledContent.vue";
-import { receiptToDmText } from "src/js/receipt-utils";
 
 export default defineComponent({
   name: "PublicCreatorProfilePage",
@@ -108,11 +104,8 @@ export default defineComponent({
     const creatorNpub = route.params.npub as string;
     const creators = useCreatorsStore();
     const nostr = useNostrStore();
-    const donationStore = useDonationPresetsStore();
-    const lockedStore = useLockedTokensStore();
     const priceStore = usePriceStore();
     const uiStore = useUiStore();
-    const mintsStore = useMintsStore();
     const nutzap = useNutzapStore();
     const { t } = useI18n();
     const bitcoinPrice = computed(() => priceStore.bitcoinPrice);
@@ -155,49 +148,17 @@ export default defineComponent({
     }: any) => {
       Loading.show({ message: "Loading..." });
       try {
-        const receipts = (await donationStore.createDonationPreset(
+        const receipts = await nutzap.send({
+          npub: creatorNpub,
           months,
           amount,
-          creatorNpub,
-          bucketId,
           startDate,
-          true,
-          {
-            tierName: selectedTier.value?.name,
-            benefits: selectedTier.value?.benefits || [],
-            frequency: "monthly",
-          }
-        )) as any[];
-        let supporterName = nostr.pubkey;
-        try {
-          const prof = await nostr.getProfile(nostr.pubkey);
-          supporterName =
-            prof?.display_name || prof?.name || prof?.username || nostr.pubkey;
-        } catch {}
-        let dmSuccess = true;
-        for (const r of receipts) {
-          const dmMessage = receiptToDmText(r, supporterName);
-          const { success, event } = await nostr.sendNip04DirectMessage(
-            creatorNpub,
-            dmMessage
-          );
-          if (event) useDmChatsStore().addOutgoing(event);
-          if (!success) dmSuccess = false;
-          await nutzap.send({
-            npub: creatorNpub,
-            months: 1,
-            amount: r.amount,
-            startDate: r.locktime,
-          });
-        }
-        if (dmSuccess) {
-          notifySuccess(t("FindCreators.notifications.subscription_success"));
-        } else {
-          notifyWarning(t("wallet.notifications.nostr_dm_failed"));
-        }
-        receiptList.value = receipts;
+        });
+
+        receiptList.value = receipts as any[];
         showReceiptDialog.value = true;
         showSubscribeDialog.value = false;
+        notifySuccess(t("FindCreators.notifications.subscription_success"));
       } catch (e: any) {
         notifyError(e.message);
       } finally {
