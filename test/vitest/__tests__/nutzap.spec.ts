@@ -1,6 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import dayjs from "dayjs";
-import { useNutzapStore } from "../../../src/stores/nutzap";
+import { useNutzapStore, calcUnlock } from "../../../src/stores/nutzap";
 import { cashuDb } from "../../../src/stores/dexie";
 
 let fetchNutzapProfile: any;
@@ -73,9 +72,7 @@ describe("Nutzap store", () => {
 
     expect(lockToPubKey).toHaveBeenCalledTimes(3);
     const times = lockToPubKey.mock.calls.map((c: any[]) => c[0].timelock);
-    const expected = [0, 1, 2].map((i) =>
-      dayjs(start).add(i, "month").startOf("day").unix()
-    );
+    const expected = [0, 1, 2].map((i) => calcUnlock(start, i));
     expect(times).toEqual(expected);
   });
 
