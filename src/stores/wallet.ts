@@ -725,7 +725,7 @@ export const useWalletStore = defineStore("wallet", {
         try {
           receivedProofs = await mintWallet.receive(tokenToRedeem, {
             counter,
-            privkey,
+            privkey: privkey || mintWallet.privkey,
             proofsWeHave: mintStore.mintUnitProofs(mint, historyToken.unit),
           });
           await proofsStore.addProofs(
