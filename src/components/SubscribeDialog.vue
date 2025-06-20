@@ -63,6 +63,7 @@ import { useDonationPresetsStore } from "stores/donationPresets";
 import { useBucketsStore, DEFAULT_BUCKET_ID } from "stores/buckets";
 import { useMintsStore } from "stores/mints";
 import { useUiStore } from "stores/ui";
+import { fetchNutzapProfile } from "stores/nostr";
 import { storeToRefs } from "pinia";
 
 export default defineComponent({
@@ -157,8 +158,15 @@ export default defineComponent({
       emit("update:modelValue", false);
     };
 
-    const confirm = () => {
+    const confirm = async () => {
       if (!startDate.value) {
+        return;
+      }
+      const profile = await fetchNutzapProfile(props.creatorPubkey);
+      if (!profile) {
+        uiStore.notifyError(
+          "Creator has not published a Nutzap profile (kind-10019)",
+        );
         return;
       }
       const ts = Math.floor(new Date(startDate.value).getTime() / 1000);
