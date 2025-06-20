@@ -275,6 +275,7 @@ export default defineComponent({
         return;
       }
       try {
+        await nostr.initSignerIfNotSet();
         await publishNutzapProfile({
           p2pkPub: first.publicKey,
           mints: mintsStore.mints.map((m) => m.url),
