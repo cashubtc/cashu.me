@@ -12,6 +12,31 @@
       }}</q-btn>
     </div>
 
+    <q-banner v-if="needsProfile" dense class="bg-orange text-white q-mt-md">
+      <div class="row items-center">
+        <div class="col">
+          ⚠ You haven’t published a Nutzap profile yet. Supporters cannot
+          subscribe to your tiers.
+        </div>
+        <q-btn
+          v-if="hasP2PK"
+          color="white"
+          text-color="orange"
+          label="Publish now"
+          @click="doPublish"
+          class="q-ml-md"
+        />
+        <q-btn
+          v-else
+          color="white"
+          text-color="orange"
+          label="Generate P2PK key"
+          @click="generateP2PK"
+          class="q-ml-md"
+        />
+      </div>
+    </q-banner>
+
     <NutzapNotification class="q-mt-md" />
 
     <div class="q-mt-md">
@@ -142,12 +167,18 @@ import { defineComponent, ref, onMounted, computed, watch } from "vue";
 import { useCreatorHubStore, Tier } from "stores/creatorHub";
 import AddTierDialog from "components/AddTierDialog.vue";
 import NutzapNotification from "components/NutzapNotification.vue";
-import { useNostrStore } from "stores/nostr";
+import {
+  useNostrStore,
+  fetchNutzapProfile,
+  publishNutzapProfile,
+} from "stores/nostr";
+import { useP2PKStore } from "stores/p2pk";
+import { useMintsStore } from "stores/mints";
 import { useRouter } from "vue-router";
 import { usePriceStore } from "stores/price";
 import { useUiStore } from "stores/ui";
 import { v4 as uuidv4 } from "uuid";
-import { notifySuccess } from "src/js/notify";
+import { notifySuccess, notifyError } from "src/js/notify";
 
 export default defineComponent({
   name: "CreatorDashboardPage",
@@ -159,6 +190,11 @@ export default defineComponent({
     const priceStore = usePriceStore();
     const uiStore = useUiStore();
     const profile = ref<any>({ display_name: "", picture: "", about: "" });
+    const needsProfile = ref(false);
+
+    const p2pkStore = useP2PKStore();
+    const mintsStore = useMintsStore();
+    const hasP2PK = computed(() => p2pkStore.p2pkKeys.length > 0);
     const tiers = computed<Tier[]>(() => store.getTierArray());
 
     const editedTiers = ref<Record<string, Tier>>({});
@@ -182,6 +218,9 @@ export default defineComponent({
       }
       const p = await nostr.getProfile(store.loggedInNpub);
       if (p) profile.value = { ...p };
+      const npub = nostr.pubkey;
+      const existing = await fetchNutzapProfile(npub);
+      needsProfile.value = !existing;
     });
 
     const logout = () => {
@@ -227,6 +266,31 @@ export default defineComponent({
       notifySuccess("Tier removed");
     };
 
+    async function doPublish() {
+      const first = p2pkStore.p2pkKeys[0];
+      if (!first) {
+        notifyError(
+          'You must generate a P2PK key first (click "Generate P2PK")'
+        );
+        return;
+      }
+      try {
+        await publishNutzapProfile({
+          p2pkPub: first.publicKey,
+          mints: mintsStore.mints.map((m) => m.url),
+          relays: nostr.relays,
+        });
+        notifySuccess("Nutzap profile published ✔");
+        needsProfile.value = false;
+      } catch (e: any) {
+        notifyError("Publishing failed", String(e));
+      }
+    }
+
+    function generateP2PK() {
+      p2pkStore.generateKeypair();
+    }
+
     const saveTier = async (tier: Tier) => {
       const data = editedTiers.value[tier.id];
       if (data) {
@@ -256,6 +320,8 @@ export default defineComponent({
     return {
       profile,
       tiers,
+      needsProfile,
+      hasP2PK,
       bitcoinPrice,
       formatCurrency,
       logout,
@@ -267,6 +333,8 @@ export default defineComponent({
       saveAllTiers,
       removeTier,
       saveTier,
+      doPublish,
+      generateP2PK,
       editedTiers,
       cancelEdit,
     };
