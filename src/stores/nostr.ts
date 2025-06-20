@@ -67,11 +67,17 @@ interface NutzapProfile {
 
 function urlsToRelaySet(ndk: NDK, urls?: string[]): NDKRelaySet | undefined {
   if (!urls?.length) return undefined;
+
   const set = new NDKRelaySet();
-  urls.forEach((u) => {
-    const r = ndk.getRelay(u);
-    if (r) set.addRelay(r);
-  });
+  for (const u of urls) {
+    // ensure relay object exists in pool
+    let relay = ndk.pool.relays.get(u);
+    if (!relay) {
+      relay = new NDKRelay(u);
+      ndk.pool.addRelay(relay); // read & write by default
+    }
+    set.addRelay(relay);
+  }
   return set;
 }
 
