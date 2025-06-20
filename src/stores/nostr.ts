@@ -965,7 +965,11 @@ export const useNostrStore = defineStore("nostr", {
         }
 
         // check for locked token format
-        if (payload && payload.token && payload.referenceId) {
+        if (
+          payload.token &&
+          payload.bucketId &&
+          payload.unlockTime !== undefined
+        ) {
           const buckets = useBucketsStore();
           if (!buckets.bucketList.find((b) => b.id === payload.bucketId)) {
             buckets.buckets.push({
