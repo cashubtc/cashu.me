@@ -36,6 +36,9 @@ module.exports = {
     // required to lint *.vue files
     "vue",
 
+    // enables rules from @typescript-eslint/eslint-plugin
+    "@typescript-eslint",
+
     // https://github.com/typescript-eslint/typescript-eslint/issues/389#issuecomment-509292674
     // Prettier has not been included as plugin to avoid performance impact
     // add it as an extension for your IDE
