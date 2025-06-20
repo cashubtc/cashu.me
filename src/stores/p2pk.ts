@@ -6,6 +6,12 @@ import { ensureCompressed } from "src/utils/ecash";
 import { bytesToHex } from "@noble/hashes/utils"; // already an installed dependency
 import { WalletProof } from "stores/mints";
 import token from "src/js/token";
+import { useWalletStore } from "./wallet";
+import { useProofsStore } from "./proofs";
+import { useMintsStore } from "./mints";
+import { useTokensStore } from "./tokens";
+import { DEFAULT_BUCKET_ID } from "./buckets";
+import { cashuDb } from "./dexie";
 
 type P2PKKey = {
   publicKey: string;
@@ -261,6 +267,59 @@ export const useP2PKStore = defineStore("p2pk", {
         return undefined;
       }
       return Math.max(...times);
+    },
+    claimLockedToken: async function (encodedToken: string) {
+      const walletStore = useWalletStore();
+      const proofsStore = useProofsStore();
+      const mintsStore = useMintsStore();
+      const tokensStore = useTokensStore();
+
+      const decoded = token.decode(encodedToken);
+      if (!decoded) {
+        throw new Error("Invalid token");
+      }
+
+      const mintUrl = token.getMint(decoded);
+      const unit = token.getUnit(decoded);
+
+      if (!mintsStore.mints.find((m) => m.url === mintUrl)) {
+        await mintsStore.addMint({ url: mintUrl });
+      }
+
+      const mint = mintsStore.mints.find((m) => m.url === mintUrl);
+      if (!mint) {
+        throw new Error("mint not found");
+      }
+
+      const wallet = walletStore.mintWallet(mintUrl, unit);
+
+      const keysetId = walletStore.getKeyset(mintUrl, unit);
+      const counter = walletStore.keysetCounter(keysetId);
+
+      const entry = await cashuDb.lockedTokens
+        .where("tokenString")
+        .equals(encodedToken)
+        .first();
+      const bucketId = entry?.tierId ?? DEFAULT_BUCKET_ID;
+      const label = entry?.label ?? "";
+
+      const receivedProofs = await wallet.receive(encodedToken, {
+        counter,
+        privkey: wallet.privkey,
+        proofsWeHave: mintsStore.mintUnitProofs(mint, unit),
+      });
+
+      await proofsStore.addProofs(receivedProofs, undefined, bucketId, label);
+      walletStore.increaseKeysetCounter(keysetId, receivedProofs.length);
+
+      tokensStore.addPaidToken({
+        amount: receivedProofs.reduce((s, p) => s + p.amount, 0),
+        token: encodedToken,
+        mint: mintUrl,
+        unit,
+        label,
+        bucketId,
+      });
     },
   },
 });
