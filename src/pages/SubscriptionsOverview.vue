@@ -489,7 +489,8 @@ import { useMessengerStore } from "stores/messenger";
 import { useDonationPresetsStore } from "stores/donationPresets";
 import { useSubscriptionsStore } from "stores/subscriptions";
 import { useRouter } from "vue-router";
-import { useQuasar, copyToClipboard } from "quasar";
+import { useQuasar } from "quasar";
+import { useClipboard } from "src/composables/useClipboard";
 import { nip19 } from "nostr-tools";
 import { formatDistanceToNow } from "date-fns";
 import { shortenString } from "src/js/string-utils";
@@ -604,6 +605,7 @@ const nostr = useNostrStore();
 const messenger = useMessengerStore();
 const router = useRouter();
 const $q = useQuasar();
+const { copy } = useClipboard();
 const isSmallScreen = computed(() => $q.screen.lt.md);
 const { t } = useI18n();
 const showDialog = ref(false);
@@ -776,12 +778,7 @@ function exportTokens(pubkey: string) {
 }
 
 function copyToken(token: string) {
-  copyToClipboard(token).then(() => {
-    $q.notify({
-      message: t("global.copy_to_clipboard.success"),
-      position: "bottom",
-    });
-  });
+  copy(token);
 }
 
 function updateProfiles() {
