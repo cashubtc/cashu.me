@@ -93,26 +93,26 @@ export const useNPCStore = defineStore("npc", {
         return;
       }
       // get info
-      this.npcLoading = true;
-      try {
-        const info = await this.getInfo();
-        if (info.error) {
-          notifyError(info.error);
-          return;
-        }
-        // log info
-        if (info.username) {
-          const usernameAddress = info.username + "@" + this.npcDomain;
-          if (previousAddress !== usernameAddress) {
-            notifySuccess(`Logged in as ${info.username}`);
-          }
-          this.npcAddress = usernameAddress;
-        }
-      } catch (e: any) {
-        notifyApiError(e);
-      } finally {
-        this.npcLoading = false;
-      }
+      // this.npcLoading = true;
+      // try {
+      //   const info = await this.getInfo();
+      //   if (info.error) {
+      //     notifyError(info.error);
+      //     return;
+      //   }
+      //   // log info
+      //   if (info.username) {
+      //     const usernameAddress = info.username + "@" + this.npcDomain;
+      //     if (previousAddress !== usernameAddress) {
+      //       notifySuccess(`Logged in as ${info.username}`);
+      //     }
+      //     this.npcAddress = usernameAddress;
+      //   }
+      // } catch (e: any) {
+      //   notifyApiError(e);
+      // } finally {
+      //   this.npcLoading = false;
+      // }
     },
     generateNip98Event: async function (
       url: string,
