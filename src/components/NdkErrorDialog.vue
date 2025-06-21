@@ -3,46 +3,64 @@
     <q-card class="q-pa-md" style="min-width: 300px">
       <q-card-section class="text-h6">Nostr Error</q-card-section>
       <q-card-section>
-        <p v-if="error?.reason === 'no-signer'">
-          No available Nostr signer was found. Please install a signer extension
-          or provide an nsec key.
-        </p>
-        <p v-else-if="error?.reason === 'connect-failed'">
-          Failed to connect to the configured relays. Check your internet
-          connection and try again.
-        </p>
-        <p v-else>
-          An unknown error occurred while starting Nostr.
-        </p>
+        <template v-if="error?.reason === 'nip07-locked'">
+          <p>Please unlock your NIP-07 signer extension and retry.</p>
+        </template>
+        <template v-else-if="error?.reason === 'no-signer'">
+          <p>No available Nostr signer found. Please enter your nsec key.</p>
+          <q-input v-model="nsec" label="nsec" type="text" dense autofocus />
+        </template>
+        <template v-else>
+          <p>An unknown error occurred while starting Nostr.</p>
+        </template>
       </q-card-section>
       <q-card-actions align="right">
-        <q-btn flat color="primary" @click="retry">Retry</q-btn>
-        <q-btn v-close-popup flat color="grey" @click="close">Close</q-btn>
+        <q-btn
+          v-if="error?.reason === 'no-signer'"
+          flat
+          color="primary"
+          @click="saveNsec"
+          >Continue</q-btn
+        >
+        <q-btn
+          v-else
+          flat
+          color="primary"
+          @click="retry"
+          >Retry</q-btn
+        >
       </q-card-actions>
     </q-card>
   </q-dialog>
 </template>
 
 <script lang="ts" setup>
-import { computed } from 'vue'
+import { ref, computed } from 'vue'
 import { storeToRefs } from 'pinia'
-import { useNdkBootStore } from 'src/stores/ndkBoot'
+import { useBootErrorStore } from 'src/stores/bootError'
 
-const ndkBoot = useNdkBootStore()
-const { error } = storeToRefs(ndkBoot)
+const bootErrorStore = useBootErrorStore()
+const { error } = storeToRefs(bootErrorStore)
+
+const nsec = ref('')
 
 const model = computed({
   get: () => error.value !== null,
   set: (v: boolean) => {
-    if (!v) ndkBoot.setError(null)
+    if (!v) bootErrorStore.clear()
   }
 })
 
-function retry() {
-  ndkBoot.retry()
+function saveNsec() {
+  const key = nsec.value.trim()
+  if (!key) return
+  localStorage.setItem('nsec', key)
+  bootErrorStore.clear()
+  location.reload()
 }
 
-function close() {
-  ndkBoot.setError(null)
+function retry() {
+  bootErrorStore.clear()
+  location.reload()
 }
 </script>
