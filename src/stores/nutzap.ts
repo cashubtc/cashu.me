@@ -40,9 +40,9 @@ export const useNutzapStore = defineStore("nutzap", {
 
   actions: {
     /** Called once on app start (e.g. from MainLayout.vue) */
-    initListener(myHex: string) {
+    async initListener(myHex: string) {
       if (this.listenerStarted) return;
-      this.subscription = subscribeToNutzaps(myHex, (ev: NostrEvent) => {
+      this.subscription = await subscribeToNutzaps(myHex, (ev: NostrEvent) => {
         this._onZap(ev);
       });
       this.listenerStarted = true;

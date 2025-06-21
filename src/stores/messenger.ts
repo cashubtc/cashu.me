@@ -289,11 +289,11 @@ export const useMessengerStore = defineStore("messenger", {
       return nostr.connected;
     },
 
-    connect(relays: string[]) {
+    async connect(relays: string[]) {
       const nostr = useNostrStore();
       this.relays = relays as any;
       // Reconnect the nostr store with the updated relays
-      nostr.connect(relays as any);
+      await nostr.connect(relays as any);
     },
 
     disconnect() {
