@@ -100,7 +100,7 @@ import { renderMarkdown as renderMarkdownFn } from "src/js/simple-markdown";
 
 export default defineComponent({
   name: "MyProfilePage",
-  async setup() {
+  setup() {
     const $q = useQuasar();
     const { t } = useI18n();
     const { copy } = useClipboard();
@@ -132,8 +132,8 @@ export default defineComponent({
       if (p) profile.value = { ...p };
     }
 
-    onMounted(async () => {
-      await initProfile();
+    onMounted(() => {
+      initProfile();
     });
 
     function renderMarkdown(text: string): string {

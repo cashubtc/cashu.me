@@ -77,12 +77,12 @@ import MessageList from "components/MessageList.vue";
 import MessageInput from "components/MessageInput.vue";
 import ChatSendTokenDialog from "components/ChatSendTokenDialog.vue";
 
-await useNdk();
+const ndkPromise = useNdk();
 
 const messenger = useMessengerStore();
 messenger.loadIdentity();
 onMounted(() => {
-  messenger.start();
+  ndkPromise.then(() => messenger.start());
 });
 
 const router = useRouter();

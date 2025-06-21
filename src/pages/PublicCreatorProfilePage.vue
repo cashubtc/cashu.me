@@ -106,7 +106,7 @@ import PaywalledContent from "components/PaywalledContent.vue";
 export default defineComponent({
   name: "PublicCreatorProfilePage",
   components: { PaywalledContent, SubscriptionReceipt },
-  async setup() {
+  setup() {
     const route = useRoute();
     const creatorNpub = route.params.npub as string;
     const creators = useCreatorsStore();
@@ -132,10 +132,8 @@ export default defineComponent({
       followers.value = await nostr.fetchFollowerCount(creatorNpub);
       following.value = await nostr.fetchFollowingCount(creatorNpub);
     };
-    await loadProfile();
-    onMounted(() => {});
-
-    await useNdk();
+    loadProfile();
+    useNdk();
 
     const openSubscribe = (tier: any) => {
       selectedTier.value = tier;
