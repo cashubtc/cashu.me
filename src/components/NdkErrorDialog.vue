@@ -29,6 +29,7 @@
           @click="retry"
           >Retry</q-btn
         >
+        <q-btn flat label="Close" @click="errStore.clear()" v-close-popup />
       </q-card-actions>
     </q-card>
   </q-dialog>
@@ -37,17 +38,17 @@
 <script lang="ts" setup>
 import { ref, computed } from 'vue'
 import { storeToRefs } from 'pinia'
-import { useBootErrorStore } from 'src/stores/bootError'
+import { useBootErrorStore } from 'stores/bootError'
 
-const bootErrorStore = useBootErrorStore()
-const { error } = storeToRefs(bootErrorStore)
+const errStore = useBootErrorStore()
+const { error } = storeToRefs(errStore)
 
 const nsec = ref('')
 
 const model = computed({
   get: () => error.value !== null,
   set: (v: boolean) => {
-    if (!v) bootErrorStore.clear()
+    if (!v) errStore.clear()
   }
 })
 
@@ -55,12 +56,12 @@ function saveNsec() {
   const key = nsec.value.trim()
   if (!key) return
   localStorage.setItem('nsec', key)
-  bootErrorStore.clear()
+  errStore.clear()
   location.reload()
 }
 
 function retry() {
-  bootErrorStore.clear()
+  errStore.clear()
   location.reload()
 }
 </script>
