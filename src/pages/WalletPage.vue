@@ -1,9 +1,11 @@
 <template>
-  <div class="row q-col-gutter-y-md justify-center q-pt-sm q-pb-md">
-    <div class="col-12 col-sm-11 col-md-8 text-center q-gutter-y-md">
-      <ActivityOrb />
-      <NoMintWarnBanner v-if="mints.length == 0" />
-      <BalanceView v-else :set-tab="setTab" />
+  <Suspense>
+    <template #default>
+      <div class="row q-col-gutter-y-md justify-center q-pt-sm q-pb-md">
+        <div class="col-12 col-sm-11 col-md-8 text-center q-gutter-y-md">
+          <ActivityOrb />
+          <NoMintWarnBanner v-if="mints.length == 0" />
+          <BalanceView v-else :set-tab="setTab" />
       <div
         class="wallet-actions row items-center justify-around q-gutter-x-xl q-pt-lg q-pb-md"
       >
@@ -172,7 +174,12 @@
 
     <!-- RECEIVE TOKENS DIALOG  -->
     <ReceiveTokenDialog v-model="showReceiveTokens" />
-  </div>
+      </div>
+    </template>
+    <template #fallback>
+      <q-skeleton height="100vh" square />
+    </template>
+  </Suspense>
 </template>
 <style>
 * {
@@ -246,6 +253,7 @@ import ActivityOrb from "components/ActivityOrb.vue";
 import BucketManager from "components/BucketManager.vue";
 import MissingSignerModal from "src/components/MissingSignerModal.vue";
 import { Dialog } from "quasar";
+import { useNdk } from "src/composables/useNdk";
 
 // pinia stores
 import { mapActions, mapState, mapWritableState } from "pinia";
@@ -620,6 +628,7 @@ export default {
   watch: {},
 
   async mounted() {
+    await useNdk();
     // generate NPC connection
     this.generateNPCConnection();
     this.claimAllTokens();
