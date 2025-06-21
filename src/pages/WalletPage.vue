@@ -624,89 +624,92 @@ export default {
         });
       }
     },
+    async initPage() {
+      await useNdk();
+      // generate NPC connection
+      this.generateNPCConnection();
+      this.claimAllTokens();
+
+      // Initialize and run migrations
+      const migrationsStore = useMigrationsStore();
+      migrationsStore.initMigrations();
+      await migrationsStore.runMigrations();
+
+      // check if another tab is open
+      this.registerBroadcastChannel();
+
+      let params = new URL(document.location).searchParams;
+      let hash = new URL(document.location).hash;
+
+      if (params.get("mint")) {
+        let addMintUrl = params.get("mint");
+        await this.setTab("mints");
+        this.showAddMintDialog = true;
+        this.addMintData = { url: addMintUrl };
+      }
+      if (!localStorage.getItem("cashu.activeMintUrl")) {
+        this.setTab("mints");
+      }
+
+      debug("Mint URL " + this.activeMintUrl);
+      debug("Wallet URL " + this.baseURL);
+
+      if (params.get("token") || hash.includes("token")) {
+        let tokenBase64 = params.get("token") || hash.split("token=")[1];
+        let seen = false;
+        for (var i = 0; i < this.historyTokens.length; i++) {
+          var thisToken = this.historyTokens[i].token;
+          if (thisToken == tokenBase64 && this.historyTokens[i].amount > 0) {
+            seen = true;
+          }
+        }
+        if (!seen) {
+          this.receiveData.tokensBase64 = tokenBase64;
+          this.showReceiveTokens = true;
+        }
+      }
+
+      if (params.get("lightning")) {
+        this.showParseDialog();
+        this.payInvoiceData.input.request = params.get("lightning");
+      }
+
+      debug(`hash: ${window.location.hash}`);
+
+      useUiStore().enableDebugConsole();
+      await this.migrateToDexie();
+      this.checkLocalStorage();
+      this.registerPWAEventHook();
+      this.initializeMnemonic();
+
+      const hasExt = await this.checkNip07Signer();
+      if (hasExt) {
+        await this.initNip07Signer();
+      } else {
+        await this.initSigner();
+        this.notifyWarning(this.$t("settings.nostr.signing_extension.not_found"));
+      }
+
+      this.showWelcomePage();
+
+      if (this.nwcEnabled) {
+        this.listenToNWCCommands();
+      }
+
+      if (this.enablePaymentRequest) {
+        this.subscribeToNip17DirectMessages();
+      }
+
+      this.subscribeToNip04DirectMessages();
+      this.startInvoiceCheckerWorker();
+      this.startLockedTokensRedeemWorker();
+      this.checkPendingInvoices();
+    },
   },
   watch: {},
 
-  async mounted() {
-    await useNdk();
-    // generate NPC connection
-    this.generateNPCConnection();
-    this.claimAllTokens();
-
-    // Initialize and run migrations
-    const migrationsStore = useMigrationsStore();
-    migrationsStore.initMigrations();
-    await migrationsStore.runMigrations();
-
-    // check if another tab is open
-    this.registerBroadcastChannel();
-
-    let params = new URL(document.location).searchParams;
-    let hash = new URL(document.location).hash;
-
-    if (params.get("mint")) {
-      let addMintUrl = params.get("mint");
-      await this.setTab("mints");
-      this.showAddMintDialog = true;
-      this.addMintData = { url: addMintUrl };
-    }
-    if (!localStorage.getItem("cashu.activeMintUrl")) {
-      this.setTab("mints");
-    }
-
-    debug("Mint URL " + this.activeMintUrl);
-    debug("Wallet URL " + this.baseURL);
-
-    if (params.get("token") || hash.includes("token")) {
-      let tokenBase64 = params.get("token") || hash.split("token=")[1];
-      let seen = false;
-      for (var i = 0; i < this.historyTokens.length; i++) {
-        var thisToken = this.historyTokens[i].token;
-        if (thisToken == tokenBase64 && this.historyTokens[i].amount > 0) {
-          seen = true;
-        }
-      }
-      if (!seen) {
-        this.receiveData.tokensBase64 = tokenBase64;
-        this.showReceiveTokens = true;
-      }
-    }
-
-    if (params.get("lightning")) {
-      this.showParseDialog();
-      this.payInvoiceData.input.request = params.get("lightning");
-    }
-
-    debug(`hash: ${window.location.hash}`);
-
-    useUiStore().enableDebugConsole();
-    await this.migrateToDexie();
-    this.checkLocalStorage();
-    this.registerPWAEventHook();
-    this.initializeMnemonic();
-
-    const hasExt = await this.checkNip07Signer();
-    if (hasExt) {
-      await this.initNip07Signer();
-    } else {
-      await this.initSigner();
-      this.notifyWarning(this.$t("settings.nostr.signing_extension.not_found"));
-    }
-
-    this.showWelcomePage();
-
-    if (this.nwcEnabled) {
-      this.listenToNWCCommands();
-    }
-
-    if (this.enablePaymentRequest) {
-      this.subscribeToNip17DirectMessages();
-    }
-
-    this.subscribeToNip04DirectMessages();
-    this.startInvoiceCheckerWorker();
-    this.startLockedTokensRedeemWorker();
-    this.checkPendingInvoices();
+  mounted() {
+    this.initPage();
   },
 
   unmounted: function () {
