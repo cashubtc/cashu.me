@@ -20,12 +20,15 @@ export default {
       urDecoderProgress: 0,
     };
   },
-  setup() {
+  async setup() {
     const instance = getCurrentInstance();
-    onMounted(async () => {
+    async function initScanner() {
       QrScanner = (await import("qr-scanner")).default;
       URDecoder = (await import("@gandlaf21/bc-ur")).URDecoder;
+    }
 
+    await initScanner();
+    onMounted(() => {
       if (!instance) return;
       const vm: any = instance.proxy;
       vm.qrScanner = new QrScanner(

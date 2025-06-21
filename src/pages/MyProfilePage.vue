@@ -126,11 +126,14 @@ export default defineComponent({
       uiStore.formatCurrency(walletBalance.value, activeUnit.value)
     );
 
-    onMounted(async () => {
+    async function initProfile() {
       if (!npub.value) return;
       const p = await nostr.getProfile(npub.value);
       if (p) profile.value = { ...p };
-    });
+    }
+
+    await initProfile();
+    onMounted(() => {});
 
     function renderMarkdown(text: string): string {
       return renderMarkdownFn(text || "");

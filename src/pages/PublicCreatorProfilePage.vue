@@ -132,7 +132,8 @@ export default defineComponent({
       followers.value = await nostr.fetchFollowerCount(creatorNpub);
       following.value = await nostr.fetchFollowingCount(creatorNpub);
     };
-    onMounted(loadProfile);
+    await loadProfile();
+    onMounted(() => {});
 
     await useNdk();
 

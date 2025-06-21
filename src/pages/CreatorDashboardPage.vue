@@ -224,7 +224,7 @@ export default defineComponent({
       { immediate: true, deep: true }
     );
 
-    onMounted(async () => {
+    async function initPage() {
       if (!store.loggedInNpub) {
         router.push("/creator/login");
         return;
@@ -234,7 +234,10 @@ export default defineComponent({
       const npub = nostr.pubkey;
       const existing = await fetchNutzapProfile(npub);
       needsProfile.value = !existing;
-    });
+    }
+
+    await initPage();
+    onMounted(() => {});
 
     const logout = () => {
       store.logout();

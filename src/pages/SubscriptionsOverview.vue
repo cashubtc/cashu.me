@@ -781,17 +781,18 @@ function copyToken(token: string) {
   copy(token);
 }
 
-function updateProfiles() {
-  subscriptionsStore.subscriptions.forEach(async (sub) => {
+async function updateProfiles() {
+  for (const sub of subscriptionsStore.subscriptions) {
     const pk = sub.creatorNpub;
     if (!profiles.value[pk]) {
       const p = await nostr.getProfile(pk);
       if (p) profiles.value[pk] = p;
     }
-  });
+  }
 }
 
-onMounted(updateProfiles);
+await updateProfiles();
+onMounted(() => {});
 watch(() => subscriptionsStore.subscriptions, updateProfiles);
 
 const columns = computed(() => [
