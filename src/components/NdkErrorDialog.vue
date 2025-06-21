@@ -50,7 +50,6 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { LocalStorage } from 'quasar'
 import { useBootErrorStore } from 'stores/bootError'
 
 const errStore   = useBootErrorStore()
@@ -63,7 +62,7 @@ const nsec = ref('')
 
 function saveNsec () {
   if (!nsec.value.startsWith('nsec')) return
-  LocalStorage.set('nsec', nsec.value.trim())
+  window.localStorage.setItem('nsec', nsec.value.trim())
   errStore.clear()
   location.reload()
 }

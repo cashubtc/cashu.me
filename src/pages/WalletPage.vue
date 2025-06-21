@@ -625,10 +625,6 @@ export default {
       }
     },
     async initPage() {
-      await useNdk();
-      // generate NPC connection
-      this.generateNPCConnection();
-      this.claimAllTokens();
 
       // Initialize and run migrations
       const migrationsStore = useMigrationsStore();
@@ -709,6 +705,11 @@ export default {
   watch: {},
 
   mounted() {
+    const ndkReady = useNdk();
+    ndkReady.then(() => {
+      this.generateNPCConnection();
+      this.claimAllTokens();
+    });
     this.initPage();
   },
 
