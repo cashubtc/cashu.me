@@ -146,6 +146,15 @@ Start a development server:
 npm run dev
 ```
 
+### Verifying the NDK refactor
+After migrating away from direct `NDK` instances, check that no lingering instantiations remain.
+Run these commands and ensure they return no results (except mocks or the boot file):
+
+```
+git grep -n "new NDK("
+git grep -n ".ndk"
+```
+
 ## Contributing
 
 Contributions are welcome! Open an issue or pull request to discuss your ideas. Bug reports and feature requests are encouraged. Help with translation and documentation is always appreciated.
