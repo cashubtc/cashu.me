@@ -132,8 +132,9 @@ export default defineComponent({
       if (p) profile.value = { ...p };
     }
 
-    await initProfile();
-    onMounted(() => {});
+    onMounted(async () => {
+      await initProfile();
+    });
 
     function renderMarkdown(text: string): string {
       return renderMarkdownFn(text || "");
