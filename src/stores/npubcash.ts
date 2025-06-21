@@ -18,6 +18,7 @@ import token from "../js/token";
 import { WalletProof, useMintsStore } from "./mints";
 import { useTokensStore } from "../stores/tokens";
 import { useNostrStore } from "../stores/nostr";
+import { useNdk } from "src/composables/useNdk";
 import { DEFAULT_BUCKET_ID } from "./buckets";
 // type NPCConnection = {
 //   walletPublicKey: string,
@@ -121,7 +122,8 @@ export const useNPCStore = defineStore("npc", {
     ): Promise<string> {
       const nostrStore = useNostrStore();
       await nostrStore.initSignerIfNotSet();
-      const nip98Event = new NDKEvent(new NDK());
+      const ndk = await useNdk();
+      const nip98Event = new NDKEvent(ndk);
       nip98Event.kind = NIP98Kind;
       nip98Event.content = "";
       nip98Event.tags = [

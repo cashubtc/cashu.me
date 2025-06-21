@@ -11,6 +11,7 @@ import { useMintsStore } from "./mints";
 import { db } from "./dexie";
 import { v4 as uuidv4 } from "uuid";
 import { notifySuccess } from "src/js/notify";
+import { useNdk } from "src/composables/useNdk";
 
 export interface Tier {
   id: string;
@@ -69,7 +70,8 @@ export const useCreatorHubStore = defineStore("creatorHub", {
     async updateProfile(profile: any) {
       const nostr = useNostrStore();
       await nostr.initSignerIfNotSet();
-      const ev = new NDKEvent(nostr.ndk);
+      const ndk = await useNdk();
+      const ev = new NDKEvent(ndk);
       ev.kind = 0;
       ev.content = JSON.stringify(profile);
       await ev.sign(nostr.signer);
@@ -110,7 +112,8 @@ export const useCreatorHubStore = defineStore("creatorHub", {
         "#d": ["tiers"],
         limit: 1,
       };
-      const events = await nostr.ndk.fetchEvents(filter);
+      const ndk = await useNdk();
+      const events = await ndk.fetchEvents(filter);
       events.forEach((ev) => {
         try {
           const data: Tier[] = JSON.parse(ev.content);
@@ -133,7 +136,8 @@ export const useCreatorHubStore = defineStore("creatorHub", {
       const tiersArray = this.getTierArray();
       const nostr = useNostrStore();
       await nostr.initSignerIfNotSet();
-      const ev = new NDKEvent(nostr.ndk);
+      const ndk = await useNdk();
+      const ev = new NDKEvent(ndk);
       ev.kind = TIER_DEFINITIONS_KIND as unknown as NDKKind;
       ev.tags = [["d", "tiers"]];
       ev.created_at = Math.floor(Date.now() / 1000);
