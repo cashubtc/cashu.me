@@ -619,18 +619,11 @@ export default {
   },
   watch: {},
 
-  mounted: function () {
+  async mounted() {
     // generate NPC connection
     this.generateNPCConnection();
     this.claimAllTokens();
-  },
 
-  unmounted: function () {
-    window.removeEventListener("message", this.handleLockedTokenMessage);
-  },
-
-  created: async function () {
-    window.addEventListener("message", this.handleLockedTokenMessage);
     // Initialize and run migrations
     const migrationsStore = useMigrationsStore();
     migrationsStore.initMigrations();
@@ -642,7 +635,6 @@ export default {
     let params = new URL(document.location).searchParams;
     let hash = new URL(document.location).hash;
 
-    // mint url
     if (params.get("mint")) {
       let addMintUrl = params.get("mint");
       await this.setTab("mints");
@@ -656,10 +648,8 @@ export default {
     debug("Mint URL " + this.activeMintUrl);
     debug("Wallet URL " + this.baseURL);
 
-    // get token to receive tokens from a link
     if (params.get("token") || hash.includes("token")) {
       let tokenBase64 = params.get("token") || hash.split("token=")[1];
-      // make sure to react only to tokens not in the users history
       let seen = false;
       for (var i = 0; i < this.historyTokens.length; i++) {
         var thisToken = this.historyTokens[i].token;
@@ -668,43 +658,22 @@ export default {
         }
       }
       if (!seen) {
-        // show receive token dialog
         this.receiveData.tokensBase64 = tokenBase64;
         this.showReceiveTokens = true;
       }
     }
 
-    // get lightning invoice from a link
     if (params.get("lightning")) {
       this.showParseDialog();
       this.payInvoiceData.input.request = params.get("lightning");
     }
 
-    // Clear all parameters from URL without refreshing the page
-    /*
-    window.history.pushState(
-      {},
-      document.title,
-      window.location.href.split("?")[0].split("#")[0]
-    );
-    */
     debug(`hash: ${window.location.hash}`);
 
-    // startup tasks
-
-    // debug console
     useUiStore().enableDebugConsole();
-
-    // migrate to dexie
     await this.migrateToDexie();
-
-    // check local storage
     this.checkLocalStorage();
-
-    // PWA install hook
     this.registerPWAEventHook();
-
-    // generate new mnemonic
     this.initializeMnemonic();
 
     const hasExt = await this.checkNip07Signer();
@@ -715,10 +684,8 @@ export default {
       this.notifyWarning(this.$t("settings.nostr.signing_extension.not_found"));
     }
 
-    // show welcome dialog
     this.showWelcomePage();
 
-    // listen to NWC commands if enabled
     if (this.nwcEnabled) {
       this.listenToNWCCommands();
     }
@@ -727,17 +694,18 @@ export default {
       this.subscribeToNip17DirectMessages();
     }
 
-    // also listen for NIP-04 direct messages
     this.subscribeToNip04DirectMessages();
-
-    // start invoice checker worker
     this.startInvoiceCheckerWorker();
-
-    // start locked tokens auto redeem worker
     this.startLockedTokensRedeemWorker();
-
-    // reconnect all websockets
     this.checkPendingInvoices();
+  },
+
+  unmounted: function () {
+    window.removeEventListener("message", this.handleLockedTokenMessage);
+  },
+
+  created() {
+    window.addEventListener("message", this.handleLockedTokenMessage);
   },
 };
 </script>
