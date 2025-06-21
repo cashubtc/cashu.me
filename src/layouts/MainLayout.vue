@@ -22,9 +22,9 @@ export default defineComponent({
     MainHeader,
     NdkErrorDialog,
   },
-  async mounted() {
+  mounted() {
     const myHex = useNostrStore().pubkey;
-    await useNutzapStore().initListener(myHex);
+    useNutzapStore().initListener(myHex);
   },
 });
 </script>

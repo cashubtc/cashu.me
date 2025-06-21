@@ -186,20 +186,23 @@ export default {
       return totalTime / successfulSwapsWithTime.length;
     },
   },
-  async mounted() {
-    try {
-      this.loading = true;
-      await this.getMintInfo();
-      if (this.mintInfo && this.mintInfo.id) {
-        await this.getMintSwaps(this.mintInfo.id);
-      }
-    } catch (err: any) {
-      this.error = err.message || "Failed to load mint data";
-    } finally {
-      this.loading = false;
-    }
+  mounted() {
+    this.loadMintData();
   },
   methods: {
+    async loadMintData() {
+      try {
+        this.loading = true;
+        await this.getMintInfo();
+        if (this.mintInfo && this.mintInfo.id) {
+          await this.getMintSwaps(this.mintInfo.id);
+        }
+      } catch (err: any) {
+        this.error = err.message || "Failed to load mint data";
+      } finally {
+        this.loading = false;
+      }
+    },
     async getMintInfo() {
       try {
         const response = await fetch(

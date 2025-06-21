@@ -20,31 +20,32 @@ export default {
       urDecoderProgress: 0,
     };
   },
-  async setup() {
+  setup() {
     const instance = getCurrentInstance();
-    async function initScanner() {
+    const scannerPromise = (async () => {
       QrScanner = (await import("qr-scanner")).default;
       URDecoder = (await import("@gandlaf21/bc-ur")).URDecoder;
-    }
+    })();
 
-    await initScanner();
     onMounted(() => {
-      if (!instance) return;
-      const vm: any = instance.proxy;
-      vm.qrScanner = new QrScanner(
-        vm.$refs.cameraEl as HTMLVideoElement,
-        (result: any) => {
-          vm.handleResult(result);
-        },
-        {
-          returnDetailedScanResult: true,
-          highlightScanRegion: true,
-          highlightCodeOutline: true,
-          onDecodeError: () => {},
-        }
-      );
-      vm.qrScanner.start();
-      vm.urDecoder = new URDecoder();
+      scannerPromise.then(() => {
+        if (!instance) return;
+        const vm: any = instance.proxy;
+        vm.qrScanner = new QrScanner(
+          vm.$refs.cameraEl as HTMLVideoElement,
+          (result: any) => {
+            vm.handleResult(result);
+          },
+          {
+            returnDetailedScanResult: true,
+            highlightScanRegion: true,
+            highlightCodeOutline: true,
+            onDecodeError: () => {},
+          }
+        );
+        vm.qrScanner.start();
+        vm.urDecoder = new URDecoder();
+      });
     });
     return {};
   },

@@ -124,7 +124,7 @@ export default {
   created() {
     // Keep synchronous: event listeners could be added here in the future
   },
-  async mounted() {
+  mounted() {
     // Set the initial selected language based on the current locale or from storage
     const stored = localStorage.getItem("cashu.language");
     const initLocale =
