@@ -95,7 +95,20 @@ export const useNPCStore = defineStore("npc", {
       // get info
       this.npcLoading = true;
       try {
-        const info = await this.getInfo();
+        // const info = await this.getInfo(); // Temporarily disable this line
+        // if (info.error) {
+        //   notifyError(info.error);
+        //   return;
+        // }
+        // // log info
+        // if (info.username) {
+        //   const usernameAddress = info.username + "@" + this.npcDomain;
+        //   if (previousAddress !== usernameAddress) {
+        //     notifySuccess(`Logged in as ${info.username}`);
+        //   }
+        //   this.npcAddress = usernameAddress;
+        // }
+        const info = {error: "Temporarily disabled"}; // Add a placeholder to avoid further errors
         if (info.error) {
           notifyError(info.error);
           return;

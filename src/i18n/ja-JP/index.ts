@@ -1,6 +1,6 @@
 export default {
   copied_to_clipboard: "Copied to clipboard!",
-  copy_failed: "Copy failed",
+  copy_failed: "Failed to copy.",
   global: {
     copy_to_clipboard: {
       success: "クリップボードにコピーしました！",
