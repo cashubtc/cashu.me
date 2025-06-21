@@ -1,4 +1,5 @@
 import { boot } from "quasar/wrappers";
+import { useBootErrorStore } from 'stores/bootError'
 import NDK, {
   NDKNip07Signer,
   NDKPrivateKeySigner,
@@ -84,5 +85,6 @@ export async function getNdk(): Promise<NDK> {
 
 export default boot(async ({ app }) => {
   ndkPromise = getNdk();
-  app.config.globalProperties.$ndkPromise = ndkPromise;
+  app.provide('$ndkPromise', ndkPromise);
+  ndkPromise.catch((e) => useBootErrorStore().set(e as NdkBootError));
 });
