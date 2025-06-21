@@ -19,9 +19,9 @@ export default defineComponent({
   components: {
     MainHeader,
   },
-  mounted() {
+  async mounted() {
     const myHex = useNostrStore().pubkey;
-    useNutzapStore().initListener(myHex);
+    await useNutzapStore().initListener(myHex);
   },
 });
 </script>

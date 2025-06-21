@@ -138,7 +138,7 @@ export async function publishNutzapProfile(opts: {
 }) {
   const nostr = useNostrStore();
   await nostr.initSignerIfNotSet();
-  nostr.ensureNdkConnected(opts.relays);
+  await nostr.ensureNdkConnected(opts.relays);
   const tags: NDKTag[] = [["pubkey", opts.p2pkPub]];
   for (const url of opts.mints) tags.push(["mint", url]);
   if (opts.relays)
@@ -168,7 +168,7 @@ export async function publishNutzap(opts: {
 }) {
   const nostr = useNostrStore();
   await nostr.initSignerIfNotSet();
-  nostr.ensureNdkConnected(opts.relayHints);
+  await nostr.ensureNdkConnected(opts.relayHints);
   const ev = new NDKEvent(nostr.ndk);
   ev.kind = 9321;
   ev.content = opts.content;
@@ -186,12 +186,12 @@ export async function publishNutzap(opts: {
 }
 
 /** Listens for incoming Nutzaps that reference my pubkey via ‘p’ tag. */
-export function subscribeToNutzaps(
+export async function subscribeToNutzaps(
   myHex: string,
   onZap: (ev: NostrEvent) => void
-): NDKSubscription {
+): Promise<NDKSubscription> {
   const nostr = useNostrStore();
-  nostr.initNdkReadOnly();
+  await nostr.initNdkReadOnly();
   const sub = nostr.ndk.subscribe({
     kinds: [9321],
     "#p": [myHex],
@@ -227,7 +227,7 @@ export const useNostrStore = defineStore("nostr", {
     connected: false,
     pubkey: useLocalStorage<string>("cashu.ndk.pubkey", ""),
     relays: useSettingsStore().defaultNostrRelays,
-    ndk: {} as NDK,
+    ndk: undefined as unknown as NDK | undefined,
     signerType: useLocalStorage<SignerType>(
       "cashu.ndk.signerType",
       SignerType.SEED
@@ -250,7 +250,7 @@ export const useNostrStore = defineStore("nostr", {
     seedSigner: {} as NDKPrivateKeySigner,
     seedSignerPrivateKeyNsec: "",
     privateKeySigner: {} as NDKPrivateKeySigner,
-    signer: {} as NDKSigner,
+    signer: undefined as unknown as NDKSigner | undefined,
     mintRecommendations: useLocalStorage<MintRecommendation[]>(
       "cashu.ndk.mintRecommendations",
       []
@@ -318,12 +318,12 @@ export const useNostrStore = defineStore("nostr", {
     },
   },
   actions: {
-    initNdkReadOnly: function () {
+    initNdkReadOnly: async function () {
       if (this.connected) {
         return;
       }
       this.ndk = new NDK({ explicitRelayUrls: this.relays });
-      this.ndk.connect();
+      await this.ndk.connect();
       this.connected = true;
     },
     disconnect: function () {
@@ -334,7 +334,7 @@ export const useNostrStore = defineStore("nostr", {
       }
       this.connected = false;
     },
-    connect: function (relays?: string[]) {
+    connect: async function (relays?: string[]) {
       if (relays) {
         this.relays = relays as any;
       }
@@ -344,23 +344,23 @@ export const useNostrStore = defineStore("nostr", {
         opts.signer = this.signer;
       }
       this.ndk = new NDK(opts);
-      this.ndk.connect();
+      await this.ndk.connect();
       this.connected = true;
     },
-    ensureNdkConnected: function (relays?: string[]) {
+    ensureNdkConnected: async function (relays?: string[]) {
       // 1. bootstrap NDK if missing
       if (!this.ndk) {
-        this.connect(relays);
+        await this.connect(relays);
       }
       // 2. still not connected? connect() might be async
       if (!this.connected) {
-        this.ndk?.connect();
+        await this.ndk?.connect();
         this.connected = true;
       }
       if (relays?.length) {
-        const added = urlsToRelaySet(this.ndk, relays);
+        const added = urlsToRelaySet(this.ndk!, relays);
         if (added) {
-          this.ndk.connect();
+          await this.ndk!.connect();
         }
       }
     },
@@ -370,6 +370,7 @@ export const useNostrStore = defineStore("nostr", {
       }
       if (!this.initialized) {
         await this.initSigner();
+        await this.ensureNdkConnected();
       }
     },
     initSigner: async function () {
@@ -387,7 +388,7 @@ export const useNostrStore = defineStore("nostr", {
     setSigner: async function (signer: NDKSigner) {
       this.signer = signer;
       this.ndk = new NDK({ signer: signer, explicitRelayUrls: this.relays });
-      this.ndk.connect();
+      await this.ndk.connect();
       this.connected = true;
     },
     signDummyEvent: async function (): Promise<NDKEvent> {
@@ -571,7 +572,7 @@ export const useNostrStore = defineStore("nostr", {
       // TODO: remove duplicate privateKeysigner
       this.privateKeySigner = this.seedSigner;
       this.signerType = SignerType.SEED;
-      this.setSigner(this.privateKeySigner);
+      await this.setSigner(this.privateKeySigner);
       this.setPubkey(this.seedSignerPublicKey);
     },
     fetchEventsFromUser: async function () {
@@ -767,14 +768,14 @@ export const useNostrStore = defineStore("nostr", {
       const privKey = this.privKeyHex;
       const pubKey = this.pubkey;
       let nip04DirectMessageEvents: Set<NDKEvent> = new Set();
-      const fetchEventsPromise = new Promise<Set<NDKEvent>>((resolve) => {
+      const fetchEventsPromise = new Promise<Set<NDKEvent>>(async (resolve) => {
         if (!this.lastEventTimestamp) {
           this.lastEventTimestamp = Math.floor(Date.now() / 1000);
         }
         debug(
           `### Subscribing to NIP-04 direct messages to ${pubKey} since ${this.lastEventTimestamp}`
         );
-        this.ndk.connect();
+        await this.ndk.connect();
         const sub = this.ndk.subscribe(
           {
             kinds: [NDKKind.EncryptedDirectMessage],
@@ -934,7 +935,7 @@ export const useNostrStore = defineStore("nostr", {
       const privKey = this.privKeyHex;
       const pubKey = this.pubkey;
       let nip17DirectMessageEvents: Set<NDKEvent> = new Set();
-      const fetchEventsPromise = new Promise<Set<NDKEvent>>((resolve) => {
+      const fetchEventsPromise = new Promise<Set<NDKEvent>>(async (resolve) => {
         if (!this.lastEventTimestamp) {
           this.lastEventTimestamp = Math.floor(Date.now() / 1000);
         }
@@ -942,7 +943,7 @@ export const useNostrStore = defineStore("nostr", {
         debug(
           `### Subscribing to NIP-17 direct messages to ${pubKey} since ${since}`
         );
-        this.ndk.connect();
+        await this.ndk.connect();
         const sub = this.ndk.subscribe(
           {
             kinds: [1059 as NDKKind],

@@ -453,7 +453,7 @@ export const useNWCStore = defineStore("nwc", {
         explicitRelayUrls: nostr.relays,
         signer: walletSigner,
       });
-      this.ndk.connect();
+      await this.ndk.connect();
 
       const nip47InfoEvent = new NDKEvent(this.ndk);
       nip47InfoEvent.kind = NWCKind.NWCInfo;

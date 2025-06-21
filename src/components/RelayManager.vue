@@ -36,7 +36,7 @@ const connect = async () => {
     .map((r) => r.trim())
     .filter((r) => r.length);
   try {
-    await Promise.resolve(messenger.connect(relays));
+    await messenger.connect(relays);
     notifySuccess("Connected to relays");
   } catch (err: any) {
     notifyError(err?.message || "Failed to connect");
