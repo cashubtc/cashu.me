@@ -3,11 +3,16 @@ import NDK, {
   NDKNip07Signer,
   NDKPrivateKeySigner,
   NDKSigner,
+  nip07,
 } from "@nostr-dev-kit/ndk";
 import { nip19 } from "nostr-tools";
 import { bytesToHex } from "@noble/hashes/utils";
 
-export type NdkBootErrorReason = "no-signer" | "connect-failed" | "unknown";
+export type NdkBootErrorReason =
+  | "no-signer"
+  | "connect-failed"
+  | "nip07-locked"
+  | "unknown";
 
 export class NdkBootError extends Error {
   reason: NdkBootErrorReason;
@@ -29,9 +34,20 @@ let ndkPromise: Promise<NDK> | undefined;
 
 async function resolveSigner(): Promise<NDKSigner> {
   if (typeof window !== "undefined" && (window as any).nostr) {
-    const signer = new NDKNip07Signer();
-    await signer.blockUntilReady();
-    return signer;
+    try {
+      await nip07.user();
+      await nip07.blockUntilReady();
+      return nip07;
+    } catch (err: any) {
+      const msg = (err as Error).message;
+      if (
+        msg?.includes("There is no active private key") ||
+        msg?.includes("User rejected")
+      ) {
+        throw new NdkBootError("nip07-locked", msg);
+      }
+      throw new NdkBootError("unknown", msg);
+    }
   }
 
   const nsec = localStorage.getItem("nsec");
