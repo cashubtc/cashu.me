@@ -1794,7 +1794,6 @@ import { useI18n } from "vue-i18n";
 
 export default defineComponent({
   name: "SettingsView",
-  mixins: [windowMixin],
   components: {
     P2PKDialog,
     NWCDialog,

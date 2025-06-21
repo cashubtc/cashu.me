@@ -1,4 +1,3 @@
-import { copyToClipboard } from "quasar";
 import { useUiStore } from "stores/ui";
 import { Clipboard } from "@capacitor/clipboard";
 import { SafeArea } from "capacitor-plugin-safe-area";
