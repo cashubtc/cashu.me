@@ -1,10 +1,12 @@
 <template>
-  <div
-    :class="[
-      $q.dark.isActive ? 'bg-dark text-white' : 'bg-white text-dark',
-      'q-pa-md',
-    ]"
-  >
+  <Suspense>
+    <template #default>
+      <div
+        :class="[
+          $q.dark.isActive ? 'bg-dark text-white' : 'bg-white text-dark',
+          'q-pa-md',
+        ]"
+      >
     <div class="q-mb-md">
       <q-btn flat color="primary" to="/find-creators">{{
         $t("CreatorHub.profile.back")
@@ -75,8 +77,12 @@
           </q-card-section>
         </q-card>
       </div>
-    </div>
-  </div>
+      </div>
+    </template>
+    <template #fallback>
+      <q-skeleton height="100vh" square />
+    </template>
+  </Suspense>
 </template>
 
 <script lang="ts">
@@ -84,6 +90,7 @@ import { defineComponent, ref, onMounted, computed } from "vue";
 import { useRoute } from "vue-router";
 import { useCreatorsStore } from "stores/creators";
 import { useNostrStore } from "stores/nostr";
+import { useNdk } from "src/composables/useNdk";
 
 import { usePriceStore } from "stores/price";
 import { useUiStore } from "stores/ui";
@@ -99,7 +106,7 @@ import PaywalledContent from "components/PaywalledContent.vue";
 export default defineComponent({
   name: "PublicCreatorProfilePage",
   components: { PaywalledContent, SubscriptionReceipt },
-  setup() {
+  async setup() {
     const route = useRoute();
     const creatorNpub = route.params.npub as string;
     const creators = useCreatorsStore();
@@ -117,13 +124,17 @@ export default defineComponent({
     const selectedTier = ref<any>(null);
     const followers = ref<number | null>(null);
     const following = ref<number | null>(null);
-    onMounted(async () => {
+
+    const loadProfile = async () => {
       await creators.fetchTierDefinitions(creatorNpub);
       const p = await nostr.getProfile(creatorNpub);
       if (p) profile.value = { ...p };
       followers.value = await nostr.fetchFollowerCount(creatorNpub);
       following.value = await nostr.fetchFollowingCount(creatorNpub);
-    });
+    };
+    onMounted(loadProfile);
+
+    await useNdk();
 
     const openSubscribe = (tier: any) => {
       selectedTier.value = tier;

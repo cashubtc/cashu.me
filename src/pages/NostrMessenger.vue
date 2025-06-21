@@ -1,10 +1,12 @@
 <template>
-  <q-page
-    class="row full-height no-horizontal-scroll"
-    :class="[$q.dark.isActive ? 'bg-dark text-white' : 'bg-white text-dark']"
-    @touchstart="onTouchStart"
-    @touchend="onTouchEnd"
-  >
+  <Suspense>
+    <template #default>
+      <q-page
+        class="row full-height no-horizontal-scroll"
+        :class="[$q.dark.isActive ? 'bg-dark text-white' : 'bg-white text-dark']"
+        @touchstart="onTouchStart"
+        @touchend="onTouchEnd"
+      >
     <q-responsive>
       <q-drawer
         v-model="drawer"
@@ -51,8 +53,12 @@
       <MessageList :messages="messages" class="col" />
       <MessageInput @send="sendMessage" @sendToken="openSendTokenDialog" />
       <ChatSendTokenDialog ref="chatSendTokenDialogRef" :recipient="selected" />
-    </div>
-  </q-page>
+      </q-page>
+    </template>
+    <template #fallback>
+      <q-skeleton height="100vh" square />
+    </template>
+  </Suspense>
 </template>
 
 <script lang="ts" setup>
@@ -60,6 +66,7 @@ import { computed, ref, onMounted, watch } from "vue";
 import { useRouter } from "vue-router";
 import { useLocalStorage } from "@vueuse/core";
 import { useMessengerStore } from "src/stores/messenger";
+import { useNdk } from "src/composables/useNdk";
 
 import NostrIdentityManager from "components/NostrIdentityManager.vue";
 import RelayManager from "components/RelayManager.vue";
@@ -69,6 +76,8 @@ import ActiveChatHeader from "components/ActiveChatHeader.vue";
 import MessageList from "components/MessageList.vue";
 import MessageInput from "components/MessageInput.vue";
 import ChatSendTokenDialog from "components/ChatSendTokenDialog.vue";
+
+await useNdk();
 
 const messenger = useMessengerStore();
 messenger.loadIdentity();
