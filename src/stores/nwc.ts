@@ -19,6 +19,7 @@ import { notify, notifyError, notifyWarning } from "../js/notify";
 import { useSettingsStore } from "./settings";
 import { decode as decodeBolt11 } from "light-bolt11-decoder";
 import { useNostrStore } from "./nostr";
+import { useNdk } from "src/composables/useNdk";
 
 type NWCConnection = {
   walletPublicKey: string;
@@ -85,7 +86,6 @@ export const useNWCStore = defineStore("nwc", {
       useSettingsStore().defaultNostrRelays
     ),
     blocking: false,
-    ndk: new NDK(),
     subscriptions: [] as NDKSubscription[],
     showNWCDialog: false,
     showNWCData: { connection: {} as NWCConnection, connectionString: "" },
@@ -449,13 +449,10 @@ export const useNWCStore = defineStore("nwc", {
       const walletSigner = nostr.signer;
       // close and delete all old subscriptions
       this.unsubscribeNWC();
-      this.ndk = new NDK({
-        explicitRelayUrls: nostr.relays,
-        signer: walletSigner,
-      });
-      await this.ndk.connect();
+      const ndk = await useNdk();
+      await ndk.connect();
 
-      const nip47InfoEvent = new NDKEvent(this.ndk);
+      const nip47InfoEvent = new NDKEvent(ndk);
       nip47InfoEvent.kind = NWCKind.NWCInfo;
       nip47InfoEvent.content = this.supportedMethods.join(" ");
       try {
@@ -465,7 +462,7 @@ export const useNWCStore = defineStore("nwc", {
           kinds: [NWCKind.NWCInfo],
           authors: [conn.walletPublicKey],
         };
-        let eventsInfoEvent = await this.ndk.fetchEvents(filterInfoEvent);
+        let eventsInfoEvent = await ndk.fetchEvents(filterInfoEvent);
         if (eventsInfoEvent.size === 0) {
           await nip47InfoEvent.publish();
           debug("### published nip47InfoEvent", nip47InfoEvent);
@@ -493,7 +490,8 @@ export const useNWCStore = defineStore("nwc", {
         authors: [conn.connectionPublicKey],
         "#p": [conn.walletPublicKey],
       } as NDKFilter;
-      const sub = this.ndk.subscribe(filter);
+      const ndk = await useNdk();
+      const sub = ndk.subscribe(filter);
       const nostr = useNostrStore();
       debug("### subscribing to NWC on relays: ", nostr.relays);
       this.subscriptions.push(sub);

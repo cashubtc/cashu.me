@@ -43,6 +43,7 @@ import {
   notifyWarning,
   notify,
 } from "../js/notify";
+import { useNdk } from "src/composables/useNdk";
 import { useSendTokensStore } from "./sendTokensStore";
 import { usePRStore } from "./payment-request";
 import token from "../js/token";
@@ -99,12 +100,13 @@ export async function fetchNutzapProfile(
 ): Promise<NutzapProfile | null> {
   const nostr = useNostrStore();
   await nostr.initNdkReadOnly();
+  const ndk = await useNdk();
   const hex = npubOrHex.startsWith("npub")
-    ? nostr.ndk.utils.hexFromBech32
-      ? nostr.ndk.utils.hexFromBech32(npubOrHex)
-      : (nostr.ndk.utils.nip19.decode(npubOrHex).data as string)
+    ? ndk.utils.hexFromBech32
+      ? ndk.utils.hexFromBech32(npubOrHex)
+      : (ndk.utils.nip19.decode(npubOrHex).data as string)
     : npubOrHex;
-  const sub = nostr.ndk.subscribe({
+  const sub = ndk.subscribe({
     kinds: [10019],
     authors: [hex],
     limit: 1,
@@ -144,13 +146,14 @@ export async function publishNutzapProfile(opts: {
   if (opts.relays)
     for (const r of opts.relays) tags.push(["relay", r]);
 
-  const ev = new NDKEvent(nostr.ndk);
+  const ndk = await useNdk();
+  const ev = new NDKEvent(ndk);
   ev.kind = 10019;
   ev.content = "";
   ev.tags = tags;
   ev.created_at = Math.floor(Date.now() / 1000);
   await ev.sign();
-  const relaySet = urlsToRelaySet(nostr.ndk, opts.relays);
+  const relaySet = urlsToRelaySet(ndk, opts.relays);
   try {
     await ev.publish(relaySet);
   } catch (e: any) {
@@ -169,13 +172,14 @@ export async function publishNutzap(opts: {
   const nostr = useNostrStore();
   await nostr.initSignerIfNotSet();
   await nostr.ensureNdkConnected(opts.relayHints);
-  const ev = new NDKEvent(nostr.ndk);
+  const ndk = await useNdk();
+  const ev = new NDKEvent(ndk);
   ev.kind = 9321;
   ev.content = opts.content;
   ev.tags = [["p", opts.receiverHex]];
   ev.created_at = Math.floor(Date.now() / 1000);
   await ev.sign();
-  const relaySet = urlsToRelaySet(nostr.ndk, opts.relayHints);
+  const relaySet = urlsToRelaySet(ndk, opts.relayHints);
   try {
     await ev.publish(relaySet);
   } catch (e: any) {
@@ -192,7 +196,8 @@ export async function subscribeToNutzaps(
 ): Promise<NDKSubscription> {
   const nostr = useNostrStore();
   await nostr.initNdkReadOnly();
-  const sub = nostr.ndk.subscribe({
+  const ndk = await useNdk();
+  const sub = ndk.subscribe({
     kinds: [9321],
     "#p": [myHex],
   });
@@ -227,7 +232,6 @@ export const useNostrStore = defineStore("nostr", {
     connected: false,
     pubkey: useLocalStorage<string>("cashu.ndk.pubkey", ""),
     relays: useSettingsStore().defaultNostrRelays,
-    ndk: undefined as NDK | undefined,
     signerType: useLocalStorage<SignerType>(
       "cashu.ndk.signerType",
       SignerType.SEED
@@ -319,16 +323,14 @@ export const useNostrStore = defineStore("nostr", {
   },
   actions: {
     initNdkReadOnly: async function () {
-      if (this.connected) {
-        return;
-      }
-      this.ndk = new NDK({ explicitRelayUrls: this.relays });
-      await this.ndk.connect();
+      if (this.connected) return;
+      const ndk = await useNdk();
+      await ndk.connect();
       this.connected = true;
     },
-    disconnect: function () {
-      this.ndk?.pool.relays.forEach((relay) => relay.disconnect());
-      this.ndk = undefined;
+    disconnect: async function () {
+      const ndk = await useNdk();
+      ndk.pool.relays.forEach((relay) => relay.disconnect());
       this.signer = undefined;
       this.connected = false;
     },
@@ -336,34 +338,27 @@ export const useNostrStore = defineStore("nostr", {
       if (relays) {
         this.relays = relays as any;
       }
-      this.disconnect();
-      const opts: any = { explicitRelayUrls: this.relays };
-      if (this.signer) {
-        opts.signer = this.signer;
-      }
-      this.ndk = new NDK(opts);
-      await this.ndk.connect();
+      await this.disconnect();
+      const ndk = await useNdk();
+      urlsToRelaySet(ndk, this.relays);
+      await ndk.connect();
       this.connected = true;
     },
     ensureNdkConnected: async function (relays?: string[]) {
-      // 1. bootstrap NDK if missing
-      if (!this.ndk) {
-        await this.connect(relays);
-      }
-      // 2. still not connected? connect() might be async
+      const ndk = await useNdk();
       if (!this.connected) {
-        await this.ndk?.connect();
+        await ndk.connect();
         this.connected = true;
       }
       if (relays?.length) {
-        const added = urlsToRelaySet(this.ndk!, relays);
+        const added = urlsToRelaySet(ndk, relays);
         if (added) {
-          await this.ndk!.connect();
+          await ndk.connect();
         }
       }
     },
     initSignerIfNotSet: async function () {
-      if (!this.signer || !this.ndk) {
+      if (!this.signer) {
         this.initialized = false; // force re-initialisation
       }
       if (!this.initialized) {
@@ -461,7 +456,8 @@ export const useNostrStore = defineStore("nostr", {
 
       await this.initNdkReadOnly();
       try {
-        const user = this.ndk.getUser({ pubkey });
+        const ndk = await useNdk();
+        const user = ndk.getUser({ pubkey });
         await user.fetchProfile();
         const entry: CachedProfile = { profile: user.profile, fetchedAt: now };
         this.profiles[pubkey] = entry;
@@ -496,7 +492,7 @@ export const useNostrStore = defineStore("nostr", {
       }
     },
     initNip46Signer: async function (nip46Token?: string) {
-      const ndk = new NDK({ explicitRelayUrls: this.relays });
+      const ndk = await useNdk();
       if (!nip46Token && !this.nip46Token.length) {
         nip46Token = (await prompt(
           "Enter your NIP-46 connection string"
@@ -570,14 +566,16 @@ export const useNostrStore = defineStore("nostr", {
     },
     fetchEventsFromUser: async function () {
       const filter: NDKFilter = { kinds: [1], authors: [this.pubkey] };
-      return await this.ndk.fetchEvents(filter);
+      const ndk = await useNdk();
+      return await ndk.fetchEvents(filter);
     },
 
     fetchFollowerCount: async function (pubkey: string): Promise<number> {
       pubkey = this.resolvePubkey(pubkey);
       await this.initNdkReadOnly();
       const filter: NDKFilter = { kinds: [3], "#p": [pubkey] };
-      const events = await this.ndk.fetchEvents(filter);
+      const ndk = await useNdk();
+      const events = await ndk.fetchEvents(filter);
       const authors = new Set<string>();
       events.forEach((ev) => authors.add(ev.pubkey));
       return authors.size;
@@ -587,7 +585,8 @@ export const useNostrStore = defineStore("nostr", {
       pubkey = this.resolvePubkey(pubkey);
       await this.initNdkReadOnly();
       const filter: NDKFilter = { kinds: [3], authors: [pubkey] };
-      const events = await this.ndk.fetchEvents(filter);
+      const ndk = await useNdk();
+      const events = await ndk.fetchEvents(filter);
       let latest: NDKEvent | undefined;
       events.forEach((ev) => {
         if (!latest || ev.created_at > (latest.created_at || 0)) {
@@ -608,7 +607,8 @@ export const useNostrStore = defineStore("nostr", {
       pubkey = this.resolvePubkey(pubkey);
       await this.initNdkReadOnly();
       const filter: NDKFilter = { kinds: [0, 1], authors: [pubkey] };
-      const events = await this.ndk.fetchEvents(filter);
+      const ndk = await useNdk();
+      const events = await ndk.fetchEvents(filter);
       let earliest: number | null = null;
       events.forEach((ev) => {
         if (earliest === null || ev.created_at < earliest) {
@@ -630,7 +630,8 @@ export const useNostrStore = defineStore("nostr", {
       pubkey = this.resolvePubkey(pubkey);
       await this.initNdkReadOnly();
       const filter: NDKFilter = { kinds: [1], authors: [pubkey], limit: 1 };
-      const events = await this.ndk.fetchEvents(filter);
+      const ndk = await useNdk();
+      const events = await ndk.fetchEvents(filter);
       let latest: NDKEvent | null = null;
       events.forEach((ev) => {
         if (!latest || ev.created_at > (latest.created_at || 0)) {
@@ -641,7 +642,8 @@ export const useNostrStore = defineStore("nostr", {
     },
     fetchMints: async function () {
       const filter: NDKFilter = { kinds: [38000 as NDKKind], limit: 2000 };
-      const events = await this.ndk.fetchEvents(filter);
+      const ndk = await useNdk();
+      const events = await ndk.fetchEvents(filter);
       let mintUrls: string[] = [];
       events.forEach((event) => {
         if (event.tagValue("k") == "38172" && event.tagValue("u")) {
@@ -733,7 +735,7 @@ export const useNostrStore = defineStore("nostr", {
       const signer = privKey ? new NDKPrivateKeySigner(privKey) : this.signer;
       const senderPubkey =
         pubKey || (privKey ? getPublicKey(hexToBytes(privKey)) : this.pubkey);
-      const ndk = new NDK({ signer });
+      const ndk = await useNdk();
       const event = new NDKEvent(ndk);
       event.kind = NDKKind.EncryptedDirectMessage;
       event.content = await this.encryptNip04(key, recipient, message);
@@ -768,8 +770,9 @@ export const useNostrStore = defineStore("nostr", {
         debug(
           `### Subscribing to NIP-04 direct messages to ${pubKey} since ${this.lastEventTimestamp}`
         );
-        await this.ndk.connect();
-        const sub = this.ndk.subscribe(
+        const ndk = await useNdk();
+        await ndk.connect();
+        const sub = ndk.subscribe(
           {
             kinds: [NDKKind.EncryptedDirectMessage],
             "#p": [pubKey],
@@ -819,7 +822,8 @@ export const useNostrStore = defineStore("nostr", {
         "#p": [pubKey],
         since,
       };
-      const sub = this.ndk.subscribe(filter, {
+      const ndk = await useNdk();
+      const sub = ndk.subscribe(filter, {
         closeOnEose: false,
         groupable: false,
       });
@@ -872,11 +876,7 @@ export const useNostrStore = defineStore("nostr", {
       dmEvent.id = dmEvent.getEventHash();
       const dmEventString = JSON.stringify(await dmEvent.toNostrEvent());
 
-      const seedNdk = new NDK({
-        signer: this.signer,
-        explicitRelayUrls: this.relays,
-      });
-      const sealEvent = new NDKEvent(seedNdk);
+      const sealEvent = new NDKEvent();
       sealEvent.kind = 13;
       sealEvent.content = nip44.v2.encrypt(
         dmEventString,
@@ -888,10 +888,7 @@ export const useNostrStore = defineStore("nostr", {
       sealEvent.sig = await sealEvent.sign();
       const sealEventString = JSON.stringify(await sealEvent.toNostrEvent());
 
-      const randomNdk = new NDK({
-        signer: new NDKPrivateKeySigner(bytesToHex(randomPrivateKey)),
-      });
-      const wrapEvent = new NDKEvent(randomNdk);
+      const wrapEvent = new NDKEvent();
       wrapEvent.kind = 1059;
       wrapEvent.tags = [["p", recipient]];
       wrapEvent.content = nip44.v2.encrypt(
@@ -936,8 +933,9 @@ export const useNostrStore = defineStore("nostr", {
         debug(
           `### Subscribing to NIP-17 direct messages to ${pubKey} since ${since}`
         );
-        await this.ndk.connect();
-        const sub = this.ndk.subscribe(
+        const ndk = await useNdk();
+        await ndk.connect();
+        const sub = ndk.subscribe(
           {
             kinds: [1059 as NDKKind],
             "#p": [pubKey],
