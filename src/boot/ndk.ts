@@ -7,10 +7,14 @@ import NDK, {
 import { nip19 } from "nostr-tools";
 import { bytesToHex } from "@noble/hashes/utils";
 
+export type NdkBootErrorReason = "no-signer" | "connect-failed" | "unknown";
+
 export class NdkBootError extends Error {
-  constructor(message: string) {
-    super(message);
+  reason: NdkBootErrorReason;
+  constructor(reason: NdkBootErrorReason, message?: string) {
+    super(message ?? reason);
     this.name = "NdkBootError";
+    this.reason = reason;
   }
 }
 
@@ -37,13 +41,17 @@ async function resolveSigner(): Promise<NDKSigner> {
     return new NDKPrivateKeySigner(hex);
   }
 
-  throw new NdkBootError("No available Nostr signer");
+  throw new NdkBootError("no-signer", "No available Nostr signer");
 }
 
 async function createNdk(): Promise<NDK> {
   const signer = await resolveSigner();
   const ndk = new NDK({ explicitRelayUrls: DEFAULT_RELAYS, signer });
-  await ndk.connect({ timeoutMs: 10000 });
+  try {
+    await ndk.connect({ timeoutMs: 10000 });
+  } catch (e) {
+    throw new NdkBootError("connect-failed", (e as Error).message);
+  }
   return ndk;
 }
 
