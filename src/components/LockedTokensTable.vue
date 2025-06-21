@@ -49,7 +49,7 @@
             flat
             dense
             icon="content_copy"
-            @click="copyText(token.token)"
+            @click="copy(token.token)"
             :aria-label="$t('LockedTokensTable.actions.copy.tooltip_text')"
             :title="$t('LockedTokensTable.actions.copy.tooltip_text')"
           >
@@ -81,6 +81,7 @@
 <script>
 import { defineComponent } from "vue";
 import { mapState } from "pinia";
+import { useClipboard } from "src/composables/useClipboard";
 import { formatDistanceToNow, parseISO } from "date-fns";
 import { shortenString } from "src/js/string-utils";
 import { useLockedTokensStore } from "stores/lockedTokens";
@@ -92,6 +93,10 @@ export default defineComponent({
   mixins: [windowMixin],
   props: {
     bucketId: { type: String, required: true },
+  },
+  setup() {
+    const { copy } = useClipboard();
+    return { copy };
   },
   data() {
     return { currentPage: 1, pageSize: 5 };

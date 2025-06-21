@@ -156,7 +156,7 @@
             </div>
             <div class="contact-text">{{ contactInfo.info }}</div>
             <copy-icon
-              @click="copyText(contactInfo.info)"
+              @click="copy(contactInfo.info)"
               size="20"
               color="#9E9E9E"
               class="copy-icon cursor-pointer"
@@ -185,7 +185,7 @@
             </div>
             <div
               class="detail-value items-center"
-              @click="copyText(showMintInfoData.url)"
+              @click="copy(showMintInfoData.url)"
             >
               {{ showMintInfoData.url }}
             </div>
@@ -313,7 +313,7 @@
 
             <div
               class="action-button cursor-pointer"
-              @click="copyText(showMintInfoData.url)"
+              @click="copy(showMintInfoData.url)"
             >
               <copy-icon size="20" color="#9E9E9E" class="action-icon" />
               <div class="action-label">
@@ -350,6 +350,7 @@ import EditMintDialog from "src/components/EditMintDialog.vue";
 import RemoveMintDialog from "src/components/RemoveMintDialog.vue";
 import MintMotdMessage from "src/components/MintMotdMessage.vue";
 import MintAuditInfo from "src/components/MintAuditInfo.vue";
+import { useClipboard } from "src/composables/useClipboard";
 import {
   X as CloseIcon,
   QrCode as QrCodeIcon,
@@ -385,6 +386,10 @@ export default defineComponent({
     RemoveMintDialog,
     MintMotdMessage,
     MintAuditInfo,
+  },
+  setup() {
+    const { copy } = useClipboard();
+    return { copy };
   },
   data: function () {
     return {
@@ -470,15 +475,6 @@ export default defineComponent({
         return text.substring(0, maxLength) + "...";
       }
       return text;
-    },
-    copyText(text) {
-      navigator.clipboard.writeText(text);
-      this.$q.notify({
-        message: this.$i18n.t("global.copy_to_clipboard.success"),
-        color: "positive",
-        position: "top",
-        timeout: 1000,
-      });
     },
     openEditMintDialog() {
       this.mintToEdit = Object.assign({}, this.showMintInfoData);

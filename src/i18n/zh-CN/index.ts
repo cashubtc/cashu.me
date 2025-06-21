@@ -1,4 +1,6 @@
 export default {
+  copied_to_clipboard: "Copied to clipboard!",
+  copy_failed: "Copy failed",
   global: {
     copy_to_clipboard: {
       success: "已复制到剪贴板！",

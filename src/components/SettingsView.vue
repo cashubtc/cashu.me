@@ -48,7 +48,7 @@
                       icon="content_copy"
                       color="primary"
                       class="cursor-pointer q-mt-md"
-                      @click="copyText(mnemonic)"
+                      @click="copy(mnemonic)"
                       :aria-label="$t('global.actions.copy.label')"
                       :title="$t('global.actions.copy.label')"
                     ></q-btn>
@@ -134,7 +134,7 @@
                     <q-spinner-hourglass size="sm" v-if="npcLoading" />
                     <q-icon
                       name="content_copy"
-                      @click="copyText(npcAddress)"
+                      @click="copy(npcAddress)"
                       size="xs"
                       color="grey"
                       class="q-mr-sm cursor-pointer"
@@ -224,7 +224,7 @@
               >
                 <q-badge
                   class="cursor-pointer q-mt-xs"
-                  @click="copyText(seedSignerPrivateKeyNsecComputed)"
+                  @click="copy(seedSignerPrivateKeyNsecComputed)"
                   outline
                   color="grey"
                 >
@@ -426,7 +426,7 @@
             >
               <q-icon
                 name="content_copy"
-                @click="copyText(relay)"
+                @click="copy(relay)"
                 size="xs"
                 color="grey"
                 class="q-mr-sm cursor-pointer"
@@ -568,7 +568,7 @@
             >
               <q-icon
                 name="content_copy"
-                @click="copyText(getConnectionString(connection))"
+                @click="copy(getConnectionString(connection))"
                 size="xs"
                 color="grey"
                 class="q-mr-sm cursor-pointer"
@@ -687,7 +687,7 @@
               >
                 <q-icon
                   name="content_copy"
-                  @click="copyText(relay)"
+                  @click="copy(relay)"
                   size="xs"
                   color="grey"
                   class="q-mr-sm cursor-pointer"
@@ -931,7 +931,7 @@
                 >
                   <q-icon
                     name="content_copy"
-                    @click="copyText(key.publicKey)"
+                    @click="copy(key.publicKey)"
                     size="1.2em"
                     color="grey"
                     class="q-mr-xs cursor-pointer"
@@ -1173,7 +1173,7 @@
                   dense
                   flat
                   icon="content_copy"
-                  @click="copyText(auditorUrl)"
+                  @click="copy(auditorUrl)"
                   size="sm"
                   color="grey"
                 />
@@ -1197,7 +1197,7 @@
                   dense
                   flat
                   icon="content_copy"
-                  @click="copyText(auditorApiUrl)"
+                  @click="copy(auditorApiUrl)"
                   size="sm"
                   color="grey"
                 />
@@ -1764,6 +1764,7 @@
 <script>
 import { debug } from "src/js/logger";
 import { defineComponent } from "vue";
+import { useClipboard } from "src/composables/useClipboard";
 import P2PKDialog from "./P2PKDialog.vue";
 import NWCDialog from "./NWCDialog.vue";
 
@@ -1797,6 +1798,10 @@ export default defineComponent({
   components: {
     P2PKDialog,
     NWCDialog,
+  },
+  setup() {
+    const { copy } = useClipboard();
+    return { copy };
   },
   props: {},
   data: function () {
@@ -2033,7 +2038,7 @@ export default defineComponent({
     exportActiveProofs: async function () {
       // export active proofs
       const token = await this.serializeProofs(this.activeProofs);
-      this.copyText(token);
+      this.copy(token);
     },
     publishMyNutzapProfile: async function () {
       try {

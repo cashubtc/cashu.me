@@ -24,7 +24,7 @@
           flat
           dense
           icon="content_copy"
-          @click="copyText(npub)"
+          @click="copy(npub)"
         />
       </div>
       <div
@@ -36,7 +36,7 @@
           flat
           dense
           icon="content_copy"
-          @click="copyText(seedSignerPrivateKeyNsecComputed)"
+          @click="copy(seedSignerPrivateKeyNsecComputed)"
         />
       </div>
       <div
@@ -48,7 +48,7 @@
           flat
           dense
           icon="content_copy"
-          @click="copyText(privateKeySignerPrivateKey)"
+          @click="copy(privateKeySignerPrivateKey)"
         />
       </div>
       <div class="q-mt-sm">
@@ -87,7 +87,8 @@
 <script lang="ts">
 import { defineComponent, ref, onMounted, computed } from "vue";
 import { storeToRefs } from "pinia";
-import { useQuasar, copyToClipboard } from "quasar";
+import { useQuasar } from "quasar";
+import { useClipboard } from "src/composables/useClipboard";
 import { useI18n } from "vue-i18n";
 import { useNostrStore } from "stores/nostr";
 import { useCreatorHubStore, Tier } from "stores/creatorHub";
@@ -102,6 +103,7 @@ export default defineComponent({
   setup() {
     const $q = useQuasar();
     const { t } = useI18n();
+    const { copy } = useClipboard();
 
     const nostr = useNostrStore();
     const {
@@ -153,14 +155,6 @@ export default defineComponent({
       }
     }
 
-    function copyText(text: string) {
-      copyToClipboard(text).then(() => {
-        $q.notify({
-          message: t("global.copy_to_clipboard.success"),
-          position: "bottom",
-        });
-      });
-    }
 
     return {
       npub,
@@ -175,7 +169,7 @@ export default defineComponent({
       walletBalanceFormatted,
       renderMarkdown,
       formatFiat,
-      copyText,
+      copy,
       supportTier,
     };
   },

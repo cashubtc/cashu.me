@@ -82,6 +82,7 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
+import { useClipboard } from "src/composables/useClipboard";
 
 export default defineComponent({
   name: "SubscriptionReceipt",
@@ -94,6 +95,10 @@ export default defineComponent({
     },
   },
   emits: ["update:modelValue"],
+  setup() {
+    const { copy } = useClipboard();
+    return { copy };
+  },
   data() {
     return {
       expanded: {} as Record<string, boolean>,
@@ -111,7 +116,7 @@ export default defineComponent({
   },
   methods: {
     copyToken(token: string) {
-      this.copyText(token);
+      this.copy(token);
     },
     saveToken(token: string) {
       const blob = new Blob([token], { type: "text/plain" });

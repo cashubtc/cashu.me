@@ -64,7 +64,7 @@
             flat
             size="0.6rem"
             class="q-mx-xs q-px-none"
-            @click="copyText(baseURL)"
+            @click="copy(baseURL)"
             >Copy URL</q-btn
           >
           <q-btn
@@ -99,6 +99,7 @@
 <script>
 import { defineComponent } from "vue";
 import { mapActions, mapState } from "pinia";
+import { useClipboard } from "src/composables/useClipboard";
 import { useWalletStore } from "src/stores/wallet";
 import { useStorageStore } from "src/stores/storage";
 
@@ -111,6 +112,10 @@ export default defineComponent({
     setTab: Function,
     getPwaDisplayMode: Function,
     setWelcomeDialogSeen: Function,
+  },
+  setup() {
+    const { copy } = useClipboard();
+    return { copy };
   },
   data: function () {
     return {};

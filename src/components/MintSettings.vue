@@ -328,7 +328,7 @@
               >
                 <q-icon
                   name="content_copy"
-                  @click="copyText(mint.url)"
+                  @click="copy(mint.url)"
                   size="1em"
                   color="grey"
                   class="q-mr-xs cursor-pointer"
@@ -458,6 +458,7 @@
 <script>
 import { debug } from "src/js/logger";
 import { ref, defineComponent, onMounted, onBeforeUnmount } from "vue";
+import { useClipboard } from "src/composables/useClipboard";
 import { getShortUrl } from "src/js/wallet-helpers";
 import { mapActions, mapState, mapWritableState } from "pinia";
 import { useMintsStore, MintClass } from "src/stores/mints";
@@ -486,6 +487,7 @@ export default defineComponent({
   props: {},
   setup() {
     const addMintDiv = ref(null);
+    const { copy } = useClipboard();
 
     const scrollToAddMintDiv = () => {
       if (addMintDiv.value) {
@@ -508,6 +510,7 @@ export default defineComponent({
     });
     return {
       addMintDiv,
+      copy,
     };
   },
   data: function () {
