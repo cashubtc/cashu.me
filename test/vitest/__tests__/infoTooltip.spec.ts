@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { mount } from "@vue/test-utils";
-import InfoTooltip from "../../src/components/InfoTooltip.vue";
+import InfoTooltip from "../../../src/components/InfoTooltip.vue";
 
 describe("InfoTooltip", () => {
   it("shows tooltip on hover", async () => {

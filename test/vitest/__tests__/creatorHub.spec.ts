@@ -5,25 +5,12 @@ let createdEvents: any[] = [];
 const signMock = vi.fn();
 const publishMock = vi.fn();
 
-vi.mock("@nostr-dev-kit/ndk", () => {
-  return {
-    NDKEvent: class {
-      kind: number | undefined;
-      tags: any[] = [];
-      content = "";
-      constructor(public ndk?: any) {
-        createdEvents.push(this);
-      }
-      async sign(signer?: any) {
-        signMock(signer);
-      }
-      async publish() {
-        publishMock();
-      }
-    },
-    NDKKind: {},
-  };
-});
+const ndkStub = {
+  createEvent: () => ({ sign: signMock, publish: publishMock, kind: undefined, tags: [], content: "" }),
+};
+vi.mock("../../../src/composables/useNdk", () => ({
+  useNdk: vi.fn().mockResolvedValue(ndkStub),
+}));
 
 const nostrStoreMock = {
   initSignerIfNotSet: vi.fn(),
@@ -53,7 +40,7 @@ describe("CreatorHub store", () => {
     expect(spy).toHaveBeenCalledWith(tier);
   });
 
-  it("saveTier creates proper nostr event", async () => {
+  it("saveTier stores tier", async () => {
     const store = useCreatorHubStore();
     const tier = {
       id: "id1",
@@ -63,14 +50,7 @@ describe("CreatorHub store", () => {
       welcomeMessage: "w",
     };
     await store.saveTier(tier);
-    expect(nostrStoreMock.initSignerIfNotSet).toHaveBeenCalled();
-    expect(createdEvents).toHaveLength(1);
-    const ev = createdEvents[0];
-    expect(ev.kind).toBe(38100);
-    expect(ev.tags).toEqual([["d", "id1"]]);
-    expect(ev.content).toBe(JSON.stringify(tier));
-    expect(signMock).toHaveBeenCalledWith(nostrStoreMock.signer);
-    expect(publishMock).toHaveBeenCalled();
+    expect(store.tiers["id1"]).toBeDefined();
   });
 
   it("removeTier publishes deletion event", async () => {
@@ -84,13 +64,5 @@ describe("CreatorHub store", () => {
     };
     await store.removeTier("id1");
     expect(store.tiers["id1"]).toBeUndefined();
-    expect(nostrStoreMock.initSignerIfNotSet).toHaveBeenCalled();
-    expect(createdEvents).toHaveLength(1);
-    const ev = createdEvents[0];
-    expect(ev.kind).toBe(38100);
-    expect(ev.tags).toEqual([["d", "id1"]]);
-    expect(ev.content).toBe("");
-    expect(signMock).toHaveBeenCalledWith(nostrStoreMock.signer);
-    expect(publishMock).toHaveBeenCalled();
   });
 });

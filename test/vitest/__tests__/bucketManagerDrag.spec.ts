@@ -1,14 +1,14 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { shallowMount } from "@vue/test-utils";
-import BucketManager from "../../src/components/BucketManager.vue";
+import BucketManager from "../../../src/components/BucketManager.vue";
 
 const moveProofsMock = vi.fn();
 
-vi.mock("../../src/stores/proofs", () => ({
+vi.mock("../../../src/stores/proofs", () => ({
   useProofsStore: () => ({ moveProofs: moveProofsMock }),
 }));
 
-vi.mock("../../src/stores/buckets", () => ({
+vi.mock("../../../src/stores/buckets", () => ({
   useBucketsStore: () => ({
     bucketList: [{ id: "b1", name: "Bucket 1" }],
     bucketBalances: {},
@@ -19,15 +19,15 @@ vi.mock("../../src/stores/buckets", () => ({
   DEFAULT_BUCKET_ID: "b1",
 }));
 
-vi.mock("../../src/stores/mints", () => ({
+vi.mock("../../../src/stores/mints", () => ({
   useMintsStore: () => ({ activeUnit: "sat" }),
 }));
 
-vi.mock("../../src/stores/ui", () => ({
+vi.mock("../../../src/stores/ui", () => ({
   useUiStore: () => ({ formatCurrency: (a: number) => String(a) }),
 }));
 
-vi.mock("../../src/js/notify", () => ({
+vi.mock("../../../src/js/notify", () => ({
   notifyError: vi.fn(),
 }));
 

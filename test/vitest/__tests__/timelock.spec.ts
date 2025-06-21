@@ -1,8 +1,8 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { useSendTokensStore } from "../../src/stores/sendTokensStore";
-import { useWalletStore } from "../../src/stores/wallet";
-import { useProofsStore } from "../../src/stores/proofs";
-import { useP2PKStore } from "../../src/stores/p2pk";
+import { useSendTokensStore } from "../../../src/stores/sendTokensStore";
+import { useWalletStore } from "../../../src/stores/wallet";
+import { useProofsStore } from "../../../src/stores/proofs";
+import { useP2PKStore } from "../../../src/stores/p2pk";
 
 beforeEach(() => {
   localStorage.clear();

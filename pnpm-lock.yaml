@@ -117,6 +117,12 @@ importers:
       '@capacitor/cli':
         specifier: ^6.2.0
         version: 6.2.1
+      '@noble/curves':
+        specifier: ^1.9.2
+        version: 1.9.2
+      '@noble/secp256k1':
+        specifier: ^2.3.0
+        version: 2.3.0
       '@quasar/app-vite':
         specifier: ^1.9.3
         version: 1.11.0(electron-packager@15.5.2)(eslint@8.57.1)(pinia@2.3.1(typescript@5.1.6)(vue@3.5.17(typescript@5.1.6)))(quasar@2.18.1)(rollup@2.79.2)(vue-router@4.5.1(vue@3.5.17(typescript@5.1.6)))(vue@3.5.17(typescript@5.1.6))(workbox-build@6.6.1)
