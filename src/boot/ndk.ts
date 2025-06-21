@@ -5,8 +5,6 @@ import NDK, {
   NDKPrivateKeySigner,
   NDKSigner,
 } from "@nostr-dev-kit/ndk";
-import { nip19 } from "nostr-tools";
-import { bytesToHex } from "@noble/hashes/utils";
 
 export type NdkBootErrorReason =
   | "no-signer"
@@ -33,6 +31,11 @@ let ndkInstance: NDK | undefined;
 let ndkPromise: Promise<NDK> | undefined;
 
 async function resolveSigner(): Promise<NDKSigner> {
+  const nsec = localStorage.getItem("nsec");
+  if (nsec?.trim().startsWith("nsec")) {
+    return NDKPrivateKeySigner.fromNsec(nsec.trim());
+  }
+
   if (typeof window !== "undefined" && (window as any).nostr) {
     try {
       const signer = new NDKNip07Signer();
@@ -49,13 +52,6 @@ async function resolveSigner(): Promise<NDKSigner> {
       }
       throw new NdkBootError("unknown", msg);
     }
-  }
-
-  const nsec = localStorage.getItem("nsec");
-  if (nsec) {
-    const data = nip19.decode(nsec).data as Uint8Array;
-    const hex = bytesToHex(data);
-    return new NDKPrivateKeySigner(hex);
   }
 
   throw new NdkBootError("no-signer", "No available Nostr signer");
