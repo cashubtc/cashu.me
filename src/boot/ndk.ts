@@ -31,9 +31,12 @@ let ndkInstance: NDK | undefined;
 let ndkPromise: Promise<NDK> | undefined;
 
 async function resolveSigner(): Promise<NDKSigner> {
-  const nsec = localStorage.getItem("nsec");
-  if (nsec?.trim().startsWith("nsec")) {
-    return NDKPrivateKeySigner.fromNsec(nsec.trim());
+  // 1 ─ local nsec (strip legacy JSON quotes if present)
+  const raw = window.localStorage.getItem('nsec') ?? ''
+  const clean = raw.replace(/^"+|"+$/g, '').trim()        // "nsec…"
+  // TODO: sanitize quoted legacy values once
+  if (clean.startsWith('nsec')) {
+    return NDKPrivateKeySigner.fromNsec(clean)
   }
 
   if (typeof window !== "undefined" && (window as any).nostr) {
@@ -54,7 +57,7 @@ async function resolveSigner(): Promise<NDKSigner> {
     }
   }
 
-  throw new NdkBootError("no-signer", "No available Nostr signer");
+  throw new NdkBootError('no-signer', 'No available Nostr signer')
 }
 
 async function createNdk(): Promise<NDK> {
