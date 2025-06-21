@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { useP2PKStore } from "../../src/stores/p2pk";
-import { useWalletStore } from "../../src/stores/wallet";
-import { useProofsStore } from "../../src/stores/proofs";
+import { useP2PKStore } from "../../../src/stores/p2pk";
+import { useWalletStore } from "../../../src/stores/wallet";
+import { useProofsStore } from "../../../src/stores/proofs";
 import { generateSecretKey, getPublicKey, nip19 } from "nostr-tools";
 import { bytesToHex } from "@noble/hashes/utils";
 

@@ -2,63 +2,10 @@ import { describe, it, expect, beforeEach, vi } from "vitest";
 import { useNostrStore } from "../../../src/stores/nostr";
 import { NDKKind } from "@nostr-dev-kit/ndk";
 
-vi.mock("@nostr-dev-kit/ndk", () => {
-  class NDKEvent {
-    kind: number | undefined;
-    content: any;
-    tags: any[] = [];
-    created_at: number | undefined;
-    pubkey = "";
-    sig: string | undefined;
-    id = "";
-    constructor(public ndk?: any) {}
-    getEventHash() {
-      return "hash";
-    }
-    async sign(_s?: any) {
-      this.sig = "signature";
-      return this.sig;
-    }
-    async toNostrEvent() {
-      return {
-        kind: this.kind,
-        content: this.content,
-        tags: this.tags,
-        created_at: this.created_at,
-        pubkey: this.pubkey,
-        id: this.id,
-        sig: this.sig,
-      };
-    }
-    async publish() {}
-  }
-  class NDKPrivateKeySigner {
-    constructor(privateKey: string) {
-      this.privateKey = privateKey;
-    }
-  }
-  class NDK {
-    constructor(opts: any) {
-      this.opts = opts;
-    }
-    connect() {}
-  }
-  return {
-    default: NDK,
-    NDKEvent,
-    NDKSigner: class {},
-    NDKNip07Signer: class {},
-    NDKNip46Signer: class {},
-    NDKFilter: class {},
-    NDKPrivateKeySigner,
-    NostrEvent: class {},
-    NDKKind: { EncryptedDirectMessage: 4 },
-    NDKRelaySet: class {},
-    NDKRelay: class {},
-    NDKTag: class {},
-    ProfilePointer: class {},
-  };
-});
+const ndkStub = {};
+vi.mock("../../../src/composables/useNdk", () => ({
+  useNdk: vi.fn().mockResolvedValue(ndkStub),
+}));
 
 const encryptMock = vi.fn((content: string) => content);
 let publishSuccess = true;

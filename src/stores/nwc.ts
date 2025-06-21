@@ -340,7 +340,8 @@ export const useNWCStore = defineStore("nwc", {
       conn: NWCConnection
     ) {
       // reply to NWC with result
-      let replyEvent = new NDKEvent(event.ndk);
+      const ndk = await useNdk();
+      let replyEvent = new NDKEvent(ndk);
       replyEvent.kind = 23195;
       debug("### replying with", JSON.stringify(result));
       const nostr = useNostrStore();
