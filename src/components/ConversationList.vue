@@ -72,7 +72,8 @@ const loadProfiles = async () => {
   }
 };
 
-onMounted(loadProfiles);
+await loadProfiles();
+onMounted(() => {});
 watch(uniqueConversations, loadProfiles);
 
 const select = (pubkey: string) => emit("select", pubkey);
