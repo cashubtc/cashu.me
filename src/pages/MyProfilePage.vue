@@ -100,7 +100,7 @@ import { renderMarkdown as renderMarkdownFn } from "src/js/simple-markdown";
 
 export default defineComponent({
   name: "MyProfilePage",
-  setup() {
+  async setup() {
     const $q = useQuasar();
     const { t } = useI18n();
     const { copy } = useClipboard();
