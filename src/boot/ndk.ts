@@ -4,7 +4,6 @@ import NDK, {
   NDKNip07Signer,
   NDKPrivateKeySigner,
   NDKSigner,
-  nip07,
 } from "@nostr-dev-kit/ndk";
 import { nip19 } from "nostr-tools";
 import { bytesToHex } from "@noble/hashes/utils";
@@ -36,9 +35,10 @@ let ndkPromise: Promise<NDK> | undefined;
 async function resolveSigner(): Promise<NDKSigner> {
   if (typeof window !== "undefined" && (window as any).nostr) {
     try {
-      await nip07.user();
-      await nip07.blockUntilReady();
-      return nip07;
+      const signer = new NDKNip07Signer();
+      await signer.user();
+      await signer.blockUntilReady();
+      return signer;
     } catch (err: any) {
       const msg = (err as Error).message;
       if (
