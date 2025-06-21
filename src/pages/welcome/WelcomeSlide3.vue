@@ -37,7 +37,7 @@
             dense
             icon="content_copy"
             class="cursor-pointer q-mt-md"
-            @click="copyText(walletStore.mnemonic)"
+            @click="copy(walletStore.mnemonic)"
             :aria-label="$t('global.actions.copy.label')"
             :title="$t('global.actions.copy.label')"
           ></q-btn>
@@ -61,6 +61,7 @@ import { useWelcomeStore } from "src/stores/welcome";
 import { useWalletStore } from "src/stores/wallet";
 import { ref, computed } from "vue";
 import { useQuasar } from "quasar";
+import { useClipboard } from "src/composables/useClipboard";
 
 export default {
   name: "WelcomeSlide3",
@@ -69,6 +70,7 @@ export default {
     const welcomeStore = useWelcomeStore();
     const walletStore = useWalletStore();
     const $q = useQuasar();
+    const { copy } = useClipboard();
     let hideMnemonic = ref(true);
 
     const hiddenMnemonic = computed(() => {
@@ -95,6 +97,7 @@ export default {
       proceed,
       toggleMnemonicVisibility,
       hiddenMnemonic,
+      copy,
     };
   },
 };

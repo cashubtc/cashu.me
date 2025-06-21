@@ -156,7 +156,7 @@
             class="q-mx-xs"
             size="md"
             flat
-            @click="copyText(invoiceData.bolt11)"
+            @click="copy(invoiceData.bolt11)"
             >{{ $t("InvoiceDetailDialog.invoice.actions.copy.label") }}</q-btn
           >
           <q-btn v-close-popup flat color="grey" class="q-ml-auto">{{
@@ -171,6 +171,7 @@
 import { debug } from "src/js/logger";
 import { defineComponent } from "vue";
 import { mapActions, mapState, mapWritableState } from "pinia";
+import { useClipboard } from "src/composables/useClipboard";
 import { defineAsyncComponent } from "vue";
 const VueQrcode = defineAsyncComponent(() =>
   import("@chenfengyuan/vue-qrcode")
@@ -192,6 +193,10 @@ export default defineComponent({
     ChooseMint,
     VueQrcode,
     NumericKeyboard,
+  },
+  setup() {
+    const { copy } = useClipboard();
+    return { copy };
   },
   props: {},
   data: function () {

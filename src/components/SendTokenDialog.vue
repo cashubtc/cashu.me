@@ -321,7 +321,7 @@
                 :value="qrCodeFragment"
                 :options="{ width: 400 }"
                 class="rounded-borders"
-                @click="copyText(sendData.tokensBase64)"
+                @click="copy(sendData.tokensBase64)"
               >
               </vue-qrcode>
             </q-responsive>
@@ -442,7 +442,7 @@
                   size="md"
                   flat
                   dense
-                  @click="copyText(sendData.tokensBase64)"
+                  @click="copy(sendData.tokensBase64)"
                   >{{ $t("SendTokenDialog.actions.copy_tokens.label") }}</q-btn
                 >
                 <q-btn
@@ -465,7 +465,7 @@
                     size="md"
                     flat
                     dense
-                    @click="copyText(encodeToPeanut(sendData.tokensBase64))"
+                    @click="copy(encodeToPeanut(sendData.tokensBase64))"
                     >{{ $t("SendTokenDialog.actions.copy_emoji.label") }}
                     <q-tooltip>{{
                       $t("SendTokenDialog.actions.copy_emoji.tooltip_text")
@@ -479,7 +479,7 @@
                     icon="link"
                     flat
                     @click="
-                      copyText(baseURL + '#token=' + sendData.tokensBase64)
+                      copy(baseURL + '#token=' + sendData.tokensBase64)
                     "
                     :aria-label="
                       $t('SendTokenDialog.actions.copy_link.tooltip_text')
@@ -641,6 +641,7 @@
 </template>
 <script lang="ts">
 import { defineComponent, defineAsyncComponent } from "vue";
+import { useClipboard } from "src/composables/useClipboard";
 import { debug } from "src/js/logger";
 import { useSendTokensStore } from "src/stores/sendTokensStore";
 import { useWalletStore } from "src/stores/wallet";
@@ -703,6 +704,10 @@ export default defineComponent({
     ScanIcon,
     NfcIcon,
     VueQrcode,
+  },
+  setup() {
+    const { copy } = useClipboard();
+    return { copy };
   },
   props: {},
   data: function () {

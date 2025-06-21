@@ -33,19 +33,6 @@ window.windowMixin = {
       this.$q.dark.toggle();
       this.$q.localStorage.set("cashu.darkMode", this.$q.dark.isActive);
     },
-    copyText: function (text, message, position) {
-      let notify = this.$q.notify;
-      let i18n = this.$i18n;
-      copyToClipboard(text).then(function () {
-        notify({
-          message:
-            message ||
-            (i18n && i18n.t("global.copy_to_clipboard.success")) ||
-            "Copied to clipboard!",
-          position: position || "bottom",
-        });
-      });
-    },
     pasteFromClipboard: async function () {
       let text = "";
       if (window?.Capacitor) {
