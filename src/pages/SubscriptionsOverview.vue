@@ -791,8 +791,13 @@ async function updateProfiles() {
   }
 }
 
-await updateProfiles();
-onMounted(() => {});
+onMounted(async () => {
+  try {
+    await updateProfiles();
+  } catch (e: any) {
+    notifyError(e.message);
+  }
+});
 watch(() => subscriptionsStore.subscriptions, updateProfiles);
 
 const columns = computed(() => [

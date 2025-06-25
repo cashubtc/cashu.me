@@ -5,6 +5,7 @@ import NDK, {
   NDKPrivateKeySigner,
   NDKSigner,
 } from "@nostr-dev-kit/ndk";
+import { nip19 } from "nostr-tools";
 
 export type NdkBootErrorReason =
   | "no-signer"
@@ -36,7 +37,13 @@ async function resolveSigner(): Promise<NDKSigner> {
   const clean = raw.replace(/^"+|"+$/g, '').trim()        // "nsec…"
   // TODO: sanitize quoted legacy values once
   if (clean.startsWith('nsec')) {
-    return NDKPrivateKeySigner.fromNsec(clean)
+    try {
+      const { data } = nip19.decode(clean)
+      if (typeof data !== 'string') throw new Error('invalid nsec')
+      return new NDKPrivateKeySigner(data)
+    } catch {
+      // fall through to nip07 below
+    }
   }
 
   if (typeof window !== "undefined" && (window as any).nostr) {
