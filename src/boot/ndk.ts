@@ -6,6 +6,7 @@ import NDK, {
   NDKSigner,
 } from "@nostr-dev-kit/ndk";
 import { nip19 } from "nostr-tools";
+import { bytesToHex } from "@noble/hashes/utils";
 
 export type NdkBootErrorReason =
   | "no-signer"
@@ -38,11 +39,11 @@ async function resolveSigner(): Promise<NDKSigner> {
   // TODO: sanitize quoted legacy values once
   if (clean.startsWith('nsec')) {
     try {
-      const { data } = nip19.decode(clean)
-      if (typeof data !== 'string') throw new Error('invalid nsec')
-      return new NDKPrivateKeySigner(data)
-    } catch {
-      // fall through to nip07 below
+      const { data } = nip19.decode(clean);      // Uint8Array
+      const hex = bytesToHex(data);              // 64-char hex
+      return new NDKPrivateKeySigner(hex);
+    } catch (e) {
+      throw new NdkBootError("unknown", (e as Error).message);
     }
   }
 
