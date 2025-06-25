@@ -236,8 +236,13 @@ export default defineComponent({
       needsProfile.value = !existing;
     }
 
-    await initPage();
-    onMounted(() => {});
+    onMounted(async () => {
+      try {
+        await initPage();
+      } catch (e) {
+        notifyError('Creator dashboard disabled – signer missing');
+      }
+    });
 
     const logout = () => {
       store.logout();
