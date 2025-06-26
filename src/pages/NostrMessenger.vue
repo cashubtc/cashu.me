@@ -53,6 +53,7 @@
       <MessageList :messages="messages" class="col" />
       <MessageInput @send="sendMessage" @sendToken="openSendTokenDialog" />
       <ChatSendTokenDialog ref="chatSendTokenDialogRef" :recipient="selected" />
+      </div>
       </q-page>
     </template>
     <template #fallback>
