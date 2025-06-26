@@ -1,11 +1,20 @@
-/**
- * Configures the Cashu-ts library axios client
- */
-// import { setupAxios } from "@cashu/cashu-ts";
+import { boot } from "quasar/wrappers";
+import { Notify } from "quasar";
+import { useWalletStore } from "src/stores/wallet";
+import { useMintsStore } from "src/stores/mints";
+import { verifyMint } from "./mint-info";
 
-// export default () => {
-//   setupAxios({
-//     // Default timeout for any interaction using the cashu-ts library to interact with a mint
-//     timeout: 15 * 1000, // 15 seconds
-//   });
-// };
+export default boot(async () => {
+  const walletStore = useWalletStore();
+  const mints = useMintsStore();
+  const ok = await verifyMint(mints.activeMintUrl);
+  if (!ok) {
+    Notify.create({
+      type: "negative",
+      message:
+        "Selected mint lacks conditional‑secret support (NUT‑10/11/14)",
+    });
+    throw new Error("Unsupported mint");
+  }
+  await walletStore.wallet.initKeys();
+});

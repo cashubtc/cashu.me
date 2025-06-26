@@ -66,6 +66,7 @@ import { useUiStore } from "stores/ui";
 import { fetchNutzapProfile } from "stores/nostr";
 import { notifyError } from "src/js/notify";
 import { storeToRefs } from "pinia";
+import { encrypt, decrypt } from "nostr-tools/nip44";
 
 export default defineComponent({
   name: "SubscribeDialog",
