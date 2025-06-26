@@ -16,5 +16,7 @@ export default boot(async () => {
     });
     throw new Error("Unsupported mint");
   }
-  await walletStore.wallet.initKeys();
+  if (typeof walletStore.initKeys === "function") {
+    await walletStore.initKeys();
+  }
 });
