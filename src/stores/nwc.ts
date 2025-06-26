@@ -10,8 +10,9 @@ import NDK, {
   NDKSubscription,
 } from "@nostr-dev-kit/ndk";
 import { useLocalStorage } from "@vueuse/core";
-import { bytesToHex } from "@noble/hashes/utils"; // already an installed dependency
-import { nip04, generateSecretKey, getPublicKey } from "nostr-tools";
+import { bytesToHex, hexToBytes } from "@noble/hashes/utils"; // already an installed dependency
+import { generateSecretKey, getPublicKey } from "nostr-tools";
+import { v2 as nip44 } from "nostr-tools/nip44";
 import { useMintsStore } from "./mints";
 import { useWalletStore, InvoiceHistory } from "./wallet";
 import { useProofsStore } from "./proofs";
@@ -345,10 +346,12 @@ export const useNWCStore = defineStore("nwc", {
       replyEvent.kind = 23195;
       debug("### replying with", JSON.stringify(result));
       const nostr = useNostrStore();
-      replyEvent.content = await nip04.encrypt(
-        nostr.privKeyHex,
-        event.author.pubkey,
-        JSON.stringify(result)
+      replyEvent.content = nip44.encrypt(
+        JSON.stringify(result),
+        nip44.utils.getConversationKey(
+          hexToBytes(nostr.privKeyHex),
+          event.author.pubkey,
+        ),
       );
       replyEvent.tags = [
         ["p", event.author.pubkey],
@@ -525,10 +528,12 @@ export const useNWCStore = defineStore("nwc", {
 
         debug("### NWC request!");
         debug("### event", event);
-        const decryptedContent = await nip04.decrypt(
-          conn.connectionSecret,
-          conn.walletPublicKey,
-          event.content
+        const decryptedContent = await nip44.decrypt(
+          event.content,
+          nip44.utils.getConversationKey(
+            hexToBytes(conn.connectionSecret),
+            conn.walletPublicKey,
+          ),
         );
         // debug("### decryptedContent", decryptedContent)
         await this.parseNWCCommand(decryptedContent, event, conn);

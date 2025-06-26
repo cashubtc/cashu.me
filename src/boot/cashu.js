@@ -6,6 +6,7 @@ import { verifyMint } from "./mint-info";
 
 export default boot(async () => {
   const walletStore = useWalletStore();
+  const wallet = walletStore.wallet;
   const mints = useMintsStore();
   const ok = await verifyMint(mints.activeMintUrl);
   if (!ok) {
@@ -16,7 +17,7 @@ export default boot(async () => {
     });
     throw new Error("Unsupported mint");
   }
-  if (typeof walletStore.initKeys === "function") {
-    await walletStore.initKeys();
+  if (typeof wallet.initKeys === "function") {
+    await wallet.initKeys();
   }
 });

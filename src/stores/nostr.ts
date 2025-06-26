@@ -16,7 +16,6 @@ import NDK, {
   NDKSubscription,
 } from "@nostr-dev-kit/ndk";
 import {
-  nip04,
   nip19,
   nip44,
   SimplePool,
@@ -676,14 +675,17 @@ export const useNostrStore = defineStore("nostr", {
         (!privKey || privKey.length === 0) &&
         (this.signerType === SignerType.NIP07 ||
           this.signerType === SignerType.NIP46) &&
-        (window as any)?.nostr?.nip04?.encrypt
+        (window as any)?.nostr?.nip44?.encrypt
       ) {
-        return await (window as any).nostr.nip04.encrypt(recipient, message);
+        return await (window as any).nostr.nip44.encrypt(recipient, message);
       }
       if (!privKey) {
         throw new Error("No private key for encryption");
       }
-      return await nip04.encrypt(privKey, recipient, message);
+      return await nip44.v2.encrypt(
+        message,
+        nip44.v2.utils.getConversationKey(privKey, recipient),
+      );
     },
     decryptNip04: async function (
       privKey: string | undefined,
@@ -694,10 +696,10 @@ export const useNostrStore = defineStore("nostr", {
         (!privKey || privKey.length === 0) &&
         (this.signerType === SignerType.NIP07 ||
           this.signerType === SignerType.NIP46) &&
-        (window as any)?.nostr?.nip04?.decrypt
+        (window as any)?.nostr?.nip44?.decrypt
       ) {
         try {
-          return await (window as any).nostr.nip04.decrypt(sender, content);
+          return await (window as any).nostr.nip44.decrypt(sender, content);
         } catch (e) {
           const shared = await (window as any).nostr.getSharedSecret(sender);
           return await nip44.v2.decrypt(content, shared);
@@ -707,7 +709,8 @@ export const useNostrStore = defineStore("nostr", {
         throw new Error("No private key for decryption");
       }
       try {
-        return await nip04.decrypt(privKey, sender, content);
+        const key = nip44.v2.utils.getConversationKey(privKey, sender);
+        return await nip44.v2.decrypt(content, key);
       } catch (e) {
         const key = nip44.v2.utils.getConversationKey(privKey, sender);
         return await nip44.v2.decrypt(content, key);
