@@ -23,10 +23,11 @@ export class NdkBootError extends Error {
   }
 }
 
-const DEFAULT_RELAYS = [
+export const DEFAULT_RELAYS = [
   "wss://relay.f7z.io/",
-  "wss://relay.primal.net/",
+  "wss://relay.damus.io/",
   "wss://relay.nostr.band/",
+  "wss://relay.primal.net/",
 ];
 
 let ndkInstance: NDK | undefined;
@@ -68,15 +69,61 @@ async function resolveSigner(): Promise<NDKSigner> {
   throw new NdkBootError('no-signer', 'No available Nostr signer')
 }
 
-async function createNdk(): Promise<NDK> {
-  const signer = await resolveSigner();
-  const ndk = new NDK({ explicitRelayUrls: DEFAULT_RELAYS, signer });
+async function pingRelay(url: string): Promise<boolean> {
+  return new Promise((resolve) => {
+    let settled = false
+    const ws = new WebSocket(url)
+    const timer = setTimeout(() => {
+      if (!settled) {
+        settled = true
+        try { ws.close() } catch {}
+        resolve(false)
+      }
+    }, 4000)
+    ws.onopen = () => {
+      if (!settled) {
+        settled = true
+        clearTimeout(timer)
+        ws.close()
+        resolve(true)
+      }
+    }
+    ws.onerror = () => {
+      if (!settled) {
+        settled = true
+        clearTimeout(timer)
+        resolve(false)
+      }
+    }
+  })
+}
+
+async function filterHealthyRelays(relays: string[]): Promise<string[]> {
+  const results = await Promise.all(relays.map(async u => (await pingRelay(u)) ? u : null))
+  return results.filter((u): u is string => !!u)
+}
+
+export async function createNdk(): Promise<NDK> {
+  let signer: NDKSigner | undefined
   try {
-    await ndk.connect({ timeoutMs: 10000 });
-  } catch (e) {
-    throw new NdkBootError("connect-failed", (e as Error).message);
+    signer = await resolveSigner()
+  } catch (e: any) {
+    if (e.reason === 'nip07-locked' || e.reason === 'no-signer') {
+      console.info('Creating read-only NDK (no signer)')
+    } else {
+      throw e
+    }
   }
-  return ndk;
+
+  const healthy = await filterHealthyRelays(DEFAULT_RELAYS)
+  const relayUrls = healthy.length ? healthy : DEFAULT_RELAYS
+  const ndk = new NDK({ signer, explicitRelayUrls: relayUrls })
+  try {
+    await ndk.connect({ timeoutMs: 10000 })
+  } catch (e) {
+    throw new NdkBootError('connect-failed', (e as Error).message)
+  }
+  return ndk
 }
 
 export async function getNdk(): Promise<NDK> {

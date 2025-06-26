@@ -7,16 +7,16 @@
         @touchstart="onTouchStart"
         @touchend="onTouchEnd"
       >
-    <q-responsive>
-      <q-drawer
-        v-model="drawer"
-        side="left"
-        show-if-above
-        :breakpoint="600"
-        bordered
-        :width="300"
-        :class="$q.screen.gt.xs ? 'q-pa-lg column' : 'q-pa-md column'"
-      >
+        <q-responsive>
+          <q-drawer
+            v-model="drawer"
+            side="left"
+            show-if-above
+            :breakpoint="600"
+            bordered
+            :width="300"
+            :class="$q.screen.gt.xs ? 'q-pa-lg column' : 'q-pa-md column'"
+          >
         <NostrIdentityManager class="q-mb-md" />
         <q-expansion-item
           class="q-mb-md"
@@ -49,6 +49,7 @@
           </q-toolbar-title>
         </q-toolbar>
       </q-header>
+      <q-spinner v-if="loading" size="lg" color="primary" />
       <ActiveChatHeader :pubkey="selected" />
       <MessageList :messages="messages" class="col" />
       <MessageInput @send="sendMessage" @sendToken="openSendTokenDialog" />
@@ -62,8 +63,8 @@
   </Suspense>
 </template>
 
-<script lang="ts" setup>
-import { computed, ref, onMounted, watch } from "vue";
+<script lang="ts">
+import { defineComponent, computed, ref, onMounted, watch } from "vue";
 import { useRouter } from "vue-router";
 import { useLocalStorage } from "@vueuse/core";
 import { useMessengerStore } from "src/stores/messenger";
@@ -78,23 +79,35 @@ import MessageList from "components/MessageList.vue";
 import MessageInput from "components/MessageInput.vue";
 import ChatSendTokenDialog from "components/ChatSendTokenDialog.vue";
 
-const ndkPromise = useNdk();
+export default defineComponent({
+  name: "NostrMessenger",
+  setup() {
+    const loading = ref(true);
+    const messenger = useMessengerStore();
 
-const messenger = useMessengerStore();
-messenger.loadIdentity();
-onMounted(() => {
-  ndkPromise.then(() => messenger.start());
-});
+    async function init() {
+      try {
+        await messenger.loadIdentity();
+        await useNdk();
+        await messenger.start();
+      } catch (e) {
+        console.error(e);
+      } finally {
+        loading.value = false;
+      }
+    }
 
-const router = useRouter();
+    onMounted(init);
 
-const goBack = () => {
-  if (window.history.length > 1) {
-    router.back();
-  } else {
-    router.push("/wallet");
-  }
-};
+    const router = useRouter();
+
+    const goBack = () => {
+      if (window.history.length > 1) {
+        router.back();
+      } else {
+        router.push("/wallet");
+      }
+    };
 
 const drawer = computed({
   get: () => messenger.drawerOpen,
@@ -148,6 +161,25 @@ const onTouchEnd = (e: TouchEvent) => {
   if (dx > 50) messenger.setDrawer(true);
   if (dx < -50) messenger.setDrawer(false);
 };
+
+    return {
+      loading,
+      messenger,
+      drawer,
+      selected,
+      chatSendTokenDialogRef,
+      messages,
+      showRelays,
+      selectConversation,
+      startChat,
+      sendMessage,
+      openSendTokenDialog,
+      goBack,
+      onTouchStart,
+      onTouchEnd,
+    };
+  },
+});
 </script>
 <style scoped>
 .q-toolbar {

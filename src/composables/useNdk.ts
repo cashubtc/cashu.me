@@ -1,22 +1,22 @@
-import { inject } from 'vue'
-import type NDK from '@nostr-dev-kit/ndk'
-import { NdkBootError } from 'boot/ndk'
-import { useNdkBootStore } from 'src/stores/ndkBoot'
+import NDK from '@nostr-dev-kit/ndk'
+import { DEFAULT_RELAYS, createNdk } from 'boot/ndk'
 
-export function useNdk(): Promise<NDK> {
-  const ndkPromise = inject<Promise<NDK> | undefined>('$ndkPromise')
-  const store = useNdkBootStore()
-  if (!ndkPromise) {
-    const err = new NdkBootError('unknown')
-    store.setError(err)
-    return Promise.reject(err)
-  }
-  return ndkPromise.catch((e) => {
-    if (e instanceof NdkBootError) {
-      store.setError(e)
+let cached: NDK | undefined
+
+export async function useNdk (opts: { requireSigner?: boolean } = {}): Promise<NDK> {
+  const { requireSigner = true } = opts
+  if (cached) return cached
+
+  try {
+    cached = await createNdk()
+  } catch (e: any) {
+    if (!requireSigner) {
+      cached = new NDK({ explicitRelayUrls: DEFAULT_RELAYS })
+      await cached.connect()
     } else {
-      store.setError(new NdkBootError('unknown', (e as any)?.message))
+      throw e
     }
-    return Promise.reject(e)
-  })
+  }
+
+  return cached
 }
