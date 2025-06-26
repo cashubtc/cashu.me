@@ -50,6 +50,7 @@ import { defineComponent, computed } from "vue";
 import { useCreatorHubStore } from "stores/creatorHub";
 import { renderMarkdown as renderMarkdownFn } from "src/js/simple-markdown";
 import NutzapNotification from "components/NutzapNotification.vue";
+import { encrypt, decrypt } from "nostr-tools/nip44";
 
 export default defineComponent({
   name: "CreatorHubPage",
