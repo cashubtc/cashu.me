@@ -22,6 +22,7 @@ vi.mock("../../../src/stores/p2pk", () => ({
   useP2PKStore: () => ({
     lockToPubKey: (...args: any[]) => lockToPubKey(...args),
     getTokenLocktime: (...args: any[]) => getTokenLocktime(...args),
+    generateRefundSecret: () => ({ preimage: 'pre', hash: 'hash' }),
   }),
 }));
 
