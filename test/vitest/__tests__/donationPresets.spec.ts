@@ -4,6 +4,9 @@ import { useWalletStore } from "../../../src/stores/wallet";
 import { useProofsStore } from "../../../src/stores/proofs";
 import { useMintsStore } from "../../../src/stores/mints";
 
+const validPub =
+  "02aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
+
 beforeEach(() => {
   localStorage.clear();
 });
@@ -41,7 +44,7 @@ describe("Donation presets", () => {
     const store = useDonationPresetsStore();
     const wallet = useWalletStore();
     const spy = wallet.sendToLock as any;
-    await store.createDonationPreset(3, 1, "pk", "b");
+    await store.createDonationPreset(3, 1, validPub, "b");
     expect(spy).toHaveBeenCalledTimes(3);
     const first = spy.mock.calls[0][5];
     const second = spy.mock.calls[1][5];
@@ -54,7 +57,7 @@ describe("Donation presets", () => {
     const store = useDonationPresetsStore();
     const wallet = useWalletStore();
     const spy = wallet.sendToLock as any;
-    const token = await store.createDonationPreset(0, 5, "pk", "b");
+    const token = await store.createDonationPreset(0, 5, validPub, "b");
     expect(spy).toHaveBeenCalledTimes(1);
     expect(spy.mock.calls[0][2]).toBe(5);
     expect(token).toBe("tok");
@@ -65,7 +68,7 @@ describe("Donation presets", () => {
     const wallet = useWalletStore();
     const spy = wallet.sendToLock as any;
     const start = 1000;
-    await store.createDonationPreset(3, 1, "pk", "b", start);
+    await store.createDonationPreset(3, 1, validPub, "b", start);
     expect(spy).toHaveBeenCalledTimes(3);
     expect(spy.mock.calls[0][5]).toBe(start);
     expect(spy.mock.calls[1][5]).toBe(start + 30 * 24 * 60 * 60);
@@ -77,7 +80,7 @@ describe("Donation presets", () => {
     const res = (await store.createDonationPreset(
       2,
       1,
-      "pk",
+      validPub,
       "b",
       undefined,
       true
