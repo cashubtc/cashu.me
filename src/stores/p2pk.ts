@@ -3,7 +3,8 @@ import { defineStore } from "pinia";
 import { useLocalStorage } from "@vueuse/core";
 import { generateSecretKey, getPublicKey, nip19 } from "nostr-tools";
 import { ensureCompressed } from "src/utils/ecash";
-import { bytesToHex } from "@noble/hashes/utils"; // already an installed dependency
+import { sha256 } from "@noble/hashes/sha256";
+import { bytesToHex } from "@noble/hashes/utils";
 import { WalletProof } from "stores/mints";
 import token from "src/js/token";
 import { useWalletStore } from "./wallet";
@@ -35,6 +36,13 @@ export const useP2PKStore = defineStore("p2pk", {
     firstKey: (state) => state.p2pkKeys[0] || null,
   },
   actions: {
+    /** Create 32-byte preimage + SHA-256 hash (hex). */
+    generateRefundSecret(): { preimage: string; hash: string } {
+      const rand = crypto.getRandomValues(new Uint8Array(32));
+      const preimage = bytesToHex(rand);
+      const hash = bytesToHex(sha256(rand));
+      return { preimage, hash };
+    },
     haveThisKey: function (key: string) {
       return this.p2pkKeys.filter((m) => m.publicKey == key).length > 0;
     },
