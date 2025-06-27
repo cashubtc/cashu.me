@@ -32,6 +32,7 @@ export default defineConfig({
       assets: path.resolve(__dirname, "src/assets"),
       boot: path.resolve(__dirname, "src/boot"),
       stores: path.resolve(__dirname, "src/stores"),
+      "@cashu/cashu-ts": path.resolve(__dirname, "src/lib/cashu-ts/src/index.ts"),
     },
   },
   plugins: [
