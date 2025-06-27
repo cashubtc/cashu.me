@@ -7,3 +7,4 @@
 .eslintrc.js
 babel.config.js
 **/cashu-ts/dist/**
+src/lib/cashu-ts/**

@@ -16,10 +16,10 @@ module.exports = configure(function (/* ctx */) {
     eslint: {
       // fix: true,
       // include: [],
-      // exclude: [],
       // rawOptions: {},
       warnings: true,
       errors: true,
+      exclude: ["src/lib/cashu-ts/**"],
     },
 
     // https://v2.quasar.dev/quasar-cli/prefetch-feature
