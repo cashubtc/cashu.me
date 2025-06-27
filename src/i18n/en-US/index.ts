@@ -1,4 +1,6 @@
-export default {
+import { default as defaultLang } from 'quasar/lang/en-US'
+
+export const messages = {
   copied_to_clipboard: "Copied to clipboard!",
   copy_failed: "Copy failed",
   global: {
@@ -1609,4 +1611,11 @@ export default {
       },
     },
   },
+};
+
+export default {
+  ...(defaultLang as any),
+  ...messages,
+  BucketManager: { helper: { intro: '' } },
+  MoveTokens:   { title: '', helper: '' }
 };

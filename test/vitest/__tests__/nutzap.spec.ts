@@ -47,7 +47,7 @@ vi.mock("../../../src/js/token", () => ({
 
 beforeEach(async () => {
   localStorage.clear();
-  await cashuDb.delete();
+  await cashuDb.close();   // close() is safe under fake-indexeddb
   await cashuDb.open();
 
   fetchNutzapProfile = vi.fn(async () => ({
