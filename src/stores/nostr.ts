@@ -74,7 +74,7 @@ async function urlsToRelaySet(urls?: string[]): Promise<NDKRelaySet | undefined>
     throw new Error('NDK instance unavailable');
   }
 
-  const set = new NDKRelaySet();
+  const set = new NDKRelaySet(ndk);
   for (const u of urls) {
     let relay: NDKRelay | undefined;
     try {
