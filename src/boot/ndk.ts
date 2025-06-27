@@ -103,13 +103,26 @@ async function filterHealthyRelays(relays: string[]): Promise<string[]> {
   return results.filter((u): u is string => !!u)
 }
 
+async function createReadOnlyNdk(): Promise<NDK> {
+  const healthy = await filterHealthyRelays(DEFAULT_RELAYS)
+  const relayUrls = healthy.length ? healthy : DEFAULT_RELAYS
+  const ndk = new NDK({ explicitRelayUrls: relayUrls })
+  try {
+    await ndk.connect({ timeoutMs: 10000 })
+  } catch (e) {
+    throw new NdkBootError('connect-failed', (e as Error).message)
+  }
+  return ndk
+}
+
 export async function createNdk(): Promise<NDK> {
   let signer: NDKSigner | undefined
   try {
     signer = await resolveSigner()
   } catch (e: any) {
-    if (e.reason === 'nip07-locked' || e.reason === 'no-signer') {
+    if (e.reason === 'no-signer' || e.reason === 'nip07-locked') {
       console.info('Creating read-only NDK (no signer)')
+      return createReadOnlyNdk()
     } else {
       throw e
     }
@@ -134,7 +147,11 @@ export async function getNdk(): Promise<NDK> {
       return ndk;
     });
   }
-  return ndkPromise;
+  const ndk = await ndkPromise;
+  if (!ndk) {
+    throw new NdkBootError('unknown', 'NDK failed to initialize');
+  }
+  return ndk;
 }
 
 export default boot(async ({ app }) => {

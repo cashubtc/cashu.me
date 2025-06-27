@@ -43,6 +43,7 @@ import {
   notify,
 } from "../js/notify";
 import { useNdk } from "src/composables/useNdk";
+import { getNdk } from "boot/ndk";
 import { useSendTokensStore } from "./sendTokensStore";
 import { usePRStore } from "./payment-request";
 import token from "../js/token";
@@ -65,8 +66,13 @@ interface NutzapProfile {
   relays: string[];
 }
 
-function urlsToRelaySet(ndk: NDK, urls?: string[]): NDKRelaySet | undefined {
+async function urlsToRelaySet(urls?: string[]): Promise<NDKRelaySet | undefined> {
   if (!urls?.length) return undefined;
+
+  const ndk = await getNdk();
+  if (!ndk) {
+    throw new Error('NDK instance unavailable');
+  }
 
   const set = new NDKRelaySet();
   for (const u of urls) {
@@ -152,7 +158,7 @@ export async function publishNutzapProfile(opts: {
   ev.tags = tags;
   ev.created_at = Math.floor(Date.now() / 1000);
   await ev.sign();
-  const relaySet = urlsToRelaySet(ndk, opts.relays);
+  const relaySet = await urlsToRelaySet(opts.relays);
   try {
     await ev.publish(relaySet);
   } catch (e: any) {
@@ -178,7 +184,7 @@ export async function publishNutzap(opts: {
   ev.tags = [["p", opts.receiverHex]];
   ev.created_at = Math.floor(Date.now() / 1000);
   await ev.sign();
-  const relaySet = urlsToRelaySet(ndk, opts.relayHints);
+  const relaySet = await urlsToRelaySet(opts.relayHints);
   try {
     await ev.publish(relaySet);
   } catch (e: any) {
@@ -339,7 +345,7 @@ export const useNostrStore = defineStore("nostr", {
       }
       await this.disconnect();
       const ndk = await useNdk();
-      urlsToRelaySet(ndk, this.relays);
+      await urlsToRelaySet(this.relays);
       await ndk.connect();
       this.connected = true;
     },
@@ -350,7 +356,7 @@ export const useNostrStore = defineStore("nostr", {
         this.connected = true;
       }
       if (relays?.length) {
-        const added = urlsToRelaySet(ndk, relays);
+        const added = await urlsToRelaySet(relays);
         if (added) {
           await ndk.connect();
         }
