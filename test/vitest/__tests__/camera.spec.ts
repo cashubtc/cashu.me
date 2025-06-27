@@ -16,10 +16,15 @@ describe("Camera store", () => {
   });
 
   it("checks camera permission", async () => {
-    const queryMock = vi.fn().mockResolvedValue({ state: "granted" });
-    (navigator as any).permissions = { query: queryMock };
+    const permissionsGetSpy = vi
+      .spyOn(navigator, "permissions", "get")
+      .mockReturnValue({
+        query: vi.fn().mockResolvedValue({ state: "granted" }),
+      });
     const store = useCameraStore();
     await store.hasCamera();
-    expect(queryMock).toHaveBeenCalledWith({ name: "camera" });
+    expect(permissionsGetSpy.mock.results[0].value.query).toHaveBeenCalledWith({
+      name: "camera",
+    });
   });
 });
