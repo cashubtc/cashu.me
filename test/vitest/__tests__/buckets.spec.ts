@@ -10,7 +10,7 @@ import { cashuDb } from "../../../src/stores/dexie";
 
 beforeEach(async () => {
   localStorage.clear();
-  await cashuDb.delete();
+  await cashuDb.close();   // close() is safe under fake-indexeddb
   await cashuDb.open();
 });
 
