@@ -103,15 +103,20 @@ async function filterHealthyRelays(relays: string[]): Promise<string[]> {
   return results.filter((u): u is string => !!u)
 }
 
+async function safeConnect(ndk: NDK) {
+  try {
+    await ndk.connect({ timeoutMs: 10_000 });
+  } catch (e: any) {
+    console.warn('[NDK] connect failed, continuing in offline mode:', e?.message)
+    // swallow error to allow offline usage
+  }
+}
+
 async function createReadOnlyNdk(): Promise<NDK> {
   const healthy = await filterHealthyRelays(DEFAULT_RELAYS)
   const relayUrls = healthy.length ? healthy : DEFAULT_RELAYS
   const ndk = new NDK({ explicitRelayUrls: relayUrls })
-  try {
-    await ndk.connect({ timeoutMs: 10000 })
-  } catch (e) {
-    throw new NdkBootError('connect-failed', (e as Error).message)
-  }
+  await safeConnect(ndk)
   return ndk
 }
 
@@ -131,11 +136,7 @@ export async function createNdk(): Promise<NDK> {
   const healthy = await filterHealthyRelays(DEFAULT_RELAYS)
   const relayUrls = healthy.length ? healthy : DEFAULT_RELAYS
   const ndk = new NDK({ signer, explicitRelayUrls: relayUrls })
-  try {
-    await ndk.connect({ timeoutMs: 10000 })
-  } catch (e) {
-    throw new NdkBootError('connect-failed', (e as Error).message)
-  }
+  await safeConnect(ndk)
   return ndk
 }
 
