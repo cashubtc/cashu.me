@@ -81,7 +81,7 @@ describe("messenger.sendToken", () => {
     expect(walletSend).toHaveBeenCalled();
     expect(sendDm).toHaveBeenCalledWith(
       "receiver",
-      "note\nTOKEN",
+      expect.stringContaining('\"token\":\"TOKEN\"'),
       "priv",
       "pub"
     );
