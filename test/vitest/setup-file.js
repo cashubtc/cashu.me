@@ -1,3 +1,8 @@
+vi.mock('quasar', async (importOriginal) => {
+  const actual = await importOriginal();
+  return { ...actual, QIcon: actual.QIcon || { name: 'QIcon', template: '<i />' } };
+});
+
 import { setActivePinia, createPinia } from 'pinia';
 import { beforeAll } from 'vitest';
 import { Quasar, Dialog } from 'quasar';
