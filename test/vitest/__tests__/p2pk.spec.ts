@@ -78,6 +78,45 @@ describe("P2PK store", () => {
     );
   });
 
+  it("uses splitWithSecret when hashSecret is provided", async () => {
+    const walletStore = useWalletStore();
+    const proofsStore = useProofsStore();
+    vi.spyOn(proofsStore, "removeProofs").mockResolvedValue();
+    vi.spyOn(proofsStore, "addProofs").mockResolvedValue();
+
+    walletStore.spendableProofs = vi.fn(() => [
+      { secret: "s", amount: 1, id: "a", C: "c" } as any,
+    ]);
+    walletStore.coinSelect = vi.fn(() => [
+      { secret: "s", amount: 1, id: "a", C: "c" } as any,
+    ]);
+    walletStore.getKeyset = vi.fn(() => "kid");
+    const wallet = {
+      mint: { mintUrl: "m" },
+      unit: "sat",
+      splitWithSecret: vi.fn(async (_a: number, _p: any, opts: any) => ({
+        keep: [],
+        send: [],
+      })),
+    } as any;
+
+    await walletStore.sendToLock(
+      [{ secret: "s", amount: 1, id: "a", C: "c" } as any],
+      wallet,
+      1,
+      "pk",
+      "b",
+      123,
+      "r",
+      "hs"
+    );
+    expect(wallet.splitWithSecret).toHaveBeenCalledWith(
+      1,
+      [{ secret: "s", amount: 1, id: "a", C: "c" }],
+      { pubkey: "pk", locktime: 123, refund: "r", hashSecret: "hs" }
+    );
+  });
+
   it("extracts pubkeys from encoded token", () => {
     const p2pk = useP2PKStore();
     const locktime = Math.floor(Date.now() / 1000) + 1000;

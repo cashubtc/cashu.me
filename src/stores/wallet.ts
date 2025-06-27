@@ -449,7 +449,8 @@ export const useWalletStore = defineStore("wallet", {
       receiverPubkey: string,
       bucketId: string = DEFAULT_BUCKET_ID,
       locktime?: number,
-      refundPubkey?: string
+      refundPubkey?: string,
+      hashSecret?: string
     ) {
       const mintStore = useMintsStore();
       const info = mintStore.activeInfo || {};
@@ -469,16 +470,32 @@ export const useWalletStore = defineStore("wallet", {
         bucketId
       );
       const keysetId = this.getKeyset(wallet.mint.mintUrl, wallet.unit);
-      const { keep: keepProofs, send: sendProofs } = await wallet.send(
-        amount,
-        proofsToSend,
-        {
-          keysetId,
-          pubkey: ensureCompressed(receiverPubkey),
-          locktime,
-          refund: refundPubkey,
-        }
-      );
+      let keepProofs: Proof[] = [];
+      let sendProofs: Proof[] = [];
+
+      if (hashSecret) {
+        ({ keep: keepProofs, send: sendProofs } = await (wallet as any).splitWithSecret(
+          amount,
+          proofsToSend,
+          {
+            pubkey: ensureCompressed(receiverPubkey),
+            locktime,
+            refund: refundPubkey,
+            hashSecret,
+          }
+        ));
+      } else {
+        ({ keep: keepProofs, send: sendProofs } = await wallet.send(
+          amount,
+          proofsToSend,
+          {
+            keysetId,
+            pubkey: ensureCompressed(receiverPubkey),
+            locktime,
+            refund: refundPubkey,
+          }
+        ));
+      }
       const proofsStore = useProofsStore();
       await proofsStore.removeProofs(proofsToSend);
       // note: we do not store sendProofs in the proofs store but
