@@ -474,16 +474,21 @@ export const useWalletStore = defineStore("wallet", {
       let sendProofs: Proof[] = [];
 
       if (hashSecret) {
-        ({ keep: keepProofs, send: sendProofs } = await (wallet as any).splitWithSecret(
-          amount,
-          proofsToSend,
+        const customSecret = [
+          "P2PK",
           {
-            pubkey: ensureCompressed(receiverPubkey),
-            locktime,
-            refund: refundPubkey,
-            hashSecret,
-          }
-        ));
+            data: ensureCompressed(receiverPubkey),
+            nonce: crypto.randomUUID().replace(/-/g, "").slice(0, 16),
+            tags: [
+              ["locktime", locktime.toString()],
+              ["refund", refundPubkey],
+              ["hashlock", hashSecret],
+            ],
+          },
+        ] as const;
+
+        ({ keep: keepProofs, send: sendProofs } =
+          await (wallet as any).splitWithSecret(amount, customSecret));
       } else {
         ({ keep: keepProofs, send: sendProofs } = await wallet.send(
           amount,

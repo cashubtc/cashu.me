@@ -5,6 +5,8 @@ import { useLockedTokensStore } from "./lockedTokens";
 import { cashuDb } from "./dexie";
 import token from "src/js/token";
 import { v4 as uuidv4 } from "uuid";
+import { useMintsStore } from "./mints";
+import { useProofsStore } from "./proofs";
 import {
   fetchNutzapProfile,
   publishNutzap,
@@ -103,11 +105,14 @@ export const useNutzapStore = defineStore("nutzap", {
         const { p2pkPubkey, trustedMints } = profile;
         const wallet = useWalletStore();
         const p2pk = useP2PKStore();
+        const mints = useMintsStore();
+        const proofsStore = useProofsStore();
         interface LockedTokenPayload {
           tokenString: string;
           mintUrl: string;
           timelock: number;
           receiver: string;
+          refundPreimage: string;
         }
         const lockedTokens: LockedTokenPayload[] = [];
 
@@ -117,27 +122,38 @@ export const useNutzapStore = defineStore("nutzap", {
           if (!mint)
             throw new Error("Insufficient balance in recipient-trusted mints");
 
-          const { token } = await p2pk.lockToPubKey({
-            mintUrl: mint.url,
+          // ----- HTLC-locked pledge with refund capability --------------
+          const { preimage, hash } = p2pk.generateRefundSecret();
+          const mintWallet = wallet.mintWallet(mint.url, mints.activeUnit);
+          const proofs = mints.mintUnitProofs(mint, mints.activeUnit);
+          const { sendProofs } = await wallet.sendToLock(
+            proofs,
+            mintWallet,
             amount,
-            pubKey: p2pkPubkey,
-            timelock: unlockDate,
-          });
+            p2pkPubkey,
+            "nutzap",
+            unlockDate,
+            undefined,
+            hash
+          );
+          const token = proofsStore.serializeProofs(sendProofs);
 
-          // store locally for UI (buckets flow)
-          lockedTokens.push({
+          const lockedToken = {
             tokenString: token,
             mintUrl: mint.url,
             timelock: unlockDate,
             receiver: npub,
-          });
+            refundPreimage: preimage,
+          };
+          lockedTokens.push(lockedToken);
 
           // Publish Nutzap (one event per period)
           await publishNutzap({
-            content: token, // ← token string per NUT-11
+            content: token,
             receiverHex: profile.hexPub,
             relayHints: profile.relays,
           });
+          await proofsStore.updateActiveProofs();
         }
 
         // Persist into bucket store for progress UI
