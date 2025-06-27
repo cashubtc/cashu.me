@@ -1,0 +1,14 @@
+/test
+/coverage
+/.github
+.eslintignore
+.eslintrc.json
+.prettierignore
+.prettierrc
+vite.config.ts
+vitest.workspace.ts
+tsconfig.json
+src
+examples
+/lib/cashu-ts.iife.js
+/lib/cashu-ts.iife.js.map
