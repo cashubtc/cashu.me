@@ -1,5 +1,9 @@
 <template>
-  <q-dialog ref="dialogRef" @hide="onDialogHide">
+  <q-dialog
+    ref="dialogRef"
+    v-model="ui.showMissingSignerModal"
+    @hide="onDialogHide"
+  >
     <q-card class="q-pa-md">
       <q-card-section>
         <div class="text-h6">Missing Signer</div>
@@ -21,6 +25,7 @@
 <script lang="ts" setup>
 import { ref } from "vue";
 import { useSignerStore } from "src/stores/signer";
+import { useUiStore } from "src/stores/ui";
 import { nip19 } from "nostr-tools";
 import { notifyError } from "src/js/notify";
 
@@ -28,7 +33,9 @@ const props = defineProps<{ dialogRef?: any }>();
 const emit = defineEmits(["ok", "hide"]);
 // Ensure dialogRef is always a Vue ref to avoid warnings
 const dialogRef = props.dialogRef ?? ref(null);
+const ui = useUiStore();
 function onDialogHide() {
+  ui.showMissingSignerModal = false;
   emit("hide");
 }
 const signer = useSignerStore();
