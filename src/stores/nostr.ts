@@ -69,9 +69,10 @@ interface NutzapProfile {
 async function urlsToRelaySet(urls?: string[]): Promise<NDKRelaySet | undefined> {
   if (!urls?.length) return undefined;
 
-  const ndk = await getNdk();
+  const ndk = await getNdk?.();
   if (!ndk) {
-    throw new Error('NDK instance unavailable');
+    console.warn("[urlsToRelaySet] NDK not ready \u2013 skip");
+    return undefined;
   }
 
   const set = new NDKRelaySet(ndk);
