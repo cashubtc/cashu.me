@@ -163,8 +163,11 @@ Before submitting a pull request, install dependencies and run the test suite:
 
 ```bash
 npm install
-npm test
+npm run test:ci
 ```
+
+Some tests communicate with an external Cashu mint. Ensure network connectivity
+or provide the required environment variables before running the suite.
 
 ## License
 
