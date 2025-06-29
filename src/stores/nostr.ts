@@ -69,9 +69,11 @@ interface NutzapProfile {
 async function urlsToRelaySet(urls?: string[]): Promise<NDKRelaySet | undefined> {
   if (!urls?.length) return undefined;
 
+  // NOTE: during very early boot `getNdk?.()` may return `undefined`
+  // because the NDK store hasn't been initialized yet.
   const ndk = await getNdk?.();
   if (!ndk) {
-    console.warn("[urlsToRelaySet] NDK not ready \u2013 skip");
+    console.warn("[urlsToRelaySet] NDK not ready \u2013 skipping relay-set build");
     return undefined;
   }
 
