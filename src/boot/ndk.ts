@@ -119,7 +119,8 @@ async function safeConnect(ndk: NDK) {
 
 async function createReadOnlyNdk(): Promise<NDK> {
   const healthy = await filterHealthyRelays(DEFAULT_RELAYS)
-  const relayUrls = healthy.length ? healthy : DEFAULT_RELAYS
+  // avoid connecting to multiple failing relays by falling back to one
+  const relayUrls = healthy.length ? healthy : [DEFAULT_RELAYS[0]]
   const ndk = new NDK({ explicitRelayUrls: relayUrls })
   await safeConnect(ndk)
   return ndk
@@ -139,7 +140,8 @@ export async function createNdk(): Promise<NDK> {
   }
 
   const healthy = await filterHealthyRelays(DEFAULT_RELAYS)
-  const relayUrls = healthy.length ? healthy : DEFAULT_RELAYS
+  // avoid connecting to multiple failing relays by falling back to one
+  const relayUrls = healthy.length ? healthy : [DEFAULT_RELAYS[0]]
   const ndk = new NDK({ signer, explicitRelayUrls: relayUrls })
   await safeConnect(ndk)
   return ndk
