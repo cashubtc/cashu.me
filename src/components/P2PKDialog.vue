@@ -46,7 +46,7 @@
           flat
           rounded
           dense
-          @click="newKeys"
+          @click="p2pk.createAndSelectNewKey()"
         >
           <q-icon name="refresh" class="q-pr-sm" size="xs" />
           {{ $t("P2PKDialog.actions.new_key.label") }}</q-btn
@@ -69,7 +69,7 @@
 </template>
 <script>
 import { defineComponent } from "vue";
-import { mapActions, mapState, mapWritableState } from "pinia";
+import { mapState, mapWritableState } from "pinia";
 import { useClipboard } from "src/composables/useClipboard";
 import { defineAsyncComponent } from "vue";
 const VueQrcode = defineAsyncComponent(() =>
@@ -86,7 +86,8 @@ export default defineComponent({
   },
   setup() {
     const { copy } = useClipboard();
-    return { copy };
+    const p2pk = useP2PKStore();
+    return { copy, p2pk };
   },
   data: function () {
     return {};
@@ -94,13 +95,6 @@ export default defineComponent({
   computed: {
     ...mapState(useP2PKStore, ["p2pkKeys", "showP2PKData", "showLastKey"]),
     ...mapWritableState(useP2PKStore, ["showP2PKDialog"]),
-  },
-  methods: {
-    ...mapActions(useP2PKStore, ["generateKeypair", "showKeyDetails"]),
-    newKeys: function () {
-      this.generateKeypair();
-      this.showLastKey();
-    },
   },
 });
 </script>

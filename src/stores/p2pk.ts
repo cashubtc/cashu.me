@@ -15,6 +15,14 @@ import { DEFAULT_BUCKET_ID } from "./buckets";
 import { cashuDb } from "./dexie";
 import { maybeRepublishNutzapProfile } from "./creatorHub";
 
+/** Return `{ pub, priv }` where `pub` is SEC-compressed hex. */
+export function generateP2pkKeyPair(): { pub: string; priv: string } {
+  const priv = generateSecretKey();
+  const privHex = bytesToHex(priv);
+  const pubHex = ensureCompressed(getPublicKey(priv));
+  return { pub: pubHex, priv: privHex };
+}
+
 type P2PKKey = {
   publicKey: string;
   privateKey: string;
@@ -122,6 +130,18 @@ export const useP2PKStore = defineStore("p2pk", {
       };
       this.p2pkKeys = this.p2pkKeys.concat(keyPair);
       maybeRepublishNutzapProfile();
+    },
+    async createAndSelectNewKey() {
+      const { pub, priv } = generateP2pkKeyPair();
+      this.p2pkKeys.unshift({
+        publicKey: pub,
+        privateKey: priv,
+        used: false,
+        usedCount: 0,
+      });
+      if (typeof maybeRepublishNutzapProfile === "function") {
+        await maybeRepublishNutzapProfile();
+      }
     },
     getSecretP2PKInfo: function (secret: string): {
       pubkey: string;
