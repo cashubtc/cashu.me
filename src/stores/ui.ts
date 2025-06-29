@@ -29,6 +29,7 @@ export const useUiStore = defineStore("ui", {
     showSendDialog: false,
     showReceiveDialog: false,
     showReceiveEcashDrawer: false,
+    showMissingSignerModal: false,
     showNumericKeyboard: false,
     activityOrb: false,
     tab: useLocalStorage("cashu.ui.tab", "history" as string),

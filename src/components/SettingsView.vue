@@ -872,7 +872,7 @@
                 size="sm"
                 rounded
                 outline
-                @click="generateKeypair"
+                @click="createAndSelectNewKey"
                 >{{ $t("Settings.p2pk_features.generate_button") }}</q-btn
               >
             </q-item>
@@ -889,16 +889,12 @@
             </q-item>
             <q-item style="display: inline-block">
               <q-btn
-                class="q-ml-sm q-px-md"
                 color="primary"
-                size="sm"
-                rounded
-                outline
-                @click="publishMyNutzapProfile"
-                >{{
-                  $t("Settings.p2pk_features.publish_profile_button")
-                }}</q-btn
+                :disable="!p2pkStore.firstKey"
+                @click="doPublish"
               >
+                Publish Nutzap profile
+              </q-btn>
             </q-item>
             <q-item>
               <q-toggle
@@ -1800,7 +1796,8 @@ export default defineComponent({
   },
   setup() {
     const { copy } = useClipboard();
-    return { copy };
+    const p2pkStore = useP2PKStore();
+    return { copy, p2pkStore };
   },
   props: {},
   data: function () {
@@ -1861,7 +1858,7 @@ export default defineComponent({
       "auditorApiUrl",
       "defaultNostrRelays",
     ]),
-    ...mapState(useP2PKStore, ["p2pkKeys"]),
+    ...mapState(useP2PKStore, ["p2pkKeys", "firstKey"]),
     ...mapWritableState(useP2PKStore, [
       "showP2PKDialog",
       "showP2PkButtonInDrawer",
@@ -1959,7 +1956,7 @@ export default defineComponent({
     ]),
     ...mapActions(useP2PKStore, [
       "importNsec",
-      "generateKeypair",
+      "createAndSelectNewKey",
       "showKeyDetails",
     ]),
     ...mapActions(useMintsStore, [
@@ -2039,20 +2036,26 @@ export default defineComponent({
       const token = await this.serializeProofs(this.activeProofs);
       this.copy(token);
     },
-    publishMyNutzapProfile: async function () {
+    doPublish: async function () {
       try {
-        if (!this.p2pkKeys.length) {
-          this.notifyError("No P2PK key available");
+        await useNostrStore().initSignerIfNotSet();
+      } catch (e) {
+        useUiStore().showMissingSignerModal = true;
+        return;
+      }
+      try {
+        if (!this.firstKey) {
+          this.notifyError("No P2PK key");
           return;
         }
         await publishNutzapProfileFn({
-          p2pkPub: this.p2pkKeys[0].publicKey,
+          p2pkPub: this.firstKey.publicKey,
           mints: this.mints.map((m) => m.url),
           relays: this.defaultNostrRelays,
         });
-        this.notifySuccess("Nutzap profile published");
+        this.notifySuccess("Profile published");
       } catch (e) {
-        this.notifyError(e.message || "Failed to publish Nutzap profile");
+        this.notifyError("Failed to publish");
       }
     },
     handleSeedClick: async function () {

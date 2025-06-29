@@ -224,7 +224,7 @@ export default defineComponent({
     ...mapActions(useTokensStore, ["addPendingToken"]),
     ...mapActions(useP2PKStore, [
       "getPrivateKeyForP2PKEncodedToken",
-      "generateKeypair",
+      "createAndSelectNewKey",
       "showLastKey",
     ]),
     ...mapActions(useMintsStore, ["addMint"]),
@@ -254,7 +254,7 @@ export default defineComponent({
     handleLockBtn: function () {
       this.showP2PKDialog = !this.showP2PKDialog;
       if (!this.p2pkKeys.length || !this.showP2PKDialog) {
-        this.generateKeypair();
+        this.createAndSelectNewKey();
       }
       this.showLastKey();
       this.showReceiveEcashDrawer = false;
