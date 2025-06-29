@@ -5,6 +5,7 @@
       <router-view />
     </q-page-container>
     <NdkErrorDialog />
+    <MissingSignerModal />
   </q-layout>
 </template>
 
@@ -12,6 +13,7 @@
 import { defineComponent, ref } from "vue";
 import MainHeader from "components/MainHeader.vue";
 import NdkErrorDialog from "components/NdkErrorDialog.vue";
+import MissingSignerModal from "components/MissingSignerModal.vue";
 import { useNostrStore } from "src/stores/nostr";
 import { useNutzapStore } from "src/stores/nutzap";
 
@@ -21,6 +23,7 @@ export default defineComponent({
   components: {
     MainHeader,
     NdkErrorDialog,
+    MissingSignerModal,
   },
   mounted() {
     const myHex = useNostrStore().pubkey;
