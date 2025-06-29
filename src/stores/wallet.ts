@@ -50,7 +50,7 @@ import { hashToCurve } from "@cashu/crypto/modules/common";
 import * as bolt11Decoder from "light-bolt11-decoder";
 import { bech32 } from "bech32";
 import axios from "axios";
-import { date, Dialog } from "quasar";
+import { date } from "quasar";
 
 // bip39 requires Buffer
 // import { Buffer } from 'buffer';
@@ -62,7 +62,7 @@ import { usePriceStore } from "./price";
 import { i18n } from "src/boot/i18n";
 import { useNostrStore } from "./nostr";
 import { useSignerStore } from "./signer";
-import MissingSignerModal from "src/components/MissingSignerModal.vue";
+import { watch } from "vue";
 // HACK: this is a workaround so that the catch block in the melt function does not throw an error when the user exits the app
 // before the payment is completed. This is necessary because the catch block in the melt function would otherwise remove all
 // quotes from the invoiceHistory and the user would not be able to pay the invoice again after reopening the app.
@@ -715,14 +715,19 @@ export const useWalletStore = defineStore("wallet", {
 
         if (!privkey && needsSig && !remoteSigned) {
           const signerStore = useSignerStore();
+          const uiStore = useUiStore();
           signerStore.reset();
-          const dlg = Dialog.create({
-            component: MissingSignerModal,
-          });
+          uiStore.showMissingSignerModal = true;
           const ok = await new Promise<boolean>((resolve) => {
-            dlg.onOk(() => resolve(true));
-            dlg.onCancel(() => resolve(false));
-            dlg.onDismiss(() => resolve(false));
+            const stop = watch(
+              () => uiStore.showMissingSignerModal,
+              (val) => {
+                if (!val) {
+                  stop();
+                  resolve(!!signerStore.method);
+                }
+              }
+            );
           });
           if (ok) {
             return false;

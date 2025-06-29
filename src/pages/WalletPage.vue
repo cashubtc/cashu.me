@@ -251,8 +251,7 @@ import iOSPWAPrompt from "components/iOSPWAPrompt.vue";
 import AndroidPWAPrompt from "components/AndroidPWAPrompt.vue";
 import ActivityOrb from "components/ActivityOrb.vue";
 import BucketManager from "components/BucketManager.vue";
-import MissingSignerModal from "src/components/MissingSignerModal.vue";
-import { Dialog } from "quasar";
+import { watch } from "vue";
 import { useNdk } from "src/composables/useNdk";
 
 // pinia stores
@@ -618,10 +617,21 @@ export default {
     handleLockedTokenMessage(event) {
       if (event.data?.type === "locked-token-missing-signer") {
         const tokenId = event.data.tokenId;
-        const dlg = Dialog.create({ component: MissingSignerModal });
-        dlg.onOk(() => {
-          postMessage({ type: "retry-locked-token", tokenId });
-        });
+        const uiStore = useUiStore();
+        const signerStore = useSignerStore();
+        signerStore.reset();
+        uiStore.showMissingSignerModal = true;
+        const stop = watch(
+          () => uiStore.showMissingSignerModal,
+          (val) => {
+            if (!val) {
+              stop();
+              if (signerStore.method) {
+                postMessage({ type: "retry-locked-token", tokenId });
+              }
+            }
+          }
+        );
       }
     },
     async initPage() {
