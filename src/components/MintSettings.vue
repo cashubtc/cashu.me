@@ -569,7 +569,7 @@ export default defineComponent({
       "fetchEventsFromUser",
       "fetchMints",
     ]),
-    ...mapActions(useP2PKStore, ["generateKeypair", "showKeyDetails"]),
+    ...mapActions(useP2PKStore, ["createAndSelectNewKey", "showKeyDetails"]),
     ...mapActions(useMintsStore, [
       "addMint",
       "removeMint",

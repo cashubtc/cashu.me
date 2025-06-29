@@ -478,7 +478,7 @@ export default defineComponent({
     ...mapActions(useTokensStore, ["addPendingToken"]),
     ...mapActions(useP2PKStore, [
       "getPrivateKeyForP2PKEncodedToken",
-      "generateKeypair",
+      "createAndSelectNewKey",
       "showLastKey",
       "getTokenLocktime",
       "getTokenPubkey",

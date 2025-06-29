@@ -288,17 +288,15 @@ export default defineComponent({
     };
 
     async function doPublish() {
-      const first = p2pkStore.p2pkKeys[0];
+      const first = p2pkStore.firstKey;
       if (!first) {
-        notifyError(
-          'You must generate a P2PK key first (click "Generate P2PK")'
-        );
+        notifyError('No P2PK key');
         return;
       }
       try {
         await nostr.initSignerIfNotSet();
       } catch (e) {
-        notifyError("You declined the Nostr signer popup");
+        uiStore.showMissingSignerModal = true;
         return;
       }
       try {
@@ -307,10 +305,10 @@ export default defineComponent({
           mints: mintsStore.mints.map((m) => m.url),
           relays: nostr.relays,
         });
-        notifySuccess("Nutzap profile published ✔");
+        notifySuccess("Profile published");
         needsProfile.value = false;
       } catch (e: any) {
-        notifyError("Relays rejected event", e?.message ?? String(e));
+        notifyError("Failed to publish");
       }
     }
 
@@ -337,8 +335,8 @@ export default defineComponent({
       }
     }
 
-    function generateP2PK() {
-      p2pkStore.generateKeypair();
+    async function generateP2PK() {
+      await p2pkStore.createAndSelectNewKey();
     }
 
     const saveTier = async (tier: Tier) => {
