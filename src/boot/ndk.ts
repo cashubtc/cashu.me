@@ -30,6 +30,11 @@ export const DEFAULT_RELAYS = [
   "wss://relay.primal.net/",
 ];
 
+// ensure there is at least one relay configured at runtime
+if (DEFAULT_RELAYS.length === 0) {
+  DEFAULT_RELAYS.push("wss://relay.damus.io/")
+}
+
 let ndkInstance: NDK | undefined;
 let ndkPromise: Promise<NDK> | undefined;
 
