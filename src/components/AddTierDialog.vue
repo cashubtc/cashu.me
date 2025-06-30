@@ -130,7 +130,9 @@ export default defineComponent({
       try {
         await nostr.initSignerIfNotSet();
         if (!nostr.signer) {
-          notifyError("Please login to Nostr (Nos2x/Alby) before saving tiers");
+          notifyError(
+            "Please unlock or connect your Nostr signer before saving tiers",
+          );
           return;
         }
         await creatorHub.addOrUpdateTier({ ...localTier });
