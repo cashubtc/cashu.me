@@ -291,7 +291,6 @@ export default defineComponent({
       const first = p2pkStore.firstKey;
       if (!first) {
         notifyError('No P2PK key');
-        return;
       }
       try {
         await nostr.initSignerIfNotSet();

@@ -26,6 +26,14 @@ export class NdkBootError extends Error {
 export const DEFAULT_RELAYS = [
   "wss://relay.damus.io/",
   "wss://relay.primal.net/",
+  "wss://eden.nostr.land/",
+  "wss://nos.lol/",
+  "wss://nostr-pub.wellorder.net/",
+  "wss://nostr.bitcoiner.social/",
+  "wss://offchain.pub/",
+  "wss://relay.nostr.band/",
+  "wss://relay.primal.net/",
+  "wss://relay.snort.social/",
 ];
 
 // ensure there is at least one relay configured at runtime
