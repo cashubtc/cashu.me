@@ -102,6 +102,7 @@ export const messages = {
         error: "Mint error",
       },
     },
+    signer_connected: "Nostr signer connected",
   },
   MainHeader: {
     menu: {

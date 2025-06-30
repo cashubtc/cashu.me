@@ -10,6 +10,15 @@
       <q-btn flat color="primary" @click="logout">{{
         $t("CreatorHub.dashboard.logout")
       }}</q-btn>
+      <q-btn
+        v-if="!nostr.signer"
+        flat
+        color="primary"
+        class="q-ml-sm"
+        @click="connectSigner"
+      >
+        Connect Nostr Signer
+      </q-btn>
     </div>
 
     <q-banner v-if="needsProfile" dense class="bg-orange text-white q-mt-md">
@@ -184,11 +193,13 @@ import { usePriceStore } from "stores/price";
 import { useUiStore } from "stores/ui";
 import { v4 as uuidv4 } from "uuid";
 import { notifySuccess, notifyError } from "src/js/notify";
+import { useI18n } from "vue-i18n";
 
 export default defineComponent({
   name: "CreatorDashboardPage",
   components: { AddTierDialog, NutzapNotification },
   setup() {
+    const { t } = useI18n();
     const store = useCreatorHubStore();
     const nostr = useNostrStore();
     const router = useRouter();
@@ -293,19 +304,6 @@ export default defineComponent({
         notifyError('No P2PK key');
       }
       try {
-        await nostr.initSignerIfNotSet();
-      } catch (e) {
-        const ui = useUiStore();
-        ui.showMissingSignerModal = true;
-        await new Promise<void>(resolve => {
-          const stop = watch(
-            () => ui.showMissingSignerModal,
-            v => { if (!v) { stop(); resolve(); } }
-          );
-        });
-        if (!useSignerStore().method) { return; }
-      }
-      try {
         await publishNutzapProfile({
           p2pkPub: first.publicKey,
           mints: mintsStore.mints.map((m) => m.url),
@@ -319,12 +317,6 @@ export default defineComponent({
     }
 
     async function publishProfile() {
-      try {
-        await nostr.initSignerIfNotSet();
-      } catch (e) {
-        notifyError("You declined the Nostr signer popup");
-        return;
-      }
       try {
         await publishNutzapProfile({
           p2pkPub: profilePub.value,
@@ -343,6 +335,15 @@ export default defineComponent({
 
     async function generateP2PK() {
       await p2pkStore.createAndSelectNewKey();
+    }
+
+    async function connectSigner() {
+      try {
+        await nostr.connectBrowserSigner();
+        notifySuccess(t("wallet.signer_connected"));
+      } catch (e: any) {
+        notifyError((e as Error).message);
+      }
     }
 
     const saveTier = async (tier: Tier) => {
@@ -389,6 +390,7 @@ export default defineComponent({
       saveTier,
       doPublish,
       generateP2PK,
+      connectSigner,
       editedTiers,
       cancelEdit,
       profilePub,

@@ -93,6 +93,7 @@ export default {
         error: "خطأ في الـ Mint",
       },
     },
+    signer_connected: "تم توصيل موقع Nostr",
   },
   MainHeader: {
     menu: {

@@ -94,6 +94,7 @@ export default {
         error: "Nane hatası",
       },
     },
+    signer_connected: "Nostr imzalayıcı bağlandı",
   },
   MainHeader: {
     menu: {

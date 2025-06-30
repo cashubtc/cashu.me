@@ -94,6 +94,7 @@ export default {
         error: "ข้อผิดพลาด Mint",
       },
     },
+    signer_connected: "เชื่อมต่อผู้ลงนาม Nostr แล้ว",
   },
   MainHeader: {
     menu: {

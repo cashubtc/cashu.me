@@ -93,6 +93,7 @@ export default {
         error: "Mint-fel",
       },
     },
+    signer_connected: "Nostr-signering ansluten",
   },
   MainHeader: {
     menu: {
