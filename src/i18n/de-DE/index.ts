@@ -94,6 +94,7 @@ export default {
         error: "Mint-Fehler",
       },
     },
+    signer_connected: "Nostr-Signer verbunden",
   },
   MainHeader: {
     menu: {

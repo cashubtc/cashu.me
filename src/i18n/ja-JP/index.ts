@@ -94,6 +94,7 @@ export default {
         error: "ミントエラー",
       },
     },
+    signer_connected: "Nostr署名者が接続されました",
   },
   MainHeader: {
     menu: {

@@ -94,6 +94,7 @@ export default {
         error: "Error del mint",
       },
     },
+    signer_connected: "Firmante de Nostr conectado",
   },
   MainHeader: {
     menu: {

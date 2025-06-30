@@ -155,12 +155,8 @@ export const useCreatorHubStore = defineStore("creatorHub", {
       const tiersArray = this.getTierArray();
       const nostr = useNostrStore();
 
-      // ensure user has granted a signer
-      await nostr.initSignerIfNotSet();
       if (!nostr.signer) {
-        throw new Error(
-          "No Nostr signer available. Unlock or connect a signer add-on (Nos2x/Alby) first.",
-        );
+        throw new Error("Signer required to publish tier definitions");
       }
 
       const ndk = await useNdk();

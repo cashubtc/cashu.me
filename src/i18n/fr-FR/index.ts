@@ -94,6 +94,7 @@ export default {
         error: "Erreur de la mint",
       },
     },
+    signer_connected: "Signer Nostr connecté",
   },
   MainHeader: {
     menu: {

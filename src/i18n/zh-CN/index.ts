@@ -93,6 +93,7 @@ export default {
         error: "Mint 错误",
       },
     },
+    signer_connected: "已连接 Nostr 签名器",
   },
   MainHeader: {
     menu: {

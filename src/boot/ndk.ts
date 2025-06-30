@@ -7,6 +7,7 @@ import NDK, {
 } from "@nostr-dev-kit/ndk";
 import { nip19 } from "nostr-tools";
 import { bytesToHex } from "@noble/hashes/utils";
+import { useSettingsStore } from "src/stores/settings";
 
 export type NdkBootErrorReason =
   | "no-signer"
@@ -129,6 +130,14 @@ async function createReadOnlyNdk(): Promise<NDK> {
   const relayUrls = healthy.length ? healthy : [DEFAULT_RELAYS[0]]
   const ndk = new NDK({ explicitRelayUrls: relayUrls })
   await safeConnect(ndk)
+  return ndk
+}
+
+export async function createSignedNdk(signer: NDKSigner): Promise<NDK> {
+  const relayUrls = useSettingsStore().defaultNostrRelays
+  const ndk = new NDK({ explicitRelayUrls: relayUrls })
+  ndk.signer = signer
+  await ndk.connect()
   return ndk
 }
 

@@ -67,12 +67,12 @@ interface NutzapProfile {
 async function urlsToRelaySet(urls?: string[]): Promise<NDKRelaySet | undefined> {
   if (!urls?.length) return undefined;
 
-  const ndk = await useNdk();
-  if (!ndk) {
-    throw new Error("NDK not initialised \u2013 call initSignerIfNotSet() first");
-  }
-
-  return new NDKRelaySet(urls.map((u) => ndk.getRelay(u) as NDKRelay), ndk);
+  const ndk = await useNdk({ requireSigner: false });
+  const set = new NDKRelaySet([], ndk);
+  urls.forEach((u) =>
+    set.addRelay(ndk.pool.getRelay(u) ?? new NDKRelay(u))
+  );
+  return set;
 }
 
 /**
@@ -125,7 +125,9 @@ export async function publishNutzapProfile(opts: {
   relays?: string[];
 }) {
   const nostr = useNostrStore();
-  await nostr.initSignerIfNotSet();
+  if (!nostr.signer) {
+    throw new Error("Signer required to publish Nutzap profile");
+  }
   await nostr.ensureNdkConnected(opts.relays);
   const tags: NDKTag[] = [["pubkey", opts.p2pkPub]];
   for (const url of opts.mints) tags.push(["mint", url]);
@@ -325,9 +327,20 @@ export const useNostrStore = defineStore("nostr", {
     },
     disconnect: async function () {
       const ndk = await useNdk();
-      ndk.pool.relays.forEach((relay) => relay.disconnect());
+      for (const relay of ndk.pool.relays.values()) relay.disconnect();
       this.signer = undefined;
       this.connected = false;
+    },
+    async connectBrowserSigner() {
+      const nip07 = new NDKNip07Signer();
+      try {
+        await nip07.user();
+        this.signer = nip07;
+        this.signerType = SignerType.NIP07;
+        await useNdk({ requireSigner: true });
+      } catch (e) {
+        throw new Error("The signer request was rejected or blocked.");
+      }
     },
     connect: async function (relays?: string[]) {
       if (relays) {

@@ -94,6 +94,7 @@ export default {
         error: "Σφάλμα mint",
       },
     },
+    signer_connected: "Ο υπογράφων συνδέθηκε",
   },
   MainHeader: {
     menu: {
