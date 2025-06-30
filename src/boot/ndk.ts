@@ -24,9 +24,7 @@ export class NdkBootError extends Error {
 }
 
 export const DEFAULT_RELAYS = [
-  "wss://relay.f7z.io/",
   "wss://relay.damus.io/",
-  "wss://relay.nostr.band/",
   "wss://relay.primal.net/",
 ];
 

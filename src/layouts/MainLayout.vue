@@ -1,11 +1,13 @@
 <template>
   <q-layout view="lHh Lpr lFf">
+    <!-- global utility dialogs – mount once -->
+    <MissingSignerModal />
+    <NdkErrorDialog />
+
     <MainHeader />
     <q-page-container>
       <router-view />
     </q-page-container>
-    <NdkErrorDialog />
-    <MissingSignerModal />
   </q-layout>
 </template>
 

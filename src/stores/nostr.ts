@@ -77,7 +77,7 @@ async function urlsToRelaySet(urls?: string[]): Promise<NDKRelaySet | undefined>
     return undefined;
   }
 
-  const set = new NDKRelaySet(ndk);
+  const set = new NDKRelaySet(ndk);      // single declaration, keep
   for (const u of urls) {
     let relay: NDKRelay | undefined;
     try {
