@@ -714,23 +714,17 @@ export const useWalletStore = defineStore("wallet", {
         }
 
         if (!privkey && needsSig && !remoteSigned) {
-          const signerStore = useSignerStore();
-          const uiStore = useUiStore();
-          signerStore.reset();
-          uiStore.showMissingSignerModal = true;
-          const ok = await new Promise<boolean>((resolve) => {
+          useSignerStore().reset();
+          const ui = useUiStore();
+          ui.showMissingSignerModal = true;
+          await new Promise<void>(resolve => {
             const stop = watch(
-              () => uiStore.showMissingSignerModal,
-              (val) => {
-                if (!val) {
-                  stop();
-                  resolve(!!signerStore.method);
-                }
-              }
+              () => ui.showMissingSignerModal,
+              v => { if (!v) { stop(); resolve(); } }
             );
           });
-          if (ok) {
-            return false;
+          if (!useSignerStore().method) {
+            throw new Error("User cancelled signer setup");
           }
           throw new Error(
             "No private key or remote signer available for P2PK unlock"

@@ -296,8 +296,15 @@ export default defineComponent({
       try {
         await nostr.initSignerIfNotSet();
       } catch (e) {
-        uiStore.showMissingSignerModal = true;
-        return;
+        const ui = useUiStore();
+        ui.showMissingSignerModal = true;
+        await new Promise<void>(resolve => {
+          const stop = watch(
+            () => ui.showMissingSignerModal,
+            v => { if (!v) { stop(); resolve(); } }
+          );
+        });
+        if (!useSignerStore().method) { return; }
       }
       try {
         await publishNutzapProfile({
