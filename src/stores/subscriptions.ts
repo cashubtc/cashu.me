@@ -45,10 +45,25 @@ export const useSubscriptionsStore = defineStore("subscriptions", () => {
     await cashuDb.subscriptions.delete(id);
   }
 
+  async function cancelSubscription(pubkey: string) {
+    const now = Math.floor(Date.now() / 1000);
+    const subs = subscriptions.value.filter((s) => s.creatorNpub === pubkey);
+    for (const sub of subs) {
+      const ids = sub.intervals
+        .filter((i) => i.unlockTs > now)
+        .map((i) => i.lockedTokenId);
+      if (ids.length) {
+        await cashuDb.lockedTokens.bulkDelete(ids);
+      }
+      await updateSubscription(sub.id, { status: "cancelled" });
+    }
+  }
+
   return {
     subscriptions,
     addSubscription,
     updateSubscription,
     deleteSubscription,
+    cancelSubscription,
   };
 });

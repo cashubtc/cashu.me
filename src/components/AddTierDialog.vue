@@ -86,7 +86,8 @@
 
 <script lang="ts">
 import { defineComponent, computed, reactive, watch } from "vue";
-import { Tier } from "stores/creatorHub";
+import { Tier, useCreatorHubStore } from "stores/creatorHub";
+import { notifySuccess, notifyError } from "src/js/notify";
 import { usePriceStore } from "stores/price";
 import { useUiStore } from "stores/ui";
 
@@ -106,6 +107,7 @@ export default defineComponent({
   setup(props, { emit }) {
     const priceStore = usePriceStore();
     const uiStore = useUiStore();
+    const creatorHub = useCreatorHubStore();
 
     const showLocal = computed({
       get: () => props.modelValue,
@@ -122,8 +124,15 @@ export default defineComponent({
       { immediate: true, deep: true }
     );
 
-    const save = () => {
-      emit("save", { ...localTier });
+    const save = async () => {
+      try {
+        await creatorHub.addOrUpdateTier({ ...localTier });
+        await creatorHub.publishTierDefinitions();
+        notifySuccess("Tier saved & published");
+        emit("update:modelValue", false);
+      } catch (e: any) {
+        notifyError(e.message);
+      }
     };
 
     const bitcoinPrice = computed(() => priceStore.bitcoinPrice);

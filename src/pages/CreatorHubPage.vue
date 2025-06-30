@@ -4,7 +4,10 @@
     :class="$q.dark.isActive ? 'bg-dark text-white' : 'bg-white text-dark'"
   >
     <div style="width: 100%; max-width: 500px">
-      <div class="text-h5 text-center q-mb-lg">Creator Hub</div>
+      <div class="text-h5 text-center q-mb-lg">
+        Creator Hub
+        <q-badge v-if="pendingZaps" color="primary" class="q-ml-sm">{{ pendingZaps }}</q-badge>
+      </div>
 
       <div v-if="!loggedIn" class="text-center q-my-xl">
         <q-btn
@@ -50,21 +53,30 @@ import { defineComponent, computed } from "vue";
 import { useCreatorHubStore } from "stores/creatorHub";
 import { renderMarkdown as renderMarkdownFn } from "src/js/simple-markdown";
 import NutzapNotification from "components/NutzapNotification.vue";
-import { encrypt, decrypt } from "nostr-tools/nip44";
+import { useLockedTokensStore } from "stores/lockedTokens";
 
 export default defineComponent({
   name: "CreatorHubPage",
   components: { NutzapNotification },
   setup() {
     const store = useCreatorHubStore();
+    const lockedStore = useLockedTokensStore();
     const tiers = computed(() => store.getTierArray());
     const loggedIn = computed(() => !!store.loggedInNpub);
+    const pendingZaps = computed(() =>
+      lockedStore.lockedTokens.filter(
+        (t) =>
+          t.pubkey === store.loggedInNpub &&
+          t.locktime &&
+          t.locktime > Math.floor(Date.now() / 1000)
+      ).length,
+    );
 
     function renderMarkdown(text: string): string {
       return renderMarkdownFn(text || "");
     }
 
-    return { tiers, loggedIn, renderMarkdown };
+    return { tiers, loggedIn, pendingZaps, renderMarkdown };
   },
 });
 </script>

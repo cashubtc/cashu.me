@@ -97,6 +97,13 @@ export const useCreatorHubStore = defineStore("creatorHub", {
       if (!existing) return;
       this.tiers[id] = { ...existing, ...updates };
     },
+    async addOrUpdateTier(data: Partial<Tier>) {
+      if (data.id && this.tiers[data.id]) {
+        this.updateTier(data.id, data);
+      } else {
+        this.addTier(data);
+      }
+    },
     async saveTier(_tier: Tier) {
       // previously published each tier individually; now no-op for backwards
       // compatibility with existing component logic
