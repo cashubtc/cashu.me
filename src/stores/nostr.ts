@@ -7,7 +7,6 @@ import NDK, {
   NDKNip46Signer,
   NDKFilter,
   NDKPrivateKeySigner,
-  NostrEvent,
   NDKKind,
   NDKRelaySet,
   NDKRelay,
@@ -70,7 +69,7 @@ async function urlsToRelaySet(urls?: string[]): Promise<NDKRelaySet | undefined>
 
   const ndk = await useNdk();
   if (!ndk) {
-    throw new Error('NDK not initialised \u2013 call initSignerIfNotSet() first');
+    throw new Error("NDK not initialised \u2013 call initSignerIfNotSet() first");
   }
 
   return new NDKRelaySet(urls.map((u) => ndk.getRelay(u) as NDKRelay), ndk);
