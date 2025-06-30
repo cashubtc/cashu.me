@@ -25,6 +25,13 @@ const TIER_DEFINITIONS_KIND = 30000;
 
 export async function maybeRepublishNutzapProfile() {
   const nostrStore = useNostrStore();
+  await nostrStore.initSignerIfNotSet();
+  const ndk = await useNdk();
+  if (!ndk) {
+    throw new Error(
+      "You need to connect a Nostr signer before publishing tiers",
+    );
+  }
   const current = await fetchNutzapProfile(nostrStore.pubkey);
   const desiredMints = useMintsStore()
     .mints.map((m) => m.url)
@@ -144,6 +151,11 @@ export const useCreatorHubStore = defineStore("creatorHub", {
       const nostr = useNostrStore();
       await nostr.initSignerIfNotSet();
       const ndk = await useNdk();
+      if (!ndk) {
+        throw new Error(
+          "You need to connect a Nostr signer before publishing tiers",
+        );
+      }
       const ev = new NDKEvent(ndk);
       ev.kind = TIER_DEFINITIONS_KIND as unknown as NDKKind;
       ev.tags = [["d", "tiers"]];

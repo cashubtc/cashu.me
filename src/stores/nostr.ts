@@ -43,7 +43,6 @@ import {
   notify,
 } from "../js/notify";
 import { useNdk } from "src/composables/useNdk";
-import { getNdk } from "boot/ndk";
 import { useSendTokensStore } from "./sendTokensStore";
 import { usePRStore } from "./payment-request";
 import token from "../js/token";
@@ -69,35 +68,12 @@ interface NutzapProfile {
 async function urlsToRelaySet(urls?: string[]): Promise<NDKRelaySet | undefined> {
   if (!urls?.length) return undefined;
 
-  // NOTE: during very early boot `getNdk?.()` may return `undefined`
-  // because the NDK store hasn't been initialized yet.
-  const ndk = await getNdk?.();
+  const ndk = await useNdk();
   if (!ndk) {
-    console.warn("[urlsToRelaySet] NDK not ready \u2013 skipping relay-set build");
-    return undefined;
+    throw new Error('NDK not initialised \u2013 call initSignerIfNotSet() first');
   }
 
-  const set = new NDKRelaySet(ndk);      // single declaration, keep
-  for (const u of urls) {
-    let relay: NDKRelay | undefined;
-    try {
-      relay = ndk.pool.relays.get(u);
-      if (!relay) {
-        relay = new NDKRelay(u);
-        ndk.pool.addRelay(relay);
-      }
-    } catch (e) {
-      console.error("Failed to construct relay", u, e);
-      continue;
-    }
-
-    relay.write = true;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (relay as any).setWrite?.(true);
-    set.addRelay(relay);
-  }
-
-  return set.relays.size ? set : undefined;
+  return new NDKRelaySet(urls.map((u) => ndk.getRelay(u) as NDKRelay), ndk);
 }
 
 /**
@@ -109,6 +85,9 @@ export async function fetchNutzapProfile(
   const nostr = useNostrStore();
   await nostr.initNdkReadOnly();
   const ndk = await useNdk();
+  if (!ndk) {
+    throw new Error('NDK not initialised \u2013 call initSignerIfNotSet() first');
+  }
   const hex = npubOrHex.startsWith("npub")
     ? ndk.utils.hexFromBech32
       ? ndk.utils.hexFromBech32(npubOrHex)
@@ -155,6 +134,9 @@ export async function publishNutzapProfile(opts: {
     for (const r of opts.relays) tags.push(["relay", r]);
 
   const ndk = await useNdk();
+  if (!ndk) {
+    throw new Error('NDK not initialised \u2013 call initSignerIfNotSet() first');
+  }
   const ev = new NDKEvent(ndk);
   ev.kind = 10019;
   ev.content = "";
@@ -181,6 +163,9 @@ export async function publishNutzap(opts: {
   await nostr.initSignerIfNotSet();
   await nostr.ensureNdkConnected(opts.relayHints);
   const ndk = await useNdk();
+  if (!ndk) {
+    throw new Error('NDK not initialised \u2013 call initSignerIfNotSet() first');
+  }
   const ev = new NDKEvent(ndk);
   ev.kind = 9321;
   ev.content = opts.content;
@@ -205,6 +190,9 @@ export async function subscribeToNutzaps(
   const nostr = useNostrStore();
   await nostr.initNdkReadOnly();
   const ndk = await useNdk();
+  if (!ndk) {
+    throw new Error('NDK not initialised \u2013 call initSignerIfNotSet() first');
+  }
   const sub = ndk.subscribe({
     kinds: [9321],
     "#p": [myHex],
