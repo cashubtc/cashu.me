@@ -37,14 +37,14 @@
               ~{{
                 formatCurrency(
                   (bitcoinPrice / 100000000) * localTier.price,
-                  "USD"
+                  "USD",
                 )
               }}
               /
               {{
                 formatCurrency(
                   (bitcoinPrice / 100000000) * localTier.price,
-                  "EUR"
+                  "EUR",
                 )
               }}
             </div>
@@ -88,6 +88,7 @@
 import { defineComponent, computed, reactive, watch } from "vue";
 import { Tier, useCreatorHubStore } from "stores/creatorHub";
 import { notifySuccess, notifyError } from "src/js/notify";
+import { useNostrStore } from "stores/nostr";
 import { usePriceStore } from "stores/price";
 import { useUiStore } from "stores/ui";
 
@@ -108,6 +109,7 @@ export default defineComponent({
     const priceStore = usePriceStore();
     const uiStore = useUiStore();
     const creatorHub = useCreatorHubStore();
+    const nostr = useNostrStore();
 
     const showLocal = computed({
       get: () => props.modelValue,
@@ -121,11 +123,16 @@ export default defineComponent({
       (val) => {
         Object.assign(localTier, val);
       },
-      { immediate: true, deep: true }
+      { immediate: true, deep: true },
     );
 
     const save = async () => {
       try {
+        await nostr.initSignerIfNotSet();
+        if (!nostr.signer) {
+          notifyError("Please login to Nostr (Nos2x/Alby) before saving tiers");
+          return;
+        }
         await creatorHub.addOrUpdateTier({ ...localTier });
         await creatorHub.publishTierDefinitions();
         notifySuccess("Tier saved & published");
