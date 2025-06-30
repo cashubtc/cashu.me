@@ -64,9 +64,10 @@ import { useBucketsStore, DEFAULT_BUCKET_ID } from "stores/buckets";
 import { useMintsStore } from "stores/mints";
 import { useUiStore } from "stores/ui";
 import { fetchNutzapProfile } from "stores/nostr";
-import { notifyError } from "src/js/notify";
+import { notifySuccess, notifyError } from "src/js/notify";
 import { storeToRefs } from "pinia";
-import { encrypt, decrypt } from "nostr-tools/nip44";
+import { useNutzapStore } from "stores/nutzap";
+import { useI18n } from "vue-i18n";
 
 export default defineComponent({
   name: "SubscribeDialog",
@@ -82,6 +83,8 @@ export default defineComponent({
     const bucketsStore = useBucketsStore();
     const mintsStore = useMintsStore();
     const uiStore = useUiStore();
+    const nutzap = useNutzapStore();
+    const { t } = useI18n();
     const { bucketList, bucketBalances } = storeToRefs(bucketsStore);
     const { activeUnit } = storeToRefs(mintsStore);
 
@@ -169,14 +172,13 @@ export default defineComponent({
         notifyError("Creator has not published a Nutzap profile (kind-10019)");
         return;
       }
-      const ts = Math.floor(new Date(startDate.value).getTime() / 1000);
-      emit("confirm", {
-        bucketId: bucketId.value,
+      await nutzap.send({
+        npub: props.creatorPubkey,
         months: months.value,
         amount: amount.value,
-        startDate: ts,
-        total: total.value,
+        startDate: Math.floor(new Date(startDate.value).getTime() / 1000),
       });
+      notifySuccess(t("FindCreators.notifications.subscription_success"));
       emit("update:modelValue", false);
     };
 

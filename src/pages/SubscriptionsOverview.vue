@@ -480,7 +480,7 @@
 <script setup lang="ts">
 import { computed, ref, onMounted, onUnmounted, watch } from "vue";
 import { storeToRefs } from "pinia";
-import { useLockedTokensStore, type LockedToken } from "stores/lockedTokens";
+import type { LockedToken } from "stores/lockedTokens";
 import { useBucketsStore } from "stores/buckets";
 import { useMintsStore } from "stores/mints";
 import { useUiStore } from "stores/ui";
@@ -501,7 +501,6 @@ import { useProofsStore } from "stores/proofs";
 import { useSendTokensStore } from "stores/sendTokensStore";
 import token from "src/js/token";
 
-const lockedStore = useLockedTokensStore();
 const bucketsStore = useBucketsStore();
 const mintsStore = useMintsStore();
 const uiStore = useUiStore();
@@ -690,15 +689,12 @@ function cancelSubscription(pubkey: string) {
     cancel: true,
     persistent: true,
   }).onOk(() => {
-    try {
-      const now = Math.floor(Date.now() / 1000);
-      row.tokens
-        .filter((t) => t.locktime && t.locktime > now)
-        .forEach((t) => lockedStore.deleteLockedToken(t.id));
-      notifySuccess(t("SubscriptionsOverview.notifications.cancel_success"));
-    } catch (e: any) {
-      notifyError(e.message);
-    }
+    subscriptionsStore
+      .cancelSubscription(pubkey)
+      .then(() =>
+        notifySuccess(t("SubscriptionsOverview.notifications.cancel_success"))
+      )
+      .catch((e: any) => notifyError(e.message));
   });
 }
 
