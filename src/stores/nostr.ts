@@ -41,8 +41,7 @@ import {
   notifyWarning,
   notify,
 } from "../js/notify";
-import { useNdk } from "src/composables/useNdk";
-import { safeConnect } from "boot/ndk";
+import { useNdk, rebuildNdk } from "src/composables/useNdk";
 import { useSendTokensStore } from "./sendTokensStore";
 import { usePRStore } from "./payment-request";
 import token from "../js/token";
@@ -368,56 +367,34 @@ export const useNostrStore = defineStore("nostr", {
       }
     },
     connect: async function (relays?: string[]) {
-      if (relays) {
-        this.relays = relays as any;
-      }
-      // 1. force fresh pool
-      await this.disconnect();
-      const ndk = await useNdk({ requireSigner: !!this.signer });
+      // 1. remember desired relay set
+      if (relays) this.relays = relays as any;
 
-      // 2. make sure the pool has the desired relays
-      const relaySet = await urlsToRelaySet(this.relays);
-      if (!relaySet || relaySet.relays.size === 0) {
-        console.warn("[nostr] connect called with empty relay list");
-        this.connected = false;
-        return;
-      }
+      // 2. build a *new* NDK whose pool contains only those relays
+      const ndk = await rebuildNdk(this.relays, this.signer);
 
-      // 3. kick off all connections in parallel with 6-second guard
-      const relaysArr = Array.from(relaySet.relays.values());
-      const connectPromises = relaysArr.map((r) => connectWithTimeout(r, 6000));
+      // 3. connect every relay with a 6-second guard, but do not await ndk.connect() again
+      const relaysArr = Array.from(ndk.pool.relays.values());
+      const connectPromises = relaysArr.map(r => connectWithTimeout(r, 6000));
 
-      // attempt NDK connect and capture error if any
-      const ndkError = await safeConnect(ndk);
-
-      // 4. whichever relay opens first → we're Online
+      // flip Online as soon as one opens
       try {
         await Promise.any(connectPromises);
         this.connected = true;
-      } catch (e: any) {
-        console.warn("[nostr] all relay connections failed", e);
+      } catch (e:any) {
         this.connected = false;
-        this.lastError = ndkError?.message ?? e?.message ?? String(e);
+        this.lastError = e?.message ?? String(e);
         notifyError(this.lastError);
       }
 
-      // clear error on success
-      this.lastError = ndkError ? ndkError.message : '';
+      // 4. keep icons in RelayManager.vue fresh
+      ndk.pool.on("relay:connect", () => { this.relays = [...this.relays]; });
+      ndk.pool.on("relay:disconnect", () => { this.relays = [...this.relays]; });
 
-      // 5. background bookkeeping (no throws!)
-      Promise.allSettled(connectPromises).then((results) => {
-        results.forEach((res, idx) => {
-          if (res.status === "rejected") {
-            console.warn(
-              `[nostr] relay ${relaysArr[idx].url ?? idx} failed`,
-              res.reason
-            );
-          }
-          // emit live updates so RelayManager.vue icon flips instantly
-          // (simple brute-force: trigger pinia reactivity)
-          this.relays = [...this.relays];
-        });
-      });
+      // 5. background logging – never throw
+      Promise.allSettled(connectPromises).then(res =>
+        res.forEach((r,i) => r.status === "rejected" &&
+          console.warn("[nostr] relay", relaysArr[i].url, "failed", r.reason)));
     },
     ensureNdkConnected: async function (relays?: string[]) {
       const ndk = await useNdk();

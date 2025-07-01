@@ -1,9 +1,18 @@
-import NDK from "@nostr-dev-kit/ndk";
+import NDK, { NDKSigner } from "@nostr-dev-kit/ndk";
 import { DEFAULT_RELAYS, createNdk, createSignedNdk } from "boot/ndk";
 import { useNostrStore } from "stores/nostr";
 import { useSettingsStore } from "stores/settings";
 
 let cached: NDK | undefined;
+
+/** Force-rebuild the cached NDK with a new relay set (and optional signer). */
+export async function rebuildNdk(relays: string[], signer?: NDKSigner) {
+  const { default: NDK } = await import("@nostr-dev-kit/ndk");
+  cached = new NDK({ explicitRelayUrls: relays });
+  if (signer) cached.signer = signer;
+  await cached.connect({ timeoutMs: 10_000 });
+  return cached;
+}
 
 export async function useNdk(
   opts: { requireSigner?: boolean } = {},
