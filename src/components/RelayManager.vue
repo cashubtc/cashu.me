@@ -42,7 +42,7 @@ onMounted(() => {
 });
 
 const relayStatuses = computed(() =>
-  (messenger.relays ?? []).map((url) => ({
+  (messenger.relays ?? []).map(url => ({
     url,
     connected: ndkRef.value?.pool.relays.get(url)?.connected === true,
   }))

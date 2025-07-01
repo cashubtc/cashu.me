@@ -75,6 +75,24 @@ async function urlsToRelaySet(urls?: string[]): Promise<NDKRelaySet | undefined>
   return set;
 }
 
+/** Wraps relay.connect() in a timeout (ms) so it never hangs forever */
+function connectWithTimeout(relay: any, ms = 6000): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const t = setTimeout(() =>
+      reject(new Error(`[nostr] timeout ${relay?.url ?? ''}`)), ms);
+    relay
+      .connect()
+      .then(() => {
+        clearTimeout(t);
+        resolve();
+      })
+      .catch(err => {
+        clearTimeout(t);
+        reject(err);
+      });
+  });
+}
+
 /**
  * Fetches the receiver’s ‘kind:10019’ Nutzap profile.
  */
@@ -351,36 +369,45 @@ export const useNostrStore = defineStore("nostr", {
       if (relays) {
         this.relays = relays as any;
       }
+      // 1. force fresh pool
       await this.disconnect();
-      const ndk = await useNdk();
-      const relaySet = await urlsToRelaySet(this.relays);
+      const ndk = await useNdk({ requireSigner: !!this.signer });
 
+      // 2. make sure the pool has the desired relays
+      const relaySet = await urlsToRelaySet(this.relays);
       if (!relaySet || relaySet.relays.size === 0) {
-        console.warn('[nostr] connect called with empty relay list');
+        console.warn("[nostr] connect called with empty relay list");
         this.connected = false;
         return;
       }
 
+      // 3. kick off all connections in parallel with 6-second guard
       const relaysArr = Array.from(relaySet.relays.values());
-      const connectPromises = relaysArr.map((r) => r.connect());
-      const first = Promise.any(connectPromises);
-      Promise.allSettled(connectPromises).then((results) => {
-        results.forEach((res, idx) => {
-          if (res.status === "rejected") {
-            console.warn(
-              `[nostr] relay ${relaysArr[idx].url ?? idx} connection failed`,
-              res.reason
-            );
-          }
-        });
-      });
+      const connectPromises = relaysArr.map((r) => connectWithTimeout(r, 6000));
+
+      // 4. whichever relay opens first → we're Online
       try {
-        await first;
+        await Promise.any(connectPromises);
         this.connected = true;
       } catch (e) {
         console.warn("[nostr] all relay connections failed", e);
         this.connected = false;
       }
+
+      // 5. background bookkeeping (no throws!)
+      Promise.allSettled(connectPromises).then((results) => {
+        results.forEach((res, idx) => {
+          if (res.status === "rejected") {
+            console.warn(
+              `[nostr] relay ${relaysArr[idx].url ?? idx} failed`,
+              res.reason
+            );
+          }
+          // emit live updates so RelayManager.vue icon flips instantly
+          // (simple brute-force: trigger pinia reactivity)
+          this.relays = [...this.relays];
+        });
+      });
     },
     ensureNdkConnected: async function (relays?: string[]) {
       const ndk = await useNdk();
