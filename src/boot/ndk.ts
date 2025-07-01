@@ -1,5 +1,5 @@
 import { boot } from "quasar/wrappers";
-import { useBootErrorStore } from 'stores/bootError'
+import { useBootErrorStore } from "stores/bootError";
 import NDK, {
   NDKNip07Signer,
   NDKPrivateKeySigner,
@@ -37,7 +37,7 @@ export const DEFAULT_RELAYS = [
 
 // ensure there is at least one relay configured at runtime
 if (DEFAULT_RELAYS.length === 0) {
-  DEFAULT_RELAYS.push("wss://relay.damus.io/")
+  DEFAULT_RELAYS.push("wss://relay.damus.io/");
 }
 
 let ndkInstance: NDK | undefined;
@@ -45,13 +45,13 @@ let ndkPromise: Promise<NDK> | undefined;
 
 async function resolveSigner(): Promise<NDKSigner> {
   // 1 ─ local nsec (strip legacy JSON quotes if present)
-  const raw = window.localStorage.getItem('nsec') ?? ''
-  const clean = raw.replace(/^"+|"+$/g, '').trim()        // "nsec…"
+  const raw = window.localStorage.getItem("nsec") ?? "";
+  const clean = raw.replace(/^"+|"+$/g, "").trim(); // "nsec…"
   // TODO: sanitize quoted legacy values once
-  if (clean.startsWith('nsec')) {
+  if (clean.startsWith("nsec")) {
     try {
-      const { data } = nip19.decode(clean);      // Uint8Array
-      const hex = bytesToHex(data);              // 64-char hex
+      const { data } = nip19.decode(clean); // Uint8Array
+      const hex = bytesToHex(data); // 64-char hex
       return new NDKPrivateKeySigner(hex);
     } catch (e) {
       throw new NdkBootError("unknown", (e as Error).message);
@@ -76,89 +76,105 @@ async function resolveSigner(): Promise<NDKSigner> {
     }
   }
 
-  throw new NdkBootError('no-signer', 'No available Nostr signer')
+  throw new NdkBootError("no-signer", "No available Nostr signer");
 }
 
 async function pingRelay(url: string): Promise<boolean> {
   return new Promise((resolve) => {
-    let settled = false
-    const ws = new WebSocket(url)
+    let settled = false;
+    const ws = new WebSocket(url);
     const timer = setTimeout(() => {
       if (!settled) {
-        settled = true
-        try { ws.close() } catch {}
-        resolve(false)
+        settled = true;
+        try {
+          ws.close();
+        } catch {}
+        resolve(false);
       }
-    }, 4000)
+    }, 4000);
     ws.onopen = () => {
       if (!settled) {
-        settled = true
-        clearTimeout(timer)
-        ws.close()
-        resolve(true)
+        settled = true;
+        clearTimeout(timer);
+        ws.close();
+        resolve(true);
       }
-    }
+    };
     ws.onerror = () => {
       if (!settled) {
-        settled = true
-        clearTimeout(timer)
-        resolve(false)
+        settled = true;
+        clearTimeout(timer);
+        resolve(false);
       }
-    }
-  })
+    };
+  });
 }
 
 async function filterHealthyRelays(relays: string[]): Promise<string[]> {
-  const results = await Promise.all(relays.map(async u => (await pingRelay(u)) ? u : null))
-  return results.filter((u): u is string => !!u)
+  const results = await Promise.all(
+    relays.map(async (u) => ((await pingRelay(u)) ? u : null)),
+  );
+  return results.filter((u): u is string => !!u);
 }
 
 export async function safeConnect(ndk: NDK): Promise<Error | null> {
   try {
-    await ndk.connect({ timeoutMs: 10_000 })
-    return null
+    await ndk.connect({ timeoutMs: 10_000 });
+    return null;
   } catch (e: any) {
-    console.warn('[NDK] connect failed, continuing in offline mode:', e?.message)
-    return e as Error
+    console.warn(
+      "[NDK] connect failed, continuing in offline mode:",
+      e?.message,
+    );
+    return e as Error;
   }
 }
 
 async function createReadOnlyNdk(): Promise<NDK> {
-  const healthy = await filterHealthyRelays(DEFAULT_RELAYS)
-  // avoid connecting to multiple failing relays by falling back to one
-  const relayUrls = healthy.length ? healthy : [DEFAULT_RELAYS[0]]
-  const ndk = new NDK({ explicitRelayUrls: relayUrls })
-  await safeConnect(ndk)
-  return ndk
+  const settings = useSettingsStore();
+  const relays = settings.defaultNostrRelays.value.length
+    ? settings.defaultNostrRelays.value
+    : DEFAULT_RELAYS;
+  const healthy = await filterHealthyRelays(relays);
+  const relayUrls = healthy.length ? healthy : [relays[0]];
+  const ndk = new NDK({ explicitRelayUrls: relayUrls });
+  await safeConnect(ndk);
+  return ndk;
 }
 
 export async function createSignedNdk(signer: NDKSigner): Promise<NDK> {
-  const relayUrls = useSettingsStore().defaultNostrRelays.value
-  const ndk = new NDK({ explicitRelayUrls: relayUrls })
-  ndk.signer = signer
-  await ndk.connect()
-  return ndk
+  const settings = useSettingsStore();
+  const relays = settings.defaultNostrRelays.value.length
+    ? settings.defaultNostrRelays.value
+    : DEFAULT_RELAYS;
+  const ndk = new NDK({ explicitRelayUrls: relays });
+  ndk.signer = signer;
+  await ndk.connect();
+  return ndk;
 }
 
 export async function createNdk(): Promise<NDK> {
-  let signer: NDKSigner | undefined
+  let signer: NDKSigner | undefined;
   try {
-    signer = await resolveSigner()
+    signer = await resolveSigner();
   } catch (e: any) {
-    if (e.reason === 'no-signer' || e.reason === 'nip07-locked') {
-      console.info('Creating read-only NDK (no signer)')
-      return createReadOnlyNdk()
+    if (e.reason === "no-signer" || e.reason === "nip07-locked") {
+      console.info("Creating read-only NDK (no signer)");
+      return createReadOnlyNdk();
     } else {
-      throw e
+      throw e;
     }
   }
 
-  const healthy = await filterHealthyRelays(DEFAULT_RELAYS)
-  // avoid connecting to multiple failing relays by falling back to one
-  const relayUrls = healthy.length ? healthy : [DEFAULT_RELAYS[0]]
-  const ndk = new NDK({ signer, explicitRelayUrls: relayUrls })
-  await safeConnect(ndk)
-  return ndk
+  const settings = useSettingsStore();
+  const relays = settings.defaultNostrRelays.value.length
+    ? settings.defaultNostrRelays.value
+    : DEFAULT_RELAYS;
+  const healthy = await filterHealthyRelays(relays);
+  const relayUrls = healthy.length ? healthy : [relays[0]];
+  const ndk = new NDK({ signer, explicitRelayUrls: relayUrls });
+  await safeConnect(ndk);
+  return ndk;
 }
 
 export async function getNdk(): Promise<NDK> {
@@ -171,13 +187,13 @@ export async function getNdk(): Promise<NDK> {
   }
   const ndk = await ndkPromise;
   if (!ndk) {
-    throw new NdkBootError('unknown', 'NDK failed to initialize');
+    throw new NdkBootError("unknown", "NDK failed to initialize");
   }
   return ndk;
 }
 
 export default boot(async ({ app }) => {
   ndkPromise = getNdk();
-  app.provide('$ndkPromise', ndkPromise);
+  app.provide("$ndkPromise", ndkPromise);
   ndkPromise.catch((e) => useBootErrorStore().set(e as NdkBootError));
 });
