@@ -23,9 +23,13 @@ export async function useNdk(
     cached = await createNdk();
   } catch (e: any) {
     if (!requireSigner) {
-      const relays = settings.defaultNostrRelays.value.length
+      if (!Array.isArray(settings.defaultNostrRelays?.value)) {
+        settings.defaultNostrRelays.value = DEFAULT_RELAYS;
+      }
+      const userRelays = Array.isArray(settings.defaultNostrRelays?.value)
         ? settings.defaultNostrRelays.value
-        : DEFAULT_RELAYS;
+        : [];
+      const relays = userRelays.length ? userRelays : DEFAULT_RELAYS;
       cached = new NDK({ explicitRelayUrls: relays });
       await cached.connect();
     } else {
