@@ -53,7 +53,11 @@ export const useMessengerStore = defineStore("messenger", {
   actions: {
     async loadIdentity() {
       const nostr = useNostrStore();
-      await nostr.initSignerIfNotSet();
+      try {
+        await nostr.initSignerIfNotSet();
+      } catch (e) {
+        console.warn("[messenger] signer unavailable, continuing read-only", e);
+      }
     },
     async sendDm(recipient: string, message: string) {
       await this.loadIdentity();
@@ -254,34 +258,38 @@ export const useMessengerStore = defineStore("messenger", {
       if (this.started) {
         return;
       }
-      await this.loadIdentity();
-      const nostr = useNostrStore();
-      let privKey: string | undefined = undefined;
-      if (
-        nostr.signerType !== SignerType.NIP07 &&
-        nostr.signerType !== SignerType.NIP46
-      ) {
-        privKey = nostr.privKeyHex;
-        if (!privKey) {
-          notifyError(
-            "No private key set. Please configure your Nostr identity."
-          );
-          return;
+      try {
+        await this.loadIdentity();
+        const nostr = useNostrStore();
+        let privKey: string | undefined = undefined;
+        if (
+          nostr.signerType !== SignerType.NIP07 &&
+          nostr.signerType !== SignerType.NIP46
+        ) {
+          privKey = nostr.privKeyHex;
+          if (!privKey) {
+            console.warn(
+              "[messenger] no private key set, running in read-only mode"
+            );
+          }
         }
+        const since = this.eventLog.reduce(
+          (max, m) => (m.created_at > max ? m.created_at : max),
+          0
+        );
+        await nostr.subscribeToNip04DirectMessagesCallback(
+          privKey,
+          nostr.pubkey,
+          async (ev, _decrypted) => {
+            await this.addIncomingMessage(ev as NostrEvent);
+          },
+          since
+        );
+      } catch (e) {
+        console.error("[messenger.start]", e);
+      } finally {
+        this.started = true;
       }
-      const since = this.eventLog.reduce(
-        (max, m) => (m.created_at > max ? m.created_at : max),
-        0
-      );
-      await nostr.subscribeToNip04DirectMessagesCallback(
-        privKey,
-        nostr.pubkey,
-        async (ev, _decrypted) => {
-          await this.addIncomingMessage(ev as NostrEvent);
-        },
-        since
-      );
-      this.started = true;
     },
 
     isConnected(): boolean {
