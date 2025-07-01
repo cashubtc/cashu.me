@@ -68,7 +68,7 @@ async function urlsToRelaySet(urls?: string[]): Promise<NDKRelaySet | undefined>
   if (!urls?.length) return undefined;
 
   const ndk = await useNdk({ requireSigner: false });
-  const set = new NDKRelaySet([], ndk);
+  const set = new NDKRelaySet(new Set(), ndk);
   urls.forEach((u) =>
     set.addRelay(ndk.pool.getRelay(u) ?? new NDKRelay(u))
   );
@@ -1174,7 +1174,7 @@ export async function signEvent(
 }
 
 export async function publishEvent(event: NostrEvent): Promise<void> {
-  const relays = useSettingsStore().defaultNostrRelays;
+  const relays = useSettingsStore().defaultNostrRelays.value;
   const pool = new SimplePool();
   try {
     await Promise.any(pool.publish(relays, event));
@@ -1184,7 +1184,7 @@ export async function publishEvent(event: NostrEvent): Promise<void> {
 }
 
 export function subscribeToNostr(filter: any, cb: (ev: NostrEvent) => void) {
-  const relays = useSettingsStore().defaultNostrRelays;
+  const relays = useSettingsStore().defaultNostrRelays.value;
   const pool = new SimplePool();
   try {
     pool.subscribeMany(relays, [filter], { onevent: cb });

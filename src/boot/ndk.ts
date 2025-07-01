@@ -134,7 +134,7 @@ async function createReadOnlyNdk(): Promise<NDK> {
 }
 
 export async function createSignedNdk(signer: NDKSigner): Promise<NDK> {
-  const relayUrls = useSettingsStore().defaultNostrRelays
+  const relayUrls = useSettingsStore().defaultNostrRelays.value
   const ndk = new NDK({ explicitRelayUrls: relayUrls })
   ndk.signer = signer
   await ndk.connect()
