@@ -27,7 +27,14 @@
         </q-expansion-item>
         <NewChat class="q-mb-md" @start="startChat" />
         <q-scroll-area class="col" style="min-height: 0">
-          <ConversationList @select="selectConversation" />
+          <Suspense>
+            <template #default>
+              <ConversationList @select="selectConversation" />
+            </template>
+            <template #fallback>
+              <q-skeleton height="100px" square />
+            </template>
+          </Suspense>
         </q-scroll-area>
       </q-drawer>
     </q-responsive>
