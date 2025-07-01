@@ -7,6 +7,21 @@
       class="q-mb-sm"
       dense
     />
+    <div class="q-mb-sm" v-if="relayStatuses.length">
+      <div
+        v-for="s in relayStatuses"
+        :key="s.url"
+        class="row items-center q-my-xs"
+      >
+        <q-icon
+          :name="s.connected ? 'check_circle' : 'warning'"
+          :color="s.connected ? 'positive' : 'negative'"
+          size="sm"
+          class="q-mr-xs"
+        />
+        <span class="text-caption">{{ s.url }}</span>
+      </div>
+    </div>
     <div class="row q-gutter-sm">
       <q-btn label="Connect" color="primary" @click="connect" dense />
       <q-btn label="Disconnect" color="primary" @click="disconnect" dense />
@@ -15,13 +30,27 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, watch } from "vue";
+import { ref, watch, computed, onMounted } from "vue";
 import { useMessengerStore } from "src/stores/messenger";
 import { notifySuccess, notifyError } from "src/js/notify";
+import { useNdk } from "src/composables/useNdk";
+import type NDK from "@nostr-dev-kit/ndk";
 
 const messenger = useMessengerStore();
 
 const relayText = ref((messenger.relays ?? []).join("\n"));
+
+const ndkRef = ref<NDK | null>(null);
+onMounted(() => {
+  useNdk({ requireSigner: false }).then((n) => (ndkRef.value = n));
+});
+
+const relayStatuses = computed(() =>
+  (messenger.relays ?? []).map((url) => ({
+    url,
+    connected: ndkRef.value?.pool.relays.get(url)?.connected === true,
+  }))
+);
 
 watch(
   () => messenger.relays,
