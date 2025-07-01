@@ -353,9 +353,39 @@ export const useNostrStore = defineStore("nostr", {
       }
       await this.disconnect();
       const ndk = await useNdk();
-      await urlsToRelaySet(this.relays);
-      await ndk.connect();
-      this.connected = true;
+      const relaySet = await urlsToRelaySet(this.relays);
+
+      if (!relaySet || relaySet.relays.size === 0) {
+        try {
+          await ndk.connect();
+          this.connected = true;
+        } catch (e) {
+          console.warn("[nostr] connect failed", e);
+          this.connected = false;
+        }
+        return;
+      }
+
+      const relaysArr = Array.from(relaySet.relays.values());
+      const connectPromises = relaysArr.map((r) => r.connect());
+      const first = Promise.any(connectPromises);
+      Promise.allSettled(connectPromises).then((results) => {
+        results.forEach((res, idx) => {
+          if (res.status === "rejected") {
+            console.warn(
+              `[nostr] relay ${relaysArr[idx].url ?? idx} connection failed`,
+              res.reason
+            );
+          }
+        });
+      });
+      try {
+        await first;
+        this.connected = true;
+      } catch (e) {
+        console.warn("[nostr] all relay connections failed", e);
+        this.connected = false;
+      }
     },
     ensureNdkConnected: async function (relays?: string[]) {
       const ndk = await useNdk();
