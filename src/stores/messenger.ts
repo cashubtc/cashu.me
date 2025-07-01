@@ -53,7 +53,8 @@ export const useMessengerStore = defineStore("messenger", {
     drawerOpen: useLocalStorage<boolean>("cashu.messenger.drawerOpen", true),
     started: false,
     watchInitialized: false,
-  }),
+    };
+  },
   getters: {
     connected(): boolean {
       const nostr = useNostrStore();
