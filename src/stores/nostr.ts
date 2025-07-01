@@ -320,8 +320,8 @@ export const useNostrStore = defineStore("nostr", {
   },
   actions: {
     initNdkReadOnly: async function () {
-      if (this.connected) return;
       const ndk = await useNdk({ requireSigner: false });
+      if (this.connected) return;
       try {
         await ndk.connect();
         this.connected = true;

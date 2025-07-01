@@ -77,6 +77,16 @@ import ChatSendTokenDialog from "components/ChatSendTokenDialog.vue";
 
 export default defineComponent({
   name: "NostrMessenger",
+  components: {
+    NostrIdentityManager,
+    RelayManager,
+    NewChat,
+    ConversationList,
+    ActiveChatHeader,
+    MessageList,
+    MessageInput,
+    ChatSendTokenDialog,
+  },
   setup() {
     const loading = ref(true);
     const messenger = useMessengerStore();
