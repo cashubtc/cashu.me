@@ -31,9 +31,7 @@ export const DEFAULT_RELAYS = [
   "wss://nos.lol/",
   "wss://nostr-pub.wellorder.net/",
   "wss://nostr.bitcoiner.social/",
-  "wss://offchain.pub/",
   "wss://relay.nostr.band/",
-  "wss://relay.primal.net/",
   "wss://relay.snort.social/",
 ];
 
