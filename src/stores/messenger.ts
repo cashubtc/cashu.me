@@ -26,7 +26,7 @@ export type MessengerMessage = {
 
 export const useMessengerStore = defineStore("messenger", {
   state: () => ({
-    relays: useSettingsStore().defaultNostrRelays.value,
+    relays: useSettingsStore().defaultNostrRelays.value ?? [] as string[],
     conversations: useLocalStorage<Record<string, MessengerMessage[]>>(
       "cashu.messenger.conversations",
       {} as Record<string, MessengerMessage[]>

@@ -21,20 +21,20 @@ import { notifySuccess, notifyError } from "src/js/notify";
 
 const messenger = useMessengerStore();
 
-const relayText = ref(messenger.relays.join("\n"));
+const relayText = ref((messenger.relays ?? []).join("\n"));
 
 watch(
   () => messenger.relays,
   (r) => {
-    relayText.value = r.join("\n");
+    relayText.value = (r ?? []).join("\n");
   }
 );
 
 const connect = async () => {
-  const relays = relayText.value
-    .split(/\n|\r/)
+  const relays = (relayText.value || "")
+    .split(/\r?\n/)
     .map((r) => r.trim())
-    .filter((r) => r.length);
+    .filter(Boolean);
   try {
     await messenger.connect(relays);
     notifySuccess("Connected to relays");
