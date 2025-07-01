@@ -161,7 +161,7 @@
                   <q-item-label caption
                     >{{
                       $t(
-                        "Settings.lightning_address.automatic_claim.description"
+                        "Settings.lightning_address.automatic_claim.description",
                       )
                     }}
                   </q-item-label>
@@ -419,7 +419,11 @@
               }}</q-item-label>
             </q-item-section>
           </q-item>
-          <q-item v-for="relay in defaultNostrRelays" :key="relay" clickable>
+          <q-item
+            v-for="(relay, idx) in defaultNostrRelays"
+            :key="relay"
+            clickable
+          >
             <q-item-section
               class="q-mx-none q-pl-none"
               style="max-width: 1.2em"
@@ -451,7 +455,13 @@
               >
             </q-item-section>
             <q-item-section style="max-width: 10rem" class="cursor-pointer">
-              <q-item-label caption>{{ relay }} </q-item-label>
+              <q-input
+                dense
+                outlined
+                rounded
+                :model-value="relay"
+                @update:model-value="updateNostrRelay(idx, $event)"
+              />
             </q-item-section>
           </q-item>
         </q-expansion-item>
@@ -708,7 +718,7 @@
                   class="q-mr-sm cursor-pointer"
                   ><q-tooltip>{{
                     $t(
-                      "Settings.nostr_wallet_connect.relays.list.remove_tooltip"
+                      "Settings.nostr_wallet_connect.relays.list.remove_tooltip",
                     )
                   }}</q-tooltip></q-icon
                 >
@@ -835,7 +845,7 @@
               <q-item-label caption
                 >{{
                   $t(
-                    "Settings.hardware_features.webnfc.quick_access.description"
+                    "Settings.hardware_features.webnfc.quick_access.description",
                   )
                 }}
               </q-item-label>
@@ -1483,7 +1493,7 @@
                         <q-item-label class="q-px-sm" caption
                           >{{
                             $t(
-                              "Settings.advanced.developer.new_seed.description"
+                              "Settings.advanced.developer.new_seed.description",
                             )
                           }}
                         </q-item-label>
@@ -1493,7 +1503,7 @@
                       <span
                         >{{
                           $t(
-                            "Settings.advanced.developer.new_seed.confirm_question"
+                            "Settings.advanced.developer.new_seed.confirm_question",
                           )
                         }}
                       </span>
@@ -1526,89 +1536,92 @@
               </q-item>
               <q-item>
                 <q-item-section>
-                    <div class="row">
-                      <q-btn
-                        dense
-                        flat
-                        outline
-                        click
-                        @click="checkActiveProofsSpendable"
-                        >{{
-                          $t("Settings.advanced.developer.remove_spent.button")
-                        }}</q-btn
-                      ></div
-                    ><div class="row">
-                      <q-item-label class="q-px-sm" caption
-                        >{{
-                          $t(
-                            "Settings.advanced.developer.remove_spent.description"
-                          )
-                        }}
-                      </q-item-label>
-                    </div>
-                </q-item-section>
-              </q-item>
-              <q-item>
-                <q-item-section>
-                    <div class="row">
-                      <q-btn dense flat outline click @click="toggleTerminal">
-                        {{
-                          $t("Settings.advanced.developer.debug_console.button")
-                        }}
-                      </q-btn></div
-                    ><div class="row">
-                      <q-item-label class="q-px-sm" caption
-                        >{{
-                          $t(
-                            "Settings.advanced.developer.debug_console.description"
-                          )
-                        }}
-                      </q-item-label>
-                    </div>
-                </q-item-section>
-              </q-item>
-              <q-item>
-                <q-item-section>
-                    <div class="row">
-                      <q-btn dense flat outline click @click="exportActiveProofs">
-                        {{
-                          $t("Settings.advanced.developer.export_proofs.button")
-                        }}
-                      </q-btn></div
-                    ><div class="row">
-                      <q-item-label class="q-px-sm" caption
-                        >{{
-                          $t(
-                            "Settings.advanced.developer.export_proofs.description"
-                          )
-                        }}
-                      </q-item-label>
-                    </div>
-                </q-item-section>
-              </q-item>
-              <q-item>
-                <q-item-section>
-                    <div class="row">
-                      <!-- add a caption, not a button here -->
-                      <q-item-label class="q-pb-sm">{{
-                        $t("Settings.advanced.developer.keyset_counters.title")
-                      }}</q-item-label></div
+                  <div class="row">
+                    <q-btn
+                      dense
+                      flat
+                      outline
+                      click
+                      @click="checkActiveProofsSpendable"
+                      >{{
+                        $t("Settings.advanced.developer.remove_spent.button")
+                      }}</q-btn
                     >
-                    <div class="row">
-                      <q-item-label class="q-px-sm" caption
-                        >{{
-                          $t(
-                            "Settings.advanced.developer.keyset_counters.description"
-                          )
-                        }}
-                      </q-item-label>
-                    </div>
-                    <div class="row q-pa-sm">
-                      <div
-                        class="q-px-sm"
-                        v-for="(mintCounter, mintUrl) in keysetCountersByMint"
-                        :key="mintUrl"
-                      >
+                  </div>
+                  <div class="row">
+                    <q-item-label class="q-px-sm" caption
+                      >{{
+                        $t(
+                          "Settings.advanced.developer.remove_spent.description",
+                        )
+                      }}
+                    </q-item-label>
+                  </div>
+                </q-item-section>
+              </q-item>
+              <q-item>
+                <q-item-section>
+                  <div class="row">
+                    <q-btn dense flat outline click @click="toggleTerminal">
+                      {{
+                        $t("Settings.advanced.developer.debug_console.button")
+                      }}
+                    </q-btn>
+                  </div>
+                  <div class="row">
+                    <q-item-label class="q-px-sm" caption
+                      >{{
+                        $t(
+                          "Settings.advanced.developer.debug_console.description",
+                        )
+                      }}
+                    </q-item-label>
+                  </div>
+                </q-item-section>
+              </q-item>
+              <q-item>
+                <q-item-section>
+                  <div class="row">
+                    <q-btn dense flat outline click @click="exportActiveProofs">
+                      {{
+                        $t("Settings.advanced.developer.export_proofs.button")
+                      }}
+                    </q-btn>
+                  </div>
+                  <div class="row">
+                    <q-item-label class="q-px-sm" caption
+                      >{{
+                        $t(
+                          "Settings.advanced.developer.export_proofs.description",
+                        )
+                      }}
+                    </q-item-label>
+                  </div>
+                </q-item-section>
+              </q-item>
+              <q-item>
+                <q-item-section>
+                  <div class="row">
+                    <!-- add a caption, not a button here -->
+                    <q-item-label class="q-pb-sm">{{
+                      $t("Settings.advanced.developer.keyset_counters.title")
+                    }}</q-item-label>
+                  </div>
+                  <div class="row">
+                    <q-item-label class="q-px-sm" caption
+                      >{{
+                        $t(
+                          "Settings.advanced.developer.keyset_counters.description",
+                        )
+                      }}
+                    </q-item-label>
+                  </div>
+                  <div class="row q-pa-sm">
+                    <div
+                      class="q-px-sm"
+                      v-for="(mintCounter, mintUrl) in keysetCountersByMint"
+                      :key="mintUrl"
+                    >
                       <q-item-label class="q-px-xs" caption>
                         {{ shortUrl(mintUrl) }}
                       </q-item-label>
@@ -1638,12 +1651,13 @@
                       {{
                         $t("Settings.advanced.developer.unset_reserved.button")
                       }}
-                    </q-btn></div
-                  ><div class="row">
+                    </q-btn>
+                  </div>
+                  <div class="row">
                     <q-item-label class="q-px-sm" caption
                       >{{
                         $t(
-                          "Settings.advanced.developer.unset_reserved.description"
+                          "Settings.advanced.developer.unset_reserved.description",
                         )
                       }}
                     </q-item-label>
@@ -1657,12 +1671,13 @@
                       {{
                         $t("Settings.advanced.developer.show_onboarding.button")
                       }}
-                    </q-btn></div
-                  ><div class="row">
+                    </q-btn>
+                  </div>
+                  <div class="row">
                     <q-item-label class="q-px-sm" caption
                       >{{
                         $t(
-                          "Settings.advanced.developer.show_onboarding.description"
+                          "Settings.advanced.developer.show_onboarding.description",
                         )
                       }}
                     </q-item-label>
@@ -1683,12 +1698,13 @@
                       {{
                         $t("Settings.advanced.developer.reset_wallet.button")
                       }}
-                    </q-btn></div
-                  ><div class="row" v-if="!confirmNuke">
+                    </q-btn>
+                  </div>
+                  <div class="row" v-if="!confirmNuke">
                     <q-item-label class="q-px-sm" caption
                       >{{
                         $t(
-                          "Settings.advanced.developer.reset_wallet.description"
+                          "Settings.advanced.developer.reset_wallet.description",
                         )
                       }}
                     </q-item-label>
@@ -1696,7 +1712,7 @@
                   <div class="row" v-if="confirmNuke">
                     <span>{{
                       $t(
-                        "Settings.advanced.developer.reset_wallet.confirm_question"
+                        "Settings.advanced.developer.reset_wallet.confirm_question",
                       )
                     }}</span>
                     <q-btn
@@ -1732,12 +1748,13 @@
                       {{
                         $t("Settings.advanced.developer.export_wallet.button")
                       }}
-                    </q-btn></div
-                  ><div class="row">
+                    </q-btn>
+                  </div>
+                  <div class="row">
                     <q-item-label class="q-px-sm" caption
                       >{{
                         $t(
-                          "Settings.advanced.developer.export_wallet.description"
+                          "Settings.advanced.developer.export_wallet.description",
                         )
                       }}
                     </q-item-label>
@@ -2125,6 +2142,9 @@ export default defineComponent({
       this.defaultNostrRelays = this.defaultNostrRelays.filter(
         (r) => r !== relay
       );
+    },
+    updateNostrRelay: function (index: number, value: string) {
+      this.defaultNostrRelays.splice(index, 1, value.trim());
     },
     changeLanguage(locale) {
       if (locale === "en") {
