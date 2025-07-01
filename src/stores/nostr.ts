@@ -42,6 +42,7 @@ import {
   notify,
 } from "../js/notify";
 import { useNdk } from "src/composables/useNdk";
+import { safeConnect } from "boot/ndk";
 import { useSendTokensStore } from "./sendTokensStore";
 import { usePRStore } from "./payment-request";
 import token from "../js/token";
@@ -275,6 +276,7 @@ export const useNostrStore = defineStore("nostr", {
       []
     ),
     initialized: false,
+    lastError: '' as string | null,
     lastEventTimestamp: useLocalStorage<number>(
       "cashu.ndk.lastEventTimestamp",
       0
@@ -385,14 +387,22 @@ export const useNostrStore = defineStore("nostr", {
       const relaysArr = Array.from(relaySet.relays.values());
       const connectPromises = relaysArr.map((r) => connectWithTimeout(r, 6000));
 
+      // attempt NDK connect and capture error if any
+      const ndkError = await safeConnect(ndk);
+
       // 4. whichever relay opens first → we're Online
       try {
         await Promise.any(connectPromises);
         this.connected = true;
-      } catch (e) {
+      } catch (e: any) {
         console.warn("[nostr] all relay connections failed", e);
         this.connected = false;
+        this.lastError = ndkError?.message ?? e?.message ?? String(e);
+        notifyError(this.lastError);
       }
+
+      // clear error on success
+      this.lastError = ndkError ? ndkError.message : '';
 
       // 5. background bookkeeping (no throws!)
       Promise.allSettled(connectPromises).then((results) => {
