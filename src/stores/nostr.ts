@@ -356,13 +356,8 @@ export const useNostrStore = defineStore("nostr", {
       const relaySet = await urlsToRelaySet(this.relays);
 
       if (!relaySet || relaySet.relays.size === 0) {
-        try {
-          await ndk.connect();
-          this.connected = true;
-        } catch (e) {
-          console.warn("[nostr] connect failed", e);
-          this.connected = false;
-        }
+        console.warn('[nostr] connect called with empty relay list');
+        this.connected = false;
         return;
       }
 

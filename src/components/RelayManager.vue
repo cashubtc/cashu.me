@@ -8,11 +8,7 @@
       dense
     />
     <div class="q-mb-sm" v-if="relayStatuses.length">
-      <div
-        v-for="s in relayStatuses"
-        :key="s.url"
-        class="row items-center q-my-xs"
-      >
+      <div v-for="s in relayStatuses" :key="s.url" class="row items-center q-my-xs">
         <q-icon
           :name="s.connected ? 'check_circle' : 'warning'"
           :color="s.connected ? 'positive' : 'negative'"
