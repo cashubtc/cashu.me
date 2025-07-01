@@ -398,6 +398,7 @@ export default defineComponent({
       profileRelays,
       canSaveNutzap,
       publishProfile,
+      nostr,
     };
   },
 });
