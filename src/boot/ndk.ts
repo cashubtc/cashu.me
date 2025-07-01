@@ -115,12 +115,13 @@ async function filterHealthyRelays(relays: string[]): Promise<string[]> {
   return results.filter((u): u is string => !!u)
 }
 
-async function safeConnect(ndk: NDK) {
+export async function safeConnect(ndk: NDK): Promise<Error | null> {
   try {
-    await ndk.connect({ timeoutMs: 10_000 });
+    await ndk.connect({ timeoutMs: 10_000 })
+    return null
   } catch (e: any) {
     console.warn('[NDK] connect failed, continuing in offline mode:', e?.message)
-    // swallow error to allow offline usage
+    return e as Error
   }
 }
 
