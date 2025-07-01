@@ -5,6 +5,7 @@ import { Event as NostrEvent } from "nostr-tools";
 import { useNostrStore, SignerType } from "./nostr";
 import { v4 as uuidv4 } from "uuid";
 import { useSettingsStore } from "./settings";
+import { DEFAULT_RELAYS } from "boot/ndk";
 import { sanitizeMessage } from "src/js/message-utils";
 import { notifySuccess, notifyError } from "src/js/notify";
 import { useWalletStore } from "./wallet";
@@ -25,8 +26,17 @@ export type MessengerMessage = {
 };
 
 export const useMessengerStore = defineStore("messenger", {
-  state: () => ({
-    relays: useSettingsStore().defaultNostrRelays.value ?? [] as string[],
+  state: () => {
+    const settings = useSettingsStore();
+    if (!Array.isArray(settings.defaultNostrRelays?.value)) {
+      settings.defaultNostrRelays.value = DEFAULT_RELAYS;
+    }
+    const userRelays = Array.isArray(settings.defaultNostrRelays?.value)
+      ? settings.defaultNostrRelays.value
+      : [];
+    const relays = userRelays.length ? userRelays : DEFAULT_RELAYS;
+    return {
+      relays,
     conversations: useLocalStorage<Record<string, MessengerMessage[]>>(
       "cashu.messenger.conversations",
       {} as Record<string, MessengerMessage[]>
