@@ -72,7 +72,11 @@
           <ChooseMint />
         </div>
         <div
-          v-if="enoughtotalUnitBalance || globalMutexLock"
+          v-if="
+            enoughtotalUnitBalance ||
+            (hasMultinutSupport && multinutEnabled) ||
+            globalMutexLock
+          "
           class="row q-mt-lg"
         >
           <q-btn
@@ -80,7 +84,9 @@
             rounded
             color="primary"
             :disabled="
-              payInvoiceData.blocking || payInvoiceData.meltQuote.error != ''
+              payInvoiceData.blocking ||
+              !enoughtotalUnitBalance ||
+              payInvoiceData.meltQuote.error != ''
             "
             @click="handleMeltButton"
             :label="
