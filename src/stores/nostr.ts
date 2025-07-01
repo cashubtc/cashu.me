@@ -321,9 +321,14 @@ export const useNostrStore = defineStore("nostr", {
   actions: {
     initNdkReadOnly: async function () {
       if (this.connected) return;
-      const ndk = await useNdk();
-      await ndk.connect();
-      this.connected = true;
+      const ndk = await useNdk({ requireSigner: false });
+      try {
+        await ndk.connect();
+        this.connected = true;
+      } catch (e) {
+        console.warn("[nostr] read-only connect failed", e);
+        this.connected = false;
+      }
     },
     disconnect: async function () {
       const ndk = await useNdk();

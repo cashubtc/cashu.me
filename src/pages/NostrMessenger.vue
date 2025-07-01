@@ -1,12 +1,10 @@
 <template>
-  <Suspense>
-    <template #default>
-      <q-page
+  <q-page
         class="row full-height no-horizontal-scroll"
         :class="[$q.dark.isActive ? 'bg-dark text-white' : 'bg-white text-dark']"
         @touchstart="onTouchStart"
         @touchend="onTouchEnd"
-      >
+  >
         <q-responsive>
           <q-drawer
             v-model="drawer"
@@ -49,18 +47,16 @@
           </q-toolbar-title>
         </q-toolbar>
       </q-header>
+      <q-banner v-if="!messenger.connected && !loading" dense class="bg-grey-3">
+        Offline - unable to connect to relays
+      </q-banner>
       <q-spinner v-if="loading" size="lg" color="primary" />
       <ActiveChatHeader :pubkey="selected" />
       <MessageList :messages="messages" class="col" />
       <MessageInput @send="sendMessage" @sendToken="openSendTokenDialog" />
       <ChatSendTokenDialog ref="chatSendTokenDialogRef" :recipient="selected" />
       </div>
-      </q-page>
-    </template>
-    <template #fallback>
-      <q-skeleton height="100vh" square />
-    </template>
-  </Suspense>
+  </q-page>
 </template>
 
 <script lang="ts">
@@ -85,11 +81,15 @@ export default defineComponent({
     const loading = ref(true);
     const messenger = useMessengerStore();
 
+    function timeout(ms: number) {
+      return new Promise<void>((resolve) => setTimeout(resolve, ms));
+    }
+
     async function init() {
       try {
         await messenger.loadIdentity();
         await useNdk();
-        await messenger.start();
+        await Promise.race([messenger.start(), timeout(10000)]);
       } catch (e) {
         console.error(e);
       } finally {
