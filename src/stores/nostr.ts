@@ -228,7 +228,7 @@ export const useNostrStore = defineStore("nostr", {
   state: () => ({
     connected: false,
     pubkey: useLocalStorage<string>("cashu.ndk.pubkey", ""),
-    relays: useSettingsStore().defaultNostrRelays,
+    relays: useSettingsStore().defaultNostrRelays.value ?? [] as string[],
     signerType: useLocalStorage<SignerType>(
       "cashu.ndk.signerType",
       SignerType.SEED
@@ -1190,6 +1190,10 @@ export async function publishEvent(event: NostrEvent): Promise<void> {
 
 export function subscribeToNostr(filter: any, cb: (ev: NostrEvent) => void) {
   const relays = useSettingsStore().defaultNostrRelays.value;
+  if (!relays || relays.length === 0) {
+    console.warn('[nostr] subscribeMany called with empty relay list');
+    return;
+  }
   const pool = new SimplePool();
   try {
     pool.subscribeMany(relays, [filter], { onevent: cb });
