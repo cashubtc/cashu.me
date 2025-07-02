@@ -144,7 +144,7 @@ export const useNostrStore = defineStore("nostr", {
       }
       this.initialized = true;
     },
-    setSigner: async function (signer: NDKSigner) {
+    setSigner: function (signer: NDKSigner) {
       this.signer = signer;
       this.ndk = new NDK({ signer: signer, explicitRelayUrls: this.relays });
     },
@@ -173,21 +173,10 @@ export const useNostrStore = defineStore("nostr", {
     },
     initNip07Signer: async function () {
       const signer = new NDKNip07Signer();
-      signer.user().then(async (user) => {
-        if (!!user.npub) {
-          console.log(
-            "Permission granted to read their public key:",
-            user.npub
-          );
-          const me = this.ndk.getUser({
-            npub: user.npub,
-          });
-          this.signerType = SignerType.NIP07;
-          await this.setSigner(signer);
-          this.setPubkey(user.pubkey);
-        }
-      });
-      await signer.blockUntilReady();
+      const user = await signer.blockUntilReady();
+      this.signerType = SignerType.NIP07;
+      this.setSigner(signer);
+      this.setPubkey(user.pubkey);
     },
     initNip46Signer: async function (nip46Token?: string) {
       const ndk = new NDK({ explicitRelayUrls: this.relays });
@@ -206,7 +195,7 @@ export const useNostrStore = defineStore("nostr", {
       }
       const signer = new NDKNip46Signer(ndk, this.nip46Token);
       this.signerType = SignerType.NIP46;
-      await this.setSigner(signer);
+      this.setSigner(signer);
       // If the backend sends an auth_url event, open that URL as a popup so the user can authorize the app
       signer.on("authUrl", (url) => {
         window.open(url, "auth", "width=600,height=600");
@@ -240,7 +229,7 @@ export const useNostrStore = defineStore("nostr", {
       );
       this.privateKeySignerPrivateKey = bytesToHex(privateKeyBytes);
       this.signerType = SignerType.PRIVATEKEY;
-      await this.setSigner(this.privateKeySigner);
+      this.setSigner(this.privateKeySigner);
       const publicKeyHex = getPublicKey(privateKeyBytes);
       this.setPubkey(publicKeyHex);
     },
