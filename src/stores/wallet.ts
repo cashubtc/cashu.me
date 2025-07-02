@@ -172,13 +172,16 @@ export const useWalletStore = defineStore("wallet", {
       }
       const mnemonic: string = this.mnemonic;
       const bip39Seed = mnemonicToSeedSync(mnemonic);
-      const wallet = new CashuWallet(mint, {
+      const walletOptions: any = {
         keys: mints.activeKeys,
         keysets: mints.activeKeysets,
-        mintInfo: mints.activeInfo,
         bip39seed: bip39Seed,
         unit: mints.activeUnit,
-      });
+      };
+      if (mints.activeInfo && (mints.activeInfo as any).nuts) {
+        walletOptions.mintInfo = mints.activeInfo;
+      }
+      const wallet = new CashuWallet(mint, walletOptions);
       return wallet;
     },
     seed(): Uint8Array {
@@ -202,13 +205,16 @@ export const useWalletStore = defineStore("wallet", {
       }
       const mnemonic: string = this.mnemonic;
       const bip39Seed = mnemonicToSeedSync(mnemonic);
-      const wallet = new CashuWallet(mint, {
+      const walletOptions: any = {
         keys: storedMint.keys,
         keysets: unitKeysets,
-        mintInfo: storedMint.info,
         bip39seed: bip39Seed,
         unit: unit,
-      });
+      };
+      if (storedMint.info && (storedMint.info as any).nuts) {
+        walletOptions.mintInfo = storedMint.info;
+      }
+      const wallet = new CashuWallet(mint, walletOptions);
       return wallet;
     },
     mnemonicToSeedSync: function (mnemonic: string): Uint8Array {
