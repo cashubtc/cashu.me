@@ -46,5 +46,5 @@ watch(
 
 const formatDate = (ts: number) => new Date(ts * 1000).toLocaleString();
 
-export { formatDay, showDateSeparator };
+defineExpose({ formatDay, showDateSeparator });
 </script>
