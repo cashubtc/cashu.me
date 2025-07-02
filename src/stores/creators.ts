@@ -8,7 +8,6 @@ import {
   subscribeToNostr,
 } from "./nostr";
 import { useNdk } from "src/composables/useNdk";
-import { ensureRelayConnectivity } from "./nostr";
 import { nip19 } from "nostr-tools";
 import { Event as NostrEvent } from "nostr-tools";
 
@@ -61,13 +60,6 @@ export const useCreatorsStore = defineStore("creators", {
       this.searching = true;
       await nostrStore.initNdkReadOnly();
       const ndk = await useNdk({ requireSigner: false });
-      try {
-        await ensureRelayConnectivity(ndk);
-      } catch (e: any) {
-        this.error = e?.message ?? String(e);
-        this.searching = false;
-        return;
-      }
       let pubkey = query.trim();
       if (pubkey.startsWith("npub")) {
         try {
@@ -111,6 +103,7 @@ export const useCreatorsStore = defineStore("creators", {
       this.error = "";
       this.searching = true;
       await nostrStore.initNdkReadOnly();
+      const ndk = await useNdk({ requireSigner: false });
 
       const pubkeys: string[] = [];
       for (const entry of FEATURED_CREATORS) {
@@ -138,7 +131,7 @@ export const useCreatorsStore = defineStore("creators", {
         const results = await Promise.all(
           pubkeys.map(async (pubkey) => {
             try {
-              const user = nostrStore.ndk.getUser({ pubkey });
+              const user = ndk.getUser({ pubkey });
               const [_, followers, following, joined] = await Promise.all([
                 user.fetchProfile(),
                 nostrStore.fetchFollowerCount(pubkey),
