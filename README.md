@@ -155,6 +155,13 @@ git grep -n "new NDK("
 git grep -n ".ndk"
 ```
 
+### Optional Backend Search Service
+You can configure a URL that returns NIP-50 search results for the
+`find-creators.html` page. Set the value in local storage using the key
+`cashu.settings.searchBackendUrl`. When defined, search queries hit this
+backend first and fall back to client-side relay queries if no results are
+returned.
+
 ## Contributing
 
 Contributions are welcome! Open an issue or pull request to discuss your ideas. Bug reports and feature requests are encouraged. Help with translation and documentation is always appreciated.
