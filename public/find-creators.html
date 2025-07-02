@@ -289,6 +289,8 @@
         "wss://purplepag.es",
         "wss://relay.nostr.band",
       ];
+      const BACKEND_SEARCH_URL =
+        window.localStorage.getItem("cashu.settings.searchBackendUrl") || "";
       let storedRelays = [];
       try {
         const stored = window.localStorage.getItem(
@@ -445,6 +447,35 @@
             loaderElement.style.display = "none";
           }
           return;
+        }
+
+        if (BACKEND_SEARCH_URL) {
+          statusMessageElement.textContent = `Searching backend for "${cleanQuery}"...`;
+          try {
+            const resp = await fetch(
+              `${BACKEND_SEARCH_URL}?q=${encodeURIComponent(cleanQuery)}`
+            );
+            if (resp.ok) {
+              const events = await resp.json();
+              if (Array.isArray(events) && events.length > 0) {
+                const pubkeys = Array.from(
+                  new Set(events.map((e) => e.pubkey))
+                );
+                await fetchAndDisplayProfiles(
+                  pubkeys,
+                  resultsListElement,
+                  foundSearchProfiles,
+                  loaderElement,
+                  statusMessageElement,
+                  false,
+                  true
+                );
+                return;
+              }
+            }
+          } catch (e) {
+            console.warn("Backend search failed:", e);
+          }
         }
 
         statusMessageElement.textContent = `Searching relays for "${cleanQuery}"... (NIP-50)`;

@@ -78,6 +78,10 @@ export const useSettingsStore = defineStore("settings", {
         "cashu.settings.auditorApiUrl",
         "https://api.audit.8333.space"
       ),
+      searchBackendUrl: useLocalStorage<string>(
+        "cashu.settings.searchBackendUrl",
+        ""
+      ),
     };
   },
 });
