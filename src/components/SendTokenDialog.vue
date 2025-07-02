@@ -372,7 +372,7 @@
                 style="font-size: 1rem"
               >
                 {{
-                  sendData.historyToken.amount &&
+                  sendData.historyToken &&
                   sendData.historyToken.amount < 0
                     ? sendData.historyToken.status === "paid"
                       ? "Sent"
@@ -386,11 +386,12 @@
               <q-item-label style="font-size: 30px" class="text-weight-bold">
                 <q-icon
                   :name="
-                    sendData.historyToken.amount >= 0
+                    sendData.historyToken && sendData.historyToken.amount >= 0
                       ? 'call_received'
                       : 'call_made'
                   "
                   :color="
+                    sendData.historyToken &&
                     sendData.historyToken.status === 'paid'
                       ? sendData.historyToken.amount >= 0
                         ? 'green'
@@ -411,7 +412,7 @@
             <!-- tada animation -->
             <div
               v-if="
-                sendData.historyToken.amount &&
+                sendData.historyToken &&
                 sendData.historyToken.amount < 0 &&
                 sendData.historyToken.status === 'paid'
               "
@@ -428,6 +429,7 @@
             <div
               v-if="
                 sendData.paymentRequest &&
+                sendData.historyToken &&
                 sendData.historyToken.amount < 0 &&
                 sendData.historyToken.status === 'pending'
               "
