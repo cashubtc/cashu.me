@@ -390,7 +390,8 @@
                 foundSearchProfiles,
                 loaderElement,
                 statusMessageElement,
-                false
+                false,
+                true
               );
               return;
             }
@@ -406,7 +407,8 @@
             foundSearchProfiles,
             loaderElement,
             statusMessageElement,
-            false
+            false,
+            true
           );
           return;
         }
@@ -431,7 +433,8 @@
                 foundSearchProfiles,
                 loaderElement,
                 statusMessageElement,
-                false
+                false,
+                true
               );
             } else {
               throw new Error("NIP-05 identifier not found in response.");
@@ -468,7 +471,8 @@
         profileMap,
         loader,
         statusMsgEl,
-        isFeatured
+        isFeatured,
+        includeKind10019 = false
       ) {
         if (pubkeys.length === 0) {
           if (loader) loader.style.display = "none";
@@ -481,7 +485,8 @@
           return;
         }
 
-        const filter = { kinds: [0], authors: pubkeys, limit: pubkeys.length };
+        const kinds = includeKind10019 ? [0, 10019] : [0];
+        const filter = { kinds, authors: pubkeys, limit: pubkeys.length };
 
         subscribeAndProcess(
           filter,
@@ -579,8 +584,8 @@
           try {
             if (event.kind === 0) {
               const profileData = JSON.parse(event.content);
-              const existing = profileMap.get(event.pubkey);
-              if (!existing || event.created_at > existing.event.created_at) {
+              const existing = profileMap.get(event.pubkey) || {};
+              if (!existing.event || event.created_at > existing.event.created_at) {
                 profileMap.set(event.pubkey, {
                   pubkey: event.pubkey,
                   name:
@@ -592,6 +597,7 @@
                   picture: profileData.picture || "",
                   about: profileData.about || "",
                   lud16: profileData.lud16 || "",
+                  hasNutzapProfile: existing.hasNutzapProfile || false,
                   event,
                 });
                 renderProfiles(
@@ -599,6 +605,21 @@
                   targetElement,
                   isFeaturedList
                 );
+              }
+            } else if (event.kind === 10019) {
+              const existing = profileMap.get(event.pubkey);
+              if (existing) {
+                if (!existing.hasNutzapProfile) {
+                  existing.hasNutzapProfile = true;
+                  profileMap.set(event.pubkey, existing);
+                  renderProfiles(
+                    Array.from(profileMap.values()),
+                    targetElement,
+                    isFeaturedList
+                  );
+                }
+              } else {
+                profileMap.set(event.pubkey, { pubkey: event.pubkey, hasNutzapProfile: true });
               }
             }
           } catch (e) {
@@ -732,6 +753,13 @@
             infoDiv.appendChild(lud16Element);
           }
 
+          if (profile.hasNutzapProfile) {
+            const nzElement = document.createElement("p");
+            nzElement.className = "text-xs text-purple-600";
+            nzElement.textContent = "Nutzap profile detected";
+            infoDiv.appendChild(nzElement);
+          }
+
           profileHeaderDiv.appendChild(avatarImg);
           profileHeaderDiv.appendChild(infoDiv);
           cardElement.appendChild(profileHeaderDiv);
@@ -836,6 +864,7 @@
             featuredProfilesData,
             featuredCreatorsLoaderElement,
             featuredStatusMessageElement,
+            true,
             true
           );
         } else {
