@@ -37,22 +37,26 @@ export const useMessengerStore = defineStore("messenger", {
     const relays = userRelays.length ? userRelays : DEFAULT_RELAYS;
     return {
       relays,
-    conversations: useLocalStorage<Record<string, MessengerMessage[]>>(
-      "cashu.messenger.conversations",
-      {} as Record<string, MessengerMessage[]>
-    ),
-    unreadCounts: useLocalStorage<Record<string, number>>(
-      "cashu.messenger.unread",
-      {} as Record<string, number>
-    ),
-    eventLog: useLocalStorage<MessengerMessage[]>(
-      "cashu.messenger.eventLog",
-      [] as MessengerMessage[]
-    ),
-    currentConversation: "",
-    drawerOpen: useLocalStorage<boolean>("cashu.messenger.drawerOpen", true),
-    started: false,
-    watchInitialized: false,
+      conversations: useLocalStorage<Record<string, MessengerMessage[]>>(
+        "cashu.messenger.conversations",
+        {} as Record<string, MessengerMessage[]>,
+      ),
+      unreadCounts: useLocalStorage<Record<string, number>>(
+        "cashu.messenger.unread",
+        {} as Record<string, number>,
+      ),
+      pinned: useLocalStorage<Record<string, boolean>>(
+        "cashu.messenger.pinned",
+        {} as Record<string, boolean>,
+      ),
+      eventLog: useLocalStorage<MessengerMessage[]>(
+        "cashu.messenger.eventLog",
+        [] as MessengerMessage[],
+      ),
+      currentConversation: "",
+      drawerOpen: useLocalStorage<boolean>("cashu.messenger.drawerOpen", true),
+      started: false,
+      watchInitialized: false,
     };
   },
   getters: {
@@ -82,7 +86,7 @@ export const useMessengerStore = defineStore("messenger", {
         recipient,
         message,
         privKey,
-        nostr.pubkey
+        nostr.pubkey,
       );
       if (success && event) {
         this.addOutgoingMessage(recipient, message, event.created_at, event.id);
@@ -93,7 +97,7 @@ export const useMessengerStore = defineStore("messenger", {
       recipient: string,
       amount: number,
       bucketId: string,
-      memo?: string
+      memo?: string,
     ) {
       try {
         const wallet = useWalletStore();
@@ -103,15 +107,15 @@ export const useMessengerStore = defineStore("messenger", {
         const tokens = useTokensStore();
 
         const sendAmount = Math.floor(
-          amount * mints.activeUnitCurrencyMultiplyer
+          amount * mints.activeUnitCurrencyMultiplyer,
         );
 
         const mintWallet = wallet.mintWallet(
           mints.activeMintUrl,
-          mints.activeUnit
+          mints.activeUnit,
         );
         const proofsForBucket = mints.activeProofs.filter(
-          (p) => p.bucketId === bucketId
+          (p) => p.bucketId === bucketId,
         );
 
         const { sendProofs } = await wallet.send(
@@ -120,7 +124,7 @@ export const useMessengerStore = defineStore("messenger", {
           sendAmount,
           true,
           settings.includeFeesInSendAmount,
-          bucketId
+          bucketId,
         );
 
         const tokenStr = proofsStore.serializeProofs(sendProofs);
@@ -134,7 +138,7 @@ export const useMessengerStore = defineStore("messenger", {
 
         const { success } = await this.sendDm(
           recipient,
-          JSON.stringify(payload)
+          JSON.stringify(payload),
         );
         if (success) {
           tokens.addPendingToken({
@@ -156,7 +160,7 @@ export const useMessengerStore = defineStore("messenger", {
       pubkey: string,
       content: string,
       created_at?: number,
-      id?: string
+      id?: string,
     ) {
       const messageId = id || uuidv4();
       if (this.eventLog.some((m) => m.id === messageId)) return;
@@ -186,7 +190,7 @@ export const useMessengerStore = defineStore("messenger", {
       const decrypted = await nostr.decryptNip04(
         privKey,
         event.pubkey,
-        event.content
+        event.content,
       );
       try {
         const payload = JSON.parse(decrypted);
@@ -198,7 +202,7 @@ export const useMessengerStore = defineStore("messenger", {
             if (proofs.some((p) => p.secret.startsWith("P2PK:"))) {
               const buckets = useBucketsStore();
               let bucket = buckets.bucketList.find(
-                (b) => b.name === "Subscriptions"
+                (b) => b.name === "Subscriptions",
               );
               if (!bucket) {
                 bucket = buckets.addBucket({ name: "Subscriptions" });
@@ -224,7 +228,7 @@ export const useMessengerStore = defineStore("messenger", {
                 payload.bucketId ?? receiveStore.receiveData.bucketId;
               await receiveStore.receiveToken(
                 payload.token,
-                receiveStore.receiveData.bucketId
+                receiveStore.receiveData.bucketId,
               );
             }
           }
@@ -262,7 +266,7 @@ export const useMessengerStore = defineStore("messenger", {
               this.start();
             }
           },
-          { deep: true }
+          { deep: true },
         );
         this.watchInitialized = true;
       }
@@ -280,13 +284,13 @@ export const useMessengerStore = defineStore("messenger", {
           privKey = nostr.privKeyHex;
           if (!privKey) {
             console.warn(
-              "[messenger] no private key set, running in read-only mode"
+              "[messenger] no private key set, running in read-only mode",
             );
           }
         }
         const since = this.eventLog.reduce(
           (max, m) => (m.created_at > max ? m.created_at : max),
-          0
+          0,
         );
         await nostr.subscribeToNip04DirectMessagesCallback(
           privKey,
@@ -294,7 +298,7 @@ export const useMessengerStore = defineStore("messenger", {
           async (ev, _decrypted) => {
             await this.addIncomingMessage(ev as NostrEvent);
           },
-          since
+          since,
         );
       } catch (e) {
         console.error("[messenger.start]", e);
@@ -331,6 +335,10 @@ export const useMessengerStore = defineStore("messenger", {
 
     markRead(pubkey: string) {
       this.unreadCounts[pubkey] = 0;
+    },
+
+    togglePin(pubkey: string) {
+      this.pinned[pubkey] = !this.pinned[pubkey];
     },
 
     setCurrentConversation(pubkey: string) {

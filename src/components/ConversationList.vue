@@ -17,7 +17,9 @@
         :key="item.pubkey"
         :pubkey="item.pubkey"
         :lastMsg="item.lastMsg"
+        :selected="item.pubkey === selectedPubkey"
         @click="select(item.pubkey)"
+        @pin="togglePin(item.pubkey)"
       />
       <div
         v-if="uniqueConversations.length === 0"
@@ -36,6 +38,8 @@ import { useMessengerStore } from "src/stores/messenger";
 import { useNostrStore } from "src/stores/nostr";
 import ConversationListItem from "./ConversationListItem.vue";
 
+const props = defineProps<{ selectedPubkey: string }>();
+
 const emit = defineEmits(["select"]);
 const messenger = useMessengerStore();
 const nostr = useNostrStore();
@@ -48,8 +52,13 @@ const uniqueConversations = computed(() => {
       pubkey,
       lastMsg: msgs[msgs.length - 1],
       timestamp: msgs[msgs.length - 1]?.created_at,
+      pinned: messenger.pinned[pubkey] || false,
     }))
-    .sort((a, b) => b.timestamp - a.timestamp);
+    .sort((a, b) => {
+      if (a.pinned && !b.pinned) return -1;
+      if (b.pinned && !a.pinned) return 1;
+      return b.timestamp - a.timestamp;
+    });
 });
 
 const filtered = computed(() => {
@@ -77,4 +86,7 @@ onMounted(() => {});
 watch(uniqueConversations, loadProfiles);
 
 const select = (pubkey: string) => emit("select", pubkey);
+const togglePin = (pubkey: string) => {
+  messenger.togglePin(pubkey);
+};
 </script>
