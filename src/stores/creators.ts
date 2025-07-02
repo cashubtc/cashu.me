@@ -7,6 +7,8 @@ import {
   publishEvent,
   subscribeToNostr,
 } from "./nostr";
+import { useNdk } from "src/composables/useNdk";
+import { notifyError } from "src/js/notify";
 import { nip19 } from "nostr-tools";
 import { Event as NostrEvent } from "nostr-tools";
 
@@ -58,6 +60,14 @@ export const useCreatorsStore = defineStore("creators", {
       }
       this.searching = true;
       await nostrStore.initNdkReadOnly();
+      const ndk = await useNdk({ requireSigner: false });
+      if (![...ndk.pool.relays.values()].some((r) => r.connected)) {
+        notifyError(
+          "No active relays. Open Relay Manager and connect first."
+        );
+        this.searching = false;
+        return;
+      }
       let pubkey = query.trim();
       if (pubkey.startsWith("npub")) {
         try {
