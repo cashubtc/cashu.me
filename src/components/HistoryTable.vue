@@ -72,32 +72,22 @@
             flat
             dense
             round
-            icon="sync"
-            @click="checkTransactionStatus(transaction)"
+            :icon="transaction.longPressActive ? 'arrow_circle_down' : 'sync'"
+            @click="
+              transaction.longPressActive
+                ? handleLongPress(transaction)
+                : checkTransactionStatus(transaction)
+            "
+            @mousedown="startLongPress(transaction)"
+            @mouseup="endLongPress(transaction)"
             class="cursor-pointer"
             v-if="transaction.status === 'pending'"
             size="sm"
           >
             <q-tooltip>{{
-              $t("HistoryTable.actions.check_status.tooltip_text")
-            }}</q-tooltip>
-          </q-btn>
-          <q-btn
-            flat
-            dense
-            round
-            icon="arrow_circle_down"
-            @click="receiveToken(transaction.token)"
-            class="cursor-pointer"
-            v-if="
-              isEcashTransaction(transaction) &&
-              transaction.status === 'pending' &&
-              transaction.amount > 0
-            "
-            size="sm"
-          >
-            <q-tooltip>{{
-              $t("HistoryTable.actions.receive.tooltip_text")
+              transaction.longPressActive
+                ? $t("HistoryTable.actions.receive.tooltip_text")
+                : $t("HistoryTable.actions.check_status.tooltip_text")
             }}</q-tooltip>
           </q-btn>
         </q-item-section>
@@ -269,6 +259,26 @@ export default defineComponent({
       "checkInvoice",
       "checkOutgoingInvoice",
     ]),
+
+    handleLongPress(transaction) {
+      if (this.isEcashTransaction(transaction)) {
+        transaction.longPressActive = false;
+        this.receiveToken(transaction.token);
+      }
+    },
+
+    startLongPress(transaction) {
+      if (this.isEcashTransaction(transaction)) {
+        transaction.longPressActive = false;
+        this.longPressTimeout = setTimeout(() => {
+          transaction.longPressActive = true;
+        }, 1000); // 1 second long press
+      }
+    },
+
+    endLongPress(transaction) {
+      clearTimeout(this.longPressTimeout);
+    },
 
     formattedDate(date_str) {
       const date = parseISO(date_str);
