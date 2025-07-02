@@ -48,7 +48,7 @@ Think Patreon, but built for the Nostr ecosystem and leveraging the privacy and 
 - **Creator Profiles** – Dedicated pages for creators and their funding needs.
 - **Tiered Support System** – Multiple support levels with unique benefits.
 - **Direct Cashu Donations & Pledges** – One-time or recurring support using P2PK and timelocks.
-- **Nostr Direct Messages** – NIP-04 encrypted chat with creators and other users.
+- **Nostr Direct Messages** – encrypted chat (NIP-44/NIP-04 compatible).
 - **Privacy-Preserving** – Chaumian ecash via Cashu.
 - **Cross-Platform** – Web App, PWA and native Android/iOS.
 - **npub.cash Integration** – Option to receive funds via a Lightning Address.
@@ -71,7 +71,7 @@ The app includes a built-in Nostr messenger for private chat.
 - **Mobile/Desktop**: Capacitor
 - **State Management**: Pinia
 - **Cashu Protocol**: `@cashu/cashu-ts`
-- **Nostr Protocol**: Nostr Dev Kit (NDK), `nip04` for encryption
+- **Nostr Protocol**: Nostr Dev Kit (NDK), `nip44`/`nip04` for encryption
 - **Storage**: Dexie.js (IndexedDB)
 
 ## Current Status
@@ -84,7 +84,7 @@ Fundstr is currently in Alpha/Beta.
 - Token Buckets (creation, management, auto-assignment rules)
 - P2PK and timelocking of tokens
 - Basic Nostr identity integration
-- Nostr Direct Messages (NIP-04 chat)
+- Nostr Direct Messages (NIP-44/NIP-04 chat)
 - Initial creator hub and donation presets
 
 **Focus of Current Development**
