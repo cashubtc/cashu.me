@@ -142,6 +142,11 @@ async function createReadOnlyNdk(): Promise<NDK> {
   const healthy = await filterHealthyRelays(relays);
   const relayUrls = healthy.length ? healthy : [relays[0]];
   const ndk = new NDK({ explicitRelayUrls: relayUrls });
+  if (ndk.pool.relays.size === 0) {
+    for (const url of DEFAULT_RELAYS) {
+      ndk.pool.addRelay(url, { read: true, write: true });
+    }
+  }
   await safeConnect(ndk);
   return ndk;
 }
@@ -152,6 +157,11 @@ export async function createSignedNdk(signer: NDKSigner): Promise<NDK> {
     ? settings.defaultNostrRelays.value
     : DEFAULT_RELAYS;
   const ndk = new NDK({ explicitRelayUrls: relays });
+  if (ndk.pool.relays.size === 0) {
+    for (const url of DEFAULT_RELAYS) {
+      ndk.pool.addRelay(url, { read: true, write: true });
+    }
+  }
   ndk.signer = signer;
   await ndk.connect();
   return ndk;
@@ -181,6 +191,11 @@ export async function createNdk(): Promise<NDK> {
   const healthy = await filterHealthyRelays(relays);
   const relayUrls = healthy.length ? healthy : [relays[0]];
   const ndk = new NDK({ signer, explicitRelayUrls: relayUrls });
+  if (ndk.pool.relays.size === 0) {
+    for (const url of DEFAULT_RELAYS) {
+      ndk.pool.addRelay(url, { read: true, write: true });
+    }
+  }
   await safeConnect(ndk);
   return ndk;
 }
