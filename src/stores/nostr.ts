@@ -94,6 +94,29 @@ function connectWithTimeout(relay: any, ms = 6000): Promise<void> {
   });
 }
 
+/** Resolves once any relay in `ndk.pool` has `connected === true`. */
+export function ensureRelayConnectivity(ndk: NDK): Promise<void> {
+  const isConnected = () =>
+    Array.from(ndk.pool.relays.values()).some((r: any) => r.connected === true);
+
+  if (isConnected()) return Promise.resolve();
+
+  const timeoutMs = 4000;
+
+  return new Promise((resolve, reject) => {
+    const expiry = Date.now() + timeoutMs;
+    const interval = setInterval(() => {
+      if (isConnected()) {
+        clearInterval(interval);
+        resolve();
+      } else if (Date.now() > expiry) {
+        clearInterval(interval);
+        reject(new Error("No relay connected"));
+      }
+    }, 100);
+  });
+}
+
 /**
  * Fetches the receiver’s ‘kind:10019’ Nutzap profile.
  */
@@ -165,6 +188,7 @@ export async function publishNutzapProfile(opts: {
   await ev.sign();
   const relaySet = await urlsToRelaySet(opts.relays);
   try {
+    await ensureRelayConnectivity(ndk);
     await ev.publish(relaySet);
   } catch (e: any) {
     notifyError(e?.message ?? String(e));
@@ -194,6 +218,7 @@ export async function publishNutzap(opts: {
   await ev.sign();
   const relaySet = await urlsToRelaySet(opts.relayHints);
   try {
+    await ensureRelayConnectivity(ndk);
     await ev.publish(relaySet);
   } catch (e: any) {
     notifyError(e?.message ?? String(e));

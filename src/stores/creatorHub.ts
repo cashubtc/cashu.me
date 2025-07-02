@@ -5,12 +5,13 @@ import {
   useNostrStore,
   fetchNutzapProfile,
   publishNutzapProfile,
+  ensureRelayConnectivity,
 } from "./nostr";
 import { useP2PKStore } from "./p2pk";
 import { useMintsStore } from "./mints";
 import { db } from "./dexie";
 import { v4 as uuidv4 } from "uuid";
-import { notifySuccess } from "src/js/notify";
+import { notifySuccess, notifyError } from "src/js/notify";
 import { useNdk } from "src/composables/useNdk";
 
 export interface Tier {
@@ -87,7 +88,13 @@ export const useCreatorHubStore = defineStore("creatorHub", {
       ev.kind = 0;
       ev.content = JSON.stringify(profile);
       await ev.sign(nostr.signer);
-      await ev.publish();
+      try {
+        await ensureRelayConnectivity(ndk);
+        await ev.publish();
+      } catch (e: any) {
+        notifyError(e?.message ?? String(e));
+        throw e;
+      }
     },
     addTier(tier: Partial<Tier>) {
       let id = tier.id || uuidv4();
@@ -170,7 +177,13 @@ export const useCreatorHubStore = defineStore("creatorHub", {
       ev.created_at = Math.floor(Date.now() / 1000);
       ev.content = JSON.stringify(tiersArray);
       await ev.sign(nostr.signer);
-      await ev.publish();
+      try {
+        await ensureRelayConnectivity(ndk);
+        await ev.publish();
+      } catch (e: any) {
+        notifyError(e?.message ?? String(e));
+        throw e;
+      }
 
       await db.creatorsTierDefinitions.put({
         creatorNpub: nostr.pubkey,
