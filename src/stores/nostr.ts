@@ -54,6 +54,16 @@ import { v4 as uuidv4 } from "uuid";
 import { useRouter } from "vue-router";
 import { useP2PKStore } from "./p2pk";
 
+export function npubToHex(s: string): string | null {
+  try {
+    const { type, data } = nip19.decode(s.trim());
+    if (type !== "npub") return null;
+    return bytesToHex(data as Uint8Array);
+  } catch {
+    return null;
+  }
+}
+
 // --- Nutzap helpers (NIP-61) ----------------------------------------------
 
 import type { NostrEvent } from "@nostr-dev-kit/ndk";
@@ -129,11 +139,8 @@ export async function fetchNutzapProfile(
   if (!ndk) {
     throw new Error('NDK not initialised \u2013 call initSignerIfNotSet() first');
   }
-  const hex = npubOrHex.startsWith("npub")
-    ? ndk.utils.hexFromBech32
-      ? ndk.utils.hexFromBech32(npubOrHex)
-      : (ndk.utils.nip19.decode(npubOrHex).data as string)
-    : npubOrHex;
+  const hex = npubOrHex.startsWith("npub") ? npubToHex(npubOrHex) : npubOrHex;
+  if (!hex) throw new Error("Invalid npub");
   const sub = ndk.subscribe({
     kinds: [10019],
     authors: [hex],

@@ -35,6 +35,14 @@ export const DEFAULT_RELAYS = [
   "wss://relay.snort.social/",
 ];
 
+export function mergeDefaultRelays(ndk: NDK) {
+  for (const url of DEFAULT_RELAYS) {
+    if (!ndk.pool.relays.has(url)) {
+      ndk.pool.addRelay(url, { read: true, write: true });
+    }
+  }
+}
+
 // ensure there is at least one relay configured at runtime
 if (DEFAULT_RELAYS.length === 0) {
   DEFAULT_RELAYS.push("wss://relay.damus.io/");
@@ -142,12 +150,13 @@ async function createReadOnlyNdk(): Promise<NDK> {
   const healthy = await filterHealthyRelays(relays);
   const relayUrls = healthy.length ? healthy : [relays[0]];
   const ndk = new NDK({ explicitRelayUrls: relayUrls });
-  if (ndk.pool.relays.size === 0) {
-    for (const url of DEFAULT_RELAYS) {
-      ndk.pool.addRelay(url, { read: true, write: true });
-    }
-  }
+  mergeDefaultRelays(ndk);
   await safeConnect(ndk);
+  await new Promise((r) => setTimeout(r, 3000));
+  if (![...ndk.pool.relays.values()].some((r: any) => r.connected)) {
+    mergeDefaultRelays(ndk);
+    await ndk.connect({ timeoutMs: 8000 });
+  }
   return ndk;
 }
 
@@ -157,13 +166,14 @@ export async function createSignedNdk(signer: NDKSigner): Promise<NDK> {
     ? settings.defaultNostrRelays.value
     : DEFAULT_RELAYS;
   const ndk = new NDK({ explicitRelayUrls: relays });
-  if (ndk.pool.relays.size === 0) {
-    for (const url of DEFAULT_RELAYS) {
-      ndk.pool.addRelay(url, { read: true, write: true });
-    }
-  }
+  mergeDefaultRelays(ndk);
   ndk.signer = signer;
   await ndk.connect();
+  await new Promise((r) => setTimeout(r, 3000));
+  if (![...ndk.pool.relays.values()].some((r: any) => r.connected)) {
+    mergeDefaultRelays(ndk);
+    await ndk.connect({ timeoutMs: 8000 });
+  }
   return ndk;
 }
 
@@ -191,12 +201,13 @@ export async function createNdk(): Promise<NDK> {
   const healthy = await filterHealthyRelays(relays);
   const relayUrls = healthy.length ? healthy : [relays[0]];
   const ndk = new NDK({ signer, explicitRelayUrls: relayUrls });
-  if (ndk.pool.relays.size === 0) {
-    for (const url of DEFAULT_RELAYS) {
-      ndk.pool.addRelay(url, { read: true, write: true });
-    }
-  }
+  mergeDefaultRelays(ndk);
   await safeConnect(ndk);
+  await new Promise((r) => setTimeout(r, 3000));
+  if (![...ndk.pool.relays.values()].some((r: any) => r.connected)) {
+    mergeDefaultRelays(ndk);
+    await ndk.connect({ timeoutMs: 8000 });
+  }
   return ndk;
 }
 
