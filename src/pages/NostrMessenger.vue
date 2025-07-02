@@ -1,20 +1,21 @@
 <template>
   <q-page
-        class="row full-height no-horizontal-scroll"
-        :class="[$q.dark.isActive ? 'bg-dark text-white' : 'bg-white text-dark']"
-        @touchstart="onTouchStart"
-        @touchend="onTouchEnd"
+    class="row full-height no-horizontal-scroll"
+    :class="[$q.dark.isActive ? 'bg-dark text-white' : 'bg-white text-dark']"
+    @touchstart="onTouchStart"
+    @touchend="onTouchEnd"
   >
-        <q-responsive>
-          <q-drawer
-            v-model="drawer"
-            side="left"
-            show-if-above
-            :breakpoint="600"
-            bordered
-            :width="300"
-            :class="$q.screen.gt.xs ? 'q-pa-lg column' : 'q-pa-md column'"
-          >
+    <q-responsive>
+      <q-drawer
+        v-model="drawer"
+        side="left"
+        show-if-above
+        :breakpoint="600"
+        bordered
+        :width="300"
+        class="drawer-transition"
+        :class="$q.screen.gt.xs ? 'q-pa-lg column' : 'q-pa-md column'"
+      >
         <NostrIdentityManager class="q-mb-md" />
         <q-expansion-item
           class="q-mb-md"
@@ -29,7 +30,10 @@
         <q-scroll-area class="col" style="min-height: 0">
           <Suspense>
             <template #default>
-              <ConversationList @select="selectConversation" />
+              <ConversationList
+                :selected-pubkey="selected"
+                @select="selectConversation"
+              />
             </template>
             <template #fallback>
               <q-skeleton height="100px" square />
@@ -62,7 +66,7 @@
       <MessageList :messages="messages" class="col" />
       <MessageInput @send="sendMessage" @sendToken="openSendTokenDialog" />
       <ChatSendTokenDialog ref="chatSendTokenDialogRef" :recipient="selected" />
-      </div>
+    </div>
   </q-page>
 </template>
 
@@ -126,58 +130,63 @@ export default defineComponent({
       }
     };
 
-const drawer = computed({
-  get: () => messenger.drawerOpen,
-  set: (val) => messenger.setDrawer(val),
-});
-const selected = ref("");
-const chatSendTokenDialogRef = ref<InstanceType<
-  typeof ChatSendTokenDialog
-> | null>(null);
-const messages = computed(() => messenger.conversations[selected.value] || []);
-const showRelays = useLocalStorage<boolean>("cashu.messenger.showRelays", true);
+    const drawer = computed({
+      get: () => messenger.drawerOpen,
+      set: (val) => messenger.setDrawer(val),
+    });
+    const selected = ref("");
+    const chatSendTokenDialogRef = ref<InstanceType<
+      typeof ChatSendTokenDialog
+    > | null>(null);
+    const messages = computed(
+      () => messenger.conversations[selected.value] || [],
+    );
+    const showRelays = useLocalStorage<boolean>(
+      "cashu.messenger.showRelays",
+      true,
+    );
 
-watch(
-  selected,
-  (val) => {
-    messenger.setCurrentConversation(val);
-  },
-  { immediate: true }
-);
+    watch(
+      selected,
+      (val) => {
+        messenger.setCurrentConversation(val);
+      },
+      { immediate: true },
+    );
 
-const selectConversation = (pubkey: string) => {
-  selected.value = pubkey;
-  messenger.markRead(pubkey);
-  messenger.setCurrentConversation(pubkey);
-};
+    const selectConversation = (pubkey: string) => {
+      selected.value = pubkey;
+      messenger.markRead(pubkey);
+      messenger.setCurrentConversation(pubkey);
+    };
 
-const startChat = (pubkey: string) => {
-  messenger.createConversation(pubkey);
-  selected.value = pubkey;
-  messenger.markRead(pubkey);
-  messenger.setCurrentConversation(pubkey);
-};
+    const startChat = (pubkey: string) => {
+      messenger.createConversation(pubkey);
+      selected.value = pubkey;
+      messenger.markRead(pubkey);
+      messenger.setCurrentConversation(pubkey);
+    };
 
-const sendMessage = (text: string) => {
-  if (!selected.value) return;
-  messenger.sendDm(selected.value, text);
-};
+    const sendMessage = (text: string) => {
+      if (!selected.value) return;
+      messenger.sendDm(selected.value, text);
+    };
 
-function openSendTokenDialog() {
-  if (!selected.value) return;
-  (chatSendTokenDialogRef.value as any)?.show();
-}
+    function openSendTokenDialog() {
+      if (!selected.value) return;
+      (chatSendTokenDialogRef.value as any)?.show();
+    }
 
-let touchStartX = 0;
-const onTouchStart = (e: TouchEvent) => {
-  touchStartX = e.touches[0].clientX;
-};
+    let touchStartX = 0;
+    const onTouchStart = (e: TouchEvent) => {
+      touchStartX = e.touches[0].clientX;
+    };
 
-const onTouchEnd = (e: TouchEvent) => {
-  const dx = e.changedTouches[0].clientX - touchStartX;
-  if (dx > 50) messenger.setDrawer(true);
-  if (dx < -50) messenger.setDrawer(false);
-};
+    const onTouchEnd = (e: TouchEvent) => {
+      const dx = e.changedTouches[0].clientX - touchStartX;
+      if (dx > 50) messenger.setDrawer(true);
+      if (dx < -50) messenger.setDrawer(false);
+    };
 
     return {
       loading,
@@ -201,5 +210,8 @@ const onTouchEnd = (e: TouchEvent) => {
 <style scoped>
 .q-toolbar {
   flex-wrap: nowrap;
+}
+.drawer-transition {
+  transition: transform 0.3s;
 }
 </style>

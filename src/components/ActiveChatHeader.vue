@@ -19,9 +19,14 @@
         @click="messenger.toggleDrawer()"
       />
       <template v-if="pubkey">
-        <q-avatar size="md" class="q-mr-sm">
+        <q-avatar size="md" class="q-mr-sm relative-position">
           <img v-if="profile?.picture" :src="profile.picture" />
           <span v-else>{{ initials }}</span>
+          <q-badge
+            class="status-dot"
+            rounded
+            :color="messenger.connected ? 'positive' : 'grey'"
+          />
         </q-avatar>
         <div class="text-h6 ellipsis">{{ displayName }}</div>
         <q-btn
@@ -84,7 +89,7 @@ watch(
   () => {
     loadProfile();
   },
-  { immediate: true }
+  { immediate: true },
 );
 
 const displayName = computed(() => {
@@ -125,3 +130,15 @@ function clearChat() {
   messenger.unreadCounts[props.pubkey] = 0;
 }
 </script>
+
+<style scoped>
+.status-dot {
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid var(--q-color-white);
+}
+</style>

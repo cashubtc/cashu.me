@@ -1,7 +1,12 @@
 <template>
-  <q-item clickable class="conversation-item" @click="handleClick">
+  <q-item
+    clickable
+    class="conversation-item"
+    :class="{ selected: props.selected }"
+    @click="handleClick"
+  >
     <q-item-section avatar>
-      <q-avatar size="48px">
+      <q-avatar size="48px" class="relative-position">
         <template v-if="loaded && profile?.picture">
           <img :src="profile.picture" />
         </template>
@@ -9,6 +14,11 @@
           <div class="placeholder text-white text-body1">{{ initials }}</div>
         </template>
         <q-skeleton v-else type="circle" size="48px" />
+        <q-badge
+          class="status-dot"
+          rounded
+          :color="isOnline ? 'positive' : 'grey'"
+        />
       </q-avatar>
     </q-item-section>
 
@@ -48,32 +58,45 @@
       </div>
     </q-item-section>
 
-    <q-item-section side v-if="unreadCount > 0">
-      <q-badge color="primary" rounded>{{ unreadCount }}</q-badge>
+    <q-item-section side>
+      <q-badge v-if="unreadCount > 0" color="primary" rounded class="q-mr-sm">{{
+        unreadCount
+      }}</q-badge>
+      <q-btn
+        flat
+        dense
+        round
+        size="sm"
+        :icon="isPinned ? 'star' : 'star_outline'"
+        @click.stop="togglePin"
+      />
     </q-item-section>
   </q-item>
 </template>
 
 <script lang="ts">
 import { defineComponent, computed, ref } from "vue";
-import { QBadge } from "quasar";
+import { QBadge, QBtn } from "quasar";
 import { useMessengerStore } from "src/stores/messenger";
 import { useNostrStore } from "src/stores/nostr";
 import { formatDistanceToNow } from "date-fns";
 
 export default defineComponent({
   name: "ConversationListItem",
-  components: { QBadge },
+  components: { QBadge, QBtn },
   props: {
     pubkey: { type: String, required: true },
     lastMsg: { type: Object as () => any, default: () => ({}) },
+    selected: { type: Boolean, default: false },
   },
-  emits: ["click"],
+  emits: ["click", "pin"],
   setup(props, { emit }) {
     const messenger = useMessengerStore();
     const nostr = useNostrStore();
+    const isOnline = computed(() => messenger.connected);
+    const isPinned = computed(() => messenger.pinned[props.pubkey]);
     const unreadCount = computed(
-      () => messenger.unreadCounts[props.pubkey] || 0
+      () => messenger.unreadCounts[props.pubkey] || 0,
     );
     const profile = computed(() => {
       const entry: any = (nostr.profiles as any)[props.pubkey];
@@ -109,6 +132,7 @@ export default defineComponent({
     const snippet = computed(() => props.lastMsg?.content?.slice(0, 30) || "");
 
     const handleClick = () => emit("click", props.pubkey);
+    const togglePin = () => emit("pin", props.pubkey);
 
     return {
       profile,
@@ -117,9 +141,12 @@ export default defineComponent({
       timeAgo,
       snippet,
       handleClick,
+      togglePin,
       loaded,
       unreadCount,
       showRaw,
+      isOnline,
+      isPinned,
       props,
     };
   },
@@ -129,6 +156,9 @@ export default defineComponent({
 <style scoped>
 .conversation-item {
   border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+.conversation-item.selected {
+  background: rgba(0, 0, 0, 0.05);
 }
 .conversation-item:hover {
   background: rgba(0, 0, 0, 0.03);
@@ -147,5 +177,14 @@ export default defineComponent({
 }
 .timestamp {
   white-space: nowrap;
+}
+.status-dot {
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid var(--q-color-white);
 }
 </style>
