@@ -281,7 +281,7 @@
       const { SimplePool, nip19, utils } = window.NostrTools;
 
       // --- Configuration ---
-      const RELAYS = [
+      const FALLBACK_RELAYS = [
         "wss://relay.damus.io",
         "wss://relay.primal.net",
         "wss://nos.lol",
@@ -289,6 +289,19 @@
         "wss://purplepag.es",
         "wss://relay.nostr.band",
       ];
+      let storedRelays = [];
+      try {
+        const stored = window.localStorage.getItem(
+          "cashu.settings.defaultNostrRelays"
+        );
+        storedRelays = JSON.parse(stored ?? "[]");
+        if (!Array.isArray(storedRelays)) {
+          storedRelays = [];
+        }
+      } catch {
+        storedRelays = [];
+      }
+      const RELAYS = Array.from(new Set([...storedRelays, ...FALLBACK_RELAYS]));
       document.getElementById("relayList").textContent = RELAYS.join(", ");
 
       const GLOBAL_SEARCH_TIMEOUT_MS = 10000;
