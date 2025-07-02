@@ -8,7 +8,7 @@ import {
   subscribeToNostr,
 } from "./nostr";
 import { useNdk } from "src/composables/useNdk";
-import { notifyError } from "src/js/notify";
+import { ensureRelayConnectivity } from "./nostr";
 import { nip19 } from "nostr-tools";
 import { Event as NostrEvent } from "nostr-tools";
 
@@ -61,10 +61,10 @@ export const useCreatorsStore = defineStore("creators", {
       this.searching = true;
       await nostrStore.initNdkReadOnly();
       const ndk = await useNdk({ requireSigner: false });
-      if (![...ndk.pool.relays.values()].some((r) => r.connected)) {
-        notifyError(
-          "No active relays. Open Relay Manager and connect first."
-        );
+      try {
+        await ensureRelayConnectivity(ndk);
+      } catch (e: any) {
+        this.error = e?.message ?? String(e);
         this.searching = false;
         return;
       }
@@ -86,7 +86,7 @@ export const useCreatorsStore = defineStore("creators", {
         return;
       }
       try {
-        const user = nostrStore.ndk.getUser({ pubkey });
+        const user = ndk.getUser({ pubkey });
         await user.fetchProfile();
         const followers = await nostrStore.fetchFollowerCount(pubkey);
         const following = await nostrStore.fetchFollowingCount(pubkey);
