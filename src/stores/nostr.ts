@@ -17,6 +17,7 @@ import NDK, {
 import {
   nip19,
   nip44,
+  nip04,
   SimplePool,
   getEventHash as ntGetEventHash,
   finalizeEvent,
@@ -722,18 +723,28 @@ export const useNostrStore = defineStore("nostr", {
     encryptNip04: async function (
       privKey: string | undefined,
       recipient: string,
-      message: string
+      message: string,
+      useNip04 = false
     ): Promise<string> {
       if (
         (!privKey || privKey.length === 0) &&
         (this.signerType === SignerType.NIP07 ||
           this.signerType === SignerType.NIP46) &&
-        (window as any)?.nostr?.nip44?.encrypt
+        (window as any)?.nostr?.[useNip04 ? 'nip04' : 'nip44']?.encrypt
       ) {
-        return await (window as any).nostr.nip44.encrypt(recipient, message);
+        return await (window as any).nostr[
+          useNip04 ? 'nip04' : 'nip44'
+        ].encrypt(recipient, message);
       }
       if (!privKey) {
         throw new Error("No private key for encryption");
+      }
+      if (useNip04) {
+        return await nip04.encrypt(
+          privKey,
+          recipient,
+          message,
+        );
       }
       return await nip44.v2.encrypt(
         message,
@@ -748,25 +759,41 @@ export const useNostrStore = defineStore("nostr", {
       if (
         (!privKey || privKey.length === 0) &&
         (this.signerType === SignerType.NIP07 ||
-          this.signerType === SignerType.NIP46) &&
-        (window as any)?.nostr?.nip44?.decrypt
+          this.signerType === SignerType.NIP46)
       ) {
-        try {
-          return await (window as any).nostr.nip44.decrypt(sender, content);
-        } catch (e) {
-          const shared = await (window as any).nostr.getSharedSecret(sender);
-          return await nip44.v2.decrypt(content, shared);
+        if ((window as any)?.nostr?.nip44?.decrypt) {
+          try {
+            return await (window as any).nostr.nip44.decrypt(sender, content);
+          } catch (e) {
+            if ((window as any)?.nostr?.nip04?.decrypt) {
+              try {
+                return await (window as any).nostr.nip04.decrypt(sender, content);
+              } catch {}
+            }
+            const shared = await (window as any).nostr.getSharedSecret(sender);
+            try {
+              return await nip44.v2.decrypt(content, shared);
+            } catch (err) {
+              throw err;
+            }
+          }
+        } else if ((window as any)?.nostr?.nip04?.decrypt) {
+          return await (window as any).nostr.nip04.decrypt(sender, content);
         }
       }
       if (!privKey) {
         throw new Error("No private key for decryption");
       }
+      const nip44Key = nip44.v2.utils.getConversationKey(privKey, sender);
       try {
-        const key = nip44.v2.utils.getConversationKey(privKey, sender);
-        return await nip44.v2.decrypt(content, key);
+        return await nip44.v2.decrypt(content, nip44Key);
       } catch (e) {
-        const key = nip44.v2.utils.getConversationKey(privKey, sender);
-        return await nip44.v2.decrypt(content, key);
+        try {
+          return await nip04.decrypt(privKey, sender, content);
+        } catch {
+          // fallback to nip44 decrypt just in case
+          return await nip44.v2.decrypt(content, nip44Key);
+        }
       }
     },
     sendNip04DirectMessage: async function (
