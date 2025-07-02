@@ -80,6 +80,8 @@
             "
             @mousedown="startLongPress(transaction)"
             @mouseup="endLongPress(transaction)"
+            @touchstart="startLongPress(transaction)"
+            @touchend="endLongTap(transaction)"
             class="cursor-pointer"
             v-if="transaction.status === 'pending'"
             size="sm"
@@ -261,6 +263,7 @@ export default defineComponent({
     ]),
 
     handleLongPress(transaction) {
+      console.debug("### handleLongPress called");
       if (this.isEcashTransaction(transaction)) {
         transaction.longPressActive = false;
         this.receiveToken(transaction.token);
@@ -277,7 +280,16 @@ export default defineComponent({
     },
 
     endLongPress(transaction) {
+      console.debug("### endLongPress called");
       clearTimeout(this.longPressTimeout);
+    },
+
+    endLongTap(transaction) {
+      console.debug("### endLongTap called");
+      clearTimeout(this.longPressTimeout);
+      if (transaction.longPressActive) {
+        this.handleLongPress(transaction);
+      }
     },
 
     formattedDate(date_str) {
