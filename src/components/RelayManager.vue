@@ -70,12 +70,12 @@ const connect = async () => {
     .map((r) => r.trim())
     .filter(Boolean);
   try {
-    const ndk = await useNdk({ requireSigner: false });
-    for (const url of urls) {
-      ndk.pool.addRelay(url, { read: true, write: true });
-    }
-    await messenger.connect(urls);
-    notifySuccess("Connected to relays");
+      const ndk = await useNdk({ requireSigner: false });
+      for (const url of urls) {
+        ndk.addExplicitRelay(url);
+      }
+      await messenger.connect(urls);
+      notifySuccess("Connected to relays");
   } catch (err: any) {
     notifyError(err?.message || "Failed to connect");
   }

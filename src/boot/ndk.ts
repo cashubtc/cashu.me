@@ -38,7 +38,7 @@ export const DEFAULT_RELAYS = [
 export function mergeDefaultRelays(ndk: NDK) {
   for (const url of DEFAULT_RELAYS) {
     if (!ndk.pool.relays.has(url)) {
-      ndk.pool.addRelay(url, { read: true, write: true });
+      ndk.addExplicitRelay(url);
     }
   }
 }
