@@ -22,6 +22,14 @@
       <q-btn label="Connect" color="primary" @click="connect" dense />
       <q-btn label="Disconnect" color="primary" @click="disconnect" dense />
     </div>
+    <div class="q-mt-sm">
+      <q-btn
+        label="Use fallback relays"
+        color="primary"
+        @click="relayText = DEFAULT_RELAYS.join('\n')"
+        dense
+      />
+    </div>
   </div>
 </template>
 
@@ -30,6 +38,7 @@ import { ref, watch, computed, onMounted } from "vue";
 import { useMessengerStore } from "src/stores/messenger";
 import { notifySuccess, notifyError } from "src/js/notify";
 import { useNdk } from "src/composables/useNdk";
+import { DEFAULT_RELAYS } from "boot/ndk";
 import type NDK from "@nostr-dev-kit/ndk";
 
 const messenger = useMessengerStore();
@@ -56,12 +65,16 @@ watch(
 );
 
 const connect = async () => {
-  const relays = (relayText.value || "")
+  const urls = (relayText.value || "")
     .split(/\r?\n/)
     .map((r) => r.trim())
     .filter(Boolean);
   try {
-    await messenger.connect(relays);
+    const ndk = await useNdk({ requireSigner: false });
+    for (const url of urls) {
+      ndk.pool.addRelay(url, { read: true, write: true });
+    }
+    await messenger.connect(urls);
     notifySuccess("Connected to relays");
   } catch (err: any) {
     notifyError(err?.message || "Failed to connect");
