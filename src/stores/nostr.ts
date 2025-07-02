@@ -17,7 +17,6 @@ import NDK, {
 import {
   nip19,
   nip44,
-  nip04,
   SimplePool,
   getEventHash as ntGetEventHash,
   finalizeEvent,
@@ -725,58 +724,50 @@ export const useNostrStore = defineStore("nostr", {
       recipient: string,
       message: string
     ): Promise<string> {
-      const extSigner =
-        this.signerType === SignerType.NIP07 ||
-        this.signerType === SignerType.NIP46;
-
-      if (extSigner) {
-        const nostr: any = (window as any)?.nostr;
-        if (nostr?.nip44?.encrypt) {
-          return await nostr.nip44.encrypt(recipient, message);
-        }
-        if (nostr?.nip04?.encrypt) {
-          return await nostr.nip04.encrypt(recipient, message);
-        }
-        if (!privKey) {
-          throw new Error(
-            "No browser encryption available and no private key provided"
-          );
-        }
+      if (
+        (!privKey || privKey.length === 0) &&
+        (this.signerType === SignerType.NIP07 ||
+          this.signerType === SignerType.NIP46) &&
+        (window as any)?.nostr?.nip44?.encrypt
+      ) {
+        return await (window as any).nostr.nip44.encrypt(recipient, message);
       }
-
       if (!privKey) {
         throw new Error("No private key for encryption");
       }
-      return await nip04.encrypt(privKey, recipient, message);
+      return await nip44.v2.encrypt(
+        message,
+        nip44.v2.utils.getConversationKey(privKey, recipient),
+      );
     },
     decryptNip04: async function (
       privKey: string | undefined,
       sender: string,
       content: string
     ): Promise<string> {
-      const extSigner =
-        this.signerType === SignerType.NIP07 ||
-        this.signerType === SignerType.NIP46;
-
-      if (extSigner) {
-        const nostr: any = (window as any)?.nostr;
-        if (nostr?.nip44?.decrypt) {
-          return await nostr.nip44.decrypt(sender, content);
-        }
-        if (nostr?.nip04?.decrypt) {
-          return await nostr.nip04.decrypt(sender, content);
-        }
-        if (!privKey) {
-          throw new Error(
-            "No browser decryption available and no private key provided"
-          );
+      if (
+        (!privKey || privKey.length === 0) &&
+        (this.signerType === SignerType.NIP07 ||
+          this.signerType === SignerType.NIP46) &&
+        (window as any)?.nostr?.nip44?.decrypt
+      ) {
+        try {
+          return await (window as any).nostr.nip44.decrypt(sender, content);
+        } catch (e) {
+          const shared = await (window as any).nostr.getSharedSecret(sender);
+          return await nip44.v2.decrypt(content, shared);
         }
       }
-
       if (!privKey) {
         throw new Error("No private key for decryption");
       }
-      return await nip04.decrypt(privKey, sender, content);
+      try {
+        const key = nip44.v2.utils.getConversationKey(privKey, sender);
+        return await nip44.v2.decrypt(content, key);
+      } catch (e) {
+        const key = nip44.v2.utils.getConversationKey(privKey, sender);
+        return await nip44.v2.decrypt(content, key);
+      }
     },
     sendNip04DirectMessage: async function (
       recipient: string,
