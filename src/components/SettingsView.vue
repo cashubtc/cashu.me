@@ -1774,7 +1774,7 @@
   <!-- NWC DIALOG -->
   <NWCDialog v-model="showNWCDialog" />
 </template>
-<script>
+<script lang="ts">
 import { debug } from "src/js/logger";
 import { defineComponent } from "vue";
 import { useClipboard } from "src/composables/useClipboard";
