@@ -1,12 +1,7 @@
 import { boot } from "quasar/wrappers";
 import { useBootErrorStore } from "stores/bootError";
-import NDK, {
-  NDKNip07Signer,
-  NDKPrivateKeySigner,
-  NDKSigner,
-} from "@nostr-dev-kit/ndk";
-import { nip19 } from "nostr-tools";
-import { bytesToHex } from "@noble/hashes/utils";
+import NDK, { NDKSigner } from "@nostr-dev-kit/ndk";
+import { useNostrStore } from "stores/nostr";
 import { useSettingsStore } from "src/stores/settings";
 
 export type NdkBootErrorReason =
@@ -50,42 +45,6 @@ if (DEFAULT_RELAYS.length === 0) {
 
 let ndkInstance: NDK | undefined;
 let ndkPromise: Promise<NDK> | undefined;
-
-async function resolveSigner(): Promise<NDKSigner> {
-  // 1 ─ local nsec (strip legacy JSON quotes if present)
-  const raw = window.localStorage.getItem("nsec") ?? "";
-  const clean = raw.replace(/^"+|"+$/g, "").trim(); // "nsec…"
-  // TODO: sanitize quoted legacy values once
-  if (clean.startsWith("nsec")) {
-    try {
-      const { data } = nip19.decode(clean); // Uint8Array
-      const hex = bytesToHex(data); // 64-char hex
-      return new NDKPrivateKeySigner(hex);
-    } catch (e) {
-      throw new NdkBootError("unknown", (e as Error).message);
-    }
-  }
-
-  if (typeof window !== "undefined" && (window as any).nostr) {
-    try {
-      const signer = new NDKNip07Signer();
-      await signer.user();
-      await signer.blockUntilReady();
-      return signer;
-    } catch (err: any) {
-      const msg = (err as Error).message;
-      if (
-        msg?.includes("There is no active private key") ||
-        msg?.includes("User rejected")
-      ) {
-        throw new NdkBootError("nip07-locked", msg);
-      }
-      throw new NdkBootError("unknown", msg);
-    }
-  }
-
-  throw new NdkBootError("no-signer", "No available Nostr signer");
-}
 
 async function pingRelay(url: string): Promise<boolean> {
   return new Promise((resolve) => {
@@ -178,16 +137,13 @@ export async function createSignedNdk(signer: NDKSigner): Promise<NDK> {
 }
 
 export async function createNdk(): Promise<NDK> {
-  let signer: NDKSigner | undefined;
-  try {
-    signer = await resolveSigner();
-  } catch (e: any) {
-    if (e.reason === "no-signer" || e.reason === "nip07-locked") {
-      console.info("Creating read-only NDK (no signer)");
-      return createReadOnlyNdk();
-    } else {
-      throw e;
-    }
+  const nostrStore = useNostrStore();
+  await nostrStore.initSignerIfNotSet();
+  const signer = nostrStore.signer;
+
+  if (!signer) {
+    console.info("Creating read-only NDK (no signer)");
+    return createReadOnlyNdk();
   }
 
   const settings = useSettingsStore();
