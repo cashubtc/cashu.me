@@ -1346,15 +1346,22 @@ export async function publishEvent(event: NostrEvent): Promise<void> {
   }
 }
 
-export function subscribeToNostr(filter: any, cb: (ev: NostrEvent) => void) {
-  const relays = useSettingsStore().defaultNostrRelays.value;
-  if (!relays || relays.length === 0) {
+export function subscribeToNostr(
+  filter: any,
+  cb: (ev: NostrEvent) => void,
+  relays?: string[],
+) {
+  const relayUrls =
+    relays && relays.length > 0
+      ? relays
+      : useSettingsStore().defaultNostrRelays.value;
+  if (!relayUrls || relayUrls.length === 0) {
     console.warn('[nostr] subscribeMany called with empty relay list');
     return;
   }
   const pool = new SimplePool();
   try {
-    pool.subscribeMany(relays, [filter], { onevent: cb });
+    pool.subscribeMany(relayUrls, [filter], { onevent: cb });
   } catch (e) {
     console.error("Failed to subscribe", e);
   }
