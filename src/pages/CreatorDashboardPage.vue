@@ -11,7 +11,7 @@
         $t("CreatorHub.dashboard.logout")
       }}</q-btn>
       <q-btn
-        v-if="!nostr.signer"
+        v-if="signerChecked && !nostr.signer"
         flat
         color="primary"
         class="q-ml-sm"
@@ -207,6 +207,7 @@ export default defineComponent({
     const uiStore = useUiStore();
     const profile = ref<any>({ display_name: "", picture: "", about: "" });
     const needsProfile = ref(false);
+    const signerChecked = ref(false);
 
     const profilePub = ref("");
     const profileMints = ref("");
@@ -253,6 +254,8 @@ export default defineComponent({
         await initPage();
       } catch (e) {
         notifyError('Creator dashboard disabled – signer missing');
+      } finally {
+        signerChecked.value = true;
       }
     });
 
@@ -399,6 +402,7 @@ export default defineComponent({
       profileRelays,
       canSaveNutzap,
       publishProfile,
+      signerChecked,
       nostr,
     };
   },
