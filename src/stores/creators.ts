@@ -185,14 +185,39 @@ export const useCreatorsStore = defineStore("creators", {
         settings.defaultNostrRelays.value.length > 0
           ? settings.defaultNostrRelays.value
           : DEFAULT_RELAYS;
-      subscribeToNostr(filter, async (event) => {
+
+      let received = false;
+      const timeout = setTimeout(async () => {
+        if (received) return;
+        const indexerUrl = settings.tiersIndexerUrl.value;
+        if (!indexerUrl) return;
+        const url = indexerUrl.includes("{pubkey}")
+          ? indexerUrl.replace("{pubkey}", creatorNpub)
+          : `${indexerUrl}${indexerUrl.includes("?") ? "&" : "?"}pubkey=${creatorNpub}`;
         try {
-          const tiersArray: Tier[] = JSON.parse(event.content).map(
-            (t: any) => ({
-              ...t,
-              price_sats: t.price_sats ?? t.price ?? 0,
-            })
-          );
+          const controller = new AbortController();
+          const id = setTimeout(() => controller.abort(), 8000);
+          const resp = await fetch(url, { signal: controller.signal });
+          clearTimeout(id);
+          if (!resp.ok) return;
+          const data = await resp.json();
+          const event =
+            data.tiers ||
+            data.event ||
+            (data.profile && data.profile.tiers) ||
+            (Array.isArray(data.events)
+              ? data.events.find(
+                  (e: any) =>
+                    e.kind === 30000 &&
+                    Array.isArray(e.tags) &&
+                    e.tags.some((t: any[]) => t[0] === "d" && t[1] === "tiers")
+                )
+              : null);
+          if (!event) return;
+          const tiersArray: Tier[] = JSON.parse(event.content).map((t: any) => ({
+            ...t,
+            price_sats: t.price_sats ?? t.price ?? 0,
+          }));
           this.tiersMap[creatorNpub] = tiersArray;
           await db.creatorsTierDefinitions.put({
             creatorNpub,
@@ -201,9 +226,33 @@ export const useCreatorsStore = defineStore("creators", {
             updatedAt: event.created_at,
           });
         } catch (e) {
-          console.error("Error parsing tier definitions JSON:", e);
+          console.error("Indexer tier fetch error:", e);
         }
-      }, relayUrls);
+      }, 5000);
+
+      subscribeToNostr(
+        filter,
+        async (event) => {
+          try {
+            received = true;
+            clearTimeout(timeout);
+            const tiersArray: Tier[] = JSON.parse(event.content).map((t: any) => ({
+              ...t,
+              price_sats: t.price_sats ?? t.price ?? 0,
+            }));
+            this.tiersMap[creatorNpub] = tiersArray;
+            await db.creatorsTierDefinitions.put({
+              creatorNpub,
+              tiers: tiersArray,
+              eventId: event.id!,
+              updatedAt: event.created_at,
+            });
+          } catch (e) {
+            console.error("Error parsing tier definitions JSON:", e);
+          }
+        },
+        relayUrls
+      );
     },
 
     async publishTierDefinitions(tiersArray: Tier[]) {

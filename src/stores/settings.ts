@@ -82,6 +82,10 @@ export const useSettingsStore = defineStore("settings", {
         "cashu.settings.searchBackendUrl",
         ""
       ),
+      tiersIndexerUrl: useLocalStorage<string>(
+        "cashu.settings.tiersIndexerUrl",
+        "https://api.nostr.band/v0/profile?pubkey={pubkey}"
+      ),
     };
   },
 });
