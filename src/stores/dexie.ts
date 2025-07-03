@@ -13,12 +13,6 @@ export interface CachedProfileDexie {
   fetchedAt: number;
 }
 
-export interface NutzapProfileDexie {
-  hexPub: string;
-  profile: any;
-  fetchedAt: number;
-}
-
 export interface CreatorTierDefinition {
   creatorNpub: string;
   tiers: {
@@ -86,7 +80,6 @@ export interface LockedToken {
 export class CashuDexie extends Dexie {
   proofs!: Table<WalletProof>;
   profiles!: Table<CachedProfileDexie>;
-  nutzapProfiles!: Table<NutzapProfileDexie>;
   creatorsTierDefinitions!: Table<CreatorTierDefinition, string>;
   subscriptions!: Table<Subscription, string>;
   lockedTokens!: Table<LockedToken, string>;
@@ -155,15 +148,6 @@ export class CashuDexie extends Dexie {
             }
           });
       });
-    this.version(7).stores({
-      proofs: "secret, id, C, amount, reserved, quote, bucketId, label",
-      profiles: "pubkey",
-      nutzapProfiles: "hexPub",
-      creatorsTierDefinitions: "&creatorNpub, eventId, updatedAt",
-      subscriptions: "&id, creatorNpub, tierId, status, createdAt, updatedAt",
-      lockedTokens:
-        "&id, tokenString, owner, tierId, intervalKey, unlockTs, refundUnlockTs, status, subscriptionEventId",
-    });
   }
 }
 
