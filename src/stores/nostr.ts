@@ -204,6 +204,66 @@ export async function publishNutzapProfile(opts: {
   return ev.id!;
 }
 
+/**
+ * Publishes a complete, discoverable user profile to Nostr.
+ * This includes kind 0 (metadata), kind 10002 (relay list), and kind 10019 (payment profile).
+ * This single action ensures a user's identity is consistent and findable.
+ */
+export async function publishDiscoveryProfile(opts: {
+  profile: { display_name?: string; picture?: string; about?: string };
+  p2pkPub: string;
+  mints: string[];
+  relays: string[];
+}) {
+  const nostr = useNostrStore();
+  if (!nostr.signer) {
+    throw new Error("Signer required to publish a discoverable profile.");
+  }
+  // Ensure we are connected to the relays we want to publish to.
+  await nostr.ensureNdkConnected(opts.relays);
+  const ndk = await useNdk();
+  if (!ndk) {
+    throw new Error("NDK not initialized. Cannot publish profile.");
+  }
+
+  // --- 1. Prepare Kind 0 (Profile Metadata) ---
+  const kind0Event = new NDKEvent(ndk);
+  kind0Event.kind = 0;
+  kind0Event.content = JSON.stringify(opts.profile);
+
+  // --- 2. Prepare Kind 10002 (Relay List) ---
+  const kind10002Event = new NDKEvent(ndk);
+  kind10002Event.kind = 10002;
+  kind10002Event.tags = opts.relays.map((r) => ["r", r]); // 'r' tag for each relay URL
+
+  // --- 3. Prepare Kind 10019 (Nutzap/Payment Profile) ---
+  const kind10019Event = new NDKEvent(ndk);
+  kind10019Event.kind = 10019;
+  kind10019Event.tags = [
+    ["pubkey", opts.p2pkPub],
+    ...opts.mints.map((m) => ["mint", m]),
+    ...opts.relays.map((r) => ["relay", r]),
+  ];
+
+  const eventsToPublish = [kind0Event, kind10002Event, kind10019Event];
+
+  // Sign all events
+  await Promise.all(eventsToPublish.map((ev) => ev.sign()));
+
+  // Publish all events
+  const relaySet = await urlsToRelaySet(opts.relays);
+  try {
+    await ensureRelayConnectivity(ndk);
+    // NDK's publish method can take a single event or an array of events
+    await ndk.publish(eventsToPublish, relaySet);
+    notifySuccess("Profile published successfully to your relays!");
+  } catch (e: any) {
+    notifyError(e?.message ?? String(e));
+    throw e;
+  }
+  return eventsToPublish.map(ev => ev.id);
+}
+
 /** Publishes a ‘kind:9321’ Nutzap event. */
 export async function publishNutzap(opts: {
   content: string;
