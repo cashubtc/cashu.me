@@ -7,6 +7,12 @@
   >
     <q-card class="q-pa-md" style="max-width: 400px; width: 100%">
       <q-card-section class="text-h6">Nostr Identity</q-card-section>
+      <q-card-section v-if="hasExistingKey">
+        <q-banner dense class="bg-grey-3 q-mb-md">
+          A private key is already present. Click "Use Key" to continue or
+          replace it below.
+        </q-banner>
+      </q-card-section>
       <q-card-section>
         <q-input v-model="key" type="text" label="nsec or hex private key" />
       </q-card-section>
@@ -21,7 +27,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from "vue";
+import { defineComponent, ref, computed } from "vue";
 import { useRouter } from "vue-router";
 import { useNostrStore } from "stores/nostr";
 import { generateSecretKey, nip19 } from "nostr-tools";
@@ -30,9 +36,10 @@ import { hexToBytes } from "@noble/hashes/utils";
 export default defineComponent({
   name: "NostrLogin",
   setup() {
-    const key = ref("");
-    const router = useRouter();
     const nostr = useNostrStore();
+    const key = ref(nostr.activePrivateKeyNsec || nostr.privKeyHex || "");
+    const hasExistingKey = computed(() => !!key.value);
+    const router = useRouter();
 
     const normalizeKey = (input: string): string => {
       const trimmed = input.trim();
@@ -55,7 +62,7 @@ export default defineComponent({
       if (nostr.pubkey) router.push("/wallet");
     };
 
-    return { key, submitKey, createIdentity };
+    return { key, hasExistingKey, submitKey, createIdentity };
   },
 });
 </script>
