@@ -27,8 +27,10 @@ export default defineComponent({
     NdkErrorDialog,
     MissingSignerModal,
   },
-  mounted() {
-    const myHex = useNostrStore().pubkey;
+  async mounted() {
+    const nostr = useNostrStore();
+    await nostr.initSignerIfNotSet();
+    const myHex = nostr.pubkey;
     useNutzapStore().initListener(myHex);
   },
 });

@@ -249,6 +249,7 @@ export default defineComponent({
 
     onMounted(async () => {
       try {
+        await nostr.initSignerIfNotSet();
         await initPage();
       } catch (e) {
         notifyError('Creator dashboard disabled – signer missing');

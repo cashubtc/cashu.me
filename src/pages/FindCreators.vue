@@ -242,7 +242,8 @@ function handleDonate({
   }
 }
 
-onMounted(() => {
+onMounted(async () => {
+  await nostr.initSignerIfNotSet();
   window.addEventListener("message", onMessage);
 });
 
