@@ -245,6 +245,11 @@ export default defineComponent({
       if (p) profile.value = { ...p };
       const npub = nostr.pubkey;
       const existing = await fetchNutzapProfile(npub);
+      if (existing) {
+        profilePub.value = existing.p2pkPubkey;
+        profileMints.value = existing.trustedMints.join(',');
+        profileRelays.value = (existing.relays || []).join(',');
+      }
       needsProfile.value = !existing;
     }
 
