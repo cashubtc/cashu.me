@@ -162,6 +162,22 @@ You can configure a URL that returns NIP-50 search results for the
 backend first and fall back to client-side relay queries if no results are
 returned.
 
+### Default Relay List
+You can also override the relays used by the creator search. Set
+`cashu.settings.defaultNostrRelays` in local storage with an array of relay
+URLs. If not defined, the search falls back to the following list:
+
+```
+wss://relay.damus.io
+wss://relay.primal.net
+wss://nos.lol
+wss://nostr.wine
+wss://purplepag.es
+wss://relay.nostr.band
+wss://eden.nostr.land
+wss://njump.me
+```
+
 ## Contributing
 
 Contributions are welcome! Open an issue or pull request to discuss your ideas. Bug reports and feature requests are encouraged. Help with translation and documentation is always appreciated.
