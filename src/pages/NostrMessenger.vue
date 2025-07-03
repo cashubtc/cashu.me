@@ -76,6 +76,7 @@ import { useRouter } from "vue-router";
 import { useLocalStorage } from "@vueuse/core";
 import { useMessengerStore } from "src/stores/messenger";
 import { useNdk } from "src/composables/useNdk";
+import { useNostrStore } from "src/stores/nostr";
 
 import NostrIdentityManager from "components/NostrIdentityManager.vue";
 import RelayManager from "components/RelayManager.vue";
@@ -101,6 +102,7 @@ export default defineComponent({
   setup() {
     const loading = ref(true);
     const messenger = useMessengerStore();
+    const nostr = useNostrStore();
 
     function timeout(ms: number) {
       return new Promise<void>((resolve) => setTimeout(resolve, ms));
@@ -108,6 +110,7 @@ export default defineComponent({
 
     async function init() {
       try {
+        await nostr.initSignerIfNotSet();
         await messenger.loadIdentity();
         await useNdk();
         await Promise.race([messenger.start(), timeout(10000)]);
