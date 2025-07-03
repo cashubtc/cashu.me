@@ -84,7 +84,7 @@ export const useSettingsStore = defineStore("settings", {
       ),
       tiersIndexerUrl: useLocalStorage<string>(
         "cashu.settings.tiersIndexerUrl",
-        "https://corsproxy.io/?https://api.nostr.band/v0/profile?pubkey={pubkey}"
+        "https://api.nostr.band/v0/profile?pubkey={pubkey}"
       ),
     };
   },
