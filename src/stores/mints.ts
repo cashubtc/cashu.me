@@ -544,7 +544,6 @@ export const useMintsStore = defineStore("mints", {
         await this.activateMint(this.mints[0], false);
       }
       notifySuccess(this.t("wallet.mint.notifications.removed"));
-      await maybeRepublishNutzapProfile();
     },
     assertMintError: function (response: { error?: any }, verbose = true) {
       if (response.error != null) {
