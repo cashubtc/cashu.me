@@ -1,4 +1,5 @@
 import { defineStore } from "pinia";
+import { watch } from "vue";
 import { useWalletStore } from "./wallet";
 import { useP2PKStore } from "./p2pk";
 import { useLockedTokensStore } from "./lockedTokens";
@@ -38,11 +39,25 @@ export const useNutzapStore = defineStore("nutzap", {
     error: null as string | null,
     subscription: null as NDKSubscription | null,
     listenerStarted: false,
+    watchInitialized: false,
   }),
 
   actions: {
     /** Called once on app start (e.g. from MainLayout.vue) */
     async initListener(myHex: string) {
+      if (!this.watchInitialized) {
+        watch(
+          () => useNostrStore().pubkey,
+          (pubkey) => {
+            if (this.listenerStarted) {
+              this.subscription?.stop();
+              this.listenerStarted = false;
+              this.initListener(pubkey);
+            }
+          }
+        );
+        this.watchInitialized = true;
+      }
       if (this.listenerStarted) return;
       this.subscription = await subscribeToNutzaps(myHex, (ev: NostrEvent) => {
         this._onZap(ev);
