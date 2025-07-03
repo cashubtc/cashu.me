@@ -134,13 +134,38 @@ export async function fetchNutzapProfile(
   npubOrHex: string
 ): Promise<NutzapProfile | null> {
   const nostr = useNostrStore();
+  const hex = npubOrHex.startsWith("npub") ? npubToHex(npubOrHex) : npubOrHex;
+  if (!hex) throw new Error("Invalid npub");
+
+  const now = Math.floor(Date.now() / 1000);
+  let cached =
+    nostr.nutzapProfiles[hex] as
+      | { profile: NutzapProfile; fetchedAt: number }
+      | undefined;
+
+  if (!cached) {
+    const dbEntry = await cashuDb.nutzapProfiles.get(hex);
+    if (dbEntry) {
+      nostr.nutzapProfiles[hex] = {
+        profile: dbEntry.profile,
+        fetchedAt: dbEntry.fetchedAt,
+      };
+      cached = nostr.nutzapProfiles[hex] as {
+        profile: NutzapProfile;
+        fetchedAt: number;
+      };
+    }
+  }
+
+  if (cached && now - cached.fetchedAt < 24 * 60 * 60) {
+    return cached.profile;
+  }
+
   await nostr.initNdkReadOnly();
   const ndk = await useNdk();
   if (!ndk) {
     throw new Error('NDK not initialised \u2013 call initSignerIfNotSet() first');
   }
-  const hex = npubOrHex.startsWith("npub") ? npubToHex(npubOrHex) : npubOrHex;
-  if (!hex) throw new Error("Invalid npub");
   const sub = ndk.subscribe({
     kinds: [10019],
     authors: [hex],
@@ -148,22 +173,29 @@ export async function fetchNutzapProfile(
   });
 
   return new Promise((resolve) => {
-    sub.on("event", (ev: NostrEvent) => {
+    sub.on("event", async (ev: NostrEvent) => {
       const p2pkPubkey = ev.tags.find((t) => t[0] === "pubkey")?.[1];
       const mints = ev.tags.filter((t) => t[0] === "mint").map((t) => t[1]);
       if (p2pkPubkey) {
-        resolve({
+        const profile: NutzapProfile = {
           hexPub: hex,
           p2pkPubkey,
           trustedMints: mints,
           relays: ev.tags.filter((t) => t[0] === "relay").map((t) => t[1]),
-        });
-      } else resolve(null);
+        };
+        const entry = { profile, fetchedAt: now };
+        nostr.nutzapProfiles[hex] = entry;
+        await cashuDb.nutzapProfiles.put({ hexPub: hex, ...entry });
+        resolve(profile);
+      } else resolve(cached ? cached.profile : null);
       sub.stop();
     });
 
     // timeout after 10 s
-    setTimeout(() => (sub.stop(), resolve(null)), 10_000);
+    setTimeout(() => {
+      sub.stop();
+      resolve(cached ? cached.profile : null);
+    }, 10_000);
   });
 }
 
@@ -320,6 +352,9 @@ export const useNostrStore = defineStore("nostr", {
     profiles: useLocalStorage<
       Record<string, { profile: any; fetchedAt: number }>
     >("cashu.ndk.profiles", {}),
+    nutzapProfiles: useLocalStorage<
+      Record<string, { profile: NutzapProfile; fetchedAt: number }>
+    >("cashu.ndk.nutzapProfiles", {}),
   }),
   getters: {
     seedSignerPrivateKeyNsecComputed: (state) => {
