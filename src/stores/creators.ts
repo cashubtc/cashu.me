@@ -191,9 +191,12 @@ export const useCreatorsStore = defineStore("creators", {
         if (received) return;
         const indexerUrl = settings.tiersIndexerUrl.value;
         if (!indexerUrl) return;
-        const url = indexerUrl.includes("{pubkey}")
+        let url = indexerUrl.includes("{pubkey}")
           ? indexerUrl.replace("{pubkey}", creatorNpub)
           : `${indexerUrl}${indexerUrl.includes("?") ? "&" : "?"}pubkey=${creatorNpub}`;
+        if (!url.startsWith("https://corsproxy.io/?")) {
+          url = `https://corsproxy.io/?${url}`;
+        }
         try {
           const controller = new AbortController();
           const id = setTimeout(() => controller.abort(), 8000);
