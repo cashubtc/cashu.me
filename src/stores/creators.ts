@@ -180,11 +180,14 @@ export const useCreatorsStore = defineStore("creators", {
         "#d": ["tiers"],
       };
       const settings = useSettingsStore();
-      const relayUrls =
-        Array.isArray(settings.defaultNostrRelays.value) &&
-        settings.defaultNostrRelays.value.length > 0
-          ? settings.defaultNostrRelays.value
-          : DEFAULT_RELAYS;
+      const relayUrls = Array.from(
+        new Set([
+          ...(Array.isArray(settings.defaultNostrRelays.value)
+            ? settings.defaultNostrRelays.value
+            : []),
+          ...DEFAULT_RELAYS,
+        ])
+      );
 
       let received = false;
       const timeout = setTimeout(async () => {
