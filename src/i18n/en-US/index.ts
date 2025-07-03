@@ -781,7 +781,7 @@ export default {
           label: "To",
         },
         amount: {
-          label: "Amount ({ ticker }))",
+          label: "Amount ({ ticker })",
         },
       },
       actions: {
