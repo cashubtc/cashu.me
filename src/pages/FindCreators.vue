@@ -24,8 +24,14 @@
         </QCardSection>
         <QSeparator />
         <QCardSection>
-          <div v-if="!tiers.length" class="text-center">
+          <div v-if="loadingTiers" class="row justify-center q-pa-md">
+            <q-spinner-hourglass />
+          </div>
+          <div v-else-if="!tiers.length" class="text-center">
             Creator has no subscription tiers
+            <div class="q-mt-md">
+              <q-btn flat color="primary" @click="retryFetchTiers">Retry</q-btn>
+            </div>
           </div>
           <div v-else>
             <QCard
@@ -64,7 +70,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onBeforeUnmount, nextTick } from "vue";
+import { ref, computed, watch, onMounted, onBeforeUnmount, nextTick } from "vue";
 import DonateDialog from "components/DonateDialog.vue";
 import SubscribeDialog from "components/SubscribeDialog.vue";
 import SubscriptionReceipt from "components/SubscriptionReceipt.vue";
@@ -95,6 +101,7 @@ const iframeEl = ref<HTMLIFrameElement | null>(null);
 const showDonateDialog = ref(false);
 const selectedPubkey = ref("");
 const showTierDialog = ref(false);
+const loadingTiers = ref(false);
 const dialogPubkey = ref("");
 
 const sendTokensStore = useSendTokensStore();
@@ -110,6 +117,7 @@ const showSubscribeDialog = ref(false);
 const showReceiptDialog = ref(false);
 const receiptList = ref<any[]>([]);
 const selectedTier = ref<any>(null);
+let tierTimeout: ReturnType<typeof setTimeout> | null = null;
 
 function getPrice(t: any): number {
   return t.price_sats ?? t.price ?? 0;
@@ -138,6 +146,11 @@ async function onMessage(ev: MessageEvent) {
     selectedPubkey.value = ev.data.pubkey;
     showDonateDialog.value = true;
   } else if (ev.data && ev.data.type === "viewProfile" && ev.data.pubkey) {
+    loadingTiers.value = true;
+    if (tierTimeout) clearTimeout(tierTimeout);
+    tierTimeout = setTimeout(() => {
+      loadingTiers.value = false;
+    }, 5000);
     await creators.fetchTierDefinitions(ev.data.pubkey);
     dialogPubkey.value = ev.data.pubkey;
     await nextTick();
@@ -145,9 +158,26 @@ async function onMessage(ev: MessageEvent) {
   }
 }
 
+watch(tiers, (val) => {
+  if (val.length > 0) {
+    loadingTiers.value = false;
+    if (tierTimeout) clearTimeout(tierTimeout);
+  }
+});
+
 function openSubscribe(tier: any) {
   selectedTier.value = tier;
   showSubscribeDialog.value = true;
+}
+
+function retryFetchTiers() {
+  if (!dialogPubkey.value) return;
+  loadingTiers.value = true;
+  if (tierTimeout) clearTimeout(tierTimeout);
+  tierTimeout = setTimeout(() => {
+    loadingTiers.value = false;
+  }, 5000);
+  creators.fetchTierDefinitions(dialogPubkey.value);
 }
 
 async function confirmSubscribe({
@@ -249,6 +279,7 @@ onMounted(async () => {
 
 onBeforeUnmount(() => {
   window.removeEventListener("message", onMessage);
+  if (tierTimeout) clearTimeout(tierTimeout);
 });
 </script>
 
