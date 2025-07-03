@@ -272,653 +272,674 @@
     </div>
 
     <script>
-      // --- Nostr Tools ---
-      if (!window.NostrTools) {
-        document.getElementById("statusMessage").textContent =
-          "Error: nostr-tools library not loaded.";
-        document.getElementById("statusMessage").classList.remove("hidden");
-      }
-      const { SimplePool, nip19, utils } = window.NostrTools;
+if (!window.NostrTools) {
+  document.getElementById("statusMessage").textContent =
+    "Error: nostr-tools library not loaded.";
+  document.getElementById("statusMessage").classList.remove("hidden");
+}
+const { SimplePool, nip19 } = window.NostrTools;
 
-      // --- Configuration ---
-      const FALLBACK_RELAYS = [
-        "wss://relay.damus.io",
-        "wss://relay.primal.net",
-        "wss://nos.lol",
-        "wss://nostr.wine",
-        "wss://purplepag.es",
-        "wss://relay.nostr.band",
-      ];
-      const BACKEND_SEARCH_URL =
-        window.localStorage.getItem("cashu.settings.searchBackendUrl") || "";
-      let storedRelays = [];
+// --- Configuration ---
+const FALLBACK_RELAYS = [
+  "wss://relay.damus.io",
+  "wss://relay.primal.net",
+  "wss://nos.lol",
+  "wss://nostr.wine",
+  "wss://purplepag.es",
+  "wss://relay.nostr.band",
+  "wss://eden.nostr.land",
+  "wss://njump.me"
+];
+const BACKEND_SEARCH_URL =
+  window.localStorage.getItem("cashu.settings.searchBackendUrl") || "";
+let storedRelays = [];
+try {
+  const stored = window.localStorage.getItem(
+    "cashu.settings.defaultNostrRelays"
+  );
+  storedRelays = JSON.parse(stored ?? "[]");
+  if (!Array.isArray(storedRelays)) {
+    storedRelays = [];
+  }
+} catch {
+  storedRelays = [];
+}
+const RELAYS = Array.from(new Set([...storedRelays, ...FALLBACK_RELAYS]));
+document.getElementById("relayList").textContent = RELAYS.join(", ");
+
+const GLOBAL_SEARCH_TIMEOUT_MS = 10000;
+
+const pool = new SimplePool({ eoseSubTimeout: 8000 });
+let currentSearchSub = null;
+let currentSearchAbortController = null;
+let foundSearchProfiles = new Map();
+
+const FEATURED_NPUBS = [
+  "npub1aljmhjp5tqrw3m60ra7t3u8uqq223d6rdg9q0h76a8djd9m4hmvsmlj82m",
+  "npub1sg6plzptd64u62a878hep2kev88swjh3tw00gjsfl8f237lmu63q0uf63m",
+  "npub1qny3tkh0acurzla8x3zy4nhrjz5zd8l9sy9jys09umwng00manysew95gx",
+  "npub1cj8znuztfqkvq89pl8hceph0svvvqk0qay6nydgk9uyq7fhpfsgsqwrz4u",
+  "npub1a2cww4kn9wqte4ry70vyfwqyqvpswksna27rtxd8vty6c74era8sdcw83a",
+  "npub1s05p3ha7en49dv8429tkk07nnfa9pcwczkf5x5qrdraqshxdje9sq6eyhe",
+  "npub180cvv07tjdrrgpa0j7j7tmnyl2yr6yr7l8j4s3evf6u64th6gkwsyjh6w6",
+  "npub1dergggklka99wwrs92yz8wdjs952h2ux2ha2ed598ngwu9w7a6fsh9xzpc",
+  "npub1s5yq6wadwrxde4lhfs56gn64hwzuhnfa6r9mj476r5s4hkunzgzqrs6q7z",
+  "npub1spdnfacgsd7lk0nlqkq443tkq4jx9z6c6ksvaquuewmw7d3qltpslcq6j7",
+];
+let featuredProfilesData = new Map();
+
+// --- DOM Elements ---
+const searchInputElement = document.getElementById("searchInput");
+const resultsListElement = document.getElementById("resultsList");
+const statusMessageElement = document.getElementById("statusMessage");
+const loaderElement = document.getElementById("loader");
+
+const featuredCreatorsGridElement = document.getElementById(
+  "featuredCreatorsGrid"
+);
+const featuredCreatorsLoaderElement = document.getElementById(
+  "featuredCreatorsLoader"
+);
+const featuredStatusMessageElement = document.getElementById(
+  "featuredStatusMessage"
+);
+
+// --- Utility Functions ---
+function fetchWithTimeout(resource, options = {}, timeout = 8000) {
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), timeout);
+  const signal = options.signal || controller.signal;
+  return fetch(resource, { ...options, signal }).finally(() =>
+    clearTimeout(id)
+  );
+}
+
+function debounce(func, delay) {
+  let timeoutId;
+  return function (...args) {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => {
+      func.apply(this, args);
+    }, delay);
+  };
+}
+
+// --- Fallback Profile Fetching ---
+async function fetchProfileFromIndexer(pubkey) {
+  const resp = await fetchWithTimeout(
+    `https://nostr.band/api/v1/profiles/${pubkey}`,
+    { signal: currentSearchAbortController.signal },
+    8000
+  );
+  if (!resp.ok) throw new Error("Indexer HTTP error: " + resp.status);
+  return resp.json();
+}
+
+async function fetchProfileFromPrimal(pubkey) {
+  const resp = await fetchWithTimeout(
+    `https://api.primal.net/v1/profile/${pubkey}`,
+    { signal: currentSearchAbortController.signal },
+    8000
+  );
+  if (!resp.ok) throw new Error("Primal HTTP error: " + resp.status);
+  return resp.json();
+}
+
+async function findProfileByPubkey(pubkey) {
+  try {
+    return await fetchProfileFromIndexer(pubkey);
+  } catch (e) {
+    console.warn("Indexer lookup failed", e);
+    try {
+      return await fetchProfileFromPrimal(pubkey);
+    } catch (e2) {
+      console.warn("Primal lookup failed", e2);
+      return null;
+    }
+  }
+}
+
+function extractRelaysFrom10002(event) {
+  if (!event || !Array.isArray(event.tags)) return [];
+  return event.tags.filter((t) => t[0] === "r").map((t) => t[1]);
+}
+
+async function fetchProfileViaRelays(pubkey, relays) {
+  try {
+    const evs = await pool.list(relays, [
+      { kinds: [0], authors: [pubkey], limit: 1 },
+    ]);
+    return evs[0] || null;
+  } catch (e) {
+    console.warn("Relay fetch failed", e);
+    return null;
+  }
+}
+
+// --- Search Handling ---
+const nip05Regex = /^([a-zA-Z0-9_.-]+)@([a-zA-Z0-9.-]+\.[a-zA-Z]{2,})$/;
+
+async function handleSearch(query) {
+  const cleanQuery = query.trim();
+
+  if (currentSearchAbortController) {
+    currentSearchAbortController.abort();
+  }
+  currentSearchAbortController = new AbortController();
+
+  if (currentSearchSub && currentSearchSub.localTimeoutId) {
+    clearTimeout(currentSearchSub.localTimeoutId);
+  }
+  if (currentSearchSub) {
+    currentSearchSub.unsub();
+    currentSearchSub = null;
+  }
+
+  resultsListElement.innerHTML = "";
+  foundSearchProfiles.clear();
+  statusMessageElement.classList.add("hidden");
+  loaderElement.style.display = "block";
+
+  if (!cleanQuery) {
+    loaderElement.style.display = "none";
+    return;
+  }
+
+  statusMessageElement.textContent = "Searching...";
+  statusMessageElement.classList.remove("hidden");
+
+  let targetPubkey = null;
+
+  try {
+    if (cleanQuery.startsWith("npub1")) {
+      const decoded = nip19.decode(cleanQuery);
+      if (decoded.type === "npub" && decoded.data) {
+        targetPubkey = decoded.data;
+      }
+    }
+  } catch (e) {
+    console.warn("Not an npub:", e.message);
+  }
+
+  if (!targetPubkey && cleanQuery.length === 64 && /^[0-9a-fA-F]+$/.test(cleanQuery)) {
+    targetPubkey = cleanQuery.toLowerCase();
+  }
+
+  if (!targetPubkey) {
+    const nip05Match = cleanQuery.match(nip05Regex);
+    if (nip05Match) {
+      const localPart = nip05Match[1];
+      const domain = nip05Match[2];
+      statusMessageElement.textContent = `Resolving NIP-05: ${cleanQuery}...`;
       try {
-        const stored = window.localStorage.getItem(
-          "cashu.settings.defaultNostrRelays"
+        const url = `https://${domain}/.well-known/nostr.json?name=${encodeURIComponent(
+          localPart
+        )}`;
+        const response = await fetchWithTimeout(
+          url,
+          { signal: currentSearchAbortController.signal },
+          8000
         );
-        storedRelays = JSON.parse(stored ?? "[]");
-        if (!Array.isArray(storedRelays)) {
-          storedRelays = [];
+        if (!response.ok)
+          throw new Error(`NIP-05 HTTP error! Status: ${response.status}`);
+        const data = await response.json();
+        if (data.names && data.names[localPart]) {
+          targetPubkey = data.names[localPart];
+        } else {
+          throw new Error("NIP-05 identifier not found in response.");
         }
-      } catch {
-        storedRelays = [];
+      } catch (e) {
+        console.error("NIP-05 lookup failed:", e);
+        statusMessageElement.textContent = `NIP-05 lookup for ${cleanQuery} failed: ${e.message}`;
+        loaderElement.style.display = "none";
+        return;
       }
-      const RELAYS = Array.from(new Set([...storedRelays, ...FALLBACK_RELAYS]));
-      document.getElementById("relayList").textContent = RELAYS.join(", ");
+    }
+  }
 
-      const GLOBAL_SEARCH_TIMEOUT_MS = 10000;
+  if (targetPubkey) {
+    await searchByPubkey(targetPubkey);
+    return;
+  }
 
-      const pool = new SimplePool({ eoseSubTimeout: 8000 });
-      let currentSearchSub = null;
-      let foundSearchProfiles = new Map();
-
-      const FEATURED_NPUBS = [
-        "npub1aljmhjp5tqrw3m60ra7t3u8uqq223d6rdg9q0h76a8djd9m4hmvsmlj82m",
-        "npub1sg6plzptd64u62a878hep2kev88swjh3tw00gjsfl8f237lmu63q0uf63m",
-        "npub1qny3tkh0acurzla8x3zy4nhrjz5zd8l9sy9jys09umwng00manysew95gx",
-        "npub1cj8znuztfqkvq89pl8hceph0svvvqk0qay6nydgk9uyq7fhpfsgsqwrz4u",
-        "npub1a2cww4kn9wqte4ry70vyfwqyqvpswksna27rtxd8vty6c74era8sdcw83a",
-        "npub1s05p3ha7en49dv8429tkk07nnfa9pcwczkf5x5qrdraqshxdje9sq6eyhe",
-        "npub180cvv07tjdrrgpa0j7j7tmnyl2yr6yr7l8j4s3evf6u64th6gkwsyjh6w6",
-        "npub1dergggklka99wwrs92yz8wdjs952h2ux2ha2ed598ngwu9w7a6fsh9xzpc",
-        "npub1s5yq6wadwrxde4lhfs56gn64hwzuhnfa6r9mj476r5s4hkunzgzqrs6q7z",
-        "npub1spdnfacgsd7lk0nlqkq443tkq4jx9z6c6ksvaquuewmw7d3qltpslcq6j7",
-      ];
-      let featuredProfilesData = new Map();
-
-      // --- DOM Elements ---
-      const searchInputElement = document.getElementById("searchInput");
-      const resultsListElement = document.getElementById("resultsList");
-      const statusMessageElement = document.getElementById("statusMessage");
-      const loaderElement = document.getElementById("loader");
-
-      const featuredCreatorsGridElement = document.getElementById(
-        "featuredCreatorsGrid"
+  if (BACKEND_SEARCH_URL) {
+    statusMessageElement.textContent = `Searching backend for "${cleanQuery}"...`;
+    try {
+      const resp = await fetchWithTimeout(
+        `${BACKEND_SEARCH_URL}?q=${encodeURIComponent(cleanQuery)}`,
+        { signal: currentSearchAbortController.signal },
+        8000
       );
-      const featuredCreatorsLoaderElement = document.getElementById(
-        "featuredCreatorsLoader"
-      );
-      const featuredStatusMessageElement = document.getElementById(
-        "featuredStatusMessage"
-      );
-
-      // --- Debounce Function ---
-      function debounce(func, delay) {
-        let timeoutId;
-        return function (...args) {
-          clearTimeout(timeoutId);
-          timeoutId = setTimeout(() => {
-            func.apply(this, args);
-          }, delay);
-        };
-      }
-
-      // --- NIP-05 Identifier Regex ---
-      const nip05Regex = /^([a-zA-Z0-9_.-]+)@([a-zA-Z0-9.-]+\.[a-zA-Z]{2,})$/;
-
-      // --- Main Search Function ---
-      async function handleSearch(query) {
-        const cleanQuery = query.trim();
-
-        if (currentSearchSub && currentSearchSub.localTimeoutId) {
-          clearTimeout(currentSearchSub.localTimeoutId);
-        }
-
-        if (currentSearchSub) {
-          currentSearchSub.unsub();
-          currentSearchSub = null;
-        }
-
-        resultsListElement.innerHTML = "";
-        foundSearchProfiles.clear();
-        statusMessageElement.classList.add("hidden");
-        loaderElement.style.display = "block";
-
-        if (!cleanQuery) {
-          loaderElement.style.display = "none";
+      if (resp.ok) {
+        const events = await resp.json();
+        if (Array.isArray(events) && events.length > 0) {
+          const pubkeys = Array.from(new Set(events.map((e) => e.pubkey)));
+          await searchByPubkeys(pubkeys);
           return;
         }
+      }
+    } catch (e) {
+      console.warn("Backend search failed:", e);
+    }
+  }
 
-        statusMessageElement.textContent = "Searching...";
-        statusMessageElement.classList.remove("hidden");
+  statusMessageElement.textContent = `Searching relays for "${cleanQuery}"... (NIP-50)`;
+  const filter = { kinds: [0], search: cleanQuery, limit: 25 };
+  await subscribeAndProcess(
+    filter,
+    resultsListElement,
+    foundSearchProfiles,
+    loaderElement,
+    statusMessageElement,
+    false,
+    (sub, timeoutId) => {
+      currentSearchSub = sub;
+      if (sub) sub.localTimeoutId = timeoutId;
+    },
+    GLOBAL_SEARCH_TIMEOUT_MS
+  );
+}
 
+async function searchByPubkeys(pubkeys) {
+  await fetchAndDisplayProfiles(
+    pubkeys,
+    resultsListElement,
+    foundSearchProfiles,
+    loaderElement,
+    statusMessageElement,
+    false,
+    true
+  );
+  if (foundSearchProfiles.size === 0) {
+    for (const pk of pubkeys) {
+      const data = await findProfileByPubkey(pk);
+      if (data && data.profile) {
+        const prof = data.profile;
+        foundSearchProfiles.set(pk, {
+          pubkey: pk,
+          name: prof.name || prof.display_name || "",
+          nip05: prof.nip05 || "",
+          picture: prof.picture || "",
+          about: prof.about || "",
+          lud16: prof.lud16 || "",
+        });
+      }
+    }
+    renderProfiles(Array.from(foundSearchProfiles.values()), resultsListElement, false);
+  }
+}
+
+async function searchByPubkey(pubkey) {
+  await searchByPubkeys([pubkey]);
+}
+
+function subscribeAndProcess(
+  filter,
+  targetElement,
+  profileMap,
+  loaderEl,
+  statusMsgEl,
+  isFeaturedList,
+  setSubCallback,
+  timeoutDuration
+) {
+  return new Promise((resolve) => {
+    if (loaderEl) loaderEl.style.display = "block";
+    if (statusMsgEl) {
+      statusMsgEl.textContent = isFeaturedList
+        ? "Loading featured creators..."
+        : "Searching...";
+      statusMsgEl.classList.remove("hidden");
+    }
+
+    let eoseCount = 0;
+    let localSubTimeoutId = null;
+
+    const sub = pool.sub([...RELAYS], [filter]);
+
+    const finalize = () => {
+      if (localSubTimeoutId) {
+        clearTimeout(localSubTimeoutId);
+        localSubTimeoutId = null;
+      }
+      if (sub && typeof sub.unsub === "function") {
         try {
-          if (cleanQuery.startsWith("npub1")) {
-            const decoded = nip19.decode(cleanQuery);
-            if (decoded.type === "npub" && decoded.data) {
-              await fetchAndDisplayProfiles(
-                [decoded.data],
-                resultsListElement,
-                foundSearchProfiles,
-                loaderElement,
-                statusMessageElement,
-                false,
-                true
-              );
-              return;
-            }
-          }
+          sub.unsub();
         } catch (e) {
-          console.warn("Not an npub:", e.message);
+          console.warn("Error during sub.unsub():", e);
         }
-
-        if (cleanQuery.length === 64 && /^[0-9a-fA-F]+$/.test(cleanQuery)) {
-          await fetchAndDisplayProfiles(
-            [cleanQuery.toLowerCase()],
-            resultsListElement,
-            foundSearchProfiles,
-            loaderElement,
-            statusMessageElement,
-            false,
-            true
-          );
-          return;
-        }
-
-        const nip05Match = cleanQuery.match(nip05Regex);
-        if (nip05Match) {
-          const localPart = nip05Match[1];
-          const domain = nip05Match[2];
-          statusMessageElement.textContent = `Resolving NIP-05: ${cleanQuery}...`;
-          try {
-            const url = `https://${domain}/.well-known/nostr.json?name=${encodeURIComponent(
-              localPart
-            )}`;
-            const response = await fetch(url);
-            if (!response.ok)
-              throw new Error(`NIP-05 HTTP error! Status: ${response.status}`);
-            const data = await response.json();
-            if (data.names && data.names[localPart]) {
-              await fetchAndDisplayProfiles(
-                [data.names[localPart]],
-                resultsListElement,
-                foundSearchProfiles,
-                loaderElement,
-                statusMessageElement,
-                false,
-                true
-              );
-            } else {
-              throw new Error("NIP-05 identifier not found in response.");
-            }
-          } catch (e) {
-            console.error("NIP-05 lookup failed:", e);
-            statusMessageElement.textContent = `NIP-05 lookup for ${cleanQuery} failed: ${e.message}`;
-            loaderElement.style.display = "none";
-          }
-          return;
-        }
-
-        if (BACKEND_SEARCH_URL) {
-          statusMessageElement.textContent = `Searching backend for "${cleanQuery}"...`;
-          try {
-            const resp = await fetch(
-              `${BACKEND_SEARCH_URL}?q=${encodeURIComponent(cleanQuery)}`
-            );
-            if (resp.ok) {
-              const events = await resp.json();
-              if (Array.isArray(events) && events.length > 0) {
-                const pubkeys = Array.from(
-                  new Set(events.map((e) => e.pubkey))
-                );
-                await fetchAndDisplayProfiles(
-                  pubkeys,
-                  resultsListElement,
-                  foundSearchProfiles,
-                  loaderElement,
-                  statusMessageElement,
-                  false,
-                  true
-                );
-                return;
-              }
-            }
-          } catch (e) {
-            console.warn("Backend search failed:", e);
-          }
-        }
-
-        statusMessageElement.textContent = `Searching relays for "${cleanQuery}"... (NIP-50)`;
-        const filter = { kinds: [0], search: cleanQuery, limit: 25 };
-        subscribeAndProcess(
-          filter,
-          resultsListElement,
-          foundSearchProfiles,
-          loaderElement,
-          statusMessageElement,
-          false,
-          (sub, timeoutId) => {
-            currentSearchSub = sub;
-            if (sub) sub.localTimeoutId = timeoutId;
-          },
-          GLOBAL_SEARCH_TIMEOUT_MS
-        );
       }
 
-      // --- Generic Profile Fetching and Display Logic ---
-      async function fetchAndDisplayProfiles(
-        pubkeys,
-        targetElement,
-        profileMap,
-        loader,
-        statusMsgEl,
-        isFeatured,
-        includeKind10019 = false
-      ) {
-        if (pubkeys.length === 0) {
-          if (loader) loader.style.display = "none";
-          if (statusMsgEl) {
-            statusMsgEl.textContent = isFeatured
-              ? "No featured creators to load."
-              : "No pubkey provided for search.";
-            statusMsgEl.classList.remove("hidden");
-          }
-          return;
-        }
-
-        const kinds = includeKind10019 ? [0, 10019] : [0];
-        const filter = { kinds, authors: pubkeys, limit: pubkeys.length };
-
-        subscribeAndProcess(
-          filter,
-          targetElement,
-          profileMap,
-          loader,
-          statusMsgEl,
-          isFeatured,
-          (sub, timeoutId) => {
-            if (!isFeatured) {
-              currentSearchSub = sub;
-              if (sub) sub.localTimeoutId = timeoutId;
-            }
-          },
-          GLOBAL_SEARCH_TIMEOUT_MS
-        );
+      if (setSubCallback && !isFeaturedList) {
+        setSubCallback(null, null);
       }
 
-      function subscribeAndProcess(
-        filter,
-        targetElement,
-        profileMap,
-        loaderEl,
-        statusMsgEl,
-        isFeaturedList,
-        setSubCallback,
-        timeoutDuration
-      ) {
-        console.log(
-          `subscribeAndProcess called for ${
-            isFeaturedList ? "featured" : "search"
-          }. Timeout duration:`,
-          timeoutDuration
-        );
-        if (!timeoutDuration || typeof timeoutDuration !== "number") {
-          console.error(
-            "Invalid timeoutDuration provided to subscribeAndProcess:",
-            timeoutDuration
-          );
-          timeoutDuration = GLOBAL_SEARCH_TIMEOUT_MS;
-        }
-
-        if (loaderEl) loaderEl.style.display = "block";
+      if (loaderEl) loaderEl.style.display = "none";
+      if (profileMap.size === 0) {
         if (statusMsgEl) {
           statusMsgEl.textContent = isFeaturedList
-            ? "Loading featured creators..."
-            : "Searching...";
+            ? "Could not load featured creators."
+            : "No profiles found.";
           statusMsgEl.classList.remove("hidden");
         }
+      } else {
+        if (statusMsgEl) statusMsgEl.classList.add("hidden");
+      }
+      resolve();
+    };
 
-        let eoseCount = 0;
-        let activeRelays = new Set();
-        let localSubTimeoutId = null;
+    if (setSubCallback) setSubCallback(sub, localSubTimeoutId);
 
-        const sub = pool.sub([...RELAYS], [filter]);
-
-        const finalize = () => {
-          if (localSubTimeoutId) {
-            clearTimeout(localSubTimeoutId);
-            localSubTimeoutId = null;
+    sub.on("event", async (event) => {
+      try {
+        if (event.kind === 0) {
+          const profileData = JSON.parse(event.content);
+          const existing = profileMap.get(event.pubkey) || {};
+          if (!existing.event || event.created_at > existing.event.created_at) {
+            profileMap.set(event.pubkey, {
+              pubkey: event.pubkey,
+              name:
+                profileData.name ||
+                profileData.display_name ||
+                profileData.username ||
+                "",
+              nip05: profileData.nip05 || "",
+              picture: profileData.picture || "",
+              about: profileData.about || "",
+              lud16: profileData.lud16 || "",
+              hasNutzapProfile: existing.hasNutzapProfile || false,
+              event,
+            });
+            renderProfiles(
+              Array.from(profileMap.values()),
+              targetElement,
+              isFeaturedList
+            );
           }
-          if (sub && typeof sub.unsub === "function") {
-            try {
-              sub.unsub();
-            } catch (e) {
-              console.warn("Error during sub.unsub():", e);
-            }
-          }
-
-          if (setSubCallback && !isFeaturedList) {
-            setSubCallback(null, null);
-          }
-
-          if (loaderEl) loaderEl.style.display = "none";
-          if (profileMap.size === 0) {
-            if (statusMsgEl) {
-              statusMsgEl.textContent = isFeaturedList
-                ? "Could not load featured creators."
-                : "No profiles found.";
-              statusMsgEl.classList.remove("hidden");
+        } else if (event.kind === 10019) {
+          const existing = profileMap.get(event.pubkey);
+          if (existing) {
+            if (!existing.hasNutzapProfile) {
+              existing.hasNutzapProfile = true;
+              profileMap.set(event.pubkey, existing);
+              renderProfiles(
+                Array.from(profileMap.values()),
+                targetElement,
+                isFeaturedList
+              );
             }
           } else {
-            if (statusMsgEl) statusMsgEl.classList.add("hidden");
+            profileMap.set(event.pubkey, {
+              pubkey: event.pubkey,
+              hasNutzapProfile: true,
+            });
           }
-          console.log(
-            `${
-              isFeaturedList ? "Featured creators" : "Search"
-            } finalized. Found ${profileMap.size} profiles.`
-          );
-        };
-
-        if (setSubCallback) setSubCallback(sub, localSubTimeoutId);
-
-        sub.on("event", (event) => {
-          try {
-            if (event.kind === 0) {
-              const profileData = JSON.parse(event.content);
-              const existing = profileMap.get(event.pubkey) || {};
-              if (!existing.event || event.created_at > existing.event.created_at) {
-                profileMap.set(event.pubkey, {
-                  pubkey: event.pubkey,
-                  name:
-                    profileData.name ||
-                    profileData.display_name ||
-                    profileData.username ||
-                    "",
-                  nip05: profileData.nip05 || "",
-                  picture: profileData.picture || "",
-                  about: profileData.about || "",
-                  lud16: profileData.lud16 || "",
-                  hasNutzapProfile: existing.hasNutzapProfile || false,
-                  event,
-                });
-                renderProfiles(
-                  Array.from(profileMap.values()),
-                  targetElement,
-                  isFeaturedList
-                );
-              }
-            } else if (event.kind === 10019) {
-              const existing = profileMap.get(event.pubkey);
-              if (existing) {
-                if (!existing.hasNutzapProfile) {
-                  existing.hasNutzapProfile = true;
-                  profileMap.set(event.pubkey, existing);
-                  renderProfiles(
-                    Array.from(profileMap.values()),
-                    targetElement,
-                    isFeaturedList
-                  );
-                }
-              } else {
-                profileMap.set(event.pubkey, { pubkey: event.pubkey, hasNutzapProfile: true });
-              }
+        } else if (event.kind === 10002) {
+          const relays = extractRelaysFrom10002(event);
+          if (relays.length > 0) {
+            const profileEvent = await fetchProfileViaRelays(event.pubkey, relays);
+            if (profileEvent) {
+              sub.emit("event", profileEvent);
             }
-          } catch (e) {
-            console.error("Error in subscription event handler:", e);
-          }
-        });
-
-        sub.on("eose", (relay) => {
-          try {
-            if (!relay || !relay.url) return;
-            const relayUrl = relay.url;
-            activeRelays.add(relayUrl);
-
-            eoseCount++;
-            console.log(
-              `EOSE from ${relayUrl} for ${
-                isFeaturedList ? "featured" : "search"
-              }. Total EOSEs: ${eoseCount}/${RELAYS.length}`
-            );
-            if (eoseCount >= RELAYS.length) {
-              console.log(
-                `All ${RELAYS.length} relays have emitted EOSE for ${
-                  isFeaturedList ? "featured" : "search"
-                }.`
-              );
-              finalize();
-            }
-          } catch (e) {
-            console.error("Error in subscription EOSE handler:", e);
-          }
-        });
-
-        localSubTimeoutId = setTimeout(() => {
-          console.log(
-            `Subscription timeout for ${
-              isFeaturedList ? "featured creators" : "search"
-            }.`
-          );
-          finalize();
-        }, timeoutDuration);
-      }
-
-      // --- Render Profiles (Generic for Search and Featured) ---
-      function renderProfiles(profiles, targetElement, isFeatured) {
-        targetElement.innerHTML = "";
-
-        if (
-          profiles.length === 0 &&
-          (isFeatured || searchInputElement.value.trim() !== "")
-        ) {
-          return;
-        }
-
-        profiles.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
-
-        profiles.forEach((profile) => {
-          const cardElement = document.createElement(isFeatured ? "div" : "li");
-          cardElement.className = `${
-            isFeatured ? "creator-card" : "result-item"
-          } group`; // Added 'group' class here
-
-          // Container for avatar and main info
-          const profileHeaderDiv = document.createElement("div");
-          profileHeaderDiv.className = "profile-header";
-
-          const avatarImg = document.createElement("img");
-          avatarImg.className = "avatar";
-          const avatarLetter = (profile.name ||
-            profile.username ||
-            "N")[0]?.toUpperCase();
-          avatarImg.src =
-            profile.picture ||
-            `https://placehold.co/50x50/A0AEC0/FFFFFF?text=${avatarLetter}`;
-          avatarImg.alt = profile.name || "Nostr User";
-          avatarImg.onerror = function () {
-            this.src = `https://placehold.co/50x50/A0AEC0/FFFFFF?text=${avatarLetter}`;
-          };
-
-          const infoDiv = document.createElement("div");
-          infoDiv.className = "info";
-
-          const nameElement = document.createElement("h3");
-          nameElement.textContent =
-            profile.name ||
-            (profile.nip05
-              ? profile.nip05.startsWith("_@")
-                ? profile.nip05.substring(2)
-                : profile.nip05
-              : "Unnamed User");
-
-          const npub = nip19.npubEncode(profile.pubkey);
-          const npubShort = `${npub.substring(0, 10)}...${npub.substring(
-            npub.length - 5
-          )}`;
-          const npubElement = document.createElement("p");
-          npubElement.innerHTML = `<strong>Npub:</strong> ${npubShort}`;
-          npubElement.title = npub;
-
-          const copyNpubButton = document.createElement("button");
-          copyNpubButton.textContent = "Copy";
-          copyNpubButton.className = "copy-button";
-          copyNpubButton.onclick = (e) => {
-            e.stopPropagation();
-            copyToClipboard(npub, copyNpubButton);
-          };
-          npubElement.appendChild(copyNpubButton);
-
-          infoDiv.appendChild(nameElement);
-          infoDiv.appendChild(npubElement);
-
-          if (profile.nip05) {
-            const nip05Element = document.createElement("p");
-            nip05Element.innerHTML = `<strong>NIP-05:</strong> <span class="nip05">${profile.nip05}</span>`;
-            infoDiv.appendChild(nip05Element);
-          }
-
-          if (profile.about) {
-            const aboutElement = document.createElement("p");
-            const aboutText =
-              profile.about.length > (isFeatured ? 80 : 150)
-                ? profile.about.substring(0, isFeatured ? 80 : 150) + "..."
-                : profile.about;
-            aboutElement.innerHTML = `<em>${escapeHtml(aboutText)}</em>`;
-            aboutElement.title = profile.about;
-            infoDiv.appendChild(aboutElement);
-          }
-
-          if (profile.lud16) {
-            const lud16Element = document.createElement("p");
-            lud16Element.innerHTML = `<strong>LN:</strong> ${profile.lud16}`;
-            infoDiv.appendChild(lud16Element);
-          }
-
-          if (profile.hasNutzapProfile) {
-            const nzElement = document.createElement("p");
-            nzElement.className = "text-xs text-purple-600";
-            nzElement.textContent = "Nutzap profile detected";
-            infoDiv.appendChild(nzElement);
-          }
-
-          profileHeaderDiv.appendChild(avatarImg);
-          profileHeaderDiv.appendChild(infoDiv);
-          cardElement.appendChild(profileHeaderDiv);
-
-          // Action Buttons Container
-          const actionsContainer = document.createElement("div");
-          actionsContainer.className = "creator-actions"; // Styles will make it appear on hover
-
-          const viewButton = document.createElement("button");
-          viewButton.className = "action-button view-button";
-          viewButton.textContent = "View";
-          viewButton.onclick = (e) => {
-            e.stopPropagation();
-            window.parent.postMessage(
-              { type: "viewProfile", pubkey: profile.pubkey },
-              "*"
-            );
-          };
-
-          const messageButton = document.createElement("button");
-          messageButton.className = "action-button message-button";
-          messageButton.textContent = "Message";
-          messageButton.onclick = (e) => {
-            e.stopPropagation();
-            // Navigate the parent application to the messenger view
-            window.parent.location.href = `/nostr-messenger`;
-          };
-
-          const donateButton = document.createElement("button");
-          donateButton.className = "action-button donate-button";
-          donateButton.textContent = "Donate";
-          donateButton.onclick = (e) => {
-            e.stopPropagation();
-            window.parent.postMessage(
-              { type: "donate", pubkey: profile.pubkey },
-              "*"
-            );
-            console.log("Donate clicked for pubkey:", profile.pubkey);
-          };
-
-          actionsContainer.appendChild(viewButton); // Add View button first
-          actionsContainer.appendChild(messageButton);
-          actionsContainer.appendChild(donateButton);
-          cardElement.appendChild(actionsContainer);
-
-          targetElement.appendChild(cardElement);
-        });
-      }
-
-      function escapeHtml(unsafe) {
-        if (unsafe === null || unsafe === undefined) return "";
-        return unsafe
-          .replace(/&/g, "&amp;")
-          .replace(/</g, "&lt;")
-          .replace(/>/g, "&gt;")
-          .replace(/"/g, "&quot;")
-          .replace(/'/g, "&#039;");
-      }
-
-      function copyToClipboard(text, buttonElement) {
-        const textArea = document.createElement("textarea");
-        textArea.value = text;
-        document.body.appendChild(textArea);
-        textArea.select();
-        try {
-          document.execCommand("copy");
-          if (buttonElement) {
-            const originalText = buttonElement.textContent;
-            buttonElement.textContent = "Copied!";
-            setTimeout(() => {
-              buttonElement.textContent = originalText;
-            }, 2000);
-          }
-        } catch (err) {
-          console.error("Failed to copy text: ", err);
-          if (buttonElement) {
-            const originalText = buttonElement.textContent;
-            buttonElement.textContent = "Error!";
-            setTimeout(() => {
-              buttonElement.textContent = originalText;
-            }, 2000);
           }
         }
-        document.body.removeChild(textArea);
+      } catch (e) {
+        console.error("Error in subscription event handler:", e);
       }
+    });
 
-      // --- Load Featured Creators on Page Load ---
-      document.addEventListener("DOMContentLoaded", () => {
-        const featuredPubkeysHex = FEATURED_NPUBS.map((npub) => {
-          try {
-            return nip19.decode(npub).data;
-          } catch (e) {
-            console.warn(`Invalid featured npub: ${npub}`, e);
-            return null;
-          }
-        }).filter((hex) => hex !== null);
+    sub.on("eose", () => {
+      eoseCount++;
+      if (eoseCount >= RELAYS.length) {
+        finalize();
+      }
+    });
 
-        if (featuredPubkeysHex.length > 0) {
-          fetchAndDisplayProfiles(
-            featuredPubkeysHex,
-            featuredCreatorsGridElement,
-            featuredProfilesData,
-            featuredCreatorsLoaderElement,
-            featuredStatusMessageElement,
-            true,
-            true
-          );
-        } else {
-          featuredCreatorsLoaderElement.style.display = "none";
-          featuredStatusMessageElement.textContent =
-            "No valid featured creators configured.";
-          featuredStatusMessageElement.classList.remove("hidden");
-        }
-      });
+    localSubTimeoutId = setTimeout(() => {
+      finalize();
+    }, timeoutDuration);
+  });
+}
 
-      // --- Event Listener for Search Input ---
-      const debouncedSearchHandler = debounce(handleSearch, 500);
-      searchInputElement.addEventListener("input", (event) => {
-        debouncedSearchHandler(event.target.value);
-      });
+async function fetchAndDisplayProfiles(
+  pubkeys,
+  targetElement,
+  profileMap,
+  loader,
+  statusMsgEl,
+  isFeatured,
+  includeKind10019 = false
+) {
+  if (pubkeys.length === 0) {
+    if (loader) loader.style.display = "none";
+    if (statusMsgEl) {
+      statusMsgEl.textContent = isFeatured
+        ? "No featured creators to load."
+        : "No pubkey provided for search.";
+      statusMsgEl.classList.remove("hidden");
+    }
+    return;
+  }
 
-      // Gracefully close connections when the page is about to be unloaded
-      window.addEventListener("beforeunload", () => {
-        if (currentSearchSub) {
-          currentSearchSub.unsub();
-        }
-        pool.close([...RELAYS]);
-      });
+  const kinds = includeKind10019 ? [0, 10019, 10002] : [0, 10002];
+  const filter = { kinds, authors: pubkeys, limit: pubkeys.length };
+
+  await subscribeAndProcess(
+    filter,
+    targetElement,
+    profileMap,
+    loader,
+    statusMsgEl,
+    isFeatured,
+    (sub, timeoutId) => {
+      if (!isFeatured) {
+        currentSearchSub = sub;
+        if (sub) sub.localTimeoutId = timeoutId;
+      }
+    },
+    GLOBAL_SEARCH_TIMEOUT_MS
+  );
+}
+
+// --- Render Profiles (Generic for Search and Featured) ---
+function renderProfiles(profiles, targetElement, isFeatured) {
+  targetElement.innerHTML = "";
+
+  if (
+    profiles.length === 0 &&
+    (isFeatured || searchInputElement.value.trim() !== "")
+  ) {
+    return;
+  }
+
+  profiles.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
+
+  profiles.forEach((profile) => {
+    const cardElement = document.createElement(isFeatured ? "div" : "li");
+    cardElement.className = `${
+      isFeatured ? "creator-card" : "result-item"
+    } group`;
+
+    const profileHeaderDiv = document.createElement("div");
+    profileHeaderDiv.className = "profile-header";
+
+    const avatarImg = document.createElement("img");
+    avatarImg.className = "avatar";
+    const avatarLetter = (profile.name || profile.username || "N")[0]?.toUpperCase();
+    avatarImg.src =
+      profile.picture ||
+      `https://placehold.co/50x50/A0AEC0/FFFFFF?text=${avatarLetter}`;
+    avatarImg.alt = profile.name || "Nostr User";
+    avatarImg.onerror = function () {
+      this.src = `https://placehold.co/50x50/A0AEC0/FFFFFF?text=${avatarLetter}`;
+    };
+
+    const infoDiv = document.createElement("div");
+    infoDiv.className = "info";
+
+    const nameElement = document.createElement("h3");
+    nameElement.textContent =
+      profile.name ||
+      (profile.nip05
+        ? profile.nip05.startsWith("_@")
+          ? profile.nip05.substring(2)
+          : profile.nip05
+        : "Unnamed User");
+
+    const npub = nip19.npubEncode(profile.pubkey);
+    const npubShort = `${npub.substring(0, 10)}...${npub.substring(npub.length - 5)}`;
+    const npubElement = document.createElement("p");
+    npubElement.innerHTML = `<strong>Npub:</strong> ${npubShort}`;
+    npubElement.title = npub;
+
+    const copyNpubButton = document.createElement("button");
+    copyNpubButton.textContent = "Copy";
+    copyNpubButton.className = "copy-button";
+    copyNpubButton.onclick = (e) => {
+      e.stopPropagation();
+      copyToClipboard(npub, copyNpubButton);
+    };
+    npubElement.appendChild(copyNpubButton);
+
+    infoDiv.appendChild(nameElement);
+    infoDiv.appendChild(npubElement);
+
+    if (profile.nip05) {
+      const nip05Element = document.createElement("p");
+      nip05Element.innerHTML = `<strong>NIP-05:</strong> <span class="nip05">${profile.nip05}</span>`;
+      infoDiv.appendChild(nip05Element);
+    }
+
+    if (profile.about) {
+      const aboutElement = document.createElement("p");
+      const aboutText =
+        profile.about.length > (isFeatured ? 80 : 150)
+          ? profile.about.substring(0, isFeatured ? 80 : 150) + "..."
+          : profile.about;
+      aboutElement.innerHTML = `<em>${escapeHtml(aboutText)}</em>`;
+      aboutElement.title = profile.about;
+      infoDiv.appendChild(aboutElement);
+    }
+
+    profileHeaderDiv.appendChild(avatarImg);
+    profileHeaderDiv.appendChild(infoDiv);
+    cardElement.appendChild(profileHeaderDiv);
+
+    const actionsContainer = document.createElement("div");
+    actionsContainer.className = "creator-actions";
+
+    const viewButton = document.createElement("button");
+    viewButton.className = "action-button view-button";
+    viewButton.textContent = "View";
+    viewButton.onclick = (e) => {
+      e.stopPropagation();
+      window.parent.postMessage({ type: "viewProfile", pubkey: profile.pubkey }, "*");
+    };
+
+    const messageButton = document.createElement("button");
+    messageButton.className = "action-button message-button";
+    messageButton.textContent = "Message";
+    messageButton.onclick = (e) => {
+      e.stopPropagation();
+      window.parent.location.href = `/nostr-messenger`;
+    };
+
+    const donateButton = document.createElement("button");
+    donateButton.className = "action-button donate-button";
+    donateButton.textContent = "Donate";
+    donateButton.onclick = (e) => {
+      e.stopPropagation();
+      window.parent.postMessage({ type: "donate", pubkey: profile.pubkey }, "*");
+    };
+
+    actionsContainer.appendChild(viewButton);
+    actionsContainer.appendChild(messageButton);
+    actionsContainer.appendChild(donateButton);
+    cardElement.appendChild(actionsContainer);
+
+    targetElement.appendChild(cardElement);
+  });
+}
+
+function escapeHtml(unsafe) {
+  if (unsafe === null || unsafe === undefined) return "";
+  return unsafe
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+function copyToClipboard(text, buttonElement) {
+  const textArea = document.createElement("textarea");
+  textArea.value = text;
+  document.body.appendChild(textArea);
+  textArea.select();
+  try {
+    document.execCommand("copy");
+    if (buttonElement) {
+      const originalText = buttonElement.textContent;
+      buttonElement.textContent = "Copied!";
+      setTimeout(() => {
+        buttonElement.textContent = originalText;
+      }, 2000);
+    }
+  } catch (err) {
+    console.error("Failed to copy text: ", err);
+    if (buttonElement) {
+      const originalText = buttonElement.textContent;
+      buttonElement.textContent = "Error!";
+      setTimeout(() => {
+        buttonElement.textContent = originalText;
+      }, 2000);
+    }
+  }
+  document.body.removeChild(textArea);
+}
+
+// --- Load Featured Creators on Page Load ---
+document.addEventListener("DOMContentLoaded", () => {
+  const featuredPubkeysHex = FEATURED_NPUBS.map((npub) => {
+    try {
+      return nip19.decode(npub).data;
+    } catch (e) {
+      console.warn(`Invalid featured npub: ${npub}`, e);
+      return null;
+    }
+  }).filter((hex) => hex !== null);
+
+  if (featuredPubkeysHex.length > 0) {
+    fetchAndDisplayProfiles(
+      featuredPubkeysHex,
+      featuredCreatorsGridElement,
+      featuredProfilesData,
+      featuredCreatorsLoaderElement,
+      featuredStatusMessageElement,
+      true,
+      true
+    );
+  } else {
+    featuredCreatorsLoaderElement.style.display = "none";
+    featuredStatusMessageElement.textContent =
+      "No valid featured creators configured.";
+    featuredStatusMessageElement.classList.remove("hidden");
+  }
+});
+
+// --- Event Listener for Search Input ---
+const debouncedSearchHandler = debounce(handleSearch, 500);
+searchInputElement.addEventListener("input", (event) => {
+  debouncedSearchHandler(event.target.value);
+});
+
+// Gracefully close connections when the page is about to be unloaded
+window.addEventListener("beforeunload", () => {
+  if (currentSearchSub) {
+    currentSearchSub.unsub();
+  }
+  pool.close([...RELAYS]);
+});
     </script>
   </body>
 </html>
