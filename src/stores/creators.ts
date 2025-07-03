@@ -7,6 +7,8 @@ import {
   publishEvent,
   subscribeToNostr,
 } from "./nostr";
+import { useSettingsStore } from "./settings";
+import { DEFAULT_RELAYS } from "boot/ndk";
 import { useNdk } from "src/composables/useNdk";
 import { nip19 } from "nostr-tools";
 import { Event as NostrEvent } from "nostr-tools";
@@ -177,6 +179,12 @@ export const useCreatorsStore = defineStore("creators", {
         kinds: [30000],
         "#d": ["tiers"],
       };
+      const settings = useSettingsStore();
+      const relayUrls =
+        Array.isArray(settings.defaultNostrRelays.value) &&
+        settings.defaultNostrRelays.value.length > 0
+          ? settings.defaultNostrRelays.value
+          : DEFAULT_RELAYS;
       subscribeToNostr(filter, async (event) => {
         try {
           const tiersArray: Tier[] = JSON.parse(event.content).map(
@@ -195,7 +203,7 @@ export const useCreatorsStore = defineStore("creators", {
         } catch (e) {
           console.error("Error parsing tier definitions JSON:", e);
         }
-      });
+      }, relayUrls);
     },
 
     async publishTierDefinitions(tiersArray: Tier[]) {
