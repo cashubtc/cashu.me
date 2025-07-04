@@ -1177,6 +1177,39 @@ export const useNostrStore = defineStore("nostr", {
       // first check if the message can be converted to a json and then to a PaymentRequestPayload
       try {
         const payload = JSON.parse(message) as any;
+        if (
+          payload &&
+          payload.type === "cashu_subscription_payment" &&
+          payload.token
+        ) {
+          const decoded = token.decode(payload.token);
+          const amount = decoded
+            ? token.getProofs(decoded).reduce((s, p) => s + p.amount, 0)
+            : 0;
+          const entry: LockedToken = {
+            id: uuidv4(),
+            tokenString: payload.token,
+            amount,
+            owner: "creator",
+            creatorNpub: this.pubkey,
+            subscriberNpub: sender,
+            tierId: payload.tier_id ?? "",
+            intervalKey: payload.subscription_id ?? "",
+            unlockTs: 0,
+            refundUnlockTs: 0,
+            status: "unlockable",
+            subscriptionEventId: null,
+            subscriptionId: payload.subscription_id,
+            monthIndex: payload.month_index,
+            totalMonths: payload.total_months,
+            label: "Subscription payment",
+          };
+          await cashuDb.lockedTokens.put(entry);
+          const receiveStore = useReceiveTokensStore();
+          receiveStore.receiveData.tokensBase64 = payload.token;
+          await receiveStore.receiveToken(payload.token, DEFAULT_BUCKET_ID);
+          return;
+        }
         if (payload && payload.proofs) {
           const receiveStore = useReceiveTokensStore();
           const prStore = usePRStore();

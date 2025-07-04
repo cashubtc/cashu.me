@@ -8,6 +8,7 @@ import token from "src/js/token";
 import { v4 as uuidv4 } from "uuid";
 import { useMintsStore } from "./mints";
 import { useProofsStore } from "./proofs";
+import { useMessengerStore } from "./messenger";
 import {
   fetchNutzapProfile,
   publishNutzap,
@@ -122,6 +123,8 @@ export const useNutzapStore = defineStore("nutzap", {
         const p2pk = useP2PKStore();
         const mints = useMintsStore();
         const proofsStore = useProofsStore();
+        const messenger = useMessengerStore();
+        const subscriptionId = uuidv4();
         interface LockedTokenPayload {
           tokenString: string;
           mintUrl: string;
@@ -141,17 +144,29 @@ export const useNutzapStore = defineStore("nutzap", {
           const { preimage, hash } = p2pk.generateRefundSecret();
           const mintWallet = wallet.mintWallet(mint.url, mints.activeUnit);
           const proofs = mints.mintUnitProofs(mint, mints.activeUnit);
-          const { sendProofs } = await wallet.sendToLock(
-            proofs,
-            mintWallet,
-            amount,
-            p2pkPubkey,
-            "nutzap",
-            unlockDate,
-            undefined,
-            hash
-          );
-          const token = proofsStore.serializeProofs(sendProofs);
+        const { sendProofs } = await wallet.sendToLock(
+          proofs,
+          mintWallet,
+          amount,
+          p2pkPubkey,
+          "nutzap",
+          unlockDate,
+          undefined,
+          hash
+        );
+        const token = proofsStore.serializeProofs(sendProofs);
+
+        await messenger.sendDm(
+          profile.hexPub,
+          JSON.stringify({
+            type: "cashu_subscription_payment",
+            subscription_id: subscriptionId,
+            tier_id: "nutzap",
+            month_index: i + 1,
+            total_months: months,
+            token,
+          })
+        );
 
           const lockedToken = {
             tokenString: token,
