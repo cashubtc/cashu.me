@@ -98,6 +98,12 @@ export const useMessengerStore = defineStore("messenger", {
       amount: number,
       bucketId: string,
       memo?: string,
+      subscription?: {
+        subscription_id: string;
+        tier_id: string;
+        month_index: number;
+        total_months: number;
+      },
     ) {
       try {
         const wallet = useWalletStore();
@@ -128,13 +134,22 @@ export const useMessengerStore = defineStore("messenger", {
         );
 
         const tokenStr = proofsStore.serializeProofs(sendProofs);
-        const payload = {
-          token: tokenStr,
-          amount: sendAmount,
-          unlockTime: null,
-          bucketId,
-          referenceId: uuidv4(),
-        };
+        const payload = subscription
+          ? {
+              type: "cashu_subscription_payment",
+              subscription_id: subscription.subscription_id,
+              tier_id: subscription.tier_id,
+              month_index: subscription.month_index,
+              total_months: subscription.total_months,
+              token: tokenStr,
+            }
+          : {
+              token: tokenStr,
+              amount: sendAmount,
+              unlockTime: null,
+              bucketId,
+              referenceId: uuidv4(),
+            };
 
         const { success } = await this.sendDm(
           recipient,
@@ -194,7 +209,20 @@ export const useMessengerStore = defineStore("messenger", {
       );
       try {
         const payload = JSON.parse(decrypted);
-        if (payload && payload.token) {
+        if (
+          payload &&
+          payload.type === "cashu_subscription_payment" &&
+          payload.token
+        ) {
+          const receiveStore = useReceiveTokensStore();
+          receiveStore.receiveData.tokensBase64 = payload.token;
+          receiveStore.receiveData.bucketId =
+            payload.tier_id ?? receiveStore.receiveData.bucketId;
+          await receiveStore.receiveToken(
+            payload.token,
+            receiveStore.receiveData.bucketId,
+          );
+        } else if (payload && payload.token) {
           const tokensStore = useTokensStore();
           const decoded = tokensStore.decodeToken(payload.token);
           if (decoded) {

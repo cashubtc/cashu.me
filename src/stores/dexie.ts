@@ -33,6 +33,10 @@ export interface SubscriptionInterval {
   refundUnlockTs: number;
   status: "pending" | "unlockable" | "claimed" | "expired";
   tokenString: string;
+  subscriptionId?: string;
+  tierId?: string;
+  monthIndex?: number;
+  totalMonths?: number;
 }
 
 export interface Subscription {
@@ -65,6 +69,9 @@ export interface LockedToken {
   refundUnlockTs: number;
   status: "pending" | "unlockable" | "claimed" | "expired";
   subscriptionEventId: string | null;
+  subscriptionId?: string;
+  monthIndex?: number;
+  totalMonths?: number;
   label?: string;
 }
 
@@ -146,6 +153,42 @@ export class CashuDexie extends Dexie {
             if (entry.tokenString === undefined && entry.token) {
               entry.tokenString = entry.token;
             }
+          });
+      });
+    this.version(7)
+      .stores({
+        proofs: "secret, id, C, amount, reserved, quote, bucketId, label",
+        profiles: "pubkey",
+        creatorsTierDefinitions: "&creatorNpub, eventId, updatedAt",
+        subscriptions: "&id, creatorNpub, tierId, status, createdAt, updatedAt",
+        lockedTokens:
+          "&id, tokenString, owner, tierId, intervalKey, unlockTs, refundUnlockTs, status, subscriptionEventId, subscriptionId, monthIndex, totalMonths",
+      })
+      .upgrade(async (tx) => {
+        await tx
+          .table("lockedTokens")
+          .toCollection()
+          .modify((entry: any) => {
+            if (entry.subscriptionId === undefined) {
+              entry.subscriptionId = null;
+            }
+            if (entry.monthIndex === undefined) {
+              entry.monthIndex = null;
+            }
+            if (entry.totalMonths === undefined) {
+              entry.totalMonths = null;
+            }
+          });
+        await tx
+          .table("subscriptions")
+          .toCollection()
+          .modify((entry: any) => {
+            entry.intervals?.forEach((i: any) => {
+              if (i.subscriptionId === undefined) i.subscriptionId = entry.id;
+              if (i.tierId === undefined) i.tierId = entry.tierId;
+              if (i.monthIndex === undefined) i.monthIndex = null;
+              if (i.totalMonths === undefined) i.totalMonths = entry.commitmentLength;
+            });
           });
       });
   }

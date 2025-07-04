@@ -20,21 +20,49 @@ export function formatTimestamp(ts: number): string {
 
 export function receiptToDmText(
   receipt: Receipt,
-  supporterName?: string
+  supporterName?: string,
+  subscription?: {
+    subscription_id: string;
+    tier_id: string;
+    month_index: number;
+    total_months: number;
+  }
 ): string {
-  const payload = {
-    token: receipt.token,
-    amount: receipt.amount,
-    unlockTime: receipt.locktime ?? null,
-    bucketId: receipt.bucketId,
-    referenceId: receipt.id,
-  };
+  const payload = subscription
+    ? {
+        type: "cashu_subscription_payment",
+        subscription_id: subscription.subscription_id,
+        tier_id: subscription.tier_id,
+        month_index: subscription.month_index,
+        total_months: subscription.total_months,
+        token: receipt.token,
+      }
+    : {
+        token: receipt.token,
+        amount: receipt.amount,
+        unlockTime: receipt.locktime ?? null,
+        bucketId: receipt.bucketId,
+        referenceId: receipt.id,
+      };
   return JSON.stringify(payload);
 }
 
 export function receiptsToDmText(
   receipts: Array<Receipt>,
-  supporterName?: string
+  supporterName?: string,
+  subscription?: { subscription_id: string; tier_id: string }
 ): string {
-  return receipts.map((r) => receiptToDmText(r, supporterName)).join("\n");
+  return receipts
+    .map((r, idx) =>
+      receiptToDmText(r, supporterName, subscription
+        ? {
+            subscription_id: subscription.subscription_id,
+            tier_id: subscription.tier_id,
+            month_index: idx + 1,
+            total_months: receipts.length,
+          }
+        : undefined,
+      )
+    )
+    .join("\n");
 }
