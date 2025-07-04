@@ -70,19 +70,23 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted, onBeforeUnmount, nextTick } from "vue";
+import {
+  ref,
+  computed,
+  watch,
+  onMounted,
+  onBeforeUnmount,
+  nextTick,
+} from "vue";
 import DonateDialog from "components/DonateDialog.vue";
 import SubscribeDialog from "components/SubscribeDialog.vue";
 import SubscriptionReceipt from "components/SubscriptionReceipt.vue";
 import SendTokenDialog from "components/SendTokenDialog.vue";
 import { useSendTokensStore } from "stores/sendTokensStore";
 import { useDonationPresetsStore } from "stores/donationPresets";
-import { useLockedTokensStore } from "stores/lockedTokens";
 import { useCreatorsStore } from "stores/creators";
-import { useNostrStore } from "stores/nostr";
-import { useMintsStore } from "stores/mints";
+import { useNostrStore, fetchNutzapProfile } from "stores/nostr";
 import { notifyError, notifySuccess, notifyWarning } from "src/js/notify";
-import { useDmChatsStore } from "stores/dmChats";
 import { useNutzapStore } from "stores/nutzap";
 import { useI18n } from "vue-i18n";
 import {
@@ -95,7 +99,6 @@ import {
   Loading,
 } from "quasar";
 import { nip19 } from "nostr-tools";
-import { receiptToDmText } from "src/js/receipt-utils";
 
 const iframeEl = ref<HTMLIFrameElement | null>(null);
 const showDonateDialog = ref(false);
@@ -106,10 +109,8 @@ const dialogPubkey = ref("");
 
 const sendTokensStore = useSendTokensStore();
 const donationStore = useDonationPresetsStore();
-const lockedStore = useLockedTokensStore();
 const creators = useCreatorsStore();
 const nostr = useNostrStore();
-const mintsStore = useMintsStore();
 const nutzap = useNutzapStore();
 const { t } = useI18n();
 const tiers = computed(() => creators.tiersMap[dialogPubkey.value] || []);
@@ -137,7 +138,7 @@ function formatTs(ts: number): string {
   return `${d.getFullYear()}-${("0" + (d.getMonth() + 1)).slice(-2)}-${(
     "0" + d.getDate()
   ).slice(-2)} ${("0" + d.getHours()).slice(-2)}:${("0" + d.getMinutes()).slice(
-    -2
+    -2,
   )}`;
 }
 
@@ -190,50 +191,24 @@ async function confirmSubscribe({
   if (!dialogPubkey.value) return;
   Loading.show({ message: "Loading..." });
   try {
-    const receipts = (await donationStore.createDonationPreset(
+    const profile = await fetchNutzapProfile(dialogPubkey.value);
+    if (!profile) {
+      notifyError("Creator has not published a Nutzap profile (kind-10019)");
+      return;
+    }
+
+    const receipts = (await nutzap.send({
+      npub: dialogPubkey.value,
       months,
       amount,
-      dialogPubkey.value,
-      bucketId,
       startDate,
-      true,
-      {
-        tierName: selectedTier.value?.name,
-        benefits: selectedTier.value?.benefits || [],
-        frequency: "monthly",
-      }
-    )) as any[];
-    let supporterName = nostr.pubkey;
-    try {
-      const prof = await nostr.getProfile(nostr.pubkey);
-      supporterName =
-        prof?.display_name || prof?.name || prof?.username || nostr.pubkey;
-    } catch {}
-    let dmSuccess = true;
-    for (const r of receipts) {
-      const dmMessage = receiptToDmText(r, supporterName);
-      const { success, event } = await nostr.sendNip04DirectMessage(
-        dialogPubkey.value,
-        dmMessage
-      );
-      if (event) useDmChatsStore().addOutgoing(event);
-      if (!success) dmSuccess = false;
-      await nutzap.send({
-        npub: dialogPubkey.value,
-        months: 1,
-        amount: r.amount,
-        startDate: r.locktime,
-      });
-    }
-    if (dmSuccess) {
-      notifySuccess(t("FindCreators.notifications.subscription_success"));
-    } else {
-      notifyWarning(t("wallet.notifications.nostr_dm_failed"));
-    }
+    })) as any[];
+
     receiptList.value = receipts;
     showReceiptDialog.value = true;
     showSubscribeDialog.value = false;
     showTierDialog.value = false;
+    notifySuccess(t("FindCreators.notifications.subscription_success"));
   } catch (e: any) {
     notifyError(e.message);
   } finally {
@@ -266,7 +241,7 @@ function handleDonate({
       months,
       amount,
       selectedPubkey.value,
-      bucketId
+      bucketId,
     );
     showDonateDialog.value = false;
   }
