@@ -1,0 +1,206 @@
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { useNutzapStore, calcUnlock } from "../../../src/stores/nutzap";
+import { useCreatorSubscriptionsStore } from "../../../src/stores/creatorSubscriptions";
+import { useLockedTokensRedeemWorker } from "../../../src/stores/lockedTokensRedeemWorker";
+import { cashuDb } from "../../../src/stores/dexie";
+
+let sendDm: any;
+let fetchNutzapProfile: any;
+let lockToPubKey: any;
+let findSpendableMint: any;
+let serializeProofs: any;
+let updateActiveProofs: any;
+let addMany: any;
+let sendToLock: any;
+let redeem: any;
+let mintWallet: any;
+let checkSpendable: any;
+
+vi.mock("../../../src/stores/nostr", () => ({
+  fetchNutzapProfile: (...args: any[]) => fetchNutzapProfile(...args),
+  publishNutzap: vi.fn(),
+  subscribeToNutzaps: vi.fn(),
+  useNostrStore: () => ({ pubkey: "myhex" }),
+}));
+
+vi.mock("../../../src/stores/p2pk", () => ({
+  useP2PKStore: () => ({
+    lockToPubKey: (...args: any[]) => lockToPubKey(...args),
+    getTokenLocktime: vi.fn(() => 0),
+    generateRefundSecret: () => ({ preimage: "pre", hash: "hash" }),
+  }),
+}));
+
+vi.mock("../../../src/stores/wallet", () => ({
+  useWalletStore: () => ({
+    findSpendableMint: (...args: any[]) => findSpendableMint(...args),
+    sendToLock: (...args: any[]) => sendToLock(...args),
+    mintWallet: (...args: any[]) => mintWallet(...args),
+    redeem: (...args: any[]) => redeem(...args),
+    checkProofsSpendable: (...args: any[]) => checkSpendable(...args),
+  }),
+}));
+
+vi.mock("../../../src/stores/lockedTokens", () => ({
+  useLockedTokensStore: () => ({ addMany: (...args: any[]) => addMany(...args) }),
+}));
+
+vi.mock("../../../src/stores/mints", () => ({
+  useMintsStore: () => ({
+    activeUnit: "sat",
+    mintUnitProofs: () => [{ id: "kid", amount: 1, secret: "s" }],
+    mints: [{ url: "mint", keysets: [{ id: "kid", unit: "sat", active: true }] }],
+  }),
+}));
+
+vi.mock("../../../src/stores/proofs", () => ({
+  useProofsStore: () => ({
+    serializeProofs: (...args: any[]) => serializeProofs(...args),
+    updateActiveProofs: (...args: any[]) => updateActiveProofs(...args),
+  }),
+}));
+
+vi.mock("../../../src/stores/messenger", () => ({
+  useMessengerStore: () => ({ sendDm: (...args: any[]) => sendDm(...args) }),
+}));
+
+vi.mock("../../../src/stores/settings", () => ({
+  useSettingsStore: () => ({ autoRedeemLockedTokens: true }),
+}));
+
+vi.mock("../../../src/stores/receiveTokensStore", () => ({
+  useReceiveTokensStore: () => ({ receiveData: { tokensBase64: "", bucketId: "" } }),
+}));
+
+vi.mock("../../../src/js/token", () => ({
+  default: {
+    decode: () => ({ proofs: [{ id: "kid", amount: 1, secret: "s" }], mint: "mint", unit: "sat" }),
+    getMint: () => "mint",
+    getUnit: () => "sat",
+    getProofs: (d: any) => d.proofs,
+  },
+}));
+
+beforeEach(async () => {
+  localStorage.clear();
+  await cashuDb.close();
+  await cashuDb.open();
+  sendDm = vi.fn(async () => ({}));
+  fetchNutzapProfile = vi.fn(async () => ({
+    p2pkPubkey: "pk",
+    trustedMints: ["mint"],
+    hexPub: "hex",
+    relays: [],
+  }));
+  lockToPubKey = vi.fn(async ({ timelock }: any) => ({ token: `t-${timelock}` }));
+  findSpendableMint = vi.fn(() => ({ url: "mint" }));
+  serializeProofs = vi.fn((p: any) => `tok-${p[0]}`);
+  updateActiveProofs = vi.fn();
+  addMany = vi.fn();
+  sendToLock = vi.fn(async (_p, _w, _a, _pk, _b, u) => ({ sendProofs: [u] }));
+  redeem = vi.fn();
+  mintWallet = vi.fn(() => ({}));
+  checkSpendable = vi.fn(async () => null);
+});
+
+describe("Nutzap subscriptions", () => {
+  it("send() sends DM per month with payload", async () => {
+    const store = useNutzapStore();
+    const start = 1000;
+    await store.send({ npub: "npub", amount: 1, months: 2, startDate: start });
+
+    expect(sendDm).toHaveBeenCalledTimes(2);
+    const p1 = JSON.parse(sendDm.mock.calls[0][1]);
+    const p2 = JSON.parse(sendDm.mock.calls[1][1]);
+    expect(p1.subscription_id).toBe(p2.subscription_id);
+    expect(p1.month_index).toBe(1);
+    expect(p2.month_index).toBe(2);
+    expect(p1.total_months).toBe(2);
+    expect(p1.token).toBe(`tok-${calcUnlock(start, 0)}`);
+    expect(p2.token).toBe(`tok-${calcUnlock(start, 1)}`);
+  });
+
+  it("aggregates incoming DMs by subscription_id", async () => {
+    const subStore = useCreatorSubscriptionsStore();
+    await cashuDb.lockedTokens.bulkAdd([
+      {
+        id: "a",
+        tokenString: "x",
+        amount: 1,
+        owner: "creator",
+        subscriberNpub: "s",
+        tierId: "t",
+        intervalKey: "i1",
+        unlockTs: 0,
+        refundUnlockTs: 0,
+        status: "unlockable",
+        subscriptionEventId: null,
+        subscriptionId: "sub1",
+        monthIndex: 1,
+        totalMonths: 2,
+        label: "Subscription payment",
+      },
+      {
+        id: "b",
+        tokenString: "y",
+        amount: 1,
+        owner: "creator",
+        subscriberNpub: "s",
+        tierId: "t",
+        intervalKey: "i2",
+        unlockTs: 0,
+        refundUnlockTs: 0,
+        status: "unlockable",
+        subscriptionEventId: null,
+        subscriptionId: "sub1",
+        monthIndex: 2,
+        totalMonths: 2,
+        label: "Subscription payment",
+      },
+      {
+        id: "c",
+        tokenString: "z",
+        amount: 1,
+        owner: "creator",
+        subscriberNpub: "s",
+        tierId: "t2",
+        intervalKey: "j1",
+        unlockTs: 0,
+        refundUnlockTs: 0,
+        status: "unlockable",
+        subscriptionEventId: null,
+        subscriptionId: "sub2",
+        monthIndex: 1,
+        totalMonths: 3,
+        label: "Subscription payment",
+      },
+    ] as any);
+    await new Promise((r) => setTimeout(r, 10));
+    const sub1 = subStore.subscriptions.find((s) => s.subscriptionId === "sub1");
+    const sub2 = subStore.subscriptions.find((s) => s.subscriptionId === "sub2");
+    expect(subStore.subscriptions.length).toBe(2);
+    expect(sub1?.receivedMonths).toBe(2);
+    expect(sub1?.status).toBe("active");
+    expect(sub2?.receivedMonths).toBe(1);
+    expect(sub2?.status).toBe("pending");
+  });
+
+  it("redeems tokens when unlock time passed", async () => {
+    const worker = useLockedTokensRedeemWorker();
+    await cashuDb.lockedTokens.put({
+      id: "r1",
+      tokenString: "tok",
+      amount: 1,
+      owner: "subscriber",
+      tierId: "tier1",
+      intervalKey: "k",
+      unlockTs: 0,
+      refundUnlockTs: 0,
+      status: "pending",
+      subscriptionEventId: null,
+    } as any);
+    await worker.processTokens();
+    expect(redeem).toHaveBeenCalledWith("tier1");
+    expect(await cashuDb.lockedTokens.count()).toBe(0);
+  });
+});
