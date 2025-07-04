@@ -15,6 +15,8 @@ import { useTokensStore } from "./tokens";
 import { useReceiveTokensStore } from "./receiveTokensStore";
 import { useBucketsStore } from "./buckets";
 import { useLockedTokensStore } from "./lockedTokens";
+import { cashuDb, type LockedToken } from "./dexie";
+import { DEFAULT_BUCKET_ID } from "./buckets";
 import token from "src/js/token";
 
 export type MessengerMessage = {
@@ -214,14 +216,33 @@ export const useMessengerStore = defineStore("messenger", {
           payload.type === "cashu_subscription_payment" &&
           payload.token
         ) {
+          const decoded = token.decode(payload.token);
+          const amount = decoded
+            ? token.getProofs(decoded).reduce((s, p) => s + p.amount, 0)
+            : 0;
+          const entry: LockedToken = {
+            id: uuidv4(),
+            tokenString: payload.token,
+            amount,
+            owner: "creator",
+            creatorNpub: useNostrStore().pubkey,
+            subscriberNpub: event.pubkey,
+            tierId: payload.tier_id ?? "",
+            intervalKey: payload.subscription_id ?? "",
+            unlockTs: 0,
+            refundUnlockTs: 0,
+            status: "unlockable",
+            subscriptionEventId: null,
+            subscriptionId: payload.subscription_id,
+            monthIndex: payload.month_index,
+            totalMonths: payload.total_months,
+            label: "Subscription payment",
+          };
+          await cashuDb.lockedTokens.put(entry);
+
           const receiveStore = useReceiveTokensStore();
           receiveStore.receiveData.tokensBase64 = payload.token;
-          receiveStore.receiveData.bucketId =
-            payload.tier_id ?? receiveStore.receiveData.bucketId;
-          await receiveStore.receiveToken(
-            payload.token,
-            receiveStore.receiveData.bucketId,
-          );
+          await receiveStore.receiveToken(payload.token, DEFAULT_BUCKET_ID);
         } else if (payload && payload.token) {
           const tokensStore = useTokensStore();
           const decoded = tokensStore.decodeToken(payload.token);
