@@ -11,7 +11,6 @@ import { useProofsStore } from "./proofs";
 import { useMessengerStore } from "./messenger";
 import {
   fetchNutzapProfile,
-  publishNutzap,
   subscribeToNutzaps,
   useNostrStore,
 } from "./nostr";
@@ -177,12 +176,7 @@ export const useNutzapStore = defineStore("nutzap", {
           };
           lockedTokens.push(lockedToken);
 
-          // Publish Nutzap (one event per period)
-          await publishNutzap({
-            content: token,
-            receiverHex: profile.hexPub,
-            relayHints: profile.relays,
-          });
+          // DM Nutzap token to creator (one message per period)
           await proofsStore.updateActiveProofs();
         }
 
