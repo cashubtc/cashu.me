@@ -389,4 +389,5 @@ export const useP2PKStore = defineStore("p2pk", {
   },
 });
 
-export { buildTimedOutputs };
+// Disabled because buildTimedOutputs is already exported above.
+// export { buildTimedOutputs };
