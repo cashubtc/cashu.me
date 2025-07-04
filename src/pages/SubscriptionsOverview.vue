@@ -474,6 +474,10 @@
         </q-card-actions>
       </q-card>
     </q-dialog>
+    <SubscriptionReceipt
+      v-model="showReceiptDialog"
+      :receipts="receiptList"
+    />
   </div>
 </template>
 
@@ -486,8 +490,9 @@ import { useMintsStore } from "stores/mints";
 import { useUiStore } from "stores/ui";
 import { useNostrStore } from "stores/nostr";
 import { useMessengerStore } from "stores/messenger";
-import { useDonationPresetsStore } from "stores/donationPresets";
 import { useSubscriptionsStore } from "stores/subscriptions";
+import { useNutzapStore } from "stores/nutzap";
+import { fetchNutzapProfile } from "stores/nostr";
 import { useRouter } from "vue-router";
 import { useQuasar } from "quasar";
 import { useClipboard } from "src/composables/useClipboard";
@@ -500,12 +505,14 @@ import type { Proof } from "@cashu/cashu-ts";
 import { useProofsStore } from "stores/proofs";
 import { useSendTokensStore } from "stores/sendTokensStore";
 import token from "src/js/token";
+import SubscriptionReceipt from "components/SubscriptionReceipt.vue";
 
 const bucketsStore = useBucketsStore();
 const mintsStore = useMintsStore();
 const uiStore = useUiStore();
 const proofsStore = useProofsStore();
 const sendTokensStore = useSendTokensStore();
+const nutzap = useNutzapStore();
 const { activeUnit } = storeToRefs(mintsStore);
 
 function pubkeyNpub(hex: string): string {
@@ -610,6 +617,8 @@ const { t } = useI18n();
 const showDialog = ref(false);
 const selectedCreator = ref("");
 const showMessageDialog = ref(false);
+const showReceiptDialog = ref(false);
+const receiptList = ref<any[]>([]);
 const messageText = ref("");
 const messageRecipient = ref("");
 const filter = ref("");
@@ -713,7 +722,6 @@ function extendSubscription(pubkey: string) {
     persistent: true,
   }).onOk(async (months: number) => {
     if (!months || months <= 0) return;
-    const donationStore = useDonationPresetsStore();
     const future = row.tokens
       .filter((t) => t.locktime)
       .sort((a, b) => (a.locktime || 0) - (b.locktime || 0));
@@ -722,19 +730,19 @@ function extendSubscription(pubkey: string) {
       : Math.floor(Date.now() / 1000);
     const startDate = lastLock + 30 * 24 * 60 * 60;
     try {
-      await donationStore.createDonationPreset(
+      const profile = await fetchNutzapProfile(pubkey);
+      if (!profile) {
+        notifyError("Creator has not published a Nutzap profile (kind-10019)");
+        return;
+      }
+      const receipts = await nutzap.send({
+        npub: pubkey,
         months,
-        row.monthly,
-        pubkey,
-        row.tokens[0]?.bucketId,
+        amount: row.monthly,
         startDate,
-        false,
-        {
-          tierName: row.tierName,
-          benefits: row.benefits,
-          frequency: row.frequency,
-        }
-      );
+      });
+      receiptList.value = receipts as any[];
+      showReceiptDialog.value = true;
       notifySuccess(t("SubscriptionsOverview.notifications.extend_success"));
     } catch (e: any) {
       notifyError(e.message);
