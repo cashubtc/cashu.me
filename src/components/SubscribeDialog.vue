@@ -167,25 +167,19 @@ export default defineComponent({
       if (!startDate.value) {
         return;
       }
-      try {
-        const profile = await fetchNutzapProfile(props.creatorPubkey);
-        if (!profile) {
-          notifyError(
-            "Creator has not published a Nutzap profile (kind-10019)"
-          );
-          return;
-        }
-        await nutzap.send({
-          npub: props.creatorPubkey,
-          months: months.value,
-          amount: amount.value,
-          startDate: Math.floor(new Date(startDate.value).getTime() / 1000),
-        });
-        notifySuccess(t("FindCreators.notifications.subscription_success"));
-        emit("update:modelValue", false);
-      } catch (e: any) {
-        notifyError(e.message);
+      const profile = await fetchNutzapProfile(props.creatorPubkey);
+      if (!profile) {
+        notifyError("Creator has not published a Nutzap profile (kind-10019)");
+        return;
       }
+      await nutzap.send({
+        npub: props.creatorPubkey,
+        months: months.value,
+        amount: amount.value,
+        startDate: Math.floor(new Date(startDate.value).getTime() / 1000),
+      });
+      notifySuccess(t("FindCreators.notifications.subscription_success"));
+      emit("update:modelValue", false);
     };
 
     return {
