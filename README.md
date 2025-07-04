@@ -120,6 +120,23 @@ Fundstr is currently in Alpha/Beta.
 4. Share your Fundstr profile with your audience.
 5. Communicate with supporters through Nostr DMs.
 
+### DM-per-Token Subscriptions
+
+The **DM-per-token** workflow allows fans to pledge recurring payments by
+sending one locked Cashu token each period via Nostr DM. Creators must publish a
+`kind:10019` profile from the Creator Hub so supporters know which P2PK key and
+mint URLs to use.
+
+1. Supporter opens the subscription dialog on a creator's page.
+2. The app retrieves the creator's `kind:10019` profile.
+3. Supporter selects the monthly amount and number of periods.
+4. Fundstr locks one token per period to the creator's P2PK key with optional
+   timelocks.
+5. Each locked token is automatically sent to the creator via Nostr DM together
+   with subscription details.
+6. Creators claim the tokens as they arrive, unlocking them when the timelock
+   expires.
+
 ## Roadmap & Future Ideas
 
 - Advanced creator discovery with search, filters and Nostr recommendations
