@@ -14,7 +14,6 @@
       :creator-pubkey="dialogPubkey.value"
       @confirm="confirmSubscribe"
     />
-    <SubscriptionReceipt v-model="showReceiptDialog" :receipts="receiptList" />
     <SendTokenDialog />
     <QDialog v-model="showTierDialog">
       <QCard class="tier-dialog">
@@ -80,14 +79,11 @@ import {
 } from "vue";
 import DonateDialog from "components/DonateDialog.vue";
 import SubscribeDialog from "components/SubscribeDialog.vue";
-import SubscriptionReceipt from "components/SubscriptionReceipt.vue";
 import SendTokenDialog from "components/SendTokenDialog.vue";
 import { useSendTokensStore } from "stores/sendTokensStore";
 import { useDonationPresetsStore } from "stores/donationPresets";
 import { useCreatorsStore } from "stores/creators";
-import { useNostrStore, fetchNutzapProfile } from "stores/nostr";
-import { notifyError, notifySuccess, notifyWarning } from "src/js/notify";
-import { useNutzapStore } from "stores/nutzap";
+import { useNostrStore } from "stores/nostr";
 import { useI18n } from "vue-i18n";
 import {
   QDialog,
@@ -96,7 +92,6 @@ import {
   QCardActions,
   QBtn,
   QSeparator,
-  Loading,
 } from "quasar";
 import { nip19 } from "nostr-tools";
 
@@ -111,12 +106,9 @@ const sendTokensStore = useSendTokensStore();
 const donationStore = useDonationPresetsStore();
 const creators = useCreatorsStore();
 const nostr = useNostrStore();
-const nutzap = useNutzapStore();
 const { t } = useI18n();
 const tiers = computed(() => creators.tiersMap[dialogPubkey.value] || []);
 const showSubscribeDialog = ref(false);
-const showReceiptDialog = ref(false);
-const receiptList = ref<any[]>([]);
 const selectedTier = ref<any>(null);
 let tierTimeout: ReturnType<typeof setTimeout> | null = null;
 
@@ -181,39 +173,17 @@ function retryFetchTiers() {
   creators.fetchTierDefinitions(dialogPubkey.value);
 }
 
-async function confirmSubscribe({
+function confirmSubscribe({
   bucketId,
   months,
   amount,
   startDate,
   total,
 }: any) {
-  if (!dialogPubkey.value) return;
-  Loading.show({ message: "Loading..." });
-  try {
-    const profile = await fetchNutzapProfile(dialogPubkey.value);
-    if (!profile) {
-      notifyError("Creator has not published a Nutzap profile (kind-10019)");
-      return;
-    }
-
-    const receipts = (await nutzap.send({
-      npub: dialogPubkey.value,
-      months,
-      amount,
-      startDate,
-    })) as any[];
-
-    receiptList.value = receipts;
-    showReceiptDialog.value = true;
-    showSubscribeDialog.value = false;
-    showTierDialog.value = false;
-    notifySuccess(t("FindCreators.notifications.subscription_success"));
-  } catch (e: any) {
-    notifyError(e.message);
-  } finally {
-    Loading.hide();
-  }
+  // Nutzap transaction is handled within SubscribeDialog.
+  // Close surrounding dialogs and process any additional UI updates here.
+  showSubscribeDialog.value = false;
+  showTierDialog.value = false;
 }
 
 function handleDonate({
