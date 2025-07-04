@@ -158,7 +158,8 @@ export const useNutzapStore = defineStore("nutzap", {
             month_index: i + 1,
             total_months: months,
             token,
-          })
+          }),
+          profile.relays
         );
 
           lockedTokens.push(locked);

@@ -61,7 +61,7 @@ describe("messenger store", () => {
   it("uses global key when sending DMs", async () => {
     const messenger = useMessengerStore();
     await messenger.sendDm("r", "m");
-    expect(sendDm).toHaveBeenCalledWith("r", "m", "priv", "pub");
+    expect(sendDm).toHaveBeenCalledWith("r", "m", "priv", "pub", undefined);
   });
 
   it("decrypts incoming messages with global key", async () => {

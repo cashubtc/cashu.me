@@ -83,7 +83,8 @@ describe("messenger.sendToken", () => {
       "receiver",
       expect.stringContaining('\"token\":\"TOKEN\"'),
       "priv",
-      "pub"
+      "pub",
+      undefined
     );
     expect(addPending).toHaveBeenCalledWith({
       amount: -1,
