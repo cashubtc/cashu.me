@@ -1,3 +1,5 @@
+import 'fake-indexeddb/auto';
+
 vi.mock('quasar', async (importOriginal) => {
   const actual = await importOriginal();
   return {

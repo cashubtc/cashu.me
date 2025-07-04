@@ -3,7 +3,6 @@ import { defineStore } from "pinia";
 import { useLocalStorage } from "@vueuse/core";
 import { generateSecretKey, getPublicKey, nip19 } from "nostr-tools";
 import { ensureCompressed } from "src/utils/ecash";
-import { sha256 } from "@noble/hashes/sha256";
 import { bytesToHex } from "@noble/hashes/utils";
 import { WalletProof } from "stores/mints";
 import token from "src/js/token";
@@ -30,6 +29,46 @@ type P2PKKey = {
   usedCount: number;
 };
 
+//--------------------------------------------------------------------------
+// NEW  helper: buildTimedOutputs()
+//--------------------------------------------------------------------------
+import { CashuWallet } from "@cashu/cashu-ts";
+
+/**
+ * Split `totalAmount` into `count` equal Cashu outputs.
+ * Each output is locked to `creatorPk` and—except index 0—has a unix
+ * "locktime" tag set to `startTime + idx*interval`.
+ *
+ * Returns `{ proofs, tokenStrings }`.
+ */
+export async function buildTimedOutputs(
+  wallet: CashuWallet,
+  totalAmount: number,
+  count: number,
+  creatorPk: string,
+  startTimeSec: number,
+  intervalSec = 30 * 24 * 3600, // 30 days
+): Promise<{ proofs: WalletProof[]; tokenStrings: string[] }> {
+  if (count <= 0) throw new Error("count must be > 0");
+  const unitAmount = Math.round(totalAmount / count);
+  const amounts = Array(count).fill(unitAmount);
+
+  return wallet.split(amounts, {
+    buildSecret: (idx) => {
+      const locktime = idx === 0 ? 0 : startTimeSec + idx * intervalSec;
+      const secretObj: any[] = [
+        "P2PK",
+        {
+          data: creatorPk,
+          nonce: crypto.randomUUID(),
+          tags: locktime ? [["locktime", String(locktime)]] : [],
+        },
+      ];
+      return JSON.stringify(secretObj);
+    },
+  });
+}
+
 export const useP2PKStore = defineStore("p2pk", {
   state: () => ({
     p2pkKeys: useLocalStorage<P2PKKey[]>("cashu.P2PKKeys", []),
@@ -44,13 +83,6 @@ export const useP2PKStore = defineStore("p2pk", {
     firstKey: (state) => state.p2pkKeys[0] || null,
   },
   actions: {
-    /** Create 32-byte preimage + SHA-256 hash (hex). */
-    generateRefundSecret(): { preimage: string; hash: string } {
-      const rand = crypto.getRandomValues(new Uint8Array(32));
-      const preimage = bytesToHex(rand);
-      const hash = bytesToHex(sha256(rand));
-      return { preimage, hash };
-    },
     haveThisKey: function (key: string) {
       return this.p2pkKeys.filter((m) => m.publicKey == key).length > 0;
     },
@@ -356,3 +388,5 @@ export const useP2PKStore = defineStore("p2pk", {
     },
   },
 });
+
+export { buildTimedOutputs };
