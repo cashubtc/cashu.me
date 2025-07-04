@@ -96,10 +96,7 @@ import { usePriceStore } from "stores/price";
 import { useUiStore } from "stores/ui";
 import SubscribeDialog from "components/SubscribeDialog.vue";
 import SubscriptionReceipt from "components/SubscriptionReceipt.vue";
-import { notifyError, notifySuccess } from "src/js/notify";
-import { useNutzapStore } from "stores/nutzap";
 import { useI18n } from "vue-i18n";
-import { Loading } from "quasar";
 import { renderMarkdown as renderMarkdownFn } from "src/js/simple-markdown";
 import PaywalledContent from "components/PaywalledContent.vue";
 
@@ -113,7 +110,6 @@ export default defineComponent({
     const nostr = useNostrStore();
     const priceStore = usePriceStore();
     const uiStore = useUiStore();
-    const nutzap = useNutzapStore();
     const { t } = useI18n();
     const bitcoinPrice = computed(() => priceStore.bitcoinPrice);
     const profile = ref<any>({});
@@ -149,31 +145,15 @@ export default defineComponent({
       ).slice(-2)}`;
     };
 
-    const confirmSubscribe = async ({
+    const confirmSubscribe = ({
       bucketId,
       months,
       amount,
       startDate,
       total,
     }: any) => {
-      Loading.show({ message: "Loading..." });
-      try {
-        const receipts = await nutzap.send({
-          npub: creatorNpub,
-          months,
-          amount,
-          startDate,
-        });
-
-        receiptList.value = receipts as any[];
-        showReceiptDialog.value = true;
-        showSubscribeDialog.value = false;
-        notifySuccess(t("FindCreators.notifications.subscription_success"));
-      } catch (e: any) {
-        notifyError(e.message);
-      } finally {
-        Loading.hide();
-      }
+      // Transaction already processed in SubscribeDialog.
+      showSubscribeDialog.value = false;
     };
     function renderMarkdown(text: string): string {
       return renderMarkdownFn(text || "");

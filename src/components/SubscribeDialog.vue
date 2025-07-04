@@ -179,6 +179,13 @@ export default defineComponent({
         startDate: Math.floor(new Date(startDate.value).getTime() / 1000),
       });
       notifySuccess(t("FindCreators.notifications.subscription_success"));
+      emit("confirm", {
+        bucketId: bucketId.value,
+        months: months.value,
+        amount: amount.value,
+        startDate: Math.floor(new Date(startDate.value).getTime() / 1000),
+        total: total.value,
+      });
       emit("update:modelValue", false);
     };
 
