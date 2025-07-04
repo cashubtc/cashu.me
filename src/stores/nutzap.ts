@@ -3,6 +3,7 @@ import { watch } from "vue";
 import { useWalletStore } from "./wallet";
 import { useP2PKStore } from "./p2pk";
 import { useLockedTokensStore } from "./lockedTokens";
+import type { LockedToken } from "./lockedTokens";
 import { cashuDb } from "./dexie";
 import token from "src/js/token";
 import { v4 as uuidv4 } from "uuid";
@@ -124,14 +125,7 @@ export const useNutzapStore = defineStore("nutzap", {
         const proofsStore = useProofsStore();
         const messenger = useMessengerStore();
         const subscriptionId = uuidv4();
-        interface LockedTokenPayload {
-          tokenString: string;
-          mintUrl: string;
-          timelock: number;
-          receiver: string;
-          refundPreimage: string;
-        }
-        const lockedTokens: LockedTokenPayload[] = [];
+        const lockedTokens: LockedToken[] = [];
 
         for (let i = 0; i < months; i++) {
           const unlockDate = calcUnlock(startDate, i);
@@ -140,10 +134,10 @@ export const useNutzapStore = defineStore("nutzap", {
             throw new Error("Insufficient balance in recipient-trusted mints");
 
           // ----- HTLC-locked pledge with refund capability --------------
-          const { preimage, hash } = p2pk.generateRefundSecret();
+          const { hash } = p2pk.generateRefundSecret();
           const mintWallet = wallet.mintWallet(mint.url, mints.activeUnit);
           const proofs = mints.mintUnitProofs(mint, mints.activeUnit);
-        const { sendProofs } = await wallet.sendToLock(
+        const { sendProofs, locked } = await wallet.sendToLock(
           proofs,
           mintWallet,
           amount,
@@ -167,14 +161,7 @@ export const useNutzapStore = defineStore("nutzap", {
           })
         );
 
-          const lockedToken = {
-            tokenString: token,
-            mintUrl: mint.url,
-            timelock: unlockDate,
-            receiver: npub,
-            refundPreimage: preimage,
-          };
-          lockedTokens.push(lockedToken);
+          lockedTokens.push(locked);
 
           // DM Nutzap token to creator (one message per period)
           await proofsStore.updateActiveProofs();
@@ -182,7 +169,7 @@ export const useNutzapStore = defineStore("nutzap", {
 
         // Persist into bucket store for progress UI
         const buckets = useLockedTokensStore();
-        await buckets.addMany(lockedTokens as any);
+        await buckets.addMany(lockedTokens);
         return lockedTokens;
       } catch (e: any) {
         this.error = e.message;
