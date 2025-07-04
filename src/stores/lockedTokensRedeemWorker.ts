@@ -4,6 +4,8 @@ import { useWalletStore } from "./wallet";
 import { useReceiveTokensStore } from "./receiveTokensStore";
 import { useSettingsStore } from "./settings";
 import { useMintsStore } from "./mints";
+import { useMessengerStore } from "./messenger";
+import { notifySuccess } from "src/js/notify";
 import token from "src/js/token";
 import { ensureCompressed } from "src/utils/ecash";
 import { debug } from "src/js/logger";
@@ -109,6 +111,48 @@ export const useLockedTokensRedeemWorker = defineStore(
                 .where("tokenString")
                 .equals(entry.tokenString)
                 .delete();
+
+              // update subscription interval if applicable
+              if (entry.subscriptionId) {
+                try {
+                  const sub = await cashuDb.subscriptions.get(
+                    entry.subscriptionId,
+                  );
+                  const idx = sub?.intervals.findIndex(
+                    (i) =>
+                      i.intervalKey === entry.intervalKey ||
+                      i.lockedTokenId === entry.id,
+                  );
+                  if (sub && idx !== undefined && idx >= 0) {
+                    sub.intervals[idx].status = "claimed";
+                    await cashuDb.subscriptions.update(sub.id, {
+                      intervals: sub.intervals,
+                    });
+                  }
+                } catch (e) {
+                  console.error("failed updating subscription interval", e);
+                }
+
+                if (entry.creatorNpub) {
+                  const messenger = useMessengerStore();
+                  const payload = {
+                    type: "cashu_subscription_claimed",
+                    subscription_id: entry.subscriptionId,
+                    tier_id: entry.tierId,
+                    month_index: entry.monthIndex,
+                    total_months: entry.totalMonths,
+                  } as const;
+                  try {
+                    await messenger.sendDm(
+                      entry.creatorNpub,
+                      JSON.stringify(payload),
+                    );
+                    notifySuccess("Subscription payment claimed");
+                  } catch (e) {
+                    console.error("failed to notify creator", e);
+                  }
+                }
+              }
             } catch (err: any) {
               if (
                 typeof err?.message === "string" &&
