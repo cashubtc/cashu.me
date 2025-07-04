@@ -892,7 +892,8 @@ export const useNostrStore = defineStore("nostr", {
       recipient: string,
       message: string,
       privKey?: string,
-      pubKey?: string
+      pubKey?: string,
+      relays?: string[]
     ): Promise<{ success: boolean; event: NDKEvent | null }> {
       recipient = this.resolvePubkey(recipient);
       if (pubKey) {
@@ -923,7 +924,7 @@ export const useNostrStore = defineStore("nostr", {
       const pool = new SimplePool();
       const nostrEvent = await event.toNostrEvent();
       try {
-        await pool.publish(this.relays, nostrEvent);
+        await pool.publish(relays ?? this.relays, nostrEvent);
         notifySuccess("NIP-04 event published");
         return { success: true, event };
       } catch (e) {

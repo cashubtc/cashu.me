@@ -76,7 +76,7 @@ export const useMessengerStore = defineStore("messenger", {
         console.warn("[messenger] signer unavailable, continuing read-only", e);
       }
     },
-    async sendDm(recipient: string, message: string) {
+    async sendDm(recipient: string, message: string, relays?: string[]) {
       await this.loadIdentity();
       const nostr = useNostrStore();
       let privKey: string | undefined = undefined;
@@ -89,6 +89,7 @@ export const useMessengerStore = defineStore("messenger", {
         message,
         privKey,
         nostr.pubkey,
+        relays,
       );
       if (success && event) {
         this.addOutgoingMessage(recipient, message, event.created_at, event.id);
