@@ -501,11 +501,9 @@ export const useWalletStore = defineStore("wallet", {
           proofsToSend,
           {
             keysetId,
-            p2pk: {
-              pubkey: ensureCompressed(receiverPubkey),
-              locktime,
-              refundKeys: refundPubkey ? [refundPubkey] : undefined,
-            },
+            pubkey: ensureCompressed(receiverPubkey),
+            locktime,
+            refund: refundPubkey,
           }
         ));
       }
