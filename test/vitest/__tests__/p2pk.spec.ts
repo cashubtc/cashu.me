@@ -4,6 +4,7 @@ import { useWalletStore } from "../../../src/stores/wallet";
 import { useProofsStore } from "../../../src/stores/proofs";
 import { generateSecretKey, getPublicKey, nip19 } from "nostr-tools";
 import { bytesToHex } from "@noble/hashes/utils";
+import * as secp from "@noble/secp256k1";
 
 beforeEach(() => {
   localStorage.clear();
@@ -38,6 +39,19 @@ describe("P2PK store", () => {
     const info = p2pk.getSecretP2PKPubkey(secret);
     expect(info.pubkey).toBe("02bb");
     expect(info.locktime).toBe(locktime);
+  });
+
+  it("normalizes pubkeys from secrets", () => {
+    const p2pk = useP2PKStore();
+    const priv = secp.utils.randomPrivateKey();
+    const compressed = Buffer.from(secp.getPublicKey(priv, true)).toString("hex");
+    const uncompressed = Buffer.from(secp.getPublicKey(priv, false)).toString("hex");
+
+    let secret = JSON.stringify(["P2PK", { data: compressed }]);
+    expect(p2pk.getSecretP2PKPubkey(secret).pubkey).toBe(compressed);
+
+    secret = JSON.stringify(["P2PK", { data: uncompressed }]);
+    expect(p2pk.getSecretP2PKPubkey(secret).pubkey).toBe(compressed);
   });
 
   it("forwards options in sendToLock", async () => {
