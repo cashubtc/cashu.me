@@ -168,19 +168,27 @@ function addTier() {
 async function saveTier(id: string) {
   const data = editedTiers.value[id];
   if (data) {
-    store.updateTier(id, data);
-    await store.publishTierDefinitions();
-    notifySuccess('Tier saved');
-    saved.value[id] = true;
-    setTimeout(() => {
-      saved.value[id] = false;
-    }, 2000);
+    try {
+      store.updateTier(id, data);
+      await store.publishTierDefinitions();
+      notifySuccess('Tier saved');
+      saved.value[id] = true;
+      setTimeout(() => {
+        saved.value[id] = false;
+      }, 2000);
+    } catch (e: any) {
+      notifyError(e?.message || 'Failed to save tier');
+    }
   }
 }
 
-function removeTier(id: string) {
-  store.removeTier(id);
-  store.publishTierDefinitions();
+async function removeTier(id: string) {
+  try {
+    store.removeTier(id);
+    await store.publishTierDefinitions();
+  } catch (e: any) {
+    notifyError(e?.message || 'Failed to delete tier');
+  }
 }
 
 onMounted(async () => {

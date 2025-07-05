@@ -1,4 +1,5 @@
 import { defineStore } from "pinia";
+import { toRaw } from "vue";
 import { useLocalStorage } from "@vueuse/core";
 import { NDKEvent, NDKKind, NDKFilter } from "@nostr-dev-kit/ndk";
 import {
@@ -159,7 +160,7 @@ export const useCreatorHubStore = defineStore("creatorHub", {
     },
 
     async publishTierDefinitions() {
-      const tiersArray = this.getTierArray();
+      const tiersArray = this.getTierArray().map((t) => ({ ...toRaw(t) }));
       const nostr = useNostrStore();
 
       if (!nostr.signer) {
