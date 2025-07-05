@@ -108,6 +108,7 @@ import { useSendTokensStore } from "stores/sendTokensStore";
 import { useDonationPresetsStore } from "stores/donationPresets";
 import { useCreatorsStore } from "stores/creators";
 import { useNostrStore, fetchNutzapProfile } from "stores/nostr";
+import { notifyWarning } from "src/js/notify";
 import { useI18n } from "vue-i18n";
 import {
   QDialog,
@@ -260,8 +261,12 @@ function handleDonate({
 }
 
 onMounted(async () => {
-  await nostr.initSignerIfNotSet();
   window.addEventListener("message", onMessage);
+  try {
+    await nostr.initSignerIfNotSet();
+  } catch (e: any) {
+    notifyWarning("Failed to initialize Nostr signer", e?.message);
+  }
 });
 
 onBeforeUnmount(() => {
