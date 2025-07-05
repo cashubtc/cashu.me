@@ -268,7 +268,7 @@ import { useCameraStore } from "src/stores/camera";
 import { useP2PKStore } from "src/stores/p2pk";
 import { useNWCStore } from "src/stores/nwc";
 import { useNPCStore } from "src/stores/npubcash";
-import { useNostrStore } from "src/stores/nostr";
+import { useNostrStore, SignerType } from "src/stores/nostr";
 import { usePRStore } from "src/stores/payment-request";
 import { useDexieStore } from "src/stores/dexie";
 
@@ -689,11 +689,18 @@ export default {
       this.initializeMnemonic();
 
       const hasExt = await this.checkNip07Signer();
-      if (hasExt) {
-        await this.initNip07Signer();
+      if (this.signerType === SignerType.NIP07) {
+        if (hasExt) {
+          await this.initNip07Signer();
+        } else {
+          await this.initSigner();
+          this.notifyWarning(this.$t("settings.nostr.signing_extension.not_found"));
+        }
       } else {
         await this.initSigner();
-        this.notifyWarning(this.$t("settings.nostr.signing_extension.not_found"));
+        if (this.signerType === SignerType.NIP07 && !hasExt) {
+          this.notifyWarning(this.$t("settings.nostr.signing_extension.not_found"));
+        }
       }
 
       this.showWelcomePage();
