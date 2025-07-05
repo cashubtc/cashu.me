@@ -22,6 +22,30 @@
           <QBtn dense flat icon="close" @click="showTierDialog = false" />
         </QCardSection>
         <QSeparator />
+        <QCardSection v-if="loadingProfile" class="row justify-center q-pa-md">
+          <q-spinner-hourglass />
+        </QCardSection>
+        <QCardSection v-else-if="nutzapProfile">
+          <div class="text-subtitle2 q-mb-xs">P2PK public key</div>
+          <div class="text-caption" style="word-break: break-all" class="q-mb-sm">
+            {{ nutzapProfile.p2pkPubkey }}
+          </div>
+          <div class="text-subtitle2 q-mb-xs">Trusted mints</div>
+          <ul class="q-pl-md q-mb-sm text-caption">
+            <li v-for="m in nutzapProfile.trustedMints" :key="m" style="word-break: break-all">
+              {{ m }}
+            </li>
+          </ul>
+          <div class="text-subtitle2 q-mb-xs">Relays</div>
+          <ul class="q-pl-md text-caption">
+            <li v-for="r in nutzapProfile.relays" :key="r" style="word-break: break-all">
+              {{ r }}
+            </li>
+          </ul>
+        </QCardSection>
+        <QCardSection v-else>
+          <div class="text-center">No Nutzap profile published</div>
+        </QCardSection>
         <QCardSection>
           <div v-if="loadingTiers" class="row justify-center q-pa-md">
             <q-spinner-hourglass />
@@ -83,7 +107,7 @@ import SendTokenDialog from "components/SendTokenDialog.vue";
 import { useSendTokensStore } from "stores/sendTokensStore";
 import { useDonationPresetsStore } from "stores/donationPresets";
 import { useCreatorsStore } from "stores/creators";
-import { useNostrStore } from "stores/nostr";
+import { useNostrStore, fetchNutzapProfile } from "stores/nostr";
 import { useI18n } from "vue-i18n";
 import {
   QDialog,
@@ -110,6 +134,8 @@ const { t } = useI18n();
 const tiers = computed(() => creators.tiersMap[dialogPubkey.value] || []);
 const showSubscribeDialog = ref(false);
 const selectedTier = ref<any>(null);
+const nutzapProfile = ref<any | null>(null);
+const loadingProfile = ref(false);
 let tierTimeout: ReturnType<typeof setTimeout> | null = null;
 
 function getPrice(t: any): number {
@@ -140,12 +166,21 @@ async function onMessage(ev: MessageEvent) {
     showDonateDialog.value = true;
   } else if (ev.data && ev.data.type === "viewProfile" && ev.data.pubkey) {
     loadingTiers.value = true;
+    loadingProfile.value = true;
+    nutzapProfile.value = null;
     if (tierTimeout) clearTimeout(tierTimeout);
     tierTimeout = setTimeout(() => {
       loadingTiers.value = false;
     }, 5000);
     await creators.fetchTierDefinitions(ev.data.pubkey);
     dialogPubkey.value = ev.data.pubkey;
+    fetchNutzapProfile(ev.data.pubkey)
+      .then((profile) => {
+        nutzapProfile.value = profile;
+      })
+      .finally(() => {
+        loadingProfile.value = false;
+      });
     await nextTick();
     showTierDialog.value = true;
   }
@@ -155,6 +190,13 @@ watch(tiers, (val) => {
   if (val.length > 0) {
     loadingTiers.value = false;
     if (tierTimeout) clearTimeout(tierTimeout);
+  }
+});
+
+watch(showTierDialog, (val) => {
+  if (!val) {
+    nutzapProfile.value = null;
+    loadingProfile.value = false;
   }
 });
 
@@ -225,6 +267,8 @@ onMounted(async () => {
 onBeforeUnmount(() => {
   window.removeEventListener("message", onMessage);
   if (tierTimeout) clearTimeout(tierTimeout);
+  nutzapProfile.value = null;
+  loadingProfile.value = false;
 });
 </script>
 
