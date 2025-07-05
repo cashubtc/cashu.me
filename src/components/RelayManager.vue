@@ -16,6 +16,12 @@
           class="q-mr-xs"
         />
         <span class="text-caption">{{ s.url }}</span>
+        <q-icon
+          name="delete_outline"
+          size="sm"
+          class="q-ml-xs cursor-pointer"
+          @click="removeRelay(s.url)"
+        />
       </div>
     </div>
     <div class="row q-gutter-sm">
@@ -88,5 +94,9 @@ const disconnect = async () => {
   } catch (err: any) {
     notifyError(err?.message || "Failed to disconnect");
   }
+};
+
+const removeRelay = (url: string) => {
+  messenger.removeRelay(url);
 };
 </script>
