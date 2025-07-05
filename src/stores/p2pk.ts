@@ -184,35 +184,18 @@ export const useP2PKStore = defineStore("p2pk", {
         // Get all the p2pk secret data
         const now = Math.floor(Date.now() / 1000); // unix TS
         const { data, tags } = secretObject[1];
-        let mainKey: string;
-        try {
-          mainKey = ensureCompressed(data);
-        } catch {
-          mainKey = data;
-        }
+        const mainKey = ensureCompressed(data);
         const locktimeTag = tags && tags.find((tag) => tag[0] === "locktime");
         const locktime = locktimeTag ? parseInt(locktimeTag[1], 10) : undefined; // Permanent lock if not set
         const refundTag = tags && tags.find((tag) => tag[0] === "refund");
         const refundKeys =
           refundTag && refundTag.length > 1
-            ? refundTag.slice(1).map((k: string) => {
-                try {
-                  return ensureCompressed(k);
-                } catch {
-                  return k;
-                }
-              })
+            ? refundTag.slice(1).map((k: string) => ensureCompressed(k))
             : [];
         const pubkeysTag = tags && tags.find((tag) => tag[0] === "pubkeys");
         const pubkeys =
           pubkeysTag && pubkeysTag.length > 1
-            ? pubkeysTag.slice(1).map((k: string) => {
-                try {
-                  return ensureCompressed(k);
-                } catch {
-                  return k;
-                }
-              })
+            ? pubkeysTag.slice(1).map((k: string) => ensureCompressed(k))
             : [];
         const n_sigsTag = tags && tags.find((tag) => tag[0] === "n_sigs");
         const n_sigs = n_sigsTag ? parseInt(n_sigsTag[1], 10) : undefined;
