@@ -69,7 +69,7 @@ import { useP2PKStore } from 'stores/p2pk';
 import { useMintsStore } from 'stores/mints';
 import { v4 as uuidv4 } from 'uuid';
 import { nip19 } from 'nostr-tools';
-import { notifySuccess } from 'src/js/notify';
+import { notifySuccess, notifyError } from 'src/js/notify';
 
 const store = useCreatorHubStore();
 const nostr = useNostrStore();
@@ -142,12 +142,16 @@ async function initPage() {
 }
 
 async function publishFullProfile() {
-  await publishDiscoveryProfile({
-    profile: profile.value,
-    p2pkPub: profilePub.value,
-    mints: profileMints.value.split(',').map((s) => s.trim()).filter(Boolean),
-    relays: profileRelays.value.split(',').map((s) => s.trim()).filter(Boolean),
-  });
+  try {
+    await publishDiscoveryProfile({
+      profile: profile.value,
+      p2pkPub: profilePub.value,
+      mints: profileMints.value.split(',').map((s) => s.trim()).filter(Boolean),
+      relays: profileRelays.value.split(',').map((s) => s.trim()).filter(Boolean),
+    });
+  } catch (e: any) {
+    notifyError(e.message);
+  }
 }
 
 function generateP2PK() {
