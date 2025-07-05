@@ -27,7 +27,7 @@
         </QCardSection>
         <QCardSection v-else-if="nutzapProfile">
           <div class="text-subtitle2 q-mb-xs">P2PK public key</div>
-          <div class="text-caption" style="word-break: break-all" class="q-mb-sm">
+          <div class="text-caption q-mb-sm" style="word-break: break-all">
             {{ nutzapProfile.p2pkPubkey }}
           </div>
           <div class="text-subtitle2 q-mb-xs">Trusted mints</div>
