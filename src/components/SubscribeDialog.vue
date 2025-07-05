@@ -63,7 +63,7 @@ import { useDonationPresetsStore } from "stores/donationPresets";
 import { useBucketsStore, DEFAULT_BUCKET_ID } from "stores/buckets";
 import { useMintsStore } from "stores/mints";
 import { useUiStore } from "stores/ui";
-import { fetchNutzapProfile } from "stores/nostr";
+import { fetchNutzapProfile, npubToHex } from "stores/nostr";
 import { notifySuccess, notifyError } from "src/js/notify";
 import { storeToRefs } from "pinia";
 import { useNutzapStore } from "stores/nutzap";
@@ -167,26 +167,36 @@ export default defineComponent({
       if (!startDate.value) {
         return;
       }
-      const profile = await fetchNutzapProfile(props.creatorPubkey);
-      if (!profile) {
-        notifyError("Creator has not published a Nutzap profile (kind-10019)");
-        return;
+      try {
+        if (!props.creatorPubkey || !npubToHex(props.creatorPubkey)) {
+          notifyError(t("FindCreators.notifications.invalid_creator_pubkey"));
+          return;
+        }
+        const profile = await fetchNutzapProfile(props.creatorPubkey);
+        if (!profile) {
+          notifyError("Creator has not published a Nutzap profile (kind-10019)");
+          return;
+        }
+        await nutzap.send({
+          npub: props.creatorPubkey,
+          months: months.value,
+          amount: amount.value,
+          startDate: Math.floor(new Date(startDate.value).getTime() / 1000),
+        });
+        notifySuccess(t("FindCreators.notifications.subscription_success"));
+        emit("confirm", {
+          bucketId: bucketId.value,
+          months: months.value,
+          amount: amount.value,
+          startDate: Math.floor(new Date(startDate.value).getTime() / 1000),
+          total: total.value,
+        });
+        emit("update:modelValue", false);
+      } catch (e: any) {
+        notifyError(
+          e.message || t("FindCreators.notifications.subscription_failed")
+        );
       }
-      await nutzap.send({
-        npub: props.creatorPubkey,
-        months: months.value,
-        amount: amount.value,
-        startDate: Math.floor(new Date(startDate.value).getTime() / 1000),
-      });
-      notifySuccess(t("FindCreators.notifications.subscription_success"));
-      emit("confirm", {
-        bucketId: bucketId.value,
-        months: months.value,
-        amount: amount.value,
-        startDate: Math.floor(new Date(startDate.value).getTime() / 1000),
-        total: total.value,
-      });
-      emit("update:modelValue", false);
     };
 
     return {
