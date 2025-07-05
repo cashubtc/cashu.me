@@ -196,6 +196,10 @@ export async function publishNutzapProfile(opts: {
   const relaySet = await urlsToRelaySet(opts.relays);
   try {
     await ensureRelayConnectivity(ndk);
+  } catch (e: any) {
+    notifyWarning("Relay connection failed", e?.message ?? String(e));
+  }
+  try {
     await ev.publish(relaySet);
   } catch (e: any) {
     notifyError(e?.message ?? String(e));
@@ -254,6 +258,10 @@ export async function publishDiscoveryProfile(opts: {
   const relaySet = await urlsToRelaySet(opts.relays);
   try {
     await ensureRelayConnectivity(ndk);
+  } catch (e: any) {
+    notifyWarning("Relay connection failed", e?.message ?? String(e));
+  }
+  try {
     // NDK's publish method can take a single event or an array of events
     await ndk.publish(eventsToPublish, relaySet);
     notifySuccess("Profile published successfully to your relays!");
@@ -286,6 +294,10 @@ export async function publishNutzap(opts: {
   const relaySet = await urlsToRelaySet(opts.relayHints);
   try {
     await ensureRelayConnectivity(ndk);
+  } catch (e: any) {
+    notifyWarning("Relay connection failed", e?.message ?? String(e));
+  }
+  try {
     await ev.publish(relaySet);
   } catch (e: any) {
     notifyError(e?.message ?? String(e));
@@ -437,8 +449,12 @@ export const useNostrStore = defineStore("nostr", {
       try {
         await ndk.connect();
         this.connected = true;
-      } catch (e) {
+      } catch (e: any) {
         console.warn("[nostr] read-only connect failed", e);
+        notifyWarning(
+          `Failed to connect to relays`,
+          e?.message ?? String(e)
+        );
         this.connected = false;
       }
     },
@@ -486,19 +502,40 @@ export const useNostrStore = defineStore("nostr", {
 
       // 5. background logging – never throw
       Promise.allSettled(connectPromises).then(res =>
-        res.forEach((r,i) => r.status === "rejected" &&
-          console.warn("[nostr] relay", relaysArr[i].url, "failed", r.reason)));
+        res.forEach((r, i) => {
+          if (r.status === "rejected") {
+            console.warn("[nostr] relay", relaysArr[i].url, "failed", r.reason);
+            notifyWarning(
+              `Relay ${relaysArr[i].url} failed`,
+              (r.reason as any)?.message ?? String(r.reason)
+            );
+          }
+        }));
     },
     ensureNdkConnected: async function (relays?: string[]) {
       const ndk = await useNdk();
       if (!this.connected) {
-        await ndk.connect();
-        this.connected = true;
+        try {
+          await ndk.connect();
+          this.connected = true;
+        } catch (e: any) {
+          notifyWarning(
+            "Failed to connect to relays",
+            e?.message ?? String(e)
+          );
+        }
       }
       if (relays?.length) {
         const added = await urlsToRelaySet(relays);
         if (added) {
-          await ndk.connect();
+          try {
+            await ndk.connect();
+          } catch (e: any) {
+            notifyWarning(
+              "Failed to connect to additional relays",
+              e?.message ?? String(e)
+            );
+          }
         }
       }
     },
@@ -947,7 +984,11 @@ export const useNostrStore = defineStore("nostr", {
           `### Subscribing to NIP-04 direct messages to ${pubKey} since ${this.lastEventTimestamp}`
         );
         const ndk = await useNdk();
-        await ndk.connect();
+        try {
+          await ndk.connect();
+        } catch (e: any) {
+          notifyWarning("Relay connection failed", e?.message ?? String(e));
+        }
         const sub = ndk.subscribe(
           {
             kinds: [NDKKind.EncryptedDirectMessage],
@@ -1110,7 +1151,11 @@ export const useNostrStore = defineStore("nostr", {
           `### Subscribing to NIP-17 direct messages to ${pubKey} since ${since}`
         );
         const ndk = await useNdk();
-        await ndk.connect();
+        try {
+          await ndk.connect();
+        } catch (e: any) {
+          notifyWarning("Relay connection failed", e?.message ?? String(e));
+        }
         const sub = ndk.subscribe(
           {
             kinds: [1059 as NDKKind],

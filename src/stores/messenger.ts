@@ -369,6 +369,12 @@ export const useMessengerStore = defineStore("messenger", {
       await nostr.connect(relays as any);
     },
 
+    removeRelay(relay: string) {
+      this.relays = (this.relays as any).filter((r: string) => r !== relay);
+      const nostr = useNostrStore();
+      nostr.connect(this.relays as any);
+    },
+
     disconnect() {
       const nostr = useNostrStore();
       nostr.disconnect();
