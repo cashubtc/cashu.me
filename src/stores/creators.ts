@@ -169,10 +169,14 @@ export const useCreatorsStore = defineStore("creators", {
     async fetchTierDefinitions(creatorNpub: string) {
       const cached = await db.creatorsTierDefinitions.get(creatorNpub);
       if (cached) {
+        const rawEvent = cached.rawEventJson
+          ? JSON.parse(cached.rawEventJson)
+          : undefined;
         this.tiersMap[creatorNpub] = cached.tiers.map((t: any) => ({
           ...t,
           price_sats: t.price_sats ?? t.price ?? 0,
         }));
+        void rawEvent; // parsed for potential use
       }
       const filter = {
         authors: [creatorNpub],
@@ -227,7 +231,7 @@ export const useCreatorsStore = defineStore("creators", {
             tiers: tiersArray,
             eventId: event.id!,
             updatedAt: event.created_at,
-            rawEvent: event,
+            rawEventJson: JSON.stringify(event),
           });
         } catch (e) {
           console.error("Indexer tier fetch error:", e);
@@ -250,7 +254,7 @@ export const useCreatorsStore = defineStore("creators", {
               tiers: tiersArray,
               eventId: event.id!,
               updatedAt: event.created_at,
-              rawEvent: event,
+              rawEventJson: JSON.stringify(event),
             });
           } catch (e) {
             console.error("Error parsing tier definitions JSON:", e);
@@ -281,7 +285,7 @@ export const useCreatorsStore = defineStore("creators", {
         tiers: tiersArray,
         eventId: event.id!,
         updatedAt: created_at,
-        rawEvent: event as NostrEvent,
+        rawEventJson: JSON.stringify(event),
       });
 
       this.tiersMap[creatorNpub] = tiersArray;

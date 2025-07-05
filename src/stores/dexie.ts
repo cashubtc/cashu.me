@@ -25,7 +25,8 @@ export interface CreatorTierDefinition {
   }[];
   eventId: string;
   updatedAt: number;
-  rawEvent?: NostrEvent;
+  /** Raw Nostr event JSON string */
+  rawEventJson?: string;
 }
 
 export interface SubscriptionInterval {
