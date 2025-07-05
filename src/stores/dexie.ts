@@ -6,6 +6,7 @@ import { WalletProof } from "./mints";
 import { useStorageStore } from "./storage";
 import { useProofsStore } from "./proofs";
 import { notifyError, notifySuccess } from "../js/notify";
+import type { NostrEvent } from "@nostr-dev-kit/ndk";
 
 export interface CachedProfileDexie {
   pubkey: string;
@@ -24,6 +25,7 @@ export interface CreatorTierDefinition {
   }[];
   eventId: string;
   updatedAt: number;
+  rawEvent?: NostrEvent;
 }
 
 export interface SubscriptionInterval {

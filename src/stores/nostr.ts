@@ -967,7 +967,7 @@ export const useNostrStore = defineStore("nostr", {
               this.parseMessageForEcash(content, event.pubkey);
               try {
                 const chatStore = useDmChatsStore();
-                chatStore.addIncoming(event);
+                chatStore.addIncoming(event.rawEvent() as any);
               } catch {}
             }
           );
@@ -1163,7 +1163,7 @@ export const useNostrStore = defineStore("nostr", {
           this.parseMessageForEcash(content, dmEvent.pubkey);
           try {
             const chatStore = useDmChatsStore();
-            chatStore.addIncoming(dmEvent);
+            chatStore.addIncoming(dmEvent as any);
           } catch {}
         });
       });

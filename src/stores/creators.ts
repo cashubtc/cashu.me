@@ -227,6 +227,7 @@ export const useCreatorsStore = defineStore("creators", {
             tiers: tiersArray,
             eventId: event.id!,
             updatedAt: event.created_at,
+            rawEvent: event,
           });
         } catch (e) {
           console.error("Indexer tier fetch error:", e);
@@ -249,6 +250,7 @@ export const useCreatorsStore = defineStore("creators", {
               tiers: tiersArray,
               eventId: event.id!,
               updatedAt: event.created_at,
+              rawEvent: event,
             });
           } catch (e) {
             console.error("Error parsing tier definitions JSON:", e);
@@ -279,6 +281,7 @@ export const useCreatorsStore = defineStore("creators", {
         tiers: tiersArray,
         eventId: event.id!,
         updatedAt: created_at,
+        rawEvent: event as NostrEvent,
       });
 
       this.tiersMap[creatorNpub] = tiersArray;
