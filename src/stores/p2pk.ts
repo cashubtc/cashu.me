@@ -238,10 +238,6 @@ export const useP2PKStore = defineStore("p2pk", {
           }
           return { pubkey: refundKeys[0], locktime, refundKeys };
         }
-        if (locktime !== undefined && locktime <= now) {
-          debug("p2pk token - lock has expired");
-          return { pubkey: mainKey, locktime, refundKeys: [] };
-        }
         debug("p2pk token - lock has expired");
       } catch {}
       return { pubkey: "", locktime: undefined, refundKeys: [] }; // Token is not locked / secret is not P2PK

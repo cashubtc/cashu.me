@@ -40,18 +40,6 @@ describe("P2PK store", () => {
     expect(info.locktime).toBe(locktime);
   });
 
-  it("returns pubkey for expired locktime secret without refund", () => {
-    const p2pk = useP2PKStore();
-    const locktime = Math.floor(Date.now() / 1000) - 1000;
-    const secret = JSON.stringify([
-      "P2PK",
-      { data: "02aa", tags: [["locktime", String(locktime)]] },
-    ]);
-    const info = p2pk.getSecretP2PKPubkey(secret);
-    expect(info.pubkey).toBe("02aa");
-    expect(info.locktime).toBe(locktime);
-  });
-
   it("forwards options in sendToLock", async () => {
     const walletStore = useWalletStore();
     const proofsStore = useProofsStore();
