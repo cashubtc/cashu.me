@@ -374,6 +374,9 @@ export const useNostrStore = defineStore("nostr", {
     seedSignerPrivateKeyNsec: "",
     privateKeySigner: {} as NDKPrivateKeySigner,
     signer: undefined as unknown as NDKSigner | undefined,
+    nip07SignerAvailable: true,
+    nip07Checked: false,
+    nip07Warned: false,
     mintRecommendations: useLocalStorage<MintRecommendation[]>(
       "cashu.ndk.mintRecommendations",
       []
@@ -540,6 +543,17 @@ export const useNostrStore = defineStore("nostr", {
     },
     initSignerIfNotSet: async function () {
       if (!this.signer) {
+        if (
+          this.signerType === SignerType.NIP07 &&
+          this.nip07Checked &&
+          !this.nip07SignerAvailable
+        ) {
+          if (!this.initialized) {
+            await this.initNdkReadOnly();
+            this.initialized = true;
+          }
+          return;
+        }
         this.initialized = false; // force re-initialisation
       }
       if (!this.initialized) {
@@ -649,16 +663,31 @@ export const useNostrStore = defineStore("nostr", {
         return cached ? cached.profile : null;
       }
     },
-    checkNip07Signer: async function (): Promise<boolean> {
+    checkNip07Signer: async function (force = false): Promise<boolean> {
+      if (this.nip07Checked && !force) return this.nip07SignerAvailable;
       const signer = new NDKNip07Signer();
       try {
         await signer.user();
-        return true;
+        this.nip07SignerAvailable = true;
       } catch (e) {
-        return false;
+        this.nip07SignerAvailable = false;
       }
+      this.nip07Checked = true;
+      return this.nip07SignerAvailable;
     },
     initNip07Signer: async function () {
+      const available = await this.checkNip07Signer();
+      if (!available) {
+        if (!this.nip07Warned) {
+          notifyWarning(
+            "Nostr extension locked or unavailable",
+            "Unlock your NIP-07 extension to enable signing"
+          );
+          this.nip07Warned = true;
+        }
+        this.initialized = true;
+        return;
+      }
       try {
         const signer = new NDKNip07Signer();
         await signer.blockUntilReady();

@@ -263,9 +263,9 @@ function handleDonate({
 onMounted(async () => {
   window.addEventListener("message", onMessage);
   try {
-    await nostr.initSignerIfNotSet();
+    await nostr.initNdkReadOnly();
   } catch (e: any) {
-    notifyWarning("Failed to initialize Nostr signer", e?.message);
+    notifyWarning("Failed to connect to Nostr relays", e?.message);
   }
 });
 
