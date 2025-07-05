@@ -7,6 +7,7 @@ import { LockedToken } from "./lockedTokens";
 import { useSubscriptionsStore } from "./subscriptions";
 import { useP2PKStore } from "./p2pk";
 import { DEFAULT_BUCKET_ID } from "./buckets";
+import { ensureCompressed } from "src/utils/ecash";
 
 export type DonationPreset = {
   months: number;
@@ -55,7 +56,7 @@ export const useDonationPresetsStore = defineStore("donationPresets", {
       const subscriptionsStore = useSubscriptionsStore();
       const p2pkStore = useP2PKStore();
 
-      const convertedPubkey = p2pkStore.maybeConvertNpub(pubkey);
+      const convertedPubkey = ensureCompressed(pubkey);
 
       const wallet = walletStore.wallet;
       let proofs = mintsStore.activeProofs.filter(

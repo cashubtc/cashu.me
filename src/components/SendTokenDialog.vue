@@ -662,6 +662,7 @@ import { Buffer } from "buffer";
 import { useCameraStore } from "src/stores/camera";
 import { useP2PKStore } from "src/stores/p2pk";
 import { nip19, ProfilePointer } from "nostr-tools";
+import { ensureCompressed } from "src/utils/ecash";
 import TokenInformation from "components/TokenInformation.vue";
 import {
   getDecodedToken,
@@ -943,7 +944,7 @@ export default defineComponent({
       "setTokenPaid",
       "deleteToken",
     ]),
-    ...mapActions(useP2PKStore, ["isValidPubkey", "maybeConvertNpub"]),
+    ...mapActions(useP2PKStore, ["isValidPubkey"]),
     ...mapActions(useCameraStore, ["closeCamera", "showCamera"]),
     ...mapActions(useMintsStore, ["toggleUnit"]),
     onDialogShown() {
@@ -1204,10 +1205,10 @@ export default defineComponent({
             console.error(e);
           }
         }
-        this.sendData.p2pkPubkey = this.maybeConvertNpub(
+        this.sendData.p2pkPubkey = ensureCompressed(
           this.sendData.p2pkPubkey
         );
-        this.sendData.refundPubkey = this.maybeConvertNpub(
+        this.sendData.refundPubkey = ensureCompressed(
           this.sendData.refundPubkey
         );
         let { _, sendProofs } = await this.sendToLock(

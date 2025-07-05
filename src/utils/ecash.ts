@@ -1,6 +1,4 @@
-import { secp256k1 } from "@noble/curves/secp256k1";
-import { bytesToHex } from "@noble/hashes/utils";
-const Point = secp256k1.ProjectivePoint;
+import { Point } from "@noble/secp256k1";
 
 /**
  * Ensure a hex pubkey is 33-byte SEC-compressed (66 hex chars 02/03…).
@@ -10,16 +8,12 @@ const Point = secp256k1.ProjectivePoint;
  */
 export function ensureCompressed(hex: string): string {
   hex = hex.toLowerCase().replace(/^0x/, "");
-  if (/^(02|03)[0-9a-f]{64}$/.test(hex)) return hex; // already good
-  if (/^[0-9a-f]{64}$/.test(hex)) {
-    try {
-      return bytesToHex(Point.fromHex("02" + hex).toRawBytes(true));
-    } catch {
-      return bytesToHex(Point.fromHex("03" + hex).toRawBytes(true));
-    }
+  if (hex.length === 64) {
+    // This is an x-only pubkey, which is what nostr-tools' getPublicKey returns.
+    // We will prepend '02' to treat it as a point on the curve.
+    hex = "02" + hex;
   }
-  if (/^04[0-9a-f]{128}$/.test(hex)) {
-    return bytesToHex(Point.fromHex(hex).toRawBytes(true));
-  }
-  throw new Error(`invalid pubkey format: ${hex}`);
+  // If it's already compressed, the point library will handle it correctly.
+  const point = Point.fromHex(hex);
+  return point.toHex(true);
 }

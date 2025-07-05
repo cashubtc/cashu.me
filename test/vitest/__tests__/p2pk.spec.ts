@@ -5,6 +5,7 @@ import { useProofsStore } from "../../../src/stores/proofs";
 import { generateSecretKey, getPublicKey, nip19 } from "nostr-tools";
 import { bytesToHex } from "@noble/hashes/utils";
 import * as secp from "@noble/secp256k1";
+import { ensureCompressed } from "../../../src/utils/ecash";
 
 beforeEach(() => {
   localStorage.clear();
@@ -18,8 +19,9 @@ describe("P2PK store", () => {
       "P2PK",
       { data: "02aa", tags: [["locktime", String(locktime)]] },
     ]);
-    const info = p2pk.getSecretP2PKPubkey(secret);
-    expect(info.pubkey).toBe("02aa");
+    const pub = p2pk.getSecretP2PKPubkey(secret);
+    const info = p2pk.getSecretP2PKInfo(secret);
+    expect(pub).toBe("02aa");
     expect(info.locktime).toBe(locktime);
   });
 
@@ -36,8 +38,9 @@ describe("P2PK store", () => {
         ],
       },
     ]);
-    const info = p2pk.getSecretP2PKPubkey(secret);
-    expect(info.pubkey).toBe("02bb");
+    const pub = p2pk.getSecretP2PKPubkey(secret);
+    const info = p2pk.getSecretP2PKInfo(secret);
+    expect(pub).toBe("02bb");
     expect(info.locktime).toBe(locktime);
   });
 
@@ -48,10 +51,10 @@ describe("P2PK store", () => {
     const uncompressed = Buffer.from(secp.getPublicKey(priv, false)).toString("hex");
 
     let secret = JSON.stringify(["P2PK", { data: compressed }]);
-    expect(p2pk.getSecretP2PKPubkey(secret).pubkey).toBe(compressed);
+    expect(p2pk.getSecretP2PKPubkey(secret)).toBe(compressed);
 
     secret = JSON.stringify(["P2PK", { data: uncompressed }]);
-    expect(p2pk.getSecretP2PKPubkey(secret).pubkey).toBe(compressed);
+    expect(p2pk.getSecretP2PKPubkey(secret)).toBe(compressed);
   });
 
   it("forwards options in sendToLock", async () => {
@@ -174,7 +177,7 @@ describe("P2PK store", () => {
     const npub = nip19.npubEncode(pk);
 
     const p2pk = useP2PKStore();
-    const pubHex = p2pk.maybeConvertNpub(npub);
+    const pubHex = ensureCompressed(nip19.decode(npub).data as string);
     p2pk.p2pkKeys = [
       { publicKey: pubHex, privateKey: skHex, used: false, usedCount: 0 },
     ];
