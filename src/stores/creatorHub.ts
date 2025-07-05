@@ -190,6 +190,7 @@ export const useCreatorHubStore = defineStore("creatorHub", {
         tiers: tiersArray as any,
         eventId: ev.id!,
         updatedAt: ev.created_at!,
+        rawEvent: ev.rawEvent(),
       });
 
       notifySuccess("Tiers published");
