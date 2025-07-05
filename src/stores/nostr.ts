@@ -262,8 +262,7 @@ export async function publishDiscoveryProfile(opts: {
     notifyWarning("Relay connection failed", e?.message ?? String(e));
   }
   try {
-    // NDK's publish method can take a single event or an array of events
-    await ndk.publish(eventsToPublish, relaySet);
+    await Promise.all(eventsToPublish.map((ev) => ev.publish(relaySet)));
     notifySuccess("Profile published successfully to your relays!");
   } catch (e: any) {
     notifyError(e?.message ?? String(e));
