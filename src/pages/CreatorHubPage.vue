@@ -31,7 +31,16 @@
         <q-separator class="q-my-lg" />
         <div class="text-h6 q-mb-md">Subscription Tiers</div>
         <div v-for="tier in tierList" :key="tier.id" class="q-mb-md">
-          <q-card flat bordered>
+          <q-card flat bordered :class="{ 'saved-bg': saved[tier.id] }" class="relative-position">
+            <transition name="fade">
+              <q-icon
+                v-if="saved[tier.id]"
+                name="check_circle"
+                color="positive"
+                size="sm"
+                class="saved-check"
+              />
+            </transition>
             <q-card-section>
               <q-input v-model="editedTiers[tier.id].name" label="Title" dense outlined class="q-mt-sm" />
               <q-input v-model.number="editedTiers[tier.id].price" label="Price (sats/month)" type="number" dense outlined class="q-mt-sm" />
@@ -60,6 +69,7 @@ import { useP2PKStore } from 'stores/p2pk';
 import { useMintsStore } from 'stores/mints';
 import { v4 as uuidv4 } from 'uuid';
 import { nip19 } from 'nostr-tools';
+import { notifySuccess } from 'src/js/notify';
 
 const store = useCreatorHubStore();
 const nostr = useNostrStore();
@@ -76,6 +86,7 @@ const loggedIn = computed(() => !!store.loggedInNpub);
 const hasP2PK = computed(() => p2pkStore.p2pkKeys.length > 0);
 const tierList = computed<Tier[]>(() => store.getTierArray());
 const editedTiers = ref<Record<string, Tier>>({});
+const saved = ref<Record<string, boolean>>({});
 const npub = computed(() => (store.loggedInNpub ? nip19.npubEncode(store.loggedInNpub) : ''));
 
 const canPublish = computed(
@@ -86,10 +97,13 @@ watch(
   () => store.tiers,
   (val) => {
     const obj: Record<string, Tier> = {};
+    const savedObj: Record<string, boolean> = {};
     Object.values(val).forEach((t) => {
       obj[t.id] = { ...t } as Tier;
+      savedObj[t.id] = saved.value[t.id] || false;
     });
     editedTiers.value = obj;
+    saved.value = savedObj;
   },
   { immediate: true, deep: true },
 );
@@ -147,11 +161,16 @@ function addTier() {
   store.addTier({ id, name: '', price: 0, description: '', welcomeMessage: '' });
 }
 
-function saveTier(id: string) {
+async function saveTier(id: string) {
   const data = editedTiers.value[id];
   if (data) {
     store.updateTier(id, data);
-    store.publishTierDefinitions();
+    await store.publishTierDefinitions();
+    notifySuccess('Tier saved');
+    saved.value[id] = true;
+    setTimeout(() => {
+      saved.value[id] = false;
+    }, 2000);
   }
 }
 
@@ -164,3 +183,19 @@ onMounted(async () => {
   if (store.loggedInNpub) await initPage();
 });
 </script>
+
+<style scoped>
+.saved-bg {
+  background-color: rgba(76, 175, 80, 0.15);
+  transition: background-color 0.5s ease;
+}
+.saved-check {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  z-index: 1;
+}
+.relative-position {
+  position: relative;
+}
+</style>
