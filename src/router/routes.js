@@ -30,23 +30,6 @@ const routes = [
     ],
   },
   {
-    path: "/creator/login",
-    component: () => import("layouts/FullscreenLayout.vue"),
-    children: [
-      { path: "", component: () => import("src/pages/CreatorLoginPage.vue") },
-    ],
-  },
-  {
-    path: "/creator/dashboard",
-    component: () => import("layouts/FullscreenLayout.vue"),
-    children: [
-      {
-        path: "",
-        component: () => import("src/pages/CreatorDashboardPage.vue"),
-      },
-    ],
-  },
-  {
     path: "/my-profile",
     component: () => import("layouts/FullscreenLayout.vue"),
     children: [
