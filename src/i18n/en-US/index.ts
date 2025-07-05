@@ -1397,6 +1397,8 @@ export const messages = {
       donation_sent: "Donation sent",
       message_sent: "Message sent",
       subscription_success: "Subscription successful",
+      invalid_creator_pubkey: "Invalid creator pubkey",
+      subscription_failed: "Subscription failed",
     },
   },
   ChooseExistingTokenDialog: {
