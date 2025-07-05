@@ -230,7 +230,10 @@ export const useP2PKStore = defineStore("p2pk", {
       locktime?: number;
     } {
       const { pubkey, locktime } = this.getSecretP2PKInfo(secret);
-      return { pubkey, locktime };
+      return {
+        pubkey: pubkey ? ensureCompressed(pubkey) : "",
+        locktime,
+      };
     },
     isLocked: function (proofs: WalletProof[]) {
       const secrets = proofs.map((p) => p.secret);
