@@ -700,14 +700,18 @@ export const useWalletStore = defineStore("wallet", {
         const keysetId = this.getKeyset(historyToken.mint, historyToken.unit);
         const counter = this.keysetCounter(keysetId);
         const nostrStore = useNostrStore();
-        let privkey =
-          receiveStore.receiveData.p2pkPrivateKey ||
-          nostrStore.activePrivkeyHex;
+        const localPriv = receiveStore.receiveData.p2pkPrivateKey;
 
         /* ---------- P2PK remote-sign fall-back ------------ */
         const needsSig = proofs.some(
           (p) => typeof p.secret === "string" && p.secret.startsWith('["P2PK"')
         );
+
+        if (needsSig && !localPriv) {
+          throw new Error("You do not have the private key to unlock this token.");
+        }
+
+        let privkey = localPriv || nostrStore.activePrivkeyHex;
 
         let remoteSigned = false;
         if (!privkey && needsSig) {
