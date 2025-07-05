@@ -86,21 +86,17 @@ export const useP2PKStore = defineStore("p2pk", {
     haveThisKey: function (key: string) {
       return this.p2pkKeys.filter((m) => m.publicKey == key).length > 0;
     },
-    maybeConvertNpub: function (key: string) {
-      // Check and convert npub to P2PK.
-      // Always normalise with ensureCompressed() before use.
-      if (key && key.startsWith("npub1")) {
-        const { type, data } = nip19.decode(key);
-        if (type === "npub" && data.length === 64) {
-          key = "02" + data;
-        }
-      }
-      return ensureCompressed(key);
-    },
     isValidPubkey: function (key: string) {
+      if (!key) return false;
       try {
-        return this.maybeConvertNpub(key).length === 66;
-      } catch {
+        if (key.startsWith("npub1")) {
+          const { type, data } = nip19.decode(key);
+          if (type === "npub") {
+            key = data as string;
+          }
+        }
+        return ensureCompressed(key).length === 66;
+      } catch (e) {
         return false;
       }
     },
@@ -134,7 +130,7 @@ export const useP2PKStore = defineStore("p2pk", {
       }
       let sk = nip19.decode(nsec).data as Uint8Array; // `sk` is a Uint8Array
       // ensureCompressed() so future code can't bypass compression checks
-      let pk = ensureCompressed("02" + getPublicKey(sk));
+      let pk = ensureCompressed(getPublicKey(sk));
       let skHex = bytesToHex(sk);
       if (this.haveThisKey(pk)) {
         debug("nsec already exists in p2pk keystore");
@@ -151,7 +147,7 @@ export const useP2PKStore = defineStore("p2pk", {
     generateKeypair: function () {
       let sk = generateSecretKey(); // `sk` is a Uint8Array
       // ensureCompressed() so future code can't bypass compression checks
-      let pk = ensureCompressed("02" + getPublicKey(sk));
+      let pk = ensureCompressed(getPublicKey(sk));
       let skHex = bytesToHex(sk);
       const keyPair: P2PKKey = {
         publicKey: pk,
@@ -225,21 +221,48 @@ export const useP2PKStore = defineStore("p2pk", {
       } catch {}
       return { pubkey: "", locktime: undefined, refundKeys: [] }; // Token is not locked / secret is not P2PK
     },
-    getSecretP2PKPubkey: function (secret: string): {
-      pubkey: string;
-      locktime?: number;
-    } {
-      const { pubkey, locktime } = this.getSecretP2PKInfo(secret);
-      return {
-        pubkey: pubkey ? ensureCompressed(pubkey) : "",
-        locktime,
-      };
+    getSecretP2PKPubkey: function (secret: string): string {
+      try {
+        const secretObject = JSON.parse(secret);
+        if (secretObject[0] !== "P2PK" || !secretObject[1]?.data) {
+          return ""; // Not a valid P2PK secret
+        }
+
+        const { data, tags } = secretObject[1];
+        const now = Math.floor(Date.now() / 1000);
+
+        const locktimeTag = tags?.find((tag: any) => tag[0] === "locktime");
+        const locktime = locktimeTag ? parseInt(locktimeTag[1], 10) : Infinity;
+
+        if (locktime > now) {
+          // Lock is active, return the main compressed key
+          return ensureCompressed(data);
+        }
+
+        const refundTag = tags?.find((tag: any) => tag[0] === "refund");
+        if (refundTag?.length > 1) {
+          // Lock has expired, check for a refund key we own
+          const refundKeys = refundTag.slice(1).map((k: string) => ensureCompressed(k));
+          for (const pk of refundKeys) {
+            if (this.haveThisKey(pk)) {
+              return pk; // We own a refund key
+            }
+          }
+          return refundKeys[0]; // We don't own any, return the first to show it's locked
+        }
+
+        // Lock has expired and there are no refund keys
+        return ensureCompressed(data);
+      } catch (e) {
+        console.error("Error parsing P2PK secret:", e);
+        return "";
+      }
     },
     isLocked: function (proofs: WalletProof[]) {
       const secrets = proofs.map((p) => p.secret);
       for (const secret of secrets) {
         try {
-          if (this.getSecretP2PKPubkey(secret).pubkey) {
+          if (this.getSecretP2PKPubkey(secret)) {
             return true;
           }
         } catch {}
@@ -249,7 +272,7 @@ export const useP2PKStore = defineStore("p2pk", {
     isLockedToUs: function (proofs: WalletProof[]) {
       const secrets = proofs.map((p) => p.secret);
       for (const secret of secrets) {
-        const { pubkey } = this.getSecretP2PKPubkey(secret);
+        const pubkey = this.getSecretP2PKPubkey(secret);
         if (pubkey) {
           return this.haveThisKey(pubkey);
         }
@@ -291,7 +314,7 @@ export const useP2PKStore = defineStore("p2pk", {
 
       const secrets = proofs.map((p) => p.secret);
       for (const secret of secrets) {
-        const { pubkey } = this.getSecretP2PKPubkey(secret);
+        const pubkey = this.getSecretP2PKPubkey(secret);
         if (pubkey && this.haveThisKey(pubkey)) {
           // NOTE: we assume all tokens are locked to the same key here!
           return this.p2pkKeys.filter((m) => m.publicKey == pubkey)[0]
@@ -307,7 +330,7 @@ export const useP2PKStore = defineStore("p2pk", {
       }
       const proofs = token.getProofs(decodedToken);
       const times = proofs
-        .map((p) => this.getSecretP2PKPubkey(p.secret).locktime)
+        .map((p) => this.getSecretP2PKInfo(p.secret).locktime)
         .filter((t) => t !== undefined) as number[];
       if (!times.length) {
         return undefined;

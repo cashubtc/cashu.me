@@ -59,7 +59,7 @@ describe("Timelock", () => {
       "P2PK",
       { data: "02aa", tags: [["locktime", String(locktime)]] },
     ]);
-    const info = p2pk.getSecretP2PKPubkey(secret);
+    const info = p2pk.getSecretP2PKInfo(secret);
     expect(info.locktime).toBe(locktime);
   });
 });
