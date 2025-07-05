@@ -195,6 +195,17 @@ wss://eden.nostr.land
 wss://njump.me
 ```
 
+### Verify Nutzap Profile
+After publishing your `kind:10019` Nutzap profile, you can confirm that relays
+have received it. Run the helper script with your npub:
+
+```bash
+npx ts-node scripts/verifyNutzapProfile.ts <your-npub>
+```
+
+The script connects read-only to your configured relays and prints the fetched
+profile data so you can double-check the values.
+
 ## Contributing
 
 Contributions are welcome! Open an issue or pull request to discuss your ideas. Bug reports and feature requests are encouraged. Help with translation and documentation is always appreciated.

@@ -1790,6 +1790,7 @@ import { useSettingsStore } from "src/stores/settings";
 import {
   useNostrStore,
   publishNutzapProfile as publishNutzapProfileFn,
+  fetchNutzapProfile,
 } from "src/stores/nostr";
 import { useNPCStore } from "src/stores/npubcash";
 import { useP2PKStore } from "src/stores/p2pk";
@@ -1804,6 +1805,7 @@ import { useReceiveTokensStore } from "../stores/receiveTokensStore";
 import { useWelcomeStore } from "src/stores/welcome";
 import { useStorageStore } from "src/stores/storage";
 import { useI18n } from "vue-i18n";
+import { Dialog } from "quasar";
 
 export default defineComponent({
   name: "SettingsView",
@@ -2071,6 +2073,10 @@ export default defineComponent({
           relays: this.defaultNostrRelays,
         });
         this.notifySuccess("Profile published");
+        const profile = await fetchNutzapProfile(this.pubkey);
+        Dialog.create({
+          message: `Profile fetched: ${JSON.stringify(profile, null, 2)}`,
+        });
       } catch (e) {
         this.notifyError("Failed to publish");
       }
