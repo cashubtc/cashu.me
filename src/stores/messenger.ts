@@ -244,6 +244,18 @@ export const useMessengerStore = defineStore("messenger", {
           const receiveStore = useReceiveTokensStore();
           receiveStore.receiveData.tokensBase64 = payload.token;
           await receiveStore.receiveToken(payload.token, DEFAULT_BUCKET_ID);
+        } else if (payload && payload.type === "cashu_subscription_claimed") {
+          const sub = await cashuDb.subscriptions.get(payload.subscription_id);
+          const idx = sub?.intervals.findIndex(
+            (i) => i.monthIndex === payload.month_index
+          );
+          if (sub && idx !== undefined && idx >= 0) {
+            sub.intervals[idx].status = "claimed";
+            await cashuDb.subscriptions.update(sub.id, {
+              intervals: sub.intervals,
+            });
+            notifySuccess("Subscription payment claimed");
+          }
         } else if (payload && payload.token) {
           const tokensStore = useTokensStore();
           const decoded = tokensStore.decodeToken(payload.token);

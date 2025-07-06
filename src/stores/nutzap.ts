@@ -10,6 +10,7 @@ import { v4 as uuidv4 } from "uuid";
 import { useMintsStore } from "./mints";
 import { useProofsStore } from "./proofs";
 import { useMessengerStore } from "./messenger";
+import { useSubscriptionsStore } from "./subscriptions";
 import {
   fetchNutzapProfile,
   subscribeToNutzaps,
@@ -126,13 +127,12 @@ export const useNutzapStore = defineStore("nutzap", {
           }
           throw e;
         }
-        const creatorP2pk = profile?.p2pkPubkey || (profile as any)?.p2pk;
-        if (!profile || !creatorP2pk) {
-          notifyError(
+        if (!profile || !profile.p2pkPubkey) {
+          throw new Error(
             "Creator's Nutzap profile is missing or does not contain a P2PK key."
           );
-          return;
         }
+        const creatorP2pk = profile.p2pkPubkey;
 
         const trustedMints = profile.trustedMints || profile.mints || [];
         const trustedRelays = profile.relays;
@@ -190,6 +190,29 @@ export const useNutzapStore = defineStore("nutzap", {
         // Persist into bucket store for progress UI
         const buckets = useLockedTokensStore();
         await buckets.addMany(lockedTokens);
+
+        const subStore = useSubscriptionsStore();
+        await subStore.addSubscription({
+          creatorNpub: npub,
+          tierId: "nutzap",
+          creatorP2PK: creatorP2pk,
+          subscriberRefundP2PK: p2pk.firstKey?.publicKey || "",
+          mintUrl: mints.activeMintUrl,
+          amountPerInterval: amount,
+          frequency: "monthly",
+          startDate,
+          commitmentLength: months,
+          intervals: lockedTokens.map((t, idx) => ({
+            intervalKey: String(idx + 1),
+            lockedTokenId: t.id,
+            unlockTs: t.locktime || 0,
+            refundUnlockTs: 0,
+            status: "pending",
+            tokenString: t.token,
+          })),
+          status: "active",
+        } as any);
+
         return lockedTokens;
       } catch (e: any) {
         this.error = e.message;
