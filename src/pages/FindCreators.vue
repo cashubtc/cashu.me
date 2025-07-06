@@ -11,7 +11,7 @@
       v-model="showSubscribeDialog"
       :tier="selectedTier"
       :supporter-pubkey="nostr.pubkey"
-      :creator-pubkey="dialogPubkey.value"
+      :creator-pubkey="nip19.npubEncode(dialogPubkey.value)"
       @confirm="confirmSubscribe"
     />
     <SendTokenDialog />

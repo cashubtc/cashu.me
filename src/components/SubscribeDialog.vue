@@ -168,7 +168,10 @@ export default defineComponent({
         return;
       }
       try {
-        if (!props.creatorPubkey || !npubToHex(props.creatorPubkey)) {
+        const hex = props.creatorPubkey.startsWith("npub")
+          ? npubToHex(props.creatorPubkey)
+          : props.creatorPubkey;
+        if (!hex || hex.length !== 64) {
           notifyError("Error: Could not decode creator's public key.");
           return;
         }

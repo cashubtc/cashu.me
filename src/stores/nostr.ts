@@ -1301,6 +1301,20 @@ export const useNostrStore = defineStore("nostr", {
           await receiveStore.receiveToken(payload.token, DEFAULT_BUCKET_ID);
           return;
         }
+        if (payload && payload.type === "cashu_subscription_claimed") {
+          const sub = await cashuDb.subscriptions.get(payload.subscription_id);
+          const idx = sub?.intervals.findIndex(
+            (i) => i.monthIndex === payload.month_index
+          );
+          if (sub && idx !== undefined && idx >= 0) {
+            sub.intervals[idx].status = "claimed";
+            await cashuDb.subscriptions.update(sub.id, {
+              intervals: sub.intervals,
+            });
+            notifySuccess("Subscription payment claimed");
+          }
+          return;
+        }
         if (payload && payload.proofs) {
           const receiveStore = useReceiveTokensStore();
           const prStore = usePRStore();
