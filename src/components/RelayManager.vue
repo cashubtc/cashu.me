@@ -44,7 +44,7 @@ import { ref, watch, computed, onMounted } from "vue";
 import { useMessengerStore } from "src/stores/messenger";
 import { notifySuccess, notifyError } from "src/js/notify";
 import { useNdk } from "src/composables/useNdk";
-import { DEFAULT_RELAYS } from "boot/ndk";
+import { DEFAULT_RELAYS } from "src/config/relays";
 import type NDK from "@nostr-dev-kit/ndk";
 
 const messenger = useMessengerStore();

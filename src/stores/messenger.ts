@@ -5,7 +5,7 @@ import { Event as NostrEvent } from "nostr-tools";
 import { useNostrStore, SignerType } from "./nostr";
 import { v4 as uuidv4 } from "uuid";
 import { useSettingsStore } from "./settings";
-import { DEFAULT_RELAYS } from "boot/ndk";
+import { DEFAULT_RELAYS } from "src/config/relays";
 import { sanitizeMessage } from "src/js/message-utils";
 import { notifySuccess, notifyError } from "src/js/notify";
 import { useWalletStore } from "./wallet";

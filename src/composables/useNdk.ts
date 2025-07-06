@@ -1,10 +1,9 @@
 import NDK, { NDKSigner } from "@nostr-dev-kit/ndk";
-import {
-  DEFAULT_RELAYS,
-  createNdk,
+import { createNdk,
   createSignedNdk,
   mergeDefaultRelays,
 } from "boot/ndk";
+import { DEFAULT_RELAYS } from "src/config/relays";
 import { useNostrStore } from "stores/nostr";
 import { useSettingsStore } from "stores/settings";
 
