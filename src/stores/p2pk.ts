@@ -222,7 +222,14 @@ export const useP2PKStore = defineStore("p2pk", {
       return { pubkey: "", locktime: undefined, refundKeys: [] }; // Token is not locked / secret is not P2PK
     },
     getSecretP2PKPubkey: function (secret: string): string {
+      console.log('Attempting to parse P2PK secret:', secret);
       try {
+        // If the secret doesn't appear to be JSON, assume it's already the public key
+        if (typeof secret === 'string' && !secret.startsWith('{')) {
+          console.warn('P2PK secret is not a JSON object, treating as raw pubkey.');
+          return secret;
+        }
+
         const secretObject = JSON.parse(secret);
         if (secretObject[0] !== "P2PK" || !secretObject[1]?.data) {
           return ""; // Not a valid P2PK secret
@@ -254,8 +261,8 @@ export const useP2PKStore = defineStore("p2pk", {
         // Lock has expired and there are no refund keys
         return ensureCompressed(data);
       } catch (e) {
-        console.error("Error parsing P2PK secret:", e);
-        return "";
+        console.error('Failed to parse P2PK secret:', e);
+        return '';
       }
     },
     isLocked: function (proofs: WalletProof[]) {
