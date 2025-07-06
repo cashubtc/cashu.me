@@ -222,48 +222,58 @@ export const useP2PKStore = defineStore("p2pk", {
       return { pubkey: "", locktime: undefined, refundKeys: [] }; // Token is not locked / secret is not P2PK
     },
     getSecretP2PKPubkey: function (secret: string): string {
-      console.log('Attempting to parse P2PK secret:', secret);
-
-      if (typeof secret !== 'string') {
-          console.error('P2PK secret is not a string:', secret);
-          return '';
+      // Step 1: Basic validation to ensure the input is a processable string.
+      if (typeof secret !== 'string' || secret.trim() === '') {
+        console.error('Invalid or empty secret provided.');
+        return '';
       }
 
-      if (!secret.trim().startsWith('{')) {
-          console.warn('P2PK secret is not a JSON object, treating as raw pubkey.');
-          return secret;
+      const trimmedSecret = secret.trim();
+
+      // Step 2: Handle secrets that are not JSON objects (e.g., raw pubkeys).
+      if (!trimmedSecret.startsWith('{')) {
+        console.warn('P2PK secret is not a JSON object, treating as raw pubkey.');
+        return trimmedSecret;
       }
 
+      // Step 3: Safely parse the JSON and extract data.
       try {
-        const secretObject = JSON.parse(secret);
-        if (secretObject[0] !== "P2PK" || !secretObject[1]?.data) {
-          return "";
+        const secretObject = JSON.parse(trimmedSecret);
+
+        if (secretObject[0] !== 'P2PK' || !secretObject[1]?.data) {
+          console.error('Secret is not a valid P2PK format.');
+          return '';
         }
 
+        // Step 4: Apply the original business logic for locktime and refunds.
         const { data, tags } = secretObject[1];
         const now = Math.floor(Date.now() / 1000);
 
-        const locktimeTag = tags?.find((tag: any) => tag[0] === "locktime");
+        const locktimeTag = tags?.find((tag: any) => tag[0] === 'locktime');
         const locktime = locktimeTag ? parseInt(locktimeTag[1], 10) : Infinity;
 
         if (locktime > now) {
+          // Lock is active, return the main key.
           return data;
         }
 
-        const refundTag = tags?.find((tag: any) => tag[0] === "refund");
+        const refundTag = tags?.find((tag: any) => tag[0] === 'refund');
         if (refundTag?.length > 1) {
           const refundKeys = refundTag.slice(1);
+          // Check if we own any of the refund keys.
           for (const pk of refundKeys) {
             if (this.haveThisKey(pk)) {
               return pk;
             }
           }
+          // If we don't own a refund key, return the first one to show it's locked.
           return refundKeys[0];
         }
 
+        // Lock has expired and there are no refund keys.
         return data;
       } catch (e) {
-        console.error('Failed to parse P2PK secret JSON:', e);
+        console.error('Failed to parse P2PK secret JSON:', e, 'Secret was:', trimmedSecret);
         return '';
       }
     },
