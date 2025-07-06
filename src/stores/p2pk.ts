@@ -223,16 +223,21 @@ export const useP2PKStore = defineStore("p2pk", {
     },
     getSecretP2PKPubkey: function (secret: string): string {
       console.log('Attempting to parse P2PK secret:', secret);
-      try {
-        // If the secret doesn't appear to be JSON, assume it's already the public key
-        if (typeof secret === 'string' && !secret.startsWith('{')) {
+
+      if (typeof secret !== 'string') {
+          console.error('P2PK secret is not a string:', secret);
+          return '';
+      }
+
+      if (!secret.trim().startsWith('{')) {
           console.warn('P2PK secret is not a JSON object, treating as raw pubkey.');
           return secret;
-        }
+      }
 
+      try {
         const secretObject = JSON.parse(secret);
         if (secretObject[0] !== "P2PK" || !secretObject[1]?.data) {
-          return ""; // Not a valid P2PK secret
+          return "";
         }
 
         const { data, tags } = secretObject[1];
@@ -242,26 +247,23 @@ export const useP2PKStore = defineStore("p2pk", {
         const locktime = locktimeTag ? parseInt(locktimeTag[1], 10) : Infinity;
 
         if (locktime > now) {
-          // Lock is active, return the main compressed key
-          return ensureCompressed(data);
+          return data;
         }
 
         const refundTag = tags?.find((tag: any) => tag[0] === "refund");
         if (refundTag?.length > 1) {
-          // Lock has expired, check for a refund key we own
-          const refundKeys = refundTag.slice(1).map((k: string) => ensureCompressed(k));
+          const refundKeys = refundTag.slice(1);
           for (const pk of refundKeys) {
             if (this.haveThisKey(pk)) {
-              return pk; // We own a refund key
+              return pk;
             }
           }
-          return refundKeys[0]; // We don't own any, return the first to show it's locked
+          return refundKeys[0];
         }
 
-        // Lock has expired and there are no refund keys
-        return ensureCompressed(data);
+        return data;
       } catch (e) {
-        console.error('Failed to parse P2PK secret:', e);
+        console.error('Failed to parse P2PK secret JSON:', e);
         return '';
       }
     },
