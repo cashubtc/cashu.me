@@ -208,7 +208,7 @@ export const useNutzapStore = defineStore("nutzap", {
             unlockTs: t.locktime || 0,
             refundUnlockTs: 0,
             status: "pending",
-            tokenString: t.token,
+            tokenString: t.tokenString,
           })),
           status: "active",
         } as any);
