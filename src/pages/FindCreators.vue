@@ -11,7 +11,7 @@
       v-model="showSubscribeDialog"
       :tier="selectedTier"
       :supporter-pubkey="nostr.pubkey"
-      :creator-pubkey="nip19.npubEncode(dialogPubkey.value)"
+      :creator-pubkey="dialogNpub"
       @confirm="confirmSubscribe"
     />
     <SendTokenDialog />
@@ -125,7 +125,13 @@ const showDonateDialog = ref(false);
 const selectedPubkey = ref("");
 const showTierDialog = ref(false);
 const loadingTiers = ref(false);
-const dialogPubkey = ref("");
+const dialogPubkey = ref("");          // always 64-char hex
+const dialogNpub = computed(() => {
+  const hex = dialogPubkey.value;
+  if (hex.length === 64 && /^[0-9a-f]{64}$/i.test(hex))
+    return nip19.npubEncode(hex);
+  return "";
+});
 
 const sendTokensStore = useSendTokensStore();
 const donationStore = useDonationPresetsStore();
@@ -163,7 +169,7 @@ function formatTs(ts: number): string {
 
 async function onMessage(ev: MessageEvent) {
   if (ev.data && ev.data.type === "donate" && ev.data.pubkey) {
-    selectedPubkey.value = ev.data.pubkey;
+    selectedPubkey.value = ev.data.pubkey;         // keep hex
     showDonateDialog.value = true;
   } else if (ev.data && ev.data.type === "viewProfile" && ev.data.pubkey) {
     loadingTiers.value = true;
@@ -174,7 +180,7 @@ async function onMessage(ev: MessageEvent) {
       loadingTiers.value = false;
     }, 5000);
     await creators.fetchTierDefinitions(ev.data.pubkey);
-    dialogPubkey.value = ev.data.pubkey;
+    dialogPubkey.value = ev.data.pubkey;           // keep hex
     try {
       const profile = await fetchNutzapProfile(ev.data.pubkey);
       nutzapProfile.value = profile;
