@@ -492,7 +492,7 @@ import { useNostrStore } from "stores/nostr";
 import { useMessengerStore } from "stores/messenger";
 import { useSubscriptionsStore } from "stores/subscriptions";
 import { useNutzapStore } from "stores/nutzap";
-import { fetchNutzapProfile } from "stores/nostr";
+import { fetchNutzapProfile, RelayConnectionError } from "stores/nostr";
 import { useRouter } from "vue-router";
 import { useQuasar } from "quasar";
 import { useClipboard } from "src/composables/useClipboard";
@@ -730,7 +730,16 @@ function extendSubscription(pubkey: string) {
       : Math.floor(Date.now() / 1000);
     const startDate = lastLock + 30 * 24 * 60 * 60;
     try {
-      const profile = await fetchNutzapProfile(pubkey);
+      let profile = null;
+      try {
+        profile = await fetchNutzapProfile(pubkey);
+      } catch (e: any) {
+        if (e instanceof RelayConnectionError) {
+          notifyError("Unable to connect to Nostr relays");
+          return;
+        }
+        throw e;
+      }
       if (!profile) {
         notifyError("Creator has not published a Nutzap profile (kind-10019)");
         return;

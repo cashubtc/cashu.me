@@ -14,6 +14,7 @@ import {
   fetchNutzapProfile,
   subscribeToNutzaps,
   useNostrStore,
+  RelayConnectionError,
 } from "./nostr";
 import type { NostrEvent, NDKSubscription } from "@nostr-dev-kit/ndk";
 import dayjs from "dayjs";
@@ -115,7 +116,16 @@ export const useNutzapStore = defineStore("nutzap", {
     async send({ npub, amount, months, startDate }: SendParams) {
       try {
         this.loading = true;
-        const profile = await fetchNutzapProfile(npub);
+        let profile = null;
+        try {
+          profile = await fetchNutzapProfile(npub);
+        } catch (e: any) {
+          if (e instanceof RelayConnectionError) {
+            notifyError("Unable to connect to Nostr relays");
+            return;
+          }
+          throw e;
+        }
         const creatorP2pk = profile?.p2pkPubkey || (profile as any)?.p2pk;
         if (!profile || !creatorP2pk) {
           notifyError(

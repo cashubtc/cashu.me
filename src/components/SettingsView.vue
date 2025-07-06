@@ -1791,6 +1791,7 @@ import {
   useNostrStore,
   publishNutzapProfile as publishNutzapProfileFn,
   fetchNutzapProfile,
+  RelayConnectionError,
 } from "src/stores/nostr";
 import { useNPCStore } from "src/stores/npubcash";
 import { useP2PKStore } from "src/stores/p2pk";
@@ -2073,7 +2074,16 @@ export default defineComponent({
           relays: this.defaultNostrRelays,
         });
         this.notifySuccess("Profile published");
-        const profile = await fetchNutzapProfile(this.pubkey);
+        let profile = null;
+        try {
+          profile = await fetchNutzapProfile(this.pubkey);
+        } catch (e: any) {
+          if (e instanceof RelayConnectionError) {
+            this.notifyError("Unable to connect to Nostr relays");
+            return;
+          }
+          throw e;
+        }
         Dialog.create({
           message: `Profile fetched: ${JSON.stringify(profile, null, 2)}`,
         });

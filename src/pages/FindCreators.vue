@@ -107,7 +107,7 @@ import SendTokenDialog from "components/SendTokenDialog.vue";
 import { useSendTokensStore } from "stores/sendTokensStore";
 import { useDonationPresetsStore } from "stores/donationPresets";
 import { useCreatorsStore } from "stores/creators";
-import { useNostrStore, fetchNutzapProfile } from "stores/nostr";
+import { useNostrStore, fetchNutzapProfile, RelayConnectionError } from "stores/nostr";
 import { notifyWarning } from "src/js/notify";
 import { useI18n } from "vue-i18n";
 import {
@@ -175,13 +175,18 @@ async function onMessage(ev: MessageEvent) {
     }, 5000);
     await creators.fetchTierDefinitions(ev.data.pubkey);
     dialogPubkey.value = ev.data.pubkey;
-    fetchNutzapProfile(ev.data.pubkey)
-      .then((profile) => {
-        nutzapProfile.value = profile;
-      })
-      .finally(() => {
-        loadingProfile.value = false;
-      });
+    try {
+      const profile = await fetchNutzapProfile(ev.data.pubkey);
+      nutzapProfile.value = profile;
+    } catch (e: any) {
+      if (e instanceof RelayConnectionError) {
+        notifyWarning("Unable to connect to Nostr relays");
+      } else {
+        console.error(e);
+      }
+    } finally {
+      loadingProfile.value = false;
+    }
     await nextTick();
     showTierDialog.value = true;
   }

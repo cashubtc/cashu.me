@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import 'fake-indexeddb/auto';
 import { createPinia, setActivePinia } from 'pinia';
-import { fetchNutzapProfile, useNostrStore } from '../src/stores/nostr';
+import { fetchNutzapProfile, useNostrStore, RelayConnectionError } from '../src/stores/nostr';
 import { useSettingsStore } from '../src/stores/settings';
 
 async function main() {
@@ -16,8 +16,16 @@ async function main() {
   const nostr = useNostrStore();
   await nostr.initNdkReadOnly();
 
-  const profile = await fetchNutzapProfile(npub);
-  console.log(JSON.stringify(profile, null, 2));
+  try {
+    const profile = await fetchNutzapProfile(npub);
+    console.log(JSON.stringify(profile, null, 2));
+  } catch (e: any) {
+    if (e instanceof RelayConnectionError) {
+      console.error("Unable to connect to Nostr relays");
+      return;
+    }
+    throw e;
+  }
 }
 
 main().catch((e) => {

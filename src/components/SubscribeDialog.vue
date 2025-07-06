@@ -63,7 +63,7 @@ import { useDonationPresetsStore } from "stores/donationPresets";
 import { useBucketsStore, DEFAULT_BUCKET_ID } from "stores/buckets";
 import { useMintsStore } from "stores/mints";
 import { useUiStore } from "stores/ui";
-import { fetchNutzapProfile, npubToHex } from "stores/nostr";
+import { fetchNutzapProfile, npubToHex, RelayConnectionError } from "stores/nostr";
 import { notifySuccess, notifyError } from "src/js/notify";
 import { storeToRefs } from "pinia";
 import { useNutzapStore } from "stores/nutzap";
@@ -172,7 +172,16 @@ export default defineComponent({
           notifyError(t("FindCreators.notifications.invalid_creator_pubkey"));
           return;
         }
-        const profile = await fetchNutzapProfile(props.creatorPubkey);
+        let profile = null;
+        try {
+          profile = await fetchNutzapProfile(props.creatorPubkey);
+        } catch (e: any) {
+          if (e instanceof RelayConnectionError) {
+            notifyError("Unable to connect to Nostr relays");
+            return;
+          }
+          throw e;
+        }
         if (!profile) {
           notifyError("Creator has not published a Nutzap profile (kind-10019)");
           return;
