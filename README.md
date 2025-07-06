@@ -185,14 +185,14 @@ You can also override the relays used by the creator search. Set
 URLs. If not defined, the search falls back to the following list:
 
 ```
-wss://relay.damus.io
-wss://relay.primal.net
-wss://nos.lol
-wss://nostr.wine
-wss://purplepag.es
-wss://relay.nostr.band
-wss://eden.nostr.land
-wss://njump.me
+wss://relay.damus.io/
+wss://relay.primal.net/
+wss://eden.nostr.land/
+wss://nos.lol/
+wss://nostr-pub.wellorder.net/
+wss://nostr.bitcoiner.social/
+wss://relay.nostr.band/
+wss://relay.snort.social/
 ```
 
 ### Verify Nutzap Profile

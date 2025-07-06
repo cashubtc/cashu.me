@@ -1,16 +1,6 @@
 import { defineStore } from "pinia";
 import { useLocalStorage } from "@vueuse/core";
-
-const defaultNostrRelays = [
-  "wss://relay.damus.io/",
-  "wss://relay.primal.net/",
-  "wss://nos.lol/",
-  "wss://nostr.wine/",
-  "wss://purplepag.es/",
-  "wss://relay.nostr.band/",
-  "wss://eden.nostr.land/",
-  "wss://njump.me/",
-];
+import { DEFAULT_RELAYS } from "boot/ndk";
 
 export const useSettingsStore = defineStore("settings", {
   state: () => {
@@ -41,7 +31,7 @@ export const useSettingsStore = defineStore("settings", {
       ),
       defaultNostrRelays: useLocalStorage<string[]>(
         "cashu.settings.defaultNostrRelays",
-        defaultNostrRelays
+        DEFAULT_RELAYS,
       ),
       includeFeesInSendAmount: useLocalStorage<boolean>(
         "cashu.settings.includeFeesInSendAmount",
