@@ -18,6 +18,7 @@ import {
 import type { NostrEvent, NDKSubscription } from "@nostr-dev-kit/ndk";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
+import { notifyError } from "src/js/notify";
 dayjs.extend(utc);
 
 export function calcUnlock(base: number, i: number): number {
@@ -115,10 +116,16 @@ export const useNutzapStore = defineStore("nutzap", {
       try {
         this.loading = true;
         const profile = await fetchNutzapProfile(npub);
-        if (!profile)
-          throw new Error("Recipient has no Nutzap profile (kind:10019)");
+        const creatorP2pk = profile?.p2pkPubkey || (profile as any)?.p2pk;
+        if (!profile || !creatorP2pk) {
+          notifyError(
+            "Creator's Nutzap profile is missing or does not contain a P2PK key."
+          );
+          return;
+        }
 
-        const { p2pkPubkey, trustedMints } = profile;
+        const trustedMints = profile.trustedMints || profile.mints || [];
+        const trustedRelays = profile.relays;
         const wallet = useWalletStore();
         const p2pk = useP2PKStore();
         const mints = useMintsStore();
@@ -131,17 +138,19 @@ export const useNutzapStore = defineStore("nutzap", {
           const unlockDate = calcUnlock(startDate, i);
           const mint = wallet.findSpendableMint(amount, trustedMints);
           if (!mint)
-            throw new Error("Insufficient balance in recipient-trusted mints");
+            throw new Error(
+              "Insufficient balance in a mint that the creator trusts."
+            );
 
           // ----- HTLC-locked pledge with refund capability --------------
           const { hash } = p2pk.generateRefundSecret();
           const mintWallet = wallet.mintWallet(mint.url, mints.activeUnit);
           const proofs = mints.mintUnitProofs(mint, mints.activeUnit);
-        const { sendProofs, locked } = await wallet.sendToLock(
-          proofs,
-          mintWallet,
-          amount,
-          p2pkPubkey,
+          const { sendProofs, locked } = await wallet.sendToLock(
+            proofs,
+            mintWallet,
+            amount,
+            creatorP2pk,
           "nutzap",
           unlockDate,
           undefined,
@@ -149,18 +158,18 @@ export const useNutzapStore = defineStore("nutzap", {
         );
         const token = proofsStore.serializeProofs(sendProofs);
 
-        await messenger.sendDm(
-          profile.hexPub,
-          JSON.stringify({
-            type: "cashu_subscription_payment",
+          await messenger.sendDm(
+            profile.hexPub,
+            JSON.stringify({
+              type: "cashu_subscription_payment",
             subscription_id: subscriptionId,
             tier_id: "nutzap",
             month_index: i + 1,
             total_months: months,
             token,
-          }),
-          profile.relays
-        );
+            }),
+            trustedRelays
+          );
 
           lockedTokens.push(locked);
 
