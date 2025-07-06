@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 import { useLocalStorage } from "@vueuse/core";
-import { DEFAULT_RELAYS } from "boot/ndk";
+import { DEFAULT_RELAYS } from "src/config/relays";
 
 export const useSettingsStore = defineStore("settings", {
   state: () => {

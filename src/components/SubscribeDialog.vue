@@ -169,7 +169,7 @@ export default defineComponent({
       }
       try {
         if (!props.creatorPubkey || !npubToHex(props.creatorPubkey)) {
-          notifyError(t("FindCreators.notifications.invalid_creator_pubkey"));
+          notifyError("Error: Could not decode creator's public key.");
           return;
         }
         let profile = null;

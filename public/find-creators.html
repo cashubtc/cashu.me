@@ -230,19 +230,14 @@
       </div>
     </div>
 
-    <script>
+    <script type="module">
+      import { DEFAULT_RELAYS } from '/src/config/relays';
       // --- Nostr Tools ---
       if (!window.NostrTools) {
         document.getElementById("statusMessage").textContent = "Error: nostr-tools library not loaded.";
         document.getElementById("statusMessage").classList.remove("hidden");
       }
       const { SimplePool, nip19, utils } = window.NostrTools;
-
-      const FALLBACK_RELAYS = [
-        "wss://relay.damus.io", "wss://relay.primal.net", "wss://nos.lol",
-        "wss://nostr.wine", "wss://purplepag.es", "wss://relay.nostr.band",
-        "wss://relay.snort.social", "wss://nostr.pleb.network", "wss://nostr-pub.wellorder.net"
-      ];
 
       let storedRelays = [];
       try {
@@ -252,7 +247,7 @@
       } catch {
         storedRelays = [];
       }
-      const RELAYS = Array.from(new Set([...storedRelays, ...FALLBACK_RELAYS]));
+      const RELAYS = Array.from(new Set([...storedRelays, ...DEFAULT_RELAYS]));
       document.getElementById("relayList").textContent = RELAYS.join(", ");
 
       const pool = new SimplePool({ eoseSubTimeout: 8000 });

@@ -3,6 +3,7 @@ import { useBootErrorStore } from "stores/bootError";
 import NDK, { NDKSigner } from "@nostr-dev-kit/ndk";
 import { useNostrStore } from "stores/nostr";
 import { useSettingsStore } from "src/stores/settings";
+import { DEFAULT_RELAYS } from "src/config/relays";
 
 export type NdkBootErrorReason =
   | "no-signer"
@@ -19,16 +20,7 @@ export class NdkBootError extends Error {
   }
 }
 
-export const DEFAULT_RELAYS = [
-  "wss://relay.damus.io/",
-  "wss://relay.primal.net/",
-  "wss://eden.nostr.land/",
-  "wss://nos.lol/",
-  "wss://nostr-pub.wellorder.net/",
-  "wss://nostr.bitcoiner.social/",
-  "wss://relay.nostr.band/",
-  "wss://relay.snort.social/",
-];
+// Default relay URLs are configured in src/config/relays.ts
 
 export function mergeDefaultRelays(ndk: NDK) {
   for (const url of DEFAULT_RELAYS) {
@@ -38,10 +30,7 @@ export function mergeDefaultRelays(ndk: NDK) {
   }
 }
 
-// ensure there is at least one relay configured at runtime
-if (DEFAULT_RELAYS.length === 0) {
-  DEFAULT_RELAYS.push("wss://relay.damus.io/");
-}
+
 
 let ndkInstance: NDK | undefined;
 let ndkPromise: Promise<NDK> | undefined;

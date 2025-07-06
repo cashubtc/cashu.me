@@ -8,7 +8,7 @@ import {
   subscribeToNostr,
 } from "./nostr";
 import { useSettingsStore } from "./settings";
-import { DEFAULT_RELAYS } from "boot/ndk";
+import { DEFAULT_RELAYS } from "src/config/relays";
 import { useNdk } from "src/composables/useNdk";
 import { nip19 } from "nostr-tools";
 import { Event as NostrEvent } from "nostr-tools";

@@ -55,11 +55,16 @@ import { useRouter } from "vue-router";
 import { useP2PKStore } from "./p2pk";
 
 export function npubToHex(s: string): string | null {
+  const input = s.trim();
+  console.debug('[npubToHex] input', input);
   try {
-    const { type, data } = nip19.decode(s.trim());
-    if (type !== "npub") return null;
+    const decoded = nip19.decode(input);
+    console.debug('[npubToHex] decoded', decoded);
+    const { type, data } = decoded;
+    if (type !== 'npub') return null;
     return bytesToHex(data as Uint8Array);
-  } catch {
+  } catch (err) {
+    console.error('[npubToHex] decode failed', err);
     return null;
   }
 }
