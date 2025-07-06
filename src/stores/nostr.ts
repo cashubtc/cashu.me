@@ -75,6 +75,13 @@ interface NutzapProfile {
   relays: string[];
 }
 
+export class RelayConnectionError extends Error {
+  constructor(message?: string) {
+    super(message ?? "Unable to connect to Nostr relays");
+    this.name = "RelayConnectionError";
+  }
+}
+
 async function urlsToRelaySet(urls?: string[]): Promise<NDKRelaySet | undefined> {
   if (!urls?.length) return undefined;
 
@@ -138,6 +145,11 @@ export async function fetchNutzapProfile(
   const ndk = await useNdk();
   if (!ndk) {
     throw new Error('NDK not initialised \u2013 call initSignerIfNotSet() first');
+  }
+  try {
+    await ensureRelayConnectivity(ndk);
+  } catch (e: any) {
+    throw new RelayConnectionError(e?.message);
   }
   const hex = npubOrHex.startsWith("npub") ? npubToHex(npubOrHex) : npubOrHex;
   if (!hex) throw new Error("Invalid npub");

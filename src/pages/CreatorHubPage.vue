@@ -64,7 +64,7 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from 'vue';
 import { useCreatorHubStore, type Tier } from 'stores/creatorHub';
-import { useNostrStore, fetchNutzapProfile, publishDiscoveryProfile } from 'stores/nostr';
+import { useNostrStore, fetchNutzapProfile, publishDiscoveryProfile, RelayConnectionError } from 'stores/nostr';
 import { useP2PKStore } from 'stores/p2pk';
 import { useMintsStore } from 'stores/mints';
 import { v4 as uuidv4 } from 'uuid';
@@ -128,7 +128,16 @@ async function initPage() {
   await nostr.initSignerIfNotSet();
   const p = await nostr.getProfile(store.loggedInNpub);
   if (p) profile.value = { ...p };
-  const existing = await fetchNutzapProfile(store.loggedInNpub);
+  let existing = null;
+  try {
+    existing = await fetchNutzapProfile(store.loggedInNpub);
+  } catch (e: any) {
+    if (e instanceof RelayConnectionError) {
+      notifyError('Unable to connect to Nostr relays');
+      return;
+    }
+    throw e;
+  }
   if (existing) {
     profilePub.value = existing.p2pkPubkey;
     profileMints.value = existing.trustedMints.join(',');

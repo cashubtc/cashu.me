@@ -7,6 +7,7 @@ import {
   fetchNutzapProfile,
   publishNutzapProfile,
   ensureRelayConnectivity,
+  RelayConnectionError,
 } from "./nostr";
 import { useP2PKStore } from "./p2pk";
 import { useMintsStore } from "./mints";
@@ -39,7 +40,16 @@ export async function maybeRepublishNutzapProfile() {
       "You need to connect a Nostr signer before publishing tiers",
     );
   }
-  const current = await fetchNutzapProfile(nostrStore.pubkey);
+  let current = null;
+  try {
+    current = await fetchNutzapProfile(nostrStore.pubkey);
+  } catch (e: any) {
+    if (e instanceof RelayConnectionError) {
+      notifyError("Unable to connect to Nostr relays");
+      return;
+    }
+    throw e;
+  }
   const desiredMints = useMintsStore()
     .mints.map((m) => m.url)
     .sort()
