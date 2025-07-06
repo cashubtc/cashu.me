@@ -4,7 +4,7 @@ import { cashuDb } from "../../../src/stores/dexie";
 
 let fetchNutzapProfile: any;
 let publishNutzap: any;
-let lockToPubKey: any;
+let sendToLock: any;
 let findSpendableMint: any;
 let addMany: any;
 let getTokenLocktime: any;
@@ -20,7 +20,6 @@ vi.mock("../../../src/stores/nostr", () => ({
 
 vi.mock("../../../src/stores/p2pk", () => ({
   useP2PKStore: () => ({
-    lockToPubKey: (...args: any[]) => lockToPubKey(...args),
     getTokenLocktime: (...args: any[]) => getTokenLocktime(...args),
     generateRefundSecret: () => ({ preimage: 'pre', hash: 'hash' }),
   }),
@@ -29,6 +28,7 @@ vi.mock("../../../src/stores/p2pk", () => ({
 vi.mock("../../../src/stores/wallet", () => ({
   useWalletStore: () => ({
     findSpendableMint: (...args: any[]) => findSpendableMint(...args),
+    sendToLock: (...args: any[]) => sendToLock(...args),
   }),
 }));
 
@@ -57,7 +57,10 @@ beforeEach(async () => {
     relays: [],
   }));
   publishNutzap = vi.fn();
-  lockToPubKey = vi.fn(async ({ timelock }) => ({ token: `token-${timelock}` }));
+  sendToLock = vi.fn(async (_p, _w, _a, _pk, _b, timelock) => ({
+    sendProofs: [`tok-${timelock}`],
+    locked: { id: `lock-${timelock}` },
+  }));
   findSpendableMint = vi.fn(() => ({ url: "mint" }));
   addMany = vi.fn();
   getTokenLocktime = vi.fn(() => 0);
@@ -71,8 +74,8 @@ describe("Nutzap store", () => {
     const start = 1000;
     await store.send({ npub: "receiver", amount: 1, months: 3, startDate: start });
 
-    expect(lockToPubKey).toHaveBeenCalledTimes(3);
-    const times = lockToPubKey.mock.calls.map((c: any[]) => c[0].timelock);
+    expect(sendToLock).toHaveBeenCalledTimes(3);
+    const times = sendToLock.mock.calls.map((c: any[]) => c[5]);
     const expected = [0, 1, 2].map((i) => calcUnlock(start, i));
     expect(times).toEqual(expected);
   });
