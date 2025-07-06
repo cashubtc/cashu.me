@@ -224,13 +224,14 @@ export const useP2PKStore = defineStore("p2pk", {
     getSecretP2PKPubkey: function (secret: string): string {
       // Step 1: Basic validation to ensure the input is a processable string.
       if (typeof secret !== 'string' || secret.trim() === '') {
-        console.error('Invalid or empty secret provided.');
+        console.error('Invalid or empty secret provided. Cannot parse.');
         return '';
       }
 
       const trimmedSecret = secret.trim();
 
-      // Step 2: Handle secrets that are not JSON objects (e.g., raw pubkeys).
+      // Step 2: Handle secrets that are not JSON objects (e.g., raw pubkeys)
+      // by returning them directly. This prevents the JSON.parse crash.
       if (!trimmedSecret.startsWith('{')) {
         console.warn('P2PK secret is not a JSON object, treating as raw pubkey.');
         return trimmedSecret;
@@ -240,7 +241,7 @@ export const useP2PKStore = defineStore("p2pk", {
       try {
         const secretObject = JSON.parse(trimmedSecret);
 
-        if (secretObject[0] !== 'P2PK' || !secretObject[1]?.data) {
+        if (!Array.isArray(secretObject) || secretObject[0] !== 'P2PK' || !secretObject[1]?.data) {
           console.error('Secret is not a valid P2PK format.');
           return '';
         }
@@ -253,8 +254,7 @@ export const useP2PKStore = defineStore("p2pk", {
         const locktime = locktimeTag ? parseInt(locktimeTag[1], 10) : Infinity;
 
         if (locktime > now) {
-          // Lock is active, return the main key.
-          return data;
+          return data; // Lock is active, return the main key.
         }
 
         const refundTag = tags?.find((tag: any) => tag[0] === 'refund');
@@ -263,7 +263,7 @@ export const useP2PKStore = defineStore("p2pk", {
           // Check if we own any of the refund keys.
           for (const pk of refundKeys) {
             if (this.haveThisKey(pk)) {
-              return pk;
+              return pk; // We own a refund key.
             }
           }
           // If we don't own a refund key, return the first one to show it's locked.
