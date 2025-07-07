@@ -204,3 +204,13 @@ describe("P2PK store", () => {
     expect(p2pk.getPrivateKeyForP2PKEncodedToken(encoded)).toBe(skHex);
   });
 });
+
+describe("generateRefundSecret", () => {
+  it("returns 64-char hex strings", () => {
+    const p2pk = useP2PKStore();
+    const { preimage, hash } = p2pk.generateRefundSecret();
+    expect(preimage).toMatch(/^[0-9a-f]{64}$/);
+    expect(hash).toMatch(/^[0-9a-f]{64}$/);
+    expect(preimage).not.toBe(hash);
+  });
+});
