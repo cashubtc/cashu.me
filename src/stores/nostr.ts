@@ -62,11 +62,15 @@ export function npubToHex(s: string): string | null {
     console.debug('[npubToHex] decoded', decoded);
     const { type, data } = decoded;
     if (type !== 'npub') return null;
-    return bytesToHex(data as Uint8Array);
+    if (typeof data === 'string') {
+      if (/^[0-9a-fA-F]{64}$/.test(data)) return data.toLowerCase();
+    } else if (data instanceof Uint8Array) {
+      return bytesToHex(data);
+    }
   } catch (err) {
     console.error('[npubToHex] decode failed', err);
-    return null;
   }
+  return null;
 }
 
 // --- Nutzap helpers (NIP-61) ----------------------------------------------
