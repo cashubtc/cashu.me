@@ -499,6 +499,11 @@ export const useWalletStore = defineStore("wallet", {
 
         console.log("customSecret", customSecret);
         console.log("tagList", tagList);
+        console.log("DEBUG tagList JSON", JSON.stringify(tagList));
+        console.log(
+          "DEBUG secret.tags JSON",
+          JSON.stringify(customSecret[1].tags)
+        );
 
         ({ keep: keepProofs, send: sendProofs } =
           await (wallet as any).splitWithSecret(amount, customSecret));

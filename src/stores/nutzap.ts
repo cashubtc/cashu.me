@@ -136,6 +136,8 @@ export const useNutzapStore = defineStore("nutzap", {
         const trustedRelays = profile.relays;
         const wallet = useWalletStore();
         const p2pk = useP2PKStore();
+        if (!p2pk.firstKey) await p2pk.generateKeypair();
+        const refundKey = p2pk.firstKey!.publicKey;
         const mints = useMintsStore();
         const proofsStore = useProofsStore();
         const messenger = useMessengerStore();
@@ -161,7 +163,7 @@ export const useNutzapStore = defineStore("nutzap", {
             creatorP2pk,
             "nutzap",
             unlockDate,
-            p2pk.firstKey?.publicKey,
+            refundKey,
             hash
           );
         const token = proofsStore.serializeProofs(sendProofs);
@@ -213,7 +215,7 @@ export const useNutzapStore = defineStore("nutzap", {
           creatorNpub: npub,
           tierId: "nutzap",
           creatorP2PK: creatorP2pk,
-          subscriberRefundP2PK: p2pk.firstKey?.publicKey || "",
+          subscriberRefundP2PK: refundKey,
           mintUrl: mints.activeMintUrl,
           amountPerInterval: amount,
           frequency: "monthly",
