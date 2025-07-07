@@ -480,8 +480,12 @@ export const useWalletStore = defineStore("wallet", {
       let sendProofs: Proof[] = [];
 
       const tagList: [string, string][] = [["locktime", locktime.toString()]];
-      if (refundPubkey) tagList.push(["refund", refundPubkey]);
-      if (hashSecret) tagList.push(["hashlock", hashSecret]);
+      if (refundPubkey?.length) tagList.push(["refund", refundPubkey]);
+      if (hashSecret?.length) tagList.push(["hashlock", hashSecret]);
+
+      if (hashSecret && !receiverPubkey) {
+        throw new Error("receiverPubkey is required when using hashlock");
+      }
 
       if (hashSecret) {
         const customSecret = [
@@ -492,6 +496,9 @@ export const useWalletStore = defineStore("wallet", {
             tags: tagList,
           },
         ] as const;
+
+        console.log("customSecret", customSecret);
+        console.log("tagList", tagList);
 
         ({ keep: keepProofs, send: sendProofs } =
           await (wallet as any).splitWithSecret(amount, customSecret));
