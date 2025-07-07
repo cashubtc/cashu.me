@@ -44,10 +44,30 @@ export const useLockedTokensRedeemWorker = defineStore(
         const settingsStore = useSettingsStore();
         if (!settingsStore.autoRedeemLockedTokens) return;
         const now = Math.floor(Date.now() / 1000);
-        const entries = await cashuDb.lockedTokens
+        let entries = await cashuDb.lockedTokens
           .where("unlockTs")
           .belowOrEqual(now)
           .toArray();
+
+        const legacyEntries = await cashuDb.lockedTokens
+          .filter(
+            (e: any) =>
+              e.unlockTs === undefined &&
+              typeof e.locktime === "number" &&
+              e.locktime <= now,
+          )
+          .toArray();
+
+        for (const entry of legacyEntries) {
+          if (entry.unlockTs === undefined && typeof entry.locktime === "number") {
+            await cashuDb.lockedTokens.update(entry.id, {
+              unlockTs: entry.locktime,
+            });
+            (entry as any).unlockTs = entry.locktime;
+          }
+        }
+
+        entries = entries.concat(legacyEntries as any[]);
         if (!entries.length) return;
         const wallet = useWalletStore();
         const receiveStore = useReceiveTokensStore();
