@@ -2,9 +2,7 @@ import { defineStore } from "pinia";
 import { watch } from "vue";
 import { useWalletStore } from "./wallet";
 import { useP2PKStore } from "./p2pk";
-import { useLockedTokensStore } from "./lockedTokens";
-import type { LockedToken } from "./lockedTokens";
-import { cashuDb } from "./dexie";
+import { cashuDb, type LockedToken as DexieLockedToken } from "./dexie";
 import token from "src/js/token";
 import { v4 as uuidv4 } from "uuid";
 import { useMintsStore } from "./mints";
@@ -142,7 +140,7 @@ export const useNutzapStore = defineStore("nutzap", {
         const proofsStore = useProofsStore();
         const messenger = useMessengerStore();
         const subscriptionId = uuidv4();
-        const lockedTokens: LockedToken[] = [];
+        const lockedTokens: DexieLockedToken[] = [];
 
         for (let i = 0; i < months; i++) {
           const unlockDate = calcUnlock(startDate, i);
@@ -181,15 +179,34 @@ export const useNutzapStore = defineStore("nutzap", {
             trustedRelays
           );
 
-          lockedTokens.push(locked);
+          const entry: DexieLockedToken = {
+            id: locked.id,
+            tokenString: locked.token,
+            amount,
+            owner: "subscriber",
+            creatorNpub: npub,
+            tierId: "nutzap",
+            intervalKey: String(i + 1),
+            unlockTs: unlockDate,
+            refundUnlockTs: 0,
+            status:
+              unlockDate > Math.floor(Date.now() / 1000)
+                ? "pending"
+                : "unlockable",
+            subscriptionEventId: null,
+            subscriptionId,
+            monthIndex: i + 1,
+            totalMonths: months,
+            label: "Subscription payment",
+          };
+          lockedTokens.push(entry);
 
           // DM Nutzap token to creator (one message per period)
           await proofsStore.updateActiveProofs();
         }
 
-        // Persist into bucket store for progress UI
-        const buckets = useLockedTokensStore();
-        await buckets.addMany(lockedTokens);
+        // Persist into Dexie
+        await cashuDb.lockedTokens.bulkAdd(lockedTokens as any);
 
         const subStore = useSubscriptionsStore();
         await subStore.addSubscription({
@@ -205,7 +222,7 @@ export const useNutzapStore = defineStore("nutzap", {
           intervals: lockedTokens.map((t, idx) => ({
             intervalKey: String(idx + 1),
             lockedTokenId: t.id,
-            unlockTs: t.locktime || 0,
+            unlockTs: t.unlockTs,
             refundUnlockTs: 0,
             status: "pending",
             tokenString: t.tokenString,
