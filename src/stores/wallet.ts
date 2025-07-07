@@ -496,15 +496,6 @@ export const useWalletStore = defineStore("wallet", {
             tags: tagList,
           },
         ] as const;
-
-        console.log("customSecret", customSecret);
-        console.log("tagList", tagList);
-        console.log("DEBUG tagList JSON", JSON.stringify(tagList));
-        console.log(
-          "DEBUG secret.tags JSON",
-          JSON.stringify(customSecret[1].tags)
-        );
-
         const secretStr = JSON.stringify(customSecret);
         const proofsSigned = this.signP2PKIfNeeded(proofsToSend);
         ({ keep: keepProofs, send: sendProofs } =

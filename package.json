@@ -58,6 +58,7 @@
     "@noble/curves": "^1.9.2",
     "@noble/secp256k1": "^2.3.0",
     "@quasar/app-vite": "^1.9.3",
+    "@scure/bip32": "^1.7.0",
     "@types/node": "^20.12.11",
     "@types/underscore": "^1.11.15",
     "@types/uuid": "^10.0.0",
