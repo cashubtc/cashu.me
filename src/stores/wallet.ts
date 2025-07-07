@@ -505,8 +505,14 @@ export const useWalletStore = defineStore("wallet", {
           JSON.stringify(customSecret[1].tags)
         );
 
+        const secretStr = JSON.stringify(customSecret);
+        const proofsSigned = this.signP2PKIfNeeded(proofsToSend);
         ({ keep: keepProofs, send: sendProofs } =
-          await (wallet as any).splitWithSecret(amount, customSecret));
+          await (wallet as any).splitWithSecret(
+            amount,
+            proofsSigned,
+            secretStr
+          ));
       } else {
         ({ keep: keepProofs, send: sendProofs } = await wallet.send(
           amount,
