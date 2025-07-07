@@ -14,7 +14,7 @@ beforeEach(() => {
 vi.mock("../../../src/stores/wallet", () => ({
   useWalletStore: () => ({
     wallet: {},
-    sendToLock: vi.fn(async (...args) => ({ locked: { id: "id", token: "tok" } })),
+    sendToLock: vi.fn(async (...args) => ({ locked: { id: "id", tokenString: "tok" } })),
   }),
 }));
 

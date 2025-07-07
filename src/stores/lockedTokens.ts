@@ -7,7 +7,9 @@ export type LockedToken = {
   id: string;
   amount: number;
   token: string;
+  tokenString: string;
   pubkey: string;
+  unlockTs?: number;
   label?: string;
   locktime?: number;
   refundPubkey?: string;
