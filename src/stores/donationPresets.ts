@@ -80,7 +80,7 @@ export const useDonationPresetsStore = defineStore("donationPresets", {
           bucketId
         );
         tokens.push(locked);
-        return detailed ? tokens : locked.token;
+        return detailed ? tokens : locked.tokenString;
       }
       const base = startDate ?? Math.floor(Date.now() / 1000);
       for (let i = 0; i < months; i++) {
@@ -115,7 +115,7 @@ export const useDonationPresetsStore = defineStore("donationPresets", {
             unlockTs: t.locktime || 0,
             refundUnlockTs: 0,
             status: "pending",
-            tokenString: t.token,
+            tokenString: t.tokenString,
           })),
           status: "active",
           createdAt: 0,
@@ -124,7 +124,7 @@ export const useDonationPresetsStore = defineStore("donationPresets", {
           ...(subscription.benefits ? { benefits: subscription.benefits } : {}),
         } as any);
       }
-      return detailed ? tokens : tokens.map((t) => t.token).join("\n");
+      return detailed ? tokens : tokens.map((t) => t.tokenString).join("\n");
     },
   },
 });

@@ -479,17 +479,17 @@ export const useWalletStore = defineStore("wallet", {
       let keepProofs: Proof[] = [];
       let sendProofs: Proof[] = [];
 
+      const tagList: [string, string][] = [["locktime", locktime.toString()]];
+      if (refundPubkey) tagList.push(["refund", refundPubkey]);
+      if (hashSecret) tagList.push(["hashlock", hashSecret]);
+
       if (hashSecret) {
         const customSecret = [
           "P2PK",
           {
             data: ensureCompressed(receiverPubkey),
             nonce: crypto.randomUUID().replace(/-/g, "").slice(0, 16),
-            tags: [
-              ["locktime", locktime.toString()],
-              ["refund", refundPubkey],
-              ["hashlock", hashSecret],
-            ],
+            tags: tagList,
           },
         ] as const;
 
@@ -518,10 +518,10 @@ export const useWalletStore = defineStore("wallet", {
       const locked = useLockedTokensStore().addLockedToken({
         id: uuidv4(),
         amount,
-        token: tokenStr,
-        bucketId: bucketsStore.ensureCreatorBucket(receiverPubkey),
+        tokenString: tokenStr,
         pubkey: receiverPubkey,
         locktime,
+        bucketId: bucketsStore.ensureCreatorBucket(receiverPubkey),
       });
       await proofsStore.addProofs(keepProofs, undefined, bucketId, "");
       useSignerStore().reset();

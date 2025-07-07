@@ -11,6 +11,7 @@ describe("LockedTokens store", () => {
     const t = store.addLockedToken({
       amount: 1,
       token: "tok",
+      tokenString: "tok",
       pubkey: "pk",
       bucketId: "b1",
     });
@@ -23,6 +24,7 @@ describe("LockedTokens store", () => {
     const t = store.addLockedToken({
       amount: 1,
       token: "tok",
+      tokenString: "tok",
       pubkey: "pk",
       bucketId: "b1",
     });
@@ -37,6 +39,7 @@ describe("LockedTokens store", () => {
     const t1 = store.addLockedToken({
       amount: 1,
       token: "a",
+      tokenString: "a",
       pubkey: "pk",
       bucketId: "b",
       locktime: past,
@@ -44,6 +47,7 @@ describe("LockedTokens store", () => {
     store.addLockedToken({
       amount: 1,
       token: "b",
+      tokenString: "b",
       pubkey: "pk",
       bucketId: "b",
       locktime: future,
@@ -51,6 +55,7 @@ describe("LockedTokens store", () => {
     store.addLockedToken({
       amount: 1,
       token: "c",
+      tokenString: "c",
       pubkey: "other",
       bucketId: "b",
     });
@@ -66,6 +71,7 @@ describe("LockedTokens store", () => {
         id: "a",
         amount: 1,
         token: "x",
+        tokenString: "x",
         pubkey: "pk1",
         bucketId: "b1",
         date: new Date().toISOString(),
@@ -74,6 +80,7 @@ describe("LockedTokens store", () => {
         id: "b",
         amount: 2,
         token: "y",
+        tokenString: "y",
         pubkey: "pk2",
         bucketId: "b2",
         date: new Date().toISOString(),

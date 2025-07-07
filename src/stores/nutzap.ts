@@ -159,11 +159,11 @@ export const useNutzapStore = defineStore("nutzap", {
             mintWallet,
             amount,
             creatorP2pk,
-          "nutzap",
-          unlockDate,
-          undefined,
-          hash
-        );
+            "nutzap",
+            unlockDate,
+            p2pk.firstKey?.publicKey,
+            hash
+          );
         const token = proofsStore.serializeProofs(sendProofs);
 
           await messenger.sendDm(
@@ -181,7 +181,7 @@ export const useNutzapStore = defineStore("nutzap", {
 
           const entry: DexieLockedToken = {
             id: locked.id,
-            tokenString: locked.token,
+            tokenString: locked.tokenString,
             amount,
             owner: "subscriber",
             creatorNpub: npub,
@@ -225,7 +225,7 @@ export const useNutzapStore = defineStore("nutzap", {
             unlockTs: t.unlockTs,
             refundUnlockTs: 0,
             status: "pending",
-            tokenString: t.token,
+            tokenString: t.tokenString,
           })),
           status: "active",
         } as any);
