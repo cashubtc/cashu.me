@@ -168,16 +168,16 @@ export default defineComponent({
         return;
       }
       try {
-        const hex = props.creatorPubkey.startsWith("npub")
+        const creatorHex = props.creatorPubkey.startsWith("npub")
           ? npubToHex(props.creatorPubkey)
           : props.creatorPubkey;
-        if (!hex || hex.length !== 64) {
+        if (!creatorHex) {
           notifyError("Error: Could not decode creator's public key.");
           return;
         }
         let profile = null;
         try {
-          profile = await fetchNutzapProfile(props.creatorPubkey);
+          profile = await fetchNutzapProfile(creatorHex);
         } catch (e: any) {
           if (e instanceof RelayConnectionError) {
             notifyError("Unable to connect to Nostr relays");
@@ -190,7 +190,7 @@ export default defineComponent({
           return;
         }
         await nutzap.send({
-          npub: props.creatorPubkey,
+          npub: creatorHex,
           months: months.value,
           amount: amount.value,
           startDate: Math.floor(new Date(startDate.value).getTime() / 1000),
