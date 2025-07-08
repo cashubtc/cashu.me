@@ -487,54 +487,70 @@ export const useWalletStore = defineStore("wallet", {
         throw new Error("receiverPubkey is required when using hashlock");
       }
 
-      if (hashSecret) {
-        const customSecret = [
-          "P2PK",
-          {
-            data: ensureCompressed(receiverPubkey),
-            nonce: crypto.randomUUID().replace(/-/g, "").slice(0, 16),
-            tags: tagList,
-          },
-        ] as const;
-        const secretStr = JSON.stringify(customSecret);
-        const proofsSigned = this.signP2PKIfNeeded(proofsToSend);
-        ({ keep: keepProofs, send: sendProofs } =
-          await (wallet as any).splitWithSecret(
-            amount,
-            proofsSigned,
-            secretStr
-          ));
-      } else {
-        ({ keep: keepProofs, send: sendProofs } = await wallet.send(
-          amount,
-          proofsToSend,
-          {
-            keysetId,
-            pubkey: ensureCompressed(receiverPubkey),
-            locktime,
-            refund: refundPubkey,
-          }
-        ));
-      }
       const proofsStore = useProofsStore();
-      await proofsStore.removeProofs(proofsToSend);
-      // note: we do not store sendProofs in the proofs store but
-      // expect from the caller to store it in the history
-      // --- NEW: persist locked proofs to creator bucket ---
-      const bucketsStore = useBucketsStore();
+      try {
+        if (hashSecret) {
+          const customSecret = [
+            "P2PK",
+            {
+              data: ensureCompressed(receiverPubkey),
+              nonce: crypto.randomUUID().replace(/-/g, "").slice(0, 16),
+              tags: tagList,
+            },
+          ] as const;
+          const secretStr = JSON.stringify(customSecret);
+          const proofsSigned = this.signP2PKIfNeeded(proofsToSend);
+          ({ keep: keepProofs, send: sendProofs } =
+            await (wallet as any).splitWithSecret(
+              amount,
+              proofsSigned,
+              secretStr,
+              { proofsWeHave: spendableProofs }
+            ));
+        } else {
+          ({ keep: keepProofs, send: sendProofs } = await wallet.send(
+            amount,
+            proofsToSend,
+            {
+              keysetId,
+              pubkey: ensureCompressed(receiverPubkey),
+              locktime,
+              refund: refundPubkey,
+            }
+          ));
+        }
+        await proofsStore.removeProofs(proofsToSend);
+        // note: we do not store sendProofs in the proofs store but
+        // expect from the caller to store it in the history
+        // --- NEW: persist locked proofs to creator bucket ---
+        const bucketsStore = useBucketsStore();
 
-      const tokenStr = useProofsStore().serializeProofs(sendProofs);
-      const locked = useLockedTokensStore().addLockedToken({
-        id: uuidv4(),
-        amount,
-        tokenString: tokenStr,
-        pubkey: receiverPubkey,
-        locktime,
-        bucketId: bucketsStore.ensureCreatorBucket(receiverPubkey),
-      });
-      await proofsStore.addProofs(keepProofs, undefined, bucketId, "");
-      useSignerStore().reset();
-      return { keepProofs, sendProofs, locked };
+        const tokenStr = useProofsStore().serializeProofs(sendProofs);
+        const locked = useLockedTokensStore().addLockedToken({
+          id: uuidv4(),
+          amount,
+          tokenString: tokenStr,
+          pubkey: receiverPubkey,
+          locktime,
+          bucketId: bucketsStore.ensureCreatorBucket(receiverPubkey),
+        });
+        await proofsStore.addProofs(keepProofs, undefined, bucketId, "");
+        useSignerStore().reset();
+        return { keepProofs, sendProofs, locked };
+      } catch (error: any) {
+        console.error(error);
+        if (error.message && error.message.includes("Token already spent")) {
+          notifyError(
+            "Selected proofs have already been spent. Correcting local state.",
+            "Balance Out of Sync"
+          );
+          await this.reconcileSpentProofs(proofsToSend);
+        } else {
+          notifyApiError(error, "Payment failed");
+        }
+        this.handleOutputsHaveAlreadyBeenSignedError(keysetId, error);
+        throw error;
+      }
     },
     send: async function (
       proofs: WalletProof[],
