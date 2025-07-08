@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { useNostrStore } from "../../../src/stores/nostr";
+import { useNostrStore, SignerType } from "../../../src/stores/nostr";
+import { useP2PKStore } from "../../../src/stores/p2pk";
 import { NDKKind } from "@nostr-dev-kit/ndk";
 
 const ndkStub = {};
@@ -19,7 +20,7 @@ vi.mock("nostr-tools", () => ({
     },
   },
   generateSecretKey: () => new Uint8Array(32).fill(1),
-  getPublicKey: () => "pubkey",
+  getPublicKey: () => "b".repeat(64),
   SimplePool: class {
     publish() {
       if (publishSuccess) {
@@ -115,5 +116,23 @@ describe("lastEventTimestamp", () => {
     const store = useNostrStore();
     const now = Math.floor(Date.now() / 1000);
     expect(store.lastEventTimestamp).toBeLessThanOrEqual(now);
+  });
+});
+
+describe("setPubkey", () => {
+  it("preserves existing P2PK first key", () => {
+    const p2pk = useP2PKStore();
+    p2pk.p2pkKeys = [
+      { publicKey: "aa", privateKey: "aa", used: false, usedCount: 0 },
+    ];
+    const first = p2pk.firstKey;
+
+    const store = useNostrStore();
+    store.signerType = SignerType.SEED;
+    store.seedSignerPrivateKey = "11".repeat(32);
+    store.setPubkey("a".repeat(64));
+
+    expect(p2pk.firstKey).toBe(first);
+    expect(p2pk.p2pkKeys.length).toBe(1);
   });
 });
