@@ -634,7 +634,10 @@ export const useNostrStore = defineStore("nostr", {
           const pk66 = ensureCompressed(
             "02" + getPublicKey(hexToBytes(privKey))
           );
-          if (!p2pkStore.haveThisKey(pk66)) {
+          if (
+            !p2pkStore.haveThisKey(pk66) &&
+            p2pkStore.p2pkKeys.length === 0
+          ) {
             const keyPair = {
               publicKey: pk66,
               privateKey: privKey,
