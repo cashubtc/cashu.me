@@ -111,4 +111,64 @@ describe("sendToLock with hash lock", () => {
 
     randomStub.mockRestore();
   });
+
+  it("uses receiver pubkey in data and refund pubkey in tag", async () => {
+    const walletStore = useWalletStore();
+    const proofsStore = useProofsStore();
+    const buckets = useBucketsStore();
+    const locked = useLockedTokensStore();
+    const signer = useSignerStore();
+
+    vi.spyOn(proofsStore, "removeProofs").mockResolvedValue();
+    vi.spyOn(proofsStore, "addProofs").mockResolvedValue();
+    vi.spyOn(buckets, "ensureCreatorBucket").mockReturnValue("creator");
+    vi.spyOn(locked, "addLockedToken").mockReturnValue({} as any);
+    vi.spyOn(signer, "reset").mockReturnValue();
+
+    walletStore.spendableProofs = vi.fn(() => [
+      { secret: "s", amount: 1, id: "a", C: "c" } as any,
+    ]);
+    walletStore.coinSelect = vi.fn(() => [
+      { secret: "s", amount: 1, id: "a", C: "c" } as any,
+    ]);
+    walletStore.getKeyset = vi.fn(() => "kid");
+    walletStore.signP2PKIfNeeded = vi.fn((p) => p);
+
+    const wallet = {
+      mint: { mintUrl: "m" },
+      unit: "sat",
+      splitWithSecret: vi.fn(async () => ({ keep: [], send: [] })),
+    } as any;
+
+    const randomStub = vi
+      .spyOn(globalThis.crypto, "randomUUID")
+      .mockReturnValue("11111111-1111-1111-1111-111111111111");
+
+    const amount = 1;
+    const locktime = 99;
+    const receiver = "creator";
+    const refund = "subscriber";
+    const lockSecret = "hs";
+    const hashSecret = hash(lockSecret, receiver);
+
+    await walletStore.sendToLock(
+      [{ secret: "s", amount: 1, id: "a", C: "c" } as any],
+      wallet,
+      amount,
+      receiver,
+      "b",
+      locktime,
+      refund,
+      hashSecret,
+    );
+
+    expect(wallet.splitWithSecret).toHaveBeenCalledTimes(1);
+    const secretStr = wallet.splitWithSecret.mock.calls[0][2];
+    const secretObj = JSON.parse(secretStr);
+    expect(secretObj[1].data).toBe(receiver);
+    const refundTag = secretObj[1].tags.find((t: any[]) => t[0] === "refund");
+    expect(refundTag).toEqual(["refund", refund]);
+
+    randomStub.mockRestore();
+  });
 });
