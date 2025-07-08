@@ -3,7 +3,7 @@ import { watch } from "vue";
 import { useWalletStore } from "./wallet";
 import { useP2PKStore } from "./p2pk";
 import { cashuDb, type LockedToken as DexieLockedToken } from "./dexie";
-import token from "src/js/token";
+import token, { createP2PKHTLC } from "src/js/token";
 import { v4 as uuidv4 } from "uuid";
 import { useMintsStore } from "./mints";
 import { useProofsStore } from "./proofs";
@@ -15,6 +15,7 @@ import {
   useNostrStore,
   RelayConnectionError,
 } from "./nostr";
+import { ndkSend } from "src/boot/ndk";
 import type { NostrEvent, NDKSubscription } from "@nostr-dev-kit/ndk";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
@@ -109,6 +110,26 @@ export const useNutzapStore = defineStore("nutzap", {
       } catch (e) {
         console.error("Failed to handle zap", e);
       }
+    },
+
+    /** Subscribe to a creator tier via HTLC */
+    async subscribeToTier({ creator, tierId, months, price, startDate, relayList }: { creator: { npub: string; p2pk: string }; tierId: string; months: number; price: number; startDate: number; relayList: string[] }) {
+      const wallet = useWalletStore();
+      const mints = useMintsStore();
+      if (!wallet || mints.activeBalance < price) {
+        throw new Error("Insufficient balance");
+      }
+
+      const { token, hash } = createP2PKHTLC(price, creator.p2pk, months, startDate);
+      await ndkSend(creator.npub, token, relayList);
+
+      await cashuDb.subscriptions.add({
+        creatorNpub: creator.npub,
+        tierId,
+        startDate,
+        endDate: startDate + months * 30 * 24 * 3600,
+        hash,
+      } as any);
     },
 
     /** High-level entry from UI – fan pledges to creator */

@@ -15,14 +15,6 @@
           dense
           :label="$t('BucketManager.inputs.name')"
         />
-        <q-input
-          v-model.number="amount"
-          type="number"
-          :label="$t('DonateDialog.inputs.amount')"
-          dense
-          outlined
-          disable
-        />
         <q-select
           v-model="months"
           :options="presetOptions"
@@ -89,21 +81,13 @@ export default defineComponent({
     const { activeUnit } = storeToRefs(mintsStore);
 
     const months = ref(donationStore.presets[0]?.months || 0);
-    const amount = ref(0);
+    const tierPrice = computed(
+      () => props.tier?.price_sats ?? (props.tier as any)?.price ?? 0,
+    );
     const bucketId = ref<string>(DEFAULT_BUCKET_ID);
     const today = new Date().toISOString().slice(0, 10);
     const startDate = ref(today);
-    const total = computed(() => amount.value * months.value);
-
-    watch(
-      () => props.tier,
-      (t) => {
-        if (t) {
-          amount.value = t.price_sats ?? t.price ?? 0;
-        }
-      },
-      { immediate: true, deep: true },
-    );
+    const total = computed(() => tierPrice.value * months.value);
 
     const model = computed({
       get: () => props.modelValue,
@@ -189,17 +173,18 @@ export default defineComponent({
           notifyError("Creator has not published a Nutzap profile (kind-10019)");
           return;
         }
-        await nutzap.send({
+        const calcAmount = tierPrice.value * months.value;
+        await nutzap.subscribeToTier({
           npub: creatorHex,
           months: months.value,
-          amount: amount.value,
+          amount: calcAmount,
           startDate: Math.floor(new Date(startDate.value).getTime() / 1000),
         });
         notifySuccess(t("FindCreators.notifications.subscription_success"));
         emit("confirm", {
           bucketId: bucketId.value,
           months: months.value,
-          amount: amount.value,
+          amount: calcAmount,
           startDate: Math.floor(new Date(startDate.value).getTime() / 1000),
           total: total.value,
         });
@@ -216,7 +201,6 @@ export default defineComponent({
       bucketId,
       bucketOptions,
       showBucketSelect,
-      amount,
       months,
       presetOptions,
       startDate,
