@@ -12,6 +12,8 @@ let tokenDecode: any;
 let tokenGetProofs: any;
 let createHTLC: any;
 let sendDm: any;
+let ndkSendFn: any;
+let filterHealthyRelaysFn: any;
 
 vi.mock("../../../src/stores/nostr", () => ({
   fetchNutzapProfile: (...args: any[]) => fetchNutzapProfile(...args),
@@ -52,6 +54,11 @@ vi.mock("../../../src/js/token", () => ({
   createP2PKHTLC: (...args: any[]) => createHTLC(...args),
 }));
 
+vi.mock("../../../src/boot/ndk", () => ({
+  ndkSend: (...args: any[]) => ndkSendFn(...args),
+  filterHealthyRelays: (...args: any[]) => filterHealthyRelaysFn(...args),
+}));
+
 beforeEach(async () => {
   localStorage.clear();
   await cashuDb.close(); // close() is safe under fake-indexeddb
@@ -77,6 +84,8 @@ beforeEach(async () => {
   tokenDecode = vi.fn(() => ({ proofs: [{ amount: 1 }] }));
   tokenGetProofs = vi.fn(() => [{ amount: 1 }]);
   sendDm = vi.fn(async () => ({ success: true }));
+  ndkSendFn = vi.fn();
+  filterHealthyRelaysFn = vi.fn(async (r: string[]) => r);
 });
 
 describe("Nutzap store", () => {
@@ -127,6 +136,8 @@ describe("Nutzap store", () => {
     });
 
     expect(ok).toBe(true);
+    expect(filterHealthyRelaysFn).toHaveBeenCalled();
+    expect(ndkSendFn).toHaveBeenCalled();
     expect(sendToLock).toHaveBeenCalledTimes(2);
     expect(sendToLock.mock.calls[0][7]).toBe("htlc-hash");
     expect(sendToLock.mock.calls[1][7]).toBe("htlc-hash");

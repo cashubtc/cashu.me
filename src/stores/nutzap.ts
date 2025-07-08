@@ -16,11 +16,11 @@ import {
   useNostrStore,
   RelayConnectionError,
 } from "./nostr";
-import { ndkSend } from "src/boot/ndk";
+import { ndkSend, filterHealthyRelays } from "src/boot/ndk";
 import type { NostrEvent, NDKSubscription } from "@nostr-dev-kit/ndk";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
-import { notifyError } from "src/js/notify";
+import { notifyError, notifyWarning } from "src/js/notify";
 dayjs.extend(utc);
 
 export function calcUnlock(base: number, i: number): number {
@@ -189,8 +189,22 @@ export const useNutzapStore = defineStore("nutzap", {
         startDate,
       );
       const subscriptionId = uuidv4();
+
+      let relaysToUse = await filterHealthyRelays(relayList);
       try {
-        await ndkSend(creator.npub, token, relayList);
+        if (!relaysToUse.length) {
+          if (relayList.length) {
+            notifyWarning(
+              "All selected relays are unreachable, using fallback relay"
+            );
+          }
+          relaysToUse = await filterHealthyRelays(["wss://relay.damus.io"]);
+          if (!relaysToUse.length) {
+            notifyError("Unable to reach any relay");
+            return false;
+          }
+        }
+        await ndkSend(creator.npub, token, relaysToUse);
       } catch (e: any) {
         console.error("Failed to send subscription token", e);
         notifyError(e?.message || "Failed to send subscription token");
