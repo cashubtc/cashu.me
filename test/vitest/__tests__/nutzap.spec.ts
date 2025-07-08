@@ -11,6 +11,7 @@ let getTokenLocktime: any;
 let tokenDecode: any;
 let tokenGetProofs: any;
 let createHTLC: any;
+let sendDm: any;
 
 vi.mock("../../../src/stores/nostr", () => ({
   fetchNutzapProfile: (...args: any[]) => fetchNutzapProfile(...args),
@@ -22,7 +23,7 @@ vi.mock("../../../src/stores/nostr", () => ({
 vi.mock("../../../src/stores/p2pk", () => ({
   useP2PKStore: () => ({
     getTokenLocktime: (...args: any[]) => getTokenLocktime(...args),
-    generateRefundSecret: () => ({ preimage: 'pre', hash: 'hash' }),
+    generateRefundSecret: () => ({ preimage: "pre", hash: "hash" }),
   }),
 }));
 
@@ -39,6 +40,10 @@ vi.mock("../../../src/stores/lockedTokens", () => ({
   }),
 }));
 
+vi.mock("../../../src/stores/messenger", () => ({
+  useMessengerStore: () => ({ sendDm: (...args: any[]) => sendDm(...args) }),
+}));
+
 vi.mock("../../../src/js/token", () => ({
   default: {
     decode: (...args: any[]) => tokenDecode(...args),
@@ -49,7 +54,7 @@ vi.mock("../../../src/js/token", () => ({
 
 beforeEach(async () => {
   localStorage.clear();
-  await cashuDb.close();   // close() is safe under fake-indexeddb
+  await cashuDb.close(); // close() is safe under fake-indexeddb
   await cashuDb.open();
 
   fetchNutzapProfile = vi.fn(async () => ({
@@ -59,23 +64,31 @@ beforeEach(async () => {
     relays: [],
   }));
   publishNutzap = vi.fn();
-  createHTLC = vi.fn(() => ({ token: 'htlc-token', hash: 'htlc-hash' }));
-  sendToLock = vi.fn(async (_p, _w, _a, _pk, _b, timelock, _refundKey, hash) => ({
-    sendProofs: [`tok-${timelock}`],
-    locked: { id: `lock-${timelock}`, hashlock: hash },
-  }));
+  createHTLC = vi.fn(() => ({ token: "htlc-token", hash: "htlc-hash" }));
+  sendToLock = vi.fn(
+    async (_p, _w, _a, _pk, _b, timelock, _refundKey, hash) => ({
+      sendProofs: [`tok-${timelock}`],
+      locked: { id: `lock-${timelock}`, hashlock: hash },
+    }),
+  );
   findSpendableMint = vi.fn(() => ({ url: "mint" }));
   addMany = vi.fn();
   getTokenLocktime = vi.fn(() => 0);
   tokenDecode = vi.fn(() => ({ proofs: [{ amount: 1 }] }));
   tokenGetProofs = vi.fn(() => [{ amount: 1 }]);
+  sendDm = vi.fn(async () => ({ success: true }));
 });
 
 describe("Nutzap store", () => {
   it("send() calculates unlockDate from startDate", async () => {
     const store = useNutzapStore();
     const start = 1000;
-    await store.send({ npub: "receiver", amount: 1, months: 3, startDate: start });
+    await store.send({
+      npub: "receiver",
+      amount: 1,
+      months: 3,
+      startDate: start,
+    });
 
     expect(sendToLock).toHaveBeenCalledTimes(3);
     const times = sendToLock.mock.calls.map((c: any[]) => c[5]);
@@ -115,13 +128,20 @@ describe("Nutzap store", () => {
 
     expect(ok).toBe(true);
     expect(sendToLock).toHaveBeenCalledTimes(2);
-    expect(sendToLock.mock.calls[0][7]).toBe('htlc-hash');
-    expect(sendToLock.mock.calls[1][7]).toBe('htlc-hash');
+    expect(sendToLock.mock.calls[0][7]).toBe("htlc-hash");
+    expect(sendToLock.mock.calls[1][7]).toBe("htlc-hash");
     const tokens = await cashuDb.lockedTokens.toArray();
     expect(tokens.length).toBe(2);
     const sub = await cashuDb.subscriptions.toArray();
     expect(sub.length).toBe(1);
     expect(sub[0].intervals[0].lockedTokenId).toBe(tokens[0].id);
   });
-});
 
+  it("queues token when DM send fails", async () => {
+    sendDm = vi.fn(async () => ({ success: false }));
+    const store = useNutzapStore();
+    await store.send({ npub: "receiver", amount: 1, months: 1, startDate: 0 });
+    expect(store.sendQueue.length).toBe(1);
+    expect(store.sendQueue[0].npub).toBe("hex");
+  });
+});

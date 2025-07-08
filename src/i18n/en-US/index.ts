@@ -1,4 +1,4 @@
-import { default as defaultLang } from 'quasar/lang/en-US'
+import { default as defaultLang } from "quasar/lang/en-US";
 
 export const messages = {
   copied_to_clipboard: "Copied to clipboard!",
@@ -1534,6 +1534,10 @@ export const messages = {
     row: {
       next_unlock_label: "Next unlock in { value }",
     },
+    pending_retry: "Queued { count } payments for resend",
+    actions: {
+      retry_now: { label: "Retry now" },
+    },
   },
   LockedTokensTable: {
     empty_text: "No locked tokens",
@@ -1619,6 +1623,6 @@ export const messages = {
 export default {
   ...(defaultLang as any),
   ...messages,
-  BucketManager: { helper: { intro: '' } },
-  MoveTokens:   { title: '', helper: '' }
+  BucketManager: { helper: { intro: "" } },
+  MoveTokens: { title: "", helper: "" },
 };
