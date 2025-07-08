@@ -16,7 +16,8 @@ import {
   useNostrStore,
   RelayConnectionError,
 } from "./nostr";
-import { ndkSend, filterHealthyRelays } from "src/boot/ndk";
+import { ndkSend, filterHealthyRelays, NdkBootError } from "src/boot/ndk";
+import { useBootErrorStore } from "./bootError";
 import type { NostrEvent, NDKSubscription } from "@nostr-dev-kit/ndk";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
@@ -207,7 +208,11 @@ export const useNutzapStore = defineStore("nutzap", {
         await ndkSend(creator.npub, token, relaysToUse);
       } catch (e: any) {
         console.error("Failed to send subscription token", e);
-        notifyError(e?.message || "Failed to send subscription token");
+        if (e instanceof NdkBootError) {
+          useBootErrorStore().set(e);
+        } else {
+          notifyError(e?.message || "Failed to send subscription token");
+        }
         this.queueSend({
           npub: creator.npub,
           token,
@@ -381,6 +386,9 @@ export const useNutzapStore = defineStore("nutzap", {
               });
             }
           } catch (err) {
+            if (err instanceof NdkBootError) {
+              useBootErrorStore().set(err);
+            }
             this.queueSend({
               npub: profile.hexPub,
               token,
