@@ -173,18 +173,19 @@ export default defineComponent({
           notifyError("Creator has not published a Nutzap profile (kind-10019)");
           return;
         }
-        const calcAmount = tierPrice.value * months.value;
+        const creator = { npub: creatorHex, p2pk: profile.p2pkPubkey };
         await nutzap.subscribeToTier({
-          npub: creatorHex,
+          creator,
+          tierId: props.tier?.id ?? props.tier?.name ?? 'tier',
+          price: tierPrice.value,
           months: months.value,
-          amount: calcAmount,
           startDate: Math.floor(new Date(startDate.value).getTime() / 1000),
+          relayList: profile.relays ?? [],
         });
         notifySuccess(t("FindCreators.notifications.subscription_success"));
         emit("confirm", {
           bucketId: bucketId.value,
           months: months.value,
-          amount: calcAmount,
           startDate: Math.floor(new Date(startDate.value).getTime() / 1000),
           total: total.value,
         });
