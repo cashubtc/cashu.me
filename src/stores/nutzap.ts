@@ -159,7 +159,6 @@ export const useNutzapStore = defineStore("nutzap", {
         const mint = wallet.findSpendableMint(price);
         if (!mint)
           throw new Error("Insufficient balance in a mint that the creator trusts.");
-        const { hash: refundHash } = p2pk.generateRefundSecret();
         const mintWallet = wallet.mintWallet(mint.url, mints.activeUnit);
         const proofs = mints.mintUnitProofs(mint, mints.activeUnit);
         const { sendProofs, locked } = await wallet.sendToLock(
@@ -170,7 +169,7 @@ export const useNutzapStore = defineStore("nutzap", {
           "nutzap",
           unlockDate,
           refundKey,
-          refundHash
+          hash
         );
         const entry: DexieLockedToken = {
           id: locked.id,

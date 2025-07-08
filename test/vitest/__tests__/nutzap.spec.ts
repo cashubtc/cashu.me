@@ -10,6 +10,7 @@ let addMany: any;
 let getTokenLocktime: any;
 let tokenDecode: any;
 let tokenGetProofs: any;
+let createHTLC: any;
 
 vi.mock("../../../src/stores/nostr", () => ({
   fetchNutzapProfile: (...args: any[]) => fetchNutzapProfile(...args),
@@ -43,6 +44,7 @@ vi.mock("../../../src/js/token", () => ({
     decode: (...args: any[]) => tokenDecode(...args),
     getProofs: (...args: any[]) => tokenGetProofs(...args),
   },
+  createP2PKHTLC: (...args: any[]) => createHTLC(...args),
 }));
 
 beforeEach(async () => {
@@ -57,9 +59,10 @@ beforeEach(async () => {
     relays: [],
   }));
   publishNutzap = vi.fn();
-  sendToLock = vi.fn(async (_p, _w, _a, _pk, _b, timelock) => ({
+  createHTLC = vi.fn(() => ({ token: 'htlc-token', hash: 'htlc-hash' }));
+  sendToLock = vi.fn(async (_p, _w, _a, _pk, _b, timelock, _refundKey, hash) => ({
     sendProofs: [`tok-${timelock}`],
-    locked: { id: `lock-${timelock}` },
+    locked: { id: `lock-${timelock}`, hashlock: hash },
   }));
   findSpendableMint = vi.fn(() => ({ url: "mint" }));
   addMany = vi.fn();
@@ -112,6 +115,8 @@ describe("Nutzap store", () => {
 
     expect(ok).toBe(true);
     expect(sendToLock).toHaveBeenCalledTimes(2);
+    expect(sendToLock.mock.calls[0][7]).toBe('htlc-hash');
+    expect(sendToLock.mock.calls[1][7]).toBe('htlc-hash');
     const tokens = await cashuDb.lockedTokens.toArray();
     expect(tokens.length).toBe(2);
     const sub = await cashuDb.subscriptions.toArray();
