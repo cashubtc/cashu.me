@@ -174,7 +174,9 @@ export async function ndkSend(
   toNpub: string,
   plaintext: string,
   relays: string[] = []
-) {
+): Promise<boolean> {
+  const nostr = useNostrStore();
+  await nostr.initSignerIfNotSet();
   const ndk = await getNdk();
   if (!ndk.signer) {
     throw new NdkBootError(
@@ -182,22 +184,15 @@ export async function ndkSend(
       "Nostr identity required to send a direct message"
     );
   }
-  const selfPub = useNostrStore().pubkey;
   const list = relays.length ? relays : ["wss://relay.damus.io"];
-  const ev = new NDKEvent(ndk);
-  ev.kind = 4;
-  ev.content = plaintext;
-  ev.tags = [
-    ["p", toNpub],
-    ["p", selfPub],
-  ];
-  await ev.sign(ndk.signer as NDKSigner);
-  try {
-    await ndk.pool.publish(list, ev);
-  } catch (e: any) {
-    const msg = e?.message ? String(e.message) : String(e);
-    throw new Error(`Failed to publish DM: ${msg}`);
-  }
+  const { success } = await nostr.sendNip04DirectMessage(
+    toNpub,
+    plaintext,
+    undefined,
+    undefined,
+    list
+  );
+  return success;
 }
 
 export default boot(async ({ app }) => {
