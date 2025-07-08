@@ -105,7 +105,8 @@ describe("sendToLock with hash lock", () => {
     expect(wallet.splitWithSecret).toHaveBeenCalledWith(
       amount,
       [{ secret: "s", amount: 1, id: "a", C: "c" }],
-      secretStr
+      secretStr,
+      { proofsWeHave: [{ secret: "s", amount: 1, id: "a", C: "c" }] }
     );
 
     randomStub.mockRestore();
