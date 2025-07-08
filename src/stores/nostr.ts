@@ -170,9 +170,19 @@ export async function fetchNutzapProfile(
 
   return new Promise((resolve) => {
     sub.on("event", (ev: NostrEvent) => {
-      const p2pkPubkey = ev.tags.find((t) => t[0] === "pubkey")?.[1];
+      let p2pkPubkey = ev.tags.find((t) => t[0] === "pubkey")?.[1];
       const mints = ev.tags.filter((t) => t[0] === "mint").map((t) => t[1]);
       if (p2pkPubkey) {
+        if (p2pkPubkey.startsWith("npub")) {
+          const hx = npubToHex(p2pkPubkey);
+          if (hx) p2pkPubkey = hx;
+        }
+        try {
+          p2pkPubkey = ensureCompressed(p2pkPubkey);
+        } catch (e) {
+          console.error("Invalid P2PK pubkey", e);
+          p2pkPubkey = "";
+        }
         resolve({
           hexPub: hex,
           p2pkPubkey,
