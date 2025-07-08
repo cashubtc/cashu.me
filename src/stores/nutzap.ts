@@ -16,7 +16,7 @@ import {
   useNostrStore,
   RelayConnectionError,
 } from "./nostr";
-import { ndkSend, filterHealthyRelays, NdkBootError } from "src/boot/ndk";
+import { NdkBootError } from "src/boot/ndk";
 import { useBootErrorStore } from "./bootError";
 import type { NostrEvent, NDKSubscription } from "@nostr-dev-kit/ndk";
 import dayjs from "dayjs";
@@ -183,7 +183,7 @@ export const useNutzapStore = defineStore("nutzap", {
         throw new Error("Insufficient balance");
       }
 
-      const { token, hash } = createP2PKHTLC(
+      const { hash } = createP2PKHTLC(
         price,
         creator.p2pk,
         months,
@@ -191,39 +191,7 @@ export const useNutzapStore = defineStore("nutzap", {
       );
       const subscriptionId = uuidv4();
 
-      let relaysToUse = await filterHealthyRelays(relayList);
-      try {
-        if (!relaysToUse.length) {
-          if (relayList.length) {
-            notifyWarning(
-              "All selected relays are unreachable, using fallback relay"
-            );
-          }
-          relaysToUse = await filterHealthyRelays(["wss://relay.damus.io"]);
-          if (!relaysToUse.length) {
-            notifyError("Unable to reach any relay");
-            return false;
-          }
-        }
-        await ndkSend(creator.npub, token, relaysToUse);
-      } catch (e: any) {
-        console.error("Failed to send subscription token", e);
-        if (e instanceof NdkBootError) {
-          useBootErrorStore().set(e);
-        } else {
-          notifyError(e?.message || "Failed to send subscription token");
-        }
-        this.queueSend({
-          npub: creator.npub,
-          token,
-          subscriptionId,
-          tierId,
-          monthIndex: 1,
-          totalMonths: months,
-          createdAt: Math.floor(Date.now() / 1000),
-        });
-      }
-
+      const messenger = useMessengerStore();
       const p2pk = useP2PKStore();
       if (!p2pk.firstKey) await p2pk.generateKeypair();
       const refundKey = p2pk.firstKey!.publicKey;
@@ -249,6 +217,47 @@ export const useNutzapStore = defineStore("nutzap", {
           refundKey,
           hash,
         );
+
+        const tokenStr = proofsStore.serializeProofs(sendProofs);
+        try {
+          const { success } = await messenger.sendDm(
+            creator.npub,
+            JSON.stringify({
+              type: "cashu_subscription_payment",
+              subscription_id: subscriptionId,
+              tier_id: tierId,
+              month_index: i + 1,
+              total_months: months,
+              token: tokenStr,
+            }),
+            relayList,
+          );
+          if (!success) {
+            this.queueSend({
+              npub: creator.npub,
+              token: tokenStr,
+              subscriptionId,
+              tierId,
+              monthIndex: i + 1,
+              totalMonths: months,
+              createdAt: Math.floor(Date.now() / 1000),
+            });
+          }
+        } catch (err) {
+          if (err instanceof NdkBootError) {
+            useBootErrorStore().set(err);
+          }
+          this.queueSend({
+            npub: creator.npub,
+            token: tokenStr,
+            subscriptionId,
+            tierId,
+            monthIndex: i + 1,
+            totalMonths: months,
+            createdAt: Math.floor(Date.now() / 1000),
+          });
+        }
+
         const entry: DexieLockedToken = {
           id: locked.id,
           tokenString: locked.tokenString,
