@@ -368,9 +368,18 @@ export enum SignerType {
 }
 
 export const useNostrStore = defineStore("nostr", {
-  state: () => ({
-    connected: false,
-    pubkey: useLocalStorage<string>("cashu.ndk.pubkey", ""),
+  state: () => {
+    const lastEventTimestamp = useLocalStorage<number>(
+      "cashu.ndk.lastEventTimestamp",
+      0
+    );
+    const now = Math.floor(Date.now() / 1000);
+    if (lastEventTimestamp.value > now) {
+      lastEventTimestamp.value = now;
+    }
+    return {
+      connected: false,
+      pubkey: useLocalStorage<string>("cashu.ndk.pubkey", ""),
     relays: useSettingsStore().defaultNostrRelays.value ?? [] as string[],
     signerType: useLocalStorage<SignerType>(
       "cashu.ndk.signerType",
@@ -404,10 +413,7 @@ export const useNostrStore = defineStore("nostr", {
     ),
     initialized: false,
     lastError: '' as string | null,
-    lastEventTimestamp: useLocalStorage<number>(
-      "cashu.ndk.lastEventTimestamp",
-      0
-    ),
+    lastEventTimestamp,
     nip17EventIdsWeHaveSeen: useLocalStorage<NostrEventLog[]>(
       "cashu.ndk.nip17EventIdsWeHaveSeen",
       []
@@ -415,7 +421,8 @@ export const useNostrStore = defineStore("nostr", {
     profiles: useLocalStorage<
       Record<string, { profile: any; fetchedAt: number }>
     >("cashu.ndk.profiles", {}),
-  }),
+  };
+  },
   getters: {
     seedSignerPrivateKeyNsecComputed: (state) => {
       const sk = hexToBytes(state.seedSignerPrivateKey);
@@ -1029,6 +1036,10 @@ export const useNostrStore = defineStore("nostr", {
         if (!this.lastEventTimestamp) {
           this.lastEventTimestamp = Math.floor(Date.now() / 1000);
         }
+        const now = Math.floor(Date.now() / 1000);
+        if (this.lastEventTimestamp > now) {
+          this.lastEventTimestamp = now;
+        }
         debug(
           `### Subscribing to NIP-04 direct messages to ${pubKey} since ${this.lastEventTimestamp}`
         );
@@ -1194,6 +1205,10 @@ export const useNostrStore = defineStore("nostr", {
       const fetchEventsPromise = new Promise<Set<NDKEvent>>(async (resolve) => {
         if (!this.lastEventTimestamp) {
           this.lastEventTimestamp = Math.floor(Date.now() / 1000);
+        }
+        const now = Math.floor(Date.now() / 1000);
+        if (this.lastEventTimestamp > now) {
+          this.lastEventTimestamp = now;
         }
         const since = this.lastEventTimestamp - 172800; // last 2 days
         debug(

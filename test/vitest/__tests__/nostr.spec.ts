@@ -104,3 +104,16 @@ describe("sendNip04DirectMessage", () => {
     publishSuccess = true;
   });
 });
+
+describe("lastEventTimestamp", () => {
+  it("clamps future timestamps on init", () => {
+    const future = Math.floor(Date.now() / 1000) + 1000;
+    localStorage.setItem(
+      "cashu.ndk.lastEventTimestamp",
+      JSON.stringify(future)
+    );
+    const store = useNostrStore();
+    const now = Math.floor(Date.now() / 1000);
+    expect(store.lastEventTimestamp).toBeLessThanOrEqual(now);
+  });
+});
