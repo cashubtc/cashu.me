@@ -143,8 +143,9 @@ export const useNutzapStore = defineStore("nutzap", {
       try {
         await ndkSend(creator.npub, token, relayList);
       } catch (e: any) {
+        console.error("Failed to send subscription token", e);
         notifyError(e?.message || "Failed to send subscription token");
-        return false;
+        throw e;
       }
 
       const p2pk = useP2PKStore();
