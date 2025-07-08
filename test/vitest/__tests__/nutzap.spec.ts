@@ -97,5 +97,26 @@ describe("Nutzap store", () => {
     expect(count).toBe(1);
     expect(store.incoming.length).toBe(1);
   });
+
+  it("subscribeToTier stores locked tokens", async () => {
+    const store = useNutzapStore();
+    const start = 1000;
+    const ok = await store.subscribeToTier({
+      creator: { npub: "creator", p2pk: "pk" },
+      tierId: "tier",
+      months: 2,
+      price: 1,
+      startDate: start,
+      relayList: [],
+    });
+
+    expect(ok).toBe(true);
+    expect(sendToLock).toHaveBeenCalledTimes(2);
+    const tokens = await cashuDb.lockedTokens.toArray();
+    expect(tokens.length).toBe(2);
+    const sub = await cashuDb.subscriptions.toArray();
+    expect(sub.length).toBe(1);
+    expect(sub[0].intervals[0].lockedTokenId).toBe(tokens[0].id);
+  });
 });
 
