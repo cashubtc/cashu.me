@@ -1,7 +1,17 @@
 import { type Token, getDecodedToken } from "@cashu/cashu-ts";
 import { useMintsStore, WalletProof } from "src/stores/mints";
 import { useProofsStore } from "src/stores/proofs";
-export default { decode, getProofs, getMint, getUnit, getMemo };
+import { sha256 } from "@noble/hashes/sha256";
+import { bytesToHex } from "@noble/hashes/utils";
+export default {
+  decode,
+  getProofs,
+  getMint,
+  getUnit,
+  getMemo,
+  createP2PKHTLC,
+};
+export { createP2PKHTLC, hash };
 
 /**
  * Decodes an encoded cashu token
@@ -61,4 +71,19 @@ function getMemo(decoded_token: Token) {
   } else {
     return "";
   }
+}
+
+function hash(secret: string, receiver: string): string {
+  return bytesToHex(sha256(new TextEncoder().encode(secret + receiver)));
+}
+
+function createP2PKHTLC(
+  amount: number,
+  receiverP2PK: string,
+  months: number,
+  startDate: number,
+) {
+  const lockSecret = crypto.randomUUID();
+  const token = JSON.stringify({ amount, receiverP2PK, months, startDate, lockSecret });
+  return { token, hash: hash(lockSecret, receiverP2PK) };
 }

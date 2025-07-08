@@ -4,6 +4,7 @@ import { useProofsStore } from "../../../src/stores/proofs";
 import { useBucketsStore } from "../../../src/stores/buckets";
 import { useLockedTokensStore } from "../../../src/stores/lockedTokens";
 import { useSignerStore } from "../../../src/stores/signer";
+import { hash } from "../../../src/js/token";
 
 vi.mock("../../../src/utils/ecash", () => ({
   ensureCompressed: (pk: string) => pk,
@@ -74,7 +75,8 @@ describe("sendToLock with hash lock", () => {
     const amount = 1;
     const locktime = 99;
     const receiver = "pk";
-    const hashSecret = "hs";
+    const lockSecret = "hs";
+    const hashSecret = hash(lockSecret, receiver);
     const secretStr = JSON.stringify([
       "P2PK",
       {
@@ -86,6 +88,7 @@ describe("sendToLock with hash lock", () => {
         ],
       },
     ] as const);
+    expect(hash(lockSecret, receiver)).toBe(hashSecret);
 
     await walletStore.sendToLock(
       [{ secret: "s", amount: 1, id: "a", C: "c" } as any],

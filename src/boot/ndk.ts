@@ -2,6 +2,7 @@ import { boot } from "quasar/wrappers";
 import { useBootErrorStore } from "stores/bootError";
 import NDK, { NDKSigner } from "@nostr-dev-kit/ndk";
 import { useNostrStore } from "stores/nostr";
+import type { NDKEvent, NDKFilter } from "@nostr-dev-kit/ndk";
 import { useSettingsStore } from "src/stores/settings";
 import { DEFAULT_RELAYS } from "src/config/relays";
 
@@ -169,6 +170,27 @@ export async function getNdk(): Promise<NDK> {
     throw new NdkBootError("unknown", "NDK failed to initialize");
   }
   return ndk;
+}
+
+export async function ndkSend(
+  toNpub: string,
+  plaintext: string,
+  relays: string[] = [],
+) {
+  const ndk = await getNdk();
+  const selfPub = useNostrStore().pubkey;
+  const list = relays.length ? relays : ["wss://relay.damus.io"];
+  const f: NDKFilter = { kinds: [4], authors: [selfPub], recipients: [toNpub] };
+  ndk.pool.mergeFilters([f]);
+  const ev = new NDKEvent(ndk);
+  ev.kind = 4;
+  ev.content = plaintext;
+  ev.tags = [
+    ["p", toNpub],
+    ["p", selfPub],
+  ];
+  await ev.sign(ndk.signer as NDKSigner);
+  await ndk.pool.publish(list, ev);
 }
 
 export default boot(async ({ app }) => {
