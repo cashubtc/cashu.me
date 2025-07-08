@@ -50,6 +50,7 @@ import { cashuDb } from "stores/dexie";
 import { useMintsStore } from "stores/mints";
 import { useReceiveTokensStore } from "stores/receiveTokensStore";
 import { useWalletStore } from "stores/wallet";
+import { useP2PKStore } from "stores/p2pk";
 import { useNostrStore } from "stores/nostr";
 import { useUiStore } from "stores/ui";
 
@@ -103,8 +104,11 @@ export default defineComponent({
     async redeem(token) {
       const receiveStore = useReceiveTokensStore();
       const wallet = useWalletStore();
+      const p2pkStore = useP2PKStore();
       receiveStore.receiveData.tokensBase64 = token.tokenString;
       receiveStore.receiveData.bucketId = token.tierId;
+      receiveStore.receiveData.p2pkPrivateKey =
+        p2pkStore.getPrivateKeyForP2PKEncodedToken(token.tokenString);
       await wallet.redeem(token.tierId);
       await cashuDb.lockedTokens
         .where("tokenString")
