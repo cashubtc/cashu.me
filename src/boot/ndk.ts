@@ -31,8 +31,6 @@ export function mergeDefaultRelays(ndk: NDK) {
   }
 }
 
-
-
 let ndkInstance: NDK | undefined;
 let ndkPromise: Promise<NDK> | undefined;
 
@@ -69,7 +67,7 @@ async function pingRelay(url: string): Promise<boolean> {
 
 async function filterHealthyRelays(relays: string[]): Promise<string[]> {
   const results = await Promise.all(
-    relays.map(async (u) => ((await pingRelay(u)) ? u : null)),
+    relays.map(async (u) => ((await pingRelay(u)) ? u : null))
   );
   return results.filter((u): u is string => !!u);
 }
@@ -81,7 +79,7 @@ export async function safeConnect(ndk: NDK): Promise<Error | null> {
   } catch (e: any) {
     console.warn(
       "[NDK] connect failed, continuing in offline mode:",
-      e?.message,
+      e?.message
     );
     return e as Error;
   }
@@ -175,12 +173,17 @@ export async function getNdk(): Promise<NDK> {
 export async function ndkSend(
   toNpub: string,
   plaintext: string,
-  relays: string[] = [],
+  relays: string[] = []
 ) {
   const ndk = await getNdk();
+  if (!ndk.signer) {
+    throw new NdkBootError(
+      "no-signer",
+      "Nostr identity required to send a direct message"
+    );
+  }
   const selfPub = useNostrStore().pubkey;
   const list = relays.length ? relays : ["wss://relay.damus.io"];
-  const f: NDKFilter = { kinds: [4], authors: [selfPub], recipients: [toNpub] };
   const ev = new NDKEvent(ndk);
   ev.kind = 4;
   ev.content = plaintext;
