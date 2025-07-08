@@ -41,7 +41,12 @@
         <q-btn flat color="primary" @click="cancel">{{
           $t("global.actions.cancel.label")
         }}</q-btn>
-        <q-btn flat color="primary" @click="confirm">{{
+        <q-btn
+          flat
+          color="primary"
+          @click="confirm"
+          :disable="!hasSigner"
+        >{{
           $t("global.actions.ok.label")
         }}</q-btn>
       </q-card-actions>
@@ -55,7 +60,12 @@ import { useDonationPresetsStore } from "stores/donationPresets";
 import { useBucketsStore, DEFAULT_BUCKET_ID } from "stores/buckets";
 import { useMintsStore } from "stores/mints";
 import { useUiStore } from "stores/ui";
-import { fetchNutzapProfile, npubToHex, RelayConnectionError } from "stores/nostr";
+import {
+  fetchNutzapProfile,
+  npubToHex,
+  RelayConnectionError,
+  useNostrStore,
+} from "stores/nostr";
 import { notifySuccess, notifyError } from "src/js/notify";
 import { storeToRefs } from "pinia";
 import { useNutzapStore } from "stores/nutzap";
@@ -78,6 +88,7 @@ export default defineComponent({
     const mintsStore = useMintsStore();
     const uiStore = useUiStore();
     const nutzap = useNutzapStore();
+    const nostr = useNostrStore();
     const { t } = useI18n();
     const { bucketList, bucketBalances } = storeToRefs(bucketsStore);
     const { activeUnit } = storeToRefs(mintsStore);
@@ -90,6 +101,8 @@ export default defineComponent({
     const today = new Date().toISOString().slice(0, 10);
     const startDate = ref(today);
     const total = computed(() => tierPrice.value * months.value);
+
+    const hasSigner = computed(() => !!nostr.signer);
 
     const model = computed({
       get: () => props.modelValue,
@@ -133,8 +146,14 @@ export default defineComponent({
 
     watch(
       () => props.modelValue,
-      (val) => {
-        if (val) selectCreatorBucket();
+      async (val) => {
+        if (val) {
+          await nostr.initSignerIfNotSet();
+          if (!nostr.signer) {
+            useBootErrorStore().set(new NdkBootError("no-signer"));
+          }
+          selectCreatorBucket();
+        }
       },
     );
 
@@ -151,6 +170,11 @@ export default defineComponent({
 
     const confirm = async () => {
       if (!startDate.value) {
+        return;
+      }
+      await nostr.initSignerIfNotSet();
+      if (!nostr.signer) {
+        useBootErrorStore().set(new NdkBootError("no-signer"));
         return;
       }
       try {
@@ -220,6 +244,7 @@ export default defineComponent({
       startDate,
       today,
       total,
+      hasSigner,
       cancel,
       confirm,
     };
