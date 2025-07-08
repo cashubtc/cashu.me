@@ -24,8 +24,8 @@ importers:
         specifier: ^6.0.0
         version: 6.2.1(@capacitor/core@6.2.1)
       '@cashu/cashu-ts':
-        specifier: link:src/lib/cashu-ts
-        version: link:src/lib/cashu-ts
+        specifier: file:src/lib/cashu-ts
+        version: file:src/lib/cashu-ts
       '@cashu/crypto':
         specifier: ^0.3.4
         version: 0.3.4
