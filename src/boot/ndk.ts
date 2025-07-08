@@ -1,6 +1,6 @@
 import { boot } from "quasar/wrappers";
 import { useBootErrorStore } from "stores/bootError";
-import NDK, { NDKSigner, mergeFilters } from "@nostr-dev-kit/ndk";
+import NDK, { NDKSigner } from "@nostr-dev-kit/ndk";
 import { useNostrStore } from "stores/nostr";
 import type { NDKEvent, NDKFilter } from "@nostr-dev-kit/ndk";
 import { useSettingsStore } from "src/stores/settings";
@@ -181,7 +181,6 @@ export async function ndkSend(
   const selfPub = useNostrStore().pubkey;
   const list = relays.length ? relays : ["wss://relay.damus.io"];
   const f: NDKFilter = { kinds: [4], authors: [selfPub], recipients: [toNpub] };
-  mergeFilters([f]);
   const ev = new NDKEvent(ndk);
   ev.kind = 4;
   ev.content = plaintext;
