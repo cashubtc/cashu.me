@@ -113,14 +113,33 @@ export const useNutzapStore = defineStore("nutzap", {
     },
 
     /** Subscribe to a creator tier via HTLC */
-    async subscribeToTier({ creator, tierId, months, price, startDate, relayList }: { creator: { npub: string; p2pk: string }; tierId: string; months: number; price: number; startDate: number; relayList: string[] }): Promise<boolean> {
+    async subscribeToTier({
+      creator,
+      tierId,
+      months,
+      price,
+      startDate,
+      relayList,
+    }: {
+      creator: { npub: string; p2pk: string };
+      tierId: string;
+      months: number;
+      price: number;
+      startDate: number;
+      relayList: string[];
+    }): Promise<boolean> {
       const wallet = useWalletStore();
       const mints = useMintsStore();
       if (!wallet || mints.activeBalance < price) {
         throw new Error("Insufficient balance");
       }
 
-      const { token, hash } = createP2PKHTLC(price, creator.p2pk, months, startDate);
+      const { token, hash } = createP2PKHTLC(
+        price,
+        creator.p2pk,
+        months,
+        startDate
+      );
       try {
         await ndkSend(creator.npub, token, relayList);
       } catch (e: any) {
@@ -128,12 +147,82 @@ export const useNutzapStore = defineStore("nutzap", {
         return false;
       }
 
-      await cashuDb.subscriptions.add({
+      const p2pk = useP2PKStore();
+      if (!p2pk.firstKey) await p2pk.generateKeypair();
+      const refundKey = p2pk.firstKey!.publicKey;
+      const proofsStore = useProofsStore();
+      const subscriptionId = uuidv4();
+      const lockedTokens: DexieLockedToken[] = [];
+
+      for (let i = 0; i < months; i++) {
+        const unlockDate = calcUnlock(startDate, i);
+        const mint = wallet.findSpendableMint(price);
+        if (!mint)
+          throw new Error("Insufficient balance in a mint that the creator trusts.");
+        const { hash: refundHash } = p2pk.generateRefundSecret();
+        const mintWallet = wallet.mintWallet(mint.url, mints.activeUnit);
+        const proofs = mints.mintUnitProofs(mint, mints.activeUnit);
+        const { sendProofs, locked } = await wallet.sendToLock(
+          proofs,
+          mintWallet,
+          price,
+          creator.p2pk,
+          "nutzap",
+          unlockDate,
+          refundKey,
+          refundHash
+        );
+        const entry: DexieLockedToken = {
+          id: locked.id,
+          tokenString: locked.tokenString,
+          amount: price,
+          owner: "subscriber",
+          creatorNpub: creator.npub,
+          tierId,
+          intervalKey: String(i + 1),
+          unlockTs: unlockDate,
+          refundUnlockTs: 0,
+          status:
+            unlockDate > Math.floor(Date.now() / 1000)
+              ? "pending"
+              : "unlockable",
+          subscriptionEventId: null,
+          subscriptionId,
+          monthIndex: i + 1,
+          totalMonths: months,
+          label: "Subscription payment",
+        };
+        lockedTokens.push(entry);
+        await proofsStore.updateActiveProofs();
+      }
+
+      await cashuDb.lockedTokens.bulkAdd(lockedTokens as any);
+
+      const subStore = useSubscriptionsStore();
+      await subStore.addSubscription({
+        id: subscriptionId,
         creatorNpub: creator.npub,
         tierId,
+        creatorP2PK: creator.p2pk,
+        subscriberRefundP2PK: refundKey,
+        mintUrl: mints.activeMintUrl,
+        amountPerInterval: price,
+        frequency: "monthly",
         startDate,
-        endDate: startDate + months * 30 * 24 * 3600,
-        hash,
+        commitmentLength: months,
+        intervals: lockedTokens.map((t, idx) => ({
+          intervalKey: String(idx + 1),
+          lockedTokenId: t.id,
+          unlockTs: t.unlockTs,
+          refundUnlockTs: 0,
+          status: "pending",
+          tokenString: t.tokenString,
+          subscriptionId,
+          tierId,
+          monthIndex: idx + 1,
+          totalMonths: months,
+        })),
+        status: "active",
       } as any);
       return true;
     },
