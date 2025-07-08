@@ -164,9 +164,11 @@ export default defineComponent({
           profile = await fetchNutzapProfile(creatorHex);
         } catch (e: any) {
           if (e instanceof RelayConnectionError) {
+            console.error("Relay connection error", e);
             notifyError("Unable to connect to Nostr relays");
             return;
           }
+          console.error("Failed to fetch Nutzap profile", e);
           throw e;
         }
         if (!profile) {
@@ -182,16 +184,20 @@ export default defineComponent({
           startDate: Math.floor(new Date(startDate.value).getTime() / 1000),
           relayList: profile.relays ?? [],
         });
-        if (!success) return;
-        notifySuccess(t("FindCreators.notifications.subscription_success"));
-        emit("confirm", {
-          bucketId: bucketId.value,
-          months: months.value,
-          startDate: Math.floor(new Date(startDate.value).getTime() / 1000),
-          total: total.value,
-        });
-        emit("update:modelValue", false);
+        if (success) {
+          notifySuccess(t("FindCreators.notifications.subscription_success"));
+          emit("confirm", {
+            bucketId: bucketId.value,
+            months: months.value,
+            startDate: Math.floor(new Date(startDate.value).getTime() / 1000),
+            total: total.value,
+          });
+          emit("update:modelValue", false);
+        } else {
+          notifyError(t("FindCreators.notifications.subscription_failed"));
+        }
       } catch (e: any) {
+        console.error("Subscription failed", e);
         notifyError(
           e.message || t("FindCreators.notifications.subscription_failed")
         );
