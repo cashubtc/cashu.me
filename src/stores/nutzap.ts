@@ -1,5 +1,6 @@
 import { defineStore } from "pinia";
 import { watch } from "vue";
+import { useLocalStorage } from "@vueuse/core";
 import { useWalletStore } from "./wallet";
 import { useP2PKStore } from "./p2pk";
 import { cashuDb, type LockedToken as DexieLockedToken } from "./dexie";
@@ -35,6 +36,16 @@ interface SendParams {
   startDate: number; // unix timestamp for first unlock
 }
 
+export interface NutzapQueuedSend {
+  npub: string;
+  token: string;
+  subscriptionId: string;
+  tierId: string;
+  monthIndex: number;
+  totalMonths: number;
+  createdAt: number;
+}
+
 export const useNutzapStore = defineStore("nutzap", {
   state: () => ({
     incoming: [] as NostrEvent[], // raw kind:9321 events waiting to be claimed
@@ -43,9 +54,46 @@ export const useNutzapStore = defineStore("nutzap", {
     subscription: null as NDKSubscription | null,
     listenerStarted: false,
     watchInitialized: false,
+    sendQueue: useLocalStorage<NutzapQueuedSend[]>(
+      "cashu.nutzap.sendQueue",
+      [],
+    ),
   }),
 
   actions: {
+    queueSend(data: NutzapQueuedSend) {
+      this.sendQueue.push(data);
+    },
+
+    async resendQueued(item: NutzapQueuedSend) {
+      const messenger = useMessengerStore();
+      const payload = {
+        type: "cashu_subscription_payment",
+        subscription_id: item.subscriptionId,
+        tier_id: item.tierId,
+        month_index: item.monthIndex,
+        total_months: item.totalMonths,
+        token: item.token,
+      } as const;
+      const { success } = await messenger.sendDm(
+        item.npub,
+        JSON.stringify(payload),
+      );
+      if (success) {
+        const idx = this.sendQueue.findIndex(
+          (q) => q.createdAt === item.createdAt,
+        );
+        if (idx >= 0) this.sendQueue.splice(idx, 1);
+      }
+      return success;
+    },
+
+    async retryQueuedSends() {
+      for (const item of [...this.sendQueue]) {
+        const ok = await this.resendQueued(item);
+        if (!ok) break;
+      }
+    },
     /** Called once on app start (e.g. from MainLayout.vue) */
     async initListener(myHex: string) {
       if (!this.watchInitialized) {
@@ -57,7 +105,7 @@ export const useNutzapStore = defineStore("nutzap", {
               this.listenerStarted = false;
               this.initListener(pubkey);
             }
-          }
+          },
         );
         this.watchInitialized = true;
       }
@@ -138,28 +186,38 @@ export const useNutzapStore = defineStore("nutzap", {
         price,
         creator.p2pk,
         months,
-        startDate
+        startDate,
       );
+      const subscriptionId = uuidv4();
       try {
         await ndkSend(creator.npub, token, relayList);
       } catch (e: any) {
         console.error("Failed to send subscription token", e);
         notifyError(e?.message || "Failed to send subscription token");
-        throw e;
+        this.queueSend({
+          npub: creator.npub,
+          token,
+          subscriptionId,
+          tierId,
+          monthIndex: 1,
+          totalMonths: months,
+          createdAt: Math.floor(Date.now() / 1000),
+        });
       }
 
       const p2pk = useP2PKStore();
       if (!p2pk.firstKey) await p2pk.generateKeypair();
       const refundKey = p2pk.firstKey!.publicKey;
       const proofsStore = useProofsStore();
-      const subscriptionId = uuidv4();
       const lockedTokens: DexieLockedToken[] = [];
 
       for (let i = 0; i < months; i++) {
         const unlockDate = calcUnlock(startDate, i);
         const mint = wallet.findSpendableMint(price);
         if (!mint)
-          throw new Error("Insufficient balance in a mint that the creator trusts.");
+          throw new Error(
+            "Insufficient balance in a mint that the creator trusts.",
+          );
         const mintWallet = wallet.mintWallet(mint.url, mints.activeUnit);
         const proofs = mints.mintUnitProofs(mint, mints.activeUnit);
         const { sendProofs, locked } = await wallet.sendToLock(
@@ -170,7 +228,7 @@ export const useNutzapStore = defineStore("nutzap", {
           "nutzap",
           unlockDate,
           refundKey,
-          hash
+          hash,
         );
         const entry: DexieLockedToken = {
           id: locked.id,
@@ -243,7 +301,7 @@ export const useNutzapStore = defineStore("nutzap", {
         }
         if (!profile || !profile.p2pkPubkey) {
           throw new Error(
-            "Creator's Nutzap profile is missing or does not contain a P2PK key."
+            "Creator's Nutzap profile is missing or does not contain a P2PK key.",
           );
         }
         const creatorP2pk = profile.p2pkPubkey;
@@ -265,7 +323,7 @@ export const useNutzapStore = defineStore("nutzap", {
           const mint = wallet.findSpendableMint(amount, trustedMints);
           if (!mint)
             throw new Error(
-              "Insufficient balance in a mint that the creator trusts."
+              "Insufficient balance in a mint that the creator trusts.",
             );
 
           // ----- HTLC-locked pledge with refund capability --------------
@@ -280,22 +338,45 @@ export const useNutzapStore = defineStore("nutzap", {
             "nutzap",
             unlockDate,
             refundKey,
-            hash
+            hash,
           );
-        const token = proofsStore.serializeProofs(sendProofs);
+          const token = proofsStore.serializeProofs(sendProofs);
 
-          await messenger.sendDm(
-            profile.hexPub,
-            JSON.stringify({
-              type: "cashu_subscription_payment",
-            subscription_id: subscriptionId,
-            tier_id: "nutzap",
-            month_index: i + 1,
-            total_months: months,
-            token,
-            }),
-            trustedRelays
-          );
+          try {
+            const { success } = await messenger.sendDm(
+              profile.hexPub,
+              JSON.stringify({
+                type: "cashu_subscription_payment",
+                subscription_id: subscriptionId,
+                tier_id: "nutzap",
+                month_index: i + 1,
+                total_months: months,
+                token,
+              }),
+              trustedRelays,
+            );
+            if (!success) {
+              this.queueSend({
+                npub: profile.hexPub,
+                token,
+                subscriptionId,
+                tierId: "nutzap",
+                monthIndex: i + 1,
+                totalMonths: months,
+                createdAt: Math.floor(Date.now() / 1000),
+              });
+            }
+          } catch (err) {
+            this.queueSend({
+              npub: profile.hexPub,
+              token,
+              subscriptionId,
+              tierId: "nutzap",
+              monthIndex: i + 1,
+              totalMonths: months,
+              createdAt: Math.floor(Date.now() / 1000),
+            });
+          }
 
           const entry: DexieLockedToken = {
             id: locked.id,
@@ -367,7 +448,7 @@ export const useNutzapStore = defineStore("nutzap", {
 
       // delete any matching locked token entries from dexie
       await cashuDb.lockedTokens
-        .where('tokenString')
+        .where("tokenString")
         .equals(tokenString)
         .delete();
 

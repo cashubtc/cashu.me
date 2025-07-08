@@ -11,6 +11,16 @@
         {{ formatCurrency(totalLocked) }}
       </div>
     </div>
+    <q-banner v-if="sendQueue.length" dense class="q-mb-md bg-orange-2">
+      {{
+        $t("SubscriptionsOverview.pending_retry", { count: sendQueue.length })
+      }}
+      <template #action>
+        <q-btn flat color="primary" dense @click="retryQueuedSends">
+          {{ $t("SubscriptionsOverview.actions.retry_now") }}
+        </q-btn>
+      </template>
+    </q-banner>
     <div v-if="isSmallScreen">
       <div class="row q-col-gutter-sm q-mb-md">
         <q-input
@@ -474,10 +484,7 @@
         </q-card-actions>
       </q-card>
     </q-dialog>
-    <SubscriptionReceipt
-      v-model="showReceiptDialog"
-      :receipts="receiptList"
-    />
+    <SubscriptionReceipt v-model="showReceiptDialog" :receipts="receiptList" />
   </div>
 </template>
 
@@ -514,6 +521,7 @@ const proofsStore = useProofsStore();
 const sendTokensStore = useSendTokensStore();
 const nutzap = useNutzapStore();
 const { activeUnit } = storeToRefs(mintsStore);
+const { sendQueue } = storeToRefs(nutzap);
 
 function pubkeyNpub(hex: string): string {
   try {
@@ -573,7 +581,7 @@ const rows = computed(() => {
         ? start + (totalMonths - 1) * 30 * 24 * 60 * 60
         : null;
     const unlocked = tokens.filter(
-      (t) => !t.locktime || t.locktime <= nowSec
+      (t) => !t.locktime || t.locktime <= nowSec,
     ).length;
     const status = monthsLeft > 0 ? "active" : "expired";
     const bucket = bucketsStore.bucketList.find((b) => b.id === sub.tierId);
@@ -603,7 +611,7 @@ const rows = computed(() => {
 
 const totalLocked = computed(() => rows.value.reduce((s, r) => s + r.total, 0));
 const monthlyTotal = computed(() =>
-  rows.value.reduce((s, r) => s + r.monthly, 0)
+  rows.value.reduce((s, r) => s + r.monthly, 0),
 );
 
 const profiles = ref<Record<string, any>>({});
@@ -689,6 +697,10 @@ async function confirmMessage() {
   }
 }
 
+function retryQueuedSends() {
+  nutzap.retryQueuedSends();
+}
+
 function cancelSubscription(pubkey: string) {
   const row = rows.value.find((r) => r.creator === pubkey);
   if (!row) return;
@@ -701,7 +713,7 @@ function cancelSubscription(pubkey: string) {
     subscriptionsStore
       .cancelSubscription(pubkey)
       .then(() =>
-        notifySuccess(t("SubscriptionsOverview.notifications.cancel_success"))
+        notifySuccess(t("SubscriptionsOverview.notifications.cancel_success")),
       )
       .catch((e: any) => notifyError(e.message));
   });
