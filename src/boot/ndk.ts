@@ -2,7 +2,7 @@ import { boot } from "quasar/wrappers";
 import { useBootErrorStore } from "stores/bootError";
 import NDK, { NDKSigner } from "@nostr-dev-kit/ndk";
 import { useNostrStore } from "stores/nostr";
-import type { NDKEvent, NDKFilter } from "@nostr-dev-kit/ndk";
+import { NDKEvent, type NDKFilter } from "@nostr-dev-kit/ndk";
 import { useSettingsStore } from "src/stores/settings";
 import { DEFAULT_RELAYS } from "src/config/relays";
 
