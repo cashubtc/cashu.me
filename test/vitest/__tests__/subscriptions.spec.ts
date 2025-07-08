@@ -15,6 +15,7 @@ let sendToLock: any;
 let redeem: any;
 let mintWallet: any;
 let checkSpendable: any;
+let setBootError: any;
 
 vi.mock("../../../src/stores/nostr", () => ({
   fetchNutzapProfile: (...args: any[]) => fetchNutzapProfile(...args),
@@ -28,6 +29,8 @@ vi.mock("../../../src/stores/p2pk", () => ({
     lockToPubKey: (...args: any[]) => lockToPubKey(...args),
     getTokenLocktime: vi.fn(() => 0),
     generateRefundSecret: () => ({ preimage: "pre", hash: "hash" }),
+    generateKeypair: vi.fn(),
+    firstKey: { publicKey: "refund" },
   }),
 }));
 
@@ -64,6 +67,14 @@ vi.mock("../../../src/stores/messenger", () => ({
   useMessengerStore: () => ({ sendDm: (...args: any[]) => sendDm(...args) }),
 }));
 
+vi.mock("../../../src/stores/bootError", () => ({
+  useBootErrorStore: () => ({
+    set: (...args: any[]) => setBootError(...args),
+    clear: vi.fn(),
+    error: null,
+  }),
+}));
+
 vi.mock("../../../src/stores/settings", () => ({
   useSettingsStore: () => ({ autoRedeemLockedTokens: true }),
 }));
@@ -79,13 +90,17 @@ vi.mock("../../../src/js/token", () => ({
     getUnit: () => "sat",
     getProofs: (d: any) => d.proofs,
   },
+  createP2PKHTLC: vi.fn(() => ({ token: "tok", hash: "hash" })),
 }));
 
 beforeEach(async () => {
   localStorage.clear();
   await cashuDb.close();
+  await cashuDb.delete();
   await cashuDb.open();
+  useNutzapStore().$reset();
   sendDm = vi.fn(async () => ({}));
+  setBootError = vi.fn();
   fetchNutzapProfile = vi.fn(async () => ({
     p2pkPubkey: "pk",
     trustedMints: ["mint"],
@@ -97,7 +112,10 @@ beforeEach(async () => {
   serializeProofs = vi.fn((p: any) => `tok-${p[0]}`);
   updateActiveProofs = vi.fn();
   addMany = vi.fn();
-  sendToLock = vi.fn(async (_p, _w, _a, _pk, _b, u) => ({ sendProofs: [u] }));
+  sendToLock = vi.fn(async (_p, _w, _a, _pk, _b, u) => ({
+    sendProofs: [u],
+    locked: { id: `id-${u}`, tokenString: `lock-${u}` },
+  }));
   redeem = vi.fn();
   mintWallet = vi.fn(() => ({}));
   checkSpendable = vi.fn(async () => null);
@@ -118,6 +136,19 @@ describe("Nutzap subscriptions", () => {
     expect(p1.total_months).toBe(2);
     expect(p1.token).toBe(`tok-${calcUnlock(start, 0)}`);
     expect(p2.token).toBe(`tok-${calcUnlock(start, 1)}`);
+  });
+
+  it("queues message and sets boot error when sendDm throws", async () => {
+    sendDm = vi.fn(async () => {
+      throw new (await import("../../../src/boot/ndk")).NdkBootError(
+        "no-signer"
+      );
+    });
+    cashuDb.lockedTokens.bulkAdd = vi.fn();
+    const store = useNutzapStore();
+    await store.send({ npub: "npub", amount: 1, months: 1, startDate: 0 });
+    expect(setBootError).toHaveBeenCalled();
+    expect(store.sendQueue.length).toBe(1);
   });
 
   it("aggregates incoming DMs by subscription_id", async () => {
@@ -202,5 +233,19 @@ describe("Nutzap subscriptions", () => {
     await worker.processTokens();
     expect(redeem).toHaveBeenCalledWith("tier1");
     expect(await cashuDb.lockedTokens.count()).toBe(0);
+  });
+
+  it("queues message and sets boot error when ndkSend throws", async () => {
+    const mod = await import("../../../src/boot/ndk");
+    vi.spyOn(mod, "ndkSend").mockRejectedValue(new mod.NdkBootError("no-signer"));
+    const subStore = useNutzapStore();
+    sendDm = vi.fn(async () => ({ success: true }));
+    cashuDb.lockedTokens.bulkAdd = vi.fn();
+    await subStore.subscribeToTier({
+      creator: { npub: "npub", p2pk: "pk" },
+      tierId: "tier", months: 1, price: 1, startDate: 0, relayList: []
+    });
+    expect(setBootError).toHaveBeenCalled();
+    expect(subStore.sendQueue.length).toBe(1);
   });
 });
