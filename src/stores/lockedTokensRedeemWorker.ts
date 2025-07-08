@@ -5,6 +5,7 @@ import { useReceiveTokensStore } from "./receiveTokensStore";
 import { useSettingsStore } from "./settings";
 import { useMintsStore } from "./mints";
 import { useMessengerStore } from "./messenger";
+import { useP2PKStore } from "./p2pk";
 import { notifySuccess } from "src/js/notify";
 import token from "src/js/token";
 import { ensureCompressed } from "src/utils/ecash";
@@ -124,6 +125,21 @@ export const useLockedTokensRedeemWorker = defineStore(
             });
             receiveStore.receiveData.tokensBase64 = entry.tokenString;
             receiveStore.receiveData.bucketId = entry.tierId;
+            const p2pkStore = useP2PKStore();
+            receiveStore.receiveData.p2pkPrivateKey =
+              p2pkStore.getPrivateKeyForP2PKEncodedToken(entry.tokenString);
+
+            const needsSig = proofs.some(
+              (p) => typeof p.secret === "string" && p.secret.startsWith('["P2PK"')
+            );
+            if (needsSig && !receiveStore.receiveData.p2pkPrivateKey) {
+              postMessage({
+                type: "locked-token-missing-signer",
+                tokenId: entry.id,
+              });
+              continue;
+            }
+
             debug("locked token redeem: sending proofs", proofs);
             try {
               await wallet.redeem(entry.tierId);
@@ -176,7 +192,10 @@ export const useLockedTokensRedeemWorker = defineStore(
             } catch (err: any) {
               if (
                 typeof err?.message === "string" &&
-                err.message.includes("No private key or remote signer")
+                (err.message.includes("No private key or remote signer") ||
+                  err.message.includes(
+                    "You do not have the private key to unlock this token."
+                  ))
               ) {
                 postMessage({
                   type: "locked-token-missing-signer",
