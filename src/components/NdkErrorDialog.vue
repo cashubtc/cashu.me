@@ -10,7 +10,8 @@
           or paste an <code>nsec</code> below.
         </p>
         <p v-else-if="reason === 'no-signer'">
-          No Nostr signer found. Paste an <code>nsec</code> to continue.
+          Please unlock your NIP‑07 signer extension or paste an <code>nsec</code>
+          to continue.
         </p>
         <p v-else>
           An unknown error occurred while starting Nostr.

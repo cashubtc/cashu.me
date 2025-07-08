@@ -60,6 +60,8 @@ import { notifySuccess, notifyError } from "src/js/notify";
 import { storeToRefs } from "pinia";
 import { useNutzapStore } from "stores/nutzap";
 import { useI18n } from "vue-i18n";
+import { NdkBootError } from "boot/ndk";
+import { useBootErrorStore } from "stores/bootError";
 
 export default defineComponent({
   name: "SubscribeDialog",
@@ -198,9 +200,13 @@ export default defineComponent({
         }
       } catch (e: any) {
         console.error("Subscription failed", e);
-        notifyError(
-          e.message || t("FindCreators.notifications.subscription_failed")
-        );
+        if (e instanceof NdkBootError && e.reason === "no-signer") {
+          useBootErrorStore().set(e);
+        } else {
+          notifyError(
+            e.message || t("FindCreators.notifications.subscription_failed")
+          );
+        }
       }
     };
 
