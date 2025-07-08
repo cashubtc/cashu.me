@@ -569,11 +569,7 @@ export const useNostrStore = defineStore("nostr", {
           this.nip07Checked &&
           !this.nip07SignerAvailable
         ) {
-          if (!this.initialized) {
-            await this.initNdkReadOnly();
-            this.initialized = true;
-          }
-          return;
+          this.signerType = SignerType.SEED;
         }
         this.initialized = false; // force re-initialisation
       }
