@@ -113,7 +113,7 @@ export const useNutzapStore = defineStore("nutzap", {
     },
 
     /** Subscribe to a creator tier via HTLC */
-    async subscribeToTier({ creator, tierId, months, price, startDate, relayList }: { creator: { npub: string; p2pk: string }; tierId: string; months: number; price: number; startDate: number; relayList: string[] }) {
+    async subscribeToTier({ creator, tierId, months, price, startDate, relayList }: { creator: { npub: string; p2pk: string }; tierId: string; months: number; price: number; startDate: number; relayList: string[] }): Promise<boolean> {
       const wallet = useWalletStore();
       const mints = useMintsStore();
       if (!wallet || mints.activeBalance < price) {
@@ -121,7 +121,12 @@ export const useNutzapStore = defineStore("nutzap", {
       }
 
       const { token, hash } = createP2PKHTLC(price, creator.p2pk, months, startDate);
-      await ndkSend(creator.npub, token, relayList);
+      try {
+        await ndkSend(creator.npub, token, relayList);
+      } catch (e: any) {
+        notifyError(e?.message || "Failed to send subscription token");
+        return false;
+      }
 
       await cashuDb.subscriptions.add({
         creatorNpub: creator.npub,
@@ -130,6 +135,7 @@ export const useNutzapStore = defineStore("nutzap", {
         endDate: startDate + months * 30 * 24 * 3600,
         hash,
       } as any);
+      return true;
     },
 
     /** High-level entry from UI – fan pledges to creator */

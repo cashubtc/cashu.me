@@ -174,7 +174,7 @@ export default defineComponent({
           return;
         }
         const creator = { npub: creatorHex, p2pk: profile.p2pkPubkey };
-        await nutzap.subscribeToTier({
+        const success = await nutzap.subscribeToTier({
           creator,
           tierId: props.tier?.id ?? props.tier?.name ?? 'tier',
           price: tierPrice.value,
@@ -182,6 +182,7 @@ export default defineComponent({
           startDate: Math.floor(new Date(startDate.value).getTime() / 1000),
           relayList: profile.relays ?? [],
         });
+        if (!success) return;
         notifySuccess(t("FindCreators.notifications.subscription_success"));
         emit("confirm", {
           bucketId: bucketId.value,

@@ -192,7 +192,12 @@ export async function ndkSend(
     ["p", selfPub],
   ];
   await ev.sign(ndk.signer as NDKSigner);
-  await ndk.pool.publish(list, ev);
+  try {
+    await ndk.pool.publish(list, ev);
+  } catch (e: any) {
+    const msg = e?.message ? String(e.message) : String(e);
+    throw new Error(`Failed to publish DM: ${msg}`);
+  }
 }
 
 export default boot(async ({ app }) => {
