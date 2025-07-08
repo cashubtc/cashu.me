@@ -65,7 +65,7 @@ async function pingRelay(url: string): Promise<boolean> {
   });
 }
 
-async function filterHealthyRelays(relays: string[]): Promise<string[]> {
+export async function filterHealthyRelays(relays: string[]): Promise<string[]> {
   const results = await Promise.all(
     relays.map(async (u) => ((await pingRelay(u)) ? u : null))
   );
