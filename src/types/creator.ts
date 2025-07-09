@@ -3,6 +3,10 @@ export interface CreatorIdentity {
   cashuP2pk: string; // SEC-compressed Cashu P2PK key
 }
 
+export function isValidCashuP2pk(key: string): boolean {
+  return /^(02|03)[0-9a-f]{64}$/i.test(key);
+}
+
 export interface SubscribeTierOptions {
   creator: CreatorIdentity;
   tierId: string;

@@ -66,6 +66,7 @@ export interface LockedToken {
   owner: "subscriber" | "creator";
   subscriberNpub?: string;
   creatorNpub?: string;
+  creatorP2PK?: string;
   tierId: string;
   intervalKey: string;
   unlockTs: number;

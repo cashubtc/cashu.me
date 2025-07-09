@@ -10,7 +10,11 @@ import { useMintsStore } from "./mints";
 import { useProofsStore } from "./proofs";
 import { useMessengerStore } from "./messenger";
 import { useSubscriptionsStore } from "./subscriptions";
-import type { CreatorIdentity, SubscribeTierOptions } from "src/types/creator";
+import type {
+  CreatorIdentity,
+  SubscribeTierOptions,
+} from "src/types/creator";
+import { isValidCashuP2pk } from "src/types/creator";
 import {
   fetchNutzapProfile,
   subscribeToNutzaps,
@@ -178,7 +182,7 @@ export const useNutzapStore = defineStore("nutzap", {
       }
 
       const p2pkStore = useP2PKStore();
-      if (!p2pkStore.isValidPubkey(creator.cashuP2pk)) {
+      if (!isValidCashuP2pk(creator.cashuP2pk)) {
         throw new Error("Creator profile missing Cashu P2PK key");
       }
 
@@ -263,6 +267,7 @@ export const useNutzapStore = defineStore("nutzap", {
           amount: price,
           owner: "subscriber",
           creatorNpub: creator.nostrPubkey,
+          creatorP2PK: creator.cashuP2pk,
           tierId,
           intervalKey: String(i + 1),
           unlockTs: unlockDate,
@@ -414,6 +419,7 @@ export const useNutzapStore = defineStore("nutzap", {
             amount,
             owner: "subscriber",
             creatorNpub: npub,
+            creatorP2PK: creatorP2pk,
             tierId: "nutzap",
             intervalKey: String(i + 1),
             unlockTs: unlockDate,
