@@ -148,7 +148,7 @@ export const useP2PKStore = defineStore("p2pk", {
         used: false,
         usedCount: 0,
       };
-      this.p2pkKeys.unshift(keyPair);
+      this.p2pkKeys = this.p2pkKeys.concat(keyPair);
     },
     generateKeypair: function () {
       let sk = generateSecretKey(); // `sk` is a Uint8Array
@@ -161,7 +161,7 @@ export const useP2PKStore = defineStore("p2pk", {
         used: false,
         usedCount: 0,
       };
-      this.p2pkKeys.unshift(keyPair);
+      this.p2pkKeys = this.p2pkKeys.concat(keyPair);
     },
     async createAndSelectNewKey() {
       const { pub, priv } = generateP2pkKeyPair();
