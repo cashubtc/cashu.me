@@ -1285,6 +1285,7 @@ export default defineComponent({
           amount: sendAmount,
           token: this.sendData.tokensBase64,
           pubkey: this.sendData.p2pkPubkey,
+          creatorP2PK: this.sendData.p2pkPubkey,
           locktime: this.sendData.locktime || undefined,
           refundPubkey: this.sendData.refundPubkey || undefined,
           bucketId,

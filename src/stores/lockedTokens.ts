@@ -9,6 +9,7 @@ export type LockedToken = {
   token: string;
   tokenString: string;
   pubkey: string;
+  creatorP2PK?: string;
   unlockTs?: number;
   label?: string;
   locktime?: number;
