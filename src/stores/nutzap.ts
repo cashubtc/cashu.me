@@ -183,6 +183,11 @@ export const useNutzapStore = defineStore("nutzap", {
         throw new Error("Insufficient balance");
       }
 
+      const p2pkStore = useP2PKStore();
+      if (!p2pkStore.isValidPubkey(creator.p2pk)) {
+        throw new Error("Creator profile missing Cashu P2PK key");
+      }
+
       const { hash } = createP2PKHTLC(
         price,
         creator.p2pk,
