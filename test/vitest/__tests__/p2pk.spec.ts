@@ -6,6 +6,7 @@ import { generateSecretKey, getPublicKey, nip19 } from "nostr-tools";
 import { bytesToHex } from "@noble/hashes/utils";
 import * as secp from "@noble/secp256k1";
 import { ensureCompressed } from "../../../src/utils/ecash";
+import { createP2PKHTLC } from "../../../src/js/token";
 
 beforeEach(() => {
   localStorage.clear();
@@ -55,6 +56,19 @@ describe("P2PK store", () => {
 
     secret = JSON.stringify(["P2PK", { data: uncompressed }]);
     expect(p2pk.getSecretP2PKPubkey(secret)).toBe(compressed);
+  });
+
+  it("extracts receiver key from HTLC token", () => {
+    const p2pk = useP2PKStore();
+    const receiver = "02112233445566778899aabbccddeeff00112233445566778899aabbccddeeff00";
+    const { token } = createP2PKHTLC(1, receiver, 1, 0);
+    expect(p2pk.getSecretP2PKPubkey(token)).toBe(receiver);
+  });
+
+  it("handles P2PK: prefixed secrets", () => {
+    const p2pk = useP2PKStore();
+    const receiver = "03112233445566778899aabbccddeeff00112233445566778899aabbccddeeff00";
+    expect(p2pk.getSecretP2PKPubkey(`P2PK:${receiver}`)).toBe(receiver);
   });
 
   it("forwards options in sendToLock", async () => {
