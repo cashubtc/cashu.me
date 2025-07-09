@@ -240,6 +240,9 @@ export const useP2PKStore = defineStore("p2pk", {
       // by returning them directly. This prevents the JSON.parse crash.
       if (!trimmedSecret.startsWith('{')) {
         console.warn('P2PK secret is not a JSON object, treating as raw pubkey.');
+        if (trimmedSecret.startsWith("P2PK:")) {
+          return trimmedSecret.slice("P2PK:".length);
+        }
         return trimmedSecret;
       }
 
