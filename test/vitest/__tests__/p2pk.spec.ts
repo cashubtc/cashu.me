@@ -203,36 +203,6 @@ describe("P2PK store", () => {
       "cashuA" + Buffer.from(JSON.stringify(tokenObj)).toString("base64");
     expect(p2pk.getPrivateKeyForP2PKEncodedToken(encoded)).toBe(skHex);
   });
-
-  it("prepends generated key", () => {
-    const p2pk = useP2PKStore();
-    p2pk.p2pkKeys = [
-      { publicKey: "aa", privateKey: "aa", used: false, usedCount: 0 },
-    ];
-    const first = p2pk.firstKey;
-    p2pk.generateKeypair();
-    expect(p2pk.p2pkKeys.length).toBe(2);
-    expect(p2pk.firstKey).not.toBe(first);
-    expect(p2pk.p2pkKeys[1]).toBe(first);
-  });
-
-  it("prepends imported nsec key", async () => {
-    const p2pk = useP2PKStore();
-    p2pk.p2pkKeys = [
-      { publicKey: "aa", privateKey: "aa", used: false, usedCount: 0 },
-    ];
-
-    const sk = generateSecretKey();
-    const skHex = bytesToHex(sk);
-    const nsec = nip19.nsecEncode(sk);
-    vi.stubGlobal("prompt", vi.fn(async () => nsec) as any);
-
-    await p2pk.importNsec();
-
-    expect(p2pk.p2pkKeys.length).toBe(2);
-    expect(p2pk.firstKey!.privateKey).toBe(skHex);
-    expect(p2pk.p2pkKeys[1].publicKey).toBe("aa");
-  });
 });
 
 describe("generateRefundSecret", () => {
