@@ -72,6 +72,7 @@ import { useNutzapStore } from "stores/nutzap";
 import { useI18n } from "vue-i18n";
 import { NdkBootError } from "boot/ndk";
 import { useBootErrorStore } from "stores/bootError";
+import type { CreatorIdentity } from "src/types/creator";
 
 export default defineComponent({
   name: "SubscribeDialog",
@@ -201,7 +202,10 @@ export default defineComponent({
           notifyError("Creator has not published a Nutzap profile (kind-10019)");
           return;
         }
-        const creator = { npub: creatorHex, p2pk: profile.p2pkPubkey };
+        const creator: CreatorIdentity = {
+          nostrPubkey: creatorHex,
+          cashuP2pk: profile.p2pkPubkey,
+        };
         const success = await nutzap.subscribeToTier({
           creator,
           tierId: props.tier?.id ?? props.tier?.name ?? 'tier',

@@ -10,6 +10,7 @@ import { useMintsStore } from "./mints";
 import { useProofsStore } from "./proofs";
 import { useMessengerStore } from "./messenger";
 import { useSubscriptionsStore } from "./subscriptions";
+import type { CreatorIdentity, SubscribeTierOptions } from "src/types/creator";
 import {
   fetchNutzapProfile,
   subscribeToNutzaps,
@@ -169,14 +170,7 @@ export const useNutzapStore = defineStore("nutzap", {
       price,
       startDate,
       relayList,
-    }: {
-      creator: { npub: string; p2pk: string };
-      tierId: string;
-      months: number;
-      price: number;
-      startDate: number;
-      relayList: string[];
-    }): Promise<boolean> {
+    }: SubscribeTierOptions): Promise<boolean> {
       const wallet = useWalletStore();
       const mints = useMintsStore();
       if (!wallet || mints.activeBalance < price) {
@@ -184,13 +178,13 @@ export const useNutzapStore = defineStore("nutzap", {
       }
 
       const p2pkStore = useP2PKStore();
-      if (!p2pkStore.isValidPubkey(creator.p2pk)) {
+      if (!p2pkStore.isValidPubkey(creator.cashuP2pk)) {
         throw new Error("Creator profile missing Cashu P2PK key");
       }
 
       const { hash } = createP2PKHTLC(
         price,
-        creator.p2pk,
+        creator.cashuP2pk,
         months,
         startDate,
       );
@@ -216,7 +210,7 @@ export const useNutzapStore = defineStore("nutzap", {
           proofs,
           mintWallet,
           price,
-          creator.p2pk,
+          creator.cashuP2pk,
           "nutzap",
           unlockDate,
           refundKey,
@@ -225,8 +219,8 @@ export const useNutzapStore = defineStore("nutzap", {
 
         const tokenStr = proofsStore.serializeProofs(sendProofs);
         try {
-          const { success } = await messenger.sendDm(
-            creator.npub,
+        const { success } = await messenger.sendDm(
+          creator.nostrPubkey,
             JSON.stringify({
               type: "cashu_subscription_payment",
               subscription_id: subscriptionId,
@@ -239,7 +233,7 @@ export const useNutzapStore = defineStore("nutzap", {
           );
           if (!success) {
             this.queueSend({
-              npub: creator.npub,
+              npub: creator.nostrPubkey,
               token: tokenStr,
               subscriptionId,
               tierId,
@@ -253,7 +247,7 @@ export const useNutzapStore = defineStore("nutzap", {
             useBootErrorStore().set(err);
           }
           this.queueSend({
-            npub: creator.npub,
+            npub: creator.nostrPubkey,
             token: tokenStr,
             subscriptionId,
             tierId,
@@ -268,7 +262,7 @@ export const useNutzapStore = defineStore("nutzap", {
           tokenString: locked.tokenString,
           amount: price,
           owner: "subscriber",
-          creatorNpub: creator.npub,
+          creatorNpub: creator.nostrPubkey,
           tierId,
           intervalKey: String(i + 1),
           unlockTs: unlockDate,
@@ -292,9 +286,9 @@ export const useNutzapStore = defineStore("nutzap", {
       const subStore = useSubscriptionsStore();
       await subStore.addSubscription({
         id: subscriptionId,
-        creatorNpub: creator.npub,
+        creatorNpub: creator.nostrPubkey,
         tierId,
-        creatorP2PK: creator.p2pk,
+        creatorP2PK: creator.cashuP2pk,
         subscriberRefundP2PK: refundKey,
         mintUrl: mints.activeMintUrl,
         amountPerInterval: price,
