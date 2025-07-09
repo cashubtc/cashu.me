@@ -14,6 +14,7 @@ let createHTLC: any;
 let sendDm: any;
 let ndkSendFn: any;
 let filterHealthyRelaysFn: any;
+let isValidPubkey: any;
 
 vi.mock("../../../src/stores/nostr", () => ({
   fetchNutzapProfile: (...args: any[]) => fetchNutzapProfile(...args),
@@ -26,6 +27,7 @@ vi.mock("../../../src/stores/p2pk", () => ({
   useP2PKStore: () => ({
     getTokenLocktime: (...args: any[]) => getTokenLocktime(...args),
     generateRefundSecret: () => ({ preimage: "pre", hash: "hash" }),
+    isValidPubkey: (...args: any[]) => isValidPubkey(...args),
   }),
 }));
 
@@ -86,6 +88,7 @@ beforeEach(async () => {
   sendDm = vi.fn(async () => ({ success: true }));
   ndkSendFn = vi.fn();
   filterHealthyRelaysFn = vi.fn(async (r: string[]) => r);
+  isValidPubkey = vi.fn(() => true);
 });
 
 describe("Nutzap store", () => {
@@ -146,6 +149,22 @@ describe("Nutzap store", () => {
     const sub = await cashuDb.subscriptions.toArray();
     expect(sub.length).toBe(1);
     expect(sub[0].intervals[0].lockedTokenId).toBe(tokens[0].id);
+  });
+
+  it("subscribeToTier throws when creator key invalid", async () => {
+    const store = useNutzapStore();
+    // override isValidPubkey to return false for this test
+    isValidPubkey = vi.fn(() => false);
+    await expect(
+      store.subscribeToTier({
+        creator: { npub: "creator", p2pk: "bad" },
+        tierId: "tier",
+        months: 1,
+        price: 1,
+        startDate: 0,
+        relayList: [],
+      }),
+    ).rejects.toThrow("Creator profile missing Cashu P2PK key");
   });
 
   it("queues token when DM send fails", async () => {

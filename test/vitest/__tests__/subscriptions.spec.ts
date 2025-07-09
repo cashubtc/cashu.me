@@ -16,6 +16,7 @@ let redeem: any;
 let mintWallet: any;
 let checkSpendable: any;
 let setBootError: any;
+let isValidPubkey: any;
 
 vi.mock("../../../src/stores/nostr", () => ({
   fetchNutzapProfile: (...args: any[]) => fetchNutzapProfile(...args),
@@ -31,6 +32,7 @@ vi.mock("../../../src/stores/p2pk", () => ({
     generateRefundSecret: () => ({ preimage: "pre", hash: "hash" }),
     generateKeypair: vi.fn(),
     firstKey: { publicKey: "refund" },
+    isValidPubkey: (...args: any[]) => isValidPubkey(...args),
   }),
 }));
 
@@ -119,6 +121,7 @@ beforeEach(async () => {
   redeem = vi.fn();
   mintWallet = vi.fn(() => ({}));
   checkSpendable = vi.fn(async () => null);
+  isValidPubkey = vi.fn(() => true);
 });
 
 describe("Nutzap subscriptions", () => {
