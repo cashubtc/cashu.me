@@ -130,7 +130,7 @@ describe("Nutzap store", () => {
     const store = useNutzapStore();
     const start = 1000;
     const ok = await store.subscribeToTier({
-      creator: { npub: "creator", p2pk: "pk" },
+      creator: { nostrPubkey: "creator", cashuP2pk: "pk" },
       tierId: "tier",
       months: 2,
       price: 1,
@@ -157,7 +157,7 @@ describe("Nutzap store", () => {
     isValidPubkey = vi.fn(() => false);
     await expect(
       store.subscribeToTier({
-        creator: { npub: "creator", p2pk: "bad" },
+        creator: { nostrPubkey: "creator", cashuP2pk: "bad" },
         tierId: "tier",
         months: 1,
         price: 1,

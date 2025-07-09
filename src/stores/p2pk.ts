@@ -92,11 +92,10 @@ export const useP2PKStore = defineStore("p2pk", {
       try {
         if (key.startsWith("npub1")) {
           const { type, data } = nip19.decode(key);
-          if (type === "npub") {
-            key = data as string;
-          }
+          if (type === "npub") key = data as string;
         }
-        return ensureCompressed(key).length === 66;
+        const COMPRESSED_RE = /^(02|03)[0-9a-f]{64}$/i;
+        return COMPRESSED_RE.test(ensureCompressed(key));
       } catch (e) {
         return false;
       }
