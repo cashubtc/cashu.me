@@ -72,7 +72,7 @@
 
 <script lang="ts">
 import { defineComponent, computed, ref, onMounted, watch } from "vue";
-import { useRouter, useRoute } from "vue-router";
+import { useRouter } from "vue-router";
 import { useLocalStorage } from "@vueuse/core";
 import { useMessengerStore } from "src/stores/messenger";
 import { useNdk } from "src/composables/useNdk";
@@ -124,7 +124,6 @@ export default defineComponent({
     onMounted(init);
 
     const router = useRouter();
-    const route = useRoute();
 
     const goBack = () => {
       if (window.history.length > 1) {
@@ -148,18 +147,6 @@ export default defineComponent({
     const showRelays = useLocalStorage<boolean>(
       "cashu.messenger.showRelays",
       true,
-    );
-
-    onMounted(() => {
-      const peer = route.query.peer as string | undefined;
-      if (peer) messenger.openConversation(peer);
-    });
-
-    watch(
-      () => route.query.peer,
-      (newPeer) => {
-        if (typeof newPeer === "string") messenger.openConversation(newPeer);
-      },
     );
 
     watch(
