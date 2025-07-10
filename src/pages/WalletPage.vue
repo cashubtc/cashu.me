@@ -16,6 +16,7 @@
                 unelevated
                 class="wallet-action-btn"
                 @click="showReceiveDialog = true"
+                :aria-label="$t('global.actions.receive.label')"
               >
                 <div class="button-content">
                   <q-icon name="south_west" size="1.2rem" class="q-mr-xs" />
@@ -35,6 +36,7 @@
                     unelevated
                     class="wallet-action-btn"
                     @click="showCamera"
+                    :aria-label="$t('global.actions.scan.label')"
                   >
                     <ScanIcon size="2.5em" />
                   </q-btn>
@@ -56,6 +58,7 @@
                 unelevated
                 class="wallet-action-btn"
                 @click="showSendDialog = true"
+                :aria-label="$t('global.actions.send.label')"
               >
                 <div class="button-content">
                   <q-icon name="north_east" size="1.2rem" class="q-mr-xs" />

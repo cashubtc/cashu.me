@@ -97,6 +97,7 @@
             class="q-mx-sm"
             v-if="hasCamera"
             @click="showCamera"
+            :aria-label="$t('global.actions.scan.label')"
           >
             <ScanIcon size="1.5em" />
             <span class="q-pl-sm">{{
@@ -186,6 +187,7 @@
               class="q-ml-xs q-mr-sm"
               :disabled="addMintBlocking"
               :loading="swapBlocking"
+              :aria-label="$t('global.actions.receive.label')"
               :label="
                 knowThisMint
                   ? addMintBlocking
