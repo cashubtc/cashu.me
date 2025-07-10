@@ -6,8 +6,7 @@
           <ActivityOrb />
           <NoMintWarnBanner v-if="mints.length == 0" />
           <BalanceView v-else :set-tab="setTab" />
-          <div class="wallet-actions">
-            <div class="row items-center justify-around q-mt-md">
+          <div class="wallet-actions justify-center q-gutter-x-md">
               <q-btn
                 fab
                 size="lg"
@@ -57,7 +56,6 @@
                   <span>{{ $t("WalletPage.actions.send.label") }}</span>
                 </div>
               </q-btn>
-            </div>
             <ReceiveDialog v-model="showReceiveDialog" />
             <SendDialog v-model="showSendDialog" />
           </div>
