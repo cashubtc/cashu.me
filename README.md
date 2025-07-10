@@ -149,18 +149,18 @@ mint URLs to use.
 
 ## Development
 
-This project uses **npm** as its package manager.
+This project uses **pnpm** as its package manager.
 
 Install dependencies:
 
 ```bash
-npm install
+pnpm install
 ```
 
 Start a development server:
 
 ```bash
-npm run dev
+pnpm dev
 ```
 
 ### Verifying the NDK refactor
@@ -213,8 +213,14 @@ Contributions are welcome! Open an issue or pull request to discuss your ideas. 
 Before submitting a pull request, install dependencies and run the test suite:
 
 ```bash
-npm install
-npm run test:ci
+pnpm install
+pnpm run test:ci
+```
+
+For a watch mode during development, you can also run:
+
+```bash
+pnpm test
 ```
 
 Some tests communicate with an external Cashu mint. Ensure network connectivity
