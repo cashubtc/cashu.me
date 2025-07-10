@@ -12,7 +12,7 @@
           map-options
           outlined
           dense
-          :label="$t('BucketManager.inputs.name')"
+          :label="$t('bucket.name')"
         />
         <q-input
           v-model.number="amount"

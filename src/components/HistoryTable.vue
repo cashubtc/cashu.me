@@ -152,7 +152,7 @@
           outlined
           type="color"
           class="q-mt-md"
-          :label="$t('BucketManager.inputs.color')"
+          :label="$t('bucket.color')"
         />
         <div class="row q-mt-md">
           <q-btn color="primary" rounded @click="saveLabel">{{

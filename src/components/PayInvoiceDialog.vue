@@ -79,7 +79,7 @@
             map-options
             outlined
             dense
-            :label="$t('BucketManager.inputs.name')"
+            :label="$t('bucket.name')"
           />
         </div>
         <div
