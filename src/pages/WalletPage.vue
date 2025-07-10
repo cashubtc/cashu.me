@@ -8,12 +8,11 @@
           <BalanceView v-else :set-tab="setTab" />
           <div class="wallet-actions justify-center q-gutter-sm">
             <q-btn
-              size="md"
+              fab
+              size="lg"
               color="primary"
               glossy
               unelevated
-              round
-              push
               class="wallet-action-btn"
               @click="showReceiveDialog = true"
               :aria-label="$t('global.actions.receive.label')"
@@ -27,12 +26,11 @@
             <transition appear enter-active-class="animated pulse">
               <div class="scan-button-container">
                 <q-btn
-                  size="md"
+                  fab
+                  size="lg"
                     color="primary"
                     glossy
                     unelevated
-                    round
-                    push
                     class="wallet-action-btn"
                     @click="showCamera"
                     :aria-label="$t('global.actions.scan.label')"
@@ -48,12 +46,11 @@
 
             <!-- button to showSendDialog -->
             <q-btn
-              size="md"
+              fab
+              size="lg"
               color="primary"
               glossy
                 unelevated
-                round
-                push
                 class="wallet-action-btn"
                 @click="showSendDialog = true"
                 :aria-label="$t('global.actions.send.label')"
@@ -229,10 +226,9 @@
 
 .wallet-action-btn {
   flex: 0 0 auto;
-  min-width: 6rem;
+  min-width: 8rem;
   white-space: nowrap;
-  font-size: 0.8rem;
-  padding: 0.4rem 0.6rem;
+  font-size: 0.9rem;
 }
 .wallet-action-btn:hover {
   box-shadow: 0 0 6px rgba(0, 0, 0, 0.15);
