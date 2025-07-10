@@ -6,7 +6,8 @@
           <ActivityOrb />
           <NoMintWarnBanner v-if="mints.length == 0" />
           <BalanceView v-else :set-tab="setTab" />
-          <div class="wallet-actions justify-center q-gutter-x-md">
+          <div class="wallet-actions row justify-center q-gutter-sm">
+            <div class="col-12 col-sm-auto">
               <q-btn
                 fab
                 size="lg"
@@ -21,7 +22,9 @@
                   <span>{{ $t("WalletPage.actions.receive.label") }}</span>
                 </div>
               </q-btn>
+            </div>
 
+            <div class="col-12 col-sm-auto">
               <transition appear enter-active-class="animated pulse">
                 <div class="scan-button-container">
                   <q-btn
@@ -41,8 +44,10 @@
                   />
                 </div>
               </transition>
+            </div>
 
-              <!-- button to showSendDialog -->
+            <!-- button to showSendDialog -->
+            <div class="col-12 col-sm-auto">
               <q-btn
                 fab
                 size="lg"
@@ -57,6 +62,7 @@
                   <span>{{ $t("WalletPage.actions.send.label") }}</span>
                 </div>
               </q-btn>
+            </div>
             <ReceiveDialog v-model="showReceiveDialog" />
             <SendDialog v-model="showSendDialog" />
           </div>
@@ -218,7 +224,7 @@
 
 .wallet-actions {
   display: flex;
-  gap: 2rem;
+  flex-wrap: wrap;
 }
 
 .wallet-action-btn {
