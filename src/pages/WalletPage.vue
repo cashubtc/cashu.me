@@ -236,6 +236,18 @@
   white-space: nowrap;
   font-size: 0.9rem;
 }
+.wallet-action-btn:hover {
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.15);
+}
+body.body--dark .wallet-action-btn:hover {
+  box-shadow: 0 0 6px rgba(255, 255, 255, 0.15);
+}
+.wallet-action-btn:active {
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.3) inset;
+}
+body.body--dark .wallet-action-btn:active {
+  box-shadow: 0 0 6px rgba(255, 255, 255, 0.3) inset;
+}
 
 .button-content {
   display: flex;
