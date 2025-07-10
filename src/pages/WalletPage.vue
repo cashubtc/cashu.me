@@ -30,6 +30,7 @@
                     color="primary"
                     glossy
                     unelevated
+                    class="wallet-action-btn"
                     @click="showCamera"
                   >
                     <ScanIcon size="2.5em" />
@@ -237,7 +238,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding-bottom: 15px;
+  padding-bottom: 5px;
   z-index: 1;
 }
 </style>
