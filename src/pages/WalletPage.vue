@@ -6,60 +6,50 @@
           <ActivityOrb />
           <NoMintWarnBanner v-if="mints.length == 0" />
           <BalanceView v-else :set-tab="setTab" />
-          <div class="wallet-actions justify-center q-gutter-sm">
-            <q-btn
-              fab
-              size="md"
-              color="primary"
-              glossy
-              unelevated
-              class="wallet-action-btn"
-              @click="showReceiveDialog = true"
-              :aria-label="$t('global.actions.receive.label')"
+          <div
+            class="row items-center justify-center no-wrap q-mb-none q-mx-none q-px-none q-pt-lg q-pb-md position-relative"
+          >
+            <div
+              class="col-6 q-mb-md flex justify-center items-center"
+              style="margin-right: 10%"
             >
-              <div class="button-content">
-                <q-icon name="south_west" size="1rem" class="q-mr-xs" />
-                <span>{{ $t("WalletPage.actions.receive.label") }}</span>
-              </div>
-            </q-btn>
+              <q-btn
+                rounded
+                dense
+                class="q-px-md wallet-action-btn"
+                color="primary"
+                @click="showReceiveDialog = true"
+              >
+                <div class="button-content">
+                  <q-icon name="south_west" size="1.2rem" class="q-mr-xs" />
+                  <span>{{ $t("WalletPage.actions.receive.label") }}</span>
+                </div>
+              </q-btn>
+            </div>
 
             <transition appear enter-active-class="animated pulse">
               <div class="scan-button-container">
-                <q-btn
-                  fab
-                  size="md"
-                  color="primary"
-                  glossy
-                  unelevated
-                  class="wallet-action-btn"
-                  @click="showCamera"
-                  :aria-label="$t('global.actions.scan.label')"
-                >
-                  <ScanIcon size="1.8em" />
+                <q-btn size="lg" outline color="primary" flat @click="showCamera">
+                  <ScanIcon size="2em" />
                 </q-btn>
-                <InfoTooltip
-                  class="q-mt-sm"
-                  :text="$t('WalletPage.actions.scan.tooltip')"
-                />
               </div>
             </transition>
 
             <!-- button to showSendDialog -->
-            <q-btn
-              fab
-              size="md"
-              color="primary"
-              glossy
-              unelevated
-              class="wallet-action-btn"
-              @click="showSendDialog = true"
-              :aria-label="$t('global.actions.send.label')"
-            >
-              <div class="button-content">
-                <q-icon name="north_east" size="1rem" class="q-mr-xs" />
-                <span>{{ $t("WalletPage.actions.send.label") }}</span>
-              </div>
-            </q-btn>
+            <div class="col-6 q-mb-md flex justify-center items-center">
+              <q-btn
+                rounded
+                dense
+                class="q-px-md wallet-action-btn"
+                color="primary"
+                @click="showSendDialog = true"
+              >
+                <div class="button-content">
+                  <q-icon name="north_east" size="1.2rem" class="q-mr-xs" />
+                  <span>{{ $t("WalletPage.actions.send.label") }}</span>
+                </div>
+              </q-btn>
+            </div>
             <ReceiveDialog v-model="showReceiveDialog" />
             <SendDialog v-model="showSendDialog" />
           </div>
@@ -219,16 +209,11 @@
   grid-area: 1 / 4 / 5 / 4;
 }
 
-.wallet-actions {
-  display: flex;
-  flex-wrap: wrap;
-}
-
 .wallet-action-btn {
-  flex: 0 0 auto;
-  min-width: 6rem;
+  min-width: 140px;
+  width: auto;
   white-space: nowrap;
-  font-size: 0.8rem;
+  font-size: 1.2rem;
 }
 .wallet-action-btn:hover {
   box-shadow: 0 0 6px rgba(0, 0, 0, 0.15);
@@ -249,12 +234,15 @@ body.body--dark .wallet-action-btn:active {
   white-space: nowrap;
 }
 
-.scan-button-container {
+.equal-width-buttons {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding-bottom: 5px;
+  justify-content: space-between;
+}
+
+.scan-button-container {
+  position: absolute;
   z-index: 1;
+  padding-bottom: 15px;
 }
 </style>
 <script>
@@ -646,6 +634,25 @@ export default {
         }
       };
     },
+    equalizeButtonWidths: function () {
+      this.$nextTick(() => {
+        const actionBtns = document.querySelectorAll(".wallet-action-btn");
+        if (actionBtns.length >= 2) {
+          actionBtns.forEach((btn) => {
+            btn.style.width = "auto";
+          });
+
+          let maxWidth = 0;
+          actionBtns.forEach((btn) => {
+            maxWidth = Math.max(maxWidth, btn.offsetWidth);
+          });
+
+          actionBtns.forEach((btn) => {
+            btn.style.width = `${maxWidth}px`;
+          });
+        }
+      });
+    },
     handleLockedTokenMessage(event) {
       if (event.data?.type === "locked-token-missing-signer") {
         const tokenId = event.data.tokenId;
@@ -764,10 +771,13 @@ export default {
       this.claimAllTokens();
     });
     this.initPage();
+    this.$nextTick(this.equalizeButtonWidths);
+    window.addEventListener("resize", this.equalizeButtonWidths);
   },
 
   unmounted: function () {
     window.removeEventListener("message", this.handleLockedTokenMessage);
+    window.removeEventListener("resize", this.equalizeButtonWidths);
   },
 
   created() {
