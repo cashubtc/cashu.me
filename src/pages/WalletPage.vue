@@ -6,31 +6,28 @@
           <ActivityOrb />
           <NoMintWarnBanner v-if="mints.length == 0" />
           <BalanceView v-else :set-tab="setTab" />
-          <div class="wallet-actions row justify-center q-gutter-sm">
-            <div class="col-12 col-sm-auto">
-              <q-btn
-                fab
-                size="lg"
-                color="primary"
-                glossy
-                unelevated
-                class="wallet-action-btn"
-                @click="showReceiveDialog = true"
-                :aria-label="$t('global.actions.receive.label')"
-              >
-                <div class="button-content">
-                  <q-icon name="south_west" size="1.2rem" class="q-mr-xs" />
-                  <span>{{ $t("WalletPage.actions.receive.label") }}</span>
-                </div>
-              </q-btn>
-            </div>
+          <div class="wallet-actions justify-center q-gutter-sm">
+            <q-btn
+              fab
+              size="lg"
+              color="primary"
+              glossy
+              unelevated
+              class="wallet-action-btn"
+              @click="showReceiveDialog = true"
+              :aria-label="$t('global.actions.receive.label')"
+            >
+              <div class="button-content">
+                <q-icon name="south_west" size="1.2rem" class="q-mr-xs" />
+                <span>{{ $t("WalletPage.actions.receive.label") }}</span>
+              </div>
+            </q-btn>
 
-            <div class="col-12 col-sm-auto">
-              <transition appear enter-active-class="animated pulse">
-                <div class="scan-button-container">
-                  <q-btn
-                    fab
-                    size="lg"
+            <transition appear enter-active-class="animated pulse">
+              <div class="scan-button-container">
+                <q-btn
+                  fab
+                  size="lg"
                     color="primary"
                     glossy
                     unelevated
@@ -45,27 +42,24 @@
                     :text="$t('WalletPage.actions.scan.tooltip')"
                   />
                 </div>
-              </transition>
-            </div>
+            </transition>
 
             <!-- button to showSendDialog -->
-            <div class="col-12 col-sm-auto">
-              <q-btn
-                fab
-                size="lg"
-                color="primary"
-                glossy
+            <q-btn
+              fab
+              size="lg"
+              color="primary"
+              glossy
                 unelevated
                 class="wallet-action-btn"
                 @click="showSendDialog = true"
                 :aria-label="$t('global.actions.send.label')"
               >
                 <div class="button-content">
-                  <q-icon name="north_east" size="1.2rem" class="q-mr-xs" />
-                  <span>{{ $t("WalletPage.actions.send.label") }}</span>
-                </div>
-              </q-btn>
-            </div>
+                <q-icon name="north_east" size="1.2rem" class="q-mr-xs" />
+                <span>{{ $t("WalletPage.actions.send.label") }}</span>
+              </div>
+            </q-btn>
             <ReceiveDialog v-model="showReceiveDialog" />
             <SendDialog v-model="showSendDialog" />
           </div>
