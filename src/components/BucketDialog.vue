@@ -4,27 +4,27 @@
       <q-form @submit.prevent="save">
         <q-input
           v-model="form.name"
-          :label="t('BucketManager.inputs.name')"
+          :label="t('bucket.name')"
           outlined
           class="q-mb-sm"
         />
         <q-input
           v-model="form.color"
-          :label="t('BucketManager.inputs.color')"
+          :label="t('bucket.color')"
           type="color"
           outlined
           class="q-mb-sm"
         />
         <q-input
           v-model.number="form.goal"
-          :label="t('BucketManager.inputs.goal')"
+          :label="t('bucket.goal')"
           type="number"
           outlined
           class="q-mb-sm"
         />
         <q-input
           v-model="form.desc"
-          :label="t('BucketManager.inputs.description')"
+          :label="t('bucket.description')"
           type="textarea"
           autogrow
           outlined

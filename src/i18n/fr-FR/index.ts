@@ -1355,6 +1355,16 @@ export default {
       },
     },
   },
+  bucketManager: {
+    actions: { add: "Add bucket" },
+    addDialog: { title: "Create new bucket" },
+  },
+  bucket: {
+    name: "Name",
+    color: "Color",
+    goal: "Monthly goal",
+    description: "Description",
+  },
   SubscriptionsOverview: {
     export_csv: "Export CSV",
     filter: {

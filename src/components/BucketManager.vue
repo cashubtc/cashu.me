@@ -53,13 +53,13 @@
           v-model="form.name"
           outlined
           :rules="nameRules"
-          :label="$t('BucketManager.inputs.name')"
+          :label="$t('bucket.name')"
           class="q-mb-sm"
         />
         <q-input
           v-model="form.color"
           outlined
-          :label="$t('BucketManager.inputs.color')"
+          :label="$t('bucket.color')"
           class="q-mb-sm"
           type="color"
         />
@@ -72,7 +72,7 @@
         >
           <template #label>
             <div class="row items-center no-wrap">
-              <span>{{ $t("BucketManager.inputs.description") }}</span>
+              <span>{{ $t('bucket.description') }}</span>
               <InfoTooltip
                 class="q-ml-xs"
                 :text="$t('BucketManager.tooltips.description')"
@@ -89,7 +89,7 @@
         >
           <template #label>
             <div class="row items-center no-wrap">
-              <span>{{ $t("BucketManager.inputs.goal") }}</span>
+              <span>{{ $t('bucket.goal') }}</span>
               <InfoTooltip
                 class="q-ml-xs"
                 :text="$t('BucketManager.tooltips.goal')"
