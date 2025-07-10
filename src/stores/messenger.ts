@@ -420,11 +420,5 @@ export const useMessengerStore = defineStore("messenger", {
     setDrawer(open: boolean) {
       this.drawerOpen = open;
     },
-
-    openConversation(pubkey: string) {
-      this.createConversation(pubkey);
-      this.markRead(pubkey);
-      this.setCurrentConversation(pubkey);
-    },
   },
 });
