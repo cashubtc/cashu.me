@@ -633,26 +633,39 @@
             lud16Element.innerHTML = `<strong>LN:</strong> ${profile.lud16}`;
             infoDiv.appendChild(lud16Element);
           }
-          profileHeaderDiv.appendChild(avatarImg);
-          profileHeaderDiv.appendChild(infoDiv);
-          cardElement.appendChild(profileHeaderDiv);
+          cardElement.className = "flex items-center justify-between bg-gray-800 rounded-lg shadow p-4 mb-3 text-white";
+          const avatarSpan = document.createElement("span");
+          avatarSpan.className = "inline-flex h-10 w-10 items-center justify-center rounded-full bg-purple-600 text-lg font-bold mr-4";
+          avatarSpan.textContent = (profile.name || "N")[0].toUpperCase();
+          const middleDiv = document.createElement("div");
+          middleDiv.className = "flex-1";
+          const nameEl = document.createElement("div");
+          nameEl.className = "text-base font-semibold";
+          nameEl.textContent = profile.name || (profile.nip05 ? profile.nip05.split('@')[0] : "Unnamed User");
+          middleDiv.appendChild(nameEl);
+          if (profile.about) {
+            const aboutEl = document.createElement("div");
+            aboutEl.className = "text-xs text-gray-400 truncate";
+            aboutEl.textContent = profile.about;
+            middleDiv.appendChild(aboutEl);
+          }
           const actionsContainer = document.createElement("div");
-          actionsContainer.className = "creator-actions";
+          actionsContainer.className = "flex";
           const viewButton = document.createElement("button");
-          viewButton.className = "action-button view-button";
-          viewButton.textContent = "View";
-          viewButton.onclick = (e) => { e.stopPropagation(); window.parent.postMessage({ type: "viewProfile", pubkey: profile.pubkey }, "*"); };
+          viewButton.className = "btn-view q-px-sm bg-transparent border border-purple-500 text-purple-400 hover:bg-purple-500 hover:text-white rounded-md text-xs font-medium mr-2";
+          viewButton.textContent = "View Subscription Tiers";
+          viewButton.addEventListener('click', (e) => { e.stopPropagation(); window.parent.postMessage({ type: "viewProfile", pubkey: profile.pubkey }, "*"); });
           const messageButton = document.createElement("button");
-          messageButton.className = "action-button message-button";
+          messageButton.className = "btn-message bg-purple-600 hover:bg-purple-700 text-white rounded-md text-xs font-medium px-3 py-1";
           messageButton.textContent = "Message";
-          messageButton.onclick = (e) => { e.stopPropagation(); window.parent.location.href = `/nostr-messenger`; };
-          const donateButton = document.createElement("button");
-          donateButton.className = "action-button donate-button";
-          donateButton.textContent = "Donate";
-          donateButton.onclick = (e) => { e.stopPropagation(); window.parent.postMessage({ type: "donate", pubkey: profile.pubkey }, "*"); };
+          const creatorNpub = nip19.npubEncode(profile.pubkey);
+          messageButton.addEventListener('click', () => {
+            window.parent.location.href = `/nostr-messenger?peer=${encodeURIComponent(creatorNpub)}`;
+          });
           actionsContainer.appendChild(viewButton);
-actionsContainer.appendChild(messageButton);
-          actionsContainer.appendChild(donateButton);
+          actionsContainer.appendChild(messageButton);
+          cardElement.appendChild(avatarSpan);
+          cardElement.appendChild(middleDiv);
           cardElement.appendChild(actionsContainer);
           targetElement.appendChild(cardElement);
         });
