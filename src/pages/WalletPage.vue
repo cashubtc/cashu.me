@@ -6,53 +6,58 @@
           <ActivityOrb />
           <NoMintWarnBanner v-if="mints.length == 0" />
           <BalanceView v-else :set-tab="setTab" />
-          <div
-            class="wallet-actions row items-center justify-around q-gutter-x-xl q-pt-lg q-pb-md"
-          >
-            <q-btn
-              rounded
-              padding="lg xl"
-              class="wallet-action-btn q-mb-md text-subtitle2"
-              color="primary"
-              @click="showReceiveDialog = true"
-            >
-              <div class="button-content">
-                <q-icon name="south_west" size="1.2rem" class="q-mr-xs" />
-                <span>{{ $t("WalletPage.actions.receive.label") }}</span>
-              </div>
-            </q-btn>
+          <div class="wallet-actions">
+            <div class="row items-center justify-around q-mt-md">
+              <q-btn
+                fab
+                size="lg"
+                color="primary"
+                glossy
+                unelevated
+                class="wallet-action-btn"
+                @click="showReceiveDialog = true"
+              >
+                <div class="button-content">
+                  <q-icon name="south_west" size="1.2rem" class="q-mr-xs" />
+                  <span>{{ $t("WalletPage.actions.receive.label") }}</span>
+                </div>
+              </q-btn>
 
-            <transition appear enter-active-class="animated pulse">
-              <div class="scan-button-container">
-                <q-btn
-                  size="lg"
-                  outline
-                  color="primary"
-                  flat
-                  @click="showCamera"
-                >
-                  <ScanIcon size="2.5em" />
-                </q-btn>
-                <InfoTooltip
-                  class="q-mt-sm"
-                  :text="$t('WalletPage.actions.scan.tooltip')"
-                />
-              </div>
-            </transition>
+              <transition appear enter-active-class="animated pulse">
+                <div class="scan-button-container">
+                  <q-btn
+                    fab
+                    size="lg"
+                    color="primary"
+                    glossy
+                    unelevated
+                    @click="showCamera"
+                  >
+                    <ScanIcon size="2.5em" />
+                  </q-btn>
+                  <InfoTooltip
+                    class="q-mt-sm"
+                    :text="$t('WalletPage.actions.scan.tooltip')"
+                  />
+                </div>
+              </transition>
 
-            <!-- button to showSendDialog -->
-            <q-btn
-              rounded
-              padding="lg xl"
-              class="wallet-action-btn q-mb-md text-subtitle2"
-              color="primary"
-              @click="showSendDialog = true"
-            >
-              <div class="button-content">
-                <q-icon name="north_east" size="1.2rem" class="q-mr-xs" />
-                <span>{{ $t("WalletPage.actions.send.label") }}</span>
-              </div>
-            </q-btn>
+              <!-- button to showSendDialog -->
+              <q-btn
+                fab
+                size="lg"
+                color="primary"
+                glossy
+                unelevated
+                class="wallet-action-btn"
+                @click="showSendDialog = true"
+              >
+                <div class="button-content">
+                  <q-icon name="north_east" size="1.2rem" class="q-mr-xs" />
+                  <span>{{ $t("WalletPage.actions.send.label") }}</span>
+                </div>
+              </q-btn>
+            </div>
             <ReceiveDialog v-model="showReceiveDialog" />
             <SendDialog v-model="showSendDialog" />
           </div>
