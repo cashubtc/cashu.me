@@ -133,6 +133,8 @@
       </q-card-actions>
     </q-card>
   </q-dialog>
+
+  <BucketDialog v-model="showAddDialog" />
 </template>
 
 <script>
@@ -146,15 +148,17 @@ import { useUiStore } from "stores/ui";
 import { notifyError } from "src/js/notify";
 import { DEFAULT_COLOR } from "src/js/constants";
 import BucketCard from "./BucketCard.vue";
+import BucketDialog from "./BucketDialog.vue";
 
 export default defineComponent({
   name: "BucketManager",
-  components: { BucketCard },
+  components: { BucketCard, BucketDialog },
   setup() {
     const bucketsStore = useBucketsStore();
     const uiStore = useUiStore();
     const { t } = useI18n();
     const showForm = ref(false);
+    const showAddDialog = ref(false);
     const bucketForm = ref(null);
     const showDelete = ref(false);
     const editId = ref(null);
@@ -178,15 +182,7 @@ export default defineComponent({
     const { activeUnit } = storeToRefs(mintsStore);
 
     const openAdd = () => {
-      editId.value = null;
-      form.value = {
-        name: "",
-        color: DEFAULT_COLOR,
-        description: "",
-        goal: null,
-        creatorPubkey: "",
-      };
-      showForm.value = true;
+      showAddDialog.value = true;
     };
 
     const openEdit = (bucket) => {
@@ -257,6 +253,7 @@ export default defineComponent({
       bucketBalances,
       activeUnit,
       showForm,
+      showAddDialog,
       showDelete,
       form,
       bucketForm,
