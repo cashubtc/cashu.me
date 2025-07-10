@@ -15,16 +15,17 @@
         <div class="col text-center">
           <span class="text-h6">{{ $t("ReceiveEcashDrawer.title") }}</span>
         </div>
-        <q-btn
-          flat
-          round
-          dense
-          @click="showCamera"
-          class="q-mr-sm"
-          color="primary"
-        >
-          <ScanIcon />
-        </q-btn>
+          <q-btn
+            flat
+            round
+            dense
+            @click="showCamera"
+            class="q-mr-sm"
+            color="primary"
+            :aria-label="$t('global.actions.scan.label')"
+          >
+            <ScanIcon />
+          </q-btn>
       </q-card-section>
 
       <q-card-section class="q-pa-md">
@@ -45,7 +46,11 @@
             </div>
           </q-btn>
 
-          <q-btn class="full-width custom-btn" @click="showCamera">
+          <q-btn
+            class="full-width custom-btn"
+            @click="showCamera"
+            :aria-label="$t('global.actions.scan.label')"
+          >
             <div class="row items-center full-width">
               <div
                 class="icon-background q-mr-md"
