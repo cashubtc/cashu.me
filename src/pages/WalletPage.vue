@@ -9,7 +9,7 @@
           <div class="wallet-actions justify-center q-gutter-sm">
             <q-btn
               fab
-              size="lg"
+              size="md"
               color="primary"
               glossy
               unelevated
@@ -18,7 +18,7 @@
               :aria-label="$t('global.actions.receive.label')"
             >
               <div class="button-content">
-                <q-icon name="south_west" size="1.2rem" class="q-mr-xs" />
+                <q-icon name="south_west" size="1rem" class="q-mr-xs" />
                 <span>{{ $t("WalletPage.actions.receive.label") }}</span>
               </div>
             </q-btn>
@@ -27,36 +27,36 @@
               <div class="scan-button-container">
                 <q-btn
                   fab
-                  size="lg"
-                    color="primary"
-                    glossy
-                    unelevated
-                    class="wallet-action-btn"
-                    @click="showCamera"
-                    :aria-label="$t('global.actions.scan.label')"
-                  >
-                    <ScanIcon size="2.5em" />
-                  </q-btn>
-                  <InfoTooltip
-                    class="q-mt-sm"
-                    :text="$t('WalletPage.actions.scan.tooltip')"
-                  />
-                </div>
+                  size="md"
+                  color="primary"
+                  glossy
+                  unelevated
+                  class="wallet-action-btn"
+                  @click="showCamera"
+                  :aria-label="$t('global.actions.scan.label')"
+                >
+                  <ScanIcon size="1.8em" />
+                </q-btn>
+                <InfoTooltip
+                  class="q-mt-sm"
+                  :text="$t('WalletPage.actions.scan.tooltip')"
+                />
+              </div>
             </transition>
 
             <!-- button to showSendDialog -->
             <q-btn
               fab
-              size="lg"
+              size="md"
               color="primary"
               glossy
-                unelevated
-                class="wallet-action-btn"
-                @click="showSendDialog = true"
-                :aria-label="$t('global.actions.send.label')"
-              >
-                <div class="button-content">
-                <q-icon name="north_east" size="1.2rem" class="q-mr-xs" />
+              unelevated
+              class="wallet-action-btn"
+              @click="showSendDialog = true"
+              :aria-label="$t('global.actions.send.label')"
+            >
+              <div class="button-content">
+                <q-icon name="north_east" size="1rem" class="q-mr-xs" />
                 <span>{{ $t("WalletPage.actions.send.label") }}</span>
               </div>
             </q-btn>
@@ -226,9 +226,9 @@
 
 .wallet-action-btn {
   flex: 0 0 auto;
-  min-width: 8rem;
+  min-width: 6rem;
   white-space: nowrap;
-  font-size: 0.9rem;
+  font-size: 0.8rem;
 }
 .wallet-action-btn:hover {
   box-shadow: 0 0 6px rgba(0, 0, 0, 0.15);
@@ -593,13 +593,13 @@ export default {
         this.deferredPWAInstallPrompt = e;
         debug(
           `'beforeinstallprompt' event was fired.`,
-          this.getPwaDisplayMode(),
+          this.getPwaDisplayMode()
         );
       });
     },
     getPwaDisplayMode: function () {
       const isStandalone = window.matchMedia(
-        "(display-mode: standalone)",
+        "(display-mode: standalone)"
       ).matches;
       if (document.referrer.startsWith("android-app://")) {
         return "twa";
@@ -628,7 +628,7 @@ export default {
         sessionStorage.setItem(
           "tabId",
           Math.random().toString(36).substring(2) +
-            new Date().getTime().toString(36),
+            new Date().getTime().toString(36)
         );
       }
       const tabId = sessionStorage.getItem("tabId");
@@ -662,7 +662,7 @@ export default {
                 postMessage({ type: "retry-locked-token", tokenId });
               }
             }
-          },
+          }
         );
       }
     },
@@ -726,14 +726,14 @@ export default {
         } else {
           await this.initSigner();
           this.notifyWarning(
-            this.$t("settings.nostr.signing_extension.not_found"),
+            this.$t("settings.nostr.signing_extension.not_found")
           );
         }
       } else {
         await this.initSigner();
         if (this.signerType === SignerType.NIP07 && !hasExt) {
           this.notifyWarning(
-            this.$t("settings.nostr.signing_extension.not_found"),
+            this.$t("settings.nostr.signing_extension.not_found")
           );
         }
       }
