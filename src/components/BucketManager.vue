@@ -19,8 +19,13 @@
       </div>
       <q-item>
         <q-item-section>
-          <q-btn color="primary" icon="add" outline @click="openAdd">
-            {{ $t("BucketManager.actions.add") }}
+          <q-btn
+            color="primary"
+            icon="add"
+            outline
+            @click="openAdd"
+            :label="$t('bucketManager.actions.add')"
+          >
             <q-tooltip>{{ $t("BucketManager.tooltips.add_button") }}</q-tooltip>
           </q-btn>
         </q-item-section>
@@ -134,7 +139,7 @@
     </q-card>
   </q-dialog>
 
-  <BucketDialog v-model="showAddDialog" />
+  <BucketDialog v-model="dialogOpen" />
 </template>
 
 <script>
@@ -158,7 +163,7 @@ export default defineComponent({
     const uiStore = useUiStore();
     const { t } = useI18n();
     const showForm = ref(false);
-    const showAddDialog = ref(false);
+    const dialogOpen = ref(false);
     const bucketForm = ref(null);
     const showDelete = ref(false);
     const editId = ref(null);
@@ -182,7 +187,7 @@ export default defineComponent({
     const { activeUnit } = storeToRefs(mintsStore);
 
     const openAdd = () => {
-      showAddDialog.value = true;
+      dialogOpen.value = true;
     };
 
     const openEdit = (bucket) => {
@@ -231,8 +236,6 @@ export default defineComponent({
       }
       if (editId.value) {
         bucketsStore.editBucket(editId.value, { ...form.value });
-      } else {
-        bucketsStore.addBucket({ ...form.value });
       }
       showForm.value = false;
     };
@@ -253,13 +256,13 @@ export default defineComponent({
       bucketBalances,
       activeUnit,
       showForm,
-      showAddDialog,
+      dialogOpen,
       showDelete,
       form,
       bucketForm,
       nameRules,
       goalRules,
-      formTitle: computed(() => (editId.value ? "Edit Bucket" : "Add Bucket")),
+      formTitle: computed(() => t('BucketManager.actions.edit')),
       openAdd,
       openEdit,
       saveBucket,
