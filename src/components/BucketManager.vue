@@ -9,81 +9,13 @@
         @dragover.prevent
         @drop="handleDrop($event, bucket.id)"
       >
-        <router-link
-          :to="`/buckets/${bucket.id}`"
-          style="text-decoration: none; display: block"
-          class="text-dark"
-        >
-          <q-item clickable class="q-card q-pa-md">
-            <q-item-section avatar>
-              <q-avatar
-                size="32px"
-                :style="{
-                  backgroundColor: bucket.color || DEFAULT_COLOR,
-                  color: 'white',
-                }"
-              >
-                {{ bucket.name.charAt(0).toUpperCase() }}
-              </q-avatar>
-            </q-item-section>
-            <q-item-section>
-              <q-item-label class="text-weight-bold">{{
-                bucket.name
-              }}</q-item-label>
-              <q-item-label caption v-if="bucket.description">{{
-                bucket.description
-              }}</q-item-label>
-              <q-item-label caption class="row items-center no-wrap">
-                <span>
-                  {{
-                    formatCurrency(
-                      bucketBalances[bucket.id] || 0,
-                      activeUnit.value
-                    )
-                  }}
-                  <span v-if="bucket.goal">
-                    / {{ formatCurrency(bucket.goal, activeUnit.value) }}
-                  </span>
-                </span>
-                <q-linear-progress
-                  v-if="bucket.goal"
-                  color="primary"
-                  :value="Math.min(bucketBalances[bucket.id] / bucket.goal, 1)"
-                  style="width: 50px; height: 4px"
-                  class="q-ml-sm"
-                />
-              </q-item-label>
-            </q-item-section>
-            <q-item-section side v-if="bucket.id !== DEFAULT_BUCKET_ID">
-              <q-btn
-                icon="edit"
-                flat
-                round
-                size="sm"
-                @click.stop.prevent="openEdit(bucket)"
-                aria-label="Edit"
-                title="Edit"
-              />
-              <InfoTooltip
-                class="q-ml-xs"
-                :text="$t('BucketManager.tooltips.edit_button')"
-              />
-              <q-btn
-                icon="delete"
-                flat
-                round
-                size="sm"
-                @click.stop.prevent="openDelete(bucket.id)"
-                :aria-label="$t('BucketManager.actions.delete')"
-                :title="$t('BucketManager.actions.delete')"
-              />
-              <InfoTooltip
-                class="q-ml-xs"
-                :text="$t('BucketManager.tooltips.delete_button')"
-              />
-            </q-item-section>
-          </q-item>
-        </router-link>
+        <BucketCard
+          :bucket="bucket"
+          :balance="bucketBalances[bucket.id] || 0"
+          :activeUnit="activeUnit.value"
+          @edit="openEdit"
+          @delete="openDelete"
+        />
       </div>
       <q-item>
         <q-item-section>
@@ -213,9 +145,11 @@ import { storeToRefs } from "pinia";
 import { useUiStore } from "stores/ui";
 import { notifyError } from "src/js/notify";
 import { DEFAULT_COLOR } from "src/js/constants";
+import BucketCard from "./BucketCard.vue";
 
 export default defineComponent({
   name: "BucketManager",
+  components: { BucketCard },
   setup() {
     const bucketsStore = useBucketsStore();
     const uiStore = useUiStore();
