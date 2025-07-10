@@ -1,11 +1,27 @@
 <template>
-  <div class="find-creators-wrapper">
-    <iframe
-      ref="iframeEl"
-      src="/find-creators.html"
-      class="find-creators-frame"
-      title="Find Creators"
-    />
+  <q-page class="q-pa-md find-creators-page">
+    <div style="max-width:600px;margin:0 auto">
+      <q-input
+        v-model="query"
+        debounce="300"
+        rounded
+        outlined
+        class="q-mb-md"
+        :label="$t('FindCreators.inputs.search.label')"
+        :placeholder="$t('FindCreators.inputs.search.placeholder')"
+      />
+      <div v-if="status" class="text-caption q-mb-md">{{ status }}</div>
+      <div v-if="loading" class="row justify-center q-my-md"><q-spinner /></div>
+      <div v-for="p in results" :key="p.pubkey">
+        <CreatorSearchCard
+          :profile="p"
+          @view="viewProfile"
+          @message="gotoMessenger"
+          @donate="openDonate"
+        />
+      </div>
+    </div>
+
     <DonateDialog v-model="showDonateDialog" @confirm="handleDonate" />
     <SubscribeDialog
       v-model="showSubscribeDialog"
@@ -89,48 +105,42 @@
         </QCardSection>
       </QCard>
     </QDialog>
-  </div>
+  </q-page>
 </template>
 
 <script setup lang="ts">
-import {
-  ref,
-  computed,
-  watch,
-  onMounted,
-  onBeforeUnmount,
-  nextTick,
-} from "vue";
-import DonateDialog from "components/DonateDialog.vue";
-import SubscribeDialog from "components/SubscribeDialog.vue";
-import SendTokenDialog from "components/SendTokenDialog.vue";
-import { useSendTokensStore } from "stores/sendTokensStore";
-import { useDonationPresetsStore } from "stores/donationPresets";
-import { useCreatorsStore } from "stores/creators";
-import { useNostrStore, fetchNutzapProfile, RelayConnectionError } from "stores/nostr";
-import { notifyWarning } from "src/js/notify";
-import { useI18n } from "vue-i18n";
-import {
-  QDialog,
-  QCard,
-  QCardSection,
-  QCardActions,
-  QBtn,
-  QSeparator,
-} from "quasar";
-import { nip19 } from "nostr-tools";
+import { ref, computed, watch } from 'vue';
+import { useRouter } from 'vue-router';
+import { watchDebounced } from '@vueuse/core';
+import DonateDialog from 'components/DonateDialog.vue';
+import SubscribeDialog from 'components/SubscribeDialog.vue';
+import SendTokenDialog from 'components/SendTokenDialog.vue';
+import CreatorSearchCard from 'components/CreatorSearchCard.vue';
+import { useAdvancedCreatorSearch } from 'src/composables/useAdvancedCreatorSearch';
+import { useSendTokensStore } from 'stores/sendTokensStore';
+import { useDonationPresetsStore } from 'stores/donationPresets';
+import { useCreatorsStore } from 'stores/creators';
+import { useNostrStore, fetchNutzapProfile, RelayConnectionError } from 'stores/nostr';
+import { notifyWarning } from 'src/js/notify';
+import { useI18n } from 'vue-i18n';
+import { QDialog, QCard, QCardSection, QCardActions, QBtn, QSeparator } from 'quasar';
+import { nip19 } from 'nostr-tools';
 
-const iframeEl = ref<HTMLIFrameElement | null>(null);
+const router = useRouter();
+const query = ref('');
+const { results, loading, status, search } = useAdvancedCreatorSearch();
+watchDebounced(query, (val) => search(val), { debounce: 500 });
+
 const showDonateDialog = ref(false);
-const selectedPubkey = ref("");
+const selectedPubkey = ref('');
 const showTierDialog = ref(false);
 const loadingTiers = ref(false);
-const dialogPubkey = ref("");          // always 64-char hex
+const dialogPubkey = ref('');          // always 64-char hex
 const dialogNpub = computed(() => {
   const hex = dialogPubkey.value;
   if (hex.length === 64 && /^[0-9a-f]{64}$/i.test(hex))
     return nip19.npubEncode(hex);
-  return "";
+  return '';
 });
 
 const sendTokensStore = useSendTokensStore();
@@ -149,53 +159,38 @@ function getPrice(t: any): number {
   return t.price_sats ?? t.price ?? 0;
 }
 
-function bech32ToHex(pubkey: string): string {
+function openDonate(pubkey: string) {
+  selectedPubkey.value = pubkey;
+  showDonateDialog.value = true;
+}
+
+async function viewProfile(pubkey: string) {
+  loadingTiers.value = true;
+  loadingProfile.value = true;
+  nutzapProfile.value = null;
+  if (tierTimeout) clearTimeout(tierTimeout);
+  tierTimeout = setTimeout(() => {
+    loadingTiers.value = false;
+  }, 5000);
+  await creators.fetchTierDefinitions(pubkey);
+  dialogPubkey.value = pubkey;
   try {
-    const decoded = nip19.decode(pubkey);
-    return typeof decoded.data === "string" ? decoded.data : pubkey;
-  } catch {
-    return pubkey;
-  }
-}
-
-function formatTs(ts: number): string {
-  const d = new Date(ts * 1000);
-  return `${d.getFullYear()}-${("0" + (d.getMonth() + 1)).slice(-2)}-${(
-    "0" + d.getDate()
-  ).slice(-2)} ${("0" + d.getHours()).slice(-2)}:${("0" + d.getMinutes()).slice(
-    -2,
-  )}`;
-}
-
-async function onMessage(ev: MessageEvent) {
-  if (ev.data && ev.data.type === "donate" && ev.data.pubkey) {
-    selectedPubkey.value = ev.data.pubkey;         // keep hex
-    showDonateDialog.value = true;
-  } else if (ev.data && ev.data.type === "viewProfile" && ev.data.pubkey) {
-    loadingTiers.value = true;
-    loadingProfile.value = true;
-    nutzapProfile.value = null;
-    if (tierTimeout) clearTimeout(tierTimeout);
-    tierTimeout = setTimeout(() => {
-      loadingTiers.value = false;
-    }, 5000);
-    await creators.fetchTierDefinitions(ev.data.pubkey);
-    dialogPubkey.value = ev.data.pubkey;           // keep hex
-    try {
-      const profile = await fetchNutzapProfile(ev.data.pubkey);
-      nutzapProfile.value = profile;
-    } catch (e: any) {
-      if (e instanceof RelayConnectionError) {
-        notifyWarning("Unable to connect to Nostr relays");
-      } else {
-        console.error(e);
-      }
-    } finally {
-      loadingProfile.value = false;
+    const profile = await fetchNutzapProfile(pubkey);
+    nutzapProfile.value = profile;
+  } catch (e: any) {
+    if (e instanceof RelayConnectionError) {
+      notifyWarning('Unable to connect to Nostr relays');
+    } else {
+      console.error(e);
     }
-    await nextTick();
-    showTierDialog.value = true;
+  } finally {
+    loadingProfile.value = false;
   }
+  showTierDialog.value = true;
+}
+
+function gotoMessenger() {
+  router.push('/nostr-messenger');
 }
 
 watch(tiers, (val) => {
@@ -234,8 +229,6 @@ function confirmSubscribe({
   startDate,
   total,
 }: any) {
-  // Nutzap transaction is handled within SubscribeDialog.
-  // Close surrounding dialogs and process any additional UI updates here.
   showSubscribeDialog.value = false;
   showTierDialog.value = false;
 }
@@ -249,14 +242,14 @@ function handleDonate({
   message,
 }: any) {
   if (!selectedPubkey.value) return;
-  if (type === "one-time") {
+  if (type === 'one-time') {
     sendTokensStore.clearSendData();
     sendTokensStore.recipientPubkey = selectedPubkey.value;
     sendTokensStore.sendViaNostr = true;
     sendTokensStore.sendData.bucketId = bucketId;
     sendTokensStore.sendData.amount = amount;
     sendTokensStore.sendData.memo = message;
-    sendTokensStore.sendData.p2pkPubkey = locked ? selectedPubkey.value : "";
+    sendTokensStore.sendData.p2pkPubkey = locked ? selectedPubkey.value : '';
     sendTokensStore.showLockInput = locked;
     showDonateDialog.value = false;
     sendTokensStore.showSendTokens = true;
@@ -271,36 +264,12 @@ function handleDonate({
   }
 }
 
-onMounted(async () => {
-  window.addEventListener("message", onMessage);
-  try {
-    await nostr.initNdkReadOnly();
-  } catch (e: any) {
-    notifyWarning("Failed to connect to Nostr relays", e?.message);
-  }
-});
-
-onBeforeUnmount(() => {
-  window.removeEventListener("message", onMessage);
-  if (tierTimeout) clearTimeout(tierTimeout);
-  nutzapProfile.value = null;
-  loadingProfile.value = false;
+nostr.initNdkReadOnly().catch((e: any) => {
+  notifyWarning('Failed to connect to Nostr relays', e?.message);
 });
 </script>
 
 <style scoped>
-.find-creators-wrapper {
-  height: 100vh;
-  padding: 0;
-  margin: 0;
-}
-
-.find-creators-frame {
-  border: none;
-  width: 100%;
-  height: 100%;
-}
-
 .tier-dialog {
   width: 100%;
   max-width: 500px;
