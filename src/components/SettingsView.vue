@@ -1258,14 +1258,15 @@
                 <q-item-label caption
                   >{{ $t("Settings.appearance.theme.description") }}
                 </q-item-label>
-                <!-- <div class="row q-py-md">
-              <q-btn dense flat rounded @click="toggleDarkMode" size="md"
-                >Toggle dark mode<q-icon
-                  class="q-ml-sm"
-                  :name="$q.dark.isActive ? 'brightness_3' : 'wb_sunny'"
-                />
-              </q-btn>
-            </div> -->
+                <div class="row q-py-md">
+                  <q-btn dense flat rounded @click="toggleDarkMode" size="md">
+                    Toggle dark mode
+                    <q-icon
+                      class="q-ml-sm"
+                      :name="$q.dark.isActive ? 'brightness_3' : 'wb_sunny'"
+                    />
+                  </q-btn>
+                </div>
                 <div class="row q-pt-md">
                   <q-btn
                     v-if="themes.includes('monochrome')"
@@ -2009,6 +2010,10 @@ export default defineComponent({
     },
     toggleTerminal: function () {
       useUiStore().toggleDebugConsole();
+    },
+    toggleDarkMode: function () {
+      this.$q.dark.toggle();
+      this.$q.localStorage.set("cashu.darkMode", this.$q.dark.isActive);
     },
     unsetAllReservedProofs: async function () {
       // mark all this.proofs as reserved=false
