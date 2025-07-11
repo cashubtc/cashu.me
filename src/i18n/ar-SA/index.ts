@@ -39,6 +39,11 @@ export default {
       send: {
         label: "إرسال",
       },
+  creatorHub: {
+    publish: "Publish Profile",
+    saveDraft: "Save Draft",
+    profileHeader: "Profile details",
+  },
       swap: {
         label: "تبديل",
       },
@@ -742,6 +747,11 @@ export default {
         },
       },
     },
+  creatorHub: {
+    publish: "Publish Profile",
+    saveDraft: "Save Draft",
+    profileHeader: "Profile details",
+  },
     swap: {
       title: "تبديل",
       overline: "تبديل بين عدة Mints",
@@ -759,6 +769,11 @@ export default {
         },
       },
       actions: {
+  creatorHub: {
+    publish: "Publish Profile",
+    saveDraft: "Save Draft",
+    profileHeader: "Profile details",
+  },
         swap: {
           label: "@:global.actions.swap.label",
           in_progress: "@:MintSettings.swap.actions.swap.label",
@@ -952,15 +967,30 @@ export default {
         label_known_mint: "@:ReceiveTokenDialog.actions.receive.label",
         label_adding_mint: "إضافة mint…",
       },
+  creatorHub: {
+    publish: "Publish Profile",
+    saveDraft: "Save Draft",
+    profileHeader: "Profile details",
+  },
       swap: {
         label: "@:global.actions.swap.label",
         tooltip_text: "التبديل إلى mint موثوق به",
         caption: "تبديل { value }",
       },
+  creatorHub: {
+    publish: "Publish Profile",
+    saveDraft: "Save Draft",
+    profileHeader: "Profile details",
+  },
       cancel_swap: {
         label: "@:global.actions.cancel.label",
         tooltip_text: "إلغاء التبديل",
       },
+  creatorHub: {
+    publish: "Publish Profile",
+    saveDraft: "Save Draft",
+    profileHeader: "Profile details",
+  },
       confirm_swap: {
         label: "@:ReceiveTokenDialog.actions.swap.label",
         tooltip_text: "@:ReceiveTokenDialog.actions.swap.tooltip_text",
@@ -1345,6 +1375,11 @@ export default {
         eur: "EUR",
       },
     },
+  },
+  creatorHub: {
+    publish: "Publish Profile",
+    saveDraft: "Save Draft",
+    profileHeader: "Profile details",
   },
   swap: {
     in_progress_warning_text: "التبديل قيد التقدم",

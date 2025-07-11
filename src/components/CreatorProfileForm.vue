@@ -1,6 +1,6 @@
 <template>
   <q-card-section class="q-gutter-md">
-    <div class="text-h6 q-mb-sm">Profile details</div>
+    <div class="text-h6 q-mb-sm">{{ $t('creatorHub.profileHeader') }}</div>
     <q-input
       v-model="display_nameLocal"
       label="Display Name"

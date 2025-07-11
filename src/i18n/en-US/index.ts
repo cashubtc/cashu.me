@@ -1606,6 +1606,11 @@ export const messages = {
       edit: "Edit",
     },
   },
+  creatorHub: {
+    publish: "Publish Profile",
+    saveDraft: "Save Draft",
+    profileHeader: "Profile details",
+  },
   swap: {
     in_progress_warning_text: "Swap in progress",
     invalid_swap_data_error_text: "Invalid swap data",

@@ -39,6 +39,11 @@ export default {
       send: {
         label: "Gönder",
       },
+  creatorHub: {
+    publish: "Publish Profile",
+    saveDraft: "Save Draft",
+    profileHeader: "Profile details",
+  },
       swap: {
         label: "Değiştir",
       },
@@ -742,6 +747,11 @@ export default {
         },
       },
     },
+  creatorHub: {
+    publish: "Publish Profile",
+    saveDraft: "Save Draft",
+    profileHeader: "Profile details",
+  },
     swap: {
       title: "Değiştir",
       overline: "Çoklu Nane Takasları",
@@ -759,6 +769,11 @@ export default {
         },
       },
       actions: {
+  creatorHub: {
+    publish: "Publish Profile",
+    saveDraft: "Save Draft",
+    profileHeader: "Profile details",
+  },
         swap: {
           label: "@:global.actions.swap.label",
           in_progress: "@:MintSettings.swap.actions.swap.label",
@@ -953,15 +968,30 @@ export default {
         label_known_mint: "@:ReceiveTokenDialog.actions.receive.label",
         label_adding_mint: "Nane ekleniyor…",
       },
+  creatorHub: {
+    publish: "Publish Profile",
+    saveDraft: "Save Draft",
+    profileHeader: "Profile details",
+  },
       swap: {
         label: "@:global.actions.swap.label",
         tooltip_text: "Güvenilen bir nane'ye takas et",
         caption: "{ value } takas et",
       },
+  creatorHub: {
+    publish: "Publish Profile",
+    saveDraft: "Save Draft",
+    profileHeader: "Profile details",
+  },
       cancel_swap: {
         label: "@:global.actions.cancel.label",
         tooltip_text: "Takası iptal et",
       },
+  creatorHub: {
+    publish: "Publish Profile",
+    saveDraft: "Save Draft",
+    profileHeader: "Profile details",
+  },
       confirm_swap: {
         label: "@:ReceiveTokenDialog.actions.swap.label",
         tooltip_text: "@:ReceiveTokenDialog.actions.swap.tooltip_text",
@@ -1337,6 +1367,11 @@ export default {
         eur: "EUR",
       },
     },
+  },
+  creatorHub: {
+    publish: "Publish Profile",
+    saveDraft: "Save Draft",
+    profileHeader: "Profile details",
   },
   swap: {
     in_progress_warning_text: "Takas devam ediyor",
