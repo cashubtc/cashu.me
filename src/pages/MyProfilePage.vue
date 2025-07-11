@@ -16,7 +16,13 @@
     </div>
     <div v-if="profile.about" class="q-mb-md">{{ profile.about }}</div>
 
-    <q-expansion-item class="q-mb-md" dense dense-toggle icon="edit" :label="$t('CreatorHub.profile.edit')">
+    <q-expansion-item
+      class="q-mb-md"
+      dense
+      dense-toggle
+      icon="edit"
+      :label="$t('CreatorHub.profile.edit')"
+    >
       <CreatorProfileForm
         v-model:display_name="display_name"
         v-model:picture="picture"
@@ -30,66 +36,105 @@
         :generateP2PK="generateP2PK"
       />
       <div class="text-center q-mt-md">
-        <q-btn color="primary" :disable="!isDirty" @click="saveProfile">Save Changes</q-btn>
+        <q-btn color="primary" :disable="!isDirty" @click="saveProfile"
+          >Save Changes</q-btn
+        >
       </div>
     </q-expansion-item>
 
-    <div class="q-mb-md text-caption">
-      <div class="row items-center q-gutter-x-sm">
-        <div><strong>npub:</strong> {{ npub }}</div>
-        <q-btn
-          v-if="npub"
-          flat
-          dense
-          icon="content_copy"
-          @click="copy(npub)"
-        />
+    <q-expansion-item
+      class="q-mb-md"
+      dense
+      dense-toggle
+      icon="account_circle"
+      label="Profile Details"
+      v-model="expandProfileDetails"
+    >
+      <div class="text-caption">
+        <div class="row items-center q-gutter-x-sm">
+          <div><strong>npub:</strong> {{ npub }}</div>
+          <q-btn
+            v-if="npub"
+            flat
+            dense
+            icon="content_copy"
+            @click="copy(npub)"
+          />
+        </div>
+        <div
+          v-if="seedSignerPrivateKeyNsecComputed"
+          class="row items-center q-gutter-x-sm q-mt-xs"
+        >
+          <div>
+            <strong>nsec:</strong> {{ seedSignerPrivateKeyNsecComputed }}
+          </div>
+          <q-btn
+            flat
+            dense
+            icon="content_copy"
+            @click="copy(seedSignerPrivateKeyNsecComputed)"
+          />
+        </div>
+        <div
+          v-if="privateKeySignerPrivateKey"
+          class="row items-center q-gutter-x-sm q-mt-xs"
+        >
+          <div><strong>hex:</strong> {{ privateKeySignerPrivateKey }}</div>
+          <q-btn
+            flat
+            dense
+            icon="content_copy"
+            @click="copy(privateKeySignerPrivateKey)"
+          />
+        </div>
+        <div class="q-mt-sm">
+          <strong>Wallet balance:</strong>
+          {{ walletBalanceFormatted }}
+        </div>
+        <div><strong>Buckets:</strong> {{ bucketCount }}</div>
+        <div><strong>Tiers:</strong> {{ tiers.length }}</div>
       </div>
-      <div
-        v-if="seedSignerPrivateKeyNsecComputed"
-        class="row items-center q-gutter-x-sm q-mt-xs"
-      >
-        <div><strong>nsec:</strong> {{ seedSignerPrivateKeyNsecComputed }}</div>
-        <q-btn
-          flat
-          dense
-          icon="content_copy"
-          @click="copy(seedSignerPrivateKeyNsecComputed)"
-        />
-      </div>
-      <div
-        v-if="privateKeySignerPrivateKey"
-        class="row items-center q-gutter-x-sm q-mt-xs"
-      >
-        <div><strong>hex:</strong> {{ privateKeySignerPrivateKey }}</div>
-        <q-btn
-          flat
-          dense
-          icon="content_copy"
-          @click="copy(privateKeySignerPrivateKey)"
-        />
-      </div>
-      <div class="q-mt-sm">
-        <strong>Wallet balance:</strong>
-        {{ walletBalanceFormatted }}
-      </div>
-      <div><strong>Buckets:</strong> {{ bucketCount }}</div>
-      <div><strong>Tiers:</strong> {{ tiers.length }}</div>
-      <div class="q-mt-md">
-        <q-btn color="primary" dense @click="openP2PKDialog">Show P2PK Key</q-btn>
+    </q-expansion-item>
+
+    <q-expansion-item
+      class="q-mb-md"
+      dense
+      dense-toggle
+      icon="vpn_key"
+      label="P2PK Keys"
+      v-model="expandP2PKKeys"
+    >
+      <div>
+        <q-btn color="primary" dense @click="openP2PKDialog"
+          >Show P2PK Key</q-btn
+        >
         <q-list v-if="p2pkKeys.length" dense bordered class="q-mt-sm">
-          <q-item v-for="key in p2pkKeys" :key="key.publicKey" clickable @click="showP2PKKeyEntry(key.publicKey)">
-            <q-item-section>{{ shortenString(key.publicKey, 16, 6) }}</q-item-section>
+          <q-item
+            v-for="key in p2pkKeys"
+            :key="key.publicKey"
+            clickable
+            @click="showP2PKKeyEntry(key.publicKey)"
+          >
+            <q-item-section>{{
+              shortenString(key.publicKey, 16, 6)
+            }}</q-item-section>
             <q-item-section side>
               <q-badge v-if="key.used" color="primary" label="used" />
             </q-item-section>
           </q-item>
         </q-list>
       </div>
-    </div>
+    </q-expansion-item>
 
-    <div v-if="tiers.length">
-      <div class="text-h6 q-mb-sm">{{ $t("CreatorHub.profile.tiers") }}</div>
+    <q-expansion-item
+      v-if="tiers.length"
+      class="q-mb-md"
+      dense
+      dense-toggle
+      icon="format_list_bulleted"
+      :label="$t('CreatorHub.profile.tiers')"
+      v-model="expandTierList"
+    >
       <div v-for="tier in tiers" :key="tier.id" class="q-mb-md">
         <div class="text-subtitle1">
           {{ tier.name }} - {{ tier.price }} sats/month
@@ -101,15 +146,11 @@
           class="text-caption"
           v-html="renderMarkdown(tier.description)"
         ></div>
-        <q-btn
-          color="primary"
-          dense
-          class="q-mt-sm"
-          @click="editProfile"
-          >{{ $t("CreatorHub.profile.edit") }}</q-btn
-        >
+        <q-btn color="primary" dense class="q-mt-sm" @click="editProfile">
+          {{ $t("CreatorHub.profile.edit") }}
+        </q-btn>
       </div>
-    </div>
+    </q-expansion-item>
   </div>
   <P2PKDialog v-model="showP2PKDialog" />
 </template>
@@ -158,6 +199,8 @@ export default defineComponent({
     const uiStore = useUiStore();
     const mints = useMintsStore();
     const buckets = useBucketsStore();
+    const { expandProfileDetails, expandTierList, expandP2PKKeys } =
+      storeToRefs(uiStore);
     const {
       display_name,
       picture,
@@ -228,10 +271,10 @@ export default defineComponent({
           mints: profileMints.value,
           relays: profileRelays.value,
         });
-        notifySuccess('Profile updated');
+        notifySuccess("Profile updated");
         profileStore.markClean();
       } catch (e: any) {
-        notifyError(e?.message || 'Failed to publish profile');
+        notifyError(e?.message || "Failed to publish profile");
       }
     }
 
@@ -253,7 +296,6 @@ export default defineComponent({
     function showP2PKKeyEntry(pubKey: string) {
       p2pkStore.showKeyDetails(pubKey);
     }
-
 
     return {
       npub,
@@ -286,6 +328,9 @@ export default defineComponent({
       editProfile,
       showP2PKDialog,
       p2pkKeys,
+      expandProfileDetails,
+      expandTierList,
+      expandP2PKKeys,
     };
   },
 });

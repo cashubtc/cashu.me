@@ -34,6 +34,15 @@ export const useUiStore = defineStore("ui", {
     activityOrb: false,
     tab: useLocalStorage("cashu.ui.tab", "history" as string),
     expandHistory: useLocalStorage("cashu.ui.expandHistory", true as boolean),
+    expandProfileDetails: useLocalStorage(
+      "cashu.ui.expandProfileDetails",
+      true as boolean
+    ),
+    expandTierList: useLocalStorage("cashu.ui.expandTierList", true as boolean),
+    expandP2PKKeys: useLocalStorage(
+      "cashu.ui.expandP2PKKeys",
+      false as boolean
+    ),
     globalMutexLock: false,
     showDebugConsole: useLocalStorage("cashu.ui.showDebugConsole", false),
     lastBalanceCached: useLocalStorage("cashu.ui.lastBalanceCached", 0),
