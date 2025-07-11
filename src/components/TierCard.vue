@@ -1,42 +1,84 @@
 <template>
-  <q-card flat bordered class="relative p-4 space-y-2">
+  <q-card flat bordered class="relative-position">
     <q-card-section class="row items-center justify-between">
-      <div class="text-subtitle2">{{ tierLocal.name || 'Tier' }}</div>
+      <div class="row items-center">
+        <div class="text-subtitle2">{{ tierLocal.name || 'Tier' }}</div>
+        <div class="text-caption text-grey q-ml-sm">{{ tierLocal.price }} sats</div>
+      </div>
       <q-btn flat dense round icon="mdi-drag" class="drag-handle" />
     </q-card-section>
-    <q-input v-model="tierLocal.name" label="Title" dense outlined />
-    <q-input v-model.number="tierLocal.price" label="Price (sats/month)" type="number" dense outlined />
-    <q-input v-model="tierLocal.description" label="Description" type="textarea" autogrow dense outlined />
-    <q-input v-model="tierLocal.welcomeMessage" label="Welcome Message" type="textarea" autogrow dense outlined />
+    <q-card-section>
+      <q-input v-model="tierLocal.name" label="Title" dense outlined class="q-mt-sm" />
+      <q-input
+        v-model.number="tierLocal.price"
+        label="Price (sats/month)"
+        type="number"
+        dense
+        outlined
+        class="q-mt-sm"
+      />
+      <q-input
+        v-model="tierLocal.description"
+        label="Description"
+        type="textarea"
+        autogrow
+        dense
+        outlined
+        class="q-mt-sm"
+      />
+      <q-input
+        v-model="tierLocal.welcomeMessage"
+        label="Welcome Message"
+        type="textarea"
+        autogrow
+        dense
+        outlined
+        class="q-mt-sm"
+      />
+    </q-card-section>
     <q-card-actions align="right">
-      <q-btn flat dense round icon="save" @click="save" />
-      <q-btn flat dense round icon="delete" color="negative" @click="remove" />
+      <q-btn flat dense round icon="save" @click="emitEdit" />
+      <q-btn flat dense round icon="delete" color="negative" @click="emitDelete" />
     </q-card-actions>
   </q-card>
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue';
-import { useCreatorHubStore, type Tier } from 'stores/creatorHub';
+import { reactive, watch, defineProps, defineEmits } from 'vue';
+import type { Tier } from 'stores/creatorHub';
 
 const props = defineProps<{ tier: Tier }>();
-const emit = defineEmits<{ (e: 'delete', id: string): void }>();
+const emit = defineEmits(['edit', 'delete', 'update:tier']);
 
-const store = useCreatorHubStore();
-const tierLocal = ref<Tier>({ ...props.tier });
+const tierLocal = reactive<Tier>({ ...props.tier });
 
 watch(
   () => props.tier,
-  val => { tierLocal.value = { ...val }; },
-  { deep: true }
+  (val) => {
+    Object.assign(tierLocal, val);
+  },
+  { immediate: true, deep: true },
 );
 
-async function save() {
-  store.updateTier(tierLocal.value.id, tierLocal.value);
-  await store.publishTierDefinitions();
+watch(
+  tierLocal,
+  () => {
+    emit('update:tier', { ...tierLocal });
+  },
+  { deep: true },
+);
+
+function emitEdit() {
+  emit('edit');
 }
 
-function remove() {
-  emit('delete', tierLocal.value.id);
+function emitDelete() {
+  emit('delete');
 }
 </script>
+
+<style scoped>
+.relative-position {
+  position: relative;
+}
+</style>
