@@ -1,11 +1,6 @@
 <template>
-  <div
-    :class="[
-      $q.dark.isActive ? 'bg-dark text-white' : 'bg-white text-dark',
-      'q-pa-md flex flex-center',
-    ]"
-  >
-    <q-card class="q-pa-md" style="max-width: 400px; width: 100%">
+  <q-page class="bg-grey-10 q-pa-md flex flex-center">
+    <q-card class="q-pa-md bg-grey-9 shadow-4" style="max-width: 400px; width: 100%">
       <q-card-section class="text-h6">Nostr Identity</q-card-section>
       <q-card-section v-if="hasExistingKey">
         <q-banner dense class="bg-grey-3 q-mb-md">
@@ -23,7 +18,7 @@
         >
       </q-card-actions>
     </q-card>
-  </div>
+  </q-page>
 </template>
 
 <script lang="ts">
