@@ -13,6 +13,7 @@
       label="Profile Picture URL"
       dense
       outlined
+      :rules="[urlRule]"
     />
     <q-img
       :src="pictureLocal"
@@ -177,6 +178,7 @@ const profileRelaysLocal = computed({
 });
 
 const validUrl = computed(() => /^https?:\/\/.+/.test(pictureLocal.value));
+const urlRule = (val: string) => /^https?:\/\/.+/.test(val) || 'Invalid URL';
 const urlListRule = (val: string[]) =>
   val.every((u) => /^wss?:\/\//.test(u)) || "Invalid URL";
 </script>
