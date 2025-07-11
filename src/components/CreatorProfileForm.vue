@@ -77,53 +77,65 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
+import { storeToRefs } from 'pinia';
 import InfoTooltip from './InfoTooltip.vue';
+import { useCreatorProfileStore } from 'stores/creatorProfile';
+import { useP2PKStore } from 'stores/p2pk';
+import { shortenString } from 'src/js/string-utils';
 
-const props = defineProps<{
-  display_name: string;
-  picture: string;
-  about: string;
-  profilePub: string | null;
-  profileMints: string[];
-  profileRelays: string[];
-  hasP2PK: boolean;
-  p2pkOptions: any[];
-  selectedKeyShort: string;
-  generateP2PK: () => void;
-}>();
+const profileStore = useCreatorProfileStore();
+const p2pkStore = useP2PKStore();
 
-const emit = defineEmits<{
-  (e: 'update:display_name', val: string): void;
-  (e: 'update:picture', val: string): void;
-  (e: 'update:about', val: string): void;
-  (e: 'update:profilePub', val: string | null): void;
-  (e: 'update:profileMints', val: string[]): void;
-  (e: 'update:profileRelays', val: string[]): void;
-}>();
+const {
+  display_name,
+  picture,
+  about,
+  pubkey: profilePub,
+  mints: profileMints,
+  relays: profileRelays,
+} = storeToRefs(profileStore);
+
+const hasP2PK = computed(() => p2pkStore.p2pkKeys.length > 0);
+const p2pkOptions = computed(() =>
+  p2pkStore.p2pkKeys.map((k) => ({
+    label: shortenString(k.publicKey, 16, 6),
+    value: k.publicKey,
+  }))
+);
+const selectedKeyShort = computed(() =>
+  profilePub.value ? shortenString(profilePub.value, 16, 6) : ''
+);
+
+function generateP2PK() {
+  p2pkStore.createAndSelectNewKey().then(() => {
+    if (!profilePub.value && p2pkStore.firstKey)
+      profilePub.value = p2pkStore.firstKey.publicKey;
+  });
+}
 
 const display_nameLocal = computed({
-  get: () => props.display_name,
-  set: (val: string) => emit('update:display_name', val),
+  get: () => display_name.value,
+  set: (val: string) => (display_name.value = val),
 });
 const pictureLocal = computed({
-  get: () => props.picture,
-  set: (val: string) => emit('update:picture', val),
+  get: () => picture.value,
+  set: (val: string) => (picture.value = val),
 });
 const aboutLocal = computed({
-  get: () => props.about,
-  set: (val: string) => emit('update:about', val),
+  get: () => about.value,
+  set: (val: string) => (about.value = val),
 });
 const profilePubLocal = computed({
-  get: () => props.profilePub,
-  set: (val: string | null) => emit('update:profilePub', val),
+  get: () => profilePub.value,
+  set: (val: string | null) => (profilePub.value = val || ''),
 });
 const profileMintsLocal = computed({
-  get: () => props.profileMints,
-  set: (val: string[]) => emit('update:profileMints', val),
+  get: () => profileMints.value,
+  set: (val: string[]) => (profileMints.value = val),
 });
 const profileRelaysLocal = computed({
-  get: () => props.profileRelays,
-  set: (val: string[]) => emit('update:profileRelays', val),
+  get: () => profileRelays.value,
+  set: (val: string[]) => (profileRelays.value = val),
 });
 </script>
 
