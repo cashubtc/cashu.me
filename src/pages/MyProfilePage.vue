@@ -318,6 +318,7 @@ export default defineComponent({
       activeUnit,
       bucketCount,
       walletBalanceFormatted,
+      shortenString,
       renderMarkdown,
       formatFiat,
       generateP2PK,
