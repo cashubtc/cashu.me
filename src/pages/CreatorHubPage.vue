@@ -87,14 +87,12 @@
 </div>
 <DeleteModal v-model="deleteDialog" @confirm="performDelete" />
 </div>
-  <div v-if="loggedIn" class="bg-grey-9 q-pa-sm text-center fixed-bottom">
-    <q-btn color="primary" class="q-mr-sm" :disable="!isDirty" @click="saveProfile()">
-      Save Changes
-    </q-btn>
-    <q-btn color="primary" outline :disable="!isDirty" @click="publishFullProfile()">
-      Publish Profile
-    </q-btn>
-  </div>
+<PublishBar
+  v-if="loggedIn"
+  :publishing="publishing"
+  @publish="publishFullProfile"
+  @save="saveProfile"
+/>
 </q-card>
   </q-page>
 </template>
@@ -116,6 +114,7 @@ import CreatorProfileForm from 'components/CreatorProfileForm.vue';
 import TierItem from 'components/TierItem.vue';
 import DeleteModal from 'components/DeleteModal.vue';
 import ThemeToggle from 'components/ThemeToggle.vue';
+import PublishBar from 'components/PublishBar.vue';
 
 const store = useCreatorHubStore();
 const nostr = useNostrStore();
@@ -150,6 +149,7 @@ const saved = reactive<Record<string, boolean>>({});
 const draggableTiers = ref<Tier[]>([]);
 const deleteDialog = ref(false);
 const deleteId = ref('');
+const publishing = ref(false);
 const npub = computed(() => (store.loggedInNpub ? nip19.npubEncode(store.loggedInNpub) : ''));
 
 
@@ -230,6 +230,7 @@ async function initPage() {
 }
 
 async function publishFullProfile() {
+  publishing.value = true;
   try {
     await publishDiscoveryProfile({
       profile: profile.value,
@@ -241,6 +242,8 @@ async function publishFullProfile() {
     profileStore.markClean();
   } catch (e: any) {
     notifyError(e?.message || 'Failed to publish profile');
+  } finally {
+    publishing.value = false;
   }
 }
 
