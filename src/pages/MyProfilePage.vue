@@ -76,8 +76,8 @@
           color="primary"
           dense
           class="q-mt-sm"
-          @click="supportTier(tier)"
-          >{{ $t("CreatorHub.profile.support") }}</q-btn
+          @click="editProfile"
+          >{{ $t("CreatorHub.profile.edit") }}</q-btn
         >
       </div>
     </div>
@@ -88,10 +88,11 @@
 import { defineComponent, ref, onMounted, computed } from "vue";
 import { storeToRefs } from "pinia";
 import { useQuasar } from "quasar";
+import { useRouter } from "vue-router";
 import { useClipboard } from "src/composables/useClipboard";
 import { useI18n } from "vue-i18n";
 import { useNostrStore } from "stores/nostr";
-import { useCreatorHubStore, Tier } from "stores/creatorHub";
+import { useCreatorHubStore } from "stores/creatorHub";
 import { usePriceStore } from "stores/price";
 import { useUiStore } from "stores/ui";
 import { useMintsStore } from "stores/mints";
@@ -104,6 +105,7 @@ export default defineComponent({
     const $q = useQuasar();
     const { t } = useI18n();
     const { copy } = useClipboard();
+    const router = useRouter();
 
     const nostr = useNostrStore();
     const {
@@ -146,17 +148,8 @@ export default defineComponent({
       return uiStore.formatCurrency(value, "USD", true);
     }
 
-    async function supportTier(tier: Tier) {
-      if (tier.welcomeMessage) {
-        try {
-          await useNostrStore().sendNip04DirectMessage(
-            npub.value,
-            tier.welcomeMessage
-          );
-        } catch (e) {
-          console.error(e);
-        }
-      }
+    function editProfile() {
+      router.push("/creator-hub");
     }
 
 
@@ -174,7 +167,7 @@ export default defineComponent({
       renderMarkdown,
       formatFiat,
       copy,
-      supportTier,
+      editProfile,
     };
   },
 });
