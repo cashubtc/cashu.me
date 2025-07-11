@@ -19,9 +19,9 @@
 <q-splitter v-if="!isMobile" v-model="splitterModel">
   <template #before>
     <div class="q-gutter-md">
-      <q-input v-model="profile.display_name" label="Display Name" dense outlined />
-      <q-input v-model="profile.picture" label="Profile Picture URL" dense outlined />
-      <q-input v-model="profile.about" label="About" type="textarea" autogrow dense outlined />
+      <q-input v-model="display_name" label="Display Name" dense outlined />
+      <q-input v-model="picture" label="Profile Picture URL" dense outlined />
+      <q-input v-model="about" label="About" type="textarea" autogrow dense outlined />
       <div>
         <q-select
           v-if="hasP2PK"
@@ -141,9 +141,9 @@
   <q-tab-panels v-model="tab" animated>
     <q-tab-panel name="profile">
       <div class="q-gutter-md">
-        <q-input v-model="profile.display_name" label="Display Name" dense outlined />
-        <q-input v-model="profile.picture" label="Profile Picture URL" dense outlined />
-        <q-input v-model="profile.about" label="About" type="textarea" autogrow dense outlined />
+        <q-input v-model="display_name" label="Display Name" dense outlined />
+        <q-input v-model="picture" label="Profile Picture URL" dense outlined />
+        <q-input v-model="about" label="About" type="textarea" autogrow dense outlined />
         <div>
         <q-select
           v-if="hasP2PK"
@@ -286,6 +286,8 @@ import { useCreatorHubStore, type Tier } from 'stores/creatorHub';
 import { useNostrStore, fetchNutzapProfile, publishDiscoveryProfile, RelayConnectionError } from 'stores/nostr';
 import { useP2PKStore } from 'stores/p2pk';
 import { useMintsStore } from 'stores/mints';
+import { useCreatorProfileStore } from 'stores/creatorProfile';
+import { storeToRefs } from 'pinia';
 import { v4 as uuidv4 } from 'uuid';
 import { nip19 } from 'nostr-tools';
 import { notifySuccess, notifyError } from 'src/js/notify';
@@ -295,12 +297,23 @@ const store = useCreatorHubStore();
 const nostr = useNostrStore();
 const p2pkStore = useP2PKStore();
 const mintsStore = useMintsStore();
+const profileStore = useCreatorProfileStore();
 const $q = useQuasar();
 
-const profile = ref({ display_name: '', picture: '', about: '' });
-const profilePub = ref('');
-const profileMints = ref<string[]>([]);
-const profileRelays = ref<string[]>([]);
+const {
+  display_name,
+  picture,
+  about,
+  pubkey: profilePub,
+  mints: profileMints,
+  relays: profileRelays,
+  isDirty,
+} = storeToRefs(profileStore);
+const profile = computed(() => ({
+  display_name: display_name.value,
+  picture: picture.value,
+  about: about.value,
+}));
 const nsec = ref('');
 const isMobile = computed(() => $q.screen.lt.md);
 const splitterModel = ref(50);
@@ -325,21 +338,6 @@ const deleteDialog = ref(false);
 const deleteId = ref('');
 const npub = computed(() => (store.loggedInNpub ? nip19.npubEncode(store.loggedInNpub) : ''));
 
-const initialData = ref({
-  profile: {} as any,
-  profilePub: '',
-  profileMints: [] as string[],
-  profileRelays: [] as string[],
-});
-
-const isDirty = computed(() => {
-  return (
-    JSON.stringify(initialData.value.profile) !== JSON.stringify(profile.value) ||
-    initialData.value.profilePub !== profilePub.value ||
-    JSON.stringify(initialData.value.profileMints) !== JSON.stringify(profileMints.value) ||
-    JSON.stringify(initialData.value.profileRelays) !== JSON.stringify(profileRelays.value)
-  );
-});
 
 watch(
   () => store.tiers,
@@ -383,7 +381,7 @@ async function initPage() {
   if (!store.loggedInNpub) return;
   await nostr.initSignerIfNotSet();
   const p = await nostr.getProfile(store.loggedInNpub);
-  if (p) profile.value = { ...p };
+  if (p) profileStore.setProfile(p);
   let existing = null;
   try {
     existing = await fetchNutzapProfile(store.loggedInNpub);
@@ -404,12 +402,7 @@ async function initPage() {
     if (mintsStore.mints.length > 0) profileMints.value = mintsStore.mints.map((m) => m.url);
   }
   await store.loadTiersFromNostr(store.loggedInNpub);
-  initialData.value = {
-    profile: JSON.parse(JSON.stringify(profile.value)),
-    profilePub: profilePub.value,
-    profileMints: [...profileMints.value],
-    profileRelays: [...profileRelays.value],
-  };
+  profileStore.markClean();
 }
 
 async function publishFullProfile() {
@@ -421,12 +414,7 @@ async function publishFullProfile() {
       relays: profileRelays.value,
     });
     notifySuccess('Profile updated');
-    initialData.value = {
-      profile: JSON.parse(JSON.stringify(profile.value)),
-      profilePub: profilePub.value,
-      profileMints: [...profileMints.value],
-      profileRelays: [...profileRelays.value],
-    };
+    profileStore.markClean();
   } catch (e: any) {
     notifyError(e.message);
   }
