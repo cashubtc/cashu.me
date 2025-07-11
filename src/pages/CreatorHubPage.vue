@@ -21,40 +21,12 @@
         </div>
 <q-splitter v-if="!isMobile" v-model="splitterModel">
   <template #before>
-    <CreatorProfileForm />
+    <q-card class="section-card">
+      <CreatorProfileForm />
+    </q-card>
   </template>
   <template #after>
-    <div>
-      <div class="text-h6 q-mb-md">Subscription Tiers</div>
-      <Draggable v-model="draggableTiers" item-key="id" handle=".drag-handle" @end="updateOrder">
-        <template #item="{ element }">
-          <div class="q-mb-md">
-            <TierItem
-              :tier-data="editedTiers[element.id]"
-              :saved="saved[element.id]"
-              @update:tierData="val => (editedTiers[element.id] = val)"
-              @save="saveTier(element.id)"
-              @delete="confirmDelete(element.id)"
-            />
-          </div>
-        </template>
-      </Draggable>
-      <div class="text-center q-mt-md">
-        <q-btn color="primary" flat @click="addTier">Add Tier</q-btn>
-      </div>
-    </div>
-  </template>
-</q-splitter>
-<div v-else>
-  <q-tabs v-model="tab" no-caps align="justify" class="q-mb-md">
-    <q-tab name="profile" label="Profile" />
-    <q-tab name="tiers" label="Subscription Tiers" />
-  </q-tabs>
-  <q-tab-panels v-model="tab" animated>
-    <q-tab-panel name="profile">
-      <CreatorProfileForm />
-    </q-tab-panel>
-    <q-tab-panel name="tiers">
+    <q-card class="section-card">
       <div>
         <div class="text-h6 q-mb-md">Subscription Tiers</div>
         <Draggable v-model="draggableTiers" item-key="id" handle=".drag-handle" @end="updateOrder">
@@ -74,6 +46,42 @@
           <q-btn color="primary" flat @click="addTier">Add Tier</q-btn>
         </div>
       </div>
+    </q-card>
+  </template>
+</q-splitter>
+<div v-else>
+  <q-tabs v-model="tab" no-caps align="justify" class="q-mb-md">
+    <q-tab name="profile" label="Profile" />
+    <q-tab name="tiers" label="Subscription Tiers" />
+  </q-tabs>
+  <q-tab-panels v-model="tab" animated>
+    <q-tab-panel name="profile">
+      <q-card class="section-card">
+        <CreatorProfileForm />
+      </q-card>
+    </q-tab-panel>
+    <q-tab-panel name="tiers">
+      <q-card class="section-card">
+        <div>
+          <div class="text-h6 q-mb-md">Subscription Tiers</div>
+          <Draggable v-model="draggableTiers" item-key="id" handle=".drag-handle" @end="updateOrder">
+            <template #item="{ element }">
+              <div class="q-mb-md">
+                <TierItem
+                  :tier-data="editedTiers[element.id]"
+                  :saved="saved[element.id]"
+                  @update:tierData="val => (editedTiers[element.id] = val)"
+                  @save="saveTier(element.id)"
+                  @delete="confirmDelete(element.id)"
+                />
+              </div>
+            </template>
+          </Draggable>
+          <div class="text-center q-mt-md">
+            <q-btn color="primary" flat @click="addTier">Add Tier</q-btn>
+          </div>
+        </div>
+      </q-card>
     </q-tab-panel>
   </q-tab-panels>
 </div>
@@ -290,5 +298,7 @@ onMounted(async () => {
   if (store.loggedInNpub) await initPage();
 });
 </script>
+
+<style lang="scss" src="../css/creator-hub.scss" scoped></style>
 
 
