@@ -106,11 +106,11 @@ const selectedKeyShort = computed(() =>
   profilePub.value ? shortenString(profilePub.value, 16, 6) : ''
 );
 
-function generateP2PK() {
-  p2pkStore.createAndSelectNewKey().then(() => {
-    if (!profilePub.value && p2pkStore.firstKey)
-      profilePub.value = p2pkStore.firstKey.publicKey;
-  });
+async function generateP2PK() {
+  await p2pkStore.createAndSelectNewKey();
+  if (p2pkStore.firstKey) {
+    profilePub.value = p2pkStore.firstKey.publicKey;
+  }
 }
 
 const display_nameLocal = computed({
