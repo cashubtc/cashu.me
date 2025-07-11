@@ -1,7 +1,13 @@
 <template>
   <div>
     <div class="text-h6 mb-4">Subscription Tiers</div>
-    <Draggable v-model="localTiers" item-key="id" handle=".drag-handle" class="space-y-4" @end="updateOrder">
+    <Draggable
+      v-model="draggableTiers"
+      item-key="id"
+      handle=".drag-handle"
+      class="space-y-4"
+      @end="updateOrder"
+    >
       <template #item="{ element }">
         <TierCard :tier="element" @delete="confirmDelete" />
       </template>
@@ -35,16 +41,18 @@ import { v4 as uuidv4 } from 'uuid';
 const store = useCreatorHubStore();
 const deleteDialog = ref(false);
 const deleteId = ref('');
-const localTiers = ref<Tier[]>([]);
+const draggableTiers = ref<Tier[]>([]);
 
 watch(
   () => store.getTierArray(),
-  val => { localTiers.value = [...val]; },
-  { immediate: true }
+  (val) => {
+    draggableTiers.value = [...val];
+  },
+  { immediate: true },
 );
 
 function updateOrder() {
-  store.setTierOrder(localTiers.value.map(t => t.id));
+  store.setTierOrder(draggableTiers.value.map((t) => t.id));
 }
 
 function addTier() {
