@@ -4,7 +4,10 @@
       class="q-pa-lg q-mt-md q-mb-md bg-grey-9 shadow-4"
       style="max-width: 1200px; width: 100%"
     >
-      <div class="text-h5 text-center q-mb-lg">Creator Hub</div>
+      <div class="row items-center justify-between q-mb-lg">
+        <div class="text-h5">Creator Hub</div>
+        <ThemeToggle />
+      </div>
       <div v-if="!loggedIn" class="q-mt-lg q-mb-lg">
         <q-btn color="primary" class="full-width q-mb-md" @click="loginNip07">Login with Browser Signer</q-btn>
         <q-input v-model="nsec" type="password" label="nsec" outlined dense class="q-mb-sm" />
@@ -102,6 +105,7 @@ import { notifySuccess, notifyError } from 'src/js/notify';
 import CreatorProfileForm from 'components/CreatorProfileForm.vue';
 import TierItem from 'components/TierItem.vue';
 import DeleteModal from 'components/DeleteModal.vue';
+import ThemeToggle from 'components/ThemeToggle.vue';
 
 const store = useCreatorHubStore();
 const nostr = useNostrStore();
