@@ -1301,7 +1301,7 @@
                     flat
                     @click="changeColor('freedom')"
                     icon="format_color_fill"
-                    color="pink-13"
+                    color="primary"
                     size="md"
                     :aria-label="
                       $t('Settings.appearance.theme.tooltips.freedom')
@@ -1317,7 +1317,7 @@
                     flat
                     @click="changeColor('nostr')"
                     icon="format_color_fill"
-                    color="deep-purple"
+                    color="primary"
                     size="md"
                     :aria-label="$t('Settings.appearance.theme.tooltips.nostr')"
                     :title="$t('Settings.appearance.theme.tooltips.nostr')"
@@ -1388,7 +1388,7 @@
                     flat
                     @click="changeColor('flamingo')"
                     icon="format_color_fill"
-                    color="pink-3"
+                    color="primary"
                     size="md"
                     :aria-label="
                       $t('Settings.appearance.theme.tooltips.flamingo')

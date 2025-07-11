@@ -1,9 +1,8 @@
 <template>
-  <q-page class="flex justify-center">
+  <q-page class="bg-grey-10 flex justify-center">
     <q-card
-      class="q-pa-lg q-my-xl"
+      class="q-pa-lg q-my-xl bg-grey-9 shadow-4"
       style="max-width:1024px"
-      :class="$q.dark.isActive ? 'bg-dark text-white' : 'bg-white text-dark'"
     >
       <div class="text-h5 text-center q-mb-lg">Creator Hub</div>
       <div v-if="!loggedIn" class="q-my-xl">
