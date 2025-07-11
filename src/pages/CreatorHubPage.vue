@@ -90,7 +90,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted } from 'vue';
+import { ref, reactive, computed, watch, onMounted } from 'vue';
 import { useQuasar } from 'quasar';
 import Draggable from 'vuedraggable';
 import { useCreatorHubStore, type Tier } from 'stores/creatorHub';
@@ -136,7 +136,7 @@ const tab = ref<'profile' | 'tiers'>('profile');
 const loggedIn = computed(() => !!store.loggedInNpub);
 const tierList = computed<Tier[]>(() => store.getTierArray());
 const editedTiers = ref<Record<string, Tier>>({});
-const saved = ref<Record<string, boolean>>({});
+const saved = reactive<Record<string, boolean>>({});
 const draggableTiers = ref<Tier[]>([]);
 const deleteDialog = ref(false);
 const deleteId = ref('');
@@ -147,13 +147,14 @@ watch(
   () => store.tiers,
   (val) => {
     const obj: Record<string, Tier> = {};
-    const savedObj: Record<string, boolean> = {};
     Object.values(val).forEach((t) => {
       obj[t.id] = { ...t } as Tier;
-      savedObj[t.id] = saved.value[t.id] || false;
+      if (!(t.id in saved)) saved[t.id] = false;
+    });
+    Object.keys(saved).forEach((id) => {
+      if (!val[id]) delete saved[id];
     });
     editedTiers.value = obj;
-    saved.value = savedObj;
   },
   { immediate: true, deep: true },
 );
@@ -258,9 +259,9 @@ async function saveTier(id: string) {
       store.updateTier(id, data);
       await store.saveTier(data);
       notifySuccess('Tier saved');
-      saved.value[id] = true;
+      saved[id] = true;
       setTimeout(() => {
-        saved.value[id] = false;
+        saved[id] = false;
       }, 2000);
     } catch (e: any) {
       notifyError(e?.message || 'Failed to save tier');

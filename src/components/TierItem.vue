@@ -1,11 +1,11 @@
 <template>
   <q-card flat bordered :class="{ 'saved-bg': saved }" class="relative-position">
     <transition name="fade">
-      <q-icon
+      <q-badge
         v-if="saved"
-        name="check_circle"
         color="positive"
-        size="sm"
+        rounded
+        icon="check"
         class="saved-check"
       />
     </transition>
