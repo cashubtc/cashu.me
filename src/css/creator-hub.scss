@@ -1,6 +1,6 @@
 .section-card {
   padding: 24px;
-  @extend .bg-grey-9;
-  @extend .shadow-2;
-  @extend .rounded-borders;
+  background-color: var(--q-color-grey-9);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  border-radius: 8px;
 }
