@@ -32,6 +32,7 @@
             <TierItem
               :tier-data="editedTiers[element.id]"
               :saved="saved[element.id]"
+              @update:tierData="val => (editedTiers[element.id] = val)"
               @save="saveTier(element.id)"
               @delete="confirmDelete(element.id)"
             />
@@ -62,6 +63,7 @@
               <TierItem
                 :tier-data="editedTiers[element.id]"
                 :saved="saved[element.id]"
+                @update:tierData="val => (editedTiers[element.id] = val)"
                 @save="saveTier(element.id)"
                 @delete="confirmDelete(element.id)"
               />
