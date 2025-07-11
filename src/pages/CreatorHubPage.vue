@@ -1,8 +1,8 @@
 <template>
   <q-page class="bg-grey-10 flex justify-center">
     <q-card
-      class="q-pa-lg q-mt-lg q-mb-lg bg-grey-9 shadow-4"
-      style="max-width:1024px"
+      class="q-pa-lg q-mt-md q-mb-md bg-grey-9 shadow-4"
+      style="max-width: 1200px; width: 100%"
     >
       <div class="text-h5 text-center q-mb-lg">Creator Hub</div>
       <div v-if="!loggedIn" class="q-mt-lg q-mb-lg">
