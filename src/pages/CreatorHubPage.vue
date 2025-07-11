@@ -268,6 +268,7 @@
     </q-card-actions>
   </q-card>
 </q-dialog>
+</div>
 </q-card>
     <q-footer v-if="loggedIn" class="bg-grey-9 q-pa-sm">
       <div class="text-center">
