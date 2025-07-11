@@ -24,34 +24,15 @@
     <div>
       <div class="text-h6 q-mb-md">Subscription Tiers</div>
       <Draggable v-model="draggableTiers" item-key="id" handle=".drag-handle" @end="updateOrder">
-        <template #item="{ element: tier }">
-        <div class="q-mb-md">
-          <q-card flat bordered :class="{ 'saved-bg': saved[tier.id] }" class="relative-position">
-            <transition name="fade">
-              <q-icon
-                v-if="saved[tier.id]"
-                name="check_circle"
-                color="positive"
-                size="sm"
-                class="saved-check"
-              />
-            </transition>
-          <q-card-section class="row items-center justify-between">
-            <div class="text-subtitle2">{{ editedTiers[tier.id].name || 'Tier' }}</div>
-            <q-btn flat dense round icon="mdi-drag" class="drag-handle" />
-          </q-card-section>
-          <q-card-section>
-            <q-input v-model="editedTiers[tier.id].name" label="Title" dense outlined class="q-mt-sm" />
-            <q-input v-model.number="editedTiers[tier.id].price" label="Price (sats/month)" type="number" dense outlined class="q-mt-sm" />
-            <q-input v-model="editedTiers[tier.id].description" label="Description" type="textarea" autogrow dense outlined class="q-mt-sm" />
-            <q-input v-model="editedTiers[tier.id].welcomeMessage" label="Welcome Message" type="textarea" autogrow dense outlined class="q-mt-sm" />
-          </q-card-section>
-          <q-card-actions align="right">
-            <q-btn flat dense round icon="save" @click="saveTier(tier.id)" />
-            <q-btn flat dense round icon="delete" color="negative" @click="confirmDelete(tier.id)" />
-          </q-card-actions>
-        </q-card>
-        </div>
+        <template #item="{ element }">
+          <div class="q-mb-md">
+            <TierItem
+              :tier-data="editedTiers[element.id]"
+              :saved="saved[element.id]"
+              @save="saveTier(element.id)"
+              @delete="confirmDelete(element.id)"
+            />
+          </div>
         </template>
       </Draggable>
       <div class="text-center q-mt-md">
@@ -73,34 +54,15 @@
       <div>
         <div class="text-h6 q-mb-md">Subscription Tiers</div>
         <Draggable v-model="draggableTiers" item-key="id" handle=".drag-handle" @end="updateOrder">
-          <template #item="{ element: tier }">
-          <div class="q-mb-md">
-            <q-card flat bordered :class="{ 'saved-bg': saved[tier.id] }" class="relative-position">
-              <transition name="fade">
-                <q-icon
-                  v-if="saved[tier.id]"
-                  name="check_circle"
-                  color="positive"
-                  size="sm"
-                  class="saved-check"
-                />
-              </transition>
-            <q-card-section class="row items-center justify-between">
-              <div class="text-subtitle2">{{ editedTiers[tier.id].name || 'Tier' }}</div>
-              <q-btn flat dense round icon="mdi-drag" class="drag-handle" />
-            </q-card-section>
-            <q-card-section>
-              <q-input v-model="editedTiers[tier.id].name" label="Title" dense outlined class="q-mt-sm" />
-              <q-input v-model.number="editedTiers[tier.id].price" label="Price (sats/month)" type="number" dense outlined class="q-mt-sm" />
-              <q-input v-model="editedTiers[tier.id].description" label="Description" type="textarea" autogrow dense outlined class="q-mt-sm" />
-              <q-input v-model="editedTiers[tier.id].welcomeMessage" label="Welcome Message" type="textarea" autogrow dense outlined class="q-mt-sm" />
-            </q-card-section>
-            <q-card-actions align="right">
-              <q-btn flat dense round icon="save" @click="saveTier(tier.id)" />
-              <q-btn flat dense round icon="delete" color="negative" @click="confirmDelete(tier.id)" />
-            </q-card-actions>
-          </q-card>
-          </div>
+          <template #item="{ element }">
+            <div class="q-mb-md">
+              <TierItem
+                :tier-data="editedTiers[element.id]"
+                :saved="saved[element.id]"
+                @save="saveTier(element.id)"
+                @delete="confirmDelete(element.id)"
+              />
+            </div>
           </template>
         </Draggable>
         <div class="text-center q-mt-md">
@@ -110,34 +72,13 @@
     </q-tab-panel>
   </q-tab-panels>
 </div>
-<q-dialog v-model="deleteDialog">
-  <q-card class="q-pa-md" style="max-width: 400px">
-    <q-card-section class="row items-center">
-      <q-icon name="warning" color="red" size="2rem" />
-      <span class="q-ml-sm">Are you sure you want to delete this tier?</span>
-    </q-card-section>
-    <q-card-actions align="right">
-      <q-btn flat color="grey" v-close-popup>Cancel</q-btn>
-      <q-btn color="negative" @click="performDelete">Delete</q-btn>
-    </q-card-actions>
-  </q-card>
-</q-dialog>
+<DeleteModal v-model="deleteDialog" @confirm="performDelete" />
 </div>
-  <div v-if="loggedIn" class="bg-grey-9 q-pa-sm text-center">
-    <q-btn
-      color="primary"
-      class="q-mr-sm"
-      :disable="!isDirty"
-      @click="saveProfile()"
-    >
+  <div v-if="loggedIn" class="bg-grey-9 q-pa-sm text-center fixed-bottom">
+    <q-btn color="primary" class="q-mr-sm" :disable="!isDirty" @click="saveProfile()">
       Save Changes
     </q-btn>
-    <q-btn
-      color="primary"
-      outline
-      :disable="!isDirty"
-      @click="publishFullProfile()"
-    >
+    <q-btn color="primary" outline :disable="!isDirty" @click="publishFullProfile()">
       Publish Profile
     </q-btn>
   </div>
@@ -159,6 +100,8 @@ import { v4 as uuidv4 } from 'uuid';
 import { nip19 } from 'nostr-tools';
 import { notifySuccess, notifyError } from 'src/js/notify';
 import CreatorProfileForm from 'components/CreatorProfileForm.vue';
+import TierItem from 'components/TierItem.vue';
+import DeleteModal from 'components/DeleteModal.vue';
 
 const store = useCreatorHubStore();
 const nostr = useNostrStore();
@@ -332,18 +275,4 @@ onMounted(async () => {
 });
 </script>
 
-<style scoped>
-.saved-bg {
-  background-color: rgba(76, 175, 80, 0.15);
-  transition: background-color 0.5s ease;
-}
-.saved-check {
-  position: absolute;
-  top: 4px;
-  right: 4px;
-  z-index: 1;
-}
-.relative-position {
-  position: relative;
-}
-</style>
+
