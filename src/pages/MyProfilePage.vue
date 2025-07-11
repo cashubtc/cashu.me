@@ -75,6 +75,17 @@
       </div>
       <div><strong>Buckets:</strong> {{ bucketCount }}</div>
       <div><strong>Tiers:</strong> {{ tiers.length }}</div>
+      <div class="q-mt-md">
+        <q-btn color="primary" dense @click="openP2PKDialog">Show P2PK Key</q-btn>
+        <q-list v-if="p2pkKeys.length" dense bordered class="q-mt-sm">
+          <q-item v-for="key in p2pkKeys" :key="key.publicKey" clickable @click="showP2PKKeyEntry(key.publicKey)">
+            <q-item-section>{{ shortenString(key.publicKey, 16, 6) }}</q-item-section>
+            <q-item-section side>
+              <q-badge v-if="key.used" color="primary" label="used" />
+            </q-item-section>
+          </q-item>
+        </q-list>
+      </div>
     </div>
 
     <div v-if="tiers.length">
@@ -100,6 +111,7 @@
       </div>
     </div>
   </div>
+  <P2PKDialog v-model="showP2PKDialog" />
 </template>
 
 <script lang="ts">
@@ -121,10 +133,11 @@ import { renderMarkdown as renderMarkdownFn } from "src/js/simple-markdown";
 import { notifySuccess, notifyError } from "src/js/notify";
 import { shortenString } from "src/js/string-utils";
 import CreatorProfileForm from "components/CreatorProfileForm.vue";
+import P2PKDialog from "components/P2PKDialog.vue";
 
 export default defineComponent({
   name: "MyProfilePage",
-  components: { CreatorProfileForm },
+  components: { CreatorProfileForm, P2PKDialog },
   setup() {
     const $q = useQuasar();
     const { t } = useI18n();
@@ -140,6 +153,7 @@ export default defineComponent({
     const hub = useCreatorHubStore();
     const profileStore = useCreatorProfileStore();
     const p2pkStore = useP2PKStore();
+    const { showP2PKDialog, p2pkKeys } = storeToRefs(p2pkStore);
     const priceStore = usePriceStore();
     const uiStore = useUiStore();
     const mints = useMintsStore();
@@ -228,6 +242,18 @@ export default defineComponent({
       });
     }
 
+    function openP2PKDialog() {
+      if (!p2pkStore.p2pkKeys.length) {
+        p2pkStore.createAndSelectNewKey().then(() => p2pkStore.showLastKey());
+      } else {
+        p2pkStore.showLastKey();
+      }
+    }
+
+    function showP2PKKeyEntry(pubKey: string) {
+      p2pkStore.showKeyDetails(pubKey);
+    }
+
 
     return {
       npub,
@@ -253,9 +279,13 @@ export default defineComponent({
       renderMarkdown,
       formatFiat,
       generateP2PK,
+      openP2PKDialog,
+      showP2PKKeyEntry,
       saveProfile,
       copy,
       editProfile,
+      showP2PKDialog,
+      p2pkKeys,
     };
   },
 });
