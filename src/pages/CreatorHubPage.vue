@@ -186,6 +186,12 @@ async function initPage() {
   await nostr.initSignerIfNotSet();
   const p = await nostr.getProfile(store.loggedInNpub);
   if (p) profileStore.setProfile(p);
+  if (profileStore.mints.length) {
+    profileMints.value = [...profileStore.mints];
+  }
+  if (profileStore.relays.length) {
+    profileRelays.value = [...profileStore.relays];
+  }
   let existing = null;
   try {
     existing = await fetchNutzapProfile(store.loggedInNpub);
@@ -201,9 +207,12 @@ async function initPage() {
     profileMints.value = [...existing.trustedMints];
     profileRelays.value = existing.relays ? [...existing.relays] : [...nostr.relays];
   } else {
-    profileRelays.value = [...nostr.relays];
+    if (!profileStore.relays.length) {
+      profileRelays.value = [...nostr.relays];
+    }
     if (p2pkStore.firstKey) profilePub.value = p2pkStore.firstKey.publicKey;
-    if (mintsStore.mints.length > 0) profileMints.value = mintsStore.mints.map((m) => m.url);
+    if (!profileStore.mints.length && mintsStore.mints.length > 0)
+      profileMints.value = mintsStore.mints.map((m) => m.url);
   }
   await store.loadTiersFromNostr(store.loggedInNpub);
   profileStore.markClean();

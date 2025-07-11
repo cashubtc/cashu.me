@@ -222,6 +222,12 @@ export default defineComponent({
         profileStore.setProfile(p);
         profileStore.markClean();
       }
+      if (profileStore.mints.length) {
+        profileMints.value = [...profileStore.mints];
+      }
+      if (profileStore.relays.length) {
+        profileRelays.value = [...profileStore.relays];
+      }
     }
 
     onMounted(() => {

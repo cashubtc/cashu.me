@@ -10,7 +10,7 @@ import {
   RelayConnectionError,
 } from "./nostr";
 import { useP2PKStore } from "./p2pk";
-import { useMintsStore } from "./mints";
+import { useCreatorProfileStore } from "./creatorProfile";
 import { db } from "./dexie";
 import { v4 as uuidv4 } from "uuid";
 import { notifySuccess, notifyError } from "src/js/notify";
@@ -50,10 +50,8 @@ export async function maybeRepublishNutzapProfile() {
     }
     throw e;
   }
-  const desiredMints = useMintsStore()
-    .mints.map((m) => m.url)
-    .sort()
-    .join(",");
+  const profileStore = useCreatorProfileStore();
+  const desiredMints = profileStore.mints.sort().join(",");
   const desiredP2PK = useP2PKStore().firstKey?.publicKey;
 
   if (!desiredP2PK) return;
@@ -66,8 +64,8 @@ export async function maybeRepublishNutzapProfile() {
   if (hasDiff) {
     await publishNutzapProfile({
       p2pkPub: desiredP2PK,
-      mints: useMintsStore().mints.map((m) => m.url),
-      relays: nostrStore.relays,
+      mints: [...profileStore.mints],
+      relays: [...profileStore.relays],
     });
   }
 }
