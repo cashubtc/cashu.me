@@ -292,7 +292,7 @@ async function publishFullProfile() {
     notifySuccess('Profile updated');
     profileStore.markClean();
   } catch (e: any) {
-    notifyError(e.message);
+    notifyError(e?.message || 'Failed to publish profile');
   }
 }
 
