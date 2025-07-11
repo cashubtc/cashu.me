@@ -1790,10 +1790,9 @@ import { map } from "underscore";
 import { useSettingsStore } from "src/stores/settings";
 import {
   useNostrStore,
-  publishNutzapProfile as publishNutzapProfileFn,
-  fetchNutzapProfile,
-  RelayConnectionError,
+  publishDiscoveryProfile,
 } from "src/stores/nostr";
+import { notifySuccess, notifyError } from "src/js/notify";
 import { useNPCStore } from "src/stores/npubcash";
 import { useP2PKStore } from "src/stores/p2pk";
 import { useCreatorProfileStore } from "src/stores/creatorProfile";
@@ -1808,7 +1807,7 @@ import { useReceiveTokensStore } from "../stores/receiveTokensStore";
 import { useWelcomeStore } from "src/stores/welcome";
 import { useStorageStore } from "src/stores/storage";
 import { useI18n } from "vue-i18n";
-import { Dialog } from "quasar";
+
 
 export default defineComponent({
   name: "SettingsView",
@@ -2071,31 +2070,23 @@ export default defineComponent({
       }
       try {
         if (!this.firstKey) {
-          this.notifyError("No P2PK key");
+          notifyError("No P2PK key");
           return;
         }
         const profileStore = useCreatorProfileStore();
-        await publishNutzapProfileFn({
+        await publishDiscoveryProfile({
+          profile: {
+            display_name: profileStore.display_name,
+            picture: profileStore.picture,
+            about: profileStore.about,
+          },
           p2pkPub: this.firstKey.publicKey,
           mints: profileStore.mints,
           relays: profileStore.relays,
         });
-        this.notifySuccess("Profile published");
-        let profile = null;
-        try {
-          profile = await fetchNutzapProfile(this.pubkey);
-        } catch (e: any) {
-          if (e instanceof RelayConnectionError) {
-            this.notifyError("Unable to connect to Nostr relays");
-            return;
-          }
-          throw e;
-        }
-        Dialog.create({
-          message: `Profile fetched: ${JSON.stringify(profile, null, 2)}`,
-        });
-      } catch (e) {
-        this.notifyError("Failed to publish");
+        notifySuccess("Profile published");
+      } catch (e: any) {
+        notifyError(e?.message || "Failed to publish");
       }
     },
     handleSeedClick: async function () {
