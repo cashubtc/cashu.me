@@ -39,6 +39,11 @@ export default {
       send: {
         label: "Skicka",
       },
+  creatorHub: {
+    publish: "Publish Profile",
+    saveDraft: "Save Draft",
+    profileHeader: "Profile details",
+  },
       swap: {
         label: "Byt",
       },
@@ -740,6 +745,11 @@ export default {
         },
       },
     },
+  creatorHub: {
+    publish: "Publish Profile",
+    saveDraft: "Save Draft",
+    profileHeader: "Profile details",
+  },
     swap: {
       title: "Byt",
       overline: "Multimint-byten",
@@ -757,6 +767,11 @@ export default {
         },
       },
       actions: {
+  creatorHub: {
+    publish: "Publish Profile",
+    saveDraft: "Save Draft",
+    profileHeader: "Profile details",
+  },
         swap: {
           label: "@:global.actions.swap.label",
           in_progress: "@:MintSettings.swap.actions.swap.label",
@@ -951,15 +966,30 @@ export default {
         label_known_mint: "@:ReceiveTokenDialog.actions.receive.label",
         label_adding_mint: "Lägger till mint…",
       },
+  creatorHub: {
+    publish: "Publish Profile",
+    saveDraft: "Save Draft",
+    profileHeader: "Profile details",
+  },
       swap: {
         label: "@:global.actions.swap.label",
         tooltip_text: "Byt till en betrodd mint",
         caption: "Byt { value }",
       },
+  creatorHub: {
+    publish: "Publish Profile",
+    saveDraft: "Save Draft",
+    profileHeader: "Profile details",
+  },
       cancel_swap: {
         label: "@:global.actions.cancel.label",
         tooltip_text: "Avbryt byte",
       },
+  creatorHub: {
+    publish: "Publish Profile",
+    saveDraft: "Save Draft",
+    profileHeader: "Profile details",
+  },
       confirm_swap: {
         label: "@:ReceiveTokenDialog.actions.swap.label",
         tooltip_text: "@:ReceiveTokenDialog.actions.swap.tooltip_text",
@@ -1334,6 +1364,11 @@ export default {
         eur: "EUR",
       },
     },
+  },
+  creatorHub: {
+    publish: "Publish Profile",
+    saveDraft: "Save Draft",
+    profileHeader: "Profile details",
   },
   swap: {
     in_progress_warning_text: "Byte pågår",

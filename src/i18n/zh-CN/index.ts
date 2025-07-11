@@ -39,6 +39,11 @@ export default {
       send: {
         label: "发送",
       },
+  creatorHub: {
+    publish: "Publish Profile",
+    saveDraft: "Save Draft",
+    profileHeader: "Profile details",
+  },
       swap: {
         label: "兑换",
       },
@@ -731,6 +736,11 @@ export default {
         },
       },
     },
+  creatorHub: {
+    publish: "Publish Profile",
+    saveDraft: "Save Draft",
+    profileHeader: "Profile details",
+  },
     swap: {
       title: "兑换",
       overline: "多 Mint 兑换",
@@ -748,6 +758,11 @@ export default {
         },
       },
       actions: {
+  creatorHub: {
+    publish: "Publish Profile",
+    saveDraft: "Save Draft",
+    profileHeader: "Profile details",
+  },
         swap: {
           label: "@:global.actions.swap.label",
           in_progress: "@:MintSettings.swap.actions.swap.label",
@@ -941,15 +956,30 @@ export default {
         label_known_mint: "@:ReceiveTokenDialog.actions.receive.label",
         label_adding_mint: "正在添加 Mint…",
       },
+  creatorHub: {
+    publish: "Publish Profile",
+    saveDraft: "Save Draft",
+    profileHeader: "Profile details",
+  },
       swap: {
         label: "@:global.actions.swap.label",
         tooltip_text: "兑换到信任的 Mint",
         caption: "兑换 { value }",
       },
+  creatorHub: {
+    publish: "Publish Profile",
+    saveDraft: "Save Draft",
+    profileHeader: "Profile details",
+  },
       cancel_swap: {
         label: "@:global.actions.cancel.label",
         tooltip_text: "取消兑换",
       },
+  creatorHub: {
+    publish: "Publish Profile",
+    saveDraft: "Save Draft",
+    profileHeader: "Profile details",
+  },
       confirm_swap: {
         label: "@:ReceiveTokenDialog.actions.swap.label",
         tooltip_text: "@:ReceiveTokenDialog.actions.swap.tooltip_text",
@@ -1324,6 +1354,11 @@ export default {
         eur: "EUR",
       },
     },
+  },
+  creatorHub: {
+    publish: "Publish Profile",
+    saveDraft: "Save Draft",
+    profileHeader: "Profile details",
   },
   swap: {
     in_progress_warning_text: "兑换进行中",

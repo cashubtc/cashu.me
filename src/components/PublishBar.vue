@@ -8,7 +8,7 @@
         :disable="publishing"
         @click="emit('save')"
       >
-        Save Changes
+        {{ $t('creatorHub.saveDraft') }}
       </q-btn>
       <q-btn
         color="primary"
@@ -17,7 +17,7 @@
         :disable="publishing"
         @click="emit('publish')"
       >
-        Publish Profile
+        {{ $t('creatorHub.publish') }}
       </q-btn>
     </div>
   </q-page-sticky>

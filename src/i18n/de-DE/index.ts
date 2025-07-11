@@ -39,6 +39,11 @@ export default {
       send: {
         label: "Senden",
       },
+  creatorHub: {
+    publish: "Publish Profile",
+    saveDraft: "Save Draft",
+    profileHeader: "Profile details",
+  },
       swap: {
         label: "Tauschen",
       },
@@ -747,6 +752,11 @@ export default {
         },
       },
     },
+  creatorHub: {
+    publish: "Publish Profile",
+    saveDraft: "Save Draft",
+    profileHeader: "Profile details",
+  },
     swap: {
       title: "Tauschen",
       overline: "Multimint-Swaps",
@@ -764,6 +774,11 @@ export default {
         },
       },
       actions: {
+  creatorHub: {
+    publish: "Publish Profile",
+    saveDraft: "Save Draft",
+    profileHeader: "Profile details",
+  },
         swap: {
           label: "@:global.actions.swap.label",
           in_progress: "@:MintSettings.swap.actions.swap.label",
@@ -958,15 +973,30 @@ export default {
         label_known_mint: "@:ReceiveTokenDialog.actions.receive.label",
         label_adding_mint: "Mint wird hinzugefügt…",
       },
+  creatorHub: {
+    publish: "Publish Profile",
+    saveDraft: "Save Draft",
+    profileHeader: "Profile details",
+  },
       swap: {
         label: "@:global.actions.swap.label",
         tooltip_text: "Zu einer vertrauenswürdigen Mint tauschen",
         caption: "Tauschen { value }",
       },
+  creatorHub: {
+    publish: "Publish Profile",
+    saveDraft: "Save Draft",
+    profileHeader: "Profile details",
+  },
       cancel_swap: {
         label: "@:global.actions.cancel.label",
         tooltip_text: "Swap abbrechen",
       },
+  creatorHub: {
+    publish: "Publish Profile",
+    saveDraft: "Save Draft",
+    profileHeader: "Profile details",
+  },
       confirm_swap: {
         label: "@:ReceiveTokenDialog.actions.swap.label",
         tooltip_text: "@:ReceiveTokenDialog.actions.swap.tooltip_text",
@@ -1351,6 +1381,11 @@ export default {
         eur: "EUR",
       },
     },
+  },
+  creatorHub: {
+    publish: "Publish Profile",
+    saveDraft: "Save Draft",
+    profileHeader: "Profile details",
   },
   swap: {
     in_progress_warning_text: "Swap läuft",
