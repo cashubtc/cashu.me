@@ -1,11 +1,11 @@
 <template>
   <q-page class="bg-grey-10 flex justify-center">
     <q-card
-      class="q-pa-lg q-my-xl bg-grey-9 shadow-4"
+      class="q-pa-lg q-mt-lg q-mb-lg bg-grey-9 shadow-4"
       style="max-width:1024px"
     >
       <div class="text-h5 text-center q-mb-lg">Creator Hub</div>
-      <div v-if="!loggedIn" class="q-my-xl">
+      <div v-if="!loggedIn" class="q-mt-lg q-mb-lg">
         <q-btn color="primary" class="full-width q-mb-md" @click="loginNip07">Login with Browser Signer</q-btn>
         <q-input v-model="nsec" type="password" label="nsec" outlined dense class="q-mb-sm" />
         <div class="text-negative text-caption q-mb-sm">Keep your nsec secret – it never leaves your browser.</div>
