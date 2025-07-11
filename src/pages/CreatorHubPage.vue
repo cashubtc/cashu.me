@@ -26,24 +26,30 @@
         <q-select
           v-if="hasP2PK"
           v-model="profilePub"
-          :options="p2pkOptions"
-          emit-value
+          filled
+          dense
           map-options
+          emit-value
+          :options="p2pkOptions"
           use-input
           fill-input
           input-debounce="0"
           label="P2PK Public Key"
-          dense
-          outlined
         >
           <template #append>
             <q-btn flat dense icon="add" @click="generateP2PK" />
+          </template>
+          <template #after-options>
+            <q-item clickable @click="generateP2PK">
+              <q-item-section>Generate new key</q-item-section>
+            </q-item>
           </template>
         </q-select>
         <div v-else class="row items-center q-gutter-sm">
           <div class="text-caption">You don't have a P2PK Public key.</div>
           <q-btn flat dense color="primary" label="Generate" @click="generateP2PK" />
         </div>
+        <div v-if="profilePub" class="text-caption q-mt-xs">{{ selectedKeyShort }}</div>
       </div>
       <q-select
         v-model="profileMints"
@@ -135,28 +141,34 @@
         <q-input v-model="profile.picture" label="Profile Picture URL" dense outlined />
         <q-input v-model="profile.about" label="About" type="textarea" autogrow dense outlined />
         <div>
-          <q-select
-            v-if="hasP2PK"
-            v-model="profilePub"
-            :options="p2pkOptions"
-            emit-value
-            map-options
-            use-input
-            fill-input
-            input-debounce="0"
-            label="P2PK Public Key"
-            dense
-            outlined
-          >
-            <template #append>
-              <q-btn flat dense icon="add" @click="generateP2PK" />
-            </template>
-          </q-select>
-          <div v-else class="row items-center q-gutter-sm">
-            <div class="text-caption">You don't have a P2PK Public key.</div>
-            <q-btn flat dense color="primary" label="Generate" @click="generateP2PK" />
-          </div>
+        <q-select
+          v-if="hasP2PK"
+          v-model="profilePub"
+          filled
+          dense
+          map-options
+          emit-value
+          :options="p2pkOptions"
+          use-input
+          fill-input
+          input-debounce="0"
+          label="P2PK Public Key"
+        >
+          <template #append>
+            <q-btn flat dense icon="add" @click="generateP2PK" />
+          </template>
+          <template #after-options>
+            <q-item clickable @click="generateP2PK">
+              <q-item-section>Generate new key</q-item-section>
+            </q-item>
+          </template>
+        </q-select>
+        <div v-else class="row items-center q-gutter-sm">
+          <div class="text-caption">You don't have a P2PK Public key.</div>
+          <q-btn flat dense color="primary" label="Generate" @click="generateP2PK" />
         </div>
+        <div v-if="profilePub" class="text-caption q-mt-xs">{{ selectedKeyShort }}</div>
+      </div>
         <q-select
           v-model="profileMints"
           multiple
@@ -274,6 +286,9 @@ const p2pkOptions = computed(() =>
     label: shortenString(k.publicKey, 16, 6),
     value: k.publicKey,
   }))
+);
+const selectedKeyShort = computed(() =>
+  profilePub.value ? shortenString(profilePub.value, 16, 6) : ''
 );
 const tierList = computed<Tier[]>(() => store.getTierArray());
 const editedTiers = ref<Record<string, Tier>>({});
