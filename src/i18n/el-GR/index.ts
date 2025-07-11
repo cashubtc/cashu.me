@@ -1390,6 +1390,7 @@ export default {
     publish: "Publish Profile",
     saveDraft: "Save Draft",
     profileHeader: "Profile details",
+    endpointsHeader: "Endpoints",
   },
   swap: {
     in_progress_warning_text: "Η ανταλλαγή βρίσκεται σε εξέλιξη",
