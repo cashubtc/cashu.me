@@ -25,6 +25,7 @@ import { ref, computed, watch } from "vue";
 import { useProofsStore } from "./proofs";
 import { useI18n } from "vue-i18n";
 import { maybeRepublishNutzapProfile } from "./creatorHub";
+import { useCreatorProfileStore } from "./creatorProfile";
 import { i18n } from "src/boot/i18n";
 
 export type Mint = {
@@ -342,6 +343,10 @@ export const useMintsStore = defineStore("mints", {
         if (verbose) {
           await notifySuccess(this.t("wallet.mint.notifications.added"));
         }
+        const profileStore = useCreatorProfileStore();
+        if (!profileStore.mints.includes(url)) {
+          profileStore.mints.push(url);
+        }
         await maybeRepublishNutzapProfile();
         return mintToAdd;
       } catch (error) {
@@ -543,6 +548,8 @@ export const useMintsStore = defineStore("mints", {
       if (this.mints.length > 0) {
         await this.activateMint(this.mints[0], false);
       }
+      const profileStore = useCreatorProfileStore();
+      profileStore.mints = profileStore.mints.filter((m) => m !== url);
       notifySuccess(this.t("wallet.mint.notifications.removed"));
     },
     assertMintError: function (response: { error?: any }, verbose = true) {

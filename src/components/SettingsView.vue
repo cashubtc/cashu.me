@@ -1796,6 +1796,7 @@ import {
 } from "src/stores/nostr";
 import { useNPCStore } from "src/stores/npubcash";
 import { useP2PKStore } from "src/stores/p2pk";
+import { useCreatorProfileStore } from "src/stores/creatorProfile";
 import { useNWCStore } from "src/stores/nwc";
 import { useUiStore } from "../stores/ui";
 import { useWorkersStore } from "src/stores/workers";
@@ -2073,10 +2074,11 @@ export default defineComponent({
           this.notifyError("No P2PK key");
           return;
         }
+        const profileStore = useCreatorProfileStore();
         await publishNutzapProfileFn({
           p2pkPub: this.firstKey.publicKey,
-          mints: this.mints.map((m) => m.url),
-          relays: this.defaultNostrRelays,
+          mints: profileStore.mints,
+          relays: profileStore.relays,
         });
         this.notifySuccess("Profile published");
         let profile = null;
@@ -2141,12 +2143,18 @@ export default defineComponent({
           this.notifyWarning("Relay already added");
         } else {
           this.relays.push(this.newRelay);
+          const profileStore = useCreatorProfileStore();
+          if (!profileStore.relays.includes(this.newRelay)) {
+            profileStore.relays.push(this.newRelay);
+          }
           this.newRelay = "";
         }
       }
     },
     removeRelay: function (relay) {
       this.relays = this.relays.filter((r) => r !== relay);
+      const profileStore = useCreatorProfileStore();
+      profileStore.relays = profileStore.relays.filter((r) => r !== relay);
     },
     addNostrRelay: function () {
       if (this.newNostrRelay) {
@@ -2155,6 +2163,10 @@ export default defineComponent({
           this.notifyWarning("Relay already added");
         } else {
           this.defaultNostrRelays.push(this.newNostrRelay);
+          const profileStore = useCreatorProfileStore();
+          if (!profileStore.relays.includes(this.newNostrRelay)) {
+            profileStore.relays.push(this.newNostrRelay);
+          }
           this.newNostrRelay = "";
         }
       }
@@ -2163,9 +2175,14 @@ export default defineComponent({
       this.defaultNostrRelays = this.defaultNostrRelays.filter(
         (r) => r !== relay
       );
+      const profileStore = useCreatorProfileStore();
+      profileStore.relays = profileStore.relays.filter((r) => r !== relay);
     },
     updateNostrRelay: function (index: number, value: string) {
-      this.defaultNostrRelays.splice(index, 1, value.trim());
+      const val = value.trim();
+      this.defaultNostrRelays.splice(index, 1, val);
+      const profileStore = useCreatorProfileStore();
+      profileStore.relays.splice(index, 1, val);
     },
     changeLanguage(locale) {
       if (locale === "en") {
