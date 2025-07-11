@@ -401,6 +401,12 @@ export const useMessengerStore = defineStore("messenger", {
       }
     },
 
+    startChat(pubkey: string) {
+      this.createConversation(pubkey);
+      this.markRead(pubkey);
+      this.setCurrentConversation(pubkey);
+    },
+
     markRead(pubkey: string) {
       this.unreadCounts[pubkey] = 0;
     },

@@ -645,7 +645,13 @@
           const messageButton = document.createElement("button");
           messageButton.className = "action-button message-button";
           messageButton.textContent = "Message";
-          messageButton.onclick = (e) => { e.stopPropagation(); window.parent.location.href = `/nostr-messenger`; };
+          messageButton.onclick = (e) => {
+            e.stopPropagation();
+            window.parent.postMessage({
+              type: "startChat",
+              pubkey: profile.pubkey,
+            }, "*");
+          };
           const donateButton = document.createElement("button");
           donateButton.className = "action-button donate-button";
           donateButton.textContent = "Donate";

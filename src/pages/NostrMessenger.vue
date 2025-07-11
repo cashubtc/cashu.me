@@ -72,11 +72,12 @@
 
 <script lang="ts">
 import { defineComponent, computed, ref, onMounted, watch } from "vue";
-import { useRouter } from "vue-router";
+import { useRouter, useRoute } from "vue-router";
 import { useLocalStorage } from "@vueuse/core";
 import { useMessengerStore } from "src/stores/messenger";
 import { useNdk } from "src/composables/useNdk";
 import { useNostrStore } from "src/stores/nostr";
+import { nip19 } from "nostr-tools";
 
 import NostrIdentityManager from "components/NostrIdentityManager.vue";
 import RelayManager from "components/RelayManager.vue";
@@ -104,6 +105,15 @@ export default defineComponent({
     const messenger = useMessengerStore();
     const nostr = useNostrStore();
 
+    function bech32ToHex(pubkey: string): string {
+      try {
+        const decoded = nip19.decode(pubkey);
+        return typeof decoded.data === "string" ? decoded.data : pubkey;
+      } catch {
+        return pubkey;
+      }
+    }
+
     function timeout(ms: number) {
       return new Promise<void>((resolve) => setTimeout(resolve, ms));
     }
@@ -118,12 +128,19 @@ export default defineComponent({
         console.error(e);
       } finally {
         loading.value = false;
+        const qp = route.query.pubkey as string | undefined;
+        if (qp) {
+          const hex = bech32ToHex(qp);
+          messenger.startChat(hex);
+          selected.value = hex;
+        }
       }
     }
 
     onMounted(init);
 
     const router = useRouter();
+    const route = useRoute();
 
     const goBack = () => {
       if (window.history.length > 1) {
@@ -164,10 +181,8 @@ export default defineComponent({
     };
 
     const startChat = (pubkey: string) => {
-      messenger.createConversation(pubkey);
+      messenger.startChat(pubkey);
       selected.value = pubkey;
-      messenger.markRead(pubkey);
-      messenger.setCurrentConversation(pubkey);
     };
 
     const sendMessage = (text: string) => {
