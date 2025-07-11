@@ -1603,7 +1603,7 @@ export const messages = {
     profile: {
       back: "Back",
       tiers: "Donation Tiers",
-      support: "Support",
+      edit: "Edit",
     },
   },
   swap: {
