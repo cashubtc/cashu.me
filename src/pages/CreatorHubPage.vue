@@ -91,10 +91,6 @@
           </div>
         </template>
       </q-select>
-      <div class="text-center q-mt-sm">
-        <q-btn color="primary" class="q-mr-sm" :disable="!canPublish" @click="saveProfile">Save Changes</q-btn>
-        <q-btn color="primary" outline :disable="!canPublish" @click="publishFullProfile">Publish Profile</q-btn>
-      </div>
     </div>
   </template>
   <template #after>
@@ -217,10 +213,6 @@
             </div>
           </template>
         </q-select>
-        <div class="text-center q-mt-sm">
-          <q-btn color="primary" class="q-mr-sm" :disable="!canPublish" @click="saveProfile">Save Changes</q-btn>
-          <q-btn color="primary" outline :disable="!canPublish" @click="publishFullProfile">Publish Profile</q-btn>
-        </div>
       </div>
     </q-tab-panel>
     <q-tab-panel name="tiers">
@@ -277,6 +269,12 @@
   </q-card>
 </q-dialog>
 </q-card>
+    <q-footer v-if="loggedIn" class="bg-grey-9 q-pa-sm">
+      <div class="text-center">
+        <q-btn color="primary" class="q-mr-sm" :disable="!isDirty" @click="saveProfile">Save Changes</q-btn>
+        <q-btn color="primary" outline :disable="!isDirty" @click="publishFullProfile">Publish Profile</q-btn>
+      </div>
+    </q-footer>
   </q-page>
 </template>
 
@@ -327,9 +325,21 @@ const deleteDialog = ref(false);
 const deleteId = ref('');
 const npub = computed(() => (store.loggedInNpub ? nip19.npubEncode(store.loggedInNpub) : ''));
 
-const canPublish = computed(
-  () => profilePub.value.startsWith('02') && profileMints.value.length > 0 && profile.value.display_name,
-);
+const initialData = ref({
+  profile: {} as any,
+  profilePub: '',
+  profileMints: [] as string[],
+  profileRelays: [] as string[],
+});
+
+const isDirty = computed(() => {
+  return (
+    JSON.stringify(initialData.value.profile) !== JSON.stringify(profile.value) ||
+    initialData.value.profilePub !== profilePub.value ||
+    JSON.stringify(initialData.value.profileMints) !== JSON.stringify(profileMints.value) ||
+    JSON.stringify(initialData.value.profileRelays) !== JSON.stringify(profileRelays.value)
+  );
+});
 
 watch(
   () => store.tiers,
@@ -394,6 +404,12 @@ async function initPage() {
     if (mintsStore.mints.length > 0) profileMints.value = mintsStore.mints.map((m) => m.url);
   }
   await store.loadTiersFromNostr(store.loggedInNpub);
+  initialData.value = {
+    profile: JSON.parse(JSON.stringify(profile.value)),
+    profilePub: profilePub.value,
+    profileMints: [...profileMints.value],
+    profileRelays: [...profileRelays.value],
+  };
 }
 
 async function publishFullProfile() {
@@ -404,6 +420,13 @@ async function publishFullProfile() {
       mints: profileMints.value,
       relays: profileRelays.value,
     });
+    notifySuccess('Profile updated');
+    initialData.value = {
+      profile: JSON.parse(JSON.stringify(profile.value)),
+      profilePub: profilePub.value,
+      profileMints: [...profileMints.value],
+      profileRelays: [...profileRelays.value],
+    };
   } catch (e: any) {
     notifyError(e.message);
   }
