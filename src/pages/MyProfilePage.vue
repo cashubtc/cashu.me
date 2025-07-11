@@ -23,18 +23,7 @@
       icon="edit"
       :label="$t('CreatorHub.profile.edit')"
     >
-      <CreatorProfileForm
-        v-model:display_name="display_name"
-        v-model:picture="picture"
-        v-model:about="about"
-        v-model:profilePub="profilePub"
-        v-model:profileMints="profileMints"
-        v-model:profileRelays="profileRelays"
-        :hasP2PK="hasP2PK"
-        :p2pkOptions="p2pkOptions"
-        :selectedKeyShort="selectedKeyShort"
-        :generateP2PK="generateP2PK"
-      />
+      <CreatorProfileForm />
       <div class="text-center q-mt-md">
         <q-btn color="primary" :disable="!isDirty" @click="saveProfile"
           >Save Changes</q-btn
@@ -218,16 +207,6 @@ export default defineComponent({
       picture: picture.value,
       about: about.value,
     }));
-    const hasP2PK = computed(() => p2pkStore.p2pkKeys.length > 0);
-    const p2pkOptions = computed(() =>
-      p2pkStore.p2pkKeys.map((k) => ({
-        label: shortenString(k.publicKey, 16, 6),
-        value: k.publicKey,
-      }))
-    );
-    const selectedKeyShort = computed(() =>
-      profilePub.value ? shortenString(profilePub.value, 16, 6) : ""
-    );
     const walletBalance = computed(() => mints.activeBalance);
     const activeUnit = computed(() => mints.activeUnit);
     const bucketCount = computed(() => buckets.bucketList.length);
@@ -278,12 +257,6 @@ export default defineComponent({
       }
     }
 
-    function generateP2PK() {
-      p2pkStore.createAndSelectNewKey().then(() => {
-        if (!profilePub.value && p2pkStore.firstKey)
-          profilePub.value = p2pkStore.firstKey.publicKey;
-      });
-    }
 
     function openP2PKDialog() {
       if (!p2pkStore.p2pkKeys.length) {
@@ -310,9 +283,6 @@ export default defineComponent({
       profileMints,
       profileRelays,
       isDirty,
-      hasP2PK,
-      p2pkOptions,
-      selectedKeyShort,
       bitcoinPrice,
       walletBalance,
       activeUnit,
@@ -321,7 +291,6 @@ export default defineComponent({
       shortenString,
       renderMarkdown,
       formatFiat,
-      generateP2PK,
       openP2PKDialog,
       showP2PKKeyEntry,
       saveProfile,

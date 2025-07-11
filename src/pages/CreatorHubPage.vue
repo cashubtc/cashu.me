@@ -18,18 +18,7 @@
         </div>
 <q-splitter v-if="!isMobile" v-model="splitterModel">
   <template #before>
-    <CreatorProfileForm
-      v-model:display_name="display_name"
-      v-model:picture="picture"
-      v-model:about="about"
-      v-model:profilePub="profilePub"
-      v-model:profileMints="profileMints"
-      v-model:profileRelays="profileRelays"
-      :hasP2PK="hasP2PK"
-      :p2pkOptions="p2pkOptions"
-      :selectedKeyShort="selectedKeyShort"
-      :generateP2PK="generateP2PK"
-    />
+    <CreatorProfileForm />
   </template>
   <template #after>
     <div>
@@ -78,18 +67,7 @@
   </q-tabs>
   <q-tab-panels v-model="tab" animated>
     <q-tab-panel name="profile">
-      <CreatorProfileForm
-        v-model:display_name="display_name"
-        v-model:picture="picture"
-        v-model:about="about"
-        v-model:profilePub="profilePub"
-        v-model:profileMints="profileMints"
-        v-model:profileRelays="profileRelays"
-        :hasP2PK="hasP2PK"
-        :p2pkOptions="p2pkOptions"
-        :selectedKeyShort="selectedKeyShort"
-        :generateP2PK="generateP2PK"
-      />
+      <CreatorProfileForm />
     </q-tab-panel>
     <q-tab-panel name="tiers">
       <div>
@@ -180,7 +158,6 @@ import { storeToRefs } from 'pinia';
 import { v4 as uuidv4 } from 'uuid';
 import { nip19 } from 'nostr-tools';
 import { notifySuccess, notifyError } from 'src/js/notify';
-import { shortenString } from 'src/js/string-utils';
 import CreatorProfileForm from 'components/CreatorProfileForm.vue';
 
 const store = useCreatorHubStore();
@@ -210,16 +187,6 @@ const splitterModel = ref(50);
 const tab = ref<'profile' | 'tiers'>('profile');
 
 const loggedIn = computed(() => !!store.loggedInNpub);
-const hasP2PK = computed(() => p2pkStore.p2pkKeys.length > 0);
-const p2pkOptions = computed(() =>
-  p2pkStore.p2pkKeys.map((k) => ({
-    label: shortenString(k.publicKey, 16, 6),
-    value: k.publicKey,
-  }))
-);
-const selectedKeyShort = computed(() =>
-  profilePub.value ? shortenString(profilePub.value, 16, 6) : ''
-);
 const tierList = computed<Tier[]>(() => store.getTierArray());
 const editedTiers = ref<Record<string, Tier>>({});
 const saved = ref<Record<string, boolean>>({});
@@ -312,12 +279,6 @@ async function publishFullProfile() {
 
 async function saveProfile() {
   await publishFullProfile();
-}
-
-function generateP2PK() {
-  p2pkStore.createAndSelectNewKey().then(() => {
-    if (!profilePub.value && p2pkStore.firstKey) profilePub.value = p2pkStore.firstKey.publicKey;
-  });
 }
 
 function addTier() {
