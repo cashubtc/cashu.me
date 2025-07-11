@@ -146,8 +146,22 @@
 </q-dialog>
 </div>
   <div v-if="loggedIn" class="bg-grey-9 q-pa-sm text-center">
-    <q-btn color="primary" class="q-mr-sm" :disable="!isDirty" @click="saveProfile">Save Changes</q-btn>
-    <q-btn color="primary" outline :disable="!isDirty" @click="publishFullProfile">Publish Profile</q-btn>
+    <q-btn
+      color="primary"
+      class="q-mr-sm"
+      :disable="!isDirty"
+      @click="saveProfile()"
+    >
+      Save Changes
+    </q-btn>
+    <q-btn
+      color="primary"
+      outline
+      :disable="!isDirty"
+      @click="publishFullProfile()"
+    >
+      Publish Profile
+    </q-btn>
   </div>
 </q-card>
   </q-page>
@@ -325,7 +339,7 @@ async function saveTier(id: string) {
   if (data) {
     try {
       store.updateTier(id, data);
-      await store.publishTierDefinitions();
+      await store.saveTier(data);
       notifySuccess('Tier saved');
       saved.value[id] = true;
       setTimeout(() => {
