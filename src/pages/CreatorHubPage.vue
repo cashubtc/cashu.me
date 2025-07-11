@@ -45,8 +45,46 @@
           <q-btn flat dense color="primary" label="Generate" @click="generateP2PK" />
         </div>
       </div>
-      <q-input v-model="profileMints" label="Trusted Mints (comma separated)" dense outlined />
-      <q-input v-model="profileRelays" label="Relays (comma separated)" dense outlined />
+      <q-select
+        v-model="profileMints"
+        multiple
+        use-input
+        use-chips
+        hide-dropdown-icon
+        new-value-mode="add-unique"
+        :options="[]"
+        dense
+        outlined
+        persistent-hint
+        hint="Press Enter after typing each URL"
+      >
+        <template #label>
+          <div class="row items-center no-wrap">
+            <span>Trusted Mints</span>
+            <InfoTooltip class="q-ml-xs" text="Type a mint URL and press Enter" />
+          </div>
+        </template>
+      </q-select>
+      <q-select
+        v-model="profileRelays"
+        multiple
+        use-input
+        use-chips
+        hide-dropdown-icon
+        new-value-mode="add-unique"
+        :options="[]"
+        dense
+        outlined
+        persistent-hint
+        hint="Press Enter after typing each URL"
+      >
+        <template #label>
+          <div class="row items-center no-wrap">
+            <span>Relays</span>
+            <InfoTooltip class="q-ml-xs" text="Type a relay URL and press Enter" />
+          </div>
+        </template>
+      </q-select>
       <div class="text-center q-mt-sm">
         <q-btn color="primary" class="q-mr-sm" :disable="!canPublish" @click="saveProfile">Save Changes</q-btn>
         <q-btn color="primary" outline :disable="!canPublish" @click="publishFullProfile">Publish Profile</q-btn>
@@ -119,8 +157,46 @@
             <q-btn flat dense color="primary" label="Generate" @click="generateP2PK" />
           </div>
         </div>
-        <q-input v-model="profileMints" label="Trusted Mints (comma separated)" dense outlined />
-        <q-input v-model="profileRelays" label="Relays (comma separated)" dense outlined />
+        <q-select
+          v-model="profileMints"
+          multiple
+          use-input
+          use-chips
+          hide-dropdown-icon
+          new-value-mode="add-unique"
+          :options="[]"
+          dense
+          outlined
+          persistent-hint
+          hint="Press Enter after typing each URL"
+        >
+          <template #label>
+            <div class="row items-center no-wrap">
+              <span>Trusted Mints</span>
+              <InfoTooltip class="q-ml-xs" text="Type a mint URL and press Enter" />
+            </div>
+          </template>
+        </q-select>
+        <q-select
+          v-model="profileRelays"
+          multiple
+          use-input
+          use-chips
+          hide-dropdown-icon
+          new-value-mode="add-unique"
+          :options="[]"
+          dense
+          outlined
+          persistent-hint
+          hint="Press Enter after typing each URL"
+        >
+          <template #label>
+            <div class="row items-center no-wrap">
+              <span>Relays</span>
+              <InfoTooltip class="q-ml-xs" text="Type a relay URL and press Enter" />
+            </div>
+          </template>
+        </q-select>
         <div class="text-center q-mt-sm">
           <q-btn color="primary" class="q-mr-sm" :disable="!canPublish" @click="saveProfile">Save Changes</q-btn>
           <q-btn color="primary" outline :disable="!canPublish" @click="publishFullProfile">Publish Profile</q-btn>
@@ -184,8 +260,8 @@ const $q = useQuasar();
 
 const profile = ref({ display_name: '', picture: '', about: '' });
 const profilePub = ref('');
-const profileMints = ref('');
-const profileRelays = ref('');
+const profileMints = ref<string[]>([]);
+const profileRelays = ref<string[]>([]);
 const nsec = ref('');
 const isMobile = computed(() => $q.screen.lt.md);
 const splitterModel = ref(50);
@@ -255,12 +331,12 @@ async function initPage() {
   }
   if (existing) {
     profilePub.value = existing.p2pkPubkey;
-    profileMints.value = existing.trustedMints.join(',');
-    profileRelays.value = (existing.relays || nostr.relays).join(',');
+    profileMints.value = [...existing.trustedMints];
+    profileRelays.value = existing.relays ? [...existing.relays] : [...nostr.relays];
   } else {
-    profileRelays.value = nostr.relays.join(',');
+    profileRelays.value = [...nostr.relays];
     if (p2pkStore.firstKey) profilePub.value = p2pkStore.firstKey.publicKey;
-    if (mintsStore.mints.length > 0) profileMints.value = mintsStore.mints.map((m) => m.url).join(',');
+    if (mintsStore.mints.length > 0) profileMints.value = mintsStore.mints.map((m) => m.url);
   }
   await store.loadTiersFromNostr(store.loggedInNpub);
 }
@@ -270,8 +346,8 @@ async function publishFullProfile() {
     await publishDiscoveryProfile({
       profile: profile.value,
       p2pkPub: profilePub.value,
-      mints: profileMints.value.split(',').map((s) => s.trim()).filter(Boolean),
-      relays: profileRelays.value.split(',').map((s) => s.trim()).filter(Boolean),
+      mints: profileMints.value,
+      relays: profileRelays.value,
     });
   } catch (e: any) {
     notifyError(e.message);
