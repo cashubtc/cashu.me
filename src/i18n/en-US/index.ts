@@ -1602,7 +1602,7 @@ export const messages = {
     },
     profile: {
       back: "Back",
-      tiers: "Donation Tiers",
+      tiers: "Subscription Tiers",
       edit: "Edit",
     },
   },
