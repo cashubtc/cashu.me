@@ -640,7 +640,7 @@
           actionsContainer.className = "creator-actions";
           const viewButton = document.createElement("button");
           viewButton.className = "action-button view-button";
-          viewButton.textContent = "View";
+          viewButton.textContent = "View Subscription Tiers";
           viewButton.onclick = (e) => { e.stopPropagation(); window.parent.postMessage({ type: "viewProfile", pubkey: profile.pubkey }, "*"); };
           const messageButton = document.createElement("button");
           messageButton.className = "action-button message-button";
