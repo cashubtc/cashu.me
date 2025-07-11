@@ -6,7 +6,7 @@
     ]"
   >
     <div class="q-mb-md">
-      <q-btn flat color="primary" to="/creator/dashboard">
+      <q-btn flat color="primary" to="/creator-hub">
         {{ $t("CreatorHub.profile.back") }}
       </q-btn>
     </div>
