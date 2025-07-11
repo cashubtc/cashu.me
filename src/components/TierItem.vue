@@ -10,13 +10,13 @@
       />
     </transition>
     <q-card-section class="row items-center justify-between">
-      <div class="text-subtitle2">{{ tierData.name || 'Tier' }}</div>
+      <div class="text-subtitle2">{{ localTier.name || 'Tier' }}</div>
       <q-btn flat dense round icon="mdi-drag" class="drag-handle" />
     </q-card-section>
     <q-card-section>
-      <q-input v-model="tierData.name" label="Title" dense outlined class="q-mt-sm" />
+      <q-input v-model="localTier.name" label="Title" dense outlined class="q-mt-sm" />
       <q-input
-        v-model.number="tierData.price"
+        v-model.number="localTier.price"
         label="Price (sats/month)"
         type="number"
         dense
@@ -24,7 +24,7 @@
         class="q-mt-sm"
       />
       <q-input
-        v-model="tierData.description"
+        v-model="localTier.description"
         label="Description"
         type="textarea"
         autogrow
@@ -33,7 +33,7 @@
         class="q-mt-sm"
       />
       <q-input
-        v-model="tierData.welcomeMessage"
+        v-model="localTier.welcomeMessage"
         label="Welcome Message"
         type="textarea"
         autogrow
@@ -50,11 +50,29 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps, defineEmits } from 'vue';
+import { defineProps, defineEmits, reactive, watch } from 'vue';
 import type { Tier } from 'stores/creatorHub';
 
 const props = defineProps<{ tierData: Tier; saved: boolean }>();
-const emit = defineEmits(['save', 'delete']);
+const emit = defineEmits(['save', 'delete', 'update:tierData']);
+
+const localTier = reactive<Tier>({ ...props.tierData });
+
+watch(
+  () => props.tierData,
+  (val) => {
+    Object.assign(localTier, val);
+  },
+  { immediate: true, deep: true },
+);
+
+watch(
+  localTier,
+  () => {
+    emit('update:tierData', { ...localTier });
+  },
+  { deep: true },
+);
 </script>
 
 <style scoped>
