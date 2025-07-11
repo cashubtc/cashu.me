@@ -1,54 +1,41 @@
 <template>
   <q-card flat bordered class="relative-position">
-    <q-card-section class="row items-center justify-between">
-      <div class="row items-center">
-        <div class="text-subtitle2">{{ tierLocal.name || 'Tier' }}</div>
-        <div class="text-caption text-grey q-ml-sm">{{ tierLocal.price }} sats</div>
-      </div>
-      <q-btn flat dense round icon="mdi-drag" class="drag-handle" />
-    </q-card-section>
-    <q-card-section>
-      <q-input v-model="tierLocal.name" label="Title" dense outlined class="q-mt-sm" />
-      <q-input
-        v-model.number="tierLocal.price"
-        label="Price (sats/month)"
-        type="number"
-        dense
-        outlined
-        class="q-mt-sm"
-      />
-      <q-input
-        v-model="tierLocal.description"
-        label="Description"
-        type="textarea"
-        autogrow
-        dense
-        outlined
-        class="q-mt-sm"
-      />
-      <q-input
-        v-model="tierLocal.welcomeMessage"
-        label="Welcome Message"
-        type="textarea"
-        autogrow
-        dense
-        outlined
-        class="q-mt-sm"
-      />
-    </q-card-section>
-    <q-card-actions align="right">
-      <q-btn flat dense round icon="save" @click="emitEdit" />
-      <q-btn flat dense round icon="delete" color="negative" @click="emitDelete" />
-    </q-card-actions>
+    <q-expansion-item expand-separator dense>
+      <template #header>
+        <div class="row items-center justify-between full-width">
+          <div class="row items-center">
+            <q-icon name="mdi-drag" class="q-mr-sm drag-handle" />
+            <div class="text-subtitle2">{{ tierLocal.name || "Tier" }}</div>
+            <div class="text-caption text-grey q-ml-sm">
+              {{ tierLocal.price }} sats
+            </div>
+          </div>
+          <div class="row items-center">
+            <q-btn flat dense round icon="edit" @click.stop="emitEdit" />
+            <q-btn
+              flat
+              dense
+              round
+              icon="delete"
+              color="negative"
+              @click.stop="emitDelete"
+            />
+          </div>
+        </div>
+      </template>
+      <q-card-section>
+        {{ tierLocal.description }}
+      </q-card-section>
+    </q-expansion-item>
   </q-card>
 </template>
 
 <script setup lang="ts">
-import { reactive, watch, defineProps, defineEmits } from 'vue';
-import type { Tier } from 'stores/creatorHub';
+import { reactive, watch, defineProps, defineEmits } from "vue";
+import type { Tier } from "stores/creatorHub";
 
 const props = defineProps<{ tier: Tier }>();
-const emit = defineEmits(['edit', 'delete', 'update:tier']);
+const emit = defineEmits(["edit", "delete", "update:tier"]);
 
 const tierLocal = reactive<Tier>({ ...props.tier });
 
@@ -63,17 +50,17 @@ watch(
 watch(
   tierLocal,
   () => {
-    emit('update:tier', { ...tierLocal });
+    emit("update:tier", { ...tierLocal });
   },
   { deep: true },
 );
 
 function emitEdit() {
-  emit('edit');
+  emit("edit");
 }
 
 function emitDelete() {
-  emit('delete');
+  emit("delete");
 }
 </script>
 
