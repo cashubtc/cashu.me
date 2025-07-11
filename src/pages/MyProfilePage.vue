@@ -16,6 +16,24 @@
     </div>
     <div v-if="profile.about" class="q-mb-md">{{ profile.about }}</div>
 
+    <q-expansion-item class="q-mb-md" dense dense-toggle icon="edit" :label="$t('CreatorHub.profile.edit')">
+      <CreatorProfileForm
+        v-model:display_name="display_name"
+        v-model:picture="picture"
+        v-model:about="about"
+        v-model:profilePub="profilePub"
+        v-model:profileMints="profileMints"
+        v-model:profileRelays="profileRelays"
+        :hasP2PK="hasP2PK"
+        :p2pkOptions="p2pkOptions"
+        :selectedKeyShort="selectedKeyShort"
+        :generateP2PK="generateP2PK"
+      />
+      <div class="text-center q-mt-md">
+        <q-btn color="primary" :disable="!isDirty" @click="saveProfile">Save Changes</q-btn>
+      </div>
+    </q-expansion-item>
+
     <div class="q-mb-md text-caption">
       <div class="row items-center q-gutter-x-sm">
         <div><strong>npub:</strong> {{ npub }}</div>
@@ -91,16 +109,22 @@ import { useQuasar } from "quasar";
 import { useRouter } from "vue-router";
 import { useClipboard } from "src/composables/useClipboard";
 import { useI18n } from "vue-i18n";
-import { useNostrStore } from "stores/nostr";
+import { useNostrStore, publishDiscoveryProfile } from "stores/nostr";
 import { useCreatorHubStore } from "stores/creatorHub";
+import { useCreatorProfileStore } from "stores/creatorProfile";
+import { useP2PKStore } from "stores/p2pk";
 import { usePriceStore } from "stores/price";
 import { useUiStore } from "stores/ui";
 import { useMintsStore } from "stores/mints";
 import { useBucketsStore } from "stores/buckets";
 import { renderMarkdown as renderMarkdownFn } from "src/js/simple-markdown";
+import { notifySuccess, notifyError } from "src/js/notify";
+import { shortenString } from "src/js/string-utils";
+import CreatorProfileForm from "components/CreatorProfileForm.vue";
 
 export default defineComponent({
   name: "MyProfilePage",
+  components: { CreatorProfileForm },
   setup() {
     const $q = useQuasar();
     const { t } = useI18n();
@@ -114,13 +138,39 @@ export default defineComponent({
       privateKeySignerPrivateKey,
     } = storeToRefs(nostr);
     const hub = useCreatorHubStore();
+    const profileStore = useCreatorProfileStore();
+    const p2pkStore = useP2PKStore();
     const priceStore = usePriceStore();
     const uiStore = useUiStore();
     const mints = useMintsStore();
     const buckets = useBucketsStore();
+    const {
+      display_name,
+      picture,
+      about,
+      pubkey: profilePub,
+      mints: profileMints,
+      relays: profileRelays,
+      isDirty,
+    } = storeToRefs(profileStore);
     const bitcoinPrice = computed(() => priceStore.bitcoinPrice);
     const profile = ref<any>({});
     const tiers = ref(hub.getTierArray());
+    const profileData = computed(() => ({
+      display_name: display_name.value,
+      picture: picture.value,
+      about: about.value,
+    }));
+    const hasP2PK = computed(() => p2pkStore.p2pkKeys.length > 0);
+    const p2pkOptions = computed(() =>
+      p2pkStore.p2pkKeys.map((k) => ({
+        label: shortenString(k.publicKey, 16, 6),
+        value: k.publicKey,
+      }))
+    );
+    const selectedKeyShort = computed(() =>
+      profilePub.value ? shortenString(profilePub.value, 16, 6) : ""
+    );
     const walletBalance = computed(() => mints.activeBalance);
     const activeUnit = computed(() => mints.activeUnit);
     const bucketCount = computed(() => buckets.bucketList.length);
@@ -131,7 +181,11 @@ export default defineComponent({
     async function initProfile() {
       if (!npub.value) return;
       const p = await nostr.getProfile(npub.value);
-      if (p) profile.value = { ...p };
+      if (p) {
+        profile.value = { ...p };
+        profileStore.setProfile(p);
+        profileStore.markClean();
+      }
     }
 
     onMounted(() => {
@@ -152,6 +206,28 @@ export default defineComponent({
       router.push("/creator-hub");
     }
 
+    async function saveProfile() {
+      try {
+        await publishDiscoveryProfile({
+          profile: profileData.value,
+          p2pkPub: profilePub.value,
+          mints: profileMints.value,
+          relays: profileRelays.value,
+        });
+        notifySuccess('Profile updated');
+        profileStore.markClean();
+      } catch (e: any) {
+        notifyError(e?.message || 'Failed to publish profile');
+      }
+    }
+
+    function generateP2PK() {
+      p2pkStore.createAndSelectNewKey().then(() => {
+        if (!profilePub.value && p2pkStore.firstKey)
+          profilePub.value = p2pkStore.firstKey.publicKey;
+      });
+    }
+
 
     return {
       npub,
@@ -159,6 +235,16 @@ export default defineComponent({
       privateKeySignerPrivateKey,
       profile,
       tiers,
+      display_name,
+      picture,
+      about,
+      profilePub,
+      profileMints,
+      profileRelays,
+      isDirty,
+      hasP2PK,
+      p2pkOptions,
+      selectedKeyShort,
       bitcoinPrice,
       walletBalance,
       activeUnit,
@@ -166,6 +252,8 @@ export default defineComponent({
       walletBalanceFormatted,
       renderMarkdown,
       formatFiat,
+      generateP2PK,
+      saveProfile,
       copy,
       editProfile,
     };
