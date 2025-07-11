@@ -109,6 +109,8 @@ import { useDonationPresetsStore } from "stores/donationPresets";
 import { useCreatorsStore } from "stores/creators";
 import { useNostrStore, fetchNutzapProfile, RelayConnectionError } from "stores/nostr";
 import { notifyWarning } from "src/js/notify";
+import { useRouter } from "vue-router";
+import { useMessengerStore } from "stores/messenger";
 import { useI18n } from "vue-i18n";
 import {
   QDialog,
@@ -137,6 +139,8 @@ const sendTokensStore = useSendTokensStore();
 const donationStore = useDonationPresetsStore();
 const creators = useCreatorsStore();
 const nostr = useNostrStore();
+const messenger = useMessengerStore();
+const router = useRouter();
 const { t } = useI18n();
 const tiers = computed(() => creators.tiersMap[dialogPubkey.value] || []);
 const showSubscribeDialog = ref(false);
@@ -195,6 +199,18 @@ async function onMessage(ev: MessageEvent) {
     }
     await nextTick();
     showTierDialog.value = true;
+  } else if (ev.data && ev.data.type === "startChat" && ev.data.pubkey) {
+    const pubkey = ev.data.pubkey;
+    router.push({ path: "/nostr-messenger", query: { pubkey } });
+    const stop = watch(
+      () => messenger.started,
+      (started) => {
+        if (started) {
+          messenger.startChat(pubkey);
+          stop();
+        }
+      },
+    );
   }
 }
 
