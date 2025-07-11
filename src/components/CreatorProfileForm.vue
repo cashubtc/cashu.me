@@ -1,8 +1,33 @@
 <template>
-  <div class="q-gutter-md">
-    <q-input v-model="display_nameLocal" label="Display Name" dense outlined />
-    <q-input v-model="pictureLocal" label="Profile Picture URL" dense outlined />
-    <q-input v-model="aboutLocal" label="About" type="textarea" autogrow dense outlined />
+  <q-card-section class="q-gutter-md">
+    <div class="text-h6 q-mb-sm">Profile details</div>
+    <q-input
+      v-model="display_nameLocal"
+      label="Display Name"
+      dense
+      outlined
+      :rules="[(v) => !!v || 'Required']"
+    />
+    <q-input
+      v-model="pictureLocal"
+      label="Profile Picture URL"
+      dense
+      outlined
+    />
+    <q-img
+      :src="pictureLocal"
+      v-if="validUrl"
+      class="q-mt-sm rounded-borders"
+      ratio="1"
+    />
+    <q-input
+      v-model="aboutLocal"
+      label="About"
+      type="textarea"
+      autogrow
+      dense
+      outlined
+    />
     <div>
       <q-select
         v-if="hasP2PK"
@@ -28,9 +53,17 @@
       </q-select>
       <div v-else class="row items-center q-gutter-sm">
         <div class="text-caption">You don't have a P2PK Public key.</div>
-        <q-btn flat dense color="primary" label="Generate" @click="generateP2PK" />
+        <q-btn
+          flat
+          dense
+          color="primary"
+          label="Generate"
+          @click="generateP2PK"
+        />
       </div>
-      <div v-if="profilePubLocal" class="text-caption q-mt-xs">{{ selectedKeyShort }}</div>
+      <div v-if="profilePubLocal" class="text-caption q-mt-xs">
+        {{ selectedKeyShort }}
+      </div>
     </div>
     <q-select
       v-model="profileMintsLocal"
@@ -43,6 +76,7 @@
       dense
       outlined
       persistent-hint
+      :rules="[urlListRule]"
       hint="Press Enter after typing each URL"
     >
       <template #label>
@@ -63,25 +97,29 @@
       dense
       outlined
       persistent-hint
+      :rules="[urlListRule]"
       hint="Press Enter after typing each URL"
     >
       <template #label>
         <div class="row items-center no-wrap">
           <span>Relays</span>
-          <InfoTooltip class="q-ml-xs" text="Type a relay URL and press Enter" />
+          <InfoTooltip
+            class="q-ml-xs"
+            text="Type a relay URL and press Enter"
+          />
         </div>
       </template>
     </q-select>
-  </div>
+  </q-card-section>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
-import { storeToRefs } from 'pinia';
-import InfoTooltip from './InfoTooltip.vue';
-import { useCreatorProfileStore } from 'stores/creatorProfile';
-import { useP2PKStore } from 'stores/p2pk';
-import { shortenString } from 'src/js/string-utils';
+import { computed } from "vue";
+import { storeToRefs } from "pinia";
+import InfoTooltip from "./InfoTooltip.vue";
+import { useCreatorProfileStore } from "stores/creatorProfile";
+import { useP2PKStore } from "stores/p2pk";
+import { shortenString } from "src/js/string-utils";
 
 const profileStore = useCreatorProfileStore();
 const p2pkStore = useP2PKStore();
@@ -103,7 +141,7 @@ const p2pkOptions = computed(() =>
   }))
 );
 const selectedKeyShort = computed(() =>
-  profilePub.value ? shortenString(profilePub.value, 16, 6) : ''
+  profilePub.value ? shortenString(profilePub.value, 16, 6) : ""
 );
 
 async function generateP2PK() {
@@ -127,7 +165,7 @@ const aboutLocal = computed({
 });
 const profilePubLocal = computed({
   get: () => profilePub.value,
-  set: (val: string | null) => (profilePub.value = val || ''),
+  set: (val: string | null) => (profilePub.value = val || ""),
 });
 const profileMintsLocal = computed({
   get: () => profileMints.value,
@@ -137,5 +175,8 @@ const profileRelaysLocal = computed({
   get: () => profileRelays.value,
   set: (val: string[]) => (profileRelays.value = val),
 });
-</script>
 
+const validUrl = computed(() => /^https?:\/\/.+/.test(pictureLocal.value));
+const urlListRule = (val: string[]) =>
+  val.every((u) => /^wss?:\/\//.test(u)) || "Invalid URL";
+</script>
