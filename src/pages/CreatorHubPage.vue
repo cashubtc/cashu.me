@@ -100,17 +100,23 @@
   <template #after>
     <div>
       <div class="text-h6 q-mb-md">Subscription Tiers</div>
-      <div v-for="tier in tierList" :key="tier.id" class="q-mb-md">
-        <q-card flat bordered :class="{ 'saved-bg': saved[tier.id] }" class="relative-position">
-          <transition name="fade">
-            <q-icon
-              v-if="saved[tier.id]"
-              name="check_circle"
-              color="positive"
-              size="sm"
-              class="saved-check"
-            />
-          </transition>
+      <Draggable v-model="draggableTiers" item-key="id" handle=".drag-handle" @end="updateOrder">
+        <template #item="{ element: tier }">
+        <div class="q-mb-md">
+          <q-card flat bordered :class="{ 'saved-bg': saved[tier.id] }" class="relative-position">
+            <transition name="fade">
+              <q-icon
+                v-if="saved[tier.id]"
+                name="check_circle"
+                color="positive"
+                size="sm"
+                class="saved-check"
+              />
+            </transition>
+          <q-card-section class="row items-center justify-between">
+            <div class="text-subtitle2">{{ editedTiers[tier.id].name || 'Tier' }}</div>
+            <q-btn flat dense round icon="mdi-drag" class="drag-handle" />
+          </q-card-section>
           <q-card-section>
             <q-input v-model="editedTiers[tier.id].name" label="Title" dense outlined class="q-mt-sm" />
             <q-input v-model.number="editedTiers[tier.id].price" label="Price (sats/month)" type="number" dense outlined class="q-mt-sm" />
@@ -118,11 +124,13 @@
             <q-input v-model="editedTiers[tier.id].welcomeMessage" label="Welcome Message" type="textarea" autogrow dense outlined class="q-mt-sm" />
           </q-card-section>
           <q-card-actions align="right">
-            <q-btn flat color="primary" @click="saveTier(tier.id)">Save</q-btn>
-            <q-btn flat color="negative" @click="removeTier(tier.id)">Delete</q-btn>
+            <q-btn flat dense round icon="save" @click="saveTier(tier.id)" />
+            <q-btn flat dense round icon="delete" color="negative" @click="confirmDelete(tier.id)" />
           </q-card-actions>
         </q-card>
-      </div>
+        </div>
+        </template>
+      </Draggable>
       <div class="text-center q-mt-md">
         <q-btn color="primary" flat @click="addTier">Add Tier</q-btn>
       </div>
@@ -218,17 +226,23 @@
     <q-tab-panel name="tiers">
       <div>
         <div class="text-h6 q-mb-md">Subscription Tiers</div>
-        <div v-for="tier in tierList" :key="tier.id" class="q-mb-md">
-          <q-card flat bordered :class="{ 'saved-bg': saved[tier.id] }" class="relative-position">
-            <transition name="fade">
-              <q-icon
-                v-if="saved[tier.id]"
-                name="check_circle"
-                color="positive"
-                size="sm"
-                class="saved-check"
-              />
-            </transition>
+        <Draggable v-model="draggableTiers" item-key="id" handle=".drag-handle" @end="updateOrder">
+          <template #item="{ element: tier }">
+          <div class="q-mb-md">
+            <q-card flat bordered :class="{ 'saved-bg': saved[tier.id] }" class="relative-position">
+              <transition name="fade">
+                <q-icon
+                  v-if="saved[tier.id]"
+                  name="check_circle"
+                  color="positive"
+                  size="sm"
+                  class="saved-check"
+                />
+              </transition>
+            <q-card-section class="row items-center justify-between">
+              <div class="text-subtitle2">{{ editedTiers[tier.id].name || 'Tier' }}</div>
+              <q-btn flat dense round icon="mdi-drag" class="drag-handle" />
+            </q-card-section>
             <q-card-section>
               <q-input v-model="editedTiers[tier.id].name" label="Title" dense outlined class="q-mt-sm" />
               <q-input v-model.number="editedTiers[tier.id].price" label="Price (sats/month)" type="number" dense outlined class="q-mt-sm" />
@@ -236,11 +250,13 @@
               <q-input v-model="editedTiers[tier.id].welcomeMessage" label="Welcome Message" type="textarea" autogrow dense outlined class="q-mt-sm" />
             </q-card-section>
             <q-card-actions align="right">
-              <q-btn flat color="primary" @click="saveTier(tier.id)">Save</q-btn>
-              <q-btn flat color="negative" @click="removeTier(tier.id)">Delete</q-btn>
+              <q-btn flat dense round icon="save" @click="saveTier(tier.id)" />
+              <q-btn flat dense round icon="delete" color="negative" @click="confirmDelete(tier.id)" />
             </q-card-actions>
           </q-card>
-        </div>
+          </div>
+          </template>
+        </Draggable>
         <div class="text-center q-mt-md">
           <q-btn color="primary" flat @click="addTier">Add Tier</q-btn>
         </div>
@@ -248,6 +264,18 @@
     </q-tab-panel>
   </q-tab-panels>
 </div>
+<q-dialog v-model="deleteDialog">
+  <q-card class="q-pa-md" style="max-width: 400px">
+    <q-card-section class="row items-center">
+      <q-icon name="warning" color="red" size="2rem" />
+      <span class="q-ml-sm">Are you sure you want to delete this tier?</span>
+    </q-card-section>
+    <q-card-actions align="right">
+      <q-btn flat color="grey" v-close-popup>Cancel</q-btn>
+      <q-btn color="negative" @click="performDelete">Delete</q-btn>
+    </q-card-actions>
+  </q-card>
+</q-dialog>
 </q-card>
   </q-page>
 </template>
@@ -255,6 +283,7 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from 'vue';
 import { useQuasar } from 'quasar';
+import Draggable from 'vuedraggable';
 import { useCreatorHubStore, type Tier } from 'stores/creatorHub';
 import { useNostrStore, fetchNutzapProfile, publishDiscoveryProfile, RelayConnectionError } from 'stores/nostr';
 import { useP2PKStore } from 'stores/p2pk';
@@ -293,6 +322,9 @@ const selectedKeyShort = computed(() =>
 const tierList = computed<Tier[]>(() => store.getTierArray());
 const editedTiers = ref<Record<string, Tier>>({});
 const saved = ref<Record<string, boolean>>({});
+const draggableTiers = ref<Tier[]>([]);
+const deleteDialog = ref(false);
+const deleteId = ref('');
 const npub = computed(() => (store.loggedInNpub ? nip19.npubEncode(store.loggedInNpub) : ''));
 
 const canPublish = computed(
@@ -312,6 +344,14 @@ watch(
     saved.value = savedObj;
   },
   { immediate: true, deep: true },
+);
+
+watch(
+  tierList,
+  (val) => {
+    draggableTiers.value = [...val];
+  },
+  { immediate: true },
 );
 
 async function loginNip07() {
@@ -384,6 +424,15 @@ function addTier() {
   store.addTier({ id, name: '', price: 0, description: '', welcomeMessage: '' });
 }
 
+function confirmDelete(id: string) {
+  deleteId.value = id;
+  deleteDialog.value = true;
+}
+
+function updateOrder() {
+  store.setTierOrder(draggableTiers.value.map((t) => t.id));
+}
+
 async function saveTier(id: string) {
   const data = editedTiers.value[id];
   if (data) {
@@ -408,6 +457,12 @@ async function removeTier(id: string) {
   } catch (e: any) {
     notifyError(e?.message || 'Failed to delete tier');
   }
+}
+
+async function performDelete() {
+  if (!deleteId.value) return;
+  await removeTier(deleteId.value);
+  deleteDialog.value = false;
 }
 
 onMounted(async () => {

@@ -76,6 +76,7 @@ export const useCreatorHubStore = defineStore("creatorHub", {
   state: () => ({
     loggedInNpub: useLocalStorage<string>("creatorHub.loggedInNpub", ""),
     tiers: useLocalStorage<Record<string, Tier>>("creatorHub.tiers", {}),
+    tierOrder: useLocalStorage<string[]>("creatorHub.tierOrder", []),
   }),
   actions: {
     async loginWithNip07() {
@@ -120,6 +121,9 @@ export const useCreatorHubStore = defineStore("creatorHub", {
         welcomeMessage: tier.welcomeMessage || "",
       };
       this.tiers[id] = newTier;
+      if (!this.tierOrder.includes(id)) {
+        this.tierOrder.push(id);
+      }
       maybeRepublishNutzapProfile();
     },
     updateTier(id: string, updates: Partial<Tier>) {
@@ -159,6 +163,7 @@ export const useCreatorHubStore = defineStore("creatorHub", {
             obj[t.id] = t;
           });
           this.tiers = obj as any;
+          this.tierOrder = data.map((t) => t.id);
         } catch (e) {
           console.error(e);
         }
@@ -166,6 +171,7 @@ export const useCreatorHubStore = defineStore("creatorHub", {
     },
     async removeTier(id: string) {
       delete this.tiers[id];
+      this.tierOrder = this.tierOrder.filter((t) => t !== id);
       await maybeRepublishNutzapProfile();
     },
 
@@ -206,8 +212,16 @@ export const useCreatorHubStore = defineStore("creatorHub", {
 
       notifySuccess("Tiers published");
     },
+    setTierOrder(order: string[]) {
+      this.tierOrder = [...order];
+    },
     getTierArray(): Tier[] {
-      return Object.values(this.tiers);
+      if (!this.tierOrder.length) {
+        return Object.values(this.tiers);
+      }
+      return this.tierOrder
+        .map((id) => this.tiers[id])
+        .filter((t): t is Tier => !!t);
     },
   },
 });
