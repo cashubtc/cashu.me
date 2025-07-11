@@ -1,6 +1,10 @@
 <template>
-  <q-page class="q-pa-md" :class="$q.dark.isActive ? 'bg-dark text-white' : 'bg-white text-dark'">
-    <div style="max-width:1200px;margin:0 auto;width:100%">
+  <q-page class="flex justify-center">
+    <q-card
+      class="q-pa-lg q-my-xl"
+      style="max-width:1024px"
+      :class="$q.dark.isActive ? 'bg-dark text-white' : 'bg-white text-dark'"
+    >
       <div class="text-h5 text-center q-mb-lg">Creator Hub</div>
       <div v-if="!loggedIn" class="q-my-xl">
         <q-btn color="primary" class="full-width q-mb-md" @click="loginNip07">Login with Browser Signer</q-btn>
@@ -13,51 +17,126 @@
           Logged in as <span class="text-primary">{{ npub }}</span>
           <q-btn flat dense color="primary" class="q-ml-sm" @click="logout">Logout</q-btn>
         </div>
-        <div class="row q-col-gutter-lg">
-          <div class="col-12 col-md-6">
-            <div class="q-gutter-y-sm">
-              <q-input v-model="profile.display_name" label="Display Name" dense outlined />
-              <q-input v-model="profile.picture" label="Profile Picture URL" dense outlined />
-              <q-input v-model="profile.about" label="About" type="textarea" autogrow dense outlined />
-              <div>
-                <q-select
-                  v-if="hasP2PK"
-                  v-model="profilePub"
-                  :options="p2pkOptions"
-                  emit-value
-                  map-options
-                  use-input
-                  fill-input
-                  input-debounce="0"
-                  label="P2PK Public Key"
-                  dense
-                  outlined
-                >
-                  <template #append>
-                    <q-btn flat dense icon="add" @click="generateP2PK" />
-                  </template>
-                </q-select>
-                <div v-else class="row items-center q-gutter-sm">
-                  <div class="text-caption">You don't have a P2PK Public key.</div>
-                  <q-btn flat dense color="primary" label="Generate" @click="generateP2PK" />
-                </div>
-              </div>
-              <q-input v-model="profileMints" label="Trusted Mints (comma separated)" dense outlined />
-              <q-input v-model="profileRelays" label="Relays (comma separated)" dense outlined />
-              <div class="text-center q-mt-sm">
-                <q-btn color="primary" class="q-mr-sm" :disable="!canPublish" @click="saveProfile">Save Changes</q-btn>
-                <q-btn color="primary" outline :disable="!canPublish" @click="publishFullProfile">Publish Profile</q-btn>
-              </div>
-            </div>
+<q-splitter v-if="!isMobile" v-model="splitterModel">
+  <template #before>
+    <div class="q-gutter-md">
+      <q-input v-model="profile.display_name" label="Display Name" dense outlined />
+      <q-input v-model="profile.picture" label="Profile Picture URL" dense outlined />
+      <q-input v-model="profile.about" label="About" type="textarea" autogrow dense outlined />
+      <div>
+        <q-select
+          v-if="hasP2PK"
+          v-model="profilePub"
+          :options="p2pkOptions"
+          emit-value
+          map-options
+          use-input
+          fill-input
+          input-debounce="0"
+          label="P2PK Public Key"
+          dense
+          outlined
+        >
+          <template #append>
+            <q-btn flat dense icon="add" @click="generateP2PK" />
+          </template>
+        </q-select>
+        <div v-else class="row items-center q-gutter-sm">
+          <div class="text-caption">You don't have a P2PK Public key.</div>
+          <q-btn flat dense color="primary" label="Generate" @click="generateP2PK" />
+        </div>
+      </div>
+      <q-input v-model="profileMints" label="Trusted Mints (comma separated)" dense outlined />
+      <q-input v-model="profileRelays" label="Relays (comma separated)" dense outlined />
+      <div class="text-center q-mt-sm">
+        <q-btn color="primary" class="q-mr-sm" :disable="!canPublish" @click="saveProfile">Save Changes</q-btn>
+        <q-btn color="primary" outline :disable="!canPublish" @click="publishFullProfile">Publish Profile</q-btn>
+      </div>
+    </div>
+  </template>
+  <template #after>
+    <div>
+      <div class="text-h6 q-mb-md">Subscription Tiers</div>
+      <div v-for="tier in tierList" :key="tier.id" class="q-mb-md">
+        <q-card flat bordered :class="{ 'saved-bg': saved[tier.id] }" class="relative-position">
+          <transition name="fade">
+            <q-icon
+              v-if="saved[tier.id]"
+              name="check_circle"
+              color="positive"
+              size="sm"
+              class="saved-check"
+            />
+          </transition>
+          <q-card-section>
+            <q-input v-model="editedTiers[tier.id].name" label="Title" dense outlined class="q-mt-sm" />
+            <q-input v-model.number="editedTiers[tier.id].price" label="Price (sats/month)" type="number" dense outlined class="q-mt-sm" />
+            <q-input v-model="editedTiers[tier.id].description" label="Description" type="textarea" autogrow dense outlined class="q-mt-sm" />
+            <q-input v-model="editedTiers[tier.id].welcomeMessage" label="Welcome Message" type="textarea" autogrow dense outlined class="q-mt-sm" />
+          </q-card-section>
+          <q-card-actions align="right">
+            <q-btn flat color="primary" @click="saveTier(tier.id)">Save</q-btn>
+            <q-btn flat color="negative" @click="removeTier(tier.id)">Delete</q-btn>
+          </q-card-actions>
+        </q-card>
+      </div>
+      <div class="text-center q-mt-md">
+        <q-btn color="primary" flat @click="addTier">Add Tier</q-btn>
+      </div>
+    </div>
+  </template>
+</q-splitter>
+<div v-else>
+  <q-tabs v-model="tab" no-caps align="justify" class="q-mb-md">
+    <q-tab name="profile" label="Profile" />
+    <q-tab name="tiers" label="Subscription Tiers" />
+  </q-tabs>
+  <q-tab-panels v-model="tab" animated>
+    <q-tab-panel name="profile">
+      <div class="q-gutter-md">
+        <q-input v-model="profile.display_name" label="Display Name" dense outlined />
+        <q-input v-model="profile.picture" label="Profile Picture URL" dense outlined />
+        <q-input v-model="profile.about" label="About" type="textarea" autogrow dense outlined />
+        <div>
+          <q-select
+            v-if="hasP2PK"
+            v-model="profilePub"
+            :options="p2pkOptions"
+            emit-value
+            map-options
+            use-input
+            fill-input
+            input-debounce="0"
+            label="P2PK Public Key"
+            dense
+            outlined
+          >
+            <template #append>
+              <q-btn flat dense icon="add" @click="generateP2PK" />
+            </template>
+          </q-select>
+          <div v-else class="row items-center q-gutter-sm">
+            <div class="text-caption">You don't have a P2PK Public key.</div>
+            <q-btn flat dense color="primary" label="Generate" @click="generateP2PK" />
           </div>
-          <div class="col-12 col-md-6">
-            <div class="text-h6 q-mb-md">Subscription Tiers</div>
-            <div v-for="tier in tierList" :key="tier.id" class="q-mb-md">
-              <q-card flat bordered :class="{ 'saved-bg': saved[tier.id] }" class="relative-position">
-                <transition name="fade">
-                  <q-icon
-                    v-if="saved[tier.id]"
-                    name="check_circle"
+        </div>
+        <q-input v-model="profileMints" label="Trusted Mints (comma separated)" dense outlined />
+        <q-input v-model="profileRelays" label="Relays (comma separated)" dense outlined />
+        <div class="text-center q-mt-sm">
+          <q-btn color="primary" class="q-mr-sm" :disable="!canPublish" @click="saveProfile">Save Changes</q-btn>
+          <q-btn color="primary" outline :disable="!canPublish" @click="publishFullProfile">Publish Profile</q-btn>
+        </div>
+      </div>
+    </q-tab-panel>
+    <q-tab-panel name="tiers">
+      <div>
+        <div class="text-h6 q-mb-md">Subscription Tiers</div>
+        <div v-for="tier in tierList" :key="tier.id" class="q-mb-md">
+          <q-card flat bordered :class="{ 'saved-bg': saved[tier.id] }" class="relative-position">
+            <transition name="fade">
+              <q-icon
+                v-if="saved[tier.id]"
+                name="check_circle"
                 color="positive"
                 size="sm"
                 class="saved-check"
@@ -73,20 +152,22 @@
               <q-btn flat color="primary" @click="saveTier(tier.id)">Save</q-btn>
               <q-btn flat color="negative" @click="removeTier(tier.id)">Delete</q-btn>
             </q-card-actions>
-            </q-card>
-          </div>
-          <div class="text-center q-mt-md">
-            <q-btn color="primary" flat @click="addTier">Add Tier</q-btn>
-          </div>
-          </div>
+          </q-card>
+        </div>
+        <div class="text-center q-mt-md">
+          <q-btn color="primary" flat @click="addTier">Add Tier</q-btn>
         </div>
       </div>
-    </div>
+    </q-tab-panel>
+  </q-tab-panels>
+</div>
+</q-card>
   </q-page>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from 'vue';
+import { useQuasar } from 'quasar';
 import { useCreatorHubStore, type Tier } from 'stores/creatorHub';
 import { useNostrStore, fetchNutzapProfile, publishDiscoveryProfile, RelayConnectionError } from 'stores/nostr';
 import { useP2PKStore } from 'stores/p2pk';
@@ -100,12 +181,16 @@ const store = useCreatorHubStore();
 const nostr = useNostrStore();
 const p2pkStore = useP2PKStore();
 const mintsStore = useMintsStore();
+const $q = useQuasar();
 
 const profile = ref({ display_name: '', picture: '', about: '' });
 const profilePub = ref('');
 const profileMints = ref('');
 const profileRelays = ref('');
 const nsec = ref('');
+const isMobile = computed(() => $q.screen.lt.md);
+const splitterModel = ref(50);
+const tab = ref<'profile' | 'tiers'>('profile');
 
 const loggedIn = computed(() => !!store.loggedInNpub);
 const hasP2PK = computed(() => p2pkStore.p2pkKeys.length > 0);
