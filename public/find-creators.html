@@ -154,6 +154,19 @@
         padding: 1.5rem;
         font-style: italic;
       }
+      .retry-button {
+        margin: 0 auto;
+        margin-top: -1rem;
+        padding: 0.5rem 1rem;
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: white;
+        background-color: #4299e1;
+        border-radius: 0.375rem;
+        transition: background-color 0.2s;
+        display: block;
+      }
+      .retry-button:hover { background-color: #3182ce; }
       .loader {
         display: none;
         margin: 1.5rem auto;
@@ -216,6 +229,13 @@
         <div id="loader" class="loader"></div>
         <ul id="resultsList" class="results-list"></ul>
         <p id="statusMessage" class="status-message hidden"></p>
+        <button
+          id="retryButton"
+          class="retry-button hidden"
+          type="button"
+        >
+          Retry
+        </button>
       </div>
 
       <div class="featured-creators-container">
@@ -260,6 +280,7 @@
 
       const pool = new SimplePool({ eoseSubTimeout: 8000 });
       let currentSearchAbortController = null;
+      let lastSearchQuery = "";
 
       const FEATURED_NPUBS = [
         "npub1aljmhjp5tqrw3m60ra7t3u8uqq223d6rdg9q0h76a8djd9m4hmvsmlj82m", "npub1sg6plzptd64u62a878hep2kev88swjh3tw00gjsfl8f237lmu63q0uf63m",
@@ -272,6 +293,7 @@
       const searchInputElement = document.getElementById("searchInput");
       const resultsListElement = document.getElementById("resultsList");
       const statusMessageElement = document.getElementById("statusMessage");
+      const retryButtonElement = document.getElementById("retryButton");
       const loaderElement = document.getElementById("loader");
       const featuredCreatorsGridElement = document.getElementById("featuredCreatorsGrid");
       const featuredCreatorsLoaderElement = document.getElementById("featuredCreatorsLoader");
@@ -298,6 +320,7 @@
 
       async function handleSearch(query) {
         const cleanQuery = query.trim();
+        lastSearchQuery = cleanQuery;
 
         if (currentSearchAbortController) {
           currentSearchAbortController.abort();
@@ -307,6 +330,7 @@
 
         resultsListElement.innerHTML = "";
         statusMessageElement.classList.add("hidden");
+        retryButtonElement.classList.add("hidden");
         loaderElement.style.display = "block";
 
         if (!cleanQuery) {
@@ -346,7 +370,13 @@
         } catch (error) {
           if (error.name !== 'AbortError') {
             console.error("Search failed:", error);
-            updateStatus(`Search failed: ${error.message}`);
+            const msg =
+              error.message && error.message.includes('Failed to fetch')
+                ? 'Network error: could not reach relays.'
+                : error.name === 'AbortError'
+                ? 'Search timed out.'
+                : `Search failed: ${error.message}`;
+            updateStatus(msg, false, true);
           }
         } finally {
           if (!signal.aborted) {
@@ -574,12 +604,17 @@
         return null;
       }
       
-      function updateStatus(message, hide = false) {
+      function updateStatus(message, hide = false, showRetry = false) {
         if (hide) {
           statusMessageElement.classList.add("hidden");
         } else {
           statusMessageElement.textContent = message;
           statusMessageElement.classList.remove("hidden");
+        }
+        if (showRetry) {
+          retryButtonElement.classList.remove("hidden");
+        } else {
+          retryButtonElement.classList.add("hidden");
         }
       }
 
@@ -708,6 +743,12 @@ actionsContainer.appendChild(messageButton);
       const debouncedSearchHandler = debounce(handleSearch, 500);
       searchInputElement.addEventListener("input", (event) => {
         debouncedSearchHandler(event.target.value);
+      });
+
+      retryButtonElement.addEventListener("click", () => {
+        if (lastSearchQuery) {
+          handleSearch(lastSearchQuery);
+        }
       });
 
       window.addEventListener("beforeunload", () => {
