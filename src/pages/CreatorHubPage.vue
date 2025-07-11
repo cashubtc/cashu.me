@@ -18,80 +18,18 @@
         </div>
 <q-splitter v-if="!isMobile" v-model="splitterModel">
   <template #before>
-    <div class="q-gutter-md">
-      <q-input v-model="display_name" label="Display Name" dense outlined />
-      <q-input v-model="picture" label="Profile Picture URL" dense outlined />
-      <q-input v-model="about" label="About" type="textarea" autogrow dense outlined />
-      <div>
-        <q-select
-          v-if="hasP2PK"
-          v-model="profilePub"
-          filled
-          dense
-          map-options
-          emit-value
-          :options="p2pkOptions"
-          use-input
-          fill-input
-          input-debounce="0"
-          label="P2PK Public Key"
-        >
-          <template #append>
-            <q-btn flat dense icon="add" @click="generateP2PK" />
-          </template>
-          <template #after-options>
-            <q-item clickable @click="generateP2PK">
-              <q-item-section>Generate new key</q-item-section>
-            </q-item>
-          </template>
-        </q-select>
-        <div v-else class="row items-center q-gutter-sm">
-          <div class="text-caption">You don't have a P2PK Public key.</div>
-          <q-btn flat dense color="primary" label="Generate" @click="generateP2PK" />
-        </div>
-        <div v-if="profilePub" class="text-caption q-mt-xs">{{ selectedKeyShort }}</div>
-      </div>
-      <q-select
-        v-model="profileMints"
-        multiple
-        use-input
-        use-chips
-        hide-dropdown-icon
-        new-value-mode="add-unique"
-        :options="[]"
-        dense
-        outlined
-        persistent-hint
-        hint="Press Enter after typing each URL"
-      >
-        <template #label>
-          <div class="row items-center no-wrap">
-            <span>Trusted Mints</span>
-            <InfoTooltip class="q-ml-xs" text="Type a mint URL and press Enter" />
-          </div>
-        </template>
-      </q-select>
-      <q-select
-        v-model="profileRelays"
-        multiple
-        use-input
-        use-chips
-        hide-dropdown-icon
-        new-value-mode="add-unique"
-        :options="[]"
-        dense
-        outlined
-        persistent-hint
-        hint="Press Enter after typing each URL"
-      >
-        <template #label>
-          <div class="row items-center no-wrap">
-            <span>Relays</span>
-            <InfoTooltip class="q-ml-xs" text="Type a relay URL and press Enter" />
-          </div>
-        </template>
-      </q-select>
-    </div>
+    <CreatorProfileForm
+      v-model:display_name="display_name"
+      v-model:picture="picture"
+      v-model:about="about"
+      v-model:profilePub="profilePub"
+      v-model:profileMints="profileMints"
+      v-model:profileRelays="profileRelays"
+      :hasP2PK="hasP2PK"
+      :p2pkOptions="p2pkOptions"
+      :selectedKeyShort="selectedKeyShort"
+      :generateP2PK="generateP2PK"
+    />
   </template>
   <template #after>
     <div>
@@ -140,80 +78,18 @@
   </q-tabs>
   <q-tab-panels v-model="tab" animated>
     <q-tab-panel name="profile">
-      <div class="q-gutter-md">
-        <q-input v-model="display_name" label="Display Name" dense outlined />
-        <q-input v-model="picture" label="Profile Picture URL" dense outlined />
-        <q-input v-model="about" label="About" type="textarea" autogrow dense outlined />
-        <div>
-        <q-select
-          v-if="hasP2PK"
-          v-model="profilePub"
-          filled
-          dense
-          map-options
-          emit-value
-          :options="p2pkOptions"
-          use-input
-          fill-input
-          input-debounce="0"
-          label="P2PK Public Key"
-        >
-          <template #append>
-            <q-btn flat dense icon="add" @click="generateP2PK" />
-          </template>
-          <template #after-options>
-            <q-item clickable @click="generateP2PK">
-              <q-item-section>Generate new key</q-item-section>
-            </q-item>
-          </template>
-        </q-select>
-        <div v-else class="row items-center q-gutter-sm">
-          <div class="text-caption">You don't have a P2PK Public key.</div>
-          <q-btn flat dense color="primary" label="Generate" @click="generateP2PK" />
-        </div>
-        <div v-if="profilePub" class="text-caption q-mt-xs">{{ selectedKeyShort }}</div>
-      </div>
-        <q-select
-          v-model="profileMints"
-          multiple
-          use-input
-          use-chips
-          hide-dropdown-icon
-          new-value-mode="add-unique"
-          :options="[]"
-          dense
-          outlined
-          persistent-hint
-          hint="Press Enter after typing each URL"
-        >
-          <template #label>
-            <div class="row items-center no-wrap">
-              <span>Trusted Mints</span>
-              <InfoTooltip class="q-ml-xs" text="Type a mint URL and press Enter" />
-            </div>
-          </template>
-        </q-select>
-        <q-select
-          v-model="profileRelays"
-          multiple
-          use-input
-          use-chips
-          hide-dropdown-icon
-          new-value-mode="add-unique"
-          :options="[]"
-          dense
-          outlined
-          persistent-hint
-          hint="Press Enter after typing each URL"
-        >
-          <template #label>
-            <div class="row items-center no-wrap">
-              <span>Relays</span>
-              <InfoTooltip class="q-ml-xs" text="Type a relay URL and press Enter" />
-            </div>
-          </template>
-        </q-select>
-      </div>
+      <CreatorProfileForm
+        v-model:display_name="display_name"
+        v-model:picture="picture"
+        v-model:about="about"
+        v-model:profilePub="profilePub"
+        v-model:profileMints="profileMints"
+        v-model:profileRelays="profileRelays"
+        :hasP2PK="hasP2PK"
+        :p2pkOptions="p2pkOptions"
+        :selectedKeyShort="selectedKeyShort"
+        :generateP2PK="generateP2PK"
+      />
     </q-tab-panel>
     <q-tab-panel name="tiers">
       <div>
@@ -291,6 +167,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { nip19 } from 'nostr-tools';
 import { notifySuccess, notifyError } from 'src/js/notify';
 import { shortenString } from 'src/js/string-utils';
+import CreatorProfileForm from 'components/CreatorProfileForm.vue';
 
 const store = useCreatorHubStore();
 const nostr = useNostrStore();
