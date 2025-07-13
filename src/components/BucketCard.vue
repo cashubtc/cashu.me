@@ -1,8 +1,5 @@
 <template>
-  <q-card
-    class="shadow-2 rounded-borders text-white"
-    :style="{ backgroundColor: bucket.color || DEFAULT_COLOR }"
-  >
+  <q-card class="shadow-2 rounded-borders bg-grey-9 text-white">
     <router-link
       :to="`/buckets/${bucket.id}`"
       style="text-decoration: none; display: block"
@@ -21,18 +18,17 @@
           </q-item-label>
           <q-item-label caption v-if="bucket.description">{{ bucket.description }}</q-item-label>
           <q-item-label caption class="row items-center no-wrap">
-            <span class="q-mr-xs">
+            <span>
               {{ formatCurrency(balance || 0, activeUnit) }}
               <span v-if="bucket.goal">
                 / {{ formatCurrency(bucket.goal, activeUnit) }}
               </span>
             </span>
-            <q-circular-progress
+            <q-linear-progress
               v-if="bucket.goal"
-              :value="Math.min(((balance || 0) / bucket.goal) * 100, 100)"
-              size="30px"
-              :color="bucket.color || 'primary'"
-              track-color="grey-8"
+              color="primary"
+              :value="Math.min((balance || 0) / bucket.goal, 1)"
+              style="width: 50px; height: 4px"
               class="q-ml-sm"
             />
           </q-item-label>
@@ -76,7 +72,6 @@ import { useI18n } from 'vue-i18n';
 import InfoTooltip from './InfoTooltip.vue';
 import { DEFAULT_BUCKET_ID } from 'stores/buckets';
 import { useUiStore } from 'stores/ui';
-import { DEFAULT_COLOR } from 'src/js/constants';
 
 export default defineComponent({
   name: 'BucketCard',
@@ -104,12 +99,8 @@ export default defineComponent({
       emitDelete,
       DEFAULT_BUCKET_ID,
       t,
-      DEFAULT_COLOR,
     };
   }
 });
 </script>
-
-<style scoped>
-</style>
 
