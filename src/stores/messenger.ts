@@ -504,6 +504,10 @@ export const useMessengerStore = defineStore("messenger", {
     },
 
     setCurrentConversation(pubkey: string) {
+      if (!pubkey) {
+        this.currentConversation = "";
+        return;
+      }
       this.currentConversation = this.normalizeKey(pubkey);
     },
 
