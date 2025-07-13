@@ -2,7 +2,7 @@ import { defineStore } from "pinia";
 import { useLocalStorage } from "@vueuse/core";
 import { watch } from "vue";
 import { Event as NostrEvent } from "nostr-tools";
-import { useNostrStore, SignerType } from "./nostr";
+import { SignerType } from "./nostr";
 import { v4 as uuidv4 } from "uuid";
 import { useSettingsStore } from "./settings";
 import { DEFAULT_RELAYS } from "src/config/relays";
@@ -15,6 +15,7 @@ import { useTokensStore } from "./tokens";
 import { useReceiveTokensStore } from "./receiveTokensStore";
 import { useBucketsStore } from "./buckets";
 import { useLockedTokensStore } from "./lockedTokens";
+import { useNostrStore } from "./nostr";
 import { cashuDb, type LockedToken } from "./dexie";
 import { DEFAULT_BUCKET_ID } from "./buckets";
 import token from "src/js/token";
@@ -78,6 +79,9 @@ export const useMessengerStore = defineStore("messenger", {
     },
   },
   actions: {
+    normalizeKey(pk: string): string {
+      return useNostrStore().resolvePubkey(pk);
+    },
     async loadIdentity() {
       const nostr = useNostrStore();
       try {
@@ -87,6 +91,7 @@ export const useMessengerStore = defineStore("messenger", {
       }
     },
     async sendDm(recipient: string, message: string, relays?: string[]) {
+      recipient = this.normalizeKey(recipient);
       await this.loadIdentity();
       const nostr = useNostrStore();
       let privKey: string | undefined = undefined;
@@ -119,6 +124,7 @@ export const useMessengerStore = defineStore("messenger", {
       },
     ) {
       try {
+        recipient = this.normalizeKey(recipient);
         const wallet = useWalletStore();
         const mints = useMintsStore();
         const proofsStore = useProofsStore();
@@ -206,6 +212,7 @@ export const useMessengerStore = defineStore("messenger", {
       created_at?: number,
       id?: string,
     ) {
+      pubkey = this.normalizeKey(pubkey);
       const messageId = id || uuidv4();
       if (this.eventLog.some((m) => m.id === messageId)) return;
       const msg: MessengerMessage = {
@@ -431,6 +438,7 @@ export const useMessengerStore = defineStore("messenger", {
     },
 
     createConversation(pubkey: string) {
+      pubkey = this.normalizeKey(pubkey);
       if (!this.conversations[pubkey]) {
         this.conversations[pubkey] = [];
       }
@@ -440,21 +448,24 @@ export const useMessengerStore = defineStore("messenger", {
     },
 
     startChat(pubkey: string) {
+      pubkey = this.normalizeKey(pubkey);
       this.createConversation(pubkey);
       this.markRead(pubkey);
       this.setCurrentConversation(pubkey);
     },
 
     markRead(pubkey: string) {
+      pubkey = this.normalizeKey(pubkey);
       this.unreadCounts[pubkey] = 0;
     },
 
     togglePin(pubkey: string) {
+      pubkey = this.normalizeKey(pubkey);
       this.pinned[pubkey] = !this.pinned[pubkey];
     },
 
     setCurrentConversation(pubkey: string) {
-      this.currentConversation = pubkey;
+      this.currentConversation = this.normalizeKey(pubkey);
     },
 
     toggleDrawer() {
