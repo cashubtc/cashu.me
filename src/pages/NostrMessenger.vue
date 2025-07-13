@@ -175,16 +175,14 @@ export default defineComponent({
     );
 
     const selectConversation = (pubkey: string) => {
-      const hex = bech32ToHex(pubkey);
-      selected.value = hex;
-      messenger.markRead(hex);
-      messenger.setCurrentConversation(hex);
+      selected.value = pubkey;
+      messenger.markRead(pubkey);
+      messenger.setCurrentConversation(pubkey);
     };
 
     const startChat = (pubkey: string) => {
-      const hex = bech32ToHex(pubkey);
-      messenger.startChat(hex);
-      selected.value = hex;
+      messenger.startChat(pubkey);
+      selected.value = pubkey;
     };
 
     const sendMessage = (text: string) => {

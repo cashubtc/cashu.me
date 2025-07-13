@@ -23,7 +23,6 @@ vi.mock("../../../src/stores/nostr", () => {
     subscribeToNip04DirectMessagesCallback: subscribe,
     walletSeedGenerateKeyPair: walletGen,
     initSignerIfNotSet: vi.fn(),
-    resolvePubkey: (pk: string) => pk,
     privateKeySignerPrivateKey: "priv",
     seedSignerPrivateKey: "",
     pubkey: "pub",
@@ -35,13 +34,8 @@ vi.mock("../../../src/stores/nostr", () => {
       return store.privateKeySignerPrivateKey;
     },
   });
-  const SignerType = { NIP07: "NIP07", NIP46: "NIP46", seed: "seed" } as any;
-  return { useNostrStore: () => store, SignerType };
+  return { useNostrStore: () => store };
 });
-
-vi.mock("../../../src/stores/settings", () => ({
-  useSettingsStore: () => ({ defaultNostrRelays: { value: [] } }),
-}));
 
 vi.mock("../../../src/js/message-utils", () => ({
   sanitizeMessage: vi.fn((s: string) => s),
@@ -91,11 +85,11 @@ describe("messenger store", () => {
     expect(args[3]).toBe(0);
   });
 
-  it("handles start without privkey", async () => {
+  it("notifies when starting without privkey", async () => {
     const messenger = useMessengerStore();
     const nostr = useNostrStore();
     nostr.privateKeySignerPrivateKey = "";
     await messenger.start();
-    expect(messenger.started).toBe(true);
+    expect(notifyErrorSpy).toHaveBeenCalled();
   });
 });
