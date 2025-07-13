@@ -9,67 +9,65 @@
         $t("SubscriptionReceipt.title")
       }}</q-card-section>
       <q-card-section style="max-height: 300px; overflow-y: auto">
-        <q-markup-table dense flat>
-          <thead>
-            <tr>
-              <th class="text-left">Amount</th>
-              <th class="text-left">Date</th>
-              <th class="text-left">Token</th>
-              <th class="text-right"></th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="r in receipts" :key="r.id">
-              <td>{{ r.amount }}</td>
-              <td>{{ formatDate(r) }}</td>
-              <td class="text-no-wrap">
-                <div class="row items-center no-wrap">
-                  <span
-                    >{{ r.token.slice(0, 16)
-                    }}<span v-if="r.token.length > 16">…</span></span
-                  >
-                  <q-btn
-                    flat
-                    dense
-                    size="sm"
-                    :icon="expanded[r.id] ? 'expand_less' : 'expand_more'"
-                    class="q-ml-xs"
-                    @click.stop="toggle(r.id)"
-                  />
+        <q-carousel
+          v-if="receipts.length"
+          v-model="activeSlide"
+          swipeable
+          control-color="primary"
+        >
+          <q-carousel-slide
+            v-for="(r, i) in receipts"
+            :name="i"
+            :key="r.id"
+            class="q-pa-md"
+          >
+            <div class="q-mb-sm"><strong>Amount:</strong> {{ r.amount }}</div>
+            <div class="q-mb-sm"><strong>Date:</strong> {{ formatDate(r) }}</div>
+            <div class="q-mb-sm">
+              <div class="row items-center no-wrap">
+                <span
+                  >{{ r.token.slice(0, 16)
+                  }}<span v-if="r.token.length > 16">…</span></span
+                >
+                <q-btn
+                  flat
+                  dense
+                  size="sm"
+                  :icon="expanded[r.id] ? 'expand_less' : 'expand_more'"
+                  class="q-ml-xs"
+                  @click.stop="toggle(r.id)"
+                />
+              </div>
+              <q-slide-transition>
+                <div
+                  v-if="expanded[r.id]"
+                  class="text-caption q-mt-xs token-full"
+                >
+                  {{ r.token }}
                 </div>
-                <q-slide-transition>
-                  <div
-                    v-if="expanded[r.id]"
-                    class="text-caption q-mt-xs token-full"
-                  >
-                    {{ r.token }}
-                  </div>
-                </q-slide-transition>
-              </td>
-              <td class="text-right">
-                <q-btn
-                  flat
-                  color="primary"
-                  size="sm"
-                  @click="copyToken(r.token)"
-                >
-                  {{ $t("global.actions.copy.label") }}
-                </q-btn>
-                <q-btn
-                  flat
-                  color="primary"
-                  size="sm"
-                  @click="saveToken(r.token)"
-                >
-                  {{ $t("SubscriptionReceipt.actions.save.label") }}
-                </q-btn>
-              </td>
-            </tr>
-            <tr v-if="!receipts.length">
-              <td colspan="4" class="text-center text-grey">No receipts</td>
-            </tr>
-          </tbody>
-        </q-markup-table>
+              </q-slide-transition>
+            </div>
+            <div class="text-right q-mt-sm">
+              <q-btn
+                flat
+                color="primary"
+                size="sm"
+                @click="copyToken(r.token)"
+              >
+                {{ $t("global.actions.copy.label") }}
+              </q-btn>
+              <q-btn
+                flat
+                color="primary"
+                size="sm"
+                @click="saveToken(r.token)"
+              >
+                {{ $t("SubscriptionReceipt.actions.save.label") }}
+              </q-btn>
+            </div>
+          </q-carousel-slide>
+        </q-carousel>
+        <div v-else class="text-center text-grey">No receipts</div>
       </q-card-section>
       <q-card-actions align="right">
         <q-btn v-close-popup flat color="grey">{{
@@ -102,6 +100,7 @@ export default defineComponent({
   data() {
     return {
       expanded: {} as Record<string, boolean>,
+      activeSlide: 0,
     };
   },
   computed: {
