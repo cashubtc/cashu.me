@@ -4,7 +4,28 @@
     :class="message.outgoing ? 'items-end' : 'items-start'"
   >
     <div :class="message.outgoing ? 'sent' : 'received'" :style="bubbleStyle">
-      {{ message.content }}
+      <template v-if="message.subscriptionPayment">
+        <q-expansion-item dense switch-toggle-side>
+          <template #header>
+            Subscription payment ({{ message.subscriptionPayment.total_months }} months)
+          </template>
+          <TokenInformation
+            :encodedToken="message.subscriptionPayment.token"
+            :showAmount="true"
+            :showMintCheck="true"
+            :showP2PKCheck="true"
+          />
+          <q-btn
+            label="Redeem"
+            color="primary"
+            class="q-mt-sm"
+            @click.stop="redeemPayment"
+          />
+        </q-expansion-item>
+      </template>
+      <template v-else>
+        {{ message.content }}
+      </template>
     </div>
     <div
       class="text-caption q-mt-xs row items-center"
@@ -31,6 +52,8 @@ import { computed } from "vue";
 import { useQuasar } from "quasar";
 import { mdiCheck, mdiCheckAll } from "@quasar/extras/mdi-v6";
 import type { MessengerMessage } from "src/stores/messenger";
+import TokenInformation from "components/TokenInformation.vue";
+import { useReceiveTokensStore } from "src/stores/receiveTokensStore";
 
 const props = defineProps<{
   message: MessengerMessage;
@@ -59,6 +82,15 @@ const isoTime = computed(() =>
 const deliveryIcon = computed(() =>
   props.deliveryStatus === "delivered" ? mdiCheckAll : mdiCheck,
 );
+
+const receiveStore = useReceiveTokensStore();
+
+async function redeemPayment() {
+  if (!props.message.subscriptionPayment) return;
+  const tokenStr = props.message.subscriptionPayment.token;
+  receiveStore.receiveData.tokensBase64 = tokenStr;
+  await receiveStore.receiveToken(tokenStr);
+}
 </script>
 
 <style scoped>
