@@ -50,6 +50,12 @@
           <div v-if="loadingTiers" class="row justify-center q-pa-md">
             <q-spinner-hourglass />
           </div>
+          <div v-else-if="tierFetchError" class="text-center">
+            Failed to load tiers – check relay connectivity
+            <div class="q-mt-md">
+              <q-btn flat color="primary" @click="retryFetchTiers">Retry</q-btn>
+            </div>
+          </div>
           <div v-else-if="!tiers.length" class="text-center">
             Creator has no subscription tiers
             <div class="q-mt-md">
@@ -143,6 +149,7 @@ const messenger = useMessengerStore();
 const router = useRouter();
 const { t } = useI18n();
 const tiers = computed(() => creators.tiersMap[dialogPubkey.value] || []);
+const tierFetchError = computed(() => creators.tierFetchError);
 const showSubscribeDialog = ref(false);
 const selectedTier = ref<any>(null);
 const nutzapProfile = ref<any | null>(null);
@@ -216,6 +223,13 @@ async function onMessage(ev: MessageEvent) {
 
 watch(tiers, (val) => {
   if (val.length > 0) {
+    loadingTiers.value = false;
+    if (tierTimeout) clearTimeout(tierTimeout);
+  }
+});
+
+watch(tierFetchError, (val) => {
+  if (val) {
     loadingTiers.value = false;
     if (tierTimeout) clearTimeout(tierTimeout);
   }

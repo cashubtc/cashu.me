@@ -12,6 +12,7 @@ import { DEFAULT_RELAYS } from "src/config/relays";
 import { useNdk } from "src/composables/useNdk";
 import { nip19 } from "nostr-tools";
 import { Event as NostrEvent } from "nostr-tools";
+import { notifyWarning } from "src/js/notify";
 
 interface Tier {
   id: string;
@@ -48,6 +49,7 @@ export const useCreatorsStore = defineStore("creators", {
     searching: false,
     error: "",
     tiersMap: {} as Record<string, Tier[]>,
+    tierFetchError: false,
     currentUserNpub: "",
     currentUserPrivkey: "",
   }),
@@ -167,6 +169,7 @@ export const useCreatorsStore = defineStore("creators", {
     },
 
     async fetchTierDefinitions(creatorNpub: string) {
+      this.tierFetchError = false;
       const cached = await db.creatorsTierDefinitions.get(creatorNpub);
       if (cached) {
         const rawEvent = cached.rawEventJson
@@ -197,7 +200,11 @@ export const useCreatorsStore = defineStore("creators", {
       const timeout = setTimeout(async () => {
         if (received) return;
         const indexerUrl = settings.tiersIndexerUrl.value;
-        if (!indexerUrl) return;
+        if (!indexerUrl) {
+          this.tierFetchError = true;
+          notifyWarning("Unable to retrieve subscription tiers");
+          return;
+        }
         const url = indexerUrl.includes("{pubkey}")
           ? indexerUrl.replace("{pubkey}", creatorNpub)
           : `${indexerUrl}${indexerUrl.includes("?") ? "&" : "?"}pubkey=${creatorNpub}`;
@@ -206,7 +213,11 @@ export const useCreatorsStore = defineStore("creators", {
           const id = setTimeout(() => controller.abort(), 8000);
           const resp = await fetch(url, { signal: controller.signal });
           clearTimeout(id);
-          if (!resp.ok) return;
+          if (!resp.ok) {
+            this.tierFetchError = true;
+            notifyWarning("Unable to retrieve subscription tiers");
+            return;
+          }
           const data = await resp.json();
           const event =
             data.tiers ||
@@ -220,7 +231,11 @@ export const useCreatorsStore = defineStore("creators", {
                     e.tags.some((t: any[]) => t[0] === "d" && t[1] === "tiers")
                 )
               : null);
-          if (!event) return;
+          if (!event) {
+            this.tierFetchError = true;
+            notifyWarning("Unable to retrieve subscription tiers");
+            return;
+          }
           const tiersArray: Tier[] = JSON.parse(event.content).map((t: any) => ({
             ...t,
             price_sats: t.price_sats ?? t.price ?? 0,
@@ -235,6 +250,8 @@ export const useCreatorsStore = defineStore("creators", {
           });
         } catch (e) {
           console.error("Indexer tier fetch error:", e);
+          this.tierFetchError = true;
+          notifyWarning("Unable to retrieve subscription tiers");
         }
       }, 5000);
 
@@ -244,6 +261,7 @@ export const useCreatorsStore = defineStore("creators", {
           try {
             received = true;
             clearTimeout(timeout);
+            this.tierFetchError = false;
             const tiersArray: Tier[] = JSON.parse(event.content).map((t: any) => ({
               ...t,
               price_sats: t.price_sats ?? t.price ?? 0,
