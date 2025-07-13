@@ -69,6 +69,7 @@ export const useMessengerStore = defineStore("messenger", {
       drawerOpen: useLocalStorage<boolean>("cashu.messenger.drawerOpen", true),
       started: false,
       watchInitialized: false,
+      normalized: false,
     };
   },
   getters: {
@@ -84,6 +85,10 @@ export const useMessengerStore = defineStore("messenger", {
         await nostr.initSignerIfNotSet();
       } catch (e) {
         console.warn("[messenger] signer unavailable, continuing read-only", e);
+      }
+      if (!this.normalized) {
+        this.normalizeConversations();
+        this.normalized = true;
       }
     },
     async sendDm(recipient: string, message: string, relays?: string[]) {
@@ -169,8 +174,10 @@ export const useMessengerStore = defineStore("messenger", {
           JSON.stringify(payload),
         );
         if (success && event) {
+          const nostr = useNostrStore();
+          const normalized = nostr.resolvePubkey(recipient);
           if (subscription) {
-            const msg = this.conversations[recipient]?.find(
+            const msg = this.conversations[normalized]?.find(
               (m) => m.id === event.id,
             );
             const logMsg = this.eventLog.find((m) => m.id === event.id);
@@ -200,24 +207,55 @@ export const useMessengerStore = defineStore("messenger", {
         return false;
       }
     },
+
+    normalizeConversations() {
+      const nostr = useNostrStore();
+      const newConvos: Record<string, MessengerMessage[]> = {};
+      for (const [key, msgs] of Object.entries(this.conversations)) {
+        const normalized = nostr.resolvePubkey(key);
+        if (!newConvos[normalized]) newConvos[normalized] = [];
+        const existingIds = new Set(newConvos[normalized].map((m) => m.id));
+        msgs.forEach((m) => {
+          if (!existingIds.has(m.id)) {
+            m.pubkey = normalized;
+            newConvos[normalized].push(m);
+          }
+        });
+      }
+      this.conversations = newConvos as any;
+      const newUnread: Record<string, number> = {};
+      for (const [key, val] of Object.entries(this.unreadCounts)) {
+        const normalized = nostr.resolvePubkey(key);
+        newUnread[normalized] = (newUnread[normalized] || 0) + val;
+      }
+      this.unreadCounts = newUnread as any;
+      const newPinned: Record<string, boolean> = {};
+      for (const [key, val] of Object.entries(this.pinned)) {
+        const normalized = nostr.resolvePubkey(key);
+        newPinned[normalized] = newPinned[normalized] || val;
+      }
+      this.pinned = newPinned as any;
+    },
     addOutgoingMessage(
       pubkey: string,
       content: string,
       created_at?: number,
       id?: string,
     ) {
+      const nostr = useNostrStore();
+      const normalized = nostr.resolvePubkey(pubkey);
       const messageId = id || uuidv4();
       if (this.eventLog.some((m) => m.id === messageId)) return;
       const msg: MessengerMessage = {
         id: messageId,
-        pubkey,
+        pubkey: normalized,
         content: sanitizeMessage(content),
         created_at: created_at ?? Math.floor(Date.now() / 1000),
         outgoing: true,
       };
-      if (!this.conversations[pubkey]) this.conversations[pubkey] = [];
-      if (!this.conversations[pubkey].some((m) => m.id === messageId))
-        this.conversations[pubkey].push(msg);
+      if (!this.conversations[normalized]) this.conversations[normalized] = [];
+      if (!this.conversations[normalized].some((m) => m.id === messageId))
+        this.conversations[normalized].push(msg);
       this.eventLog.push(msg);
     },
     async addIncomingMessage(event: NostrEvent) {
@@ -431,30 +469,39 @@ export const useMessengerStore = defineStore("messenger", {
     },
 
     createConversation(pubkey: string) {
-      if (!this.conversations[pubkey]) {
-        this.conversations[pubkey] = [];
+      const nostr = useNostrStore();
+      const normalized = nostr.resolvePubkey(pubkey);
+      if (!this.conversations[normalized]) {
+        this.conversations[normalized] = [];
       }
-      if (this.unreadCounts[pubkey] === undefined) {
-        this.unreadCounts[pubkey] = 0;
+      if (this.unreadCounts[normalized] === undefined) {
+        this.unreadCounts[normalized] = 0;
       }
     },
 
     startChat(pubkey: string) {
-      this.createConversation(pubkey);
-      this.markRead(pubkey);
-      this.setCurrentConversation(pubkey);
+      const nostr = useNostrStore();
+      const normalized = nostr.resolvePubkey(pubkey);
+      this.createConversation(normalized);
+      this.markRead(normalized);
+      this.setCurrentConversation(normalized);
     },
 
     markRead(pubkey: string) {
-      this.unreadCounts[pubkey] = 0;
+      const nostr = useNostrStore();
+      const normalized = nostr.resolvePubkey(pubkey);
+      this.unreadCounts[normalized] = 0;
     },
 
     togglePin(pubkey: string) {
-      this.pinned[pubkey] = !this.pinned[pubkey];
+      const nostr = useNostrStore();
+      const normalized = nostr.resolvePubkey(pubkey);
+      this.pinned[normalized] = !this.pinned[normalized];
     },
 
     setCurrentConversation(pubkey: string) {
-      this.currentConversation = pubkey;
+      const nostr = useNostrStore();
+      this.currentConversation = nostr.resolvePubkey(pubkey);
     },
 
     toggleDrawer() {

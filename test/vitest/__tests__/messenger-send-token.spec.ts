@@ -15,6 +15,7 @@ vi.mock("../../../src/stores/nostr", () => {
     useNostrStore: () => ({
       sendNip04DirectMessage: sendDm,
       initSignerIfNotSet: vi.fn(),
+      resolvePubkey: (pk: string) => pk,
       privateKeySignerPrivateKey: "priv",
       seedSignerPrivateKey: "",
       pubkey: "pub",
@@ -25,8 +26,13 @@ vi.mock("../../../src/stores/nostr", () => {
         return this.privateKeySignerPrivateKey;
       },
     }),
+    SignerType: { NIP07: "NIP07", NIP46: "NIP46", seed: "seed" },
   };
 });
+
+vi.mock("../../../src/stores/settings", () => ({
+  useSettingsStore: () => ({ includeFeesInSendAmount: false, defaultNostrRelays: { value: [] } }),
+}));
 
 vi.mock("../../../src/stores/wallet", () => {
   walletSend = vi.fn(async () => ({
@@ -52,9 +58,6 @@ vi.mock("../../../src/stores/proofs", () => {
   return { useProofsStore: () => ({ serializeProofs }) };
 });
 
-vi.mock("../../../src/stores/settings", () => ({
-  useSettingsStore: () => ({ includeFeesInSendAmount: false }),
-}));
 
 vi.mock("../../../src/stores/tokens", () => {
   addPending = vi.fn();
