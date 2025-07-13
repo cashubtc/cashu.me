@@ -5,23 +5,59 @@
   >
     <div :class="message.outgoing ? 'sent' : 'received'" :style="bubbleStyle">
       <template v-if="message.subscriptionPayment">
-        <q-expansion-item dense switch-toggle-side>
-          <template #header>
-            Subscription payment ({{ message.subscriptionPayment.total_months }} months)
-          </template>
-          <TokenInformation
-            :encodedToken="message.subscriptionPayment.token"
-            :showAmount="true"
-            :showMintCheck="true"
-            :showP2PKCheck="true"
-          />
-          <q-btn
-            label="Redeem"
-            color="primary"
-            class="q-mt-sm"
-            @click.stop="redeemPayment"
-          />
-        </q-expansion-item>
+        <template v-if="message.subscriptionPayment.total_months > 1">
+          <q-carousel
+            v-model="activeSlide"
+            animated
+            control-color="primary"
+            swipeable
+            class="subscription-carousel"
+          >
+            <q-carousel-slide
+              v-for="idx in message.subscriptionPayment.total_months"
+              :key="idx"
+              :name="idx"
+            >
+              <q-expansion-item dense switch-toggle-side>
+                <template #header>Month {{ idx }}</template>
+                <TokenInformation
+                  :encodedToken="message.subscriptionPayment.token"
+                  :showAmount="true"
+                  :showMintCheck="true"
+                  :showP2PKCheck="true"
+                />
+                <q-btn
+                  label="Redeem"
+                  color="primary"
+                  class="q-mt-sm"
+                  @click.stop="redeemPayment"
+                />
+              </q-expansion-item>
+            </q-carousel-slide>
+          </q-carousel>
+        </template>
+        <template v-else>
+          <q-expansion-item dense switch-toggle-side>
+            <template #header>
+              Subscription payment ({{
+                message.subscriptionPayment.total_months
+              }}
+              months)
+            </template>
+            <TokenInformation
+              :encodedToken="message.subscriptionPayment.token"
+              :showAmount="true"
+              :showMintCheck="true"
+              :showP2PKCheck="true"
+            />
+            <q-btn
+              label="Redeem"
+              color="primary"
+              class="q-mt-sm"
+              @click.stop="redeemPayment"
+            />
+          </q-expansion-item>
+        </template>
       </template>
       <template v-else>
         {{ message.content }}
@@ -48,7 +84,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed } from "vue";
+import { computed, ref } from "vue";
 import { useQuasar } from "quasar";
 import { mdiCheck, mdiCheckAll } from "@quasar/extras/mdi-v6";
 import type { MessengerMessage } from "src/stores/messenger";
@@ -61,6 +97,8 @@ const props = defineProps<{
 }>();
 
 const $q = useQuasar();
+
+const activeSlide = ref(1);
 
 const receivedStyle = computed(() => ({
   backgroundColor: $q.dark.isActive
