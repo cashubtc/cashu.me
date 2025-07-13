@@ -1376,6 +1376,11 @@ export default {
   bucketManager: {
     actions: { add: "Add bucket" },
     addDialog: { title: "Create new bucket" },
+    inputs: {
+      search: {
+        placeholder: "Search buckets",
+      },
+    },
   },
   bucket: {
     name: "Name",

@@ -1,9 +1,16 @@
 <template>
   <div style="max-width: 800px; margin: 0 auto">
     <div class="text-body2 q-mb-md">{{ $t("BucketManager.helper.intro") }}</div>
+    <q-input
+      v-model="searchTerm"
+      outlined
+      dense
+      class="q-mb-md"
+      :placeholder="$t('bucketManager.inputs.search.placeholder')"
+    />
     <q-list padding>
       <div
-        v-for="bucket in bucketList"
+        v-for="bucket in filteredBuckets"
         :key="bucket.id"
         class="q-mb-md"
         @dragover.prevent
@@ -177,6 +184,13 @@ export default defineComponent({
     });
 
     const bucketList = computed(() => bucketsStore.bucketList);
+    const searchTerm = ref("");
+    const filteredBuckets = computed(() => {
+      const term = searchTerm.value.toLowerCase();
+      return bucketList.value.filter((b) =>
+        b.name.toLowerCase().includes(term)
+      );
+    });
     const bucketBalances = computed(() => bucketsStore.bucketBalances);
 
     const formatCurrency = (amount, unit) => {
@@ -253,6 +267,8 @@ export default defineComponent({
     return {
       DEFAULT_BUCKET_ID,
       bucketList,
+      searchTerm,
+      filteredBuckets,
       bucketBalances,
       activeUnit,
       showForm,
