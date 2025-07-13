@@ -19,12 +19,22 @@ import { cashuDb, type LockedToken } from "./dexie";
 import { DEFAULT_BUCKET_ID } from "./buckets";
 import token from "src/js/token";
 
+export interface SubscriptionPayment {
+  token: string;
+  subscription_id: string;
+  tier_id: string;
+  month_index: number;
+  total_months: number;
+  amount: number;
+}
+
 export type MessengerMessage = {
   id: string;
   pubkey: string;
   content: string;
   created_at: number;
   outgoing: boolean;
+  subscriptionPayment?: SubscriptionPayment;
 };
 
 export const useMessengerStore = defineStore("messenger", {
@@ -154,11 +164,27 @@ export const useMessengerStore = defineStore("messenger", {
               referenceId: uuidv4(),
             };
 
-        const { success } = await this.sendDm(
+        const { success, event } = await this.sendDm(
           recipient,
           JSON.stringify(payload),
         );
-        if (success) {
+        if (success && event) {
+          if (subscription) {
+            const msg = this.conversations[recipient]?.find(
+              (m) => m.id === event.id,
+            );
+            const logMsg = this.eventLog.find((m) => m.id === event.id);
+            const payment: SubscriptionPayment = {
+              token: tokenStr,
+              subscription_id: subscription.subscription_id,
+              tier_id: subscription.tier_id,
+              month_index: subscription.month_index,
+              total_months: subscription.total_months,
+              amount: sendAmount,
+            };
+            if (msg) msg.subscriptionPayment = payment;
+            if (logMsg) logMsg.subscriptionPayment = payment;
+          }
           tokens.addPendingToken({
             amount: -sendAmount,
             token: tokenStr,
@@ -210,6 +236,7 @@ export const useMessengerStore = defineStore("messenger", {
         event.pubkey,
         event.content,
       );
+      let subscriptionInfo: SubscriptionPayment | undefined;
       try {
         const payload = JSON.parse(decrypted);
         if (
@@ -221,6 +248,14 @@ export const useMessengerStore = defineStore("messenger", {
           const amount = decoded
             ? token.getProofs(decoded).reduce((s, p) => s + p.amount, 0)
             : 0;
+          subscriptionInfo = {
+            token: payload.token,
+            subscription_id: payload.subscription_id,
+            tier_id: payload.tier_id,
+            month_index: payload.month_index,
+            total_months: payload.total_months,
+            amount,
+          };
           const entry: LockedToken = {
             id: uuidv4(),
             tokenString: payload.token,
@@ -304,6 +339,9 @@ export const useMessengerStore = defineStore("messenger", {
         created_at: event.created_at,
         outgoing: false,
       };
+      if (subscriptionInfo) {
+        msg.subscriptionPayment = subscriptionInfo;
+      }
       if (!this.conversations[event.pubkey]) {
         this.conversations[event.pubkey] = [];
       }
