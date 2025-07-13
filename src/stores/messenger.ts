@@ -82,6 +82,44 @@ export const useMessengerStore = defineStore("messenger", {
     normalizeKey(pk: string): string {
       return useNostrStore().resolvePubkey(pk);
     },
+    normalizeStoredConversations() {
+      // normalize conversation keys and merge duplicates
+      for (const key of Object.keys(this.conversations)) {
+        const normalized = this.normalizeKey(key);
+        const msgs = this.conversations[key];
+        if (!msgs) continue;
+        if (!this.conversations[normalized]) this.conversations[normalized] = [];
+        for (const msg of msgs) {
+          msg.pubkey = normalized;
+          if (!this.conversations[normalized].some((m) => m.id === msg.id)) {
+            this.conversations[normalized].push(msg);
+          }
+        }
+        if (normalized !== key) delete this.conversations[key];
+      }
+
+      for (const key of Object.keys(this.unreadCounts)) {
+        const normalized = this.normalizeKey(key);
+        if (normalized !== key) {
+          this.unreadCounts[normalized] =
+            (this.unreadCounts[normalized] || 0) + this.unreadCounts[key];
+          delete this.unreadCounts[key];
+        }
+      }
+
+      for (const key of Object.keys(this.pinned)) {
+        const normalized = this.normalizeKey(key);
+        if (normalized !== key) {
+          this.pinned[normalized] = this.pinned[normalized] || this.pinned[key];
+          delete this.pinned[key];
+        }
+      }
+
+      // normalize event log entries
+      this.eventLog.forEach((msg) => {
+        msg.pubkey = this.normalizeKey(msg.pubkey);
+      });
+    },
     async loadIdentity() {
       const nostr = useNostrStore();
       try {
@@ -364,6 +402,7 @@ export const useMessengerStore = defineStore("messenger", {
     },
 
     async start() {
+      this.normalizeStoredConversations();
       if (!this.watchInitialized) {
         watch(
           () => [useNostrStore().pubkey, this.relays],
