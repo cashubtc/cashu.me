@@ -22,9 +22,11 @@
 import { ref } from "vue";
 import { nip19 } from "nostr-tools";
 import { notifyError } from "src/js/notify";
+import { useNostrStore } from "src/stores/nostr";
 
 const emit = defineEmits(["start"]);
 const pubkey = ref("");
+const nostr = useNostrStore();
 
 const start = () => {
   const pk = pubkey.value.trim();
@@ -40,7 +42,8 @@ const start = () => {
     notifyError("Invalid Nostr pubkey");
     return;
   }
-  emit("start", pk);
+  const resolved = nostr.resolvePubkey(pk);
+  emit("start", resolved);
   pubkey.value = "";
 };
 </script>

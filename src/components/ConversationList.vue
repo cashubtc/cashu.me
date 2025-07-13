@@ -84,8 +84,8 @@ const loadProfiles = async () => {
 onMounted(loadProfiles);
 watch(uniqueConversations, loadProfiles);
 
-const select = (pubkey: string) => emit("select", pubkey);
+const select = (pubkey: string) => emit("select", nostr.resolvePubkey(pubkey));
 const togglePin = (pubkey: string) => {
-  messenger.togglePin(pubkey);
+  messenger.togglePin(nostr.resolvePubkey(pubkey));
 };
 </script>

@@ -131,8 +131,8 @@ export default defineComponent({
 
     const snippet = computed(() => props.lastMsg?.content?.slice(0, 30) || "");
 
-    const handleClick = () => emit("click", props.pubkey);
-    const togglePin = () => emit("pin", props.pubkey);
+    const handleClick = () => emit("click", nostr.resolvePubkey(props.pubkey));
+    const togglePin = () => emit("pin", nostr.resolvePubkey(props.pubkey));
 
     return {
       profile,
