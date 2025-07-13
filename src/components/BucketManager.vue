@@ -1,13 +1,28 @@
 <template>
   <div style="max-width: 800px; margin: 0 auto">
     <div class="text-body2 q-mb-md">{{ $t("BucketManager.helper.intro") }}</div>
+    <div class="row q-gutter-sm q-mb-md">
+      <q-input
+        v-model="searchTerm"
+        dense
+        outlined
+        placeholder="Search buckets"
+        class="col"
+      />
+    </div>
     <q-list padding>
       <div
-        v-for="bucket in bucketList"
+        v-for="bucket in filteredBuckets"
         :key="bucket.id"
         class="q-mb-md"
+        :class="{ 'drag-over': draggedOverId === bucket.id }"
         @dragover.prevent
+        @dragenter.prevent="onDragEnter(bucket.id)"
+        @dragleave.prevent="onDragLeave"
         @drop="handleDrop($event, bucket.id)"
+        :style="draggedOverId === bucket.id ? {
+            border: '2px dashed ' + (bucket.color || DEFAULT_COLOR)
+          } : {}"
       >
         <BucketCard
           :bucket="bucket"
@@ -178,6 +193,15 @@ export default defineComponent({
 
     const bucketList = computed(() => bucketsStore.bucketList);
     const bucketBalances = computed(() => bucketsStore.bucketBalances);
+    const searchTerm = ref('');
+    const filteredBuckets = computed(() =>
+      bucketList.value
+        .filter((b) =>
+          b.name.toLowerCase().includes(searchTerm.value.toLowerCase())
+        )
+        .sort((a, b) => a.name.localeCompare(b.name))
+    );
+    const draggedOverId = ref<string | null>(null);
 
     const formatCurrency = (amount, unit) => {
       return uiStore.formatCurrency(amount, unit);
@@ -216,6 +240,7 @@ export default defineComponent({
 
     const handleDrop = async (ev, id) => {
       ev.preventDefault();
+      draggedOverId.value = null;
       const data = ev.dataTransfer?.getData("text/plain");
       if (!data) return;
       let secrets;
@@ -227,6 +252,13 @@ export default defineComponent({
       if (Array.isArray(secrets) && secrets.length) {
         await proofsStore.moveProofs(secrets, id);
       }
+    };
+
+    const onDragEnter = (id) => {
+      draggedOverId.value = id;
+    };
+    const onDragLeave = () => {
+      draggedOverId.value = null;
     };
 
     const saveBucket = async () => {
@@ -254,6 +286,9 @@ export default defineComponent({
       DEFAULT_BUCKET_ID,
       bucketList,
       bucketBalances,
+      searchTerm,
+      filteredBuckets,
+      draggedOverId,
       activeUnit,
       showForm,
       dialogOpen,
@@ -270,8 +305,16 @@ export default defineComponent({
       deleteBucket,
       formatCurrency,
       handleDrop,
+      onDragEnter,
+      onDragLeave,
       DEFAULT_COLOR,
     };
   },
 });
 </script>
+
+<style scoped>
+.drag-over {
+  transition: border 0.2s;
+}
+</style>
