@@ -200,7 +200,7 @@ async function onMessage(ev: MessageEvent) {
     await nextTick();
     showTierDialog.value = true;
   } else if (ev.data && ev.data.type === "startChat" && ev.data.pubkey) {
-    const pubkey = ev.data.pubkey;
+    const pubkey = nostr.resolvePubkey(ev.data.pubkey);
     router.push({ path: "/nostr-messenger", query: { pubkey } });
     const stop = watch(
       () => messenger.started,
