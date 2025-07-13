@@ -1,24 +1,13 @@
 <template>
   <div style="max-width: 800px; margin: 0 auto">
     <div class="text-body2 q-mb-md">{{ $t("BucketManager.helper.intro") }}</div>
-    <q-input
-      v-model="search"
-      dense
-      debounce="300"
-      outlined
-      class="q-mb-md"
-      :placeholder="$t('global.actions.search.label')"
-    />
     <q-list padding>
       <div
-        v-for="bucket in filteredBuckets"
+        v-for="bucket in bucketList"
         :key="bucket.id"
         class="q-mb-md"
         @dragover.prevent
-        @dragenter="draggedOverId = bucket.id"
-        @dragleave="draggedOverId = null"
         @drop="handleDrop($event, bucket.id)"
-        :class="{ 'drag-over': draggedOverId === bucket.id }"
       >
         <BucketCard
           :bucket="bucket"
@@ -189,21 +178,6 @@ export default defineComponent({
 
     const bucketList = computed(() => bucketsStore.bucketList);
     const bucketBalances = computed(() => bucketsStore.bucketBalances);
-    const search = ref("");
-    const draggedOverId = ref<string | null>(null);
-    const filteredBuckets = computed(() => {
-      const term = search.value.toLowerCase();
-      const list = bucketList.value.filter((b) =>
-        b.name.toLowerCase().includes(term)
-      );
-      list.sort((a, b) => a.name.localeCompare(b.name));
-      const idx = list.findIndex((b) => b.id === DEFAULT_BUCKET_ID);
-      if (idx > -1) {
-        const def = list.splice(idx, 1)[0];
-        list.unshift(def);
-      }
-      return list;
-    });
 
     const formatCurrency = (amount, unit) => {
       return uiStore.formatCurrency(amount, unit);
@@ -296,18 +270,8 @@ export default defineComponent({
       deleteBucket,
       formatCurrency,
       handleDrop,
-      search,
-      filteredBuckets,
-      draggedOverId,
       DEFAULT_COLOR,
     };
   },
 });
 </script>
-
-<style scoped>
-.drag-over {
-  border: 2px dashed #aaa;
-  border-radius: 8px;
-}
-</style>
