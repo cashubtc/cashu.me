@@ -1,6 +1,11 @@
 <template>
   <div class="q-pa-xs" style="max-width: 500px; margin: 0 auto">
     <h6 class="q-mt-none q-mb-md">Creator Locked Tokens</h6>
+    <div class="q-mb-sm" v-if="pendingTokens.length > 1">
+      <q-btn flat dense color="primary" @click="redeemAll"
+        >{{ $t('CreatorLockedTokensTable.redeem_all') }}</q-btn
+      >
+    </div>
     <q-list bordered>
       <q-item v-for="token in paginatedTokens" :key="token.id">
         <q-item-section avatar>
@@ -80,6 +85,9 @@ export default defineComponent({
       const end = start + this.pageSize;
       return this.filteredTokens.slice().reverse().slice(start, end);
     },
+    pendingTokens() {
+      return this.filteredTokens.filter((t) => this.canRedeem(t));
+    },
   },
   methods: {
     formattedDate(dateStr) {
@@ -114,6 +122,23 @@ export default defineComponent({
         .where("tokenString")
         .equals(token.tokenString)
         .delete();
+      if (token.subscriptionId) {
+        const sub = await cashuDb.subscriptions.get(token.subscriptionId);
+        const idx = sub?.intervals.findIndex(
+          (i) => i.intervalKey === token.intervalKey || i.lockedTokenId === token.id,
+        );
+        if (sub && idx !== undefined && idx >= 0) {
+          sub.intervals[idx].status = "claimed";
+          sub.intervals[idx].redeemed = true;
+          await cashuDb.subscriptions.update(sub.id, { intervals: sub.intervals });
+        }
+      }
+    },
+
+    async redeemAll() {
+      for (const t of this.pendingTokens) {
+        await this.redeem(t);
+      }
     },
   },
 });

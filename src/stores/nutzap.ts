@@ -307,6 +307,7 @@ export const useNutzapStore = defineStore("nutzap", {
           refundUnlockTs: 0,
           status: "pending",
           tokenString: t.tokenString,
+          redeemed: false,
           subscriptionId,
           tierId,
           monthIndex: idx + 1,
@@ -454,14 +455,15 @@ export const useNutzapStore = defineStore("nutzap", {
           frequency: "monthly",
           startDate,
           commitmentLength: months,
-          intervals: lockedTokens.map((t, idx) => ({
-            intervalKey: String(idx + 1),
-            lockedTokenId: t.id,
-            unlockTs: t.unlockTs,
-            refundUnlockTs: 0,
-            status: "pending",
-            tokenString: t.tokenString,
-          })),
+        intervals: lockedTokens.map((t, idx) => ({
+          intervalKey: String(idx + 1),
+          lockedTokenId: t.id,
+          unlockTs: t.unlockTs,
+          refundUnlockTs: 0,
+          status: "pending",
+          tokenString: t.tokenString,
+          redeemed: false,
+        })),
           status: "active",
         } as any);
 

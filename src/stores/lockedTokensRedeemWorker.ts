@@ -161,6 +161,7 @@ export const useLockedTokensRedeemWorker = defineStore(
                   );
                   if (sub && idx !== undefined && idx >= 0) {
                     sub.intervals[idx].status = "claimed";
+                    sub.intervals[idx].redeemed = true;
                     await cashuDb.subscriptions.update(sub.id, {
                       intervals: sub.intervals,
                     });

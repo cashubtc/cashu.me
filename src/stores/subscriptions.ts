@@ -24,6 +24,10 @@ export const useSubscriptionsStore = defineStore("subscriptions", () => {
     const entry: Subscription = {
       id: data.id ?? uuidv4(),
       ...data,
+      intervals: data.intervals.map((i) => ({
+        ...i,
+        redeemed: i.redeemed ?? false,
+      })),
       createdAt: now,
       updatedAt: now,
     } as Subscription;
@@ -59,11 +63,27 @@ export const useSubscriptionsStore = defineStore("subscriptions", () => {
     }
   }
 
+  async function markIntervalRedeemed(
+    subscriptionId: string,
+    monthIndex: number | null | undefined,
+  ) {
+    const sub = await cashuDb.subscriptions.get(subscriptionId);
+    const idx = sub?.intervals.findIndex(
+      (i) => i.monthIndex === monthIndex,
+    );
+    if (sub && idx !== undefined && idx >= 0) {
+      sub.intervals[idx].status = "claimed";
+      sub.intervals[idx].redeemed = true;
+      await cashuDb.subscriptions.update(sub.id, { intervals: sub.intervals });
+    }
+  }
+
   return {
     subscriptions,
     addSubscription,
     updateSubscription,
     deleteSubscription,
     cancelSubscription,
+    markIntervalRedeemed,
   };
 });
