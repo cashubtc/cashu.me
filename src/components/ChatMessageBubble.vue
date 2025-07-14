@@ -57,6 +57,7 @@ import type { MessengerMessage } from "src/stores/messenger";
 import TokenInformation from "components/TokenInformation.vue";
 import { useReceiveTokensStore } from "src/stores/receiveTokensStore";
 import { notifyError } from "src/js/notify";
+import { cashuDb } from "src/stores/dexie";
 
 const props = defineProps<{
   message: MessengerMessage;
@@ -96,6 +97,19 @@ async function redeemPayment() {
   receiveStore.receiveData.tokensBase64 = tokenStr;
   try {
     await receiveStore.receiveToken(tokenStr);
+    if (props.message.subscriptionPayment.subscription_id) {
+      const sub = await cashuDb.subscriptions.get(
+        props.message.subscriptionPayment.subscription_id,
+      );
+      const idx = sub?.intervals.findIndex(
+        (i) => i.monthIndex === props.message.subscriptionPayment.month_index,
+      );
+      if (sub && idx !== undefined && idx >= 0) {
+        sub.intervals[idx].status = "claimed";
+        sub.intervals[idx].redeemed = true;
+        await cashuDb.subscriptions.update(sub.id, { intervals: sub.intervals });
+      }
+    }
     redeemed.value = true;
   } catch (e) {
     console.error(e);

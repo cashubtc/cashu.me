@@ -36,6 +36,7 @@ export interface SubscriptionInterval {
   refundUnlockTs: number;
   status: "pending" | "unlockable" | "claimed" | "expired";
   tokenString: string;
+  redeemed?: boolean;
   subscriptionId?: string;
   tierId?: string;
   monthIndex?: number;
@@ -213,6 +214,26 @@ export class CashuDexie extends Dexie {
             if (entry.creatorP2PK === undefined) {
               entry.creatorP2PK = null;
             }
+          });
+      });
+
+    this.version(9)
+      .stores({
+        proofs: "secret, id, C, amount, reserved, quote, bucketId, label",
+        profiles: "pubkey",
+        creatorsTierDefinitions: "&creatorNpub, eventId, updatedAt",
+        subscriptions: "&id, creatorNpub, tierId, status, createdAt, updatedAt",
+        lockedTokens:
+          "&id, tokenString, owner, tierId, intervalKey, unlockTs, refundUnlockTs, status, subscriptionEventId, subscriptionId, monthIndex, totalMonths",
+      })
+      .upgrade(async (tx) => {
+        await tx
+          .table("subscriptions")
+          .toCollection()
+          .modify((entry: any) => {
+            entry.intervals?.forEach((i: any) => {
+              if (i.redeemed === undefined) i.redeemed = false;
+            });
           });
       });
   }

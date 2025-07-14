@@ -1551,6 +1551,10 @@ export const messages = {
       copy: { tooltip_text: "Copy" },
     },
   },
+  CreatorLockedTokensTable: {
+    redeem_all: "Redeem all pending",
+    status: { redeemed: "Redeemed", pending: "Pending" },
+  },
   restore: {
     mnemonic_error_text: "Please enter a mnemonic",
     restore_mint_error_text: "Error restoring mint: { error }",

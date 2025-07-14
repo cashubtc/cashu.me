@@ -434,10 +434,16 @@
                   {{ formatCurrency(t.amount) }}
                 </q-item-label>
                 <q-item-label caption>
+                  Month {{ t.monthIndex }} -
                   {{ t.locktime ? formatTs(t.locktime) : "-" }}
                 </q-item-label>
               </q-item-section>
               <q-item-section side>
+                <q-icon
+                  :name="t.redeemed ? 'check_circle' : 'hourglass_empty'"
+                  :color="t.redeemed ? 'positive' : 'grey'"
+                  class="q-mr-sm"
+                />
                 <q-btn
                   flat
                   dense
@@ -565,6 +571,9 @@ const rows = computed(() => {
       bucketId: sub.tierId,
       refundPubkey: "",
       date: "",
+      status: i.status,
+      redeemed: i.redeemed ?? false,
+      monthIndex: i.monthIndex,
     }));
     const total = tokens.reduce((sum, t) => sum + t.amount, 0);
     const future = tokens.filter((t) => t.locktime && t.locktime > nowSec);
