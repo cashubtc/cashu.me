@@ -282,8 +282,15 @@ export const useMessengerStore = defineStore("messenger", {
         event.content,
       );
       let subscriptionInfo: SubscriptionPayment | undefined;
-      try {
-        const payload = JSON.parse(decrypted);
+      const lines = decrypted.split("\n").filter((l) => l.trim().length > 0);
+      for (const line of lines) {
+        let payload: any;
+        try {
+          payload = JSON.parse(line);
+        } catch (e) {
+          console.warn("[messenger.addIncomingMessage] invalid JSON", e);
+          continue;
+        }
         if (
           payload &&
           payload.type === "cashu_subscription_payment" &&
@@ -375,7 +382,7 @@ export const useMessengerStore = defineStore("messenger", {
             }
           }
         }
-      } catch {}
+      }
       if (this.eventLog.some((m) => m.id === event.id)) return;
       const msg: MessengerMessage = {
         id: event.id,
