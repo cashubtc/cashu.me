@@ -120,6 +120,26 @@ function connectWithTimeout(relay: any, ms = 6000): Promise<void> {
   });
 }
 
+export class PublishTimeoutError extends Error {
+  constructor(message = "Publish timed out") {
+    super(message);
+    this.name = "PublishTimeoutError";
+  }
+}
+
+export async function publishWithTimeout(
+  ev: NDKEvent,
+  relays?: NDKRelaySet,
+  timeoutMs = 10000
+): Promise<void> {
+  return Promise.race([
+    ev.publish(relays),
+    new Promise<void>((_, reject) =>
+      setTimeout(() => reject(new PublishTimeoutError()), timeoutMs)
+    ),
+  ]);
+}
+
 /** Resolves once any relay in `ndk.pool` has `connected === true`. */
 export function ensureRelayConnectivity(ndk: NDK): Promise<void> {
   const isConnected = () =>
@@ -231,7 +251,7 @@ export async function publishNutzapProfile(opts: {
     notifyWarning("Relay connection failed", e?.message ?? String(e));
   }
   try {
-    await ev.publish(relaySet);
+    await publishWithTimeout(ev, relaySet);
   } catch (e: any) {
     notifyError(e?.message ?? String(e));
     throw e;
@@ -293,7 +313,9 @@ export async function publishDiscoveryProfile(opts: {
     notifyWarning("Relay connection failed", e?.message ?? String(e));
   }
   try {
-    await Promise.all(eventsToPublish.map((ev) => ev.publish(relaySet)));
+    await Promise.all(
+      eventsToPublish.map((ev) => publishWithTimeout(ev, relaySet))
+    );
     notifySuccess("Profile published successfully to your relays!");
   } catch (e: any) {
     notifyError(e?.message ?? String(e));

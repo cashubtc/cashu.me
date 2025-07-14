@@ -102,7 +102,13 @@ import { ref, reactive, computed, watch, onMounted } from 'vue';
 import { useQuasar } from 'quasar';
 import Draggable from 'vuedraggable';
 import { useCreatorHubStore, type Tier } from 'stores/creatorHub';
-import { useNostrStore, fetchNutzapProfile, publishDiscoveryProfile, RelayConnectionError } from 'stores/nostr';
+import {
+  useNostrStore,
+  fetchNutzapProfile,
+  publishDiscoveryProfile,
+  RelayConnectionError,
+  PublishTimeoutError,
+} from 'stores/nostr';
 import { useP2PKStore } from 'stores/p2pk';
 import { useMintsStore } from 'stores/mints';
 import { useCreatorProfileStore } from 'stores/creatorProfile';
@@ -241,7 +247,11 @@ async function publishFullProfile() {
     notifySuccess('Profile updated');
     profileStore.markClean();
   } catch (e: any) {
-    notifyError(e?.message || 'Failed to publish profile');
+    if (e instanceof PublishTimeoutError) {
+      notifyError('Publishing timed out');
+    } else {
+      notifyError(e?.message || 'Failed to publish profile');
+    }
   } finally {
     publishing.value = false;
   }
