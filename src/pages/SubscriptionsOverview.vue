@@ -437,6 +437,9 @@
                   Month {{ t.monthIndex }} -
                   {{ t.locktime ? formatTs(t.locktime) : "-" }}
                 </q-item-label>
+                <q-item-label caption v-if="t.locktime">
+                  Unlocks in {{ countdownTo(t.locktime) }}
+                </q-item-label>
               </q-item-section>
               <q-item-section side>
                 <q-icon
@@ -546,6 +549,10 @@ function formatTs(ts: number): string {
   return `${d.getFullYear()}-${("0" + (d.getMonth() + 1)).slice(-2)}-${(
     "0" + d.getDate()
   ).slice(-2)}`;
+}
+
+function countdownTo(ts: number): string {
+  return formatDistanceToNow(ts * 1000);
 }
 
 const subscriptionsStore = useSubscriptionsStore();

@@ -16,6 +16,12 @@
             :showMintCheck="true"
             :showP2PKCheck="true"
           />
+          <div v-if="receiverPubkey" class="q-mt-xs text-caption">
+            Locked to: {{ shortenString(receiverPubkeyNpub, 15, 6) }}
+          </div>
+          <div v-if="unlockIso" class="q-mt-xs text-caption">
+            Locked until: {{ unlockIso }}
+          </div>
           <q-btn
             label="Redeem"
             color="primary"
@@ -58,6 +64,9 @@ import TokenInformation from "components/TokenInformation.vue";
 import { useReceiveTokensStore } from "src/stores/receiveTokensStore";
 import { notifyError } from "src/js/notify";
 import { cashuDb } from "src/stores/dexie";
+import { useP2PKStore } from "src/stores/p2pk";
+import { nip19 } from "nostr-tools";
+import { shortenString } from "src/js/string-utils";
 
 const props = defineProps<{
   message: MessengerMessage;
@@ -65,6 +74,7 @@ const props = defineProps<{
 }>();
 
 const $q = useQuasar();
+const p2pk = useP2PKStore();
 
 
 const receivedStyle = computed(() => ({
@@ -90,6 +100,28 @@ const deliveryIcon = computed(() =>
 
 const receiveStore = useReceiveTokensStore();
 const redeemed = ref(false);
+
+const receiverPubkey = computed(() => {
+  if (!props.message.subscriptionPayment) return "";
+  return p2pk.getTokenPubkey(props.message.subscriptionPayment.token) || "";
+});
+
+const unlockTime = computed(() => {
+  if (!props.message.subscriptionPayment) return undefined;
+  return p2pk.getTokenLocktime(props.message.subscriptionPayment.token);
+});
+
+const unlockIso = computed(() =>
+  unlockTime.value ? new Date(unlockTime.value * 1000).toISOString() : "",
+);
+
+const receiverPubkeyNpub = computed(() => {
+  try {
+    return receiverPubkey.value ? nip19.npubEncode(receiverPubkey.value) : "";
+  } catch {
+    return receiverPubkey.value;
+  }
+});
 
 async function redeemPayment() {
   if (!props.message.subscriptionPayment) return;
