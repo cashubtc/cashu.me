@@ -312,6 +312,14 @@
         </q-form>
       </div>
     </q-card>
+    <template v-if="autoMultinutInProgress">
+      <div class="row justify-center q-mt-md">
+        <q-spinner color="primary" size="24px" class="q-mr-sm" />
+        <span>
+          Processing payment across {{ autoMultinutMintCount }} mints...
+        </span>
+      </div>
+    </template>
   </q-dialog>
 
   <!-- Multinut Payment Dialog -->
@@ -348,8 +356,11 @@ export default defineComponent({
     ScanIcon,
   },
   props: {},
-  data: function () {
-    return {};
+  data() {
+    return {
+      autoMultinutInProgress: false,
+      autoMultinutMintCount: 0,
+    };
   },
   watch: {
     activeMintUrl: async function () {
@@ -465,12 +476,12 @@ export default defineComponent({
       this.payInvoiceData.show = true;
     },
     async executeAutomaticMultinutPayment() {
+      this.autoMultinutInProgress = true;
+      const selectedMints = [...this.multiMints];
+      this.autoMultinutMintCount = selectedMints.length;
       try {
         // Set blocking state to prevent multiple payments
         this.payInvoiceData.blocking = true;
-
-        // Use all available mints for automatic payment
-        const selectedMints = [...this.multiMints];
 
         // Initialize proportions based on balance weights
         const totalAmount = this.payInvoiceData.meltQuote.response.amount;
@@ -538,6 +549,8 @@ export default defineComponent({
         this.offerManualMultinutFallback();
       } finally {
         this.payInvoiceData.blocking = false;
+        this.autoMultinutInProgress = false;
+        this.autoMultinutMintCount = 0;
       }
     },
     showInsufficientBalanceError() {
