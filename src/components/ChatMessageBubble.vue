@@ -13,7 +13,7 @@
         />
         <q-toggle
           v-if="!message.outgoing"
-          v-model="message.autoRedeem"
+          v-model="autoRedeem"
           label="Auto-redeem"
           class="q-mt-sm"
           @update:model-value="updateAutoRedeem"
@@ -88,13 +88,14 @@ const deliveryIcon = computed(() =>
 
 const receiveStore = useReceiveTokensStore();
 const redeemed = ref(false);
+const autoRedeem = ref(false);
 if (props.message.subscriptionPayment) {
   cashuDb.lockedTokens
     .where("tokenString")
     .equals(props.message.subscriptionPayment.token)
     .first()
     .then((row) => {
-      props.message.autoRedeem = row?.autoRedeem ?? false;
+      autoRedeem.value = row?.autoRedeem ?? false;
     });
 }
 
@@ -153,6 +154,7 @@ async function updateAutoRedeem(val: boolean) {
     .equals(props.message.subscriptionPayment.token)
     .first();
   if (row) await cashuDb.lockedTokens.update(row.id, { autoRedeem: val });
+  autoRedeem.value = val;
 }
 </script>
 
