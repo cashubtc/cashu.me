@@ -38,6 +38,7 @@ export interface SubscriptionInterval {
   tokenString: string;
   preimage?: string | null;
   hashlock?: string | null;
+  autoRedeem?: boolean;
   redeemed?: boolean;
   subscriptionId?: string;
   tierId?: string;
@@ -82,6 +83,7 @@ export interface LockedToken {
   monthIndex?: number;
   totalMonths?: number;
   label?: string;
+  autoRedeem?: boolean;
 }
 
 // export interface Proof {
@@ -267,6 +269,50 @@ export class CashuDexie extends Dexie {
               if (i.preimage === undefined) i.preimage = null;
               if (i.hashlock === undefined) i.hashlock = null;
             });
+          });
+      });
+
+    this.version(11)
+      .stores({
+        proofs: "secret, id, C, amount, reserved, quote, bucketId, label",
+        profiles: "pubkey",
+        creatorsTierDefinitions: "&creatorNpub, eventId, updatedAt",
+        subscriptions: "&id, creatorNpub, tierId, status, createdAt, updatedAt",
+        lockedTokens:
+          "&id, tokenString, owner, tierId, intervalKey, unlockTs, refundUnlockTs, status, subscriptionEventId, subscriptionId, monthIndex, totalMonths, hashlock, preimage, autoRedeem",
+      })
+      .upgrade(async (tx) => {
+        await tx
+          .table("lockedTokens")
+          .toCollection()
+          .modify((entry: any) => {
+            if (entry.autoRedeem === undefined) entry.autoRedeem = false;
+          });
+        await tx
+          .table("subscriptions")
+          .toCollection()
+          .modify((entry: any) => {
+            entry.intervals?.forEach((i: any) => {
+              if (i.autoRedeem === undefined) i.autoRedeem = false;
+            });
+          });
+      });
+
+    this.version(11)
+      .stores({
+        proofs: "secret, id, C, amount, reserved, quote, bucketId, label",
+        profiles: "pubkey",
+        creatorsTierDefinitions: "&creatorNpub, eventId, updatedAt",
+        subscriptions: "&id, creatorNpub, tierId, status, createdAt, updatedAt",
+        lockedTokens:
+          "&id, tokenString, owner, tierId, intervalKey, unlockTs, refundUnlockTs, status, subscriptionEventId, subscriptionId, monthIndex, totalMonths, hashlock, preimage, autoRedeem",
+      })
+      .upgrade(async (tx) => {
+        await tx
+          .table("lockedTokens")
+          .toCollection()
+          .modify((entry: any) => {
+            if (entry.autoRedeem === undefined) entry.autoRedeem = false;
           });
       });
   }

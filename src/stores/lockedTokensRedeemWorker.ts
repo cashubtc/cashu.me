@@ -74,6 +74,7 @@ export const useLockedTokensRedeemWorker = defineStore(
         const receiveStore = useReceiveTokensStore();
         const mintStore = useMintsStore();
         for (const entry of entries) {
+          if (entry.autoRedeem !== true) continue;
           const nowSec = Math.floor(Date.now() / 1000);
           if (entry.unlockTs > nowSec) {
             await cashuDb.lockedTokens.update(entry.id, { status: "pending" });
