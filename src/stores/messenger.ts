@@ -315,10 +315,12 @@ export const useMessengerStore = defineStore("messenger", {
             owner: "creator",
             creatorNpub: useNostrStore().pubkey,
             subscriberNpub: event.pubkey,
+            creatorP2PK: payload.receiver_p2pk,
             tierId: payload.tier_id ?? "",
             intervalKey: payload.subscription_id ?? "",
-            unlockTs: 0,
+            unlockTs: payload.unlock_time ?? payload.unlockTime ?? 0,
             refundUnlockTs: 0,
+            hashlock: payload.hashlock ?? null,
             status: "unlockable",
             subscriptionEventId: null,
             subscriptionId: payload.subscription_id,
@@ -365,7 +367,8 @@ export const useMessengerStore = defineStore("messenger", {
                   amount,
                   token: payload.token,
                   pubkey: event.pubkey,
-                  locktime: payload.unlockTime || undefined,
+                  locktime:
+                    payload.unlock_time ?? payload.unlockTime || undefined,
                   bucketId: bucket.id,
                 });
               }
