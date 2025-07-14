@@ -7,6 +7,9 @@ export type Receipt = {
   refundPubkey?: string;
   bucketId: string;
   date: string;
+  receiver_p2pk?: string;
+  unlock_time?: number;
+  hashlock?: string;
 };
 
 export function formatTimestamp(ts: number): string {
@@ -36,6 +39,9 @@ export function receiptToDmText(
         month_index: subscription.month_index,
         total_months: subscription.total_months,
         token: receipt.token,
+        receiver_p2pk: receipt.receiver_p2pk ?? receipt.pubkey,
+        unlock_time: receipt.unlock_time ?? receipt.locktime ?? null,
+        hashlock: receipt.hashlock ?? null,
       }
     : {
         token: receipt.token,
@@ -43,6 +49,9 @@ export function receiptToDmText(
         unlockTime: receipt.locktime ?? null,
         bucketId: receipt.bucketId,
         referenceId: receipt.id,
+        receiver_p2pk: receipt.receiver_p2pk ?? receipt.pubkey,
+        unlock_time: receipt.unlock_time ?? receipt.locktime ?? null,
+        hashlock: receipt.hashlock ?? null,
       };
   return JSON.stringify(payload);
 }
@@ -54,14 +63,17 @@ export function receiptsToDmText(
 ): string {
   return receipts
     .map((r, idx) =>
-      receiptToDmText(r, supporterName, subscription
-        ? {
-            subscription_id: subscription.subscription_id,
-            tier_id: subscription.tier_id,
-            month_index: idx + 1,
-            total_months: receipts.length,
-          }
-        : undefined,
+      receiptToDmText(
+        r,
+        supporterName,
+        subscription
+          ? {
+              subscription_id: subscription.subscription_id,
+              tier_id: subscription.tier_id,
+              month_index: idx + 1,
+              total_months: receipts.length,
+            }
+          : undefined
       )
     )
     .join("\n");

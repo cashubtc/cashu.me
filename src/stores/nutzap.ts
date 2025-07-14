@@ -230,6 +230,9 @@ export const useNutzapStore = defineStore("nutzap", {
               month_index: i + 1,
               total_months: months,
               token: tokenStr,
+              receiver_p2pk: creator.cashuP2pk,
+              unlock_time: unlockDate,
+              hashlock: hash,
             }),
             relayList
           );
