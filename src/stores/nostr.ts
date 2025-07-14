@@ -35,6 +35,7 @@ import {
   Token,
 } from "@cashu/cashu-ts";
 import { useTokensStore } from "./tokens";
+import { filterHealthyRelays } from "src/boot/ndk";
 import {
   notifyApiError,
   notifyError,
@@ -1538,23 +1539,33 @@ export async function publishEvent(event: NostrEvent): Promise<void> {
   }
 }
 
-export function subscribeToNostr(
+export async function subscribeToNostr(
   filter: any,
   cb: (ev: NostrEvent) => void,
-  relays?: string[],
-) {
+  relays?: string[]
+): Promise<boolean> {
   const relayUrls =
     relays && relays.length > 0
       ? relays
       : useSettingsStore().defaultNostrRelays.value;
   if (!relayUrls || relayUrls.length === 0) {
     console.warn('[nostr] subscribeMany called with empty relay list');
-    return;
+    return false;
   }
+
+  // Ensure at least one relay is reachable before subscribing
+  const healthy = await filterHealthyRelays(relayUrls);
+  if (healthy.length === 0) {
+    console.error('[nostr] subscription failed: all relays unreachable');
+    return false;
+  }
+
   const pool = new SimplePool();
   try {
-    pool.subscribeMany(relayUrls, [filter], { onevent: cb });
+    pool.subscribeMany(healthy, [filter], { onevent: cb });
+    return true;
   } catch (e) {
-    console.error("Failed to subscribe", e);
+    console.error('Failed to subscribe', e);
+    return false;
   }
 }

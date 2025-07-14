@@ -9,6 +9,7 @@ import {
 } from "./nostr";
 import { useSettingsStore } from "./settings";
 import { DEFAULT_RELAYS } from "src/config/relays";
+import { filterHealthyRelays } from "src/boot/ndk";
 import { useNdk } from "src/composables/useNdk";
 import { nip19 } from "nostr-tools";
 import { Event as NostrEvent } from "nostr-tools";
@@ -196,8 +197,11 @@ export const useCreatorsStore = defineStore("creators", {
         ])
       );
 
+      // Filter out unreachable relays before subscribing
+      const healthyRelays = await filterHealthyRelays(relayUrls);
+
       let received = false;
-      const timeout = setTimeout(async () => {
+      const fetchFromIndexer = async () => {
         if (received) return;
         const indexerUrl = settings.tiersIndexerUrl.value;
         if (!indexerUrl) {
@@ -253,9 +257,17 @@ export const useCreatorsStore = defineStore("creators", {
           this.tierFetchError = true;
           notifyWarning("Unable to retrieve subscription tiers");
         }
-      }, 5000);
+      };
 
-      subscribeToNostr(
+      if (healthyRelays.length === 0) {
+        // No healthy relays found – fallback immediately
+        await fetchFromIndexer();
+        return;
+      }
+
+      const timeout = setTimeout(fetchFromIndexer, 5000);
+
+      const subscribed = await subscribeToNostr(
         filter,
         async (event) => {
           try {
@@ -278,8 +290,14 @@ export const useCreatorsStore = defineStore("creators", {
             console.error("Error parsing tier definitions JSON:", e);
           }
         },
-        relayUrls
+        healthyRelays
       );
+
+      if (!subscribed) {
+        // Subscription failed – query indexer without waiting
+        clearTimeout(timeout);
+        await fetchFromIndexer();
+      }
     },
 
     async publishTierDefinitions(tiersArray: Tier[]) {
