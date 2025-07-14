@@ -8,16 +8,18 @@
       <q-card-section class="text-h6">{{
         $t("SubscriptionReceipt.title")
       }}</q-card-section>
-      <q-card-section style="max-height: 300px; overflow-y: auto">
+      <q-card-section style="max-height: 300px">
         <q-carousel
           v-if="receipts.length"
           v-model="activeSlide"
+          :height="260"
+          animated
           swipeable
           control-color="primary"
         >
           <q-carousel-slide
             v-for="(r, i) in receipts"
-            :name="i"
+            :name="i + 1"
             :key="r.id"
             class="q-pa-md"
           >
@@ -26,8 +28,8 @@
             <div class="q-mb-sm">
               <div class="row items-center no-wrap">
                 <span
-                  >{{ r.token.slice(0, 16)
-                  }}<span v-if="r.token.length > 16">…</span></span
+                  >{{ r.tokenString.slice(0, 16)
+                  }}<span v-if="r.tokenString.length > 16">…</span></span
                 >
                 <q-btn
                   flat
@@ -43,7 +45,7 @@
                   v-if="expanded[r.id]"
                   class="text-caption q-mt-xs token-full"
                 >
-                  {{ r.token }}
+                  {{ r.tokenString }}
                 </div>
               </q-slide-transition>
             </div>
@@ -52,7 +54,7 @@
                 flat
                 color="primary"
                 size="sm"
-                @click="copyToken(r.token)"
+                @click="copyToken(r.tokenString)"
               >
                 {{ $t("global.actions.copy.label") }}
               </q-btn>
@@ -60,7 +62,7 @@
                 flat
                 color="primary"
                 size="sm"
-                @click="saveToken(r.token)"
+                @click="saveToken(r.tokenString)"
               >
                 {{ $t("SubscriptionReceipt.actions.save.label") }}
               </q-btn>
@@ -100,7 +102,7 @@ export default defineComponent({
   data() {
     return {
       expanded: {} as Record<string, boolean>,
-      activeSlide: 0,
+      activeSlide: 1,
     };
   },
   computed: {
@@ -111,6 +113,14 @@ export default defineComponent({
       set(v: boolean) {
         this.$emit("update:modelValue", v);
       },
+    },
+  },
+  watch: {
+    modelValue(val: boolean) {
+      if (val) this.activeSlide = 1;
+    },
+    receipts() {
+      this.activeSlide = 1;
     },
   },
   methods: {
