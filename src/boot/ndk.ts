@@ -4,7 +4,7 @@ import NDK, { NDKSigner } from "@nostr-dev-kit/ndk";
 import { useNostrStore } from "stores/nostr";
 import { NDKEvent, type NDKFilter } from "@nostr-dev-kit/ndk";
 import { useSettingsStore } from "src/stores/settings";
-import { DEFAULT_RELAYS } from "src/config/relays";
+import { DEFAULT_RELAYS, FREE_RELAYS } from "src/config/relays";
 
 export type NdkBootErrorReason =
   | "no-signer"
@@ -46,7 +46,7 @@ async function pingRelay(url: string): Promise<boolean> {
         } catch {}
         resolve(false);
       }
-    }, 4000);
+    }, 1000);
     ws.onopen = () => {
       if (!settled) {
         settled = true;
@@ -62,6 +62,18 @@ async function pingRelay(url: string): Promise<boolean> {
         resolve(false);
       }
     };
+    ws.onmessage = (ev) => {
+      if (
+        !settled &&
+        typeof ev.data === "string" &&
+        ev.data.startsWith("restricted:")
+      ) {
+        settled = true;
+        clearTimeout(timer);
+        ws.close();
+        resolve(false);
+      }
+    };
   });
 }
 
@@ -69,7 +81,8 @@ export async function filterHealthyRelays(relays: string[]): Promise<string[]> {
   const results = await Promise.all(
     relays.map(async (u) => ((await pingRelay(u)) ? u : null))
   );
-  return results.filter((u): u is string => !!u);
+  const healthy = results.filter((u): u is string => !!u);
+  return healthy.length >= 2 ? healthy : FREE_RELAYS;
 }
 
 export async function safeConnect(ndk: NDK): Promise<Error | null> {
@@ -95,7 +108,7 @@ async function createReadOnlyNdk(): Promise<NDK> {
     : [];
   const relays = userRelays.length ? userRelays : DEFAULT_RELAYS;
   const healthy = await filterHealthyRelays(relays);
-  const relayUrls = healthy.length ? healthy : [relays[0]];
+  const relayUrls = healthy.length ? healthy : FREE_RELAYS;
   const ndk = new NDK({ explicitRelayUrls: relayUrls });
   mergeDefaultRelays(ndk);
   await safeConnect(ndk);
@@ -143,7 +156,7 @@ export async function createNdk(): Promise<NDK> {
     : [];
   const relays = userRelays.length ? userRelays : DEFAULT_RELAYS;
   const healthy = await filterHealthyRelays(relays);
-  const relayUrls = healthy.length ? healthy : [relays[0]];
+  const relayUrls = healthy.length ? healthy : FREE_RELAYS;
   const ndk = new NDK({ signer, explicitRelayUrls: relayUrls });
   mergeDefaultRelays(ndk);
   await safeConnect(ndk);

@@ -50,6 +50,7 @@ import { mdiCheck, mdiCheckAll } from "@quasar/extras/mdi-v6";
 import type { MessengerMessage } from "src/stores/messenger";
 import TokenCarousel from "components/TokenCarousel.vue";
 import { useReceiveTokensStore } from "src/stores/receiveTokensStore";
+import { useWalletStore } from "src/stores/wallet";
 import { notifyError } from "src/js/notify";
 import { cashuDb } from "src/stores/dexie";
 import { useP2PKStore } from "src/stores/p2pk";
@@ -123,16 +124,14 @@ const receiverPubkeyNpub = computed(() => {
 
 async function redeemPayment() {
   if (!props.message.subscriptionPayment) return;
-  const tokenStr = props.message.subscriptionPayment.token;
-  receiveStore.receiveData.tokensBase64 = tokenStr;
+  const payment = props.message.subscriptionPayment;
+  const wallet = useWalletStore();
   try {
-    await receiveStore.receiveToken(tokenStr);
-    if (props.message.subscriptionPayment.subscription_id) {
-      const sub = await cashuDb.subscriptions.get(
-        props.message.subscriptionPayment.subscription_id,
-      );
+    await wallet.redeem(payment.token, payment.preimage ?? undefined);
+    if (payment.subscription_id) {
+      const sub = await cashuDb.subscriptions.get(payment.subscription_id);
       const idx = sub?.intervals.findIndex(
-        (i) => i.monthIndex === props.message.subscriptionPayment.month_index,
+        (i) => i.monthIndex === payment.month_index,
       );
       if (sub && idx !== undefined && idx >= 0) {
         sub.intervals[idx].status = "claimed";

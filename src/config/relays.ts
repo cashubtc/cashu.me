@@ -5,3 +5,9 @@ export const DEFAULT_RELAYS = [
   'wss://nostr.wine',
   'wss://nos.lol'
 ];
+
+export const FREE_RELAYS = [
+  'wss://relay.damus.io',
+  'wss://relay.primal.net',
+  'wss://relayable.org'
+];
