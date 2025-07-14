@@ -312,14 +312,12 @@
         </q-form>
       </div>
     </q-card>
-    <template v-if="autoMultinutInProgress">
-      <div class="row justify-center q-mt-md">
-        <q-spinner color="primary" size="24px" class="q-mr-sm" />
-        <span>
-          Processing payment across {{ autoMultinutMintCount }} mints...
-        </span>
-      </div>
-    </template>
+    <div class="auto-multinut-progress" v-if="autoMultinutInProgress">
+      <q-spinner color="primary" size="20px" class="q-mr-sm" />
+      <span
+        >Processing payment across {{ autoMultinutMintCount }} mints...</span
+      >
+    </div>
   </q-dialog>
 
   <!-- Multinut Payment Dialog -->
@@ -410,13 +408,6 @@ export default defineComponent({
         this.multiMints.length > 1 &&
         this.payInvoiceData.meltQuote.response.amount > 0 &&
         totalMultinutBalance >= this.payInvoiceData.meltQuote.response.amount;
-      console.log("DEBUG: hasMultinutSupport", result, {
-        multiMints: this.multiMints,
-        totalMultinutBalance,
-        required: this.payInvoiceData.meltQuote.response.amount,
-        multinutEnabled: this.multinutEnabled,
-        multinutAutoEnabled: this.multinutAutoEnabled,
-      });
       return result;
     },
   },

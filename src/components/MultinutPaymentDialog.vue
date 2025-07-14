@@ -846,7 +846,6 @@ export default defineComponent({
       return { overallBalance: overallBalance, weights: weights };
     },
     executeMultinutPayment: async function () {
-      console.log("DEBUG: Entered executeMultinutPayment");
       const uiStore = useUiStore();
       //
       const totalQuoteAmount = this.payInvoiceData.meltQuote.response.amount;
