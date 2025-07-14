@@ -148,7 +148,8 @@ export const useLockedTokensRedeemWorker = defineStore(
 
             debug("locked token redeem: sending proofs", proofs);
             try {
-              await wallet.redeem(entry.tierId, entry.preimage ?? undefined);
+              const witness = entry.preimage ?? undefined;
+              await wallet.redeem(entry.tokenString, witness);
               await cashuDb.lockedTokens
                 .where("tokenString")
                 .equals(entry.tokenString)

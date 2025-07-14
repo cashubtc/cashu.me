@@ -141,17 +141,32 @@ export const useMessengerStore = defineStore("messenger", {
         privKey = nostr.privKeyHex;
         if (!privKey) return { success: false, event: null } as any;
       }
-      const { success, event } = await nostr.sendNip04DirectMessage(
-        recipient,
-        message,
-        privKey,
-        nostr.pubkey,
-        relays,
-      );
-      if (success && event) {
-        this.addOutgoingMessage(recipient, message, event.created_at, event.id);
+
+      const list = relays && relays.length ? relays : (this.relays as any);
+      for (const r of list) {
+        try {
+          const { success, event } = await nostr.sendNip04DirectMessage(
+            recipient,
+            message,
+            privKey,
+            nostr.pubkey,
+            [r],
+          );
+          if (success && event) {
+            this.addOutgoingMessage(
+              recipient,
+              message,
+              event.created_at,
+              event.id,
+            );
+            return { success: true, event } as any;
+          }
+          console.warn(`[messenger.sendDm] failed via ${r}`);
+        } catch (e) {
+          console.error(`[messenger.sendDm] relay ${r}`, e);
+        }
       }
-      return { success, event } as any;
+      return { success: false } as any;
     },
     async sendToken(
       recipient: string,

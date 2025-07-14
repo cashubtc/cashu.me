@@ -860,9 +860,18 @@ export const useWalletStore = defineStore("wallet", {
     },
 
     redeem: async function (
-      bucketId: string = DEFAULT_BUCKET_ID,
+      bucketOrToken: string = DEFAULT_BUCKET_ID,
       preimage?: string,
     ) {
+      let bucketId = bucketOrToken;
+      if (bucketOrToken.length > 50) {
+        const receiveStore = useReceiveTokensStore();
+        const p2pkStore = useP2PKStore();
+        receiveStore.receiveData.tokensBase64 = bucketOrToken;
+        receiveStore.receiveData.p2pkPrivateKey =
+          p2pkStore.getPrivateKeyForP2PKEncodedToken(bucketOrToken);
+        bucketId = DEFAULT_BUCKET_ID;
+      }
       while (true) {
         const res = await this.attemptRedeem(bucketId, preimage);
         if (res) break;
