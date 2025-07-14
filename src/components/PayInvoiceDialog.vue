@@ -324,6 +324,8 @@ import { mapActions, mapState, mapWritableState } from "pinia";
 import ChooseMint from "components/ChooseMint.vue";
 import ToggleUnit from "components/ToggleUnit.vue";
 import MultinutPaymentDialog from "./MultinutPaymentDialog.vue";
+import { MultinutService } from "src/js/multinut-service.js";
+import { notifyError, notifySuccess } from "src/js/notify";
 
 import * as _ from "underscore";
 import { Scan as ScanIcon } from "lucide-vue-next";
@@ -355,7 +357,7 @@ export default defineComponent({
   },
   computed: {
     ...mapState(useUiStore, ["tickerShort", "globalMutexLock"]),
-    ...mapState(useSettingsStore, ["multinutEnabled"]),
+    ...mapState(useSettingsStore, ["multinutEnabled", "multinutAutoEnabled"]),
     ...mapWritableState(useCameraStore, ["camera", "hasCamera"]),
     ...mapState(useWalletStore, ["payInvoiceData"]),
     ...mapState(useMintsStore, [
@@ -420,11 +422,29 @@ export default defineComponent({
         // await this.decodeAndQuote(text.trim());
       }
     },
-    handleMeltButton: function () {
+    handleMeltButton: async function () {
       if (this.payInvoiceData.blocking) {
         throw new Error("already processing an invoice.");
       }
-      this.meltInvoiceData();
+
+      // First, try normal single-mint payment if we have sufficient balance
+      if (this.enoughtotalUnitBalance) {
+        this.meltInvoiceData();
+        return;
+      }
+
+      // If insufficient balance, check if auto-multinut is possible and enabled
+      if (
+        this.hasMultinutSupport &&
+        this.multinutEnabled &&
+        this.multinutAutoEnabled
+      ) {
+        await this.executeAutomaticMultinutPayment();
+        return;
+      }
+
+      // If auto-multinut is not available or disabled, show error
+      this.showInsufficientBalanceError();
     },
     openMultinutDialog: function () {
       this.payInvoiceData.show = false;
@@ -432,6 +452,101 @@ export default defineComponent({
     },
     handleReturnToPayDialog: function () {
       this.payInvoiceData.show = true;
+    },
+    async executeAutomaticMultinutPayment() {
+      try {
+        // Set blocking state to prevent multiple payments
+        this.payInvoiceData.blocking = true;
+
+        // Use all available mints for automatic payment
+        const selectedMints = [...this.multiMints];
+
+        // Initialize proportions based on balance weights
+        const totalAmount = this.payInvoiceData.meltQuote.response.amount;
+        const mintProportions = MultinutService.initializeMintProportions(
+          selectedMints,
+          totalAmount,
+          this.activeUnit
+        );
+
+        // Progress callback for UI updates
+        const onProgress = (phase, mintCount) => {
+          if (phase === "requesting") {
+            this.payInvoiceData.blocking = true;
+            // Could update UI to show "Processing payment across X mints..."
+          } else if (phase === "paying") {
+            // Could update UI to show payment progress
+          }
+        };
+
+        // Execute the multinut payment
+        const result = await MultinutService.executePayment(
+          this.payInvoiceData,
+          selectedMints,
+          mintProportions,
+          this.activeUnit,
+          onProgress
+        );
+
+        if (result.success) {
+          // Payment successful
+          useUiStore().vibrate();
+          const uiStore = useUiStore();
+          notifySuccess(
+            `Payment completed! Used ${result.successfulPayments.length} mints: ${result.mintBreakdown}`
+          );
+
+          // Close the dialog
+          this.payInvoiceData.invoice = { sat: 0, memo: "", bolt11: "" };
+          this.payInvoiceData.show = false;
+        } else {
+          // Some payments failed
+          const failedCount = result.failedPayments.length;
+          const successCount = result.successfulPayments.length;
+
+          if (successCount > 0) {
+            // Partial success
+            notifyError(
+              `Payment partially completed. ${successCount} mints succeeded, ${failedCount} failed.`
+            );
+          } else {
+            // Complete failure
+            notifyError(
+              "Automatic multinut payment failed. Try manual multinut payment."
+            );
+            // Offer manual multinut as fallback
+            this.offerManualMultinutFallback();
+          }
+        }
+      } catch (error) {
+        console.error("Automatic multinut payment failed:", error);
+        notifyError(
+          "Automatic multinut payment failed. Try manual multinut payment."
+        );
+        // Offer manual multinut as fallback
+        this.offerManualMultinutFallback();
+      } finally {
+        this.payInvoiceData.blocking = false;
+      }
+    },
+    showInsufficientBalanceError() {
+      const uiStore = useUiStore();
+      const amount = this.payInvoiceData.meltQuote.response.amount;
+      const balance = this.activeBalance;
+      notifyError(
+        uiStore.t("wallet.notifications.insufficient_balance", {
+          amount: uiStore.formatCurrency(amount, this.activeUnit),
+          balance: uiStore.formatCurrency(balance, this.activeUnit),
+        })
+      );
+    },
+    offerManualMultinutFallback() {
+      // If manual multinut is available, offer it as a fallback
+      if (this.hasMultinutSupport && this.multinutEnabled) {
+        // Could show a dialog asking if user wants to try manual multinut
+        // For now, just keep the dialog open so user can click the "Multi" button
+        console.log("Manual multinut available as fallback");
+      }
     },
   },
   created: function () {},
