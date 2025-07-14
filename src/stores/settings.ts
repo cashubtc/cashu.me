@@ -82,6 +82,10 @@ export const useSettingsStore = defineStore("settings", {
         "cashu.settings.multinutEnabled",
         false
       ),
+      multinutAutoEnabled: useLocalStorage<boolean>(
+        "cashu.settings.multinutAutoEnabled",
+        false
+      ),
       nostrMintBackupEnabled: useLocalStorage<boolean>(
         "cashu.settings.nostrMintBackupEnabled",
         false

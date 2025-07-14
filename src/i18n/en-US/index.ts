@@ -373,6 +373,9 @@ export default {
         toggle: "Enable Multinut",
         description:
           "If enabled, the wallet will use Multinut to pay invoices from multiple mints at once.",
+        auto_toggle: "Auto-use multinut when needed",
+        auto_description:
+          "If enabled, multinut payments will happen automatically when you don't have enough balance in one mint but have sufficient balance across multiple mints.",
       },
       nostr_mint_backup: {
         toggle: "Backup mint list on Nostr",

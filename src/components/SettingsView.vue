@@ -1146,6 +1146,17 @@
                 </q-item-label>
               </q-toggle>
             </div>
+            <!-- Auto-multinut toggle - only visible when multinut is enabled -->
+            <div v-if="multinutEnabled" class="row q-pt-md q-px-md">
+              <q-toggle
+                v-model="multinutAutoEnabled"
+                :label="$t('Settings.experimental.multinut.auto_toggle')"
+                color="primary"
+              />
+              <q-item-label caption class="q-px-md">
+                {{ $t("Settings.experimental.multinut.auto_description") }}
+              </q-item-label>
+            </div>
           </div>
         </div>
 
@@ -1805,6 +1816,7 @@ export default defineComponent({
       "auditorApiUrl",
       "bip177BitcoinSymbol",
       "multinutEnabled",
+      "multinutAutoEnabled",
       "nostrMintBackupEnabled",
     ]),
     ...mapState(useP2PKStore, ["p2pkKeys"]),
