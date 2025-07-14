@@ -368,7 +368,7 @@ export const useMessengerStore = defineStore("messenger", {
                   token: payload.token,
                   pubkey: event.pubkey,
                   locktime:
-                    payload.unlock_time ?? payload.unlockTime || undefined,
+                    payload.unlock_time ?? payload.unlockTime,
                   bucketId: bucket.id,
                 });
               }
