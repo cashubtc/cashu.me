@@ -311,20 +311,37 @@
           </div>
         </q-form>
       </div>
-    </q-card>
-    <div class="auto-multinut-progress" v-if="autoMultinutInProgress">
-      <q-spinner color="primary" size="20px" class="q-mr-sm" />
-      <span
-        >Processing payment across {{ autoMultinutMintCount }} mints...</span
+      <div
+        v-if="multinutBreakdown && multinutBreakdown.length > 0"
+        class="multi-nut-summary q-mb-md"
       >
-    </div>
+        <div class="multi-nut-notice q-mb-xs">
+          <q-icon name="bolt" color="primary" size="18px" class="q-mr-xs" />
+          This payment will use multiple mints:
+        </div>
+        <ul class="multi-nut-breakdown">
+          <li v-for="entry in multinutBreakdown" :key="entry.mint.url">
+            <span class="mint-name">{{
+              entry.mint.nickname || entry.mint.info?.name || entry.mint.url
+            }}</span
+            >:
+            <span class="mint-amount">{{ entry.amount }} sats</span>
+          </li>
+        </ul>
+      </div>
+      <div class="auto-multinut-progress" v-if="autoMultinutInProgress">
+        <q-spinner color="primary" size="20px" class="q-mr-sm" />
+        <span
+          >Processing payment across {{ autoMultinutMintCount }} mints...</span
+        >
+      </div>
+    </q-card>
+    <!-- Multinut Payment Dialog -->
+    <MultinutPaymentDialog
+      ref="multinutDialog"
+      @return-to-pay-dialog="handleReturnToPayDialog"
+    />
   </q-dialog>
-
-  <!-- Multinut Payment Dialog -->
-  <MultinutPaymentDialog
-    ref="multinutDialog"
-    @return-to-pay-dialog="handleReturnToPayDialog"
-  />
 </template>
 <script>
 import { defineComponent } from "vue";
@@ -409,6 +426,38 @@ export default defineComponent({
         this.payInvoiceData.meltQuote.response.amount > 0 &&
         totalMultinutBalance >= this.payInvoiceData.meltQuote.response.amount;
       return result;
+    },
+    multinutBreakdown() {
+      // Only show if auto-multinut is enabled, required, and possible
+      if (
+        !this.hasMultinutSupport ||
+        !this.multinutEnabled ||
+        !this.multinutAutoEnabled ||
+        this.enoughtotalUnitBalance
+      ) {
+        return null;
+      }
+      // Calculate the distribution
+      const selectedMints = [...this.multiMints];
+      const totalAmount = this.payInvoiceData.meltQuote.response.amount;
+      const mintProportions = MultinutService.initializeMintProportions(
+        selectedMints,
+        totalAmount,
+        this.activeUnit
+      );
+      // Build breakdown: [{ mint, amount }]
+      return selectedMints
+        .map((mint) => {
+          const percentage = mintProportions[mint.url] || 0;
+          const amount = Math.round(totalAmount * (percentage / 100));
+          return amount > 0
+            ? {
+                mint,
+                amount,
+              }
+            : null;
+        })
+        .filter(Boolean);
     },
   },
   methods: {
@@ -601,5 +650,39 @@ export default defineComponent({
   background-color: var(--q-primary);
   border-radius: 50%;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.multi-nut-summary {
+  background: rgba(255, 255, 255, 0.04); /* subtle, matches modal */
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+}
+
+.multi-nut-notice {
+  font-weight: 600;
+  color: #1976d2;
+  display: flex;
+  align-items: center;
+  font-size: 15px;
+  margin-bottom: 6px;
+}
+
+.multi-nut-breakdown {
+  list-style: none;
+  padding-left: 0;
+  margin: 0;
+}
+
+.mint-name {
+  font-weight: 500;
+  color: #1976d2;
+}
+
+.mint-amount {
+  font-weight: 500;
+  color: #fff;
+  margin-left: 4px;
 }
 </style>
