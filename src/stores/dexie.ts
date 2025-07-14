@@ -36,6 +36,8 @@ export interface SubscriptionInterval {
   refundUnlockTs: number;
   status: "pending" | "unlockable" | "claimed" | "expired";
   tokenString: string;
+  preimage?: string | null;
+  hashlock?: string | null;
   redeemed?: boolean;
   subscriptionId?: string;
   tierId?: string;
@@ -68,6 +70,8 @@ export interface LockedToken {
   subscriberNpub?: string;
   creatorNpub?: string;
   creatorP2PK?: string;
+  preimage?: string | null;
+  hashlock?: string | null;
   tierId: string;
   intervalKey: string;
   unlockTs: number;
@@ -192,7 +196,8 @@ export class CashuDexie extends Dexie {
               if (i.subscriptionId === undefined) i.subscriptionId = entry.id;
               if (i.tierId === undefined) i.tierId = entry.tierId;
               if (i.monthIndex === undefined) i.monthIndex = null;
-              if (i.totalMonths === undefined) i.totalMonths = entry.commitmentLength;
+              if (i.totalMonths === undefined)
+                i.totalMonths = entry.commitmentLength;
             });
           });
       });
@@ -233,6 +238,34 @@ export class CashuDexie extends Dexie {
           .modify((entry: any) => {
             entry.intervals?.forEach((i: any) => {
               if (i.redeemed === undefined) i.redeemed = false;
+            });
+          });
+      });
+
+    this.version(10)
+      .stores({
+        proofs: "secret, id, C, amount, reserved, quote, bucketId, label",
+        profiles: "pubkey",
+        creatorsTierDefinitions: "&creatorNpub, eventId, updatedAt",
+        subscriptions: "&id, creatorNpub, tierId, status, createdAt, updatedAt",
+        lockedTokens:
+          "&id, tokenString, owner, tierId, intervalKey, unlockTs, refundUnlockTs, status, subscriptionEventId, subscriptionId, monthIndex, totalMonths, hashlock, preimage",
+      })
+      .upgrade(async (tx) => {
+        await tx
+          .table("lockedTokens")
+          .toCollection()
+          .modify((entry: any) => {
+            if (entry.preimage === undefined) entry.preimage = null;
+            if (entry.hashlock === undefined) entry.hashlock = null;
+          });
+        await tx
+          .table("subscriptions")
+          .toCollection()
+          .modify((entry: any) => {
+            entry.intervals?.forEach((i: any) => {
+              if (i.preimage === undefined) i.preimage = null;
+              if (i.hashlock === undefined) i.hashlock = null;
             });
           });
       });

@@ -10,10 +10,7 @@ import { useMintsStore } from "./mints";
 import { useProofsStore } from "./proofs";
 import { useMessengerStore } from "./messenger";
 import { useSubscriptionsStore } from "./subscriptions";
-import type {
-  CreatorIdentity,
-  SubscribeTierOptions,
-} from "src/types/creator";
+import type { CreatorIdentity, SubscribeTierOptions } from "src/types/creator";
 import { isValidCashuP2pk } from "src/types/creator";
 import {
   fetchNutzapProfile,
@@ -62,7 +59,7 @@ export const useNutzapStore = defineStore("nutzap", {
     watchInitialized: false,
     sendQueue: useLocalStorage<NutzapQueuedSend[]>(
       "cashu.nutzap.sendQueue",
-      [],
+      []
     ),
   }),
 
@@ -83,11 +80,11 @@ export const useNutzapStore = defineStore("nutzap", {
       } as const;
       const { success } = await messenger.sendDm(
         item.npub,
-        JSON.stringify(payload),
+        JSON.stringify(payload)
       );
       if (success) {
         const idx = this.sendQueue.findIndex(
-          (q) => q.createdAt === item.createdAt,
+          (q) => q.createdAt === item.createdAt
         );
         if (idx >= 0) this.sendQueue.splice(idx, 1);
       }
@@ -111,7 +108,7 @@ export const useNutzapStore = defineStore("nutzap", {
               this.listenerStarted = false;
               this.initListener(pubkey);
             }
-          },
+          }
         );
         this.watchInitialized = true;
       }
@@ -186,12 +183,13 @@ export const useNutzapStore = defineStore("nutzap", {
         throw new Error("Creator profile missing Cashu P2PK key");
       }
 
-      const { hash } = createP2PKHTLC(
+      const { token: htlcToken, hash } = createP2PKHTLC(
         price,
         creator.cashuP2pk,
         months,
-        startDate,
+        startDate
       );
+      const { lockSecret } = JSON.parse(htlcToken);
       const subscriptionId = uuidv4();
 
       const messenger = useMessengerStore();
@@ -206,7 +204,7 @@ export const useNutzapStore = defineStore("nutzap", {
         const mint = wallet.findSpendableMint(price);
         if (!mint)
           throw new Error(
-            "Insufficient balance in a mint that the creator trusts.",
+            "Insufficient balance in a mint that the creator trusts."
           );
         const mintWallet = wallet.mintWallet(mint.url, mints.activeUnit);
         const proofs = mints.mintUnitProofs(mint, mints.activeUnit);
@@ -218,13 +216,13 @@ export const useNutzapStore = defineStore("nutzap", {
           "nutzap",
           unlockDate,
           refundKey,
-          hash,
+          hash
         );
 
         const tokenStr = proofsStore.serializeProofs(sendProofs);
         try {
-        const { success } = await messenger.sendDm(
-          creator.nostrPubkey,
+          const { success } = await messenger.sendDm(
+            creator.nostrPubkey,
             JSON.stringify({
               type: "cashu_subscription_payment",
               subscription_id: subscriptionId,
@@ -233,7 +231,7 @@ export const useNutzapStore = defineStore("nutzap", {
               total_months: months,
               token: tokenStr,
             }),
-            relayList,
+            relayList
           );
           if (!success) {
             this.queueSend({
@@ -268,6 +266,8 @@ export const useNutzapStore = defineStore("nutzap", {
           owner: "subscriber",
           creatorNpub: creator.nostrPubkey,
           creatorP2PK: creator.cashuP2pk,
+          preimage: lockSecret,
+          hashlock: hash,
           tierId,
           intervalKey: String(i + 1),
           unlockTs: unlockDate,
@@ -307,6 +307,8 @@ export const useNutzapStore = defineStore("nutzap", {
           refundUnlockTs: 0,
           status: "pending",
           tokenString: t.tokenString,
+          preimage: lockSecret,
+          hashlock: hash,
           redeemed: false,
           subscriptionId,
           tierId,
@@ -334,7 +336,7 @@ export const useNutzapStore = defineStore("nutzap", {
         }
         if (!profile || !profile.p2pkPubkey) {
           throw new Error(
-            "Creator's Nutzap profile is missing or does not contain a P2PK key.",
+            "Creator's Nutzap profile is missing or does not contain a P2PK key."
           );
         }
         const creatorP2pk = profile.p2pkPubkey;
@@ -356,7 +358,7 @@ export const useNutzapStore = defineStore("nutzap", {
           const mint = wallet.findSpendableMint(amount, trustedMints);
           if (!mint)
             throw new Error(
-              "Insufficient balance in a mint that the creator trusts.",
+              "Insufficient balance in a mint that the creator trusts."
             );
 
           // ----- HTLC-locked pledge with refund capability --------------
@@ -371,7 +373,7 @@ export const useNutzapStore = defineStore("nutzap", {
             "nutzap",
             unlockDate,
             refundKey,
-            hash,
+            hash
           );
           const token = proofsStore.serializeProofs(sendProofs);
 
@@ -386,7 +388,7 @@ export const useNutzapStore = defineStore("nutzap", {
                 total_months: months,
                 token,
               }),
-              trustedRelays,
+              trustedRelays
             );
             if (!success) {
               this.queueSend({
@@ -455,15 +457,15 @@ export const useNutzapStore = defineStore("nutzap", {
           frequency: "monthly",
           startDate,
           commitmentLength: months,
-        intervals: lockedTokens.map((t, idx) => ({
-          intervalKey: String(idx + 1),
-          lockedTokenId: t.id,
-          unlockTs: t.unlockTs,
-          refundUnlockTs: 0,
-          status: "pending",
-          tokenString: t.tokenString,
-          redeemed: false,
-        })),
+          intervals: lockedTokens.map((t, idx) => ({
+            intervalKey: String(idx + 1),
+            lockedTokenId: t.id,
+            unlockTs: t.unlockTs,
+            refundUnlockTs: 0,
+            status: "pending",
+            tokenString: t.tokenString,
+            redeemed: false,
+          })),
           status: "active",
         } as any);
 
