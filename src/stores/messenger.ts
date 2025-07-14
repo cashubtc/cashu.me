@@ -27,6 +27,9 @@ export interface SubscriptionPayment {
   month_index: number;
   total_months: number;
   amount: number;
+  unlock_time?: number;
+  preimage?: string | null;
+  hashlock?: string | null;
 }
 
 export type MessengerMessage = {
@@ -36,6 +39,7 @@ export type MessengerMessage = {
   created_at: number;
   outgoing: boolean;
   subscriptionPayment?: SubscriptionPayment;
+  autoRedeem?: boolean;
 };
 
 export const useMessengerStore = defineStore("messenger", {
@@ -265,6 +269,31 @@ export const useMessengerStore = defineStore("messenger", {
         this.conversations[pubkey].push(msg);
       this.eventLog.push(msg);
     },
+
+    pushOwnMessage(event: NostrEvent) {
+      const msg = this.eventLog.find((m) => m.id === event.id);
+      if (!msg) return;
+      try {
+        const payload = JSON.parse(msg.content);
+        if (payload && payload.type === "cashu_subscription_payment" && payload.token) {
+          const decoded = token.decode(payload.token);
+          const amount = decoded
+            ? token.getProofs(decoded).reduce((s, p) => s + p.amount, 0)
+            : 0;
+          msg.subscriptionPayment = {
+            token: payload.token,
+            subscription_id: payload.subscription_id,
+            tier_id: payload.tier_id,
+            month_index: payload.month_index,
+            total_months: payload.total_months,
+            amount,
+            unlock_time: payload.unlock_time,
+            preimage: payload.preimage,
+            hashlock: payload.hashlock,
+          };
+        }
+      } catch {}
+    },
     async addIncomingMessage(event: NostrEvent) {
       await this.loadIdentity();
       const nostr = useNostrStore();
@@ -307,6 +336,9 @@ export const useMessengerStore = defineStore("messenger", {
             month_index: payload.month_index,
             total_months: payload.total_months,
             amount,
+            unlock_time: payload.unlock_time,
+            preimage: payload.preimage,
+            hashlock: payload.hashlock,
           };
           const entry: LockedToken = {
             id: uuidv4(),
@@ -321,6 +353,8 @@ export const useMessengerStore = defineStore("messenger", {
             unlockTs: payload.unlock_time ?? payload.unlockTime ?? 0,
             refundUnlockTs: 0,
             hashlock: payload.hashlock ?? null,
+            preimage: payload.preimage ?? null,
+            autoRedeem: false,
             status: "unlockable",
             subscriptionEventId: null,
             subscriptionId: payload.subscription_id,
@@ -396,6 +430,7 @@ export const useMessengerStore = defineStore("messenger", {
       };
       if (subscriptionInfo) {
         msg.subscriptionPayment = subscriptionInfo;
+        msg.autoRedeem = false;
       }
       if (!this.conversations[event.pubkey]) {
         this.conversations[event.pubkey] = [];

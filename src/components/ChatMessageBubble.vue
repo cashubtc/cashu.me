@@ -5,31 +5,19 @@
   >
     <div :class="message.outgoing ? 'sent' : 'received'" :style="bubbleStyle">
       <template v-if="message.subscriptionPayment">
-        <q-expansion-item dense switch-toggle-side>
-          <template #header>
-            Month {{ message.subscriptionPayment.month_index }} of
-            {{ message.subscriptionPayment.total_months }}
-          </template>
-          <TokenInformation
-            :encodedToken="message.subscriptionPayment.token"
-            :showAmount="true"
-            :showMintCheck="true"
-            :showP2PKCheck="true"
-          />
-          <div v-if="receiverPubkey" class="q-mt-xs text-caption">
-            Locked to: {{ shortenString(receiverPubkeyNpub, 15, 6) }}
-          </div>
-          <div v-if="unlockIso" class="q-mt-xs text-caption">
-            Locked until: {{ unlockIso }}
-          </div>
-          <q-btn
-            label="Redeem"
-            color="primary"
-            class="q-mt-sm"
-            @click.stop="redeemPayment"
-            :disable="redeemed"
-          />
-        </q-expansion-item>
+        <TokenCarousel
+          :payments="message.subscriptionPayment"
+          :creator="!message.outgoing"
+          :message="message"
+          @redeem="redeemPayment"
+        />
+        <q-toggle
+          v-if="!message.outgoing"
+          v-model="message.autoRedeem"
+          label="Auto-redeem"
+          class="q-mt-sm"
+          @update:model-value="updateAutoRedeem"
+        />
       </template>
       <template v-else>
         {{ message.content }}
@@ -60,7 +48,7 @@ import { computed, ref } from "vue";
 import { useQuasar } from "quasar";
 import { mdiCheck, mdiCheckAll } from "@quasar/extras/mdi-v6";
 import type { MessengerMessage } from "src/stores/messenger";
-import TokenInformation from "components/TokenInformation.vue";
+import TokenCarousel from "components/TokenCarousel.vue";
 import { useReceiveTokensStore } from "src/stores/receiveTokensStore";
 import { notifyError } from "src/js/notify";
 import { cashuDb } from "src/stores/dexie";
@@ -100,6 +88,15 @@ const deliveryIcon = computed(() =>
 
 const receiveStore = useReceiveTokensStore();
 const redeemed = ref(false);
+if (props.message.subscriptionPayment) {
+  cashuDb.lockedTokens
+    .where("tokenString")
+    .equals(props.message.subscriptionPayment.token)
+    .first()
+    .then((row) => {
+      props.message.autoRedeem = row?.autoRedeem ?? false;
+    });
+}
 
 const receiverPubkey = computed(() => {
   if (!props.message.subscriptionPayment) return "";
@@ -147,6 +144,15 @@ async function redeemPayment() {
     console.error(e);
     notifyError(e);
   }
+}
+
+async function updateAutoRedeem(val: boolean) {
+  if (!props.message.subscriptionPayment) return;
+  const row = await cashuDb.lockedTokens
+    .where("tokenString")
+    .equals(props.message.subscriptionPayment.token)
+    .first();
+  if (row) await cashuDb.lockedTokens.update(row.id, { autoRedeem: val });
 }
 </script>
 

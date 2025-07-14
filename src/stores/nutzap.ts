@@ -221,7 +221,7 @@ export const useNutzapStore = defineStore("nutzap", {
 
         const tokenStr = proofsStore.serializeProofs(sendProofs);
         try {
-          const { success } = await messenger.sendDm(
+          const { success, event } = await messenger.sendDm(
             creator.nostrPubkey,
             JSON.stringify({
               type: "cashu_subscription_payment",
@@ -233,9 +233,11 @@ export const useNutzapStore = defineStore("nutzap", {
               receiver_p2pk: creator.cashuP2pk,
               unlock_time: unlockDate,
               hashlock: hash,
+              preimage: lockSecret,
             }),
             relayList
           );
+          if (event) messenger.pushOwnMessage(event as any);
           if (!success) {
             this.queueSend({
               npub: creator.nostrPubkey,
@@ -271,6 +273,7 @@ export const useNutzapStore = defineStore("nutzap", {
           creatorP2PK: creator.cashuP2pk,
           preimage: lockSecret,
           hashlock: hash,
+          autoRedeem: false,
           tierId,
           intervalKey: String(i + 1),
           unlockTs: unlockDate,
@@ -312,6 +315,7 @@ export const useNutzapStore = defineStore("nutzap", {
           tokenString: t.tokenString,
           preimage: lockSecret,
           hashlock: hash,
+          autoRedeem: false,
           redeemed: false,
           subscriptionId,
           tierId,
@@ -365,7 +369,7 @@ export const useNutzapStore = defineStore("nutzap", {
             );
 
           // ----- HTLC-locked pledge with refund capability --------------
-          const { hash } = p2pk.generateRefundSecret();
+          const { preimage, hash } = p2pk.generateRefundSecret();
           const mintWallet = wallet.mintWallet(mint.url, mints.activeUnit);
           const proofs = mints.mintUnitProofs(mint, mints.activeUnit);
           const { sendProofs, locked } = await wallet.sendToLock(
@@ -381,7 +385,7 @@ export const useNutzapStore = defineStore("nutzap", {
           const token = proofsStore.serializeProofs(sendProofs);
 
           try {
-            const { success } = await messenger.sendDm(
+            const { success, event } = await messenger.sendDm(
               profile.hexPub,
               JSON.stringify({
                 type: "cashu_subscription_payment",
@@ -390,9 +394,14 @@ export const useNutzapStore = defineStore("nutzap", {
                 month_index: i + 1,
                 total_months: months,
                 token,
+                receiver_p2pk: creatorP2pk,
+                unlock_time: unlockDate,
+                hashlock: hash,
+                preimage,
               }),
               trustedRelays
             );
+            if (event) messenger.pushOwnMessage(event as any);
             if (!success) {
               this.queueSend({
                 npub: profile.hexPub,
@@ -426,6 +435,9 @@ export const useNutzapStore = defineStore("nutzap", {
             owner: "subscriber",
             creatorNpub: npub,
             creatorP2PK: creatorP2pk,
+            preimage,
+            hashlock: hash,
+            autoRedeem: false,
             tierId: "nutzap",
             intervalKey: String(i + 1),
             unlockTs: unlockDate,
@@ -467,6 +479,9 @@ export const useNutzapStore = defineStore("nutzap", {
             refundUnlockTs: 0,
             status: "pending",
             tokenString: t.tokenString,
+            preimage: t.preimage,
+            hashlock: t.hashlock,
+            autoRedeem: false,
             redeemed: false,
           })),
           status: "active",
