@@ -92,4 +92,17 @@ describe("messenger store", () => {
     await messenger.start();
     expect(notifyErrorSpy).toHaveBeenCalled();
   });
+
+  it("handles multi-line JSON messages", async () => {
+    const messenger = useMessengerStore();
+    (decryptDm as any).mockResolvedValue('{"a":1}\n{"b":2}');
+    await messenger.addIncomingMessage({
+      id: "1",
+      pubkey: "s",
+      content: "c",
+      created_at: 1,
+    } as any);
+    expect(messenger.eventLog.length).toBe(1);
+    expect(messenger.eventLog[0].content).toBe('{"a":1}\n{"b":2}');
+  });
 });
