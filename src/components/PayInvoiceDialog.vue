@@ -435,13 +435,11 @@ export default defineComponent({
       }
     },
     handleMeltButton: async function () {
-      console.log("DEBUG: handleMeltButton called");
       if (this.payInvoiceData.blocking) {
         throw new Error("already processing an invoice.");
       }
 
       if (this.enoughtotalUnitBalance) {
-        console.log("DEBUG: Trying single-mint payment");
         this.meltInvoiceData();
         return;
       }
@@ -451,12 +449,9 @@ export default defineComponent({
         this.multinutEnabled &&
         this.multinutAutoEnabled
       ) {
-        console.log("DEBUG: Trying automatic multinut payment");
         await this.executeAutomaticMultinutPayment();
         return;
       }
-
-      console.log("DEBUG: Showing insufficient balance error");
       this.showInsufficientBalanceError();
     },
     openMultinutDialog: function () {
@@ -467,14 +462,12 @@ export default defineComponent({
       this.payInvoiceData.show = true;
     },
     async executeAutomaticMultinutPayment() {
-      console.log("DEBUG: Entered executeAutomaticMultinutPayment");
       try {
         // Set blocking state to prevent multiple payments
         this.payInvoiceData.blocking = true;
 
         // Use all available mints for automatic payment
         const selectedMints = [...this.multiMints];
-        console.log("DEBUG: selectedMints", selectedMints);
 
         // Initialize proportions based on balance weights
         const totalAmount = this.payInvoiceData.meltQuote.response.amount;
@@ -483,7 +476,6 @@ export default defineComponent({
           totalAmount,
           this.activeUnit
         );
-        console.log("DEBUG: mintProportions", mintProportions);
 
         // Progress callback for UI updates
         const onProgress = (phase, mintCount) => {
