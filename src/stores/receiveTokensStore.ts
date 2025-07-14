@@ -96,7 +96,7 @@ export const useReceiveTokensStore = defineStore("receiveTokensStore", {
       }
       // redeem the token
       try {
-        await walletStore.redeem(bucketId);
+        await walletStore.redeem(receiveStore.receiveData.tokensBase64);
       } finally {
         await cashuDb.lockedTokens
           .where("tokenString")

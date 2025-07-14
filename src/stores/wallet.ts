@@ -669,8 +669,7 @@ export const useWalletStore = defineStore("wallet", {
      * @param {array} proofs
      */
     attemptRedeem: async function (
-      bucketId: string = DEFAULT_BUCKET_ID,
-      preimage?: string,
+      tokenString: string,
     ): Promise<boolean> {
       /*
       Receives a token that is prepared in the receiveToken – it is not yet in the history
@@ -679,12 +678,16 @@ export const useWalletStore = defineStore("wallet", {
       const mintStore = useMintsStore();
       const p2pkStore = useP2PKStore();
 
+      const receiveStore = useReceiveTokensStore();
+
+      const bucketId = receiveStore.receiveData.bucketId ?? DEFAULT_BUCKET_ID;
+
       receiveStore.showReceiveTokens = false;
 
-      if (receiveStore.receiveData.tokensBase64.length == 0) {
+      if (tokenString.length == 0) {
         throw new Error("no tokens provided.");
       }
-      const tokenJson = token.decode(receiveStore.receiveData.tokensBase64);
+      const tokenJson = token.decode(tokenString);
       if (tokenJson == undefined) {
         throw new Error("no tokens provided.");
       }
@@ -706,7 +709,7 @@ export const useWalletStore = defineStore("wallet", {
 
       const historyToken = {
         amount: inputAmount,
-        token: receiveStore.receiveData.tokensBase64,
+        token: tokenString,
         unit: unitInToken,
         mint: mintInToken,
         label: receiveStore.receiveData.label ?? "",
@@ -750,12 +753,7 @@ export const useWalletStore = defineStore("wallet", {
           }
         }
 
-        if (preimage) {
-          proofs = proofs.map((p) => ({
-            ...(p as any),
-            witness: { ...(p as any).witness, preimage },
-          }));
-        }
+
 
         if (!privkey && needsSig && !remoteSigned) {
           useSignerStore().reset();
@@ -782,7 +780,7 @@ export const useWalletStore = defineStore("wallet", {
               unit: unitInToken,
               proofs,
             })
-          : receiveStore.receiveData.tokensBase64;
+          : tokenString;
 
         debug("redeem: sending proofs", proofs);
 
@@ -817,21 +815,18 @@ export const useWalletStore = defineStore("wallet", {
         // if token is already in history, set to paid, else add to history
         if (
           tokenStore.historyTokens.find(
-            (t) =>
-              t.token === receiveStore.receiveData.tokensBase64 && t.amount > 0
+            (t) => t.token === tokenString && t.amount > 0
           )
         ) {
-          tokenStore.setTokenPaid(receiveStore.receiveData.tokensBase64);
+          tokenStore.setTokenPaid(tokenString);
         } else {
           // if this is a self-sent token, we will find an outgoing token with the inverse amount
           if (
             tokenStore.historyTokens.find(
-              (t) =>
-                t.token === receiveStore.receiveData.tokensBase64 &&
-                t.amount < 0
+              (t) => t.token === tokenString && t.amount < 0
             )
           ) {
-            tokenStore.setTokenPaid(receiveStore.receiveData.tokensBase64);
+            tokenStore.setTokenPaid(tokenString);
           }
           fee = inputAmount - outputAmount;
           historyToken.fee = fee;
@@ -859,21 +854,14 @@ export const useWalletStore = defineStore("wallet", {
       // }
     },
 
-    redeem: async function (
-      bucketOrToken: string = DEFAULT_BUCKET_ID,
-      preimage?: string,
-    ) {
-      let bucketId = bucketOrToken;
-      if (bucketOrToken.length > 50) {
-        const receiveStore = useReceiveTokensStore();
-        const p2pkStore = useP2PKStore();
-        receiveStore.receiveData.tokensBase64 = bucketOrToken;
-        receiveStore.receiveData.p2pkPrivateKey =
-          p2pkStore.getPrivateKeyForP2PKEncodedToken(bucketOrToken);
-        bucketId = DEFAULT_BUCKET_ID;
-      }
+    redeem: async function (tokenString: string) {
+      const receiveStore = useReceiveTokensStore();
+      const p2pkStore = useP2PKStore();
+      receiveStore.receiveData.tokensBase64 = tokenString;
+      receiveStore.receiveData.p2pkPrivateKey =
+        p2pkStore.getPrivateKeyForP2PKEncodedToken(tokenString);
       while (true) {
-        const res = await this.attemptRedeem(bucketId, preimage);
+        const res = await this.attemptRedeem(tokenString);
         if (res) break;
       }
     },

@@ -26,7 +26,7 @@ const TokenCarouselStub = {
 };
 
 describe("redeem payment", () => {
-  it("calls wallet.redeem with preimage", async () => {
+  it("calls wallet.redeem", async () => {
     const payment = { token: "tok", preimage: "secret123", month_index: 1, total_months: 1, subscription_id: "s", tier_id: "t", amount: 1 };
     const wrapper = mount(ChatMessageBubble, {
       props: { message: { id: "1", pubkey: "p", content: "", created_at: 0, outgoing: false, subscriptionPayment: payment } },
@@ -35,6 +35,6 @@ describe("redeem payment", () => {
 
     await wrapper.findComponent(TokenCarouselStub).vm.$emit("redeem", payment);
 
-    expect(redeemMock).toHaveBeenCalledWith("tok", "secret123");
+    expect(redeemMock).toHaveBeenCalledWith("tok");
   });
 });
