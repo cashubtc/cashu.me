@@ -21,6 +21,7 @@
             color="primary"
             class="q-mt-sm"
             @click.stop="redeemPayment"
+            :disable="redeemed"
           />
         </q-expansion-item>
       </template>
@@ -49,12 +50,13 @@
 </template>
 
 <script lang="ts" setup>
-import { computed } from "vue";
+import { computed, ref } from "vue";
 import { useQuasar } from "quasar";
 import { mdiCheck, mdiCheckAll } from "@quasar/extras/mdi-v6";
 import type { MessengerMessage } from "src/stores/messenger";
 import TokenInformation from "components/TokenInformation.vue";
 import { useReceiveTokensStore } from "src/stores/receiveTokensStore";
+import { notifyError } from "src/js/notify";
 
 const props = defineProps<{
   message: MessengerMessage;
@@ -86,12 +88,19 @@ const deliveryIcon = computed(() =>
 );
 
 const receiveStore = useReceiveTokensStore();
+const redeemed = ref(false);
 
 async function redeemPayment() {
   if (!props.message.subscriptionPayment) return;
   const tokenStr = props.message.subscriptionPayment.token;
   receiveStore.receiveData.tokensBase64 = tokenStr;
-  await receiveStore.receiveToken(tokenStr);
+  try {
+    await receiveStore.receiveToken(tokenStr);
+    redeemed.value = true;
+  } catch (e) {
+    console.error(e);
+    notifyError(e);
+  }
 }
 </script>
 
