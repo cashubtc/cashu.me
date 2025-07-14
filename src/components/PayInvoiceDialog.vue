@@ -85,7 +85,12 @@
             color="primary"
             :disabled="
               payInvoiceData.blocking ||
-              !enoughtotalUnitBalance ||
+              (!enoughtotalUnitBalance &&
+                !(
+                  hasMultinutSupport &&
+                  multinutEnabled &&
+                  multinutAutoEnabled
+                )) ||
               payInvoiceData.meltQuote.error != ''
             "
             @click="handleMeltButton"
@@ -387,11 +392,18 @@ export default defineComponent({
         (acc, mint) => acc + new MintClass(mint).unitBalance(this.activeUnit),
         0
       );
-      return (
+      const result =
         this.multiMints.length > 1 &&
         this.payInvoiceData.meltQuote.response.amount > 0 &&
-        totalMultinutBalance >= this.payInvoiceData.meltQuote.response.amount
-      );
+        totalMultinutBalance >= this.payInvoiceData.meltQuote.response.amount;
+      console.log("DEBUG: hasMultinutSupport", result, {
+        multiMints: this.multiMints,
+        totalMultinutBalance,
+        required: this.payInvoiceData.meltQuote.response.amount,
+        multinutEnabled: this.multinutEnabled,
+        multinutAutoEnabled: this.multinutAutoEnabled,
+      });
+      return result;
     },
   },
   methods: {
@@ -423,27 +435,28 @@ export default defineComponent({
       }
     },
     handleMeltButton: async function () {
+      console.log("DEBUG: handleMeltButton called");
       if (this.payInvoiceData.blocking) {
         throw new Error("already processing an invoice.");
       }
 
-      // First, try normal single-mint payment if we have sufficient balance
       if (this.enoughtotalUnitBalance) {
+        console.log("DEBUG: Trying single-mint payment");
         this.meltInvoiceData();
         return;
       }
 
-      // If insufficient balance, check if auto-multinut is possible and enabled
       if (
         this.hasMultinutSupport &&
         this.multinutEnabled &&
         this.multinutAutoEnabled
       ) {
+        console.log("DEBUG: Trying automatic multinut payment");
         await this.executeAutomaticMultinutPayment();
         return;
       }
 
-      // If auto-multinut is not available or disabled, show error
+      console.log("DEBUG: Showing insufficient balance error");
       this.showInsufficientBalanceError();
     },
     openMultinutDialog: function () {
@@ -454,12 +467,14 @@ export default defineComponent({
       this.payInvoiceData.show = true;
     },
     async executeAutomaticMultinutPayment() {
+      console.log("DEBUG: Entered executeAutomaticMultinutPayment");
       try {
         // Set blocking state to prevent multiple payments
         this.payInvoiceData.blocking = true;
 
         // Use all available mints for automatic payment
         const selectedMints = [...this.multiMints];
+        console.log("DEBUG: selectedMints", selectedMints);
 
         // Initialize proportions based on balance weights
         const totalAmount = this.payInvoiceData.meltQuote.response.amount;
@@ -468,6 +483,7 @@ export default defineComponent({
           totalAmount,
           this.activeUnit
         );
+        console.log("DEBUG: mintProportions", mintProportions);
 
         // Progress callback for UI updates
         const onProgress = (phase, mintCount) => {
