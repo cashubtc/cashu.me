@@ -110,7 +110,10 @@
           </q-btn>
           <q-btn
             v-if="
-              !payInvoiceData.blocking && hasMultinutSupport && multinutEnabled
+              !payInvoiceData.blocking &&
+              hasMultinutSupport &&
+              multinutEnabled &&
+              !multinutAutoEnabled
             "
             unelevated
             rounded
