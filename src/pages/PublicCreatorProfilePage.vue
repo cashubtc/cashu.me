@@ -21,7 +21,7 @@
       v-model="showSubscribeDialog"
       :tier="selectedTier"
       :supporter-pubkey="nostr.pubkey"
-      :creator-pubkey="creatorNpub"
+      :creator-pubkey="creatorHex"
       @confirm="confirmSubscribe"
     />
     <SubscriptionReceipt v-model="showReceiptDialog" :receipts="receiptList" />
@@ -68,7 +68,7 @@
               />
             </div>
             <PaywalledContent
-              :creator-npub="creatorNpub"
+              :creator-npub="creatorHex"
               :tier-id="t.id"
               class="q-mt-md"
             >
@@ -91,6 +91,7 @@ import { useRoute } from "vue-router";
 import { useCreatorsStore } from "stores/creators";
 import { useNostrStore } from "stores/nostr";
 import { useNdk } from "src/composables/useNdk";
+import { nip19 } from "nostr-tools";
 
 import { usePriceStore } from "stores/price";
 import { useUiStore } from "stores/ui";
@@ -106,6 +107,15 @@ export default defineComponent({
   setup() {
     const route = useRoute();
     const creatorNpub = route.params.npub as string;
+    let creatorHex = creatorNpub;
+    try {
+      const decoded = nip19.decode(creatorNpub);
+      if (typeof decoded.data === "string") {
+        creatorHex = decoded.data;
+      }
+    } catch (e) {
+      // ignore decode error and keep original value
+    }
     const creators = useCreatorsStore();
     const nostr = useNostrStore();
     const priceStore = usePriceStore();
@@ -113,7 +123,7 @@ export default defineComponent({
     const { t } = useI18n();
     const bitcoinPrice = computed(() => priceStore.bitcoinPrice);
     const profile = ref<any>({});
-    const tiers = computed(() => creators.tiersMap[creatorNpub] || []);
+    const tiers = computed(() => creators.tiersMap[creatorHex] || []);
     const showSubscribeDialog = ref(false);
     const showReceiptDialog = ref(false);
     const receiptList = ref<any[]>([]);
@@ -122,11 +132,11 @@ export default defineComponent({
     const following = ref<number | null>(null);
 
     const loadProfile = async () => {
-      await creators.fetchTierDefinitions(creatorNpub);
-      const p = await nostr.getProfile(creatorNpub);
+      await creators.fetchTierDefinitions(creatorHex);
+      const p = await nostr.getProfile(creatorHex);
       if (p) profile.value = { ...p };
-      followers.value = await nostr.fetchFollowerCount(creatorNpub);
-      following.value = await nostr.fetchFollowingCount(creatorNpub);
+      followers.value = await nostr.fetchFollowerCount(creatorHex);
+      following.value = await nostr.fetchFollowingCount(creatorHex);
     };
     loadProfile();
     useNdk();
@@ -171,6 +181,7 @@ export default defineComponent({
 
     return {
       creatorNpub,
+      creatorHex,
       profile,
       tiers,
       showSubscribeDialog,
