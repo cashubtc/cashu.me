@@ -1339,10 +1339,12 @@ export const useNostrStore = defineStore("nostr", {
             owner: "creator",
             creatorNpub: this.pubkey,
             subscriberNpub: sender,
+            creatorP2PK: payload.receiver_p2pk,
             tierId: payload.tier_id ?? "",
             intervalKey: payload.subscription_id ?? "",
-            unlockTs: 0,
+            unlockTs: payload.unlock_time ?? payload.unlockTime ?? 0,
             refundUnlockTs: 0,
+            hashlock: payload.hashlock ?? null,
             status: "unlockable",
             subscriptionEventId: null,
             subscriptionId: payload.subscription_id,
@@ -1412,7 +1414,7 @@ export const useNostrStore = defineStore("nostr", {
         if (
           payload.token &&
           payload.bucketId &&
-          payload.unlockTime !== undefined
+          (payload.unlockTime !== undefined || payload.unlock_time !== undefined)
         ) {
           const buckets = useBucketsStore();
           if (!buckets.bucketList.find((b) => b.id === payload.bucketId)) {
@@ -1440,13 +1442,16 @@ export const useNostrStore = defineStore("nostr", {
             owner: "creator",
             creatorNpub: this.pubkey,
             subscriberNpub: sender,
+            creatorP2PK: payload.receiver_p2pk,
             tierId: payload.bucketId,
             intervalKey: payload.referenceId,
-            unlockTs: payload.unlockTime || 0,
+            unlockTs: payload.unlock_time ?? payload.unlockTime ?? 0,
             refundUnlockTs: 0,
+            hashlock: payload.hashlock ?? null,
             status:
-              payload.unlockTime &&
-              payload.unlockTime > Math.floor(Date.now() / 1000)
+              (payload.unlock_time ?? payload.unlockTime) &&
+              (payload.unlock_time ?? payload.unlockTime) >
+                Math.floor(Date.now() / 1000)
                 ? "pending"
                 : "unlockable",
             subscriptionEventId: null,
