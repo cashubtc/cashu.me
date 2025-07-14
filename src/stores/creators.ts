@@ -171,19 +171,35 @@ export const useCreatorsStore = defineStore("creators", {
 
     async fetchTierDefinitions(creatorNpub: string) {
       this.tierFetchError = false;
-      const cached = await db.creatorsTierDefinitions.get(creatorNpub);
+
+      let hex = creatorNpub;
+      if (creatorNpub.startsWith("npub")) {
+        try {
+          const decoded = nip19.decode(creatorNpub);
+          hex = typeof decoded.data === "string" ? (decoded.data as string) : "";
+        } catch (e) {
+          this.tierFetchError = true;
+          return;
+        }
+      }
+      if (!/^[0-9a-fA-F]{64}$/.test(hex)) {
+        this.tierFetchError = true;
+        return;
+      }
+
+      const cached = await db.creatorsTierDefinitions.get(hex);
       if (cached) {
         const rawEvent = cached.rawEventJson
           ? JSON.parse(cached.rawEventJson)
           : undefined;
-        this.tiersMap[creatorNpub] = cached.tiers.map((t: any) => ({
+        this.tiersMap[hex] = cached.tiers.map((t: any) => ({
           ...t,
           price_sats: t.price_sats ?? t.price ?? 0,
         }));
         void rawEvent; // parsed for potential use
       }
       const filter = {
-        authors: [creatorNpub],
+        authors: [hex],
         kinds: [30000],
         "#d": ["tiers"],
       };
@@ -210,8 +226,8 @@ export const useCreatorsStore = defineStore("creators", {
           return;
         }
         const url = indexerUrl.includes("{pubkey}")
-          ? indexerUrl.replace("{pubkey}", creatorNpub)
-          : `${indexerUrl}${indexerUrl.includes("?") ? "&" : "?"}pubkey=${creatorNpub}`;
+          ? indexerUrl.replace("{pubkey}", hex)
+          : `${indexerUrl}${indexerUrl.includes("?") ? "&" : "?"}pubkey=${hex}`;
         try {
           const controller = new AbortController();
           const id = setTimeout(() => controller.abort(), 8000);
@@ -244,9 +260,9 @@ export const useCreatorsStore = defineStore("creators", {
             ...t,
             price_sats: t.price_sats ?? t.price ?? 0,
           }));
-          this.tiersMap[creatorNpub] = tiersArray;
+          this.tiersMap[hex] = tiersArray;
           await db.creatorsTierDefinitions.put({
-            creatorNpub,
+            creatorNpub: hex,
             tiers: tiersArray,
             eventId: event.id!,
             updatedAt: event.created_at,
@@ -278,9 +294,9 @@ export const useCreatorsStore = defineStore("creators", {
               ...t,
               price_sats: t.price_sats ?? t.price ?? 0,
             }));
-            this.tiersMap[creatorNpub] = tiersArray;
+            this.tiersMap[hex] = tiersArray;
             await db.creatorsTierDefinitions.put({
-              creatorNpub,
+              creatorNpub: hex,
               tiers: tiersArray,
               eventId: event.id!,
               updatedAt: event.created_at,
