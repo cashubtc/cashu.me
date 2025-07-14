@@ -669,7 +669,8 @@ export const useWalletStore = defineStore("wallet", {
      * @param {array} proofs
      */
     attemptRedeem: async function (
-      bucketId: string = DEFAULT_BUCKET_ID
+      bucketId: string = DEFAULT_BUCKET_ID,
+      preimage?: string,
     ): Promise<boolean> {
       /*
       Receives a token that is prepared in the receiveToken – it is not yet in the history
@@ -747,6 +748,13 @@ export const useWalletStore = defineStore("wallet", {
             proofs = signed;
             remoteSigned = true;
           }
+        }
+
+        if (preimage) {
+          proofs = proofs.map((p) => ({
+            ...(p as any),
+            witness: { ...(p as any).witness, preimage },
+          }));
         }
 
         if (!privkey && needsSig && !remoteSigned) {
@@ -851,9 +859,12 @@ export const useWalletStore = defineStore("wallet", {
       // }
     },
 
-    redeem: async function (bucketId: string = DEFAULT_BUCKET_ID) {
+    redeem: async function (
+      bucketId: string = DEFAULT_BUCKET_ID,
+      preimage?: string,
+    ) {
       while (true) {
-        const res = await this.attemptRedeem(bucketId);
+        const res = await this.attemptRedeem(bucketId, preimage);
         if (res) break;
       }
     },

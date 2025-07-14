@@ -74,6 +74,11 @@ export const useLockedTokensRedeemWorker = defineStore(
         const receiveStore = useReceiveTokensStore();
         const mintStore = useMintsStore();
         for (const entry of entries) {
+          const nowSec = Math.floor(Date.now() / 1000);
+          if (entry.unlockTs > nowSec) {
+            await cashuDb.lockedTokens.update(entry.id, { status: "pending" });
+            continue;
+          }
           try {
             const decoded = token.decode(entry.tokenString);
             if (!decoded) {
@@ -142,7 +147,7 @@ export const useLockedTokensRedeemWorker = defineStore(
 
             debug("locked token redeem: sending proofs", proofs);
             try {
-              await wallet.redeem(entry.tierId);
+              await wallet.redeem(entry.tierId, entry.preimage ?? undefined);
               await cashuDb.lockedTokens
                 .where("tokenString")
                 .equals(entry.tokenString)
