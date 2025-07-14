@@ -13,7 +13,11 @@ import { computed } from 'vue';
 import CreatorProfileForm from './CreatorProfileForm.vue';
 import { useCreatorHubStore } from 'stores/creatorHub';
 import { useCreatorProfileStore } from 'stores/creatorProfile';
-import { useNostrStore, publishDiscoveryProfile } from 'stores/nostr';
+import {
+  useNostrStore,
+  publishDiscoveryProfile,
+  PublishTimeoutError,
+} from 'stores/nostr';
 import { useMintsStore } from 'stores/mints';
 import { storeToRefs } from 'pinia';
 import { notifySuccess, notifyError } from 'src/js/notify';
@@ -49,7 +53,11 @@ async function publishProfile() {
     notifySuccess('Profile updated');
     profileStore.markClean();
   } catch (e: any) {
-    notifyError(e?.message || 'Failed to publish profile');
+    if (e instanceof PublishTimeoutError) {
+      notifyError('Publishing timed out');
+    } else {
+      notifyError(e?.message || 'Failed to publish profile');
+    }
   }
 }
 
