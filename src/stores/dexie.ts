@@ -36,8 +36,6 @@ export interface SubscriptionInterval {
   refundUnlockTs: number;
   status: "pending" | "unlockable" | "claimed" | "expired";
   tokenString: string;
-  preimage?: string | null;
-  hashlock?: string | null;
   autoRedeem?: boolean;
   redeemed?: boolean;
   subscriptionId?: string;
@@ -71,8 +69,6 @@ export interface LockedToken {
   subscriberNpub?: string;
   creatorNpub?: string;
   creatorP2PK?: string;
-  preimage?: string | null;
-  hashlock?: string | null;
   tierId: string;
   intervalKey: string;
   unlockTs: number;
@@ -251,25 +247,7 @@ export class CashuDexie extends Dexie {
         creatorsTierDefinitions: "&creatorNpub, eventId, updatedAt",
         subscriptions: "&id, creatorNpub, tierId, status, createdAt, updatedAt",
         lockedTokens:
-          "&id, tokenString, owner, tierId, intervalKey, unlockTs, refundUnlockTs, status, subscriptionEventId, subscriptionId, monthIndex, totalMonths, hashlock, preimage",
-      })
-      .upgrade(async (tx) => {
-        await tx
-          .table("lockedTokens")
-          .toCollection()
-          .modify((entry: any) => {
-            if (entry.preimage === undefined) entry.preimage = null;
-            if (entry.hashlock === undefined) entry.hashlock = null;
-          });
-        await tx
-          .table("subscriptions")
-          .toCollection()
-          .modify((entry: any) => {
-            entry.intervals?.forEach((i: any) => {
-              if (i.preimage === undefined) i.preimage = null;
-              if (i.hashlock === undefined) i.hashlock = null;
-            });
-          });
+          "&id, tokenString, owner, tierId, intervalKey, unlockTs, refundUnlockTs, status, subscriptionEventId, subscriptionId, monthIndex, totalMonths",
       });
 
     this.version(11)
@@ -279,7 +257,7 @@ export class CashuDexie extends Dexie {
         creatorsTierDefinitions: "&creatorNpub, eventId, updatedAt",
         subscriptions: "&id, creatorNpub, tierId, status, createdAt, updatedAt",
         lockedTokens:
-          "&id, tokenString, owner, tierId, intervalKey, unlockTs, refundUnlockTs, status, subscriptionEventId, subscriptionId, monthIndex, totalMonths, hashlock, preimage, autoRedeem",
+          "&id, tokenString, owner, tierId, intervalKey, unlockTs, refundUnlockTs, status, subscriptionEventId, subscriptionId, monthIndex, totalMonths, autoRedeem",
       })
       .upgrade(async (tx) => {
         await tx
@@ -294,6 +272,34 @@ export class CashuDexie extends Dexie {
           .modify((entry: any) => {
             entry.intervals?.forEach((i: any) => {
               if (i.autoRedeem === undefined) i.autoRedeem = false;
+            });
+          });
+      });
+
+    this.version(12)
+      .stores({
+        proofs: "secret, id, C, amount, reserved, quote, bucketId, label",
+        profiles: "pubkey",
+        creatorsTierDefinitions: "&creatorNpub, eventId, updatedAt",
+        subscriptions: "&id, creatorNpub, tierId, status, createdAt, updatedAt",
+        lockedTokens:
+          "&id, tokenString, owner, tierId, intervalKey, unlockTs, refundUnlockTs, status, subscriptionEventId, subscriptionId, monthIndex, totalMonths, autoRedeem",
+      })
+      .upgrade(async (tx) => {
+        await tx
+          .table("lockedTokens")
+          .toCollection()
+          .modify((entry: any) => {
+            delete (entry as any).preimage;
+            delete (entry as any).hashlock;
+          });
+        await tx
+          .table("subscriptions")
+          .toCollection()
+          .modify((entry: any) => {
+            entry.intervals?.forEach((i: any) => {
+              delete i.preimage;
+              delete i.hashlock;
             });
           });
       });
