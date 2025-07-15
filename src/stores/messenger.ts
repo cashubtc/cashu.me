@@ -355,6 +355,7 @@ export const useMessengerStore = defineStore("messenger", {
             preimage: payload.preimage,
             hashlock: payload.hashlock,
           };
+          const unlockTs = payload.unlock_time ?? payload.unlockTime ?? 0;
           const entry: LockedToken = {
             id: uuidv4(),
             tokenString: payload.token,
@@ -365,12 +366,13 @@ export const useMessengerStore = defineStore("messenger", {
             creatorP2PK: payload.receiver_p2pk,
             tierId: payload.tier_id ?? "",
             intervalKey: payload.subscription_id ?? "",
-            unlockTs: payload.unlock_time ?? payload.unlockTime ?? 0,
+            unlockTs,
             refundUnlockTs: 0,
-            hashlock: payload.hashlock ?? null,
-            preimage: payload.preimage ?? null,
-            autoRedeem: false,
-            status: "unlockable",
+            autoRedeem: true,
+            status:
+              unlockTs && unlockTs > Math.floor(Date.now() / 1000)
+                ? "pending"
+                : "unlockable",
             subscriptionEventId: null,
             subscriptionId: payload.subscription_id,
             monthIndex: payload.month_index,
@@ -445,7 +447,7 @@ export const useMessengerStore = defineStore("messenger", {
       };
       if (subscriptionInfo) {
         msg.subscriptionPayment = subscriptionInfo;
-        msg.autoRedeem = false;
+        msg.autoRedeem = true;
       }
       if (!this.conversations[event.pubkey]) {
         this.conversations[event.pubkey] = [];
