@@ -112,12 +112,13 @@ export default defineComponent({
     async redeem(token) {
       const receiveStore = useReceiveTokensStore();
       const wallet = useWalletStore();
+      const receiveStore = useReceiveTokensStore();
       const p2pkStore = useP2PKStore();
       receiveStore.receiveData.tokensBase64 = token.tokenString;
       receiveStore.receiveData.bucketId = token.tierId;
       receiveStore.receiveData.p2pkPrivateKey =
         p2pkStore.getPrivateKeyForP2PKEncodedToken(token.tokenString);
-      await wallet.redeem(token.tokenString);
+      await receiveStore.enqueue(() => wallet.redeem(token.tokenString));
       await cashuDb.lockedTokens
         .where("tokenString")
         .equals(token.tokenString)

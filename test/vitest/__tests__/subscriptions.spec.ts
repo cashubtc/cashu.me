@@ -82,7 +82,10 @@ vi.mock("../../../src/stores/settings", () => ({
 }));
 
 vi.mock("../../../src/stores/receiveTokensStore", () => ({
-  useReceiveTokensStore: () => ({ receiveData: { tokensBase64: "", bucketId: "" } }),
+  useReceiveTokensStore: () => ({
+    receiveData: { tokensBase64: "", bucketId: "" },
+    enqueue: (fn: any) => fn(),
+  }),
 }));
 
 vi.mock("../../../src/js/token", () => ({

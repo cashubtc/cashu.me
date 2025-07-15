@@ -383,7 +383,9 @@ export const useMessengerStore = defineStore("messenger", {
 
           const receiveStore = useReceiveTokensStore();
           receiveStore.receiveData.tokensBase64 = payload.token;
-          await receiveStore.receiveToken(payload.token, DEFAULT_BUCKET_ID);
+          await receiveStore.enqueue(() =>
+            receiveStore.receiveToken(payload.token, DEFAULT_BUCKET_ID),
+          );
         } else if (payload && payload.type === "cashu_subscription_claimed") {
           const sub = await cashuDb.subscriptions.get(payload.subscription_id);
           const idx = sub?.intervals.findIndex(
@@ -429,9 +431,11 @@ export const useMessengerStore = defineStore("messenger", {
               receiveStore.receiveData.tokensBase64 = payload.token;
               receiveStore.receiveData.bucketId =
                 payload.bucketId ?? receiveStore.receiveData.bucketId;
-              await receiveStore.receiveToken(
-                payload.token,
-                receiveStore.receiveData.bucketId,
+              await receiveStore.enqueue(() =>
+                receiveStore.receiveToken(
+                  payload.token,
+                  receiveStore.receiveData.bucketId,
+                ),
               );
             }
           }

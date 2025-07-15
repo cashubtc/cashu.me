@@ -1359,7 +1359,9 @@ export const useNostrStore = defineStore("nostr", {
           await cashuDb.lockedTokens.put(entry);
           const receiveStore = useReceiveTokensStore();
           receiveStore.receiveData.tokensBase64 = payload.token;
-          await receiveStore.receiveToken(payload.token, DEFAULT_BUCKET_ID);
+          await receiveStore.enqueue(() =>
+            receiveStore.receiveToken(payload.token, DEFAULT_BUCKET_ID),
+          );
           return;
         }
         if (payload && payload.type === "cashu_subscription_claimed") {

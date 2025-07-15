@@ -9,7 +9,10 @@ vi.mock("../../../src/stores/wallet", () => ({
 }));
 
 vi.mock("../../../src/stores/receiveTokensStore", () => ({
-  useReceiveTokensStore: () => ({ receiveData: {} }),
+  useReceiveTokensStore: () => ({
+    receiveData: {},
+    enqueue: (fn: any) => fn(),
+  }),
 }));
 
 vi.mock("../../../src/stores/dexie", () => ({

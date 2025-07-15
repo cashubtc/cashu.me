@@ -18,6 +18,14 @@ import { Clipboard } from "@capacitor/clipboard";
 import { DEFAULT_BUCKET_ID } from "./buckets";
 import { cashuDb } from "./dexie";
 
+let redemptionQueue: Promise<any> = Promise.resolve();
+
+export function enqueueRedemption<T>(fn: () => Promise<T>): Promise<T> {
+  const res = redemptionQueue.then(fn);
+  redemptionQueue = res.catch(() => {});
+  return res;
+}
+
 function isValidTokenString(tokenStr: string): boolean {
   // allow any Cashu token prefix (e.g. cashuA, cashuB, ...)
   // and accept base64/base64url characters in the body
@@ -38,6 +46,9 @@ export const useReceiveTokensStore = defineStore("receiveTokensStore", {
     scanningCard: false,
   }),
   actions: {
+    enqueue<T>(fn: () => Promise<T>): Promise<T> {
+      return enqueueRedemption(fn);
+    },
     decodeToken: function (encodedToken: string) {
       encodedToken = encodedToken.trim();
       if (!isValidTokenString(encodedToken)) {
@@ -110,9 +121,11 @@ export const useReceiveTokensStore = defineStore("receiveTokensStore", {
       try {
         const decodedToken = this.decodeToken(this.receiveData.tokensBase64);
         if (decodedToken) {
-          await this.receiveToken(
-            this.receiveData.tokensBase64,
-            this.receiveData.bucketId,
+          await this.enqueue(() =>
+            this.receiveToken(
+              this.receiveData.tokensBase64,
+              this.receiveData.bucketId,
+            ),
           );
           return true;
         }
