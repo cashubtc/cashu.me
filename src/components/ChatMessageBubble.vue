@@ -153,11 +153,12 @@ async function redeemPayment() {
   if (!props.message.subscriptionPayment) return;
   const payment = props.message.subscriptionPayment;
   const wallet = useWalletStore();
+  const receiveStore = useReceiveTokensStore();
   try {
     if (unlockTime.value && remaining.value > 0) {
       return;
     }
-    await wallet.redeem(payment.token);
+    await receiveStore.enqueue(() => wallet.redeem(payment.token));
     if (payment.subscription_id) {
       const sub = await cashuDb.subscriptions.get(payment.subscription_id);
       const idx = sub?.intervals.findIndex(
