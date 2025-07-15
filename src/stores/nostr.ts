@@ -1332,6 +1332,7 @@ export const useNostrStore = defineStore("nostr", {
           const amount = decoded
             ? token.getProofs(decoded).reduce((s, p) => s + p.amount, 0)
             : 0;
+          const unlockTs = payload.unlock_time ?? payload.unlockTime ?? 0;
           const entry: LockedToken = {
             id: uuidv4(),
             tokenString: payload.token,
@@ -1342,10 +1343,13 @@ export const useNostrStore = defineStore("nostr", {
             creatorP2PK: payload.receiver_p2pk,
             tierId: payload.tier_id ?? "",
             intervalKey: payload.subscription_id ?? "",
-            unlockTs: payload.unlock_time ?? payload.unlockTime ?? 0,
+            unlockTs,
             refundUnlockTs: 0,
-            hashlock: payload.hashlock ?? null,
-            status: "unlockable",
+            autoRedeem: true,
+            status:
+              unlockTs && unlockTs > Math.floor(Date.now() / 1000)
+                ? "pending"
+                : "unlockable",
             subscriptionEventId: null,
             subscriptionId: payload.subscription_id,
             monthIndex: payload.month_index,
@@ -1435,6 +1439,7 @@ export const useNostrStore = defineStore("nostr", {
             } catch {}
           }
 
+          const unlockTs = payload.unlock_time ?? payload.unlockTime ?? 0;
           const entry: LockedToken = {
             id: uuidv4(),
             tokenString: payload.token,
@@ -1445,13 +1450,11 @@ export const useNostrStore = defineStore("nostr", {
             creatorP2PK: payload.receiver_p2pk,
             tierId: payload.bucketId,
             intervalKey: payload.referenceId,
-            unlockTs: payload.unlock_time ?? payload.unlockTime ?? 0,
+            unlockTs,
             refundUnlockTs: 0,
-            hashlock: payload.hashlock ?? null,
+            autoRedeem: true,
             status:
-              (payload.unlock_time ?? payload.unlockTime) &&
-              (payload.unlock_time ?? payload.unlockTime) >
-                Math.floor(Date.now() / 1000)
+              unlockTs && unlockTs > Math.floor(Date.now() / 1000)
                 ? "pending"
                 : "unlockable",
             subscriptionEventId: null,
