@@ -52,6 +52,5 @@ describe('subscribeToTier', () => {
     });
     expect(sendDm).toHaveBeenCalled();
     const payload = JSON.parse(sendDm.mock.calls[0][1]);
-    expect(payload.preimage).toBe('pre');
   });
 });

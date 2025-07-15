@@ -241,6 +241,34 @@ describe("Nutzap subscriptions", () => {
     expect(await cashuDb.lockedTokens.count()).toBe(0);
   });
 
+  it("defers redemption until unlock time", async () => {
+    const worker = useLockedTokensRedeemWorker();
+    const future = Math.floor(Date.now() / 1000) + 1000;
+    await cashuDb.lockedTokens.put({
+      id: "r2",
+      tokenString: "tok2",
+      amount: 1,
+      owner: "subscriber",
+      tierId: "tier2",
+      intervalKey: "k2",
+      unlockTs: future,
+      refundUnlockTs: 0,
+      status: "pending",
+      subscriptionEventId: null,
+    } as any);
+
+    const spy = vi.spyOn(Date, "now").mockReturnValue((future - 10) * 1000);
+    await worker.processTokens();
+    expect(redeem).not.toHaveBeenCalled();
+    expect(await cashuDb.lockedTokens.count()).toBe(1);
+
+    spy.mockReturnValue((future + 1) * 1000);
+    await worker.processTokens();
+    expect(redeem).toHaveBeenCalledWith("tier2");
+    expect(await cashuDb.lockedTokens.count()).toBe(0);
+    spy.mockRestore();
+  });
+
   it("queues message and sets boot error when ndkSend throws", async () => {
     const mod = await import("../../../src/boot/ndk");
     vi.spyOn(mod, "ndkSend").mockRejectedValue(new mod.NdkBootError("no-signer"));
