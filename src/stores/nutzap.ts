@@ -4,7 +4,7 @@ import { useLocalStorage } from "@vueuse/core";
 import { useWalletStore } from "./wallet";
 import { useP2PKStore } from "./p2pk";
 import { cashuDb, type LockedToken as DexieLockedToken } from "./dexie";
-import token, { createP2PKHTLC } from "src/js/token";
+import token from "src/js/token";
 import { v4 as uuidv4 } from "uuid";
 import { useMintsStore } from "./mints";
 import { useProofsStore } from "./proofs";
@@ -42,10 +42,9 @@ interface SendParams {
 export interface NutzapQueuedSend {
   npub: string;
   token: string;
-  subscriptionId: string;
-  tierId: string;
-  monthIndex: number;
-  totalMonths: number;
+  unlockTime: number;
+  receiverP2PK: string;
+  refundPubkey?: string;
   createdAt: number;
 }
 
@@ -72,11 +71,10 @@ export const useNutzapStore = defineStore("nutzap", {
       const messenger = useMessengerStore();
       const payload = {
         type: "cashu_subscription_payment",
-        subscription_id: item.subscriptionId,
-        tier_id: item.tierId,
-        month_index: item.monthIndex,
-        total_months: item.totalMonths,
         token: item.token,
+        receiver_p2pk: item.receiverP2PK,
+        unlock_time: item.unlockTime,
+        ...(item.refundPubkey ? { refund_pubkey: item.refundPubkey } : {}),
       } as const;
       const { success } = await messenger.sendDm(
         item.npub,
@@ -183,13 +181,6 @@ export const useNutzapStore = defineStore("nutzap", {
         throw new Error("Creator profile missing Cashu P2PK key");
       }
 
-      const { token: htlcToken, hash } = createP2PKHTLC(
-        price,
-        creator.cashuP2pk,
-        months,
-        startDate
-      );
-      const { lockSecret } = JSON.parse(htlcToken);
       const subscriptionId = uuidv4();
 
       const messenger = useMessengerStore();
@@ -215,8 +206,7 @@ export const useNutzapStore = defineStore("nutzap", {
           creator.cashuP2pk,
           "nutzap",
           unlockDate,
-          refundKey,
-          hash
+          refundKey
         );
 
         const tokenStr = proofsStore.serializeProofs(sendProofs);
@@ -225,15 +215,10 @@ export const useNutzapStore = defineStore("nutzap", {
             creator.nostrPubkey,
             JSON.stringify({
               type: "cashu_subscription_payment",
-              subscription_id: subscriptionId,
-              tier_id: tierId,
-              month_index: i + 1,
-              total_months: months,
               token: tokenStr,
               receiver_p2pk: creator.cashuP2pk,
               unlock_time: unlockDate,
-              hashlock: hash,
-              preimage: lockSecret,
+              refund_pubkey: refundKey,
             }),
             relayList
           );
@@ -242,10 +227,9 @@ export const useNutzapStore = defineStore("nutzap", {
             this.queueSend({
               npub: creator.nostrPubkey,
               token: tokenStr,
-              subscriptionId,
-              tierId,
-              monthIndex: i + 1,
-              totalMonths: months,
+              unlockTime: unlockDate,
+              receiverP2PK: creator.cashuP2pk,
+              refundPubkey: refundKey,
               createdAt: Math.floor(Date.now() / 1000),
             });
           }
@@ -256,10 +240,9 @@ export const useNutzapStore = defineStore("nutzap", {
           this.queueSend({
             npub: creator.nostrPubkey,
             token: tokenStr,
-            subscriptionId,
-            tierId,
-            monthIndex: i + 1,
-            totalMonths: months,
+            unlockTime: unlockDate,
+            receiverP2PK: creator.cashuP2pk,
+            refundPubkey: refundKey,
             createdAt: Math.floor(Date.now() / 1000),
           });
         }
@@ -271,8 +254,6 @@ export const useNutzapStore = defineStore("nutzap", {
           owner: "subscriber",
           creatorNpub: creator.nostrPubkey,
           creatorP2PK: creator.cashuP2pk,
-          preimage: lockSecret,
-          hashlock: hash,
           autoRedeem: false,
           tierId,
           intervalKey: String(i + 1),
@@ -313,8 +294,6 @@ export const useNutzapStore = defineStore("nutzap", {
           refundUnlockTs: 0,
           status: "pending",
           tokenString: t.tokenString,
-          preimage: lockSecret,
-          hashlock: hash,
           autoRedeem: false,
           redeemed: false,
           subscriptionId,
@@ -368,8 +347,6 @@ export const useNutzapStore = defineStore("nutzap", {
               "Insufficient balance in a mint that the creator trusts."
             );
 
-          // ----- HTLC-locked pledge with refund capability --------------
-          const { preimage, hash } = p2pk.generateRefundSecret();
           const mintWallet = wallet.mintWallet(mint.url, mints.activeUnit);
           const proofs = mints.mintUnitProofs(mint, mints.activeUnit);
           const { sendProofs, locked } = await wallet.sendToLock(
@@ -379,8 +356,7 @@ export const useNutzapStore = defineStore("nutzap", {
             creatorP2pk,
             "nutzap",
             unlockDate,
-            refundKey,
-            hash
+            refundKey
           );
           const token = proofsStore.serializeProofs(sendProofs);
 
@@ -389,15 +365,10 @@ export const useNutzapStore = defineStore("nutzap", {
               profile.hexPub,
               JSON.stringify({
                 type: "cashu_subscription_payment",
-                subscription_id: subscriptionId,
-                tier_id: "nutzap",
-                month_index: i + 1,
-                total_months: months,
                 token,
                 receiver_p2pk: creatorP2pk,
                 unlock_time: unlockDate,
-                hashlock: hash,
-                preimage,
+                refund_pubkey: refundKey,
               }),
               trustedRelays
             );
@@ -406,10 +377,9 @@ export const useNutzapStore = defineStore("nutzap", {
               this.queueSend({
                 npub: profile.hexPub,
                 token,
-                subscriptionId,
-                tierId: "nutzap",
-                monthIndex: i + 1,
-                totalMonths: months,
+                unlockTime: unlockDate,
+                receiverP2PK: creatorP2pk,
+                refundPubkey: refundKey,
                 createdAt: Math.floor(Date.now() / 1000),
               });
             }
@@ -420,10 +390,9 @@ export const useNutzapStore = defineStore("nutzap", {
             this.queueSend({
               npub: profile.hexPub,
               token,
-              subscriptionId,
-              tierId: "nutzap",
-              monthIndex: i + 1,
-              totalMonths: months,
+              unlockTime: unlockDate,
+              receiverP2PK: creatorP2pk,
+              refundPubkey: refundKey,
               createdAt: Math.floor(Date.now() / 1000),
             });
           }
@@ -435,8 +404,6 @@ export const useNutzapStore = defineStore("nutzap", {
             owner: "subscriber",
             creatorNpub: npub,
             creatorP2PK: creatorP2pk,
-            preimage,
-            hashlock: hash,
             autoRedeem: false,
             tierId: "nutzap",
             intervalKey: String(i + 1),
@@ -478,11 +445,9 @@ export const useNutzapStore = defineStore("nutzap", {
             unlockTs: t.unlockTs,
             refundUnlockTs: 0,
             status: "pending",
-            tokenString: t.tokenString,
-            preimage: t.preimage,
-            hashlock: t.hashlock,
-            autoRedeem: false,
-            redeemed: false,
+          tokenString: t.tokenString,
+          autoRedeem: false,
+          redeemed: false,
           })),
           status: "active",
         } as any);
