@@ -11,6 +11,12 @@
           :message="message"
           @redeem="redeemPayment"
         />
+        <div
+          v-if="unlockTime && remaining > 0"
+          class="text-caption q-mt-xs"
+        >
+          Unlocks in {{ countdown }}
+        </div>
         <q-toggle
           v-if="!message.outgoing"
           v-model="autoRedeem"
@@ -44,7 +50,8 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref } from "vue";
+import { computed, ref, onMounted, onUnmounted } from "vue";
+import { formatDistanceToNow } from "date-fns";
 import { useQuasar } from "quasar";
 import { mdiCheck, mdiCheckAll } from "@quasar/extras/mdi-v6";
 import type { MessengerMessage } from "src/stores/messenger";
@@ -100,6 +107,15 @@ if (props.message.subscriptionPayment) {
     });
 }
 
+const now = ref(Date.now());
+let timer: any;
+onMounted(() => {
+  timer = setInterval(() => {
+    now.value = Date.now();
+  }, 1000);
+});
+onUnmounted(() => clearInterval(timer));
+
 const receiverPubkey = computed(() => {
   if (!props.message.subscriptionPayment) return "";
   return p2pk.getTokenPubkey(props.message.subscriptionPayment.token) || "";
@@ -112,6 +128,17 @@ const unlockTime = computed(() => {
 
 const unlockIso = computed(() =>
   unlockTime.value ? new Date(unlockTime.value * 1000).toISOString() : "",
+);
+
+const remaining = computed(() => {
+  if (!unlockTime.value) return 0;
+  return unlockTime.value - Math.floor(now.value / 1000);
+});
+
+const countdown = computed(() =>
+  unlockTime.value
+    ? formatDistanceToNow(unlockTime.value * 1000, { includeSeconds: true })
+    : ""
 );
 
 const receiverPubkeyNpub = computed(() => {
@@ -127,6 +154,9 @@ async function redeemPayment() {
   const payment = props.message.subscriptionPayment;
   const wallet = useWalletStore();
   try {
+    if (unlockTime.value && remaining.value > 0) {
+      return;
+    }
     await wallet.redeem(payment.token);
     if (payment.subscription_id) {
       const sub = await cashuDb.subscriptions.get(payment.subscription_id);
