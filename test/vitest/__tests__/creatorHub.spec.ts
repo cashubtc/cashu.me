@@ -55,14 +55,18 @@ const nostrStoreMock = {
   relays: [] as string[],
 };
 
-vi.mock("../../../src/stores/nostr", () => ({
-  useNostrStore: () => nostrStoreMock,
-  ensureRelayConnectivity: (...args: any[]) =>
-    ensureRelayConnectivityMock(...args),
-  fetchNutzapProfile: (...args: any[]) => fetchNutzapProfileMock(...args),
-  publishNutzapProfile: (...args: any[]) => publishNutzapProfileMock(...args),
-  RelayConnectionError: class RelayConnectionError extends Error {},
-}));
+vi.mock("../../../src/stores/nostr", async (importOriginal) => {
+  const actual = await importOriginal();
+  return {
+    ...actual,
+    useNostrStore: () => nostrStoreMock,
+    ensureRelayConnectivity: (...args: any[]) =>
+      ensureRelayConnectivityMock(...args),
+    fetchNutzapProfile: (...args: any[]) => fetchNutzapProfileMock(...args),
+    publishNutzapProfile: (...args: any[]) => publishNutzapProfileMock(...args),
+    RelayConnectionError: class RelayConnectionError extends Error {},
+  };
+});
 
 beforeEach(() => {
   createdEvents = [];

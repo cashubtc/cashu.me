@@ -15,9 +15,10 @@ const nostrStoreMock = {
   fetchJoinDate: vi.fn().mockResolvedValue(123456),
 };
 
-vi.mock("../../../src/stores/nostr", () => ({
-  useNostrStore: () => nostrStoreMock,
-}));
+vi.mock("../../../src/stores/nostr", async (importOriginal) => {
+  const actual = await importOriginal();
+  return { ...actual, useNostrStore: () => nostrStoreMock };
+});
 
 vi.mock("nostr-tools", () => ({
   nip19: { decode: vi.fn() },

@@ -3,9 +3,11 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 var subMock: any;
 var filterMock: any;
 
-vi.mock("../../../src/stores/nostr", () => {
+vi.mock("../../../src/stores/nostr", async (importOriginal) => {
+  const actual = await importOriginal();
   subMock = vi.fn();
   return {
+    ...actual,
     subscribeToNostr: (...args: any[]) => subMock(...args),
     useNostrStore: () => ({}),
   };

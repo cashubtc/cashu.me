@@ -18,12 +18,16 @@ let checkSpendable: any;
 let setBootError: any;
 let isValidPubkey: any;
 
-vi.mock("../../../src/stores/nostr", () => ({
-  fetchNutzapProfile: (...args: any[]) => fetchNutzapProfile(...args),
-  publishNutzap: vi.fn(),
-  subscribeToNutzaps: vi.fn(),
-  useNostrStore: () => ({ pubkey: "myhex" }),
-}));
+vi.mock("../../../src/stores/nostr", async (importOriginal) => {
+  const actual = await importOriginal();
+  return {
+    ...actual,
+    fetchNutzapProfile: (...args: any[]) => fetchNutzapProfile(...args),
+    publishNutzap: vi.fn(),
+    subscribeToNutzaps: vi.fn(),
+    useNostrStore: () => ({ pubkey: "myhex" }),
+  };
+});
 
 vi.mock("../../../src/stores/p2pk", () => ({
   useP2PKStore: () => ({

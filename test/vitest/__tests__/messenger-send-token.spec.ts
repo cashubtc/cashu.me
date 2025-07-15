@@ -6,12 +6,14 @@ var walletMintWallet: any;
 var serializeProofs: any;
 var addPending: any;
 
-vi.mock("../../../src/stores/nostr", () => {
+vi.mock("../../../src/stores/nostr", async (importOriginal) => {
+  const actual = await importOriginal();
   sendDm = vi.fn(async () => ({
     success: true,
     event: { id: "1", created_at: 0 },
   }));
   return {
+    ...actual,
     useNostrStore: () => ({
       sendNip04DirectMessage: sendDm,
       initSignerIfNotSet: vi.fn(),

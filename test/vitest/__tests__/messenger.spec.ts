@@ -5,7 +5,8 @@ var decryptDm: any;
 var subscribe: any;
 var walletGen: any;
 
-vi.mock("../../../src/stores/nostr", () => {
+vi.mock("../../../src/stores/nostr", async (importOriginal) => {
+  const actual = await importOriginal();
   sendDm = vi.fn(async () => ({
     success: true,
     event: { id: "1", created_at: 0 },
@@ -34,7 +35,7 @@ vi.mock("../../../src/stores/nostr", () => {
       return store.privateKeySignerPrivateKey;
     },
   });
-  return { useNostrStore: () => store };
+  return { ...actual, useNostrStore: () => store };
 });
 
 vi.mock("../../../src/js/message-utils", () => ({
