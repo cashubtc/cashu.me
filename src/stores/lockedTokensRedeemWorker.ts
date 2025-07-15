@@ -17,6 +17,7 @@ export const useLockedTokensRedeemWorker = defineStore(
     state: () => ({
       checkInterval: 5000,
       worker: null as NodeJS.Timeout | null,
+      redeemChain: Promise.resolve() as Promise<void>,
     }),
     actions: {
       startLockedTokensRedeemWorker() {
@@ -41,7 +42,11 @@ export const useLockedTokensRedeemWorker = defineStore(
           this.processTokens();
         }
       },
-      async processTokens() {
+      processTokens() {
+        this.redeemChain = this.redeemChain.then(() => this._processTokens());
+        return this.redeemChain;
+      },
+      async _processTokens() {
         const settingsStore = useSettingsStore();
         if (!settingsStore.autoRedeemLockedTokens) return;
         const now = Math.floor(Date.now() / 1000);
