@@ -653,20 +653,21 @@ export default defineComponent({
 }
 
 .multi-nut-summary {
-  background: rgba(255, 255, 255, 0.04); /* subtle, matches modal */
-  border-radius: 8px;
-  padding: 12px 16px;
-  margin-bottom: 16px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+  background: var(--q-dark); /* or the modal's background color */
+  border-radius: 12px; /* match modal's border radius */
+  padding: 16px;
+  margin-top: 16px;
+  margin-bottom: 0;
+  color: var(--q-text); /* use the modal's default text color */
 }
 
 .multi-nut-notice {
   font-weight: 600;
-  color: #1976d2;
+  color: var(--q-primary); /* use your app's primary color */
   display: flex;
   align-items: center;
   font-size: 15px;
-  margin-bottom: 6px;
+  margin-bottom: 8px;
 }
 
 .multi-nut-breakdown {
@@ -677,12 +678,12 @@ export default defineComponent({
 
 .mint-name {
   font-weight: 500;
-  color: #1976d2;
+  color: var(--q-primary); /* use your app's primary color */
 }
 
 .mint-amount {
   font-weight: 500;
-  color: #fff;
+  color: var(--q-text); /* use the modal's default text color */
   margin-left: 4px;
 }
 </style>
