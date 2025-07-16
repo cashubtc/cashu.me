@@ -153,13 +153,6 @@
                 })
               }}
             </q-chip>
-            <q-chip v-if="refundPubkey" outline icon="undo" class="q-ml-sm">
-              {{
-                $t("LockedTokensTable.row.refund_label", {
-                  value: shortenString(pubkeyNpub(refundPubkey), 15, 6),
-                })
-              }}
-            </q-chip>
           </div>
           <div class="row q-pt-sm">
             <q-select
@@ -457,12 +450,6 @@ export default defineComponent({
         return "";
       }
       return this.getTokenPubkey(this.receiveData.tokensBase64) || "";
-    },
-    refundPubkey: function () {
-      if (!this.tokenDecodesCorrectly) {
-        return "";
-      }
-      return this.getTokenRefundPubkey(this.receiveData.tokensBase64) || "";
     },
     unlockDate: function () {
       const ts = this.getTokenLocktime(this.receiveData.tokensBase64);

@@ -219,13 +219,6 @@
                   dense
                   class="col-12 q-mb-sm"
                 />
-                <q-input
-                  v-model="sendData.refundPubkey"
-                  :label="$t('SendTokenDialog.inputs.refund_pubkey.label')"
-                  outlined
-                  dense
-                  class="col-12"
-                />
               </div>
             </div>
           </transition>
@@ -1208,9 +1201,6 @@ export default defineComponent({
         this.sendData.p2pkPubkey = ensureCompressed(
           this.sendData.p2pkPubkey
         );
-        this.sendData.refundPubkey = ensureCompressed(
-          this.sendData.refundPubkey
-        );
         let { _, sendProofs } = await this.sendToLock(
           proofsForBucket,
           mintWallet,
@@ -1286,7 +1276,6 @@ export default defineComponent({
           pubkey: this.sendData.p2pkPubkey,
           creatorP2PK: this.sendData.p2pkPubkey,
           locktime: this.sendData.locktime || undefined,
-          refundPubkey: this.sendData.refundPubkey || undefined,
           bucketId,
         });
         const historyToken = {

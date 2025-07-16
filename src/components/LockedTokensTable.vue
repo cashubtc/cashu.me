@@ -22,13 +22,6 @@
               })
             }}
           </q-item-label>
-          <q-item-label caption v-if="token.refundPubkey">
-            {{
-              $t("LockedTokensTable.row.refund_label", {
-                value: shortenString(pubkeyNpub(token.refundPubkey), 15, 6),
-              })
-            }}
-          </q-item-label>
           <q-item-label caption v-if="token.locktime">
             {{
               $t("LockedTokensTable.row.unlock_label", {
