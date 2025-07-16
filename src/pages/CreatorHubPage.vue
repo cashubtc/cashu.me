@@ -33,10 +33,8 @@
           <template #item="{ element }">
             <div class="q-mb-md">
               <TierItem
-                :tier-data="editedTiers[element.id]"
-                :saved="saved[element.id]"
-                @update:tierData="val => (editedTiers[element.id] = val)"
-                @save="saveTier(element.id)"
+                :tier-data="element"
+                @edit="editTier(element.id)"
                 @delete="confirmDelete(element.id)"
               />
             </div>
@@ -68,10 +66,8 @@
             <template #item="{ element }">
               <div class="q-mb-md">
                 <TierItem
-                  :tier-data="editedTiers[element.id]"
-                  :saved="saved[element.id]"
-                  @update:tierData="val => (editedTiers[element.id] = val)"
-                  @save="saveTier(element.id)"
+                  :tier-data="element"
+                  @edit="editTier(element.id)"
                   @delete="confirmDelete(element.id)"
                 />
               </div>
@@ -86,6 +82,7 @@
   </q-tab-panels>
 </div>
 <DeleteModal v-model="deleteDialog" @confirm="performDelete" />
+<AddTierDialog v-model="showTierDialog" :tier="currentTier" @save="refreshTiers" />
 </div>
 <PublishBar
   v-if="loggedIn"
@@ -113,11 +110,11 @@ import { useP2PKStore } from 'stores/p2pk';
 import { useMintsStore } from 'stores/mints';
 import { useCreatorProfileStore } from 'stores/creatorProfile';
 import { storeToRefs } from 'pinia';
-import { v4 as uuidv4 } from 'uuid';
 import { nip19 } from 'nostr-tools';
 import { notifySuccess, notifyError } from 'src/js/notify';
 import CreatorProfileForm from 'components/CreatorProfileForm.vue';
 import TierItem from 'components/TierItem.vue';
+import AddTierDialog from 'components/AddTierDialog.vue';
 import DeleteModal from 'components/DeleteModal.vue';
 import ThemeToggle from 'components/ThemeToggle.vue';
 import PublishBar from 'components/PublishBar.vue';
@@ -150,30 +147,13 @@ const tab = ref<'profile' | 'tiers'>('profile');
 
 const loggedIn = computed(() => !!store.loggedInNpub);
 const tierList = computed<Tier[]>(() => store.getTierArray());
-const editedTiers = ref<Record<string, Tier>>({});
-const saved = reactive<Record<string, boolean>>({});
 const draggableTiers = ref<Tier[]>([]);
 const deleteDialog = ref(false);
 const deleteId = ref('');
+const showTierDialog = ref(false);
+const currentTier = ref<Partial<Tier>>({});
 const publishing = ref(false);
 const npub = computed(() => (store.loggedInNpub ? nip19.npubEncode(store.loggedInNpub) : ''));
-
-
-watch(
-  () => store.tiers,
-  (val) => {
-    const obj: Record<string, Tier> = {};
-    Object.values(val).forEach((t) => {
-      obj[t.id] = { ...t } as Tier;
-      if (!(t.id in saved)) saved[t.id] = false;
-    });
-    Object.keys(saved).forEach((id) => {
-      if (!val[id]) delete saved[id];
-    });
-    editedTiers.value = obj;
-  },
-  { immediate: true, deep: true },
-);
 
 watch(
   tierList,
@@ -262,8 +242,16 @@ async function saveProfile() {
 }
 
 function addTier() {
-  const id = uuidv4();
-  store.addTier({ id, name: '', price: 0, description: '', welcomeMessage: '' });
+  currentTier.value = { name: '', price: 0, description: '', welcomeMessage: '' };
+  showTierDialog.value = true;
+}
+
+function editTier(id: string) {
+  const t = store.tiers[id];
+  if (t) {
+    currentTier.value = { ...t };
+    showTierDialog.value = true;
+  }
 }
 
 function confirmDelete(id: string) {
@@ -275,21 +263,8 @@ function updateOrder() {
   store.setTierOrder(draggableTiers.value.map((t) => t.id));
 }
 
-async function saveTier(id: string) {
-  const data = editedTiers.value[id];
-  if (data) {
-    try {
-      store.updateTier(id, data);
-      await store.saveTier(data);
-      notifySuccess('Tier saved');
-      saved[id] = true;
-      setTimeout(() => {
-        saved[id] = false;
-      }, 2000);
-    } catch (e: any) {
-      notifyError(e?.message || 'Failed to save tier');
-    }
-  }
+function refreshTiers() {
+  draggableTiers.value = [...tierList.value];
 }
 
 async function removeTier(id: string) {
