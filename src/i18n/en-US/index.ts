@@ -901,6 +901,9 @@ export const messages = {
       locktime: {
         label: "Unlock time",
       },
+      lock_toggle: {
+        label: "Lock to pubkey/timelock",
+      },
       memo: {
         label: "Message",
       },

@@ -148,6 +148,12 @@
             v-model.trim="sendData.memo"
             :label="$t('SendTokenDialog.inputs.memo.label')"
           />
+          <q-toggle
+            v-model="showLockInput"
+            color="primary"
+            :label="$t('SendTokenDialog.inputs.lock_toggle.label')"
+            class="q-mt-md"
+          />
           <transition
             appear
             enter-active-class="animated fadeIn"
@@ -261,28 +267,6 @@
                 <!-- <q-btn rounded flat color="primary" icon="lock">Locked</q-btn> -->
               </transition>
             </div>
-            <transition
-              appear
-              enter-active-class="animated fadeIn"
-              leave-active-class="animated fadeOut"
-            >
-              <q-btn
-                v-if="
-                  sendData.amount > 0 &&
-                  !showLockInput &&
-                  activeBalance >= sendData.amount
-                "
-                :disable="sendData.p2pkPubkey == null || sendData.amount <= 0"
-                color="primary"
-                class="q-ml-sm"
-                rounded
-                flat
-                @click="showLockInput = true"
-              >
-                <!-- <q-icon size="xs" class="q-mr-xs" name="lock" />  -->
-                {{ $t("SendTokenDialog.actions.lock.label") }}</q-btn
-              >
-            </transition>
             <q-btn v-close-popup rounded flat color="grey" class="q-ml-auto">{{
               $t("SendTokenDialog.actions.close.label")
             }}</q-btn>
@@ -915,7 +899,8 @@ export default defineComponent({
       const bucket = this.bucketList.find((b) => b.id === val);
       if (bucket && bucket.creatorPubkey) {
         this.sendData.p2pkPubkey = bucket.creatorPubkey;
-        this.showLockInput = true;
+      } else {
+        this.showLockInput = false;
       }
     },
   },
