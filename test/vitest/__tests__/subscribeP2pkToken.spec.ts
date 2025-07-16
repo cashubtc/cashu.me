@@ -12,7 +12,7 @@ vi.mock("../../../src/stores/p2pk", () => ({
     isValidPubkey: () => true,
     generateRefundSecret: () => ({ hash: "h" }),
     generateKeypair: vi.fn(),
-    firstKey: { publicKey: "refund" },
+    firstKey: { publicKey: "key" },
     getTokenPubkey: (t: string) => {
       try {
         const decoded = JSON.parse(Buffer.from(t.slice(6), "base64").toString());

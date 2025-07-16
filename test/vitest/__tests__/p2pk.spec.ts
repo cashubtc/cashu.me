@@ -26,22 +26,19 @@ describe("P2PK store", () => {
     expect(info.locktime).toBe(locktime);
   });
 
-  it("returns refund key for expired locktime secret", () => {
+  it("returns original key for expired locktime secret", () => {
     const p2pk = useP2PKStore();
     const locktime = Math.floor(Date.now() / 1000) - 1000;
     const secret = JSON.stringify([
       "P2PK",
       {
         data: "02aa",
-        tags: [
-          ["locktime", String(locktime)],
-          ["refund", "02bb", "02cc"],
-        ],
+        tags: [["locktime", String(locktime)]],
       },
     ]);
     const pub = p2pk.getSecretP2PKPubkey(secret);
     const info = p2pk.getSecretP2PKInfo(secret);
-    expect(pub).toBe("02bb");
+    expect(pub).toBe("02aa");
     expect(info.locktime).toBe(locktime);
   });
 
@@ -155,10 +152,7 @@ describe("P2PK store", () => {
       "P2PK",
       {
         data: "02aa",
-        tags: [
-          ["locktime", String(locktime)],
-          ["refund", "02bb"],
-        ],
+        tags: [["locktime", String(locktime)]],
       },
     ]);
     const tokenObj = {
@@ -167,7 +161,7 @@ describe("P2PK store", () => {
     const encoded =
       "cashuA" + Buffer.from(JSON.stringify(tokenObj)).toString("base64");
     expect(p2pk.getTokenPubkey(encoded)).toBe("02aa");
-    expect(p2pk.getTokenRefundPubkey(encoded)).toBe("02bb");
+    expect(p2pk.getTokenRefundPubkey(encoded)).toBeUndefined();
   });
 
   it("redeems token locked to converted npub", async () => {

@@ -35,7 +35,7 @@ vi.mock("../../../src/stores/p2pk", () => ({
     getTokenLocktime: vi.fn(() => 0),
     generateRefundSecret: () => ({ preimage: "pre", hash: "hash" }),
     generateKeypair: vi.fn(),
-    firstKey: { publicKey: "refund" },
+    firstKey: { publicKey: "key" },
     isValidPubkey: (...args: any[]) => isValidPubkey(...args),
   }),
 }));
