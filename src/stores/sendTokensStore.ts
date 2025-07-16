@@ -17,7 +17,6 @@ export const useSendTokensStore = defineStore("sendTokensStore", {
       tokensBase64: "",
       p2pkPubkey: "",
       locktime: null,
-      refundPubkey: "",
       paymentRequest: undefined,
       historyToken: undefined,
       bucketId: DEFAULT_BUCKET_ID,
@@ -29,7 +28,6 @@ export const useSendTokensStore = defineStore("sendTokensStore", {
       tokensBase64: string;
       p2pkPubkey: string;
       locktime: number | null;
-      refundPubkey: string;
       paymentRequest?: PaymentRequest;
       historyToken: HistoryToken | undefined;
       bucketId?: string;
@@ -44,7 +42,6 @@ export const useSendTokensStore = defineStore("sendTokensStore", {
       this.sendData.tokensBase64 = "";
       this.sendData.p2pkPubkey = "";
       this.sendData.locktime = null;
-      this.sendData.refundPubkey = "";
       this.sendData.paymentRequest = undefined;
       this.sendData.historyToken = undefined;
       this.sendData.bucketId = DEFAULT_BUCKET_ID;

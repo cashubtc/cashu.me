@@ -41,7 +41,6 @@ export function receiptToDmText(
         token: receipt.token,
         receiver_p2pk: receipt.receiver_p2pk ?? receipt.pubkey,
         unlock_time: receipt.unlock_time ?? receipt.locktime ?? null,
-        hashlock: receipt.hashlock ?? null,
       }
     : {
         token: receipt.token,
@@ -51,7 +50,6 @@ export function receiptToDmText(
         referenceId: receipt.id,
         receiver_p2pk: receipt.receiver_p2pk ?? receipt.pubkey,
         unlock_time: receipt.unlock_time ?? receipt.locktime ?? null,
-        hashlock: receipt.hashlock ?? null,
       };
   return JSON.stringify(payload);
 }

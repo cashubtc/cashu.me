@@ -303,8 +303,6 @@ export const useMessengerStore = defineStore("messenger", {
             total_months: payload.total_months,
             amount,
             unlock_time: payload.unlock_time,
-            preimage: payload.preimage,
-            hashlock: payload.hashlock,
           };
         }
       } catch {}
@@ -352,8 +350,6 @@ export const useMessengerStore = defineStore("messenger", {
             total_months: payload.total_months,
             amount,
             unlock_time: payload.unlock_time,
-            preimage: payload.preimage,
-            hashlock: payload.hashlock,
           };
           const unlockTs = payload.unlock_time ?? payload.unlockTime ?? 0;
           const entry: LockedToken = {

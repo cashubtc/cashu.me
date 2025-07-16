@@ -13,7 +13,6 @@ export type LockedToken = {
   unlockTs?: number;
   label?: string;
   locktime?: number;
-  refundPubkey?: string;
   bucketId: string;
   date: string;
 };
