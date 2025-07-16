@@ -853,9 +853,6 @@ export default {
         locktime: {
           label: "Unlock time",
         },
-        refund_pubkey: {
-          label: "Refund public key",
-        },
       },
     },
     actions: {

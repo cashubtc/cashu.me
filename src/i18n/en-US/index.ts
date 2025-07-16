@@ -901,9 +901,6 @@ export const messages = {
       locktime: {
         label: "Unlock time",
       },
-      refund_pubkey: {
-        label: "Refund public key",
-      },
       memo: {
         label: "Message",
       },
@@ -997,7 +994,6 @@ export const messages = {
     timelock: {
       unlock_date_label: "Unlocks { value }",
       receiver_label: "Receiver { value }",
-      refund_label: "Refund { value }",
     },
     errors: {
       invalid_token: {
@@ -1545,7 +1541,6 @@ export const messages = {
       date_label: "{ value } ago",
       unlock_label: "Unlocks { value }",
       receiver_label: "Receiver { value }",
-      refund_label: "Refund { value }",
     },
     actions: {
       copy: { tooltip_text: "Copy" },
