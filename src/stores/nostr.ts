@@ -1344,7 +1344,6 @@ export const useNostrStore = defineStore("nostr", {
             tierId: payload.tier_id ?? "",
             intervalKey: payload.subscription_id ?? "",
             unlockTs,
-            refundUnlockTs: 0,
             autoRedeem: true,
             status:
               unlockTs && unlockTs > Math.floor(Date.now() / 1000)
@@ -1453,7 +1452,6 @@ export const useNostrStore = defineStore("nostr", {
             tierId: payload.bucketId,
             intervalKey: payload.referenceId,
             unlockTs,
-            refundUnlockTs: 0,
             autoRedeem: true,
             status:
               unlockTs && unlockTs > Math.floor(Date.now() / 1000)

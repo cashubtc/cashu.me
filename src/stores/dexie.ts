@@ -33,7 +33,6 @@ export interface SubscriptionInterval {
   intervalKey: string;
   lockedTokenId: string;
   unlockTs: number;
-  refundUnlockTs: number;
   status: "pending" | "unlockable" | "claimed" | "expired";
   tokenString: string;
   autoRedeem?: boolean;
@@ -49,7 +48,6 @@ export interface Subscription {
   creatorNpub: string;
   tierId: string;
   creatorP2PK: string;
-  subscriberRefundP2PK: string;
   mintUrl: string;
   amountPerInterval: number;
   frequency: "monthly" | "weekly";
@@ -72,7 +70,6 @@ export interface LockedToken {
   tierId: string;
   intervalKey: string;
   unlockTs: number;
-  refundUnlockTs: number;
   status: "pending" | "unlockable" | "claimed" | "expired";
   subscriptionEventId: string | null;
   subscriptionId?: string;
@@ -300,6 +297,33 @@ export class CashuDexie extends Dexie {
             entry.intervals?.forEach((i: any) => {
               delete i.preimage;
               delete i.hashlock;
+            });
+          });
+      });
+
+    this.version(13)
+      .stores({
+        proofs: "secret, id, C, amount, reserved, quote, bucketId, label",
+        profiles: "pubkey",
+        creatorsTierDefinitions: "&creatorNpub, eventId, updatedAt",
+        subscriptions: "&id, creatorNpub, tierId, status, createdAt, updatedAt",
+        lockedTokens:
+          "&id, tokenString, owner, tierId, intervalKey, unlockTs, status, subscriptionEventId, subscriptionId, monthIndex, totalMonths, autoRedeem",
+      })
+      .upgrade(async (tx) => {
+        await tx
+          .table("lockedTokens")
+          .toCollection()
+          .modify((entry: any) => {
+            delete (entry as any).refundUnlockTs;
+          });
+        await tx
+          .table("subscriptions")
+          .toCollection()
+          .modify((entry: any) => {
+            delete (entry as any).subscriberRefundP2PK;
+            entry.intervals?.forEach((i: any) => {
+              delete i.refundUnlockTs;
             });
           });
       });

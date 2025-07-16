@@ -147,7 +147,6 @@ export const useNutzapStore = defineStore("nutzap", {
           tierId: "nutzap",
           intervalKey: ev.id,
           unlockTs,
-          refundUnlockTs: 0,
           status:
             unlockTs && unlockTs > Math.floor(Date.now() / 1000)
               ? "pending"
@@ -257,7 +256,6 @@ export const useNutzapStore = defineStore("nutzap", {
           tierId,
           intervalKey: String(i + 1),
           unlockTs: unlockDate,
-          refundUnlockTs: 0,
           status:
             unlockDate > Math.floor(Date.now() / 1000)
               ? "pending"
@@ -280,7 +278,6 @@ export const useNutzapStore = defineStore("nutzap", {
         creatorNpub: creator.nostrPubkey,
         tierId,
         creatorP2PK: creator.cashuP2pk,
-        subscriberRefundP2PK: refundKey,
         mintUrl: mints.activeMintUrl,
         amountPerInterval: price,
         frequency: "monthly",
@@ -290,7 +287,6 @@ export const useNutzapStore = defineStore("nutzap", {
           intervalKey: String(idx + 1),
           lockedTokenId: t.id,
           unlockTs: t.unlockTs,
-          refundUnlockTs: 0,
           status: "pending",
           tokenString: t.tokenString,
           autoRedeem: false,
@@ -406,7 +402,6 @@ export const useNutzapStore = defineStore("nutzap", {
             tierId: "nutzap",
             intervalKey: String(i + 1),
             unlockTs: unlockDate,
-            refundUnlockTs: 0,
             status:
               unlockDate > Math.floor(Date.now() / 1000)
                 ? "pending"
@@ -431,7 +426,6 @@ export const useNutzapStore = defineStore("nutzap", {
           creatorNpub: npub,
           tierId: "nutzap",
           creatorP2PK: creatorP2pk,
-          subscriberRefundP2PK: refundKey,
           mintUrl: mints.activeMintUrl,
           amountPerInterval: amount,
           frequency: "monthly",
@@ -441,11 +435,10 @@ export const useNutzapStore = defineStore("nutzap", {
             intervalKey: String(idx + 1),
             lockedTokenId: t.id,
             unlockTs: t.unlockTs,
-            refundUnlockTs: 0,
             status: "pending",
-          tokenString: t.tokenString,
-          autoRedeem: false,
-          redeemed: false,
+            tokenString: t.tokenString,
+            autoRedeem: false,
+            redeemed: false,
           })),
           status: "active",
         } as any);
