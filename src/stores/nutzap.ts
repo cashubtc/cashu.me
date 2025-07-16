@@ -194,14 +194,9 @@ export const useNutzapStore = defineStore("nutzap", {
           throw new Error(
             "Insufficient balance in a mint that the creator trusts."
           );
-        const mintWallet = wallet.mintWallet(mint.url, mints.activeUnit);
-        const proofs = mints.mintUnitProofs(mint, mints.activeUnit);
         const { sendProofs, locked } = await wallet.sendToLock(
-          proofs,
-          mintWallet,
           price,
           creator.cashuP2pk,
-          "nutzap",
           unlockDate
         );
 
@@ -337,14 +332,9 @@ export const useNutzapStore = defineStore("nutzap", {
               "Insufficient balance in a mint that the creator trusts."
             );
 
-          const mintWallet = wallet.mintWallet(mint.url, mints.activeUnit);
-          const proofs = mints.mintUnitProofs(mint, mints.activeUnit);
           const { sendProofs, locked } = await wallet.sendToLock(
-            proofs,
-            mintWallet,
             amount,
             creatorP2pk,
-            "nutzap",
             unlockDate
           );
           const token = proofsStore.serializeProofs(sendProofs);

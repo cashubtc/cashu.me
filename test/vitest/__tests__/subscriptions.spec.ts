@@ -121,7 +121,7 @@ beforeEach(async () => {
   serializeProofs = vi.fn((p: any) => `tok-${p[0]}`);
   updateActiveProofs = vi.fn();
   addMany = vi.fn();
-  sendToLock = vi.fn(async (_p, _w, _a, _pk, _b, u) => ({
+  sendToLock = vi.fn(async (_a, _pk, u) => ({
     sendProofs: [u],
     locked: { id: `id-${u}`, tokenString: `lock-${u}` },
   }));

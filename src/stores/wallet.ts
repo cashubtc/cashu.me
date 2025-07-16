@@ -449,14 +449,17 @@ export const useWalletStore = defineStore("wallet", {
       return this.wallet.getFeesForProofs(proofs);
     },
     sendToLock: async function (
-      proofs: WalletProof[],
-      wallet: CashuWallet,
       amount: number,
       receiverPubkey: string,
-      bucketId: string = DEFAULT_BUCKET_ID,
-      locktime?: number
+      locktime: number
     ) {
       const mintStore = useMintsStore();
+      const wallet = this.wallet;
+      const sendTokensStore = useSendTokensStore();
+      const bucketId = sendTokensStore.sendData.bucketId || DEFAULT_BUCKET_ID;
+      const proofs = mintStore.activeProofs.filter(
+        (p) => p.bucketId === bucketId
+      );
       const info = mintStore.activeInfo || {};
       const nuts = Array.isArray(info.nut_supports)
         ? info.nut_supports
@@ -484,8 +487,10 @@ export const useWalletStore = defineStore("wallet", {
           proofsToSend,
           {
             keysetId,
-            pubkey: ensureCompressed(receiverPubkey),
-            locktime,
+            p2pk: {
+              pubkey: ensureCompressed(receiverPubkey),
+              locktime,
+            },
           }
         ));
         await proofsStore.removeProofs(proofsToSend);
