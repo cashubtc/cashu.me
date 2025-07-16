@@ -112,7 +112,6 @@ export default defineComponent({
     async redeem(token) {
       const receiveStore = useReceiveTokensStore();
       const wallet = useWalletStore();
-      const receiveStore = useReceiveTokensStore();
       const p2pkStore = useP2PKStore();
       receiveStore.receiveData.tokensBase64 = token.tokenString;
       receiveStore.receiveData.bucketId = token.tierId;
