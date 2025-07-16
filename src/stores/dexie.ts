@@ -327,6 +327,18 @@ export class CashuDexie extends Dexie {
             });
           });
       });
+
+    this.version(14)
+      .upgrade(async (tx) => {
+        await tx
+          .table("lockedTokens")
+          .toCollection()
+          .modify((entry: any) => {
+            delete (entry as any).preimage;
+            delete (entry as any).hashlock;
+            if (entry.redeemed === undefined) entry.redeemed = false;
+          });
+      });
   }
 }
 

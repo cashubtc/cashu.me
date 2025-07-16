@@ -505,7 +505,6 @@ export const useWalletStore = defineStore("wallet", {
           amount,
           tokenString: tokenStr,
           pubkey: receiverPubkey,
-          creatorP2PK: receiverPubkey,
           locktime,
           bucketId: bucketsStore.ensureCreatorBucket(receiverPubkey),
         });

@@ -153,13 +153,15 @@ export const useLockedTokensRedeemWorker = defineStore(
 
             debug("locked token redeem: sending proofs", proofs);
             try {
+              await cashuDb.transaction('rw', cashuDb.lockedTokens, async () => {
+                const row = await cashuDb.lockedTokens.get(entry.id);
+                if (!row || row.status === 'processing') return;
+                await cashuDb.lockedTokens.update(entry.id, { status: 'processing' });
+              });
               await receiveStore.enqueue(() =>
                 wallet.redeem(entry.tokenString),
               );
-              await cashuDb.lockedTokens
-                .where("tokenString")
-                .equals(entry.tokenString)
-                .delete();
+              await cashuDb.lockedTokens.delete(entry.id);
 
               // update subscription interval if applicable
               if (entry.subscriptionId) {

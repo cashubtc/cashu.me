@@ -26,9 +26,6 @@ vi.mock('../src/stores/proofs', () => ({
   useProofsStore: () => ({ serializeProofs: vi.fn(() => 'token'), updateActiveProofs: vi.fn() }),
 }));
 
-vi.mock('../src/stores/p2pk', () => ({
-  useP2PKStore: () => ({ firstKey: { publicKey: 'refund' } }),
-}));
 
 beforeEach(async () => {
   localStorage.clear();

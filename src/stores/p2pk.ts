@@ -100,11 +100,6 @@ export const useP2PKStore = defineStore("p2pk", {
         return false;
       }
     },
-    generateRefundSecret: function () {
-      const pre = randomBytes(32);
-      const hash = sha256(pre);
-      return { preimage: bytesToHex(pre), hash: bytesToHex(hash) };
-    },
     setPrivateKeyUsed: function (key: string) {
       const thisKeys = this.p2pkKeys.filter((k) => k.privateKey == key);
       if (thisKeys.length) {
@@ -188,11 +183,7 @@ export const useP2PKStore = defineStore("p2pk", {
         const mainKey = ensureCompressed(data);
         const locktimeTag = tags && tags.find((tag) => tag[0] === "locktime");
         const locktime = locktimeTag ? parseInt(locktimeTag[1], 10) : undefined; // Permanent lock if not set
-        const refundTag = tags && tags.find((tag) => tag[0] === "refund");
-        const refundKeys =
-          refundTag && refundTag.length > 1
-            ? refundTag.slice(1).map((k: string) => ensureCompressed(k))
-            : [];
+        const refundKeys: string[] = [];
         const pubkeysTag = tags && tags.find((tag) => tag[0] === "pubkeys");
         const pubkeys =
           pubkeysTag && pubkeysTag.length > 1
@@ -212,16 +203,7 @@ export const useP2PKStore = defineStore("p2pk", {
           }
           return { pubkey: mainKey, locktime, refundKeys };
         }
-        // If locktime expired, return first owned 'refund' key match or
-        // or just return the first refund key to show token is locked
-        if (refundKeys.length > 0) {
-          debug("p2pk token - locked to refund keys");
-          for (const pk of refundKeys) {
-            if (this.haveThisKey(pk))
-              return { pubkey: pk, locktime, refundKeys };
-          }
-          return { pubkey: refundKeys[0], locktime, refundKeys };
-        }
+        // If locktime expired, return main key
         debug("p2pk token - lock has expired");
       } catch {}
       return { pubkey: "", locktime: undefined, refundKeys: [] }; // Token is not locked / secret is not P2PK
@@ -264,17 +246,6 @@ export const useP2PKStore = defineStore("p2pk", {
 
         if (locktime > now) {
           return data;
-        }
-
-        const refundTag = tags?.find((tag: any) => tag[0] === "refund");
-        if (refundTag?.length > 1) {
-          const refundKeys = refundTag.slice(1);
-          for (const pk of refundKeys) {
-            if (this.haveThisKey(pk)) {
-              return pk;
-            }
-          }
-          return refundKeys[0];
         }
 
         return data;

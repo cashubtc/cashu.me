@@ -10,7 +10,6 @@ let sendDm: any;
 vi.mock("../../../src/stores/p2pk", () => ({
   useP2PKStore: () => ({
     isValidPubkey: () => true,
-    generateRefundSecret: () => ({ hash: "h" }),
     generateKeypair: vi.fn(),
     firstKey: { publicKey: "key" },
     getTokenPubkey: (t: string) => {
