@@ -43,7 +43,6 @@ export interface NutzapQueuedSend {
   npub: string;
   token: string;
   unlockTime: number;
-  receiverP2PK: string;
   createdAt: number;
 }
 
@@ -71,7 +70,6 @@ export const useNutzapStore = defineStore("nutzap", {
       const payload = {
         type: "cashu_subscription_payment",
         token: item.token,
-        receiver_p2pk: item.receiverP2PK,
         unlock_time: item.unlockTime,
       } as const;
       const { success } = await messenger.sendDm(
@@ -207,7 +205,6 @@ export const useNutzapStore = defineStore("nutzap", {
             JSON.stringify({
               type: "cashu_subscription_payment",
               token: tokenStr,
-              receiver_p2pk: creator.cashuP2pk,
               unlock_time: unlockDate,
             }),
             relayList
@@ -218,7 +215,6 @@ export const useNutzapStore = defineStore("nutzap", {
               npub: creator.nostrPubkey,
               token: tokenStr,
               unlockTime: unlockDate,
-              receiverP2PK: creator.cashuP2pk,
               createdAt: Math.floor(Date.now() / 1000),
             });
           }
@@ -230,7 +226,6 @@ export const useNutzapStore = defineStore("nutzap", {
             npub: creator.nostrPubkey,
             token: tokenStr,
             unlockTime: unlockDate,
-            receiverP2PK: creator.cashuP2pk,
             createdAt: Math.floor(Date.now() / 1000),
           });
         }
@@ -241,7 +236,6 @@ export const useNutzapStore = defineStore("nutzap", {
           amount: price,
           owner: "subscriber",
           creatorNpub: creator.nostrPubkey,
-          creatorP2PK: creator.cashuP2pk,
           autoRedeem: false,
           tierId,
           intervalKey: String(i + 1),
@@ -345,7 +339,6 @@ export const useNutzapStore = defineStore("nutzap", {
               JSON.stringify({
                 type: "cashu_subscription_payment",
                 token,
-                receiver_p2pk: creatorP2pk,
                 unlock_time: unlockDate,
               }),
               trustedRelays
@@ -356,7 +349,6 @@ export const useNutzapStore = defineStore("nutzap", {
                 npub: profile.hexPub,
                 token,
                 unlockTime: unlockDate,
-                receiverP2PK: creatorP2pk,
                 createdAt: Math.floor(Date.now() / 1000),
               });
             }
@@ -368,7 +360,6 @@ export const useNutzapStore = defineStore("nutzap", {
               npub: profile.hexPub,
               token,
               unlockTime: unlockDate,
-              receiverP2PK: creatorP2pk,
               createdAt: Math.floor(Date.now() / 1000),
             });
           }
@@ -378,9 +369,8 @@ export const useNutzapStore = defineStore("nutzap", {
             tokenString: locked.tokenString,
             amount,
             owner: "subscriber",
-            creatorNpub: npub,
-            creatorP2PK: creatorP2pk,
-            autoRedeem: false,
+          creatorNpub: npub,
+          autoRedeem: false,
             tierId: "nutzap",
             intervalKey: String(i + 1),
             unlockTs: unlockDate,

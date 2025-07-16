@@ -118,10 +118,7 @@ export default defineComponent({
       receiveStore.receiveData.p2pkPrivateKey =
         p2pkStore.getPrivateKeyForP2PKEncodedToken(token.tokenString);
       await receiveStore.enqueue(() => wallet.redeem(token.tokenString));
-      await cashuDb.lockedTokens
-        .where("tokenString")
-        .equals(token.tokenString)
-        .delete();
+      await cashuDb.lockedTokens.delete(token.id);
       if (token.subscriptionId) {
         const sub = await cashuDb.subscriptions.get(token.subscriptionId);
         const idx = sub?.intervals.findIndex(

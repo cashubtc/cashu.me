@@ -30,7 +30,6 @@ vi.mock("../../../src/stores/nostr", async (importOriginal) => {
 vi.mock("../../../src/stores/p2pk", () => ({
   useP2PKStore: () => ({
     getTokenLocktime: (...args: any[]) => getTokenLocktime(...args),
-    generateRefundSecret: () => ({ preimage: "pre", hash: "hash" }),
     isValidPubkey: (...args: any[]) => isValidPubkey(...args),
   }),
 }));

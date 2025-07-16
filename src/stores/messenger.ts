@@ -35,8 +35,6 @@ export interface SubscriptionPayment {
   total_months: number;
   amount: number;
   unlock_time?: number;
-  preimage?: string | null;
-  hashlock?: string | null;
 }
 
 export type MessengerMessage = {
@@ -364,7 +362,6 @@ export const useMessengerStore = defineStore("messenger", {
             owner: "creator",
             creatorNpub: useNostrStore().pubkey,
             subscriberNpub: event.pubkey,
-            creatorP2PK: payload.receiver_p2pk,
             tierId: payload.tier_id ?? "",
             intervalKey: payload.subscription_id ?? "",
             unlockTs,
