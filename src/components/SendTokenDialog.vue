@@ -1217,8 +1217,7 @@ export default defineComponent({
           sendAmount,
           this.sendData.p2pkPubkey,
           bucketId,
-          this.sendData.locktime || undefined,
-          this.sendData.refundPubkey || undefined
+          this.sendData.locktime || undefined
         );
         // update UI
         this.sendData.tokens = sendProofs;

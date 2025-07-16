@@ -99,13 +99,12 @@ describe("P2PK store", () => {
       1,
       "pk",
       "b",
-      123,
-      "r"
+      123
     );
     expect(wallet.send).toHaveBeenCalledWith(
       1,
       [{ secret: "s", amount: 1, id: "a", C: "c" }],
-      { keysetId: "kid", pubkey: "pk", locktime: 123, refund: "r" }
+      { keysetId: "kid", pubkey: "pk", locktime: 123 }
     );
   });
 
