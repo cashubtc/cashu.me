@@ -42,13 +42,12 @@ describe("Timelock", () => {
       1,
       "pk",
       "b",
-      99,
-      "r"
+      99
     );
     expect(wallet.send).toHaveBeenCalledWith(
       1,
       [{ secret: "s", amount: 1, id: "a", C: "c" }],
-      { keysetId: "kid", pubkey: "pk", locktime: 99, refund: "r" }
+      { keysetId: "kid", pubkey: "pk", locktime: 99 }
     );
   });
 

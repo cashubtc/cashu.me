@@ -454,9 +454,7 @@ export const useWalletStore = defineStore("wallet", {
       amount: number,
       receiverPubkey: string,
       bucketId: string = DEFAULT_BUCKET_ID,
-      locktime?: number,
-      refundPubkey?: string,
-      hashSecret?: string
+      locktime?: number
     ) {
       const mintStore = useMintsStore();
       const info = mintStore.activeInfo || {};
@@ -479,46 +477,17 @@ export const useWalletStore = defineStore("wallet", {
       let keepProofs: Proof[] = [];
       let sendProofs: Proof[] = [];
 
-      const tagList: [string, string][] = [["locktime", locktime.toString()]];
-      if (refundPubkey?.length) tagList.push(["refund", refundPubkey]);
-      if (hashSecret?.length) tagList.push(["hashlock", hashSecret]);
-
-      if (hashSecret && !receiverPubkey) {
-        throw new Error("receiverPubkey is required when using hashlock");
-      }
-
       const proofsStore = useProofsStore();
       try {
-        if (hashSecret) {
-          const customSecret = [
-            "P2PK",
-            {
-              data: ensureCompressed(receiverPubkey),
-              nonce: crypto.randomUUID().replace(/-/g, "").slice(0, 16),
-              tags: tagList,
-            },
-          ] as const;
-          const secretStr = JSON.stringify(customSecret);
-          const proofsSigned = this.signP2PKIfNeeded(proofsToSend);
-          ({ keep: keepProofs, send: sendProofs } =
-            await (wallet as any).splitWithSecret(
-              amount,
-              proofsSigned,
-              secretStr,
-              { proofsWeHave: spendableProofs }
-            ));
-        } else {
-          ({ keep: keepProofs, send: sendProofs } = await wallet.send(
-            amount,
-            proofsToSend,
-            {
-              keysetId,
-              pubkey: ensureCompressed(receiverPubkey),
-              locktime,
-              refund: refundPubkey,
-            }
-          ));
-        }
+        ({ keep: keepProofs, send: sendProofs } = await wallet.send(
+          amount,
+          proofsToSend,
+          {
+            keysetId,
+            pubkey: ensureCompressed(receiverPubkey),
+            locktime,
+          }
+        ));
         await proofsStore.removeProofs(proofsToSend);
         // note: we do not store sendProofs in the proofs store but
         // expect from the caller to store it in the history

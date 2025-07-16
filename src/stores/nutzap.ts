@@ -205,8 +205,7 @@ export const useNutzapStore = defineStore("nutzap", {
           price,
           creator.cashuP2pk,
           "nutzap",
-          unlockDate,
-          refundKey
+          unlockDate
         );
 
         const tokenStr = proofsStore.serializeProofs(sendProofs);
@@ -355,8 +354,7 @@ export const useNutzapStore = defineStore("nutzap", {
             amount,
             creatorP2pk,
             "nutzap",
-            unlockDate,
-            refundKey
+            unlockDate
           );
           const token = proofsStore.serializeProofs(sendProofs);
 
