@@ -313,21 +313,18 @@
       </div>
       <div
         v-if="multinutBreakdown && multinutBreakdown.length > 0"
-        class="multi-nut-summary q-mb-md"
+        class="multi-mint-banner q-mt-md q-pa-md"
       >
-        <div class="multi-nut-notice q-mb-xs">
-          <q-icon name="bolt" color="primary" size="18px" class="q-mr-xs" />
-          This payment will use multiple mints:
+        <div class="row items-center q-mb-xs">
+          <q-icon name="bolt" class="q-mr-sm" />
+          <span class="text-weight-bold"
+            >This payment will use multiple mints:</span
+          >
         </div>
-        <ul class="multi-nut-breakdown">
-          <li v-for="entry in multinutBreakdown" :key="entry.mint.url">
-            <span class="mint-name">{{
-              entry.mint.nickname || entry.mint.info?.name || entry.mint.url
-            }}</span
-            >:
-            <span class="mint-amount">{{ entry.amount }} sats</span>
-          </li>
-        </ul>
+        <div v-for="entry in multinutBreakdown" :key="entry.mint.url">
+          {{ entry.mint.nickname || entry.mint.info?.name || entry.mint.url }}:
+          {{ entry.amount }} sats
+        </div>
       </div>
       <div class="auto-multinut-progress" v-if="autoMultinutInProgress">
         <q-spinner color="primary" size="20px" class="q-mr-sm" />
@@ -623,11 +620,6 @@ export default defineComponent({
   border-top-right-radius: 0px;
 }
 
-.qcard {
-  border-top-left-radius: 20px;
-  border-top-right-radius: 20px;
-}
-
 .request-input {
   word-break: break-all;
   -webkit-hyphens: none;
@@ -685,5 +677,15 @@ export default defineComponent({
   font-weight: 500;
   color: var(--q-text); /* use the modal's default text color */
   margin-left: 4px;
+}
+
+.multi-mint-banner {
+  border-radius: 20px !important; /* Makes all corners rounded */
+  background: #222 !important; /* Or your preferred color */
+  color: #fff; /* Ensures text is visible */
+  margin-bottom: 16px;
+  margin-top: 16px;
+  padding: 16px;
+  /* Remove box-shadow or border if you want it even cleaner */
 }
 </style>
