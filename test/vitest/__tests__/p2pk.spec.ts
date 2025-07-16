@@ -89,19 +89,13 @@ describe("P2PK store", () => {
         send: [],
       })),
     } as any;
+    vi.spyOnProperty(walletStore, "wallet", "get").mockReturnValue(wallet);
 
-    await walletStore.sendToLock(
-      [{ secret: "s", amount: 1, id: "a", C: "c" } as any],
-      wallet,
-      1,
-      "pk",
-      "b",
-      123
-    );
+    await walletStore.sendToLock(1, "pk", 123);
     expect(wallet.send).toHaveBeenCalledWith(
       1,
       [{ secret: "s", amount: 1, id: "a", C: "c" }],
-      { keysetId: "kid", pubkey: "pk", locktime: 123 }
+      { keysetId: "kid", p2pk: { pubkey: "pk", locktime: 123 } }
     );
   });
 
@@ -198,12 +192,12 @@ describe("P2PK store", () => {
       }),
     } as any;
 
+    vi.spyOnProperty(walletStore, "wallet", "get").mockReturnValue(wallet);
+
     const { sendProofs } = await walletStore.sendToLock(
-      [{ secret: "s", amount: 1, id: "a", C: "c" } as any],
-      wallet,
       1,
       pubHex,
-      "b"
+      0
     );
     const tokenObj = { token: [{ proofs: sendProofs, mint: "m" }] };
     const encoded =

@@ -33,19 +33,13 @@ describe("Timelock", () => {
       unit: "sat",
       send: vi.fn(async (_a, _p, opts) => ({ keep: [], send: [] })),
     } as any;
+    vi.spyOnProperty(walletStore, "wallet", "get").mockReturnValue(wallet);
 
-    await walletStore.sendToLock(
-      [{ secret: "s", amount: 1, id: "a", C: "c" } as any],
-      wallet,
-      1,
-      "pk",
-      "b",
-      99
-    );
+    await walletStore.sendToLock(1, "pk", 99);
     expect(wallet.send).toHaveBeenCalledWith(
       1,
       [{ secret: "s", amount: 1, id: "a", C: "c" }],
-      { keysetId: "kid", pubkey: "pk", locktime: 99 }
+      { keysetId: "kid", p2pk: { pubkey: "pk", locktime: 99 } }
     );
   });
 

@@ -1202,12 +1202,9 @@ export default defineComponent({
           this.sendData.p2pkPubkey
         );
         let { _, sendProofs } = await this.sendToLock(
-          proofsForBucket,
-          mintWallet,
           sendAmount,
           this.sendData.p2pkPubkey,
-          bucketId,
-          this.sendData.locktime || undefined
+          this.sendData.locktime || 0
         );
         // update UI
         this.sendData.tokens = sendProofs;

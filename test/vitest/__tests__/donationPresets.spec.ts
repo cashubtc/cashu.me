@@ -46,9 +46,9 @@ describe("Donation presets", () => {
     const spy = wallet.sendToLock as any;
     await store.createDonationPreset(3, 1, validPub, "b");
     expect(spy).toHaveBeenCalledTimes(3);
-    const first = spy.mock.calls[0][5];
-    const second = spy.mock.calls[1][5];
-    const third = spy.mock.calls[2][5];
+    const first = spy.mock.calls[0][2];
+    const second = spy.mock.calls[1][2];
+    const third = spy.mock.calls[2][2];
     expect(second).toBeGreaterThan(first);
     expect(third).toBeGreaterThan(second);
   });
@@ -59,7 +59,7 @@ describe("Donation presets", () => {
     const spy = wallet.sendToLock as any;
     const token = await store.createDonationPreset(0, 5, validPub, "b");
     expect(spy).toHaveBeenCalledTimes(1);
-    expect(spy.mock.calls[0][2]).toBe(5);
+    expect(spy.mock.calls[0][0]).toBe(5);
     expect(token).toBe("tok");
   });
 
@@ -70,9 +70,9 @@ describe("Donation presets", () => {
     const start = 1000;
     await store.createDonationPreset(3, 1, validPub, "b", start);
     expect(spy).toHaveBeenCalledTimes(3);
-    expect(spy.mock.calls[0][5]).toBe(start);
-    expect(spy.mock.calls[1][5]).toBe(start + 30 * 24 * 60 * 60);
-    expect(spy.mock.calls[2][5]).toBe(start + 2 * 30 * 24 * 60 * 60);
+    expect(spy.mock.calls[0][2]).toBe(start);
+    expect(spy.mock.calls[1][2]).toBe(start + 30 * 24 * 60 * 60);
+    expect(spy.mock.calls[2][2]).toBe(start + 2 * 30 * 24 * 60 * 60);
   });
 
   it("returns locked token data when detailed is true", async () => {

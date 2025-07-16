@@ -78,7 +78,7 @@ beforeEach(async () => {
   }));
   publishNutzap = vi.fn();
   createHTLC = vi.fn(() => ({ token: "htlc-token", hash: "htlc-hash" }));
-  sendToLock = vi.fn(async (_p, _w, _a, _pk, _b, timelock) => ({
+  sendToLock = vi.fn(async (_amt, _pk, timelock) => ({
     sendProofs: [`tok-${timelock}`],
     locked: { id: `lock-${timelock}` },
   }));
@@ -105,7 +105,7 @@ describe("Nutzap store", () => {
     });
 
     expect(sendToLock).toHaveBeenCalledTimes(3);
-    const times = sendToLock.mock.calls.map((c: any[]) => c[5]);
+    const times = sendToLock.mock.calls.map((c: any[]) => c[2]);
     const expected = [0, 1, 2].map((i) => calcUnlock(start, i));
     expect(times).toEqual(expected);
   });
