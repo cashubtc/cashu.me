@@ -295,6 +295,7 @@ import ReceiveTokenDialog from "src/components/ReceiveTokenDialog.vue";
 import { useWelcomeStore } from "../stores/welcome";
 import { useInvoicesWorkerStore } from "src/stores/invoicesWorker";
 import { useLockedTokensRedeemWorker } from "src/stores/lockedTokensRedeemWorker";
+import { useSubscriptionRedeemWorker } from "src/stores/subscriptionRedeemWorker";
 import { useNutzapSendWorker } from "src/stores/nutzapSendWorker";
 import { notifyError, notify, notifyWarning } from "../js/notify";
 import { DEFAULT_BUCKET_ID } from "src/stores/buckets";
@@ -461,6 +462,9 @@ export default {
     ...mapActions(useLockedTokensRedeemWorker, [
       "startLockedTokensRedeemWorker",
     ]),
+    ...mapActions(useSubscriptionRedeemWorker, {
+      startSubscriptionRedeemWorker: "start",
+    }),
     ...mapActions(useNutzapSendWorker, ["start"]),
     // TOKEN METHODS
     decodeToken: function (encoded_token) {
@@ -759,6 +763,7 @@ export default {
       this.startInvoiceCheckerWorker();
       this.startLockedTokensRedeemWorker();
       this.start();
+      this.startSubscriptionRedeemWorker();
       this.checkPendingInvoices();
     },
   },
