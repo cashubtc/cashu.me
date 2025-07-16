@@ -96,6 +96,7 @@ import {
   Coins as CoinsIcon,
 } from "lucide-vue-next";
 import { notifyWarning } from "src/js/notify";
+import { DEFAULT_BUCKET_ID } from "src/stores/buckets";
 
 export default defineComponent({
   name: "SendDialog",
@@ -184,6 +185,7 @@ export default defineComponent({
       this.sendData.memo = "";
       this.sendData.p2pkPubkey = "";
       this.sendData.paymentRequest = undefined;
+      this.sendData.bucketId = DEFAULT_BUCKET_ID;
       this.showSendDialog = false;
       this.showSendTokens = true;
       this.showLockInput = false;
