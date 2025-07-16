@@ -78,12 +78,10 @@ beforeEach(async () => {
   }));
   publishNutzap = vi.fn();
   createHTLC = vi.fn(() => ({ token: "htlc-token", hash: "htlc-hash" }));
-  sendToLock = vi.fn(
-    async (_p, _w, _a, _pk, _b, timelock, _refundKey, hash) => ({
-      sendProofs: [`tok-${timelock}`],
-      locked: { id: `lock-${timelock}`, hashlock: hash },
-    }),
-  );
+  sendToLock = vi.fn(async (_p, _w, _a, _pk, _b, timelock) => ({
+    sendProofs: [`tok-${timelock}`],
+    locked: { id: `lock-${timelock}` },
+  }));
   findSpendableMint = vi.fn(() => ({ url: "mint" }));
   addMany = vi.fn();
   getTokenLocktime = vi.fn(() => 0);
@@ -146,8 +144,6 @@ describe("Nutzap store", () => {
     expect(filterHealthyRelaysFn).toHaveBeenCalled();
     expect(ndkSendFn).toHaveBeenCalled();
     expect(sendToLock).toHaveBeenCalledTimes(2);
-    expect(sendToLock.mock.calls[0][7]).toBe("htlc-hash");
-    expect(sendToLock.mock.calls[1][7]).toBe("htlc-hash");
     const tokens = await cashuDb.lockedTokens.toArray();
     expect(tokens.length).toBe(2);
     const sub = await cashuDb.subscriptions.toArray();

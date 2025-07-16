@@ -40,8 +40,8 @@ Think Patreon, but built for the Nostr ecosystem and leveraging the privacy and 
 - **Token Buckets** – Organize tokens into named categories with descriptions, colors and goals. Auto-assign incoming tokens based on mint URL or memo rules and move tokens between buckets as needed.
 - **Advanced Token Management**
   - P2PK (Pay-to-PubKey) support.
-  - Timelocked tokens for pledge-style recurring support with optional refund keys.
-  - View and manage locked tokens with unlock dates and refund information.
+  - Timelocked tokens for pledge-style recurring support with irrevocable P2PK locks.
+  - View and manage locked tokens with unlock dates.
 - **Nostr Identity Integration** – Log in with your existing npub.
   - If your private key is available (via NIP-07 or imported nsec), Fundstr automatically saves the corresponding 66-char key pair for P2PK locking.
 - **Creator Discovery** – Find creators by category, search or Nostr social graphs.

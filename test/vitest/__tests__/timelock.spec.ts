@@ -12,9 +12,7 @@ describe("Timelock", () => {
   it("stores locktime in sendData", () => {
     const store = useSendTokensStore();
     store.sendData.locktime = 123;
-    store.sendData.refundPubkey = "abc";
     expect(store.sendData.locktime).toBe(123);
-    expect(store.sendData.refundPubkey).toBe("abc");
   });
 
   it("forwards locktime in sendToLock", async () => {
