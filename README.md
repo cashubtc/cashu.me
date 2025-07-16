@@ -158,6 +158,15 @@ Start a development server:
 pnpm dev
 ```
 
+## Development setup
+
+Install project dependencies before running tests:
+
+```bash
+pnpm install
+pnpm test
+```
+
 ### Verifying the NDK refactor
 After migrating away from direct `NDK` instances, check that no lingering instantiations remain.
 Run these commands and ensure they return no results (except mocks or the boot file):
