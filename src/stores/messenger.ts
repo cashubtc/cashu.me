@@ -20,6 +20,13 @@ import { cashuDb, type LockedToken } from "./dexie";
 import { DEFAULT_BUCKET_ID } from "./buckets";
 import token from "src/js/token";
 
+function parseSubscriptionPaymentPayload(
+  obj: any,
+): { token: string; unlock_time?: number } | undefined {
+  if (obj?.type !== "cashu_subscription_payment" || !obj.token) return;
+  return { token: obj.token, unlock_time: obj.unlock_time };
+}
+
 export interface SubscriptionPayment {
   token: string;
   subscription_id: string;
@@ -290,19 +297,20 @@ export const useMessengerStore = defineStore("messenger", {
       if (!msg) return;
       try {
         const payload = JSON.parse(msg.content);
-        if (payload && payload.type === "cashu_subscription_payment" && payload.token) {
-          const decoded = token.decode(payload.token);
+        const sub = parseSubscriptionPaymentPayload(payload);
+        if (sub) {
+          const decoded = token.decode(sub.token);
           const amount = decoded
             ? token.getProofs(decoded).reduce((s, p) => s + p.amount, 0)
             : 0;
           msg.subscriptionPayment = {
-            token: payload.token,
+            token: sub.token,
             subscription_id: payload.subscription_id,
             tier_id: payload.tier_id,
             month_index: payload.month_index,
             total_months: payload.total_months,
             amount,
-            unlock_time: payload.unlock_time,
+            unlock_time: sub.unlock_time,
           };
         }
       } catch {}
@@ -333,28 +341,25 @@ export const useMessengerStore = defineStore("messenger", {
           console.warn("[messenger.addIncomingMessage] invalid JSON", e);
           continue;
         }
-        if (
-          payload &&
-          payload.type === "cashu_subscription_payment" &&
-          payload.token
-        ) {
-          const decoded = token.decode(payload.token);
+        const sub = parseSubscriptionPaymentPayload(payload);
+        if (sub) {
+          const decoded = token.decode(sub.token);
           const amount = decoded
             ? token.getProofs(decoded).reduce((s, p) => s + p.amount, 0)
             : 0;
           subscriptionInfo = {
-            token: payload.token,
+            token: sub.token,
             subscription_id: payload.subscription_id,
             tier_id: payload.tier_id,
             month_index: payload.month_index,
             total_months: payload.total_months,
             amount,
-            unlock_time: payload.unlock_time,
+            unlock_time: sub.unlock_time,
           };
-          const unlockTs = payload.unlock_time ?? payload.unlockTime ?? 0;
+          const unlockTs = sub.unlock_time ?? payload.unlockTime ?? 0;
           const entry: LockedToken = {
             id: uuidv4(),
-            tokenString: payload.token,
+            tokenString: sub.token,
             amount,
             owner: "creator",
             creatorNpub: useNostrStore().pubkey,
@@ -377,9 +382,9 @@ export const useMessengerStore = defineStore("messenger", {
           await cashuDb.lockedTokens.put(entry);
 
           const receiveStore = useReceiveTokensStore();
-          receiveStore.receiveData.tokensBase64 = payload.token;
+          receiveStore.receiveData.tokensBase64 = sub.token;
           await receiveStore.enqueue(() =>
-            receiveStore.receiveToken(payload.token, DEFAULT_BUCKET_ID),
+            receiveStore.receiveToken(sub.token, DEFAULT_BUCKET_ID),
           );
         } else if (payload && payload.type === "cashu_subscription_claimed") {
           const sub = await cashuDb.subscriptions.get(payload.subscription_id);
