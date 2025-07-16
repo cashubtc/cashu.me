@@ -473,7 +473,18 @@ export default defineComponent({
         this.totalUnitBalance
       );
     },
-    closeParseDialog: function () {},
+    closeParseDialog() {
+      // Reset the payInvoiceData and/or multinut state here
+      this.payInvoiceData.input.request = "";
+      this.payInvoiceData.invoice = null;
+      this.payInvoiceData.meltQuote = { response: {}, error: "" };
+      // If you have a specific multinut state, reset it:
+      this.autoMultinutInProgress = false;
+      this.autoMultinutMintCount = 0;
+      // If multinutBreakdown is a computed property, make sure its dependencies are reset.
+      // If it's a data property, reset it directly:
+      // this.multinutBreakdown = null;
+    },
     decodeAndQuote: async function (request) {
       await this.decodeRequest(request);
     },
