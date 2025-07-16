@@ -24,7 +24,6 @@ describe('dexie migration v11', () => {
       tierId: 'tier',
       intervalKey: '1',
       unlockTs: 0,
-      refundUnlockTs: 0,
       status: 'pending',
       subscriptionEventId: null,
     });

@@ -367,7 +367,6 @@ export const useMessengerStore = defineStore("messenger", {
             tierId: payload.tier_id ?? "",
             intervalKey: payload.subscription_id ?? "",
             unlockTs,
-            refundUnlockTs: 0,
             autoRedeem: true,
             status:
               unlockTs && unlockTs > Math.floor(Date.now() / 1000)
