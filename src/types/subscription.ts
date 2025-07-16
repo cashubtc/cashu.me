@@ -3,8 +3,6 @@ export interface SubscriptionPaymentPayload {
   token: string;
   receiver_p2pk: string;
   unlock_time: number;
-  hashlock: string;
-  preimage: string;
   subscription_id: string;
   tier_id: string;
   month_index: number;

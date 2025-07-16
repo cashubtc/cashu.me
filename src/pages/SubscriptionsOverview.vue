@@ -576,7 +576,6 @@ const rows = computed(() => {
       pubkey: sub.creatorNpub,
       locktime: i.unlockTs,
       bucketId: sub.tierId,
-      refundPubkey: "",
       date: "",
       status: i.status,
       redeemed: i.redeemed ?? false,

@@ -13,8 +13,6 @@ export function saveReceipt(msg: MessengerMessage) {
     amount,
     mintUrl,
     unlock_time: msg.subscriptionPayment.unlock_time,
-    preimage: msg.subscriptionPayment.preimage,
-    hashlock: msg.subscriptionPayment.hashlock,
   };
   const fileName = `fundstr_${msg.subscriptionPayment.subscription_id}_${dayjs().utc().format('YYYYMMDD-HHmmss')}.json`;
   exportFile(fileName, JSON.stringify(data, null, 2), 'application/json');

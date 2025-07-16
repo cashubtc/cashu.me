@@ -40,7 +40,7 @@ beforeEach(async () => {
 });
 
 describe('subscribeToTier', () => {
-  it('includes preimage in DM payload', async () => {
+  it('sends minimal DM payload', async () => {
     const store = useNutzapStore();
     await store.subscribeToTier({
       creator: { nostrPubkey: 'c', cashuP2pk: 'pk' },
@@ -52,5 +52,8 @@ describe('subscribeToTier', () => {
     });
     expect(sendDm).toHaveBeenCalled();
     const payload = JSON.parse(sendDm.mock.calls[0][1]);
+    expect(payload).not.toHaveProperty('refund_pubkey');
+    expect(payload).not.toHaveProperty('preimage');
+    expect(payload).not.toHaveProperty('hashlock');
   });
 });
