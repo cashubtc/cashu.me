@@ -130,12 +130,7 @@ mint URLs to use.
 1. Supporter opens the subscription dialog on a creator's page.
 2. The app retrieves the creator's `kind:10019` profile.
 3. Supporter selects the monthly amount and number of periods.
-4. Fundstr locks one token per period to the creator's P2PK key with optional
-   timelocks.
-5. Each locked token is automatically sent to the creator via Nostr DM together
-   with subscription details.
-6. Creators claim the tokens as they arrive, unlocking them when the timelock
-   expires.
+4. Fundstr sends one token per period that is irrevocably locked to the creator's pubkey until the specified `locktime`.
 
 ## Roadmap & Future Ideas
 
