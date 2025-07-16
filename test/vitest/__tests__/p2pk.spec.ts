@@ -204,6 +204,47 @@ describe("P2PK store", () => {
       "cashuA" + Buffer.from(JSON.stringify(tokenObj)).toString("base64");
     expect(p2pk.getPrivateKeyForP2PKEncodedToken(encoded)).toBe(skHex);
   });
+
+  it("creates locktime-only secret in locked token", async () => {
+    const walletStore = useWalletStore();
+    const proofsStore = useProofsStore();
+    vi.spyOn(proofsStore, "removeProofs").mockResolvedValue();
+    vi.spyOn(proofsStore, "addProofs").mockResolvedValue();
+    vi.spyOn(proofsStore, "serializeProofs").mockImplementation((proofs: any) => {
+      const tokenObj = { token: [{ proofs, mint: "m" }] };
+      return "cashuA" + Buffer.from(JSON.stringify(tokenObj)).toString("base64");
+    });
+
+    walletStore.spendableProofs = vi.fn(() => [
+      { secret: "s", amount: 100, id: "a", C: "c" } as any,
+    ]);
+    walletStore.coinSelect = vi.fn(() => [
+      { secret: "s", amount: 100, id: "a", C: "c" } as any,
+    ]);
+    walletStore.getKeyset = vi.fn(() => "kid");
+
+    const locktime = Math.floor(Date.now() / 1000) + 3600;
+    const wallet = {
+      mint: { mintUrl: "m" },
+      unit: "sat",
+      send: vi.fn(async (_a: number, _p: any, opts: any) => {
+        const secret = JSON.stringify([
+          "P2PK",
+          { data: opts.p2pk.pubkey, tags: [["locktime", String(opts.p2pk.locktime)]] },
+        ]);
+        return { keep: [], send: [{ id: "a", amount: 100, C: "c", secret }] };
+      }),
+    } as any;
+
+    vi.spyOnProperty(walletStore, "wallet", "get").mockReturnValue(wallet);
+
+    const { locked } = await walletStore.sendToLock(100, "02aa", locktime);
+    const decoded = JSON.parse(
+      Buffer.from(locked.tokenString.slice(6), "base64").toString()
+    );
+    const secretObj = JSON.parse(decoded.token[0].proofs[0].secret);
+    expect(secretObj[1].tags).toEqual([["locktime", String(locktime)]]);
+  });
 });
 
 describe("generateRefundSecret", () => {

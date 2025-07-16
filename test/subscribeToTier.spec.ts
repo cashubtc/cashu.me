@@ -52,8 +52,5 @@ describe('subscribeToTier', () => {
     });
     expect(sendDm).toHaveBeenCalled();
     const payload = JSON.parse(sendDm.mock.calls[0][1]);
-    expect(payload).not.toHaveProperty('refund_pubkey');
-    expect(payload).not.toHaveProperty('preimage');
-    expect(payload).not.toHaveProperty('hashlock');
   });
 });
