@@ -38,7 +38,6 @@ type NWCTransaction = {
   type: string;
   invoice: string;
   description: string | null;
-  paymentPreimage: string | null;
   payment_hash: string | null;
   amount: number;
   fees_paid: number | null;
