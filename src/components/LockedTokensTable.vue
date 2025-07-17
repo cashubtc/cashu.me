@@ -38,6 +38,13 @@
           </q-item-label>
         </q-item-section>
         <q-item-section side>
+          <q-badge
+            v-if="token.redeemed"
+            color="positive"
+            rounded
+            class="q-mr-sm"
+            ><q-icon name="check" /></q-badge
+          >
           <q-btn
             flat
             dense

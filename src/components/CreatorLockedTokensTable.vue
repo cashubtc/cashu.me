@@ -20,11 +20,18 @@
           </q-item-label>
         </q-item-section>
         <q-item-section side>
+          <q-badge
+            v-if="token.redeemed"
+            color="positive"
+            rounded
+            class="q-mr-sm"
+            ><q-icon name="check" /></q-badge
+          >
           <q-btn
             flat
             dense
             icon="download"
-            v-if="canRedeem(token)"
+            v-if="canRedeem(token) && !token.redeemed"
             @click="redeem(token)"
           />
         </q-item-section>
@@ -86,7 +93,7 @@ export default defineComponent({
       return this.filteredTokens.slice().reverse().slice(start, end);
     },
     pendingTokens() {
-      return this.filteredTokens.filter((t) => this.canRedeem(t));
+      return this.filteredTokens.filter((t) => !t.redeemed && this.canRedeem(t));
     },
   },
   methods: {
@@ -117,8 +124,12 @@ export default defineComponent({
       receiveStore.receiveData.bucketId = token.tierId;
       receiveStore.receiveData.p2pkPrivateKey =
         p2pkStore.getPrivateKeyForP2PKEncodedToken(token.tokenString);
-      await receiveStore.enqueue(() => wallet.redeem(token.tokenString));
-      await cashuDb.lockedTokens.delete(token.id);
+      await cashuDb.lockedTokens.update(token.id, {
+        status: "processing",
+        redeemed: true,
+      });
+      await receiveStore.enqueue(() => wallet.receive(token.tokenString));
+      await cashuDb.lockedTokens.update(token.id, { status: "claimed" });
       if (token.subscriptionId) {
         const sub = await cashuDb.subscriptions.get(token.subscriptionId);
         const idx = sub?.intervals.findIndex(

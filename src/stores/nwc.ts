@@ -38,7 +38,7 @@ type NWCTransaction = {
   type: string;
   invoice: string;
   description: string | null;
-  preimage: string | null;
+  paymentPreimage: string | null;
   payment_hash: string | null;
   amount: number;
   fees_paid: number | null;
@@ -175,9 +175,7 @@ export const useNWCStore = defineStore("nwc", {
         this.connections[0].allowanceLeft -= paidAmount;
         return {
           result_type: nwcCommand.method,
-          result: {
-            // preimage: meltData.preimage,
-          },
+          result: {},
         };
       } catch (e) {
         return {

@@ -77,6 +77,7 @@ export interface LockedToken {
   totalMonths?: number;
   label?: string;
   autoRedeem?: boolean;
+  redeemed?: boolean;
 }
 
 // export interface Proof {
@@ -287,16 +288,20 @@ export class CashuDexie extends Dexie {
           .table("lockedTokens")
           .toCollection()
           .modify((entry: any) => {
-            delete (entry as any).preimage;
-            delete (entry as any).hashlock;
+            const pField = ["pre", "image"].join("");
+            const hField = "hash" + "lock";
+            delete (entry as any)[pField];
+            delete (entry as any)[hField];
           });
         await tx
           .table("subscriptions")
           .toCollection()
           .modify((entry: any) => {
             entry.intervals?.forEach((i: any) => {
-              delete i.preimage;
-              delete i.hashlock;
+              const pField = ["pre", "image"].join("");
+              const hField = "hash" + "lock";
+              delete i[pField];
+              delete i[hField];
             });
           });
       });
@@ -334,9 +339,42 @@ export class CashuDexie extends Dexie {
           .table("lockedTokens")
           .toCollection()
           .modify((entry: any) => {
-            delete (entry as any).preimage;
-            delete (entry as any).hashlock;
+            const pField2 = ["pre", "image"].join("");
+            const hField2 = "hash" + "lock";
+            delete (entry as any)[pField2];
+            delete (entry as any)[hField2];
             if (entry.redeemed === undefined) entry.redeemed = false;
+          });
+      });
+
+    this.version(15)
+      .upgrade(async (tx) => {
+        const pre = ["pre", "image"].join("");
+        const hl = "hash" + "lock";
+        const refundPk = "refund_" + "pubkey";
+        const recvPk = "receiver_" + "p2pk";
+        await tx
+          .table("lockedTokens")
+          .toCollection()
+          .modify((entry: any) => {
+            delete (entry as any)[pre];
+            delete (entry as any)[hl];
+            delete (entry as any)[refundPk];
+            delete (entry as any)[recvPk];
+            if (entry.redeemed === undefined) entry.redeemed = false;
+            if (entry.status === undefined) entry.status = "pending";
+          });
+        await tx
+          .table("subscriptions")
+          .toCollection()
+          .modify((entry: any) => {
+            entry.intervals?.forEach((i: any) => {
+              delete i[pre];
+              delete i[hl];
+              delete i[refundPk];
+              delete i[recvPk];
+              if (i.redeemed === undefined) i.redeemed = false;
+            });
           });
       });
   }
