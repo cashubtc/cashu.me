@@ -139,6 +139,17 @@ describe("Nutzap subscriptions", () => {
     expect(sendDm).toHaveBeenCalledTimes(2);
     const p1 = JSON.parse(sendDm.mock.calls[0][1]);
     const p2 = JSON.parse(sendDm.mock.calls[1][1]);
+    const keys = [
+      'type',
+      'token',
+      'unlock_time',
+      'subscription_id',
+      'tier_id',
+      'month_index',
+      'total_months',
+    ].sort();
+    expect(Object.keys(p1).sort()).toEqual(keys);
+    expect(Object.keys(p2).sort()).toEqual(keys);
     expect(p1.subscription_id).toBe(p2.subscription_id);
     expect(p1.month_index).toBe(1);
     expect(p2.month_index).toBe(2);

@@ -19,6 +19,7 @@ import { useNostrStore } from "./nostr";
 import { cashuDb, type LockedToken } from "./dexie";
 import { DEFAULT_BUCKET_ID } from "./buckets";
 import token from "src/js/token";
+import { subscriptionPayload } from "src/js/receipt-utils";
 
 function parseSubscriptionPaymentPayload(
   obj: any,
@@ -216,14 +217,12 @@ export const useMessengerStore = defineStore("messenger", {
 
         const tokenStr = proofsStore.serializeProofs(sendProofs);
         const payload = subscription
-          ? {
-              type: "cashu_subscription_payment",
+          ? subscriptionPayload(tokenStr, null, {
               subscription_id: subscription.subscription_id,
               tier_id: subscription.tier_id,
               month_index: subscription.month_index,
               total_months: subscription.total_months,
-              token: tokenStr,
-            }
+            })
           : {
               token: tokenStr,
               amount: sendAmount,

@@ -49,5 +49,18 @@ describe('subscribeToTier', () => {
     });
     expect(sendDm).toHaveBeenCalled();
     const payload = JSON.parse(sendDm.mock.calls[0][1]);
+    expect(Object.keys(payload).sort()).toEqual(
+      [
+        'type',
+        'token',
+        'unlock_time',
+        'subscription_id',
+        'tier_id',
+        'month_index',
+        'total_months',
+      ].sort(),
+    );
+    expect(payload.type).toBe('cashu_subscription_payment');
+    expect(payload.tier_id).toBe('tier');
   });
 });
