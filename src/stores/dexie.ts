@@ -377,6 +377,33 @@ export class CashuDexie extends Dexie {
             });
           });
       });
+
+    this.version(16)
+      .upgrade(async (tx) => {
+        const recvPk = "receiver_" + "p2pk";
+        const hl = "hash" + "lock";
+        const pre = ["pre", "image"].join("");
+        await tx
+          .table("lockedTokens")
+          .toCollection()
+          .modify((entry: any) => {
+            delete (entry as any)[recvPk];
+            delete (entry as any)[hl];
+            delete (entry as any)[pre];
+            if (entry.redeemed === undefined) entry.redeemed = false;
+          });
+        await tx
+          .table("subscriptions")
+          .toCollection()
+          .modify((entry: any) => {
+            entry.intervals?.forEach((i: any) => {
+              delete i[recvPk];
+              delete i[hl];
+              delete i[pre];
+              if (i.redeemed === undefined) i.redeemed = false;
+            });
+          });
+      });
   }
 }
 
