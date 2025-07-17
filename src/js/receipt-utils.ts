@@ -2,7 +2,6 @@ export type Receipt = {
   id: string;
   amount: number;
   token: string;
-  pubkey: string;
   locktime?: number;
   bucketId: string;
   date: string;
@@ -27,47 +26,6 @@ export function formatTimestamp(ts: number): string {
   )}`;
 }
 
-export function receiptToDmText(
-  receipt: Receipt,
-  subscription: {
-    subscription_id: string;
-    tier_id: string;
-    month_index: number;
-    total_months: number;
-  },
-): string {
-  const payload: SubscriptionDmPayload = {
-    type: "cashu_subscription_payment",
-    subscription_id: subscription.subscription_id,
-    tier_id: subscription.tier_id,
-    month_index: subscription.month_index,
-    total_months: subscription.total_months,
-    token: receipt.token,
-    unlock_time: receipt.locktime ?? null,
-  };
-  return JSON.stringify(payload);
-}
-
-export function receiptsToDmText(
-  receipts: Array<Receipt>,
-  subscription?: { subscription_id: string; tier_id: string }
-): string {
-  return receipts
-    .map((r, idx) =>
-      receiptToDmText(
-        r,
-        subscription
-          ? {
-              subscription_id: subscription.subscription_id,
-              tier_id: subscription.tier_id,
-              month_index: idx + 1,
-              total_months: receipts.length,
-            }
-          : undefined
-      )
-    )
-    .join("\n");
-}
 
 export function parseSubscriptionDm(text: string): SubscriptionDmPayload | undefined {
   try {
