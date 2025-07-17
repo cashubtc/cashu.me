@@ -19,7 +19,7 @@ import { useNostrStore } from "./nostr";
 import { cashuDb, type LockedToken } from "./dexie";
 import { DEFAULT_BUCKET_ID } from "./buckets";
 import token from "src/js/token";
-import { subscriptionPayload } from "src/js/receipt-utils";
+import { subscriptionPayload } from "src/utils/receipt-utils";
 
 function parseSubscriptionPaymentPayload(
   obj: any,

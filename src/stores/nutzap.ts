@@ -24,7 +24,7 @@ import type { NostrEvent, NDKSubscription } from "@nostr-dev-kit/ndk";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import { notifyError, notifyWarning } from "src/js/notify";
-import { subscriptionPayload } from "src/js/receipt-utils";
+import { subscriptionPayload } from "src/utils/receipt-utils";
 dayjs.extend(utc);
 
 export function calcUnlock(base: number, i: number): number {
