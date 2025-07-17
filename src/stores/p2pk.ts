@@ -169,13 +169,12 @@ export const useP2PKStore = defineStore("p2pk", {
     getSecretP2PKInfo: function (secret: string): {
       pubkey: string;
       locktime?: number;
-      refundKeys: string[];
     } {
       try {
         let secretObject = JSON.parse(secret);
         if (secretObject[0] != "P2PK" || secretObject[1]["data"] == undefined) {
           debug("not p2pk locked");
-          return { pubkey: "", locktime: undefined, refundKeys: [] }; // not p2pk locked
+          return { pubkey: "", locktime: undefined }; // not p2pk locked
         }
         // Get all the p2pk secret data
         const now = Math.floor(Date.now() / 1000); // unix TS
@@ -183,7 +182,6 @@ export const useP2PKStore = defineStore("p2pk", {
         const mainKey = ensureCompressed(data);
         const locktimeTag = tags && tags.find((tag) => tag[0] === "locktime");
         const locktime = locktimeTag ? parseInt(locktimeTag[1], 10) : undefined; // Permanent lock if not set
-        const refundKeys: string[] = [];
         const pubkeysTag = tags && tags.find((tag) => tag[0] === "pubkeys");
         const pubkeys =
           pubkeysTag && pubkeysTag.length > 1
@@ -198,15 +196,15 @@ export const useP2PKStore = defineStore("p2pk", {
           if (n_sigs && n_sigs >= 1) {
             for (const pk of pubkeys) {
               if (this.haveThisKey(pk))
-                return { pubkey: pk, locktime, refundKeys };
+                return { pubkey: pk, locktime };
             }
           }
-          return { pubkey: mainKey, locktime, refundKeys };
+          return { pubkey: mainKey, locktime };
         }
         // If locktime expired, return main key
         debug("p2pk token - lock has expired");
       } catch {}
-      return { pubkey: "", locktime: undefined, refundKeys: [] }; // Token is not locked / secret is not P2PK
+      return { pubkey: "", locktime: undefined }; // Token is not locked / secret is not P2PK
     },
     getSecretP2PKPubkey: function (secret: string): string {
       if (typeof secret !== "string" || secret.trim() === "") {
@@ -283,18 +281,6 @@ export const useP2PKStore = defineStore("p2pk", {
       for (const p of proofs) {
         const { pubkey } = this.getSecretP2PKInfo(p.secret);
         if (pubkey) return pubkey;
-      }
-      return undefined;
-    },
-    getTokenRefundPubkey: function (encodedToken: string): string | undefined {
-      const decodedToken = token.decode(encodedToken);
-      if (!decodedToken) {
-        return undefined;
-      }
-      const proofs = token.getProofs(decodedToken);
-      for (const p of proofs) {
-        const { refundKeys } = this.getSecretP2PKInfo(p.secret);
-        if (refundKeys.length) return refundKeys[0];
       }
       return undefined;
     },
