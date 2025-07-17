@@ -181,7 +181,6 @@ export const useNutzapStore = defineStore("nutzap", {
       const messenger = useMessengerStore();
       const p2pk = useP2PKStore();
       if (!p2pk.firstKey) await p2pk.generateKeypair();
-      const refundKey = p2pk.firstKey!.publicKey;
       const proofsStore = useProofsStore();
       const lockedTokens: DexieLockedToken[] = [];
 
@@ -311,7 +310,6 @@ export const useNutzapStore = defineStore("nutzap", {
         const wallet = useWalletStore();
         const p2pk = useP2PKStore();
         if (!p2pk.firstKey) await p2pk.generateKeypair();
-        const refundKey = p2pk.firstKey!.publicKey;
         const mints = useMintsStore();
         const proofsStore = useProofsStore();
         const messenger = useMessengerStore();
