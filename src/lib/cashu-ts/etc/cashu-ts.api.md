@@ -302,7 +302,6 @@ export function hasValidDleq(proof: Proof, keyset: MintKeys): boolean;
 
 // @public
 export type HTLCWitness = {
-    preimage: string;
     signatures?: Array<string>;
 };
 
@@ -582,7 +581,6 @@ export type PartialMeltQuoteResponse = {
     fee_reserve: number;
     state: MeltQuoteState;
     expiry: number;
-    payment_preimage: string | null;
     change?: Array<SerializedBlindedSignature>;
     request?: string;
     unit?: string;

@@ -208,12 +208,7 @@ const runWalletExample = async () => {
 					console.error(quote.error, quote.code, quote.detail);
 					return;
 				}
-				if (quote.state === MeltQuoteState.PAID) {
-					// if the request has succeeded, we should receive the preimage for the paid invoice.
-					console.log(
-						'success! here is the payment preimage (if its null, the mints lightning backend did not forward the preimage): ',
-						quote.payment_preimage
-					);
+                                if (quote.state === MeltQuoteState.PAID) {
 
 					console.log(`Ecash left: ${sumProofs(proofs)}`);
 					console.log(`Spent ecash notes: ${sumProofs(sentProofs)}`);

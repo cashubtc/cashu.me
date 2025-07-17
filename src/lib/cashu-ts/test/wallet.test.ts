@@ -154,13 +154,12 @@ describe('test fees', () => {
 	test('test melt quote fees', async () => {
 		server.use(
 			http.get(mintUrl + '/v1/melt/quote/bolt11/test', () => {
-				return HttpResponse.json({
-					quote: 'test_melt_quote_id',
-					amount: 2000,
-					fee_reserve: 20,
-					payment_preimage: null,
-					state: 'UNPAID'
-				} as MeltQuoteResponse);
+                                return HttpResponse.json({
+                                        quote: 'test_melt_quote_id',
+                                        amount: 2000,
+                                        fee_reserve: 20,
+                                        state: 'UNPAID'
+                                } as MeltQuoteResponse);
 			})
 		);
 		const wallet = new CashuWallet(mint, { unit });
@@ -833,13 +832,12 @@ describe('multi mint', async () => {
 						fee_reserve: 2,
 						paid: false,
 						state: 'UNPAID',
-						expiry: 1673972705,
-						payment_preimage: null,
-						change: null
-					});
-				}
-			)
-		);
+                                                expiry: 1673972705,
+                                                change: null
+                                        });
+                                }
+                        )
+                );
 		const mint = new CashuMint(mintUrl);
 		const wallet = new CashuWallet(mint);
 		const invoice =

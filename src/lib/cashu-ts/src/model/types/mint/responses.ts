@@ -142,14 +142,10 @@ export type PartialMeltQuoteResponse = {
 	 * Timestamp of when the quote expires
 	 */
 	expiry: number;
-	/**
-	 * preimage of the paid invoice. is null if it the invoice has not been paid yet. can be null, depending on which LN-backend the mint uses
-	 */
-	payment_preimage: string | null;
-	/**
-	 * Return/Change from overpaid fees. This happens due to Lighting fee estimation being inaccurate
-	 */
-	change?: Array<SerializedBlindedSignature>;
+       /**
+        * Return/Change from overpaid fees. This happens due to Lighting fee estimation being inaccurate
+        */
+       change?: Array<SerializedBlindedSignature>;
 	/**
 	 *  Payment request for the melt quote.
 	 */
