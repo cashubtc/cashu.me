@@ -474,7 +474,7 @@ export type MintProofOptions = {
     p2pk?: {
         pubkey: string;
         locktime?: number;
-        refundKeys?: Array<string>;
+        rfndKeys?: Array<string>;
     };
 };
 
@@ -549,7 +549,7 @@ export class OutputData implements OutputDataLike {
     static createP2PKData(p2pk: {
         pubkey: string;
         locktime?: number;
-        refundKeys?: Array<string>;
+        rfndKeys?: Array<string>;
     }, amount: number, keyset: MintKeys, customSplit?: Array<number>): OutputData[];
     // (undocumented)
     static createRandomData(amount: number, keyset: MintKeys, customSplit?: Array<number>): OutputData[];
@@ -559,7 +559,7 @@ export class OutputData implements OutputDataLike {
     static createSingleP2PKData(p2pk: {
         pubkey: string;
         locktime?: number;
-        refundKeys?: Array<string>;
+        rfndKeys?: Array<string>;
     }, amount: number, keysetId: string): OutputData;
     // (undocumented)
     static createSingleRandomData(amount: number, keysetId: string): OutputData;
@@ -726,7 +726,7 @@ export type ReceiveOptions = {
     p2pk?: {
         pubkey: string;
         locktime?: number;
-        refundKeys?: Array<string>;
+        rfndKeys?: Array<string>;
     };
 };
 
@@ -767,7 +767,7 @@ export type SendOptions = {
     p2pk?: {
         pubkey: string;
         locktime?: number;
-        refundKeys?: Array<string>;
+        rfndKeys?: Array<string>;
     };
 };
 
@@ -832,7 +832,7 @@ export type SwapOptions = {
     p2pk?: {
         pubkey: string;
         locktime?: number;
-        refundKeys?: Array<string>;
+        rfndKeys?: Array<string>;
     };
 };
 

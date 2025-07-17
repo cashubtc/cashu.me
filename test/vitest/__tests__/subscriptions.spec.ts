@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { useNutzapStore, calcUnlock } from "../../../src/stores/nutzap";
+import { subscriptionPayload } from "../../../src/utils/receipt-utils";
 import { useCreatorSubscriptionsStore } from "../../../src/stores/creatorSubscriptions";
 import { useLockedTokensRedeemWorker } from "../../../src/stores/lockedTokensRedeemWorker";
 import { cashuDb } from "../../../src/stores/dexie";
@@ -137,25 +138,24 @@ describe("Nutzap subscriptions", () => {
     await store.send({ npub: "npub", amount: 1, months: 2, startDate: start });
 
     expect(sendDm).toHaveBeenCalledTimes(2);
+    expect(sendToLock).toHaveBeenCalledWith(1, "pk", calcUnlock(start, 0));
     const p1 = JSON.parse(sendDm.mock.calls[0][1]);
     const p2 = JSON.parse(sendDm.mock.calls[1][1]);
-    const keys = [
-      'type',
-      'token',
-      'unlock_time',
-      'subscription_id',
-      'tier_id',
-      'month_index',
-      'total_months',
-    ].sort();
-    expect(Object.keys(p1).sort()).toEqual(keys);
-    expect(Object.keys(p2).sort()).toEqual(keys);
-    expect(p1.subscription_id).toBe(p2.subscription_id);
-    expect(p1.month_index).toBe(1);
-    expect(p2.month_index).toBe(2);
-    expect(p1.total_months).toBe(2);
-    expect(p1.token).toBe(`tok-${calcUnlock(start, 0)}`);
-    expect(p2.token).toBe(`tok-${calcUnlock(start, 1)}`);
+    const id = p1.subscription_id;
+    const expected1 = subscriptionPayload(`tok-${calcUnlock(start, 0)}`, calcUnlock(start, 0), {
+      subscription_id: id,
+      tier_id: "nutzap",
+      month_index: 1,
+      total_months: 2,
+    });
+    const expected2 = subscriptionPayload(`tok-${calcUnlock(start, 1)}`, calcUnlock(start, 1), {
+      subscription_id: id,
+      tier_id: "nutzap",
+      month_index: 2,
+      total_months: 2,
+    });
+    expect(p1).toEqual(expected1);
+    expect(p2).toEqual(expected2);
   });
 
   it("queues message and sets boot error when sendDm throws", async () => {

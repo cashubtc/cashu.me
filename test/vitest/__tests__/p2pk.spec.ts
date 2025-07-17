@@ -129,12 +129,12 @@ describe("P2PK store", () => {
   //     "b",
   //     123,
   //     "r",
-  //     "hs"
-  //   );
+  //   "hs"
+  // );
   //   expect(wallet.splitWithSecret).toHaveBeenCalledWith(
   //     1,
   //     [{ secret: "s", amount: 1, id: "a", C: "c" }],
-  //     { pubkey: "pk", locktime: 123, refund: "r", hashSecret: "hs" }
+  //     { pubkey: "pk", locktime: 123, rfnd: "r", hSecret: "hs" }
   //   );
   // });
 

@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { useNutzapStore } from '../src/stores/nutzap';
 import { cashuDb } from '../src/stores/dexie';
+import { subscriptionPayload } from '../src/utils/receipt-utils';
 
 let sendDm: any;
 let createHTLC: any;
@@ -49,18 +50,16 @@ describe('subscribeToTier', () => {
     });
     expect(sendDm).toHaveBeenCalled();
     const payload = JSON.parse(sendDm.mock.calls[0][1]);
-    expect(Object.keys(payload).sort()).toEqual(
-      [
-        'type',
-        'token',
-        'unlock_time',
-        'subscription_id',
-        'tier_id',
-        'month_index',
-        'total_months',
-      ].sort(),
+    const expected = subscriptionPayload(
+      'token',
+      expect.any(Number),
+      {
+        subscription_id: expect.any(String),
+        tier_id: 'tier',
+        month_index: 1,
+        total_months: 1,
+      },
     );
-    expect(payload.type).toBe('cashu_subscription_payment');
-    expect(payload.tier_id).toBe('tier');
+    expect(payload).toMatchObject(expected);
   });
 });

@@ -14,7 +14,8 @@
     "format": "prettier --write .",
     "checkformat": "prettier --check .",
     "test": "vitest",
-    "test:ci": "vitest run"
+    "test:ci": "vitest run",
+    "types": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
     "@capacitor/android": "^6.2.0",

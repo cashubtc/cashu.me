@@ -15,7 +15,7 @@ describe('dexie migration v11', () => {
     const pre = 'pre' + 'image';
     oldDb.version(10).stores({
       lockedTokens:
-        `&id, tokenString, owner, tierId, intervalKey, unlockTs, refundUnlockTs, status, subscriptionEventId, subscriptionId, monthIndex, totalMonths, ${hl}, ${pre}`,
+        `&id, tokenString, owner, tierId, intervalKey, unlockTs, rfndUnlockTs, status, subscriptionEventId, subscriptionId, monthIndex, totalMonths, ${hl}, ${pre}`,
     });
     await oldDb.open();
     await oldDb.table('lockedTokens').add({
