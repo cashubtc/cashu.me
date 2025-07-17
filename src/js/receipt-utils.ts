@@ -17,6 +17,29 @@ export interface SubscriptionDmPayload {
   total_months: number;
 }
 
+export interface SubscriptionMeta {
+  subscription_id: string;
+  tier_id: string;
+  month_index: number;
+  total_months: number;
+}
+
+export function subscriptionPayload(
+  token: string,
+  unlock_time: number | null,
+  meta: SubscriptionMeta,
+) {
+  return {
+    type: "cashu_subscription_payment" as const,
+    token,
+    unlock_time,
+    subscription_id: meta.subscription_id,
+    tier_id: meta.tier_id,
+    month_index: meta.month_index,
+    total_months: meta.total_months,
+  };
+}
+
 export function formatTimestamp(ts: number): string {
   const d = new Date(ts * 1000);
   return `${d.getFullYear()}-${("0" + (d.getMonth() + 1)).slice(-2)}-${(

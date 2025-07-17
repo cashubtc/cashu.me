@@ -24,6 +24,7 @@ import type { NostrEvent, NDKSubscription } from "@nostr-dev-kit/ndk";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import { notifyError, notifyWarning } from "src/js/notify";
+import { subscriptionPayload } from "src/js/receipt-utils";
 dayjs.extend(utc);
 
 export function calcUnlock(base: number, i: number): number {
@@ -67,11 +68,12 @@ export const useNutzapStore = defineStore("nutzap", {
 
     async resendQueued(item: NutzapQueuedSend) {
       const messenger = useMessengerStore();
-      const payload = {
-        type: "cashu_subscription_payment",
-        token: item.token,
-        unlock_time: item.unlockTime,
-      } as const;
+      const payload = subscriptionPayload(item.token, item.unlockTime, {
+        subscription_id: "",
+        tier_id: "",
+        month_index: 0,
+        total_months: 0,
+      });
       const { success } = await messenger.sendDm(
         item.npub,
         JSON.stringify(payload)
@@ -201,11 +203,14 @@ export const useNutzapStore = defineStore("nutzap", {
         try {
           const { success, event } = await messenger.sendDm(
             creator.nostrPubkey,
-            JSON.stringify({
-              type: "cashu_subscription_payment",
-              token: tokenStr,
-              unlock_time: unlockDate,
-            }),
+            JSON.stringify(
+              subscriptionPayload(tokenStr, unlockDate, {
+                subscription_id: subscriptionId,
+                tier_id: tierId,
+                month_index: i + 1,
+                total_months: months,
+              }),
+            ),
             relayList
           );
           if (event) messenger.pushOwnMessage(event as any);
@@ -334,11 +339,14 @@ export const useNutzapStore = defineStore("nutzap", {
           try {
             const { success, event } = await messenger.sendDm(
               profile.hexPub,
-              JSON.stringify({
-                type: "cashu_subscription_payment",
-                token,
-                unlock_time: unlockDate,
-              }),
+              JSON.stringify(
+                subscriptionPayload(token, unlockDate, {
+                  subscription_id: subscriptionId,
+                  tier_id: "nutzap",
+                  month_index: i + 1,
+                  total_months: months,
+                }),
+              ),
               trustedRelays
             );
             if (event) messenger.pushOwnMessage(event as any);
