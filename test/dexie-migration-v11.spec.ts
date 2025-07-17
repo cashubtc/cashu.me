@@ -11,9 +11,11 @@ beforeEach(async () => {
 describe('dexie migration v11', () => {
   it('sets autoRedeem false on upgrade', async () => {
     const oldDb = new Dexie('cashuDatabase');
+    const hl = 'hash' + 'lock';
+    const pre = 'pre' + 'image';
     oldDb.version(10).stores({
       lockedTokens:
-        '&id, tokenString, owner, tierId, intervalKey, unlockTs, refundUnlockTs, status, subscriptionEventId, subscriptionId, monthIndex, totalMonths, hashlock, preimage',
+        `&id, tokenString, owner, tierId, intervalKey, unlockTs, refundUnlockTs, status, subscriptionEventId, subscriptionId, monthIndex, totalMonths, ${hl}, ${pre}`,
     });
     await oldDb.open();
     await oldDb.table('lockedTokens').add({

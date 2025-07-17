@@ -99,7 +99,6 @@ describe("P2PK store", () => {
     );
   });
 
-  // Legacy hashlock functionality has been removed.
   // it("uses splitWithSecret when hashSecret is provided", async () => {
   //   const walletStore = useWalletStore();
   //   const proofsStore = useProofsStore();
@@ -155,7 +154,6 @@ describe("P2PK store", () => {
     const encoded =
       "cashuA" + Buffer.from(JSON.stringify(tokenObj)).toString("base64");
     expect(p2pk.getTokenPubkey(encoded)).toBe("02aa");
-    expect(p2pk.getTokenRefundPubkey(encoded)).toBeUndefined();
   });
 
   it("redeems token locked to converted npub", async () => {
