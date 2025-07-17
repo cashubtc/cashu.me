@@ -471,7 +471,6 @@ export default defineComponent({
       "showLastKey",
       "getTokenLocktime",
       "getTokenPubkey",
-      "getTokenRefundPubkey",
     ]),
     ...mapActions(useMintsStore, ["addMint"]),
     ...mapActions(useReceiveTokensStore, [
