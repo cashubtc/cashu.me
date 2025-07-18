@@ -44,7 +44,7 @@
       </div>
       <div v-if="tokenPubkey" class="q-my-sm text-caption">
         <q-icon name="vpn_key" size="xs" color="grey" class="q-mr-sm" />
-        Locked to: {{ shortenString(pubkeyNpub(tokenPubkey), 15, 6) }}
+        Locked to: {{ shortenString(formatPubkey(tokenPubkey), 15, 6) }}
       </div>
       <div v-if="tokenLocktimeISO" class="q-my-sm text-caption">
         <q-icon name="schedule" size="xs" color="grey" class="q-mr-sm" />
@@ -59,7 +59,7 @@ import { getShortUrl } from "src/js/wallet-helpers";
 import { mapActions, mapState } from "pinia";
 import { useMintsStore } from "stores/mints";
 import { useP2PKStore } from "src/stores/p2pk";
-import { nip19 } from "nostr-tools";
+import { ensureCompressed } from "src/utils/ecash";
 import { shortenString } from "src/js/string-utils";
 import token from "src/js/token";
 
@@ -124,10 +124,10 @@ export default defineComponent({
       "getTokenPubkey",
       "getTokenLocktime",
     ]),
-    pubkeyNpub(hex) {
+    formatPubkey(hex) {
       try {
         if (!hex) return "";
-        return nip19.npubEncode(hex);
+        return ensureCompressed(hex);
       } catch (e) {
         return hex;
       }
