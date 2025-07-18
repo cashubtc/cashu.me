@@ -4,7 +4,7 @@ import { useLocalStorage } from "@vueuse/core";
 import { useWalletStore } from "./wallet";
 import { useP2PKStore } from "./p2pk";
 import { cashuDb, type LockedToken as DexieLockedToken } from "./dexie";
-import token from "src/js/token";
+import token, { createP2PKHTLC } from "src/js/token";
 import { v4 as uuidv4 } from "uuid";
 import { useMintsStore } from "./mints";
 import { useProofsStore } from "./proofs";
@@ -166,6 +166,7 @@ export const useNutzapStore = defineStore("nutzap", {
       price,
       startDate,
       relayList,
+      htlc,
     }: SubscribeTierOptions): Promise<boolean> {
       const wallet = useWalletStore();
       const mints = useMintsStore();
@@ -199,6 +200,10 @@ export const useNutzapStore = defineStore("nutzap", {
           unlockDate
         );
 
+        const htlcData = htlc
+          ? createP2PKHTLC(price, creator.cashuP2pk, months, startDate)
+          : null;
+
         const tokenStr = proofsStore.serializeProofs(sendProofs);
         try {
           const { success, event } = await messenger.sendDm(
@@ -209,7 +214,7 @@ export const useNutzapStore = defineStore("nutzap", {
                 tier_id: tierId,
                 month_index: i + 1,
                 total_months: months,
-              }),
+              }, htlcData?.hash),
             ),
             relayList
           );
@@ -252,6 +257,8 @@ export const useNutzapStore = defineStore("nutzap", {
           monthIndex: i + 1,
           totalMonths: months,
           label: "Subscription payment",
+          htlcHash: htlcData?.hash ?? null,
+          htlcSecret: htlcData?.token ?? null,
         };
         lockedTokens.push(entry);
         await proofsStore.updateActiveProofs();
@@ -282,6 +289,8 @@ export const useNutzapStore = defineStore("nutzap", {
           tierId,
           monthIndex: idx + 1,
           totalMonths: months,
+          htlcHash: t.htlcHash ?? null,
+          htlcSecret: t.htlcSecret ?? null,
         })),
         status: "active",
       } as any);

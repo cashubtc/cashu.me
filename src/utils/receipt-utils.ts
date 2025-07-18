@@ -35,6 +35,8 @@ export interface SubscriptionDmPayload {
   tier_id: string;
   month_index: number;
   total_months: number;
+  htlc_hash?: string;
+  htlc_secret?: string;
 }
 
 export interface SubscriptionMeta {
@@ -48,6 +50,7 @@ export function subscriptionPayload(
   token: string,
   unlock_time: number | null,
   meta: SubscriptionMeta,
+  htlc_hash?: string,
 ) {
   return {
     type: "cashu_subscription_payment" as const,
@@ -57,6 +60,7 @@ export function subscriptionPayload(
     tier_id: meta.tier_id,
     month_index: meta.month_index,
     total_months: meta.total_months,
+    ...(htlc_hash ? { htlc_hash } : {}),
   };
 }
 
@@ -81,6 +85,8 @@ export function parseSubscriptionDm(text: string): SubscriptionDmPayload | undef
       tier_id: obj.tier_id,
       month_index: obj.month_index,
       total_months: obj.total_months,
+      htlc_hash: obj.htlc_hash,
+      htlc_secret: obj.htlc_secret,
     };
   } catch {
     return;

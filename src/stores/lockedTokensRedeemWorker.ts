@@ -196,6 +196,7 @@ export const useLockedTokensRedeemWorker = defineStore(
                     tier_id: entry.tierId,
                     month_index: entry.monthIndex,
                     total_months: entry.totalMonths,
+                    ...(entry.htlcSecret ? { htlc_secret: entry.htlcSecret } : {}),
                   } as const;
                   try {
                     await messenger.sendDm(

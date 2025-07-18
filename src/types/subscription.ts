@@ -6,4 +6,6 @@ export interface SubscriptionPaymentPayload {
   tier_id: string;
   month_index: number;
   total_months: number;
+  htlc_hash?: string;
+  htlc_secret?: string;
 }

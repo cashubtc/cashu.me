@@ -14,4 +14,5 @@ export interface SubscribeTierOptions {
   price: number;
   startDate: number;
   relayList: string[];
+  htlc?: boolean;
 }

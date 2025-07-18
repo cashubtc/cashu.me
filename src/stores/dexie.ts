@@ -41,6 +41,8 @@ export interface SubscriptionInterval {
   tierId?: string;
   monthIndex?: number;
   totalMonths?: number;
+  htlcHash?: string | null;
+  htlcSecret?: string | null;
 }
 
 export interface Subscription {
@@ -78,6 +80,8 @@ export interface LockedToken {
   label?: string;
   autoRedeem?: boolean;
   redeemed?: boolean;
+  htlcHash?: string | null;
+  htlcSecret?: string | null;
 }
 
 // export interface Proof {
@@ -403,6 +407,20 @@ export class CashuDexie extends Dexie {
               if (i.redeemed === undefined) i.redeemed = false;
             });
           });
+      });
+
+    this.version(17)
+      .upgrade(async (tx) => {
+        await tx.table("lockedTokens").toCollection().modify((entry: any) => {
+          if (entry.htlcHash === undefined) entry.htlcHash = null;
+          if (entry.htlcSecret === undefined) entry.htlcSecret = null;
+        });
+        await tx.table("subscriptions").toCollection().modify((entry: any) => {
+          entry.intervals?.forEach((i: any) => {
+            if (i.htlcHash === undefined) i.htlcHash = null;
+            if (i.htlcSecret === undefined) i.htlcSecret = null;
+          });
+        });
       });
   }
 }
