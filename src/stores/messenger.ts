@@ -165,6 +165,7 @@ export const useMessengerStore = defineStore("messenger", {
               event.created_at,
               event.id,
             );
+            this.pushOwnMessage(event as any);
             return { success: true, event } as any;
           }
           console.warn(`[messenger.sendDm] failed via ${r}`);

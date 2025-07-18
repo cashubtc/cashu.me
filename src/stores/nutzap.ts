@@ -213,7 +213,6 @@ export const useNutzapStore = defineStore("nutzap", {
             ),
             relayList
           );
-          if (event) messenger.pushOwnMessage(event as any);
           if (!success) {
             this.queueSend({
               npub: creator.nostrPubkey,
@@ -349,7 +348,6 @@ export const useNutzapStore = defineStore("nutzap", {
               ),
               trustedRelays
             );
-            if (event) messenger.pushOwnMessage(event as any);
             if (!success) {
               this.queueSend({
                 npub: profile.hexPub,
