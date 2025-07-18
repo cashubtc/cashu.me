@@ -23,9 +23,14 @@ import { subscriptionPayload } from "src/utils/receipt-utils";
 
 function parseSubscriptionPaymentPayload(
   obj: any,
-): { token: string; unlock_time?: number } | undefined {
+): { token: string; unlock_time?: number; htlc_hash?: string; htlc_secret?: string } | undefined {
   if (obj?.type !== "cashu_subscription_payment" || !obj.token) return;
-  return { token: obj.token, unlock_time: obj.unlock_time };
+  return {
+    token: obj.token,
+    unlock_time: obj.unlock_time,
+    htlc_hash: obj.htlc_hash,
+    htlc_secret: obj.htlc_secret,
+  };
 }
 
 export interface SubscriptionPayment {
@@ -309,6 +314,8 @@ export const useMessengerStore = defineStore("messenger", {
             total_months: payload.total_months,
             amount,
             unlock_time: sub.unlock_time,
+            htlc_hash: sub.htlc_hash,
+            htlc_secret: sub.htlc_secret,
           };
         }
       } catch {}
@@ -353,6 +360,8 @@ export const useMessengerStore = defineStore("messenger", {
             total_months: payload.total_months,
             amount,
             unlock_time: sub.unlock_time,
+            htlc_hash: sub.htlc_hash,
+            htlc_secret: sub.htlc_secret,
           };
           const unlockTs = sub.unlock_time ?? payload.unlockTime ?? 0;
           const entry: LockedToken = {
@@ -366,6 +375,7 @@ export const useMessengerStore = defineStore("messenger", {
             intervalKey: payload.subscription_id ?? "",
             unlockTs,
             autoRedeem: true,
+            htlcHash: sub.htlc_hash ?? null,
             status:
               unlockTs && unlockTs > Math.floor(Date.now() / 1000)
                 ? "pending"

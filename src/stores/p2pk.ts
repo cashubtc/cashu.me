@@ -263,6 +263,18 @@ export const useP2PKStore = defineStore("p2pk", {
       }
       return false;
     },
+    isHTLC: function (proofs: WalletProof[]) {
+      const secrets = proofs.map((p) => p.secret);
+      for (const secret of secrets) {
+        try {
+          const obj = JSON.parse(secret);
+          if (!Array.isArray(obj) && obj.receiverP2PK) {
+            return true;
+          }
+        } catch {}
+      }
+      return false;
+    },
     isLockedToUs: function (proofs: WalletProof[]) {
       const secrets = proofs.map((p) => p.secret);
       for (const secret of secrets) {

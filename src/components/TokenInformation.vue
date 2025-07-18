@@ -38,6 +38,14 @@
           class="q-ml-xs"
         />
       </q-chip>
+      <q-chip
+        v-if="isHTLC(proofsToShow)"
+        outline
+        icon="link"
+        class="q-pa-md"
+      >
+        HTLC
+      </q-chip>
       <div v-if="displayMemo" class="q-my-md">
         <q-icon name="chat" size="xs" color="grey" class="q-mr-sm" />
         <span>{{ displayMemo }}</span>
@@ -123,6 +131,7 @@ export default defineComponent({
       "isLockedToUs",
       "getTokenPubkey",
       "getTokenLocktime",
+      "isHTLC",
     ]),
     formatPubkey(hex) {
       try {
