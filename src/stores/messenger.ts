@@ -50,12 +50,18 @@ export interface SubscriptionPayment {
   unlock_time?: number;
 }
 
+export interface MessageAttachment {
+  type: string;
+  name: string;
+}
+
 export type MessengerMessage = {
   id: string;
   pubkey: string;
   content: string;
   created_at: number;
   outgoing: boolean;
+  attachment?: MessageAttachment;
   subscriptionPayment?: SubscriptionPayment;
   autoRedeem?: boolean;
 };
@@ -163,7 +169,12 @@ export const useMessengerStore = defineStore("messenger", {
         console.warn("[messenger] signer unavailable, continuing read-only", e);
       }
     },
-    async sendDm(recipient: string, message: string, relays?: string[]) {
+    async sendDm(
+      recipient: string,
+      message: string,
+      relays?: string[],
+      attachment?: MessageAttachment
+    ) {
       recipient = this.normalizeKey(recipient);
       await this.loadIdentity();
       const nostr = useNostrStore();
@@ -188,7 +199,8 @@ export const useMessengerStore = defineStore("messenger", {
               recipient,
               message,
               event.created_at,
-              event.id
+              event.id,
+              attachment
             );
             this.pushOwnMessage(event as any);
             return { success: true, event } as any;
@@ -297,7 +309,8 @@ export const useMessengerStore = defineStore("messenger", {
       pubkey: string,
       content: string,
       created_at?: number,
-      id?: string
+      id?: string,
+      attachment?: MessageAttachment
     ) {
       pubkey = this.normalizeKey(pubkey);
       const messageId = id || uuidv4();
@@ -308,6 +321,7 @@ export const useMessengerStore = defineStore("messenger", {
         content: sanitizeMessage(content),
         created_at: created_at ?? Math.floor(Date.now() / 1000),
         outgoing: true,
+        attachment,
       };
       if (!this.conversations[pubkey]) this.conversations[pubkey] = [];
       if (!this.conversations[pubkey].some((m) => m.id === messageId))
@@ -468,13 +482,18 @@ export const useMessengerStore = defineStore("messenger", {
         }
       }
       if (this.eventLog.some((m) => m.id === event.id)) return;
+      const sanitized = sanitizeMessage(decrypted);
       const msg: MessengerMessage = {
         id: event.id,
         pubkey: event.pubkey,
-        content: sanitizeMessage(decrypted),
+        content: sanitized,
         created_at: event.created_at,
         outgoing: false,
       };
+      if (/^data:[^;]+;base64,/.test(sanitized)) {
+        const type = sanitized.substring(5, sanitized.indexOf(";"));
+        msg.attachment = { type, name: "" };
+      }
       if (subscriptionInfo) {
         msg.subscriptionPayment = subscriptionInfo;
         msg.autoRedeem = true;

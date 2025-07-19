@@ -26,7 +26,20 @@
         />
       </template>
       <template v-else>
-        {{ message.content }}
+        <q-img
+          v-if="imageSrc"
+          :src="imageSrc"
+          style="max-width: 300px; max-height: 300px"
+          class="q-mb-sm"
+        />
+        <template v-else-if="isFile">
+          <a :href="message.content" target="_blank" :download="attachmentName">
+            {{ attachmentName }}
+          </a>
+        </template>
+        <template v-else>
+          {{ message.content }}
+        </template>
       </template>
     </div>
     <div
@@ -93,6 +106,18 @@ const isoTime = computed(() =>
 const deliveryIcon = computed(() =>
   props.deliveryStatus === "delivered" ? mdiCheckAll : mdiCheck,
 );
+
+const isDataUrl = computed(() => props.message.content.startsWith("data:"));
+const isImageDataUrl = computed(() => props.message.content.startsWith("data:image"));
+const isHttpUrl = computed(() => /^https?:\/\//.test(props.message.content));
+const isImageLink = computed(() =>
+  isHttpUrl.value && /\.(png|jpe?g|gif|webp|svg)$/i.test(props.message.content)
+);
+const imageSrc = computed(() =>
+  isImageDataUrl.value || isImageLink.value ? props.message.content : ""
+);
+const isFile = computed(() => isDataUrl.value || isHttpUrl.value);
+const attachmentName = computed(() => props.message.attachment?.name || props.message.content.split('/').pop()?.split('?')[0] || 'file');
 
 const receiveStore = useReceiveTokensStore();
 const redeemed = ref(false);

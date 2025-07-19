@@ -210,9 +210,22 @@ export default defineComponent({
       selected.value = pubkey;
     };
 
-    const sendMessage = (text: string) => {
+    const sendMessage = (
+      payload: string | { text: string; attachment?: { dataUrl: string; name: string; type: string } }
+    ) => {
       if (!selected.value) return;
-      messenger.sendDm(selected.value, text);
+      if (typeof payload === "string") {
+        messenger.sendDm(selected.value, payload);
+        return;
+      }
+      const { text, attachment } = payload;
+      if (text) messenger.sendDm(selected.value, text);
+      if (attachment) {
+        messenger.sendDm(selected.value, attachment.dataUrl, undefined, {
+          name: attachment.name,
+          type: attachment.type,
+        });
+      }
     };
 
     function openSendTokenDialog() {
