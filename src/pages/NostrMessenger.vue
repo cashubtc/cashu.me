@@ -2,8 +2,6 @@
   <q-page
     class="row full-height no-horizontal-scroll"
     :class="[$q.dark.isActive ? 'bg-dark text-white' : 'bg-white text-dark']"
-    @touchstart="onTouchStart"
-    @touchend="onTouchEnd"
   >
     <q-responsive>
       <q-drawer
@@ -46,6 +44,7 @@
     <div :class="['col column', $q.screen.gt.xs ? 'q-pa-lg' : 'q-pa-md']">
       <q-header elevated class="q-mb-md bg-transparent">
         <q-toolbar>
+          <q-btn flat round dense icon="menu" @click="drawer = !drawer" />
           <q-btn flat round dense icon="arrow_back" @click="goBack" />
           <q-toolbar-title class="text-h6 ellipsis">
             Nostr Messenger
@@ -172,11 +171,11 @@ export default defineComponent({
       typeof ChatSendTokenDialog
     > | null>(null);
     const messages = computed(
-      () => messenger.conversations[selected.value] || [],
+      () => messenger.conversations[selected.value] || []
     );
     const showRelays = useLocalStorage<boolean>(
       "cashu.messenger.showRelays",
-      true,
+      true
     );
 
     watch(
@@ -184,7 +183,7 @@ export default defineComponent({
       (val) => {
         messenger.setCurrentConversation(val);
       },
-      { immediate: true },
+      { immediate: true }
     );
 
     const selectConversation = (pubkey: string) => {
@@ -207,17 +206,6 @@ export default defineComponent({
       if (!selected.value) return;
       (chatSendTokenDialogRef.value as any)?.show();
     }
-
-    let touchStartX = 0;
-    const onTouchStart = (e: TouchEvent) => {
-      touchStartX = e.touches[0].clientX;
-    };
-
-    const onTouchEnd = (e: TouchEvent) => {
-      const dx = e.changedTouches[0].clientX - touchStartX;
-      if (dx > 50) messenger.setDrawer(true);
-      if (dx < -50) messenger.setDrawer(false);
-    };
 
     const reconnect = async () => {
       connecting.value = true;
@@ -246,8 +234,6 @@ export default defineComponent({
       sendMessage,
       openSendTokenDialog,
       goBack,
-      onTouchStart,
-      onTouchEnd,
       reconnect,
     };
   },
