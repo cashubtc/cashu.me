@@ -77,6 +77,7 @@
       <ChatSendTokenDialog ref="chatSendTokenDialogRef" :recipient="selected" />
     </div>
   </q-page>
+  <NostrSetupWizard v-model="showSetupWizard" @complete="setupComplete" />
 </template>
 
 <script lang="ts">
@@ -96,6 +97,7 @@ import ActiveChatHeader from "components/ActiveChatHeader.vue";
 import MessageList from "components/MessageList.vue";
 import MessageInput from "components/MessageInput.vue";
 import ChatSendTokenDialog from "components/ChatSendTokenDialog.vue";
+import NostrSetupWizard from "components/NostrSetupWizard.vue";
 
 export default defineComponent({
   name: "NostrMessenger",
@@ -108,12 +110,14 @@ export default defineComponent({
     MessageList,
     MessageInput,
     ChatSendTokenDialog,
+    NostrSetupWizard,
   },
   setup() {
     const loading = ref(true);
     const connecting = ref(false);
     const messenger = useMessengerStore();
     const nostr = useNostrStore();
+    const showSetupWizard = ref(false);
 
     function bech32ToHex(pubkey: string): string {
       try {
@@ -149,7 +153,16 @@ export default defineComponent({
       }
     }
 
-    onMounted(init);
+    async function checkAndInit() {
+      if (!nostr.pubkey || nostr.relays.length === 0) {
+        loading.value = false;
+        showSetupWizard.value = true;
+        return;
+      }
+      await init();
+    }
+
+    onMounted(checkAndInit);
 
     const router = useRouter();
     const route = useRoute();
@@ -220,6 +233,12 @@ export default defineComponent({
       }
     };
 
+    const setupComplete = async () => {
+      showSetupWizard.value = false;
+      loading.value = true;
+      await init();
+    };
+
     return {
       loading,
       connecting,
@@ -229,12 +248,14 @@ export default defineComponent({
       chatSendTokenDialogRef,
       messages,
       showRelays,
+      showSetupWizard,
       selectConversation,
       startChat,
       sendMessage,
       openSendTokenDialog,
       goBack,
       reconnect,
+      setupComplete,
     };
   },
 });
