@@ -57,6 +57,7 @@
         :name="deliveryIcon"
         size="16px"
         class="q-ml-xs"
+        :color="deliveryColor"
       />
     </div>
   </div>
@@ -66,7 +67,7 @@
 import { computed, ref, onMounted, onUnmounted } from "vue";
 import { formatDistanceToNow } from "date-fns";
 import { useQuasar } from "quasar";
-import { mdiCheck, mdiCheckAll } from "@quasar/extras/mdi-v6";
+import { mdiCheck, mdiCheckAll, mdiAlertCircleOutline } from "@quasar/extras/mdi-v6";
 import type { MessengerMessage } from "src/stores/messenger";
 import TokenCarousel from "components/TokenCarousel.vue";
 import { useReceiveTokensStore } from "src/stores/receiveTokensStore";
@@ -79,7 +80,7 @@ import { shortenString } from "src/js/string-utils";
 
 const props = defineProps<{
   message: MessengerMessage;
-  deliveryStatus?: "sent" | "delivered";
+  deliveryStatus?: "sent" | "delivered" | "failed";
 }>();
 
 const $q = useQuasar();
@@ -103,8 +104,12 @@ const time = computed(() =>
 const isoTime = computed(() =>
   new Date(props.message.created_at * 1000).toISOString(),
 );
-const deliveryIcon = computed(() =>
-  props.deliveryStatus === "delivered" ? mdiCheckAll : mdiCheck,
+const deliveryIcon = computed(() => {
+  if (props.deliveryStatus === "failed") return mdiAlertCircleOutline;
+  return props.deliveryStatus === "delivered" ? mdiCheckAll : mdiCheck;
+});
+const deliveryColor = computed(() =>
+  props.deliveryStatus === "failed" ? "negative" : undefined,
 );
 
 const isDataUrl = computed(() => props.message.content.startsWith("data:"));
