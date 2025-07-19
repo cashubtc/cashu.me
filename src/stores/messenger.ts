@@ -22,8 +22,15 @@ import token from "src/js/token";
 import { subscriptionPayload } from "src/utils/receipt-utils";
 
 function parseSubscriptionPaymentPayload(
-  obj: any,
-): { token: string; unlock_time?: number; htlc_hash?: string; htlc_secret?: string } | undefined {
+  obj: any
+):
+  | {
+      token: string;
+      unlock_time?: number;
+      htlc_hash?: string;
+      htlc_secret?: string;
+    }
+  | undefined {
   if (obj?.type !== "cashu_subscription_payment" || !obj.token) return;
   return {
     token: obj.token,
@@ -67,19 +74,23 @@ export const useMessengerStore = defineStore("messenger", {
       relays,
       conversations: useLocalStorage<Record<string, MessengerMessage[]>>(
         "cashu.messenger.conversations",
-        {} as Record<string, MessengerMessage[]>,
+        {} as Record<string, MessengerMessage[]>
       ),
       unreadCounts: useLocalStorage<Record<string, number>>(
         "cashu.messenger.unread",
-        {} as Record<string, number>,
+        {} as Record<string, number>
       ),
       pinned: useLocalStorage<Record<string, boolean>>(
         "cashu.messenger.pinned",
-        {} as Record<string, boolean>,
+        {} as Record<string, boolean>
+      ),
+      aliases: useLocalStorage<Record<string, string>>(
+        "cashu.messenger.aliases",
+        {} as Record<string, string>
       ),
       eventLog: useLocalStorage<MessengerMessage[]>(
         "cashu.messenger.eventLog",
-        [] as MessengerMessage[],
+        [] as MessengerMessage[]
       ),
       currentConversation: "",
       drawerOpen: useLocalStorage<boolean>("cashu.messenger.drawerOpen", true),
@@ -103,7 +114,8 @@ export const useMessengerStore = defineStore("messenger", {
         const normalized = this.normalizeKey(key);
         const msgs = this.conversations[key];
         if (!msgs) continue;
-        if (!this.conversations[normalized]) this.conversations[normalized] = [];
+        if (!this.conversations[normalized])
+          this.conversations[normalized] = [];
         for (const msg of msgs) {
           msg.pubkey = normalized;
           if (!this.conversations[normalized].some((m) => m.id === msg.id)) {
@@ -127,6 +139,14 @@ export const useMessengerStore = defineStore("messenger", {
         if (normalized !== key) {
           this.pinned[normalized] = this.pinned[normalized] || this.pinned[key];
           delete this.pinned[key];
+        }
+      }
+
+      for (const key of Object.keys(this.aliases)) {
+        const normalized = this.normalizeKey(key);
+        if (normalized !== key) {
+          this.aliases[normalized] = this.aliases[key];
+          delete this.aliases[key];
         }
       }
 
@@ -161,14 +181,14 @@ export const useMessengerStore = defineStore("messenger", {
             message,
             privKey,
             nostr.pubkey,
-            [r],
+            [r]
           );
           if (success && event) {
             this.addOutgoingMessage(
               recipient,
               message,
               event.created_at,
-              event.id,
+              event.id
             );
             this.pushOwnMessage(event as any);
             return { success: true, event } as any;
@@ -190,7 +210,7 @@ export const useMessengerStore = defineStore("messenger", {
         tier_id: string;
         month_index: number;
         total_months: number;
-      },
+      }
     ) {
       try {
         recipient = this.normalizeKey(recipient);
@@ -201,15 +221,15 @@ export const useMessengerStore = defineStore("messenger", {
         const tokens = useTokensStore();
 
         const sendAmount = Math.floor(
-          amount * mints.activeUnitCurrencyMultiplyer,
+          amount * mints.activeUnitCurrencyMultiplyer
         );
 
         const mintWallet = wallet.mintWallet(
           mints.activeMintUrl,
-          mints.activeUnit,
+          mints.activeUnit
         );
         const proofsForBucket = mints.activeProofs.filter(
-          (p) => p.bucketId === bucketId,
+          (p) => p.bucketId === bucketId
         );
 
         const { sendProofs } = await wallet.send(
@@ -218,7 +238,7 @@ export const useMessengerStore = defineStore("messenger", {
           sendAmount,
           true,
           settings.includeFeesInSendAmount,
-          bucketId,
+          bucketId
         );
 
         const tokenStr = proofsStore.serializeProofs(sendProofs);
@@ -239,12 +259,12 @@ export const useMessengerStore = defineStore("messenger", {
 
         const { success, event } = await this.sendDm(
           recipient,
-          JSON.stringify(payload),
+          JSON.stringify(payload)
         );
         if (success && event) {
           if (subscription) {
             const msg = this.conversations[recipient]?.find(
-              (m) => m.id === event.id,
+              (m) => m.id === event.id
             );
             const logMsg = this.eventLog.find((m) => m.id === event.id);
             const payment: SubscriptionPayment = {
@@ -277,7 +297,7 @@ export const useMessengerStore = defineStore("messenger", {
       pubkey: string,
       content: string,
       created_at?: number,
-      id?: string,
+      id?: string
     ) {
       pubkey = this.normalizeKey(pubkey);
       const messageId = id || uuidv4();
@@ -334,7 +354,7 @@ export const useMessengerStore = defineStore("messenger", {
       const decrypted = await nostr.decryptNip04(
         privKey,
         event.pubkey,
-        event.content,
+        event.content
       );
       let subscriptionInfo: SubscriptionPayment | undefined;
       const lines = decrypted.split("\n").filter((l) => l.trim().length > 0);
@@ -391,7 +411,7 @@ export const useMessengerStore = defineStore("messenger", {
           const receiveStore = useReceiveTokensStore();
           receiveStore.receiveData.tokensBase64 = sub.token;
           await receiveStore.enqueue(() =>
-            receiveStore.receiveToken(sub.token, DEFAULT_BUCKET_ID),
+            receiveStore.receiveToken(sub.token, DEFAULT_BUCKET_ID)
           );
         } else if (payload && payload.type === "cashu_subscription_claimed") {
           const sub = await cashuDb.subscriptions.get(payload.subscription_id);
@@ -413,7 +433,7 @@ export const useMessengerStore = defineStore("messenger", {
             if (proofs.some((p) => p.secret.startsWith("P2PK:"))) {
               const buckets = useBucketsStore();
               let bucket = buckets.bucketList.find(
-                (b) => b.name === "Subscriptions",
+                (b) => b.name === "Subscriptions"
               );
               if (!bucket) {
                 bucket = buckets.addBucket({ name: "Subscriptions" });
@@ -427,8 +447,7 @@ export const useMessengerStore = defineStore("messenger", {
                   amount,
                   token: payload.token,
                   pubkey: event.pubkey,
-                  locktime:
-                    payload.unlock_time ?? payload.unlockTime,
+                  locktime: payload.unlock_time ?? payload.unlockTime,
                   bucketId: bucket.id,
                 });
               }
@@ -441,8 +460,8 @@ export const useMessengerStore = defineStore("messenger", {
               await receiveStore.enqueue(() =>
                 receiveStore.receiveToken(
                   payload.token,
-                  receiveStore.receiveData.bucketId,
-                ),
+                  receiveStore.receiveData.bucketId
+                )
               );
             }
           }
@@ -485,7 +504,7 @@ export const useMessengerStore = defineStore("messenger", {
               this.start();
             }
           },
-          { deep: true },
+          { deep: true }
         );
         this.watchInitialized = true;
       }
@@ -503,13 +522,13 @@ export const useMessengerStore = defineStore("messenger", {
           privKey = nostr.privKeyHex;
           if (!privKey) {
             console.warn(
-              "[messenger] no private key set, running in read-only mode",
+              "[messenger] no private key set, running in read-only mode"
             );
           }
         }
         const since = this.eventLog.reduce(
           (max, m) => (m.created_at > max ? m.created_at : max),
-          0,
+          0
         );
         await nostr.subscribeToNip04DirectMessagesCallback(
           privKey,
@@ -517,7 +536,7 @@ export const useMessengerStore = defineStore("messenger", {
           async (ev, _decrypted) => {
             await this.addIncomingMessage(ev as NostrEvent);
           },
-          since,
+          since
         );
       } catch (e) {
         console.error("[messenger.start]", e);
@@ -574,6 +593,20 @@ export const useMessengerStore = defineStore("messenger", {
     togglePin(pubkey: string) {
       pubkey = this.normalizeKey(pubkey);
       this.pinned[pubkey] = !this.pinned[pubkey];
+    },
+
+    setAlias(pubkey: string, alias: string) {
+      pubkey = this.normalizeKey(pubkey);
+      if (alias.trim()) {
+        this.aliases[pubkey] = alias.trim();
+      } else {
+        delete this.aliases[pubkey];
+      }
+    },
+
+    getAlias(pubkey: string): string | undefined {
+      pubkey = this.normalizeKey(pubkey);
+      return this.aliases[pubkey];
     },
 
     setCurrentConversation(pubkey: string) {

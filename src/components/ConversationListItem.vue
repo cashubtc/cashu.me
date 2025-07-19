@@ -96,13 +96,16 @@ export default defineComponent({
     const isOnline = computed(() => messenger.connected);
     const isPinned = computed(() => messenger.pinned[props.pubkey]);
     const unreadCount = computed(
-      () => messenger.unreadCounts[props.pubkey] || 0,
+      () => messenger.unreadCounts[props.pubkey] || 0
     );
     const profile = computed(() => {
       const entry: any = (nostr.profiles as any)[props.pubkey];
       return entry?.profile ?? entry ?? {};
     });
+    const alias = computed(() => messenger.aliases[props.pubkey]);
     const displayName = computed(() => {
+      const a = alias.value;
+      if (a) return a;
       const p: any = profile.value;
       return (
         p?.name ||
