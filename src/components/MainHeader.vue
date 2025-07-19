@@ -94,6 +94,7 @@
         @click="reload"
         :loading="reloading"
         :disable="uiStore.globalMutexLock && countdown === 0"
+        class="q-mx-sm"
       >
         <q-tooltip>{{ $t('MainHeader.reload.tooltip') }}</q-tooltip>
         <template v-slot:loading>
@@ -109,8 +110,10 @@
         color="primary"
         aria-label="Toggle Dark Mode"
         @click="toggleDarkMode"
-        class="q-ml-sm"
-      />
+        class="q-mx-sm"
+      >
+        <q-tooltip>Toggle Dark Mode</q-tooltip>
+      </q-btn>
     </q-toolbar>
   </q-header>
 
@@ -302,15 +305,14 @@ export default defineComponent({
     const messenger = useMessengerStore();
     const $q = useQuasar();
     const toggleDarkMode = () => {
-      console.log("toggleDarkMode", $q.dark.isActive);
       $q.dark.toggle();
       $q.localStorage.set("cashu.darkMode", $q.dark.isActive);
       vm?.notifySuccess(
-        $q.dark.isActive ? "Dark mode enabled" : "Dark mode disabled"
+        $q.dark.isActive ? "Dark mode enabled" : "Light mode enabled"
       );
     };
     const darkIcon = computed(() =>
-      $q.dark.isActive ? "wb_sunny" : "brightness_3"
+      $q.dark.isActive ? "light_mode" : "dark_mode"
     );
     const needsNostrLogin = computed(
       () => !nostrStore.privateKeySignerPrivateKey
