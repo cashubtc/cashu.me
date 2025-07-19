@@ -10,34 +10,44 @@
         show-if-above
         :breakpoint="600"
         bordered
-        :width="300"
+        :width="320"
         class="drawer-transition"
         :class="$q.screen.gt.xs ? 'q-pa-lg column' : 'q-pa-md column'"
       >
-        <NostrIdentityManager class="q-mb-md" />
-        <q-expansion-item
-          class="q-mb-md"
-          dense
-          dense-toggle
-          label="Relays"
-          v-model="showRelays"
-        >
-          <RelayManager class="q-mb-md" />
-        </q-expansion-item>
-        <NewChat class="q-mb-md" @start="startChat" />
-        <q-scroll-area class="col" style="min-height: 0">
-          <Suspense>
-            <template #default>
-              <ConversationList
-                :selected-pubkey="selected"
-                @select="selectConversation"
-              />
-            </template>
-            <template #fallback>
-              <q-skeleton height="100px" square />
-            </template>
-          </Suspense>
-        </q-scroll-area>
+        <q-tabs v-model="sidebarTab" dense no-caps align="justify" class="q-mb-md">
+          <q-tab name="chats" label="Chats" />
+          <q-tab name="settings" label="Settings" />
+        </q-tabs>
+        <q-tab-panels v-model="sidebarTab" animated class="col column no-wrap">
+          <q-tab-panel name="chats" class="col column no-wrap q-pa-none">
+            <NewChat class="q-mb-md" @start="startChat" />
+            <q-scroll-area class="col" style="min-height: 0">
+              <Suspense>
+                <template #default>
+                  <ConversationList
+                    :selected-pubkey="selected"
+                    @select="selectConversation"
+                  />
+                </template>
+                <template #fallback>
+                  <q-skeleton height="100px" square />
+                </template>
+              </Suspense>
+            </q-scroll-area>
+          </q-tab-panel>
+          <q-tab-panel name="settings" class="col column no-wrap q-pa-none">
+            <NostrIdentityManager class="q-mb-md" />
+            <q-expansion-item
+              class="q-mb-md"
+              dense
+              dense-toggle
+              label="Relays"
+              v-model="showRelays"
+            >
+              <RelayManager class="q-mb-md" />
+            </q-expansion-item>
+          </q-tab-panel>
+        </q-tab-panels>
       </q-drawer>
     </q-responsive>
 
@@ -203,6 +213,10 @@ export default defineComponent({
       get: () => messenger.drawerOpen,
       set: (val) => messenger.setDrawer(val),
     });
+    const sidebarTab = useLocalStorage<string>(
+      "cashu.messenger.sidebarTab",
+      "chats"
+    );
     const selected = ref("");
     const chatSendTokenDialogRef = ref<InstanceType<
       typeof ChatSendTokenDialog
@@ -310,6 +324,7 @@ export default defineComponent({
       connecting,
       messenger,
       drawer,
+      sidebarTab,
       selected,
       chatSendTokenDialogRef,
       messages,
