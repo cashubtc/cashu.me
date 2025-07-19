@@ -12,9 +12,25 @@
       class="q-px-md q-mt-sm"
     />
     <q-list bordered>
+      <template v-if="filteredPinned.length">
+        <q-item-label header>Pinned</q-item-label>
+        <ConversationListItem
+          v-for="item in filteredPinned"
+          :key="'pinned-' + item.pubkey"
+          :pubkey="item.pubkey"
+          :lastMsg="item.lastMsg"
+          :selected="item.pubkey === selectedPubkey"
+          @click="select(item.pubkey)"
+          @pin="togglePin(item.pubkey)"
+          @delete="deleteConversation(item.pubkey)"
+        />
+        <q-separator spaced />
+      </template>
+
+      <q-item-label header>All Conversations</q-item-label>
       <ConversationListItem
-        v-for="item in filtered"
-        :key="item.pubkey"
+        v-for="item in filteredRegular"
+        :key="'reg-' + item.pubkey"
         :pubkey="item.pubkey"
         :lastMsg="item.lastMsg"
         :selected="item.pubkey === selectedPubkey"
@@ -23,7 +39,7 @@
         @delete="deleteConversation(item.pubkey)"
       />
       <div
-        v-if="uniqueConversations.length === 0"
+        v-if="filteredPinned.length + filteredRegular.length === 0"
         class="q-pa-md text-caption text-grey-7"
       >
         No active conversations.
@@ -62,17 +78,28 @@ const uniqueConversations = computed(() => {
     });
 });
 
-const filtered = computed(() => {
+const pinnedConversations = computed(() =>
+  uniqueConversations.value.filter((c) => c.pinned)
+);
+
+const regularConversations = computed(() =>
+  uniqueConversations.value.filter((c) => !c.pinned)
+);
+
+const applyFilter = (list: typeof uniqueConversations.value) => {
   const q = filterQuery.value.toLowerCase();
-  if (!q) return uniqueConversations.value;
-  return uniqueConversations.value.filter(({ pubkey }) => {
+  if (!q) return list;
+  return list.filter(({ pubkey }) => {
     const entry: any = (nostr.profiles as any)[pubkey];
     const profile = entry?.profile ?? entry ?? {};
     const name =
       profile.display_name || profile.name || profile.displayName || pubkey;
     return name.toLowerCase().includes(q) || pubkey.toLowerCase().includes(q);
   });
-});
+};
+
+const filteredPinned = computed(() => applyFilter(pinnedConversations.value));
+const filteredRegular = computed(() => applyFilter(regularConversations.value));
 
 const loadProfiles = async () => {
   for (const { pubkey } of uniqueConversations.value) {
