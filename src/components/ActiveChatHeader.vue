@@ -47,13 +47,6 @@
         <div class="text-grey-6">Select a conversation to start chatting.</div>
       </template>
     </div>
-    <q-btn
-      flat
-      dense
-      round
-      :icon="$q.dark.isActive ? 'wb_sunny' : 'brightness_3'"
-      @click="$q.dark.toggle()"
-    />
     <ChatSendTokenDialog
       ref="chatSendTokenDialogRef"
       :recipient="props.pubkey"
