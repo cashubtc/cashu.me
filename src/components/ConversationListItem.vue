@@ -37,13 +37,12 @@
               >{{ secondaryName }}</span
             >
           </div>
-          <span class="timestamp text-caption q-ml-auto">{{ timeAgo }}</span>
           <q-btn
             flat
             dense
             round
             icon="more_vert"
-            class="q-ml-xs"
+            class="q-ml-auto"
             @click.stop="menu = true"
             aria-label="Conversation options"
           />
@@ -78,7 +77,7 @@
       </div>
       <div
         :class="[
-          'text-caption ellipsis snippet',
+          'text-caption snippet',
           { 'text-weight-bold': unreadCount > 0 },
         ]"
         class="q-mt-xs"
@@ -94,6 +93,10 @@
         </template>
         <template v-else><q-skeleton type="text" width="80%" /></template>
       </div>
+    </q-item-section>
+
+    <q-item-section side top class="timestamp-section">
+      <span class="timestamp text-caption">{{ timeAgo }}</span>
     </q-item-section>
 
     <q-item-section side>
@@ -212,7 +215,8 @@ export default defineComponent({
 <style scoped>
 .conversation-item {
   border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-  padding: 12px 16px;
+  padding: 16px 20px;
+  transition: background-color 0.2s ease;
 }
 .conversation-item.selected {
   background: rgba(0, 0, 0, 0.05);
@@ -234,10 +238,11 @@ export default defineComponent({
 }
 .timestamp {
   white-space: nowrap;
-  font-size: 0.7rem;
+  font-size: 0.75rem;
 }
 .snippet {
-  font-size: 0.75rem;
+  font-size: 0.8rem;
+  white-space: normal;
 }
 .status-dot {
   position: absolute;
@@ -253,5 +258,11 @@ export default defineComponent({
   font-weight: bold;
   font-size: 0.75rem;
   padding: 0 6px;
+  box-shadow: 0 0 0 2px var(--q-color-white);
+}
+
+.timestamp-section {
+  min-width: 64px;
+  text-align: right;
 }
 </style>
