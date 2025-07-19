@@ -20,7 +20,6 @@
         </q-tabs>
         <q-tab-panels v-model="sidebarTab" animated class="col column no-wrap">
           <q-tab-panel name="chats" class="col column no-wrap q-pa-none">
-            <NewChat class="q-mb-md" @start="startChat" />
             <q-scroll-area class="col" style="min-height: 0">
               <Suspense>
                 <template #default>
@@ -89,6 +88,10 @@
       <MessageList :messages="messages" class="col" />
       <MessageInput @send="sendMessage" @sendToken="openSendTokenDialog" />
       <ChatSendTokenDialog ref="chatSendTokenDialogRef" :recipient="selected" />
+      <q-page-sticky position="bottom-right" :offset="[18, 18]">
+        <q-btn fab color="primary" icon="add" @click="openNewChatDialog" />
+      </q-page-sticky>
+      <NewChatDialog ref="newChatDialogRef" @start="startChat" />
     </div>
   </q-page>
   <NostrSetupWizard v-model="showSetupWizard" @complete="setupComplete" />
@@ -113,7 +116,7 @@ import type NDK from "@nostr-dev-kit/ndk";
 
 import NostrIdentityManager from "components/NostrIdentityManager.vue";
 import RelayManagerDialog from "components/RelayManagerDialog.vue";
-import NewChat from "components/NewChat.vue";
+import NewChatDialog from "components/NewChatDialog.vue";
 import ConversationList from "components/ConversationList.vue";
 import ActiveChatHeader from "components/ActiveChatHeader.vue";
 import MessageList from "components/MessageList.vue";
@@ -126,7 +129,7 @@ export default defineComponent({
   components: {
     NostrIdentityManager,
     RelayManagerDialog,
-    NewChat,
+    NewChatDialog,
     ConversationList,
     ActiveChatHeader,
     MessageList,
@@ -223,6 +226,9 @@ export default defineComponent({
     const relayManagerDialogRef = ref<InstanceType<
       typeof RelayManagerDialog
     > | null>(null);
+    const newChatDialogRef = ref<InstanceType<
+      typeof NewChatDialog
+    > | null>(null);
     const messages = computed(
       () => messenger.conversations[selected.value] || []
     );
@@ -302,6 +308,10 @@ export default defineComponent({
       (relayManagerDialogRef.value as any)?.show();
     }
 
+    function openNewChatDialog() {
+      (newChatDialogRef.value as any)?.show();
+    }
+
     const reconnectAll = async () => {
       connecting.value = true;
       try {
@@ -330,6 +340,7 @@ export default defineComponent({
       selected,
       chatSendTokenDialogRef,
       relayManagerDialogRef,
+      newChatDialogRef,
       messages,
       showSetupWizard,
       selectConversation,
@@ -337,6 +348,7 @@ export default defineComponent({
       sendMessage,
       openSendTokenDialog,
       openRelayDialog,
+      openNewChatDialog,
       goBack,
       reconnectAll,
       connectedCount,
