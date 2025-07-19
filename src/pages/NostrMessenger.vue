@@ -58,8 +58,18 @@
           </q-toolbar-title>
         </q-toolbar>
       </q-header>
-      <q-banner v-if="!messenger.connected && !loading" dense class="bg-grey-3">
-        Offline - unable to connect to relays
+      <q-banner v-if="connecting && !loading" dense class="bg-grey-3">
+        Connecting...
+      </q-banner>
+      <q-banner
+        v-else-if="!messenger.connected && !loading"
+        dense
+        class="bg-grey-3"
+      >
+        <div class="row items-center q-gutter-sm">
+          <span>Offline - unable to connect to relays</span>
+          <q-btn flat dense label="Reconnect" @click="reconnect" />
+        </div>
       </q-banner>
       <q-spinner v-if="loading" size="lg" color="primary" />
       <ActiveChatHeader :pubkey="selected" />
@@ -102,6 +112,7 @@ export default defineComponent({
   },
   setup() {
     const loading = ref(true);
+    const connecting = ref(false);
     const messenger = useMessengerStore();
     const nostr = useNostrStore();
 
@@ -119,6 +130,7 @@ export default defineComponent({
     }
 
     async function init() {
+      connecting.value = true;
       try {
         await nostr.initSignerIfNotSet();
         await messenger.loadIdentity();
@@ -127,6 +139,7 @@ export default defineComponent({
       } catch (e) {
         console.error(e);
       } finally {
+        connecting.value = false;
         loading.value = false;
         const qp = route.query.pubkey as string | undefined;
         if (qp) {
@@ -206,8 +219,22 @@ export default defineComponent({
       if (dx < -50) messenger.setDrawer(false);
     };
 
+    const reconnect = async () => {
+      connecting.value = true;
+      try {
+        messenger.disconnect();
+        messenger.started = false;
+        await messenger.start();
+      } catch (e) {
+        console.error(e);
+      } finally {
+        connecting.value = false;
+      }
+    };
+
     return {
       loading,
+      connecting,
       messenger,
       drawer,
       selected,
@@ -221,6 +248,7 @@ export default defineComponent({
       goBack,
       onTouchStart,
       onTouchEnd,
+      reconnect,
     };
   },
 });
