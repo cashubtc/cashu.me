@@ -6,14 +6,14 @@
     @click="handleClick"
   >
     <q-item-section avatar>
-      <q-avatar size="48px" class="relative-position">
+      <q-avatar size="56px" class="relative-position">
         <template v-if="loaded && profile?.picture">
           <img :src="profile.picture" />
         </template>
         <template v-else-if="loaded">
           <div class="placeholder text-white text-body1">{{ initials }}</div>
         </template>
-        <q-skeleton v-else type="circle" size="48px" />
+        <q-skeleton v-else type="circle" size="56px" />
         <q-badge
           class="status-dot"
           rounded
@@ -25,23 +25,52 @@
     <q-item-section class="full-width">
       <div class="row items-center no-wrap">
         <template v-if="loaded">
-          <span
-            :class="[
-              'text-subtitle1 ellipsis',
-              { 'text-weight-bold': unreadCount > 0 },
-            ]"
-            >{{ showRaw ? props.pubkey : displayName }}</span
-          >
+          <div class="column">
+            <span
+              :class="[
+                'text-subtitle1 ellipsis',
+                { 'text-weight-bold': unreadCount > 0 },
+              ]"
+              >{{ displayName }}</span
+            >
+            <span v-if="secondaryName" class="text-caption text-grey ellipsis"
+              >{{ secondaryName }}</span
+            >
+          </div>
           <span class="timestamp text-caption q-ml-auto">{{ timeAgo }}</span>
           <q-btn
             flat
             dense
             round
-            icon="visibility"
+            icon="more_vert"
             class="q-ml-xs"
-            @click.stop="showRaw = !showRaw"
-            aria-label="Toggle pubkey"
+            @click.stop="menu = true"
+            aria-label="Conversation options"
           />
+          <q-menu v-model="menu" anchor="bottom right" self="top right">
+            <q-list style="min-width: 120px">
+              <q-item clickable v-close-popup @click.stop="togglePin">
+                <q-item-section avatar>
+                  <q-icon :name="isPinned ? 'star' : 'star_outline'" />
+                </q-item-section>
+                <q-item-section>
+                  {{ isPinned ? 'Unpin' : 'Pin' }}
+                </q-item-section>
+              </q-item>
+              <q-item clickable v-close-popup @click.stop="showRaw = !showRaw">
+                <q-item-section avatar>
+                  <q-icon name="vpn_key" />
+                </q-item-section>
+                <q-item-section>View Raw Key</q-item-section>
+              </q-item>
+              <q-item clickable v-close-popup @click.stop="deleteItem">
+                <q-item-section avatar>
+                  <q-icon name="delete" />
+                </q-item-section>
+                <q-item-section>Delete</q-item-section>
+              </q-item>
+            </q-list>
+          </q-menu>
         </template>
         <template v-else>
           <q-skeleton type="text" width="60%" />
@@ -52,6 +81,7 @@
           'text-caption ellipsis',
           { 'text-weight-bold': unreadCount > 0 },
         ]"
+        class="q-mt-xs"
       >
         <template v-if="loaded">
           <q-icon
@@ -67,9 +97,13 @@
     </q-item-section>
 
     <q-item-section side>
-      <q-badge v-if="unreadCount > 0" color="primary" rounded class="q-mr-sm">{{
-        unreadCount
-      }}</q-badge>
+      <q-badge
+        v-if="unreadCount > 0"
+        color="primary"
+        rounded
+        class="q-mr-sm unread-badge"
+        >{{ unreadCount }}</q-badge
+      >
       <q-btn
         flat
         dense
@@ -98,7 +132,7 @@ export default defineComponent({
     lastMsg: { type: Object as () => any, default: () => ({}) },
     selected: { type: Boolean, default: false },
   },
-  emits: ["click", "pin"],
+  emits: ["click", "pin", "delete"],
   setup(props, { emit }) {
     const messenger = useMessengerStore();
     const nostr = useNostrStore();
@@ -112,9 +146,7 @@ export default defineComponent({
       return entry?.profile ?? entry ?? {};
     });
     const alias = computed(() => messenger.aliases[props.pubkey]);
-    const displayName = computed(() => {
-      const a = alias.value;
-      if (a) return a;
+    const profileName = computed(() => {
       const p: any = profile.value;
       return (
         p?.name ||
@@ -123,7 +155,13 @@ export default defineComponent({
         props.pubkey.slice(0, 8) + "…"
       );
     });
+    const displayName = computed(() => alias.value || profileName.value);
     const showRaw = ref(false);
+    const menu = ref(false);
+    const secondaryName = computed(() => {
+      if (!alias.value) return showRaw.value ? props.pubkey : "";
+      return showRaw.value ? props.pubkey : profileName.value;
+    });
 
     const initials = computed(() => {
       const name = displayName.value;
@@ -147,6 +185,7 @@ export default defineComponent({
 
     const handleClick = () => emit("click", nostr.resolvePubkey(props.pubkey));
     const togglePin = () => emit("pin", nostr.resolvePubkey(props.pubkey));
+    const deleteItem = () => emit("delete", nostr.resolvePubkey(props.pubkey));
 
     return {
       profile,
@@ -156,9 +195,12 @@ export default defineComponent({
       snippet,
       handleClick,
       togglePin,
+      deleteItem,
       loaded,
       unreadCount,
       showRaw,
+      menu,
+      secondaryName,
       isOnline,
       isPinned,
       props,
@@ -200,5 +242,11 @@ export default defineComponent({
   height: 12px;
   border-radius: 50%;
   border: 2px solid var(--q-color-white);
+}
+
+.unread-badge {
+  font-weight: bold;
+  font-size: 0.75rem;
+  padding: 0 6px;
 }
 </style>
