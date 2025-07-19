@@ -595,6 +595,17 @@ export const useMessengerStore = defineStore("messenger", {
       this.pinned[pubkey] = !this.pinned[pubkey];
     },
 
+    deleteConversation(pubkey: string) {
+      pubkey = this.normalizeKey(pubkey);
+      delete this.conversations[pubkey];
+      delete this.unreadCounts[pubkey];
+      delete this.pinned[pubkey];
+      delete this.aliases[pubkey];
+      if (this.currentConversation === pubkey) {
+        this.currentConversation = "";
+      }
+    },
+
     setAlias(pubkey: string, alias: string) {
       pubkey = this.normalizeKey(pubkey);
       if (alias.trim()) {

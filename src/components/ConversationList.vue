@@ -20,6 +20,7 @@
         :selected="item.pubkey === selectedPubkey"
         @click="select(item.pubkey)"
         @pin="togglePin(item.pubkey)"
+        @delete="deleteConversation(item.pubkey)"
       />
       <div
         v-if="uniqueConversations.length === 0"
@@ -87,5 +88,9 @@ watch(uniqueConversations, loadProfiles);
 const select = (pubkey: string) => emit("select", nostr.resolvePubkey(pubkey));
 const togglePin = (pubkey: string) => {
   messenger.togglePin(nostr.resolvePubkey(pubkey));
+};
+
+const deleteConversation = (pubkey: string) => {
+  messenger.deleteConversation(nostr.resolvePubkey(pubkey));
 };
 </script>
