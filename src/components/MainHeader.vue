@@ -297,8 +297,12 @@ export default defineComponent({
     const messenger = useMessengerStore();
     const $q = useQuasar();
     const toggleDarkMode = () => {
+      console.log("toggleDarkMode", $q.dark.isActive);
       $q.dark.toggle();
       $q.localStorage.set("cashu.darkMode", $q.dark.isActive);
+      vm?.notifySuccess(
+        $q.dark.isActive ? "Dark mode enabled" : "Dark mode disabled"
+      );
     };
     const needsNostrLogin = computed(
       () => !nostrStore.privateKeySignerPrivateKey
@@ -357,7 +361,11 @@ export default defineComponent({
     });
 
     const toggleMessengerDrawer = () => {
+      console.log("toggleMessengerDrawer", messenger.drawerOpen);
       messenger.toggleDrawer();
+      vm?.notify(
+        messenger.drawerOpen ? "Messenger closed" : "Messenger opened"
+      );
     };
 
     const isStaging = () => {
@@ -365,10 +373,18 @@ export default defineComponent({
     };
 
     const reload = () => {
+      console.log(
+        "reload",
+        "countdown:",
+        countdown.value,
+        "mutex:",
+        uiStore.globalMutexLock
+      );
       if (countdown.value > 0) {
         try {
           clearInterval(countdownInterval);
           countdown.value = 0;
+          vm?.notifyWarning("Reload cancelled");
         } finally {
           uiStore.unlockMutex();
         }
@@ -377,6 +393,7 @@ export default defineComponent({
       if (uiStore.globalMutexLock) return;
       uiStore.lockMutex();
       countdown.value = 3;
+      vm?.notify("Reloading in 3 seconds…");
       countdownInterval = setInterval(() => {
         countdown.value--;
         if (countdown.value === 0) {
