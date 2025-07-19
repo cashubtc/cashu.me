@@ -5,54 +5,71 @@
   >
     <q-responsive>
       <q-drawer
-        v-model="drawer"
+        :model-value="true"
         side="left"
         show-if-above
         :breakpoint="600"
         bordered
-        :width="320"
+        :width="drawerOpen ? 320 : 72"
         class="drawer-transition drawer-container"
         :class="$q.screen.gt.xs ? 'q-pa-lg column' : 'q-pa-md column'"
       >
-        <q-tabs v-model="sidebarTab" dense no-caps align="justify" class="q-mb-md">
-          <q-tab name="chats" label="Chats" />
-          <q-tab name="settings" label="Settings" />
-        </q-tabs>
-        <q-tab-panels v-model="sidebarTab" animated class="col column no-wrap">
-          <q-tab-panel name="chats" class="col column no-wrap q-pa-none">
-            <q-scroll-area class="col fit" style="min-height: 0">
-              <Suspense>
-                <template #default>
-                  <ConversationList
-                    :selected-pubkey="selected"
-                    @select="selectConversation"
-                  />
-                </template>
-                <template #fallback>
-                  <q-skeleton height="100px" square />
-                </template>
-              </Suspense>
-            </q-scroll-area>
-          </q-tab-panel>
-          <q-tab-panel name="settings" class="col column no-wrap q-pa-none">
-            <NostrIdentityManager class="q-mb-md" />
-            <q-btn
-              class="q-mb-md"
-              size="sm"
-              label="Relays"
-              color="primary"
-              @click="openRelayDialog"
-            />
-            <RelayManagerDialog ref="relayManagerDialogRef" />
-          </q-tab-panel>
-        </q-tab-panels>
+        <template v-if="drawerOpen">
+          <q-tabs v-model="sidebarTab" dense no-caps align="justify" class="q-mb-md">
+            <q-tab name="chats" label="Chats" />
+            <q-tab name="settings" label="Settings" />
+          </q-tabs>
+          <q-tab-panels v-model="sidebarTab" animated class="col column no-wrap">
+            <q-tab-panel name="chats" class="col column no-wrap q-pa-none">
+              <q-scroll-area class="col fit" style="min-height: 0">
+                <Suspense>
+                  <template #default>
+                    <ConversationList
+                      :selected-pubkey="selected"
+                      @select="selectConversation"
+                    />
+                  </template>
+                  <template #fallback>
+                    <q-skeleton height="100px" square />
+                  </template>
+                </Suspense>
+              </q-scroll-area>
+            </q-tab-panel>
+            <q-tab-panel name="settings" class="col column no-wrap q-pa-none">
+              <NostrIdentityManager class="q-mb-md" />
+              <q-btn
+                class="q-mb-md"
+                size="sm"
+                label="Relays"
+                color="primary"
+                @click="openRelayDialog"
+              />
+              <RelayManagerDialog ref="relayManagerDialogRef" />
+            </q-tab-panel>
+          </q-tab-panels>
+        </template>
+        <template v-else>
+          <div class="column items-center q-gutter-md" style="overflow-y:auto">
+            <q-avatar
+              v-for="item in miniList"
+              :key="item.pubkey"
+              size="40px"
+              class="cursor-pointer"
+              @click="selectConversation(item.pubkey)"
+            >
+              <img v-if="item.profile?.picture" :src="item.profile.picture" />
+              <span v-else>{{ item.initials }}</span>
+              <q-tooltip>{{ item.displayName }}</q-tooltip>
+            </q-avatar>
+          </div>
+        </template>
       </q-drawer>
     </q-responsive>
 
     <div :class="['col column', $q.screen.gt.xs ? 'q-pa-lg' : 'q-pa-md']">
       <q-header elevated class="q-mb-md bg-transparent">
         <q-toolbar>
-          <q-btn flat round dense icon="menu" @click="drawer = !drawer" />
+          <q-btn flat round dense icon="menu" @click="messenger.toggleDrawer()" />
           <q-btn flat round dense icon="arrow_back" @click="goBack" />
           <q-toolbar-title class="text-h6 ellipsis">
             Nostr Messenger
@@ -211,10 +228,7 @@ export default defineComponent({
       }
     };
 
-    const drawer = computed({
-      get: () => messenger.drawerOpen,
-      set: (val) => messenger.setDrawer(val),
-    });
+    const drawerOpen = computed(() => messenger.drawerOpen);
     const sidebarTab = useLocalStorage<string>(
       "cashu.messenger.sidebarTab",
       "chats"
@@ -232,6 +246,40 @@ export default defineComponent({
     const messages = computed(
       () => messenger.conversations[selected.value] || []
     );
+
+    const miniList = computed(() => {
+      return Object.entries(messenger.conversations)
+        .map(([pubkey, msgs]) => {
+          const entry: any = (nostr.profiles as any)[pubkey];
+          const profile = entry?.profile ?? entry ?? {};
+          const alias = messenger.aliases[pubkey];
+          const displayName =
+            alias ||
+            profile.display_name ||
+            profile.name ||
+            profile.displayName ||
+            pubkey.slice(0, 8) + "…";
+          const initials = displayName
+            .split(/\s+/)
+            .map((w) => w[0])
+            .join("")
+            .slice(0, 2)
+            .toUpperCase();
+          return {
+            pubkey,
+            profile,
+            displayName,
+            initials,
+            lastMsg: msgs[msgs.length - 1],
+            pinned: messenger.pinned[pubkey] || false,
+          };
+        })
+        .sort((a, b) => {
+          if (a.pinned && !b.pinned) return -1;
+          if (b.pinned && !a.pinned) return 1;
+          return (b.lastMsg?.created_at || 0) - (a.lastMsg?.created_at || 0);
+        });
+    });
 
     const connectedCount = computed(() => {
       if (!ndkRef.value) return 0;
@@ -335,7 +383,7 @@ export default defineComponent({
       loading,
       connecting,
       messenger,
-      drawer,
+      drawerOpen,
       sidebarTab,
       selected,
       chatSendTokenDialogRef,
@@ -355,6 +403,7 @@ export default defineComponent({
       totalRelays,
       nextReconnectIn,
       setupComplete,
+      miniList,
     };
   },
 });
