@@ -78,7 +78,7 @@
       </div>
       <div
         :class="[
-          'text-caption ellipsis',
+          'text-caption ellipsis snippet',
           { 'text-weight-bold': unreadCount > 0 },
         ]"
         class="q-mt-xs"
@@ -212,12 +212,13 @@ export default defineComponent({
 <style scoped>
 .conversation-item {
   border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  padding: 12px 16px;
 }
 .conversation-item.selected {
   background: rgba(0, 0, 0, 0.05);
 }
 .conversation-item:hover {
-  background: rgba(0, 0, 0, 0.03);
+  background: var(--conversation-hover-color);
 }
 .conversation-item:focus {
   border-left: 2px solid var(--q-primary);
@@ -233,6 +234,10 @@ export default defineComponent({
 }
 .timestamp {
   white-space: nowrap;
+  font-size: 0.7rem;
+}
+.snippet {
+  font-size: 0.75rem;
 }
 .status-dot {
   position: absolute;
