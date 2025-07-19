@@ -53,7 +53,15 @@
           { 'text-weight-bold': unreadCount > 0 },
         ]"
       >
-        <template v-if="loaded">{{ snippet }}</template>
+        <template v-if="loaded">
+          <q-icon
+            v-if="snippet.icon"
+            :name="snippet.icon"
+            size="xs"
+            class="q-mr-xs"
+          />
+          {{ snippet.text }}
+        </template>
         <template v-else><q-skeleton type="text" width="80%" /></template>
       </div>
     </q-item-section>
@@ -80,6 +88,7 @@ import { QBadge, QBtn } from "quasar";
 import { useMessengerStore } from "src/stores/messenger";
 import { useNostrStore } from "src/stores/nostr";
 import { formatDistanceToNow } from "date-fns";
+import { parseMessageSnippet } from "src/utils/message-snippet";
 
 export default defineComponent({
   name: "ConversationListItem",
@@ -132,7 +141,9 @@ export default defineComponent({
       return formatDistanceToNow(ts * 1000, { addSuffix: true });
     });
 
-    const snippet = computed(() => props.lastMsg?.content?.slice(0, 30) || "");
+    const snippet = computed(() =>
+      parseMessageSnippet(props.lastMsg?.content || "")
+    );
 
     const handleClick = () => emit("click", nostr.resolvePubkey(props.pubkey));
     const togglePin = () => emit("pin", nostr.resolvePubkey(props.pubkey));
