@@ -89,11 +89,13 @@ watch(
   () => {
     loadProfile();
   },
-  { immediate: true },
+  { immediate: true }
 );
 
 const displayName = computed(() => {
   if (!props.pubkey) return "";
+  const alias = messenger.aliases[props.pubkey];
+  if (alias) return alias;
   const p: any = profile.value;
   if (p?.display_name) return p.display_name;
   if (p?.name) return p.name;
