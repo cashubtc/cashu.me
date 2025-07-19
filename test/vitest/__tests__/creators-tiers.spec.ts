@@ -13,7 +13,7 @@ vi.mock("../../../src/stores/nostr", async (importOriginal) => {
   };
 });
 
-vi.mock("../../../src/boot/ndk", () => {
+vi.mock("../../../src/utils/relayHealth", () => {
   filterMock = vi.fn();
   return {
     filterHealthyRelays: (...args: any[]) => filterMock(...args),

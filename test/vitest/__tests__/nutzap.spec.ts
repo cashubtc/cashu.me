@@ -61,6 +61,9 @@ vi.mock("../../../src/js/token", () => ({
 
 vi.mock("../../../src/boot/ndk", () => ({
   ndkSend: (...args: any[]) => ndkSendFn(...args),
+}));
+
+vi.mock("../../../src/utils/relayHealth", () => ({
   filterHealthyRelays: (...args: any[]) => filterHealthyRelaysFn(...args),
 }));
 

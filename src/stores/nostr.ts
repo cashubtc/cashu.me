@@ -35,7 +35,7 @@ import {
   Token,
 } from "@cashu/cashu-ts";
 import { useTokensStore } from "./tokens";
-import { filterHealthyRelays } from "src/boot/ndk";
+import { filterHealthyRelays } from "src/utils/relayHealth";
 import {
   notifyApiError,
   notifyError,

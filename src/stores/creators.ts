@@ -9,7 +9,7 @@ import {
 } from "./nostr";
 import { useSettingsStore } from "./settings";
 import { DEFAULT_RELAYS } from "src/config/relays";
-import { filterHealthyRelays } from "src/boot/ndk";
+import { filterHealthyRelays } from "src/utils/relayHealth";
 import { useNdk } from "src/composables/useNdk";
 import { nip19 } from "nostr-tools";
 import { Event as NostrEvent } from "nostr-tools";
