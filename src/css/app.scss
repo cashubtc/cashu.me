@@ -92,6 +92,8 @@ body,
   --muted-light: var(--q-color-grey-6);
   --panel-dark: var(--q-color-grey-9);
   --panel-light: var(--q-color-grey-2);
+  --conversation-hover-dark: var(--q-color-grey-8);
+  --conversation-hover-light: var(--q-color-grey-3);
 }
 
 body.body--dark {
@@ -101,6 +103,7 @@ body.body--dark {
   --divider-color: var(--divider-dark);
   --muted-color: var(--muted-dark);
   --panel-bg-color: var(--panel-dark);
+  --conversation-hover-color: var(--conversation-hover-dark);
 }
 
 body.body--light {
@@ -110,6 +113,7 @@ body.body--light {
   --divider-color: var(--divider-light);
   --muted-color: var(--muted-light);
   --panel-bg-color: var(--panel-light);
+  --conversation-hover-color: var(--conversation-hover-light);
 }
 
 /* utility background classes */
