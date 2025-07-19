@@ -65,11 +65,7 @@
         <span v-if="!isStaging()">Beta</span>
         <span v-else>Staging – don't use with real funds!</span>
       </q-badge> -->
-      <transition
-        appear
-        enter-active-class="animated pulse"
-        leave-active-class="animated fadeOut"
-      >
+      <transition-group appear enter-active-class="animated pulse">
         <q-badge
           v-if="countdown > 0"
           color="negative"
@@ -86,7 +82,7 @@
             color="white"
           />
         </q-badge>
-      </transition>
+      </transition-group>
       <q-btn
         flat
         dense
@@ -410,7 +406,7 @@ export default defineComponent({
       uiStore.lockMutex();
       reloading.value = true;
       countdown.value = 3;
-      vm?.notify("Reloading in 3s…");
+      vm?.notify("Reloading in 3 seconds…");
       countdownInterval = setInterval(() => {
         countdown.value--;
         if (countdown.value === 0) {
