@@ -7,7 +7,7 @@
       >
         {{ formatDay(msg.created_at) }}
       </div>
-      <ChatMessageBubble :message="msg" />
+      <ChatMessageBubble :message="msg" :delivery-status="msg.status" />
     </template>
     <div ref="bottom"></div>
   </q-scroll-area>

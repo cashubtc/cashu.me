@@ -61,6 +61,7 @@ export type MessengerMessage = {
   content: string;
   created_at: number;
   outgoing: boolean;
+  status?: "pending" | "sent" | "delivered" | "failed";
   attachment?: MessageAttachment;
   subscriptionPayment?: SubscriptionPayment;
   autoRedeem?: boolean;
@@ -98,6 +99,7 @@ export const useMessengerStore = defineStore("messenger", {
         "cashu.messenger.eventLog",
         [] as MessengerMessage[]
       ),
+      sendQueue: [] as MessengerMessage[],
       currentConversation: "",
       drawerOpen: useLocalStorage<boolean>("cashu.messenger.drawerOpen", true),
       started: false,
@@ -183,6 +185,14 @@ export const useMessengerStore = defineStore("messenger", {
         privKey = nostr.privKeyHex;
         if (!privKey) return { success: false, event: null } as any;
       }
+      const msg = this.addOutgoingMessage(
+        recipient,
+        message,
+        Math.floor(Date.now() / 1000),
+        undefined,
+        attachment,
+        "pending"
+      );
 
       const list = relays && relays.length ? relays : (this.relays as any);
       for (const r of list) {
@@ -195,13 +205,9 @@ export const useMessengerStore = defineStore("messenger", {
             [r]
           );
           if (success && event) {
-            this.addOutgoingMessage(
-              recipient,
-              message,
-              event.created_at,
-              event.id,
-              attachment
-            );
+            msg.id = event.id;
+            msg.created_at = event.created_at;
+            msg.status = "sent";
             this.pushOwnMessage(event as any);
             return { success: true, event } as any;
           }
@@ -210,6 +216,8 @@ export const useMessengerStore = defineStore("messenger", {
           console.error(`[messenger.sendDm] relay ${r}`, e);
         }
       }
+      msg.status = "failed";
+      this.sendQueue.push(msg);
       return { success: false } as any;
     },
     async sendToken(
@@ -310,11 +318,13 @@ export const useMessengerStore = defineStore("messenger", {
       content: string,
       created_at?: number,
       id?: string,
-      attachment?: MessageAttachment
-    ) {
+      attachment?: MessageAttachment,
+      status: "pending" | "sent" | "delivered" | "failed" = "pending"
+    ): MessengerMessage {
       pubkey = this.normalizeKey(pubkey);
       const messageId = id || uuidv4();
-      if (this.eventLog.some((m) => m.id === messageId)) return;
+      if (this.eventLog.some((m) => m.id === messageId))
+        return this.eventLog.find((m) => m.id === messageId)!;
       const msg: MessengerMessage = {
         id: messageId,
         pubkey,
@@ -322,11 +332,13 @@ export const useMessengerStore = defineStore("messenger", {
         created_at: created_at ?? Math.floor(Date.now() / 1000),
         outgoing: true,
         attachment,
+        status,
       };
       if (!this.conversations[pubkey]) this.conversations[pubkey] = [];
       if (!this.conversations[pubkey].some((m) => m.id === messageId))
         this.conversations[pubkey].push(msg);
       this.eventLog.push(msg);
+      return msg;
     },
 
     pushOwnMessage(event: NostrEvent) {
@@ -481,7 +493,11 @@ export const useMessengerStore = defineStore("messenger", {
           }
         }
       }
-      if (this.eventLog.some((m) => m.id === event.id)) return;
+      const existing = this.eventLog.find((m) => m.id === event.id);
+      if (existing) {
+        if (existing.outgoing) existing.status = "delivered";
+        return;
+      }
       const sanitized = sanitizeMessage(decrypted);
       const msg: MessengerMessage = {
         id: event.id,
@@ -524,6 +540,12 @@ export const useMessengerStore = defineStore("messenger", {
             }
           },
           { deep: true }
+        );
+        watch(
+          () => useNostrStore().connected,
+          (val) => {
+            if (val) this.retryFailedMessages();
+          }
         );
         this.watchInitialized = true;
       }
@@ -585,6 +607,42 @@ export const useMessengerStore = defineStore("messenger", {
     disconnect() {
       const nostr = useNostrStore();
       nostr.disconnect();
+    },
+
+    async retryFailedMessages() {
+      if (!this.isConnected() || !this.sendQueue.length) return;
+      const nostr = useNostrStore();
+      let privKey: string | undefined = undefined;
+      if (nostr.signerType !== "NIP07" && nostr.signerType !== "NIP46") {
+        privKey = nostr.privKeyHex;
+        if (!privKey) return;
+      }
+      const list = this.relays as any;
+      for (const msg of [...this.sendQueue]) {
+        for (const r of list) {
+          try {
+            const { success, event } = await nostr.sendNip04DirectMessage(
+              msg.pubkey,
+              msg.content,
+              privKey,
+              nostr.pubkey,
+              [r]
+            );
+            if (success && event) {
+              msg.id = event.id;
+              msg.created_at = event.created_at;
+              msg.status = "sent";
+              this.pushOwnMessage(event as any);
+              const idx = this.sendQueue.indexOf(msg);
+              if (idx >= 0) this.sendQueue.splice(idx, 1);
+              break;
+            }
+          } catch (e) {
+            console.error(`[messenger.retryFailedMessages] relay ${r}`, e);
+          }
+        }
+        if (msg.status !== "sent") msg.status = "failed";
+      }
     },
 
     createConversation(pubkey: string) {
