@@ -22,65 +22,32 @@
       </q-avatar>
     </q-item-section>
 
-    <q-item-section class="full-width">
-      <div class="row items-center no-wrap">
-        <template v-if="loaded">
-          <div class="column">
-            <span
-              :class="[
-                'text-subtitle1 ellipsis',
-                { 'text-weight-bold': unreadCount > 0 },
-              ]"
-              >{{ displayName }}</span
-            >
-            <span v-if="secondaryName" class="text-caption text-grey ellipsis"
-              >{{ secondaryName }}</span
-            >
-          </div>
-          <q-btn
-            flat
-            dense
-            round
-            icon="more_vert"
-            class="q-ml-auto"
-            @click.stop="menu = true"
-            aria-label="Conversation options"
-          />
-          <q-menu v-model="menu" anchor="bottom right" self="top right">
-            <q-list style="min-width: 120px">
-              <q-item clickable v-close-popup @click.stop="togglePin">
-                <q-item-section avatar>
-                  <q-icon :name="isPinned ? 'star' : 'star_outline'" />
-                </q-item-section>
-                <q-item-section>
-                  {{ isPinned ? 'Unpin' : 'Pin' }}
-                </q-item-section>
-              </q-item>
-              <q-item clickable v-close-popup @click.stop="showRaw = !showRaw">
-                <q-item-section avatar>
-                  <q-icon name="vpn_key" />
-                </q-item-section>
-                <q-item-section>View Raw Key</q-item-section>
-              </q-item>
-              <q-item clickable v-close-popup @click.stop="deleteItem">
-                <q-item-section avatar>
-                  <q-icon name="delete" />
-                </q-item-section>
-                <q-item-section>Delete</q-item-section>
-              </q-item>
-            </q-list>
-          </q-menu>
-        </template>
-        <template v-else>
-          <q-skeleton type="text" width="60%" />
-        </template>
-      </div>
-      <div
-        :class="[
-          'text-caption snippet',
-          { 'text-weight-bold': unreadCount > 0 },
-        ]"
-        class="q-mt-xs"
+    <q-item-section class="q-hoverable">
+      <template v-if="loaded">
+        <q-item-label
+          class="text-subtitle1 ellipsis"
+          :class="{ 'text-weight-bold': unreadCount > 0 }"
+        >
+          {{ displayName }}
+        </q-item-label>
+        <q-item-label
+          v-if="secondaryName"
+          caption
+          class="text-grey ellipsis"
+        >
+          {{ secondaryName }}
+        </q-item-label>
+      </template>
+      <template v-else>
+        <q-skeleton type="text" width="60%" />
+      </template>
+    </q-item-section>
+
+    <q-item-section class="q-hoverable">
+      <q-item-label
+        caption
+        class="snippet ellipsis"
+        :class="{ 'text-weight-bold': unreadCount > 0 }"
       >
         <template v-if="loaded">
           <q-icon
@@ -92,14 +59,14 @@
           {{ snippet.text }}
         </template>
         <template v-else><q-skeleton type="text" width="80%" /></template>
-      </div>
+      </q-item-label>
     </q-item-section>
 
     <q-item-section side top class="timestamp-section">
       <span class="timestamp text-caption">{{ timeAgo }}</span>
     </q-item-section>
 
-    <q-item-section side>
+    <q-item-section side class="items-center">
       <q-badge
         v-if="unreadCount > 0"
         color="primary"
@@ -115,6 +82,39 @@
         :icon="isPinned ? 'star' : 'star_outline'"
         @click.stop="togglePin"
       />
+      <q-btn
+        flat
+        dense
+        round
+        icon="more_vert"
+        class="q-ml-sm"
+        @click.stop="menu = true"
+        aria-label="Conversation options"
+      />
+      <q-menu v-model="menu" anchor="bottom right" self="top right">
+        <q-list style="min-width: 120px">
+          <q-item clickable v-close-popup @click.stop="togglePin">
+            <q-item-section avatar>
+              <q-icon :name="isPinned ? 'star' : 'star_outline'" />
+            </q-item-section>
+            <q-item-section>
+              {{ isPinned ? 'Unpin' : 'Pin' }}
+            </q-item-section>
+          </q-item>
+          <q-item clickable v-close-popup @click.stop="showRaw = !showRaw">
+            <q-item-section avatar>
+              <q-icon name="vpn_key" />
+            </q-item-section>
+            <q-item-section>View Raw Key</q-item-section>
+          </q-item>
+          <q-item clickable v-close-popup @click.stop="deleteItem">
+            <q-item-section avatar>
+              <q-icon name="delete" />
+            </q-item-section>
+            <q-item-section>Delete</q-item-section>
+          </q-item>
+        </q-list>
+      </q-menu>
     </q-item-section>
   </q-item>
 </template>
