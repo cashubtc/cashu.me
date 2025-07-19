@@ -92,8 +92,13 @@
         :color="countdown > 0 ? 'negative' : 'primary'"
         aria-label="Refresh"
         @click="reload"
+        :loading="reloading"
         :disable="uiStore.globalMutexLock && countdown === 0"
       >
+        <q-tooltip>{{ $t('MainHeader.reload.tooltip') }}</q-tooltip>
+        <template v-slot:loading>
+          <q-spinner size="xs" />
+        </template>
       </q-btn>
       <q-btn
         flat
@@ -316,6 +321,7 @@ export default defineComponent({
     const showBackButton = computed(() => isMessengerPage.value);
     const backRoute = computed(() => "/wallet");
     const countdown = ref(0);
+    const reloading = ref(false);
     let countdownInterval;
 
     const essentialLinks = [
@@ -387,6 +393,7 @@ export default defineComponent({
         try {
           clearInterval(countdownInterval);
           countdown.value = 0;
+          reloading.value = false;
           vm?.notifyWarning("Reload cancelled");
         } finally {
           uiStore.unlockMutex();
@@ -395,6 +402,7 @@ export default defineComponent({
       }
       if (uiStore.globalMutexLock) return;
       uiStore.lockMutex();
+      reloading.value = true;
       countdown.value = 3;
       vm?.notify("Reloading in 3 seconds…");
       countdownInterval = setInterval(() => {
@@ -458,6 +466,7 @@ export default defineComponent({
       isStaging,
       reload,
       countdown,
+      reloading,
       uiStore,
       gotoBuckets,
       gotoFindCreators,

@@ -189,6 +189,8 @@ export const messages = {
       warning: {
         text: "Reload in { countdown }",
       },
+      tooltip:
+        "Reload the page. A 3 second countdown starts; click again to cancel.",
     },
     staging: {
       warning: {
