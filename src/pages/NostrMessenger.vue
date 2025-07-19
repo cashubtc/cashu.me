@@ -37,15 +37,14 @@
           </q-tab-panel>
           <q-tab-panel name="settings" class="col column no-wrap q-pa-none">
             <NostrIdentityManager class="q-mb-md" />
-            <q-expansion-item
+            <q-btn
               class="q-mb-md"
-              dense
-              dense-toggle
+              size="sm"
               label="Relays"
-              v-model="showRelays"
-            >
-              <RelayManager class="q-mb-md" />
-            </q-expansion-item>
+              color="primary"
+              @click="openRelayDialog"
+            />
+            <RelayManagerDialog ref="relayManagerDialogRef" />
           </q-tab-panel>
         </q-tab-panels>
       </q-drawer>
@@ -113,7 +112,7 @@ import { nip19 } from "nostr-tools";
 import type NDK from "@nostr-dev-kit/ndk";
 
 import NostrIdentityManager from "components/NostrIdentityManager.vue";
-import RelayManager from "components/RelayManager.vue";
+import RelayManagerDialog from "components/RelayManagerDialog.vue";
 import NewChat from "components/NewChat.vue";
 import ConversationList from "components/ConversationList.vue";
 import ActiveChatHeader from "components/ActiveChatHeader.vue";
@@ -126,7 +125,7 @@ export default defineComponent({
   name: "NostrMessenger",
   components: {
     NostrIdentityManager,
-    RelayManager,
+    RelayManagerDialog,
     NewChat,
     ConversationList,
     ActiveChatHeader,
@@ -221,12 +220,11 @@ export default defineComponent({
     const chatSendTokenDialogRef = ref<InstanceType<
       typeof ChatSendTokenDialog
     > | null>(null);
+    const relayManagerDialogRef = ref<InstanceType<
+      typeof RelayManagerDialog
+    > | null>(null);
     const messages = computed(
       () => messenger.conversations[selected.value] || []
-    );
-    const showRelays = useLocalStorage<boolean>(
-      "cashu.messenger.showRelays",
-      true
     );
 
     const connectedCount = computed(() => {
@@ -300,6 +298,10 @@ export default defineComponent({
       (chatSendTokenDialogRef.value as any)?.show();
     }
 
+    function openRelayDialog() {
+      (relayManagerDialogRef.value as any)?.show();
+    }
+
     const reconnectAll = async () => {
       connecting.value = true;
       try {
@@ -327,13 +329,14 @@ export default defineComponent({
       sidebarTab,
       selected,
       chatSendTokenDialogRef,
+      relayManagerDialogRef,
       messages,
-      showRelays,
       showSetupWizard,
       selectConversation,
       startChat,
       sendMessage,
       openSendTokenDialog,
+      openRelayDialog,
       goBack,
       reconnectAll,
       connectedCount,
