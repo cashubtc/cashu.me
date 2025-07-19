@@ -222,7 +222,7 @@ export default defineComponent({
   background: rgba(0, 0, 0, 0.05);
 }
 .conversation-item:hover {
-  background: var(--hover-bg-color);
+  background: var(--conversation-hover-color);
 }
 .conversation-item:focus {
   border-left: 2px solid var(--q-primary);
@@ -243,7 +243,6 @@ export default defineComponent({
 .snippet {
   font-size: 0.8rem;
   white-space: normal;
-  color: var(--muted-color);
 }
 .status-dot {
   position: absolute;
@@ -265,15 +264,5 @@ export default defineComponent({
 .timestamp-section {
   min-width: 64px;
   text-align: right;
-}
-
-@media (max-width: 320px) {
-  .conversation-item :deep(.q-avatar) {
-    width: 40px !important;
-    height: 40px !important;
-  }
-  .snippet {
-    display: none;
-  }
 }
 </style>
