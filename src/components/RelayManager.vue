@@ -16,6 +16,12 @@
           class="q-mr-xs"
         />
         <span class="text-caption">{{ s.url }}</span>
+        <span class="text-caption q-ml-sm">
+          {{ s.status }}
+          <span v-if="!s.connected && s.nextReconnectAt">
+            - reconnect in {{ Math.max(0, Math.ceil((s.nextReconnectAt - now) / 1000)) }}s
+          </span>
+        </span>
         <q-icon
           name="delete_outline"
           size="sm"
@@ -40,12 +46,13 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, watch, computed, onMounted } from "vue";
+import { ref, watch, computed, onMounted, onUnmounted } from "vue";
 import { useMessengerStore } from "src/stores/messenger";
 import { notifySuccess, notifyError } from "src/js/notify";
 import { useNdk } from "src/composables/useNdk";
 import { DEFAULT_RELAYS } from "src/config/relays";
 import type NDK from "@nostr-dev-kit/ndk";
+import { NDKRelayStatus } from "@nostr-dev-kit/ndk";
 
 const messenger = useMessengerStore();
 
@@ -56,11 +63,29 @@ onMounted(() => {
   useNdk({ requireSigner: false }).then((n) => (ndkRef.value = n));
 });
 
+const now = ref(Date.now());
+let timer: ReturnType<typeof setInterval> | undefined;
+onMounted(() => {
+  timer = setInterval(() => (now.value = Date.now()), 1000);
+});
+onUnmounted(() => {
+  if (timer) clearInterval(timer);
+});
+
 const relayStatuses = computed(() =>
-  (messenger.relays ?? []).map(url => ({
-    url,
-    connected: ndkRef.value?.pool.relays.get(url)?.connected === true,
-  }))
+  (messenger.relays ?? []).map((url) => {
+    const relay = ndkRef.value?.pool.relays.get(url);
+    const statusNum = relay?.status;
+    const status =
+      typeof statusNum === "number" ? NDKRelayStatus[statusNum] : "UNKNOWN";
+    const nextReconnectAt = relay?.connectionStats.nextReconnectAt;
+    return {
+      url,
+      connected: relay?.connected === true,
+      status,
+      nextReconnectAt,
+    };
+  })
 );
 
 watch(

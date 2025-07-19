@@ -66,8 +66,13 @@
         class="bg-grey-3"
       >
         <div class="row items-center q-gutter-sm">
-          <span>Offline - unable to connect to relays</span>
-          <q-btn flat dense label="Reconnect" @click="reconnect" />
+          <span>
+            Offline - {{ connectedCount }}/{{ totalRelays }} connected
+            <span v-if="nextReconnectIn !== null">
+              - reconnecting in {{ nextReconnectIn }}s
+            </span>
+          </span>
+          <q-btn flat dense label="Reconnect All" @click="reconnectAll" />
         </div>
       </q-banner>
       <q-spinner v-if="loading" size="lg" color="primary" />
@@ -81,13 +86,21 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, computed, ref, onMounted, watch } from "vue";
+import {
+  defineComponent,
+  computed,
+  ref,
+  onMounted,
+  onUnmounted,
+  watch,
+} from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { useLocalStorage } from "@vueuse/core";
 import { useMessengerStore } from "src/stores/messenger";
 import { useNdk } from "src/composables/useNdk";
 import { useNostrStore } from "src/stores/nostr";
 import { nip19 } from "nostr-tools";
+import type NDK from "@nostr-dev-kit/ndk";
 
 import NostrIdentityManager from "components/NostrIdentityManager.vue";
 import RelayManager from "components/RelayManager.vue";
@@ -119,6 +132,10 @@ export default defineComponent({
     const nostr = useNostrStore();
     const showSetupWizard = ref(false);
 
+    const ndkRef = ref<NDK | null>(null);
+    const now = ref(Date.now());
+    let timer: ReturnType<typeof setInterval> | undefined;
+
     function bech32ToHex(pubkey: string): string {
       try {
         const decoded = nip19.decode(pubkey);
@@ -137,7 +154,7 @@ export default defineComponent({
       try {
         await nostr.initSignerIfNotSet();
         await messenger.loadIdentity();
-        await useNdk();
+        ndkRef.value = await useNdk();
         await Promise.race([messenger.start(), timeout(10000)]);
       } catch (e) {
         console.error(e);
@@ -162,7 +179,14 @@ export default defineComponent({
       await init();
     }
 
-    onMounted(checkAndInit);
+    onMounted(() => {
+      checkAndInit();
+      timer = setInterval(() => (now.value = Date.now()), 1000);
+    });
+
+    onUnmounted(() => {
+      if (timer) clearInterval(timer);
+    });
 
     const router = useRouter();
     const route = useRoute();
@@ -190,6 +214,35 @@ export default defineComponent({
       "cashu.messenger.showRelays",
       true
     );
+
+    const connectedCount = computed(() => {
+      if (!ndkRef.value) return 0;
+      return Array.from(ndkRef.value.pool.relays.values()).filter(
+        (r) => r.connected
+      ).length;
+    });
+
+    const totalRelays = computed(() => ndkRef.value?.pool.relays.size || 0);
+
+    const nextReconnectIn = computed(() => {
+      if (!ndkRef.value) return null;
+      let earliest: number | null = null;
+      ndkRef.value.pool.relays.forEach((r) => {
+        if (r.status !== 5) {
+          const nr = r.connectionStats.nextReconnectAt;
+          if (nr && (earliest === null || nr < earliest)) earliest = nr;
+        }
+      });
+      return earliest
+        ? Math.max(0, Math.ceil((earliest - now.value) / 1000))
+        : null;
+    });
+
+    watch(nextReconnectIn, (val) => {
+      if (val === 0 && !messenger.connected && !connecting.value) {
+        reconnectAll();
+      }
+    });
 
     watch(
       selected,
@@ -233,7 +286,7 @@ export default defineComponent({
       (chatSendTokenDialogRef.value as any)?.show();
     }
 
-    const reconnect = async () => {
+    const reconnectAll = async () => {
       connecting.value = true;
       try {
         messenger.disconnect();
@@ -267,7 +320,10 @@ export default defineComponent({
       sendMessage,
       openSendTokenDialog,
       goBack,
-      reconnect,
+      reconnectAll,
+      connectedCount,
+      totalRelays,
+      nextReconnectIn,
       setupComplete,
     };
   },
