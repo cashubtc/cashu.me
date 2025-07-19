@@ -11,7 +11,7 @@
         :breakpoint="600"
         bordered
         :width="320"
-        class="drawer-transition"
+        class="drawer-transition drawer-container"
         :class="$q.screen.gt.xs ? 'q-pa-lg column' : 'q-pa-md column'"
       >
         <q-tabs v-model="sidebarTab" dense no-caps align="justify" class="q-mb-md">
@@ -20,7 +20,7 @@
         </q-tabs>
         <q-tab-panels v-model="sidebarTab" animated class="col column no-wrap">
           <q-tab-panel name="chats" class="col column no-wrap q-pa-none">
-            <q-scroll-area class="col" style="min-height: 0">
+            <q-scroll-area class="col fit" style="min-height: 0">
               <Suspense>
                 <template #default>
                   <ConversationList
@@ -365,5 +365,19 @@ export default defineComponent({
 }
 .drawer-transition {
   transition: transform 0.3s;
+}
+
+.drawer-container {
+  min-width: 0;
+}
+
+@media (max-width: 320px) {
+  .drawer-container .conversation-item q-avatar {
+    width: 40px;
+    height: 40px;
+  }
+  .drawer-container .conversation-item .snippet {
+    display: none;
+  }
 }
 </style>
