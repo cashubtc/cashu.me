@@ -100,7 +100,7 @@
         dense
         round
         size="0.8em"
-        :icon="$q.dark.isActive ? 'wb_sunny' : 'brightness_3'"
+        :icon="darkIcon"
         color="primary"
         aria-label="Toggle Dark Mode"
         @click="toggleDarkMode"
@@ -304,6 +304,9 @@ export default defineComponent({
         $q.dark.isActive ? "Dark mode enabled" : "Dark mode disabled"
       );
     };
+    const darkIcon = computed(() =>
+      $q.dark.isActive ? "wb_sunny" : "brightness_3"
+    );
     const needsNostrLogin = computed(
       () => !nostrStore.privateKeySignerPrivateKey
     );
@@ -470,6 +473,7 @@ export default defineComponent({
       toggleMessengerDrawer,
       isMessengerPage,
       toggleDarkMode,
+      darkIcon,
     };
   },
 });
