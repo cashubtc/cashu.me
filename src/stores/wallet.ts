@@ -4,6 +4,7 @@ import { currentDateStr } from "src/js/utils";
 import { useMintsStore, WalletProof, MintClass, Mint } from "./mints";
 import { useLocalStorage } from "@vueuse/core";
 import { useProofsStore } from "./proofs";
+import { LOCAL_STORAGE_KEYS } from "src/constants/localStorageKeys";
 import { HistoryToken, useTokensStore } from "./tokens";
 import { useReceiveTokensStore } from "./receiveTokensStore";
 import { useUiStore } from "src/stores/ui";
@@ -101,17 +102,17 @@ export const useWalletStore = defineStore("wallet", {
     const t = i18n.global.t;
     return {
       t: t,
-      mnemonic: useLocalStorage("cashu.mnemonic", ""),
+      mnemonic: useLocalStorage(LOCAL_STORAGE_KEYS.CASHU_MNEMONIC, ""),
       invoiceHistory: useLocalStorage(
-        "cashu.invoiceHistory",
+        LOCAL_STORAGE_KEYS.CASHU_INVOICEHISTORY,
         [] as InvoiceHistory[]
       ),
       keysetCounters: useLocalStorage(
-        "cashu.keysetCounters",
+        LOCAL_STORAGE_KEYS.CASHU_KEYSETCOUNTERS,
         [] as KeysetCounter[]
       ),
       oldMnemonicCounters: useLocalStorage(
-        "cashu.oldMnemonicCounters",
+        LOCAL_STORAGE_KEYS.CASHU_OLDMNEMONICCOUNTERS,
         [] as { mnemonic: string; keysetCounters: KeysetCounter[] }[]
       ),
       invoiceData: {} as InvoiceHistory,

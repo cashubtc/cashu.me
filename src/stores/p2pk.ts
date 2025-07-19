@@ -1,6 +1,7 @@
 import { debug } from "src/js/logger";
 import { defineStore } from "pinia";
 import { useLocalStorage } from "@vueuse/core";
+import { LOCAL_STORAGE_KEYS } from "src/constants/localStorageKeys";
 import { generateSecretKey, getPublicKey, nip19 } from "nostr-tools";
 import { ensureCompressed } from "src/utils/ecash";
 import { bytesToHex, randomBytes } from "@noble/hashes/utils";
@@ -72,9 +73,9 @@ export async function buildTimedOutputs(
 
 export const useP2PKStore = defineStore("p2pk", {
   state: () => ({
-    p2pkKeys: useLocalStorage<P2PKKey[]>("cashu.P2PKKeys", []),
+    p2pkKeys: useLocalStorage<P2PKKey[]>(LOCAL_STORAGE_KEYS.CASHU_P2PKKEYS, []),
     showP2PkButtonInDrawer: useLocalStorage<boolean>(
-      "cashu.p2pk.showP2PkButtonInDrawer",
+      LOCAL_STORAGE_KEYS.CASHU_P2PK_SHOWP2PKBUTTONINDRAWER,
       false
     ),
     showP2PKDialog: false,
