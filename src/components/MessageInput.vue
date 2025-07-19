@@ -25,27 +25,45 @@
     </q-input>
     <input ref="fileInput" type="file" class="hidden" @change="handleFile" />
   </div>
+  <div v-if="attachment" class="q-px-sm q-pb-sm">
+    <q-img
+      v-if="isImage"
+      :src="attachment"
+      style="max-width: 150px; max-height: 150px"
+      class="q-mb-sm"
+    />
+    <div v-else class="text-caption">{{ attachmentName }}</div>
+  </div>
 </template>
 
 <script lang="ts" setup>
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import { Nut as NutIcon } from "lucide-vue-next";
 
 const emit = defineEmits(["send", "sendToken"]);
 const text = ref("");
 const attachment = ref<string | null>(null);
+const attachmentName = ref<string>("");
+const attachmentType = ref<string>("");
+const isImage = computed(() => attachment.value?.startsWith("data:image"));
 const fileInput = ref<HTMLInputElement>();
 
 const send = () => {
   const m = text.value.trim();
-  if (m || attachment.value) {
-    emit("send", m);
-    if (attachment.value) {
-      emit("send", attachment.value);
-      attachment.value = null;
-    }
-    text.value = "";
+  if (!m && !attachment.value) return;
+  const payload: any = { text: m };
+  if (attachment.value) {
+    payload.attachment = {
+      dataUrl: attachment.value,
+      name: attachmentName.value,
+      type: attachmentType.value,
+    };
   }
+  emit("send", payload);
+  attachment.value = null;
+  attachmentName.value = "";
+  attachmentType.value = "";
+  text.value = "";
 };
 
 const sendToken = () => {
@@ -62,6 +80,8 @@ const handleFile = (e: Event) => {
   const reader = new FileReader();
   reader.onload = () => {
     attachment.value = reader.result as string;
+    attachmentName.value = files[0].name;
+    attachmentType.value = files[0].type;
   };
   reader.readAsDataURL(files[0]);
 };
