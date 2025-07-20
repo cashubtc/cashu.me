@@ -215,14 +215,15 @@ export default defineComponent({
 <style scoped>
 .conversation-item {
   border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-  padding: 16px 20px;
+  padding: 12px 16px;
+  border-radius: 8px;
   transition: background-color 0.2s ease;
 }
 .conversation-item.selected {
-  background: rgba(0, 0, 0, 0.05);
+  background-color: color-mix(in srgb, var(--q-primary), transparent 85%);
 }
 .conversation-item:hover {
-  background: var(--conversation-hover-color);
+  background-color: var(--q-color-grey-3);
 }
 .conversation-item:focus {
   border-left: 2px solid var(--q-primary);
@@ -258,7 +259,7 @@ export default defineComponent({
   font-weight: bold;
   font-size: 0.75rem;
   padding: 0 6px;
-  box-shadow: 0 0 0 2px var(--q-color-white);
+  box-shadow: 0 0 0 2px var(--q-color-white), 0 2px 4px rgba(0, 0, 0, 0.15);
 }
 
 .timestamp-section {
