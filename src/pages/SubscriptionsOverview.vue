@@ -448,7 +448,10 @@
             }}
           </div>
         </q-card-section>
-        <q-card-section class="q-pa-none">
+        <q-card-section
+          class="q-pa-none"
+          style="max-height: 300px; overflow-y: auto"
+        >
           <q-list bordered>
             <q-item v-for="t in creatorTokens" :key="t.id">
               <q-item-section>
@@ -553,6 +556,14 @@
       </q-card>
     </q-dialog>
     <SubscriptionReceipt v-model="showReceiptDialog" :receipts="receiptList" />
+    <ConfirmationDialog
+      v-model="showConfirmDialog"
+      :title="confirmTitle"
+      :message="confirmDialogMessage"
+      :confirm-label="$t('global.actions.ok.label')"
+      :cancel-label="$t('global.actions.cancel.label')"
+      @confirm="confirmCancel"
+    />
   </div>
 </template>
 
@@ -570,7 +581,7 @@ import { useNutzapStore } from "stores/nutzap";
 import { fetchNutzapProfile, RelayConnectionError } from "stores/nostr";
 import { useRouter } from "vue-router";
 import { useQuasar } from "quasar";
-import { useClipboard } from "src/composables/useClipboard";
+import ConfirmationDialog from "components/ConfirmationDialog.vue";
 import { nip19 } from "nostr-tools";
 import { formatDistanceToNow } from "date-fns";
 import { shortenString } from "src/js/string-utils";
@@ -693,7 +704,6 @@ const nostr = useNostrStore();
 const messenger = useMessengerStore();
 const router = useRouter();
 const $q = useQuasar();
-const { copy } = useClipboard();
 const isSmallScreen = computed(() => $q.screen.lt.md);
 const { t } = useI18n();
 const showDialog = ref(false);
@@ -701,6 +711,10 @@ const selectedCreator = ref("");
 const showMessageDialog = ref(false);
 const showReceiptDialog = ref(false);
 const receiptList = ref<any[]>([]);
+const showConfirmDialog = ref(false);
+const confirmTitle = ref("");
+const confirmDialogMessage = ref("");
+const confirmPubkey = ref("");
 const messageText = ref("");
 const messageRecipient = ref("");
 const filter = ref("");
@@ -787,19 +801,10 @@ function retryQueuedSends() {
 function cancelSubscription(pubkey: string) {
   const row = rows.value.find((r) => r.creator === pubkey);
   if (!row) return;
-  $q.dialog({
-    title: t("SubscriptionsOverview.cancel_confirm_title"),
-    message: t("SubscriptionsOverview.cancel_confirm_text"),
-    cancel: true,
-    persistent: true,
-  }).onOk(() => {
-    subscriptionsStore
-      .cancelSubscription(pubkey)
-      .then(() =>
-        notifySuccess(t("SubscriptionsOverview.notifications.cancel_success"))
-      )
-      .catch((e: any) => notifyError(e.message));
-  });
+  confirmPubkey.value = pubkey;
+  confirmTitle.value = t("SubscriptionsOverview.cancel_confirm_title");
+  confirmDialogMessage.value = t("SubscriptionsOverview.cancel_confirm_text");
+  showConfirmDialog.value = true;
 }
 
 function extendSubscription(pubkey: string) {
@@ -885,8 +890,25 @@ function exportTokens(pubkey: string) {
   URL.revokeObjectURL(url);
 }
 
+function confirmCancel() {
+  const pubkey = confirmPubkey.value;
+  if (!pubkey) return;
+  subscriptionsStore
+    .cancelSubscription(pubkey)
+    .then(() =>
+      notifySuccess(t("SubscriptionsOverview.notifications.cancel_success"))
+    )
+    .catch((e: any) => notifyError(e.message))
+    .finally(() => {
+      showConfirmDialog.value = false;
+    });
+}
+
 function copyToken(token: string) {
-  copy(token);
+  navigator.clipboard
+    .writeText(token)
+    .then(() => notifySuccess(t("copied_to_clipboard")))
+    .catch(() => notifyError(t("copy_failed")));
 }
 
 async function updateProfiles() {
