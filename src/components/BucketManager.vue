@@ -187,9 +187,11 @@ export default defineComponent({
     const searchTerm = ref("");
     const filteredBuckets = computed(() => {
       const term = searchTerm.value.toLowerCase();
-      return bucketList.value.filter((b) =>
-        b.name.toLowerCase().includes(term)
-      );
+      return bucketList.value.filter((b) => {
+        const name = (b.name || "").toLowerCase();
+        const description = (b.description || "").toLowerCase();
+        return name.includes(term) || description.includes(term);
+      });
     });
     const bucketBalances = computed(() => bucketsStore.bucketBalances);
 
