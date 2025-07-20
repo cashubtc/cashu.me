@@ -35,6 +35,7 @@
           v-if="secondaryName"
           caption
           class="text-grey ellipsis"
+          :title="secondaryName"
         >
           {{ secondaryName }}
         </q-item-label>
@@ -217,15 +218,19 @@ export default defineComponent({
 <style scoped>
 .conversation-item {
   border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-  padding: 12px 16px;
+  padding: 16px 20px;
   border-radius: 8px;
   transition: background-color 0.2s ease;
+  display: flex;
+  gap: 12px;
 }
 .conversation-item.selected {
-  background-color: color-mix(in srgb, var(--q-primary), transparent 85%);
+  background-color: color-mix(in srgb, var(--q-primary), transparent 92%);
+  border-left: 3px solid var(--q-primary);
 }
-.conversation-item:hover {
-  background-color: var(--q-color-grey-3);
+.conversation-item:hover,
+.conversation-item:active {
+  background-color: var(--conversation-hover-color);
 }
 .conversation-item:focus {
   border-left: 2px solid var(--q-primary);
