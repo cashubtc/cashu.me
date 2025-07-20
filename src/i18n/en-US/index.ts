@@ -1432,6 +1432,9 @@ export const messages = {
       add: "Create new Bucket",
       delete: "Delete",
       edit: "Edit",
+      archive: "Archive",
+      unarchive: "Unarchive",
+      view_tokens: "View tokens",
     },
     inputs: {
       name: "Name",
