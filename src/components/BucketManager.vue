@@ -54,7 +54,7 @@
   </div>
 
   <q-dialog v-model="showDelete">
-    <q-card class="q-pa-md" style="max-width: 400px">
+    <q-card class="q-pa-md bucket-modal" style="max-width: 400px">
       <q-card-section class="row items-center">
         <q-icon name="warning" color="red" size="2rem" />
         <span class="q-ml-sm">{{

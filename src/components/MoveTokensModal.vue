@@ -1,7 +1,7 @@
 <template>
   <q-dialog v-model="showLocal">
-    <q-card class="q-pa-md" style="max-width: 800px">
-      <h5 class="q-my-none q-mb-md">{{ $t('MoveTokens.title') }}</h5>
+    <q-card class="q-pa-md bucket-modal" style="max-width: 800px">
+      <h5 class="q-my-none q-mb-md bucket-accent">{{ $t('MoveTokens.title') }}</h5>
       <div class="row q-col-gutter-md">
         <div class="col-7">
           <div v-for="bucket in bucketList" :key="bucket.id" class="q-mb-md">

@@ -94,6 +94,10 @@ body,
   --panel-light: var(--q-color-grey-2);
   --conversation-hover-dark: var(--q-color-grey-8);
   --conversation-hover-light: var(--q-color-grey-3);
+  --bucket-bg-dark: #2E202B;
+  --bucket-bg-light: #f9f5f8;
+  --bucket-accent-dark: #EC4899;
+  --bucket-accent-light: #EC4899;
 }
 
 body.body--dark {
@@ -104,6 +108,8 @@ body.body--dark {
   --muted-color: var(--muted-dark);
   --panel-bg-color: var(--panel-dark);
   --conversation-hover-color: var(--conversation-hover-dark);
+  --bucket-background: var(--bucket-bg-dark);
+  --bucket-accent: var(--bucket-accent-dark);
 }
 
 body.body--light {
@@ -114,6 +120,8 @@ body.body--light {
   --muted-color: var(--muted-light);
   --panel-bg-color: var(--panel-light);
   --conversation-hover-color: var(--conversation-hover-light);
+  --bucket-background: var(--bucket-bg-light);
+  --bucket-accent: var(--bucket-accent-light);
 }
 
 /* utility background classes */
@@ -160,4 +168,17 @@ body.body--dark .received {
   border-radius: 4px;
   padding: 4px 12px;
   font-weight: 500;
+}
+
+.bucket-card,
+.bucket-modal {
+  background-color: var(--bucket-background);
+}
+
+.bucket-modal {
+  padding: 1rem;
+}
+
+.bucket-accent {
+  color: var(--bucket-accent);
 }
