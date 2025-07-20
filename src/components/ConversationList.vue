@@ -1,16 +1,5 @@
 <template>
   <div>
-    <q-toolbar>
-      <q-toolbar-title>Conversations</q-toolbar-title>
-    </q-toolbar>
-    <q-input
-      dense
-      rounded
-      debounce="300"
-      v-model="filterQuery"
-      placeholder="Search…"
-      class="q-px-md q-mt-sm"
-    />
     <q-list bordered>
       <template v-if="filteredPinned.length">
         <q-item-label header class="q-px-md q-pt-sm q-pb-xs">Pinned</q-item-label>
@@ -55,13 +44,19 @@ import { useMessengerStore } from "src/stores/messenger";
 import { useNostrStore } from "src/stores/nostr";
 import ConversationListItem from "./ConversationListItem.vue";
 
-const props = defineProps<{ selectedPubkey: string }>();
+const props = defineProps<{ selectedPubkey: string; search?: string }>();
 
 const emit = defineEmits(["select"]);
 const messenger = useMessengerStore();
 const nostr = useNostrStore();
 const { conversations } = storeToRefs(messenger);
-const filterQuery = ref("");
+const filterQuery = ref(props.search || "");
+watch(
+  () => props.search,
+  (val) => {
+    filterQuery.value = val || "";
+  }
+);
 
 const uniqueConversations = computed(() => {
   return Object.entries(conversations.value)
