@@ -55,81 +55,6 @@
     </q-list>
   </div>
 
-  <q-dialog v-model="showForm">
-    <q-card class="q-pa-lg" style="max-width: 500px">
-      <h6 class="q-mt-none q-mb-md">{{ formTitle }}</h6>
-      <q-form ref="bucketForm">
-        <q-input
-          v-model="form.name"
-          outlined
-          :rules="nameRules"
-          :label="$t('bucket.name')"
-          class="q-mb-sm"
-        />
-        <q-input
-          v-model="form.color"
-          outlined
-          :label="$t('bucket.color')"
-          class="q-mb-sm"
-          type="color"
-        />
-        <q-input
-          v-model="form.description"
-          outlined
-          type="textarea"
-          autogrow
-          class="q-mb-sm"
-        >
-          <template #label>
-            <div class="row items-center no-wrap">
-              <span>{{ $t('bucket.description') }}</span>
-              <InfoTooltip
-                class="q-ml-xs"
-                :text="$t('BucketManager.tooltips.description')"
-              />
-            </div>
-          </template>
-        </q-input>
-        <q-input
-          v-model.number="form.goal"
-          outlined
-          :rules="goalRules"
-          type="number"
-          class="q-mb-sm"
-        >
-          <template #label>
-            <div class="row items-center no-wrap">
-              <span>{{ $t('bucket.goal') }}</span>
-              <InfoTooltip
-                class="q-ml-xs"
-                :text="$t('BucketManager.tooltips.goal')"
-              />
-            </div>
-          </template>
-        </q-input>
-        <q-input v-model="form.creatorPubkey" outlined class="q-mb-sm">
-          <template #label>
-            <div class="row items-center no-wrap">
-              <span>{{ $t("BucketManager.inputs.creator_pubkey") }}</span>
-              <InfoTooltip
-                class="q-ml-xs"
-                :text="$t('BucketManager.tooltips.creator_pubkey')"
-              />
-            </div>
-          </template>
-        </q-input>
-        <div class="row q-mt-md">
-          <q-btn color="primary" rounded @click="saveBucket">{{
-            $t("global.actions.update.label")
-          }}</q-btn>
-          <q-btn flat rounded color="grey" class="q-ml-auto" v-close-popup>{{
-            $t("global.actions.cancel.label")
-          }}</q-btn>
-        </div>
-      </q-form>
-    </q-card>
-  </q-dialog>
-
   <q-dialog v-model="showDelete">
     <q-card class="q-pa-md" style="max-width: 400px">
       <q-card-section class="row items-center">
@@ -150,145 +75,121 @@
   </q-dialog>
 
   <BucketDialog v-model="dialogOpen" />
+  <EditBucketModal v-model="editModalOpen" @save="handleEditSave" :bucket="editBucket" />
+  <BucketDetailModal v-model="detailModalOpen" :bucket-id="detailBucketId" />
 </template>
 
-<script>
-import { defineComponent, ref, computed } from "vue";
-import { useI18n } from "vue-i18n";
-import { useBucketsStore, DEFAULT_BUCKET_ID } from "stores/buckets";
-import { useMintsStore } from "stores/mints";
-import { useProofsStore } from "stores/proofs";
-import { storeToRefs } from "pinia";
-import { useUiStore } from "stores/ui";
-import { notifyError } from "src/js/notify";
-import { DEFAULT_COLOR } from "src/js/constants";
-import BucketCard from "./BucketCard.vue";
-import BucketDialog from "./BucketDialog.vue";
-import { useRouter } from "vue-router";
+<script lang="ts">
+import { defineComponent, ref, computed } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { useBucketsStore, DEFAULT_BUCKET_ID } from 'stores/buckets';
+import { useMintsStore } from 'stores/mints';
+import { useProofsStore } from 'stores/proofs';
+import { storeToRefs } from 'pinia';
+import { useUiStore } from 'stores/ui';
+import BucketCard from './BucketCard.vue';
+import BucketDialog from './BucketDialog.vue';
+import EditBucketModal from './EditBucketModal.vue';
+import BucketDetailModal from './BucketDetailModal.vue';
 
 export default defineComponent({
-  name: "BucketManager",
-  components: { BucketCard, BucketDialog },
+  name: 'BucketManager',
+  components: { BucketCard, BucketDialog, EditBucketModal, BucketDetailModal },
   setup() {
     const bucketsStore = useBucketsStore();
-    const router = useRouter();
     const uiStore = useUiStore();
     const { t } = useI18n();
-    const showForm = ref(false);
-    const dialogOpen = ref(false);
-    const bucketForm = ref(null);
-    const showDelete = ref(false);
-    const editId = ref(null);
-    const deleteId = ref(null);
-    const form = ref({
-      name: "",
-      color: DEFAULT_COLOR,
-      description: "",
-      goal: null,
-      creatorPubkey: "",
-    });
 
-    const viewMode = ref("all");
+    const dialogOpen = ref(false);
+    const showDelete = ref(false);
+    const deleteId = ref(null as string | null);
+
+    const editModalOpen = ref(false);
+    const detailModalOpen = ref(false);
+    const editBucket = ref<any>(null);
+    const detailBucketId = ref<string | null>(null);
+
+    const viewMode = ref('all');
 
     const bucketList = computed(() => bucketsStore.bucketList);
-    const searchTerm = ref("");
+    const searchTerm = ref('');
     const filteredBuckets = computed(() => {
       const term = searchTerm.value.toLowerCase();
       return bucketList.value
-        .filter((b) =>
-          viewMode.value === "archived" ? b.isArchived : !b.isArchived
-        )
+        .filter((b) => (viewMode.value === 'archived' ? b.isArchived : !b.isArchived))
         .filter((b) => {
-          const name = (b.name || "").toLowerCase();
-          const description = (b.description || "").toLowerCase();
+          const name = (b.name || '').toLowerCase();
+          const description = (b.description || '').toLowerCase();
           return name.includes(term) || description.includes(term);
         });
     });
     const bucketBalances = computed(() => bucketsStore.bucketBalances);
 
-    const formatCurrency = (amount, unit) => {
-      return uiStore.formatCurrency(amount, unit);
-    };
-
     const mintsStore = useMintsStore();
     const { activeUnit } = storeToRefs(mintsStore);
+
+    const proofsStore = useProofsStore();
+
+    const formatCurrency = (amount: number, unit: string) => uiStore.formatCurrency(amount, unit);
 
     const openAdd = () => {
       dialogOpen.value = true;
     };
 
-    const openEdit = (bucket) => {
-      editId.value = bucket.id;
-      form.value = {
-        name: bucket.name,
-        color: bucket.color,
-        description: bucket.description,
-        goal: bucket.goal,
-        creatorPubkey: bucket.creatorPubkey || "",
-      };
-      showForm.value = true;
+    const openEdit = (bucket: any) => {
+      editBucket.value = bucket;
+      editModalOpen.value = true;
     };
 
-    const nameRules = [(val) => !!val || t("BucketManager.validation.name")];
+    const openDetail = (bucket: any) => {
+      detailBucketId.value = bucket.id;
+      detailModalOpen.value = true;
+    };
 
-    const goalRules = [
-      (val) =>
-        val === null ||
-        val === undefined ||
-        val >= 0 ||
-        t("BucketManager.validation.goal"),
-    ];
+    const handleEditSave = (data: any) => {
+      if (editBucket.value) {
+        bucketsStore.editBucket(editBucket.value.id, { ...data });
+      }
+      editModalOpen.value = false;
+    };
 
-    const proofsStore = useProofsStore();
-
-    const handleDrop = async (ev, id) => {
+    const handleDrop = async (ev: DragEvent, id: string) => {
       ev.preventDefault();
-      const data = ev.dataTransfer?.getData("text/plain");
+      const data = ev.dataTransfer?.getData('text/plain');
       if (!data) return;
-      let secrets;
+      let secrets: string[] | undefined;
       try {
         secrets = JSON.parse(data);
       } catch (e) {
-        secrets = data.split(",");
+        secrets = data.split(',');
       }
       if (Array.isArray(secrets) && secrets.length) {
         await proofsStore.moveProofs(secrets, id);
       }
     };
 
-    const saveBucket = async () => {
-      if (!(await bucketForm.value.validate())) {
-        notifyError(t("BucketManager.validation.error"));
-        return;
-      }
-      if (editId.value) {
-        bucketsStore.editBucket(editId.value, { ...form.value });
-      }
-      showForm.value = false;
-    };
-
-    const openDelete = (id) => {
+    const openDelete = (id: string) => {
       deleteId.value = id;
       showDelete.value = true;
     };
 
     const deleteBucket = () => {
-      bucketsStore.deleteBucket(deleteId.value);
+      bucketsStore.deleteBucket(deleteId.value as string);
       showDelete.value = false;
     };
 
-    const handleMenuAction = ({ action, bucket }) => {
+    const handleMenuAction = ({ action, bucket }: any) => {
       switch (action) {
-        case "view":
-          router.push(`/buckets/${bucket.id}`);
+        case 'view':
+          openDetail(bucket);
           break;
-        case "edit":
+        case 'edit':
           openEdit(bucket);
           break;
-        case "archive":
+        case 'archive':
           bucketsStore.editBucket(bucket.id, { isArchived: !bucket.isArchived });
           break;
-        case "delete":
+        case 'delete':
           openDelete(bucket.id);
           break;
       }
@@ -302,23 +203,21 @@ export default defineComponent({
       filteredBuckets,
       bucketBalances,
       activeUnit,
-      showForm,
       dialogOpen,
       showDelete,
-      form,
-      bucketForm,
-      nameRules,
-      goalRules,
-      formTitle: computed(() => t('BucketManager.actions.edit')),
+      editModalOpen,
+      detailModalOpen,
+      editBucket,
+      detailBucketId,
       openAdd,
       openEdit,
-      saveBucket,
+      openDetail,
+      handleEditSave,
       openDelete,
       deleteBucket,
       formatCurrency,
       handleDrop,
       handleMenuAction,
-      DEFAULT_COLOR,
     };
   },
 });
