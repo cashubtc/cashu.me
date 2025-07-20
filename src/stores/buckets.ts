@@ -15,6 +15,7 @@ export type Bucket = {
   description?: string;
   goal?: number;
   creatorPubkey?: string;
+  isArchived?: boolean;
 };
 
 export type BucketRule = {
@@ -29,14 +30,18 @@ export const DEFAULT_BUCKET_NAME = "Default";
 
 function ensureDefaultBucket(buckets: { value: Bucket[] }) {
   if (!buckets.value.find((b) => b.id === DEFAULT_BUCKET_ID)) {
-    buckets.value.unshift({ id: DEFAULT_BUCKET_ID, name: DEFAULT_BUCKET_NAME });
+    buckets.value.unshift({
+      id: DEFAULT_BUCKET_ID,
+      name: DEFAULT_BUCKET_NAME,
+      isArchived: false,
+    });
   }
 }
 
 export const useBucketsStore = defineStore("buckets", {
   state: () => {
     const buckets = useLocalStorage<Bucket[]>("cashu.buckets", [
-      { id: DEFAULT_BUCKET_ID, name: DEFAULT_BUCKET_NAME },
+      { id: DEFAULT_BUCKET_ID, name: DEFAULT_BUCKET_NAME, isArchived: false },
     ]);
     const proofsStore = useProofsStore();
     const notifiedGoals = ref<Record<string, boolean>>({});
@@ -91,6 +96,12 @@ export const useBucketsStore = defineStore("buckets", {
   getters: {
     bucketList(state): Bucket[] {
       return state.buckets;
+    },
+    activeBuckets(state): Bucket[] {
+      return state.buckets.filter((b) => !b.isArchived);
+    },
+    archivedBuckets(state): Bucket[] {
+      return state.buckets.filter((b) => b.isArchived);
     },
     bucketBalance:
       () =>
@@ -153,6 +164,7 @@ export const useBucketsStore = defineStore("buckets", {
         id,
         name: creatorPubkey.slice(0, 8), // short label
         creatorPubkey,
+        isArchived: false,
       });
       return id;
     },
@@ -169,7 +181,11 @@ export const useBucketsStore = defineStore("buckets", {
         return;
       }
 
-      const newBucket: Bucket = { id: uuidv4(), ...bucket };
+      const newBucket: Bucket = {
+        id: uuidv4(),
+        isArchived: false,
+        ...bucket,
+      };
       this.buckets.push(newBucket);
       return newBucket;
     },
@@ -177,7 +193,16 @@ export const useBucketsStore = defineStore("buckets", {
       const index = this.buckets.findIndex((b) => b.id === id);
       if (index === -1) return;
       if (id === DEFAULT_BUCKET_ID) return;
-      this.buckets[index] = { ...this.buckets[index], ...updates };
+      const current = this.buckets[index];
+      const next: Bucket = {
+        ...current,
+        ...updates,
+        isArchived:
+          updates.isArchived !== undefined
+            ? updates.isArchived
+            : current.isArchived ?? false,
+      };
+      this.buckets[index] = next;
     },
     async deleteBucket(id: string) {
       if (id === DEFAULT_BUCKET_ID) return;
