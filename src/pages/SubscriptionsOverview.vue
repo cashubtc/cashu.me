@@ -313,6 +313,7 @@ import { formatDistanceToNow } from "date-fns";
 import { shortenString } from "src/js/string-utils";
 import { useI18n } from "vue-i18n";
 import { notifySuccess, notifyError } from "src/js/notify";
+import { toastSuccess } from "src/js/toast";
 import type { Proof } from "@cashu/cashu-ts";
 import { useProofsStore } from "stores/proofs";
 import { useSendTokensStore } from "stores/sendTokensStore";
@@ -652,7 +653,7 @@ function confirmCancel() {
   subscriptionsStore
     .cancelSubscription(pubkey)
     .then(() =>
-      notifySuccess(t("SubscriptionsOverview.notifications.cancel_success"))
+      toastSuccess(t("SubscriptionsOverview.notifications.cancel_success"))
     )
     .catch((e: any) => notifyError(e.message))
     .finally(() => {
