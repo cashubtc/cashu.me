@@ -78,6 +78,7 @@
       <span v-else>{{ initials }}</span>
     </q-avatar>
   </div>
+  </div>
 </template>
 
 <script lang="ts" setup>
