@@ -291,6 +291,7 @@
       @confirm="confirmCancel"
     />
   </div>
+  </div>
 </template>
 
 <script setup lang="ts">
