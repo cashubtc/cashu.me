@@ -1528,6 +1528,12 @@ export const messages = {
       bucket: "Filter by bucket",
       frequency: "Filter by frequency",
     },
+    sort_by: "Sort by",
+    sort: {
+      end: "End date",
+      name: "Name",
+      cost: "Cost",
+    },
     notifications: {
       cancel_success: "Subscription canceled",
       extend_success: "Subscription extended",
