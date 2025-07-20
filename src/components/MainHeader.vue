@@ -36,7 +36,7 @@
         icon="menu"
         color="primary"
         aria-label="Toggle Chat Menu"
-        @click="toggleMessengerDrawer"
+        @click.stop="toggleMessengerDrawer"
         class="q-mr-sm"
       />
       <transition
@@ -91,7 +91,7 @@
         :icon="countdown > 0 ? 'close' : 'refresh'"
         :color="countdown > 0 ? 'negative' : 'primary'"
         aria-label="Refresh"
-        @click="reload"
+        @click.stop="reload"
         :loading="reloading"
         :disable="uiStore.globalMutexLock && countdown === 0"
       >
@@ -108,7 +108,7 @@
         :icon="darkIcon"
         color="primary"
         aria-label="Toggle Dark Mode"
-        @click="toggleDarkMode"
+        @click.stop="toggleDarkMode"
         class="q-ml-sm"
       />
     </q-toolbar>
