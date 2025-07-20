@@ -1275,7 +1275,7 @@ export default defineComponent({
             "FindCreators.notifications.donation_sent"
           ) as string,
           ok: {
-            label: this.$t("FindCreators.actions.back_to_search") as string,
+            label: this.$t("FindCreators.actions.back_to_search.label") as string,
           },
         }).onOk(() => {
           this.showSendTokens = false;

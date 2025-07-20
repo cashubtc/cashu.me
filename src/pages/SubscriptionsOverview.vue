@@ -130,7 +130,7 @@
               class="q-ml-xs"
               :to="`/creator/${pubkeyNpub(row.creator)}`"
             >
-              {{ $t("FindCreators.actions.view_profile") }}
+              {{ $t("FindCreators.actions.view_profile.label") }}
             </q-btn>
             <q-btn
               flat
@@ -358,7 +358,7 @@
           class="q-ml-xs"
           :to="`/creator/${pubkeyNpub(props.row.creator)}`"
         >
-          {{ $t("FindCreators.actions.view_profile") }}
+          {{ $t("FindCreators.actions.view_profile.label") }}
         </q-btn>
         <q-btn
           flat
