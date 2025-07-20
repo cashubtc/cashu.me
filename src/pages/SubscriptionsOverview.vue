@@ -68,7 +68,7 @@
           <q-btn flat dense icon="tune" @click="showAdvancedFilters = true" />
         </q-toolbar>
       </q-form>
-      <div v-if="isLoading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div v-if="isLoading" class="subscription-grid">
         <q-card
           v-for="n in 3"
           :key="n"
@@ -77,25 +77,38 @@
           class="placeholder-card"
         >
           <q-card-section class="row items-center">
-            <q-skeleton type="circle" size="32px" />
+            <q-skeleton type="circle" size="40px" />
             <div class="q-ml-sm col">
               <q-skeleton type="text" width="75%" />
               <q-skeleton type="text" width="50%" />
             </div>
-            <q-skeleton width="40px" height="20px" class="q-ml-auto" />
+            <q-skeleton width="60px" height="20px" class="q-ml-auto" />
           </q-card-section>
           <q-card-section class="q-pt-none">
             <q-skeleton width="100%" height="8px" />
+            <div class="row justify-between q-mt-sm">
+              <q-skeleton width="40%" height="12px" />
+              <q-skeleton width="40%" height="12px" />
+            </div>
           </q-card-section>
-          <q-card-actions align="right">
+          <q-card-section>
+            <q-skeleton type="text" width="70%" class="q-mb-xs" />
+            <q-skeleton type="text" width="50%" class="q-mb-xs" />
+            <q-skeleton type="text" width="60%" />
+          </q-card-section>
+          <q-card-actions class="justify-between">
+            <div class="q-gutter-xs">
+              <q-skeleton width="60px" height="24px" />
+              <q-skeleton width="60px" height="24px" />
+            </div>
             <q-skeleton width="24px" height="24px" />
           </q-card-actions>
         </q-card>
       </div>
-      <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        <q-card v-for="row in filteredRows" :key="row.creator" flat bordered>
+      <div v-else class="subscription-grid">
+        <q-card v-for="row in filteredRows" :key="row.creator" flat bordered class="subscription-card">
           <q-card-section class="row items-center">
-            <q-avatar size="32px" v-if="profiles[row.creator]?.picture">
+            <q-avatar size="40px" v-if="profiles[row.creator]?.picture">
               <img :src="profiles[row.creator].picture" />
             </q-avatar>
             <div class="q-ml-sm">
@@ -122,11 +135,11 @@
               class="mobile-progress"
               :class="row.status === 'active' ? 'active-bar' : 'expired-bar'"
               :value="row.progress"
-              :label="Math.round(row.progress * 100) + '%'"
-              :color="row.status === 'active' ? 'positive' : 'negative'"
               track-color="grey-4"
-            >
-              <q-tooltip>
+            />
+            <div class="row justify-between text-caption q-mt-xs">
+              <div>{{ row.totalMonths - row.monthsLeft }} / {{ row.totalMonths }} months</div>
+              <div>
                 {{
                   row.countdown
                     ? $t("SubscriptionsOverview.row.next_unlock_label", {
@@ -134,10 +147,30 @@
                       })
                     : "-"
                 }}
-              </q-tooltip>
-            </q-linear-progress>
+              </div>
+            </div>
           </q-card-section>
-          <q-card-actions align="right">
+          <q-card-section>
+            <div class="text-caption"><strong>{{ row.tierName }}</strong></div>
+            <div class="text-caption">
+              Cost: {{ formatCurrency(row.monthly) }} / {{ row.frequency }}
+            </div>
+            <div class="text-caption">
+              Total: {{ formatCurrency(row.total) }}
+            </div>
+            <ul class="q-pl-md q-mt-xs text-caption">
+              <li v-for="(b, i) in row.benefits" :key="i">{{ b }}</li>
+            </ul>
+          </q-card-section>
+          <q-card-actions class="justify-between">
+            <div class="q-gutter-xs">
+              <q-btn size="sm" flat color="primary" @click="openDetails(row.creator)">
+                {{ $t('SubscriptionsOverview.view') }}
+              </q-btn>
+              <q-btn size="sm" flat color="primary" @click="sendMessage(row.creator)">
+                {{ $t('SubscriptionsOverview.message') }}
+              </q-btn>
+            </div>
             <q-btn flat round dense icon="more_vert">
               <q-menu anchor="bottom right" self="top right">
                 <q-list dense style="min-width: 150px">
@@ -714,6 +747,24 @@ watch(() => subscriptionsStore.subscriptions, updateProfiles);
 
 .placeholder-card {
   animation: placeholder-pulse 1.5s ease-in-out infinite;
+}
+
+.subscription-grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 600px) {
+  .subscription-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .subscription-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
 }
 
 @keyframes placeholder-pulse {
