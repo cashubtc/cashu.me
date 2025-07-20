@@ -119,63 +119,33 @@
               </q-tooltip>
             </q-linear-progress>
           </q-card-section>
-          <q-card-actions align="right" class="q-gutter-xs">
-            <q-btn flat dense size="sm" @click="openDetails(row.creator)">
-              {{ $t("SubscriptionsOverview.view") }}
-            </q-btn>
-            <q-btn
-              flat
-              dense
-              size="sm"
-              class="q-ml-xs"
-              :to="`/creator/${pubkeyNpub(row.creator)}`"
-            >
-              {{ $t("FindCreators.actions.view_profile.label") }}
-            </q-btn>
-            <q-btn
-              flat
-              dense
-              size="sm"
-              class="q-ml-xs"
-              @click="sendMessage(row.creator)"
-            >
-              {{ $t("SubscriptionsOverview.message") }}
-            </q-btn>
-            <q-btn
-              flat
-              dense
-              size="sm"
-              class="q-ml-xs"
-              @click="extendSubscription(row.creator)"
-            >
-              {{ $t("SubscriptionsOverview.extend") }}
-            </q-btn>
-            <q-btn
-              flat
-              dense
-              size="sm"
-              class="q-ml-xs"
-              @click="shareTokens(row.creator)"
-            >
-              {{ $t("SubscriptionsOverview.export") }}
-            </q-btn>
-            <q-btn
-              flat
-              dense
-              size="sm"
-              class="q-ml-xs"
-              @click="exportTokens(row.creator)"
-            >
-              {{ $t("SubscriptionsOverview.export_csv") }}
-            </q-btn>
-            <q-btn
-              flat
-              dense
-              size="sm"
-              class="q-ml-xs"
-              @click="cancelSubscription(row.creator)"
-            >
-              {{ $t("SubscriptionsOverview.cancel") }}
+          <q-card-actions align="right">
+            <q-btn flat round dense icon="more_vert">
+              <q-menu anchor="bottom right" self="top right">
+                <q-list dense style="min-width: 150px">
+                  <q-item clickable v-close-popup @click="openDetails(row.creator)">
+                    <q-item-section>{{ $t("SubscriptionsOverview.view") }}</q-item-section>
+                  </q-item>
+                  <q-item clickable v-close-popup :to="`/creator/${pubkeyNpub(row.creator)}`">
+                    <q-item-section>{{ $t("FindCreators.actions.view_profile.label") }}</q-item-section>
+                  </q-item>
+                  <q-item clickable v-close-popup @click="sendMessage(row.creator)">
+                    <q-item-section>{{ $t("SubscriptionsOverview.message") }}</q-item-section>
+                  </q-item>
+                  <q-item clickable v-close-popup @click="extendSubscription(row.creator)">
+                    <q-item-section>{{ $t("SubscriptionsOverview.extend") }}</q-item-section>
+                  </q-item>
+                  <q-item clickable v-close-popup @click="shareTokens(row.creator)">
+                    <q-item-section>{{ $t("SubscriptionsOverview.export") }}</q-item-section>
+                  </q-item>
+                  <q-item clickable v-close-popup @click="exportTokens(row.creator)">
+                    <q-item-section>{{ $t("SubscriptionsOverview.export_csv") }}</q-item-section>
+                  </q-item>
+                  <q-item clickable v-close-popup @click="cancelSubscription(row.creator)">
+                    <q-item-section>{{ $t("SubscriptionsOverview.cancel") }}</q-item-section>
+                  </q-item>
+                </q-list>
+              </q-menu>
             </q-btn>
           </q-card-actions>
         </q-card>
@@ -348,62 +318,32 @@
         </div>
       </template>
       <template #body-cell-actions="props">
-        <q-btn flat dense size="sm" @click="openDetails(props.row.creator)">
-          {{ $t("SubscriptionsOverview.view") }}
-        </q-btn>
-        <q-btn
-          flat
-          dense
-          size="sm"
-          class="q-ml-xs"
-          :to="`/creator/${pubkeyNpub(props.row.creator)}`"
-        >
-          {{ $t("FindCreators.actions.view_profile.label") }}
-        </q-btn>
-        <q-btn
-          flat
-          dense
-          size="sm"
-          class="q-ml-xs"
-          @click="sendMessage(props.row.creator)"
-        >
-          {{ $t("SubscriptionsOverview.message") }}
-        </q-btn>
-        <q-btn
-          flat
-          dense
-          size="sm"
-          class="q-ml-xs"
-          @click="extendSubscription(props.row.creator)"
-        >
-          {{ $t("SubscriptionsOverview.extend") }}
-        </q-btn>
-        <q-btn
-          flat
-          dense
-          size="sm"
-          class="q-ml-xs"
-          @click="shareTokens(props.row.creator)"
-        >
-          {{ $t("SubscriptionsOverview.export") }}
-        </q-btn>
-        <q-btn
-          flat
-          dense
-          size="sm"
-          class="q-ml-xs"
-          @click="exportTokens(props.row.creator)"
-        >
-          {{ $t("SubscriptionsOverview.export_csv") }}
-        </q-btn>
-        <q-btn
-          flat
-          dense
-          size="sm"
-          class="q-ml-xs"
-          @click="cancelSubscription(props.row.creator)"
-        >
-          {{ $t("SubscriptionsOverview.cancel") }}
+        <q-btn flat round dense icon="more_vert">
+          <q-menu anchor="bottom right" self="top right">
+            <q-list dense style="min-width: 150px">
+              <q-item clickable v-close-popup @click="openDetails(props.row.creator)">
+                <q-item-section>{{ $t("SubscriptionsOverview.view") }}</q-item-section>
+              </q-item>
+              <q-item clickable v-close-popup :to="`/creator/${pubkeyNpub(props.row.creator)}`">
+                <q-item-section>{{ $t("FindCreators.actions.view_profile.label") }}</q-item-section>
+              </q-item>
+              <q-item clickable v-close-popup @click="sendMessage(props.row.creator)">
+                <q-item-section>{{ $t("SubscriptionsOverview.message") }}</q-item-section>
+              </q-item>
+              <q-item clickable v-close-popup @click="extendSubscription(props.row.creator)">
+                <q-item-section>{{ $t("SubscriptionsOverview.extend") }}</q-item-section>
+              </q-item>
+              <q-item clickable v-close-popup @click="shareTokens(props.row.creator)">
+                <q-item-section>{{ $t("SubscriptionsOverview.export") }}</q-item-section>
+              </q-item>
+              <q-item clickable v-close-popup @click="exportTokens(props.row.creator)">
+                <q-item-section>{{ $t("SubscriptionsOverview.export_csv") }}</q-item-section>
+              </q-item>
+              <q-item clickable v-close-popup @click="cancelSubscription(props.row.creator)">
+                <q-item-section>{{ $t("SubscriptionsOverview.cancel") }}</q-item-section>
+              </q-item>
+            </q-list>
+          </q-menu>
         </q-btn>
       </template>
       <template #no-data>
