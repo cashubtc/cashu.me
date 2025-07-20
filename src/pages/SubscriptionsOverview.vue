@@ -216,64 +216,11 @@
           {{ $t("SubscriptionsOverview.discover") }}
         </q-btn>
       </div>
-    <q-dialog v-model="showDialog">
-      <q-card style="min-width: 300px">
-        <q-card-section>
-          <div class="text-h6">
-            {{
-              profiles[selectedCreator]?.display_name ||
-              profiles[selectedCreator]?.name ||
-              shortenString(pubkeyNpub(selectedCreator), 15, 6)
-            }}
-          </div>
-        </q-card-section>
-        <q-card-section
-          class="q-pa-none"
-          style="max-height: 300px; overflow-y: auto"
-        >
-          <q-list bordered>
-            <q-item v-for="t in creatorTokens" :key="t.id">
-              <q-item-section>
-                <q-item-label class="text-weight-bold">
-                  {{ formatCurrency(t.amount) }}
-                </q-item-label>
-                <q-item-label caption>
-                  Month {{ t.monthIndex }} -
-                  {{ t.locktime ? formatTs(t.locktime) : "-" }}
-                </q-item-label>
-                <q-item-label caption v-if="t.locktime">
-                  Unlocks in {{ countdownTo(t.locktime) }}
-                </q-item-label>
-              </q-item-section>
-              <q-item-section side>
-                <q-icon
-                  :name="t.redeemed ? 'check_circle' : 'hourglass_empty'"
-                  :color="t.redeemed ? 'positive' : 'grey'"
-                  class="q-mr-sm"
-                />
-                <q-btn
-                  flat
-                  dense
-                  icon="content_copy"
-                  @click="copyToken(t.token)"
-                />
-              </q-item-section>
-            </q-item>
-          </q-list>
-          <div
-            v-if="creatorTokens.length === 0"
-            class="text-center q-pa-md text-caption"
-          >
-            {{ $t("LockedTokensTable.empty_text") }}
-          </div>
-        </q-card-section>
-        <q-card-actions align="right">
-          <q-btn flat color="primary" v-close-popup>
-            {{ $t("global.actions.close.label") }}
-          </q-btn>
-        </q-card-actions>
-      </q-card>
-    </q-dialog>
+    <SubscriptionDetailDialog
+      v-model="showDialog"
+      :tokens="creatorTokens"
+      :title="creatorTitle"
+    />
     <q-dialog v-model="showAdvancedFilters">
       <q-card style="min-width: 250px">
         <q-card-section class="q-gutter-sm">
@@ -371,6 +318,7 @@ import { useProofsStore } from "stores/proofs";
 import { useSendTokensStore } from "stores/sendTokensStore";
 import token from "src/js/token";
 import SubscriptionReceipt from "components/SubscriptionReceipt.vue";
+import SubscriptionDetailDialog from "components/SubscriptionDetailDialog.vue";
 
 const bucketsStore = useBucketsStore();
 const mintsStore = useMintsStore();
@@ -486,6 +434,14 @@ const $q = useQuasar();
 const { t } = useI18n();
 const showDialog = ref(false);
 const selectedCreator = ref("");
+const creatorTitle = computed(() => {
+  const pk = selectedCreator.value;
+  return (
+    profiles.value[pk]?.display_name ||
+    profiles.value[pk]?.name ||
+    shortenString(pubkeyNpub(pk), 15, 6)
+  );
+});
 const showMessageDialog = ref(false);
 const showReceiptDialog = ref(false);
 const receiptList = ref<any[]>([]);
@@ -704,12 +660,6 @@ function confirmCancel() {
     });
 }
 
-function copyToken(token: string) {
-  navigator.clipboard
-    .writeText(token)
-    .then(() => notifySuccess(t("copied_to_clipboard")))
-    .catch(() => notifyError(t("copy_failed")));
-}
 
 async function updateProfiles() {
   for (const sub of subscriptionsStore.subscriptions) {
