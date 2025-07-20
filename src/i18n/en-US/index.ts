@@ -1461,6 +1461,10 @@ export const messages = {
     delete_confirm: {
       title: "Delete bucket?",
     },
+    view: {
+      all: "All",
+      archived: "Archived",
+    },
   },
   BucketDetail: {
     move: "Move tokens",

@@ -8,6 +8,10 @@
       class="q-mb-md"
       :placeholder="$t('bucketManager.inputs.search.placeholder')"
     />
+    <q-tabs v-model="viewMode" dense class="q-mb-md" no-caps>
+      <q-tab name="all" :label="$t('BucketManager.view.all')" />
+      <q-tab name="archived" :label="$t('BucketManager.view.archived')" />
+    </q-tabs>
     <q-list padding>
       <div
         v-for="bucket in filteredBuckets"
@@ -183,15 +187,21 @@ export default defineComponent({
       creatorPubkey: "",
     });
 
+    const viewMode = ref("all");
+
     const bucketList = computed(() => bucketsStore.bucketList);
     const searchTerm = ref("");
     const filteredBuckets = computed(() => {
       const term = searchTerm.value.toLowerCase();
-      return bucketList.value.filter((b) => {
-        const name = (b.name || "").toLowerCase();
-        const description = (b.description || "").toLowerCase();
-        return name.includes(term) || description.includes(term);
-      });
+      return bucketList.value
+        .filter((b) =>
+          viewMode.value === "archived" ? b.isArchived : !b.isArchived
+        )
+        .filter((b) => {
+          const name = (b.name || "").toLowerCase();
+          const description = (b.description || "").toLowerCase();
+          return name.includes(term) || description.includes(term);
+        });
     });
     const bucketBalances = computed(() => bucketsStore.bucketBalances);
 
@@ -270,6 +280,7 @@ export default defineComponent({
       DEFAULT_BUCKET_ID,
       bucketList,
       searchTerm,
+      viewMode,
       filteredBuckets,
       bucketBalances,
       activeUnit,
