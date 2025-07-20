@@ -12,7 +12,7 @@
         bordered
         :width="drawerOpen ? 320 : 72"
         class="drawer-transition drawer-container"
-        :class="$q.screen.gt.xs ? 'q-pa-lg column' : 'q-pa-md column'"
+        :class="[$q.screen.gt.xs ? 'q-pa-lg column' : 'q-pa-md column', { 'drawer-collapsed': !drawerOpen }]"
       >
         <template v-if="drawerOpen">
           <q-tabs v-model="sidebarTab" dense no-caps align="justify" class="q-mb-md">
@@ -418,6 +418,15 @@ export default defineComponent({
 
 .drawer-container {
   min-width: 0;
+}
+
+.drawer-collapsed .conversation-item .q-item-section:not([avatar]) {
+  display: none;
+}
+
+.drawer-collapsed .conversation-item q-avatar {
+  width: 40px;
+  height: 40px;
 }
 
 @media (max-width: 320px) {
