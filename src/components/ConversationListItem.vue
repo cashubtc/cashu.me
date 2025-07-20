@@ -29,6 +29,13 @@
           :class="{ 'text-weight-bold': unreadCount > 0 }"
           :title="displayName"
         >
+          <q-icon
+            v-if="isPinned"
+            name="star"
+            size="xs"
+            color="warning"
+            class="q-mr-xs"
+          />
           {{ displayName }}
         </q-item-label>
         <q-item-label
@@ -83,7 +90,9 @@
         size="sm"
         :icon="isPinned ? 'star' : 'star_outline'"
         @click.stop="togglePin"
-      />
+      >
+        <q-tooltip>{{ isPinned ? 'Unpin' : 'Pin' }}</q-tooltip>
+      </q-btn>
       <q-btn
         flat
         dense
@@ -92,7 +101,9 @@
         class="q-ml-sm"
         @click.stop="menu = true"
         aria-label="Conversation options"
-      />
+      >
+        <q-tooltip>Options</q-tooltip>
+      </q-btn>
       <q-menu v-model="menu" anchor="bottom right" self="top right">
         <q-list style="min-width: 120px">
           <q-item clickable v-close-popup @click.stop="togglePin">
