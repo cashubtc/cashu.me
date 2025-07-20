@@ -1,9 +1,18 @@
 <template>
   <div
-    class="q-my-xs flex column"
-    :class="message.outgoing ? 'items-end' : 'items-start'"
+    class="q-my-xs row"
+    :class="message.outgoing ? 'justify-end' : 'justify-start'"
   >
-    <div :class="message.outgoing ? 'sent' : 'received'" :style="bubbleStyle">
+    <q-avatar
+      v-if="!message.outgoing"
+      size="32px"
+      class="q-mr-sm"
+    >
+      <img v-if="profile?.picture" :src="profile.picture" />
+      <span v-else>{{ initials }}</span>
+    </q-avatar>
+    <div class="flex column" :class="message.outgoing ? 'items-end' : 'items-start'">
+      <div :class="message.outgoing ? 'sent' : 'received'">
       <template v-if="message.subscriptionPayment">
         <TokenCarousel
           :payments="message.subscriptionPayment"
@@ -60,13 +69,21 @@
         :color="deliveryColor"
       />
     </div>
+    <q-avatar
+      v-if="message.outgoing"
+      size="32px"
+      class="q-ml-sm"
+    >
+      <img v-if="profile?.picture" :src="profile.picture" />
+      <span v-else>{{ initials }}</span>
+    </q-avatar>
   </div>
 </template>
 
 <script lang="ts" setup>
 import { computed, ref, onMounted, onUnmounted } from "vue";
 import { formatDistanceToNow } from "date-fns";
-import { useQuasar } from "quasar";
+
 import { mdiCheck, mdiCheckAll, mdiAlertCircleOutline } from "@quasar/extras/mdi-v6";
 import type { MessengerMessage } from "src/stores/messenger";
 import TokenCarousel from "components/TokenCarousel.vue";
@@ -75,28 +92,35 @@ import { useWalletStore } from "src/stores/wallet";
 import { notifyError } from "src/js/notify";
 import { cashuDb } from "src/stores/dexie";
 import { useP2PKStore } from "src/stores/p2pk";
+import { useNostrStore } from "src/stores/nostr";
+import { useMessengerStore } from "src/stores/messenger";
 import { nip19 } from "nostr-tools";
-import { shortenString } from "src/js/string-utils";
 
 const props = defineProps<{
   message: MessengerMessage;
   deliveryStatus?: "sent" | "delivered" | "failed";
 }>();
 
-const $q = useQuasar();
 const p2pk = useP2PKStore();
+const nostr = useNostrStore();
+const messenger = useMessengerStore();
 
-
-const receivedStyle = computed(() => ({
-  backgroundColor: $q.dark.isActive
-    ? "var(--q-secondary)"
-    : "var(--q-color-grey-2)",
-  color: $q.dark.isActive ? "#ffffff" : "#000000",
-}));
-
-const bubbleStyle = computed(() =>
-  props.message.outgoing ? {} : receivedStyle.value,
+const avatarPubkey = computed(() =>
+  props.message.outgoing ? nostr.pubkey : props.message.pubkey,
 );
+const profile = ref<any>(null);
+const initials = computed(() => {
+  const alias = messenger.aliases[avatarPubkey.value];
+  const p: any = profile.value;
+  const name = alias || p?.display_name || p?.name || "";
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+  return name.slice(0, 2).toUpperCase();
+});
+
+onMounted(async () => {
+  profile.value = await nostr.getProfile(avatarPubkey.value);
+});
 
 const time = computed(() =>
   new Date(props.message.created_at * 1000).toLocaleString(),
@@ -222,7 +246,6 @@ async function updateAutoRedeem(val: boolean) {
 .sent,
 .received {
   padding: 16px;
-  border-radius: 12px;
   max-width: 70%;
   word-break: break-word;
 }
@@ -230,10 +253,12 @@ async function updateAutoRedeem(val: boolean) {
 .sent {
   background-color: var(--q-primary);
   color: #ffffff;
+  border-radius: 12px 0 12px 12px;
 }
 
 .received {
   background-color: var(--q-secondary);
   color: #000000;
+  border-radius: 0 12px 12px 12px;
 }
 </style>
