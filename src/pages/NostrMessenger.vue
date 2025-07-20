@@ -46,19 +46,7 @@
                 </template>
               </Suspense>
             </q-scroll-area>
-            <div class="row items-center justify-between q-mt-md">
-              <div class="row items-center">
-                <q-avatar size="32px" class="q-mr-sm">
-                  <img v-if="myProfile?.picture" :src="myProfile.picture" />
-                  <span v-else>{{ myInitials }}</span>
-                </q-avatar>
-                <div class="row items-center no-wrap">
-                  <span class="text-caption ellipsis" style="max-width: 100px">{{ truncatedNpub }}</span>
-                  <q-btn flat dense round icon="content_copy" size="sm" class="q-ml-xs" @click="copy(nostr.npub)" />
-                </div>
-              </div>
-              <ThemeToggle />
-            </div>
+            <UserInfo />
           </div>
         </template>
         <template v-else>
@@ -148,8 +136,7 @@ import MessageList from "components/MessageList.vue";
 import MessageInput from "components/MessageInput.vue";
 import ChatSendTokenDialog from "components/ChatSendTokenDialog.vue";
 import NostrSetupWizard from "components/NostrSetupWizard.vue";
-import ThemeToggle from "components/ThemeToggle.vue";
-import { useClipboard } from "src/composables/useClipboard";
+import UserInfo from "components/UserInfo.vue";
 import { shortenString } from "src/js/string-utils";
 
 export default defineComponent({
@@ -162,7 +149,7 @@ export default defineComponent({
     MessageInput,
     ChatSendTokenDialog,
     NostrSetupWizard,
-    ThemeToggle,
+    UserInfo,
   },
   setup() {
     const loading = ref(true);
@@ -247,20 +234,6 @@ export default defineComponent({
       typeof NewChatDialog
     > | null>(null);
     const conversationSearch = ref("");
-    const { copy } = useClipboard();
-    const myProfile = computed(() => {
-      const entry: any = (nostr.profiles as any)[nostr.pubkey];
-      return entry?.profile ?? entry ?? {};
-    });
-    const myInitials = computed(() => {
-      const name =
-        myProfile.value.display_name || myProfile.value.name || "";
-      const parts = name.split(/\s+/).filter(Boolean);
-      return parts.slice(0, 2).map((w) => w[0]).join("").toUpperCase();
-    });
-    const truncatedNpub = computed(
-      () => shortenString(nostr.npub, 12, 6) || nostr.npub
-    );
     const messages = computed(
       () => messenger.conversations[selected.value] || []
     );
@@ -402,10 +375,6 @@ export default defineComponent({
       chatSendTokenDialogRef,
       newChatDialogRef,
       conversationSearch,
-      copy,
-      myProfile,
-      myInitials,
-      truncatedNpub,
       messages,
       showSetupWizard,
       selectConversation,
