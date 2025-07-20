@@ -50,13 +50,6 @@ const routes = [
     children: [{ path: "", component: () => import("src/pages/Buckets.vue") }],
   },
   {
-    path: "/move-tokens",
-    component: () => import("layouts/FullscreenLayout.vue"),
-    children: [
-      { path: "", component: () => import("src/pages/MoveTokens.vue") },
-    ],
-  },
-  {
     path: "/subscriptions",
     component: () => import("layouts/FullscreenLayout.vue"),
     children: [
