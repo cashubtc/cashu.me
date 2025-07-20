@@ -66,6 +66,10 @@ export const useNutzapStore = defineStore("nutzap", {
       this.sendQueue.push(data);
     },
 
+    clearSendQueue() {
+      this.sendQueue.splice(0, this.sendQueue.length);
+    },
+
     async resendQueued(item: NutzapQueuedSend) {
       const messenger = useMessengerStore();
       const payload = subscriptionPayload(item.token, item.unlockTime, {

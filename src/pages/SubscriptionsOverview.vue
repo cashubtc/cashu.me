@@ -551,8 +551,9 @@ async function confirmMessage() {
   }
 }
 
-function retryQueuedSends() {
-  nutzap.retryQueuedSends();
+async function retryQueuedSends() {
+  await nutzap.retryQueuedSends();
+  nutzap.clearSendQueue();
 }
 
 function cancelSubscription(pubkey: string) {
