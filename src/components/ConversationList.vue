@@ -13,7 +13,7 @@
     />
     <q-list bordered>
       <template v-if="filteredPinned.length">
-        <q-item-label header>Pinned</q-item-label>
+        <q-item-label header class="q-px-md q-pt-sm q-pb-xs">Pinned</q-item-label>
         <ConversationListItem
           v-for="item in filteredPinned"
           :key="'pinned-' + item.pubkey"
@@ -24,10 +24,10 @@
           @pin="togglePin(item.pubkey)"
           @delete="deleteConversation(item.pubkey)"
         />
-        <q-separator spaced />
+        <q-separator v-if="filteredRegular.length" spaced />
       </template>
 
-      <q-item-label header>All Conversations</q-item-label>
+      <q-item-label header class="q-px-md q-pt-sm q-pb-xs">All Conversations</q-item-label>
       <ConversationListItem
         v-for="item in filteredRegular"
         :key="'reg-' + item.pubkey"
