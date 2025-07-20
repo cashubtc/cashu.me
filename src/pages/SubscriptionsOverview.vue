@@ -68,8 +68,29 @@
           <q-btn flat dense icon="tune" @click="showAdvancedFilters = true" />
         </q-toolbar>
       </q-form>
-      <div v-if="isLoading" class="grid grid-cols-1 gap-4">
-        <q-skeleton v-for="n in 3" :key="n" height="150px" square />
+      <div v-if="isLoading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <q-card
+          v-for="n in 3"
+          :key="n"
+          flat
+          bordered
+          class="placeholder-card"
+        >
+          <q-card-section class="row items-center">
+            <q-skeleton type="circle" size="32px" />
+            <div class="q-ml-sm col">
+              <q-skeleton type="text" width="75%" />
+              <q-skeleton type="text" width="50%" />
+            </div>
+            <q-skeleton width="40px" height="20px" class="q-ml-auto" />
+          </q-card-section>
+          <q-card-section class="q-pt-none">
+            <q-skeleton width="100%" height="8px" />
+          </q-card-section>
+          <q-card-actions align="right">
+            <q-skeleton width="24px" height="24px" />
+          </q-card-actions>
+        </q-card>
       </div>
       <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <q-card v-for="row in filteredRows" :key="row.creator" flat bordered>
@@ -713,5 +734,19 @@ watch(() => subscriptionsStore.subscriptions, updateProfiles);
 
 .mobile-progress {
   width: 100%;
+}
+
+.placeholder-card {
+  animation: placeholder-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes placeholder-pulse {
+  0%,
+  100% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
 }
 </style>
