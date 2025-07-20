@@ -78,6 +78,7 @@
         </q-card>
       </div>
       </div>
+      </div>
     </template>
     <template #fallback>
       <q-skeleton height="100vh" square />
