@@ -15,38 +15,51 @@
         :class="[$q.screen.gt.xs ? 'q-pa-lg column' : 'q-pa-md column', { 'drawer-collapsed': !drawerOpen }]"
       >
         <template v-if="drawerOpen">
-          <q-tabs v-model="sidebarTab" dense no-caps align="justify" class="q-mb-md">
-            <q-tab name="chats" label="Chats" />
-            <q-tab name="settings" label="Settings" />
-          </q-tabs>
-          <q-tab-panels v-model="sidebarTab" animated class="col column no-wrap">
-            <q-tab-panel name="chats" class="col column no-wrap q-pa-none">
-              <q-scroll-area class="col fit" style="min-height: 0">
-                <Suspense>
-                  <template #default>
-                    <ConversationList
-                      :selected-pubkey="selected"
-                      @select="selectConversation"
-                    />
-                  </template>
-                  <template #fallback>
-                    <q-skeleton height="100px" square />
-                  </template>
-                </Suspense>
-              </q-scroll-area>
-            </q-tab-panel>
-            <q-tab-panel name="settings" class="col column no-wrap q-pa-none">
-              <NostrIdentityManager class="q-mb-md" />
-              <q-btn
-                class="q-mb-md"
-                size="sm"
-                label="Relays"
-                color="primary"
-                @click="openRelayDialog"
-              />
-              <RelayManagerDialog ref="relayManagerDialogRef" />
-            </q-tab-panel>
-          </q-tab-panels>
+          <div class="column no-wrap full-height">
+            <div class="row items-center justify-between q-mb-md">
+              <div class="text-subtitle1">Chats</div>
+              <q-btn flat dense round icon="add" @click="openNewChatDialog" />
+            </div>
+            <q-input
+              dense
+              rounded
+              debounce="300"
+              v-model="conversationSearch"
+              placeholder="Search"
+              class="q-mb-md"
+            >
+              <template #prepend>
+                <q-icon name="search" />
+              </template>
+            </q-input>
+            <q-scroll-area class="col" style="min-height: 0">
+              <Suspense>
+                <template #default>
+                  <ConversationList
+                    :selected-pubkey="selected"
+                    :search="conversationSearch"
+                    @select="selectConversation"
+                  />
+                </template>
+                <template #fallback>
+                  <q-skeleton height="100px" square />
+                </template>
+              </Suspense>
+            </q-scroll-area>
+            <div class="row items-center justify-between q-mt-md">
+              <div class="row items-center">
+                <q-avatar size="32px" class="q-mr-sm">
+                  <img v-if="myProfile?.picture" :src="myProfile.picture" />
+                  <span v-else>{{ myInitials }}</span>
+                </q-avatar>
+                <div class="row items-center no-wrap">
+                  <span class="text-caption ellipsis" style="max-width: 100px">{{ truncatedNpub }}</span>
+                  <q-btn flat dense round icon="content_copy" size="sm" class="q-ml-xs" @click="copy(nostr.npub)" />
+                </div>
+              </div>
+              <ThemeToggle />
+            </div>
+          </div>
         </template>
         <template v-else>
           <div class="column items-center q-gutter-md" style="overflow-y:auto">
@@ -105,9 +118,6 @@
       <MessageList :messages="messages" class="col" />
       <MessageInput @send="sendMessage" @sendToken="openSendTokenDialog" />
       <ChatSendTokenDialog ref="chatSendTokenDialogRef" :recipient="selected" />
-      <q-page-sticky position="bottom-right" :offset="[18, 18]">
-        <q-btn fab color="primary" icon="add" @click="openNewChatDialog" />
-      </q-page-sticky>
       <NewChatDialog ref="newChatDialogRef" @start="startChat" />
     </div>
   </q-page>
@@ -131,8 +141,6 @@ import { useNostrStore } from "src/stores/nostr";
 import { nip19 } from "nostr-tools";
 import type NDK from "@nostr-dev-kit/ndk";
 
-import NostrIdentityManager from "components/NostrIdentityManager.vue";
-import RelayManagerDialog from "components/RelayManagerDialog.vue";
 import NewChatDialog from "components/NewChatDialog.vue";
 import ConversationList from "components/ConversationList.vue";
 import ActiveChatHeader from "components/ActiveChatHeader.vue";
@@ -140,12 +148,13 @@ import MessageList from "components/MessageList.vue";
 import MessageInput from "components/MessageInput.vue";
 import ChatSendTokenDialog from "components/ChatSendTokenDialog.vue";
 import NostrSetupWizard from "components/NostrSetupWizard.vue";
+import ThemeToggle from "components/ThemeToggle.vue";
+import { useClipboard } from "src/composables/useClipboard";
+import { shortenString } from "src/js/string-utils";
 
 export default defineComponent({
   name: "NostrMessenger",
   components: {
-    NostrIdentityManager,
-    RelayManagerDialog,
     NewChatDialog,
     ConversationList,
     ActiveChatHeader,
@@ -153,6 +162,7 @@ export default defineComponent({
     MessageInput,
     ChatSendTokenDialog,
     NostrSetupWizard,
+    ThemeToggle,
   },
   setup() {
     const loading = ref(true);
@@ -229,20 +239,28 @@ export default defineComponent({
     };
 
     const drawerOpen = computed(() => messenger.drawerOpen);
-    const sidebarTab = useLocalStorage<string>(
-      "cashu.messenger.sidebarTab",
-      "chats"
-    );
     const selected = ref("");
     const chatSendTokenDialogRef = ref<InstanceType<
       typeof ChatSendTokenDialog
     > | null>(null);
-    const relayManagerDialogRef = ref<InstanceType<
-      typeof RelayManagerDialog
-    > | null>(null);
     const newChatDialogRef = ref<InstanceType<
       typeof NewChatDialog
     > | null>(null);
+    const conversationSearch = ref("");
+    const { copy } = useClipboard();
+    const myProfile = computed(() => {
+      const entry: any = (nostr.profiles as any)[nostr.pubkey];
+      return entry?.profile ?? entry ?? {};
+    });
+    const myInitials = computed(() => {
+      const name =
+        myProfile.value.display_name || myProfile.value.name || "";
+      const parts = name.split(/\s+/).filter(Boolean);
+      return parts.slice(0, 2).map((w) => w[0]).join("").toUpperCase();
+    });
+    const truncatedNpub = computed(
+      () => shortenString(nostr.npub, 12, 6) || nostr.npub
+    );
     const messages = computed(
       () => messenger.conversations[selected.value] || []
     );
@@ -352,10 +370,6 @@ export default defineComponent({
       (chatSendTokenDialogRef.value as any)?.show();
     }
 
-    function openRelayDialog() {
-      (relayManagerDialogRef.value as any)?.show();
-    }
-
     function openNewChatDialog() {
       (newChatDialogRef.value as any)?.show();
     }
@@ -384,18 +398,20 @@ export default defineComponent({
       connecting,
       messenger,
       drawerOpen,
-      sidebarTab,
       selected,
       chatSendTokenDialogRef,
-      relayManagerDialogRef,
       newChatDialogRef,
+      conversationSearch,
+      copy,
+      myProfile,
+      myInitials,
+      truncatedNpub,
       messages,
       showSetupWizard,
       selectConversation,
       startChat,
       sendMessage,
       openSendTokenDialog,
-      openRelayDialog,
       openNewChatDialog,
       goBack,
       reconnectAll,
