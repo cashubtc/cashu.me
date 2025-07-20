@@ -28,7 +28,14 @@
             :color="messenger.connected ? 'positive' : 'grey'"
           />
         </q-avatar>
-        <div class="text-h6 ellipsis">{{ displayName }}</div>
+        <div class="row items-center">
+          <div class="text-h6 ellipsis">{{ displayName }}</div>
+          <q-badge
+            class="q-ml-sm"
+            :color="messenger.connected ? 'positive' : 'negative'"
+            >{{ messenger.connected ? 'Online' : 'Offline' }}</q-badge
+          >
+        </div>
         <q-btn
           flat
           round
@@ -36,6 +43,14 @@
           icon="more_vert"
           class="q-ml-xs"
           @click="showProfileDialog = true"
+        />
+        <q-btn
+          flat
+          round
+          dense
+          icon="rss_feed"
+          class="q-ml-xs"
+          @click="openRelayDialog"
         />
         <ProfileInfoDialog
           v-model="showProfileDialog"
@@ -51,6 +66,7 @@
       ref="chatSendTokenDialogRef"
       :recipient="props.pubkey"
     />
+    <RelayManagerDialog ref="relayManagerDialogRef" />
   </div>
 </template>
 
@@ -62,6 +78,7 @@ import { useMessengerStore } from "src/stores/messenger";
 import ChatSendTokenDialog from "./ChatSendTokenDialog.vue";
 import { nip19 } from "nostr-tools";
 import ProfileInfoDialog from "./ProfileInfoDialog.vue";
+import RelayManagerDialog from "./RelayManagerDialog.vue";
 
 const props = defineProps<{ pubkey: string }>();
 const nostr = useNostrStore();
@@ -112,11 +129,18 @@ const initials = computed(() => {
 const chatSendTokenDialogRef = ref<InstanceType<
   typeof ChatSendTokenDialog
 > | null>(null);
+const relayManagerDialogRef = ref<InstanceType<
+  typeof RelayManagerDialog
+> | null>(null);
 const showProfileDialog = ref(false);
 
 function openSendTokenDialog() {
   if (!props.pubkey) return;
   (chatSendTokenDialogRef.value as any)?.show();
+}
+
+function openRelayDialog() {
+  (relayManagerDialogRef.value as any)?.show();
 }
 
 function clearChat() {
