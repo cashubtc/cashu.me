@@ -1,25 +1,23 @@
 <template>
-  <q-card class="shadow-2 rounded-borders bg-grey-9 text-white">
-    <router-link
-      :to="`/buckets/${bucket.id}`"
-      style="text-decoration: none; display: block"
-      class="text-white"
-    >
-      <q-item clickable class="q-pa-md">
-        <q-item-section avatar>
-          <q-avatar square size="32px" :style="avatarStyle">
-            {{ bucket.name.charAt(0).toUpperCase() }}
-          </q-avatar>
-        </q-item-section>
-        <q-item-section>
-          <q-item-label class="text-weight-bold row items-center no-wrap">
+  <q-card class="shadow-2 rounded-borders bg-grey-9 text-white q-pa-md">
+    <div class="row items-center">
+      <router-link
+        :to="`/buckets/${bucket.id}`"
+        style="text-decoration: none"
+        class="row items-center text-white ellipsis"
+      >
+        <q-avatar square size="42px" :style="avatarStyle" class="q-mr-md">
+          {{ bucket.name.charAt(0).toUpperCase() }}
+        </q-avatar>
+        <div class="column items-start">
+          <div class="text-weight-bold row items-center no-wrap">
             <span>{{ bucket.name }}</span>
             <q-icon v-if="bucket.description" name="info" class="q-ml-sm" />
-          </q-item-label>
-          <q-item-label caption v-if="bucket.description">{{
+          </div>
+          <div class="text-caption" v-if="bucket.description">{{
             bucket.description
-          }}</q-item-label>
-          <q-item-label caption class="row items-center no-wrap">
+          }}</div>
+          <div class="text-caption row items-center no-wrap">
             <span>
               {{ formatCurrency(balance || 0, activeUnit) }}
               <span v-if="bucket.goal">
@@ -30,61 +28,66 @@
               v-if="bucket.goal"
               :color="bucketColor"
               :value="Math.min((balance || 0) / bucket.goal, 1)"
-              style="width: 50px; height: 4px"
+              style="width: 60px; height: 4px"
               class="q-ml-sm"
             />
-          </q-item-label>
-        </q-item-section>
-        <q-item-section side v-if="bucket.id !== DEFAULT_BUCKET_ID">
-          <q-btn
-            icon="edit"
-            flat
-            round
-            size="sm"
-            @click.stop.prevent="emitEdit"
-            aria-label="Edit"
-            title="Edit"
-          />
-          <InfoTooltip
-            class="q-ml-xs"
-            :text="$t('BucketManager.tooltips.edit_button')"
-          />
-          <q-btn
-            icon="delete"
-            flat
-            round
-            size="sm"
-            @click.stop.prevent="emitDelete"
-            :aria-label="$t('BucketManager.actions.delete')"
-            :title="$t('BucketManager.actions.delete')"
-          />
-          <InfoTooltip
-            class="q-ml-xs"
-            :text="$t('BucketManager.tooltips.delete_button')"
-          />
-        </q-item-section>
-      </q-item>
-    </router-link>
+          </div>
+        </div>
+      </router-link>
+      <div class="q-ml-auto" v-if="bucket.id !== DEFAULT_BUCKET_ID">
+        <q-btn
+          dense
+          flat
+          round
+          icon="more_vert"
+          @click.stop="menu = true"
+          aria-label="Options"
+          data-test="bucket-menu-btn"
+        />
+        <q-menu v-model="menu" anchor="bottom right" self="top right">
+          <q-list style="min-width: 150px">
+            <q-item clickable v-close-popup @click.stop="emitAction('view')" data-test="view">
+              <q-item-section>{{ t('BucketManager.view_tokens') }}</q-item-section>
+            </q-item>
+            <q-item clickable v-close-popup @click.stop="emitAction('edit')" data-test="edit">
+              <q-item-section>{{ t('global.actions.edit.label') }}</q-item-section>
+            </q-item>
+            <q-item
+              clickable
+              v-close-popup
+              @click.stop="emitAction('archive')"
+              data-test="archive"
+            >
+              <q-item-section>
+                {{ bucket.isArchived ? t('BucketManager.actions.unarchive') : t('BucketManager.actions.archive') }}
+              </q-item-section>
+            </q-item>
+            <q-item clickable v-close-popup @click.stop="emitAction('delete')" data-test="delete">
+              <q-item-section>{{ t('BucketManager.actions.delete') }}</q-item-section>
+            </q-item>
+          </q-list>
+        </q-menu>
+      </div>
+    </div>
   </q-card>
 </template>
 
 <script lang="ts">
-import { defineComponent, computed } from "vue";
+import { defineComponent, computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
-import InfoTooltip from "./InfoTooltip.vue";
 import { DEFAULT_BUCKET_ID } from "stores/buckets";
 import { useUiStore } from "stores/ui";
 import { DEFAULT_COLOR } from "src/js/constants";
 
 export default defineComponent({
   name: "BucketCard",
-  components: { InfoTooltip },
+  components: {},
   props: {
     bucket: { type: Object as () => any, required: true },
     balance: { type: Number, default: 0 },
     activeUnit: { type: String, required: true },
   },
-  emits: ["edit", "delete"],
+  emits: ["menu-action"],
   setup(props, { emit }) {
     const uiStore = useUiStore();
     const { t } = useI18n();
@@ -109,13 +112,16 @@ export default defineComponent({
       return uiStore.formatCurrency(amount, unit);
     };
 
-    const emitEdit = () => emit("edit", props.bucket);
-    const emitDelete = () => emit("delete", props.bucket.id);
+    const menu = ref(false);
+
+    const emitAction = (action: string) => {
+      emit("menu-action", { action, bucket: props.bucket });
+    };
 
     return {
       formatCurrency,
-      emitEdit,
-      emitDelete,
+      menu,
+      emitAction,
       bucketColor,
       avatarStyle,
       DEFAULT_BUCKET_ID,

@@ -24,8 +24,7 @@
           :bucket="bucket"
           :balance="bucketBalances[bucket.id] || 0"
           :activeUnit="activeUnit.value"
-          @edit="openEdit"
-          @delete="openDelete"
+          @menu-action="handleMenuAction"
         />
       </div>
       <q-item>
@@ -165,12 +164,14 @@ import { notifyError } from "src/js/notify";
 import { DEFAULT_COLOR } from "src/js/constants";
 import BucketCard from "./BucketCard.vue";
 import BucketDialog from "./BucketDialog.vue";
+import { useRouter } from "vue-router";
 
 export default defineComponent({
   name: "BucketManager",
   components: { BucketCard, BucketDialog },
   setup() {
     const bucketsStore = useBucketsStore();
+    const router = useRouter();
     const uiStore = useUiStore();
     const { t } = useI18n();
     const showForm = ref(false);
@@ -276,6 +277,23 @@ export default defineComponent({
       showDelete.value = false;
     };
 
+    const handleMenuAction = ({ action, bucket }) => {
+      switch (action) {
+        case "view":
+          router.push(`/buckets/${bucket.id}`);
+          break;
+        case "edit":
+          openEdit(bucket);
+          break;
+        case "archive":
+          bucketsStore.editBucket(bucket.id, { isArchived: !bucket.isArchived });
+          break;
+        case "delete":
+          openDelete(bucket.id);
+          break;
+      }
+    };
+
     return {
       DEFAULT_BUCKET_ID,
       bucketList,
@@ -299,6 +317,7 @@ export default defineComponent({
       deleteBucket,
       formatCurrency,
       handleDrop,
+      handleMenuAction,
       DEFAULT_COLOR,
     };
   },
