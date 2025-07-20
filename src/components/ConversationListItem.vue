@@ -27,6 +27,7 @@
         <q-item-label
           class="text-subtitle1 ellipsis"
           :class="{ 'text-weight-bold': unreadCount > 0 }"
+          :title="displayName"
         >
           {{ displayName }}
         </q-item-label>
@@ -48,6 +49,7 @@
         caption
         class="snippet ellipsis"
         :class="{ 'text-weight-bold': unreadCount > 0 }"
+        :title="snippet.text"
       >
         <template v-if="loaded">
           <q-icon
@@ -244,6 +246,15 @@ export default defineComponent({
 .snippet {
   font-size: 0.8rem;
   white-space: normal;
+}
+
+.conversation-item .ellipsis {
+  flex: 1;
+  min-width: 0;
+}
+
+.drawer-collapsed .conversation-item .ellipsis {
+  display: none;
 }
 .status-dot {
   position: absolute;
