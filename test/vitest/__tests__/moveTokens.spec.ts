@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { shallowMount } from "@vue/test-utils";
-import MoveTokens from "../../../src/pages/MoveTokens.vue";
+import MoveTokens from "../../../src/components/MoveTokensModal.vue";
 
 const moveProofsMock = vi.fn();
 
@@ -35,7 +35,7 @@ beforeEach(() => {
 
 describe("MoveTokens component", () => {
   it("toggles token selection", () => {
-    const wrapper = shallowMount(MoveTokens);
+    const wrapper = shallowMount(MoveTokens, { props: { modelValue: true } });
     const vm: any = wrapper.vm;
 
     vm.toggleProof("s1", true);
@@ -46,7 +46,7 @@ describe("MoveTokens component", () => {
   });
 
   it("moves selected tokens", async () => {
-    const wrapper = shallowMount(MoveTokens);
+    const wrapper = shallowMount(MoveTokens, { props: { modelValue: true } });
     const vm: any = wrapper.vm;
     vm.selectedSecrets = ["a", "b"];
     vm.targetBucketId = "b2";
@@ -55,5 +55,14 @@ describe("MoveTokens component", () => {
 
     expect(moveProofsMock).toHaveBeenCalledWith(["a", "b"], "b2");
     expect(vm.selectedSecrets.length).toBe(0);
+    expect(wrapper.emitted("update:modelValue")?.[0]).toEqual([false]);
+  });
+
+  it("reflects modelValue via showLocal", async () => {
+    const wrapper = shallowMount(MoveTokens, { props: { modelValue: true } });
+    const vm: any = wrapper.vm;
+    expect(vm.showLocal).toBe(true);
+    await wrapper.setProps({ modelValue: false });
+    expect((wrapper.vm as any).showLocal).toBe(false);
   });
 });
