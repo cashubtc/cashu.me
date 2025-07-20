@@ -3,8 +3,8 @@ import { shallowMount } from "@vue/test-utils";
 import BucketManager from "../../../src/components/BucketManager.vue";
 
 const mockBuckets = [
-  { id: "b1", name: "Alpha" },
-  { id: "b2", name: "Beta" },
+  { id: "b1", name: "Alpha", description: "First bucket" },
+  { id: "b2", name: "Beta", description: "Second bucket" },
 ];
 
 vi.mock("../../../src/stores/proofs", () => ({
@@ -47,6 +47,14 @@ describe("BucketManager form", () => {
     const wrapper = shallowMount(BucketManager);
     expect(wrapper.findAll("bucket-card-stub").length).toBe(2);
     (wrapper.vm as any).searchTerm = "Beta";
+    await wrapper.vm.$nextTick();
+    expect(wrapper.findAll("bucket-card-stub").length).toBe(1);
+  });
+
+  it("filters buckets by description text", async () => {
+    const wrapper = shallowMount(BucketManager);
+    expect(wrapper.findAll("bucket-card-stub").length).toBe(2);
+    (wrapper.vm as any).searchTerm = "Second";
     await wrapper.vm.$nextTick();
     expect(wrapper.findAll("bucket-card-stub").length).toBe(1);
   });
