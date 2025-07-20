@@ -213,6 +213,10 @@ export default defineComponent({
           months: months.value,
           startDate: Math.floor(new Date(startDate.value).getTime() / 1000),
           relayList: profile.relays ?? [],
+          tierName: props.tier?.name,
+          benefits: props.tier?.benefits,
+          creatorName: profile?.name,
+          creatorAvatar: profile?.picture,
         });
         if (success) {
           notifySuccess(t("FindCreators.notifications.subscription_success"));

@@ -24,6 +24,10 @@ export const useSubscriptionsStore = defineStore("subscriptions", () => {
     const entry: Subscription = {
       id: data.id ?? uuidv4(),
       ...data,
+      tierName: data.tierName ?? null,
+      benefits: data.benefits ?? [],
+      creatorName: data.creatorName ?? null,
+      creatorAvatar: data.creatorAvatar ?? null,
       intervals: data.intervals.map((i) => ({
         ...i,
         redeemed: i.redeemed ?? false,

@@ -171,6 +171,10 @@ export const useNutzapStore = defineStore("nutzap", {
       startDate,
       relayList,
       htlc,
+      tierName,
+      benefits,
+      creatorName,
+      creatorAvatar,
     }: SubscribeTierOptions): Promise<boolean> {
       const wallet = useWalletStore();
       const mints = useMintsStore();
@@ -281,6 +285,10 @@ export const useNutzapStore = defineStore("nutzap", {
         frequency: "monthly",
         startDate,
         commitmentLength: months,
+        ...(tierName ? { tierName } : {}),
+        ...(benefits ? { benefits } : {}),
+        ...(creatorName ? { creatorName } : {}),
+        ...(creatorAvatar ? { creatorAvatar } : {}),
         intervals: lockedTokens.map((t, idx) => ({
           intervalKey: String(idx + 1),
           lockedTokenId: t.id,

@@ -55,6 +55,10 @@ export interface Subscription {
   frequency: "monthly" | "weekly";
   startDate: number;
   commitmentLength: number;
+  tierName?: string;
+  benefits?: string[];
+  creatorName?: string;
+  creatorAvatar?: string;
   intervals: SubscriptionInterval[];
   status: "active" | "pending_renewal" | "cancelled" | "completed";
   createdAt: number;
@@ -420,6 +424,16 @@ export class CashuDexie extends Dexie {
             if (i.htlcHash === undefined) i.htlcHash = null;
             if (i.htlcSecret === undefined) i.htlcSecret = null;
           });
+        });
+      });
+
+    this.version(18)
+      .upgrade(async (tx) => {
+        await tx.table("subscriptions").toCollection().modify((entry: any) => {
+          if (entry.tierName === undefined) entry.tierName = null;
+          if (entry.benefits === undefined) entry.benefits = [];
+          if (entry.creatorName === undefined) entry.creatorName = null;
+          if (entry.creatorAvatar === undefined) entry.creatorAvatar = null;
         });
       });
   }
