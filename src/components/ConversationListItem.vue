@@ -1,19 +1,22 @@
 <template>
   <q-item
     clickable
-    class="conversation-item"
+    class="conversation-item hover:bg-grey-2 dark:hover:bg-grey-8"
     :class="{ selected: props.selected }"
+    :style="{
+      borderLeft: '3px solid ' + (props.selected ? 'var(--q-primary)' : 'transparent')
+    }"
     @click="handleClick"
   >
     <q-item-section avatar>
-      <q-avatar size="56px" class="relative-position">
+      <q-avatar size="48px" class="relative-position">
         <template v-if="loaded && profile?.picture">
           <img :src="profile.picture" />
         </template>
         <template v-else-if="loaded">
           <div class="placeholder text-white text-body1">{{ initials }}</div>
         </template>
-        <q-skeleton v-else type="circle" size="56px" />
+        <q-skeleton v-else type="circle" size="48px" />
         <q-badge
           class="status-dot"
           rounded
@@ -72,7 +75,7 @@
       </q-item-label>
     </q-item-section>
 
-    <q-item-section side top class="timestamp-section">
+    <q-item-section side top class="timestamp-section text-right">
       <span class="timestamp text-caption">{{ timeAgo }}</span>
     </q-item-section>
 
@@ -234,14 +237,10 @@ export default defineComponent({
   transition: background-color 0.2s ease;
   display: flex;
   gap: 12px;
+  border-left: 3px solid transparent;
 }
 .conversation-item.selected {
   background-color: color-mix(in srgb, var(--q-primary), transparent 92%);
-  border-left: 3px solid var(--q-primary);
-}
-.conversation-item:hover,
-.conversation-item:active {
-  background-color: var(--conversation-hover-color);
 }
 .conversation-item:focus {
   border-left: 2px solid var(--q-primary);
