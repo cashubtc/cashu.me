@@ -22,62 +22,74 @@
       </template>
     </q-banner>
     <div v-if="isSmallScreen">
-      <div class="row q-col-gutter-sm q-mb-md">
-        <q-input
-          v-model="filter"
-          dense
-          debounce="300"
-          class="col"
-          :placeholder="$t('global.actions.search.label')"
-        />
-        <q-select
-          v-model="statusFilter"
-          dense
-          emit-value
-          map-options
-          clearable
-          class="col"
-          :options="[
-            {
-              label: $t('SubscriptionsOverview.status.active'),
-              value: 'active',
-            },
-            {
-              label: $t('SubscriptionsOverview.status.expired'),
-              value: 'expired',
-            },
-          ]"
-          :placeholder="$t('SubscriptionsOverview.filter.status')"
-        />
-        <q-select
-          v-model="bucketFilter"
-          dense
-          emit-value
-          map-options
-          clearable
-          class="col"
-          :options="
-            bucketsStore.bucketList.map((b) => ({
-              label: b.name,
-              value: b.name,
-            }))
-          "
-          :placeholder="$t('SubscriptionsOverview.filter.bucket')"
-        />
-        <q-select
-          v-model="frequencyFilter"
-          dense
-          emit-value
-          map-options
-          clearable
-          class="col"
-          :options="[
-            { label: 'monthly', value: 'monthly' },
-            { label: 'weekly', value: 'weekly' },
-          ]"
-          :placeholder="$t('SubscriptionsOverview.filter.frequency')"
-        />
-      </div>
+      <q-form class="q-gutter-sm q-mb-md">
+        <q-toolbar class="q-gutter-sm">
+          <q-input
+            v-model="filter"
+            dense
+            debounce="300"
+            class="col"
+            :placeholder="$t('global.actions.search.label')"
+          />
+          <q-select
+            v-model="statusFilter"
+            dense
+            emit-value
+            map-options
+            clearable
+            class="col"
+            :options="[
+              {
+                label: $t('SubscriptionsOverview.status.active'),
+                value: 'active',
+              },
+              {
+                label: $t('SubscriptionsOverview.status.expired'),
+                value: 'expired',
+              },
+            ]"
+            :placeholder="$t('SubscriptionsOverview.filter.status')"
+          />
+          <q-btn
+            flat
+            dense
+            icon="tune"
+            @click="showAdvancedFilters = !showAdvancedFilters"
+          />
+        </q-toolbar>
+        <q-slide-transition>
+          <div v-show="showAdvancedFilters" class="row q-gutter-sm q-mt-sm">
+            <q-select
+              v-model="bucketFilter"
+              dense
+              emit-value
+              map-options
+              clearable
+              class="col"
+              :options="
+                bucketsStore.bucketList.map((b) => ({
+                  label: b.name,
+                  value: b.name,
+                }))
+              "
+              :placeholder="$t('SubscriptionsOverview.filter.bucket')"
+            />
+            <q-select
+              v-model="frequencyFilter"
+              dense
+              emit-value
+              map-options
+              clearable
+              class="col"
+              :options="[
+                { label: 'monthly', value: 'monthly' },
+                { label: 'weekly', value: 'weekly' },
+              ]"
+              :placeholder="$t('SubscriptionsOverview.filter.frequency')"
+            />
+          </div>
+        </q-slide-transition>
+      </q-form>
       <div v-for="row in filteredRows" :key="row.creator" class="q-mb-md">
         <q-card flat bordered>
           <q-card-section class="row items-center">
@@ -171,59 +183,74 @@
       :sort-method="customSort"
     >
       <template #top-right>
-        <q-input
-          v-model="filter"
-          dense
-          debounce="300"
-          class="q-mr-md"
-          :placeholder="$t('global.actions.search.label')"
-        />
-        <q-select
-          v-model="statusFilter"
-          dense
-          emit-value
-          map-options
-          clearable
-          :options="[
-            {
-              label: $t('SubscriptionsOverview.status.active'),
-              value: 'active',
-            },
-            {
-              label: $t('SubscriptionsOverview.status.expired'),
-              value: 'expired',
-            },
-          ]"
-          :placeholder="$t('SubscriptionsOverview.filter.status')"
-        />
-        <q-select
-          v-model="bucketFilter"
-          dense
-          emit-value
-          map-options
-          clearable
-          :options="
-            bucketsStore.bucketList.map((b) => ({
-              label: b.name,
-              value: b.name,
-            }))
-          "
-          class="q-ml-md"
-          :placeholder="$t('SubscriptionsOverview.filter.bucket')"
-        />
-        <q-select
-          v-model="frequencyFilter"
-          dense
-          emit-value
-          map-options
-          clearable
-          :options="[
-            { label: 'monthly', value: 'monthly' },
-            { label: 'weekly', value: 'weekly' },
-          ]"
-          class="q-ml-md"
-          :placeholder="$t('SubscriptionsOverview.filter.frequency')"
-        />
+        <div class="column">
+          <q-toolbar class="q-gutter-sm">
+            <q-input
+              v-model="filter"
+              dense
+              debounce="300"
+              class="col"
+              :placeholder="$t('global.actions.search.label')"
+            />
+            <q-select
+              v-model="statusFilter"
+              dense
+              emit-value
+              map-options
+              clearable
+              class="col"
+              :options="[
+                {
+                  label: $t('SubscriptionsOverview.status.active'),
+                  value: 'active',
+                },
+                {
+                  label: $t('SubscriptionsOverview.status.expired'),
+                  value: 'expired',
+                },
+              ]"
+              :placeholder="$t('SubscriptionsOverview.filter.status')"
+            />
+            <q-btn
+              flat
+              dense
+              icon="tune"
+              @click="showAdvancedFilters = !showAdvancedFilters"
+            />
+          </q-toolbar>
+          <q-slide-transition>
+            <div v-show="showAdvancedFilters" class="row q-gutter-sm q-mt-sm">
+              <q-select
+                v-model="bucketFilter"
+                dense
+                emit-value
+                map-options
+                clearable
+                class="col"
+                :options="
+                  bucketsStore.bucketList.map((b) => ({
+                    label: b.name,
+                    value: b.name,
+                  }))
+                "
+                :placeholder="$t('SubscriptionsOverview.filter.bucket')"
+              />
+              <q-select
+                v-model="frequencyFilter"
+                dense
+                emit-value
+                map-options
+                clearable
+                class="col"
+                :options="[
+                  { label: 'monthly', value: 'monthly' },
+                  { label: 'weekly', value: 'weekly' },
+                ]"
+                :placeholder="$t('SubscriptionsOverview.filter.frequency')"
+              />
+            </div>
+          </q-slide-transition>
+        </div>
       </template>
       <template #body-cell-creator="props">
         <div class="row items-center">
@@ -588,6 +615,7 @@ const filter = ref("");
 const statusFilter = ref<string | null>(null);
 const bucketFilter = ref<string | null>(null);
 const frequencyFilter = ref<string | null>(null);
+const showAdvancedFilters = ref(false);
 const pagination = ref({ page: 1, rowsPerPage: 10 });
 
 const filteredRows = computed(() => {
