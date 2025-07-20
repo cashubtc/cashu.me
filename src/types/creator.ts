@@ -15,4 +15,8 @@ export interface SubscribeTierOptions {
   startDate: number;
   relayList: string[];
   htlc?: boolean;
+  tierName?: string;
+  benefits?: string[];
+  creatorName?: string;
+  creatorAvatar?: string;
 }
