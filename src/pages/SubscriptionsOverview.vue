@@ -499,11 +499,15 @@ const filter = ref("");
 const statusFilter = ref<string | null>(null);
 const bucketFilter = ref<string | null>(null);
 const frequencyFilter = ref<string | null>(null);
-const sortBy = ref("end");
+const sortBy = ref("end-date-asc");
 const sortOptions = [
-  { label: t("SubscriptionsOverview.sort.end"), value: "end" },
-  { label: t("SubscriptionsOverview.sort.name"), value: "creator" },
-  { label: t("SubscriptionsOverview.sort.cost"), value: "monthly" },
+  { label: t("SubscriptionsOverview.sort.end"), value: "end-date-asc" },
+  { label: t("SubscriptionsOverview.sort.name"), value: "name-asc" },
+  { label: t("SubscriptionsOverview.sort.cost"), value: "cost-desc" },
+  {
+    label: t("SubscriptionsOverview.columns.start"),
+    value: "start-date-desc",
+  },
 ];
 const showAdvancedFilters = ref(false);
 const isLoading = ref(true);
@@ -521,7 +525,26 @@ const filteredRows = computed(() => {
     const matchesFilter = !term || rowString.includes(term);
     return matchesStatus && matchesBucket && matchesFrequency && matchesFilter;
   });
-  return customSort([...list], sortBy.value, false);
+  let field = "end";
+  let descending = false;
+  switch (sortBy.value) {
+    case "name-asc":
+      field = "creator";
+      break;
+    case "cost-desc":
+      field = "monthly";
+      descending = true;
+      break;
+    case "start-date-desc":
+      field = "start";
+      descending = true;
+      break;
+    case "end-date-asc":
+    default:
+      field = "end";
+      break;
+  }
+  return customSort([...list], field, descending);
 });
 
 function customSort(rows: any[], sortBy: string, descending: boolean) {
