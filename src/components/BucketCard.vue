@@ -1,5 +1,5 @@
 <template>
-  <q-card class="shadow-2 rounded-borders bg-grey-9 text-white q-pa-md">
+  <q-card class="shadow-2 rounded-borders bucket-card text-white q-pa-md">
     <div class="row items-center">
       <router-link
         :to="`/buckets/${bucket.id}`"

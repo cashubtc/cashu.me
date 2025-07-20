@@ -1,6 +1,6 @@
 <template>
   <q-dialog v-model="showLocal" persistent>
-    <q-card class="q-pa-lg" style="max-width: 500px">
+    <q-card class="q-pa-lg bucket-modal" style="max-width: 500px">
       <q-form @submit.prevent="save">
         <q-input
           v-model="form.name"
