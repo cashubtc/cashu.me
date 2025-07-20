@@ -28,9 +28,15 @@
             v-model="filter"
             dense
             debounce="300"
+            outlined
+            clearable
             class="col"
             :placeholder="$t('global.actions.search.label')"
-          />
+          >
+            <template #prepend>
+              <q-icon name="search" />
+            </template>
+          </q-input>
           <q-select
             v-model="statusFilter"
             dense
@@ -50,48 +56,23 @@
             ]"
             :placeholder="$t('SubscriptionsOverview.filter.status')"
           />
-          <q-btn
-            flat
+          <q-select
+            v-model="sortBy"
             dense
-            icon="tune"
-            @click="showAdvancedFilters = !showAdvancedFilters"
+            emit-value
+            map-options
+            class="col"
+            :options="sortOptions"
+            :placeholder="$t('SubscriptionsOverview.sort_by')"
           />
+          <q-btn flat dense icon="tune" @click="showAdvancedFilters = true" />
         </q-toolbar>
-        <q-slide-transition>
-          <div v-show="showAdvancedFilters" class="row q-gutter-sm q-mt-sm">
-            <q-select
-              v-model="bucketFilter"
-              dense
-              emit-value
-              map-options
-              clearable
-              class="col"
-              :options="
-                bucketsStore.bucketList.map((b) => ({
-                  label: b.name,
-                  value: b.name,
-                }))
-              "
-              :placeholder="$t('SubscriptionsOverview.filter.bucket')"
-            />
-            <q-select
-              v-model="frequencyFilter"
-              dense
-              emit-value
-              map-options
-              clearable
-              class="col"
-              :options="[
-                { label: 'monthly', value: 'monthly' },
-                { label: 'weekly', value: 'weekly' },
-              ]"
-              :placeholder="$t('SubscriptionsOverview.filter.frequency')"
-            />
-          </div>
-        </q-slide-transition>
       </q-form>
-      <div v-for="row in filteredRows" :key="row.creator" class="q-mb-md">
-        <q-card flat bordered>
+      <div v-if="isLoading" class="grid grid-cols-1 gap-4">
+        <q-skeleton v-for="n in 3" :key="n" height="150px" square />
+      </div>
+      <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <q-card v-for="row in filteredRows" :key="row.creator" flat bordered>
           <q-card-section class="row items-center">
             <q-avatar size="32px" v-if="profiles[row.creator]?.picture">
               <img :src="profiles[row.creator].picture" />
@@ -104,10 +85,14 @@
                   shortenString(pubkeyNpub(row.creator), 15, 6)
                 }}
               </div>
-              <div class="text-caption">
-                {{ row.tierName }}
-              </div>
+              <div class="text-caption">{{ row.tierName }}</div>
             </div>
+            <q-badge
+              :color="row.status === 'active' ? 'positive' : 'negative'"
+              class="q-ml-auto"
+            >
+              {{ $t(`SubscriptionsOverview.status.${row.status}`) }}
+            </q-badge>
           </q-card-section>
           <q-card-section class="q-pt-none">
             <q-linear-progress
@@ -135,26 +120,68 @@
             <q-btn flat round dense icon="more_vert">
               <q-menu anchor="bottom right" self="top right">
                 <q-list dense style="min-width: 150px">
-                  <q-item clickable v-close-popup @click="openDetails(row.creator)">
-                    <q-item-section>{{ $t("SubscriptionsOverview.view") }}</q-item-section>
+                  <q-item
+                    clickable
+                    v-close-popup
+                    @click="openDetails(row.creator)"
+                  >
+                    <q-item-section>{{
+                      $t("SubscriptionsOverview.view")
+                    }}</q-item-section>
                   </q-item>
-                  <q-item clickable v-close-popup :to="`/creator/${pubkeyNpub(row.creator)}`">
-                    <q-item-section>{{ $t("FindCreators.actions.view_profile.label") }}</q-item-section>
+                  <q-item
+                    clickable
+                    v-close-popup
+                    :to="`/creator/${pubkeyNpub(row.creator)}`"
+                  >
+                    <q-item-section>{{
+                      $t("FindCreators.actions.view_profile.label")
+                    }}</q-item-section>
                   </q-item>
-                  <q-item clickable v-close-popup @click="sendMessage(row.creator)">
-                    <q-item-section>{{ $t("SubscriptionsOverview.message") }}</q-item-section>
+                  <q-item
+                    clickable
+                    v-close-popup
+                    @click="sendMessage(row.creator)"
+                  >
+                    <q-item-section>{{
+                      $t("SubscriptionsOverview.message")
+                    }}</q-item-section>
                   </q-item>
-                  <q-item clickable v-close-popup @click="extendSubscription(row.creator)">
-                    <q-item-section>{{ $t("SubscriptionsOverview.extend") }}</q-item-section>
+                  <q-item
+                    clickable
+                    v-close-popup
+                    @click="extendSubscription(row.creator)"
+                  >
+                    <q-item-section>{{
+                      $t("SubscriptionsOverview.extend")
+                    }}</q-item-section>
                   </q-item>
-                  <q-item clickable v-close-popup @click="shareTokens(row.creator)">
-                    <q-item-section>{{ $t("SubscriptionsOverview.export") }}</q-item-section>
+                  <q-item
+                    clickable
+                    v-close-popup
+                    @click="shareTokens(row.creator)"
+                  >
+                    <q-item-section>{{
+                      $t("SubscriptionsOverview.export")
+                    }}</q-item-section>
                   </q-item>
-                  <q-item clickable v-close-popup @click="exportTokens(row.creator)">
-                    <q-item-section>{{ $t("SubscriptionsOverview.export_csv") }}</q-item-section>
+                  <q-item
+                    clickable
+                    v-close-popup
+                    @click="exportTokens(row.creator)"
+                  >
+                    <q-item-section>{{
+                      $t("SubscriptionsOverview.export_csv")
+                    }}</q-item-section>
                   </q-item>
-                  <q-item clickable v-close-popup @click="cancelSubscription(row.creator)">
-                    <q-item-section>{{ $t("SubscriptionsOverview.cancel") }}</q-item-section>
+                  <q-item
+                    clickable
+                    v-close-popup
+                    @click="cancelSubscription(row.creator)"
+                  >
+                    <q-item-section>{{
+                      $t("SubscriptionsOverview.cancel")
+                    }}</q-item-section>
                   </q-item>
                 </q-list>
               </q-menu>
@@ -169,219 +196,247 @@
         </q-btn>
       </div>
     </div>
-    <q-table
-      v-else
-      flat
-      bordered
-      dense
-      :rows="filteredRows"
-      :columns="columns"
-      row-key="creator"
-      :rows-per-page-options="[5, 10, 20, 0]"
-      :filter="filter"
-      :pagination="pagination"
-      :sort-method="customSort"
-    >
-      <template #top-right>
-        <div class="column">
-          <q-toolbar class="q-gutter-sm">
-            <q-input
-              v-model="filter"
-              dense
-              debounce="300"
-              class="col"
-              :placeholder="$t('global.actions.search.label')"
-            />
-            <q-select
-              v-model="statusFilter"
-              dense
-              emit-value
-              map-options
-              clearable
-              class="col"
-              :options="[
-                {
-                  label: $t('SubscriptionsOverview.status.active'),
-                  value: 'active',
-                },
-                {
-                  label: $t('SubscriptionsOverview.status.expired'),
-                  value: 'expired',
-                },
-              ]"
-              :placeholder="$t('SubscriptionsOverview.filter.status')"
-            />
-            <q-btn
-              flat
-              dense
-              icon="tune"
-              @click="showAdvancedFilters = !showAdvancedFilters"
-            />
-          </q-toolbar>
-          <q-slide-transition>
-            <div v-show="showAdvancedFilters" class="row q-gutter-sm q-mt-sm">
-              <q-select
-                v-model="bucketFilter"
+    <div v-else>
+      <q-skeleton v-if="isLoading" height="200px" square />
+      <q-table
+        v-else
+        flat
+        bordered
+        dense
+        :rows="filteredRows"
+        :columns="columns"
+        row-key="creator"
+        :rows-per-page-options="[5, 10, 20, 0]"
+        :filter="filter"
+        :pagination="pagination"
+        :sort-method="customSort"
+      >
+        <template #top-right>
+          <div class="column">
+            <q-toolbar class="q-gutter-sm">
+              <q-input
+                v-model="filter"
                 dense
-                emit-value
-                map-options
+                debounce="300"
+                outlined
                 clearable
                 class="col"
-                :options="
-                  bucketsStore.bucketList.map((b) => ({
-                    label: b.name,
-                    value: b.name,
-                  }))
-                "
-                :placeholder="$t('SubscriptionsOverview.filter.bucket')"
-              />
+                :placeholder="$t('global.actions.search.label')"
+              >
+                <template #prepend>
+                  <q-icon name="search" />
+                </template>
+              </q-input>
               <q-select
-                v-model="frequencyFilter"
+                v-model="statusFilter"
                 dense
                 emit-value
                 map-options
                 clearable
                 class="col"
                 :options="[
-                  { label: 'monthly', value: 'monthly' },
-                  { label: 'weekly', value: 'weekly' },
+                  {
+                    label: $t('SubscriptionsOverview.status.active'),
+                    value: 'active',
+                  },
+                  {
+                    label: $t('SubscriptionsOverview.status.expired'),
+                    value: 'expired',
+                  },
                 ]"
-                :placeholder="$t('SubscriptionsOverview.filter.frequency')"
+                :placeholder="$t('SubscriptionsOverview.filter.status')"
               />
-            </div>
-          </q-slide-transition>
-        </div>
-      </template>
-      <template #body-cell-creator="props">
-        <div class="row items-center">
-          <q-avatar size="32px" v-if="profiles[props.row.creator]?.picture">
-            <img :src="profiles[props.row.creator].picture" />
-          </q-avatar>
-          <div class="q-ml-sm">
-            <div>
-              {{
-                profiles[props.row.creator]?.display_name ||
-                profiles[props.row.creator]?.name ||
-                shortenString(pubkeyNpub(props.row.creator), 15, 6)
-              }}
-            </div>
-            <div class="text-caption">
-              {{ props.row.bucketName }}
+              <q-select
+                v-model="sortBy"
+                dense
+                emit-value
+                map-options
+                class="col"
+                :options="sortOptions"
+                :placeholder="$t('SubscriptionsOverview.sort_by')"
+              />
+              <q-btn
+                flat
+                dense
+                icon="tune"
+                @click="showAdvancedFilters = true"
+              />
+            </q-toolbar>
+          </div>
+        </template>
+        <template #body-cell-creator="props">
+          <div class="row items-center">
+            <q-avatar size="32px" v-if="profiles[props.row.creator]?.picture">
+              <img :src="profiles[props.row.creator].picture" />
+            </q-avatar>
+            <div class="q-ml-sm">
+              <div>
+                {{
+                  profiles[props.row.creator]?.display_name ||
+                  profiles[props.row.creator]?.name ||
+                  shortenString(pubkeyNpub(props.row.creator), 15, 6)
+                }}
+              </div>
+              <div class="text-caption">
+                {{ props.row.bucketName }}
+              </div>
             </div>
           </div>
-        </div>
-      </template>
-      <template #body-cell-bucket="props">
-        {{ props.row.bucketName || "-" }}
-      </template>
-      <template #body-cell-benefits="props">
-        <template v-if="Array.isArray(props.row.benefits)">
-          <ul class="q-my-none q-pl-none">
-            <li v-for="(benefit, idx) in props.row.benefits" :key="idx">
-              {{ benefit }}
-            </li>
-          </ul>
         </template>
-        <template v-else>
-          {{ props.row.benefits }}
+        <template #body-cell-bucket="props">
+          {{ props.row.bucketName || "-" }}
         </template>
-      </template>
-      <template #body-cell-monthly="props">
-        {{ formatCurrency(props.row.monthly) }}
-      </template>
-      <template #body-cell-total="props">
-        {{ formatCurrency(props.row.total) }}
-      </template>
-      <template #body-cell-start="props">
-        {{ props.row.start ? formatTs(props.row.start) : "-" }}
-      </template>
-      <template #body-cell-end="props">
-        {{ props.row.end ? formatTs(props.row.end) : "-" }}
-      </template>
-      <template #body-cell-totalMonths="props">
-        {{ props.row.totalMonths }}
-      </template>
-      <template #body-cell-next_unlock="props">
-        {{ props.row.nextUnlock ? formatTs(props.row.nextUnlock) : "-" }}
-      </template>
-      <template #body-cell-status="props">
-        <div class="row items-center">
-          <q-badge
-            :color="props.row.status === 'active' ? 'positive' : 'negative'"
-            class="q-mr-xs"
-          >
-            {{ $t(`SubscriptionsOverview.status.${props.row.status}`) }}
-          </q-badge>
-          <q-badge v-if="props.row.hasUnlocked" color="primary">
-            {{ $t("SubscriptionsOverview.status.unlocked") }}
-          </q-badge>
-        </div>
-      </template>
-      <template #body-cell-remaining="props">
-        <div class="row items-center">
-          <span class="q-mr-sm">{{ props.row.monthsLeft }}</span>
-          <q-linear-progress
-            rounded
-            size="8px"
-            class="progress"
-            :class="
-              props.row.status === 'active' ? 'active-bar' : 'expired-bar'
-            "
-            :value="props.row.progress"
-            :label="Math.round(props.row.progress * 100) + '%'"
-            :color="props.row.status === 'active' ? 'positive' : 'negative'"
-            track-color="grey-4"
-          >
-            <q-tooltip>
-              {{
-                props.row.countdown
-                  ? $t("SubscriptionsOverview.row.next_unlock_label", {
-                      value: props.row.countdown,
-                    })
-                  : "-"
-              }}
-            </q-tooltip>
-          </q-linear-progress>
-        </div>
-      </template>
-      <template #body-cell-actions="props">
-        <q-btn flat round dense icon="more_vert">
-          <q-menu anchor="bottom right" self="top right">
-            <q-list dense style="min-width: 150px">
-              <q-item clickable v-close-popup @click="openDetails(props.row.creator)">
-                <q-item-section>{{ $t("SubscriptionsOverview.view") }}</q-item-section>
-              </q-item>
-              <q-item clickable v-close-popup :to="`/creator/${pubkeyNpub(props.row.creator)}`">
-                <q-item-section>{{ $t("FindCreators.actions.view_profile.label") }}</q-item-section>
-              </q-item>
-              <q-item clickable v-close-popup @click="sendMessage(props.row.creator)">
-                <q-item-section>{{ $t("SubscriptionsOverview.message") }}</q-item-section>
-              </q-item>
-              <q-item clickable v-close-popup @click="extendSubscription(props.row.creator)">
-                <q-item-section>{{ $t("SubscriptionsOverview.extend") }}</q-item-section>
-              </q-item>
-              <q-item clickable v-close-popup @click="shareTokens(props.row.creator)">
-                <q-item-section>{{ $t("SubscriptionsOverview.export") }}</q-item-section>
-              </q-item>
-              <q-item clickable v-close-popup @click="exportTokens(props.row.creator)">
-                <q-item-section>{{ $t("SubscriptionsOverview.export_csv") }}</q-item-section>
-              </q-item>
-              <q-item clickable v-close-popup @click="cancelSubscription(props.row.creator)">
-                <q-item-section>{{ $t("SubscriptionsOverview.cancel") }}</q-item-section>
-              </q-item>
-            </q-list>
-          </q-menu>
-        </q-btn>
-      </template>
-      <template #no-data>
-        <div class="text-center q-pa-md">
-          {{ $t("SubscriptionsOverview.empty") }}
-          <q-btn flat color="primary" to="/find-creators" class="q-ml-md">
-            {{ $t("SubscriptionsOverview.discover") }}
+        <template #body-cell-benefits="props">
+          <template v-if="Array.isArray(props.row.benefits)">
+            <ul class="q-my-none q-pl-none">
+              <li v-for="(benefit, idx) in props.row.benefits" :key="idx">
+                {{ benefit }}
+              </li>
+            </ul>
+          </template>
+          <template v-else>
+            {{ props.row.benefits }}
+          </template>
+        </template>
+        <template #body-cell-monthly="props">
+          {{ formatCurrency(props.row.monthly) }}
+        </template>
+        <template #body-cell-total="props">
+          {{ formatCurrency(props.row.total) }}
+        </template>
+        <template #body-cell-start="props">
+          {{ props.row.start ? formatTs(props.row.start) : "-" }}
+        </template>
+        <template #body-cell-end="props">
+          {{ props.row.end ? formatTs(props.row.end) : "-" }}
+        </template>
+        <template #body-cell-totalMonths="props">
+          {{ props.row.totalMonths }}
+        </template>
+        <template #body-cell-next_unlock="props">
+          {{ props.row.nextUnlock ? formatTs(props.row.nextUnlock) : "-" }}
+        </template>
+        <template #body-cell-status="props">
+          <div class="row items-center">
+            <q-badge
+              :color="props.row.status === 'active' ? 'positive' : 'negative'"
+              class="q-mr-xs"
+            >
+              {{ $t(`SubscriptionsOverview.status.${props.row.status}`) }}
+            </q-badge>
+            <q-badge v-if="props.row.hasUnlocked" color="primary">
+              {{ $t("SubscriptionsOverview.status.unlocked") }}
+            </q-badge>
+          </div>
+        </template>
+        <template #body-cell-remaining="props">
+          <div class="row items-center">
+            <span class="q-mr-sm">{{ props.row.monthsLeft }}</span>
+            <q-linear-progress
+              rounded
+              size="8px"
+              class="progress"
+              :class="
+                props.row.status === 'active' ? 'active-bar' : 'expired-bar'
+              "
+              :value="props.row.progress"
+              :label="Math.round(props.row.progress * 100) + '%'"
+              :color="props.row.status === 'active' ? 'positive' : 'negative'"
+              track-color="grey-4"
+            >
+              <q-tooltip>
+                {{
+                  props.row.countdown
+                    ? $t("SubscriptionsOverview.row.next_unlock_label", {
+                        value: props.row.countdown,
+                      })
+                    : "-"
+                }}
+              </q-tooltip>
+            </q-linear-progress>
+          </div>
+        </template>
+        <template #body-cell-actions="props">
+          <q-btn flat round dense icon="more_vert">
+            <q-menu anchor="bottom right" self="top right">
+              <q-list dense style="min-width: 150px">
+                <q-item
+                  clickable
+                  v-close-popup
+                  @click="openDetails(props.row.creator)"
+                >
+                  <q-item-section>{{
+                    $t("SubscriptionsOverview.view")
+                  }}</q-item-section>
+                </q-item>
+                <q-item
+                  clickable
+                  v-close-popup
+                  :to="`/creator/${pubkeyNpub(props.row.creator)}`"
+                >
+                  <q-item-section>{{
+                    $t("FindCreators.actions.view_profile.label")
+                  }}</q-item-section>
+                </q-item>
+                <q-item
+                  clickable
+                  v-close-popup
+                  @click="sendMessage(props.row.creator)"
+                >
+                  <q-item-section>{{
+                    $t("SubscriptionsOverview.message")
+                  }}</q-item-section>
+                </q-item>
+                <q-item
+                  clickable
+                  v-close-popup
+                  @click="extendSubscription(props.row.creator)"
+                >
+                  <q-item-section>{{
+                    $t("SubscriptionsOverview.extend")
+                  }}</q-item-section>
+                </q-item>
+                <q-item
+                  clickable
+                  v-close-popup
+                  @click="shareTokens(props.row.creator)"
+                >
+                  <q-item-section>{{
+                    $t("SubscriptionsOverview.export")
+                  }}</q-item-section>
+                </q-item>
+                <q-item
+                  clickable
+                  v-close-popup
+                  @click="exportTokens(props.row.creator)"
+                >
+                  <q-item-section>{{
+                    $t("SubscriptionsOverview.export_csv")
+                  }}</q-item-section>
+                </q-item>
+                <q-item
+                  clickable
+                  v-close-popup
+                  @click="cancelSubscription(props.row.creator)"
+                >
+                  <q-item-section>{{
+                    $t("SubscriptionsOverview.cancel")
+                  }}</q-item-section>
+                </q-item>
+              </q-list>
+            </q-menu>
           </q-btn>
-        </div>
-      </template>
-    </q-table>
+        </template>
+        <template #no-data>
+          <div class="text-center q-pa-md">
+            {{ $t("SubscriptionsOverview.empty") }}
+            <q-btn flat color="primary" to="/find-creators" class="q-ml-md">
+              {{ $t("SubscriptionsOverview.discover") }}
+            </q-btn>
+          </div>
+        </template>
+      </q-table>
+    </div>
     <q-dialog v-model="showDialog">
       <q-card style="min-width: 300px">
         <q-card-section>
@@ -433,6 +488,43 @@
         <q-card-actions align="right">
           <q-btn flat color="primary" v-close-popup>
             {{ $t("global.actions.close.label") }}
+          </q-btn>
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
+    <q-dialog v-model="showAdvancedFilters">
+      <q-card style="min-width: 250px">
+        <q-card-section class="q-gutter-sm">
+          <q-select
+            v-model="bucketFilter"
+            dense
+            emit-value
+            map-options
+            clearable
+            :options="
+              bucketsStore.bucketList.map((b) => ({
+                label: b.name,
+                value: b.name,
+              }))
+            "
+            :placeholder="$t('SubscriptionsOverview.filter.bucket')"
+          />
+          <q-select
+            v-model="frequencyFilter"
+            dense
+            emit-value
+            map-options
+            clearable
+            :options="[
+              { label: 'monthly', value: 'monthly' },
+              { label: 'weekly', value: 'weekly' },
+            ]"
+            :placeholder="$t('SubscriptionsOverview.filter.frequency')"
+          />
+        </q-card-section>
+        <q-card-actions align="right">
+          <q-btn flat v-close-popup color="primary">
+            {{ $t("global.actions.ok.label") }}
           </q-btn>
         </q-card-actions>
       </q-card>
@@ -563,7 +655,7 @@ const rows = computed(() => {
         ? start + (totalMonths - 1) * 30 * 24 * 60 * 60
         : null;
     const unlocked = tokens.filter(
-      (t) => !t.locktime || t.locktime <= nowSec,
+      (t) => !t.locktime || t.locktime <= nowSec
     ).length;
     const status = monthsLeft > 0 ? "active" : "expired";
     const bucket = bucketsStore.bucketList.find((b) => b.id === sub.tierId);
@@ -593,7 +685,7 @@ const rows = computed(() => {
 
 const totalLocked = computed(() => rows.value.reduce((s, r) => s + r.total, 0));
 const monthlyTotal = computed(() =>
-  rows.value.reduce((s, r) => s + r.monthly, 0),
+  rows.value.reduce((s, r) => s + r.monthly, 0)
 );
 
 const profiles = ref<Record<string, any>>({});
@@ -615,12 +707,19 @@ const filter = ref("");
 const statusFilter = ref<string | null>(null);
 const bucketFilter = ref<string | null>(null);
 const frequencyFilter = ref<string | null>(null);
+const sortBy = ref("end");
+const sortOptions = [
+  { label: t("SubscriptionsOverview.sort.end"), value: "end" },
+  { label: t("SubscriptionsOverview.sort.name"), value: "creator" },
+  { label: t("SubscriptionsOverview.sort.cost"), value: "monthly" },
+];
 const showAdvancedFilters = ref(false);
-const pagination = ref({ page: 1, rowsPerPage: 10 });
+const pagination = ref({ page: 1, rowsPerPage: 10, sortBy: sortBy.value });
+const isLoading = ref(true);
 
 const filteredRows = computed(() => {
   const term = filter.value.toLowerCase();
-  return rows.value.filter((r) => {
+  const list = rows.value.filter((r) => {
     const matchesStatus =
       !statusFilter.value || r.status === statusFilter.value;
     const matchesBucket =
@@ -631,6 +730,7 @@ const filteredRows = computed(() => {
     const matchesFilter = !term || rowString.includes(term);
     return matchesStatus && matchesBucket && matchesFrequency && matchesFilter;
   });
+  return customSort([...list], sortBy.value, false);
 });
 
 function customSort(rows: any[], sortBy: string, descending: boolean) {
@@ -696,7 +796,7 @@ function cancelSubscription(pubkey: string) {
     subscriptionsStore
       .cancelSubscription(pubkey)
       .then(() =>
-        notifySuccess(t("SubscriptionsOverview.notifications.cancel_success")),
+        notifySuccess(t("SubscriptionsOverview.notifications.cancel_success"))
       )
       .catch((e: any) => notifyError(e.message));
   });
@@ -802,11 +902,15 @@ async function updateProfiles() {
 onMounted(async () => {
   try {
     await updateProfiles();
+    isLoading.value = false;
   } catch (e: any) {
     notifyError(e.message);
   }
 });
 watch(() => subscriptionsStore.subscriptions, updateProfiles);
+watch(sortBy, (val) => {
+  pagination.value.sortBy = val;
+});
 
 const columns = computed(() => [
   {
