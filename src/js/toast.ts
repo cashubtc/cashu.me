@@ -17,3 +17,11 @@ export function toastError(message: string) {
 export function toast(message: string) {
   Notify.create({ ...baseOpts, message })
 }
+
+export function showToast(
+  message: string,
+  type?: QNotifyCreateOptions['type']
+) {
+  Notify.create({ ...baseOpts, type, message })
+}
+

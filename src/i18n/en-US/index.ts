@@ -1537,6 +1537,7 @@ export const messages = {
     notifications: {
       cancel_success: "Subscription canceled",
       extend_success: "Subscription extended",
+      export_success: "Tokens exported",
     },
     row: {
       next_unlock_label: "Next unlock in { value }",

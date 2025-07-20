@@ -346,8 +346,8 @@ import { nip19 } from "nostr-tools";
 import { formatDistanceToNow } from "date-fns";
 import { shortenString } from "src/js/string-utils";
 import { useI18n } from "vue-i18n";
-import { notifySuccess, notifyError } from "src/js/notify";
-import { toastSuccess } from "src/js/toast";
+import { notifyError } from "src/js/notify";
+import { showToast } from "src/js/toast";
 import type { Proof } from "@cashu/cashu-ts";
 import { useProofsStore } from "stores/proofs";
 import { useSendTokensStore } from "stores/sendTokensStore";
@@ -644,9 +644,9 @@ function extendSubscription(pubkey: string) {
       });
       receiptList.value = receipts as any[];
       showReceiptDialog.value = true;
-      notifySuccess(t("SubscriptionsOverview.notifications.extend_success"));
+      showToast(t("SubscriptionsOverview.notifications.extend_success"), "positive");
     } catch (e: any) {
-      notifyError(e.message);
+      showToast(e.message, 'negative');
     }
   });
 }
@@ -680,6 +680,7 @@ function exportTokens(pubkey: string) {
   a.download = `tokens_${pubkey}.csv`;
   a.click();
   URL.revokeObjectURL(url);
+  showToast(t('SubscriptionsOverview.notifications.export_success'), 'positive');
 }
 
 function confirmCancel() {
@@ -688,9 +689,9 @@ function confirmCancel() {
   subscriptionsStore
     .cancelSubscription(pubkey)
     .then(() =>
-      toastSuccess(t("SubscriptionsOverview.notifications.cancel_success"))
+      showToast(t("SubscriptionsOverview.notifications.cancel_success"), "positive")
     )
-    .catch((e: any) => notifyError(e.message))
+    .catch((e: any) => showToast(e.message, 'negative'))
     .finally(() => {
       showConfirmDialog.value = false;
     });
