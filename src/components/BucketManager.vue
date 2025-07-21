@@ -1,18 +1,33 @@
 <template>
-  <div style="max-width: 800px; margin: 0 auto">
+  <div class="w-full max-w-7xl mx-auto flex flex-col">
+    <header class="q-mb-lg text-center">
+      <h1 class="text-h4 text-weight-bold text-white q-mb-md">Buckets Dashboard</h1>
+      <q-btn-toggle
+        v-model="viewMode"
+        no-caps
+        rounded
+        unelevated
+        toggle-color="pink-6"
+        color="grey-9"
+        text-color="white"
+        :options="[
+          {label: 'Active', value: 'all'},
+          {label: 'Archived', value: 'archived'}
+        ]"
+        class="q-mb-md"
+      />
+      <q-input
+        v-model="searchTerm"
+        dark
+        borderless
+        dense
+        class="q-mb-md bg-slate-800 rounded-lg q-px-md q-py-sm"
+        placeholder="Search by name or description..."
+        aria-label="Search buckets by name or description"
+      />
+    </header>
     <div class="text-body2 q-mb-md">{{ $t("BucketManager.helper.intro") }}</div>
-    <q-input
-      v-model="searchTerm"
-      outlined
-      dense
-      class="q-mb-md"
-      :placeholder="$t('bucketManager.inputs.search.placeholder')"
-    />
-    <q-tabs v-model="viewMode" dense class="q-mb-md" no-caps>
-      <q-tab name="all" :label="$t('BucketManager.view.all')" />
-      <q-tab name="archived" :label="$t('BucketManager.view.archived')" />
-    </q-tabs>
-    <div class="row q-col-gutter-md q-mb-md">
+    <div v-if="filteredBuckets.length > 0" class="row q-col-gutter-md q-mb-md">
       <div
         v-for="bucket in filteredBuckets"
         :key="bucket.id"
@@ -31,36 +46,32 @@
         />
       </div>
     </div>
-    <q-item>
-        <q-item-section>
-          <q-btn
-            color="primary"
-            icon="add"
-            outline
-            @click="openAdd"
-            :label="$t('bucketManager.actions.add')"
-          >
-            <q-tooltip>{{ $t("BucketManager.tooltips.add_button") }}</q-tooltip>
-          </q-btn>
-        </q-item-section>
-      </q-item>
-      <q-item>
-        <q-item-section>
-          <q-btn color="primary" outline :icon="multiSelectMode ? 'close' : 'select_all'" @click="toggleMultiSelect">
-            <q-tooltip>{{ multiSelectMode ? $t('global.actions.cancel.label') : 'Select buckets' }}</q-tooltip>
-          </q-btn>
-        </q-item-section>
-      </q-item>
-      <q-item>
-        <q-item-section>
-          <q-btn color="primary" outline @click="moveSelected" :disable="!selectedBucketIds.length">
-            {{ $t("BucketDetail.move") }}
-            <q-tooltip>{{
-              $t("BucketManager.tooltips.move_button")
-            }}</q-tooltip>
-          </q-btn>
-        </q-item-section>
-      </q-item>
+    <div v-else class="text-center text-grey-6 q-py-xl">
+      <q-icon name="o_search" size="4em" class="q-mb-md" />
+      <div class="text-h6">No Buckets Found</div>
+      <p>Try adjusting your search or filter.</p>
+    </div>
+    <footer class="row justify-center q-mt-xl q-gutter-md">
+      <q-btn
+        @click="openAdd"
+        label="+ New Bucket"
+        no-caps
+        unelevated
+        padding="12px 32px"
+        text-color="white"
+        class="font-semibold"
+        style="background-image: linear-gradient(to right, #db2777, #9333ea);"
+      />
+      <q-btn
+        @click="moveSelected"
+        label="Move Tokens"
+        no-caps
+        unelevated
+        padding="12px 32px"
+        :disable="!selectedBucketIds.length"
+        class="bg-grey-8 font-semibold"
+      />
+    </footer>
   </div>
 
   <q-dialog v-model="showDelete">
