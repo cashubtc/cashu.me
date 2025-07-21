@@ -24,6 +24,9 @@
           :bucket="bucket"
           :balance="bucketBalances[bucket.id] || 0"
           :activeUnit="activeUnit.value"
+          :multi-select-mode="multiSelectMode"
+          :selected="selectedBucketIds.includes(bucket.id)"
+          @toggle-select="toggleBucketSelection"
           @menu-action="handleMenuAction"
         />
       </div>
@@ -43,7 +46,14 @@
       </q-item>
       <q-item>
         <q-item-section>
-          <q-btn color="primary" outline @click="moveTokensOpen = true">
+          <q-btn color="primary" outline :icon="multiSelectMode ? 'close' : 'select_all'" @click="toggleMultiSelect">
+            <q-tooltip>{{ multiSelectMode ? $t('global.actions.cancel.label') : 'Select buckets' }}</q-tooltip>
+          </q-btn>
+        </q-item-section>
+      </q-item>
+      <q-item>
+        <q-item-section>
+          <q-btn color="primary" outline @click="moveSelected" :disable="!selectedBucketIds.length">
             {{ $t("BucketDetail.move") }}
             <q-tooltip>{{
               $t("BucketManager.tooltips.move_button")
@@ -75,7 +85,7 @@
   <BucketDialog v-model="dialogOpen" />
   <EditBucketModal v-model="editModalOpen" @save="handleEditSave" :bucket="editBucket" />
   <BucketDetailModal v-model="detailModalOpen" :bucket-id="detailBucketId" />
-  <MoveTokensModal v-model="moveTokensOpen" />
+  <MoveTokensModal v-model="moveTokensOpen" :bucket-ids="selectedBucketIds" />
 </template>
 
 <script lang="ts">
@@ -113,6 +123,8 @@ export default defineComponent({
     const editModalOpen = ref(false);
     const detailModalOpen = ref(false);
     const moveTokensOpen = ref(false);
+    const multiSelectMode = ref(false);
+    const selectedBucketIds = ref<string[]>([]);
     const editBucket = ref<any>(null);
     const detailBucketId = ref<string | null>(null);
 
@@ -151,6 +163,25 @@ export default defineComponent({
     const openDetail = (bucket: any) => {
       detailBucketId.value = bucket.id;
       detailModalOpen.value = true;
+    };
+
+    const toggleBucketSelection = (id: string) => {
+      if (selectedBucketIds.value.includes(id)) {
+        selectedBucketIds.value = selectedBucketIds.value.filter((b) => b !== id);
+      } else {
+        selectedBucketIds.value.push(id);
+      }
+    };
+
+    const toggleMultiSelect = () => {
+      multiSelectMode.value = !multiSelectMode.value;
+      if (!multiSelectMode.value) selectedBucketIds.value = [];
+    };
+
+    const moveSelected = () => {
+      if (selectedBucketIds.value.length) {
+        moveTokensOpen.value = true;
+      }
     };
 
     const handleEditSave = (data: any) => {
@@ -226,6 +257,11 @@ export default defineComponent({
       formatCurrency,
       handleDrop,
       handleMenuAction,
+      multiSelectMode,
+      selectedBucketIds,
+      toggleBucketSelection,
+      toggleMultiSelect,
+      moveSelected,
     };
   },
 });

@@ -2,12 +2,23 @@
   <q-card
     class="shadow-2 rounded-borders bucket-card text-white q-pa-md"
     :style="{ opacity: bucket.isArchived ? 0.5 : 1 }"
+    @click="handleClick"
   >
     <div class="row items-center">
+      <q-checkbox
+        v-if="multiSelectMode"
+        :model-value="selected"
+        color="white"
+        class="q-mr-sm"
+        @update:model-value="emitToggle"
+        @click.stop
+      />
       <router-link
+        v-if="!multiSelectMode"
         :to="`/buckets/${bucket.id}`"
         style="text-decoration: none"
         class="row items-center text-white ellipsis"
+        @click.stop
       >
         <q-avatar square size="56px" :style="avatarStyle" class="q-mr-md">
           {{ bucket.name.charAt(0).toUpperCase() }}
@@ -22,6 +33,23 @@
           </div>
         </div>
       </router-link>
+      <div
+        v-else
+        class="row items-center text-white ellipsis"
+      >
+        <q-avatar square size="56px" :style="avatarStyle" class="q-mr-md">
+          {{ bucket.name.charAt(0).toUpperCase() }}
+        </q-avatar>
+        <div class="column items-start">
+          <div class="text-weight-bold row items-center no-wrap">
+            <span>{{ bucket.name }}</span>
+            <q-icon v-if="bucket.description" name="info" class="q-ml-sm" />
+          </div>
+          <div class="text-caption" v-if="bucket.description">
+            {{ bucket.description }}
+          </div>
+        </div>
+      </div>
       <div class="q-ml-auto" v-if="bucket.id !== DEFAULT_BUCKET_ID">
         <q-btn
           flat
@@ -90,8 +118,10 @@ export default defineComponent({
     bucket: { type: Object as () => any, required: true },
     balance: { type: Number, default: 0 },
     activeUnit: { type: String, required: true },
+    multiSelectMode: { type: Boolean, default: false },
+    selected: { type: Boolean, default: false },
   },
-  emits: ["menu-action"],
+  emits: ["menu-action", "toggle-select"],
   setup(props, { emit }) {
     const uiStore = useUiStore();
     const { t } = useI18n();
@@ -122,10 +152,20 @@ export default defineComponent({
       emit("menu-action", { action, bucket: props.bucket });
     };
 
+    const emitToggle = () => {
+      emit("toggle-select", props.bucket.id);
+    };
+
+    const handleClick = () => {
+      if (props.multiSelectMode) emitToggle();
+    };
+
     return {
       formatCurrency,
       menu,
       emitAction,
+      emitToggle,
+      handleClick,
       bucketColor,
       avatarStyle,
       DEFAULT_BUCKET_ID,
