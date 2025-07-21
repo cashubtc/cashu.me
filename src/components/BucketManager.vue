@@ -157,15 +157,17 @@
       <p class="q-mb-md">Create your first bucket to organize your tokens.</p>
       <q-btn color="pink-6" icon="add" label="Create Bucket" @click="openAdd" />
     </div>
-    <q-fab
-      v-if="!isLoading && selectedBucketIds.length === 0"
-      position="bottom-right"
-      color="pink-6"
-      icon="add"
-      @click="openAdd"
-      aria-label="Create new bucket"
-      style="position: fixed; bottom: 16px; right: 16px;"
-    />
+    <div class="sticky-bar">
+      <div class="action-container">
+        <q-btn color="pink-6" icon="add" label="Create Bucket" @click="openAdd" />
+        <q-btn
+          color="pink-6"
+          icon="swap_horiz"
+          :label="$t('BucketDetail.move')"
+          @click="moveSelected"
+        />
+      </div>
+    </div>
   </div>
 
   <q-dialog v-model="showDelete">
@@ -427,5 +429,21 @@ export default defineComponent({
   50% {
     opacity: 1;
   }
+}
+
+.sticky-bar {
+  position: sticky;
+  bottom: 0;
+  z-index: 10;
+  background-color: #111827;
+  padding: 0.5rem 0;
+}
+
+.action-container {
+  max-width: 80rem;
+  margin: 0 auto;
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
 }
 </style>
