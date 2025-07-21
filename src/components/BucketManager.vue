@@ -12,11 +12,11 @@
       <q-tab name="all" :label="$t('BucketManager.view.all')" />
       <q-tab name="archived" :label="$t('BucketManager.view.archived')" />
     </q-tabs>
-    <q-list padding>
+    <div class="row q-col-gutter-md q-mb-md">
       <div
         v-for="bucket in filteredBuckets"
         :key="bucket.id"
-        class="q-mb-md"
+        class="col-12 col-md-6 col-lg-4"
         @dragover.prevent
         @drop="handleDrop($event, bucket.id)"
       >
@@ -27,7 +27,8 @@
           @menu-action="handleMenuAction"
         />
       </div>
-      <q-item>
+    </div>
+    <q-item>
         <q-item-section>
           <q-btn
             color="primary"
@@ -50,7 +51,6 @@
           </q-btn>
         </q-item-section>
       </q-item>
-    </q-list>
   </div>
 
   <q-dialog v-model="showDelete">
