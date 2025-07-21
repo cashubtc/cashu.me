@@ -1,4 +1,5 @@
 // app global css in SCSS form
+@import "tokens.scss";
 
 // Use Inter if installed locally and fall back to system fonts
 body {
@@ -94,10 +95,10 @@ body,
   --panel-light: var(--q-color-grey-2);
   --conversation-hover-dark: var(--q-color-grey-8);
   --conversation-hover-light: var(--q-color-grey-3);
-  --bucket-bg-dark: #2E202B;
+  --bucket-bg-dark: #2e202b;
   --bucket-bg-light: #f9f5f8;
-  --bucket-accent-dark: #EC4899;
-  --bucket-accent-light: #EC4899;
+  --bucket-accent-dark: #ec4899;
+  --bucket-accent-light: #ec4899;
 }
 
 body.body--dark {
@@ -184,11 +185,22 @@ body.body--dark .received {
 }
 
 /* Utility classes for revamped Buckets UI */
-.w-full { width: 100%; }
-.max-w-7xl { max-width: 80rem; }
-.mx-auto { margin-left: auto; margin-right: auto; }
-.flex { display: flex; }
-.flex-col { flex-direction: column; }
+.w-full {
+  width: 100%;
+}
+.max-w-7xl {
+  max-width: 80rem;
+}
+.mx-auto {
+  margin-left: auto;
+  margin-right: auto;
+}
+.flex {
+  display: flex;
+}
+.flex-col {
+  flex-direction: column;
+}
 
 /* Shared modal card styling */
 .modal-card {

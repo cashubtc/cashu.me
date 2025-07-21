@@ -1,4 +1,5 @@
 // Quasar SCSS (& Sass) Variables
+@import "tokens.scss";
 // --------------------------------------------------
 // To customize the look and feel of this app, you can override
 // the Sass/SCSS variables found in Quasar's source Sass/SCSS files.
@@ -12,12 +13,12 @@
 // to match your app's branding.
 // Tip: Use the "Theme Builder" on Quasar's documentation website.
 
-$primary: #7e22ce;
-$secondary: #4b5563;
-$accent: #EC4899;
+$primary: $primary-pink;
+$secondary: $primary-navy;
+$accent: $accent-green;
 
-$dark: #2E202B;
-$dark-page: #2E202B;
+$dark: $primary-navy;
+$dark-page: $primary-navy;
 
 $positive: #21ba45;
 $negative: #c10015;

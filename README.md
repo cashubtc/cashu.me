@@ -168,6 +168,7 @@ pnpm test
 ```
 
 ### Verifying the NDK refactor
+
 After migrating away from direct `NDK` instances, check that no lingering instantiations remain.
 Run these commands and ensure they return no results (except mocks or the boot file):
 
@@ -177,6 +178,7 @@ git grep -n ".ndk"
 ```
 
 ### Optional Backend Search Service
+
 You can configure a URL that returns NIP-50 search results for the
 `find-creators.html` page. Set the value in local storage using the key
 `cashu.settings.searchBackendUrl`. When defined, search queries hit this
@@ -184,6 +186,7 @@ backend first and fall back to client-side relay queries if no results are
 returned.
 
 ### Default Relay List
+
 You can also override the relays used by the creator search. Set
 `cashu.settings.defaultNostrRelays` in local storage with an array of relay
 URLs. If not defined, the search falls back to the following list:
@@ -200,6 +203,7 @@ wss://relay.snort.social/
 ```
 
 ### Verify Nutzap Profile
+
 After publishing your `kind:10019` Nutzap profile, you can confirm that relays
 have received it. Run the helper script with your npub:
 
@@ -229,6 +233,16 @@ pnpm test
 
 Some tests communicate with an external Cashu mint. Ensure network connectivity
 or provide the required environment variables before running the suite.
+
+## Updated UI Components
+
+The wallet interface now uses three new Vue components:
+
+- `src/pages/WalletBucketsPage.vue`
+- `src/components/HeaderBar.vue`
+- `src/components/Sidebar.vue`
+
+To try the redesign, swap the old wallet route to `WalletBucketsPage` and include `HeaderBar` and `Sidebar` where appropriate. These components rely on the existing stores and keep all previous functionality.
 
 ## License
 
