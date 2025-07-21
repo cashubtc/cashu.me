@@ -30,13 +30,6 @@
             { label: 'Archived', value: 'archived' }
           ]"
         />
-        <q-btn
-          color="pink-6"
-          class="q-ml-sm"
-          icon="add"
-          label="Create Bucket"
-          @click="openAdd"
-        />
         <q-select
           v-model="sortBy"
           borderless
@@ -49,17 +42,6 @@
           ]"
           label="Sort By"
         />
-        <q-btn
-          color="pink-6"
-          class="q-ml-sm"
-          icon="swap_horiz"
-          :label="$t('BucketDetail.move')"
-          @click="moveSelected"
-          :title="$t('BucketManager.tooltips.move_button')"
-          :aria-label="$t('BucketManager.tooltips.move_button')"
-        >
-          <q-tooltip>{{ $t('BucketManager.tooltips.move_button') }}</q-tooltip>
-        </q-btn>
         <q-checkbox
           dense
           dark
