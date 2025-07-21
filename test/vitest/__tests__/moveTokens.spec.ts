@@ -1,11 +1,9 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { shallowMount } from "@vue/test-utils";
 import MoveTokens from "../../../src/components/MoveTokensModal.vue";
 
-const moveProofsMock = vi.fn();
-
 vi.mock("../../../src/stores/proofs", () => ({
-  useProofsStore: () => ({ proofs: [], moveProofs: moveProofsMock }),
+  useProofsStore: () => ({ proofs: [] }),
 }));
 
 vi.mock("../../../src/stores/buckets", () => ({
@@ -29,10 +27,6 @@ vi.mock("../../../src/js/notify", () => ({
   notifyError: vi.fn(),
 }));
 
-beforeEach(() => {
-  moveProofsMock.mockReset();
-});
-
 describe("MoveTokens component", () => {
   it("toggles token selection", () => {
     const wrapper = shallowMount(MoveTokens, { props: { modelValue: true } });
@@ -53,7 +47,7 @@ describe("MoveTokens component", () => {
 
     await vm.moveSelected();
 
-    expect(moveProofsMock).toHaveBeenCalledWith(["a", "b"], "b2");
+    expect(wrapper.emitted("move")?.[0]).toEqual([{ secrets: ["a", "b"], bucketId: "b2" }]);
     expect(vm.selectedSecrets.length).toBe(0);
     expect(wrapper.emitted("update:modelValue")?.[0]).toEqual([false]);
   });
