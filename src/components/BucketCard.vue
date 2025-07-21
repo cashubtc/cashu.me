@@ -1,15 +1,31 @@
 <template>
-  <div class="bucket-card-new" :class="{ 'opacity-50': bucket.isArchived }" :style="{ borderTopColor: bucketColor }" @click="handleClick">
+  <div
+    class="bucket-card-new"
+    :class="{
+      'opacity-50': bucket.isArchived,
+      selected,
+      'drag-over': dragOver,
+    }"
+    :style="{ borderTopColor: bucketColor }"
+    @click="handleClick"
+    @dragover.prevent="onDragOver"
+    @dragenter.prevent="onDragOver"
+    @dragleave="onDragLeave"
+    @drop="onDrop"
+  >
+    <div v-if="selected" class="selected-check">
+      <q-icon name="check" size="sm" color="white" />
+    </div>
     <div class="row items-start no-wrap q-mb-md">
       <div v-if="multiSelectMode" class="q-mr-sm">
         <q-checkbox :model-value="selected" dark @update:model-value="emitToggle" />
       </div>
-      <div :style="{ backgroundColor: bucketColor }" class="bucket-avatar text-white flex-shrink-0">
+      <div :style="avatarStyle" class="bucket-avatar flex-shrink-0">
         {{ bucket.name.charAt(0).toUpperCase() }}
       </div>
       <div class="col q-ml-md" style="min-width: 0;">
         <h3 class="text-lg text-weight-bold text-white ellipsis">{{ bucket.name }}</h3>
-        <p class="text-grey-5 text-sm line-clamp-2 q-mt-xs">{{ bucket.description || 'No description provided.' }}</p>
+        <p v-if="bucket.description" class="text-grey-5 text-sm line-clamp-2 q-mt-xs">{{ bucket.description }}</p>
       </div>
       <q-btn v-if="!multiSelectMode && bucket.id !== DEFAULT_BUCKET_ID" flat round dense color="grey-6" icon="more_vert" @click.stop="menu = !menu" />
     </div>
@@ -17,13 +33,11 @@
     <div class="col-grow"></div>
 
     <div class="q-mt-auto">
-      <p class="text-md text-weight-semibold text-white q-mb-sm">{{ formatCurrency(balance || 0, activeUnit) }}</p>
-      <div v-if="bucket.goal > 0">
-        <p class="text-xs text-grey-5 text-right q-mb-xs">Goal: {{ formatCurrency(bucket.goal, activeUnit) }}</p>
-        <div class="progress-bar-container">
-          <div class="progress-bar-value" :style="{ width: progress + '%', backgroundColor: bucketColor }"></div>
-        </div>
-      </div>
+      <p class="text-h6 text-weight-semibold text-white q-mb-sm">{{ formatCurrency(balance || 0, activeUnit) }}</p>
+      <p v-if="bucket.goal > 0" class="text-xs text-grey-5 text-right q-mb-xs">Goal: {{ formatCurrency(bucket.goal, activeUnit) }}</p>
+    </div>
+    <div v-if="bucket.goal > 0" class="progress-bar-container q-mt-sm">
+      <div class="progress-bar-value" :style="{ width: progress + '%', backgroundColor: bucketColor }"></div>
     </div>
 
     <q-menu v-model="menu" anchor="bottom right" self="top right" dark class="bg-slate-800">
@@ -74,6 +88,18 @@ export default defineComponent({
 
     const bucketColor = computed(() => props.bucket.color || DEFAULT_COLOR);
 
+    const adjustColor = (col: string, amt: number) => {
+      let color = col.startsWith('#') ? col.slice(1) : col;
+      const num = parseInt(color, 16);
+      let r = (num >> 16) + amt;
+      r = Math.max(Math.min(255, r), 0);
+      let g = ((num >> 8) & 0x00ff) + amt;
+      g = Math.max(Math.min(255, g), 0);
+      let b = (num & 0x00ff) + amt;
+      b = Math.max(Math.min(255, b), 0);
+      return '#' + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+    };
+
     const isColorDark = (color: string) => {
       const hex = color.replace("#", "");
       const r = parseInt(hex.substring(0, 2), 16);
@@ -83,9 +109,11 @@ export default defineComponent({
       return brightness < 128;
     };
 
+    const vibrantColor = computed(() => adjustColor(bucketColor.value, 20));
+
     const avatarStyle = computed(() => ({
-      backgroundColor: bucketColor.value,
-      color: isColorDark(bucketColor.value) ? "white" : "black",
+      backgroundColor: vibrantColor.value,
+      color: isColorDark(vibrantColor.value) ? "white" : "black",
     }));
 
     const formatCurrency = (amount: number, unit: string) => {
@@ -93,6 +121,7 @@ export default defineComponent({
     };
 
     const menu = ref(false);
+    const dragOver = ref(false);
 
     const progress = computed(() => {
       if (!props.bucket.goal || props.bucket.goal === 0) return 0;
@@ -107,6 +136,18 @@ export default defineComponent({
       emit("toggle-select", props.bucket.id);
     };
 
+    const onDragOver = () => {
+      dragOver.value = true;
+    };
+
+    const onDragLeave = () => {
+      dragOver.value = false;
+    };
+
+    const onDrop = () => {
+      dragOver.value = false;
+    };
+
     const handleClick = () => {
       if (props.multiSelectMode) emitToggle();
     };
@@ -117,8 +158,12 @@ export default defineComponent({
       emitAction,
       emitToggle,
       handleClick,
+      onDragOver,
+      onDragLeave,
+      onDrop,
       bucketColor,
       avatarStyle,
+      dragOver,
       DEFAULT_BUCKET_ID,
       t,
       progress,
@@ -129,19 +174,40 @@ export default defineComponent({
 
 <style scoped>
 .bucket-card-new {
-  background-color: #1e293b; /* bg-slate-800 */
-  padding: 16px;
+  background: linear-gradient(145deg, #1e293b, #111827);
+  padding: 24px;
   border-radius: 16px;
   border-top: 4px solid;
   height: 200px;
   display: flex;
   flex-direction: column;
-  transition: all 0.2s ease-in-out;
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
   cursor: pointer;
+  position: relative;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
 }
 .bucket-card-new:hover {
-  transform: translateY(-4px) scale(1.02);
-  box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3), 0 10px 10px -5px rgba(0,0,0,0.2);
+  transform: scale(1.03);
+  box-shadow: 0 20px 25px -5px rgba(0,0,0,0.4), 0 10px 10px -5px rgba(0,0,0,0.3);
+}
+.bucket-card-new.selected {
+  border: 3px solid var(--q-primary);
+}
+.bucket-card-new.drag-over {
+  box-shadow: 0 0 0 3px var(--q-primary) inset;
+}
+.selected-check {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background-color: var(--q-primary);
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
 }
 .bucket-avatar {
   width: 48px;
