@@ -8,7 +8,7 @@
         {{ bucket.name.charAt(0).toUpperCase() }}
       </div>
       <div class="col q-ml-md" style="min-width: 0;">
-        <h3 class="text-xl text-weight-bold text-white ellipsis">{{ bucket.name }}</h3>
+        <h3 class="text-lg text-weight-bold text-white ellipsis">{{ bucket.name }}</h3>
         <p class="text-grey-5 text-sm line-clamp-2 q-mt-xs">{{ bucket.description || 'No description provided.' }}</p>
       </div>
       <q-btn v-if="!multiSelectMode && bucket.id !== DEFAULT_BUCKET_ID" flat round dense color="grey-6" icon="more_vert" @click.stop="menu = !menu" />
@@ -17,7 +17,7 @@
     <div class="col-grow"></div>
 
     <div class="q-mt-auto">
-      <p class="text-lg text-weight-semibold text-white q-mb-sm">{{ formatCurrency(balance || 0, activeUnit) }}</p>
+      <p class="text-md text-weight-semibold text-white q-mb-sm">{{ formatCurrency(balance || 0, activeUnit) }}</p>
       <div v-if="bucket.goal > 0">
         <p class="text-xs text-grey-5 text-right q-mb-xs">Goal: {{ formatCurrency(bucket.goal, activeUnit) }}</p>
         <div class="progress-bar-container">
@@ -130,10 +130,10 @@ export default defineComponent({
 <style scoped>
 .bucket-card-new {
   background-color: #1e293b; /* bg-slate-800 */
-  padding: 24px;
+  padding: 16px;
   border-radius: 16px;
   border-top: 4px solid;
-  height: 256px;
+  height: 200px;
   display: flex;
   flex-direction: column;
   transition: all 0.2s ease-in-out;
@@ -150,7 +150,7 @@ export default defineComponent({
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 24px;
+  font-size: 20px;
   font-weight: bold;
 }
 .line-clamp-2 {
