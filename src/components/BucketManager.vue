@@ -121,6 +121,8 @@
         class="col-12 col-sm-6 col-md-4 col-lg-3"
         @dragover.prevent
         @drop="handleDrop($event, bucket.id)"
+        draggable="true"
+        @dragstart="onDragStart($event, bucket.id)"
       >
         <BucketCard
           :bucket="bucket"
@@ -180,6 +182,7 @@
 <script lang="ts">
 import { defineComponent, ref, computed, onMounted, nextTick } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { useQuasar } from 'quasar';
 import { useBucketsStore, DEFAULT_BUCKET_ID } from 'stores/buckets';
 import { useMintsStore } from 'stores/mints';
 import { useProofsStore } from 'stores/proofs';
@@ -204,6 +207,7 @@ export default defineComponent({
     const bucketsStore = useBucketsStore();
     const uiStore = useUiStore();
     const { t } = useI18n();
+    const $q = useQuasar();
 
     const dialogOpen = ref(false);
     const showDelete = ref(false);
@@ -310,8 +314,43 @@ export default defineComponent({
       editModalOpen.value = false;
     };
 
+    const onDragStart = (ev: DragEvent, id: string) => {
+      ev.dataTransfer?.setData('application/x-bucket-id', id);
+    };
+
     const handleDrop = async (ev: DragEvent, id: string) => {
       ev.preventDefault();
+      const bucketIdData = ev.dataTransfer?.getData('application/x-bucket-id');
+      if (bucketIdData) {
+        const draggedId = bucketIdData;
+        if (draggedId && draggedId !== id) {
+          const draggedItem = bucketsStore.bucketList.find((b) => b.id === draggedId);
+          const targetItem = bucketsStore.bucketList.find((b) => b.id === id);
+          if (draggedItem && targetItem) {
+            const secrets = proofsStore.proofs
+              .filter((p) => p.bucketId === draggedId)
+              .map((p) => p.secret);
+            if (secrets.length) {
+              $q.dialog({
+                title: t('BucketManager.move_confirm.title'),
+                message: t('BucketManager.move_confirm.text', {
+                  from: draggedItem.name,
+                  to: targetItem.name,
+                }),
+                cancel: true,
+                persistent: true,
+              }).onOk(async () => {
+                await proofsStore.moveProofs(secrets, id);
+                $q.notify({
+                  type: 'positive',
+                  message: t('BucketManager.notifications.move_success'),
+                });
+              });
+            }
+          }
+        }
+        return;
+      }
       const data = ev.dataTransfer?.getData('text/plain');
       if (!data) return;
       let secrets: string[] | undefined;
@@ -374,6 +413,7 @@ export default defineComponent({
       openEdit,
       openDetail,
       handleEditSave,
+      onDragStart,
       openDelete,
       deleteBucket,
       formatCurrency,
