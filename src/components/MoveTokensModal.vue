@@ -76,7 +76,7 @@ import { useUiStore } from "stores/ui";
 import { storeToRefs } from "pinia";
 import { notifyError } from "src/js/notify";
 
-const props = defineProps<{ modelValue: boolean }>();
+const props = defineProps<{ modelValue: boolean; bucketIds?: string[] }>();
 const emit = defineEmits(["update:modelValue"]);
 
 const showLocal = computed({
@@ -90,7 +90,12 @@ const mintsStore = useMintsStore();
 const uiStore = useUiStore();
 const { activeUnit } = storeToRefs(mintsStore);
 
-const bucketList = computed(() => bucketsStore.bucketList);
+const bucketList = computed(() => {
+  if (props.bucketIds && props.bucketIds.length) {
+    return bucketsStore.bucketList.filter((b) => props.bucketIds!.includes(b.id));
+  }
+  return bucketsStore.bucketList;
+});
 
 const proofsByBucket = computed<Record<string, WalletProof[]>>(() => {
   const map: Record<string, WalletProof[]> = {};
