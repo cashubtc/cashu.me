@@ -16,7 +16,7 @@
     <div v-if="selected" class="selected-check">
       <q-icon name="check" size="sm" color="white" />
     </div>
-    <div class="row items-start no-wrap q-mb-md">
+    <div class="row items-center no-wrap q-mb-sm">
       <div v-if="multiSelectMode" class="q-mr-sm">
         <q-checkbox :model-value="selected" dark @update:model-value="emitToggle" />
       </div>
@@ -175,10 +175,10 @@ export default defineComponent({
 <style scoped>
 .bucket-card-new {
   background: linear-gradient(145deg, #1e293b, #111827);
-  padding: 16px;
+  padding: 12px;
   border-radius: 16px;
   border-top: 4px solid;
-  height: 150px;
+  height: 100px;
   display: flex;
   flex-direction: column;
   transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
