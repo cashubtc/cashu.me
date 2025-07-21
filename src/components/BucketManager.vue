@@ -1,7 +1,7 @@
 <template>
   <div class="w-full max-w-7xl mx-auto flex flex-col">
     <header class="q-mb-lg text-center">
-      <h1 class="text-h4 text-weight-bold text-white q-mb-md">Buckets Dashboard</h1>
+      <h1 class="text-h5 text-weight-bold text-white q-mb-sm">Buckets Dashboard</h1>
       <q-btn-toggle
         v-model="viewMode"
         no-caps
