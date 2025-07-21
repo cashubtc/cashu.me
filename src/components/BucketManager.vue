@@ -174,9 +174,20 @@
   </q-dialog>
 
   <BucketDialog v-model="dialogOpen" />
-  <EditBucketModal v-model="editModalOpen" @save="handleEditSave" :bucket="editBucket" />
-  <BucketDetailModal v-model="detailModalOpen" :bucket-id="detailBucketId" />
-  <MoveTokensModal v-model="moveTokensOpen" :bucket-ids="selectedBucketIds" />
+  <EditBucketModal
+    v-model="editModalOpen"
+    @save="handleEditSave"
+    :bucket="editingBucket"
+  />
+  <BucketDetailModal
+    v-model="detailModalOpen"
+    :bucket-id="viewingBucket ? viewingBucket.id : null"
+  />
+  <MoveTokensModal
+    v-model="isMoveModalOpen"
+    :bucket-ids="selectedBucketIds"
+    @move="handleMoveTokens"
+  />
 </template>
 
 <script lang="ts">
@@ -213,13 +224,25 @@ export default defineComponent({
     const showDelete = ref(false);
     const deleteId = ref(null as string | null);
 
-    const editModalOpen = ref(false);
-    const detailModalOpen = ref(false);
-    const moveTokensOpen = ref(false);
+    const editingBucket = ref<any>(null);
+    const viewingBucket = ref<any>(null);
+    const isMoveModalOpen = ref(false);
     const multiSelectMode = ref(false);
     const selectedBucketIds = ref<string[]>([]);
-    const editBucket = ref<any>(null);
-    const detailBucketId = ref<string | null>(null);
+
+    const editModalOpen = computed({
+      get: () => editingBucket.value !== null,
+      set: (val: boolean) => {
+        if (!val) editingBucket.value = null;
+      },
+    });
+
+    const detailModalOpen = computed({
+      get: () => viewingBucket.value !== null,
+      set: (val: boolean) => {
+        if (!val) viewingBucket.value = null;
+      },
+    });
     const isLoading = ref(true);
 
     onMounted(async () => {
@@ -281,12 +304,12 @@ export default defineComponent({
     };
 
     const openEdit = (bucket: any) => {
-      editBucket.value = bucket;
+      editingBucket.value = bucket;
       editModalOpen.value = true;
     };
 
     const openDetail = (bucket: any) => {
-      detailBucketId.value = bucket.id;
+      viewingBucket.value = bucket;
       detailModalOpen.value = true;
     };
 
@@ -304,14 +327,19 @@ export default defineComponent({
     };
 
     const moveSelected = () => {
-      moveTokensOpen.value = true;
+      isMoveModalOpen.value = true;
     };
 
     const handleEditSave = (data: any) => {
-      if (editBucket.value) {
-        bucketsStore.editBucket(editBucket.value.id, { ...data });
+      if (editingBucket.value) {
+        bucketsStore.editBucket(editingBucket.value.id, { ...data });
       }
       editModalOpen.value = false;
+    };
+
+    const handleMoveTokens = async ({ secrets, bucketId }: { secrets: string[]; bucketId: string }) => {
+      await proofsStore.moveProofs(secrets, bucketId);
+      isMoveModalOpen.value = false;
     };
 
     const onDragStart = (ev: DragEvent, id: string) => {
@@ -406,9 +434,9 @@ export default defineComponent({
       showDelete,
       editModalOpen,
       detailModalOpen,
-      moveTokensOpen,
-      editBucket,
-      detailBucketId,
+      isMoveModalOpen,
+      editingBucket,
+      viewingBucket,
       openAdd,
       openEdit,
       openDetail,
@@ -424,6 +452,7 @@ export default defineComponent({
       toggleBucketSelection,
       toggleMultiSelect,
       moveSelected,
+      handleMoveTokens,
       isLoading,
     };
   },

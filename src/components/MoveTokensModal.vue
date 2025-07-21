@@ -96,7 +96,7 @@ import { storeToRefs } from "pinia";
 import { notifyError } from "src/js/notify";
 
 const props = defineProps<{ modelValue: boolean; bucketIds?: string[] }>();
-const emit = defineEmits(["update:modelValue"]);
+const emit = defineEmits(["update:modelValue", "move"]);
 
 const showLocal = computed({
   get: () => props.modelValue,
@@ -164,7 +164,10 @@ async function moveSelected() {
     notifyError(`Bucket not found: ${targetBucketId.value}`);
     return;
   }
-  await proofsStore.moveProofs(selectedSecrets.value, targetBucketId.value);
+  emit("move", {
+    secrets: [...selectedSecrets.value],
+    bucketId: targetBucketId.value,
+  });
   selectedSecrets.value = [];
   emit("update:modelValue", false);
 }
