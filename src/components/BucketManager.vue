@@ -30,6 +30,13 @@
             { label: 'Archived', value: 'archived' }
           ]"
         />
+        <q-btn
+          color="pink-6"
+          class="q-ml-sm"
+          icon="add"
+          label="Create Bucket"
+          @click="openAdd"
+        />
         <q-select
           v-model="sortBy"
           borderless
@@ -146,6 +153,7 @@
       icon="add"
       @click="openAdd"
       aria-label="Create new bucket"
+      style="position: fixed; bottom: 16px; right: 16px;"
     />
   </div>
 
