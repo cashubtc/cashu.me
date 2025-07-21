@@ -42,6 +42,15 @@
           ]"
           label="Sort By"
         />
+        <q-checkbox
+          dense
+          dark
+          class="q-ml-sm"
+          :model-value="multiSelectMode"
+          @update:model-value="toggleMultiSelect"
+          data-test="multi-select-toggle"
+          aria-label="Toggle multi select"
+        />
         <q-btn
           flat
           dense
