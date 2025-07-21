@@ -1,6 +1,6 @@
 <template>
-  <q-dialog v-model="showLocal">
-    <q-card class="q-pa-lg bucket-modal" style="max-width: 500px">
+  <q-dialog v-model="showLocal" persistent>
+    <q-card dark class="modal-card q-pa-lg" :style="{ borderTopColor: bucket.color }">
       <h6 class="q-mt-none q-mb-md bucket-accent">{{ $t('BucketManager.actions.edit') }}</h6>
       <q-form>
         <q-input

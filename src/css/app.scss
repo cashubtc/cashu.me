@@ -182,3 +182,19 @@ body.body--dark .received {
 .bucket-accent {
   color: var(--bucket-accent);
 }
+
+/* Utility classes for revamped Buckets UI */
+.w-full { width: 100%; }
+.max-w-7xl { max-width: 80rem; }
+.mx-auto { margin-left: auto; margin-right: auto; }
+.flex { display: flex; }
+.flex-col { flex-direction: column; }
+
+/* Shared modal card styling */
+.modal-card {
+  background-color: #1e293b !important; // bg-slate-800
+  border-radius: 16px !important;
+  border-top: 4px solid #db2777; // Default to pink accent
+  width: 100%;
+  max-width: 500px;
+}

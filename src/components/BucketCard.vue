@@ -1,107 +1,53 @@
 <template>
-  <q-card
-    class="shadow-2 rounded-borders bucket-card text-white q-pa-md"
-    :style="{ opacity: bucket.isArchived ? 0.5 : 1 }"
-    @click="handleClick"
-  >
-    <div class="row items-center">
-      <q-checkbox
-        v-if="multiSelectMode"
-        :model-value="selected"
-        color="white"
-        class="q-mr-sm"
-        @update:model-value="emitToggle"
-        @click.stop
-      />
-      <router-link
-        v-if="!multiSelectMode"
-        :to="`/buckets/${bucket.id}`"
-        style="text-decoration: none"
-        class="row items-center text-white ellipsis"
-        @click.stop
-      >
-        <q-avatar square size="56px" :style="avatarStyle" class="q-mr-md">
-          {{ bucket.name.charAt(0).toUpperCase() }}
-        </q-avatar>
-        <div class="column items-start">
-          <div class="text-weight-bold row items-center no-wrap">
-            <span>{{ bucket.name }}</span>
-            <q-icon v-if="bucket.description" name="info" class="q-ml-sm" />
-          </div>
-          <div class="text-caption" v-if="bucket.description">
-            {{ bucket.description }}
-          </div>
-        </div>
-      </router-link>
-      <div
-        v-else
-        class="row items-center text-white ellipsis"
-      >
-        <q-avatar square size="56px" :style="avatarStyle" class="q-mr-md">
-          {{ bucket.name.charAt(0).toUpperCase() }}
-        </q-avatar>
-        <div class="column items-start">
-          <div class="text-weight-bold row items-center no-wrap">
-            <span>{{ bucket.name }}</span>
-            <q-icon v-if="bucket.description" name="info" class="q-ml-sm" />
-          </div>
-          <div class="text-caption" v-if="bucket.description">
-            {{ bucket.description }}
-          </div>
+  <div class="bucket-card-new" :class="{ 'opacity-50': bucket.isArchived }" :style="{ borderTopColor: bucketColor }" @click="handleClick">
+    <div class="row items-start no-wrap q-mb-md">
+      <div v-if="multiSelectMode" class="q-mr-sm">
+        <q-checkbox :model-value="selected" dark @update:model-value="emitToggle" />
+      </div>
+      <div :style="{ backgroundColor: bucketColor }" class="bucket-avatar text-white flex-shrink-0">
+        {{ bucket.name.charAt(0).toUpperCase() }}
+      </div>
+      <div class="col q-ml-md" style="min-width: 0;">
+        <h3 class="text-xl text-weight-bold text-white ellipsis">{{ bucket.name }}</h3>
+        <p class="text-grey-5 text-sm line-clamp-2 q-mt-xs">{{ bucket.description || 'No description provided.' }}</p>
+      </div>
+      <q-btn v-if="!multiSelectMode && bucket.id !== DEFAULT_BUCKET_ID" flat round dense color="grey-6" icon="more_vert" @click.stop="menu = !menu" />
+    </div>
+
+    <div class="col-grow"></div>
+
+    <div class="q-mt-auto">
+      <p class="text-lg text-weight-semibold text-white q-mb-sm">{{ formatCurrency(balance || 0, activeUnit) }}</p>
+      <div v-if="bucket.goal > 0">
+        <p class="text-xs text-grey-5 text-right q-mb-xs">Goal: {{ formatCurrency(bucket.goal, activeUnit) }}</p>
+        <div class="progress-bar-container">
+          <div class="progress-bar-value" :style="{ width: progress + '%', backgroundColor: bucketColor }"></div>
         </div>
       </div>
-      <div class="q-ml-auto" v-if="bucket.id !== DEFAULT_BUCKET_ID">
-        <q-btn
-          flat
-          round
-          dense
-          color="white"
-          icon="more_vert"
-          @click.stop="menu = true"
-          aria-label="Options"
-          data-test="bucket-menu-btn"
-        />
-        <q-menu v-model="menu" anchor="bottom right" self="top right">
-          <q-list style="min-width: 150px">
-            <q-item clickable v-close-popup @click.stop="emitAction('view')" data-test="view">
-              <q-item-section>{{ t('BucketManager.view_tokens') }}</q-item-section>
-            </q-item>
-            <q-item clickable v-close-popup @click.stop="emitAction('edit')" data-test="edit">
-              <q-item-section>{{ t('global.actions.edit.label') }}</q-item-section>
-            </q-item>
-            <q-item
-              clickable
-              v-close-popup
-              @click.stop="emitAction('archive')"
-              data-test="archive"
-            >
-              <q-item-section>
-                {{ bucket.isArchived ? t('BucketManager.actions.unarchive') : t('BucketManager.actions.archive') }}
-              </q-item-section>
-            </q-item>
-            <q-item clickable v-close-popup @click.stop="emitAction('delete')" data-test="delete">
-              <q-item-section>{{ t('BucketManager.actions.delete') }}</q-item-section>
-            </q-item>
-          </q-list>
-        </q-menu>
-      </div>
     </div>
-    <div class="text-caption row items-center no-wrap q-mt-sm">
-      <span>
-        {{ formatCurrency(balance || 0, activeUnit) }}
-        <span v-if="bucket.goal">
-          / {{ formatCurrency(bucket.goal, activeUnit) }}
-        </span>
-      </span>
-      <q-linear-progress
-        v-if="bucket.goal"
-        :color="bucketColor"
-        :value="Math.min((balance || 0) / bucket.goal, 1)"
-        style="width: 60px; height: 4px"
-        class="q-ml-sm"
-      />
-    </div>
-  </q-card>
+
+    <q-menu v-model="menu" anchor="bottom right" self="top right" dark class="bg-slate-800">
+      <q-list dense>
+        <q-item clickable v-close-popup @click.stop="emitAction('view')">
+          <q-item-section avatar><q-icon name="o_visibility" /></q-item-section>
+          <q-item-section>View Tokens</q-item-section>
+        </q-item>
+        <q-item clickable v-close-popup @click.stop="emitAction('edit')">
+          <q-item-section avatar><q-icon name="o_edit" /></q-item-section>
+          <q-item-section>Edit</q-item-section>
+        </q-item>
+        <q-item clickable v-close-popup @click.stop="emitAction('archive')">
+          <q-item-section avatar><q-icon name="o_archive" /></q-item-section>
+          <q-item-section>{{ bucket.isArchived ? 'Unarchive' : 'Archive' }}</q-item-section>
+        </q-item>
+        <q-separator dark />
+        <q-item clickable v-close-popup @click.stop="emitAction('delete')">
+          <q-item-section avatar><q-icon name="o_delete" color="red-4" /></q-item-section>
+          <q-item-section class="text-red-4">Delete</q-item-section>
+        </q-item>
+      </q-list>
+    </q-menu>
+  </div>
 </template>
 
 <script lang="ts">
@@ -148,6 +94,11 @@ export default defineComponent({
 
     const menu = ref(false);
 
+    const progress = computed(() => {
+      if (!props.bucket.goal || props.bucket.goal === 0) return 0;
+      return Math.min((props.balance / props.bucket.goal) * 100, 100);
+    });
+
     const emitAction = (action: string) => {
       emit("menu-action", { action, bucket: props.bucket });
     };
@@ -170,7 +121,60 @@ export default defineComponent({
       avatarStyle,
       DEFAULT_BUCKET_ID,
       t,
+      progress,
     };
   },
 });
 </script>
+
+<style scoped>
+.bucket-card-new {
+  background-color: #1e293b; /* bg-slate-800 */
+  padding: 24px;
+  border-radius: 16px;
+  border-top: 4px solid;
+  height: 256px;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.2s ease-in-out;
+  cursor: pointer;
+}
+.bucket-card-new:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3), 0 10px 10px -5px rgba(0,0,0,0.2);
+}
+.bucket-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: bold;
+}
+.line-clamp-2 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  max-height: 2.5em; /* Fallback for non-webkit */
+}
+.progress-bar-container {
+  width: 100%;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 9999px;
+  height: 6px;
+}
+.progress-bar-value {
+  height: 6px;
+  border-radius: 9999px;
+  transition: width 0.5s ease;
+}
+.col-grow {
+  flex-grow: 1;
+}
+.opacity-50 {
+    opacity: 0.5;
+}
+</style>

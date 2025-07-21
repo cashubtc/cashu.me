@@ -1,6 +1,6 @@
 <template>
-  <q-dialog v-model="showLocal">
-    <q-card class="q-pa-md bucket-modal" style="max-width: 600px">
+  <q-dialog v-model="showLocal" persistent>
+    <q-card dark class="modal-card q-pa-lg">
       <h6 class="q-mt-none q-mb-md bucket-accent">{{ bucket?.name }}</h6>
       <q-list bordered>
         <q-item v-for="p in bucketProofs" :key="p.secret">
