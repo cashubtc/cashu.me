@@ -1,22 +1,7 @@
 <template>
-  <q-page
-    :class="[
-      $q.dark.isActive ? 'bg-dark text-white' : 'bg-white text-dark',
-      'q-pa-md q-pb-xl',
-    ]"
-  >
-    <BucketManager />
-  </q-page>
+  <BucketsPage />
 </template>
 
-<script>
-import { defineComponent } from "vue";
-import BucketManager from "components/BucketManager.vue";
-
-export default defineComponent({
-  name: "BucketsPage",
-  components: {
-    BucketManager,
-  },
-});
+<script setup lang="ts">
+import BucketsPage from './BucketsPage.vue';
 </script>
