@@ -93,7 +93,28 @@
       </template>
     </q-banner>
     <div class="text-body2 q-mb-md">{{ $t("BucketManager.helper.intro") }}</div>
-    <div v-if="filteredBuckets.length > 0" class="row q-col-gutter-md q-mb-md">
+    <div v-if="isLoading" class="row q-col-gutter-md q-mb-md">
+      <div
+        v-for="n in 4"
+        :key="'skeleton-' + n"
+        class="col-12 col-sm-6 col-md-4 col-lg-3"
+      >
+        <q-card flat bordered class="placeholder-card">
+          <q-card-section class="row items-start">
+            <q-skeleton type="rect" width="48px" height="48px" />
+            <div class="col q-ml-md">
+              <q-skeleton type="text" width="70%" />
+              <q-skeleton type="text" width="50%" />
+            </div>
+          </q-card-section>
+          <q-card-section class="q-pt-none">
+            <q-skeleton type="text" width="60%" class="q-mb-sm" />
+            <q-skeleton width="100%" height="6px" />
+          </q-card-section>
+        </q-card>
+      </div>
+    </div>
+    <div v-else-if="filteredBuckets.length > 0" class="row q-col-gutter-md q-mb-md">
       <div
         v-for="bucket in filteredBuckets"
         :key="bucket.id"
@@ -112,13 +133,14 @@
         />
       </div>
     </div>
-    <div v-else class="text-center text-grey-6 q-py-xl">
-      <q-icon name="o_search" size="4em" class="q-mb-md" />
-      <div class="text-h6">No Buckets Found</div>
-      <p>Try adjusting your search or filter.</p>
+    <div v-else class="empty-state text-center text-grey-6 q-py-xl">
+      <q-icon name="inbox" size="4em" class="q-mb-md" />
+      <div class="text-h6 q-mb-sm">No Buckets Yet</div>
+      <p class="q-mb-md">Create your first bucket to organize your tokens.</p>
+      <q-btn color="pink-6" icon="add" label="Create Bucket" @click="openAdd" />
     </div>
     <q-fab
-      v-if="selectedBucketIds.length === 0"
+      v-if="!isLoading && selectedBucketIds.length === 0"
       position="bottom-right"
       color="pink-6"
       icon="add"
@@ -153,7 +175,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, computed } from 'vue';
+import { defineComponent, ref, computed, onMounted, nextTick } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useBucketsStore, DEFAULT_BUCKET_ID } from 'stores/buckets';
 import { useMintsStore } from 'stores/mints';
@@ -191,6 +213,12 @@ export default defineComponent({
     const selectedBucketIds = ref<string[]>([]);
     const editBucket = ref<any>(null);
     const detailBucketId = ref<string | null>(null);
+    const isLoading = ref(true);
+
+    onMounted(async () => {
+      await nextTick();
+      isLoading.value = false;
+    });
 
     const viewMode = ref('all');
 
@@ -355,7 +383,32 @@ export default defineComponent({
       toggleBucketSelection,
       toggleMultiSelect,
       moveSelected,
+      isLoading,
     };
   },
 });
 </script>
+
+<style scoped>
+.placeholder-card {
+  height: 200px;
+  border-radius: 16px;
+  background: linear-gradient(145deg, #1e293b, #111827);
+  padding: 24px;
+  animation: placeholder-pulse 1.5s ease-in-out infinite;
+}
+
+.empty-state q-icon {
+  color: var(--q-primary);
+}
+
+@keyframes placeholder-pulse {
+  0%,
+  100% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+</style>
