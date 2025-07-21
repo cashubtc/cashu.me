@@ -1,12 +1,15 @@
 <template>
-  <q-card class="shadow-2 rounded-borders bucket-card text-white q-pa-md">
+  <q-card
+    class="shadow-2 rounded-borders bucket-card text-white q-pa-md"
+    :style="{ opacity: bucket.isArchived ? 0.5 : 1 }"
+  >
     <div class="row items-center">
       <router-link
         :to="`/buckets/${bucket.id}`"
         style="text-decoration: none"
         class="row items-center text-white ellipsis"
       >
-        <q-avatar square size="42px" :style="avatarStyle" class="q-mr-md">
+        <q-avatar square size="56px" :style="avatarStyle" class="q-mr-md">
           {{ bucket.name.charAt(0).toUpperCase() }}
         </q-avatar>
         <div class="column items-start">
@@ -14,31 +17,17 @@
             <span>{{ bucket.name }}</span>
             <q-icon v-if="bucket.description" name="info" class="q-ml-sm" />
           </div>
-          <div class="text-caption" v-if="bucket.description">{{
-            bucket.description
-          }}</div>
-          <div class="text-caption row items-center no-wrap">
-            <span>
-              {{ formatCurrency(balance || 0, activeUnit) }}
-              <span v-if="bucket.goal">
-                / {{ formatCurrency(bucket.goal, activeUnit) }}
-              </span>
-            </span>
-            <q-linear-progress
-              v-if="bucket.goal"
-              :color="bucketColor"
-              :value="Math.min((balance || 0) / bucket.goal, 1)"
-              style="width: 60px; height: 4px"
-              class="q-ml-sm"
-            />
+          <div class="text-caption" v-if="bucket.description">
+            {{ bucket.description }}
           </div>
         </div>
       </router-link>
       <div class="q-ml-auto" v-if="bucket.id !== DEFAULT_BUCKET_ID">
         <q-btn
-          dense
           flat
           round
+          dense
+          color="white"
           icon="more_vert"
           @click.stop="menu = true"
           aria-label="Options"
@@ -68,6 +57,21 @@
           </q-list>
         </q-menu>
       </div>
+    </div>
+    <div class="text-caption row items-center no-wrap q-mt-sm">
+      <span>
+        {{ formatCurrency(balance || 0, activeUnit) }}
+        <span v-if="bucket.goal">
+          / {{ formatCurrency(bucket.goal, activeUnit) }}
+        </span>
+      </span>
+      <q-linear-progress
+        v-if="bucket.goal"
+        :color="bucketColor"
+        :value="Math.min((balance || 0) / bucket.goal, 1)"
+        style="width: 60px; height: 4px"
+        class="q-ml-sm"
+      />
     </div>
   </q-card>
 </template>
