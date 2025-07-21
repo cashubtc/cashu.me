@@ -1,8 +1,22 @@
 <template>
   <div class="w-full max-w-7xl mx-auto flex flex-col">
     <header class="q-mb-lg text-center">
-      <h1 class="text-h5 text-weight-bold text-white q-mb-sm">Buckets Dashboard</h1>
-      <div class="row items-center justify-center q-gutter-xs q-mb-md">
+      <div class="text-h5 text-weight-bold text-white">
+        {{ formatCurrency(totalActiveBalance, activeUnit.value) }}
+      </div>
+      <div class="text-grey-5 q-mb-md">
+        {{ activeBucketCount }} Active Buckets
+      </div>
+      <div class="row items-center justify-center q-gutter-xs">
+        <q-input
+          v-model="searchTerm"
+          dark
+          borderless
+          dense
+          class="bg-slate-800 rounded-lg q-px-md q-py-sm"
+          placeholder="Search by name or description..."
+          aria-label="Search buckets by name or description"
+        />
         <q-btn-toggle
           v-model="viewMode"
           no-caps
@@ -16,6 +30,18 @@
             { label: 'Archived', value: 'archived' }
           ]"
         />
+        <q-select
+          v-model="sortBy"
+          borderless
+          dense
+          dark
+          class="bg-slate-800 rounded-lg q-px-md"
+          :options="[
+            { label: 'Name', value: 'name' },
+            { label: 'Balance', value: 'balance' }
+          ]"
+          label="Sort By"
+        />
         <q-btn
           flat
           dense
@@ -28,15 +54,6 @@
           aria-label="Toggle bucket selection mode"
         />
       </div>
-      <q-input
-        v-model="searchTerm"
-        dark
-        borderless
-        dense
-        class="q-mb-md bg-slate-800 rounded-lg q-px-md q-py-sm"
-        placeholder="Search by name or description..."
-        aria-label="Search buckets by name or description"
-      />
     </header>
 
     <q-banner
@@ -170,17 +187,43 @@ export default defineComponent({
 
     const bucketList = computed(() => bucketsStore.bucketList);
     const searchTerm = ref('');
+    const sortBy = ref('name');
+    const bucketBalances = computed(() => bucketsStore.bucketBalances);
+
+    const activeBuckets = computed(() =>
+      bucketList.value.filter((b) => !b.isArchived)
+    );
+
+    const activeBucketCount = computed(() => activeBuckets.value.length);
+
+    const totalActiveBalance = computed(() => {
+      return activeBuckets.value.reduce(
+        (sum, b) => sum + (bucketBalances.value[b.id] || 0),
+        0
+      );
+    });
+
     const filteredBuckets = computed(() => {
       const term = searchTerm.value.toLowerCase();
-      return bucketList.value
-        .filter((b) => (viewMode.value === 'archived' ? b.isArchived : !b.isArchived))
+      const list = bucketList.value
+        .filter((b) =>
+          viewMode.value === 'archived' ? b.isArchived : !b.isArchived
+        )
         .filter((b) => {
           const name = (b.name || '').toLowerCase();
           const description = (b.description || '').toLowerCase();
           return name.includes(term) || description.includes(term);
         });
+      const sorted = [...list];
+      if (sortBy.value === 'balance') {
+        sorted.sort(
+          (a, b) => (bucketBalances.value[b.id] || 0) - (bucketBalances.value[a.id] || 0)
+        );
+      } else {
+        sorted.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+      }
+      return sorted;
     });
-    const bucketBalances = computed(() => bucketsStore.bucketBalances);
 
     const mintsStore = useMintsStore();
     const { activeUnit } = storeToRefs(mintsStore);
@@ -275,9 +318,12 @@ export default defineComponent({
       DEFAULT_BUCKET_ID,
       bucketList,
       searchTerm,
+      sortBy,
       viewMode,
       filteredBuckets,
       bucketBalances,
+      activeBucketCount,
+      totalActiveBalance,
       activeUnit,
       dialogOpen,
       showDelete,
