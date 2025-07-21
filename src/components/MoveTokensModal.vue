@@ -42,8 +42,26 @@
             :options="bucketOptions"
             emit-value
             map-options
+            option-value="value"
+            option-label="label"
             class="q-mb-md"
           >
+            <template #option="scope">
+              <q-item v-bind="scope.itemProps">
+                <q-item-section avatar>
+                  <q-avatar size="sm" :style="{ backgroundColor: scope.opt.color }" />
+                </q-item-section>
+                <q-item-section>
+                  <q-item-label>{{ scope.opt.label }}</q-item-label>
+                </q-item-section>
+              </q-item>
+            </template>
+            <template #selected-item="scope">
+              <div class="row items-center no-wrap">
+                <q-avatar size="sm" :style="{ backgroundColor: scope.opt.color }" class="q-mr-sm" />
+                <span>{{ scope.opt.label }}</span>
+              </div>
+            </template>
             <template #label>
               <div class="row items-center no-wrap">
                 <span>{{ $t('BucketDetail.inputs.target_bucket.label') }}</span>
@@ -73,6 +91,7 @@ import { useBucketsStore } from "stores/buckets";
 import { useProofsStore } from "stores/proofs";
 import { useMintsStore, WalletProof } from "stores/mints";
 import { useUiStore } from "stores/ui";
+import { DEFAULT_COLOR } from "src/js/constants";
 import { storeToRefs } from "pinia";
 import { notifyError } from "src/js/notify";
 
@@ -89,6 +108,7 @@ const proofsStore = useProofsStore();
 const mintsStore = useMintsStore();
 const uiStore = useUiStore();
 const { activeUnit } = storeToRefs(mintsStore);
+const { bucketBalances } = storeToRefs(bucketsStore);
 
 const bucketList = computed(() => {
   if (props.bucketIds && props.bucketIds.length) {
@@ -120,7 +140,12 @@ function toggleProof(secret: string, val: boolean) {
 }
 
 const bucketOptions = computed(() =>
-  bucketsStore.bucketList.map((b) => ({ label: b.name, value: b.id }))
+  bucketList.value.map((b) => ({
+    label: b.name,
+    value: b.id,
+    color: b.color || DEFAULT_COLOR,
+    balance: bucketBalances.value[b.id] ?? 0,
+  }))
 );
 
 function formatCurrency(amount: number, unit: string) {
