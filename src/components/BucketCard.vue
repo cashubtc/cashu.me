@@ -24,7 +24,7 @@
         {{ bucket.name.charAt(0).toUpperCase() }}
       </div>
       <div class="col q-ml-md" style="min-width: 0;">
-        <h3 class="text-lg text-weight-bold text-white ellipsis">{{ bucket.name }}</h3>
+        <h3 class="text-body1 text-weight-bold text-white ellipsis">{{ bucket.name }}</h3>
         <p v-if="bucket.description" class="text-grey-5 text-sm line-clamp-2 q-mt-xs">{{ bucket.description }}</p>
       </div>
       <q-btn v-if="!multiSelectMode && bucket.id !== DEFAULT_BUCKET_ID" flat round dense color="grey-6" icon="more_vert" @click.stop="menu = !menu" />
@@ -175,10 +175,10 @@ export default defineComponent({
 <style scoped>
 .bucket-card-new {
   background: linear-gradient(145deg, #1e293b, #111827);
-  padding: 24px;
+  padding: 16px;
   border-radius: 16px;
   border-top: 4px solid;
-  height: 200px;
+  height: 150px;
   display: flex;
   flex-direction: column;
   transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
@@ -216,7 +216,7 @@ export default defineComponent({
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 20px;
+  font-size: 16px;
   font-weight: bold;
 }
 .line-clamp-2 {
