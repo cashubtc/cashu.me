@@ -49,6 +49,17 @@
           ]"
           label="Sort By"
         />
+        <q-btn
+          color="pink-6"
+          class="q-ml-sm"
+          icon="swap_horiz"
+          :label="$t('BucketDetail.move')"
+          @click="moveSelected"
+          :title="$t('BucketManager.tooltips.move_button')"
+          :aria-label="$t('BucketManager.tooltips.move_button')"
+        >
+          <q-tooltip>{{ $t('BucketManager.tooltips.move_button') }}</q-tooltip>
+        </q-btn>
         <q-checkbox
           dense
           dark
@@ -305,9 +316,7 @@ export default defineComponent({
     };
 
     const moveSelected = () => {
-      if (selectedBucketIds.value.length) {
-        moveTokensOpen.value = true;
-      }
+      moveTokensOpen.value = true;
     };
 
     const handleEditSave = (data: any) => {

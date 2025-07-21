@@ -1435,6 +1435,7 @@ export const messages = {
       archive: "Archive",
       unarchive: "Unarchive",
       view_tokens: "View tokens",
+      move: "Move tokens",
       deselect_all: "Deselect All",
     },
     inputs: {
