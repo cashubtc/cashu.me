@@ -1334,6 +1334,7 @@ export default {
   },
   MoveTokens: {
     title: "Move tokens",
+    select_tokens: "Select tokens to move",
     empty: "No tokens",
     helper: "Move tokens between buckets to organize them.",
   },
