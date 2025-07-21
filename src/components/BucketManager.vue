@@ -2,20 +2,32 @@
   <div class="w-full max-w-7xl mx-auto flex flex-col">
     <header class="q-mb-lg text-center">
       <h1 class="text-h5 text-weight-bold text-white q-mb-sm">Buckets Dashboard</h1>
-      <q-btn-toggle
-        v-model="viewMode"
-        no-caps
-        rounded
-        unelevated
-        toggle-color="pink-6"
-        color="grey-9"
-        text-color="white"
-        :options="[
-          {label: 'Active', value: 'all'},
-          {label: 'Archived', value: 'archived'}
-        ]"
-        class="q-mb-md"
-      />
+      <div class="row items-center justify-center q-gutter-xs q-mb-md">
+        <q-btn-toggle
+          v-model="viewMode"
+          no-caps
+          rounded
+          unelevated
+          toggle-color="pink-6"
+          color="grey-9"
+          text-color="white"
+          :options="[
+            { label: 'Active', value: 'all' },
+            { label: 'Archived', value: 'archived' }
+          ]"
+        />
+        <q-btn
+          flat
+          dense
+          round
+          class="q-ml-sm"
+          :color="multiSelectMode ? 'pink-6' : 'grey-5'"
+          :icon="multiSelectMode ? 'close' : 'select_all'"
+          @click="toggleMultiSelect"
+          :aria-pressed="multiSelectMode"
+          aria-label="Toggle bucket selection mode"
+        />
+      </div>
       <q-input
         v-model="searchTerm"
         dark
@@ -26,6 +38,34 @@
         aria-label="Search buckets by name or description"
       />
     </header>
+
+    <q-banner
+      v-if="selectedBucketIds.length > 0"
+      dense
+      class="q-mb-md bg-primary text-white"
+    >
+      {{ selectedBucketIds.length }} buckets selected.
+      <template #action>
+        <q-btn
+          flat
+          dense
+          color="white"
+          @click="moveSelected"
+          aria-label="Move tokens"
+        >
+          {{ $t('BucketDetail.move') }}
+        </q-btn>
+        <q-btn
+          flat
+          dense
+          color="white"
+          @click="toggleMultiSelect"
+          aria-label="Deselect all"
+        >
+          {{ $t('BucketManager.actions.deselect_all') }}
+        </q-btn>
+      </template>
+    </q-banner>
     <div class="text-body2 q-mb-md">{{ $t("BucketManager.helper.intro") }}</div>
     <div v-if="filteredBuckets.length > 0" class="row q-col-gutter-md q-mb-md">
       <div
@@ -51,27 +91,14 @@
       <div class="text-h6">No Buckets Found</div>
       <p>Try adjusting your search or filter.</p>
     </div>
-    <footer class="row justify-center q-mt-xl q-gutter-md">
-      <q-btn
-        @click="openAdd"
-        label="+ New Bucket"
-        no-caps
-        unelevated
-        padding="12px 32px"
-        text-color="white"
-        class="font-semibold"
-        style="background-image: linear-gradient(to right, #db2777, #9333ea);"
-      />
-      <q-btn
-        @click="moveSelected"
-        label="Move Tokens"
-        no-caps
-        unelevated
-        padding="12px 32px"
-        :disable="!selectedBucketIds.length"
-        class="bg-grey-8 font-semibold"
-      />
-    </footer>
+    <q-fab
+      v-if="selectedBucketIds.length === 0"
+      position="bottom-right"
+      color="pink-6"
+      icon="add"
+      @click="openAdd"
+      aria-label="Create new bucket"
+    />
   </div>
 
   <q-dialog v-model="showDelete">
