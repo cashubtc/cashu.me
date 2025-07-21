@@ -1466,6 +1466,13 @@ export const messages = {
     delete_confirm: {
       title: "Delete bucket?",
     },
+    move_confirm: {
+      title: "Move tokens?",
+      text: "Move all tokens from {from} to {to}?",
+    },
+    notifications: {
+      move_success: "Tokens moved",
+    },
     view: {
       all: "All",
       archived: "Archived",
