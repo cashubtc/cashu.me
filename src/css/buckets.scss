@@ -30,5 +30,6 @@
 }
 
 .q-item__section--main {
-  white-space: nowrap;
+  white-space: normal; // allow wrapping within menu items
+  word-break: break-word; // prevent overflow for long words
 }
