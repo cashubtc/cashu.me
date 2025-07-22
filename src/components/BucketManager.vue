@@ -185,7 +185,7 @@ export default defineComponent({
       isLoading.value = false;
     });
 
-    const viewMode = ref('all');
+    const viewMode = ref('active');
 
     const bucketList = computed(() => bucketsStore.bucketList);
     const searchTerm = ref('');
@@ -208,9 +208,11 @@ export default defineComponent({
     const filteredBuckets = computed(() => {
       const term = searchTerm.value.toLowerCase();
       const list = bucketList.value
-        .filter((b) =>
-          viewMode.value === 'archived' ? b.isArchived : !b.isArchived
-        )
+        .filter((b) => {
+          if (viewMode.value === 'archived') return b.isArchived;
+          if (viewMode.value === 'active') return !b.isArchived;
+          return true;
+        })
         .filter((b) => {
           const name = (b.name || '').toLowerCase();
           const description = (b.description || '').toLowerCase();
