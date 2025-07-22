@@ -1,6 +1,6 @@
 <template>
   <div class="w-full max-w-7xl mx-auto flex flex-col">
-    <div class="buckets-toolbar q-mb-md q-gutter-sm row items-center">
+    <q-toolbar class="bg-transparent q-pl-md q-pr-md q-gutter-md row items-center buckets-toolbar q-mb-md">
       <slot name="toolbar"
         :search-term="searchTerm"
         :view-mode="viewMode"
@@ -9,7 +9,7 @@
         :toggle-multi-select="toggleMultiSelect"
         :move-selected="moveSelected"
       />
-    </div>
+    </q-toolbar>
 
     <q-banner
       v-if="selectedBucketIds.length > 0"

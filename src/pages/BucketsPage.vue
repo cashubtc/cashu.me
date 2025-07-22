@@ -14,7 +14,7 @@
           moveSelected,
         }"
       >
-        <div class="row items-center q-gutter-sm buckets-toolbar">
+        <q-toolbar class="bg-transparent q-pl-md q-pr-md q-gutter-md row items-center">
           <q-input
             :model-value="searchTerm.value"
             @update:model-value="(val) => (searchTerm.value = val)"
@@ -37,6 +37,9 @@
             outlined
             dense
             label="Sort"
+            aria-label="Sort buckets"
+            emit-value
+            map-options
             :options="[
               'Name (A–Z)',
               'Name (Z–A)',
@@ -61,7 +64,7 @@
             :aria-pressed="multiSelectMode"
             aria-label="Toggle selection"
           />
-        </div>
+        </q-toolbar>
       </template>
     </BucketManager>
     <q-page-sticky
@@ -97,11 +100,8 @@ const dialogOpen = ref(false);
 </script>
 
 <style scoped>
-@media (max-width: 1400px) {
-  h1 {
-    font-size: 48px;
-    line-height: 1.2;
-    margin-top: 0;
-  }
+h1 {
+  font-size: clamp(32px, 6vw, 64px);
+  margin: 0;
 }
 </style>
