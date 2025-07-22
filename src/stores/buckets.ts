@@ -8,6 +8,24 @@ import { useLockedTokensStore } from "./lockedTokens";
 import { ref, watch } from "vue";
 import { notifySuccess } from "src/js/notify";
 
+export const COLOR_PALETTE = [
+  "#ec4899",
+  "#3b82f6",
+  "#10b981",
+  "#f59e0b",
+  "#8b5cf6",
+  "#ef4444",
+];
+
+export function hashColor(name: string): string {
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) {
+    hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  const idx = Math.abs(hash) % COLOR_PALETTE.length;
+  return COLOR_PALETTE[idx];
+}
+
 export type Bucket = {
   id: string;
   name: string;
@@ -139,6 +157,16 @@ export const useBucketsStore = defineStore("buckets", {
       });
       return balances;
     },
+    totalActiveBalance(): number {
+      const balances = this.bucketBalances;
+      return this.activeBuckets.reduce(
+        (sum, b) => sum + (balances[b.id] || 0),
+        0
+      );
+    },
+    activeCount(): number {
+      return this.activeBuckets.length;
+    },
     autoBucketFor:
       (state) =>
       (mint?: string, memo?: string): string | undefined => {
@@ -184,6 +212,7 @@ export const useBucketsStore = defineStore("buckets", {
       const newBucket: Bucket = {
         id: uuidv4(),
         isArchived: false,
+        color: bucket.color || hashColor(bucket.name),
         ...bucket,
       };
       this.buckets.push(newBucket);
