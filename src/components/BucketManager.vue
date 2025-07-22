@@ -189,7 +189,7 @@ export default defineComponent({
 
     const bucketList = computed(() => bucketsStore.bucketList);
     const searchTerm = ref('');
-    const sortBy = ref('name-asc');
+    const sortBy = ref('name');
     const bucketBalances = computed(() => bucketsStore.bucketBalances);
 
     const activeBuckets = computed(() =>
@@ -217,23 +217,12 @@ export default defineComponent({
           return name.includes(term) || description.includes(term);
         });
       const sorted = [...list];
-      switch (sortBy.value) {
-        case 'balance-asc':
-          sorted.sort(
-            (a, b) => (bucketBalances.value[a.id] || 0) - (bucketBalances.value[b.id] || 0)
-          );
-          break;
-        case 'balance-desc':
-          sorted.sort(
-            (a, b) => (bucketBalances.value[b.id] || 0) - (bucketBalances.value[a.id] || 0)
-          );
-          break;
-        case 'name-desc':
-          sorted.sort((a, b) => (b.name || '').localeCompare(a.name || ''));
-          break;
-        case 'name-asc':
-        default:
-          sorted.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+      if (sortBy.value === 'balance') {
+        sorted.sort(
+          (a, b) => (bucketBalances.value[b.id] || 0) - (bucketBalances.value[a.id] || 0)
+        );
+      } else {
+        sorted.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
       }
       return sorted;
     });

@@ -41,10 +41,10 @@
             emit-value
             map-options
             :options="[
-              { label: 'Name (A–Z)', value: 'name-asc' },
-              { label: 'Name (Z–A)', value: 'name-desc' },
-              { label: 'Balance (↓)', value: 'balance-desc' },
-              { label: 'Balance (↑)', value: 'balance-asc' },
+              'Name (A–Z)',
+              'Name (Z–A)',
+              'Balance (↓)',
+              'Balance (↑)',
             ]"
           />
           <q-btn
