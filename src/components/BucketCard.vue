@@ -40,43 +40,50 @@
       />
     </div>
 
-    <div class="col-grow"></div>
-
-    <div class="q-mt-auto">
-      <p class="text-h6 text-weight-semibold text-white q-mb-sm">{{ formatCurrency(balance || 0, activeUnit) }}</p>
-    </div>
-    <div data-test="progress-section" class="progress-section q-mt-sm">
-      <q-linear-progress
-        v-if="bucket.goal"
-        :value="progressRatio"
-        :color="bucketColor"
-        rounded
-        size="4px"
-      />
-      <div v-if="bucket.goal" class="row items-center text-caption q-mt-xs">
-        <span>Progress</span>
-        <span class="q-ml-auto">Goal: {{ formatCurrency(bucket.goal, activeUnit) }}</span>
+    <div class="bottom-info q-mt-auto column justify-between">
+      <p class="text-h6 text-weight-semibold text-white q-mb-sm">
+        {{ formatCurrency(balance || 0, activeUnit) }}
+      </p>
+      <div data-test="progress-section" class="progress-section q-mt-sm">
+        <q-linear-progress
+          v-if="bucket.goal"
+          :value="progressRatio"
+          :color="bucketColor"
+          rounded
+          size="4px"
+        />
+        <div v-if="bucket.goal" class="row items-center text-caption q-mt-xs">
+          <span>Progress</span>
+          <span class="q-ml-auto">Goal: {{ formatCurrency(bucket.goal, activeUnit) }}</span>
+        </div>
       </div>
     </div>
 
-    <q-menu v-model="menu" anchor="bottom right" self="top right" dark class="bg-slate-800">
+    <q-menu
+      v-model="menu"
+      anchor="bottom right"
+      self="top right"
+      dark
+      class="bg-slate-800"
+      style="min-width:160px"
+    >
       <q-list dense>
         <q-item clickable v-close-popup @click.stop="emitAction('view')" data-test="view">
           <q-item-section avatar><q-icon name="o_visibility" /></q-item-section>
-          <q-item-section>View Tokens</q-item-section>
+          <q-item-section class="text-no-wrap">View Tokens</q-item-section>
         </q-item>
         <q-item clickable v-close-popup @click.stop="emitAction('edit')" data-test="edit">
           <q-item-section avatar><q-icon name="o_edit" /></q-item-section>
-          <q-item-section>Edit</q-item-section>
+          <q-item-section class="text-no-wrap">Edit</q-item-section>
         </q-item>
         <q-item clickable v-close-popup @click.stop="emitAction('archive')" data-test="archive">
           <q-item-section avatar><q-icon name="o_archive" /></q-item-section>
-          <q-item-section>{{ bucket.isArchived ? 'Unarchive' : 'Archive' }}</q-item-section>
+          <q-item-section class="text-no-wrap">{{ bucket.isArchived ? 'Unarchive' : 'Archive' }}</q-item-section>
         </q-item>
         <q-separator dark />
         <q-item clickable v-close-popup @click.stop="emitAction('delete')" data-test="delete">
           <q-item-section avatar><q-icon name="o_delete" color="red-4" /></q-item-section>
-          <q-item-section class="text-red-4">Delete</q-item-section>
+          <q-item-section class="text-red-4 text-no-wrap">Delete</q-item-section>
         </q-item>
       </q-list>
     </q-menu>
@@ -199,6 +206,7 @@ export default defineComponent({
   height: 100%;
   display: flex;
   flex-direction: column;
+  min-height: 220px;
   transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
   cursor: pointer;
   position: relative;
@@ -244,13 +252,23 @@ export default defineComponent({
   -webkit-line-clamp: 2;
   max-height: 2.5em; /* Fallback for non-webkit */
 }
-.col-grow {
-  flex-grow: 1;
-}
 .opacity-50 {
     opacity: 0.5;
 }
 .progress-section {
   min-height: 48px;
+}
+
+.bottom-info {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  flex-grow: 1;
+}
+
+@media (max-width: 600px) {
+  .bucket-card {
+    min-height: 180px;
+  }
 }
 </style>

@@ -1,5 +1,5 @@
 <template>
-  <q-layout view="lHh Lpr lFf" class="wallet-layout">
+  <q-layout view="lHh Lpr lFf" class="wallet-layout bg-dark">
     <Sidebar />
     <HeaderBar />
     <q-page-container class="q-pa-md">

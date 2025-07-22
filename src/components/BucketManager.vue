@@ -1,6 +1,6 @@
 <template>
   <div class="w-full max-w-7xl mx-auto flex flex-col">
-    <div class="buckets-toolbar q-mb-md">
+    <div class="buckets-toolbar q-mb-md q-gutter-sm row items-center">
       <slot name="toolbar"
         :search-term="searchTerm"
         :view-mode="viewMode"

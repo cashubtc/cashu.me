@@ -1,5 +1,5 @@
 <template>
-  <q-layout view="lHh Lpr lFf">
+  <q-layout view="lHh Lpr lFf" class="bg-dark">
     <!-- global utility dialogs – mount once -->
     <MissingSignerModal />
     <NdkErrorDialog />

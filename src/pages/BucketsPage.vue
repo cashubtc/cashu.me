@@ -96,4 +96,12 @@ const { totalActiveBalance, activeCount } = storeToRefs(bucketsStore);
 const dialogOpen = ref(false);
 </script>
 
-<style scoped></style>
+<style scoped>
+@media (max-width: 1400px) {
+  h1 {
+    font-size: 48px;
+    line-height: 1.2;
+    margin-top: 0;
+  }
+}
+</style>
