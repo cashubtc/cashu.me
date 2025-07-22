@@ -27,7 +27,7 @@
             @update:model-value="(val) => (viewMode.value = val)"
             dense
             :options="[
-              { label: 'Active', value: 'all' },
+              { label: 'Active', value: 'active' },
               { label: 'Archived', value: 'archived' },
             ]"
           />
