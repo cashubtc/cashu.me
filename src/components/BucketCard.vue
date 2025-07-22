@@ -1,6 +1,6 @@
 <template>
   <div
-    class="bucket-card-new"
+    class="bucket-card"
     :class="{
       'opacity-50': bucket.isArchived,
       selected,
@@ -27,35 +27,54 @@
         <h3 class="text-body1 text-weight-bold text-white ellipsis">{{ bucket.name }}</h3>
         <p v-if="bucket.description" class="text-grey-5 text-sm line-clamp-2 q-mt-xs">{{ bucket.description }}</p>
       </div>
-      <q-btn v-if="!multiSelectMode && bucket.id !== DEFAULT_BUCKET_ID" flat round dense color="grey-6" icon="more_vert" @click.stop="menu = !menu" />
+      <q-btn
+        v-if="!multiSelectMode && bucket.id !== DEFAULT_BUCKET_ID"
+        flat
+        round
+        dense
+        color="grey-6"
+        icon="more_vert"
+        @click.stop="menu = !menu"
+        aria-label="Bucket actions"
+        data-test="bucket-menu-btn"
+      />
     </div>
 
     <div class="col-grow"></div>
 
     <div class="q-mt-auto">
       <p class="text-h6 text-weight-semibold text-white q-mb-sm">{{ formatCurrency(balance || 0, activeUnit) }}</p>
-      <p v-if="bucket.goal > 0" class="text-xs text-grey-5 text-right q-mb-xs">Goal: {{ formatCurrency(bucket.goal, activeUnit) }}</p>
     </div>
-    <div v-if="bucket.goal > 0" class="progress-bar-container q-mt-sm">
-      <div class="progress-bar-value" :style="{ width: progress + '%', backgroundColor: bucketColor }"></div>
+    <div data-test="progress-section" class="progress-section q-mt-sm">
+      <q-linear-progress
+        v-if="bucket.goal"
+        :value="progressRatio"
+        :color="bucketColor"
+        rounded
+        size="4px"
+      />
+      <div v-if="bucket.goal" class="row items-center text-caption q-mt-xs">
+        <span>Progress</span>
+        <span class="q-ml-auto">Goal: {{ formatCurrency(bucket.goal, activeUnit) }}</span>
+      </div>
     </div>
 
     <q-menu v-model="menu" anchor="bottom right" self="top right" dark class="bg-slate-800">
       <q-list dense>
-        <q-item clickable v-close-popup @click.stop="emitAction('view')">
+        <q-item clickable v-close-popup @click.stop="emitAction('view')" data-test="view">
           <q-item-section avatar><q-icon name="o_visibility" /></q-item-section>
           <q-item-section>View Tokens</q-item-section>
         </q-item>
-        <q-item clickable v-close-popup @click.stop="emitAction('edit')">
+        <q-item clickable v-close-popup @click.stop="emitAction('edit')" data-test="edit">
           <q-item-section avatar><q-icon name="o_edit" /></q-item-section>
           <q-item-section>Edit</q-item-section>
         </q-item>
-        <q-item clickable v-close-popup @click.stop="emitAction('archive')">
+        <q-item clickable v-close-popup @click.stop="emitAction('archive')" data-test="archive">
           <q-item-section avatar><q-icon name="o_archive" /></q-item-section>
           <q-item-section>{{ bucket.isArchived ? 'Unarchive' : 'Archive' }}</q-item-section>
         </q-item>
         <q-separator dark />
-        <q-item clickable v-close-popup @click.stop="emitAction('delete')">
+        <q-item clickable v-close-popup @click.stop="emitAction('delete')" data-test="delete">
           <q-item-section avatar><q-icon name="o_delete" color="red-4" /></q-item-section>
           <q-item-section class="text-red-4">Delete</q-item-section>
         </q-item>
@@ -67,9 +86,8 @@
 <script lang="ts">
 import { defineComponent, computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
-import { DEFAULT_BUCKET_ID } from "stores/buckets";
+import { DEFAULT_BUCKET_ID, hashColor } from "stores/buckets";
 import { useUiStore } from "stores/ui";
-import { DEFAULT_COLOR } from "src/js/constants";
 
 export default defineComponent({
   name: "BucketCard",
@@ -86,7 +104,7 @@ export default defineComponent({
     const uiStore = useUiStore();
     const { t } = useI18n();
 
-    const bucketColor = computed(() => props.bucket.color || DEFAULT_COLOR);
+    const bucketColor = computed(() => props.bucket.color || hashColor(props.bucket.name));
 
     const adjustColor = (col: string, amt: number) => {
       let color = col.startsWith('#') ? col.slice(1) : col;
@@ -123,9 +141,9 @@ export default defineComponent({
     const menu = ref(false);
     const dragOver = ref(false);
 
-    const progress = computed(() => {
+    const progressRatio = computed(() => {
       if (!props.bucket.goal || props.bucket.goal === 0) return 0;
-      return Math.min((props.balance / props.bucket.goal) * 100, 100);
+      return Math.min(props.balance / props.bucket.goal, 1);
     });
 
     const emitAction = (action: string) => {
@@ -166,19 +184,19 @@ export default defineComponent({
       dragOver,
       DEFAULT_BUCKET_ID,
       t,
-      progress,
+      progressRatio,
     };
   },
 });
 </script>
 
 <style scoped>
-.bucket-card-new {
-  background: linear-gradient(145deg, #1e293b, #111827);
+.bucket-card {
+  background-color: #1b2330;
   padding: 12px;
   border-radius: 16px;
   border-top: 4px solid;
-  height: 100px;
+  height: 100%;
   display: flex;
   flex-direction: column;
   transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
@@ -186,14 +204,14 @@ export default defineComponent({
   position: relative;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
 }
-.bucket-card-new:hover {
+.bucket-card:hover {
   transform: scale(1.03);
   box-shadow: 0 20px 25px -5px rgba(0,0,0,0.4), 0 10px 10px -5px rgba(0,0,0,0.3);
 }
-.bucket-card-new.selected {
+.bucket-card.selected {
   border: 3px solid var(--q-primary);
 }
-.bucket-card-new.drag-over {
+.bucket-card.drag-over {
   box-shadow: 0 0 0 3px var(--q-primary) inset;
 }
 .selected-check {
@@ -226,21 +244,13 @@ export default defineComponent({
   -webkit-line-clamp: 2;
   max-height: 2.5em; /* Fallback for non-webkit */
 }
-.progress-bar-container {
-  width: 100%;
-  background-color: rgba(255, 255, 255, 0.1);
-  border-radius: 9999px;
-  height: 6px;
-}
-.progress-bar-value {
-  height: 6px;
-  border-radius: 9999px;
-  transition: width 0.5s ease;
-}
 .col-grow {
   flex-grow: 1;
 }
 .opacity-50 {
     opacity: 0.5;
+}
+.progress-section {
+  min-height: 48px;
 }
 </style>

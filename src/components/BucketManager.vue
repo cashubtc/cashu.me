@@ -1,69 +1,15 @@
 <template>
   <div class="w-full max-w-7xl mx-auto flex flex-col">
-    <header class="q-mb-lg text-center">
-      <div class="text-h5 text-weight-bold text-white">
-        {{ formatCurrency(totalActiveBalance, activeUnit.value) }}
-      </div>
-      <div class="text-grey-5 q-mb-md">
-        {{ activeBucketCount }} Active Buckets
-      </div>
-      <div class="row items-center justify-center q-gutter-xs">
-        <q-input
-          v-model="searchTerm"
-          dark
-          borderless
-          dense
-          class="bg-slate-800 rounded-lg q-px-md q-py-sm"
-          placeholder="Search by name or description..."
-          aria-label="Search buckets by name or description"
-        />
-        <q-btn-toggle
-          v-model="viewMode"
-          no-caps
-          rounded
-          unelevated
-          toggle-color="pink-6"
-          color="grey-9"
-          text-color="white"
-          :options="[
-            { label: 'Active', value: 'all' },
-            { label: 'Archived', value: 'archived' }
-          ]"
-        />
-        <q-select
-          v-model="sortBy"
-          borderless
-          dense
-          dark
-          class="bg-slate-800 rounded-lg q-px-md"
-          :options="[
-            { label: 'Name', value: 'name' },
-            { label: 'Balance', value: 'balance' }
-          ]"
-          label="Sort By"
-        />
-        <q-checkbox
-          dense
-          dark
-          class="q-ml-sm"
-          :model-value="multiSelectMode"
-          @update:model-value="toggleMultiSelect"
-          data-test="multi-select-toggle"
-          aria-label="Toggle multi select"
-        />
-        <q-btn
-          flat
-          dense
-          round
-          class="q-ml-sm"
-          :color="multiSelectMode ? 'pink-6' : 'grey-5'"
-          :icon="multiSelectMode ? 'close' : 'select_all'"
-          @click="toggleMultiSelect"
-          :aria-pressed="multiSelectMode"
-          aria-label="Toggle bucket selection mode"
-        />
-      </div>
-    </header>
+    <div class="buckets-toolbar q-mb-md">
+      <slot name="toolbar"
+        :search-term="searchTerm"
+        :view-mode="viewMode"
+        :sort-by="sortBy"
+        :multi-select-mode="multiSelectMode"
+        :toggle-multi-select="toggleMultiSelect"
+        :move-selected="moveSelected"
+      />
+    </div>
 
     <q-banner
       v-if="selectedBucketIds.length > 0"
@@ -140,17 +86,6 @@
       <div class="text-h6 q-mb-sm">No Buckets Yet</div>
       <p class="q-mb-md">Create your first bucket to organize your tokens.</p>
       <q-btn color="pink-6" icon="add" label="Create Bucket" @click="openAdd" />
-    </div>
-    <div class="sticky-bar">
-      <div class="action-container">
-        <q-btn color="pink-6" icon="add" label="Create Bucket" @click="openAdd" />
-        <q-btn
-          color="pink-6"
-          icon="swap_horiz"
-          :label="$t('BucketDetail.move')"
-          @click="moveSelected"
-        />
-      </div>
     </div>
   </div>
 
@@ -388,7 +323,12 @@ export default defineComponent({
         secrets = data.split(',');
       }
       if (Array.isArray(secrets) && secrets.length) {
-        await proofsStore.moveProofs(secrets, id);
+        try {
+          await proofsStore.moveProofs(secrets, id);
+          $q.notify({ type: 'positive', message: t('BucketManager.notifications.move_success') });
+        } catch (e) {
+          $q.notify({ type: 'negative', message: 'Move failed' });
+        }
       }
     };
 
@@ -482,19 +422,4 @@ export default defineComponent({
   }
 }
 
-.sticky-bar {
-  position: sticky;
-  bottom: 0;
-  z-index: 10;
-  background-color: #111827;
-  padding: 0.5rem 0;
-}
-
-.action-container {
-  max-width: 80rem;
-  margin: 0 auto;
-  display: flex;
-  justify-content: center;
-  gap: 0.5rem;
-}
 </style>

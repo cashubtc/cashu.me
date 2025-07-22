@@ -31,7 +31,7 @@ module.exports = configure(function (/* ctx */) {
     boot: ["polyfills", "ndk", "base", "global-components", "cashu", "i18n"],
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#css
-    css: ["app.scss", "base.scss"],
+    css: ["app.scss", "base.scss", "buckets.scss"],
 
     // https://github.com/quasarframework/quasar/tree/dev/extras
     extras: ["roboto-font", "material-icons"],
@@ -82,7 +82,13 @@ module.exports = configure(function (/* ctx */) {
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#framework
     framework: {
-      config: {},
+      config: {
+        brand: {
+          dark: '#0e141b',
+          'dark-page': '#0e141b',
+          accent: '#f54dd0'
+        }
+      },
 
       iconSet: "material-icons", // Quasar icon set
       // lang: 'en-US', // Quasar language pack

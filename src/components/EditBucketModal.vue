@@ -11,13 +11,12 @@
           :label="$t('bucket.name')"
           class="q-mb-sm"
         />
-        <q-input
+        <q-color
           v-model="local.color"
-          outlined
-          color="accent"
-          rounded
-          :label="$t('bucket.color')"
-          type="color"
+          :palette="COLOR_PALETTE"
+          default-view="palette"
+          no-header
+          no-footer
           class="q-mb-sm"
         />
         <q-input
@@ -50,7 +49,7 @@
           </template>
         </q-input>
         <div class="row q-mt-md">
-          <q-btn color="accent" rounded @click="onSave">{{ $t('global.actions.save.label') }}</q-btn>
+          <q-btn color="accent" rounded :disable="!canSave" @click="onSave">{{ $t('global.actions.save.label') }}</q-btn>
           <q-btn flat rounded color="grey" class="q-ml-auto" v-close-popup>{{ $t('global.actions.cancel.label') }}</q-btn>
         </div>
       </q-form>
@@ -61,13 +60,14 @@
 <script lang="ts" setup>
 import { reactive, watch, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { DEFAULT_COLOR } from 'src/js/constants';
+import { COLOR_PALETTE, hashColor, useBucketsStore } from 'stores/buckets';
 import type { Bucket } from 'stores/buckets';
 
 const props = defineProps<{ modelValue: boolean; bucket: Bucket | null }>();
 const emit = defineEmits(['update:modelValue', 'save']);
 
 const { t } = useI18n();
+const bucketsStore = useBucketsStore();
 
 const showLocal = computed({
   get: () => props.modelValue,
@@ -76,18 +76,31 @@ const showLocal = computed({
 
 const local = reactive({
   name: '',
-  color: DEFAULT_COLOR,
+  color: hashColor(''),
   description: '',
   goal: null as number | null,
   creatorPubkey: ''
 });
+
+const nameTaken = computed(() =>
+  props.bucket ?
+    false :
+    bucketsStore.bucketList.some(
+      b => b.id !== props.bucket?.id && b.name.toLowerCase() === local.name.trim().toLowerCase()
+    )
+);
+const canSave = computed(() =>
+  local.name.trim().length > 0 &&
+  !nameTaken.value &&
+  (local.goal === null || local.goal >= 0)
+);
 
 watch(
   () => props.bucket,
   (b) => {
     if (!b) return;
     local.name = b.name;
-    local.color = b.color || DEFAULT_COLOR;
+    local.color = b.color || hashColor(b.name);
     local.description = b.description || '';
     local.goal = b.goal ?? null;
     local.creatorPubkey = b.creatorPubkey || '';
@@ -99,8 +112,8 @@ watch(
   () => props.modelValue,
   (val) => {
     if (val && props.bucket) {
-      local.name = props.bucket.name;
-      local.color = props.bucket.color || DEFAULT_COLOR;
+        local.name = props.bucket.name;
+        local.color = props.bucket.color || hashColor(props.bucket.name);
       local.description = props.bucket.description || '';
       local.goal = props.bucket.goal ?? null;
       local.creatorPubkey = props.bucket.creatorPubkey || '';
@@ -109,6 +122,7 @@ watch(
 );
 
 function onSave() {
+  if (!canSave.value) return;
   emit('save', { ...local });
   emit('update:modelValue', false);
 }

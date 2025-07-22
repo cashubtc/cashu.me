@@ -8,11 +8,12 @@
           outlined
           class="q-mb-sm"
         />
-        <q-input
+        <q-color
           v-model="form.color"
-          :label="t('bucket.color')"
-          type="color"
-          outlined
+          :palette="COLOR_PALETTE"
+          default-view="palette"
+          no-header
+          no-footer
           class="q-mb-sm"
         />
         <q-input
@@ -48,10 +49,9 @@
 </template>
 
 <script setup lang="ts">
-import { computed, reactive } from 'vue'
+import { computed, reactive, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useBucketsStore } from 'stores/buckets'
-import { DEFAULT_COLOR } from 'src/js/constants'
+import { useBucketsStore, COLOR_PALETTE, hashColor } from 'stores/buckets'
 
 const props = defineProps<{ modelValue: boolean }>()
 const emit = defineEmits(['update:modelValue'])
@@ -63,7 +63,7 @@ const showLocal = computed({
 
 const form = reactive({
   name: '',
-  color: DEFAULT_COLOR,
+  color: hashColor(''),
   goal: null as number | null,
   desc: ''
 })
@@ -71,11 +71,22 @@ const form = reactive({
 const { t } = useI18n()
 const buckets = useBucketsStore()
 
-const canSave = computed(() => form.name.trim().length > 0)
+const nameTaken = computed(() =>
+  buckets.bucketList.some(b => b.name.toLowerCase() === form.name.trim().toLowerCase())
+)
+const canSave = computed(() =>
+  form.name.trim().length > 0 &&
+  !nameTaken.value &&
+  (form.goal === null || form.goal >= 0)
+)
+
+watch(() => form.name, val => {
+  form.color = hashColor(val)
+})
 
 function reset () {
   form.name = ''
-  form.color = DEFAULT_COLOR
+  form.color = hashColor('')
   form.goal = null
   form.desc = ''
 }
