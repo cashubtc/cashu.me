@@ -25,9 +25,12 @@
       dense
       outlined
       class="bg-slate-800"
+      label="Sort"
       :options="[
-        { label: 'Name', value: 'name' },
-        { label: 'Balance', value: 'balance' }
+        { label: 'Name (A–Z)', value: 'name-asc' },
+        { label: 'Name (Z–A)', value: 'name-desc' },
+        { label: 'Balance (↓)', value: 'balance-desc' },
+        { label: 'Balance (↑)', value: 'balance-asc' }
       ]"
     />
     <q-space />
