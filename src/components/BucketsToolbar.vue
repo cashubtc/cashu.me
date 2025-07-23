@@ -1,5 +1,5 @@
 <template>
-  <div class="buckets-toolbar row items-center q-gutter-sm">
+  <div class="buckets-toolbar row items-center q-gutter-sm q-mb-md">
     <q-input
       v-model="modelSearch"
       dense
