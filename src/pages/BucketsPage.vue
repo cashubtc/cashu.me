@@ -3,7 +3,74 @@
     <h1>Buckets</h1>
     <p class="text-grey-5 q-mb-md">Organize your tokens</p>
     <SummaryStats :total="totalActiveBalance" :active-count="activeCount" />
-    <BucketManager />
+    <BucketManager>
+      <template
+        #toolbar="{
+          searchTerm,
+          viewMode,
+          sortBy,
+          toggleMultiSelect,
+          multiSelectMode,
+          moveSelected,
+        }"
+      >
+        <q-toolbar
+          class="bg-transparent q-pl-md q-pr-md q-gutter-md row items-center"
+        >
+          <q-input
+            :model-value="searchTerm.value"
+            @update:model-value="(val) => (searchTerm.value = val)"
+            outlined
+            dense
+            placeholder="Search buckets…"
+          />
+          <q-btn-toggle
+            v-model="viewMode.value"
+            dense
+            unelevated
+            toggle-color="primary"
+            :options="[
+              { label: 'Active', value: 'active' },
+              { label: 'Archived', value: 'archived' },
+            ]"
+          />
+          <q-select
+            :model-value="sortBy.value"
+            @update:model-value="(val) => (sortBy.value = val)"
+            outlined
+            dense
+            label="Sort"
+            aria-label="Sort buckets"
+            emit-value
+            map-options
+            :options="[
+              { label: 'Name (A–Z)', value: 'name-asc' },
+              { label: 'Name (Z–A)', value: 'name-desc' },
+              { label: 'Balance (↓)', value: 'balance-desc' },
+              { label: 'Balance (↑)', value: 'balance-asc' },
+            ]"
+          />
+          <q-btn
+            color="white"
+            text-color="black"
+            icon="swap_horiz"
+            label="Move Tokens"
+            @click="moveSelected"
+            aria-label="Move Tokens"
+          />
+          <q-btn
+            flat
+            dense
+            round
+            class="q-ml-sm"
+            :icon="multiSelectMode ? 'close' : 'select_all'"
+            @click="toggleMultiSelect"
+            :aria-pressed="multiSelectMode"
+            aria-label="Toggle selection"
+          />
+        </q-toolbar>
+      </template>
+    </BucketManager>
     <q-page-sticky
       position="bottom-right"
       :offset="[18, 18]"
