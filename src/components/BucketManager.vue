@@ -1,15 +1,11 @@
 <template>
   <div class="w-full max-w-7xl mx-auto flex flex-col">
-    <q-toolbar class="bg-transparent q-pl-md q-pr-md q-gutter-md row items-center buckets-toolbar q-mb-md">
-      <slot name="toolbar"
-        :search-term="searchTerm"
-        :view-mode="viewMode"
-        :sort-by="sortBy"
-        :multi-select-mode="multiSelectMode"
-        :toggle-multi-select="toggleMultiSelect"
-        :move-selected="moveSelected"
-      />
-    </q-toolbar>
+    <BucketsToolbar
+      v-model:search="searchTerm"
+      v-model:viewMode="viewMode"
+      v-model:sort="sortBy"
+      @move-tokens="moveSelected"
+    />
 
     <q-banner
       v-if="selectedBucketIds.length > 0"
@@ -145,6 +141,7 @@ import BucketDialog from './BucketDialog.vue';
 import EditBucketModal from './EditBucketModal.vue';
 import BucketDetailModal from './BucketDetailModal.vue';
 import MoveTokensModal from './MoveTokensModal.vue';
+import BucketsToolbar from './BucketsToolbar.vue';
 
 export default defineComponent({
   name: 'BucketManager',
@@ -154,6 +151,7 @@ export default defineComponent({
     EditBucketModal,
     BucketDetailModal,
     MoveTokensModal,
+    BucketsToolbar,
   },
   setup() {
     const bucketsStore = useBucketsStore();

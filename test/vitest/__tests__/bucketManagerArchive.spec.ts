@@ -1,10 +1,13 @@
 import { describe, it, expect, vi } from 'vitest';
-import { mount } from '@vue/test-utils';
+import { mount, flushPromises } from '@vue/test-utils';
 import { reactive, ref } from 'vue';
 import BucketManager from '../../../src/components/BucketManager.vue';
 import BucketCard from '../../../src/components/BucketCard.vue';
 
-const bucketsData = reactive([{ id: 'b1', name: 'Bucket', isArchived: false }]);
+const bucketsData = reactive([
+  { id: 'b1', name: 'Active', isArchived: false },
+  { id: 'b2', name: 'Old', isArchived: true },
+]);
 
 const editBucketMock = vi.fn((id: string, updates: any) => {
   const idx = bucketsData.findIndex(b => b.id === id);
@@ -42,21 +45,22 @@ vi.mock('../../../src/js/notify', () => ({
 
 const qMenuStub = { template: '<div><slot /></div>' };
 
-describe('BucketManager archive action', () => {
-  it('opens menu and archives bucket', async () => {
+describe('BucketManager archive view', () => {
+  it('shows only archived buckets when Archived button clicked', async () => {
     const wrapper = mount(BucketManager, {
       global: { stubs: { 'q-menu': qMenuStub } },
     });
 
-    const card = wrapper.findComponent(BucketCard);
-    expect((card.vm as any).menu).toBe(false);
+    await flushPromises();
 
-    await wrapper.find('[data-test="bucket-menu-btn"]').trigger('click');
-    expect((card.vm as any).menu).toBe(true);
+    expect(wrapper.findAllComponents(BucketCard).length).toBe(1);
 
-    await wrapper.find('[data-test="archive"]').trigger('click');
+    const toolbar = wrapper.findComponent({ name: 'BucketsToolbar' });
+    await toolbar.findAll('button')[1].trigger('click');
+    await flushPromises();
 
-    expect(editBucketMock).toHaveBeenCalledWith('b1', { isArchived: true });
-    expect(bucketsData[0].isArchived).toBe(true);
+    const cards = wrapper.findAllComponents(BucketCard);
+    expect(cards.length).toBe(1);
+    expect((cards[0].props('bucket') as any).id).toBe('b2');
   });
 });
