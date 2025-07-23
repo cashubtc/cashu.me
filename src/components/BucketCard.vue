@@ -77,36 +77,29 @@
     >
       <q-list dense>
         <q-item clickable v-close-popup @click.stop="emitAction('view')" data-test="view">
-          <q-item-section avatar><q-icon name="o_visibility" /></q-item-section>
           <q-item-section>View Tokens</q-item-section>
         </q-item>
         <template v-if="bucket.id !== DEFAULT_BUCKET_ID">
           <q-item clickable v-close-popup @click.stop="emitAction('edit')" data-test="edit">
-            <q-item-section avatar><q-icon name="o_edit" /></q-item-section>
             <q-item-section>Edit</q-item-section>
           </q-item>
           <q-item clickable v-close-popup @click.stop="emitAction('archive')" data-test="archive">
-            <q-item-section avatar><q-icon name="o_archive" /></q-item-section>
             <q-item-section>{{ bucket.isArchived ? 'Unarchive' : 'Archive' }}</q-item-section>
           </q-item>
           <q-separator dark />
           <q-item clickable v-close-popup @click.stop="emitAction('delete')" data-test="delete">
-            <q-item-section avatar><q-icon name="o_delete" color="red-4" /></q-item-section>
             <q-item-section class="text-red-4">Delete</q-item-section>
           </q-item>
         </template>
         <template v-else>
           <q-item disable>
-            <q-item-section avatar><q-icon name="o_edit" /></q-item-section>
             <q-item-section>Edit</q-item-section>
           </q-item>
           <q-item disable>
-            <q-item-section avatar><q-icon name="o_archive" /></q-item-section>
             <q-item-section>Archive</q-item-section>
           </q-item>
           <q-separator dark />
           <q-item disable>
-            <q-item-section avatar><q-icon name="o_delete" color="red-4" /></q-item-section>
             <q-item-section class="text-red-4">Delete</q-item-section>
           </q-item>
         </template>
