@@ -1,6 +1,7 @@
 <template>
   <div
     class="bucket-card"
+    ref="menuTarget"
     :class="{
       'opacity-50': bucket.isArchived,
       selected,
@@ -69,8 +70,8 @@
       self="top right"
       dark
       class="bg-slate-800"
-      :style="{ minWidth: '200px', zIndex: 10 }"
-      :offset="[0, 8]"
+      style="min-width: 200px"
+      :target="menuTarget"
     >
       <q-list dense>
         <q-item clickable v-close-popup @click.stop="emitAction('view')" data-test="view">
@@ -168,6 +169,7 @@ export default defineComponent({
     };
 
     const menu = ref(false);
+    const menuTarget = ref<HTMLElement | null>(null);
     const dragOver = ref(false);
 
     const progressRatio = computed(() => {
@@ -214,6 +216,7 @@ export default defineComponent({
       DEFAULT_BUCKET_ID,
       t,
       progressRatio,
+      menuTarget,
     };
   },
 });

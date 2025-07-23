@@ -33,3 +33,9 @@
   white-space: normal; // allow wrapping within menu items
   word-break: break-word; // prevent overflow for long words
 }
+
+/* ensure menu text wraps and doesn't overflow */
+.bucket-card .q-menu .q-item__section--main {
+  white-space: normal;
+  word-break: break-word;
+}
