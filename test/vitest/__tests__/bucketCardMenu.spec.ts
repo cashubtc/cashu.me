@@ -17,6 +17,7 @@ describe('BucketCard menu actions', () => {
     });
 
     await wrapper.find('[data-test="bucket-menu-btn"]').trigger('click');
+    expect(wrapper.find('q-menu-stub').attributes('style')).toContain('z-index: 2000');
     await wrapper.find('[data-test="view"]').trigger('click');
     await wrapper.find('[data-test="edit"]').trigger('click');
     await wrapper.find('[data-test="archive"]').trigger('click');

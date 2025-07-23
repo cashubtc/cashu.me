@@ -70,8 +70,9 @@
       self="top right"
       dark
       class="bg-slate-800"
-      style="min-width: 200px"
+      style="min-width: 200px; z-index: 2000"
       :target="menuTarget"
+      separate
     >
       <q-list dense>
         <q-item clickable v-close-popup @click.stop="emitAction('view')" data-test="view">
