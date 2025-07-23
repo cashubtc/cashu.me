@@ -1,6 +1,9 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { mount } from '@vue/test-utils';
 import BucketCard from '../../../src/components/BucketCard.vue';
+import * as quasar from 'quasar';
+
+const qMenuStub = { template: '<div><slot /></div>' };
 
 const bucket = { id: 'b1', name: 'Bucket', isArchived: false };
 
@@ -25,5 +28,29 @@ describe('BucketCard menu actions', () => {
     expect(events?.[1][0].action).toBe('edit');
     expect(events?.[2][0].action).toBe('archive');
     expect(events?.[3][0].action).toBe('delete');
+  });
+});
+
+describe('BucketCard menu responsive behaviour', () => {
+  const spy = vi.spyOn(quasar, 'useQuasar');
+
+  afterEach(() => {
+    spy.mockReset();
+  });
+
+  it('toggles menu on large and small screens', async () => {
+    for (const small of [false, true]) {
+      spy.mockReturnValue({ screen: { lt: { sm: small } } });
+      const wrapper = mount(BucketCard, {
+        props: { bucket, balance: 0, activeUnit: 'sat' },
+        global: { stubs: { 'q-menu': qMenuStub } },
+      });
+      expect(wrapper.vm.menu).toBe(false);
+      await wrapper.find('[data-test="bucket-menu-btn"]').trigger('click');
+      expect(wrapper.vm.menu).toBe(true);
+      await wrapper.find('[data-test="bucket-menu-btn"]').trigger('click');
+      expect(wrapper.vm.menu).toBe(false);
+      wrapper.unmount();
+    }
   });
 });
