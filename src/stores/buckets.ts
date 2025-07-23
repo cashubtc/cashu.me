@@ -7,6 +7,7 @@ import { useTokensStore } from "./tokens";
 import { useLockedTokensStore } from "./lockedTokens";
 import { ref, watch } from "vue";
 import { notifySuccess } from "src/js/notify";
+import { Bucket, BucketRule } from "src/types/buckets";
 
 export const COLOR_PALETTE = [
   "#ec4899",
@@ -26,22 +27,6 @@ export function hashColor(name: string): string {
   return COLOR_PALETTE[idx];
 }
 
-export type Bucket = {
-  id: string;
-  name: string;
-  color?: string;
-  description?: string;
-  goal?: number;
-  creatorPubkey?: string;
-  isArchived?: boolean;
-};
-
-export type BucketRule = {
-  id: string;
-  bucketId: string;
-  mint?: string;
-  memo?: string;
-};
 
 export const DEFAULT_BUCKET_ID = "unassigned";
 export const DEFAULT_BUCKET_NAME = "Default";

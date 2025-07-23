@@ -177,6 +177,7 @@ import { mapActions, mapState, mapWritableState } from "pinia";
 import { useMintsStore, MintClass } from "src/stores/mints";
 import { useRestoreStore } from "src/stores/restore";
 import { useWalletStore } from "src/stores/wallet";
+import { useMnemonicStore } from "src/stores/mnemonic";
 import { useUiStore } from "src/stores/ui";
 import { notifyError, notifySuccess } from "src/js/notify";
 
@@ -193,7 +194,7 @@ export default defineComponent({
   },
   computed: {
     ...mapState(useMintsStore, ["mints"]),
-    ...mapWritableState(useWalletStore, ["mnemonic"]),
+    ...mapWritableState(useMnemonicStore, ["mnemonic"]),
     ...mapWritableState(useRestoreStore, [
       "mnemonicToRestore",
       "restoreProgress",

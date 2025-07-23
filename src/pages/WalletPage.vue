@@ -280,6 +280,8 @@ import { useReceiveTokensStore } from "src/stores/receiveTokensStore";
 import { useWorkersStore } from "src/stores/workers";
 import { useTokensStore } from "src/stores/tokens";
 import { useWalletStore } from "src/stores/wallet";
+import { useMnemonicStore } from "src/stores/mnemonic";
+import { useInvoiceHistoryStore } from "src/stores/invoiceHistory";
 import { useUiStore } from "src/stores/ui";
 import { useProofsStore } from "src/stores/proofs";
 import { useCameraStore } from "src/stores/camera";
@@ -388,11 +390,8 @@ export default {
       "mints",
       "activeMint",
     ]),
-    ...mapWritableState(useWalletStore, [
-      "invoiceHistory",
-      "invoiceData",
-      "payInvoiceData",
-    ]),
+    ...mapWritableState(useInvoiceHistoryStore, ["invoiceHistory"]),
+    ...mapWritableState(useWalletStore, ["invoiceData", "payInvoiceData"]),
     ...mapWritableState(useMintsStore, ["addMintData", "showAddMintDialog"]),
     ...mapWritableState(useWorkersStore, [
       "invoiceCheckListener",
@@ -434,12 +433,12 @@ export default {
     ]),
     ...mapActions(useWorkersStore, ["clearAllWorkers", "invoiceCheckWorker"]),
     ...mapActions(useTokensStore, ["setTokenPaid"]),
+    ...mapActions(useMnemonicStore, ["initializeMnemonic"]),
     ...mapActions(useWalletStore, [
       "setInvoicePaid",
       "mint",
       "checkPendingTokens",
       "decodeRequest",
-      "initializeMnemonic",
     ]),
     ...mapActions(useCameraStore, ["closeCamera", "showCamera"]),
     ...mapActions(useNWCStore, ["listenToNWCCommands"]),

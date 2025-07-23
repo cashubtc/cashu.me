@@ -1,6 +1,7 @@
 import { debug } from "src/js/logger";
 import { defineStore } from "pinia";
 import { useWalletStore } from "./wallet";
+import { useInvoiceHistoryStore } from "./invoiceHistory";
 import { useLocalStorage } from "@vueuse/core";
 import { useSettingsStore } from "./settings";
 interface InvoiceQuote {
@@ -127,7 +128,7 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
       )
         return;
       const walletStore = useWalletStore();
-      const quotesToCheck = walletStore.invoiceHistory.filter(
+      const quotesToCheck = useInvoiceHistoryStore().invoiceHistory.filter(
         (q) =>
           q.status === "pending" &&
           q.amount > 0 &&

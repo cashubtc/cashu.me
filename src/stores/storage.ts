@@ -8,6 +8,7 @@ import { useTokensStore } from "./tokens";
 import { currentDateStr } from "src/js/utils";
 import { useProofsStore } from "./proofs";
 import { useBucketsStore } from "./buckets";
+import { useInvoiceHistoryStore } from "./invoiceHistory";
 
 export const useStorageStore = defineStore("storage", {
   state: () => ({
@@ -120,7 +121,7 @@ export const useStorageStore = defineStore("storage", {
 
       // from all paid invoices in this.invoiceHistory, delete the oldest so that only max 100 remain
       const max_history = 200;
-      let paidInvoices = walletStore.invoiceHistory.filter(
+      let paidInvoices = useInvoiceHistoryStore().invoiceHistory.filter(
         (i) => i.status == "paid"
       );
 
@@ -132,7 +133,8 @@ export const useStorageStore = defineStore("storage", {
           0,
           sortedInvoices.length - max_history
         );
-        walletStore.invoiceHistory = walletStore.invoiceHistory.filter(
+        const invStore = useInvoiceHistoryStore();
+        invStore.invoiceHistory = invStore.invoiceHistory.filter(
           (i) => !deleteInvoices.includes(i)
         );
       }

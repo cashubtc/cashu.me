@@ -84,6 +84,7 @@ import { useReceiveTokensStore } from "src/stores/receiveTokensStore";
 import { mapActions, mapState, mapWritableState } from "pinia";
 import { useUiStore } from "src/stores/ui";
 import { useWalletStore } from "src/stores/wallet";
+import { useInvoiceHistoryStore } from "src/stores/invoiceHistory";
 import { useCameraStore } from "src/stores/camera";
 import { useSendTokensStore } from "src/stores/sendTokensStore";
 import { useSettingsStore } from "../stores/settings";
@@ -122,11 +123,8 @@ export default defineComponent({
       "showSendDialog",
       "showReceiveDialog",
     ]),
-    ...mapWritableState(useWalletStore, [
-      "invoiceHistory",
-      "invoiceData",
-      "payInvoiceData",
-    ]),
+    ...mapWritableState(useInvoiceHistoryStore, ["invoiceHistory"]),
+    ...mapWritableState(useWalletStore, ["invoiceData", "payInvoiceData"]),
     ...mapWritableState(useCameraStore, ["camera"]),
     ...mapWritableState(useSendTokensStore, [
       "showSendTokens",

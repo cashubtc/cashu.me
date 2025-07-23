@@ -12,7 +12,11 @@ import { useWalletStore } from "./wallet";
 import { useProofsStore } from "./proofs";
 import { useMintsStore } from "./mints";
 import { useTokensStore } from "./tokens";
-import { DEFAULT_BUCKET_ID } from "./buckets";
+import { useSendTokensStore } from "./sendTokensStore";
+import { DEFAULT_BUCKET_ID, useBucketsStore } from "./buckets";
+import { useLockedTokensStore } from "./lockedTokens";
+import { useSignerStore } from "./signer";
+import { notifyApiError, notifyError } from "src/js/notify";
 import { cashuDb } from "./dexie";
 import { maybeRepublishNutzapProfile } from "./creatorHub";
 
@@ -389,6 +393,67 @@ export const useP2PKStore = defineStore("p2pk", {
         label,
         bucketId,
       });
+    },
+    async sendToLock(amount: number, receiverPubkey: string, locktime: number) {
+      const mintStore = useMintsStore();
+      const walletStore = useWalletStore();
+      const wallet = walletStore.wallet;
+      const sendTokensStore = useSendTokensStore();
+      const bucketId = sendTokensStore.sendData.bucketId || DEFAULT_BUCKET_ID;
+      const proofs = mintStore.activeProofs.filter((p) => p.bucketId === bucketId);
+      const info = mintStore.activeInfo || {};
+      const nuts = Array.isArray(info.nut_supports)
+        ? info.nut_supports
+        : Object.keys(info.nuts || {}).map((n) => Number(n));
+      if (!(nuts.includes(10) && nuts.includes(11))) {
+        notifyError(walletStore.t("wallet.notifications.lock_not_supported"));
+        throw new Error("Mint does not support timelocks or P2PK");
+      }
+      const spendableProofs = walletStore.spendableProofs(proofs, amount);
+      const proofsToSend = walletStore.coinSelect(
+        spendableProofs,
+        wallet,
+        amount,
+        true,
+        bucketId
+      );
+      const keysetId = walletStore.getKeyset(wallet.mint.mintUrl, wallet.unit);
+      let keepProofs: Proof[] = [];
+      let sendProofs: Proof[] = [];
+      const proofsStore = useProofsStore();
+      try {
+        ({ keep: keepProofs, send: sendProofs } = await wallet.send(amount, proofsToSend, {
+          keysetId,
+          p2pk: { pubkey: ensureCompressed(receiverPubkey), locktime },
+        }));
+        await proofsStore.removeProofs(proofsToSend);
+        const bucketsStore = useBucketsStore();
+        const tokenStr = useProofsStore().serializeProofs(sendProofs);
+        const locked = useLockedTokensStore().addLockedToken({
+          id: uuidv4(),
+          amount,
+          tokenString: tokenStr,
+          pubkey: receiverPubkey,
+          locktime,
+          bucketId: bucketsStore.ensureCreatorBucket(receiverPubkey),
+        });
+        await proofsStore.addProofs(keepProofs, undefined, bucketId, "");
+        useSignerStore().reset();
+        return { keepProofs, sendProofs, locked };
+      } catch (error: any) {
+        console.error(error);
+        if (error.message && error.message.includes("Token already spent")) {
+          notifyError(
+            "Selected proofs have already been spent. Correcting local state.",
+            "Balance Out of Sync"
+          );
+          await walletStore.reconcileSpentProofs(proofsToSend);
+        } else {
+          notifyApiError(error, "Payment failed");
+        }
+        walletStore.handleOutputsHaveAlreadyBeenSignedError(keysetId, error);
+        throw error;
+      }
     },
   },
 });

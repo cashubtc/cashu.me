@@ -106,6 +106,7 @@ import { shortenString } from "src/js/string-utils";
 import { mapWritableState, mapActions } from "pinia";
 import { useUiStore } from "src/stores/ui";
 import { useWalletStore } from "src/stores/wallet";
+import { useInvoiceHistoryStore } from "src/stores/invoiceHistory";
 import { useInvoicesWorkerStore } from "src/stores/invoicesWorker";
 import { formatDistanceToNow, parseISO } from "date-fns";
 
@@ -127,11 +128,8 @@ export default defineComponent({
   },
   computed: {
     ...mapWritableState(useUiStore, ["showInvoiceDetails"]),
-    ...mapWritableState(useWalletStore, [
-      "invoiceHistory",
-      "invoiceData",
-      "payInvoiceData",
-    ]),
+    ...mapWritableState(useInvoiceHistoryStore, ["invoiceHistory"]),
+    ...mapWritableState(useWalletStore, ["invoiceData", "payInvoiceData"]),
     maxPages() {
       return Math.ceil(this.invoiceHistory.length / this.pageSize);
     },

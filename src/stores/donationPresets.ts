@@ -72,7 +72,7 @@ export const useDonationPresetsStore = defineStore("donationPresets", {
       const tokens: LockedToken[] = [];
 
       if (!months || months <= 0) {
-        const { locked } = await walletStore.sendToLock(
+        const { locked } = await p2pkStore.sendToLock(
           amount,
           convertedPubkey,
           0
@@ -83,7 +83,7 @@ export const useDonationPresetsStore = defineStore("donationPresets", {
       const base = startDate ?? Math.floor(Date.now() / 1000);
       for (let i = 0; i < months; i++) {
         const locktime = base + i * 30 * 24 * 60 * 60;
-        const { locked } = await walletStore.sendToLock(
+        const { locked } = await p2pkStore.sendToLock(
           amount,
           convertedPubkey,
           locktime

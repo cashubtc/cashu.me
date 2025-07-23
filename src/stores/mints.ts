@@ -22,6 +22,7 @@ import { useUiStore } from "./ui";
 import { cashuDb } from "src/stores/dexie";
 import { liveQuery } from "dexie";
 import { ref, computed, watch } from "vue";
+import { WalletProof } from "src/types/proofs";
 import { useProofsStore } from "./proofs";
 import { useI18n } from "vue-i18n";
 import { maybeRepublishNutzapProfile } from "./creatorHub";
@@ -90,13 +91,7 @@ export class MintClass {
   }
 }
 
-// type that extends type Proof with reserved boolean
-export type WalletProof = Proof & {
-  reserved: boolean;
-  quote?: string;
-  bucketId?: string;
-  label?: string;
-};
+
 
 export type Balances = {
   [unit: string]: number;
