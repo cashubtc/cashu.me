@@ -34,7 +34,7 @@ module.exports = configure(function (/* ctx */) {
     css: ["app.scss", "base.scss", "buckets.scss"],
 
     // https://github.com/quasarframework/quasar/tree/dev/extras
-    extras: ["roboto-font", "material-icons"],
+    extras: ["roboto-font"],
 
     // Full list of options: https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#build
     build: {
@@ -90,7 +90,8 @@ module.exports = configure(function (/* ctx */) {
         }
       },
 
-      iconSet: "material-icons", // Quasar icon set
+      // Auto-import SVG material icons
+      iconSet: "svg-material-icons",
       // lang: 'en-US', // Quasar language pack
 
       // For special cases outside of where the auto-import strategy can have an impact
@@ -104,9 +105,8 @@ module.exports = configure(function (/* ctx */) {
       plugins: ["LocalStorage", "Notify", "Dialog"],
     },
 
-    animations: "all", // --- includes all animations
-    // https://v2.quasar.dev/options/animations
-    // animations: [],
+    // Enable only the animations used in the app
+    animations: ["bounce", "bounceIn", "tada"],
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#property-sourcefiles
     // sourceFiles: {
