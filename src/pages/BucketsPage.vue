@@ -14,7 +14,9 @@
           moveSelected,
         }"
       >
-        <q-toolbar class="bg-transparent q-pl-md q-pr-md q-gutter-md row items-center">
+        <q-toolbar
+          class="bg-transparent q-pl-md q-pr-md q-gutter-md row items-center"
+        >
           <q-input
             :model-value="searchTerm.value"
             @update:model-value="(val) => (searchTerm.value = val)"
@@ -23,9 +25,10 @@
             placeholder="Search buckets…"
           />
           <q-btn-toggle
-            :model-value="viewMode.value"
-            @update:model-value="(val) => (viewMode.value = val)"
+            v-model="viewMode.value"
             dense
+            unelevated
+            toggle-color="primary"
             :options="[
               { label: 'Active', value: 'active' },
               { label: 'Archived', value: 'archived' },
