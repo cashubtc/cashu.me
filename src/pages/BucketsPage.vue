@@ -51,7 +51,8 @@
             ]"
           />
           <q-btn
-            color="primary"
+            color="white"
+            text-color="black"
             icon="swap_horiz"
             label="Move Tokens"
             @click="moveSelected"
