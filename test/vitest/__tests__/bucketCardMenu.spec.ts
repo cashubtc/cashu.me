@@ -38,7 +38,7 @@ describe('BucketCard menu responsive behaviour', () => {
     spy.mockReset();
   });
 
-  it('opens menu when clicked on large and small screens', async () => {
+  it('toggles menu on large and small screens', async () => {
     for (const small of [false, true]) {
       spy.mockReturnValue({ screen: { lt: { sm: small } } });
       const wrapper = mount(BucketCard, {
@@ -48,6 +48,8 @@ describe('BucketCard menu responsive behaviour', () => {
       expect(wrapper.vm.menu).toBe(false);
       await wrapper.find('[data-test="bucket-menu-btn"]').trigger('click');
       expect(wrapper.vm.menu).toBe(true);
+      await wrapper.find('[data-test="bucket-menu-btn"]').trigger('click');
+      expect(wrapper.vm.menu).toBe(false);
       wrapper.unmount();
     }
   });
