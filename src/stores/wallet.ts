@@ -1,7 +1,8 @@
 import { debug } from "src/js/logger";
 import { defineStore } from "pinia";
 import { currentDateStr } from "src/js/utils";
-import { useMintsStore, WalletProof, MintClass, Mint } from "./mints";
+import { useMintsStore, MintClass, Mint } from "./mints";
+import { WalletProof } from "src/types/proofs";
 import { useLocalStorage } from "@vueuse/core";
 import { useProofsStore } from "./proofs";
 import { LOCAL_STORAGE_KEYS } from "src/constants/localStorageKeys";
@@ -15,6 +16,7 @@ import { useWorkersStore } from "./workers";
 import { useInvoicesWorkerStore } from "./invoicesWorker";
 import { DEFAULT_BUCKET_ID, useBucketsStore } from "./buckets";
 import { useLockedTokensStore } from "./lockedTokens";
+import { useInvoiceHistoryStore } from "./invoiceHistory";
 import { v4 as uuidv4 } from "uuid";
 import { ensureCompressed } from "src/utils/ecash";
 
@@ -58,6 +60,8 @@ import { date } from "quasar";
 // window.Buffer = Buffer;
 import { generateMnemonic, mnemonicToSeedSync } from "@scure/bip39";
 import { wordlist } from "@scure/bip39/wordlists/english";
+import { useMnemonicStore } from "./mnemonic";
+import { Invoice, InvoiceHistory } from "src/types/invoice";
 import { useSettingsStore } from "./settings";
 import { usePriceStore } from "./price";
 import { i18n } from "src/boot/i18n";
@@ -72,21 +76,6 @@ window.addEventListener("beforeunload", () => {
   isUnloading = true;
 });
 
-type Invoice = {
-  amount: number;
-  bolt11: string;
-  quote: string;
-  memo: string;
-};
-
-export type InvoiceHistory = Invoice & {
-  date: string;
-  status: "pending" | "paid";
-  mint: string;
-  unit: string;
-  mintQuote?: MintQuoteResponse;
-  meltQuote?: MeltQuoteResponse;
-};
 
 type KeysetCounter = {
   id: string;
@@ -102,18 +91,10 @@ export const useWalletStore = defineStore("wallet", {
     const t = i18n.global.t;
     return {
       t: t,
-      mnemonic: useLocalStorage(LOCAL_STORAGE_KEYS.CASHU_MNEMONIC, ""),
-      invoiceHistory: useLocalStorage(
-        LOCAL_STORAGE_KEYS.CASHU_INVOICEHISTORY,
-        [] as InvoiceHistory[]
-      ),
+      
       keysetCounters: useLocalStorage(
         LOCAL_STORAGE_KEYS.CASHU_KEYSETCOUNTERS,
         [] as KeysetCounter[]
-      ),
-      oldMnemonicCounters: useLocalStorage(
-        LOCAL_STORAGE_KEYS.CASHU_OLDMNEMONICCOUNTERS,
-        [] as { mnemonic: string; keysetCounters: KeysetCounter[] }[]
       ),
       invoiceData: {} as InvoiceHistory,
       activeWebsocketConnections: 0,
@@ -168,10 +149,11 @@ export const useWalletStore = defineStore("wallet", {
     wallet() {
       const mints = useMintsStore();
       const mint = new CashuMint(mints.activeMintUrl);
-      if (this.mnemonic == "") {
-        this.mnemonic = generateMnemonic(wordlist);
+      const mnemonicStore = useMnemonicStore();
+      if (mnemonicStore.mnemonic == "") {
+        mnemonicStore.mnemonic = generateMnemonic(wordlist);
       }
-      const mnemonic: string = this.mnemonic;
+      const mnemonic: string = mnemonicStore.mnemonic;
       const bip39Seed = mnemonicToSeedSync(mnemonic);
       const walletOptions: any = {
         keys: mints.activeKeys,
@@ -186,7 +168,8 @@ export const useWalletStore = defineStore("wallet", {
       return wallet;
     },
     seed(): Uint8Array {
-      return mnemonicToSeedSync(this.mnemonic);
+      const mnemonicStore = useMnemonicStore();
+      return mnemonicToSeedSync(mnemonicStore.mnemonic);
     },
   },
   actions: {
@@ -201,10 +184,11 @@ export const useWalletStore = defineStore("wallet", {
       }
       const unitKeysets = mints.mintUnitKeysets(storedMint, unit);
       const mint = new CashuMint(url);
-      if (this.mnemonic == "") {
-        this.mnemonic = generateMnemonic(wordlist);
+      const mnemonicStore = useMnemonicStore();
+      if (mnemonicStore.mnemonic == "") {
+        mnemonicStore.mnemonic = generateMnemonic(wordlist);
       }
-      const mnemonic: string = this.mnemonic;
+      const mnemonic: string = mnemonicStore.mnemonic;
       const bip39Seed = mnemonicToSeedSync(mnemonic);
       const walletOptions: any = {
         keys: storedMint.keys,
@@ -217,17 +201,6 @@ export const useWalletStore = defineStore("wallet", {
       }
       const wallet = new CashuWallet(mint, walletOptions);
       return wallet;
-    },
-    mnemonicToSeedSync: function (mnemonic: string): Uint8Array {
-      return mnemonicToSeedSync(mnemonic);
-    },
-    newMnemonic: function () {
-      // store old mnemonic and keysetCounters
-      const oldMnemonicCounters = this.oldMnemonicCounters;
-      const keysetCounters = this.keysetCounters;
-      oldMnemonicCounters.push({ mnemonic: this.mnemonic, keysetCounters });
-      this.keysetCounters = [];
-      this.mnemonic = generateMnemonic(wordlist);
     },
     keysetCounter: function (id: string) {
       const keysetCounter = this.keysetCounters.find((c) => c.id === id);
@@ -344,9 +317,7 @@ export const useWalletStore = defineStore("wallet", {
      * Sets an invoice status to paid
      */
     setInvoicePaid(quoteId: string) {
-      const invoice = this.invoiceHistory.find((i) => i.quote === quoteId);
-      if (!invoice) return;
-      invoice.status = "paid";
+      useInvoiceHistoryStore().setInvoicePaid(quoteId);
     },
     splitAmount: function (value: number) {
       // returns optimal 2^n split
@@ -448,84 +419,6 @@ export const useWalletStore = defineStore("wallet", {
     },
     getFeesForProofs: function (proofs: Proof[]): number {
       return this.wallet.getFeesForProofs(proofs);
-    },
-    sendToLock: async function (
-      amount: number,
-      receiverPubkey: string,
-      locktime: number
-    ) {
-      const mintStore = useMintsStore();
-      const wallet = this.wallet;
-      const sendTokensStore = useSendTokensStore();
-      const bucketId = sendTokensStore.sendData.bucketId || DEFAULT_BUCKET_ID;
-      const proofs = mintStore.activeProofs.filter(
-        (p) => p.bucketId === bucketId
-      );
-      const info = mintStore.activeInfo || {};
-      const nuts = Array.isArray(info.nut_supports)
-        ? info.nut_supports
-        : Object.keys(info.nuts || {}).map((n) => Number(n));
-      if (!(nuts.includes(10) && nuts.includes(11))) {
-        notifyError(this.t("wallet.notifications.lock_not_supported"));
-        throw new Error("Mint does not support timelocks or P2PK");
-      }
-      const spendableProofs = this.spendableProofs(proofs, amount);
-      const proofsToSend = this.coinSelect(
-        spendableProofs,
-        wallet,
-        amount,
-        true,
-        bucketId
-      );
-      const keysetId = this.getKeyset(wallet.mint.mintUrl, wallet.unit);
-      let keepProofs: Proof[] = [];
-      let sendProofs: Proof[] = [];
-
-      const proofsStore = useProofsStore();
-      try {
-        ({ keep: keepProofs, send: sendProofs } = await wallet.send(
-          amount,
-          proofsToSend,
-          {
-            keysetId,
-            p2pk: {
-              pubkey: ensureCompressed(receiverPubkey),
-              locktime,
-            },
-          }
-        ));
-        await proofsStore.removeProofs(proofsToSend);
-        // note: we do not store sendProofs in the proofs store but
-        // expect from the caller to store it in the history
-        // --- NEW: persist locked proofs to creator bucket ---
-        const bucketsStore = useBucketsStore();
-
-        const tokenStr = useProofsStore().serializeProofs(sendProofs);
-        const locked = useLockedTokensStore().addLockedToken({
-          id: uuidv4(),
-          amount,
-          tokenString: tokenStr,
-          pubkey: receiverPubkey,
-          locktime,
-          bucketId: bucketsStore.ensureCreatorBucket(receiverPubkey),
-        });
-        await proofsStore.addProofs(keepProofs, undefined, bucketId, "");
-        useSignerStore().reset();
-        return { keepProofs, sendProofs, locked };
-      } catch (error: any) {
-        console.error(error);
-        if (error.message && error.message.includes("Token already spent")) {
-          notifyError(
-            "Selected proofs have already been spent. Correcting local state.",
-            "Balance Out of Sync"
-          );
-          await this.reconcileSpentProofs(proofsToSend);
-        } else {
-          notifyApiError(error, "Payment failed");
-        }
-        this.handleOutputsHaveAlreadyBeenSignedError(keysetId, error);
-        throw error;
-      }
     },
     send: async function (
       proofs: WalletProof[],
@@ -865,7 +758,7 @@ export const useWalletStore = defineStore("wallet", {
         this.invoiceData.mint = mintWallet.mint.mintUrl;
         this.invoiceData.unit = mintWallet.unit;
         this.invoiceData.mintQuote = data;
-        this.invoiceHistory.push({
+        useInvoiceHistoryStore().invoiceHistory.push({
           ...this.invoiceData,
         });
         return data;
@@ -1007,9 +900,10 @@ export const useWalletStore = defineStore("wallet", {
       }
       const request = this.payInvoiceData.invoice.bolt11;
       if (
-        this.invoiceHistory.find(
+        useInvoiceHistoryStore()
+          .invoiceHistory.find(
           (i) => i.bolt11 === request && i.amount < 0 && i.status === "paid"
-        )
+          )
       ) {
         notifyError("Invoice already paid.");
         throw new Error("invoice already paid.");
@@ -1307,7 +1201,9 @@ export const useWalletStore = defineStore("wallet", {
       const uIStore = useUiStore();
       uIStore.triggerActivityOrb();
       const mintStore = useMintsStore();
-      const invoice = this.invoiceHistory.find((i) => i.quote === quote);
+      const invoice = useInvoiceHistoryStore().invoiceHistory.find(
+        (i) => i.quote === quote
+      );
       if (!invoice) {
         throw new Error("invoice not found");
       }
@@ -1352,7 +1248,9 @@ export const useWalletStore = defineStore("wallet", {
     checkOutgoingInvoice: async function (quote: string, verbose = true) {
       const uIStore = useUiStore();
       const mintStore = useMintsStore();
-      const invoice = this.invoiceHistory.find((i) => i.quote === quote);
+      const invoice = useInvoiceHistoryStore().invoiceHistory.find(
+        (i) => i.quote === quote
+      );
       if (!invoice) {
         throw new Error("invoice not found");
       }
@@ -1489,7 +1387,9 @@ export const useWalletStore = defineStore("wallet", {
         );
         return;
       }
-      const invoice = this.invoiceHistory.find((i) => i.quote === quote);
+      const invoice = useInvoiceHistoryStore().invoiceHistory.find(
+        (i) => i.quote === quote
+      );
       if (!invoice) {
         throw new Error("invoice not found");
       }
@@ -1571,7 +1471,7 @@ export const useWalletStore = defineStore("wallet", {
       quote: MeltQuoteResponse
     ) {
       const mintStore = useMintsStore();
-      this.invoiceHistory.push({
+      useInvoiceHistoryStore().invoiceHistory.push({
         amount: -(quote.amount + quote.fee_reserve),
         bolt11: this.payInvoiceData.input.request,
         quote: quote.quote,
@@ -1584,28 +1484,13 @@ export const useWalletStore = defineStore("wallet", {
       });
     },
     removeOutgoingInvoiceFromHistory: function (quote: string) {
-      const index = this.invoiceHistory.findIndex((i) => i.quote === quote);
-      if (index >= 0) {
-        this.invoiceHistory.splice(index, 1);
-      }
+      useInvoiceHistoryStore().removeOutgoingInvoiceFromHistory(quote);
     },
     updateOutgoingInvoiceInHistory: function (
       quote: MeltQuoteResponse,
       options?: { status?: "pending" | "paid"; amount?: number }
     ) {
-      this.invoiceHistory
-        .filter((i) => i.quote === quote.quote)
-        .forEach((i) => {
-          if (options) {
-            if (options.status) {
-              i.status = options.status;
-            }
-            if (options.amount) {
-              i.amount = options.amount;
-            }
-            i.meltQuote = quote;
-          }
-        });
+      useInvoiceHistoryStore().updateOutgoingInvoiceInHistory(quote, options);
     },
     checkPendingTokens: async function (verbose: boolean = true) {
       const tokenStore = useTokensStore();
@@ -1833,12 +1718,6 @@ export const useWalletStore = defineStore("wallet", {
         }
         await this.decodeRequest(data.pr);
       }
-    },
-    initializeMnemonic: function () {
-      if (this.mnemonic == "") {
-        this.mnemonic = generateMnemonic(wordlist);
-      }
-      return this.mnemonic;
     },
     handleOutputsHaveAlreadyBeenSignedError: function (
       keysetId: string,

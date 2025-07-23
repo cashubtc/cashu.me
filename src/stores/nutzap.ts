@@ -202,7 +202,7 @@ export const useNutzapStore = defineStore("nutzap", {
           throw new Error(
             "Insufficient balance in a mint that the creator trusts."
           );
-        const { sendProofs, locked } = await wallet.sendToLock(
+        const { sendProofs, locked } = await useP2PKStore().sendToLock(
           price,
           creator.cashuP2pk,
           unlockDate
@@ -349,7 +349,7 @@ export const useNutzapStore = defineStore("nutzap", {
               "Insufficient balance in a mint that the creator trusts."
             );
 
-          const { sendProofs, locked } = await wallet.sendToLock(
+          const { sendProofs, locked } = await useP2PKStore().sendToLock(
             amount,
             creatorP2pk,
             unlockDate

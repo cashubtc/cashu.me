@@ -101,6 +101,7 @@ import { defineComponent } from "vue";
 import { mapActions, mapState } from "pinia";
 import { useClipboard } from "src/composables/useClipboard";
 import { useWalletStore } from "src/stores/wallet";
+import { useMnemonicStore } from "src/stores/mnemonic";
 import { useStorageStore } from "src/stores/storage";
 
 export default defineComponent({
@@ -122,7 +123,7 @@ export default defineComponent({
   },
   watch: {},
   computed: {
-    ...mapState(useWalletStore, ["mnemonic"]),
+    ...mapState(useMnemonicStore, ["mnemonic"]),
   },
   methods: {
     ...mapActions(useStorageStore, ["restoreFromBackup"]),

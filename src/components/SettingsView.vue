@@ -1786,6 +1786,7 @@ import { getShortUrl } from "src/js/wallet-helpers";
 import { mapActions, mapState, mapWritableState } from "pinia";
 import { useMintsStore, MintClass } from "src/stores/mints";
 import { useWalletStore } from "src/stores/wallet";
+import { useMnemonicStore } from "src/stores/mnemonic";
 import { map } from "underscore";
 import { useSettingsStore } from "src/stores/settings";
 import {
@@ -1893,7 +1894,7 @@ export default defineComponent({
       "signerType",
       "seedSignerPrivateKeyNsecComputed",
     ]),
-    ...mapState(useWalletStore, ["mnemonic"]),
+    ...mapState(useMnemonicStore, ["mnemonic"]),
     ...mapState(useUiStore, ["ndefSupported"]),
     ...mapWritableState(useNPCStore, ["npcAddress"]),
     ...mapWritableState(useNPCStore, ["npcEnabled", "automaticClaim"]),
@@ -1986,8 +1987,8 @@ export default defineComponent({
       "activateMintUrl",
       "updateMint",
     ]),
+    ...mapActions(useMnemonicStore, ["newMnemonic"]),
     ...mapActions(useWalletStore, [
-      "newMnemonic",
       "decodeRequest",
       "checkProofsSpendable",
       "increaseKeysetCounter",

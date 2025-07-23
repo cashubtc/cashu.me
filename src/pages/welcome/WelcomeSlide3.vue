@@ -37,7 +37,7 @@
             dense
             icon="content_copy"
             class="cursor-pointer q-mt-md"
-            @click="copy(walletStore.mnemonic)"
+            @click="copy(mnemonicStore.mnemonic)"
             :aria-label="$t('global.actions.copy.label')"
             :title="$t('global.actions.copy.label')"
           ></q-btn>
@@ -59,6 +59,7 @@
 <script>
 import { useWelcomeStore } from "src/stores/welcome";
 import { useWalletStore } from "src/stores/wallet";
+import { useMnemonicStore } from "src/stores/mnemonic";
 import { ref, computed } from "vue";
 import { useQuasar } from "quasar";
 import { useClipboard } from "src/composables/useClipboard";
@@ -69,18 +70,19 @@ export default {
   setup() {
     const welcomeStore = useWelcomeStore();
     const walletStore = useWalletStore();
+    const mnemonicStore = useMnemonicStore();
     const $q = useQuasar();
     const { copy } = useClipboard();
     let hideMnemonic = ref(true);
 
     const hiddenMnemonic = computed(() => {
       if (hideMnemonic.value) {
-        return walletStore.mnemonic
+        return mnemonicStore.mnemonic
           .split(" ")
           .map((w) => "*".repeat(6))
           .join(" ");
       }
-      return walletStore.mnemonic;
+      return mnemonicStore.mnemonic;
     });
 
     const toggleMnemonicVisibility = () => {

@@ -14,7 +14,9 @@ import { bytesToHex, hexToBytes } from "@noble/hashes/utils"; // already an inst
 import { generateSecretKey, getPublicKey } from "nostr-tools";
 import { v2 as nip44 } from "nostr-tools/nip44";
 import { useMintsStore } from "./mints";
-import { useWalletStore, InvoiceHistory } from "./wallet";
+import { useWalletStore } from "./wallet";
+import { useInvoiceHistoryStore } from "./invoiceHistory";
+import { InvoiceHistory } from "src/types/invoice";
 import { useProofsStore } from "./proofs";
 import { notify, notifyError, notifyWarning } from "../js/notify";
 import { useSettingsStore } from "./settings";
@@ -230,7 +232,7 @@ export const useNWCStore = defineStore("nwc", {
       const unpaid = nwcCommand.params.unpaid || false;
       const type = nwcCommand.params.type || undefined;
 
-      const invoiceHistory = walletStore.invoiceHistory;
+      const invoiceHistory = useInvoiceHistoryStore().invoiceHistory;
       const transactionsHistory = invoiceHistory
         .filter((invoice) => {
           const date = new Date(invoice.date);
@@ -289,7 +291,7 @@ export const useNWCStore = defineStore("nwc", {
 
       debug("### lookup_invoice");
       const walletStore = useWalletStore();
-      const invoiceHistory = walletStore.invoiceHistory;
+      const invoiceHistory = useInvoiceHistoryStore().invoiceHistory;
 
       for (const inv of invoiceHistory) {
         const decoded = decodeBolt11(nwcCommand.params.invoice);

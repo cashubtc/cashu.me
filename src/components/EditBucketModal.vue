@@ -61,7 +61,7 @@
 import { reactive, watch, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { COLOR_PALETTE, hashColor, useBucketsStore } from 'stores/buckets';
-import type { Bucket } from 'stores/buckets';
+import type { Bucket } from 'src/types/buckets';
 
 const props = defineProps<{ modelValue: boolean; bucket: Bucket | null }>();
 const emit = defineEmits(['update:modelValue', 'save']);

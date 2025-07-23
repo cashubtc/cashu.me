@@ -908,7 +908,6 @@ export default defineComponent({
     ...mapActions(useWorkersStore, ["clearAllWorkers"]),
     ...mapActions(useWalletStore, [
       "send",
-      "sendToLock",
       "coinSelect",
       "spendableProofs",
       "getFeesForProofs",
@@ -922,7 +921,7 @@ export default defineComponent({
       "setTokenPaid",
       "deleteToken",
     ]),
-    ...mapActions(useP2PKStore, ["isValidPubkey"]),
+    ...mapActions(useP2PKStore, ["isValidPubkey", "sendToLock"]),
     ...mapActions(useCameraStore, ["closeCamera", "showCamera"]),
     ...mapActions(useMintsStore, ["toggleUnit"]),
     onDialogShown() {
