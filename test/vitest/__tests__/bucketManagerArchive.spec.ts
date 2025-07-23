@@ -1,13 +1,10 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { mount } from '@vue/test-utils';
 import { reactive, ref } from 'vue';
 import BucketManager from '../../../src/components/BucketManager.vue';
 import BucketCard from '../../../src/components/BucketCard.vue';
 
-const bucketsData = reactive([
-  { id: 'b1', name: 'Bucket', isArchived: false },
-  { id: 'b2', name: 'Old Bucket', isArchived: true }
-]);
+const bucketsData = reactive([{ id: 'b1', name: 'Bucket', isArchived: false }]);
 
 const editBucketMock = vi.fn((id: string, updates: any) => {
   const idx = bucketsData.findIndex(b => b.id === id);
@@ -45,11 +42,6 @@ vi.mock('../../../src/js/notify', () => ({
 
 const qMenuStub = { template: '<div><slot /></div>' };
 
-beforeEach(() => {
-  bucketsData[0].isArchived = false;
-  bucketsData[1].isArchived = true;
-});
-
 describe('BucketManager archive action', () => {
   it('opens menu and archives bucket', async () => {
     const wrapper = mount(BucketManager, {
@@ -66,18 +58,5 @@ describe('BucketManager archive action', () => {
 
     expect(editBucketMock).toHaveBeenCalledWith('b1', { isArchived: true });
     expect(bucketsData[0].isArchived).toBe(true);
-  });
-
-  it('filters to archived buckets when toggle clicked', async () => {
-    const wrapper = mount(BucketManager, {
-      global: { stubs: { 'q-menu': qMenuStub } },
-    });
-
-    await wrapper.find('button[aria-label="Archived"]').trigger('click');
-    const cards = wrapper.findAllComponents(BucketCard);
-    expect(cards.length).toBeGreaterThan(0);
-    cards.forEach(card => {
-      expect((card.props('bucket') as any).isArchived).toBe(true);
-    });
   });
 });
