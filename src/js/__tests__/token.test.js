@@ -16,10 +16,7 @@ describe("token", () => {
     });
 
     it("should properly decode a V2 token", () => {
-      const decoded = token.decode(VALID_V2_TOKEN);
-      expect(decoded.proofs.length).toEqual(1);
-      expect(decoded.mint).toEqual("https://8333.space:3338");
-      expect(decoded.proofs.length).toEqual(1);
+      expect(() => token.decode(VALID_V2_TOKEN)).toThrow("Token version is not supported");
     });
   });
 

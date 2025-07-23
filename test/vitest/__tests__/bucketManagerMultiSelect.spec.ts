@@ -21,6 +21,8 @@ vi.mock('../../../src/stores/buckets', () => ({
     deleteBucket: vi.fn(),
   }),
   DEFAULT_BUCKET_ID: 'b1',
+  COLOR_PALETTE: ['#fff'],
+  hashColor: () => '#fff',
 }));
 
 vi.mock('../../../src/stores/mints', () => ({

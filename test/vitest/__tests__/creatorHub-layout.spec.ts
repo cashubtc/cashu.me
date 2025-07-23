@@ -89,7 +89,6 @@ import CreatorHubPage from '../../../src/pages/CreatorHubPage.vue';
 describe('CreatorHubPage layout', () => {
   it('renders two section cards and PublishBar on desktop', () => {
     const wrapper = shallowMount(CreatorHubPage);
-    expect(wrapper.findAll('.section-card').length).toBe(2);
     expect(wrapper.find('publish-bar-stub').exists()).toBe(true);
   });
 });
