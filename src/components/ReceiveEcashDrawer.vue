@@ -166,7 +166,6 @@ import {
 } from "lucide-vue-next";
 // import ChooseMint from "components/ChooseMint.vue";
 import TokenInformation from "components/TokenInformation.vue";
-import { map } from "underscore";
 import { notifyError, notifySuccess, notify } from "../js/notify";
 
 export default defineComponent({

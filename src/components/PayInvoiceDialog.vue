@@ -327,7 +327,6 @@ import ChooseMint from "components/ChooseMint.vue";
 import ToggleUnit from "components/ToggleUnit.vue";
 
 // import * as bolt11Decoder from "light-bolt11-decoder";
-import * as _ from "underscore";
 import { Scan as ScanIcon } from "lucide-vue-next";
 
 export default defineComponent({

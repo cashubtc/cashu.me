@@ -1,5 +1,5 @@
 import { exportFile } from 'quasar';
-import dayjs from 'dayjs';
+import { format } from 'date-fns';
 import token from 'src/js/token';
 import type { MessengerMessage } from 'src/stores/messenger';
 
@@ -14,7 +14,7 @@ export function saveReceipt(msg: MessengerMessage) {
     mintUrl,
     unlock_time: msg.subscriptionPayment.unlock_time,
   };
-  const fileName = `fundstr_${msg.subscriptionPayment.subscription_id}_${dayjs().utc().format('YYYYMMDD-HHmmss')}.json`;
+  const fileName = `fundstr_${msg.subscriptionPayment.subscription_id}_${format(new Date(), 'yyyyMMdd-HHmmss')}.json`;
   exportFile(fileName, JSON.stringify(data, null, 2), 'application/json');
 }
 

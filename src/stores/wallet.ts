@@ -20,7 +20,6 @@ import { useInvoiceHistoryStore } from "./invoiceHistory";
 import { v4 as uuidv4 } from "uuid";
 import { ensureCompressed } from "src/utils/ecash";
 
-import * as _ from "underscore";
 import token from "src/js/token";
 import {
   notifyApiError,
@@ -1534,8 +1533,8 @@ export const useWalletStore = defineStore("wallet", {
         expireDate: "",
         expired: false,
       };
-      _.each(invoice.sections, (tag) => {
-        if (_.isObject(tag) && _.has(tag, "name")) {
+      invoice.sections.forEach((tag) => {
+        if (typeof tag === "object" && tag !== null && Object.prototype.hasOwnProperty.call(tag, "name")) {
           if (tag.name === "amount") {
             cleanInvoice.msat = parseInt(tag.value, 10);
             cleanInvoice.sat = parseInt(tag.value, 10) / 1000;

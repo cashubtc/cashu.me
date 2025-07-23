@@ -21,16 +21,21 @@ import {
 import { NdkBootError } from "src/boot/ndk";
 import { useBootErrorStore } from "./bootError";
 import type { NostrEvent, NDKSubscription } from "@nostr-dev-kit/ndk";
-import dayjs from "dayjs";
-import utc from "dayjs/plugin/utc";
+import {
+  addMinutes,
+  addMonths,
+  fromUnixTime,
+  isAfter,
+  startOfDay,
+} from "date-fns";
 import { notifyError, notifyWarning } from "src/js/notify";
 import { subscriptionPayload } from "src/utils/receipt-utils";
-dayjs.extend(utc);
 
 export function calcUnlock(base: number, i: number): number {
-  const first = dayjs.unix(base).utc().startOf("day").add(30, "minute");
-  const now = dayjs().add(30, "minute");
-  return (first.isAfter(now) ? first : now).add(i, "month").unix();
+  const first = addMinutes(startOfDay(fromUnixTime(base)), 30);
+  const now = addMinutes(new Date(), 30);
+  const ref = isAfter(first, now) ? first : now;
+  return Math.floor(addMonths(ref, i).getTime() / 1000);
 }
 
 interface SendParams {

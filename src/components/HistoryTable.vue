@@ -168,7 +168,6 @@
 </template>
 <script>
 import { debug } from "src/js/logger";
-import * as _ from "underscore";
 import { defineComponent } from "vue";
 import { shortenString } from "src/js/string-utils";
 import { formatDistanceToNow, parseISO } from "date-fns";
@@ -270,7 +269,7 @@ export default defineComponent({
       debug("##### showTokenDialog");
       const tokenObj = token.decode(tokensBase64);
       this.sendData.tokens = token.getProofs(tokenObj);
-      this.sendData.tokensBase64 = _.clone(tokensBase64);
+      this.sendData.tokensBase64 = tokensBase64;
       this.sendData.paymentRequest = historyToken.paymentRequest;
       this.sendData.historyAmount = historyToken.amount;
       this.sendData.historyToken = historyToken;

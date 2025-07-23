@@ -248,7 +248,6 @@ body.body--dark .wallet-action-btn:active {
 <script>
 import { debug } from "src/js/logger";
 import { date } from "quasar";
-import * as _ from "underscore";
 import { shortenString } from "src/js/string-utils";
 import token from "src/js/token";
 
