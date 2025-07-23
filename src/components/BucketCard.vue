@@ -36,8 +36,10 @@
         dense
         color="grey-6"
         icon="more_vert"
+        @mousedown.stop
         @click.stop="menu = !menu"
         aria-label="Bucket actions"
+        draggable="false"
         data-test="bucket-menu-btn"
       />
     </div>
