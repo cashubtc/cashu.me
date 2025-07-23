@@ -43,7 +43,8 @@ import {
   notifyWarning,
   notify,
 } from "../js/notify";
-import { useNdk, rebuildNdk } from "src/composables/useNdk";
+import { useNdk } from "src/composables/useNdk";
+import { rebuildNdk } from "boot/ndk";
 import { useSendTokensStore } from "./sendTokensStore";
 import { usePRStore } from "./payment-request";
 import token from "../js/token";
