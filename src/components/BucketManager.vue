@@ -14,28 +14,34 @@
     <q-banner
       v-if="selectedBucketIds.length > 0"
       dense
-      class="q-mb-md bg-primary text-white"
+      class="q-mb-md bg-primary text-white dark:bg-grey-9 rounded-borders q-px-md q-py-sm row items-center justify-between"
     >
-      {{ selectedBucketIds.length }} buckets selected.
+      <div class="text-subtitle2 text-weight-medium">
+        {{ selectedBucketIds.length }} buckets selected
+      </div>
       <template #action>
-        <q-btn
-          flat
-          dense
-          color="white"
-          @click="moveSelected"
-          aria-label="Move tokens"
-        >
-          {{ $t('BucketDetail.move') }}
-        </q-btn>
-        <q-btn
-          flat
-          dense
-          color="white"
-          @click="toggleMultiSelect"
-          aria-label="Deselect all"
-        >
-          {{ $t('BucketManager.actions.deselect_all') }}
-        </q-btn>
+        <div class="row q-gutter-sm">
+          <q-btn
+            flat
+            dense
+            color="white"
+            class="text-weight-medium"
+            @click="moveSelected"
+            aria-label="Move tokens"
+          >
+            {{ $t('BucketDetail.move') }}
+          </q-btn>
+          <q-btn
+            flat
+            dense
+            color="white"
+            class="text-weight-medium"
+            @click="toggleMultiSelect"
+            aria-label="Deselect all"
+          >
+            {{ $t('BucketManager.actions.deselect_all') }}
+          </q-btn>
+        </div>
       </template>
     </q-banner>
     <div class="text-body2 q-mb-md">{{ $t("BucketManager.helper.intro") }}</div>
