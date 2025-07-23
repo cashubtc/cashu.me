@@ -89,7 +89,7 @@ describe("P2PK store", () => {
         send: [],
       })),
     } as any;
-    vi.spyOnProperty(walletStore, "wallet", "get").mockReturnValue(wallet);
+    vi.spyOn(walletStore, "wallet", "get").mockReturnValue(wallet);
 
     await walletStore.sendToLock(1, "pk", 123);
     expect(wallet.send).toHaveBeenCalledWith(
@@ -190,7 +190,7 @@ describe("P2PK store", () => {
       }),
     } as any;
 
-    vi.spyOnProperty(walletStore, "wallet", "get").mockReturnValue(wallet);
+    vi.spyOn(walletStore, "wallet", "get").mockReturnValue(wallet);
 
     const { sendProofs } = await walletStore.sendToLock(
       1,
@@ -234,7 +234,7 @@ describe("P2PK store", () => {
       }),
     } as any;
 
-    vi.spyOnProperty(walletStore, "wallet", "get").mockReturnValue(wallet);
+    vi.spyOn(walletStore, "wallet", "get").mockReturnValue(wallet);
 
     const { locked } = await walletStore.sendToLock(100, "02aa", locktime);
     const decoded = JSON.parse(

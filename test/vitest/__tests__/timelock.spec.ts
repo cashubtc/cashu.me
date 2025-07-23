@@ -33,7 +33,7 @@ describe("Timelock", () => {
       unit: "sat",
       send: vi.fn(async (_a, _p, opts) => ({ keep: [], send: [] })),
     } as any;
-    vi.spyOnProperty(walletStore, "wallet", "get").mockReturnValue(wallet);
+    vi.spyOn(walletStore, "wallet", "get").mockReturnValue(wallet);
 
     await walletStore.sendToLock(1, "pk", 99);
     expect(wallet.send).toHaveBeenCalledWith(

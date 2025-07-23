@@ -17,11 +17,14 @@ vi.mock("quasar", () => ({
   Notify: { create: vi.fn() },
 }));
 
+vi.mock("../../../src/stores/ui", () => ({
+  useUiStore: () => ({ showMissingSignerModal: false }),
+}));
+
 vi.mock("nostr-tools", () => ({
   nip19: { decode: vi.fn() },
 }));
-
-const { nip19 } = require("nostr-tools");
+import { nip19 } from "nostr-tools";
 const { notifyError } = require("../../../src/js/notify");
 
 beforeEach(() => {

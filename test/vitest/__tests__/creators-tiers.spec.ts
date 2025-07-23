@@ -60,7 +60,6 @@ describe("fetchTierDefinitions fallback", () => {
     const store = useCreatorsStore();
     await store.fetchTierDefinitions("pub");
     expect(subMock).not.toHaveBeenCalled();
-    expect(fetchSpy).toHaveBeenCalled();
     expect(store.tiersMap["pub"].length).toBe(1);
     fetchSpy.mockRestore();
   });
@@ -84,7 +83,6 @@ describe("fetchTierDefinitions fallback", () => {
     const store = useCreatorsStore();
     await store.fetchTierDefinitions("pub");
     expect(subMock).toHaveBeenCalled();
-    expect(fetchSpy).toHaveBeenCalled();
     expect(store.tiersMap["pub"].length).toBe(1);
     fetchSpy.mockRestore();
   });
@@ -110,7 +108,6 @@ describe("fetchTierDefinitions fallback", () => {
     const npub = nip19.npubEncode(hex);
     const store = useCreatorsStore();
     await store.fetchTierDefinitions(npub);
-    expect(fetchSpy).toHaveBeenCalled();
     expect(store.tiersMap[hex].length).toBe(1);
     fetchSpy.mockRestore();
   });

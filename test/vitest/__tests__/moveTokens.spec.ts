@@ -13,6 +13,8 @@ vi.mock("../../../src/stores/buckets", () => ({
       { id: "b2", name: "Bucket 2" },
     ],
   }),
+  COLOR_PALETTE: ["#fff"],
+  hashColor: () => "#fff",
 }));
 
 vi.mock("../../../src/stores/mints", () => ({
