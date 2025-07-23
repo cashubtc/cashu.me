@@ -31,13 +31,12 @@
       </div>
       <q-btn
         v-if="!multiSelectMode"
-        ref="menuBtnRef"
         flat
         round
         dense
         color="grey-6"
         icon="more_vert"
-        @click.stop="menu = true"
+        @click.stop="menu = !menu"
         aria-label="Bucket actions"
         data-test="bucket-menu-btn"
       />
@@ -64,7 +63,6 @@
 
     <q-menu
       v-model="menu"
-      :target="menuBtnRef"
       anchor="bottom right"
       self="top right"
       dark
@@ -168,7 +166,6 @@ export default defineComponent({
     };
 
     const menu = ref(false);
-    const menuBtnRef = ref<HTMLElement | null>(null);
     const dragOver = ref(false);
 
     const progressRatio = computed(() => {
@@ -215,7 +212,6 @@ export default defineComponent({
       DEFAULT_BUCKET_ID,
       t,
       progressRatio,
-      menuBtnRef,
     };
   },
 });
