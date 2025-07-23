@@ -24,8 +24,8 @@ importers:
         specifier: ^6.0.0
         version: 6.2.1(@capacitor/core@6.2.1)
       '@cashu/cashu-ts':
-        specifier: file:src/lib/cashu-ts
-        version: file:src/lib/cashu-ts
+        specifier: ^2.5.2
+        version: 2.5.2
       '@cashu/crypto':
         specifier: ^0.3.4
         version: 0.3.4
@@ -758,8 +758,8 @@ packages:
     peerDependencies:
       '@capacitor/core': ^6.2.0
 
-  '@cashu/cashu-ts@file:src/lib/cashu-ts':
-    resolution: {directory: src/lib/cashu-ts, type: directory}
+  '@cashu/cashu-ts@2.5.2':
+    resolution: {integrity: sha512-AjfDOZKb3RWWhmpHABC4KJxwJs3wp6eOFg6U3S6d3QOqtSoNkceMTn6lLN4/bYQarLR19rysbrIJ8MHsSwNxeQ==}
 
   '@cashu/crypto@0.3.4':
     resolution: {integrity: sha512-mfv1Pj4iL1PXzUj9NKIJbmncCLMqYfnEDqh/OPxAX0nNBt6BOnVJJLjLWFlQeYxlnEfWABSNkrqPje1t5zcyhA==}
@@ -7432,7 +7432,7 @@ snapshots:
     dependencies:
       '@capacitor/core': 6.2.1
 
-  '@cashu/cashu-ts@file:src/lib/cashu-ts':
+  '@cashu/cashu-ts@2.5.2':
     dependencies:
       '@noble/curves': 1.9.2
       '@noble/hashes': 1.8.0

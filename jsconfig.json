@@ -11,7 +11,7 @@
       "boot/*": ["src/boot/*"],
       "stores/*": ["src/stores/*"],
       "vue$": ["node_modules/vue/dist/vue.runtime.esm-bundler.js"],
-      "@cashu/cashu-ts": ["src/lib/cashu-ts/src/index.ts"]
+      "@cashu/cashu-ts": ["node_modules/@cashu/cashu-ts"]
     }
   },
   "exclude": ["dist", ".quasar", "node_modules", "android", "ios"]
