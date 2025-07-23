@@ -69,7 +69,8 @@
       anchor="bottom right"
       self="top right"
       dark
-      class="bg-slate-800"
+      separate
+      class="bg-slate-800 elevated-menu"
       style="min-width: 200px"
       :target="menuTarget"
     >
