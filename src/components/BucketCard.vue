@@ -72,7 +72,7 @@
       dark
       separate
       class="bg-slate-800 elevated-menu"
-      style="min-width: 200px; z-index: 100;"
+      style="min-width: 200px;"
       :target="menuTarget"
     >
       <q-list dense>
