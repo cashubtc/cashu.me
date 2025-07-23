@@ -321,7 +321,6 @@ import {
   Nfc as NfcIcon,
 } from "lucide-vue-next";
 
-import { map } from "underscore";
 import {
   notifyError,
   notifySuccess,

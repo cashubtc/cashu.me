@@ -184,7 +184,6 @@ import { useBucketsStore } from "stores/buckets";
 import ToggleUnit from "components/ToggleUnit.vue";
 import AnimatedNumber from "components/AnimatedNumber.vue";
 import axios from "axios";
-import { map } from "underscore";
 
 export default defineComponent({
   name: "BalanceView",

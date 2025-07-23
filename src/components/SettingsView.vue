@@ -1787,7 +1787,6 @@ import { mapActions, mapState, mapWritableState } from "pinia";
 import { useMintsStore, MintClass } from "src/stores/mints";
 import { useWalletStore } from "src/stores/wallet";
 import { useMnemonicStore } from "src/stores/mnemonic";
-import { map } from "underscore";
 import { useSettingsStore } from "src/stores/settings";
 import {
   useNostrStore,
