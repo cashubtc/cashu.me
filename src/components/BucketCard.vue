@@ -31,16 +31,13 @@
       </div>
       <q-btn
         v-if="!multiSelectMode"
-        ref="menuBtn"
         flat
         round
         dense
         color="grey-6"
         icon="more_vert"
-        @click.stop="menu = true"
+        @click.stop="menu = !menu"
         aria-label="Bucket actions"
-        aria-haspopup="menu"
-        :aria-expanded="menu"
         data-test="bucket-menu-btn"
       />
     </div>
@@ -66,16 +63,14 @@
 
     <q-menu
       v-model="menu"
-      :target="menuBtn"
-      :separate-popup="true"
       anchor="bottom right"
       self="top right"
       dark
       class="bg-slate-800"
-      :style="{ minWidth: '200px', zIndex: 2000 }"
+      :style="{ minWidth: '200px', zIndex: 10 }"
       :offset="[0, 8]"
     >
-      <q-list dense data-test="bucket-menu-list">
+      <q-list dense>
         <q-item clickable v-close-popup @click.stop="emitAction('view')" data-test="view">
           <q-item-section avatar><q-icon name="o_visibility" /></q-item-section>
           <q-item-section>View Tokens</q-item-section>
@@ -171,7 +166,6 @@ export default defineComponent({
     };
 
     const menu = ref(false);
-    const menuBtn = ref<HTMLElement | null>(null);
     const dragOver = ref(false);
 
     const progressRatio = computed(() => {
@@ -218,7 +212,6 @@ export default defineComponent({
       DEFAULT_BUCKET_ID,
       t,
       progressRatio,
-      menuBtn,
     };
   },
 });
