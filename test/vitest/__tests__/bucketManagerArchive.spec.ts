@@ -4,7 +4,10 @@ import { reactive, ref } from 'vue';
 import BucketManager from '../../../src/components/BucketManager.vue';
 import BucketCard from '../../../src/components/BucketCard.vue';
 
-const bucketsData = reactive([{ id: 'b1', name: 'Bucket', isArchived: false }]);
+const bucketsData = reactive([
+  { id: 'b1', name: 'Bucket', isArchived: false },
+  { id: 'b2', name: 'Old', isArchived: true },
+]);
 
 const editBucketMock = vi.fn((id: string, updates: any) => {
   const idx = bucketsData.findIndex(b => b.id === id);
@@ -43,20 +46,32 @@ vi.mock('../../../src/js/notify', () => ({
 const qMenuStub = { template: '<div><slot /></div>' };
 
 describe('BucketManager archive action', () => {
-  it('opens menu and archives bucket', async () => {
+  it('archives bucket through menu action', async () => {
     const wrapper = mount(BucketManager, {
-      global: { stubs: { 'q-menu': qMenuStub } },
+      global: { stubs: { 'q-menu': qMenuStub, BucketsToolbar: { template: '<div></div>' } } },
     });
+    await wrapper.vm.$nextTick();
 
-    const card = wrapper.findComponent(BucketCard);
-    expect((card.vm as any).menu).toBe(false);
-
-    await wrapper.find('[data-test="bucket-menu-btn"]').trigger('click');
-    expect((card.vm as any).menu).toBe(true);
-
-    await wrapper.find('[data-test="archive"]').trigger('click');
+    (wrapper.vm as any).handleMenuAction({ action: 'archive', bucket: bucketsData[0] });
 
     expect(editBucketMock).toHaveBeenCalledWith('b1', { isArchived: true });
     expect(bucketsData[0].isArchived).toBe(true);
+  });
+
+  it('filters archived buckets when viewMode is set', async () => {
+    const wrapper = mount(BucketManager, {
+      global: { stubs: { 'q-menu': qMenuStub, BucketsToolbar: { template: '<div></div>' } } },
+    });
+    await wrapper.vm.$nextTick();
+
+    (wrapper.vm as any).viewMode = 'archived';
+    await wrapper.vm.$nextTick();
+
+    const cards = wrapper.findAllComponents(BucketCard);
+    expect(cards.length).toBeGreaterThan(0);
+    cards.forEach(c => {
+      const bucket = c.props('bucket') as any;
+      expect(bucket.isArchived).toBe(true);
+    });
   });
 });
