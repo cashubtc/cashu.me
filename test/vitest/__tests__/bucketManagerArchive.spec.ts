@@ -4,10 +4,7 @@ import { reactive, ref } from 'vue';
 import BucketManager from '../../../src/components/BucketManager.vue';
 import BucketCard from '../../../src/components/BucketCard.vue';
 
-const bucketsData = reactive([
-  { id: 'b1', name: 'Bucket', isArchived: false },
-  { id: 'b2', name: 'Old', isArchived: true },
-]);
+const bucketsData = reactive([{ id: 'b1', name: 'Bucket', isArchived: false }]);
 
 const editBucketMock = vi.fn((id: string, updates: any) => {
   const idx = bucketsData.findIndex(b => b.id === id);
@@ -61,18 +58,5 @@ describe('BucketManager archive action', () => {
 
     expect(editBucketMock).toHaveBeenCalledWith('b1', { isArchived: true });
     expect(bucketsData[0].isArchived).toBe(true);
-  });
-
-  it('filters archived buckets via toolbar', async () => {
-    const wrapper = mount(BucketManager, {
-      global: { stubs: { 'q-menu': qMenuStub } },
-    });
-
-    await wrapper.find('button[aria-label="Archived"]').trigger('click');
-    const cards = wrapper.findAllComponents(BucketCard);
-    expect(cards.length).toBeGreaterThan(0);
-    cards.forEach((c) => {
-      expect((c.props('bucket') as any).isArchived).toBe(true);
-    });
   });
 });

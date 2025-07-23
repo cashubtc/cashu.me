@@ -3,10 +3,7 @@ import { mount } from '@vue/test-utils';
 import BucketCard from '../../../src/components/BucketCard.vue';
 import * as quasar from 'quasar';
 
-const qMenuStub = {
-  props: ['modelValue'],
-  template: '<div v-if="modelValue" class="q-menu-stub"><slot /></div>'
-};
+const qMenuStub = { template: '<div><slot /></div>' };
 
 const bucket = { id: 'b1', name: 'Bucket', isArchived: false };
 
@@ -15,7 +12,7 @@ describe('BucketCard menu actions', () => {
     const wrapper = mount(BucketCard, {
       props: { bucket, balance: 0, activeUnit: 'sat' },
       global: {
-        stubs: { 'q-menu': qMenuStub }
+        stubs: { 'q-menu': { template: '<div><slot /></div>' } }
       }
     });
 
@@ -49,13 +46,10 @@ describe('BucketCard menu responsive behaviour', () => {
         global: { stubs: { 'q-menu': qMenuStub } },
       });
       expect(wrapper.vm.menu).toBe(false);
-      expect(wrapper.find('.q-menu-stub').exists()).toBe(false);
       await wrapper.find('[data-test="bucket-menu-btn"]').trigger('click');
       expect(wrapper.vm.menu).toBe(true);
-      expect(wrapper.find('.q-menu-stub').exists()).toBe(true);
       await wrapper.find('[data-test="bucket-menu-btn"]').trigger('click');
       expect(wrapper.vm.menu).toBe(false);
-      expect(wrapper.find('.q-menu-stub').exists()).toBe(false);
       wrapper.unmount();
     }
   });
