@@ -69,8 +69,9 @@
       anchor="bottom right"
       self="top right"
       dark
+      separate
       class="bg-slate-800"
-      style="min-width: 200px"
+      style="min-width: 200px; z-index: 2000"
       :target="menuTarget"
     >
       <q-list dense>

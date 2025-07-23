@@ -12,7 +12,7 @@ describe('BucketCard menu actions', () => {
     const wrapper = mount(BucketCard, {
       props: { bucket, balance: 0, activeUnit: 'sat' },
       global: {
-        stubs: { 'q-menu': { template: '<div><slot /></div>' } }
+        stubs: { 'q-menu': qMenuStub }
       }
     });
 
@@ -21,6 +21,9 @@ describe('BucketCard menu actions', () => {
     await wrapper.find('[data-test="edit"]').trigger('click');
     await wrapper.find('[data-test="archive"]').trigger('click');
     await wrapper.find('[data-test="delete"]').trigger('click');
+
+    const menu = wrapper.find('div[separate]');
+    expect(menu.attributes('style')).toContain('z-index: 2000');
 
     const events = wrapper.emitted('menu-action');
     expect(events).toHaveLength(4);
