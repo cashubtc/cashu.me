@@ -1815,6 +1815,7 @@ export default defineComponent({
     P2PKDialog,
     NWCDialog,
   },
+  mixins: [windowMixin],
   setup() {
     const { copy } = useClipboard();
     const p2pkStore = useP2PKStore();
