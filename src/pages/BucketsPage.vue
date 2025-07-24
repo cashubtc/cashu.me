@@ -1,5 +1,5 @@
 <template>
-  <q-page class="q-pa-md text-white">
+  <q-page :class="[$q.dark.isActive ? 'text-white' : 'text-dark', 'q-pa-md']">
     <h1>Buckets</h1>
     <p class="text-grey-5 q-mb-md">Organize your tokens</p>
     <SummaryStats :total="totalActiveBalance" :active-count="activeCount" />
