@@ -25,7 +25,7 @@
       </q-avatar>
     </q-item-section>
 
-    <q-item-section class="q-hoverable">
+    <q-item-section class="q-hoverable name-section">
       <template v-if="loaded">
         <q-item-label
           class="text-subtitle1 ellipsis"
@@ -55,7 +55,7 @@
       </template>
     </q-item-section>
 
-    <q-item-section class="q-hoverable">
+    <q-item-section class="q-hoverable snippet-section">
       <q-item-label
         caption
         class="snippet ellipsis"
@@ -259,9 +259,17 @@ export default defineComponent({
   font-size: 0.75rem;
 }
 .snippet {
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   line-height: 1.2;
   white-space: normal;
+}
+
+.name-section {
+  max-width: 40%;
+}
+
+.snippet-section {
+  max-width: 35%;
 }
 
 .conversation-item .ellipsis {
@@ -290,7 +298,7 @@ export default defineComponent({
 }
 
 .timestamp-section {
-  min-width: 64px;
+  min-width: 56px;
   text-align: right;
 }
 </style>
