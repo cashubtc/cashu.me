@@ -128,24 +128,22 @@
     :key="bucket.id"
     class="row q-mt-xs q-mb-none text-secondary"
   >
-    <div class="col-12">
-      <router-link :to="`/buckets/${bucket.id}`" class="text-secondary">
-        <span class="q-my-none q-py-none text-weight-regular">
-          {{ bucket.name }}:
-          <b>{{
-            formatCurrency(bucketBalances[bucket.id] || 0, activeUnit)
-          }}</b>
-          <span v-if="bucket.goal"
-            >/ {{ formatCurrency(bucket.goal, activeUnit) }}</span
-          >
-        </span>
-        <q-linear-progress
-          v-if="bucket.goal"
-          :value="Math.min(bucketBalances[bucket.id] / bucket.goal, 1)"
-          color="primary"
-          class="q-mt-xs"
-        />
-      </router-link>
+    <div class="col-12 cursor-pointer" @click="openBucketDetail(bucket)">
+      <span class="q-my-none q-py-none text-weight-regular">
+        {{ bucket.name }}:
+        <b>{{
+          formatCurrency(bucketBalances[bucket.id] || 0, activeUnit)
+        }}</b>
+        <span v-if="bucket.goal"
+          >/ {{ formatCurrency(bucket.goal, activeUnit) }}</span
+        >
+      </span>
+      <q-linear-progress
+        v-if="bucket.goal"
+        :value="Math.min(bucketBalances[bucket.id] / bucket.goal, 1)"
+        color="primary"
+        class="q-mt-xs"
+      />
     </div>
   </div>
   <!-- pending -->
@@ -167,11 +165,15 @@
       </q-btn>
     </div>
   </div>
+  <BucketDetailModal
+    v-model="detailModalOpen"
+    :bucket-id="viewingBucket ? viewingBucket.id : null"
+  />
   <!-- </q-card-section>
   </q-card> -->
 </template>
 <script>
-import { defineComponent, ref } from "vue";
+import { defineComponent } from "vue";
 import { getShortUrl } from "src/js/wallet-helpers";
 import { mapState, mapWritableState, mapActions } from "pinia";
 import { useMintsStore } from "stores/mints";
@@ -183,6 +185,7 @@ import { usePriceStore } from "stores/price";
 import { useBucketsStore } from "stores/buckets";
 import ToggleUnit from "components/ToggleUnit.vue";
 import AnimatedNumber from "components/AnimatedNumber.vue";
+import BucketDetailModal from "components/BucketDetailModal.vue";
 import axios from "axios";
 
 export default defineComponent({
@@ -191,6 +194,7 @@ export default defineComponent({
   components: {
     ToggleUnit,
     AnimatedNumber,
+    BucketDetailModal,
   },
   props: {
     setTab: Function,
@@ -252,6 +256,8 @@ export default defineComponent({
   data() {
     return {
       priceLabel: null,
+      viewingBucket: null,
+      detailModalOpen: false,
     };
   },
   mounted() {
@@ -268,6 +274,10 @@ export default defineComponent({
     },
     toggleHideBalance() {
       this.hideBalance = !this.hideBalance;
+    },
+    openBucketDetail(bucket) {
+      this.viewingBucket = bucket;
+      this.detailModalOpen = true;
     },
   },
 });
