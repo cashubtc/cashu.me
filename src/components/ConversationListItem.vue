@@ -9,14 +9,14 @@
     @click="handleClick"
   >
     <q-item-section avatar>
-      <q-avatar size="48px" class="relative-position">
+      <q-avatar size="40px" class="relative-position">
         <template v-if="loaded && profile?.picture">
           <img :src="profile.picture" />
         </template>
         <template v-else-if="loaded">
           <div class="placeholder text-white text-body1">{{ initials }}</div>
         </template>
-        <q-skeleton v-else type="circle" size="48px" />
+        <q-skeleton v-else type="circle" size="40px" />
         <q-badge
           class="status-dot"
           rounded
@@ -232,11 +232,11 @@ export default defineComponent({
 <style scoped>
 .conversation-item {
   border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-  padding: 16px 20px;
+  padding: 10px 16px;
   border-radius: 8px;
   transition: background-color 0.2s ease;
   display: flex;
-  gap: 12px;
+  gap: 10px;
   border-left: 3px solid transparent;
 }
 .conversation-item.selected {
@@ -259,7 +259,8 @@ export default defineComponent({
   font-size: 0.75rem;
 }
 .snippet {
-  font-size: 0.8rem;
+  font-size: 0.75rem;
+  line-height: 1.2;
   white-space: normal;
 }
 
