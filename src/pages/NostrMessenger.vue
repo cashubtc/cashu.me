@@ -10,8 +10,9 @@
         show-if-above
         :breakpoint="600"
         bordered
-        :width="drawerOpen ? 320 : 72"
+        :width="drawerOpen ? 240 : 64"
         class="drawer-transition drawer-container"
+        :style="{ overflowX: 'hidden' }"
         :class="[
           $q.screen.gt.xs ? 'q-pa-lg column' : 'q-pa-md column',
           { 'drawer-collapsed': !drawerOpen },
