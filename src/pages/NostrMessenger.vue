@@ -10,7 +10,7 @@
         show-if-above
         :breakpoint="600"
         bordered
-        :width="drawerOpen ? 280 : 72"
+        :width="drawerOpen ? 320 : 72"
         class="drawer-transition drawer-container"
         :class="[
           $q.screen.gt.xs ? 'q-pa-lg column' : 'q-pa-md column',
@@ -417,7 +417,6 @@ export default defineComponent({
 
 .drawer-container {
   min-width: 0;
-  overflow-x: hidden;
 }
 
 /* When the drawer is collapsed, only show the avatar */
