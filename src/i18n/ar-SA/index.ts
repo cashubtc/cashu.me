@@ -346,6 +346,10 @@ export default {
         toggle: "الحصول على سعر الصرف من Coinbase",
         description:
           "إذا تم تمكين هذا، سيتم جلب سعر صرف Bitcoin الحالي من coinbase.com وسيتم عرض رصيدك المحول.",
+        currency: {
+          title: "العملة الورقية",
+          description: "اختر العملة الورقية لعرض سعر البيتكوين.",
+        },
       },
     },
     experimental: {

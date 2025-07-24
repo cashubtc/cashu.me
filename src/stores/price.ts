@@ -18,12 +18,18 @@ export const usePriceStore = defineStore("price", {
       0 as number
     ),
     bitcoinPriceMinRefreshInterval: 60_000,
+    bitcoinPrices: useLocalStorage(
+      "cashu.price.bitcoinPrices",
+      {} as Record<string, number>
+    ),
   }),
   actions: {
-    fetchBitcoinPriceUSD: async function () {
-      if (!useSettingsStore().getBitcoinPrice) {
+    fetchBitcoinPrice: async function () {
+      const settingsStore = useSettingsStore();
+      if (!settingsStore.getBitcoinPrice) {
         this.bitcoinPrice = 0;
         this.bitcoinPriceLastUpdated = 0;
+        this.bitcoinPrices = {};
         console.log("Not fetching bitcoin price, disabled in settings");
         return;
       }
@@ -38,12 +44,36 @@ export const usePriceStore = defineStore("price", {
         );
         return;
       }
-      var { data } = await axios.get(
-        "https://api.coinbase.com/v2/exchange-rates?currency=BTC"
-      );
-      this.bitcoinPrice = data.data.rates.USD;
-      this.bitcoinPriceLastUpdated = Date.now();
+      try {
+        var { data } = await axios.get(
+          "https://api.coinbase.com/v2/exchange-rates?currency=BTC"
+        );
+        this.bitcoinPrices = data.data.rates;
+        // Update the main bitcoinPrice to current selected currency for backward compatibility
+        this.bitcoinPrice =
+          data.data.rates[settingsStore.bitcoinPriceCurrency] ||
+          data.data.rates.USD;
+        this.bitcoinPriceLastUpdated = Date.now();
+      } catch (error) {
+        console.error("Failed to fetch bitcoin price:", error);
+        notifyError("Failed to fetch bitcoin price");
+      }
+    },
+    updateBitcoinPriceForCurrentCurrency: function () {
+      const settingsStore = useSettingsStore();
+      // Update the main bitcoinPrice to reflect the current selected currency
+      this.bitcoinPrice =
+        this.bitcoinPrices[settingsStore.bitcoinPriceCurrency] ||
+        this.bitcoinPrice;
     },
   },
-  getters: {},
+  getters: {
+    currentCurrencyPrice(): number {
+      const settingsStore = useSettingsStore();
+      return (
+        this.bitcoinPrices[settingsStore.bitcoinPriceCurrency] ||
+        this.bitcoinPrice
+      );
+    },
+  },
 });

@@ -347,6 +347,10 @@ export default {
         toggle: "Hämta växelkurs från Coinbase",
         description:
           "Om aktiverat kommer aktuell Bitcoin-växelkurs att hämtas från coinbase.com och ditt konverterade saldo kommer att visas.",
+        currency: {
+          title: "Fiat-valuta",
+          description: "Välj fiat-valuta för Bitcoin-prisvisning.",
+        },
       },
     },
     experimental: {

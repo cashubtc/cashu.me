@@ -66,22 +66,28 @@
               <div v-if="bitcoinPrice">
                 <strong v-if="this.activeUnit == 'sat'">
                   <AnimatedNumber
-                    :value="(bitcoinPrice / 100000000) * getTotalBalance"
-                    :format="(val) => formatCurrency(val, 'USD')"
+                    :value="
+                      (currentCurrencyPrice / 100000000) * getTotalBalance
+                    "
+                    :format="(val) => formatCurrency(val, bitcoinPriceCurrency)"
                   />
                 </strong>
                 <strong
                   v-if="this.activeUnit == 'usd' || this.activeUnit == 'eur'"
                 >
                   <AnimatedNumber
-                    :value="(getTotalBalance / 100 / bitcoinPrice) * 100000000"
+                    :value="
+                      (getTotalBalance / 100 / currentCurrencyPrice) * 100000000
+                    "
                     :format="(val) => formatCurrency(val, 'sat')"
                   />
                 </strong>
                 <q-tooltip>
-                  {{ formatCurrency(bitcoinPrice, "USD").slice(1) }}
-                  USD/BTC</q-tooltip
-                >
+                  1 BTC =
+                  {{
+                    formatCurrency(currentCurrencyPrice, bitcoinPriceCurrency)
+                  }}
+                </q-tooltip>
               </div>
             </div>
           </div>
@@ -182,7 +188,12 @@ export default defineComponent({
     ]),
     ...mapState(useTokensStore, ["historyTokens"]),
     ...mapState(useUiStore, ["globalMutexLock"]),
-    ...mapState(usePriceStore, ["bitcoinPrice"]),
+    ...mapState(usePriceStore, [
+      "bitcoinPrice",
+      "bitcoinPrices",
+      "currentCurrencyPrice",
+    ]),
+    ...mapState(useSettingsStore, ["bitcoinPriceCurrency"]),
     ...mapWritableState(useMintsStore, ["activeUnit"]),
     ...mapWritableState(useUiStore, ["hideBalance", "lastBalanceCached"]),
     pendingBalance: function () {
@@ -229,11 +240,11 @@ export default defineComponent({
     };
   },
   mounted() {
-    this.fetchBitcoinPriceUSD();
+    this.fetchBitcoinPrice();
   },
   methods: {
     ...mapActions(useWalletStore, ["checkPendingTokens"]),
-    ...mapActions(usePriceStore, ["fetchBitcoinPriceUSD"]),
+    ...mapActions(usePriceStore, ["fetchBitcoinPrice"]),
     toggleUnit: function () {
       const units = this.activeMint().units;
       this.activeUnit =

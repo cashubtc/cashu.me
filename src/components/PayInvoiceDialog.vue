@@ -40,9 +40,9 @@
               >
                 ({{
                   formatCurrency(
-                    (bitcoinPrice / 100000000) *
+                    (currentCurrencyPrice / 100000000) *
                       payInvoiceData.meltQuote.response.amount,
-                    "USD",
+                    bitcoinPriceCurrency,
                     true
                   )
                 }})
@@ -367,7 +367,12 @@ export default defineComponent({
       "activeBalance",
       "multiMints",
     ]),
-    ...mapState(usePriceStore, ["bitcoinPrice"]),
+    ...mapState(usePriceStore, [
+      "bitcoinPrice",
+      "bitcoinPrices",
+      "currentCurrencyPrice",
+    ]),
+    ...mapState(useSettingsStore, ["bitcoinPriceCurrency"]),
     canPasteFromClipboard: function () {
       return (
         window.isSecureContext &&
