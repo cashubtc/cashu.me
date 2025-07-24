@@ -45,15 +45,15 @@
             :bucket-id="props.bucketId ?? ''"
             class="q-mt-lg"
           />
-          <div class="row q-mt-md" v-if="bucket?.creatorPubkey">
+          <div class="row q-mt-md">
             <q-btn
               color="primary"
               outline
               :disable="!bucketProofs.length"
-              @click="sendBucketToCreator"
+              @click="openSendDmDialog"
               class="q-mr-auto"
             >
-              {{ $t("BucketDetail.send_to_creator") }}
+              Send via Nostr DM
             </q-btn>
           </div>
         </q-tab-panel>
@@ -67,6 +67,11 @@
         }}</q-btn>
       </div>
     </q-card>
+    <SendBucketDmDialog
+      ref="sendDmDialogRef"
+      :bucket-id="props.bucketId ?? ''"
+      :prefill-npub="bucket?.creatorPubkey"
+    />
   </q-dialog>
 </template>
 
@@ -75,14 +80,14 @@ import { computed, ref } from "vue";
 import { useProofsStore } from "stores/proofs";
 import { useBucketsStore } from "stores/buckets";
 import { useMintsStore } from "stores/mints";
-import { useNostrStore } from "stores/nostr";
 import { storeToRefs } from "pinia";
 import { useUiStore } from "stores/ui";
 import { useI18n } from "vue-i18n";
-import { notifySuccess, notifyError } from "src/js/notify";
+import { notifyError } from "src/js/notify";
 import LockedTokensTable from "components/LockedTokensTable.vue";
 import CreatorLockedTokensTable from "components/CreatorLockedTokensTable.vue";
 import HistoryTable from "components/HistoryTable.vue";
+import SendBucketDmDialog from "components/SendBucketDmDialog.vue";
 
 const props = defineProps<{ modelValue: boolean; bucketId: string | null }>();
 const emit = defineEmits(["update:modelValue"]);
@@ -98,9 +103,9 @@ const activeTab = ref<"overview" | "history">("overview");
 const bucketsStore = useBucketsStore();
 const proofsStore = useProofsStore();
 const mintsStore = useMintsStore();
-const nostrStore = useNostrStore();
 const uiStore = useUiStore();
 const { activeUnit } = storeToRefs(mintsStore);
+const sendDmDialogRef = ref<InstanceType<typeof SendBucketDmDialog> | null>(null);
 
 const bucket = computed(
   () => bucketsStore.bucketList.find((b) => b.id === props.bucketId) || null
@@ -115,23 +120,8 @@ const bucketBalance = computed(() =>
 const formatCurrency = (a: number, unit: string) =>
   uiStore.formatCurrency(a, unit);
 
-async function sendBucketToCreator() {
-  if (!bucket.value?.creatorPubkey) return;
-  const proofs = bucketProofs.value.filter((p) => !p.reserved);
-  if (!proofs.length) return;
-  const token = proofsStore.serializeProofs(proofs);
-  try {
-    const { success } = await nostrStore.sendNip04DirectMessage(
-      bucket.value.creatorPubkey,
-      JSON.stringify({ token })
-    );
-    if (success) {
-      notifySuccess("Tokens sent");
-    } else {
-      notifyError("Failed to send tokens");
-    }
-  } catch (e: any) {
-    notifyError(e);
-  }
+function openSendDmDialog() {
+  const npub = bucket.value?.creatorPubkey;
+  (sendDmDialogRef.value as any)?.show(npub);
 }
 </script>

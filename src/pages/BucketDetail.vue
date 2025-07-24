@@ -97,18 +97,19 @@
           {{ $t("BucketDetail.export") }}
         </q-btn>
         <q-btn
-          v-if="bucket && bucket.creatorPubkey"
+          v-if="bucket"
           color="primary"
           outline
           :disable="!bucketProofs.length"
-          @click="sendBucketToCreator"
+          @click="openSendDmDialog"
         >
-          {{ $t("BucketDetail.send_to_creator") }}
+          Send via Nostr DM
         </q-btn>
       </div>
     </div>
 
     <SendTokenDialog />
+    <SendBucketDmDialog ref="sendDmDialogRef" :bucket-id="bucketId" />
     <q-dialog v-model="editDialog.show">
       <q-card class="q-pa-md" style="max-width: 400px">
         <h6 class="q-mt-none q-mb-md">Edit token</h6>
@@ -147,12 +148,12 @@ import { useUiStore } from "stores/ui";
 import { storeToRefs } from "pinia";
 import { useSendTokensStore } from "stores/sendTokensStore";
 import { useTokensStore, HistoryToken } from "stores/tokens";
-import { useNostrStore } from "stores/nostr";
 import SendTokenDialog from "components/SendTokenDialog.vue";
+import SendBucketDmDialog from "components/SendBucketDmDialog.vue";
 import HistoryTable from "components/HistoryTable.vue";
 import LockedTokensTable from "components/LockedTokensTable.vue";
 import CreatorLockedTokensTable from "components/CreatorLockedTokensTable.vue";
-import { notifyError, notifySuccess } from "src/js/notify";
+import { notifyError } from "src/js/notify";
 import { DEFAULT_COLOR } from "src/js/constants";
 import { useI18n } from "vue-i18n";
 
@@ -177,7 +178,7 @@ const bucketBalance = computed(() =>
 );
 const { activeUnit } = storeToRefs(mintsStore);
 const showSendTokens = storeToRefs(sendTokensStore).showSendTokens;
-const nostrStore = useNostrStore();
+const sendDmDialogRef = ref<InstanceType<typeof SendBucketDmDialog> | null>(null);
 
 const selectedSecrets = ref<string[]>([]);
 const targetBucketId = ref<string | null>(null);
@@ -324,23 +325,8 @@ function exportBucket() {
   showSendTokens.value = true;
 }
 
-async function sendBucketToCreator() {
-  if (!bucket.value?.creatorPubkey) return;
-  const proofs = bucketProofs.value.filter((p) => !p.reserved);
-  if (!proofs.length) return;
-  const token = proofsStore.serializeProofs(proofs);
-  try {
-    const { success } = await nostrStore.sendNip04DirectMessage(
-      bucket.value.creatorPubkey,
-      JSON.stringify({ token })
-    );
-    if (success) {
-      notifySuccess("Tokens sent");
-    } else {
-      notifyError("Failed to send tokens");
-    }
-  } catch (e: any) {
-    notifyError(e);
-  }
+function openSendDmDialog() {
+  const npub = bucket.value?.creatorPubkey;
+  (sendDmDialogRef.value as any)?.show(npub);
 }
 </script>
