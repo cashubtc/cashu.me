@@ -261,7 +261,8 @@ export default defineComponent({
 .snippet {
   font-size: 0.75rem;
   line-height: 1.2;
-  white-space: normal;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 .conversation-item .ellipsis {
