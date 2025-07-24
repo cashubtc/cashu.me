@@ -302,7 +302,6 @@ export default defineComponent({
     const messenger = useMessengerStore();
     const $q = useQuasar();
     const toggleDarkMode = () => {
-      console.log("toggleDarkMode", $q.dark.isActive);
       $q.dark.toggle();
       $q.localStorage.set("cashu.darkMode", $q.dark.isActive);
       vm?.notifySuccess(
@@ -370,7 +369,6 @@ export default defineComponent({
     });
 
     const toggleMessengerDrawer = () => {
-      console.log("toggleMessengerDrawer", messenger.drawerOpen);
       messenger.toggleDrawer();
       vm?.notify(
         messenger.drawerOpen ? "Messenger closed" : "Messenger opened"
@@ -382,13 +380,6 @@ export default defineComponent({
     };
 
     const reload = () => {
-      console.log(
-        "reload",
-        "countdown:",
-        countdown.value,
-        "mutex:",
-        uiStore.globalMutexLock
-      );
       if (countdown.value > 0) {
         try {
           clearInterval(countdownInterval);
@@ -491,7 +482,7 @@ export default defineComponent({
 .q-header {
   position: sticky; /* or fixed */
   top: 0;
-  z-index: 1000; /* ensures header stays above page content */
+  z-index: 1200; /* ensures header stays above page content */
   overflow-x: hidden;
 }
 
