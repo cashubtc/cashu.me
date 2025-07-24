@@ -12,7 +12,10 @@
         bordered
         :width="drawerOpen ? 320 : 72"
         class="drawer-transition drawer-container"
-        :class="[$q.screen.gt.xs ? 'q-pa-lg column' : 'q-pa-md column', { 'drawer-collapsed': !drawerOpen }]"
+        :class="[
+          $q.screen.gt.xs ? 'q-pa-lg column' : 'q-pa-md column',
+          { 'drawer-collapsed': !drawerOpen },
+        ]"
       >
         <template v-if="drawerOpen">
           <div class="column no-wrap full-height">
@@ -50,7 +53,7 @@
           </div>
         </template>
         <template v-else>
-          <div class="column items-center q-gutter-md" style="overflow-y:auto">
+          <div class="column items-center q-gutter-md" style="overflow-y: auto">
             <q-avatar
               v-for="item in miniList"
               :key="item.pubkey"
@@ -70,7 +73,13 @@
     <div :class="['col column', $q.screen.gt.xs ? 'q-pa-lg' : 'q-pa-md']">
       <q-header elevated class="messenger-header q-mb-md bg-transparent">
         <q-toolbar>
-          <q-btn flat round dense icon="menu" @click="messenger.toggleDrawer()" />
+          <q-btn
+            flat
+            round
+            dense
+            icon="menu"
+            @click="messenger.toggleDrawer()"
+          />
           <q-btn flat round dense icon="arrow_back" @click="goBack" />
           <q-toolbar-title class="text-h6 ellipsis">
             Nostr Messenger
@@ -230,9 +239,9 @@ export default defineComponent({
     const chatSendTokenDialogRef = ref<InstanceType<
       typeof ChatSendTokenDialog
     > | null>(null);
-    const newChatDialogRef = ref<InstanceType<
-      typeof NewChatDialog
-    > | null>(null);
+    const newChatDialogRef = ref<InstanceType<typeof NewChatDialog> | null>(
+      null
+    );
     const conversationSearch = ref("");
     const messages = computed(
       () => messenger.conversations[selected.value] || []
@@ -321,7 +330,12 @@ export default defineComponent({
     };
 
     const sendMessage = (
-      payload: string | { text: string; attachment?: { dataUrl: string; name: string; type: string } }
+      payload:
+        | string
+        | {
+            text: string;
+            attachment?: { dataUrl: string; name: string; type: string };
+          }
     ) => {
       if (!selected.value) return;
       if (typeof payload === "string") {
@@ -403,6 +417,13 @@ export default defineComponent({
 
 .drawer-container {
   min-width: 0;
+}
+
+/* When the drawer is collapsed, only show the avatar */
+.drawer-collapsed .conversation-item {
+  padding: 8px;
+  justify-content: center;
+  overflow: hidden;
 }
 
 .drawer-collapsed .conversation-item .q-item-section:not([avatar]) {
