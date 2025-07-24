@@ -75,7 +75,7 @@ import { useMessengerStore } from 'src/stores/messenger';
 import { useP2PKStore } from 'src/stores/p2pk';
 import type { WalletProof } from 'src/types/proofs';
 
-const props = defineProps<{ bucketId: string }>();
+const props = defineProps<{ bucketId: string; prefillNpub?: string }>();
 
 const bucketsStore = useBucketsStore();
 const proofsStore = useProofsStore();
@@ -140,8 +140,9 @@ function reset() {
   selectedSecrets.value = [];
 }
 
-function showDialog() {
+function showDialog(npub?: string) {
   reset();
+  recipient.value = npub || props.prefillNpub || '';
   show.value = true;
 }
 
