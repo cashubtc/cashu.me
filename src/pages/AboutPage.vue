@@ -1,5 +1,5 @@
 <template>
-  <q-page class="bg-dark text-white q-pa-md">
+  <q-page :class="[$q.dark.isActive ? 'bg-dark text-white' : 'bg-white text-dark', 'q-pa-md']">
     <div class="text-h5 q-mb-md">{{ $t("AboutPage.title") }}</div>
     <p>
       Cashu.me is a free and open-source Bitcoin wallet built on the Cashu ecash
