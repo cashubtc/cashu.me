@@ -1,5 +1,8 @@
 <template>
-  <q-layout view="lHh Lpr lFf" class="wallet-layout bg-dark">
+  <q-layout
+    view="lHh Lpr lFf"
+    :class="[$q.dark.isActive ? 'bg-dark text-white' : 'bg-white text-dark', 'wallet-layout']"
+  >
     <Sidebar />
     <HeaderBar />
     <q-page-container class="q-pa-md">
