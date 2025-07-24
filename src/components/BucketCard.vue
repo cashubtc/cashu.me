@@ -77,7 +77,7 @@
     >
       <q-list dense>
         <q-item clickable v-close-popup @click.stop="emitAction('manage')" data-test="manage">
-          <q-item-section>Manage</q-item-section>
+          <q-item-section>{{ t('BucketManager.actions.manage') }}</q-item-section>
         </q-item>
         <template v-if="bucket.id !== DEFAULT_BUCKET_ID">
           <q-item clickable v-close-popup @click.stop="emitAction('edit')" data-test="edit">
