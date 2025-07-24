@@ -22,9 +22,9 @@ function formatCurrency (val: number) {
 
 <style scoped>
 .summary-stats {
-  background-color: #1b2330;
+  background-color: var(--bucket-background);
   border-radius: 8px;
-  color: #DDE2E6;
+  color: var(--bucket-text-color);
 }
 @media (max-width: 600px) {
   .summary-stats {
