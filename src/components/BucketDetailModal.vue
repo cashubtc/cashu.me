@@ -1,7 +1,16 @@
 <template>
   <q-dialog v-model="showLocal" persistent>
     <q-card dark class="modal-card q-pa-lg">
-      <h6 class="q-mt-none q-mb-md bucket-accent">{{ bucket?.name }}</h6>
+      <h6 class="q-mt-none q-mb-xs bucket-accent">{{ bucket?.name }}</h6>
+      <div v-if="bucket?.description" class="text-caption q-mb-sm">
+        {{ bucket.description }}
+      </div>
+      <div v-if="bucket" class="text-secondary q-mb-md">
+        <span>{{ formatCurrency(bucketBalance, activeUnit.value) }}</span>
+        <span v-if="bucket.goal">
+          / {{ formatCurrency(bucket.goal, activeUnit.value) }}
+        </span>
+      </div>
       <q-list bordered>
         <q-item v-for="p in bucketProofs" :key="p.secret">
           <q-item-section>
@@ -10,6 +19,19 @@
           </q-item-section>
         </q-item>
       </q-list>
+      <LockedTokensTable :bucket-id="props.bucketId ?? ''" class="q-mt-lg" />
+      <CreatorLockedTokensTable :bucket-id="props.bucketId ?? ''" class="q-mt-lg" />
+      <div class="row q-mt-md" v-if="bucket?.creatorPubkey">
+        <q-btn
+          color="primary"
+          outline
+          :disable="!bucketLockedTokens.length"
+          @click="sendBucketToCreator"
+          class="q-mr-auto"
+        >
+          {{ $t('BucketDetail.send_to_creator') }}
+        </q-btn>
+      </div>
       <div class="row q-mt-md">
         <q-btn flat rounded color="grey" class="q-ml-auto" v-close-popup>{{ $t('global.actions.close.label') }}</q-btn>
       </div>
@@ -22,9 +44,13 @@ import { computed } from 'vue';
 import { useProofsStore } from 'stores/proofs';
 import { useBucketsStore } from 'stores/buckets';
 import { useMintsStore } from 'stores/mints';
+import { useLockedTokensStore } from 'stores/lockedTokens';
+import { useNostrStore } from 'stores/nostr';
 import { storeToRefs } from 'pinia';
 import { useUiStore } from 'stores/ui';
 import { useI18n } from 'vue-i18n';
+import LockedTokensTable from 'components/LockedTokensTable.vue';
+import CreatorLockedTokensTable from 'components/CreatorLockedTokensTable.vue';
 
 const props = defineProps<{ modelValue: boolean; bucketId: string | null }>();
 const emit = defineEmits(['update:modelValue']);
@@ -38,6 +64,8 @@ const showLocal = computed({
 const bucketsStore = useBucketsStore();
 const proofsStore = useProofsStore();
 const mintsStore = useMintsStore();
+const lockedTokensStore = useLockedTokensStore();
+const nostrStore = useNostrStore();
 const uiStore = useUiStore();
 const { activeUnit } = storeToRefs(mintsStore);
 
@@ -47,5 +75,30 @@ const bucket = computed(() =>
 const bucketProofs = computed(() =>
   proofsStore.proofs.filter(p => p.bucketId === props.bucketId && !p.reserved)
 );
+const bucketBalance = computed(() =>
+  bucketProofs.value.reduce((s, p) => s + p.amount, 0)
+);
+const bucketLockedTokens = computed(() =>
+  lockedTokensStore.tokensByBucket(props.bucketId ?? '')
+);
+
 const formatCurrency = (a:number, unit:string) => uiStore.formatCurrency(a, unit);
+
+async function sendBucketToCreator () {
+  if (!bucket.value?.creatorPubkey) return;
+  if (!bucketLockedTokens.value.length) return;
+  for (const t of bucketLockedTokens.value) {
+    const payload = {
+      token: t.token,
+      amount: t.amount,
+      unlockTime: t.locktime ?? null,
+      bucketId: t.bucketId,
+      referenceId: t.id
+    };
+    await nostrStore.sendNip04DirectMessage(
+      bucket.value.creatorPubkey,
+      JSON.stringify(payload)
+    );
+  }
+}
 </script>
