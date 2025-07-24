@@ -1,5 +1,5 @@
 <template>
-  <q-scroll-area class="col column q-pa-md" style="height: 100%; min-height: 0;">
+  <q-scroll-area class="col column q-pa-md">
     <template v-for="(msg, idx) in messages" :key="msg.id">
       <div
         v-if="showDateSeparator(idx)"
