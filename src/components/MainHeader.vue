@@ -145,7 +145,7 @@
       </q-item>
       <q-item clickable @click="gotoFindCreators">
         <q-item-section avatar>
-          <q-icon name="search" />
+          <q-icon name="img:icons/find-creators.svg" color="white" />
         </q-item-section>
         <q-item-section>
           <q-item-label>{{

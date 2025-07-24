@@ -49,7 +49,7 @@ const mini = ref(false);
 
 const navLinks = [
   { to: "/wallet", label: "Wallet", icon: "account_balance_wallet" },
-  { to: "/find-creators", label: "Find Creators", icon: "search" },
+  { to: "/find-creators", label: "Find Creators", icon: "img:icons/find-creators.svg" },
   { to: "/nostr-messenger", label: "Chats", icon: "chat" },
 ];
 
