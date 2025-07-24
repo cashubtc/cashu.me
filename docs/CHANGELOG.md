@@ -6,3 +6,4 @@
   Direct links to `/buckets/:id` still work but are only kept
   for backward compatibility. Navigate to `/buckets` and select
   "Manage" on a bucket to open the modal.
+- Bucket detail modal includes a History tab.

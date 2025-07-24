@@ -11,27 +11,38 @@
           / {{ formatCurrency(bucket.goal, activeUnit.value) }}
         </span>
       </div>
-      <q-list bordered>
-        <q-item v-for="p in bucketProofs" :key="p.secret">
-          <q-item-section>
-            <q-item-label class="text-weight-bold">{{ formatCurrency(p.amount, activeUnit.value) }}</q-item-label>
-            <q-item-label caption v-if="p.label">{{ p.label }}</q-item-label>
-          </q-item-section>
-        </q-item>
-      </q-list>
-      <LockedTokensTable :bucket-id="props.bucketId ?? ''" class="q-mt-lg" />
-      <CreatorLockedTokensTable :bucket-id="props.bucketId ?? ''" class="q-mt-lg" />
-      <div class="row q-mt-md" v-if="bucket?.creatorPubkey">
-        <q-btn
-          color="primary"
-          outline
-          :disable="!bucketLockedTokens.length"
-          @click="sendBucketToCreator"
-          class="q-mr-auto"
-        >
-          {{ $t('BucketDetail.send_to_creator') }}
-        </q-btn>
-      </div>
+      <q-tabs v-model="activeTab" no-caps class="q-mb-md">
+        <q-tab name="overview" class="text-secondary" :label="t('BucketDetail.tabs.overview')" />
+        <q-tab name="history" class="text-secondary" :label="t('BucketDetail.tabs.history')" />
+      </q-tabs>
+      <q-tab-panels v-model="activeTab" animated>
+        <q-tab-panel name="overview" class="q-pa-none">
+          <q-list bordered>
+            <q-item v-for="p in bucketProofs" :key="p.secret">
+              <q-item-section>
+                <q-item-label class="text-weight-bold">{{ formatCurrency(p.amount, activeUnit.value) }}</q-item-label>
+                <q-item-label caption v-if="p.label">{{ p.label }}</q-item-label>
+              </q-item-section>
+            </q-item>
+          </q-list>
+          <LockedTokensTable :bucket-id="props.bucketId ?? ''" class="q-mt-lg" />
+          <CreatorLockedTokensTable :bucket-id="props.bucketId ?? ''" class="q-mt-lg" />
+          <div class="row q-mt-md" v-if="bucket?.creatorPubkey">
+            <q-btn
+              color="primary"
+              outline
+              :disable="!bucketLockedTokens.length"
+              @click="sendBucketToCreator"
+              class="q-mr-auto"
+            >
+              {{ $t('BucketDetail.send_to_creator') }}
+            </q-btn>
+          </div>
+        </q-tab-panel>
+        <q-tab-panel name="history" class="q-pa-none">
+          <HistoryTable :bucket-id="props.bucketId ?? ''" />
+        </q-tab-panel>
+      </q-tab-panels>
       <div class="row q-mt-md">
         <q-btn flat rounded color="grey" class="q-ml-auto" v-close-popup>{{ $t('global.actions.close.label') }}</q-btn>
       </div>
@@ -40,7 +51,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import { useProofsStore } from 'stores/proofs';
 import { useBucketsStore } from 'stores/buckets';
 import { useMintsStore } from 'stores/mints';
@@ -51,6 +62,7 @@ import { useUiStore } from 'stores/ui';
 import { useI18n } from 'vue-i18n';
 import LockedTokensTable from 'components/LockedTokensTable.vue';
 import CreatorLockedTokensTable from 'components/CreatorLockedTokensTable.vue';
+import HistoryTable from 'components/HistoryTable.vue';
 
 const props = defineProps<{ modelValue: boolean; bucketId: string | null }>();
 const emit = defineEmits(['update:modelValue']);
@@ -60,6 +72,8 @@ const showLocal = computed({
   get: () => props.modelValue,
   set: val => emit('update:modelValue', val)
 });
+
+const activeTab = ref<'overview' | 'history'>('overview');
 
 const bucketsStore = useBucketsStore();
 const proofsStore = useProofsStore();
