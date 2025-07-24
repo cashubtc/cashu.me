@@ -1485,6 +1485,10 @@ export const messages = {
     export: "Export bucket",
     send_to_creator: "Send to creator",
     locked_tokens_heading: "Locked tokens",
+    tabs: {
+      overview: "Overview",
+      history: "History",
+    },
     inputs: {
       target_bucket: {
         label: "Move to bucket",
