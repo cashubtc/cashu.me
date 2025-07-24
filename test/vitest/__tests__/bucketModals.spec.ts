@@ -56,10 +56,10 @@ describe('BucketManager modals', () => {
     expect(vm.editModalOpen).toBe(false);
   });
 
-  it('opens detail modal on view', async () => {
+  it('opens detail modal on manage', async () => {
     const wrapper = shallowMount(BucketManager);
     const vm:any = wrapper.vm;
-    vm.handleMenuAction({ action: 'view', bucket });
+    vm.handleMenuAction({ action: 'manage', bucket });
     await wrapper.vm.$nextTick();
     expect(vm.detailModalOpen).toBe(true);
     wrapper.findComponent({ name: 'BucketDetailModal' }).vm.$emit('update:modelValue', false);
