@@ -2,13 +2,13 @@
   <!-- Central Hub Node -->
   <circle cx="12" cy="12" r="3"></circle>
   
-  <!-- Outer Nodes -->
-  <circle cx="20" cy="6" r="2"></circle>
-  <circle cx="20" cy="18" r="2"></circle>
-  <circle cx="2" cy="12" r="2"></circle>
+  <!-- Outer Nodes (Adjusted for padding) -->
+  <circle cx="21" cy="6" r="2"></circle>
+  <circle cx="21" cy="18" r="2"></circle>
+  <circle cx="3" cy="12" r="2"></circle>
   
-  <!-- Connector Lines -->
-  <line x1="13.5" y1="10.5" x2="18.5" y2="7.5"></line>
-  <line x1="13.5" y1="13.5" x2="18.5" y2="16.5"></line>
-  <line x1="10.5" y1="12" x2="4" y2="12"></line>
+  <!-- Connector Lines (Adjusted for new node positions) -->
+  <line x1="13.5" y1="10.5" x2="19.5" y2="7.5"></line>
+  <line x1="13.5" y1="13.5" x2="19.5" y2="16.5"></line>
+  <line x1="10.5" y1="12" x2="5" y2="12"></line>
 </svg>
