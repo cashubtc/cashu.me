@@ -91,12 +91,15 @@ import { useBucketsStore } from "stores/buckets";
 import { useProofsStore } from "stores/proofs";
 import { useMintsStore, WalletProof } from "stores/mints";
 import { useUiStore } from "stores/ui";
+import { useI18n } from "vue-i18n";
 import { DEFAULT_COLOR } from "src/js/constants";
 import { storeToRefs } from "pinia";
 import { notifyError } from "src/js/notify";
 
 const props = defineProps<{ modelValue: boolean; bucketIds?: string[] }>();
 const emit = defineEmits(["update:modelValue", "move"]);
+
+const { t } = useI18n();
 
 const showLocal = computed({
   get: () => props.modelValue,
@@ -154,7 +157,7 @@ function formatCurrency(amount: number, unit: string) {
 
 async function moveSelected() {
   if (!targetBucketId.value) {
-    notifyError("Please select a bucket");
+    notifyError(t('MoveTokens.errors.select_bucket'));
     return;
   }
   const bucketExists = bucketsStore.bucketList.find(

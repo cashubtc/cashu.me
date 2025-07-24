@@ -1434,6 +1434,7 @@ export const messages = {
       edit: "Edit",
       archive: "Archive",
       unarchive: "Unarchive",
+      manage: "Manage",
       view_tokens: "View tokens",
       move: "Move tokens",
       deselect_all: "Deselect All",
@@ -1499,6 +1500,9 @@ export const messages = {
     select_tokens: "Select tokens to move",
     empty: "No tokens",
     helper: "Move tokens between buckets to organize them.",
+    errors: {
+      select_bucket: "Please select a bucket",
+    },
   },
   SubscriptionsOverview: {
     title: "Subscriptions",

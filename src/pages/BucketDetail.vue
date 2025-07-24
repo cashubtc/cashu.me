@@ -155,8 +155,10 @@ import LockedTokensTable from "components/LockedTokensTable.vue";
 import CreatorLockedTokensTable from "components/CreatorLockedTokensTable.vue";
 import { notifyError } from "src/js/notify";
 import { DEFAULT_COLOR } from "src/js/constants";
+import { useI18n } from "vue-i18n";
 
 const route = useRoute();
+const { t } = useI18n();
 const bucketsStore = useBucketsStore();
 const proofsStore = useProofsStore();
 const mintsStore = useMintsStore();
@@ -293,7 +295,7 @@ function saveEdit() {
 
 async function moveSelected() {
   if (!targetBucketId.value) {
-    notifyError("Please select a bucket");
+    notifyError(t('MoveTokens.errors.select_bucket'));
     return;
   }
   const bucketExists = bucketsStore.bucketList.find(
