@@ -364,7 +364,7 @@ export default defineComponent({
 
     const handleMenuAction = ({ action, bucket }: any) => {
       switch (action) {
-        case 'view':
+        case 'manage':
           openDetail(bucket);
           break;
         case 'edit':
