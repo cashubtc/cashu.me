@@ -100,7 +100,7 @@
           v-if="bucket && bucket.creatorPubkey"
           color="primary"
           outline
-          :disable="!bucketLockedTokens.length"
+          :disable="!bucketProofs.length"
           @click="sendBucketToCreator"
         >
           {{ $t("BucketDetail.send_to_creator") }}
@@ -147,13 +147,12 @@ import { useUiStore } from "stores/ui";
 import { storeToRefs } from "pinia";
 import { useSendTokensStore } from "stores/sendTokensStore";
 import { useTokensStore, HistoryToken } from "stores/tokens";
-import { useLockedTokensStore } from "stores/lockedTokens";
 import { useNostrStore } from "stores/nostr";
 import SendTokenDialog from "components/SendTokenDialog.vue";
 import HistoryTable from "components/HistoryTable.vue";
 import LockedTokensTable from "components/LockedTokensTable.vue";
 import CreatorLockedTokensTable from "components/CreatorLockedTokensTable.vue";
-import { notifyError } from "src/js/notify";
+import { notifyError, notifySuccess } from "src/js/notify";
 import { DEFAULT_COLOR } from "src/js/constants";
 import { useI18n } from "vue-i18n";
 
@@ -165,7 +164,6 @@ const mintsStore = useMintsStore();
 const uiStore = useUiStore();
 const sendTokensStore = useSendTokensStore();
 const tokensStore = useTokensStore();
-const lockedTokensStore = useLockedTokensStore();
 
 const bucketId = route.params.id as string;
 const bucket = computed(() =>
@@ -176,9 +174,6 @@ const bucketProofs = computed(() =>
 );
 const bucketBalance = computed(() =>
   bucketProofs.value.reduce((s, p) => s + p.amount, 0)
-);
-const bucketLockedTokens = computed(() =>
-  lockedTokensStore.tokensByBucket(bucketId)
 );
 const { activeUnit } = storeToRefs(mintsStore);
 const showSendTokens = storeToRefs(sendTokensStore).showSendTokens;
@@ -295,7 +290,7 @@ function saveEdit() {
 
 async function moveSelected() {
   if (!targetBucketId.value) {
-    notifyError(t('MoveTokens.errors.select_bucket'));
+    notifyError(t("MoveTokens.errors.select_bucket"));
     return;
   }
   const bucketExists = bucketsStore.bucketList.find(
@@ -331,19 +326,21 @@ function exportBucket() {
 
 async function sendBucketToCreator() {
   if (!bucket.value?.creatorPubkey) return;
-  if (!bucketLockedTokens.value.length) return;
-  for (const t of bucketLockedTokens.value) {
-    const payload = {
-      token: t.token,
-      amount: t.amount,
-      unlockTime: t.locktime ?? null,
-      bucketId: t.bucketId,
-      referenceId: t.id,
-    };
-    await nostrStore.sendNip04DirectMessage(
+  const proofs = bucketProofs.value.filter((p) => !p.reserved);
+  if (!proofs.length) return;
+  const token = proofsStore.serializeProofs(proofs);
+  try {
+    const { success } = await nostrStore.sendNip04DirectMessage(
       bucket.value.creatorPubkey,
-      JSON.stringify(payload)
+      JSON.stringify({ token })
     );
+    if (success) {
+      notifySuccess("Tokens sent");
+    } else {
+      notifyError("Failed to send tokens");
+    }
+  } catch (e: any) {
+    notifyError(e);
   }
 }
 </script>

@@ -12,30 +12,48 @@
         </span>
       </div>
       <q-tabs v-model="activeTab" no-caps class="q-mb-md">
-        <q-tab name="overview" class="text-secondary" :label="t('BucketDetail.tabs.overview')" />
-        <q-tab name="history" class="text-secondary" :label="t('BucketDetail.tabs.history')" />
+        <q-tab
+          name="overview"
+          class="text-secondary"
+          :label="t('BucketDetail.tabs.overview')"
+        />
+        <q-tab
+          name="history"
+          class="text-secondary"
+          :label="t('BucketDetail.tabs.history')"
+        />
       </q-tabs>
       <q-tab-panels v-model="activeTab" animated>
         <q-tab-panel name="overview" class="q-pa-none">
           <q-list bordered>
             <q-item v-for="p in bucketProofs" :key="p.secret">
               <q-item-section>
-                <q-item-label class="text-weight-bold">{{ formatCurrency(p.amount, activeUnit.value) }}</q-item-label>
-                <q-item-label caption v-if="p.label">{{ p.label }}</q-item-label>
+                <q-item-label class="text-weight-bold">{{
+                  formatCurrency(p.amount, activeUnit.value)
+                }}</q-item-label>
+                <q-item-label caption v-if="p.label">{{
+                  p.label
+                }}</q-item-label>
               </q-item-section>
             </q-item>
           </q-list>
-          <LockedTokensTable :bucket-id="props.bucketId ?? ''" class="q-mt-lg" />
-          <CreatorLockedTokensTable :bucket-id="props.bucketId ?? ''" class="q-mt-lg" />
+          <LockedTokensTable
+            :bucket-id="props.bucketId ?? ''"
+            class="q-mt-lg"
+          />
+          <CreatorLockedTokensTable
+            :bucket-id="props.bucketId ?? ''"
+            class="q-mt-lg"
+          />
           <div class="row q-mt-md" v-if="bucket?.creatorPubkey">
             <q-btn
               color="primary"
               outline
-              :disable="!bucketLockedTokens.length"
+              :disable="!bucketProofs.length"
               @click="sendBucketToCreator"
               class="q-mr-auto"
             >
-              {{ $t('BucketDetail.send_to_creator') }}
+              {{ $t("BucketDetail.send_to_creator") }}
             </q-btn>
           </div>
         </q-tab-panel>
@@ -44,75 +62,76 @@
         </q-tab-panel>
       </q-tab-panels>
       <div class="row q-mt-md">
-        <q-btn flat rounded color="grey" class="q-ml-auto" v-close-popup>{{ $t('global.actions.close.label') }}</q-btn>
+        <q-btn flat rounded color="grey" class="q-ml-auto" v-close-popup>{{
+          $t("global.actions.close.label")
+        }}</q-btn>
       </div>
     </q-card>
   </q-dialog>
 </template>
 
 <script lang="ts" setup>
-import { computed, ref } from 'vue';
-import { useProofsStore } from 'stores/proofs';
-import { useBucketsStore } from 'stores/buckets';
-import { useMintsStore } from 'stores/mints';
-import { useLockedTokensStore } from 'stores/lockedTokens';
-import { useNostrStore } from 'stores/nostr';
-import { storeToRefs } from 'pinia';
-import { useUiStore } from 'stores/ui';
-import { useI18n } from 'vue-i18n';
-import LockedTokensTable from 'components/LockedTokensTable.vue';
-import CreatorLockedTokensTable from 'components/CreatorLockedTokensTable.vue';
-import HistoryTable from 'components/HistoryTable.vue';
+import { computed, ref } from "vue";
+import { useProofsStore } from "stores/proofs";
+import { useBucketsStore } from "stores/buckets";
+import { useMintsStore } from "stores/mints";
+import { useNostrStore } from "stores/nostr";
+import { storeToRefs } from "pinia";
+import { useUiStore } from "stores/ui";
+import { useI18n } from "vue-i18n";
+import { notifySuccess, notifyError } from "src/js/notify";
+import LockedTokensTable from "components/LockedTokensTable.vue";
+import CreatorLockedTokensTable from "components/CreatorLockedTokensTable.vue";
+import HistoryTable from "components/HistoryTable.vue";
 
 const props = defineProps<{ modelValue: boolean; bucketId: string | null }>();
-const emit = defineEmits(['update:modelValue']);
+const emit = defineEmits(["update:modelValue"]);
 const { t } = useI18n();
 
 const showLocal = computed({
   get: () => props.modelValue,
-  set: val => emit('update:modelValue', val)
+  set: (val) => emit("update:modelValue", val),
 });
 
-const activeTab = ref<'overview' | 'history'>('overview');
+const activeTab = ref<"overview" | "history">("overview");
 
 const bucketsStore = useBucketsStore();
 const proofsStore = useProofsStore();
 const mintsStore = useMintsStore();
-const lockedTokensStore = useLockedTokensStore();
 const nostrStore = useNostrStore();
 const uiStore = useUiStore();
 const { activeUnit } = storeToRefs(mintsStore);
 
-const bucket = computed(() =>
-  bucketsStore.bucketList.find(b => b.id === props.bucketId) || null
+const bucket = computed(
+  () => bucketsStore.bucketList.find((b) => b.id === props.bucketId) || null
 );
 const bucketProofs = computed(() =>
-  proofsStore.proofs.filter(p => p.bucketId === props.bucketId && !p.reserved)
+  proofsStore.proofs.filter((p) => p.bucketId === props.bucketId && !p.reserved)
 );
 const bucketBalance = computed(() =>
   bucketProofs.value.reduce((s, p) => s + p.amount, 0)
 );
-const bucketLockedTokens = computed(() =>
-  lockedTokensStore.tokensByBucket(props.bucketId ?? '')
-);
 
-const formatCurrency = (a:number, unit:string) => uiStore.formatCurrency(a, unit);
+const formatCurrency = (a: number, unit: string) =>
+  uiStore.formatCurrency(a, unit);
 
-async function sendBucketToCreator () {
+async function sendBucketToCreator() {
   if (!bucket.value?.creatorPubkey) return;
-  if (!bucketLockedTokens.value.length) return;
-  for (const t of bucketLockedTokens.value) {
-    const payload = {
-      token: t.token,
-      amount: t.amount,
-      unlockTime: t.locktime ?? null,
-      bucketId: t.bucketId,
-      referenceId: t.id
-    };
-    await nostrStore.sendNip04DirectMessage(
+  const proofs = bucketProofs.value.filter((p) => !p.reserved);
+  if (!proofs.length) return;
+  const token = proofsStore.serializeProofs(proofs);
+  try {
+    const { success } = await nostrStore.sendNip04DirectMessage(
       bucket.value.creatorPubkey,
-      JSON.stringify(payload)
+      JSON.stringify({ token })
     );
+    if (success) {
+      notifySuccess("Tokens sent");
+    } else {
+      notifyError("Failed to send tokens");
+    }
+  } catch (e: any) {
+    notifyError(e);
   }
 }
 </script>

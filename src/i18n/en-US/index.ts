@@ -1449,7 +1449,7 @@ export const messages = {
     tooltips: {
       description: "Buckets are for categorizing tokens",
       goal: "Set a target amount for this bucket",
-      creator_pubkey: "Nostr pubkey to receive locked tokens",
+      creator_pubkey: "Nostr pubkey to receive tokens",
       add_button: "Add a new bucket",
       edit_button: "Edit this bucket",
       delete_button: "Remove this bucket",
