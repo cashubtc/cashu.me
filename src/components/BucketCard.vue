@@ -219,7 +219,8 @@ export default defineComponent({
 
 <style scoped>
 .bucket-card {
-  background-color: #1b2330;
+  background-color: var(--bucket-background);
+  color: var(--bucket-text-color);
   padding: 12px;
   border-radius: 16px;
   border-top: 4px solid;

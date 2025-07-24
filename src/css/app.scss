@@ -97,6 +97,8 @@ body,
   --conversation-hover-light: var(--q-color-grey-3);
   --bucket-bg-dark: #2e202b;
   --bucket-bg-light: #f9f5f8;
+  --bucket-text-dark: #ffffff;
+  --bucket-text-light: #000000;
   --bucket-accent-dark: #ec4899;
   --bucket-accent-light: #ec4899;
 }
@@ -110,6 +112,7 @@ body.body--dark {
   --panel-bg-color: var(--panel-dark);
   --conversation-hover-color: var(--conversation-hover-dark);
   --bucket-background: var(--bucket-bg-dark);
+  --bucket-text-color: var(--bucket-text-dark);
   --bucket-accent: var(--bucket-accent-dark);
 }
 
@@ -122,6 +125,7 @@ body.body--light {
   --panel-bg-color: var(--panel-light);
   --conversation-hover-color: var(--conversation-hover-light);
   --bucket-background: var(--bucket-bg-light);
+  --bucket-text-color: var(--bucket-text-light);
   --bucket-accent: var(--bucket-accent-light);
 }
 
