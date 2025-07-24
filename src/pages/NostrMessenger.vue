@@ -5,17 +5,17 @@
   >
     <q-responsive>
       <q-drawer
-        v-model="drawerOpen"
+        :model-value="true"
         side="left"
+        show-if-above
         :breakpoint="600"
-        :behavior="$q.screen.lt.sm ? 'mobile' : 'default'"
         bordered
-        :width="$q.screen.lt.sm ? 240 : drawerOpen ? 240 : 64"
+        :width="drawerOpen ? 240 : 64"
         class="drawer-transition drawer-container"
         :style="{ overflowX: 'hidden' }"
         :class="[
           $q.screen.gt.xs ? 'q-pa-lg column' : 'q-pa-md column',
-          { 'drawer-collapsed': $q.screen.gt.xs && !drawerOpen },
+          { 'drawer-collapsed': !drawerOpen },
         ]"
       >
         <template v-if="drawerOpen">
@@ -235,10 +235,7 @@ export default defineComponent({
       }
     };
 
-    const drawerOpen = computed({
-      get: () => messenger.drawerOpen,
-      set: (val: boolean) => messenger.setDrawer(val),
-    });
+    const drawerOpen = computed(() => messenger.drawerOpen);
     const selected = ref("");
     const chatSendTokenDialogRef = ref<InstanceType<
       typeof ChatSendTokenDialog
