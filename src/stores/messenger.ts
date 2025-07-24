@@ -12,6 +12,7 @@ import { useWalletStore } from "./wallet";
 import { useMintsStore } from "./mints";
 import { useProofsStore } from "./proofs";
 import { useTokensStore } from "./tokens";
+import type { WalletProof } from "src/types/proofs";
 import { useReceiveTokensStore } from "./receiveTokensStore";
 import { useBucketsStore } from "./buckets";
 import { useLockedTokensStore } from "./lockedTokens";
@@ -298,6 +299,68 @@ export const useMessengerStore = defineStore("messenger", {
             if (msg) msg.subscriptionPayment = payment;
             if (logMsg) logMsg.subscriptionPayment = payment;
           }
+          tokens.addPendingToken({
+            amount: -sendAmount,
+            token: tokenStr,
+            unit: mints.activeUnit,
+            mint: mints.activeMintUrl,
+            bucketId,
+          });
+        }
+        return success;
+      } catch (e) {
+        console.error(e);
+        notifyError("Failed to send token");
+        return false;
+      }
+    },
+
+    async sendTokenFromProofs(
+      recipient: string,
+      proofs: WalletProof[],
+      bucketId: string,
+      memo?: string
+    ) {
+      try {
+        recipient = this.normalizeKey(recipient);
+        const wallet = useWalletStore();
+        const mints = useMintsStore();
+        const proofsStore = useProofsStore();
+        const settings = useSettingsStore();
+        const tokens = useTokensStore();
+
+        const sendAmount = proofs.reduce((sum, p) => sum + p.amount, 0);
+
+        const mintWallet = wallet.mintWallet(
+          mints.activeMintUrl,
+          mints.activeUnit
+        );
+
+        const { sendProofs } = await wallet.send(
+          proofs,
+          mintWallet,
+          sendAmount,
+          true,
+          settings.includeFeesInSendAmount,
+          bucketId
+        );
+
+        const tokenStr = proofsStore.serializeProofs(sendProofs);
+        const payload = {
+          token: tokenStr,
+          amount: sendAmount,
+          unlockTime: null,
+          bucketId,
+          referenceId: uuidv4(),
+          memo: memo || undefined,
+        };
+
+        const { success, event } = await this.sendDm(
+          recipient,
+          JSON.stringify(payload)
+        );
+
+        if (success && event) {
           tokens.addPendingToken({
             amount: -sendAmount,
             token: tokenStr,
