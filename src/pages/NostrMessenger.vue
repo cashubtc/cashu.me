@@ -71,7 +71,7 @@
     </q-responsive>
 
     <div :class="['col column', $q.screen.gt.xs ? 'q-pa-lg' : 'q-pa-md']">
-      <q-header elevated class="messenger-header q-mb-md bg-transparent">
+      <q-header elevated class="q-mb-md bg-transparent">
         <q-toolbar>
           <q-btn
             flat
@@ -434,12 +434,6 @@ export default defineComponent({
 .drawer-collapsed .conversation-item q-avatar {
   width: 40px;
   height: 40px;
-}
-
-.messenger-header {
-  position: sticky;
-  top: 50px;
-  z-index: 900;
 }
 
 @media (max-width: 320px) {
