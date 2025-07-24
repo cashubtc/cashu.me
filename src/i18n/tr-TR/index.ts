@@ -349,6 +349,10 @@ export default {
         toggle: "Döviz kurunu Coinbase'den al",
         description:
           "Etkinleştirilirse, güncel Bitcoin döviz kuru coinbase.com'dan alınacak ve dönüştürülmüş bakiyeniz görüntülenecektir.",
+        currency: {
+          title: "Fiat Para Birimi",
+          description: "Bitcoin fiyat gösterimi için fiat para birimini seçin.",
+        },
       },
     },
     experimental: {

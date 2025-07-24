@@ -55,10 +55,10 @@
               >
                 ({{
                   formatCurrency(
-                    (bitcoinPrice / 100000000) *
+                    (currentCurrencyPrice / 100000000) *
                       sendData.amount *
                       activeUnitCurrencyMultiplyer,
-                    "USD",
+                    bitcoinPriceCurrency,
                     true
                   )
                 }})
@@ -674,7 +674,12 @@ export default defineComponent({
       "nfcEncoding",
       "useNumericKeyboard",
     ]),
-    ...mapState(usePriceStore, ["bitcoinPrice"]),
+    ...mapState(usePriceStore, [
+      "bitcoinPrice",
+      "bitcoinPrices",
+      "currentCurrencyPrice",
+    ]),
+    ...mapState(useSettingsStore, ["bitcoinPriceCurrency"]),
     ...mapState(useWorkersStore, ["tokenWorkerRunning"]),
     // TOKEN METHODS
     sumProofs: function () {

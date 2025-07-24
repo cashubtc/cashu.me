@@ -926,6 +926,31 @@
               >{{ $t("Settings.privacy.bitcoin_price.description") }}
             </q-item-label>
           </q-item>
+          <!-- currency selection -->
+          <q-item v-if="getBitcoinPrice">
+            <q-item-section>
+              <q-item-label overline class="text-weight-bold">{{
+                $t("Settings.privacy.bitcoin_price.currency.title")
+              }}</q-item-label>
+              <q-item-label caption>{{
+                $t("Settings.privacy.bitcoin_price.currency.description")
+              }}</q-item-label>
+            </q-item-section>
+          </q-item>
+          <q-item v-if="getBitcoinPrice">
+            <q-item-section>
+              <q-select
+                v-model="bitcoinPriceCurrency"
+                :options="currencyOptions"
+                rounded
+                outlined
+                dense
+                emit-value
+                map-options
+                @update:model-value="onCurrencyChange"
+              />
+            </q-item-section>
+          </q-item>
         </div>
 
         <div class="section-divider q-my-md">
@@ -1739,6 +1764,7 @@ import { useWelcomeStore } from "src/stores/welcome";
 import { useStorageStore } from "src/stores/storage";
 import { useNPCV2Store } from "src/stores/npcv2";
 import { useNostrMintBackupStore } from "src/stores/nostrMintBackup";
+import { usePriceStore } from "src/stores/price";
 import { useI18n } from "vue-i18n";
 
 export default defineComponent({
@@ -1778,6 +1804,35 @@ export default defineComponent({
         { label: "中文", value: "zh-CN" },
         { label: "日本語", value: "ja-JP" },
       ],
+      currencyOptions: [
+        { label: "US Dollar (USD)", value: "USD" },
+        { label: "Euro (EUR)", value: "EUR" },
+
+        { label: "Australian Dollar (AUD)", value: "AUD" },
+        { label: "Brazilian Real (BRL)", value: "BRL" },
+        { label: "Canadian Dollar (CAD)", value: "CAD" },
+        { label: "Swiss Franc (CHF)", value: "CHF" },
+        { label: "Chinese Yuan (CNY)", value: "CNY" },
+        { label: "Czech Koruna (CZK)", value: "CZK" },
+        { label: "Danish Krone (DKK)", value: "DKK" },
+        { label: "British Pound (GBP)", value: "GBP" },
+        { label: "Hong Kong Dollar (HKD)", value: "HKD" },
+        { label: "Hungarian Forint (HUF)", value: "HUF" },
+        { label: "Israeli Shekel (ILS)", value: "ILS" },
+        { label: "Indian Rupee (INR)", value: "INR" },
+        { label: "Japanese Yen (JPY)", value: "JPY" },
+        { label: "South Korean Won (KRW)", value: "KRW" },
+        { label: "Mexican Peso (MXN)", value: "MXN" },
+        { label: "New Zealand Dollar (NZD)", value: "NZD" },
+        { label: "Norwegian Krone (NOK)", value: "NOK" },
+        { label: "Polish Zloty (PLN)", value: "PLN" },
+        { label: "Russian Ruble (RUB)", value: "RUB" },
+        { label: "Swedish Krona (SEK)", value: "SEK" },
+        { label: "Singapore Dollar (SGD)", value: "SGD" },
+        { label: "Thai Baht (THB)", value: "THB" },
+        { label: "Turkish Lira (TRY)", value: "TRY" },
+        { label: "South African Rand (ZAR)", value: "ZAR" },
+      ],
       discoveringMints: false,
       hideMnemonic: true,
       confirmMnemonic: false,
@@ -1790,6 +1845,7 @@ export default defineComponent({
   computed: {
     ...mapWritableState(useSettingsStore, [
       "getBitcoinPrice",
+      "bitcoinPriceCurrency",
       "checkSentTokens",
       "useWebsockets",
       "nfcEncoding",
@@ -1954,6 +2010,10 @@ export default defineComponent({
     ...mapActions(useRestoreStore, ["restoreMint"]),
     ...mapActions(useDexieStore, ["deleteAllTables"]),
     ...mapActions(useStorageStore, ["restoreFromBackup", "exportWalletState"]),
+    ...mapActions(usePriceStore, [
+      "fetchBitcoinPrice",
+      "updateBitcoinPriceForCurrentCurrency",
+    ]),
     generateNewMnemonic: async function () {
       this.newMnemonic();
       await this.initSigner();
@@ -2113,6 +2173,19 @@ export default defineComponent({
       // setTimeout(() => {
       //   window.location.reload();
       // }, 300);
+    },
+    onCurrencyChange: async function (currency) {
+      // Fetch fresh rates if they're stale, since we get all currencies at once
+      const priceStore = usePriceStore();
+      if (
+        Date.now() - priceStore.bitcoinPriceLastUpdated >
+        priceStore.bitcoinPriceMinRefreshInterval
+      ) {
+        await this.fetchBitcoinPrice();
+      } else {
+        // Update the main bitcoinPrice to reflect the new currency selection
+        this.updateBitcoinPriceForCurrentCurrency();
+      }
     },
   },
   created: async function () {

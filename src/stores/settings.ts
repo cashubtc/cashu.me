@@ -14,6 +14,10 @@ export const useSettingsStore = defineStore("settings", {
         "cashu.settings.getBitcoinPrice",
         false
       ),
+      bitcoinPriceCurrency: useLocalStorage<string>(
+        "cashu.settings.bitcoinPriceCurrency",
+        "USD"
+      ),
       checkSentTokens: useLocalStorage<boolean>(
         "cashu.settings.checkSentTokens",
         true

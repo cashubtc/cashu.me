@@ -343,6 +343,10 @@ export default {
         toggle: "从 Coinbase 获取汇率",
         description:
           "如果启用，将从 coinbase.com 获取当前比特币汇率并显示您的转换后余额。",
+        currency: {
+          title: "法定货币",
+          description: "选择用于比特币价格显示的法定货币。",
+        },
       },
     },
     experimental: {

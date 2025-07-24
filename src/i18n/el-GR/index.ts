@@ -350,6 +350,11 @@ export default {
         toggle: "Λήψη συναλλαγματικής ισοτιμίας από Coinbase",
         description:
           "Εάν είναι ενεργοποιημένο, η τρέχουσα συναλλαγματική ισοτιμία Bitcoin θα ληφθεί από το coinbase.com και θα εμφανιστεί το μετατραπέν υπόλοιπό σας.",
+        currency: {
+          title: "Νόμισμα Fiat",
+          description:
+            "Επιλέξτε το νόμισμα fiat για την εμφάνιση της τιμής Bitcoin.",
+        },
       },
     },
     experimental: {

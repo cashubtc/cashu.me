@@ -348,6 +348,11 @@ export default {
         toggle: "Ottieni tasso di cambio da Coinbase",
         description:
           "Se abilitato, il tasso di cambio attuale di Bitcoin verrà recuperato da coinbase.com e verrà visualizzato il tuo saldo convertito.",
+        currency: {
+          title: "Valuta Fiat",
+          description:
+            "Scegli la valuta fiat per la visualizzazione del prezzo Bitcoin.",
+        },
       },
     },
     experimental: {

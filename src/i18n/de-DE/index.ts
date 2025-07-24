@@ -351,6 +351,11 @@ export default {
         toggle: "Wechselkurs von Coinbase abrufen",
         description:
           "Wenn aktiviert, wird der aktuelle Bitcoin-Wechselkurs von coinbase.com abgerufen und Ihr umgerechnetes Guthaben angezeigt.",
+        currency: {
+          title: "Fiat-Währung",
+          description:
+            "Wählen Sie die Fiat-Währung für die Bitcoin-Preisanzeige.",
+        },
       },
     },
     experimental: {

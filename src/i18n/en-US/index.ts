@@ -345,6 +345,10 @@ export default {
         toggle: "Get exchange rate from Coinbase",
         description:
           "If enabled, the current Bitcoin exchange rate will be fetched from coinbase.com and your converted balance will be displayed.",
+        currency: {
+          title: "Fiat Currency",
+          description: "Choose the fiat currency for Bitcoin price display.",
+        },
       },
     },
     experimental: {

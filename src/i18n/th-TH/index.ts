@@ -346,6 +346,10 @@ export default {
         toggle: "รับอัตราแลกเปลี่ยนจาก Coinbase",
         description:
           "หากเปิดใช้งาน จะดึงอัตราแลกเปลี่ยน Bitcoin ปัจจุบันจาก coinbase.com และแสดงยอดคงเหลือที่แปลงแล้วของคุณ",
+        currency: {
+          title: "สกุลเงินเฟียต",
+          description: "เลือกสกุลเงินเฟียตสำหรับการแสดงราคา Bitcoin",
+        },
       },
     },
     experimental: {
