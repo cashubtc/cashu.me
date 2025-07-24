@@ -103,7 +103,8 @@
           :disable="!bucketProofs.length"
           @click="openSendDmDialog"
         >
-          Send via Nostr DM
+          {{ $t('BucketDetail.send_dm') }}
+          <InfoTooltip class="q-ml-xs" :text="$t('BucketDetail.tooltips.send_dm')" />
         </q-btn>
       </div>
     </div>

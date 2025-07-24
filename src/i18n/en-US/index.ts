@@ -1416,6 +1416,26 @@ export const messages = {
       send: { label: "@:global.actions.send.label" },
     },
   },
+  SendBucketDmDialog: {
+    title: "Send Bucket Tokens",
+    inputs: {
+      recipient: { label: "Recipient npub" },
+      amount: { label: "Amount" },
+      memo: { label: "Memo" },
+    },
+    options: {
+      amount: "Amount",
+      proofs: "Select Proofs",
+    },
+    actions: {
+      cancel: { label: "@:global.actions.cancel.label" },
+      send: { label: "@:global.actions.send.label" },
+    },
+    errors: {
+      invalid_npub: "Invalid npub",
+      invalid_pubkey: "Invalid pubkey",
+    },
+  },
   DonateDialog: {
     inputs: {
       preset: "Donation months",
@@ -1484,6 +1504,7 @@ export const messages = {
     send: "Send tokens",
     export: "Export bucket",
     send_to_creator: "Send to creator",
+    send_dm: "Send via Nostr DM",
     locked_tokens_heading: "Locked tokens",
     tabs: {
       overview: "Overview",
@@ -1496,6 +1517,7 @@ export const messages = {
     },
     tooltips: {
       target_bucket: "Choose a bucket to receive the selected tokens",
+      send_dm: "Send tokens via Nostr direct message",
     },
     not_found: "Bucket not found.",
   },

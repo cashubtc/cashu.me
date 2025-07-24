@@ -1,15 +1,15 @@
 <template>
   <q-dialog v-model="show" persistent ref="dialog">
     <q-card class="q-pa-md qcard" style="min-width: 300px">
-      <q-card-section class="text-h6">Send Bucket Tokens</q-card-section>
+      <q-card-section class="text-h6">{{ t('SendBucketDmDialog.title') }}</q-card-section>
       <q-card-section>
         <q-input
           v-model="recipient"
-          label="Recipient npub"
+          :label="t('SendBucketDmDialog.inputs.recipient.label')"
           outlined
           dense
           :error="recipient && !isValidRecipient"
-          :error-message="'Invalid pubkey'"
+          :error-message="t('SendBucketDmDialog.errors.invalid_pubkey')"
           class="q-mb-md"
         />
         <div class="text-caption q-mb-sm">
@@ -25,7 +25,7 @@
           <q-input
             v-model.number="amount"
             type="number"
-            label="Amount"
+            :label="t('SendBucketDmDialog.inputs.amount.label')"
             outlined
             dense
           />
@@ -52,13 +52,13 @@
             </q-item>
           </q-list>
         </div>
-        <q-input v-model="memo" label="Memo" outlined dense class="q-mt-md" />
+        <q-input v-model="memo" :label="t('SendBucketDmDialog.inputs.memo.label')" outlined dense class="q-mt-md" />
       </q-card-section>
       <q-card-actions align="right">
-        <q-btn flat color="primary" @click="cancel">Cancel</q-btn>
-        <q-btn flat color="primary" :disable="sendDisabled" @click="confirm"
-          >Send</q-btn
-        >
+        <q-btn flat color="primary" @click="cancel">{{ t('SendBucketDmDialog.actions.cancel.label') }}</q-btn>
+        <q-btn flat color="primary" :disable="sendDisabled" @click="confirm">
+          {{ t('SendBucketDmDialog.actions.send.label') }}
+        </q-btn>
       </q-card-actions>
     </q-card>
   </q-dialog>
@@ -74,6 +74,7 @@ import { useUiStore } from 'src/stores/ui';
 import { useMessengerStore } from 'src/stores/messenger';
 import { useP2PKStore } from 'src/stores/p2pk';
 import type { WalletProof } from 'src/types/proofs';
+import { useI18n } from 'vue-i18n';
 
 const props = defineProps<{ bucketId: string; prefillNpub?: string }>();
 
@@ -86,6 +87,7 @@ const p2pkStore = useP2PKStore();
 
 const { activeUnit } = storeToRefs(mintsStore);
 const { bucketBalances } = storeToRefs(bucketsStore);
+const { t } = useI18n();
 
 const show = ref(false);
 const recipient = ref('');
@@ -95,8 +97,8 @@ const mode = ref<'amount' | 'proofs'>('amount');
 const selectedSecrets = ref<string[]>([]);
 
 const modeOptions = [
-  { label: 'Amount', value: 'amount' },
-  { label: 'Select Proofs', value: 'proofs' },
+  { label: t('SendBucketDmDialog.options.amount'), value: 'amount' },
+  { label: t('SendBucketDmDialog.options.proofs'), value: 'proofs' },
 ];
 
 const bucketProofs = computed<WalletProof[]>(() =>
