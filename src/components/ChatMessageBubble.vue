@@ -282,4 +282,12 @@ async function updateAutoRedeem(val: boolean) {
   border-radius: 8px;
   margin-top: 4px;
 }
+
+.token-wrapper .q-chip {
+  white-space: normal;
+  word-break: break-word;
+  max-width: 100%;
+  display: block; /* optional: stack chips vertically */
+  margin-bottom: 4px; /* spacing between chips */
+}
 </style>
