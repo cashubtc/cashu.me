@@ -44,4 +44,13 @@ describe('BucketDetailModal openEdit', () => {
     vm.saveEdit();
     expect(tokenStore.editHistoryToken).toHaveBeenCalledWith('s1', { newLabel: 'new', newDescription: 'desc' });
   });
+
+  it('shows description when token item expanded', async () => {
+    const wrapper = mount(BucketDetailModal, { props: { modelValue: true, bucketId: 'b1' } });
+    expect(wrapper.text()).not.toContain('bar');
+    const item = wrapper.find('.q-expansion-item');
+    await item.trigger('click');
+    await wrapper.vm.$nextTick();
+    expect(wrapper.text()).toContain('bar');
+  });
 });
