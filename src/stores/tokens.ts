@@ -42,6 +42,7 @@ export const useTokensStore = defineStore("tokens", {
       fee,
       paymentRequest,
       label,
+      description,
       color,
       bucketId = DEFAULT_BUCKET_ID,
     }: {
@@ -52,6 +53,7 @@ export const useTokensStore = defineStore("tokens", {
       fee?: number;
       paymentRequest?: PaymentRequest;
       label?: string;
+      description?: string;
       color?: string;
       bucketId?: string;
     }) {
@@ -63,6 +65,7 @@ export const useTokensStore = defineStore("tokens", {
         mint,
         unit,
         label,
+        description,
         color: color ?? DEFAULT_COLOR,
         fee,
         paymentRequest,
@@ -77,6 +80,7 @@ export const useTokensStore = defineStore("tokens", {
       fee,
       paymentRequest,
       label,
+      description,
       color,
       bucketId = DEFAULT_BUCKET_ID,
     }: {
@@ -87,6 +91,7 @@ export const useTokensStore = defineStore("tokens", {
       fee?: number;
       paymentRequest?: PaymentRequest;
       label?: string;
+      description?: string;
       color?: string;
       bucketId?: string;
     }) {
@@ -98,6 +103,7 @@ export const useTokensStore = defineStore("tokens", {
         mint,
         unit,
         label,
+        description,
         color: color ?? DEFAULT_COLOR,
         fee,
         paymentRequest,
@@ -183,6 +189,41 @@ export const useTokensStore = defineStore("tokens", {
       }
 
       return undefined;
+    },
+
+    findHistoryTokenBySecret(secret: string): HistoryToken | undefined {
+      for (const ht of this.historyTokens) {
+        try {
+          const tokenJson = token.decode(ht.token);
+          if (tokenJson) {
+            const proofs = token.getProofs(tokenJson);
+            if (proofs.some((p) => p.secret === secret)) {
+              return ht;
+            }
+          }
+        } catch (e) {
+          console.warn("Could not decode token", e);
+        }
+      }
+      return undefined;
+    },
+
+    editHistoryTokenBySecret(
+      secret: string,
+      options?: {
+        newAmount?: number;
+        addAmount?: number;
+        newStatus?: "paid" | "pending";
+        newToken?: string;
+        newFee?: number;
+        newLabel?: string;
+        newColor?: string;
+        newDescription?: string;
+      }
+    ): HistoryToken | undefined {
+      const ht = this.findHistoryTokenBySecret(secret);
+      if (!ht) return undefined;
+      return this.editHistoryToken(ht.token, options);
     },
     setTokenPaid(token: string) {
       const index = this.historyTokens.findIndex(

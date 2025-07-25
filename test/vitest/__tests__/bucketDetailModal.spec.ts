@@ -24,7 +24,7 @@ vi.mock('../../../src/components/HistoryTable.vue', () => ({ default: { template
 vi.mock('../../../src/components/SendBucketDmDialog.vue', () => ({ default: { template: '<div />', methods: { show: vi.fn() } } }));
 
 vi.mock('../../../src/stores/tokens', () => {
-  tokenStore = { editHistoryToken: vi.fn() };
+  tokenStore = { editHistoryTokenBySecret: vi.fn() };
   return { useTokensStore: () => tokenStore };
 });
 
@@ -42,6 +42,6 @@ describe('BucketDetailModal openEdit', () => {
     vm.editDialog.label = 'new';
     vm.editDialog.description = 'desc';
     vm.saveEdit();
-    expect(tokenStore.editHistoryToken).toHaveBeenCalledWith('s1', { newLabel: 'new', newDescription: 'desc' });
+    expect(tokenStore.editHistoryTokenBySecret).toHaveBeenCalledWith('s1', { newLabel: 'new', newDescription: 'desc' });
   });
 });

@@ -42,6 +42,7 @@ export const useReceiveTokensStore = defineStore("receiveTokensStore", {
       p2pkPrivateKey: "",
       bucketId: DEFAULT_BUCKET_ID,
       label: "",
+      description: "",
     },
     scanningCard: false,
   }),

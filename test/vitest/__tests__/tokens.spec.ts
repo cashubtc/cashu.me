@@ -29,4 +29,26 @@ describe("Tokens store", () => {
     store.editHistoryToken("t3", { newDescription: "foo" });
     expect(store.historyTokens[0].description).toBe("foo");
   });
+
+  it("finds history token by secret", () => {
+    const tokenObj = {
+      token: [{ proofs: [{ id: "a", amount: 1, C: "c", secret: "sec" }], mint: "m1" }],
+    };
+    const encoded = "cashuA" + Buffer.from(JSON.stringify(tokenObj)).toString("base64");
+    const store = useTokensStore();
+    store.addPaidToken({ amount: 1, token: encoded, mint: "m1", unit: "sat" });
+    const found = store.findHistoryTokenBySecret("sec");
+    expect(found?.token).toBe(encoded);
+  });
+
+  it("edits history token by secret", () => {
+    const tokenObj = {
+      token: [{ proofs: [{ id: "a", amount: 1, C: "c", secret: "sec2" }], mint: "m1" }],
+    };
+    const encoded = "cashuA" + Buffer.from(JSON.stringify(tokenObj)).toString("base64");
+    const store = useTokensStore();
+    store.addPaidToken({ amount: 1, token: encoded, mint: "m1", unit: "sat" });
+    store.editHistoryTokenBySecret("sec2", { newLabel: "abc" });
+    expect(store.historyTokens[0].label).toBe("abc");
+  });
 });
