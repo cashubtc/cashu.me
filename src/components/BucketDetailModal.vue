@@ -26,30 +26,26 @@
       <q-tab-panels v-model="activeTab" animated>
         <q-tab-panel name="overview" class="q-pa-none">
           <q-list bordered>
-            <q-expansion-item
-              v-for="p in bucketProofs"
-              :key="p.secret"
-              expand-separator
-            >
-              <template #header>
-                <q-item-section class="text-weight-bold">
-                  {{ formatCurrency(p.amount, activeUnit.value) }}
-                </q-item-section>
-              </template>
-              <div class="q-pa-sm">
-                <div v-if="p.label" class="text-body2">{{ p.label }}</div>
-                <div v-if="p.description" class="text-caption">{{ p.description }}</div>
+            <q-item v-for="p in bucketProofs" :key="p.secret">
+              <q-item-section>
+                <q-item-label class="text-weight-bold">{{
+                  formatCurrency(p.amount, activeUnit.value)
+                }}</q-item-label>
+                <q-item-label caption v-if="p.label">{{
+                  p.label
+                }}</q-item-label>
+              </q-item-section>
+              <q-item-section side>
                 <q-btn
                   flat
                   dense
                   icon="edit"
-                  class="q-mt-sm"
                   @click.stop="openEdit(p)"
                   aria-label="Edit"
                   title="Edit"
                 />
-              </div>
-            </q-expansion-item>
+              </q-item-section>
+            </q-item>
           </q-list>
           <LockedTokensTable
             :bucket-id="props.bucketId ?? ''"
