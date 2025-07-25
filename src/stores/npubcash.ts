@@ -219,6 +219,7 @@ export const useNPCStore = defineStore("npc", {
         mint: mintUrl,
         unit: unit,
         label: "",
+        description: receiveStore.receiveData.description ?? "",
         bucketId: DEFAULT_BUCKET_ID,
       });
       receiveStore.showReceiveTokens = false;

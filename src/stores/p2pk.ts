@@ -411,6 +411,7 @@ export const useP2PKStore = defineStore("p2pk", {
         mint: mintUrl,
         unit,
         label,
+        description: entry?.description ?? "",
         bucketId,
       });
     },
