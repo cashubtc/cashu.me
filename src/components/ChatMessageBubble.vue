@@ -35,12 +35,15 @@
         />
       </template>
       <template v-else-if="message.tokenPayload">
-        <TokenInformation
-          :encodedToken="message.tokenPayload.token"
-          :showAmount="true"
-        />
-        <div v-if="message.tokenPayload.memo" class="q-mt-sm">
-          {{ message.tokenPayload.memo }}
+        <div class="token-wrapper">
+          <TokenInformation
+            :encodedToken="message.tokenPayload.token"
+            :showAmount="true"
+          />
+          <div v-if="message.tokenPayload.memo" class="q-mt-sm">
+            <span class="text-weight-bold">Memo:</span>
+            {{ message.tokenPayload.memo }}
+          </div>
         </div>
       </template>
       <template v-else>
@@ -271,5 +274,12 @@ async function updateAutoRedeem(val: boolean) {
   background-color: var(--q-secondary);
   color: #000000;
   border-radius: 0 12px 12px 12px;
+}
+
+.token-wrapper {
+  border: 1px solid currentColor;
+  padding: 8px;
+  border-radius: 8px;
+  margin-top: 4px;
 }
 </style>
