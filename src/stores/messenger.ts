@@ -65,6 +65,7 @@ export type MessengerMessage = {
   status?: "pending" | "sent" | "delivered" | "failed";
   attachment?: MessageAttachment;
   subscriptionPayment?: SubscriptionPayment;
+  tokenPayload?: any;
   autoRedeem?: boolean;
 };
 
@@ -176,7 +177,8 @@ export const useMessengerStore = defineStore("messenger", {
       recipient: string,
       message: string,
       relays?: string[],
-      attachment?: MessageAttachment
+      attachment?: MessageAttachment,
+      tokenPayload?: any
     ) {
       recipient = this.normalizeKey(recipient);
       await this.loadIdentity();
@@ -192,7 +194,8 @@ export const useMessengerStore = defineStore("messenger", {
         Math.floor(Date.now() / 1000),
         undefined,
         attachment,
-        "pending"
+        "pending",
+        tokenPayload
       );
 
       const list = relays && relays.length ? relays : (this.relays as any);
@@ -280,7 +283,10 @@ export const useMessengerStore = defineStore("messenger", {
 
         const { success, event } = await this.sendDm(
           recipient,
-          JSON.stringify(payload)
+          JSON.stringify(payload),
+          undefined,
+          undefined,
+          { token: tokenStr, amount: sendAmount, memo }
         );
         if (success && event) {
           if (subscription) {
@@ -357,7 +363,10 @@ export const useMessengerStore = defineStore("messenger", {
 
         const { success, event } = await this.sendDm(
           recipient,
-          JSON.stringify(payload)
+          JSON.stringify(payload),
+          undefined,
+          undefined,
+          { token: tokenStr, amount: sendAmount, memo }
         );
 
         if (success && event) {
@@ -382,7 +391,8 @@ export const useMessengerStore = defineStore("messenger", {
       created_at?: number,
       id?: string,
       attachment?: MessageAttachment,
-      status: "pending" | "sent" | "delivered" | "failed" = "pending"
+      status: "pending" | "sent" | "delivered" | "failed" = "pending",
+      tokenPayload?: any
     ): MessengerMessage {
       pubkey = this.normalizeKey(pubkey);
       const messageId = id || uuidv4();
@@ -396,6 +406,7 @@ export const useMessengerStore = defineStore("messenger", {
         outgoing: true,
         attachment,
         status,
+        tokenPayload,
       };
       if (!this.conversations[pubkey]) this.conversations[pubkey] = [];
       if (!this.conversations[pubkey].some((m) => m.id === messageId))
@@ -446,6 +457,7 @@ export const useMessengerStore = defineStore("messenger", {
         event.content
       );
       let subscriptionInfo: SubscriptionPayment | undefined;
+      let tokenPayload: any | undefined;
       const lines = decrypted.split("\n").filter((l) => l.trim().length > 0);
       for (const line of lines) {
         let payload: any;
@@ -516,6 +528,7 @@ export const useMessengerStore = defineStore("messenger", {
           }
         } else if (payload && payload.token) {
           const tokensStore = useTokensStore();
+          tokenPayload = payload;
           const decoded = tokensStore.decodeToken(payload.token);
           if (decoded) {
             const proofs = token.getProofs(decoded);
@@ -576,6 +589,9 @@ export const useMessengerStore = defineStore("messenger", {
       if (subscriptionInfo) {
         msg.subscriptionPayment = subscriptionInfo;
         msg.autoRedeem = true;
+      }
+      if (tokenPayload) {
+        msg.tokenPayload = tokenPayload;
       }
       if (!this.conversations[event.pubkey]) {
         this.conversations[event.pubkey] = [];
