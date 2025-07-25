@@ -1428,7 +1428,7 @@ export const messages = {
     },
     options: {
       amount: "Amount",
-      proofs: "Select Proofs",
+      proofs: "Select Tokens",
     },
     actions: {
       cancel: { label: "@:global.actions.cancel.label" },
