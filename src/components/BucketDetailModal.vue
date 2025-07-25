@@ -26,26 +26,37 @@
       <q-tab-panels v-model="activeTab" animated>
         <q-tab-panel name="overview" class="q-pa-none">
           <q-list bordered>
-            <q-item v-for="p in bucketProofs" :key="p.secret">
-              <q-item-section>
-                <q-item-label class="text-weight-bold">{{
-                  formatCurrency(p.amount, activeUnit.value)
-                }}</q-item-label>
-                <q-item-label caption v-if="p.label">{{
-                  p.label
-                }}</q-item-label>
-              </q-item-section>
-              <q-item-section side>
-                <q-btn
-                  flat
-                  dense
-                  icon="edit"
-                  @click.stop="openEdit(p)"
-                  aria-label="Edit"
-                  title="Edit"
-                />
-              </q-item-section>
-            </q-item>
+            <q-expansion-item
+              v-for="p in bucketProofs"
+              :key="p.secret"
+              expand-icon-class="hidden"
+              dense
+              dense-toggle
+            >
+              <template #header>
+                <q-item>
+                  <q-item-section>
+                    <q-item-label class="text-weight-bold">{{
+                      formatCurrency(p.amount, activeUnit.value)
+                    }}</q-item-label>
+                    <q-item-label caption v-if="p.label">{{ p.label }}</q-item-label>
+                  </q-item-section>
+                  <q-item-section side>
+                    <q-btn
+                      flat
+                      dense
+                      icon="edit"
+                      @click.stop="openEdit(p)"
+                      aria-label="Edit"
+                      title="Edit"
+                    />
+                  </q-item-section>
+                </q-item>
+              </template>
+              <div class="q-pa-sm" v-if="p.description">
+                <q-item-label caption>{{ p.description }}</q-item-label>
+              </div>
+            </q-expansion-item>
           </q-list>
           <LockedTokensTable
             :bucket-id="props.bucketId ?? ''"
