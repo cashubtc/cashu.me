@@ -220,12 +220,13 @@ export const useP2PKStore = defineStore("p2pk", {
       const trimmedSecret = secret.trim();
 
       if (trimmedSecret.startsWith("P2PK:")) {
-        return trimmedSecret.slice("P2PK:".length);
+        const key = trimmedSecret.slice("P2PK:".length);
+        return this.isValidPubkey(key) ? key : "";
       }
 
       // Non JSON strings are interpreted as raw pubkeys
       if (!trimmedSecret.startsWith("{") && !trimmedSecret.startsWith("[")) {
-        return trimmedSecret;
+        return this.isValidPubkey(trimmedSecret) ? trimmedSecret : "";
       }
 
       try {
@@ -233,7 +234,8 @@ export const useP2PKStore = defineStore("p2pk", {
 
         // handle HTLC style tokens created via createP2PKHTLC
         if (!Array.isArray(secretObject) && secretObject.receiverP2PK) {
-          return ensureCompressed(secretObject.receiverP2PK);
+          const pk = ensureCompressed(secretObject.receiverP2PK);
+          return this.isValidPubkey(pk) ? pk : "";
         }
 
         if (!Array.isArray(secretObject) || secretObject[0] !== "P2PK" || !secretObject[1]?.data) {
@@ -247,11 +249,13 @@ export const useP2PKStore = defineStore("p2pk", {
         const locktimeTag = tags?.find((tag: any) => tag[0] === "locktime");
         const locktime = locktimeTag ? parseInt(locktimeTag[1], 10) : Infinity;
 
+        const pk = ensureCompressed(data);
+
         if (locktime > now) {
-          return data;
+          return this.isValidPubkey(pk) ? pk : "";
         }
 
-        return data;
+        return this.isValidPubkey(pk) ? pk : "";
       } catch (e) {
         console.error("Failed to parse P2PK secret JSON:", e, "Secret was:", trimmedSecret);
         return "";

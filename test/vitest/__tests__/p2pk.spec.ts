@@ -68,6 +68,20 @@ describe("P2PK store", () => {
     expect(p2pk.getSecretP2PKPubkey(`P2PK:${receiver}`)).toBe(receiver);
   });
 
+  it("returns empty string for random secret", () => {
+    const p2pk = useP2PKStore();
+    const random = "aa".repeat(32); // 64-hex string
+    expect(p2pk.getSecretP2PKPubkey(random)).toBe("");
+    expect(p2pk.isLocked([{ secret: random } as any])).toBe(false);
+  });
+
+  it("parses valid P2PK secret", () => {
+    const p2pk = useP2PKStore();
+    const secret = JSON.stringify(["P2PK", { data: "02aa" }]);
+    expect(p2pk.getSecretP2PKPubkey(secret)).toBe("02aa");
+    expect(p2pk.isLocked([{ secret } as any])).toBe(true);
+  });
+
   it("forwards options in sendToLock", async () => {
     const walletStore = useWalletStore();
     const proofsStore = useProofsStore();
