@@ -557,13 +557,9 @@ export const useMessengerStore = defineStore("messenger", {
             } else {
               const receiveStore = useReceiveTokensStore();
               receiveStore.receiveData.tokensBase64 = payload.token;
-              receiveStore.receiveData.bucketId =
-                payload.bucketId ?? receiveStore.receiveData.bucketId;
+              receiveStore.receiveData.bucketId = DEFAULT_BUCKET_ID;
               await receiveStore.enqueue(() =>
-                receiveStore.receiveToken(
-                  payload.token,
-                  receiveStore.receiveData.bucketId
-                )
+                receiveStore.receiveToken(payload.token, DEFAULT_BUCKET_ID)
               );
             }
           }
