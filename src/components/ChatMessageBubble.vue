@@ -34,6 +34,15 @@
           @update:model-value="updateAutoRedeem"
         />
       </template>
+      <template v-else-if="message.tokenPayload">
+        <TokenInformation
+          :encodedToken="message.tokenPayload.token"
+          :showAmount="true"
+        />
+        <div v-if="message.tokenPayload.memo" class="q-mt-sm">
+          {{ message.tokenPayload.memo }}
+        </div>
+      </template>
       <template v-else>
         <q-img
           v-if="imageSrc"
@@ -88,6 +97,7 @@ import { formatDistanceToNow } from "date-fns";
 import { mdiCheck, mdiCheckAll, mdiAlertCircleOutline } from "@quasar/extras/mdi-v6";
 import type { MessengerMessage } from "src/stores/messenger";
 import TokenCarousel from "components/TokenCarousel.vue";
+import TokenInformation from "components/TokenInformation.vue";
 import { useReceiveTokensStore } from "src/stores/receiveTokensStore";
 import { useWalletStore } from "src/stores/wallet";
 import { notifyError } from "src/js/notify";
