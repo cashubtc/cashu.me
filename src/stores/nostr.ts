@@ -1498,7 +1498,7 @@ export const useNostrStore = defineStore("nostr", {
 
       tokensStore.addPendingToken({
         amount: amount,
-        token: tokenStr,
+        tokenStr: tokenStr,
         mint: token.getMint(decodedToken),
         unit: token.getUnit(decodedToken),
         label: "",

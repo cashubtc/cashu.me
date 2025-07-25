@@ -74,7 +74,7 @@ export const useTokensStore = defineStore("tokens", {
     },
     addPendingToken({
       amount,
-      token,
+      tokenStr,
       mint,
       unit,
       fee,
@@ -85,7 +85,7 @@ export const useTokensStore = defineStore("tokens", {
       bucketId = DEFAULT_BUCKET_ID,
     }: {
       amount: number;
-      token: string;
+      tokenStr: string;
       mint: string;
       unit: string;
       fee?: number;
@@ -99,7 +99,7 @@ export const useTokensStore = defineStore("tokens", {
         status: "pending",
         amount,
         date: currentDateStr(),
-        token: token,
+        token: tokenStr,
         mint,
         unit,
         label,

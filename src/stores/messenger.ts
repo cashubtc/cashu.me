@@ -306,7 +306,7 @@ export const useMessengerStore = defineStore("messenger", {
           }
           tokens.addPendingToken({
             amount: -sendAmount,
-            token: tokenStr,
+            tokenStr: tokenStr,
             unit: mints.activeUnit,
             mint: mints.activeMintUrl,
             bucketId,
@@ -370,7 +370,7 @@ export const useMessengerStore = defineStore("messenger", {
         if (success && event) {
           tokens.addPendingToken({
             amount: -sendAmount,
-            token: tokenStr,
+            tokenStr: tokenStr,
             unit: mints.activeUnit,
             mint: mints.activeMintUrl,
             bucketId,
