@@ -34,7 +34,17 @@ vi.mock('../../../src/stores/ui', () => ({
 
 vi.mock('../../../src/js/notify', () => ({ notifyError: vi.fn() }));
 
-describe('BucketDetailModal openEdit', () => {
+describe('BucketDetailModal token list', () => {
+  it('shows metadata when expanded', async () => {
+    const wrapper = mount(BucketDetailModal, { props: { modelValue: true, bucketId: 'b1' } });
+    const item = wrapper.find('q-expansion-item');
+    expect(item.exists()).toBe(true);
+    expect(item.text()).not.toContain('foo');
+    await item.trigger('click');
+    expect(item.text()).toContain('foo');
+    expect(item.text()).toContain('bar');
+  });
+
   it('calls editHistoryToken with new values', async () => {
     const wrapper = mount(BucketDetailModal, { props: { modelValue: true, bucketId: 'b1' } });
     const vm: any = wrapper.vm;
