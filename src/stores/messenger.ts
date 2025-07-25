@@ -277,7 +277,6 @@ export const useMessengerStore = defineStore("messenger", {
               token: tokenStr,
               amount: sendAmount,
               unlockTime: null,
-              bucketId,
               referenceId: uuidv4(),
             };
 
@@ -356,7 +355,6 @@ export const useMessengerStore = defineStore("messenger", {
           token: tokenStr,
           amount: sendAmount,
           unlockTime: null,
-          bucketId,
           referenceId: uuidv4(),
           memo: memo || undefined,
         };
