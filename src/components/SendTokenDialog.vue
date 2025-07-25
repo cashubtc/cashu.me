@@ -1267,7 +1267,7 @@ export default defineComponent({
           label: "",
           bucketId,
         };
-        this.addPendingToken(historyToken);
+        this.addPendingToken({ ...historyToken, tokenStr: historyToken.token });
         this.sendData.historyToken = historyToken;
         Dialog.create({
           message: this.$t(
@@ -1415,7 +1415,7 @@ export default defineComponent({
           label: "",
           bucketId,
         };
-        this.addPendingToken(historyToken);
+        this.addPendingToken({ ...historyToken, tokenStr: historyToken.token });
         this.sendData.historyToken = historyToken;
 
         if (!this.g.offline) {

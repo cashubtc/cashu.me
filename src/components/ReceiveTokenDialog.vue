@@ -582,7 +582,7 @@ export default defineComponent({
 
       tokensStore.addPendingToken({
         amount: amount,
-        token: tokenStr,
+        tokenStr: tokenStr,
         mint: mintInToken,
         unit: unitInToken,
         label: this.receiveData.label,

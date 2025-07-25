@@ -1162,7 +1162,7 @@ export const useWalletStore = defineStore("wallet", {
           if (historyToken2) {
             tokenStore.addPendingToken({
               amount: unspentAmount * Math.sign(historyToken2.amount),
-              token: serializedUnspentProofs,
+              tokenStr: serializedUnspentProofs,
               unit: historyToken2.unit,
               mint: historyToken2.mint,
               label: historyToken2.label ?? "",
