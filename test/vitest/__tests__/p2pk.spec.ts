@@ -8,6 +8,7 @@ import * as secp from "@noble/secp256k1";
 import { ensureCompressed } from "../../../src/utils/ecash";
 import { createP2PKHTLC } from "../../../src/js/token";
 
+
 beforeEach(() => {
   localStorage.clear();
 });
@@ -80,6 +81,15 @@ describe("P2PK store", () => {
     const secret = JSON.stringify(["P2PK", { data: "02aa" }]);
     expect(p2pk.getSecretP2PKPubkey(secret)).toBe("02aa");
     expect(p2pk.isLocked([{ secret } as any])).toBe(true);
+  });
+
+  it("detects pure P2PK tokens", () => {
+    const p2pk = useP2PKStore();
+    const pure = JSON.stringify(["P2PK", { data: "02aa" }]);
+    const htlc = JSON.stringify({ receiverP2PK: "02bb" });
+    expect(p2pk.isPureP2PK([{ secret: pure } as any])).toBe(true);
+    expect(p2pk.isPureP2PK([{ secret: htlc } as any])).toBe(false);
+    expect(p2pk.isPureP2PK([{ secret: "random" } as any])).toBe(false);
   });
 
   it("forwards options in sendToLock", async () => {
@@ -256,6 +266,27 @@ describe("P2PK store", () => {
     );
     const secretObj = JSON.parse(decoded.token[0].proofs[0].secret);
     expect(secretObj[1].tags).toEqual([["locktime", String(locktime)]]);
+  });
+
+  it("shows P2PK chip only for pure P2PK tokens", async () => {
+    window.windowMixin = { methods: { formatCurrency: (v: number) => String(v) } } as any;
+    const TokenInformation = (
+      await import("../../../src/components/TokenInformation.vue")
+    ).default;
+    const { mount } = await import("@vue/test-utils");
+
+    const pureSecret = JSON.stringify(["P2PK", { data: "02aa" }]);
+    const tokenObj = { token: [{ proofs: [{ id: "a", amount: 1, C: "c", secret: pureSecret }], mint: "m" }] };
+    const encoded = "cashuA" + Buffer.from(JSON.stringify(tokenObj)).toString("base64");
+
+    const wrapperPure = mount(TokenInformation, { props: { encodedToken: encoded } });
+    expect(wrapperPure.text()).toContain("P2PK");
+
+    const htlcSecret = JSON.stringify({ receiverP2PK: "02bb" });
+    const tokenObjHtlc = { token: [{ proofs: [{ id: "a", amount: 1, C: "c", secret: htlcSecret }], mint: "m" }] };
+    const encodedHtlc = "cashuA" + Buffer.from(JSON.stringify(tokenObjHtlc)).toString("base64");
+    const wrapperHtlc = mount(TokenInformation, { props: { encodedToken: encodedHtlc } });
+    expect(wrapperHtlc.text()).not.toContain("P2PK");
   });
 });
 

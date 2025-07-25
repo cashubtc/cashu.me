@@ -28,7 +28,7 @@
           class="q-ml-xs"
         />
       </q-chip>
-      <q-chip v-if="isLocked(proofsToShow)" outline icon="lock" class="q-pa-md">
+      <q-chip v-if="isPureP2PK(proofsToShow)" outline icon="lock" class="q-pa-md">
         P2PK
         <q-icon
           v-if="showP2PKCheck || isLockedToUs(proofsToShow)"
@@ -127,7 +127,7 @@ export default defineComponent({
   },
   methods: {
     ...mapActions(useP2PKStore, [
-      "isLocked",
+      "isPureP2PK",
       "isLockedToUs",
       "getTokenPubkey",
       "getTokenLocktime",
