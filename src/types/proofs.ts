@@ -5,4 +5,5 @@ export interface WalletProof extends Proof {
   quote?: string;
   bucketId?: string;
   label?: string;
+  description?: string;
 }

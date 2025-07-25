@@ -91,7 +91,8 @@ export const useProofsStore = defineStore("proofs", {
       proofs: Proof[],
       quote?: string,
       bucketId: string = "unassigned",
-      label: string = ""
+      label: string = "",
+      description: string = ""
     ): WalletProof[] {
       return proofs.map((p) => {
         return {
@@ -100,6 +101,7 @@ export const useProofsStore = defineStore("proofs", {
           quote: quote,
           bucketId,
           label,
+          description,
         } as WalletProof;
       });
     },
@@ -107,7 +109,8 @@ export const useProofsStore = defineStore("proofs", {
       proofs: Proof[],
       quote?: string,
       bucketId: string = "unassigned",
-      label: string = ""
+      label: string = "",
+      description: string = ""
     ) {
       const bucketsStore = useBucketsStore();
       const mintsStore = useMintsStore();
@@ -128,7 +131,8 @@ export const useProofsStore = defineStore("proofs", {
         proofs,
         quote,
         bucketId,
-        label
+        label,
+        description
       );
       await cashuDb.transaction("rw", cashuDb.proofs, async () => {
         walletProofs.forEach(async (p) => {
@@ -232,6 +236,16 @@ export const useProofsStore = defineStore("proofs", {
       await cashuDb.transaction("rw", cashuDb.proofs, async () => {
         for (const secret of secrets) {
           await cashuDb.proofs.where("secret").equals(secret).modify({ label });
+        }
+      });
+    },
+    async updateProofDescriptions(secrets: string[], description: string) {
+      await cashuDb.transaction("rw", cashuDb.proofs, async () => {
+        for (const secret of secrets) {
+          await cashuDb.proofs
+            .where("secret")
+            .equals(secret)
+            .modify({ description });
         }
       });
     },

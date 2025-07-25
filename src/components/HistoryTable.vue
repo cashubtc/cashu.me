@@ -55,6 +55,9 @@
           <q-item-label caption v-if="token.label">
             {{ token.label }}
           </q-item-label>
+          <q-item-label caption v-if="token.description">
+            {{ token.description }}
+          </q-item-label>
         </q-item-section>
 
         <q-item-section side top class="q-gutter-xs">
@@ -154,6 +157,12 @@
           class="q-mt-md"
           :label="$t('bucket.color')"
         />
+        <q-input
+          v-model="editDialog.description"
+          outlined
+          class="q-mt-md"
+          :label="$t('ReceiveTokenDialog.inputs.description.label')"
+        />
         <div class="row q-mt-md">
           <q-btn color="primary" rounded @click="saveLabel">{{
             $t("global.actions.update.label")
@@ -198,6 +207,7 @@ export default defineComponent({
         show: false,
         label: "",
         color: DEFAULT_COLOR,
+        description: "",
         token: null,
       },
     };
@@ -279,6 +289,7 @@ export default defineComponent({
       this.editDialog.token = token;
       this.editDialog.label = token.label || "";
       this.editDialog.color = token.color || DEFAULT_COLOR;
+      this.editDialog.description = token.description || "";
       this.editDialog.show = true;
     },
     saveLabel() {
@@ -286,6 +297,7 @@ export default defineComponent({
       this.editHistoryToken(this.editDialog.token.token, {
         newLabel: this.editDialog.label,
         newColor: this.editDialog.color,
+        newDescription: this.editDialog.description,
       });
       this.editDialog.show = false;
     },
