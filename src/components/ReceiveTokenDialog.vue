@@ -171,6 +171,13 @@
               class="q-mt-sm"
               :label="$t('ReceiveTokenDialog.inputs.label.label')"
             />
+            <q-input
+              v-model="receiveData.description"
+              outlined
+              dense
+              class="q-mt-sm"
+              :label="$t('ReceiveTokenDialog.inputs.description.label')"
+            />
           </div>
           <div class="row q-pt-md" v-if="!swapSelected">
             <q-btn
@@ -579,6 +586,7 @@ export default defineComponent({
         mint: mintInToken,
         unit: unitInToken,
         label: this.receiveData.label,
+        description: this.receiveData.description,
         bucketId: this.receiveData.bucketId,
       });
       this.showReceiveTokens = false;

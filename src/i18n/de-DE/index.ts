@@ -946,6 +946,9 @@ export default {
       label: {
         label: "Label",
       },
+      description: {
+        label: "Description",
+      },
     },
     timelock: {
       unlock_date_label: "Unlocks { value }",

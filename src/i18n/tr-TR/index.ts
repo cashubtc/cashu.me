@@ -941,6 +941,9 @@ export default {
       label: {
         label: "Label",
       },
+      description: {
+        label: "Description",
+      },
     },
     errors: {
       invalid_token: {
