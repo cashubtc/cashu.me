@@ -1402,4 +1402,24 @@ export default {
       frequency: "กรองตามความถี่",
     },
   },
+  SendBucketDmDialog: {
+    title: "Send Bucket Tokens",
+    inputs: {
+      recipient: { label: "Recipient npub" },
+      amount: { label: "Amount" },
+      memo: { label: "Memo" },
+    },
+    options: {
+      amount: "Amount",
+      proofs: "Select Tokens",
+    },
+    actions: {
+      cancel: { label: "@:global.actions.cancel.label" },
+      send: { label: "@:global.actions.send.label" },
+    },
+    errors: {
+      invalid_npub: "Invalid npub",
+      invalid_pubkey: "Invalid pubkey",
+    },
+  },
 };
