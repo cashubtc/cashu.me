@@ -20,6 +20,7 @@ export type HistoryToken = {
   unit: string;
   label?: string;
   color?: string;
+  description?: string;
   paymentRequest?: PaymentRequest;
   fee?: number;
   bucketId: string;
@@ -113,6 +114,7 @@ export const useTokensStore = defineStore("tokens", {
         newFee?: number;
         newLabel?: string;
         newColor?: string;
+        newDescription?: string;
       }
     ): HistoryToken | undefined {
       const index = this.historyTokens.findIndex(
@@ -154,6 +156,22 @@ export const useTokensStore = defineStore("tokens", {
               }
             } catch (e) {
               console.warn("Could not update proof labels", e);
+            }
+          }
+          if (options.newDescription !== undefined) {
+            this.historyTokens[index].description = options.newDescription;
+            try {
+              const tokenJson = token.decode(this.historyTokens[index].token);
+              if (tokenJson) {
+                const proofs = token.getProofs(tokenJson);
+                const proofsStore = useProofsStore();
+                proofsStore.updateProofDescriptions(
+                  proofs.map((p) => p.secret),
+                  options.newDescription
+                );
+              }
+            } catch (e) {
+              console.warn("Could not update proof descriptions", e);
             }
           }
           if (options.newColor !== undefined) {

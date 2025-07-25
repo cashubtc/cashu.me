@@ -22,4 +22,11 @@ describe("Tokens store", () => {
     store.editHistoryToken("t2", { newColor: "#ff0000" });
     expect(store.historyTokens[0].color).toBe("#ff0000");
   });
+
+  it("edits token description", () => {
+    const store = useTokensStore();
+    store.addPaidToken({ amount: 1, token: "t3", mint: "m1", unit: "sat" });
+    store.editHistoryToken("t3", { newDescription: "foo" });
+    expect(store.historyTokens[0].description).toBe("foo");
+  });
 });

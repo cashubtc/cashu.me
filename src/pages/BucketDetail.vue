@@ -35,6 +35,9 @@
           <q-item-label class="text-weight-bold">{{
             group.label || "(No label)"
           }}</q-item-label>
+          <q-item-label caption v-if="group.tokens[0]?.description">
+            {{ group.tokens[0]?.description }}
+          </q-item-label>
           <q-item-label caption>
             {{ formatCurrency(group.total, activeUnit) }}
           </q-item-label>
@@ -122,6 +125,12 @@
           class="q-mt-md"
           label="Color"
         />
+        <q-input
+          v-model="editDialog.description"
+          outlined
+          class="q-mt-md"
+          :label="$t('ReceiveTokenDialog.inputs.description.label')"
+        />
         <div class="row q-mt-md">
           <q-btn color="primary" rounded @click="saveEdit">Update</q-btn>
           <q-btn flat rounded color="grey" class="q-ml-auto" v-close-popup
@@ -187,6 +196,7 @@ const editDialog = ref({
   show: false,
   label: "",
   color: DEFAULT_COLOR,
+  description: "",
   originalLabel: "",
 });
 
@@ -272,6 +282,7 @@ function openEditGroup(group: ProofGroup) {
   editDialog.value.show = true;
   editDialog.value.label = group.label;
   editDialog.value.color = group.color;
+  editDialog.value.description = group.tokens[0]?.description || "";
   editDialog.value.originalLabel = group.label;
 }
 
@@ -285,6 +296,7 @@ function saveEdit() {
     tokensStore.editHistoryToken(t.token, {
       newLabel: editDialog.value.label,
       newColor: editDialog.value.color,
+      newDescription: editDialog.value.description,
     });
   });
   editDialog.value.show = false;

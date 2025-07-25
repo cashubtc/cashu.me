@@ -436,6 +436,25 @@ export class CashuDexie extends Dexie {
           if (entry.creatorAvatar === undefined) entry.creatorAvatar = null;
         });
       });
+
+    this.version(19)
+      .stores({
+        proofs:
+          "secret, id, C, amount, reserved, quote, bucketId, label, description",
+        profiles: "pubkey",
+        creatorsTierDefinitions: "&creatorNpub, eventId, updatedAt",
+        subscriptions: "&id, creatorNpub, tierId, status, createdAt, updatedAt",
+        lockedTokens:
+          "&id, tokenString, owner, tierId, intervalKey, unlockTs, status, subscriptionEventId, subscriptionId, monthIndex, totalMonths, autoRedeem",
+      })
+      .upgrade(async (tx) => {
+        await tx
+          .table("proofs")
+          .toCollection()
+          .modify((entry: any) => {
+            if (entry.description === undefined) entry.description = "";
+          });
+      });
   }
 }
 
