@@ -87,7 +87,7 @@
           </q-btn>
 
           <q-btn
-            v-if="showP2PkButtonInDrawer"
+            v-if="showP2PkButtonInDrawer && p2pkKeys.length"
             class="full-width custom-btn"
             @click="handleLockBtn"
           >
