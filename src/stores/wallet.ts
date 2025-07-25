@@ -579,6 +579,7 @@ export const useWalletStore = defineStore("wallet", {
         unit: unitInToken,
         mint: mintInToken,
         label: receiveStore.receiveData.label ?? "",
+        description: receiveStore.receiveData.description ?? "",
         fee: fee,
         bucketId,
       } as HistoryToken;
@@ -830,6 +831,7 @@ export const useWalletStore = defineStore("wallet", {
           unit: invoice.unit,
           mint: invoice.mint,
           label: "",
+          description: invoice.memo ?? "",
           bucketId,
         });
         useInvoicesWorkerStore().removeInvoiceFromChecker(invoice.quote);
@@ -1006,6 +1008,7 @@ export const useWalletStore = defineStore("wallet", {
           unit: mintWallet.unit,
           mint: mintWallet.mint.mintUrl,
           label: "",
+          description: this.payInvoiceData.invoice?.description ?? "",
           bucketId,
         });
 
@@ -1093,6 +1096,7 @@ export const useWalletStore = defineStore("wallet", {
               unit: wallet.unit,
               mint: wallet.mint.mintUrl,
               label: "",
+              description: "",
               bucketId,
             });
           }
@@ -1166,6 +1170,7 @@ export const useWalletStore = defineStore("wallet", {
               unit: historyToken2.unit,
               mint: historyToken2.mint,
               label: historyToken2.label ?? "",
+              description: historyToken2.description ?? "",
               bucketId: historyToken2.bucketId,
             });
           }

@@ -309,6 +309,7 @@ export const useMessengerStore = defineStore("messenger", {
             tokenStr: tokenStr,
             unit: mints.activeUnit,
             mint: mints.activeMintUrl,
+            description: memo ?? "",
             bucketId,
           });
         }
@@ -373,6 +374,7 @@ export const useMessengerStore = defineStore("messenger", {
             tokenStr: tokenStr,
             unit: mints.activeUnit,
             mint: mints.activeMintUrl,
+            description: memo ?? "",
             bucketId,
           });
         }

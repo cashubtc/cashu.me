@@ -1502,6 +1502,7 @@ export const useNostrStore = defineStore("nostr", {
         mint: token.getMint(decodedToken),
         unit: token.getUnit(decodedToken),
         label: "",
+        description: receiveStore.receiveData.description ?? "",
         bucketId: DEFAULT_BUCKET_ID,
       });
       receiveStore.showReceiveTokens = false;

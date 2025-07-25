@@ -1265,6 +1265,7 @@ export default defineComponent({
           unit: this.activeUnit,
           mint: this.activeMintUrl,
           label: "",
+          description: this.sendData.memo || "",
           bucketId,
         };
         this.addPendingToken({ ...historyToken, tokenStr: historyToken.token });
@@ -1413,6 +1414,7 @@ export default defineComponent({
           paymentRequest: this.sendData.paymentRequest,
           status: "pending",
           label: "",
+          description: this.sendData.memo || "",
           bucketId,
         };
         this.addPendingToken({ ...historyToken, tokenStr: historyToken.token });
