@@ -916,6 +916,10 @@
               <q-item-label caption
                 >{{ $t("Settings.p2pk_features.quick_access.description") }}
               </q-item-label>
+              <q-item-label caption class="q-mt-xs">
+                The button appears in Receive Ecash after you generate or import a
+                key.
+              </q-item-label>
             </q-item>
           </q-list>
           <q-item v-if="p2pkKeys.length">
