@@ -272,6 +272,22 @@ export const useP2PKStore = defineStore("p2pk", {
       }
       return false;
     },
+    isPureP2PK: function (proofs: WalletProof[]) {
+      const secrets = proofs.map((p) => p.secret);
+      for (const secret of secrets) {
+        try {
+          const obj = JSON.parse(secret);
+          if (!Array.isArray(obj)) continue;
+          if (obj[0] !== "P2PK") continue;
+          // ignore HTLC style objects
+          if (obj[1] && typeof obj[1] === "object" && "receiverP2PK" in obj[1]) {
+            continue;
+          }
+          return true;
+        } catch {}
+      }
+      return false;
+    },
     isHTLC: function (proofs: WalletProof[]) {
       const secrets = proofs.map((p) => p.secret);
       for (const secret of secrets) {
