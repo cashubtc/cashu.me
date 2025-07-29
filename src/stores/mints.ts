@@ -482,18 +482,21 @@ export const useMintsStore = defineStore("mints", {
         console.error(error);
         try {
           // notifyApiError(error, this.t("wallet.mint.notifications.could_not_get_info"));
-        } catch { }
+        } catch {}
         throw error;
       }
     },
-    checkForMintKeysetIdCollisions: async function (mintToAdd: Mint, keysets: MintKeyset[]) {
+    checkForMintKeysetIdCollisions: async function (
+      mintToAdd: Mint,
+      keysets: MintKeyset[]
+    ) {
       // check if there are any keysets with the same id in another mint
       const allKeysets = this.mints
         .filter((m) => m.url !== mintToAdd.url) // exclude the mint we are adding
         .map((m) => m.keysets)
-        .flat()
-      const collisions = keysets.filter(
-        (k) => allKeysets.map((k) => k.id).includes(k.id)
+        .flat();
+      const collisions = keysets.filter((k) =>
+        allKeysets.map((k) => k.id).includes(k.id)
       );
       // perform the same check for the integer representation of the keyset id
       const collisionsBigInt = keysets.filter((k) => {
@@ -507,7 +510,6 @@ export const useMintsStore = defineStore("mints", {
         const errorMessage = this.t(
           "wallet.mint.notifications.mint_validation_error"
         );
-        notifyError(errorMessage);
         throw new Error(errorMessage);
       }
       return true;
@@ -550,7 +552,7 @@ export const useMintsStore = defineStore("mints", {
         console.error(error);
         try {
           // notifyApiError(error, this.t("wallet.mint.notifications.could_not_get_keys"));
-        } catch { }
+        } catch {}
         throw error;
       }
     },
@@ -564,7 +566,7 @@ export const useMintsStore = defineStore("mints", {
         console.error(error);
         try {
           // notifyApiError(error, this.t("wallet.mint.notifications.could_not_get_keysets"));
-        } catch { }
+        } catch {}
         throw error;
       }
     },
