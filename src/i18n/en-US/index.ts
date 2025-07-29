@@ -91,6 +91,7 @@ export default {
         could_not_get_info: "Could not get mint info",
         could_not_get_keys: "Could not get mint keys",
         could_not_get_keysets: "Could not get mint keysets",
+        mint_validation_error: "Mint validation error",
         removed: "Mint removed",
         error: "Mint error",
       },

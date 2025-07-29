@@ -482,15 +482,43 @@ export const useMintsStore = defineStore("mints", {
         console.error(error);
         try {
           // notifyApiError(error, this.t("wallet.mint.notifications.could_not_get_info"));
-        } catch {}
+        } catch { }
         throw error;
       }
+    },
+    checkForMintKeysetIdCollisions: async function (mintToAdd: Mint, keysets: MintKeyset[]) {
+      // check if there are any keysets with the same id in another mint
+      const allKeysets = this.mints
+        .filter((m) => m.url !== mintToAdd.url) // exclude the mint we are adding
+        .map((m) => m.keysets)
+        .flat()
+      const collisions = keysets.filter(
+        (k) => allKeysets.map((k) => k.id).includes(k.id)
+      );
+      // perform the same check for the integer representation of the keyset id
+      const collisionsBigInt = keysets.filter((k) => {
+        const keysetIdBigInt = BigInt(`0x${k.id}`) % BigInt(2 ** 31 - 1);
+        return allKeysets
+          .map((k) => BigInt(`0x${k.id}`) % BigInt(2 ** 31 - 1))
+          .includes(keysetIdBigInt);
+      });
+
+      if (collisions.length > 0 || collisionsBigInt.length > 0) {
+        const errorMessage = this.t(
+          "wallet.mint.notifications.mint_validation_error"
+        );
+        notifyError(errorMessage);
+        throw new Error(errorMessage);
+      }
+      return true;
     },
     fetchMintKeys: async function (mint: Mint): Promise<Mint> {
       try {
         const mintClass = new MintClass(mint);
         const keysets = await this.fetchMintKeysets(mint);
         if (keysets.length > 0) {
+          // check for keyset id collisions with other mints
+          await this.checkForMintKeysetIdCollisions(mint, keysets);
           // store keysets in mint and update local storage
           // TODO: do not overwrite anykeyset, but append new keysets and update existing ones
           this.mints.filter((m) => m.url === mint.url)[0].keysets = keysets;
@@ -522,7 +550,7 @@ export const useMintsStore = defineStore("mints", {
         console.error(error);
         try {
           // notifyApiError(error, this.t("wallet.mint.notifications.could_not_get_keys"));
-        } catch {}
+        } catch { }
         throw error;
       }
     },
@@ -536,7 +564,7 @@ export const useMintsStore = defineStore("mints", {
         console.error(error);
         try {
           // notifyApiError(error, this.t("wallet.mint.notifications.could_not_get_keysets"));
-        } catch {}
+        } catch { }
         throw error;
       }
     },
