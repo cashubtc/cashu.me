@@ -21,6 +21,7 @@ import { useI18n } from "vue-i18n";
 import { i18n } from "src/boot/i18n";
 import { useSettingsStore } from "./settings";
 import { useNostrMintBackupStore } from "./nostrMintBackup";
+import { bytesToHex } from "@noble/hashes/utils"; // already an installed dependency
 
 export type Mint = {
   url: string;
@@ -499,14 +500,20 @@ export const useMintsStore = defineStore("mints", {
         allKeysets.map((k) => k.id).includes(k.id)
       );
       // perform the same check for the integer representation of the keyset id
-      const collisionsBigInt = keysets.filter((k) => {
-        const keysetIdBigInt = BigInt(`0x${k.id}`) % BigInt(2 ** 31 - 1);
-        return allKeysets
-          .map((k) => BigInt(`0x${k.id}`) % BigInt(2 ** 31 - 1))
-          .includes(keysetIdBigInt);
-      });
-
-      if (collisions.length > 0 || collisionsBigInt.length > 0) {
+      function keysetIdToBigInt(id: string): bigint {
+        if (/^[0-9a-fA-F]+$/.test(id)) {
+          return BigInt(`0x${id}`) % BigInt(2 ** 31 - 1);
+        } else {
+          const bin = atob(id);
+          const hex = bytesToHex(new TextEncoder().encode(bin));
+          return BigInt(`0x${hex}`) % BigInt(2 ** 31 - 1);
+        }
+      }
+      const allKeysetsIdsBigInt = allKeysets.map((k) => keysetIdToBigInt(k.id));
+      const hasCollisions = keysets.some((k) =>
+        allKeysetsIdsBigInt.includes(keysetIdToBigInt(k.id))
+      );
+      if (hasCollisions) {
         const errorMessage = this.t(
           "wallet.mint.notifications.mint_validation_error"
         );
