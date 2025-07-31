@@ -22,6 +22,21 @@ export function ipfsToGateway(url: string): string {
   return url;
 }
 
+export function normalizeNostrEventUrl(url: string): string {
+  const match = url
+    .trim()
+    .match(/^https:\/\/(primal\.net|snort\.social)\/e\/([a-z0-9]+)/i);
+  if (match) {
+    const [, host, id] = match;
+    return `https://${host}/e/${id}?embed=1`;
+  }
+  return url;
+}
+
+export function isNostrEventUrl(url: string): boolean {
+  return /^https:\/\/(primal\.net|snort\.social)\/e\/[a-z0-9]+/i.test(url.trim());
+}
+
 export function extractIframeSrc(input: string): string {
   const match = input
     .trim()
@@ -31,12 +46,12 @@ export function extractIframeSrc(input: string): string {
 
 export function normalizeMediaUrl(url: string): string {
   const cleaned = extractIframeSrc(url);
-  return normalizeYouTube(ipfsToGateway(cleaned));
+  return normalizeYouTube(ipfsToGateway(normalizeNostrEventUrl(cleaned)));
 }
 
 export function determineMediaType(
   url: string,
-): 'youtube' | 'video' | 'audio' | 'image' | 'iframe' {
+): 'youtube' | 'video' | 'audio' | 'image' | 'iframe' | 'nostr' {
   const lower = url.toLowerCase();
   if (lower.includes('youtube.com/embed/')) {
     return 'youtube';
@@ -49,6 +64,9 @@ export function determineMediaType(
   }
   if (/(\.png|\.jpe?g|\.gif|\.svg|\.webp|\.bmp|\.avif)(\?.*)?$/.test(lower)) {
     return 'image';
+  }
+  if (isNostrEventUrl(lower)) {
+    return 'nostr';
   }
   return 'iframe';
 }
