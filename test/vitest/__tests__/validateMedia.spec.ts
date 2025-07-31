@@ -4,6 +4,7 @@ import {
   normalizeYouTube,
   ipfsToGateway,
   normalizeMediaUrl,
+  extractIframeSrc,
   determineMediaType,
   filterValidMedia,
 } from '../../../src/utils/validateMedia';
@@ -31,11 +32,18 @@ describe('validateMedia', () => {
     expect(normalizeMediaUrl(url)).toBe('https://nftstorage.link/ipfs/bafy123/file.png');
   });
 
+  it('parses iframe snippets', () => {
+    const snippet = '<iframe src="https://example.com/embed"></iframe>';
+    expect(extractIframeSrc(snippet)).toBe('https://example.com/embed');
+    expect(normalizeMediaUrl(snippet)).toBe('https://example.com/embed');
+  });
+
   it('detects media type', () => {
     expect(determineMediaType('https://example.com/video.mp4')).toBe('video');
     expect(determineMediaType('https://example.com/song.mp3')).toBe('audio');
     expect(determineMediaType('https://www.youtube.com/embed/id')).toBe('youtube');
     expect(determineMediaType('https://example.com/image.png')).toBe('image');
+    expect(determineMediaType('https://example.com/page')).toBe('iframe');
   });
 
   it('filters invalid media entries', () => {

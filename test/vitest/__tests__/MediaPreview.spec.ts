@@ -17,4 +17,10 @@ describe('MediaPreview component', () => {
     const wrapper = mount(MediaPreview, { props: { url: 'https://example.com/movie.mp4' } });
     expect(wrapper.find('video').exists()).toBe(true);
   });
+
+  it('renders generic iframe for unknown url', () => {
+    const wrapper = mount(MediaPreview, { props: { url: 'https://example.com/page' } });
+    const iframes = wrapper.findAll('iframe');
+    expect(iframes.length).toBe(1);
+  });
 });
