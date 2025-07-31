@@ -1,26 +1,20 @@
 <template>
   <div v-if="src">
-    <img v-if="type === 'image'" :src="src" class="q-mb-sm" />
-    <iframe
-      v-else-if="type === 'youtube'"
-      :src="src"
-      frameborder="0"
-      allowfullscreen
-      class="q-mb-sm"
-    ></iframe>
-    <iframe
-      v-else-if="type === 'iframe'"
-      :src="src"
-      frameborder="0"
-      class="q-mb-sm"
-    ></iframe>
-    <iframe
-      v-else-if="type === 'nostr'"
-      :src="src"
-      frameborder="0"
-      class="q-mb-sm"
-    ></iframe>
-    <video v-else-if="type === 'video'" :src="src" controls class="q-mb-sm"></video>
+    <div v-if="type === 'image'" class="media-preview-container q-mb-sm">
+      <img :src="src" />
+    </div>
+    <div v-else-if="type === 'youtube'" class="media-preview-container q-mb-sm">
+      <iframe :src="src" frameborder="0" allowfullscreen></iframe>
+    </div>
+    <div v-else-if="type === 'iframe'" class="media-preview-container q-mb-sm">
+      <iframe :src="src" frameborder="0"></iframe>
+    </div>
+    <div v-else-if="type === 'nostr'" class="media-preview-container q-mb-sm">
+      <iframe :src="src" frameborder="0"></iframe>
+    </div>
+    <div v-else-if="type === 'video'" class="media-preview-container q-mb-sm">
+      <video :src="src" controls></video>
+    </div>
     <audio v-else-if="type === 'audio'" :src="src" controls class="q-mb-sm"></audio>
   </div>
 </template>
@@ -43,4 +37,4 @@ const src = computed(() => {
 const type = computed(() => (src.value ? determineMediaType(src.value) : 'image'));
 </script>
 
-<style scoped></style>
+<style lang="scss" src="../css/media-preview.scss" scoped></style>
