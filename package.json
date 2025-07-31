@@ -5,6 +5,7 @@
   "productName": "Cashu.me",
   "author": "cashu.me",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "quasar dev",
     "build": "quasar build",
@@ -13,8 +14,8 @@
     "lint": "eslint --ext .js,.vue ./",
     "format": "prettier --write .",
     "checkformat": "prettier --check .",
-    "test": "vitest",
-    "test:ci": "vitest run",
+    "test": "node --experimental-vm-modules node_modules/vitest/vitest.mjs",
+    "test:ci": "node --experimental-vm-modules node_modules/vitest/vitest.mjs run",
     "types": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
@@ -59,6 +60,7 @@
     "@noble/curves": "^1.9.6",
     "@noble/secp256k1": "^2.3.0",
     "@quasar/app-vite": "^2.3.0",
+    "@quasar/vite-plugin": "^1.10.0",
     "@types/node": "^20.12.11",
     "@types/uuid": "^10.0.0",
     "@typescript-eslint/eslint-plugin": "^5.62.0",
