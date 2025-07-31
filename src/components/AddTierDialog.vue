@@ -71,6 +71,49 @@
           dense
           class="q-mb-sm"
         />
+        <div class="q-mt-md">
+          <div class="row items-center justify-between q-mb-sm">
+            <div class="text-subtitle2">Media Preview</div>
+            <q-btn flat dense icon="add" label="Add Media" @click="addMedia" />
+          </div>
+          <div v-for="(m, idx) in localTier.media" :key="idx" class="q-mb-md">
+            <div class="row items-center q-col-gutter-sm">
+              <q-select
+                v-model="m.type"
+                :options="mediaTypes"
+                dense
+                outlined
+                class="col-2"
+              />
+              <q-input
+                v-model="m.url"
+                label="URL"
+                outlined
+                dense
+                class="col"
+                :error="m.url ? !isTrustedUrl(m.url) : false"
+                error-message="Invalid URL"
+              />
+              <q-input
+                v-model="m.title"
+                label="Title"
+                outlined
+                dense
+                class="col-3"
+              />
+              <q-icon
+                name="delete"
+                class="cursor-pointer"
+                @click="removeMedia(idx)"
+              />
+            </div>
+            <MediaPreview
+              v-if="m.url && isTrustedUrl(m.url)"
+              :url="m.url"
+              class="q-mt-sm"
+            />
+          </div>
+        </div>
       </q-card-section>
       <q-card-actions align="between" class="q-pt-none">
         <q-btn flat color="primary" @click="save">{{
@@ -92,10 +135,12 @@ import { notifySuccess, notifyError } from "src/js/notify";
 import { useNostrStore } from "stores/nostr";
 import { usePriceStore } from "stores/price";
 import { useUiStore } from "stores/ui";
-import { filterValidMedia } from "src/utils/validateMedia";
+import MediaPreview from "./MediaPreview.vue";
+import { filterValidMedia, isTrustedUrl } from "src/utils/validateMedia";
 
 export default defineComponent({
   name: "AddTierDialog",
+  components: { MediaPreview },
   props: {
     modelValue: {
       type: Boolean,
@@ -118,12 +163,30 @@ export default defineComponent({
       set: (val) => emit("update:modelValue", val),
     });
 
-    const localTier = reactive<Partial<Tier>>({ ...props.tier });
+    const localTier = reactive<Partial<Tier>>({
+      media: [],
+      ...props.tier,
+    });
+
+    const mediaTypes = ["image", "video", "audio"] as const;
+
+    function addMedia() {
+      if (!localTier.media) localTier.media = [];
+      localTier.media.push({ url: "", type: "image", title: "" });
+    }
+
+    function removeMedia(idx: number) {
+      if (!localTier.media) return;
+      localTier.media.splice(idx, 1);
+    }
 
     watch(
       () => props.tier,
       (val) => {
         Object.assign(localTier, val);
+        if (!val.media) {
+          localTier.media = [];
+        }
       },
       { immediate: true, deep: true },
     );
@@ -149,9 +212,12 @@ export default defineComponent({
           );
           return;
         }
+        if (localTier.media) {
+          localTier.media = filterValidMedia(localTier.media);
+        }
         await creatorHub.addOrUpdateTier({
           ...localTier,
-          media: localTier.media ? filterValidMedia(localTier.media) : undefined,
+          media: localTier.media,
         });
         await creatorHub.publishTierDefinitions();
         notifySuccess("Tier saved & published");
@@ -166,7 +232,17 @@ export default defineComponent({
     const formatCurrency = (amount: number, unit: string) =>
       uiStore.formatCurrency(amount, unit);
 
-    return { showLocal, localTier, save, bitcoinPrice, formatCurrency };
+    return {
+      showLocal,
+      localTier,
+      save,
+      bitcoinPrice,
+      formatCurrency,
+      addMedia,
+      removeMedia,
+      mediaTypes,
+      isTrustedUrl,
+    };
   },
 });
 </script>
