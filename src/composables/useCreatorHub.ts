@@ -139,6 +139,9 @@ export function useCreatorHub() {
     }
   }
 
+  async function saveProfile() {
+    await publishFullProfile();
+  }
 
   function addTier() {
     currentTier.value = {
@@ -211,6 +214,7 @@ export function useCreatorHub() {
     logout,
     initPage,
     publishFullProfile,
+    saveProfile,
     addTier,
     editTier,
     confirmDelete,
