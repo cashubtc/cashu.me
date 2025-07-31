@@ -1,5 +1,10 @@
 import { describe, it, expect } from 'vitest';
-import { isTrustedUrl, normalizeYouTube, determineMediaType } from '../../../src/utils/validateMedia';
+import {
+  isTrustedUrl,
+  normalizeYouTube,
+  determineMediaType,
+  filterValidMedia,
+} from '../../../src/utils/validateMedia';
 
 describe('validateMedia', () => {
   it('accepts trusted schemes', () => {
@@ -23,5 +28,14 @@ describe('validateMedia', () => {
     expect(determineMediaType('https://example.com/song.mp3')).toBe('audio');
     expect(determineMediaType('https://www.youtube.com/embed/id')).toBe('youtube');
     expect(determineMediaType('https://example.com/image.png')).toBe('image');
+  });
+
+  it('filters invalid media entries', () => {
+    const media = filterValidMedia([
+      { url: '' },
+      { url: 'http://bad.com' },
+      { url: 'https://good.com/ok.png' },
+    ]);
+    expect(media).toEqual([{ url: 'https://good.com/ok.png' }]);
   });
 });

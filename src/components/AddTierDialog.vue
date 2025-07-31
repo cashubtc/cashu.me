@@ -92,6 +92,7 @@ import { notifySuccess, notifyError } from "src/js/notify";
 import { useNostrStore } from "stores/nostr";
 import { usePriceStore } from "stores/price";
 import { useUiStore } from "stores/ui";
+import { filterValidMedia } from "src/utils/validateMedia";
 
 export default defineComponent({
   name: "AddTierDialog",
@@ -128,6 +129,18 @@ export default defineComponent({
     );
 
     const save = async () => {
+      if (!localTier.name || !localTier.name.trim()) {
+        notifyError("Tier name is required");
+        return;
+      }
+      if (!localTier.description || !localTier.description.trim()) {
+        notifyError("Description is required");
+        return;
+      }
+      if (!localTier.price_sats || localTier.price_sats <= 0) {
+        notifyError("Price must be a positive number");
+        return;
+      }
       try {
         await nostr.initSignerIfNotSet();
         if (!nostr.signer) {
@@ -136,7 +149,10 @@ export default defineComponent({
           );
           return;
         }
-        await creatorHub.addOrUpdateTier({ ...localTier });
+        await creatorHub.addOrUpdateTier({
+          ...localTier,
+          media: localTier.media ? filterValidMedia(localTier.media) : undefined,
+        });
         await creatorHub.publishTierDefinitions();
         notifySuccess("Tier saved & published");
         emit("update:modelValue", false);

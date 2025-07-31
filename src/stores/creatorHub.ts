@@ -14,6 +14,7 @@ import { useCreatorProfileStore } from "./creatorProfile";
 import { db } from "./dexie";
 import { v4 as uuidv4 } from "uuid";
 import { notifySuccess, notifyError } from "src/js/notify";
+import { filterValidMedia } from "src/utils/validateMedia";
 import { useNdk } from "src/composables/useNdk";
 import type { Tier, TierMedia } from "./types";
 
@@ -114,7 +115,7 @@ export const useCreatorHubStore = defineStore("creatorHub", {
         ...(tier.benefits || (tier as any).perks
           ? { benefits: tier.benefits || [(tier as any).perks] }
           : {}),
-        media: tier.media ? [...tier.media] : [],
+        media: tier.media ? filterValidMedia(tier.media as TierMedia[]) : [],
       };
       this.tiers[id] = newTier;
       if (!this.tierOrder.includes(id)) {
@@ -134,7 +135,9 @@ export const useCreatorHubStore = defineStore("creatorHub", {
         ...(updates.benefits === undefined && (updates as any).perks
           ? { benefits: [(updates as any).perks] }
           : {}),
-        media: updates.media ? [...updates.media] : existing.media,
+        media: updates.media
+          ? filterValidMedia(updates.media as TierMedia[])
+          : existing.media,
       };
     },
     async addOrUpdateTier(data: Partial<Tier>) {
@@ -170,6 +173,7 @@ export const useCreatorHubStore = defineStore("creatorHub", {
               ...t,
               price_sats: t.price_sats ?? t.price ?? 0,
               ...(t.perks && !t.benefits ? { benefits: [t.perks] } : {}),
+              media: t.media ? filterValidMedia(t.media) : [],
             };
             obj[tier.id] = tier;
           });
@@ -190,7 +194,7 @@ export const useCreatorHubStore = defineStore("creatorHub", {
       const tiersArray = this.getTierArray().map((t) => ({
         ...toRaw(t),
         price: t.price_sats,
-        media: t.media ? [...t.media] : [],
+        media: t.media ? filterValidMedia(t.media) : [],
       }));
       const nostr = useNostrStore();
 

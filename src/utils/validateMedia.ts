@@ -1,3 +1,5 @@
+import type { TierMedia } from 'stores/types';
+
 export function isTrustedUrl(url: string): boolean {
   return /^(https:\/\/|ipfs:\/\/|nostr:)/i.test(url.trim());
 }
@@ -28,4 +30,10 @@ export function determineMediaType(url: string): 'youtube' | 'video' | 'audio' |
     return 'video';
   }
   return 'image';
+}
+
+export function filterValidMedia(media: TierMedia[] = []): TierMedia[] {
+  return media
+    .filter((m) => m.url && isTrustedUrl(m.url))
+    .map((m) => ({ ...m, url: normalizeMediaUrl(m.url) }));
 }
