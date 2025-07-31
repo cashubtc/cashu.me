@@ -53,6 +53,9 @@ export function useCreatorHub() {
   const showTierDialog = ref(false);
   const currentTier = ref<Partial<Tier>>({});
   const publishing = ref(false);
+  const loadingProfile = ref(false);
+  const loadingNutzap = ref(false);
+  const loadingTiers = ref(false);
   const npub = computed(() =>
     store.loggedInNpub ? nip19.npubEncode(store.loggedInNpub) : ''
   );
@@ -83,37 +86,61 @@ export function useCreatorHub() {
   async function initPage() {
     if (!store.loggedInNpub) return;
     await nostr.initSignerIfNotSet();
-    const p = await nostr.getProfile(store.loggedInNpub);
-    if (p) profileStore.setProfile(p);
-    if (profileStore.mints.length) {
-      profileMints.value = [...profileStore.mints];
-    }
-    if (profileStore.relays.length) {
-      profileRelays.value = [...profileStore.relays];
-    }
-    let existing = null;
-    try {
-      existing = await fetchNutzapProfile(store.loggedInNpub);
-    } catch (e: any) {
-      if (e instanceof RelayConnectionError) {
-        notifyError('Unable to connect to Nostr relays');
-        return;
+    loadingProfile.value = true;
+    loadingNutzap.value = true;
+    loadingTiers.value = true;
+
+    const profilePromise = nostr
+      .getProfile(store.loggedInNpub)
+      .then((p) => {
+        if (p) profileStore.setProfile(p);
+        if (profileStore.mints.length) {
+          profileMints.value = [...profileStore.mints];
+        }
+        if (profileStore.relays.length) {
+          profileRelays.value = [...profileStore.relays];
+        }
+      })
+      .finally(() => {
+        loadingProfile.value = false;
+      });
+
+    const nutzapPromise = (async () => {
+      let existing = null;
+      try {
+        existing = await fetchNutzapProfile(store.loggedInNpub);
+      } catch (e: any) {
+        if (e instanceof RelayConnectionError) {
+          notifyError('Unable to connect to Nostr relays');
+          return;
+        }
+        throw e;
       }
-      throw e;
-    }
-    if (existing) {
-      profilePub.value = existing.p2pkPubkey;
-      profileMints.value = [...existing.trustedMints];
-      profileRelays.value = existing.relays ? [...existing.relays] : [...nostr.relays];
-    } else {
-      if (!profileStore.relays.length) {
-        profileRelays.value = [...nostr.relays];
+      if (existing) {
+        profilePub.value = existing.p2pkPubkey;
+        profileMints.value = [...existing.trustedMints];
+        profileRelays.value = existing.relays
+          ? [...existing.relays]
+          : [...nostr.relays];
+      } else {
+        if (!profileStore.relays.length) {
+          profileRelays.value = [...nostr.relays];
+        }
+        if (p2pkStore.firstKey) profilePub.value = p2pkStore.firstKey.publicKey;
+        if (!profileStore.mints.length && mintsStore.mints.length > 0)
+          profileMints.value = mintsStore.mints.map((m) => m.url);
       }
-      if (p2pkStore.firstKey) profilePub.value = p2pkStore.firstKey.publicKey;
-      if (!profileStore.mints.length && mintsStore.mints.length > 0)
-        profileMints.value = mintsStore.mints.map((m) => m.url);
-    }
-    await store.loadTiersFromNostr(store.loggedInNpub);
+    })().finally(() => {
+      loadingNutzap.value = false;
+    });
+
+    const tiersPromise = store
+      .loadTiersFromNostr(store.loggedInNpub)
+      .finally(() => {
+        loadingTiers.value = false;
+      });
+
+    await Promise.all([profilePromise, nutzapPromise, tiersPromise]);
     profileStore.markClean();
   }
 
@@ -204,6 +231,9 @@ export function useCreatorHub() {
     showTierDialog,
     currentTier,
     publishing,
+    loadingProfile,
+    loadingNutzap,
+    loadingTiers,
     npub,
     isDirty,
     loginNip07,
