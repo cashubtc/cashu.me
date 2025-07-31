@@ -25,6 +25,14 @@
       </template>
       <q-card-section>
         {{ tierLocal.description }}
+        <div v-if="tierLocal.media && tierLocal.media.length" class="q-mt-sm">
+          <MediaPreview
+            v-for="(m, idx) in tierLocal.media"
+            :key="idx"
+            :url="m.url"
+            class="q-mt-sm"
+          />
+        </div>
       </q-card-section>
     </q-expansion-item>
   </q-card>
@@ -33,6 +41,7 @@
 <script setup lang="ts">
 import { reactive, watch } from "vue";
 import type { Tier } from "stores/creatorHub";
+import MediaPreview from "./MediaPreview.vue";
 
 const props = defineProps<{ tier: Tier }>();
 const emit = defineEmits(["edit", "delete", "update:tier"]);

@@ -120,7 +120,7 @@ describe("publishTierDefinitions", () => {
   it("creates a 30000 event with correct tags and content", async () => {
     const store = useCreatorHubStore();
     store.tiers = {
-      t1: { id: "t1", name: "Tier", price: 1, description: "", welcomeMessage: "" },
+      t1: { id: "t1", name: "Tier", price: 1, description: "", welcomeMessage: "", media: [] },
     } as any;
     store.tierOrder = ["t1"];
 
@@ -132,7 +132,7 @@ describe("publishTierDefinitions", () => {
     expect(ev.tags).toEqual([["d", "tiers"]]);
     expect(ev.content).toBe(
       JSON.stringify([
-        { id: "t1", name: "Tier", price: 1, description: "", welcomeMessage: "" },
+        { id: "t1", name: "Tier", price: 1, description: "", welcomeMessage: "", media: [] },
       ])
     );
     expect(signMock).toHaveBeenCalledWith(nostrStoreMock.signer);

@@ -16,12 +16,18 @@ import { v4 as uuidv4 } from "uuid";
 import { notifySuccess, notifyError } from "src/js/notify";
 import { useNdk } from "src/composables/useNdk";
 
+export interface TierMedia {
+  url: string;
+  type?: "image" | "video" | "audio";
+}
+
 export interface Tier {
   id: string;
   name: string;
   price: number;
   description: string;
   welcomeMessage?: string;
+  media?: TierMedia[];
 }
 
 const TIER_DEFINITIONS_KIND = 30000;
@@ -117,6 +123,7 @@ export const useCreatorHubStore = defineStore("creatorHub", {
         price: tier.price || 0,
         description: (tier as any).description || (tier as any).perks || "",
         welcomeMessage: tier.welcomeMessage || "",
+        media: tier.media ? [...tier.media] : [],
       };
       this.tiers[id] = newTier;
       if (!this.tierOrder.includes(id)) {
@@ -127,7 +134,11 @@ export const useCreatorHubStore = defineStore("creatorHub", {
     updateTier(id: string, updates: Partial<Tier>) {
       const existing = this.tiers[id];
       if (!existing) return;
-      this.tiers[id] = { ...existing, ...updates };
+      this.tiers[id] = {
+        ...existing,
+        ...updates,
+        media: updates.media ? [...updates.media] : existing.media,
+      };
     },
     async addOrUpdateTier(data: Partial<Tier>) {
       if (data.id && this.tiers[data.id]) {
@@ -174,7 +185,10 @@ export const useCreatorHubStore = defineStore("creatorHub", {
     },
 
     async publishTierDefinitions() {
-      const tiersArray = this.getTierArray().map((t) => ({ ...toRaw(t) }));
+      const tiersArray = this.getTierArray().map((t) => ({
+        ...toRaw(t),
+        media: t.media ? [...t.media] : [],
+      }));
       const nostr = useNostrStore();
 
       if (!nostr.signer) {

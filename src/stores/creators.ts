@@ -14,6 +14,7 @@ import { useNdk } from "src/composables/useNdk";
 import { nip19 } from "nostr-tools";
 import { Event as NostrEvent } from "nostr-tools";
 import { notifyWarning } from "src/js/notify";
+import type { TierMedia } from "./creatorHub";
 
 interface Tier {
   id: string;
@@ -21,6 +22,7 @@ interface Tier {
   price_sats: number;
   description: string;
   benefits: string[];
+  media?: TierMedia[];
 }
 
 export const FEATURED_CREATORS = [
@@ -195,6 +197,7 @@ export const useCreatorsStore = defineStore("creators", {
         this.tiersMap[hex] = cached.tiers.map((t: any) => ({
           ...t,
           price_sats: t.price_sats ?? t.price ?? 0,
+          media: t.media ? [...t.media] : [],
         }));
         void rawEvent; // parsed for potential use
       }
@@ -259,6 +262,7 @@ export const useCreatorsStore = defineStore("creators", {
           const tiersArray: Tier[] = JSON.parse(event.content).map((t: any) => ({
             ...t,
             price_sats: t.price_sats ?? t.price ?? 0,
+            media: t.media ? [...t.media] : [],
           }));
           this.tiersMap[hex] = tiersArray;
           await db.creatorsTierDefinitions.put({
@@ -293,6 +297,7 @@ export const useCreatorsStore = defineStore("creators", {
             const tiersArray: Tier[] = JSON.parse(event.content).map((t: any) => ({
               ...t,
               price_sats: t.price_sats ?? t.price ?? 0,
+              media: t.media ? [...t.media] : [],
             }));
             this.tiersMap[hex] = tiersArray;
             await db.creatorsTierDefinitions.put({
