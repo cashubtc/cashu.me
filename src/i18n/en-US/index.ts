@@ -1675,7 +1675,6 @@ export const messages = {
   },
   creatorHub: {
     publish: "Publish Profile",
-    saveDraft: "Save Draft",
     profileHeader: "Profile details",
     endpointsHeader: "Endpoints",
   },
