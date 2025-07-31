@@ -137,6 +137,13 @@ mint URLs to use.
 Creators can attach media links to each tier so supporters can preview what they’ll receive. Simply add trusted URLs (e.g. YouTube, IPFS, or other HTTPS resources) when defining your tiers in the Creator Hub. The app doesn’t host any files itself – it only stores the links you provide and renders previews from those sources. 
 
 You can also supply raw `<iframe>` snippets for custom embeds or include a `nostr:` link that references an event ID. If a `nostr:` link is provided, the preview displays the linked event’s content. These previews appear both on a creator’s profile and when browsing tiers from the **find creators** page.
+**Preview layout tips**
+
+- Previews are displayed inside a responsive container that aims for a 16:9 aspect ratio.
+- Images and videos are scaled to fit while maintaining their own ratio.
+- Content with very different dimensions may be letterboxed or cropped depending on the source embed.
+
+You can access this documentation from the Creator Hub: look for the "Learn more" link next to the Media Preview help icon when editing tiers.
 
 Example `kind:30000` event content:
 
