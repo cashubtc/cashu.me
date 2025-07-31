@@ -14,8 +14,15 @@ export function normalizeYouTube(url: string): string {
   return url;
 }
 
+export function ipfsToGateway(url: string): string {
+  if (url.trim().toLowerCase().startsWith('ipfs://')) {
+    return url.replace(/^ipfs:\/\//i, 'https://nftstorage.link/ipfs/');
+  }
+  return url;
+}
+
 export function normalizeMediaUrl(url: string): string {
-  return normalizeYouTube(url.trim());
+  return normalizeYouTube(ipfsToGateway(url.trim()));
 }
 
 export function determineMediaType(url: string): 'youtube' | 'video' | 'audio' | 'image' {

@@ -2,6 +2,8 @@ import { describe, it, expect } from 'vitest';
 import {
   isTrustedUrl,
   normalizeYouTube,
+  ipfsToGateway,
+  normalizeMediaUrl,
   determineMediaType,
   filterValidMedia,
 } from '../../../src/utils/validateMedia';
@@ -21,6 +23,12 @@ describe('validateMedia', () => {
   it('normalizes youtube links', () => {
     const url = 'https://youtu.be/abcd1234efg';
     expect(normalizeYouTube(url)).toBe('https://www.youtube.com/embed/abcd1234efg');
+  });
+
+  it('converts ipfs links to gateway', () => {
+    const url = 'ipfs://bafy123/file.png';
+    expect(ipfsToGateway(url)).toBe('https://nftstorage.link/ipfs/bafy123/file.png');
+    expect(normalizeMediaUrl(url)).toBe('https://nftstorage.link/ipfs/bafy123/file.png');
   });
 
   it('detects media type', () => {
