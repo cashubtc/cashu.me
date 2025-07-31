@@ -78,6 +78,14 @@
                   </div>
                 </div>
                 <div class="q-mt-sm">{{ t.description }}</div>
+                <div v-if="t.media && t.media.length">
+                  <MediaPreview
+                    v-for="(m, idx) in t.media"
+                    :key="idx"
+                    :url="m.url"
+                    class="q-mt-sm"
+                  />
+                </div>
                 <ul class="q-pl-md q-mt-xs text-caption">
                   <li v-for="b in t.benefits" :key="b">{{ b }}</li>
                 </ul>
@@ -110,6 +118,9 @@ import {
 import DonateDialog from "components/DonateDialog.vue";
 import SubscribeDialog from "components/SubscribeDialog.vue";
 import SendTokenDialog from "components/SendTokenDialog.vue";
+import MediaPreview from "components/MediaPreview.vue";
+
+defineOptions({ components: { MediaPreview } });
 import { useSendTokensStore } from "stores/sendTokensStore";
 import { useDonationPresetsStore } from "stores/donationPresets";
 import { useCreatorsStore } from "stores/creators";
