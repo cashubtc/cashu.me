@@ -132,6 +132,27 @@ mint URLs to use.
 3. Supporter selects the monthly amount and number of periods.
 4. Fundstr sends one token per period that is irrevocably locked to the creator's pubkey until the specified `locktime`.
 
+### Media Previews for Tiers
+
+Creators can attach media links to each tier so supporters can preview what they’ll receive. Simply add trusted URLs (e.g. YouTube, IPFS, or other HTTPS resources) when defining your tiers in the Creator Hub. The app doesn’t host any files itself – it only stores the links you provide and renders previews from those sources.
+
+Example `kind:30000` event content:
+
+```json
+[
+  {
+    "id": "gold",
+    "name": "Gold Tier",
+    "price_sats": 10000,
+    "description": "Access to behind-the-scenes posts",
+    "media": [
+      { "url": "https://www.youtube.com/embed/abcd1234" },
+      { "url": "ipfs://bafybeibxyz/file.png", "type": "image" }
+    ]
+  }
+]
+```
+
 ## Roadmap & Future Ideas
 
 - Advanced creator discovery with search, filters and Nostr recommendations
