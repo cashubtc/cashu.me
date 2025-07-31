@@ -1,7 +1,8 @@
 import type { TierMedia } from 'stores/types';
 
 export function isTrustedUrl(url: string): boolean {
-  return /^(https:\/\/|ipfs:\/\/|nostr:)/i.test(url.trim());
+  const cleaned = extractIframeSrc(url);
+  return /^(https:\/\/|ipfs:\/\/|nostr:)/i.test(cleaned.trim());
 }
 
 export function normalizeYouTube(url: string): string {
@@ -21,11 +22,21 @@ export function ipfsToGateway(url: string): string {
   return url;
 }
 
-export function normalizeMediaUrl(url: string): string {
-  return normalizeYouTube(ipfsToGateway(url.trim()));
+export function extractIframeSrc(input: string): string {
+  const match = input
+    .trim()
+    .match(/<iframe[^>]*src=['"]([^'"]+)['"][^>]*>/i);
+  return match ? match[1].trim() : input.trim();
 }
 
-export function determineMediaType(url: string): 'youtube' | 'video' | 'audio' | 'image' {
+export function normalizeMediaUrl(url: string): string {
+  const cleaned = extractIframeSrc(url);
+  return normalizeYouTube(ipfsToGateway(cleaned));
+}
+
+export function determineMediaType(
+  url: string,
+): 'youtube' | 'video' | 'audio' | 'image' | 'iframe' {
   const lower = url.toLowerCase();
   if (lower.includes('youtube.com/embed/')) {
     return 'youtube';
@@ -36,11 +47,14 @@ export function determineMediaType(url: string): 'youtube' | 'video' | 'audio' |
   if (/(\.mp4|\.webm|\.mov|\.ogv)(\?.*)?$/.test(lower)) {
     return 'video';
   }
-  return 'image';
+  if (/(\.png|\.jpe?g|\.gif|\.svg|\.webp|\.bmp|\.avif)(\?.*)?$/.test(lower)) {
+    return 'image';
+  }
+  return 'iframe';
 }
 
 export function filterValidMedia(media: TierMedia[] = []): TierMedia[] {
   return media
-    .filter((m) => m.url && isTrustedUrl(m.url))
-    .map((m) => ({ ...m, url: normalizeMediaUrl(m.url) }));
+    .map((m) => ({ ...m, url: normalizeMediaUrl(m.url) }))
+    .filter((m) => m.url && isTrustedUrl(m.url));
 }
