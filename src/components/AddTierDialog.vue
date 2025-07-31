@@ -80,6 +80,12 @@
                 :text="$t('AddTierDialog.helper.media_preview')"
                 :close-label="$t('global.actions.close.label')"
               />
+              <a
+                href="https://github.com/cashu-community/cashu.me/blob/main/README.md#media-previews-for-tiers"
+                target="_blank"
+                class="text-primary text-caption q-ml-sm"
+                >Learn more</a
+              >
             </div>
             <q-btn flat dense icon="add" label="Add Media" @click="addMedia" />
           </div>
