@@ -35,7 +35,8 @@
 import { ref, watch } from 'vue';
 import Draggable from 'vuedraggable';
 import TierCard from './TierCard.vue';
-import { useCreatorHubStore, type Tier } from 'stores/creatorHub';
+import { useCreatorHubStore } from 'stores/creatorHub';
+import type { Tier } from 'stores/types';
 import { v4 as uuidv4 } from 'uuid';
 
 const store = useCreatorHubStore();
@@ -57,7 +58,7 @@ function updateOrder() {
 
 function addTier() {
   const id = uuidv4();
-  store.addTier({ id, name: '', price: 0, description: '', welcomeMessage: '' });
+  store.addTier({ id, name: '', price_sats: 0, description: '', welcomeMessage: '' });
 }
 
 function confirmDelete(id: string) {

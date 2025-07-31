@@ -14,15 +14,11 @@ export interface CachedProfileDexie {
   fetchedAt: number;
 }
 
+import type { Tier } from "./types";
+
 export interface CreatorTierDefinition {
   creatorNpub: string;
-  tiers: {
-    id: string;
-    name: string;
-    price_sats: number;
-    description: string;
-    benefits: string[];
-  }[];
+  tiers: Tier[];
   eventId: string;
   updatedAt: number;
   /** Raw Nostr event JSON string */

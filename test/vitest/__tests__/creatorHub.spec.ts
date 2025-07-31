@@ -83,7 +83,7 @@ describe("CreatorHub store", () => {
   it("addTier stores tier and calls saveTier", () => {
     const store = useCreatorHubStore();
     const spy = vi.spyOn(store, "saveTier").mockResolvedValue();
-    store.addTier({ name: "Tier 1", price: 5, perks: "p" });
+    store.addTier({ name: "Tier 1", price_sats: 5, perks: "p" });
     const tier = store.getTierArray()[0];
     expect(tier.name).toBe("Tier 1");
     expect(spy).toHaveBeenCalledWith(tier);
@@ -94,7 +94,7 @@ describe("CreatorHub store", () => {
     const tier = {
       id: "id1",
       name: "T",
-      price: 1,
+      price_sats: 1,
       perks: "p",
       welcomeMessage: "w",
     };
@@ -107,10 +107,10 @@ describe("CreatorHub store", () => {
     store.tiers["id1"] = {
       id: "id1",
       name: "T",
-      price: 1,
+      price_sats: 1,
       description: "",
       welcomeMessage: "",
-    };
+    } as any;
     await store.removeTier("id1");
     expect(store.tiers["id1"]).toBeUndefined();
   });
@@ -120,7 +120,14 @@ describe("publishTierDefinitions", () => {
   it("creates a 30000 event with correct tags and content", async () => {
     const store = useCreatorHubStore();
     store.tiers = {
-      t1: { id: "t1", name: "Tier", price: 1, description: "", welcomeMessage: "", media: [] },
+      t1: {
+        id: "t1",
+        name: "Tier",
+        price_sats: 1,
+        description: "",
+        welcomeMessage: "",
+        media: [],
+      },
     } as any;
     store.tierOrder = ["t1"];
 
@@ -132,7 +139,15 @@ describe("publishTierDefinitions", () => {
     expect(ev.tags).toEqual([["d", "tiers"]]);
     expect(ev.content).toBe(
       JSON.stringify([
-        { id: "t1", name: "Tier", price: 1, description: "", welcomeMessage: "", media: [] },
+        {
+          id: "t1",
+          name: "Tier",
+          price_sats: 1,
+          price: 1,
+          description: "",
+          welcomeMessage: "",
+          media: [],
+        },
       ])
     );
     expect(signMock).toHaveBeenCalledWith(nostrStoreMock.signer);

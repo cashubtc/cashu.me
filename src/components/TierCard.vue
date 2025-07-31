@@ -7,7 +7,7 @@
             <q-icon name="mdi-drag" class="q-mr-sm drag-handle" />
             <div class="text-subtitle2">{{ tierLocal.name || "Tier" }}</div>
             <div class="text-caption text-grey q-ml-sm">
-              {{ tierLocal.price }} sats
+              {{ tierLocal.price_sats }} sats
             </div>
           </div>
           <div class="row items-center">
@@ -40,7 +40,7 @@
 
 <script setup lang="ts">
 import { reactive, watch } from "vue";
-import type { Tier } from "stores/creatorHub";
+import type { Tier } from "stores/types";
 import MediaPreview from "./MediaPreview.vue";
 
 const props = defineProps<{ tier: Tier }>();

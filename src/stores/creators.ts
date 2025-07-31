@@ -14,16 +14,7 @@ import { useNdk } from "src/composables/useNdk";
 import { nip19 } from "nostr-tools";
 import { Event as NostrEvent } from "nostr-tools";
 import { notifyWarning } from "src/js/notify";
-import type { TierMedia } from "./creatorHub";
-
-interface Tier {
-  id: string;
-  name: string;
-  price_sats: number;
-  description: string;
-  benefits: string[];
-  media?: TierMedia[];
-}
+import type { Tier, TierMedia } from "./types";
 
 export const FEATURED_CREATORS = [
   "npub1aljmhjp5tqrw3m60ra7t3u8uqq223d6rdg9q0h76a8djd9m4hmvsmlj82m",
@@ -197,6 +188,7 @@ export const useCreatorsStore = defineStore("creators", {
         this.tiersMap[hex] = cached.tiers.map((t: any) => ({
           ...t,
           price_sats: t.price_sats ?? t.price ?? 0,
+          ...(t.perks && !t.benefits ? { benefits: [t.perks] } : {}),
           media: t.media ? [...t.media] : [],
         }));
         void rawEvent; // parsed for potential use
@@ -262,6 +254,7 @@ export const useCreatorsStore = defineStore("creators", {
           const tiersArray: Tier[] = JSON.parse(event.content).map((t: any) => ({
             ...t,
             price_sats: t.price_sats ?? t.price ?? 0,
+            ...(t.perks && !t.benefits ? { benefits: [t.perks] } : {}),
             media: t.media ? [...t.media] : [],
           }));
           this.tiersMap[hex] = tiersArray;
@@ -297,6 +290,7 @@ export const useCreatorsStore = defineStore("creators", {
             const tiersArray: Tier[] = JSON.parse(event.content).map((t: any) => ({
               ...t,
               price_sats: t.price_sats ?? t.price ?? 0,
+              ...(t.perks && !t.benefits ? { benefits: [t.perks] } : {}),
               media: t.media ? [...t.media] : [],
             }));
             this.tiersMap[hex] = tiersArray;
@@ -324,7 +318,9 @@ export const useCreatorsStore = defineStore("creators", {
     async publishTierDefinitions(tiersArray: Tier[]) {
       const creatorNpub = this.currentUserNpub;
       const created_at = Math.floor(Date.now() / 1000);
-      const content = JSON.stringify(tiersArray);
+      const content = JSON.stringify(
+        tiersArray.map((t) => ({ ...t, price: t.price_sats }))
+      );
 
       const event: Partial<NostrEvent> = {
         pubkey: creatorNpub,

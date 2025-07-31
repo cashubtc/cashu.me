@@ -2,7 +2,8 @@ import { ref, computed, watch, onMounted } from 'vue';
 import { useQuasar } from 'quasar';
 import { storeToRefs } from 'pinia';
 import { nip19 } from 'nostr-tools';
-import { useCreatorHubStore, type Tier } from 'stores/creatorHub';
+import { useCreatorHubStore } from 'stores/creatorHub';
+import type { Tier } from 'stores/types';
 import {
   useNostrStore,
   fetchNutzapProfile,
@@ -143,7 +144,12 @@ export function useCreatorHub() {
   }
 
   function addTier() {
-    currentTier.value = { name: '', price: 0, description: '', welcomeMessage: '' };
+    currentTier.value = {
+      name: '',
+      price_sats: 0,
+      description: '',
+      welcomeMessage: '',
+    };
     showTierDialog.value = true;
   }
 

@@ -25,7 +25,7 @@
           class="q-mb-sm"
         />
         <q-input
-          v-model.number="localTier.price"
+          v-model.number="localTier.price_sats"
           type="number"
           :label="$t('CreatorHub.dashboard.inputs.price.label')"
           outlined
@@ -36,14 +36,14 @@
             <div v-if="bitcoinPrice">
               ~{{
                 formatCurrency(
-                  (bitcoinPrice / 100000000) * localTier.price,
+                  (bitcoinPrice / 100000000) * localTier.price_sats,
                   "USD",
                 )
               }}
               /
               {{
                 formatCurrency(
-                  (bitcoinPrice / 100000000) * localTier.price,
+                  (bitcoinPrice / 100000000) * localTier.price_sats,
                   "EUR",
                 )
               }}
@@ -86,7 +86,8 @@
 
 <script lang="ts">
 import { defineComponent, computed, reactive, watch } from "vue";
-import { Tier, useCreatorHubStore } from "stores/creatorHub";
+import { useCreatorHubStore } from "stores/creatorHub";
+import type { Tier } from "stores/types";
 import { notifySuccess, notifyError } from "src/js/notify";
 import { useNostrStore } from "stores/nostr";
 import { usePriceStore } from "stores/price";

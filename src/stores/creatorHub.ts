@@ -15,20 +15,7 @@ import { db } from "./dexie";
 import { v4 as uuidv4 } from "uuid";
 import { notifySuccess, notifyError } from "src/js/notify";
 import { useNdk } from "src/composables/useNdk";
-
-export interface TierMedia {
-  url: string;
-  type?: "image" | "video" | "audio";
-}
-
-export interface Tier {
-  id: string;
-  name: string;
-  price: number;
-  description: string;
-  welcomeMessage?: string;
-  media?: TierMedia[];
-}
+import type { Tier, TierMedia } from "./types";
 
 const TIER_DEFINITIONS_KIND = 30000;
 
@@ -112,7 +99,7 @@ export const useCreatorHubStore = defineStore("creatorHub", {
         throw e;
       }
     },
-    addTier(tier: Partial<Tier>) {
+    addTier(tier: Partial<Tier> & { price?: number; perks?: string }) {
       let id = tier.id || uuidv4();
       while (this.tiers[id]) {
         id = uuidv4();
@@ -120,9 +107,13 @@ export const useCreatorHubStore = defineStore("creatorHub", {
       const newTier: Tier = {
         id,
         name: tier.name || "",
-        price: tier.price || 0,
-        description: (tier as any).description || (tier as any).perks || "",
+        price_sats:
+          (tier as any).price_sats ?? (tier as any).price ?? 0,
+        description: (tier as any).description || "",
         welcomeMessage: tier.welcomeMessage || "",
+        ...(tier.benefits || (tier as any).perks
+          ? { benefits: tier.benefits || [(tier as any).perks] }
+          : {}),
         media: tier.media ? [...tier.media] : [],
       };
       this.tiers[id] = newTier;
@@ -131,12 +122,18 @@ export const useCreatorHubStore = defineStore("creatorHub", {
       }
       maybeRepublishNutzapProfile();
     },
-    updateTier(id: string, updates: Partial<Tier>) {
+    updateTier(id: string, updates: Partial<Tier> & { price?: number; perks?: string }) {
       const existing = this.tiers[id];
       if (!existing) return;
       this.tiers[id] = {
         ...existing,
         ...updates,
+        ...(updates.price_sats === undefined && updates.price !== undefined
+          ? { price_sats: updates.price }
+          : {}),
+        ...(updates.benefits === undefined && (updates as any).perks
+          ? { benefits: [(updates as any).perks] }
+          : {}),
         media: updates.media ? [...updates.media] : existing.media,
       };
     },
@@ -166,13 +163,18 @@ export const useCreatorHubStore = defineStore("creatorHub", {
       const events = await ndk.fetchEvents(filter);
       events.forEach((ev) => {
         try {
-          const data: Tier[] = JSON.parse(ev.content);
+          const raw: any[] = JSON.parse(ev.content);
           const obj: Record<string, Tier> = {};
-          data.forEach((t) => {
-            obj[t.id] = t;
+          raw.forEach((t) => {
+            const tier: Tier = {
+              ...t,
+              price_sats: t.price_sats ?? t.price ?? 0,
+              ...(t.perks && !t.benefits ? { benefits: [t.perks] } : {}),
+            };
+            obj[tier.id] = tier;
           });
           this.tiers = obj as any;
-          this.tierOrder = data.map((t) => t.id);
+          this.tierOrder = raw.map((t) => t.id);
         } catch (e) {
           console.error(e);
         }
@@ -187,6 +189,7 @@ export const useCreatorHubStore = defineStore("creatorHub", {
     async publishTierDefinitions() {
       const tiersArray = this.getTierArray().map((t) => ({
         ...toRaw(t),
+        price: t.price_sats,
         media: t.media ? [...t.media] : [],
       }));
       const nostr = useNostrStore();

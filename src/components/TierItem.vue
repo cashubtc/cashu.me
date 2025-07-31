@@ -9,7 +9,7 @@
 
 <script setup lang="ts">
 import TierCard from "./TierCard.vue";
-import type { Tier } from "stores/creatorHub";
+import type { Tier } from "stores/types";
 
 const props = defineProps<{ tierData: Tier; saved: boolean }>();
 const emit = defineEmits(["save", "delete", "update:tierData"]);
