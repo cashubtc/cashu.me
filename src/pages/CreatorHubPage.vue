@@ -22,18 +22,12 @@
 <q-splitter v-if="!isMobile" v-model="splitterModel">
   <template #before>
     <q-card class="section-card">
-      <div v-if="loadingProfile || loadingNutzap" class="row justify-center q-pa-md">
-        <q-spinner-hourglass />
-      </div>
-      <CreatorProfileForm v-else />
+      <CreatorProfileForm />
     </q-card>
   </template>
   <template #after>
     <q-card class="section-card">
-      <div v-if="loadingTiers" class="row justify-center q-pa-md">
-        <q-spinner-hourglass />
-      </div>
-      <div v-else>
+      <div>
         <div class="text-h6 q-mb-md">Subscription Tiers</div>
         <Draggable v-model="draggableTiers" item-key="id" handle=".drag-handle" @end="updateOrder">
           <template #item="{ element }">
@@ -61,18 +55,12 @@
   <q-tab-panels v-model="tab" animated>
     <q-tab-panel name="profile">
       <q-card class="section-card">
-        <div v-if="loadingProfile || loadingNutzap" class="row justify-center q-pa-md">
-          <q-spinner-hourglass />
-        </div>
-        <CreatorProfileForm v-else />
+        <CreatorProfileForm />
       </q-card>
     </q-tab-panel>
     <q-tab-panel name="tiers">
       <q-card class="section-card">
-        <div v-if="loadingTiers" class="row justify-center q-pa-md">
-          <q-spinner-hourglass />
-        </div>
-        <div v-else>
+        <div>
           <div class="text-h6 q-mb-md">Subscription Tiers</div>
           <Draggable v-model="draggableTiers" item-key="id" handle=".drag-handle" @end="updateOrder">
             <template #item="{ element }">
@@ -128,9 +116,6 @@ const {
   showTierDialog,
   currentTier,
   publishing,
-  loadingProfile,
-  loadingNutzap,
-  loadingTiers,
   npub,
   loginNip07,
   loginNsec,
