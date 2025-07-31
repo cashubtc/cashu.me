@@ -88,6 +88,7 @@
   v-if="loggedIn"
   :publishing="publishing"
   @publish="publishFullProfile"
+  @save="saveProfile"
 />
 </q-card>
   </q-page>
@@ -121,6 +122,7 @@ const {
   loginNsec,
   logout,
   publishFullProfile,
+  saveProfile,
   addTier,
   editTier,
   confirmDelete,

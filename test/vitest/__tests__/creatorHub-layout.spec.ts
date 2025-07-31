@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { shallowMount, mount } from '@vue/test-utils';
+import { shallowMount } from '@vue/test-utils';
 import * as quasar from 'quasar';
 
 vi.spyOn(quasar, 'useQuasar').mockReturnValue({ screen: { lt: { md: false } } });
@@ -85,17 +85,11 @@ vi.mock('nostr-tools', () => ({
 }));
 
 import CreatorHubPage from '../../../src/pages/CreatorHubPage.vue';
-import PublishBar from '../../../src/components/PublishBar.vue';
 
 describe('CreatorHubPage layout', () => {
   it('renders two section cards and PublishBar on desktop', () => {
     const wrapper = shallowMount(CreatorHubPage);
     expect(wrapper.find('publish-bar-stub').exists()).toBe(true);
-  });
-
-  it('PublishBar shows only publish button', () => {
-    const wrapper = mount(PublishBar, { props: { publishing: false } });
-    expect(wrapper.findAll('button')).toHaveLength(1);
   });
 });
 

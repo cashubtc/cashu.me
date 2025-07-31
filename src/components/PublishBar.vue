@@ -3,6 +3,15 @@
     <div class="q-pa-sm text-center">
       <q-btn
         color="primary"
+        class="q-mr-sm"
+        :loading="publishing"
+        :disable="publishing"
+        @click="emit('save')"
+      >
+        {{ $t('creatorHub.saveDraft') }}
+      </q-btn>
+      <q-btn
+        color="primary"
         outline
         :loading="publishing"
         :disable="publishing"
@@ -16,5 +25,5 @@
 
 <script setup lang="ts">
 const { publishing } = defineProps<{ publishing: boolean }>();
-const emit = defineEmits(['publish']);
+const emit = defineEmits(['publish', 'save']);
 </script>
