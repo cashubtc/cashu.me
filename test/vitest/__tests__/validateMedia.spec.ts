@@ -46,6 +46,11 @@ describe('validateMedia', () => {
     expect(determineMediaType('https://example.com/page')).toBe('iframe');
   });
 
+  it('detects nostr event links', () => {
+    expect(determineMediaType('https://primal.net/e/abc123')).toBe('nostr');
+    expect(determineMediaType('https://snort.social/e/def456')).toBe('nostr');
+  });
+
   it('filters invalid media entries', () => {
     const media = filterValidMedia([
       { url: '' },

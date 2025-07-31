@@ -23,4 +23,9 @@ describe('MediaPreview component', () => {
     const iframes = wrapper.findAll('iframe');
     expect(iframes.length).toBe(1);
   });
+
+  it('renders iframe for nostr event link', () => {
+    const wrapper = mount(MediaPreview, { props: { url: 'https://primal.net/e/abc123' } });
+    expect(wrapper.find('iframe').exists()).toBe(true);
+  });
 });
