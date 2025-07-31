@@ -1364,6 +1364,12 @@ export const messages = {
       },
     },
   },
+  AddTierDialog: {
+    helper: {
+      media_preview:
+        "Supported URL types: HTTPS, IPFS, YouTube, <iframe> snippets and Nostr event links. Only the embedded source URL is stored.",
+    },
+  },
   FindCreators: {
     inputs: {
       search: {

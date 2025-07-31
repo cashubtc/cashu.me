@@ -73,7 +73,14 @@
         />
         <div class="q-mt-md">
           <div class="row items-center justify-between q-mb-sm">
-            <div class="text-subtitle2">Media Preview</div>
+            <div class="row items-center">
+              <div class="text-subtitle2">Media Preview</div>
+              <HelpPopup
+                class="q-ml-xs"
+                :text="$t('AddTierDialog.helper.media_preview')"
+                :close-label="$t('global.actions.close.label')"
+              />
+            </div>
             <q-btn flat dense icon="add" label="Add Media" @click="addMedia" />
           </div>
           <div v-for="(m, idx) in localTier.media" :key="idx" class="q-mb-md">

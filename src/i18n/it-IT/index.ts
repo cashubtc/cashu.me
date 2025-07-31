@@ -1303,6 +1303,12 @@ export default {
       },
     },
   },
+  AddTierDialog: {
+    helper: {
+      media_preview:
+        "Supported URL types: HTTPS, IPFS, YouTube, <iframe> snippets and Nostr event links. Only the embedded source URL is stored.",
+    },
+  },
   BucketManager: {
     tooltips: {
       description: "I bucket servono per categorizzare i token",
