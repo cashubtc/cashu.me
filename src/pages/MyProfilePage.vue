@@ -126,9 +126,9 @@
     >
       <div v-for="tier in tiers" :key="tier.id" class="q-mb-md">
         <div class="text-subtitle1">
-          {{ tier.name }} - {{ tier.price }} sats/month
+          {{ tier.name }} - {{ tier.price_sats }} sats/month
           <span v-if="bitcoinPrice" class="text-caption">
-            ({{ formatFiat(tier.price) }})
+            ({{ formatFiat(tier.price_sats) }})
           </span>
         </div>
         <div
