@@ -54,6 +54,14 @@
           </q-card-section>
           <q-card-section>
             <div class="text-body1 q-mb-sm">{{ t.description }}</div>
+            <div v-if="t.media && t.media.length">
+              <MediaPreview
+                v-for="(m, idx) in t.media"
+                :key="idx"
+                :url="m.url"
+                class="q-mt-sm"
+              />
+            </div>
             <ul class="q-pl-md q-mb-none">
               <li v-for="benefit in t.benefits" :key="benefit">
                 {{ benefit }}
@@ -101,10 +109,11 @@ import SubscriptionReceipt from "components/SubscriptionReceipt.vue";
 import { useI18n } from "vue-i18n";
 import { renderMarkdown as renderMarkdownFn } from "src/js/simple-markdown";
 import PaywalledContent from "components/PaywalledContent.vue";
+import MediaPreview from "components/MediaPreview.vue";
 
 export default defineComponent({
   name: "PublicCreatorProfilePage",
-  components: { PaywalledContent, SubscriptionReceipt },
+  components: { PaywalledContent, SubscriptionReceipt, MediaPreview },
   setup() {
     const route = useRoute();
     const creatorNpub = route.params.npub as string;
