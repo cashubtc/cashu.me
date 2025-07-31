@@ -8,12 +8,8 @@
       allowfullscreen
       class="q-mb-sm"
     ></iframe>
-    <video v-else-if="type === 'video'" controls class="q-mb-sm">
-      <source :src="src" />
-    </video>
-    <audio v-else-if="type === 'audio'" controls class="q-mb-sm">
-      <source :src="src" />
-    </audio>
+    <video v-else-if="type === 'video'" :src="src" controls class="q-mb-sm"></video>
+    <audio v-else-if="type === 'audio'" :src="src" controls class="q-mb-sm"></audio>
   </div>
 </template>
 
