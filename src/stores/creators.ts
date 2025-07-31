@@ -14,7 +14,8 @@ import { useNdk } from "src/composables/useNdk";
 import { nip19 } from "nostr-tools";
 import { Event as NostrEvent } from "nostr-tools";
 import { notifyWarning } from "src/js/notify";
-import type { Tier, TierMedia } from "./types";
+import { filterValidMedia } from "src/utils/validateMedia";
+import type { Tier } from "./types";
 
 export const FEATURED_CREATORS = [
   "npub1aljmhjp5tqrw3m60ra7t3u8uqq223d6rdg9q0h76a8djd9m4hmvsmlj82m",
@@ -255,7 +256,7 @@ export const useCreatorsStore = defineStore("creators", {
             ...t,
             price_sats: t.price_sats ?? t.price ?? 0,
             ...(t.perks && !t.benefits ? { benefits: [t.perks] } : {}),
-            media: t.media ? [...t.media] : [],
+            media: t.media ? filterValidMedia(t.media) : [],
           }));
           this.tiersMap[hex] = tiersArray;
           await db.creatorsTierDefinitions.put({
@@ -291,7 +292,7 @@ export const useCreatorsStore = defineStore("creators", {
               ...t,
               price_sats: t.price_sats ?? t.price ?? 0,
               ...(t.perks && !t.benefits ? { benefits: [t.perks] } : {}),
-              media: t.media ? [...t.media] : [],
+              media: t.media ? filterValidMedia(t.media) : [],
             }));
             this.tiersMap[hex] = tiersArray;
             await db.creatorsTierDefinitions.put({
