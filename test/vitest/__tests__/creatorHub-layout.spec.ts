@@ -88,11 +88,22 @@ import CreatorHubPage from '../../../src/pages/CreatorHubPage.vue';
 import FullscreenLayout from '../../../src/layouts/FullscreenLayout.vue';
 
 describe('CreatorHubPage layout', () => {
-  it('renders PublishBar when logged in', () => {
+  it('renders PublishBar only on creator hub page', () => {
     const wrapper = shallowMount(FullscreenLayout, {
-      global: { stubs: { 'router-view': CreatorHubPage } },
+      global: {
+        stubs: { 'router-view': CreatorHubPage },
+        mocks: { $route: { path: '/creator-hub' } },
+      },
     });
     expect(wrapper.find('publish-bar-stub').exists()).toBe(true);
+
+    const wrapperOther = shallowMount(FullscreenLayout, {
+      global: {
+        stubs: { 'router-view': CreatorHubPage },
+        mocks: { $route: { path: '/wallet' } },
+      },
+    });
+    expect(wrapperOther.find('publish-bar-stub').exists()).toBe(false);
   });
 });
 
