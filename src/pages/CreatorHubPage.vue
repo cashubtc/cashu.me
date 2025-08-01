@@ -84,11 +84,6 @@
 <DeleteModal v-model="deleteDialog" @confirm="performDelete" />
 <AddTierDialog v-model="showTierDialog" :tier="currentTier" @save="refreshTiers" />
 </div>
-  <PublishBar
-    v-if="loggedIn"
-    :publishing="publishing"
-    @publish="publishFullProfile"
-  />
 </q-card>
   </q-page>
 </template>
@@ -102,7 +97,6 @@ import TierItem from 'components/TierItem.vue';
 import AddTierDialog from 'components/AddTierDialog.vue';
 import DeleteModal from 'components/DeleteModal.vue';
 import ThemeToggle from 'components/ThemeToggle.vue';
-import PublishBar from 'components/PublishBar.vue';
 
 const {
   nsec,
@@ -115,7 +109,6 @@ const {
   deleteId,
   showTierDialog,
   currentTier,
-  publishing,
   npub,
   loginNip07,
   loginNsec,

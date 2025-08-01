@@ -116,9 +116,10 @@ Fundstr is currently in Alpha/Beta.
 
 1. Go to the **Creator Hub** section.
 2. Set up your profile and link your npub.
-3. Define support tiers and benefits.
-4. Share your Fundstr profile with your audience.
-5. Communicate with supporters through Nostr DMs.
+3. Make sure a Nostr signer (NIP-07 extension or nsec key) is connected and at least one relay is configured.
+4. Define support tiers and benefits.
+5. Share your Fundstr profile with your audience.
+6. Communicate with supporters through Nostr DMs.
 
 ### DM-per-Token Subscriptions
 

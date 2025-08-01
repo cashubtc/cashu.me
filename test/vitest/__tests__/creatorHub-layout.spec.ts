@@ -85,10 +85,13 @@ vi.mock('nostr-tools', () => ({
 }));
 
 import CreatorHubPage from '../../../src/pages/CreatorHubPage.vue';
+import FullscreenLayout from '../../../src/layouts/FullscreenLayout.vue';
 
 describe('CreatorHubPage layout', () => {
-  it('renders two section cards and PublishBar on desktop', () => {
-    const wrapper = shallowMount(CreatorHubPage);
+  it('renders PublishBar when logged in', () => {
+    const wrapper = shallowMount(FullscreenLayout, {
+      global: { stubs: { 'router-view': CreatorHubPage } },
+    });
     expect(wrapper.find('publish-bar-stub').exists()).toBe(true);
   });
 });

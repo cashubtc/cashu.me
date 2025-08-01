@@ -124,6 +124,14 @@ export function useCreatorHub() {
       notifyError('Pay-to-public-key pubkey is required');
       return;
     }
+
+    await nostr.initSignerIfNotSet();
+
+    if (!nostr.signer) {
+      notifyError('Please connect a Nostr signer (NIP-07 or nsec)');
+      return;
+    }
+
     if (!profileRelays.value.length) {
       notifyError('Please configure at least one Nostr relay');
       return;
@@ -148,7 +156,10 @@ export function useCreatorHub() {
       if (e instanceof PublishTimeoutError) {
         notifyError('Publishing timed out');
       } else {
-        notifyError(e?.message || 'Failed to publish profile');
+        let msg = e?.message || 'Failed to publish profile';
+        if (!nostr.signer) msg += ' (missing signer)';
+        if (!profileRelays.value.length) msg += ' (no relays)';
+        notifyError(msg);
       }
     } finally {
       publishing.value = false;
