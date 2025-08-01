@@ -2,6 +2,8 @@
   <q-page :class="[$q.dark.isActive ? 'bg-dark text-white' : 'bg-white text-dark', 'q-pa-md']">
     <div class="text-h5 q-mb-md">{{ $t("AboutPage.title") }}</div>
     <p>Fundstr is a <strong>privacy-first Bitcoin wallet, social chat and creator-monetisation hub</strong> built on the open-source Cashu ecash protocol and the decentralised Nostr network. Everything you see in the sidebar is a doorway to a feature that either <strong>helps creators earn</strong> or <strong>lets fans support &amp; interact</strong> — all with instant, low-fee Bitcoin-denominated e-cash.</p>
+    <p class="q-mt-sm">{{ $t('AboutPage.cross_platform') }}</p>
+    <p class="text-negative"><strong>{{ $t('AboutPage.alpha_notice') }}</strong></p>
     <p>Below you’ll find a <strong>page-by-page guide</strong> written in two parallel voices:</p>
     <ul>
       <li><strong>“Creator view”</strong> – what each screen means when you make money on Fundstr.</li>
@@ -158,6 +160,7 @@
     <hr />
     <h2>6 Stay safe &amp; thrive</h2>
     <ul>
+      <li>{{ $t('AboutPage.security_summary') }}</li>
       <li><strong>Back-up</strong> your 12-word seed and Nostr private key offline.</li>
       <li>Diversify across multiple mints for larger balances.</li>
       <li>Keep Fundstr updated — service-worker auto-updates bring the latest protocol fixes.</li>
@@ -169,6 +172,9 @@
         </ul>
       </li>
     </ul>
+    <h2 class="q-mt-lg">7 Open-source &amp; configuration</h2>
+    <p v-html="$t('AboutPage.license_section')"></p>
+    <p>{{ $t('AboutPage.advanced_settings') }}</p>
     <hr />
     <blockquote>
       Fundstr is powered by open-source code and an open community. Whether you’re a <strong>storyteller earning sats</strong> or a <strong>fan supporting work you love</strong>, we hope this guide helps you navigate every page with confidence — and makes your next payment feel as effortless as a like, comment, or retweet.
