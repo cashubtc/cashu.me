@@ -84,12 +84,11 @@
 <DeleteModal v-model="deleteDialog" @confirm="performDelete" />
 <AddTierDialog v-model="showTierDialog" :tier="currentTier" @save="refreshTiers" />
 </div>
-<PublishBar
-  v-if="loggedIn"
-  :publishing="publishing"
-  @publish="publishFullProfile"
-  @save="saveProfile"
-/>
+  <PublishBar
+    v-if="loggedIn"
+    :publishing="publishing"
+    @publish="publishFullProfile"
+  />
 </q-card>
   </q-page>
 </template>
@@ -122,7 +121,6 @@ const {
   loginNsec,
   logout,
   publishFullProfile,
-  saveProfile,
   addTier,
   editTier,
   confirmDelete,
