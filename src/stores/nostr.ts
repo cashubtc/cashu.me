@@ -132,7 +132,7 @@ export class PublishTimeoutError extends Error {
 export async function publishWithTimeout(
   ev: NDKEvent,
   relays?: NDKRelaySet,
-  timeoutMs = 10000
+  timeoutMs = 30000
 ): Promise<void> {
   return Promise.race([
     ev.publish(relays),
