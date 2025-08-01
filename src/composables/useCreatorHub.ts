@@ -120,12 +120,18 @@ export function useCreatorHub() {
   async function publishFullProfile() {
     publishing.value = true;
     try {
-      await publishDiscoveryProfile({
-        profile: profile.value,
-        p2pkPub: profilePub.value,
-        mints: profileMints.value,
-        relays: profileRelays.value,
-      });
+      const timeoutMs = 10000;
+      await Promise.race([
+        publishDiscoveryProfile({
+          profile: profile.value,
+          p2pkPub: profilePub.value,
+          mints: profileMints.value,
+          relays: profileRelays.value,
+        }),
+        new Promise((_, reject) =>
+          setTimeout(() => reject(new PublishTimeoutError()), timeoutMs)
+        ),
+      ]);
       notifySuccess('Profile updated');
       profileStore.markClean();
     } catch (e: any) {
