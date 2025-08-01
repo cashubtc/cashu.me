@@ -67,13 +67,15 @@ export function useCreatorHub() {
 
   async function loginNip07() {
     await store.loginWithNip07();
-    await initPage();
+    // load cached data immediately and update in the background
+    initPage();
   }
 
   async function loginNsec() {
     if (!nsec.value) return;
     await store.loginWithNsec(nsec.value);
-    await initPage();
+    // don't block UI while profile/tiers are fetched
+    initPage();
   }
 
   function logout() {
@@ -192,8 +194,8 @@ export function useCreatorHub() {
     deleteDialog.value = false;
   }
 
-  onMounted(async () => {
-    if (store.loggedInNpub) await initPage();
+  onMounted(() => {
+    if (store.loggedInNpub) initPage();
   });
 
   return {
