@@ -1630,7 +1630,7 @@ export const messages = {
     restored_amount_success_text: "Restored { amount }",
   },
   AboutPage: {
-    title: "About Cashu.me",
+    title: "About Fundstr",
     video_placeholder: "Video coming soon",
   },
   CreatorHub: {
