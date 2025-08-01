@@ -15,6 +15,12 @@ import { useP2PKStore } from 'stores/p2pk';
 import { useMintsStore } from 'stores/mints';
 import { useCreatorProfileStore } from 'stores/creatorProfile';
 import { notifySuccess, notifyError } from 'src/js/notify';
+import { pingRelay } from 'src/utils/relayHealth';
+
+async function anyRelayReachable(urls: string[]): Promise<boolean> {
+  const results = await Promise.all(urls.map(pingRelay));
+  return results.some(Boolean);
+}
 
 export function useCreatorHub() {
   const store = useCreatorHubStore();
@@ -134,6 +140,10 @@ export function useCreatorHub() {
 
     if (!profileRelays.value.length) {
       notifyError('Please configure at least one Nostr relay');
+      return;
+    }
+    if (!(await anyRelayReachable(profileRelays.value))) {
+      notifyError('Unable to connect to any configured Nostr relays');
       return;
     }
     publishing.value = true;
