@@ -132,23 +132,29 @@ beforeEach(async () => {
 });
 
 describe("Nutzap subscriptions", () => {
-  it("send() sends DM per month with payload", async () => {
+  it("send() sends DM per interval with payload", async () => {
     const store = useNutzapStore();
     const start = 1000;
-    await store.send({ npub: "npub", amount: 1, months: 2, startDate: start });
+    await store.send({
+      npub: "npub",
+      amount: 1,
+      months: 2,
+      startDate: start,
+      intervalDays: 7,
+    });
 
     expect(sendDm).toHaveBeenCalledTimes(2);
-    expect(sendToLock).toHaveBeenCalledWith(1, "pk", calcUnlock(start, 0));
+    expect(sendToLock).toHaveBeenCalledWith(1, "pk", calcUnlock(start, 0, 7));
     const p1 = JSON.parse(sendDm.mock.calls[0][1]);
     const p2 = JSON.parse(sendDm.mock.calls[1][1]);
     const id = p1.subscription_id;
-    const expected1 = subscriptionPayload(`tok-${calcUnlock(start, 0)}`, calcUnlock(start, 0), {
+    const expected1 = subscriptionPayload(`tok-${calcUnlock(start, 0, 7)}`, calcUnlock(start, 0, 7), {
       subscription_id: id,
       tier_id: "nutzap",
       month_index: 1,
       total_months: 2,
     });
-    const expected2 = subscriptionPayload(`tok-${calcUnlock(start, 1)}`, calcUnlock(start, 1), {
+    const expected2 = subscriptionPayload(`tok-${calcUnlock(start, 1, 7)}`, calcUnlock(start, 1, 7), {
       subscription_id: id,
       tier_id: "nutzap",
       month_index: 2,
@@ -286,7 +292,7 @@ describe("Nutzap subscriptions", () => {
     cashuDb.lockedTokens.bulkAdd = vi.fn();
     await subStore.subscribeToTier({
       creator: { nostrPubkey: "npub", cashuP2pk: "pk" },
-      tierId: "tier", months: 1, price: 1, startDate: 0, relayList: []
+      tierId: "tier", months: 1, price: 1, startDate: 0, relayList: [], intervalDays: 14
     });
     expect(setBootError).toHaveBeenCalled();
     expect(subStore.sendQueue.length).toBe(1);

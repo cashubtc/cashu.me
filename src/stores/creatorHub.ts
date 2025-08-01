@@ -111,6 +111,7 @@ export const useCreatorHubStore = defineStore("creatorHub", {
         price_sats:
           (tier as any).price_sats ?? (tier as any).price ?? 0,
         description: (tier as any).description || "",
+        intervalDays: tier.intervalDays ?? 30,
         welcomeMessage: tier.welcomeMessage || "",
         ...(tier.benefits || (tier as any).perks
           ? { benefits: tier.benefits || [(tier as any).perks] }
@@ -129,6 +130,7 @@ export const useCreatorHubStore = defineStore("creatorHub", {
       this.tiers[id] = {
         ...existing,
         ...updates,
+        ...(updates.intervalDays !== undefined ? { intervalDays: updates.intervalDays } : {}),
         ...(updates.price_sats === undefined && updates.price !== undefined
           ? { price_sats: updates.price }
           : {}),

@@ -24,6 +24,7 @@ export const useSubscriptionsStore = defineStore("subscriptions", () => {
     const entry: Subscription = {
       id: data.id ?? uuidv4(),
       ...data,
+      intervalDays: data.intervalDays ?? 30,
       tierName: data.tierName ?? null,
       benefits: data.benefits ?? [],
       creatorName: data.creatorName ?? null,

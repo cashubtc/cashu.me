@@ -49,6 +49,8 @@ export interface Subscription {
   mintUrl: string;
   amountPerInterval: number;
   frequency: "monthly" | "weekly";
+  /** Number of days between payments */
+  intervalDays?: number;
   startDate: number;
   commitmentLength: number;
   tierName?: string;
@@ -449,6 +451,33 @@ export class CashuDexie extends Dexie {
           .toCollection()
           .modify((entry: any) => {
             if (entry.description === undefined) entry.description = "";
+          });
+      });
+
+    this.version(20)
+      .stores({
+        proofs:
+          "secret, id, C, amount, reserved, quote, bucketId, label, description",
+        profiles: "pubkey",
+        creatorsTierDefinitions: "&creatorNpub, eventId, updatedAt",
+        subscriptions: "&id, creatorNpub, tierId, status, createdAt, updatedAt",
+        lockedTokens:
+          "&id, tokenString, owner, tierId, intervalKey, unlockTs, status, subscriptionEventId, subscriptionId, monthIndex, totalMonths, autoRedeem",
+      })
+      .upgrade(async (tx) => {
+        await tx
+          .table("creatorsTierDefinitions")
+          .toCollection()
+          .modify((entry: any) => {
+            entry.tiers?.forEach((t: any) => {
+              if (t.intervalDays === undefined) t.intervalDays = null;
+            });
+          });
+        await tx
+          .table("subscriptions")
+          .toCollection()
+          .modify((entry: any) => {
+            if (entry.intervalDays === undefined) entry.intervalDays = null;
           });
       });
   }

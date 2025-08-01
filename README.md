@@ -131,7 +131,8 @@ mint URLs to use.
 1. Supporter opens the subscription dialog on a creator's page.
 2. The app retrieves the creator's `kind:10019` profile.
 3. Supporter selects the monthly amount and number of periods.
-4. Fundstr sends one token per period that is irrevocably locked to the creator's pubkey until the specified `locktime`.
+4. If the tier defines a custom `intervalDays` value, the supporter can subscribe on that schedule instead of monthly.
+5. Fundstr sends one token per period that is irrevocably locked to the creator's pubkey until the specified `locktime`.
 
 ### Media Previews for Tiers
 
@@ -154,6 +155,7 @@ Example `kind:30000` event content:
     "id": "gold",
     "name": "Gold Tier",
     "price_sats": 10000,
+    "intervalDays": 30,
     "description": "Access to behind-the-scenes posts",
     "media": [
       { "url": "https://www.youtube.com/embed/abcd1234" },
