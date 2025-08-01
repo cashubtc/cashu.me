@@ -8,7 +8,7 @@
       <router-view />
     </q-page-container>
     <PublishBar
-      v-if="loggedIn"
+      v-if="loggedIn && showPublishBar"
       :publishing="publishing"
       @publish="publishFullProfile"
     />
@@ -16,7 +16,8 @@
 </template>
 
 <script>
-import { defineComponent } from "vue";
+import { defineComponent, computed } from "vue";
+import { useRoute } from "vue-router";
 import MainHeader from "components/MainHeader.vue";
 import PublishBar from "components/PublishBar.vue";
 import { useCreatorHub } from "src/composables/useCreatorHub";
@@ -30,7 +31,9 @@ export default defineComponent({
   },
   setup() {
     const { loggedIn, publishFullProfile, publishing } = useCreatorHub();
-    return { loggedIn, publishFullProfile, publishing };
+    const route = useRoute();
+    const showPublishBar = computed(() => route.path === "/creator-hub");
+    return { loggedIn, publishFullProfile, publishing, showPublishBar };
   },
 });
 </script>
