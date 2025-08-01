@@ -505,7 +505,7 @@ export const useMintsStore = defineStore("mints", {
           return BigInt(`0x${id}`) % BigInt(2 ** 31 - 1);
         } else {
           const bin = atob(id);
-          const hex = bytesToHex(new TextEncoder().encode(bin));
+          const hex = bytesToHex(Uint8Array.from(bin, (c) => c.charCodeAt(0)));
           return BigInt(`0x${hex}`) % BigInt(2 ** 31 - 1);
         }
       }
