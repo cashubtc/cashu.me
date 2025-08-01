@@ -122,7 +122,7 @@ export function useCreatorHub() {
   async function publishFullProfile() {
     publishing.value = true;
     try {
-      const timeoutMs = 10000;
+      const timeoutMs = 30000;
       await Promise.race([
         publishDiscoveryProfile({
           profile: profile.value,
