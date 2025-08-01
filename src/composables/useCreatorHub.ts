@@ -120,6 +120,14 @@ export function useCreatorHub() {
   }
 
   async function publishFullProfile() {
+    if (!profilePub.value) {
+      notifyError('Pay-to-public-key pubkey is required');
+      return;
+    }
+    if (!profileRelays.value.length) {
+      notifyError('Please configure at least one Nostr relay');
+      return;
+    }
     publishing.value = true;
     try {
       const timeoutMs = 30000;
