@@ -48,7 +48,7 @@ export interface Subscription {
   creatorP2PK: string;
   mintUrl: string;
   amountPerInterval: number;
-  frequency: "monthly" | "weekly";
+  frequency: import('../constants/subscriptionFrequency').SubscriptionFrequency;
   /** Number of days between payments */
   intervalDays?: number;
   startDate: number;

@@ -35,7 +35,9 @@
           :min="today"
           required
         />
-        <div class="q-mt-sm text-caption">Every {{ intervalDays }} days</div>
+        <div class="q-mt-sm text-caption">
+          {{ frequencyLabel }}
+        </div>
         <div class="q-mt-md text-right">Total: {{ total }} sats</div>
       </q-card-section>
       <q-card-actions align="right">
@@ -74,6 +76,10 @@ import { useI18n } from "vue-i18n";
 import { NdkBootError } from "boot/ndk";
 import { useBootErrorStore } from "stores/bootError";
 import type { CreatorIdentity } from "src/types/creator";
+import {
+  frequencyToDays,
+  type SubscriptionFrequency,
+} from "src/constants/subscriptionFrequency";
 
 export default defineComponent({
   name: "SubscribeDialog",
@@ -99,7 +105,24 @@ export default defineComponent({
     const tierPrice = computed(
       () => props.tier?.price_sats ?? (props.tier as any)?.price ?? 0,
     );
-    const intervalDays = computed(() => props.tier?.intervalDays ?? 30);
+    const frequency = computed<SubscriptionFrequency>(
+      () => (props.tier?.frequency as SubscriptionFrequency) || 'monthly',
+    );
+    const intervalDays = computed(() =>
+      props.tier?.intervalDays !== undefined
+        ? props.tier.intervalDays
+        : frequencyToDays(frequency.value),
+    );
+    const frequencyLabel = computed(() => {
+      switch (frequency.value) {
+        case 'weekly':
+          return 'Every week';
+        case 'biweekly':
+          return 'Twice a month';
+        default:
+          return 'Every month';
+      }
+    });
     const bucketId = ref<string>(DEFAULT_BUCKET_ID);
     const today = new Date().toISOString().slice(0, 10);
     const startDate = ref(today);
@@ -215,6 +238,7 @@ export default defineComponent({
           months: months.value,
           startDate: Math.floor(new Date(startDate.value).getTime() / 1000),
           relayList: profile.relays ?? [],
+          frequency: frequency.value,
           intervalDays: intervalDays.value,
           tierName: props.tier?.name,
           benefits: props.tier?.benefits,
@@ -253,6 +277,8 @@ export default defineComponent({
       months,
       presetOptions,
       intervalDays,
+      frequency,
+      frequencyLabel,
       startDate,
       today,
       total,

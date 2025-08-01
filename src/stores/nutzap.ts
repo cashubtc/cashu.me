@@ -30,6 +30,7 @@ import {
 } from "date-fns";
 import { notifyError, notifyWarning } from "src/js/notify";
 import { subscriptionPayload } from "src/utils/receipt-utils";
+import { frequencyToDays, type SubscriptionFrequency } from "src/constants/subscriptionFrequency";
 
 export function calcUnlock(
   base: number,
@@ -185,9 +186,12 @@ export const useNutzapStore = defineStore("nutzap", {
       benefits,
       creatorName,
       creatorAvatar,
+      frequency,
       intervalDays,
     }: SubscribeTierOptions): Promise<boolean> {
-      intervalDays = intervalDays ?? 30;
+      intervalDays =
+        intervalDays ??
+        frequencyToDays((frequency as SubscriptionFrequency) || 'monthly');
       const wallet = useWalletStore();
       const mints = useMintsStore();
       if (!wallet || mints.activeBalance < price) {
@@ -294,7 +298,7 @@ export const useNutzapStore = defineStore("nutzap", {
         creatorP2PK: creator.cashuP2pk,
         mintUrl: mints.activeMintUrl,
         amountPerInterval: price,
-        frequency: "monthly",
+        frequency: (frequency as SubscriptionFrequency) || 'monthly',
         intervalDays,
         startDate,
         commitmentLength: months,
@@ -438,8 +442,8 @@ export const useNutzapStore = defineStore("nutzap", {
           tierId: "nutzap",
           creatorP2PK: creatorP2pk,
           mintUrl: mints.activeMintUrl,
-          amountPerInterval: amount,
-          frequency: "monthly",
+        amountPerInterval: amount,
+        frequency: 'monthly',
           intervalDays,
           startDate,
           commitmentLength: months,

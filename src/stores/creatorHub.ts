@@ -17,6 +17,7 @@ import { notifySuccess, notifyError } from "src/js/notify";
 import { filterValidMedia } from "src/utils/validateMedia";
 import { useNdk } from "src/composables/useNdk";
 import type { Tier, TierMedia } from "./types";
+import { frequencyToDays } from "src/constants/subscriptionFrequency";
 
 const TIER_DEFINITIONS_KIND = 30000;
 
@@ -111,7 +112,9 @@ export const useCreatorHubStore = defineStore("creatorHub", {
         price_sats:
           (tier as any).price_sats ?? (tier as any).price ?? 0,
         description: (tier as any).description || "",
-        intervalDays: tier.intervalDays ?? 30,
+        frequency: (tier as any).frequency || 'monthly',
+        intervalDays: tier.intervalDays ??
+          frequencyToDays(((tier as any).frequency || 'monthly') as any),
         welcomeMessage: tier.welcomeMessage || "",
         ...(tier.benefits || (tier as any).perks
           ? { benefits: tier.benefits || [(tier as any).perks] }
@@ -130,7 +133,12 @@ export const useCreatorHubStore = defineStore("creatorHub", {
       this.tiers[id] = {
         ...existing,
         ...updates,
-        ...(updates.intervalDays !== undefined ? { intervalDays: updates.intervalDays } : {}),
+        ...(updates.frequency !== undefined
+          ? { frequency: updates.frequency,
+              intervalDays: frequencyToDays(updates.frequency as any) }
+          : updates.intervalDays !== undefined
+          ? { intervalDays: updates.intervalDays }
+          : {}),
         ...(updates.price_sats === undefined && updates.price !== undefined
           ? { price_sats: updates.price }
           : {}),

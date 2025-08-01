@@ -9,6 +9,8 @@ export interface Tier {
   name: string;
   price_sats: number;
   description: string;
+  /** Subscription payment frequency */
+  frequency?: import('../constants/subscriptionFrequency').SubscriptionFrequency;
   /** Number of days between payments */
   intervalDays?: number;
   benefits?: string[];

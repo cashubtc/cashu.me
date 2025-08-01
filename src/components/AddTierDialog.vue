@@ -50,14 +50,15 @@
             </div>
           </template>
         </q-input>
-        <q-input
-          v-model.number="localTier.intervalDays"
-          type="number"
-          min="1"
-          label="Interval (days)"
+        <q-select
+          v-model="localTier.frequency"
+          :options="frequencyOptions"
+          emit-value
+          map-options
           outlined
           dense
           class="q-mb-sm"
+          label="Interval"
         />
         <q-input
           v-model="localTier.description"
@@ -158,6 +159,10 @@ import { useNostrStore } from "stores/nostr";
 import { usePriceStore } from "stores/price";
 import { useUiStore } from "stores/ui";
 import MediaPreview from "./MediaPreview.vue";
+import {
+  type SubscriptionFrequency,
+  frequencyToDays,
+} from "src/constants/subscriptionFrequency";
 import { filterValidMedia, isTrustedUrl } from "src/utils/validateMedia";
 
 export default defineComponent({
@@ -187,9 +192,16 @@ export default defineComponent({
 
     const localTier = reactive<Partial<Tier>>({
       media: [],
+      frequency: 'monthly' as SubscriptionFrequency,
       intervalDays: 30,
       ...props.tier,
     });
+
+    const frequencyOptions = [
+      { label: 'Weekly', value: 'weekly' },
+      { label: 'Twice Monthly', value: 'biweekly' },
+      { label: 'Monthly', value: 'monthly' },
+    ] as const;
 
     const mediaTypes = ["image", "video", "audio"] as const;
 
@@ -210,11 +222,23 @@ export default defineComponent({
         if (!val.media) {
           localTier.media = [];
         }
-        if (val.intervalDays === undefined) {
-          localTier.intervalDays = 30;
+        if (!val.frequency) {
+          localTier.frequency = 'monthly';
         }
+        localTier.intervalDays = frequencyToDays(
+          (localTier.frequency as SubscriptionFrequency) || 'monthly',
+        );
       },
       { immediate: true, deep: true },
+    );
+
+    watch(
+      () => localTier.frequency,
+      (val) => {
+        localTier.intervalDays = frequencyToDays(
+          (val as SubscriptionFrequency) || 'monthly',
+        );
+      },
     );
 
     const save = async () => {
@@ -230,10 +254,9 @@ export default defineComponent({
         notifyError("Price must be a positive number");
         return;
       }
-      if (!localTier.intervalDays || localTier.intervalDays <= 0) {
-        notifyError("Interval must be greater than 0");
-        return;
-      }
+      localTier.intervalDays = frequencyToDays(
+        (localTier.frequency as SubscriptionFrequency) || 'monthly',
+      );
       try {
         await nostr.initSignerIfNotSet();
         if (!nostr.signer) {
@@ -271,6 +294,7 @@ export default defineComponent({
       addMedia,
       removeMedia,
       mediaTypes,
+      frequencyOptions,
       isTrustedUrl,
     };
   },
