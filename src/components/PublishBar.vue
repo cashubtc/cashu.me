@@ -1,6 +1,6 @@
 <template>
-  <q-page-sticky position="bottom" expand class="bg-grey-9">
-    <div class="q-pa-sm text-center">
+  <q-footer class="w-full bg-grey-3 dark:bg-grey-9 text-dark dark:text-white">
+    <q-toolbar class="justify-center">
       <q-btn
         color="primary"
         outline
@@ -10,8 +10,8 @@
       >
         {{ $t('creatorHub.publish') }}
       </q-btn>
-    </div>
-  </q-page-sticky>
+    </q-toolbar>
+  </q-footer>
 </template>
 
 <script setup lang="ts">
