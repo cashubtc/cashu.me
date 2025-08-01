@@ -58,7 +58,15 @@ function updateOrder() {
 
 function addTier() {
   const id = uuidv4();
-  store.addTier({ id, name: '', price_sats: 0, description: '', welcomeMessage: '', intervalDays: 30 });
+  store.addTier({
+    id,
+    name: '',
+    price_sats: 0,
+    description: '',
+    welcomeMessage: '',
+    frequency: 'monthly',
+    intervalDays: 30,
+  });
 }
 
 function confirmDelete(id: string) {

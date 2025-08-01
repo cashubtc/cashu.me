@@ -8,6 +8,10 @@ import { useSubscriptionsStore } from "./subscriptions";
 import { useP2PKStore } from "./p2pk";
 import { DEFAULT_BUCKET_ID } from "./buckets";
 import { ensureCompressed } from "src/utils/ecash";
+import {
+  frequencyToDays,
+  type SubscriptionFrequency,
+} from "src/constants/subscriptionFrequency";
 
 export type DonationPreset = {
   months: number;
@@ -47,7 +51,7 @@ export const useDonationPresetsStore = defineStore("donationPresets", {
       subscription?: {
         tierName?: string;
         benefits?: string[];
-        frequency?: "monthly" | "weekly";
+        frequency?: SubscriptionFrequency;
         intervalDays?: number;
       }
     ): Promise<string | LockedToken[]> {
@@ -84,9 +88,9 @@ export const useDonationPresetsStore = defineStore("donationPresets", {
       const base = startDate ?? Math.floor(Date.now() / 1000);
       const interval = subscription?.intervalDays
         ? subscription.intervalDays
-        : subscription?.frequency === "weekly"
-        ? 7
-        : 30;
+        : subscription?.frequency
+        ? frequencyToDays(subscription.frequency)
+        : frequencyToDays('monthly');
       for (let i = 0; i < months; i++) {
         const locktime = base + i * interval * 24 * 60 * 60;
         const { locked } = await p2pkStore.sendToLock(
@@ -106,9 +110,12 @@ export const useDonationPresetsStore = defineStore("donationPresets", {
           creatorP2PK: "",
           mintUrl: "",
           amountPerInterval: amount,
-          frequency: subscription.frequency || "monthly",
-          intervalDays: subscription.intervalDays ??
-            (subscription.frequency === "weekly" ? 7 : 30),
+          frequency: subscription.frequency || 'monthly',
+          intervalDays:
+            subscription.intervalDays ??
+            (subscription.frequency
+              ? frequencyToDays(subscription.frequency)
+              : frequencyToDays('monthly')),
           startDate: base,
           commitmentLength: months,
           intervals: tokens.map((t, idx) => ({

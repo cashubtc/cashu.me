@@ -292,7 +292,7 @@ describe("Nutzap subscriptions", () => {
     cashuDb.lockedTokens.bulkAdd = vi.fn();
     await subStore.subscribeToTier({
       creator: { nostrPubkey: "npub", cashuP2pk: "pk" },
-      tierId: "tier", months: 1, price: 1, startDate: 0, relayList: [], intervalDays: 14
+      tierId: "tier", months: 1, price: 1, startDate: 0, relayList: [], frequency: 'biweekly'
     });
     expect(setBootError).toHaveBeenCalled();
     expect(subStore.sendQueue.length).toBe(1);
