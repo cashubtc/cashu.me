@@ -35,6 +35,7 @@
           :min="today"
           required
         />
+        <div class="q-mt-sm text-caption">Every {{ intervalDays }} days</div>
         <div class="q-mt-md text-right">Total: {{ total }} sats</div>
       </q-card-section>
       <q-card-actions align="right">
@@ -98,6 +99,7 @@ export default defineComponent({
     const tierPrice = computed(
       () => props.tier?.price_sats ?? (props.tier as any)?.price ?? 0,
     );
+    const intervalDays = computed(() => props.tier?.intervalDays ?? 30);
     const bucketId = ref<string>(DEFAULT_BUCKET_ID);
     const today = new Date().toISOString().slice(0, 10);
     const startDate = ref(today);
@@ -213,6 +215,7 @@ export default defineComponent({
           months: months.value,
           startDate: Math.floor(new Date(startDate.value).getTime() / 1000),
           relayList: profile.relays ?? [],
+          intervalDays: intervalDays.value,
           tierName: props.tier?.name,
           benefits: props.tier?.benefits,
           creatorName: profile?.name,
@@ -249,6 +252,7 @@ export default defineComponent({
       showBucketSelect,
       months,
       presetOptions,
+      intervalDays,
       startDate,
       today,
       total,

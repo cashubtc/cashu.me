@@ -23,7 +23,7 @@ import { useBootErrorStore } from "./bootError";
 import type { NostrEvent, NDKSubscription } from "@nostr-dev-kit/ndk";
 import {
   addMinutes,
-  addMonths,
+  addDays,
   fromUnixTime,
   isAfter,
   startOfDay,
@@ -31,11 +31,15 @@ import {
 import { notifyError, notifyWarning } from "src/js/notify";
 import { subscriptionPayload } from "src/utils/receipt-utils";
 
-export function calcUnlock(base: number, i: number): number {
+export function calcUnlock(
+  base: number,
+  i: number,
+  intervalDays = 30,
+): number {
   const first = addMinutes(startOfDay(fromUnixTime(base)), 30);
   const now = addMinutes(new Date(), 30);
   const ref = isAfter(first, now) ? first : now;
-  return Math.floor(addMonths(ref, i).getTime() / 1000);
+  return Math.floor(addDays(ref, i * intervalDays).getTime() / 1000);
 }
 
 interface SendParams {
@@ -43,6 +47,7 @@ interface SendParams {
   amount: number; // sats per period
   months: number; // number of periods
   startDate: number; // unix timestamp for first unlock
+  intervalDays?: number; // days between periods
 }
 
 export interface NutzapQueuedSend {
@@ -180,7 +185,9 @@ export const useNutzapStore = defineStore("nutzap", {
       benefits,
       creatorName,
       creatorAvatar,
+      intervalDays,
     }: SubscribeTierOptions): Promise<boolean> {
+      intervalDays = intervalDays ?? 30;
       const wallet = useWalletStore();
       const mints = useMintsStore();
       if (!wallet || mints.activeBalance < price) {
@@ -201,7 +208,7 @@ export const useNutzapStore = defineStore("nutzap", {
       const lockedTokens: DexieLockedToken[] = [];
 
       for (let i = 0; i < months; i++) {
-        const unlockDate = calcUnlock(startDate, i);
+        const unlockDate = calcUnlock(startDate, i, intervalDays);
         const mint = wallet.findSpendableMint(price);
         if (!mint)
           throw new Error(
@@ -288,6 +295,7 @@ export const useNutzapStore = defineStore("nutzap", {
         mintUrl: mints.activeMintUrl,
         amountPerInterval: price,
         frequency: "monthly",
+        intervalDays,
         startDate,
         commitmentLength: months,
         ...(tierName ? { tierName } : {}),
@@ -315,8 +323,9 @@ export const useNutzapStore = defineStore("nutzap", {
     },
 
     /** High-level entry from UI – fan pledges to creator */
-    async send({ npub, amount, months, startDate }: SendParams) {
+    async send({ npub, amount, months, startDate, intervalDays }: SendParams) {
       try {
+        intervalDays = intervalDays ?? 30;
         this.loading = true;
         let profile = null;
         try {
@@ -347,7 +356,7 @@ export const useNutzapStore = defineStore("nutzap", {
         const lockedTokens: DexieLockedToken[] = [];
 
         for (let i = 0; i < months; i++) {
-          const unlockDate = calcUnlock(startDate, i);
+        const unlockDate = calcUnlock(startDate, i, intervalDays);
           const mint = wallet.findSpendableMint(amount, trustedMints);
           if (!mint)
             throw new Error(
@@ -431,6 +440,7 @@ export const useNutzapStore = defineStore("nutzap", {
           mintUrl: mints.activeMintUrl,
           amountPerInterval: amount,
           frequency: "monthly",
+          intervalDays,
           startDate,
           commitmentLength: months,
           intervals: lockedTokens.map((t, idx) => ({

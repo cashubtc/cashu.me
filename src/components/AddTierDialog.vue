@@ -51,6 +51,15 @@
           </template>
         </q-input>
         <q-input
+          v-model.number="localTier.intervalDays"
+          type="number"
+          min="1"
+          label="Interval (days)"
+          outlined
+          dense
+          class="q-mb-sm"
+        />
+        <q-input
           v-model="localTier.description"
           type="textarea"
           autogrow
@@ -178,6 +187,7 @@ export default defineComponent({
 
     const localTier = reactive<Partial<Tier>>({
       media: [],
+      intervalDays: 30,
       ...props.tier,
     });
 
@@ -200,6 +210,9 @@ export default defineComponent({
         if (!val.media) {
           localTier.media = [];
         }
+        if (val.intervalDays === undefined) {
+          localTier.intervalDays = 30;
+        }
       },
       { immediate: true, deep: true },
     );
@@ -215,6 +228,10 @@ export default defineComponent({
       }
       if (!localTier.price_sats || localTier.price_sats <= 0) {
         notifyError("Price must be a positive number");
+        return;
+      }
+      if (!localTier.intervalDays || localTier.intervalDays <= 0) {
+        notifyError("Interval must be greater than 0");
         return;
       }
       try {

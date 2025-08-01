@@ -9,6 +9,8 @@ export interface Tier {
   name: string;
   price_sats: number;
   description: string;
+  /** Number of days between payments */
+  intervalDays?: number;
   benefits?: string[];
   welcomeMessage?: string;
   media?: TierMedia[];

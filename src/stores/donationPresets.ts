@@ -48,6 +48,7 @@ export const useDonationPresetsStore = defineStore("donationPresets", {
         tierName?: string;
         benefits?: string[];
         frequency?: "monthly" | "weekly";
+        intervalDays?: number;
       }
     ): Promise<string | LockedToken[]> {
       const walletStore = useWalletStore();
@@ -81,8 +82,13 @@ export const useDonationPresetsStore = defineStore("donationPresets", {
         return detailed ? tokens : locked.tokenString;
       }
       const base = startDate ?? Math.floor(Date.now() / 1000);
+      const interval = subscription?.intervalDays
+        ? subscription.intervalDays
+        : subscription?.frequency === "weekly"
+        ? 7
+        : 30;
       for (let i = 0; i < months; i++) {
-        const locktime = base + i * 30 * 24 * 60 * 60;
+        const locktime = base + i * interval * 24 * 60 * 60;
         const { locked } = await p2pkStore.sendToLock(
           amount,
           convertedPubkey,
@@ -101,6 +107,8 @@ export const useDonationPresetsStore = defineStore("donationPresets", {
           mintUrl: "",
           amountPerInterval: amount,
           frequency: subscription.frequency || "monthly",
+          intervalDays: subscription.intervalDays ??
+            (subscription.frequency === "weekly" ? 7 : 30),
           startDate: base,
           commitmentLength: months,
           intervals: tokens.map((t, idx) => ({
