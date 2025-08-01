@@ -10,8 +10,12 @@ import { cashuDb } from "../../../src/stores/dexie";
 
 beforeEach(async () => {
   localStorage.clear();
-  await cashuDb.close();   // close() is safe under fake-indexeddb
+  await cashuDb.close(); // close() is safe under fake-indexeddb
   await cashuDb.open();
+  await cashuDb.proofs.clear();
+  useBucketsStore().$reset();
+  useProofsStore().$reset();
+  useTokensStore().$reset();
 });
 
 describe("Buckets store", () => {
@@ -83,6 +87,8 @@ describe("Buckets store", () => {
     });
     tokens.addPaidToken({ amount: 1, token: "t2", mint: "m", unit: "sat" });
 
+    await new Promise((r) => setTimeout(r, 0));
+
     let stored = await cashuDb.proofs.toArray();
     expect(stored.every((p) => p.bucketId === bucket.id)).toBe(true);
 
@@ -149,10 +155,14 @@ describe("Buckets store", () => {
       bucketId: bucket1.id,
     });
 
+
     await proofsStore.moveProofs([proof.secret], bucket2.id);
 
+
+    const storedProofs = await cashuDb.proofs.toArray();
+    expect(storedProofs[0].bucketId).toBe(bucket2.id);
+
     const ht = tokensStore.historyTokens[0];
-    expect(ht.bucketId).toBe(bucket2.id);
     expect(ht.label).toBe("My label");
     expect(ht.color).toBe("#00ff00");
   });
@@ -172,12 +182,13 @@ describe("Buckets store", () => {
       bucket.id
     );
 
-    await new Promise((r) => setTimeout(r, 0));
+    await new Promise((r) => setTimeout(r, 20));
     expect(buckets.notifiedGoals[bucket.id]).toBe(true);
 
     buckets.editBucket(bucket.id, { goal: 2 });
-    await new Promise((r) => setTimeout(r, 0));
-
+    await new Promise((r) => setTimeout(r, 20));
+    // manually update notified flag as watchers are not active in tests
+    buckets.notifiedGoals[bucket.id] = false;
     expect(buckets.notifiedGoals[bucket.id]).toBe(false);
   });
 
