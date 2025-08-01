@@ -1347,7 +1347,7 @@ export default {
     restored_amount_success_text: "تم استعادة { amount }",
   },
   AboutPage: {
-    title: "About Cashu.me",
+    title: "About Fundstr",
     video_placeholder: "Video coming soon",
   },
   CreatorHub: {
