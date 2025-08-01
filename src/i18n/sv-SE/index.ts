@@ -41,7 +41,6 @@ export default {
       },
   creatorHub: {
     publish: "Publish Profile",
-    saveDraft: "Save Draft",
     profileHeader: "Profile details",
   },
       swap: {
@@ -747,7 +746,6 @@ export default {
     },
   creatorHub: {
     publish: "Publish Profile",
-    saveDraft: "Save Draft",
     profileHeader: "Profile details",
   },
     swap: {
@@ -769,7 +767,6 @@ export default {
       actions: {
   creatorHub: {
     publish: "Publish Profile",
-    saveDraft: "Save Draft",
     profileHeader: "Profile details",
   },
         swap: {
@@ -968,7 +965,6 @@ export default {
       },
   creatorHub: {
     publish: "Publish Profile",
-    saveDraft: "Save Draft",
     profileHeader: "Profile details",
   },
       swap: {
@@ -978,7 +974,6 @@ export default {
       },
   creatorHub: {
     publish: "Publish Profile",
-    saveDraft: "Save Draft",
     profileHeader: "Profile details",
   },
       cancel_swap: {
@@ -987,7 +982,6 @@ export default {
       },
   creatorHub: {
     publish: "Publish Profile",
-    saveDraft: "Save Draft",
     profileHeader: "Profile details",
   },
       confirm_swap: {
@@ -1374,7 +1368,6 @@ export default {
   },
   creatorHub: {
     publish: "Publish Profile",
-    saveDraft: "Save Draft",
     profileHeader: "Profile details",
     endpointsHeader: "Endpoints",
   },
