@@ -260,7 +260,7 @@
                 <tr
                   v-for="(item, index) in navigationItems"
                   :key="item.menuItem"
-                  :class="{ 'border-b border-gray-800': index !== navigationItems.value.length - 1 }"
+                  :class="{ 'border-b border-gray-800': index !== navigationItems.length - 1 }"
                 >
                   <td class="p-4 font-semibold">{{ item.menuItem }}</td>
                   <td class="p-4">
