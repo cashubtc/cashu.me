@@ -222,22 +222,13 @@
 
         <!-- Perspective Toggle -->
         <div class="mb-8 flex justify-center">
-          <div class="interactive-card inline-flex overflow-hidden rounded-lg">
-            <button
-              class="px-4 py-2 focus:outline-none text-gray-300"
-              :class="{ 'gradient-bg text-black font-semibold': viewMode === 'fan' }"
-              @click="viewMode = 'fan'"
-            >
-              Fan
-            </button>
-            <button
-              class="px-4 py-2 focus:outline-none text-gray-300"
-              :class="{ 'gradient-bg text-black font-semibold': viewMode === 'creator' }"
-              @click="viewMode = 'creator'"
-            >
-              Creator
-            </button>
-          </div>
+          <q-btn-toggle
+            v-model="viewMode"
+            :options="[
+              { label: 'Fan', value: 'fan' },
+              { label: 'Creator', value: 'creator' }
+            ]"
+          />
         </div>
 
         <!-- Desktop Table -->
@@ -452,9 +443,9 @@ import { onMounted, ref } from 'vue'
 const dialogStep1 = ref(false)
 const dialogStep2 = ref(false)
 const dialogStep3 = ref(false)
-const viewMode = ref<'fan' | 'creator'>('fan')
+export const viewMode = ref<'fan' | 'creator'>('fan')
 
-const navigationItems = [
+export const navigationItems = ref([
   {
     menuItem: 'Settings',
     fanText:
@@ -518,7 +509,7 @@ const navigationItems = [
     fanText: 'Cashu.space docs, GitHub, Twitter, Telegram, Donate.',
     creatorText: 'Identical — share with collaborators or fans.',
   },
-]
+])
 
 onMounted(() => {
   const observer = new IntersectionObserver((entries) => {
