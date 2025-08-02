@@ -221,13 +221,22 @@
         </p>
 
         <!-- Perspective Toggle -->
-        <div class="mb-8 flex justify-center">
-          <q-btn-toggle
-            v-model="viewMode"
-            :options="[
-              { label: 'Fan', value: 'fan' },
-              { label: 'Creator', value: 'creator' }
-            ]"
+        <div class="mb-8 flex justify-center gap-4">
+          <q-btn
+            rounded
+            unelevated
+            color="primary"
+            label="Fan / Subscriber"
+            :outline="viewMode !== 'fan'"
+            @click="viewMode = 'fan'"
+          />
+          <q-btn
+            rounded
+            unelevated
+            color="primary"
+            label="Creator"
+            :outline="viewMode !== 'creator'"
+            @click="viewMode = 'creator'"
           />
         </div>
 
