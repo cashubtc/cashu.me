@@ -15,8 +15,7 @@
         target="_blank"
         class="text-blue-600 dark:text-blue-400 underline"
         >MIT License</a
-      >.
-      Contribute or read the code on
+      >. Contribute or read the code on
       <a
         href="https://github.com/cashubtc/cashu.me"
         target="_blank"
@@ -39,29 +38,71 @@
       Fundstr is non-custodial. Lost seeds or tokens cannot be recovered, so
       back up your 12-word seed and Nostr keys securely.
     </p>
+
+    <ul class="list-disc pl-5 fade-section space-y-2">
+      <li>
+        <a
+          href="https://github.com/cashubtc/cashu.me"
+          target="_blank"
+          class="text-blue-600 dark:text-blue-400 underline"
+          >Explore on GitHub</a
+        >
+      </li>
+      <li>
+        <a
+          href="https://njump.me/npub1aljmhjp5tqrw3m60ra7t3u8uqq223d6rdg9q0h76a8djd9m4hmvsmlj82m"
+          target="_blank"
+          class="text-blue-600 dark:text-blue-400 underline"
+          >Creator's Profile</a
+        >
+      </li>
+      <li>
+        <a
+          href="https://fundstr.app"
+          target="_blank"
+          class="text-blue-600 dark:text-blue-400 underline"
+          >Fundstr Project Page</a
+        >
+      </li>
+      <li>
+        <router-link
+          class="text-blue-600 dark:text-blue-400 underline"
+          :to="{ path: '/welcome' }"
+          >Install PWA</router-link
+        >
+      </li>
+      <li>
+        <a
+          href="https://github.com/sponsors/cashubtc"
+          target="_blank"
+          class="text-blue-600 dark:text-blue-400 underline"
+          >Support Fundstr</a
+        >
+      </li>
+    </ul>
   </main>
 </template>
 
 <script setup>
-import { onMounted } from 'vue'
+import { onMounted } from "vue";
 
 onMounted(() => {
   const observer = new IntersectionObserver(
     (entries, obs) => {
       entries.forEach((entry) => {
         if (entry.isIntersecting) {
-          entry.target.classList.add('visible')
-          obs.unobserve(entry.target)
+          entry.target.classList.add("visible");
+          obs.unobserve(entry.target);
         }
-      })
+      });
     },
     { threshold: 0.1 }
-  )
+  );
 
   document
-    .querySelectorAll('.fade-section')
-    .forEach((el) => observer.observe(el))
-})
+    .querySelectorAll(".fade-section")
+    .forEach((el) => observer.observe(el));
+});
 </script>
 
 <style scoped>
