@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>About Fundstr</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --color-accent: #22d3ee;
+      --color-accent-rgb: 34, 211, 238;
+    }
+    body {
+      background-color: #0a0a0a;
+      color: #e2e8f0;
+      font-family: 'Inter', sans-serif;
+      background-image: radial-gradient(#1e293b 1px, transparent 1px);
+      background-size: 20px 20px;
+    }
+    .gradient-text {
+      background: linear-gradient(to right, #a78bfa, #f472b6);
+      -webkit-background-clip: text;
+      color: transparent;
+    }
+    .accent-text {
+      color: var(--color-accent);
+    }
+    .gradient-bg {
+      background: linear-gradient(to right, #a78bfa, #f472b6);
+    }
+    .interactive-card {
+      background-color: rgba(15, 23, 42, 0.5);
+      backdrop-filter: blur(4px);
+      border: 1px solid #1e293b;
+      transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+    }
+    .interactive-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 0 25px rgba(var(--color-accent-rgb), 0.2);
+      border-color: rgba(var(--color-accent-rgb), 0.4);
+    }
+    .fade-in-section {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+    }
+    .fade-in-section.is-visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    details summary {
+      list-style: none;
+    }
+    details summary::-webkit-details-marker {
+      display: none;
+    }
+    details summary svg {
+      transition: transform 0.3s ease;
+    }
+    details[open] summary svg {
+      transform: rotate(180deg);
+    }
+    .hover-accent:hover {
+      color: var(--color-accent);
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="text-center py-20 px-4 fade-in-section">
+    <h1 class="text-4xl sm:text-5xl font-extrabold mb-4">About <span class="gradient-text">Fundstr</span></h1>
+    <p class="max-w-3xl mx-auto text-lg">A <strong>privacy-first Bitcoin wallet, social chat, and creator-monetisation hub</strong> built on the open-source Cashu ecash protocol and the decentralised Nostr network.</p>
+    <div class="mt-6 max-w-2xl mx-auto border border-amber-500/30 bg-amber-900/20 text-amber-200 p-4 rounded">
+      ⚠️ <strong>Please note:</strong> Fundstr is currently in an <strong>alpha stage.</strong> While functional, it is experimental software. Use with caution and do not store large amounts of funds.
+    </div>
+  </header>
+
+  <main class="space-y-32 max-w-7xl mx-auto px-4">
+    <!-- Vision -->
+    <section id="vision" class="text-center fade-in-section">
+      <h2 class="text-3xl font-bold mb-6 gradient-text">Your Money, Your Network</h2>
+      <p class="max-w-3xl mx-auto">We believe in a world where your financial life and social interactions are truly your own. Fundstr is an experiment in creating a parallel, peer-to-peer economy—free from corporate gatekeepers, surveillance, and unpredictable fees. It’s a gateway to a more sovereign way of connecting and transacting.</p>
+    </section>
+
+    <!-- How Ecash Works -->
+    <section id="how-it-works" class="fade-in-section">
+      <h2 class="text-3xl font-bold text-center mb-6 gradient-text">How Ecash Works</h2>
+      <p class="text-center mb-12">The loop is simple: <strong>Bitcoin in → private e-cash out → social payments everywhere.</strong></p>
+      <div class="grid grid-cols-1 md:grid-cols-5 items-center gap-6 text-center">
+        <!-- Step 1 -->
+        <div class="interactive-card p-6 rounded-lg flex flex-col items-center">
+          <div class="mb-4">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="w-12 h-12" fill="#f7931a"><path d="M11.998 0C5.371 0 0 5.371 0 11.998c0 6.626 5.371 11.998 11.998 11.998s11.998-5.372 11.998-11.998C23.996 5.371 18.625 0 11.998 0zm1.8 17.135c-.145.99-.702 1.64-1.843 1.918l-.283 1.395-1.379-.287.276-1.361c-.363-.07-.731-.144-1.098-.218l-.277 1.366-1.379-.287.282-1.388c-.301-.061-.6-.122-.897-.185l-1.834-.361.466-1.575s1.026.202 1.016.198c.397.078.57-.204.625-.43l.637-3.25c.01-.285-.079-.646-.61-.746.014-.013-1.039-.208-1.039-.208l.252-1.514 1.967.382.273-1.353 1.379.287-.269 1.331c.296.056.587.112.873.167l.267-1.322 1.379.287-.271 1.339c1.801.389 2.977 1.557 2.622 3.349-.279 1.442-1.35 2.168-2.736 2.389zm-3.102-4.044l-.547 2.798c.61.121 2.482.345 2.848-.655.301-1.459-1.351-1.785-2.301-2.143zm-.838-4.283l-.5 2.56c.555.11 2.258.309 2.559-.59.271-1.317-1.238-1.687-2.059-1.97z"/></svg>
+          </div>
+          <h3 class="font-bold mb-1">Your Bitcoin</h3>
+          <p class="text-sm">From any wallet</p>
+        </div>
+        <!-- Arrow -->
+        <div class="hidden md:flex justify-center text-3xl">→</div>
+        <!-- Step 2 -->
+        <div class="interactive-card p-6 rounded-lg flex flex-col items-center">
+          <div class="mb-4">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="w-12 h-12" fill="#6366f1"><path d="M3 10l9-7 9 7v11a1 1 0 01-1 1h-3a1 1 0 01-1-1v-5H8v5a1 1 0 01-1 1H4a1 1 0 01-1-1V10z"/></svg>
+          </div>
+          <h3 class="font-bold mb-1">The Mint</h3>
+          <p class="text-sm">Swaps for Ecash</p>
+        </div>
+        <!-- Arrow -->
+        <div class="hidden md:flex justify-center text-3xl">→</div>
+        <!-- Step 3 -->
+        <div class="interactive-card p-6 rounded-lg flex flex-col items-center">
+          <div class="mb-4">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="w-12 h-12" fill="#f472b6"><path d="M12 1a9 9 0 00-9 9v5a3 3 0 003 3h12a3 3 0 003-3v-5a9 9 0 00-9-9zm0 2a7 7 0 017 7v5a1 1 0 01-1 1H6a1 1 0 01-1-1v-5a7 7 0 017-7z"/></svg>
+          </div>
+          <h3 class="font-bold mb-1">Fundstr Wallet</h3>
+          <p class="text-sm">Private & ready to spend</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Built for the Sovereign Individual -->
+    <section id="who-for" class="fade-in-section">
+      <h2 class="text-3xl font-bold text-center mb-8 gradient-text">Built for the Sovereign Individual</h2>
+      <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+        <div class="interactive-card p-6 rounded-lg text-center">
+          <div class="mb-4 flex justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20v-6"/><path d="M6 20v-4"/><path d="M18 20v-8"/><path d="M2 10l10-8 10 8"/></svg>
+          </div>
+          <h3 class="font-semibold mb-2">Content Creators</h3>
+          <p class="text-sm">Monetize your audience directly, free from de-platforming and high fees.</p>
+        </div>
+        <div class="interactive-card p-6 rounded-lg text-center">
+          <div class="mb-4 flex justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          </div>
+          <h3 class="font-semibold mb-2">Privacy Advocates</h3>
+          <p class="text-sm">Transact with confidence that your financial life isn't being tracked.</p>
+        </div>
+        <div class="interactive-card p-6 rounded-lg text-center">
+          <div class="mb-4 flex justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+          </div>
+          <h3 class="font-semibold mb-2">Nostr Users</h3>
+          <p class="text-sm">Upgrade your zaps to be truly private and integrate payments seamlessly.</p>
+        </div>
+        <div class="interactive-card p-6 rounded-lg text-center">
+          <div class="mb-4 flex justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15 15 0 010 20"/></svg>
+          </div>
+          <h3 class="font-semibold mb-2">Global Citizens</h3>
+          <p class="text-sm">Move value across borders instantly, without relying on traditional banking.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Navigation Map -->
+    <section id="navigation-map" class="fade-in-section">
+      <h2 class="text-3xl font-bold text-center mb-8 gradient-text">Navigation Map</h2>
+      <div class="hidden md:block interactive-card overflow-x-auto">
+        <table class="w-full text-left">
+          <thead>
+            <tr class="bg-white/5">
+              <th class="py-3 px-4">Menu Item</th>
+              <th class="py-3 px-4">Fan / Subscriber perspective</th>
+              <th class="py-3 px-4">Creator perspective</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="border-t border-white/5">
+              <td class="py-3 px-4">Settings</td>
+              <td class="py-3 px-4">Adjust preferences and privacy</td>
+              <td class="py-3 px-4">Configure creator tools and payouts</td>
+            </tr>
+            <tr class="border-t border-white/5">
+              <td class="py-3 px-4">Find Creators</td>
+              <td class="py-3 px-4">Discover voices to support</td>
+              <td class="py-3 px-4">Get discovered by new supporters</td>
+            </tr>
+            <tr class="border-t border-white/5">
+              <td class="py-3 px-4">Creator Hub</td>
+              <td class="py-3 px-4">Browse featured updates</td>
+              <td class="py-3 px-4">Publish content and track earnings</td>
+            </tr>
+            <tr class="border-t border-white/5">
+              <td class="py-3 px-4">My Profile</td>
+              <td class="py-3 px-4">Manage your Fundstr identity</td>
+              <td class="py-3 px-4">Showcase your creator brand</td>
+            </tr>
+            <tr class="border-t border-white/5">
+              <td class="py-3 px-4">Buckets</td>
+              <td class="py-3 px-4">Organize ecash for different goals</td>
+              <td class="py-3 px-4">Segment income streams</td>
+            </tr>
+            <tr class="border-t border-white/5">
+              <td class="py-3 px-4">Subscriptions</td>
+              <td class="py-3 px-4">Manage recurring supports</td>
+              <td class="py-3 px-4">Reward loyal fans</td>
+            </tr>
+            <tr class="border-t border-white/5">
+              <td class="py-3 px-4">Chats</td>
+              <td class="py-3 px-4">Connect privately with creators</td>
+              <td class="py-3 px-4">Engage directly with your audience</td>
+            </tr>
+            <tr class="border-t border-white/5">
+              <td class="py-3 px-4">Terms</td>
+              <td class="py-3 px-4">Know your rights and responsibilities</td>
+              <td class="py-3 px-4">Understand platform rules</td>
+            </tr>
+            <tr class="border-t border-white/5">
+              <td class="py-3 px-4">About</td>
+              <td class="py-3 px-4">Learn the project's vision</td>
+              <td class="py-3 px-4">See how Fundstr empowers creators</td>
+            </tr>
+            <tr class="border-t border-white/5">
+              <td class="py-3 px-4">External links</td>
+              <td class="py-3 px-4">Explore resources and communities</td>
+              <td class="py-3 px-4">Access tools and docs for building</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="md:hidden grid gap-4">
+        <!-- Mobile Cards -->
+        <div class="interactive-card p-4 rounded-lg">
+          <h3 class="font-semibold">Settings</h3>
+          <p class="text-sm mt-1"><span class="accent-text">Fan:</span> Adjust preferences and privacy</p>
+          <p class="text-sm"><span class="accent-text">Creator:</span> Configure creator tools and payouts</p>
+        </div>
+        <div class="interactive-card p-4 rounded-lg">
+          <h3 class="font-semibold">Find Creators</h3>
+          <p class="text-sm mt-1"><span class="accent-text">Fan:</span> Discover voices to support</p>
+          <p class="text-sm"><span class="accent-text">Creator:</span> Get discovered by new supporters</p>
+        </div>
+        <div class="interactive-card p-4 rounded-lg">
+          <h3 class="font-semibold">Creator Hub</h3>
+          <p class="text-sm mt-1"><span class="accent-text">Fan:</span> Browse featured updates</p>
+          <p class="text-sm"><span class="accent-text">Creator:</span> Publish content and track earnings</p>
+        </div>
+        <div class="interactive-card p-4 rounded-lg">
+          <h3 class="font-semibold">My Profile</h3>
+          <p class="text-sm mt-1"><span class="accent-text">Fan:</span> Manage your Fundstr identity</p>
+          <p class="text-sm"><span class="accent-text">Creator:</span> Showcase your creator brand</p>
+        </div>
+        <div class="interactive-card p-4 rounded-lg">
+          <h3 class="font-semibold">Buckets</h3>
+          <p class="text-sm mt-1"><span class="accent-text">Fan:</span> Organize ecash for different goals</p>
+          <p class="text-sm"><span class="accent-text">Creator:</span> Segment income streams</p>
+        </div>
+        <div class="interactive-card p-4 rounded-lg">
+          <h3 class="font-semibold">Subscriptions</h3>
+          <p class="text-sm mt-1"><span class="accent-text">Fan:</span> Manage recurring supports</p>
+          <p class="text-sm"><span class="accent-text">Creator:</span> Reward loyal fans</p>
+        </div>
+        <div class="interactive-card p-4 rounded-lg">
+          <h3 class="font-semibold">Chats</h3>
+          <p class="text-sm mt-1"><span class="accent-text">Fan:</span> Connect privately with creators</p>
+          <p class="text-sm"><span class="accent-text">Creator:</span> Engage directly with your audience</p>
+        </div>
+        <div class="interactive-card p-4 rounded-lg">
+          <h3 class="font-semibold">Terms</h3>
+          <p class="text-sm mt-1"><span class="accent-text">Fan:</span> Know your rights and responsibilities</p>
+          <p class="text-sm"><span class="accent-text">Creator:</span> Understand platform rules</p>
+        </div>
+        <div class="interactive-card p-4 rounded-lg">
+          <h3 class="font-semibold">About</h3>
+          <p class="text-sm mt-1"><span class="accent-text">Fan:</span> Learn the project's vision</p>
+          <p class="text-sm"><span class="accent-text">Creator:</span> See how Fundstr empowers creators</p>
+        </div>
+        <div class="interactive-card p-4 rounded-lg">
+          <h3 class="font-semibold">External links</h3>
+          <p class="text-sm mt-1"><span class="accent-text">Fan:</span> Explore resources and communities</p>
+          <p class="text-sm"><span class="accent-text">Creator:</span> Access tools and docs for building</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Trust Through Transparency -->
+    <section id="trust" class="fade-in-section">
+      <h2 class="text-3xl font-bold text-center mb-8 gradient-text">Trust Through Transparency</h2>
+      <div class="grid gap-6 md:grid-cols-2">
+        <div class="interactive-card p-6 rounded-lg">
+          <div class="flex items-center mb-2">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="w-6 h-6 mr-2" fill="currentColor"><path d="M12 0C5.372 0 0 5.373 0 12c0 5.302 3.438 9.8 8.205 11.386.6.113.82-.26.82-.577 0-.285-.01-1.04-.016-2.04-3.338.726-4.042-1.61-4.042-1.61-.546-1.387-1.333-1.756-1.333-1.756-1.091-.746.083-.731.083-.731 1.205.084 1.84 1.237 1.84 1.237 1.072 1.835 2.809 1.305 3.495.998.108-.776.42-1.305.763-1.605-2.665-.304-5.466-1.333-5.466-5.931 0-1.31.468-2.381 1.236-3.221-.124-.303-.536-1.524.117-3.176 0 0 1.008-.322 3.3 1.23a11.52 11.52 0 013.003-.404c1.018.005 2.045.138 3.003.404 2.291-1.552 3.297-1.23 3.297-1.23.654 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.61-2.804 5.624-5.475 5.921.431.372.815 1.102.815 2.222 0 1.604-.015 2.896-.015 3.286 0 .319.219.694.825.576C20.565 21.796 24 17.298 24 12c0-6.627-5.373-12-12-12z"/></svg>
+            <h3 class="font-semibold">Open Source &amp; Verifiable</h3>
+          </div>
+          <p class="text-sm mb-2">Fundstr is built on open-source code. We invite you to inspect, verify, and contribute.</p>
+          <a href="https://github.com/cashubtc/cashu.me" class="accent-text text-sm">Explore on GitHub →</a>
+        </div>
+        <div class="interactive-card p-6 rounded-lg">
+          <div class="flex items-center mb-2">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="w-6 h-6 mr-2" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12l2-2 4 4L21 4"/><path d="M3 12v6a2 2 0 002 2h14"/></svg>
+            <h3 class="font-semibold">You Hold the Keys</h3>
+          </div>
+          <p class="text-sm">You are the sole holder of your ecash tokens and Nostr identity. Mints act as custodians for the underlying Bitcoin, but only you can spend your ecash.</p>
+        </div>
+        <div class="interactive-card p-6 rounded-lg">
+          <div class="flex items-center mb-2">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="w-6 h-6 mr-2" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
+            <h3 class="font-semibold">Unbreakable Privacy</h3>
+          </div>
+          <p class="text-sm">Thanks to Chaumian blind signatures, mints cannot link your deposits to your withdrawals. Your spending habits remain completely private.</p>
+        </div>
+        <div class="interactive-card p-6 rounded-lg">
+          <div class="flex items-center mb-2">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="w-6 h-6 mr-2" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 18l6-6 6 6"/><path d="M6 6h12"/></svg>
+            <h3 class="font-semibold">Mint Diversification</h3>
+          </div>
+          <p class="text-sm">Fundstr supports multiple mints, allowing you to diversify your holdings. Our audit tools will warn you (⚠️) of any unusual mint behavior.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section id="faq" class="fade-in-section">
+      <h2 class="text-3xl font-bold text-center mb-8 gradient-text">Frequently Asked Questions</h2>
+      <div class="space-y-4">
+        <details class="interactive-card p-4 rounded-lg">
+          <summary class="flex justify-between items-center cursor-pointer font-medium">
+            <span>What if a fan stops paying?</span>
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M19 9l-7 7-7-7"/></svg>
+          </summary>
+          <p class="mt-2 text-sm">Creators retain control and can revoke access or perks if payments stop.</p>
+        </details>
+        <details class="interactive-card p-4 rounded-lg">
+          <summary class="flex justify-between items-center cursor-pointer font-medium">
+            <span>Can I withdraw to a Lightning wallet?</span>
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M19 9l-7 7-7-7"/></svg>
+          </summary>
+          <p class="mt-2 text-sm">Yes. Swap your ecash back to Bitcoin and send it to any Lightning wallet you control.</p>
+        </details>
+        <details class="interactive-card p-4 rounded-lg">
+          <summary class="flex justify-between items-center cursor-pointer font-medium">
+            <span>How private is this really?</span>
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M19 9l-7 7-7-7"/></svg>
+          </summary>
+          <p class="mt-2 text-sm">Ecash transactions are unlinkable. Mints cannot trace deposits and withdrawals.</p>
+        </details>
+        <details class="interactive-card p-4 rounded-lg">
+          <summary class="flex justify-between items-center cursor-pointer font-medium">
+            <span>Fees?</span>
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M19 9l-7 7-7-7"/></svg>
+          </summary>
+          <p class="mt-2 text-sm">Fundstr aims for minimal fees. Mint and network fees may apply when swapping in or out.</p>
+        </details>
+        <details class="interactive-card p-4 rounded-lg">
+          <summary class="flex justify-between items-center cursor-pointer font-medium">
+            <span>What is a 'mint' and why do I have to trust it?</span>
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M19 9l-7 7-7-7"/></svg>
+          </summary>
+          <p class="mt-2 text-sm">A mint issues ecash tokens in exchange for Bitcoin. You trust it to hold collateral, but tokens stay under your control.</p>
+        </details>
+        <details class="interactive-card p-4 rounded-lg">
+          <summary class="flex justify-between items-center cursor-pointer font-medium">
+            <span>What happens if a mint I use goes offline?</span>
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M19 9l-7 7-7-7"/></svg>
+          </summary>
+          <p class="mt-2 text-sm">Your tokens remain valid. You can redeem them later or diversify across multiple mints for resilience.</p>
+        </details>
+      </div>
+    </section>
+  </main>
+
+  <!-- Community -->
+  <section id="community" class="fade-in-section mt-32 text-center px-4">
+    <h2 class="text-3xl font-bold mb-6 gradient-text">Join the Conversation</h2>
+    <p class="mb-6 max-w-3xl mx-auto">Follow the project and its creator on Nostr to stay up-to-date and connect with the community.</p>
+    <div class="flex justify-center gap-8">
+      <a href="#" class="hover-accent flex items-center gap-2">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2"><path d="M5.121 17.804A9 9 0 1112 21a9.003 9.003 0 01-6.879-3.196z"/></svg>
+        Creator's Profile
+      </a>
+      <a href="#" class="hover-accent flex items-center gap-2">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3h18v18H3V3z"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
+        Fundstr Project Page
+      </a>
+    </div>
+  </section>
+
+  <!-- Quote -->
+  <blockquote class="fade-in-section max-w-3xl mx-auto mt-24 italic border-l-4 pl-6" style="border-color: var(--color-accent);">
+    Fundstr is powered by open-source code and an open community...
+  </blockquote>
+
+  <!-- CTA -->
+  <section id="cta" class="fade-in-section text-center mt-24 px-4 pb-20">
+    <h2 class="text-3xl font-bold mb-4">Ready to Join the Movement?</h2>
+    <p class="mb-8">Install the PWA, explore the code, or help fund development.</p>
+    <div class="flex flex-col sm:flex-row gap-4 justify-center">
+      <a href="#" class="px-6 py-3 rounded-full bg-indigo-600 text-white font-semibold">Install PWA</a>
+      <a href="#" class="px-6 py-3 rounded-full gradient-bg text-black font-semibold">Support Fundstr</a>
+      <a href="https://github.com/cashubtc/cashu.me" class="px-6 py-3 rounded-full border border-white/20 font-semibold hover-accent">Explore Code</a>
+    </div>
+  </section>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-visible');
+            observer.unobserve(entry.target);
+          }
+        });
+      });
+      document.querySelectorAll('.fade-in-section').forEach((el) => observer.observe(el));
+    });
+  </script>
+</body>
+</html>
