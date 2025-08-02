@@ -1,243 +1,305 @@
 <template>
-  <div class="font-sans text-gray-300">
-    <header class="text-center py-16 fade-in-section">
-      <h1 class="text-4xl sm:text-5xl font-extrabold gradient-text">About Fundstr</h1>
-      <p class="mt-4 text-lg max-w-2xl mx-auto">
-        Learn how Fundstr uses Cashu ecash to empower fans and creators with private, instant payments.
+  <div class="about-page antialiased">
+    <!-- Header -->
+    <header class="text-center py-20 fade-in-section">
+      <h1 class="text-5xl md:text-7xl font-extrabold mb-6">
+        About <span class="gradient-text">Fundstr</span>
+      </h1>
+      <p class="max-w-2xl mx-auto text-lg md:text-xl mb-8">
+        A privacy-first Bitcoin wallet, social chat, and creator-monetisation hub built on the open-source Cashu ecash protocol and the decentralised Nostr network.
       </p>
-      <div class="mt-6 max-w-xl mx-auto border border-amber-500/30 bg-amber-900/20 text-amber-200 p-4 rounded">
-        ⚠️ Fundstr is in <span class="font-semibold">alpha</span>. Expect bugs and use at your own risk.
+      <div class="max-w-3xl mx-auto bg-amber-900/20 border border-amber-500/30 text-amber-300 px-4 py-3 rounded">
+        ⚠️ Please note: Fundstr is currently in an alpha stage. While functional, it is experimental software. Use with caution and do not store large amounts of funds.
       </div>
     </header>
 
-    <main class="max-w-5xl mx-auto space-y-24 px-6">
-      <!-- Vision -->
-      <section id="vision" class="fade-in-section text-center">
-        <h2 class="text-2xl font-semibold mb-4">Our Vision</h2>
-        <p class="prose-custom mx-auto">
-          Fundstr imagines a world where anyone can fund what they love using
-          <span class="accent-text">privacy‑preserving ecash</span>.
-        </p>
-      </section>
+    <!-- Vision -->
+    <section id="vision" class="max-w-3xl mx-auto px-4 py-20 fade-in-section">
+      <h2 class="text-4xl font-bold mb-6 gradient-text">Your Money, Your Network</h2>
+      <p>
+        We believe in a world where your financial life and social interactions are truly your own. Fundstr is an experiment in creating a parallel, peer-to-peer economy—free from corporate gatekeepers, surveillance, and unpredictable fees. It’s a gateway to a more sovereign way of connecting and transacting.
+      </p>
+    </section>
 
-      <!-- How Ecash Works -->
-      <section id="how-it-works" class="fade-in-section">
-        <h2 class="text-2xl font-semibold mb-8 text-center">How Ecash Works</h2>
-        <div class="grid gap-6 md:grid-cols-5 items-center text-center">
-          <!-- Your Bitcoin -->
-          <div class="p-6 rounded-lg bg-white/5 interactive-card flex flex-col items-center">
-            <div class="mb-4 flex items-center justify-center w-12 h-12 rounded-full border border-white/20">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="w-6 h-6 fill-current accent-text"><path d="M11.755 12.016l-.002.009c1.676.408 2.74 1.56 2.414 3.265-.392 1.917-2.055 2.542-3.897 2.644l-.16.809-1.26-.245.154-.78c-.322-.064-.65-.132-.978-.2l-.153.773-1.26-.245.155-.786c-.267-.058-.533-.116-.796-.177l-1.586-.309.402-1.362s.9.188.889.176c.348.069.504-.156.56-.327l.394-2.004c.023.005.053.01.086.016l-.085-.017.62-3.156c.011-.262-.073-.595-.561-.688.012-.011-.887-.177-.887-.177l.215-1.293 1.682.327c.313.061.622.122.923.182l.153-.79 1.26.245-.154.78c.33.064.654.127.97.188l.152-.774 1.26.245-.154.78c1.642.356 2.717 1.409 2.4 3.024-.255 1.312-1.214 1.969-2.459 2.176zM9.74 9.36l-.437 2.23c.49.098 2.003.272 2.246-.577.237-1.206-1.103-1.482-1.809-1.653zm-.713 3.636l-.482 2.463c.583.116 2.344.336 2.602-.539.263-1.302-1.335-1.596-2.12-1.924z"/></svg>
-            </div>
-            <h3 class="font-bold mb-2">Your Bitcoin</h3>
-            <p class="text-sm">Start with sats you already own.</p>
-          </div>
-          <div class="hidden md:flex justify-center">&rarr;</div>
-          <!-- The Mint -->
-          <div class="p-6 rounded-lg bg-white/5 interactive-card flex flex-col items-center">
-            <div class="mb-4 flex items-center justify-center w-12 h-12 rounded-full border border-white/20">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="w-6 h-6 stroke-current accent-text" fill="none"><path stroke-width="2" d="M4 4h16v16H4z"/><path stroke-width="2" d="M4 9h16"/><path stroke-width="2" d="M9 4v16"/></svg>
-            </div>
-            <h3 class="font-bold mb-2">The Mint</h3>
-            <p class="text-sm">Swap sats for ecash tokens.</p>
-          </div>
-          <div class="hidden md:flex justify-center">&rarr;</div>
-          <!-- Fundstr Wallet -->
-          <div class="p-6 rounded-lg bg-white/5 interactive-card flex flex-col items-center">
-            <div class="mb-4 flex items-center justify-center w-12 h-12 rounded-full border border-white/20">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="w-6 h-6 stroke-current accent-text" fill="none"><path stroke-width="2" d="M3 7h18v10H3z"/><path stroke-width="2" d="M7 11h10"/><path stroke-width="2" d="M7 15h6"/></svg>
-            </div>
-            <h3 class="font-bold mb-2">Fundstr Wallet</h3>
-            <p class="text-sm">Spend or send instantly and privately.</p>
-          </div>
+    <!-- How Ecash Works -->
+    <section id="how-it-works" class="px-4 py-20 fade-in-section">
+      <h2 class="text-center text-4xl font-bold mb-10 gradient-text">How Ecash Works</h2>
+      <p class="text-center mb-12">The loop is simple: Bitcoin in → private e-cash out → social payments everywhere.</p>
+      <div class="grid grid-cols-1 md:grid-cols-5 gap-6 max-w-5xl mx-auto items-center">
+        <!-- Step 1 -->
+        <div class="interactive-card p-6 flex flex-col items-center text-center">
+          <svg class="w-16 h-16 mb-4" viewBox="0 0 100 100">
+            <circle cx="50" cy="50" r="50" fill="#f7931a" />
+            <text x="50" y="65" text-anchor="middle" font-size="60" font-weight="bold" fill="white" font-family="Arial, sans-serif">₿</text>
+          </svg>
+          <h3 class="font-bold text-xl mb-2">Your Bitcoin</h3>
+          <p class="text-sm">From any wallet</p>
         </div>
-      </section>
-
-      <!-- Built for the Sovereign Individual -->
-      <section id="who-for" class="fade-in-section">
-        <h2 class="text-2xl font-semibold mb-8 text-center">Built for the Sovereign Individual</h2>
-        <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-          <div class="p-6 rounded-lg bg-white/5 interactive-card text-center">
-            <div class="mb-4 flex justify-center">
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 accent-text" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="7" r="4"/><path d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/></svg>
-            </div>
-            <h3 class="font-bold mb-2">Creators</h3>
-            <p class="text-sm">Collect tips directly from your audience.</p>
-          </div>
-          <div class="p-6 rounded-lg bg-white/5 interactive-card text-center">
-            <div class="mb-4 flex justify-center">
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 accent-text" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l8.84 8.84 8.84-8.84a5.5 5.5 0 000-7.78z"/></svg>
-            </div>
-            <h3 class="font-bold mb-2">Fans</h3>
-            <p class="text-sm">Support what you love without friction.</p>
-          </div>
-          <div class="p-6 rounded-lg bg-white/5 interactive-card text-center">
-            <div class="mb-4 flex justify-center">
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 accent-text" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
-            </div>
-            <h3 class="font-bold mb-2">Communities</h3>
-            <p class="text-sm">Pool funds for causes and friends.</p>
-          </div>
-          <div class="p-6 rounded-lg bg-white/5 interactive-card text-center">
-            <div class="mb-4 flex justify-center">
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 accent-text" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20v-6"/><path d="M6 20v-4"/><path d="M18 20v-8"/><path d="M2 10l10-8 10 8"/></svg>
-            </div>
-            <h3 class="font-bold mb-2">Developers</h3>
-            <p class="text-sm">Build on an open, extensible protocol.</p>
-          </div>
+        <!-- Arrow -->
+        <div class="hidden md:flex justify-center text-4xl">→</div>
+        <!-- Step 2 -->
+        <div class="interactive-card p-6 flex flex-col items-center text-center">
+          <svg class="w-16 h-16 mb-4" viewBox="0 0 24 24">
+            <path fill="#4f46e5" d="M12 2l7 4v6c0 5-3 9-7 10-4-1-7-5-7-10V6l7-4z" />
+          </svg>
+          <h3 class="font-bold text-xl mb-2">The Mint</h3>
+          <p class="text-sm">Swaps for Ecash</p>
         </div>
-      </section>
+        <!-- Arrow -->
+        <div class="hidden md:flex justify-center text-4xl">→</div>
+        <!-- Step 3 -->
+        <div class="interactive-card p-6 flex flex-col items-center text-center">
+          <svg class="w-16 h-16 mb-4" viewBox="0 0 24 24">
+            <path fill="#ec4899" d="M12 4.5c-7 0-10 7.5-10 7.5s3 7.5 10 7.5 10-7.5 10-7.5-3-7.5-10-7.5zm0 12a4.5 4.5 0 110-9 4.5 4.5 0 010 9z" />
+          </svg>
+          <h3 class="font-bold text-xl mb-2">Fundstr Wallet</h3>
+          <p class="text-sm">Private &amp; ready to spend</p>
+        </div>
+      </div>
+    </section>
 
-      <!-- Navigation Map -->
-      <section id="navigation-map" class="fade-in-section">
-        <h2 class="text-2xl font-semibold mb-4 text-center">Navigation Map</h2>
-        <table class="nav-table w-full text-left hidden md:table">
+    <!-- Built for the Sovereign Individual -->
+    <section id="who-for" class="px-4 py-20 fade-in-section">
+      <h2 class="text-center text-4xl font-bold mb-12 gradient-text">Built for the Sovereign Individual</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
+        <!-- Card 1 -->
+        <div class="interactive-card p-6 text-center">
+          <div class="text-4xl mb-4">🎨</div>
+          <h3 class="font-bold text-xl mb-2">Content Creators</h3>
+          <p class="text-sm">Monetize your audience directly, free from de-platforming and high fees.</p>
+        </div>
+        <!-- Card 2 -->
+        <div class="interactive-card p-6 text-center">
+          <div class="text-4xl mb-4">🛡️</div>
+          <h3 class="font-bold text-xl mb-2">Privacy Advocates</h3>
+          <p class="text-sm">Transact with confidence that your financial life isn't being tracked.</p>
+        </div>
+        <!-- Card 3 -->
+        <div class="interactive-card p-6 text-center">
+          <div class="text-4xl mb-4">⛓️</div>
+          <h3 class="font-bold text-xl mb-2">Nostr Users</h3>
+          <p class="text-sm">Upgrade your zaps to be truly private and integrate payments seamlessly.</p>
+        </div>
+        <!-- Card 4 -->
+        <div class="interactive-card p-6 text-center">
+          <div class="text-4xl mb-4">🌍</div>
+          <h3 class="font-bold text-xl mb-2">Global Citizens</h3>
+          <p class="text-sm">Move value across borders instantly, without relying on traditional banking.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Navigation Map -->
+    <section id="navigation-map" class="px-4 py-20 fade-in-section">
+      <h2 class="text-center text-4xl font-bold mb-6 gradient-text">Navigation Map</h2>
+      <p class="text-center mb-12">Every page explained from both the Creator and Fan perspectives.</p>
+      <!-- Desktop Table -->
+      <div class="hidden md:block interactive-card p-6 overflow-x-auto">
+        <table class="w-full text-left">
           <thead>
-            <tr class="bg-white/5">
-              <th class="py-2 px-4">Section</th>
-              <th class="py-2 px-4">Fan View</th>
-              <th class="py-2 px-4">Creator View</th>
+            <tr class="text-sm text-gray-400">
+              <th class="py-2 pr-4">🧭 Menu item</th>
+              <th class="py-2 pr-4">Fan / Subscriber perspective</th>
+              <th class="py-2">Creator perspective</th>
             </tr>
           </thead>
-          <tbody>
-            <tr>
-              <td class="py-2 px-4">Dashboard</td>
-              <td class="py-2 px-4 accent-text">Track tips</td>
-              <td class="py-2 px-4 text-pink-400">Monitor income</td>
+          <tbody class="text-sm">
+            <tr class="border-t border-gray-700">
+              <td class="py-3 pr-4">Settings</td>
+              <td class="py-3 pr-4">Add / switch mints, choose display unit, set language &amp; theme, import or back-up your 12-word seed, manage Nostr keys &amp; relays.</td>
+              <td class="py-3">Same, plus Publishing settings: toggle automatic NIP-61 profile updates and set a default “Earnings” bucket.</td>
             </tr>
-            <tr>
-              <td class="py-2 px-4">Find Creators</td>
-              <td class="py-2 px-4 accent-text">Discover talent</td>
-              <td class="py-2 px-4 text-pink-400">Showcase profile</td>
+            <tr class="border-t border-gray-700">
+              <td class="py-3 pr-4">Find Creators</td>
+              <td class="py-3 pr-4">Search or browse Nostr-indexed profiles. View tier prices, previews and public posts. Hit Subscribe or Zap with a single tap.</td>
+              <td class="py-3">Your public storefront as seen by visitors. Great for a quick audit of how your profile appears worldwide.</td>
             </tr>
-            <tr>
-              <td class="py-2 px-4">Settings</td>
-              <td class="py-2 px-4 accent-text">Manage wallet</td>
-              <td class="py-2 px-4 text-pink-400">Customize hub</td>
+            <tr class="border-t border-gray-700">
+              <td class="py-3 pr-4">Creator Hub</td>
+              <td class="py-3 pr-4">— (hidden unless you toggle “Creator Mode”)</td>
+              <td class="py-3">Define or edit tiers (price, duration, perks), upload cover art, publish pay-walled posts, check revenue analytics and subscriber list.</td>
+            </tr>
+            <tr class="border-t border-gray-700">
+              <td class="py-3 pr-4">My Profile</td>
+              <td class="py-3 pr-4">Show off your avatar, npub link and optional NIP-05. Personal stats: total zaps sent &amp; received, bucket balances.</td>
+              <td class="py-3">Same card plus Edit. Update bio, tags and the secondary P2PK key used by fans to send you locked tokens.</td>
+            </tr>
+            <tr class="border-t border-gray-700">
+              <td class="py-3 pr-4">Buckets</td>
+              <td class="py-3 pr-4">Drag-and-drop jars for budgeting (“Groceries”, “Fun money”, “Subs”). Move sats with zero fees.</td>
+              <td class="py-3">Create an “Income” bucket that auto-receives new tips; split out taxes or savings instantly.</td>
+            </tr>
+            <tr class="border-t border-gray-700">
+              <td class="py-3 pr-4">Subscriptions</td>
+              <td class="py-3 pr-4">See every active plan: tier name, next renewal, cumulative sats spent. Cancel or renew with one click.</td>
+              <td class="py-3">Quick list of paying supporters, tier breakdown, churn alerts and pending renewals.</td>
+            </tr>
+            <tr class="border-t border-gray-700">
+              <td class="py-3 pr-4">Chats</td>
+              <td class="py-3 pr-4">End-to-end encrypted DMs (Nostr kind 4). Attach images or Cashu tokens. Green flash means a payment is embedded and auto-redeemed on receipt.</td>
+              <td class="py-3">Same powerful chat plus a broadcast toggle to message all subs in a tier at once.</td>
+            </tr>
+            <tr class="border-t border-gray-700">
+              <td class="py-3 pr-4">Terms</td>
+              <td class="py-3 pr-4">Human-readable, plain-English licence &amp; disclaimers.</td>
+              <td class="py-3">Identical — clarifies you keep full custody of funds.</td>
+            </tr>
+            <tr class="border-t border-gray-700">
+              <td class="py-3 pr-4">About</td>
+              <td class="py-3 pr-4">Learn everything in one scroll.</td>
+              <td class="py-3">Ditto; includes creator-specific FAQs below.</td>
+            </tr>
+            <tr class="border-t border-gray-700">
+              <td class="py-3 pr-4">External links</td>
+              <td class="py-3 pr-4">Cashu.space docs, GitHub, Twitter, Telegram, Donate.</td>
+              <td class="py-3">Identical — share with collaborators or fans.</td>
             </tr>
           </tbody>
         </table>
-        <div class="nav-cards grid gap-4 md:hidden">
-          <div class="p-4 rounded-lg bg-white/5 interactive-card">
-            <h3 class="font-semibold">Dashboard</h3>
-            <p class="mt-2"><span class="accent-text">Fan:</span> Track tips</p>
-            <p><span class="text-pink-400">Creator:</span> Monitor income</p>
-          </div>
-          <div class="p-4 rounded-lg bg-white/5 interactive-card">
-            <h3 class="font-semibold">Find Creators</h3>
-            <p class="mt-2"><span class="accent-text">Fan:</span> Discover talent</p>
-            <p><span class="text-pink-400">Creator:</span> Showcase profile</p>
-          </div>
-          <div class="p-4 rounded-lg bg-white/5 interactive-card">
-            <h3 class="font-semibold">Settings</h3>
-            <p class="mt-2"><span class="accent-text">Fan:</span> Manage wallet</p>
-            <p><span class="text-pink-400">Creator:</span> Customize hub</p>
-          </div>
-        </div>
-      </section>
+      </div>
 
-      <!-- Trust & Security -->
-      <section id="trust" class="fade-in-section">
-        <h2 class="text-2xl font-semibold mb-8 text-center">Trust &amp; Security</h2>
-        <div class="grid gap-6 md:grid-cols-2">
-          <div class="p-6 rounded-lg bg-white/5 interactive-card">
-            <h3 class="font-bold mb-2 flex items-center">
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-2 accent-text" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-              Open Source
-            </h3>
-            <p class="text-sm">Explore the code on GitHub and audit everything.</p>
-            <a href="https://github.com/cashubtc/cashu.me" target="_blank" class="accent-text underline text-sm">Explore on GitHub</a>
-          </div>
-          <div class="p-6 rounded-lg bg-white/5 interactive-card">
-            <h3 class="font-bold mb-2 flex items-center">
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-2 accent-text" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12l2-2 4 4L21 4"/><path d="M3 12v6a2 2 0 002 2h14"/></svg>
-              Your Keys, Your Money
-            </h3>
-            <p class="text-sm">Seed words stay on your device—no custodian required.</p>
-          </div>
-          <div class="p-6 rounded-lg bg-white/5 interactive-card">
-            <h3 class="font-bold mb-2 flex items-center">
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-2 accent-text" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v18"/><path d="M5 12h14"/></svg>
-              Privacy First
-            </h3>
-            <p class="text-sm">Ecash hides amounts and identities by design.</p>
-          </div>
-          <div class="p-6 rounded-lg bg-white/5 interactive-card">
-            <h3 class="font-bold mb-2 flex items-center">
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-2 accent-text" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 13h6"/><path d="M5 17h14"/><path d="M7 9h10"/><path d="M12 4v1"/><path d="M12 19v1"/></svg>
-              Mint Diversification
-            </h3>
-            <p class="text-sm">Use multiple mints to spread risk. ⚠️</p>
-          </div>
+      <!-- Mobile Cards -->
+      <div class="md:hidden space-y-4">
+        <div class="interactive-card p-4">
+          <h3 class="font-semibold text-lg mb-1">Settings</h3>
+          <p class="text-sm"><span class="font-medium">Fan / Subscriber perspective:</span> Add / switch mints, choose display unit, set language &amp; theme, import or back-up your 12-word seed, manage Nostr keys &amp; relays.</p>
+          <p class="text-sm mt-2"><span class="font-medium">Creator perspective:</span> Same, plus Publishing settings: toggle automatic NIP-61 profile updates and set a default “Earnings” bucket.</p>
         </div>
-      </section>
-
-      <!-- FAQ -->
-      <section id="faq" class="fade-in-section">
-        <h2 class="text-2xl font-semibold mb-4 text-center">FAQ</h2>
-        <div class="space-y-4">
-          <details class="p-4 rounded-lg bg-white/5 interactive-card">
-            <summary class="font-medium flex justify-between items-center cursor-pointer">
-              <span>What happens if I lose my seed?</span>
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M19 9l-7 7-7-7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            </summary>
-            <p class="mt-2 text-sm">Lost seeds cannot be recovered. Always back up your 12‑word seed securely.</p>
-          </details>
-          <details class="p-4 rounded-lg bg-white/5 interactive-card">
-            <summary class="font-medium flex justify-between items-center cursor-pointer">
-              <span>Is Fundstr free?</span>
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M19 9l-7 7-7-7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            </summary>
-            <p class="mt-2 text-sm">Yes, Fundstr is free and open‑source. Donate if you find it useful.</p>
-          </details>
-          <details class="p-4 rounded-lg bg-white/5 interactive-card">
-            <summary class="font-medium flex justify-between items-center cursor-pointer">
-              <span>Can I run my own mint?</span>
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M19 9l-7 7-7-7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            </summary>
-            <p class="mt-2 text-sm">Absolutely. Cashu is permissionless—run a mint and plug it into Fundstr.</p>
-          </details>
+        <div class="interactive-card p-4">
+          <h3 class="font-semibold text-lg mb-1">Find Creators</h3>
+          <p class="text-sm"><span class="font-medium">Fan / Subscriber perspective:</span> Search or browse Nostr-indexed profiles. View tier prices, previews and public posts. Hit Subscribe or Zap with a single tap.</p>
+          <p class="text-sm mt-2"><span class="font-medium">Creator perspective:</span> Your public storefront as seen by visitors. Great for a quick audit of how your profile appears worldwide.</p>
         </div>
-      </section>
-
-      <!-- Community Links -->
-      <section id="community" class="fade-in-section">
-        <h2 class="text-2xl font-semibold mb-4 text-center">Community</h2>
-        <div class="flex flex-wrap gap-4 justify-center">
-          <a href="https://github.com/cashubtc/cashu.me" target="_blank" class="flex items-center px-4 py-2 rounded-lg bg-white/5 interactive-card">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 .5C5.65.5.5 5.65.5 12a11.5 11.5 0 007.87 10.95c.58.1.79-.25.79-.56 0-.28-.01-1.02-.02-2-3.2.7-3.88-1.54-3.88-1.54-.53-1.35-1.3-1.7-1.3-1.7-1.06-.72.08-.71.08-.71 1.18.08 1.8 1.22 1.8 1.22 1.04 1.78 2.73 1.27 3.4.97.1-.75.41-1.27.75-1.56-2.56-.29-5.26-1.28-5.26-5.69 0-1.26.45-2.29 1.2-3.1-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.18 1.18a11.07 11.07 0 015.8 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.75.81 1.2 1.84 1.2 3.1 0 4.42-2.7 5.39-5.28 5.67.42.36.8 1.06.8 2.13 0 1.54-.01 2.78-.01 3.16 0 .31.21.67.8.56A11.5 11.5 0 0023.5 12C23.5 5.65 18.35.5 12 .5z"/></svg>
-            <span class="ml-2">GitHub</span>
-          </a>
-          <a href="https://fundstr.app" target="_blank" class="flex items-center px-4 py-2 rounded-lg bg-white/5 interactive-card">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M12 5v14" stroke-width="2" stroke-linecap="round"/><path d="M5 12h14" stroke-width="2" stroke-linecap="round"/></svg>
-            <span class="ml-2">Website</span>
-          </a>
-          <a href="https://njump.me/npub1aljmhjp5tqrw3m60ra7t3u8uqq223d6rdg9q0h76a8djd9m4hmvsmlj82m" target="_blank" class="flex items-center px-4 py-2 rounded-lg bg-white/5 interactive-card">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M15 10l4.55-4.55a2 2 0 000-2.83l-.17-.17a2 2 0 00-2.83 0L12 7"/><path d="M17 8l-6.29 6.29"/><path d="M11 16l-1.17 1.17a2 2 0 01-2.83 0l-.17-.17a2 2 0 010-2.83L10 12" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            <span class="ml-2">Nostr</span>
-          </a>
+        <div class="interactive-card p-4">
+          <h3 class="font-semibold text-lg mb-1">Creator Hub</h3>
+          <p class="text-sm"><span class="font-medium">Fan / Subscriber perspective:</span> — (hidden unless you toggle “Creator Mode”)</p>
+          <p class="text-sm mt-2"><span class="font-medium">Creator perspective:</span> Define or edit tiers (price, duration, perks), upload cover art, publish pay-walled posts, check revenue analytics and subscriber list.</p>
         </div>
-      </section>
-
-      <!-- Final Quote -->
-      <section class="fade-in-section text-center">
-        <blockquote class="italic max-w-2xl mx-auto">
-          "The future of digital economies lies in open, community‑driven tools."
-        </blockquote>
-      </section>
-
-      <!-- Call to Action -->
-      <section id="cta" class="fade-in-section text-center pb-16">
-        <div class="flex flex-col sm:flex-row gap-4 justify-center mt-8">
-          <router-link to="/welcome" class="px-6 py-3 rounded-lg bg-white/5 interactive-card">
-            Install PWA
-          </router-link>
-          <a href="https://fundstr.app/support" target="_blank" class="px-6 py-3 rounded-lg gradient-bg text-white shadow">
-            Support Fundstr
-          </a>
+        <div class="interactive-card p-4">
+          <h3 class="font-semibold text-lg mb-1">My Profile</h3>
+          <p class="text-sm"><span class="font-medium">Fan / Subscriber perspective:</span> Show off your avatar, npub link and optional NIP-05. Personal stats: total zaps sent &amp; received, bucket balances.</p>
+          <p class="text-sm mt-2"><span class="font-medium">Creator perspective:</span> Same card plus Edit. Update bio, tags and the secondary P2PK key used by fans to send you locked tokens.</p>
         </div>
-      </section>
-    </main>
+        <div class="interactive-card p-4">
+          <h3 class="font-semibold text-lg mb-1">Buckets</h3>
+          <p class="text-sm"><span class="font-medium">Fan / Subscriber perspective:</span> Drag-and-drop jars for budgeting (“Groceries”, “Fun money”, “Subs”). Move sats with zero fees.</p>
+          <p class="text-sm mt-2"><span class="font-medium">Creator perspective:</span> Create an “Income” bucket that auto-receives new tips; split out taxes or savings instantly.</p>
+        </div>
+        <div class="interactive-card p-4">
+          <h3 class="font-semibold text-lg mb-1">Subscriptions</h3>
+          <p class="text-sm"><span class="font-medium">Fan / Subscriber perspective:</span> See every active plan: tier name, next renewal, cumulative sats spent. Cancel or renew with one click.</p>
+          <p class="text-sm mt-2"><span class="font-medium">Creator perspective:</span> Quick list of paying supporters, tier breakdown, churn alerts and pending renewals.</p>
+        </div>
+        <div class="interactive-card p-4">
+          <h3 class="font-semibold text-lg mb-1">Chats</h3>
+          <p class="text-sm"><span class="font-medium">Fan / Subscriber perspective:</span> End-to-end encrypted DMs (Nostr kind 4). Attach images or Cashu tokens. Green flash means a payment is embedded and auto-redeemed on receipt.</p>
+          <p class="text-sm mt-2"><span class="font-medium">Creator perspective:</span> Same powerful chat plus a broadcast toggle to message all subs in a tier at once.</p>
+        </div>
+        <div class="interactive-card p-4">
+          <h3 class="font-semibold text-lg mb-1">Terms</h3>
+          <p class="text-sm"><span class="font-medium">Fan / Subscriber perspective:</span> Human-readable, plain-English licence &amp; disclaimers.</p>
+          <p class="text-sm mt-2"><span class="font-medium">Creator perspective:</span> Identical — clarifies you keep full custody of funds.</p>
+        </div>
+        <div class="interactive-card p-4">
+          <h3 class="font-semibold text-lg mb-1">About</h3>
+          <p class="text-sm"><span class="font-medium">Fan / Subscriber perspective:</span> Learn everything in one scroll.</p>
+          <p class="text-sm mt-2"><span class="font-medium">Creator perspective:</span> Ditto; includes creator-specific FAQs below.</p>
+        </div>
+        <div class="interactive-card p-4">
+          <h3 class="font-semibold text-lg mb-1">External links</h3>
+          <p class="text-sm"><span class="font-medium">Fan / Subscriber perspective:</span> Cashu.space docs, GitHub, Twitter, Telegram, Donate.</p>
+          <p class="text-sm mt-2"><span class="font-medium">Creator perspective:</span> Identical — share with collaborators or fans.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Trust Through Transparency -->
+    <section id="trust" class="px-4 py-20 fade-in-section">
+      <h2 class="text-center text-4xl font-bold mb-12 gradient-text">Trust Through Transparency</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl mx-auto">
+        <!-- Card 1 -->
+        <div class="interactive-card p-6">
+          <div class="text-4xl mb-4">🐙</div>
+          <h3 class="font-bold text-xl mb-2">Open Source &amp; Verifiable</h3>
+          <p class="text-sm">Fundstr is built on open-source code. We invite you to inspect, verify, and contribute. Transparency is our core principle.</p>
+        </div>
+        <!-- Card 2 -->
+        <div class="interactive-card p-6">
+          <div class="text-4xl mb-4">🔑</div>
+          <h3 class="font-bold text-xl mb-2">You Hold the Keys</h3>
+          <p class="text-sm">You are the sole holder of your ecash tokens and Nostr identity. Mints act as custodians for the underlying Bitcoin, but only you can spend your ecash.</p>
+        </div>
+        <!-- Card 3 -->
+        <div class="interactive-card p-6">
+          <div class="text-4xl mb-4">🛡️✔️</div>
+          <h3 class="font-bold text-xl mb-2">Unbreakable Privacy</h3>
+          <p class="text-sm">Thanks to Chaumian blind signatures, mints cannot link your deposits to your withdrawals. Your spending habits remain completely private.</p>
+        </div>
+        <!-- Card 4 -->
+        <div class="interactive-card p-6">
+          <div class="text-4xl mb-4">🪙🪙</div>
+          <h3 class="font-bold text-xl mb-2">Mint Diversification</h3>
+          <p class="text-sm">Fundstr supports multiple mints, allowing you to diversify your holdings. Our audit tools will warn you (⚠️) of any unusual mint behavior.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section id="faq" class="px-4 py-20 max-w-3xl mx-auto fade-in-section">
+      <h2 class="text-4xl font-bold mb-10 gradient-text">Frequently Asked Questions</h2>
+      <div class="space-y-6">
+        <details class="interactive-card p-4">
+          <summary class="font-semibold cursor-pointer">What if a fan stops paying?</summary>
+          <div class="mt-2 text-sm space-y-2">
+            <p><span class="font-medium">Creator view »</span> Their timelocked token never unlocks for you. Fundstr flags the user as “Expired” and hides future paid posts.</p>
+            <p><span class="font-medium">Fan view »</span> You simply don’t renew. No recurring pull, no surprise charges.</p>
+          </div>
+        </details>
+        <details class="interactive-card p-4">
+          <summary class="font-semibold cursor-pointer">Can I withdraw to a Lightning wallet?</summary>
+          <div class="mt-2 text-sm">
+            Yes. Go to Wallet → Send → Lightning Invoice, paste the invoice from any external wallet; Fundstr melts the tokens at the mint and pays it.
+          </div>
+        </details>
+        <details class="interactive-card p-4">
+          <summary class="font-semibold cursor-pointer">How private is this really?</summary>
+          <div class="mt-2 text-sm space-y-2">
+            <p>Mints see withdraw/redeem events but cannot correlate them.</p>
+            <p>Nostr chats are E2E encrypted; Nutzaps use P2PK so only the intended receiver can claim them.</p>
+            <p>Choose different mints or buckets to compartmentalise further.</p>
+          </div>
+        </details>
+      </div>
+    </section>
+
+    <!-- Community -->
+    <section class="px-4 py-20 fade-in-section">
+      <h2 class="text-center text-4xl font-bold mb-4 gradient-text">Join the Conversation</h2>
+      <p class="text-center max-w-2xl mx-auto mb-6">
+        Follow the project and its creator on Nostr to stay up-to-date and connect with the community.
+      </p>
+      <div class="flex justify-center space-x-6">
+        <a href="#" class="accent-text underline">Creator's Profile</a>
+        <a href="#" class="accent-text underline">Fundstr Project Page</a>
+      </div>
+    </section>
+
+    <!-- Quote -->
+    <section class="max-w-3xl mx-auto px-4 mb-20 fade-in-section">
+      <blockquote class="border-l-4 pl-4 border-[var(--color-accent)] italic">
+        Fundstr is powered by open-source code and an open community. Whether you’re a storyteller earning sats or a fan supporting work you love, we hope this guide helps you navigate every page with confidence — and makes your next payment feel as effortless as a like, comment, or retweet.
+      </blockquote>
+    </section>
+
+    <!-- CTA -->
+    <section id="cta" class="text-center px-4 py-20 fade-in-section">
+      <h2 class="text-4xl font-bold mb-4 gradient-text">Ready to Join the Movement?</h2>
+      <p class="mb-8">Install the PWA, explore the code, or help fund development.</p>
+      <div class="flex flex-col sm:flex-row justify-center gap-4">
+        <a href="#" class="px-8 py-3 rounded bg-indigo-600 text-white font-semibold">Install PWA</a>
+        <a href="#" class="px-8 py-3 rounded bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold">Support Fundstr</a>
+      </div>
+    </section>
   </div>
 </template>
 
@@ -245,77 +307,53 @@
 import { onMounted } from 'vue'
 
 onMounted(() => {
-  const observer = new IntersectionObserver(
-    (entries, obs) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('is-visible')
-          obs.unobserve(entry.target)
-        }
-      })
-    },
-    { threshold: 0.1 }
-  )
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('is-visible')
+        observer.unobserve(entry.target)
+      }
+    })
+  }, { threshold: 0.1 })
 
-  document.querySelectorAll('.fade-in-section').forEach((el) => observer.observe(el))
+  document.querySelectorAll('.fade-in-section').forEach((section) => {
+    observer.observe(section)
+  })
 })
 </script>
 
 <style scoped>
 :root {
-  --gradient-start: #8b5cf6;
-  --gradient-end: #ec4899;
-  --accent-color: #22d3ee;
+  --color-accent: #22d3ee;
+  --color-accent-rgb: 34, 211, 238;
 }
-
+.about-page {
+  font-family: 'Inter', sans-serif;
+  background-color: #0a0a0a;
+  background-image: radial-gradient(#1e293b 1px, transparent 1px);
+  background-size: 20px 20px;
+  color: #e2e8f0;
+}
 .gradient-text {
-  background: linear-gradient(to right, var(--gradient-start), var(--gradient-end));
+  background: linear-gradient(to right, #a78bfa, #f472b6);
   -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
   color: transparent;
 }
-
 .accent-text {
-  color: var(--accent-color);
+  color: var(--color-accent);
 }
-
-.prose-custom {
-  line-height: 1.7;
-}
-
 .interactive-card {
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background-color: rgba(15, 23, 42, 0.5);
   backdrop-filter: blur(4px);
-  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+  border: 1px solid #1e293b;
+  border-radius: 0.5rem;
+  transition: all 0.3s ease;
 }
 .interactive-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 20px rgba(34, 211, 238, 0.2);
-  border-color: rgba(34, 211, 238, 0.4);
+  transform: translateY(-5px);
+  box-shadow: 0 0 25px rgba(var(--color-accent-rgb), 0.2);
+  border-color: rgba(var(--color-accent-rgb), 0.4);
 }
-
-.nav-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.gradient-bg {
-  background: linear-gradient(to right, var(--gradient-start), var(--gradient-end));
-}
-.nav-table th,
-.nav-table td {
-  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-  padding: 0.75rem 1rem;
-}
-
-summary {
-  list-style: none;
-}
-summary::-webkit-details-marker {
-  display: none;
-}
-
 .fade-in-section {
   opacity: 0;
   transform: translateY(20px);
@@ -323,26 +361,6 @@ summary::-webkit-details-marker {
 }
 .fade-in-section.is-visible {
   opacity: 1;
-  transform: translateY(0);
-}
-
-details[open] summary svg {
-  transform: rotate(180deg);
-}
-
-@media (max-width: 767px) {
-  .nav-table {
-    display: none;
-  }
-  .nav-cards {
-    display: grid;
-  }
-}
-
-@media (min-width: 768px) {
-  .nav-cards {
-    display: none;
-  }
+  transform: none;
 }
 </style>
-
