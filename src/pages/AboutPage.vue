@@ -8,8 +8,11 @@
       <p class="max-w-3xl mx-auto text-lg md:text-xl">
         A privacy-first Bitcoin wallet, social chat, and creator-monetisation hub built on the open-source Cashu ecash protocol and the decentralised Nostr network.
       </p>
-      <div class="mt-8 p-4 border rounded bg-amber-900/20 border-amber-500/30 max-w-3xl mx-auto flex items-start gap-2 text-amber-300">
-        <span class="text-2xl">⚠️</span>
+      <div
+        class="alpha-warning mt-8 max-w-3xl mx-auto flex items-start gap-3 animate-pulse"
+        role="alert"
+      >
+        <span class="text-3xl">⚠️</span>
         <p>
           Fundstr is experimental alpha software. Features may break or change, and loss of funds is possible. Use only small amounts you can afford to lose.
         </p>
@@ -592,6 +595,23 @@ blockquote {
   border-left: 4px solid var(--color-accent);
   padding-left: 1rem;
   font-style: italic;
+}
+
+.alpha-warning {
+  background-color: rgba(120, 53, 15, 0.2);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  color: #fcd34d;
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  font-size: 1.25rem;
+  font-weight: 700;
+  box-shadow: 0 0 10px rgba(245, 158, 11, 0.5);
+}
+
+@media (min-width: 768px) {
+  .alpha-warning {
+    font-size: 1.5rem;
+  }
 }
 </style>
 
