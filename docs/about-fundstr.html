@@ -93,6 +93,10 @@
         font-size: 1.5rem;
       }
     }
+    #navigation-map.show-fan .creator,
+    #navigation-map.show-creator .fan {
+      display: none;
+    }
   </style>
 </head>
 <body class="antialiased">
@@ -212,69 +216,73 @@
   </section>
 
   <!-- Navigation Map -->
-  <section id="navigation-map" class="px-4 py-20 fade-in-section">
+  <section id="navigation-map" class="px-4 py-20 fade-in-section show-fan">
     <h2 class="text-center text-4xl font-bold mb-6 gradient-text">Navigation Map</h2>
     <p class="text-center mb-12">Every page explained from both the Creator and Fan perspectives.</p>
+    <div class="flex justify-center gap-4 mb-8">
+      <button type="button" class="toggle-btn px-4 py-2 rounded bg-indigo-600 text-white" data-mode="fan" aria-pressed="true">Fan</button>
+      <button type="button" class="toggle-btn px-4 py-2 rounded bg-slate-700" data-mode="creator" aria-pressed="false">Creator</button>
+    </div>
     <!-- Desktop Table -->
     <div class="hidden md:block interactive-card p-6 overflow-x-auto">
       <table class="w-full text-left">
         <thead>
           <tr class="text-sm text-gray-400">
             <th class="py-2 pr-4">🧭 Menu item</th>
-            <th class="py-2 pr-4">Fan / Subscriber perspective</th>
-            <th class="py-2">Creator perspective</th>
+            <th class="py-2 pr-4"><span class="fan">Fan / Subscriber perspective</span></th>
+            <th class="py-2"><span class="creator">Creator perspective</span></th>
           </tr>
         </thead>
         <tbody class="text-sm">
           <tr class="border-t border-gray-700">
             <td class="py-3 pr-4">Settings</td>
-            <td class="py-3 pr-4">Add / switch mints, choose display unit, set language & theme, import or back-up your 12-word seed, manage Nostr keys & relays.</td>
-            <td class="py-3">Same, plus Publishing settings: toggle automatic NIP-61 profile updates and set a default “Earnings” bucket.</td>
+            <td class="py-3 pr-4"><span class="fan">Add / switch mints, choose display unit, set language & theme, import or back-up your 12-word seed, manage Nostr keys & relays.</span></td>
+            <td class="py-3"><span class="creator">Same, plus Publishing settings: toggle automatic NIP-61 profile updates and set a default “Earnings” bucket.</span></td>
           </tr>
           <tr class="border-t border-gray-700">
             <td class="py-3 pr-4">Find Creators</td>
-            <td class="py-3 pr-4">Search or browse Nostr-indexed profiles. View tier prices, previews and public posts. Hit Subscribe or Zap with a single tap.</td>
-            <td class="py-3">Your public storefront as seen by visitors. Great for a quick audit of how your profile appears worldwide.</td>
+            <td class="py-3 pr-4"><span class="fan">Search or browse Nostr-indexed profiles. View tier prices, previews and public posts. Hit Subscribe or Zap with a single tap.</span></td>
+            <td class="py-3"><span class="creator">Your public storefront as seen by visitors. Great for a quick audit of how your profile appears worldwide.</span></td>
           </tr>
           <tr class="border-t border-gray-700">
             <td class="py-3 pr-4">Creator Hub</td>
-            <td class="py-3 pr-4">— (hidden unless you toggle “Creator Mode”)</td>
-            <td class="py-3">Define or edit tiers (price, duration, perks), upload cover art, publish pay-walled posts, check revenue analytics and subscriber list.</td>
+            <td class="py-3 pr-4"><span class="fan">— (hidden unless you toggle “Creator Mode”)</span></td>
+            <td class="py-3"><span class="creator">Define or edit tiers (price, duration, perks), upload cover art, publish pay-walled posts, check revenue analytics and subscriber list.</span></td>
           </tr>
           <tr class="border-t border-gray-700">
             <td class="py-3 pr-4">My Profile</td>
-            <td class="py-3 pr-4">Show off your avatar, npub link and optional NIP-05. Personal stats: total zaps sent & received, bucket balances.</td>
-            <td class="py-3">Same card plus Edit. Update bio, tags and the secondary P2PK key used by fans to send you locked tokens.</td>
+            <td class="py-3 pr-4"><span class="fan">Show off your avatar, npub link and optional NIP-05. Personal stats: total zaps sent & received, bucket balances.</span></td>
+            <td class="py-3"><span class="creator">Same card plus Edit. Update bio, tags and the secondary P2PK key used by fans to send you locked tokens.</span></td>
           </tr>
           <tr class="border-t border-gray-700">
             <td class="py-3 pr-4">Buckets</td>
-            <td class="py-3 pr-4">Drag-and-drop jars for budgeting (“Groceries”, “Fun money”, “Subs”). Move sats with zero fees.</td>
-            <td class="py-3">Create an “Income” bucket that auto-receives new tips; split out taxes or savings instantly.</td>
+            <td class="py-3 pr-4"><span class="fan">Drag-and-drop jars for budgeting (“Groceries”, “Fun money”, “Subs”). Move sats with zero fees.</span></td>
+            <td class="py-3"><span class="creator">Create an “Income” bucket that auto-receives new tips; split out taxes or savings instantly.</span></td>
           </tr>
           <tr class="border-t border-gray-700">
             <td class="py-3 pr-4">Subscriptions</td>
-            <td class="py-3 pr-4">See every active plan: tier name, next renewal, cumulative sats spent. Cancel or renew with one click.</td>
-            <td class="py-3">Quick list of paying supporters, tier breakdown, churn alerts and pending renewals.</td>
+            <td class="py-3 pr-4"><span class="fan">See every active plan: tier name, next renewal, cumulative sats spent. Cancel or renew with one click.</span></td>
+            <td class="py-3"><span class="creator">Quick list of paying supporters, tier breakdown, churn alerts and pending renewals.</span></td>
           </tr>
           <tr class="border-t border-gray-700">
             <td class="py-3 pr-4">Chats</td>
-            <td class="py-3 pr-4">End-to-end encrypted DMs (Nostr kind 4). Attach images or Cashu tokens. Green flash means a payment is embedded and auto-redeemed on receipt.</td>
-            <td class="py-3">Same powerful chat plus a broadcast toggle to message all subs in a tier at once.</td>
+            <td class="py-3 pr-4"><span class="fan">End-to-end encrypted DMs (Nostr kind 4). Attach images or Cashu tokens. Green flash means a payment is embedded and auto-redeemed on receipt.</span></td>
+            <td class="py-3"><span class="creator">Same powerful chat plus a broadcast toggle to message all subs in a tier at once.</span></td>
           </tr>
           <tr class="border-t border-gray-700">
             <td class="py-3 pr-4">Terms</td>
-            <td class="py-3 pr-4">Human-readable, plain-English licence & disclaimers.</td>
-            <td class="py-3">Identical — clarifies you keep full custody of funds.</td>
+            <td class="py-3 pr-4"><span class="fan">Human-readable, plain-English licence & disclaimers.</span></td>
+            <td class="py-3"><span class="creator">Identical — clarifies you keep full custody of funds.</span></td>
           </tr>
           <tr class="border-t border-gray-700">
             <td class="py-3 pr-4">About</td>
-            <td class="py-3 pr-4">Learn everything in one scroll.</td>
-            <td class="py-3">Ditto; includes creator-specific FAQs below.</td>
+            <td class="py-3 pr-4"><span class="fan">Learn everything in one scroll.</span></td>
+            <td class="py-3"><span class="creator">Ditto; includes creator-specific FAQs below.</span></td>
           </tr>
           <tr class="border-t border-gray-700">
             <td class="py-3 pr-4">External links</td>
-            <td class="py-3 pr-4">Cashu.space docs, GitHub, Twitter, Telegram, Donate.</td>
-            <td class="py-3">Identical — share with collaborators or fans.</td>
+            <td class="py-3 pr-4"><span class="fan">Cashu.space docs, GitHub, Twitter, Telegram, Donate.</span></td>
+            <td class="py-3"><span class="creator">Identical — share with collaborators or fans.</span></td>
           </tr>
         </tbody>
       </table>
@@ -285,55 +293,73 @@
       <!-- Repeat each row as card -->
       <div class="interactive-card p-4">
         <h3 class="font-semibold text-lg mb-1">Settings</h3>
-        <p class="text-sm"><span class="font-medium">Fan / Subscriber perspective:</span> Add / switch mints, choose display unit, set language & theme, import or back-up your 12-word seed, manage Nostr keys & relays.</p>
-        <p class="text-sm mt-2"><span class="font-medium">Creator perspective:</span> Same, plus Publishing settings: toggle automatic NIP-61 profile updates and set a default “Earnings” bucket.</p>
+        <p class="text-sm fan"><span class="fan"><span class="font-medium">Fan / Subscriber perspective:</span> Add / switch mints, choose display unit, set language & theme, import or back-up your 12-word seed, manage Nostr keys & relays.</span></p>
+        <p class="text-sm mt-2 creator"><span class="creator"><span class="font-medium">Creator perspective:</span> Same, plus Publishing settings: toggle automatic NIP-61 profile updates and set a default “Earnings” bucket.</span></p>
       </div>
       <div class="interactive-card p-4">
         <h3 class="font-semibold text-lg mb-1">Find Creators</h3>
-        <p class="text-sm"><span class="font-medium">Fan / Subscriber perspective:</span> Search or browse Nostr-indexed profiles. View tier prices, previews and public posts. Hit Subscribe or Zap with a single tap.</p>
-        <p class="text-sm mt-2"><span class="font-medium">Creator perspective:</span> Your public storefront as seen by visitors. Great for a quick audit of how your profile appears worldwide.</p>
+        <p class="text-sm fan"><span class="fan"><span class="font-medium">Fan / Subscriber perspective:</span> Search or browse Nostr-indexed profiles. View tier prices, previews and public posts. Hit Subscribe or Zap with a single tap.</span></p>
+        <p class="text-sm mt-2 creator"><span class="creator"><span class="font-medium">Creator perspective:</span> Your public storefront as seen by visitors. Great for a quick audit of how your profile appears worldwide.</span></p>
       </div>
       <div class="interactive-card p-4">
         <h3 class="font-semibold text-lg mb-1">Creator Hub</h3>
-        <p class="text-sm"><span class="font-medium">Fan / Subscriber perspective:</span> — (hidden unless you toggle “Creator Mode”)</p>
-        <p class="text-sm mt-2"><span class="font-medium">Creator perspective:</span> Define or edit tiers (price, duration, perks), upload cover art, publish pay-walled posts, check revenue analytics and subscriber list.</p>
+        <p class="text-sm fan"><span class="fan"><span class="font-medium">Fan / Subscriber perspective:</span> — (hidden unless you toggle “Creator Mode”)</span></p>
+        <p class="text-sm mt-2 creator"><span class="creator"><span class="font-medium">Creator perspective:</span> Define or edit tiers (price, duration, perks), upload cover art, publish pay-walled posts, check revenue analytics and subscriber list.</span></p>
       </div>
       <div class="interactive-card p-4">
         <h3 class="font-semibold text-lg mb-1">My Profile</h3>
-        <p class="text-sm"><span class="font-medium">Fan / Subscriber perspective:</span> Show off your avatar, npub link and optional NIP-05. Personal stats: total zaps sent & received, bucket balances.</p>
-        <p class="text-sm mt-2"><span class="font-medium">Creator perspective:</span> Same card plus Edit. Update bio, tags and the secondary P2PK key used by fans to send you locked tokens.</p>
+        <p class="text-sm fan"><span class="fan"><span class="font-medium">Fan / Subscriber perspective:</span> Show off your avatar, npub link and optional NIP-05. Personal stats: total zaps sent & received, bucket balances.</span></p>
+        <p class="text-sm mt-2 creator"><span class="creator"><span class="font-medium">Creator perspective:</span> Same card plus Edit. Update bio, tags and the secondary P2PK key used by fans to send you locked tokens.</span></p>
       </div>
       <div class="interactive-card p-4">
         <h3 class="font-semibold text-lg mb-1">Buckets</h3>
-        <p class="text-sm"><span class="font-medium">Fan / Subscriber perspective:</span> Drag-and-drop jars for budgeting (“Groceries”, “Fun money”, “Subs”). Move sats with zero fees.</p>
-        <p class="text-sm mt-2"><span class="font-medium">Creator perspective:</span> Create an “Income” bucket that auto-receives new tips; split out taxes or savings instantly.</p>
+        <p class="text-sm fan"><span class="fan"><span class="font-medium">Fan / Subscriber perspective:</span> Drag-and-drop jars for budgeting (“Groceries”, “Fun money”, “Subs”). Move sats with zero fees.</span></p>
+        <p class="text-sm mt-2 creator"><span class="creator"><span class="font-medium">Creator perspective:</span> Create an “Income” bucket that auto-receives new tips; split out taxes or savings instantly.</span></p>
       </div>
       <div class="interactive-card p-4">
         <h3 class="font-semibold text-lg mb-1">Subscriptions</h3>
-        <p class="text-sm"><span class="font-medium">Fan / Subscriber perspective:</span> See every active plan: tier name, next renewal, cumulative sats spent. Cancel or renew with one click.</p>
-        <p class="text-sm mt-2"><span class="font-medium">Creator perspective:</span> Quick list of paying supporters, tier breakdown, churn alerts and pending renewals.</p>
+        <p class="text-sm fan"><span class="fan"><span class="font-medium">Fan / Subscriber perspective:</span> See every active plan: tier name, next renewal, cumulative sats spent. Cancel or renew with one click.</span></p>
+        <p class="text-sm mt-2 creator"><span class="creator"><span class="font-medium">Creator perspective:</span> Quick list of paying supporters, tier breakdown, churn alerts and pending renewals.</span></p>
       </div>
       <div class="interactive-card p-4">
         <h3 class="font-semibold text-lg mb-1">Chats</h3>
-        <p class="text-sm"><span class="font-medium">Fan / Subscriber perspective:</span> End-to-end encrypted DMs (Nostr kind 4). Attach images or Cashu tokens. Green flash means a payment is embedded and auto-redeemed on receipt.</p>
-        <p class="text-sm mt-2"><span class="font-medium">Creator perspective:</span> Same powerful chat plus a broadcast toggle to message all subs in a tier at once.</p>
+        <p class="text-sm fan"><span class="fan"><span class="font-medium">Fan / Subscriber perspective:</span> End-to-end encrypted DMs (Nostr kind 4). Attach images or Cashu tokens. Green flash means a payment is embedded and auto-redeemed on receipt.</span></p>
+        <p class="text-sm mt-2 creator"><span class="creator"><span class="font-medium">Creator perspective:</span> Same powerful chat plus a broadcast toggle to message all subs in a tier at once.</span></p>
       </div>
       <div class="interactive-card p-4">
         <h3 class="font-semibold text-lg mb-1">Terms</h3>
-        <p class="text-sm"><span class="font-medium">Fan / Subscriber perspective:</span> Human-readable, plain-English licence & disclaimers.</p>
-        <p class="text-sm mt-2"><span class="font-medium">Creator perspective:</span> Identical — clarifies you keep full custody of funds.</p>
+        <p class="text-sm fan"><span class="fan"><span class="font-medium">Fan / Subscriber perspective:</span> Human-readable, plain-English licence & disclaimers.</span></p>
+        <p class="text-sm mt-2 creator"><span class="creator"><span class="font-medium">Creator perspective:</span> Identical — clarifies you keep full custody of funds.</span></p>
       </div>
       <div class="interactive-card p-4">
         <h3 class="font-semibold text-lg mb-1">About</h3>
-        <p class="text-sm"><span class="font-medium">Fan / Subscriber perspective:</span> Learn everything in one scroll.</p>
-        <p class="text-sm mt-2"><span class="font-medium">Creator perspective:</span> Ditto; includes creator-specific FAQs below.</p>
+        <p class="text-sm fan"><span class="fan"><span class="font-medium">Fan / Subscriber perspective:</span> Learn everything in one scroll.</span></p>
+        <p class="text-sm mt-2 creator"><span class="creator"><span class="font-medium">Creator perspective:</span> Ditto; includes creator-specific FAQs below.</span></p>
       </div>
       <div class="interactive-card p-4">
         <h3 class="font-semibold text-lg mb-1">External links</h3>
-        <p class="text-sm"><span class="font-medium">Fan / Subscriber perspective:</span> Cashu.space docs, GitHub, Twitter, Telegram, Donate.</p>
-        <p class="text-sm mt-2"><span class="font-medium">Creator perspective:</span> Identical — share with collaborators or fans.</p>
+        <p class="text-sm fan"><span class="fan"><span class="font-medium">Fan / Subscriber perspective:</span> Cashu.space docs, GitHub, Twitter, Telegram, Donate.</span></p>
+        <p class="text-sm mt-2 creator"><span class="creator"><span class="font-medium">Creator perspective:</span> Identical — share with collaborators or fans.</span></p>
       </div>
     </div>
+    <script>
+      const navMap = document.getElementById('navigation-map');
+      const toggleBtns = navMap.querySelectorAll('.toggle-btn');
+      toggleBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const mode = btn.dataset.mode;
+          navMap.classList.remove('show-fan', 'show-creator');
+          navMap.classList.add('show-' + mode);
+          toggleBtns.forEach(b => {
+            const active = b === btn;
+            b.setAttribute('aria-pressed', active);
+            b.classList.toggle('bg-indigo-600', active);
+            b.classList.toggle('text-white', active);
+            b.classList.toggle('bg-slate-700', !active);
+          });
+        });
+      });
+    </script>
   </section>
 
   <!-- Trust Through Transparency -->
