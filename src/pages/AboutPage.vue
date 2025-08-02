@@ -527,17 +527,23 @@ const navigationItems: NavigationItem[] = [
 ]
 
 onMounted(() => {
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach((entry) => {
-      if (entry.isIntersecting) {
-        entry.target.classList.add('is-visible')
-      }
+  if ('IntersectionObserver' in window) {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible')
+        }
+      })
     })
-  })
 
-  document.querySelectorAll('.fade-in-section').forEach((el) => {
-    observer.observe(el)
-  })
+    document.querySelectorAll('.fade-in-section').forEach((el) => {
+      observer.observe(el)
+    })
+  } else {
+    document
+      .querySelectorAll('.fade-in-section')
+      .forEach((el) => el.classList.add('is-visible'))
+  }
 })
 </script>
 
