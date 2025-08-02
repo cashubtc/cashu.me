@@ -460,7 +460,7 @@ const dialogStep2 = ref(false)
 const dialogStep3 = ref(false)
 const viewMode = ref<'fan' | 'creator'>('fan')
 
-const navigationItems: NavigationItem[] = [
+const navigationItems = ref<NavigationItem[]>([
   {
     menuItem: 'Settings',
     fanText:
@@ -524,7 +524,7 @@ const navigationItems: NavigationItem[] = [
     fanText: 'Cashu.space docs, GitHub, Twitter, Telegram, Donate.',
     creatorText: 'Identical — share with collaborators or fans.',
   },
-]
+])
 
 onMounted(() => {
   if ('IntersectionObserver' in window) {
