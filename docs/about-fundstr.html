@@ -43,6 +43,32 @@
       box-shadow: 0 0 25px rgba(var(--color-accent-rgb), 0.2);
       border-color: rgba(var(--color-accent-rgb), 0.4);
     }
+    .step-card {
+      position: relative;
+    }
+    .step-card::after {
+      content: '→';
+      position: absolute;
+      top: 50%;
+      right: -1.5rem;
+      transform: translateY(-50%);
+      font-size: 2rem;
+      color: currentColor;
+    }
+    .step-card:last-child::after {
+      content: '';
+    }
+    @media (max-width: 768px) {
+      .step-card::after {
+        content: '↓';
+        top: auto;
+        bottom: -1.5rem;
+        left: 50%;
+        right: auto;
+        transform: translateX(-50%);
+        font-size: 1.5rem;
+      }
+    }
     .fade-in-section {
       opacity: 0;
       transform: translateY(20px);
@@ -98,35 +124,58 @@
   <section id="how-it-works" class="px-4 py-20 fade-in-section">
     <h2 class="text-center text-4xl font-bold mb-10 gradient-text">How Ecash Works</h2>
     <p class="text-center mb-12">The loop is simple: Bitcoin in → private e-cash out → social payments everywhere.</p>
-    <div class="grid grid-cols-1 md:grid-cols-5 gap-6 max-w-5xl mx-auto items-center">
+    <div class="grid grid-cols-1 md:grid-cols-3 items-center gap-6 max-w-5xl mx-auto">
       <!-- Step 1 -->
-      <div class="interactive-card p-6 flex flex-col items-center text-center">
-        <svg class="w-16 h-16 mb-4" viewBox="0 0 100 100">
-          <circle cx="50" cy="50" r="50" fill="#f7931a"></circle>
-          <text x="50" y="65" text-anchor="middle" font-size="60" font-weight="bold" fill="white" font-family="Arial, sans-serif">₿</text>
+      <button type="button" data-modal="modal-step1" class="step-card interactive-card p-6 flex flex-col items-center focus:outline-none">
+        <svg class="w-12 h-12 mb-4 text-yellow-400" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M23.112 13.506c.353-2.353-1.444-3.415-3.897-4.2l.797-3.194-1.948-.485-.776 3.111c-.511-.127-1.035-.246-1.555-.364l.784-3.144-1.948-.486-.797 3.194c-.422-.096-.84-.19-1.246-.29l-.001-.006-2.688-.669-.518 2.075s1.444.331 1.415.352c.79.197.933.716.909 1.13l-2.195 8.8c-.096.238-.34.596-.89.461.02.028-1.415-.353-1.415-.353l-.966 2.385 2.538.631c.472.119.934.241 1.392.357l-.806 3.245 1.948.486.797-3.194c.529.143 1.042.274 1.547.398l-.793 3.179 1.948.485.805-3.244c3.324.63 5.827.376 6.885-2.633.849-2.417-.042-3.814-1.794-4.728 1.277-.295 2.237-1.135 2.497-2.873zm-4.462 6.26c-.605 2.417-4.696 1.108-6.025.781l1.076-4.32c1.329.332 5.585.991 4.949 3.539zm.605-6.29c-.553 2.211-3.96 1.086-5.063.811l.974-3.906c1.102.275 4.67.79 4.09 3.095z"/>
         </svg>
         <h3 class="font-bold text-xl mb-2">Your Bitcoin</h3>
         <p class="text-sm">From any wallet</p>
-      </div>
-      <!-- Arrow -->
-      <div class="hidden md:flex justify-center text-4xl">→</div>
+      </button>
+
       <!-- Step 2 -->
-      <div class="interactive-card p-6 flex flex-col items-center text-center">
-        <svg class="w-16 h-16 mb-4" viewBox="0 0 24 24">
-          <path fill="#4f46e5" d="M12 2l7 4v6c0 5-3 9-7 10-4-1-7-5-7-10V6l7-4z"/>
+      <button type="button" data-modal="modal-step2" class="step-card interactive-card p-6 flex flex-col items-center focus:outline-none">
+        <svg class="w-12 h-12 mb-4 text-indigo-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
         </svg>
         <h3 class="font-bold text-xl mb-2">The Mint</h3>
         <p class="text-sm">Swaps for Ecash</p>
-      </div>
-      <!-- Arrow -->
-      <div class="hidden md:flex justify-center text-4xl">→</div>
+      </button>
+
       <!-- Step 3 -->
-      <div class="interactive-card p-6 flex flex-col items-center text-center">
-        <svg class="w-16 h-16 mb-4" viewBox="0 0 24 24">
-          <path fill="#ec4899" d="M12 4.5c-7 0-10 7.5-10 7.5s3 7.5 10 7.5 10-7.5 10-7.5-3-7.5-10-7.5zm0 12a4.5 4.5 0 110-9 4.5 4.5 0 010 9z"/>
+      <button type="button" data-modal="modal-step3" class="step-card interactive-card p-6 flex flex-col items-center focus:outline-none">
+        <svg class="w-12 h-12 mb-4 text-pink-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+          <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
         </svg>
-        <h3 class="font-bold text-xl mb-2">Fundstr Wallet</h3
-        ><p class="text-sm">Private & ready to spend</p>
+        <h3 class="font-bold text-xl mb-2">Fundstr Wallet</h3>
+        <p class="text-sm">Private & ready to spend</p>
+      </button>
+    </div>
+
+    <!-- Modals -->
+    <div id="modal-step1" class="modal fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75 hidden">
+      <div class="bg-slate-900 border border-slate-700 p-6 rounded max-w-sm mx-4 text-left">
+        <h3 class="text-xl font-bold mb-4">Your Bitcoin</h3>
+        <p>Start with sats from any wallet. For example, swap 100k sats for ecash to send privately.</p>
+        <button class="close-modal mt-6 px-4 py-2 bg-indigo-600 rounded text-white">Close</button>
+      </div>
+    </div>
+
+    <div id="modal-step2" class="modal fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75 hidden">
+      <div class="bg-slate-900 border border-slate-700 p-6 rounded max-w-sm mx-4 text-left">
+        <h3 class="text-xl font-bold mb-4">The Mint</h3>
+        <p>The mint issues blind signed tokens in exchange for your bitcoin. Example: deposit 100k sats and receive ecash you can split and spend.</p>
+        <button class="close-modal mt-6 px-4 py-2 bg-indigo-600 rounded text-white">Close</button>
+      </div>
+    </div>
+
+    <div id="modal-step3" class="modal fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75 hidden">
+      <div class="bg-slate-900 border border-slate-700 p-6 rounded max-w-sm mx-4 text-left">
+        <h3 class="text-xl font-bold mb-4">Fundstr Wallet</h3>
+        <p>Store and send ecash privately. For instance, forward tokens to a friend or redeem them back for bitcoin later.</p>
+        <button class="close-modal mt-6 px-4 py-2 bg-indigo-600 rounded text-white">Close</button>
       </div>
     </div>
   </section>
@@ -387,6 +436,26 @@
 
     document.querySelectorAll('.fade-in-section').forEach(section => {
       observer.observe(section);
+    });
+
+    // Modal interactions
+    document.querySelectorAll('[data-modal]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const modal = document.getElementById(btn.dataset.modal);
+        if (modal) modal.classList.remove('hidden');
+      });
+    });
+
+    document.querySelectorAll('.close-modal').forEach(btn => {
+      btn.addEventListener('click', () => {
+        btn.closest('.modal').classList.add('hidden');
+      });
+    });
+
+    document.querySelectorAll('.modal').forEach(modal => {
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) modal.classList.add('hidden');
+      });
     });
   </script>
 </body>
