@@ -86,6 +86,36 @@
             </router-link>
             – {{ $t('AboutPage.siteOverview.settings') }}
           </li>
+          <li>
+            <router-link to="/restore" class="text-accent font-semibold">
+              {{ $t('AboutPage.siteOverview.restoreTitle') }}
+            </router-link>
+            – {{ $t('AboutPage.siteOverview.restore') }}
+          </li>
+          <li>
+            <router-link to="/already-running" class="text-accent font-semibold">
+              {{ $t('AboutPage.siteOverview.alreadyRunningTitle') }}
+            </router-link>
+            – {{ $t('AboutPage.siteOverview.alreadyRunning') }}
+          </li>
+          <li>
+            <router-link to="/welcome" class="text-accent font-semibold">
+              {{ $t('AboutPage.siteOverview.welcomeTitle') }}
+            </router-link>
+            – {{ $t('AboutPage.siteOverview.welcome') }}
+          </li>
+          <li>
+            <router-link to="/terms" class="text-accent font-semibold">
+              {{ $t('MainHeader.menu.terms.title') }}
+            </router-link>
+            – {{ $t('AboutPage.siteOverview.terms') }}
+          </li>
+          <li>
+            <router-link to="/nostr-login" class="text-accent font-semibold">
+              {{ $t('AboutPage.siteOverview.nostrLoginTitle') }}
+            </router-link>
+            – {{ $t('AboutPage.siteOverview.nostrLogin') }}
+          </li>
         </ul>
       </div>
     </section>
