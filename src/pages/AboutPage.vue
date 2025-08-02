@@ -443,9 +443,9 @@ import { onMounted, ref } from 'vue'
 const dialogStep1 = ref(false)
 const dialogStep2 = ref(false)
 const dialogStep3 = ref(false)
-export const viewMode = ref<'fan' | 'creator'>('fan')
+const viewMode = ref<'fan' | 'creator'>('fan')
 
-export const navigationItems = ref([
+const navigationItems = ref([
   {
     menuItem: 'Settings',
     fanText:
