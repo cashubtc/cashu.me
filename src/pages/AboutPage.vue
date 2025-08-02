@@ -74,8 +74,23 @@
               you’re here to follow, tip and chat.
             </li>
           </ul>
-          <div class="video-placeholder q-my-xl flex flex-center">
-            {{ $t("AboutPage.video_placeholder") }}
+          <div class="q-my-xl">
+            <q-carousel
+              v-model="carouselSlide"
+              swipeable
+              animated
+              arrows
+              navigation
+              infinite
+              height="200px"
+            >
+              <q-carousel-slide
+                v-for="(src, idx) in demoScreens"
+                :key="idx"
+                :name="idx"
+                :img-src="src"
+              />
+            </q-carousel>
           </div>
           <hr />
           <h3 id="section-1">1 How Fundstr works in one minute</h3>
@@ -404,6 +419,14 @@ const sections = [
 
 const creatorView = ref(false);
 
+const carouselSlide = ref(0);
+
+const demoScreens = [
+  "https://placehold.co/600x400?text=Demo+1",
+  "https://placehold.co/600x400?text=Demo+2",
+  "https://placehold.co/600x400?text=Demo+3",
+];
+
 const menuItems = [
   {
     title: "Settings",
@@ -494,14 +517,6 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-.video-placeholder {
-  height: 200px;
-  border: 1px dashed #ccc;
-  border-radius: 8px;
-  color: #ccc;
-  width: 100%;
-}
-
 .about-inline-icon {
   width: 24px;
   height: 24px;
