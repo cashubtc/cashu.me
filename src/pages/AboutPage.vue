@@ -31,6 +31,65 @@
       </div>
     </section>
 
+    <!-- Site Overview -->
+    <section id="site-overview" class="py-16 px-4 fade-in-section">
+      <div class="max-w-4xl mx-auto text-center">
+        <h2 class="text-3xl md:text-5xl font-bold mb-6 gradient-text">
+          {{ $t('AboutPage.siteOverview.title') }}
+        </h2>
+        <ul class="text-lg md:text-xl space-y-4 text-left">
+          <li>
+            <router-link to="/wallet" class="text-accent font-semibold">
+              {{ $t('MainHeader.menu.wallet.title') }}
+            </router-link>
+            – {{ $t('AboutPage.siteOverview.wallet') }}
+          </li>
+          <li>
+            <router-link to="/find-creators" class="text-accent font-semibold">
+              {{ $t('MainHeader.menu.findCreators.title') }}
+            </router-link>
+            – {{ $t('AboutPage.siteOverview.findCreators') }}
+          </li>
+          <li>
+            <router-link to="/creator-hub" class="text-accent font-semibold">
+              {{ $t('MainHeader.menu.creatorHub.title') }}
+            </router-link>
+            – {{ $t('AboutPage.siteOverview.creatorHub') }}
+          </li>
+          <li>
+            <router-link to="/my-profile" class="text-accent font-semibold">
+              {{ $t('MainHeader.menu.myProfile.title') }}
+            </router-link>
+            – {{ $t('AboutPage.siteOverview.myProfile') }}
+          </li>
+          <li>
+            <router-link to="/buckets" class="text-accent font-semibold">
+              {{ $t('MainHeader.menu.buckets.title') }}
+            </router-link>
+            – {{ $t('AboutPage.siteOverview.buckets') }}
+          </li>
+          <li>
+            <router-link to="/subscriptions" class="text-accent font-semibold">
+              {{ $t('MainHeader.menu.subscriptions.title') }}
+            </router-link>
+            – {{ $t('AboutPage.siteOverview.subscriptions') }}
+          </li>
+          <li>
+            <router-link to="/nostr-messenger" class="text-accent font-semibold">
+              {{ $t('AboutPage.siteOverview.nostrMessengerTitle') }}
+            </router-link>
+            – {{ $t('AboutPage.siteOverview.nostrMessenger') }}
+          </li>
+          <li>
+            <router-link to="/settings" class="text-accent font-semibold">
+              {{ $t('MainHeader.menu.settings.title') }}
+            </router-link>
+            – {{ $t('AboutPage.siteOverview.settings') }}
+          </li>
+        </ul>
+      </div>
+    </section>
+
     <!-- How Ecash Works -->
     <section id="how-it-works" class="py-16 px-4 fade-in-section">
       <div class="max-w-5xl mx-auto text-center">
