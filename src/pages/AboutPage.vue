@@ -1,5 +1,6 @@
 <template>
   <q-page
+    class="about-page-content"
     :class="[
       $q.dark.isActive ? 'bg-dark text-white' : 'bg-white text-dark',
       'q-pa-md',
@@ -517,6 +518,10 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
+.about-page-content {
+  overflow-x: hidden;
+}
+
 .about-inline-icon {
   width: 24px;
   height: 24px;
@@ -525,9 +530,23 @@ onUnmounted(() => {
 .about-toc ul {
   list-style: none;
   padding-left: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.about-toc li {
+  flex: 1 1 100%;
+}
+
+@media (min-width: 600px) {
+  .about-toc li {
+    flex: 0 0 auto;
+  }
 }
 
 .about-toc a {
   text-decoration: none;
+  word-break: break-word;
 }
 </style>

@@ -1,16 +1,18 @@
 <template>
   <div class="q-pa-md">
     <h5 class="q-my-none q-mb-md">{{ $t("SubscriptionsOverview.title") }}</h5>
-    <div class="row items-center q-mb-md">
-      <div class="col">
-        {{ $t("SubscriptionsOverview.summary.monthly") }}:
-        {{ formatCurrency(monthlyTotal) }}
-      </div>
-      <div class="col text-right">
-        {{ $t("SubscriptionsOverview.summary.total") }}:
-        {{ formatCurrency(totalLocked) }}
-      </div>
-    </div>
+    <q-card flat bordered class="q-mb-md">
+      <q-card-section class="row items-center">
+        <div class="col-12 col-sm-6">
+          {{ $t("SubscriptionsOverview.summary.monthly") }}:
+          {{ formatCurrency(monthlyTotal) }}
+        </div>
+        <div class="col-12 col-sm-6 text-left text-sm-right">
+          {{ $t("SubscriptionsOverview.summary.total") }}:
+          {{ formatCurrency(totalLocked) }}
+        </div>
+      </q-card-section>
+    </q-card>
     <q-banner v-if="sendQueue.length" dense class="q-mb-md bg-orange-2">
       {{
         $t("SubscriptionsOverview.pending_retry", { count: sendQueue.length })
