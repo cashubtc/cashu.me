@@ -220,6 +220,26 @@
           Every page explained from both the Creator and Fan perspectives.
         </p>
 
+        <!-- Perspective Toggle -->
+        <div class="mb-8 flex justify-center">
+          <div class="interactive-card inline-flex overflow-hidden rounded-lg">
+            <button
+              class="px-4 py-2 focus:outline-none"
+              :class="{ 'gradient-bg text-black': viewMode === 'fan' }"
+              @click="viewMode = 'fan'"
+            >
+              Fan
+            </button>
+            <button
+              class="px-4 py-2 focus:outline-none"
+              :class="{ 'gradient-bg text-black': viewMode === 'creator' }"
+              @click="viewMode = 'creator'"
+            >
+              Creator
+            </button>
+          </div>
+        </div>
+
         <!-- Desktop Table -->
         <div class="hidden md:block">
           <div class="interactive-card p-2 overflow-x-auto">
@@ -227,92 +247,97 @@
               <thead class="border-b border-gray-700 text-sm uppercase">
                 <tr>
                   <th class="p-4">🧭 Menu item</th>
-                  <th class="p-4">Fan / Subscriber perspective</th>
-                  <th class="p-4">Creator perspective</th>
+                  <th class="p-4">
+                    {{
+                      viewMode === 'fan'
+                        ? 'Fan / Subscriber perspective'
+                        : 'Creator perspective'
+                    }}
+                  </th>
                 </tr>
               </thead>
               <tbody class="text-sm">
                 <tr class="border-b border-gray-800">
                   <td class="p-4 font-semibold">Settings</td>
-                  <td class="p-4">
+                  <td v-if="viewMode === 'fan'" class="p-4">
                     Add / switch mints, choose display unit, set language & theme, import or back-up your 12-word seed, manage Nostr keys & relays.
                   </td>
-                  <td class="p-4">
+                  <td v-else class="p-4">
                     Same, plus Publishing settings: toggle automatic NIP-61 profile updates and set a default “Earnings” bucket.
                   </td>
                 </tr>
                 <tr class="border-b border-gray-800">
                   <td class="p-4 font-semibold">Find Creators</td>
-                  <td class="p-4">
+                  <td v-if="viewMode === 'fan'" class="p-4">
                     Search or browse Nostr-indexed profiles. View tier prices, previews and public posts. Hit Subscribe or Zap with a single tap.
                   </td>
-                  <td class="p-4">
+                  <td v-else class="p-4">
                     Your public storefront as seen by visitors. Great for a quick audit of how your profile appears worldwide.
                   </td>
                 </tr>
                 <tr class="border-b border-gray-800">
                   <td class="p-4 font-semibold">Creator Hub</td>
-                  <td class="p-4">— (hidden unless you toggle “Creator Mode”)</td>
-                  <td class="p-4">
+                  <td v-if="viewMode === 'fan'" class="p-4">— (hidden unless you toggle “Creator Mode”)</td>
+                  <td v-else class="p-4">
                     Define or edit tiers (price, duration, perks), upload cover art, publish pay-walled posts, check revenue analytics and subscriber list.
                   </td>
                 </tr>
                 <tr class="border-b border-gray-800">
                   <td class="p-4 font-semibold">My Profile</td>
-                  <td class="p-4">
+                  <td v-if="viewMode === 'fan'" class="p-4">
                     Show off your avatar, npub link and optional NIP-05. Personal stats: total zaps sent & received, bucket balances.
                   </td>
-                  <td class="p-4">
+                  <td v-else class="p-4">
                     Same card plus Edit. Update bio, tags and the secondary P2PK key used by fans to send you locked tokens.
                   </td>
                 </tr>
                 <tr class="border-b border-gray-800">
                   <td class="p-4 font-semibold">Buckets</td>
-                  <td class="p-4">
+                  <td v-if="viewMode === 'fan'" class="p-4">
                     Drag-and-drop jars for budgeting (“Groceries”, “Fun money”, “Subs”). Move sats with zero fees.
                   </td>
-                  <td class="p-4">
+                  <td v-else class="p-4">
                     Create an “Income” bucket that auto-receives new tips; split out taxes or savings instantly.
                   </td>
                 </tr>
                 <tr class="border-b border-gray-800">
                   <td class="p-4 font-semibold">Subscriptions</td>
-                  <td class="p-4">
+                  <td v-if="viewMode === 'fan'" class="p-4">
                     See every active plan: tier name, next renewal, cumulative sats spent. Cancel or renew with one click.
                   </td>
-                  <td class="p-4">
+                  <td v-else class="p-4">
                     Quick list of paying supporters, tier breakdown, churn alerts and pending renewals.
                   </td>
                 </tr>
                 <tr class="border-b border-gray-800">
                   <td class="p-4 font-semibold">Chats</td>
-                  <td class="p-4">
+                  <td v-if="viewMode === 'fan'" class="p-4">
                     End-to-end encrypted DMs (Nostr kind 4). Attach images or Cashu tokens. Green flash means a payment is embedded and auto-redeemed on receipt.
                   </td>
-                  <td class="p-4">
+                  <td v-else class="p-4">
                     Same powerful chat plus a broadcast toggle to message all subs in a tier at once.
                   </td>
                 </tr>
                 <tr class="border-b border-gray-800">
                   <td class="p-4 font-semibold">Terms</td>
-                  <td class="p-4">
+                  <td v-if="viewMode === 'fan'" class="p-4">
                     Human-readable, plain-English licence & disclaimers.
                   </td>
-                  <td class="p-4">
+                  <td v-else class="p-4">
                     Identical — clarifies you keep full custody of funds.
                   </td>
                 </tr>
                 <tr class="border-b border-gray-800">
                   <td class="p-4 font-semibold">About</td>
-                  <td class="p-4">Learn everything in one scroll.</td>
-                  <td class="p-4">Ditto; includes creator-specific FAQs below.</td>
+                  <td v-if="viewMode === 'fan'" class="p-4">Learn everything in one scroll.</td>
+                  <td v-else class="p-4">Ditto; includes creator-specific FAQs below.</td>
                 </tr>
                 <tr>
                   <td class="p-4 font-semibold">External links</td>
-                  <td class="p-4">
+                  <td v-if="viewMode === 'fan'" class="p-4">
                     Cashu.space docs, GitHub, Twitter, Telegram, Donate.
                   </td>
-                  <td class="p-4">
+                  <td v-else class="p-4">
                     Identical — share with collaborators or fans.
                   </td>
                 </tr>
@@ -325,100 +350,100 @@
         <div class="md:hidden space-y-4">
           <div class="interactive-card p-6">
             <h3 class="font-semibold text-lg mb-2">Settings</h3>
-            <p class="text-sm mb-2">
+            <p v-if="viewMode === 'fan'" class="text-sm">
               <strong>Fan / Subscriber perspective:</strong> Add / switch mints, choose display unit, set language & theme, import or back-up your 12-word seed, manage Nostr keys & relays.
             </p>
-            <p class="text-sm">
+            <p v-else class="text-sm">
               <strong>Creator perspective:</strong> Same, plus Publishing settings: toggle automatic NIP-61 profile updates and set a default “Earnings” bucket.
             </p>
           </div>
 
           <div class="interactive-card p-6">
             <h3 class="font-semibold text-lg mb-2">Find Creators</h3>
-            <p class="text-sm mb-2">
+            <p v-if="viewMode === 'fan'" class="text-sm">
               <strong>Fan / Subscriber perspective:</strong> Search or browse Nostr-indexed profiles. View tier prices, previews and public posts. Hit Subscribe or Zap with a single tap.
             </p>
-            <p class="text-sm">
+            <p v-else class="text-sm">
               <strong>Creator perspective:</strong> Your public storefront as seen by visitors. Great for a quick audit of how your profile appears worldwide.
             </p>
           </div>
 
           <div class="interactive-card p-6">
             <h3 class="font-semibold text-lg mb-2">Creator Hub</h3>
-            <p class="text-sm mb-2">
+            <p v-if="viewMode === 'fan'" class="text-sm">
               <strong>Fan / Subscriber perspective:</strong> — (hidden unless you toggle “Creator Mode”)
             </p>
-            <p class="text-sm">
+            <p v-else class="text-sm">
               <strong>Creator perspective:</strong> Define or edit tiers (price, duration, perks), upload cover art, publish pay-walled posts, check revenue analytics and subscriber list.
             </p>
           </div>
 
           <div class="interactive-card p-6">
             <h3 class="font-semibold text-lg mb-2">My Profile</h3>
-            <p class="text-sm mb-2">
+            <p v-if="viewMode === 'fan'" class="text-sm">
               <strong>Fan / Subscriber perspective:</strong> Show off your avatar, npub link and optional NIP-05. Personal stats: total zaps sent & received, bucket balances.
             </p>
-            <p class="text-sm">
+            <p v-else class="text-sm">
               <strong>Creator perspective:</strong> Same card plus Edit. Update bio, tags and the secondary P2PK key used by fans to send you locked tokens.
             </p>
           </div>
 
           <div class="interactive-card p-6">
             <h3 class="font-semibold text-lg mb-2">Buckets</h3>
-            <p class="text-sm mb-2">
+            <p v-if="viewMode === 'fan'" class="text-sm">
               <strong>Fan / Subscriber perspective:</strong> Drag-and-drop jars for budgeting (“Groceries”, “Fun money”, “Subs”). Move sats with zero fees.
             </p>
-            <p class="text-sm">
+            <p v-else class="text-sm">
               <strong>Creator perspective:</strong> Create an “Income” bucket that auto-receives new tips; split out taxes or savings instantly.
             </p>
           </div>
 
           <div class="interactive-card p-6">
             <h3 class="font-semibold text-lg mb-2">Subscriptions</h3>
-            <p class="text-sm mb-2">
+            <p v-if="viewMode === 'fan'" class="text-sm">
               <strong>Fan / Subscriber perspective:</strong> See every active plan: tier name, next renewal, cumulative sats spent. Cancel or renew with one click.
             </p>
-            <p class="text-sm">
+            <p v-else class="text-sm">
               <strong>Creator perspective:</strong> Quick list of paying supporters, tier breakdown, churn alerts and pending renewals.
             </p>
           </div>
 
           <div class="interactive-card p-6">
             <h3 class="font-semibold text-lg mb-2">Chats</h3>
-            <p class="text-sm mb-2">
+            <p v-if="viewMode === 'fan'" class="text-sm">
               <strong>Fan / Subscriber perspective:</strong> End-to-end encrypted DMs (Nostr kind 4). Attach images or Cashu tokens. Green flash means a payment is embedded and auto-redeemed on receipt.
             </p>
-            <p class="text-sm">
+            <p v-else class="text-sm">
               <strong>Creator perspective:</strong> Same powerful chat plus a broadcast toggle to message all subs in a tier at once.
             </p>
           </div>
 
           <div class="interactive-card p-6">
             <h3 class="font-semibold text-lg mb-2">Terms</h3>
-            <p class="text-sm mb-2">
+            <p v-if="viewMode === 'fan'" class="text-sm">
               <strong>Fan / Subscriber perspective:</strong> Human-readable, plain-English licence & disclaimers.
             </p>
-            <p class="text-sm">
+            <p v-else class="text-sm">
               <strong>Creator perspective:</strong> Identical — clarifies you keep full custody of funds.
             </p>
           </div>
 
           <div class="interactive-card p-6">
             <h3 class="font-semibold text-lg mb-2">About</h3>
-            <p class="text-sm mb-2">
+            <p v-if="viewMode === 'fan'" class="text-sm">
               <strong>Fan / Subscriber perspective:</strong> Learn everything in one scroll.
             </p>
-            <p class="text-sm">
+            <p v-else class="text-sm">
               <strong>Creator perspective:</strong> Ditto; includes creator-specific FAQs below.
             </p>
           </div>
 
           <div class="interactive-card p-6">
             <h3 class="font-semibold text-lg mb-2">External links</h3>
-            <p class="text-sm mb-2">
+            <p v-if="viewMode === 'fan'" class="text-sm">
               <strong>Fan / Subscriber perspective:</strong> Cashu.space docs, GitHub, Twitter, Telegram, Donate.
             </p>
-            <p class="text-sm">
+            <p v-else class="text-sm">
               <strong>Creator perspective:</strong> Identical — share with collaborators or fans.
             </p>
           </div>
@@ -583,6 +608,7 @@ import { onMounted, ref } from 'vue'
 const dialogStep1 = ref(false)
 const dialogStep2 = ref(false)
 const dialogStep3 = ref(false)
+const viewMode = ref('fan')
 
 onMounted(() => {
   const observer = new IntersectionObserver((entries) => {
