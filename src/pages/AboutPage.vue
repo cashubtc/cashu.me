@@ -224,15 +224,15 @@
         <div class="mb-8 flex justify-center">
           <div class="interactive-card inline-flex overflow-hidden rounded-lg">
             <button
-              class="px-4 py-2 focus:outline-none"
-              :class="{ 'gradient-bg text-black': viewMode === 'fan' }"
+              class="px-4 py-2 focus:outline-none text-gray-300"
+              :class="{ 'gradient-bg text-black font-semibold': viewMode === 'fan' }"
               @click="viewMode = 'fan'"
             >
               Fan
             </button>
             <button
-              class="px-4 py-2 focus:outline-none"
-              :class="{ 'gradient-bg text-black': viewMode === 'creator' }"
+              class="px-4 py-2 focus:outline-none text-gray-300"
+              :class="{ 'gradient-bg text-black font-semibold': viewMode === 'creator' }"
               @click="viewMode = 'creator'"
             >
               Creator
@@ -608,7 +608,7 @@ import { onMounted, ref } from 'vue'
 const dialogStep1 = ref(false)
 const dialogStep2 = ref(false)
 const dialogStep3 = ref(false)
-const viewMode = ref('fan')
+const viewMode = ref<'fan' | 'creator'>('fan')
 
 onMounted(() => {
   const observer = new IntersectionObserver((entries) => {
@@ -649,6 +649,7 @@ onMounted(() => {
 
 .interactive-card {
   background-color: rgba(15, 23, 42, 0.5);
+  color: #e2e8f0;
   backdrop-filter: blur(4px);
   border: 1px solid #1e293b;
   border-radius: 0.75rem;
