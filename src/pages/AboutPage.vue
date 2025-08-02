@@ -11,7 +11,7 @@
       <div class="mt-8 p-4 border rounded bg-amber-900/20 border-amber-500/30 max-w-3xl mx-auto flex items-start gap-2 text-amber-300">
         <span class="text-2xl">⚠️</span>
         <p>
-          Please note: Fundstr is currently in an alpha stage. While functional, it is experimental software. Use with caution and do not store large amounts of funds.
+          Fundstr is experimental alpha software. Features may break or change, and loss of funds is possible. Use only small amounts you can afford to lose.
         </p>
       </div>
     </header>
