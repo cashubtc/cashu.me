@@ -12,6 +12,7 @@ body {
 html,
 body {
   overscroll-behavior: none;
+  scroll-behavior: smooth;
 }
 
 // margin for top elements for ios safe area
