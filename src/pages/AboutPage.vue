@@ -42,9 +42,15 @@
         </p>
 
         <!-- Flow Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-5 items-center gap-6">
+        <div class="grid grid-cols-1 md:grid-cols-3 items-center gap-6">
           <!-- Step 1 -->
-          <div class="interactive-card p-6 flex flex-col items-center">
+          <button
+            type="button"
+            class="step-card interactive-card p-6 flex flex-col items-center focus:outline-none"
+            @click="dialogStep1 = true"
+            @keyup.enter="dialogStep1 = true"
+            tabindex="0"
+          >
             <svg
               class="w-12 h-12 mb-4 text-yellow-400"
               viewBox="0 0 24 24"
@@ -57,13 +63,16 @@
             </svg>
             <h3 class="font-semibold text-xl mb-2">Your Bitcoin</h3>
             <p class="text-sm">From any wallet</p>
-          </div>
-
-          <!-- Arrow -->
-          <div class="hidden md:flex justify-center text-4xl">→</div>
+          </button>
 
           <!-- Step 2 -->
-          <div class="interactive-card p-6 flex flex-col items-center">
+          <button
+            type="button"
+            class="step-card interactive-card p-6 flex flex-col items-center focus:outline-none"
+            @click="dialogStep2 = true"
+            @keyup.enter="dialogStep2 = true"
+            tabindex="0"
+          >
             <svg
               class="w-12 h-12 mb-4 text-indigo-400"
               fill="none"
@@ -80,13 +89,16 @@
             </svg>
             <h3 class="font-semibold text-xl mb-2">The Mint</h3>
             <p class="text-sm">Swaps for Ecash</p>
-          </div>
-
-          <!-- Arrow -->
-          <div class="hidden md:flex justify-center text-4xl">→</div>
+          </button>
 
           <!-- Step 3 -->
-          <div class="interactive-card p-6 flex flex-col items-center">
+          <button
+            type="button"
+            class="step-card interactive-card p-6 flex flex-col items-center focus:outline-none"
+            @click="dialogStep3 = true"
+            @keyup.enter="dialogStep3 = true"
+            tabindex="0"
+          >
             <svg
               class="w-12 h-12 mb-4 text-pink-400"
               fill="none"
@@ -108,8 +120,47 @@
             </svg>
             <h3 class="font-semibold text-xl mb-2">Fundstr Wallet</h3>
             <p class="text-sm">Private & ready to spend</p>
-          </div>
+          </button>
         </div>
+
+        <!-- Dialogs -->
+        <q-dialog v-model="dialogStep1">
+          <q-card>
+            <q-card-section class="text-h6">Your Bitcoin</q-card-section>
+            <q-card-section>
+              Start with sats from any wallet. For example, swap 100k sats for ecash to send privately.
+            </q-card-section>
+            <q-card-actions align="right">
+              <q-btn flat label="Close" v-close-popup />
+            </q-card-actions>
+          </q-card>
+        </q-dialog>
+
+        <q-dialog v-model="dialogStep2">
+          <q-card>
+            <q-card-section class="text-h6">The Mint</q-card-section>
+            <q-card-section>
+              The mint issues blind signed tokens in exchange for your bitcoin. Example: deposit 100k sats and receive
+              ecash you can split and spend.
+            </q-card-section>
+            <q-card-actions align="right">
+              <q-btn flat label="Close" v-close-popup />
+            </q-card-actions>
+          </q-card>
+        </q-dialog>
+
+        <q-dialog v-model="dialogStep3">
+          <q-card>
+            <q-card-section class="text-h6">Fundstr Wallet</q-card-section>
+            <q-card-section>
+              Store and send ecash privately. For instance, forward tokens to a friend or redeem them back for bitcoin
+              later.
+            </q-card-section>
+            <q-card-actions align="right">
+              <q-btn flat label="Close" v-close-popup />
+            </q-card-actions>
+          </q-card>
+        </q-dialog>
       </div>
     </section>
 
@@ -527,7 +578,11 @@
 </template>
 
 <script setup>
-import { onMounted } from 'vue'
+import { onMounted, ref } from 'vue'
+
+const dialogStep1 = ref(false)
+const dialogStep2 = ref(false)
+const dialogStep3 = ref(false)
 
 onMounted(() => {
   const observer = new IntersectionObserver((entries) => {
@@ -578,6 +633,36 @@ onMounted(() => {
   transform: translateY(-5px);
   box-shadow: 0 0 25px rgba(var(--color-accent-rgb), 0.2);
   border-color: rgba(var(--color-accent-rgb), 0.4);
+}
+
+.step-card {
+  position: relative;
+}
+
+.step-card::after {
+  content: '→';
+  position: absolute;
+  top: 50%;
+  right: -1.5rem;
+  transform: translateY(-50%);
+  font-size: 2rem;
+  color: currentColor;
+}
+
+.step-card:last-child::after {
+  content: '';
+}
+
+@media (max-width: 768px) {
+  .step-card::after {
+    content: '↓';
+    top: auto;
+    bottom: -1.5rem;
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
+    font-size: 1.5rem;
+  }
 }
 
 .fade-in-section {
