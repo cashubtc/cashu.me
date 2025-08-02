@@ -6,19 +6,15 @@
         About <span class="gradient-text">Fundstr</span>
       </h1>
       <p class="max-w-3xl mx-auto text-lg md:text-xl">
-        A privacy-first Bitcoin wallet, social chat, and creator-monetisation
-        hub built on the open-source Cashu ecash protocol and the decentralised
-        Nostr network.
+        A privacy-first Bitcoin wallet, social chat, and creator-monetisation hub built on the open-source Cashu ecash protocol and the decentralised Nostr network.
       </p>
       <div
-        class="alpha-warning mt-8 max-w-3xl mx-auto flex items-center gap-4 bg-yellow-50 p-4 border-l-4 border-yellow-400 rounded text-yellow-800 animate-pulse"
+        class="alpha-warning mt-8 max-w-3xl mx-auto flex items-start gap-3 animate-pulse"
         role="alert"
       >
-        <span class="text-5xl">⚠️</span>
+        <span class="text-3xl">⚠️</span>
         <p>
-          Fundstr is experimental alpha software. Features may break or change,
-          and loss of funds is possible. Use only small amounts you can afford
-          to lose.
+          Fundstr is experimental alpha software. Features may break or change, and loss of funds is possible. Use only small amounts you can afford to lose.
         </p>
       </div>
     </header>
@@ -30,11 +26,7 @@
           Your Money, Your Network
         </h2>
         <p class="text-lg md:text-xl">
-          We believe in a world where your financial life and social
-          interactions are truly your own. Fundstr is an experiment in creating
-          a parallel, peer-to-peer economy—free from corporate gatekeepers,
-          surveillance, and unpredictable fees. It’s a gateway to a more
-          sovereign way of connecting and transacting.
+          We believe in a world where your financial life and social interactions are truly your own. Fundstr is an experiment in creating a parallel, peer-to-peer economy—free from corporate gatekeepers, surveillance, and unpredictable fees. It’s a gateway to a more sovereign way of connecting and transacting.
         </p>
       </div>
     </section>
@@ -46,8 +38,7 @@
           How Ecash Works
         </h2>
         <p class="text-lg md:text-xl mb-12">
-          The loop is simple: Bitcoin in → private e-cash out → social payments
-          everywhere.
+          The loop is simple: Bitcoin in → private e-cash out → social payments everywhere.
         </p>
 
         <!-- Flow Grid -->
@@ -137,8 +128,7 @@
           <q-card>
             <q-card-section class="text-h6">Your Bitcoin</q-card-section>
             <q-card-section>
-              Start with sats from any wallet. For example, swap 100k sats for
-              ecash to send privately.
+              Start with sats from any wallet. For example, swap 100k sats for ecash to send privately.
             </q-card-section>
             <q-card-actions align="right">
               <q-btn flat label="Close" v-close-popup />
@@ -150,9 +140,8 @@
           <q-card>
             <q-card-section class="text-h6">The Mint</q-card-section>
             <q-card-section>
-              The mint issues blind signed tokens in exchange for your bitcoin.
-              Example: deposit 100k sats and receive ecash you can split and
-              spend.
+              The mint issues blind signed tokens in exchange for your bitcoin. Example: deposit 100k sats and receive
+              ecash you can split and spend.
             </q-card-section>
             <q-card-actions align="right">
               <q-btn flat label="Close" v-close-popup />
@@ -164,8 +153,8 @@
           <q-card>
             <q-card-section class="text-h6">Fundstr Wallet</q-card-section>
             <q-card-section>
-              Store and send ecash privately. For instance, forward tokens to a
-              friend or redeem them back for bitcoin later.
+              Store and send ecash privately. For instance, forward tokens to a friend or redeem them back for bitcoin
+              later.
             </q-card-section>
             <q-card-actions align="right">
               <q-btn flat label="Close" v-close-popup />
@@ -187,8 +176,7 @@
             <div class="text-4xl mb-4">🖌️</div>
             <h3 class="font-semibold text-xl mb-2">Content Creators</h3>
             <p class="text-sm">
-              Monetize your audience directly, free from de-platforming and high
-              fees.
+              Monetize your audience directly, free from de-platforming and high fees.
             </p>
           </div>
 
@@ -197,8 +185,7 @@
             <div class="text-4xl mb-4">🛡️</div>
             <h3 class="font-semibold text-xl mb-2">Privacy Advocates</h3>
             <p class="text-sm">
-              Transact with confidence that your financial life isn't being
-              tracked.
+              Transact with confidence that your financial life isn't being tracked.
             </p>
           </div>
 
@@ -207,8 +194,7 @@
             <div class="text-4xl mb-4">🔗</div>
             <h3 class="font-semibold text-xl mb-2">Nostr Users</h3>
             <p class="text-sm">
-              Upgrade your zaps to be truly private and integrate payments
-              seamlessly.
+              Upgrade your zaps to be truly private and integrate payments seamlessly.
             </p>
           </div>
 
@@ -217,8 +203,7 @@
             <div class="text-4xl mb-4">🌐</div>
             <h3 class="font-semibold text-xl mb-2">Global Citizens</h3>
             <p class="text-sm">
-              Move value across borders instantly, without relying on
-              traditional banking.
+              Move value across borders instantly, without relying on traditional banking.
             </p>
           </div>
         </div>
@@ -250,81 +235,62 @@
                 <tr class="border-b border-gray-800">
                   <td class="p-4 font-semibold">Settings</td>
                   <td class="p-4">
-                    Add / switch mints, choose display unit, set language &
-                    theme, import or back-up your 12-word seed, manage Nostr
-                    keys & relays.
+                    Add / switch mints, choose display unit, set language & theme, import or back-up your 12-word seed, manage Nostr keys & relays.
                   </td>
                   <td class="p-4">
-                    Same, plus Publishing settings: toggle automatic NIP-61
-                    profile updates and set a default “Earnings” bucket.
+                    Same, plus Publishing settings: toggle automatic NIP-61 profile updates and set a default “Earnings” bucket.
                   </td>
                 </tr>
                 <tr class="border-b border-gray-800">
                   <td class="p-4 font-semibold">Find Creators</td>
                   <td class="p-4">
-                    Search or browse Nostr-indexed profiles. View tier prices,
-                    previews and public posts. Hit Subscribe or Zap with a
-                    single tap.
+                    Search or browse Nostr-indexed profiles. View tier prices, previews and public posts. Hit Subscribe or Zap with a single tap.
                   </td>
                   <td class="p-4">
-                    Your public storefront as seen by visitors. Great for a
-                    quick audit of how your profile appears worldwide.
+                    Your public storefront as seen by visitors. Great for a quick audit of how your profile appears worldwide.
                   </td>
                 </tr>
                 <tr class="border-b border-gray-800">
                   <td class="p-4 font-semibold">Creator Hub</td>
+                  <td class="p-4">— (hidden unless you toggle “Creator Mode”)</td>
                   <td class="p-4">
-                    — (hidden unless you toggle “Creator Mode”)
-                  </td>
-                  <td class="p-4">
-                    Define or edit tiers (price, duration, perks), upload cover
-                    art, publish pay-walled posts, check revenue analytics and
-                    subscriber list.
+                    Define or edit tiers (price, duration, perks), upload cover art, publish pay-walled posts, check revenue analytics and subscriber list.
                   </td>
                 </tr>
                 <tr class="border-b border-gray-800">
                   <td class="p-4 font-semibold">My Profile</td>
                   <td class="p-4">
-                    Show off your avatar, npub link and optional NIP-05.
-                    Personal stats: total zaps sent & received, bucket balances.
+                    Show off your avatar, npub link and optional NIP-05. Personal stats: total zaps sent & received, bucket balances.
                   </td>
                   <td class="p-4">
-                    Same card plus Edit. Update bio, tags and the secondary P2PK
-                    key used by fans to send you locked tokens.
+                    Same card plus Edit. Update bio, tags and the secondary P2PK key used by fans to send you locked tokens.
                   </td>
                 </tr>
                 <tr class="border-b border-gray-800">
                   <td class="p-4 font-semibold">Buckets</td>
                   <td class="p-4">
-                    Drag-and-drop jars for budgeting (“Groceries”, “Fun money”,
-                    “Subs”). Move sats with zero fees.
+                    Drag-and-drop jars for budgeting (“Groceries”, “Fun money”, “Subs”). Move sats with zero fees.
                   </td>
                   <td class="p-4">
-                    Create an “Income” bucket that auto-receives new tips; split
-                    out taxes or savings instantly.
+                    Create an “Income” bucket that auto-receives new tips; split out taxes or savings instantly.
                   </td>
                 </tr>
                 <tr class="border-b border-gray-800">
                   <td class="p-4 font-semibold">Subscriptions</td>
                   <td class="p-4">
-                    See every active plan: tier name, next renewal, cumulative
-                    sats spent. Cancel or renew with one click.
+                    See every active plan: tier name, next renewal, cumulative sats spent. Cancel or renew with one click.
                   </td>
                   <td class="p-4">
-                    Quick list of paying supporters, tier breakdown, churn
-                    alerts and pending renewals.
+                    Quick list of paying supporters, tier breakdown, churn alerts and pending renewals.
                   </td>
                 </tr>
                 <tr class="border-b border-gray-800">
                   <td class="p-4 font-semibold">Chats</td>
                   <td class="p-4">
-                    End-to-end encrypted DMs (Nostr kind 4). Attach images or
-                    Cashu tokens. Green flash means a payment is embedded and
-                    auto-redeemed on receipt.
+                    End-to-end encrypted DMs (Nostr kind 4). Attach images or Cashu tokens. Green flash means a payment is embedded and auto-redeemed on receipt.
                   </td>
                   <td class="p-4">
-                    Same powerful chat plus a broadcast toggle to message all
-                    subs in a tier at once.
+                    Same powerful chat plus a broadcast toggle to message all subs in a tier at once.
                   </td>
                 </tr>
                 <tr class="border-b border-gray-800">
@@ -339,9 +305,7 @@
                 <tr class="border-b border-gray-800">
                   <td class="p-4 font-semibold">About</td>
                   <td class="p-4">Learn everything in one scroll.</td>
-                  <td class="p-4">
-                    Ditto; includes creator-specific FAQs below.
-                  </td>
+                  <td class="p-4">Ditto; includes creator-specific FAQs below.</td>
                 </tr>
                 <tr>
                   <td class="p-4 font-semibold">External links</td>
@@ -362,130 +326,100 @@
           <div class="interactive-card p-6">
             <h3 class="font-semibold text-lg mb-2">Settings</h3>
             <p class="text-sm mb-2">
-              <strong>Fan / Subscriber perspective:</strong> Add / switch mints,
-              choose display unit, set language & theme, import or back-up your
-              12-word seed, manage Nostr keys & relays.
+              <strong>Fan / Subscriber perspective:</strong> Add / switch mints, choose display unit, set language & theme, import or back-up your 12-word seed, manage Nostr keys & relays.
             </p>
             <p class="text-sm">
-              <strong>Creator perspective:</strong> Same, plus Publishing
-              settings: toggle automatic NIP-61 profile updates and set a
-              default “Earnings” bucket.
+              <strong>Creator perspective:</strong> Same, plus Publishing settings: toggle automatic NIP-61 profile updates and set a default “Earnings” bucket.
             </p>
           </div>
 
           <div class="interactive-card p-6">
             <h3 class="font-semibold text-lg mb-2">Find Creators</h3>
             <p class="text-sm mb-2">
-              <strong>Fan / Subscriber perspective:</strong> Search or browse
-              Nostr-indexed profiles. View tier prices, previews and public
-              posts. Hit Subscribe or Zap with a single tap.
+              <strong>Fan / Subscriber perspective:</strong> Search or browse Nostr-indexed profiles. View tier prices, previews and public posts. Hit Subscribe or Zap with a single tap.
             </p>
             <p class="text-sm">
-              <strong>Creator perspective:</strong> Your public storefront as
-              seen by visitors. Great for a quick audit of how your profile
-              appears worldwide.
+              <strong>Creator perspective:</strong> Your public storefront as seen by visitors. Great for a quick audit of how your profile appears worldwide.
             </p>
           </div>
 
           <div class="interactive-card p-6">
             <h3 class="font-semibold text-lg mb-2">Creator Hub</h3>
             <p class="text-sm mb-2">
-              <strong>Fan / Subscriber perspective:</strong> — (hidden unless
-              you toggle “Creator Mode”)
+              <strong>Fan / Subscriber perspective:</strong> — (hidden unless you toggle “Creator Mode”)
             </p>
             <p class="text-sm">
-              <strong>Creator perspective:</strong> Define or edit tiers (price,
-              duration, perks), upload cover art, publish pay-walled posts,
-              check revenue analytics and subscriber list.
+              <strong>Creator perspective:</strong> Define or edit tiers (price, duration, perks), upload cover art, publish pay-walled posts, check revenue analytics and subscriber list.
             </p>
           </div>
 
           <div class="interactive-card p-6">
             <h3 class="font-semibold text-lg mb-2">My Profile</h3>
             <p class="text-sm mb-2">
-              <strong>Fan / Subscriber perspective:</strong> Show off your
-              avatar, npub link and optional NIP-05. Personal stats: total zaps
-              sent & received, bucket balances.
+              <strong>Fan / Subscriber perspective:</strong> Show off your avatar, npub link and optional NIP-05. Personal stats: total zaps sent & received, bucket balances.
             </p>
             <p class="text-sm">
-              <strong>Creator perspective:</strong> Same card plus Edit. Update
-              bio, tags and the secondary P2PK key used by fans to send you
-              locked tokens.
+              <strong>Creator perspective:</strong> Same card plus Edit. Update bio, tags and the secondary P2PK key used by fans to send you locked tokens.
             </p>
           </div>
 
           <div class="interactive-card p-6">
             <h3 class="font-semibold text-lg mb-2">Buckets</h3>
             <p class="text-sm mb-2">
-              <strong>Fan / Subscriber perspective:</strong> Drag-and-drop jars
-              for budgeting (“Groceries”, “Fun money”, “Subs”). Move sats with
-              zero fees.
+              <strong>Fan / Subscriber perspective:</strong> Drag-and-drop jars for budgeting (“Groceries”, “Fun money”, “Subs”). Move sats with zero fees.
             </p>
             <p class="text-sm">
-              <strong>Creator perspective:</strong> Create an “Income” bucket
-              that auto-receives new tips; split out taxes or savings instantly.
+              <strong>Creator perspective:</strong> Create an “Income” bucket that auto-receives new tips; split out taxes or savings instantly.
             </p>
           </div>
 
           <div class="interactive-card p-6">
             <h3 class="font-semibold text-lg mb-2">Subscriptions</h3>
             <p class="text-sm mb-2">
-              <strong>Fan / Subscriber perspective:</strong> See every active
-              plan: tier name, next renewal, cumulative sats spent. Cancel or
-              renew with one click.
+              <strong>Fan / Subscriber perspective:</strong> See every active plan: tier name, next renewal, cumulative sats spent. Cancel or renew with one click.
             </p>
             <p class="text-sm">
-              <strong>Creator perspective:</strong> Quick list of paying
-              supporters, tier breakdown, churn alerts and pending renewals.
+              <strong>Creator perspective:</strong> Quick list of paying supporters, tier breakdown, churn alerts and pending renewals.
             </p>
           </div>
 
           <div class="interactive-card p-6">
             <h3 class="font-semibold text-lg mb-2">Chats</h3>
             <p class="text-sm mb-2">
-              <strong>Fan / Subscriber perspective:</strong> End-to-end
-              encrypted DMs (Nostr kind 4). Attach images or Cashu tokens. Green
-              flash means a payment is embedded and auto-redeemed on receipt.
+              <strong>Fan / Subscriber perspective:</strong> End-to-end encrypted DMs (Nostr kind 4). Attach images or Cashu tokens. Green flash means a payment is embedded and auto-redeemed on receipt.
             </p>
             <p class="text-sm">
-              <strong>Creator perspective:</strong> Same powerful chat plus a
-              broadcast toggle to message all subs in a tier at once.
+              <strong>Creator perspective:</strong> Same powerful chat plus a broadcast toggle to message all subs in a tier at once.
             </p>
           </div>
 
           <div class="interactive-card p-6">
             <h3 class="font-semibold text-lg mb-2">Terms</h3>
             <p class="text-sm mb-2">
-              <strong>Fan / Subscriber perspective:</strong> Human-readable,
-              plain-English licence & disclaimers.
+              <strong>Fan / Subscriber perspective:</strong> Human-readable, plain-English licence & disclaimers.
             </p>
             <p class="text-sm">
-              <strong>Creator perspective:</strong> Identical — clarifies you
-              keep full custody of funds.
+              <strong>Creator perspective:</strong> Identical — clarifies you keep full custody of funds.
             </p>
           </div>
 
           <div class="interactive-card p-6">
             <h3 class="font-semibold text-lg mb-2">About</h3>
             <p class="text-sm mb-2">
-              <strong>Fan / Subscriber perspective:</strong> Learn everything in
-              one scroll.
+              <strong>Fan / Subscriber perspective:</strong> Learn everything in one scroll.
             </p>
             <p class="text-sm">
-              <strong>Creator perspective:</strong> Ditto; includes
-              creator-specific FAQs below.
+              <strong>Creator perspective:</strong> Ditto; includes creator-specific FAQs below.
             </p>
           </div>
 
           <div class="interactive-card p-6">
             <h3 class="font-semibold text-lg mb-2">External links</h3>
             <p class="text-sm mb-2">
-              <strong>Fan / Subscriber perspective:</strong> Cashu.space docs,
-              GitHub, Twitter, Telegram, Donate.
+              <strong>Fan / Subscriber perspective:</strong> Cashu.space docs, GitHub, Twitter, Telegram, Donate.
             </p>
             <p class="text-sm">
-              <strong>Creator perspective:</strong> Identical — share with
-              collaborators or fans.
+              <strong>Creator perspective:</strong> Identical — share with collaborators or fans.
             </p>
           </div>
         </div>
@@ -504,8 +438,7 @@
             <div class="text-4xl mb-4">🐙</div>
             <h3 class="font-semibold text-xl mb-2">Open Source & Verifiable</h3>
             <p class="text-sm">
-              Fundstr is built on open-source code. We invite you to inspect,
-              verify, and contribute. Transparency is our core principle.
+              Fundstr is built on open-source code. We invite you to inspect, verify, and contribute. Transparency is our core principle.
             </p>
           </div>
 
@@ -514,9 +447,7 @@
             <div class="text-4xl mb-4">🔑</div>
             <h3 class="font-semibold text-xl mb-2">You Hold the Keys</h3>
             <p class="text-sm">
-              You are the sole holder of your ecash tokens and Nostr identity.
-              Mints act as custodians for the underlying Bitcoin, but only you
-              can spend your ecash.
+              You are the sole holder of your ecash tokens and Nostr identity. Mints act as custodians for the underlying Bitcoin, but only you can spend your ecash.
             </p>
           </div>
 
@@ -525,9 +456,7 @@
             <div class="text-4xl mb-4">🛡️</div>
             <h3 class="font-semibold text-xl mb-2">Unbreakable Privacy</h3>
             <p class="text-sm">
-              Thanks to Chaumian blind signatures, mints cannot link your
-              deposits to your withdrawals. Your spending habits remain
-              completely private.
+              Thanks to Chaumian blind signatures, mints cannot link your deposits to your withdrawals. Your spending habits remain completely private.
             </p>
           </div>
 
@@ -536,9 +465,7 @@
             <div class="text-4xl mb-4">🪙</div>
             <h3 class="font-semibold text-xl mb-2">Mint Diversification</h3>
             <p class="text-sm">
-              Fundstr supports multiple mints, allowing you to diversify your
-              holdings. Our audit tools will warn you (⚠️) of any unusual mint
-              behavior.
+              Fundstr supports multiple mints, allowing you to diversify your holdings. Our audit tools will warn you (⚠️) of any unusual mint behavior.
             </p>
           </div>
         </div>
@@ -548,9 +475,7 @@
     <!-- FAQ -->
     <section id="faq" class="py-16 px-4 fade-in-section">
       <div class="max-w-4xl mx-auto">
-        <h2
-          class="text-3xl md:text-5xl font-bold mb-12 text-center gradient-text"
-        >
+        <h2 class="text-3xl md:text-5xl font-bold mb-12 text-center gradient-text">
           Frequently Asked Questions
         </h2>
 
@@ -561,10 +486,7 @@
               What if a fan stops paying?
             </summary>
             <p class="mt-4 text-sm">
-              Creator view » Their timelocked token never unlocks for you.
-              Fundstr flags the user as “Expired” and hides future paid posts.
-              Fan view » You simply don’t renew. No recurring pull, no surprise
-              charges.
+              Creator view » Their timelocked token never unlocks for you. Fundstr flags the user as “Expired” and hides future paid posts. Fan view » You simply don’t renew. No recurring pull, no surprise charges.
             </p>
           </details>
 
@@ -574,9 +496,7 @@
               Can I withdraw to a Lightning wallet?
             </summary>
             <p class="mt-4 text-sm">
-              Yes. Go to Wallet → Send → Lightning Invoice, paste the invoice
-              from any external wallet; Fundstr melts the tokens at the mint and
-              pays it.
+              Yes. Go to Wallet → Send → Lightning Invoice, paste the invoice from any external wallet; Fundstr melts the tokens at the mint and pays it.
             </p>
           </details>
 
@@ -586,16 +506,9 @@
               How private is this really?
             </summary>
             <ul class="mt-4 text-sm list-disc pl-6 space-y-1">
-              <li>
-                Mints see withdraw/redeem events but cannot correlate them.
-              </li>
-              <li>
-                Nostr chats are E2E encrypted; Nutzaps use P2PK so only the
-                intended receiver can claim them.
-              </li>
-              <li>
-                Choose different mints or buckets to compartmentalise further.
-              </li>
+              <li>Mints see withdraw/redeem events but cannot correlate them.</li>
+              <li>Nostr chats are E2E encrypted; Nutzaps use P2PK so only the intended receiver can claim them.</li>
+              <li>Choose different mints or buckets to compartmentalise further.</li>
             </ul>
           </details>
         </div>
@@ -611,12 +524,9 @@
             Join the Conversation
           </h2>
           <p class="mb-6">
-            Follow the project and its creator on Nostr to stay up-to-date and
-            connect with the community.
+            Follow the project and its creator on Nostr to stay up-to-date and connect with the community.
           </p>
-          <div
-            class="flex flex-col sm:flex-row justify-center gap-4 text-accent"
-          >
+          <div class="flex flex-col sm:flex-row justify-center gap-4 text-accent">
             <a
               href="#"
               class="interactive-card px-6 py-3 flex items-center justify-center gap-2"
@@ -635,11 +545,7 @@
       <section class="py-16 fade-in-section">
         <div class="max-w-5xl mx-auto">
           <blockquote>
-            Fundstr is powered by open-source code and an open community.
-            Whether you’re a storyteller earning sats or a fan supporting work
-            you love, we hope this guide helps you navigate every page with
-            confidence — and makes your next payment feel as effortless as a
-            like, comment, or retweet.
+            Fundstr is powered by open-source code and an open community. Whether you’re a storyteller earning sats or a fan supporting work you love, we hope this guide helps you navigate every page with confidence — and makes your next payment feel as effortless as a like, comment, or retweet.
           </blockquote>
         </div>
       </section>
@@ -672,32 +578,32 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from "vue";
+import { onMounted, ref } from 'vue'
 
-const dialogStep1 = ref(false);
-const dialogStep2 = ref(false);
-const dialogStep3 = ref(false);
+const dialogStep1 = ref(false)
+const dialogStep2 = ref(false)
+const dialogStep3 = ref(false)
 
 onMounted(() => {
   const observer = new IntersectionObserver((entries) => {
     entries.forEach((entry) => {
       if (entry.isIntersecting) {
-        entry.target.classList.add("is-visible");
+        entry.target.classList.add('is-visible')
       }
-    });
-  });
+    })
+  })
 
-  document.querySelectorAll(".fade-in-section").forEach((el) => {
-    observer.observe(el);
-  });
-});
+  document.querySelectorAll('.fade-in-section').forEach((el) => {
+    observer.observe(el)
+  })
+})
 </script>
 
 <style scoped>
 .about-page {
   --color-accent: #22d3ee;
   --color-accent-rgb: 34, 211, 238;
-  font-family: "Inter", sans-serif;
+  font-family: 'Inter', sans-serif;
   background-color: #0a0a0a;
   background-image: radial-gradient(#1e293b 1px, transparent 1px);
   background-size: 20px 20px;
@@ -734,7 +640,7 @@ onMounted(() => {
 }
 
 .step-card::after {
-  content: "→";
+  content: '→';
   position: absolute;
   top: 50%;
   right: -1.5rem;
@@ -744,12 +650,12 @@ onMounted(() => {
 }
 
 .step-card:last-child::after {
-  content: "";
+  content: '';
 }
 
 @media (max-width: 768px) {
   .step-card::after {
-    content: "↓";
+    content: '↓';
     top: auto;
     bottom: -1.5rem;
     left: 50%;
@@ -775,4 +681,22 @@ blockquote {
   padding-left: 1rem;
   font-style: italic;
 }
+
+.alpha-warning {
+  background-color: rgba(120, 53, 15, 0.2);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  color: #fcd34d;
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  font-size: 1.25rem;
+  font-weight: 700;
+  box-shadow: 0 0 10px rgba(245, 158, 11, 0.5);
+}
+
+@media (min-width: 768px) {
+  .alpha-warning {
+    font-size: 1.5rem;
+  }
+}
 </style>
+
