@@ -1,9 +1,34 @@
 <template>
-  <q-page :class="[$q.dark.isActive ? 'text-white' : 'text-dark', 'q-pa-md']">
-    <h1>Buckets</h1>
-    <p class="text-grey-5 q-mb-md">Organize your tokens</p>
-    <SummaryStats :total="totalActiveBalance" :active-count="activeCount" />
-    <BucketManager />
+  <q-page
+    :class="[
+      $q.dark.isActive ? 'bg-dark text-white' : 'bg-white text-dark',
+      'q-pa-md',
+    ]"
+  >
+    <div class="q-gutter-md">
+      <q-card
+        :class="
+          $q.dark.isActive ? 'bg-grey-9 text-white' : 'bg-white text-dark'
+        "
+        class="q-pa-md"
+      >
+        <div class="text-h5">Buckets</div>
+        <div class="text-subtitle2 text-grey-6 q-mb-md">
+          Organize your tokens
+        </div>
+        <SummaryStats :total="totalActiveBalance" :active-count="activeCount" />
+      </q-card>
+
+      <q-card
+        :class="
+          $q.dark.isActive ? 'bg-grey-9 text-white' : 'bg-white text-dark'
+        "
+        class="q-pa-md"
+      >
+        <BucketManager />
+      </q-card>
+    </div>
+
     <q-page-sticky
       position="bottom-right"
       :offset="[18, 18]"
@@ -35,10 +60,3 @@ const { totalActiveBalance, activeCount } = storeToRefs(bucketsStore);
 
 const dialogOpen = ref(false);
 </script>
-
-<style scoped>
-h1 {
-  font-size: clamp(32px, 6vw, 64px);
-  margin: 0;
-}
-</style>
