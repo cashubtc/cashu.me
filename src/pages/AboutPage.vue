@@ -11,24 +11,54 @@ const viewMode = ref<"fan" | "creator">("fan");
 
 const navItems: NavItem[] = [
   {
-    label: "Wallet",
-    fan: "View your balance and recent activity.",
-    creator: "Track incoming support and withdraw funds.",
-  },
-  {
-    label: "Send",
-    fan: "Tip your favorite creators or friends.",
-    creator: "Pay collaborators or move funds.",
-  },
-  {
-    label: "Receive",
-    fan: "Collect ecash or lightning payments.",
-    creator: "Let fans support you directly.",
-  },
-  {
     label: "Settings",
     fan: "Customize the app to suit your needs.",
     creator: "Manage creator tools and preferences.",
+  },
+  {
+    label: "Find Creators",
+    fan: "Discover new creators to support.",
+    creator: "Promote your profile to potential fans.",
+  },
+  {
+    label: "Creator Hub",
+    fan: "Explore tools designed for creators.",
+    creator: "Access your creator dashboard and resources.",
+  },
+  {
+    label: "My Profile",
+    fan: "View and edit your personal information.",
+    creator: "Manage your creator identity and bio.",
+  },
+  {
+    label: "Buckets",
+    fan: "Organize your funds into custom buckets.",
+    creator: "Track income streams with bucketed funds.",
+  },
+  {
+    label: "Subscriptions",
+    fan: "Manage the creators you're subscribed to.",
+    creator: "Control your subscriber tiers and benefits.",
+  },
+  {
+    label: "Chats",
+    fan: "Message creators directly.",
+    creator: "Interact with your supporters.",
+  },
+  {
+    label: "Terms",
+    fan: "Review the platform's terms of service.",
+    creator: "Review the platform's terms of service.",
+  },
+  {
+    label: "About",
+    fan: "Learn more about the project.",
+    creator: "Learn more about the project.",
+  },
+  {
+    label: "External links",
+    fan: "Visit official resources and documentation.",
+    creator: "Visit official resources and documentation.",
   },
 ];
 
