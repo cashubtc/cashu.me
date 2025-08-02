@@ -1365,6 +1365,24 @@ export default {
       "Advanced users can override default Nostr relays or set a custom search backend via local storage keys.",
     security_summary:
       "Fundstr is non-custodial. Lost seeds or tokens cannot be recovered, so back up your 12-word seed and Nostr keys securely.",
+    sections: {
+      intro: {
+        title: "Introduction",
+        summary: "Overview and quick start",
+      },
+      features: {
+        title: "Feature Walkthrough",
+        summary: "Navigation map and deep dive",
+      },
+      faq: {
+        title: "FAQ",
+        summary: "Common questions",
+      },
+      security: {
+        title: "Security & Open Source",
+        summary: "Safety tips and license info",
+      },
+    },
   },
   CreatorHub: {
     dashboard: {
