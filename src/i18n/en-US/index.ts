@@ -1701,6 +1701,20 @@ export const messages = {
     goal: "Monthly goal",
     description: "Description",
   },
+  AboutPage: {
+    siteOverview: {
+      title: "Site Overview",
+      wallet: "Manage your ecash balance.",
+      findCreators: "Discover creators to support.",
+      creatorHub: "Set up and manage your creator profile.",
+      myProfile: "View and edit your profile.",
+      buckets: "Organize funds into buckets.",
+      subscriptions: "Manage your subscriptions.",
+      nostrMessengerTitle: "Nostr Messenger",
+      nostrMessenger: "Chat privately with Nostr.",
+      settings: "Configure the app.",
+    },
+  },
 };
 
 export default {
