@@ -43,9 +43,12 @@
 
 <script setup lang="ts">
 import { ref } from "vue";
+import { useI18n } from "vue-i18n";
 
 const opened = ref(true);
 const mini = ref(false);
+
+const { t } = useI18n();
 
 const navLinks = [
   { to: "/wallet", label: "Wallet", icon: "account_balance_wallet" },
@@ -59,8 +62,8 @@ const accountLinks = [
 ];
 
 const docLinks = [
-  { to: "/terms", label: "Terms", icon: "gavel" },
-  { to: "/about", label: "About", icon: "info" },
+  { to: "/terms", label: t("MainHeader.menu.terms.terms.title"), icon: "gavel" },
+  { to: "/about", label: t("MainHeader.menu.about.about.title"), icon: "info" },
 ];
 </script>
 
