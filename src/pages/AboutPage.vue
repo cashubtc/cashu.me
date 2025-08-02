@@ -437,15 +437,21 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { onMounted, ref } from 'vue'
+
+interface NavigationItem {
+  menuItem: string
+  fanText: string
+  creatorText: string
+}
 
 const dialogStep1 = ref(false)
 const dialogStep2 = ref(false)
 const dialogStep3 = ref(false)
 const viewMode = ref<'fan' | 'creator'>('fan')
 
-const navigationItems = ref([
+const navigationItems = ref<NavigationItem[]>([
   {
     menuItem: 'Settings',
     fanText:
