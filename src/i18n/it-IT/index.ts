@@ -1338,7 +1338,6 @@ export default {
   AboutPage: {
     title: "About Fundstr",
     alpha_notice: "Fundstr is in Alpha/Beta – use at your own risk.",
-    video_placeholder: "Video coming soon",
     license_section:
       "Fundstr is open-source under the <a href='https://github.com/cashubtc/cashu.me/blob/master/LICENSE.md' target='_blank'>MIT License</a>. Contribute or read the code on <a href='https://github.com/cashubtc/cashu.me' target='_blank'>GitHub</a>.",
     cross_platform:
