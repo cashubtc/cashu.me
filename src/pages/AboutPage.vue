@@ -9,15 +9,24 @@
         default-opened
       >
         <div class="q-mt-md">
-          <p>
-            Fundstr is a
-            <strong>privacy-first Bitcoin wallet, social chat and creator-monetisation hub</strong>
-            built on the open-source Cashu ecash protocol and the decentralised Nostr network. Everything you see in the
-            sidebar is a doorway to a feature that either <strong>helps creators earn</strong> or
-            <strong>lets fans support &amp; interact</strong> — all with instant, low-fee Bitcoin-denominated e-cash.
+          <p class="flex items-center">
+            <img :src="PrivacyIcon" :alt="$t('AboutPage.icons.privacy_alt')" class="about-inline-icon q-mr-sm" />
+            <span>
+              Fundstr is a
+              <strong>privacy-first Bitcoin wallet, social chat and creator-monetisation hub</strong>
+              built on the open-source Cashu ecash protocol and the decentralised Nostr network. Everything you see in the
+              sidebar is a doorway to a feature that either <strong>helps creators earn</strong> or
+              <strong>lets fans support &amp; interact</strong> — all with instant, low-fee Bitcoin-denominated e-cash.
+            </span>
           </p>
-          <p class="q-mt-sm">{{ $t('AboutPage.cross_platform') }}</p>
-          <p class="text-negative"><strong>{{ $t('AboutPage.alpha_notice') }}</strong></p>
+          <p class="q-mt-sm flex items-center">
+            <img :src="StarIcon" :alt="$t('AboutPage.icons.star_alt')" class="about-inline-icon q-mr-sm" />
+            {{ $t('AboutPage.cross_platform') }}
+          </p>
+          <p class="text-negative flex items-center">
+            <q-icon name="warning" class="q-mr-xs" :aria-label="$t('AboutPage.icons.warning')" />
+            <strong>{{ $t('AboutPage.alpha_notice') }}</strong>
+          </p>
           <p>Below you’ll find a <strong>page-by-page guide</strong> written in two parallel voices:</p>
           <ul>
             <li><strong>“Creator view”</strong> – what each screen means when you make money on Fundstr.</li>
@@ -294,7 +303,10 @@
   </q-page>
 </template>
 
-<script setup></script>
+<script setup>
+import PrivacyIcon from 'src/assets/about/privacy.svg';
+import StarIcon from 'src/assets/about/star.svg';
+</script>
 
 <style scoped>
 .video-placeholder {
@@ -303,5 +315,10 @@
   border-radius: 8px;
   color: #ccc;
   width: 100%;
+}
+
+.about-inline-icon {
+  width: 24px;
+  height: 24px;
 }
 </style>
