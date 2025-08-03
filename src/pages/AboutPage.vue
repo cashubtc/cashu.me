@@ -37,86 +37,27 @@
         <h2 class="text-3xl md:text-5xl font-bold mb-6 gradient-text">
           {{ $t('AboutPage.siteOverview.title') }}
         </h2>
-        <ul class="text-lg md:text-xl space-y-4 text-left">
-          <li>
-            <router-link to="/wallet" class="text-accent font-semibold">
-              {{ $t('MainHeader.menu.wallet.title') }}
+        <div
+          class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 text-left"
+        >
+          <div
+            v-for="card in siteOverviewCards"
+            :key="card.route"
+            class="interactive-card p-6 flex flex-col"
+          >
+            <q-icon
+              :name="$t(card.iconKey)"
+              size="2.5rem"
+              class="text-accent mb-4"
+            />
+            <router-link :to="card.route" class="text-accent font-semibold">
+              {{ $t(card.titleKey) }}
             </router-link>
-            – {{ $t('AboutPage.siteOverview.wallet') }}
-          </li>
-          <li>
-            <router-link to="/find-creators" class="text-accent font-semibold">
-              {{ $t('MainHeader.menu.findCreators.title') }}
-            </router-link>
-            – {{ $t('AboutPage.siteOverview.findCreators') }}
-          </li>
-          <li>
-            <router-link to="/creator-hub" class="text-accent font-semibold">
-              {{ $t('MainHeader.menu.creatorHub.title') }}
-            </router-link>
-            – {{ $t('AboutPage.siteOverview.creatorHub') }}
-          </li>
-          <li>
-            <router-link to="/my-profile" class="text-accent font-semibold">
-              {{ $t('MainHeader.menu.myProfile.title') }}
-            </router-link>
-            – {{ $t('AboutPage.siteOverview.myProfile') }}
-          </li>
-          <li>
-            <router-link to="/buckets" class="text-accent font-semibold">
-              {{ $t('MainHeader.menu.buckets.title') }}
-            </router-link>
-            – {{ $t('AboutPage.siteOverview.buckets') }}
-          </li>
-          <li>
-            <router-link to="/subscriptions" class="text-accent font-semibold">
-              {{ $t('MainHeader.menu.subscriptions.title') }}
-            </router-link>
-            – {{ $t('AboutPage.siteOverview.subscriptions') }}
-          </li>
-          <li>
-            <router-link to="/nostr-messenger" class="text-accent font-semibold">
-              {{ $t('MainHeader.menu.nostrMessenger.title') }}
-            </router-link>
-            – {{ $t('AboutPage.siteOverview.nostrMessenger') }}
-          </li>
-          <li>
-            <router-link to="/settings" class="text-accent font-semibold">
-              {{ $t('MainHeader.menu.settings.title') }}
-            </router-link>
-            – {{ $t('AboutPage.siteOverview.settings') }}
-          </li>
-          <li>
-            <router-link to="/restore" class="text-accent font-semibold">
-              {{ $t('MainHeader.menu.restore.title') }}
-            </router-link>
-            – {{ $t('AboutPage.siteOverview.restore') }}
-          </li>
-          <li>
-            <router-link to="/already-running" class="text-accent font-semibold">
-              {{ $t('MainHeader.menu.alreadyRunning.title') }}
-            </router-link>
-            – {{ $t('AboutPage.siteOverview.alreadyRunning') }}
-          </li>
-          <li>
-            <router-link to="/welcome" class="text-accent font-semibold">
-              {{ $t('MainHeader.menu.welcome.title') }}
-            </router-link>
-            – {{ $t('AboutPage.siteOverview.welcome') }}
-          </li>
-          <li>
-            <router-link to="/terms" class="text-accent font-semibold">
-              {{ $t('MainHeader.menu.terms.title') }}
-            </router-link>
-            – {{ $t('AboutPage.siteOverview.terms') }}
-          </li>
-          <li>
-            <router-link to="/nostr-login" class="text-accent font-semibold">
-              {{ $t('MainHeader.menu.nostrLogin.title') }}
-            </router-link>
-            – {{ $t('AboutPage.siteOverview.nostrLogin') }}
-          </li>
-        </ul>
+            <p class="text-sm mt-2">
+              {{ $t(card.descriptionKey) }}
+            </p>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -548,6 +489,94 @@ const dialogStep1 = ref(false)
 const dialogStep2 = ref(false)
 const dialogStep3 = ref(false)
 const viewMode = ref<'fan' | 'creator'>('fan')
+
+interface SiteOverviewCard {
+  route: string
+  titleKey: string
+  descriptionKey: string
+  iconKey: string
+}
+
+const siteOverviewCards: SiteOverviewCard[] = [
+  {
+    route: '/wallet',
+    titleKey: 'MainHeader.menu.wallet.title',
+    descriptionKey: 'AboutPage.siteOverview.wallet.description',
+    iconKey: 'AboutPage.siteOverview.wallet.icon',
+  },
+  {
+    route: '/find-creators',
+    titleKey: 'MainHeader.menu.findCreators.title',
+    descriptionKey: 'AboutPage.siteOverview.findCreators.description',
+    iconKey: 'AboutPage.siteOverview.findCreators.icon',
+  },
+  {
+    route: '/creator-hub',
+    titleKey: 'MainHeader.menu.creatorHub.title',
+    descriptionKey: 'AboutPage.siteOverview.creatorHub.description',
+    iconKey: 'AboutPage.siteOverview.creatorHub.icon',
+  },
+  {
+    route: '/my-profile',
+    titleKey: 'MainHeader.menu.myProfile.title',
+    descriptionKey: 'AboutPage.siteOverview.myProfile.description',
+    iconKey: 'AboutPage.siteOverview.myProfile.icon',
+  },
+  {
+    route: '/buckets',
+    titleKey: 'MainHeader.menu.buckets.title',
+    descriptionKey: 'AboutPage.siteOverview.buckets.description',
+    iconKey: 'AboutPage.siteOverview.buckets.icon',
+  },
+  {
+    route: '/subscriptions',
+    titleKey: 'MainHeader.menu.subscriptions.title',
+    descriptionKey: 'AboutPage.siteOverview.subscriptions.description',
+    iconKey: 'AboutPage.siteOverview.subscriptions.icon',
+  },
+  {
+    route: '/nostr-messenger',
+    titleKey: 'MainHeader.menu.nostrMessenger.title',
+    descriptionKey: 'AboutPage.siteOverview.nostrMessenger.description',
+    iconKey: 'AboutPage.siteOverview.nostrMessenger.icon',
+  },
+  {
+    route: '/settings',
+    titleKey: 'MainHeader.menu.settings.title',
+    descriptionKey: 'AboutPage.siteOverview.settings.description',
+    iconKey: 'AboutPage.siteOverview.settings.icon',
+  },
+  {
+    route: '/restore',
+    titleKey: 'MainHeader.menu.restore.title',
+    descriptionKey: 'AboutPage.siteOverview.restore.description',
+    iconKey: 'AboutPage.siteOverview.restore.icon',
+  },
+  {
+    route: '/already-running',
+    titleKey: 'MainHeader.menu.alreadyRunning.title',
+    descriptionKey: 'AboutPage.siteOverview.alreadyRunning.description',
+    iconKey: 'AboutPage.siteOverview.alreadyRunning.icon',
+  },
+  {
+    route: '/welcome',
+    titleKey: 'MainHeader.menu.welcome.title',
+    descriptionKey: 'AboutPage.siteOverview.welcome.description',
+    iconKey: 'AboutPage.siteOverview.welcome.icon',
+  },
+  {
+    route: '/terms',
+    titleKey: 'MainHeader.menu.terms.title',
+    descriptionKey: 'AboutPage.siteOverview.terms.description',
+    iconKey: 'AboutPage.siteOverview.terms.icon',
+  },
+  {
+    route: '/nostr-login',
+    titleKey: 'MainHeader.menu.nostrLogin.title',
+    descriptionKey: 'AboutPage.siteOverview.nostrLogin.description',
+    iconKey: 'AboutPage.siteOverview.nostrLogin.icon',
+  },
+]
 
 // navigation items for the navigation map
 const navigationItems = ref<NavigationItem[]>([
