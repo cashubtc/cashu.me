@@ -1,0 +1,37 @@
+{
+  "MainHeader": {
+    "menu": {
+      "wallet": { "title": "Wallet" },
+      "findCreators": { "title": "Find Creators" },
+      "creatorHub": { "title": "Creator Hub" },
+      "myProfile": { "title": "My Profile" },
+      "buckets": { "title": "Buckets" },
+      "subscriptions": { "title": "Subscriptions" },
+      "settings": { "title": "Settings" },
+      "terms": { "title": "Terms" }
+    }
+  },
+  "AboutPage": {
+    "siteOverview": {
+      "title": "Site Overview",
+      "wallet": "A private, secure ecash wallet to manage your funds.",
+      "findCreators": "Discover and support your favorite creators on the Nostr network.",
+      "creatorHub": "Manage your tiers, posts, and subscribers.",
+      "myProfile": "View and edit your public profile.",
+      "buckets": "Organize your sats into different spending buckets.",
+      "subscriptions": "Manage your subscriptions to creators.",
+      "nostrMessengerTitle": "Nostr Messenger",
+      "nostrMessenger": "Chat privately with end‑to‑end encrypted messages.",
+      "settings": "Configure your wallet, mints, and Nostr settings.",
+      "restoreTitle": "Restore",
+      "restore": "Restore your wallet from your seed phrase.",
+      "alreadyRunningTitle": "Already Running",
+      "alreadyRunning": "Handles cases where the app is open in another tab.",
+      "welcomeTitle": "Welcome",
+      "welcome": "The initial welcome and setup screen.",
+      "terms": "Read the terms of service.",
+      "nostrLoginTitle": "Nostr Login",
+      "nostrLogin": "Login using your Nostr credentials."
+    }
+  }
+}
