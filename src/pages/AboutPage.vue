@@ -249,79 +249,40 @@
         <p class="text-lg md:text-xl mb-12">
           Every page explained from both the Creator and Fan perspectives.
         </p>
-
-        <!-- Perspective Toggle -->
-        <div class="mb-8 flex justify-center gap-4">
-          <q-btn
-            rounded
-            unelevated
-            color="primary"
-            label="Fan / Subscriber"
-            :outline="viewMode !== 'fan'"
-            @click="viewMode = 'fan'"
-          />
-          <q-btn
-            rounded
-            unelevated
-            color="primary"
-            label="Creator"
-            :outline="viewMode !== 'creator'"
-            @click="viewMode = 'creator'"
-          />
-        </div>
-
-        <!-- Desktop Table -->
-        <div class="hidden md:block">
-          <div class="interactive-card p-2 overflow-x-auto">
-            <table class="min-w-full text-left">
-              <thead class="border-b border-gray-700 text-sm uppercase">
-                <tr>
-                  <th class="p-4">🧭 Menu item</th>
-                  <th class="p-4">
-                    {{
-                      viewMode === 'fan'
-                        ? 'Fan / Subscriber perspective'
-                        : 'Creator perspective'
-                    }}
-                  </th>
-                </tr>
-              </thead>
-              <tbody class="text-sm">
-                <tr
-                  v-for="(item, index) in navigationItems"
-                  :key="item.menuItem"
-                  :class="{ 'border-b border-gray-800': index !== navigationItems.length - 1 }"
-                >
-                  <td class="p-4 font-semibold">{{ item.menuItem }}</td>
-                  <td class="p-4">
-                    {{ viewMode === 'fan' ? item.fanText : item.creatorText }}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <!-- Mobile Cards -->
-        <div class="md:hidden space-y-4">
-          <div
+        <q-list bordered class="text-left mt-8">
+          <q-expansion-item
             v-for="item in navigationItems"
             :key="item.menuItem"
-            class="interactive-card p-6"
+            expand-separator
+            switch-toggle-side
+            dense
           >
-            <h3 class="font-semibold text-lg mb-2">{{ item.menuItem }}</h3>
-            <p class="text-sm">
-              <strong
-                >{{
-                  viewMode === 'fan'
-                    ? 'Fan / Subscriber perspective:'
-                    : 'Creator perspective:'
-                }}</strong
-              >
-              {{ viewMode === 'fan' ? item.fanText : item.creatorText }}
-            </p>
-          </div>
-        </div>
+            <template #header>
+              <q-item-section avatar>
+                <q-icon :name="item.icon" />
+              </q-item-section>
+              <q-item-section>
+                <q-item-label class="font-semibold">{{
+                  item.menuItem
+                }}</q-item-label>
+              </q-item-section>
+            </template>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 p-4">
+              <div>
+                <h4 class="font-semibold mb-2">
+                  {{ $t('AboutPage.navigation.fanPerspective') }}
+                </h4>
+                <p class="text-sm">{{ item.fanText }}</p>
+              </div>
+              <div>
+                <h4 class="font-semibold mb-2">
+                  {{ $t('AboutPage.navigation.creatorPerspective') }}
+                </h4>
+                <p class="text-sm">{{ item.creatorText }}</p>
+              </div>
+            </div>
+          </q-expansion-item>
+        </q-list>
       </div>
     </section>
 
@@ -481,6 +442,7 @@ import { onMounted, ref } from 'vue'
 
 interface NavigationItem {
   menuItem: string
+  icon: string
   fanText: string
   creatorText: string
 }
@@ -488,7 +450,6 @@ interface NavigationItem {
 const dialogStep1 = ref(false)
 const dialogStep2 = ref(false)
 const dialogStep3 = ref(false)
-const viewMode = ref<'fan' | 'creator'>('fan')
 
 interface SiteOverviewCard {
   route: string
@@ -582,6 +543,7 @@ const siteOverviewCards: SiteOverviewCard[] = [
 const navigationItems = ref<NavigationItem[]>([
   {
     menuItem: 'Settings',
+    icon: 'settings',
     fanText:
       'Add / switch mints, choose display unit, set language & theme, import or back-up your 12-word seed, manage Nostr keys & relays.',
     creatorText:
@@ -589,6 +551,7 @@ const navigationItems = ref<NavigationItem[]>([
   },
   {
     menuItem: 'Find Creators',
+    icon: 'search',
     fanText:
       'Search or browse Nostr-indexed profiles. View tier prices, previews and public posts. Hit Subscribe or Zap with a single tap.',
     creatorText:
@@ -596,12 +559,14 @@ const navigationItems = ref<NavigationItem[]>([
   },
   {
     menuItem: 'Creator Hub',
+    icon: 'hub',
     fanText: '— (hidden unless you toggle “Creator Mode”)',
     creatorText:
       'Define or edit tiers (price, duration, perks), upload cover art, publish pay-walled posts, check revenue analytics and subscriber list.',
   },
   {
     menuItem: 'My Profile',
+    icon: 'person',
     fanText:
       'Show off your avatar, npub link and optional NIP-05. Personal stats: total zaps sent & received, bucket balances.',
     creatorText:
@@ -609,6 +574,7 @@ const navigationItems = ref<NavigationItem[]>([
   },
   {
     menuItem: 'Buckets',
+    icon: 'inbox',
     fanText:
       'Drag-and-drop jars for budgeting (“Groceries”, “Fun money”, “Subs”). Move sats with zero fees.',
     creatorText:
@@ -616,6 +582,7 @@ const navigationItems = ref<NavigationItem[]>([
   },
   {
     menuItem: 'Subscriptions',
+    icon: 'subscriptions',
     fanText:
       'See every active plan: tier name, next renewal, cumulative sats spent. Cancel or renew with one click.',
     creatorText:
@@ -623,6 +590,7 @@ const navigationItems = ref<NavigationItem[]>([
   },
   {
     menuItem: 'Chats',
+    icon: 'chat',
     fanText:
       'End-to-end encrypted DMs (Nostr kind 4). Attach images or Cashu tokens. Green flash means a payment is embedded and auto-redeemed on receipt.',
     creatorText:
@@ -630,16 +598,19 @@ const navigationItems = ref<NavigationItem[]>([
   },
   {
     menuItem: 'Terms',
+    icon: 'gavel',
     fanText: 'Human-readable, plain-English licence & disclaimers.',
     creatorText: 'Identical — clarifies you keep full custody of funds.',
   },
   {
     menuItem: 'About',
+    icon: 'info',
     fanText: 'Learn everything in one scroll.',
     creatorText: 'Ditto; includes creator-specific FAQs below.',
   },
   {
     menuItem: 'External links',
+    icon: 'link',
     fanText: 'Cashu.space docs, GitHub, Twitter, Telegram, Donate.',
     creatorText: 'Identical — share with collaborators or fans.',
   },
