@@ -106,6 +106,12 @@ export const messages = {
   },
   MainHeader: {
     menu: {
+      wallet: { title: "@:FullscreenHeader.actions.back.label" },
+      nostrMessenger: { title: "@:AboutPage.siteOverview.nostrMessengerTitle" },
+      restore: { title: "@:AboutPage.siteOverview.restoreTitle" },
+      alreadyRunning: { title: "@:AboutPage.siteOverview.alreadyRunningTitle" },
+      welcome: { title: "@:AboutPage.siteOverview.welcomeTitle" },
+      nostrLogin: { title: "@:AboutPage.siteOverview.nostrLoginTitle" },
       settings: {
         title: "Settings",
         settings: {
