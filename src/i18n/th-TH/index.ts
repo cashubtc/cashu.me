@@ -102,6 +102,12 @@ export default {
   },
   MainHeader: {
     menu: {
+      wallet: { title: "@:FullscreenHeader.actions.back.label" },
+      nostrMessenger: { title: "@:AboutPage.siteOverview.nostrMessengerTitle" },
+      restore: { title: "@:AboutPage.siteOverview.restoreTitle" },
+      alreadyRunning: { title: "@:AboutPage.siteOverview.alreadyRunningTitle" },
+      welcome: { title: "@:AboutPage.siteOverview.welcomeTitle" },
+      nostrLogin: { title: "@:AboutPage.siteOverview.nostrLoginTitle" },
       settings: {
         title: "การตั้งค่า",
         settings: {

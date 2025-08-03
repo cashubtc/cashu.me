@@ -76,7 +76,7 @@
           </li>
           <li>
             <router-link to="/nostr-messenger" class="text-accent font-semibold">
-              {{ $t('AboutPage.siteOverview.nostrMessengerTitle') }}
+              {{ $t('MainHeader.menu.nostrMessenger.title') }}
             </router-link>
             – {{ $t('AboutPage.siteOverview.nostrMessenger') }}
           </li>
@@ -88,19 +88,19 @@
           </li>
           <li>
             <router-link to="/restore" class="text-accent font-semibold">
-              {{ $t('AboutPage.siteOverview.restoreTitle') }}
+              {{ $t('MainHeader.menu.restore.title') }}
             </router-link>
             – {{ $t('AboutPage.siteOverview.restore') }}
           </li>
           <li>
             <router-link to="/already-running" class="text-accent font-semibold">
-              {{ $t('AboutPage.siteOverview.alreadyRunningTitle') }}
+              {{ $t('MainHeader.menu.alreadyRunning.title') }}
             </router-link>
             – {{ $t('AboutPage.siteOverview.alreadyRunning') }}
           </li>
           <li>
             <router-link to="/welcome" class="text-accent font-semibold">
-              {{ $t('AboutPage.siteOverview.welcomeTitle') }}
+              {{ $t('MainHeader.menu.welcome.title') }}
             </router-link>
             – {{ $t('AboutPage.siteOverview.welcome') }}
           </li>
@@ -112,7 +112,7 @@
           </li>
           <li>
             <router-link to="/nostr-login" class="text-accent font-semibold">
-              {{ $t('AboutPage.siteOverview.nostrLoginTitle') }}
+              {{ $t('MainHeader.menu.nostrLogin.title') }}
             </router-link>
             – {{ $t('AboutPage.siteOverview.nostrLogin') }}
           </li>

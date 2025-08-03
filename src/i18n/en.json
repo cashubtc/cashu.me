@@ -7,7 +7,12 @@
       "myProfile": { "title": "My Profile" },
       "buckets": { "title": "Buckets" },
       "subscriptions": { "title": "Subscriptions" },
+      "nostrMessenger": { "title": "@:AboutPage.siteOverview.nostrMessengerTitle" },
       "settings": { "title": "Settings" },
+      "restore": { "title": "@:AboutPage.siteOverview.restoreTitle" },
+      "alreadyRunning": { "title": "@:AboutPage.siteOverview.alreadyRunningTitle" },
+      "welcome": { "title": "@:AboutPage.siteOverview.welcomeTitle" },
+      "nostrLogin": { "title": "@:AboutPage.siteOverview.nostrLoginTitle" },
       "terms": { "title": "Terms" }
     }
   },
