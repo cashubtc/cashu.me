@@ -1432,24 +1432,63 @@ export default {
   AboutPage: {
     siteOverview: {
       title: "サイトの概要",
-      wallet: "ecashの残高を管理します。",
-      findCreators: "支援するクリエイターを見つけましょう。",
-      creatorHub: "クリエイタープロフィールを設定して管理します。",
-      myProfile: "プロフィールを表示して編集します。",
-      buckets: "資金をバケットに整理します。",
-      subscriptions: "サブスクリプションを管理します。",
+      wallet: {
+        description: "ecashの残高を管理します。",
+        icon: "account_balance_wallet",
+      },
+      findCreators: {
+        description: "支援するクリエイターを見つけましょう。",
+        icon: "search",
+      },
+      creatorHub: {
+        description: "クリエイタープロフィールを設定して管理します。",
+        icon: "hub",
+      },
+      myProfile: {
+        description: "プロフィールを表示して編集します。",
+        icon: "person",
+      },
+      buckets: {
+        description: "資金をバケットに整理します。",
+        icon: "inbox",
+      },
+      subscriptions: {
+        description: "サブスクリプションを管理します。",
+        icon: "subscriptions",
+      },
       nostrMessengerTitle: "Nostr Messenger",
-      nostrMessenger: "Nostrとプライベートにチャットします。",
-      settings: "アプリを設定します。",
+      nostrMessenger: {
+        description: "Nostrとプライベートにチャットします。",
+        icon: "chat",
+      },
+      settings: {
+        description: "アプリを設定します。",
+        icon: "settings",
+      },
       restoreTitle: "Restore",
-      restore: "Recover your wallet from a backup.",
+      restore: {
+        description: "Recover your wallet from a backup.",
+        icon: "settings_backup_restore",
+      },
       alreadyRunningTitle: "Already Running",
-      alreadyRunning: "Warning when another session is active.",
+      alreadyRunning: {
+        description: "Warning when another session is active.",
+        icon: "warning",
+      },
       welcomeTitle: "Welcome",
-      welcome: "Introductory guide to Fundstr.",
-      terms: "Review the terms of service.",
+      welcome: {
+        description: "Introductory guide to Fundstr.",
+        icon: "info",
+      },
+      terms: {
+        description: "Review the terms of service.",
+        icon: "gavel",
+      },
       nostrLoginTitle: "Nostr Login",
-      nostrLogin: "Authenticate using your Nostr keys.",
+      nostrLogin: {
+        description: "Authenticate using your Nostr keys.",
+        icon: "login",
+      },
     },
   },
 };

@@ -1421,24 +1421,63 @@ export default {
   AboutPage: {
     siteOverview: {
       title: "站点概述",
-      wallet: "管理您的Ecash余额。",
-      findCreators: "发现可以支持的创作者。",
-      creatorHub: "设置并管理您的创作者资料。",
-      myProfile: "查看并编辑您的个人资料。",
-      buckets: "将资金组织成类别。",
-      subscriptions: "管理您的订阅。",
+      wallet: {
+        description: "管理您的Ecash余额。",
+        icon: "account_balance_wallet",
+      },
+      findCreators: {
+        description: "发现可以支持的创作者。",
+        icon: "search",
+      },
+      creatorHub: {
+        description: "设置并管理您的创作者资料。",
+        icon: "hub",
+      },
+      myProfile: {
+        description: "查看并编辑您的个人资料。",
+        icon: "person",
+      },
+      buckets: {
+        description: "将资金组织成类别。",
+        icon: "inbox",
+      },
+      subscriptions: {
+        description: "管理您的订阅。",
+        icon: "subscriptions",
+      },
       nostrMessengerTitle: "Nostr Messenger",
-      nostrMessenger: "与 Nostr 私下聊天。",
-      settings: "配置应用程序。",
+      nostrMessenger: {
+        description: "与 Nostr 私下聊天。",
+        icon: "chat",
+      },
+      settings: {
+        description: "配置应用程序。",
+        icon: "settings",
+      },
       restoreTitle: "Restore",
-      restore: "Recover your wallet from a backup.",
+      restore: {
+        description: "Recover your wallet from a backup.",
+        icon: "settings_backup_restore",
+      },
       alreadyRunningTitle: "Already Running",
-      alreadyRunning: "Warning when another session is active.",
+      alreadyRunning: {
+        description: "Warning when another session is active.",
+        icon: "warning",
+      },
       welcomeTitle: "Welcome",
-      welcome: "Introductory guide to Fundstr.",
-      terms: "Review the terms of service.",
+      welcome: {
+        description: "Introductory guide to Fundstr.",
+        icon: "info",
+      },
+      terms: {
+        description: "Review the terms of service.",
+        icon: "gavel",
+      },
       nostrLoginTitle: "Nostr Login",
-      nostrLogin: "Authenticate using your Nostr keys.",
+      nostrLogin: {
+        description: "Authenticate using your Nostr keys.",
+        icon: "login",
+      },
     },
   },
 };

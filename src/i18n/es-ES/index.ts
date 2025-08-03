@@ -1449,24 +1449,63 @@ export default {
   AboutPage: {
     siteOverview: {
       title: "Descripción general del sitio",
-      wallet: "Administra tu saldo de ecash.",
-      findCreators: "Descubre creadores a los que apoyar.",
-      creatorHub: "Configura y gestiona tu perfil de creador.",
-      myProfile: "Visualiza y edita tu perfil.",
-      buckets: "Organiza fondos en cubos.",
-      subscriptions: "Administra tus suscripciones.",
+      wallet: {
+        description: "Administra tu saldo de ecash.",
+        icon: "account_balance_wallet",
+      },
+      findCreators: {
+        description: "Descubre creadores a los que apoyar.",
+        icon: "search",
+      },
+      creatorHub: {
+        description: "Configura y gestiona tu perfil de creador.",
+        icon: "hub",
+      },
+      myProfile: {
+        description: "Visualiza y edita tu perfil.",
+        icon: "person",
+      },
+      buckets: {
+        description: "Organiza fondos en cubos.",
+        icon: "inbox",
+      },
+      subscriptions: {
+        description: "Administra tus suscripciones.",
+        icon: "subscriptions",
+      },
       nostrMessengerTitle: "Nostr Messenger",
-      nostrMessenger: "Chatea en privado con Nostr.",
-      settings: "Configura la aplicación.",
+      nostrMessenger: {
+        description: "Chatea en privado con Nostr.",
+        icon: "chat",
+      },
+      settings: {
+        description: "Configura la aplicación.",
+        icon: "settings",
+      },
       restoreTitle: "Restore",
-      restore: "Recover your wallet from a backup.",
+      restore: {
+        description: "Recover your wallet from a backup.",
+        icon: "settings_backup_restore",
+      },
       alreadyRunningTitle: "Already Running",
-      alreadyRunning: "Warning when another session is active.",
+      alreadyRunning: {
+        description: "Warning when another session is active.",
+        icon: "warning",
+      },
       welcomeTitle: "Welcome",
-      welcome: "Introductory guide to Fundstr.",
-      terms: "Review the terms of service.",
+      welcome: {
+        description: "Introductory guide to Fundstr.",
+        icon: "info",
+      },
+      terms: {
+        description: "Review the terms of service.",
+        icon: "gavel",
+      },
       nostrLoginTitle: "Nostr Login",
-      nostrLogin: "Authenticate using your Nostr keys.",
+      nostrLogin: {
+        description: "Authenticate using your Nostr keys.",
+        icon: "login",
+      },
     },
   },
 };
