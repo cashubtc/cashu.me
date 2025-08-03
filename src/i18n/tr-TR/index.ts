@@ -1492,5 +1492,9 @@ export default {
         icon: "login",
       },
     },
+    navigation: {
+      fanPerspective: "Fan perspective",
+      creatorPerspective: "Creator perspective",
+    },
   },
 };
