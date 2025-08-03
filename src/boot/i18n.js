@@ -2,16 +2,16 @@ import { boot } from "quasar/wrappers";
 import { createI18n } from "vue-i18n";
 import { loadMessages } from "src/i18n";
 
-// Get stored locale from localStorage or fallback to browser language or en-US
+// Get stored locale from localStorage or fallback to browser language or en
 let storedLocale =
-  localStorage.getItem("cashu.language") || navigator.language || "en-US";
+  localStorage.getItem("cashu.language") || navigator.language || "en";
 
-// Map generic English locale to en-US since no "en" folder exists
-if (storedLocale === "en") {
-  storedLocale = "en-US";
-}
-const messages = { "en-US": await loadMessages("en-US") };
-if (storedLocale !== "en-US") {
+const messages = {
+  en: await loadMessages("en"),
+  "en-US": await loadMessages("en-US"),
+};
+
+if (!["en", "en-US"].includes(storedLocale)) {
   messages[storedLocale] = await loadMessages(storedLocale);
 }
 
