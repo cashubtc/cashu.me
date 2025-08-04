@@ -30,7 +30,12 @@
         </q-item>
         <q-separator class="q-my-sm" />
         <q-item-label class="section-header" caption>Docs</q-item-label>
-        <q-item v-for="link in docLinks" :key="link.to" clickable :to="link.to">
+        <q-item
+          v-for="link in docLinks"
+          :key="link.to || link.href"
+          clickable
+          v-bind="link.href ? { href: link.href, target: '_blank' } : { to: link.to }"
+        >
           <q-item-section avatar>
             <q-icon :name="link.icon" />
           </q-item-section>
@@ -64,6 +69,11 @@ const accountLinks = [
 const docLinks = [
   { to: "/terms", label: t("MainHeader.menu.terms.terms.title"), icon: "gavel" },
   { to: "/about", label: t("MainHeader.menu.about.about.title"), icon: "info" },
+  {
+    href: "https://primal.net/KalonAxiarch",
+    label: "KalonAxiarch",
+    icon: "link",
+  },
 ];
 </script>
 
