@@ -128,6 +128,10 @@ export default {
       },
       links: {
         title: "Links",
+        fundstrCreator: {
+          title: "Ersteller von Fundstr",
+          caption: "primal.net/KalonAxiarch",
+        },
         cashuSpace: {
           title: "Cashu.space",
           caption: "cashu.space",

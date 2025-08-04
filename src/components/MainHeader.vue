@@ -326,6 +326,12 @@ export default defineComponent({
 
     const essentialLinks = [
       {
+        title: t("MainHeader.menu.links.fundstrCreator.title"),
+        caption: t("MainHeader.menu.links.fundstrCreator.caption"),
+        icon: "web",
+        link: "https://primal.net/KalonAxiarch",
+      },
+      {
         title: t("MainHeader.menu.links.cashuSpace.title"),
         caption: t("MainHeader.menu.links.cashuSpace.caption"),
         icon: "web",
