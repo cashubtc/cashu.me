@@ -16,6 +16,7 @@ export const useCreatorSubscriptionsStore = defineStore(
   "creatorSubscriptions",
   () => {
     const subscriptions = ref<CreatorSubscription[]>([]);
+    const loading = ref(true);
 
     liveQuery(() =>
       cashuDb.lockedTokens
@@ -47,10 +48,14 @@ export const useCreatorSubscriptionsStore = defineStore(
           return s;
         });
         subscriptions.value = arr;
+        loading.value = false;
       },
-      error: (err) => console.error(err),
+      error: (err) => {
+        console.error(err);
+        loading.value = false;
+      },
     });
 
-    return { subscriptions };
+    return { subscriptions, loading };
   }
 );

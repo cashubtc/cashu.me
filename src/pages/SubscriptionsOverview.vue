@@ -1,6 +1,11 @@
 <template>
   <div class="q-pa-md">
-    <h5 class="q-my-none q-mb-md">{{ $t("SubscriptionsOverview.title") }}</h5>
+    <div class="row items-center justify-between q-mb-md">
+      <h5 class="q-my-none">{{ $t("SubscriptionsOverview.title") }}</h5>
+      <q-btn flat color="primary" to="/creator-subscribers">
+        My Subscribers
+      </q-btn>
+    </div>
     <q-card flat bordered class="q-mb-md">
       <q-card-section class="row items-center">
         <div class="col-12 col-sm-6">
