@@ -564,6 +564,12 @@ const siteOverviewCards: SiteOverviewCard[] = [
 // navigation items for the navigation map
 const navigationItems = computed<NavigationItem[]>(() => [
   {
+    menuItem: t('MainHeader.menu.wallet.title'),
+    icon: 'account_balance_wallet',
+    fanText: t('AboutPage.navigation.items.wallet.fan'),
+    creatorText: t('AboutPage.navigation.items.wallet.creator'),
+  },
+  {
     menuItem: t('MainHeader.menu.settings.title'),
     icon: 'settings',
     fanText: t('AboutPage.navigation.items.settings.fan'),
@@ -606,6 +612,24 @@ const navigationItems = computed<NavigationItem[]>(() => [
     creatorText: t('AboutPage.navigation.items.chats.creator'),
   },
   {
+    menuItem: t('MainHeader.menu.restore.title'),
+    icon: 'settings_backup_restore',
+    fanText: t('AboutPage.navigation.items.restore.fan'),
+    creatorText: t('AboutPage.navigation.items.restore.creator'),
+  },
+  {
+    menuItem: t('MainHeader.menu.alreadyRunning.title'),
+    icon: 'warning',
+    fanText: t('AboutPage.navigation.items.alreadyRunning.fan'),
+    creatorText: t('AboutPage.navigation.items.alreadyRunning.creator'),
+  },
+  {
+    menuItem: t('MainHeader.menu.welcome.title'),
+    icon: 'info',
+    fanText: t('AboutPage.navigation.items.welcome.fan'),
+    creatorText: t('AboutPage.navigation.items.welcome.creator'),
+  },
+  {
     menuItem: t('MainHeader.menu.terms.title'),
     icon: 'gavel',
     fanText: t('AboutPage.navigation.items.terms.fan'),
@@ -622,6 +646,12 @@ const navigationItems = computed<NavigationItem[]>(() => [
     icon: 'link',
     fanText: t('AboutPage.navigation.items.externalLinks.fan'),
     creatorText: t('AboutPage.navigation.items.externalLinks.creator'),
+  },
+  {
+    menuItem: t('MainHeader.menu.nostrLogin.title'),
+    icon: 'vpn_key',
+    fanText: t('AboutPage.navigation.items.nostrLogin.fan'),
+    creatorText: t('AboutPage.navigation.items.nostrLogin.creator'),
   },
 ])
 

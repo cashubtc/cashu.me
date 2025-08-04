@@ -1510,6 +1510,10 @@ export default {
       fanPerspective: "Fan perspective",
       creatorPerspective: "Creator perspective",
       items: {
+        wallet: {
+          fan: "Check balance, send and receive ecash.",
+          creator: "Same wallet view—shows supporter payments.",
+        },
         settings: {
           fan: "Add / switch mints, choose display unit, set language & theme, import or back-up your 12-word seed, manage Nostr keys & relays.",
           creator: "Same, plus Publishing settings: toggle automatic NIP-61 profile updates and set a default “Earnings” bucket.",
@@ -1538,6 +1542,18 @@ export default {
           fan: "End-to-end encrypted DMs (Nostr kind 4). Attach images or Cashu tokens. Green flash means a payment is embedded and auto-redeemed on receipt.",
           creator: "Same powerful chat plus a broadcast toggle to message all subs in a tier at once.",
         },
+        restore: {
+          fan: "Recover your wallet from a 12-word seed.",
+          creator: "Same recovery flow for creator profiles.",
+        },
+        alreadyRunning: {
+          fan: "Warns when Fundstr is open in another tab.",
+          creator: "Same warning to avoid conflicting sessions.",
+        },
+        welcome: {
+          fan: "Quick guide for new users.",
+          creator: "Same introduction including creator tips.",
+        },
         terms: {
           fan: "Human-readable, plain-English licence & disclaimers.",
           creator: "Identical — clarifies you keep full custody of funds.",
@@ -1549,6 +1565,10 @@ export default {
         externalLinks: {
           fan: "Cashu.space docs, GitHub, Twitter, Telegram, Donate.",
           creator: "Identical — share with collaborators or fans.",
+        },
+        nostrLogin: {
+          fan: "Sign in using your Nostr keys.",
+          creator: "Same login method required for posting.",
         },
       },
     },
