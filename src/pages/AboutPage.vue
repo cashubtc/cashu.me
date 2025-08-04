@@ -483,7 +483,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref, watch } from 'vue'
+import { onMounted, onUnmounted, ref, watch, nextTick } from 'vue'
 
 interface NavigationItem {
   menuItem: string
@@ -686,11 +686,12 @@ watch(openIndex, (newIndex, oldIndex) => {
   updateOpenItemHeight()
 })
 
-watch(mode, (val) => {
+watch(mode, async (val) => {
   if (mapContainer.value) {
     mapContainer.value.classList.toggle('fan-mode', val === 'fan')
     mapContainer.value.classList.toggle('creator-mode', val === 'creator')
   }
+  await nextTick()
   updateOpenItemHeight()
 })
 
