@@ -452,7 +452,8 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, watch } from 'vue'
+import { onMounted, ref, watch, computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 interface NavigationItem {
   menuItem: string
@@ -464,6 +465,8 @@ interface NavigationItem {
 const dialogStep1 = ref(false)
 const dialogStep2 = ref(false)
 const dialogStep3 = ref(false)
+
+const { t } = useI18n()
 
 interface SiteOverviewCard {
   route: string
@@ -554,79 +557,66 @@ const siteOverviewCards: SiteOverviewCard[] = [
 ]
 
 // navigation items for the navigation map
-const navigationItems = ref<NavigationItem[]>([
+const navigationItems = computed<NavigationItem[]>(() => [
   {
-    menuItem: 'Settings',
+    menuItem: t('MainHeader.menu.settings.title'),
     icon: 'settings',
-    fanText:
-      'Add / switch mints, choose display unit, set language & theme, import or back-up your 12-word seed, manage Nostr keys & relays.',
-    creatorText:
-      'Same, plus Publishing settings: toggle automatic NIP-61 profile updates and set a default “Earnings” bucket.',
+    fanText: t('AboutPage.navigation.items.settings.fan'),
+    creatorText: t('AboutPage.navigation.items.settings.creator'),
   },
   {
-    menuItem: 'Find Creators',
+    menuItem: t('MainHeader.menu.findCreators.title'),
     icon: 'search',
-    fanText:
-      'Search or browse Nostr-indexed profiles. View tier prices, previews and public posts. Hit Subscribe or Zap with a single tap.',
-    creatorText:
-      'Your public storefront as seen by visitors. Great for a quick audit of how your profile appears worldwide.',
+    fanText: t('AboutPage.navigation.items.findCreators.fan'),
+    creatorText: t('AboutPage.navigation.items.findCreators.creator'),
   },
   {
-    menuItem: 'Creator Hub',
+    menuItem: t('MainHeader.menu.creatorHub.title'),
     icon: 'hub',
-    fanText: '— (hidden unless you toggle “Creator Mode”)',
-    creatorText:
-      'Define or edit tiers (price, duration, perks), upload cover art, publish pay-walled posts, check revenue analytics and subscriber list.',
+    fanText: t('AboutPage.navigation.items.creatorHub.fan'),
+    creatorText: t('AboutPage.navigation.items.creatorHub.creator'),
   },
   {
-    menuItem: 'My Profile',
+    menuItem: t('MainHeader.menu.myProfile.title'),
     icon: 'person',
-    fanText:
-      'Show off your avatar, npub link and optional NIP-05. Personal stats: total zaps sent & received, bucket balances.',
-    creatorText:
-      'Same card plus Edit. Update bio, tags and the secondary P2PK key used by fans to send you locked tokens.',
+    fanText: t('AboutPage.navigation.items.myProfile.fan'),
+    creatorText: t('AboutPage.navigation.items.myProfile.creator'),
   },
   {
-    menuItem: 'Buckets',
+    menuItem: t('MainHeader.menu.buckets.title'),
     icon: 'inbox',
-    fanText:
-      'Drag-and-drop jars for budgeting (“Groceries”, “Fun money”, “Subs”). Move sats with zero fees.',
-    creatorText:
-      'Create an “Income” bucket that auto-receives new tips; split out taxes or savings instantly.',
+    fanText: t('AboutPage.navigation.items.buckets.fan'),
+    creatorText: t('AboutPage.navigation.items.buckets.creator'),
   },
   {
-    menuItem: 'Subscriptions',
+    menuItem: t('MainHeader.menu.subscriptions.title'),
     icon: 'subscriptions',
-    fanText:
-      'See every active plan: tier name, next renewal, cumulative sats spent. Cancel or renew with one click.',
-    creatorText:
-      'Quick list of paying supporters, tier breakdown, churn alerts and pending renewals.',
+    fanText: t('AboutPage.navigation.items.subscriptions.fan'),
+    creatorText: t('AboutPage.navigation.items.subscriptions.creator'),
   },
   {
-    menuItem: 'Chats',
+    menuItem: t('MainHeader.menu.nostrMessenger.title'),
     icon: 'chat',
-    fanText:
-      'End-to-end encrypted DMs (Nostr kind 4). Attach images or Cashu tokens. Green flash means a payment is embedded and auto-redeemed on receipt.',
-    creatorText:
-      'Same powerful chat plus a broadcast toggle to message all subs in a tier at once.',
+    fanText: t('AboutPage.navigation.items.chats.fan'),
+    creatorText: t('AboutPage.navigation.items.chats.creator'),
   },
   {
-    menuItem: 'Terms',
+    menuItem: t('MainHeader.menu.terms.title'),
     icon: 'gavel',
-    fanText: 'Human-readable, plain-English licence & disclaimers.',
-    creatorText: 'Identical — clarifies you keep full custody of funds.',
+    fanText: t('AboutPage.navigation.items.terms.fan'),
+    creatorText: t('AboutPage.navigation.items.terms.creator'),
   },
   {
-    menuItem: 'About',
+    menuItem: t('MainHeader.menu.about.title'),
     icon: 'info',
-    fanText: 'Learn everything in one scroll.',
-    creatorText: 'Ditto; includes creator-specific FAQs below.',
+    fanText: t('AboutPage.navigation.items.about.fan'),
+    creatorText: t('AboutPage.navigation.items.about.creator'),
   },
   {
-    menuItem: 'External links',
+    menuItem: t('MainHeader.menu.links.title'),
     icon: 'link',
-    fanText: 'Cashu.space docs, GitHub, Twitter, Telegram, Donate.',
-    creatorText: 'Identical — share with collaborators or fans.',
+    fanText: t('AboutPage.navigation.items.externalLinks.fan'),
+    creatorText: t('AboutPage.navigation.items.externalLinks.creator'),
   },
 ])
 

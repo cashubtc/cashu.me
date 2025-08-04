@@ -1513,6 +1513,48 @@ export default {
     navigation: {
       fanPerspective: "Fan perspective",
       creatorPerspective: "Creator perspective",
+      items: {
+        settings: {
+          fan: "Add / switch mints, choose display unit, set language & theme, import or back-up your 12-word seed, manage Nostr keys & relays.",
+          creator: "Same, plus Publishing settings: toggle automatic NIP-61 profile updates and set a default “Earnings” bucket.",
+        },
+        findCreators: {
+          fan: "Search or browse Nostr-indexed profiles. View tier prices, previews and public posts. Hit Subscribe or Zap with a single tap.",
+          creator: "Your public storefront as seen by visitors. Great for a quick audit of how your profile appears worldwide.",
+        },
+        creatorHub: {
+          fan: "— (hidden unless you toggle “Creator Mode”)",
+          creator: "Define or edit tiers (price, duration, perks), upload cover art, publish pay-walled posts, check revenue analytics and subscriber list.",
+        },
+        myProfile: {
+          fan: "Show off your avatar, npub link and optional NIP-05. Personal stats: total zaps sent & received, bucket balances.",
+          creator: "Same card plus Edit. Update bio, tags and the secondary P2PK key used by fans to send you locked tokens.",
+        },
+        buckets: {
+          fan: "Drag-and-drop jars for budgeting (“Groceries”, “Fun money”, “Subs”). Move sats with zero fees.",
+          creator: "Create an “Income” bucket that auto-receives new tips; split out taxes or savings instantly.",
+        },
+        subscriptions: {
+          fan: "See every active plan: tier name, next renewal, cumulative sats spent. Cancel or renew with one click.",
+          creator: "Quick list of paying supporters, tier breakdown, churn alerts and pending renewals.",
+        },
+        chats: {
+          fan: "End-to-end encrypted DMs (Nostr kind 4). Attach images or Cashu tokens. Green flash means a payment is embedded and auto-redeemed on receipt.",
+          creator: "Same powerful chat plus a broadcast toggle to message all subs in a tier at once.",
+        },
+        terms: {
+          fan: "Human-readable, plain-English licence & disclaimers.",
+          creator: "Identical — clarifies you keep full custody of funds.",
+        },
+        about: {
+          fan: "Learn everything in one scroll.",
+          creator: "Ditto; includes creator-specific FAQs below.",
+        },
+        externalLinks: {
+          fan: "Cashu.space docs, GitHub, Twitter, Telegram, Donate.",
+          creator: "Identical — share with collaborators or fans.",
+        },
+      },
     },
   },
 };
