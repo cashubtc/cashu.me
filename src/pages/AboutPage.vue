@@ -273,12 +273,17 @@
 
           <q-list class="accordion">
             <q-expansion-item
-              v-for="item in navigationItems"
+              v-for="(item, idx) in navigationItems"
               :key="item.menuItem"
               :label="item.menuItem"
               :icon="item.icon"
               group="navigation"
-              class="border-b"
+              class="border-b accordion-item"
+              :class="{ open: openIndex === idx }"
+              @show="openIndex = idx"
+              @hide="openIndex = null"
+              expand-icon="keyboard_arrow_down"
+              expanded-icon="keyboard_arrow_down"
             >
               <div class="px-4 pb-4 text-sm">
                 <div class="fan-content">
@@ -622,6 +627,7 @@ const navigationItems = computed<NavigationItem[]>(() => [
 
 const mode = ref<'fan' | 'creator'>('fan')
 const mapContainer = ref<HTMLElement | null>(null)
+const openIndex = ref<number | null>(null)
 
 watch(mode, (val) => {
   if (mapContainer.value) {
@@ -690,6 +696,22 @@ onMounted(() => {
   transform: translateY(-5px);
   box-shadow: 0 0 25px rgba(var(--color-accent-rgb), 0.2);
   border-color: rgba(var(--color-accent-rgb), 0.4);
+}
+
+.accordion-item {
+  transition: background-color 0.3s;
+}
+
+.accordion-item.open {
+  background-color: rgba(var(--color-accent-rgb), 0.15);
+}
+
+.accordion-item .q-expansion-item__toggle-icon {
+  transition: transform 0.3s;
+}
+
+.accordion-item.open .q-expansion-item__toggle-icon {
+  transform: rotate(180deg);
 }
 
 .step-card {
