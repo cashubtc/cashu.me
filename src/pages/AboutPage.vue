@@ -254,32 +254,22 @@
           class="mt-8 text-left"
           ref="mapContainer"
         >
-          <div class="mode-toggle flex justify-center mb-6 gap-4">
-            <input
-              id="fan-toggle"
-              v-model="mode"
-              class="hidden"
-              type="radio"
-              value="fan"
+          <q-tabs
+            v-model="mode"
+            align="center"
+            dense
+            class="mb-6"
+            aria-label="Toggle between fan and creator modes"
+            :active-color="mode === 'fan' ? 'accent' : 'primary'"
+            :indicator-color="mode === 'fan' ? 'accent' : 'primary'"
+          >
+            <q-tab name="fan" label="Fan" :aria-selected="mode === 'fan'" />
+            <q-tab
+              name="creator"
+              label="Creator"
+              :aria-selected="mode === 'creator'"
             />
-            <label for="fan-toggle" :class="{ active: mode === 'fan' }">
-              Fan
-            </label>
-
-            <input
-              id="creator-toggle"
-              v-model="mode"
-              class="hidden"
-              type="radio"
-              value="creator"
-            />
-            <label
-              for="creator-toggle"
-              :class="{ active: mode === 'creator' }"
-            >
-              Creator
-            </label>
-          </div>
+          </q-tabs>
 
           <q-list class="accordion">
             <q-expansion-item
@@ -774,31 +764,6 @@ blockquote {
   .alpha-warning {
     font-size: 1.5rem;
   }
-}
-
-#map-container {
-  --fan-color: var(--q-accent);
-  --creator-color: var(--q-primary);
-}
-
-#map-container .mode-toggle label {
-  padding: 0.5rem 1rem;
-  border-radius: 9999px;
-  cursor: pointer;
-  border: 1px solid var(--q-dark);
-}
-
-#map-container .mode-toggle label.active {
-  background-color: var(--mode-color);
-  color: var(--q-dark);
-}
-
-#map-container.fan-mode {
-  --mode-color: var(--fan-color);
-}
-
-#map-container.creator-mode {
-  --mode-color: var(--creator-color);
 }
 
 .fan-mode .creator-content,
