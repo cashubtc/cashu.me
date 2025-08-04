@@ -38,7 +38,7 @@
           {{ $t('AboutPage.siteOverview.title') }}
         </h2>
         <div
-          class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 text-left"
+          class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 text-left"
         >
           <router-link
             v-for="card in siteOverviewCards"
