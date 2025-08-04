@@ -313,40 +313,76 @@
         </h2>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
           <!-- Card 1 -->
-          <div class="interactive-card p-6 text-left flex flex-col">
-            <div class="text-4xl mb-4">🐙</div>
-            <h3 class="font-semibold text-xl mb-2">Open Source & Verifiable</h3>
-            <p class="text-sm">
-              Fundstr is built on open-source code. We invite you to inspect, verify, and contribute. Transparency is our core principle.
-            </p>
-          </div>
+          <details class="interactive-card p-6 text-left">
+            <summary class="cursor-pointer">
+              <span class="block text-4xl mb-4">🐙</span>
+              <span class="block font-semibold text-xl mb-2">Open Source & Verifiable</span>
+              <span class="block text-sm">Fundstr is built on open-source code. We invite you to inspect, verify, and contribute. Transparency is our core principle.</span>
+            </summary>
+            <div class="mt-4 text-sm space-y-2">
+              <p>Anyone can audit our wallet and mint implementations or even reproduce the exact binaries we ship.</p>
+              <ul class="list-disc pl-6 space-y-1">
+                <li><a href="https://opensource.org/osd?utm_source=chatgpt.com" target="_blank" rel="noopener">Open Source Definition</a></li>
+                <li><a href="https://github.com/cashubtc?utm_source=chatgpt.com" target="_blank" rel="noopener">Cashu organisation on GitHub</a></li>
+                <li><a href="https://linderud.dev/blog/nixos-is-not-reproducible/?utm_source=chatgpt.com" target="_blank" rel="noopener">Build provenance and reproducible builds</a></li>
+                <li><a href="https://telegram.org/blog/verifiable-apps-and-more?utm_source=chatgpt.com" target="_blank" rel="noopener">Telegram's verifiable builds programme</a></li>
+              </ul>
+            </div>
+          </details>
 
           <!-- Card 2 -->
-          <div class="interactive-card p-6 text-left flex flex-col">
-            <div class="text-4xl mb-4">🔑</div>
-            <h3 class="font-semibold text-xl mb-2">You Hold the Keys</h3>
-            <p class="text-sm">
-              You are the sole holder of your ecash tokens and Nostr identity. Mints act as custodians for the underlying Bitcoin, but only you can spend your ecash.
-            </p>
-          </div>
+          <details class="interactive-card p-6 text-left">
+            <summary class="cursor-pointer">
+              <span class="block text-4xl mb-4">🔑</span>
+              <span class="block font-semibold text-xl mb-2">You Hold the Keys</span>
+              <span class="block text-sm">You are the sole holder of your ecash tokens and Nostr identity. Mints act as custodians for the underlying Bitcoin, but only you can spend your ecash.</span>
+            </summary>
+            <div class="mt-4 text-sm space-y-2">
+              <p>Owning your private key means only you can authorise payments or posts.</p>
+              <ul class="list-disc pl-6 space-y-1">
+                <li><a href="https://www.coindesk.com/learn/what-is-crypto-custody?utm_source=chatgpt.com" target="_blank" rel="noopener">CoinDesk: What is crypto custody?</a></li>
+                <li><a href="https://www.investopedia.com/terms/p/private-key.asp?utm_source=chatgpt.com" target="_blank" rel="noopener">Investopedia: Private keys explained</a></li>
+                <li><a href="https://github.com/nostr-protocol/nips?utm_source=chatgpt.com" target="_blank" rel="noopener">Nostr Implementation Possibilities (NIPs)</a></li>
+              </ul>
+            </div>
+          </details>
 
           <!-- Card 3 -->
-          <div class="interactive-card p-6 text-left flex flex-col">
-            <div class="text-4xl mb-4">🛡️</div>
-            <h3 class="font-semibold text-xl mb-2">Unbreakable Privacy</h3>
-            <p class="text-sm">
-              Thanks to Chaumian blind signatures, mints cannot link your deposits to your withdrawals. Your spending habits remain completely private.
-            </p>
-          </div>
+          <details class="interactive-card p-6 text-left">
+            <summary class="cursor-pointer">
+              <span class="block text-4xl mb-4">🛡️</span>
+              <span class="block font-semibold text-xl mb-2">Unbreakable Privacy</span>
+              <span class="block text-sm">Thanks to Chaumian blind signatures, mints cannot link your deposits to your withdrawals. Your spending habits remain completely private.</span>
+            </summary>
+            <div class="mt-4 text-sm space-y-2">
+              <p>Blind signatures break the trail between your deposits and spends, even from the mint itself.</p>
+              <ul class="list-disc pl-6 space-y-1">
+                <li><a href="https://sceweb.sce.uhcl.edu/yang/teaching/csci5234WebSecurityFall2011/Chaum-blind-signatures.PDF?utm_source=chatgpt.com" target="_blank" rel="noopener">David Chaum's original paper</a></li>
+                <li><a href="https://medium.com/rootstock-tech-blog/blind-signatures-af6338da6347?utm_source=chatgpt.com" target="_blank" rel="noopener">Rootstock: blind signatures explainer</a></li>
+                <li><a href="https://delvingbitcoin.org/t/building-intuition-for-the-cashu-blind-signature-scheme/506?utm_source=chatgpt.com" target="_blank" rel="noopener">Building intuition for Cashu's scheme</a></li>
+                <li><a href="https://blog.cashu.space/buckets-of-blind-signatures/?utm_source=chatgpt.com" target="_blank" rel="noopener">Buckets of blind signatures</a></li>
+                <li><a href="https://bitcoin.design/guide/how-it-works/ecash/cashu/?utm_source=chatgpt.com" target="_blank" rel="noopener">Bitcoin Design guide: Cashu overview</a></li>
+              </ul>
+            </div>
+          </details>
 
           <!-- Card 4 -->
-          <div class="interactive-card p-6 text-left flex flex-col">
-            <div class="text-4xl mb-4">🪙</div>
-            <h3 class="font-semibold text-xl mb-2">Mint Diversification</h3>
-            <p class="text-sm">
-              Fundstr supports multiple mints, allowing you to diversify your holdings. Our audit tools will warn you (⚠️) of any unusual mint behavior.
-            </p>
-          </div>
+          <details class="interactive-card p-6 text-left">
+            <summary class="cursor-pointer">
+              <span class="block text-4xl mb-4">🪙</span>
+              <span class="block font-semibold text-xl mb-2">Mint Diversification</span>
+              <span class="block text-sm">Fundstr supports multiple mints, allowing you to diversify your holdings. Our audit tools will warn you (⚠️) of any unusual mint behavior.</span>
+            </summary>
+            <div class="mt-4 text-sm space-y-2">
+              <p>Spreading tokens across independent mints limits custodial risk.</p>
+              <ul class="list-disc pl-6 space-y-1">
+                <li><a href="https://docs.cashu.space/mints?utm_source=chatgpt.com" target="_blank" rel="noopener">Cashu docs: mints</a></li>
+                <li><a href="https://bitcoinmagazine.com/technical/the-emerging-bitcoin-modular-ecosystem?utm_source=chatgpt.com" target="_blank" rel="noopener">Bitcoin Magazine: modular ecosystem</a></li>
+                <li><a href="https://github.com/cashubtc/awesome-cashu?utm_source=chatgpt.com" target="_blank" rel="noopener">Awesome Cashu resources</a></li>
+                <li><a href="https://www.nasdaq.com/articles/how-to-guide%3A-running-an-ecash-mint?utm_source=chatgpt.com" target="_blank" rel="noopener">Nasdaq guide: running an ecash mint</a></li>
+              </ul>
+            </div>
+          </details>
         </div>
       </div>
     </section>
