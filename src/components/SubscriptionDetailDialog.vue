@@ -24,7 +24,13 @@
                 :color="t.redeemed ? 'positive' : 'grey'"
                 class="q-mr-sm"
               />
-              <q-btn flat dense icon="content_copy" @click="copy(t.token)" />
+              <q-btn
+                flat
+                dense
+                icon="content_copy"
+                @click="copy(t.token)"
+                :aria-label="$t('global.actions.copy.label')"
+              />
             </q-item-section>
           </q-item>
         </q-list>

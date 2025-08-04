@@ -1111,6 +1111,8 @@ export const messages = {
       save: {
         label: "@:global.actions.save.label",
       },
+      expand_token: { label: "Expand token" },
+      collapse_token: { label: "Collapse token" },
     },
   },
   NumericKeyboard: {
@@ -1607,6 +1609,8 @@ export const messages = {
     pending_retry: "Queued { count } payments for resend",
     actions: {
       retry_now: { label: "Retry now" },
+      open_filters: { label: "Open filters" },
+      more_actions: { label: "More actions" },
     },
   },
   LockedTokensTable: {

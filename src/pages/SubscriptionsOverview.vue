@@ -67,7 +67,13 @@
             :options="sortOptions"
             :placeholder="$t('SubscriptionsOverview.sort_by')"
           />
-          <q-btn flat dense icon="tune" @click="showAdvancedFilters = true" />
+          <q-btn
+            flat
+            dense
+            icon="tune"
+            @click="showAdvancedFilters = true"
+            :aria-label="$t('SubscriptionsOverview.actions.open_filters.label')"
+          />
         </q-toolbar>
       </q-form>
       <div v-if="isLoading" class="subscription-grid">
@@ -173,7 +179,13 @@
                 {{ $t('SubscriptionsOverview.message') }}
               </q-btn>
             </div>
-            <q-btn flat round dense icon="more_vert">
+            <q-btn
+              flat
+              round
+              dense
+              icon="more_vert"
+              :aria-label="$t('SubscriptionsOverview.actions.more_actions.label')"
+            >
               <q-menu anchor="bottom right" self="top right">
                 <q-list dense style="min-width: 150px">
                   <q-item

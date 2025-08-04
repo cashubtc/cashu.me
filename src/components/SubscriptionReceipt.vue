@@ -38,6 +38,11 @@
                   :icon="expanded[r.id] ? 'expand_less' : 'expand_more'"
                   class="q-ml-xs"
                   @click.stop="toggle(r.id)"
+                  :aria-label="
+                    expanded[r.id]
+                      ? $t('SubscriptionReceipt.actions.collapse_token.label')
+                      : $t('SubscriptionReceipt.actions.expand_token.label')
+                  "
                 />
               </div>
               <q-slide-transition>
