@@ -682,6 +682,10 @@ watch(mode, (val) => {
     mapContainer.value.classList.toggle('fan-mode', val === 'fan')
     mapContainer.value.classList.toggle('creator-mode', val === 'creator')
   }
+  if (openIndex.value !== -1 && accordionRefs.value[openIndex.value]) {
+    const el = accordionRefs.value[openIndex.value]
+    el.style.maxHeight = el.scrollHeight + 'px'
+  }
 })
 
 onMounted(() => {
