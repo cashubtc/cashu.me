@@ -544,7 +544,9 @@
           </p>
           <div class="flex flex-col sm:flex-row justify-center gap-4 text-accent">
             <a
-              href="#"
+              href="https://primal.net/KalonAxiarch"
+              target="_blank"
+              rel="noopener noreferrer"
               class="interactive-card px-6 py-3 flex items-center justify-center gap-2"
               >👤 Creator's Profile</a
             >
