@@ -55,6 +55,79 @@ import { cashuDb, type LockedToken } from "./dexie";
 import { v4 as uuidv4 } from "uuid";
 import { useRouter } from "vue-router";
 import { useP2PKStore } from "./p2pk";
+import { watch } from "vue";
+
+const STORAGE_SECRET = "cashu_ndk_storage_key";
+let cachedKey: CryptoKey | null = null;
+
+async function getKey(): Promise<CryptoKey> {
+  if (cachedKey) return cachedKey;
+  const enc = new TextEncoder();
+  const material = await crypto.subtle.importKey(
+    "raw",
+    enc.encode(STORAGE_SECRET),
+    { name: "PBKDF2" },
+    false,
+    ["deriveKey"]
+  );
+  cachedKey = await crypto.subtle.deriveKey(
+    {
+      name: "PBKDF2",
+      salt: enc.encode("cashu_ndk_salt"),
+      iterations: 100000,
+      hash: "SHA-256",
+    },
+    material,
+    { name: "AES-GCM", length: 256 },
+    false,
+    ["encrypt", "decrypt"]
+  );
+  return cachedKey;
+}
+
+async function encryptString(value: string): Promise<string> {
+  const key = await getKey();
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const encoder = new TextEncoder();
+  const ciphertext = await crypto.subtle.encrypt(
+    { name: "AES-GCM", iv },
+    key,
+    encoder.encode(value)
+  );
+  const buff = new Uint8Array(iv.length + ciphertext.byteLength);
+  buff.set(iv, 0);
+  buff.set(new Uint8Array(ciphertext), iv.length);
+  return btoa(String.fromCharCode(...buff));
+}
+
+async function decryptString(value: string): Promise<string> {
+  const bytes = Uint8Array.from(atob(value), (c) => c.charCodeAt(0));
+  const iv = bytes.slice(0, 12);
+  const ciphertext = bytes.slice(12);
+  const key = await getKey();
+  const decrypted = await crypto.subtle.decrypt(
+    { name: "AES-GCM", iv },
+    key,
+    ciphertext
+  );
+  return new TextDecoder().decode(decrypted);
+}
+
+async function secureSetItem(key: string, value: string) {
+  const enc = await encryptString(value);
+  localStorage.setItem(key, enc);
+}
+
+async function secureGetItem(key: string): Promise<string | null> {
+  const val = localStorage.getItem(key);
+  if (!val) return null;
+  try {
+    return await decryptString(val);
+  } catch (e) {
+    console.error("Failed to decrypt", e);
+    return null;
+  }
+}
 
 export function npubToHex(s: string): string | null {
   const input = s.trim();
@@ -413,48 +486,37 @@ export const useNostrStore = defineStore("nostr", {
     }
     return {
       connected: false,
-      pubkey: useLocalStorage<string>("cashu.ndk.pubkey", ""),
-    relays: useSettingsStore().defaultNostrRelays.value ?? [] as string[],
-    signerType: useLocalStorage<SignerType>(
-      "cashu.ndk.signerType",
-      SignerType.SEED
-    ),
-    nip07signer: {} as NDKNip07Signer,
-    nip46Token: useLocalStorage<string>("cashu.ndk.nip46Token", ""),
-    nip46signer: {} as NDKNip46Signer,
-    privateKeySignerPrivateKey: useLocalStorage<string>(
-      "cashu.ndk.privateKeySignerPrivateKey",
-      ""
-    ),
-    seedSignerPrivateKey: useLocalStorage<string>(
-      "cashu.ndk.seedSignerPrivateKey",
-      ""
-    ),
-    seedSignerPublicKey: useLocalStorage<string>(
-      "cashu.ndk.seedSignerPublicKey",
-      ""
-    ),
-    seedSigner: {} as NDKPrivateKeySigner,
-    seedSignerPrivateKeyNsec: "",
-    privateKeySigner: {} as NDKPrivateKeySigner,
-    signer: undefined as unknown as NDKSigner | undefined,
-    nip07SignerAvailable: true,
-    nip07Checked: false,
-    nip07Warned: false,
-    mintRecommendations: useLocalStorage<MintRecommendation[]>(
-      "cashu.ndk.mintRecommendations",
-      []
-    ),
-    initialized: false,
-    lastError: '' as string | null,
-    lastEventTimestamp,
-    nip17EventIdsWeHaveSeen: useLocalStorage<NostrEventLog[]>(
-      "cashu.ndk.nip17EventIdsWeHaveSeen",
-      []
-    ),
-    profiles: useLocalStorage<
-      Record<string, { profile: any; fetchedAt: number }>
-    >("cashu.ndk.profiles", {}),
+      pubkey: "",
+      relays: useSettingsStore().defaultNostrRelays.value ?? ([] as string[]),
+      signerType: SignerType.SEED,
+      nip07signer: {} as NDKNip07Signer,
+      nip46Token: "",
+      nip46signer: {} as NDKNip46Signer,
+      privateKeySignerPrivateKey: "",
+      seedSignerPrivateKey: "",
+      seedSignerPublicKey: "",
+      seedSigner: {} as NDKPrivateKeySigner,
+      seedSignerPrivateKeyNsec: "",
+      privateKeySigner: {} as NDKPrivateKeySigner,
+      signer: undefined as unknown as NDKSigner | undefined,
+      nip07SignerAvailable: true,
+      nip07Checked: false,
+      nip07Warned: false,
+      mintRecommendations: useLocalStorage<MintRecommendation[]>(
+        "cashu.ndk.mintRecommendations",
+        []
+      ),
+      initialized: false,
+      secureStorageLoaded: false,
+      lastError: '' as string | null,
+      lastEventTimestamp,
+      nip17EventIdsWeHaveSeen: useLocalStorage<NostrEventLog[]>(
+        "cashu.ndk.nip17EventIdsWeHaveSeen",
+        []
+      ),
+      profiles: useLocalStorage<
+        Record<string, { profile: any; fetchedAt: number }>
+      >("cashu.ndk.profiles", {}),
   };
   },
   getters: {
@@ -507,7 +569,30 @@ export const useNostrStore = defineStore("nostr", {
     },
   },
   actions: {
+    loadKeysFromStorage: async function () {
+      if (this.secureStorageLoaded) return;
+      const pk = await secureGetItem("cashu.ndk.pubkey");
+      if (pk) this.pubkey = pk;
+      const st = await secureGetItem("cashu.ndk.signerType");
+      if (st) this.signerType = st as SignerType;
+      const nip46 = await secureGetItem("cashu.ndk.nip46Token");
+      if (nip46) this.nip46Token = nip46;
+      const pks = await secureGetItem("cashu.ndk.privateKeySignerPrivateKey");
+      if (pks) this.privateKeySignerPrivateKey = pks;
+      const seedSk = await secureGetItem("cashu.ndk.seedSignerPrivateKey");
+      if (seedSk) this.seedSignerPrivateKey = seedSk;
+      const seedPk = await secureGetItem("cashu.ndk.seedSignerPublicKey");
+      if (seedPk) this.seedSignerPublicKey = seedPk;
+      watch(() => this.pubkey, v => { secureSetItem("cashu.ndk.pubkey", v); });
+      watch(() => this.signerType, v => { secureSetItem("cashu.ndk.signerType", v.toString()); });
+      watch(() => this.nip46Token, v => { secureSetItem("cashu.ndk.nip46Token", v); });
+      watch(() => this.privateKeySignerPrivateKey, v => { secureSetItem("cashu.ndk.privateKeySignerPrivateKey", v); });
+      watch(() => this.seedSignerPrivateKey, v => { secureSetItem("cashu.ndk.seedSignerPrivateKey", v); });
+      watch(() => this.seedSignerPublicKey, v => { secureSetItem("cashu.ndk.seedSignerPublicKey", v); });
+      this.secureStorageLoaded = true;
+    },
     initNdkReadOnly: async function () {
+      await this.loadKeysFromStorage();
       const ndk = await useNdk({ requireSigner: false });
       if (this.connected) return;
       try {
@@ -604,6 +689,7 @@ export const useNostrStore = defineStore("nostr", {
       }
     },
     initSignerIfNotSet: async function () {
+      await this.loadKeysFromStorage();
       if (!this.signer) {
         if (
           this.signerType === SignerType.NIP07 &&
