@@ -17,7 +17,18 @@
       <div v-else>
         <div class="text-center q-mb-md">
           Logged in as <span class="text-primary">{{ npub }}</span>
-          <q-btn flat dense color="primary" class="q-ml-sm" @click="logout">Logout</q-btn>
+          <q-btn
+            flat
+            dense
+            color="primary"
+            class="q-ml-sm"
+            to="/creator-subscribers"
+          >
+            Subscribers
+          </q-btn>
+          <q-btn flat dense color="primary" class="q-ml-sm" @click="logout"
+            >Logout</q-btn
+          >
         </div>
 <q-splitter v-if="!isMobile" v-model="splitterModel">
   <template #before>
