@@ -126,7 +126,7 @@ import { useDonationPresetsStore } from "stores/donationPresets";
 import { useCreatorsStore } from "stores/creators";
 import { useNostrStore, fetchNutzapProfile, RelayConnectionError } from "stores/nostr";
 import { notifyWarning } from "src/js/notify";
-import { useRouter } from "vue-router";
+import { useRouter, useRoute } from "vue-router";
 import { useMessengerStore } from "stores/messenger";
 import { useI18n } from "vue-i18n";
 import {
@@ -158,6 +158,7 @@ const creators = useCreatorsStore();
 const nostr = useNostrStore();
 const messenger = useMessengerStore();
 const router = useRouter();
+const route = useRoute();
 const { t } = useI18n();
 const tiers = computed(() => creators.tiersMap[dialogPubkey.value] || []);
 const tierFetchError = computed(() => creators.tierFetchError);
@@ -318,6 +319,30 @@ onMounted(async () => {
     await nostr.initNdkReadOnly();
   } catch (e: any) {
     notifyWarning("Failed to connect to Nostr relays", e?.message);
+  }
+
+  const npub = route.query.npub;
+  if (npub && typeof npub === "string") {
+    const sendViewProfile = () => {
+      try {
+        const decoded = nip19.decode(npub);
+        const hex = typeof decoded.data === "string" ? decoded.data : "";
+        if (hex) {
+          window.postMessage({ type: "viewProfile", pubkey: hex }, "*");
+        }
+      } catch {
+        /* ignore decode errors */
+      }
+    };
+
+    if (iframeEl.value) {
+      const iframe = iframeEl.value;
+      if (iframe.contentWindow?.document.readyState === "complete") {
+        sendViewProfile();
+      } else {
+        iframe.addEventListener("load", sendViewProfile, { once: true });
+      }
+    }
   }
 });
 
