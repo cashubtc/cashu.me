@@ -390,6 +390,106 @@
               <li>Choose different mints or buckets to compartmentalise further.</li>
             </ul>
           </details>
+
+          <!-- Q4 -->
+          <details class="interactive-card p-6">
+            <summary class="cursor-pointer font-semibold text-lg">
+              What exactly is Cashu and how is it different from regular Bitcoin or Lightning wallets?
+            </summary>
+            <p class="mt-4 text-sm">
+              Cashu uses Chaumian e‑cash, allowing the mint to issue anonymized tokens. Unlike typical wallets, your transactions never appear on the blockchain, and the mint cannot link where your tokens are spent.
+            </p>
+          </details>
+
+          <!-- Q5 -->
+          <details class="interactive-card p-6">
+            <summary class="cursor-pointer font-semibold text-lg">
+              Do I need to trust a mint, and what happens if a mint goes offline?
+            </summary>
+            <p class="mt-4 text-sm">
+              A mint is required to issue and redeem tokens. If it disappears, any tokens it issued become unusable. To reduce risk, you can hold small balances, spread funds across multiple mints, and withdraw or swap tokens when you suspect a mint might fail.
+            </p>
+          </details>
+
+          <!-- Q6 -->
+          <details class="interactive-card p-6">
+            <summary class="cursor-pointer font-semibold text-lg">
+              How can I back up or restore my wallet?
+            </summary>
+            <p class="mt-4 text-sm">
+              During setup you can generate a BIP‑39 seed. Record it safely; if your device is lost, reinstall the app, enter the seed, and reconnect to your mints to restore unspent tokens. Without a seed or token export, lost devices mean lost funds.
+            </p>
+          </details>
+
+          <!-- Q7 -->
+          <details class="interactive-card p-6">
+            <summary class="cursor-pointer font-semibold text-lg">
+              What are “Buckets” and why would I use them?
+            </summary>
+            <p class="mt-4 text-sm">
+              Buckets act like sub‑accounts. You can allocate tokens to categories (e.g., savings, subscriptions) and move funds between buckets instantly, which helps with budgeting or keeping project funds separate.
+            </p>
+          </details>
+
+          <!-- Q8 -->
+          <details class="interactive-card p-6">
+            <summary class="cursor-pointer font-semibold text-lg">
+              How does the Nostr integration work?
+            </summary>
+            <p class="mt-4 text-sm">
+              The app can generate or import a Nostr key pair, connect to relays, and send encrypted DMs. This enables token transfers and tipping directly through Nostr events without exposing invoices or addresses.
+            </p>
+          </details>
+
+          <!-- Q9 -->
+          <details class="interactive-card p-6">
+            <summary class="cursor-pointer font-semibold text-lg">
+              What are Nutzaps and how do I receive them?
+            </summary>
+            <p class="mt-4 text-sm">
+              Nutzaps let users send Cashu tokens as Nostr “zap” events. Publish your NIP‑61 profile (the app guides you), and others can tip you using ecash locked to your Nostr wallet key, keeping the payment private yet publicly verifiable.
+            </p>
+          </details>
+
+          <!-- Q10 -->
+          <details class="interactive-card p-6">
+            <summary class="cursor-pointer font-semibold text-lg">
+              Can I connect the wallet to other Nostr‑enabled apps?
+            </summary>
+            <p class="mt-4 text-sm">
+              Yes. Nostr Wallet Connect (NWC) provides a QR code and secret key. Pair it with supported apps, and they can request payments or signatures through Nostr events that you approve inside the wallet.
+            </p>
+          </details>
+
+          <!-- Q11 -->
+          <details class="interactive-card p-6">
+            <summary class="cursor-pointer font-semibold text-lg">
+              Are there any fees for using Cashu tokens?
+            </summary>
+            <p class="mt-4 text-sm">
+              Sending tokens between users is free. Fees may apply when minting or melting tokens via Lightning, depending on the mint’s policy and Lightning network costs. The app shows mint‑specific fees before you confirm a transaction.
+            </p>
+          </details>
+
+          <!-- Q12 -->
+          <details class="interactive-card p-6">
+            <summary class="cursor-pointer font-semibold text-lg">
+              Does the app work offline?
+            </summary>
+            <p class="mt-4 text-sm">
+              You can view balances, buckets, and message history offline. Creating or redeeming tokens, chatting, and nutzap processing require an internet connection to reach the mint and Nostr relays.
+            </p>
+          </details>
+
+          <!-- Q13 -->
+          <details class="interactive-card p-6">
+            <summary class="cursor-pointer font-semibold text-lg">
+              Is the code open source and can I run it myself?
+            </summary>
+            <p class="mt-4 text-sm">
+              Yes. The entire project is MIT‑licensed. You can review, fork, or self‑host the repository. Advanced users can also run their own mint and point the wallet at it for full control over issuance and redemption.
+            </p>
+          </details>
         </div>
       </div>
     </section>
