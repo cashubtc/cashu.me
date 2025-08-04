@@ -33,18 +33,18 @@
 
     <!-- Site Overview -->
     <section id="site-overview" class="py-16 px-4 fade-in-section">
-      <div class="max-w-4xl mx-auto text-center">
+      <div class="max-w-6xl mx-auto text-center">
         <h2 class="text-3xl md:text-5xl font-bold mb-6 gradient-text">
           {{ $t('AboutPage.siteOverview.title') }}
         </h2>
         <div
-          class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 text-left"
+          class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 text-left"
         >
           <router-link
             v-for="card in siteOverviewCards"
             :key="card.route"
             :to="card.route"
-            class="interactive-card p-6 flex flex-col cursor-pointer"
+            class="interactive-card p-6 md:p-8 flex flex-col cursor-pointer"
           >
             <q-icon
               :name="$t(card.iconKey)"
