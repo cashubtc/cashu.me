@@ -480,7 +480,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, watch } from 'vue'
+import { onMounted, onUnmounted, ref, watch } from 'vue'
 
 interface NavigationItem {
   menuItem: string
@@ -663,6 +663,15 @@ const mapContainer = ref<HTMLElement | null>(null)
 const openIndex = ref<number>(-1)
 const accordionRefs = ref<HTMLElement[]>([])
 
+const updateOpenItemHeight = () => {
+  if (openIndex.value !== -1) {
+    const el = accordionRefs.value[openIndex.value]
+    if (el) {
+      el.style.maxHeight = el.scrollHeight + 'px'
+    }
+  }
+}
+
 const toggleItem = (index: number) => {
   openIndex.value = openIndex.value === index ? -1 : index
 }
@@ -671,10 +680,7 @@ watch(openIndex, (newIndex, oldIndex) => {
   if (oldIndex !== -1 && accordionRefs.value[oldIndex]) {
     accordionRefs.value[oldIndex].style.maxHeight = '0px'
   }
-  if (newIndex !== -1 && accordionRefs.value[newIndex]) {
-    const el = accordionRefs.value[newIndex]
-    el.style.maxHeight = el.scrollHeight + 'px'
-  }
+  updateOpenItemHeight()
 })
 
 watch(mode, (val) => {
@@ -682,10 +688,7 @@ watch(mode, (val) => {
     mapContainer.value.classList.toggle('fan-mode', val === 'fan')
     mapContainer.value.classList.toggle('creator-mode', val === 'creator')
   }
-  if (openIndex.value !== -1 && accordionRefs.value[openIndex.value]) {
-    const el = accordionRefs.value[openIndex.value]
-    el.style.maxHeight = el.scrollHeight + 'px'
-  }
+  updateOpenItemHeight()
 })
 
 onMounted(() => {
@@ -695,6 +698,8 @@ onMounted(() => {
   accordionRefs.value.forEach((el) => {
     if (el) el.style.maxHeight = '0px'
   })
+
+  window.addEventListener('resize', updateOpenItemHeight)
 
   if ('IntersectionObserver' in window) {
     const observer = new IntersectionObserver((entries) => {
@@ -713,6 +718,10 @@ onMounted(() => {
       .querySelectorAll('.fade-in-section')
       .forEach((el) => el.classList.add('is-visible'))
   }
+})
+
+onUnmounted(() => {
+  window.removeEventListener('resize', updateOpenItemHeight)
 })
 </script>
 
