@@ -249,40 +249,82 @@
         <p class="text-lg md:text-xl mb-12">
           Every page explained from both the Creator and Fan perspectives.
         </p>
-        <q-list bordered class="text-left mt-8">
-          <q-expansion-item
-            v-for="item in navigationItems"
-            :key="item.menuItem"
-            expand-separator
-            switch-toggle-side
-            dense
-          >
-            <template #header>
-              <q-item-section avatar>
-                <q-icon :name="item.icon" />
-              </q-item-section>
-              <q-item-section>
-                <q-item-label class="font-semibold">{{
-                  item.menuItem
-                }}</q-item-label>
-              </q-item-section>
-            </template>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 p-4">
-              <div>
-                <h4 class="font-semibold mb-2">
-                  {{ $t('AboutPage.navigation.fanPerspective') }}
-                </h4>
-                <p class="text-sm">{{ item.fanText }}</p>
-              </div>
-              <div>
-                <h4 class="font-semibold mb-2">
-                  {{ $t('AboutPage.navigation.creatorPerspective') }}
-                </h4>
-                <p class="text-sm">{{ item.creatorText }}</p>
+        <div
+          id="map-container"
+          class="mt-8 text-left"
+          ref="mapContainer"
+        >
+          <div class="mode-toggle flex justify-center mb-6 gap-4">
+            <input
+              id="fan-toggle"
+              v-model="mode"
+              class="hidden"
+              type="radio"
+              value="fan"
+            />
+            <label for="fan-toggle" :class="{ active: mode === 'fan' }">
+              Fan
+            </label>
+
+            <input
+              id="creator-toggle"
+              v-model="mode"
+              class="hidden"
+              type="radio"
+              value="creator"
+            />
+            <label
+              for="creator-toggle"
+              :class="{ active: mode === 'creator' }"
+            >
+              Creator
+            </label>
+          </div>
+
+          <div class="accordion">
+            <div
+              v-for="(item, index) in navigationItems"
+              :key="item.menuItem"
+              class="accordion-item border-b"
+              :class="{ open: openIndex === index }"
+            >
+              <button
+                class="accordion-header w-full flex items-center justify-between p-4"
+                type="button"
+                @click="toggleItem(index)"
+              >
+                <div class="flex items-center gap-2">
+                  <q-icon :name="item.icon" />
+                  <span class="font-semibold">{{ item.menuItem }}</span>
+                </div>
+                <q-icon
+                  :name="
+                    openIndex === index
+                      ? 'keyboard_arrow_up'
+                      : 'keyboard_arrow_down'
+                  "
+                />
+              </button>
+              <div
+                class="accordion-content px-4 pb-4 text-sm"
+                :ref="(el) => (accordionRefs[index] = el as HTMLElement)"
+              >
+                <div class="fan-content">
+                  <h4 class="font-semibold mb-2">
+                    {{ $t('AboutPage.navigation.fanPerspective') }}
+                  </h4>
+                  <p>{{ item.fanText }}</p>
+                </div>
+                <div class="creator-content">
+                  <h4 class="font-semibold mb-2">
+                    {{ $t('AboutPage.navigation.creatorPerspective') }}
+                  </h4>
+                  <p>{{ item.creatorText }}</p>
+                </div>
               </div>
             </div>
-          </q-expansion-item>
-        </q-list>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -438,7 +480,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 
 interface NavigationItem {
   menuItem: string
@@ -616,7 +658,40 @@ const navigationItems = ref<NavigationItem[]>([
   },
 ])
 
+const mode = ref<'fan' | 'creator'>('fan')
+const mapContainer = ref<HTMLElement | null>(null)
+const openIndex = ref<number>(-1)
+const accordionRefs = ref<HTMLElement[]>([])
+
+const toggleItem = (index: number) => {
+  openIndex.value = openIndex.value === index ? -1 : index
+}
+
+watch(openIndex, (newIndex, oldIndex) => {
+  if (oldIndex !== -1 && accordionRefs.value[oldIndex]) {
+    accordionRefs.value[oldIndex].style.maxHeight = '0px'
+  }
+  if (newIndex !== -1 && accordionRefs.value[newIndex]) {
+    const el = accordionRefs.value[newIndex]
+    el.style.maxHeight = el.scrollHeight + 'px'
+  }
+})
+
+watch(mode, (val) => {
+  if (mapContainer.value) {
+    mapContainer.value.classList.toggle('fan-mode', val === 'fan')
+    mapContainer.value.classList.toggle('creator-mode', val === 'creator')
+  }
+})
+
 onMounted(() => {
+  if (mapContainer.value) {
+    mapContainer.value.classList.add('fan-mode')
+  }
+  accordionRefs.value.forEach((el) => {
+    if (el) el.style.maxHeight = '0px'
+  })
+
   if ('IntersectionObserver' in window) {
     const observer = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
@@ -639,8 +714,8 @@ onMounted(() => {
 
 <style scoped>
 .about-page {
-  --color-accent: #22d3ee;
-  --color-accent-rgb: 34, 211, 238;
+  --color-accent: var(--q-accent);
+  --color-accent-rgb: var(--q-accent-rgb, 34, 211, 238);
   font-family: 'Inter', sans-serif;
   background-color: #0a0a0a;
   background-image: radial-gradient(#1e293b 1px, transparent 1px);
@@ -736,6 +811,42 @@ blockquote {
   .alpha-warning {
     font-size: 1.5rem;
   }
+}
+
+#map-container {
+  --fan-color: var(--q-accent);
+  --creator-color: var(--q-primary);
+}
+
+#map-container .mode-toggle label {
+  padding: 0.5rem 1rem;
+  border-radius: 9999px;
+  cursor: pointer;
+  border: 1px solid var(--q-dark);
+}
+
+#map-container .mode-toggle label.active {
+  background-color: var(--mode-color);
+  color: var(--q-dark);
+}
+
+#map-container.fan-mode {
+  --mode-color: var(--fan-color);
+}
+
+#map-container.creator-mode {
+  --mode-color: var(--creator-color);
+}
+
+.accordion-content {
+  overflow: hidden;
+  max-height: 0;
+  transition: max-height 0.3s ease;
+}
+
+.fan-mode .creator-content,
+.creator-mode .fan-content {
+  display: none;
 }
 </style>
 
