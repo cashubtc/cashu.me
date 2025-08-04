@@ -49,7 +49,7 @@
             <q-icon
               :name="$t(card.iconKey)"
               size="2.5rem"
-              class="text-accent mb-4"
+              class="text-white mb-4"
             />
             <p class="text-accent font-semibold">
               {{ $t(card.titleKey) }}
