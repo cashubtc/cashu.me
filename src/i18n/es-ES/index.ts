@@ -1504,7 +1504,7 @@ export default {
       nostrLoginTitle: "Nostr Login",
       nostrLogin: {
         description: "Authenticate using your Nostr keys.",
-        icon: "login",
+        icon: "vpn_key",
       },
     },
     navigation: {
