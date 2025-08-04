@@ -164,6 +164,10 @@ export const messages = {
       },
       links: {
         title: "Links",
+        fundstrCreator: {
+          title: "Fundstr's Creator",
+          caption: "primal.net/KalonAxiarch",
+        },
         cashuSpace: {
           title: "Cashu.space",
           caption: "cashu.space",

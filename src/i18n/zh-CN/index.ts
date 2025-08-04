@@ -127,6 +127,10 @@ export default {
       },
       links: {
         title: "链接",
+        fundstrCreator: {
+          title: "Fundstr 的创建者",
+          caption: "primal.net/KalonAxiarch",
+        },
         cashuSpace: {
           title: "Cashu.space",
           caption: "cashu.space",
