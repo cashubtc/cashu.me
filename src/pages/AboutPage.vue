@@ -40,23 +40,24 @@
         <div
           class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 text-left"
         >
-          <div
+          <router-link
             v-for="card in siteOverviewCards"
             :key="card.route"
-            class="interactive-card p-6 flex flex-col"
+            :to="card.route"
+            class="interactive-card p-6 flex flex-col cursor-pointer"
           >
             <q-icon
               :name="$t(card.iconKey)"
               size="2.5rem"
               class="text-accent mb-4"
             />
-            <router-link :to="card.route" class="text-accent font-semibold">
+            <p class="text-accent font-semibold">
               {{ $t(card.titleKey) }}
-            </router-link>
+            </p>
             <p class="text-sm mt-2">
               {{ $t(card.descriptionKey) }}
             </p>
-          </div>
+          </router-link>
         </div>
       </div>
     </section>
