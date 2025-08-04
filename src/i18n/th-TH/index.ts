@@ -1435,11 +1435,11 @@ export default {
       },
       findCreators: {
         description: "ค้นพบผู้สร้างเพื่อสนับสนุน",
-        icon: "search",
+        icon: "img:icons/find-creators.svg",
       },
       creatorHub: {
         description: "ตั้งค่าและจัดการโปรไฟล์ผู้สร้างของคุณ",
-        icon: "hub",
+        icon: "img:icons/creator-hub.svg",
       },
       myProfile: {
         description: "ดูและแก้ไขโปรไฟล์ของคุณ",
@@ -1447,11 +1447,11 @@ export default {
       },
       buckets: {
         description: "จัดระเบียบเงินทุนเป็นถัง",
-        icon: "inbox",
+        icon: "inventory_2",
       },
       subscriptions: {
         description: "จัดการการสมัครสมาชิกของคุณ",
-        icon: "subscriptions",
+        icon: "auto_awesome_motion",
       },
       nostrMessengerTitle: "Nostr Messenger",
       nostrMessenger: {

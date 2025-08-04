@@ -1445,11 +1445,11 @@ export default {
       },
       findCreators: {
         description: "Découvrez des créateurs à soutenir.",
-        icon: "search",
+        icon: "img:icons/find-creators.svg",
       },
       creatorHub: {
         description: "Configurez et gérez votre profil créateur.",
-        icon: "hub",
+        icon: "img:icons/creator-hub.svg",
       },
       myProfile: {
         description: "Affichez et modifiez votre profil.",
@@ -1457,11 +1457,11 @@ export default {
       },
       buckets: {
         description: "Organisez les fonds en catégories.",
-        icon: "inbox",
+        icon: "inventory_2",
       },
       subscriptions: {
         description: "Gérez vos abonnements.",
-        icon: "subscriptions",
+        icon: "auto_awesome_motion",
       },
       nostrMessengerTitle: "Nostr Messenger",
       nostrMessenger: {

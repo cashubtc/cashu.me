@@ -1438,11 +1438,11 @@ export default {
       },
       findCreators: {
         description: "支援するクリエイターを見つけましょう。",
-        icon: "search",
+        icon: "img:icons/find-creators.svg",
       },
       creatorHub: {
         description: "クリエイタープロフィールを設定して管理します。",
-        icon: "hub",
+        icon: "img:icons/creator-hub.svg",
       },
       myProfile: {
         description: "プロフィールを表示して編集します。",
@@ -1450,11 +1450,11 @@ export default {
       },
       buckets: {
         description: "資金をバケットに整理します。",
-        icon: "inbox",
+        icon: "inventory_2",
       },
       subscriptions: {
         description: "サブスクリプションを管理します。",
-        icon: "subscriptions",
+        icon: "auto_awesome_motion",
       },
       nostrMessengerTitle: "Nostr Messenger",
       nostrMessenger: {

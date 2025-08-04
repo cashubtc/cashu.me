@@ -1440,11 +1440,11 @@ export default {
       },
       findCreators: {
         description: "Destekleyecek yaratıcılar keşfedin.",
-        icon: "search",
+        icon: "img:icons/find-creators.svg",
       },
       creatorHub: {
         description: "Yaratıcı profilinizi kurun ve yönetin.",
-        icon: "hub",
+        icon: "img:icons/creator-hub.svg",
       },
       myProfile: {
         description: "Profilinizi görüntüleyin ve düzenleyin.",
@@ -1452,11 +1452,11 @@ export default {
       },
       buckets: {
         description: "Fonları kovalar halinde düzenleyin.",
-        icon: "inbox",
+        icon: "inventory_2",
       },
       subscriptions: {
         description: "Aboneliklerinizi yönetin.",
-        icon: "subscriptions",
+        icon: "auto_awesome_motion",
       },
       nostrMessengerTitle: "Nostr Messenger",
       nostrMessenger: {

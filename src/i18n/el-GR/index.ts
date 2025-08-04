@@ -1458,11 +1458,11 @@ export default {
       },
       findCreators: {
         description: "Ανακαλύψτε δημιουργούς για υποστήριξη.",
-        icon: "search",
+        icon: "img:icons/find-creators.svg",
       },
       creatorHub: {
         description: "Ρυθμίστε και διαχειριστείτε το προφίλ δημιουργού σας.",
-        icon: "hub",
+        icon: "img:icons/creator-hub.svg",
       },
       myProfile: {
         description: "Προβάλετε και επεξεργαστείτε το προφίλ σας.",
@@ -1470,11 +1470,11 @@ export default {
       },
       buckets: {
         description: "Οργανώστε κεφάλαια σε κάδους.",
-        icon: "inbox",
+        icon: "inventory_2",
       },
       subscriptions: {
         description: "Διαχειριστείτε τις συνδρομές σας.",
-        icon: "subscriptions",
+        icon: "auto_awesome_motion",
       },
       nostrMessengerTitle: "Nostr Messenger",
       nostrMessenger: {

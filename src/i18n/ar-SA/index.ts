@@ -1448,11 +1448,11 @@ export default {
       },
       findCreators: {
         description: "اكتشف المبدعين لدعمهم.",
-        icon: "search",
+        icon: "img:icons/find-creators.svg",
       },
       creatorHub: {
         description: "إعداد وإدارة ملف المبدع الخاص بك.",
-        icon: "hub",
+        icon: "img:icons/creator-hub.svg",
       },
       myProfile: {
         description: "عرض وتحرير ملفك الشخصي.",
@@ -1460,11 +1460,11 @@ export default {
       },
       buckets: {
         description: "تنظيم الأموال في حاويات.",
-        icon: "inbox",
+        icon: "inventory_2",
       },
       subscriptions: {
         description: "إدارة اشتراكاتك.",
-        icon: "subscriptions",
+        icon: "auto_awesome_motion",
       },
       nostrMessengerTitle: "Nostr Messenger",
       nostrMessenger: {
