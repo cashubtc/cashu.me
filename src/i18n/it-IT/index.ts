@@ -1437,11 +1437,11 @@ export default {
       },
       findCreators: {
         description: "Scopri i creatori da supportare.",
-        icon: "search",
+        icon: "img:icons/find-creators.svg",
       },
       creatorHub: {
         description: "Imposta e gestisci il tuo profilo creatore.",
-        icon: "hub",
+        icon: "img:icons/creator-hub.svg",
       },
       myProfile: {
         description: "Visualizza e modifica il tuo profilo.",
@@ -1449,11 +1449,11 @@ export default {
       },
       buckets: {
         description: "Organizza i fondi in secchi.",
-        icon: "inbox",
+        icon: "inventory_2",
       },
       subscriptions: {
         description: "Gestisci i tuoi abbonamenti.",
-        icon: "subscriptions",
+        icon: "auto_awesome_motion",
       },
       nostrMessengerTitle: "Nostr Messenger",
       nostrMessenger: {

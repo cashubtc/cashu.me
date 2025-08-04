@@ -1427,11 +1427,11 @@ export default {
       },
       findCreators: {
         description: "发现可以支持的创作者。",
-        icon: "search",
+        icon: "img:icons/find-creators.svg",
       },
       creatorHub: {
         description: "设置并管理您的创作者资料。",
-        icon: "hub",
+        icon: "img:icons/creator-hub.svg",
       },
       myProfile: {
         description: "查看并编辑您的个人资料。",
@@ -1439,11 +1439,11 @@ export default {
       },
       buckets: {
         description: "将资金组织成类别。",
-        icon: "inbox",
+        icon: "inventory_2",
       },
       subscriptions: {
         description: "管理您的订阅。",
-        icon: "subscriptions",
+        icon: "auto_awesome_motion",
       },
       nostrMessengerTitle: "Nostr Messenger",
       nostrMessenger: {

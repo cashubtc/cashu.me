@@ -1716,11 +1716,11 @@ export const messages = {
       },
       findCreators: {
         description: "Discover creators to support.",
-        icon: "search",
+        icon: "img:icons/find-creators.svg",
       },
       creatorHub: {
         description: "Set up and manage your creator profile.",
-        icon: "hub",
+        icon: "img:icons/creator-hub.svg",
       },
       myProfile: {
         description: "View and edit your profile.",
@@ -1728,11 +1728,11 @@ export const messages = {
       },
       buckets: {
         description: "Organize funds into buckets.",
-        icon: "inbox",
+        icon: "inventory_2",
       },
       subscriptions: {
         description: "Manage your subscriptions.",
-        icon: "subscriptions",
+        icon: "auto_awesome_motion",
       },
       nostrMessengerTitle: "Nostr Messenger",
       nostrMessenger: {

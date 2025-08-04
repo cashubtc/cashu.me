@@ -571,13 +571,13 @@ const navigationItems = computed<NavigationItem[]>(() => [
   },
   {
     menuItem: t('MainHeader.menu.findCreators.title'),
-    icon: 'search',
+    icon: 'img:icons/find-creators.svg',
     fanText: t('AboutPage.navigation.items.findCreators.fan'),
     creatorText: t('AboutPage.navigation.items.findCreators.creator'),
   },
   {
     menuItem: t('MainHeader.menu.creatorHub.title'),
-    icon: 'hub',
+    icon: 'img:icons/creator-hub.svg',
     fanText: t('AboutPage.navigation.items.creatorHub.fan'),
     creatorText: t('AboutPage.navigation.items.creatorHub.creator'),
   },
@@ -589,13 +589,13 @@ const navigationItems = computed<NavigationItem[]>(() => [
   },
   {
     menuItem: t('MainHeader.menu.buckets.title'),
-    icon: 'inbox',
+    icon: 'inventory_2',
     fanText: t('AboutPage.navigation.items.buckets.fan'),
     creatorText: t('AboutPage.navigation.items.buckets.creator'),
   },
   {
     menuItem: t('MainHeader.menu.subscriptions.title'),
-    icon: 'subscriptions',
+    icon: 'auto_awesome_motion',
     fanText: t('AboutPage.navigation.items.subscriptions.fan'),
     creatorText: t('AboutPage.navigation.items.subscriptions.creator'),
   },
