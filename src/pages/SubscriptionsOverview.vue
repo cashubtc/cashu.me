@@ -76,8 +76,8 @@
             flat
             dense
             icon="tune"
+            :label="$t('SubscriptionsOverview.actions.open_filters.label')"
             @click="showAdvancedFilters = true"
-            :aria-label="$t('SubscriptionsOverview.actions.open_filters.label')"
           />
         </q-toolbar>
       </q-form>
@@ -191,6 +191,9 @@
               icon="more_vert"
               :aria-label="$t('SubscriptionsOverview.actions.more_actions.label')"
             >
+              <q-tooltip>
+                {{ $t('SubscriptionsOverview.actions.more_actions.label') }}
+              </q-tooltip>
               <q-menu anchor="bottom right" self="top right">
                 <q-list dense style="min-width: 150px">
                   <q-item
