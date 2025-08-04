@@ -555,6 +555,11 @@
               class="interactive-card px-6 py-3 flex items-center justify-center gap-2"
               >🚀 Fundstr Project Page</a
             >
+            <a
+              href="/find-creators?npub=npub1aljmhjp5tqrw3m60ra7t3u8uqq223d6rdg9q0h76a8djd9m4hmvsmlj82m"
+              class="interactive-card px-6 py-3 flex items-center justify-center gap-2"
+              >💰 View KalonAxiarch's Tiers</a
+            >
           </div>
         </div>
       </section>
