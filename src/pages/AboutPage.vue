@@ -281,37 +281,16 @@
             </label>
           </div>
 
-          <div class="accordion">
-            <div
-              v-for="(item, index) in navigationItems"
+          <q-list class="accordion">
+            <q-expansion-item
+              v-for="item in navigationItems"
               :key="item.menuItem"
-              class="accordion-item border-b"
-              :class="{ open: openIndex === index }"
+              :label="item.menuItem"
+              :icon="item.icon"
+              group="navigation"
+              class="border-b"
             >
-              <button
-                class="accordion-header w-full flex items-center justify-between p-4"
-                type="button"
-                @click="toggleItem(index)"
-                :aria-expanded="openIndex === index"
-                :aria-controls="`accordion-content-${index}`"
-              >
-                <div class="flex items-center gap-2">
-                  <q-icon :name="item.icon" />
-                  <span class="font-semibold">{{ item.menuItem }}</span>
-                </div>
-                <q-icon
-                  :name="
-                    openIndex === index
-                      ? 'keyboard_arrow_up'
-                      : 'keyboard_arrow_down'
-                  "
-                />
-              </button>
-              <div
-                class="accordion-content px-4 pb-4 text-sm"
-                :id="`accordion-content-${index}`"
-                :ref="(el) => (accordionRefs[index] = el as HTMLElement)"
-              >
+              <div class="px-4 pb-4 text-sm">
                 <div class="fan-content">
                   <h4 class="font-semibold mb-2">
                     {{ $t('AboutPage.navigation.fanPerspective') }}
@@ -325,8 +304,8 @@
                   <p>{{ item.creatorText }}</p>
                 </div>
               </div>
-            </div>
-          </div>
+            </q-expansion-item>
+          </q-list>
         </div>
       </div>
     </section>
@@ -483,7 +462,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref, watch, nextTick } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 
 interface NavigationItem {
   menuItem: string
@@ -663,47 +642,18 @@ const navigationItems = ref<NavigationItem[]>([
 
 const mode = ref<'fan' | 'creator'>('fan')
 const mapContainer = ref<HTMLElement | null>(null)
-const openIndex = ref<number>(-1)
-const accordionRefs = ref<HTMLElement[]>([])
 
-const updateOpenItemHeight = () => {
-  if (openIndex.value !== -1) {
-    const el = accordionRefs.value[openIndex.value]
-    if (el) {
-      el.style.maxHeight = el.scrollHeight + 'px'
-    }
-  }
-}
-
-const toggleItem = (index: number) => {
-  openIndex.value = openIndex.value === index ? -1 : index
-}
-
-watch(openIndex, (newIndex, oldIndex) => {
-  if (oldIndex !== -1 && accordionRefs.value[oldIndex]) {
-    accordionRefs.value[oldIndex].style.maxHeight = '0px'
-  }
-  updateOpenItemHeight()
-})
-
-watch(mode, async (val) => {
+watch(mode, (val) => {
   if (mapContainer.value) {
     mapContainer.value.classList.toggle('fan-mode', val === 'fan')
     mapContainer.value.classList.toggle('creator-mode', val === 'creator')
   }
-  await nextTick()
-  updateOpenItemHeight()
 })
 
 onMounted(() => {
   if (mapContainer.value) {
     mapContainer.value.classList.add('fan-mode')
   }
-  accordionRefs.value.forEach((el) => {
-    if (el) el.style.maxHeight = '0px'
-  })
-
-  window.addEventListener('resize', updateOpenItemHeight)
 
   if ('IntersectionObserver' in window) {
     const observer = new IntersectionObserver((entries) => {
@@ -722,10 +672,6 @@ onMounted(() => {
       .querySelectorAll('.fade-in-section')
       .forEach((el) => el.classList.add('is-visible'))
   }
-})
-
-onUnmounted(() => {
-  window.removeEventListener('resize', updateOpenItemHeight)
 })
 </script>
 
@@ -853,17 +799,6 @@ blockquote {
 
 #map-container.creator-mode {
   --mode-color: var(--creator-color);
-}
-
-.accordion-header:focus-visible {
-  outline: 2px solid var(--color-accent);
-  outline-offset: 2px;
-}
-
-.accordion-content {
-  overflow: hidden;
-  max-height: 0;
-  transition: max-height 0.3s ease;
 }
 
 .fan-mode .creator-content,
