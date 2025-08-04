@@ -105,6 +105,16 @@
           }}</q-item-label>
         </q-item-section>
       </q-item>
+      <q-item-label header>About</q-item-label>
+      <q-item clickable to="/about">
+        <q-item-section avatar>
+          <q-icon name="info" />
+        </q-item-section>
+        <q-item-section>
+          <q-item-label>About</q-item-label>
+          <q-item-label caption>About this wallet</q-item-label>
+        </q-item-section>
+      </q-item>
       <q-item-label header>{{
         $t("MainHeader.menu.links.title")
       }}</q-item-label>
