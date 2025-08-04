@@ -292,6 +292,8 @@
                 class="accordion-header w-full flex items-center justify-between p-4"
                 type="button"
                 @click="toggleItem(index)"
+                :aria-expanded="openIndex === index"
+                :aria-controls="`accordion-content-${index}`"
               >
                 <div class="flex items-center gap-2">
                   <q-icon :name="item.icon" />
@@ -307,6 +309,7 @@
               </button>
               <div
                 class="accordion-content px-4 pb-4 text-sm"
+                :id="`accordion-content-${index}`"
                 :ref="(el) => (accordionRefs[index] = el as HTMLElement)"
               >
                 <div class="fan-content">
@@ -849,6 +852,11 @@ blockquote {
 
 #map-container.creator-mode {
   --mode-color: var(--creator-color);
+}
+
+.accordion-header:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
 }
 
 .accordion-content {
