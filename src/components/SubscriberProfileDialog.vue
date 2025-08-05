@@ -17,12 +17,23 @@
       <q-card-section v-if="profile?.about" class="text-body2">
         {{ profile.about }}
       </q-card-section>
-      <q-card-section class="text-caption" v-if="followers !== null && following !== null">
-        Followers: {{ followers }} | Following: {{ following }}
-      </q-card-section>
-      <q-card-section v-if="latestNote">
-        <div class="text-subtitle1 q-mb-xs">Most Recent Note</div>
-        <div class="text-body2">{{ latestNote }}</div>
+      <q-card-section v-if="followers !== null || following !== null || latestNote">
+        <q-list dense>
+          <q-item v-if="followers !== null">
+            <q-item-section>Followers</q-item-section>
+            <q-item-section side>{{ followers }}</q-item-section>
+          </q-item>
+          <q-item v-if="following !== null">
+            <q-item-section>Following</q-item-section>
+            <q-item-section side>{{ following }}</q-item-section>
+          </q-item>
+          <q-item v-if="latestNote">
+            <q-item-section>
+              <div class="text-subtitle1 q-mb-xs">Most Recent Note</div>
+              <div class="text-body2">{{ latestNote }}</div>
+            </q-item-section>
+          </q-item>
+        </q-list>
       </q-card-section>
       <q-card-actions align="right">
         <q-btn flat v-close-popup color="grey">Close</q-btn>
@@ -33,8 +44,11 @@
 
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
-import { useNostrStore } from 'src/stores/nostr';
 import { nip19 } from 'nostr-tools';
+import { NDKKind, type NDKEvent, type NDKFilter } from '@nostr-dev-kit/ndk';
+import { useNostrStore } from 'src/stores/nostr';
+import { useNdk } from 'src/composables/useNdk';
+import profileCache from 'src/js/profile-cache';
 
 const props = defineProps<{ modelValue: boolean; npub: string }>();
 const emit = defineEmits(['update:modelValue']);
@@ -50,12 +64,53 @@ const followers = ref<number | null>(null);
 const following = ref<number | null>(null);
 const latestNote = ref<string | null>(null);
 
+async function fetchLatestText(pubkey: string): Promise<string | null> {
+  const hex = nostr.resolvePubkey(pubkey);
+  await nostr.initNdkReadOnly();
+  const ndk = await useNdk({ requireSigner: false });
+  const filter: NDKFilter = { kinds: [NDKKind.Text], authors: [hex], limit: 1 };
+  const events = await ndk.fetchEvents(filter);
+  let latest: NDKEvent | undefined;
+  events.forEach((ev) => {
+    if (!latest || ev.created_at > (latest.created_at || 0)) latest = ev;
+  });
+  return latest ? (latest.content as string) : null;
+}
+
 async function load() {
   if (!props.npub) return;
-  profile.value = await nostr.getProfile(props.npub);
-  followers.value = await nostr.fetchFollowerCount(props.npub);
-  following.value = await nostr.fetchFollowingCount(props.npub);
-  latestNote.value = await nostr.fetchMostRecentPost(props.npub);
+  const pk = props.npub;
+  const cached = profileCache.get(pk);
+  if (cached) {
+    profile.value = cached;
+    followers.value = cached.followerCount ?? null;
+    following.value = cached.followingCount ?? null;
+    latestNote.value = cached.latestNote ?? null;
+  } else {
+    profile.value = await nostr.getProfile(pk);
+  }
+
+  let updated = false;
+  if (followers.value === null) {
+    followers.value = await nostr.fetchFollowerCount(pk);
+    updated = true;
+  }
+  if (following.value === null) {
+    following.value = await nostr.fetchFollowingCount(pk);
+    updated = true;
+  }
+  if (latestNote.value === null) {
+    latestNote.value = await fetchLatestText(pk);
+    updated = true;
+  }
+  if (!cached || updated) {
+    profileCache.set(pk, {
+      ...profile.value,
+      followerCount: followers.value,
+      followingCount: following.value,
+      latestNote: latestNote.value,
+    });
+  }
 }
 
 watch(
