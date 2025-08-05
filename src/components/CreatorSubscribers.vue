@@ -130,8 +130,8 @@
           <q-btn
             flat
             color="primary"
-            :label="t('CreatorSubscribers.findCreators')"
-            to="/find-creators"
+            :label="t('CreatorSubscribers.shareProfile')"
+            to="/my-profile"
             class="q-mt-sm"
           />
         </div>

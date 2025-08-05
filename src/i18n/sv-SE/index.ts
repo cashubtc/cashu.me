@@ -1581,6 +1581,6 @@ export default {
       sendMessage: "Send message",
     },
     noData: "No subscribers yet",
-    findCreators: "Find creators",
+    shareProfile: "Share your profile",
   },
 };
