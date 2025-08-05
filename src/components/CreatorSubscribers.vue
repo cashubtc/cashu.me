@@ -22,7 +22,7 @@
       :rows="subscriptions"
       :columns="columns"
       :filter="filter"
-      :pagination="pagination"
+      v-model:pagination="pagination"
       :loading="loading"
       :rows-per-page-options="[5, 10, 20]"
     >
@@ -82,7 +82,12 @@ const { subscriptions, loading } = storeToRefs(store);
 const { t } = useI18n();
 
 const filter = ref('');
-const pagination = ref({ page: 1, rowsPerPage: 5 });
+const pagination = ref({
+  page: 1,
+  rowsPerPage: 5,
+  sortBy: 'subscriber',
+  descending: false,
+});
 
 const columns = computed(() => [
   {
@@ -90,24 +95,31 @@ const columns = computed(() => [
     label: t('CreatorSubscribers.columns.subscriber'),
     field: 'subscriberNpub',
     align: 'left',
+    sortable: true,
   },
   {
     name: 'tier',
     label: t('CreatorSubscribers.columns.tier'),
     field: 'tierId',
     align: 'left',
+    sortable: true,
   },
   {
     name: 'months',
     label: t('CreatorSubscribers.columns.months'),
     field: 'receivedMonths',
     align: 'center',
+    sortable: true,
+    sort: (a, b, rowA, rowB) =>
+      rowA.receivedMonths / rowA.totalMonths -
+      rowB.receivedMonths / rowB.totalMonths,
   },
   {
     name: 'status',
     label: t('CreatorSubscribers.columns.status'),
     field: 'status',
     align: 'left',
+    sortable: true,
   },
 ]);
 
