@@ -1580,6 +1580,8 @@ export default {
     columns: {
       subscriber: "Subscriber",
       tier: "Tier",
+      start: "Start",
+      nextRenewal: "Next renewal",
       months: "Months",
       status: "Status",
       actions: "Actions",

@@ -105,13 +105,6 @@
                 {{ t("CreatorSubscribers.monthsTooltip") }}
               </q-tooltip>
             </div>
-            <div v-if="props.row.nextRenewal" class="text-caption">
-              {{
-                t("CreatorSubscribers.nextRenewal", {
-                  date: formatTs(props.row.nextRenewal),
-                })
-              }}
-            </div>
           </div>
         </q-td>
       </template>
@@ -206,17 +199,31 @@
                       <q-tooltip>
                         {{ t("CreatorSubscribers.monthsTooltip") }}
                       </q-tooltip>
-                      <div
-                        v-if="props.row.nextRenewal"
-                        class="text-caption"
-                      >
-                        {{
-                          t("CreatorSubscribers.nextRenewal", {
-                            date: formatTs(props.row.nextRenewal),
-                          })
-                        }}
-                      </div>
                     </div>
+                  </q-item-label>
+                </q-item-section>
+              </q-item>
+              <q-item>
+                <q-item-section>
+                  <q-item-label caption>
+                    {{ t("CreatorSubscribers.columns.start") }}
+                  </q-item-label>
+                  <q-item-label>
+                    {{ props.row.startDate ? formatTs(props.row.startDate) : "-" }}
+                  </q-item-label>
+                </q-item-section>
+              </q-item>
+              <q-item>
+                <q-item-section>
+                  <q-item-label caption>
+                    {{ t("CreatorSubscribers.columns.nextRenewal") }}
+                  </q-item-label>
+                  <q-item-label>
+                    {{
+                      props.row.nextRenewal
+                        ? formatTs(props.row.nextRenewal)
+                        : "-"
+                    }}
                   </q-item-label>
                 </q-item-section>
               </q-item>
@@ -310,7 +317,7 @@ import { useCreatorsStore } from "stores/creators";
 const store = useCreatorSubscriptionsStore();
 const { subscriptions, loading } = storeToRefs(store);
 
-const { t } = useI18n();
+const { t, d } = useI18n();
 const router = useRouter();
 const messenger = useMessengerStore();
 const $q = useQuasar();
@@ -346,6 +353,24 @@ const columns = computed(() => [
     field: "tierName",
     align: "left",
     sortable: true,
+  },
+  {
+    name: "start",
+    label: t("CreatorSubscribers.columns.start"),
+    field: "startDate",
+    align: "left",
+    sortable: true,
+    sort: (a, b) => (a ?? 0) - (b ?? 0),
+    format: (val) => (val ? formatTs(val) : "-"),
+  },
+  {
+    name: "nextRenewal",
+    label: t("CreatorSubscribers.columns.nextRenewal"),
+    field: "nextRenewal",
+    align: "left",
+    sortable: true,
+    sort: (a, b) => (a ?? 0) - (b ?? 0),
+    format: (val) => (val ? formatTs(val) : "-"),
   },
   {
     name: "months",
@@ -454,10 +479,7 @@ function pubkeyNpub(hex: string): string {
 }
 
 function formatTs(ts: number): string {
-  const d = new Date(ts * 1000);
-  return `${d.getFullYear()}-${("0" + (d.getMonth() + 1)).slice(-2)}-${(
-    "0" + d.getDate()
-  ).slice(-2)}`;
+  return d(new Date(ts * 1000), { dateStyle: "medium" });
 }
 
 function sendMessage(pk: string) {
