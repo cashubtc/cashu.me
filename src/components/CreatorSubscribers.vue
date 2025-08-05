@@ -45,6 +45,7 @@
       v-model:pagination="pagination"
       :loading="loading"
       :rows-per-page-options="[5, 10, 20]"
+      :grid="isSmallScreen"
     >
       <template #body-cell-subscriber="props">
         <q-td :props="props">
@@ -124,6 +125,110 @@
           </q-btn>
         </q-td>
       </template>
+      <template v-if="isSmallScreen" #item="props">
+        <div class="q-pa-xs col-12">
+          <q-card>
+            <q-card-section class="row items-center no-wrap">
+              <q-avatar
+                size="32px"
+                v-if="profiles[props.row.subscriberNpub]?.picture"
+              >
+                <img :src="profiles[props.row.subscriberNpub].picture" />
+              </q-avatar>
+              <div class="q-ml-sm">
+                {{
+                  profiles[props.row.subscriberNpub]?.display_name ||
+                  profiles[props.row.subscriberNpub]?.name ||
+                  shortenString(pubkeyNpub(props.row.subscriberNpub), 15, 6)
+                }}
+              </div>
+            </q-card-section>
+            <q-separator />
+            <q-list dense>
+              <q-item>
+                <q-item-section>
+                  <q-item-label caption>
+                    {{ t('CreatorSubscribers.columns.tier') }}
+                  </q-item-label>
+                  <q-item-label>{{ props.row.tierName }}</q-item-label>
+                </q-item-section>
+              </q-item>
+              <q-item>
+                <q-item-section>
+                  <q-item-label caption>
+                    {{ t('CreatorSubscribers.columns.months') }}
+                  </q-item-label>
+                  <q-item-label>
+                    <div class="row items-center no-wrap">
+                      <q-linear-progress
+                        :value="
+                          props.row.totalMonths
+                            ? props.row.receivedMonths / props.row.totalMonths
+                            : 0
+                        "
+                        color="primary"
+                        style="width: 100px"
+                      >
+                        <q-tooltip>
+                          {{ props.row.receivedMonths }} /
+                          {{ props.row.totalMonths }}
+                        </q-tooltip>
+                      </q-linear-progress>
+                      <div class="q-ml-sm text-caption">
+                        {{ props.row.receivedMonths }} /
+                        {{ props.row.totalMonths }}
+                      </div>
+                    </div>
+                  </q-item-label>
+                </q-item-section>
+              </q-item>
+              <q-item>
+                <q-item-section>
+                  <q-item-label caption>
+                    {{ t('CreatorSubscribers.columns.status') }}
+                  </q-item-label>
+                  <q-item-label>
+                    <q-badge
+                      :color="
+                        props.row.status === 'active' ? 'positive' : 'warning'
+                      "
+                    >
+                      {{ props.row.status }}
+                    </q-badge>
+                  </q-item-label>
+                </q-item-section>
+              </q-item>
+            </q-list>
+            <q-separator />
+            <q-card-actions align="right">
+              <q-btn flat dense round icon="more_vert">
+                <q-menu>
+                  <q-list style="min-width: 120px">
+                    <q-item
+                      clickable
+                      v-close-popup
+                      :to="`/creator/${pubkeyNpub(props.row.subscriberNpub)}`"
+                    >
+                      <q-item-section>
+                        {{ t('CreatorSubscribers.actions.viewProfile') }}
+                      </q-item-section>
+                    </q-item>
+                    <q-item
+                      clickable
+                      v-close-popup
+                      @click="sendMessage(props.row.subscriberNpub)"
+                    >
+                      <q-item-section>
+                        {{ t('CreatorSubscribers.actions.sendMessage') }}
+                      </q-item-section>
+                    </q-item>
+                  </q-list>
+                </q-menu>
+              </q-btn>
+            </q-card-actions>
+          </q-card>
+        </div>
+      </template>
       <template #no-data>
         <div class="full-width column items-center q-pa-md">
           <div>{{ t('CreatorSubscribers.noData') }}</div>
@@ -150,6 +255,7 @@ import { shortenString } from "src/js/string-utils";
 import { useI18n } from "vue-i18n";
 import { useNostrStore } from "stores/nostr";
 import { useMessengerStore } from "stores/messenger";
+import { useQuasar } from "quasar";
 
 const store = useCreatorSubscriptionsStore();
 const { subscriptions, loading } = storeToRefs(store);
@@ -157,6 +263,8 @@ const { subscriptions, loading } = storeToRefs(store);
 const { t } = useI18n();
 const router = useRouter();
 const messenger = useMessengerStore();
+const $q = useQuasar();
+const isSmallScreen = computed(() => $q.screen.lt.md);
 
 const filter = ref("");
 const tierFilter = ref<string | null>(null);
