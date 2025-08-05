@@ -1560,4 +1560,13 @@ export default {
       },
     },
   },
+  CreatorSubscribers: {
+    filter: { placeholder: "Filter" },
+    columns: {
+      subscriber: "Subscriber",
+      tier: "Tier",
+      months: "Months",
+      status: "Status",
+    },
+  },
 };

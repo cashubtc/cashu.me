@@ -1632,6 +1632,15 @@ export const messages = {
     redeem_all: "Redeem all pending",
     status: { redeemed: "Redeemed", pending: "Pending" },
   },
+  CreatorSubscribers: {
+    filter: { placeholder: "Filter" },
+    columns: {
+      subscriber: "Subscriber",
+      tier: "Tier",
+      months: "Months",
+      status: "Status",
+    },
+  },
   restore: {
     mnemonic_error_text: "Please enter a mnemonic",
     restore_mint_error_text: "Error restoring mint: { error }",
