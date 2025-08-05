@@ -28,7 +28,21 @@
     >
       <template #body-cell-subscriber="props">
         <q-td :props="props">
-          {{ shortenString(pubkeyNpub(props.row.subscriberNpub), 15, 6) }}
+          <div class="row items-center no-wrap">
+            <q-avatar
+              size="32px"
+              v-if="profiles[props.row.subscriberNpub]?.picture"
+            >
+              <img :src="profiles[props.row.subscriberNpub].picture" />
+            </q-avatar>
+            <div class="q-ml-sm">
+              {{
+                profiles[props.row.subscriberNpub]?.display_name ||
+                profiles[props.row.subscriberNpub]?.name ||
+                shortenString(pubkeyNpub(props.row.subscriberNpub), 15, 6)
+              }}
+            </div>
+          </div>
         </q-td>
       </template>
       <template #body-cell-months="props">
@@ -54,12 +68,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import { storeToRefs } from 'pinia';
 import { nip19 } from 'nostr-tools';
 import { useCreatorSubscriptionsStore } from 'stores/creatorSubscriptions';
 import { shortenString } from 'src/js/string-utils';
 import { useI18n } from 'vue-i18n';
+import { useNostrStore } from 'stores/nostr';
 
 const store = useCreatorSubscriptionsStore();
 const { subscriptions, loading } = storeToRefs(store);
@@ -95,6 +110,22 @@ const columns = computed(() => [
     align: 'left',
   },
 ]);
+
+const profiles = ref<Record<string, any>>({});
+const nostr = useNostrStore();
+
+async function updateProfiles() {
+  for (const sub of subscriptions.value) {
+    const pk = sub.subscriberNpub;
+    if (!profiles.value[pk]) {
+      const p = await nostr.getProfile(pk);
+      if (p) profiles.value[pk] = p;
+    }
+  }
+}
+
+onMounted(updateProfiles);
+watch(subscriptions, updateProfiles);
 
 function pubkeyNpub(hex: string): string {
   try {
