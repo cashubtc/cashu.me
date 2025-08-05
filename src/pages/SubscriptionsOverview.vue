@@ -30,56 +30,84 @@
     </q-banner>
     <div>
       <q-form class="q-gutter-sm q-mb-md">
-        <q-toolbar class="q-gutter-sm">
-          <q-input
-            v-model="filter"
-            dense
-            debounce="300"
-            outlined
-            clearable
-            class="col"
-            :placeholder="$t('global.actions.search.label')"
+        <q-btn
+          flat
+          dense
+          icon="tune"
+          :label="$t('SubscriptionsOverview.actions.open_filters.label')"
+          @click="showFilterPanel = !showFilterPanel"
+        />
+        <q-slide-transition>
+          <div
+            v-show="showFilterPanel"
+            class="q-mt-sm q-gutter-sm column"
           >
-            <template #prepend>
-              <q-icon name="search" />
-            </template>
-          </q-input>
-          <q-select
-            v-model="statusFilter"
-            dense
-            emit-value
-            map-options
-            clearable
-            class="col"
-            :options="[
-              {
-                label: $t('SubscriptionsOverview.status.active'),
-                value: 'active',
-              },
-              {
-                label: $t('SubscriptionsOverview.status.expired'),
-                value: 'expired',
-              },
-            ]"
-            :placeholder="$t('SubscriptionsOverview.filter.status')"
-          />
-          <q-select
-            v-model="sortBy"
-            dense
-            emit-value
-            map-options
-            class="col"
-            :options="sortOptions"
-            :placeholder="$t('SubscriptionsOverview.sort_by')"
-          />
-          <q-btn
-            flat
-            dense
-            icon="tune"
-            :label="$t('SubscriptionsOverview.actions.open_filters.label')"
-            @click="showAdvancedFilters = true"
-          />
-        </q-toolbar>
+            <q-input
+              v-model="filter"
+              dense
+              debounce="300"
+              outlined
+              clearable
+              :placeholder="$t('global.actions.search.label')"
+            >
+              <template #prepend>
+                <q-icon name="search" />
+              </template>
+            </q-input>
+            <q-select
+              v-model="statusFilter"
+              dense
+              emit-value
+              map-options
+              clearable
+              :options="[
+                {
+                  label: $t('SubscriptionsOverview.status.active'),
+                  value: 'active',
+                },
+                {
+                  label: $t('SubscriptionsOverview.status.expired'),
+                  value: 'expired',
+                },
+              ]"
+              :placeholder="$t('SubscriptionsOverview.filter.status')"
+            />
+            <q-select
+              v-model="sortBy"
+              dense
+              emit-value
+              map-options
+              :options="sortOptions"
+              :placeholder="$t('SubscriptionsOverview.sort_by')"
+            />
+            <q-select
+              v-model="bucketFilter"
+              dense
+              emit-value
+              map-options
+              clearable
+              :options="
+                bucketsStore.bucketList.map((b) => ({
+                  label: b.name,
+                  value: b.name,
+                }))
+              "
+              :placeholder="$t('SubscriptionsOverview.filter.bucket')"
+            />
+            <q-select
+              v-model="frequencyFilter"
+              dense
+              emit-value
+              map-options
+              clearable
+              :options="[
+                { label: 'monthly', value: 'monthly' },
+                { label: 'weekly', value: 'weekly' },
+              ]"
+              :placeholder="$t('SubscriptionsOverview.filter.frequency')"
+            />
+          </div>
+        </q-slide-transition>
       </q-form>
       <div v-if="isLoading" class="subscription-grid">
         <q-card
@@ -276,43 +304,6 @@
       :tokens="creatorTokens"
       :title="creatorTitle"
     />
-    <q-dialog v-model="showAdvancedFilters">
-      <q-card style="min-width: 250px">
-        <q-card-section class="q-gutter-sm">
-          <q-select
-            v-model="bucketFilter"
-            dense
-            emit-value
-            map-options
-            clearable
-            :options="
-              bucketsStore.bucketList.map((b) => ({
-                label: b.name,
-                value: b.name,
-              }))
-            "
-            :placeholder="$t('SubscriptionsOverview.filter.bucket')"
-          />
-          <q-select
-            v-model="frequencyFilter"
-            dense
-            emit-value
-            map-options
-            clearable
-            :options="[
-              { label: 'monthly', value: 'monthly' },
-              { label: 'weekly', value: 'weekly' },
-            ]"
-            :placeholder="$t('SubscriptionsOverview.filter.frequency')"
-          />
-        </q-card-section>
-        <q-card-actions align="right">
-          <q-btn flat v-close-popup color="primary">
-            {{ $t("global.actions.ok.label") }}
-          </q-btn>
-        </q-card-actions>
-      </q-card>
-    </q-dialog>
     <q-dialog v-model="showMessageDialog">
       <q-card style="min-width: 300px">
         <q-card-section class="text-h6">
@@ -522,7 +513,7 @@ const sortOptions = [
     value: "start-date-desc",
   },
 ];
-const showAdvancedFilters = ref(false);
+const showFilterPanel = ref(false);
 const isLoading = ref(true);
 
 const filteredRows = computed(() => {
