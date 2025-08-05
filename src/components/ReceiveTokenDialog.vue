@@ -35,8 +35,8 @@
             >
               ({{
                 formatCurrency(
-                  (bitcoinPrice / 100000000) * tokenAmount,
-                  "USD",
+                  (currentCurrencyPrice / 100000000) * tokenAmount,
+                  bitcoinPriceCurrency,
                   true
                 )
               }})
@@ -324,7 +324,12 @@ export default defineComponent({
       "scanningCard",
     ]),
     ...mapState(useUiStore, ["tickerShort", "ndefSupported"]),
-    ...mapState(usePriceStore, ["bitcoinPrice"]),
+    ...mapState(usePriceStore, [
+      "bitcoinPrice",
+      "bitcoinPrices",
+      "currentCurrencyPrice",
+    ]),
+    ...mapState(useSettingsStore, ["bitcoinPriceCurrency"]),
     ...mapState(useMintsStore, [
       "activeMintUrl",
       "activeProofs",

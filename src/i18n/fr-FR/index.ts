@@ -350,6 +350,11 @@ export default {
         toggle: "Obtenir le taux de change de Coinbase",
         description:
           "Si activé, le taux de change actuel du Bitcoin sera récupéré de coinbase.com et votre solde converti sera affiché.",
+        currency: {
+          title: "Devise Fiat",
+          description:
+            "Choisissez la devise fiat pour l'affichage du prix Bitcoin.",
+        },
       },
     },
     experimental: {

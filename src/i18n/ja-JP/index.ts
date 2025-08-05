@@ -348,6 +348,10 @@ export default {
         toggle: "Coinbaseから為替レートを取得",
         description:
           "有効にすると、現在のBitcoin為替レートがcoinbase.comから取得され、換算された残高が表示されます。",
+        currency: {
+          title: "法定通貨",
+          description: "Bitcoin価格表示用の法定通貨を選択してください。",
+        },
       },
     },
     experimental: {
