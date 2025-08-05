@@ -217,7 +217,7 @@
           </q-card-section>
           <q-card-actions class="justify-between">
             <div class="q-gutter-xs">
-              <q-btn size="sm" flat color="primary" @click="openDetails(row.creator)">
+              <q-btn size="sm" flat color="primary" @click="toggleDetails(row.creator)">
                 {{ $t('SubscriptionsOverview.view') }}
               </q-btn>
               <q-btn size="sm" flat color="primary" @click="sendMessage(row.creator)">
@@ -242,7 +242,7 @@
                   <q-item
                     clickable
                     v-close-popup
-                    @click="openDetails(row.creator)"
+                    @click="toggleDetails(row.creator)"
                   >
                     <q-item-section>{{
                       $t("SubscriptionsOverview.view")
@@ -306,6 +306,42 @@
               </q-menu>
             </q-btn>
           </q-card-actions>
+          <q-slide-transition>
+            <div v-show="row.expanded" class="q-mt-sm">
+              <q-list bordered>
+                <q-item v-for="t in row.tokens" :key="t.id">
+                  <q-item-section>
+                    <q-item-label class="text-weight-bold">
+                      {{ formatCurrency(t.amount) }}
+                    </q-item-label>
+                    <q-item-label caption>
+                      Month {{ t.monthIndex }} - {{ t.locktime ? formatTs(t.locktime) : '-' }}
+                    </q-item-label>
+                    <q-item-label caption v-if="t.locktime">
+                      Unlocks in {{ countdownTo(t.locktime) }}
+                    </q-item-label>
+                  </q-item-section>
+                  <q-item-section side>
+                    <q-icon
+                      :name="t.redeemed ? 'check_circle' : 'hourglass_empty'"
+                      :color="t.redeemed ? 'positive' : 'grey'"
+                      class="q-mr-sm"
+                    />
+                    <q-btn
+                      flat
+                      dense
+                      icon="content_copy"
+                      @click="copy(t.token)"
+                      :aria-label="$t('global.actions.copy.label')"
+                    />
+                  </q-item-section>
+                </q-item>
+                <div v-if="row.tokens.length === 0" class="text-center q-pa-md text-caption">
+                  {{ $t('LockedTokensTable.empty_text') }}
+                </div>
+              </q-list>
+            </div>
+          </q-slide-transition>
         </q-card>
       </div>
       <div v-if="!filteredRows.length" class="text-center q-pa-md">
@@ -314,11 +350,6 @@
           {{ $t("SubscriptionsOverview.discover") }}
         </q-btn>
       </div>
-    <SubscriptionDetailDialog
-      v-model="showDialog"
-      :tokens="creatorTokens"
-      :title="creatorTitle"
-    />
     <q-dialog v-model="showMessageDialog">
       <q-card style="min-width: 300px">
         <q-card-section class="text-h6">
@@ -381,8 +412,8 @@ import { useProofsStore } from "stores/proofs";
 import { useSendTokensStore } from "stores/sendTokensStore";
 import token from "src/js/token";
 import SubscriptionReceipt from "components/SubscriptionReceipt.vue";
-import SubscriptionDetailDialog from "components/SubscriptionDetailDialog.vue";
 import { cashuDb } from "stores/dexie";
+import { useClipboard } from "src/composables/useClipboard";
 
 const bucketsStore = useBucketsStore();
 const mintsStore = useMintsStore();
@@ -426,6 +457,8 @@ onMounted(() => {
   }, 1000);
 });
 onUnmounted(() => clearInterval(nowTimer));
+
+const expandedRows = ref<Record<string, boolean>>({});
 
 const rows = computed(() => {
   const nowSec = Math.floor(now.value / 1000);
@@ -484,6 +517,7 @@ const rows = computed(() => {
       frequency: sub.frequency,
       tokensRemaining: monthsLeft,
       soon,
+      expanded: expandedRows.value[sub.creatorNpub] || false,
     };
   });
 });
@@ -501,16 +535,7 @@ const messenger = useMessengerStore();
 const router = useRouter();
 const $q = useQuasar();
 const { t } = useI18n();
-const showDialog = ref(false);
-const selectedCreator = ref("");
-const creatorTitle = computed(() => {
-  const pk = selectedCreator.value;
-  return (
-    profiles.value[pk]?.display_name ||
-    profiles.value[pk]?.name ||
-    shortenString(pubkeyNpub(pk), 15, 6)
-  );
-});
+const { copy } = useClipboard();
 const showMessageDialog = ref(false);
 const showReceiptDialog = ref(false);
 const receiptList = ref<any[]>([]);
@@ -586,14 +611,8 @@ function customSort(rows: any[], sortBy: string, descending: boolean) {
   });
 }
 
-const creatorTokens = computed(() => {
-  const row = rows.value.find((r) => r.creator === selectedCreator.value);
-  return row ? row.tokens : [];
-});
-
-function openDetails(pubkey: string) {
-  selectedCreator.value = pubkey;
-  showDialog.value = true;
+function toggleDetails(pubkey: string) {
+  expandedRows.value[pubkey] = !expandedRows.value[pubkey];
 }
 
 function sendMessage(pubkey: string) {
