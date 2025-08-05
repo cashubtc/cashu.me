@@ -93,7 +93,7 @@
           <q-badge
             :color="props.row.status === 'active' ? 'positive' : 'warning'"
           >
-            {{ props.row.status }}
+            {{ t('CreatorSubscribers.status.' + props.row.status) }}
           </q-badge>
         </q-td>
       </template>
@@ -193,7 +193,7 @@
                         props.row.status === 'active' ? 'positive' : 'warning'
                       "
                     >
-                      {{ props.row.status }}
+                      {{ t('CreatorSubscribers.status.' + props.row.status) }}
                     </q-badge>
                   </q-item-label>
                 </q-item-section>
