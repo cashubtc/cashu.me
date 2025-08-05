@@ -2,9 +2,14 @@
   <div class="q-pa-md">
     <div class="row items-center justify-between q-mb-md">
       <h5 class="q-my-none">{{ $t("SubscriptionsOverview.title") }}</h5>
-      <q-btn flat color="primary" to="/creator-subscribers">
-        My Subscribers
-      </q-btn>
+        <q-btn
+          v-if="creatorSubscriptions.length > 0"
+          flat
+          color="primary"
+          to="/creator-subscribers"
+        >
+          My Subscribers
+        </q-btn>
     </div>
     <q-card flat bordered class="q-mb-md">
       <q-card-section class="row items-center">
@@ -397,6 +402,7 @@ import { useNostrStore } from "stores/nostr";
 import { useMessengerStore } from "stores/messenger";
 import { useSubscriptionsStore } from "stores/subscriptions";
 import { useNutzapStore } from "stores/nutzap";
+import { useCreatorSubscriptionsStore } from "stores/creatorSubscriptions";
 import { fetchNutzapProfile, RelayConnectionError } from "stores/nostr";
 import { useRouter } from "vue-router";
 import { useQuasar } from "quasar";
@@ -421,8 +427,12 @@ const uiStore = useUiStore();
 const proofsStore = useProofsStore();
 const sendTokensStore = useSendTokensStore();
 const nutzap = useNutzapStore();
+const creatorSubscriptionsStore = useCreatorSubscriptionsStore();
 const { activeUnit } = storeToRefs(mintsStore);
 const { sendQueue } = storeToRefs(nutzap);
+const { subscriptions: creatorSubscriptions } = storeToRefs(
+  creatorSubscriptionsStore
+);
 
 function pubkeyNpub(hex: string): string {
   try {
