@@ -52,15 +52,23 @@
       </template>
       <template #body-cell-status="props">
         <q-td :props="props">
-          <q-badge :color="props.row.status === 'active' ? 'positive' : 'warning'">
+          <q-badge
+            :color="props.row.status === 'active' ? 'positive' : 'warning'"
+          >
             {{ props.row.status }}
           </q-badge>
         </q-td>
       </template>
       <template #no-data>
         <div class="full-width column items-center q-pa-md">
-          <div>No subscribers yet</div>
-          <q-btn flat color="primary" label="Find creators" to="/find-creators" class="q-mt-sm" />
+          <div>{{ t("CreatorSubscribers.noData") }}</div>
+          <q-btn
+            flat
+            color="primary"
+            :label="t('CreatorSubscribers.findCreators')"
+            to="/find-creators"
+            class="q-mt-sm"
+          />
         </div>
       </template>
     </q-table>
@@ -68,57 +76,57 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue';
-import { storeToRefs } from 'pinia';
-import { nip19 } from 'nostr-tools';
-import { useCreatorSubscriptionsStore } from 'stores/creatorSubscriptions';
-import { shortenString } from 'src/js/string-utils';
-import { useI18n } from 'vue-i18n';
-import { useNostrStore } from 'stores/nostr';
+import { ref, computed, onMounted, watch } from "vue";
+import { storeToRefs } from "pinia";
+import { nip19 } from "nostr-tools";
+import { useCreatorSubscriptionsStore } from "stores/creatorSubscriptions";
+import { shortenString } from "src/js/string-utils";
+import { useI18n } from "vue-i18n";
+import { useNostrStore } from "stores/nostr";
 
 const store = useCreatorSubscriptionsStore();
 const { subscriptions, loading } = storeToRefs(store);
 
 const { t } = useI18n();
 
-const filter = ref('');
+const filter = ref("");
 const pagination = ref({
   page: 1,
   rowsPerPage: 5,
-  sortBy: 'subscriber',
+  sortBy: "subscriber",
   descending: false,
 });
 
 const columns = computed(() => [
   {
-    name: 'subscriber',
-    label: t('CreatorSubscribers.columns.subscriber'),
-    field: 'subscriberNpub',
-    align: 'left',
+    name: "subscriber",
+    label: t("CreatorSubscribers.columns.subscriber"),
+    field: "subscriberNpub",
+    align: "left",
     sortable: true,
   },
   {
-    name: 'tier',
-    label: t('CreatorSubscribers.columns.tier'),
-    field: 'tierId',
-    align: 'left',
+    name: "tier",
+    label: t("CreatorSubscribers.columns.tier"),
+    field: "tierId",
+    align: "left",
     sortable: true,
   },
   {
-    name: 'months',
-    label: t('CreatorSubscribers.columns.months'),
-    field: 'receivedMonths',
-    align: 'center',
+    name: "months",
+    label: t("CreatorSubscribers.columns.months"),
+    field: "receivedMonths",
+    align: "center",
     sortable: true,
     sort: (a, b, rowA, rowB) =>
       rowA.receivedMonths / rowA.totalMonths -
       rowB.receivedMonths / rowB.totalMonths,
   },
   {
-    name: 'status',
-    label: t('CreatorSubscribers.columns.status'),
-    field: 'status',
-    align: 'left',
+    name: "status",
+    label: t("CreatorSubscribers.columns.status"),
+    field: "status",
+    align: "left",
     sortable: true,
   },
 ]);
