@@ -1570,6 +1570,10 @@ export default {
       viewProfile: "View profile",
       sendMessage: "Send message",
     },
+    status: {
+      active: "活跃",
+      pending: "待处理",
+    },
     noData: "No subscribers yet",
     shareProfile: "Share your profile",
   },

@@ -1591,6 +1591,10 @@ export default {
       viewProfile: "View profile",
       sendMessage: "Send message",
     },
+    status: {
+      active: "نشط",
+      pending: "معلق",
+    },
     noData: "No subscribers yet",
     shareProfile: "Share your profile",
   },

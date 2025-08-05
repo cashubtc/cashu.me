@@ -1580,6 +1580,10 @@ export default {
       viewProfile: "View profile",
       sendMessage: "Send message",
     },
+    status: {
+      active: "Attivo",
+      pending: "In attesa",
+    },
     noData: "No subscribers yet",
     shareProfile: "Share your profile",
   },

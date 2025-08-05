@@ -1601,6 +1601,10 @@ export default {
       viewProfile: "View profile",
       sendMessage: "Send message",
     },
+    status: {
+      active: "Ενεργό",
+      pending: "Σε εκκρεμότητα",
+    },
     noData: "No subscribers yet",
     shareProfile: "Share your profile",
   },

@@ -1583,6 +1583,10 @@ export default {
       viewProfile: "View profile",
       sendMessage: "Send message",
     },
+    status: {
+      active: "Aktif",
+      pending: "Beklemede",
+    },
     noData: "No subscribers yet",
     shareProfile: "Share your profile",
   },
