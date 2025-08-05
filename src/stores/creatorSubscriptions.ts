@@ -7,6 +7,7 @@ export interface CreatorSubscription {
   subscriptionId: string;
   subscriberNpub: string;
   tierId: string;
+  tierName: string;
   totalMonths: number;
   receivedMonths: number;
   status: "pending" | "active";
@@ -35,6 +36,7 @@ export const useCreatorSubscriptionsStore = defineStore(
               subscriptionId: id,
               subscriberNpub: row.subscriberNpub || "",
               tierId: row.tierId,
+              tierName: row.tierName || "",
               totalMonths: row.totalMonths || 0,
               receivedMonths: 0,
               status: "pending",

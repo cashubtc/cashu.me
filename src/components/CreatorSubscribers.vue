@@ -20,6 +20,8 @@
         dense
         outlined
         clearable
+        emit-value
+        map-options
         :label="t('CreatorSubscribers.columns.tier')"
         class="col-3"
       />
@@ -177,7 +179,7 @@ const columns = computed(() => [
   {
     name: "tier",
     label: t("CreatorSubscribers.columns.tier"),
-    field: "tierId",
+    field: "tierName",
     align: "left",
     sortable: true,
   },
@@ -208,9 +210,11 @@ const columns = computed(() => [
 ]);
 
 const tierOptions = computed(() => {
-  const set = new Set<string>();
-  for (const sub of subscriptions.value) set.add(sub.tierId);
-  return Array.from(set);
+  const map = new Map<string, string>();
+  for (const sub of subscriptions.value) {
+    map.set(sub.tierId, sub.tierName);
+  }
+  return Array.from(map.entries()).map(([value, label]) => ({ label, value }));
 });
 
 const statusOptions = ["active", "pending"];
