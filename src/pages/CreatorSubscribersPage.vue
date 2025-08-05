@@ -10,12 +10,19 @@
         aria-label="Go back"
         class="q-mr-sm"
       />
-      <h5 class="q-my-none">My Subscribers</h5>
+      <h5 class="q-my-none">My Subscribers ({{ count }})</h5>
     </div>
     <CreatorSubscribers />
   </q-page>
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue';
+import { storeToRefs } from 'pinia';
 import CreatorSubscribers from 'components/CreatorSubscribers.vue';
+import { useCreatorSubscriptionsStore } from 'stores/creatorSubscriptions';
+
+const creatorSubscriptionsStore = useCreatorSubscriptionsStore();
+const { subscriptions } = storeToRefs(creatorSubscriptionsStore);
+const count = computed(() => subscriptions.value.length);
 </script>
