@@ -65,7 +65,24 @@
       </template>
       <template #body-cell-months="props">
         <q-td :props="props">
-          {{ props.row.receivedMonths }} / {{ props.row.totalMonths }}
+          <div class="row items-center no-wrap">
+            <q-linear-progress
+              :value="
+                props.row.totalMonths
+                  ? props.row.receivedMonths / props.row.totalMonths
+                  : 0
+              "
+              color="primary"
+              style="width: 100px"
+            >
+              <q-tooltip>
+                {{ props.row.receivedMonths }} / {{ props.row.totalMonths }}
+              </q-tooltip>
+            </q-linear-progress>
+            <div class="q-ml-sm text-caption">
+              {{ props.row.receivedMonths }} / {{ props.row.totalMonths }}
+            </div>
+          </div>
         </q-td>
       </template>
       <template #body-cell-status="props">
@@ -88,7 +105,7 @@
                   :to="`/creator/${pubkeyNpub(props.row.subscriberNpub)}`"
                 >
                   <q-item-section>
-                    {{ t('CreatorSubscribers.actions.viewProfile') }}
+                    {{ t("CreatorSubscribers.actions.viewProfile") }}
                   </q-item-section>
                 </q-item>
                 <q-item
@@ -97,7 +114,7 @@
                   @click="sendMessage(props.row.subscriberNpub)"
                 >
                   <q-item-section>
-                    {{ t('CreatorSubscribers.actions.sendMessage') }}
+                    {{ t("CreatorSubscribers.actions.sendMessage") }}
                   </q-item-section>
                 </q-item>
               </q-list>
