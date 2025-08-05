@@ -77,6 +77,34 @@
           </q-badge>
         </q-td>
       </template>
+      <template #body-cell-actions="props">
+        <q-td :props="props" class="text-right">
+          <q-btn flat dense round icon="more_vert">
+            <q-menu>
+              <q-list style="min-width: 120px">
+                <q-item
+                  clickable
+                  v-close-popup
+                  :to="`/creator/${pubkeyNpub(props.row.subscriberNpub)}`"
+                >
+                  <q-item-section>
+                    {{ t('CreatorSubscribers.actions.viewProfile') }}
+                  </q-item-section>
+                </q-item>
+                <q-item
+                  clickable
+                  v-close-popup
+                  @click="sendMessage(props.row.subscriberNpub)"
+                >
+                  <q-item-section>
+                    {{ t('CreatorSubscribers.actions.sendMessage') }}
+                  </q-item-section>
+                </q-item>
+              </q-list>
+            </q-menu>
+          </q-btn>
+        </q-td>
+      </template>
       <template #no-data>
         <div class="full-width column items-center q-pa-md">
           <div>{{ t("CreatorSubscribers.noData") }}</div>
@@ -96,16 +124,20 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from "vue";
 import { storeToRefs } from "pinia";
+import { useRouter } from "vue-router";
 import { nip19 } from "nostr-tools";
 import { useCreatorSubscriptionsStore } from "stores/creatorSubscriptions";
 import { shortenString } from "src/js/string-utils";
 import { useI18n } from "vue-i18n";
 import { useNostrStore } from "stores/nostr";
+import { useMessengerStore } from "stores/messenger";
 
 const store = useCreatorSubscriptionsStore();
 const { subscriptions, loading } = storeToRefs(store);
 
 const { t } = useI18n();
+const router = useRouter();
+const messenger = useMessengerStore();
 
 const filter = ref("");
 const tierFilter = ref<string | null>(null);
@@ -148,6 +180,12 @@ const columns = computed(() => [
     field: "status",
     align: "left",
     sortable: true,
+  },
+  {
+    name: "actions",
+    label: t("CreatorSubscribers.columns.actions"),
+    field: "actions",
+    align: "right",
   },
 ]);
 
@@ -192,6 +230,24 @@ function pubkeyNpub(hex: string): string {
     return nip19.npubEncode(hex);
   } catch {
     return hex;
+  }
+}
+
+function sendMessage(pk: string) {
+  const npub = pubkeyNpub(pk);
+  router.push({ path: "/nostr-messenger", query: { pubkey: npub } });
+  if (messenger.started) {
+    messenger.startChat(pk);
+  } else {
+    const stop = watch(
+      () => messenger.started,
+      (started) => {
+        if (started) {
+          messenger.startChat(pk);
+          stop();
+        }
+      }
+    );
   }
 }
 </script>
