@@ -2,6 +2,7 @@ import { defineStore } from "pinia";
 import { cashuDb } from "./dexie";
 import { liveQuery } from "dexie";
 import { ref } from "vue";
+import { useCreatorsStore } from "./creators";
 
 export interface CreatorSubscription {
   subscriptionId: string;
@@ -18,6 +19,7 @@ export const useCreatorSubscriptionsStore = defineStore(
   () => {
     const subscriptions = ref<CreatorSubscription[]>([]);
     const loading = ref(true);
+    const creatorsStore = useCreatorsStore();
 
     liveQuery(() =>
       cashuDb.lockedTokens
@@ -36,7 +38,12 @@ export const useCreatorSubscriptionsStore = defineStore(
               subscriptionId: id,
               subscriberNpub: row.subscriberNpub || "",
               tierId: row.tierId,
-              tierName: row.tierName || "",
+              tierName:
+                row.tierName ||
+                creatorsStore.tiersMap[row.creatorNpub || ""]?.find(
+                  (t) => t.id === row.tierId,
+                )?.name ||
+                "",
               totalMonths: row.totalMonths || 0,
               receivedMonths: 0,
               status: "pending",

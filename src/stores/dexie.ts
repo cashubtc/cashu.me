@@ -72,6 +72,7 @@ export interface LockedToken {
   creatorNpub?: string;
   creatorP2PK?: string;
   tierId: string;
+  tierName?: string;
   intervalKey: string;
   unlockTs: number;
   status: "pending" | "unlockable" | "claimed" | "expired";
