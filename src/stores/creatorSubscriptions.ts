@@ -13,6 +13,8 @@ export interface CreatorSubscription {
   receivedMonths: number;
   status: "pending" | "active";
   nextRenewal: number | null;
+  startDate: number | null;
+  endDate: number | null;
 }
 
 export const useCreatorSubscriptionsStore = defineStore(
@@ -32,7 +34,10 @@ export const useCreatorSubscriptionsStore = defineStore(
       next: (rows) => {
         const map = new Map<
           string,
-          CreatorSubscription & { latestUnlock: number | null }
+          CreatorSubscription & {
+            earliestUnlock: number | null;
+            latestUnlock: number | null;
+          }
         >();
         for (const row of rows) {
           const id = row.subscriptionId!;
@@ -52,16 +57,27 @@ export const useCreatorSubscriptionsStore = defineStore(
               receivedMonths: 0,
               status: "pending",
               nextRenewal: null,
+              startDate: null,
+              endDate: null,
+              earliestUnlock: row.unlockTs ?? null,
               latestUnlock: row.unlockTs ?? null,
             };
             map.set(id, sub);
           }
           sub.receivedMonths += 1;
-          if (
-            row.unlockTs != null &&
-            (sub.latestUnlock == null || row.unlockTs > sub.latestUnlock)
-          ) {
-            sub.latestUnlock = row.unlockTs;
+          if (row.unlockTs != null) {
+            if (
+              sub.earliestUnlock == null ||
+              row.unlockTs < sub.earliestUnlock
+            ) {
+              sub.earliestUnlock = row.unlockTs;
+            }
+            if (
+              sub.latestUnlock == null ||
+              row.unlockTs > sub.latestUnlock
+            ) {
+              sub.latestUnlock = row.unlockTs;
+            }
           }
         }
         const monthSeconds = 30 * 24 * 60 * 60;
@@ -78,6 +94,8 @@ export const useCreatorSubscriptionsStore = defineStore(
             status:
               s.receivedMonths >= s.totalMonths ? "active" : "pending",
             nextRenewal,
+            startDate: s.earliestUnlock,
+            endDate: s.latestUnlock,
           } as CreatorSubscription;
         });
         subscriptions.value = arr;

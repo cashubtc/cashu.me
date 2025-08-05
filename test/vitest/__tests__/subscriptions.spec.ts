@@ -235,8 +235,14 @@ describe("Nutzap subscriptions", () => {
     expect(subStore.subscriptions.length).toBe(2);
     expect(sub1?.receivedMonths).toBe(2);
     expect(sub1?.status).toBe("active");
+    expect(sub1?.startDate).toBe(0);
+    expect(sub1?.endDate).toBe(0);
+    expect(sub1?.nextRenewal).toBe(0 + 30 * 24 * 60 * 60);
     expect(sub2?.receivedMonths).toBe(1);
     expect(sub2?.status).toBe("pending");
+    expect(sub2?.startDate).toBe(0);
+    expect(sub2?.endDate).toBe(0);
+    expect(sub2?.nextRenewal).toBe(0 + 30 * 24 * 60 * 60);
   });
 
   it("redeems tokens when unlock time passed", async () => {
