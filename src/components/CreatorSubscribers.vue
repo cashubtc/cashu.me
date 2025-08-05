@@ -1,39 +1,55 @@
 <template>
   <div>
-    <div class="row q-mb-md q-gutter-sm">
-      <q-input
-        v-model="filter"
-        dense
-        outlined
-        debounce="300"
-        clearable
-        :placeholder="$t('CreatorSubscribers.filter.placeholder')"
-        class="col"
-      >
-        <template #prepend>
-          <q-icon name="search" />
-        </template>
-      </q-input>
-      <q-select
-        v-model="tierFilter"
-        :options="tierOptions"
-        dense
-        outlined
-        clearable
-        emit-value
-        map-options
-        :label="t('CreatorSubscribers.columns.tier')"
-        class="col-3"
+    <div class="q-mb-md">
+      <q-btn
+        v-if="isSmallScreen"
+        flat
+        color="primary"
+        icon="filter_list"
+        label="Filters"
+        @click="showFilters = !showFilters"
+        class="q-mb-sm"
       />
-      <q-select
-        v-model="statusFilter"
-        :options="statusOptions"
-        dense
-        outlined
-        clearable
-        :label="t('CreatorSubscribers.columns.status')"
-        class="col-3"
-      />
+      <q-slide-transition>
+        <div
+          v-show="!isSmallScreen || showFilters"
+          class="row q-gutter-sm"
+        >
+          <q-input
+            v-model="filter"
+            dense
+            outlined
+            debounce="300"
+            clearable
+            :placeholder="$t('CreatorSubscribers.filter.placeholder')"
+            class="col"
+          >
+            <template #prepend>
+              <q-icon name="search" />
+            </template>
+          </q-input>
+          <q-select
+            v-model="tierFilter"
+            :options="tierOptions"
+            dense
+            outlined
+            clearable
+            emit-value
+            map-options
+            :label="t('CreatorSubscribers.columns.tier')"
+            class="col-3"
+          />
+          <q-select
+            v-model="statusFilter"
+            :options="statusOptions"
+            dense
+            outlined
+            clearable
+            :label="t('CreatorSubscribers.columns.status')"
+            class="col-3"
+          />
+        </div>
+      </q-slide-transition>
     </div>
     <q-table
       flat
@@ -272,6 +288,11 @@ const messenger = useMessengerStore();
 const $q = useQuasar();
 const isSmallScreen = computed(() => $q.screen.lt.md);
 
+const showFilters = ref(!isSmallScreen.value);
+watch(isSmallScreen, (val) => {
+  showFilters.value = !val;
+});
+
 const filter = ref("");
 const tierFilter = ref<string | null>(null);
 const statusFilter = ref<string | null>(null);
@@ -383,7 +404,7 @@ async function updateProfiles() {
 onMounted(updateProfiles);
 watch(subscriptions, updateProfiles);
 
-watch([filter, tierFilter, statusFilter], () => {
+watch([filter, tierFilter, statusFilter, showFilters], () => {
   pagination.value.page = 1;
 });
 
