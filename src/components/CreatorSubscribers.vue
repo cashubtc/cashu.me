@@ -210,11 +210,11 @@ const columns = computed(() => [
 ]);
 
 const tierOptions = computed(() => {
-  const map = new Map<string, string>();
+  const set = new Set<string>();
   for (const sub of subscriptions.value) {
-    map.set(sub.tierId, sub.tierName);
+    set.add(sub.tierName);
   }
-  return Array.from(map.entries()).map(([value, label]) => ({ label, value }));
+  return Array.from(set).map((tierName) => ({ label: tierName, value: tierName }));
 });
 
 const statusOptions = ["active", "pending"];
@@ -222,7 +222,7 @@ const statusOptions = ["active", "pending"];
 const filteredSubscriptions = computed(() =>
   subscriptions.value.filter(
     (s) =>
-      (!tierFilter.value || s.tierId === tierFilter.value) &&
+      (!tierFilter.value || s.tierName === tierFilter.value) &&
       (!statusFilter.value || s.status === statusFilter.value)
   )
 );
