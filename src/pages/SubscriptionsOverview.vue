@@ -79,7 +79,7 @@
                   value: 'expired',
                 },
               ]"
-              :placeholder="$t('SubscriptionsOverview.filter.status')"
+              :label="$t('SubscriptionsOverview.filter.status')"
             />
             <q-select
               v-model="sortBy"
@@ -87,7 +87,7 @@
               emit-value
               map-options
               :options="sortOptions"
-              :placeholder="$t('SubscriptionsOverview.sort_by')"
+              :label="$t('SubscriptionsOverview.sort_by')"
             />
             <q-select
               v-model="bucketFilter"
@@ -101,7 +101,7 @@
                   value: b.name,
                 }))
               "
-              :placeholder="$t('SubscriptionsOverview.filter.bucket')"
+              :label="$t('SubscriptionsOverview.filter.bucket')"
             />
             <q-select
               v-model="frequencyFilter"
@@ -113,7 +113,7 @@
                 { label: 'monthly', value: 'monthly' },
                 { label: 'weekly', value: 'weekly' },
               ]"
-              :placeholder="$t('SubscriptionsOverview.filter.frequency')"
+              :label="$t('SubscriptionsOverview.filter.frequency')"
             />
           </div>
         </q-slide-transition>
