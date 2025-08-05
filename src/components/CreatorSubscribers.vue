@@ -186,6 +186,7 @@ const columns = computed(() => [
     label: t("CreatorSubscribers.columns.actions"),
     field: "actions",
     align: "right",
+    sortable: true,
   },
 ]);
 
