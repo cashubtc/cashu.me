@@ -43,6 +43,12 @@
           </q-badge>
         </q-td>
       </template>
+      <template #no-data>
+        <div class="full-width column items-center q-pa-md">
+          <div>No subscribers yet</div>
+          <q-btn flat color="primary" label="Find creators" to="/find-creators" class="q-mt-sm" />
+        </div>
+      </template>
     </q-table>
   </div>
 </template>
