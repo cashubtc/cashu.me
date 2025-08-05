@@ -28,6 +28,15 @@
         </q-btn>
       </template>
     </q-banner>
+    <q-banner
+      v-if="soonRows.length"
+      dense
+      class="q-mb-md bg-warning"
+    >
+      {{
+        $t("SubscriptionsOverview.soon_unlock", { count: soonRows.length })
+      }}
+    </q-banner>
     <div>
       <q-form class="q-gutter-sm q-mb-md">
         <q-btn
@@ -168,6 +177,9 @@
             >
               {{ $t(`SubscriptionsOverview.status.${row.status}`) }}
             </q-badge>
+            <q-badge v-if="row.soon" color="warning" class="q-ml-sm">
+              {{ $t('SubscriptionsOverview.soon_badge') }}
+            </q-badge>
           </q-card-section>
           <q-card-section class="q-pt-none">
             <q-linear-progress
@@ -210,6 +222,9 @@
               </q-btn>
               <q-btn size="sm" flat color="primary" @click="sendMessage(row.creator)">
                 {{ $t('SubscriptionsOverview.message') }}
+              </q-btn>
+              <q-btn size="sm" flat color="primary" @click="extendSubscription(row.creator)">
+                {{ $t('SubscriptionsOverview.renew') }}
               </q-btn>
             </div>
             <q-btn
@@ -367,6 +382,7 @@ import { useSendTokensStore } from "stores/sendTokensStore";
 import token from "src/js/token";
 import SubscriptionReceipt from "components/SubscriptionReceipt.vue";
 import SubscriptionDetailDialog from "components/SubscriptionDetailDialog.vue";
+import { cashuDb } from "stores/dexie";
 
 const bucketsStore = useBucketsStore();
 const mintsStore = useMintsStore();
@@ -431,6 +447,8 @@ const rows = computed(() => {
     const nextUnlock =
       future.sort((a, b) => a.locktime! - b.locktime!)[0]?.locktime || null;
     const countdown = nextUnlock ? formatDistanceToNow(nextUnlock * 1000) : "";
+    const soon =
+      !!nextUnlock && nextUnlock - nowSec <= 7 * 24 * 60 * 60;
     const monthsLeft = future.length;
     const monthly = sub.amountPerInterval;
     const start = sub.startDate || null;
@@ -465,9 +483,12 @@ const rows = computed(() => {
       benefits: (sub as any).benefits || [],
       frequency: sub.frequency,
       tokensRemaining: monthsLeft,
+      soon,
     };
   });
 });
+
+const soonRows = computed(() => rows.value.filter((r) => r.soon));
 
 const totalLocked = computed(() => rows.value.reduce((s, r) => s + r.total, 0));
 const monthlyTotal = computed(() =>
@@ -614,7 +635,10 @@ function cancelSubscription(pubkey: string) {
 
 function extendSubscription(pubkey: string) {
   const row = rows.value.find((r) => r.creator === pubkey);
-  if (!row) return;
+  const sub = subscriptionsStore.subscriptions.find(
+    (s) => s.creatorNpub === pubkey
+  );
+  if (!row || !sub) return;
   $q.dialog({
     title: t("SubscriptionsOverview.extend_dialog_title"),
     message: t("SubscriptionsOverview.extend_dialog_text"),
@@ -633,7 +657,8 @@ function extendSubscription(pubkey: string) {
     const lastLock = future.length
       ? future[future.length - 1].locktime!
       : Math.floor(Date.now() / 1000);
-    const startDate = lastLock + 30 * 24 * 60 * 60;
+    const startDate =
+      lastLock + (sub.intervalDays ?? 30) * 24 * 60 * 60;
     try {
       let profile = null;
       try {
@@ -649,17 +674,61 @@ function extendSubscription(pubkey: string) {
         notifyError("Creator has not published a Nutzap profile (kind-10019)");
         return;
       }
-      const receipts = await nutzap.send({
+      const newTokens = await nutzap.send({
         npub: pubkey,
         months,
         amount: row.monthly,
         startDate,
+        intervalDays: sub.intervalDays,
       });
-      receiptList.value = receipts as any[];
+      receiptList.value = newTokens as any[];
       showReceiptDialog.value = true;
-      showToast(t("SubscriptionsOverview.notifications.extend_success"), "positive");
+      const newSubId = newTokens[0]?.subscriptionId;
+      if (newSubId) {
+        await subscriptionsStore.deleteSubscription(newSubId);
+      }
+      const totalMonths = sub.intervals.length + newTokens.length;
+      const existingIntervals = sub.intervals.map((i, idx) => ({
+        ...i,
+        monthIndex: idx + 1,
+        totalMonths,
+      }));
+      const addedIntervals = newTokens.map((t: any, idx: number) => ({
+        intervalKey: String(sub.intervals.length + idx + 1),
+        lockedTokenId: t.id,
+        unlockTs: t.unlockTs,
+        status: "pending",
+        tokenString: t.tokenString,
+        autoRedeem: false,
+        redeemed: false,
+        subscriptionId: sub.id,
+        tierId: sub.tierId,
+        monthIndex: sub.intervals.length + idx + 1,
+        totalMonths,
+        htlcHash: t.htlcHash ?? null,
+        htlcSecret: t.htlcSecret ?? null,
+      }));
+      await cashuDb.lockedTokens.bulkPut(
+        newTokens.map((t: any, idx: number) => ({
+          ...t,
+          tierId: sub.tierId,
+          subscriptionId: sub.id,
+          monthIndex: sub.intervals.length + idx + 1,
+          totalMonths,
+        }))
+      );
+      await subscriptionsStore.addSubscription({
+        ...sub,
+        id: sub.id,
+        commitmentLength: totalMonths,
+        intervals: [...existingIntervals, ...addedIntervals],
+      } as any);
+      showToast(
+        t("SubscriptionsOverview.notifications.extend_success"),
+        "positive"
+      );
     } catch (e: any) {
-      showToast(e.message, 'negative');
+      showToast(e.message, "negative");
     }
   });
 }
