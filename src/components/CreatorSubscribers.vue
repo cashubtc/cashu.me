@@ -107,7 +107,7 @@
       </template>
       <template #no-data>
         <div class="full-width column items-center q-pa-md">
-          <div>{{ t("CreatorSubscribers.noData") }}</div>
+          <div>{{ t('CreatorSubscribers.noData') }}</div>
           <q-btn
             flat
             color="primary"
