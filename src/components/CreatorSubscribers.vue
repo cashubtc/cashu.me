@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="row q-mb-md">
+    <div class="row q-mb-md q-gutter-sm">
       <q-input
         v-model="filter"
         dense
@@ -14,12 +14,30 @@
           <q-icon name="search" />
         </template>
       </q-input>
+      <q-select
+        v-model="tierFilter"
+        :options="tierOptions"
+        dense
+        outlined
+        clearable
+        :label="t('CreatorSubscribers.columns.tier')"
+        class="col-3"
+      />
+      <q-select
+        v-model="statusFilter"
+        :options="statusOptions"
+        dense
+        outlined
+        clearable
+        :label="t('CreatorSubscribers.columns.status')"
+        class="col-3"
+      />
     </div>
     <q-table
       flat
       bordered
       row-key="subscriptionId"
-      :rows="subscriptions"
+      :rows="filteredSubscriptions"
       :columns="columns"
       :filter="filter"
       v-model:pagination="pagination"
@@ -90,6 +108,8 @@ const { subscriptions, loading } = storeToRefs(store);
 const { t } = useI18n();
 
 const filter = ref("");
+const tierFilter = ref<string | null>(null);
+const statusFilter = ref<string | null>(null);
 const pagination = ref({
   page: 1,
   rowsPerPage: 5,
@@ -131,6 +151,22 @@ const columns = computed(() => [
   },
 ]);
 
+const tierOptions = computed(() => {
+  const set = new Set<string>();
+  for (const sub of subscriptions.value) set.add(sub.tierId);
+  return Array.from(set);
+});
+
+const statusOptions = ["active", "pending"];
+
+const filteredSubscriptions = computed(() =>
+  subscriptions.value.filter(
+    (s) =>
+      (!tierFilter.value || s.tierId === tierFilter.value) &&
+      (!statusFilter.value || s.status === statusFilter.value)
+  )
+);
+
 const profiles = ref<Record<string, any>>({});
 const nostr = useNostrStore();
 
@@ -146,6 +182,10 @@ async function updateProfiles() {
 
 onMounted(updateProfiles);
 watch(subscriptions, updateProfiles);
+
+watch([filter, tierFilter, statusFilter], () => {
+  pagination.value.page = 1;
+});
 
 function pubkeyNpub(hex: string): string {
   try {
