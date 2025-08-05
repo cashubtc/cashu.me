@@ -1595,6 +1595,11 @@ export default {
       tier: "Tier",
       months: "Months",
       status: "Status",
+      actions: "Actions",
+    },
+    actions: {
+      viewProfile: "View profile",
+      sendMessage: "Send message",
     },
     noData: "No subscribers yet",
     findCreators: "Find creators",
