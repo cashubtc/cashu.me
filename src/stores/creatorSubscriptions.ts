@@ -12,6 +12,7 @@ export interface CreatorSubscription {
   totalMonths: number;
   receivedMonths: number;
   status: "pending" | "active";
+  nextRenewal: number | null;
 }
 
 export const useCreatorSubscriptionsStore = defineStore(
@@ -29,7 +30,10 @@ export const useCreatorSubscriptionsStore = defineStore(
         .toArray()
     ).subscribe({
       next: (rows) => {
-        const map = new Map<string, CreatorSubscription>();
+        const map = new Map<
+          string,
+          CreatorSubscription & { latestUnlock: number | null }
+        >();
         for (const row of rows) {
           const id = row.subscriptionId!;
           let sub = map.get(id);
@@ -47,14 +51,34 @@ export const useCreatorSubscriptionsStore = defineStore(
               totalMonths: row.totalMonths || 0,
               receivedMonths: 0,
               status: "pending",
+              nextRenewal: null,
+              latestUnlock: row.unlockTs ?? null,
             };
             map.set(id, sub);
           }
           sub.receivedMonths += 1;
+          if (
+            row.unlockTs != null &&
+            (sub.latestUnlock == null || row.unlockTs > sub.latestUnlock)
+          ) {
+            sub.latestUnlock = row.unlockTs;
+          }
         }
+        const monthSeconds = 30 * 24 * 60 * 60;
         const arr = Array.from(map.values()).map((s) => {
-          if (s.receivedMonths >= s.totalMonths) s.status = "active";
-          return s;
+          const nextRenewal =
+            s.latestUnlock != null ? s.latestUnlock + monthSeconds : null;
+          return {
+            subscriptionId: s.subscriptionId,
+            subscriberNpub: s.subscriberNpub,
+            tierId: s.tierId,
+            tierName: s.tierName,
+            totalMonths: s.totalMonths,
+            receivedMonths: s.receivedMonths,
+            status:
+              s.receivedMonths >= s.totalMonths ? "active" : "pending",
+            nextRenewal,
+          } as CreatorSubscription;
         });
         subscriptions.value = arr;
         loading.value = false;

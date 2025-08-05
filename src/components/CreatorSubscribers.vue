@@ -84,22 +84,33 @@
       </template>
       <template #body-cell-months="props">
         <q-td :props="props">
-          <div class="row items-center no-wrap">
-            <q-linear-progress
-              :value="
-                props.row.totalMonths
-                  ? props.row.receivedMonths / props.row.totalMonths
-                  : 0
-              "
-              color="primary"
-              style="width: 100px"
-            >
+          <div class="column">
+            <div>
+              {{
+                t("CreatorSubscribers.monthsText", {
+                  received: props.row.receivedMonths,
+                  total: props.row.totalMonths,
+                })
+              }}
+              <span v-if="props.row.totalMonths">
+                (
+                {{
+                  Math.round(
+                    (props.row.receivedMonths / props.row.totalMonths) * 100,
+                  )
+                }}%
+                )
+              </span>
               <q-tooltip>
-                {{ props.row.receivedMonths }} / {{ props.row.totalMonths }}
+                {{ t("CreatorSubscribers.monthsTooltip") }}
               </q-tooltip>
-            </q-linear-progress>
-            <div class="q-ml-sm text-caption">
-              {{ props.row.receivedMonths }} / {{ props.row.totalMonths }}
+            </div>
+            <div v-if="props.row.nextRenewal" class="text-caption">
+              {{
+                t("CreatorSubscribers.nextRenewal", {
+                  date: formatTs(props.row.nextRenewal),
+                })
+              }}
             </div>
           </div>
         </q-td>
@@ -175,24 +186,35 @@
                     {{ t("CreatorSubscribers.columns.months") }}
                   </q-item-label>
                   <q-item-label>
-                    <div class="row items-center no-wrap">
-                      <q-linear-progress
-                        :value="
-                          props.row.totalMonths
-                            ? props.row.receivedMonths / props.row.totalMonths
-                            : 0
-                        "
-                        color="primary"
-                        style="width: 100px"
+                    <div>
+                      {{
+                        t("CreatorSubscribers.monthsText", {
+                          received: props.row.receivedMonths,
+                          total: props.row.totalMonths,
+                        })
+                      }}
+                      <span v-if="props.row.totalMonths">
+                        (
+                        {{
+                          Math.round(
+                            (props.row.receivedMonths / props.row.totalMonths) *
+                              100,
+                          )
+                        }}%
+                        )
+                      </span>
+                      <q-tooltip>
+                        {{ t("CreatorSubscribers.monthsTooltip") }}
+                      </q-tooltip>
+                      <div
+                        v-if="props.row.nextRenewal"
+                        class="text-caption"
                       >
-                        <q-tooltip>
-                          {{ props.row.receivedMonths }} /
-                          {{ props.row.totalMonths }}
-                        </q-tooltip>
-                      </q-linear-progress>
-                      <div class="q-ml-sm text-caption">
-                        {{ props.row.receivedMonths }} /
-                        {{ props.row.totalMonths }}
+                        {{
+                          t("CreatorSubscribers.nextRenewal", {
+                            date: formatTs(props.row.nextRenewal),
+                          })
+                        }}
                       </div>
                     </div>
                   </q-item-label>
@@ -429,6 +451,13 @@ function pubkeyNpub(hex: string): string {
   } catch {
     return hex;
   }
+}
+
+function formatTs(ts: number): string {
+  const d = new Date(ts * 1000);
+  return `${d.getFullYear()}-${("0" + (d.getMonth() + 1)).slice(-2)}-${(
+    "0" + d.getDate()
+  ).slice(-2)}`;
 }
 
 function sendMessage(pk: string) {
