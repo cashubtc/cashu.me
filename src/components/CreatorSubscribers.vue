@@ -121,7 +121,7 @@
                 <q-item
                   clickable
                   v-close-popup
-                  :to="`/creator/${pubkeyNpub(props.row.subscriberNpub)}`"
+                  @click="viewProfile(props.row.subscriberNpub)"
                 >
                   <q-item-section>
                     {{ t("CreatorSubscribers.actions.viewProfile") }}
@@ -223,7 +223,7 @@
                     <q-item
                       clickable
                       v-close-popup
-                      :to="`/creator/${pubkeyNpub(props.row.subscriberNpub)}`"
+                      @click="viewProfile(props.row.subscriberNpub)"
                     >
                       <q-item-section>
                         {{ t("CreatorSubscribers.actions.viewProfile") }}
@@ -263,6 +263,10 @@
         </div>
       </template>
     </q-table>
+    <SubscriberProfileDialog
+      v-model="showProfileDialog"
+      :npub="profileNpub"
+    />
   </div>
 </template>
 
@@ -278,6 +282,7 @@ import { useNostrStore } from "stores/nostr";
 import { useMessengerStore } from "stores/messenger";
 import { useQuasar } from "quasar";
 import profileCache from "src/js/profile-cache";
+import SubscriberProfileDialog from "./SubscriberProfileDialog.vue";
 
 const store = useCreatorSubscriptionsStore();
 const { subscriptions, loading } = storeToRefs(store);
@@ -371,6 +376,9 @@ const filteredSubscriptions = computed(() =>
 const profiles = ref<Record<string, any>>({});
 const nostr = useNostrStore();
 
+const showProfileDialog = ref(false);
+const profileNpub = ref("");
+
 async function updateProfiles() {
   const missing: string[] = [];
   const subs = subscriptions.value;
@@ -432,5 +440,10 @@ function sendMessage(pk: string) {
       }
     );
   }
+}
+
+function viewProfile(pk: string) {
+  profileNpub.value = pubkeyNpub(pk);
+  showProfileDialog.value = true;
 }
 </script>
