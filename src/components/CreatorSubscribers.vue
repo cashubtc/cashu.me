@@ -283,6 +283,7 @@ import { useMessengerStore } from "stores/messenger";
 import { useQuasar } from "quasar";
 import profileCache from "src/js/profile-cache";
 import SubscriberProfileDialog from "./SubscriberProfileDialog.vue";
+import { useCreatorsStore } from "stores/creators";
 
 const store = useCreatorSubscriptionsStore();
 const { subscriptions, loading } = storeToRefs(store);
@@ -291,6 +292,7 @@ const { t } = useI18n();
 const router = useRouter();
 const messenger = useMessengerStore();
 const $q = useQuasar();
+const creators = useCreatorsStore();
 const isSmallScreen = computed(() => $q.screen.lt.md);
 
 const showFilters = ref(!isSmallScreen.value);
@@ -409,7 +411,12 @@ async function updateProfiles() {
   }
 }
 
-onMounted(updateProfiles);
+onMounted(() => {
+  updateProfiles();
+  if (!creators.tiersMap[nostr.pubkey]) {
+    creators.fetchTierDefinitions(nostr.pubkey);
+  }
+});
 watch(subscriptions, updateProfiles);
 
 watch([filter, tierFilter, statusFilter, showFilters], () => {

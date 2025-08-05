@@ -158,6 +158,7 @@ export const useNutzapStore = defineStore("nutzap", {
           creatorNpub: creator.pubkey,
           subscriberNpub: ev.pubkey,
           tierId: "nutzap",
+          tierName: "Nutzap",
           intervalKey: ev.id,
           unlockTs,
           status:
@@ -270,6 +271,7 @@ export const useNutzapStore = defineStore("nutzap", {
           creatorNpub: creator.nostrPubkey,
           autoRedeem: false,
           tierId,
+          ...(tierName ? { tierName } : {}),
           intervalKey: String(i + 1),
           unlockTs: unlockDate,
           status:
@@ -426,6 +428,7 @@ export const useNutzapStore = defineStore("nutzap", {
             monthIndex: i + 1,
             totalMonths: months,
             label: "Subscription payment",
+            tierName: "Nutzap",
           };
           lockedTokens.push(entry);
 
@@ -440,6 +443,7 @@ export const useNutzapStore = defineStore("nutzap", {
         await subStore.addSubscription({
           creatorNpub: npub,
           tierId: "nutzap",
+          tierName: "Nutzap",
           creatorP2PK: creatorP2pk,
           mintUrl: mints.activeMintUrl,
         amountPerInterval: amount,

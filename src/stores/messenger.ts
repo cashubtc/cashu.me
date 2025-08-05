@@ -21,6 +21,7 @@ import { cashuDb, type LockedToken } from "./dexie";
 import { DEFAULT_BUCKET_ID } from "./buckets";
 import token from "src/js/token";
 import { subscriptionPayload } from "src/utils/receipt-utils";
+import { useCreatorsStore } from "./creators";
 
 function parseSubscriptionPaymentPayload(
   obj: any
@@ -485,14 +486,21 @@ export const useMessengerStore = defineStore("messenger", {
             htlc_secret: sub.htlc_secret,
           };
           const unlockTs = sub.unlock_time ?? payload.unlockTime ?? 0;
+          const creatorsStore = useCreatorsStore();
+          const myPubkey = useNostrStore().pubkey;
+          const tierName =
+            creatorsStore.tiersMap[myPubkey || ""]?.find(
+              (t) => t.id === payload.tier_id,
+            )?.name;
           const entry: LockedToken = {
             id: uuidv4(),
             tokenString: sub.token,
             amount,
             owner: "creator",
-            creatorNpub: useNostrStore().pubkey,
+            creatorNpub: myPubkey,
             subscriberNpub: event.pubkey,
             tierId: payload.tier_id ?? "",
+            ...(tierName ? { tierName } : {}),
             intervalKey: payload.subscription_id ?? "",
             unlockTs,
             autoRedeem: true,

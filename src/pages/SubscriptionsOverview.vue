@@ -751,6 +751,7 @@ function extendSubscription(pubkey: string) {
         newTokens.map((t: any, idx: number) => ({
           ...t,
           tierId: sub.tierId,
+          ...(sub.tierName ? { tierName: sub.tierName } : {}),
           subscriptionId: sub.id,
           monthIndex: sub.intervals.length + idx + 1,
           totalMonths,

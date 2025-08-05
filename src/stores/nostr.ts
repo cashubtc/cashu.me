@@ -56,6 +56,7 @@ import { v4 as uuidv4 } from "uuid";
 import { useRouter } from "vue-router";
 import { useP2PKStore } from "./p2pk";
 import { watch } from "vue";
+import { useCreatorsStore } from "./creators";
 
 const STORAGE_SECRET = "cashu_ndk_storage_key";
 let cachedKey: CryptoKey | null = null;
@@ -1420,6 +1421,11 @@ export const useNostrStore = defineStore("nostr", {
             ? token.getProofs(decoded).reduce((s, p) => s + p.amount, 0)
             : 0;
           const unlockTs = payload.unlock_time ?? payload.unlockTime ?? 0;
+          const creatorsStore = useCreatorsStore();
+          const tierName =
+            creatorsStore.tiersMap[this.pubkey || ""]?.find(
+              (t) => t.id === payload.tier_id,
+            )?.name;
           const entry: LockedToken = {
             id: uuidv4(),
             tokenString: payload.token,
@@ -1428,6 +1434,7 @@ export const useNostrStore = defineStore("nostr", {
             creatorNpub: this.pubkey,
             subscriberNpub: sender,
             tierId: payload.tier_id ?? "",
+            ...(tierName ? { tierName } : {}),
             intervalKey: payload.subscription_id ?? "",
             unlockTs,
             autoRedeem: true,
