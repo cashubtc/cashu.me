@@ -256,6 +256,7 @@ import { useI18n } from "vue-i18n";
 import { useNostrStore } from "stores/nostr";
 import { useMessengerStore } from "stores/messenger";
 import { useQuasar } from "quasar";
+import profileCache from "src/js/profile-cache";
 
 const store = useCreatorSubscriptionsStore();
 const { subscriptions, loading } = storeToRefs(store);
@@ -342,11 +343,31 @@ const profiles = ref<Record<string, any>>({});
 const nostr = useNostrStore();
 
 async function updateProfiles() {
-  for (const sub of subscriptions.value) {
-    const pk = sub.subscriberNpub;
-    if (!profiles.value[pk]) {
-      const p = await nostr.getProfile(pk);
-      if (p) profiles.value[pk] = p;
+  const missing: string[] = [];
+  const subs = subscriptions.value;
+
+  for (const { subscriberNpub: pk } of subs) {
+    const cached = profileCache.get(pk);
+    if (cached) {
+      profiles.value[pk] = cached;
+    } else if (!profiles.value[pk]) {
+      missing.push(pk);
+    }
+  }
+
+  if (missing.length) {
+    const fetched = await Promise.all(
+      missing.map(async (pk) => {
+        const p = await nostr.getProfile(pk);
+        return [pk, p] as const;
+      })
+    );
+
+    for (const [pk, p] of fetched) {
+      if (p) {
+        profileCache.set(pk, p);
+        profiles.value[pk] = p;
+      }
     }
   }
 }
