@@ -599,13 +599,23 @@ const filteredRows = computed(() => {
 
 function customSort(rows: any[], sortBy: string, descending: boolean) {
   return rows.sort((a, b) => {
-    const x = a[sortBy];
-    const y = b[sortBy];
     let result = 0;
-    if (typeof x === "number" && typeof y === "number") {
-      result = x - y;
+    if (sortBy === "creator") {
+      const profileA = profiles.value[a.creator];
+      const profileB = profiles.value[b.creator];
+      const nameA =
+        profileA?.display_name || profileA?.name || (a.creator as string);
+      const nameB =
+        profileB?.display_name || profileB?.name || (b.creator as string);
+      result = nameA.localeCompare(nameB);
     } else {
-      result = String(x).localeCompare(String(y));
+      const x = a[sortBy];
+      const y = b[sortBy];
+      if (typeof x === "number" && typeof y === "number") {
+        result = x - y;
+      } else {
+        result = String(x).localeCompare(String(y));
+      }
     }
     return descending ? -result : result;
   });
