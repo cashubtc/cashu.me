@@ -237,11 +237,11 @@ export default defineComponent({
       "globalMutexLock",
       "showNumericKeyboard",
     ]),
-    ...mapState(useSettingsStore, ["useNumericKeyboard", "bitcoinPriceCurrency"]),
-    ...mapState(usePriceStore, [
-      "bitcoinPrice",
-      "currentCurrencyPrice",
+    ...mapState(useSettingsStore, [
+      "useNumericKeyboard",
+      "bitcoinPriceCurrency",
     ]),
+    ...mapState(usePriceStore, ["bitcoinPrice", "currentCurrencyPrice"]),
     displayUnit: function () {
       let display = this.formatCurrency(
         this.invoiceData.amount,
