@@ -1583,6 +1583,7 @@ export const messages = {
     discover: "Discover creators",
     view: "View",
     message: "Message",
+    renew: "Renew",
     extend: "Extend",
     export: "Export",
     export_csv: "Export CSV",
@@ -1591,6 +1592,8 @@ export const messages = {
     cancel_confirm_text: "Delete all future locked tokens?",
     extend_dialog_title: "Extend subscription",
     extend_dialog_text: "Number of additional months",
+    soon_unlock: "{ count } subscriptions unlocking within 7 days",
+    soon_badge: "Soon",
     filter: {
       status: "Filter by status",
       bucket: "Filter by bucket",
