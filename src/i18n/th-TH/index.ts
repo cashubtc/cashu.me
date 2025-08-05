@@ -39,10 +39,10 @@ export default {
       send: {
         label: "ส่ง",
       },
-  creatorHub: {
-    publish: "Publish Profile",
-    profileHeader: "Profile details",
-  },
+      creatorHub: {
+        publish: "Publish Profile",
+        profileHeader: "Profile details",
+      },
       swap: {
         label: "แลกเปลี่ยน",
       },
@@ -752,10 +752,10 @@ export default {
         },
       },
     },
-  creatorHub: {
-    publish: "Publish Profile",
-    profileHeader: "Profile details",
-  },
+    creatorHub: {
+      publish: "Publish Profile",
+      profileHeader: "Profile details",
+    },
     swap: {
       title: "แลกเปลี่ยน",
       overline: "การแลกเปลี่ยนระหว่าง Mints",
@@ -773,10 +773,10 @@ export default {
         },
       },
       actions: {
-  creatorHub: {
-    publish: "Publish Profile",
-    profileHeader: "Profile details",
-  },
+        creatorHub: {
+          publish: "Publish Profile",
+          profileHeader: "Profile details",
+        },
         swap: {
           label: "@:global.actions.swap.label",
           in_progress: "@:MintSettings.swap.actions.swap.label",
@@ -970,27 +970,27 @@ export default {
         label_known_mint: "@:ReceiveTokenDialog.actions.receive.label",
         label_adding_mint: "กำลังเพิ่ม Mint…",
       },
-  creatorHub: {
-    publish: "Publish Profile",
-    profileHeader: "Profile details",
-  },
+      creatorHub: {
+        publish: "Publish Profile",
+        profileHeader: "Profile details",
+      },
       swap: {
         label: "@:global.actions.swap.label",
         tooltip_text: "แลกเปลี่ยนไปยัง Mint ที่เชื่อถือได้",
         caption: "แลกเปลี่ยน { value }",
       },
-  creatorHub: {
-    publish: "Publish Profile",
-    profileHeader: "Profile details",
-  },
+      creatorHub: {
+        publish: "Publish Profile",
+        profileHeader: "Profile details",
+      },
       cancel_swap: {
         label: "@:global.actions.cancel.label",
         tooltip_text: "ยกเลิกการแลกเปลี่ยน",
       },
-  creatorHub: {
-    publish: "Publish Profile",
-    profileHeader: "Profile details",
-  },
+      creatorHub: {
+        publish: "Publish Profile",
+        profileHeader: "Profile details",
+      },
       confirm_swap: {
         label: "@:ReceiveTokenDialog.actions.swap.label",
         tooltip_text: "@:ReceiveTokenDialog.actions.swap.tooltip_text",
@@ -1501,31 +1501,38 @@ export default {
         },
         settings: {
           fan: "Add / switch mints, choose display unit, set language & theme, import or back-up your 12-word seed, manage Nostr keys & relays.",
-          creator: "Same, plus Publishing settings: toggle automatic NIP-61 profile updates and set a default “Earnings” bucket.",
+          creator:
+            "Same, plus Publishing settings: toggle automatic NIP-61 profile updates and set a default “Earnings” bucket.",
         },
         findCreators: {
           fan: "Search or browse Nostr-indexed profiles. View tier prices, previews and public posts. Hit Subscribe or Zap with a single tap.",
-          creator: "Your public storefront as seen by visitors. Great for a quick audit of how your profile appears worldwide.",
+          creator:
+            "Your public storefront as seen by visitors. Great for a quick audit of how your profile appears worldwide.",
         },
         creatorHub: {
           fan: "— (hidden unless you toggle “Creator Mode”)",
-          creator: "Define or edit tiers (price, duration, perks), upload cover art, publish pay-walled posts, check revenue analytics and subscriber list.",
+          creator:
+            "Define or edit tiers (price, duration, perks), upload cover art, publish pay-walled posts, check revenue analytics and subscriber list.",
         },
         myProfile: {
           fan: "Show off your avatar, npub link and optional NIP-05. Personal stats: total zaps sent & received, bucket balances.",
-          creator: "Same card plus Edit. Update bio, tags and the secondary P2PK key used by fans to send you locked tokens.",
+          creator:
+            "Same card plus Edit. Update bio, tags and the secondary P2PK key used by fans to send you locked tokens.",
         },
         buckets: {
           fan: "Drag-and-drop jars for budgeting (“Groceries”, “Fun money”, “Subs”). Move sats with zero fees.",
-          creator: "Create an “Income” bucket that auto-receives new tips; split out taxes or savings instantly.",
+          creator:
+            "Create an “Income” bucket that auto-receives new tips; split out taxes or savings instantly.",
         },
         subscriptions: {
           fan: "See every active plan: tier name, next renewal, cumulative sats spent. Cancel or renew with one click.",
-          creator: "Quick list of paying supporters, tier breakdown, churn alerts and pending renewals.",
+          creator:
+            "Quick list of paying supporters, tier breakdown, churn alerts and pending renewals.",
         },
         chats: {
           fan: "End-to-end encrypted DMs (Nostr kind 4). Attach images or Cashu tokens. Green flash means a payment is embedded and auto-redeemed on receipt.",
-          creator: "Same powerful chat plus a broadcast toggle to message all subs in a tier at once.",
+          creator:
+            "Same powerful chat plus a broadcast toggle to message all subs in a tier at once.",
         },
         restore: {
           fan: "Recover your wallet from a 12-word seed.",
@@ -1566,5 +1573,7 @@ export default {
       months: "Months",
       status: "Status",
     },
+    noData: "No subscribers yet",
+    findCreators: "Find creators",
   },
 };
