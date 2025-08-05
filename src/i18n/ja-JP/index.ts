@@ -1581,6 +1581,10 @@ export default {
       viewProfile: "View profile",
       sendMessage: "Send message",
     },
+    status: {
+      active: "アクティブ",
+      pending: "保留中",
+    },
     noData: "No subscribers yet",
     shareProfile: "Share your profile",
   },

@@ -1578,6 +1578,10 @@ export default {
       viewProfile: "View profile",
       sendMessage: "Send message",
     },
+    status: {
+      active: "ใช้งาน",
+      pending: "รอดำเนินการ",
+    },
     noData: "No subscribers yet",
     shareProfile: "Share your profile",
   },

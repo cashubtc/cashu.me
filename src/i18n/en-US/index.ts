@@ -1648,6 +1648,10 @@ export const messages = {
       viewProfile: "View profile",
       sendMessage: "Send message",
     },
+    status: {
+      active: "Active",
+      pending: "Pending",
+    },
     noData: "No subscribers yet",
     shareProfile: "Share your profile",
   },

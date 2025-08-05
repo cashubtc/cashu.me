@@ -217,7 +217,10 @@ const tierOptions = computed(() => {
   return Array.from(set).map((tierName) => ({ label: tierName, value: tierName }));
 });
 
-const statusOptions = ["active", "pending"];
+const statusOptions = computed(() => [
+  { label: t("CreatorSubscribers.status.active"), value: "active" },
+  { label: t("CreatorSubscribers.status.pending"), value: "pending" },
+]);
 
 const filteredSubscriptions = computed(() =>
   subscriptions.value.filter(
