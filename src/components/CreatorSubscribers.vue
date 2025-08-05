@@ -93,7 +93,7 @@
           <q-badge
             :color="props.row.status === 'active' ? 'positive' : 'warning'"
           >
-            {{ t('CreatorSubscribers.status.' + props.row.status) }}
+            {{ t("CreatorSubscribers.status." + props.row.status) }}
           </q-badge>
         </q-td>
       </template>
@@ -148,7 +148,7 @@
               <q-item>
                 <q-item-section>
                   <q-item-label caption>
-                    {{ t('CreatorSubscribers.columns.tier') }}
+                    {{ t("CreatorSubscribers.columns.tier") }}
                   </q-item-label>
                   <q-item-label>{{ props.row.tierName }}</q-item-label>
                 </q-item-section>
@@ -156,7 +156,7 @@
               <q-item>
                 <q-item-section>
                   <q-item-label caption>
-                    {{ t('CreatorSubscribers.columns.months') }}
+                    {{ t("CreatorSubscribers.columns.months") }}
                   </q-item-label>
                   <q-item-label>
                     <div class="row items-center no-wrap">
@@ -185,7 +185,7 @@
               <q-item>
                 <q-item-section>
                   <q-item-label caption>
-                    {{ t('CreatorSubscribers.columns.status') }}
+                    {{ t("CreatorSubscribers.columns.status") }}
                   </q-item-label>
                   <q-item-label>
                     <q-badge
@@ -193,7 +193,7 @@
                         props.row.status === 'active' ? 'positive' : 'warning'
                       "
                     >
-                      {{ t('CreatorSubscribers.status.' + props.row.status) }}
+                      {{ t("CreatorSubscribers.status." + props.row.status) }}
                     </q-badge>
                   </q-item-label>
                 </q-item-section>
@@ -210,7 +210,7 @@
                       :to="`/creator/${pubkeyNpub(props.row.subscriberNpub)}`"
                     >
                       <q-item-section>
-                        {{ t('CreatorSubscribers.actions.viewProfile') }}
+                        {{ t("CreatorSubscribers.actions.viewProfile") }}
                       </q-item-section>
                     </q-item>
                     <q-item
@@ -219,7 +219,7 @@
                       @click="sendMessage(props.row.subscriberNpub)"
                     >
                       <q-item-section>
-                        {{ t('CreatorSubscribers.actions.sendMessage') }}
+                        {{ t("CreatorSubscribers.actions.sendMessage") }}
                       </q-item-section>
                     </q-item>
                   </q-list>
@@ -229,9 +229,14 @@
           </q-card>
         </div>
       </template>
+      <template #loading>
+        <q-inner-loading showing>
+          <q-spinner color="primary" />
+        </q-inner-loading>
+      </template>
       <template #no-data>
         <div class="full-width column items-center q-pa-md">
-          <div>{{ t('CreatorSubscribers.noData') }}</div>
+          <div>{{ t("CreatorSubscribers.noData") }}</div>
           <q-btn
             flat
             color="primary"
@@ -323,7 +328,10 @@ const tierOptions = computed(() => {
   for (const sub of subscriptions.value) {
     set.add(sub.tierName);
   }
-  return Array.from(set).map((tierName) => ({ label: tierName, value: tierName }));
+  return Array.from(set).map((tierName) => ({
+    label: tierName,
+    value: tierName,
+  }));
 });
 
 const statusOptions = computed(() => [
