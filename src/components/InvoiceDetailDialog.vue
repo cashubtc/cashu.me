@@ -22,6 +22,20 @@
         <div class="row items-center no-wrap q-mb-sm q-pr-md q-py-lg">
           <div class="col-10">
             <span class="text-h6">{{ $t("InvoiceDetailDialog.title") }}</span>
+            <span
+              v-if="invoiceData.amount && bitcoinPrice && activeUnit == 'sat'"
+              class="q-ml-xs text-subtitle2 text-grey-6"
+            >
+              ({{
+                formatCurrency(
+                  (currentCurrencyPrice / 100000000) *
+                    invoiceData.amount *
+                    activeUnitCurrencyMultiplyer,
+                  bitcoinPriceCurrency,
+                  true
+                )
+              }})
+            </span>
           </div>
         </div>
         <div class="row items-center no-wrap q-my-sm q-py-none">
@@ -179,6 +193,7 @@ import { getShortUrl } from "src/js/wallet-helpers";
 import { useWorkersStore } from "src/stores/workers";
 import { useMintsStore } from "src/stores/mints";
 import { useSettingsStore } from "../stores/settings";
+import { usePriceStore } from "src/stores/price";
 import NumericKeyboard from "components/NumericKeyboard.vue";
 
 export default defineComponent({
@@ -222,7 +237,11 @@ export default defineComponent({
       "globalMutexLock",
       "showNumericKeyboard",
     ]),
-    ...mapState(useSettingsStore, ["useNumericKeyboard"]),
+    ...mapState(useSettingsStore, [
+      "useNumericKeyboard",
+      "bitcoinPriceCurrency",
+    ]),
+    ...mapState(usePriceStore, ["bitcoinPrice", "currentCurrencyPrice"]),
     displayUnit: function () {
       let display = this.formatCurrency(
         this.invoiceData.amount,
