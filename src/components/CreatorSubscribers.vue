@@ -145,6 +145,26 @@
         </q-card>
       </div>
     </div>
+    <div
+      v-if="selected.length"
+      class="row q-gutter-sm q-mb-md"
+      :class="{ column: isSmallScreen }"
+    >
+      <q-btn
+        color="primary"
+        icon="chat"
+        :label="t('CreatorSubscribers.actions.sendGroupMessage')"
+        @click="sendGroupMessage"
+        class="q-mb-sm"
+      />
+      <q-btn
+        color="primary"
+        icon="download"
+        :label="t('CreatorSubscribers.actions.exportSelected')"
+        @click="exportSelected"
+        class="q-mb-sm"
+      />
+    </div>
     <q-table
       flat
       bordered
@@ -152,6 +172,8 @@
       :rows="filteredSubscriptions"
       :columns="columns"
       :filter="filter"
+      selection="multiple"
+      v-model:selected="selected"
       v-model:pagination="pagination"
       :loading="loading"
       :rows-per-page-options="[5, 10, 20]"
@@ -250,7 +272,17 @@
       </template>
       <template v-if="isSmallScreen" #item="props">
         <div class="q-pa-xs col-12">
-          <q-card>
+          <q-card
+            class="relative-position"
+            :class="props.selected ? 'bg-grey-2' : ''"
+          >
+            <q-checkbox
+              class="absolute-top-right q-ma-sm"
+              dense
+              v-model="props.selected"
+              @update:model-value="props.toggleSelection"
+              @click.stop
+            />
             <q-card-section class="row items-center no-wrap">
               <q-avatar size="32px">
                 <template v-if="profiles[props.row.subscriberNpub] === undefined">
@@ -377,7 +409,7 @@
             </q-list>
             <q-separator />
             <q-card-actions align="right">
-              <q-btn flat dense round icon="more_vert">
+              <q-btn flat dense round icon="more_vert" @click.stop>
                 <q-menu>
                   <q-list style="min-width: 120px">
                     <q-item
@@ -480,6 +512,8 @@ const pagination = ref({
   sortBy: "subscriber",
   descending: false,
 });
+
+const selected = ref<any[]>([]);
 
 const columns = computed(() => [
   {
@@ -734,5 +768,75 @@ function downloadCsv() {
   a.download = "subscribers.csv";
   a.click();
   URL.revokeObjectURL(url);
+}
+
+function exportSelected() {
+  const headers = [
+    t("CreatorSubscribers.columns.subscriber"),
+    t("CreatorSubscribers.columns.tier"),
+    t("CreatorSubscribers.columns.start"),
+    t("CreatorSubscribers.columns.nextRenewal"),
+    t("CreatorSubscribers.columns.months"),
+    t("CreatorSubscribers.columns.remaining"),
+    t("CreatorSubscribers.columns.status"),
+  ];
+  const lines = [headers.join(",")];
+  for (const sub of selected.value) {
+    const subscriber =
+      profiles.value[sub.subscriberNpub]?.display_name ||
+      profiles.value[sub.subscriberNpub]?.name ||
+      pubkeyNpub(sub.subscriberNpub);
+    const start = sub.startDate ? formatTs(sub.startDate) : "";
+    const next = sub.nextRenewal ? formatTs(sub.nextRenewal) : "";
+    const months = `${sub.receivedMonths}/${sub.totalMonths ?? ""}`;
+    const remaining =
+      (sub.totalMonths ?? sub.receivedMonths) - sub.receivedMonths;
+    const status = t(`CreatorSubscribers.status.${sub.status}`);
+    const row = [
+      subscriber,
+      sub.tierName,
+      start,
+      next,
+      months,
+      remaining,
+      status,
+    ].map((v) => `"${String(v).replace(/"/g, '""')}"`).join(",");
+    lines.push(row);
+  }
+  const csv = lines.join("\n");
+  const blob = new Blob([csv], { type: "text/csv" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "subscribers.csv";
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function sendGroupMessage() {
+  $q.dialog({
+    title: t('CreatorSubscribers.actions.sendGroupMessage'),
+    prompt: {
+      model: '',
+      type: 'textarea',
+      label: t('CreatorSubscribers.actions.sendMessage'),
+    },
+    cancel: true,
+    persistent: true,
+  }).onOk(async (val: string) => {
+    const recipients = selected.value.slice();
+    for (const sub of recipients) {
+      try {
+        await messenger.sendDm(sub.subscriberNpub, val);
+      } catch (e) {
+        console.error(e);
+      }
+    }
+    $q.notify({
+      type: 'positive',
+      message: `Sent to ${recipients.length} subscribers`,
+    });
+    selected.value = [];
+  });
 }
 </script>

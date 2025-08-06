@@ -1593,6 +1593,8 @@ export default {
       viewProfile: "View profile",
       sendMessage: "Send message",
       downloadCsv: "Download CSV",
+      sendGroupMessage: "Send group message",
+      exportSelected: "Export selected",
     },
     status: {
       active: "Aktif",
