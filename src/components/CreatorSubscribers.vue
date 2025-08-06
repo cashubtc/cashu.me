@@ -45,12 +45,13 @@
       flat
       bordered
       row-key="subscriptionId"
-      :rows="filteredSubscriptions"
+      :rows="paginatedSubscriptions"
+      :row-count="filteredSubscriptions.length"
       :columns="columns"
-      :filter="filter"
       selection="multiple"
       v-model:selected="selected"
-      v-model:pagination="pagination"
+      :pagination="pagination"
+      @request="onRequest"
       :loading="loading"
       :rows-per-page-options="[5, 10, 20]"
       :grid="isSmallScreen"
@@ -489,7 +490,14 @@ const filteredSubscriptions = computed(() =>
     const start = s.startDate ?? 0;
     const next = s.nextRenewal ?? 0;
     const remaining = (s.totalMonths ?? s.receivedMonths) - s.receivedMonths;
+    const text = filter.value.toLowerCase();
+    const matchesText =
+      !text ||
+      s.subscriberNpub.toLowerCase().includes(text) ||
+      s.tierName.toLowerCase().includes(text) ||
+      s.status.toLowerCase().includes(text);
     return (
+      matchesText &&
       (!tierFilter.value || s.tierName === tierFilter.value) &&
       (!statusFilter.value || s.status === statusFilter.value) &&
       (!startFromTs.value || start >= startFromTs.value) &&
@@ -500,6 +508,17 @@ const filteredSubscriptions = computed(() =>
     );
   })
 );
+
+const paginatedSubscriptions = computed(() => {
+  const { page, rowsPerPage } = pagination.value;
+  const start = (page - 1) * rowsPerPage;
+  const end = start + rowsPerPage;
+  return filteredSubscriptions.value.slice(start, end);
+});
+
+function onRequest(props: { pagination: any }) {
+  pagination.value = props.pagination;
+}
 
 const totalActiveSubscribers = computed(
   () => filteredSubscriptions.value.filter((s) => s.status === "active").length

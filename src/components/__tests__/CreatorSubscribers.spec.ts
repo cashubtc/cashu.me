@@ -224,6 +224,8 @@ describe('CreatorSubscribers.vue', () => {
     expect(qMock.notify).toHaveBeenCalledTimes(1);
     // resolve all pending sendDm promises
     resolvers.forEach((r) => r());
+    await nextTick();
+    await nextTick();
     await Promise.resolve();
     await Promise.resolve();
     expect(notifyUpdate).toHaveBeenCalledWith(
@@ -252,6 +254,47 @@ describe('CreatorSubscribers.vue', () => {
       wrapper.vm.selected,
       'subscribers.csv',
     );
+  });
+
+  it('paginates and keeps selection across pages for large datasets', async () => {
+    subscriptions.value = Array.from({ length: 50 }, (_, i) => ({
+      subscriptionId: `sub${i}`,
+      subscriberNpub: `pk${i}`,
+      tierName: 'Gold',
+      startDate: 1,
+      nextRenewal: 2,
+      receivedMonths: 1,
+      totalMonths: 3,
+      totalAmount: 1000,
+      status: 'active',
+    }));
+
+    const wrapper = mount(CreatorSubscribers);
+    await nextTick();
+
+    // first page shows limited rows
+    let rows = wrapper.findAll('tbody tr');
+    expect(rows).toHaveLength(5);
+    expect(wrapper.vm.paginatedSubscriptions[0].subscriptionId).toBe('sub0');
+
+    // select first row on page 1
+    wrapper.vm.selected = [wrapper.vm.paginatedSubscriptions[0]];
+
+    // go to page 2
+    wrapper.vm.onRequest({ pagination: { ...wrapper.vm.pagination, page: 2 } });
+    await nextTick();
+
+    rows = wrapper.findAll('tbody tr');
+    expect(rows).toHaveLength(5);
+    expect(wrapper.vm.paginatedSubscriptions[0].subscriptionId).toBe('sub5');
+
+    // select first row on page 2
+    wrapper.vm.selected.push(wrapper.vm.paginatedSubscriptions[0]);
+    expect(wrapper.vm.selected).toHaveLength(2);
+    expect(wrapper.vm.selected.map((s: any) => s.subscriptionId)).toEqual([
+      'sub0',
+      'sub5',
+    ]);
   });
 
   it('mounts filter and summary components', () => {
