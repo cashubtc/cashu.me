@@ -1,150 +1,26 @@
 <template>
   <div>
-    <div class="q-mb-md">
-      <div class="row q-gutter-sm q-mb-sm">
-        <q-btn
-          v-if="isSmallScreen"
-          flat
-          color="primary"
-          icon="filter_list"
-          label="Filters"
-          @click="showFilters = !showFilters"
-        />
-        <q-btn
-          flat
-          color="primary"
-          icon="download"
-          :label="t('CreatorSubscribers.actions.downloadCsv')"
-          @click="downloadCsv"
-        />
-      </div>
-      <q-slide-transition>
-        <div v-show="!isSmallScreen || showFilters" class="row q-gutter-sm">
-          <q-input
-            v-model="filter"
-            dense
-            outlined
-            debounce="300"
-            clearable
-            :placeholder="$t('CreatorSubscribers.filter.placeholder')"
-            class="col"
-          >
-            <template #prepend>
-              <q-icon name="search" />
-            </template>
-          </q-input>
-          <q-select
-            v-model="tierFilter"
-            :options="tierOptions"
-            dense
-            outlined
-            clearable
-            emit-value
-            map-options
-            :label="t('CreatorSubscribers.columns.tier')"
-            class="col-3"
-          />
-          <q-select
-            v-model="statusFilter"
-            :options="statusOptions"
-            dense
-            outlined
-            clearable
-            :label="t('CreatorSubscribers.columns.status')"
-            class="col-3"
-          />
-          <q-input
-            v-model="startFrom"
-            type="date"
-            dense
-            outlined
-            clearable
-            :label="t('CreatorSubscribers.filter.startFrom')"
-            class="col-3"
-          >
-            <q-tooltip>{{ t("CreatorSubscribers.startTooltip") }}</q-tooltip>
-          </q-input>
-          <q-input
-            v-model="startTo"
-            type="date"
-            dense
-            outlined
-            clearable
-            :label="t('CreatorSubscribers.filter.startTo')"
-            class="col-3"
-          >
-            <q-tooltip>{{ t("CreatorSubscribers.startTooltip") }}</q-tooltip>
-          </q-input>
-          <q-input
-            v-model="nextRenewalFrom"
-            type="date"
-            dense
-            outlined
-            clearable
-            :label="t('CreatorSubscribers.filter.nextRenewalFrom')"
-            class="col-3"
-          >
-            <q-tooltip>{{
-              t("CreatorSubscribers.nextRenewalTooltip")
-            }}</q-tooltip>
-          </q-input>
-          <q-input
-            v-model="nextRenewalTo"
-            type="date"
-            dense
-            outlined
-            clearable
-            :label="t('CreatorSubscribers.filter.nextRenewalTo')"
-            class="col-3"
-          >
-            <q-tooltip>{{
-              t("CreatorSubscribers.nextRenewalTooltip")
-            }}</q-tooltip>
-          </q-input>
-          <q-input
-            v-model.number="monthsRemaining"
-            type="number"
-            dense
-            outlined
-            clearable
-            :label="t('CreatorSubscribers.filter.monthsRemaining')"
-            class="col-3"
-          >
-            <q-tooltip>{{
-              t("CreatorSubscribers.monthsRemainingTooltip")
-            }}</q-tooltip>
-          </q-input>
-        </div>
-      </q-slide-transition>
-    </div>
-    <div class="row q-col-gutter-md q-mb-md">
-      <div class="col-12 col-sm-4">
-        <q-card flat bordered class="q-pa-sm text-center">
-          <div class="text-h6">{{ totalActiveSubscribers }}</div>
-          <div class="text-caption">
-            {{ t('CreatorSubscribers.summary.activeSubscribers') }}
-          </div>
-        </q-card>
-      </div>
-      <div class="col-12 col-sm-4">
-        <q-card flat bordered class="q-pa-sm text-center">
-          <div class="text-h6">{{ totalReceivedMonths }}</div>
-          <div class="text-caption">
-            {{ t('CreatorSubscribers.summary.receivedMonths') }}
-          </div>
-        </q-card>
-      </div>
-      <div class="col-12 col-sm-4">
-        <q-card flat bordered class="q-pa-sm text-center">
-          <div class="text-h6">
-            {{ formatCurrency(totalRevenue) }}
-          </div>
-          <div class="text-caption">
-            {{ t('CreatorSubscribers.summary.revenue') }}
-          </div>
-        </q-card>
-      </div>
-    </div>
+    <CreatorSubscribersFilters
+      v-model:filter="filter"
+      v-model:tierFilter="tierFilter"
+      v-model:statusFilter="statusFilter"
+      v-model:startFrom="startFrom"
+      v-model:startTo="startTo"
+      v-model:nextRenewalFrom="nextRenewalFrom"
+      v-model:nextRenewalTo="nextRenewalTo"
+      v-model:monthsRemaining="monthsRemaining"
+      :tier-options="tierOptions"
+      :status-options="statusOptions"
+      :is-small-screen="isSmallScreen"
+      v-model:showFilters="showFilters"
+      @download-csv="downloadCsv"
+    />
+    <CreatorSubscribersSummary
+      :total-active-subscribers="totalActiveSubscribers"
+      :total-received-months="totalReceivedMonths"
+      :total-revenue="totalRevenue"
+      :format-currency="formatCurrency"
+    />
     <div
       v-if="selected.length"
       class="row q-gutter-sm q-mb-md"
@@ -472,6 +348,8 @@ import { useMessengerStore } from "stores/messenger";
 import { useQuasar } from "quasar";
 import profileCache from "src/js/profile-cache";
 import SubscriberProfileDialog from "./SubscriberProfileDialog.vue";
+import CreatorSubscribersFilters from "./CreatorSubscribersFilters.vue";
+import CreatorSubscribersSummary from "./CreatorSubscribersSummary.vue";
 import { useCreatorsStore } from "stores/creators";
 import { useUiStore } from "stores/ui";
 import { useMintsStore } from "stores/mints";
