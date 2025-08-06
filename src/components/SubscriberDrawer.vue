@@ -1,46 +1,68 @@
 <template>
-  <q-drawer v-model="model" side="right" overlay :width="320" class="column">
-    <q-toolbar>
-      <q-btn flat round dense icon="close" @click="close" />
-      <q-toolbar-title>{{ displayName }}</q-toolbar-title>
-    </q-toolbar>
-    <q-scroll-area class="col">
-      <div class="q-pa-md">
-        <q-avatar size="64px" class="q-mb-md">
-          <template v-if="profile?.picture">
-            <img :src="profile.picture" />
-          </template>
-          <template v-else>
-            <div class="placeholder text-white">{{ initials }}</div>
-          </template>
-        </q-avatar>
-        <div v-if="profile?.about" class="text-body2 q-mb-md">
-          {{ profile.about }}
+  <div>
+    <div
+      v-if="model"
+      class="fixed inset-0 bg-black/50 z-40"
+      @click="close"
+    ></div>
+    <div
+      class="fixed top-0 right-0 h-full w-80 bg-white z-50 flex flex-col transform transition-transform duration-300"
+      :class="model ? 'translate-x-0' : 'translate-x-full'"
+    >
+      <q-toolbar>
+        <q-btn flat round dense icon="close" @click="close" />
+        <q-toolbar-title>{{ displayName }}</q-toolbar-title>
+      </q-toolbar>
+      <div class="flex-1 overflow-y-auto">
+        <div class="p-4">
+          <q-avatar size="64px" class="mb-4">
+            <template v-if="profile?.picture">
+              <img :src="profile.picture" />
+            </template>
+            <template v-else>
+              <div class="placeholder text-white">{{ initials }}</div>
+            </template>
+          </q-avatar>
+          <div v-if="profile?.about" class="text-body2 mb-4">
+            {{ profile.about }}
+          </div>
+          <q-list dense>
+            <q-item v-if="followers !== null">
+              <q-item-section>Followers</q-item-section>
+              <q-item-section side>{{ followers }}</q-item-section>
+            </q-item>
+            <q-item v-if="following !== null">
+              <q-item-section>Following</q-item-section>
+              <q-item-section side>{{ following }}</q-item-section>
+            </q-item>
+            <q-item v-if="latestNote">
+              <q-item-section>
+                <div class="text-subtitle1 mb-2">Most Recent Note</div>
+                <div class="text-body2">{{ latestNote }}</div>
+              </q-item-section>
+            </q-item>
+          </q-list>
         </div>
-        <q-list dense>
-          <q-item v-if="followers !== null">
-            <q-item-section>Followers</q-item-section>
-            <q-item-section side>{{ followers }}</q-item-section>
-          </q-item>
-          <q-item v-if="following !== null">
-            <q-item-section>Following</q-item-section>
-            <q-item-section side>{{ following }}</q-item-section>
-          </q-item>
-          <q-item v-if="latestNote">
-            <q-item-section>
-              <div class="text-subtitle1 q-mb-xs">Most Recent Note</div>
-              <div class="text-body2">{{ latestNote }}</div>
-            </q-item-section>
-          </q-item>
-        </q-list>
       </div>
-    </q-scroll-area>
-    <div class="q-pa-md column q-gutter-sm">
-      <q-btn color="primary" icon="chat" label="Send DM" class="full-width" @click="openSendDialog" />
-      <q-btn color="primary" icon="content_copy" label="Copy npub" class="full-width" @click="copyNpub" />
+      <div class="p-4 flex flex-col space-y-2">
+        <button
+          class="w-full flex items-center justify-center gap-2 bg-primary text-white py-2 rounded"
+          @click="openSendDialog"
+        >
+          <span class="material-icons">chat</span>
+          <span>Send DM</span>
+        </button>
+        <button
+          class="w-full flex items-center justify-center gap-2 bg-primary text-white py-2 rounded"
+          @click="copyNpub"
+        >
+          <span class="material-icons">content_copy</span>
+          <span>Copy Npub</span>
+        </button>
+      </div>
+      <SendMessageDialog v-model="showSendDialog" @send="sendDm" />
     </div>
-    <SendMessageDialog v-model="showSendDialog" @send="sendDm" />
-  </q-drawer>
+  </div>
 </template>
 
 <script setup lang="ts">
