@@ -1580,6 +1580,7 @@ export default {
       nextRenewalFrom: "Next renewal from",
       nextRenewalTo: "Next renewal to",
       monthsRemaining: "Months remaining",
+      frequency: "頻度でフィルタ",
     },
     columns: {
       subscriber: "Subscriber",

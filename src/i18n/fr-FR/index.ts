@@ -1587,6 +1587,7 @@ export default {
       nextRenewalFrom: "Next renewal from",
       nextRenewalTo: "Next renewal to",
       monthsRemaining: "Months remaining",
+      frequency: "Filtrer par fréquence",
     },
     columns: {
       subscriber: "Subscriber",

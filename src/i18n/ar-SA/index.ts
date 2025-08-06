@@ -1590,6 +1590,7 @@ export default {
       nextRenewalFrom: "Next renewal from",
       nextRenewalTo: "Next renewal to",
       monthsRemaining: "Months remaining",
+      frequency: "تصفية حسب التكرار",
     },
     columns: {
       subscriber: "Subscriber",
