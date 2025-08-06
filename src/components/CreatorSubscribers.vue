@@ -16,7 +16,8 @@
       @download-csv="downloadCsv"
     />
     <CreatorSubscribersSummary
-      :total-active-subscribers="totalActiveSubscribers"
+      :active-count="totalActiveSubscribers"
+      :pending-count="totalPendingSubscribers"
       :total-received-periods="totalReceivedPeriods"
       :total-revenue="totalRevenue"
       :format-currency="formatCurrency"
@@ -210,6 +211,9 @@ const filteredSubscriptions = computed(() =>
 
 const totalActiveSubscribers = computed(
   () => filteredSubscriptions.value.filter((s) => s.status === "active").length
+);
+const totalPendingSubscribers = computed(
+  () => filteredSubscriptions.value.filter((s) => s.status === "pending").length
 );
 const totalReceivedPeriods = computed(() =>
   filteredSubscriptions.value.reduce((sum, s) => sum + s.receivedPeriods, 0)

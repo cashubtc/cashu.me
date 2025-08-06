@@ -1627,7 +1627,9 @@ export default {
       pending: "Σε εκκρεμότητα",
     },
     summary: {
-      activeSubscribers: "Active subscribers",
+      subscribers: "Subscribers",
+      active: "Active",
+      pending: "Pending",
       receivedPeriods: "Received months",
       revenue: "Revenue",
     },

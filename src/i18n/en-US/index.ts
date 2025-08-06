@@ -1674,7 +1674,9 @@ export const messages = {
       pending: "Pending",
     },
     summary: {
-      activeSubscribers: "Active subscribers",
+      subscribers: "Subscribers",
+      active: "Active",
+      pending: "Pending",
       receivedPeriods: "Received months",
       revenue: "Revenue",
     },

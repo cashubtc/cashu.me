@@ -1609,7 +1609,9 @@ export default {
       pending: "Beklemede",
     },
     summary: {
-      activeSubscribers: "Active subscribers",
+      subscribers: "Subscribers",
+      active: "Active",
+      pending: "Pending",
       receivedPeriods: "Received months",
       revenue: "Revenue",
     },
