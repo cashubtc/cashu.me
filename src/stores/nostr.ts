@@ -57,6 +57,7 @@ import { useRouter } from "vue-router";
 import { useP2PKStore } from "./p2pk";
 import { watch } from "vue";
 import { useCreatorsStore } from "./creators";
+import { frequencyToDays } from "src/constants/subscriptionFrequency";
 
 const STORAGE_SECRET = "cashu_ndk_storage_key";
 let cachedKey: CryptoKey | null = null;
@@ -1445,7 +1446,11 @@ export const useNostrStore = defineStore("nostr", {
             subscriptionEventId: null,
             subscriptionId: payload.subscription_id,
             monthIndex: payload.month_index,
-            totalMonths: payload.total_months,
+            totalPeriods: payload.total_months,
+            frequency: (payload as any).frequency || "monthly",
+            intervalDays:
+              (payload as any).interval_days ||
+              frequencyToDays(((payload as any).frequency as any) || "monthly"),
             label: "Subscription payment",
           };
           await cashuDb.lockedTokens.put(entry);

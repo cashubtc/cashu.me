@@ -196,7 +196,7 @@
               track-color="grey-4"
             />
             <div class="row justify-between text-caption q-mt-xs">
-              <div>{{ row.totalMonths - row.monthsLeft }} / {{ row.totalMonths }} months</div>
+              <div>{{ row.totalPeriods - row.monthsLeft }} / {{ row.totalPeriods }} months</div>
               <div>
                 {{
                   row.countdown
@@ -496,10 +496,10 @@ const rows = computed(() => {
     const monthly = sub.amountPerInterval;
     const start = sub.startDate || null;
     const progress = tokens.length ? 1 - monthsLeft / tokens.length : 0;
-    const totalMonths = tokens.length;
+    const totalPeriods = tokens.length;
     const end =
-      start && totalMonths
-        ? start + (totalMonths - 1) * 30 * 24 * 60 * 60
+      start && totalPeriods
+        ? start + (totalPeriods - 1) * 30 * 24 * 60 * 60
         : null;
     const unlocked = tokens.filter(
       (t) => !t.locktime || t.locktime <= nowSec
@@ -517,7 +517,7 @@ const rows = computed(() => {
       countdown,
       monthsLeft,
       progress,
-      totalMonths,
+      totalPeriods,
       end,
       hasUnlocked: unlocked > 0,
       status,
@@ -726,11 +726,11 @@ function extendSubscription(pubkey: string) {
       if (newSubId) {
         await subscriptionsStore.deleteSubscription(newSubId);
       }
-      const totalMonths = sub.intervals.length + newTokens.length;
+      const totalPeriods = sub.intervals.length + newTokens.length;
       const existingIntervals = sub.intervals.map((i, idx) => ({
         ...i,
         monthIndex: idx + 1,
-        totalMonths,
+        totalPeriods,
       }));
       const addedIntervals = newTokens.map((t: any, idx: number) => ({
         intervalKey: String(sub.intervals.length + idx + 1),
@@ -743,7 +743,7 @@ function extendSubscription(pubkey: string) {
         subscriptionId: sub.id,
         tierId: sub.tierId,
         monthIndex: sub.intervals.length + idx + 1,
-        totalMonths,
+        totalPeriods,
         htlcHash: t.htlcHash ?? null,
         htlcSecret: t.htlcSecret ?? null,
       }));
@@ -754,13 +754,13 @@ function extendSubscription(pubkey: string) {
           ...(sub.tierName ? { tierName: sub.tierName } : {}),
           subscriptionId: sub.id,
           monthIndex: sub.intervals.length + idx + 1,
-          totalMonths,
+          totalPeriods,
         }))
       );
       await subscriptionsStore.addSubscription({
         ...sub,
         id: sub.id,
-        commitmentLength: totalMonths,
+        commitmentLength: totalPeriods,
         intervals: [...existingIntervals, ...addedIntervals],
       } as any);
       showToast(

@@ -193,7 +193,7 @@ describe("Nutzap subscriptions", () => {
         subscriptionEventId: null,
         subscriptionId: "sub1",
         monthIndex: 1,
-        totalMonths: 2,
+        totalPeriods: 2,
         label: "Subscription payment",
       },
       {
@@ -209,7 +209,7 @@ describe("Nutzap subscriptions", () => {
         subscriptionEventId: null,
         subscriptionId: "sub1",
         monthIndex: 2,
-        totalMonths: 2,
+        totalPeriods: 2,
         label: "Subscription payment",
       },
       {
@@ -225,7 +225,7 @@ describe("Nutzap subscriptions", () => {
         subscriptionEventId: null,
         subscriptionId: "sub2",
         monthIndex: 1,
-        totalMonths: 3,
+        totalPeriods: 3,
         label: "Subscription payment",
       },
     ] as any);
@@ -233,12 +233,12 @@ describe("Nutzap subscriptions", () => {
     const sub1 = subStore.subscriptions.find((s) => s.subscriptionId === "sub1");
     const sub2 = subStore.subscriptions.find((s) => s.subscriptionId === "sub2");
     expect(subStore.subscriptions.length).toBe(2);
-    expect(sub1?.receivedMonths).toBe(2);
+    expect(sub1?.receivedPeriods).toBe(2);
     expect(sub1?.status).toBe("active");
     expect(sub1?.startDate).toBe(0);
     expect(sub1?.endDate).toBe(0);
     expect(sub1?.nextRenewal).toBe(0 + 30 * 24 * 60 * 60);
-    expect(sub2?.receivedMonths).toBe(1);
+    expect(sub2?.receivedPeriods).toBe(1);
     expect(sub2?.status).toBe("pending");
     expect(sub2?.startDate).toBe(0);
     expect(sub2?.endDate).toBe(0);

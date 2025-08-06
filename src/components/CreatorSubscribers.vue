@@ -17,7 +17,7 @@
     />
     <CreatorSubscribersSummary
       :total-active-subscribers="totalActiveSubscribers"
-      :total-received-months="totalReceivedMonths"
+      :total-received-periods="totalReceivedPeriods"
       :total-revenue="totalRevenue"
       :format-currency="formatCurrency"
     />
@@ -91,15 +91,15 @@
             <div>
               {{
                 t("CreatorSubscribers.monthsText", {
-                  received: props.row.receivedMonths,
-                  total: props.row.totalMonths,
+                  received: props.row.receivedPeriods,
+                  total: props.row.totalPeriods,
                 })
               }}
-              <span v-if="props.row.totalMonths">
+              <span v-if="props.row.totalPeriods">
                 (
                 {{
                   Math.round(
-                    (props.row.receivedMonths / props.row.totalMonths) * 100
+                    (props.row.receivedPeriods / props.row.totalPeriods) * 100
                   )
                 }}% )
               </span>
@@ -210,15 +210,15 @@
                     <div>
                       {{
                         t("CreatorSubscribers.monthsText", {
-                          received: props.row.receivedMonths,
-                          total: props.row.totalMonths,
+                          received: props.row.receivedPeriods,
+                          total: props.row.totalPeriods,
                         })
                       }}
-                      <span v-if="props.row.totalMonths">
+                      <span v-if="props.row.totalPeriods">
                         (
                         {{
                           Math.round(
-                            (props.row.receivedMonths / props.row.totalMonths) *
+                            (props.row.receivedPeriods / props.row.totalPeriods) *
                               100
                           )
                         }}% )
@@ -237,8 +237,8 @@
                   </q-item-label>
                   <q-item-label>
                     {{
-                      props.row.totalMonths != null
-                        ? props.row.totalMonths - props.row.receivedMonths
+                      props.row.totalPeriods != null
+                        ? props.row.totalPeriods - props.row.receivedPeriods
                         : 0
                     }}
                     <q-tooltip>
@@ -474,18 +474,18 @@ const columns = computed(() => {
     {
       name: "months",
       label: t("CreatorSubscribers.columns.months"),
-      field: "receivedMonths",
+      field: "receivedPeriods",
       align: "center",
       sortable: true,
       sort: (a: number, b: number, rowA: any, rowB: any) =>
-        rowA.receivedMonths / (rowA.totalMonths || 1) -
-        rowB.receivedMonths / (rowB.totalMonths || 1),
+        rowA.receivedPeriods / (rowA.totalPeriods || 1) -
+        rowB.receivedPeriods / (rowB.totalPeriods || 1),
     },
     {
       name: "remaining",
       label: t("CreatorSubscribers.columns.remaining"),
       field: (row: any) =>
-        (row.totalMonths ?? row.receivedMonths) - row.receivedMonths,
+        (row.totalPeriods ?? row.receivedPeriods) - row.receivedPeriods,
       align: "center",
       sortable: true,
     },
@@ -528,7 +528,7 @@ const filteredSubscriptions = computed(() =>
   subscriptions.value.filter((s) => {
     const start = s.startDate ?? 0;
     const next = s.nextRenewal ?? 0;
-    const remaining = (s.totalMonths ?? s.receivedMonths) - s.receivedMonths;
+    const remaining = (s.totalPeriods ?? s.receivedPeriods) - s.receivedPeriods;
     const text = filter.value.toLowerCase();
     const matchesText =
       !text ||
@@ -562,8 +562,8 @@ function onRequest(props: { pagination: any }) {
 const totalActiveSubscribers = computed(
   () => filteredSubscriptions.value.filter((s) => s.status === "active").length
 );
-const totalReceivedMonths = computed(() =>
-  filteredSubscriptions.value.reduce((sum, s) => sum + s.receivedMonths, 0)
+const totalReceivedPeriods = computed(() =>
+  filteredSubscriptions.value.reduce((sum, s) => sum + s.receivedPeriods, 0)
 );
 const totalRevenue = computed(() =>
   filteredSubscriptions.value.reduce((sum, s) => sum + (s.totalAmount || 0), 0)

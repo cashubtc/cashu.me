@@ -17,9 +17,9 @@ export function exportSubscribers(
   for (const sub of subscribers) {
     const start = sub.startDate ? new Date(sub.startDate).toISOString() : "";
     const next = sub.nextRenewal ? new Date(sub.nextRenewal).toISOString() : "";
-    const months = `${sub.receivedMonths}/${sub.totalMonths ?? ""}`;
+    const months = `${sub.receivedPeriods}/${sub.totalPeriods ?? ""}`;
     const remaining =
-      (sub.totalMonths ?? sub.receivedMonths) - sub.receivedMonths;
+      (sub.totalPeriods ?? sub.receivedPeriods) - sub.receivedPeriods;
     const row = [
       sub.subscriberNpub,
       sub.tierName,

@@ -195,7 +195,7 @@ export const useLockedTokensRedeemWorker = defineStore(
                     subscription_id: entry.subscriptionId,
                     tier_id: entry.tierId,
                     month_index: entry.monthIndex,
-                    total_months: entry.totalMonths,
+                    total_months: entry.totalPeriods,
                     ...(entry.htlcSecret ? { htlc_secret: entry.htlcSecret } : {}),
                   } as const;
                   try {

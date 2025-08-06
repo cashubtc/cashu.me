@@ -27,8 +27,8 @@ const subscriptions = ref([
     tierName: 'Gold',
     startDate: 1,
     nextRenewal: 2,
-    receivedMonths: 1,
-    totalMonths: 3,
+    receivedPeriods: 1,
+    totalPeriods: 3,
     totalAmount: 1000,
     status: 'active',
   },
@@ -38,8 +38,8 @@ const subscriptions = ref([
     tierName: 'Silver',
     startDate: 1,
     nextRenewal: 2,
-    receivedMonths: 2,
-    totalMonths: 4,
+    receivedPeriods: 2,
+    totalPeriods: 4,
     totalAmount: 2000,
     status: 'pending',
   },
@@ -127,8 +127,8 @@ describe('CreatorSubscribers.vue', () => {
         tierName: 'Gold',
         startDate: 1,
         nextRenewal: 2,
-        receivedMonths: 1,
-        totalMonths: 3,
+        receivedPeriods: 1,
+        totalPeriods: 3,
         totalAmount: 1000,
         status: 'active',
       },
@@ -138,8 +138,8 @@ describe('CreatorSubscribers.vue', () => {
         tierName: 'Silver',
         startDate: 1,
         nextRenewal: 2,
-        receivedMonths: 2,
-        totalMonths: 4,
+        receivedPeriods: 2,
+        totalPeriods: 4,
         totalAmount: 2000,
         status: 'pending',
       },
@@ -175,15 +175,15 @@ describe('CreatorSubscribers.vue', () => {
     expect(rows[0].text()).toContain('Bob');
   });
 
-  it('sorts rows predictably when totalMonths is zero', async () => {
+  it('sorts rows predictably when totalPeriods is zero', async () => {
     subscriptions.value.push({
       subscriptionId: 'sub3',
       subscriberNpub: 'pk3',
       tierName: 'Bronze',
       startDate: 1,
       nextRenewal: 2,
-      receivedMonths: 1,
-      totalMonths: 0,
+      receivedPeriods: 1,
+      totalPeriods: 0,
       totalAmount: 500,
       status: 'active',
     });
@@ -194,7 +194,7 @@ describe('CreatorSubscribers.vue', () => {
     const monthsCol = wrapper.vm.columns.find((c: any) => c.name === 'months');
     const sorted = subscriptions.value
       .slice()
-      .sort((a, b) => monthsCol.sort(a.receivedMonths, b.receivedMonths, a, b));
+      .sort((a, b) => monthsCol.sort(a.receivedPeriods, b.receivedPeriods, a, b));
 
     expect(sorted.map((r: any) => r.subscriptionId)).toEqual([
       'sub1',
@@ -263,8 +263,8 @@ describe('CreatorSubscribers.vue', () => {
       tierName: 'Gold',
       startDate: 1,
       nextRenewal: 2,
-      receivedMonths: 1,
-      totalMonths: 3,
+      receivedPeriods: 1,
+      totalPeriods: 3,
       totalAmount: 1000,
       status: 'active',
     }));
@@ -319,7 +319,7 @@ describe('CreatorSubscribers.vue', () => {
     const summaryWrapper = mount(CreatorSubscribersSummary, {
       props: {
         totalActiveSubscribers: 1,
-        totalReceivedMonths: 2,
+        totalReceivedPeriods: 2,
         totalRevenue: 3,
         formatCurrency: (a: number) => `${a}`,
       },

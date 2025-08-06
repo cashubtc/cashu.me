@@ -7,6 +7,7 @@ import { useStorageStore } from "./storage";
 import { useProofsStore } from "./proofs";
 import { notifyError, notifySuccess } from "../js/notify";
 import type { NostrEvent } from "@nostr-dev-kit/ndk";
+import { frequencyToDays } from "src/constants/subscriptionFrequency";
 
 export interface CachedProfileDexie {
   pubkey: string;
@@ -36,7 +37,7 @@ export interface SubscriptionInterval {
   subscriptionId?: string;
   tierId?: string;
   monthIndex?: number;
-  totalMonths?: number;
+  totalPeriods?: number;
   htlcHash?: string | null;
   htlcSecret?: string | null;
 }
@@ -79,7 +80,10 @@ export interface LockedToken {
   subscriptionEventId: string | null;
   subscriptionId?: string;
   monthIndex?: number;
-  totalMonths?: number;
+  totalPeriods?: number;
+  frequency: import("../constants/subscriptionFrequency").SubscriptionFrequency;
+  /** Number of days between payments */
+  intervalDays?: number;
   label?: string;
   autoRedeem?: boolean;
   redeemed?: boolean;
@@ -479,6 +483,57 @@ export class CashuDexie extends Dexie {
           .toCollection()
           .modify((entry: any) => {
             if (entry.intervalDays === undefined) entry.intervalDays = null;
+          });
+      });
+
+    this.version(21)
+      .stores({
+        proofs:
+          "secret, id, C, amount, reserved, quote, bucketId, label, description",
+        profiles: "pubkey",
+        creatorsTierDefinitions: "&creatorNpub, eventId, updatedAt",
+        subscriptions:
+          "&id, creatorNpub, tierId, status, createdAt, updatedAt, frequency, intervalDays",
+        lockedTokens:
+          "&id, tokenString, owner, tierId, intervalKey, unlockTs, status, subscriptionEventId, subscriptionId, monthIndex, totalPeriods, autoRedeem, frequency, intervalDays",
+      })
+      .upgrade(async (tx) => {
+        await tx
+          .table("lockedTokens")
+          .toCollection()
+          .modify((entry: any) => {
+            if (entry.totalPeriods === undefined && entry.totalMonths !== undefined)
+              entry.totalPeriods = entry.totalMonths;
+            if (entry.frequency === undefined) entry.frequency = "monthly";
+            if (entry.intervalDays === undefined)
+              entry.intervalDays = frequencyToDays(entry.frequency);
+            delete (entry as any).totalMonths;
+          });
+        await tx
+          .table("subscriptions")
+          .toCollection()
+          .modify((entry: any) => {
+            if (entry.totalPeriods === undefined && entry.totalMonths !== undefined)
+              entry.totalPeriods = entry.totalMonths;
+            if (entry.receivedPeriods === undefined && entry.receivedMonths !== undefined)
+              entry.receivedPeriods = entry.receivedMonths;
+            if (entry.frequency === undefined) entry.frequency = "monthly";
+            if (entry.intervalDays === undefined)
+              entry.intervalDays = frequencyToDays(entry.frequency);
+            entry.intervals?.forEach((i: any) => {
+              if (i.totalPeriods === undefined && i.totalMonths !== undefined)
+                i.totalPeriods = i.totalMonths;
+              if (i.receivedPeriods === undefined && i.receivedMonths !== undefined)
+                i.receivedPeriods = i.receivedMonths;
+              if (i.frequency === undefined)
+                i.frequency = entry.frequency || "monthly";
+              if (i.intervalDays === undefined)
+                i.intervalDays = frequencyToDays(i.frequency);
+              delete i.totalMonths;
+              delete i.receivedMonths;
+            });
+            delete (entry as any).totalMonths;
+            delete (entry as any).receivedMonths;
           });
       });
   }
