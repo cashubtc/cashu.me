@@ -160,18 +160,28 @@
       <template #body-cell-subscriber="props">
         <q-td :props="props">
           <div class="row items-center no-wrap">
-            <q-avatar
-              size="32px"
-              v-if="profiles[props.row.subscriberNpub]?.picture"
-            >
-              <img :src="profiles[props.row.subscriberNpub].picture" />
+            <q-avatar size="32px">
+              <template v-if="profiles[props.row.subscriberNpub] === undefined">
+                <q-skeleton type="circle" size="32px" />
+              </template>
+              <template v-else-if="profiles[props.row.subscriberNpub]?.picture">
+                <img :src="profiles[props.row.subscriberNpub].picture" />
+              </template>
+              <template v-else>
+                <q-icon name="account_circle" />
+              </template>
             </q-avatar>
             <div class="q-ml-sm">
-              {{
-                profiles[props.row.subscriberNpub]?.display_name ||
-                profiles[props.row.subscriberNpub]?.name ||
-                shortenString(pubkeyNpub(props.row.subscriberNpub), 15, 6)
-              }}
+              <template v-if="profiles[props.row.subscriberNpub] === undefined">
+                <q-skeleton type="text" width="120px" />
+              </template>
+              <template v-else>
+                {{
+                  profiles[props.row.subscriberNpub]?.display_name ||
+                  profiles[props.row.subscriberNpub]?.name ||
+                  shortenString(pubkeyNpub(props.row.subscriberNpub), 15, 6)
+                }}
+              </template>
             </div>
           </div>
         </q-td>
@@ -242,18 +252,28 @@
         <div class="q-pa-xs col-12">
           <q-card>
             <q-card-section class="row items-center no-wrap">
-              <q-avatar
-                size="32px"
-                v-if="profiles[props.row.subscriberNpub]?.picture"
-              >
-                <img :src="profiles[props.row.subscriberNpub].picture" />
+              <q-avatar size="32px">
+                <template v-if="profiles[props.row.subscriberNpub] === undefined">
+                  <q-skeleton type="circle" size="32px" />
+                </template>
+                <template v-else-if="profiles[props.row.subscriberNpub]?.picture">
+                  <img :src="profiles[props.row.subscriberNpub].picture" />
+                </template>
+                <template v-else>
+                  <q-icon name="account_circle" />
+                </template>
               </q-avatar>
               <div class="q-ml-sm">
-                {{
-                  profiles[props.row.subscriberNpub]?.display_name ||
-                  profiles[props.row.subscriberNpub]?.name ||
-                  shortenString(pubkeyNpub(props.row.subscriberNpub), 15, 6)
-                }}
+                <template v-if="profiles[props.row.subscriberNpub] === undefined">
+                  <q-skeleton type="text" width="120px" />
+                </template>
+                <template v-else>
+                  {{
+                    profiles[props.row.subscriberNpub]?.display_name ||
+                    profiles[props.row.subscriberNpub]?.name ||
+                    shortenString(pubkeyNpub(props.row.subscriberNpub), 15, 6)
+                  }}
+                </template>
               </div>
             </q-card-section>
             <q-separator />
@@ -588,25 +608,24 @@ async function updateProfiles() {
     const cached = profileCache.get(pk);
     if (cached) {
       profiles.value[pk] = cached;
-    } else if (!profiles.value[pk]) {
+    } else if (profiles.value[pk] === undefined) {
       missing.push(pk);
     }
   }
 
-  if (missing.length) {
-    const fetched = await Promise.all(
-      missing.map(async (pk) => {
-        const p = await nostr.getProfile(pk);
-        return [pk, p] as const;
-      })
-    );
-
-    for (const [pk, p] of fetched) {
+  const batchSize = 5;
+  for (let i = 0; i < missing.length; i += batchSize) {
+    const batch = missing.slice(i, i + batchSize);
+    const fetched = await Promise.all(batch.map((pk) => nostr.getProfile(pk)));
+    fetched.forEach((p, idx) => {
+      const pk = batch[idx];
       if (p) {
         profileCache.set(pk, p);
         profiles.value[pk] = p;
+      } else {
+        profiles.value[pk] = {};
       }
-    }
+    });
   }
 }
 
