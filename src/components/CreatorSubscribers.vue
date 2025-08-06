@@ -63,7 +63,7 @@
                 :class="{ 'bg-grey-2': isSelected(item) }"
                 :subscription="item"
                 :profile="profiles[item.subscriberNpub]"
-                @view="viewProfile(item.subscriberNpub)"
+                @view="viewSubscriber(item)"
               />
             </div>
           </div>
@@ -80,7 +80,10 @@
         class="q-mt-sm"
       />
     </div>
-    <SubscriberProfileDialog v-model="showProfileDialog" :npub="profileNpub" />
+    <SubscriberDrawer
+      v-model="showDrawer"
+      :subscription="selectedSubscription"
+    />
   </div>
 </template>
 
@@ -98,11 +101,11 @@ import { useNostrStore } from "stores/nostr";
 import { useNdk } from "src/composables/useNdk";
 import profileCache from "src/js/profile-cache";
 import { exportSubscribers } from "src/utils/subscriberCsv";
-import SubscriberProfileDialog from "./SubscriberProfileDialog.vue";
 import CreatorSubscribersFilters from "./CreatorSubscribersFilters.vue";
 import CreatorSubscribersSummary from "./CreatorSubscribersSummary.vue";
 import SubscriberCard from "./SubscriberCard.vue";
-import { nip19 } from "nostr-tools";
+import SubscriberDrawer from "./SubscriberDrawer.vue";
+import type { CreatorSubscription } from "stores/creatorSubscriptions";
 
 const store = useCreatorSubscriptionsStore();
 const { subscriptions } = storeToRefs(store);
@@ -209,16 +212,8 @@ function formatCurrency(amount: number) {
 }
 
 const profiles = ref<Record<string, any>>({});
-const showProfileDialog = ref(false);
-const profileNpub = ref("");
-
-function pubkeyNpub(hex: string): string {
-  try {
-    return nip19.npubEncode(hex);
-  } catch {
-    return hex;
-  }
-}
+const showDrawer = ref(false);
+const selectedSubscription = ref<CreatorSubscription | null>(null);
 
 async function updateProfiles() {
   const subs = subscriptions.value;
@@ -266,9 +261,9 @@ async function updateProfiles() {
   }
 }
 
-function viewProfile(pk: string) {
-  profileNpub.value = pubkeyNpub(pk);
-  showProfileDialog.value = true;
+function viewSubscriber(sub: CreatorSubscription) {
+  selectedSubscription.value = sub;
+  showDrawer.value = true;
 }
 
 function downloadCsv() {
