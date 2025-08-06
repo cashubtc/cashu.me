@@ -402,72 +402,111 @@ const pagination = ref({
 
 const selected = ref<any[]>([]);
 
-const columns = computed(() => [
-  {
-    name: "subscriber",
-    label: t("CreatorSubscribers.columns.subscriber"),
-    field: "subscriberNpub",
-    align: "left",
-    sortable: true,
-  },
-  {
-    name: "tier",
-    label: t("CreatorSubscribers.columns.tier"),
-    field: "tierName",
-    align: "left",
-    sortable: true,
-  },
-  {
-    name: "start",
-    label: t("CreatorSubscribers.columns.start"),
-    field: "startDate",
-    align: "left",
-    sortable: true,
-    sort: (a, b) => (a ?? 0) - (b ?? 0),
-    format: (val) => (val ? formatTs(val) : "-"),
-  },
-  {
-    name: "nextRenewal",
-    label: t("CreatorSubscribers.columns.nextRenewal"),
-    field: "nextRenewal",
-    align: "left",
-    sortable: true,
-    sort: (a, b) => (a ?? 0) - (b ?? 0),
-    format: (val) => (val ? formatTs(val) : "-"),
-  },
-  {
-    name: "months",
-    label: t("CreatorSubscribers.columns.months"),
-    field: "receivedMonths",
-    align: "center",
-    sortable: true,
-    sort: (a, b, rowA, rowB) =>
-      rowA.receivedMonths / (rowA.totalMonths || 1) -
-      rowB.receivedMonths / (rowB.totalMonths || 1),
-  },
-  {
-    name: "remaining",
-    label: t("CreatorSubscribers.columns.remaining"),
-    field: (row) =>
-      (row.totalMonths ?? row.receivedMonths) - row.receivedMonths,
-    align: "center",
-    sortable: true,
-  },
-  {
-    name: "status",
-    label: t("CreatorSubscribers.columns.status"),
-    field: "status",
-    align: "left",
-    sortable: true,
-  },
-  {
-    name: "actions",
-    label: t("CreatorSubscribers.columns.actions"),
-    field: "actions",
-    align: "right",
-    sortable: true,
-  },
-]);
+const columns = computed(() => {
+  const cols: any[] = [
+    {
+      name: "subscriber",
+      label: t("CreatorSubscribers.columns.subscriber"),
+      field: "subscriberNpub",
+      align: "left",
+      sortable: true,
+    },
+    {
+      name: "tier",
+      label: t("CreatorSubscribers.columns.tier"),
+      field: "tierName",
+      align: "left",
+      sortable: true,
+    },
+  ];
+
+  if (!isSmallScreen.value) {
+    cols.push(
+      {
+        name: "followers",
+        label: t("CreatorSubscribers.columns.followers"),
+        field: (row: any) =>
+          profiles.value[row.subscriberNpub]?.followerCount ?? null,
+        align: "right",
+        sortable: true,
+        sort: (a: number | null, b: number | null) => (a ?? 0) - (b ?? 0),
+      },
+      {
+        name: "following",
+        label: t("CreatorSubscribers.columns.following"),
+        field: (row: any) =>
+          profiles.value[row.subscriberNpub]?.followingCount ?? null,
+        align: "right",
+        sortable: true,
+        sort: (a: number | null, b: number | null) => (a ?? 0) - (b ?? 0),
+      },
+      {
+        name: "latestNote",
+        label: t("CreatorSubscribers.columns.latestNote"),
+        field: (row: any) => profiles.value[row.subscriberNpub]?.latestNote,
+        align: "left",
+        sortable: false,
+        format: (val: string | undefined) =>
+          val ? (val.length > 50 ? `${val.slice(0, 50)}…` : val) : "-",
+      }
+    );
+  }
+
+  cols.push(
+    {
+      name: "start",
+      label: t("CreatorSubscribers.columns.start"),
+      field: "startDate",
+      align: "left",
+      sortable: true,
+      sort: (a: number | null, b: number | null) => (a ?? 0) - (b ?? 0),
+      format: (val: number | null) => (val ? formatTs(val) : "-"),
+    },
+    {
+      name: "nextRenewal",
+      label: t("CreatorSubscribers.columns.nextRenewal"),
+      field: "nextRenewal",
+      align: "left",
+      sortable: true,
+      sort: (a: number | null, b: number | null) => (a ?? 0) - (b ?? 0),
+      format: (val: number | null) => (val ? formatTs(val) : "-"),
+    },
+    {
+      name: "months",
+      label: t("CreatorSubscribers.columns.months"),
+      field: "receivedMonths",
+      align: "center",
+      sortable: true,
+      sort: (a: number, b: number, rowA: any, rowB: any) =>
+        rowA.receivedMonths / (rowA.totalMonths || 1) -
+        rowB.receivedMonths / (rowB.totalMonths || 1),
+    },
+    {
+      name: "remaining",
+      label: t("CreatorSubscribers.columns.remaining"),
+      field: (row: any) =>
+        (row.totalMonths ?? row.receivedMonths) - row.receivedMonths,
+      align: "center",
+      sortable: true,
+    },
+    {
+      name: "status",
+      label: t("CreatorSubscribers.columns.status"),
+      field: "status",
+      align: "left",
+      sortable: true,
+    },
+    {
+      name: "actions",
+      label: t("CreatorSubscribers.columns.actions"),
+      field: "actions",
+      align: "right",
+      sortable: true,
+    }
+  );
+
+  return cols;
+});
 
 const tierOptions = computed(() => {
   const set = new Set<string>();
@@ -547,7 +586,12 @@ async function updateProfiles() {
   for (const { subscriberNpub: pk } of subs) {
     const cached = profileCache.get(pk);
     if (cached) {
-      profiles.value[pk] = cached;
+      profiles.value[pk] = {
+        ...cached,
+        followerCount: cached.followerCount,
+        followingCount: cached.followingCount,
+        latestNote: cached.latestNote,
+      };
     } else if (profiles.value[pk] === undefined) {
       missing.push(pk);
     }
