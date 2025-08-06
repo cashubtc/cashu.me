@@ -353,6 +353,7 @@ import CreatorSubscribersSummary from "./CreatorSubscribersSummary.vue";
 import { useCreatorsStore } from "stores/creators";
 import { useUiStore } from "stores/ui";
 import { useMintsStore } from "stores/mints";
+import { exportSubscribers } from "src/utils/subscriberCsv";
 
 const store = useCreatorSubscriptionsStore();
 const { subscriptions, loading } = storeToRefs(store);
@@ -606,89 +607,11 @@ function viewProfile(pk: string) {
 }
 
 function downloadCsv() {
-  const headers = [
-    t("CreatorSubscribers.columns.subscriber"),
-    t("CreatorSubscribers.columns.tier"),
-    t("CreatorSubscribers.columns.start"),
-    t("CreatorSubscribers.columns.nextRenewal"),
-    t("CreatorSubscribers.columns.months"),
-    t("CreatorSubscribers.columns.remaining"),
-    t("CreatorSubscribers.columns.status"),
-  ];
-  const lines = [headers.join(",")];
-  for (const sub of filteredSubscriptions.value) {
-    const subscriber =
-      profiles.value[sub.subscriberNpub]?.display_name ||
-      profiles.value[sub.subscriberNpub]?.name ||
-      pubkeyNpub(sub.subscriberNpub);
-    const start = sub.startDate ? formatTs(sub.startDate) : "";
-    const next = sub.nextRenewal ? formatTs(sub.nextRenewal) : "";
-    const months = `${sub.receivedMonths}/${sub.totalMonths ?? ""}`;
-    const remaining =
-      (sub.totalMonths ?? sub.receivedMonths) - sub.receivedMonths;
-    const status = t(`CreatorSubscribers.status.${sub.status}`);
-    const row = [
-      subscriber,
-      sub.tierName,
-      start,
-      next,
-      months,
-      remaining,
-      status,
-    ].map((v) => `"${String(v).replace(/"/g, '""')}"`).join(",");
-    lines.push(row);
-  }
-  const csv = lines.join("\n");
-  const blob = new Blob([csv], { type: "text/csv" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = "subscribers.csv";
-  a.click();
-  URL.revokeObjectURL(url);
+  exportSubscribers(filteredSubscriptions.value, "subscribers.csv");
 }
 
 function exportSelected() {
-  const headers = [
-    t("CreatorSubscribers.columns.subscriber"),
-    t("CreatorSubscribers.columns.tier"),
-    t("CreatorSubscribers.columns.start"),
-    t("CreatorSubscribers.columns.nextRenewal"),
-    t("CreatorSubscribers.columns.months"),
-    t("CreatorSubscribers.columns.remaining"),
-    t("CreatorSubscribers.columns.status"),
-  ];
-  const lines = [headers.join(",")];
-  for (const sub of selected.value) {
-    const subscriber =
-      profiles.value[sub.subscriberNpub]?.display_name ||
-      profiles.value[sub.subscriberNpub]?.name ||
-      pubkeyNpub(sub.subscriberNpub);
-    const start = sub.startDate ? formatTs(sub.startDate) : "";
-    const next = sub.nextRenewal ? formatTs(sub.nextRenewal) : "";
-    const months = `${sub.receivedMonths}/${sub.totalMonths ?? ""}`;
-    const remaining =
-      (sub.totalMonths ?? sub.receivedMonths) - sub.receivedMonths;
-    const status = t(`CreatorSubscribers.status.${sub.status}`);
-    const row = [
-      subscriber,
-      sub.tierName,
-      start,
-      next,
-      months,
-      remaining,
-      status,
-    ].map((v) => `"${String(v).replace(/"/g, '""')}"`).join(",");
-    lines.push(row);
-  }
-  const csv = lines.join("\n");
-  const blob = new Blob([csv], { type: "text/csv" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = "subscribers.csv";
-  a.click();
-  URL.revokeObjectURL(url);
+  exportSubscribers(selected.value, "subscribers.csv");
 }
 
 function sendGroupMessage() {
