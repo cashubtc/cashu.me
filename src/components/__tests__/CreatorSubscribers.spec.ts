@@ -175,6 +175,34 @@ describe('CreatorSubscribers.vue', () => {
     expect(rows[0].text()).toContain('Bob');
   });
 
+  it('sorts rows predictably when totalMonths is zero', async () => {
+    subscriptions.value.push({
+      subscriptionId: 'sub3',
+      subscriberNpub: 'pk3',
+      tierName: 'Bronze',
+      startDate: 1,
+      nextRenewal: 2,
+      receivedMonths: 1,
+      totalMonths: 0,
+      totalAmount: 500,
+      status: 'active',
+    });
+
+    const wrapper = mount(CreatorSubscribers);
+    await nextTick();
+
+    const monthsCol = wrapper.vm.columns.find((c: any) => c.name === 'months');
+    const sorted = subscriptions.value
+      .slice()
+      .sort((a, b) => monthsCol.sort(a.receivedMonths, b.receivedMonths, a, b));
+
+    expect(sorted.map((r: any) => r.subscriptionId)).toEqual([
+      'sub1',
+      'sub2',
+      'sub3',
+    ]);
+  });
+
   it('sends messages via actions', async () => {
     const wrapper = mount(CreatorSubscribers);
     await nextTick();
