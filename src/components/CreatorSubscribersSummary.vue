@@ -10,9 +10,9 @@
     </div>
     <div class="col-12 col-sm-4">
       <q-card flat bordered class="q-pa-sm text-center">
-        <div class="text-h6">{{ totalReceivedMonths }}</div>
+        <div class="text-h6">{{ totalReceivedPeriods }}</div>
         <div class="text-caption">
-          {{ t('CreatorSubscribers.summary.receivedMonths') }}
+          {{ t('CreatorSubscribers.summary.receivedPeriods') }}
         </div>
       </q-card>
     </div>
@@ -33,12 +33,12 @@ import { useI18n } from 'vue-i18n';
 
 const props = defineProps<{
   totalActiveSubscribers: number;
-  totalReceivedMonths: number;
+  totalReceivedPeriods: number;
   totalRevenue: number;
   formatCurrency: (amount: number) => string;
 }>();
 
-const { totalActiveSubscribers, totalReceivedMonths, totalRevenue } = toRefs(props);
+const { totalActiveSubscribers, totalReceivedPeriods, totalRevenue } = toRefs(props);
 const formatCurrency = props.formatCurrency;
 
 const { t } = useI18n();

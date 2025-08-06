@@ -1624,7 +1624,7 @@ export default {
     },
     summary: {
       activeSubscribers: "Active subscribers",
-      receivedMonths: "Received months",
+      receivedPeriods: "Received months",
       revenue: "Revenue",
     },
     monthsText: "{received} of {total} months",

@@ -22,6 +22,7 @@ import { DEFAULT_BUCKET_ID } from "./buckets";
 import token from "src/js/token";
 import { subscriptionPayload } from "src/utils/receipt-utils";
 import { useCreatorsStore } from "./creators";
+import { frequencyToDays } from "src/constants/subscriptionFrequency";
 
 function parseSubscriptionPaymentPayload(
   obj: any
@@ -512,7 +513,11 @@ export const useMessengerStore = defineStore("messenger", {
             subscriptionEventId: null,
             subscriptionId: payload.subscription_id,
             monthIndex: payload.month_index,
-            totalMonths: payload.total_months,
+            totalPeriods: payload.total_months,
+            frequency: (payload as any).frequency || "monthly",
+            intervalDays:
+              (payload as any).interval_days ||
+              frequencyToDays(((payload as any).frequency as any) || "monthly"),
             label: "Subscription payment",
           };
           await cashuDb.lockedTokens.put(entry);
