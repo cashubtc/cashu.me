@@ -1647,6 +1647,7 @@ export const messages = {
       nextRenewalFrom: "Next renewal from",
       nextRenewalTo: "Next renewal to",
       monthsRemaining: "Months remaining",
+      frequency: "Frequency",
     },
     columns: {
       subscriber: "Subscriber",

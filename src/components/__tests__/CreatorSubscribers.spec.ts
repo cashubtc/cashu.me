@@ -212,7 +212,6 @@ describe("CreatorSubscribers.vue", () => {
   it("mounts filter and summary components", () => {
     const filtersWrapper = mount(CreatorSubscribersFilters, {
       props: {
-        filter: "",
         tierFilter: null,
         statusFilter: null,
         startFrom: null,
@@ -220,6 +219,7 @@ describe("CreatorSubscribers.vue", () => {
         nextRenewalFrom: null,
         nextRenewalTo: null,
         monthsRemaining: null,
+        frequencyFilter: null,
         tierOptions: [],
         statusOptions: [],
         isSmallScreen: false,

@@ -1,37 +1,12 @@
 <template>
-  <div class="q-mb-md">
-    <div class="row q-gutter-sm q-mb-sm">
-      <q-btn
-        v-if="isSmallScreen"
-        flat
-        color="primary"
-        icon="filter_list"
-        label="Filters"
-        @click="showFiltersModel = !showFiltersModel"
-      />
-      <q-btn
-        flat
-        color="primary"
-        icon="download"
-        :label="t('CreatorSubscribers.actions.downloadCsv')"
-        @click="$emit('downloadCsv')"
-      />
-    </div>
-    <q-slide-transition>
-      <div v-show="!isSmallScreen || showFiltersModel" class="row q-gutter-sm">
-        <q-input
-          v-model="filterModel"
-          dense
-          outlined
-          debounce="300"
-          clearable
-          :placeholder="t('CreatorSubscribers.filter.placeholder')"
-          class="col"
-        >
-          <template #prepend>
-            <q-icon name="search" />
-          </template>
-        </q-input>
+  <q-dialog v-model="showFiltersModel" position="right" :maximized="isSmallScreen">
+    <q-card style="min-width: 250px">
+      <q-card-section class="row items-center q-pb-none">
+        <div class="text-h6">Filters</div>
+        <q-space />
+        <q-btn icon="close" flat round dense v-close-popup />
+      </q-card-section>
+      <q-card-section class="column q-gutter-sm">
         <q-select
           v-model="tierFilterModel"
           :options="tierOptions"
@@ -41,7 +16,6 @@
           emit-value
           map-options
           :label="t('CreatorSubscribers.columns.tier')"
-          class="col-3"
         />
         <q-select
           v-model="statusFilterModel"
@@ -50,7 +24,16 @@
           outlined
           clearable
           :label="t('CreatorSubscribers.columns.status')"
-          class="col-3"
+        />
+        <q-select
+          v-model="frequencyFilterModel"
+          :options="frequencyOptions"
+          dense
+          outlined
+          clearable
+          emit-value
+          map-options
+          :label="t('CreatorSubscribers.filter.frequency')"
         />
         <q-input
           v-model="startFromModel"
@@ -59,7 +42,6 @@
           outlined
           clearable
           :label="t('CreatorSubscribers.filter.startFrom')"
-          class="col-3"
         >
           <q-tooltip>{{ t('CreatorSubscribers.startTooltip') }}</q-tooltip>
         </q-input>
@@ -70,7 +52,6 @@
           outlined
           clearable
           :label="t('CreatorSubscribers.filter.startTo')"
-          class="col-3"
         >
           <q-tooltip>{{ t('CreatorSubscribers.startTooltip') }}</q-tooltip>
         </q-input>
@@ -81,7 +62,6 @@
           outlined
           clearable
           :label="t('CreatorSubscribers.filter.nextRenewalFrom')"
-          class="col-3"
         >
           <q-tooltip>{{ t('CreatorSubscribers.nextRenewalTooltip') }}</q-tooltip>
         </q-input>
@@ -92,7 +72,6 @@
           outlined
           clearable
           :label="t('CreatorSubscribers.filter.nextRenewalTo')"
-          class="col-3"
         >
           <q-tooltip>{{ t('CreatorSubscribers.nextRenewalTooltip') }}</q-tooltip>
         </q-input>
@@ -103,13 +82,19 @@
           outlined
           clearable
           :label="t('CreatorSubscribers.filter.monthsRemaining')"
-          class="col-3"
         >
           <q-tooltip>{{ t('CreatorSubscribers.monthsRemainingTooltip') }}</q-tooltip>
         </q-input>
-      </div>
-    </q-slide-transition>
-  </div>
+        <q-btn
+          flat
+          color="primary"
+          icon="download"
+          :label="t('CreatorSubscribers.actions.downloadCsv')"
+          @click="$emit('downloadCsv')"
+        />
+      </q-card-section>
+    </q-card>
+  </q-dialog>
 </template>
 
 <script setup lang="ts">
@@ -117,7 +102,6 @@ import { computed, toRefs } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 const props = defineProps<{
-  filter: string;
   tierFilter: string | null;
   statusFilter: string | null;
   startFrom: string | null;
@@ -125,6 +109,7 @@ const props = defineProps<{
   nextRenewalFrom: string | null;
   nextRenewalTo: string | null;
   monthsRemaining: number | null;
+  frequencyFilter: string | null;
   tierOptions: { label: string; value: string }[];
   statusOptions: { label: string; value: string }[];
   isSmallScreen: boolean;
@@ -132,7 +117,6 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits([
-  'update:filter',
   'update:tierFilter',
   'update:statusFilter',
   'update:startFrom',
@@ -140,6 +124,7 @@ const emit = defineEmits([
   'update:nextRenewalFrom',
   'update:nextRenewalTo',
   'update:monthsRemaining',
+  'update:frequencyFilter',
   'update:showFilters',
   'downloadCsv',
 ]);
@@ -150,10 +135,6 @@ const {
   isSmallScreen,
 } = toRefs(props);
 
-const filterModel = computed({
-  get: () => props.filter,
-  set: (val: string) => emit('update:filter', val),
-});
 const tierFilterModel = computed({
   get: () => props.tierFilter,
   set: (val: string | null) => emit('update:tierFilter', val),
@@ -161,6 +142,10 @@ const tierFilterModel = computed({
 const statusFilterModel = computed({
   get: () => props.statusFilter,
   set: (val: string | null) => emit('update:statusFilter', val),
+});
+const frequencyFilterModel = computed({
+  get: () => props.frequencyFilter,
+  set: (val: string | null) => emit('update:frequencyFilter', val),
 });
 const startFromModel = computed({
   get: () => props.startFrom,
@@ -187,5 +172,12 @@ const showFiltersModel = computed({
   set: (val: boolean) => emit('update:showFilters', val),
 });
 
+const frequencyOptions = [
+  { label: 'Weekly', value: 'weekly' },
+  { label: 'Twice Monthly', value: 'biweekly' },
+  { label: 'Monthly', value: 'monthly' },
+];
+
 const { t } = useI18n();
 </script>
+

@@ -1,7 +1,6 @@
 <template>
   <div>
     <CreatorSubscribersFilters
-      v-model:filter="filter"
       v-model:tierFilter="tierFilter"
       v-model:statusFilter="statusFilter"
       v-model:startFrom="startFrom"
@@ -9,6 +8,7 @@
       v-model:nextRenewalFrom="nextRenewalFrom"
       v-model:nextRenewalTo="nextRenewalTo"
       v-model:monthsRemaining="monthsRemaining"
+      v-model:frequencyFilter="frequencyFilter"
       :tier-options="tierOptions"
       :status-options="statusOptions"
       :is-small-screen="isSmallScreen"
@@ -120,12 +120,20 @@ const { activeUnit } = storeToRefs(mints);
 const nostr = useNostrStore();
 
 const isSmallScreen = computed(() => $q.screen.lt.md);
-const showFilters = ref(!isSmallScreen.value);
-watch(isSmallScreen, (val) => {
-  showFilters.value = !val;
-});
 
-const filter = ref("");
+const props = withDefaults(
+  defineProps<{ filter?: string; showFilters?: boolean }>(),
+  { filter: "", showFilters: false }
+);
+const emit = defineEmits(["update:filter", "update:showFilters"]);
+const filter = computed({
+  get: () => props.filter,
+  set: (val: string) => emit("update:filter", val),
+});
+const showFilters = computed({
+  get: () => props.showFilters,
+  set: (val: boolean) => emit("update:showFilters", val),
+});
 const tierFilter = ref<string | null>(null);
 const statusFilter = ref<string | null>(null);
 const startFrom = ref<string | null>(null);
@@ -133,6 +141,7 @@ const startTo = ref<string | null>(null);
 const nextRenewalFrom = ref<string | null>(null);
 const nextRenewalTo = ref<string | null>(null);
 const monthsRemaining = ref<number | null>(null);
+const frequencyFilter = ref<string | null>(null);
 
 function dateStringToTs(val: string | null): number | null {
   return val ? Math.floor(new Date(val).getTime() / 1000) : null;
@@ -189,6 +198,7 @@ const filteredSubscriptions = computed(() =>
       matchesText &&
       (!tierFilter.value || s.tierName === tierFilter.value) &&
       (!statusFilter.value || s.status === statusFilter.value) &&
+      (!frequencyFilter.value || s.frequency === frequencyFilter.value) &&
       (!startFromTs.value || start >= startFromTs.value) &&
       (!startToTs.value || start <= startToTs.value) &&
       (!nextRenewalFromTs.value || next >= nextRenewalFromTs.value) &&

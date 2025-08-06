@@ -1569,6 +1569,7 @@ export default {
       nextRenewalFrom: "Next renewal from",
       nextRenewalTo: "Next renewal to",
       monthsRemaining: "Months remaining",
+      frequency: "按频率筛选",
     },
     columns: {
       subscriber: "Subscriber",

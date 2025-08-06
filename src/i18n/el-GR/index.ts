@@ -1600,6 +1600,7 @@ export default {
       nextRenewalFrom: "Next renewal from",
       nextRenewalTo: "Next renewal to",
       monthsRemaining: "Months remaining",
+      frequency: "Φιλτράρισμα ανά συχνότητα",
     },
     columns: {
       subscriber: "Subscriber",
