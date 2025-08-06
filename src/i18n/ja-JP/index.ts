@@ -518,7 +518,11 @@ export default {
   },
   ErrorNotFound: {
     title: "404",
-    text: "おっと、何もありません…",
+    text: "このページは存在しません。下のリンクを利用してください。",
+    links: {
+      docs: "ドキュメント",
+      tips: "ヒント",
+    },
     actions: {
       home: {
         label: "ホームに戻る",

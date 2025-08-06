@@ -525,7 +525,11 @@ export default {
   },
   ErrorNotFound: {
     title: "404",
-    text: "Oops. Nada por aquí…",
+    text: "Esta página no existe. Prueba los enlaces de abajo para obtener ayuda:",
+    links: {
+      docs: "Documentación",
+      tips: "Consejos",
+    },
     actions: {
       home: {
         label: "Volver al inicio",

@@ -519,7 +519,11 @@ export default {
   },
   ErrorNotFound: {
     title: "404",
-    text: "Oops. Ingenting här…",
+    text: "Den här sidan finns inte. Använd länkarna nedan för hjälp:",
+    links: {
+      docs: "Dokumentation",
+      tips: "Tips",
+    },
     actions: {
       home: {
         label: "Gå tillbaka hem",
