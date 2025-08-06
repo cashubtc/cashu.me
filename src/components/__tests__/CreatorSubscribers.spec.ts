@@ -101,6 +101,8 @@ vi.mock('nostr-tools', () => ({
 }));
 
 import CreatorSubscribers from '../CreatorSubscribers.vue';
+import CreatorSubscribersFilters from '../CreatorSubscribersFilters.vue';
+import CreatorSubscribersSummary from '../CreatorSubscribersSummary.vue';
 
 describe('CreatorSubscribers.vue', () => {
   beforeEach(() => {
@@ -180,5 +182,35 @@ describe('CreatorSubscribers.vue', () => {
     expect(messenger.sendDm).toHaveBeenCalledTimes(2);
     expect(qMock.notify).toHaveBeenCalled();
     expect(wrapper.vm.selected).toHaveLength(0);
+  });
+
+  it('mounts filter and summary components', () => {
+    const filtersWrapper = mount(CreatorSubscribersFilters, {
+      props: {
+        filter: '',
+        tierFilter: null,
+        statusFilter: null,
+        startFrom: null,
+        startTo: null,
+        nextRenewalFrom: null,
+        nextRenewalTo: null,
+        monthsRemaining: null,
+        tierOptions: [],
+        statusOptions: [],
+        isSmallScreen: false,
+        showFilters: true,
+      },
+    });
+    expect(filtersWrapper.exists()).toBe(true);
+
+    const summaryWrapper = mount(CreatorSubscribersSummary, {
+      props: {
+        totalActiveSubscribers: 1,
+        totalReceivedMonths: 2,
+        totalRevenue: 3,
+        formatCurrency: (a: number) => `${a}`,
+      },
+    });
+    expect(summaryWrapper.exists()).toBe(true);
   });
 });
