@@ -11,10 +11,7 @@
         class="q-mb-sm"
       />
       <q-slide-transition>
-        <div
-          v-show="!isSmallScreen || showFilters"
-          class="row q-gutter-sm"
-        >
+        <div v-show="!isSmallScreen || showFilters" class="row q-gutter-sm">
           <q-input
             v-model="filter"
             dense
@@ -48,6 +45,67 @@
             :label="t('CreatorSubscribers.columns.status')"
             class="col-3"
           />
+          <q-input
+            v-model="startFrom"
+            type="date"
+            dense
+            outlined
+            clearable
+            :label="t('CreatorSubscribers.filter.startFrom')"
+            class="col-3"
+          >
+            <q-tooltip>{{ t("CreatorSubscribers.startTooltip") }}</q-tooltip>
+          </q-input>
+          <q-input
+            v-model="startTo"
+            type="date"
+            dense
+            outlined
+            clearable
+            :label="t('CreatorSubscribers.filter.startTo')"
+            class="col-3"
+          >
+            <q-tooltip>{{ t("CreatorSubscribers.startTooltip") }}</q-tooltip>
+          </q-input>
+          <q-input
+            v-model="nextRenewalFrom"
+            type="date"
+            dense
+            outlined
+            clearable
+            :label="t('CreatorSubscribers.filter.nextRenewalFrom')"
+            class="col-3"
+          >
+            <q-tooltip>{{
+              t("CreatorSubscribers.nextRenewalTooltip")
+            }}</q-tooltip>
+          </q-input>
+          <q-input
+            v-model="nextRenewalTo"
+            type="date"
+            dense
+            outlined
+            clearable
+            :label="t('CreatorSubscribers.filter.nextRenewalTo')"
+            class="col-3"
+          >
+            <q-tooltip>{{
+              t("CreatorSubscribers.nextRenewalTooltip")
+            }}</q-tooltip>
+          </q-input>
+          <q-input
+            v-model.number="monthsRemaining"
+            type="number"
+            dense
+            outlined
+            clearable
+            :label="t('CreatorSubscribers.filter.monthsRemaining')"
+            class="col-3"
+          >
+            <q-tooltip>{{
+              t("CreatorSubscribers.monthsRemainingTooltip")
+            }}</q-tooltip>
+          </q-input>
         </div>
       </q-slide-transition>
     </div>
@@ -96,10 +154,9 @@
                 (
                 {{
                   Math.round(
-                    (props.row.receivedMonths / props.row.totalMonths) * 100,
+                    (props.row.receivedMonths / props.row.totalMonths) * 100
                   )
-                }}%
-                )
+                }}% )
               </span>
               <q-tooltip>
                 {{ t("CreatorSubscribers.monthsTooltip") }}
@@ -191,10 +248,9 @@
                         {{
                           Math.round(
                             (props.row.receivedMonths / props.row.totalMonths) *
-                              100,
+                              100
                           )
-                        }}%
-                        )
+                        }}% )
                       </span>
                       <q-tooltip>
                         {{ t("CreatorSubscribers.monthsTooltip") }}
@@ -206,10 +262,29 @@
               <q-item>
                 <q-item-section>
                   <q-item-label caption>
+                    {{ t("CreatorSubscribers.columns.remaining") }}
+                  </q-item-label>
+                  <q-item-label>
+                    {{
+                      props.row.totalMonths != null
+                        ? props.row.totalMonths - props.row.receivedMonths
+                        : 0
+                    }}
+                    <q-tooltip>
+                      {{ t("CreatorSubscribers.monthsRemainingTooltip") }}
+                    </q-tooltip>
+                  </q-item-label>
+                </q-item-section>
+              </q-item>
+              <q-item>
+                <q-item-section>
+                  <q-item-label caption>
                     {{ t("CreatorSubscribers.columns.start") }}
                   </q-item-label>
                   <q-item-label>
-                    {{ props.row.startDate ? formatTs(props.row.startDate) : "-" }}
+                    {{
+                      props.row.startDate ? formatTs(props.row.startDate) : "-"
+                    }}
                   </q-item-label>
                 </q-item-section>
               </q-item>
@@ -292,10 +367,7 @@
         </div>
       </template>
     </q-table>
-    <SubscriberProfileDialog
-      v-model="showProfileDialog"
-      :npub="profileNpub"
-    />
+    <SubscriberProfileDialog v-model="showProfileDialog" :npub="profileNpub" />
   </div>
 </template>
 
@@ -332,6 +404,15 @@ watch(isSmallScreen, (val) => {
 const filter = ref("");
 const tierFilter = ref<string | null>(null);
 const statusFilter = ref<string | null>(null);
+const startFrom = ref<string | null>(null);
+const startTo = ref<string | null>(null);
+const nextRenewalFrom = ref<string | null>(null);
+const nextRenewalTo = ref<string | null>(null);
+const monthsRemaining = ref<number | null>(null);
+const startFromTs = computed(() => dateStringToTs(startFrom.value));
+const startToTs = computed(() => dateStringToTs(startTo.value));
+const nextRenewalFromTs = computed(() => dateStringToTs(nextRenewalFrom.value));
+const nextRenewalToTs = computed(() => dateStringToTs(nextRenewalTo.value));
 const pagination = ref({
   page: 1,
   rowsPerPage: 5,
@@ -383,6 +464,14 @@ const columns = computed(() => [
       rowB.receivedMonths / rowB.totalMonths,
   },
   {
+    name: "remaining",
+    label: t("CreatorSubscribers.columns.remaining"),
+    field: (row) =>
+      (row.totalMonths ?? row.receivedMonths) - row.receivedMonths,
+    align: "center",
+    sortable: true,
+  },
+  {
     name: "status",
     label: t("CreatorSubscribers.columns.status"),
     field: "status",
@@ -415,11 +504,20 @@ const statusOptions = computed(() => [
 ]);
 
 const filteredSubscriptions = computed(() =>
-  subscriptions.value.filter(
-    (s) =>
+  subscriptions.value.filter((s) => {
+    const start = s.startDate ?? 0;
+    const next = s.nextRenewal ?? 0;
+    const remaining = (s.totalMonths ?? s.receivedMonths) - s.receivedMonths;
+    return (
       (!tierFilter.value || s.tierName === tierFilter.value) &&
-      (!statusFilter.value || s.status === statusFilter.value)
-  )
+      (!statusFilter.value || s.status === statusFilter.value) &&
+      (!startFromTs.value || start >= startFromTs.value) &&
+      (!startToTs.value || start <= startToTs.value) &&
+      (!nextRenewalFromTs.value || next >= nextRenewalFromTs.value) &&
+      (!nextRenewalToTs.value || next <= nextRenewalToTs.value) &&
+      (monthsRemaining.value == null || remaining >= monthsRemaining.value)
+    );
+  })
 );
 
 const profiles = ref<Record<string, any>>({});
@@ -466,9 +564,22 @@ onMounted(() => {
 });
 watch(subscriptions, updateProfiles);
 
-watch([filter, tierFilter, statusFilter, showFilters], () => {
-  pagination.value.page = 1;
-});
+watch(
+  [
+    filter,
+    tierFilter,
+    statusFilter,
+    startFrom,
+    startTo,
+    nextRenewalFrom,
+    nextRenewalTo,
+    monthsRemaining,
+    showFilters,
+  ],
+  () => {
+    pagination.value.page = 1;
+  }
+);
 
 function pubkeyNpub(hex: string): string {
   try {
@@ -476,6 +587,10 @@ function pubkeyNpub(hex: string): string {
   } catch {
     return hex;
   }
+}
+
+function dateStringToTs(val: string | null): number | null {
+  return val ? Math.floor(new Date(val).getTime() / 1000) : null;
 }
 
 function formatTs(ts: number): string {
