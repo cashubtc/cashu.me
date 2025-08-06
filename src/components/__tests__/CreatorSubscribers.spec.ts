@@ -3,9 +3,10 @@ import { mount } from '@vue/test-utils';
 import { ref, nextTick } from 'vue';
 
 // mock quasar and its composables
+const notifyUpdate = vi.fn();
 const qMock = {
   dialog: vi.fn(() => ({ onOk: (cb: (val: string) => void) => cb('hello') })),
-  notify: vi.fn(),
+  notify: vi.fn(() => notifyUpdate),
   screen: { lt: { md: false } },
 };
 vi.mock('quasar', async (importOriginal) => {
@@ -114,7 +115,11 @@ describe('CreatorSubscribers.vue', () => {
   beforeEach(() => {
     routerPush.mockClear();
     messenger.startChat.mockClear();
-    messenger.sendDm.mockClear();
+    messenger.sendDm.mockReset();
+    messenger.sendDm.mockImplementation(async () => {});
+    qMock.notify.mockClear();
+    qMock.dialog.mockClear();
+    notifyUpdate.mockClear();
     subscriptions.value = [
       {
         subscriptionId: 'sub1',
@@ -180,13 +185,25 @@ describe('CreatorSubscribers.vue', () => {
     expect(messenger.startChat).toHaveBeenCalledWith('pk1');
 
     // group message
-    qMock.dialog.mockClear();
-    qMock.notify.mockClear();
+    const resolvers: Array<() => void> = [];
+    messenger.sendDm.mockImplementation(
+      () => new Promise((resolve) => resolvers.push(resolve)),
+    );
     wrapper.vm.selected = subscriptions.value.slice();
     wrapper.vm.sendGroupMessage();
-    await new Promise((r) => setTimeout(r));
+    await Promise.resolve();
     expect(messenger.sendDm).toHaveBeenCalledTimes(2);
-    expect(qMock.notify).toHaveBeenCalled();
+    expect(qMock.notify).toHaveBeenCalledTimes(1);
+    // resolve all pending sendDm promises
+    resolvers.forEach((r) => r());
+    await Promise.resolve();
+    await Promise.resolve();
+    expect(notifyUpdate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: 'positive',
+        message: expect.stringContaining('Sent to 2 subscribers'),
+      }),
+    );
     expect(wrapper.vm.selected).toHaveLength(0);
   });
 

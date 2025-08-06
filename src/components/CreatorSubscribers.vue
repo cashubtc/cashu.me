@@ -638,17 +638,27 @@ function sendGroupMessage() {
     persistent: true,
   }).onOk(async (val: string) => {
     const recipients = selected.value.slice();
-    for (const sub of recipients) {
-      try {
-        await messenger.sendDm(sub.subscriberNpub, val);
-      } catch (e) {
-        console.error(e);
-      }
-    }
-    $q.notify({
+    const notif = $q.notify({
+      spinner: true,
+      timeout: 0,
+      message: `Sending to ${recipients.length} subscribers...`,
+    });
+
+    const promises = recipients.map((sub) =>
+      messenger
+        .sendDm(sub.subscriberNpub, val)
+        .catch((e) => console.error(e)),
+    );
+
+    await Promise.all(promises);
+
+    notif({
       type: "positive",
+      spinner: false,
+      timeout: 3000,
       message: `Sent to ${recipients.length} subscribers`,
     });
+
     selected.value = [];
   });
 }
