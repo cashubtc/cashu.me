@@ -1593,6 +1593,11 @@ export default {
       active: "ใช้งาน",
       pending: "รอดำเนินการ",
     },
+    summary: {
+      activeSubscribers: "Active subscribers",
+      receivedMonths: "Received months",
+      revenue: "Revenue",
+    },
     monthsText: "{received} of {total} months",
     monthsTooltip: "Months received vs months purchased",
     startTooltip: "Filter by subscription start date",

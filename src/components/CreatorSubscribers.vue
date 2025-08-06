@@ -117,6 +117,34 @@
         </div>
       </q-slide-transition>
     </div>
+    <div class="row q-col-gutter-md q-mb-md">
+      <div class="col-12 col-sm-4">
+        <q-card flat bordered class="q-pa-sm text-center">
+          <div class="text-h6">{{ totalActiveSubscribers }}</div>
+          <div class="text-caption">
+            {{ t('CreatorSubscribers.summary.activeSubscribers') }}
+          </div>
+        </q-card>
+      </div>
+      <div class="col-12 col-sm-4">
+        <q-card flat bordered class="q-pa-sm text-center">
+          <div class="text-h6">{{ totalReceivedMonths }}</div>
+          <div class="text-caption">
+            {{ t('CreatorSubscribers.summary.receivedMonths') }}
+          </div>
+        </q-card>
+      </div>
+      <div class="col-12 col-sm-4">
+        <q-card flat bordered class="q-pa-sm text-center">
+          <div class="text-h6">
+            {{ formatCurrency(totalRevenue) }}
+          </div>
+          <div class="text-caption">
+            {{ t('CreatorSubscribers.summary.revenue') }}
+          </div>
+        </q-card>
+      </div>
+    </div>
     <q-table
       flat
       bordered
@@ -393,6 +421,8 @@ import { useQuasar } from "quasar";
 import profileCache from "src/js/profile-cache";
 import SubscriberProfileDialog from "./SubscriberProfileDialog.vue";
 import { useCreatorsStore } from "stores/creators";
+import { useUiStore } from "stores/ui";
+import { useMintsStore } from "stores/mints";
 
 const store = useCreatorSubscriptionsStore();
 const { subscriptions, loading } = storeToRefs(store);
@@ -402,6 +432,9 @@ const router = useRouter();
 const messenger = useMessengerStore();
 const $q = useQuasar();
 const creators = useCreatorsStore();
+const ui = useUiStore();
+const mints = useMintsStore();
+const { activeUnit } = storeToRefs(mints);
 const isSmallScreen = computed(() => $q.screen.lt.md);
 
 const showFilters = ref(!isSmallScreen.value);
@@ -527,6 +560,19 @@ const filteredSubscriptions = computed(() =>
     );
   })
 );
+
+const totalActiveSubscribers = computed(
+  () => filteredSubscriptions.value.filter((s) => s.status === "active").length
+);
+const totalReceivedMonths = computed(() =>
+  filteredSubscriptions.value.reduce((sum, s) => sum + s.receivedMonths, 0)
+);
+const totalRevenue = computed(() =>
+  filteredSubscriptions.value.reduce((sum, s) => sum + (s.totalAmount || 0), 0)
+);
+function formatCurrency(amount: number) {
+  return ui.formatCurrency(amount, activeUnit.value);
+}
 
 const profiles = ref<Record<string, any>>({});
 const nostr = useNostrStore();
