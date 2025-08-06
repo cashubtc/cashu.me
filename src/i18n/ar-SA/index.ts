@@ -1600,6 +1600,7 @@ export default {
     actions: {
       viewProfile: "View profile",
       sendMessage: "Send message",
+      downloadCsv: "Download CSV",
     },
     status: {
       active: "نشط",

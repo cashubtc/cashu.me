@@ -1,15 +1,23 @@
 <template>
   <div>
     <div class="q-mb-md">
-      <q-btn
-        v-if="isSmallScreen"
-        flat
-        color="primary"
-        icon="filter_list"
-        label="Filters"
-        @click="showFilters = !showFilters"
-        class="q-mb-sm"
-      />
+      <div class="row q-gutter-sm q-mb-sm">
+        <q-btn
+          v-if="isSmallScreen"
+          flat
+          color="primary"
+          icon="filter_list"
+          label="Filters"
+          @click="showFilters = !showFilters"
+        />
+        <q-btn
+          flat
+          color="primary"
+          icon="download"
+          :label="t('CreatorSubscribers.actions.downloadCsv')"
+          @click="downloadCsv"
+        />
+      </div>
       <q-slide-transition>
         <div v-show="!isSmallScreen || showFilters" class="row q-gutter-sm">
           <q-input
@@ -618,5 +626,48 @@ function sendMessage(pk: string) {
 function viewProfile(pk: string) {
   profileNpub.value = pubkeyNpub(pk);
   showProfileDialog.value = true;
+}
+
+function downloadCsv() {
+  const headers = [
+    t("CreatorSubscribers.columns.subscriber"),
+    t("CreatorSubscribers.columns.tier"),
+    t("CreatorSubscribers.columns.start"),
+    t("CreatorSubscribers.columns.nextRenewal"),
+    t("CreatorSubscribers.columns.months"),
+    t("CreatorSubscribers.columns.remaining"),
+    t("CreatorSubscribers.columns.status"),
+  ];
+  const lines = [headers.join(",")];
+  for (const sub of filteredSubscriptions.value) {
+    const subscriber =
+      profiles.value[sub.subscriberNpub]?.display_name ||
+      profiles.value[sub.subscriberNpub]?.name ||
+      pubkeyNpub(sub.subscriberNpub);
+    const start = sub.startDate ? formatTs(sub.startDate) : "";
+    const next = sub.nextRenewal ? formatTs(sub.nextRenewal) : "";
+    const months = `${sub.receivedMonths}/${sub.totalMonths ?? ""}`;
+    const remaining =
+      (sub.totalMonths ?? sub.receivedMonths) - sub.receivedMonths;
+    const status = t(`CreatorSubscribers.status.${sub.status}`);
+    const row = [
+      subscriber,
+      sub.tierName,
+      start,
+      next,
+      months,
+      remaining,
+      status,
+    ].map((v) => `"${String(v).replace(/"/g, '""')}"`).join(",");
+    lines.push(row);
+  }
+  const csv = lines.join("\n");
+  const blob = new Blob([csv], { type: "text/csv" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "subscribers.csv";
+  a.click();
+  URL.revokeObjectURL(url);
 }
 </script>
