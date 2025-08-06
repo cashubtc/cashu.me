@@ -1,90 +1,104 @@
 <template>
-  <div>
-    <CreatorSubscribersFilters
-      v-model:tierFilter="tierFilter"
-      v-model:statusFilter="statusFilter"
-      v-model:startFrom="startFrom"
-      v-model:startTo="startTo"
-      v-model:nextRenewalFrom="nextRenewalFrom"
-      v-model:nextRenewalTo="nextRenewalTo"
-      v-model:monthsRemaining="monthsRemaining"
-      v-model:frequencyFilter="frequencyFilter"
-      :tier-options="tierOptions"
-      :status-options="statusOptions"
-      :is-small-screen="isSmallScreen"
-      v-model:showFilters="showFilters"
-      @download-csv="downloadCsv"
-    />
-    <CreatorSubscribersSummary
-      :active-count="totalActiveSubscribers"
-      :pending-count="totalPendingSubscribers"
-      :total-received-periods="totalReceivedPeriods"
-      :total-revenue="totalRevenue"
-      :format-currency="formatCurrency"
-    />
-    <div
-      v-if="selected.length"
-      class="row q-gutter-sm q-mb-md"
-      :class="{ column: isSmallScreen }"
-    >
-      <q-btn
-        color="primary"
-        icon="chat"
-        :label="t('CreatorSubscribers.actions.sendGroupMessage')"
-        @click="sendGroupMessage"
-        class="q-mb-sm"
-      />
-      <q-btn
-        color="primary"
-        icon="download"
-        :label="t('CreatorSubscribers.actions.exportSelected')"
-        @click="exportSelected"
-        class="q-mb-sm"
-      />
+  <div class="space-y-4">
+    <!-- Summary cards -->
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+      <div class="p-4 border rounded text-center">
+        <div class="font-semibold">{{ t('CreatorSubscribers.summary.subscribers') }}</div>
+        <div class="mt-2 text-sm">
+          {{ t('CreatorSubscribers.summary.active') }}: {{ totalActiveSubscribers }}
+        </div>
+        <div class="text-sm">
+          {{ t('CreatorSubscribers.summary.pending') }}: {{ totalPendingSubscribers }}
+        </div>
+      </div>
+      <div class="p-4 border rounded text-center">
+        <div class="font-semibold">{{ t('CreatorSubscribers.summary.receivedPeriods') }}</div>
+        <div class="text-lg">{{ totalReceivedPeriods }}</div>
+      </div>
+      <div class="p-4 border rounded text-center">
+        <div class="font-semibold">{{ t('CreatorSubscribers.summary.revenue') }}</div>
+        <div class="text-lg">{{ formatCurrency(totalRevenue) }}</div>
+      </div>
     </div>
-    <div v-if="filteredSubscriptions.length">
-      <q-virtual-scroll
-        :items="filteredSubscriptions"
-        item-key="subscriptionId"
-        scroll-target="body"
-        items-size="auto"
-        scroll-padding
+
+    <!-- Bulk action bar -->
+    <div v-if="selected.length" class="flex flex-wrap gap-2">
+      <button class="px-4 py-2 text-white bg-blue-500 rounded" @click="sendGroupMessage">
+        {{ t('CreatorSubscribers.actions.sendGroupMessage') }}
+      </button>
+      <button class="px-4 py-2 text-white bg-blue-500 rounded" @click="exportSelected">
+        {{ t('CreatorSubscribers.actions.exportSelected') }}
+      </button>
+    </div>
+
+    <!-- List container -->
+    <div v-if="filteredSubscriptions.length" class="space-y-2">
+      <div
+        v-for="item in filteredSubscriptions"
+        :key="item.subscriptionId"
+        class="relative p-4 border rounded cursor-pointer"
+        @click="viewSubscriber(item)"
       >
-        <template #default="{ item }">
-          <div class="q-pa-xs">
-            <div class="relative-position">
-              <q-checkbox
-                class="absolute-top-right q-ma-sm z-top"
-                dense
-                :model-value="isSelected(item)"
-                @update:model-value="() => toggleSelection(item)"
-                @click.stop
-              />
-              <SubscriberCard
-                :class="{ 'bg-grey-2': isSelected(item) }"
-                :subscription="item"
-                :profile="profiles[item.subscriberNpub]"
-                @view="viewSubscriber(item)"
-              />
-            </div>
-          </div>
-        </template>
-      </q-virtual-scroll>
+        <input
+          type="checkbox"
+          class="absolute top-2 right-2"
+          :checked="isSelected(item)"
+          @change.stop="toggleSelection(item)"
+        />
+        <div class="font-medium">{{ item.tierName }}</div>
+        <div class="text-sm">{{ item.subscriberNpub }}</div>
+        <div class="text-xs">{{ t('CreatorSubscribers.status.' + item.status) }}</div>
+      </div>
     </div>
-    <div v-else class="full-width column items-center q-pa-md">
-      <div>{{ t("CreatorSubscribers.noData") }}</div>
-      <q-btn
-        flat
-        color="primary"
-        :label="t('CreatorSubscribers.shareProfile')"
-        to="/my-profile"
-        class="q-mt-sm"
-      />
+    <div v-else class="flex flex-col items-center w-full p-4">
+      <div>{{ t('CreatorSubscribers.noData') }}</div>
+      <router-link to="/my-profile" class="mt-2 text-blue-500 underline">
+        {{ t('CreatorSubscribers.shareProfile') }}
+      </router-link>
     </div>
-    <SubscriberDrawer
-      v-model="showDrawer"
-      :subscription="selectedSubscription"
-    />
+
+    <!-- Filter modal -->
+    <div v-if="showFilters" class="fixed inset-0 flex justify-end bg-black bg-opacity-50">
+      <div class="w-80 p-4 overflow-y-auto bg-white">
+        <button class="mb-4" @click="showFilters = false">&times;</button>
+        <div class="flex flex-col space-y-2">
+          <select v-model="tierFilter" class="p-2 border">
+            <option value="">{{ t('CreatorSubscribers.columns.tier') }}</option>
+            <option v-for="opt in tierOptions" :key="opt.value" :value="opt.value">
+              {{ opt.label }}
+            </option>
+          </select>
+          <select v-model="statusFilter" class="p-2 border">
+            <option value="">{{ t('CreatorSubscribers.columns.status') }}</option>
+            <option v-for="opt in statusOptions" :key="opt.value" :value="opt.value">
+              {{ opt.label }}
+            </option>
+          </select>
+          <select v-model="frequencyFilter" class="p-2 border">
+            <option value="">{{ t('CreatorSubscribers.filter.frequency') }}</option>
+            <option value="weekly">Weekly</option>
+            <option value="biweekly">Twice Monthly</option>
+            <option value="monthly">Monthly</option>
+          </select>
+          <input v-model="startFrom" type="date" class="p-2 border" />
+          <input v-model="startTo" type="date" class="p-2 border" />
+          <input v-model="nextRenewalFrom" type="date" class="p-2 border" />
+          <input v-model="nextRenewalTo" type="date" class="p-2 border" />
+          <input
+            v-model.number="monthsRemaining"
+            type="number"
+            class="p-2 border"
+            :placeholder="t('CreatorSubscribers.filter.monthsRemaining')"
+          />
+          <button class="px-4 py-2 text-white bg-blue-500 rounded" @click="downloadCsv">
+            {{ t('CreatorSubscribers.actions.downloadCsv') }}
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Drawer anchor -->
+    <SubscriberDrawer v-model="showDrawer" :subscription="selectedSubscription" />
   </div>
 </template>
 
@@ -92,7 +106,6 @@
 import { ref, computed, onMounted, watch } from "vue";
 import { storeToRefs } from "pinia";
 import { useI18n } from "vue-i18n";
-import { useQuasar } from "quasar";
 import { useCreatorSubscriptionsStore } from "stores/creatorSubscriptions";
 import { useMessengerStore } from "stores/messenger";
 import { useCreatorsStore } from "stores/creators";
@@ -102,9 +115,6 @@ import { useNostrStore } from "stores/nostr";
 import { useNdk } from "src/composables/useNdk";
 import profileCache from "src/js/profile-cache";
 import { exportSubscribers } from "src/utils/subscriberCsv";
-import CreatorSubscribersFilters from "./CreatorSubscribersFilters.vue";
-import CreatorSubscribersSummary from "./CreatorSubscribersSummary.vue";
-import SubscriberCard from "./SubscriberCard.vue";
 import SubscriberDrawer from "./SubscriberDrawer.vue";
 import type { CreatorSubscription } from "stores/creatorSubscriptions";
 
@@ -112,15 +122,12 @@ const store = useCreatorSubscriptionsStore();
 const { subscriptions } = storeToRefs(store);
 
 const { t } = useI18n();
-const $q = useQuasar();
 const messenger = useMessengerStore();
 const creators = useCreatorsStore();
 const ui = useUiStore();
 const mints = useMintsStore();
 const { activeUnit } = storeToRefs(mints);
 const nostr = useNostrStore();
-
-const isSmallScreen = computed(() => $q.screen.lt.md);
 
 const props = withDefaults(
   defineProps<{ filter?: string; showFilters?: boolean }>(),
@@ -135,6 +142,7 @@ const showFilters = computed({
   get: () => props.showFilters,
   set: (val: boolean) => emit("update:showFilters", val),
 });
+
 const tierFilter = ref<string | null>(null);
 const statusFilter = ref<string | null>(null);
 const startFrom = ref<string | null>(null);
@@ -158,9 +166,7 @@ function isSelected(sub: any) {
   return selected.value.some((s) => s.subscriptionId === sub.subscriptionId);
 }
 function toggleSelection(sub: any) {
-  const idx = selected.value.findIndex(
-    (s) => s.subscriptionId === sub.subscriptionId
-  );
+  const idx = selected.value.findIndex((s) => s.subscriptionId === sub.subscriptionId);
   if (idx >= 0) {
     selected.value.splice(idx, 1);
   } else {
@@ -288,39 +294,19 @@ function exportSelected() {
   exportSubscribers(selected.value, "subscribers.csv");
 }
 
-function sendGroupMessage() {
-  $q.dialog({
-    title: t("CreatorSubscribers.actions.sendGroupMessage"),
-    prompt: {
-      model: "",
-      type: "textarea",
-      label: t("CreatorSubscribers.actions.sendMessage"),
-    },
-    cancel: true,
-    persistent: true,
-  }).onOk(async (val: string) => {
-    const recipients = selected.value.slice();
-    const notif = $q.notify({
-      spinner: true,
-      timeout: 0,
-      message: `Sending to ${recipients.length} subscribers...`,
-    });
-
-    const promises = recipients.map((sub) =>
-      messenger.sendDm(sub.subscriberNpub, val).catch((e) => console.error(e))
-    );
-
-    await Promise.all(promises);
-
-    notif({
-      type: "positive",
-      spinner: false,
-      timeout: 3000,
-      message: `Sent to ${recipients.length} subscribers`,
-    });
-
-    selected.value = [];
-  });
+async function sendGroupMessage() {
+  const val = window.prompt(
+    t("CreatorSubscribers.actions.sendMessage"),
+    ""
+  );
+  if (!val) return;
+  const recipients = selected.value.slice();
+  const promises = recipients.map((sub) =>
+    messenger.sendDm(sub.subscriberNpub, val).catch((e) => console.error(e))
+  );
+  await Promise.all(promises);
+  window.alert(`Sent to ${recipients.length} subscribers`);
+  selected.value = [];
 }
 
 onMounted(() => {
@@ -331,3 +317,4 @@ onMounted(() => {
 });
 watch(subscriptions, updateProfiles);
 </script>
+
