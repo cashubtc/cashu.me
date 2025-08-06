@@ -1581,6 +1581,9 @@ export default {
     columns: {
       subscriber: "Subscriber",
       tier: "Tier",
+      followers: "Followers",
+      following: "Following",
+      latestNote: "Latest note",
       start: "Start",
       nextRenewal: "Next renewal",
       months: "Months",
