@@ -1607,7 +1607,9 @@ export default {
       pending: "保留中",
     },
     summary: {
-      activeSubscribers: "Active subscribers",
+      subscribers: "Subscribers",
+      active: "Active",
+      pending: "Pending",
       receivedPeriods: "Received months",
       revenue: "Revenue",
     },

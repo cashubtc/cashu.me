@@ -230,7 +230,8 @@ describe("CreatorSubscribers.vue", () => {
 
     const summaryWrapper = mount(CreatorSubscribersSummary, {
       props: {
-        totalActiveSubscribers: 1,
+        activeCount: 1,
+        pendingCount: 1,
         totalReceivedPeriods: 2,
         totalRevenue: 3,
         formatCurrency: (a: number) => `${a}`,
