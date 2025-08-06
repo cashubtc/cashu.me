@@ -90,9 +90,26 @@
             class="p-2 border"
             :placeholder="t('CreatorSubscribers.filter.monthsRemaining')"
           />
-          <button class="px-4 py-2 text-white bg-blue-500 rounded" @click="downloadCsv">
+          <button
+            class="px-4 py-2 text-white bg-blue-500 rounded"
+            @click="downloadCsv"
+          >
             {{ t('CreatorSubscribers.actions.downloadCsv') }}
           </button>
+          <div class="flex justify-end gap-2 pt-2">
+            <button
+              class="px-4 py-2 border rounded"
+              @click="resetAllFilters"
+            >
+              Reset
+            </button>
+            <button
+              class="px-4 py-2 text-white bg-blue-500 rounded"
+              @click="applyAllFilters"
+            >
+              Apply
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -292,6 +309,21 @@ function downloadCsv() {
 
 function exportSelected() {
   exportSubscribers(selected.value, "subscribers.csv");
+}
+
+function resetAllFilters() {
+  tierFilter.value = null;
+  statusFilter.value = null;
+  frequencyFilter.value = null;
+  startFrom.value = null;
+  startTo.value = null;
+  nextRenewalFrom.value = null;
+  nextRenewalTo.value = null;
+  monthsRemaining.value = null;
+}
+
+function applyAllFilters() {
+  showFilters.value = false;
 }
 
 async function sendGroupMessage() {

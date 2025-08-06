@@ -106,7 +106,6 @@ vi.mock("src/utils/subscriberCsv", () => ({
 import { exportSubscribers } from "src/utils/subscriberCsv";
 
 import CreatorSubscribers from "../CreatorSubscribers.vue";
-import CreatorSubscribersFilters from "../CreatorSubscribersFilters.vue";
 import CreatorSubscribersSummary from "../CreatorSubscribersSummary.vue";
 
 describe("CreatorSubscribers.vue", () => {
@@ -209,25 +208,7 @@ describe("CreatorSubscribers.vue", () => {
     expect(wrapper.vm.selected).toHaveLength(0);
   });
 
-  it("mounts filter and summary components", () => {
-    const filtersWrapper = mount(CreatorSubscribersFilters, {
-      props: {
-        tierFilter: null,
-        statusFilter: null,
-        startFrom: null,
-        startTo: null,
-        nextRenewalFrom: null,
-        nextRenewalTo: null,
-        monthsRemaining: null,
-        frequencyFilter: null,
-        tierOptions: [],
-        statusOptions: [],
-        isSmallScreen: false,
-        showFilters: true,
-      },
-    });
-    expect(filtersWrapper.exists()).toBe(true);
-
+  it("mounts summary component", () => {
     const summaryWrapper = mount(CreatorSubscribersSummary, {
       props: {
         activeCount: 1,
@@ -238,5 +219,14 @@ describe("CreatorSubscribers.vue", () => {
       },
     });
     expect(summaryWrapper.exists()).toBe(true);
+  });
+
+  it("resets filters", () => {
+    const wrapper = mount(CreatorSubscribers);
+    wrapper.vm.tierFilter = "Gold";
+    wrapper.vm.statusFilter = "active";
+    wrapper.vm.resetAllFilters();
+    expect(wrapper.vm.tierFilter).toBeNull();
+    expect(wrapper.vm.statusFilter).toBeNull();
   });
 });
