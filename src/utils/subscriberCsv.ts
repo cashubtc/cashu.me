@@ -9,15 +9,15 @@ export function exportSubscribers(
     "Tier",
     "Start",
     "Next Renewal",
-    "Months",
-    "Remaining",
-    "Status",
+    "Periods received",
+    "Remaining periods",
+    "Frequency",
   ];
   const lines = [headers.join(",")];
   for (const sub of subscribers) {
     const start = sub.startDate ? new Date(sub.startDate).toISOString() : "";
     const next = sub.nextRenewal ? new Date(sub.nextRenewal).toISOString() : "";
-    const months = `${sub.receivedPeriods}/${sub.totalPeriods ?? ""}`;
+    const periods = `${sub.receivedPeriods}/${sub.totalPeriods ?? ""}`;
     const remaining =
       (sub.totalPeriods ?? sub.receivedPeriods) - sub.receivedPeriods;
     const row = [
@@ -25,9 +25,9 @@ export function exportSubscribers(
       sub.tierName,
       start,
       next,
-      months,
+      periods,
       remaining,
-      sub.status,
+      sub.frequency,
     ]
       .map((v) => `"${String(v).replace(/"/g, '""')}"`)
       .join(",");
