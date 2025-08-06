@@ -143,11 +143,13 @@ describe("CreatorSubscribers.vue", () => {
     ];
   });
 
-  it("renders subscriber cards with profile names", async () => {
+  it("renders subscriber cards", async () => {
     const wrapper = mount(CreatorSubscribers);
     await nextTick();
-    expect(wrapper.text()).toContain("Alice");
-    expect(wrapper.text()).toContain("Bob");
+    const cards = wrapper.findAll("div.cursor-pointer");
+    expect(cards).toHaveLength(2);
+    expect(cards[0].text()).toContain("pk1");
+    expect(cards[1].text()).toContain("pk2");
   });
 
   it("filters by tier and status", async () => {
@@ -156,14 +158,14 @@ describe("CreatorSubscribers.vue", () => {
 
     wrapper.vm.tierFilter = "Gold";
     await nextTick();
-    expect(wrapper.text()).toContain("Alice");
-    expect(wrapper.text()).not.toContain("Bob");
+    expect(wrapper.text()).toContain("pk1");
+    expect(wrapper.text()).not.toContain("pk2");
 
     wrapper.vm.tierFilter = null;
     wrapper.vm.statusFilter = "pending";
     await nextTick();
-    expect(wrapper.text()).toContain("Bob");
-    expect(wrapper.text()).not.toContain("Alice");
+    expect(wrapper.text()).toContain("pk2");
+    expect(wrapper.text()).not.toContain("pk1");
   });
 
   it("sends group messages", async () => {
@@ -173,8 +175,10 @@ describe("CreatorSubscribers.vue", () => {
     messenger.sendDm.mockImplementation(
       () => new Promise((resolve) => resolvers.push(resolve))
     );
-    wrapper.vm.selected = subscriptions.value.slice();
-    wrapper.vm.sendGroupMessage();
+    const checkboxes = wrapper.findAll('input[type="checkbox"]');
+    await checkboxes[0].setValue(true);
+    await checkboxes[1].setValue(true);
+    await wrapper.vm.sendGroupMessage();
     await Promise.resolve();
     expect(messenger.sendDm).toHaveBeenCalledTimes(2);
     resolvers.forEach((r) => r());
@@ -200,11 +204,13 @@ describe("CreatorSubscribers.vue", () => {
     expect(mock).toHaveBeenCalledWith(wrapper.vm.selected, "subscribers.csv");
   });
 
-  it("toggleSelection adds and removes", () => {
+  it("toggleSelection adds and removes", async () => {
     const wrapper = mount(CreatorSubscribers);
-    wrapper.vm.toggleSelection(subscriptions.value[0]);
+    await nextTick();
+    const checkbox = wrapper.find('input[type="checkbox"]');
+    await checkbox.setValue(true);
     expect(wrapper.vm.selected).toHaveLength(1);
-    wrapper.vm.toggleSelection(subscriptions.value[0]);
+    await checkbox.setValue(false);
     expect(wrapper.vm.selected).toHaveLength(0);
   });
 

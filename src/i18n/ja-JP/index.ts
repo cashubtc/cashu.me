@@ -1605,8 +1605,9 @@ export default {
       viewProfile: "View profile",
       sendMessage: "Send message",
       downloadCsv: "Download CSV",
-      sendGroupMessage: "Send group message",
+      sendGroupMessage: "Send Group DM",
       exportSelected: "Export selected",
+      filters: "Filters",
     },
     status: {
       active: "アクティブ",
