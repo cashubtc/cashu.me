@@ -62,6 +62,16 @@ const routes = [
     ],
   },
   {
+    path: "/creator-subscribers",
+    component: () => import("layouts/FullscreenLayout.vue"),
+    children: [
+      {
+        path: "",
+        component: () => import("src/pages/CreatorSubscribers.vue"),
+      },
+    ],
+  },
+  {
     path: "/nostr-messenger",
     component: () => import("layouts/MainLayout.vue"),
     children: [
