@@ -521,7 +521,11 @@ export default {
   },
   ErrorNotFound: {
     title: "404",
-    text: "Oops. Burada bir şey yok…",
+    text: "Bu sayfa mevcut değil. Yardım için aşağıdaki bağlantıları deneyin:",
+    links: {
+      docs: "Dokümantasyon",
+      tips: "İpuçları",
+    },
     actions: {
       home: {
         label: "Ana sayfaya geri dön",

@@ -511,7 +511,11 @@ export default {
   },
   ErrorNotFound: {
     title: "404",
-    text: "哎呀。这里什么都没有…",
+    text: "该页面不存在。请使用下面的链接获取帮助：",
+    links: {
+      docs: "文档",
+      tips: "提示",
+    },
     actions: {
       home: {
         label: "返回主页",

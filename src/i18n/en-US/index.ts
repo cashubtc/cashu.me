@@ -578,7 +578,11 @@ export const messages = {
   },
   ErrorNotFound: {
     title: "404",
-    text: "Oops. Nothing here…",
+    text: "This page doesn't exist. Try the links below for help:",
+    links: {
+      docs: "Documentation",
+      tips: "Tips & Tricks",
+    },
     actions: {
       home: {
         label: "Go back home",
