@@ -100,6 +100,12 @@ vi.mock('nostr-tools', () => ({
   nip19: { npubEncode: (pk: string) => `npub_${pk}` },
 }));
 
+// mock export helper
+vi.mock('src/utils/subscriberCsv', () => ({
+  exportSubscribers: vi.fn(),
+}));
+import { exportSubscribers } from 'src/utils/subscriberCsv';
+
 import CreatorSubscribers from '../CreatorSubscribers.vue';
 import CreatorSubscribersFilters from '../CreatorSubscribersFilters.vue';
 import CreatorSubscribersSummary from '../CreatorSubscribersSummary.vue';
@@ -182,6 +188,25 @@ describe('CreatorSubscribers.vue', () => {
     expect(messenger.sendDm).toHaveBeenCalledTimes(2);
     expect(qMock.notify).toHaveBeenCalled();
     expect(wrapper.vm.selected).toHaveLength(0);
+  });
+
+  it('exports subscribers via helper', () => {
+    const wrapper = mount(CreatorSubscribers);
+    const mock = vi.mocked(exportSubscribers);
+    mock.mockClear();
+    wrapper.vm.downloadCsv();
+    expect(mock).toHaveBeenCalledWith(
+      wrapper.vm.filteredSubscriptions,
+      'subscribers.csv',
+    );
+
+    mock.mockClear();
+    wrapper.vm.selected = [subscriptions.value[0]];
+    wrapper.vm.exportSelected();
+    expect(mock).toHaveBeenCalledWith(
+      wrapper.vm.selected,
+      'subscribers.csv',
+    );
   });
 
   it('mounts filter and summary components', () => {
