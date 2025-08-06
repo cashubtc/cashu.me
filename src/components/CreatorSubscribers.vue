@@ -441,8 +441,8 @@ const columns = computed(() => [
     align: "center",
     sortable: true,
     sort: (a, b, rowA, rowB) =>
-      rowA.receivedMonths / rowA.totalMonths -
-      rowB.receivedMonths / rowB.totalMonths,
+      rowA.receivedMonths / (rowA.totalMonths || 1) -
+      rowB.receivedMonths / (rowB.totalMonths || 1),
   },
   {
     name: "remaining",
