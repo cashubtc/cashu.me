@@ -161,10 +161,14 @@
             />
             <q-card-section class="row items-center no-wrap">
               <q-avatar size="32px">
-                <template v-if="profiles[props.row.subscriberNpub] === undefined">
+                <template
+                  v-if="profiles[props.row.subscriberNpub] === undefined"
+                >
                   <q-skeleton type="circle" size="32px" />
                 </template>
-                <template v-else-if="profiles[props.row.subscriberNpub]?.picture">
+                <template
+                  v-else-if="profiles[props.row.subscriberNpub]?.picture"
+                >
                   <img :src="profiles[props.row.subscriberNpub].picture" />
                 </template>
                 <template v-else>
@@ -172,7 +176,9 @@
                 </template>
               </q-avatar>
               <div class="q-ml-sm">
-                <template v-if="profiles[props.row.subscriberNpub] === undefined">
+                <template
+                  v-if="profiles[props.row.subscriberNpub] === undefined"
+                >
                   <q-skeleton type="text" width="120px" />
                 </template>
                 <template v-else>
@@ -354,6 +360,7 @@ import { useCreatorsStore } from "stores/creators";
 import { useUiStore } from "stores/ui";
 import { useMintsStore } from "stores/mints";
 import { exportSubscribers } from "src/utils/subscriberCsv";
+import pLimit from "p-limit";
 
 const store = useCreatorSubscriptionsStore();
 const { subscriptions, loading } = storeToRefs(store);
@@ -512,6 +519,7 @@ const nostr = useNostrStore();
 
 const showProfileDialog = ref(false);
 const profileNpub = ref("");
+const limit = pLimit(5);
 
 async function updateProfiles() {
   const missing: string[] = [];
@@ -526,20 +534,24 @@ async function updateProfiles() {
     }
   }
 
-  const batchSize = 5;
-  for (let i = 0; i < missing.length; i += batchSize) {
-    const batch = missing.slice(i, i + batchSize);
-    const fetched = await Promise.all(batch.map((pk) => nostr.getProfile(pk)));
-    fetched.forEach((p, idx) => {
-      const pk = batch[idx];
-      if (p) {
-        profileCache.set(pk, p);
-        profiles.value[pk] = p;
-      } else {
-        profiles.value[pk] = {};
-      }
-    });
-  }
+  await Promise.all(
+    missing.map((pk) =>
+      limit(async () => {
+        try {
+          const p = await nostr.getProfile(pk);
+          if (p) {
+            profileCache.set(pk, p);
+            profiles.value[pk] = p;
+          } else {
+            profiles.value[pk] = {};
+          }
+        } catch (e) {
+          console.error("Failed to fetch profile", pk, e);
+          profiles.value[pk] = {};
+        }
+      })
+    )
+  );
 }
 
 onMounted(() => {
@@ -616,11 +628,11 @@ function exportSelected() {
 
 function sendGroupMessage() {
   $q.dialog({
-    title: t('CreatorSubscribers.actions.sendGroupMessage'),
+    title: t("CreatorSubscribers.actions.sendGroupMessage"),
     prompt: {
-      model: '',
-      type: 'textarea',
-      label: t('CreatorSubscribers.actions.sendMessage'),
+      model: "",
+      type: "textarea",
+      label: t("CreatorSubscribers.actions.sendMessage"),
     },
     cancel: true,
     persistent: true,
@@ -634,7 +646,7 @@ function sendGroupMessage() {
       }
     }
     $q.notify({
-      type: 'positive',
+      type: "positive",
       message: `Sent to ${recipients.length} subscribers`,
     });
     selected.value = [];
