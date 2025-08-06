@@ -2,14 +2,14 @@
   <div class="q-pa-md">
     <div class="row items-center justify-between q-mb-md">
       <h5 class="q-my-none">{{ $t("SubscriptionsOverview.title") }}</h5>
-        <q-btn
-          v-if="creatorSubscriptions.length > 0"
-          flat
-          color="primary"
-          to="/creator-subscribers"
-        >
-          My Subscribers
-        </q-btn>
+      <q-btn
+        v-if="creatorSubscriptions.length > 0"
+        flat
+        color="primary"
+        to="/creator-subscribers"
+      >
+        My Subscribers
+      </q-btn>
     </div>
     <q-card flat bordered class="q-mb-md">
       <q-card-section class="row items-center">
@@ -33,14 +33,8 @@
         </q-btn>
       </template>
     </q-banner>
-    <q-banner
-      v-if="soonRows.length"
-      dense
-      class="q-mb-md bg-warning"
-    >
-      {{
-        $t("SubscriptionsOverview.soon_unlock", { count: soonRows.length })
-      }}
+    <q-banner v-if="soonRows.length" dense class="q-mb-md bg-warning">
+      {{ $t("SubscriptionsOverview.soon_unlock", { count: soonRows.length }) }}
     </q-banner>
     <div>
       <q-form class="q-gutter-sm q-mb-md">
@@ -52,10 +46,7 @@
           @click="showFilterPanel = !showFilterPanel"
         />
         <q-slide-transition>
-          <div
-            v-show="showFilterPanel"
-            class="q-mt-sm q-gutter-sm column"
-          >
+          <div v-show="showFilterPanel" class="q-mt-sm q-gutter-sm column">
             <q-input
               v-model="filter"
               dense
@@ -124,13 +115,7 @@
         </q-slide-transition>
       </q-form>
       <div v-if="isLoading" class="subscription-grid">
-        <q-card
-          v-for="n in 3"
-          :key="n"
-          flat
-          bordered
-          class="placeholder-card"
-        >
+        <q-card v-for="n in 3" :key="n" flat bordered class="placeholder-card">
           <q-card-section class="row items-center">
             <q-skeleton type="circle" size="40px" />
             <div class="q-ml-sm col">
@@ -161,7 +146,13 @@
         </q-card>
       </div>
       <div v-else class="subscription-grid">
-        <q-card v-for="row in filteredRows" :key="row.creator" flat bordered class="subscription-card">
+        <q-card
+          v-for="row in filteredRows"
+          :key="row.creator"
+          flat
+          bordered
+          class="subscription-card"
+        >
           <q-card-section class="row items-center">
             <q-avatar size="40px" v-if="profiles[row.creator]?.picture">
               <img :src="profiles[row.creator].picture" />
@@ -183,7 +174,7 @@
               {{ $t(`SubscriptionsOverview.status.${row.status}`) }}
             </q-badge>
             <q-badge v-if="row.soon" color="warning" class="q-ml-sm">
-              {{ $t('SubscriptionsOverview.soon_badge') }}
+              {{ $t("SubscriptionsOverview.soon_badge") }}
             </q-badge>
           </q-card-section>
           <q-card-section class="q-pt-none">
@@ -196,7 +187,10 @@
               track-color="grey-4"
             />
             <div class="row justify-between text-caption q-mt-xs">
-              <div>{{ row.totalPeriods - row.monthsLeft }} / {{ row.totalPeriods }} months</div>
+              <div>
+                {{ row.totalPeriods - row.monthsLeft }} /
+                {{ row.totalPeriods }} months
+              </div>
               <div>
                 {{
                   row.countdown
@@ -209,7 +203,9 @@
             </div>
           </q-card-section>
           <q-card-section>
-            <div class="text-caption"><strong>{{ row.tierName }}</strong></div>
+            <div class="text-caption">
+              <strong>{{ row.tierName }}</strong>
+            </div>
             <div class="text-caption">
               Cost: {{ formatCurrency(row.monthly) }} / {{ row.frequency }}
             </div>
@@ -222,14 +218,29 @@
           </q-card-section>
           <q-card-actions class="justify-between">
             <div class="q-gutter-xs">
-              <q-btn size="sm" flat color="primary" @click="toggleDetails(row.creator)">
-                {{ $t('SubscriptionsOverview.view') }}
+              <q-btn
+                size="sm"
+                flat
+                color="primary"
+                @click="toggleDetails(row.creator)"
+              >
+                {{ $t("SubscriptionsOverview.view") }}
               </q-btn>
-              <q-btn size="sm" flat color="primary" @click="sendMessage(row.creator)">
-                {{ $t('SubscriptionsOverview.message') }}
+              <q-btn
+                size="sm"
+                flat
+                color="primary"
+                @click="sendMessage(row.creator)"
+              >
+                {{ $t("SubscriptionsOverview.message") }}
               </q-btn>
-              <q-btn size="sm" flat color="primary" @click="extendSubscription(row.creator)">
-                {{ $t('SubscriptionsOverview.renew') }}
+              <q-btn
+                size="sm"
+                flat
+                color="primary"
+                @click="extendSubscription(row.creator)"
+              >
+                {{ $t("SubscriptionsOverview.renew") }}
               </q-btn>
             </div>
             <q-btn
@@ -237,10 +248,12 @@
               round
               dense
               icon="more_vert"
-              :aria-label="$t('SubscriptionsOverview.actions.more_actions.label')"
+              :aria-label="
+                $t('SubscriptionsOverview.actions.more_actions.label')
+              "
             >
               <q-tooltip>
-                {{ $t('SubscriptionsOverview.actions.more_actions.label') }}
+                {{ $t("SubscriptionsOverview.actions.more_actions.label") }}
               </q-tooltip>
               <q-menu anchor="bottom right" self="top right">
                 <q-list dense style="min-width: 150px">
@@ -320,7 +333,8 @@
                       {{ formatCurrency(t.amount) }}
                     </q-item-label>
                     <q-item-label caption>
-                      Month {{ t.monthIndex }} - {{ t.locktime ? formatTs(t.locktime) : '-' }}
+                      Month {{ t.monthIndex }} -
+                      {{ t.locktime ? formatTs(t.locktime) : "-" }}
                     </q-item-label>
                     <q-item-label caption v-if="t.locktime">
                       Unlocks in {{ countdownTo(t.locktime) }}
@@ -341,8 +355,11 @@
                     />
                   </q-item-section>
                 </q-item>
-                <div v-if="row.tokens.length === 0" class="text-center q-pa-md text-caption">
-                  {{ $t('LockedTokensTable.empty_text') }}
+                <div
+                  v-if="row.tokens.length === 0"
+                  class="text-center q-pa-md text-caption"
+                >
+                  {{ $t("LockedTokensTable.empty_text") }}
                 </div>
               </q-list>
             </div>
@@ -355,39 +372,42 @@
           {{ $t("SubscriptionsOverview.discover") }}
         </q-btn>
       </div>
-    <q-dialog v-model="showMessageDialog">
-      <q-card style="min-width: 300px">
-        <q-card-section class="text-h6">
-          {{ $t("SubscriptionsOverview.message") }}
-        </q-card-section>
-        <q-card-section>
-          <q-input v-model="messageText" type="textarea" autofocus />
-        </q-card-section>
-        <q-card-actions align="right">
-          <q-btn flat v-close-popup color="grey">
-            {{ $t("global.actions.cancel.label") }}
-          </q-btn>
-          <q-btn
-            flat
-            color="primary"
-            :disable="!messageText.trim()"
-            @click="confirmMessage"
-          >
-            {{ $t("global.actions.send.label") }}
-          </q-btn>
-        </q-card-actions>
-      </q-card>
-    </q-dialog>
-    <SubscriptionReceipt v-model="showReceiptDialog" :receipts="receiptList" />
-    <ConfirmationDialog
-      v-model="showConfirmDialog"
-      :title="confirmTitle"
-      :message="confirmDialogMessage"
-      :confirm-label="$t('global.actions.ok.label')"
-      :cancel-label="$t('global.actions.cancel.label')"
-      @confirm="confirmCancel"
-    />
-  </div>
+      <q-dialog v-model="showMessageDialog">
+        <q-card style="min-width: 300px">
+          <q-card-section class="text-h6">
+            {{ $t("SubscriptionsOverview.message") }}
+          </q-card-section>
+          <q-card-section>
+            <q-input v-model="messageText" type="textarea" autofocus />
+          </q-card-section>
+          <q-card-actions align="right">
+            <q-btn flat v-close-popup color="grey">
+              {{ $t("global.actions.cancel.label") }}
+            </q-btn>
+            <q-btn
+              flat
+              color="primary"
+              :disable="!messageText.trim()"
+              @click="confirmMessage"
+            >
+              {{ $t("global.actions.send.label") }}
+            </q-btn>
+          </q-card-actions>
+        </q-card>
+      </q-dialog>
+      <SubscriptionReceipt
+        v-model="showReceiptDialog"
+        :receipts="receiptList"
+      />
+      <ConfirmationDialog
+        v-model="showConfirmDialog"
+        :title="confirmTitle"
+        :message="confirmDialogMessage"
+        :confirm-label="$t('global.actions.ok.label')"
+        :cancel-label="$t('global.actions.cancel.label')"
+        @confirm="confirmCancel"
+      />
+    </div>
   </div>
 </template>
 
@@ -420,6 +440,8 @@ import token from "src/js/token";
 import SubscriptionReceipt from "components/SubscriptionReceipt.vue";
 import { cashuDb } from "stores/dexie";
 import { useClipboard } from "src/composables/useClipboard";
+import profileCache from "src/js/profile-cache";
+import { useNdk } from "src/composables/useNdk";
 
 const bucketsStore = useBucketsStore();
 const mintsStore = useMintsStore();
@@ -490,8 +512,7 @@ const rows = computed(() => {
     const nextUnlock =
       future.sort((a, b) => a.locktime! - b.locktime!)[0]?.locktime || null;
     const countdown = nextUnlock ? formatDistanceToNow(nextUnlock * 1000) : "";
-    const soon =
-      !!nextUnlock && nextUnlock - nowSec <= 7 * 24 * 60 * 60;
+    const soon = !!nextUnlock && nextUnlock - nowSec <= 7 * 24 * 60 * 60;
     const monthsLeft = future.length;
     const monthly = sub.amountPerInterval;
     const start = sub.startDate || null;
@@ -696,8 +717,7 @@ function extendSubscription(pubkey: string) {
     const lastLock = future.length
       ? future[future.length - 1].locktime!
       : Math.floor(Date.now() / 1000);
-    const startDate =
-      lastLock + (sub.intervalDays ?? 30) * 24 * 60 * 60;
+    const startDate = lastLock + (sub.intervalDays ?? 30) * 24 * 60 * 60;
     try {
       let profile = null;
       try {
@@ -802,7 +822,10 @@ function exportTokens(pubkey: string) {
   a.download = `tokens_${pubkey}.csv`;
   a.click();
   URL.revokeObjectURL(url);
-  showToast(t('SubscriptionsOverview.notifications.export_success'), 'positive');
+  showToast(
+    t("SubscriptionsOverview.notifications.export_success"),
+    "positive"
+  );
 }
 
 function confirmCancel() {
@@ -811,21 +834,53 @@ function confirmCancel() {
   subscriptionsStore
     .cancelSubscription(pubkey)
     .then(() =>
-      showToast(t("SubscriptionsOverview.notifications.cancel_success"), "positive")
+      showToast(
+        t("SubscriptionsOverview.notifications.cancel_success"),
+        "positive"
+      )
     )
-    .catch((e: any) => showToast(e.message, 'negative'))
+    .catch((e: any) => showToast(e.message, "negative"))
     .finally(() => {
       showConfirmDialog.value = false;
     });
 }
 
-
 async function updateProfiles() {
+  const missing: string[] = [];
   for (const sub of subscriptionsStore.subscriptions) {
     const pk = sub.creatorNpub;
-    if (!profiles.value[pk]) {
-      const p = await nostr.getProfile(pk);
-      if (p) profiles.value[pk] = p;
+    const cached = profileCache.get(pk);
+    if (cached) {
+      profiles.value[pk] = cached;
+    } else if (profiles.value[pk] === undefined) {
+      missing.push(pk);
+    }
+  }
+  if (!missing.length) return;
+  try {
+    await nostr.initNdkReadOnly();
+    const ndk = await useNdk({ requireSigner: false });
+    const events = await ndk.fetchEvents({ kinds: [0], authors: missing });
+    const found = new Set<string>();
+    events.forEach((ev: any) => {
+      try {
+        const profile = JSON.parse(ev.content || "{}");
+        profileCache.set(ev.pubkey, profile);
+        profiles.value[ev.pubkey] = profile;
+        found.add(ev.pubkey);
+      } catch (e) {
+        profiles.value[ev.pubkey] = {};
+      }
+    });
+    for (const pk of missing) {
+      if (!found.has(pk)) {
+        profiles.value[pk] = {};
+      }
+    }
+  } catch (e) {
+    console.error("Failed to fetch profiles", e);
+    for (const pk of missing) {
+      profiles.value[pk] = {};
     }
   }
 }
