@@ -11,6 +11,7 @@ export interface CreatorSubscription {
   tierName: string;
   totalMonths: number;
   receivedMonths: number;
+  totalAmount: number;
   status: "pending" | "active";
   nextRenewal: number | null;
   startDate: number | null;
@@ -55,6 +56,7 @@ export const useCreatorSubscriptionsStore = defineStore(
                 "",
               totalMonths: row.totalMonths || 0,
               receivedMonths: 0,
+              totalAmount: 0,
               status: "pending",
               nextRenewal: null,
               startDate: null,
@@ -65,6 +67,7 @@ export const useCreatorSubscriptionsStore = defineStore(
             map.set(id, sub);
           }
           sub.receivedMonths += 1;
+          sub.totalAmount += row.amount;
           if (row.unlockTs != null) {
             if (
               sub.earliestUnlock == null ||
@@ -91,6 +94,7 @@ export const useCreatorSubscriptionsStore = defineStore(
             tierName: s.tierName,
             totalMonths: s.totalMonths,
             receivedMonths: s.receivedMonths,
+            totalAmount: s.totalAmount,
             status:
               s.receivedMonths >= s.totalMonths ? "active" : "pending",
             nextRenewal,

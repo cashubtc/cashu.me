@@ -1585,6 +1585,11 @@ export default {
       active: "活跃",
       pending: "待处理",
     },
+    summary: {
+      activeSubscribers: "Active subscribers",
+      receivedMonths: "Received months",
+      revenue: "Revenue",
+    },
     monthsText: "{received} of {total} months",
     monthsTooltip: "Months received vs months purchased",
     startTooltip: "Filter by subscription start date",

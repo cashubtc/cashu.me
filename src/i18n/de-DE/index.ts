@@ -1612,6 +1612,11 @@ export default {
       active: "Aktiv",
       pending: "Ausstehend",
     },
+    summary: {
+      activeSubscribers: "Active subscribers",
+      receivedMonths: "Received months",
+      revenue: "Revenue",
+    },
     monthsText: "{received} of {total} months",
     monthsTooltip: "Months received vs months purchased",
     startTooltip: "Filter by subscription start date",
