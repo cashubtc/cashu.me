@@ -4,13 +4,24 @@ import { liveQuery } from "dexie";
 import { ref } from "vue";
 import { useCreatorsStore } from "./creators";
 
+function daysToFrequency(
+  days: number,
+): "weekly" | "biweekly" | "monthly" {
+  if (days === 7) return "weekly";
+  if (days === 14) return "biweekly";
+  return "monthly";
+}
+
 export interface CreatorSubscription {
   subscriptionId: string;
   subscriberNpub: string;
   tierId: string;
   tierName: string;
-  totalMonths: number;
-  receivedMonths: number;
+  frequency: "weekly" | "biweekly" | "monthly";
+  intervalDays: number;
+  totalPeriods: number | null;
+  receivedPeriods: number;
+  remainingPeriods: number;
   totalAmount: number;
   status: "pending" | "active";
   nextRenewal: number | null;
@@ -42,6 +53,7 @@ export const useCreatorSubscriptionsStore = defineStore(
         >();
         for (const row of rows) {
           const id = row.subscriptionId!;
+          const intervalDays = row.intervalDays ?? 30;
           let sub = map.get(id);
           if (!sub) {
             sub = {
@@ -54,8 +66,11 @@ export const useCreatorSubscriptionsStore = defineStore(
                   (t) => t.id === row.tierId,
                 )?.name ||
                 "",
-              totalMonths: row.totalMonths || 0,
-              receivedMonths: 0,
+              frequency: daysToFrequency(intervalDays),
+              intervalDays,
+              totalPeriods: row.totalPeriods ?? null,
+              receivedPeriods: 0,
+              remainingPeriods: 0,
               totalAmount: 0,
               status: "pending",
               nextRenewal: null,
@@ -66,7 +81,7 @@ export const useCreatorSubscriptionsStore = defineStore(
             };
             map.set(id, sub);
           }
-          sub.receivedMonths += 1;
+          sub.receivedPeriods += 1;
           sub.totalAmount += row.amount;
           if (row.unlockTs != null) {
             if (
@@ -83,20 +98,24 @@ export const useCreatorSubscriptionsStore = defineStore(
             }
           }
         }
-        const monthSeconds = 30 * 24 * 60 * 60;
         const arr = Array.from(map.values()).map((s) => {
+          const periodSeconds = s.intervalDays * 24 * 60 * 60;
           const nextRenewal =
-            s.latestUnlock != null ? s.latestUnlock + monthSeconds : null;
+            s.latestUnlock != null ? s.latestUnlock + periodSeconds : null;
+          const total = s.totalPeriods ?? s.receivedPeriods;
+          const remaining = total - s.receivedPeriods;
           return {
             subscriptionId: s.subscriptionId,
             subscriberNpub: s.subscriberNpub,
             tierId: s.tierId,
             tierName: s.tierName,
-            totalMonths: s.totalMonths,
-            receivedMonths: s.receivedMonths,
+            frequency: s.frequency,
+            intervalDays: s.intervalDays,
+            totalPeriods: s.totalPeriods,
+            receivedPeriods: s.receivedPeriods,
+            remainingPeriods: remaining,
             totalAmount: s.totalAmount,
-            status:
-              s.receivedMonths >= s.totalMonths ? "active" : "pending",
+            status: remaining <= 0 ? "active" : "pending",
             nextRenewal,
             startDate: s.earliestUnlock,
             endDate: s.latestUnlock,
