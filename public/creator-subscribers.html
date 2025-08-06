@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Creator Subscribers Mockup</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+
+        body {
+
+            font-family: 'Inter', sans-serif;
+
+        }
+
+        /* Custom scrollbar for a more polished look */
+
+        ::-webkit-scrollbar {
+
+            width: 8px;
+
+        }
+
+        ::-webkit-scrollbar-track {
+
+            background: #111827; /* bg-gray-900 */
+
+        }
+
+        ::-webkit-scrollbar-thumb {
+
+            background: #374151; /* bg-gray-700 */
+
+            border-radius: 4px;
+
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+
+            background: #4b5563; /* bg-gray-600 */
+
+        }
+
+        /* Simple sparkline styling */
+
+        .sparkline {
+
+            stroke-width: 2;
+
+            fill: none;
+
+        }
+
+        .sparkline-fill {
+
+            stroke: none;
+
+            fill: url(#sparkline-gradient);
+
+        }
+
+        /* Transitions */
+
+        #subscriberDrawer, #filterModal {
+
+            transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+
+        }
+
+        .modal-backdrop {
+
+            transition: opacity 0.3s ease-in-out;
+
+        }
+
+        #subscriberDrawer {
+
+             transform: translateX(100%);
+
+        }
+
+        #filterModal {
+
+            transform: scale(0.95);
+
+            opacity: 0;
+
+        }
+
+        #filterModal.active {
+
+            transform: scale(1);
+
+            opacity: 1;
+
+        }
+
+    </style>
+
+</head>
+
+<body class="bg-gray-900 text-gray-200">
+
+
+
+    <!-- Main Container -->
+
+    <div class="flex h-screen overflow-hidden">
+
+        <!-- Main Content -->
+
+        <main class="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto">
+
+            <!-- Header -->
+
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
+
+                <div class="flex items-center mb-4 sm:mb-0">
+
+                    <button class="mr-4 p-2 rounded-full hover:bg-gray-800 transition-colors">
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+
+                    </button>
+
+                    <h1 class="text-2xl font-bold text-white">My Subscribers (124)</h1>
+
+                </div>
+
+                <div class="flex items-center w-full sm:w-auto">
+
+                    <div class="relative w-full sm:w-64 mr-4">
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+
+                        <input type="text" id="searchInput" placeholder="Search subscribers..." class="w-full bg-gray-800 border border-gray-700 rounded-lg pl-10 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-shadow">
+
+                    </div>
+
+                    <button id="openFilterModal" class="flex items-center px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg hover:bg-gray-700 transition-colors">
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1v-2zM13 10a1 1 0 011-1h6a1 1 0 011 1v2a1 1 0 01-1 1h-6a1 1 0 01-1-1v-2z" /></svg>
+
+                        Filters
+
+                    </button>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- Summary Cards -->
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+
+                <div class="bg-gray-800/50 border border-gray-700 rounded-xl p-6 flex justify-between items-start">
+
+                    <div>
+
+                        <p class="text-sm font-medium text-gray-400">Total Subscribers</p>
+
+                        <p class="text-3xl font-bold text-white mt-2">124</p>
+
+                        <div class="flex items-center mt-2 text-sm">
+
+                            <span class="flex items-center text-green-400"><svg class="h-4 w-4 mr-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>118 Active</span>
+
+                            <span class="ml-4 flex items-center text-yellow-400"><svg class="h-4 w-4 mr-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.414-1.415L11 9.586V6z" clip-rule="evenodd"></path></svg>6 Pending</span>
+
+                        </div>
+
+                    </div>
+
+                    <div class="p-3 bg-purple-500/10 rounded-lg"><svg class="h-6 w-6 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg></div>
+
+                </div>
+
+                <div class="bg-gray-800/50 border border-gray-700 rounded-xl p-6 flex justify-between items-start">
+
+                     <div>
+
+                        <p class="text-sm font-medium text-gray-400">Total Received Periods</p>
+
+                        <p class="text-3xl font-bold text-white mt-2">1,280</p>
+
+                        <p class="text-sm text-green-400 mt-2">+150 this month</p>
+
+                    </div>
+
+                     <div class="p-3 bg-blue-500/10 rounded-lg"><svg class="h-6 w-6 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg></div>
+
+                </div>
+
+                <div class="bg-gray-800/50 border border-gray-700 rounded-xl p-6">
+
+                    <div class="flex justify-between items-start">
+
+                        <div>
+
+                            <p class="text-sm font-medium text-gray-400">Total Revenue</p>
+
+                            <p class="text-3xl font-bold text-white mt-2">1,280,000 sat</p>
+
+                        </div>
+
+                        <div class="p-3 bg-green-500/10 rounded-lg"><svg class="h-6 w-6 text-green-400" viewBox="0 0 20 20" fill="currentColor"><path d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.5 2.5 0 00-1.134 0v-1.431zm1.134 0v-1.698c.22.071.412.164.567.267v1.431a2.5 2.5 0 00-1.134 0zM10 12a2 2 0 100-4 2 2 0 000 4z"></path><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm0-2a6 6 0 100-12 6 6 0 000 12z" clip-rule="evenodd"></path></svg></div>
+
+                    </div>
+
+                    <svg class="w-full h-16 mt-2" viewBox="0 0 100 30"><defs><linearGradient id="sparkline-gradient" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#34D399" stop-opacity="0.3"></stop><stop offset="100%" stop-color="#34D399" stop-opacity="0"></stop></linearGradient></defs><path class="sparkline-fill" d="M 0 25 L 10 20 L 20 22 L 30 15 L 40 18 L 50 12 L 60 15 L 70 10 L 80 14 L 90 8 L 100 12 V 30 H 0 Z"></path><path class="sparkline" stroke="#34D399" d="M 0 25 L 10 20 L 20 22 L 30 15 L 40 18 L 50 12 L 60 15 L 70 10 L 80 14 L 90 8 L 100 12"></path></svg>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- Bulk Actions Bar -->
+
+            <div id="bulkActionsBar" class="hidden bg-gray-800 rounded-lg p-3 mb-4 flex justify-between items-center sticky top-0 z-10">
+
+                <p class="font-medium"><span id="selectedCount">0</span> subscribers selected</p>
+
+                <div>
+
+                    <button class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 text-sm font-semibold transition-colors">Send Group DM</button>
+
+                    <button class="ml-2 px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 text-sm font-semibold transition-colors">Export CSV</button>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- Subscriber List -->
+
+            <div id="subscriberListContainer" class="bg-gray-800/50 border border-gray-700 rounded-xl">
+
+                <!-- Subscriber cards will be dynamically inserted here -->
+
+            </div>
+
+        </main>
+
+
+
+        <!-- Subscriber Detail Drawer -->
+
+        <aside id="subscriberDrawer" class="w-full sm:w-96 bg-gray-800 border-l border-gray-700 h-full fixed top-0 right-0 z-50 overflow-y-auto">
+
+            <div class="p-6 pb-24"> <!-- Added padding-bottom for footer -->
+
+                <div class="flex justify-between items-center mb-6">
+
+                    <h2 class="text-xl font-bold text-white">Subscriber Details</h2>
+
+                    <button id="closeDrawer" class="p-2 rounded-full hover:bg-gray-700 transition-colors"><svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
+
+                </div>
+
+                <div class="flex flex-col items-center text-center">
+
+                    <img id="drawer-avatar" src="" class="h-24 w-24 rounded-full mb-4 border-2 border-purple-500" alt="Subscriber avatar">
+
+                    <h3 id="drawer-name" class="text-2xl font-bold text-white"></h3>
+
+                    <p id="drawer-npub" class="text-sm text-gray-400 mt-1 break-all"></p>
+
+                    <div class="mt-4 flex space-x-4 text-sm">
+
+                        <div><p class="font-bold text-white">1.2k</p><p class="text-gray-400">Followers</p></div>
+
+                        <div><p class="font-bold text-white">345</p><p class="text-gray-400">Following</p></div>
+
+                    </div>
+
+                </div>
+
+                <div class="mt-8 space-y-4">
+
+                    <div class="bg-gray-700/50 rounded-lg p-4 flex justify-between items-center"><p class="text-sm font-medium text-gray-300">Status</p><span id="drawer-status"></span></div>
+
+                    <div class="bg-gray-700/50 rounded-lg p-4 flex justify-between items-center"><p class="text-sm font-medium text-gray-300">Tier</p><span id="drawer-tier"></span></div>
+
+                    <div class="bg-gray-700/50 rounded-lg p-4 flex justify-between items-center"><p class="text-sm font-medium text-gray-300">Next Renewal</p><p id="drawer-renewal" class="text-sm font-semibold text-white"></p></div>
+
+                    <div class="bg-gray-700/50 rounded-lg p-4 flex justify-between items-center"><p class="text-sm font-medium text-gray-300">Total Paid</p><p id="drawer-revenue" class="text-sm font-semibold text-white"></p></div>
+
+                </div>
+
+                <div class="mt-8">
+
+                    <h4 class="text-sm font-bold text-gray-400 uppercase tracking-wider mb-3">Most Recent Note</h4>
+
+                    <div class="bg-gray-700/50 rounded-lg p-4 text-sm text-gray-300">
+
+                        <p id="drawer-note"></p>
+
+                        <p id="drawer-note-date" class="text-xs text-gray-500 mt-3"></p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="absolute bottom-0 left-0 right-0 bg-gray-800/80 backdrop-blur-sm p-4 border-t border-gray-700 flex space-x-4">
+
+                <button class="flex-1 px-4 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 font-semibold transition-colors">Send DM</button>
+
+                <button id="drawer-copy-npub" class="flex-1 px-4 py-3 bg-gray-700 text-white rounded-lg hover:bg-gray-600 font-semibold transition-colors">Copy Npub</button>
+
+            </div>
+
+        </aside>
+
+    </div>
+
+
+
+    <!-- Filter Modal -->
+
+    <div id="filterModal" class="fixed inset-0 z-50 items-center justify-center hidden">
+
+        <div class="modal-backdrop fixed inset-0 bg-black/50"></div>
+
+        <div class="bg-gray-800 rounded-xl border border-gray-700 shadow-xl w-full max-w-md m-4 relative p-6">
+
+            <div class="flex justify-between items-center mb-6">
+
+                <h2 class="text-xl font-bold text-white">Filters</h2>
+
+                <button id="closeFilterModal" class="p-2 rounded-full hover:bg-gray-700 transition-colors"><svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
+
+            </div>
+
+            <div class="space-y-6">
+
+                <div>
+
+                    <h3 class="text-sm font-semibold text-gray-400 mb-2">Tier</h3>
+
+                    <div class="flex flex-wrap gap-2">
+
+                        <label class="flex items-center"><input type="checkbox" data-filter="tier" value="Gold" class="h-4 w-4 bg-gray-700 border-gray-600 rounded text-purple-500 focus:ring-purple-500 mr-2"> Gold</label>
+
+                        <label class="flex items-center"><input type="checkbox" data-filter="tier" value="Silver" class="h-4 w-4 bg-gray-700 border-gray-600 rounded text-purple-500 focus:ring-purple-500 mr-2"> Silver</label>
+
+                        <label class="flex items-center"><input type="checkbox" data-filter="tier" value="Bronze" class="h-4 w-4 bg-gray-700 border-gray-600 rounded text-purple-500 focus:ring-purple-500 mr-2"> Bronze</label>
+
+                    </div>
+
+                </div>
+
+                <div>
+
+                    <h3 class="text-sm font-semibold text-gray-400 mb-2">Status</h3>
+
+                     <div class="flex flex-wrap gap-2">
+
+                        <label class="flex items-center"><input type="checkbox" data-filter="status" value="Active" class="h-4 w-4 bg-gray-700 border-gray-600 rounded text-purple-500 focus:ring-purple-500 mr-2"> Active</label>
+
+                        <label class="flex items-center"><input type="checkbox" data-filter="status" value="Pending" class="h-4 w-4 bg-gray-700 border-gray-600 rounded text-purple-500 focus:ring-purple-500 mr-2"> Pending</label>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="mt-8 flex justify-end space-x-4">
+
+                <button id="resetFilters" class="px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 font-semibold transition-colors">Reset</button>
+
+                <button id="applyFilters" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 font-semibold transition-colors">Apply Filters</button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <script>
+
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // --- Data ---
+
+            const subscribers = [
+
+                { id: 1, name: 'Alice', npub: 'npub1alice23456789abcdefghijklmnopqrstuvwxyz', avatar: 'https://i.pravatar.cc/150?u=alice', tier: 'Gold', status: 'Active', revenue: 1200, memberSince: '6 months', frequency: 'Monthly', renewal: 'Sep 1, 2025', lastNote: 'Just discovered this project, amazing work! The integration with Nostr is seamless. Happy to support as a Gold Tier subscriber. Keep it up!', noteDate: '2 hours ago' },
+
+                { id: 2, name: 'Bob', npub: 'npub1bob23456789abcdefghijklmnopqrstuvwxyz', avatar: 'https://i.pravatar.cc/150?u=bob', tier: 'Silver', status: 'Active', revenue: 500, memberSince: '1 year', frequency: 'Monthly', renewal: 'Aug 15, 2025', lastNote: 'Great content, always look forward to the updates.', noteDate: '1 day ago' },
+
+                { id: 3, name: 'Carol', npub: 'npub1carol23456789abcdefghijklmnopqrstuvwxyz', avatar: 'https://i.pravatar.cc/150?u=carol', tier: 'Bronze', status: 'Pending', revenue: 100, memberSince: '2 weeks', frequency: 'Weekly', renewal: 'Aug 12, 2025', lastNote: 'Excited to join the community!', noteDate: '5 days ago' },
+
+                { id: 4, name: 'David', npub: 'npub1david23456789abcdefghijklmnopqrstuvwxyz', avatar: 'https://i.pravatar.cc/150?u=david', tier: 'Gold', status: 'Active', revenue: 2400, memberSince: '2 years', frequency: 'Monthly', renewal: 'Oct 20, 2025', lastNote: 'Long time supporter, keep up the fantastic work.', noteDate: '1 week ago' },
+
+                { id: 5, name: 'Eve', npub: 'npub1eve23456789abcdefghijklmnopqrstuvwxyz', avatar: 'https://i.pravatar.cc/150?u=eve', tier: 'Silver', status: 'Pending', revenue: 250, memberSince: '3 days', frequency: 'Weekly', renewal: 'Aug 9, 2025', lastNote: 'Just subscribed!', noteDate: '3 days ago' }
+
+            ];
+
+
+
+            const tierColors = {
+
+                'Gold': 'bg-green-500/20 text-green-300',
+
+                'Silver': 'bg-purple-500/20 text-purple-300',
+
+                'Bronze': 'bg-yellow-500/20 text-yellow-300'
+
+            };
+
+
+
+            const statusColors = {
+
+                'Active': 'bg-blue-500/20 text-blue-300',
+
+                'Pending': 'bg-yellow-500/20 text-yellow-300'
+
+            };
+
+
+
+            const listContainer = document.getElementById('subscriberListContainer');
+
+
+
+            // --- Initial Render ---
+
+            function renderSubscribers(subscriberData) {
+
+                listContainer.innerHTML = '';
+
+                const listFragment = document.createDocumentFragment();
+
+                subscriberData.forEach(sub => {
+
+                    const card = document.createElement('div');
+
+                    card.className = 'subscriber-card p-4 flex items-center hover:bg-gray-800 cursor-pointer transition-colors duration-200';
+
+                    card.dataset.id = sub.id;
+
+                    card.dataset.name = sub.name.toLowerCase();
+
+                    card.dataset.tier = sub.tier;
+
+                    card.dataset.status = sub.status;
+
+
+
+                    card.innerHTML = `
+
+                        <input type="checkbox" class="subscriber-checkbox h-5 w-5 bg-gray-700 border-gray-600 rounded text-purple-500 focus:ring-purple-500 mr-4 flex-shrink-0">
+
+                        <img src="${sub.avatar}" class="h-12 w-12 rounded-full mr-4 flex-shrink-0" alt="${sub.name}'s avatar">
+
+                        <div class="flex-1 grid grid-cols-2 sm:grid-cols-5 gap-4 items-center">
+
+                            <div>
+
+                                <p class="font-bold text-white">${sub.name}</p>
+
+                                <p class="text-sm text-gray-400 truncate">${sub.npub.substring(0, 12)}...</p>
+
+                            </div>
+
+                            <div><span class="inline-block px-2 py-1 text-xs font-semibold rounded-full ${tierColors[sub.tier]}">${sub.tier} Tier</span></div>
+
+                            <div>
+
+                                <p class="text-sm font-medium text-white">${sub.revenue} sat</p>
+
+                                <p class="text-xs text-gray-400">Total Revenue</p>
+
+                            </div>
+
+                            <div class="hidden sm:block">
+
+                                <p class="text-sm font-medium text-white">${sub.memberSince}</p>
+
+                                <p class="text-xs text-gray-400">${sub.frequency}</p>
+
+                            </div>
+
+                            <div><span class="inline-block px-2 py-1 text-xs font-semibold rounded-full ${statusColors[sub.status]}">${sub.status}</span></div>
+
+                        </div>
+
+                        <button class="ml-4 p-2 rounded-full hover:bg-gray-700 view-btn flex-shrink-0 transition-colors"><svg class="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path></svg></button>
+
+                    `;
+
+                    listFragment.appendChild(card);
+
+                });
+
+                listContainer.appendChild(listFragment);
+
+                addEventListenersToCards();
+
+            }
+
+            
+
+            renderSubscribers(subscribers);
+
+
+
+            // --- Drawer Logic ---
+
+            const drawer = document.getElementById('subscriberDrawer');
+
+            const closeDrawerButton = document.getElementById('closeDrawer');
+
+            const drawerCopyNpubButton = document.getElementById('drawer-copy-npub');
+
+
+
+            function openDrawer(subscriberId) {
+
+                const sub = subscribers.find(s => s.id == subscriberId);
+
+                if (!sub) return;
+
+
+
+                document.getElementById('drawer-avatar').src = sub.avatar;
+
+                document.getElementById('drawer-name').textContent = sub.name;
+
+                document.getElementById('drawer-npub').textContent = sub.npub;
+
+                document.getElementById('drawer-status').className = `px-2 py-1 text-xs font-semibold rounded-full ${statusColors[sub.status]}`;
+
+                document.getElementById('drawer-status').textContent = sub.status;
+
+                document.getElementById('drawer-tier').className = `px-2 py-1 text-xs font-semibold rounded-full ${tierColors[sub.tier]}`;
+
+                document.getElementById('drawer-tier').textContent = `${sub.tier} Tier`;
+
+                document.getElementById('drawer-renewal').textContent = sub.renewal;
+
+                document.getElementById('drawer-revenue').textContent = `${sub.revenue} sat`;
+
+                document.getElementById('drawer-note').textContent = sub.lastNote;
+
+                document.getElementById('drawer-note-date').textContent = sub.noteDate;
+
+                
+
+                drawerCopyNpubButton.dataset.npub = sub.npub;
+
+                drawerCopyNpubButton.textContent = 'Copy Npub';
+
+
+
+
+                drawer.style.transform = 'translateX(0)';
+
+            }
+
+
+
+            const closeDrawer = () => drawer.style.transform = 'translateX(100%)';
+
+            closeDrawerButton.addEventListener('click', closeDrawer);
+
+            
+
+            drawerCopyNpubButton.addEventListener('click', (e) => {
+
+                const npubToCopy = e.target.dataset.npub;
+
+                if (!npubToCopy) return;
+
+
+
+                const tempInput = document.createElement('input');
+
+                tempInput.value = npubToCopy;
+
+                document.body.appendChild(tempInput);
+
+                tempInput.select();
+
+                try {
+
+                    document.execCommand('copy');
+
+                    e.target.textContent = 'Copied!';
+
+                    setTimeout(() => { e.target.textContent = 'Copy Npub'; }, 2000);
+
+                } catch (err) {
+
+                    console.error('Failed to copy: ', err);
+
+                }
+
+                document.body.removeChild(tempInput);
+
+            });
+
+
+
+            // --- Filter Modal Logic ---
+
+            const filterModal = document.getElementById('filterModal');
+
+            const openFilterModalButton = document.getElementById('openFilterModal');
+
+            const closeFilterModalButton = document.getElementById('closeFilterModal');
+
+            const applyFiltersButton = document.getElementById('applyFilters');
+
+            const resetFiltersButton = document.getElementById('resetFilters');
+
+            const searchInput = document.getElementById('searchInput');
+
+
+
+            const toggleModal = (show) => {
+
+                if (show) {
+
+                    filterModal.classList.remove('hidden');
+
+                    setTimeout(() => filterModal.classList.add('active'), 10);
+
+                } else {
+
+                    filterModal.classList.remove('active');
+
+                    setTimeout(() => filterModal.classList.add('hidden'), 300);
+
+                }
+
+            };
+
+
+
+            openFilterModalButton.addEventListener('click', () => toggleModal(true));
+
+            closeFilterModalButton.addEventListener('click', () => toggleModal(false));
+
+            filterModal.querySelector('.modal-backdrop').addEventListener('click', () => toggleModal(false));
+
+
+
+            function applyAllFilters() {
+
+                const searchString = searchInput.value.toLowerCase();
+
+                
+
+                const selectedTiers = Array.from(document.querySelectorAll('[data-filter="tier"]:checked')).map(el => el.value);
+
+                const selectedStatuses = Array.from(document.querySelectorAll('[data-filter="status"]:checked')).map(el => el.value);
+
+
+
+                document.querySelectorAll('.subscriber-card').forEach(card => {
+
+                    const nameMatch = card.dataset.name.includes(searchString);
+
+                    const tierMatch = selectedTiers.length === 0 || selectedTiers.includes(card.dataset.tier);
+
+                    const statusMatch = selectedStatuses.length === 0 || selectedStatuses.includes(card.dataset.status);
+
+
+
+                    if (nameMatch && tierMatch && statusMatch) {
+
+                        card.classList.remove('hidden');
+
+                    } else {
+
+                        card.classList.add('hidden');
+
+                    }
+
+                });
+
+            }
+
+
+
+            applyFiltersButton.addEventListener('click', () => {
+
+                applyAllFilters();
+
+                toggleModal(false);
+
+            });
+
+            
+
+            resetFiltersButton.addEventListener('click', () => {
+
+                document.querySelectorAll('#filterModal input[type="checkbox"]').forEach(el => el.checked = false);
+
+                applyAllFilters();
+
+            });
+
+
+
+            searchInput.addEventListener('input', applyAllFilters);
+
+
+
+            // --- Bulk Selection & Card Listeners ---
+
+            function addEventListenersToCards() {
+
+                const checkboxes = document.querySelectorAll('.subscriber-checkbox');
+
+                const bulkActionsBar = document.getElementById('bulkActionsBar');
+
+                const selectedCountSpan = document.getElementById('selectedCount');
+
+
+
+                const updateBulkActions = () => {
+
+                    const selectedCheckboxes = document.querySelectorAll('.subscriber-checkbox:checked');
+
+                    selectedCountSpan.textContent = selectedCheckboxes.length;
+
+                    bulkActionsBar.classList.toggle('hidden', selectedCheckboxes.length === 0);
+
+                };
+
+
+
+                document.querySelectorAll('.subscriber-card').forEach(card => {
+
+                    card.addEventListener('click', (e) => {
+
+                        if (e.target.tagName.toLowerCase() === 'input') return;
+
+                        openDrawer(card.dataset.id);
+
+                    });
+
+                    
+
+                    const checkbox = card.querySelector('.subscriber-checkbox');
+
+                    checkbox.addEventListener('click', e => e.stopPropagation());
+
+                    checkbox.addEventListener('change', updateBulkActions);
+
+                });
+
+            }
+
+        });
+
+    </script>
+
+</body>
+
+</html>
+
