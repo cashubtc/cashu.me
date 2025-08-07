@@ -1616,6 +1616,7 @@ export default {
       pending: "Pending",
       receivedPeriods: "Received periods",
       revenue: "Revenue",
+      thisMonth: "this month",
     },
     periodsText: "{received} of {total} periods",
     periodsTooltip: "Periods received vs periods purchased",

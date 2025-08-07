@@ -1,37 +1,82 @@
 <template>
   <q-page class="q-pa-md">
     <!-- summary cards -->
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-      <q-card class="bg-primary text-white">
-        <q-card-section class="text-center">
-          <div class="text-sm">
-            {{ $t("CreatorSubscribers.summary.subscribers") }}
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+      <!-- total subscribers card -->
+      <q-card class="bg-gray-800/50 border border-gray-700 text-white">
+        <q-card-section>
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <q-icon name="group" />
+              <div class="text-sm">
+                {{ $t("CreatorSubscribers.summary.subscribers") }}
+              </div>
+            </div>
+            <div class="text-right">
+              <div class="text-h6">{{ total }}</div>
+              <div class="text-xs text-gray-300">
+                +{{ subscribersThisMonth }} {{ $t("CreatorSubscribers.summary.thisMonth") }}
+              </div>
+            </div>
           </div>
-          <div class="text-h6">{{ total }}</div>
+          <div class="flex justify-between text-xs text-gray-300 mt-2">
+            <div class="flex items-center gap-1">
+              <q-icon name="check_circle" size="16px" />
+              <span>{{ active }}</span>
+            </div>
+            <div class="flex items-center gap-1">
+              <q-icon name="hourglass_top" size="16px" />
+              <span>{{ pending }}</span>
+            </div>
+          </div>
         </q-card-section>
       </q-card>
-      <q-card class="bg-primary text-white">
-        <q-card-section class="text-center">
-          <div class="text-sm">
-            {{ $t("CreatorSubscribers.summary.active") }}
+
+      <!-- active subscribers card -->
+      <q-card class="bg-gray-800/50 border border-gray-700 text-white">
+        <q-card-section>
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <q-icon name="verified" />
+              <div class="text-sm">
+                {{ $t("CreatorSubscribers.summary.active") }}
+              </div>
+            </div>
+            <div class="text-right">
+              <div class="text-h6">{{ active }}</div>
+              <div class="text-xs text-gray-300">
+                +{{ activeThisMonth }} {{ $t("CreatorSubscribers.summary.thisMonth") }}
+              </div>
+            </div>
           </div>
-          <div class="text-h6">{{ active }}</div>
         </q-card-section>
       </q-card>
-      <q-card class="bg-primary text-white">
-        <q-card-section class="text-center">
-          <div class="text-sm">
-            {{ $t("CreatorSubscribers.summary.pending") }}
+
+      <!-- revenue card -->
+      <q-card class="bg-gray-800/50 border border-gray-700 text-white">
+        <q-card-section>
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <q-icon name="attach_money" />
+              <div class="text-sm">
+                {{ $t("CreatorSubscribers.summary.revenue") }}
+              </div>
+            </div>
+            <div class="text-right">
+              <div class="text-h6">{{ formatCurrency(revenue) }}</div>
+              <div class="text-xs text-gray-300">
+                +{{ formatCurrency(revenueThisMonth) }} {{ $t("CreatorSubscribers.summary.thisMonth") }}
+              </div>
+            </div>
           </div>
-          <div class="text-h6">{{ pending }}</div>
-        </q-card-section>
-      </q-card>
-      <q-card class="bg-primary text-white">
-        <q-card-section class="text-center">
-          <div class="text-sm">
-            {{ $t("CreatorSubscribers.summary.revenue") }}
-          </div>
-          <div class="text-h6">{{ formatCurrency(revenue) }}</div>
+          <svg viewBox="0 0 100 30" class="w-full h-8 mt-2 text-primary">
+            <polyline
+              :points="revenueSparklinePoints"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            />
+          </svg>
         </q-card-section>
       </q-card>
     </div>
@@ -320,6 +365,49 @@ const pending = computed(
 const revenue = computed(() =>
   subscriptions.value.reduce((sum, s) => sum + s.totalAmount, 0)
 );
+
+function isThisMonth(ts: number | null) {
+  if (!ts) return false;
+  const d = new Date(ts * 1000);
+  const now = new Date();
+  return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+}
+
+const subscribersThisMonth = computed(() =>
+  subscriptions.value.filter((s) => isThisMonth(s.startDate)).length
+);
+const activeThisMonth = computed(() =>
+  subscriptions.value.filter(
+    (s) => s.status === "active" && isThisMonth(s.startDate)
+  ).length
+);
+const revenueThisMonth = computed(() =>
+  subscriptions.value
+    .filter((s) => isThisMonth(s.startDate))
+    .reduce((sum, s) => sum + s.totalAmount, 0)
+);
+
+const revenueTrend = computed(() =>
+  subscriptions.value
+    .slice()
+    .sort((a, b) => (a.startDate || 0) - (b.startDate || 0))
+    .map((s) => s.totalAmount)
+);
+
+const revenueSparklinePoints = computed(() => {
+  const data = revenueTrend.value;
+  if (data.length === 0) return "";
+  const max = Math.max(...data);
+  const min = Math.min(...data);
+  const range = max - min || 1;
+  return data
+    .map((v, i) => {
+      const x = (i / (data.length - 1)) * 100;
+      const y = 30 - ((v - min) / range) * 30;
+      return `${x},${y}`;
+    })
+    .join(" ");
+});
 
 const messenger = useMessengerStore();
 const router = useRouter();
