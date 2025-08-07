@@ -69,20 +69,32 @@
       v-if="selected.length"
       class="bg-grey-2 q-px-md q-py-sm rounded-borders mb-4 flex items-center gap-2"
     >
+      <div class="text-caption">{{ t('CreatorSubscribers.selectionCount', { count: selected.length }) }}</div>
       <q-btn
         flat
         color="primary"
-        :disable="selected.length === 0"
+        :disable="selected.length === 0 || !canSendDm"
         :label="$t('CreatorSubscribers.actions.sendGroupMessage')"
         @click="sendGroupMessage"
-      />
+      >
+        <q-tooltip v-if="selected.length === 0">
+          {{ t('CreatorSubscribers.tooltips.noSelection') }}
+        </q-tooltip>
+        <q-tooltip v-else-if="!canSendDm">
+          {{ t('CreatorSubscribers.tooltips.notLoggedIn') }}
+        </q-tooltip>
+      </q-btn>
       <q-btn
         flat
         color="primary"
         :disable="selected.length === 0"
         :label="$t('CreatorSubscribers.actions.exportSelected')"
         @click="exportSelected"
-      />
+      >
+        <q-tooltip v-if="selected.length === 0">
+          {{ t('CreatorSubscribers.tooltips.noSelection') }}
+        </q-tooltip>
+      </q-btn>
     </q-banner>
 
     <!-- no data -->
@@ -321,6 +333,11 @@ const dialogTitle = computed(() =>
     ? t("CreatorSubscribers.actions.sendGroupMessage")
     : t("CreatorSubscribers.actions.sendMessage"),
 );
+const canSendDm = computed(
+  () =>
+    messenger.connected &&
+    (!!nostr.signer || !!nostr.privKeyHex)
+);
 
 function pubkeyNpub(hex: string): string {
   try {
@@ -349,23 +366,39 @@ async function confirmMessage() {
   const recips = messageRecipients.value;
   showMessageDialog.value = false;
   if (!text || recips.length === 0) return;
+  if (!canSendDm.value) {
+    notifyError(t('CreatorSubscribers.notifications.dm_not_ready'));
+    return;
+  }
+  let allSuccess = true;
   for (const r of recips) {
     const { success } = await messenger.sendDm(r, text);
     if (success) {
-      notifySuccess(t("wallet.notifications.nostr_dm_sent"));
       messenger.createConversation(r);
       messenger.setCurrentConversation(r);
       messenger.markRead(r);
     } else {
-      notifyError(t("wallet.notifications.nostr_dm_failed"));
+      allSuccess = false;
     }
   }
-  if (recips.length) router.push("/nostr-messenger");
+  selected.value = [];
+  if (allSuccess) {
+    notifySuccess(t('wallet.notifications.nostr_dm_sent'));
+    if (recips.length) router.push('/nostr-messenger');
+  } else {
+    notifyError(t('wallet.notifications.nostr_dm_failed'));
+  }
 }
 
 function exportSelected() {
   if (!selected.value.length) return;
-  exportSubscribers(selected.value, "subscribers.csv");
+  try {
+    exportSubscribers(selected.value, 'subscribers.csv');
+    notifySuccess(t('CreatorSubscribers.notifications.export_success'));
+  } catch {
+    notifyError(t('CreatorSubscribers.notifications.export_failed'));
+  }
+  selected.value = [];
 }
 
 function isSelected(sub: CreatorSubscription) {
@@ -376,6 +409,10 @@ function handleSelectChange(val: boolean, sub: CreatorSubscription) {
   const idx = selected.value.findIndex((s) => s.subscriptionId === sub.subscriptionId);
   if (val && idx === -1) selected.value.push(sub);
   if (!val && idx !== -1) selected.value.splice(idx, 1);
+  const ids = selected.value.map((s) => s.subscriptionId);
+  if (ids.length !== new Set(ids).size) {
+    console.warn('Duplicate subscriptionId detected in selection');
+  }
 }
 
 const showSubscriberDialog = ref(false);
