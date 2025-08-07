@@ -1,7 +1,7 @@
 import { defineStore } from "pinia";
 import { cashuDb } from "./dexie";
 import { liveQuery } from "dexie";
-import { ref } from "vue";
+import { ref, watch } from "vue";
 import { useCreatorsStore } from "./creators";
 
 function daysToFrequency(
@@ -36,6 +36,24 @@ export const useCreatorSubscriptionsStore = defineStore(
     const loading = ref(true);
     const creatorsStore = useCreatorsStore();
 
+    const FALLBACK_TIER_NAME = "Unknown Tier";
+
+    function resolveTierName(tierId: string): string {
+      for (const tiers of Object.values(creatorsStore.tiersMap)) {
+        const match = tiers.find((t) => t.id === tierId);
+        if (match) return match.name;
+      }
+      return FALLBACK_TIER_NAME;
+    }
+
+    function fillMissingTierNames() {
+      subscriptions.value.forEach((sub) => {
+        if (!sub.tierName || sub.tierName === FALLBACK_TIER_NAME) {
+          sub.tierName = resolveTierName(sub.tierId);
+        }
+      });
+    }
+
     liveQuery(() =>
       cashuDb.lockedTokens
         .where("owner")
@@ -65,7 +83,7 @@ export const useCreatorSubscriptionsStore = defineStore(
                 creatorsStore.tiersMap[row.creatorNpub || ""]?.find(
                   (t) => t.id === row.tierId,
                 )?.name ||
-                "",
+                FALLBACK_TIER_NAME,
               frequency: daysToFrequency(intervalDays),
               intervalDays,
               totalPeriods: row.totalPeriods ?? null,
@@ -122,6 +140,7 @@ export const useCreatorSubscriptionsStore = defineStore(
           } as CreatorSubscription;
         });
         subscriptions.value = arr;
+        fillMissingTierNames();
         loading.value = false;
       },
       error: (err) => {
@@ -129,6 +148,14 @@ export const useCreatorSubscriptionsStore = defineStore(
         loading.value = false;
       },
     });
+
+    watch(
+      () => creatorsStore.tiersMap,
+      () => {
+        fillMissingTierNames();
+      },
+      { deep: true }
+    );
 
     return { subscriptions, loading };
   }
