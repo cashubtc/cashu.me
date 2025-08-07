@@ -105,5 +105,30 @@ describe('creatorSubscriptions store', () => {
     expect(biweekly?.nextRenewal).toBe(BIWEEK * 2);
     expect(biweekly?.status).toBe('active');
   });
+
+  it('falls back to Unknown Tier when tier data is missing', async () => {
+    const store = useCreatorSubscriptionsStore();
+
+    await cashuDb.lockedTokens.add({
+      id: 'u1',
+      tokenString: 'tok',
+      amount: 1,
+      owner: 'creator',
+      subscriberNpub: 'npub',
+      tierId: 'tier',
+      intervalKey: 'int1',
+      unlockTs: 0,
+      status: 'unlockable',
+      subscriptionEventId: null,
+      subscriptionId: 'subU',
+      totalPeriods: 1,
+      intervalDays: 30,
+    } as any);
+
+    await new Promise((r) => setTimeout(r, 20));
+
+    const sub = store.subscriptions.find((s) => s.subscriptionId === 'subU');
+    expect(sub?.tierName).toBe('Unknown Tier');
+  });
 });
 
