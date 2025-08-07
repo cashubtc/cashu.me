@@ -93,20 +93,81 @@
         :rows="filteredSubscribers"
         :columns="columns"
         row-key="subscriptionId"
+        selection="multiple"
+        v-model:selected="selected"
         flat
         :pagination="{ rowsPerPage: 0 }"
-      />
+      >
+        <template #top>
+          <div class="row items-center q-gutter-sm">
+            <q-btn
+              flat
+              color="primary"
+              :disable="selected.length === 0"
+              :label="$t('CreatorSubscribers.actions.sendGroupMessage')"
+              @click="sendGroupMessage"
+            />
+            <q-btn
+              flat
+              color="primary"
+              :disable="selected.length === 0"
+              :label="$t('CreatorSubscribers.actions.exportSelected')"
+              @click="exportSelected"
+            />
+          </div>
+        </template>
+        <template #body-cell-actions="props">
+          <q-td :props="props">
+            <q-btn
+              size="sm"
+              flat
+              icon="chat"
+              @click="sendMessage(props.row.subscriberNpub)"
+            >
+              <q-tooltip>{{ $t('CreatorSubscribers.actions.sendMessage') }}</q-tooltip>
+            </q-btn>
+          </q-td>
+        </template>
+      </q-table>
     </div>
+    <q-dialog v-model="showMessageDialog" persistent>
+      <q-card style="min-width: 350px">
+        <q-card-section class="text-h6">{{ dialogTitle }}</q-card-section>
+        <q-card-section>
+          <q-input
+            v-model="messageText"
+            type="textarea"
+            autogrow
+            dense
+          />
+        </q-card-section>
+        <q-card-actions align="right">
+          <q-btn flat color="primary" v-close-popup>
+            {{ $t('global.actions.cancel.label') }}
+          </q-btn>
+          <q-btn flat color="primary" @click="confirmMessage">
+            {{ $t('global.actions.send.label') }}
+          </q-btn>
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
   </q-page>
 </template>
 
 <script setup lang="ts">
 import { computed, ref } from "vue";
 import { storeToRefs } from "pinia";
-import { useCreatorSubscriptionsStore } from "stores/creatorSubscriptions";
+import {
+  useCreatorSubscriptionsStore,
+  type CreatorSubscription,
+} from "stores/creatorSubscriptions";
 import { useMintsStore } from "stores/mints";
 import { useUiStore } from "stores/ui";
 import { useI18n } from "vue-i18n";
+import { useMessengerStore } from "stores/messenger";
+import { useRouter } from "vue-router";
+import { notifySuccess, notifyError } from "src/js/notify";
+import exportSubscribers from "src/utils/subscriberCsv";
 
 const creatorSubscriptionsStore = useCreatorSubscriptionsStore();
 const { subscriptions, loading } = storeToRefs(creatorSubscriptionsStore);
@@ -153,6 +214,56 @@ const revenue = computed(() =>
   subscriptions.value.reduce((sum, s) => sum + s.totalAmount, 0)
 );
 
+const messenger = useMessengerStore();
+const router = useRouter();
+const selected = ref<CreatorSubscription[]>([]);
+const showMessageDialog = ref(false);
+const messageText = ref("");
+const messageRecipients = ref<string[]>([]);
+const dialogTitle = computed(() =>
+  messageRecipients.value.length > 1
+    ? t("CreatorSubscribers.actions.sendGroupMessage")
+    : t("CreatorSubscribers.actions.sendMessage"),
+);
+
+function sendMessage(npub: string) {
+  messageRecipients.value = [npub];
+  messageText.value = "";
+  showMessageDialog.value = true;
+}
+
+function sendGroupMessage() {
+  const recips = selected.value.map((s) => s.subscriberNpub);
+  if (!recips.length) return;
+  messageRecipients.value = recips;
+  messageText.value = "";
+  showMessageDialog.value = true;
+}
+
+async function confirmMessage() {
+  const text = messageText.value.trim();
+  const recips = messageRecipients.value;
+  showMessageDialog.value = false;
+  if (!text || recips.length === 0) return;
+  for (const r of recips) {
+    const { success } = await messenger.sendDm(r, text);
+    if (success) {
+      notifySuccess(t("wallet.notifications.nostr_dm_sent"));
+      messenger.createConversation(r);
+      messenger.setCurrentConversation(r);
+      messenger.markRead(r);
+    } else {
+      notifyError(t("wallet.notifications.nostr_dm_failed"));
+    }
+  }
+  if (recips.length) router.push("/nostr-messenger");
+}
+
+function exportSelected() {
+  if (!selected.value.length) return;
+  exportSubscribers(selected.value, "subscribers.csv");
+}
+
 const columns = computed(() => [
   {
     name: "tier",
@@ -181,6 +292,12 @@ const columns = computed(() => [
     label: t("CreatorSubscribers.summary.revenue"),
     field: "totalAmount",
     format: (val: number) => formatCurrency(val),
+  },
+  {
+    name: "actions",
+    label: t("CreatorSubscribers.columns.actions"),
+    field: "actions",
+    align: "right",
   },
 ]);
 
