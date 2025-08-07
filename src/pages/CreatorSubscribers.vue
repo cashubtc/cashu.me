@@ -1,86 +1,91 @@
 <template>
   <q-page class="q-pa-md">
-    <div class="row q-col-gutter-md q-mb-lg">
-      <div class="col-12 col-sm-6 col-md-3">
-        <q-card>
-          <q-card-section class="text-center">
-            <div class="text-h6">
-              {{ $t("CreatorSubscribers.summary.subscribers") }}
-            </div>
-            <div class="text-subtitle1">{{ total }}</div>
-          </q-card-section>
-        </q-card>
-      </div>
-      <div class="col-12 col-sm-6 col-md-3">
-        <q-card>
-          <q-card-section class="text-center">
-            <div class="text-h6">
-              {{ $t("CreatorSubscribers.summary.active") }}
-            </div>
-            <div class="text-subtitle1">{{ active }}</div>
-          </q-card-section>
-        </q-card>
-      </div>
-      <div class="col-12 col-sm-6 col-md-3">
-        <q-card>
-          <q-card-section class="text-center">
-            <div class="text-h6">
-              {{ $t("CreatorSubscribers.summary.pending") }}
-            </div>
-            <div class="text-subtitle1">{{ pending }}</div>
-          </q-card-section>
-        </q-card>
-      </div>
-      <div class="col-12 col-sm-6 col-md-3">
-        <q-card>
-          <q-card-section class="text-center">
-            <div class="text-h6">
-              {{ $t("CreatorSubscribers.summary.revenue") }}
-            </div>
-            <div class="text-subtitle1">{{ formatCurrency(revenue) }}</div>
-          </q-card-section>
-        </q-card>
-      </div>
+    <!-- summary cards -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+      <q-card class="bg-primary text-white">
+        <q-card-section class="text-center">
+          <div class="text-sm">
+            {{ $t("CreatorSubscribers.summary.subscribers") }}
+          </div>
+          <div class="text-h6">{{ total }}</div>
+        </q-card-section>
+      </q-card>
+      <q-card class="bg-primary text-white">
+        <q-card-section class="text-center">
+          <div class="text-sm">
+            {{ $t("CreatorSubscribers.summary.active") }}
+          </div>
+          <div class="text-h6">{{ active }}</div>
+        </q-card-section>
+      </q-card>
+      <q-card class="bg-primary text-white">
+        <q-card-section class="text-center">
+          <div class="text-sm">
+            {{ $t("CreatorSubscribers.summary.pending") }}
+          </div>
+          <div class="text-h6">{{ pending }}</div>
+        </q-card-section>
+      </q-card>
+      <q-card class="bg-primary text-white">
+        <q-card-section class="text-center">
+          <div class="text-sm">
+            {{ $t("CreatorSubscribers.summary.revenue") }}
+          </div>
+          <div class="text-h6">{{ formatCurrency(revenue) }}</div>
+        </q-card-section>
+      </q-card>
     </div>
 
-    <div class="row q-col-gutter-md q-mb-md">
-      <div class="col-12 col-md-4">
+    <!-- search and filters -->
+    <div
+      class="sticky top-0 z-10 mb-4"
+      :class="$q.dark.isActive ? 'bg-dark' : 'bg-white'"
+    >
+      <div class="flex items-center gap-2">
         <q-input
           v-model="filter"
           dense
           debounce="300"
           clearable
+          class="flex-1"
           :placeholder="$t('CreatorSubscribers.filter.placeholder')"
         >
           <template #prepend>
             <q-icon name="search" />
           </template>
         </q-input>
-      </div>
-      <div class="col-6 col-md-4">
-        <q-select
-          v-model="frequencyFilter"
-          dense
-          emit-value
-          map-options
-          clearable
-          :options="frequencyOptions"
-          :label="$t('CreatorSubscribers.filters.frequency')"
-        />
-      </div>
-      <div class="col-6 col-md-4">
-        <q-select
-          v-model="statusFilter"
-          dense
-          emit-value
-          map-options
-          clearable
-          :options="statusOptions"
-          :label="$t('CreatorSubscribers.columns.status')"
+        <q-btn
+          flat
+          color="primary"
+          icon="filter_list"
+          :label="$t('CreatorSubscribers.actions.filters')"
+          @click="showFilters = true"
         />
       </div>
     </div>
 
+    <!-- bulk actions -->
+    <q-banner
+      v-if="selected.length"
+      class="bg-grey-2 q-px-md q-py-sm rounded-borders mb-4 flex items-center gap-2"
+    >
+      <q-btn
+        flat
+        color="primary"
+        :disable="selected.length === 0"
+        :label="$t('CreatorSubscribers.actions.sendGroupMessage')"
+        @click="sendGroupMessage"
+      />
+      <q-btn
+        flat
+        color="primary"
+        :disable="selected.length === 0"
+        :label="$t('CreatorSubscribers.actions.exportSelected')"
+        @click="exportSelected"
+      />
+    </q-banner>
+
+    <!-- no data -->
     <div
       v-if="!loading && filteredSubscribers.length === 0"
       class="text-center q-mt-xl"
@@ -88,49 +93,79 @@
       {{ $t("CreatorSubscribers.noData") }}
     </div>
 
-    <div v-else>
-      <q-table
-        :rows="filteredSubscribers"
-        :columns="columns"
-        row-key="subscriptionId"
-        selection="multiple"
-        v-model:selected="selected"
-        flat
-        :pagination="{ rowsPerPage: 0 }"
-        @row-click="(_, row) => openSubscriber(row)"
+    <!-- subscriber cards -->
+    <div v-else class="space-y-4">
+      <q-card
+        v-for="sub in filteredSubscribers"
+        :key="sub.subscriptionId"
+        class="p-4 flex items-center gap-4 cursor-pointer"
+        @click="openSubscriber(sub)"
       >
-        <template #top>
-          <div class="row items-center q-gutter-sm">
-            <q-btn
-              flat
-              color="primary"
-              :disable="selected.length === 0"
-              :label="$t('CreatorSubscribers.actions.sendGroupMessage')"
-              @click="sendGroupMessage"
-            />
-            <q-btn
-              flat
-              color="primary"
-              :disable="selected.length === 0"
-              :label="$t('CreatorSubscribers.actions.exportSelected')"
-              @click="exportSelected"
-            />
+        <q-checkbox
+          :model-value="isSelected(sub)"
+          @update:model-value="(val) => handleSelectChange(val, sub)"
+          @click.stop
+        />
+        <q-avatar size="48px">
+          <div class="placeholder text-white">
+            {{ getInitials(sub.subscriberNpub) }}
           </div>
-        </template>
-        <template #body-cell-actions="props">
-          <q-td :props="props">
-            <q-btn
-              size="sm"
-              flat
-              icon="chat"
-              @click.stop="sendMessage(props.row.subscriberNpub)"
-            >
-              <q-tooltip>{{ $t('CreatorSubscribers.actions.sendMessage') }}</q-tooltip>
-            </q-btn>
-          </q-td>
-        </template>
-      </q-table>
+        </q-avatar>
+        <div class="flex-1">
+          <div class="font-medium">
+            {{ shortenString(pubkeyNpub(sub.subscriberNpub), 15, 6) }}
+          </div>
+          <q-badge color="primary" class="q-mt-xs">{{ sub.tierName }}</q-badge>
+        </div>
+        <div class="text-right">
+          <div>{{ formatCurrency(sub.totalAmount) }}</div>
+          <q-badge
+            class="q-mt-xs"
+            :color="sub.status === 'active' ? 'positive' : 'warning'"
+          >
+            {{ t(`CreatorSubscribers.status.${sub.status}`) }}
+          </q-badge>
+        </div>
+      </q-card>
     </div>
+
+    <!-- filter dialog -->
+    <q-dialog v-model="showFilters">
+      <q-card style="min-width: 300px">
+        <q-card-section class="text-h6">
+          {{ $t('CreatorSubscribers.actions.filters') }}
+        </q-card-section>
+        <q-card-section>
+          <q-select
+            v-model="tierFilter"
+            dense
+            emit-value
+            map-options
+            clearable
+            :options="tierOptions"
+            :label="$t('CreatorSubscribers.columns.tier')"
+          />
+          <q-select
+            v-model="statusFilter"
+            dense
+            emit-value
+            map-options
+            clearable
+            class="q-mt-md"
+            :options="statusOptions"
+            :label="$t('CreatorSubscribers.columns.status')"
+          />
+        </q-card-section>
+        <q-card-actions align="right">
+          <q-btn flat color="primary" @click="clearFilters" v-close-popup>
+            {{ $t('global.actions.cancel.label') }}
+          </q-btn>
+          <q-btn flat color="primary" v-close-popup>
+            {{ $t('global.actions.ok.label') }}
+          </q-btn>
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
     <q-dialog v-model="showSubscriberDialog" position="right">
       <q-card style="min-width: 350px">
         <q-card-section class="row items-center q-gutter-md">
@@ -148,13 +183,20 @@
           </div>
         </q-card-section>
         <q-card-section>
-          <div><strong>Tier:</strong> {{ currentSubscriber?.tierName }}</div>
           <div>
-            <strong>Next renewal:</strong>
-            {{ currentSubscriber?.nextRenewal ? formatTs(currentSubscriber.nextRenewal) : '-' }}
+            <strong>{{ $t('CreatorSubscribers.columns.tier') }}:</strong>
+            {{ currentSubscriber?.tierName }}
           </div>
           <div>
-            <strong>Total paid:</strong>
+            <strong>{{ $t('CreatorSubscribers.columns.nextRenewal') }}:</strong>
+            {{
+              currentSubscriber?.nextRenewal
+                ? formatTs(currentSubscriber.nextRenewal)
+                : '-'
+            }}
+          </div>
+          <div>
+            <strong>{{ $t('CreatorSubscribers.summary.revenue') }}:</strong>
             {{ formatCurrency(currentSubscriber?.totalAmount || 0) }}
           </div>
         </q-card-section>
@@ -163,9 +205,15 @@
           <div class="text-body2">{{ latestNote }}</div>
         </q-card-section>
         <q-card-actions align="right">
-          <q-btn flat color="primary" @click="viewProfile">View Profile</q-btn>
-          <q-btn flat color="primary" @click="sendMessageFromDrawer">Send Message</q-btn>
-          <q-btn flat v-close-popup color="grey">Close</q-btn>
+          <q-btn flat color="primary" @click="sendMessageFromDrawer">
+            {{ $t('CreatorSubscribers.actions.sendMessage') }}
+          </q-btn>
+          <q-btn flat color="primary" @click="copyNpub">
+            {{ $t('global.actions.copy.label') }}
+          </q-btn>
+          <q-btn flat v-close-popup color="grey">
+            {{ $t('global.actions.close.label') }}
+          </q-btn>
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -220,19 +268,24 @@ const { activeUnit } = storeToRefs(mintsStore);
 const { t } = useI18n();
 
 const filter = ref("");
-const frequencyFilter = ref<string | null>(null);
+const tierFilter = ref<string | null>(null);
 const statusFilter = ref<string | null>(null);
+const showFilters = ref(false);
 
-const frequencyOptions = computed(() => [
-  { label: t("CreatorSubscribers.frequency.weekly"), value: "weekly" },
-  { label: t("CreatorSubscribers.frequency.biweekly"), value: "biweekly" },
-  { label: t("CreatorSubscribers.frequency.monthly"), value: "monthly" },
-]);
+const tierOptions = computed(() => {
+  const set = new Set(subscriptions.value.map((s) => s.tierName));
+  return Array.from(set).map((name) => ({ label: name, value: name }));
+});
 
 const statusOptions = computed(() => [
   { label: t("CreatorSubscribers.status.active"), value: "active" },
   { label: t("CreatorSubscribers.status.pending"), value: "pending" },
 ]);
+
+function clearFilters() {
+  tierFilter.value = null;
+  statusFilter.value = null;
+}
 
 function formatCurrency(amount: number): string {
   return uiStore.formatCurrency(amount, activeUnit.value);
@@ -315,6 +368,16 @@ function exportSelected() {
   exportSubscribers(selected.value, "subscribers.csv");
 }
 
+function isSelected(sub: CreatorSubscription) {
+  return selected.value.some((s) => s.subscriptionId === sub.subscriptionId);
+}
+
+function handleSelectChange(val: boolean, sub: CreatorSubscription) {
+  const idx = selected.value.findIndex((s) => s.subscriptionId === sub.subscriptionId);
+  if (val && idx === -1) selected.value.push(sub);
+  if (!val && idx !== -1) selected.value.splice(idx, 1);
+}
+
 const showSubscriberDialog = ref(false);
 const currentSubscriber = ref<CreatorSubscription | null>(null);
 const subscriberProfile = ref<any>(null);
@@ -351,56 +414,24 @@ const subscriberInitials = computed(() => {
   return name.slice(0, 2).toUpperCase();
 });
 
-function viewProfile() {
-  if (!currentSubscriber.value) return;
-  showSubscriberDialog.value = false;
-  router.push(`/creator/${currentSubscriberNpub.value}`);
-}
-
 function sendMessageFromDrawer() {
   if (!currentSubscriber.value) return;
   showSubscriberDialog.value = false;
   sendMessage(currentSubscriber.value.subscriberNpub);
 }
 
-const columns = computed(() => [
-  {
-    name: "tier",
-    label: t("CreatorSubscribers.columns.tier"),
-    field: "tierName",
-  },
-  {
-    name: "subscriber",
-    label: t("CreatorSubscribers.columns.subscriber"),
-    field: "subscriberNpub",
-    format: (val: string) =>
-      shortenString(pubkeyNpub(val), 15, 6) || pubkeyNpub(val),
-  },
-  {
-    name: "status",
-    label: t("CreatorSubscribers.columns.status"),
-    field: "status",
-    format: (val: string) => t(`CreatorSubscribers.status.${val}`),
-  },
-  {
-    name: "nextRenewal",
-    label: t("CreatorSubscribers.columns.nextRenewal"),
-    field: "nextRenewal",
-    format: (val: number | null) => (val ? formatTs(val) : "-"),
-  },
-  {
-    name: "revenue",
-    label: t("CreatorSubscribers.summary.revenue"),
-    field: "totalAmount",
-    format: (val: number) => formatCurrency(val),
-  },
-  {
-    name: "actions",
-    label: t("CreatorSubscribers.columns.actions"),
-    field: "actions",
-    align: "right",
-  },
-]);
+async function copyNpub() {
+  if (!currentSubscriber.value) return;
+  try {
+    await navigator?.clipboard?.writeText(currentSubscriberNpub.value);
+    notifySuccess(t("global.copy_to_clipboard.success"));
+  } catch {
+    notifyError(t("copy_failed"));
+  }
+}
+function getInitials(npub: string): string {
+  return pubkeyNpub(npub).slice(0, 2).toUpperCase();
+}
 
 const filteredSubscribers = computed(() => {
   const term = filter.value.toLowerCase();
@@ -409,11 +440,10 @@ const filteredSubscribers = computed(() => {
       !term ||
       s.subscriberNpub.toLowerCase().includes(term) ||
       s.tierName.toLowerCase().includes(term);
-    const matchesFrequency =
-      !frequencyFilter.value || s.frequency === frequencyFilter.value;
+    const matchesTier = !tierFilter.value || s.tierName === tierFilter.value;
     const matchesStatus =
       !statusFilter.value || s.status === statusFilter.value;
-    return matchesSearch && matchesFrequency && matchesStatus;
+    return matchesSearch && matchesTier && matchesStatus;
   });
 });
 </script>
