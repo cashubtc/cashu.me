@@ -144,7 +144,7 @@
           </q-avatar>
           <div class="column">
             <div class="text-h6">{{ subscriberName }}</div>
-            <div class="text-caption">{{ currentSubscriber?.subscriberNpub }}</div>
+            <div class="text-caption">{{ currentSubscriberNpub }}</div>
           </div>
         </q-card-section>
         <q-card-section>
@@ -208,6 +208,8 @@ import { useRouter } from "vue-router";
 import { useNostrStore } from "stores/nostr";
 import { notifySuccess, notifyError } from "src/js/notify";
 import exportSubscribers from "src/utils/subscriberCsv";
+import { nip19 } from "nostr-tools";
+import { shortenString } from "src/js/string-utils";
 
 const creatorSubscriptionsStore = useCreatorSubscriptionsStore();
 const { subscriptions, loading } = storeToRefs(creatorSubscriptionsStore);
@@ -267,6 +269,14 @@ const dialogTitle = computed(() =>
     : t("CreatorSubscribers.actions.sendMessage"),
 );
 
+function pubkeyNpub(hex: string): string {
+  try {
+    return nip19.npubEncode(hex);
+  } catch {
+    return hex;
+  }
+}
+
 function sendMessage(npub: string) {
   messageRecipients.value = [npub];
   messageText.value = "";
@@ -310,6 +320,10 @@ const currentSubscriber = ref<CreatorSubscription | null>(null);
 const subscriberProfile = ref<any>(null);
 const latestNote = ref<string | null>(null);
 
+const currentSubscriberNpub = computed(() =>
+  currentSubscriber.value ? pubkeyNpub(currentSubscriber.value.subscriberNpub) : ""
+);
+
 async function openSubscriber(sub: CreatorSubscription) {
   currentSubscriber.value = sub;
   showSubscriberDialog.value = true;
@@ -326,9 +340,7 @@ async function openSubscriber(sub: CreatorSubscription) {
 const subscriberName = computed(() => {
   if (!currentSubscriber.value) return "";
   const p: any = subscriberProfile.value;
-  return (
-    p?.display_name || p?.name || currentSubscriber.value.subscriberNpub
-  );
+  return p?.display_name || p?.name || currentSubscriberNpub.value;
 });
 
 const subscriberInitials = computed(() => {
@@ -342,7 +354,7 @@ const subscriberInitials = computed(() => {
 function viewProfile() {
   if (!currentSubscriber.value) return;
   showSubscriberDialog.value = false;
-  router.push(`/creator/${currentSubscriber.value.subscriberNpub}`);
+  router.push(`/creator/${currentSubscriberNpub.value}`);
 }
 
 function sendMessageFromDrawer() {
@@ -361,6 +373,8 @@ const columns = computed(() => [
     name: "subscriber",
     label: t("CreatorSubscribers.columns.subscriber"),
     field: "subscriberNpub",
+    format: (val: string) =>
+      shortenString(pubkeyNpub(val), 15, 6) || pubkeyNpub(val),
   },
   {
     name: "status",
