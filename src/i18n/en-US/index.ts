@@ -1694,6 +1694,16 @@ export const messages = {
     nextRenewal: "Renews on {date}",
     noData: "No subscribers yet",
     shareProfile: "Share your profile",
+    selectionCount: "{count} selected",
+    tooltips: {
+      noSelection: "Select subscribers first",
+      notLoggedIn: "Connect to Nostr to send messages",
+    },
+    notifications: {
+      export_success: "Subscribers exported",
+      export_failed: "Failed to export subscribers",
+      dm_not_ready: "Messenger not ready",
+    },
   },
   restore: {
     mnemonic_error_text: "Please enter a mnemonic",
