@@ -97,6 +97,7 @@
         v-model:selected="selected"
         flat
         :pagination="{ rowsPerPage: 0 }"
+        @row-click="(_, row) => openSubscriber(row)"
       >
         <template #top>
           <div class="row items-center q-gutter-sm">
@@ -122,7 +123,7 @@
               size="sm"
               flat
               icon="chat"
-              @click="sendMessage(props.row.subscriberNpub)"
+              @click.stop="sendMessage(props.row.subscriberNpub)"
             >
               <q-tooltip>{{ $t('CreatorSubscribers.actions.sendMessage') }}</q-tooltip>
             </q-btn>
@@ -130,6 +131,44 @@
         </template>
       </q-table>
     </div>
+    <q-dialog v-model="showSubscriberDialog" position="right">
+      <q-card style="min-width: 350px">
+        <q-card-section class="row items-center q-gutter-md">
+          <q-avatar size="64px">
+            <template v-if="subscriberProfile?.picture">
+              <img :src="subscriberProfile.picture" />
+            </template>
+            <template v-else>
+              <div class="placeholder text-white">{{ subscriberInitials }}</div>
+            </template>
+          </q-avatar>
+          <div class="column">
+            <div class="text-h6">{{ subscriberName }}</div>
+            <div class="text-caption">{{ currentSubscriber?.subscriberNpub }}</div>
+          </div>
+        </q-card-section>
+        <q-card-section>
+          <div><strong>Tier:</strong> {{ currentSubscriber?.tierName }}</div>
+          <div>
+            <strong>Next renewal:</strong>
+            {{ currentSubscriber?.nextRenewal ? formatTs(currentSubscriber.nextRenewal) : '-' }}
+          </div>
+          <div>
+            <strong>Total paid:</strong>
+            {{ formatCurrency(currentSubscriber?.totalAmount || 0) }}
+          </div>
+        </q-card-section>
+        <q-card-section v-if="latestNote">
+          <div class="text-subtitle1 q-mb-xs">Latest note</div>
+          <div class="text-body2">{{ latestNote }}</div>
+        </q-card-section>
+        <q-card-actions align="right">
+          <q-btn flat color="primary" @click="viewProfile">View Profile</q-btn>
+          <q-btn flat color="primary" @click="sendMessageFromDrawer">Send Message</q-btn>
+          <q-btn flat v-close-popup color="grey">Close</q-btn>
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
     <q-dialog v-model="showMessageDialog" persistent>
       <q-card style="min-width: 350px">
         <q-card-section class="text-h6">{{ dialogTitle }}</q-card-section>
@@ -166,6 +205,7 @@ import { useUiStore } from "stores/ui";
 import { useI18n } from "vue-i18n";
 import { useMessengerStore } from "stores/messenger";
 import { useRouter } from "vue-router";
+import { useNostrStore } from "stores/nostr";
 import { notifySuccess, notifyError } from "src/js/notify";
 import exportSubscribers from "src/utils/subscriberCsv";
 
@@ -216,6 +256,7 @@ const revenue = computed(() =>
 
 const messenger = useMessengerStore();
 const router = useRouter();
+const nostr = useNostrStore();
 const selected = ref<CreatorSubscription[]>([]);
 const showMessageDialog = ref(false);
 const messageText = ref("");
@@ -262,6 +303,52 @@ async function confirmMessage() {
 function exportSelected() {
   if (!selected.value.length) return;
   exportSubscribers(selected.value, "subscribers.csv");
+}
+
+const showSubscriberDialog = ref(false);
+const currentSubscriber = ref<CreatorSubscription | null>(null);
+const subscriberProfile = ref<any>(null);
+const latestNote = ref<string | null>(null);
+
+async function openSubscriber(sub: CreatorSubscription) {
+  currentSubscriber.value = sub;
+  showSubscriberDialog.value = true;
+  subscriberProfile.value = null;
+  latestNote.value = null;
+  try {
+    subscriberProfile.value = await nostr.getProfile(sub.subscriberNpub);
+    latestNote.value = await nostr.fetchMostRecentPost(sub.subscriberNpub);
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+const subscriberName = computed(() => {
+  if (!currentSubscriber.value) return "";
+  const p: any = subscriberProfile.value;
+  return (
+    p?.display_name || p?.name || currentSubscriber.value.subscriberNpub
+  );
+});
+
+const subscriberInitials = computed(() => {
+  const name = subscriberName.value.trim();
+  if (!name) return "";
+  const parts = name.split(" ");
+  if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+  return name.slice(0, 2).toUpperCase();
+});
+
+function viewProfile() {
+  if (!currentSubscriber.value) return;
+  showSubscriberDialog.value = false;
+  router.push(`/creator/${currentSubscriber.value.subscriberNpub}`);
+}
+
+function sendMessageFromDrawer() {
+  if (!currentSubscriber.value) return;
+  showSubscriberDialog.value = false;
+  sendMessage(currentSubscriber.value.subscriberNpub);
 }
 
 const columns = computed(() => [
@@ -317,4 +404,14 @@ const filteredSubscribers = computed(() => {
 });
 </script>
 
-<style scoped></style>
+<style scoped>
+.placeholder {
+  background: var(--divider-color);
+  width: 64px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+}
+</style>
