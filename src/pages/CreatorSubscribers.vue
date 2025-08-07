@@ -1,5 +1,40 @@
 <template>
   <q-page class="q-pa-md">
+    <!-- page header -->
+    <div
+      class="sticky top-0 z-10 mb-6"
+      :class="$q.dark.isActive ? 'bg-dark' : 'bg-white'"
+    >
+      <div
+        class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between"
+      >
+        <h5 class="q-my-none">
+          {{ $t("CreatorSubscribers.summary.subscribers") }} ({{ total }})
+        </h5>
+        <div class="flex items-center gap-2 w-full md:w-auto">
+          <q-input
+            v-model="filter"
+            dense
+            debounce="300"
+            clearable
+            class="flex-1"
+            :placeholder="$t('CreatorSubscribers.filter.placeholder')"
+          >
+            <template #prepend>
+              <q-icon name="search" />
+            </template>
+          </q-input>
+          <q-btn
+            flat
+            color="primary"
+            icon="filter_list"
+            :label="$t('CreatorSubscribers.actions.filters')"
+            @click="showFilters = true"
+          />
+        </div>
+      </div>
+    </div>
+
     <!-- summary cards -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
       <!-- total subscribers card -->
@@ -79,34 +114,6 @@
           </svg>
         </q-card-section>
       </q-card>
-    </div>
-
-    <!-- search and filters -->
-    <div
-      class="sticky top-0 z-10 mb-4"
-      :class="$q.dark.isActive ? 'bg-dark' : 'bg-white'"
-    >
-      <div class="flex items-center gap-2">
-        <q-input
-          v-model="filter"
-          dense
-          debounce="300"
-          clearable
-          class="flex-1"
-          :placeholder="$t('CreatorSubscribers.filter.placeholder')"
-        >
-          <template #prepend>
-            <q-icon name="search" />
-          </template>
-        </q-input>
-        <q-btn
-          flat
-          color="primary"
-          icon="filter_list"
-          :label="$t('CreatorSubscribers.actions.filters')"
-          @click="showFilters = true"
-        />
-      </div>
     </div>
 
     <!-- bulk actions -->
