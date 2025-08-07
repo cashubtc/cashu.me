@@ -28,15 +28,57 @@
       </div>
     </div>
 
-    <div v-if="loading" class="text-center q-mt-xl">
-      <q-spinner-dots color="primary" size="40px" />
-      <p class="q-mt-md">Loading subscribers...</p>
+    <!-- Loading Skeleton -->
+    <div v-if="loading" class="q-pa-md">
+      <!-- Skeleton for Summary Cards -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+        <q-card v-for="i in 3" :key="i" class="bg-grey-9" flat bordered>
+          <q-card-section class="flex justify-between items-center">
+            <div class="flex-grow pr-4">
+              <q-skeleton type="text" width="60%" class="text-sm" />
+              <q-skeleton type="text" width="40%" class="text-3xl mt-2" />
+              <q-skeleton type="text" width="80%" class="text-sm mt-2" />
+            </div>
+            <q-skeleton type="QAvatar" size="40px" />
+          </q-card-section>
+        </q-card>
+      </div>
+
+      <!-- Skeleton for Table -->
+      <q-card class="bg-grey-9" flat bordered>
+        <q-markup-table dark class="bg-transparent">
+          <thead>
+            <tr>
+              <th v-for="i in 6" :key="i" class="text-left">
+                <q-skeleton type="text" width="50%" />
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="n in 5" :key="n">
+              <td class="text-left">
+                <div class="flex items-center">
+                  <q-skeleton type="QCheckbox" class="mr-2" />
+                  <q-skeleton type="QAvatar" size="40px" />
+                  <div class="ml-4 flex-grow">
+                    <q-skeleton type="text" width="60%" />
+                    <q-skeleton type="text" width="40%" class="text-xs" />
+                  </div>
+                </div>
+              </td>
+              <td v-for="i in 5" :key="i" class="text-center">
+                <q-skeleton type="text" width="70%" />
+              </td>
+            </tr>
+          </tbody>
+        </q-markup-table>
+      </q-card>
     </div>
 
     <div v-else>
       <!-- Summary Cards -->
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
-        <q-card class="bg-grey-9" flat bordered>
+        <q-card class="bg-grey-9 summary-card" flat bordered>
           <q-card-section>
             <div class="flex justify-between items-start">
               <div>
@@ -52,7 +94,7 @@
           </q-card-section>
         </q-card>
 
-        <q-card class="bg-grey-9" flat bordered>
+        <q-card class="bg-grey-9 summary-card" flat bordered>
           <q-card-section>
             <div class="flex justify-between items-start">
               <div>
@@ -64,7 +106,7 @@
           </q-card-section>
         </q-card>
 
-        <q-card class="bg-grey-9" flat bordered>
+        <q-card class="bg-grey-9 summary-card" flat bordered>
           <q-card-section>
             <div class="flex justify-between items-start">
               <div>
@@ -78,24 +120,26 @@
       </div>
 
       <!-- Bulk Actions Bar -->
-      <div v-if="selectedRows.length > 0" class="bg-grey-8 rounded-lg p-3 mb-4 flex justify-between items-center sticky-top-card">
-        <p class="font-medium">{{ selectedRows.length }} subscriber<span v-if="selectedRows.length > 1">s</span> selected</p>
-        <div>
-          <q-btn
-            color="primary"
-            label="Export CSV"
-            @click="exportCsv"
-            no-caps
-          />
-          <q-btn
-            class="ml-2"
-            color="grey-7"
-            label="Send Group DM"
-            disabled
-            no-caps
-          />
+      <transition name="fade-slide">
+        <div v-if="selectedRows.length > 0" class="bg-grey-8 rounded-lg p-3 mb-4 flex justify-between items-center sticky-top-card">
+          <p class="font-medium">{{ selectedRows.length }} subscriber<span v-if="selectedRows.length > 1">s</span> selected</p>
+          <div>
+            <q-btn
+              color="primary"
+              label="Export CSV"
+              @click="exportCsv"
+              no-caps
+            />
+            <q-btn
+              class="ml-2"
+              color="grey-7"
+              label="Send Group DM"
+              disabled
+              no-caps
+            />
+          </div>
         </div>
-      </div>
+      </transition>
 
       <!-- Subscriber Table -->
       <q-table
@@ -201,6 +245,19 @@
             color="primary"
             dark
             dense
+          />
+        </q-card-section>
+        <q-card-section>
+          <div class="text-sm font-semibold text-grey-5 mb-2">Revenue Range (sats)</div>
+          <q-range
+            v-model="filterRevenue"
+            :min="0"
+            :max="maxRevenue"
+            :step="100"
+            label-always
+            dark
+            color="primary"
+            class="q-mt-md"
           />
         </q-card-section>
         <q-separator dark />
@@ -321,6 +378,19 @@ const showFilterDialog = ref(false);
 const filterTier = ref<string[]>([]);
 const filterStatus = ref<string[]>([]);
 
+const maxRevenue = computed(() => {
+  if (subscriptions.value.length === 0) return 10000;
+  return Math.max(...subscriptions.value.map(s => s.totalAmount));
+});
+
+const filterRevenue = ref({ min: 0, max: maxRevenue.value });
+watchEffect(() => {
+  if (filterRevenue.value.max > maxRevenue.value) {
+    filterRevenue.value.max = maxRevenue.value;
+  }
+});
+
+
 const tierOptions = computed(() => {
   const tiers = new Set(subscriptions.value.map(s => s.tierName).filter(Boolean));
   return Array.from(tiers).map(tier => ({ label: `${tier} Tier`, value: tier }));
@@ -334,6 +404,7 @@ const statusOptions = [
 function resetFilters() {
   filterTier.value = [];
   filterStatus.value = [];
+  filterRevenue.value = { min: 0, max: maxRevenue.value };
 }
 // ---------------------------------
 
@@ -379,8 +450,9 @@ const filteredRows = computed(() => {
 
     const tierMatch = filterTier.value.length === 0 || filterTier.value.includes(row.tierName);
     const statusMatch = filterStatus.value.length === 0 || filterStatus.value.includes(row.status);
+    const revenueMatch = row.totalAmount >= filterRevenue.value.min && row.totalAmount <= filterRevenue.value.max;
 
-    return searchMatch && tierMatch && statusMatch;
+    return searchMatch && tierMatch && statusMatch && revenueMatch;
   });
 });
 
@@ -420,6 +492,25 @@ function formatDate(timestamp: number | null) {
     text-transform: capitalize;
   }
 }
+
+.summary-card {
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+.summary-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.fade-slide-enter-active,
+.fade-slide-leave-active {
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+.fade-slide-enter-from,
+.fade-slide-leave-to {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+
 // Using Tailwind-style utility classes directly in the template
 .grid {
   display: grid;
