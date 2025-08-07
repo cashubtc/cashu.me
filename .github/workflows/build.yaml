@@ -6,7 +6,6 @@ on:
 
 jobs:
   build:
-    # This key *must* be "build" to match your branch protection
     runs-on: ubuntu-latest
 
     steps:
@@ -17,12 +16,16 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "20"
-          cache: "npm"
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9 # Specify your pnpm version
 
       - name: Install dependencies
-        run: npm install
+        run: pnpm install --frozen-lockfile
 
       - name: Run build & PWA build
         run: |
-          npm run build
-          npm run build:pwa
+          pnpm run build
+          pnpm run build:pwa
