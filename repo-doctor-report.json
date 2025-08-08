@@ -1,25 +1,25 @@
 {
-  "created_at": "2025-08-08T06:54:42Z",
+  "created_at": "2025-08-08T08:06:24Z",
   "git": {
     "repo_path": "/home/simulacraproductions/Desktop/Simulacra_Productions/KA/CASHU/cashu.mecustomized",
     "is_git": true,
-    "git_dir_size": "72.8 MB",
-    "worktree_size": "72.1 MB",
-    "tracked_files": 552,
-    "commit_count": 3890,
-    "local_branches": 36,
+    "git_dir_size": "73.4 MB",
+    "worktree_size": "41.7 MB",
+    "tracked_files": 571,
+    "commit_count": 3899,
+    "local_branches": 39,
     "remote_branches": 294,
     "tags": 0,
-    "current_branch": "Phase9-clean",
-    "head_commit": "2af8ebc8",
+    "current_branch": "fix/pwa-workbox-mode",
+    "head_commit": "06f3bd0d",
     "default_branch_guess": "main"
   },
   "status": {
-    "modified": 6,
+    "modified": 0,
     "added": 0,
-    "deleted": 2,
+    "deleted": 0,
     "renamed": 0,
-    "untracked": 10,
+    "untracked": 0,
     "conflicted": 0,
     "stashes": 4,
     "stash_list": [
@@ -117,9 +117,9 @@
     {
       "name": "Phase9-clean",
       "upstream": "origin/Phase9-clean",
-      "ahead": 0,
+      "ahead": 1,
       "behind": 0,
-      "last_commit_date": "2025-08-08T07:58:35+02:00"
+      "last_commit_date": "2025-08-08T09:12:56+02:00"
     },
     {
       "name": "addBuckets",
@@ -155,6 +155,27 @@
       "ahead": 0,
       "behind": 0,
       "last_commit_date": "2025-06-12T11:10:36+02:00"
+    },
+    {
+      "name": "fix/build-polyfills",
+      "upstream": null,
+      "ahead": 0,
+      "behind": 0,
+      "last_commit_date": "2025-08-08T09:23:24+02:00"
+    },
+    {
+      "name": "fix/pwa-workbox-mode",
+      "upstream": null,
+      "ahead": 0,
+      "behind": 0,
+      "last_commit_date": "2025-08-08T09:54:05+02:00"
+    },
+    {
+      "name": "fix/vite-node-polyfills",
+      "upstream": null,
+      "ahead": 0,
+      "behind": 0,
+      "last_commit_date": "2025-08-08T09:34:26+02:00"
     },
     {
       "name": "fix/vitest-alias-ecash-permissions",
@@ -293,12 +314,12 @@
       "commits": 647
     },
     {
-      "author": "mjkeaton",
+      "author": "Simu",
       "commits": 51
     },
     {
-      "author": "Simu",
-      "commits": 42
+      "author": "mjkeaton",
+      "commits": 51
     },
     {
       "author": "lollerfirst",
@@ -477,6 +498,66 @@
     [
       "269.1 KB",
       "public/icons/apple-launch-2048x2732.png"
+    ],
+    [
+      "245.2 KB",
+      "public/icons/apple-launch-1536x2048.png"
+    ],
+    [
+      "241.3 KB",
+      "package-lock.json"
+    ],
+    [
+      "239.3 KB",
+      "package-lock.json"
+    ],
+    [
+      "239.3 KB",
+      "package-lock.json"
+    ],
+    [
+      "239.1 KB",
+      "package-lock.json"
+    ],
+    [
+      "239.1 KB",
+      "package-lock.json"
+    ],
+    [
+      "236.8 KB",
+      "package-lock.json"
+    ],
+    [
+      "220.0 KB",
+      "icon.png"
+    ],
+    [
+      "210.0 KB",
+      "package-lock.json"
+    ],
+    [
+      "180.5 KB",
+      "public/icons/apple-launch-1290x2796.png"
+    ],
+    [
+      "178.8 KB",
+      "pnpm-lock.yaml"
+    ],
+    [
+      "178.7 KB",
+      "pnpm-lock.yaml"
+    ],
+    [
+      "178.7 KB",
+      "pnpm-lock.yaml"
+    ],
+    [
+      "178.4 KB",
+      "public/icons/apple-launch-1284x2778.png"
+    ],
+    [
+      "172.2 KB",
+      "pnpm-lock.yaml.bak"
     ]
   ],
   "top_large_files": [
@@ -489,36 +570,16 @@
       "src/lib/cashu-ts/node_modules/esbuild/bin/esbuild"
     ],
     [
-      "9.3 MB",
-      "src/lib/cashu-ts.bak.1754632785/node_modules/.bin/esbuild"
-    ],
-    [
-      "9.3 MB",
-      "src/lib/cashu-ts.bak.1754632785/node_modules/esbuild/bin/esbuild"
-    ],
-    [
       "2.0 MB",
       "src/lib/cashu-ts/node_modules/vite/dist/node/chunks/dep-C6uTJdX2.js"
-    ],
-    [
-      "2.0 MB",
-      "src/lib/cashu-ts.bak.1754632785/node_modules/vite/dist/node/chunks/dep-C6uTJdX2.js"
     ],
     [
       "897.7 KB",
       "src/lib/cashu-ts/node_modules/rollup/dist/es/shared/node-entry.js"
     ],
     [
-      "897.7 KB",
-      "src/lib/cashu-ts.bak.1754632785/node_modules/rollup/dist/es/shared/node-entry.js"
-    ],
-    [
       "896.8 KB",
       "src/lib/cashu-ts/node_modules/rollup/dist/shared/rollup.js"
-    ],
-    [
-      "896.8 KB",
-      "src/lib/cashu-ts.bak.1754632785/node_modules/rollup/dist/shared/rollup.js"
     ],
     [
       "614.6 KB",
@@ -529,14 +590,6 @@
       "src/lib/cashu-ts/node_modules/@vitest/ui/dist/client/assets/index-B6hUSIXg.js"
     ],
     [
-      "614.6 KB",
-      "src/lib/cashu-ts.bak.1754632785/node_modules/@vitest/browser/dist/client/__vitest__/assets/index-B6hUSIXg.js"
-    ],
-    [
-      "614.6 KB",
-      "src/lib/cashu-ts.bak.1754632785/node_modules/@vitest/ui/dist/client/assets/index-B6hUSIXg.js"
-    ],
-    [
       "540.8 KB",
       "assets/icon-background.png"
     ],
@@ -545,7 +598,7 @@
       "public/icons/apple-launch-2048x2732.png"
     ],
     [
-      "469.7 KB",
+      "470.1 KB",
       "pnpm-lock.yaml"
     ],
     [
@@ -553,12 +606,100 @@
       "src/lib/cashu-ts/package-lock.json"
     ],
     [
-      "434.2 KB",
-      "src/lib/cashu-ts.bak.1754632785/package-lock.json"
-    ],
-    [
       "412.9 KB",
       "src/lib/cashu-ts/node_modules/@vitest/browser/dist/client/__vitest_browser__/tester-BaiNqOPw.js"
+    ],
+    [
+      "375.5 KB",
+      "icon.png"
+    ],
+    [
+      "375.5 KB",
+      "assets/icon-only.png"
+    ],
+    [
+      "372.3 KB",
+      "icon-round.png"
+    ],
+    [
+      "360.5 KB",
+      "public/icons/apple-launch-1668x2388.png"
+    ],
+    [
+      "355.1 KB",
+      "public/icons/apple-launch-1668x2224.png"
+    ],
+    [
+      "350.6 KB",
+      "src/lib/cashu-ts/node_modules/vitest/dist/chunks/cli-api.DqsSTaIi.js"
+    ],
+    [
+      "335.4 KB",
+      "public/icons/apple-launch-1620x2160.png"
+    ],
+    [
+      "323.9 KB",
+      "src/lib/cashu-ts/node_modules/vite/dist/node/chunks/dep-D-7KCb9p.js"
+    ],
+    [
+      "309.5 KB",
+      "ios/App/App/Assets.xcassets/AppIcon.appiconset/AppIcon-512@2x.png"
+    ],
+    [
+      "303.1 KB",
+      "public/icons/apple-launch-1536x2048.png"
+    ],
+    [
+      "248.6 KB",
+      "public/icons/apple-launch-1290x2796.png"
+    ],
+    [
+      "245.1 KB",
+      "src/lib/cashu-ts/node_modules/rollup/dist/es/shared/watch.js"
+    ],
+    [
+      "243.6 KB",
+      "public/icons/apple-launch-1284x2778.png"
+    ],
+    [
+      "235.4 KB",
+      "src/lib/cashu-ts/node_modules/rollup/dist/shared/index.js"
+    ],
+    [
+      "231.6 KB",
+      "public/icons/apple-launch-1242x2688.png"
+    ],
+    [
+      "227.2 KB",
+      "src/lib/cashu-ts/node_modules/vite/dist/node/chunks/dep-CEGXe0Sr.js"
+    ],
+    [
+      "226.0 KB",
+      "src/lib/cashu-ts/node_modules/vitest/dist/chunks/resolveConfig.rBxzbVsl.js"
+    ],
+    [
+      "219.1 KB",
+      "public/icons/apple-launch-1242x2208.png"
+    ],
+    [
+      "211.7 KB",
+      "public/icons/apple-launch-1179x2556.png"
+    ],
+    [
+      "208.7 KB",
+      "public/icons/apple-launch-1170x2532.png"
+    ],
+    [
+      "193.9 KB",
+      "public/icons/apple-launch-1125x2436.png"
+    ],
+    [
+      "186.5 KB",
+      "src/lib/cashu-ts/node_modules/@vitest/browser/dist/client/__vitest__/bg.png"
+    ],
+    [
+      "186.5 KB",
+      "src/lib/cashu-ts/node_modules/@vitest/ui/dist/client/bg.png"
     ]
   ],
   "lfs_summary": "0 LFS-tracked files",
@@ -685,9 +826,10 @@
       "checkformat": "prettier --check .",
       "test": "node --experimental-vm-modules node_modules/vitest/vitest.mjs",
       "test:ci": "node --experimental-vm-modules node_modules/vitest/vitest.mjs run",
-      "types": "tsc -p tsconfig.json --noEmit"
+      "types": "tsc -p tsconfig.json --noEmit",
+      "ci:verify": "pnpm run types && pnpm run lint && pnpm run test:ci && pnpm run build && pnpm run build:pwa"
     },
-    "deps_count": 36,
+    "deps_count": 38,
     "dev_deps_count": 36,
     "has_quasar": true,
     "quasar_app_vite": "^2.3.0",
@@ -695,27 +837,27 @@
     "vite_pkg": null
   },
   "quasar_vite": {
-    "quasar_config_path": "/home/simulacraproductions/Desktop/Simulacra_Productions/KA/CASHU/cashu.mecustomized/quasar.config.js.bak.1754632126",
+    "quasar_config_path": "/home/simulacraproductions/Desktop/Simulacra_Productions/KA/CASHU/cashu.mecustomized/quasar.config.js",
     "vite_config_path": null,
-    "suspicious_lines": [
-      "quasar.config.js:12: import { nodePolyfills } from 'vite-plugin-node-polyfills';",
-      "quasar.config.js:75: nodePolyfills({",
-      "quasar.config.js:76: globals: { Buffer: true, global: true, process: true },",
-      "quasar.config.js.fixbak.1754632541:12: import { nodePolyfills } from 'vite-plugin-node-polyfills';",
-      "quasar.config.js.fixbak.1754632541:75: nodePolyfills({",
-      "quasar.config.js.fixbak.1754632541:76: globals: { Buffer: true, global: true, process: true },"
-    ],
-    "has_node_polyfills_plugin": true,
-    "has_globals_boolean_map": true,
+    "suspicious_lines": [],
+    "has_node_polyfills_plugin": false,
+    "has_globals_boolean_map": false,
     "define_entries": [],
     "optimize_deps_hints": [
-      "quasar.config.js:43: optimizeDeps: { include: ['process', 'buffer'] },",
-      "quasar.config.js.fixbak.1754632541:43: optimizeDeps: { include: ['process', 'buffer'] },",
-      "quasar.config.js.aliasbak.1754632274:41: optimizeDeps: { include: ['buffer'] },",
-      "quasar.config.js.polybak.1754632425:42: optimizeDeps: { include: ['buffer'] },"
+      "quasar.config.js:42: optimizeDeps: { include: ['process', 'buffer'] },",
+      "quasar.config.js:70: viteConf.optimizeDeps = { ...(viteConf.optimizeDeps || {}), include: [ ...(viteConf.optimizeDeps?.include || []), 'buffer', 'process' ] };"
     ]
   },
   "recent_commits": [
+    "06f3bd0d 2025-08-08 09:54:05 +0200 Simu | chore(ci): add ci:verify to gate types/lint/tests/spa+pwa builds",
+    "92a9ae69 2025-08-08 09:53:45 +0200 Simu | chore: cleanup backups/logs; ignore nested node_modules; harden .gitignore",
+    "1fe4545e 2025-08-08 09:53:27 +0200 Simu | build: use only static imports for @nostr-dev-kit/ndk to avoid split warning",
+    "7aa39401 2025-08-08 09:53:00 +0200 Simu | fix(pwa): register emitted sw.js instead of service-worker.js",
+    "3de98f08 2025-08-08 09:53:00 +0200 Simu | WIP: before SW path fix",
+    "2c3bdbb2 2025-08-08 09:44:22 +0200 Simu | WIP: before fixing PWA registration",
+    "b361101c 2025-08-08 09:34:26 +0200 Simu | WIP: before PWA workboxMode fix",
+    "615bda72 2025-08-08 09:23:24 +0200 Simu | WIP: before polyfill install",
+    "2e8b9413 2025-08-08 09:12:56 +0200 Simu | WIP: before auto-repair",
     "2af8ebc8 2025-08-08 07:58:35 +0200 Simu | build: repair quasar config (node polyfills via extendViteConf, aliases, deps, boot)",
     "9586d9d6 2025-08-08 07:53:57 +0200 Simu | build: enable vite-plugin-node-polyfills (buffer/process) and include in optimizeDeps",
     "63f4ac1a 2025-08-08 07:51:14 +0200 Simu | build: add root-level alias for buffer and process (vite bundling)",
@@ -731,19 +873,8 @@
     "9d26a262 2025-08-07 08:54:22 +0200 ritty65 | feat: card-based creator subscribers",
     "5d25a78c 2025-08-07 08:39:48 +0200 ritty65 | Merge pull request #1510 from ritty65/i7ua7u-codex/fill-missing-tiername-values-in-subscriptions",
     "3e55da7c 2025-08-07 08:39:37 +0200 ritty65 | fill missing tier names",
-    "12fde0cc 2025-08-07 08:28:06 +0200 ritty65 | Merge pull request #1509 from ritty65/7ajhwp-codex/refactor-subscriber-rendering-in-creatorsubscribers",
-    "dea025a2 2025-08-07 08:27:48 +0200 ritty65 | Encode subscriber npubs",
-    "81959949 2025-08-07 08:10:07 +0200 ritty65 | Merge pull request #1508 from ritty65/9ed55b-codex/remove-creator-subscribers.html-and-verify-routes",
-    "a0155d20 2025-08-07 08:09:55 +0200 ritty65 | chore: remove creator subscribers static page",
-    "6b3bc485 2025-08-07 07:57:17 +0200 ritty65 | Merge pull request #1507 from ritty65/19dugi-codex/add-qdrawer-or-qdialog-for-subscriber-details",
-    "c8437784 2025-08-07 07:57:00 +0200 ritty65 | feat: add subscriber details drawer",
-    "d0dc24c9 2025-08-07 07:48:00 +0200 ritty65 | Merge pull request #1506 from ritty65/zwp7p3-codex/add-checkboxes-and-export-functionality-to-subscribers",
-    "0ab698cc 2025-08-07 07:47:49 +0200 ritty65 | feat: enable subscriber selection actions",
-    "42ee1683 2025-08-07 07:37:40 +0200 ritty65 | Merge pull request #1505 from ritty65/13t46y-codex/implement-subscriber-filters-and-search",
-    "d97863d5 2025-08-07 07:37:10 +0200 ritty65 | feat: add filtering to creator subscribers"
+    "12fde0cc 2025-08-07 08:28:06 +0200 ritty65 | Merge pull request #1509 from ritty65/7ajhwp-codex/refactor-subscriber-rendering-in-creatorsubscribers"
   ],
-  "last_build": "build: rc=1 | log=20250808-085440-build.log\n> cashu@0.0.1 build /home/simulacraproductions/Desktop/Simulacra_Productions/KA/CASHU/cashu.mecustomized\n> quasar build\n\n\n .d88888b.\nd88P\" \"Y88b\n888     888\n888     888 888  888  8888b.  .d8888b   8888b.  888d888\n888     888 888  888     \"88b 88K          \"88b 888P\"\n888 Y8b 888 888  888 .d888888 \"Y8888b. .d888888 888\nY88b.Y8b88P Y88b 888 888  888      X88 888  888 888\n \"Y888888\"   \"Y88888 \"Y888888  88888P' \"Y888888 888\n       Y8b\n\n\n Build mode............. spa\n Pkg quasar............. v2.18.1\n Pkg @quasar/app-vite... v2.3.0\n Pkg vite............... v6.2.0\n Debugging.............. no\n Publishing............. no\n\n App • Using quasar.config.js in \"esm\" format\n\n ELIFECYCLE  Command failed with exit code 1.\n\n✘ [ERROR] Expected identifier but found \"true\"\n\n    quasar.config.js:76:29:\n      76 │           globals: { Buffer: true, global: true, process: true },\n         ╵                              ~~~~\n\nError: Build failed with 1 error:\nquasar.config.js:76:29: ERROR: Expected identifier but found \"true\"\n    at failureErrorWithLog (/home/simulacraproductions/Desktop/Simulacra_Productions/KA/CASHU/cashu.mecustomized/node_modules/.pnpm/esbuild@0.25.8/node_modules/esbuild/lib/main.js:1467:15)\n    at /home/simulacraproductions/Desktop/Simulacra_Productions/KA/CASHU/cashu.mecustomized/node_modules/.pnpm/esbuild@0.25.8/node_modules/esbuild/lib/main.js:926:25\n    at runOnEndCallbacks (/home/simulacraproductions/Desktop/Simulacra_Productions/KA/CASHU/cashu.mecustomized/node_modules/.pnpm/esbuild@0.25.8/node_modules/esbuild/lib/main.js:1307:45)\n    at buildResponseToResult (/home/simulacraproductions/Desktop/Simulacra_Productions/KA/CASHU/cashu.mecustomized/node_modules/.pnpm/esbuild@0.25.8/node_modules/esbuild/lib/main.js:924:7)\n    at /home/simulacraproductions/Desktop/Simulacra_Productions/KA/CASHU/cashu.mecustomized/node_modules/.pnpm/esbuild@0.25.8/node_modules/esbuild/lib/main.js:951:16\n    at responseCallbacks.<computed> (/home/simulacraproductions/Desktop/Simulacra_Productions/KA/CASHU/cashu.mecustomized/node_modules/.pnpm/esbuild@0.25.8/node_modules/esbuild/lib/main.js:603:9)\n    at handleIncomingPacket (/home/simulacraproductions/Desktop/Simulacra_Productions/KA/CASHU/cashu.mecustomized/node_modules/.pnpm/esbuild@0.25.8/node_modules/esbuild/lib/main.js:658:12)\n    at Socket.readFromStdout (/home/simulacraproductions/Desktop/Simulacra_Productions/KA/CASHU/cashu.mecustomized/node_modules/.pnpm/esbuild@0.25.8/node_modules/esbuild/lib/main.js:581:7)\n    at Socket.emit (node:events:524:28)\n    at addChunk (node:internal/streams/readable:561:12) {\n  errors: [Getter/Setter],\n  warnings: [Getter/Setter]\n}\n\n App • ⚠️   FAIL  Could not compile the quasar.config file because it has errors.\n\nbuild:pwa: rc=1 | log=20250808-085441-build_pwa.log\n> cashu@0.0.1 build:pwa /home/simulacraproductions/Desktop/Simulacra_Productions/KA/CASHU/cashu.mecustomized\n> quasar build -m pwa\n\n\n .d88888b.\nd88P\" \"Y88b\n888     888\n888     888 888  888  8888b.  .d8888b   8888b.  888d888\n888     888 888  888     \"88b 88K          \"88b 888P\"\n888 Y8b 888 888  888 .d888888 \"Y8888b. .d888888 888\nY88b.Y8b88P Y88b 888 888  888      X88 888  888 888\n \"Y888888\"   \"Y88888 \"Y888888  88888P' \"Y888888 888\n       Y8b\n\n\n Build mode............. pwa\n Pkg quasar............. v2.18.1\n Pkg @quasar/app-vite... v2.3.0\n Pkg vite............... v6.2.0\n Debugging.............. no\n Publishing............. no\n\n App • Using quasar.config.js in \"esm\" format\n\n ELIFECYCLE  Command failed with exit code 1.\n\n✘ [ERROR] Expected identifier but found \"true\"\n\n    quasar.config.js:76:29:\n      76 │           globals: { Buffer: true, global: true, process: true },\n         ╵                              ~~~~\n\nError: Build failed with 1 error:\nquasar.config.js:76:29: ERROR: Expected identifier but found \"true\"\n    at failureErrorWithLog (/home/simulacraproductions/Desktop/Simulacra_Productions/KA/CASHU/cashu.mecustomized/node_modules/.pnpm/esbuild@0.25.8/node_modules/esbuild/lib/main.js:1467:15)\n    at /home/simulacraproductions/Desktop/Simulacra_Productions/KA/CASHU/cashu.mecustomized/node_modules/.pnpm/esbuild@0.25.8/node_modules/esbuild/lib/main.js:926:25\n    at runOnEndCallbacks (/home/simulacraproductions/Desktop/Simulacra_Productions/KA/CASHU/cashu.mecustomized/node_modules/.pnpm/esbuild@0.25.8/node_modules/esbuild/lib/main.js:1307:45)\n    at buildResponseToResult (/home/simulacraproductions/Desktop/Simulacra_Productions/KA/CASHU/cashu.mecustomized/node_modules/.pnpm/esbuild@0.25.8/node_modules/esbuild/lib/main.js:924:7)\n    at /home/simulacraproductions/Desktop/Simulacra_Productions/KA/CASHU/cashu.mecustomized/node_modules/.pnpm/esbuild@0.25.8/node_modules/esbuild/lib/main.js:951:16\n    at responseCallbacks.<computed> (/home/simulacraproductions/Desktop/Simulacra_Productions/KA/CASHU/cashu.mecustomized/node_modules/.pnpm/esbuild@0.25.8/node_modules/esbuild/lib/main.js:603:9)\n    at handleIncomingPacket (/home/simulacraproductions/Desktop/Simulacra_Productions/KA/CASHU/cashu.mecustomized/node_modules/.pnpm/esbuild@0.25.8/node_modules/esbuild/lib/main.js:658:12)\n    at Socket.readFromStdout (/home/simulacraproductions/Desktop/Simulacra_Productions/KA/CASHU/cashu.mecustomized/node_modules/.pnpm/esbuild@0.25.8/node_modules/esbuild/lib/main.js:581:7)\n    at Socket.emit (node:events:524:28)\n    at addChunk (node:internal/streams/readable:561:12) {\n  errors: [Getter/Setter],\n  warnings: [Getter/Setter]\n}\n\n App • ⚠️   FAIL  Could not compile the quasar.config file because it has errors.",
-  "notes": [
-    "Detected 'globals: { Buffer: true, global: true, process: true }' — this is often misused outside polyfill plugins and can trigger esbuild parsing failures. Prefer proper 'define' mappings or a vetted polyfill plugin."
-  ]
+  "last_build": "build: rc=0 | log=20250808-100548-build.log\n ║                                          assets/MediaPreview-7gU6gfi6.css ║      0.62 KB ║      0.32 KB ║\n ║                                        assets/NostrMessenger-CMs9SkoS.css ║      2.70 KB ║      0.85 KB ║\n ║                              assets/PublicCreatorProfilePage-Clq_8-3j.css ║      0.12 KB ║      0.10 KB ║\n ║                                       assets/SendTokenDialog-CssGghAJ.css ║      1.52 KB ║      0.60 KB ║\n ║                                              assets/Settings-B-ht4wvc.css ║      0.21 KB ║      0.17 KB ║\n ║                                   assets/SubscriptionReceipt-DU4tK0q6.css ║      0.09 KB ║      0.10 KB ║\n ║                                 assets/SubscriptionsOverview-CuPSf4O0.css ║      0.74 KB ║      0.33 KB ║\n ║                                             assets/TermsPage-CqT4GrQ4.css ║      0.34 KB ║      0.22 KB ║\n ║                                            assets/WalletPage-DO7rqT2J.css ║     15.46 KB ║      3.18 KB ║\n ║                                           assets/WelcomePage-BTf0y8Tr.css ║      0.35 KB ║      0.22 KB ║\n ║                                                 assets/index-BSIoN0tV.css ║    233.41 KB ║     40.32 KB ║\n ╟───────────────────────────────────────────────────────────────────────────╫──────────────╫──────────────╢\n ║                                                        find-creators.html ║     29.67 KB ║            - ║\n ║                                                                index.html ║      1.15 KB ║            - ║\n ╠═══════════════════════════════════════════════════════════════════════════╬══════════════╬══════════════╣\n ║                                                      Total JS (106 files) ║   2659.96 KB ║            - ║\n ║                                                      Total CSS (18 files) ║    260.97 KB ║            - ║\n ╚═══════════════════════════════════════════════════════════════════════════╩══════════════╩══════════════╝\n\n Build succeeded\n\n Build mode............. spa\n Pkg quasar............. v2.18.1\n Pkg @quasar/app-vite... v2.3.0\n Pkg vite............... v6.2.0\n Debugging.............. no\n Publishing............. no\n Browser target......... esnext\n =======================\n Output folder.......... /home/simulacraproductions/Desktop/Simulacra_Productions/KA/CASHU/cashu.mecustomized/dist/spa\n\n Tip: Built files are meant to be served over an HTTP server\n      Opening index.html over file:// won't work\n\n Tip: You can use \"$ quasar serve\" command to create a web server,\n      both for testing or production. Type \"$ quasar serve -h\" for\n      parameters. Also, an npm script (usually named \"start\") can\n      be added for deployment environments.\n      If you're using Vue Router \"history\" mode, don't forget to\n      specify the \"--history\" parameter: \"$ quasar serve --history\"\n\n\nnode_modules/.pnpm/tseep@1.3.1/node_modules/tseep/lib/task-collection/bake-collection.js (65:26): Use of eval in \"node_modules/.pnpm/tseep@1.3.1/node_modules/tseep/lib/task-collection/bake-collection.js\" is strongly discouraged as it poses security risks and may cause issues with minification.\nnode_modules/.pnpm/tseep@1.3.1/node_modules/tseep/lib/task-collection/bake-collection.js (91:26): Use of eval in \"node_modules/.pnpm/tseep@1.3.1/node_modules/tseep/lib/task-collection/bake-collection.js\" is strongly discouraged as it poses security risks and may cause issues with minification.\nnode_modules/.pnpm/tseep@1.3.1/node_modules/tseep/lib/task-collection/bake-collection.js (115:26): Use of eval in \"node_modules/.pnpm/tseep@1.3.1/node_modules/tseep/lib/task-collection/bake-collection.js\" is strongly discouraged as it poses security risks and may cause issues with minification.\n\n(!) Some chunks are larger than 500 kB after minification. Consider:\n- Using dynamic import() to code-split the application\n- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks\n- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.\n\nbuild:pwa: rc=0 | log=20250808-100605-build_pwa.log\n ║                              assets/PublicCreatorProfilePage-Clq_8-3j.css ║      0.12 KB ║      0.10 KB ║\n ║                                       assets/SendTokenDialog-CssGghAJ.css ║      1.52 KB ║      0.60 KB ║\n ║                                              assets/Settings-B-ht4wvc.css ║      0.21 KB ║      0.17 KB ║\n ║                                   assets/SubscriptionReceipt-DU4tK0q6.css ║      0.09 KB ║      0.10 KB ║\n ║                                 assets/SubscriptionsOverview-CuPSf4O0.css ║      0.74 KB ║      0.33 KB ║\n ║                                             assets/TermsPage-CqT4GrQ4.css ║      0.34 KB ║      0.22 KB ║\n ║                                            assets/WalletPage-DO7rqT2J.css ║     15.46 KB ║      3.18 KB ║\n ║                                           assets/WelcomePage-BTf0y8Tr.css ║      0.35 KB ║      0.22 KB ║\n ║                                                 assets/index-BSIoN0tV.css ║    233.41 KB ║     40.32 KB ║\n ╟───────────────────────────────────────────────────────────────────────────╫──────────────╫──────────────╢\n ║                                                             manifest.json ║      1.36 KB ║            - ║\n ╟───────────────────────────────────────────────────────────────────────────╫──────────────╫──────────────╢\n ║                                                        find-creators.html ║     29.67 KB ║            - ║\n ║                                                                index.html ║      1.91 KB ║            - ║\n ╠═══════════════════════════════════════════════════════════════════════════╬══════════════╬══════════════╣\n ║                                                      Total JS (108 files) ║   2692.35 KB ║            - ║\n ║                                                      Total CSS (18 files) ║    260.97 KB ║            - ║\n ╚═══════════════════════════════════════════════════════════════════════════╩══════════════╩══════════════╝\n\n Build succeeded\n\n Build mode............. pwa\n Pkg quasar............. v2.18.1\n Pkg @quasar/app-vite... v2.3.0\n Pkg vite............... v6.2.0\n Debugging.............. no\n Publishing............. no\n Browser target......... esnext\n =======================\n Output folder.......... /home/simulacraproductions/Desktop/Simulacra_Productions/KA/CASHU/cashu.mecustomized/dist/pwa\n\n Tip: Built files are meant to be served over an HTTP server\n      Opening index.html over file:// won't work\n\n Tip: You can use \"$ quasar serve\" command to create a web server,\n      both for testing or production. Type \"$ quasar serve -h\" for\n      parameters. Also, an npm script (usually named \"start\") can\n      be added for deployment environments.\n      If you're using Vue Router \"history\" mode, don't forget to\n      specify the \"--history\" parameter: \"$ quasar serve --history\"\n\n\nnode_modules/.pnpm/tseep@1.3.1/node_modules/tseep/lib/task-collection/bake-collection.js (65:26): Use of eval in \"node_modules/.pnpm/tseep@1.3.1/node_modules/tseep/lib/task-collection/bake-collection.js\" is strongly discouraged as it poses security risks and may cause issues with minification.\nnode_modules/.pnpm/tseep@1.3.1/node_modules/tseep/lib/task-collection/bake-collection.js (91:26): Use of eval in \"node_modules/.pnpm/tseep@1.3.1/node_modules/tseep/lib/task-collection/bake-collection.js\" is strongly discouraged as it poses security risks and may cause issues with minification.\nnode_modules/.pnpm/tseep@1.3.1/node_modules/tseep/lib/task-collection/bake-collection.js (115:26): Use of eval in \"node_modules/.pnpm/tseep@1.3.1/node_modules/tseep/lib/task-collection/bake-collection.js\" is strongly discouraged as it poses security risks and may cause issues with minification.\n\n(!) Some chunks are larger than 500 kB after minification. Consider:\n- Using dynamic import() to code-split the application\n- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks\n- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.",
+  "notes": []
 }
