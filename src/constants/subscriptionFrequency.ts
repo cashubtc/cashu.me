@@ -9,3 +9,11 @@ export const FREQUENCY_TO_DAYS: Record<SubscriptionFrequency, number> = {
 export function frequencyToDays(freq: SubscriptionFrequency): number {
   return FREQUENCY_TO_DAYS[freq] || 30;
 }
+
+export function daysToFrequency(
+  days: number,
+): SubscriptionFrequency {
+  if (days === 7) return 'weekly';
+  if (days === 14) return 'biweekly';
+  return 'monthly';
+}
