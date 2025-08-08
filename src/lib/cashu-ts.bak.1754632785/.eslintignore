@@ -1,6 +1,0 @@
-/node_modules
-/dist
-/test
-/coverage
-/.jest
-jest.config.ts
