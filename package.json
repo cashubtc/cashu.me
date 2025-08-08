@@ -65,6 +65,7 @@
     "@capacitor/cli": "^6.2.0",
     "@noble/curves": "^1.9.6",
     "@noble/secp256k1": "^2.3.0",
+    "@pinia/testing": "^0.1.0",
     "@playwright/test": "^1.54.2",
     "@quasar/app-vite": "^2.3.0",
     "@quasar/vite-plugin": "^1.10.0",
