@@ -59,7 +59,7 @@ export async function buildTimedOutputs(
   const unitAmount = Math.round(totalAmount / count);
   const amounts = Array(count).fill(unitAmount);
 
-  return wallet.split(amounts, {
+  return (wallet as any).split(amounts, {
     buildSecret: (idx) => {
       const locktime = idx === 0 ? 0 : startTimeSec + idx * intervalSec;
       const secretObj: any[] = [
@@ -411,7 +411,7 @@ export const useP2PKStore = defineStore("p2pk", {
         mint: mintUrl,
         unit,
         label,
-        description: entry?.description ?? "",
+        description: (entry as any)?.description ?? "",
         bucketId,
       });
     },
@@ -423,9 +423,9 @@ export const useP2PKStore = defineStore("p2pk", {
       const bucketId = sendTokensStore.sendData.bucketId || DEFAULT_BUCKET_ID;
       const proofs = mintStore.activeProofs.filter((p) => p.bucketId === bucketId);
       const info = mintStore.activeInfo || {};
-      const nuts = Array.isArray(info.nut_supports)
-        ? info.nut_supports
-        : Object.keys(info.nuts || {}).map((n) => Number(n));
+      const nuts = Array.isArray((info as any).nut_supports)
+        ? (info as any).nut_supports
+        : Object.keys((info as any).nuts || {}).map((n) => Number(n));
       if (!(nuts.includes(10) && nuts.includes(11))) {
         notifyError(walletStore.t("wallet.notifications.lock_not_supported"));
         throw new Error("Mint does not support timelocks or P2PK");
@@ -439,8 +439,8 @@ export const useP2PKStore = defineStore("p2pk", {
         bucketId
       );
       const keysetId = walletStore.getKeyset(wallet.mint.mintUrl, wallet.unit);
-      let keepProofs: Proof[] = [];
-      let sendProofs: Proof[] = [];
+      let keepProofs: any[] = [];
+      let sendProofs: any[] = [];
       const proofsStore = useProofsStore();
       try {
         ({ keep: keepProofs, send: sendProofs } = await wallet.send(amount, proofsToSend, {
@@ -451,7 +451,7 @@ export const useP2PKStore = defineStore("p2pk", {
         const bucketsStore = useBucketsStore();
         const tokenStr = useProofsStore().serializeProofs(sendProofs);
         const locked = useLockedTokensStore().addLockedToken({
-          id: uuidv4(),
+          id: crypto.randomUUID(),
           amount,
           tokenString: tokenStr,
           pubkey: receiverPubkey,

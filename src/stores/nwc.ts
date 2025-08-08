@@ -265,7 +265,7 @@ export const useNWCStore = defineStore("nwc", {
       // According to the NWC spec (NIP47): "Transactions are returned in descending order of creation time."
       const transactions = transactionsHistory
         .map(this.mapToNwcTransaction)
-        .sort((a, b) => b.created_at - a.created_at);
+        .sort((a: any, b: any) => (b.created_at as number) - (a.created_at as number));
 
       return {
         result_type: "list_transactions",

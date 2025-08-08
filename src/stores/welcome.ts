@@ -6,10 +6,10 @@ import { computed } from "vue";
 import router from "src/router";
 
 export type WelcomeState = {
-  showWelcome: boolean;
-  currentSlide: number;
-  seedPhraseValidated: boolean;
-  termsAccepted: boolean;
+  showWelcome: any;
+  currentSlide: any;
+  seedPhraseValidated: any;
+  termsAccepted: any;
 };
 
 // Define the Pinia store

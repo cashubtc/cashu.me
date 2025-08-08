@@ -51,7 +51,7 @@ export const useLockedTokensStore = defineStore("lockedTokens", {
       return token;
     },
     async addMany(arr: LockedToken[]) {
-      await cashuDb.lockedTokens.bulkAdd(arr);
+      await cashuDb.lockedTokens.bulkAdd(arr as any);
     },
     deleteLockedToken(id: string) {
       const idx = this.lockedTokens.findIndex((t) => t.id === id);

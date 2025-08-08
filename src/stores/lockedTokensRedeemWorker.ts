@@ -65,11 +65,11 @@ export const useLockedTokensRedeemWorker = defineStore(
           .toArray();
 
         for (const entry of legacyEntries) {
-          if (entry.unlockTs === undefined && typeof entry.locktime === "number") {
+          if (entry.unlockTs === undefined && typeof (entry as any).locktime === "number") {
             await cashuDb.lockedTokens.update(entry.id, {
-              unlockTs: entry.locktime,
+              unlockTs: (entry as any).locktime,
             });
-            (entry as any).unlockTs = entry.locktime;
+            (entry as any).unlockTs = (entry as any).locktime;
           }
         }
 
@@ -155,14 +155,14 @@ export const useLockedTokensRedeemWorker = defineStore(
             try {
               await cashuDb.transaction('rw', cashuDb.lockedTokens, async () => {
                 const row = await cashuDb.lockedTokens.get(entry.id);
-                if (!row || row.status === 'processing') return;
+                if (!row || (row.status as any) === 'processing') return;
                 await cashuDb.lockedTokens.update(entry.id, {
-                  status: 'processing',
+                  status: 'processing' as any,
                   redeemed: true,
                 });
               });
               await receiveStore.enqueue(() =>
-                wallet.receive(entry.tokenString),
+                (wallet as any).receive(entry.tokenString),
               );
               await cashuDb.lockedTokens.update(entry.id, { status: 'claimed' });
 

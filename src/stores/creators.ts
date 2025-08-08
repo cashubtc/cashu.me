@@ -215,7 +215,7 @@ export const useCreatorsStore = defineStore("creators", {
       let received = false;
       const fetchFromIndexer = async () => {
         if (received) return;
-        const indexerUrl = settings.tiersIndexerUrl.value;
+        const indexerUrl = settings.tiersIndexerUrl;
         if (!indexerUrl) {
           this.tierFetchError = true;
           notifyWarning("Unable to retrieve subscription tiers");

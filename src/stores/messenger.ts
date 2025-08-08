@@ -74,10 +74,10 @@ export type MessengerMessage = {
 export const useMessengerStore = defineStore("messenger", {
   state: () => {
     const settings = useSettingsStore();
-    if (!Array.isArray(settings.defaultNostrRelays?.value)) {
+    if (!Array.isArray(settings.defaultNostrRelays)) {
       settings.defaultNostrRelays = DEFAULT_RELAYS;
     }
-    const userRelays = Array.isArray(settings.defaultNostrRelays?.value)
+    const userRelays = Array.isArray(settings.defaultNostrRelays)
       ? settings.defaultNostrRelays
       : [];
     const relays = userRelays.length ? userRelays : DEFAULT_RELAYS;
@@ -295,7 +295,7 @@ export const useMessengerStore = defineStore("messenger", {
               (m) => m.id === event.id
             );
             const logMsg = this.eventLog.find((m) => m.id === event.id);
-            const payment: SubscriptionPayment = {
+            const payment: SubscriptionPayment & { htlc_hash?: string } = {
               token: tokenStr,
               subscription_id: subscription.subscription_id,
               tier_id: subscription.tier_id,

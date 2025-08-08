@@ -258,7 +258,7 @@ export const useWalletStore = defineStore("wallet", {
       const privKey = useNostrStore().privKeyHex;
       if (!privKey) return proofs;
       try {
-        const signed = getSignedProofs(proofs as unknown as Proof[], privKey);
+        const signed = getSignedProofs(proofs as any, privKey as any);
         return proofs.map((p, idx) => ({
           ...(p as any),
           ...(signed[idx] as any),
@@ -608,7 +608,7 @@ export const useWalletStore = defineStore("wallet", {
           throw new Error("You do not have the private key to unlock this token.");
         }
 
-        let privkey = localPriv || nostrStore.activePrivkeyHex;
+        let privkey = localPriv || (nostrStore as any).activePrivkeyHex;
 
         let remoteSigned = false;
         if (!privkey && needsSig) {
@@ -761,7 +761,7 @@ export const useWalletStore = defineStore("wallet", {
         useInvoiceHistoryStore().invoiceHistory.push({
           ...this.invoiceData,
         });
-        return data;
+        return data as any;
       } catch (error: any) {
         console.error(error);
         notifyApiError(
@@ -872,7 +872,7 @@ export const useWalletStore = defineStore("wallet", {
         mintStore.assertMintError(data);
         this.payInvoiceData.meltQuote.response = data;
         this.payInvoiceData.blocking = false;
-        return data;
+        return data as any;
       } catch (error: any) {
         this.payInvoiceData.blocking = false;
         this.payInvoiceData.meltQuote.error = error;
@@ -889,7 +889,7 @@ export const useWalletStore = defineStore("wallet", {
       const mintStore = useMintsStore();
       const data = await wallet.createMeltQuote(request);
       mintStore.assertMintError(data);
-      return data;
+      return data as any;
     },
     meltInvoiceData: async function (bucketId: string = DEFAULT_BUCKET_ID) {
       if (this.payInvoiceData.invoice == null) {
@@ -1019,7 +1019,7 @@ export const useWalletStore = defineStore("wallet", {
 
         this.payInvoiceData.invoice = { sat: 0, memo: "", bolt11: "" };
         this.payInvoiceData.show = false;
-        return data;
+        return data as any;
       } catch (error: any) {
         if (isUnloading) {
           // NOTE: An error is thrown when the user exits the app while the payment is in progress.

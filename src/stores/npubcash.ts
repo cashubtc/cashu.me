@@ -132,7 +132,7 @@ export const useNPCStore = defineStore("npc", {
         ["method", method],
       ];
       // TODO: if body is set, add 'payload' tag with sha256 hash of body
-      const sig = await nip98Event.sign(nostrStore.signer);
+      const sig = await nip98Event.sign(nostrStore.signer as any);
       const eventString = JSON.stringify(nip98Event.rawEvent());
       // encode the eventString to base64
       return btoa(eventString);
