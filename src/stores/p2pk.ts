@@ -452,7 +452,7 @@ export const useP2PKStore = defineStore("p2pk", {
         const tokenStr = useProofsStore().serializeProofs(sendProofs);
         const locked = useLockedTokensStore().addLockedToken({
           amount,
-          tokenString: tokenStr,
+          token: tokenStr,
           pubkey: receiverPubkey,
           locktime,
           bucketId: bucketsStore.ensureCreatorBucket(receiverPubkey),

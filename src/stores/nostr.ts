@@ -1454,7 +1454,7 @@ export const useNostrStore = defineStore("nostr", {
               frequencyToDays(((payload as any).frequency as any) || "monthly"),
             label: "Subscription payment",
           };
-          await cashuDb.lockedTokens.put(entry);
+          await cashuDb.lockedTokens.put(entry as any);
           const receiveStore = useReceiveTokensStore();
           receiveStore.receiveData.tokensBase64 = payload.token;
           await receiveStore.enqueue(() =>
@@ -1558,7 +1558,7 @@ export const useNostrStore = defineStore("nostr", {
             subscriptionEventId: null,
             label: "Locked tokens",
           };
-          await cashuDb.lockedTokens.put(entry);
+          await cashuDb.lockedTokens.put(entry as any);
           return;
         }
       } catch (e) {

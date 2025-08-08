@@ -495,7 +495,7 @@ export const useMessengerStore = defineStore("messenger", {
             )?.name;
           const entry: LockedToken = {
             id: uuidv4(),
-            tokenString: sub.token,
+            token: sub.token,
             amount,
             owner: "creator",
             creatorNpub: myPubkey,
@@ -560,7 +560,7 @@ export const useMessengerStore = defineStore("messenger", {
                     : proofs.reduce((s, p) => s + p.amount, 0);
                 useLockedTokensStore().addLockedToken({
                   amount,
-                  tokenString: payload.token,
+                  token: payload.token,
                   pubkey: event.pubkey,
                   locktime: payload.unlock_time ?? payload.unlockTime,
                   bucketId: bucket.id,
