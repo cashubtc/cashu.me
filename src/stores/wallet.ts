@@ -615,7 +615,7 @@ export const useWalletStore = defineStore("wallet", {
           const signed = await useWorkersStore().signWithRemote(proofs);
           // did we actually get any witness back?
           if (signed.some((p) => (p as any).witness?.signatures?.length > 0)) {
-            proofs = signed;
+  proofs = signed as any;
             remoteSigned = true;
           }
         }

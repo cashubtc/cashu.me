@@ -436,7 +436,7 @@ export const useMessengerStore = defineStore("messenger", {
             total_months: payload.total_months,
             amount,
             unlock_time: sub.unlock_time,
-            htlc_hash: sub.htlc_hash,
+            ...({ htlc_hash: sub.htlc_hash } as any),
             htlc_secret: sub.htlc_secret,
           };
         }
@@ -483,7 +483,7 @@ export const useMessengerStore = defineStore("messenger", {
             total_months: payload.total_months,
             amount,
             unlock_time: sub.unlock_time,
-            htlc_hash: sub.htlc_hash,
+            ...({ htlc_hash: sub.htlc_hash } as any),
             htlc_secret: sub.htlc_secret,
           };
           const unlockTs = sub.unlock_time ?? payload.unlockTime ?? 0;
@@ -560,7 +560,7 @@ export const useMessengerStore = defineStore("messenger", {
                     : proofs.reduce((s, p) => s + p.amount, 0);
                 useLockedTokensStore().addLockedToken({
                   amount,
-                  token: payload.token,
+                  tokenString: payload.token,
                   pubkey: event.pubkey,
                   locktime: payload.unlock_time ?? payload.unlockTime,
                   bucketId: bucket.id,

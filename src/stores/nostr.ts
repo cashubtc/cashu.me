@@ -1297,7 +1297,7 @@ export const useNostrStore = defineStore("nostr", {
       wrapEvent.content = nip44.v2.encrypt(
         sealEventString,
         nip44.v2.utils.getConversationKey(
-          bytesToHex(randomPrivateKey),
+          randomPrivateKey,
           recipient
         )
       );
@@ -1428,7 +1428,7 @@ export const useNostrStore = defineStore("nostr", {
             creatorsStore.tiersMap[this.pubkey || ""]?.find(
               (t) => t.id === payload.tier_id,
             )?.name;
-          const entry: LockedToken = {
+          const entry = {
             id: uuidv4(),
             tokenString: payload.token,
             amount,
@@ -1540,7 +1540,7 @@ export const useNostrStore = defineStore("nostr", {
           }
 
           const unlockTs = payload.unlock_time ?? payload.unlockTime ?? 0;
-          const entry: LockedToken = {
+          const entry = {
             id: uuidv4(),
             tokenString: payload.token,
             amount: amount || 0,
