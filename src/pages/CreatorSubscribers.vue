@@ -1,707 +1,270 @@
 <template>
   <q-page class="q-pa-md">
-    <!-- page header -->
-    <div
-      class="sticky top-0 z-10 mb-6"
-      :class="$q.dark.isActive ? 'bg-dark' : 'bg-white'"
-    >
-      <div
-        class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between"
-      >
-        <h5 class="q-my-none">
-          {{ $t("CreatorSubscribers.summary.subscribers") }} ({{ total }})
-        </h5>
-        <div class="flex items-center gap-2 w-full md:w-auto">
-          <q-input
-            v-model="filter"
-            dense
-            debounce="300"
-            clearable
-            class="flex-1"
-            :placeholder="$t('CreatorSubscribers.filter.placeholder')"
-          >
-            <template #prepend>
-              <q-icon name="search" />
-            </template>
-          </q-input>
-          <q-btn
-            flat
-            color="primary"
-            icon="filter_list"
-            :label="$t('CreatorSubscribers.actions.filters')"
-            @click="showFilters = true"
-          />
-        </div>
+    <div v-if="loading" class="q-gutter-md">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <q-skeleton v-for="n in 3" :key="n" type="QCard" class="h-24" />
       </div>
+      <q-skeleton v-for="n in 3" :key="n" class="h-8" />
     </div>
+    <template v-else>
+      <!-- KPI cards -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <q-card>
+          <q-card-section>
+            <div class="text-subtitle1">{{ t('CreatorSubscribers.summary.subscribers') }}</div>
+            <div class="text-h6">{{ total }}</div>
+          </q-card-section>
+        </q-card>
+        <q-card>
+          <q-card-section>
+            <div class="text-subtitle1">{{ t('CreatorSubscribers.summary.active') }}</div>
+            <div class="text-h6">{{ active }}</div>
+          </q-card-section>
+        </q-card>
+        <q-card>
+          <q-card-section>
+            <div class="text-subtitle1">{{ t('CreatorSubscribers.summary.revenue') }}</div>
+            <div class="text-h6">{{ formatCurrency(lifetimeRevenue) }}</div>
+            <div class="text-caption">
+              {{ revenueToggle === 'week' ? t('CreatorSubscribers.summary.thisWeek') : t('CreatorSubscribers.summary.thisMonth') }}:
+              {{ formatCurrency(periodRevenue) }}
+            </div>
+          </q-card-section>
+        </q-card>
+      </div>
 
-    <!-- summary cards -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-      <!-- total subscribers card -->
-      <q-card class="bg-gray-800/50 border border-gray-700 text-white">
-        <q-card-section>
-          <div class="flex items-center justify-between">
-            <div class="flex items-center gap-2">
-              <q-icon name="group" />
-              <div class="text-sm">
-                {{ $t("CreatorSubscribers.summary.subscribers") }}
-              </div>
-            </div>
-            <div class="text-right">
-              <div class="text-h6">{{ total }}</div>
-              <div class="text-xs text-gray-300">
-                +{{ subscribersThisMonth }} {{ $t("CreatorSubscribers.summary.thisMonth") }}
-              </div>
-            </div>
-          </div>
-          <div class="flex justify-between text-xs text-gray-300 mt-2">
-            <div class="flex items-center gap-1">
-              <q-icon name="check_circle" size="16px" />
-              <span>{{ active }}</span>
-            </div>
-            <div class="flex items-center gap-1">
-              <q-icon name="hourglass_top" size="16px" />
-              <span>{{ pending }}</span>
-            </div>
-          </div>
-        </q-card-section>
-      </q-card>
+      <!-- toolbar -->
+      <div class="flex flex-wrap items-center gap-2 mb-6">
+        <q-input
+          v-model="search"
+          dense
+          clearable
+          debounce="0"
+          placeholder="Search"
+        >
+          <template #prepend>
+            <q-icon name="search" />
+          </template>
+        </q-input>
 
-      <!-- active subscribers card -->
-      <q-card class="bg-gray-800/50 border border-gray-700 text-white">
-        <q-card-section>
-          <div class="flex items-center justify-between">
-            <div class="flex items-center gap-2">
-              <q-icon name="verified" />
-              <div class="text-sm">
-                {{ $t("CreatorSubscribers.summary.active") }}
-              </div>
-            </div>
-            <div class="text-right">
-              <div class="text-h6">{{ active }}</div>
-              <div class="text-xs text-gray-300">
-                +{{ activeThisMonth }} {{ $t("CreatorSubscribers.summary.thisMonth") }}
-              </div>
-            </div>
-          </div>
-        </q-card-section>
-      </q-card>
+        <div class="flex items-center gap-1">
+          <q-chip
+            v-for="f in frequenciesOptions"
+            :key="f.value"
+            clickable
+            :color="selectedFrequencies.includes(f.value) ? 'primary' : 'grey-6'"
+            text-color="white"
+            @click="toggleFrequency(f.value)"
+          >
+            {{ f.label }}
+          </q-chip>
+        </div>
 
-      <!-- revenue card -->
-      <q-card class="bg-gray-800/50 border border-gray-700 text-white">
-        <q-card-section>
-          <div class="flex items-center justify-between">
-            <div class="flex items-center gap-2">
-              <q-icon name="attach_money" />
-              <div class="text-sm">
-                {{ $t("CreatorSubscribers.summary.revenue") }}
-              </div>
-            </div>
-            <div class="text-right">
-              <div class="text-h6">{{ formatCurrency(revenue) }}</div>
-              <div class="text-xs text-gray-300">
-                +{{ formatCurrency(revenueThisMonth) }} {{ $t("CreatorSubscribers.summary.thisMonth") }}
-              </div>
-            </div>
-          </div>
-          <svg viewBox="0 0 100 30" class="w-full h-8 mt-2 text-primary">
-            <polyline
-              :points="revenueSparklinePoints"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-            />
-          </svg>
-        </q-card-section>
-      </q-card>
-    </div>
+        <div class="flex items-center gap-1">
+          <q-chip
+            v-for="s in statusOptions"
+            :key="s.value"
+            clickable
+            :color="selectedStatuses.includes(s.value) ? 'primary' : 'grey-6'"
+            text-color="white"
+            @click="toggleStatus(s.value)"
+          >
+            {{ s.label }}
+          </q-chip>
+        </div>
 
-    <!-- bulk actions -->
-    <q-banner
-      v-if="selected.length"
-      class="bg-grey-2 q-px-md q-py-sm rounded-borders mb-4 flex items-center gap-2"
-    >
-      <div class="text-caption">{{ t('CreatorSubscribers.selectionCount', { count: selected.length }) }}</div>
-      <q-btn
-        flat
-        color="primary"
-        :disable="selected.length === 0 || !canSendDm"
-        :label="$t('CreatorSubscribers.actions.sendGroupMessage')"
-        @click="sendGroupMessage"
-      >
-        <q-tooltip v-if="selected.length === 0">
-          {{ t('CreatorSubscribers.tooltips.noSelection') }}
-        </q-tooltip>
-        <q-tooltip v-else-if="!canSendDm">
-          {{ t('CreatorSubscribers.tooltips.notLoggedIn') }}
-        </q-tooltip>
-      </q-btn>
-      <q-btn
-        flat
-        color="primary"
-        :disable="selected.length === 0"
-        :label="$t('CreatorSubscribers.actions.exportSelected')"
-        @click="exportSelected"
-      >
-        <q-tooltip v-if="selected.length === 0">
-          {{ t('CreatorSubscribers.tooltips.noSelection') }}
-        </q-tooltip>
-      </q-btn>
-    </q-banner>
+        <q-select
+          v-model="tierFilter"
+          :options="tierOptions"
+          dense
+          clearable
+          emit-value
+          map-options
+          placeholder="Tier"
+          style="min-width: 120px"
+        />
 
-    <!-- no data -->
-    <div
-      v-if="!loading && filteredSubscribers.length === 0"
-      class="text-center q-mt-xl"
-    >
-      {{ $t("CreatorSubscribers.noData") }}
-    </div>
+        <q-select
+          v-model="sort"
+          :options="sortOptions"
+          dense
+          emit-value
+          map-options
+          placeholder="Sort"
+          style="min-width: 120px"
+        />
 
-    <!-- subscriber table -->
-    <q-table
-      v-else
-      flat
-      :rows="filteredSubscribers"
-      :columns="columns"
-      row-key="subscriptionId"
-      :pagination="{ rowsPerPage: 0 }"
-      :row-class="() => 'cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800'"
-      @row-click="(_, row) => openSubscriber(row)"
-      class="subscriber-table"
-    >
-      <template #body-cell-select="props">
-        <q-td :props="props">
-          <q-checkbox
-            :model-value="isSelected(props.row)"
-            @update:model-value="(val) => handleSelectChange(val, props.row)"
-            @click.stop
+        <q-toggle v-model="compact" label="Compact" />
+
+        <q-btn flat icon="download" :disable="filtered.all.length === 0" @click="exportCsv" />
+      </div>
+
+      <!-- grouped sections -->
+      <div v-for="(list, key) in grouped" :key="key" class="mb-8">
+        <h6 class="q-my-md">{{ keyLabel(key) }}</h6>
+        <q-virtual-scroll
+          :items="list"
+          :item-size="compact ? 56 : 92"
+          v-slot="{ item }"
+        >
+          <SubscriberCard
+            :subscription="item"
+            :compact="compact"
+            @click="openSubscriber(item)"
           />
-        </q-td>
-      </template>
+        </q-virtual-scroll>
+      </div>
 
-      <template #body-cell-subscriber="props">
-        <q-td :props="props">
-          <div class="flex items-center gap-3">
-            <q-avatar size="32px">
-              <template v-if="avatarFor(props.row.subscriberNpub)">
-                <img :src="avatarFor(props.row.subscriberNpub)" />
-              </template>
-              <template v-else>
-                <div class="placeholder text-white">
-                  {{ getInitials(props.row.subscriberNpub) }}
-                </div>
-              </template>
-            </q-avatar>
-            <div class="flex flex-col">
-              <span class="font-medium">
-                {{ displayNameFor(props.row.subscriberNpub) }}
-              </span>
-              <span class="text-xs text-gray-500">
-                {{ shortenString(pubkeyNpub(props.row.subscriberNpub), 10, 6) }}
-              </span>
-            </div>
-          </div>
-        </q-td>
-      </template>
-
-      <template #body-cell-tier="props">
-        <q-td :props="props">{{ props.row.tierName }}</q-td>
-      </template>
-
-      <template #body-cell-revenue="props">
-        <q-td :props="props">{{ formatCurrency(props.row.totalAmount) }}</q-td>
-      </template>
-
-      <template #body-cell-start="props">
-        <q-td :props="props">
-          {{ props.row.startDate ? formatTs(props.row.startDate) : '-' }}
-        </q-td>
-      </template>
-
-      <template #body-cell-frequency="props">
-        <q-td :props="props">
-          {{ t(`CreatorSubscribers.frequency.${props.row.frequency}`) }}
-        </q-td>
-      </template>
-
-      <template #body-cell-status="props">
-        <q-td :props="props">
-          <q-badge :color="props.row.status === 'active' ? 'positive' : 'warning'">
-            {{ t(`CreatorSubscribers.status.${props.row.status}`) }}
-          </q-badge>
-        </q-td>
-      </template>
-
-      <template #body-cell-actions="props">
-        <q-td :props="props">
-          <q-icon name="chevron_right" class="text-gray-500" />
-        </q-td>
-      </template>
-    </q-table>
-
-    <!-- filter dialog -->
-    <q-dialog v-model="showFilters">
-      <q-card style="min-width: 300px">
-        <q-card-section class="text-h6">
-          {{ $t('CreatorSubscribers.actions.filters') }}
-        </q-card-section>
-        <q-card-section>
-          <q-select
-            v-model="tierFilter"
-            dense
-            emit-value
-            map-options
-            clearable
-            :options="tierOptions"
-            :label="$t('CreatorSubscribers.columns.tier')"
-          />
-          <q-select
-            v-model="statusFilter"
-            dense
-            emit-value
-            map-options
-            clearable
-            class="q-mt-md"
-            :options="statusOptions"
-            :label="$t('CreatorSubscribers.columns.status')"
-          />
-        </q-card-section>
-        <q-card-actions align="right">
-          <q-btn flat color="primary" @click="clearFilters" v-close-popup>
-            {{ $t('global.actions.cancel.label') }}
-          </q-btn>
-          <q-btn flat color="primary" v-close-popup>
-            {{ $t('global.actions.ok.label') }}
-          </q-btn>
-        </q-card-actions>
-      </q-card>
-    </q-dialog>
-    <q-dialog v-model="showSubscriberDialog" position="right">
-      <q-card style="min-width: 350px">
-        <q-card-section class="row items-center q-gutter-md">
-          <q-avatar size="64px">
-            <template v-if="subscriberProfile?.picture">
-              <img :src="subscriberProfile.picture" />
-            </template>
-            <template v-else>
-              <div class="placeholder text-white">{{ subscriberInitials }}</div>
-            </template>
-          </q-avatar>
-          <div class="column">
-            <div class="text-h6">{{ subscriberName }}</div>
-            <div class="text-caption">{{ currentSubscriberNpub }}</div>
-          </div>
-        </q-card-section>
-        <q-card-section>
-          <div>
-            <strong>{{ $t('CreatorSubscribers.columns.tier') }}:</strong>
-            {{ currentSubscriber?.tierName }}
-          </div>
-          <div>
-            <strong>{{ $t('CreatorSubscribers.columns.nextRenewal') }}:</strong>
-            {{
-              currentSubscriber?.nextRenewal
-                ? formatTs(currentSubscriber.nextRenewal)
-                : '-'
-            }}
-          </div>
-          <div>
-            <strong>{{ $t('CreatorSubscribers.summary.revenue') }}:</strong>
-            {{ formatCurrency(currentSubscriber?.totalAmount || 0) }}
-          </div>
-        </q-card-section>
-        <q-card-section v-if="latestNote">
-          <div class="text-subtitle1 q-mb-xs">Latest note</div>
-          <div class="text-body2">{{ latestNote }}</div>
-        </q-card-section>
-        <q-card-actions align="right">
-          <q-btn flat color="primary" @click="sendMessageFromDrawer">
-            {{ $t('CreatorSubscribers.actions.sendMessage') }}
-          </q-btn>
-          <q-btn flat color="primary" @click="copyNpub">
-            {{ $t('global.actions.copy.label') }}
-          </q-btn>
-          <q-btn flat v-close-popup color="grey">
-            {{ $t('global.actions.close.label') }}
-          </q-btn>
-        </q-card-actions>
-      </q-card>
-    </q-dialog>
-    <q-dialog v-model="showMessageDialog" persistent>
-      <q-card style="min-width: 350px">
-        <q-card-section class="text-h6">{{ dialogTitle }}</q-card-section>
-        <q-card-section>
-          <q-input
-            v-model="messageText"
-            type="textarea"
-            autogrow
-            dense
-          />
-        </q-card-section>
-        <q-card-actions align="right">
-          <q-btn flat color="primary" v-close-popup>
-            {{ $t('global.actions.cancel.label') }}
-          </q-btn>
-          <q-btn flat color="primary" @click="confirmMessage">
-            {{ $t('global.actions.send.label') }}
-          </q-btn>
-        </q-card-actions>
-      </q-card>
-    </q-dialog>
+      <SubscriberDrawer v-model="drawer" :subscription="current" />
+    </template>
   </q-page>
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from "vue";
-import { storeToRefs } from "pinia";
-import {
-  useCreatorSubscriptionsStore,
-  type CreatorSubscription,
-} from "stores/creatorSubscriptions";
-import { useMintsStore } from "stores/mints";
-import { useUiStore } from "stores/ui";
-import { useI18n } from "vue-i18n";
-import { useMessengerStore } from "stores/messenger";
-import { useRouter } from "vue-router";
-import { useNostrStore } from "stores/nostr";
-import { notifySuccess, notifyError } from "src/js/notify";
-import exportSubscribers from "src/utils/subscriberCsv";
-import { nip19 } from "nostr-tools";
-import { shortenString } from "src/js/string-utils";
+import { ref, computed, watch } from 'vue';
+import { storeToRefs } from 'pinia';
+import { useI18n } from 'vue-i18n';
+import { useDebounceFn } from '@vueuse/core';
+import SubscriberCard from 'components/SubscriberCard.vue';
+import SubscriberDrawer from 'components/SubscriberDrawer.vue';
+import { useCreatorSubscriptionsStore, type CreatorSubscription } from 'stores/creatorSubscriptions';
+import { exportSubscribers } from 'src/utils/subscriberCsv';
 
+const { t } = useI18n();
 const creatorSubscriptionsStore = useCreatorSubscriptionsStore();
 const { subscriptions, loading } = storeToRefs(creatorSubscriptionsStore);
 
-const mintsStore = useMintsStore();
-const uiStore = useUiStore();
-const { activeUnit } = storeToRefs(mintsStore);
-const { t } = useI18n();
+// search with debounce
+const search = ref('');
+const debouncedSearch = ref('');
+watch(search, useDebounceFn((v: string) => (debouncedSearch.value = v), 200));
 
-const columns = computed(() => [
-  { name: "select", label: "", field: "select", sortable: false },
-  {
-    name: "subscriber",
-    label: t("CreatorSubscribers.columns.subscriber"),
-    field: "subscriberNpub",
-    sortable: true,
-  },
-  {
-    name: "tier",
-    label: t("CreatorSubscribers.columns.tier"),
-    field: "tierName",
-    sortable: true,
-  },
-  {
-    name: "revenue",
-    label: t("CreatorSubscribers.summary.revenue"),
-    field: "totalAmount",
-    sortable: true,
-  },
-  {
-    name: "start",
-    label: t("CreatorSubscribers.columns.start"),
-    field: "startDate",
-    sortable: true,
-  },
-  {
-    name: "frequency",
-    label: t("CreatorSubscribers.filters.frequency"),
-    field: "frequency",
-    sortable: true,
-  },
-  {
-    name: "status",
-    label: t("CreatorSubscribers.columns.status"),
-    field: "status",
-    sortable: true,
-  },
-  { name: "actions", label: "", field: "actions", sortable: false },
-]);
+// frequency chips
+const frequenciesOptions = [
+  { label: t('CreatorSubscribers.frequency.weekly'), value: 'weekly' },
+  { label: t('CreatorSubscribers.frequency.biweekly'), value: 'biweekly' },
+  { label: t('CreatorSubscribers.frequency.monthly'), value: 'monthly' },
+];
+const selectedFrequencies = ref<string[]>(frequenciesOptions.map((o) => o.value));
+function toggleFrequency(val: string) {
+  const idx = selectedFrequencies.value.indexOf(val);
+  if (idx === -1) selectedFrequencies.value.push(val);
+  else selectedFrequencies.value.splice(idx, 1);
+}
 
-const filter = ref("");
+// status chips
+const statusOptions = [
+  { label: t('CreatorSubscribers.status.active'), value: 'active' },
+  { label: t('CreatorSubscribers.status.pending'), value: 'pending' },
+];
+const selectedStatuses = ref<string[]>(statusOptions.map((o) => o.value));
+function toggleStatus(val: string) {
+  const idx = selectedStatuses.value.indexOf(val);
+  if (idx === -1) selectedStatuses.value.push(val);
+  else selectedStatuses.value.splice(idx, 1);
+}
+
+// tier filter
 const tierFilter = ref<string | null>(null);
-const statusFilter = ref<string | null>(null);
-const showFilters = ref(false);
-
 const tierOptions = computed(() => {
-  const set = new Set(subscriptions.value.map((s) => s.tierName));
-  return Array.from(set).map((name) => ({ label: name, value: name }));
+  const map = new Map<string, string>();
+  subscriptions.value.forEach((s) => map.set(s.tierId, s.tierName));
+  return Array.from(map, ([value, label]) => ({ label, value }));
 });
 
-const statusOptions = computed(() => [
-  { label: t("CreatorSubscribers.status.active"), value: "active" },
-  { label: t("CreatorSubscribers.status.pending"), value: "pending" },
-]);
+// sort select
+const sortOptions = [
+  { label: t('CreatorSubscribers.sort.newest'), value: 'newest' },
+  { label: t('CreatorSubscribers.sort.amount'), value: 'amount' },
+];
+const sort = ref('newest');
 
-function clearFilters() {
-  tierFilter.value = null;
-  statusFilter.value = null;
-}
+const compact = ref(false);
 
-function formatCurrency(amount: number): string {
-  return uiStore.formatCurrency(amount, activeUnit.value);
-}
-
-function formatTs(ts: number): string {
-  const d = new Date(ts * 1000);
-  return `${d.getFullYear()}-${("0" + (d.getMonth() + 1)).slice(-2)}-${(
-    "0" + d.getDate()
-  ).slice(-2)}`;
-}
-
+// KPI metrics
 const total = computed(() => subscriptions.value.length);
-const active = computed(
-  () => subscriptions.value.filter((s) => s.status === "active").length
-);
-const pending = computed(
-  () => subscriptions.value.filter((s) => s.status === "pending").length
-);
-const revenue = computed(() =>
-  subscriptions.value.reduce((sum, s) => sum + s.totalAmount, 0)
+const active = computed(() => subscriptions.value.filter((s) => s.status === 'active').length);
+const pending = computed(() => subscriptions.value.filter((s) => s.status === 'pending').length);
+const lifetimeRevenue = computed(() =>
+  subscriptions.value.reduce((sum, s) => sum + s.totalAmount, 0),
 );
 
-function isThisMonth(ts: number | null) {
-  if (!ts) return false;
-  const d = new Date(ts * 1000);
-  const now = new Date();
-  return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
-}
-
-const subscribersThisMonth = computed(() =>
-  subscriptions.value.filter((s) => isThisMonth(s.startDate)).length
-);
-const activeThisMonth = computed(() =>
-  subscriptions.value.filter(
-    (s) => s.status === "active" && isThisMonth(s.startDate)
-  ).length
-);
-const revenueThisMonth = computed(() =>
-  subscriptions.value
-    .filter((s) => isThisMonth(s.startDate))
-    .reduce((sum, s) => sum + s.totalAmount, 0)
-);
-
-const revenueTrend = computed(() =>
-  subscriptions.value
-    .slice()
-    .sort((a, b) => (a.startDate || 0) - (b.startDate || 0))
-    .map((s) => s.totalAmount)
-);
-
-const revenueSparklinePoints = computed(() => {
-  const data = revenueTrend.value;
-  if (data.length === 0) return "";
-  const max = Math.max(...data);
-  const min = Math.min(...data);
-  const range = max - min || 1;
-  return data
-    .map((v, i) => {
-      const x = (i / (data.length - 1)) * 100;
-      const y = 30 - ((v - min) / range) * 30;
-      return `${x},${y}`;
-    })
-    .join(" ");
+const revenueToggle = ref<'week' | 'month'>('week');
+const weekRevenue = computed(() => {
+  const now = Date.now();
+  const weekStart = now - 7 * 24 * 3600 * 1000;
+  return subscriptions.value
+    .filter((s) => (s.endDate ?? 0) * 1000 >= weekStart)
+    .reduce((sum, s) => sum + s.totalAmount, 0);
 });
-
-const messenger = useMessengerStore();
-const router = useRouter();
-const nostr = useNostrStore();
-const selected = ref<CreatorSubscription[]>([]);
-const showMessageDialog = ref(false);
-const messageText = ref("");
-const messageRecipients = ref<string[]>([]);
-const dialogTitle = computed(() =>
-  messageRecipients.value.length > 1
-    ? t("CreatorSubscribers.actions.sendGroupMessage")
-    : t("CreatorSubscribers.actions.sendMessage"),
-);
-const canSendDm = computed(
-  () =>
-    messenger.connected &&
-    (!!nostr.signer || !!nostr.privKeyHex)
+const monthRevenue = computed(() => {
+  const now = Date.now();
+  const monthStart = now - 30 * 24 * 3600 * 1000;
+  return subscriptions.value
+    .filter((s) => (s.endDate ?? 0) * 1000 >= monthStart)
+    .reduce((sum, s) => sum + s.totalAmount, 0);
+});
+const periodRevenue = computed(() =>
+  revenueToggle.value === 'week' ? weekRevenue.value : monthRevenue.value,
 );
 
-function pubkeyNpub(hex: string): string {
-  try {
-    return nip19.npubEncode(hex);
-  } catch {
-    return hex;
+// filtering and sorting
+const filtered = computed(() => {
+  let arr = subscriptions.value.slice();
+  if (debouncedSearch.value) {
+    const term = debouncedSearch.value.toLowerCase();
+    arr = arr.filter(
+      (s) =>
+        s.subscriberNpub.toLowerCase().includes(term) ||
+        s.tierName.toLowerCase().includes(term),
+    );
   }
-}
+  arr = arr.filter((s) => selectedFrequencies.value.includes(s.frequency));
+  arr = arr.filter((s) => selectedStatuses.value.includes(s.status));
+  if (tierFilter.value) arr = arr.filter((s) => s.tierId === tierFilter.value);
 
-const profiles = ref<Record<string, any>>({});
-
-function avatarFor(pk: string): string | null {
-  const p = profiles.value[pk];
-  return p?.picture || null;
-}
-
-function displayNameFor(pk: string): string {
-  const p = profiles.value[pk];
-  return p?.display_name || p?.name || shortenString(pubkeyNpub(pk), 15, 6);
-}
-
-watch(
-  () => subscriptions.value.map((s) => s.subscriberNpub),
-  (npubs) => {
-    npubs.forEach((pk) => {
-      if (profiles.value[pk] === undefined) {
-        nostr
-          .getProfile(pk)
-          .then((p) => (profiles.value[pk] = p || {}))
-          .catch(() => (profiles.value[pk] = {}));
-      }
-    });
-  },
-  { immediate: true }
-);
-
-function sendMessage(npub: string) {
-  messageRecipients.value = [npub];
-  messageText.value = "";
-  showMessageDialog.value = true;
-}
-
-function sendGroupMessage() {
-  const recips = selected.value.map((s) => s.subscriberNpub);
-  if (!recips.length) return;
-  messageRecipients.value = recips;
-  messageText.value = "";
-  showMessageDialog.value = true;
-}
-
-async function confirmMessage() {
-  const text = messageText.value.trim();
-  const recips = messageRecipients.value;
-  showMessageDialog.value = false;
-  if (!text || recips.length === 0) return;
-  if (!canSendDm.value) {
-    notifyError(t('CreatorSubscribers.notifications.dm_not_ready'));
-    return;
-  }
-  let allSuccess = true;
-  for (const r of recips) {
-    const { success } = await messenger.sendDm(r, text);
-    if (success) {
-      messenger.createConversation(r);
-      messenger.setCurrentConversation(r);
-      messenger.markRead(r);
-    } else {
-      allSuccess = false;
-    }
-  }
-  selected.value = [];
-  if (allSuccess) {
-    notifySuccess(t('wallet.notifications.nostr_dm_sent'));
-    if (recips.length) router.push('/nostr-messenger');
+  if (sort.value === 'amount') {
+    arr.sort((a, b) => b.totalAmount - a.totalAmount);
   } else {
-    notifyError(t('wallet.notifications.nostr_dm_failed'));
+    arr.sort((a, b) => (b.startDate ?? 0) - (a.startDate ?? 0));
   }
-}
-
-function exportSelected() {
-  if (!selected.value.length) return;
-  try {
-    exportSubscribers(selected.value, 'subscribers.csv');
-    notifySuccess(t('CreatorSubscribers.notifications.export_success'));
-  } catch {
-    notifyError(t('CreatorSubscribers.notifications.export_failed'));
-  }
-  selected.value = [];
-}
-
-function isSelected(sub: CreatorSubscription) {
-  return selected.value.some((s) => s.subscriptionId === sub.subscriptionId);
-}
-
-function handleSelectChange(val: boolean, sub: CreatorSubscription) {
-  const idx = selected.value.findIndex((s) => s.subscriptionId === sub.subscriptionId);
-  if (val && idx === -1) selected.value.push(sub);
-  if (!val && idx !== -1) selected.value.splice(idx, 1);
-  const ids = selected.value.map((s) => s.subscriptionId);
-  if (ids.length !== new Set(ids).size) {
-    console.warn('Duplicate subscriptionId detected in selection');
-  }
-}
-
-const showSubscriberDialog = ref(false);
-const currentSubscriber = ref<CreatorSubscription | null>(null);
-const subscriberProfile = ref<any>(null);
-const latestNote = ref<string | null>(null);
-
-const currentSubscriberNpub = computed(() =>
-  currentSubscriber.value ? pubkeyNpub(currentSubscriber.value.subscriberNpub) : ""
-);
-
-async function openSubscriber(sub: CreatorSubscription) {
-  currentSubscriber.value = sub;
-  showSubscriberDialog.value = true;
-  subscriberProfile.value = null;
-  latestNote.value = null;
-  try {
-    subscriberProfile.value = await nostr.getProfile(sub.subscriberNpub);
-    latestNote.value = await nostr.fetchMostRecentPost(sub.subscriberNpub);
-  } catch (e) {
-    console.error(e);
-  }
-}
-
-const subscriberName = computed(() => {
-  if (!currentSubscriber.value) return "";
-  const p: any = subscriberProfile.value;
-  return p?.display_name || p?.name || currentSubscriberNpub.value;
+  return {
+    all: arr,
+    weekly: arr.filter((s) => s.frequency === 'weekly'),
+    biweekly: arr.filter((s) => s.frequency === 'biweekly'),
+    monthly: arr.filter((s) => s.frequency === 'monthly'),
+  };
 });
+const grouped = computed(() => ({
+  weekly: filtered.value.weekly,
+  biweekly: filtered.value.biweekly,
+  monthly: filtered.value.monthly,
+}));
 
-const subscriberInitials = computed(() => {
-  const name = subscriberName.value.trim();
-  if (!name) return "";
-  const parts = name.split(" ");
-  if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
-  return name.slice(0, 2).toUpperCase();
-});
-
-function sendMessageFromDrawer() {
-  if (!currentSubscriber.value) return;
-  showSubscriberDialog.value = false;
-  sendMessage(currentSubscriber.value.subscriberNpub);
+function keyLabel(key: string) {
+  const map: Record<string, string> = {
+    weekly: t('CreatorSubscribers.frequency.weekly'),
+    biweekly: t('CreatorSubscribers.frequency.biweekly'),
+    monthly: t('CreatorSubscribers.frequency.monthly'),
+  };
+  return map[key] || key;
 }
 
-async function copyNpub() {
-  if (!currentSubscriber.value) return;
-  try {
-    await navigator?.clipboard?.writeText(currentSubscriberNpub.value);
-    notifySuccess(t("global.copy_to_clipboard.success"));
-  } catch {
-    notifyError(t("copy_failed"));
-  }
-}
-function getInitials(npub: string): string {
-  return pubkeyNpub(npub).slice(0, 2).toUpperCase();
+function exportCsv() {
+  exportSubscribers(filtered.value.all, 'subscribers.csv');
 }
 
-const filteredSubscribers = computed(() => {
-  const term = filter.value.toLowerCase();
-  return subscriptions.value.filter((s) => {
-    const matchesSearch =
-      !term ||
-      s.subscriberNpub.toLowerCase().includes(term) ||
-      s.tierName.toLowerCase().includes(term);
-    const matchesTier = !tierFilter.value || s.tierName === tierFilter.value;
-    const matchesStatus =
-      !statusFilter.value || s.status === statusFilter.value;
-    return matchesSearch && matchesTier && matchesStatus;
-  });
-});
+// drawer
+const drawer = ref(false);
+const current = ref<CreatorSubscription | null>(null);
+function openSubscriber(sub: CreatorSubscription) {
+  current.value = sub;
+  drawer.value = true;
+}
+
+function formatCurrency(amount: number) {
+  return new Intl.NumberFormat(undefined, { style: 'currency', currency: 'USD' }).format(
+    amount / 100,
+  );
+}
 </script>
-
-<style scoped>
-.placeholder {
-  background: var(--divider-color);
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-}
-</style>
