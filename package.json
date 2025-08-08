@@ -16,7 +16,8 @@
     "checkformat": "prettier --check .",
     "test": "node --experimental-vm-modules node_modules/vitest/vitest.mjs",
     "test:ci": "node --experimental-vm-modules node_modules/vitest/vitest.mjs run",
-    "types": "tsc -p tsconfig.json --noEmit"
+    "types": "tsc -p tsconfig.json --noEmit",
+    "ci:verify": "pnpm run types && pnpm run lint && pnpm run test:ci && pnpm run build && pnpm run build:pwa"
   },
   "dependencies": {
     "@capacitor/android": "^6.2.0",
