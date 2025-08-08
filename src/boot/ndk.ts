@@ -37,7 +37,7 @@ let ndkPromise: Promise<NDK> | undefined;
 
 export async function safeConnect(ndk: NDK): Promise<Error | null> {
   try {
-    await ndk.connect({ timeoutMs: 10_000 });
+    await ndk.connect(10_000);
     return null;
   } catch (e: any) {
     console.warn(
@@ -50,11 +50,11 @@ export async function safeConnect(ndk: NDK): Promise<Error | null> {
 
 async function createReadOnlyNdk(): Promise<NDK> {
   const settings = useSettingsStore();
-  if (!Array.isArray(settings.defaultNostrRelays?.value)) {
-    settings.defaultNostrRelays.value = DEFAULT_RELAYS;
+  if (!Array.isArray(settings.defaultNostrRelays)) {
+    settings.defaultNostrRelays = DEFAULT_RELAYS;
   }
-  const userRelays = Array.isArray(settings.defaultNostrRelays?.value)
-    ? settings.defaultNostrRelays.value
+  const userRelays = Array.isArray(settings.defaultNostrRelays)
+    ? settings.defaultNostrRelays
     : [];
   const relays = userRelays.length ? userRelays : DEFAULT_RELAYS;
   const healthy = await filterHealthyRelays(relays);
@@ -65,15 +65,15 @@ async function createReadOnlyNdk(): Promise<NDK> {
   await new Promise((r) => setTimeout(r, 3000));
   if (![...ndk.pool.relays.values()].some((r: any) => r.connected)) {
     mergeDefaultRelays(ndk);
-    await ndk.connect({ timeoutMs: 8000 });
+    await ndk.connect(8000);
   }
   return ndk;
 }
 
 export async function createSignedNdk(signer: NDKSigner): Promise<NDK> {
   const settings = useSettingsStore();
-  const relays = settings.defaultNostrRelays.value.length
-    ? settings.defaultNostrRelays.value
+  const relays = settings.defaultNostrRelays.length
+    ? settings.defaultNostrRelays
     : DEFAULT_RELAYS;
   const ndk = new NDK({ explicitRelayUrls: relays });
   mergeDefaultRelays(ndk);
@@ -82,7 +82,7 @@ export async function createSignedNdk(signer: NDKSigner): Promise<NDK> {
   await new Promise((r) => setTimeout(r, 3000));
   if (![...ndk.pool.relays.values()].some((r: any) => r.connected)) {
     mergeDefaultRelays(ndk);
-    await ndk.connect({ timeoutMs: 8000 });
+    await ndk.connect(8000);
   }
   return ndk;
 }
@@ -98,22 +98,22 @@ export async function createNdk(): Promise<NDK> {
   }
 
   const settings = useSettingsStore();
-  if (!Array.isArray(settings.defaultNostrRelays?.value)) {
-    settings.defaultNostrRelays.value = DEFAULT_RELAYS;
+  if (!Array.isArray(settings.defaultNostrRelays)) {
+    settings.defaultNostrRelays = DEFAULT_RELAYS;
   }
-  const userRelays = Array.isArray(settings.defaultNostrRelays?.value)
-    ? settings.defaultNostrRelays.value
+  const userRelays = Array.isArray(settings.defaultNostrRelays)
+    ? settings.defaultNostrRelays
     : [];
   const relays = userRelays.length ? userRelays : DEFAULT_RELAYS;
   const healthy = await filterHealthyRelays(relays);
   const relayUrls = healthy.length ? healthy : FREE_RELAYS;
-  const ndk = new NDK({ signer, explicitRelayUrls: relayUrls });
+  const ndk = new NDK({ signer: signer as any, explicitRelayUrls: relayUrls });
   mergeDefaultRelays(ndk);
   await safeConnect(ndk);
   await new Promise((r) => setTimeout(r, 3000));
   if (![...ndk.pool.relays.values()].some((r: any) => r.connected)) {
     mergeDefaultRelays(ndk);
-    await ndk.connect({ timeoutMs: 8000 });
+    await ndk.connect(8000);
   }
   return ndk;
 }
@@ -122,11 +122,10 @@ export async function rebuildNdk(
   relays: string[],
   signer?: NDKSigner
 ): Promise<NDK> {
-  const { default: NDK } = await import("@nostr-dev-kit/ndk");
   const ndk = new NDK({ explicitRelayUrls: relays });
   mergeDefaultRelays(ndk);
   if (signer) ndk.signer = signer;
-  await ndk.connect({ timeoutMs: 10_000 });
+  await ndk.connect(10_000);
   return ndk;
 }
 

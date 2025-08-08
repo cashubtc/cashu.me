@@ -128,10 +128,7 @@ export const messages = {
       },
       creatorHub: {
         title: "Creator Hub",
-        creatorHub: {
-          title: "Creator Hub",
-          caption: "Manage your tiers",
-        },
+        
       },
       myProfile: {
         title: "My Profile",
@@ -1757,11 +1754,7 @@ export const messages = {
       edit: "Edit",
     },
   },
-  creatorHub: {
-    publish: "Publish Profile",
-    profileHeader: "Profile details",
-    endpointsHeader: "Endpoints",
-  },
+  
   swap: {
     in_progress_warning_text: "Swap in progress",
     invalid_swap_data_error_text: "Invalid swap data",
@@ -1800,10 +1793,7 @@ export const messages = {
         description: "Discover creators to support.",
         icon: "img:icons/find-creators.svg",
       },
-      creatorHub: {
-        description: "Set up and manage your creator profile.",
-        icon: "img:icons/creator-hub.svg",
-      },
+      
       myProfile: {
         description: "View and edit your profile.",
         icon: "person",
@@ -1868,11 +1858,7 @@ export const messages = {
           creator:
             "Your public storefront as seen by visitors. Great for a quick audit of how your profile appears worldwide.",
         },
-        creatorHub: {
-          fan: "— (hidden unless you toggle “Creator Mode”)",
-          creator:
-            "Define or edit tiers (price, duration, perks), upload cover art, publish pay-walled posts, check revenue analytics and subscriber list.",
-        },
+        
         myProfile: {
           fan: "Show off your avatar, npub link and optional NIP-05. Personal stats: total zaps sent & received, bucket balances.",
           creator:

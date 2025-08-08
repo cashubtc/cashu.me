@@ -92,7 +92,7 @@ export const useCreatorHubStore = defineStore("creatorHub", {
       const ev = new NDKEvent(ndk);
       ev.kind = 0;
       ev.content = JSON.stringify(profile);
-      await ev.sign(nostr.signer);
+      await ev.sign(nostr.signer as any);
       try {
         await ensureRelayConnectivity(ndk);
         await ev.publish();
@@ -222,7 +222,7 @@ export const useCreatorHubStore = defineStore("creatorHub", {
       ev.tags = [["d", "tiers"]];
       ev.created_at = Math.floor(Date.now() / 1000);
       ev.content = JSON.stringify(tiersArray);
-      await ev.sign(nostr.signer);
+      await ev.sign(nostr.signer as any);
       try {
         await ensureRelayConnectivity(ndk);
         await ev.publish();

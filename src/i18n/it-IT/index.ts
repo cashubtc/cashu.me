@@ -759,10 +759,7 @@ export default {
         },
       },
     },
-    creatorHub: {
-      publish: "Publish Profile",
-      profileHeader: "Profile details",
-    },
+    
     swap: {
       title: "Scambia",
       overline: "Scambi Multimint",
@@ -780,10 +777,7 @@ export default {
         },
       },
       actions: {
-        creatorHub: {
-          publish: "Publish Profile",
-          profileHeader: "Profile details",
-        },
+        
         swap: {
           label: "@:global.actions.swap.label",
           in_progress: "@:MintSettings.swap.actions.swap.label",
@@ -977,27 +971,18 @@ export default {
         label_known_mint: "@:ReceiveTokenDialog.actions.receive.label",
         label_adding_mint: "Aggiunta mint…",
       },
-      creatorHub: {
-        publish: "Publish Profile",
-        profileHeader: "Profile details",
-      },
+      
       swap: {
         label: "@:global.actions.swap.label",
         tooltip_text: "Scambia verso un mint fidato",
         caption: "Scambia { value }",
       },
-      creatorHub: {
-        publish: "Publish Profile",
-        profileHeader: "Profile details",
-      },
+      
       cancel_swap: {
         label: "@:global.actions.cancel.label",
         tooltip_text: "Annulla scambio",
       },
-      creatorHub: {
-        publish: "Publish Profile",
-        profileHeader: "Profile details",
-      },
+      
       confirm_swap: {
         label: "@:ReceiveTokenDialog.actions.swap.label",
         tooltip_text: "@:ReceiveTokenDialog.actions.swap.tooltip_text",
@@ -1376,11 +1361,7 @@ export default {
       },
     },
   },
-  creatorHub: {
-    publish: "Publish Profile",
-    profileHeader: "Profile details",
-    endpointsHeader: "Endpoints",
-  },
+  
   swap: {
     in_progress_warning_text: "Scambio in corso",
     invalid_swap_data_error_text: "Dati di scambio non validi",
@@ -1446,10 +1427,7 @@ export default {
         description: "Scopri i creatori da supportare.",
         icon: "img:icons/find-creators.svg",
       },
-      creatorHub: {
-        description: "Imposta e gestisci il tuo profilo creatore.",
-        icon: "img:icons/creator-hub.svg",
-      },
+      
       myProfile: {
         description: "Visualizza e modifica il tuo profilo.",
         icon: "person",
@@ -1514,11 +1492,7 @@ export default {
           creator:
             "Your public storefront as seen by visitors. Great for a quick audit of how your profile appears worldwide.",
         },
-        creatorHub: {
-          fan: "— (hidden unless you toggle “Creator Mode”)",
-          creator:
-            "Define or edit tiers (price, duration, perks), upload cover art, publish pay-walled posts, check revenue analytics and subscriber list.",
-        },
+        
         myProfile: {
           fan: "Show off your avatar, npub link and optional NIP-05. Personal stats: total zaps sent & received, bucket balances.",
           creator:

@@ -19,7 +19,7 @@ import { useLockedTokensStore } from "./lockedTokens";
 import { useNostrStore } from "./nostr";
 import { cashuDb, type LockedToken } from "./dexie";
 import { DEFAULT_BUCKET_ID } from "./buckets";
-import token from "src/js/token";
+import tokenUtil from "src/js/token";
 import { subscriptionPayload } from "src/utils/receipt-utils";
 import { useCreatorsStore } from "./creators";
 import { frequencyToDays } from "src/constants/subscriptionFrequency";
@@ -74,11 +74,11 @@ export type MessengerMessage = {
 export const useMessengerStore = defineStore("messenger", {
   state: () => {
     const settings = useSettingsStore();
-    if (!Array.isArray(settings.defaultNostrRelays?.value)) {
-      settings.defaultNostrRelays.value = DEFAULT_RELAYS;
+    if (!Array.isArray(settings.defaultNostrRelays)) {
+      settings.defaultNostrRelays = DEFAULT_RELAYS;
     }
-    const userRelays = Array.isArray(settings.defaultNostrRelays?.value)
-      ? settings.defaultNostrRelays.value
+    const userRelays = Array.isArray(settings.defaultNostrRelays)
+      ? settings.defaultNostrRelays
       : [];
     const relays = userRelays.length ? userRelays : DEFAULT_RELAYS;
     return {
@@ -212,7 +212,7 @@ export const useMessengerStore = defineStore("messenger", {
           );
           if (success && event) {
             msg.id = event.id;
-            msg.created_at = event.created_at;
+            msg.created_at = (event.created_at ?? Math.floor(Date.now()/1000));
             msg.status = "sent";
             this.pushOwnMessage(event as any);
             return { success: true, event } as any;
@@ -295,7 +295,7 @@ export const useMessengerStore = defineStore("messenger", {
               (m) => m.id === event.id
             );
             const logMsg = this.eventLog.find((m) => m.id === event.id);
-            const payment: SubscriptionPayment = {
+            const payment: SubscriptionPayment & { htlc_hash?: string } = {
               token: tokenStr,
               subscription_id: subscription.subscription_id,
               tier_id: subscription.tier_id,
@@ -424,19 +424,19 @@ export const useMessengerStore = defineStore("messenger", {
         const payload = JSON.parse(msg.content);
         const sub = parseSubscriptionPaymentPayload(payload);
         if (sub) {
-          const decoded = token.decode(sub.token);
+          const decoded = tokenUtil.decode(sub.token);
           const amount = decoded
-            ? token.getProofs(decoded).reduce((s, p) => s + p.amount, 0)
+            ? tokenUtil.getProofs(decoded).reduce((s, p) => s + p.amount, 0)
             : 0;
           msg.subscriptionPayment = {
-            token: sub.token,
+            tokenString: sub.token,
             subscription_id: payload.subscription_id,
             tier_id: payload.tier_id,
             month_index: payload.month_index,
             total_months: payload.total_months,
             amount,
             unlock_time: sub.unlock_time,
-            htlc_hash: sub.htlc_hash,
+            ...({ htlc_hash: sub.htlc_hash } as any),
             htlc_secret: sub.htlc_secret,
           };
         }
@@ -471,19 +471,19 @@ export const useMessengerStore = defineStore("messenger", {
         }
         const sub = parseSubscriptionPaymentPayload(payload);
         if (sub) {
-          const decoded = token.decode(sub.token);
+          const decoded = tokenUtil.decode(sub.token);
           const amount = decoded
-            ? token.getProofs(decoded).reduce((s, p) => s + p.amount, 0)
+            ? tokenUtil.getProofs(decoded).reduce((s, p) => s + p.amount, 0)
             : 0;
           subscriptionInfo = {
-            token: sub.token,
+            tokenString: sub.token,
             subscription_id: payload.subscription_id,
             tier_id: payload.tier_id,
             month_index: payload.month_index,
             total_months: payload.total_months,
             amount,
             unlock_time: sub.unlock_time,
-            htlc_hash: sub.htlc_hash,
+            ...({ htlc_hash: sub.htlc_hash } as any),
             htlc_secret: sub.htlc_secret,
           };
           const unlockTs = sub.unlock_time ?? payload.unlockTime ?? 0;
@@ -544,7 +544,7 @@ export const useMessengerStore = defineStore("messenger", {
           tokenPayload = payload;
           const decoded = tokensStore.decodeToken(payload.token);
           if (decoded) {
-            const proofs = token.getProofs(decoded);
+            const proofs = tokenUtil.getProofs(decoded);
             if (proofs.some((p) => p.secret.startsWith("P2PK:"))) {
               const buckets = useBucketsStore();
               let bucket = buckets.bucketList.find(
@@ -560,7 +560,9 @@ export const useMessengerStore = defineStore("messenger", {
                     : proofs.reduce((s, p) => s + p.amount, 0);
                 useLockedTokensStore().addLockedToken({
                   amount,
-                  token: payload.token,
+  tokenString: payload.token,
+
+  token:  payload.token,
                   pubkey: event.pubkey,
                   locktime: payload.unlock_time ?? payload.unlockTime,
                   bucketId: bucket.id,
@@ -718,7 +720,7 @@ export const useMessengerStore = defineStore("messenger", {
             );
             if (success && event) {
               msg.id = event.id;
-              msg.created_at = event.created_at;
+              msg.created_at = (event.created_at ?? Math.floor(Date.now()/1000));
               msg.status = "sent";
               this.pushOwnMessage(event as any);
               const idx = this.sendQueue.indexOf(msg);

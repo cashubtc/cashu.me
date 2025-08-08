@@ -31,3 +31,12 @@ yarn-error.log*
 *.ntvs*
 *.njsproj
 *.sln
+
+# Repo Doctor artifacts
+.repo-doctor/
+# Backups
+*.bak.*
+# Nested node_modules
+src/**/node_modules/
+dist/
+backups/

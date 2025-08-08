@@ -66,7 +66,7 @@ export const useStorageStore = defineStore("storage", {
       downloadLink.innerHTML = "Download File";
       downloadLink.href = textToSaveAsURL;
       downloadLink.onclick = function () {
-        document.body.removeChild(event.target);
+        document.body.removeChild(event.target as Node);
       };
       downloadLink.style.display = "none";
       document.body.appendChild(downloadLink);

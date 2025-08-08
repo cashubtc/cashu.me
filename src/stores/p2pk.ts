@@ -6,8 +6,8 @@ import { generateSecretKey, getPublicKey, nip19 } from "nostr-tools";
 import { ensureCompressed } from "src/utils/ecash";
 import { bytesToHex, randomBytes } from "@noble/hashes/utils";
 import { sha256 } from "@noble/hashes/sha256";
-import { WalletProof } from "stores/mints";
-import token from "src/js/token";
+import type { WalletProof } from "src/types/proofs";
+import tokenUtil from "src/js/token";
 import { useWalletStore } from "./wallet";
 import { useProofsStore } from "./proofs";
 import { useMintsStore } from "./mints";
@@ -59,7 +59,7 @@ export async function buildTimedOutputs(
   const unitAmount = Math.round(totalAmount / count);
   const amounts = Array(count).fill(unitAmount);
 
-  return wallet.split(amounts, {
+  return (wallet as any).split(amounts, {
     buildSecret: (idx) => {
       const locktime = idx === 0 ? 0 : startTimeSec + idx * intervalSec;
       const secretObj: any[] = [
@@ -310,11 +310,11 @@ export const useP2PKStore = defineStore("p2pk", {
       }
     },
     getTokenPubkey: function (encodedToken: string): string | undefined {
-      const decodedToken = token.decode(encodedToken);
+      const decodedToken = tokenUtil.decode(encodedToken);
       if (!decodedToken) {
         return undefined;
       }
-      const proofs = token.getProofs(decodedToken);
+      const proofs = tokenUtil.getProofs(decodedToken);
       for (const p of proofs) {
         const { pubkey } = this.getSecretP2PKInfo(p.secret);
         if (pubkey) return pubkey;
@@ -322,11 +322,11 @@ export const useP2PKStore = defineStore("p2pk", {
       return undefined;
     },
     getPrivateKeyForP2PKEncodedToken: function (encodedToken: string): string {
-      const decodedToken = token.decode(encodedToken);
+      const decodedToken = tokenUtil.decode(encodedToken);
       if (!decodedToken) {
         return "";
       }
-      const proofs = token.getProofs(decodedToken);
+      const proofs = tokenUtil.getProofs(decodedToken);
       if (!this.isLocked(proofs) || !this.isLockedToUs(proofs)) {
         return "";
       }
@@ -343,11 +343,11 @@ export const useP2PKStore = defineStore("p2pk", {
       return "";
     },
     getTokenLocktime: function (encodedToken: string): number | undefined {
-      const decodedToken = token.decode(encodedToken);
+      const decodedToken = tokenUtil.decode(encodedToken);
       if (!decodedToken) {
         return undefined;
       }
-      const proofs = token.getProofs(decodedToken);
+      const proofs = tokenUtil.getProofs(decodedToken);
       const times = proofs
         .map((p) => this.getSecretP2PKInfo(p.secret).locktime)
         .filter((t) => t !== undefined) as number[];
@@ -362,13 +362,13 @@ export const useP2PKStore = defineStore("p2pk", {
       const mintsStore = useMintsStore();
       const tokensStore = useTokensStore();
 
-      const decoded = token.decode(encodedToken);
+      const decoded = tokenUtil.decode(encodedToken);
       if (!decoded) {
         throw new Error("Invalid token");
       }
 
-      const mintUrl = token.getMint(decoded);
-      const unit = token.getUnit(decoded);
+      const mintUrl = tokenUtil.getMint(decoded);
+      const unit = tokenUtil.getUnit(decoded);
 
       if (!mintsStore.mints.find((m) => m.url === mintUrl)) {
         await mintsStore.addMint({ url: mintUrl });
@@ -411,7 +411,7 @@ export const useP2PKStore = defineStore("p2pk", {
         mint: mintUrl,
         unit,
         label,
-        description: entry?.description ?? "",
+        description: (entry as any)?.description ?? "",
         bucketId,
       });
     },
@@ -423,9 +423,9 @@ export const useP2PKStore = defineStore("p2pk", {
       const bucketId = sendTokensStore.sendData.bucketId || DEFAULT_BUCKET_ID;
       const proofs = mintStore.activeProofs.filter((p) => p.bucketId === bucketId);
       const info = mintStore.activeInfo || {};
-      const nuts = Array.isArray(info.nut_supports)
-        ? info.nut_supports
-        : Object.keys(info.nuts || {}).map((n) => Number(n));
+      const nuts = Array.isArray((info as any).nut_supports)
+        ? (info as any).nut_supports
+        : Object.keys((info as any).nuts || {}).map((n) => Number(n));
       if (!(nuts.includes(10) && nuts.includes(11))) {
         notifyError(walletStore.t("wallet.notifications.lock_not_supported"));
         throw new Error("Mint does not support timelocks or P2PK");
@@ -439,8 +439,8 @@ export const useP2PKStore = defineStore("p2pk", {
         bucketId
       );
       const keysetId = walletStore.getKeyset(wallet.mint.mintUrl, wallet.unit);
-      let keepProofs: Proof[] = [];
-      let sendProofs: Proof[] = [];
+      let keepProofs: any[] = [];
+      let sendProofs: any[] = [];
       const proofsStore = useProofsStore();
       try {
         ({ keep: keepProofs, send: sendProofs } = await wallet.send(amount, proofsToSend, {
@@ -451,9 +451,10 @@ export const useP2PKStore = defineStore("p2pk", {
         const bucketsStore = useBucketsStore();
         const tokenStr = useProofsStore().serializeProofs(sendProofs);
         const locked = useLockedTokensStore().addLockedToken({
-          id: uuidv4(),
           amount,
-          tokenString: tokenStr,
+  tokenString: tokenStr,
+
+  token:  tokenStr,
           pubkey: receiverPubkey,
           locktime,
           bucketId: bucketsStore.ensureCreatorBucket(receiverPubkey),

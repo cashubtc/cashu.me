@@ -2,7 +2,7 @@ import { debug } from "src/js/logger";
 import { defineStore } from "pinia";
 import Dexie, { Table } from "dexie";
 import { useLocalStorage } from "@vueuse/core";
-import { WalletProof } from "./mints";
+import type { WalletProof } from "src/types/proofs";
 import { useStorageStore } from "./storage";
 import { useProofsStore } from "./proofs";
 import { notifyError, notifySuccess } from "../js/notify";

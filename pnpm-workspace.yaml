@@ -1,0 +1,9 @@
+onlyBuiltDependencies:
+  - '@parcel/watcher'
+  - core-js
+  - electron
+  - esbuild
+  - msw
+  - pngquant-bin
+  - sharp
+  - vue-demi

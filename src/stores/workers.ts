@@ -80,7 +80,7 @@ export const useWorkersStore = defineStore("workers", {
       let signSchnorr: ((h: string) => Promise<string>) | undefined;
       if (method === "local" && signerStore.nsec) {
         const key = nip19.decode(signerStore.nsec).data as Uint8Array;
-        signSchnorr = async (h: string) => schnorr.sign(h, key);
+        signSchnorr = async (h: string) => schnorr.sign(h, key) as unknown as string;
       } else if (method === "nip07") {
         signSchnorr =
           (window as any)?.nostr?.signSchnorr ||

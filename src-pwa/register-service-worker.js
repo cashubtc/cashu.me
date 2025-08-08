@@ -1,41 +1,33 @@
-import { register } from "register-service-worker";
+import { register } from 'register-service-worker'
 
-// The ready(), registered(), cached(), updatefound() and updated()
-// events passes a ServiceWorkerRegistration instance in their arguments.
-// ServiceWorkerRegistration: https://developer.mozilla.org/en-US/docs/Web/API/ServiceWorkerRegistration
-
-register(process.env.SERVICE_WORKER_FILE, {
-  // The registrationOptions object will be passed as the second argument
-  // to ServiceWorkerContainer.register()
-  // https://developer.mozilla.org/en-US/docs/Web/API/ServiceWorkerContainer/register#Parameter
-
-  // registrationOptions: { scope: './' },
-
-  ready(/* registration */) {
-    // console.log('Service worker is active.')
-  },
-
-  registered(/* registration */) {
-    // console.log('Service worker has been registered.')
-  },
-
-  cached(/* registration */) {
-    // console.log('Content has been cached for offline use.')
-  },
-
-  updatefound(/* registration */) {
-    // console.log('New content is downloading.')
-  },
-
-  updated(/* registration */) {
-    // console.log('New content is available; please refresh.')
-  },
-
-  offline() {
-    // console.log('No internet connection found. App is running in offline mode.')
-  },
-
-  error(/* err */) {
-    // console.error('Error during service worker registration:', err)
-  },
-});
+// Vite-compatible: 'import.meta.env.PROD' instead of process.env.NODE_ENV === 'production'
+if (import.meta.env.PROD) {
+  register('/sw.js', {
+    ready() {
+      console.log('[PWA] App is being served from cache by a service worker.')
+    },
+    registered() {
+      console.log('[PWA] Service worker has been registered.')
+    },
+    cached() {
+      console.log('[PWA] Content has been cached for offline use.')
+    },
+    updatefound() {
+      console.log('[PWA] New content is downloading.')
+    },
+    updated(registration) {
+      console.log('[PWA] New content is available; refreshing...')
+      // Simple strategy: refresh when a new SW takes control
+      if (registration && registration.waiting) {
+        registration.waiting.postMessage({ type: 'SKIP_WAITING' })
+      }
+      window.location.reload()
+    },
+    offline() {
+      console.log('[PWA] No internet connection found. App is running in offline mode.')
+    },
+    error(error) {
+      console.error('[PWA] Error during service worker registration:', error)
+    }
+  })
+}

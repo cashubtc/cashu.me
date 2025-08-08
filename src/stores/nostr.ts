@@ -1,3 +1,4 @@
+import { useBucketsStore } from "./buckets";
 import { debug } from "src/js/logger";
 import { defineStore } from "pinia";
 import NDK, {
@@ -141,7 +142,7 @@ export function npubToHex(s: string): string | null {
     if (type !== 'npub') return null;
     if (typeof data === 'string') {
       if (/^[0-9a-fA-F]{64}$/.test(data)) return data.toLowerCase();
-    } else if (data instanceof Uint8Array) {
+    } else if ((data as any) instanceof Uint8Array) {
       return bytesToHex(data);
     }
   } catch (err) {
@@ -174,7 +175,7 @@ async function urlsToRelaySet(urls?: string[]): Promise<NDKRelaySet | undefined>
   const ndk = await useNdk({ requireSigner: false });
   const set = new NDKRelaySet(new Set(), ndk);
   urls.forEach((u) =>
-    set.addRelay(ndk.pool.getRelay(u) ?? new NDKRelay(u))
+    set.addRelay(ndk.pool.getRelay(u) ?? new NDKRelay(u, undefined as any, ndk as any))
   );
   return set;
 }
@@ -209,7 +210,7 @@ export async function publishWithTimeout(
   relays?: NDKRelaySet,
   timeoutMs = 30000
 ): Promise<void> {
-  return Promise.race([
+  await Promise.race([
     ev.publish(relays),
     new Promise<void>((_, reject) =>
       setTimeout(() => reject(new PublishTimeoutError()), timeoutMs)
@@ -489,7 +490,7 @@ export const useNostrStore = defineStore("nostr", {
     return {
       connected: false,
       pubkey: "",
-      relays: useSettingsStore().defaultNostrRelays.value ?? ([] as string[]),
+      relays: useSettingsStore().defaultNostrRelays ?? ([] as string[]),
       signerType: SignerType.SEED,
       nip07signer: {} as NDKNip07Signer,
       nip46Token: "",
@@ -1058,7 +1059,7 @@ export const useNostrStore = defineStore("nostr", {
       }
       return await nip44.v2.encrypt(
         message,
-        nip44.v2.utils.getConversationKey(privKey, recipient),
+        nip44.v2.utils.getConversationKey(privKey as any, recipient as any),
       );
     },
     decryptNip04: async function (
@@ -1094,7 +1095,7 @@ export const useNostrStore = defineStore("nostr", {
       if (!privKey) {
         throw new Error("No private key for decryption");
       }
-      const nip44Key = nip44.v2.utils.getConversationKey(privKey, sender);
+      const nip44Key = nip44.v2.utils.getConversationKey(privKey as any, sender as any);
       try {
         return await nip44.v2.decrypt(content, nip44Key);
       } catch (e) {
@@ -1142,7 +1143,7 @@ export const useNostrStore = defineStore("nostr", {
       const pool = new SimplePool();
       const nostrEvent = await event.toNostrEvent();
       try {
-        await pool.publish(relays ?? this.relays, nostrEvent);
+        await pool.publish(relays ?? this.relays, nostrEvent as any);
         notifySuccess("NIP-04 event published");
         return { success: true, event };
       } catch (e) {
@@ -1282,7 +1283,7 @@ export const useNostrStore = defineStore("nostr", {
       sealEvent.kind = 13;
       sealEvent.content = nip44.v2.encrypt(
         dmEventString,
-        nip44.v2.utils.getConversationKey(privKey, recipient)
+        nip44.v2.utils.getConversationKey(privKey as any, recipient as any)
       );
       sealEvent.created_at = this.randomTimeUpTo2DaysInThePast();
       sealEvent.pubkey = this.pubkey;
@@ -1296,7 +1297,7 @@ export const useNostrStore = defineStore("nostr", {
       wrapEvent.content = nip44.v2.encrypt(
         sealEventString,
         nip44.v2.utils.getConversationKey(
-          bytesToHex(randomPrivateKey),
+          randomPrivateKey,
           recipient
         )
       );
@@ -1308,7 +1309,7 @@ export const useNostrStore = defineStore("nostr", {
       const pool = new SimplePool();
       const nostrEvent = await wrapEvent.toNostrEvent();
       try {
-        await pool.publish(relays ?? this.relays, nostrEvent);
+        await pool.publish(relays ?? this.relays, nostrEvent as any);
         const chatStore = useDmChatsStore();
         chatStore.addOutgoing(dmEvent);
         const router = useRouter();
@@ -1377,12 +1378,12 @@ export const useNostrStore = defineStore("nostr", {
           try {
             const wappedContent = nip44.v2.decrypt(
               wrapEvent.content,
-              nip44.v2.utils.getConversationKey(privKey || "", wrapEvent.pubkey)
+              nip44.v2.utils.getConversationKey(privKey || "" as any, wrapEvent.pubkey as any)
             );
             const sealEvent = JSON.parse(wappedContent) as NostrEvent;
             const dmEventString = nip44.v2.decrypt(
               sealEvent.content,
-              nip44.v2.utils.getConversationKey(privKey || "", sealEvent.pubkey)
+              nip44.v2.utils.getConversationKey(privKey || "" as any, sealEvent.pubkey as any)
             );
             dmEvent = JSON.parse(dmEventString) as NDKEvent;
             content = dmEvent.content;
@@ -1427,7 +1428,7 @@ export const useNostrStore = defineStore("nostr", {
             creatorsStore.tiersMap[this.pubkey || ""]?.find(
               (t) => t.id === payload.tier_id,
             )?.name;
-          const entry: LockedToken = {
+          const entry = {
             id: uuidv4(),
             tokenString: payload.token,
             amount,
@@ -1453,7 +1454,7 @@ export const useNostrStore = defineStore("nostr", {
               frequencyToDays(((payload as any).frequency as any) || "monthly"),
             label: "Subscription payment",
           };
-          await cashuDb.lockedTokens.put(entry);
+          await cashuDb.lockedTokens.put(entry as any);
           const receiveStore = useReceiveTokensStore();
           receiveStore.receiveData.tokensBase64 = payload.token;
           await receiveStore.enqueue(() =>
@@ -1539,7 +1540,7 @@ export const useNostrStore = defineStore("nostr", {
           }
 
           const unlockTs = payload.unlock_time ?? payload.unlockTime ?? 0;
-          const entry: LockedToken = {
+          const entry = {
             id: uuidv4(),
             tokenString: payload.token,
             amount: amount || 0,
@@ -1557,7 +1558,7 @@ export const useNostrStore = defineStore("nostr", {
             subscriptionEventId: null,
             label: "Locked tokens",
           };
-          await cashuDb.lockedTokens.put(entry);
+          await cashuDb.lockedTokens.put(entry as any);
           return;
         }
       } catch (e) {
@@ -1614,7 +1615,7 @@ export const useNostrStore = defineStore("nostr", {
 
 export function getEventHash(event: NostrEvent): string {
   try {
-    return ntGetEventHash(event);
+    return ntGetEventHash(event as any);
   } catch (e) {
     console.error("Failed to hash event", e);
     throw e;
@@ -1636,10 +1637,10 @@ export async function signEvent(
 }
 
 export async function publishEvent(event: NostrEvent): Promise<void> {
-  const relays = useSettingsStore().defaultNostrRelays.value;
+  const relays = useSettingsStore().defaultNostrRelays;
   const pool = new SimplePool();
   try {
-    await Promise.any(pool.publish(relays, event));
+    await Promise.any(pool.publish(relays, event as any));
   } catch (e) {
     console.error("Failed to publish event", e);
   }
@@ -1653,7 +1654,7 @@ export async function subscribeToNostr(
   const relayUrls =
     relays && relays.length > 0
       ? relays
-      : useSettingsStore().defaultNostrRelays.value;
+      : useSettingsStore().defaultNostrRelays;
   if (!relayUrls || relayUrls.length === 0) {
     console.warn('[nostr] subscribeMany called with empty relay list');
     return false;

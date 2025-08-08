@@ -202,8 +202,8 @@ export const useCreatorsStore = defineStore("creators", {
       const settings = useSettingsStore();
       const relayUrls = Array.from(
         new Set([
-          ...(Array.isArray(settings.defaultNostrRelays.value)
-            ? settings.defaultNostrRelays.value
+          ...(Array.isArray(settings.defaultNostrRelays)
+            ? settings.defaultNostrRelays
             : []),
           ...DEFAULT_RELAYS,
         ])
@@ -215,7 +215,7 @@ export const useCreatorsStore = defineStore("creators", {
       let received = false;
       const fetchFromIndexer = async () => {
         if (received) return;
-        const indexerUrl = settings.tiersIndexerUrl.value;
+        const indexerUrl = settings.tiersIndexerUrl;
         if (!indexerUrl) {
           this.tierFetchError = true;
           notifyWarning("Unable to retrieve subscription tiers");

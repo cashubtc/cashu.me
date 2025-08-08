@@ -13,6 +13,7 @@ import path from "path";
 
 export default configure(function (/* ctx */) {
   return {
+    alias: { buffer: 'buffer', process: 'process/browser' },
     eslint: {
       // fix: true,
       // include: [],
@@ -28,7 +29,7 @@ export default configure(function (/* ctx */) {
     // app boot file (/src/boot)
     // --> boot files are part of "main.js"
     // https://v2.quasar.dev/quasar-cli/boot-files
-    boot: ["polyfills", "ndk", "base", "global-components", "cashu", "i18n"],
+    boot: ['buffer', "polyfills", "ndk", "base", "global-components", "cashu", "i18n", 'node-globals'],
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#css
     css: ["app.scss", "base.scss", "buckets.scss"],
@@ -38,6 +39,7 @@ export default configure(function (/* ctx */) {
 
     // Full list of options: https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#build
     build: {
+      optimizeDeps: { include: ['process', 'buffer'] },
       target: {
         browser: ["esnext"],
         node: "node16",
@@ -60,7 +62,15 @@ export default configure(function (/* ctx */) {
       // distDir
 
       extendViteConf(viteConf) {
-        viteConf.resolve = viteConf.resolve || {};
+      viteConf.resolve = viteConf.resolve || {};
+      viteConf.resolve.alias = { ...(viteConf.resolve.alias || {}), buffer: 'buffer', process: 'process/browser' };
+
+      viteConf.define = { ...(viteConf.define || {}), global: 'globalThis' };
+
+      viteConf.optimizeDeps = { ...(viteConf.optimizeDeps || {}), include: [ ...(viteConf.optimizeDeps?.include || []), 'buffer', 'process' ] };
+
+viteConf.resolve = viteConf.resolve || {
+};
         viteConf.resolve.alias = {
           ...(viteConf.resolve.alias || {}),
           "@cashu/cashu-ts": path.resolve(__dirname, "src/lib/cashu-ts/src/index.ts"),
@@ -69,7 +79,7 @@ export default configure(function (/* ctx */) {
       // viteVuePluginOptions: {},
 
       // vitePlugins: [
-      //   [ 'package-name', { ..options.. } ]
+        //   [ 'package-name', { ..options.. } ]
       // ]
     },
 
@@ -143,7 +153,7 @@ export default configure(function (/* ctx */) {
 
     // https://v2.quasar.dev/quasar-cli/developing-pwa/configuring-pwa
     pwa: {
-      workboxMode: "generateSW", // or 'injectManifest'
+      workboxMode: 'GenerateSW', // or 'injectManifest'
       injectPwaMetaTags: true,
       swFilename: "sw.js",
       manifestFilename: "manifest.json",

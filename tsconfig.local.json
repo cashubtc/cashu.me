@@ -1,0 +1,15 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "strict": false,
+    "noImplicitAny": false,
+    "useUnknownInCatchVariables": false,
+    "skipLibCheck": true
+  },
+  "exclude": [
+    "src/lib/**",
+    "src/js/__tests__/**",
+    "**/*.test.ts",
+    "**/*.test.tsx"
+  ]
+}

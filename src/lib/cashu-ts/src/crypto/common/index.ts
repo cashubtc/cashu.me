@@ -3,7 +3,8 @@ import { secp256k1 } from '@noble/curves/secp256k1';
 import { sha256 } from '@noble/hashes/sha256';
 import { bytesToHex, hexToBytes } from '@noble/curves/abstract/utils';
 import { bytesToNumber, encodeBase64toUint8, hexToNumber } from '../util/utils.js';
-import { Buffer } from 'buffer';
+import 'buffer'
+declare const Buffer: any;
 
 export type Enumerate<N extends number, Acc extends number[] = []> = Acc['length'] extends N
 	? Acc[number]

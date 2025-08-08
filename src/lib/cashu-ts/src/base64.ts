@@ -1,4 +1,5 @@
-import { Buffer } from 'buffer';
+import 'buffer'
+declare const Buffer: any;
 
 function encodeUint8toBase64(uint8array: Uint8Array): string {
 	return Buffer.from(uint8array).toString('base64');

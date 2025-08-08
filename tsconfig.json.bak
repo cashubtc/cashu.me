@@ -34,29 +34,6 @@
       "@cashu/cashu-ts": [
         "src/lib/cashu-ts/src/index.ts"
       ]
-    },
-    "moduleResolution": "Bundler",
-    "skipLibCheck": true,
-    "lib": [
-      "ES2022",
-      "DOM",
-      "DOM.Iterable",
-      "WebWorker"
-    ],
-    "types": [
-      "vite/client",
-      "node"
-    ]
-  },
-  "include": [
-    "src/**/*.ts",
-    "src/**/*.d.ts",
-    "src/**/*.vue"
-  ],
-  "exclude": [
-    "node_modules",
-    "dist",
-    ".quasar",
-    "src-pwa/**"
-  ]
+    }
+  }
 }

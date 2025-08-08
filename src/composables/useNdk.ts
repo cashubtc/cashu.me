@@ -23,7 +23,7 @@ export async function useNdk(
 
   if (cached) {
     if (requireSigner && !cached.signer && nostr.signer) {
-      cached = await createSignedNdk(nostr.signer);
+      cached = await createSignedNdk(nostr.signer as any);
     }
     return cached;
   }
@@ -31,7 +31,7 @@ export async function useNdk(
   cached = await createNdk();
 
   if (requireSigner && !cached.signer && nostr.signer) {
-    cached = await createSignedNdk(nostr.signer);
+    cached = await createSignedNdk(nostr.signer as any);
   }
 
   return cached;

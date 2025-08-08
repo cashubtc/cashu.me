@@ -765,10 +765,7 @@ export default {
         },
       },
     },
-    creatorHub: {
-      publish: "Publish Profile",
-      profileHeader: "Profile details",
-    },
+    
     swap: {
       title: "Tauschen",
       overline: "Multimint-Swaps",
@@ -786,10 +783,7 @@ export default {
         },
       },
       actions: {
-        creatorHub: {
-          publish: "Publish Profile",
-          profileHeader: "Profile details",
-        },
+        
         swap: {
           label: "@:global.actions.swap.label",
           in_progress: "@:MintSettings.swap.actions.swap.label",
@@ -984,27 +978,18 @@ export default {
         label_known_mint: "@:ReceiveTokenDialog.actions.receive.label",
         label_adding_mint: "Mint wird hinzugefügt…",
       },
-      creatorHub: {
-        publish: "Publish Profile",
-        profileHeader: "Profile details",
-      },
+      
       swap: {
         label: "@:global.actions.swap.label",
         tooltip_text: "Zu einer vertrauenswürdigen Mint tauschen",
         caption: "Tauschen { value }",
       },
-      creatorHub: {
-        publish: "Publish Profile",
-        profileHeader: "Profile details",
-      },
+      
       cancel_swap: {
         label: "@:global.actions.cancel.label",
         tooltip_text: "Swap abbrechen",
       },
-      creatorHub: {
-        publish: "Publish Profile",
-        profileHeader: "Profile details",
-      },
+      
       confirm_swap: {
         label: "@:ReceiveTokenDialog.actions.swap.label",
         tooltip_text: "@:ReceiveTokenDialog.actions.swap.tooltip_text",
@@ -1393,11 +1378,7 @@ export default {
       },
     },
   },
-  creatorHub: {
-    publish: "Publish Profile",
-    profileHeader: "Profile details",
-    endpointsHeader: "Endpoints",
-  },
+  
   swap: {
     in_progress_warning_text: "Swap läuft",
     invalid_swap_data_error_text: "Ungültige Swap-Daten",
@@ -1463,10 +1444,7 @@ export default {
         description: "Entdecken Sie Creator zur Unterstützung.",
         icon: "img:icons/find-creators.svg",
       },
-      creatorHub: {
-        description: "Richten Sie Ihr Creator-Profil ein und verwalten Sie es.",
-        icon: "img:icons/creator-hub.svg",
-      },
+      
       myProfile: {
         description: "Sehen und bearbeiten Sie Ihr Profil.",
         icon: "person",
@@ -1531,11 +1509,7 @@ export default {
           creator:
             "Your public storefront as seen by visitors. Great for a quick audit of how your profile appears worldwide.",
         },
-        creatorHub: {
-          fan: "— (hidden unless you toggle “Creator Mode”)",
-          creator:
-            "Define or edit tiers (price, duration, perks), upload cover art, publish pay-walled posts, check revenue analytics and subscriber list.",
-        },
+        
         myProfile: {
           fan: "Show off your avatar, npub link and optional NIP-05. Personal stats: total zaps sent & received, bucket balances.",
           creator:

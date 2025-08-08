@@ -1,5 +1,6 @@
 import { type Token, getDecodedToken } from "@cashu/cashu-ts";
-import { useMintsStore, WalletProof } from "src/stores/mints";
+import { useMintsStore } from "src/stores/mints";
+import type { WalletProof } from "src/types/proofs";
 import { useProofsStore } from "src/stores/proofs";
 import { sha256 } from "@noble/hashes/sha256";
 import { bytesToHex } from "@noble/hashes/utils";
