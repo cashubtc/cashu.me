@@ -128,20 +128,19 @@
           v-slot="{ item }"
         >
           <SubscriberCard
-            :subscription="item"
+            :sub="item"
+            :profile="profilesById[item.subscriptionId]"
             :compact="compact"
-            :status="uiStatus(item)"
-            :next-in="nextIn(item)"
-            :progress="progress(item)"
-            :amount="amountPerInterval(item)"
+            @select="selectSubscriber(item)"
             @open="openSubscriber(item)"
           />
         </q-virtual-scroll>
       </div>
 
       <SubscriberDrawer
+        v-if="current"
         v-model="drawer"
-        :subscription="current"
+        :sub="current"
         :profile="currentProfile"
       />
     </template>
@@ -153,7 +152,7 @@ import { ref, computed, watch } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useI18n } from 'vue-i18n';
 import { useDebounceFn } from '@vueuse/core';
-import SubscriberCard from 'components/SubscriberCard.vue';
+import SubscriberCard from 'components/subscribers/SubscriberCard.vue';
 import SubscriberDrawer from 'components/subscribers/SubscriberDrawer.vue';
 import KpiCard from 'components/subscribers/KpiCard.vue';
 import Sparkline from 'components/subscribers/Sparkline.vue';
@@ -384,6 +383,9 @@ const current = ref<CreatorSubscription | null>(null);
 const currentProfile = computed(() =>
   current.value ? profilesById.value[current.value.subscriptionId] : undefined,
 );
+function selectSubscriber(sub: CreatorSubscription) {
+  current.value = sub;
+}
 function openSubscriber(sub: CreatorSubscription) {
   current.value = sub;
   drawer.value = true;
