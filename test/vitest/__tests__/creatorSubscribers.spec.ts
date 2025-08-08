@@ -118,6 +118,7 @@ describe('CreatorSubscribers', () => {
           SubscriberDrawer: true,
           KpiCard: true,
           Sparkline: true,
+          SubscriptionsCharts: true,
           'q-virtual-scroll': {
             props: ['items'],
             template: '<div><slot v-for="item in items" :item="item" /></div>',

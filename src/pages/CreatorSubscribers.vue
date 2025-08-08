@@ -8,36 +8,50 @@
     </div>
     <template v-else>
       <!-- KPI cards -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
         <KpiCard
           :title="t('CreatorSubscribers.summary.subscribers')"
           :value="total"
-          :diff="0"
-        >
-          <Sparkline :data="totalTrend" />
-        </KpiCard>
+        />
         <KpiCard
           :title="t('CreatorSubscribers.summary.active')"
           :value="active"
-          :diff="0"
-        >
-          <Sparkline :data="activeTrend" />
-        </KpiCard>
+          :diff="pending"
+        />
         <KpiCard
           :title="t('CreatorSubscribers.summary.revenue')"
           :value="formatCurrency(lifetimeRevenue)"
         >
+          <Sparkline :data="lifetimeTrend" />
+        </KpiCard>
+        <KpiCard
+          :title="t('CreatorSubscribers.summary.thisPeriod')"
+          :value="formatCurrency(periodRevenue)"
+        >
           <template #caption>
-            {{
-              revenueToggle === 'week'
-                ? t('CreatorSubscribers.summary.thisWeek')
-                : t('CreatorSubscribers.summary.thisMonth')
-            }}:
-            {{ formatCurrency(periodRevenue) }}
+            <q-btn-group dense>
+              <q-btn
+                size="sm"
+                flat
+                :color="revenueToggle === 'week' ? 'primary' : 'grey-6'"
+                @click="revenueToggle = 'week'"
+              >
+                {{ t('CreatorSubscribers.summary.thisWeek') }}
+              </q-btn>
+              <q-btn
+                size="sm"
+                flat
+                :color="revenueToggle === 'month' ? 'primary' : 'grey-6'"
+                @click="revenueToggle = 'month'"
+              >
+                {{ t('CreatorSubscribers.summary.thisMonth') }}
+              </q-btn>
+            </q-btn-group>
           </template>
-          <Sparkline :data="revenueTrend" />
         </KpiCard>
       </div>
+
+      <SubscriptionsCharts :rows="rows" class="mb-6" />
 
       <!-- toolbar -->
       <div class="flex flex-wrap items-center gap-2 mb-6">
@@ -71,7 +85,7 @@
             v-for="s in statusOptions"
             :key="s.value"
             clickable
-            :color="selectedStatuses.includes(s.value) ? 'primary' : 'grey-6'"
+            :color="statusChipColor(s.value)"
             text-color="white"
             @click="toggleStatus(s.value)"
           >
@@ -120,7 +134,7 @@
             :next-in="nextIn(item)"
             :progress="progress(item)"
             :amount="amountPerInterval(item)"
-            @click="openSubscriber(item)"
+            @open="openSubscriber(item)"
           />
         </q-virtual-scroll>
       </div>
@@ -143,6 +157,7 @@ import SubscriberCard from 'components/SubscriberCard.vue';
 import SubscriberDrawer from 'components/subscribers/SubscriberDrawer.vue';
 import KpiCard from 'components/subscribers/KpiCard.vue';
 import Sparkline from 'components/subscribers/Sparkline.vue';
+import SubscriptionsCharts from 'components/subscribers/SubscriptionsCharts.vue';
 import { useCreatorSubscriptionsStore, type CreatorSubscription } from 'stores/creatorSubscriptions';
 import { downloadCsv } from 'src/utils/subscriberCsv';
 import { useNostrStore } from 'stores/nostr';
@@ -172,14 +187,26 @@ function toggleFrequency(val: string) {
 
 // status chips
 const statusOptions = [
+  { label: t('CreatorSubscribers.status.any'), value: 'any' },
   { label: t('CreatorSubscribers.status.active'), value: 'active' },
   { label: t('CreatorSubscribers.status.pending'), value: 'pending' },
+  { label: t('CreatorSubscribers.status.ended'), value: 'ended' },
 ];
-const selectedStatuses = ref<string[]>(statusOptions.map((o) => o.value));
+const allStatusValues = ['active', 'pending', 'ended'];
+const selectedStatuses = ref<string[]>(allStatusValues.slice());
 function toggleStatus(val: string) {
-  const idx = selectedStatuses.value.indexOf(val);
-  if (idx === -1) selectedStatuses.value.push(val);
-  else selectedStatuses.value.splice(idx, 1);
+  if (val === 'any') {
+    selectedStatuses.value = allStatusValues.slice();
+  } else {
+    const idx = selectedStatuses.value.indexOf(val);
+    if (idx === -1) selectedStatuses.value.push(val);
+    else selectedStatuses.value.splice(idx, 1);
+  }
+}
+function statusChipColor(val: string) {
+  if (val === 'any')
+    return selectedStatuses.value.length === allStatusValues.length ? 'primary' : 'grey-6';
+  return selectedStatuses.value.includes(val) ? 'primary' : 'grey-6';
 }
 
 // tier filter
@@ -192,10 +219,11 @@ const tierOptions = computed(() => {
 
 // sort select
 const sortOptions = [
-  { label: t('CreatorSubscribers.sort.newest'), value: 'newest' },
+  { label: t('CreatorSubscribers.sort.next'), value: 'next' },
+  { label: t('CreatorSubscribers.sort.first'), value: 'first' },
   { label: t('CreatorSubscribers.sort.amount'), value: 'amount' },
 ];
-const sort = ref('newest');
+const sort = ref('next');
 
 const compact = ref(false);
 
@@ -315,8 +343,8 @@ const avatar = computed(() => {
 
 // KPI metrics
 const total = computed(() => subscriptions.value.length);
-const active = computed(() => subscriptions.value.filter((s) => s.status === 'active').length);
-const pending = computed(() => subscriptions.value.filter((s) => s.status === 'pending').length);
+const active = computed(() => subscriptions.value.filter((s) => uiStatus(s) === 'active').length);
+const pending = computed(() => subscriptions.value.filter((s) => uiStatus(s) === 'pending').length);
 const lifetimeRevenue = computed(() =>
   subscriptions.value.reduce((sum, s) => sum + s.totalAmount, 0),
 );
@@ -340,9 +368,7 @@ const periodRevenue = computed(() =>
   revenueToggle.value === 'week' ? weekRevenue.value : monthRevenue.value,
 );
 
-const totalTrend = computed(() => [0, total.value]);
-const activeTrend = computed(() => [0, active.value]);
-const revenueTrend = computed(() => [0, periodRevenue.value]);
+const lifetimeTrend = computed(() => [0, lifetimeRevenue.value]);
 
 // filtering and sorting
 const filtered = computed(() => {
@@ -356,13 +382,15 @@ const filtered = computed(() => {
     );
   }
   arr = arr.filter((s) => selectedFrequencies.value.includes(s.frequency));
-  arr = arr.filter((s) => selectedStatuses.value.includes(s.status));
+  arr = arr.filter((s) => selectedStatuses.value.includes(uiStatus(s)));
   if (tierFilter.value) arr = arr.filter((s) => s.tierId === tierFilter.value);
 
   if (sort.value === 'amount') {
     arr.sort((a, b) => b.totalAmount - a.totalAmount);
+  } else if (sort.value === 'first') {
+    arr.sort((a, b) => (a.startDate ?? 0) - (b.startDate ?? 0));
   } else {
-    arr.sort((a, b) => (b.startDate ?? 0) - (a.startDate ?? 0));
+    arr.sort((a, b) => (a.nextRenewal ?? 0) - (b.nextRenewal ?? 0));
   }
   return {
     all: arr,
@@ -376,6 +404,8 @@ const grouped = computed(() => ({
   biweekly: filtered.value.biweekly,
   monthly: filtered.value.monthly,
 }));
+
+const rows = computed(() => filtered.value.all);
 
 function keyLabel(key: string) {
   const map: Record<string, string> = {
