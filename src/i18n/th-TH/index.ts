@@ -756,10 +756,7 @@ export default {
         },
       },
     },
-    creatorHub: {
-      publish: "Publish Profile",
-      profileHeader: "Profile details",
-    },
+    
     swap: {
       title: "แลกเปลี่ยน",
       overline: "การแลกเปลี่ยนระหว่าง Mints",
@@ -777,10 +774,7 @@ export default {
         },
       },
       actions: {
-        creatorHub: {
-          publish: "Publish Profile",
-          profileHeader: "Profile details",
-        },
+        
         swap: {
           label: "@:global.actions.swap.label",
           in_progress: "@:MintSettings.swap.actions.swap.label",
@@ -974,27 +968,18 @@ export default {
         label_known_mint: "@:ReceiveTokenDialog.actions.receive.label",
         label_adding_mint: "กำลังเพิ่ม Mint…",
       },
-      creatorHub: {
-        publish: "Publish Profile",
-        profileHeader: "Profile details",
-      },
+      
       swap: {
         label: "@:global.actions.swap.label",
         tooltip_text: "แลกเปลี่ยนไปยัง Mint ที่เชื่อถือได้",
         caption: "แลกเปลี่ยน { value }",
       },
-      creatorHub: {
-        publish: "Publish Profile",
-        profileHeader: "Profile details",
-      },
+      
       cancel_swap: {
         label: "@:global.actions.cancel.label",
         tooltip_text: "ยกเลิกการแลกเปลี่ยน",
       },
-      creatorHub: {
-        publish: "Publish Profile",
-        profileHeader: "Profile details",
-      },
+      
       confirm_swap: {
         label: "@:ReceiveTokenDialog.actions.swap.label",
         tooltip_text: "@:ReceiveTokenDialog.actions.swap.tooltip_text",
@@ -1374,11 +1359,7 @@ export default {
       },
     },
   },
-  creatorHub: {
-    publish: "Publish Profile",
-    profileHeader: "Profile details",
-    endpointsHeader: "Endpoints",
-  },
+  
   swap: {
     in_progress_warning_text: "กำลังดำเนินการแลกเปลี่ยน",
     invalid_swap_data_error_text: "ข้อมูลการแลกเปลี่ยนไม่ถูกต้อง",
@@ -1444,10 +1425,7 @@ export default {
         description: "ค้นพบผู้สร้างเพื่อสนับสนุน",
         icon: "img:icons/find-creators.svg",
       },
-      creatorHub: {
-        description: "ตั้งค่าและจัดการโปรไฟล์ผู้สร้างของคุณ",
-        icon: "img:icons/creator-hub.svg",
-      },
+      
       myProfile: {
         description: "ดูและแก้ไขโปรไฟล์ของคุณ",
         icon: "person",
@@ -1512,11 +1490,7 @@ export default {
           creator:
             "Your public storefront as seen by visitors. Great for a quick audit of how your profile appears worldwide.",
         },
-        creatorHub: {
-          fan: "— (hidden unless you toggle “Creator Mode”)",
-          creator:
-            "Define or edit tiers (price, duration, perks), upload cover art, publish pay-walled posts, check revenue analytics and subscriber list.",
-        },
+        
         myProfile: {
           fan: "Show off your avatar, npub link and optional NIP-05. Personal stats: total zaps sent & received, bucket balances.",
           creator:
