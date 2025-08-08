@@ -144,7 +144,7 @@ import SubscriberDrawer from 'components/subscribers/SubscriberDrawer.vue';
 import KpiCard from 'components/subscribers/KpiCard.vue';
 import Sparkline from 'components/subscribers/Sparkline.vue';
 import { useCreatorSubscriptionsStore, type CreatorSubscription } from 'stores/creatorSubscriptions';
-import { exportSubscribers } from 'src/utils/subscriberCsv';
+import { downloadCsv } from 'src/utils/subscriberCsv';
 import { useNostrStore } from 'stores/nostr';
 import type { NDKUserProfile as Profile } from '@nostr-dev-kit/ndk';
 
@@ -387,7 +387,15 @@ function keyLabel(key: string) {
 }
 
 function exportCsv() {
-  exportSubscribers(filtered.value.all, 'subscribers.csv');
+  const rows = filtered.value.all.map((s) => ({
+    ...s,
+    npub: s.subscriberNpub,
+    displayName: displayName.value[s.subscriptionId],
+    nip05: nip05.value[s.subscriptionId],
+    lud16: lud16.value[s.subscriptionId],
+    tier: s.tierName,
+  }));
+  downloadCsv(rows);
 }
 
 // drawer
