@@ -129,6 +129,8 @@ import SubscriberCard from 'components/SubscriberCard.vue';
 import SubscriberDrawer from 'components/SubscriberDrawer.vue';
 import { useCreatorSubscriptionsStore, type CreatorSubscription } from 'stores/creatorSubscriptions';
 import { exportSubscribers } from 'src/utils/subscriberCsv';
+import { useNostrStore } from 'stores/nostr';
+import type { NDKUserProfile as Profile } from '@nostr-dev-kit/ndk';
 
 const { t } = useI18n();
 const creatorSubscriptionsStore = useCreatorSubscriptionsStore();
@@ -180,6 +182,120 @@ const sortOptions = [
 const sort = ref('newest');
 
 const compact = ref(false);
+
+// profile caching
+const profileCache = new Map<string, Profile>();
+const profileVersion = ref(0);
+const pendingProfiles = new Set<string>();
+
+function saveProfile(npub: string, profile: Profile) {
+  profileCache.set(npub, profile);
+  try {
+    localStorage.setItem(npub, JSON.stringify(profile));
+  } catch (e) {
+    console.error(e);
+  }
+  profileVersion.value++;
+}
+
+function loadProfile(npub: string): Profile | undefined {
+  const cached = profileCache.get(npub);
+  if (cached) return cached;
+  const stored = localStorage.getItem(npub);
+  if (stored) {
+    try {
+      const parsed = JSON.parse(stored) as Profile;
+      profileCache.set(npub, parsed);
+      return parsed;
+    } catch (e) {
+      console.error(e);
+    }
+  }
+  return undefined;
+}
+
+function ensureProfile(npub: string) {
+  if (loadProfile(npub) || pendingProfiles.has(npub)) return;
+  pendingProfiles.add(npub);
+  const schedule =
+    typeof requestIdleCallback !== 'undefined'
+      ? requestIdleCallback
+      : (cb: any) => setTimeout(cb, 0);
+  schedule(async () => {
+    try {
+      const profile = await useNostrStore().getProfile(npub);
+      if (profile) saveProfile(npub, profile);
+    } finally {
+      pendingProfiles.delete(npub);
+    }
+  });
+}
+
+const profilesById = computed(() => {
+  profileVersion.value;
+  const map: Record<string, Profile | undefined> = {};
+  subscriptions.value.forEach((s) => {
+    const p = loadProfile(s.subscriberNpub);
+    if (!p) ensureProfile(s.subscriberNpub);
+    map[s.subscriptionId] = p;
+  });
+  return map;
+});
+
+function truncateNpub(npub: string) {
+  return npub.slice(0, 8) + '...' + npub.slice(-4);
+}
+
+const displayName = computed(() => {
+  const map: Record<string, string> = {};
+  subscriptions.value.forEach((s) => {
+    const p = profilesById.value[s.subscriptionId];
+    let name = '';
+    if (p?.display_name) name = p.display_name;
+    else if (p?.name) name = p.name;
+    else if ((p as any)?.displayName) name = (p as any).displayName;
+    else if (p?.nip05) name = p.nip05.split('@')[0];
+    else name = truncateNpub(s.subscriberNpub);
+    map[s.subscriptionId] = name;
+  });
+  return map;
+});
+
+const nip05 = computed(() => {
+  const map: Record<string, string> = {};
+  subscriptions.value.forEach((s) => {
+    const p = profilesById.value[s.subscriptionId];
+    map[s.subscriptionId] = p?.nip05 || truncateNpub(s.subscriberNpub);
+  });
+  return map;
+});
+
+const lud16 = computed(() => {
+  const map: Record<string, string> = {};
+  subscriptions.value.forEach((s) => {
+    const p = profilesById.value[s.subscriptionId];
+    map[s.subscriptionId] = p?.lud16 || '';
+  });
+  return map;
+});
+
+const about = computed(() => {
+  const map: Record<string, string> = {};
+  subscriptions.value.forEach((s) => {
+    const p = profilesById.value[s.subscriptionId];
+    map[s.subscriptionId] = p?.about || '';
+  });
+  return map;
+});
+
+const avatar = computed(() => {
+  const map: Record<string, string> = {};
+  subscriptions.value.forEach((s) => {
+    const p = profilesById.value[s.subscriptionId];
+    map[s.subscriptionId] = (p as any)?.picture || '';
+  });
+  return map;
+});
 
 // KPI metrics
 const total = computed(() => subscriptions.value.length);
