@@ -51,7 +51,44 @@
         </KpiCard>
       </div>
 
-      <SubscriptionsCharts :rows="rows" class="mb-6" />
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <div class="flex flex-col items-center">
+          <MiniDonut :series="frequencySeries" :labels="frequencyLabels" />
+          <div class="text-caption q-mt-xs">
+            {{ t('CreatorSubscribers.charts.frequency') }}
+          </div>
+        </div>
+        <div class="flex flex-col items-center">
+          <MiniDonut :series="statusSeries" :labels="statusLabels" />
+          <div class="text-caption q-mt-xs">
+            {{ t('CreatorSubscribers.charts.status') }}
+          </div>
+        </div>
+        <div class="flex flex-col items-center w-full">
+          <MiniBar :series="newSubsSeries" class="w-full" />
+          <div class="text-caption q-mt-xs flex items-center gap-1">
+            <span>{{ t('CreatorSubscribers.charts.newSubs') }}</span>
+            <q-btn-group dense>
+              <q-btn
+                size="sm"
+                flat
+                :color="subsToggle === 'week' ? 'primary' : 'grey-6'"
+                @click="subsToggle = 'week'"
+              >
+                {{ t('CreatorSubscribers.summary.thisWeek') }}
+              </q-btn>
+              <q-btn
+                size="sm"
+                flat
+                :color="subsToggle === 'month' ? 'primary' : 'grey-6'"
+                @click="subsToggle = 'month'"
+              >
+                {{ t('CreatorSubscribers.summary.thisMonth') }}
+              </q-btn>
+            </q-btn-group>
+          </div>
+        </div>
+      </div>
 
       <!-- toolbar -->
       <div class="flex flex-wrap items-center gap-2 mb-6">
@@ -155,12 +192,12 @@ import SubscriberCard from 'components/subscribers/SubscriberCard.vue';
 import SubscriberDrawer from 'components/subscribers/SubscriberDrawer.vue';
 import KpiCard from 'components/subscribers/KpiCard.vue';
 import Sparkline from 'components/subscribers/Sparkline.vue';
-import SubscriptionsCharts from 'components/subscribers/SubscriptionsCharts.vue';
+import MiniDonut from 'components/subscribers/MiniDonut.vue';
+import MiniBar from 'components/subscribers/MiniBar.vue';
 import { useCreatorSubscriptionsStore, type CreatorSubscription } from 'stores/creatorSubscriptions';
 import { downloadCsv } from 'src/utils/subscriberCsv';
 import type { NDKUserProfile as Profile } from '@nostr-dev-kit/ndk';
 import { useNostrProfiles } from 'src/composables/useNostrProfiles';
-import { daysToFrequency } from 'src/constants/subscriptionFrequency';
 
 const { t } = useI18n();
 const creatorSubscriptionsStore = useCreatorSubscriptionsStore();
@@ -272,39 +309,20 @@ const avatar = computed(() => {
   });
   return map;
 });
+interface Row extends CreatorSubscription {
+  statusKey: 'active' | 'pending' | 'ended';
+}
 
-// KPI metrics
-const total = computed(() => subscriptions.value.length);
-const active = computed(() => subscriptions.value.filter((s) => uiStatus(s) === 'active').length);
-const pending = computed(() => subscriptions.value.filter((s) => uiStatus(s) === 'pending').length);
-const lifetimeRevenue = computed(() =>
-  subscriptions.value.reduce((sum, s) => sum + s.totalAmount, 0),
+const normalized = computed<Row[]>(() =>
+  subscriptions.value.map((s) => ({
+    ...s,
+    statusKey: uiStatus(s),
+  })),
 );
-
-const revenueToggle = ref<'week' | 'month'>('week');
-const weekRevenue = computed(() => {
-  const now = Date.now();
-  const weekStart = now - 7 * 24 * 3600 * 1000;
-  return subscriptions.value
-    .filter((s) => (s.endDate ?? 0) * 1000 >= weekStart)
-    .reduce((sum, s) => sum + s.totalAmount, 0);
-});
-const monthRevenue = computed(() => {
-  const now = Date.now();
-  const monthStart = now - 30 * 24 * 3600 * 1000;
-  return subscriptions.value
-    .filter((s) => (s.endDate ?? 0) * 1000 >= monthStart)
-    .reduce((sum, s) => sum + s.totalAmount, 0);
-});
-const periodRevenue = computed(() =>
-  revenueToggle.value === 'week' ? weekRevenue.value : monthRevenue.value,
-);
-
-const lifetimeTrend = computed(() => [0, lifetimeRevenue.value]);
 
 // filtering and sorting
 const filtered = computed(() => {
-  let arr = subscriptions.value.slice();
+  let arr = normalized.value.slice();
   if (search.value) {
     const term = search.value.toLowerCase();
     arr = arr.filter((s) => {
@@ -318,9 +336,9 @@ const filtered = computed(() => {
       );
     });
   }
-  arr = arr.filter((s) => selectedFrequencies.value.includes(freqKey(s)));
+  arr = arr.filter((s) => selectedFrequencies.value.includes(s.frequency));
   if (selectedStatus.value !== 'any') {
-    arr = arr.filter((s) => uiStatus(s) === selectedStatus.value);
+    arr = arr.filter((s) => s.statusKey === selectedStatus.value);
   }
   if (tierFilter.value) arr = arr.filter((s) => s.tierId === tierFilter.value);
 
@@ -333,19 +351,94 @@ const filtered = computed(() => {
   }
   return arr;
 });
+const rows = filtered;
+
 const grouped = computed(() => {
-  const groups: Record<'weekly' | 'biweekly' | 'monthly', CreatorSubscription[]> = {
+  const groups: Record<'weekly' | 'biweekly' | 'monthly', Row[]> = {
     weekly: [],
     biweekly: [],
     monthly: [],
   };
   filtered.value.forEach((s) => {
-    groups[freqKey(s)].push(s);
+    groups[s.frequency].push(s);
   });
   return groups;
 });
 
-const rows = filtered;
+// KPI metrics
+const total = computed(() => rows.value.length);
+const active = computed(
+  () => rows.value.filter((s) => s.statusKey === 'active').length,
+);
+const pending = computed(
+  () => rows.value.filter((s) => s.statusKey === 'pending').length,
+);
+const lifetimeRevenue = computed(() =>
+  rows.value.reduce((sum, s) => sum + s.totalAmount, 0),
+);
+
+const revenueToggle = ref<'week' | 'month'>('week');
+const weekRevenue = computed(() => {
+  const now = Date.now();
+  const weekStart = now - 7 * 24 * 3600 * 1000;
+  return rows.value
+    .filter((s) => (s.endDate ?? 0) * 1000 >= weekStart)
+    .reduce((sum, s) => sum + s.totalAmount, 0);
+});
+const monthRevenue = computed(() => {
+  const now = Date.now();
+  const monthStart = now - 30 * 24 * 3600 * 1000;
+  return rows.value
+    .filter((s) => (s.endDate ?? 0) * 1000 >= monthStart)
+    .reduce((sum, s) => sum + s.totalAmount, 0);
+});
+const periodRevenue = computed(() =>
+  revenueToggle.value === 'week' ? weekRevenue.value : monthRevenue.value,
+);
+
+const lifetimeTrend = computed(() => [0, lifetimeRevenue.value]);
+
+// charts
+const frequencyLabels = computed(() => [
+  t('CreatorSubscribers.frequency.weekly'),
+  t('CreatorSubscribers.frequency.biweekly'),
+  t('CreatorSubscribers.frequency.monthly'),
+]);
+const frequencySeries = computed(() => {
+  const counts = { weekly: 0, biweekly: 0, monthly: 0 };
+  rows.value.forEach((r) => {
+    counts[r.frequency as 'weekly' | 'biweekly' | 'monthly']++;
+  });
+  return [counts.weekly, counts.biweekly, counts.monthly];
+});
+
+const statusLabels = computed(() => [
+  t('CreatorSubscribers.status.active'),
+  t('CreatorSubscribers.status.pending'),
+  t('CreatorSubscribers.status.ended'),
+]);
+const statusSeries = computed(() => {
+  const counts = { active: 0, pending: 0, ended: 0 };
+  rows.value.forEach((r) => {
+    counts[r.statusKey]++;
+  });
+  return [counts.active, counts.pending, counts.ended];
+});
+
+const subsToggle = ref<'week' | 'month'>('week');
+const newSubsSeries = computed(() => {
+  const days = subsToggle.value === 'week' ? 7 : 30;
+  const now = Date.now() / 1000;
+  const arr = Array(days).fill(0);
+  rows.value.forEach((r) => {
+    if (!r.startDate) return;
+    const diff = Math.floor((now - r.startDate) / (24 * 60 * 60));
+    if (diff >= 0 && diff < days) {
+      arr[days - diff - 1]++;
+    }
+  });
+  return arr;
+});
 
 function keyLabel(key: string) {
   const map: Record<string, string> = {
@@ -382,10 +475,6 @@ function openSubscriber(sub: CreatorSubscription) {
   drawer.value = true;
 }
 
-function freqKey(sub: CreatorSubscription): 'weekly' | 'biweekly' | 'monthly' {
-  return daysToFrequency(sub.intervalDays || 30);
-}
-
 function uiStatus(
   sub: CreatorSubscription,
 ): 'active' | 'pending' | 'ended' {
@@ -393,35 +482,6 @@ function uiStatus(
   if (sub.startDate && sub.startDate > now) return 'pending';
   if (sub.endDate && sub.endDate < now) return 'ended';
   return 'active';
-}
-
-function nextIn(sub: CreatorSubscription): string {
-  if (!sub.nextRenewal) return '—';
-  const diff = sub.nextRenewal * 1000 - Date.now();
-  if (diff <= 0) return '—';
-  const day = 24 * 60 * 60 * 1000;
-  const hour = 60 * 60 * 1000;
-  const days = Math.floor(diff / day);
-  const hours = Math.floor((diff % day) / hour);
-  return `${days}d ${hours}h`;
-}
-
-function progress(sub: CreatorSubscription): number {
-  if (!sub.nextRenewal) return 0;
-  const end = sub.nextRenewal * 1000;
-  const period = sub.intervalDays * 24 * 60 * 60 * 1000;
-  const start = end - period;
-  const now = Date.now();
-  if (now <= start) return 0;
-  if (now >= end) return 1;
-  return (now - start) / period;
-}
-
-function amountPerInterval(sub: CreatorSubscription): string {
-  if (sub.receivedPeriods > 0) {
-    return formatCurrency(sub.totalAmount / sub.receivedPeriods);
-  }
-  return '—';
 }
 
 function formatCurrency(amount: number) {
