@@ -1585,9 +1585,19 @@ export default {
       exportSelected: "Export selected",
       filters: "Filters",
     },
+    toolbar: {
+      searchPlaceholder: "Search",
+      frequency: "Frequency",
+      status: "Status",
+      tier: "Tier",
+      sort: "Sort",
+      compact: "Compact",
+      exportCsv: "Export CSV",
+    },
     status: {
       active: "Aktif",
       pending: "Beklemede",
+      ended: "Ended",
     },
     summary: {
       subscribers: "Subscribers",
@@ -1595,6 +1605,7 @@ export default {
       pending: "Pending",
       receivedPeriods: "Received periods",
       revenue: "Revenue",
+      thisWeek: "this week",
       thisMonth: "this month",
     },
     periodsText: "{received} of {total} periods",
@@ -1605,5 +1616,23 @@ export default {
     nextRenewal: "Renews on {date}",
     noData: "No subscribers yet",
     shareProfile: "Share your profile",
+  },
+  SubscriberDrawer: {
+    tabs: {
+      overview: "Overview",
+      payments: "Payments",
+      notes: "Notes",
+    },
+    actions: {
+      dm: "DM",
+      copyNpub: "Copy npub",
+      copyLud16: "Copy lud16",
+      openProfile: "Profile",
+      cancel: "Cancel",
+    },
+    notifications: {
+      note_saved: "Note saved",
+      note_save_failed: "Failed to save note",
+    },
   },
 };

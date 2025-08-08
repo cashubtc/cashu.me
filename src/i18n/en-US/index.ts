@@ -1672,9 +1672,19 @@ export const messages = {
       exportSelected: "Export selected",
       filters: "Filters",
     },
+    toolbar: {
+      searchPlaceholder: "Search",
+      frequency: "Frequency",
+      status: "Status",
+      tier: "Tier",
+      sort: "Sort",
+      compact: "Compact",
+      exportCsv: "Export CSV",
+    },
     status: {
       active: "Active",
       pending: "Pending",
+      ended: "Ended",
     },
     summary: {
       subscribers: "Subscribers",
@@ -1682,6 +1692,7 @@ export const messages = {
       pending: "Pending",
       receivedPeriods: "Received periods",
       revenue: "Revenue",
+      thisWeek: "this week",
       thisMonth: "this month",
     },
     periodsText: "{received} of {total} periods",
@@ -1701,6 +1712,24 @@ export const messages = {
       export_success: "Subscribers exported",
       export_failed: "Failed to export subscribers",
       dm_not_ready: "Messenger not ready",
+    },
+  },
+  SubscriberDrawer: {
+    tabs: {
+      overview: "Overview",
+      payments: "Payments",
+      notes: "Notes",
+    },
+    actions: {
+      dm: "DM",
+      copyNpub: "Copy npub",
+      copyLud16: "Copy lud16",
+      openProfile: "Profile",
+      cancel: "Cancel",
+    },
+    notifications: {
+      note_saved: "Note saved",
+      note_save_failed: "Failed to save note",
     },
   },
   restore: {
