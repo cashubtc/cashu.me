@@ -1,492 +1,293 @@
 <template>
-  <q-page class="q-pa-md">
-    <div v-if="loading" class="q-gutter-md">
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <q-skeleton v-for="n in 3" :key="n" type="QCard" class="h-24" />
-      </div>
-      <q-skeleton v-for="n in 3" :key="n" class="h-8" />
+  <!-- TOOLBAR (labels are plain text, not broken i18n keys) -->
+  <div class="row items-end q-col-gutter-md q-mt-md">
+    <div class="col-12 col-sm-6 col-md-4">
+      <q-input dense v-model="state.query" label="Search (name / npub / nip05)" clearable>
+        <template #prepend><q-icon name="search" /></template>
+      </q-input>
     </div>
-    <template v-else>
-      <!-- KPI cards -->
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <KpiCard
-          :title="t('CreatorSubscribers.summary.subscribers')"
-          :value="total"
-        />
-        <KpiCard
-          :title="t('CreatorSubscribers.summary.active')"
-          :value="active"
-          :diff="pending"
-        />
-        <KpiCard
-          :title="t('CreatorSubscribers.summary.revenue')"
-          :value="formatCurrency(lifetimeRevenue)"
-        >
-          <Sparkline :data="lifetimeTrend" />
-        </KpiCard>
-        <KpiCard
-          :title="t('CreatorSubscribers.summary.thisPeriod')"
-          :value="formatCurrency(periodRevenue)"
-        >
-          <template #caption>
-            <q-btn-group dense>
-              <q-btn
-                size="sm"
-                flat
-                :color="revenueToggle === 'week' ? 'primary' : 'grey-6'"
-                @click="revenueToggle = 'week'"
-              >
-                {{ t('CreatorSubscribers.summary.thisWeek') }}
-              </q-btn>
-              <q-btn
-                size="sm"
-                flat
-                :color="revenueToggle === 'month' ? 'primary' : 'grey-6'"
-                @click="revenueToggle = 'month'"
-              >
-                {{ t('CreatorSubscribers.summary.thisMonth') }}
-              </q-btn>
-            </q-btn-group>
-          </template>
-        </KpiCard>
+
+    <div class="col-12 col-sm-6 col-md-4">
+      <div class="text-caption text-grey-5 q-mb-xs">Frequency</div>
+      <div class="row items-center q-gutter-xs">
+        <q-chip clickable :color="state.freq.has('weekly')?'primary':''" outline @click="toggleFreq('weekly')">Weekly</q-chip>
+        <q-chip clickable :color="state.freq.has('biweekly')?'primary':''" outline @click="toggleFreq('biweekly')">Bi-weekly</q-chip>
+        <q-chip clickable :color="state.freq.has('monthly')?'primary':''" outline @click="toggleFreq('monthly')">Monthly</q-chip>
+      </div>
+    </div>
+
+    <div class="col-12 col-sm-6 col-md-2">
+      <q-select dense :options="['any','active','pending','ended']" v-model="state.status" label="Status"/>
+    </div>
+
+    <div class="col-6 col-sm-3 col-md-2">
+      <q-select dense :options="tierOptions" v-model="state.tier" label="Tier"/>
+    </div>
+
+    <div class="col-6 col-sm-3 col-md-2">
+      <q-select dense :options="[{label:'Next renewal',value:'next'},{label:'First seen',value:'first'},{label:'Lifetime sats',value:'amount'}]"
+                map-options emit-value v-model="state.sort" label="Sort by"/>
+    </div>
+
+    <div class="col-6 col-sm-3 col-md-2">
+      <q-toggle v-model="state.compact" label="Compact"/>
+    </div>
+
+    <div class="col-6 col-sm-3 col-md-2">
+      <q-btn outline color="grey-5" icon="download" label="Export CSV" @click="exportCsv"/>
+    </div>
+  </div>
+
+  <!-- KPI rail -->
+  <div class="row q-col-gutter-md q-mt-lg">
+    <div class="col-12 col-sm-6 col-lg-3">
+      <q-card class="sub-card"><q-card-section>
+        <div class="text-caption text-grey-5">Subscribers</div>
+        <div class="text-h5">{{ kpis.total }}</div>
+      </q-card-section></q-card>
+    </div>
+    <div class="col-12 col-sm-6 col-lg-3">
+      <q-card class="sub-card"><q-card-section>
+        <div class="text-caption text-grey-5">Active</div>
+        <div class="text-h5">{{ kpis.active }}</div>
+        <div class="text-caption text-grey-6">Pending {{ kpis.pending }}</div>
+      </q-card-section></q-card>
+    </div>
+    <div class="col-12 col-sm-6 col-lg-3">
+      <q-card class="sub-card"><q-card-section class="row items-center justify-between">
+        <div>
+          <div class="text-caption text-grey-5">Revenue</div>
+          <div class="text-h5">{{ kpis.revenueLifetime }} sat</div>
+        </div>
+        <!-- tiny sparkline -->
+        <svg width="90" height="28"><path d="M2 20 L20 14 L38 16 L56 10 L74 12 L88 8" stroke="currentColor" fill="none" stroke-width="2"/></svg>
+      </q-card-section></q-card>
+    </div>
+    <div class="col-12 col-sm-6 col-lg-3">
+      <q-card class="sub-card"><q-card-section class="row items-center justify-between">
+        <div>
+          <div class="text-caption text-grey-5">This period</div>
+          <div class="text-h5">{{ kpis.revenueThisPeriod }} sat</div>
+        </div>
+        <div>
+          <q-btn size="sm" :flat="state.period!=='week'" :color="state.period==='week'?'primary':'grey-5'" label="This week" @click="state.period='week'"/>
+          <q-btn size="sm" :flat="state.period!=='month'" :color="state.period==='month'?'primary':'grey-5'" label="This month" class="q-ml-xs" @click="state.period='month'"/>
+        </div>
+      </q-card-section></q-card>
+    </div>
+  </div>
+
+  <!-- Micro charts -->
+  <div class="row q-col-gutter-md q-mt-md">
+    <div class="col-12 col-sm-6 col-lg-3">
+      <q-card class="sub-card"><q-card-section>
+        <div class="text-caption text-grey-5 q-mb-sm">Frequency</div>
+        <svg viewBox="0 0 36 36" width="80">
+          <circle cx="18" cy="18" r="15.915" fill="none" stroke="#2b2f3a" stroke-width="3"/>
+          <circle cx="18" cy="18" r="15.915" fill="none" stroke="#22c55e" stroke-width="3"
+                  :stroke-dasharray="(freqSeries[0]/(freqSeries[0]+freqSeries[1]+freqSeries[2]||1))*100 + ', 100'" />
+        </svg>
+        <div class="text-caption text-grey-6 q-mt-xs">W {{ freqSeries[0] }} • 2W {{ freqSeries[1] }} • M {{ freqSeries[2] }}</div>
+      </q-card-section></q-card>
+    </div>
+
+    <div class="col-12 col-sm-6 col-lg-3">
+      <q-card class="sub-card"><q-card-section>
+        <div class="text-caption text-grey-5 q-mb-sm">Status</div>
+        <div class="text-caption text-grey-6">Active {{ statusSeries[0] }} • Pending {{ statusSeries[1] }} • Ended {{ statusSeries[2] }}</div>
+      </q-card-section></q-card>
+    </div>
+  </div>
+
+  <!-- GROUPED CARDS (always renders; no VirtualScroll yet) -->
+  <div class="q-mt-lg">
+    <div v-for="section in ['weekly','biweekly','monthly']" :key="section" class="q-mb-lg">
+      <div class="row items-center q-mb-sm">
+        <div class="text-subtitle2 text-grey-4">{{ section === 'weekly' ? 'Weekly' : section === 'biweekly' ? 'Bi-weekly' : 'Monthly' }}</div>
+        <q-space />
+        <div class="text-caption text-grey-6">{{ grouped[section].length }}</div>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <div class="flex flex-col items-center">
-          <MiniDonut :series="frequencySeries" :labels="frequencyLabels" />
-          <div class="text-caption q-mt-xs">
-            {{ t('CreatorSubscribers.charts.frequency') }}
-          </div>
-        </div>
-        <div class="flex flex-col items-center">
-          <MiniDonut :series="statusSeries" :labels="statusLabels" />
-          <div class="text-caption q-mt-xs">
-            {{ t('CreatorSubscribers.charts.status') }}
-          </div>
-        </div>
-        <div class="flex flex-col items-center w-full">
-          <MiniBar :series="newSubsSeries" class="w-full" />
-          <div class="text-caption q-mt-xs flex items-center gap-1">
-            <span>{{ t('CreatorSubscribers.charts.newSubs') }}</span>
-            <q-btn-group dense>
-              <q-btn
-                size="sm"
-                flat
-                :color="subsToggle === 'week' ? 'primary' : 'grey-6'"
-                @click="subsToggle = 'week'"
-              >
-                {{ t('CreatorSubscribers.summary.thisWeek') }}
-              </q-btn>
-              <q-btn
-                size="sm"
-                flat
-                :color="subsToggle === 'month' ? 'primary' : 'grey-6'"
-                @click="subsToggle = 'month'"
-              >
-                {{ t('CreatorSubscribers.summary.thisMonth') }}
-              </q-btn>
-            </q-btn-group>
-          </div>
-        </div>
-      </div>
+      <div class="row q-col-gutter-md">
+        <div v-for="r in grouped[section]" :key="r.subscriptionId" class="col-12 col-sm-6 col-lg-4">
+          <q-card :class="['sub-card', { compact: state.compact }]">
+            <q-card-section class="row items-center no-wrap">
+              <q-avatar rounded class="bg-grey-8 text-grey-2">{{ (r.displayName || r.subscriberNpub).slice(0,2).toUpperCase() }}</q-avatar>
+              <div class="q-ml-md">
+                <div class="text-body1 ellipsis">{{ r.displayName || r.subscriberNpub }}</div>
+                <div class="text-caption text-grey-5 ellipsis">{{ r.subscriberNpub }}</div>
+              </div>
+              <q-space/>
+              <q-badge outline :color="uiStatus(r)==='active' ? 'positive' : uiStatus(r)==='pending' ? 'warning' : 'grey-6'">
+                {{ uiStatus(r) }}
+              </q-badge>
+            </q-card-section>
 
-      <!-- toolbar -->
-      <div class="flex flex-wrap items-center gap-2 mb-6">
-        <q-input
-          v-model="search"
-          dense
-          clearable
-          debounce="200"
-          placeholder="Search"
-        >
-          <template #prepend>
-            <q-icon name="search" />
-          </template>
-        </q-input>
+            <q-card-section class="q-pt-none">
+              <div class="row items-center q-gutter-sm">
+                <q-chip dense color="deep-purple-5" text-color="white">{{ r.tierName || 'Unknown' }}</q-chip>
+                <q-chip dense outline>{{ section }}</q-chip>
+              </div>
 
-        <div class="flex items-center gap-1">
-          <q-chip
-            v-for="f in frequenciesOptions"
-            :key="f.value"
-            clickable
-            color="primary"
-            :text-color="selectedFrequencies.includes(f.value) ? 'white' : 'primary'"
-            :outline="!selectedFrequencies.includes(f.value)"
-            @click="toggleFrequency(f.value)"
-          >
-            {{ f.label }}
-          </q-chip>
-        </div>
+              <div class="row items-center justify-between q-mt-sm">
+                <div class="text-body2">
+                  {{ (r.amountPerInterval ?? '—') }}<span class="text-caption"> sat / {{ section==='weekly'?'wk':section==='biweekly'?'2wk':'mo' }}</span>
+                </div>
+                <div class="text-caption text-grey-5">renews in {{ nextInStr(r.nextRenewal) }}</div>
+              </div>
 
-        <div class="flex items-center gap-1">
-          <q-chip
-            v-for="s in statusOptions"
-            :key="s.value"
-            clickable
-            color="primary"
-            :text-color="selectedStatus === s.value ? 'white' : 'primary'"
-            :outline="selectedStatus !== s.value"
-            @click="selectedStatus = s.value"
-          >
-            {{ s.label }}
-          </q-chip>
-        </div>
-
-        <q-select
-          v-model="tierFilter"
-          :options="tierOptions"
-          dense
-          clearable
-          emit-value
-          map-options
-          placeholder="Tier"
-          style="min-width: 120px"
-        />
-
-        <q-select
-          v-model="sort"
-          :options="sortOptions"
-          dense
-          emit-value
-          map-options
-          placeholder="Sort"
-          style="min-width: 120px"
-        />
-
-        <q-toggle v-model="compact" label="Compact" />
-
-        <q-btn flat icon="download" :disable="rows.length === 0" @click="exportCsv" />
-      </div>
-
-      <!-- grouped sections -->
-      <div v-for="(list, key) in grouped" :key="key" class="mb-8">
-        <h6 class="q-my-md">{{ keyLabel(key) }}</h6>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <SubscriberCard
-            v-for="item in list"
-            :key="item.subscriptionId"
-            :sub="item"
-            :profile="profilesById[item.subscriptionId]"
-            :compact="compact"
-            @select="selectSubscriber(item)"
-            @open="openSubscriber(item)"
-          />
+              <q-linear-progress :value="progress(r)" color="purple" class="q-mt-xs"/>
+              <div class="text-caption text-grey-6 q-mt-xs">total {{ r.totalAmount ?? 0 }} sat</div>
+            </q-card-section>
+          </q-card>
         </div>
       </div>
 
-      <SubscriberDrawer
-        v-if="current"
-        v-model="drawer"
-        :sub="current"
-        :profile="currentProfile"
-      />
-    </template>
-  </q-page>
+      <div v-if="grouped[section].length === 0" class="text-caption text-grey-6 q-pt-md">No {{ section }} subscribers.</div>
+    </div>
+  </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
-import { storeToRefs } from 'pinia';
-import { useI18n } from 'vue-i18n';
-import SubscriberCard from 'components/subscribers/SubscriberCard.vue';
-import SubscriberDrawer from 'components/subscribers/SubscriberDrawer.vue';
-import KpiCard from 'components/subscribers/KpiCard.vue';
-import Sparkline from 'components/subscribers/Sparkline.vue';
-import MiniDonut from 'components/subscribers/MiniDonut.vue';
-import MiniBar from 'components/subscribers/MiniBar.vue';
-import { useCreatorSubscriptionsStore, type CreatorSubscription } from 'stores/creatorSubscriptions';
-import { downloadCsv } from 'src/utils/subscriberCsv';
-import type { NDKUserProfile as Profile } from '@nostr-dev-kit/ndk';
-import { useNostrProfiles } from 'src/composables/useNostrProfiles';
+import { computed, reactive } from 'vue'
+import { useCreatorSubscriptionsStore } from 'src/stores/creatorSubscriptions'
+import { daysToFrequency } from 'src/constants/subscriptionFrequency'
 
-const { t } = useI18n();
-const creatorSubscriptionsStore = useCreatorSubscriptionsStore();
-const { subscriptions, loading } = storeToRefs(creatorSubscriptionsStore);
+const store = useCreatorSubscriptionsStore()
 
-// search term
-const search = ref('');
+// ---------- Filters/state ----------
+const state = reactive({
+  query: '',
+  freq: new Set<string>(),            // 'weekly'|'biweekly'|'monthly'
+  status: 'any' as 'any'|'active'|'pending'|'ended',
+  tier: 'all' as 'all' | string,
+  sort: 'next' as 'next'|'first'|'amount',
+  compact: false,
+  period: 'month' as 'week'|'month'
+})
 
-// frequency chips
-const frequenciesOptions = [
-  { label: t('CreatorSubscribers.frequency.weekly'), value: 'weekly' },
-  { label: t('CreatorSubscribers.frequency.biweekly'), value: 'biweekly' },
-  { label: t('CreatorSubscribers.frequency.monthly'), value: 'monthly' },
-];
-const selectedFrequencies = ref<string[]>(frequenciesOptions.map((o) => o.value));
-function toggleFrequency(val: string) {
-  const idx = selectedFrequencies.value.indexOf(val);
-  if (idx === -1) selectedFrequencies.value.push(val);
-  else selectedFrequencies.value.splice(idx, 1);
+const rows = computed(() => store.subscriptions ?? [])
+const now = computed(() => Math.floor(Date.now()/1000))
+
+function normalizeFreq(r: any) {
+  const key = (r.frequency || daysToFrequency(r.intervalDays || 30) || '').toLowerCase()
+  return key === 'biweekly' ? 'biweekly' : key === 'weekly' ? 'weekly' : 'monthly'
+}
+function uiStatus(r: any) {
+  if (r.status === 'pending') return 'pending'
+  const ended = !!r.endDate && r.endDate <= now.value
+  return ended ? 'ended' : (r.status === 'active' ? 'active' : 'ended')
+}
+function nextInStr(sec?: number) {
+  if (!sec) return '—'
+  const diff = Math.max(0, sec - now.value)
+  const d = Math.floor(diff / 86400), h = Math.floor((diff % 86400)/3600)
+  return d ? `${d}d ${h}h` : `${h}h`
+}
+function progress(r: any) {
+  if (!r.nextRenewal) return 0
+  const days = r.intervalDays || (normalizeFreq(r)==='weekly'?7:normalizeFreq(r)==='biweekly'?14:30)
+  const end = r.nextRenewal * 1000
+  const start = end - days*86400000
+  const ratio = (Date.now() - start) / (end - start)
+  return Math.max(0, Math.min(1, ratio))
 }
 
-// status chips
-const statusOptions = [
-  { label: t('CreatorSubscribers.status.any'), value: 'any' },
-  { label: t('CreatorSubscribers.status.active'), value: 'active' },
-  { label: t('CreatorSubscribers.status.pending'), value: 'pending' },
-  { label: t('CreatorSubscribers.status.ended'), value: 'ended' },
-];
-const selectedStatus = ref<'any' | 'active' | 'pending' | 'ended'>('any');
-
-// tier filter
-const tierFilter = ref<string | null>(null);
+// ---------- Filtering/sorting ----------
 const tierOptions = computed(() => {
-  const map = new Map<string, string>();
-  subscriptions.value.forEach((s) => map.set(s.tierId, s.tierName));
-  return Array.from(map, ([value, label]) => ({ label, value }));
-});
+  const set = new Set<string>()
+  rows.value.forEach(r => set.add(r.tierName || 'Unknown'))
+  return ['all', ...Array.from(set)]
+})
 
-// sort select
-const sortOptions = [
-  { label: t('CreatorSubscribers.sort.next'), value: 'next' },
-  { label: t('CreatorSubscribers.sort.first'), value: 'first' },
-  { label: t('CreatorSubscribers.sort.amount'), value: 'amount' },
-];
-const sort = ref('next');
-
-const compact = ref(false);
-
-const profiles = useNostrProfiles();
-const profilesById = computed(() => {
-  const map: Record<string, Profile | undefined> = {};
-  subscriptions.value.forEach((s) => {
-    map[s.subscriptionId] = profiles.get(s.subscriberNpub);
-  });
-  return map;
-});
-
-function truncateNpub(npub: string) {
-  return npub.slice(0, 8) + '...' + npub.slice(-4);
-}
-
-const displayName = computed(() => {
-  const map: Record<string, string> = {};
-  subscriptions.value.forEach((s) => {
-    const p = profilesById.value[s.subscriptionId];
-    let name = '';
-    if (p?.display_name) name = p.display_name;
-    else if (p?.name) name = p.name;
-    else if ((p as any)?.displayName) name = (p as any).displayName;
-    else if (p?.nip05) name = p.nip05.split('@')[0];
-    else name = truncateNpub(s.subscriberNpub);
-    map[s.subscriptionId] = name;
-  });
-  return map;
-});
-
-const nip05 = computed(() => {
-  const map: Record<string, string> = {};
-  subscriptions.value.forEach((s) => {
-    const p = profilesById.value[s.subscriptionId];
-    map[s.subscriptionId] = p?.nip05 || truncateNpub(s.subscriberNpub);
-  });
-  return map;
-});
-
-const lud16 = computed(() => {
-  const map: Record<string, string> = {};
-  subscriptions.value.forEach((s) => {
-    const p = profilesById.value[s.subscriptionId];
-    map[s.subscriptionId] = p?.lud16 || '';
-  });
-  return map;
-});
-
-const about = computed(() => {
-  const map: Record<string, string> = {};
-  subscriptions.value.forEach((s) => {
-    const p = profilesById.value[s.subscriptionId];
-    map[s.subscriptionId] = p?.about || '';
-  });
-  return map;
-});
-
-const avatar = computed(() => {
-  const map: Record<string, string> = {};
-  subscriptions.value.forEach((s) => {
-    const p = profilesById.value[s.subscriptionId];
-    map[s.subscriptionId] = (p as any)?.picture || '';
-  });
-  return map;
-});
-interface Row extends CreatorSubscription {
-  statusKey: 'active' | 'pending' | 'ended';
-}
-
-const normalized = computed<Row[]>(() =>
-  subscriptions.value.map((s) => ({
-    ...s,
-    statusKey: uiStatus(s),
-  })),
-);
-
-// filtering and sorting
 const filtered = computed(() => {
-  let arr = normalized.value.slice();
-  if (search.value) {
-    const term = search.value.toLowerCase();
-    arr = arr.filter((s) => {
-      const name = displayName.value[s.subscriptionId]?.toLowerCase() || '';
-      const npub = s.subscriberNpub.toLowerCase();
-      const nip = nip05.value[s.subscriptionId]?.toLowerCase() || '';
-      return (
-        name.includes(term) ||
-        npub.includes(term) ||
-        nip.includes(term)
-      );
-    });
+  const q = state.query.trim().toLowerCase()
+  const arr = rows.value.filter((r) => {
+    const statusOk = state.status === 'any' || uiStatus(r) === state.status
+    const freqOk = !state.freq.size || state.freq.has(normalizeFreq(r))
+    const tierOk = state.tier === 'all' || (r.tierName || 'Unknown') === state.tier
+    const qOk = !q || String(r.subscriberNpub).toLowerCase().includes(q) || String(r.tierName||'').toLowerCase().includes(q)
+    return statusOk && freqOk && tierOk && qOk
+  })
+  switch (state.sort) {
+    case 'amount': return arr.sort((a,b) => (b.totalAmount||0) - (a.totalAmount||0))
+    case 'first':  return arr.sort((a,b) => (a.startDate||0) - (b.startDate||0))
+    default:       return arr.sort((a,b) => (a.nextRenewal||0) - (b.nextRenewal||0))
   }
-  arr = arr.filter((s) => selectedFrequencies.value.includes(s.frequency));
-  if (selectedStatus.value !== 'any') {
-    arr = arr.filter((s) => s.statusKey === selectedStatus.value);
-  }
-  if (tierFilter.value) arr = arr.filter((s) => s.tierId === tierFilter.value);
-
-  if (sort.value === 'amount') {
-    arr.sort((a, b) => b.totalAmount - a.totalAmount);
-  } else if (sort.value === 'first') {
-    arr.sort((a, b) => (a.startDate ?? 0) - (b.startDate ?? 0));
-  } else {
-    arr.sort((a, b) => (a.nextRenewal ?? 0) - (b.nextRenewal ?? 0));
-  }
-  return arr;
-});
-const rows = filtered;
+})
 
 const grouped = computed(() => {
-  const groups: Record<'weekly' | 'biweekly' | 'monthly', Row[]> = {
-    weekly: [],
-    biweekly: [],
-    monthly: [],
-  };
-  filtered.value.forEach((s) => {
-    groups[s.frequency].push(s);
-  });
-  return groups;
-});
+  const g: Record<'weekly'|'biweekly'|'monthly', any[]> = { weekly:[], biweekly:[], monthly:[] }
+  filtered.value.forEach(r => g[normalizeFreq(r) as keyof typeof g].push(r))
+  return g
+})
 
-// KPI metrics
-const total = computed(() => rows.value.length);
-const active = computed(
-  () => rows.value.filter((s) => s.statusKey === 'active').length,
-);
-const pending = computed(
-  () => rows.value.filter((s) => s.statusKey === 'pending').length,
-);
-const lifetimeRevenue = computed(() =>
-  rows.value.reduce((sum, s) => sum + s.totalAmount, 0),
-);
-
-const revenueToggle = ref<'week' | 'month'>('week');
-const weekRevenue = computed(() => {
-  const now = Date.now();
-  const weekStart = now - 7 * 24 * 3600 * 1000;
-  return rows.value
-    .filter((s) => (s.endDate ?? 0) * 1000 >= weekStart)
-    .reduce((sum, s) => sum + s.totalAmount, 0);
-});
-const monthRevenue = computed(() => {
-  const now = Date.now();
-  const monthStart = now - 30 * 24 * 3600 * 1000;
-  return rows.value
-    .filter((s) => (s.endDate ?? 0) * 1000 >= monthStart)
-    .reduce((sum, s) => sum + s.totalAmount, 0);
-});
-const periodRevenue = computed(() =>
-  revenueToggle.value === 'week' ? weekRevenue.value : monthRevenue.value,
-);
-
-const lifetimeTrend = computed(() => [0, lifetimeRevenue.value]);
-
-// charts
-const frequencyLabels = computed(() => [
-  t('CreatorSubscribers.frequency.weekly'),
-  t('CreatorSubscribers.frequency.biweekly'),
-  t('CreatorSubscribers.frequency.monthly'),
-]);
-const frequencySeries = computed(() => {
-  const counts = { weekly: 0, biweekly: 0, monthly: 0 };
-  rows.value.forEach((r) => {
-    counts[r.frequency as 'weekly' | 'biweekly' | 'monthly']++;
-  });
-  return [counts.weekly, counts.biweekly, counts.monthly];
-});
-
-const statusLabels = computed(() => [
-  t('CreatorSubscribers.status.active'),
-  t('CreatorSubscribers.status.pending'),
-  t('CreatorSubscribers.status.ended'),
-]);
-const statusSeries = computed(() => {
-  const counts = { active: 0, pending: 0, ended: 0 };
-  rows.value.forEach((r) => {
-    counts[r.statusKey]++;
-  });
-  return [counts.active, counts.pending, counts.ended];
-});
-
-const subsToggle = ref<'week' | 'month'>('week');
-const newSubsSeries = computed(() => {
-  const days = subsToggle.value === 'week' ? 7 : 30;
-  const now = Date.now() / 1000;
-  const arr = Array(days).fill(0);
-  rows.value.forEach((r) => {
-    if (!r.startDate) return;
-    const diff = Math.floor((now - r.startDate) / (24 * 60 * 60));
-    if (diff >= 0 && diff < days) {
-      arr[days - diff - 1]++;
-    }
-  });
-  return arr;
-});
-
-function keyLabel(key: string) {
-  const map: Record<string, string> = {
-    weekly: t('CreatorSubscribers.frequency.weekly'),
-    biweekly: t('CreatorSubscribers.frequency.biweekly'),
-    monthly: t('CreatorSubscribers.frequency.monthly'),
-  };
-  return map[key] || key;
-}
-
+// CSV
 function exportCsv() {
-  const rows = filtered.value.map((s) => ({
-    ...s,
-    npub: s.subscriberNpub,
-    displayName: displayName.value[s.subscriptionId],
-    nip05: nip05.value[s.subscriptionId],
-    lud16: lud16.value[s.subscriptionId],
-    tier: s.tierName,
-  }));
-  downloadCsv(rows);
+  const header = ['subscriptionId','displayName','npub','tier','frequency','status','nextRenewal','intervalDays','totalAmount','startDate','endDate']
+  const lines = [header.join(',')]
+  filtered.value.forEach(r => {
+    const line = [
+      r.subscriptionId,
+      JSON.stringify(r.displayName ?? ''),
+      r.subscriberNpub,
+      JSON.stringify(r.tierName || 'Unknown'),
+      normalizeFreq(r),
+      uiStatus(r),
+      r.nextRenewal ?? '',
+      r.intervalDays ?? '',
+      r.totalAmount ?? 0,
+      r.startDate ?? '',
+      r.endDate ?? ''
+    ].join(',')
+    lines.push(line)
+  })
+  const blob = new Blob([lines.join('\n')], {type:'text/csv;charset=utf-8;'})
+  const url = URL.createObjectURL(blob); const a = document.createElement('a')
+  a.href = url; a.download = `subscribers-${Date.now()}.csv`; a.click()
+  URL.revokeObjectURL(url)
 }
 
-// drawer
-const drawer = ref(false);
-const current = ref<CreatorSubscription | null>(null);
-const currentProfile = computed(() =>
-  current.value ? profilesById.value[current.value.subscriptionId] : undefined,
-);
-function selectSubscriber(sub: CreatorSubscription) {
-  current.value = sub;
-}
-function openSubscriber(sub: CreatorSubscription) {
-  current.value = sub;
-  drawer.value = true;
+// chips helpers
+function toggleFreq(key: 'weekly'|'biweekly'|'monthly') {
+  state.freq.has(key) ? state.freq.delete(key) : state.freq.add(key)
 }
 
-function uiStatus(
-  sub: CreatorSubscription,
-): 'active' | 'pending' | 'ended' {
-  const now = Date.now() / 1000;
-  if (sub.startDate && sub.startDate > now) return 'pending';
-  if (sub.endDate && sub.endDate < now) return 'ended';
-  return 'active';
-}
+// ---------- KPIs & charts ----------
+const kpis = computed(() => {
+  const total = rows.value.length
+  const active = rows.value.filter(r => uiStatus(r) === 'active').length
+  const pending = rows.value.filter(r => uiStatus(r) === 'pending').length
+  const revenueLifetime = rows.value.reduce((s,r)=> s + (r.totalAmount||0), 0)
 
-function formatCurrency(amount: number) {
-  return new Intl.NumberFormat(undefined, { style: 'currency', currency: 'USD' }).format(
-    amount / 100,
-  );
-}
+  const days = state.period === 'week' ? 7 : 30
+  const cut = now.value - days*86400
+  const revenueThisPeriod = rows.value
+    .filter(r => (r.startDate||0) >= cut || (r.nextRenewal||0) >= cut)
+    .reduce((s,r)=> s + (r.amountPerInterval||0), 0)
+
+  return { total, active, pending, revenueLifetime, revenueThisPeriod }
+})
+
+const freqSeries = computed(() => {
+  const c = { weekly:0, biweekly:0, monthly:0 }
+  rows.value.forEach(r => c[normalizeFreq(r)]++)
+  return [c.weekly, c.biweekly, c.monthly]
+})
+const statusSeries = computed(() => {
+  const c = { active:0, pending:0, ended:0 }
+  rows.value.forEach(r => c[uiStatus(r)]++)
+  return [c.active, c.pending, c.ended]
+})
 </script>
+
+<style scoped>
+.sub-card {
+  border: 1px solid #2b2f3a;
+  border-radius: 16px;
+  background: rgba(20,22,28,0.8);
+}
+.sub-card.compact .q-card__section:first-of-type { padding: 8px 12px; }
+.sub-card.compact .q-card__section:nth-of-type(2) { padding: 8px 12px 12px; }
+</style>
+
