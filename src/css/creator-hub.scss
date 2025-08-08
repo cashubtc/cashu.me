@@ -13,6 +13,19 @@
   background: linear-gradient(135deg, #334155 0%, #1e293b 100%);
 }
 
+/* Soft gradient backgrounds */
+.gradient-soft-blue {
+  background: linear-gradient(135deg, #93c5fd 0%, #bfdbfe 100%);
+}
+.gradient-soft-green {
+  background: linear-gradient(135deg, #a7f3d0 0%, #d1fae5 100%);
+}
+
+/* Subtle border helpers */
+.border-subtle {
+  border: var(--border-subtle);
+}
+
 /* Rounded card helpers */
 .card-rounded-16 {
   border-radius: 16px;
@@ -23,14 +36,17 @@
 
 /* Chip variants */
 .chip-outline {
-  border: 1px solid var(--q-color-grey-5);
+  border: var(--border-subtle);
   background-color: transparent;
   color: var(--q-color-grey-8);
 }
-.chip-filled {
+.chip-solid {
   background-color: var(--q-color-grey-8);
   color: #fff;
   border: none;
+}
+.chip-filled {
+  @extend .chip-solid;
 }
 
 /* Compact spacing utilities */

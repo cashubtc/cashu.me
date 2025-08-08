@@ -10,6 +10,8 @@ $h3-size: 20px;
 $body-size: 16px;
 $caption-size: 14px;
 $spacing-base: 8px;
+$border-subtle-light: #e5e7eb;
+$border-subtle-dark: #374151;
 
 :root {
   --color-primary-pink: #ff2d75;
@@ -18,4 +20,6 @@ $spacing-base: 8px;
   --color-accent-green: #15c972;
   --color-accent-orange: #ff9f0a;
   --font-family-base: "Inter", system-ui, sans-serif;
+  --border-subtle-light: #e5e7eb;
+  --border-subtle-dark: #374151;
 }
