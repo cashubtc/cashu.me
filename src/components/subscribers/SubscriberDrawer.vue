@@ -4,6 +4,7 @@
     side="right"
     bordered
     overlay
+    :transition-duration="100"
     @keydown.esc.prevent="close"
   >
     <q-toolbar>
