@@ -489,7 +489,7 @@ export const useNostrStore = defineStore("nostr", {
     return {
       connected: false,
       pubkey: "",
-      relays: useSettingsStore().defaultNostrRelays.value ?? ([] as string[]),
+      relays: useSettingsStore().defaultNostrRelays ?? ([] as string[]),
       signerType: SignerType.SEED,
       nip07signer: {} as NDKNip07Signer,
       nip46Token: "",
@@ -1636,7 +1636,7 @@ export async function signEvent(
 }
 
 export async function publishEvent(event: NostrEvent): Promise<void> {
-  const relays = useSettingsStore().defaultNostrRelays.value;
+  const relays = useSettingsStore().defaultNostrRelays;
   const pool = new SimplePool();
   try {
     await Promise.any(pool.publish(relays, event));
@@ -1653,7 +1653,7 @@ export async function subscribeToNostr(
   const relayUrls =
     relays && relays.length > 0
       ? relays
-      : useSettingsStore().defaultNostrRelays.value;
+      : useSettingsStore().defaultNostrRelays;
   if (!relayUrls || relayUrls.length === 0) {
     console.warn('[nostr] subscribeMany called with empty relay list');
     return false;

@@ -51,10 +51,10 @@ export async function safeConnect(ndk: NDK): Promise<Error | null> {
 async function createReadOnlyNdk(): Promise<NDK> {
   const settings = useSettingsStore();
   if (!Array.isArray(settings.defaultNostrRelays?.value)) {
-    settings.defaultNostrRelays.value = DEFAULT_RELAYS;
+    settings.defaultNostrRelays = DEFAULT_RELAYS;
   }
   const userRelays = Array.isArray(settings.defaultNostrRelays?.value)
-    ? settings.defaultNostrRelays.value
+    ? settings.defaultNostrRelays
     : [];
   const relays = userRelays.length ? userRelays : DEFAULT_RELAYS;
   const healthy = await filterHealthyRelays(relays);
@@ -72,8 +72,8 @@ async function createReadOnlyNdk(): Promise<NDK> {
 
 export async function createSignedNdk(signer: NDKSigner): Promise<NDK> {
   const settings = useSettingsStore();
-  const relays = settings.defaultNostrRelays.value.length
-    ? settings.defaultNostrRelays.value
+  const relays = settings.defaultNostrRelays.length
+    ? settings.defaultNostrRelays
     : DEFAULT_RELAYS;
   const ndk = new NDK({ explicitRelayUrls: relays });
   mergeDefaultRelays(ndk);
@@ -99,10 +99,10 @@ export async function createNdk(): Promise<NDK> {
 
   const settings = useSettingsStore();
   if (!Array.isArray(settings.defaultNostrRelays?.value)) {
-    settings.defaultNostrRelays.value = DEFAULT_RELAYS;
+    settings.defaultNostrRelays = DEFAULT_RELAYS;
   }
   const userRelays = Array.isArray(settings.defaultNostrRelays?.value)
-    ? settings.defaultNostrRelays.value
+    ? settings.defaultNostrRelays
     : [];
   const relays = userRelays.length ? userRelays : DEFAULT_RELAYS;
   const healthy = await filterHealthyRelays(relays);

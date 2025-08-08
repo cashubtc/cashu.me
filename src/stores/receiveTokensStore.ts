@@ -178,22 +178,22 @@ export const useReceiveTokensStore = defineStore("receiveTokensStore", {
       const uiStore = useUiStore();
       if (this.scanningCard === false) {
         try {
-          this.ndef = new window.NDEFReader();
-          this.controller = new AbortController();
-          const signal = this.controller.signal;
-          this.ndef
+          (this as any).ndef = new (window as any).NDEFReader();
+          (this as any).controller = new AbortController();
+          const signal = (this as any).controller.signal;
+          (this as any).ndef
             .scan({ signal })
             .then(() => {
               debug("> Scan started");
 
-              this.ndef.addEventListener("readingerror", () => {
+              (this as any).ndef.addEventListener("readingerror", () => {
                 console.error("Cannot read data from the NFC tag.");
                 notifyError("Cannot read data from the NFC tag.");
-                this.controller.abort();
+                (this as any).controller.abort();
                 this.scanningCard = false;
               });
 
-              this.ndef.addEventListener(
+              (this as any).ndef.addEventListener(
                 "reading",
                 ({ message, serialNumber }) => {
                   try {
@@ -250,7 +250,7 @@ export const useReceiveTokensStore = defineStore("receiveTokensStore", {
                     console.error(`Something went wrong! ${err}`);
                     notifyError(`Something went wrong! ${err}`);
                   }
-                  this.controller.abort();
+                  (this as any).controller.abort();
                   this.scanningCard = false;
                 },
               );
@@ -265,7 +265,7 @@ export const useReceiveTokensStore = defineStore("receiveTokensStore", {
           notifyError(`NFC error: ${error.message}`);
         }
       } else {
-        this.controller.abort();
+        (this as any).controller.abort();
         this.scanningCard = false;
       }
     },

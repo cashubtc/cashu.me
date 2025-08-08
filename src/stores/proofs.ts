@@ -1,7 +1,8 @@
 import { debug } from "src/js/logger";
 import { ref } from "vue";
 import { defineStore } from "pinia";
-import { useMintsStore, WalletProof } from "./mints";
+import { useMintsStore } from "./mints";
+import type { WalletProof } from "src/types/proofs";
 import { cashuDb, CashuDexie, useDexieStore } from "./dexie";
 import { useBucketsStore, DEFAULT_BUCKET_ID } from "./buckets";
 import { useTokensStore } from "./tokens";

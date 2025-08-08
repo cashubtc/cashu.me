@@ -202,8 +202,8 @@ export const useCreatorsStore = defineStore("creators", {
       const settings = useSettingsStore();
       const relayUrls = Array.from(
         new Set([
-          ...(Array.isArray(settings.defaultNostrRelays.value)
-            ? settings.defaultNostrRelays.value
+          ...(Array.isArray(settings.defaultNostrRelays)
+            ? settings.defaultNostrRelays
             : []),
           ...DEFAULT_RELAYS,
         ])

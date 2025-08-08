@@ -75,10 +75,10 @@ export const useMessengerStore = defineStore("messenger", {
   state: () => {
     const settings = useSettingsStore();
     if (!Array.isArray(settings.defaultNostrRelays?.value)) {
-      settings.defaultNostrRelays.value = DEFAULT_RELAYS;
+      settings.defaultNostrRelays = DEFAULT_RELAYS;
     }
     const userRelays = Array.isArray(settings.defaultNostrRelays?.value)
-      ? settings.defaultNostrRelays.value
+      ? settings.defaultNostrRelays
       : [];
     const relays = userRelays.length ? userRelays : DEFAULT_RELAYS;
     return {
@@ -212,7 +212,7 @@ export const useMessengerStore = defineStore("messenger", {
           );
           if (success && event) {
             msg.id = event.id;
-            msg.created_at = event.created_at;
+            msg.created_at = (event.created_at ?? Math.floor(Date.now()/1000));
             msg.status = "sent";
             this.pushOwnMessage(event as any);
             return { success: true, event } as any;
@@ -718,7 +718,7 @@ export const useMessengerStore = defineStore("messenger", {
             );
             if (success && event) {
               msg.id = event.id;
-              msg.created_at = event.created_at;
+              msg.created_at = (event.created_at ?? Math.floor(Date.now()/1000));
               msg.status = "sent";
               this.pushOwnMessage(event as any);
               const idx = this.sendQueue.indexOf(msg);

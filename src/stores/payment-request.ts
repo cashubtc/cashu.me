@@ -121,7 +121,7 @@ export const usePRStore = defineStore("payment-request", {
       }
     },
     async parseAndPayPaymentRequest(request: PaymentRequest, tokenStr: string) {
-      const transports: PaymentRequestTransport[] = request.transport;
+      const transports: PaymentRequestTransport[] = request.transport ?? [];
       for (const transport of transports) {
         if (transport.type == PaymentRequestTransportType.NOSTR) {
           await this.payNostrPaymentRequest(request, transport, tokenStr);

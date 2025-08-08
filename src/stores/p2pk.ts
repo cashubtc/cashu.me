@@ -6,7 +6,7 @@ import { generateSecretKey, getPublicKey, nip19 } from "nostr-tools";
 import { ensureCompressed } from "src/utils/ecash";
 import { bytesToHex, randomBytes } from "@noble/hashes/utils";
 import { sha256 } from "@noble/hashes/sha256";
-import { WalletProof } from "stores/mints";
+import type { WalletProof } from "src/types/proofs";
 import token from "src/js/token";
 import { useWalletStore } from "./wallet";
 import { useProofsStore } from "./proofs";

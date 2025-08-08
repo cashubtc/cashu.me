@@ -85,7 +85,7 @@ export const useNWCStore = defineStore("nwc", {
     ],
     relays: useLocalStorage<string[]>(
       "cashu.nwc.relays",
-      useSettingsStore().defaultNostrRelays.value
+      useSettingsStore().defaultNostrRelays
     ),
     blocking: false,
     subscriptions: [] as NDKSubscription[],

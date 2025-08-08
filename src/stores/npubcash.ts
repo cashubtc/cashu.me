@@ -15,7 +15,8 @@ import {
 } from "../js/notify";
 import { Proof } from "@cashu/cashu-ts";
 import token from "../js/token";
-import { WalletProof, useMintsStore } from "./mints";
+import { useMintsStore } from "./mints";
+import type { WalletProof } from "src/types/proofs";
 import { useTokensStore } from "../stores/tokens";
 import { useNostrStore } from "../stores/nostr";
 import { useNdk } from "src/composables/useNdk";
