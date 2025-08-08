@@ -50,7 +50,7 @@ import { useSendTokensStore } from "./sendTokensStore";
 import { usePRStore } from "./payment-request";
 import token from "../js/token";
 import { HistoryToken } from "./tokens";
-import { DEFAULT_BUCKET_ID } from "./buckets";
+import { DEFAULT_BUCKET_ID } from "@/constants/buckets";
 import { useDmChatsStore } from "./dmChats";
 import { cashuDb, type LockedToken } from "./dexie";
 import { v4 as uuidv4 } from "uuid";

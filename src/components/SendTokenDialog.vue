@@ -646,7 +646,8 @@ import {
   getEncodedTokenV4,
   getEncodedToken,
 } from "@cashu/cashu-ts";
-import { DEFAULT_BUCKET_ID, useBucketsStore } from "src/stores/buckets";
+import { useBucketsStore } from "src/stores/buckets";
+import { DEFAULT_BUCKET_ID } from "@/constants/buckets";
 
 import { mapActions, mapState, mapWritableState } from "pinia";
 import ChooseMint from "components/ChooseMint.vue";

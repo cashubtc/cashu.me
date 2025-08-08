@@ -1,9 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import {
-  useBucketsStore,
-  DEFAULT_BUCKET_ID,
-  DEFAULT_BUCKET_NAME,
-} from "../../../src/stores/buckets";
+import { useBucketsStore } from "../../../src/stores/buckets";
+import { DEFAULT_BUCKET_ID, DEFAULT_BUCKET_NAME } from "@/constants/buckets";
 import { useProofsStore } from "../../../src/stores/proofs";
 import { useTokensStore } from "../../../src/stores/tokens";
 import { cashuDb } from "../../../src/stores/dexie";

@@ -15,7 +15,7 @@ import {
 import { Token } from "@cashu/cashu-ts";
 import { useSwapStore } from "./swap";
 import { Clipboard } from "@capacitor/clipboard";
-import { DEFAULT_BUCKET_ID } from "./buckets";
+import { DEFAULT_BUCKET_ID } from "@/constants/buckets";
 import { cashuDb } from "./dexie";
 
 let redemptionQueue: Promise<any> = Promise.resolve();

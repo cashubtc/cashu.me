@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { useP2PKStore } from 'stores/p2pk';
 import { useWalletStore } from 'stores/wallet';
-import { DEFAULT_BUCKET_ID } from 'stores/buckets';
+import { DEFAULT_BUCKET_ID } from '@/constants/buckets';
 
 let mintsStoreMock: any;
 let proofsStoreMock: any;

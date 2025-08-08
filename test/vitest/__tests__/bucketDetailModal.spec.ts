@@ -10,6 +10,9 @@ vi.mock('../../../src/stores/proofs', () => ({
 
 vi.mock('../../../src/stores/buckets', () => ({
   useBucketsStore: () => ({ bucketList: [{ id: 'b1', name: 'Bucket' }] }),
+}));
+
+vi.mock('../../../src/constants/buckets', () => ({
   DEFAULT_BUCKET_ID: 'b1',
 }));
 

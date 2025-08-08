@@ -316,7 +316,8 @@ import { nip19 } from "nostr-tools";
 import ChooseMint from "src/components/ChooseMint.vue";
 import TokenInformation from "components/TokenInformation.vue";
 
-import { useBucketsStore, DEFAULT_BUCKET_ID } from "src/stores/buckets";
+import { useBucketsStore } from "src/stores/buckets";
+import { DEFAULT_BUCKET_ID } from "@/constants/buckets";
 
 import { mapActions, mapState, mapWritableState } from "pinia";
 import {

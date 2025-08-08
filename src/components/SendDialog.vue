@@ -97,7 +97,7 @@ import {
   Coins as CoinsIcon,
 } from "lucide-vue-next";
 import { notifyWarning } from "src/js/notify";
-import { DEFAULT_BUCKET_ID } from "src/stores/buckets";
+import { DEFAULT_BUCKET_ID } from "@/constants/buckets";
 
 export default defineComponent({
   name: "SendDialog",

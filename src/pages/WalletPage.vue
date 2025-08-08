@@ -299,7 +299,7 @@ import { useLockedTokensRedeemWorker } from "src/stores/lockedTokensRedeemWorker
 import { useSubscriptionRedeemWorker } from "src/stores/subscriptionRedeemWorker";
 import { useNutzapSendWorker } from "src/stores/nutzapSendWorker";
 import { notifyError, notify, notifyWarning } from "../js/notify";
-import { DEFAULT_BUCKET_ID } from "src/stores/buckets";
+import { DEFAULT_BUCKET_ID } from "@/constants/buckets";
 
 import {
   X as XIcon,

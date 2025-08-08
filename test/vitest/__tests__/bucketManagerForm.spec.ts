@@ -19,9 +19,12 @@ vi.mock("../../../src/stores/buckets", () => ({
     editBucket: vi.fn(),
     deleteBucket: vi.fn(),
   }),
-  DEFAULT_BUCKET_ID: "b1",
   COLOR_PALETTE: ["#fff"],
   hashColor: () => "#fff",
+}));
+
+vi.mock("../../../src/constants/buckets", () => ({
+  DEFAULT_BUCKET_ID: "b1",
 }));
 
 vi.mock("../../../src/stores/mints", () => ({
