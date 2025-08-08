@@ -1,12 +1,15 @@
 <template>
-  <q-card class="rounded-lg bg-white dark:bg-grey-9 text-dark dark:text-white">
+  <q-card class="kpi-card bg-grey-10 text-white">
     <q-card-section>
       <div class="flex items-start justify-between">
         <div>
-          <div class="text-subtitle1">{{ title }}</div>
-          <div class="text-h6">{{ value }}</div>
+          <div class="text-body1">{{ title }}</div>
+          <div class="text-h5">{{ value }}</div>
         </div>
-        <div v-if="diff !== undefined" :class="[diff >= 0 ? 'text-positive' : 'text-negative', 'text-subtitle2']">
+        <div
+          v-if="diff !== undefined"
+          :class="[diff >= 0 ? 'text-positive' : 'text-negative', 'text-subtitle2']"
+        >
           {{ diff >= 0 ? '+' : '' }}{{ diff }}
         </div>
       </div>
@@ -29,7 +32,13 @@ const props = defineProps<{
 </script>
 
 <style scoped>
-.rounded-lg {
-  border-radius: 0.5rem;
+.kpi-card {
+  border: 1px solid #2b2f3a;
+  border-radius: 16px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.kpi-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
 }
 </style>
