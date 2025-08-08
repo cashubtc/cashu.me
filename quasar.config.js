@@ -39,6 +39,9 @@ export default configure(function (/* ctx */) {
 
     // Full list of options: https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#build
     build: {
+      alias: {
+        '@': path.resolve(__dirname, 'src'),
+      },
       optimizeDeps: { include: ['process', 'buffer'] },
       target: {
         browser: ["esnext"],
