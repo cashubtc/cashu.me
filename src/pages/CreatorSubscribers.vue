@@ -125,7 +125,11 @@
         </q-virtual-scroll>
       </div>
 
-      <SubscriberDrawer v-model="drawer" :subscription="current" />
+      <SubscriberDrawer
+        v-model="drawer"
+        :subscription="current"
+        :profile="currentProfile"
+      />
     </template>
   </q-page>
 </template>
@@ -136,7 +140,7 @@ import { storeToRefs } from 'pinia';
 import { useI18n } from 'vue-i18n';
 import { useDebounceFn } from '@vueuse/core';
 import SubscriberCard from 'components/SubscriberCard.vue';
-import SubscriberDrawer from 'components/SubscriberDrawer.vue';
+import SubscriberDrawer from 'components/subscribers/SubscriberDrawer.vue';
 import KpiCard from 'components/subscribers/KpiCard.vue';
 import Sparkline from 'components/subscribers/Sparkline.vue';
 import { useCreatorSubscriptionsStore, type CreatorSubscription } from 'stores/creatorSubscriptions';
@@ -389,6 +393,9 @@ function exportCsv() {
 // drawer
 const drawer = ref(false);
 const current = ref<CreatorSubscription | null>(null);
+const currentProfile = computed(() =>
+  current.value ? profilesById.value[current.value.subscriptionId] : undefined,
+);
 function openSubscriber(sub: CreatorSubscription) {
   current.value = sub;
   drawer.value = true;
