@@ -11,7 +11,7 @@
     "build": "quasar build",
     "build:pwa": "quasar build -m pwa",
     "quasar": "quasar",
-    "lint": "eslint .",
+    "lint": "eslint . --no-eslintrc --config eslint.config.js",
     "format": "prettier --write .",
     "checkformat": "prettier --check .",
     "test": "node --experimental-vm-modules node_modules/vitest/vitest.mjs",
