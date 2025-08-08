@@ -1,0 +1,59 @@
+$ pnpm run build:pwa
+
+[stdout]
+
+> cashu@0.0.1 build:pwa /home/simulacraproductions/Desktop/Simulacra_Productions/KA/CASHU/cashu.mecustomized
+> quasar build -m pwa
+
+
+ .d88888b.
+d88P" "Y88b
+888     888
+888     888 888  888  8888b.  .d8888b   8888b.  888d888
+888     888 888  888     "88b 88K          "88b 888P"
+888 Y8b 888 888  888 .d888888 "Y8888b. .d888888 888
+Y88b.Y8b88P Y88b 888 888  888      X88 888  888 888
+ "Y888888"   "Y88888 "Y888888  88888P' "Y888888 888
+       Y8b
+
+
+ Build mode............. pwa
+ Pkg quasar............. v2.18.1
+ Pkg @quasar/app-vite... v2.3.0
+ Pkg vite............... v6.2.0
+ Debugging.............. no
+ Publishing............. no
+
+ App • Using quasar.config.js in "esm" format
+
+ ELIFECYCLE  Command failed with exit code 1.
+
+
+[stderr]
+✘ [ERROR] Expected identifier but found "true"
+
+    quasar.config.js:76:29:
+      76 │           globals: { Buffer: true, global: true, process: true },
+         ╵                              ~~~~
+
+Error: Build failed with 1 error:
+quasar.config.js:76:29: ERROR: Expected identifier but found "true"
+    at failureErrorWithLog (/home/simulacraproductions/Desktop/Simulacra_Productions/KA/CASHU/cashu.mecustomized/node_modules/.pnpm/esbuild@0.25.8/node_modules/esbuild/lib/main.js:1467:15)
+    at /home/simulacraproductions/Desktop/Simulacra_Productions/KA/CASHU/cashu.mecustomized/node_modules/.pnpm/esbuild@0.25.8/node_modules/esbuild/lib/main.js:926:25
+    at runOnEndCallbacks (/home/simulacraproductions/Desktop/Simulacra_Productions/KA/CASHU/cashu.mecustomized/node_modules/.pnpm/esbuild@0.25.8/node_modules/esbuild/lib/main.js:1307:45)
+    at buildResponseToResult (/home/simulacraproductions/Desktop/Simulacra_Productions/KA/CASHU/cashu.mecustomized/node_modules/.pnpm/esbuild@0.25.8/node_modules/esbuild/lib/main.js:924:7)
+    at /home/simulacraproductions/Desktop/Simulacra_Productions/KA/CASHU/cashu.mecustomized/node_modules/.pnpm/esbuild@0.25.8/node_modules/esbuild/lib/main.js:951:16
+    at responseCallbacks.<computed> (/home/simulacraproductions/Desktop/Simulacra_Productions/KA/CASHU/cashu.mecustomized/node_modules/.pnpm/esbuild@0.25.8/node_modules/esbuild/lib/main.js:603:9)
+    at handleIncomingPacket (/home/simulacraproductions/Desktop/Simulacra_Productions/KA/CASHU/cashu.mecustomized/node_modules/.pnpm/esbuild@0.25.8/node_modules/esbuild/lib/main.js:658:12)
+    at Socket.readFromStdout (/home/simulacraproductions/Desktop/Simulacra_Productions/KA/CASHU/cashu.mecustomized/node_modules/.pnpm/esbuild@0.25.8/node_modules/esbuild/lib/main.js:581:7)
+    at Socket.emit (node:events:524:28)
+    at addChunk (node:internal/streams/readable:561:12) {
+  errors: [Getter/Setter],
+  warnings: [Getter/Setter]
+}
+
+ App • ⚠️   FAIL  Could not compile the quasar.config file because it has errors.
+
+
+
+[rc] 1
