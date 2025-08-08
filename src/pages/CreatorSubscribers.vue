@@ -116,25 +116,23 @@
 
         <q-toggle v-model="compact" label="Compact" />
 
-        <q-btn flat icon="download" :disable="filtered.all.length === 0" @click="exportCsv" />
+        <q-btn flat icon="download" :disable="rows.length === 0" @click="exportCsv" />
       </div>
 
       <!-- grouped sections -->
       <div v-for="(list, key) in grouped" :key="key" class="mb-8">
         <h6 class="q-my-md">{{ keyLabel(key) }}</h6>
-        <q-virtual-scroll
-          :items="list"
-          :item-size="compact ? 56 : 92"
-          v-slot="{ item }"
-        >
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
           <SubscriberCard
+            v-for="item in list"
+            :key="item.subscriptionId"
             :sub="item"
             :profile="profilesById[item.subscriptionId]"
             :compact="compact"
             @select="selectSubscriber(item)"
             @open="openSubscriber(item)"
           />
-        </q-virtual-scroll>
+        </div>
       </div>
 
       <SubscriberDrawer
@@ -161,6 +159,7 @@ import { useCreatorSubscriptionsStore, type CreatorSubscription } from 'stores/c
 import { downloadCsv } from 'src/utils/subscriberCsv';
 import type { NDKUserProfile as Profile } from '@nostr-dev-kit/ndk';
 import { useNostrProfiles } from 'src/composables/useNostrProfiles';
+import { daysToFrequency } from 'src/constants/subscriptionFrequency';
 
 const { t } = useI18n();
 const creatorSubscriptionsStore = useCreatorSubscriptionsStore();
@@ -330,7 +329,7 @@ const filtered = computed(() => {
         s.tierName.toLowerCase().includes(term),
     );
   }
-  arr = arr.filter((s) => selectedFrequencies.value.includes(s.frequency));
+  arr = arr.filter((s) => selectedFrequencies.value.includes(freqKey(s)));
   arr = arr.filter((s) => selectedStatuses.value.includes(uiStatus(s)));
   if (tierFilter.value) arr = arr.filter((s) => s.tierId === tierFilter.value);
 
@@ -341,20 +340,21 @@ const filtered = computed(() => {
   } else {
     arr.sort((a, b) => (a.nextRenewal ?? 0) - (b.nextRenewal ?? 0));
   }
-  return {
-    all: arr,
-    weekly: arr.filter((s) => s.frequency === 'weekly'),
-    biweekly: arr.filter((s) => s.frequency === 'biweekly'),
-    monthly: arr.filter((s) => s.frequency === 'monthly'),
-  };
+  return arr;
 });
-const grouped = computed(() => ({
-  weekly: filtered.value.weekly,
-  biweekly: filtered.value.biweekly,
-  monthly: filtered.value.monthly,
-}));
+const grouped = computed(() => {
+  const groups: Record<'weekly' | 'biweekly' | 'monthly', CreatorSubscription[]> = {
+    weekly: [],
+    biweekly: [],
+    monthly: [],
+  };
+  filtered.value.forEach((s) => {
+    groups[freqKey(s)].push(s);
+  });
+  return groups;
+});
 
-const rows = computed(() => filtered.value.all);
+const rows = filtered;
 
 function keyLabel(key: string) {
   const map: Record<string, string> = {
@@ -366,7 +366,7 @@ function keyLabel(key: string) {
 }
 
 function exportCsv() {
-  const rows = filtered.value.all.map((s) => ({
+  const rows = filtered.value.map((s) => ({
     ...s,
     npub: s.subscriberNpub,
     displayName: displayName.value[s.subscriptionId],
@@ -391,11 +391,15 @@ function openSubscriber(sub: CreatorSubscription) {
   drawer.value = true;
 }
 
+function freqKey(sub: CreatorSubscription): 'weekly' | 'biweekly' | 'monthly' {
+  return daysToFrequency(sub.intervalDays || 30);
+}
+
 function uiStatus(
   sub: CreatorSubscription,
 ): 'active' | 'pending' | 'ended' {
-  if (sub.status === 'pending') return 'pending';
   const now = Date.now() / 1000;
+  if (sub.startDate && sub.startDate > now) return 'pending';
   if (sub.endDate && sub.endDate < now) return 'ended';
   return 'active';
 }
