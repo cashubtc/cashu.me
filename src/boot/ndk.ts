@@ -122,7 +122,6 @@ export async function rebuildNdk(
   relays: string[],
   signer?: NDKSigner
 ): Promise<NDK> {
-  const { default: NDK } = await import("@nostr-dev-kit/ndk");
   const ndk = new NDK({ explicitRelayUrls: relays });
   mergeDefaultRelays(ndk);
   if (signer) ndk.signer = signer;
