@@ -9,28 +9,34 @@
     <template v-else>
       <!-- KPI cards -->
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <q-card>
-          <q-card-section>
-            <div class="text-subtitle1">{{ t('CreatorSubscribers.summary.subscribers') }}</div>
-            <div class="text-h6">{{ total }}</div>
-          </q-card-section>
-        </q-card>
-        <q-card>
-          <q-card-section>
-            <div class="text-subtitle1">{{ t('CreatorSubscribers.summary.active') }}</div>
-            <div class="text-h6">{{ active }}</div>
-          </q-card-section>
-        </q-card>
-        <q-card>
-          <q-card-section>
-            <div class="text-subtitle1">{{ t('CreatorSubscribers.summary.revenue') }}</div>
-            <div class="text-h6">{{ formatCurrency(lifetimeRevenue) }}</div>
-            <div class="text-caption">
-              {{ revenueToggle === 'week' ? t('CreatorSubscribers.summary.thisWeek') : t('CreatorSubscribers.summary.thisMonth') }}:
-              {{ formatCurrency(periodRevenue) }}
-            </div>
-          </q-card-section>
-        </q-card>
+        <KpiCard
+          :title="t('CreatorSubscribers.summary.subscribers')"
+          :value="total"
+          :diff="0"
+        >
+          <Sparkline :data="totalTrend" />
+        </KpiCard>
+        <KpiCard
+          :title="t('CreatorSubscribers.summary.active')"
+          :value="active"
+          :diff="0"
+        >
+          <Sparkline :data="activeTrend" />
+        </KpiCard>
+        <KpiCard
+          :title="t('CreatorSubscribers.summary.revenue')"
+          :value="formatCurrency(lifetimeRevenue)"
+        >
+          <template #caption>
+            {{
+              revenueToggle === 'week'
+                ? t('CreatorSubscribers.summary.thisWeek')
+                : t('CreatorSubscribers.summary.thisMonth')
+            }}:
+            {{ formatCurrency(periodRevenue) }}
+          </template>
+          <Sparkline :data="revenueTrend" />
+        </KpiCard>
       </div>
 
       <!-- toolbar -->
@@ -131,6 +137,8 @@ import { useI18n } from 'vue-i18n';
 import { useDebounceFn } from '@vueuse/core';
 import SubscriberCard from 'components/SubscriberCard.vue';
 import SubscriberDrawer from 'components/SubscriberDrawer.vue';
+import KpiCard from 'components/subscribers/KpiCard.vue';
+import Sparkline from 'components/subscribers/Sparkline.vue';
 import { useCreatorSubscriptionsStore, type CreatorSubscription } from 'stores/creatorSubscriptions';
 import { exportSubscribers } from 'src/utils/subscriberCsv';
 import { useNostrStore } from 'stores/nostr';
@@ -327,6 +335,10 @@ const monthRevenue = computed(() => {
 const periodRevenue = computed(() =>
   revenueToggle.value === 'week' ? weekRevenue.value : monthRevenue.value,
 );
+
+const totalTrend = computed(() => [0, total.value]);
+const activeTrend = computed(() => [0, active.value]);
+const revenueTrend = computed(() => [0, periodRevenue.value]);
 
 // filtering and sorting
 const filtered = computed(() => {
