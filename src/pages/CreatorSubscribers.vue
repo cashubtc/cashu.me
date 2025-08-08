@@ -160,8 +160,8 @@ import Sparkline from 'components/subscribers/Sparkline.vue';
 import SubscriptionsCharts from 'components/subscribers/SubscriptionsCharts.vue';
 import { useCreatorSubscriptionsStore, type CreatorSubscription } from 'stores/creatorSubscriptions';
 import { downloadCsv } from 'src/utils/subscriberCsv';
-import { useNostrStore } from 'stores/nostr';
 import type { NDKUserProfile as Profile } from '@nostr-dev-kit/ndk';
+import { useNostrProfiles } from 'src/composables/useNostrProfiles';
 
 const { t } = useI18n();
 const creatorSubscriptionsStore = useCreatorSubscriptionsStore();
@@ -227,61 +227,11 @@ const sort = ref('next');
 
 const compact = ref(false);
 
-// profile caching
-const profileCache = new Map<string, Profile>();
-const profileVersion = ref(0);
-const pendingProfiles = new Set<string>();
-
-function saveProfile(npub: string, profile: Profile) {
-  profileCache.set(npub, profile);
-  try {
-    localStorage.setItem(npub, JSON.stringify(profile));
-  } catch (e) {
-    console.error(e);
-  }
-  profileVersion.value++;
-}
-
-function loadProfile(npub: string): Profile | undefined {
-  const cached = profileCache.get(npub);
-  if (cached) return cached;
-  const stored = localStorage.getItem(npub);
-  if (stored) {
-    try {
-      const parsed = JSON.parse(stored) as Profile;
-      profileCache.set(npub, parsed);
-      return parsed;
-    } catch (e) {
-      console.error(e);
-    }
-  }
-  return undefined;
-}
-
-function ensureProfile(npub: string) {
-  if (loadProfile(npub) || pendingProfiles.has(npub)) return;
-  pendingProfiles.add(npub);
-  const schedule =
-    typeof requestIdleCallback !== 'undefined'
-      ? requestIdleCallback
-      : (cb: any) => setTimeout(cb, 0);
-  schedule(async () => {
-    try {
-      const profile = await useNostrStore().getProfile(npub);
-      if (profile) saveProfile(npub, profile);
-    } finally {
-      pendingProfiles.delete(npub);
-    }
-  });
-}
-
+const profiles = useNostrProfiles();
 const profilesById = computed(() => {
-  profileVersion.value;
   const map: Record<string, Profile | undefined> = {};
   subscriptions.value.forEach((s) => {
-    const p = loadProfile(s.subscriberNpub);
-    if (!p) ensureProfile(s.subscriberNpub);
-    map[s.subscriptionId] = p;
+    map[s.subscriptionId] = profiles.get(s.subscriberNpub);
   });
   return map;
 });
