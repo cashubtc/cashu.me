@@ -1713,23 +1713,31 @@ export const messages = {
       export_failed: "Failed to export subscribers",
       dm_not_ready: "Messenger not ready",
     },
-  },
-  SubscriberDrawer: {
-    tabs: {
-      overview: "Overview",
-      payments: "Payments",
-      notes: "Notes",
-    },
-    actions: {
-      dm: "DM",
-      copyNpub: "Copy npub",
-      copyLud16: "Copy lud16",
-      openProfile: "Profile",
-      cancel: "Cancel",
-    },
-    notifications: {
-      note_saved: "Note saved",
-      note_save_failed: "Failed to save note",
+    drawer: {
+      tabs: {
+        overview: "Overview",
+        payments: "Payments",
+        notes: "Notes",
+      },
+      overview: {
+        nip05: "nip05",
+        lud16: "lud16",
+        about: "about",
+        nextRenewal: "Next renewal",
+        amountPerInterval: "Amount / interval",
+        lifetimeTotal: "Lifetime total",
+        since: "Since",
+      },
+      actions: {
+        dm: "DM",
+        copyNpub: "Copy npub",
+        copyLud16: "Copy lud16",
+        openProfile: "Profile",
+        cancel: "Cancel",
+      },
+      payments: {
+        noPayments: "No payments",
+      },
     },
   },
   restore: {

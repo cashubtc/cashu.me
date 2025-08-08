@@ -14,58 +14,82 @@
     </q-toolbar>
 
     <q-tabs v-model="tab" dense align="justify" class="text-grey-7" active-color="primary">
-      <q-tab name="overview" label="Overview" />
-      <q-tab name="payments" label="Payments" />
-      <q-tab name="notes" label="Notes" />
+      <q-tab name="overview" :label="t('CreatorSubscribers.drawer.tabs.overview')" />
+      <q-tab name="payments" :label="t('CreatorSubscribers.drawer.tabs.payments')" />
+      <q-tab name="notes" :label="t('CreatorSubscribers.drawer.tabs.notes')" />
     </q-tabs>
     <q-separator />
 
     <q-tab-panels v-model="tab" animated>
       <q-tab-panel name="overview" class="q-pa-md">
-        <q-list dense v-if="subscription">
+        <q-list dense v-if="sub">
           <q-item v-if="profile?.nip05">
-            <q-item-section>nip05</q-item-section>
+            <q-item-section>{{ t('CreatorSubscribers.drawer.overview.nip05') }}</q-item-section>
             <q-item-section side>{{ profile.nip05 }}</q-item-section>
           </q-item>
           <q-item v-if="profile?.lud16">
-            <q-item-section>lud16</q-item-section>
+            <q-item-section>{{ t('CreatorSubscribers.drawer.overview.lud16') }}</q-item-section>
             <q-item-section side>{{ profile.lud16 }}</q-item-section>
           </q-item>
           <q-item v-if="profile?.about">
-            <q-item-section>about</q-item-section>
+            <q-item-section>{{ t('CreatorSubscribers.drawer.overview.about') }}</q-item-section>
             <q-item-section side>{{ profile.about }}</q-item-section>
           </q-item>
           <q-item>
-            <q-item-section>Next renewal</q-item-section>
+            <q-item-section>{{ t('CreatorSubscribers.drawer.overview.nextRenewal') }}</q-item-section>
             <q-item-section side>{{ nextRenewal }}</q-item-section>
           </q-item>
           <q-item>
-            <q-item-section>Amount / interval</q-item-section>
+            <q-item-section>{{ t('CreatorSubscribers.drawer.overview.amountPerInterval') }}</q-item-section>
             <q-item-section side>{{ amountPerInterval }}</q-item-section>
           </q-item>
           <q-item>
-            <q-item-section>Lifetime total</q-item-section>
+            <q-item-section>{{ t('CreatorSubscribers.drawer.overview.lifetimeTotal') }}</q-item-section>
             <q-item-section side>{{ lifetimeTotal }}</q-item-section>
           </q-item>
           <q-item>
-            <q-item-section>Since</q-item-section>
+            <q-item-section>{{ t('CreatorSubscribers.drawer.overview.since') }}</q-item-section>
             <q-item-section side>{{ sinceDate }}</q-item-section>
           </q-item>
         </q-list>
 
         <div class="row q-gutter-sm q-mt-md">
-          <q-btn flat dense icon="chat" label="DM" @click="emit('dm')" />
-          <q-btn flat dense icon="content_copy" label="npub" @click="copy(subscription?.subscriberNpub)" />
+          <q-btn
+            flat
+            dense
+            icon="chat"
+            :label="t('CreatorSubscribers.drawer.actions.dm')"
+            @click="emit('dm')"
+          />
           <q-btn
             flat
             dense
             icon="content_copy"
-            label="lud16"
+            :label="t('CreatorSubscribers.drawer.actions.copyNpub')"
+            @click="copy(sub?.subscriberNpub)"
+          />
+          <q-btn
+            flat
+            dense
+            icon="content_copy"
+            :label="t('CreatorSubscribers.drawer.actions.copyLud16')"
             v-if="profile?.lud16"
             @click="copy(profile.lud16)"
           />
-          <q-btn flat dense icon="open_in_new" label="Profile" @click="openProfile" />
-          <q-btn flat dense color="negative" label="Cancel" @click="emit('cancel')" />
+          <q-btn
+            flat
+            dense
+            icon="open_in_new"
+            :label="t('CreatorSubscribers.drawer.actions.openProfile')"
+            @click="emit('openProfile')"
+          />
+          <q-btn
+            flat
+            dense
+            color="negative"
+            :label="t('CreatorSubscribers.drawer.actions.cancel')"
+            @click="emit('cancel')"
+          />
         </div>
       </q-tab-panel>
 
@@ -79,7 +103,9 @@
             <q-item-section>{{ p.date }}</q-item-section>
             <q-item-section side>{{ formatCurrency(p.amount) }}</q-item-section>
           </q-item>
-          <div v-if="payments.length === 0" class="text-caption q-pa-md">No payments</div>
+          <div v-if="payments.length === 0" class="text-caption q-pa-md">
+            {{ t('CreatorSubscribers.drawer.payments.noPayments') }}
+          </div>
         </q-list>
       </q-tab-panel>
 
@@ -94,19 +120,24 @@
 import { computed, ref, watch } from 'vue';
 import { onKeyStroke, useLocalStorage } from '@vueuse/core';
 import { copyToClipboard } from 'quasar';
+import { useI18n } from 'vue-i18n';
 import { cashuDb } from 'stores/dexie';
 import { useUiStore } from 'stores/ui';
 import { useMintsStore } from 'stores/mints';
 import type { CreatorSubscription } from 'stores/creatorSubscriptions';
 import type { NDKUserProfile as Profile } from '@nostr-dev-kit/ndk';
 
-const props = defineProps<{ modelValue: boolean; profile: Profile | null; subscription: CreatorSubscription | null }>();
+const props = defineProps<{ modelValue: boolean; sub: CreatorSubscription; profile?: Profile; notes?: string }>();
 
 const emit = defineEmits<{
   (e: 'update:modelValue', v: boolean): void;
+  (e: 'update:notes', v: string): void;
   (e: 'dm'): void;
   (e: 'cancel'): void;
+  (e: 'openProfile'): void;
 }>();
+
+const { t } = useI18n();
 
 const model = computed({
   get: () => props.modelValue,
@@ -126,32 +157,32 @@ const profileTitle = computed(() => {
   return (
     props.profile?.display_name ||
     props.profile?.name ||
-    props.subscription?.subscriberNpub ||
+    props.sub?.subscriberNpub ||
     ''
   );
 });
 
 const nextRenewal = computed(() => {
-  const ts = props.subscription?.nextRenewal;
+  const ts = props.sub?.nextRenewal;
   if (!ts) return '—';
   return new Date(ts * 1000).toLocaleString();
 });
 
 const amountPerInterval = computed(() => {
-  const s = props.subscription;
+  const s = props.sub;
   if (!s) return '';
   const periodAmount = s.receivedPeriods > 0 ? s.totalAmount / s.receivedPeriods : s.totalAmount;
   return `${formatCurrency(periodAmount)} / ${s.frequency}`;
 });
 
 const lifetimeTotal = computed(() => {
-  const s = props.subscription;
+  const s = props.sub;
   if (!s) return '';
   return formatCurrency(s.totalAmount);
 });
 
 const sinceDate = computed(() => {
-  const ts = props.subscription?.startDate;
+  const ts = props.sub?.startDate;
   if (!ts) return '—';
   return new Date(ts * 1000).toLocaleDateString();
 });
@@ -161,19 +192,12 @@ function copy(text?: string) {
   copyToClipboard(text);
 }
 
-function openProfile() {
-  const npub = props.subscription?.subscriberNpub;
-  if (npub) {
-    window.open(`https://njump.me/${npub}`, '_blank');
-  }
-}
-
 const payments = ref<Array<{ id: string; status: string; date: string; amount: number }>>([]);
 const paymentsLoading = ref(false);
 const originEl = ref<HTMLElement | null>(null);
 
 async function loadPayments() {
-  const id = props.subscription?.subscriptionId;
+  const id = props.sub?.subscriptionId;
   if (!id) {
     payments.value = [];
     return;
@@ -198,7 +222,7 @@ async function loadPayments() {
 }
 
 watch(
-  () => props.subscription?.subscriptionId,
+  () => props.sub?.subscriptionId,
   () => {
     if (model.value) loadPayments();
   },
@@ -213,8 +237,17 @@ watch(model, (v) => {
   }
 });
 
-const storageKey = computed(() => `sub-notes:${props.subscription?.subscriptionId ?? ''}`);
-const notes = useLocalStorage<string>(storageKey, '');
+const storageKey = computed(() => `sub-notes:${props.sub?.subscriptionId ?? ''}`);
+const notes = useLocalStorage<string>(storageKey, props.notes ?? '');
+
+watch(
+  () => props.notes,
+  (v) => {
+    if (v !== undefined) notes.value = v;
+  },
+);
+
+watch(notes, (v) => emit('update:notes', v));
 
 function close() {
   model.value = false;
