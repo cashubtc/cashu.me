@@ -111,9 +111,9 @@ describe('CreatorSubscribers', () => {
         stubs: {
           'q-page': { template: '<div><slot /></div>' },
           SubscriberCard: {
-            props: ['subscription'],
+            props: ['sub', 'profile', 'compact'],
             template:
-              '<div class="subscriber-card">{{ subscription.subscriptionId }} {{ subscription.totalAmount }}</div>',
+              '<div class="subscriber-card">{{ sub.subscriptionId }} {{ sub.totalAmount }}</div>',
           },
           SubscriberDrawer: true,
           KpiCard: true,
