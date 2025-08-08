@@ -131,7 +131,8 @@
 import { defineComponent, ref, computed, onMounted, nextTick } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useQuasar } from 'quasar';
-import { useBucketsStore, DEFAULT_BUCKET_ID } from 'stores/buckets';
+import { useBucketsStore } from 'stores/buckets';
+import { DEFAULT_BUCKET_ID } from '@/constants/buckets';
 import { useMintsStore } from 'stores/mints';
 import { useProofsStore } from 'stores/proofs';
 import { storeToRefs } from 'pinia';

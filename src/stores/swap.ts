@@ -4,7 +4,7 @@ import { defineStore } from "pinia";
 import { PaymentRequest, Proof, Token } from "@cashu/cashu-ts";
 import { Mint, useMintsStore } from "./mints";
 import { useWalletStore } from "./wallet";
-import { DEFAULT_BUCKET_ID } from "./buckets";
+import { DEFAULT_BUCKET_ID } from "@/constants/buckets";
 import { useProofsStore } from "./proofs";
 import { notifyError, notifyWarning } from "../js/notify";
 import token from "src/js/token";

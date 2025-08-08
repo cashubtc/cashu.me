@@ -6,7 +6,7 @@ import { useProofsStore } from "./proofs";
 import { LockedToken } from "./lockedTokens";
 import { useSubscriptionsStore } from "./subscriptions";
 import { useP2PKStore } from "./p2pk";
-import { DEFAULT_BUCKET_ID } from "./buckets";
+import { DEFAULT_BUCKET_ID } from "@/constants/buckets";
 import { ensureCompressed } from "src/utils/ecash";
 import {
   frequencyToDays,

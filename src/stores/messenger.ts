@@ -18,7 +18,7 @@ import { useBucketsStore } from "./buckets";
 import { useLockedTokensStore } from "./lockedTokens";
 import { useNostrStore } from "./nostr";
 import { cashuDb, type LockedToken } from "./dexie";
-import { DEFAULT_BUCKET_ID } from "./buckets";
+import { DEFAULT_BUCKET_ID } from "@/constants/buckets";
 import tokenUtil from "src/js/token";
 import { subscriptionPayload } from "src/utils/receipt-utils";
 import { useCreatorsStore } from "./creators";

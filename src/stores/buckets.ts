@@ -8,6 +8,7 @@ import { useLockedTokensStore } from "./lockedTokens";
 import { ref, watch } from "vue";
 import { notifySuccess } from "src/js/notify";
 import { Bucket, BucketRule } from "src/types/buckets";
+import { DEFAULT_BUCKET_ID, DEFAULT_BUCKET_NAME } from "@/constants/buckets";
 
 export const COLOR_PALETTE = [
   "#ec4899",
@@ -26,10 +27,6 @@ export function hashColor(name: string): string {
   const idx = Math.abs(hash) % COLOR_PALETTE.length;
   return COLOR_PALETTE[idx];
 }
-
-
-export const DEFAULT_BUCKET_ID = "unassigned";
-export const DEFAULT_BUCKET_NAME = "Default";
 
 function ensureDefaultBucket(buckets: { value: Bucket[] }) {
   if (!buckets.value.find((b) => b.id === DEFAULT_BUCKET_ID)) {

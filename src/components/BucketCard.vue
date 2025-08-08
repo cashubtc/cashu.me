@@ -111,7 +111,8 @@
 <script lang="ts">
 import { defineComponent, computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
-import { DEFAULT_BUCKET_ID, hashColor } from "stores/buckets";
+import { hashColor } from "stores/buckets";
+import { DEFAULT_BUCKET_ID } from "@/constants/buckets";
 import { useUiStore } from "stores/ui";
 
 export default defineComponent({

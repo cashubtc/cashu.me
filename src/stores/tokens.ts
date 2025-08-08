@@ -4,7 +4,7 @@ import { defineStore } from "pinia";
 import { PaymentRequest, Proof, Token } from "@cashu/cashu-ts";
 import token from "src/js/token";
 import { DEFAULT_COLOR } from "src/js/constants";
-import { DEFAULT_BUCKET_ID } from "./buckets";
+import { DEFAULT_BUCKET_ID } from "@/constants/buckets";
 import { useProofsStore } from "./proofs";
 
 /**

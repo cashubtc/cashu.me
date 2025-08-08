@@ -5,7 +5,7 @@ import { useP2PKStore } from "./p2pk";
 import { useMintsStore } from "./mints";
 import { useProofsStore } from "./proofs";
 import { useTokensStore } from "./tokens";
-import { DEFAULT_BUCKET_ID } from "./buckets";
+import { DEFAULT_BUCKET_ID } from "@/constants/buckets";
 import token from "src/js/token";
 import { ensureCompressed } from "src/utils/ecash";
 import { MintOperationError } from "@cashu/cashu-ts";

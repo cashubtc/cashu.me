@@ -20,7 +20,7 @@ import type { WalletProof } from "src/types/proofs";
 import { useTokensStore } from "../stores/tokens";
 import { useNostrStore } from "../stores/nostr";
 import { useNdk } from "src/composables/useNdk";
-import { DEFAULT_BUCKET_ID } from "./buckets";
+import { DEFAULT_BUCKET_ID } from "@/constants/buckets";
 // type NPCConnection = {
 //   walletPublicKey: string,
 //   walletPrivateKey: string,

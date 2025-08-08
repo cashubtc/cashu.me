@@ -4,7 +4,8 @@ import { defineStore } from "pinia";
 import { useMintsStore } from "./mints";
 import type { WalletProof } from "src/types/proofs";
 import { cashuDb, CashuDexie, useDexieStore } from "./dexie";
-import { useBucketsStore, DEFAULT_BUCKET_ID } from "./buckets";
+import { useBucketsStore } from "./buckets";
+import { DEFAULT_BUCKET_ID } from "@/constants/buckets";
 import { useTokensStore } from "./tokens";
 import {
   Proof,

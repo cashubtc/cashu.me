@@ -322,7 +322,8 @@ import { useMintsStore } from "src/stores/mints";
 import { useSettingsStore } from "src/stores/settings";
 import { usePriceStore } from "src/stores/price";
 import { mapActions, mapState, mapWritableState } from "pinia";
-import { useBucketsStore, DEFAULT_BUCKET_ID } from "src/stores/buckets";
+import { useBucketsStore } from "src/stores/buckets";
+import { DEFAULT_BUCKET_ID } from "@/constants/buckets";
 import ChooseMint from "components/ChooseMint.vue";
 import ToggleUnit from "components/ToggleUnit.vue";
 

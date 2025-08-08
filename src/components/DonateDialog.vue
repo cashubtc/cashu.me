@@ -72,7 +72,8 @@
 
 <script lang="ts">
 import { defineComponent, computed, ref } from "vue";
-import { useBucketsStore, DEFAULT_BUCKET_ID } from "stores/buckets";
+import { useBucketsStore } from "stores/buckets";
+import { DEFAULT_BUCKET_ID } from "@/constants/buckets";
 import { useMintsStore } from "stores/mints";
 import { useUiStore } from "stores/ui";
 import { storeToRefs } from "pinia";

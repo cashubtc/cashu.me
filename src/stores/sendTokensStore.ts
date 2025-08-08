@@ -1,7 +1,7 @@
 import { defineStore } from "pinia";
 import { decodePaymentRequest, PaymentRequest } from "@cashu/cashu-ts";
 import { HistoryToken } from "./tokens";
-import { DEFAULT_BUCKET_ID } from "./buckets";
+import { DEFAULT_BUCKET_ID } from "@/constants/buckets";
 
 export const useSendTokensStore = defineStore("sendTokensStore", {
   state: () => ({
