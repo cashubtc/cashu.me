@@ -19,7 +19,7 @@ import { useLockedTokensStore } from "./lockedTokens";
 import { useNostrStore } from "./nostr";
 import { cashuDb, type LockedToken } from "./dexie";
 import { DEFAULT_BUCKET_ID } from "./buckets";
-import token from "src/js/token";
+import tokenUtil from "src/js/token";
 import { subscriptionPayload } from "src/utils/receipt-utils";
 import { useCreatorsStore } from "./creators";
 import { frequencyToDays } from "src/constants/subscriptionFrequency";
@@ -424,12 +424,12 @@ export const useMessengerStore = defineStore("messenger", {
         const payload = JSON.parse(msg.content);
         const sub = parseSubscriptionPaymentPayload(payload);
         if (sub) {
-          const decoded = token.decode(sub.token);
+          const decoded = tokenUtil.decode(sub.token);
           const amount = decoded
-            ? token.getProofs(decoded).reduce((s, p) => s + p.amount, 0)
+            ? tokenUtil.getProofs(decoded).reduce((s, p) => s + p.amount, 0)
             : 0;
           msg.subscriptionPayment = {
-            token: sub.token,
+            tokenString: sub.token,
             subscription_id: payload.subscription_id,
             tier_id: payload.tier_id,
             month_index: payload.month_index,
@@ -471,12 +471,12 @@ export const useMessengerStore = defineStore("messenger", {
         }
         const sub = parseSubscriptionPaymentPayload(payload);
         if (sub) {
-          const decoded = token.decode(sub.token);
+          const decoded = tokenUtil.decode(sub.token);
           const amount = decoded
-            ? token.getProofs(decoded).reduce((s, p) => s + p.amount, 0)
+            ? tokenUtil.getProofs(decoded).reduce((s, p) => s + p.amount, 0)
             : 0;
           subscriptionInfo = {
-            token: sub.token,
+            tokenString: sub.token,
             subscription_id: payload.subscription_id,
             tier_id: payload.tier_id,
             month_index: payload.month_index,
@@ -495,7 +495,7 @@ export const useMessengerStore = defineStore("messenger", {
             )?.name;
           const entry: LockedToken = {
             id: uuidv4(),
-            token: sub.token,
+            tokenString: sub.token,
             amount,
             owner: "creator",
             creatorNpub: myPubkey,
@@ -544,7 +544,7 @@ export const useMessengerStore = defineStore("messenger", {
           tokenPayload = payload;
           const decoded = tokensStore.decodeToken(payload.token);
           if (decoded) {
-            const proofs = token.getProofs(decoded);
+            const proofs = tokenUtil.getProofs(decoded);
             if (proofs.some((p) => p.secret.startsWith("P2PK:"))) {
               const buckets = useBucketsStore();
               let bucket = buckets.bucketList.find(
@@ -560,7 +560,9 @@ export const useMessengerStore = defineStore("messenger", {
                     : proofs.reduce((s, p) => s + p.amount, 0);
                 useLockedTokensStore().addLockedToken({
                   amount,
-                  token: payload.token,
+  tokenString: payload.token,
+
+  token:  payload.token,
                   pubkey: event.pubkey,
                   locktime: payload.unlock_time ?? payload.unlockTime,
                   bucketId: bucket.id,

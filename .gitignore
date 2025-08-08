@@ -38,3 +38,5 @@ yarn-error.log*
 *.bak.*
 # Nested node_modules
 src/**/node_modules/
+dist/
+backups/

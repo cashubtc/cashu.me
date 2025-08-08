@@ -7,7 +7,7 @@ import { ensureCompressed } from "src/utils/ecash";
 import { bytesToHex, randomBytes } from "@noble/hashes/utils";
 import { sha256 } from "@noble/hashes/sha256";
 import type { WalletProof } from "src/types/proofs";
-import token from "src/js/token";
+import tokenUtil from "src/js/token";
 import { useWalletStore } from "./wallet";
 import { useProofsStore } from "./proofs";
 import { useMintsStore } from "./mints";
@@ -310,11 +310,11 @@ export const useP2PKStore = defineStore("p2pk", {
       }
     },
     getTokenPubkey: function (encodedToken: string): string | undefined {
-      const decodedToken = token.decode(encodedToken);
+      const decodedToken = tokenUtil.decode(encodedToken);
       if (!decodedToken) {
         return undefined;
       }
-      const proofs = token.getProofs(decodedToken);
+      const proofs = tokenUtil.getProofs(decodedToken);
       for (const p of proofs) {
         const { pubkey } = this.getSecretP2PKInfo(p.secret);
         if (pubkey) return pubkey;
@@ -322,11 +322,11 @@ export const useP2PKStore = defineStore("p2pk", {
       return undefined;
     },
     getPrivateKeyForP2PKEncodedToken: function (encodedToken: string): string {
-      const decodedToken = token.decode(encodedToken);
+      const decodedToken = tokenUtil.decode(encodedToken);
       if (!decodedToken) {
         return "";
       }
-      const proofs = token.getProofs(decodedToken);
+      const proofs = tokenUtil.getProofs(decodedToken);
       if (!this.isLocked(proofs) || !this.isLockedToUs(proofs)) {
         return "";
       }
@@ -343,11 +343,11 @@ export const useP2PKStore = defineStore("p2pk", {
       return "";
     },
     getTokenLocktime: function (encodedToken: string): number | undefined {
-      const decodedToken = token.decode(encodedToken);
+      const decodedToken = tokenUtil.decode(encodedToken);
       if (!decodedToken) {
         return undefined;
       }
-      const proofs = token.getProofs(decodedToken);
+      const proofs = tokenUtil.getProofs(decodedToken);
       const times = proofs
         .map((p) => this.getSecretP2PKInfo(p.secret).locktime)
         .filter((t) => t !== undefined) as number[];
@@ -362,13 +362,13 @@ export const useP2PKStore = defineStore("p2pk", {
       const mintsStore = useMintsStore();
       const tokensStore = useTokensStore();
 
-      const decoded = token.decode(encodedToken);
+      const decoded = tokenUtil.decode(encodedToken);
       if (!decoded) {
         throw new Error("Invalid token");
       }
 
-      const mintUrl = token.getMint(decoded);
-      const unit = token.getUnit(decoded);
+      const mintUrl = tokenUtil.getMint(decoded);
+      const unit = tokenUtil.getUnit(decoded);
 
       if (!mintsStore.mints.find((m) => m.url === mintUrl)) {
         await mintsStore.addMint({ url: mintUrl });
@@ -452,7 +452,9 @@ export const useP2PKStore = defineStore("p2pk", {
         const tokenStr = useProofsStore().serializeProofs(sendProofs);
         const locked = useLockedTokensStore().addLockedToken({
           amount,
-          token: tokenStr,
+  tokenString: tokenStr,
+
+  token:  tokenStr,
           pubkey: receiverPubkey,
           locktime,
           bucketId: bucketsStore.ensureCreatorBucket(receiverPubkey),

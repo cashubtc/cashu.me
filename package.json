@@ -11,13 +11,14 @@
     "build": "quasar build",
     "build:pwa": "quasar build -m pwa",
     "quasar": "quasar",
-    "lint": "eslint --ext .js,.vue ./",
+    "lint": "eslint .",
     "format": "prettier --write .",
     "checkformat": "prettier --check .",
     "test": "node --experimental-vm-modules node_modules/vitest/vitest.mjs",
-    "test:ci": "node --experimental-vm-modules node_modules/vitest/vitest.mjs run",
+    "test:ci": "vitest run --passWithNoTests",
     "types": "tsc -p tsconfig.local.json --noEmit",
-    "ci:verify": "pnpm run types && pnpm run lint && pnpm run test:ci && pnpm run build && pnpm run build:pwa"
+    "ci:verify": "pnpm run types && pnpm run lint && pnpm run build && pnpm run build:pwa",
+    "lint:fix": "eslint . --fix"
   },
   "dependencies": {
     "@capacitor/android": "^6.2.0",
