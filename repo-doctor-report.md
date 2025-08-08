@@ -1,19 +1,19 @@
 # Repo Doctor Report — cashu.mecustomized
 
-_Created: 2025-08-08T08:06:24Z_
+_Created: 2025-08-08T08:48:50Z_
 
 ## Summary
 | Metric | Value |
 |---|---|
-| Working-tree size (approx, excludes heavy dirs) | 41.7 MB |
-| .git directory size | 73.4 MB |
-| Tracked files | 571 |
-| Commits | 3899 |
-| Local branches | 39 |
+| Working-tree size (approx, excludes heavy dirs) | 41.8 MB |
+| .git directory size | 73.6 MB |
+| Tracked files | 574 |
+| Commits | 3904 |
+| Local branches | 40 |
 | Remote branches | 294 |
 | Tags | 0 |
-| Current branch | fix/pwa-workbox-mode |
-| HEAD | 06f3bd0d |
+| Current branch | fix/tsconfig-ci |
+| HEAD | cc501963 |
 | Default branch (guess) | main |
 
 ## Status
@@ -60,6 +60,7 @@ stash@{3}: On phase5: WIP: before creating Phase5 at merge commit
  |  `fix-infinite-loop` | — | 0 | 0 | 2025-06-12T11:10:36+02:00 |
  |  `fix/build-polyfills` | — | 0 | 0 | 2025-08-08T09:23:24+02:00 |
  |  `fix/pwa-workbox-mode` | — | 0 | 0 | 2025-08-08T09:54:05+02:00 |
+ |  `fix/tsconfig-ci` | — | 0 | 0 | 2025-08-08T10:45:05+02:00 |
  |  `fix/vite-node-polyfills` | — | 0 | 0 | 2025-08-08T09:34:26+02:00 |
  |  `fix/vitest-alias-ecash-permissions` | — | 0 | 0 | 2025-06-12T08:03:21+02:00 |
  |  `fixVitest` | origin/fixVitest | 1 | 0 | 2025-06-12T18:33:37+02:00 |
@@ -85,7 +86,7 @@ stash@{3}: On phase5: WIP: before creating Phase5 at merge commit
 |---|---:|
 | ritty65 | 2979 |
 | callebtc | 647 |
-| Simu | 51 |
+| Simu | 56 |
 | mjkeaton | 51 |
 | lollerfirst | 32 |
 | Erik Brakke | 28 |
@@ -322,7 +323,7 @@ file:.git/config	lfs.***=0
   "checkformat": "prettier --check .",
   "test": "node --experimental-vm-modules node_modules/vitest/vitest.mjs",
   "test:ci": "node --experimental-vm-modules node_modules/vitest/vitest.mjs run",
-  "types": "tsc -p tsconfig.json --noEmit",
+  "types": "tsc -p tsconfig.local.json --noEmit",
   "ci:verify": "pnpm run types && pnpm run lint && pnpm run test:ci && pnpm run build && pnpm run build:pwa"
 }
 ```
@@ -351,6 +352,11 @@ quasar.config.js:70: viteConf.optimizeDeps = { ...(viteConf.optimizeDeps || {}),
 
 ## Recent commits
 ```
+cc501963 2025-08-08 10:45:05 +0200 Simu | chore(ts): minimal final fixes (tokenString, htlc_hash spread, raw key bytes, remove id, cast)
+a275e329 2025-08-08 10:33:47 +0200 Simu | chore(ts): quick passes to get types script green
+c47d3d27 2025-08-08 10:31:31 +0200 Simu | WIP: before TS quick fixes batch 2
+48217852 2025-08-08 10:16:30 +0200 Simu | WIP: before quick type relax
+0acd5115 2025-08-08 10:10:38 +0200 Simu | chore(tsconfig): skip lib checks, add DOM/WebWorker libs, restrict include/exclude
 06f3bd0d 2025-08-08 09:54:05 +0200 Simu | chore(ci): add ci:verify to gate types/lint/tests/spa+pwa builds
 92a9ae69 2025-08-08 09:53:45 +0200 Simu | chore: cleanup backups/logs; ignore nested node_modules; harden .gitignore
 1fe4545e 2025-08-08 09:53:27 +0200 Simu | build: use only static imports for @nostr-dev-kit/ndk to avoid split warning
@@ -371,16 +377,11 @@ df1b2577 2025-08-07 09:30:57 +0200 ritty65 | Merge pull request #1513 from ritty
 628dc6e3 2025-08-07 09:29:14 +0200 ritty65 | refactor: enhance subscriber metrics cards
 3eb20d2b 2025-08-07 09:07:52 +0200 ritty65 | Merge pull request #1512 from ritty65/b6zrj8-codex/verify-subscriptionid-uniqueness-and-selection-updates
 3feb3ba3 2025-08-07 09:07:24 +0200 ritty65 | feat: improve subscriber selection actions
-285c27d0 2025-08-07 08:56:02 +0200 ritty65 | Merge pull request #1511 from ritty65/ge1u8h-codex/replace-q-table-with-card-layout
-9d26a262 2025-08-07 08:54:22 +0200 ritty65 | feat: card-based creator subscribers
-5d25a78c 2025-08-07 08:39:48 +0200 ritty65 | Merge pull request #1510 from ritty65/i7ua7u-codex/fill-missing-tiername-values-in-subscriptions
-3e55da7c 2025-08-07 08:39:37 +0200 ritty65 | fill missing tier names
-12fde0cc 2025-08-07 08:28:06 +0200 ritty65 | Merge pull request #1509 from ritty65/7ajhwp-codex/refactor-subscriber-rendering-in-creatorsubscribers
 ```
 
 ## Last build attempt (summary)
 ```
-build: rc=0 | log=20250808-100548-build.log
+build: rc=0 | log=20250808-104817-build.log
  ║                                          assets/MediaPreview-7gU6gfi6.css ║      0.62 KB ║      0.32 KB ║
  ║                                        assets/NostrMessenger-CMs9SkoS.css ║      2.70 KB ║      0.85 KB ║
  ║                              assets/PublicCreatorProfilePage-Clq_8-3j.css ║      0.12 KB ║      0.10 KB ║
@@ -396,7 +397,7 @@ build: rc=0 | log=20250808-100548-build.log
  ║                                                        find-creators.html ║     29.67 KB ║            - ║
  ║                                                                index.html ║      1.15 KB ║            - ║
  ╠═══════════════════════════════════════════════════════════════════════════╬══════════════╬══════════════╣
- ║                                                      Total JS (106 files) ║   2659.96 KB ║            - ║
+ ║                                                      Total JS (106 files) ║   2659.82 KB ║            - ║
  ║                                                      Total CSS (18 files) ║    260.97 KB ║            - ║
  ╚═══════════════════════════════════════════════════════════════════════════╩══════════════╩══════════════╝
 
@@ -432,7 +433,7 @@ node_modules/.pnpm/tseep@1.3.1/node_modules/tseep/lib/task-collection/bake-colle
 - Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
 - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
 
-build:pwa: rc=0 | log=20250808-100605-build_pwa.log
+build:pwa: rc=0 | log=20250808-104832-build_pwa.log
  ║                              assets/PublicCreatorProfilePage-Clq_8-3j.css ║      0.12 KB ║      0.10 KB ║
  ║                                       assets/SendTokenDialog-CssGghAJ.css ║      1.52 KB ║      0.60 KB ║
  ║                                              assets/Settings-B-ht4wvc.css ║      0.21 KB ║      0.17 KB ║
@@ -448,7 +449,7 @@ build:pwa: rc=0 | log=20250808-100605-build_pwa.log
  ║                                                        find-creators.html ║     29.67 KB ║            - ║
  ║                                                                index.html ║      1.91 KB ║            - ║
  ╠═══════════════════════════════════════════════════════════════════════════╬══════════════╬══════════════╣
- ║                                                      Total JS (108 files) ║   2692.35 KB ║            - ║
+ ║                                                      Total JS (108 files) ║   2692.21 KB ║            - ║
  ║                                                      Total CSS (18 files) ║    260.97 KB ║            - ║
  ╚═══════════════════════════════════════════════════════════════════════════╩══════════════╩══════════════╝
 
