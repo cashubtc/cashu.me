@@ -59,7 +59,7 @@
           v-model="search"
           dense
           clearable
-          debounce="0"
+          debounce="200"
           placeholder="Search"
         >
           <template #prepend>
@@ -72,8 +72,9 @@
             v-for="f in frequenciesOptions"
             :key="f.value"
             clickable
-            :color="selectedFrequencies.includes(f.value) ? 'primary' : 'grey-6'"
-            text-color="white"
+            color="primary"
+            :text-color="selectedFrequencies.includes(f.value) ? 'white' : 'primary'"
+            :outline="!selectedFrequencies.includes(f.value)"
             @click="toggleFrequency(f.value)"
           >
             {{ f.label }}
@@ -85,9 +86,10 @@
             v-for="s in statusOptions"
             :key="s.value"
             clickable
-            :color="statusChipColor(s.value)"
-            text-color="white"
-            @click="toggleStatus(s.value)"
+            color="primary"
+            :text-color="selectedStatus === s.value ? 'white' : 'primary'"
+            :outline="selectedStatus !== s.value"
+            @click="selectedStatus = s.value"
           >
             {{ s.label }}
           </q-chip>
@@ -146,10 +148,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue';
+import { ref, computed } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useI18n } from 'vue-i18n';
-import { useDebounceFn } from '@vueuse/core';
 import SubscriberCard from 'components/subscribers/SubscriberCard.vue';
 import SubscriberDrawer from 'components/subscribers/SubscriberDrawer.vue';
 import KpiCard from 'components/subscribers/KpiCard.vue';
@@ -165,10 +166,8 @@ const { t } = useI18n();
 const creatorSubscriptionsStore = useCreatorSubscriptionsStore();
 const { subscriptions, loading } = storeToRefs(creatorSubscriptionsStore);
 
-// search with debounce
+// search term
 const search = ref('');
-const debouncedSearch = ref('');
-watch(search, useDebounceFn((v: string) => (debouncedSearch.value = v), 200));
 
 // frequency chips
 const frequenciesOptions = [
@@ -190,22 +189,7 @@ const statusOptions = [
   { label: t('CreatorSubscribers.status.pending'), value: 'pending' },
   { label: t('CreatorSubscribers.status.ended'), value: 'ended' },
 ];
-const allStatusValues = ['active', 'pending', 'ended'];
-const selectedStatuses = ref<string[]>(allStatusValues.slice());
-function toggleStatus(val: string) {
-  if (val === 'any') {
-    selectedStatuses.value = allStatusValues.slice();
-  } else {
-    const idx = selectedStatuses.value.indexOf(val);
-    if (idx === -1) selectedStatuses.value.push(val);
-    else selectedStatuses.value.splice(idx, 1);
-  }
-}
-function statusChipColor(val: string) {
-  if (val === 'any')
-    return selectedStatuses.value.length === allStatusValues.length ? 'primary' : 'grey-6';
-  return selectedStatuses.value.includes(val) ? 'primary' : 'grey-6';
-}
+const selectedStatus = ref<'any' | 'active' | 'pending' | 'ended'>('any');
 
 // tier filter
 const tierFilter = ref<string | null>(null);
@@ -321,16 +305,23 @@ const lifetimeTrend = computed(() => [0, lifetimeRevenue.value]);
 // filtering and sorting
 const filtered = computed(() => {
   let arr = subscriptions.value.slice();
-  if (debouncedSearch.value) {
-    const term = debouncedSearch.value.toLowerCase();
-    arr = arr.filter(
-      (s) =>
-        s.subscriberNpub.toLowerCase().includes(term) ||
-        s.tierName.toLowerCase().includes(term),
-    );
+  if (search.value) {
+    const term = search.value.toLowerCase();
+    arr = arr.filter((s) => {
+      const name = displayName.value[s.subscriptionId]?.toLowerCase() || '';
+      const npub = s.subscriberNpub.toLowerCase();
+      const nip = nip05.value[s.subscriptionId]?.toLowerCase() || '';
+      return (
+        name.includes(term) ||
+        npub.includes(term) ||
+        nip.includes(term)
+      );
+    });
   }
   arr = arr.filter((s) => selectedFrequencies.value.includes(freqKey(s)));
-  arr = arr.filter((s) => selectedStatuses.value.includes(uiStatus(s)));
+  if (selectedStatus.value !== 'any') {
+    arr = arr.filter((s) => uiStatus(s) === selectedStatus.value);
+  }
   if (tierFilter.value) arr = arr.filter((s) => s.tierId === tierFilter.value);
 
   if (sort.value === 'amount') {
