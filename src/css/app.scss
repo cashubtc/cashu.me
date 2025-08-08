@@ -1,6 +1,6 @@
 // app global css in SCSS form
 @import "tokens.scss";
-
+@import "creator-hub.scss";
 // Use Inter if installed locally and fall back to system fonts
 body {
   font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
@@ -102,6 +102,7 @@ body,
   --bucket-text-light: #000000;
   --bucket-accent-dark: #ec4899;
   --bucket-accent-light: #ec4899;
+  --border-subtle: 1px solid var(--border-subtle-light);
 }
 
 body.body--dark {
@@ -115,6 +116,7 @@ body.body--dark {
   --bucket-background: var(--bucket-bg-dark);
   --bucket-text-color: var(--bucket-text-dark);
   --bucket-accent: var(--bucket-accent-dark);
+  --border-subtle: 1px solid var(--border-subtle-dark);
 }
 
 body.body--light {
@@ -128,6 +130,7 @@ body.body--light {
   --bucket-background: var(--bucket-bg-light);
   --bucket-text-color: var(--bucket-text-light);
   --bucket-accent: var(--bucket-accent-light);
+  --border-subtle: 1px solid var(--border-subtle-light);
 }
 
 /* utility background classes */
@@ -216,4 +219,3 @@ body.body--dark .received {
   max-width: 500px;
 }
 
-@import './creator-hub.scss';
