@@ -110,6 +110,10 @@
           <SubscriberCard
             :subscription="item"
             :compact="compact"
+            :status="uiStatus(item)"
+            :next-in="nextIn(item)"
+            :progress="progress(item)"
+            :amount="amountPerInterval(item)"
             @click="openSubscriber(item)"
           />
         </q-virtual-scroll>
@@ -376,6 +380,44 @@ const current = ref<CreatorSubscription | null>(null);
 function openSubscriber(sub: CreatorSubscription) {
   current.value = sub;
   drawer.value = true;
+}
+
+function uiStatus(
+  sub: CreatorSubscription,
+): 'active' | 'pending' | 'ended' {
+  if (sub.status === 'pending') return 'pending';
+  const now = Date.now() / 1000;
+  if (sub.endDate && sub.endDate < now) return 'ended';
+  return 'active';
+}
+
+function nextIn(sub: CreatorSubscription): string {
+  if (!sub.nextRenewal) return '—';
+  const diff = sub.nextRenewal * 1000 - Date.now();
+  if (diff <= 0) return '—';
+  const day = 24 * 60 * 60 * 1000;
+  const hour = 60 * 60 * 1000;
+  const days = Math.floor(diff / day);
+  const hours = Math.floor((diff % day) / hour);
+  return `${days}d ${hours}h`;
+}
+
+function progress(sub: CreatorSubscription): number {
+  if (!sub.nextRenewal) return 0;
+  const end = sub.nextRenewal * 1000;
+  const period = sub.intervalDays * 24 * 60 * 60 * 1000;
+  const start = end - period;
+  const now = Date.now();
+  if (now <= start) return 0;
+  if (now >= end) return 1;
+  return (now - start) / period;
+}
+
+function amountPerInterval(sub: CreatorSubscription): string {
+  if (sub.receivedPeriods > 0) {
+    return formatCurrency(sub.totalAmount / sub.receivedPeriods);
+  }
+  return '—';
 }
 
 function formatCurrency(amount: number) {
