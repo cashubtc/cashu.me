@@ -1682,6 +1682,7 @@ export const messages = {
       exportCsv: "Export CSV",
     },
     status: {
+      any: "Any",
       active: "Active",
       pending: "Pending",
       ended: "Ended",
@@ -1692,8 +1693,14 @@ export const messages = {
       pending: "Pending",
       receivedPeriods: "Received periods",
       revenue: "Revenue",
+      thisPeriod: "This period",
       thisWeek: "this week",
       thisMonth: "this month",
+    },
+    charts: {
+      frequency: "Frequency",
+      status: "Status",
+      newSubs: "New subs",
     },
     periodsText: "{received} of {total} periods",
     periodsTooltip: "Periods received vs periods purchased",

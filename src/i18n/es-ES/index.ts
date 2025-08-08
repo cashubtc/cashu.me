@@ -1613,6 +1613,7 @@ export default {
       active: "Activo",
       pending: "Pendiente",
       ended: "Ended",
+      any: "Any",
     },
     summary: {
       subscribers: "Subscribers",
@@ -1620,8 +1621,14 @@ export default {
       pending: "Pending",
       receivedPeriods: "Received periods",
       revenue: "Revenue",
+      thisPeriod: "This period",
       thisWeek: "this week",
       thisMonth: "this month",
+    },
+    charts: {
+      frequency: "Frequency",
+      status: "Status",
+      newSubs: "New subs",
     },
     periodsText: "{received} of {total} periods",
     periodsTooltip: "Periods received vs periods purchased",
@@ -1631,6 +1638,32 @@ export default {
     nextRenewal: "Renews on {date}",
     noData: "No subscribers yet",
     shareProfile: "Share your profile",
+    drawer: {
+      tabs: {
+        overview: "Overview",
+        payments: "Payments",
+        notes: "Notes",
+      },
+      overview: {
+        nip05: "nip05",
+        lud16: "lud16",
+        about: "about",
+        nextRenewal: "Next renewal",
+        amountPerInterval: "Amount / interval",
+        lifetimeTotal: "Lifetime total",
+        since: "Since",
+      },
+      actions: {
+        dm: "DM",
+        copyNpub: "Copy npub",
+        copyLud16: "Copy lud16",
+        openProfile: "Profile",
+        cancel: "Cancel",
+      },
+      payments: {
+        noPayments: "No payments",
+      },
+    },
   },
   SubscriberDrawer: {
     tabs: {
