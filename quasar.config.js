@@ -9,6 +9,7 @@
 // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js
 
 import { configure } from "quasar/wrappers";
+import { nodePolyfills } from 'vite-plugin-node-polyfills';
 import path from "path";
 
 export default configure(function (/* ctx */) {
@@ -39,7 +40,7 @@ export default configure(function (/* ctx */) {
 
     // Full list of options: https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#build
     build: {
-      optimizeDeps: { include: ['buffer'] },
+      optimizeDeps: { include: ['process', 'buffer'] },
       target: {
         browser: ["esnext"],
         node: "node16",
@@ -71,6 +72,10 @@ export default configure(function (/* ctx */) {
       // viteVuePluginOptions: {},
 
       // vitePlugins: [
+        nodePolyfills({
+          globals: { Buffer: true, global: true, process: true },
+          protocolImports: true
+        }), 
       //   [ 'package-name', { ..options.. } ]
       // ]
     },
