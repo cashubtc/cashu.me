@@ -13,6 +13,7 @@ import path from "path";
 
 export default configure(function (/* ctx */) {
   return {
+    alias: { buffer: 'buffer', process: 'process/browser' },
     eslint: {
       // fix: true,
       // include: [],
