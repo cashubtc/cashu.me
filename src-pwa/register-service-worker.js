@@ -2,7 +2,7 @@ import { register } from 'register-service-worker'
 
 // Vite-compatible: 'import.meta.env.PROD' instead of process.env.NODE_ENV === 'production'
 if (import.meta.env.PROD) {
-  register('/service-worker.js', {
+  register('/sw.js', {
     ready() {
       console.log('[PWA] App is being served from cache by a service worker.')
     },
