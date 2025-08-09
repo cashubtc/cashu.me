@@ -22,7 +22,7 @@
         class="q-ml-sm"
         :options="[
           { value: 'table', icon: 'table_rows' },
-          { value: 'cards', icon: 'grid_view' }
+          { value: 'cards', icon: 'grid_view' },
         ]"
       />
       <q-btn-toggle
@@ -32,7 +32,7 @@
         class="q-ml-sm"
         :options="[
           { value: 'comfortable', icon: 'view_comfy' },
-          { value: 'compact', icon: 'view_compact' }
+          { value: 'compact', icon: 'view_compact' },
         ]"
       />
       <q-btn
@@ -84,23 +84,10 @@
         flat
         bordered
         class="col-12 col-sm-6 col-md-3 panel-container q-pa-sm"
+        @click="togglePeriod"
       >
-        <div class="row items-center justify-between">
-          <div>
-            <div class="text-caption text-grey">This period</div>
-            <div class="text-h6">{{ periodValue }} sat</div>
-          </div>
-          <q-btn-toggle
-            v-model="period"
-            dense
-            size="sm"
-            toggle-color="primary"
-            :options="[
-              { label: 'W', value: 'week' },
-              { label: 'M', value: 'month' }
-            ]"
-          />
-        </div>
+        <div class="text-caption text-grey">Next {{ periodMode }}</div>
+        <div class="text-h6">{{ formattedKpiThisPeriodSat }} sat</div>
       </q-card>
     </div>
 
@@ -300,7 +287,7 @@
         color="white"
         icon="download"
         label="Export selection"
-          @click="downloadCsv(selected)"
+        @click="downloadCsv(selected)"
       />
       <q-btn flat dense color="white" label="Clear" @click="selected = []" />
     </div>
@@ -414,23 +401,37 @@ import SubscriberCard from "src/components/SubscriberCard.vue";
 const subStore = useCreatorSubscribersStore();
 const { filtered, counts, activeTab } = storeToRefs(subStore);
 
-const activeCount = computed(() =>
-  filtered.value.filter((s) => s.status === "active").length
+const activeCount = computed(
+  () => filtered.value.filter((s) => s.status === "active").length
 );
-const pendingCount = computed(() =>
-  filtered.value.filter((s) => s.status === "pending").length
+const pendingCount = computed(
+  () => filtered.value.filter((s) => s.status === "pending").length
 );
 const lifetimeRevenue = computed(() =>
   filtered.value.reduce((sum, s) => sum + s.lifetimeSat, 0)
 );
-const period = ref<"week" | "month">("week");
-const periodValue = computed(() =>
-  filtered.value
-    .filter((s) =>
-      period.value === "week" ? s.frequency === "weekly" : s.frequency === "monthly"
+
+const periodMode = ref<"week" | "month">("month");
+const periodWindowDays = computed(() => (periodMode.value === "week" ? 7 : 30));
+const kpiThisPeriodSat = computed(() => {
+  const now = Date.now() / 1000;
+  const end = now + periodWindowDays.value * 86400;
+  return filtered.value
+    .filter(
+      (s) =>
+        s.status === "active" &&
+        s.nextRenewal !== undefined &&
+        s.nextRenewal <= end
     )
-    .reduce((sum, s) => sum + s.amountSat, 0)
+    .reduce((sum, s) => sum + s.amountSat, 0);
+});
+const formattedKpiThisPeriodSat = computed(() =>
+  kpiThisPeriodSat.value.toLocaleString()
 );
+
+function togglePeriod() {
+  periodMode.value = periodMode.value === "week" ? "month" : "week";
+}
 
 const revenueSeries = computed(() => {
   const arr = filtered.value.slice().sort((a, b) => a.startDate - b.startDate);
@@ -449,14 +450,20 @@ const freqMix = computed(() => [
 const statusByFreq = computed(() => {
   const freqs: Frequency[] = ["weekly", "biweekly", "monthly"];
   const labels = ["Weekly", "Bi-weekly", "Monthly"];
-  const active = freqs.map((f) =>
-    filtered.value.filter((s) => s.frequency === f && s.status === "active").length
+  const active = freqs.map(
+    (f) =>
+      filtered.value.filter((s) => s.frequency === f && s.status === "active")
+        .length
   );
-  const pending = freqs.map((f) =>
-    filtered.value.filter((s) => s.frequency === f && s.status === "pending").length
+  const pending = freqs.map(
+    (f) =>
+      filtered.value.filter((s) => s.frequency === f && s.status === "pending")
+        .length
   );
-  const ended = freqs.map((f) =>
-    filtered.value.filter((s) => s.frequency === f && s.status === "ended").length
+  const ended = freqs.map(
+    (f) =>
+      filtered.value.filter((s) => s.frequency === f && s.status === "ended")
+        .length
   );
   return { labels, active, pending, ended };
 });
@@ -467,8 +474,7 @@ const applySearch = useDebounceFn((v: string) => {
 }, 300);
 watch(search, (v) => applySearch(v));
 
-const filters =
-  ref<InstanceType<typeof SubscriberFiltersPopover> | null>(null);
+const filters = ref<InstanceType<typeof SubscriberFiltersPopover> | null>(null);
 
 function openFilters(e: MouseEvent) {
   filters.value?.show(e);
@@ -476,8 +482,8 @@ function openFilters(e: MouseEvent) {
 
 const selected = ref<Subscriber[]>([]);
 
-const view = ref<'table' | 'cards'>('table');
-const density = ref<'compact' | 'comfortable'>('comfortable');
+const view = ref<"table" | "cards">("table");
+const density = ref<"compact" | "comfortable">("comfortable");
 
 const lineEl = ref<HTMLCanvasElement | null>(null);
 const doughnutEl = ref<HTMLCanvasElement | null>(null);
@@ -580,7 +586,12 @@ const columns = [
     field: "nextRenewal",
     sortable: false,
   },
-  { name: "lifetime", label: "Lifetime", field: "lifetimeSat", sortable: false },
+  {
+    name: "lifetime",
+    label: "Lifetime",
+    field: "lifetimeSat",
+    sortable: false,
+  },
   { name: "actions", label: "", field: "id", sortable: false },
 ];
 
@@ -623,8 +634,6 @@ function formatDate(ts: number) {
   return format(ts * 1000, "PP p");
 }
 
-
-
 const drawer = ref(false);
 const current = ref<Subscriber | null>(null);
 function openDrawer(r: Subscriber) {
@@ -638,12 +647,15 @@ const { t } = useI18n();
 function copyNpub() {
   if (!current.value) return;
   $q.clipboard.writeText(current.value.npub);
-  $q.notify({ message: t('copied_to_clipboard'), color: 'positive' });
+  $q.notify({ message: t("copied_to_clipboard"), color: "positive" });
 }
 
 function dmSubscriber() {
   if (!current.value) return;
-  router.push({ path: '/nostr-messenger', query: { pubkey: current.value.npub } });
+  router.push({
+    path: "/nostr-messenger",
+    query: { pubkey: current.value.npub },
+  });
 }
 const payments = computed(() => {
   const r = current.value;
@@ -664,5 +676,3 @@ const activity = computed(() => {
   return arr;
 });
 </script>
-
-
