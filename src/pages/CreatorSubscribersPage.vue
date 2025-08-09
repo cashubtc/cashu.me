@@ -1,5 +1,6 @@
 <template>
   <q-page padding>
+    <SubscriberFiltersPopover ref="filters" />
     <!-- Top bar -->
     <div class="row items-center q-gutter-sm q-mb-md">
       <div class="text-h6">Subscribers</div>
@@ -40,7 +41,8 @@
         round
         icon="tune"
         class="q-ml-sm"
-        @click="filters.value.show()"
+        @click.stop="openFilters"
+        aria-label="Filters"
       />
       <q-btn
         outline
@@ -297,7 +299,6 @@
         </div>
       </div>
     </q-drawer>
-    <SubscriberFiltersPopover ref="filters" />
   </q-page>
 </template>
 
@@ -326,6 +327,10 @@ watch(search, (v) => applySearch(v));
 
 const filters =
   ref<InstanceType<typeof SubscriberFiltersPopover> | null>(null);
+
+function openFilters(e: MouseEvent) {
+  filters.value?.show(e);
+}
 
 const selected = ref<Subscriber[]>([]);
 
