@@ -104,6 +104,14 @@ vi.mock('vue-i18n', async (importOriginal) => {
   };
 });
 
+vi.mock('vue-router', () => ({
+  useRouter: () => ({ push: vi.fn() }),
+}));
+
+vi.mock('quasar', () => ({
+  useQuasar: () => ({ clipboard: { writeText: vi.fn() }, notify: vi.fn() }),
+}));
+
 describe('CreatorSubscribersPage', () => {
   function mountComponent() {
     return mount(CreatorSubscribersPage, {
