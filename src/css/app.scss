@@ -102,6 +102,14 @@ body,
   --bucket-text-light: #000000;
   --bucket-accent-dark: #ec4899;
   --bucket-accent-light: #ec4899;
+  --chip-bg-dark: var(--q-color-grey-8);
+  --chip-bg-light: var(--q-color-grey-3);
+  --chip-text-dark: #ffffff;
+  --chip-text-light: #111827;
+  --progress-ring-fill-dark: var(--q-color-primary);
+  --progress-ring-fill-light: var(--q-color-primary);
+  --progress-ring-track-dark: var(--q-color-grey-8);
+  --progress-ring-track-light: var(--q-color-grey-3);
   --border-subtle: 1px solid var(--border-subtle-light);
 }
 
@@ -117,6 +125,10 @@ body.body--dark {
   --bucket-text-color: var(--bucket-text-dark);
   --bucket-accent: var(--bucket-accent-dark);
   --border-subtle: 1px solid var(--border-subtle-dark);
+  --chip-bg: var(--chip-bg-dark);
+  --chip-text: var(--chip-text-dark);
+  --progress-ring-fill: var(--progress-ring-fill-dark);
+  --progress-ring-track: var(--progress-ring-track-dark);
 }
 
 body.body--light {
@@ -131,6 +143,57 @@ body.body--light {
   --bucket-text-color: var(--bucket-text-light);
   --bucket-accent: var(--bucket-accent-light);
   --border-subtle: 1px solid var(--border-subtle-light);
+  --chip-bg: var(--chip-bg-light);
+  --chip-text: var(--chip-text-light);
+  --progress-ring-fill: var(--progress-ring-fill-light);
+  --progress-ring-track: var(--progress-ring-track-light);
+}
+
+/* Utility components */
+.panel-container {
+  background-color: var(--panel-bg-color);
+  border: var(--border-subtle);
+  border-radius: 16px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 8px;
+  border-radius: 9999px;
+  font-size: 14px;
+  line-height: 24px;
+}
+
+.chip-outline {
+  @extend .chip;
+  border: var(--border-subtle);
+  background-color: transparent;
+  color: var(--chip-text);
+}
+
+.chip-solid {
+  @extend .chip;
+  background-color: var(--chip-bg);
+  color: var(--chip-text);
+  border: none;
+}
+
+.chip-filled {
+  @extend .chip-solid;
+}
+
+.progress-ring {
+  --progress: 0;
+  --size: 40px;
+  width: var(--size);
+  height: var(--size);
+  border-radius: 50%;
+  background: conic-gradient(var(--progress-ring-fill) calc(var(--progress) * 1%),
+      var(--progress-ring-track) 0);
+  mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 0);
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 0);
 }
 
 /* utility background classes */
