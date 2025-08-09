@@ -108,15 +108,15 @@
     <div class="row q-col-gutter-md q-mb-md">
       <q-card flat bordered class="col-12 col-md-4 panel-container q-pa-sm">
         <div class="text-subtitle2 q-mb-sm">Revenue over time</div>
-        <canvas />
+        <canvas ref="lineEl" />
       </q-card>
       <q-card flat bordered class="col-12 col-md-4 panel-container q-pa-sm">
         <div class="text-subtitle2 q-mb-sm">Frequency mix</div>
-        <canvas />
+        <canvas ref="doughnutEl" />
       </q-card>
       <q-card flat bordered class="col-12 col-md-4 panel-container q-pa-sm">
         <div class="text-subtitle2 q-mb-sm">Status by frequency</div>
-        <canvas />
+        <canvas ref="barEl" />
       </q-card>
     </div>
 
@@ -398,7 +398,7 @@ Chart.register(
   Tooltip
 );
 
-import { ref, computed, watch } from "vue";
+import { ref, computed, watch, onMounted } from "vue";
 import { useCreatorSubscribersStore } from "src/stores/creatorSubscribers";
 import { storeToRefs } from "pinia";
 import { useDebounceFn } from "@vueuse/core";
@@ -413,6 +413,53 @@ import SubscriberCard from "src/components/SubscriberCard.vue";
 
 const subStore = useCreatorSubscribersStore();
 const { filtered, counts, activeTab } = storeToRefs(subStore);
+
+const activeCount = computed(() =>
+  filtered.value.filter((s) => s.status === "active").length
+);
+const pendingCount = computed(() =>
+  filtered.value.filter((s) => s.status === "pending").length
+);
+const lifetimeRevenue = computed(() =>
+  filtered.value.reduce((sum, s) => sum + s.lifetimeSat, 0)
+);
+const period = ref<"week" | "month">("week");
+const periodValue = computed(() =>
+  filtered.value
+    .filter((s) =>
+      period.value === "week" ? s.frequency === "weekly" : s.frequency === "monthly"
+    )
+    .reduce((sum, s) => sum + s.amountSat, 0)
+);
+
+const revenueSeries = computed(() => {
+  const arr = filtered.value.slice().sort((a, b) => a.startDate - b.startDate);
+  return {
+    labels: arr.map((s) => format(s.startDate * 1000, "MM/dd")),
+    data: arr.map((s) => s.amountSat),
+  };
+});
+
+const freqMix = computed(() => [
+  filtered.value.filter((s) => s.frequency === "weekly").length,
+  filtered.value.filter((s) => s.frequency === "biweekly").length,
+  filtered.value.filter((s) => s.frequency === "monthly").length,
+]);
+
+const statusByFreq = computed(() => {
+  const freqs: Frequency[] = ["weekly", "biweekly", "monthly"];
+  const labels = ["Weekly", "Bi-weekly", "Monthly"];
+  const active = freqs.map((f) =>
+    filtered.value.filter((s) => s.frequency === f && s.status === "active").length
+  );
+  const pending = freqs.map((f) =>
+    filtered.value.filter((s) => s.frequency === f && s.status === "pending").length
+  );
+  const ended = freqs.map((f) =>
+    filtered.value.filter((s) => s.frequency === f && s.status === "ended").length
+  );
+  return { labels, active, pending, ended };
+});
 
 const search = ref(subStore.query);
 const applySearch = useDebounceFn((v: string) => {
@@ -431,24 +478,95 @@ const selected = ref<Subscriber[]>([]);
 
 const view = ref<'table' | 'cards'>('table');
 const density = ref<'compact' | 'comfortable'>('comfortable');
-const period = ref<'week' | 'month'>('week');
 
-const activeCount = computed(() =>
-  filtered.value.filter((s) => s.status === 'active').length
-);
-const pendingCount = computed(() =>
-  filtered.value.filter((s) => s.status === 'pending').length
-);
-const lifetimeRevenue = computed(() =>
-  filtered.value.reduce((sum, s) => sum + s.lifetimeSat, 0)
-);
-const periodValue = computed(() =>
-  filtered.value
-    .filter((s) =>
-      period.value === 'week' ? s.frequency === 'weekly' : s.frequency === 'monthly'
-    )
-    .reduce((sum, s) => sum + s.amountSat, 0)
-);
+const lineEl = ref<HTMLCanvasElement | null>(null);
+const doughnutEl = ref<HTMLCanvasElement | null>(null);
+const barEl = ref<HTMLCanvasElement | null>(null);
+
+let lineChart: Chart | null = null;
+let doughnutChart: Chart | null = null;
+let barChart: Chart | null = null;
+
+onMounted(() => {
+  if (lineEl.value) {
+    lineChart = new Chart(lineEl.value, {
+      type: "line",
+      data: {
+        labels: revenueSeries.value.labels,
+        datasets: [
+          {
+            data: revenueSeries.value.data,
+            borderColor: "#027be3",
+            backgroundColor: "rgba(2,123,227,0.1)",
+            fill: false,
+            pointRadius: 0,
+          },
+        ],
+      },
+      options: { plugins: { legend: { display: false } }, animation: false },
+    });
+  }
+  if (doughnutEl.value) {
+    doughnutChart = new Chart(doughnutEl.value, {
+      type: "doughnut",
+      data: {
+        labels: ["Weekly", "Bi-weekly", "Monthly"],
+        datasets: [
+          {
+            data: freqMix.value,
+            backgroundColor: ["#027be3", "#26a69a", "#9c27b0"],
+          },
+        ],
+      },
+      options: { plugins: { legend: { display: false } }, animation: false },
+    });
+  }
+  if (barEl.value) {
+    barChart = new Chart(barEl.value, {
+      type: "bar",
+      data: {
+        labels: statusByFreq.value.labels,
+        datasets: [
+          {
+            label: "Active",
+            backgroundColor: "#21ba45",
+            data: statusByFreq.value.active,
+          },
+          {
+            label: "Pending",
+            backgroundColor: "#f2c037",
+            data: statusByFreq.value.pending,
+          },
+          {
+            label: "Ended",
+            backgroundColor: "#f44336",
+            data: statusByFreq.value.ended,
+          },
+        ],
+      },
+      options: { plugins: { legend: { display: false } }, animation: false },
+    });
+  }
+});
+
+watch([revenueSeries, freqMix, statusByFreq], ([rev, mix, status]) => {
+  if (lineChart) {
+    lineChart.data.labels = rev.labels;
+    lineChart.data.datasets[0].data = rev.data;
+    lineChart.update("none");
+  }
+  if (doughnutChart) {
+    doughnutChart.data.datasets[0].data = mix;
+    doughnutChart.update("none");
+  }
+  if (barChart) {
+    barChart.data.labels = status.labels;
+    barChart.data.datasets[0].data = status.active;
+    barChart.data.datasets[1].data = status.pending;
+    barChart.data.datasets[2].data = status.ended;
+    barChart.update("none");
+  }
+});
 
 const columns = [
   { name: "subscriber", label: "Subscriber", field: "name", sortable: false },
