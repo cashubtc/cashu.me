@@ -65,18 +65,26 @@ export default configure(function (/* ctx */) {
       // distDir
 
       extendViteConf(viteConf) {
-      viteConf.resolve = viteConf.resolve || {};
-      viteConf.resolve.alias = { ...(viteConf.resolve.alias || {}), buffer: 'buffer', process: 'process/browser' };
-
-      viteConf.define = { ...(viteConf.define || {}), global: 'globalThis' };
-
-      viteConf.optimizeDeps = { ...(viteConf.optimizeDeps || {}), include: [ ...(viteConf.optimizeDeps?.include || []), 'buffer', 'process' ] };
-
-viteConf.resolve = viteConf.resolve || {
-};
+        viteConf.resolve = viteConf.resolve || {};
         viteConf.resolve.alias = {
           ...(viteConf.resolve.alias || {}),
-          "@cashu/cashu-ts": path.resolve(__dirname, "src/lib/cashu-ts/src/index.ts"),
+          buffer: 'buffer',
+          process: 'process/browser',
+          "@cashu/cashu-ts": path.resolve(
+            __dirname,
+            "src/lib/cashu-ts/src/index.ts"
+          ),
+        };
+
+        viteConf.define = { ...(viteConf.define || {}), global: 'globalThis' };
+
+        viteConf.optimizeDeps = {
+          ...(viteConf.optimizeDeps || {}),
+          include: [
+            ...(viteConf.optimizeDeps?.include || []),
+            'buffer',
+            'process',
+          ],
         };
       },
       // viteVuePluginOptions: {},
