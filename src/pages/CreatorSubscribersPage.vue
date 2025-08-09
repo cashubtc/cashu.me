@@ -401,6 +401,9 @@ import SubscriberCard from "src/components/SubscriberCard.vue";
 
 const subStore = useCreatorSubscribersStore();
 const { filtered, counts, activeTab } = storeToRefs(subStore);
+// `filtered` is maintained by the Pinia store based on the active tab,
+// search query and filter popover. Treat it as the single source of truth
+// for the subscriber list and KPI counts throughout this page.
 
 const activeCount = computed(
   () => filtered.value.filter((s) => s.status === "active").length
@@ -417,8 +420,12 @@ const lifetimeRevenue = computed(() =>
   ),
 );
 
+// Controls the "Next week/month" KPI card. Clicking the card swaps
+// `periodMode` to show upcoming revenue for the next 7 vs 30 days.
 const periodMode = ref<"week" | "month">("month");
 const periodWindowDays = computed(() => (periodMode.value === "week" ? 7 : 30));
+// Aggregate expected sats from subscriptions that renew inside the
+// selected window. This feeds the final KPI card.
 const kpiThisPeriodSat = computed(() => {
   const now = Date.now() / 1000;
   const end = now + periodWindowDays.value * 86400;
@@ -439,10 +446,13 @@ const formattedKpiThisPeriodSat = computed(() =>
 );
 
 function togglePeriod() {
+  // Toggle between week and month views when the KPI card is clicked.
   periodMode.value = periodMode.value === "week" ? "month" : "week";
 }
 
+// Data plumbing for charts: build lightweight structures consumed by Chart.js.
 const revenueSeries = computed(() => {
+  // Line chart: each subscriber's start date vs amount.
   const arr = filtered.value.slice().sort((a, b) => a.startDate - b.startDate);
   return {
     labels: arr.map((s) => format(s.startDate * 1000, "MM/dd")),
@@ -451,12 +461,14 @@ const revenueSeries = computed(() => {
 });
 
 const freqMix = computed(() => [
+  // Doughnut chart: breakdown of subscribers by frequency.
   filtered.value.filter((s) => s.frequency === "weekly").length,
   filtered.value.filter((s) => s.frequency === "biweekly").length,
   filtered.value.filter((s) => s.frequency === "monthly").length,
 ]);
 
 const statusByFreq = computed(() => {
+  // Bar chart: counts of active/pending/ended subscriptions per frequency.
   const freqs: Frequency[] = ["weekly", "biweekly", "monthly"];
   const labels = ["Weekly", "Bi-weekly", "Monthly"];
   const active = freqs.map(
@@ -478,6 +490,8 @@ const statusByFreq = computed(() => {
 });
 
 const search = ref(subStore.query);
+// Forward the user-entered search term to the Pinia store (debounced),
+// which recomputes `filtered` for us.
 const applySearch = useDebounceFn((v: string) => {
   subStore.query = v;
 }, 300);
@@ -498,11 +512,13 @@ const lineEl = ref<HTMLCanvasElement | null>(null);
 const doughnutEl = ref<HTMLCanvasElement | null>(null);
 const barEl = ref<HTMLCanvasElement | null>(null);
 
+// Chart.js instances are created once on mount and then updated reactively.
 let lineChart: Chart | null = null;
 let doughnutChart: Chart | null = null;
 let barChart: Chart | null = null;
 
 onMounted(() => {
+  // Instantiate charts after DOM elements are available.
   if (lineEl.value) {
     lineChart = new ChartJS(lineEl.value, {
       type: "line",
@@ -564,6 +580,8 @@ onMounted(() => {
   }
 });
 
+// When the underlying computed data changes, update the charts without
+// re-creating them. This keeps Chart.js lifecycle simple and avoids leaks.
 watch([revenueSeries, freqMix, statusByFreq], ([rev, mix, status]) => {
   if (lineChart) {
     lineChart.data.labels = rev.labels;

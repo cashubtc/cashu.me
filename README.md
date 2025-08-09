@@ -47,6 +47,7 @@ Think Patreon, but built for the Nostr ecosystem and leveraging the privacy and 
 - **Creator Discovery** – Find creators by category, search or Nostr social graphs.
 - **Creator Profiles** – Dedicated pages for creators and their funding needs.
 - **Tiered Support System** – Multiple support levels with unique benefits.
+- **Subscriber Analytics Dashboard** – KPI cards and charts visualize subscriber counts, status mix and projected revenue. The final KPI toggles between upcoming week or month to estimate expected income.
 - **Direct Cashu Donations & Pledges** – One-time or recurring support using P2PK and timelocks.
 - **Nostr Direct Messages** – NIP-04 encrypted chat with creators and other users.
 - **Privacy-Preserving** – Chaumian ecash via Cashu.
