@@ -14,62 +14,14 @@
           <q-icon name="search" />
         </template>
       </q-input>
-      <q-btn dense flat round icon="tune" class="q-ml-sm">
-        <q-menu class="q-pa-md" anchor="bottom right" self="top right">
-          <div class="column q-gutter-md" style="min-width: 220px">
-            <div>
-              <div class="text-caption text-grey-6 q-mb-xs">Status</div>
-              <div class="row q-gutter-xs">
-                <q-chip
-                  clickable
-                  outline
-                  :color="statuses.has('active') ? 'primary' : ''"
-                  @click="toggleStatus('active')"
-                  >Active</q-chip
-                >
-                <q-chip
-                  clickable
-                  outline
-                  :color="statuses.has('pending') ? 'primary' : ''"
-                  @click="toggleStatus('pending')"
-                  >Pending</q-chip
-                >
-                <q-chip
-                  clickable
-                  outline
-                  :color="statuses.has('ended') ? 'primary' : ''"
-                  @click="toggleStatus('ended')"
-                  >Ended</q-chip
-                >
-              </div>
-            </div>
-            <div>
-              <div class="text-caption text-grey-6 q-mb-xs">Tiers</div>
-              <div class="row q-gutter-xs">
-                <q-chip
-                  v-for="t in tierOptions"
-                  :key="t.id"
-                  clickable
-                  outline
-                  :color="tiers.has(t.id) ? 'primary' : ''"
-                  @click="toggleTier(t.id)"
-                  >{{ t.name }}</q-chip
-                >
-              </div>
-            </div>
-            <div>
-              <div class="text-caption text-grey-6 q-mb-xs">Sort</div>
-              <q-select
-                dense
-                v-model="sort"
-                :options="sortOptions"
-                emit-value
-                map-options
-              />
-            </div>
-          </div>
-        </q-menu>
-      </q-btn>
+      <q-btn
+        dense
+        flat
+        round
+        icon="tune"
+        class="q-ml-sm"
+        @click="filters.value.show()"
+      />
       <q-btn
         outline
         color="grey-5"
@@ -309,6 +261,7 @@
         </div>
       </div>
     </q-drawer>
+    <SubscriberFiltersPopover ref="filters" />
   </q-page>
 </template>
 
@@ -323,10 +276,10 @@ import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
 import type { Subscriber, Frequency, SubStatus } from "src/types/subscriber";
 import downloadCsv from "src/utils/subscriberCsv";
+import SubscriberFiltersPopover from "src/components/subscribers/SubscriberFiltersPopover.vue";
 
 const subStore = useCreatorSubscribersStore();
-const { filtered, counts } = storeToRefs(subStore);
-const { activeTab, statuses, tiers, sort } = storeToRefs(subStore);
+const { filtered, counts, activeTab } = storeToRefs(subStore);
 
 const search = ref(subStore.query);
 const applySearch = useDebounceFn((v: string) => {
@@ -334,24 +287,8 @@ const applySearch = useDebounceFn((v: string) => {
 }, 300);
 watch(search, (v) => applySearch(v));
 
-const tierOptions = computed(() => {
-  const map = new Map<string, string>();
-  subStore.subscribers.forEach((s) => map.set(s.tierId, s.tierName));
-  return Array.from(map).map(([id, name]) => ({ id, name }));
-});
-
-function toggleStatus(s: SubStatus) {
-  statuses.value.has(s) ? statuses.value.delete(s) : statuses.value.add(s);
-}
-function toggleTier(id: string) {
-  tiers.value.has(id) ? tiers.value.delete(id) : tiers.value.add(id);
-}
-
-const sortOptions = [
-  { label: "Next renewal", value: "next" },
-  { label: "First seen", value: "first" },
-  { label: "Lifetime sats", value: "amount" },
-];
+const filters =
+  ref<InstanceType<typeof SubscriberFiltersPopover> | null>(null);
 
 const selected = ref<Subscriber[]>([]);
 
