@@ -307,3 +307,19 @@ body.body--dark .received {
   width: 100%;
   max-width: 500px;
 }
+
+.density--compact .q-tr {
+  padding: 0.25rem 0;
+  font-size: 0.85rem;
+}
+
+.density--comfortable .q-tr {
+  padding: 0.5rem 0;
+  font-size: 1rem;
+}
+
+.subscriber-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 1rem;
+}

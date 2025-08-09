@@ -112,6 +112,7 @@
       :rows-per-page-options="[10, 25, 50]"
       :row-class="rowClass"
       :dense="density === 'compact'"
+      :class="['density--' + density]"
     >
       <template #body-cell-subscriber="props">
         <q-td :props="props">
@@ -204,22 +205,18 @@
             @click="openDrawer(props.row)" /></q-td
       ></template>
     </q-table>
-    <div v-else class="row q-col-gutter-md q-row-gutter-md">
-      <div
+    <div v-else class="subscriber-cards">
+      <SubscriberCard
         v-for="row in filtered"
         :key="row.id"
-        class="col-12 col-sm-6 col-md-4"
-      >
-        <SubscriberCard
-          :subscription="{ tierName: row.tierName, subscriberNpub: row.npub } as any"
-          :status="row.status"
-          :next-in="row.nextRenewal ? distToNow(row.nextRenewal) : '—'"
-          :progress="progressPercent(row) / 100"
-          :amount="row.amountSat + ' sat'"
-          :compact="density === 'compact'"
-          @click="openDrawer(row)"
-        />
-      </div>
+        :subscription="{ tierName: row.tierName, subscriberNpub: row.npub } as any"
+        :status="row.status"
+        :next-in="row.nextRenewal ? distToNow(row.nextRenewal) : '—'"
+        :progress="progressPercent(row) / 100"
+        :amount="row.amountSat + ' sat'"
+        :compact="density === 'compact'"
+        @click="openDrawer(row)"
+      />
     </div>
 
     <!-- Selection bar -->
@@ -381,10 +378,7 @@ function dueSoon(r: Subscriber) {
   return r.nextRenewal * 1000 - Date.now() < 72 * 3600 * 1000;
 }
 function rowClass(row: Subscriber) {
-  const classes = [] as string[];
-  if (dueSoon(row)) classes.push("due-soon");
-  classes.push(density.value);
-  return classes.join(" ");
+  return dueSoon(row) ? "due-soon" : "";
 }
 function distToNow(ts: number) {
   return formatDistanceToNow(ts * 1000, { addSuffix: true });
@@ -435,16 +429,4 @@ const activity = computed(() => {
 });
 </script>
 
-<style scoped>
-.compact td {
-  padding-top: 4px;
-  padding-bottom: 4px;
-  font-size: 12px;
-}
 
-.comfortable td {
-  padding-top: 8px;
-  padding-bottom: 8px;
-  font-size: 14px;
-}
-</style>
