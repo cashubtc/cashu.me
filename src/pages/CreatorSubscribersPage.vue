@@ -54,6 +54,72 @@
       />
     </div>
 
+    <!-- KPI Row -->
+    <div class="row q-col-gutter-md q-mb-md">
+      <q-card
+        flat
+        bordered
+        class="col-12 col-sm-6 col-md-3 panel-container q-pa-sm"
+      >
+        <div class="text-caption text-grey">Subscribers</div>
+        <div class="text-h6">{{ counts.all }}</div>
+      </q-card>
+      <q-card
+        flat
+        bordered
+        class="col-12 col-sm-6 col-md-3 panel-container q-pa-sm"
+      >
+        <div class="text-caption text-grey">Active / Pending</div>
+        <div class="text-h6">{{ activeCount }} / {{ pendingCount }}</div>
+      </q-card>
+      <q-card
+        flat
+        bordered
+        class="col-12 col-sm-6 col-md-3 panel-container q-pa-sm"
+      >
+        <div class="text-caption text-grey">Lifetime revenue</div>
+        <div class="text-h6">{{ lifetimeRevenue }} sat</div>
+      </q-card>
+      <q-card
+        flat
+        bordered
+        class="col-12 col-sm-6 col-md-3 panel-container q-pa-sm"
+      >
+        <div class="row items-center justify-between">
+          <div>
+            <div class="text-caption text-grey">This period</div>
+            <div class="text-h6">{{ periodValue }} sat</div>
+          </div>
+          <q-btn-toggle
+            v-model="period"
+            dense
+            size="sm"
+            toggle-color="primary"
+            :options="[
+              { label: 'W', value: 'week' },
+              { label: 'M', value: 'month' }
+            ]"
+          />
+        </div>
+      </q-card>
+    </div>
+
+    <!-- Charts -->
+    <div class="row q-col-gutter-md q-mb-md">
+      <q-card flat bordered class="col-12 col-md-4 panel-container q-pa-sm">
+        <div class="text-subtitle2 q-mb-sm">Revenue over time</div>
+        <canvas />
+      </q-card>
+      <q-card flat bordered class="col-12 col-md-4 panel-container q-pa-sm">
+        <div class="text-subtitle2 q-mb-sm">Frequency mix</div>
+        <canvas />
+      </q-card>
+      <q-card flat bordered class="col-12 col-md-4 panel-container q-pa-sm">
+        <div class="text-subtitle2 q-mb-sm">Status by frequency</div>
+        <canvas />
+      </q-card>
+    </div>
+
     <!-- Tabs -->
     <q-tabs v-model="activeTab" dense class="q-mb-md" no-caps>
       <q-tab name="all"
@@ -336,6 +402,24 @@ const selected = ref<Subscriber[]>([]);
 
 const view = ref<'table' | 'cards'>('table');
 const density = ref<'compact' | 'comfortable'>('comfortable');
+const period = ref<'week' | 'month'>('week');
+
+const activeCount = computed(() =>
+  filtered.value.filter((s) => s.status === 'active').length
+);
+const pendingCount = computed(() =>
+  filtered.value.filter((s) => s.status === 'pending').length
+);
+const lifetimeRevenue = computed(() =>
+  filtered.value.reduce((sum, s) => sum + s.lifetimeSat, 0)
+);
+const periodValue = computed(() =>
+  filtered.value
+    .filter((s) =>
+      period.value === 'week' ? s.frequency === 'weekly' : s.frequency === 'monthly'
+    )
+    .reduce((sum, s) => sum + s.amountSat, 0)
+);
 
 const columns = [
   { name: "subscriber", label: "Subscriber", field: "name", sortable: false },
