@@ -35,8 +35,8 @@ const statusOptions = [
 ];
 
 const tierOptions = computed(() => {
-  const ids = Array.from(new Set(store.subscribers.map(s => s.tierId)));
-  return ids.map(id => ({ label: id, value: id }));
+  const map = new Map(store.subscribers.map(s => [s.tierId, s.tierName]));
+  return Array.from(map, ([id, name]) => ({ label: name, value: id }));
 });
 
 const sortOptions = [
