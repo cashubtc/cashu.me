@@ -141,13 +141,17 @@ export const useCreatorSubscribersStore = defineStore("creatorSubscribers", {
 
       arr.sort((a, b) => {
         if (state.sort === "amount") {
-          return b.lifetimeSat - a.lifetimeSat;
+          const al = typeof a.lifetimeSat === "number" ? a.lifetimeSat : 0;
+          const bl = typeof b.lifetimeSat === "number" ? b.lifetimeSat : 0;
+          return bl - al;
         }
         if (state.sort === "first") {
           return a.startDate - b.startDate;
         }
-        const an = a.nextRenewal ?? 0;
-        const bn = b.nextRenewal ?? 0;
+        const an =
+          typeof a.nextRenewal === "number" ? a.nextRenewal : Number.POSITIVE_INFINITY;
+        const bn =
+          typeof b.nextRenewal === "number" ? b.nextRenewal : Number.POSITIVE_INFINITY;
         return an - bn;
       });
 

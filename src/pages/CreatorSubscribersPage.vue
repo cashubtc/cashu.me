@@ -408,8 +408,13 @@ const activeCount = computed(
 const pendingCount = computed(
   () => filtered.value.filter((s) => s.status === "pending").length
 );
+// Lifetime sats are included in the KPI row. Safeguard against undefined
+// values in case the field is missing from older data snapshots.
 const lifetimeRevenue = computed(() =>
-  filtered.value.reduce((sum, s) => sum + s.lifetimeSat, 0)
+  filtered.value.reduce(
+    (sum, s) => sum + (typeof s.lifetimeSat === "number" ? s.lifetimeSat : 0),
+    0,
+  ),
 );
 
 const periodMode = ref<"week" | "month">("month");
@@ -421,10 +426,13 @@ const kpiThisPeriodSat = computed(() => {
     .filter(
       (s) =>
         s.status === "active" &&
-        s.nextRenewal !== undefined &&
-        s.nextRenewal <= end
+        typeof s.nextRenewal === "number" &&
+        s.nextRenewal <= end,
     )
-    .reduce((sum, s) => sum + s.amountSat, 0);
+    .reduce(
+      (sum, s) => sum + (typeof s.amountSat === "number" ? s.amountSat : 0),
+      0,
+    );
 });
 const formattedKpiThisPeriodSat = computed(() =>
   kpiThisPeriodSat.value.toLocaleString()
