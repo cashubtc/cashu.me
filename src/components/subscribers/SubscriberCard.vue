@@ -1,41 +1,59 @@
 <template>
   <q-card
-    :class="[{ 'q-mb-sm': !compact, 'q-mb-xs': compact }, 'cursor-pointer']"
-    :style="{ height: cardHeight }"
+    :class="['cursor-pointer', { 'q-mb-sm': !compact, 'q-mb-xs': compact, 'card-selected': selected }]"
     @click="emit('select')"
+    flat
+    bordered
   >
-    <q-card-section :class="compact ? 'q-pa-xs' : 'q-pa-sm'">
+    <q-card-section :class="compact ? 'q-pa-sm' : 'q-pa-md'">
       <div class="row items-start justify-between no-wrap">
-        <div class="row items-start no-wrap">
-          <q-avatar size="40px" class="q-mr-sm">
+        <!-- Left side: avatar and info -->
+        <div class="row items-start no-wrap" style="flex-shrink: 1; min-width: 0">
+          <q-avatar size="40px" class="q-mr-sm" rounded>
             <img v-if="profile?.picture" :src="profile.picture" />
             <span v-else>{{ initials }}</span>
           </q-avatar>
-          <div class="column">
-            <div class="text-body2">{{ displayName }}</div>
-            <div class="text-caption text-grey-6">{{ nip05Domain }}</div>
-            <div class="row items-center q-mt-xs no-wrap">
-              <q-chip dense color="primary" text-color="white" class="q-mr-xs">
-                {{ subscription.tierName }}
-              </q-chip>
-              <q-chip dense outline class="q-mr-xs">
-                {{ subscription.frequency }}
-              </q-chip>
-              <q-chip dense :color="statusColor" text-color="white">
-                {{ subscription.status }}
-              </q-chip>
-            </div>
+          <div class="column" style="min-width: 0">
+            <div class="text-body1 ellipsis">{{ displayName }}</div>
+            <div class="text-caption text-grey-6 ellipsis">{{ profile?.nip05 || subscription.subscriberNpub.slice(0,24) + '...' }}</div>
           </div>
         </div>
-        <div class="column items-end">
-          <div class="text-subtitle2">{{ amountPerInterval }}</div>
+
+        <!-- Right side: amount and menu -->
+        <div class="column items-end no-wrap q-ml-sm">
+          <div class="text-subtitle2">{{ amountPerIntervalText }}</div>
           <div class="text-caption text-grey-6">{{ renewsText }}</div>
-          <q-btn flat dense round icon="chevron_right" @click.stop="emit('open')" />
         </div>
       </div>
-      <q-linear-progress :value="progress" class="q-mt-sm" />
-      <div class="text-caption text-grey-6 q-mt-xs">
-        Lifetime {{ lifetimeTotal }}
+
+      <!-- Bottom part: chips and progress -->
+      <div class="row items-center justify-between no-wrap q-mt-sm">
+        <div class="row items-center q-gutter-xs no-wrap">
+          <q-chip dense :label="subscription.tierName" color="primary" text-color="white" />
+          <q-chip dense outline :label="freqBadge">
+            <q-tooltip>{{ subscription.frequency }}</q-tooltip>
+          </q-chip>
+          <q-chip dense :color="statusColor" text-color="white" :label="subscription.status" />
+        </div>
+        <q-btn flat dense round icon="more_vert" @click.stop>
+          <q-menu auto-close>
+            <q-list dense>
+              <q-item clickable @click="emit('open')"><q-item-section>View details</q-item-section></q-item>
+              <q-item clickable><q-item-section>Copy npub</q-item-section></q-item>
+              <q-item clickable><q-item-section>Send DM</q-item-section></q-item>
+            </q-list>
+          </q-menu>
+        </q-btn>
+      </div>
+
+      <q-linear-progress
+        :value="subscription.nextRenewalProgress || 0"
+        :color="subscription.dueSoon ? 'orange' : 'primary'"
+        class="q-mt-sm"
+        rounded
+      />
+      <div class="text-caption text-grey-6 q-mt-xs text-right">
+        Lifetime {{ lifetimeTotalText }}
       </div>
     </q-card-section>
   </q-card>
@@ -43,15 +61,16 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import { formatDistanceToNow } from 'date-fns';
-import { useMintsStore } from 'stores/mints';
+import { formatDistanceToNowStrict } from 'date-fns';
 import { useUiStore } from 'stores/ui';
-import type { CreatorSubscription } from 'stores/creatorSubscriptions';
+import type { CreatorSubscription, Status, Frequency } from 'stores/creatorSubscriptions';
+import type { NDKUserProfile } from '@nostr-dev-kit/ndk';
 
 const props = defineProps<{
-  profile: any;
   subscription: CreatorSubscription;
+  profile?: NDKUserProfile;
   compact?: boolean;
+  selected?: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -60,72 +79,46 @@ const emit = defineEmits<{
 }>();
 
 const uiStore = useUiStore();
-const { activeUnit } = useMintsStore();
 
 function formatCurrency(amount: number): string {
-  return uiStore.formatCurrency(amount, activeUnit.value);
+  return uiStore.formatCurrency(amount);
 }
 
-const cardHeight = computed(() => (props.compact ? '96px' : '120px'));
-
 const initials = computed(() => {
-  const n =
-    props.profile?.display_name ||
-    props.profile?.name ||
-    props.subscription.subscriberNpub;
-  return n
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((p: string) => p[0])
-    .join('')
-    .toUpperCase();
+  const n = props.profile?.displayName || props.profile?.name || props.subscription.subscriberNpub;
+  return n.split(/\s+/).filter(Boolean).slice(0, 2).map((p: string) => p[0]).join('').toUpperCase();
 });
 
-const displayName = computed(
-  () =>
-    props.profile?.display_name ||
-    props.profile?.name ||
-    props.subscription.subscriberNpub,
-);
+const displayName = computed(() => props.profile?.displayName || props.profile?.name || props.subscription.subscriberNpub);
 
-const nip05Domain = computed(() => {
-  const nip05 = props.profile?.nip05;
-  if (!nip05) return '';
-  return nip05.split('@')[1] || nip05;
+const amountPerIntervalText = computed(() => {
+  const amount = props.subscription.amountPerInterval;
+  if (amount === undefined) return '—';
+  return `${formatCurrency(amount)} / ${freqBadge.value}`;
 });
 
-const amountPerInterval = computed(() => {
-  const periodAmount =
-    props.subscription.receivedPeriods > 0
-      ? props.subscription.totalAmount / props.subscription.receivedPeriods
-      : props.subscription.totalAmount;
-  return `${formatCurrency(periodAmount)} / ${props.subscription.frequency}`;
-});
-
-const lifetimeTotal = computed(() =>
-  formatCurrency(props.subscription.totalAmount),
-);
+const lifetimeTotalText = computed(() => formatCurrency(props.subscription.totalAmount));
 
 const statusColor = computed(() => {
-  if (props.subscription.status === 'active') return 'positive';
-  if (props.subscription.status === 'pending') return 'warning';
-  return 'grey';
+  const colors: Record<Status, string> = { active: 'positive', pending: 'warning', ended: 'grey-7' };
+  return colors[props.subscription.status] || 'grey';
+});
+
+const freqBadge = computed(() => {
+  const badges: Record<Frequency, string> = { weekly: 'W', biweekly: '2W', monthly: 'M' };
+  return badges[props.subscription.frequency];
 });
 
 const renewsText = computed(() => {
-  if (!props.subscription.nextRenewal) return 'renews in —';
-  return `renews in ${formatDistanceToNow(
-    props.subscription.nextRenewal * 1000,
-  )}`;
+  if (!props.subscription.nextRenewal) return '—';
+  if (props.subscription.status === 'ended') return 'Ended';
+  return `in ${formatDistanceToNowStrict(new Date(props.subscription.nextRenewal * 1000))}`;
 });
 
-const progress = computed(() => {
-  if (!props.subscription.nextRenewal) return 0;
-  const periodSeconds = props.subscription.intervalDays * 24 * 60 * 60;
-  const lastRenewal = props.subscription.nextRenewal - periodSeconds;
-  const now = Date.now() / 1000;
-  const elapsed = now - lastRenewal;
-  return Math.min(Math.max(elapsed / periodSeconds, 0), 1);
-});
 </script>
+
+<style scoped>
+.card-selected {
+  border-color: var(--q-primary);
+}
+</style>
