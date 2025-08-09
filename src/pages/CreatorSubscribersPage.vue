@@ -293,19 +293,19 @@ const filters =
 const selected = ref<Subscriber[]>([]);
 
 const columns = [
-  { name: "subscriber", label: "Subscriber", field: "name", sortable: true },
-  { name: "tier", label: "Tier", field: "tierName" },
-  { name: "frequency", label: "Freq", field: "frequency" },
-  { name: "status", label: "Status", field: "status" },
-  { name: "amount", label: "Amount", field: "amountSat", sortable: true },
+  { name: "subscriber", label: "Subscriber", field: "name", sortable: false },
+  { name: "tier", label: "Tier", field: "tierName", sortable: false },
+  { name: "frequency", label: "Freq", field: "frequency", sortable: false },
+  { name: "status", label: "Status", field: "status", sortable: false },
+  { name: "amount", label: "Amount", field: "amountSat", sortable: false },
   {
     name: "nextRenewal",
     label: "Next renewal",
     field: "nextRenewal",
-    sortable: true,
+    sortable: false,
   },
-  { name: "lifetime", label: "Lifetime", field: "lifetimeSat", sortable: true },
-  { name: "actions", label: "", field: "id" },
+  { name: "lifetime", label: "Lifetime", field: "lifetimeSat", sortable: false },
+  { name: "actions", label: "", field: "id", sortable: false },
 ];
 
 function initials(name: string) {
