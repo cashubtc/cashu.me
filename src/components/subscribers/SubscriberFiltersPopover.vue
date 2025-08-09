@@ -1,5 +1,11 @@
 <template>
-  <q-popup-proxy ref="popup" cover transition-show="scale" transition-hide="scale">
+  <q-menu
+    ref="menu"
+    anchor="bottom right"
+    self="top right"
+    transition-show="jump-down"
+    transition-hide="jump-up"
+  >
     <div class="q-pa-md" style="min-width: 200px">
       <div class="text-subtitle2 q-mb-sm">Status</div>
       <q-option-group v-model="localStatuses" :options="statusOptions" type="checkbox" />
@@ -8,11 +14,11 @@
       <div class="text-subtitle2 q-mt-md q-mb-sm">Sort</div>
       <q-option-group v-model="localSort" :options="sortOptions" type="radio" />
       <div class="row justify-end q-mt-md q-gutter-sm">
-        <q-btn flat label="Clear" @click="clear" />
-        <q-btn color="primary" label="Apply" @click="apply" />
+        <q-btn flat label="Clear" v-close-popup @click="clear" />
+        <q-btn color="primary" label="Apply" v-close-popup @click="apply" />
       </div>
     </div>
-  </q-popup-proxy>
+  </q-menu>
 </template>
 
 <script setup lang="ts">
@@ -23,7 +29,7 @@ import type { SortOption } from 'src/stores/creatorSubscribers';
 
 const store = useCreatorSubscribersStore();
 
-const popup = ref();
+const menu = ref();
 const localStatuses = ref<SubStatus[]>(Array.from(store.statuses));
 const localTiers = ref<string[]>(Array.from(store.tiers));
 const localSort = ref<SortOption>(store.sort);
@@ -51,7 +57,6 @@ function apply() {
     tiers: new Set(localTiers.value),
     sort: localSort.value
   });
-  popup.value?.hide();
 }
 
 function clear() {
@@ -59,11 +64,10 @@ function clear() {
   localTiers.value = [];
   localSort.value = 'next';
   store.clearFilters();
-  popup.value?.hide();
 }
 
-function show() {
-  popup.value?.show();
+function show(evt?: MouseEvent) {
+  menu.value?.show(evt);
 }
 
 defineExpose({ show });
