@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { mount } from '@vue/test-utils';
 import { ref } from 'vue';
-import CreatorSubscribers from '../../../src/pages/CreatorSubscribers.vue';
+import CreatorSubscribersPage from '../../../src/pages/CreatorSubscribersPage.vue';
 import type { CreatorSubscription } from '../../../src/stores/creatorSubscriptions';
 
 const mockSubs: CreatorSubscription[] = [
@@ -104,9 +104,9 @@ vi.mock('vue-i18n', async (importOriginal) => {
   };
 });
 
-describe('CreatorSubscribers', () => {
+describe('CreatorSubscribersPage', () => {
   function mountComponent() {
-    return mount(CreatorSubscribers, {
+    return mount(CreatorSubscribersPage, {
       global: {
         stubs: {
           'q-page': { template: '<div><slot /></div>' },
