@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { mount } from '@vue/test-utils';
 import { createTestingPinia } from '@pinia/testing';
-import CreatorSubscribers from '../src/pages/CreatorSubscribers.vue';
+import CreatorSubscribersPage from '../src/pages/CreatorSubscribersPage.vue';
 import type { CreatorSubscription } from '../src/stores/creatorSubscriptions';
 
 const mockSubs: CreatorSubscription[] = [
@@ -98,7 +98,7 @@ vi.mock('vue-i18n', async (importOriginal) => {
 
 describe('CreatorSubscribers page', () => {
   function mountPage() {
-    return mount(CreatorSubscribers, {
+    return mount(CreatorSubscribersPage, {
       global: {
         plugins: [
           createTestingPinia({
