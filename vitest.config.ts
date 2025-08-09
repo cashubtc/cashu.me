@@ -23,6 +23,7 @@ export default defineConfig({
     ],
     include: [
       "src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
+      "test/creatorSubscribers-page.spec.ts",
       "test/vitest/__tests__/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
     ],
   },
