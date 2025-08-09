@@ -76,7 +76,7 @@
         icon="download"
         label="Export CSV"
         class="q-ml-sm"
-        @click="exportCsv()"
+        @click="downloadCsv()"
       />
     </div>
 
@@ -244,7 +244,7 @@
         color="white"
         icon="download"
         label="Export selection"
-        @click="exportCsv(true)"
+          @click="downloadCsv(selected)"
       />
       <q-btn flat dense color="white" label="Clear" @click="selected = []" />
     </div>
@@ -320,6 +320,7 @@ import { useDebounceFn } from "@vueuse/core";
 import { format, formatDistanceToNow } from "date-fns";
 import { copyToClipboard } from "quasar";
 import type { Subscriber, Frequency, SubStatus } from "src/types/subscriber";
+import downloadCsv from "src/utils/subscriberCsv";
 
 const subStore = useCreatorSubscribersStore();
 const { filtered, counts } = storeToRefs(subStore);
@@ -407,34 +408,7 @@ function formatDate(ts: number) {
   return format(ts * 1000, "PP p");
 }
 
-function exportCsv(selectionOnly = false) {
-  const rows = selectionOnly ? selected.value : filtered.value;
-  const header =
-    "name,npub,nip05,tier,frequency,status,amount_sat,next_renewalISO,lifetime_sat,start_dateISO";
-  const lines = rows.map((r) =>
-    [
-      JSON.stringify(r.name),
-      r.npub,
-      r.nip05,
-      JSON.stringify(r.tierName),
-      r.frequency,
-      r.status,
-      r.amountSat,
-      r.nextRenewal ? new Date(r.nextRenewal * 1000).toISOString() : "",
-      r.lifetimeSat,
-      new Date(r.startDate * 1000).toISOString(),
-    ].join(",")
-  );
-  const blob = new Blob([header + "\n" + lines.join("\n")], {
-    type: "text/csv;charset=utf-8;",
-  });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = `subscribers-${Date.now()}.csv`;
-  a.click();
-  URL.revokeObjectURL(url);
-}
+
 
 const drawer = ref(false);
 const current = ref<Subscriber | null>(null);
