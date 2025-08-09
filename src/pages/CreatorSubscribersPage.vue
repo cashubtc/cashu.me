@@ -369,6 +369,35 @@
 </template>
 
 <script setup lang="ts">
+import {
+  Chart,
+  LineController,
+  DoughnutController,
+  BarController,
+  LineElement,
+  ArcElement,
+  BarElement,
+  PointElement,
+  CategoryScale,
+  LinearScale,
+  Legend,
+  Tooltip,
+} from "chart.js";
+
+Chart.register(
+  LineController,
+  DoughnutController,
+  BarController,
+  LineElement,
+  ArcElement,
+  BarElement,
+  PointElement,
+  CategoryScale,
+  LinearScale,
+  Legend,
+  Tooltip
+);
+
 import { ref, computed, watch } from "vue";
 import { useCreatorSubscribersStore } from "src/stores/creatorSubscribers";
 import { storeToRefs } from "pinia";
