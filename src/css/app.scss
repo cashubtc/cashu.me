@@ -110,6 +110,8 @@ body,
   --progress-ring-fill-light: var(--q-color-primary);
   --progress-ring-track-dark: var(--q-color-grey-8);
   --progress-ring-track-light: var(--q-color-grey-3);
+  --due-soon-bg-dark: color-mix(in srgb, var(--q-warning) 30%, transparent);
+  --due-soon-bg-light: color-mix(in srgb, var(--q-warning) 15%, transparent);
   --border-subtle: 1px solid var(--border-subtle-light);
 }
 
@@ -129,6 +131,7 @@ body.body--dark {
   --chip-text: var(--chip-text-dark);
   --progress-ring-fill: var(--progress-ring-fill-dark);
   --progress-ring-track: var(--progress-ring-track-dark);
+  --due-soon-bg: var(--due-soon-bg-dark);
 }
 
 body.body--light {
@@ -147,6 +150,7 @@ body.body--light {
   --chip-text: var(--chip-text-light);
   --progress-ring-fill: var(--progress-ring-fill-light);
   --progress-ring-track: var(--progress-ring-track-light);
+  --due-soon-bg: var(--due-soon-bg-light);
 }
 
 /* Utility components */
@@ -187,13 +191,35 @@ body.body--light {
 .progress-ring {
   --progress: 0;
   --size: 40px;
+  --thickness: 4px;
   width: var(--size);
   height: var(--size);
   border-radius: 50%;
-  background: conic-gradient(var(--progress-ring-fill) calc(var(--progress) * 1%),
-      var(--progress-ring-track) 0);
-  mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 0);
-  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 0);
+  position: relative;
+  display: grid;
+  place-items: center;
+  font-size: 0.65rem;
+  background: conic-gradient(
+    var(--progress-ring-fill) calc(var(--progress) * 1%),
+    var(--progress-ring-track) 0
+  );
+}
+
+.progress-ring::before {
+  content: "";
+  position: absolute;
+  inset: var(--thickness);
+  background: var(--panel-bg-color);
+  border-radius: inherit;
+}
+
+.progress-ring::after {
+  content: attr(data-label);
+  position: relative;
+}
+
+.due-soon {
+  background-color: var(--due-soon-bg);
 }
 
 /* utility background classes */
@@ -281,4 +307,3 @@ body.body--dark .received {
   width: 100%;
   max-width: 500px;
 }
-
