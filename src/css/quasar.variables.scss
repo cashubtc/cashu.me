@@ -24,3 +24,21 @@ $positive: #21ba45;
 $negative: #c10015;
 $info: #06b6d4;
 $warning: #f2c037;
+
+// Custom variables
+// Panel backgrounds
+$panel-dark: $grey-9;
+$panel-light: $grey-2;
+
+// Subtle border colors
+$subtle-border-dark: $border-subtle-dark;
+$subtle-border-light: $border-subtle-light;
+
+// Chip colors
+$chip-bg: $accent-green;
+$chip-text: #ffffff;
+
+// Progress ring colors
+$progress-ring-fill: $primary-pink;
+$progress-ring-track-dark: $grey-8;
+$progress-ring-track-light: $grey-3;
