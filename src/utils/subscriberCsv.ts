@@ -1,63 +1,36 @@
-import type { CreatorSubscription } from "stores/creatorSubscriptions";
+import { useCreatorSubscribersStore } from "src/stores/creatorSubscribers";
+import type { Subscriber } from "src/types/subscriber";
 
-export function downloadCsv(rows: CreatorSubscription[]) {
-  const headers = [
-    "subscriptionId",
-    "displayName",
-    "npub",
-    "nip05",
-    "lud16",
-    "tier",
-    "frequency",
-    "status",
-    "nextRenewal",
-    "intervalDays",
-    "totalAmount",
-    "startDate",
-    "endDate",
-  ];
-  const lines = [headers.join(",")];
+export function downloadCsv(rows?: Subscriber[]) {
+  const store = useCreatorSubscribersStore();
+  const data = rows ?? store.filtered;
 
-  for (const sub of rows) {
-    const r: any = sub as any;
-    const next = sub.nextRenewal
-      ? new Date(sub.nextRenewal * 1000).toISOString()
-      : "";
-    const start = sub.startDate
-      ? new Date(sub.startDate * 1000).toISOString()
-      : "";
-    const end = sub.endDate
-      ? new Date(sub.endDate * 1000).toISOString()
-      : "";
-    const row = [
-      sub.subscriptionId,
-      r.displayName ?? "",
-      r.npub ?? sub.subscriberNpub,
-      r.nip05 ?? "",
-      r.lud16 ?? "",
-      r.tier ?? sub.tierName,
-      sub.frequency,
-      sub.status,
-      next,
-      sub.intervalDays,
-      sub.totalAmount,
-      start,
-      end,
-    ]
-      .map((v) => `"${String(v ?? "").replace(/"/g, '""')}"`)
-      .join(",");
-    lines.push(row);
-  }
+  const header =
+    "name,npub,nip05,tier,frequency,status,amount_sat,next_renewalISO,lifetime_sat,start_dateISO";
+  const lines = data.map((r) =>
+    [
+      JSON.stringify(r.name),
+      r.npub,
+      r.nip05,
+      JSON.stringify(r.tierName),
+      r.frequency,
+      r.status,
+      r.amountSat,
+      r.nextRenewal ? new Date(r.nextRenewal * 1000).toISOString() : "",
+      r.lifetimeSat,
+      new Date(r.startDate * 1000).toISOString(),
+    ].join(","),
+  );
 
-  const csv = lines.join("\n");
-  const blob = new Blob([csv], { type: "text/csv" });
+  const blob = new Blob([header + "\n" + lines.join("\n")], {
+    type: "text/csv;charset=utf-8;",
+  });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = "subscribers.csv";
+  a.download = `subscribers-${Date.now()}.csv`;
   a.click();
   URL.revokeObjectURL(url);
 }
 
 export default downloadCsv;
-
