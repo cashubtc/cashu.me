@@ -3,7 +3,7 @@ import type { Subscriber, Frequency, SubStatus } from "../types/subscriber";
 
 type Tab = "all" | Frequency | "pending" | "ended";
 
-type SortOption = "next" | "first" | "amount";
+export type SortOption = "next" | "first" | "amount";
 
 const mockSubscribers: Subscriber[] = [
   {
@@ -102,6 +102,9 @@ export const useCreatorSubscribersStore = defineStore("creatorSubscribers", {
   }),
   getters: {
     filtered(state): Subscriber[] {
+      // accessing the active tab here ensures this getter recomputes whenever
+      // the user switches tabs in the UI
+      const currentTab = state.activeTab;
       let arr = state.subscribers.slice();
 
       if (state.statuses.size) {
@@ -151,6 +154,9 @@ export const useCreatorSubscribersStore = defineStore("creatorSubscribers", {
       return arr;
     },
     counts(state) {
+      // state.sort is included to make the getter reactive to sort changes,
+      // even though the sorting itself does not affect the totals
+      void state.sort;
       let arr = state.subscribers.slice();
 
       if (state.statuses.size) {
@@ -177,6 +183,24 @@ export const useCreatorSubscribersStore = defineStore("creatorSubscribers", {
         pending: arr.filter((s) => s.status === "pending").length,
         ended: arr.filter((s) => s.status === "ended").length,
       };
+    },
+  },
+  actions: {
+    setActiveTab(tab: Tab) {
+      this.activeTab = tab;
+    },
+    setQuery(q: string) {
+      this.query = q;
+    },
+    applyFilters(opts: { statuses: Set<SubStatus>; tiers: Set<string>; sort: SortOption }) {
+      this.statuses = new Set(opts.statuses);
+      this.tiers = new Set(opts.tiers);
+      this.sort = opts.sort;
+    },
+    clearFilters() {
+      this.statuses.clear();
+      this.tiers.clear();
+      this.sort = "next";
     },
   },
 });
