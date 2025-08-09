@@ -14,6 +14,26 @@
           <q-icon name="search" />
         </template>
       </q-input>
+      <q-btn-toggle
+        v-model="view"
+        dense
+        toggle-color="primary"
+        class="q-ml-sm"
+        :options="[
+          { value: 'table', icon: 'table_rows' },
+          { value: 'cards', icon: 'grid_view' }
+        ]"
+      />
+      <q-btn-toggle
+        v-model="density"
+        dense
+        toggle-color="primary"
+        class="q-ml-sm"
+        :options="[
+          { value: 'comfortable', icon: 'view_comfy' },
+          { value: 'compact', icon: 'view_compact' }
+        ]"
+      />
       <q-btn
         dense
         flat
@@ -82,6 +102,7 @@
 
     <!-- Table -->
     <q-table
+      v-if="view === 'table'"
       flat
       :rows="filtered"
       row-key="id"
@@ -90,6 +111,7 @@
       :columns="columns"
       :rows-per-page-options="[10, 25, 50]"
       :row-class="rowClass"
+      :dense="density === 'compact'"
     >
       <template #body-cell-subscriber="props">
         <q-td :props="props">
@@ -182,6 +204,23 @@
             @click="openDrawer(props.row)" /></q-td
       ></template>
     </q-table>
+    <div v-else class="row q-col-gutter-md q-row-gutter-md">
+      <div
+        v-for="row in filtered"
+        :key="row.id"
+        class="col-12 col-sm-6 col-md-4"
+      >
+        <SubscriberCard
+          :subscription="{ tierName: row.tierName, subscriberNpub: row.npub } as any"
+          :status="row.status"
+          :next-in="row.nextRenewal ? distToNow(row.nextRenewal) : '—'"
+          :progress="progressPercent(row) / 100"
+          :amount="row.amountSat + ' sat'"
+          :compact="density === 'compact'"
+          @click="openDrawer(row)"
+        />
+      </div>
+    </div>
 
     <!-- Selection bar -->
     <div
@@ -277,6 +316,7 @@ import { useI18n } from "vue-i18n";
 import type { Subscriber, Frequency, SubStatus } from "src/types/subscriber";
 import downloadCsv from "src/utils/subscriberCsv";
 import SubscriberFiltersPopover from "src/components/subscribers/SubscriberFiltersPopover.vue";
+import SubscriberCard from "src/components/SubscriberCard.vue";
 
 const subStore = useCreatorSubscribersStore();
 const { filtered, counts, activeTab } = storeToRefs(subStore);
@@ -291,6 +331,9 @@ const filters =
   ref<InstanceType<typeof SubscriberFiltersPopover> | null>(null);
 
 const selected = ref<Subscriber[]>([]);
+
+const view = ref<'table' | 'cards'>('table');
+const density = ref<'compact' | 'comfortable'>('comfortable');
 
 const columns = [
   { name: "subscriber", label: "Subscriber", field: "name", sortable: false },
@@ -338,7 +381,10 @@ function dueSoon(r: Subscriber) {
   return r.nextRenewal * 1000 - Date.now() < 72 * 3600 * 1000;
 }
 function rowClass(row: Subscriber) {
-  return dueSoon(row) ? "due-soon" : "";
+  const classes = [] as string[];
+  if (dueSoon(row)) classes.push("due-soon");
+  classes.push(density.value);
+  return classes.join(" ");
 }
 function distToNow(ts: number) {
   return formatDistanceToNow(ts * 1000, { addSuffix: true });
@@ -388,3 +434,17 @@ const activity = computed(() => {
   return arr;
 });
 </script>
+
+<style scoped>
+.compact td {
+  padding-top: 4px;
+  padding-bottom: 4px;
+  font-size: 12px;
+}
+
+.comfortable td {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  font-size: 14px;
+}
+</style>
