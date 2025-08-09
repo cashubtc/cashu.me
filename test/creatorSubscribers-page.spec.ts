@@ -1,202 +1,132 @@
 import { describe, it, expect, vi } from 'vitest';
 import { mount } from '@vue/test-utils';
 import { createTestingPinia } from '@pinia/testing';
+
+vi.mock('@vueuse/core', () => ({ useDebounceFn: (fn: any) => fn }));
+vi.mock('quasar', () => ({ copyToClipboard: vi.fn() }));
+vi.mock('src/utils/subscriberCsv', () => ({ default: vi.fn() }));
+
+import downloadCsv from 'src/utils/subscriberCsv';
 import CreatorSubscribersPage from '../src/pages/CreatorSubscribersPage.vue';
-import type { CreatorSubscription } from '../src/stores/creatorSubscriptions';
+import { useCreatorSubscribersStore } from '../src/stores/creatorSubscribers';
 
-const mockSubs: CreatorSubscription[] = [
-  {
-    subscriptionId: 'w1',
-    subscriberNpub: 'alice',
-    tierId: 't1',
-    tierName: 'Alpha',
-    frequency: 'weekly',
-    intervalDays: 7,
-    totalPeriods: null,
-    receivedPeriods: 1,
-    remainingPeriods: 0,
-    totalAmount: 1000,
-    status: 'active',
-    nextRenewal: 1000,
-    startDate: 100,
-    endDate: null,
+const stubs = {
+  'q-page': { template: '<div><slot /></div>' },
+  'q-input': {
+    props: ['modelValue'],
+    emits: ['update:modelValue'],
+    template: '<input :value="modelValue" @input="$emit(\'update:modelValue\', $event.target.value)" />',
   },
-  {
-    subscriptionId: 'b1',
-    subscriberNpub: 'bob',
-    tierId: 't2',
-    tierName: 'Beta',
-    frequency: 'biweekly',
-    intervalDays: 14,
-    totalPeriods: null,
-    receivedPeriods: 1,
-    remainingPeriods: 0,
-    totalAmount: 2000,
-    status: 'pending',
-    nextRenewal: 2000,
-    startDate: 200,
-    endDate: null,
+  'q-btn': {
+    props: ['label'],
+    template: '<button :data-label="label" @click="$emit(\'click\')"><slot /></button>',
   },
-  {
-    subscriptionId: 'm1',
-    subscriberNpub: 'carol',
-    tierId: 't3',
-    tierName: 'Gamma',
-    frequency: 'monthly',
-    intervalDays: 30,
-    totalPeriods: null,
-    receivedPeriods: 1,
-    remainingPeriods: 0,
-    totalAmount: 3000,
-    status: 'active',
-    nextRenewal: 3000,
-    startDate: 300,
-    endDate: 1,
+  'q-menu': { template: '<div><slot /></div>' },
+  'q-chip': { template: '<div class="q-chip" @click="$emit(\'click\')"><slot /></div>' },
+  'q-select': {
+    props: ['modelValue', 'options'],
+    emits: ['update:model-value'],
+    template:
+      '<select @change="$emit(\'update:model-value\', $event.target.value)"><option v-for="o in options" :value="o.value">{{o.label}}</option></select>',
   },
-  {
-    subscriptionId: 'w2',
-    subscriberNpub: 'dave',
-    tierId: 't1',
-    tierName: 'Alpha',
-    frequency: 'weekly',
-    intervalDays: 7,
-    totalPeriods: null,
-    receivedPeriods: 1,
-    remainingPeriods: 0,
-    totalAmount: 4000,
-    status: 'active',
-    nextRenewal: 1500,
-    startDate: 50,
-    endDate: null,
+  'q-tabs': { template: '<div class="q-tabs"><slot /></div>' },
+  'q-tab': { props: ['name'], template: '<div class="q-tab" :data-name="name"><slot /></div>' },
+  'q-badge': { template: '<span class="q-badge"><slot /></span>' },
+  'q-table': {
+    props: ['rows'],
+    template:
+      '<div class="q-table"><div v-for="r in rows" :key="r.id" class="tbody-row">{{ r.name }}</div></div>',
   },
-];
+  'q-avatar': { template: '<span class="q-avatar"><slot /></span>' },
+  'q-td': { template: '<td><slot /></td>' },
+  'q-drawer': {
+    props: ['modelValue'],
+    emits: ['update:modelValue'],
+    template: '<div class="drawer" v-show="modelValue"><slot /></div>',
+  },
+  'q-space': { template: '<span class="q-space"></span>' },
+};
 
-vi.mock('../src/composables/useNostrProfiles', () => ({
-  useNostrProfiles: () => ({ get: () => undefined }),
-}));
+function mountPage() {
+  return mount(CreatorSubscribersPage, {
+    global: {
+      plugins: [createTestingPinia({ createSpy: vi.fn })],
+      stubs,
+    },
+  });
+}
 
-vi.mock('@vueuse/core', () => ({
-  useDebounceFn: (fn: any) => fn,
-}));
-
-vi.mock('vue-i18n', async (importOriginal) => {
-  const actual = await importOriginal();
-  return {
-    ...actual,
-    useI18n: () => ({
-      t: (key: string) => {
-        const map: Record<string, string> = {
-          'CreatorSubscribers.frequency.weekly': 'Weekly',
-          'CreatorSubscribers.frequency.biweekly': 'Bi-weekly',
-          'CreatorSubscribers.frequency.monthly': 'Monthly',
-        };
-        return map[key] || key;
-      },
-    }),
-  };
-});
-
-describe('CreatorSubscribers page', () => {
-  function mountPage() {
-    return mount(CreatorSubscribersPage, {
-      global: {
-        plugins: [
-          createTestingPinia({
-            createSpy: vi.fn,
-            initialState: {
-              creatorSubscriptions: {
-                subscriptions: mockSubs,
-                loading: false,
-              },
-            },
-          }),
-        ],
-        stubs: {
-          'q-page': { template: '<div><slot /></div>' },
-          SubscriberCard: {
-            props: ['sub', 'profile', 'compact'],
-            template: '<div class="subscriber-card">{{ sub.subscriptionId }}</div>',
-          },
-          SubscriberDrawer: true,
-          KpiCard: true,
-          Sparkline: true,
-          SubscriptionsCharts: true,
-          'q-virtual-scroll': {
-            props: ['items'],
-            template: '<div><slot v-for="item in items" :item="item" /></div>',
-          },
-        },
-      },
-    });
-  }
-
-  it('groups subscriptions by frequency', () => {
+describe('CreatorSubscribersPage', () => {
+  it('shows correct tab counts', () => {
     const wrapper = mountPage();
-    const groups = wrapper.findAll('.mb-8');
-    expect(groups.length).toBe(3);
-    expect(groups[0].find('h6').text()).toContain('Weekly');
-    expect(groups[0].findAll('.subscriber-card').length).toBe(2);
-    expect(groups[1].find('h6').text()).toContain('Bi-weekly');
-    expect(groups[1].findAll('.subscriber-card').length).toBe(1);
-    expect(groups[2].find('h6').text()).toContain('Monthly');
-    expect(groups[2].findAll('.subscriber-card').length).toBe(1);
+    const badges = wrapper.findAll('.q-badge');
+    expect(badges.map((b) => b.text())).toEqual(['6', '2', '2', '2', '2', '1']);
   });
 
-  it('filters by search, frequency, status, and tier', async () => {
+  it('filters by search, status and tier', async () => {
     const wrapper = mountPage();
+    const rows = () => wrapper.findAll('.tbody-row').map((r) => r.text());
 
-    wrapper.vm.search = 'Beta';
+    wrapper.vm.search = 'bob';
     await wrapper.vm.$nextTick();
-    expect(wrapper.findAll('.subscriber-card').length).toBe(1);
+    expect(rows()).toEqual(['Bob']);
 
     wrapper.vm.search = '';
     await wrapper.vm.$nextTick();
 
-    wrapper.vm.toggleFrequency('biweekly');
-    wrapper.vm.toggleFrequency('monthly');
-    await wrapper.vm.$nextTick();
-    expect(wrapper.findAll('.subscriber-card').length).toBe(2);
-    wrapper.vm.toggleFrequency('biweekly');
-    wrapper.vm.toggleFrequency('monthly');
-    await wrapper.vm.$nextTick();
-
     wrapper.vm.toggleStatus('pending');
-    wrapper.vm.toggleStatus('ended');
     await wrapper.vm.$nextTick();
-    expect(wrapper.findAll('.subscriber-card').length).toBe(2);
-    wrapper.vm.toggleStatus('pending');
-    wrapper.vm.toggleStatus('ended');
-    await wrapper.vm.$nextTick();
+    expect(rows()).toEqual(['Bob', 'Frank']);
 
-    wrapper.vm.tierFilter = 't2';
+    wrapper.vm.toggleTier('t3');
     await wrapper.vm.$nextTick();
-    expect(wrapper.findAll('.subscriber-card').length).toBe(1);
+    expect(rows()).toEqual(['Frank']);
   });
 
-  it('sorts by next renewal, first seen, and lifetime sats', async () => {
+  it('sorts subscribers', async () => {
     const wrapper = mountPage();
-
-    let weekly = wrapper
-      .findAll('.mb-8')[0]
-      .findAll('.subscriber-card')
-      .map((c) => c.text());
-    expect(weekly).toEqual(['w1', 'w2']);
+    const rows = () => wrapper.findAll('.tbody-row').map((r) => r.text());
 
     wrapper.vm.sort = 'first';
     await wrapper.vm.$nextTick();
-    weekly = wrapper
-      .findAll('.mb-8')[0]
-      .findAll('.subscriber-card')
-      .map((c) => c.text());
-    expect(weekly).toEqual(['w2', 'w1']);
+    expect(rows()[0]).toBe('Dave');
 
     wrapper.vm.sort = 'amount';
     await wrapper.vm.$nextTick();
-    weekly = wrapper
-      .findAll('.mb-8')[0]
-      .findAll('.subscriber-card')
-      .map((c) => c.text());
-    expect(weekly).toEqual(['w2', 'w1']);
+    expect(rows()[0]).toBe('Eve');
+  });
+
+  it('computes progress and dueSoon correctly', () => {
+    vi.useFakeTimers();
+    const wrapper = mountPage();
+    const store = useCreatorSubscribersStore();
+    const alice = store.subscribers[0];
+    const start = alice.nextRenewal! * 1000 - 7 * 86400000;
+
+    vi.setSystemTime(start + 3.5 * 86400000);
+    expect(wrapper.vm.progressPercent(alice)).toBe(50);
+
+    vi.setSystemTime(alice.nextRenewal! * 1000 - 2 * 86400000);
+    expect(wrapper.vm.dueSoon(alice)).toBe(true);
+
+    vi.setSystemTime(alice.nextRenewal! * 1000 - 5 * 86400000);
+    expect(wrapper.vm.dueSoon(alice)).toBe(false);
+    vi.useRealTimers();
+  });
+
+  it('exports all or selected rows to CSV', async () => {
+    const wrapper = mountPage();
+    const store = useCreatorSubscribersStore();
+    (downloadCsv as unknown as vi.Mock).mockClear();
+
+    await wrapper.find('button[data-label="Export CSV"]').trigger('click');
+    expect(downloadCsv).toHaveBeenCalledWith();
+
+    (downloadCsv as unknown as vi.Mock).mockClear();
+    wrapper.vm.selected = [store.subscribers[0]];
+    await wrapper.vm.$nextTick();
+    await wrapper.find('button[data-label="Export selection"]').trigger('click');
+    expect(downloadCsv).toHaveBeenCalledWith([store.subscribers[0]]);
   });
 });
 
