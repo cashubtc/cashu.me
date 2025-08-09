@@ -357,7 +357,7 @@
 
 <script setup lang="ts">
 import {
-  Chart,
+  Chart as ChartJS,
   LineController,
   DoughnutController,
   BarController,
@@ -369,9 +369,10 @@ import {
   LinearScale,
   Legend,
   Tooltip,
+  type Chart,
 } from "chart.js";
 
-Chart.register(
+ChartJS.register(
   LineController,
   DoughnutController,
   BarController,
@@ -495,7 +496,7 @@ let barChart: Chart | null = null;
 
 onMounted(() => {
   if (lineEl.value) {
-    lineChart = new Chart(lineEl.value, {
+    lineChart = new ChartJS(lineEl.value, {
       type: "line",
       data: {
         labels: revenueSeries.value.labels,
@@ -513,7 +514,7 @@ onMounted(() => {
     });
   }
   if (doughnutEl.value) {
-    doughnutChart = new Chart(doughnutEl.value, {
+    doughnutChart = new ChartJS(doughnutEl.value, {
       type: "doughnut",
       data: {
         labels: ["Weekly", "Bi-weekly", "Monthly"],
@@ -528,7 +529,7 @@ onMounted(() => {
     });
   }
   if (barEl.value) {
-    barChart = new Chart(barEl.value, {
+    barChart = new ChartJS(barEl.value, {
       type: "bar",
       data: {
         labels: statusByFreq.value.labels,
