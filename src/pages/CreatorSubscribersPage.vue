@@ -284,7 +284,7 @@
         <div class="q-mt-sm">Lifetime: {{ current.lifetimeSat }} sat</div>
         <div class="q-mt-sm">Since {{ formatDate(current.startDate) }}</div>
         <div class="row q-gutter-sm q-mt-md">
-          <q-btn outline label="DM" :to="'/dm/' + current.npub" />
+          <q-btn outline label="DM" @click="dmSubscriber" />
           <q-btn outline label="Copy npub" @click="copyNpub" />
         </div>
         <div class="q-mt-lg">
@@ -318,7 +318,9 @@ import { useCreatorSubscribersStore } from "src/stores/creatorSubscribers";
 import { storeToRefs } from "pinia";
 import { useDebounceFn } from "@vueuse/core";
 import { format, formatDistanceToNow } from "date-fns";
-import { copyToClipboard } from "quasar";
+import { useQuasar } from "quasar";
+import { useRouter } from "vue-router";
+import { useI18n } from "vue-i18n";
 import type { Subscriber, Frequency, SubStatus } from "src/types/subscriber";
 import downloadCsv from "src/utils/subscriberCsv";
 
@@ -416,8 +418,19 @@ function openDrawer(r: Subscriber) {
   current.value = r;
   drawer.value = true;
 }
+const $q = useQuasar();
+const router = useRouter();
+const { t } = useI18n();
+
 function copyNpub() {
-  if (current.value) copyToClipboard(current.value.npub);
+  if (!current.value) return;
+  $q.clipboard.writeText(current.value.npub);
+  $q.notify({ message: t('copied_to_clipboard'), color: 'positive' });
+}
+
+function dmSubscriber() {
+  if (!current.value) return;
+  router.push({ path: '/nostr-messenger', query: { pubkey: current.value.npub } });
 }
 const payments = computed(() => {
   const r = current.value;
