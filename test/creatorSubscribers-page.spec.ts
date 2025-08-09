@@ -2,8 +2,40 @@ import { describe, it, expect, vi } from 'vitest';
 import { mount } from '@vue/test-utils';
 import { createTestingPinia } from '@pinia/testing';
 
+var Chart: any;
+const charts: { type: string; inst: any }[] = [];
+vi.mock('chart.js', () => {
+  Chart = vi.fn((_: any, cfg: any) => {
+    const inst = { data: JSON.parse(JSON.stringify(cfg.data)), update: vi.fn() };
+    charts.push({ type: cfg.type, inst });
+    return inst;
+  });
+  Chart.register = vi.fn();
+  return {
+    Chart,
+    LineController: vi.fn(),
+    DoughnutController: vi.fn(),
+    BarController: vi.fn(),
+    LineElement: vi.fn(),
+    ArcElement: vi.fn(),
+    BarElement: vi.fn(),
+    PointElement: vi.fn(),
+    CategoryScale: vi.fn(),
+    LinearScale: vi.fn(),
+    Legend: vi.fn(),
+    Tooltip: vi.fn(),
+  };
+});
+
 vi.mock('@vueuse/core', () => ({ useDebounceFn: (fn: any) => fn }));
-vi.mock('quasar', () => ({ copyToClipboard: vi.fn() }));
+vi.mock('quasar', async (importOriginal) => {
+  const actual = await importOriginal();
+  return {
+    ...actual,
+    copyToClipboard: vi.fn(),
+    useQuasar: () => ({ clipboard: { writeText: vi.fn() }, notify: vi.fn() }),
+  };
+});
 vi.mock('src/utils/subscriberCsv', () => ({ default: vi.fn() }));
 
 import downloadCsv from 'src/utils/subscriberCsv';
@@ -50,7 +82,7 @@ const stubs = {
 function mountPage() {
   return mount(CreatorSubscribersPage, {
     global: {
-      plugins: [createTestingPinia({ createSpy: vi.fn })],
+      plugins: [createTestingPinia({ createSpy: vi.fn, stubActions: false })],
       stubs,
     },
   });
@@ -65,6 +97,7 @@ describe('CreatorSubscribersPage', () => {
 
   it('filters by search, status and tier', async () => {
     const wrapper = mountPage();
+    const store = useCreatorSubscribersStore(wrapper.vm.$pinia);
     const rows = () => wrapper.findAll('.tbody-row').map((r) => r.text());
 
     wrapper.vm.search = 'bob';
@@ -74,24 +107,25 @@ describe('CreatorSubscribersPage', () => {
     wrapper.vm.search = '';
     await wrapper.vm.$nextTick();
 
-    wrapper.vm.toggleStatus('pending');
+    store.applyFilters({ statuses: new Set(['pending']), tiers: new Set(), sort: 'next' });
     await wrapper.vm.$nextTick();
     expect(rows()).toEqual(['Bob', 'Frank']);
 
-    wrapper.vm.toggleTier('t3');
+    store.applyFilters({ statuses: new Set(['pending']), tiers: new Set(['t3']), sort: 'next' });
     await wrapper.vm.$nextTick();
     expect(rows()).toEqual(['Frank']);
   });
 
   it('sorts subscribers', async () => {
     const wrapper = mountPage();
+    const store = useCreatorSubscribersStore(wrapper.vm.$pinia);
     const rows = () => wrapper.findAll('.tbody-row').map((r) => r.text());
 
-    wrapper.vm.sort = 'first';
+    store.sort = 'first';
     await wrapper.vm.$nextTick();
     expect(rows()[0]).toBe('Dave');
 
-    wrapper.vm.sort = 'amount';
+    store.sort = 'amount';
     await wrapper.vm.$nextTick();
     expect(rows()[0]).toBe('Eve');
   });
@@ -99,7 +133,7 @@ describe('CreatorSubscribersPage', () => {
   it('computes progress and dueSoon correctly', () => {
     vi.useFakeTimers();
     const wrapper = mountPage();
-    const store = useCreatorSubscribersStore();
+    const store = useCreatorSubscribersStore(wrapper.vm.$pinia);
     const alice = store.subscribers[0];
     const start = alice.nextRenewal! * 1000 - 7 * 86400000;
 
@@ -127,6 +161,66 @@ describe('CreatorSubscribersPage', () => {
     await wrapper.vm.$nextTick();
     await wrapper.find('button[data-label="Export selection"]').trigger('click');
     expect(downloadCsv).toHaveBeenCalledWith([store.subscribers[0]]);
+  });
+
+  it('updates KPI numbers when searching, switching tabs and applying filters', async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(1700000000000));
+    const wrapper = mountPage();
+    await wrapper.vm.$nextTick();
+    const store = useCreatorSubscribersStore(wrapper.vm.$pinia);
+
+    const values = () => [
+      String(wrapper.vm.counts.all),
+      `${wrapper.vm.activeCount} / ${wrapper.vm.pendingCount}`,
+      `${wrapper.vm.lifetimeRevenue} sat`,
+      `${wrapper.vm.formattedKpiThisPeriodSat} sat`,
+    ];
+
+    expect(values()).toEqual(['6', '3 / 2', '27000 sat', '3,000 sat']);
+
+    wrapper.vm.search = 'bob';
+    await wrapper.vm.$nextTick();
+    expect(values()).toEqual(['1', '0 / 1', '1000 sat', '0 sat']);
+
+    wrapper.vm.search = '';
+    await wrapper.vm.$nextTick();
+
+    store.setActiveTab('weekly');
+    await wrapper.vm.$nextTick();
+    expect(values()).toEqual(['6', '1 / 1', '6000 sat', '1,000 sat']);
+
+    store.setActiveTab('all');
+    await wrapper.vm.$nextTick();
+    store.applyFilters({ statuses: new Set(['pending']), tiers: new Set(['t3']), sort: 'next' });
+    await wrapper.vm.$nextTick();
+    expect(values()).toEqual(['1', '0 / 1', '5000 sat', '0 sat']);
+
+    vi.useRealTimers();
+  });
+
+  it('updates charts without re-instantiating on filter and period changes', async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(1700000000000));
+    const wrapper = mountPage();
+    await wrapper.vm.$nextTick();
+    await wrapper.vm.$nextTick();
+
+    const initialCalls = charts.length;
+
+    wrapper.vm.search = 'bob';
+    await wrapper.vm.$nextTick();
+    await wrapper.vm.$nextTick();
+    expect(wrapper.vm.filtered.map((s: any) => s.name)).toEqual(['Bob']);
+    expect(charts.length).toBe(initialCalls);
+
+    wrapper.vm.search = '';
+    await wrapper.vm.$nextTick();
+    wrapper.vm.togglePeriod();
+    await wrapper.vm.$nextTick();
+
+    expect(charts.length).toBe(initialCalls);
+    vi.useRealTimers();
   });
 });
 
