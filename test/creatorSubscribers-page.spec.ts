@@ -59,6 +59,7 @@ const stubs = {
   'q-layout': { template: '<div><slot /></div>' },
   'q-header': { template: '<div><slot /></div>' },
   'q-toolbar': { template: '<div><slot /></div>' },
+  'q-btn-group': { template: '<div><slot /></div>' },
   'q-page-container': { template: '<div><slot /></div>' },
   'q-page': { template: '<div><slot /></div>' },
   'q-input': {
