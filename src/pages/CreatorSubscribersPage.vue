@@ -589,6 +589,7 @@ function openFilters(e: MouseEvent) {
 }
 
 function retry() {
+  void subStore.loadFromDb();
   void subStore.fetchProfiles();
 }
 
@@ -625,7 +626,8 @@ let lineChart: Chart | null = null;
 let doughnutChart: Chart | null = null;
 let barChart: Chart | null = null;
 
-onMounted(() => {
+onMounted(async () => {
+  await subStore.loadFromDb();
   void subStore.fetchProfiles();
   // Instantiate charts after DOM elements are available.
   if (lineEl.value) {
