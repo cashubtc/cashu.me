@@ -638,9 +638,8 @@ let lineChart: Chart | null = null;
 let doughnutChart: Chart | null = null;
 let barChart: Chart | null = null;
 
-onMounted(async () => {
-  await subStore.loadFromDb();
-  void subStore.fetchProfiles();
+onMounted(() => {
+  void subStore.loadFromDb();
   // Instantiate charts after DOM elements are available.
   if (lineEl.value) {
     lineChart = new ChartJS(lineEl.value, {
@@ -706,6 +705,17 @@ onMounted(async () => {
     });
   }
 });
+
+// When the list of subscribers changes, fetch profiles for any new npubs.
+watch(
+  () => subStore.subscribers.map((s) => s.npub),
+  (npubs, prev) => {
+    const prevSet = new Set(prev);
+    if (npubs.some((n) => !prevSet.has(n))) {
+      void subStore.fetchProfiles();
+    }
+  },
+);
 
 // When the underlying computed data changes, update the charts without
 // re-creating them. This keeps Chart.js lifecycle simple and avoids leaks.
