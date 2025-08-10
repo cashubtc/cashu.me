@@ -370,7 +370,7 @@
     </div>
     </q-page>
   </q-page-container>
-  <q-drawer v-model="drawer" side="right" overlay bordered>
+  <q-drawer v-model="drawer" side="right" :overlay="$q.screen.lt.md" bordered>
     <div v-if="current" class="q-pa-md">
         <div class="row items-center q-gutter-sm">
           <q-avatar size="64px">{{ initials(current.name) }}</q-avatar>
@@ -378,6 +378,8 @@
             <div class="text-h6">{{ current.name }}</div>
             <div class="text-body2 text-grey-6">{{ current.nip05 }}</div>
           </div>
+          <q-space />
+          <q-btn icon="close" flat round @click="drawer = false" />
         </div>
         <div class="row q-gutter-xs q-mt-md">
           <q-chip dense color="primary" text-color="white">{{
