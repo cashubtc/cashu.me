@@ -2,6 +2,7 @@ import { defineStore } from "pinia";
 import type { Subscriber, Frequency, SubStatus } from "../types/subscriber";
 import { useNostrStore } from "./nostr";
 import { cashuDb } from "./dexie";
+import { liveQuery } from "dexie";
 import {
   daysToFrequency,
   frequencyToDays,
@@ -15,6 +16,8 @@ export const useCreatorSubscribersStore = defineStore("creatorSubscribers", {
   state: () => ({
     subscribers: [] as Subscriber[],
     profileCache: {} as Record<string, { name: string; nip05: string }>,
+    /** handle returned by Dexie's liveQuery for cleanup */
+    _dbSub: null as { unsubscribe(): void } | null,
     query: "",
     activeTab: "all" as Tab,
     statuses: new Set<SubStatus>(),
@@ -113,111 +116,123 @@ export const useCreatorSubscribersStore = defineStore("creatorSubscribers", {
     },
   },
   actions: {
-    async loadFromDb() {
+    loadFromDb() {
       this.loading = true;
       this.error = null;
-      try {
-        const rows = await cashuDb.lockedTokens
+      // dispose previous subscription if called again
+      this._dbSub?.unsubscribe();
+      this._dbSub = liveQuery(() =>
+        cashuDb.lockedTokens
           .where("owner")
           .equals("creator")
           .and((t) => !!t.subscriptionId && !!t.subscriberNpub)
-          .toArray();
-
-        type Agg = {
-          id: string;
-          npub: string;
-          tierId: string;
-          tierName: string;
-          amountSat: number;
-          frequency: Frequency;
-          intervalDays: number;
-          tokens: { unlockTs: number }[];
-          lifetime: number;
-          totalPeriods?: number;
-        };
-
-        const map = new Map<string, Agg>();
-        for (const row of rows) {
-          const key = `${row.subscriptionId}-${row.subscriberNpub}`;
-          const freq = (row.frequency || daysToFrequency(row.intervalDays || 30)) as Frequency;
-          const intervalDays = row.intervalDays ?? frequencyToDays(freq);
-          let agg = map.get(key);
-          if (!agg) {
-            agg = {
-              id: key,
-              npub: row.subscriberNpub!,
-              tierId: row.tierId,
-              tierName: row.tierName || "",
-              amountSat: row.amount,
-              frequency: freq,
-              intervalDays,
-              tokens: [],
-              lifetime: 0,
-              totalPeriods: row.totalPeriods,
+          .toArray(),
+      ).subscribe({
+        next: (rows) => {
+          try {
+            type Agg = {
+              id: string;
+              npub: string;
+              tierId: string;
+              tierName: string;
+              amountSat: number;
+              frequency: Frequency;
+              intervalDays: number;
+              tokens: { unlockTs: number }[];
+              lifetime: number;
+              totalPeriods?: number;
             };
-            map.set(key, agg);
-          }
-          if (row.unlockTs != null) {
-            agg.tokens.push({ unlockTs: row.unlockTs });
-          }
-          agg.lifetime += row.amount;
-          if (row.totalPeriods != null && agg.totalPeriods == null) {
-            agg.totalPeriods = row.totalPeriods;
-          }
-        }
 
-        const now = Date.now() / 1000;
-        this.subscribers = Array.from(map.values()).map((g) => {
-          g.tokens.sort((a, b) => a.unlockTs - b.unlockTs);
-          const receivedPeriods = g.tokens.length;
-          const earliest = g.tokens[0]?.unlockTs ?? 0;
-          const latest = g.tokens[g.tokens.length - 1]?.unlockTs;
-          const nextRenewal =
-            latest != null ? latest + g.intervalDays * 86400 : undefined;
+            const map = new Map<string, Agg>();
+            for (const row of rows) {
+              const key = `${row.subscriptionId}-${row.subscriberNpub}`;
+              const freq = (row.frequency || daysToFrequency(row.intervalDays || 30)) as Frequency;
+              const intervalDays = row.intervalDays ?? frequencyToDays(freq);
+              let agg = map.get(key);
+              if (!agg) {
+                agg = {
+                  id: key,
+                  npub: row.subscriberNpub!,
+                  tierId: row.tierId,
+                  tierName: row.tierName || "",
+                  amountSat: row.amount,
+                  frequency: freq,
+                  intervalDays,
+                  tokens: [],
+                  lifetime: 0,
+                  totalPeriods: row.totalPeriods,
+                };
+                map.set(key, agg);
+              }
+              if (row.unlockTs != null) {
+                agg.tokens.push({ unlockTs: row.unlockTs });
+              }
+              agg.lifetime += row.amount;
+              if (row.totalPeriods != null && agg.totalPeriods == null) {
+                agg.totalPeriods = row.totalPeriods;
+              }
+            }
 
-          let status: SubStatus;
-          if (g.totalPeriods != null && receivedPeriods >= g.totalPeriods) {
-            status = "ended";
-          } else {
-            const nextUnlock = g.tokens[0]?.unlockTs;
-            status = nextUnlock != null && nextUnlock <= now ? "active" : "pending";
+            const now = Date.now() / 1000;
+            this.subscribers = Array.from(map.values()).map((g) => {
+              g.tokens.sort((a, b) => a.unlockTs - b.unlockTs);
+              const receivedPeriods = g.tokens.length;
+              const earliest = g.tokens[0]?.unlockTs ?? 0;
+              const latest = g.tokens[g.tokens.length - 1]?.unlockTs;
+              const nextRenewal =
+                latest != null ? latest + g.intervalDays * 86400 : undefined;
+
+              let status: SubStatus;
+              if (g.totalPeriods != null && receivedPeriods >= g.totalPeriods) {
+                status = "ended";
+              } else {
+                const nextUnlock = g.tokens[0]?.unlockTs;
+                status =
+                  nextUnlock != null && nextUnlock <= now ? "active" : "pending";
+              }
+
+              let progress = 0;
+              let dueSoon = false;
+              if (nextRenewal != null) {
+                const period = g.intervalDays * 86400;
+                const start = nextRenewal - period;
+                progress = Math.min(Math.max((now - start) / period, 0), 1);
+                dueSoon = status === "active" && nextRenewal - now < 72 * 3600;
+              }
+
+              return {
+                id: g.id,
+                name: g.npub,
+                npub: g.npub,
+                nip05: "",
+                tierId: g.tierId,
+                tierName: g.tierName,
+                amountSat: g.amountSat,
+                frequency: g.frequency,
+                intervalDays: g.intervalDays,
+                status,
+                startDate: earliest,
+                nextRenewal,
+                lifetimeSat: g.lifetime,
+                receivedPeriods,
+                totalPeriods: g.totalPeriods,
+                progress,
+                dueSoon,
+              } as Subscriber;
+            });
+            this.loading = false;
+          } catch (e) {
+            console.error(e);
+            this.error = e instanceof Error ? e.message : String(e);
+            this.loading = false;
           }
-
-          let progress = 0;
-          let dueSoon = false;
-          if (nextRenewal != null) {
-            const period = g.intervalDays * 86400;
-            const start = nextRenewal - period;
-            progress = Math.min(Math.max((now - start) / period, 0), 1);
-            dueSoon = status === "active" && nextRenewal - now < 72 * 3600;
-          }
-
-          return {
-            id: g.id,
-            name: g.npub,
-            npub: g.npub,
-            nip05: "",
-            tierId: g.tierId,
-            tierName: g.tierName,
-            amountSat: g.amountSat,
-            frequency: g.frequency,
-            intervalDays: g.intervalDays,
-            status,
-            startDate: earliest,
-            nextRenewal,
-            lifetimeSat: g.lifetime,
-            receivedPeriods,
-            totalPeriods: g.totalPeriods,
-            progress,
-            dueSoon,
-          } as Subscriber;
-        });
-      } catch (e) {
-        console.error(e);
-        this.error = e instanceof Error ? e.message : String(e);
-      } finally {
-        this.loading = false;
-      }
+        },
+        error: (e) => {
+          console.error(e);
+          this.error = e instanceof Error ? e.message : String(e);
+          this.loading = false;
+        },
+      });
     },
     async fetchProfiles() {
       const nostr = useNostrStore();
@@ -225,14 +240,13 @@ export const useCreatorSubscribersStore = defineStore("creatorSubscribers", {
       this.error = null;
       try {
         const unique = Array.from(new Set(this.subscribers.map((s) => s.npub)));
-        for (const npub of unique) {
-          if (!this.profileCache[npub]) {
-            const profile = await nostr.getProfile(npub);
-            this.profileCache[npub] = {
-              name: profile?.name || "",
-              nip05: profile?.nip05 || "",
-            };
-          }
+        const uncached = unique.filter((npub) => !this.profileCache[npub]);
+        for (const npub of uncached) {
+          const profile = await nostr.getProfile(npub);
+          this.profileCache[npub] = {
+            name: profile?.name || "",
+            nip05: profile?.nip05 || "",
+          };
         }
         this.subscribers = this.subscribers.map((s) => {
           const cached = this.profileCache[s.npub];
