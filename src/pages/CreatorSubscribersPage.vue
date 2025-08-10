@@ -351,23 +351,6 @@
         </div>
         <q-bar class="bg-grey-2 q-mt-sm">
           <div class="text-body2 monospace ellipsis">{{ current.npub }}</div>
-          <q-space />
-          <q-btn
-            flat
-            dense
-            round
-            icon="content_copy"
-            :aria-label="t('CreatorSubscribers.drawer.actions.copyNpub')"
-            @click="copyNpub"
-          />
-          <q-btn
-            flat
-            dense
-            round
-            icon="share"
-            aria-label="Share npub"
-            @click="shareNpub"
-          />
         </q-bar>
         <div class="row q-gutter-xs q-mt-md">
           <q-chip dense color="primary" text-color="white">{{
@@ -409,6 +392,22 @@
             :label="t('CreatorSubscribers.drawer.actions.dm')"
             :aria-label="t('CreatorSubscribers.drawer.actions.dm')"
             @click="dmSubscriber"
+          />
+          <q-btn
+            flat
+            dense
+            round
+            icon="content_copy"
+            :aria-label="t('CreatorSubscribers.drawer.actions.copyNpub')"
+            @click="copyNpub"
+          />
+          <q-btn
+            flat
+            dense
+            round
+            icon="share"
+            aria-label="Share npub"
+            @click="shareNpub"
           />
         </div>
         <q-expansion-item
