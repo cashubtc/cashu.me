@@ -234,7 +234,12 @@
       <template #body-cell-subscriber="props">
         <q-td :props="props">
           <div class="row items-center q-gutter-sm no-wrap">
-            <q-avatar size="32px">{{ initials(props.row.name) }}</q-avatar>
+            <q-avatar
+              size="32px"
+              @click.stop="showAvatarMenu($event, props.row)"
+            >
+              {{ initials(props.row.name) }}
+            </q-avatar>
             <div>
               <div class="text-body2">{{ props.row.name }}</div>
               <div class="text-caption text-grey-6">{{ props.row.nip05 }}</div>
@@ -344,6 +349,17 @@
       </template>
     </q-virtual-scroll>
 
+    <q-menu ref="avatarMenuRef">
+      <q-list>
+        <q-item clickable v-close-popup @click="copyAnyNpub(menuNpub)">
+          <q-item-section>{{ t('CreatorSubscribers.drawer.actions.copyNpub') }}</q-item-section>
+        </q-item>
+        <q-item clickable v-close-popup @click="shareAnyNpub(menuNpub)">
+          <q-item-section>Share</q-item-section>
+        </q-item>
+      </q-list>
+    </q-menu>
+
     <!-- Selection bar -->
     <div
       v-if="selected.length"
@@ -374,14 +390,41 @@
   <q-drawer v-model="drawer" side="right" :overlay="$q.screen.lt.md" bordered>
     <div v-if="current" class="q-pa-md">
         <div class="row items-center q-gutter-sm">
+          <q-btn
+            flat
+            dense
+            round
+            icon="arrow_back"
+            aria-label="Back"
+            @click="drawer = false"
+          />
           <q-avatar size="64px">{{ initials(current.name) }}</q-avatar>
           <div>
             <div class="text-h6">{{ current.name }}</div>
             <div class="text-body2 text-grey-6">{{ current.nip05 }}</div>
           </div>
           <q-space />
-          <q-btn icon="close" flat round @click="drawer = false" />
         </div>
+        <q-bar class="bg-grey-2 q-mt-sm">
+          <div class="text-body2 monospace ellipsis">{{ current.npub }}</div>
+          <q-space />
+          <q-btn
+            flat
+            dense
+            round
+            icon="content_copy"
+            :aria-label="t('CreatorSubscribers.drawer.actions.copyNpub')"
+            @click="copyNpub"
+          />
+          <q-btn
+            flat
+            dense
+            round
+            icon="share"
+            aria-label="Share npub"
+            @click="shareNpub"
+          />
+        </q-bar>
         <div class="row q-gutter-xs q-mt-md">
           <q-chip dense color="primary" text-color="white">{{
             current.tierName
@@ -417,33 +460,49 @@
           {{ formatDate(current.startDate) }}
         </div>
         <div class="row q-gutter-sm q-mt-md">
-          <q-btn outline :label="t('CreatorSubscribers.drawer.actions.dm')" :aria-label="t('CreatorSubscribers.drawer.actions.dm')" @click="dmSubscriber" />
-          <q-btn outline :label="t('CreatorSubscribers.drawer.actions.copyNpub')" :aria-label="t('CreatorSubscribers.drawer.actions.copyNpub')" @click="copyNpub" />
+          <q-btn
+            outline
+            :label="t('CreatorSubscribers.drawer.actions.dm')"
+            :aria-label="t('CreatorSubscribers.drawer.actions.dm')"
+            @click="dmSubscriber"
+          />
         </div>
-        <div class="q-mt-lg">
-          <div class="text-subtitle2 q-mb-sm">
-            {{ t('CreatorSubscribers.drawer.tabs.payments') }}
-          </div>
-          <q-list bordered dense>
-            <q-item v-for="p in payments" :key="p.ts">
-              <q-item-section>{{ formatDate(p.ts) }}</q-item-section>
-              <q-item-section side>{{ p.amount }} sat</q-item-section>
-            </q-item>
-          </q-list>
-        </div>
-        <div class="q-mt-lg">
-          <div class="text-subtitle2 q-mb-sm">
-            {{ t('CreatorSubscribers.drawer.activity') }}
-          </div>
-          <q-list bordered dense>
-            <q-item v-for="a in activity" :key="a.ts">
-              <q-item-section>{{ a.text }}</q-item-section>
-              <q-item-section side class="text-caption text-grey">{{
-                distToNow(a.ts)
-              }}</q-item-section>
-            </q-item>
-          </q-list>
-        </div>
+        <q-expansion-item
+          class="q-mt-lg"
+          expand-separator
+          icon="payments"
+          :label="t('CreatorSubscribers.drawer.tabs.payments')"
+        >
+          <q-card>
+            <q-card-section class="q-pa-none">
+              <q-list bordered dense>
+                <q-item v-for="p in payments" :key="p.ts">
+                  <q-item-section>{{ formatDate(p.ts) }}</q-item-section>
+                  <q-item-section side>{{ p.amount }} sat</q-item-section>
+                </q-item>
+              </q-list>
+            </q-card-section>
+          </q-card>
+        </q-expansion-item>
+        <q-expansion-item
+          class="q-mt-md"
+          expand-separator
+          icon="history"
+          :label="t('CreatorSubscribers.drawer.activity')"
+        >
+          <q-card>
+            <q-card-section class="q-pa-none">
+              <q-list bordered dense>
+                <q-item v-for="a in activity" :key="a.ts">
+                  <q-item-section>{{ a.text }}</q-item-section>
+                  <q-item-section side class="text-caption text-grey">
+                    {{ distToNow(a.ts) }}
+                  </q-item-section>
+                </q-item>
+              </q-list>
+            </q-card-section>
+          </q-card>
+        </q-expansion-item>
     </div>
   </q-drawer>
 </q-layout>
@@ -486,7 +545,7 @@ import { storeToRefs } from "pinia";
 import { useDebounceFn } from "@vueuse/core";
 import { format, formatDistanceToNow } from "date-fns";
 import { useQuasar } from "quasar";
-import type { QTableRequestProp } from "quasar";
+import type { QTableRequestProp, QMenu } from "quasar";
 import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
 import type { Subscriber, Frequency, SubStatus } from "src/types/subscriber";
@@ -934,13 +993,33 @@ function openDrawer(r: Subscriber) {
   current.value = r;
   drawer.value = true;
 }
+const avatarMenuRef = ref<QMenu | null>(null);
+const menuNpub = ref("");
+function showAvatarMenu(e: Event, row: Subscriber) {
+  menuNpub.value = row.npub;
+  avatarMenuRef.value?.show(e);
+}
 const $q = useQuasar();
 const router = useRouter();
 
+function copyAnyNpub(npub: string) {
+  $q.clipboard.writeText(npub);
+  $q.notify({ message: t("copied_to_clipboard"), color: "positive" });
+}
 function copyNpub() {
   if (!current.value) return;
-  $q.clipboard.writeText(current.value.npub);
-  $q.notify({ message: t("copied_to_clipboard"), color: "positive" });
+  copyAnyNpub(current.value.npub);
+}
+function shareAnyNpub(npub: string) {
+  if ((navigator as any).share) {
+    (navigator as any).share({ text: npub });
+  } else {
+    copyAnyNpub(npub);
+  }
+}
+function shareNpub() {
+  if (!current.value) return;
+  shareAnyNpub(current.value.npub);
 }
 
 function dmSubscriber() {
