@@ -1,70 +1,73 @@
 <template>
-  <q-page padding>
-    <SubscriberFiltersPopover ref="filters" />
-    <q-banner v-if="error" dense class="q-mb-md bg-red-1 text-red">
-      {{ error }}
-      <template #action>
+  <q-layout view="hHh lpR fFf">
+    <q-header class="bg-white text-dark">
+      <q-toolbar class="row items-center q-gutter-sm">
         <q-btn
           flat
-          color="red"
-          :label="t('CreatorSubscribers.actions.retry')"
-          :aria-label="t('CreatorSubscribers.actions.retry')"
-          @click="retry"
+          dense
+          round
+          icon="menu"
+          :aria-label="t('CreatorSubscribers.actions.filters')"
+          @click="filtersOpen = !filtersOpen"
         />
-      </template>
-    </q-banner>
-    <q-inner-loading :showing="loading">
-      <q-spinner size="50px" color="primary" />
-    </q-inner-loading>
-    <!-- Top bar -->
-    <div class="row items-center q-gutter-sm q-mb-md">
-      <div class="text-h6">{{ t('CreatorSubscribers.summary.subscribers') }}</div>
-      <q-input
-        dense
-        v-model="search"
-        :placeholder="t('CreatorSubscribers.toolbar.searchPlaceholder')"
-        class="q-ml-md"
-        clearable
-      >
-        <template #prepend>
-          <q-icon name="search" />
-        </template>
-      </q-input>
-      <q-btn-toggle
-        v-model="view"
-        dense
-        toggle-color="primary"
-        class="q-ml-sm"
-        :options="viewOptions"
-      />
-      <q-btn-toggle
-        v-model="density"
-        dense
-        toggle-color="primary"
-        class="q-ml-sm"
-        :options="densityOptions"
-      />
-      <q-btn
-        dense
-        flat
-        round
-        icon="tune"
-        class="q-ml-sm"
-        @click.stop="openFilters()"
-        :aria-label="t('CreatorSubscribers.actions.filters')"
-      />
-      <q-btn
-        outline
-        color="grey-5"
-        icon="download"
-        :label="t('CreatorSubscribers.toolbar.exportCsv')"
-        class="q-ml-sm"
-        :aria-label="t('CreatorSubscribers.toolbar.exportCsv')"
-        @click="downloadCsv()"
-      />
-    </div>
-
-    <!-- KPI Row -->
+        <div class="text-h6">{{ t('CreatorSubscribers.summary.subscribers') }}</div>
+        <q-input
+          dense
+          v-model="search"
+          :placeholder="t('CreatorSubscribers.toolbar.searchPlaceholder')"
+          class="q-ml-md"
+          clearable
+        >
+          <template #prepend>
+            <q-icon name="search" />
+          </template>
+        </q-input>
+        <q-btn-toggle
+          v-model="view"
+          dense
+          toggle-color="primary"
+          class="q-ml-sm"
+          :options="viewOptions"
+        />
+        <q-btn-toggle
+          v-model="density"
+          dense
+          toggle-color="primary"
+          class="q-ml-sm"
+          :options="densityOptions"
+        />
+        <q-btn
+          outline
+          color="grey-5"
+          icon="download"
+          :label="t('CreatorSubscribers.toolbar.exportCsv')"
+          class="q-ml-sm"
+          :aria-label="t('CreatorSubscribers.toolbar.exportCsv')"
+          @click="downloadCsv()"
+        />
+      </q-toolbar>
+    </q-header>
+    <q-drawer v-model="filtersOpen" side="left" bordered :overlay="$q.screen.lt.md">
+      <SubscriberFilters />
+    </q-drawer>
+    <q-page-container>
+      <q-page class="q-pa-md fit">
+        <q-banner v-if="error" dense class="q-mb-md bg-red-1 text-red">
+          {{ error }}
+          <template #action>
+            <q-btn
+              flat
+              color="red"
+              :label="t('CreatorSubscribers.actions.retry')"
+              :aria-label="t('CreatorSubscribers.actions.retry')"
+              @click="retry"
+            />
+          </template>
+        </q-banner>
+        <q-inner-loading :showing="loading">
+          <q-spinner size="50px" color="primary" />
+        </q-inner-loading>
+        <!-- KPI Row -->
     <div class="row q-col-gutter-md q-mb-md">
       <q-card
         flat
@@ -331,10 +334,10 @@
         @click="clearSelected"
       />
     </div>
-
-    <!-- Drawer -->
-    <q-drawer v-model="drawer" side="right" overlay bordered>
-      <div v-if="current" class="q-pa-md">
+    </q-page>
+  </q-page-container>
+  <q-drawer v-model="drawer" side="right" overlay bordered>
+    <div v-if="current" class="q-pa-md">
         <div class="row items-center q-gutter-sm">
           <q-avatar size="64px">{{ initials(current.name) }}</q-avatar>
           <div>
@@ -404,9 +407,9 @@
             </q-item>
           </q-list>
         </div>
-      </div>
-    </q-drawer>
-  </q-page>
+    </div>
+  </q-drawer>
+</q-layout>
 </template>
 
 <script setup lang="ts">
@@ -451,7 +454,7 @@ import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
 import type { Subscriber, Frequency, SubStatus } from "src/types/subscriber";
 import downloadCsv from "src/utils/subscriberCsv";
-import SubscriberFiltersPopover from "src/components/subscribers/SubscriberFiltersPopover.vue";
+import SubscriberFilters from "src/components/subscribers/SubscriberFilters.vue";
 import SubscriberCard from "src/components/SubscriberCard.vue";
 
 const { t } = useI18n();
@@ -459,7 +462,7 @@ const { t } = useI18n();
 const subStore = useCreatorSubscribersStore();
 const { filtered, counts, activeTab, loading, error } = storeToRefs(subStore);
 // `filtered` is maintained by the Pinia store based on the active tab,
-// search query and filter popover. Treat it as the single source of truth
+// search query and filter drawer. Treat it as the single source of truth
 // for the subscriber list and KPI counts throughout this page.
 
 const activeCount = computed(
@@ -586,11 +589,7 @@ const applySearch = useDebounceFn((v: string) => {
 }, 300);
 watch(search, (v) => applySearch(v));
 
-const filters = ref<InstanceType<typeof SubscriberFiltersPopover> | null>(null);
-
-function openFilters() {
-  filters.value?.show();
-}
+const filtersOpen = ref(false);
 
 function retry() {
   void subStore.loadFromDb();

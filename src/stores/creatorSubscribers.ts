@@ -3,6 +3,7 @@ import type { Subscriber, Frequency, SubStatus } from "../types/subscriber";
 import { useNostrStore } from "./nostr";
 import { cashuDb } from "./dexie";
 import { liveQuery } from "dexie";
+import { nip19 } from "nostr-tools";
 import {
   daysToFrequency,
   frequencyToDays,
@@ -200,10 +201,12 @@ export const useCreatorSubscribersStore = defineStore("creatorSubscribers", {
                 dueSoon = status === "active" && nextRenewal - now < 72 * 3600;
               }
 
+              const npub = nip19.npubEncode(g.npub);
+
               return {
                 id: g.id,
-                name: g.npub,
-                npub: g.npub,
+                name: npub,
+                npub,
                 nip05: "",
                 tierId: g.tierId,
                 tierName: g.tierName,

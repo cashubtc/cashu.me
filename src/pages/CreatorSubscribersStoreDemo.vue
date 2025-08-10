@@ -2,8 +2,8 @@
   <q-page class="q-pa-md">
     <div class="row items-center q-gutter-sm q-mb-md">
       <q-input dense v-model="search" placeholder="Search" clearable @update:model-value="onSearch" />
-      <q-btn flat icon="filter_list" @click="filters?.show()" />
     </div>
+    <SubscriberFilters class="q-mb-md" />
     <q-tabs v-model="activeTab" dense class="text-grey-7" active-color="primary" indicator-color="primary">
       <q-tab name="all" :label="`All (${counts.all})`" />
       <q-tab name="weekly" :label="`Weekly (${counts.weekly})`" />
@@ -23,7 +23,6 @@
         </div>
       </template>
     </q-virtual-scroll>
-    <SubscriberFiltersPopover ref="filters" />
   </q-page>
 </template>
 
@@ -31,14 +30,13 @@
 import { ref } from 'vue';
 import { useDebounceFn } from '@vueuse/core';
 import { storeToRefs } from 'pinia';
-import SubscriberFiltersPopover from 'src/components/subscribers/SubscriberFiltersPopover.vue';
+import SubscriberFilters from 'src/components/subscribers/SubscriberFilters.vue';
 import { useCreatorSubscribersStore } from 'src/stores/creatorSubscribers';
 
 const store = useCreatorSubscribersStore();
 const { filtered, counts, activeTab } = storeToRefs(store);
 
 const search = ref(store.query);
-const filters = ref<InstanceType<typeof SubscriberFiltersPopover> | null>(null);
 
 const onSearch = useDebounceFn((val: string) => {
   store.setQuery(val);

@@ -42,7 +42,7 @@ vi.mock('quasar', async (importOriginal) => {
   return {
     ...actual,
     copyToClipboard: vi.fn(),
-    useQuasar: () => ({ clipboard: { writeText: clipboardWrite }, notify: vi.fn() }),
+    useQuasar: () => ({ clipboard: { writeText: clipboardWrite }, notify: vi.fn(), screen: { lt: { md: false } } }),
   };
 });
 const routerPush = vi.fn();
@@ -56,6 +56,10 @@ import downloadCsv from 'src/utils/subscriberCsv';
 import CreatorSubscribersPage from '../src/pages/CreatorSubscribersPage.vue';
 
 const stubs = {
+  'q-layout': { template: '<div><slot /></div>' },
+  'q-header': { template: '<div><slot /></div>' },
+  'q-toolbar': { template: '<div><slot /></div>' },
+  'q-page-container': { template: '<div><slot /></div>' },
   'q-page': { template: '<div><slot /></div>' },
   'q-input': {
     props: ['modelValue'],
@@ -67,7 +71,6 @@ const stubs = {
     template:
       '<button :data-label="label" :aria-label="ariaLabel" @click="$emit(\'click\', $event)"><slot /></button>',
   },
-  'q-menu': { template: '<div><slot /></div>' },
   'q-chip': { template: '<div class="q-chip" @click="$emit(\'click\')"><slot /></div>' },
   'q-select': {
     props: ['modelValue', 'options'],
@@ -92,7 +95,7 @@ const stubs = {
   },
   'q-space': { template: '<span class="q-space"></span>' },
   'q-banner': { template: '<div><slot /><slot name="action" /></div>' },
-  SubscriberFiltersPopover: { template: '<div></div>' },
+  SubscriberFilters: { template: '<div></div>' },
 };
 
 function mountPage() {
@@ -110,6 +113,12 @@ describe('CreatorSubscribersPage', () => {
     const wrapper = mountPage();
     const badges = wrapper.findAll('.q-badge');
     expect(badges.map((b) => b.text())).toEqual(['6', '2', '2', '2', '2', '1']);
+  });
+
+  it('converts npub to bech32', () => {
+    const wrapper = mountPage();
+    const store = useCreatorSubscribersStore(wrapper.vm.$pinia);
+    expect(store.subscribers[0].npub).toMatch(/^npub1/);
   });
 
   it('filters by search, status and tier', async () => {
@@ -204,10 +213,9 @@ describe('CreatorSubscribersPage', () => {
 
   it('opens filters when filter button clicked', async () => {
     const wrapper = mountPage();
-    const show = vi.fn();
-    wrapper.vm.filters = { show } as any;
+    expect(wrapper.vm.filtersOpen).toBe(false);
     await wrapper.find('button[aria-label="Filters"]').trigger('click');
-    expect(show).toHaveBeenCalled();
+    expect(wrapper.vm.filtersOpen).toBe(true);
   });
 
   it('clears selection when clear button clicked', async () => {

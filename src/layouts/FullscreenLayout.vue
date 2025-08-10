@@ -5,9 +5,7 @@
   >
     <MainHeader />
     <q-page-container class="text-body1">
-      <div class="max-w-7xl mx-auto">
-        <router-view />
-      </div>
+      <router-view />
     </q-page-container>
     <PublishBar
       v-if="loggedIn && showPublishBar"
