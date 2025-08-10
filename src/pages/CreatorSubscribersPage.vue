@@ -49,7 +49,7 @@
         round
         icon="tune"
         class="q-ml-sm"
-        @click.stop="openFilters"
+        @click.stop="openFilters()"
         :aria-label="t('CreatorSubscribers.actions.filters')"
       />
       <q-btn
@@ -584,8 +584,8 @@ watch(search, (v) => applySearch(v));
 
 const filters = ref<InstanceType<typeof SubscriberFiltersPopover> | null>(null);
 
-function openFilters(e: MouseEvent) {
-  filters.value?.show(e);
+function openFilters() {
+  filters.value?.show();
 }
 
 function retry() {

@@ -1,8 +1,8 @@
 <template>
   <q-menu
     ref="menu"
-    anchor="bottom right"
-    self="top right"
+    anchor="bottom left"
+    self="top left"
     transition-show="jump-down"
     transition-hide="jump-up"
   >
@@ -84,8 +84,8 @@ function clear() {
   store.clearFilters();
 }
 
-function show(evt?: MouseEvent) {
-  menu.value?.show(evt);
+function show() {
+  menu.value?.show();
 }
 
 defineExpose({ show });
