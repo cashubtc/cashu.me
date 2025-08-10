@@ -68,11 +68,11 @@
           <q-spinner size="50px" color="primary" />
         </q-inner-loading>
         <!-- KPI Row -->
-    <div class="row q-col-gutter-md q-mb-md">
+    <div class="row q-col-gutter-lg q-mb-lg">
       <q-card
         flat
         bordered
-        class="col-12 col-sm-6 col-md-3 panel-container q-pa-sm"
+        class="col-12 col-sm-6 col-md-3 panel-container q-pa-md q-ma-sm"
       >
         <div class="text-caption text-grey">
           {{ t('CreatorSubscribers.summary.subscribers') }}
@@ -82,7 +82,7 @@
       <q-card
         flat
         bordered
-        class="col-12 col-sm-6 col-md-3 panel-container q-pa-sm"
+        class="col-12 col-sm-6 col-md-3 panel-container q-pa-md q-ma-sm"
       >
         <div class="text-caption text-grey">
           {{ t('CreatorSubscribers.summary.active') }} /
@@ -93,7 +93,7 @@
       <q-card
         flat
         bordered
-        class="col-12 col-sm-6 col-md-3 panel-container q-pa-sm"
+        class="col-12 col-sm-6 col-md-3 panel-container q-pa-md q-ma-sm"
       >
         <div class="text-caption text-grey">
           {{ t('CreatorSubscribers.summary.lifetimeRevenue') }}
@@ -103,7 +103,7 @@
       <q-card
         flat
         bordered
-        class="col-12 col-sm-6 col-md-3 panel-container q-pa-sm"
+        class="col-12 col-sm-6 col-md-3 panel-container q-pa-md q-ma-sm"
         @click="togglePeriod"
       >
         <div class="text-caption text-grey">
@@ -123,12 +123,12 @@
       class="q-mb-md"
       :options="chartToggleOptions"
     />
-    <div class="row q-col-gutter-md q-mb-md">
+    <div class="row q-col-gutter-lg q-mb-lg">
       <q-card
         v-show="showRevenueChart"
         flat
         bordered
-        class="col-12 col-md-4 panel-container q-pa-sm"
+        class="col-12 col-md-4 panel-container q-pa-md q-ma-sm"
       >
         <div class="text-subtitle2 q-mb-sm">
           {{ t('CreatorSubscribers.charts.revenueOverTime') }}
@@ -144,7 +144,7 @@
           v-show="showFrequencyChart"
           flat
           bordered
-          class="col-12 col-md-4 panel-container q-pa-sm"
+          class="col-12 col-md-4 panel-container q-pa-md q-ma-sm"
         >
         <div class="text-subtitle2 q-mb-sm">
           {{ t('CreatorSubscribers.charts.frequencyMix') }}
@@ -160,7 +160,7 @@
         v-show="showStatusChart"
         flat
         bordered
-        class="col-12 col-md-4 panel-container q-pa-sm"
+        class="col-12 col-md-4 panel-container q-pa-md q-ma-sm"
       >
         <div class="text-subtitle2 q-mb-sm">
           {{ t('CreatorSubscribers.charts.statusByFrequency') }}
@@ -226,7 +226,7 @@
       :rows-per-page-options="[10, 25, 50]"
       :row-class="rowClass"
       :dense="density === 'compact'"
-      :class="['density--' + density]"
+      :class="['density--' + density, 'q-mb-lg']"
       v-model:pagination="pagination"
       :row-count="filtered.length"
       @request="onRequest"
@@ -329,6 +329,7 @@
       :items="filtered"
       :virtual-scroll-item-size="140"
       content-class="subscriber-cards"
+      class="q-mb-lg"
     >
       <template #default="{ item: row }">
         <SubscriberCard
