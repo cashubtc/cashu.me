@@ -116,26 +116,60 @@
     </div>
 
     <!-- Charts -->
+    <q-option-group
+      v-model="visibleCharts"
+      type="toggle"
+      inline
+      class="q-mb-md"
+      :options="chartToggleOptions"
+    />
     <div class="row q-col-gutter-md q-mb-md">
-      <q-card flat bordered class="col-12 col-md-4 panel-container q-pa-sm">
+      <q-card
+        v-show="showRevenueChart"
+        flat
+        bordered
+        class="col-12 col-md-4 panel-container q-pa-sm"
+      >
         <div class="text-subtitle2 q-mb-sm">
           {{ t('CreatorSubscribers.charts.revenueOverTime') }}
         </div>
-        <canvas ref="lineEl" :aria-label="t('CreatorSubscribers.charts.revenueOverTime')" role="img" />
+        <canvas
+          ref="lineEl"
+          :aria-label="t('CreatorSubscribers.charts.revenueOverTime')"
+          role="img"
+        />
         <p class="sr-only">{{ revenueSummary }}</p>
       </q-card>
-      <q-card flat bordered class="col-12 col-md-4 panel-container q-pa-sm">
+      <q-card
+          v-show="showFrequencyChart"
+          flat
+          bordered
+          class="col-12 col-md-4 panel-container q-pa-sm"
+        >
         <div class="text-subtitle2 q-mb-sm">
           {{ t('CreatorSubscribers.charts.frequencyMix') }}
         </div>
-        <canvas ref="doughnutEl" :aria-label="t('CreatorSubscribers.charts.frequencyMix')" role="img" />
+        <canvas
+          ref="doughnutEl"
+          :aria-label="t('CreatorSubscribers.charts.frequencyMix')"
+          role="img"
+        />
         <p class="sr-only">{{ frequencySummary }}</p>
       </q-card>
-      <q-card flat bordered class="col-12 col-md-4 panel-container q-pa-sm">
+      <q-card
+        v-show="showStatusChart"
+        flat
+        bordered
+        class="col-12 col-md-4 panel-container q-pa-sm"
+      >
         <div class="text-subtitle2 q-mb-sm">
           {{ t('CreatorSubscribers.charts.statusByFrequency') }}
         </div>
-        <canvas ref="barEl" :aria-label="t('CreatorSubscribers.charts.statusByFrequency')" role="img" />
+        <canvas
+          ref="barEl"
+          :aria-label="t('CreatorSubscribers.charts.statusByFrequency')"
+          role="img"
+        />
         <p class="sr-only">{{ statusSummary }}</p>
       </q-card>
     </div>
@@ -618,6 +652,29 @@ const densityOptions = computed(() => [
   { value: 'compact', icon: 'view_compact', 'aria-label': t('CreatorSubscribers.toolbar.compact') },
 ]);
 
+const visibleCharts = ref<Array<'revenue' | 'frequency' | 'status'>>([
+  'revenue',
+  'frequency',
+  'status',
+]);
+const chartToggleOptions = computed(() => [
+  {
+    value: 'revenue',
+    label: t('CreatorSubscribers.charts.revenueOverTime'),
+  },
+  {
+    value: 'frequency',
+    label: t('CreatorSubscribers.charts.frequencyMix'),
+  },
+  {
+    value: 'status',
+    label: t('CreatorSubscribers.charts.statusByFrequency'),
+  },
+]);
+const showRevenueChart = computed(() => visibleCharts.value.includes('revenue'));
+const showFrequencyChart = computed(() => visibleCharts.value.includes('frequency'));
+const showStatusChart = computed(() => visibleCharts.value.includes('status'));
+
 const pagination = ref({ page: 1, rowsPerPage: 25 });
 const paginatedRows = computed(() => {
   const start = (pagination.value.page - 1) * pagination.value.rowsPerPage;
@@ -632,24 +689,22 @@ const lineEl = ref<HTMLCanvasElement | null>(null);
 const doughnutEl = ref<HTMLCanvasElement | null>(null);
 const barEl = ref<HTMLCanvasElement | null>(null);
 
-// Chart.js instances are created once on mount and then updated reactively.
+// Chart.js instances are created on demand and updated reactively.
 let lineChart: Chart | null = null;
 let doughnutChart: Chart | null = null;
 let barChart: Chart | null = null;
 
-onMounted(() => {
-  void subStore.loadFromDb();
-  // Instantiate charts after DOM elements are available.
+function createLineChart() {
   if (lineEl.value) {
     lineChart = new ChartJS(lineEl.value, {
-      type: "line",
+      type: 'line',
       data: {
         labels: revenueSeries.value.labels,
         datasets: [
           {
             data: revenueSeries.value.data,
-            borderColor: "#027be3",
-            backgroundColor: "rgba(2,123,227,0.1)",
+            borderColor: '#027be3',
+            backgroundColor: 'rgba(2,123,227,0.1)',
             fill: false,
             pointRadius: 0,
           },
@@ -658,6 +713,12 @@ onMounted(() => {
       options: { plugins: { legend: { display: false } }, animation: false },
     });
   }
+}
+function destroyLineChart() {
+  lineChart?.destroy();
+  lineChart = null;
+}
+function createDoughnutChart() {
   if (doughnutEl.value) {
     doughnutChart = new ChartJS(doughnutEl.value, {
       type: 'doughnut',
@@ -677,9 +738,15 @@ onMounted(() => {
       options: { plugins: { legend: { display: false } }, animation: false },
     });
   }
+}
+function destroyDoughnutChart() {
+  doughnutChart?.destroy();
+  doughnutChart = null;
+}
+function createBarChart() {
   if (barEl.value) {
     barChart = new ChartJS(barEl.value, {
-      type: "bar",
+      type: 'bar',
       data: {
         labels: statusByFreq.value.labels,
         datasets: [
@@ -702,6 +769,45 @@ onMounted(() => {
       },
       options: { plugins: { legend: { display: false } }, animation: false },
     });
+  }
+}
+function destroyBarChart() {
+  barChart?.destroy();
+  barChart = null;
+}
+
+onMounted(() => {
+  void subStore.loadFromDb();
+  if (showRevenueChart.value) {
+    createLineChart();
+  }
+  if (showFrequencyChart.value) {
+    createDoughnutChart();
+  }
+  if (showStatusChart.value) {
+    createBarChart();
+  }
+});
+
+watch(showRevenueChart, (val) => {
+  if (val) {
+    createLineChart();
+  } else {
+    destroyLineChart();
+  }
+});
+watch(showFrequencyChart, (val) => {
+  if (val) {
+    createDoughnutChart();
+  } else {
+    destroyDoughnutChart();
+  }
+});
+watch(showStatusChart, (val) => {
+  if (val) {
+    createBarChart();
+  } else {
+    destroyBarChart();
   }
 });
 
