@@ -116,63 +116,7 @@
     </div>
 
     <!-- Charts -->
-    <q-option-group
-      v-model="visibleCharts"
-      type="toggle"
-      inline
-      class="q-mb-md"
-      :options="chartToggleOptions"
-    />
-    <div class="row q-col-gutter-lg q-mb-lg">
-      <q-card
-        v-show="showRevenueChart"
-        flat
-        bordered
-        class="col-12 col-md-4 panel-container q-pa-md q-ma-sm"
-      >
-        <div class="text-subtitle2 q-mb-sm">
-          {{ t('CreatorSubscribers.charts.revenueOverTime') }}
-        </div>
-        <canvas
-          ref="lineEl"
-          :aria-label="t('CreatorSubscribers.charts.revenueOverTime')"
-          role="img"
-        />
-        <p class="sr-only">{{ revenueSummary }}</p>
-      </q-card>
-      <q-card
-          v-show="showFrequencyChart"
-          flat
-          bordered
-          class="col-12 col-md-4 panel-container q-pa-md q-ma-sm"
-        >
-        <div class="text-subtitle2 q-mb-sm">
-          {{ t('CreatorSubscribers.charts.frequencyMix') }}
-        </div>
-        <canvas
-          ref="doughnutEl"
-          :aria-label="t('CreatorSubscribers.charts.frequencyMix')"
-          role="img"
-        />
-        <p class="sr-only">{{ frequencySummary }}</p>
-      </q-card>
-      <q-card
-        v-show="showStatusChart"
-        flat
-        bordered
-        class="col-12 col-md-4 panel-container q-pa-md q-ma-sm"
-      >
-        <div class="text-subtitle2 q-mb-sm">
-          {{ t('CreatorSubscribers.charts.statusByFrequency') }}
-        </div>
-        <canvas
-          ref="barEl"
-          :aria-label="t('CreatorSubscribers.charts.statusByFrequency')"
-          role="img"
-        />
-        <p class="sr-only">{{ statusSummary }}</p>
-      </q-card>
-    </div>
+    <SubscriptionsCharts :rows="filtered" class="q-mb-lg" />
 
     <!-- Tabs -->
     <q-tabs v-model="activeTab" dense class="q-mb-md" no-caps>
@@ -509,36 +453,6 @@
 </template>
 
 <script setup lang="ts">
-import {
-  Chart as ChartJS,
-  LineController,
-  DoughnutController,
-  BarController,
-  LineElement,
-  ArcElement,
-  BarElement,
-  PointElement,
-  CategoryScale,
-  LinearScale,
-  Legend,
-  Tooltip,
-  type Chart,
-} from "chart.js";
-
-ChartJS.register(
-  LineController,
-  DoughnutController,
-  BarController,
-  LineElement,
-  ArcElement,
-  BarElement,
-  PointElement,
-  CategoryScale,
-  LinearScale,
-  Legend,
-  Tooltip
-);
-
 import { ref, computed, watch, onMounted } from "vue";
 import { useCreatorSubscribersStore } from "src/stores/creatorSubscribers";
 import { storeToRefs } from "pinia";
@@ -552,6 +466,7 @@ import type { Subscriber, Frequency, SubStatus } from "src/types/subscriber";
 import downloadCsv from "src/utils/subscriberCsv";
 import SubscriberFilters from "src/components/subscribers/SubscriberFilters.vue";
 import SubscriberCard from "src/components/SubscriberCard.vue";
+import SubscriptionsCharts from "src/components/subscribers/SubscriptionsCharts.vue";
 
 const { t } = useI18n();
 
@@ -606,77 +521,6 @@ function togglePeriod() {
   periodMode.value = periodMode.value === "week" ? "month" : "week";
 }
 
-// Data plumbing for charts: build lightweight structures consumed by Chart.js.
-const revenueSeries = computed(() => {
-  // Line chart: each subscriber's start date vs amount.
-  const arr = filtered.value.slice().sort((a, b) => a.startDate - b.startDate);
-  return {
-    labels: arr.map((s) => format(s.startDate * 1000, "MM/dd")),
-    data: arr.map((s) => s.amountSat),
-  };
-});
-
-const freqMix = computed(() => [
-  // Doughnut chart: breakdown of subscribers by frequency.
-  filtered.value.filter((s) => s.frequency === "weekly").length,
-  filtered.value.filter((s) => s.frequency === "biweekly").length,
-  filtered.value.filter((s) => s.frequency === "monthly").length,
-]);
-
-const revenueSummary = computed(() =>
-  t('CreatorSubscribers.charts.revenueSummary', {
-    total: revenueSeries.value.data.reduce((a, b) => a + b, 0),
-  }),
-);
-const frequencySummary = computed(() =>
-  t('CreatorSubscribers.charts.frequencySummary', {
-    weekly: freqMix.value[0],
-    biweekly: freqMix.value[1],
-    monthly: freqMix.value[2],
-  }),
-);
-
-const statusByFreq = computed(() => {
-  // Bar chart: counts of active/pending/ended subscriptions per frequency.
-  const freqs: Frequency[] = ['weekly', 'biweekly', 'monthly'];
-  const labels = [
-    t('CreatorSubscribers.frequency.weekly'),
-    t('CreatorSubscribers.frequency.biweekly'),
-    t('CreatorSubscribers.frequency.monthly'),
-  ];
-  const active = freqs.map(
-    (f) =>
-      filtered.value.filter((s) => s.frequency === f && s.status === 'active')
-        .length,
-  );
-  const pending = freqs.map(
-    (f) =>
-      filtered.value.filter((s) => s.frequency === f && s.status === 'pending')
-        .length,
-  );
-  const ended = freqs.map(
-    (f) =>
-      filtered.value.filter((s) => s.frequency === f && s.status === 'ended')
-        .length,
-  );
-  return { labels, active, pending, ended };
-});
-
-const statusSummary = computed(() => {
-  const s = statusByFreq.value;
-  return t('CreatorSubscribers.charts.statusSummary', {
-    weeklyActive: s.active[0],
-    weeklyPending: s.pending[0],
-    weeklyEnded: s.ended[0],
-    biweeklyActive: s.active[1],
-    biweeklyPending: s.pending[1],
-    biweeklyEnded: s.ended[1],
-    monthlyActive: s.active[2],
-    monthlyPending: s.pending[2],
-    monthlyEnded: s.ended[2],
-  });
-});
-
 const search = ref(subStore.query);
 // Forward the user-entered search term to the Pinia store (debounced),
 // which recomputes `filtered` for us.
@@ -714,29 +558,6 @@ const densityOptions = computed(() => [
   { value: 'compact', icon: 'view_compact', 'aria-label': t('CreatorSubscribers.toolbar.compact') },
 ]);
 
-const visibleCharts = ref<Array<'revenue' | 'frequency' | 'status'>>([
-  'revenue',
-  'frequency',
-  'status',
-]);
-const chartToggleOptions = computed(() => [
-  {
-    value: 'revenue',
-    label: t('CreatorSubscribers.charts.revenueOverTime'),
-  },
-  {
-    value: 'frequency',
-    label: t('CreatorSubscribers.charts.frequencyMix'),
-  },
-  {
-    value: 'status',
-    label: t('CreatorSubscribers.charts.statusByFrequency'),
-  },
-]);
-const showRevenueChart = computed(() => visibleCharts.value.includes('revenue'));
-const showFrequencyChart = computed(() => visibleCharts.value.includes('frequency'));
-const showStatusChart = computed(() => visibleCharts.value.includes('status'));
-
 const pagination = ref({ page: 1, rowsPerPage: 25 });
 const paginatedRows = computed(() => {
   const start = (pagination.value.page - 1) * pagination.value.rowsPerPage;
@@ -747,130 +568,8 @@ function onRequest(props: QTableRequestProp) {
   pagination.value = props.pagination;
 }
 
-const lineEl = ref<HTMLCanvasElement | null>(null);
-const doughnutEl = ref<HTMLCanvasElement | null>(null);
-const barEl = ref<HTMLCanvasElement | null>(null);
-
-// Chart.js instances are created on demand and updated reactively.
-let lineChart: Chart | null = null;
-let doughnutChart: Chart | null = null;
-let barChart: Chart | null = null;
-
-function createLineChart() {
-  if (lineEl.value) {
-    lineChart = new ChartJS(lineEl.value, {
-      type: 'line',
-      data: {
-        labels: revenueSeries.value.labels,
-        datasets: [
-          {
-            data: revenueSeries.value.data,
-            borderColor: '#027be3',
-            backgroundColor: 'rgba(2,123,227,0.1)',
-            fill: false,
-            pointRadius: 0,
-          },
-        ],
-      },
-      options: { plugins: { legend: { display: false } }, animation: false },
-    });
-  }
-}
-function destroyLineChart() {
-  lineChart?.destroy();
-  lineChart = null;
-}
-function createDoughnutChart() {
-  if (doughnutEl.value) {
-    doughnutChart = new ChartJS(doughnutEl.value, {
-      type: 'doughnut',
-      data: {
-        labels: [
-          t('CreatorSubscribers.frequency.weekly'),
-          t('CreatorSubscribers.frequency.biweekly'),
-          t('CreatorSubscribers.frequency.monthly'),
-        ],
-        datasets: [
-          {
-            data: freqMix.value,
-            backgroundColor: ['#027be3', '#26a69a', '#9c27b0'],
-          },
-        ],
-      },
-      options: { plugins: { legend: { display: false } }, animation: false },
-    });
-  }
-}
-function destroyDoughnutChart() {
-  doughnutChart?.destroy();
-  doughnutChart = null;
-}
-function createBarChart() {
-  if (barEl.value) {
-    barChart = new ChartJS(barEl.value, {
-      type: 'bar',
-      data: {
-        labels: statusByFreq.value.labels,
-        datasets: [
-          {
-            label: t('CreatorSubscribers.status.active'),
-            backgroundColor: '#21ba45',
-            data: statusByFreq.value.active,
-          },
-          {
-            label: t('CreatorSubscribers.status.pending'),
-            backgroundColor: '#f2c037',
-            data: statusByFreq.value.pending,
-          },
-          {
-            label: t('CreatorSubscribers.status.ended'),
-            backgroundColor: '#f44336',
-            data: statusByFreq.value.ended,
-          },
-        ],
-      },
-      options: { plugins: { legend: { display: false } }, animation: false },
-    });
-  }
-}
-function destroyBarChart() {
-  barChart?.destroy();
-  barChart = null;
-}
-
 onMounted(() => {
   void subStore.loadFromDb();
-  if (showRevenueChart.value) {
-    createLineChart();
-  }
-  if (showFrequencyChart.value) {
-    createDoughnutChart();
-  }
-  if (showStatusChart.value) {
-    createBarChart();
-  }
-});
-
-watch(showRevenueChart, (val) => {
-  if (val) {
-    createLineChart();
-  } else {
-    destroyLineChart();
-  }
-});
-watch(showFrequencyChart, (val) => {
-  if (val) {
-    createDoughnutChart();
-  } else {
-    destroyDoughnutChart();
-  }
-});
-watch(showStatusChart, (val) => {
-  if (val) {
-    createBarChart();
-  } else {
-    destroyBarChart();
-  }
 });
 
 // When the list of subscribers changes, fetch profiles for any new npubs.
@@ -883,27 +582,6 @@ watch(
     }
   },
 );
-
-// When the underlying computed data changes, update the charts without
-// re-creating them. This keeps Chart.js lifecycle simple and avoids leaks.
-watch([revenueSeries, freqMix, statusByFreq], ([rev, mix, status]) => {
-  if (lineChart) {
-    lineChart.data.labels = rev.labels;
-    lineChart.data.datasets[0].data = rev.data;
-    lineChart.update("none");
-  }
-  if (doughnutChart) {
-    doughnutChart.data.datasets[0].data = mix;
-    doughnutChart.update("none");
-  }
-  if (barChart) {
-    barChart.data.labels = status.labels;
-    barChart.data.datasets[0].data = status.active;
-    barChart.data.datasets[1].data = status.pending;
-    barChart.data.datasets[2].data = status.ended;
-    barChart.update("none");
-  }
-});
 
 const columns = [
   {
