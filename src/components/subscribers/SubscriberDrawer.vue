@@ -11,7 +11,14 @@
       <q-toolbar-title>
         {{ profileTitle }}
       </q-toolbar-title>
-      <q-btn flat round dense icon="close" @click="close" />
+      <q-btn
+        flat
+        round
+        dense
+        icon="close"
+        :aria-label="t('global.actions.close.label')"
+        @click="close"
+      />
     </q-toolbar>
 
     <q-tabs v-model="tab" dense align="justify" class="text-grey-7" active-color="primary">

@@ -1,14 +1,15 @@
 <template>
   <q-page padding>
     <SubscriberFiltersPopover ref="filters" />
-    <q-banner
-      v-if="error"
-      dense
-      class="q-mb-md bg-red-1 text-red"
-    >
+    <q-banner v-if="error" dense class="q-mb-md bg-red-1 text-red">
       {{ error }}
       <template #action>
-        <q-btn flat color="red" label="Retry" @click="retry" />
+        <q-btn
+          flat
+          color="red"
+          :label="t('CreatorSubscribers.actions.retry')"
+          @click="retry"
+        />
       </template>
     </q-banner>
     <q-inner-loading :showing="loading">
@@ -16,11 +17,11 @@
     </q-inner-loading>
     <!-- Top bar -->
     <div class="row items-center q-gutter-sm q-mb-md">
-      <div class="text-h6">Subscribers</div>
+      <div class="text-h6">{{ t('CreatorSubscribers.summary.subscribers') }}</div>
       <q-input
         dense
         v-model="search"
-        placeholder="Search"
+        :placeholder="t('CreatorSubscribers.toolbar.searchPlaceholder')"
         class="q-ml-md"
         clearable
       >
@@ -33,20 +34,14 @@
         dense
         toggle-color="primary"
         class="q-ml-sm"
-        :options="[
-          { value: 'table', icon: 'table_rows' },
-          { value: 'cards', icon: 'grid_view' },
-        ]"
+        :options="viewOptions"
       />
       <q-btn-toggle
         v-model="density"
         dense
         toggle-color="primary"
         class="q-ml-sm"
-        :options="[
-          { value: 'comfortable', icon: 'view_comfy' },
-          { value: 'compact', icon: 'view_compact' },
-        ]"
+        :options="densityOptions"
       />
       <q-btn
         dense
@@ -55,13 +50,13 @@
         icon="tune"
         class="q-ml-sm"
         @click.stop="openFilters"
-        aria-label="Filters"
+        :aria-label="t('CreatorSubscribers.actions.filters')"
       />
       <q-btn
         outline
         color="grey-5"
         icon="download"
-        label="Export CSV"
+        :label="t('CreatorSubscribers.toolbar.exportCsv')"
         class="q-ml-sm"
         @click="downloadCsv()"
       />
@@ -74,7 +69,9 @@
         bordered
         class="col-12 col-sm-6 col-md-3 panel-container q-pa-sm"
       >
-        <div class="text-caption text-grey">Subscribers</div>
+        <div class="text-caption text-grey">
+          {{ t('CreatorSubscribers.summary.subscribers') }}
+        </div>
         <div class="text-h6">{{ counts.all }}</div>
       </q-card>
       <q-card
@@ -82,7 +79,10 @@
         bordered
         class="col-12 col-sm-6 col-md-3 panel-container q-pa-sm"
       >
-        <div class="text-caption text-grey">Active / Pending</div>
+        <div class="text-caption text-grey">
+          {{ t('CreatorSubscribers.summary.active') }} /
+          {{ t('CreatorSubscribers.summary.pending') }}
+        </div>
         <div class="text-h6">{{ activeCount }} / {{ pendingCount }}</div>
       </q-card>
       <q-card
@@ -90,7 +90,9 @@
         bordered
         class="col-12 col-sm-6 col-md-3 panel-container q-pa-sm"
       >
-        <div class="text-caption text-grey">Lifetime revenue</div>
+        <div class="text-caption text-grey">
+          {{ t('CreatorSubscribers.summary.lifetimeRevenue') }}
+        </div>
         <div class="text-h6">{{ lifetimeRevenue }} sat</div>
       </q-card>
       <q-card
@@ -99,7 +101,11 @@
         class="col-12 col-sm-6 col-md-3 panel-container q-pa-sm"
         @click="togglePeriod"
       >
-        <div class="text-caption text-grey">Next {{ periodMode }}</div>
+        <div class="text-caption text-grey">
+          {{ periodMode === 'week'
+            ? t('CreatorSubscribers.summary.nextWeek')
+            : t('CreatorSubscribers.summary.nextMonth') }}
+        </div>
         <div class="text-h6">{{ formattedKpiThisPeriodSat }} sat</div>
       </q-card>
     </div>
@@ -107,65 +113,66 @@
     <!-- Charts -->
     <div class="row q-col-gutter-md q-mb-md">
       <q-card flat bordered class="col-12 col-md-4 panel-container q-pa-sm">
-        <div class="text-subtitle2 q-mb-sm">Revenue over time</div>
-        <canvas ref="lineEl" />
+        <div class="text-subtitle2 q-mb-sm">
+          {{ t('CreatorSubscribers.charts.revenueOverTime') }}
+        </div>
+        <canvas ref="lineEl" :aria-label="t('CreatorSubscribers.charts.revenueOverTime')" role="img" />
+        <p class="sr-only">{{ revenueSummary }}</p>
       </q-card>
       <q-card flat bordered class="col-12 col-md-4 panel-container q-pa-sm">
-        <div class="text-subtitle2 q-mb-sm">Frequency mix</div>
-        <canvas ref="doughnutEl" />
+        <div class="text-subtitle2 q-mb-sm">
+          {{ t('CreatorSubscribers.charts.frequencyMix') }}
+        </div>
+        <canvas ref="doughnutEl" :aria-label="t('CreatorSubscribers.charts.frequencyMix')" role="img" />
+        <p class="sr-only">{{ frequencySummary }}</p>
       </q-card>
       <q-card flat bordered class="col-12 col-md-4 panel-container q-pa-sm">
-        <div class="text-subtitle2 q-mb-sm">Status by frequency</div>
-        <canvas ref="barEl" />
+        <div class="text-subtitle2 q-mb-sm">
+          {{ t('CreatorSubscribers.charts.statusByFrequency') }}
+        </div>
+        <canvas ref="barEl" :aria-label="t('CreatorSubscribers.charts.statusByFrequency')" role="img" />
+        <p class="sr-only">{{ statusSummary }}</p>
       </q-card>
     </div>
 
     <!-- Tabs -->
     <q-tabs v-model="activeTab" dense class="q-mb-md" no-caps>
-      <q-tab name="all"
-        ><div class="row items-center no-wrap">
-          <span>All</span
-          ><q-badge class="q-ml-xs" color="primary">{{ counts.all }}</q-badge>
-        </div></q-tab
-      >
-      <q-tab name="weekly"
-        ><div class="row items-center no-wrap">
-          <span>Weekly</span
-          ><q-badge class="q-ml-xs" color="primary">{{
-            counts.weekly
-          }}</q-badge>
-        </div></q-tab
-      >
-      <q-tab name="biweekly"
-        ><div class="row items-center no-wrap">
-          <span>Bi-weekly</span
-          ><q-badge class="q-ml-xs" color="primary">{{
-            counts.biweekly
-          }}</q-badge>
-        </div></q-tab
-      >
-      <q-tab name="monthly"
-        ><div class="row items-center no-wrap">
-          <span>Monthly</span
-          ><q-badge class="q-ml-xs" color="primary">{{
-            counts.monthly
-          }}</q-badge>
-        </div></q-tab
-      >
-      <q-tab name="pending"
-        ><div class="row items-center no-wrap">
-          <span>Pending</span
-          ><q-badge class="q-ml-xs" color="primary">{{
-            counts.pending
-          }}</q-badge>
-        </div></q-tab
-      >
-      <q-tab name="ended"
-        ><div class="row items-center no-wrap">
-          <span>Ended</span
-          ><q-badge class="q-ml-xs" color="primary">{{ counts.ended }}</q-badge>
-        </div></q-tab
-      >
+      <q-tab name="all">
+        <div class="row items-center no-wrap">
+          <span>{{ t('CreatorSubscribers.tabs.all') }}</span>
+          <q-badge class="q-ml-xs" color="primary">{{ counts.all }}</q-badge>
+        </div>
+      </q-tab>
+      <q-tab name="weekly">
+        <div class="row items-center no-wrap">
+          <span>{{ t('CreatorSubscribers.frequency.weekly') }}</span>
+          <q-badge class="q-ml-xs" color="primary">{{ counts.weekly }}</q-badge>
+        </div>
+      </q-tab>
+      <q-tab name="biweekly">
+        <div class="row items-center no-wrap">
+          <span>{{ t('CreatorSubscribers.frequency.biweekly') }}</span>
+          <q-badge class="q-ml-xs" color="primary">{{ counts.biweekly }}</q-badge>
+        </div>
+      </q-tab>
+      <q-tab name="monthly">
+        <div class="row items-center no-wrap">
+          <span>{{ t('CreatorSubscribers.frequency.monthly') }}</span>
+          <q-badge class="q-ml-xs" color="primary">{{ counts.monthly }}</q-badge>
+        </div>
+      </q-tab>
+      <q-tab name="pending">
+        <div class="row items-center no-wrap">
+          <span>{{ t('CreatorSubscribers.status.pending') }}</span>
+          <q-badge class="q-ml-xs" color="primary">{{ counts.pending }}</q-badge>
+        </div>
+      </q-tab>
+      <q-tab name="ended">
+        <div class="row items-center no-wrap">
+          <span>{{ t('CreatorSubscribers.status.ended') }}</span>
+          <q-badge class="q-ml-xs" color="primary">{{ counts.ended }}</q-badge>
+        </div>
+      </q-tab>
     </q-tabs>
 
     <!-- Table -->
@@ -215,10 +222,10 @@
           ><q-chip
             dense
             :color="statusColor(props.row.status)"
-            text-color="white"
-            >{{ props.row.status }}</q-chip
-          ></q-td
-        >
+            :text-color="statusTextColor(props.row.status)"
+            :icon="statusIcon(props.row.status)"
+            >{{ t('CreatorSubscribers.status.' + props.row.status) }}</q-chip
+          ></q-td>
       </template>
       <template #body-cell-amount="props"
         ><q-td :props="props">{{ props.row.amountSat }} sat</q-td></template
@@ -241,7 +248,8 @@
               :aria-valuenow="progressPercent(props.row)"
               aria-valuemin="0"
               aria-valuemax="100"
-              aria-label="Renewal progress"
+              :aria-label="t('CreatorSubscribers.renewalProgress')"
+              :aria-valuetext="progressPercent(props.row) + '%'"
             />
             <div class="column">
               <div
@@ -251,12 +259,12 @@
                 ]"
               >
                 {{
-                  props.row.nextRenewal ? distToNow(props.row.nextRenewal) : "—"
+                  props.row.nextRenewal ? distToNow(props.row.nextRenewal) : '—'
                 }}
               </div>
               <div class="text-caption text-grey-6">
                 {{
-                  props.row.nextRenewal ? formatDate(props.row.nextRenewal) : ""
+                  props.row.nextRenewal ? formatDate(props.row.nextRenewal) : ''
                 }}
               </div>
             </div>
@@ -273,6 +281,7 @@
             dense
             round
             icon="chevron_right"
+            :aria-label="t('CreatorSubscribers.actions.openDetails')"
             @click="openDrawer(props.row)" /></q-td
       ></template>
     </q-table>
@@ -300,17 +309,23 @@
       v-if="selected.length"
       class="q-mt-sm q-pa-sm bg-primary text-white row items-center q-gutter-sm"
     >
-      <div>{{ selected.length }} selected</div>
+      <div>{{ t('CreatorSubscribers.selectionCount', { count: selected.length }) }}</div>
       <q-space />
       <q-btn
         outline
         dense
         color="white"
         icon="download"
-        label="Export selection"
+        :label="t('CreatorSubscribers.actions.exportSelected')"
         @click="downloadCsv(selected)"
       />
-      <q-btn flat dense color="white" label="Clear" @click="selected = []" />
+      <q-btn
+        flat
+        dense
+        color="white"
+        :label="t('CreatorSubscribers.actions.clear')"
+        @click="selected = []"
+      />
     </div>
 
     <!-- Drawer -->
@@ -327,32 +342,44 @@
           <q-chip dense color="primary" text-color="white">{{
             current.tierName
           }}</q-chip>
-          <q-chip dense outline>{{ current.frequency }}</q-chip>
+          <q-chip dense outline>{{
+            t('CreatorSubscribers.frequency.' + current.frequency)
+          }}</q-chip>
           <q-chip
             dense
             :color="statusColor(current.status)"
-            text-color="white"
-            >{{ current.status }}</q-chip
+            :text-color="statusTextColor(current.status)"
+            :icon="statusIcon(current.status)"
+            >{{ t('CreatorSubscribers.status.' + current.status) }}</q-chip
           >
         </div>
         <div class="q-mt-md">
-          {{ current.amountSat }} sat / {{ current.frequency }}
+          {{ current.amountSat }} sat /
+          {{ t('CreatorSubscribers.frequency.' + current.frequency) }}
         </div>
         <div class="q-mt-sm">
-          Next renewal:
-          {{ current.nextRenewal ? formatDate(current.nextRenewal) : "—" }}
+          {{ t('CreatorSubscribers.drawer.overview.nextRenewal') }}:
+          {{ current.nextRenewal ? formatDate(current.nextRenewal) : '—' }}
           <span v-if="current.nextRenewal" class="text-grey-6"
             >({{ distToNow(current.nextRenewal) }})</span
           >
         </div>
-        <div class="q-mt-sm">Lifetime: {{ current.lifetimeSat }} sat</div>
-        <div class="q-mt-sm">Since {{ formatDate(current.startDate) }}</div>
+        <div class="q-mt-sm">
+          {{ t('CreatorSubscribers.drawer.overview.lifetimeTotal') }}:
+          {{ current.lifetimeSat }} sat
+        </div>
+        <div class="q-mt-sm">
+          {{ t('CreatorSubscribers.drawer.overview.since') }}
+          {{ formatDate(current.startDate) }}
+        </div>
         <div class="row q-gutter-sm q-mt-md">
-          <q-btn outline label="DM" @click="dmSubscriber" />
-          <q-btn outline label="Copy npub" @click="copyNpub" />
+          <q-btn outline :label="t('CreatorSubscribers.drawer.actions.dm')" @click="dmSubscriber" />
+          <q-btn outline :label="t('CreatorSubscribers.drawer.actions.copyNpub')" @click="copyNpub" />
         </div>
         <div class="q-mt-lg">
-          <div class="text-subtitle2 q-mb-sm">Payments</div>
+          <div class="text-subtitle2 q-mb-sm">
+            {{ t('CreatorSubscribers.drawer.tabs.payments') }}
+          </div>
           <q-list bordered dense>
             <q-item v-for="p in payments" :key="p.ts">
               <q-item-section>{{ formatDate(p.ts) }}</q-item-section>
@@ -361,7 +388,9 @@
           </q-list>
         </div>
         <div class="q-mt-lg">
-          <div class="text-subtitle2 q-mb-sm">Activity</div>
+          <div class="text-subtitle2 q-mb-sm">
+            {{ t('CreatorSubscribers.drawer.activity') }}
+          </div>
           <q-list bordered dense>
             <q-item v-for="a in activity" :key="a.ts">
               <q-item-section>{{ a.text }}</q-item-section>
@@ -420,6 +449,8 @@ import type { Subscriber, Frequency, SubStatus } from "src/types/subscriber";
 import downloadCsv from "src/utils/subscriberCsv";
 import SubscriberFiltersPopover from "src/components/subscribers/SubscriberFiltersPopover.vue";
 import SubscriberCard from "src/components/SubscriberCard.vue";
+
+const { t } = useI18n();
 
 const subStore = useCreatorSubscribersStore();
 const { filtered, counts, activeTab, loading, error } = storeToRefs(subStore);
@@ -489,26 +520,58 @@ const freqMix = computed(() => [
   filtered.value.filter((s) => s.frequency === "monthly").length,
 ]);
 
+const revenueSummary = computed(() =>
+  t('CreatorSubscribers.charts.revenueSummary', {
+    total: revenueSeries.value.data.reduce((a, b) => a + b, 0),
+  }),
+);
+const frequencySummary = computed(() =>
+  t('CreatorSubscribers.charts.frequencySummary', {
+    weekly: freqMix.value[0],
+    biweekly: freqMix.value[1],
+    monthly: freqMix.value[2],
+  }),
+);
+
 const statusByFreq = computed(() => {
   // Bar chart: counts of active/pending/ended subscriptions per frequency.
-  const freqs: Frequency[] = ["weekly", "biweekly", "monthly"];
-  const labels = ["Weekly", "Bi-weekly", "Monthly"];
+  const freqs: Frequency[] = ['weekly', 'biweekly', 'monthly'];
+  const labels = [
+    t('CreatorSubscribers.frequency.weekly'),
+    t('CreatorSubscribers.frequency.biweekly'),
+    t('CreatorSubscribers.frequency.monthly'),
+  ];
   const active = freqs.map(
     (f) =>
-      filtered.value.filter((s) => s.frequency === f && s.status === "active")
-        .length
+      filtered.value.filter((s) => s.frequency === f && s.status === 'active')
+        .length,
   );
   const pending = freqs.map(
     (f) =>
-      filtered.value.filter((s) => s.frequency === f && s.status === "pending")
-        .length
+      filtered.value.filter((s) => s.frequency === f && s.status === 'pending')
+        .length,
   );
   const ended = freqs.map(
     (f) =>
-      filtered.value.filter((s) => s.frequency === f && s.status === "ended")
-        .length
+      filtered.value.filter((s) => s.frequency === f && s.status === 'ended')
+        .length,
   );
   return { labels, active, pending, ended };
+});
+
+const statusSummary = computed(() => {
+  const s = statusByFreq.value;
+  return t('CreatorSubscribers.charts.statusSummary', {
+    weeklyActive: s.active[0],
+    weeklyPending: s.pending[0],
+    weeklyEnded: s.ended[0],
+    biweeklyActive: s.active[1],
+    biweeklyPending: s.pending[1],
+    biweeklyEnded: s.ended[1],
+    monthlyActive: s.active[2],
+    monthlyPending: s.pending[2],
+    monthlyEnded: s.ended[2],
+  });
 });
 
 const search = ref(subStore.query);
@@ -531,8 +594,17 @@ function retry() {
 
 const selected = ref<Subscriber[]>([]);
 
-const view = ref<"table" | "cards">("table");
-const density = ref<"compact" | "comfortable">("comfortable");
+const view = ref<'table' | 'cards'>('table');
+const density = ref<'compact' | 'comfortable'>('comfortable');
+
+const viewOptions = computed(() => [
+  { value: 'table', icon: 'table_rows', 'aria-label': t('CreatorSubscribers.toolbar.tableView') },
+  { value: 'cards', icon: 'grid_view', 'aria-label': t('CreatorSubscribers.toolbar.cardView') },
+]);
+const densityOptions = computed(() => [
+  { value: 'comfortable', icon: 'view_comfy', 'aria-label': t('CreatorSubscribers.toolbar.comfortable') },
+  { value: 'compact', icon: 'view_compact', 'aria-label': t('CreatorSubscribers.toolbar.compact') },
+]);
 
 const pagination = ref({ page: 1, rowsPerPage: 25 });
 const paginatedRows = computed(() => {
@@ -576,13 +648,17 @@ onMounted(() => {
   }
   if (doughnutEl.value) {
     doughnutChart = new ChartJS(doughnutEl.value, {
-      type: "doughnut",
+      type: 'doughnut',
       data: {
-        labels: ["Weekly", "Bi-weekly", "Monthly"],
+        labels: [
+          t('CreatorSubscribers.frequency.weekly'),
+          t('CreatorSubscribers.frequency.biweekly'),
+          t('CreatorSubscribers.frequency.monthly'),
+        ],
         datasets: [
           {
             data: freqMix.value,
-            backgroundColor: ["#027be3", "#26a69a", "#9c27b0"],
+            backgroundColor: ['#027be3', '#26a69a', '#9c27b0'],
           },
         ],
       },
@@ -596,18 +672,18 @@ onMounted(() => {
         labels: statusByFreq.value.labels,
         datasets: [
           {
-            label: "Active",
-            backgroundColor: "#21ba45",
+            label: t('CreatorSubscribers.status.active'),
+            backgroundColor: '#21ba45',
             data: statusByFreq.value.active,
           },
           {
-            label: "Pending",
-            backgroundColor: "#f2c037",
+            label: t('CreatorSubscribers.status.pending'),
+            backgroundColor: '#f2c037',
             data: statusByFreq.value.pending,
           },
           {
-            label: "Ended",
-            backgroundColor: "#f44336",
+            label: t('CreatorSubscribers.status.ended'),
+            backgroundColor: '#f44336',
             data: statusByFreq.value.ended,
           },
         ],
@@ -639,24 +715,49 @@ watch([revenueSeries, freqMix, statusByFreq], ([rev, mix, status]) => {
 });
 
 const columns = [
-  { name: "subscriber", label: "Subscriber", field: "name", sortable: false },
-  { name: "tier", label: "Tier", field: "tierName", sortable: false },
-  { name: "frequency", label: "Freq", field: "frequency", sortable: false },
-  { name: "status", label: "Status", field: "status", sortable: false },
-  { name: "amount", label: "Amount", field: "amountSat", sortable: false },
   {
-    name: "nextRenewal",
-    label: "Next renewal",
-    field: "nextRenewal",
+    name: 'subscriber',
+    label: t('CreatorSubscribers.columns.subscriber'),
+    field: 'name',
     sortable: false,
   },
   {
-    name: "lifetime",
-    label: "Lifetime",
-    field: "lifetimeSat",
+    name: 'tier',
+    label: t('CreatorSubscribers.columns.tier'),
+    field: 'tierName',
     sortable: false,
   },
-  { name: "actions", label: "", field: "id", sortable: false },
+  {
+    name: 'frequency',
+    label: t('CreatorSubscribers.columns.frequency'),
+    field: 'frequency',
+    sortable: false,
+  },
+  {
+    name: 'status',
+    label: t('CreatorSubscribers.columns.status'),
+    field: 'status',
+    sortable: false,
+  },
+  {
+    name: 'amount',
+    label: t('CreatorSubscribers.columns.amount'),
+    field: 'amountSat',
+    sortable: false,
+  },
+  {
+    name: 'nextRenewal',
+    label: t('CreatorSubscribers.columns.nextRenewal'),
+    field: 'nextRenewal',
+    sortable: false,
+  },
+  {
+    name: 'lifetime',
+    label: t('CreatorSubscribers.columns.lifetime'),
+    field: 'lifetimeSat',
+    sortable: false,
+  },
+  { name: 'actions', label: t('CreatorSubscribers.columns.actions'), field: 'id', sortable: false },
 ];
 
 function initials(name: string) {
@@ -671,7 +772,13 @@ function freqShort(f: Frequency) {
   return f === "weekly" ? "W" : f === "biweekly" ? "2W" : "M";
 }
 function statusColor(s: SubStatus) {
-  return s === "active" ? "positive" : s === "pending" ? "warning" : "negative";
+  return s === 'active' ? 'positive' : s === 'pending' ? 'warning' : 'negative';
+}
+function statusTextColor(s: SubStatus) {
+  return s === 'pending' ? 'black' : 'white';
+}
+function statusIcon(s: SubStatus) {
+  return s === 'active' ? 'check' : s === 'pending' ? 'schedule' : 'close';
 }
 function progressPercent(r: Subscriber) {
   if (!r.nextRenewal) return 0;
@@ -706,7 +813,6 @@ function openDrawer(r: Subscriber) {
 }
 const $q = useQuasar();
 const router = useRouter();
-const { t } = useI18n();
 
 function copyNpub() {
   if (!current.value) return;

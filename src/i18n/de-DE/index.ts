@@ -1572,18 +1572,25 @@ export default {
     },
     filters: {
       frequency: "Filter by frequency",
+      status: "Status",
+      tier: "Tier",
+      sort: "Sort",
+      clear: "Clear",
+      apply: "Apply",
+      sortOptions: {
+        next: "Next renewal",
+        first: "First seen",
+        amount: "Lifetime sats",
+      },
     },
     columns: {
       subscriber: "Subscriber",
       tier: "Tier",
-      followers: "Followers",
-      following: "Following",
-      latestNote: "Latest note",
-      start: "Start",
-      nextRenewal: "Next renewal",
-      months: "Periods",
-      remaining: "Remaining",
+      frequency: "Freq",
       status: "Status",
+      amount: "Amount",
+      nextRenewal: "Next renewal",
+      lifetime: "Lifetime",
       actions: "Actions",
     },
     frequency: {
@@ -1598,6 +1605,9 @@ export default {
       sendGroupMessage: "Send Group DM",
       exportSelected: "Export selected",
       filters: "Filters",
+      retry: "Retry",
+      clear: "Clear",
+      openDetails: "Open details",
     },
     toolbar: {
       searchPlaceholder: "Search",
@@ -1605,13 +1615,16 @@ export default {
       status: "Status",
       tier: "Tier",
       sort: "Sort",
+      tableView: "Table view",
+      cardView: "Card view",
+      comfortable: "Comfortable",
       compact: "Compact",
       exportCsv: "Export CSV",
     },
     status: {
       any: "Any",
-      active: "Aktiv",
-      pending: "Ausstehend",
+      active: "Active",
+      pending: "Pending",
       ended: "Ended",
     },
     summary: {
@@ -1620,14 +1633,29 @@ export default {
       pending: "Pending",
       receivedPeriods: "Received periods",
       revenue: "Revenue",
+      lifetimeRevenue: "Lifetime revenue",
       thisPeriod: "This period",
       thisWeek: "this week",
       thisMonth: "this month",
+      nextWeek: "Next week",
+      nextMonth: "Next month",
     },
     charts: {
       frequency: "Frequency",
       status: "Status",
       newSubs: "New subs",
+      revenueOverTime: "Revenue over time",
+      frequencyMix: "Frequency mix",
+      statusByFrequency: "Status by frequency",
+      revenueSummary: "Total revenue {total} sat",
+      frequencySummary:
+        "Weekly: {weekly}, Bi-weekly: {biweekly}, Monthly: {monthly}",
+      statusSummary:
+        "Weekly - Active {weeklyActive}, Pending {weeklyPending}, Ended {weeklyEnded}; Bi-weekly - Active {biweeklyActive}, Pending {biweeklyPending}, Ended {biweeklyEnded}; Monthly - Active {monthlyActive}, Pending {monthlyPending}, Ended {monthlyEnded}",
+    },
+    renewalProgress: "Renewal progress",
+    tabs: {
+      all: "All",
     },
     periodsText: "{received} of {total} periods",
     periodsTooltip: "Periods received vs periods purchased",
@@ -1637,6 +1665,16 @@ export default {
     nextRenewal: "Renews on {date}",
     noData: "No subscribers yet",
     shareProfile: "Share your profile",
+    selectionCount: "{count} selected",
+    tooltips: {
+      noSelection: "Select subscribers first",
+      notLoggedIn: "Connect to Nostr to send messages",
+    },
+    notifications: {
+      export_success: "Subscribers exported",
+      export_failed: "Failed to export subscribers",
+      dm_not_ready: "Messenger not ready",
+    },
     drawer: {
       tabs: {
         overview: "Overview",
@@ -1662,6 +1700,7 @@ export default {
       payments: {
         noPayments: "No payments",
       },
+      activity: "Activity",
     },
   },
   SubscriberDrawer: {
