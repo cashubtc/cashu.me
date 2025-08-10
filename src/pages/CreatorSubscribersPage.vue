@@ -783,19 +783,10 @@ function statusIcon(s: SubStatus) {
   return s === 'active' ? 'check' : s === 'pending' ? 'schedule' : 'close';
 }
 function progressPercent(r: Subscriber) {
-  if (!r.nextRenewal) return 0;
-  const days =
-    r.frequency === "weekly" ? 7 : r.frequency === "biweekly" ? 14 : 30;
-  const end = r.nextRenewal * 1000;
-  const start = end - days * 86400000;
-  const now = Date.now();
-  return Math.round(
-    Math.min(Math.max((now - start) / (end - start), 0), 1) * 100
-  );
+  return Math.round((r.progress ?? 0) * 100);
 }
 function dueSoon(r: Subscriber) {
-  if (!r.nextRenewal || r.status !== "active") return false;
-  return r.nextRenewal * 1000 - Date.now() < 72 * 3600 * 1000;
+  return r.dueSoon;
 }
 function rowClass(row: Subscriber) {
   return dueSoon(row) ? "due-soon" : "";

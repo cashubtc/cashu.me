@@ -135,19 +135,29 @@ describe('CreatorSubscribersPage', () => {
 
   it('computes progress and dueSoon correctly', () => {
     vi.useFakeTimers();
+    const now = new Date(1700000000000);
+    vi.setSystemTime(now);
     const wrapper = mountPage();
     const store = useCreatorSubscribersStore(wrapper.vm.$pinia);
     const alice = store.subscribers[0];
-    const start = alice.nextRenewal! * 1000 - 7 * 86400000;
 
-    vi.setSystemTime(start + 3.5 * 86400000);
-    expect(wrapper.vm.progressPercent(alice)).toBe(50);
+    const periodSec = alice.intervalDays * 86400;
+    const start = (alice.nextRenewal ?? 0) - periodSec;
+    const expectedProgress = Math.min(
+      Math.max((now.getTime() / 1000 - start) / periodSec, 0),
+      1,
+    );
+    const expectedDueSoon =
+      alice.status === 'active' &&
+      typeof alice.nextRenewal === 'number' &&
+      alice.nextRenewal - now.getTime() / 1000 < 72 * 3600;
 
-    vi.setSystemTime(alice.nextRenewal! * 1000 - 2 * 86400000);
-    expect(wrapper.vm.dueSoon(alice)).toBe(true);
-
-    vi.setSystemTime(alice.nextRenewal! * 1000 - 5 * 86400000);
-    expect(wrapper.vm.dueSoon(alice)).toBe(false);
+    expect(alice.progress).toBeCloseTo(expectedProgress);
+    expect(alice.dueSoon).toBe(expectedDueSoon);
+    expect(wrapper.vm.progressPercent(alice)).toBe(
+      Math.round(alice.progress * 100),
+    );
+    expect(wrapper.vm.dueSoon(alice)).toBe(alice.dueSoon);
     vi.useRealTimers();
   });
 

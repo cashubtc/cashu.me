@@ -130,17 +130,18 @@ export const useCreatorSubscribersStore = defineStore("creatorSubscribers", {
           tierName: string;
           amountSat: number;
           frequency: Frequency;
-          earliest: number | null;
-          latest: number | null;
+          intervalDays: number;
+          tokens: { unlockTs: number }[];
           lifetime: number;
-          allPending: boolean;
+          totalPeriods?: number;
         };
 
         const map = new Map<string, Agg>();
         for (const row of rows) {
           const key = `${row.subscriptionId}-${row.subscriberNpub}`;
-          let agg = map.get(key);
           const freq = (row.frequency || daysToFrequency(row.intervalDays || 30)) as Frequency;
+          const intervalDays = row.intervalDays ?? frequencyToDays(freq);
+          let agg = map.get(key);
           if (!agg) {
             agg = {
               id: key,
@@ -149,36 +150,48 @@ export const useCreatorSubscribersStore = defineStore("creatorSubscribers", {
               tierName: row.tierName || "",
               amountSat: row.amount,
               frequency: freq,
-              earliest: row.unlockTs ?? null,
-              latest: row.unlockTs ?? null,
+              intervalDays,
+              tokens: [],
               lifetime: 0,
-              allPending: true,
+              totalPeriods: row.totalPeriods,
             };
             map.set(key, agg);
           }
-          agg.lifetime += row.amount;
-          agg.allPending &&= row.status === "pending";
           if (row.unlockTs != null) {
-            if (agg.earliest == null || row.unlockTs < agg.earliest) {
-              agg.earliest = row.unlockTs;
-            }
-            if (agg.latest == null || row.unlockTs > agg.latest) {
-              agg.latest = row.unlockTs;
-            }
+            agg.tokens.push({ unlockTs: row.unlockTs });
+          }
+          agg.lifetime += row.amount;
+          if (row.totalPeriods != null && agg.totalPeriods == null) {
+            agg.totalPeriods = row.totalPeriods;
           }
         }
 
         const now = Date.now() / 1000;
         this.subscribers = Array.from(map.values()).map((g) => {
-          const period = frequencyToDays(g.frequency) * 86400;
+          g.tokens.sort((a, b) => a.unlockTs - b.unlockTs);
+          const receivedPeriods = g.tokens.length;
+          const earliest = g.tokens[0]?.unlockTs ?? 0;
+          const latest = g.tokens[g.tokens.length - 1]?.unlockTs;
           const nextRenewal =
-            g.latest != null ? g.latest + period : undefined;
-          let status: SubStatus = "active";
-          if (g.allPending) {
-            status = "pending";
-          } else if (!nextRenewal || nextRenewal <= now) {
+            latest != null ? latest + g.intervalDays * 86400 : undefined;
+
+          let status: SubStatus;
+          if (g.totalPeriods != null && receivedPeriods >= g.totalPeriods) {
             status = "ended";
+          } else {
+            const nextUnlock = g.tokens[0]?.unlockTs;
+            status = nextUnlock != null && nextUnlock <= now ? "active" : "pending";
           }
+
+          let progress = 0;
+          let dueSoon = false;
+          if (nextRenewal != null) {
+            const period = g.intervalDays * 86400;
+            const start = nextRenewal - period;
+            progress = Math.min(Math.max((now - start) / period, 0), 1);
+            dueSoon = status === "active" && nextRenewal - now < 72 * 3600;
+          }
+
           return {
             id: g.id,
             name: g.npub,
@@ -188,10 +201,15 @@ export const useCreatorSubscribersStore = defineStore("creatorSubscribers", {
             tierName: g.tierName,
             amountSat: g.amountSat,
             frequency: g.frequency,
+            intervalDays: g.intervalDays,
             status,
-            startDate: g.earliest || 0,
+            startDate: earliest,
             nextRenewal,
             lifetimeSat: g.lifetime,
+            receivedPeriods,
+            totalPeriods: g.totalPeriods,
+            progress,
+            dueSoon,
           } as Subscriber;
         });
       } catch (e) {
