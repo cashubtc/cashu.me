@@ -1,100 +1,19 @@
 import { defineStore } from "pinia";
 import type { Subscriber, Frequency, SubStatus } from "../types/subscriber";
 import { useNostrStore } from "./nostr";
+import { cashuDb } from "./dexie";
+import {
+  daysToFrequency,
+  frequencyToDays,
+} from "../constants/subscriptionFrequency";
 
 type Tab = "all" | Frequency | "pending" | "ended";
 
 export type SortOption = "next" | "first" | "amount";
 
-const mockSubscribers: Subscriber[] = [
-  {
-    id: "1",
-    name: "Alice",
-    npub: "npub1alice",
-    nip05: "alice@example.com",
-    tierId: "t1",
-    tierName: "Bronze",
-    amountSat: 1000,
-    frequency: "weekly",
-    status: "active",
-    startDate: 1700000000,
-    nextRenewal: 1700000000 + 7 * 86400,
-    lifetimeSat: 5000,
-  },
-  {
-    id: "2",
-    name: "Bob",
-    npub: "npub1bob",
-    nip05: "bob@example.com",
-    tierId: "t1",
-    tierName: "Bronze",
-    amountSat: 1000,
-    frequency: "weekly",
-    status: "pending",
-    startDate: 1700001000,
-    nextRenewal: 1700001000 + 7 * 86400,
-    lifetimeSat: 1000,
-  },
-  {
-    id: "3",
-    name: "Carol",
-    npub: "npub1carol",
-    nip05: "carol@example.com",
-    tierId: "t2",
-    tierName: "Silver",
-    amountSat: 2000,
-    frequency: "biweekly",
-    status: "active",
-    startDate: 1700002000,
-    nextRenewal: 1700002000 + 14 * 86400,
-    lifetimeSat: 4000,
-  },
-  {
-    id: "4",
-    name: "Dave",
-    npub: "npub1dave",
-    nip05: "dave@example.com",
-    tierId: "t2",
-    tierName: "Silver",
-    amountSat: 2000,
-    frequency: "biweekly",
-    status: "ended",
-    startDate: 1690000000,
-    lifetimeSat: 2000,
-  },
-  {
-    id: "5",
-    name: "Eve",
-    npub: "npub1eve",
-    nip05: "eve@example.com",
-    tierId: "t3",
-    tierName: "Gold",
-    amountSat: 5000,
-    frequency: "monthly",
-    status: "active",
-    startDate: 1700003000,
-    nextRenewal: 1700003000 + 30 * 86400,
-    lifetimeSat: 10000,
-  },
-  {
-    id: "6",
-    name: "Frank",
-    npub: "npub1frank",
-    nip05: "frank@example.com",
-    tierId: "t3",
-    tierName: "Gold",
-    amountSat: 5000,
-    frequency: "monthly",
-    status: "pending",
-    startDate: 1700004000,
-    nextRenewal: 1700004000 + 30 * 86400,
-    lifetimeSat: 5000,
-  },
-];
-
 export const useCreatorSubscribersStore = defineStore("creatorSubscribers", {
   state: () => ({
-    subscribers: mockSubscribers as Subscriber[],
+    subscribers: [] as Subscriber[],
     profileCache: {} as Record<string, { name: string; nip05: string }>,
     query: "",
     activeTab: "all" as Tab,
@@ -194,6 +113,94 @@ export const useCreatorSubscribersStore = defineStore("creatorSubscribers", {
     },
   },
   actions: {
+    async loadFromDb() {
+      this.loading = true;
+      this.error = null;
+      try {
+        const rows = await cashuDb.lockedTokens
+          .where("owner")
+          .equals("creator")
+          .and((t) => !!t.subscriptionId && !!t.subscriberNpub)
+          .toArray();
+
+        type Agg = {
+          id: string;
+          npub: string;
+          tierId: string;
+          tierName: string;
+          amountSat: number;
+          frequency: Frequency;
+          earliest: number | null;
+          latest: number | null;
+          lifetime: number;
+          allPending: boolean;
+        };
+
+        const map = new Map<string, Agg>();
+        for (const row of rows) {
+          const key = `${row.subscriptionId}-${row.subscriberNpub}`;
+          let agg = map.get(key);
+          const freq = (row.frequency || daysToFrequency(row.intervalDays || 30)) as Frequency;
+          if (!agg) {
+            agg = {
+              id: key,
+              npub: row.subscriberNpub!,
+              tierId: row.tierId,
+              tierName: row.tierName || "",
+              amountSat: row.amount,
+              frequency: freq,
+              earliest: row.unlockTs ?? null,
+              latest: row.unlockTs ?? null,
+              lifetime: 0,
+              allPending: true,
+            };
+            map.set(key, agg);
+          }
+          agg.lifetime += row.amount;
+          agg.allPending &&= row.status === "pending";
+          if (row.unlockTs != null) {
+            if (agg.earliest == null || row.unlockTs < agg.earliest) {
+              agg.earliest = row.unlockTs;
+            }
+            if (agg.latest == null || row.unlockTs > agg.latest) {
+              agg.latest = row.unlockTs;
+            }
+          }
+        }
+
+        const now = Date.now() / 1000;
+        this.subscribers = Array.from(map.values()).map((g) => {
+          const period = frequencyToDays(g.frequency) * 86400;
+          const nextRenewal =
+            g.latest != null ? g.latest + period : undefined;
+          let status: SubStatus = "active";
+          if (g.allPending) {
+            status = "pending";
+          } else if (!nextRenewal || nextRenewal <= now) {
+            status = "ended";
+          }
+          return {
+            id: g.id,
+            name: g.npub,
+            npub: g.npub,
+            nip05: "",
+            tierId: g.tierId,
+            tierName: g.tierName,
+            amountSat: g.amountSat,
+            frequency: g.frequency,
+            status,
+            startDate: g.earliest || 0,
+            nextRenewal,
+            lifetimeSat: g.lifetime,
+          } as Subscriber;
+        });
+      } catch (e) {
+        console.error(e);
+        this.error = e instanceof Error ? e.message : String(e);
+      } finally {
+        this.loading = false;
+      }
+    },
     async fetchProfiles() {
       const nostr = useNostrStore();
       this.loading = true;
