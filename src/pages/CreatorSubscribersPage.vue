@@ -22,26 +22,26 @@
             <q-icon name="search" />
           </template>
         </q-input>
-        <q-btn-toggle
-          v-model="view"
-          dense
-          toggle-color="primary"
-          class="q-ml-sm"
-          :options="viewOptions"
-        />
-        <q-btn-toggle
-          v-model="density"
-          dense
-          toggle-color="primary"
-          class="q-ml-sm"
-          :options="densityOptions"
-        />
+        <q-btn-group flat rounded class="q-ml-sm">
+          <q-btn-toggle
+            v-model="view"
+            dense
+            toggle-color="primary"
+            :options="viewOptions"
+          />
+          <q-btn-toggle
+            v-model="density"
+            dense
+            toggle-color="primary"
+            :options="densityOptions"
+          />
+        </q-btn-group>
+        <q-space />
         <q-btn
-          outline
-          color="grey-5"
+          flat
+          color="primary"
           icon="download"
           :label="t('CreatorSubscribers.toolbar.exportCsv')"
-          class="q-ml-sm"
           :aria-label="t('CreatorSubscribers.toolbar.exportCsv')"
           @click="downloadCsv()"
         />
