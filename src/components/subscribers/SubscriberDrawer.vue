@@ -24,6 +24,7 @@
     <q-tabs v-model="tab" dense align="justify" class="text-grey-7" active-color="primary">
       <q-tab name="overview" :label="t('CreatorSubscribers.drawer.tabs.overview')" />
       <q-tab name="payments" :label="t('CreatorSubscribers.drawer.tabs.payments')" />
+      <q-tab name="activity" :label="t('CreatorSubscribers.drawer.activity')" />
       <q-tab name="notes" :label="t('CreatorSubscribers.drawer.tabs.notes')" />
     </q-tabs>
     <q-separator />
@@ -76,7 +77,7 @@
             icon="content_copy"
             :label="t('CreatorSubscribers.drawer.actions.copyNpub')"
             :aria-label="t('CreatorSubscribers.drawer.actions.copyNpub')"
-            @click="copy(sub?.subscriberNpub)"
+            @click="copy(subscriberNpub)"
           />
           <q-btn
             flat
@@ -122,6 +123,17 @@
         </q-list>
       </q-tab-panel>
 
+      <q-tab-panel name="activity" class="q-pa-md">
+        <q-list bordered dense>
+          <q-item v-for="a in activity" :key="a.ts">
+            <q-item-section>{{ a.text }}</q-item-section>
+            <q-item-section side class="text-caption text-grey">
+              {{ distToNow(a.ts) }}
+            </q-item-section>
+          </q-item>
+        </q-list>
+      </q-tab-panel>
+
       <q-tab-panel name="notes" class="q-pa-md">
         <q-input v-model="notes" type="textarea" autogrow />
       </q-tab-panel>
@@ -137,10 +149,14 @@ import { useI18n } from 'vue-i18n';
 import { cashuDb } from 'stores/dexie';
 import { useUiStore } from 'stores/ui';
 import { useMintsStore } from 'stores/mints';
+import { formatDistanceToNow } from 'date-fns';
 import type { CreatorSubscription } from 'stores/creatorSubscriptions';
 import type { NDKUserProfile as Profile } from '@nostr-dev-kit/ndk';
+import type { Subscriber } from 'src/types/subscriber';
 
-const props = defineProps<{ modelValue: boolean; sub: CreatorSubscription; profile?: Profile; notes?: string }>();
+type Sub = CreatorSubscription | Subscriber | undefined;
+
+const props = defineProps<{ modelValue: boolean; sub: Sub; profile?: Profile; notes?: string }>();
 
 const emit = defineEmits<{
   (e: 'update:modelValue', v: boolean): void;
@@ -166,36 +182,41 @@ function formatCurrency(amount: number): string {
   return uiStore.formatCurrency(amount, activeUnit.value);
 }
 
+const subscriberNpub = computed(() => {
+  const s: any = props.sub;
+  return s?.subscriberNpub || s?.npub || '';
+});
+
 const profileTitle = computed(() => {
-  return (
-    props.profile?.display_name ||
-    props.profile?.name ||
-    props.sub?.subscriberNpub ||
-    ''
-  );
+  return props.profile?.display_name || props.profile?.name || subscriberNpub.value || '';
 });
 
 const nextRenewal = computed(() => {
-  const ts = props.sub?.nextRenewal;
+  const s: any = props.sub;
+  const ts = s?.nextRenewal;
   if (!ts) return '—';
   return new Date(ts * 1000).toLocaleString();
 });
 
+const totalAmount = computed(() => {
+  const s: any = props.sub;
+  return s?.totalAmount ?? s?.lifetimeSat ?? 0;
+});
+
 const amountPerInterval = computed(() => {
-  const s = props.sub;
+  const s: any = props.sub;
   if (!s) return '';
-  const periodAmount = s.receivedPeriods > 0 ? s.totalAmount / s.receivedPeriods : s.totalAmount;
+  const periodAmount = s.receivedPeriods > 0 ? totalAmount.value / s.receivedPeriods : totalAmount.value;
   return `${formatCurrency(periodAmount)} / ${s.frequency}`;
 });
 
 const lifetimeTotal = computed(() => {
-  const s = props.sub;
-  if (!s) return '';
-  return formatCurrency(s.totalAmount);
+  return formatCurrency(totalAmount.value);
 });
 
 const sinceDate = computed(() => {
-  const ts = props.sub?.startDate;
+  const s: any = props.sub;
+  const ts = s?.startDate;
   if (!ts) return '—';
   return new Date(ts * 1000).toLocaleDateString();
 });
@@ -210,7 +231,8 @@ const paymentsLoading = ref(false);
 const originEl = ref<HTMLElement | null>(null);
 
 async function loadPayments() {
-  const id = props.sub?.subscriptionId;
+  const s: any = props.sub;
+  const id = s?.subscriptionId || s?.id;
   if (!id) {
     payments.value = [];
     return;
@@ -235,7 +257,10 @@ async function loadPayments() {
 }
 
 watch(
-  () => props.sub?.subscriptionId,
+  () => {
+    const s: any = props.sub;
+    return s?.subscriptionId || s?.id;
+  },
   () => {
     if (model.value) loadPayments();
   },
@@ -250,7 +275,10 @@ watch(model, (v) => {
   }
 });
 
-const storageKey = computed(() => `sub-notes:${props.sub?.subscriptionId ?? ''}`);
+const storageKey = computed(() => {
+  const s: any = props.sub;
+  return `sub-notes:${s?.subscriptionId || s?.id || ''}`;
+});
 const notes = useLocalStorage<string>(storageKey, props.notes ?? '');
 
 watch(
@@ -261,6 +289,19 @@ watch(
 );
 
 watch(notes, (v) => emit('update:notes', v));
+
+const activity = computed(() => {
+  const s: any = props.sub;
+  if (!s) return [] as Array<{ ts: number; text: string }>;
+  const arr: Array<{ ts: number; text: string }> = [];
+  if (s.startDate) arr.push({ ts: s.startDate, text: 'Started subscription' });
+  if (s.nextRenewal) arr.push({ ts: s.nextRenewal, text: 'Next renewal' });
+  return arr;
+});
+
+function distToNow(ts: number) {
+  return formatDistanceToNow(ts * 1000, { addSuffix: true });
+}
 
 function close() {
   model.value = false;
