@@ -12,11 +12,17 @@
       <q-tab name="pending" :label="`Pending (${counts.pending})`" />
       <q-tab name="ended" :label="`Ended (${counts.ended})`" />
     </q-tabs>
-    <div class="q-mt-md">
-      <div v-for="s in filtered" :key="s.id" class="q-pa-sm">
-        {{ s.name }} - {{ s.tierName }}
-      </div>
-    </div>
+    <q-virtual-scroll
+      class="q-mt-md"
+      :items="filtered"
+      :virtual-scroll-item-size="48"
+    >
+      <template #default="{ item: s }">
+        <div class="q-pa-sm">
+          {{ s.name }} - {{ s.tierName }}
+        </div>
+      </template>
+    </q-virtual-scroll>
     <SubscriberFiltersPopover ref="filters" />
   </q-page>
 </template>
