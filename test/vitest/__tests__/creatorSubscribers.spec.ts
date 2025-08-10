@@ -3,6 +3,7 @@ import { mount } from '@vue/test-utils';
 import { ref } from 'vue';
 import CreatorSubscribersPage from '../../../src/pages/CreatorSubscribersPage.vue';
 import type { CreatorSubscription } from '../../../src/stores/creatorSubscriptions';
+import { useCreatorSubscribersStore } from '../../../src/stores/creatorSubscribers';
 
 const mockSubs: CreatorSubscription[] = [
   {
@@ -78,9 +79,10 @@ vi.mock('../../../src/stores/creatorSubscriptions', () => ({
   }),
 }));
 
+const getProfileMock = vi.fn().mockResolvedValue(null);
 vi.mock('../../../src/stores/nostr', () => ({
   useNostrStore: () => ({
-    getProfile: vi.fn().mockResolvedValue(null),
+    getProfile: getProfileMock,
   }),
 }));
 
@@ -108,9 +110,13 @@ vi.mock('vue-router', () => ({
   useRouter: () => ({ push: vi.fn() }),
 }));
 
-vi.mock('quasar', () => ({
-  useQuasar: () => ({ clipboard: { writeText: vi.fn() }, notify: vi.fn() }),
-}));
+vi.mock('quasar', async (importOriginal) => {
+  const actual = await importOriginal();
+  return {
+    ...actual,
+    useQuasar: () => ({ clipboard: { writeText: vi.fn() }, notify: vi.fn() }),
+  };
+});
 
 describe('CreatorSubscribersPage', () => {
   function mountComponent() {
@@ -173,6 +179,20 @@ describe('CreatorSubscribersPage', () => {
 
     weeklyCards = wrapper.findAll('.mb-8')[0].findAll('.subscriber-card');
     expect(weeklyCards.map((c) => c.text())).toEqual(['w1 200', 'w2 100']);
+  });
+
+  it('fetches and caches profiles for unique subscribers', async () => {
+    const wrapper = mountComponent();
+    await wrapper.vm.$nextTick();
+    await new Promise((r) => setTimeout(r, 0));
+
+    expect(getProfileMock).toHaveBeenCalledTimes(4);
+
+    const store = useCreatorSubscribersStore();
+    await store.fetchProfiles();
+    await new Promise((r) => setTimeout(r, 0));
+
+    expect(getProfileMock).toHaveBeenCalledTimes(4);
   });
 });
 

@@ -1,5 +1,6 @@
 import { defineStore } from "pinia";
 import type { Subscriber, Frequency, SubStatus } from "../types/subscriber";
+import { useNostrStore } from "./nostr";
 
 type Tab = "all" | Frequency | "pending" | "ended";
 
@@ -94,6 +95,7 @@ const mockSubscribers: Subscriber[] = [
 export const useCreatorSubscribersStore = defineStore("creatorSubscribers", {
   state: () => ({
     subscribers: mockSubscribers as Subscriber[],
+    profileCache: {} as Record<string, { name: string; nip05: string }>,
     query: "",
     activeTab: "all" as Tab,
     statuses: new Set<SubStatus>(),
@@ -190,6 +192,27 @@ export const useCreatorSubscribersStore = defineStore("creatorSubscribers", {
     },
   },
   actions: {
+    async fetchProfiles() {
+      const nostr = useNostrStore();
+      const unique = Array.from(new Set(this.subscribers.map((s) => s.npub)));
+      for (const npub of unique) {
+        if (!this.profileCache[npub]) {
+          const profile = await nostr.getProfile(npub);
+          this.profileCache[npub] = {
+            name: profile?.name || "",
+            nip05: profile?.nip05 || "",
+          };
+        }
+      }
+      this.subscribers = this.subscribers.map((s) => {
+        const cached = this.profileCache[s.npub];
+        return {
+          ...s,
+          name: cached?.name || s.name || s.npub,
+          nip05: cached?.nip05 || s.nip05 || "",
+        };
+      });
+    },
     setActiveTab(tab: Tab) {
       this.activeTab = tab;
     },

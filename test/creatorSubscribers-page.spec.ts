@@ -37,6 +37,9 @@ vi.mock('quasar', async (importOriginal) => {
   };
 });
 vi.mock('src/utils/subscriberCsv', () => ({ default: vi.fn() }));
+vi.mock('src/stores/nostr', () => ({
+  useNostrStore: () => ({ getProfile: vi.fn().mockResolvedValue(null) }),
+}));
 
 import downloadCsv from 'src/utils/subscriberCsv';
 import CreatorSubscribersPage from '../src/pages/CreatorSubscribersPage.vue';
