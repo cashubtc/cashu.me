@@ -225,5 +225,14 @@ describe('CreatorSubscribersPage', () => {
     expect(charts.length).toBe(initialCalls);
     vi.useRealTimers();
   });
+
+  it('keeps KPI counts when paginating table rows', async () => {
+    const wrapper = mountPage();
+    wrapper.vm.pagination.rowsPerPage = 2;
+    wrapper.vm.pagination.page = 1;
+    await wrapper.vm.$nextTick();
+    expect(wrapper.vm.paginatedRows.length).toBe(2);
+    expect(wrapper.vm.counts.all).toBe(6);
+  });
 });
 

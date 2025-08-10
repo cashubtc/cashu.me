@@ -172,7 +172,7 @@
     <q-table
       v-if="view === 'table'"
       flat
-      :rows="filtered"
+      :rows="paginatedRows"
       row-key="id"
       selection="multiple"
       v-model:selected="selected"
@@ -181,6 +181,9 @@
       :row-class="rowClass"
       :dense="density === 'compact'"
       :class="['density--' + density]"
+      v-model:pagination="pagination"
+      :row-count="filtered.length"
+      @request="onRequest"
     >
       <template #body-cell-subscriber="props">
         <q-td :props="props">
@@ -273,19 +276,24 @@
             @click="openDrawer(props.row)" /></q-td
       ></template>
     </q-table>
-    <div v-else class="subscriber-cards">
-      <SubscriberCard
-        v-for="row in filtered"
-        :key="row.id"
-        :subscription="{ tierName: row.tierName, subscriberNpub: row.npub } as any"
-        :status="row.status"
-        :next-in="row.nextRenewal ? distToNow(row.nextRenewal) : '—'"
-        :progress="progressPercent(row) / 100"
-        :amount="row.amountSat + ' sat'"
-        :compact="density === 'compact'"
-        @click="openDrawer(row)"
-      />
-    </div>
+    <q-virtual-scroll
+      v-else
+      :items="filtered"
+      :virtual-scroll-item-size="140"
+      content-class="subscriber-cards"
+    >
+      <template #default="{ item: row }">
+        <SubscriberCard
+          :subscription="{ tierName: row.tierName, subscriberNpub: row.npub } as any"
+          :status="row.status"
+          :next-in="row.nextRenewal ? distToNow(row.nextRenewal) : '—'"
+          :progress="progressPercent(row) / 100"
+          :amount="row.amountSat + ' sat'"
+          :compact="density === 'compact'"
+          @click="openDrawer(row)"
+        />
+      </template>
+    </q-virtual-scroll>
 
     <!-- Selection bar -->
     <div
@@ -405,6 +413,7 @@ import { storeToRefs } from "pinia";
 import { useDebounceFn } from "@vueuse/core";
 import { format, formatDistanceToNow } from "date-fns";
 import { useQuasar } from "quasar";
+import type { QTableRequestProp } from "quasar";
 import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
 import type { Subscriber, Frequency, SubStatus } from "src/types/subscriber";
@@ -524,6 +533,16 @@ const selected = ref<Subscriber[]>([]);
 
 const view = ref<"table" | "cards">("table");
 const density = ref<"compact" | "comfortable">("comfortable");
+
+const pagination = ref({ page: 1, rowsPerPage: 25 });
+const paginatedRows = computed(() => {
+  const start = (pagination.value.page - 1) * pagination.value.rowsPerPage;
+  const end = start + pagination.value.rowsPerPage;
+  return filtered.value.slice(start, end);
+});
+function onRequest(props: QTableRequestProp) {
+  pagination.value = props.pagination;
+}
 
 const lineEl = ref<HTMLCanvasElement | null>(null);
 const doughnutEl = ref<HTMLCanvasElement | null>(null);
