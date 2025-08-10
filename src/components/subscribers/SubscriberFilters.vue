@@ -1,30 +1,22 @@
 <template>
-  <q-menu
-    ref="menu"
-    anchor="bottom left"
-    self="top left"
-    transition-show="jump-down"
-    transition-hide="jump-up"
-  >
-    <div class="q-pa-md" style="min-width: 200px">
-      <div class="text-subtitle2 q-mb-sm">
-        {{ t('CreatorSubscribers.filters.status') }}
-      </div>
-      <q-option-group v-model="localStatuses" :options="statusOptions" type="checkbox" />
-      <div class="text-subtitle2 q-mt-md q-mb-sm">
-        {{ t('CreatorSubscribers.filters.tier') }}
-      </div>
-      <q-option-group v-model="localTiers" :options="tierOptions" type="checkbox" />
-      <div class="text-subtitle2 q-mt-md q-mb-sm">
-        {{ t('CreatorSubscribers.filters.sort') }}
-      </div>
-      <q-option-group v-model="localSort" :options="sortOptions" type="radio" />
-      <div class="row justify-end q-mt-md q-gutter-sm">
-        <q-btn flat :label="t('CreatorSubscribers.filters.clear')" v-close-popup @click="clear" />
-        <q-btn color="primary" :label="t('CreatorSubscribers.filters.apply')" v-close-popup @click="apply" />
-      </div>
+  <div class="q-pa-md" style="min-width: 200px">
+    <div class="text-subtitle2 q-mb-sm">
+      {{ t('CreatorSubscribers.filters.status') }}
     </div>
-  </q-menu>
+    <q-option-group v-model="localStatuses" :options="statusOptions" type="checkbox" />
+    <div class="text-subtitle2 q-mt-md q-mb-sm">
+      {{ t('CreatorSubscribers.filters.tier') }}
+    </div>
+    <q-option-group v-model="localTiers" :options="tierOptions" type="checkbox" />
+    <div class="text-subtitle2 q-mt-md q-mb-sm">
+      {{ t('CreatorSubscribers.filters.sort') }}
+    </div>
+    <q-option-group v-model="localSort" :options="sortOptions" type="radio" />
+    <div class="row justify-end q-mt-md q-gutter-sm">
+      <q-btn flat :label="t('CreatorSubscribers.filters.clear')" @click="clear" />
+      <q-btn color="primary" :label="t('CreatorSubscribers.filters.apply')" @click="apply" />
+    </div>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -36,7 +28,6 @@ import { useI18n } from 'vue-i18n';
 
 const store = useCreatorSubscribersStore();
 
-const menu = ref();
 const localStatuses = ref<SubStatus[]>(Array.from(store.statuses));
 const localTiers = ref<string[]>(Array.from(store.tiers));
 const localSort = ref<SortOption>(store.sort);
@@ -73,7 +64,7 @@ function apply() {
   store.applyFilters({
     statuses: new Set(localStatuses.value),
     tiers: new Set(localTiers.value),
-    sort: localSort.value
+    sort: localSort.value,
   });
 }
 
@@ -83,10 +74,4 @@ function clear() {
   localSort.value = 'next';
   store.clearFilters();
 }
-
-function show() {
-  menu.value?.show();
-}
-
-defineExpose({ show });
 </script>
