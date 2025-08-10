@@ -157,8 +157,9 @@ body.body--light {
 .panel-container {
   background-color: var(--panel-bg-color);
   border: var(--border-subtle);
+  border-width: 2px;
   border-radius: 16px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .chip {
@@ -321,5 +322,5 @@ body.body--dark .received {
 .subscriber-cards {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-  gap: 1rem;
+  gap: 1.5rem;
 }

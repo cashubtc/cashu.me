@@ -1,6 +1,6 @@
 <template>
-  <q-card :class="[{ 'q-mb-sm': !compact }, 'cursor-pointer']" @click="$emit('click')">
-    <q-card-section class="q-pa-sm">
+  <q-card :class="[{ 'q-mb-sm': !compact }, 'q-pa-md', 'q-ma-sm', 'cursor-pointer']" @click="$emit('click')">
+    <q-card-section class="q-pa-none">
       <div class="row items-center justify-between">
         <div>
           <div class="text-subtitle2">{{ subscription.tierName }}</div>
