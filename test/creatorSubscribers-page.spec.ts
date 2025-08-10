@@ -1,6 +1,10 @@
 import { describe, it, expect, vi } from 'vitest';
 import { mount } from '@vue/test-utils';
 import { createTestingPinia } from '@pinia/testing';
+import { ref } from 'vue';
+import { createI18n } from 'vue-i18n';
+import { messages as enMessages } from '../src/i18n/en-US/index.ts';
+import { useCreatorSubscribersStore } from '../src/stores/creatorSubscribers';
 
 var Chart: any;
 const charts: { type: string; inst: any }[] = [];
@@ -27,15 +31,22 @@ vi.mock('chart.js', () => {
   };
 });
 
-vi.mock('@vueuse/core', () => ({ useDebounceFn: (fn: any) => fn }));
+vi.mock('@vueuse/core', () => ({
+  useDebounceFn: (fn: any) => fn,
+  useLocalStorage: (_k: any, v: any) => ref(v),
+  onKeyStroke: () => {},
+}));
+const clipboardWrite = vi.fn();
 vi.mock('quasar', async (importOriginal) => {
   const actual = await importOriginal();
   return {
     ...actual,
     copyToClipboard: vi.fn(),
-    useQuasar: () => ({ clipboard: { writeText: vi.fn() }, notify: vi.fn() }),
+    useQuasar: () => ({ clipboard: { writeText: clipboardWrite }, notify: vi.fn() }),
   };
 });
+const routerPush = vi.fn();
+vi.mock('vue-router', () => ({ useRouter: () => ({ push: routerPush }) }));
 vi.mock('src/utils/subscriberCsv', () => ({ default: vi.fn() }));
 vi.mock('src/stores/nostr', () => ({
   useNostrStore: () => ({ getProfile: vi.fn().mockResolvedValue(null) }),
@@ -43,7 +54,6 @@ vi.mock('src/stores/nostr', () => ({
 
 import downloadCsv from 'src/utils/subscriberCsv';
 import CreatorSubscribersPage from '../src/pages/CreatorSubscribersPage.vue';
-import { useCreatorSubscribersStore } from '../src/stores/creatorSubscribers';
 
 const stubs = {
   'q-page': { template: '<div><slot /></div>' },
@@ -53,8 +63,9 @@ const stubs = {
     template: '<input :value="modelValue" @input="$emit(\'update:modelValue\', $event.target.value)" />',
   },
   'q-btn': {
-    props: ['label'],
-    template: '<button :data-label="label" @click="$emit(\'click\')"><slot /></button>',
+    props: ['label', 'ariaLabel'],
+    template:
+      '<button :data-label="label" :aria-label="ariaLabel" @click="$emit(\'click\', $event)"><slot /></button>',
   },
   'q-menu': { template: '<div><slot /></div>' },
   'q-chip': { template: '<div class="q-chip" @click="$emit(\'click\')"><slot /></div>' },
@@ -80,12 +91,15 @@ const stubs = {
     template: '<div class="drawer" v-show="modelValue"><slot /></div>',
   },
   'q-space': { template: '<span class="q-space"></span>' },
+  'q-banner': { template: '<div><slot /><slot name="action" /></div>' },
+  SubscriberFiltersPopover: { template: '<div></div>' },
 };
 
 function mountPage() {
+  const i18n = createI18n({ locale: 'en-US', messages: { 'en-US': enMessages } });
   return mount(CreatorSubscribersPage, {
     global: {
-      plugins: [createTestingPinia({ createSpy: vi.fn, stubActions: false })],
+      plugins: [createTestingPinia({ createSpy: vi.fn, stubActions: false }), i18n],
       stubs,
     },
   });
@@ -174,6 +188,55 @@ describe('CreatorSubscribersPage', () => {
     await wrapper.vm.$nextTick();
     await wrapper.find('button[data-label="Export selection"]').trigger('click');
     expect(downloadCsv).toHaveBeenCalledWith([store.subscribers[0]]);
+  });
+
+  it('retries loading when retry button clicked', async () => {
+    const wrapper = mountPage();
+    const store = useCreatorSubscribersStore(wrapper.vm.$pinia);
+    wrapper.vm.error = 'oops';
+    await wrapper.vm.$nextTick();
+    const loadSpy = vi.spyOn(store, 'loadFromDb');
+    const fetchSpy = vi.spyOn(store, 'fetchProfiles');
+    await wrapper.find('button[data-label="Retry"]').trigger('click');
+    expect(loadSpy).toHaveBeenCalled();
+    expect(fetchSpy).toHaveBeenCalled();
+  });
+
+  it('opens filters when filter button clicked', async () => {
+    const wrapper = mountPage();
+    const show = vi.fn();
+    wrapper.vm.filters = { show } as any;
+    await wrapper.find('button[aria-label="Filters"]').trigger('click');
+    expect(show).toHaveBeenCalled();
+  });
+
+  it('clears selection when clear button clicked', async () => {
+    const wrapper = mountPage();
+    const store = useCreatorSubscribersStore();
+    wrapper.vm.selected = [store.subscribers[0]];
+    await wrapper.vm.$nextTick();
+    await wrapper.find('button[data-label="Clear"]').trigger('click');
+    expect(wrapper.vm.selected).toEqual([]);
+  });
+
+  it('copies npub when drawer action used', async () => {
+    const wrapper = mountPage();
+    const npub = 'npubtest';
+    wrapper.vm.openDrawer({
+      npub,
+      name: '',
+      tierName: '',
+      status: 'active',
+      frequency: 'monthly',
+      amountSat: 0,
+      nextRenewal: 0,
+      lifetimeSat: 0,
+      startDate: 0,
+    } as any);
+    await wrapper.vm.$nextTick();
+    clipboardWrite.mockReset();
+    wrapper.vm.copyNpub();
+    expect(clipboardWrite).toHaveBeenCalledWith(npub);
   });
 
   it('updates KPI numbers when searching, switching tabs and applying filters', async () => {

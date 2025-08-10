@@ -67,6 +67,7 @@
             dense
             icon="chat"
             :label="t('CreatorSubscribers.drawer.actions.dm')"
+            :aria-label="t('CreatorSubscribers.drawer.actions.dm')"
             @click="emit('dm')"
           />
           <q-btn
@@ -74,6 +75,7 @@
             dense
             icon="content_copy"
             :label="t('CreatorSubscribers.drawer.actions.copyNpub')"
+            :aria-label="t('CreatorSubscribers.drawer.actions.copyNpub')"
             @click="copy(sub?.subscriberNpub)"
           />
           <q-btn
@@ -82,6 +84,7 @@
             icon="content_copy"
             :label="t('CreatorSubscribers.drawer.actions.copyLud16')"
             v-if="profile?.lud16"
+            :aria-label="t('CreatorSubscribers.drawer.actions.copyLud16')"
             @click="copy(profile.lud16)"
           />
           <q-btn
@@ -89,6 +92,7 @@
             dense
             icon="open_in_new"
             :label="t('CreatorSubscribers.drawer.actions.openProfile')"
+            :aria-label="t('CreatorSubscribers.drawer.actions.openProfile')"
             @click="emit('openProfile')"
           />
           <q-btn
@@ -96,6 +100,7 @@
             dense
             color="negative"
             :label="t('CreatorSubscribers.drawer.actions.cancel')"
+            :aria-label="t('CreatorSubscribers.drawer.actions.cancel')"
             @click="emit('cancel')"
           />
         </div>
