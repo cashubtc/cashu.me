@@ -1,6 +1,19 @@
 <template>
   <q-page padding>
     <SubscriberFiltersPopover ref="filters" />
+    <q-banner
+      v-if="error"
+      dense
+      class="q-mb-md bg-red-1 text-red"
+    >
+      {{ error }}
+      <template #action>
+        <q-btn flat color="red" label="Retry" @click="retry" />
+      </template>
+    </q-banner>
+    <q-inner-loading :showing="loading">
+      <q-spinner size="50px" color="primary" />
+    </q-inner-loading>
     <!-- Top bar -->
     <div class="row items-center q-gutter-sm q-mb-md">
       <div class="text-h6">Subscribers</div>
@@ -400,7 +413,7 @@ import SubscriberFiltersPopover from "src/components/subscribers/SubscriberFilte
 import SubscriberCard from "src/components/SubscriberCard.vue";
 
 const subStore = useCreatorSubscribersStore();
-const { filtered, counts, activeTab } = storeToRefs(subStore);
+const { filtered, counts, activeTab, loading, error } = storeToRefs(subStore);
 // `filtered` is maintained by the Pinia store based on the active tab,
 // search query and filter popover. Treat it as the single source of truth
 // for the subscriber list and KPI counts throughout this page.
@@ -501,6 +514,10 @@ const filters = ref<InstanceType<typeof SubscriberFiltersPopover> | null>(null);
 
 function openFilters(e: MouseEvent) {
   filters.value?.show(e);
+}
+
+function retry() {
+  void subStore.fetchProfiles();
 }
 
 const selected = ref<Subscriber[]>([]);

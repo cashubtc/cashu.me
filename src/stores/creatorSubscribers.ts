@@ -101,6 +101,8 @@ export const useCreatorSubscribersStore = defineStore("creatorSubscribers", {
     statuses: new Set<SubStatus>(),
     tiers: new Set<string>(),
     sort: "next" as SortOption,
+    loading: false,
+    error: null as string | null,
   }),
   getters: {
     filtered(state): Subscriber[] {
@@ -194,24 +196,33 @@ export const useCreatorSubscribersStore = defineStore("creatorSubscribers", {
   actions: {
     async fetchProfiles() {
       const nostr = useNostrStore();
-      const unique = Array.from(new Set(this.subscribers.map((s) => s.npub)));
-      for (const npub of unique) {
-        if (!this.profileCache[npub]) {
-          const profile = await nostr.getProfile(npub);
-          this.profileCache[npub] = {
-            name: profile?.name || "",
-            nip05: profile?.nip05 || "",
-          };
+      this.loading = true;
+      this.error = null;
+      try {
+        const unique = Array.from(new Set(this.subscribers.map((s) => s.npub)));
+        for (const npub of unique) {
+          if (!this.profileCache[npub]) {
+            const profile = await nostr.getProfile(npub);
+            this.profileCache[npub] = {
+              name: profile?.name || "",
+              nip05: profile?.nip05 || "",
+            };
+          }
         }
+        this.subscribers = this.subscribers.map((s) => {
+          const cached = this.profileCache[s.npub];
+          return {
+            ...s,
+            name: cached?.name || s.name || s.npub,
+            nip05: cached?.nip05 || s.nip05 || "",
+          };
+        });
+      } catch (e) {
+        console.error(e);
+        this.error = e instanceof Error ? e.message : String(e);
+      } finally {
+        this.loading = false;
       }
-      this.subscribers = this.subscribers.map((s) => {
-        const cached = this.profileCache[s.npub];
-        return {
-          ...s,
-          name: cached?.name || s.name || s.npub,
-          nip05: cached?.nip05 || s.nip05 || "",
-        };
-      });
     },
     setActiveTab(tab: Tab) {
       this.activeTab = tab;
