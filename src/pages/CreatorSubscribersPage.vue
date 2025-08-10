@@ -8,6 +8,7 @@
           flat
           color="red"
           :label="t('CreatorSubscribers.actions.retry')"
+          :aria-label="t('CreatorSubscribers.actions.retry')"
           @click="retry"
         />
       </template>
@@ -58,6 +59,7 @@
         icon="download"
         :label="t('CreatorSubscribers.toolbar.exportCsv')"
         class="q-ml-sm"
+        :aria-label="t('CreatorSubscribers.toolbar.exportCsv')"
         @click="downloadCsv()"
       />
     </div>
@@ -317,14 +319,16 @@
         color="white"
         icon="download"
         :label="t('CreatorSubscribers.actions.exportSelected')"
-        @click="downloadCsv(selected)"
+        :aria-label="t('CreatorSubscribers.actions.exportSelected')"
+        @click="exportSelected"
       />
       <q-btn
         flat
         dense
         color="white"
         :label="t('CreatorSubscribers.actions.clear')"
-        @click="selected = []"
+        :aria-label="t('CreatorSubscribers.actions.clear')"
+        @click="clearSelected"
       />
     </div>
 
@@ -373,8 +377,8 @@
           {{ formatDate(current.startDate) }}
         </div>
         <div class="row q-gutter-sm q-mt-md">
-          <q-btn outline :label="t('CreatorSubscribers.drawer.actions.dm')" @click="dmSubscriber" />
-          <q-btn outline :label="t('CreatorSubscribers.drawer.actions.copyNpub')" @click="copyNpub" />
+          <q-btn outline :label="t('CreatorSubscribers.drawer.actions.dm')" :aria-label="t('CreatorSubscribers.drawer.actions.dm')" @click="dmSubscriber" />
+          <q-btn outline :label="t('CreatorSubscribers.drawer.actions.copyNpub')" :aria-label="t('CreatorSubscribers.drawer.actions.copyNpub')" @click="copyNpub" />
         </div>
         <div class="q-mt-lg">
           <div class="text-subtitle2 q-mb-sm">
@@ -594,6 +598,14 @@ function retry() {
 }
 
 const selected = ref<Subscriber[]>([]);
+
+function exportSelected() {
+  downloadCsv(selected.value);
+}
+
+function clearSelected() {
+  selected.value = [];
+}
 
 const view = ref<'table' | 'cards'>('table');
 const density = ref<'compact' | 'comfortable'>('comfortable');
