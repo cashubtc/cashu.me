@@ -2,15 +2,21 @@
   <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
     <div class="flex flex-col items-center">
       <MiniDonut :series="frequencySeries" :labels="frequencyLabels" />
-      <div class="text-caption q-mt-xs">Frequency</div>
+      <div class="text-caption q-mt-xs">
+        {{ t('CreatorSubscribers.charts.frequency') }}
+      </div>
     </div>
     <div class="flex flex-col items-center">
       <MiniDonut :series="statusSeries" :labels="statusLabels" />
-      <div class="text-caption q-mt-xs">Status</div>
+      <div class="text-caption q-mt-xs">
+        {{ t('CreatorSubscribers.charts.status') }}
+      </div>
     </div>
     <div class="flex flex-col items-center w-full">
       <MiniBar :series="newSubsSeries" class="w-full" />
-      <div class="text-caption q-mt-xs">New subs</div>
+      <div class="text-caption q-mt-xs">
+        {{ t('CreatorSubscribers.charts.newSubs') }}
+      </div>
     </div>
   </div>
 </template>
