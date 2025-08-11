@@ -68,6 +68,7 @@ const stubs = {
   'q-btn-toggle': { template: '<div></div>' },
   'q-page-container': { template: '<div><slot /></div>' },
   'q-page': { template: '<div><slot /></div>' },
+  'q-footer': { template: '<div><slot /></div>' },
   'q-input': {
     props: ['modelValue'],
     emits: ['update:modelValue'],
