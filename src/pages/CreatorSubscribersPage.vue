@@ -178,13 +178,13 @@
       :rows-per-page-options="[10, 25, 50]"
       :row-class="rowClass"
       :dense="density === 'compact'"
-      :class="['density--' + density, 'q-mb-lg']"
+      :class="['density--' + density, 'q-mb-lg', 'text-body1']"
       v-model:pagination="pagination"
       :row-count="filtered.length"
       @request="onRequest"
     >
       <template #body-cell-subscriber="props">
-        <q-td :props="props">
+        <q-td :props="props" class="q-pa-sm">
           <div class="row items-center q-gutter-sm no-wrap">
             <q-avatar
               size="32px"
@@ -193,28 +193,28 @@
               {{ initials(props.row.name) }}
             </q-avatar>
             <div>
-              <div class="text-body2">{{ props.row.name }}</div>
+              <div class="text-body1">{{ props.row.name }}</div>
               <div class="text-caption text-grey-6">{{ props.row.nip05 }}</div>
             </div>
           </div>
         </q-td>
       </template>
       <template #body-cell-tier="props">
-        <q-td :props="props"
+        <q-td :props="props" class="q-pa-sm"
           ><q-chip dense color="primary" text-color="white">{{
             props.row.tierName
           }}</q-chip></q-td
         >
       </template>
       <template #body-cell-frequency="props">
-        <q-td :props="props"
+        <q-td :props="props" class="q-pa-sm"
           ><q-chip dense outline>{{
             freqShort(props.row.frequency)
           }}</q-chip></q-td
         >
       </template>
       <template #body-cell-status="props">
-        <q-td :props="props"
+        <q-td :props="props" class="q-pa-sm"
           ><q-chip
             dense
             :color="statusColor(props.row.status)"
@@ -224,10 +224,10 @@
           ></q-td>
       </template>
       <template #body-cell-amount="props"
-        ><q-td :props="props">{{ props.row.amountSat }} sat</q-td></template
+        ><q-td :props="props" class="q-pa-sm">{{ props.row.amountSat }} sat</q-td></template
       >
       <template #body-cell-nextRenewal="props">
-        <q-td :props="props">
+        <q-td :props="props" class="q-pa-sm">
           <div class="row items-center no-wrap q-gutter-sm">
             <div
               class="progress-ring"
@@ -268,10 +268,10 @@
         </q-td>
       </template>
       <template #body-cell-lifetime="props"
-        ><q-td :props="props">{{ props.row.lifetimeSat }} sat</q-td></template
+        ><q-td :props="props" class="q-pa-sm">{{ props.row.lifetimeSat }} sat</q-td></template
       >
       <template #body-cell-actions="props"
-        ><q-td :props="props"
+        ><q-td :props="props" class="q-pa-sm"
           ><q-btn
             flat
             dense
