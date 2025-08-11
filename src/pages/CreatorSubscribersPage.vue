@@ -171,7 +171,7 @@
       selection="multiple"
       v-model:selected="selected"
       :columns="columns"
-      :visible-columns="visibleColumns"
+      v-model:visible-columns="visibleColumns"
       :rows-per-page-options="[10, 25, 50]"
       :row-class="rowClass"
       :dense="density === 'compact'"
@@ -231,7 +231,7 @@
           ></q-td>
       </template>
       <template #body-cell-amount="props"
-        ><q-td :props="props" class="q-pa-sm">{{ props.row.amountSat }} sat</q-td></template
+        ><q-td :props="props" class="q-pa-sm text-right">{{ props.row.amountSat }} sat</q-td></template
       >
       <template #body-cell-nextRenewal="props">
         <q-td :props="props" class="q-pa-sm">
@@ -255,15 +255,25 @@
               :aria-valuetext="progressPercent(props.row) + '%'"
             />
             <div class="column">
-              <div
-                :class="[
-                  'text-caption',
-                  dueSoon(props.row) ? 'text-warning' : '',
-                ]"
-              >
-                {{
-                  props.row.nextRenewal ? distToNow(props.row.nextRenewal) : '—'
-                }}
+              <div class="row items-center no-wrap">
+                <div
+                  :class="[
+                    'text-caption',
+                    dueSoon(props.row) ? 'text-warning' : '',
+                  ]"
+                >
+                  {{
+                    props.row.nextRenewal ? distToNow(props.row.nextRenewal) : '—'
+                  }}
+                </div>
+                <q-badge
+                  v-if="dueSoon(props.row)"
+                  color="warning"
+                  text-color="black"
+                  outline
+                  class="q-ml-xs"
+                  label="Soon"
+                />
               </div>
               <div class="text-caption text-grey-6">
                 {{
@@ -275,7 +285,7 @@
         </q-td>
       </template>
       <template #body-cell-lifetime="props"
-        ><q-td :props="props" class="q-pa-sm">{{ props.row.lifetimeSat }} sat</q-td></template
+        ><q-td :props="props" class="q-pa-sm text-right">{{ props.row.lifetimeSat }} sat</q-td></template
       >
       <template #body-cell-actions="props"
         ><q-td :props="props" class="q-pa-sm"
@@ -711,48 +721,61 @@ watch(
 
 const columns = [
   {
+    name: 'actions',
+    label: t('CreatorSubscribers.columns.actions'),
+    field: 'id',
+    sortable: false,
+    align: 'left',
+  },
+  {
     name: 'subscriber',
     label: t('CreatorSubscribers.columns.subscriber'),
     field: 'name',
     sortable: false,
+    align: 'left',
   },
   {
     name: 'tier',
     label: t('CreatorSubscribers.columns.tier'),
     field: 'tierName',
     sortable: false,
+    align: 'left',
   },
   {
     name: 'frequency',
     label: t('CreatorSubscribers.columns.frequency'),
     field: 'frequency',
     sortable: false,
+    align: 'left',
   },
   {
     name: 'status',
     label: t('CreatorSubscribers.columns.status'),
     field: 'status',
     sortable: false,
+    align: 'left',
   },
   {
     name: 'amount',
     label: t('CreatorSubscribers.columns.amount'),
     field: 'amountSat',
     sortable: false,
+    align: 'right',
   },
   {
     name: 'nextRenewal',
     label: t('CreatorSubscribers.columns.nextRenewal'),
     field: 'nextRenewal',
     sortable: false,
+    align: 'left',
   },
   {
     name: 'lifetime',
     label: t('CreatorSubscribers.columns.lifetime'),
     field: 'lifetimeSat',
     sortable: false,
+    align: 'right',
   },
-  { name: 'actions', label: t('CreatorSubscribers.columns.actions'), field: 'id', sortable: false },
 ];
 
 const visibleColumns = ref(columns.map((c) => c.name));
