@@ -35,13 +35,53 @@
       <!-- Right section -->
       <div class="row items-center q-gutter-sm">
         <DisplayMenu :columns="columns" />
-        <q-select
-          v-model="modelSavedView"
-          :options="savedViews"
+        <q-btn-dropdown
+          v-if="views.length > 0"
           dense
-          outlined
-          placeholder="Saved Views"
-        />
+          outline
+          label="Saved Views"
+          class="q-ml-sm"
+        >
+          <q-list style="min-width: 200px" class="card-bg">
+            <q-item
+              v-for="v in views"
+              :key="v.id"
+              clickable
+              v-close-popup
+              @click="apply(v.id)"
+            >
+              <q-item-section>{{ v.name }}</q-item-section>
+              <q-item-section side>
+                <q-btn
+                  flat
+                  dense
+                  icon="delete"
+                  @click.stop="remove(v.id)"
+                />
+              </q-item-section>
+            </q-item>
+            <q-separator />
+            <q-item clickable v-close-popup @click="saveCurrent">
+              <q-item-section>Save current as…</q-item-section>
+            </q-item>
+            <q-item
+              clickable
+              v-close-popup
+              :disable="!store.activeViewId"
+              @click="setDefault"
+            >
+              <q-item-section>Set as default</q-item-section>
+            </q-item>
+            <q-item
+              clickable
+              v-close-popup
+              :disable="!store.activeViewId"
+              @click="resetLast"
+            >
+              <q-item-section>Reset to Last Used</q-item-section>
+            </q-item>
+          </q-list>
+        </q-btn-dropdown>
         <q-btn
           ref="exportBtn"
           color="primary"
@@ -58,13 +98,12 @@
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
 import FilterChips from './FilterChips.vue';
 import DisplayMenu from '../common/DisplayMenu.vue';
+import { useSubscribersStore } from 'src/stores/subscribersStore';
 
 const props = withDefaults(defineProps<{
   total: number;
   dateRange: string;
   search: string;
-  savedView: string;
-  savedViews: { label: string; value: string }[];
   filters: { key: string; label: string }[];
   columns?: { name: string; label: string }[];
 }>(), {
@@ -74,7 +113,6 @@ const props = withDefaults(defineProps<{
 const emit = defineEmits<{
   'update:dateRange': [string];
   'update:search': [string];
-  'update:savedView': [string];
   'open-filters': [];
   export: [];
 }>();
@@ -94,12 +132,35 @@ const modelSearch = computed({
   set: (val: string) => emit('update:search', val),
 });
 
-const modelSavedView = computed({
-  get: () => props.savedView,
-  set: (val: string) => emit('update:savedView', val),
-});
-
 const searchRef = ref<{ focus: () => void } | null>(null);
+
+const store = useSubscribersStore();
+const views = computed(() => store.savedViews);
+
+function saveCurrent() {
+  const name = window.prompt('View name?');
+  if (name) {
+    store.saveCurrentView(name);
+  }
+}
+
+function apply(id: string) {
+  store.applyView(id);
+}
+
+function remove(id: string) {
+  store.deleteView(id);
+}
+
+function setDefault() {
+  store.savePrefs();
+}
+
+function resetLast() {
+  if (store.activeViewId) {
+    store.applyView(store.activeViewId);
+  }
+}
 
 function handleKey(event: KeyboardEvent) {
   const tag = (event.target as HTMLElement).tagName;
