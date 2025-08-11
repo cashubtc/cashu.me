@@ -1,122 +1,122 @@
 <template>
   <q-layout view="hHh lpR fFf">
-    <q-header class="bg-white text-dark">
-      <q-toolbar class="row items-center q-gutter-sm">
-        <q-input
-          dense
-          v-model="search"
-          :placeholder="t('CreatorSubscribers.toolbar.searchPlaceholder')"
-          clearable
-        >
-          <template #prepend>
-            <q-icon name="search" />
-          </template>
-        </q-input>
-        <q-select
-          v-model="savedView"
-          dense
-          emit-value
-          map-options
-          :options="savedViewOptions"
-          class="q-ml-sm"
-        />
-        <q-btn
-          flat
-          dense
-          class="q-ml-sm"
-          icon="filter_list"
-          :label="$q.screen.gt.xs ? t('CreatorSubscribers.actions.filters') : ''"
-          :aria-label="t('CreatorSubscribers.actions.filters')"
-        >
-          <q-menu>
-            <SubscriberFilters />
-          </q-menu>
-        </q-btn>
-        <q-space />
-        <q-btn-dropdown flat label="Display">
-          <q-list style="min-width: 200px">
-            <q-item>
-              <q-item-section>
-                <div class="q-mb-sm">
-                  {{ t('CreatorSubscribers.toolbar.view') }}
-                </div>
-                <q-btn-toggle
-                  v-model="view"
-                  dense
-                  toggle-color="primary"
-                  :options="viewOptions"
-                />
-              </q-item-section>
-            </q-item>
-            <q-item>
-              <q-item-section>
-                <div class="q-mb-sm">
-                  {{ t('CreatorSubscribers.toolbar.density') }}
-                </div>
-                <q-btn-toggle
-                  v-model="density"
-                  dense
-                  toggle-color="primary"
-                  :options="densityOptions"
-                />
-              </q-item-section>
-            </q-item>
-            <q-separator />
-            <q-item-label header>{{ t('CreatorSubscribers.toolbar.columns') }}</q-item-label>
-            <q-item v-for="col in columns" :key="col.name" clickable>
-              <q-item-section avatar>
-                <q-checkbox v-model="visibleColumns" :val="col.name" />
-              </q-item-section>
-              <q-item-section>{{ col.label }}</q-item-section>
-            </q-item>
-          </q-list>
-        </q-btn-dropdown>
-        <q-btn
-          class="q-ml-sm"
-          color="secondary"
-          icon="download"
-          :label="$q.screen.gt.xs ? t('CreatorSubscribers.toolbar.exportCsv') : ''"
-          :aria-label="t('CreatorSubscribers.toolbar.exportCsv')"
-          @click="downloadCsv()"
-        />
-        <q-btn
-          class="q-ml-sm"
-          flat
-          icon="event"
-          aria-label="Date range"
-        >
-          <q-popup-proxy transition-show="scale" transition-hide="scale">
-            <q-date v-model="chartRange" range mask="YYYY-MM-DD" />
-          </q-popup-proxy>
-        </q-btn>
-      </q-toolbar>
-      <div class="bg-grey-2 q-px-md q-pb-sm">
-        <div
-          v-if="filterChips.length"
-          class="row q-gutter-xs q-mb-sm"
-        >
-          <q-chip
-            v-for="chip in filterChips"
-            :key="chip.key"
-            dense
-            removable
-            color="primary"
-            text-color="white"
-            @remove="removeFilter(chip)"
-          >
-            {{ chip.label }}
-          </q-chip>
-        </div>
-        <q-segmented
-          v-model="activeTab"
-          dense
-          color="primary"
-          :options="tabOptions"
-        />
-      </div>
-    </q-header>
     <q-page-container>
       <q-page class="q-pa-md fit">
+        <div class="bg-white text-dark">
+          <q-toolbar class="row items-center q-gutter-sm">
+            <q-input
+              dense
+              v-model="search"
+              :placeholder="t('CreatorSubscribers.toolbar.searchPlaceholder')"
+              clearable
+            >
+              <template #prepend>
+                <q-icon name="search" />
+              </template>
+            </q-input>
+            <q-select
+              v-model="savedView"
+              dense
+              emit-value
+              map-options
+              :options="savedViewOptions"
+              class="q-ml-sm"
+            />
+            <q-btn
+              flat
+              dense
+              class="q-ml-sm"
+              icon="filter_list"
+              :label="$q.screen.gt.xs ? t('CreatorSubscribers.actions.filters') : ''"
+              :aria-label="t('CreatorSubscribers.actions.filters')"
+            >
+              <q-menu>
+                <SubscriberFilters />
+              </q-menu>
+            </q-btn>
+            <q-space />
+            <q-btn-dropdown flat label="Display">
+              <q-list style="min-width: 200px">
+                <q-item>
+                  <q-item-section>
+                    <div class="q-mb-sm">
+                      {{ t('CreatorSubscribers.toolbar.view') }}
+                    </div>
+                    <q-btn-toggle
+                      v-model="view"
+                      dense
+                      toggle-color="primary"
+                      :options="viewOptions"
+                    />
+                  </q-item-section>
+                </q-item>
+                <q-item>
+                  <q-item-section>
+                    <div class="q-mb-sm">
+                      {{ t('CreatorSubscribers.toolbar.density') }}
+                    </div>
+                    <q-btn-toggle
+                      v-model="density"
+                      dense
+                      toggle-color="primary"
+                      :options="densityOptions"
+                    />
+                  </q-item-section>
+                </q-item>
+                <q-separator />
+                <q-item-label header>{{ t('CreatorSubscribers.toolbar.columns') }}</q-item-label>
+                <q-item v-for="col in columns" :key="col.name" clickable>
+                  <q-item-section avatar>
+                    <q-checkbox v-model="visibleColumns" :val="col.name" />
+                  </q-item-section>
+                  <q-item-section>{{ col.label }}</q-item-section>
+                </q-item>
+              </q-list>
+            </q-btn-dropdown>
+            <q-btn
+              class="q-ml-sm"
+              color="secondary"
+              icon="download"
+              :label="$q.screen.gt.xs ? t('CreatorSubscribers.toolbar.exportCsv') : ''"
+              :aria-label="t('CreatorSubscribers.toolbar.exportCsv')"
+              @click="downloadCsv()"
+            />
+            <q-btn
+              class="q-ml-sm"
+              flat
+              icon="event"
+              aria-label="Date range"
+            >
+              <q-popup-proxy transition-show="scale" transition-hide="scale">
+                <q-date v-model="chartRange" range mask="YYYY-MM-DD" />
+              </q-popup-proxy>
+            </q-btn>
+          </q-toolbar>
+          <div class="bg-grey-2 q-px-md q-pb-sm">
+            <div
+              v-if="filterChips.length"
+              class="row q-gutter-xs q-mb-sm"
+            >
+              <q-chip
+                v-for="chip in filterChips"
+                :key="chip.key"
+                dense
+                removable
+                color="primary"
+                text-color="white"
+                @remove="removeFilter(chip)"
+              >
+                {{ chip.label }}
+              </q-chip>
+            </div>
+            <q-segmented
+              v-model="activeTab"
+              dense
+              color="primary"
+              :options="tabOptions"
+            />
+          </div>
+        </div>
         <q-banner v-if="error" dense class="q-mb-md bg-red-1 text-red-9">
           {{ error }}
           <template #action>
