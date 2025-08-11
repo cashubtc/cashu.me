@@ -131,7 +131,6 @@ describe('CreatorSubscribersPage', () => {
           },
           SubscriberDrawer: true,
           KpiCard: true,
-          Sparkline: true,
           SubscriptionsCharts: true,
           'q-virtual-scroll': {
             props: ['items'],
