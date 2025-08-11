@@ -20,6 +20,18 @@
           :options="savedViewOptions"
           class="q-ml-sm"
         />
+        <q-btn
+          flat
+          dense
+          class="q-ml-sm"
+          icon="filter_list"
+          :label="$q.screen.gt.xs ? t('CreatorSubscribers.actions.filters') : ''"
+          :aria-label="t('CreatorSubscribers.actions.filters')"
+        >
+          <q-menu>
+            <SubscriberFilters />
+          </q-menu>
+        </q-btn>
         <q-space />
         <q-btn-dropdown flat label="Display">
           <q-list style="min-width: 200px">
@@ -74,6 +86,22 @@
         </q-btn>
       </q-toolbar>
       <div class="bg-grey-2 q-px-md q-pb-sm">
+        <div
+          v-if="filterChips.length"
+          class="row q-gutter-xs q-mb-sm"
+        >
+          <q-chip
+            v-for="chip in filterChips"
+            :key="chip.key"
+            dense
+            removable
+            color="primary"
+            text-color="white"
+            @remove="removeFilter(chip)"
+          >
+            {{ chip.label }}
+          </q-chip>
+        </div>
         <q-segmented
           v-model="activeTab"
           dense
@@ -82,9 +110,6 @@
         />
       </div>
     </q-header>
-    <q-drawer v-model="filtersOpen" side="left" bordered :overlay="$q.screen.lt.md">
-      <SubscriberFilters />
-    </q-drawer>
     <q-page-container>
       <q-page class="q-pa-md fit">
         <q-banner v-if="error" dense class="q-mb-md bg-red-1 text-red">
@@ -452,7 +477,7 @@
 
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from "vue";
-import { useCreatorSubscribersStore } from "src/stores/creatorSubscribers";
+import { useCreatorSubscribersStore, type SortOption } from "src/stores/creatorSubscribers";
 import { storeToRefs } from "pinia";
 import { useDebounceFn } from "@vueuse/core";
 import { format, formatDistanceToNow } from "date-fns";
@@ -534,8 +559,6 @@ const applySearch = useDebounceFn((v: string) => {
 }, 300);
 watch(search, (v) => applySearch(v));
 
-const filtersOpen = ref(false);
-
 const savedView = ref('default');
 const savedViewOptions = [{ label: 'Default', value: 'default' }];
 
@@ -576,6 +599,60 @@ const tabOptions = computed(() => [
     value: 'ended',
   },
 ]);
+
+const tierMap = computed(() => {
+  return new Map(subStore.subscribers.map((s) => [s.tierId, s.tierName]));
+});
+
+const filterChips = computed(() => {
+  const chips: Array<{ key: string; label: string; type: string; value?: string }>
+    = [];
+  for (const s of subStore.statuses) {
+    chips.push({
+      key: `status-${s}`,
+      type: 'status',
+      value: s,
+      label: `${t('CreatorSubscribers.filters.status')}: ${t(`CreatorSubscribers.status.${s}`)}`,
+    });
+  }
+  for (const tierId of subStore.tiers) {
+    chips.push({
+      key: `tier-${tierId}`,
+      type: 'tier',
+      value: tierId,
+      label: `${t('CreatorSubscribers.filters.tier')}: ${tierMap.value.get(tierId) ?? tierId}`,
+    });
+  }
+  if (subStore.sort !== 'next') {
+    chips.push({
+      key: 'sort',
+      type: 'sort',
+      value: subStore.sort,
+      label: `${t('CreatorSubscribers.filters.sort')}: ${t(
+        `CreatorSubscribers.filters.sortOptions.${subStore.sort}`,
+      )}`,
+    });
+  }
+  return chips;
+});
+
+function removeFilter(chip: { type: string; value?: string }) {
+  const statuses = new Set(subStore.statuses);
+  const tiers = new Set(subStore.tiers);
+  let sort: SortOption = subStore.sort;
+  if (chip.type === 'status' && chip.value) {
+    statuses.delete(chip.value as SubStatus);
+  } else if (chip.type === 'tier' && chip.value) {
+    tiers.delete(chip.value);
+  } else if (chip.type === 'sort') {
+    sort = 'next';
+  }
+  if (statuses.size || tiers.size || sort !== 'next') {
+    subStore.applyFilters({ statuses, tiers, sort });
+  } else {
+    subStore.clearFilters();
+  }
+}
 
 function retry() {
   void subStore.loadFromDb();

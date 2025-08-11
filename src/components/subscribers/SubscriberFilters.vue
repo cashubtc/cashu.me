@@ -13,14 +13,14 @@
     </div>
     <q-option-group v-model="localSort" :options="sortOptions" type="radio" />
     <div class="row justify-end q-mt-md q-gutter-sm">
-      <q-btn flat :label="t('CreatorSubscribers.filters.clear')" @click="clear" />
-      <q-btn color="primary" :label="t('CreatorSubscribers.filters.apply')" @click="apply" />
+      <q-btn flat :label="t('CreatorSubscribers.filters.clear')" @click="clear" v-close-popup />
+      <q-btn color="primary" :label="t('CreatorSubscribers.filters.apply')" @click="apply" v-close-popup />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { useCreatorSubscribersStore } from 'src/stores/creatorSubscribers';
 import type { SubStatus } from 'src/types/subscriber';
 import type { SortOption } from 'src/stores/creatorSubscribers';
@@ -59,6 +59,25 @@ const sortOptions = computed(() => [
     value: 'amount',
   },
 ]);
+
+watch(
+  () => Array.from(store.statuses),
+  (v) => {
+    localStatuses.value = v as SubStatus[];
+  },
+);
+watch(
+  () => Array.from(store.tiers),
+  (v) => {
+    localTiers.value = v as string[];
+  },
+);
+watch(
+  () => store.sort,
+  (v) => {
+    localSort.value = v;
+  },
+);
 
 function apply() {
   store.applyFilters({
