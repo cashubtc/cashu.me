@@ -42,7 +42,7 @@ export default configure(function (/* ctx */) {
       alias: {
         '@': path.resolve(__dirname, 'src'),
       },
-      optimizeDeps: { include: ['process', 'buffer'] },
+      optimizeDeps: { include: ['process', 'buffer', 'vue-chartjs'] },
       target: {
         browser: ["esnext"],
         node: "node16",
@@ -84,6 +84,7 @@ export default configure(function (/* ctx */) {
             ...(viteConf.optimizeDeps?.include || []),
             'buffer',
             'process',
+            'vue-chartjs',
           ],
         };
       },
