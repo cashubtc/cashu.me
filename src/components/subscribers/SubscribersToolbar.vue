@@ -34,7 +34,7 @@
 
       <!-- Right section -->
       <div class="row items-center q-gutter-sm">
-        <DisplayMenu />
+        <DisplayMenu :columns="columns" />
         <q-select
           v-model="modelSavedView"
           :options="savedViews"
@@ -57,16 +57,19 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
 import FilterChips from './FilterChips.vue';
-import DisplayMenu from './DisplayMenu.vue';
+import DisplayMenu from '../common/DisplayMenu.vue';
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
   total: number;
   dateRange: string;
   search: string;
   savedView: string;
   savedViews: { label: string; value: string }[];
   filters: { key: string; label: string }[];
-}>();
+  columns?: { name: string; label: string }[];
+}>(), {
+  columns: () => [],
+});
 
 const emit = defineEmits<{
   'update:dateRange': [string];
