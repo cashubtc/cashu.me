@@ -22,14 +22,15 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
 import { useCreatorSubscribersStore } from 'src/stores/creatorSubscribers';
+import { useSubscribersStore, type SortOption } from 'src/stores/subscribersStore';
 import type { SubStatus } from 'src/types/subscriber';
-import type { SortOption } from 'src/stores/creatorSubscribers';
 import { useI18n } from 'vue-i18n';
 
-const store = useCreatorSubscribersStore();
+const dataStore = useCreatorSubscribersStore();
+const store = useSubscribersStore();
 
-const localStatuses = ref<SubStatus[]>(Array.from(store.statuses));
-const localTiers = ref<string[]>(Array.from(store.tiers));
+const localStatuses = ref<SubStatus[]>(Array.from(store.status));
+const localTiers = ref<string[]>(Array.from(store.tier));
 const localSort = ref<SortOption>(store.sort);
 
 const { t } = useI18n();
@@ -41,7 +42,7 @@ const statusOptions = computed(() => [
 ]);
 
 const tierOptions = computed(() => {
-  const map = new Map(store.subscribers.map(s => [s.tierId, s.tierName]));
+  const map = new Map(dataStore.subscribers.map(s => [s.tierId, s.tierName]));
   return Array.from(map, ([id, name]) => ({ label: name, value: id }));
 });
 
@@ -61,13 +62,13 @@ const sortOptions = computed(() => [
 ]);
 
 watch(
-  () => Array.from(store.statuses),
+  () => Array.from(store.status),
   (v) => {
     localStatuses.value = v as SubStatus[];
   },
 );
 watch(
-  () => Array.from(store.tiers),
+  () => Array.from(store.tier),
   (v) => {
     localTiers.value = v as string[];
   },
@@ -81,8 +82,8 @@ watch(
 
 function apply() {
   store.applyFilters({
-    statuses: new Set(localStatuses.value),
-    tiers: new Set(localTiers.value),
+    status: new Set(localStatuses.value),
+    tier: new Set(localTiers.value),
     sort: localSort.value,
   });
 }

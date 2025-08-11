@@ -5,6 +5,7 @@ import { ref } from 'vue';
 import { createI18n } from 'vue-i18n';
 import { messages as enMessages } from '../src/i18n/en-US/index.ts';
 import { useCreatorSubscribersStore } from '../src/stores/creatorSubscribers';
+import { useSubscribersStore } from '../src/stores/subscribersStore';
 
 var Chart: any;
 const charts: { type: string; inst: any }[] = [];
@@ -133,6 +134,7 @@ describe('CreatorSubscribersPage', () => {
   it('filters by search, status and tier', async () => {
     const wrapper = mountPage();
     const store = useCreatorSubscribersStore(wrapper.vm.$pinia);
+    const viewStore = useSubscribersStore(wrapper.vm.$pinia);
     const rows = () => wrapper.findAll('.tbody-row').map((r) => r.text());
 
     wrapper.vm.search = 'bob';
@@ -142,11 +144,11 @@ describe('CreatorSubscribersPage', () => {
     wrapper.vm.search = '';
     await wrapper.vm.$nextTick();
 
-    store.applyFilters({ statuses: new Set(['pending']), tiers: new Set(), sort: 'next' });
+    viewStore.applyFilters({ status: new Set(['pending']), tier: new Set(), sort: 'next' });
     await wrapper.vm.$nextTick();
     expect(rows()).toEqual(['Bob', 'Frank']);
 
-    store.applyFilters({ statuses: new Set(['pending']), tiers: new Set(['t3']), sort: 'next' });
+    viewStore.applyFilters({ status: new Set(['pending']), tier: new Set(['t3']), sort: 'next' });
     await wrapper.vm.$nextTick();
     expect(rows()).toEqual(['Frank']);
   });
@@ -154,13 +156,14 @@ describe('CreatorSubscribersPage', () => {
   it('sorts subscribers', async () => {
     const wrapper = mountPage();
     const store = useCreatorSubscribersStore(wrapper.vm.$pinia);
+    const viewStore = useSubscribersStore(wrapper.vm.$pinia);
     const rows = () => wrapper.findAll('.tbody-row').map((r) => r.text());
 
-    store.sort = 'first';
+    viewStore.applyFilters({ sort: 'first' });
     await wrapper.vm.$nextTick();
     expect(rows()[0]).toBe('Dave');
 
-    store.sort = 'amount';
+    viewStore.applyFilters({ sort: 'amount' });
     await wrapper.vm.$nextTick();
     expect(rows()[0]).toBe('Eve');
   });
@@ -262,6 +265,7 @@ describe('CreatorSubscribersPage', () => {
     const wrapper = mountPage();
     await wrapper.vm.$nextTick();
     const store = useCreatorSubscribersStore(wrapper.vm.$pinia);
+    const viewStore = useSubscribersStore(wrapper.vm.$pinia);
 
     const values = () => [
       String(wrapper.vm.counts.all),
@@ -285,7 +289,7 @@ describe('CreatorSubscribersPage', () => {
 
     store.setActiveTab('all');
     await wrapper.vm.$nextTick();
-    store.applyFilters({ statuses: new Set(['pending']), tiers: new Set(['t3']), sort: 'next' });
+    viewStore.applyFilters({ status: new Set(['pending']), tier: new Set(['t3']), sort: 'next' });
     await wrapper.vm.$nextTick();
     expect(values()).toEqual(['1', '0 / 1', '5000 sat', '0 sat']);
 

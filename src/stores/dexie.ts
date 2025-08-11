@@ -91,6 +91,18 @@ export interface LockedToken {
   htlcSecret?: string | null;
 }
 
+export interface SubscriberView {
+  name: string;
+  query: string;
+  status: string[];
+  freq: string[];
+  tier: string[];
+  sort: string;
+  visibleColumns: string[];
+  density: "comfortable" | "compact";
+  viewMode: "table" | "card";
+}
+
 // export interface Proof {
 //   id: string
 //   C: string
@@ -106,6 +118,7 @@ export class CashuDexie extends Dexie {
   creatorsTierDefinitions!: Table<CreatorTierDefinition, string>;
   subscriptions!: Table<Subscription, string>;
   lockedTokens!: Table<LockedToken, string>;
+  subscriberViews!: Table<SubscriberView, string>;
 
   constructor() {
     super("cashuDatabase");
@@ -536,6 +549,18 @@ export class CashuDexie extends Dexie {
             delete (entry as any).receivedMonths;
           });
       });
+
+    this.version(22).stores({
+      proofs:
+        "secret, id, C, amount, reserved, quote, bucketId, label, description",
+      profiles: "pubkey",
+      creatorsTierDefinitions: "&creatorNpub, eventId, updatedAt",
+      subscriptions:
+        "&id, creatorNpub, tierId, status, createdAt, updatedAt, frequency, intervalDays",
+      lockedTokens:
+        "&id, tokenString, owner, tierId, intervalKey, unlockTs, status, subscriptionEventId, subscriptionId, monthIndex, totalPeriods, autoRedeem, frequency, intervalDays",
+      subscriberViews: "&name",
+    });
   }
 }
 

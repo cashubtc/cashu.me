@@ -474,7 +474,8 @@
 
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from "vue";
-import { useCreatorSubscribersStore, type SortOption } from "src/stores/creatorSubscribers";
+import { useCreatorSubscribersStore } from "src/stores/creatorSubscribers";
+import { useSubscribersStore, type SortOption } from "src/stores/subscribersStore";
 import { storeToRefs } from "pinia";
 import { useDebounceFn } from "@vueuse/core";
 import { format, formatDistanceToNow } from "date-fns";
@@ -493,13 +494,8 @@ const { t } = useI18n();
 const $q = useQuasar();
 
 const subStore = useCreatorSubscribersStore();
-const {
-  filtered,
-  counts,
-  activeTab,
-  loading,
-  error,
-} = storeToRefs(subStore);
+const viewStore = useSubscribersStore();
+const { filtered, counts, activeTab, loading, error } = storeToRefs(subStore);
 // `filtered` is maintained by the Pinia store based on the active tab,
 // search query and filter drawer. Treat it as the single source of truth
 // for the subscriber list and KPI counts throughout this page.
@@ -549,13 +545,22 @@ function togglePeriod() {
   periodMode.value = periodMode.value === "week" ? "month" : "week";
 }
 
-const search = ref(subStore.query);
+const search = ref(viewStore.query);
 // Forward the user-entered search term to the Pinia store (debounced),
 // which recomputes `filtered` for us.
 const applySearch = useDebounceFn((v: string) => {
-  subStore.query = v;
+  viewStore.applyFilters({ query: v });
 }, 300);
 watch(search, (v) => applySearch(v));
+
+const sort = ref<SortOption>(viewStore.sort);
+watch(
+  () => viewStore.sort,
+  (v) => {
+    sort.value = v;
+  },
+);
+watch(sort, (v) => viewStore.applyFilters({ sort: v }));
 
 const savedView = ref('default');
 const savedViewOptions = [{ label: 'Default', value: 'default' }];
@@ -605,7 +610,7 @@ const tierMap = computed(() => {
 const filterChips = computed(() => {
   const chips: Array<{ key: string; label: string; type: string; value?: string }>
     = [];
-  for (const s of subStore.statuses) {
+  for (const s of viewStore.status) {
     chips.push({
       key: `status-${s}`,
       type: 'status',
@@ -613,7 +618,7 @@ const filterChips = computed(() => {
       label: `${t('CreatorSubscribers.filters.status')}: ${t(`CreatorSubscribers.status.${s}`)}`,
     });
   }
-  for (const tierId of subStore.tiers) {
+  for (const tierId of viewStore.tier) {
     chips.push({
       key: `tier-${tierId}`,
       type: 'tier',
@@ -621,13 +626,13 @@ const filterChips = computed(() => {
       label: `${t('CreatorSubscribers.filters.tier')}: ${tierMap.value.get(tierId) ?? tierId}`,
     });
   }
-  if (subStore.sort !== 'next') {
+  if (viewStore.sort !== 'next') {
     chips.push({
       key: 'sort',
       type: 'sort',
-      value: subStore.sort,
+      value: viewStore.sort,
       label: `${t('CreatorSubscribers.filters.sort')}: ${t(
-        `CreatorSubscribers.filters.sortOptions.${subStore.sort}`,
+        `CreatorSubscribers.filters.sortOptions.${viewStore.sort}`,
       )}`,
     });
   }
@@ -635,9 +640,9 @@ const filterChips = computed(() => {
 });
 
 function removeFilter(chip: { type: string; value?: string }) {
-  const statuses = new Set(subStore.statuses);
-  const tiers = new Set(subStore.tiers);
-  let sort: SortOption = subStore.sort;
+  const statuses = new Set(viewStore.status);
+  const tiers = new Set(viewStore.tier);
+  let sort: SortOption = viewStore.sort;
   if (chip.type === 'status' && chip.value) {
     statuses.delete(chip.value as SubStatus);
   } else if (chip.type === 'tier' && chip.value) {
@@ -646,9 +651,9 @@ function removeFilter(chip: { type: string; value?: string }) {
     sort = 'next';
   }
   if (statuses.size || tiers.size || sort !== 'next') {
-    subStore.applyFilters({ statuses, tiers, sort });
+    viewStore.applyFilters({ status: statuses, tier: tiers, sort });
   } else {
-    subStore.clearFilters();
+    viewStore.clearFilters();
   }
 }
 
@@ -667,8 +672,8 @@ function clearSelected() {
   selected.value = [];
 }
 
-const view = ref<'table' | 'cards'>('table');
-const density = ref<'compact' | 'comfortable'>('comfortable');
+const view = ref<'table' | 'card'>(viewStore.viewMode);
+const density = ref<'compact' | 'comfortable'>(viewStore.density);
 
 const viewOptions = computed(() => [
   {
@@ -678,7 +683,7 @@ const viewOptions = computed(() => [
     'aria-label': t('CreatorSubscribers.toolbar.tableView'),
   },
   {
-    value: 'cards',
+    value: 'card',
     icon: 'grid_view',
     label: $q.screen.gt.xs ? t('CreatorSubscribers.toolbar.cardView') : '',
     'aria-label': t('CreatorSubscribers.toolbar.cardView'),
@@ -712,6 +717,9 @@ function onRequest(props: QTableRequestProp) {
 onMounted(() => {
   void subStore.loadFromDb();
 });
+
+watch(view, (v) => viewStore.setViewMode(v));
+watch(density, (v) => viewStore.setDensity(v));
 
 // When the list of subscribers changes, fetch profiles for any new npubs.
 watch(
