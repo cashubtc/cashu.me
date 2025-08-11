@@ -4,7 +4,7 @@ import { createTestingPinia } from '@pinia/testing';
 import { defineComponent, h, ref } from 'vue';
 import SubscriberDrawer from 'src/components/subscribers/SubscriberDrawer.vue';
 
-vi.mock('quasar', () => ({ copyToClipboard: vi.fn() }));
+vi.mock('src/utils/clipboard', () => ({ copyNpub: vi.fn() }));
 vi.mock('@vueuse/core', () => ({ onKeyStroke: () => {}, useLocalStorage: (_k: any, v: any) => ref(v) }));
 vi.mock('src/stores/mints', () => ({ useMintsStore: () => ({ activeUnit: { value: 'sat' } }) }));
 vi.mock('src/stores/ui', () => ({ useUiStore: () => ({ formatCurrency: (a: number) => String(a) }) }));

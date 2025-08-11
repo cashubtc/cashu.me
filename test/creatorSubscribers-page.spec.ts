@@ -37,14 +37,12 @@ vi.mock('@vueuse/core', () => ({
   useLocalStorage: (_k: any, v: any) => ref(v),
   onKeyStroke: () => {},
 }));
-const clipboardWrite = vi.fn();
+vi.mock('src/utils/clipboard', () => ({ copyNpub: vi.fn() }));
 vi.mock('quasar', async (importOriginal) => {
   const actual = await importOriginal();
   return {
     ...actual,
-    copyToClipboard: vi.fn(),
     useQuasar: () => ({
-      clipboard: { writeText: clipboardWrite },
       notify: vi.fn(),
       screen: { lt: { md: false }, gt: { xs: true } },
     }),
@@ -57,6 +55,7 @@ vi.mock('src/stores/nostr', () => ({
   useNostrStore: () => ({ getProfile: vi.fn().mockResolvedValue(null) }),
 }));
 
+import { copyNpub } from 'src/utils/clipboard';
 import downloadCsv from 'src/utils/subscriberCsv';
 import CreatorSubscribersPage from '../src/pages/CreatorSubscribersPage.vue';
 
@@ -255,9 +254,9 @@ describe('CreatorSubscribersPage', () => {
       startDate: 0,
     } as any);
     await wrapper.vm.$nextTick();
-    clipboardWrite.mockReset();
-    wrapper.vm.copyNpub();
-    expect(clipboardWrite).toHaveBeenCalledWith(npub);
+    ;(copyNpub as any).mockReset();
+    wrapper.vm.copyCurrentNpub();
+    expect(copyNpub).toHaveBeenCalledWith(npub);
   });
 
   it('updates KPI numbers when searching, switching tabs and applying filters', async () => {
