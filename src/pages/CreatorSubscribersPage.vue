@@ -319,7 +319,8 @@
     </q-page>
   </q-page-container>
   <q-drawer v-model="drawer" side="right" :overlay="$q.screen.lt.md" bordered>
-    <div v-if="current" class="q-pa-md">
+    <div v-if="current" class="column fit">
+      <div class="q-pa-md scroll">
         <div class="row items-center q-gutter-sm">
           <q-btn
             flat
@@ -339,92 +340,95 @@
         <q-bar class="bg-grey-2 q-mt-sm">
           <div class="text-body2 monospace ellipsis">{{ current.npub }}</div>
         </q-bar>
-        <div class="row q-gutter-xs q-mt-md">
-          <q-chip dense color="primary" text-color="white">{{
-            current.tierName
-          }}</q-chip>
-          <q-chip dense outline>{{
-            t('CreatorSubscribers.frequency.' + current.frequency)
-          }}</q-chip>
-          <q-chip
-            dense
-            :color="statusColor(current.status)"
-            :text-color="statusTextColor(current.status)"
-            :icon="statusIcon(current.status)"
-            >{{ t('CreatorSubscribers.status.' + current.status) }}</q-chip
-          >
-        </div>
+
         <div class="q-mt-md">
-          {{ current.amountSat }} sat /
-          {{ t('CreatorSubscribers.frequency.' + current.frequency) }}
+          <div class="text-subtitle2 q-mb-sm">
+            {{ t('CreatorSubscribers.drawer.tabs.overview') }}
+          </div>
+          <q-list bordered dense>
+            <q-item>
+              <q-item-section>{{ t('CreatorSubscribers.columns.tier') }}</q-item-section>
+              <q-item-section side>{{ current.tierName }}</q-item-section>
+            </q-item>
+            <q-item>
+              <q-item-section>{{ t('CreatorSubscribers.columns.frequency') }}</q-item-section>
+              <q-item-section side>{{ t('CreatorSubscribers.frequency.' + current.frequency) }}</q-item-section>
+            </q-item>
+            <q-item>
+              <q-item-section>{{ t('CreatorSubscribers.columns.status') }}</q-item-section>
+              <q-item-section side>{{ t('CreatorSubscribers.status.' + current.status) }}</q-item-section>
+            </q-item>
+            <q-item>
+              <q-item-section>{{ t('CreatorSubscribers.drawer.overview.amountPerInterval') }}</q-item-section>
+              <q-item-section side>
+                {{ current.amountSat }} sat / {{ t('CreatorSubscribers.frequency.' + current.frequency) }}
+              </q-item-section>
+            </q-item>
+            <q-item>
+              <q-item-section>{{ t('CreatorSubscribers.drawer.overview.nextRenewal') }}</q-item-section>
+              <q-item-section side>
+                {{ current.nextRenewal ? formatDate(current.nextRenewal) : '—' }}
+              </q-item-section>
+            </q-item>
+            <q-item>
+              <q-item-section>{{ t('CreatorSubscribers.drawer.overview.lifetimeTotal') }}</q-item-section>
+              <q-item-section side>{{ current.lifetimeSat }} sat</q-item-section>
+            </q-item>
+            <q-item>
+              <q-item-section>{{ t('CreatorSubscribers.drawer.overview.since') }}</q-item-section>
+              <q-item-section side>{{ formatDate(current.startDate) }}</q-item-section>
+            </q-item>
+          </q-list>
         </div>
-        <div class="q-mt-sm">
-          {{ t('CreatorSubscribers.drawer.overview.nextRenewal') }}:
-          {{ current.nextRenewal ? formatDate(current.nextRenewal) : '—' }}
-          <span v-if="current.nextRenewal" class="text-grey-6"
-            >({{ distToNow(current.nextRenewal) }})</span
-          >
+
+        <div class="q-mt-lg">
+          <div class="text-subtitle2 q-mb-sm">
+            {{ t('CreatorSubscribers.drawer.tabs.payments') }}
+          </div>
+          <q-list bordered dense>
+            <q-item v-for="p in payments" :key="p.ts">
+              <q-item-section>{{ formatDate(p.ts) }}</q-item-section>
+              <q-item-section side>{{ p.amount }} sat</q-item-section>
+            </q-item>
+          </q-list>
         </div>
-        <div class="q-mt-sm">
-          {{ t('CreatorSubscribers.drawer.overview.lifetimeTotal') }}:
-          {{ current.lifetimeSat }} sat
+
+        <div class="q-mt-lg">
+          <div class="text-subtitle2 q-mb-sm">
+            {{ t('CreatorSubscribers.drawer.activity') }}
+          </div>
+          <q-list bordered dense>
+            <q-item v-for="a in activity" :key="a.ts">
+              <q-item-section>{{ a.text }}</q-item-section>
+              <q-item-section side class="text-caption text-grey">
+                {{ distToNow(a.ts) }}
+              </q-item-section>
+            </q-item>
+          </q-list>
         </div>
-        <div class="q-mt-sm">
-          {{ t('CreatorSubscribers.drawer.overview.since') }}
-          {{ formatDate(current.startDate) }}
-        </div>
-        <div class="row q-gutter-sm q-mt-md">
-          <q-btn
-            outline
-            :label="t('CreatorSubscribers.drawer.actions.dm')"
-            :aria-label="t('CreatorSubscribers.drawer.actions.dm')"
-            @click="dmSubscriber"
-          />
-          <q-btn
-            flat
-            dense
-            round
-            icon="content_copy"
-            :aria-label="t('CreatorSubscribers.drawer.actions.copyNpub')"
-            @click="copyNpub"
-          />
-        </div>
-        <q-expansion-item
-          class="q-mt-lg"
-          expand-separator
-          icon="payments"
-          :label="t('CreatorSubscribers.drawer.tabs.payments')"
-        >
-          <q-card>
-            <q-card-section class="q-pa-none">
-              <q-list bordered dense>
-                <q-item v-for="p in payments" :key="p.ts">
-                  <q-item-section>{{ formatDate(p.ts) }}</q-item-section>
-                  <q-item-section side>{{ p.amount }} sat</q-item-section>
-                </q-item>
-              </q-list>
-            </q-card-section>
-          </q-card>
-        </q-expansion-item>
-        <q-expansion-item
-          class="q-mt-md"
-          expand-separator
-          icon="history"
-          :label="t('CreatorSubscribers.drawer.activity')"
-        >
-          <q-card>
-            <q-card-section class="q-pa-none">
-              <q-list bordered dense>
-                <q-item v-for="a in activity" :key="a.ts">
-                  <q-item-section>{{ a.text }}</q-item-section>
-                  <q-item-section side class="text-caption text-grey">
-                    {{ distToNow(a.ts) }}
-                  </q-item-section>
-                </q-item>
-              </q-list>
-            </q-card-section>
-          </q-card>
-        </q-expansion-item>
+      </div>
+      <q-separator />
+      <div class="q-pa-sm bg-grey-2 row q-gutter-sm justify-end">
+        <q-btn
+          flat
+          :label="t('CreatorSubscribers.drawer.actions.dm')"
+          :aria-label="t('CreatorSubscribers.drawer.actions.dm')"
+          @click="dmSubscriber"
+        />
+        <q-btn
+          flat
+          :label="t('CreatorSubscribers.drawer.actions.copyNpub')"
+          :aria-label="t('CreatorSubscribers.drawer.actions.copyNpub')"
+          @click="copyNpub"
+        />
+        <q-btn
+          flat
+          color="negative"
+          :label="t('CreatorSubscribers.drawer.actions.cancel')"
+          :aria-label="t('CreatorSubscribers.drawer.actions.cancel')"
+          @click="drawer = false"
+        />
+      </div>
     </div>
   </q-drawer>
   <q-footer v-if="selected.length" class="bg-primary text-white">
