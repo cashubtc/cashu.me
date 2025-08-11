@@ -154,7 +154,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
 import { onKeyStroke, useLocalStorage } from '@vueuse/core';
-import { copyToClipboard } from 'quasar';
+import { copyNpub } from 'src/utils/clipboard';
 import { useI18n } from 'vue-i18n';
 import { cashuDb } from 'stores/dexie';
 import { useUiStore } from 'stores/ui';
@@ -224,7 +224,7 @@ const sinceDate = computed(() => {
 
 function copy(text?: string) {
   if (!text) return;
-  copyToClipboard(text);
+  copyNpub(text);
 }
 
 const payments = ref<Array<{ id: string; status: string; date: string; amount: number }>>([]);

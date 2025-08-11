@@ -196,7 +196,7 @@
 
     <q-menu ref="avatarMenuRef">
       <q-list class="card-bg">
-        <q-item clickable v-close-popup @click="copyAnyNpub(menuNpub)">
+        <q-item clickable v-close-popup @click="copyNpub(menuNpub)">
           <q-item-section>{{ t('CreatorSubscribers.drawer.actions.copyNpub') }}</q-item-section>
         </q-item>
       </q-list>
@@ -307,7 +307,7 @@
             flat
             :label="t('CreatorSubscribers.drawer.actions.copyNpub')"
             :aria-label="t('CreatorSubscribers.drawer.actions.copyNpub')"
-            @click="copyNpub"
+            @click="copyCurrentNpub"
             class="focus-outline"
           />
           <q-btn
@@ -367,6 +367,7 @@ import SubscriberCard from "src/components/SubscriberCard.vue";
 import SubscriptionsCharts from "src/components/subscribers/SubscriptionsCharts.vue";
 import KpiCard from "src/components/subscribers/KpiCard.vue";
 import SubscribersTable from "src/components/subscribers/SubscribersTable.vue";
+import { copyNpub } from "src/utils/clipboard";
 
 const { t } = useI18n();
 const $q = useQuasar();
@@ -682,13 +683,9 @@ function showAvatarMenu(e: Event, row: Subscriber) {
 }
 const router = useRouter();
 
-function copyAnyNpub(npub: string) {
-  $q.clipboard.writeText(npub);
-  $q.notify({ message: t("copied_to_clipboard"), color: "positive" });
-}
-function copyNpub() {
+function copyCurrentNpub() {
   if (!current.value) return;
-  copyAnyNpub(current.value.npub);
+  copyNpub(current.value.npub);
 }
 
 function dmSubscriber() {
