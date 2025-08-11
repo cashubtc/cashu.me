@@ -2,46 +2,63 @@
   <q-layout view="hHh lpR fFf">
     <q-header class="bg-white text-dark">
       <q-toolbar class="row items-center q-gutter-sm">
-        <q-btn
-          flat
-          dense
-          round
-          icon="menu"
-          :color="filtersActive ? 'primary' : 'dark'"
-          :aria-label="t('CreatorSubscribers.actions.filters')"
-          @click="filtersOpen = !filtersOpen"
-        >
-          <q-badge v-if="filtersActive" floating rounded color="primary" />
-        </q-btn>
-        <q-toolbar-title>
-          {{ t('CreatorSubscribers.summary.subscribers') }}
-        </q-toolbar-title>
         <q-input
           dense
           v-model="search"
           :placeholder="t('CreatorSubscribers.toolbar.searchPlaceholder')"
-          class="q-ml-md"
           clearable
         >
           <template #prepend>
             <q-icon name="search" />
           </template>
         </q-input>
+        <q-select
+          v-model="savedView"
+          dense
+          emit-value
+          map-options
+          :options="savedViewOptions"
+          class="q-ml-sm"
+        />
         <q-space />
-        <q-btn-group flat rounded>
-          <q-btn-toggle
-            v-model="view"
-            dense
-            toggle-color="primary"
-            :options="viewOptions"
-          />
-          <q-btn-toggle
-            v-model="density"
-            dense
-            toggle-color="primary"
-            :options="densityOptions"
-          />
-        </q-btn-group>
+        <q-btn-dropdown flat label="Display">
+          <q-list style="min-width: 200px">
+            <q-item>
+              <q-item-section>
+                <div class="q-mb-sm">
+                  {{ t('CreatorSubscribers.toolbar.view') }}
+                </div>
+                <q-btn-toggle
+                  v-model="view"
+                  dense
+                  toggle-color="primary"
+                  :options="viewOptions"
+                />
+              </q-item-section>
+            </q-item>
+            <q-item>
+              <q-item-section>
+                <div class="q-mb-sm">
+                  {{ t('CreatorSubscribers.toolbar.density') }}
+                </div>
+                <q-btn-toggle
+                  v-model="density"
+                  dense
+                  toggle-color="primary"
+                  :options="densityOptions"
+                />
+              </q-item-section>
+            </q-item>
+            <q-separator />
+            <q-item-label header>{{ t('CreatorSubscribers.toolbar.columns') }}</q-item-label>
+            <q-item v-for="col in columns" :key="col.name" clickable>
+              <q-item-section avatar>
+                <q-checkbox v-model="visibleColumns" :val="col.name" />
+              </q-item-section>
+              <q-item-section>{{ col.label }}</q-item-section>
+            </q-item>
+          </q-list>
+        </q-btn-dropdown>
         <q-btn
           class="q-ml-sm"
           color="secondary"
@@ -50,47 +67,20 @@
           :aria-label="t('CreatorSubscribers.toolbar.exportCsv')"
           @click="downloadCsv()"
         />
+        <q-btn class="q-ml-sm" flat icon="event">
+          <q-popup-proxy transition-show="scale" transition-hide="scale">
+            <q-date v-model="chartRange" range mask="YYYY-MM-DD" />
+          </q-popup-proxy>
+        </q-btn>
       </q-toolbar>
-      <q-toolbar class="bg-grey-2">
-        <q-tabs v-model="activeTab" dense no-caps class="text-dark">
-          <q-tab name="all">
-            <div class="row items-center no-wrap">
-              <span>{{ t('CreatorSubscribers.tabs.all') }}</span>
-              <q-badge class="q-ml-xs" color="primary">{{ counts.all }}</q-badge>
-            </div>
-          </q-tab>
-          <q-tab name="weekly">
-            <div class="row items-center no-wrap">
-              <span>{{ t('CreatorSubscribers.frequency.weekly') }}</span>
-              <q-badge class="q-ml-xs" color="primary">{{ counts.weekly }}</q-badge>
-            </div>
-          </q-tab>
-          <q-tab name="biweekly">
-            <div class="row items-center no-wrap">
-              <span>{{ t('CreatorSubscribers.frequency.biweekly') }}</span>
-              <q-badge class="q-ml-xs" color="primary">{{ counts.biweekly }}</q-badge>
-            </div>
-          </q-tab>
-          <q-tab name="monthly">
-            <div class="row items-center no-wrap">
-              <span>{{ t('CreatorSubscribers.frequency.monthly') }}</span>
-              <q-badge class="q-ml-xs" color="primary">{{ counts.monthly }}</q-badge>
-            </div>
-          </q-tab>
-          <q-tab name="pending">
-            <div class="row items-center no-wrap">
-              <span>{{ t('CreatorSubscribers.status.pending') }}</span>
-              <q-badge class="q-ml-xs" color="primary">{{ counts.pending }}</q-badge>
-            </div>
-          </q-tab>
-          <q-tab name="ended">
-            <div class="row items-center no-wrap">
-              <span>{{ t('CreatorSubscribers.status.ended') }}</span>
-              <q-badge class="q-ml-xs" color="primary">{{ counts.ended }}</q-badge>
-            </div>
-          </q-tab>
-        </q-tabs>
-      </q-toolbar>
+      <div class="bg-grey-2 q-px-md q-pb-sm">
+        <q-segmented
+          v-model="activeTab"
+          dense
+          color="primary"
+          :options="tabOptions"
+        />
+      </div>
     </q-header>
     <q-drawer v-model="filtersOpen" side="left" bordered :overlay="$q.screen.lt.md">
       <SubscriberFilters />
@@ -165,7 +155,7 @@
         <!-- Charts -->
         <q-card class="q-mb-lg">
           <q-card-section>
-            <SubscriptionsCharts :rows="filtered" />
+            <SubscriptionsCharts :rows="chartRows" />
           </q-card-section>
         </q-card>
 
@@ -178,6 +168,7 @@
       selection="multiple"
       v-model:selected="selected"
       :columns="columns"
+      :visible-columns="visibleColumns"
       :rows-per-page-options="[10, 25, 50]"
       :row-class="rowClass"
       :dense="density === 'compact'"
@@ -485,13 +476,7 @@ const {
   activeTab,
   loading,
   error,
-  statuses,
-  tiers,
-  sort,
 } = storeToRefs(subStore);
-const filtersActive = computed(
-  () => statuses.value.size > 0 || tiers.value.size > 0 || sort.value !== 'next'
-);
 // `filtered` is maintained by the Pinia store based on the active tab,
 // search query and filter drawer. Treat it as the single source of truth
 // for the subscriber list and KPI counts throughout this page.
@@ -550,6 +535,47 @@ const applySearch = useDebounceFn((v: string) => {
 watch(search, (v) => applySearch(v));
 
 const filtersOpen = ref(false);
+
+const savedView = ref('default');
+const savedViewOptions = [{ label: 'Default', value: 'default' }];
+
+const chartRange = ref<{ from: string; to: string } | null>(null);
+const chartRows = computed(() => {
+  if (!chartRange.value) return filtered.value;
+  const from = new Date(chartRange.value.from).getTime() / 1000;
+  const to =
+    new Date(chartRange.value.to).getTime() / 1000 + 24 * 60 * 60;
+  return filtered.value.filter(
+    (r) => r.startDate && r.startDate >= from && r.startDate <= to,
+  );
+});
+
+const tabOptions = computed(() => [
+  {
+    label: `${t('CreatorSubscribers.tabs.all')} (${counts.value.all})`,
+    value: 'all',
+  },
+  {
+    label: `${t('CreatorSubscribers.frequency.weekly')} (${counts.value.weekly})`,
+    value: 'weekly',
+  },
+  {
+    label: `${t('CreatorSubscribers.frequency.biweekly')} (${counts.value.biweekly})`,
+    value: 'biweekly',
+  },
+  {
+    label: `${t('CreatorSubscribers.frequency.monthly')} (${counts.value.monthly})`,
+    value: 'monthly',
+  },
+  {
+    label: `${t('CreatorSubscribers.status.pending')} (${counts.value.pending})`,
+    value: 'pending',
+  },
+  {
+    label: `${t('CreatorSubscribers.status.ended')} (${counts.value.ended})`,
+    value: 'ended',
+  },
+]);
 
 function retry() {
   void subStore.loadFromDb();
@@ -668,6 +694,8 @@ const columns = [
   },
   { name: 'actions', label: t('CreatorSubscribers.columns.actions'), field: 'id', sortable: false },
 ];
+
+const visibleColumns = ref(columns.map((c) => c.name));
 
 function initials(name: string) {
   return name
