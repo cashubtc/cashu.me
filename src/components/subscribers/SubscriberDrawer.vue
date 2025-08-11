@@ -7,7 +7,7 @@
     :transition-duration="100"
     :width="448"
     v-focus-trap
-    class="subscriber-drawer column no-wrap"
+    class="subscriber-drawer column no-wrap z-40"
     @keydown.esc.prevent="close"
   >
     <div class="drawer-header">

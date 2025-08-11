@@ -1,5 +1,5 @@
 <template>
-  <q-header class="bg-transparent">
+  <q-header class="bg-transparent z-10">
     <q-toolbar>
       <q-btn
         flat

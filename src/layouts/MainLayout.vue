@@ -3,10 +3,6 @@
     view="lHh Lpr lFf"
     :class="$q.dark.isActive ? 'bg-dark text-white' : 'bg-white text-dark'"
   >
-    <!-- global utility dialogs – mount once -->
-    <MissingSignerModal />
-    <NdkErrorDialog />
-
     <MainHeader />
     <q-page-container class="text-body1">
       <div class="max-w-7xl mx-auto">
@@ -17,10 +13,8 @@
 </template>
 
 <script>
-import { defineComponent, ref } from "vue";
+import { defineComponent } from "vue";
 import MainHeader from "components/MainHeader.vue";
-import NdkErrorDialog from "components/NdkErrorDialog.vue";
-import MissingSignerModal from "components/MissingSignerModal.vue";
 import { useNostrStore } from "src/stores/nostr";
 import { useNutzapStore } from "src/stores/nutzap";
 
@@ -29,8 +23,6 @@ export default defineComponent({
   mixins: [windowMixin],
   components: {
     MainHeader,
-    NdkErrorDialog,
-    MissingSignerModal,
   },
   async mounted() {
     const nostr = useNostrStore();
