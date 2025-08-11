@@ -65,7 +65,7 @@ const props = defineProps<{
   search: string;
   savedView: string;
   savedViews: { label: string; value: string }[];
-  filters: any[];
+  filters: { key: string; label: string }[];
 }>();
 
 const emit = defineEmits<{
