@@ -1,0 +1,16 @@
+.subscribers-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background-color: var(--panel-bg-color);
+
+  .q-toolbar {
+    min-height: 56px;
+  }
+
+  @media (min-width: 600px) {
+    .q-toolbar {
+      min-height: 64px;
+    }
+  }
+}
