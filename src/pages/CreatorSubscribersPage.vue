@@ -168,143 +168,9 @@
         </q-card>
 
     <!-- Table -->
-    <q-table
-      v-if="view === 'table'"
-      flat
-      :rows="paginatedRows"
-      row-key="id"
-      selection="multiple"
-      v-model:selected="selected"
-      :columns="columns"
-      v-model:visible-columns="visibleColumns"
-      :rows-per-page-options="[10, 25, 50]"
-      :row-class="rowClass"
-      :dense="density === 'compact'"
-      :class="['density--' + density, 'q-mb-lg', 'text-body1']"
-      v-model:pagination="pagination"
-      :row-count="filtered.length"
-      @request="onRequest"
-    >
-      <template #top-right>
-        <q-chip
-          v-if="selected.length"
-          dense
-          color="primary"
-          text-color="white"
-        >
-          {{ t('CreatorSubscribers.selectionCount', { count: selected.length }) }}
-        </q-chip>
-      </template>
-      <template #body-cell-subscriber="props">
-        <q-td :props="props" class="q-pa-sm">
-          <div class="row items-center q-gutter-sm no-wrap">
-            <q-avatar
-              size="32px"
-              @click.stop="showAvatarMenu($event, props.row)"
-            >
-              {{ initials(props.row.name) }}
-            </q-avatar>
-            <div>
-              <div class="text-body1">{{ props.row.name }}</div>
-              <div class="text-caption text-grey-7">{{ props.row.nip05 }}</div>
-            </div>
-          </div>
-        </q-td>
-      </template>
-      <template #body-cell-tier="props">
-        <q-td :props="props" class="q-pa-sm"
-          ><q-chip dense color="primary" text-color="white">{{
-            props.row.tierName
-          }}</q-chip></q-td
-        >
-      </template>
-      <template #body-cell-frequency="props">
-        <q-td :props="props" class="q-pa-sm"
-          ><q-chip dense outline>{{
-            freqShort(props.row.frequency)
-          }}</q-chip></q-td
-        >
-      </template>
-      <template #body-cell-status="props">
-        <q-td :props="props" class="q-pa-sm"
-          ><q-chip
-            dense
-            :color="statusColor(props.row.status)"
-            :text-color="statusTextColor(props.row.status)"
-            :icon="statusIcon(props.row.status)"
-            >{{ t('CreatorSubscribers.status.' + props.row.status) }}</q-chip
-          ></q-td>
-      </template>
-      <template #body-cell-amount="props"
-        ><q-td :props="props" class="q-pa-sm text-right">{{ props.row.amountSat }} sat</q-td></template
-      >
-      <template #body-cell-nextRenewal="props">
-        <q-td :props="props" class="q-pa-sm">
-          <div class="row items-center no-wrap q-gutter-sm">
-            <div
-              class="progress-ring"
-              :style="{
-                '--progress': progressPercent(props.row),
-                '--size': '28px',
-                '--thickness': '3px',
-                '--progress-ring-fill': `var(--q-${
-                  dueSoon(props.row) ? 'warning' : 'primary'
-                })`,
-              }"
-              :data-label="`${progressPercent(props.row)}%`"
-              role="progressbar"
-              :aria-valuenow="progressPercent(props.row)"
-              aria-valuemin="0"
-              aria-valuemax="100"
-              :aria-label="t('CreatorSubscribers.renewalProgress')"
-              :aria-valuetext="progressPercent(props.row) + '%'"
-            />
-            <div class="column">
-              <div class="row items-center no-wrap">
-                <div
-                  :class="[
-                    'text-caption',
-                    dueSoon(props.row) ? 'text-warning' : '',
-                  ]"
-                >
-                  {{
-                    props.row.nextRenewal ? distToNow(props.row.nextRenewal) : '—'
-                  }}
-                </div>
-                <q-badge
-                  v-if="dueSoon(props.row)"
-                  color="warning"
-                  text-color="black"
-                  outline
-                  class="q-ml-xs"
-                  label="Soon"
-                />
-              </div>
-              <div class="text-caption text-grey-7">
-                {{
-                  props.row.nextRenewal ? formatDate(props.row.nextRenewal) : ''
-                }}
-              </div>
-            </div>
-          </div>
-        </q-td>
-      </template>
-      <template #body-cell-lifetime="props"
-        ><q-td :props="props" class="q-pa-sm text-right">{{ props.row.lifetimeSat }} sat</q-td></template
-      >
-      <template #body-cell-actions="props"
-        ><q-td :props="props" class="q-pa-sm"
-          ><q-btn
-            flat
-            dense
-            round
-            icon="chevron_right"
-            :aria-label="t('CreatorSubscribers.actions.openDetails')"
-            @click="openDrawer(props.row)" /></q-td
-      ></template>
-    </q-table>
+    <SubscribersTable :subscribers="filtered" @select="openDrawer" />
     <q-virtual-scroll
-      v-else
+      v-if="view === 'card'"
       :items="filtered"
       :virtual-scroll-item-size="140"
       content-class="subscriber-cards"
@@ -480,7 +346,7 @@ import { storeToRefs } from "pinia";
 import { useDebounceFn } from "@vueuse/core";
 import { format, formatDistanceToNow } from "date-fns";
 import { useQuasar } from "quasar";
-import type { QTableRequestProp, QMenu } from "quasar";
+import type { QMenu } from "quasar";
 import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
 import type { Subscriber, Frequency, SubStatus } from "src/types/subscriber";
@@ -489,6 +355,7 @@ import SubscriberFilters from "src/components/subscribers/SubscriberFilters.vue"
 import SubscriberCard from "src/components/SubscriberCard.vue";
 import SubscriptionsCharts from "src/components/subscribers/SubscriptionsCharts.vue";
 import KpiCard from "src/components/subscribers/KpiCard.vue";
+import SubscribersTable from "src/components/subscribers/SubscribersTable.vue";
 
 const { t } = useI18n();
 const $q = useQuasar();
@@ -672,8 +539,7 @@ function clearSelected() {
   selected.value = [];
 }
 
-const view = ref<'table' | 'card'>(viewStore.viewMode);
-const density = ref<'compact' | 'comfortable'>(viewStore.density);
+const { viewMode: view, density, visibleColumns } = storeToRefs(viewStore);
 
 const viewOptions = computed(() => [
   {
@@ -704,22 +570,9 @@ const densityOptions = computed(() => [
   },
 ]);
 
-const pagination = ref({ page: 1, rowsPerPage: 25 });
-const paginatedRows = computed(() => {
-  const start = (pagination.value.page - 1) * pagination.value.rowsPerPage;
-  const end = start + pagination.value.rowsPerPage;
-  return filtered.value.slice(start, end);
-});
-function onRequest(props: QTableRequestProp) {
-  pagination.value = props.pagination;
-}
-
 onMounted(() => {
   void subStore.loadFromDb();
 });
-
-watch(view, (v) => viewStore.setViewMode(v));
-watch(density, (v) => viewStore.setDensity(v));
 
 // When the list of subscribers changes, fetch profiles for any new npubs.
 watch(
@@ -734,64 +587,39 @@ watch(
 
 const columns = [
   {
-    name: 'actions',
-    label: t('CreatorSubscribers.columns.actions'),
-    field: 'id',
-    sortable: false,
-    align: 'left',
-  },
-  {
     name: 'subscriber',
     label: t('CreatorSubscribers.columns.subscriber'),
-    field: 'name',
-    sortable: false,
-    align: 'left',
   },
   {
     name: 'tier',
     label: t('CreatorSubscribers.columns.tier'),
-    field: 'tierName',
-    sortable: false,
-    align: 'left',
   },
   {
     name: 'frequency',
     label: t('CreatorSubscribers.columns.frequency'),
-    field: 'frequency',
-    sortable: false,
-    align: 'left',
   },
   {
     name: 'status',
     label: t('CreatorSubscribers.columns.status'),
-    field: 'status',
-    sortable: false,
-    align: 'left',
   },
   {
     name: 'amount',
     label: t('CreatorSubscribers.columns.amount'),
-    field: 'amountSat',
-    sortable: false,
-    align: 'right',
   },
   {
     name: 'nextRenewal',
     label: t('CreatorSubscribers.columns.nextRenewal'),
-    field: 'nextRenewal',
-    sortable: false,
-    align: 'left',
   },
   {
     name: 'lifetime',
     label: t('CreatorSubscribers.columns.lifetime'),
-    field: 'lifetimeSat',
-    sortable: false,
-    align: 'right',
   },
 ];
 
-const visibleColumns = ref(columns.map((c) => c.name));
+if (visibleColumns.value.length === 0) {
+  visibleColumns.value = columns.map((c) => c.name);
+}
+
 
 function initials(name: string) {
   return name
