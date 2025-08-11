@@ -306,9 +306,6 @@
         <q-item clickable v-close-popup @click="copyAnyNpub(menuNpub)">
           <q-item-section>{{ t('CreatorSubscribers.drawer.actions.copyNpub') }}</q-item-section>
         </q-item>
-        <q-item clickable v-close-popup @click="shareAnyNpub(menuNpub)">
-          <q-item-section>Share</q-item-section>
-        </q-item>
       </q-list>
     </q-menu>
 
@@ -408,14 +405,6 @@
             icon="content_copy"
             :aria-label="t('CreatorSubscribers.drawer.actions.copyNpub')"
             @click="copyNpub"
-          />
-          <q-btn
-            flat
-            dense
-            round
-            icon="share"
-            aria-label="Share npub"
-            @click="shareNpub"
           />
         </div>
         <q-expansion-item
@@ -714,17 +703,6 @@ function copyAnyNpub(npub: string) {
 function copyNpub() {
   if (!current.value) return;
   copyAnyNpub(current.value.npub);
-}
-function shareAnyNpub(npub: string) {
-  if ((navigator as any).share) {
-    (navigator as any).share({ text: npub });
-  } else {
-    copyAnyNpub(npub);
-  }
-}
-function shareNpub() {
-  if (!current.value) return;
-  shareAnyNpub(current.value.npub);
 }
 
 function dmSubscriber() {
