@@ -1,14 +1,16 @@
 <template>
   <q-layout view="hHh lpR fFf">
     <q-page-container>
-      <q-page class="q-pa-md fit">
-        <div class="bg-white text-dark">
-          <q-toolbar class="row items-center q-gutter-sm">
+      <q-page class="q-pa-md fit page-surface">
+        <div class="card-bg">
+          <q-toolbar class="row items-center q-gutter-sm card-bg">
             <q-input
               dense
               v-model="search"
               :placeholder="t('CreatorSubscribers.toolbar.searchPlaceholder')"
+              :aria-label="t('CreatorSubscribers.toolbar.searchPlaceholder')"
               clearable
+              class="focus-outline"
             >
               <template #prepend>
                 <q-icon name="search" />
@@ -20,12 +22,12 @@
               emit-value
               map-options
               :options="savedViewOptions"
-              class="q-ml-sm"
+              class="q-ml-sm focus-outline"
             />
             <q-btn
               flat
               dense
-              class="q-ml-sm"
+              class="q-ml-sm focus-outline"
               icon="filter_list"
               :label="$q.screen.gt.xs ? t('CreatorSubscribers.actions.filters') : ''"
               :aria-label="t('CreatorSubscribers.actions.filters')"
@@ -35,8 +37,8 @@
               </q-menu>
             </q-btn>
             <q-space />
-            <q-btn-dropdown flat label="Display">
-              <q-list style="min-width: 200px">
+            <q-btn-dropdown flat label="Display" aria-label="Display options" class="focus-outline">
+              <q-list style="min-width: 200px" class="card-bg">
                 <q-item>
                   <q-item-section>
                     <div class="q-mb-sm">
@@ -63,7 +65,7 @@
                     />
                   </q-item-section>
                 </q-item>
-                <q-separator />
+                <q-separator class="divider-bg" />
                 <q-item-label header>{{ t('CreatorSubscribers.toolbar.columns') }}</q-item-label>
                 <q-item v-for="col in columns" :key="col.name" clickable>
                   <q-item-section avatar>
@@ -74,7 +76,7 @@
               </q-list>
             </q-btn-dropdown>
             <q-btn
-              class="q-ml-sm"
+              class="q-ml-sm focus-outline"
               color="secondary"
               icon="download"
               :label="$q.screen.gt.xs ? t('CreatorSubscribers.toolbar.exportCsv') : ''"
@@ -82,7 +84,7 @@
               @click="downloadCsv()"
             />
             <q-btn
-              class="q-ml-sm"
+              class="q-ml-sm focus-outline"
               flat
               icon="event"
               aria-label="Date range"
@@ -92,7 +94,7 @@
               </q-popup-proxy>
             </q-btn>
           </q-toolbar>
-          <div class="bg-grey-2 q-px-md q-pb-sm">
+          <div class="card-bg q-px-md q-pb-sm">
             <div
               v-if="filterChips.length"
               class="row q-gutter-xs q-mb-sm"
@@ -105,6 +107,8 @@
                 color="primary"
                 text-color="white"
                 @remove="removeFilter(chip)"
+                class="focus-outline"
+                tabindex="0"
               >
                 {{ chip.label }}
               </q-chip>
@@ -126,6 +130,7 @@
               :label="t('CreatorSubscribers.actions.retry')"
               :aria-label="t('CreatorSubscribers.actions.retry')"
               @click="retry"
+              class="focus-outline"
             />
           </template>
         </q-banner>
@@ -161,7 +166,7 @@
         </div>
 
         <!-- Charts -->
-        <q-card class="q-mb-lg">
+        <q-card class="q-mb-lg card-bg">
           <q-card-section>
             <SubscriptionsCharts :rows="chartRows" />
           </q-card-section>
@@ -190,7 +195,7 @@
     </q-virtual-scroll>
 
     <q-menu ref="avatarMenuRef">
-      <q-list>
+      <q-list class="card-bg">
         <q-item clickable v-close-popup @click="copyAnyNpub(menuNpub)">
           <q-item-section>{{ t('CreatorSubscribers.drawer.actions.copyNpub') }}</q-item-section>
         </q-item>
@@ -199,7 +204,7 @@
 
     </q-page>
   </q-page-container>
-  <q-drawer v-model="drawer" side="right" :overlay="$q.screen.lt.md" bordered>
+  <q-drawer v-model="drawer" side="right" :overlay="$q.screen.lt.md" bordered class="page-surface">
     <div v-if="current" class="column fit">
       <div class="q-pa-md scroll">
         <div class="row items-center q-gutter-sm">
@@ -210,15 +215,16 @@
             icon="arrow_back"
             aria-label="Back"
             @click="drawer = false"
+            class="focus-outline"
           />
           <q-avatar size="64px">{{ initials(current.name) }}</q-avatar>
           <div>
             <div class="text-h6">{{ current.name }}</div>
-            <div class="text-body2 text-grey-7">{{ current.nip05 }}</div>
+            <div class="text-body2 text-secondary">{{ current.nip05 }}</div>
           </div>
           <q-space />
         </div>
-        <q-bar class="bg-grey-2 q-mt-sm">
+        <q-bar class="card-bg q-mt-sm">
           <div class="text-body2 monospace ellipsis">{{ current.npub }}</div>
         </q-bar>
 
@@ -226,7 +232,7 @@
           <div class="text-subtitle2 q-mb-sm">
             {{ t('CreatorSubscribers.drawer.tabs.overview') }}
           </div>
-          <q-list bordered dense>
+          <q-list bordered dense class="card-bg">
             <q-item>
               <q-item-section>{{ t('CreatorSubscribers.columns.tier') }}</q-item-section>
               <q-item-section side>{{ current.tierName }}</q-item-section>
@@ -266,7 +272,7 @@
           <div class="text-subtitle2 q-mb-sm">
             {{ t('CreatorSubscribers.drawer.tabs.payments') }}
           </div>
-          <q-list bordered dense>
+          <q-list bordered dense class="card-bg">
             <q-item v-for="p in payments" :key="p.ts">
               <q-item-section>{{ formatDate(p.ts) }}</q-item-section>
               <q-item-section side>{{ p.amount }} sat</q-item-section>
@@ -278,40 +284,43 @@
           <div class="text-subtitle2 q-mb-sm">
             {{ t('CreatorSubscribers.drawer.activity') }}
           </div>
-          <q-list bordered dense>
+          <q-list bordered dense class="card-bg">
             <q-item v-for="a in activity" :key="a.ts">
               <q-item-section>{{ a.text }}</q-item-section>
-              <q-item-section side class="text-caption text-grey-7">
-                {{ distToNow(a.ts) }}
-              </q-item-section>
-            </q-item>
-          </q-list>
+                <q-item-section side class="text-caption text-secondary">
+                  {{ distToNow(a.ts) }}
+                </q-item-section>
+              </q-item>
+            </q-list>
+          </div>
+        </div>
+        <q-separator class="divider-bg" />
+        <div class="q-pa-sm card-bg row q-gutter-sm justify-end">
+          <q-btn
+            flat
+            :label="t('CreatorSubscribers.drawer.actions.dm')"
+            :aria-label="t('CreatorSubscribers.drawer.actions.dm')"
+            @click="dmSubscriber"
+            class="focus-outline"
+          />
+          <q-btn
+            flat
+            :label="t('CreatorSubscribers.drawer.actions.copyNpub')"
+            :aria-label="t('CreatorSubscribers.drawer.actions.copyNpub')"
+            @click="copyNpub"
+            class="focus-outline"
+          />
+          <q-btn
+            flat
+            color="negative"
+            :label="t('CreatorSubscribers.drawer.actions.cancel')"
+            :aria-label="t('CreatorSubscribers.drawer.actions.cancel')"
+            @click="drawer = false"
+            class="focus-outline"
+          />
         </div>
       </div>
-      <q-separator />
-      <div class="q-pa-sm bg-grey-2 row q-gutter-sm justify-end">
-        <q-btn
-          flat
-          :label="t('CreatorSubscribers.drawer.actions.dm')"
-          :aria-label="t('CreatorSubscribers.drawer.actions.dm')"
-          @click="dmSubscriber"
-        />
-        <q-btn
-          flat
-          :label="t('CreatorSubscribers.drawer.actions.copyNpub')"
-          :aria-label="t('CreatorSubscribers.drawer.actions.copyNpub')"
-          @click="copyNpub"
-        />
-        <q-btn
-          flat
-          color="negative"
-          :label="t('CreatorSubscribers.drawer.actions.cancel')"
-          :aria-label="t('CreatorSubscribers.drawer.actions.cancel')"
-          @click="drawer = false"
-        />
-      </div>
-    </div>
-  </q-drawer>
+    </q-drawer>
   <q-footer v-if="selected.length" class="bg-primary text-white">
     <div class="row items-center q-pa-sm q-gutter-sm full-width">
       <div>{{ t('CreatorSubscribers.selectionCount', { count: selected.length }) }}</div>
@@ -324,6 +333,7 @@
         :label="t('CreatorSubscribers.actions.exportSelected')"
         :aria-label="t('CreatorSubscribers.actions.exportSelected')"
         @click="exportSelected"
+        class="focus-outline"
       />
       <q-btn
         flat
@@ -332,6 +342,7 @@
         :label="t('CreatorSubscribers.actions.clear')"
         :aria-label="t('CreatorSubscribers.actions.clear')"
         @click="clearSelected"
+        class="focus-outline"
       />
     </div>
   </q-footer>
@@ -706,3 +717,24 @@ const activity = computed(() => {
   return arr;
 });
 </script>
+
+<style scoped>
+.page-surface {
+  background-color: #0f1216;
+  color: #e7ecf3;
+}
+.card-bg {
+  background-color: #12161c;
+}
+.divider-bg {
+  background-color: #1c222b;
+}
+.text-secondary {
+  color: #a7b0bf;
+}
+.focus-outline:focus-visible,
+.focus-outline .q-field__native:focus-visible {
+  outline: 2px solid #8c5efb;
+  outline-offset: 2px;
+}
+</style>
