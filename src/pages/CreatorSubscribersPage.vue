@@ -68,55 +68,61 @@
           <q-spinner size="50px" color="primary" />
         </q-inner-loading>
         <!-- KPI Row -->
-    <div class="row q-col-gutter-lg q-mb-lg">
-      <q-card
-        flat
-        bordered
-        class="col-12 col-sm-6 col-md-3 panel-container q-pa-md q-ma-sm"
-      >
-        <div class="text-caption text-grey">
-          {{ t('CreatorSubscribers.summary.subscribers') }}
-        </div>
-        <div class="text-h6">{{ counts.all }}</div>
-      </q-card>
-      <q-card
-        flat
-        bordered
-        class="col-12 col-sm-6 col-md-3 panel-container q-pa-md q-ma-sm"
-      >
-        <div class="text-caption text-grey">
-          {{ t('CreatorSubscribers.summary.active') }} /
-          {{ t('CreatorSubscribers.summary.pending') }}
-        </div>
-        <div class="text-h6">{{ activeCount }} / {{ pendingCount }}</div>
-      </q-card>
-      <q-card
-        flat
-        bordered
-        class="col-12 col-sm-6 col-md-3 panel-container q-pa-md q-ma-sm"
-      >
-        <div class="text-caption text-grey">
-          {{ t('CreatorSubscribers.summary.lifetimeRevenue') }}
-        </div>
-        <div class="text-h6">{{ lifetimeRevenue }} sat</div>
-      </q-card>
-      <q-card
-        flat
-        bordered
-        class="col-12 col-sm-6 col-md-3 panel-container q-pa-md q-ma-sm"
-        @click="togglePeriod"
-      >
-        <div class="text-caption text-grey">
-          {{ periodMode === 'week'
-            ? t('CreatorSubscribers.summary.nextWeek')
-            : t('CreatorSubscribers.summary.nextMonth') }}
-        </div>
-        <div class="text-h6">{{ formattedKpiThisPeriodSat }} sat</div>
-      </q-card>
-    </div>
+        <q-card-section class="bg-grey-1 q-mb-lg">
+          <div class="row q-col-gutter-xl">
+            <q-card
+              flat
+              bordered
+              class="col-12 col-sm-6 col-md-3 panel-container q-pa-lg"
+            >
+              <div class="text-caption text-grey">
+                {{ t('CreatorSubscribers.summary.subscribers') }}
+              </div>
+              <div class="text-h5">{{ counts.all }}</div>
+            </q-card>
+            <q-card
+              flat
+              bordered
+              class="col-12 col-sm-6 col-md-3 panel-container q-pa-lg"
+            >
+              <div class="text-caption text-grey">
+                {{ t('CreatorSubscribers.summary.active') }} /
+                {{ t('CreatorSubscribers.summary.pending') }}
+              </div>
+              <div class="text-h5">{{ activeCount }} / {{ pendingCount }}</div>
+            </q-card>
+            <q-card
+              flat
+              bordered
+              class="col-12 col-sm-6 col-md-3 panel-container q-pa-lg"
+            >
+              <div class="text-caption text-grey">
+                {{ t('CreatorSubscribers.summary.lifetimeRevenue') }}
+              </div>
+              <div class="text-h5">{{ lifetimeRevenue }} sat</div>
+            </q-card>
+            <q-card
+              flat
+              bordered
+              class="col-12 col-sm-6 col-md-3 panel-container q-pa-lg"
+              @click="togglePeriod"
+            >
+              <div class="text-caption text-grey">
+                {{ periodMode === 'week'
+                  ? t('CreatorSubscribers.summary.nextWeek')
+                  : t('CreatorSubscribers.summary.nextMonth') }}
+              </div>
+              <div class="text-h5">{{ formattedKpiThisPeriodSat }} sat</div>
+            </q-card>
+          </div>
+        </q-card-section>
 
-    <!-- Charts -->
-    <SubscriptionsCharts :rows="filtered" class="q-mb-lg" />
+        <!-- Charts -->
+        <q-card class="q-mb-lg">
+          <q-card-section>
+            <SubscriptionsCharts :rows="filtered" />
+          </q-card-section>
+        </q-card>
 
     <!-- Tabs -->
     <q-tabs v-model="activeTab" dense class="q-mb-md" no-caps>
