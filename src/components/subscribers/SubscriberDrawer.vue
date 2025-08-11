@@ -5,30 +5,51 @@
     bordered
     overlay
     :transition-duration="100"
+    :width="448"
+    v-focus-trap
+    class="subscriber-drawer column no-wrap"
     @keydown.esc.prevent="close"
   >
-    <q-toolbar>
-      <q-toolbar-title>
-        {{ profileTitle }}
-      </q-toolbar-title>
-      <q-btn
-        flat
-        round
+    <div class="drawer-header">
+      <q-toolbar>
+        <q-toolbar-title>
+          {{ profileTitle }}
+        </q-toolbar-title>
+        <q-btn
+          flat
+          round
+          dense
+          icon="close"
+          :aria-label="t('global.actions.close.label')"
+          @click="close"
+        />
+      </q-toolbar>
+
+      <q-tabs
+        v-model="tab"
         dense
-        icon="close"
-        :aria-label="t('global.actions.close.label')"
-        @click="close"
-      />
-    </q-toolbar>
+        align="justify"
+        class="text-grey-7"
+        active-color="primary"
+      >
+        <q-tab
+          name="overview"
+          :label="t('CreatorSubscribers.drawer.tabs.overview')"
+        />
+        <q-tab
+          name="payments"
+          :label="t('CreatorSubscribers.drawer.tabs.payments')"
+        />
+        <q-tab
+          name="notes"
+          :label="t('CreatorSubscribers.drawer.tabs.notes')"
+        />
+      </q-tabs>
+      <q-separator />
+    </div>
 
-    <q-tabs v-model="tab" dense align="justify" class="text-grey-7" active-color="primary">
-      <q-tab name="overview" :label="t('CreatorSubscribers.drawer.tabs.overview')" />
-      <q-tab name="payments" :label="t('CreatorSubscribers.drawer.tabs.payments')" />
-      <q-tab name="notes" :label="t('CreatorSubscribers.drawer.tabs.notes')" />
-    </q-tabs>
-    <q-separator />
-
-    <q-tab-panels v-model="tab" animated>
+    <div class="drawer-scroll">
+      <q-tab-panels v-model="tab" animated>
       <q-tab-panel name="overview" class="q-pa-md">
         <q-list dense v-if="sub">
           <q-item v-if="profile?.nip05">
@@ -126,6 +147,7 @@
         <q-input v-model="notes" type="textarea" autogrow />
       </q-tab-panel>
     </q-tab-panels>
+    </div>
   </q-drawer>
 </template>
 
@@ -273,3 +295,43 @@ onKeyStroke('Escape', (e) => {
   }
 });
 </script>
+
+<style scoped lang="scss">
+.subscriber-drawer {
+  max-height: 100vh;
+  z-index: 3000;
+}
+
+.drawer-header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background-color: var(--panel-bg-color);
+}
+
+.drawer-scroll {
+  overflow: auto;
+  flex: 1;
+}
+
+.drawer-scroll::before,
+.drawer-scroll::after {
+  content: '';
+  position: sticky;
+  left: 0;
+  right: 0;
+  height: 16px;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.drawer-scroll::before {
+  top: 0;
+  background: linear-gradient(var(--panel-bg-color), transparent);
+}
+
+.drawer-scroll::after {
+  bottom: 0;
+  background: linear-gradient(transparent, var(--panel-bg-color));
+}
+</style>
