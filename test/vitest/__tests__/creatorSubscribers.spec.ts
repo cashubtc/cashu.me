@@ -114,7 +114,11 @@ vi.mock('quasar', async (importOriginal) => {
   const actual = await importOriginal();
   return {
     ...actual,
-    useQuasar: () => ({ clipboard: { writeText: vi.fn() }, notify: vi.fn() }),
+    useQuasar: () => ({
+      clipboard: { writeText: vi.fn() },
+      notify: vi.fn(),
+      screen: { lt: { md: false }, gt: { xs: true } },
+    }),
   };
 });
 

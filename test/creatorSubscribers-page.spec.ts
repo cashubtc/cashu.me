@@ -42,7 +42,11 @@ vi.mock('quasar', async (importOriginal) => {
   return {
     ...actual,
     copyToClipboard: vi.fn(),
-    useQuasar: () => ({ clipboard: { writeText: clipboardWrite }, notify: vi.fn(), screen: { lt: { md: false } } }),
+    useQuasar: () => ({
+      clipboard: { writeText: clipboardWrite },
+      notify: vi.fn(),
+      screen: { lt: { md: false }, gt: { xs: true } },
+    }),
   };
 });
 const routerPush = vi.fn();
@@ -59,7 +63,9 @@ const stubs = {
   'q-layout': { template: '<div><slot /></div>' },
   'q-header': { template: '<div><slot /></div>' },
   'q-toolbar': { template: '<div><slot /></div>' },
+  'q-toolbar-title': { template: '<div><slot /></div>' },
   'q-btn-group': { template: '<div><slot /></div>' },
+  'q-btn-toggle': { template: '<div></div>' },
   'q-page-container': { template: '<div><slot /></div>' },
   'q-page': { template: '<div><slot /></div>' },
   'q-input': {
@@ -97,6 +103,7 @@ const stubs = {
   'q-space': { template: '<span class="q-space"></span>' },
   'q-banner': { template: '<div><slot /><slot name="action" /></div>' },
   SubscriberFilters: { template: '<div></div>' },
+  SubscriptionsCharts: { template: '<div></div>' },
 };
 
 function mountPage() {

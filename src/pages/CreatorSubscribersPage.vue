@@ -10,7 +10,9 @@
           :aria-label="t('CreatorSubscribers.actions.filters')"
           @click="filtersOpen = !filtersOpen"
         />
-        <div class="text-h6">{{ t('CreatorSubscribers.summary.subscribers') }}</div>
+        <q-toolbar-title>
+          {{ t('CreatorSubscribers.summary.subscribers') }}
+        </q-toolbar-title>
         <q-input
           dense
           v-model="search"
@@ -22,7 +24,8 @@
             <q-icon name="search" />
           </template>
         </q-input>
-        <q-btn-group flat rounded class="q-ml-sm">
+        <q-space />
+        <q-btn-group flat rounded>
           <q-btn-toggle
             v-model="view"
             dense
@@ -36,15 +39,54 @@
             :options="densityOptions"
           />
         </q-btn-group>
-        <q-space />
         <q-btn
-          flat
-          color="primary"
+          class="q-ml-sm"
+          color="secondary"
           icon="download"
-          :label="t('CreatorSubscribers.toolbar.exportCsv')"
+          :label="$q.screen.gt.xs ? t('CreatorSubscribers.toolbar.exportCsv') : ''"
           :aria-label="t('CreatorSubscribers.toolbar.exportCsv')"
           @click="downloadCsv()"
         />
+      </q-toolbar>
+      <q-toolbar class="bg-grey-2">
+        <q-tabs v-model="activeTab" dense no-caps class="text-dark">
+          <q-tab name="all">
+            <div class="row items-center no-wrap">
+              <span>{{ t('CreatorSubscribers.tabs.all') }}</span>
+              <q-badge class="q-ml-xs" color="primary">{{ counts.all }}</q-badge>
+            </div>
+          </q-tab>
+          <q-tab name="weekly">
+            <div class="row items-center no-wrap">
+              <span>{{ t('CreatorSubscribers.frequency.weekly') }}</span>
+              <q-badge class="q-ml-xs" color="primary">{{ counts.weekly }}</q-badge>
+            </div>
+          </q-tab>
+          <q-tab name="biweekly">
+            <div class="row items-center no-wrap">
+              <span>{{ t('CreatorSubscribers.frequency.biweekly') }}</span>
+              <q-badge class="q-ml-xs" color="primary">{{ counts.biweekly }}</q-badge>
+            </div>
+          </q-tab>
+          <q-tab name="monthly">
+            <div class="row items-center no-wrap">
+              <span>{{ t('CreatorSubscribers.frequency.monthly') }}</span>
+              <q-badge class="q-ml-xs" color="primary">{{ counts.monthly }}</q-badge>
+            </div>
+          </q-tab>
+          <q-tab name="pending">
+            <div class="row items-center no-wrap">
+              <span>{{ t('CreatorSubscribers.status.pending') }}</span>
+              <q-badge class="q-ml-xs" color="primary">{{ counts.pending }}</q-badge>
+            </div>
+          </q-tab>
+          <q-tab name="ended">
+            <div class="row items-center no-wrap">
+              <span>{{ t('CreatorSubscribers.status.ended') }}</span>
+              <q-badge class="q-ml-xs" color="primary">{{ counts.ended }}</q-badge>
+            </div>
+          </q-tab>
+        </q-tabs>
       </q-toolbar>
     </q-header>
     <q-drawer v-model="filtersOpen" side="left" bordered :overlay="$q.screen.lt.md">
@@ -123,46 +165,6 @@
             <SubscriptionsCharts :rows="filtered" />
           </q-card-section>
         </q-card>
-
-    <!-- Tabs -->
-    <q-tabs v-model="activeTab" dense class="q-mb-md" no-caps>
-      <q-tab name="all">
-        <div class="row items-center no-wrap">
-          <span>{{ t('CreatorSubscribers.tabs.all') }}</span>
-          <q-badge class="q-ml-xs" color="primary">{{ counts.all }}</q-badge>
-        </div>
-      </q-tab>
-      <q-tab name="weekly">
-        <div class="row items-center no-wrap">
-          <span>{{ t('CreatorSubscribers.frequency.weekly') }}</span>
-          <q-badge class="q-ml-xs" color="primary">{{ counts.weekly }}</q-badge>
-        </div>
-      </q-tab>
-      <q-tab name="biweekly">
-        <div class="row items-center no-wrap">
-          <span>{{ t('CreatorSubscribers.frequency.biweekly') }}</span>
-          <q-badge class="q-ml-xs" color="primary">{{ counts.biweekly }}</q-badge>
-        </div>
-      </q-tab>
-      <q-tab name="monthly">
-        <div class="row items-center no-wrap">
-          <span>{{ t('CreatorSubscribers.frequency.monthly') }}</span>
-          <q-badge class="q-ml-xs" color="primary">{{ counts.monthly }}</q-badge>
-        </div>
-      </q-tab>
-      <q-tab name="pending">
-        <div class="row items-center no-wrap">
-          <span>{{ t('CreatorSubscribers.status.pending') }}</span>
-          <q-badge class="q-ml-xs" color="primary">{{ counts.pending }}</q-badge>
-        </div>
-      </q-tab>
-      <q-tab name="ended">
-        <div class="row items-center no-wrap">
-          <span>{{ t('CreatorSubscribers.status.ended') }}</span>
-          <q-badge class="q-ml-xs" color="primary">{{ counts.ended }}</q-badge>
-        </div>
-      </q-tab>
-    </q-tabs>
 
     <!-- Table -->
     <q-table
@@ -474,6 +476,7 @@ import SubscriberCard from "src/components/SubscriberCard.vue";
 import SubscriptionsCharts from "src/components/subscribers/SubscriptionsCharts.vue";
 
 const { t } = useI18n();
+const $q = useQuasar();
 
 const subStore = useCreatorSubscribersStore();
 const { filtered, counts, activeTab, loading, error } = storeToRefs(subStore);
@@ -555,12 +558,32 @@ const view = ref<'table' | 'cards'>('table');
 const density = ref<'compact' | 'comfortable'>('comfortable');
 
 const viewOptions = computed(() => [
-  { value: 'table', icon: 'table_rows', 'aria-label': t('CreatorSubscribers.toolbar.tableView') },
-  { value: 'cards', icon: 'grid_view', 'aria-label': t('CreatorSubscribers.toolbar.cardView') },
+  {
+    value: 'table',
+    icon: 'table_rows',
+    label: $q.screen.gt.xs ? t('CreatorSubscribers.toolbar.tableView') : '',
+    'aria-label': t('CreatorSubscribers.toolbar.tableView'),
+  },
+  {
+    value: 'cards',
+    icon: 'grid_view',
+    label: $q.screen.gt.xs ? t('CreatorSubscribers.toolbar.cardView') : '',
+    'aria-label': t('CreatorSubscribers.toolbar.cardView'),
+  },
 ]);
 const densityOptions = computed(() => [
-  { value: 'comfortable', icon: 'view_comfy', 'aria-label': t('CreatorSubscribers.toolbar.comfortable') },
-  { value: 'compact', icon: 'view_compact', 'aria-label': t('CreatorSubscribers.toolbar.compact') },
+  {
+    value: 'comfortable',
+    icon: 'view_comfy',
+    label: $q.screen.gt.xs ? t('CreatorSubscribers.toolbar.comfortable') : '',
+    'aria-label': t('CreatorSubscribers.toolbar.comfortable'),
+  },
+  {
+    value: 'compact',
+    icon: 'view_compact',
+    label: $q.screen.gt.xs ? t('CreatorSubscribers.toolbar.compact') : '',
+    'aria-label': t('CreatorSubscribers.toolbar.compact'),
+  },
 ]);
 
 const pagination = ref({ page: 1, rowsPerPage: 25 });
@@ -682,7 +705,6 @@ function showAvatarMenu(e: Event, row: Subscriber) {
   menuNpub.value = row.npub;
   avatarMenuRef.value?.show(e);
 }
-const $q = useQuasar();
 const router = useRouter();
 
 function copyAnyNpub(npub: string) {
