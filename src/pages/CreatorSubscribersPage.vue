@@ -128,54 +128,32 @@
           <q-spinner size="50px" color="primary" />
         </q-inner-loading>
         <!-- KPI Row -->
-        <q-card-section class="bg-grey-1 q-mb-lg">
-          <div class="row q-col-gutter-xl">
-            <q-card
-              flat
-              bordered
-              class="col-12 col-sm-6 col-md-3 panel-container q-pa-lg"
-            >
-              <div class="text-caption text-grey">
-                {{ t('CreatorSubscribers.summary.subscribers') }}
-              </div>
-              <div class="text-h5">{{ counts.all }}</div>
-            </q-card>
-            <q-card
-              flat
-              bordered
-              class="col-12 col-sm-6 col-md-3 panel-container q-pa-lg"
-            >
-              <div class="text-caption text-grey">
-                {{ t('CreatorSubscribers.summary.active') }} /
-                {{ t('CreatorSubscribers.summary.pending') }}
-              </div>
-              <div class="text-h5">{{ activeCount }} / {{ pendingCount }}</div>
-            </q-card>
-            <q-card
-              flat
-              bordered
-              class="col-12 col-sm-6 col-md-3 panel-container q-pa-lg"
-            >
-              <div class="text-caption text-grey">
-                {{ t('CreatorSubscribers.summary.lifetimeRevenue') }}
-              </div>
-              <div class="text-h5">{{ lifetimeRevenue }} sat</div>
-            </q-card>
-            <q-card
-              flat
-              bordered
-              class="col-12 col-sm-6 col-md-3 panel-container q-pa-lg"
+        <div class="q-mb-lg">
+          <div class="text-h6 q-mb-md">Subscribers Overview</div>
+          <div class="row q-gutter-md">
+            <KpiCard
+              class="col-12 col-sm-6 col-md-3"
+              title="Total Subscribers"
+              :value="counts.all"
+            />
+            <KpiCard
+              class="col-12 col-sm-6 col-md-3"
+              title="Active / Pending"
+              :value="`${activeCount} / ${pendingCount}`"
+            />
+            <KpiCard
+              class="col-12 col-sm-6 col-md-3"
+              title="Lifetime Revenue"
+              :value="`${lifetimeRevenue} sat`"
+            />
+            <KpiCard
+              class="col-12 col-sm-6 col-md-3 cursor-pointer"
+              :title="periodMode === 'week' ? 'Next Week Revenue' : 'Next Month Revenue'"
+              :value="`${formattedKpiThisPeriodSat} sat`"
               @click="togglePeriod"
-            >
-              <div class="text-caption text-grey">
-                {{ periodMode === 'week'
-                  ? t('CreatorSubscribers.summary.nextWeek')
-                  : t('CreatorSubscribers.summary.nextMonth') }}
-              </div>
-              <div class="text-h5">{{ formattedKpiThisPeriodSat }} sat</div>
-            </q-card>
+            />
           </div>
-        </q-card-section>
+        </div>
 
         <!-- Charts -->
         <q-card class="q-mb-lg">
@@ -490,6 +468,7 @@ import downloadCsv from "src/utils/subscriberCsv";
 import SubscriberFilters from "src/components/subscribers/SubscriberFilters.vue";
 import SubscriberCard from "src/components/SubscriberCard.vue";
 import SubscriptionsCharts from "src/components/subscribers/SubscriptionsCharts.vue";
+import KpiCard from "src/components/subscribers/KpiCard.vue";
 
 const { t } = useI18n();
 const $q = useQuasar();

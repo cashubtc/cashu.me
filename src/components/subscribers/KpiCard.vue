@@ -1,5 +1,10 @@
 <template>
-  <q-card class="kpi-card bg-grey-10 text-white">
+  <q-card
+    flat
+    bordered
+    class="kpi-card"
+    :class="($q.dark && $q.dark.isActive) ? 'bg-grey-10 text-white' : 'bg-grey-1 text-dark'"
+  >
     <q-card-section>
       <div class="flex items-start justify-between">
         <div>
@@ -24,16 +29,17 @@
 </template>
 
 <script setup lang="ts">
+import { useQuasar } from 'quasar';
 const props = defineProps<{
   title: string;
   value: string | number;
   diff?: number;
 }>();
+const $q = useQuasar();
 </script>
 
 <style scoped>
 .kpi-card {
-  border: 1px solid #2b2f3a;
   border-radius: 16px;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
