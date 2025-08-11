@@ -95,6 +95,7 @@ const stubs = {
     template:
       '<div class="q-table"><div v-for="r in rows" :key="r.id" class="tbody-row">{{ r.name }}</div></div>',
   },
+  'q-pagination': { template: '<div></div>' },
   'q-avatar': { template: '<span class="q-avatar"><slot /></span>' },
   'q-td': { template: '<td><slot /></td>' },
   'q-drawer': {
@@ -322,10 +323,11 @@ describe('CreatorSubscribersPage', () => {
 
   it('keeps KPI counts when paginating table rows', async () => {
     const wrapper = mountPage();
-    wrapper.vm.pagination.rowsPerPage = 2;
-    wrapper.vm.pagination.page = 1;
+    const table = wrapper.findComponent({ name: 'SubscribersTable' });
+    ;(table.vm as any).pagination.rowsPerPage = 2;
+    ;(table.vm as any).pagination.page = 1;
     await wrapper.vm.$nextTick();
-    expect(wrapper.vm.paginatedRows.length).toBe(2);
+    expect((table.vm as any).paginatedRows.length).toBe(2);
     expect(wrapper.vm.counts.all).toBe(6);
   });
 });
