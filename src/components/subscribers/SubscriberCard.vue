@@ -7,7 +7,7 @@
     <q-card-section :class="compact ? 'q-pa-xs' : 'q-pa-sm'">
       <div class="row items-start justify-between no-wrap">
         <div class="row items-start no-wrap">
-          <q-avatar size="40px" class="q-mr-sm">
+          <q-avatar size="56px" class="q-mr-sm">
             <img v-if="profile?.picture" :src="profile.picture" />
             <span v-else>{{ initials }}</span>
           </q-avatar>
@@ -18,17 +18,29 @@
               <q-chip dense color="primary" text-color="white" class="q-mr-xs">
                 {{ subscription.tierName }}
               </q-chip>
-              <q-chip dense outline class="q-mr-xs">
-                {{ subscription.frequency }}
-              </q-chip>
-              <q-chip dense :color="statusColor" text-color="white">
-                {{ subscription.status }}
-              </q-chip>
+              <template v-if="$q.screen.gt.xs">
+                <q-chip dense outline class="q-mr-xs">
+                  {{ subscription.frequency }}
+                </q-chip>
+                <q-chip
+                  dense
+                  :color="statusColor"
+                  :text-color="statusTextColor"
+                >
+                  {{ subscription.status }}
+                </q-chip>
+              </template>
+              <q-icon
+                v-else
+                :name="statusIcon"
+                :color="statusColor"
+                class="q-ml-xs"
+              />
             </div>
           </div>
         </div>
         <div class="column items-end">
-          <div class="text-subtitle2">{{ amountPerInterval }}</div>
+          <div class="text-h6">{{ amountPerInterval }}</div>
           <div class="text-caption text-grey-6">{{ renewsText }}</div>
           <q-btn flat dense round icon="chevron_right" @click.stop="emit('open')" />
         </div>
@@ -43,6 +55,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
+import { useQuasar } from 'quasar';
 import { formatDistanceToNow } from 'date-fns';
 import { useMintsStore } from 'stores/mints';
 import { useUiStore } from 'stores/ui';
@@ -61,6 +74,7 @@ const emit = defineEmits<{
 
 const uiStore = useUiStore();
 const { activeUnit } = useMintsStore();
+const $q = useQuasar();
 
 function formatCurrency(amount: number): string {
   return uiStore.formatCurrency(amount, activeUnit.value);
@@ -110,8 +124,20 @@ const lifetimeTotal = computed(() =>
 const statusColor = computed(() => {
   if (props.subscription.status === 'active') return 'positive';
   if (props.subscription.status === 'pending') return 'warning';
-  return 'grey';
+  return 'negative';
 });
+
+const statusTextColor = computed(() =>
+  props.subscription.status === 'pending' ? 'black' : 'white'
+);
+
+const statusIcon = computed(() =>
+  props.subscription.status === 'active'
+    ? 'check'
+    : props.subscription.status === 'pending'
+    ? 'schedule'
+    : 'close'
+);
 
 const renewsText = computed(() => {
   if (!props.subscription.nextRenewal) return 'renews in —';
