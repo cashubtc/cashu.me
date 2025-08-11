@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import type { Subscriber, Frequency, SubStatus } from "../types/subscriber";
+import type { Subscriber, Frequency } from "../types/subscriber";
 import { useNostrStore } from "./nostr";
 import { cashuDb } from "./dexie";
 import { liveQuery } from "dexie";
@@ -8,10 +8,9 @@ import {
   daysToFrequency,
   frequencyToDays,
 } from "../constants/subscriptionFrequency";
+import { useSubscribersStore } from "./subscribersStore";
 
 type Tab = "all" | Frequency | "pending" | "ended";
-
-export type SortOption = "next" | "first" | "amount";
 
 export const useCreatorSubscribersStore = defineStore("creatorSubscribers", {
   state: () => ({
@@ -19,31 +18,33 @@ export const useCreatorSubscribersStore = defineStore("creatorSubscribers", {
     profileCache: {} as Record<string, { name: string; nip05: string }>,
     /** handle returned by Dexie's liveQuery for cleanup */
     _dbSub: null as { unsubscribe(): void } | null,
-    query: "",
     activeTab: "all" as Tab,
-    statuses: new Set<SubStatus>(),
-    tiers: new Set<string>(),
-    sort: "next" as SortOption,
     loading: false,
     error: null as string | null,
   }),
   getters: {
     filtered(state): Subscriber[] {
+      const filterStore = useSubscribersStore();
+      const { query, status, freq, tier, sort } = filterStore;
       // accessing the active tab here ensures this getter recomputes whenever
       // the user switches tabs in the UI
       const currentTab = state.activeTab;
       let arr = state.subscribers.slice();
 
-      if (state.statuses.size) {
-        arr = arr.filter((s) => state.statuses.has(s.status));
+      if (status.size) {
+        arr = arr.filter((s) => status.has(s.status));
       }
 
-      if (state.tiers.size) {
-        arr = arr.filter((s) => state.tiers.has(s.tierId));
+      if (tier.size) {
+        arr = arr.filter((s) => tier.has(s.tierId));
       }
 
-      if (state.query.trim()) {
-        const q = state.query.toLowerCase();
+      if (freq.size) {
+        arr = arr.filter((s) => freq.has(s.frequency));
+      }
+
+      if (query.trim()) {
+        const q = query.toLowerCase();
         arr = arr.filter(
           (s) =>
             s.name.toLowerCase().includes(q) ||
@@ -67,12 +68,12 @@ export const useCreatorSubscribersStore = defineStore("creatorSubscribers", {
       }
 
       arr.sort((a, b) => {
-        if (state.sort === "amount") {
+        if (sort === "amount") {
           const al = typeof a.lifetimeSat === "number" ? a.lifetimeSat : 0;
           const bl = typeof b.lifetimeSat === "number" ? b.lifetimeSat : 0;
           return bl - al;
         }
-        if (state.sort === "first") {
+        if (sort === "first") {
           return a.startDate - b.startDate;
         }
         const an =
@@ -85,19 +86,22 @@ export const useCreatorSubscribersStore = defineStore("creatorSubscribers", {
       return arr;
     },
     counts(state) {
-      // state.sort is included to make the getter reactive to sort changes,
-      // even though the sorting itself does not affect the totals
-      void state.sort;
+      const filterStore = useSubscribersStore();
+      // include sort for reactivity even though it doesn't change totals
+      void filterStore.sort;
       let arr = state.subscribers.slice();
 
-      if (state.statuses.size) {
-        arr = arr.filter((s) => state.statuses.has(s.status));
+      if (filterStore.status.size) {
+        arr = arr.filter((s) => filterStore.status.has(s.status));
       }
-      if (state.tiers.size) {
-        arr = arr.filter((s) => state.tiers.has(s.tierId));
+      if (filterStore.tier.size) {
+        arr = arr.filter((s) => filterStore.tier.has(s.tierId));
       }
-      if (state.query.trim()) {
-        const q = state.query.toLowerCase();
+      if (filterStore.freq.size) {
+        arr = arr.filter((s) => filterStore.freq.has(s.frequency));
+      }
+      if (filterStore.query.trim()) {
+        const q = filterStore.query.toLowerCase();
         arr = arr.filter(
           (s) =>
             s.name.toLowerCase().includes(q) ||
@@ -268,19 +272,6 @@ export const useCreatorSubscribersStore = defineStore("creatorSubscribers", {
     },
     setActiveTab(tab: Tab) {
       this.activeTab = tab;
-    },
-    setQuery(q: string) {
-      this.query = q;
-    },
-    applyFilters(opts: { statuses: Set<SubStatus>; tiers: Set<string>; sort: SortOption }) {
-      this.statuses = new Set(opts.statuses);
-      this.tiers = new Set(opts.tiers);
-      this.sort = opts.sort;
-    },
-    clearFilters() {
-      this.statuses.clear();
-      this.tiers.clear();
-      this.sort = "next";
     },
   },
 });

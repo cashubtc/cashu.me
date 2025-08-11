@@ -32,13 +32,15 @@ import { useDebounceFn } from '@vueuse/core';
 import { storeToRefs } from 'pinia';
 import SubscriberFilters from 'src/components/subscribers/SubscriberFilters.vue';
 import { useCreatorSubscribersStore } from 'src/stores/creatorSubscribers';
+import { useSubscribersStore } from 'src/stores/subscribersStore';
 
 const store = useCreatorSubscribersStore();
+const viewStore = useSubscribersStore();
 const { filtered, counts, activeTab } = storeToRefs(store);
 
-const search = ref(store.query);
+const search = ref(viewStore.query);
 
 const onSearch = useDebounceFn((val: string) => {
-  store.setQuery(val);
+  viewStore.applyFilters({ query: val });
 }, 220);
 </script>
