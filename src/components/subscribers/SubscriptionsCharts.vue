@@ -1,27 +1,29 @@
 <template>
-  <div class="row q-col-gutter-lg">
-    <q-card class="col-12 col-md-4" aria-label="Frequency distribution pie chart">
-      <q-card-section>
-        <div style="height: 200px">
-          <Pie :data="frequencyData" :options="pieOptions" aria-label="Frequency distribution pie chart" role="img" />
-        </div>
-      </q-card-section>
-    </q-card>
-    <q-card class="col-12 col-md-4" aria-label="Subscription status bar chart">
-      <q-card-section>
-        <div style="height: 200px">
-          <Bar :data="statusData" :options="barOptions" aria-label="Subscription status bar chart" role="img" />
-        </div>
-      </q-card-section>
-    </q-card>
-    <q-card class="col-12 col-md-4" aria-label="New subscribers line chart">
-      <q-card-section>
-        <div style="height: 200px">
-          <Line :data="newSubsData" :options="lineOptions" aria-label="New subscribers line chart" role="img" />
-        </div>
-      </q-card-section>
-    </q-card>
-  </div>
+  <q-expansion-item label="Insights" expand-separator>
+    <div class="row q-col-gutter-lg">
+      <q-card class="col-12" aria-label="Frequency distribution pie chart">
+        <q-card-section>
+          <div style="height: 300px">
+            <Pie :data="frequencyData" :options="pieOptions" aria-label="Frequency distribution pie chart" role="img" />
+          </div>
+        </q-card-section>
+      </q-card>
+      <q-card class="col-12" aria-label="Subscription status bar chart">
+        <q-card-section>
+          <div style="height: 300px">
+            <Bar :data="statusData" :options="barOptions" aria-label="Subscription status bar chart" role="img" />
+          </div>
+        </q-card-section>
+      </q-card>
+      <q-card class="col-12" aria-label="New subscribers line chart">
+        <q-card-section>
+          <div style="height: 300px">
+            <Line :data="newSubsData" :options="lineOptions" aria-label="New subscribers line chart" role="img" />
+          </div>
+        </q-card-section>
+      </q-card>
+    </div>
+  </q-expansion-item>
 </template>
 
 <script setup lang="ts">
@@ -52,6 +54,23 @@ ChartJS.register(
   PointElement,
   LineElement,
   Title,
+  {
+    id: 'pieLabelPlugin',
+    afterDatasetsDraw(chart) {
+      if (chart.config.type !== 'pie') return;
+      const { ctx, data } = chart;
+      ctx.save();
+      chart.getDatasetMeta(0).data.forEach((datapoint, i) => {
+        const { x, y } = datapoint.tooltipPosition();
+        const value = data.datasets[0].data[i] as number;
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold 14px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(String(value), x, y);
+      });
+    },
+  },
 );
 
 const props = defineProps<{ rows: CreatorSubscription[] }>();
@@ -125,10 +144,12 @@ const frequencyData = computed(() => ({
     {
       data: frequencySeries.value,
       backgroundColor: [
-        'var(--q-positive)',
-        'var(--q-warning)',
-        'var(--q-negative)',
+        'var(--q-light-green-5)',
+        'var(--q-amber-5)',
+        'var(--q-red-5)',
       ],
+      borderColor: '#fff',
+      borderWidth: 1,
     },
   ],
 }));
@@ -139,10 +160,12 @@ const statusData = computed(() => ({
     {
       data: statusSeries.value,
       backgroundColor: [
-        'var(--q-positive)',
-        'var(--q-warning)',
-        'var(--q-negative)',
+        'var(--q-light-green-5)',
+        'var(--q-amber-5)',
+        'var(--q-red-5)',
       ],
+      borderColor: '#fff',
+      borderWidth: 1,
     },
   ],
 }));
@@ -164,10 +187,11 @@ const pieOptions = computed(() => ({
   responsive: true,
   maintainAspectRatio: false,
   plugins: {
-    legend: { position: 'bottom' },
+    legend: { position: 'bottom', labels: { font: { size: 14 } } },
     title: {
       display: true,
       text: t('CreatorSubscribers.charts.frequency'),
+      font: { size: 16 },
     },
     tooltip: {
       callbacks: {
@@ -181,10 +205,11 @@ const barOptions = computed(() => ({
   responsive: true,
   maintainAspectRatio: false,
   plugins: {
-    legend: { position: 'bottom' },
+    legend: { position: 'bottom', labels: { font: { size: 14 } } },
     title: {
       display: true,
       text: t('CreatorSubscribers.charts.status'),
+      font: { size: 16 },
     },
     tooltip: {
       callbacks: {
@@ -193,7 +218,13 @@ const barOptions = computed(() => ({
     },
   },
   scales: {
-    y: { beginAtZero: true },
+    x: {
+      ticks: { font: { size: 12 } },
+    },
+    y: {
+      beginAtZero: true,
+      ticks: { font: { size: 12 } },
+    },
   },
 }));
 
@@ -201,10 +232,11 @@ const lineOptions = computed(() => ({
   responsive: true,
   maintainAspectRatio: false,
   plugins: {
-    legend: { position: 'bottom' },
+    legend: { position: 'bottom', labels: { font: { size: 14 } } },
     title: {
       display: true,
       text: t('CreatorSubscribers.charts.newSubs'),
+      font: { size: 16 },
     },
     tooltip: {
       callbacks: {
@@ -213,7 +245,13 @@ const lineOptions = computed(() => ({
     },
   },
   scales: {
-    y: { beginAtZero: true },
+    x: {
+      ticks: { font: { size: 12 } },
+    },
+    y: {
+      beginAtZero: true,
+      ticks: { font: { size: 12 } },
+    },
   },
 }));
 </script>
