@@ -79,7 +79,12 @@
           :aria-label="t('CreatorSubscribers.toolbar.exportCsv')"
           @click="downloadCsv()"
         />
-        <q-btn class="q-ml-sm" flat icon="event">
+        <q-btn
+          class="q-ml-sm"
+          flat
+          icon="event"
+          aria-label="Date range"
+        >
           <q-popup-proxy transition-show="scale" transition-hide="scale">
             <q-date v-model="chartRange" range mask="YYYY-MM-DD" />
           </q-popup-proxy>
@@ -112,7 +117,7 @@
     </q-header>
     <q-page-container>
       <q-page class="q-pa-md fit">
-        <q-banner v-if="error" dense class="q-mb-md bg-red-1 text-red">
+        <q-banner v-if="error" dense class="q-mb-md bg-red-1 text-red-9">
           {{ error }}
           <template #action>
             <q-btn
@@ -201,7 +206,7 @@
             </q-avatar>
             <div>
               <div class="text-body1">{{ props.row.name }}</div>
-              <div class="text-caption text-grey-6">{{ props.row.nip05 }}</div>
+              <div class="text-caption text-grey-7">{{ props.row.nip05 }}</div>
             </div>
           </div>
         </q-td>
@@ -275,7 +280,7 @@
                   label="Soon"
                 />
               </div>
-              <div class="text-caption text-grey-6">
+              <div class="text-caption text-grey-7">
                 {{
                   props.row.nextRenewal ? formatDate(props.row.nextRenewal) : ''
                 }}
@@ -343,7 +348,7 @@
           <q-avatar size="64px">{{ initials(current.name) }}</q-avatar>
           <div>
             <div class="text-h6">{{ current.name }}</div>
-            <div class="text-body2 text-grey-6">{{ current.nip05 }}</div>
+            <div class="text-body2 text-grey-7">{{ current.nip05 }}</div>
           </div>
           <q-space />
         </div>
@@ -410,7 +415,7 @@
           <q-list bordered dense>
             <q-item v-for="a in activity" :key="a.ts">
               <q-item-section>{{ a.text }}</q-item-section>
-              <q-item-section side class="text-caption text-grey">
+              <q-item-section side class="text-caption text-grey-7">
                 {{ distToNow(a.ts) }}
               </q-item-section>
             </q-item>
