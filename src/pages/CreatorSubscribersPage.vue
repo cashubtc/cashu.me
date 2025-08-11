@@ -7,9 +7,12 @@
           dense
           round
           icon="menu"
+          :color="filtersActive ? 'primary' : 'dark'"
           :aria-label="t('CreatorSubscribers.actions.filters')"
           @click="filtersOpen = !filtersOpen"
-        />
+        >
+          <q-badge v-if="filtersActive" floating rounded color="primary" />
+        </q-btn>
         <q-toolbar-title>
           {{ t('CreatorSubscribers.summary.subscribers') }}
         </q-toolbar-title>
@@ -183,6 +186,16 @@
       :row-count="filtered.length"
       @request="onRequest"
     >
+      <template #top-right>
+        <q-chip
+          v-if="selected.length"
+          dense
+          color="primary"
+          text-color="white"
+        >
+          {{ t('CreatorSubscribers.selectionCount', { count: selected.length }) }}
+        </q-chip>
+      </template>
       <template #body-cell-subscriber="props">
         <q-td :props="props" class="q-pa-sm">
           <div class="row items-center q-gutter-sm no-wrap">
@@ -309,31 +322,6 @@
       </q-list>
     </q-menu>
 
-    <!-- Selection bar -->
-    <div
-      v-if="selected.length"
-      class="q-mt-sm q-pa-sm bg-primary text-white row items-center q-gutter-sm"
-    >
-      <div>{{ t('CreatorSubscribers.selectionCount', { count: selected.length }) }}</div>
-      <q-space />
-      <q-btn
-        outline
-        dense
-        color="white"
-        icon="download"
-        :label="t('CreatorSubscribers.actions.exportSelected')"
-        :aria-label="t('CreatorSubscribers.actions.exportSelected')"
-        @click="exportSelected"
-      />
-      <q-btn
-        flat
-        dense
-        color="white"
-        :label="t('CreatorSubscribers.actions.clear')"
-        :aria-label="t('CreatorSubscribers.actions.clear')"
-        @click="clearSelected"
-      />
-    </div>
     </q-page>
   </q-page-container>
   <q-drawer v-model="drawer" side="right" :overlay="$q.screen.lt.md" bordered>
@@ -445,6 +433,29 @@
         </q-expansion-item>
     </div>
   </q-drawer>
+  <q-footer v-if="selected.length" class="bg-primary text-white">
+    <div class="row items-center q-pa-sm q-gutter-sm full-width">
+      <div>{{ t('CreatorSubscribers.selectionCount', { count: selected.length }) }}</div>
+      <q-space />
+      <q-btn
+        outline
+        dense
+        color="white"
+        icon="download"
+        :label="t('CreatorSubscribers.actions.exportSelected')"
+        :aria-label="t('CreatorSubscribers.actions.exportSelected')"
+        @click="exportSelected"
+      />
+      <q-btn
+        flat
+        dense
+        color="white"
+        :label="t('CreatorSubscribers.actions.clear')"
+        :aria-label="t('CreatorSubscribers.actions.clear')"
+        @click="clearSelected"
+      />
+    </div>
+  </q-footer>
 </q-layout>
 </template>
 
@@ -468,7 +479,19 @@ const { t } = useI18n();
 const $q = useQuasar();
 
 const subStore = useCreatorSubscribersStore();
-const { filtered, counts, activeTab, loading, error } = storeToRefs(subStore);
+const {
+  filtered,
+  counts,
+  activeTab,
+  loading,
+  error,
+  statuses,
+  tiers,
+  sort,
+} = storeToRefs(subStore);
+const filtersActive = computed(
+  () => statuses.value.size > 0 || tiers.value.size > 0 || sort.value !== 'next'
+);
 // `filtered` is maintained by the Pinia store based on the active tab,
 // search query and filter drawer. Treat it as the single source of truth
 // for the subscriber list and KPI counts throughout this page.
