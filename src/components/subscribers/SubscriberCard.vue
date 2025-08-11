@@ -13,7 +13,7 @@
           </q-avatar>
           <div class="column">
             <div class="text-body2">{{ displayName }}</div>
-            <div class="text-caption text-grey-6">{{ nip05Domain }}</div>
+            <div class="text-caption text-grey-7">{{ nip05Domain }}</div>
             <div class="row items-center q-mt-xs no-wrap">
               <q-chip dense color="primary" text-color="white" class="q-mr-xs">
                 {{ subscription.tierName }}
@@ -41,12 +41,19 @@
         </div>
         <div class="column items-end">
           <div class="text-h6">{{ amountPerInterval }}</div>
-          <div class="text-caption text-grey-6">{{ renewsText }}</div>
-          <q-btn flat dense round icon="chevron_right" @click.stop="emit('open')" />
+          <div class="text-caption text-grey-7">{{ renewsText }}</div>
+          <q-btn
+            flat
+            dense
+            round
+            icon="chevron_right"
+            aria-label="Open subscriber details"
+            @click.stop="emit('open')"
+          />
         </div>
       </div>
       <q-linear-progress :value="progress" class="q-mt-sm" />
-      <div class="text-caption text-grey-6 q-mt-xs">
+      <div class="text-caption text-grey-7 q-mt-xs">
         Lifetime {{ lifetimeTotal }}
       </div>
     </q-card-section>

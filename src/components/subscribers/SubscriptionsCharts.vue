@@ -1,24 +1,51 @@
 <template>
   <q-expansion-item label="Insights" expand-separator>
     <div class="row q-col-gutter-lg">
-      <q-card class="col-12" aria-label="Frequency distribution pie chart">
+      <q-card class="col-12">
         <q-card-section>
+          <div id="frequencyChartDesc" class="text-caption text-grey-7 q-mb-sm">
+            Shows number of subscriptions by frequency.
+          </div>
           <div style="height: 300px">
-            <Pie :data="frequencyData" :options="pieOptions" aria-label="Frequency distribution pie chart" role="img" />
+            <Pie
+              :data="frequencyData"
+              :options="pieOptions"
+              aria-label="Frequency distribution pie chart"
+              aria-describedby="frequencyChartDesc"
+              role="img"
+            />
           </div>
         </q-card-section>
       </q-card>
-      <q-card class="col-12" aria-label="Subscription status bar chart">
+      <q-card class="col-12">
         <q-card-section>
+          <div id="statusChartDesc" class="text-caption text-grey-7 q-mb-sm">
+            Shows number of subscriptions by status.
+          </div>
           <div style="height: 300px">
-            <Bar :data="statusData" :options="barOptions" aria-label="Subscription status bar chart" role="img" />
+            <Bar
+              :data="statusData"
+              :options="barOptions"
+              aria-label="Subscription status bar chart"
+              aria-describedby="statusChartDesc"
+              role="img"
+            />
           </div>
         </q-card-section>
       </q-card>
-      <q-card class="col-12" aria-label="New subscribers line chart">
+      <q-card class="col-12">
         <q-card-section>
+          <div id="newSubsChartDesc" class="text-caption text-grey-7 q-mb-sm">
+            Shows new subscribers over the past week.
+          </div>
           <div style="height: 300px">
-            <Line :data="newSubsData" :options="lineOptions" aria-label="New subscribers line chart" role="img" />
+            <Line
+              :data="newSubsData"
+              :options="lineOptions"
+              aria-label="New subscribers line chart"
+              aria-describedby="newSubsChartDesc"
+              role="img"
+            />
           </div>
         </q-card-section>
       </q-card>
@@ -194,6 +221,9 @@ const pieOptions = computed(() => ({
       font: { size: 16 },
     },
     tooltip: {
+      backgroundColor: '#2f2f2f',
+      titleColor: '#fff',
+      bodyColor: '#fff',
       callbacks: {
         label: (ctx: any) => `${ctx.label}: ${ctx.parsed}`,
       },
@@ -212,6 +242,9 @@ const barOptions = computed(() => ({
       font: { size: 16 },
     },
     tooltip: {
+      backgroundColor: '#2f2f2f',
+      titleColor: '#fff',
+      bodyColor: '#fff',
       callbacks: {
         label: (ctx: any) => `${ctx.label}: ${ctx.parsed.y}`,
       },
@@ -239,6 +272,9 @@ const lineOptions = computed(() => ({
       font: { size: 16 },
     },
     tooltip: {
+      backgroundColor: '#2f2f2f',
+      titleColor: '#fff',
+      bodyColor: '#fff',
       callbacks: {
         label: (ctx: any) => `${ctx.label}: ${ctx.parsed.y}`,
       },
