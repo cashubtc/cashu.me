@@ -10,6 +10,8 @@ import {
 } from "../constants/subscriptionFrequency";
 import { useSubscribersStore } from "./subscribersStore";
 import { useNdk } from "../composables/useNdk";
+import type { NDKEvent, NDKRelay, NDKRelaySet } from "@nostr-dev-kit/ndk";
+import { DEFAULT_RELAYS } from "src/config/relays";
 
 type Tab = "all" | Frequency | "pending" | "ended";
 
@@ -23,7 +25,6 @@ export const useCreatorSubscribersStore = defineStore("creatorSubscribers", {
     loading: false,
     profilesLoading: false,
     error: null as string | null,
-    profilesBatchFetchedAt: null as number | null,
   }),
   getters: {
     filtered(state): Subscriber[] {
@@ -245,6 +246,7 @@ export const useCreatorSubscribersStore = defineStore("creatorSubscribers", {
       });
     },
     async fetchProfiles() {
+      const BATCH_SIZE = 50;
       const nostr = useNostrStore();
       this.profilesLoading = true;
       this.error = null;
@@ -254,6 +256,7 @@ export const useCreatorSubscribersStore = defineStore("creatorSubscribers", {
         const uncached = unique.filter((npub) => !this.profileCache[npub]);
 
         if (!uncached.length) {
+          // Apply cached profiles to subscribers
           this.subscribers = this.subscribers.map((s) => {
             const cached = this.profileCache[s.npub];
             return {
@@ -262,102 +265,89 @@ export const useCreatorSubscribersStore = defineStore("creatorSubscribers", {
               nip05: cached?.nip05 || s.nip05 || "",
             };
           });
+          this.profilesLoading = false;
           return;
         }
 
+        if (!navigator.onLine) {
+            this.profilesLoading = false;
+            return;
+        }
+
+        await nostr.initNdkReadOnly();
         if (!nostr.connected) {
-          this.subscribers = this.subscribers.map((s) => {
-            const cached = this.profileCache[s.npub];
-            return {
-              ...s,
-              name: cached?.name || s.name || s.npub,
-              nip05: cached?.nip05 || s.nip05 || "",
-            };
-          });
           this.error = nostr.lastError;
-          return;
-        }
-
-        if (!navigator.onLine && this.profilesBatchFetchedAt) {
-          this.subscribers = this.subscribers.map((s) => {
-            const cached = this.profileCache[s.npub];
-            return {
-              ...s,
-              name: cached?.name || s.name || s.npub,
-              nip05: cached?.nip05 || s.nip05 || "",
-            };
-          });
-          return;
-        }
-
-        try {
-          await nostr.initNdkReadOnly();
-        } catch (e) {
-          console.error(e);
-          this.subscribers = this.subscribers.map((s) => {
-            const cached = this.profileCache[s.npub];
-            return {
-              ...s,
-              name: cached?.name || s.name || s.npub,
-              nip05: cached?.nip05 || s.nip05 || "",
-            };
-          });
+          this.profilesLoading = false;
           return;
         }
 
         const ndk = await useNdk({ requireSigner: false });
-        const authors = uncached.map((npub) => nostr.resolvePubkey(npub));
-        const events: Set<any> = await ndk.fetchEvents({ kinds: [0], authors });
-        const found = new Set<string>();
+        const relays = new Set<NDKRelay>();
+        for (const url of DEFAULT_RELAYS) {
+            relays.add(ndk.pool.getRelay(url));
+        }
+        const relaySet = new NDKRelaySet(relays, ndk);
 
-        events.forEach((ev: any) => {
+        for (let i = 0; i < uncached.length; i += BATCH_SIZE) {
+          const batch = uncached.slice(i, i + BATCH_SIZE);
+          const authors = batch.map((npub) => nostr.resolvePubkey(npub));
+
           try {
-            const profile = JSON.parse(ev.content || "{}");
-            const npub = nip19.npubEncode(ev.pubkey);
-            this.profileCache[npub] = {
-              name: profile.name || "",
-              nip05: profile.nip05 || "",
-            };
-            cashuDb.profiles
-              .put({
-                pubkey: ev.pubkey,
-                profile,
-                fetchedAt: Math.floor(Date.now() / 1000),
-              })
-              .catch(console.error);
-            found.add(npub);
-          } catch (err) {
-            console.error(err);
-          }
-        });
+            const events: Set<NDKEvent> = await ndk.fetchEvents(
+              { kinds: [0], authors },
+              { relaySet }
+            );
 
-        for (const npub of uncached) {
-          if (!found.has(npub)) {
-            this.profileCache[npub] = { name: "", nip05: "" };
+            const found = new Set<string>();
+
+            events.forEach((ev: NDKEvent) => {
+              try {
+                const profile = JSON.parse(ev.content || "{}");
+                const npub = nip19.npubEncode(ev.pubkey);
+                this.profileCache[npub] = {
+                  name: profile.name || "",
+                  nip05: profile.nip05 || "",
+                };
+                cashuDb.profiles
+                  .put({
+                    pubkey: ev.pubkey,
+                    profile,
+                    fetchedAt: Math.floor(Date.now() / 1000),
+                  })
+                  .catch(console.error);
+                found.add(npub);
+              } catch (err) {
+                console.error(err);
+              }
+            });
+
+            // Mark profiles that were not found in this batch to avoid re-fetching
+            for (const npub of batch) {
+              if (!found.has(npub)) {
+                this.profileCache[npub] = { name: "", nip05: "" };
+              }
+            }
+
+            // Incremental update of the subscribers list
+            this.subscribers = this.subscribers.map((s) => {
+              const cached = this.profileCache[s.npub];
+              if (cached) {
+                return {
+                  ...s,
+                  name: cached.name || s.name || s.npub,
+                  nip05: cached.nip05 || s.nip05 || "",
+                };
+              }
+              return s;
+            });
+
+          } catch (batchError) {
+            console.error(`Error fetching batch ${i / BATCH_SIZE + 1}:`, batchError);
           }
         }
-
-        this.profilesBatchFetchedAt = Date.now();
-
-        this.subscribers = this.subscribers.map((s) => {
-          const cached = this.profileCache[s.npub];
-          return {
-            ...s,
-            name: cached?.name || s.name || s.npub,
-            nip05: cached?.nip05 || s.nip05 || "",
-          };
-        });
       } catch (e) {
         console.error(e);
         this.error = e instanceof Error ? e.message : String(e);
-        this.subscribers = this.subscribers.map((s) => {
-          const cached = this.profileCache[s.npub];
-          return {
-            ...s,
-            name: cached?.name || s.name || s.npub,
-            nip05: cached?.nip05 || s.nip05 || "",
-          };
-        });
       } finally {
         this.profilesLoading = false;
       }

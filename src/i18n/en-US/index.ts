@@ -128,7 +128,10 @@ export const messages = {
       },
       creatorHub: {
         title: "Creator Hub",
-        
+        creatorHub: {
+          title: "Creator Hub",
+          caption: "Manage your creator profile",
+        },
       },
       myProfile: {
         title: "My Profile",
