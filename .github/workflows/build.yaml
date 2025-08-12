@@ -3,15 +3,17 @@ name: Check build
 on: [push, pull_request]
 
 jobs:
-  build:
+  build:                         # required check name
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      # Install pnpm BEFORE setup-node when using cache: pnpm
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
+          # If your package.json has "packageManager": "pnpm@x.y.z" you can omit version
           version: 9
           run_install: false
 
