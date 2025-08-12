@@ -173,8 +173,8 @@ import { defineComponent } from "vue";
 import { mapActions, mapState, mapWritableState } from "pinia";
 import { useClipboard } from "src/composables/useClipboard";
 import { defineAsyncComponent } from "vue";
-const VueQrcode = defineAsyncComponent(() =>
-  import("@chenfengyuan/vue-qrcode")
+const VueQrcode = defineAsyncComponent(
+  () => import("@chenfengyuan/vue-qrcode"),
 );
 
 import { useWalletStore } from "src/stores/wallet";
@@ -236,7 +236,7 @@ export default defineComponent({
       let display = this.formatCurrency(
         this.invoiceData.amount,
         this.invoiceData.unit,
-        true
+        true,
       );
       return display;
     },
@@ -268,11 +268,11 @@ export default defineComponent({
         this.createInvoiceButtonBlocked = true;
         const mintWallet = useWalletStore().mintWallet(
           mintStore.activeMintUrl,
-          mintStore.activeUnit
+          mintStore.activeUnit,
         );
         const mintQuote = await this.requestMint(
           this.invoiceData.amount,
-          mintWallet
+          mintWallet,
         );
         await this.mintOnPaid(mintQuote.quote);
       } catch (e) {

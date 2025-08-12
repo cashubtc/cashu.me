@@ -1,6 +1,6 @@
 <template>
   <q-card-section class="q-gutter-md">
-    <div class="text-h6 q-mb-sm">{{ $t('creatorHub.profileHeader') }}</div>
+    <div class="text-h6 q-mb-sm">{{ $t("creatorHub.profileHeader") }}</div>
     <q-input
       v-model="display_nameLocal"
       label="Display Name"
@@ -139,10 +139,10 @@ const p2pkOptions = computed(() =>
   p2pkStore.p2pkKeys.map((k) => ({
     label: shortenString(k.publicKey, 16, 6),
     value: k.publicKey,
-  }))
+  })),
 );
 const selectedKeyShort = computed(() =>
-  profilePub.value ? shortenString(profilePub.value, 16, 6) : ""
+  profilePub.value ? shortenString(profilePub.value, 16, 6) : "",
 );
 
 async function generateP2PK() {
@@ -178,7 +178,7 @@ const profileRelaysLocal = computed({
 });
 
 const validUrl = computed(() => /^https?:\/\/.+/.test(pictureLocal.value));
-const urlRule = (val: string) => /^https?:\/\/.+/.test(val) || 'Invalid URL';
+const urlRule = (val: string) => /^https?:\/\/.+/.test(val) || "Invalid URL";
 const urlListRule = (val: string[]) =>
   val.every((u) => /^wss?:\/\//.test(u)) || "Invalid URL";
 </script>

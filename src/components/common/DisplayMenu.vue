@@ -1,10 +1,5 @@
 <template>
-  <q-btn-dropdown
-    :flat="flat"
-    :icon="icon"
-    :label="label"
-    dense
-  >
+  <q-btn-dropdown :flat="flat" :icon="icon" :label="label" dense>
     <q-list class="display-menu" style="min-width: 200px">
       <q-item>
         <q-item-section>
@@ -55,8 +50,8 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
-import { useSubscribersStore } from 'src/stores/subscribersStore';
+import { computed } from "vue";
+import { useSubscribersStore } from "src/stores/subscribersStore";
 
 interface Column {
   name: string;
@@ -72,16 +67,16 @@ const props = withDefaults(
   }>(),
   {
     columns: () => [],
-    label: 'Display',
+    label: "Display",
     flat: true,
-    icon: 'view_module',
+    icon: "view_module",
   },
 );
 
 const emit = defineEmits<{
-  'update:viewMode': ['table' | 'card'];
-  'update:density': ['comfortable' | 'compact'];
-  'update:visibleColumns': [string[]];
+  "update:viewMode": ["table" | "card"];
+  "update:density": ["comfortable" | "compact"];
+  "update:visibleColumns": [string[]];
 }>();
 
 const store = useSubscribersStore();
@@ -92,33 +87,33 @@ if (store.visibleColumns.length === 0 && props.columns.length) {
 
 const viewMode = computed({
   get: () => store.viewMode,
-  set: (val: 'table' | 'card') => {
+  set: (val: "table" | "card") => {
     store.setViewMode(val);
-    emit('update:viewMode', val);
+    emit("update:viewMode", val);
   },
 });
 
 const density = computed({
   get: () => store.density,
-  set: (val: 'comfortable' | 'compact') => {
+  set: (val: "comfortable" | "compact") => {
     store.setDensity(val);
-    emit('update:density', val);
+    emit("update:density", val);
   },
 });
 
 function onToggleColumn(name: string) {
   store.toggleColumn(name);
-  emit('update:visibleColumns', store.visibleColumns);
+  emit("update:visibleColumns", store.visibleColumns);
 }
 
 const viewOptions = [
-  { label: 'Table', value: 'table' },
-  { label: 'Card', value: 'card' },
+  { label: "Table", value: "table" },
+  { label: "Card", value: "card" },
 ];
 
 const densityOptions = [
-  { label: 'Comfortable', value: 'comfortable' },
-  { label: 'Compact', value: 'compact' },
+  { label: "Comfortable", value: "comfortable" },
+  { label: "Compact", value: "compact" },
 ];
 </script>
 
@@ -128,4 +123,3 @@ const densityOptions = [
   outline-offset: 2px;
 }
 </style>
-

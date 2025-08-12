@@ -23,7 +23,11 @@ vi.mock("../../../src/stores/nostr", async (importOriginal) => {
     fetchNutzapProfile: (...args: any[]) => fetchNutzapProfile(...args),
     publishNutzap: (...args: any[]) => publishNutzap(...args),
     subscribeToNutzaps: vi.fn(),
-    useNostrStore: () => ({ pubkey: "myhex", connected: true, lastError: null }),
+    useNostrStore: () => ({
+      pubkey: "myhex",
+      connected: true,
+      lastError: null,
+    }),
   };
 });
 

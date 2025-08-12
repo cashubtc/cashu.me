@@ -41,7 +41,7 @@ export default {
             highlightScanRegion: true,
             highlightCodeOutline: true,
             onDecodeError: () => {},
-          }
+          },
         );
         vm.qrScanner.start();
         vm.urDecoder = new URDecoder();

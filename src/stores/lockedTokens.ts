@@ -30,7 +30,7 @@ export const useLockedTokensStore = defineStore("lockedTokens", {
         (t) =>
           t.bucketId === tierId &&
           t.pubkey === creatorPubkey &&
-          (!t.locktime || t.locktime <= now)
+          (!t.locktime || t.locktime <= now),
       );
     },
   },
@@ -39,7 +39,7 @@ export const useLockedTokensStore = defineStore("lockedTokens", {
       data: Omit<LockedToken, "id" | "date" | "label"> & {
         date?: string;
         label?: string;
-      }
+      },
     ) {
       const token: LockedToken = {
         id: uuidv4(),

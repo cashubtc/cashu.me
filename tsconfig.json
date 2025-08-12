@@ -3,63 +3,24 @@
   "compilerOptions": {
     "baseUrl": ".",
     "target": "ES2020",
-      "paths": {
-        "@/*": [
-          "src/*"
-        ],
-        "src/*": [
-          "src/*"
-        ],
-      "app/*": [
-        "*"
-      ],
-      "components/*": [
-        "src/components/*"
-      ],
-      "layouts/*": [
-        "src/layouts/*"
-      ],
-      "pages/*": [
-        "src/pages/*"
-      ],
-      "assets/*": [
-        "src/assets/*"
-      ],
-      "boot/*": [
-        "src/boot/*"
-      ],
-      "stores/*": [
-        "src/stores/*"
-      ],
-      "vue$": [
-        "node_modules/vue/dist/vue.runtime.esm-bundler.js"
-      ],
-      "@cashu/cashu-ts": [
-        "src/lib/cashu-ts/src/index.ts"
-      ]
+    "paths": {
+      "@/*": ["src/*"],
+      "src/*": ["src/*"],
+      "app/*": ["*"],
+      "components/*": ["src/components/*"],
+      "layouts/*": ["src/layouts/*"],
+      "pages/*": ["src/pages/*"],
+      "assets/*": ["src/assets/*"],
+      "boot/*": ["src/boot/*"],
+      "stores/*": ["src/stores/*"],
+      "vue$": ["node_modules/vue/dist/vue.runtime.esm-bundler.js"],
+      "@cashu/cashu-ts": ["src/lib/cashu-ts/src/index.ts"]
     },
     "moduleResolution": "Bundler",
     "skipLibCheck": true,
-    "lib": [
-      "ES2022",
-      "DOM",
-      "DOM.Iterable",
-      "WebWorker"
-    ],
-    "types": [
-      "vite/client",
-      "node"
-    ]
+    "lib": ["ES2022", "DOM", "DOM.Iterable", "WebWorker"],
+    "types": ["vite/client", "node"]
   },
-  "include": [
-    "src/**/*.ts",
-    "src/**/*.d.ts",
-    "src/**/*.vue"
-  ],
-  "exclude": [
-    "node_modules",
-    "dist",
-    ".quasar",
-    "src-pwa/**"
-  ]
+  "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.vue"],
+  "exclude": ["node_modules", "dist", ".quasar", "src-pwa/**"]
 }

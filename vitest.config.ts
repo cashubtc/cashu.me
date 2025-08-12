@@ -27,18 +27,21 @@ export default defineConfig({
       "test/vitest/__tests__/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
     ],
   },
-    resolve: {
-      alias: {
-        '@': path.resolve(__dirname, 'src'),
-        src: path.resolve(__dirname, "src"),
-        app: path.resolve(__dirname),
-        components: path.resolve(__dirname, "src/components"),
+  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "src"),
+      src: path.resolve(__dirname, "src"),
+      app: path.resolve(__dirname),
+      components: path.resolve(__dirname, "src/components"),
       layouts: path.resolve(__dirname, "src/layouts"),
       pages: path.resolve(__dirname, "src/pages"),
       assets: path.resolve(__dirname, "src/assets"),
       boot: path.resolve(__dirname, "src/boot"),
       stores: path.resolve(__dirname, "src/stores"),
-      "@cashu/cashu-ts": path.resolve(__dirname, "src/lib/cashu-ts/src/index.ts"),
+      "@cashu/cashu-ts": path.resolve(
+        __dirname,
+        "src/lib/cashu-ts/src/index.ts",
+      ),
     },
   },
   plugins: [

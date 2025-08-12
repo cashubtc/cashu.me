@@ -84,8 +84,8 @@ export const useNPCStore = defineStore("npc", {
       const walletPublicKeyHex = nostrStore.pubkey;
       notifySuccess(
         `Lightning address for wallet: ${nip19.npubEncode(
-          walletPublicKeyHex
-        )}@${this.npcDomain}`
+          walletPublicKeyHex,
+        )}@${this.npcDomain}`,
       );
       this.baseURL = `https://${this.npcDomain}`;
       const previousAddress = this.npcAddress;
@@ -119,7 +119,7 @@ export const useNPCStore = defineStore("npc", {
     generateNip98Event: async function (
       url: string,
       method: string,
-      body?: string
+      body?: string,
     ): Promise<string> {
       const nostrStore = useNostrStore();
       await nostrStore.initSignerIfNotSet();
@@ -140,7 +140,7 @@ export const useNPCStore = defineStore("npc", {
     getInfo: async function (): Promise<NPCInfo> {
       const authHeader = await this.generateNip98Event(
         `${this.baseURL}/api/v1/info`,
-        "GET"
+        "GET",
       );
       try {
         const response = await fetch(`${this.baseURL}/api/v1/info`, {
@@ -229,7 +229,7 @@ export const useNPCStore = defineStore("npc", {
     getBalance: async function (): Promise<number> {
       const authHeader = await this.generateNip98Event(
         `${this.baseURL}/api/v1/balance`,
-        "GET"
+        "GET",
       );
       try {
         const response = await fetch(`${this.baseURL}/api/v1/balance`, {
@@ -252,7 +252,7 @@ export const useNPCStore = defineStore("npc", {
     getClaim: async function (): Promise<string> {
       const authHeader = await this.generateNip98Event(
         `${this.baseURL}/api/v1/claim`,
-        "GET"
+        "GET",
       );
       try {
         const response = await fetch(`${this.baseURL}/api/v1/claim`, {

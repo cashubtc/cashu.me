@@ -15,15 +15,17 @@ export type WelcomeState = {
 // Define the Pinia store
 export const useWelcomeStore = defineStore("welcome", {
   state: (): WelcomeState => ({
-    showWelcome: useLocalStorage<boolean>("cashu.welcome.showWelcome", true).value,
-    currentSlide: useLocalStorage<number>("cashu.welcome.currentSlide", 0).value,
+    showWelcome: useLocalStorage<boolean>("cashu.welcome.showWelcome", true)
+      .value,
+    currentSlide: useLocalStorage<number>("cashu.welcome.currentSlide", 0)
+      .value,
     seedPhraseValidated: useLocalStorage<boolean>(
       "cashu.welcome.seedPhraseValidated",
-      false
+      false,
     ),
     termsAccepted: useLocalStorage<boolean>(
       "cashu.welcome.termsAccepted",
-      false
+      false,
     ),
   }),
   getters: {

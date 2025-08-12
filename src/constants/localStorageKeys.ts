@@ -53,16 +53,20 @@ export const LOCAL_STORAGE_KEYS = {
   CASHU_SETTINGS_AUDITORENABLED: "cashu.settings.auditorEnabled",
   CASHU_SETTINGS_AUDITORURL: "cashu.settings.auditorUrl",
   CASHU_SETTINGS_AUTOPASTEECASHRECEIVE: "cashu.settings.autoPasteEcashReceive",
-  CASHU_SETTINGS_AUTOREDEEMLOCKEDTOKENS: "cashu.settings.autoRedeemLockedTokens",
+  CASHU_SETTINGS_AUTOREDEEMLOCKEDTOKENS:
+    "cashu.settings.autoRedeemLockedTokens",
   CASHU_SETTINGS_CHECKINCOMINGINVOICES: "cashu.settings.checkIncomingInvoices",
-  CASHU_SETTINGS_CHECKINVOICESONSTARTUP: "cashu.settings.checkInvoicesOnStartup",
+  CASHU_SETTINGS_CHECKINVOICESONSTARTUP:
+    "cashu.settings.checkInvoicesOnStartup",
   CASHU_SETTINGS_CHECKSENTTOKENS: "cashu.settings.checkSentTokens",
   CASHU_SETTINGS_DEFAULTNOSTRRELAYS: "cashu.settings.defaultNostrRelays",
   CASHU_SETTINGS_ENABLERECEIVESWAPS: "cashu.settings.enableReceiveSwaps",
   CASHU_SETTINGS_GETBITCOINPRICE: "cashu.settings.getBitcoinPrice",
-  CASHU_SETTINGS_INCLUDEFEESINSENDAMOUNT: "cashu.settings.includeFeesInSendAmount",
+  CASHU_SETTINGS_INCLUDEFEESINSENDAMOUNT:
+    "cashu.settings.includeFeesInSendAmount",
   CASHU_SETTINGS_NFCENCODING: "cashu.settings.nfcEncoding",
-  CASHU_SETTINGS_PERIODICALLYCHECKINCOMINGINVOICES: "cashu.settings.periodicallyCheckIncomingInvoices",
+  CASHU_SETTINGS_PERIODICALLYCHECKINCOMINGINVOICES:
+    "cashu.settings.periodicallyCheckIncomingInvoices",
   CASHU_SETTINGS_SEARCHBACKENDURL: "cashu.settings.searchBackendUrl",
   CASHU_SETTINGS_TIERSINDEXERURL: "cashu.settings.tiersIndexerUrl",
   CASHU_SETTINGS_USENUMERICKEYBOARD: "cashu.settings.useNumericKeyboard",
@@ -80,7 +84,8 @@ export const LOCAL_STORAGE_KEYS = {
   CASHU_WELCOME_SEEDPHRASEVALIDATED: "cashu.welcome.seedPhraseValidated",
   CASHU_WELCOME_SHOWWELCOME: "cashu.welcome.showWelcome",
   CASHU_WELCOME_TERMSACCEPTED: "cashu.welcome.termsAccepted",
-  CASHU_WORKER_INVOICES_LASTPENDINGINVOICECHECK: "cashu.worker.invoices.lastPendingInvoiceCheck",
+  CASHU_WORKER_INVOICES_LASTPENDINGINVOICECHECK:
+    "cashu.worker.invoices.lastPendingInvoiceCheck",
   CASHU_WORKER_INVOICES_QUOTESQUEUE: "cashu.worker.invoices.quotesQueue",
   CREATORHUB_LOGGEDINNPUB: "creatorHub.loggedInNpub",
   CREATORHUB_TIERORDER: "creatorHub.tierOrder",

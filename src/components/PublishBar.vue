@@ -8,7 +8,7 @@
         :disable="publishing"
         @click="emit('publish')"
       >
-        {{ $t('creatorHub.publish') }}
+        {{ $t("creatorHub.publish") }}
       </q-btn>
     </q-toolbar>
   </q-footer>
@@ -16,5 +16,5 @@
 
 <script setup lang="ts">
 const { publishing } = defineProps<{ publishing: boolean }>();
-const emit = defineEmits(['publish']);
+const emit = defineEmits(["publish"]);
 </script>

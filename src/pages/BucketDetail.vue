@@ -106,8 +106,11 @@
           :disable="!bucketProofs.length"
           @click="openSendDmDialog"
         >
-          {{ $t('BucketDetail.send_dm') }}
-          <InfoTooltip class="q-ml-xs" :text="$t('BucketDetail.tooltips.send_dm')" />
+          {{ $t("BucketDetail.send_dm") }}
+          <InfoTooltip
+            class="q-ml-xs"
+            :text="$t('BucketDetail.tooltips.send_dm')"
+          />
         </q-btn>
       </div>
     </div>
@@ -179,17 +182,19 @@ const tokensStore = useTokensStore();
 
 const bucketId = route.params.id as string;
 const bucket = computed(() =>
-  bucketsStore.bucketList.find((b) => b.id === bucketId)
+  bucketsStore.bucketList.find((b) => b.id === bucketId),
 );
 const bucketProofs = computed(() =>
-  proofsStore.proofs.filter((p) => p.bucketId === bucketId && !p.reserved)
+  proofsStore.proofs.filter((p) => p.bucketId === bucketId && !p.reserved),
 );
 const bucketBalance = computed(() =>
-  bucketProofs.value.reduce((s, p) => s + p.amount, 0)
+  bucketProofs.value.reduce((s, p) => s + p.amount, 0),
 );
 const { activeUnit } = storeToRefs(mintsStore);
 const showSendTokens = storeToRefs(sendTokensStore).showSendTokens;
-const sendDmDialogRef = ref<InstanceType<typeof SendBucketDmDialog> | null>(null);
+const sendDmDialogRef = ref<InstanceType<typeof SendBucketDmDialog> | null>(
+  null,
+);
 
 const selectedSecrets = ref<string[]>([]);
 const targetBucketId = ref<string | null>(null);
@@ -242,7 +247,7 @@ const groupedProofs = computed<ProofGroup[]>(() => {
 const bucketOptions = computed(() =>
   bucketsStore.bucketList
     .filter((b) => b.id !== bucketId)
-    .map((b) => ({ label: b.name, value: b.id }))
+    .map((b) => ({ label: b.name, value: b.id })),
 );
 
 function formatCurrency(amount: number, unit: string) {
@@ -254,7 +259,7 @@ function formatTs(ts: number) {
   return `${d.getFullYear()}-${("0" + (d.getMonth() + 1)).slice(-2)}-${(
     "0" + d.getDate()
   ).slice(-2)} ${("0" + d.getHours()).slice(-2)}:${("0" + d.getMinutes()).slice(
-    -2
+    -2,
   )}`;
 }
 
@@ -264,7 +269,7 @@ function toggleGroup(group: ProofGroup, val: boolean) {
     selectedSecrets.value.push(...add);
   } else {
     selectedSecrets.value = selectedSecrets.value.filter(
-      (s) => !group.secrets.includes(s)
+      (s) => !group.secrets.includes(s),
     );
   }
 }
@@ -291,7 +296,7 @@ function saveEdit() {
   const tokens = tokensStore.historyTokens.filter(
     (t) =>
       t.bucketId === bucketId &&
-      (t.label ?? "") === editDialog.value.originalLabel
+      (t.label ?? "") === editDialog.value.originalLabel,
   );
   tokens.forEach((t) => {
     tokensStore.editHistoryToken(t.token, {
@@ -309,7 +314,7 @@ async function moveSelected() {
     return;
   }
   const bucketExists = bucketsStore.bucketList.find(
-    (b) => b.id === targetBucketId.value
+    (b) => b.id === targetBucketId.value,
   );
   if (!bucketExists) {
     notifyError(`Bucket not found: ${targetBucketId.value}`);
@@ -317,14 +322,14 @@ async function moveSelected() {
   }
   await proofsStore.moveProofs(
     selectedSecrets.value,
-    targetBucketId.value as string
+    targetBucketId.value as string,
   );
   selectedSecrets.value = [];
 }
 
 function sendSelected() {
   const proofs = bucketProofs.value.filter((p) =>
-    selectedSecrets.value.includes(p.secret)
+    selectedSecrets.value.includes(p.secret),
   );
   const token = proofsStore.serializeProofs(proofs);
   sendTokensStore.clearSendData();

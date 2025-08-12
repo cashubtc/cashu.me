@@ -65,7 +65,10 @@ export const useLockedTokensRedeemWorker = defineStore(
           .toArray();
 
         for (const entry of legacyEntries) {
-          if (entry.unlockTs === undefined && typeof (entry as any).locktime === "number") {
+          if (
+            entry.unlockTs === undefined &&
+            typeof (entry as any).locktime === "number"
+          ) {
             await cashuDb.lockedTokens.update(entry.id, {
               unlockTs: (entry as any).locktime,
             });
@@ -141,7 +144,8 @@ export const useLockedTokensRedeemWorker = defineStore(
               p2pkStore.getPrivateKeyForP2PKEncodedToken(entry.tokenString);
 
             const needsSig = proofs.some(
-              (p) => typeof p.secret === "string" && p.secret.startsWith('["P2PK"')
+              (p) =>
+                typeof p.secret === "string" && p.secret.startsWith('["P2PK"'),
             );
             if (needsSig && !receiveStore.receiveData.p2pkPrivateKey) {
               postMessage({
@@ -153,18 +157,24 @@ export const useLockedTokensRedeemWorker = defineStore(
 
             debug("locked token redeem: sending proofs", proofs);
             try {
-              await cashuDb.transaction('rw', cashuDb.lockedTokens, async () => {
-                const row = await cashuDb.lockedTokens.get(entry.id);
-                if (!row || (row.status as any) === 'processing') return;
-                await cashuDb.lockedTokens.update(entry.id, {
-                  status: 'processing' as any,
-                  redeemed: true,
-                });
-              });
+              await cashuDb.transaction(
+                "rw",
+                cashuDb.lockedTokens,
+                async () => {
+                  const row = await cashuDb.lockedTokens.get(entry.id);
+                  if (!row || (row.status as any) === "processing") return;
+                  await cashuDb.lockedTokens.update(entry.id, {
+                    status: "processing" as any,
+                    redeemed: true,
+                  });
+                },
+              );
               await receiveStore.enqueue(() =>
                 (wallet as any).receive(entry.tokenString),
               );
-              await cashuDb.lockedTokens.update(entry.id, { status: 'claimed' });
+              await cashuDb.lockedTokens.update(entry.id, {
+                status: "claimed",
+              });
 
               // update subscription interval if applicable
               if (entry.subscriptionId) {
@@ -196,7 +206,9 @@ export const useLockedTokensRedeemWorker = defineStore(
                     tier_id: entry.tierId,
                     month_index: entry.monthIndex,
                     total_months: entry.totalPeriods,
-                    ...(entry.htlcSecret ? { htlc_secret: entry.htlcSecret } : {}),
+                    ...(entry.htlcSecret
+                      ? { htlc_secret: entry.htlcSecret }
+                      : {}),
                   } as const;
                   try {
                     await messenger.sendDm(
@@ -214,7 +226,7 @@ export const useLockedTokensRedeemWorker = defineStore(
                 typeof err?.message === "string" &&
                 (err.message.includes("No private key or remote signer") ||
                   err.message.includes(
-                    "You do not have the private key to unlock this token."
+                    "You do not have the private key to unlock this token.",
                   ))
               ) {
                 postMessage({

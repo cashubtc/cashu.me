@@ -52,7 +52,7 @@ export const useCreatorSubscribersStore = defineStore("creatorSubscribers", {
           (s) =>
             s.name.toLowerCase().includes(q) ||
             s.npub.toLowerCase().includes(q) ||
-            s.nip05.toLowerCase().includes(q)
+            s.nip05.toLowerCase().includes(q),
         );
       }
 
@@ -80,9 +80,13 @@ export const useCreatorSubscribersStore = defineStore("creatorSubscribers", {
           return a.startDate - b.startDate;
         }
         const an =
-          typeof a.nextRenewal === "number" ? a.nextRenewal : Number.POSITIVE_INFINITY;
+          typeof a.nextRenewal === "number"
+            ? a.nextRenewal
+            : Number.POSITIVE_INFINITY;
         const bn =
-          typeof b.nextRenewal === "number" ? b.nextRenewal : Number.POSITIVE_INFINITY;
+          typeof b.nextRenewal === "number"
+            ? b.nextRenewal
+            : Number.POSITIVE_INFINITY;
         return an - bn;
       });
 
@@ -109,7 +113,7 @@ export const useCreatorSubscribersStore = defineStore("creatorSubscribers", {
           (s) =>
             s.name.toLowerCase().includes(q) ||
             s.npub.toLowerCase().includes(q) ||
-            s.nip05.toLowerCase().includes(q)
+            s.nip05.toLowerCase().includes(q),
         );
       }
 
@@ -154,7 +158,8 @@ export const useCreatorSubscribersStore = defineStore("creatorSubscribers", {
             const map = new Map<string, Agg>();
             for (const row of rows) {
               const key = `${row.subscriptionId}-${row.subscriberNpub}`;
-              const freq = (row.frequency || daysToFrequency(row.intervalDays || 30)) as Frequency;
+              const freq = (row.frequency ||
+                daysToFrequency(row.intervalDays || 30)) as Frequency;
               const intervalDays = row.intervalDays ?? frequencyToDays(freq);
               let agg = map.get(key);
               if (!agg) {
@@ -196,7 +201,9 @@ export const useCreatorSubscribersStore = defineStore("creatorSubscribers", {
               } else {
                 const nextUnlock = g.tokens[0]?.unlockTs;
                 status =
-                  nextUnlock != null && nextUnlock <= now ? "active" : "pending";
+                  nextUnlock != null && nextUnlock <= now
+                    ? "active"
+                    : "pending";
               }
 
               let progress = 0;

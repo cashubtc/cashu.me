@@ -29,7 +29,9 @@
               dense
               class="q-ml-sm focus-outline"
               icon="filter_list"
-              :label="$q.screen.gt.xs ? t('CreatorSubscribers.actions.filters') : ''"
+              :label="
+                $q.screen.gt.xs ? t('CreatorSubscribers.actions.filters') : ''
+              "
               :aria-label="t('CreatorSubscribers.actions.filters')"
             >
               <q-menu>
@@ -37,12 +39,17 @@
               </q-menu>
             </q-btn>
             <q-space />
-            <q-btn-dropdown flat label="Display" aria-label="Display options" class="focus-outline">
+            <q-btn-dropdown
+              flat
+              label="Display"
+              aria-label="Display options"
+              class="focus-outline"
+            >
               <q-list style="min-width: 200px" class="card-bg">
                 <q-item>
                   <q-item-section>
                     <div class="q-mb-sm">
-                      {{ t('CreatorSubscribers.toolbar.view') }}
+                      {{ t("CreatorSubscribers.toolbar.view") }}
                     </div>
                     <q-btn-toggle
                       v-model="view"
@@ -55,7 +62,7 @@
                 <q-item>
                   <q-item-section>
                     <div class="q-mb-sm">
-                      {{ t('CreatorSubscribers.toolbar.density') }}
+                      {{ t("CreatorSubscribers.toolbar.density") }}
                     </div>
                     <q-btn-toggle
                       v-model="density"
@@ -66,7 +73,9 @@
                   </q-item-section>
                 </q-item>
                 <q-separator class="divider-bg" />
-                <q-item-label header>{{ t('CreatorSubscribers.toolbar.columns') }}</q-item-label>
+                <q-item-label header>{{
+                  t("CreatorSubscribers.toolbar.columns")
+                }}</q-item-label>
                 <q-item v-for="col in columns" :key="col.name" clickable>
                   <q-item-section avatar>
                     <q-checkbox v-model="visibleColumns" :val="col.name" />
@@ -79,7 +88,9 @@
               class="q-ml-sm focus-outline"
               color="secondary"
               icon="download"
-              :label="$q.screen.gt.xs ? t('CreatorSubscribers.toolbar.exportCsv') : ''"
+              :label="
+                $q.screen.gt.xs ? t('CreatorSubscribers.toolbar.exportCsv') : ''
+              "
               :aria-label="t('CreatorSubscribers.toolbar.exportCsv')"
               @click="downloadCsv()"
             />
@@ -95,10 +106,7 @@
             </q-btn>
           </q-toolbar>
           <div class="card-bg q-px-md q-pb-sm">
-            <div
-              v-if="filterChips.length"
-              class="row q-gutter-xs q-mb-sm"
-            >
+            <div v-if="filterChips.length" class="row q-gutter-xs q-mb-sm">
               <q-chip
                 v-for="chip in filterChips"
                 :key="chip.key"
@@ -164,7 +172,11 @@
             />
             <KpiCard
               class="col-12 col-sm-6 col-md-3 cursor-pointer"
-              :title="periodMode === 'week' ? 'Next Week Revenue' : 'Next Month Revenue'"
+              :title="
+                periodMode === 'week'
+                  ? 'Next Week Revenue'
+                  : 'Next Month Revenue'
+              "
               :value="`${formattedKpiThisPeriodSat} sat`"
               @click="togglePeriod"
             />
@@ -178,121 +190,155 @@
           </q-card-section>
         </q-card>
 
-    <!-- Table -->
-    <SubscribersTable :subscribers="filtered" @select="openDrawer" />
-    <q-virtual-scroll
-      v-if="view === 'card'"
-      :items="filtered"
-      :virtual-scroll-item-size="140"
-      content-class="subscriber-cards"
-      class="q-mb-lg"
+        <!-- Table -->
+        <SubscribersTable :subscribers="filtered" @select="openDrawer" />
+        <q-virtual-scroll
+          v-if="view === 'card'"
+          :items="filtered"
+          :virtual-scroll-item-size="140"
+          content-class="subscriber-cards"
+          class="q-mb-lg"
+        >
+          <template #default="{ item: row }">
+            <SubscriberCard
+              :subscription="
+                { tierName: row.tierName, subscriberNpub: row.npub } as any
+              "
+              :status="row.status"
+              :next-in="row.nextRenewal ? distToNow(row.nextRenewal) : '—'"
+              :progress="progressPercent(row) / 100"
+              :amount="row.amountSat + ' sat'"
+              :compact="density === 'compact'"
+              @click="openDrawer(row)"
+            />
+          </template>
+        </q-virtual-scroll>
+
+        <q-menu ref="avatarMenuRef">
+          <q-list class="card-bg">
+            <q-item clickable v-close-popup @click="copyNpub(menuNpub)">
+              <q-item-section>{{
+                t("CreatorSubscribers.drawer.actions.copyNpub")
+              }}</q-item-section>
+            </q-item>
+          </q-list>
+        </q-menu>
+      </q-page>
+    </q-page-container>
+    <q-drawer
+      v-model="drawer"
+      side="right"
+      :overlay="$q.screen.lt.md"
+      bordered
+      class="page-surface"
     >
-      <template #default="{ item: row }">
-        <SubscriberCard
-          :subscription="{ tierName: row.tierName, subscriberNpub: row.npub } as any"
-          :status="row.status"
-          :next-in="row.nextRenewal ? distToNow(row.nextRenewal) : '—'"
-          :progress="progressPercent(row) / 100"
-          :amount="row.amountSat + ' sat'"
-          :compact="density === 'compact'"
-          @click="openDrawer(row)"
-        />
-      </template>
-    </q-virtual-scroll>
-
-    <q-menu ref="avatarMenuRef">
-      <q-list class="card-bg">
-        <q-item clickable v-close-popup @click="copyNpub(menuNpub)">
-          <q-item-section>{{ t('CreatorSubscribers.drawer.actions.copyNpub') }}</q-item-section>
-        </q-item>
-      </q-list>
-    </q-menu>
-
-    </q-page>
-  </q-page-container>
-  <q-drawer v-model="drawer" side="right" :overlay="$q.screen.lt.md" bordered class="page-surface">
-    <div v-if="current" class="column fit">
-      <div class="q-pa-md scroll">
-        <div class="row items-center q-gutter-sm">
-          <q-btn
-            flat
-            dense
-            round
-            icon="arrow_back"
-            aria-label="Back"
-            @click="drawer = false"
-            class="focus-outline"
-          />
-          <q-avatar size="64px">{{ initials(current.name) }}</q-avatar>
-          <div>
-            <div class="text-h6">{{ current.name }}</div>
-            <div class="text-body2 text-secondary">{{ current.nip05 }}</div>
+      <div v-if="current" class="column fit">
+        <div class="q-pa-md scroll">
+          <div class="row items-center q-gutter-sm">
+            <q-btn
+              flat
+              dense
+              round
+              icon="arrow_back"
+              aria-label="Back"
+              @click="drawer = false"
+              class="focus-outline"
+            />
+            <q-avatar size="64px">{{ initials(current.name) }}</q-avatar>
+            <div>
+              <div class="text-h6">{{ current.name }}</div>
+              <div class="text-body2 text-secondary">{{ current.nip05 }}</div>
+            </div>
+            <q-space />
           </div>
-          <q-space />
-        </div>
-        <q-bar class="card-bg q-mt-sm">
-          <div class="text-body2 monospace ellipsis">{{ current.npub }}</div>
-        </q-bar>
+          <q-bar class="card-bg q-mt-sm">
+            <div class="text-body2 monospace ellipsis">{{ current.npub }}</div>
+          </q-bar>
 
-        <div class="q-mt-md">
-          <div class="text-subtitle2 q-mb-sm">
-            {{ t('CreatorSubscribers.drawer.tabs.overview') }}
+          <div class="q-mt-md">
+            <div class="text-subtitle2 q-mb-sm">
+              {{ t("CreatorSubscribers.drawer.tabs.overview") }}
+            </div>
+            <q-list bordered dense class="card-bg">
+              <q-item>
+                <q-item-section>{{
+                  t("CreatorSubscribers.columns.tier")
+                }}</q-item-section>
+                <q-item-section side>{{ current.tierName }}</q-item-section>
+              </q-item>
+              <q-item>
+                <q-item-section>{{
+                  t("CreatorSubscribers.columns.frequency")
+                }}</q-item-section>
+                <q-item-section side>{{
+                  t("CreatorSubscribers.frequency." + current.frequency)
+                }}</q-item-section>
+              </q-item>
+              <q-item>
+                <q-item-section>{{
+                  t("CreatorSubscribers.columns.status")
+                }}</q-item-section>
+                <q-item-section side>{{
+                  t("CreatorSubscribers.status." + current.status)
+                }}</q-item-section>
+              </q-item>
+              <q-item>
+                <q-item-section>{{
+                  t("CreatorSubscribers.drawer.overview.amountPerInterval")
+                }}</q-item-section>
+                <q-item-section side>
+                  {{ current.amountSat }} sat /
+                  {{ t("CreatorSubscribers.frequency." + current.frequency) }}
+                </q-item-section>
+              </q-item>
+              <q-item>
+                <q-item-section>{{
+                  t("CreatorSubscribers.drawer.overview.nextRenewal")
+                }}</q-item-section>
+                <q-item-section side>
+                  {{
+                    current.nextRenewal ? formatDate(current.nextRenewal) : "—"
+                  }}
+                </q-item-section>
+              </q-item>
+              <q-item>
+                <q-item-section>{{
+                  t("CreatorSubscribers.drawer.overview.lifetimeTotal")
+                }}</q-item-section>
+                <q-item-section side
+                  >{{ current.lifetimeSat }} sat</q-item-section
+                >
+              </q-item>
+              <q-item>
+                <q-item-section>{{
+                  t("CreatorSubscribers.drawer.overview.since")
+                }}</q-item-section>
+                <q-item-section side>{{
+                  formatDate(current.startDate)
+                }}</q-item-section>
+              </q-item>
+            </q-list>
           </div>
-          <q-list bordered dense class="card-bg">
-            <q-item>
-              <q-item-section>{{ t('CreatorSubscribers.columns.tier') }}</q-item-section>
-              <q-item-section side>{{ current.tierName }}</q-item-section>
-            </q-item>
-            <q-item>
-              <q-item-section>{{ t('CreatorSubscribers.columns.frequency') }}</q-item-section>
-              <q-item-section side>{{ t('CreatorSubscribers.frequency.' + current.frequency) }}</q-item-section>
-            </q-item>
-            <q-item>
-              <q-item-section>{{ t('CreatorSubscribers.columns.status') }}</q-item-section>
-              <q-item-section side>{{ t('CreatorSubscribers.status.' + current.status) }}</q-item-section>
-            </q-item>
-            <q-item>
-              <q-item-section>{{ t('CreatorSubscribers.drawer.overview.amountPerInterval') }}</q-item-section>
-              <q-item-section side>
-                {{ current.amountSat }} sat / {{ t('CreatorSubscribers.frequency.' + current.frequency) }}
-              </q-item-section>
-            </q-item>
-            <q-item>
-              <q-item-section>{{ t('CreatorSubscribers.drawer.overview.nextRenewal') }}</q-item-section>
-              <q-item-section side>
-                {{ current.nextRenewal ? formatDate(current.nextRenewal) : '—' }}
-              </q-item-section>
-            </q-item>
-            <q-item>
-              <q-item-section>{{ t('CreatorSubscribers.drawer.overview.lifetimeTotal') }}</q-item-section>
-              <q-item-section side>{{ current.lifetimeSat }} sat</q-item-section>
-            </q-item>
-            <q-item>
-              <q-item-section>{{ t('CreatorSubscribers.drawer.overview.since') }}</q-item-section>
-              <q-item-section side>{{ formatDate(current.startDate) }}</q-item-section>
-            </q-item>
-          </q-list>
-        </div>
 
-        <div class="q-mt-lg">
-          <div class="text-subtitle2 q-mb-sm">
-            {{ t('CreatorSubscribers.drawer.tabs.payments') }}
+          <div class="q-mt-lg">
+            <div class="text-subtitle2 q-mb-sm">
+              {{ t("CreatorSubscribers.drawer.tabs.payments") }}
+            </div>
+            <q-list bordered dense class="card-bg">
+              <q-item v-for="p in payments" :key="p.ts">
+                <q-item-section>{{ formatDate(p.ts) }}</q-item-section>
+                <q-item-section side>{{ p.amount }} sat</q-item-section>
+              </q-item>
+            </q-list>
           </div>
-          <q-list bordered dense class="card-bg">
-            <q-item v-for="p in payments" :key="p.ts">
-              <q-item-section>{{ formatDate(p.ts) }}</q-item-section>
-              <q-item-section side>{{ p.amount }} sat</q-item-section>
-            </q-item>
-          </q-list>
-        </div>
 
-        <div class="q-mt-lg">
-          <div class="text-subtitle2 q-mb-sm">
-            {{ t('CreatorSubscribers.drawer.activity') }}
-          </div>
-          <q-list bordered dense class="card-bg">
-            <q-item v-for="a in activity" :key="a.ts">
-              <q-item-section>{{ a.text }}</q-item-section>
+          <div class="q-mt-lg">
+            <div class="text-subtitle2 q-mb-sm">
+              {{ t("CreatorSubscribers.drawer.activity") }}
+            </div>
+            <q-list bordered dense class="card-bg">
+              <q-item v-for="a in activity" :key="a.ts">
+                <q-item-section>{{ a.text }}</q-item-section>
                 <q-item-section side class="text-caption text-secondary">
                   {{ distToNow(a.ts) }}
                 </q-item-section>
@@ -327,38 +373,45 @@
         </div>
       </div>
     </q-drawer>
-  <q-footer v-if="selected.length" class="bg-primary text-white">
-    <div class="row items-center q-pa-sm q-gutter-sm full-width">
-      <div>{{ t('CreatorSubscribers.selectionCount', { count: selected.length }) }}</div>
-      <q-space />
-      <q-btn
-        outline
-        dense
-        color="white"
-        icon="download"
-        :label="t('CreatorSubscribers.actions.exportSelected')"
-        :aria-label="t('CreatorSubscribers.actions.exportSelected')"
-        @click="exportSelected"
-        class="focus-outline"
-      />
-      <q-btn
-        flat
-        dense
-        color="white"
-        :label="t('CreatorSubscribers.actions.clear')"
-        :aria-label="t('CreatorSubscribers.actions.clear')"
-        @click="clearSelected"
-        class="focus-outline"
-      />
-    </div>
-  </q-footer>
-</q-layout>
+    <q-footer v-if="selected.length" class="bg-primary text-white">
+      <div class="row items-center q-pa-sm q-gutter-sm full-width">
+        <div>
+          {{
+            t("CreatorSubscribers.selectionCount", { count: selected.length })
+          }}
+        </div>
+        <q-space />
+        <q-btn
+          outline
+          dense
+          color="white"
+          icon="download"
+          :label="t('CreatorSubscribers.actions.exportSelected')"
+          :aria-label="t('CreatorSubscribers.actions.exportSelected')"
+          @click="exportSelected"
+          class="focus-outline"
+        />
+        <q-btn
+          flat
+          dense
+          color="white"
+          :label="t('CreatorSubscribers.actions.clear')"
+          :aria-label="t('CreatorSubscribers.actions.clear')"
+          @click="clearSelected"
+          class="focus-outline"
+        />
+      </div>
+    </q-footer>
+  </q-layout>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from "vue";
 import { useCreatorSubscribersStore } from "src/stores/creatorSubscribers";
-import { useSubscribersStore, type SortOption } from "src/stores/subscribersStore";
+import {
+  useSubscribersStore,
+  type SortOption,
+} from "src/stores/subscribersStore";
 import { storeToRefs } from "pinia";
 import { useDebounceFn } from "@vueuse/core";
 import { format, formatDistanceToNow } from "date-fns";
@@ -387,10 +440,10 @@ const { filtered, counts, activeTab, loading, profilesLoading, error } =
 // for the subscriber list and KPI counts throughout this page.
 
 const activeCount = computed(
-  () => filtered.value.filter((s) => s.status === "active").length
+  () => filtered.value.filter((s) => s.status === "active").length,
 );
 const pendingCount = computed(
-  () => filtered.value.filter((s) => s.status === "pending").length
+  () => filtered.value.filter((s) => s.status === "pending").length,
 );
 // Lifetime sats are included in the KPI row. Safeguard against undefined
 // values in case the field is missing from older data snapshots.
@@ -423,7 +476,7 @@ const kpiThisPeriodSat = computed(() => {
     );
 });
 const formattedKpiThisPeriodSat = computed(() =>
-  kpiThisPeriodSat.value.toLocaleString()
+  kpiThisPeriodSat.value.toLocaleString(),
 );
 
 function togglePeriod() {
@@ -448,15 +501,14 @@ watch(
 );
 watch(sort, (v) => viewStore.applyFilters({ sort: v }));
 
-const savedView = ref('default');
-const savedViewOptions = [{ label: 'Default', value: 'default' }];
+const savedView = ref("default");
+const savedViewOptions = [{ label: "Default", value: "default" }];
 
 const chartRange = ref<{ from: string; to: string } | null>(null);
 const chartRows = computed(() => {
   if (!chartRange.value) return filtered.value;
   const from = new Date(chartRange.value.from).getTime() / 1000;
-  const to =
-    new Date(chartRange.value.to).getTime() / 1000 + 24 * 60 * 60;
+  const to = new Date(chartRange.value.to).getTime() / 1000 + 24 * 60 * 60;
   return filtered.value.filter(
     (r) => r.startDate && r.startDate >= from && r.startDate <= to,
   );
@@ -464,28 +516,36 @@ const chartRows = computed(() => {
 
 const tabOptions = computed(() => [
   {
-    label: `${t('CreatorSubscribers.tabs.all')} (${counts.value.all})`,
-    value: 'all',
+    label: `${t("CreatorSubscribers.tabs.all")} (${counts.value.all})`,
+    value: "all",
   },
   {
-    label: `${t('CreatorSubscribers.frequency.weekly')} (${counts.value.weekly})`,
-    value: 'weekly',
+    label: `${t("CreatorSubscribers.frequency.weekly")} (${
+      counts.value.weekly
+    })`,
+    value: "weekly",
   },
   {
-    label: `${t('CreatorSubscribers.frequency.biweekly')} (${counts.value.biweekly})`,
-    value: 'biweekly',
+    label: `${t("CreatorSubscribers.frequency.biweekly")} (${
+      counts.value.biweekly
+    })`,
+    value: "biweekly",
   },
   {
-    label: `${t('CreatorSubscribers.frequency.monthly')} (${counts.value.monthly})`,
-    value: 'monthly',
+    label: `${t("CreatorSubscribers.frequency.monthly")} (${
+      counts.value.monthly
+    })`,
+    value: "monthly",
   },
   {
-    label: `${t('CreatorSubscribers.status.pending')} (${counts.value.pending})`,
-    value: 'pending',
+    label: `${t("CreatorSubscribers.status.pending")} (${
+      counts.value.pending
+    })`,
+    value: "pending",
   },
   {
-    label: `${t('CreatorSubscribers.status.ended')} (${counts.value.ended})`,
-    value: 'ended',
+    label: `${t("CreatorSubscribers.status.ended")} (${counts.value.ended})`,
+    value: "ended",
   },
 ]);
 
@@ -494,30 +554,38 @@ const tierMap = computed(() => {
 });
 
 const filterChips = computed(() => {
-  const chips: Array<{ key: string; label: string; type: string; value?: string }>
-    = [];
+  const chips: Array<{
+    key: string;
+    label: string;
+    type: string;
+    value?: string;
+  }> = [];
   for (const s of viewStore.status) {
     chips.push({
       key: `status-${s}`,
-      type: 'status',
+      type: "status",
       value: s,
-      label: `${t('CreatorSubscribers.filters.status')}: ${t(`CreatorSubscribers.status.${s}`)}`,
+      label: `${t("CreatorSubscribers.filters.status")}: ${t(
+        `CreatorSubscribers.status.${s}`,
+      )}`,
     });
   }
   for (const tierId of viewStore.tier) {
     chips.push({
       key: `tier-${tierId}`,
-      type: 'tier',
+      type: "tier",
       value: tierId,
-      label: `${t('CreatorSubscribers.filters.tier')}: ${tierMap.value.get(tierId) ?? tierId}`,
+      label: `${t("CreatorSubscribers.filters.tier")}: ${
+        tierMap.value.get(tierId) ?? tierId
+      }`,
     });
   }
-  if (viewStore.sort !== 'next') {
+  if (viewStore.sort !== "next") {
     chips.push({
-      key: 'sort',
-      type: 'sort',
+      key: "sort",
+      type: "sort",
       value: viewStore.sort,
-      label: `${t('CreatorSubscribers.filters.sort')}: ${t(
+      label: `${t("CreatorSubscribers.filters.sort")}: ${t(
         `CreatorSubscribers.filters.sortOptions.${viewStore.sort}`,
       )}`,
     });
@@ -529,14 +597,14 @@ function removeFilter(chip: { type: string; value?: string }) {
   const statuses = new Set(viewStore.status);
   const tiers = new Set(viewStore.tier);
   let sort: SortOption = viewStore.sort;
-  if (chip.type === 'status' && chip.value) {
+  if (chip.type === "status" && chip.value) {
     statuses.delete(chip.value as SubStatus);
-  } else if (chip.type === 'tier' && chip.value) {
+  } else if (chip.type === "tier" && chip.value) {
     tiers.delete(chip.value);
-  } else if (chip.type === 'sort') {
-    sort = 'next';
+  } else if (chip.type === "sort") {
+    sort = "next";
   }
-  if (statuses.size || tiers.size || sort !== 'next') {
+  if (statuses.size || tiers.size || sort !== "next") {
     viewStore.applyFilters({ status: statuses, tier: tiers, sort });
   } else {
     viewStore.clearFilters();
@@ -562,30 +630,30 @@ const { viewMode: view, density, visibleColumns } = storeToRefs(viewStore);
 
 const viewOptions = computed(() => [
   {
-    value: 'table',
-    icon: 'table_rows',
-    label: $q.screen.gt.xs ? t('CreatorSubscribers.toolbar.tableView') : '',
-    'aria-label': t('CreatorSubscribers.toolbar.tableView'),
+    value: "table",
+    icon: "table_rows",
+    label: $q.screen.gt.xs ? t("CreatorSubscribers.toolbar.tableView") : "",
+    "aria-label": t("CreatorSubscribers.toolbar.tableView"),
   },
   {
-    value: 'card',
-    icon: 'grid_view',
-    label: $q.screen.gt.xs ? t('CreatorSubscribers.toolbar.cardView') : '',
-    'aria-label': t('CreatorSubscribers.toolbar.cardView'),
+    value: "card",
+    icon: "grid_view",
+    label: $q.screen.gt.xs ? t("CreatorSubscribers.toolbar.cardView") : "",
+    "aria-label": t("CreatorSubscribers.toolbar.cardView"),
   },
 ]);
 const densityOptions = computed(() => [
   {
-    value: 'comfortable',
-    icon: 'view_comfy',
-    label: $q.screen.gt.xs ? t('CreatorSubscribers.toolbar.comfortable') : '',
-    'aria-label': t('CreatorSubscribers.toolbar.comfortable'),
+    value: "comfortable",
+    icon: "view_comfy",
+    label: $q.screen.gt.xs ? t("CreatorSubscribers.toolbar.comfortable") : "",
+    "aria-label": t("CreatorSubscribers.toolbar.comfortable"),
   },
   {
-    value: 'compact',
-    icon: 'view_compact',
-    label: $q.screen.gt.xs ? t('CreatorSubscribers.toolbar.compact') : '',
-    'aria-label': t('CreatorSubscribers.toolbar.compact'),
+    value: "compact",
+    icon: "view_compact",
+    label: $q.screen.gt.xs ? t("CreatorSubscribers.toolbar.compact") : "",
+    "aria-label": t("CreatorSubscribers.toolbar.compact"),
   },
 ]);
 
@@ -607,39 +675,38 @@ watch(
 
 const columns = [
   {
-    name: 'subscriber',
-    label: t('CreatorSubscribers.columns.subscriber'),
+    name: "subscriber",
+    label: t("CreatorSubscribers.columns.subscriber"),
   },
   {
-    name: 'tier',
-    label: t('CreatorSubscribers.columns.tier'),
+    name: "tier",
+    label: t("CreatorSubscribers.columns.tier"),
   },
   {
-    name: 'frequency',
-    label: t('CreatorSubscribers.columns.frequency'),
+    name: "frequency",
+    label: t("CreatorSubscribers.columns.frequency"),
   },
   {
-    name: 'status',
-    label: t('CreatorSubscribers.columns.status'),
+    name: "status",
+    label: t("CreatorSubscribers.columns.status"),
   },
   {
-    name: 'amount',
-    label: t('CreatorSubscribers.columns.amount'),
+    name: "amount",
+    label: t("CreatorSubscribers.columns.amount"),
   },
   {
-    name: 'nextRenewal',
-    label: t('CreatorSubscribers.columns.nextRenewal'),
+    name: "nextRenewal",
+    label: t("CreatorSubscribers.columns.nextRenewal"),
   },
   {
-    name: 'lifetime',
-    label: t('CreatorSubscribers.columns.lifetime'),
+    name: "lifetime",
+    label: t("CreatorSubscribers.columns.lifetime"),
   },
 ];
 
 if (visibleColumns.value.length === 0) {
   visibleColumns.value = columns.map((c) => c.name);
 }
-
 
 function initials(name: string) {
   return name
@@ -653,13 +720,13 @@ function freqShort(f: Frequency) {
   return f === "weekly" ? "W" : f === "biweekly" ? "2W" : "M";
 }
 function statusColor(s: SubStatus) {
-  return s === 'active' ? 'positive' : s === 'pending' ? 'warning' : 'negative';
+  return s === "active" ? "positive" : s === "pending" ? "warning" : "negative";
 }
 function statusTextColor(s: SubStatus) {
-  return s === 'pending' ? 'black' : 'white';
+  return s === "pending" ? "black" : "white";
 }
 function statusIcon(s: SubStatus) {
-  return s === 'active' ? 'check' : s === 'pending' ? 'schedule' : 'close';
+  return s === "active" ? "check" : s === "pending" ? "schedule" : "close";
 }
 function progressPercent(r: Subscriber) {
   return Math.round((r.progress ?? 0) * 100);

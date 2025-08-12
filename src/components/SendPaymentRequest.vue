@@ -68,7 +68,7 @@ export default defineComponent({
       try {
         await this.parseAndPayPaymentRequest(
           this.sendData.paymentRequest,
-          this.sendData.tokensBase64
+          this.sendData.tokensBase64,
         );
       } catch (error) {
         console.error(error);
@@ -101,7 +101,7 @@ export default defineComponent({
       for (const transport of transports) {
         if (transport.type == PaymentRequestTransportType.NOSTR) {
           return `${transport.target.slice(0, 20)}..${transport.target.slice(
-            -10
+            -10,
           )}`;
         }
         if (transport.type == PaymentRequestTransportType.POST) {
@@ -111,7 +111,7 @@ export default defineComponent({
           } catch (error) {
             console.error(
               `Invalid URL in transport.target: ${transport.target}`,
-              error
+              error,
             );
             return "Invalid URL";
           }

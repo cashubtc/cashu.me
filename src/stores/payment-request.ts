@@ -29,7 +29,7 @@ export const usePRStore = defineStore("payment-request", {
     enablePaymentRequest: useLocalStorage<boolean>("cashu.pr.enable", false),
     receivePaymentRequestsAutomatically: useLocalStorage<boolean>(
       "cashu.pr.receive",
-      false
+      false,
     ),
   }),
   getters: {},
@@ -41,7 +41,7 @@ export const usePRStore = defineStore("payment-request", {
     createPaymentRequest: function (
       amount?: number,
       memo?: string,
-      mintUrl?: string
+      mintUrl?: string,
     ) {
       const nostrStore = useNostrStore();
       const mintStore = useMintsStore();
@@ -64,7 +64,7 @@ export const usePRStore = defineStore("payment-request", {
             ? [mintStore.activeMintUrl]
             : undefined
           : undefined,
-        memo
+        memo,
       );
       return paymentRequest.toEncodedRequest();
     },
@@ -87,7 +87,7 @@ export const usePRStore = defineStore("payment-request", {
         if (!foundMint) {
           notifyError("We do not know the mint in the payment request");
           throw new Error(
-            `We do not know the mint in the payment request: ${request.mints}`
+            `We do not know the mint in the payment request: ${request.mints}`,
           );
         }
       }
@@ -99,7 +99,7 @@ export const usePRStore = defineStore("payment-request", {
           mintsStore.activeUnit = request.unit;
         } else {
           notifyWarning(
-            `The mint does not support the unit in the payment request: ${request.unit}`
+            `The mint does not support the unit in the payment request: ${request.unit}`,
           );
         }
       }
@@ -136,7 +136,7 @@ export const usePRStore = defineStore("payment-request", {
     async payNostrPaymentRequest(
       request: PaymentRequest,
       transport: PaymentRequestTransport,
-      tokenStr: string
+      tokenStr: string,
     ) {
       debug("payNostrPaymentRequest", request, tokenStr);
       debug("transport", transport);
@@ -158,7 +158,7 @@ export const usePRStore = defineStore("payment-request", {
       try {
         await nostrStore.sendNip17DirectMessageToNprofile(
           transport.target,
-          paymentPayloadString
+          paymentPayloadString,
         );
       } catch (error) {
         console.error("Error paying payment request:", error);
@@ -169,7 +169,7 @@ export const usePRStore = defineStore("payment-request", {
     async payPostPaymentRequest(
       request: PaymentRequest,
       transport: PaymentRequestTransport,
-      tokenStr: string
+      tokenStr: string,
     ) {
       debug("payPostPaymentRequest", request, tokenStr);
       // get the endpoint from the transport target and make an HTTP POST request with the paymentPayload as the body

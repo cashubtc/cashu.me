@@ -917,8 +917,8 @@
                 >{{ $t("Settings.p2pk_features.quick_access.description") }}
               </q-item-label>
               <q-item-label caption class="q-mt-xs">
-                The button appears in Receive Ecash after you generate or import a
-                key.
+                The button appears in Receive Ecash after you generate or import
+                a key.
               </q-item-label>
             </q-item>
           </q-list>
@@ -1792,10 +1792,7 @@ import { useMintsStore, MintClass } from "src/stores/mints";
 import { useWalletStore } from "src/stores/wallet";
 import { useMnemonicStore } from "src/stores/mnemonic";
 import { useSettingsStore } from "src/stores/settings";
-import {
-  useNostrStore,
-  publishDiscoveryProfile,
-} from "src/stores/nostr";
+import { useNostrStore, publishDiscoveryProfile } from "src/stores/nostr";
 import { notifySuccess, notifyError } from "src/js/notify";
 import { useNPCStore } from "src/stores/npubcash";
 import { useP2PKStore } from "src/stores/p2pk";
@@ -1811,7 +1808,6 @@ import { useReceiveTokensStore } from "../stores/receiveTokensStore";
 import { useWelcomeStore } from "src/stores/welcome";
 import { useStorageStore } from "src/stores/storage";
 import { useI18n } from "vue-i18n";
-
 
 export default defineComponent({
   name: "SettingsView",
@@ -1920,7 +1916,7 @@ export default defineComponent({
       for (let mint of mints) {
         const mintIds = mint.keysets.map((keyset) => keyset.id);
         const keysetCounterThisMint = this.keysetCounters.filter((entry) =>
-          mintIds.includes(entry.id)
+          mintIds.includes(entry.id),
         );
         keysetCountersByMint[mint.url] = keysetCounterThisMint;
       }
@@ -2030,7 +2026,7 @@ export default defineComponent({
       // iterate over this.activeProofs in batches of 50 and check if they are spendable
       let wallet = useWalletStore().mintWallet(
         this.activeMintUrl,
-        this.activeUnit
+        this.activeUnit,
       );
       let proofs = this.activeProofs.flat();
       debug("Checking proofs", proofs);
@@ -2169,7 +2165,7 @@ export default defineComponent({
     },
     removeNostrRelay: function (relay) {
       this.defaultNostrRelays = this.defaultNostrRelays.filter(
-        (r) => r !== relay
+        (r) => r !== relay,
       );
       const profileStore = useCreatorProfileStore();
       profileStore.relays = profileStore.relays.filter((r) => r !== relay);

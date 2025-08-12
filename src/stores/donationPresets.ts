@@ -28,7 +28,7 @@ export const useDonationPresetsStore = defineStore("donationPresets", {
   state: () => {
     const presets = useLocalStorage<DonationPreset[]>(
       "cashu.donationPresets",
-      DEFAULT_PRESETS
+      DEFAULT_PRESETS,
     );
     if (!presets.value.find((p) => p.months === 1)) {
       presets.value.unshift({ months: 1 });
@@ -53,7 +53,7 @@ export const useDonationPresetsStore = defineStore("donationPresets", {
         benefits?: string[];
         frequency?: SubscriptionFrequency;
         intervalDays?: number;
-      }
+      },
     ): Promise<string | LockedToken[]> {
       const walletStore = useWalletStore();
       const proofsStore = useProofsStore();
@@ -65,7 +65,7 @@ export const useDonationPresetsStore = defineStore("donationPresets", {
 
       const wallet = walletStore.wallet;
       let proofs = mintsStore.activeProofs.filter(
-        (p) => p.bucketId === bucketId
+        (p) => p.bucketId === bucketId,
       );
 
       const totalAmount = !months || months <= 0 ? amount : amount * months;
@@ -80,7 +80,7 @@ export const useDonationPresetsStore = defineStore("donationPresets", {
         const { locked } = await p2pkStore.sendToLock(
           amount,
           convertedPubkey,
-          0
+          0,
         );
         tokens.push(locked);
         return detailed ? tokens : locked.tokenString;
@@ -89,14 +89,14 @@ export const useDonationPresetsStore = defineStore("donationPresets", {
       const interval = subscription?.intervalDays
         ? subscription.intervalDays
         : subscription?.frequency
-        ? frequencyToDays(subscription.frequency)
-        : frequencyToDays('monthly');
+          ? frequencyToDays(subscription.frequency)
+          : frequencyToDays("monthly");
       for (let i = 0; i < months; i++) {
         const locktime = base + i * interval * 24 * 60 * 60;
         const { locked } = await p2pkStore.sendToLock(
           amount,
           convertedPubkey,
-          locktime
+          locktime,
         );
         tokens.push(locked);
         await proofsStore.updateActiveProofs();
@@ -110,12 +110,12 @@ export const useDonationPresetsStore = defineStore("donationPresets", {
           creatorP2PK: "",
           mintUrl: "",
           amountPerInterval: amount,
-          frequency: subscription.frequency || 'monthly',
+          frequency: subscription.frequency || "monthly",
           intervalDays:
             subscription.intervalDays ??
             (subscription.frequency
               ? frequencyToDays(subscription.frequency)
-              : frequencyToDays('monthly')),
+              : frequencyToDays("monthly")),
           startDate: base,
           commitmentLength: months,
           intervals: tokens.map((t, idx) => ({

@@ -84,10 +84,10 @@ describe("messenger.sendToken", () => {
     expect(walletSend).toHaveBeenCalled();
     expect(sendDm).toHaveBeenCalledWith(
       "receiver",
-      expect.stringContaining('\"token\":\"TOKEN\"'),
+      expect.stringContaining('"token":"TOKEN"'),
       "priv",
       "pub",
-      undefined
+      undefined,
     );
     expect(addPending).toHaveBeenCalledWith({
       amount: -1,

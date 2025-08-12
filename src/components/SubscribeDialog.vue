@@ -44,12 +44,7 @@
         <q-btn flat color="primary" @click="cancel">{{
           $t("global.actions.cancel.label")
         }}</q-btn>
-        <q-btn
-          flat
-          color="primary"
-          @click="confirm"
-          :disable="!hasSigner"
-        >{{
+        <q-btn flat color="primary" @click="confirm" :disable="!hasSigner">{{
           $t("global.actions.ok.label")
         }}</q-btn>
       </q-card-actions>
@@ -107,7 +102,7 @@ export default defineComponent({
       () => props.tier?.price_sats ?? (props.tier as any)?.price ?? 0,
     );
     const frequency = computed<SubscriptionFrequency>(
-      () => (props.tier?.frequency as SubscriptionFrequency) || 'monthly',
+      () => (props.tier?.frequency as SubscriptionFrequency) || "monthly",
     );
     const intervalDays = computed(() =>
       props.tier?.intervalDays !== undefined
@@ -116,12 +111,12 @@ export default defineComponent({
     );
     const frequencyLabel = computed(() => {
       switch (frequency.value) {
-        case 'weekly':
-          return 'Every week';
-        case 'biweekly':
-          return 'Twice a month';
+        case "weekly":
+          return "Every week";
+        case "biweekly":
+          return "Twice a month";
         default:
-          return 'Every month';
+          return "Every month";
       }
     });
     const bucketId = ref<string>(DEFAULT_BUCKET_ID);
@@ -225,7 +220,9 @@ export default defineComponent({
           throw e;
         }
         if (!profile) {
-          notifyError("Creator has not published a Nutzap profile (kind-10019)");
+          notifyError(
+            "Creator has not published a Nutzap profile (kind-10019)",
+          );
           return;
         }
         const creator: CreatorIdentity = {
@@ -234,7 +231,7 @@ export default defineComponent({
         };
         const success = await nutzap.subscribeToTier({
           creator,
-          tierId: props.tier?.id ?? props.tier?.name ?? 'tier',
+          tierId: props.tier?.id ?? props.tier?.name ?? "tier",
           price: tierPrice.value,
           months: months.value,
           startDate: Math.floor(new Date(startDate.value).getTime() / 1000),
@@ -264,7 +261,7 @@ export default defineComponent({
           useBootErrorStore().set(e);
         } else {
           notifyError(
-            e.message || t("FindCreators.notifications.subscription_failed")
+            e.message || t("FindCreators.notifications.subscription_failed"),
           );
         }
       }

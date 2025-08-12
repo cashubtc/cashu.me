@@ -766,7 +766,7 @@ export default {
         },
       },
     },
-    
+
     swap: {
       title: "Intercambiar",
       overline: "Intercambios Multimint",
@@ -784,7 +784,6 @@ export default {
         },
       },
       actions: {
-        
         swap: {
           label: "@:global.actions.swap.label",
           in_progress: "@:MintSettings.swap.actions.swap.label",
@@ -979,18 +978,18 @@ export default {
         label_known_mint: "@:ReceiveTokenDialog.actions.receive.label",
         label_adding_mint: "Añadiendo mint…",
       },
-      
+
       swap: {
         label: "@:global.actions.swap.label",
         tooltip_text: "Intercambiar a un mint de confianza",
         caption: "Intercambiar { value }",
       },
-      
+
       cancel_swap: {
         label: "@:global.actions.cancel.label",
         tooltip_text: "Cancelar intercambio",
       },
-      
+
       confirm_swap: {
         label: "@:ReceiveTokenDialog.actions.swap.label",
         tooltip_text: "@:ReceiveTokenDialog.actions.swap.tooltip_text",
@@ -1379,7 +1378,7 @@ export default {
       },
     },
   },
-  
+
   swap: {
     in_progress_warning_text: "Intercambio en progreso",
     invalid_swap_data_error_text: "Datos de intercambio inválidos",
@@ -1445,7 +1444,7 @@ export default {
         description: "Descubre creadores a los que apoyar.",
         icon: "img:icons/find-creators.svg",
       },
-      
+
       myProfile: {
         description: "Visualiza y edita tu perfil.",
         icon: "person",
@@ -1510,7 +1509,7 @@ export default {
           creator:
             "Your public storefront as seen by visitors. Great for a quick audit of how your profile appears worldwide.",
         },
-        
+
         myProfile: {
           fan: "Show off your avatar, npub link and optional NIP-05. Personal stats: total zaps sent & received, bucket balances.",
           creator:

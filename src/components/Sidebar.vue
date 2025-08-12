@@ -34,7 +34,9 @@
           v-for="link in docLinks"
           :key="link.to || link.href"
           clickable
-          v-bind="link.href ? { href: link.href, target: '_blank' } : { to: link.to }"
+          v-bind="
+            link.href ? { href: link.href, target: '_blank' } : { to: link.to }
+          "
         >
           <q-item-section avatar>
             <q-icon :name="link.icon" />
@@ -57,7 +59,11 @@ const { t } = useI18n();
 
 const navLinks = [
   { to: "/wallet", label: "Wallet", icon: "account_balance_wallet" },
-  { to: "/find-creators", label: "Find Creators", icon: "img:icons/find-creators.svg" },
+  {
+    to: "/find-creators",
+    label: "Find Creators",
+    icon: "img:icons/find-creators.svg",
+  },
   { to: "/nostr-messenger", label: "Chats", icon: "chat" },
 ];
 
@@ -67,7 +73,11 @@ const accountLinks = [
 ];
 
 const docLinks = [
-  { to: "/terms", label: t("MainHeader.menu.terms.terms.title"), icon: "gavel" },
+  {
+    to: "/terms",
+    label: t("MainHeader.menu.terms.terms.title"),
+    icon: "gavel",
+  },
   { to: "/about", label: t("MainHeader.menu.about.about.title"), icon: "info" },
   {
     href: "https://primal.net/KalonAxiarch",

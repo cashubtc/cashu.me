@@ -14,13 +14,13 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed } from "vue";
 
 const props = defineProps<{ modelValue: boolean }>();
-const emit = defineEmits(['update:modelValue', 'confirm']);
+const emit = defineEmits(["update:modelValue", "confirm"]);
 
 const showLocal = computed({
   get: () => props.modelValue,
-  set: (val: boolean) => emit('update:modelValue', val),
+  set: (val: boolean) => emit("update:modelValue", val),
 });
 </script>

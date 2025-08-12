@@ -24,7 +24,7 @@ export default defineComponent({
   setup(props) {
     const store = useLockedTokensStore();
     const validTokens = computed(() =>
-      store.validTokensForTier(props.creatorNpub, props.tierId)
+      store.validTokensForTier(props.creatorNpub, props.tierId),
     );
     const hasAccess = computed(() => validTokens.value.length > 0);
     return { hasAccess };

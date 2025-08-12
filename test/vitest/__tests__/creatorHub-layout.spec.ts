@@ -1,11 +1,13 @@
-import { describe, it, expect, vi } from 'vitest';
-import { shallowMount } from '@vue/test-utils';
-import * as quasar from 'quasar';
+import { describe, it, expect, vi } from "vitest";
+import { shallowMount } from "@vue/test-utils";
+import * as quasar from "quasar";
 
-vi.spyOn(quasar, 'useQuasar').mockReturnValue({ screen: { lt: { md: false } } });
+vi.spyOn(quasar, "useQuasar").mockReturnValue({
+  screen: { lt: { md: false } },
+});
 
 const creatorHubStoreMock = {
-  loggedInNpub: 'pubkey',
+  loggedInNpub: "pubkey",
   tiers: {},
   tierOrder: [] as string[],
   getTierArray: () => [] as any[],
@@ -21,7 +23,7 @@ const creatorHubStoreMock = {
   setTierOrder: vi.fn(),
 };
 
-vi.mock('../../../src/stores/creatorHub', () => ({
+vi.mock("../../../src/stores/creatorHub", () => ({
   useCreatorHubStore: () => creatorHubStoreMock,
 }));
 
@@ -33,7 +35,7 @@ const nostrStoreMock = {
   lastError: null,
 };
 
-vi.mock('../../../src/stores/nostr', async (importOriginal) => {
+vi.mock("../../../src/stores/nostr", async (importOriginal) => {
   const actual = await importOriginal();
   return {
     ...actual,
@@ -44,32 +46,32 @@ vi.mock('../../../src/stores/nostr', async (importOriginal) => {
   };
 });
 
-vi.mock('../../../src/stores/p2pk', () => ({
+vi.mock("../../../src/stores/p2pk", () => ({
   useP2PKStore: () => ({ firstKey: null }),
 }));
 
-vi.mock('../../../src/stores/mints', () => ({
+vi.mock("../../../src/stores/mints", () => ({
   useMintsStore: () => ({ mints: [] }),
 }));
 
 const profileStoreMock = {
-  display_name: '',
-  picture: '',
-  about: '',
-  pubkey: '',
+  display_name: "",
+  picture: "",
+  about: "",
+  pubkey: "",
   mints: [] as string[],
   relays: [] as string[],
   setProfile: vi.fn(),
   markClean: vi.fn(),
 };
 
-vi.mock('../../../src/stores/creatorProfile', () => ({
+vi.mock("../../../src/stores/creatorProfile", () => ({
   useCreatorProfileStore: () => profileStoreMock,
 }));
 
-vi.mock('pinia', async (importOriginal) => {
+vi.mock("pinia", async (importOriginal) => {
   const actual: any = await importOriginal();
-  const vue = await import('vue');
+  const vue = await import("vue");
   return {
     ...actual,
     storeToRefs(store: any) {
@@ -82,30 +84,29 @@ vi.mock('pinia', async (importOriginal) => {
   };
 });
 
-vi.mock('nostr-tools', () => ({
+vi.mock("nostr-tools", () => ({
   nip19: { npubEncode: (s: string) => `npub${s}` },
 }));
 
-import CreatorHubPage from '../../../src/pages/CreatorHubPage.vue';
-import FullscreenLayout from '../../../src/layouts/FullscreenLayout.vue';
+import CreatorHubPage from "../../../src/pages/CreatorHubPage.vue";
+import FullscreenLayout from "../../../src/layouts/FullscreenLayout.vue";
 
-describe('CreatorHubPage layout', () => {
-  it('renders PublishBar only on creator hub page', () => {
+describe("CreatorHubPage layout", () => {
+  it("renders PublishBar only on creator hub page", () => {
     const wrapper = shallowMount(FullscreenLayout, {
       global: {
-        stubs: { 'router-view': CreatorHubPage },
-        mocks: { $route: { path: '/creator-hub' } },
+        stubs: { "router-view": CreatorHubPage },
+        mocks: { $route: { path: "/creator-hub" } },
       },
     });
-    expect(wrapper.find('publish-bar-stub').exists()).toBe(true);
+    expect(wrapper.find("publish-bar-stub").exists()).toBe(true);
 
     const wrapperOther = shallowMount(FullscreenLayout, {
       global: {
-        stubs: { 'router-view': CreatorHubPage },
-        mocks: { $route: { path: '/wallet' } },
+        stubs: { "router-view": CreatorHubPage },
+        mocks: { $route: { path: "/wallet" } },
       },
     });
-    expect(wrapperOther.find('publish-bar-stub').exists()).toBe(false);
+    expect(wrapperOther.find("publish-bar-stub").exists()).toBe(false);
   });
 });
-

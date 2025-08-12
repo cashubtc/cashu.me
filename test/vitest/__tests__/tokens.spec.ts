@@ -4,7 +4,7 @@ import { cashuDb } from "../../../src/stores/dexie";
 
 beforeEach(async () => {
   localStorage.clear();
-  await cashuDb.close();   // close() is safe under fake-indexeddb
+  await cashuDb.close(); // close() is safe under fake-indexeddb
   await cashuDb.open();
 });
 
@@ -32,9 +32,12 @@ describe("Tokens store", () => {
 
   it("finds history token by secret", () => {
     const tokenObj = {
-      token: [{ proofs: [{ id: "a", amount: 1, C: "c", secret: "sec" }], mint: "m1" }],
+      token: [
+        { proofs: [{ id: "a", amount: 1, C: "c", secret: "sec" }], mint: "m1" },
+      ],
     };
-    const encoded = "cashuA" + Buffer.from(JSON.stringify(tokenObj)).toString("base64");
+    const encoded =
+      "cashuA" + Buffer.from(JSON.stringify(tokenObj)).toString("base64");
     const store = useTokensStore();
     store.addPaidToken({ amount: 1, token: encoded, mint: "m1", unit: "sat" });
     const found = store.findHistoryTokenBySecret("sec");
@@ -43,9 +46,15 @@ describe("Tokens store", () => {
 
   it("edits history token by secret", () => {
     const tokenObj = {
-      token: [{ proofs: [{ id: "a", amount: 1, C: "c", secret: "sec2" }], mint: "m1" }],
+      token: [
+        {
+          proofs: [{ id: "a", amount: 1, C: "c", secret: "sec2" }],
+          mint: "m1",
+        },
+      ],
     };
-    const encoded = "cashuA" + Buffer.from(JSON.stringify(tokenObj)).toString("base64");
+    const encoded =
+      "cashuA" + Buffer.from(JSON.stringify(tokenObj)).toString("base64");
     const store = useTokensStore();
     store.addPaidToken({ amount: 1, token: encoded, mint: "m1", unit: "sat" });
     store.editHistoryTokenBySecret("sec2", { newLabel: "abc" });

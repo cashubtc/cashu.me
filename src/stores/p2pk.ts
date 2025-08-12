@@ -81,7 +81,7 @@ export const useP2PKStore = defineStore("p2pk", {
     p2pkKeys: useLocalStorage<P2PKKey[]>(LOCAL_STORAGE_KEYS.CASHU_P2PKKEYS, []),
     showP2PkButtonInDrawer: useLocalStorage<boolean>(
       LOCAL_STORAGE_KEYS.CASHU_P2PK_SHOWP2PKBUTTONINDRAWER,
-      false
+      false,
     ),
     showP2PKDialog: false,
     showP2PKData: {} as P2PKKey,
@@ -123,7 +123,7 @@ export const useP2PKStore = defineStore("p2pk", {
     showLastKey: function () {
       if (this.p2pkKeys.length) {
         this.showP2PKData = JSON.parse(
-          JSON.stringify(this.p2pkKeys[this.p2pkKeys.length - 1])
+          JSON.stringify(this.p2pkKeys[this.p2pkKeys.length - 1]),
         );
         this.showP2PKDialog = true;
       }
@@ -201,8 +201,7 @@ export const useP2PKStore = defineStore("p2pk", {
           debug("p2pk token - locktime is active");
           if (n_sigs && n_sigs >= 1) {
             for (const pk of pubkeys) {
-              if (this.haveThisKey(pk))
-                return { pubkey: pk, locktime };
+              if (this.haveThisKey(pk)) return { pubkey: pk, locktime };
             }
           }
           return { pubkey: mainKey, locktime };
@@ -239,7 +238,11 @@ export const useP2PKStore = defineStore("p2pk", {
           return this.isValidPubkey(pk) ? pk : "";
         }
 
-        if (!Array.isArray(secretObject) || secretObject[0] !== "P2PK" || !secretObject[1]?.data) {
+        if (
+          !Array.isArray(secretObject) ||
+          secretObject[0] !== "P2PK" ||
+          !secretObject[1]?.data
+        ) {
           console.error("Secret is not a valid P2PK format.");
           return "";
         }
@@ -258,7 +261,12 @@ export const useP2PKStore = defineStore("p2pk", {
 
         return this.isValidPubkey(pk) ? pk : "";
       } catch (e) {
-        console.error("Failed to parse P2PK secret JSON:", e, "Secret was:", trimmedSecret);
+        console.error(
+          "Failed to parse P2PK secret JSON:",
+          e,
+          "Secret was:",
+          trimmedSecret,
+        );
         return "";
       }
     },
@@ -281,7 +289,11 @@ export const useP2PKStore = defineStore("p2pk", {
           if (!Array.isArray(obj)) continue;
           if (obj[0] !== "P2PK") continue;
           // ignore HTLC style objects
-          if (obj[1] && typeof obj[1] === "object" && "receiverP2PK" in obj[1]) {
+          if (
+            obj[1] &&
+            typeof obj[1] === "object" &&
+            "receiverP2PK" in obj[1]
+          ) {
             continue;
           }
           return true;
@@ -422,7 +434,9 @@ export const useP2PKStore = defineStore("p2pk", {
       const wallet = walletStore.wallet;
       const sendTokensStore = useSendTokensStore();
       const bucketId = sendTokensStore.sendData.bucketId || DEFAULT_BUCKET_ID;
-      const proofs = mintStore.activeProofs.filter((p) => p.bucketId === bucketId);
+      const proofs = mintStore.activeProofs.filter(
+        (p) => p.bucketId === bucketId,
+      );
       const info = mintStore.activeInfo || {};
       const nuts = Array.isArray((info as any).nut_supports)
         ? (info as any).nut_supports
@@ -437,25 +451,29 @@ export const useP2PKStore = defineStore("p2pk", {
         wallet,
         amount,
         true,
-        bucketId
+        bucketId,
       );
       const keysetId = walletStore.getKeyset(wallet.mint.mintUrl, wallet.unit);
       let keepProofs: any[] = [];
       let sendProofs: any[] = [];
       const proofsStore = useProofsStore();
       try {
-        ({ keep: keepProofs, send: sendProofs } = await wallet.send(amount, proofsToSend, {
-          keysetId,
-          p2pk: { pubkey: ensureCompressed(receiverPubkey), locktime },
-        }));
+        ({ keep: keepProofs, send: sendProofs } = await wallet.send(
+          amount,
+          proofsToSend,
+          {
+            keysetId,
+            p2pk: { pubkey: ensureCompressed(receiverPubkey), locktime },
+          },
+        ));
         await proofsStore.removeProofs(proofsToSend);
         const bucketsStore = useBucketsStore();
         const tokenStr = useProofsStore().serializeProofs(sendProofs);
         const locked = useLockedTokensStore().addLockedToken({
           amount,
-  tokenString: tokenStr,
+          tokenString: tokenStr,
 
-  token:  tokenStr,
+          token: tokenStr,
           pubkey: receiverPubkey,
           locktime,
           bucketId: bucketsStore.ensureCreatorBucket(receiverPubkey),
@@ -468,7 +486,7 @@ export const useP2PKStore = defineStore("p2pk", {
         if (error.message && error.message.includes("Token already spent")) {
           notifyError(
             "Selected proofs have already been spent. Correcting local state.",
-            "Balance Out of Sync"
+            "Balance Out of Sync",
           );
           await walletStore.reconcileSpentProofs(proofsToSend);
         } else {

@@ -24,7 +24,9 @@
             class="q-pa-md"
           >
             <div class="q-mb-sm"><strong>Amount:</strong> {{ r.amount }}</div>
-            <div class="q-mb-sm"><strong>Date:</strong> {{ formatDate(r) }}</div>
+            <div class="q-mb-sm">
+              <strong>Date:</strong> {{ formatDate(r) }}
+            </div>
             <div class="q-mb-sm">
               <div class="row items-center no-wrap">
                 <span

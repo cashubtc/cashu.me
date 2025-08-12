@@ -49,10 +49,10 @@ export type P2PKWitness = {
  * HTLC witness
  */
 export type HTLCWitness = {
-        /**
-         * An array of signatures in hex format
-         */
-        signatures?: Array<string>;
+	/**
+	 * An array of signatures in hex format
+	 */
+	signatures?: Array<string>;
 };
 
 /**

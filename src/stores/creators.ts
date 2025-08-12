@@ -148,7 +148,7 @@ export const useCreatorsStore = defineStore("creators", {
               console.error(e);
               return null;
             }
-          })
+          }),
         );
 
         results.forEach((res) => {
@@ -170,7 +170,8 @@ export const useCreatorsStore = defineStore("creators", {
       if (creatorNpub.startsWith("npub")) {
         try {
           const decoded = nip19.decode(creatorNpub);
-          hex = typeof decoded.data === "string" ? (decoded.data as string) : "";
+          hex =
+            typeof decoded.data === "string" ? (decoded.data as string) : "";
         } catch (e) {
           this.tierFetchError = true;
           return;
@@ -206,7 +207,7 @@ export const useCreatorsStore = defineStore("creators", {
             ? settings.defaultNostrRelays
             : []),
           ...DEFAULT_RELAYS,
-        ])
+        ]),
       );
 
       // Filter out unreachable relays before subscribing
@@ -221,9 +222,11 @@ export const useCreatorsStore = defineStore("creators", {
           notifyWarning("Unable to retrieve subscription tiers");
           return;
         }
-        const url = indexerUrl.includes("{pubkey}")
+        const url = String(indexerUrl).includes("{pubkey}")
           ? indexerUrl.replace("{pubkey}", hex)
-          : `${indexerUrl}${indexerUrl.includes("?") ? "&" : "?"}pubkey=${hex}`;
+          : `${indexerUrl}${
+              String(indexerUrl).includes("?") ? "&" : "?"
+            }pubkey=${hex}`;
         try {
           const controller = new AbortController();
           const id = setTimeout(() => controller.abort(), 8000);
@@ -244,7 +247,7 @@ export const useCreatorsStore = defineStore("creators", {
                   (e: any) =>
                     e.kind === 30000 &&
                     Array.isArray(e.tags) &&
-                    e.tags.some((t: any[]) => t[0] === "d" && t[1] === "tiers")
+                    e.tags.some((t: any[]) => t[0] === "d" && t[1] === "tiers"),
                 )
               : null);
           if (!event) {
@@ -252,12 +255,14 @@ export const useCreatorsStore = defineStore("creators", {
             notifyWarning("Unable to retrieve subscription tiers");
             return;
           }
-          const tiersArray: Tier[] = JSON.parse(event.content).map((t: any) => ({
-            ...t,
-            price_sats: t.price_sats ?? t.price ?? 0,
-            ...(t.perks && !t.benefits ? { benefits: [t.perks] } : {}),
-            media: t.media ? filterValidMedia(t.media) : [],
-          }));
+          const tiersArray: Tier[] = JSON.parse(event.content).map(
+            (t: any) => ({
+              ...t,
+              price_sats: t.price_sats ?? t.price ?? 0,
+              ...(t.perks && !t.benefits ? { benefits: [t.perks] } : {}),
+              media: t.media ? filterValidMedia(t.media) : [],
+            }),
+          );
           this.tiersMap[hex] = tiersArray;
           await db.creatorsTierDefinitions.put({
             creatorNpub: hex,
@@ -288,12 +293,14 @@ export const useCreatorsStore = defineStore("creators", {
             received = true;
             clearTimeout(timeout);
             this.tierFetchError = false;
-            const tiersArray: Tier[] = JSON.parse(event.content).map((t: any) => ({
-              ...t,
-              price_sats: t.price_sats ?? t.price ?? 0,
-              ...(t.perks && !t.benefits ? { benefits: [t.perks] } : {}),
-              media: t.media ? filterValidMedia(t.media) : [],
-            }));
+            const tiersArray: Tier[] = JSON.parse(event.content).map(
+              (t: any) => ({
+                ...t,
+                price_sats: t.price_sats ?? t.price ?? 0,
+                ...(t.perks && !t.benefits ? { benefits: [t.perks] } : {}),
+                media: t.media ? filterValidMedia(t.media) : [],
+              }),
+            );
             this.tiersMap[hex] = tiersArray;
             await db.creatorsTierDefinitions.put({
               creatorNpub: hex,
@@ -306,7 +313,7 @@ export const useCreatorsStore = defineStore("creators", {
             console.error("Error parsing tier definitions JSON:", e);
           }
         },
-        healthyRelays
+        healthyRelays,
       );
 
       if (!subscribed) {
@@ -320,7 +327,7 @@ export const useCreatorsStore = defineStore("creators", {
       const creatorNpub = this.currentUserNpub;
       const created_at = Math.floor(Date.now() / 1000);
       const content = JSON.stringify(
-        tiersArray.map((t) => ({ ...t, price: t.price_sats }))
+        tiersArray.map((t) => ({ ...t, price: t.price_sats })),
       );
 
       const event: Partial<NostrEvent> = {

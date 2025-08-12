@@ -211,7 +211,7 @@ export default defineComponent({
     const activeUnit = computed(() => mints.activeUnit);
     const bucketCount = computed(() => buckets.bucketList.length);
     const walletBalanceFormatted = computed(() =>
-      uiStore.formatCurrency(walletBalance.value, activeUnit.value)
+      uiStore.formatCurrency(walletBalance.value, activeUnit.value),
     );
 
     async function initProfile() {
@@ -262,7 +262,6 @@ export default defineComponent({
         notifyError(e?.message || "Failed to publish profile");
       }
     }
-
 
     function openP2PKDialog() {
       if (!p2pkStore.p2pkKeys.length) {

@@ -26,7 +26,11 @@ vi.mock("../../../src/stores/nostr", async (importOriginal) => {
     fetchNutzapProfile: (...args: any[]) => fetchNutzapProfile(...args),
     publishNutzap: vi.fn(),
     subscribeToNutzaps: vi.fn(),
-    useNostrStore: () => ({ pubkey: "myhex", connected: true, lastError: null }),
+    useNostrStore: () => ({
+      pubkey: "myhex",
+      connected: true,
+      lastError: null,
+    }),
   };
 });
 
@@ -51,14 +55,18 @@ vi.mock("../../../src/stores/wallet", () => ({
 }));
 
 vi.mock("../../../src/stores/lockedTokens", () => ({
-  useLockedTokensStore: () => ({ addMany: (...args: any[]) => addMany(...args) }),
+  useLockedTokensStore: () => ({
+    addMany: (...args: any[]) => addMany(...args),
+  }),
 }));
 
 vi.mock("../../../src/stores/mints", () => ({
   useMintsStore: () => ({
     activeUnit: "sat",
     mintUnitProofs: () => [{ id: "kid", amount: 1, secret: "s" }],
-    mints: [{ url: "mint", keysets: [{ id: "kid", unit: "sat", active: true }] }],
+    mints: [
+      { url: "mint", keysets: [{ id: "kid", unit: "sat", active: true }] },
+    ],
   }),
 }));
 
@@ -94,7 +102,11 @@ vi.mock("../../../src/stores/receiveTokensStore", () => ({
 
 vi.mock("../../../src/js/token", () => ({
   default: {
-    decode: () => ({ proofs: [{ id: "kid", amount: 1, secret: "s" }], mint: "mint", unit: "sat" }),
+    decode: () => ({
+      proofs: [{ id: "kid", amount: 1, secret: "s" }],
+      mint: "mint",
+      unit: "sat",
+    }),
     getMint: () => "mint",
     getUnit: () => "sat",
     getProofs: (d: any) => d.proofs,
@@ -116,7 +128,9 @@ beforeEach(async () => {
     hexPub: "hex",
     relays: [],
   }));
-  lockToPubKey = vi.fn(async ({ timelock }: any) => ({ token: `t-${timelock}` }));
+  lockToPubKey = vi.fn(async ({ timelock }: any) => ({
+    token: `t-${timelock}`,
+  }));
   findSpendableMint = vi.fn(() => ({ url: "mint" }));
   serializeProofs = vi.fn((p: any) => `tok-${p[0]}`);
   updateActiveProofs = vi.fn();
@@ -148,18 +162,26 @@ describe("Nutzap subscriptions", () => {
     const p1 = JSON.parse(sendDm.mock.calls[0][1]);
     const p2 = JSON.parse(sendDm.mock.calls[1][1]);
     const id = p1.subscription_id;
-    const expected1 = subscriptionPayload(`tok-${calcUnlock(start, 0, 7)}`, calcUnlock(start, 0, 7), {
-      subscription_id: id,
-      tier_id: "nutzap",
-      month_index: 1,
-      total_months: 2,
-    });
-    const expected2 = subscriptionPayload(`tok-${calcUnlock(start, 1, 7)}`, calcUnlock(start, 1, 7), {
-      subscription_id: id,
-      tier_id: "nutzap",
-      month_index: 2,
-      total_months: 2,
-    });
+    const expected1 = subscriptionPayload(
+      `tok-${calcUnlock(start, 0, 7)}`,
+      calcUnlock(start, 0, 7),
+      {
+        subscription_id: id,
+        tier_id: "nutzap",
+        month_index: 1,
+        total_months: 2,
+      },
+    );
+    const expected2 = subscriptionPayload(
+      `tok-${calcUnlock(start, 1, 7)}`,
+      calcUnlock(start, 1, 7),
+      {
+        subscription_id: id,
+        tier_id: "nutzap",
+        month_index: 2,
+        total_months: 2,
+      },
+    );
     expect(p1).toEqual(expected1);
     expect(p2).toEqual(expected2);
   });
@@ -167,7 +189,7 @@ describe("Nutzap subscriptions", () => {
   it("queues message and sets boot error when sendDm throws", async () => {
     sendDm = vi.fn(async () => {
       throw new (await import("../../../src/boot/ndk")).NdkBootError(
-        "no-signer"
+        "no-signer",
       );
     });
     cashuDb.lockedTokens.bulkAdd = vi.fn();
@@ -230,8 +252,12 @@ describe("Nutzap subscriptions", () => {
       },
     ] as any);
     await new Promise((r) => setTimeout(r, 10));
-    const sub1 = subStore.subscriptions.find((s) => s.subscriptionId === "sub1");
-    const sub2 = subStore.subscriptions.find((s) => s.subscriptionId === "sub2");
+    const sub1 = subStore.subscriptions.find(
+      (s) => s.subscriptionId === "sub1",
+    );
+    const sub2 = subStore.subscriptions.find(
+      (s) => s.subscriptionId === "sub2",
+    );
     expect(subStore.subscriptions.length).toBe(2);
     expect(sub1?.receivedPeriods).toBe(2);
     expect(sub1?.status).toBe("active");
@@ -292,13 +318,20 @@ describe("Nutzap subscriptions", () => {
 
   it("queues message and sets boot error when ndkSend throws", async () => {
     const mod = await import("../../../src/boot/ndk");
-    vi.spyOn(mod, "ndkSend").mockRejectedValue(new mod.NdkBootError("no-signer"));
+    vi.spyOn(mod, "ndkSend").mockRejectedValue(
+      new mod.NdkBootError("no-signer"),
+    );
     const subStore = useNutzapStore();
     sendDm = vi.fn(async () => ({ success: true }));
     cashuDb.lockedTokens.bulkAdd = vi.fn();
     await subStore.subscribeToTier({
       creator: { nostrPubkey: "npub", cashuP2pk: "pk" },
-      tierId: "tier", months: 1, price: 1, startDate: 0, relayList: [], frequency: 'biweekly'
+      tierId: "tier",
+      months: 1,
+      price: 1,
+      startDate: 0,
+      relayList: [],
+      frequency: "biweekly",
     });
     expect(setBootError).toHaveBeenCalled();
     expect(subStore.sendQueue.length).toBe(1);

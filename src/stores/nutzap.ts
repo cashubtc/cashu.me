@@ -30,13 +30,12 @@ import {
 } from "date-fns";
 import { notifyError, notifyWarning } from "src/js/notify";
 import { subscriptionPayload } from "src/utils/receipt-utils";
-import { frequencyToDays, type SubscriptionFrequency } from "src/constants/subscriptionFrequency";
+import {
+  frequencyToDays,
+  type SubscriptionFrequency,
+} from "src/constants/subscriptionFrequency";
 
-export function calcUnlock(
-  base: number,
-  i: number,
-  intervalDays = 30,
-): number {
+export function calcUnlock(base: number, i: number, intervalDays = 30): number {
   const first = addMinutes(startOfDay(fromUnixTime(base)), 30);
   const now = addMinutes(new Date(), 30);
   const ref = isAfter(first, now) ? first : now;
@@ -68,7 +67,7 @@ export const useNutzapStore = defineStore("nutzap", {
     watchInitialized: false,
     sendQueue: useLocalStorage<NutzapQueuedSend[]>(
       "cashu.nutzap.sendQueue",
-      []
+      [],
     ),
   }),
 
@@ -91,11 +90,11 @@ export const useNutzapStore = defineStore("nutzap", {
       });
       const { success } = await messenger.sendDm(
         item.npub,
-        JSON.stringify(payload)
+        JSON.stringify(payload),
       );
       if (success) {
         const idx = this.sendQueue.findIndex(
-          (q) => q.createdAt === item.createdAt
+          (q) => q.createdAt === item.createdAt,
         );
         if (idx >= 0) this.sendQueue.splice(idx, 1);
       }
@@ -119,7 +118,7 @@ export const useNutzapStore = defineStore("nutzap", {
               this.listenerStarted = false;
               this.initListener(pubkey);
             }
-          }
+          },
         );
         this.watchInitialized = true;
       }
@@ -192,7 +191,7 @@ export const useNutzapStore = defineStore("nutzap", {
     }: SubscribeTierOptions): Promise<boolean> {
       intervalDays =
         intervalDays ??
-        frequencyToDays((frequency as SubscriptionFrequency) || 'monthly');
+        frequencyToDays((frequency as SubscriptionFrequency) || "monthly");
       const wallet = useWalletStore();
       const mints = useMintsStore();
       if (!wallet || mints.activeBalance < price) {
@@ -217,12 +216,12 @@ export const useNutzapStore = defineStore("nutzap", {
         const mint = wallet.findSpendableMint(price);
         if (!mint)
           throw new Error(
-            "Insufficient balance in a mint that the creator trusts."
+            "Insufficient balance in a mint that the creator trusts.",
           );
         const { sendProofs, locked } = await useP2PKStore().sendToLock(
           price,
           creator.cashuP2pk,
-          unlockDate
+          unlockDate,
         );
 
         const htlcData = htlc
@@ -234,14 +233,19 @@ export const useNutzapStore = defineStore("nutzap", {
           const { success, event } = await messenger.sendDm(
             creator.nostrPubkey,
             JSON.stringify(
-              subscriptionPayload(tokenStr, unlockDate, {
-                subscription_id: subscriptionId,
-                tier_id: tierId,
-                month_index: i + 1,
-                total_months: months,
-              }, htlcData?.hash),
+              subscriptionPayload(
+                tokenStr,
+                unlockDate,
+                {
+                  subscription_id: subscriptionId,
+                  tier_id: tierId,
+                  month_index: i + 1,
+                  total_months: months,
+                },
+                htlcData?.hash,
+              ),
             ),
-            relayList
+            relayList,
           );
           if (!success) {
             this.queueSend({
@@ -282,7 +286,7 @@ export const useNutzapStore = defineStore("nutzap", {
           subscriptionId,
           monthIndex: i + 1,
           totalPeriods: months,
-          frequency: (frequency as SubscriptionFrequency) || 'monthly',
+          frequency: (frequency as SubscriptionFrequency) || "monthly",
           intervalDays,
           label: "Subscription payment",
           htlcHash: htlcData?.hash ?? null,
@@ -302,7 +306,7 @@ export const useNutzapStore = defineStore("nutzap", {
         creatorP2PK: creator.cashuP2pk,
         mintUrl: mints.activeMintUrl,
         amountPerInterval: price,
-        frequency: (frequency as SubscriptionFrequency) || 'monthly',
+        frequency: (frequency as SubscriptionFrequency) || "monthly",
         intervalDays,
         startDate,
         commitmentLength: months,
@@ -347,7 +351,7 @@ export const useNutzapStore = defineStore("nutzap", {
         }
         if (!profile || !profile.p2pkPubkey) {
           throw new Error(
-            "Creator's Nutzap profile is missing or does not contain a P2PK key."
+            "Creator's Nutzap profile is missing or does not contain a P2PK key.",
           );
         }
         const creatorP2pk = profile.p2pkPubkey;
@@ -364,17 +368,17 @@ export const useNutzapStore = defineStore("nutzap", {
         const lockedTokens: DexieLockedToken[] = [];
 
         for (let i = 0; i < months; i++) {
-        const unlockDate = calcUnlock(startDate, i, intervalDays);
+          const unlockDate = calcUnlock(startDate, i, intervalDays);
           const mint = wallet.findSpendableMint(amount, trustedMints);
           if (!mint)
             throw new Error(
-              "Insufficient balance in a mint that the creator trusts."
+              "Insufficient balance in a mint that the creator trusts.",
             );
 
           const { sendProofs, locked } = await useP2PKStore().sendToLock(
             amount,
             creatorP2pk,
-            unlockDate
+            unlockDate,
           );
           const token = proofsStore.serializeProofs(sendProofs);
 
@@ -389,7 +393,7 @@ export const useNutzapStore = defineStore("nutzap", {
                   total_months: months,
                 }),
               ),
-              trustedRelays
+              trustedRelays,
             );
             if (!success) {
               this.queueSend({
@@ -416,8 +420,8 @@ export const useNutzapStore = defineStore("nutzap", {
             tokenString: locked.tokenString,
             amount,
             owner: "subscriber",
-          creatorNpub: npub,
-          autoRedeem: false,
+            creatorNpub: npub,
+            autoRedeem: false,
             tierId: "nutzap",
             intervalKey: String(i + 1),
             unlockTs: unlockDate,
@@ -429,7 +433,7 @@ export const useNutzapStore = defineStore("nutzap", {
             subscriptionId,
             monthIndex: i + 1,
             totalPeriods: months,
-            frequency: 'monthly',
+            frequency: "monthly",
             intervalDays,
             label: "Subscription payment",
             tierName: "Nutzap",
@@ -450,8 +454,8 @@ export const useNutzapStore = defineStore("nutzap", {
           tierName: "Nutzap",
           creatorP2PK: creatorP2pk,
           mintUrl: mints.activeMintUrl,
-        amountPerInterval: amount,
-        frequency: 'monthly',
+          amountPerInterval: amount,
+          frequency: "monthly",
           intervalDays,
           startDate,
           commitmentLength: months,

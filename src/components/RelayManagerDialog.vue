@@ -6,15 +6,21 @@
         <RelayManager />
       </q-card-section>
       <q-card-actions align="right">
-        <q-btn flat label="Close" color="primary" v-close-popup @click="hideDialog" />
+        <q-btn
+          flat
+          label="Close"
+          color="primary"
+          v-close-popup
+          @click="hideDialog"
+        />
       </q-card-actions>
     </q-card>
   </q-dialog>
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue';
-import RelayManager from './RelayManager.vue';
+import { ref } from "vue";
+import RelayManager from "./RelayManager.vue";
 
 const show = ref(false);
 
@@ -28,4 +34,3 @@ function hideDialog() {
 
 defineExpose({ show: showDialog, hide: hideDialog });
 </script>
-

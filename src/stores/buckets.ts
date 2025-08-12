@@ -47,7 +47,7 @@ export const useBucketsStore = defineStore("buckets", {
     const notifiedGoals = ref<Record<string, boolean>>({});
     const autoAssignRules = useLocalStorage<BucketRule[]>(
       "cashu.bucketRules",
-      []
+      [],
     );
 
     ensureDefaultBucket(buckets);
@@ -66,7 +66,7 @@ export const useBucketsStore = defineStore("buckets", {
           }
         });
       },
-      { deep: true }
+      { deep: true },
     );
 
     watch(
@@ -84,7 +84,7 @@ export const useBucketsStore = defineStore("buckets", {
           }
         });
       },
-      { deep: true }
+      { deep: true },
     );
 
     return {
@@ -143,7 +143,7 @@ export const useBucketsStore = defineStore("buckets", {
       const balances = this.bucketBalances;
       return this.activeBuckets.reduce(
         (sum, b) => sum + (balances[b.id] || 0),
-        0
+        0,
       );
     },
     activeCount(): number {
@@ -165,7 +165,7 @@ export const useBucketsStore = defineStore("buckets", {
     /** Ensure we have (or create) a bucket dedicated to a creator npub */
     ensureCreatorBucket(creatorPubkey: string): string {
       const existing = this.buckets.find(
-        (b) => b.creatorPubkey === creatorPubkey
+        (b) => b.creatorPubkey === creatorPubkey,
       );
       if (existing) return existing.id;
 
@@ -211,7 +211,7 @@ export const useBucketsStore = defineStore("buckets", {
         isArchived:
           updates.isArchived !== undefined
             ? updates.isArchived
-            : current.isArchived ?? false,
+            : (current.isArchived ?? false),
       };
       this.buckets[index] = next;
     },
@@ -238,7 +238,7 @@ export const useBucketsStore = defineStore("buckets", {
       }
       this.buckets.splice(index, 1);
       this.autoAssignRules = this.autoAssignRules.filter(
-        (r) => r.bucketId !== id
+        (r) => r.bucketId !== id,
       );
     },
     addAutoRule(rule: Omit<BucketRule, "id">): BucketRule | undefined {

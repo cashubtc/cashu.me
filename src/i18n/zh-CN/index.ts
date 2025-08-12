@@ -749,7 +749,7 @@ export default {
         },
       },
     },
-    
+
     swap: {
       title: "兑换",
       overline: "多 Mint 兑换",
@@ -767,7 +767,6 @@ export default {
         },
       },
       actions: {
-        
         swap: {
           label: "@:global.actions.swap.label",
           in_progress: "@:MintSettings.swap.actions.swap.label",
@@ -961,18 +960,18 @@ export default {
         label_known_mint: "@:ReceiveTokenDialog.actions.receive.label",
         label_adding_mint: "正在添加 Mint…",
       },
-      
+
       swap: {
         label: "@:global.actions.swap.label",
         tooltip_text: "兑换到信任的 Mint",
         caption: "兑换 { value }",
       },
-      
+
       cancel_swap: {
         label: "@:global.actions.cancel.label",
         tooltip_text: "取消兑换",
       },
-      
+
       confirm_swap: {
         label: "@:ReceiveTokenDialog.actions.swap.label",
         tooltip_text: "@:ReceiveTokenDialog.actions.swap.tooltip_text",
@@ -1351,7 +1350,7 @@ export default {
       },
     },
   },
-  
+
   swap: {
     in_progress_warning_text: "兑换进行中",
     invalid_swap_data_error_text: "无效的兑换数据",
@@ -1417,7 +1416,7 @@ export default {
         description: "发现可以支持的创作者。",
         icon: "img:icons/find-creators.svg",
       },
-      
+
       myProfile: {
         description: "查看并编辑您的个人资料。",
         icon: "person",
@@ -1482,7 +1481,7 @@ export default {
           creator:
             "Your public storefront as seen by visitors. Great for a quick audit of how your profile appears worldwide.",
         },
-        
+
         myProfile: {
           fan: "Show off your avatar, npub link and optional NIP-05. Personal stats: total zaps sent & received, bucket balances.",
           creator:

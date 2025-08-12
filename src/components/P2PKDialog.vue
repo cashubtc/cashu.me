@@ -72,8 +72,8 @@ import { defineComponent } from "vue";
 import { mapState, mapWritableState } from "pinia";
 import { useClipboard } from "src/composables/useClipboard";
 import { defineAsyncComponent } from "vue";
-const VueQrcode = defineAsyncComponent(() =>
-  import("@chenfengyuan/vue-qrcode")
+const VueQrcode = defineAsyncComponent(
+  () => import("@chenfengyuan/vue-qrcode"),
 );
 
 import { useP2PKStore } from "src/stores/p2pk";

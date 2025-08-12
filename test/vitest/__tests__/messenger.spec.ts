@@ -15,7 +15,7 @@ vi.mock("../../../src/stores/nostr", async (importOriginal) => {
   subscribe = vi.fn(
     async (_priv: string, _pub: string, cb: any, _since?: number) => {
       cb && cb({} as any, "");
-    }
+    },
   );
   walletGen = vi.fn();
   const store = {

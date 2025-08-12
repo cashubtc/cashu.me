@@ -19,15 +19,26 @@
     </div>
     <div class="row items-center no-wrap q-mb-sm">
       <div v-if="multiSelectMode" class="q-mr-sm">
-        <q-checkbox :model-value="selected" dark @update:model-value="emitToggle" />
+        <q-checkbox
+          :model-value="selected"
+          dark
+          @update:model-value="emitToggle"
+        />
       </div>
       <div :style="avatarStyle" class="bucket-avatar flex-shrink-0">
         {{ bucket.name.charAt(0).toUpperCase() }}
       </div>
-      <div class="col q-ml-md" style="min-width: 0;">
+      <div class="col q-ml-md" style="min-width: 0">
         <div class="name-block">
-          <h3 class="text-body1 text-weight-bold text-white ellipsis">{{ bucket.name }}</h3>
-          <p v-if="bucket.description" class="text-grey-5 text-sm line-clamp-2 q-mt-xs">{{ bucket.description }}</p>
+          <h3 class="text-body1 text-weight-bold text-white ellipsis">
+            {{ bucket.name }}
+          </h3>
+          <p
+            v-if="bucket.description"
+            class="text-grey-5 text-sm line-clamp-2 q-mt-xs"
+          >
+            {{ bucket.description }}
+          </p>
         </div>
       </div>
       <q-btn
@@ -59,7 +70,9 @@
         />
         <div v-if="bucket.goal" class="row items-center text-caption q-mt-xs">
           <span>Progress</span>
-          <span class="q-ml-auto">Goal: {{ formatCurrency(bucket.goal, activeUnit) }}</span>
+          <span class="q-ml-auto"
+            >Goal: {{ formatCurrency(bucket.goal, activeUnit) }}</span
+          >
         </div>
       </div>
     </div>
@@ -72,22 +85,46 @@
       dark
       separate
       class="bg-slate-800 elevated-menu"
-      style="min-width: 200px;"
+      style="min-width: 200px"
       :target="menuTarget"
     >
       <q-list dense>
-        <q-item clickable v-close-popup @click.stop="emitAction('manage')" data-test="manage">
-          <q-item-section>{{ t('BucketManager.actions.manage') }}</q-item-section>
+        <q-item
+          clickable
+          v-close-popup
+          @click.stop="emitAction('manage')"
+          data-test="manage"
+        >
+          <q-item-section>{{
+            t("BucketManager.actions.manage")
+          }}</q-item-section>
         </q-item>
         <template v-if="bucket.id !== DEFAULT_BUCKET_ID">
-          <q-item clickable v-close-popup @click.stop="emitAction('edit')" data-test="edit">
+          <q-item
+            clickable
+            v-close-popup
+            @click.stop="emitAction('edit')"
+            data-test="edit"
+          >
             <q-item-section>Edit</q-item-section>
           </q-item>
-          <q-item clickable v-close-popup @click.stop="emitAction('archive')" data-test="archive">
-            <q-item-section>{{ bucket.isArchived ? 'Unarchive' : 'Archive' }}</q-item-section>
+          <q-item
+            clickable
+            v-close-popup
+            @click.stop="emitAction('archive')"
+            data-test="archive"
+          >
+            <q-item-section>{{
+              bucket.isArchived ? "Unarchive" : "Archive"
+            }}</q-item-section>
           </q-item>
           <q-separator dark />
-          <q-item clickable v-close-popup @click.stop="emitAction('delete')" data-test="delete">
+          <q-item
+            clickable
+            v-close-popup
+            @click.stop="emitAction('delete')"
+            data-test="delete"
+          >
             <q-item-section class="text-red-4">Delete</q-item-section>
           </q-item>
         </template>
@@ -130,10 +167,12 @@ export default defineComponent({
     const uiStore = useUiStore();
     const { t } = useI18n();
 
-    const bucketColor = computed(() => props.bucket.color || hashColor(props.bucket.name));
+    const bucketColor = computed(
+      () => props.bucket.color || hashColor(props.bucket.name),
+    );
 
     const adjustColor = (col: string, amt: number) => {
-      let color = col.startsWith('#') ? col.slice(1) : col;
+      let color = col.startsWith("#") ? col.slice(1) : col;
       const num = parseInt(color, 16);
       let r = (num >> 16) + amt;
       r = Math.max(Math.min(255, r), 0);
@@ -141,7 +180,7 @@ export default defineComponent({
       g = Math.max(Math.min(255, g), 0);
       let b = (num & 0x00ff) + amt;
       b = Math.max(Math.min(255, b), 0);
-      return '#' + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+      return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
     };
 
     const isColorDark = (color: string) => {
@@ -229,14 +268,18 @@ export default defineComponent({
   display: flex;
   flex-direction: column;
   min-height: 220px;
-  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  transition:
+    transform 0.2s ease-in-out,
+    box-shadow 0.2s ease-in-out;
   cursor: pointer;
   position: relative;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
 }
 .bucket-card:hover {
   transform: scale(1.03);
-  box-shadow: 0 20px 25px -5px rgba(0,0,0,0.4), 0 10px 10px -5px rgba(0,0,0,0.3);
+  box-shadow:
+    0 20px 25px -5px rgba(0, 0, 0, 0.4),
+    0 10px 10px -5px rgba(0, 0, 0, 0.3);
 }
 .bucket-card.selected {
   border: 3px solid var(--q-primary);
@@ -278,7 +321,7 @@ export default defineComponent({
   min-height: 40px;
 }
 .opacity-50 {
-    opacity: 0.5;
+  opacity: 0.5;
 }
 .progress-section {
   min-height: 48px;

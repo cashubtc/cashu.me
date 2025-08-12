@@ -7,7 +7,7 @@ import {
 	PaymentRequestTransport,
 	PaymentRequestTransportType
 } from './types';
-import 'buffer'
+import 'buffer';
 declare const Buffer: any;
 
 export class PaymentRequest {
@@ -76,14 +76,14 @@ export class PaymentRequest {
 					type: t.t,
 					target: t.a,
 					tags: t.g
-			  }))
+				}))
 			: undefined;
 		const nut10 = rawPaymentRequest.nut10
 			? {
 					kind: rawPaymentRequest.nut10.k,
 					data: rawPaymentRequest.nut10.d,
 					tags: rawPaymentRequest.nut10.t
-			  }
+				}
 			: undefined;
 		return new PaymentRequest(
 			transports,

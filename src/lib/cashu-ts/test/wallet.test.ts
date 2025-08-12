@@ -154,12 +154,12 @@ describe('test fees', () => {
 	test('test melt quote fees', async () => {
 		server.use(
 			http.get(mintUrl + '/v1/melt/quote/bolt11/test', () => {
-                                return HttpResponse.json({
-                                        quote: 'test_melt_quote_id',
-                                        amount: 2000,
-                                        fee_reserve: 20,
-                                        state: 'UNPAID'
-                                } as MeltQuoteResponse);
+				return HttpResponse.json({
+					quote: 'test_melt_quote_id',
+					amount: 2000,
+					fee_reserve: 20,
+					state: 'UNPAID'
+				} as MeltQuoteResponse);
 			})
 		);
 		const wallet = new CashuWallet(mint, { unit });
@@ -832,12 +832,12 @@ describe('multi mint', async () => {
 						fee_reserve: 2,
 						paid: false,
 						state: 'UNPAID',
-                                                expiry: 1673972705,
-                                                change: null
-                                        });
-                                }
-                        )
-                );
+						expiry: 1673972705,
+						change: null
+					});
+				}
+			)
+		);
 		const mint = new CashuMint(mintUrl);
 		const wallet = new CashuWallet(mint);
 		const invoice =
@@ -849,11 +849,11 @@ describe('multi mint', async () => {
 	});
 });
 describe('P2PK BlindingData', () => {
-        test('Create BlindingData locked to pk with locktime and single rfnd key', async () => {
+	test('Create BlindingData locked to pk with locktime and single rfnd key', async () => {
 		const wallet = new CashuWallet(mint);
 		const keys = await wallet.getKeys();
 		const data = OutputData.createP2PKData(
-                        { pubkey: 'thisisatest', locktime: 212, rfndKeys: ['iamarefund'] },
+			{ pubkey: 'thisisatest', locktime: 212, rfndKeys: ['iamarefund'] },
 			21,
 			keys
 		);
@@ -863,14 +863,14 @@ describe('P2PK BlindingData', () => {
 			expect(s[0] === 'P2PK');
 			expect(s[1].data).toBe('thisisatest');
 			expect(s[1].tags).toContainEqual(['locktime', 212]);
-                        expect(s[1].tags).toContainEqual(['rfnd', 'iamarefund']);
+			expect(s[1].tags).toContainEqual(['rfnd', 'iamarefund']);
 		});
 	});
-        test('Create BlindingData locked to pk with locktime and multiple rfnd keys', async () => {
+	test('Create BlindingData locked to pk with locktime and multiple rfnd keys', async () => {
 		const wallet = new CashuWallet(mint);
 		const keys = await wallet.getKeys();
 		const data = OutputData.createP2PKData(
-                        { pubkey: 'thisisatest', locktime: 212, rfndKeys: ['iamarefund', 'asecondrefund'] },
+			{ pubkey: 'thisisatest', locktime: 212, rfndKeys: ['iamarefund', 'asecondrefund'] },
 			21,
 			keys
 		);
@@ -880,10 +880,10 @@ describe('P2PK BlindingData', () => {
 			expect(s[0] === 'P2PK');
 			expect(s[1].data).toBe('thisisatest');
 			expect(s[1].tags).toContainEqual(['locktime', 212]);
-                        expect(s[1].tags).toContainEqual(['rfnd', 'iamarefund', 'asecondrefund']);
+			expect(s[1].tags).toContainEqual(['rfnd', 'iamarefund', 'asecondrefund']);
 		});
 	});
-        test('Create BlindingData locked to pk without locktime and no rfnd keys', async () => {
+	test('Create BlindingData locked to pk without locktime and no rfnd keys', async () => {
 		const wallet = new CashuWallet(mint);
 		const keys = await wallet.getKeys();
 		const data = OutputData.createP2PKData({ pubkey: 'thisisatest' }, 21, keys);

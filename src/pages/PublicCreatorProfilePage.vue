@@ -7,85 +7,94 @@
           'q-pa-md',
         ]"
       >
-    <div class="q-mb-md">
-      <q-btn flat color="primary" to="/find-creators">{{
-        $t("CreatorHub.profile.back")
-      }}</q-btn>
-    </div>
-    <div class="text-h5 q-mb-md">{{ profile.display_name || creatorNpub }}</div>
-    <div v-if="profile.picture" class="q-mb-md">
-      <img :src="profile.picture" style="max-width: 150px" />
-    </div>
-    <div v-if="profile.about" class="q-mb-md">{{ profile.about }}</div>
-    <SubscribeDialog
-      v-model="showSubscribeDialog"
-      :tier="selectedTier"
-      :supporter-pubkey="nostr.pubkey"
-      :creator-pubkey="creatorHex"
-      @confirm="confirmSubscribe"
-    />
-    <SubscriptionReceipt v-model="showReceiptDialog" :receipts="receiptList" />
-    <div v-if="followers !== null" class="text-caption q-mb-md">
-      {{ $t("FindCreators.labels.followers") }}: {{ followers }} |
-      {{ $t("FindCreators.labels.following") }}: {{ following }}
-    </div>
+        <div class="q-mb-md">
+          <q-btn flat color="primary" to="/find-creators">{{
+            $t("CreatorHub.profile.back")
+          }}</q-btn>
+        </div>
+        <div class="text-h5 q-mb-md">
+          {{ profile.display_name || creatorNpub }}
+        </div>
+        <div v-if="profile.picture" class="q-mb-md">
+          <img :src="profile.picture" style="max-width: 150px" />
+        </div>
+        <div v-if="profile.about" class="q-mb-md">{{ profile.about }}</div>
+        <SubscribeDialog
+          v-model="showSubscribeDialog"
+          :tier="selectedTier"
+          :supporter-pubkey="nostr.pubkey"
+          :creator-pubkey="creatorHex"
+          @confirm="confirmSubscribe"
+        />
+        <SubscriptionReceipt
+          v-model="showReceiptDialog"
+          :receipts="receiptList"
+        />
+        <div v-if="followers !== null" class="text-caption q-mb-md">
+          {{ $t("FindCreators.labels.followers") }}: {{ followers }} |
+          {{ $t("FindCreators.labels.following") }}: {{ following }}
+        </div>
 
-    <div>
-      <div class="text-h6 q-mb-sm">{{ $t("CreatorHub.profile.tiers") }}</div>
-      <div v-if="!tiers.length" class="text-body1 q-mb-md">
-        Creator has no subscription tiers
-      </div>
-      <div v-else>
-        <q-card
-          v-for="t in tiers"
-          :key="t.id"
-          flat
-          bordered
-          class="q-mb-md tier-card"
-        >
-          <q-card-section class="row items-center justify-between bg-grey-2">
-            <div class="text-subtitle1">{{ t.name }}</div>
-            <div class="text-subtitle2">
-              {{ getPrice(t) }} sats/month
-              <span v-if="priceStore.bitcoinPrice">
-                ({{ formatFiat(getPrice(t)) }})
-              </span>
-            </div>
-          </q-card-section>
-          <q-card-section>
-            <div class="text-body1 q-mb-sm">{{ t.description }}</div>
-            <div v-if="t.media && t.media.length">
-              <MediaPreview
-                v-for="(m, idx) in t.media"
-                :key="idx"
-                :url="m.url"
-                class="q-mt-sm"
-              />
-            </div>
-            <ul class="q-pl-md q-mb-none">
-              <li v-for="benefit in t.benefits" :key="benefit">
-                {{ benefit }}
-              </li>
-            </ul>
-            <div class="q-mt-md text-right subscribe-container">
-              <q-btn
-                label="Subscribe"
-                color="primary"
-                class="subscribe-btn"
-                @click="openSubscribe(t)"
-              />
-            </div>
-            <PaywalledContent
-              :creator-npub="creatorHex"
-              :tier-id="t.id"
-              class="q-mt-md"
+        <div>
+          <div class="text-h6 q-mb-sm">
+            {{ $t("CreatorHub.profile.tiers") }}
+          </div>
+          <div v-if="!tiers.length" class="text-body1 q-mb-md">
+            Creator has no subscription tiers
+          </div>
+          <div v-else>
+            <q-card
+              v-for="t in tiers"
+              :key="t.id"
+              flat
+              bordered
+              class="q-mb-md tier-card"
             >
-              <div>Protected content visible to subscribers.</div>
-            </PaywalledContent>
-          </q-card-section>
-        </q-card>
-      </div>
-      </div>
+              <q-card-section
+                class="row items-center justify-between bg-grey-2"
+              >
+                <div class="text-subtitle1">{{ t.name }}</div>
+                <div class="text-subtitle2">
+                  {{ getPrice(t) }} sats/month
+                  <span v-if="priceStore.bitcoinPrice">
+                    ({{ formatFiat(getPrice(t)) }})
+                  </span>
+                </div>
+              </q-card-section>
+              <q-card-section>
+                <div class="text-body1 q-mb-sm">{{ t.description }}</div>
+                <div v-if="t.media && t.media.length">
+                  <MediaPreview
+                    v-for="(m, idx) in t.media"
+                    :key="idx"
+                    :url="m.url"
+                    class="q-mt-sm"
+                  />
+                </div>
+                <ul class="q-pl-md q-mb-none">
+                  <li v-for="benefit in t.benefits" :key="benefit">
+                    {{ benefit }}
+                  </li>
+                </ul>
+                <div class="q-mt-md text-right subscribe-container">
+                  <q-btn
+                    label="Subscribe"
+                    color="primary"
+                    class="subscribe-btn"
+                    @click="openSubscribe(t)"
+                  />
+                </div>
+                <PaywalledContent
+                  :creator-npub="creatorHex"
+                  :tier-id="t.id"
+                  class="q-mt-md"
+                >
+                  <div>Protected content visible to subscribers.</div>
+                </PaywalledContent>
+              </q-card-section>
+            </q-card>
+          </div>
+        </div>
       </div>
     </template>
     <template #fallback>

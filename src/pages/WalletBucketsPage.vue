@@ -1,7 +1,10 @@
 <template>
   <q-layout
     view="lHh Lpr lFf"
-    :class="[$q.dark.isActive ? 'bg-dark text-white' : 'bg-white text-dark', 'wallet-layout']"
+    :class="[
+      $q.dark.isActive ? 'bg-dark text-white' : 'bg-white text-dark',
+      'wallet-layout',
+    ]"
   >
     <Sidebar />
     <HeaderBar />

@@ -2,7 +2,9 @@
   <div>
     <q-list bordered>
       <template v-if="filteredPinned.length">
-        <q-item-label header class="q-px-md q-pt-sm q-pb-xs">Pinned</q-item-label>
+        <q-item-label header class="q-px-md q-pt-sm q-pb-xs"
+          >Pinned</q-item-label
+        >
         <ConversationListItem
           v-for="item in filteredPinned"
           :key="'pinned-' + item.pubkey"
@@ -16,7 +18,9 @@
         <q-separator v-if="filteredRegular.length" spaced />
       </template>
 
-      <q-item-label header class="q-px-md q-pt-sm q-pb-xs">All Conversations</q-item-label>
+      <q-item-label header class="q-px-md q-pt-sm q-pb-xs"
+        >All Conversations</q-item-label
+      >
       <ConversationListItem
         v-for="item in filteredRegular"
         :key="'reg-' + item.pubkey"
@@ -55,7 +59,7 @@ watch(
   () => props.search,
   (val) => {
     filterQuery.value = val || "";
-  }
+  },
 );
 
 const uniqueConversations = computed(() => {
@@ -74,11 +78,11 @@ const uniqueConversations = computed(() => {
 });
 
 const pinnedConversations = computed(() =>
-  uniqueConversations.value.filter((c) => c.pinned)
+  uniqueConversations.value.filter((c) => c.pinned),
 );
 
 const regularConversations = computed(() =>
-  uniqueConversations.value.filter((c) => !c.pinned)
+  uniqueConversations.value.filter((c) => !c.pinned),
 );
 
 const applyFilter = (list: typeof uniqueConversations.value) => {

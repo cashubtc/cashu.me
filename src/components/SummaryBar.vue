@@ -3,14 +3,12 @@
     <div class="text-h5 text-weight-bold text-white">
       {{ formatCurrency(total, unit) }}
     </div>
-    <div class="text-grey-5">
-      {{ activeCount }} Active Buckets
-    </div>
+    <div class="text-grey-5">{{ activeCount }} Active Buckets</div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { useUiStore } from 'stores/ui';
+import { useUiStore } from "stores/ui";
 
 const props = defineProps<{
   total: number;

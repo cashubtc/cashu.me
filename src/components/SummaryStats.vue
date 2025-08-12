@@ -6,17 +6,17 @@
 </template>
 
 <script setup lang="ts">
-import { useUiStore } from 'stores/ui'
-import { useMintsStore } from 'stores/mints'
-import { storeToRefs } from 'pinia'
+import { useUiStore } from "stores/ui";
+import { useMintsStore } from "stores/mints";
+import { storeToRefs } from "pinia";
 
-const props = defineProps<{ total: number; activeCount: number }>()
+const props = defineProps<{ total: number; activeCount: number }>();
 
-const ui = useUiStore()
-const { activeUnit } = storeToRefs(useMintsStore())
+const ui = useUiStore();
+const { activeUnit } = storeToRefs(useMintsStore());
 
-function formatCurrency (val: number) {
-  return ui.formatCurrency(val, activeUnit.value)
+function formatCurrency(val: number) {
+  return ui.formatCurrency(val, activeUnit.value);
 }
 </script>
 

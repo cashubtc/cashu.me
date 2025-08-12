@@ -110,10 +110,10 @@ export default defineComponent({
       bucketList.value.map((b) => ({
         label: `${b.name} (${uiStore.formatCurrency(
           bucketBalances.value[b.id] ?? 0,
-          activeUnit.value
+          activeUnit.value,
         )})`,
         value: b.id,
-      }))
+      })),
     );
 
     const typeOptions = [
@@ -130,7 +130,7 @@ export default defineComponent({
       donationStore.presets.map((p) => ({
         label: `${p.months}m`,
         value: p.months,
-      }))
+      })),
     );
 
     const cancel = () => {

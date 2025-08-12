@@ -73,7 +73,7 @@
             $t(
               filterPending
                 ? 'InvoiceTable.actions.show_all.label'
-                : 'InvoiceTable.actions.filter_pending.label'
+                : 'InvoiceTable.actions.filter_pending.label',
             )
           "
           class="q-ml-sm q-px-md"

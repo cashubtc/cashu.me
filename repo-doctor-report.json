@@ -1,17 +1,17 @@
 {
-  "created_at": "2025-08-08T08:48:50Z",
+  "created_at": "2025-08-12T15:48:32Z",
   "git": {
     "repo_path": "/home/simulacraproductions/Desktop/Simulacra_Productions/KA/CASHU/cashu.mecustomized",
     "is_git": true,
-    "git_dir_size": "73.6 MB",
-    "worktree_size": "41.8 MB",
-    "tracked_files": 574,
-    "commit_count": 3904,
-    "local_branches": 40,
-    "remote_branches": 294,
-    "tags": 0,
-    "current_branch": "fix/tsconfig-ci",
-    "head_commit": "cc501963",
+    "git_dir_size": "78.3 MB",
+    "worktree_size": "11.7 MB",
+    "tracked_files": 584,
+    "commit_count": 4182,
+    "local_branches": 48,
+    "remote_branches": 435,
+    "tags": 1,
+    "current_branch": "fix/safe-shims",
+    "head_commit": "81ca109d",
     "default_branch_guess": "main"
   },
   "status": {
@@ -54,9 +54,9 @@
     {
       "name": "Phase10",
       "upstream": "origin/Phase10",
-      "ahead": 0,
-      "behind": 2,
-      "last_commit_date": "2025-08-07T13:05:39+02:00"
+      "ahead": 2,
+      "behind": 0,
+      "last_commit_date": "2025-08-12T13:48:32+02:00"
     },
     {
       "name": "Phase2",
@@ -136,6 +136,13 @@
       "last_commit_date": "2025-08-07T13:05:39+02:00"
     },
     {
+      "name": "backup/messy-20250812-1708",
+      "upstream": null,
+      "ahead": 0,
+      "behind": 0,
+      "last_commit_date": "2025-08-12T16:49:37+02:00"
+    },
+    {
       "name": "feature/p2pk-dm-ux-enhancements",
       "upstream": null,
       "ahead": 0,
@@ -143,11 +150,25 @@
       "last_commit_date": "2025-06-10T11:23:33+00:00"
     },
     {
+      "name": "feature/refactor-creator-subscribers-page",
+      "upstream": "origin/feature/refactor-creator-subscribers-page",
+      "ahead": 0,
+      "behind": 0,
+      "last_commit_date": "2025-08-09T05:42:00+00:00"
+    },
+    {
       "name": "fix-ci-pipeline",
       "upstream": "origin/fix-ci-pipeline",
       "ahead": 0,
       "behind": 0,
       "last_commit_date": "2025-08-07T22:00:47+02:00"
+    },
+    {
+      "name": "fix-creator-subscribers-performance",
+      "upstream": "origin/fix-creator-subscribers-performance",
+      "ahead": 0,
+      "behind": 0,
+      "last_commit_date": "2025-08-12T06:58:39+00:00"
     },
     {
       "name": "fix-infinite-loop",
@@ -164,6 +185,13 @@
       "last_commit_date": "2025-08-08T09:23:24+02:00"
     },
     {
+      "name": "fix/catastrophic-wallet-failure",
+      "upstream": "origin/fix/catastrophic-wallet-failure",
+      "ahead": 0,
+      "behind": 0,
+      "last_commit_date": "2025-08-12T13:26:10+02:00"
+    },
+    {
       "name": "fix/pwa-workbox-mode",
       "upstream": null,
       "ahead": 0,
@@ -171,11 +199,18 @@
       "last_commit_date": "2025-08-08T09:54:05+02:00"
     },
     {
+      "name": "fix/safe-shims",
+      "upstream": null,
+      "ahead": 0,
+      "behind": 0,
+      "last_commit_date": "2025-08-12T17:14:44+02:00"
+    },
+    {
       "name": "fix/tsconfig-ci",
       "upstream": null,
       "ahead": 0,
       "behind": 0,
-      "last_commit_date": "2025-08-08T10:45:05+02:00"
+      "last_commit_date": "2025-08-08T11:45:23+02:00"
     },
     {
       "name": "fix/vite-node-polyfills",
@@ -234,6 +269,13 @@
       "last_commit_date": "2025-06-11T22:06:25+02:00"
     },
     {
+      "name": "phase10-reset",
+      "upstream": "origin/phase10-reset",
+      "ahead": 0,
+      "behind": 0,
+      "last_commit_date": "2025-08-12T10:59:22+02:00"
+    },
+    {
       "name": "phase2",
       "upstream": null,
       "ahead": 0,
@@ -248,6 +290,13 @@
       "last_commit_date": "2025-06-13T10:23:44+02:00"
     },
     {
+      "name": "pr/ci-fix",
+      "upstream": "origin/codex/fix-dexie-upgrade-path-in-dexie.ts",
+      "ahead": 0,
+      "behind": 1,
+      "last_commit_date": "2025-08-12T14:30:58+02:00"
+    },
+    {
       "name": "pr527",
       "upstream": null,
       "ahead": 0,
@@ -260,6 +309,13 @@
       "ahead": 0,
       "behind": 0,
       "last_commit_date": "2025-06-14T12:13:45+02:00"
+    },
+    {
+      "name": "restore-pr-1562",
+      "upstream": null,
+      "ahead": 0,
+      "behind": 0,
+      "last_commit_date": "2025-08-09T11:17:25+02:00"
     },
     {
       "name": "ritty65-patch-1",
@@ -314,7 +370,7 @@
   "authors": [
     {
       "author": "ritty65",
-      "commits": 2979
+      "commits": 3231
     },
     {
       "author": "callebtc",
@@ -322,7 +378,7 @@
     },
     {
       "author": "Simu",
-      "commits": 56
+      "commits": 76
     },
     {
       "author": "mjkeaton",
@@ -349,12 +405,12 @@
       "commits": 16
     },
     {
-      "author": "aurorabor",
-      "commits": 12
+      "author": "google-labs-jules[bot]",
+      "commits": 14
     },
     {
-      "author": "google-labs-jules[bot]",
-      "commits": 8
+      "author": "aurorabor",
+      "commits": 12
     },
     {
       "author": "Caleb Beery",
@@ -426,288 +482,54 @@
     }
   ],
   "top_large_objects": [
-    [
-      "15.4 MB",
-      "assets/splash-dark.png"
-    ],
-    [
-      "5.9 MB",
-      "android/app/src/main/res/drawable-land-xxxhdpi/splash.png"
-    ],
-    [
-      "5.6 MB",
-      "android/app/src/main/res/drawable-port-xxxhdpi/splash.png"
-    ],
-    [
-      "3.7 MB",
-      "android/app/src/main/res/drawable-land-xxhdpi/splash.png"
-    ],
-    [
-      "3.5 MB",
-      "android/app/src/main/res/drawable-port-xxhdpi/splash.png"
-    ],
-    [
-      "2.2 MB",
-      "android/app/src/main/res/drawable-land-xhdpi/splash.png"
-    ],
-    [
-      "2.1 MB",
-      "android/app/src/main/res/drawable-port-xhdpi/splash.png"
-    ],
-    [
-      "946.7 KB",
-      "android/app/src/main/res/drawable-land-hdpi/splash.png"
-    ],
-    [
-      "899.1 KB",
-      "android/app/src/main/res/drawable-port-hdpi/splash.png"
-    ],
-    [
-      "540.9 KB",
-      "assets/icon-background.png"
-    ],
-    [
-      "409.3 KB",
-      "public/icons/apple-launch-2048x2732.png"
-    ],
-    [
-      "379.6 KB",
-      "android/app/src/main/res/drawable-land-mdpi/splash.png"
-    ],
-    [
-      "374.8 KB",
-      "assets/icon-only.png"
-    ],
-    [
-      "371.2 KB",
-      "icon-round.png"
-    ],
-    [
-      "364.7 KB",
-      "android/app/src/main/res/drawable-port-mdpi/splash.png"
-    ],
+    ["15.4 MB", "assets/splash-dark.png"],
+    ["5.9 MB", "android/app/src/main/res/drawable-land-xxxhdpi/splash.png"],
+    ["5.6 MB", "android/app/src/main/res/drawable-port-xxxhdpi/splash.png"],
+    ["3.7 MB", "android/app/src/main/res/drawable-land-xxhdpi/splash.png"],
+    ["3.5 MB", "android/app/src/main/res/drawable-port-xxhdpi/splash.png"],
+    ["2.2 MB", "android/app/src/main/res/drawable-land-xhdpi/splash.png"],
+    ["2.1 MB", "android/app/src/main/res/drawable-port-xhdpi/splash.png"],
+    ["946.7 KB", "android/app/src/main/res/drawable-land-hdpi/splash.png"],
+    ["899.1 KB", "android/app/src/main/res/drawable-port-hdpi/splash.png"],
+    ["540.9 KB", "assets/icon-background.png"],
+    ["409.3 KB", "public/icons/apple-launch-2048x2732.png"],
+    ["379.6 KB", "android/app/src/main/res/drawable-land-mdpi/splash.png"],
+    ["374.8 KB", "assets/icon-only.png"],
+    ["371.2 KB", "icon-round.png"],
+    ["364.7 KB", "android/app/src/main/res/drawable-port-mdpi/splash.png"],
     [
       "300.8 KB",
       "ios/App/App/Assets.xcassets/AppIcon.appiconset/AppIcon-512@2x.png"
     ],
-    [
-      "289.7 KB",
-      "public/icons/apple-launch-1668x2224.png"
-    ],
-    [
-      "289.5 KB",
-      "public/icons/apple-launch-1668x2388.png"
-    ],
-    [
-      "271.5 KB",
-      "public/icons/apple-launch-1620x2160.png"
-    ],
-    [
-      "269.1 KB",
-      "public/icons/apple-launch-2048x2732.png"
-    ],
-    [
-      "245.2 KB",
-      "public/icons/apple-launch-1536x2048.png"
-    ],
-    [
-      "241.3 KB",
-      "package-lock.json"
-    ],
-    [
-      "239.3 KB",
-      "package-lock.json"
-    ],
-    [
-      "239.3 KB",
-      "package-lock.json"
-    ],
-    [
-      "239.1 KB",
-      "package-lock.json"
-    ],
-    [
-      "239.1 KB",
-      "package-lock.json"
-    ],
-    [
-      "236.8 KB",
-      "package-lock.json"
-    ],
-    [
-      "220.0 KB",
-      "icon.png"
-    ],
-    [
-      "210.0 KB",
-      "package-lock.json"
-    ],
-    [
-      "180.5 KB",
-      "public/icons/apple-launch-1290x2796.png"
-    ],
-    [
-      "178.8 KB",
-      "pnpm-lock.yaml"
-    ],
-    [
-      "178.7 KB",
-      "pnpm-lock.yaml"
-    ],
-    [
-      "178.7 KB",
-      "pnpm-lock.yaml"
-    ],
-    [
-      "178.4 KB",
-      "public/icons/apple-launch-1284x2778.png"
-    ],
-    [
-      "172.2 KB",
-      "pnpm-lock.yaml.bak"
-    ]
+    ["289.7 KB", "public/icons/apple-launch-1668x2224.png"],
+    ["289.5 KB", "public/icons/apple-launch-1668x2388.png"],
+    ["271.5 KB", "public/icons/apple-launch-1620x2160.png"],
+    ["269.1 KB", "public/icons/apple-launch-2048x2732.png"]
   ],
   "top_large_files": [
-    [
-      "9.3 MB",
-      "src/lib/cashu-ts/node_modules/.bin/esbuild"
-    ],
-    [
-      "9.3 MB",
-      "src/lib/cashu-ts/node_modules/esbuild/bin/esbuild"
-    ],
-    [
-      "2.0 MB",
-      "src/lib/cashu-ts/node_modules/vite/dist/node/chunks/dep-C6uTJdX2.js"
-    ],
-    [
-      "897.7 KB",
-      "src/lib/cashu-ts/node_modules/rollup/dist/es/shared/node-entry.js"
-    ],
-    [
-      "896.8 KB",
-      "src/lib/cashu-ts/node_modules/rollup/dist/shared/rollup.js"
-    ],
-    [
-      "614.6 KB",
-      "src/lib/cashu-ts/node_modules/@vitest/browser/dist/client/__vitest__/assets/index-B6hUSIXg.js"
-    ],
-    [
-      "614.6 KB",
-      "src/lib/cashu-ts/node_modules/@vitest/ui/dist/client/assets/index-B6hUSIXg.js"
-    ],
-    [
-      "540.8 KB",
-      "assets/icon-background.png"
-    ],
-    [
-      "514.0 KB",
-      "public/icons/apple-launch-2048x2732.png"
-    ],
-    [
-      "470.1 KB",
-      "pnpm-lock.yaml"
-    ],
-    [
-      "434.2 KB",
-      "src/lib/cashu-ts/package-lock.json"
-    ],
-    [
-      "412.9 KB",
-      "src/lib/cashu-ts/node_modules/@vitest/browser/dist/client/__vitest_browser__/tester-BaiNqOPw.js"
-    ],
-    [
-      "375.5 KB",
-      "icon.png"
-    ],
-    [
-      "375.5 KB",
-      "assets/icon-only.png"
-    ],
-    [
-      "372.3 KB",
-      "icon-round.png"
-    ],
-    [
-      "360.5 KB",
-      "public/icons/apple-launch-1668x2388.png"
-    ],
-    [
-      "355.1 KB",
-      "public/icons/apple-launch-1668x2224.png"
-    ],
-    [
-      "350.6 KB",
-      "src/lib/cashu-ts/node_modules/vitest/dist/chunks/cli-api.DqsSTaIi.js"
-    ],
-    [
-      "335.4 KB",
-      "public/icons/apple-launch-1620x2160.png"
-    ],
-    [
-      "323.9 KB",
-      "src/lib/cashu-ts/node_modules/vite/dist/node/chunks/dep-D-7KCb9p.js"
-    ],
+    ["540.8 KB", "assets/icon-background.png"],
+    ["514.0 KB", "public/icons/apple-launch-2048x2732.png"],
+    ["502.0 KB", "pnpm-lock.yaml"],
+    ["434.2 KB", "src/lib/cashu-ts/package-lock.json"],
+    ["375.5 KB", "icon.png"],
+    ["375.5 KB", "assets/icon-only.png"],
+    ["372.3 KB", "icon-round.png"],
+    ["360.5 KB", "public/icons/apple-launch-1668x2388.png"],
+    ["355.1 KB", "public/icons/apple-launch-1668x2224.png"],
+    ["335.4 KB", "public/icons/apple-launch-1620x2160.png"],
     [
       "309.5 KB",
       "ios/App/App/Assets.xcassets/AppIcon.appiconset/AppIcon-512@2x.png"
     ],
-    [
-      "303.1 KB",
-      "public/icons/apple-launch-1536x2048.png"
-    ],
-    [
-      "248.6 KB",
-      "public/icons/apple-launch-1290x2796.png"
-    ],
-    [
-      "245.1 KB",
-      "src/lib/cashu-ts/node_modules/rollup/dist/es/shared/watch.js"
-    ],
-    [
-      "243.6 KB",
-      "public/icons/apple-launch-1284x2778.png"
-    ],
-    [
-      "235.4 KB",
-      "src/lib/cashu-ts/node_modules/rollup/dist/shared/index.js"
-    ],
-    [
-      "231.6 KB",
-      "public/icons/apple-launch-1242x2688.png"
-    ],
-    [
-      "227.2 KB",
-      "src/lib/cashu-ts/node_modules/vite/dist/node/chunks/dep-CEGXe0Sr.js"
-    ],
-    [
-      "226.0 KB",
-      "src/lib/cashu-ts/node_modules/vitest/dist/chunks/resolveConfig.rBxzbVsl.js"
-    ],
-    [
-      "219.1 KB",
-      "public/icons/apple-launch-1242x2208.png"
-    ],
-    [
-      "211.7 KB",
-      "public/icons/apple-launch-1179x2556.png"
-    ],
-    [
-      "208.7 KB",
-      "public/icons/apple-launch-1170x2532.png"
-    ],
-    [
-      "193.9 KB",
-      "public/icons/apple-launch-1125x2436.png"
-    ],
-    [
-      "186.5 KB",
-      "src/lib/cashu-ts/node_modules/@vitest/browser/dist/client/__vitest__/bg.png"
-    ],
-    [
-      "186.5 KB",
-      "src/lib/cashu-ts/node_modules/@vitest/ui/dist/client/bg.png"
-    ]
+    ["303.1 KB", "public/icons/apple-launch-1536x2048.png"],
+    ["248.6 KB", "public/icons/apple-launch-1290x2796.png"],
+    ["243.6 KB", "public/icons/apple-launch-1284x2778.png"],
+    ["231.6 KB", "public/icons/apple-launch-1242x2688.png"],
+    ["219.1 KB", "public/icons/apple-launch-1242x2208.png"],
+    ["211.7 KB", "public/icons/apple-launch-1179x2556.png"],
+    ["208.7 KB", "public/icons/apple-launch-1170x2532.png"],
+    ["193.9 KB", "public/icons/apple-launch-1125x2436.png"],
+    ["179.3 KB", "public/icons/apple-launch-1080x2340.png"]
   ],
   "lfs_summary": "0 LFS-tracked files",
   "remotes": {
@@ -804,7 +626,17 @@
     "file:.git/config\tbranch.wip/phase9-pre-clean.merge=refs/heads/wip/phase9-pre-clean",
     "file:.git/config\tbranch.Phase9-clean.remote=origin",
     "file:.git/config\tbranch.Phase9-clean.merge=refs/heads/Phase9-clean",
-    "file:.git/config\tlfs.***=0"
+    "file:.git/config\tlfs.***=0",
+    "file:.git/config\tbranch.feature/***.remote=origin",
+    "file:.git/config\tbranch.feature/***.merge=refs/heads/feature/***",
+    "file:.git/config\tbranch.***.remote=origin",
+    "file:.git/config\tbranch.***.merge=refs/heads/***",
+    "file:.git/config\tbranch.phase10-reset.remote=origin",
+    "file:.git/config\tbranch.phase10-reset.merge=refs/heads/phase10-reset",
+    "file:.git/config\tbranch.fix/***.remote=origin",
+    "file:.git/config\tbranch.fix/***.merge=refs/heads/fix/***",
+    "file:.git/config\tbranch.pr/ci-fix.remote=origin",
+    "file:.git/config\tbranch.pr/ci-fix.merge=refs/heads/codex/***.ts"
   ],
   "node_env": {
     "node": "v20.19.4",
@@ -828,20 +660,21 @@
       "build": "quasar build",
       "build:pwa": "quasar build -m pwa",
       "quasar": "quasar",
-      "lint": "eslint --ext .js,.vue ./",
+      "lint": "eslint .",
       "format": "prettier --write .",
       "checkformat": "prettier --check .",
       "test": "node --experimental-vm-modules node_modules/vitest/vitest.mjs",
-      "test:ci": "node --experimental-vm-modules node_modules/vitest/vitest.mjs run",
+      "test:ci": "vitest run --passWithNoTests",
       "types": "tsc -p tsconfig.local.json --noEmit",
-      "ci:verify": "pnpm run types && pnpm run lint && pnpm run test:ci && pnpm run build && pnpm run build:pwa"
+      "ci:verify": "pnpm run types && pnpm run lint && pnpm run build && pnpm run build:pwa",
+      "lint:fix": "eslint . --fix"
     },
-    "deps_count": 38,
-    "dev_deps_count": 36,
+    "deps_count": 40,
+    "dev_deps_count": 38,
     "has_quasar": true,
     "quasar_app_vite": "^2.3.0",
     "quasar_pkg": "^2.16.2",
-    "vite_pkg": null
+    "vite_pkg": "^6.1.0"
   },
   "quasar_vite": {
     "quasar_config_path": "/home/simulacraproductions/Desktop/Simulacra_Productions/KA/CASHU/cashu.mecustomized/quasar.config.js",
@@ -851,37 +684,39 @@
     "has_globals_boolean_map": false,
     "define_entries": [],
     "optimize_deps_hints": [
-      "quasar.config.js:42: optimizeDeps: { include: ['process', 'buffer'] },",
-      "quasar.config.js:70: viteConf.optimizeDeps = { ...(viteConf.optimizeDeps || {}), include: [ ...(viteConf.optimizeDeps?.include || []), 'buffer', 'process' ] };"
+      "quasar.config.js:54: optimizeDeps: { include: [\"process\", \"buffer\", \"vue-chartjs\"] },",
+      "quasar.config.js:90: viteConf.optimizeDeps = {",
+      "quasar.config.js:91: ...(viteConf.optimizeDeps || {}),",
+      "quasar.config.js:93: ...(viteConf.optimizeDeps?.include || []),"
     ]
   },
   "recent_commits": [
-    "cc501963 2025-08-08 10:45:05 +0200 Simu | chore(ts): minimal final fixes (tokenString, htlc_hash spread, raw key bytes, remove id, cast)",
-    "a275e329 2025-08-08 10:33:47 +0200 Simu | chore(ts): quick passes to get types script green",
-    "c47d3d27 2025-08-08 10:31:31 +0200 Simu | WIP: before TS quick fixes batch 2",
-    "48217852 2025-08-08 10:16:30 +0200 Simu | WIP: before quick type relax",
-    "0acd5115 2025-08-08 10:10:38 +0200 Simu | chore(tsconfig): skip lib checks, add DOM/WebWorker libs, restrict include/exclude",
-    "06f3bd0d 2025-08-08 09:54:05 +0200 Simu | chore(ci): add ci:verify to gate types/lint/tests/spa+pwa builds",
-    "92a9ae69 2025-08-08 09:53:45 +0200 Simu | chore: cleanup backups/logs; ignore nested node_modules; harden .gitignore",
-    "1fe4545e 2025-08-08 09:53:27 +0200 Simu | build: use only static imports for @nostr-dev-kit/ndk to avoid split warning",
-    "7aa39401 2025-08-08 09:53:00 +0200 Simu | fix(pwa): register emitted sw.js instead of service-worker.js",
-    "3de98f08 2025-08-08 09:53:00 +0200 Simu | WIP: before SW path fix",
-    "2c3bdbb2 2025-08-08 09:44:22 +0200 Simu | WIP: before fixing PWA registration",
-    "b361101c 2025-08-08 09:34:26 +0200 Simu | WIP: before PWA workboxMode fix",
-    "615bda72 2025-08-08 09:23:24 +0200 Simu | WIP: before polyfill install",
-    "2e8b9413 2025-08-08 09:12:56 +0200 Simu | WIP: before auto-repair",
-    "2af8ebc8 2025-08-08 07:58:35 +0200 Simu | build: repair quasar config (node polyfills via extendViteConf, aliases, deps, boot)",
-    "9586d9d6 2025-08-08 07:53:57 +0200 Simu | build: enable vite-plugin-node-polyfills (buffer/process) and include in optimizeDeps",
-    "63f4ac1a 2025-08-08 07:51:14 +0200 Simu | build: add root-level alias for buffer and process (vite bundling)",
-    "5c84ed5e 2025-08-08 07:48:46 +0200 Simu | chore: add Buffer polyfill boot and include buffer in Vite deps (scripted)",
-    "78a93fdb 2025-08-08 07:47:58 +0200 Simu | fix(i18n): remove duplicate creatorHub keys across locales (scripted)",
-    "697c4680 2025-08-08 07:46:23 +0200 Simu | fix(i18n): remove duplicate creatorHub keys across locales",
-    "5ee56e4f 2025-08-08 07:30:05 +0200 Simu | chore: refresh pnpm lockfile on Phase9-clean",
-    "df1b2577 2025-08-07 09:30:57 +0200 ritty65 | Merge pull request #1513 from ritty65/a4fduh-codex/update-summary-card-design-in-creatorsubscribers.vue",
-    "628dc6e3 2025-08-07 09:29:14 +0200 ritty65 | refactor: enhance subscriber metrics cards",
-    "3eb20d2b 2025-08-07 09:07:52 +0200 ritty65 | Merge pull request #1512 from ritty65/b6zrj8-codex/verify-subscriptionid-uniqueness-and-selection-updates",
-    "3feb3ba3 2025-08-07 09:07:24 +0200 ritty65 | feat: improve subscriber selection actions"
+    "81ca109d 2025-08-12 17:14:44 +0200 Simu | chore: add safe shims (Nostr fallback, String(indexerUrl), guard Dexie liveQuery)",
+    "0ac24677 2025-08-12 14:30:58 +0200 Simu | style: format with Prettier",
+    "5f3ba467 2025-08-12 14:30:16 +0200 Simu | ci: align pnpm with packageManager (use pnpm 10)",
+    "cd74740c 2025-08-12 14:21:14 +0200 Simu | ci: valid YAML; install pnpm before setup-node; job id 'build'; pnpm cache",
+    "d3dd775d 2025-08-12 14:10:02 +0200 Simu | ci: remove '...' placeholders; install pnpm before setup-node; job id 'build'; cache pnpm",
+    "65742d60 2025-08-12 13:56:46 +0200 Simu | ci: fix pnpm setup; job id 'build'; enable pnpm cache",
+    "679151cd 2025-08-12 13:51:38 +0200 Simu | ci: setup pnpm before setup-node; rename job to 'build'; enable pnpm cache",
+    "1e06c221 2025-08-12 13:31:39 +0200 ritty65 | fix Dexie upgrade path",
+    "890b713a 2025-08-12 08:27:40 +0200 ritty65 | Merge pull request #1650 from ritty65/codex/replace-q-segmented-with-q-btn-toggle",
+    "1d4927ec 2025-08-12 08:27:28 +0200 ritty65 | Replace deprecated q-segmented with q-btn-toggle",
+    "2f1477c5 2025-08-12 08:16:46 +0200 ritty65 | Merge pull request #1649 from ritty65/codex/improve-connection-error-handling-in-nostr",
+    "6e4655d9 2025-08-12 08:16:34 +0200 ritty65 | feat(nostr): add reconnect backoff and expose connection state",
+    "7ae140f0 2025-08-12 08:05:17 +0200 ritty65 | Merge pull request #1648 from ritty65/codex/refactor-fetchprofiles-for-efficiency",
+    "70b17298 2025-08-12 08:05:02 +0200 ritty65 | refactor: batch profile fetching",
+    "d7811766 2025-08-12 07:50:14 +0200 ritty65 | Merge pull request #1647 from ritty65/codex/add-profilesloading-state-and-update-ui",
+    "3d562ba6 2025-08-12 07:50:01 +0200 ritty65 | feat: separate profile loading state",
+    "b115175b 2025-08-12 07:11:52 +0200 ritty65 | Merge pull request #1646 from ritty65/codex/refactor-creatorsubscribers-for-concurrency-and-caching",
+    "0263a4b2 2025-08-12 07:11:30 +0200 ritty65 | refactor: batch profile fetch with timeout",
+    "84107e8e 2025-08-11 21:38:33 +0200 ritty65 | Merge pull request #1645 from ritty65/codex/remove-standalone-copy-npub-buttons",
+    "1a80f108 2025-08-11 21:38:16 +0200 ritty65 | refactor: centralize npub copying",
+    "cb750133 2025-08-11 21:27:31 +0200 ritty65 | Merge pull request #1644 from ritty65/codex/extend-subscribersstore-and-update-subscriberstoolbar",
+    "cfeb32e9 2025-08-11 21:27:12 +0200 ritty65 | feat: add saved views for subscribers",
+    "3d61b9ed 2025-08-11 14:24:43 +0200 ritty65 | Merge pull request #1643 from ritty65/codex/enhance-accessibility-on-creator-subscribers-page",
+    "fd70bf87 2025-08-11 14:24:29 +0200 ritty65 | chore: add dark theme and accessibility to creator subscribers",
+    "c4e7c91d 2025-08-11 14:02:29 +0200 ritty65 | Merge pull request #1642 from ritty65/codex/add-unit-tests-for-subscriberstoolbar"
   ],
-  "last_build": "build: rc=0 | log=20250808-104817-build.log\n ║                                          assets/MediaPreview-7gU6gfi6.css ║      0.62 KB ║      0.32 KB ║\n ║                                        assets/NostrMessenger-CMs9SkoS.css ║      2.70 KB ║      0.85 KB ║\n ║                              assets/PublicCreatorProfilePage-Clq_8-3j.css ║      0.12 KB ║      0.10 KB ║\n ║                                       assets/SendTokenDialog-CssGghAJ.css ║      1.52 KB ║      0.60 KB ║\n ║                                              assets/Settings-B-ht4wvc.css ║      0.21 KB ║      0.17 KB ║\n ║                                   assets/SubscriptionReceipt-DU4tK0q6.css ║      0.09 KB ║      0.10 KB ║\n ║                                 assets/SubscriptionsOverview-CuPSf4O0.css ║      0.74 KB ║      0.33 KB ║\n ║                                             assets/TermsPage-CqT4GrQ4.css ║      0.34 KB ║      0.22 KB ║\n ║                                            assets/WalletPage-DO7rqT2J.css ║     15.46 KB ║      3.18 KB ║\n ║                                           assets/WelcomePage-BTf0y8Tr.css ║      0.35 KB ║      0.22 KB ║\n ║                                                 assets/index-BSIoN0tV.css ║    233.41 KB ║     40.32 KB ║\n ╟───────────────────────────────────────────────────────────────────────────╫──────────────╫──────────────╢\n ║                                                        find-creators.html ║     29.67 KB ║            - ║\n ║                                                                index.html ║      1.15 KB ║            - ║\n ╠═══════════════════════════════════════════════════════════════════════════╬══════════════╬══════════════╣\n ║                                                      Total JS (106 files) ║   2659.82 KB ║            - ║\n ║                                                      Total CSS (18 files) ║    260.97 KB ║            - ║\n ╚═══════════════════════════════════════════════════════════════════════════╩══════════════╩══════════════╝\n\n Build succeeded\n\n Build mode............. spa\n Pkg quasar............. v2.18.1\n Pkg @quasar/app-vite... v2.3.0\n Pkg vite............... v6.2.0\n Debugging.............. no\n Publishing............. no\n Browser target......... esnext\n =======================\n Output folder.......... /home/simulacraproductions/Desktop/Simulacra_Productions/KA/CASHU/cashu.mecustomized/dist/spa\n\n Tip: Built files are meant to be served over an HTTP server\n      Opening index.html over file:// won't work\n\n Tip: You can use \"$ quasar serve\" command to create a web server,\n      both for testing or production. Type \"$ quasar serve -h\" for\n      parameters. Also, an npm script (usually named \"start\") can\n      be added for deployment environments.\n      If you're using Vue Router \"history\" mode, don't forget to\n      specify the \"--history\" parameter: \"$ quasar serve --history\"\n\n\nnode_modules/.pnpm/tseep@1.3.1/node_modules/tseep/lib/task-collection/bake-collection.js (65:26): Use of eval in \"node_modules/.pnpm/tseep@1.3.1/node_modules/tseep/lib/task-collection/bake-collection.js\" is strongly discouraged as it poses security risks and may cause issues with minification.\nnode_modules/.pnpm/tseep@1.3.1/node_modules/tseep/lib/task-collection/bake-collection.js (91:26): Use of eval in \"node_modules/.pnpm/tseep@1.3.1/node_modules/tseep/lib/task-collection/bake-collection.js\" is strongly discouraged as it poses security risks and may cause issues with minification.\nnode_modules/.pnpm/tseep@1.3.1/node_modules/tseep/lib/task-collection/bake-collection.js (115:26): Use of eval in \"node_modules/.pnpm/tseep@1.3.1/node_modules/tseep/lib/task-collection/bake-collection.js\" is strongly discouraged as it poses security risks and may cause issues with minification.\n\n(!) Some chunks are larger than 500 kB after minification. Consider:\n- Using dynamic import() to code-split the application\n- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks\n- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.\n\nbuild:pwa: rc=0 | log=20250808-104832-build_pwa.log\n ║                              assets/PublicCreatorProfilePage-Clq_8-3j.css ║      0.12 KB ║      0.10 KB ║\n ║                                       assets/SendTokenDialog-CssGghAJ.css ║      1.52 KB ║      0.60 KB ║\n ║                                              assets/Settings-B-ht4wvc.css ║      0.21 KB ║      0.17 KB ║\n ║                                   assets/SubscriptionReceipt-DU4tK0q6.css ║      0.09 KB ║      0.10 KB ║\n ║                                 assets/SubscriptionsOverview-CuPSf4O0.css ║      0.74 KB ║      0.33 KB ║\n ║                                             assets/TermsPage-CqT4GrQ4.css ║      0.34 KB ║      0.22 KB ║\n ║                                            assets/WalletPage-DO7rqT2J.css ║     15.46 KB ║      3.18 KB ║\n ║                                           assets/WelcomePage-BTf0y8Tr.css ║      0.35 KB ║      0.22 KB ║\n ║                                                 assets/index-BSIoN0tV.css ║    233.41 KB ║     40.32 KB ║\n ╟───────────────────────────────────────────────────────────────────────────╫──────────────╫──────────────╢\n ║                                                             manifest.json ║      1.36 KB ║            - ║\n ╟───────────────────────────────────────────────────────────────────────────╫──────────────╫──────────────╢\n ║                                                        find-creators.html ║     29.67 KB ║            - ║\n ║                                                                index.html ║      1.91 KB ║            - ║\n ╠═══════════════════════════════════════════════════════════════════════════╬══════════════╬══════════════╣\n ║                                                      Total JS (108 files) ║   2692.21 KB ║            - ║\n ║                                                      Total CSS (18 files) ║    260.97 KB ║            - ║\n ╚═══════════════════════════════════════════════════════════════════════════╩══════════════╩══════════════╝\n\n Build succeeded\n\n Build mode............. pwa\n Pkg quasar............. v2.18.1\n Pkg @quasar/app-vite... v2.3.0\n Pkg vite............... v6.2.0\n Debugging.............. no\n Publishing............. no\n Browser target......... esnext\n =======================\n Output folder.......... /home/simulacraproductions/Desktop/Simulacra_Productions/KA/CASHU/cashu.mecustomized/dist/pwa\n\n Tip: Built files are meant to be served over an HTTP server\n      Opening index.html over file:// won't work\n\n Tip: You can use \"$ quasar serve\" command to create a web server,\n      both for testing or production. Type \"$ quasar serve -h\" for\n      parameters. Also, an npm script (usually named \"start\") can\n      be added for deployment environments.\n      If you're using Vue Router \"history\" mode, don't forget to\n      specify the \"--history\" parameter: \"$ quasar serve --history\"\n\n\nnode_modules/.pnpm/tseep@1.3.1/node_modules/tseep/lib/task-collection/bake-collection.js (65:26): Use of eval in \"node_modules/.pnpm/tseep@1.3.1/node_modules/tseep/lib/task-collection/bake-collection.js\" is strongly discouraged as it poses security risks and may cause issues with minification.\nnode_modules/.pnpm/tseep@1.3.1/node_modules/tseep/lib/task-collection/bake-collection.js (91:26): Use of eval in \"node_modules/.pnpm/tseep@1.3.1/node_modules/tseep/lib/task-collection/bake-collection.js\" is strongly discouraged as it poses security risks and may cause issues with minification.\nnode_modules/.pnpm/tseep@1.3.1/node_modules/tseep/lib/task-collection/bake-collection.js (115:26): Use of eval in \"node_modules/.pnpm/tseep@1.3.1/node_modules/tseep/lib/task-collection/bake-collection.js\" is strongly discouraged as it poses security risks and may cause issues with minification.\n\n(!) Some chunks are larger than 500 kB after minification. Consider:\n- Using dynamic import() to code-split the application\n- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks\n- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.",
+  "last_build": "build: rc=0 | log=20250812-174747-build.log\n ║                                          assets/MediaPreview-jHz4daLP.css ║      0.67 KB ║      0.34 KB ║\n ║                                        assets/NostrMessenger-DGUK8O7f.css ║      2.70 KB ║      0.86 KB ║\n ║                              assets/PublicCreatorProfilePage-vEjoyEzm.css ║      0.12 KB ║      0.10 KB ║\n ║                                       assets/SendTokenDialog-Dy8QKpfc.css ║      1.58 KB ║      0.62 KB ║\n ║                                              assets/Settings-B-ht4wvc.css ║      0.21 KB ║      0.17 KB ║\n ║                                   assets/SubscriptionReceipt-DrvpyJ0g.css ║      0.09 KB ║      0.10 KB ║\n ║                                 assets/SubscriptionsOverview-CuPSf4O0.css ║      0.74 KB ║      0.33 KB ║\n ║                                             assets/TermsPage-CqT4GrQ4.css ║      0.34 KB ║      0.22 KB ║\n ║                                            assets/WalletPage-BVQlm9wt.css ║     15.76 KB ║      3.21 KB ║\n ║                                           assets/WelcomePage-BTf0y8Tr.css ║      0.35 KB ║      0.22 KB ║\n ║                                                 assets/index-Dg_QP3V2.css ║    237.38 KB ║     41.17 KB ║\n ╟───────────────────────────────────────────────────────────────────────────╫──────────────╫──────────────╢\n ║                                                        find-creators.html ║     30.89 KB ║            - ║\n ║                                                                index.html ║      1.15 KB ║            - ║\n ╠═══════════════════════════════════════════════════════════════════════════╬══════════════╬══════════════╣\n ║                                                      Total JS (114 files) ║   2930.53 KB ║            - ║\n ║                                                      Total CSS (18 files) ║    267.79 KB ║            - ║\n ╚═══════════════════════════════════════════════════════════════════════════╩══════════════╩══════════════╝\n\n Build succeeded\n\n Build mode............. spa\n Pkg quasar............. v2.18.1\n Pkg @quasar/app-vite... v2.3.0\n Pkg vite............... v6.2.0\n Debugging.............. no\n Publishing............. no\n Browser target......... esnext\n =======================\n Output folder.......... /home/simulacraproductions/Desktop/Simulacra_Productions/KA/CASHU/cashu.mecustomized/dist/spa\n\n Tip: Built files are meant to be served over an HTTP server\n      Opening index.html over file:// won't work\n\n Tip: You can use \"$ quasar serve\" command to create a web server,\n      both for testing or production. Type \"$ quasar serve -h\" for\n      parameters. Also, an npm script (usually named \"start\") can\n      be added for deployment environments.\n      If you're using Vue Router \"history\" mode, don't forget to\n      specify the \"--history\" parameter: \"$ quasar serve --history\"\n\n\nnode_modules/.pnpm/tseep@1.3.1/node_modules/tseep/lib/task-collection/bake-collection.js (65:26): Use of eval in \"node_modules/.pnpm/tseep@1.3.1/node_modules/tseep/lib/task-collection/bake-collection.js\" is strongly discouraged as it poses security risks and may cause issues with minification.\nnode_modules/.pnpm/tseep@1.3.1/node_modules/tseep/lib/task-collection/bake-collection.js (91:26): Use of eval in \"node_modules/.pnpm/tseep@1.3.1/node_modules/tseep/lib/task-collection/bake-collection.js\" is strongly discouraged as it poses security risks and may cause issues with minification.\nnode_modules/.pnpm/tseep@1.3.1/node_modules/tseep/lib/task-collection/bake-collection.js (115:26): Use of eval in \"node_modules/.pnpm/tseep@1.3.1/node_modules/tseep/lib/task-collection/bake-collection.js\" is strongly discouraged as it poses security risks and may cause issues with minification.\n\n(!) Some chunks are larger than 500 kB after minification. Consider:\n- Using dynamic import() to code-split the application\n- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks\n- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.\n\nbuild:pwa: rc=0 | log=20250812-174806-build_pwa.log\n ║                              assets/PublicCreatorProfilePage-vEjoyEzm.css ║      0.12 KB ║      0.10 KB ║\n ║                                       assets/SendTokenDialog-Dy8QKpfc.css ║      1.58 KB ║      0.62 KB ║\n ║                                              assets/Settings-B-ht4wvc.css ║      0.21 KB ║      0.17 KB ║\n ║                                   assets/SubscriptionReceipt-DrvpyJ0g.css ║      0.09 KB ║      0.10 KB ║\n ║                                 assets/SubscriptionsOverview-CuPSf4O0.css ║      0.74 KB ║      0.33 KB ║\n ║                                             assets/TermsPage-CqT4GrQ4.css ║      0.34 KB ║      0.22 KB ║\n ║                                            assets/WalletPage-BVQlm9wt.css ║     15.76 KB ║      3.21 KB ║\n ║                                           assets/WelcomePage-BTf0y8Tr.css ║      0.35 KB ║      0.22 KB ║\n ║                                                 assets/index-Dg_QP3V2.css ║    237.38 KB ║     41.17 KB ║\n ╟───────────────────────────────────────────────────────────────────────────╫──────────────╫──────────────╢\n ║                                                             manifest.json ║      1.36 KB ║            - ║\n ╟───────────────────────────────────────────────────────────────────────────╫──────────────╫──────────────╢\n ║                                                        find-creators.html ║     30.89 KB ║            - ║\n ║                                                                index.html ║      1.91 KB ║            - ║\n ╠═══════════════════════════════════════════════════════════════════════════╬══════════════╬══════════════╣\n ║                                                      Total JS (116 files) ║   2963.56 KB ║            - ║\n ║                                                      Total CSS (18 files) ║    267.79 KB ║            - ║\n ╚═══════════════════════════════════════════════════════════════════════════╩══════════════╩══════════════╝\n\n Build succeeded\n\n Build mode............. pwa\n Pkg quasar............. v2.18.1\n Pkg @quasar/app-vite... v2.3.0\n Pkg vite............... v6.2.0\n Debugging.............. no\n Publishing............. no\n Browser target......... esnext\n =======================\n Output folder.......... /home/simulacraproductions/Desktop/Simulacra_Productions/KA/CASHU/cashu.mecustomized/dist/pwa\n\n Tip: Built files are meant to be served over an HTTP server\n      Opening index.html over file:// won't work\n\n Tip: You can use \"$ quasar serve\" command to create a web server,\n      both for testing or production. Type \"$ quasar serve -h\" for\n      parameters. Also, an npm script (usually named \"start\") can\n      be added for deployment environments.\n      If you're using Vue Router \"history\" mode, don't forget to\n      specify the \"--history\" parameter: \"$ quasar serve --history\"\n\n\nnode_modules/.pnpm/tseep@1.3.1/node_modules/tseep/lib/task-collection/bake-collection.js (65:26): Use of eval in \"node_modules/.pnpm/tseep@1.3.1/node_modules/tseep/lib/task-collection/bake-collection.js\" is strongly discouraged as it poses security risks and may cause issues with minification.\nnode_modules/.pnpm/tseep@1.3.1/node_modules/tseep/lib/task-collection/bake-collection.js (91:26): Use of eval in \"node_modules/.pnpm/tseep@1.3.1/node_modules/tseep/lib/task-collection/bake-collection.js\" is strongly discouraged as it poses security risks and may cause issues with minification.\nnode_modules/.pnpm/tseep@1.3.1/node_modules/tseep/lib/task-collection/bake-collection.js (115:26): Use of eval in \"node_modules/.pnpm/tseep@1.3.1/node_modules/tseep/lib/task-collection/bake-collection.js\" is strongly discouraged as it poses security risks and may cause issues with minification.\n\n(!) Some chunks are larger than 500 kB after minification. Consider:\n- Using dynamic import() to code-split the application\n- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks\n- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.",
   "notes": []
 }

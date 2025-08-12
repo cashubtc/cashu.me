@@ -61,7 +61,7 @@ type MeltQuoteResponse = {
 	fee_reserve: number;
 	paid: boolean;
 	expiry: number;
-        payment_preimg: string;
+	payment_preimg: string;
 	state: MeltQuoteState;
 	change?: Array<SerializedBlindedSignature>;
 };

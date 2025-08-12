@@ -10,7 +10,7 @@ export interface Tier {
   price_sats: number;
   description: string;
   /** Subscription payment frequency */
-  frequency?: import('../constants/subscriptionFrequency').SubscriptionFrequency;
+  frequency?: import("../constants/subscriptionFrequency").SubscriptionFrequency;
   /** Number of days between payments */
   intervalDays?: number;
   benefits?: string[];

@@ -150,7 +150,7 @@ describe("publishTierDefinitions", () => {
           welcomeMessage: "",
           media: [],
         },
-      ])
+      ]),
     );
     expect(signMock).toHaveBeenCalledWith(nostrStoreMock.signer);
     expect(publishMock).toHaveBeenCalled();

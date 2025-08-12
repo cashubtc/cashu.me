@@ -1,16 +1,16 @@
-import { defineStore } from 'pinia'
-import type { NdkBootError } from 'boot/ndk'
+import { defineStore } from "pinia";
+import type { NdkBootError } from "boot/ndk";
 
-export const useBootErrorStore = defineStore('bootError', {
+export const useBootErrorStore = defineStore("bootError", {
   state: () => ({
-    error: null as NdkBootError | null
+    error: null as NdkBootError | null,
   }),
   actions: {
     set(error: NdkBootError) {
-      this.error = error
+      this.error = error;
     },
     clear() {
-      this.error = null
-    }
-  }
-})
+      this.error = null;
+    },
+  },
+});

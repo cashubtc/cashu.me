@@ -15,11 +15,11 @@ export const useDmChatsStore = defineStore("dmChats", {
   state: () => ({
     chats: useLocalStorage<Record<string, DMMessage[]>>(
       "cashu.dmChats",
-      {} as Record<string, DMMessage[]>
+      {} as Record<string, DMMessage[]>,
     ),
     unreadCounts: useLocalStorage<Record<string, number>>(
       "cashu.dmChats.unread",
-      {} as Record<string, number>
+      {} as Record<string, number>,
     ),
   }),
   actions: {

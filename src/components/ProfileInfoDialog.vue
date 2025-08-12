@@ -88,7 +88,7 @@ watch(
   () => {
     load();
   },
-  { immediate: true }
+  { immediate: true },
 );
 
 const displayName = computed(() => {

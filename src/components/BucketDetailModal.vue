@@ -72,8 +72,11 @@
               @click="openSendDmDialog"
               class="q-mr-auto"
             >
-              {{ t('BucketDetail.send_dm') }}
-              <InfoTooltip class="q-ml-xs" :text="t('BucketDetail.tooltips.send_dm')" />
+              {{ t("BucketDetail.send_dm") }}
+              <InfoTooltip
+                class="q-ml-xs"
+                :text="t('BucketDetail.tooltips.send_dm')"
+              />
             </q-btn>
           </div>
         </q-tab-panel>
@@ -95,7 +98,11 @@
     <q-dialog v-model="editDialog.show">
       <q-card class="q-pa-md" style="max-width: 400px">
         <h6 class="q-mt-none q-mb-md">Edit token</h6>
-        <q-input v-model="editDialog.label" outlined :label="t('ReceiveTokenDialog.inputs.label.label')" />
+        <q-input
+          v-model="editDialog.label"
+          outlined
+          :label="t('ReceiveTokenDialog.inputs.label.label')"
+        />
         <q-input
           v-model="editDialog.description"
           outlined
@@ -103,9 +110,11 @@
           :label="t('ReceiveTokenDialog.inputs.description.label')"
         />
         <div class="row q-mt-md">
-          <q-btn color="primary" rounded @click="saveEdit">{{ t('global.actions.update.label') }}</q-btn>
+          <q-btn color="primary" rounded @click="saveEdit">{{
+            t("global.actions.update.label")
+          }}</q-btn>
           <q-btn flat rounded color="grey" class="q-ml-auto" v-close-popup>{{
-            t('global.actions.cancel.label')
+            t("global.actions.cancel.label")
           }}</q-btn>
         </div>
       </q-card>
@@ -145,7 +154,9 @@ const mintsStore = useMintsStore();
 const tokensStore = useTokensStore();
 const uiStore = useUiStore();
 const { activeUnit } = storeToRefs(mintsStore);
-const sendDmDialogRef = ref<InstanceType<typeof SendBucketDmDialog> | null>(null);
+const sendDmDialogRef = ref<InstanceType<typeof SendBucketDmDialog> | null>(
+  null,
+);
 const editDialog = ref({
   show: false,
   label: "",
@@ -154,13 +165,15 @@ const editDialog = ref({
 });
 
 const bucket = computed(
-  () => bucketsStore.bucketList.find((b) => b.id === props.bucketId) || null
+  () => bucketsStore.bucketList.find((b) => b.id === props.bucketId) || null,
 );
 const bucketProofs = computed(() =>
-  proofsStore.proofs.filter((p) => p.bucketId === props.bucketId && !p.reserved)
+  proofsStore.proofs.filter(
+    (p) => p.bucketId === props.bucketId && !p.reserved,
+  ),
 );
 const bucketBalance = computed(() =>
-  bucketProofs.value.reduce((s, p) => s + p.amount, 0)
+  bucketProofs.value.reduce((s, p) => s + p.amount, 0),
 );
 
 const formatCurrency = (a: number, unit: string) =>

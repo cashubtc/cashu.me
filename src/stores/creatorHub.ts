@@ -109,12 +109,12 @@ export const useCreatorHubStore = defineStore("creatorHub", {
       const newTier: Tier = {
         id,
         name: tier.name || "",
-        price_sats:
-          (tier as any).price_sats ?? (tier as any).price ?? 0,
+        price_sats: (tier as any).price_sats ?? (tier as any).price ?? 0,
         description: (tier as any).description || "",
-        frequency: (tier as any).frequency || 'monthly',
-        intervalDays: tier.intervalDays ??
-          frequencyToDays(((tier as any).frequency || 'monthly') as any),
+        frequency: (tier as any).frequency || "monthly",
+        intervalDays:
+          tier.intervalDays ??
+          frequencyToDays(((tier as any).frequency || "monthly") as any),
         welcomeMessage: tier.welcomeMessage || "",
         ...(tier.benefits || (tier as any).perks
           ? { benefits: tier.benefits || [(tier as any).perks] }
@@ -127,18 +127,23 @@ export const useCreatorHubStore = defineStore("creatorHub", {
       }
       maybeRepublishNutzapProfile();
     },
-    updateTier(id: string, updates: Partial<Tier> & { price?: number; perks?: string }) {
+    updateTier(
+      id: string,
+      updates: Partial<Tier> & { price?: number; perks?: string },
+    ) {
       const existing = this.tiers[id];
       if (!existing) return;
       this.tiers[id] = {
         ...existing,
         ...updates,
         ...(updates.frequency !== undefined
-          ? { frequency: updates.frequency,
-              intervalDays: frequencyToDays(updates.frequency as any) }
+          ? {
+              frequency: updates.frequency,
+              intervalDays: frequencyToDays(updates.frequency as any),
+            }
           : updates.intervalDays !== undefined
-          ? { intervalDays: updates.intervalDays }
-          : {}),
+            ? { intervalDays: updates.intervalDays }
+            : {}),
         ...(updates.price_sats === undefined && updates.price !== undefined
           ? { price_sats: updates.price }
           : {}),

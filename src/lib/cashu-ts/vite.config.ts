@@ -17,7 +17,7 @@ const config =
 					sourcemap: true
 				},
 				plugins: [dts({ tsconfigPath: './tsconfig.json', outDir: 'lib/types' })]
-		  })
+			})
 		: defineConfig({
 				build: {
 					outDir: 'lib',
@@ -38,6 +38,6 @@ const config =
 					sourcemap: true
 				},
 				plugins: [dts({ tsconfigPath: './tsconfig.json', outDir: 'lib/types' })]
-		  });
+			});
 
 export default config;

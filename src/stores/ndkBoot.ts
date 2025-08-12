@@ -1,26 +1,29 @@
-import { defineStore } from 'pinia'
-import { getNdk, NdkBootError } from 'boot/ndk'
+import { defineStore } from "pinia";
+import { getNdk, NdkBootError } from "boot/ndk";
 
 export type NdkBootState = {
-  error: NdkBootError | null
-}
+  error: NdkBootError | null;
+};
 
-export const useNdkBootStore = defineStore('ndkBoot', {
+export const useNdkBootStore = defineStore("ndkBoot", {
   state: (): NdkBootState => ({
-    error: null
+    error: null,
   }),
   actions: {
     setError(err: NdkBootError | null) {
-      this.error = err
+      this.error = err;
     },
     async retry() {
       try {
-        await getNdk()
-        this.error = null
+        await getNdk();
+        this.error = null;
       } catch (e) {
-        this.error = e instanceof NdkBootError ? e : new NdkBootError('unknown', (e as any)?.message)
-        throw e
+        this.error =
+          e instanceof NdkBootError
+            ? e
+            : new NdkBootError("unknown", (e as any)?.message);
+        throw e;
       }
-    }
-  }
-})
+    },
+  },
+});

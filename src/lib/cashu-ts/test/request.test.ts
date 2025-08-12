@@ -31,12 +31,12 @@ describe('requests', () => {
 		server.use(
 			http.get(mintUrl + '/v1/melt/quote/bolt11/test', ({ request }) => {
 				headers = request.headers;
-                                return HttpResponse.json({
-                                        quote: 'test_melt_quote_id',
-                                        amount: 2000,
-                                        fee_reserve: 20,
-                                        state: 'UNPAID'
-                                });
+				return HttpResponse.json({
+					quote: 'test_melt_quote_id',
+					amount: 2000,
+					fee_reserve: 20,
+					state: 'UNPAID'
+				});
 			})
 		);
 		const wallet = new CashuWallet(mint, { unit });
@@ -53,12 +53,12 @@ describe('requests', () => {
 		server.use(
 			http.get(mintUrl + '/v1/melt/quote/bolt11/test', ({ request }) => {
 				headers = request.headers;
-                                return HttpResponse.json({
-                                        quote: 'test_melt_quote_id',
-                                        amount: 2000,
-                                        fee_reserve: 20,
-                                        state: 'UNPAID'
-                                });
+				return HttpResponse.json({
+					quote: 'test_melt_quote_id',
+					amount: 2000,
+					fee_reserve: 20,
+					state: 'UNPAID'
+				});
 			})
 		);
 

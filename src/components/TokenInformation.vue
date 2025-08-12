@@ -28,7 +28,12 @@
           class="q-ml-xs"
         />
       </q-chip>
-      <q-chip v-if="isPureP2PK(proofsToShow)" outline icon="lock" class="q-pa-md">
+      <q-chip
+        v-if="isPureP2PK(proofsToShow)"
+        outline
+        icon="lock"
+        class="q-pa-md"
+      >
         P2PK
         <q-icon
           v-if="showP2PKCheck || isLockedToUs(proofsToShow)"
@@ -38,12 +43,7 @@
           class="q-ml-xs"
         />
       </q-chip>
-      <q-chip
-        v-if="isHTLC(proofsToShow)"
-        outline
-        icon="link"
-        class="q-pa-md"
-      >
+      <q-chip v-if="isHTLC(proofsToShow)" outline icon="link" class="q-pa-md">
         HTLC
       </q-chip>
       <div v-if="displayMemo" class="q-my-md">
@@ -147,7 +147,7 @@ export default defineComponent({
       let uniqueIds = [...new Set(proofs.map((p) => p.id))];
       // mints that have any of the keyset IDs
       let mints_keysets = this.mints.filter((m) =>
-        m.keysets.some((r) => uniqueIds.indexOf(r) >= 0)
+        m.keysets.some((r) => uniqueIds.indexOf(r) >= 0),
       );
       // what we put into the JSON
       let mints = mints_keysets.map((m) => [{ url: m.url, ids: m.keysets }][0]);
@@ -163,7 +163,7 @@ export default defineComponent({
       // mints that have any of the keyset IDs
       return (
         this.mints.filter((m) =>
-          m.keysets.some((r) => uniqueIds.indexOf(r.id) >= 0)
+          m.keysets.some((r) => uniqueIds.indexOf(r.id) >= 0),
         ).length > 0
       );
     },

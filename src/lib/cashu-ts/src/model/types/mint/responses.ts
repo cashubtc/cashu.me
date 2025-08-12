@@ -142,10 +142,10 @@ export type PartialMeltQuoteResponse = {
 	 * Timestamp of when the quote expires
 	 */
 	expiry: number;
-       /**
-        * Return/Change from overpaid fees. This happens due to Lighting fee estimation being inaccurate
-        */
-       change?: Array<SerializedBlindedSignature>;
+	/**
+	 * Return/Change from overpaid fees. This happens due to Lighting fee estimation being inaccurate
+	 */
+	change?: Array<SerializedBlindedSignature>;
 	/**
 	 *  Payment request for the melt quote.
 	 */

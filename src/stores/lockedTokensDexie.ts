@@ -17,7 +17,7 @@ export const useDexieLockedTokensStore = defineStore(
     });
 
     async function addLockedToken(
-      data: Omit<LockedToken, "id"> & { id?: string }
+      data: Omit<LockedToken, "id"> & { id?: string },
     ) {
       const entry: LockedToken = { id: data.id ?? uuidv4(), ...data };
       await cashuDb.lockedTokens.put(entry);
@@ -29,5 +29,5 @@ export const useDexieLockedTokensStore = defineStore(
     }
 
     return { lockedTokens, addLockedToken, deleteLockedToken };
-  }
+  },
 );

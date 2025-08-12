@@ -166,7 +166,7 @@
                         {{
                           formatCurrency(
                             mintClass(mint).unitBalance(unit),
-                            unit
+                            unit,
                           )
                         }}
                       </span>
@@ -607,7 +607,7 @@ export default defineComponent({
       }
       if (!this.validateMintUrl(this.addMintData.url)) {
         notifyError(
-          this.$i18n.t("MintSettings.add.actions.add_mint.error_invalid_url")
+          this.$i18n.t("MintSettings.add.actions.add_mint.error_invalid_url"),
         );
         return;
       }
@@ -672,13 +672,13 @@ export default defineComponent({
       }
       if (mintUrls.length == 0) {
         this.notifyError(
-          this.$i18n.t("MintSettings.discover.actions.discover.error_no_mints")
+          this.$i18n.t("MintSettings.discover.actions.discover.error_no_mints"),
         );
       } else {
         this.notifySuccess(
           this.$i18n.t("MintSettings.discover.actions.discover.success", {
             length: mintUrls.length,
-          })
+          }),
         );
       }
       debug(mintUrls);
@@ -713,7 +713,9 @@ export default defineComponent({
 <style>
 .fade-enter-active,
 .fade-leave-active {
-  transition: transform 1s ease, opacity 1s ease;
+  transition:
+    transform 1s ease,
+    opacity 1s ease;
 }
 .mint-card.q-loading {
   opacity: 0.5; /* Reduce opacity when loading */

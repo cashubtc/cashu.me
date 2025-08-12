@@ -1,21 +1,26 @@
-import { exportFile } from 'quasar';
-import { format } from 'date-fns';
-import token from 'src/js/token';
-import type { MessengerMessage } from 'src/stores/messenger';
+import { exportFile } from "quasar";
+import { format } from "date-fns";
+import token from "src/js/token";
+import type { MessengerMessage } from "src/stores/messenger";
 
 export function saveReceipt(msg: MessengerMessage) {
   if (!msg.subscriptionPayment) return;
   const decoded = token.decode(msg.subscriptionPayment.token);
-  const amount = decoded ? token.getProofs(decoded).reduce((s, p) => s + p.amount, 0) : 0;
-  const mintUrl = decoded ? token.getMint(decoded) : '';
+  const amount = decoded
+    ? token.getProofs(decoded).reduce((s, p) => s + p.amount, 0)
+    : 0;
+  const mintUrl = decoded ? token.getMint(decoded) : "";
   const data = {
     rawToken: msg.subscriptionPayment.token,
     amount,
     mintUrl,
     unlock_time: msg.subscriptionPayment.unlock_time,
   };
-  const fileName = `fundstr_${msg.subscriptionPayment.subscription_id}_${format(new Date(), 'yyyyMMdd-HHmmss')}.json`;
-  exportFile(fileName, JSON.stringify(data, null, 2), 'application/json');
+  const fileName = `fundstr_${msg.subscriptionPayment.subscription_id}_${format(
+    new Date(),
+    "yyyyMMdd-HHmmss",
+  )}.json`;
+  exportFile(fileName, JSON.stringify(data, null, 2), "application/json");
 }
 
 export type Receipt = {
@@ -69,11 +74,13 @@ export function formatTimestamp(ts: number): string {
   return `${d.getFullYear()}-${("0" + (d.getMonth() + 1)).slice(-2)}-${
     "0" + d.getDate()
   }.slice(-2) ${("0" + d.getHours()).slice(-2)}:${("0" + d.getMinutes()).slice(
-    -2
+    -2,
   )}`;
 }
 
-export function parseSubscriptionDm(text: string): SubscriptionDmPayload | undefined {
+export function parseSubscriptionDm(
+  text: string,
+): SubscriptionDmPayload | undefined {
   try {
     const obj = JSON.parse(text);
     if (obj?.type !== "cashu_subscription_payment" || !obj.token) return;

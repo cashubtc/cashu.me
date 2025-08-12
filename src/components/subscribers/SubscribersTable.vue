@@ -35,13 +35,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
-import { useI18n } from 'vue-i18n';
-import { useSubscribersStore } from 'src/stores/subscribersStore';
-import { storeToRefs } from 'pinia';
-import type { Subscriber } from 'src/types/subscriber';
+import { ref, computed } from "vue";
+import { useI18n } from "vue-i18n";
+import { useSubscribersStore } from "src/stores/subscribersStore";
+import { storeToRefs } from "pinia";
+import type { Subscriber } from "src/types/subscriber";
 
-defineOptions({ name: 'SubscribersTable' });
+defineOptions({ name: "SubscribersTable" });
 
 const props = defineProps<{ subscribers: Subscriber[] }>();
 
@@ -52,13 +52,48 @@ const store = useSubscribersStore();
 const { density, visibleColumns, viewMode } = storeToRefs(store);
 
 const columns = [
-  { name: 'subscriber', label: t('CreatorSubscribers.columns.subscriber'), field: 'name', align: 'left' },
-  { name: 'tier', label: t('CreatorSubscribers.columns.tier'), field: 'tierName', align: 'left' },
-  { name: 'frequency', label: t('CreatorSubscribers.columns.frequency'), field: 'frequency', align: 'left' },
-  { name: 'status', label: t('CreatorSubscribers.columns.status'), field: 'status', align: 'left' },
-  { name: 'amount', label: t('CreatorSubscribers.columns.amount'), field: 'amountSat', align: 'right' },
-  { name: 'nextRenewal', label: t('CreatorSubscribers.columns.nextRenewal'), field: 'nextRenewal', align: 'left' },
-  { name: 'lifetime', label: t('CreatorSubscribers.columns.lifetime'), field: 'lifetimeSat', align: 'right' },
+  {
+    name: "subscriber",
+    label: t("CreatorSubscribers.columns.subscriber"),
+    field: "name",
+    align: "left",
+  },
+  {
+    name: "tier",
+    label: t("CreatorSubscribers.columns.tier"),
+    field: "tierName",
+    align: "left",
+  },
+  {
+    name: "frequency",
+    label: t("CreatorSubscribers.columns.frequency"),
+    field: "frequency",
+    align: "left",
+  },
+  {
+    name: "status",
+    label: t("CreatorSubscribers.columns.status"),
+    field: "status",
+    align: "left",
+  },
+  {
+    name: "amount",
+    label: t("CreatorSubscribers.columns.amount"),
+    field: "amountSat",
+    align: "right",
+  },
+  {
+    name: "nextRenewal",
+    label: t("CreatorSubscribers.columns.nextRenewal"),
+    field: "nextRenewal",
+    align: "left",
+  },
+  {
+    name: "lifetime",
+    label: t("CreatorSubscribers.columns.lifetime"),
+    field: "lifetimeSat",
+    align: "right",
+  },
 ];
 
 const pagination = ref({ page: 1, rowsPerPage: 25 });
@@ -71,7 +106,7 @@ const paginatedRows = computed(() => {
 });
 
 function onRowClick(_evt: Event, row: Subscriber) {
-  emit('select', row);
+  emit("select", row);
 }
 
 defineExpose({ pagination, paginatedRows });

@@ -15,7 +15,7 @@ try {
 } catch (err) {
   console.warn(
     `Failed to load locale ${locale}, falling back to ${fallbackLocale}`,
-    err
+    err,
   );
   locale = fallbackLocale;
   messages[locale] = await loadMessages(fallbackLocale);

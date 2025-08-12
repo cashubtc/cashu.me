@@ -1,5 +1,5 @@
-import { defineStore } from 'pinia';
-import { useLocalStorage } from '@vueuse/core';
+import { defineStore } from "pinia";
+import { useLocalStorage } from "@vueuse/core";
 
 export interface CreatorProfile {
   display_name: string;
@@ -21,15 +21,15 @@ function snapshot(p: CreatorProfile) {
   });
 }
 
-export const useCreatorProfileStore = defineStore('creatorProfile', {
+export const useCreatorProfileStore = defineStore("creatorProfile", {
   state: () => ({
-    display_name: useLocalStorage<string>('creatorProfile.display_name', ''),
-    picture: useLocalStorage<string>('creatorProfile.picture', ''),
-    about: useLocalStorage<string>('creatorProfile.about', ''),
-    pubkey: useLocalStorage<string>('creatorProfile.pubkey', ''),
-    mints: useLocalStorage<string[]>('creatorProfile.mints', []),
-    relays: useLocalStorage<string[]>('creatorProfile.relays', []),
-    _clean: '',
+    display_name: useLocalStorage<string>("creatorProfile.display_name", ""),
+    picture: useLocalStorage<string>("creatorProfile.picture", ""),
+    about: useLocalStorage<string>("creatorProfile.about", ""),
+    pubkey: useLocalStorage<string>("creatorProfile.pubkey", ""),
+    mints: useLocalStorage<string[]>("creatorProfile.mints", []),
+    relays: useLocalStorage<string[]>("creatorProfile.relays", []),
+    _clean: "",
   }),
   getters: {
     profile(state): { display_name: string; picture: string; about: string } {
@@ -45,7 +45,8 @@ export const useCreatorProfileStore = defineStore('creatorProfile', {
   },
   actions: {
     setProfile(data: Partial<CreatorProfile>) {
-      if (data.display_name !== undefined) this.display_name = data.display_name;
+      if (data.display_name !== undefined)
+        this.display_name = data.display_name;
       if (data.picture !== undefined) this.picture = data.picture;
       if (data.about !== undefined) this.about = data.about;
       if (data.pubkey !== undefined) this.pubkey = data.pubkey;

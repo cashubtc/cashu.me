@@ -131,9 +131,7 @@
     <div class="col-12 cursor-pointer" @click="openBucketDetail(bucket)">
       <span class="q-my-none q-py-none text-weight-regular">
         {{ bucket.name }}:
-        <b>{{
-          formatCurrency(bucketBalances[bucket.id] || 0, activeUnit)
-        }}</b>
+        <b>{{ formatCurrency(bucketBalances[bucket.id] || 0, activeUnit) }}</b>
         <span v-if="bucket.goal"
           >/ {{ formatCurrency(bucket.goal, activeUnit) }}</span
         >

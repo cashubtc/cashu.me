@@ -14,7 +14,9 @@ beforeEach(() => {
 vi.mock("../../../src/stores/wallet", () => ({
   useWalletStore: () => ({
     wallet: {},
-    sendToLock: vi.fn(async (...args) => ({ locked: { id: "id", tokenString: "tok" } })),
+    sendToLock: vi.fn(async (...args) => ({
+      locked: { id: "id", tokenString: "tok" },
+    })),
   }),
 }));
 
@@ -83,7 +85,7 @@ describe("Donation presets", () => {
       validPub,
       "b",
       undefined,
-      true
+      true,
     )) as any[];
     expect(Array.isArray(res)).toBe(true);
     expect(res.length).toBe(2);

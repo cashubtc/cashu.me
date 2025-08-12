@@ -111,7 +111,7 @@ describe("lastEventTimestamp", () => {
     const future = Math.floor(Date.now() / 1000) + 1000;
     localStorage.setItem(
       "cashu.ndk.lastEventTimestamp",
-      JSON.stringify(future)
+      JSON.stringify(future),
     );
     const store = useNostrStore();
     const now = Math.floor(Date.now() / 1000);

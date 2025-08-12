@@ -61,12 +61,12 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
-import { useQuasar } from 'quasar';
-import { formatDistanceToNow } from 'date-fns';
-import { useMintsStore } from 'stores/mints';
-import { useUiStore } from 'stores/ui';
-import type { CreatorSubscription } from 'stores/creatorSubscriptions';
+import { computed } from "vue";
+import { useQuasar } from "quasar";
+import { formatDistanceToNow } from "date-fns";
+import { useMintsStore } from "stores/mints";
+import { useUiStore } from "stores/ui";
+import type { CreatorSubscription } from "stores/creatorSubscriptions";
 
 const props = defineProps<{
   profile: any;
@@ -75,8 +75,8 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: 'select'): void;
-  (e: 'open'): void;
+  (e: "select"): void;
+  (e: "open"): void;
 }>();
 
 const uiStore = useUiStore();
@@ -87,7 +87,7 @@ function formatCurrency(amount: number): string {
   return uiStore.formatCurrency(amount, activeUnit.value);
 }
 
-const cardHeight = computed(() => (props.compact ? '96px' : '120px'));
+const cardHeight = computed(() => (props.compact ? "96px" : "120px"));
 
 const initials = computed(() => {
   const n =
@@ -99,7 +99,7 @@ const initials = computed(() => {
     .filter(Boolean)
     .slice(0, 2)
     .map((p: string) => p[0])
-    .join('')
+    .join("")
     .toUpperCase();
 });
 
@@ -112,8 +112,8 @@ const displayName = computed(
 
 const nip05Domain = computed(() => {
   const nip05 = props.profile?.nip05;
-  if (!nip05) return '';
-  return nip05.split('@')[1] || nip05;
+  if (!nip05) return "";
+  return nip05.split("@")[1] || nip05;
 });
 
 const amountPerInterval = computed(() => {
@@ -129,25 +129,25 @@ const lifetimeTotal = computed(() =>
 );
 
 const statusColor = computed(() => {
-  if (props.subscription.status === 'active') return 'positive';
-  if (props.subscription.status === 'pending') return 'warning';
-  return 'negative';
+  if (props.subscription.status === "active") return "positive";
+  if (props.subscription.status === "pending") return "warning";
+  return "negative";
 });
 
 const statusTextColor = computed(() =>
-  props.subscription.status === 'pending' ? 'black' : 'white'
+  props.subscription.status === "pending" ? "black" : "white",
 );
 
 const statusIcon = computed(() =>
-  props.subscription.status === 'active'
-    ? 'check'
-    : props.subscription.status === 'pending'
-    ? 'schedule'
-    : 'close'
+  props.subscription.status === "active"
+    ? "check"
+    : props.subscription.status === "pending"
+      ? "schedule"
+      : "close",
 );
 
 const renewsText = computed(() => {
-  if (!props.subscription.nextRenewal) return 'renews in —';
+  if (!props.subscription.nextRenewal) return "renews in —";
   return `renews in ${formatDistanceToNow(
     props.subscription.nextRenewal * 1000,
   )}`;

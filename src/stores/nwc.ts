@@ -73,7 +73,7 @@ export const useNWCStore = defineStore("nwc", {
     connections: useLocalStorage<NWCConnection[]>("cashu.nwc.connections", []),
     seenCommandsUntil: useLocalStorage<number>(
       "cashu.nwc.seenCommandsUntil",
-      0
+      0,
     ),
     supportedMethods: [
       "pay_invoice",
@@ -85,7 +85,7 @@ export const useNWCStore = defineStore("nwc", {
     ],
     relays: useLocalStorage<string[]>(
       "cashu.nwc.relays",
-      useSettingsStore().defaultNostrRelays
+      useSettingsStore().defaultNostrRelays,
     ),
     blocking: false,
     subscriptions: [] as NDKSubscription[],
@@ -195,7 +195,7 @@ export const useNWCStore = defineStore("nwc", {
       const walletStore = useWalletStore();
       const quote = await walletStore.requestMint(
         amount / 1000,
-        walletStore.wallet
+        walletStore.wallet,
       );
       if (!quote) {
         return {
@@ -265,7 +265,10 @@ export const useNWCStore = defineStore("nwc", {
       // According to the NWC spec (NIP47): "Transactions are returned in descending order of creation time."
       const transactions = transactionsHistory
         .map(this.mapToNwcTransaction)
-        .sort((a: any, b: any) => (b.created_at as number) - (a.created_at as number));
+        .sort(
+          (a: any, b: any) =>
+            (b.created_at as number) - (a.created_at as number),
+        );
 
       return {
         result_type: "list_transactions",
@@ -297,7 +300,7 @@ export const useNWCStore = defineStore("nwc", {
         const decoded = decodeBolt11(nwcCommand.params.invoice);
         // @ts-ignore
         const invHash = decoded.sections.find(
-          (s) => s.name === "payment_hash"
+          (s) => s.name === "payment_hash",
         )?.value;
         if (invHash === hash) {
           return {
@@ -337,7 +340,7 @@ export const useNWCStore = defineStore("nwc", {
     replyNWC: async function (
       result: NWCResult | NWCError,
       event: NDKEvent,
-      conn: NWCConnection
+      conn: NWCConnection,
     ) {
       // reply to NWC with result
       const ndk = await useNdk();
@@ -364,7 +367,7 @@ export const useNWCStore = defineStore("nwc", {
     parseNWCCommand: async function (
       command: string,
       event: NDKEvent,
-      conn: NWCConnection
+      conn: NWCConnection,
     ) {
       // parse command to JSON object {method: 'pay_invoice', params: {invoice: '1234'}}
       let nwcCommand: NWCCommand;
@@ -424,7 +427,7 @@ export const useNWCStore = defineStore("nwc", {
       const walletPublicKeyHex = connection.walletPublicKey;
       const connectionSecretHex = connection.connectionSecret;
       return `nostr+walletconnect://${walletPublicKeyHex}?relay=${nostr.relays.join(
-        "&relay="
+        "&relay=",
       )}&secret=${connectionSecretHex}`;
     },
     generateNWCConnection: async function () {
@@ -500,7 +503,7 @@ export const useNWCStore = defineStore("nwc", {
       this.subscriptions.push(sub);
 
       sub.on("eose", () =>
-        debug("All relays have reached the end of the event stream")
+        debug("All relays have reached the end of the event stream"),
       );
       sub.on("close", () => debug("Subscription closed"));
 

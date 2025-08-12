@@ -18,17 +18,14 @@ export const useSubscribersStore = defineStore("subscribers", {
     freq: new Set<Frequency>(freqStorage.value as Frequency[]),
     tier: new Set<string>(tierStorage.value),
     sort: useLocalStorage<SortOption>("subscribers.sort", "next"),
-    visibleColumns: useLocalStorage<string[]>(
-      "subscribers.visibleColumns",
-      []
-    ),
+    visibleColumns: useLocalStorage<string[]>("subscribers.visibleColumns", []),
     density: useLocalStorage<"comfortable" | "compact">(
       "subscribers.density",
-      "comfortable"
+      "comfortable",
     ),
     viewMode: useLocalStorage<"table" | "card">(
       "subscribers.viewMode",
-      "table"
+      "table",
     ),
     savedViews: [] as Array<{
       id: string;
@@ -134,7 +131,11 @@ export const useSubscribersStore = defineStore("subscribers", {
     },
     async loadPrefs() {
       const views = await cashuDb.subscriberViews.toArray();
-      this.savedViews = views.map((v) => ({ id: v.id, name: v.name, state: v.state }));
+      this.savedViews = views.map((v) => ({
+        id: v.id,
+        name: v.name,
+        state: v.state,
+      }));
       const pref = await cashuDb.subscriberViewPrefs.get("prefs");
       this.activeViewId = pref?.activeViewId ?? null;
       if (this.activeViewId) {
