@@ -14,8 +14,7 @@ jobs:
         uses: pnpm/action-setup@v4
         with:
           # If your package.json has "packageManager": "pnpm@x.y.z" you can omit version
-          version: 9
-          run_install: false
+                    run_install: false
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
