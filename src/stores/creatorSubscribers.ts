@@ -24,6 +24,7 @@ export const useCreatorSubscribersStore = defineStore("creatorSubscribers", {
     _dbSub: null as { unsubscribe(): void } | null,
     activeTab: "all" as Tab,
     loading: false,
+    profilesLoading: false,
     error: null as string | null,
   }),
   getters: {
@@ -247,7 +248,7 @@ export const useCreatorSubscribersStore = defineStore("creatorSubscribers", {
     },
     async fetchProfiles() {
       const nostr = useNostrStore();
-      this.loading = true;
+      this.profilesLoading = true;
       this.error = null;
       try {
         const unique = Array.from(new Set(this.subscribers.map((s) => s.npub)));
@@ -294,7 +295,7 @@ export const useCreatorSubscribersStore = defineStore("creatorSubscribers", {
         console.error(e);
         this.error = e instanceof Error ? e.message : String(e);
       } finally {
-        this.loading = false;
+        this.profilesLoading = false;
       }
     },
     setActiveTab(tab: Tab) {

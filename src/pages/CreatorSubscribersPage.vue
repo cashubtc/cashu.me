@@ -137,6 +137,12 @@
         <q-inner-loading :showing="loading">
           <q-spinner size="50px" color="primary" />
         </q-inner-loading>
+        <q-linear-progress
+          v-if="!loading && profilesLoading"
+          indeterminate
+          color="primary"
+          class="q-mb-md"
+        />
         <!-- KPI Row -->
         <div class="q-mb-lg">
           <div class="text-h6 q-mb-md">Subscribers Overview</div>
@@ -374,7 +380,8 @@ const $q = useQuasar();
 
 const subStore = useCreatorSubscribersStore();
 const viewStore = useSubscribersStore();
-const { filtered, counts, activeTab, loading, error } = storeToRefs(subStore);
+const { filtered, counts, activeTab, loading, profilesLoading, error } =
+  storeToRefs(subStore);
 // `filtered` is maintained by the Pinia store based on the active tab,
 // search query and filter drawer. Treat it as the single source of truth
 // for the subscriber list and KPI counts throughout this page.
@@ -584,6 +591,7 @@ const densityOptions = computed(() => [
 
 onMounted(() => {
   void subStore.loadFromDb();
+  void subStore.fetchProfiles();
 });
 
 // When the list of subscribers changes, fetch profiles for any new npubs.
