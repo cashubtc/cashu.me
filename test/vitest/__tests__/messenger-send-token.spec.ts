@@ -22,6 +22,7 @@ vi.mock("../../../src/stores/nostr", async (importOriginal) => {
       pubkey: "pub",
       signerType: "seed",
       connected: true,
+      lastError: null,
       relays: [] as string[],
       get privKeyHex() {
         return this.privateKeySignerPrivateKey;

@@ -29,6 +29,8 @@ const nostrStoreMock = {
   initSignerIfNotSet: vi.fn(),
   getProfile: vi.fn(async () => null),
   relays: [] as string[],
+  connected: true,
+  lastError: null,
 };
 
 vi.mock('../../../src/stores/nostr', async (importOriginal) => {

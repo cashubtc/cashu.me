@@ -28,6 +28,7 @@ vi.mock("../../../src/stores/nostr", async (importOriginal) => {
     seedSignerPrivateKey: "",
     pubkey: "pub",
     connected: true,
+    lastError: null,
     relays: [] as string[],
   };
   Object.defineProperty(store, "privKeyHex", {

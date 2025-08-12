@@ -62,6 +62,7 @@ import { frequencyToDays } from "src/constants/subscriptionFrequency";
 
 const STORAGE_SECRET = "cashu_ndk_storage_key";
 let cachedKey: CryptoKey | null = null;
+const RECONNECT_BACKOFF_MS = 15000; // 15s cooldown after failed attempts
 
 async function getKey(): Promise<CryptoKey> {
   if (cachedKey) return cachedKey;
@@ -512,6 +513,7 @@ export const useNostrStore = defineStore("nostr", {
       initialized: false,
       secureStorageLoaded: false,
       lastError: '' as string | null,
+      reconnectBackoffUntil: 0,
       lastEventTimestamp,
       nip17EventIdsWeHaveSeen: useLocalStorage<NostrEventLog[]>(
         "cashu.ndk.nip17EventIdsWeHaveSeen",
@@ -601,6 +603,7 @@ export const useNostrStore = defineStore("nostr", {
       try {
         await ndk.connect();
         this.connected = true;
+        this.lastError = null;
       } catch (e: any) {
         console.warn("[nostr] read-only connect failed", e);
         notifyWarning(
@@ -608,6 +611,7 @@ export const useNostrStore = defineStore("nostr", {
           e?.message ?? String(e)
         );
         this.connected = false;
+        this.lastError = e?.message ?? String(e);
       }
     },
     disconnect: async function () {
@@ -628,6 +632,11 @@ export const useNostrStore = defineStore("nostr", {
       }
     },
     connect: async function (relays?: string[]) {
+      // respect cooldown if previous attempt failed
+      if (this.reconnectBackoffUntil && Date.now() < this.reconnectBackoffUntil) {
+        return;
+      }
+
       // 1. remember desired relay set
       if (relays) this.relays = relays as any;
 
@@ -642,9 +651,12 @@ export const useNostrStore = defineStore("nostr", {
       try {
         await Promise.any(connectPromises);
         this.connected = true;
+        this.lastError = null;
+        this.reconnectBackoffUntil = 0;
       } catch (e:any) {
         this.connected = false;
         this.lastError = e?.message ?? String(e);
+        this.reconnectBackoffUntil = Date.now() + RECONNECT_BACKOFF_MS;
         notifyError(this.lastError);
       }
 

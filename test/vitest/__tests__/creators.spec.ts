@@ -13,6 +13,8 @@ const nostrStoreMock = {
   fetchFollowerCount: vi.fn().mockResolvedValue(10),
   fetchFollowingCount: vi.fn().mockResolvedValue(5),
   fetchJoinDate: vi.fn().mockResolvedValue(123456),
+  connected: true,
+  lastError: null,
 };
 
 vi.mock("../../../src/stores/nostr", async (importOriginal) => {
