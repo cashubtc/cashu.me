@@ -29,4 +29,4 @@ jobs:
       - name: Run tests
         env:
           CI: true
-        run: pnpm run test:ci
+        run: pnpm vitest run -c vitest.skip.mts
