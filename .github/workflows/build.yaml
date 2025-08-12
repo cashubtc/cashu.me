@@ -1,33 +1,22 @@
 name: Check build
-
-on: [push, pull_request]
-
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
 jobs:
-  build: # required check name
+  build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      # Install pnpm BEFORE setup-node when using cache: pnpm
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
         with:
-          # If your package.json has "packageManager": "pnpm@x.y.z" you can omit version
+          version: 10.11.0
           run_install: false
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: "20"
-          cache: "pnpm"
-          cache-dependency-path: pnpm-lock.yaml
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Build
-        run: pnpm run build
-
-      - name: Build PWA
-        run: pnpm run build:pwa
+          node-version: 20
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run build
+      - run: pnpm run build:pwa
