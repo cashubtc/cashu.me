@@ -53,6 +53,8 @@ const nostrStoreMock = {
   signer: "sig",
   pubkey: "pub",
   relays: [] as string[],
+  connected: true,
+  lastError: null,
 };
 
 vi.mock("../../../src/stores/nostr", async (importOriginal) => {

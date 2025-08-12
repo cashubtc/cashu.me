@@ -55,6 +55,8 @@ vi.mock('src/stores/nostr', () => ({
   useNostrStore: () => ({
     initNdkReadOnly: vi.fn().mockResolvedValue(undefined),
     resolvePubkey: (s: string) => s,
+    connected: true,
+    lastError: null,
   }),
 }));
 vi.mock('src/composables/useNdk', () => {

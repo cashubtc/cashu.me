@@ -9,7 +9,7 @@ vi.mock("../../../src/stores/nostr", async (importOriginal) => {
   return {
     ...actual,
     subscribeToNostr: (...args: any[]) => subMock(...args),
-    useNostrStore: () => ({}),
+    useNostrStore: () => ({ connected: true, lastError: null }),
   };
 });
 

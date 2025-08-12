@@ -265,6 +265,19 @@ export const useCreatorSubscribersStore = defineStore("creatorSubscribers", {
           return;
         }
 
+        if (!nostr.connected) {
+          this.subscribers = this.subscribers.map((s) => {
+            const cached = this.profileCache[s.npub];
+            return {
+              ...s,
+              name: cached?.name || s.name || s.npub,
+              nip05: cached?.nip05 || s.nip05 || "",
+            };
+          });
+          this.error = nostr.lastError;
+          return;
+        }
+
         if (!navigator.onLine && this.profilesBatchFetchedAt) {
           this.subscribers = this.subscribers.map((s) => {
             const cached = this.profileCache[s.npub];
