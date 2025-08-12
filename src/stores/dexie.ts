@@ -572,28 +572,8 @@ export class CashuDexie extends Dexie {
           "&id, creatorNpub, tierId, status, createdAt, updatedAt, frequency, intervalDays",
         lockedTokens:
           "&id, tokenString, owner, tierId, intervalKey, unlockTs, status, subscriptionEventId, subscriptionId, monthIndex, totalPeriods, autoRedeem, frequency, intervalDays",
-        subscriberViews: "&id, name",
+        subscriberViews: "&name",
         subscriberViewPrefs: "&id",
-      })
-      .upgrade(async (tx) => {
-        const oldViews = await tx.table("subscriberViews").toArray();
-        await tx.table("subscriberViews").clear();
-        await tx.table("subscriberViews").bulkAdd(
-          oldViews.map((v: any) => ({
-            id: v.name,
-            name: v.name,
-            state: {
-              query: v.query,
-              status: v.status,
-              freq: v.freq,
-              tier: v.tier,
-              sort: v.sort,
-              visibleColumns: v.visibleColumns,
-              density: v.density,
-              viewMode: v.viewMode,
-            },
-          }))
-        );
       });
   }
 }
