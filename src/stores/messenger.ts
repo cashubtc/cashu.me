@@ -116,7 +116,10 @@ export const useMessengerStore = defineStore("messenger", {
   },
   actions: {
     normalizeKey(pk: string): string {
-      return useNostrStore().resolvePubkey(pk);
+      const ns: any = useNostrStore();
+      return typeof ns?.resolvePubkey === "function"
+        ? ns.resolvePubkey(pk)
+        : pk;
     },
     normalizeStoredConversations() {
       // normalize conversation keys and merge duplicates

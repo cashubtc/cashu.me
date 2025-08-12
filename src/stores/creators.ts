@@ -222,9 +222,11 @@ export const useCreatorsStore = defineStore("creators", {
           notifyWarning("Unable to retrieve subscription tiers");
           return;
         }
-        const url = indexerUrl.includes("{pubkey}")
+        const url = String(indexerUrl).includes("{pubkey}")
           ? indexerUrl.replace("{pubkey}", hex)
-          : `${indexerUrl}${indexerUrl.includes("?") ? "&" : "?"}pubkey=${hex}`;
+          : `${indexerUrl}${
+              String(indexerUrl).includes("?") ? "&" : "?"
+            }pubkey=${hex}`;
         try {
           const controller = new AbortController();
           const id = setTimeout(() => controller.abort(), 8000);
