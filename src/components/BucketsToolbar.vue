@@ -17,7 +17,7 @@
       text-color="white"
       :options="[
         { label: 'Active', value: 'active' },
-        { label: 'Archived', value: 'archived' }
+        { label: 'Archived', value: 'archived' },
       ]"
     />
     <q-select
@@ -27,7 +27,7 @@
       class="bg-slate-800"
       :options="[
         { label: 'Name', value: 'name' },
-        { label: 'Balance', value: 'balance' }
+        { label: 'Balance', value: 'balance' },
       ]"
     />
     <q-space />
@@ -36,7 +36,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed } from "vue";
 
 const props = defineProps<{
   search: string;
@@ -45,23 +45,23 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  'update:search': [string];
-  'update:viewMode': [string];
-  'update:sort': [string];
-  'move-tokens': [];
+  "update:search": [string];
+  "update:viewMode": [string];
+  "update:sort": [string];
+  "move-tokens": [];
 }>();
 
 const modelSearch = computed({
   get: () => props.search,
-  set: (val: string) => emit('update:search', val),
+  set: (val: string) => emit("update:search", val),
 });
 const modelViewMode = computed({
   get: () => props.viewMode,
-  set: (val: string) => emit('update:viewMode', val),
+  set: (val: string) => emit("update:viewMode", val),
 });
 const modelSort = computed({
   get: () => props.sort,
-  set: (val: string) => emit('update:sort', val),
+  set: (val: string) => emit("update:sort", val),
 });
 </script>
 

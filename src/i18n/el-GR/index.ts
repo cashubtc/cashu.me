@@ -768,7 +768,7 @@ export default {
         },
       },
     },
-    
+
     swap: {
       title: "Ανταλλαγή",
       overline: "Ανταλλαγές Multimint",
@@ -786,7 +786,6 @@ export default {
         },
       },
       actions: {
-        
         swap: {
           label: "@:global.actions.swap.label",
           in_progress: "@:MintSettings.swap.actions.swap.label",
@@ -981,18 +980,18 @@ export default {
         label_known_mint: "@:ReceiveTokenDialog.actions.receive.label",
         label_adding_mint: "Προσθήκη mint…",
       },
-      
+
       swap: {
         label: "@:global.actions.swap.label",
         tooltip_text: "Ανταλλαγή σε αξιόπιστο mint",
         caption: "Ανταλλαγή { value }",
       },
-      
+
       cancel_swap: {
         label: "@:global.actions.cancel.label",
         tooltip_text: "Ακύρωση ανταλλαγής",
       },
-      
+
       confirm_swap: {
         label: "@:ReceiveTokenDialog.actions.swap.label",
         tooltip_text: "@:ReceiveTokenDialog.actions.swap.tooltip_text",
@@ -1382,7 +1381,7 @@ export default {
       },
     },
   },
-  
+
   swap: {
     in_progress_warning_text: "Η ανταλλαγή βρίσκεται σε εξέλιξη",
     invalid_swap_data_error_text: "Μη έγκυρα δεδομένα ανταλλαγής",
@@ -1448,7 +1447,7 @@ export default {
         description: "Ανακαλύψτε δημιουργούς για υποστήριξη.",
         icon: "img:icons/find-creators.svg",
       },
-      
+
       myProfile: {
         description: "Προβάλετε και επεξεργαστείτε το προφίλ σας.",
         icon: "person",
@@ -1513,7 +1512,7 @@ export default {
           creator:
             "Your public storefront as seen by visitors. Great for a quick audit of how your profile appears worldwide.",
         },
-        
+
         myProfile: {
           fan: "Show off your avatar, npub link and optional NIP-05. Personal stats: total zaps sent & received, bucket balances.",
           creator:

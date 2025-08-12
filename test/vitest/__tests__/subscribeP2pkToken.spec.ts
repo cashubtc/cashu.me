@@ -14,7 +14,9 @@ vi.mock("../../../src/stores/p2pk", () => ({
     firstKey: { publicKey: "key" },
     getTokenPubkey: (t: string) => {
       try {
-        const decoded = JSON.parse(Buffer.from(t.slice(6), "base64").toString());
+        const decoded = JSON.parse(
+          Buffer.from(t.slice(6), "base64").toString()
+        );
         const secret = decoded.token[0].proofs[0].secret;
         const obj = JSON.parse(secret);
         if (Array.isArray(obj)) return obj[1].data;

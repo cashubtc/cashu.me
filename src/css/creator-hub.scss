@@ -50,7 +50,10 @@
 }
 
 /* Compact spacing utilities */
-$compact-spacing: (xs: 4px, sm: 8px);
+$compact-spacing: (
+  xs: 4px,
+  sm: 8px,
+);
 
 @each $name, $size in $compact-spacing {
   .m-#{$name} {
@@ -100,4 +103,3 @@ $compact-spacing: (xs: 4px, sm: 8px);
     padding-left: $size;
   }
 }
-

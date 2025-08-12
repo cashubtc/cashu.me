@@ -7,7 +7,7 @@ import {
 	PaymentRequestTransport,
 	PaymentRequestTransportType
 } from './types';
-import 'buffer'
+import 'buffer';
 declare const Buffer: any;
 
 export class PaymentRequest {

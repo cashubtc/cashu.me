@@ -17,7 +17,7 @@
     </div>
 
     <q-dialog v-model="deleteDialog">
-      <q-card class="p-4" style="max-width:400px">
+      <q-card class="p-4" style="max-width: 400px">
         <q-card-section class="row items-center">
           <q-icon name="warning" color="red" size="2rem" />
           <span class="ml-2">Are you sure you want to delete this tier?</span>
@@ -32,16 +32,16 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue';
-import Draggable from 'vuedraggable';
-import TierCard from './TierCard.vue';
-import { useCreatorHubStore } from 'stores/creatorHub';
-import type { Tier } from 'stores/types';
-import { v4 as uuidv4 } from 'uuid';
+import { ref, watch } from "vue";
+import Draggable from "vuedraggable";
+import TierCard from "./TierCard.vue";
+import { useCreatorHubStore } from "stores/creatorHub";
+import type { Tier } from "stores/types";
+import { v4 as uuidv4 } from "uuid";
 
 const store = useCreatorHubStore();
 const deleteDialog = ref(false);
-const deleteId = ref('');
+const deleteId = ref("");
 const draggableTiers = ref<Tier[]>([]);
 
 watch(
@@ -49,7 +49,7 @@ watch(
   (val) => {
     draggableTiers.value = [...val];
   },
-  { immediate: true },
+  { immediate: true }
 );
 
 function updateOrder() {
@@ -60,11 +60,11 @@ function addTier() {
   const id = uuidv4();
   store.addTier({
     id,
-    name: '',
+    name: "",
     price_sats: 0,
-    description: '',
-    welcomeMessage: '',
-    frequency: 'monthly',
+    description: "",
+    welcomeMessage: "",
+    frequency: "monthly",
     intervalDays: 30,
   });
 }

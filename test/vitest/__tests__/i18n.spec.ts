@@ -6,6 +6,8 @@ describe("i18n SendBucketDmDialog", () => {
   it("loads de-DE translation", async () => {
     const messages = { "de-DE": await loadMessages("de-DE") };
     const i18n = createI18n({ legacy: false, locale: "de-DE", messages });
-    expect(i18n.global.t("SendBucketDmDialog.options.proofs")).toBe("Select Tokens");
+    expect(i18n.global.t("SendBucketDmDialog.options.proofs")).toBe(
+      "Select Tokens"
+    );
   });
 });

@@ -19,9 +19,9 @@ export * from './model/types/index.js';
 
 export {
 	CashuMint,
-        CashuWallet,
-        splitWithSecret,
-        CashuAuthMint,
+	CashuWallet,
+	splitWithSecret,
+	CashuAuthMint,
 	CashuAuthWallet,
 	getEncodedAuthToken,
 	getBlindedAuthToken,

@@ -1,10 +1,10 @@
-import { defineStore } from 'pinia';
-import { useLocalStorage } from '@vueuse/core';
-import { LOCAL_STORAGE_KEYS } from 'src/constants/localStorageKeys';
-import { InvoiceHistory } from 'src/types/invoice';
-import { MeltQuoteResponse } from '@cashu/cashu-ts';
+import { defineStore } from "pinia";
+import { useLocalStorage } from "@vueuse/core";
+import { LOCAL_STORAGE_KEYS } from "src/constants/localStorageKeys";
+import { InvoiceHistory } from "src/types/invoice";
+import { MeltQuoteResponse } from "@cashu/cashu-ts";
 
-export const useInvoiceHistoryStore = defineStore('invoiceHistory', {
+export const useInvoiceHistoryStore = defineStore("invoiceHistory", {
   state: () => ({
     invoiceHistory: useLocalStorage<InvoiceHistory[]>(
       LOCAL_STORAGE_KEYS.CASHU_INVOICEHISTORY,
@@ -14,18 +14,18 @@ export const useInvoiceHistoryStore = defineStore('invoiceHistory', {
   actions: {
     setInvoicePaid(quoteId: string) {
       const invoice = this.invoiceHistory.find((i) => i.quote === quoteId);
-      if (invoice) invoice.status = 'paid';
+      if (invoice) invoice.status = "paid";
     },
     addOutgoingPendingInvoiceToHistory(quote: MeltQuoteResponse) {
       this.invoiceHistory.push({
         amount: -(quote.amount + quote.fee_reserve),
-        bolt11: '',
+        bolt11: "",
         quote: quote.quote,
-        memo: 'Outgoing invoice',
+        memo: "Outgoing invoice",
         date: new Date().toISOString(),
-        status: 'pending',
-        mint: '',
-        unit: '',
+        status: "pending",
+        mint: "",
+        unit: "",
         meltQuote: quote,
       });
     },
@@ -35,7 +35,7 @@ export const useInvoiceHistoryStore = defineStore('invoiceHistory', {
     },
     updateOutgoingInvoiceInHistory(
       quote: MeltQuoteResponse,
-      options?: { status?: 'pending' | 'paid'; amount?: number }
+      options?: { status?: "pending" | "paid"; amount?: number }
     ) {
       this.invoiceHistory
         .filter((i) => i.quote === quote.quote)

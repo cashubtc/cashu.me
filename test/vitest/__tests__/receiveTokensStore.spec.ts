@@ -7,7 +7,7 @@ const VALID_TOKEN =
 
 beforeEach(async () => {
   localStorage.clear();
-  await cashuDb.close();   // close() is safe under fake-indexeddb
+  await cashuDb.close(); // close() is safe under fake-indexeddb
   await cashuDb.open();
 });
 

@@ -1,4 +1,4 @@
-import 'buffer'
+import 'buffer';
 declare const Buffer: any;
 
 function encodeUint8toBase64(uint8array: Uint8Array): string {

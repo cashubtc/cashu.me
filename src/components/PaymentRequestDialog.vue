@@ -98,13 +98,9 @@
           {{ $t("PaymentRequestDialog.actions.new_request.label") }}</q-btn
         >
         <div class="row q-mt-lg">
-          <q-btn
-            class="q-mx-xs"
-            size="md"
-            flat
-            @click="copy(showPRKData)"
-            >{{ $t("PaymentRequestDialog.actions.copy.label") }}</q-btn
-          >
+          <q-btn class="q-mx-xs" size="md" flat @click="copy(showPRKData)">{{
+            $t("PaymentRequestDialog.actions.copy.label")
+          }}</q-btn>
           <q-btn v-close-popup flat color="grey" class="q-ml-auto">{{
             $t("PaymentRequestDialog.actions.close.label")
           }}</q-btn>
@@ -142,8 +138,8 @@ export default defineComponent({
   },
   data() {
     const amountLabelDefault = this.$t(
-        "PaymentRequestDialog.actions.add_amount.label"
-      );
+      "PaymentRequestDialog.actions.add_amount.label"
+    );
     return {
       paymentRequestAmount: undefined,
       isEditingAmount: false,
@@ -151,8 +147,8 @@ export default defineComponent({
       amountLabelDefault,
       amountLabel: amountLabelDefault,
       defaultAnyMint: this.$t(
-          "PaymentRequestDialog.actions.use_active_mint.label"
-        ),
+        "PaymentRequestDialog.actions.use_active_mint.label"
+      ),
       chosenMintUrl: undefined,
       memo: "",
     };

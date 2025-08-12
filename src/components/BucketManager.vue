@@ -25,7 +25,7 @@
             @click="moveSelected"
             aria-label="Move tokens"
           >
-            {{ $t('BucketDetail.move') }}
+            {{ $t("BucketDetail.move") }}
           </q-btn>
           <q-btn
             flat
@@ -35,7 +35,7 @@
             @click="toggleMultiSelect"
             aria-label="Deselect all"
           >
-            {{ $t('BucketManager.actions.deselect_all') }}
+            {{ $t("BucketManager.actions.deselect_all") }}
           </q-btn>
         </div>
       </template>
@@ -62,7 +62,10 @@
         </q-card>
       </div>
     </div>
-    <div v-else-if="filteredBuckets.length > 0" class="row q-col-gutter-md q-mb-md">
+    <div
+      v-else-if="filteredBuckets.length > 0"
+      class="row q-col-gutter-md q-mb-md"
+    >
       <div
         v-for="bucket in filteredBuckets"
         :key="bucket.id"
@@ -128,24 +131,24 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, computed, onMounted, nextTick } from 'vue';
-import { useI18n } from 'vue-i18n';
-import { useQuasar } from 'quasar';
-import { useBucketsStore } from 'stores/buckets';
-import { DEFAULT_BUCKET_ID } from '@/constants/buckets';
-import { useMintsStore } from 'stores/mints';
-import { useProofsStore } from 'stores/proofs';
-import { storeToRefs } from 'pinia';
-import { useUiStore } from 'stores/ui';
-import BucketCard from './BucketCard.vue';
-import BucketDialog from './BucketDialog.vue';
-import EditBucketModal from './EditBucketModal.vue';
-import BucketDetailModal from './BucketDetailModal.vue';
-import MoveTokensModal from './MoveTokensModal.vue';
-import BucketsToolbar from './BucketsToolbar.vue';
+import { defineComponent, ref, computed, onMounted, nextTick } from "vue";
+import { useI18n } from "vue-i18n";
+import { useQuasar } from "quasar";
+import { useBucketsStore } from "stores/buckets";
+import { DEFAULT_BUCKET_ID } from "@/constants/buckets";
+import { useMintsStore } from "stores/mints";
+import { useProofsStore } from "stores/proofs";
+import { storeToRefs } from "pinia";
+import { useUiStore } from "stores/ui";
+import BucketCard from "./BucketCard.vue";
+import BucketDialog from "./BucketDialog.vue";
+import EditBucketModal from "./EditBucketModal.vue";
+import BucketDetailModal from "./BucketDetailModal.vue";
+import MoveTokensModal from "./MoveTokensModal.vue";
+import BucketsToolbar from "./BucketsToolbar.vue";
 
 export default defineComponent({
-  name: 'BucketManager',
+  name: "BucketManager",
   components: {
     BucketCard,
     BucketDialog,
@@ -190,11 +193,11 @@ export default defineComponent({
       isLoading.value = false;
     });
 
-    const viewMode = ref('active');
+    const viewMode = ref("active");
 
     const bucketList = computed(() => bucketsStore.bucketList);
-    const searchTerm = ref('');
-    const sortBy = ref('name-asc');
+    const searchTerm = ref("");
+    const sortBy = ref("name-asc");
     const bucketBalances = computed(() => bucketsStore.bucketBalances);
 
     const activeBuckets = computed(() =>
@@ -214,35 +217,37 @@ export default defineComponent({
       const term = searchTerm.value.toLowerCase();
       const list = bucketList.value
         .filter((b) => {
-          if (viewMode.value === 'archived') return b.isArchived;
-          if (viewMode.value === 'active') return !b.isArchived;
+          if (viewMode.value === "archived") return b.isArchived;
+          if (viewMode.value === "active") return !b.isArchived;
           return true;
         })
         .filter((b) => {
-          const name = (b.name || '').toLowerCase();
-          const description = (b.description || '').toLowerCase();
+          const name = (b.name || "").toLowerCase();
+          const description = (b.description || "").toLowerCase();
           return name.includes(term) || description.includes(term);
         });
       const sorted = [...list];
       switch (sortBy.value) {
-        case 'name-desc':
-          sorted.sort((a, b) => (b.name || '').localeCompare(a.name || ''));
+        case "name-desc":
+          sorted.sort((a, b) => (b.name || "").localeCompare(a.name || ""));
           break;
-        case 'balance-asc':
+        case "balance-asc":
           sorted.sort(
             (a, b) =>
-              (bucketBalances.value[a.id] || 0) - (bucketBalances.value[b.id] || 0)
+              (bucketBalances.value[a.id] || 0) -
+              (bucketBalances.value[b.id] || 0)
           );
           break;
-        case 'balance-desc':
+        case "balance-desc":
           sorted.sort(
             (a, b) =>
-              (bucketBalances.value[b.id] || 0) - (bucketBalances.value[a.id] || 0)
+              (bucketBalances.value[b.id] || 0) -
+              (bucketBalances.value[a.id] || 0)
           );
           break;
-        case 'name-asc':
+        case "name-asc":
         default:
-          sorted.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+          sorted.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
           break;
       }
       return sorted;
@@ -253,7 +258,8 @@ export default defineComponent({
 
     const proofsStore = useProofsStore();
 
-    const formatCurrency = (amount: number, unit: string) => uiStore.formatCurrency(amount, unit);
+    const formatCurrency = (amount: number, unit: string) =>
+      uiStore.formatCurrency(amount, unit);
 
     const openAdd = () => {
       dialogOpen.value = true;
@@ -271,7 +277,9 @@ export default defineComponent({
 
     const toggleBucketSelection = (id: string) => {
       if (selectedBucketIds.value.includes(id)) {
-        selectedBucketIds.value = selectedBucketIds.value.filter((b) => b !== id);
+        selectedBucketIds.value = selectedBucketIds.value.filter(
+          (b) => b !== id
+        );
       } else {
         selectedBucketIds.value.push(id);
       }
@@ -293,22 +301,30 @@ export default defineComponent({
       editModalOpen.value = false;
     };
 
-    const handleMoveTokens = async ({ secrets, bucketId }: { secrets: string[]; bucketId: string }) => {
+    const handleMoveTokens = async ({
+      secrets,
+      bucketId,
+    }: {
+      secrets: string[];
+      bucketId: string;
+    }) => {
       await proofsStore.moveProofs(secrets, bucketId);
       isMoveModalOpen.value = false;
     };
 
     const onDragStart = (ev: DragEvent, id: string) => {
-      ev.dataTransfer?.setData('application/x-bucket-id', id);
+      ev.dataTransfer?.setData("application/x-bucket-id", id);
     };
 
     const handleDrop = async (ev: DragEvent, id: string) => {
       ev.preventDefault();
-      const bucketIdData = ev.dataTransfer?.getData('application/x-bucket-id');
+      const bucketIdData = ev.dataTransfer?.getData("application/x-bucket-id");
       if (bucketIdData) {
         const draggedId = bucketIdData;
         if (draggedId && draggedId !== id) {
-          const draggedItem = bucketsStore.bucketList.find((b) => b.id === draggedId);
+          const draggedItem = bucketsStore.bucketList.find(
+            (b) => b.id === draggedId
+          );
           const targetItem = bucketsStore.bucketList.find((b) => b.id === id);
           if (draggedItem && targetItem) {
             const secrets = proofsStore.proofs
@@ -316,8 +332,8 @@ export default defineComponent({
               .map((p) => p.secret);
             if (secrets.length) {
               $q.dialog({
-                title: t('BucketManager.move_confirm.title'),
-                message: t('BucketManager.move_confirm.text', {
+                title: t("BucketManager.move_confirm.title"),
+                message: t("BucketManager.move_confirm.text", {
                   from: draggedItem.name,
                   to: targetItem.name,
                 }),
@@ -326,8 +342,8 @@ export default defineComponent({
               }).onOk(async () => {
                 await proofsStore.moveProofs(secrets, id);
                 $q.notify({
-                  type: 'positive',
-                  message: t('BucketManager.notifications.move_success'),
+                  type: "positive",
+                  message: t("BucketManager.notifications.move_success"),
                 });
               });
             }
@@ -335,20 +351,23 @@ export default defineComponent({
         }
         return;
       }
-      const data = ev.dataTransfer?.getData('text/plain');
+      const data = ev.dataTransfer?.getData("text/plain");
       if (!data) return;
       let secrets: string[] | undefined;
       try {
         secrets = JSON.parse(data);
       } catch (e) {
-        secrets = data.split(',');
+        secrets = data.split(",");
       }
       if (Array.isArray(secrets) && secrets.length) {
         try {
           await proofsStore.moveProofs(secrets, id);
-          $q.notify({ type: 'positive', message: t('BucketManager.notifications.move_success') });
+          $q.notify({
+            type: "positive",
+            message: t("BucketManager.notifications.move_success"),
+          });
         } catch (e) {
-          $q.notify({ type: 'negative', message: 'Move failed' });
+          $q.notify({ type: "negative", message: "Move failed" });
         }
       }
     };
@@ -365,16 +384,18 @@ export default defineComponent({
 
     const handleMenuAction = ({ action, bucket }: any) => {
       switch (action) {
-        case 'manage':
+        case "manage":
           openDetail(bucket);
           break;
-        case 'edit':
+        case "edit":
           openEdit(bucket);
           break;
-        case 'archive':
-          bucketsStore.editBucket(bucket.id, { isArchived: !bucket.isArchived });
+        case "archive":
+          bucketsStore.editBucket(bucket.id, {
+            isArchived: !bucket.isArchived,
+          });
           break;
-        case 'delete':
+        case "delete":
           openDelete(bucket.id);
           break;
       }
@@ -442,5 +463,4 @@ export default defineComponent({
     opacity: 1;
   }
 }
-
 </style>

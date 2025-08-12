@@ -54,8 +54,8 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
-import { useI18n } from 'vue-i18n';
+import { computed } from "vue";
+import { useI18n } from "vue-i18n";
 import {
   Chart as ChartJS,
   ArcElement,
@@ -67,9 +67,9 @@ import {
   PointElement,
   LineElement,
   Title,
-} from 'chart.js';
-import { Pie, Bar, Line } from 'vue-chartjs';
-import type { CreatorSubscription } from 'stores/creatorSubscriptions';
+} from "chart.js";
+import { Pie, Bar, Line } from "vue-chartjs";
+import type { CreatorSubscription } from "stores/creatorSubscriptions";
 
 ChartJS.register(
   ArcElement,
@@ -82,22 +82,22 @@ ChartJS.register(
   LineElement,
   Title,
   {
-    id: 'pieLabelPlugin',
+    id: "pieLabelPlugin",
     afterDatasetsDraw(chart) {
-      if (chart.config.type !== 'pie') return;
+      if (chart.config.type !== "pie") return;
       const { ctx, data } = chart;
       ctx.save();
       chart.getDatasetMeta(0).data.forEach((datapoint, i) => {
         const { x, y } = datapoint.tooltipPosition();
         const value = data.datasets[0].data[i] as number;
-        ctx.fillStyle = '#fff';
-        ctx.font = 'bold 14px sans-serif';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
+        ctx.fillStyle = "#fff";
+        ctx.font = "bold 14px sans-serif";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
         ctx.fillText(String(value), x, y);
       });
     },
-  },
+  }
 );
 
 const props = defineProps<{ rows: CreatorSubscription[] }>();
@@ -105,9 +105,9 @@ const props = defineProps<{ rows: CreatorSubscription[] }>();
 const { t } = useI18n();
 
 const frequencyLabels = computed(() => [
-  t('CreatorSubscribers.frequency.weekly'),
-  t('CreatorSubscribers.frequency.biweekly'),
-  t('CreatorSubscribers.frequency.monthly'),
+  t("CreatorSubscribers.frequency.weekly"),
+  t("CreatorSubscribers.frequency.biweekly"),
+  t("CreatorSubscribers.frequency.monthly"),
 ]);
 
 const frequencySeries = computed(() => {
@@ -118,19 +118,17 @@ const frequencySeries = computed(() => {
   return [counts.weekly, counts.biweekly, counts.monthly];
 });
 
-function uiStatus(
-  sub: CreatorSubscription,
-): 'active' | 'pending' | 'ended' {
-  if (sub.status === 'pending') return 'pending';
+function uiStatus(sub: CreatorSubscription): "active" | "pending" | "ended" {
+  if (sub.status === "pending") return "pending";
   const now = Date.now() / 1000;
-  if (sub.endDate && sub.endDate < now) return 'ended';
-  return 'active';
+  if (sub.endDate && sub.endDate < now) return "ended";
+  return "active";
 }
 
 const statusLabels = computed(() => [
-  t('CreatorSubscribers.status.active'),
-  t('CreatorSubscribers.status.pending'),
-  t('CreatorSubscribers.status.ended'),
+  t("CreatorSubscribers.status.active"),
+  t("CreatorSubscribers.status.pending"),
+  t("CreatorSubscribers.status.ended"),
 ]);
 
 const statusSeries = computed(() => {
@@ -171,11 +169,11 @@ const frequencyData = computed(() => ({
     {
       data: frequencySeries.value,
       backgroundColor: [
-        'var(--q-light-green-5)',
-        'var(--q-amber-5)',
-        'var(--q-red-5)',
+        "var(--q-light-green-5)",
+        "var(--q-amber-5)",
+        "var(--q-red-5)",
       ],
-      borderColor: '#fff',
+      borderColor: "#fff",
       borderWidth: 1,
     },
   ],
@@ -187,11 +185,11 @@ const statusData = computed(() => ({
     {
       data: statusSeries.value,
       backgroundColor: [
-        'var(--q-light-green-5)',
-        'var(--q-amber-5)',
-        'var(--q-red-5)',
+        "var(--q-light-green-5)",
+        "var(--q-amber-5)",
+        "var(--q-red-5)",
       ],
-      borderColor: '#fff',
+      borderColor: "#fff",
       borderWidth: 1,
     },
   ],
@@ -202,8 +200,8 @@ const newSubsData = computed(() => ({
   datasets: [
     {
       data: newSubsSeries.value,
-      label: t('CreatorSubscribers.charts.newSubs'),
-      borderColor: 'var(--q-primary)',
+      label: t("CreatorSubscribers.charts.newSubs"),
+      borderColor: "var(--q-primary)",
       tension: 0.3,
       fill: false,
     },
@@ -214,16 +212,16 @@ const pieOptions = computed(() => ({
   responsive: true,
   maintainAspectRatio: false,
   plugins: {
-    legend: { position: 'bottom', labels: { font: { size: 14 } } },
+    legend: { position: "bottom", labels: { font: { size: 14 } } },
     title: {
       display: true,
-      text: t('CreatorSubscribers.charts.frequency'),
+      text: t("CreatorSubscribers.charts.frequency"),
       font: { size: 16 },
     },
     tooltip: {
-      backgroundColor: '#2f2f2f',
-      titleColor: '#fff',
-      bodyColor: '#fff',
+      backgroundColor: "#2f2f2f",
+      titleColor: "#fff",
+      bodyColor: "#fff",
       callbacks: {
         label: (ctx: any) => `${ctx.label}: ${ctx.parsed}`,
       },
@@ -235,16 +233,16 @@ const barOptions = computed(() => ({
   responsive: true,
   maintainAspectRatio: false,
   plugins: {
-    legend: { position: 'bottom', labels: { font: { size: 14 } } },
+    legend: { position: "bottom", labels: { font: { size: 14 } } },
     title: {
       display: true,
-      text: t('CreatorSubscribers.charts.status'),
+      text: t("CreatorSubscribers.charts.status"),
       font: { size: 16 },
     },
     tooltip: {
-      backgroundColor: '#2f2f2f',
-      titleColor: '#fff',
-      bodyColor: '#fff',
+      backgroundColor: "#2f2f2f",
+      titleColor: "#fff",
+      bodyColor: "#fff",
       callbacks: {
         label: (ctx: any) => `${ctx.label}: ${ctx.parsed.y}`,
       },
@@ -265,16 +263,16 @@ const lineOptions = computed(() => ({
   responsive: true,
   maintainAspectRatio: false,
   plugins: {
-    legend: { position: 'bottom', labels: { font: { size: 14 } } },
+    legend: { position: "bottom", labels: { font: { size: 14 } } },
     title: {
       display: true,
-      text: t('CreatorSubscribers.charts.newSubs'),
+      text: t("CreatorSubscribers.charts.newSubs"),
       font: { size: 16 },
     },
     tooltip: {
-      backgroundColor: '#2f2f2f',
-      titleColor: '#fff',
-      bodyColor: '#fff',
+      backgroundColor: "#2f2f2f",
+      titleColor: "#fff",
+      bodyColor: "#fff",
       callbacks: {
         label: (ctx: any) => `${ctx.label}: ${ctx.parsed.y}`,
       },
@@ -291,4 +289,3 @@ const lineOptions = computed(() => ({
   },
 }));
 </script>
-

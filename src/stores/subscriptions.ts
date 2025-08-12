@@ -70,12 +70,10 @@ export const useSubscriptionsStore = defineStore("subscriptions", () => {
 
   async function markIntervalRedeemed(
     subscriptionId: string,
-    monthIndex: number | null | undefined,
+    monthIndex: number | null | undefined
   ) {
     const sub = await cashuDb.subscriptions.get(subscriptionId);
-    const idx = sub?.intervals.findIndex(
-      (i) => i.monthIndex === monthIndex,
-    );
+    const idx = sub?.intervals.findIndex((i) => i.monthIndex === monthIndex);
     if (sub && idx !== undefined && idx >= 0) {
       sub.intervals[idx].status = "claimed";
       sub.intervals[idx].redeemed = true;

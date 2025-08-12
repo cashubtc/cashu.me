@@ -1,7 +1,9 @@
 <template>
   <q-dialog v-model="show" persistent ref="dialog">
     <q-card class="q-pa-md qcard" style="min-width: 300px">
-      <q-card-section class="text-h6">{{ t('SendBucketDmDialog.title') }}</q-card-section>
+      <q-card-section class="text-h6">{{
+        t("SendBucketDmDialog.title")
+      }}</q-card-section>
       <q-card-section>
         <q-input
           v-model="recipient"
@@ -12,9 +14,7 @@
           :error-message="t('SendBucketDmDialog.errors.invalid_pubkey')"
           class="q-mb-md"
         />
-        <div class="text-caption q-mb-sm">
-          Balance: {{ formattedBalance }}
-        </div>
+        <div class="text-caption q-mb-sm">Balance: {{ formattedBalance }}</div>
         <q-option-group
           v-model="mode"
           inline
@@ -30,21 +30,22 @@
             dense
           />
         </div>
-        <div v-else style="max-height: 200px; overflow:auto">
+        <div v-else style="max-height: 200px; overflow: auto">
           <q-list bordered>
-            <q-item
-              v-for="p in bucketProofs"
-              :key="p.secret"
-            >
+            <q-item v-for="p in bucketProofs" :key="p.secret">
               <q-item-section side>
                 <q-checkbox
                   :model-value="selectedSecrets.includes(p.secret)"
-                  @update:model-value="val => toggleProof(p.secret, val)"
+                  @update:model-value="(val) => toggleProof(p.secret, val)"
                 />
               </q-item-section>
               <q-item-section>
-                <q-item-label>{{ formatCurrency(p.amount, activeUnit) }}</q-item-label>
-                <q-item-label caption v-if="p.label">{{ p.label }}</q-item-label>
+                <q-item-label>{{
+                  formatCurrency(p.amount, activeUnit)
+                }}</q-item-label>
+                <q-item-label caption v-if="p.label">{{
+                  p.label
+                }}</q-item-label>
               </q-item-section>
             </q-item>
             <q-item v-if="!bucketProofs.length">
@@ -52,12 +53,20 @@
             </q-item>
           </q-list>
         </div>
-        <q-input v-model="memo" :label="t('SendBucketDmDialog.inputs.memo.label')" outlined dense class="q-mt-md" />
+        <q-input
+          v-model="memo"
+          :label="t('SendBucketDmDialog.inputs.memo.label')"
+          outlined
+          dense
+          class="q-mt-md"
+        />
       </q-card-section>
       <q-card-actions align="right">
-        <q-btn flat color="primary" @click="cancel">{{ t('SendBucketDmDialog.actions.cancel.label') }}</q-btn>
+        <q-btn flat color="primary" @click="cancel">{{
+          t("SendBucketDmDialog.actions.cancel.label")
+        }}</q-btn>
         <q-btn flat color="primary" :disable="sendDisabled" @click="confirm">
-          {{ t('SendBucketDmDialog.actions.send.label') }}
+          {{ t("SendBucketDmDialog.actions.send.label") }}
         </q-btn>
       </q-card-actions>
     </q-card>
@@ -65,16 +74,16 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed } from 'vue';
-import { storeToRefs } from 'pinia';
-import { useBucketsStore } from 'src/stores/buckets';
-import { useProofsStore } from 'src/stores/proofs';
-import { useMintsStore } from 'src/stores/mints';
-import { useUiStore } from 'src/stores/ui';
-import { useMessengerStore } from 'src/stores/messenger';
-import { useP2PKStore } from 'src/stores/p2pk';
-import type { WalletProof } from 'src/types/proofs';
-import { useI18n } from 'vue-i18n';
+import { ref, computed } from "vue";
+import { storeToRefs } from "pinia";
+import { useBucketsStore } from "src/stores/buckets";
+import { useProofsStore } from "src/stores/proofs";
+import { useMintsStore } from "src/stores/mints";
+import { useUiStore } from "src/stores/ui";
+import { useMessengerStore } from "src/stores/messenger";
+import { useP2PKStore } from "src/stores/p2pk";
+import type { WalletProof } from "src/types/proofs";
+import { useI18n } from "vue-i18n";
 
 const props = defineProps<{ bucketId: string; prefillNpub?: string }>();
 
@@ -90,21 +99,19 @@ const { bucketBalances } = storeToRefs(bucketsStore);
 const { t } = useI18n();
 
 const show = ref(false);
-const recipient = ref('');
+const recipient = ref("");
 const amount = ref<number | null>(null);
-const memo = ref('');
-const mode = ref<'amount' | 'proofs'>('amount');
+const memo = ref("");
+const mode = ref<"amount" | "proofs">("amount");
 const selectedSecrets = ref<string[]>([]);
 
 const modeOptions = [
-  { label: t('SendBucketDmDialog.options.amount'), value: 'amount' },
-  { label: t('SendBucketDmDialog.options.proofs'), value: 'proofs' },
+  { label: t("SendBucketDmDialog.options.amount"), value: "amount" },
+  { label: t("SendBucketDmDialog.options.proofs"), value: "proofs" },
 ];
 
 const bucketProofs = computed<WalletProof[]>(() =>
-  proofsStore.proofs.filter(
-    (p) => p.bucketId === props.bucketId && !p.reserved
-  )
+  proofsStore.proofs.filter((p) => p.bucketId === props.bucketId && !p.reserved)
 );
 
 const formattedBalance = computed(() =>
@@ -114,7 +121,9 @@ const formattedBalance = computed(() =>
   )
 );
 
-const isValidRecipient = computed(() => p2pkStore.isValidPubkey(recipient.value));
+const isValidRecipient = computed(() =>
+  p2pkStore.isValidPubkey(recipient.value)
+);
 
 function formatCurrency(a: number, unit: string) {
   return uiStore.formatCurrency(a, unit);
@@ -122,7 +131,8 @@ function formatCurrency(a: number, unit: string) {
 
 function toggleProof(secret: string, val: boolean) {
   if (val) {
-    if (!selectedSecrets.value.includes(secret)) selectedSecrets.value.push(secret);
+    if (!selectedSecrets.value.includes(secret))
+      selectedSecrets.value.push(secret);
   } else {
     selectedSecrets.value = selectedSecrets.value.filter((s) => s !== secret);
   }
@@ -130,21 +140,21 @@ function toggleProof(secret: string, val: boolean) {
 
 const sendDisabled = computed(() => {
   if (!isValidRecipient.value) return true;
-  if (mode.value === 'amount') return !(amount.value && amount.value > 0);
+  if (mode.value === "amount") return !(amount.value && amount.value > 0);
   return selectedSecrets.value.length === 0;
 });
 
 function reset() {
-  recipient.value = '';
+  recipient.value = "";
   amount.value = null;
-  memo.value = '';
-  mode.value = 'amount';
+  memo.value = "";
+  mode.value = "amount";
   selectedSecrets.value = [];
 }
 
 function showDialog(npub?: string) {
   reset();
-  recipient.value = npub || props.prefillNpub || '';
+  recipient.value = npub || props.prefillNpub || "";
   show.value = true;
 }
 
@@ -163,7 +173,7 @@ async function confirm() {
     hideDialog();
     return;
   }
-  if (mode.value === 'amount') {
+  if (mode.value === "amount") {
     if (!amount.value) {
       hideDialog();
       return;

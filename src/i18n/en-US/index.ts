@@ -128,7 +128,6 @@ export const messages = {
       },
       creatorHub: {
         title: "Creator Hub",
-        
       },
       myProfile: {
         title: "My Profile",
@@ -1827,7 +1826,7 @@ export const messages = {
       edit: "Edit",
     },
   },
-  
+
   swap: {
     in_progress_warning_text: "Swap in progress",
     invalid_swap_data_error_text: "Invalid swap data",
@@ -1866,7 +1865,7 @@ export const messages = {
         description: "Discover creators to support.",
         icon: "img:icons/find-creators.svg",
       },
-      
+
       myProfile: {
         description: "View and edit your profile.",
         icon: "person",
@@ -1931,7 +1930,7 @@ export const messages = {
           creator:
             "Your public storefront as seen by visitors. Great for a quick audit of how your profile appears worldwide.",
         },
-        
+
         myProfile: {
           fan: "Show off your avatar, npub link and optional NIP-05. Personal stats: total zaps sent & received, bucket balances.",
           creator:

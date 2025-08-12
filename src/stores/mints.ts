@@ -91,8 +91,6 @@ export class MintClass {
   }
 }
 
-
-
 export type Balances = {
   [unit: string]: number;
 };

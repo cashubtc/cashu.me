@@ -161,7 +161,7 @@
                   <q-item-label caption
                     >{{
                       $t(
-                        "Settings.lightning_address.automatic_claim.description",
+                        "Settings.lightning_address.automatic_claim.description"
                       )
                     }}
                   </q-item-label>
@@ -718,7 +718,7 @@
                   class="q-mr-sm cursor-pointer"
                   ><q-tooltip>{{
                     $t(
-                      "Settings.nostr_wallet_connect.relays.list.remove_tooltip",
+                      "Settings.nostr_wallet_connect.relays.list.remove_tooltip"
                     )
                   }}</q-tooltip></q-icon
                 >
@@ -845,7 +845,7 @@
               <q-item-label caption
                 >{{
                   $t(
-                    "Settings.hardware_features.webnfc.quick_access.description",
+                    "Settings.hardware_features.webnfc.quick_access.description"
                   )
                 }}
               </q-item-label>
@@ -917,8 +917,8 @@
                 >{{ $t("Settings.p2pk_features.quick_access.description") }}
               </q-item-label>
               <q-item-label caption class="q-mt-xs">
-                The button appears in Receive Ecash after you generate or import a
-                key.
+                The button appears in Receive Ecash after you generate or import
+                a key.
               </q-item-label>
             </q-item>
           </q-list>
@@ -1498,7 +1498,7 @@
                         <q-item-label class="q-px-sm" caption
                           >{{
                             $t(
-                              "Settings.advanced.developer.new_seed.description",
+                              "Settings.advanced.developer.new_seed.description"
                             )
                           }}
                         </q-item-label>
@@ -1508,7 +1508,7 @@
                       <span
                         >{{
                           $t(
-                            "Settings.advanced.developer.new_seed.confirm_question",
+                            "Settings.advanced.developer.new_seed.confirm_question"
                           )
                         }}
                       </span>
@@ -1557,7 +1557,7 @@
                     <q-item-label class="q-px-sm" caption
                       >{{
                         $t(
-                          "Settings.advanced.developer.remove_spent.description",
+                          "Settings.advanced.developer.remove_spent.description"
                         )
                       }}
                     </q-item-label>
@@ -1577,7 +1577,7 @@
                     <q-item-label class="q-px-sm" caption
                       >{{
                         $t(
-                          "Settings.advanced.developer.debug_console.description",
+                          "Settings.advanced.developer.debug_console.description"
                         )
                       }}
                     </q-item-label>
@@ -1597,7 +1597,7 @@
                     <q-item-label class="q-px-sm" caption
                       >{{
                         $t(
-                          "Settings.advanced.developer.export_proofs.description",
+                          "Settings.advanced.developer.export_proofs.description"
                         )
                       }}
                     </q-item-label>
@@ -1616,7 +1616,7 @@
                     <q-item-label class="q-px-sm" caption
                       >{{
                         $t(
-                          "Settings.advanced.developer.keyset_counters.description",
+                          "Settings.advanced.developer.keyset_counters.description"
                         )
                       }}
                     </q-item-label>
@@ -1662,7 +1662,7 @@
                     <q-item-label class="q-px-sm" caption
                       >{{
                         $t(
-                          "Settings.advanced.developer.unset_reserved.description",
+                          "Settings.advanced.developer.unset_reserved.description"
                         )
                       }}
                     </q-item-label>
@@ -1682,7 +1682,7 @@
                     <q-item-label class="q-px-sm" caption
                       >{{
                         $t(
-                          "Settings.advanced.developer.show_onboarding.description",
+                          "Settings.advanced.developer.show_onboarding.description"
                         )
                       }}
                     </q-item-label>
@@ -1709,7 +1709,7 @@
                     <q-item-label class="q-px-sm" caption
                       >{{
                         $t(
-                          "Settings.advanced.developer.reset_wallet.description",
+                          "Settings.advanced.developer.reset_wallet.description"
                         )
                       }}
                     </q-item-label>
@@ -1717,7 +1717,7 @@
                   <div class="row" v-if="confirmNuke">
                     <span>{{
                       $t(
-                        "Settings.advanced.developer.reset_wallet.confirm_question",
+                        "Settings.advanced.developer.reset_wallet.confirm_question"
                       )
                     }}</span>
                     <q-btn
@@ -1759,7 +1759,7 @@
                     <q-item-label class="q-px-sm" caption
                       >{{
                         $t(
-                          "Settings.advanced.developer.export_wallet.description",
+                          "Settings.advanced.developer.export_wallet.description"
                         )
                       }}
                     </q-item-label>
@@ -1792,10 +1792,7 @@ import { useMintsStore, MintClass } from "src/stores/mints";
 import { useWalletStore } from "src/stores/wallet";
 import { useMnemonicStore } from "src/stores/mnemonic";
 import { useSettingsStore } from "src/stores/settings";
-import {
-  useNostrStore,
-  publishDiscoveryProfile,
-} from "src/stores/nostr";
+import { useNostrStore, publishDiscoveryProfile } from "src/stores/nostr";
 import { notifySuccess, notifyError } from "src/js/notify";
 import { useNPCStore } from "src/stores/npubcash";
 import { useP2PKStore } from "src/stores/p2pk";
@@ -1811,7 +1808,6 @@ import { useReceiveTokensStore } from "../stores/receiveTokensStore";
 import { useWelcomeStore } from "src/stores/welcome";
 import { useStorageStore } from "src/stores/storage";
 import { useI18n } from "vue-i18n";
-
 
 export default defineComponent({
   name: "SettingsView",

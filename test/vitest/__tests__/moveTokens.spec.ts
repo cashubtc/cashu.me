@@ -49,7 +49,9 @@ describe("MoveTokens component", () => {
 
     await vm.moveSelected();
 
-    expect(wrapper.emitted("move")?.[0]).toEqual([{ secrets: ["a", "b"], bucketId: "b2" }]);
+    expect(wrapper.emitted("move")?.[0]).toEqual([
+      { secrets: ["a", "b"], bucketId: "b2" },
+    ]);
     expect(vm.selectedSecrets.length).toBe(0);
     expect(wrapper.emitted("update:modelValue")?.[0]).toEqual([false]);
   });

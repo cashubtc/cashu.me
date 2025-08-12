@@ -1,13 +1,17 @@
 #!/usr/bin/env node
-import 'fake-indexeddb/auto';
-import { createPinia, setActivePinia } from 'pinia';
-import { fetchNutzapProfile, useNostrStore, RelayConnectionError } from '../src/stores/nostr';
-import { useSettingsStore } from '../src/stores/settings';
+import "fake-indexeddb/auto";
+import { createPinia, setActivePinia } from "pinia";
+import {
+  fetchNutzapProfile,
+  useNostrStore,
+  RelayConnectionError,
+} from "../src/stores/nostr";
+import { useSettingsStore } from "../src/stores/settings";
 
 async function main() {
   const npub = process.argv[2];
   if (!npub) {
-    console.error('Usage: verifyNutzapProfile <npub>');
+    console.error("Usage: verifyNutzapProfile <npub>");
     process.exit(1);
   }
 

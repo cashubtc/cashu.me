@@ -12,7 +12,9 @@ vi.mock("../../../src/stores/wallet", () => {
   initKeysMock = vi.fn();
   return { useWalletStore: () => ({ wallet: { initKeys: initKeysMock } }) };
 });
-vi.mock("../../../src/stores/mints", () => ({ useMintsStore: () => ({ activeMintUrl: "" }) }));
+vi.mock("../../../src/stores/mints", () => ({
+  useMintsStore: () => ({ activeMintUrl: "" }),
+}));
 vi.mock("quasar", () => ({ Notify: { create: vi.fn() } }));
 
 describe("cashu boot", () => {

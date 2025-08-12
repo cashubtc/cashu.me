@@ -1,5 +1,11 @@
 <template>
-  <q-carousel v-model="slide" control-color="primary" swipeable animated :height="220">
+  <q-carousel
+    v-model="slide"
+    control-color="primary"
+    swipeable
+    animated
+    :height="220"
+  >
     <q-carousel-slide
       v-for="(p, idx) in payments"
       :name="idx"
@@ -38,12 +44,16 @@
   </q-carousel>
 </template>
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue';
-import { formatDistanceToNow } from 'date-fns';
-import TokenInformation from './TokenInformation.vue';
-import { saveReceipt } from 'src/utils/receipt-utils';
-const props = defineProps<{ payments: any | any[]; creator?: boolean; message: any }>();
-const emit = defineEmits(['redeem']);
+import { ref, computed, onMounted, onUnmounted } from "vue";
+import { formatDistanceToNow } from "date-fns";
+import TokenInformation from "./TokenInformation.vue";
+import { saveReceipt } from "src/utils/receipt-utils";
+const props = defineProps<{
+  payments: any | any[];
+  creator?: boolean;
+  message: any;
+}>();
+const emit = defineEmits(["redeem"]);
 const slide = ref(0);
 const payments = computed(() =>
   Array.isArray(props.payments) ? props.payments : [props.payments]
@@ -57,14 +67,14 @@ onMounted(() => {
 });
 onUnmounted(() => clearInterval(timer));
 function badgeColor(s: string) {
-  if (s === 'claimed') return 'info';
-  if (s === 'redeemable') return 'positive';
-  return 'warning';
+  if (s === "claimed") return "info";
+  if (s === "redeemable") return "positive";
+  return "warning";
 }
 function badgeIcon(s: string) {
-  if (s === 'claimed') return 'check';
-  if (s === 'redeemable') return 'lock_open';
-  return 'schedule';
+  if (s === "claimed") return "check";
+  if (s === "redeemable") return "lock_open";
+  return "schedule";
 }
 function remaining(p: any): number {
   if (!p.unlock_time) return 0;

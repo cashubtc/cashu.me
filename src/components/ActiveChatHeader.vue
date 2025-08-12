@@ -33,7 +33,7 @@
           <q-badge
             class="q-ml-sm"
             :color="messenger.connected ? 'positive' : 'negative'"
-            >{{ messenger.connected ? 'Online' : 'Offline' }}</q-badge
+            >{{ messenger.connected ? "Online" : "Offline" }}</q-badge
           >
         </div>
         <q-btn

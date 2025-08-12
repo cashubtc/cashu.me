@@ -23,7 +23,11 @@ vi.mock("../../../src/stores/nostr", async (importOriginal) => {
     fetchNutzapProfile: (...args: any[]) => fetchNutzapProfile(...args),
     publishNutzap: (...args: any[]) => publishNutzap(...args),
     subscribeToNutzaps: vi.fn(),
-    useNostrStore: () => ({ pubkey: "myhex", connected: true, lastError: null }),
+    useNostrStore: () => ({
+      pubkey: "myhex",
+      connected: true,
+      lastError: null,
+    }),
   };
 });
 
@@ -165,7 +169,7 @@ describe("Nutzap store", () => {
         price: 1,
         startDate: 0,
         relayList: [],
-      }),
+      })
     ).rejects.toThrow("Creator profile missing Cashu P2PK key");
   });
 

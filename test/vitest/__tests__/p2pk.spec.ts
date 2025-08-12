@@ -8,7 +8,6 @@ import * as secp from "@noble/secp256k1";
 import { ensureCompressed } from "../../../src/utils/ecash";
 import { createP2PKHTLC } from "../../../src/js/token";
 
-
 beforeEach(() => {
   localStorage.clear();
 });
@@ -46,8 +45,12 @@ describe("P2PK store", () => {
   it("normalizes pubkeys from secrets", () => {
     const p2pk = useP2PKStore();
     const priv = secp.utils.randomPrivateKey();
-    const compressed = Buffer.from(secp.getPublicKey(priv, true)).toString("hex");
-    const uncompressed = Buffer.from(secp.getPublicKey(priv, false)).toString("hex");
+    const compressed = Buffer.from(secp.getPublicKey(priv, true)).toString(
+      "hex"
+    );
+    const uncompressed = Buffer.from(secp.getPublicKey(priv, false)).toString(
+      "hex"
+    );
 
     let secret = JSON.stringify(["P2PK", { data: compressed }]);
     expect(p2pk.getSecretP2PKPubkey(secret)).toBe(compressed);
@@ -58,14 +61,16 @@ describe("P2PK store", () => {
 
   it("extracts receiver key from HTLC token", () => {
     const p2pk = useP2PKStore();
-    const receiver = "02112233445566778899aabbccddeeff00112233445566778899aabbccddeeff00";
+    const receiver =
+      "02112233445566778899aabbccddeeff00112233445566778899aabbccddeeff00";
     const { token } = createP2PKHTLC(1, receiver, 1, 0);
     expect(p2pk.getSecretP2PKPubkey(token)).toBe(receiver);
   });
 
   it("handles P2PK: prefixed secrets", () => {
     const p2pk = useP2PKStore();
-    const receiver = "03112233445566778899aabbccddeeff00112233445566778899aabbccddeeff00";
+    const receiver =
+      "03112233445566778899aabbccddeeff00112233445566778899aabbccddeeff00";
     expect(p2pk.getSecretP2PKPubkey(`P2PK:${receiver}`)).toBe(receiver);
   });
 
@@ -216,11 +221,7 @@ describe("P2PK store", () => {
 
     vi.spyOn(walletStore, "wallet", "get").mockReturnValue(wallet);
 
-    const { sendProofs } = await walletStore.sendToLock(
-      1,
-      pubHex,
-      0
-    );
+    const { sendProofs } = await walletStore.sendToLock(1, pubHex, 0);
     const tokenObj = { token: [{ proofs: sendProofs, mint: "m" }] };
     const encoded =
       "cashuA" + Buffer.from(JSON.stringify(tokenObj)).toString("base64");
@@ -232,10 +233,14 @@ describe("P2PK store", () => {
     const proofsStore = useProofsStore();
     vi.spyOn(proofsStore, "removeProofs").mockResolvedValue();
     vi.spyOn(proofsStore, "addProofs").mockResolvedValue();
-    vi.spyOn(proofsStore, "serializeProofs").mockImplementation((proofs: any) => {
-      const tokenObj = { token: [{ proofs, mint: "m" }] };
-      return "cashuA" + Buffer.from(JSON.stringify(tokenObj)).toString("base64");
-    });
+    vi.spyOn(proofsStore, "serializeProofs").mockImplementation(
+      (proofs: any) => {
+        const tokenObj = { token: [{ proofs, mint: "m" }] };
+        return (
+          "cashuA" + Buffer.from(JSON.stringify(tokenObj)).toString("base64")
+        );
+      }
+    );
 
     walletStore.spendableProofs = vi.fn(() => [
       { secret: "s", amount: 100, id: "a", C: "c" } as any,
@@ -252,7 +257,10 @@ describe("P2PK store", () => {
       send: vi.fn(async (_a: number, _p: any, opts: any) => {
         const secret = JSON.stringify([
           "P2PK",
-          { data: opts.p2pk.pubkey, tags: [["locktime", String(opts.p2pk.locktime)]] },
+          {
+            data: opts.p2pk.pubkey,
+            tags: [["locktime", String(opts.p2pk.locktime)]],
+          },
         ]);
         return { keep: [], send: [{ id: "a", amount: 100, C: "c", secret }] };
       }),
@@ -269,24 +277,45 @@ describe("P2PK store", () => {
   });
 
   it("shows P2PK chip only for pure P2PK tokens", async () => {
-    window.windowMixin = { methods: { formatCurrency: (v: number) => String(v) } } as any;
+    window.windowMixin = {
+      methods: { formatCurrency: (v: number) => String(v) },
+    } as any;
     const TokenInformation = (
       await import("../../../src/components/TokenInformation.vue")
     ).default;
     const { mount } = await import("@vue/test-utils");
 
     const pureSecret = JSON.stringify(["P2PK", { data: "02aa" }]);
-    const tokenObj = { token: [{ proofs: [{ id: "a", amount: 1, C: "c", secret: pureSecret }], mint: "m" }] };
-    const encoded = "cashuA" + Buffer.from(JSON.stringify(tokenObj)).toString("base64");
+    const tokenObj = {
+      token: [
+        {
+          proofs: [{ id: "a", amount: 1, C: "c", secret: pureSecret }],
+          mint: "m",
+        },
+      ],
+    };
+    const encoded =
+      "cashuA" + Buffer.from(JSON.stringify(tokenObj)).toString("base64");
 
-    const wrapperPure = mount(TokenInformation, { props: { encodedToken: encoded } });
+    const wrapperPure = mount(TokenInformation, {
+      props: { encodedToken: encoded },
+    });
     expect(wrapperPure.text()).toContain("P2PK");
 
     const htlcSecret = JSON.stringify({ receiverP2PK: "02bb" });
-    const tokenObjHtlc = { token: [{ proofs: [{ id: "a", amount: 1, C: "c", secret: htlcSecret }], mint: "m" }] };
-    const encodedHtlc = "cashuA" + Buffer.from(JSON.stringify(tokenObjHtlc)).toString("base64");
-    const wrapperHtlc = mount(TokenInformation, { props: { encodedToken: encodedHtlc } });
+    const tokenObjHtlc = {
+      token: [
+        {
+          proofs: [{ id: "a", amount: 1, C: "c", secret: htlcSecret }],
+          mint: "m",
+        },
+      ],
+    };
+    const encodedHtlc =
+      "cashuA" + Buffer.from(JSON.stringify(tokenObjHtlc)).toString("base64");
+    const wrapperHtlc = mount(TokenInformation, {
+      props: { encodedToken: encodedHtlc },
+    });
     expect(wrapperHtlc.text()).not.toContain("P2PK");
   });
 });
-

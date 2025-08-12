@@ -757,7 +757,7 @@ export default {
         },
       },
     },
-    
+
     swap: {
       title: "スワップ",
       overline: "マルチミントスワップ",
@@ -775,7 +775,6 @@ export default {
         },
       },
       actions: {
-        
         swap: {
           label: "@:global.actions.swap.label",
           in_progress: "@:MintSettings.swap.actions.swap.label",
@@ -970,18 +969,18 @@ export default {
         label_known_mint: "@:ReceiveTokenDialog.actions.receive.label",
         label_adding_mint: "ミント追加中…",
       },
-      
+
       swap: {
         label: "@:global.actions.swap.label",
         tooltip_text: "信頼できるミントにスワップ",
         caption: "{ value }をスワップ",
       },
-      
+
       cancel_swap: {
         label: "@:global.actions.cancel.label",
         tooltip_text: "スワップをキャンセル",
       },
-      
+
       confirm_swap: {
         label: "@:ReceiveTokenDialog.actions.swap.label",
         tooltip_text: "@:ReceiveTokenDialog.actions.swap.tooltip_text",
@@ -1362,7 +1361,7 @@ export default {
       },
     },
   },
-  
+
   swap: {
     in_progress_warning_text: "スワップ進行中",
     invalid_swap_data_error_text: "無効なスワップデータ",
@@ -1428,7 +1427,7 @@ export default {
         description: "支援するクリエイターを見つけましょう。",
         icon: "img:icons/find-creators.svg",
       },
-      
+
       myProfile: {
         description: "プロフィールを表示して編集します。",
         icon: "person",
@@ -1493,7 +1492,7 @@ export default {
           creator:
             "Your public storefront as seen by visitors. Great for a quick audit of how your profile appears worldwide.",
         },
-        
+
         myProfile: {
           fan: "Show off your avatar, npub link and optional NIP-05. Personal stats: total zaps sent & received, bucket balances.",
           creator:

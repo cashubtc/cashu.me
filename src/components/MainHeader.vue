@@ -95,7 +95,7 @@
         :loading="reloading"
         :disable="uiStore.globalMutexLock && countdown === 0"
       >
-        <q-tooltip>{{ $t('MainHeader.reload.tooltip') }}</q-tooltip>
+        <q-tooltip>{{ $t("MainHeader.reload.tooltip") }}</q-tooltip>
         <template v-slot:loading>
           <q-spinner size="xs" />
         </template>

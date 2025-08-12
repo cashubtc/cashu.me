@@ -29,7 +29,13 @@
 
             <transition appear enter-active-class="animated pulse">
               <div class="scan-button-container">
-                <q-btn size="lg" outline color="primary" flat @click="showCamera">
+                <q-btn
+                  size="lg"
+                  outline
+                  color="primary"
+                  flat
+                  @click="showCamera"
+                >
                   <ScanIcon size="2em" />
                 </q-btn>
               </div>

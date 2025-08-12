@@ -28,7 +28,12 @@
           class="q-ml-xs"
         />
       </q-chip>
-      <q-chip v-if="isPureP2PK(proofsToShow)" outline icon="lock" class="q-pa-md">
+      <q-chip
+        v-if="isPureP2PK(proofsToShow)"
+        outline
+        icon="lock"
+        class="q-pa-md"
+      >
         P2PK
         <q-icon
           v-if="showP2PKCheck || isLockedToUs(proofsToShow)"
@@ -38,12 +43,7 @@
           class="q-ml-xs"
         />
       </q-chip>
-      <q-chip
-        v-if="isHTLC(proofsToShow)"
-        outline
-        icon="link"
-        class="q-pa-md"
-      >
+      <q-chip v-if="isHTLC(proofsToShow)" outline icon="link" class="q-pa-md">
         HTLC
       </q-chip>
       <div v-if="displayMemo" class="q-my-md">

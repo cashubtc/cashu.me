@@ -8,7 +8,11 @@
       dense
     />
     <div class="q-mb-sm" v-if="relayStatuses.length">
-      <div v-for="s in relayStatuses" :key="s.url" class="row items-center q-my-xs">
+      <div
+        v-for="s in relayStatuses"
+        :key="s.url"
+        class="row items-center q-my-xs"
+      >
         <q-icon
           :name="s.connected ? 'check_circle' : 'warning'"
           :color="s.connected ? 'positive' : 'negative'"
@@ -19,7 +23,8 @@
         <span class="text-caption q-ml-sm">
           {{ s.status }}
           <span v-if="!s.connected && s.nextReconnectAt">
-            - reconnect in {{ Math.max(0, Math.ceil((s.nextReconnectAt - now) / 1000)) }}s
+            - reconnect in
+            {{ Math.max(0, Math.ceil((s.nextReconnectAt - now) / 1000)) }}s
           </span>
         </span>
         <q-icon
@@ -101,12 +106,12 @@ const connect = async () => {
     .map((r) => r.trim())
     .filter(Boolean);
   try {
-      const ndk = await useNdk({ requireSigner: false });
-      for (const url of urls) {
-        ndk.addExplicitRelay(url);
-      }
-      await messenger.connect(urls);
-      notifySuccess("Connected to relays");
+    const ndk = await useNdk({ requireSigner: false });
+    for (const url of urls) {
+      ndk.addExplicitRelay(url);
+    }
+    await messenger.connect(urls);
+    notifySuccess("Connected to relays");
   } catch (err: any) {
     notifyError(err?.message || "Failed to connect");
   }

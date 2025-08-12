@@ -4,9 +4,7 @@ import { liveQuery } from "dexie";
 import { ref, watch } from "vue";
 import { useCreatorsStore } from "./creators";
 
-function daysToFrequency(
-  days: number,
-): "weekly" | "biweekly" | "monthly" {
+function daysToFrequency(days: number): "weekly" | "biweekly" | "monthly" {
   if (days === 7) return "weekly";
   if (days === 14) return "biweekly";
   return "monthly";
@@ -81,7 +79,7 @@ export const useCreatorSubscriptionsStore = defineStore(
               tierName:
                 row.tierName ||
                 creatorsStore.tiersMap[row.creatorNpub || ""]?.find(
-                  (t) => t.id === row.tierId,
+                  (t) => t.id === row.tierId
                 )?.name ||
                 FALLBACK_TIER_NAME,
               frequency: daysToFrequency(intervalDays),
@@ -108,10 +106,7 @@ export const useCreatorSubscriptionsStore = defineStore(
             ) {
               sub.earliestUnlock = row.unlockTs;
             }
-            if (
-              sub.latestUnlock == null ||
-              row.unlockTs > sub.latestUnlock
-            ) {
+            if (sub.latestUnlock == null || row.unlockTs > sub.latestUnlock) {
               sub.latestUnlock = row.unlockTs;
             }
           }

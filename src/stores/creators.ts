@@ -170,7 +170,8 @@ export const useCreatorsStore = defineStore("creators", {
       if (creatorNpub.startsWith("npub")) {
         try {
           const decoded = nip19.decode(creatorNpub);
-          hex = typeof decoded.data === "string" ? (decoded.data as string) : "";
+          hex =
+            typeof decoded.data === "string" ? (decoded.data as string) : "";
         } catch (e) {
           this.tierFetchError = true;
           return;
@@ -252,12 +253,14 @@ export const useCreatorsStore = defineStore("creators", {
             notifyWarning("Unable to retrieve subscription tiers");
             return;
           }
-          const tiersArray: Tier[] = JSON.parse(event.content).map((t: any) => ({
-            ...t,
-            price_sats: t.price_sats ?? t.price ?? 0,
-            ...(t.perks && !t.benefits ? { benefits: [t.perks] } : {}),
-            media: t.media ? filterValidMedia(t.media) : [],
-          }));
+          const tiersArray: Tier[] = JSON.parse(event.content).map(
+            (t: any) => ({
+              ...t,
+              price_sats: t.price_sats ?? t.price ?? 0,
+              ...(t.perks && !t.benefits ? { benefits: [t.perks] } : {}),
+              media: t.media ? filterValidMedia(t.media) : [],
+            })
+          );
           this.tiersMap[hex] = tiersArray;
           await db.creatorsTierDefinitions.put({
             creatorNpub: hex,
@@ -288,12 +291,14 @@ export const useCreatorsStore = defineStore("creators", {
             received = true;
             clearTimeout(timeout);
             this.tierFetchError = false;
-            const tiersArray: Tier[] = JSON.parse(event.content).map((t: any) => ({
-              ...t,
-              price_sats: t.price_sats ?? t.price ?? 0,
-              ...(t.perks && !t.benefits ? { benefits: [t.perks] } : {}),
-              media: t.media ? filterValidMedia(t.media) : [],
-            }));
+            const tiersArray: Tier[] = JSON.parse(event.content).map(
+              (t: any) => ({
+                ...t,
+                price_sats: t.price_sats ?? t.price ?? 0,
+                ...(t.perks && !t.benefits ? { benefits: [t.perks] } : {}),
+                media: t.media ? filterValidMedia(t.media) : [],
+              })
+            );
             this.tiersMap[hex] = tiersArray;
             await db.creatorsTierDefinitions.put({
               creatorNpub: hex,

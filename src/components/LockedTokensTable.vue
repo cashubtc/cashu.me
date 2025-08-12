@@ -43,8 +43,8 @@
             color="positive"
             rounded
             class="q-mr-sm"
-            ><q-icon name="check" /></q-badge
-          >
+            ><q-icon name="check"
+          /></q-badge>
           <q-btn
             flat
             dense

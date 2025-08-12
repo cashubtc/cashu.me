@@ -25,7 +25,7 @@ export const useLockedTokensRedeemWorker = defineStore(
         window.addEventListener("message", this.handleMessage);
         this.worker = setInterval(
           () => this.processTokens(),
-          this.checkInterval,
+          this.checkInterval
         );
         // run immediately
         this.processTokens();
@@ -60,12 +60,15 @@ export const useLockedTokensRedeemWorker = defineStore(
             (e: any) =>
               e.unlockTs === undefined &&
               typeof e.locktime === "number" &&
-              e.locktime <= now,
+              e.locktime <= now
           )
           .toArray();
 
         for (const entry of legacyEntries) {
-          if (entry.unlockTs === undefined && typeof (entry as any).locktime === "number") {
+          if (
+            entry.unlockTs === undefined &&
+            typeof (entry as any).locktime === "number"
+          ) {
             await cashuDb.lockedTokens.update(entry.id, {
               unlockTs: (entry as any).locktime,
             });
@@ -105,7 +108,7 @@ export const useLockedTokensRedeemWorker = defineStore(
             ) {
               console.error(
                 "Mint or keyset mismatch for locked token",
-                entry.id,
+                entry.id
               );
               await cashuDb.lockedTokens
                 .where("tokenString")
@@ -141,7 +144,8 @@ export const useLockedTokensRedeemWorker = defineStore(
               p2pkStore.getPrivateKeyForP2PKEncodedToken(entry.tokenString);
 
             const needsSig = proofs.some(
-              (p) => typeof p.secret === "string" && p.secret.startsWith('["P2PK"')
+              (p) =>
+                typeof p.secret === "string" && p.secret.startsWith('["P2PK"')
             );
             if (needsSig && !receiveStore.receiveData.p2pkPrivateKey) {
               postMessage({
@@ -153,29 +157,35 @@ export const useLockedTokensRedeemWorker = defineStore(
 
             debug("locked token redeem: sending proofs", proofs);
             try {
-              await cashuDb.transaction('rw', cashuDb.lockedTokens, async () => {
-                const row = await cashuDb.lockedTokens.get(entry.id);
-                if (!row || (row.status as any) === 'processing') return;
-                await cashuDb.lockedTokens.update(entry.id, {
-                  status: 'processing' as any,
-                  redeemed: true,
-                });
-              });
-              await receiveStore.enqueue(() =>
-                (wallet as any).receive(entry.tokenString),
+              await cashuDb.transaction(
+                "rw",
+                cashuDb.lockedTokens,
+                async () => {
+                  const row = await cashuDb.lockedTokens.get(entry.id);
+                  if (!row || (row.status as any) === "processing") return;
+                  await cashuDb.lockedTokens.update(entry.id, {
+                    status: "processing" as any,
+                    redeemed: true,
+                  });
+                }
               );
-              await cashuDb.lockedTokens.update(entry.id, { status: 'claimed' });
+              await receiveStore.enqueue(() =>
+                (wallet as any).receive(entry.tokenString)
+              );
+              await cashuDb.lockedTokens.update(entry.id, {
+                status: "claimed",
+              });
 
               // update subscription interval if applicable
               if (entry.subscriptionId) {
                 try {
                   const sub = await cashuDb.subscriptions.get(
-                    entry.subscriptionId,
+                    entry.subscriptionId
                   );
                   const idx = sub?.intervals.findIndex(
                     (i) =>
                       i.intervalKey === entry.intervalKey ||
-                      i.lockedTokenId === entry.id,
+                      i.lockedTokenId === entry.id
                   );
                   if (sub && idx !== undefined && idx >= 0) {
                     sub.intervals[idx].status = "claimed";
@@ -196,12 +206,14 @@ export const useLockedTokensRedeemWorker = defineStore(
                     tier_id: entry.tierId,
                     month_index: entry.monthIndex,
                     total_months: entry.totalPeriods,
-                    ...(entry.htlcSecret ? { htlc_secret: entry.htlcSecret } : {}),
+                    ...(entry.htlcSecret
+                      ? { htlc_secret: entry.htlcSecret }
+                      : {}),
                   } as const;
                   try {
                     await messenger.sendDm(
                       entry.creatorNpub,
-                      JSON.stringify(payload),
+                      JSON.stringify(payload)
                     );
                     notifySuccess("Subscription payment claimed");
                   } catch (e) {
@@ -231,5 +243,5 @@ export const useLockedTokensRedeemWorker = defineStore(
         }
       },
     },
-  },
+  }
 );

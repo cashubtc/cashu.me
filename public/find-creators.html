@@ -142,12 +142,24 @@
         transition: background-color 0.2s;
         box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
       }
-      .view-button { background-color: #a0aec0; }
-      .view-button:hover { background-color: #718096; }
-      .message-button { background-color: #4299e1; }
-      .message-button:hover { background-color: #3182ce; }
-      .donate-button { background-color: #48bb78; }
-      .donate-button:hover { background-color: #38a169; }
+      .view-button {
+        background-color: #a0aec0;
+      }
+      .view-button:hover {
+        background-color: #718096;
+      }
+      .message-button {
+        background-color: #4299e1;
+      }
+      .message-button:hover {
+        background-color: #3182ce;
+      }
+      .donate-button {
+        background-color: #48bb78;
+      }
+      .donate-button:hover {
+        background-color: #38a169;
+      }
       .status-message {
         text-align: center;
         color: #718096;
@@ -166,7 +178,9 @@
         transition: background-color 0.2s;
         display: block;
       }
-      .retry-button:hover { background-color: #3182ce; }
+      .retry-button:hover {
+        background-color: #3182ce;
+      }
       .loader {
         display: none;
         margin: 1.5rem auto;
@@ -178,8 +192,12 @@
         animation: spin 1s linear infinite;
       }
       @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
       }
       .relay-info {
         font-size: 0.8rem;
@@ -201,7 +219,9 @@
         border: 1px solid #cbd5e0;
         transition: background-color 0.2s;
       }
-      .copy-button:hover { background-color: #e2e8f0; }
+      .copy-button:hover {
+        background-color: #e2e8f0;
+      }
       .section-title {
         font-size: 1.5rem;
         font-weight: 700;
@@ -229,47 +249,48 @@
         <div id="loader" class="loader"></div>
         <ul id="resultsList" class="results-list"></ul>
         <p id="statusMessage" class="status-message hidden"></p>
-        <button
-          id="retryButton"
-          class="retry-button hidden"
-          type="button"
-        >
+        <button id="retryButton" class="retry-button hidden" type="button">
           Retry
         </button>
       </div>
 
       <div class="featured-creators-container">
         <h2 class="section-title">Featured Creators</h2>
-        <div id="featuredCreatorsLoader" class="loader" style="display: block"></div>
+        <div
+          id="featuredCreatorsLoader"
+          class="loader"
+          style="display: block"
+        ></div>
         <div id="featuredCreatorsGrid" class="featured-creators-grid"></div>
         <p id="featuredStatusMessage" class="status-message hidden"></p>
       </div>
 
-      <div class="relay-info">
-        Connecting to: <span id="relayList"></span>
-      </div>
+      <div class="relay-info">Connecting to: <span id="relayList"></span></div>
     </div>
 
     <script type="module">
-      import { DEFAULT_RELAYS } from '/src/config/relays';
+      import { DEFAULT_RELAYS } from "/src/config/relays";
 
       const FALLBACK_RELAYS = [
-        'wss://relay.damus.io',
-        'wss://relay.primal.net',
-        'wss://relay.snort.social',
-        'wss://nostr.wine',
-        'wss://nos.lol'
+        "wss://relay.damus.io",
+        "wss://relay.primal.net",
+        "wss://relay.snort.social",
+        "wss://nostr.wine",
+        "wss://nos.lol",
       ];
       // --- Nostr Tools ---
       if (!window.NostrTools) {
-        document.getElementById("statusMessage").textContent = "Error: nostr-tools library not loaded.";
+        document.getElementById("statusMessage").textContent =
+          "Error: nostr-tools library not loaded.";
         document.getElementById("statusMessage").classList.remove("hidden");
       }
       const { SimplePool, nip19, utils } = window.NostrTools;
 
       let storedRelays = [];
       try {
-        const stored = window.localStorage.getItem("cashu.settings.defaultNostrRelays");
+        const stored = window.localStorage.getItem(
+          "cashu.settings.defaultNostrRelays"
+        );
         storedRelays = JSON.parse(stored ?? "[]");
         if (!Array.isArray(storedRelays)) storedRelays = [];
       } catch {
@@ -283,21 +304,32 @@
       let lastSearchQuery = "";
 
       const FEATURED_NPUBS = [
-        "npub1aljmhjp5tqrw3m60ra7t3u8uqq223d6rdg9q0h76a8djd9m4hmvsmlj82m", "npub1sg6plzptd64u62a878hep2kev88swjh3tw00gjsfl8f237lmu63q0uf63m",
-        "npub1qny3tkh0acurzla8x3zy4nhrjz5zd8l9sy9jys09umwng00manysew95gx", "npub1cj8znuztfqkvq89pl8hceph0svvvqk0qay6nydgk9uyq7fhpfsgsqwrz4u",
-        "npub1a2cww4kn9wqte4ry70vyfwqyqvpswksna27rtxd8vty6c74era8sdcw83a", "npub1s05p3ha7en49dv8429tkk07nnfa9pcwczkf5x5qrdraqshxdje9sq6eyhe",
-        "npub180cvv07tjdrrgpa0j7j7tmnyl2yr6yr7l8j4s3evf6u64th6gkwsyjh6w6", "npub1dergggklka99wwrs92yz8wdjs952h2ux2ha2ed598ngwu9w7a6fsh9xzpc",
-        "npub1s5yq6wadwrxde4lhfs56gn64hwzuhnfa6r9mj476r5s4hkunzgzqrs6q7z", "npub1spdnfacgsd7lk0nlqkq443tkq4jx9z6c6ksvaquuewmw7d3qltpslcq6j7",
+        "npub1aljmhjp5tqrw3m60ra7t3u8uqq223d6rdg9q0h76a8djd9m4hmvsmlj82m",
+        "npub1sg6plzptd64u62a878hep2kev88swjh3tw00gjsfl8f237lmu63q0uf63m",
+        "npub1qny3tkh0acurzla8x3zy4nhrjz5zd8l9sy9jys09umwng00manysew95gx",
+        "npub1cj8znuztfqkvq89pl8hceph0svvvqk0qay6nydgk9uyq7fhpfsgsqwrz4u",
+        "npub1a2cww4kn9wqte4ry70vyfwqyqvpswksna27rtxd8vty6c74era8sdcw83a",
+        "npub1s05p3ha7en49dv8429tkk07nnfa9pcwczkf5x5qrdraqshxdje9sq6eyhe",
+        "npub180cvv07tjdrrgpa0j7j7tmnyl2yr6yr7l8j4s3evf6u64th6gkwsyjh6w6",
+        "npub1dergggklka99wwrs92yz8wdjs952h2ux2ha2ed598ngwu9w7a6fsh9xzpc",
+        "npub1s5yq6wadwrxde4lhfs56gn64hwzuhnfa6r9mj476r5s4hkunzgzqrs6q7z",
+        "npub1spdnfacgsd7lk0nlqkq443tkq4jx9z6c6ksvaquuewmw7d3qltpslcq6j7",
       ];
-      
+
       const searchInputElement = document.getElementById("searchInput");
       const resultsListElement = document.getElementById("resultsList");
       const statusMessageElement = document.getElementById("statusMessage");
       const retryButtonElement = document.getElementById("retryButton");
       const loaderElement = document.getElementById("loader");
-      const featuredCreatorsGridElement = document.getElementById("featuredCreatorsGrid");
-      const featuredCreatorsLoaderElement = document.getElementById("featuredCreatorsLoader");
-      const featuredStatusMessageElement = document.getElementById("featuredStatusMessage");
+      const featuredCreatorsGridElement = document.getElementById(
+        "featuredCreatorsGrid"
+      );
+      const featuredCreatorsLoaderElement = document.getElementById(
+        "featuredCreatorsLoader"
+      );
+      const featuredStatusMessageElement = document.getElementById(
+        "featuredStatusMessage"
+      );
 
       const nip05Regex = /^([a-zA-Z0-9_.-]+)@([a-zA-Z0-9.-]+\.[a-zA-Z]{2,})$/;
 
@@ -308,12 +340,15 @@
           timeoutId = setTimeout(() => func.apply(this, args), delay);
         };
       }
-      
+
       function fetchWithTimeout(resource, options = {}) {
         const { timeout = 8000 } = options;
         const controller = new AbortController();
         const id = setTimeout(() => controller.abort(), timeout);
-        const promise = fetch(resource, { ...options, signal: controller.signal });
+        const promise = fetch(resource, {
+          ...options,
+          signal: controller.signal,
+        });
         promise.finally(() => clearTimeout(id));
         return promise;
       }
@@ -341,8 +376,15 @@
         try {
           let pubkeyToFind = null;
           if (cleanQuery.startsWith("npub1")) {
-             try { pubkeyToFind = nip19.decode(cleanQuery).data; } catch (e) { /* ignore invalid npub */ }
-          } else if (cleanQuery.length === 64 && /^[0-9a-fA-F]+$/.test(cleanQuery)) {
+            try {
+              pubkeyToFind = nip19.decode(cleanQuery).data;
+            } catch (e) {
+              /* ignore invalid npub */
+            }
+          } else if (
+            cleanQuery.length === 64 &&
+            /^[0-9a-fA-F]+$/.test(cleanQuery)
+          ) {
             pubkeyToFind = cleanQuery.toLowerCase();
           } else if (nip05Regex.test(cleanQuery)) {
             updateStatus("Resolving NIP-05 identifier...");
@@ -357,24 +399,27 @@
 
           updateStatus(`Searching relays for "${cleanQuery}"...`);
           const filter = { kinds: [0], search: cleanQuery, limit: 25 };
-          const profiles = await fetchProfilesFromRelays(RELAYS, filter, signal);
+          const profiles = await fetchProfilesFromRelays(
+            RELAYS,
+            filter,
+            signal
+          );
           if (signal.aborted) return;
-          
+
           if (profiles.length > 0) {
             renderProfiles(profiles, resultsListElement, false);
             updateStatus("", true);
           } else {
             updateStatus("No profiles found matching your search.");
           }
-
         } catch (error) {
-          if (error.name !== 'AbortError') {
+          if (error.name !== "AbortError") {
             console.error("Search failed:", error);
             const msg =
-              error.message && error.message.includes('Failed to fetch')
-                ? 'Network error: could not reach relays.'
-                : error.name === 'AbortError'
-                ? 'Search timed out.'
+              error.message && error.message.includes("Failed to fetch")
+                ? "Network error: could not reach relays."
+                : error.name === "AbortError"
+                ? "Search timed out."
                 : `Search failed: ${error.message}`;
             updateStatus(msg, false, true);
           }
@@ -388,7 +433,11 @@
       async function findProfileByPubkey(pubkey, signal) {
         // Tier 1: Search known relays
         updateStatus("Searching known relays for profile...");
-        let profiles = await fetchProfilesFromRelays(RELAYS, { kinds: [0], authors: [pubkey] }, signal);
+        let profiles = await fetchProfilesFromRelays(
+          RELAYS,
+          { kinds: [0], authors: [pubkey] },
+          signal
+        );
         if (signal.aborted) return;
         if (profiles.length > 0) {
           renderProfiles(profiles, resultsListElement, false);
@@ -401,8 +450,14 @@
         const userRelays = await findUserRelayList(pubkey, signal);
         if (signal.aborted) return;
         if (userRelays.length > 0) {
-          updateStatus(`Searching ${userRelays.length} newly discovered relays...`);
-          profiles = await fetchProfilesFromRelays(userRelays, { kinds: [0], authors: [pubkey] }, signal);
+          updateStatus(
+            `Searching ${userRelays.length} newly discovered relays...`
+          );
+          profiles = await fetchProfilesFromRelays(
+            userRelays,
+            { kinds: [0], authors: [pubkey] },
+            signal
+          );
           if (signal.aborted) return;
           if (profiles.length > 0) {
             renderProfiles(profiles, resultsListElement, false);
@@ -410,20 +465,28 @@
             return;
           }
         }
-        
+
         // Tier 3: Use nostr.band indexer to find where user is active
-        updateStatus("Still not found. Consulting nostr.band indexer for relay locations...");
+        updateStatus(
+          "Still not found. Consulting nostr.band indexer for relay locations..."
+        );
         const indexedRelays = await fetchRelayListFromIndexer(pubkey, signal);
         if (signal.aborted) return;
-        if(indexedRelays.length > 0) {
-            updateStatus(`Found ${indexedRelays.length} potential relays from indexer. Searching...`);
-            profiles = await fetchProfilesFromRelays(indexedRelays, { kinds: [0], authors: [pubkey] }, signal);
-            if (signal.aborted) return;
-            if (profiles.length > 0) {
-              renderProfiles(profiles, resultsListElement, false);
-              updateStatus("", true);
-              return;
-            }
+        if (indexedRelays.length > 0) {
+          updateStatus(
+            `Found ${indexedRelays.length} potential relays from indexer. Searching...`
+          );
+          profiles = await fetchProfilesFromRelays(
+            indexedRelays,
+            { kinds: [0], authors: [pubkey] },
+            signal
+          );
+          if (signal.aborted) return;
+          if (profiles.length > 0) {
+            renderProfiles(profiles, resultsListElement, false);
+            updateStatus("", true);
+            return;
+          }
         }
 
         // Tier 4: Fallback to nostr.band indexer for the profile content
@@ -431,33 +494,41 @@
         let profile = await fetchProfileFromIndexer(pubkey, signal);
         if (signal.aborted) return;
         if (profile) {
-            renderProfiles([profile], resultsListElement, false);
-            updateStatus("", true);
-            return;
+          renderProfiles([profile], resultsListElement, false);
+          updateStatus("", true);
+          return;
         }
 
         // Tier 5: The ultimate fallback, query the Primal.net API
-        updateStatus("Last attempt: Consulting Primal, the most powerful indexer...");
+        updateStatus(
+          "Last attempt: Consulting Primal, the most powerful indexer..."
+        );
         profile = await fetchProfileFromPrimal(pubkey, signal);
         if (signal.aborted) return;
         if (profile) {
-            renderProfiles([profile], resultsListElement, false);
-            updateStatus("", true);
+          renderProfiles([profile], resultsListElement, false);
+          updateStatus("", true);
         } else {
-            updateStatus("Profile could not be found after exhaustive search on known relays, discovered relays, and multiple public indexers.");
+          updateStatus(
+            "Profile could not be found after exhaustive search on known relays, discovered relays, and multiple public indexers."
+          );
         }
       }
-      
+
       async function fetchProfileFromIndexer(pubkey, signal) {
         try {
-          const response = await fetchWithTimeout(`https://api.nostr.band/v0/profile?pubkey=${pubkey}`, { signal });
+          const response = await fetchWithTimeout(
+            `https://api.nostr.band/v0/profile?pubkey=${pubkey}`,
+            { signal }
+          );
           if (!response.ok) return null;
           const data = await response.json();
           if (data && data.profile) {
             const content = JSON.parse(data.profile.content);
             return {
               pubkey: data.profile.pubkey,
-              name: content.name || content.display_name || content.username || "",
+              name:
+                content.name || content.display_name || content.username || "",
               nip05: content.nip05 || "",
               picture: content.picture || "",
               about: content.about || "",
@@ -467,62 +538,73 @@
           }
           return null;
         } catch (error) {
-          if (error.name === 'AbortError') throw error;
+          if (error.name === "AbortError") throw error;
           console.error("nostr.band API error:", error);
           return null;
         }
       }
-      
+
       async function fetchProfileFromPrimal(pubkey, signal) {
-          try {
-              const primalUrl = `https://primal-cache.snort.social/api/v1/eose/user/profile/${pubkey}`;
-              const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(primalUrl)}`;
-              const response = await fetchWithTimeout(proxyUrl, { signal });
-              if (!response.ok) return null;
-              const data = await response.json();
-              if (data && data[0] && data[0].content) {
-                  const content = JSON.parse(data[0].content);
-                   return {
-                      pubkey: data[0].pubkey,
-                      name: content.name || content.display_name || content.username || "",
-                      nip05: content.nip05 || "",
-                      picture: content.picture || "",
-                      about: content.about || "",
-                      lud16: content.lud16 || "",
-                      event: data[0],
-                    };
-              }
-              return null;
-          } catch(error) {
-              if (error.name === 'AbortError') throw error;
-              console.error("Primal API error:", error);
-              return null;
+        try {
+          const primalUrl = `https://primal-cache.snort.social/api/v1/eose/user/profile/${pubkey}`;
+          const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(
+            primalUrl
+          )}`;
+          const response = await fetchWithTimeout(proxyUrl, { signal });
+          if (!response.ok) return null;
+          const data = await response.json();
+          if (data && data[0] && data[0].content) {
+            const content = JSON.parse(data[0].content);
+            return {
+              pubkey: data[0].pubkey,
+              name:
+                content.name || content.display_name || content.username || "",
+              nip05: content.nip05 || "",
+              picture: content.picture || "",
+              about: content.about || "",
+              lud16: content.lud16 || "",
+              event: data[0],
+            };
           }
+          return null;
+        } catch (error) {
+          if (error.name === "AbortError") throw error;
+          console.error("Primal API error:", error);
+          return null;
+        }
       }
 
       async function fetchRelayListFromIndexer(pubkey, signal) {
-          try {
-              const response = await fetchWithTimeout(`https://api.nostr.band/v0/relays/for_pubkey/${pubkey}`, { signal });
-              if (!response.ok) return [];
-              const data = await response.json();
-              if (data && Array.isArray(data.relays)) {
-                  return data.relays.map(r => r.relay);
-              }
-              return [];
-          } catch(error) {
-              if (error.name === 'AbortError') throw error;
-              console.error("nostr.band relay list fetch error:", error);
-              return [];
+        try {
+          const response = await fetchWithTimeout(
+            `https://api.nostr.band/v0/relays/for_pubkey/${pubkey}`,
+            { signal }
+          );
+          if (!response.ok) return [];
+          const data = await response.json();
+          if (data && Array.isArray(data.relays)) {
+            return data.relays.map((r) => r.relay);
           }
+          return [];
+        } catch (error) {
+          if (error.name === "AbortError") throw error;
+          console.error("nostr.band relay list fetch error:", error);
+          return [];
+        }
       }
 
       async function findUserRelayList(pubkey, signal) {
         const filter = { kinds: [10002], authors: [pubkey], limit: 1 };
-        const events = await fetchEventsFromRelays(RELAYS, filter, signal, 4000);
+        const events = await fetchEventsFromRelays(
+          RELAYS,
+          filter,
+          signal,
+          4000
+        );
         if (events.length > 0) {
           return events[0].tags
-            .filter(tag => tag[0] === 'r' && tag[1])
-            .map(tag => tag[1]);
+            .filter((tag) => tag[0] === "r" && tag[1])
+            .map((tag) => tag[1]);
         }
         return [];
       }
@@ -530,68 +612,83 @@
       async function fetchProfilesFromRelays(relays, filter, signal) {
         const events = await fetchEventsFromRelays(relays, filter, signal);
         const profileMap = new Map();
-        events.forEach(event => {
+        events.forEach((event) => {
           if (event.kind === 0) {
             try {
-                const profileData = JSON.parse(event.content);
-                const existing = profileMap.get(event.pubkey);
-                if (!existing || event.created_at > existing.event.created_at) {
-                  profileMap.set(event.pubkey, {
-                    pubkey: event.pubkey,
-                    name: profileData.name || profileData.display_name || profileData.username || "",
-                    nip05: profileData.nip05 || "",
-                    picture: profileData.picture || "",
-                    about: profileData.about || "",
-                    lud16: profileData.lud16 || "",
-                    event: event,
-                  });
-                }
-            } catch(e) { console.error("Failed to parse profile event content", e, event.content); }
+              const profileData = JSON.parse(event.content);
+              const existing = profileMap.get(event.pubkey);
+              if (!existing || event.created_at > existing.event.created_at) {
+                profileMap.set(event.pubkey, {
+                  pubkey: event.pubkey,
+                  name:
+                    profileData.name ||
+                    profileData.display_name ||
+                    profileData.username ||
+                    "",
+                  nip05: profileData.nip05 || "",
+                  picture: profileData.picture || "",
+                  about: profileData.about || "",
+                  lud16: profileData.lud16 || "",
+                  event: event,
+                });
+              }
+            } catch (e) {
+              console.error(
+                "Failed to parse profile event content",
+                e,
+                event.content
+              );
+            }
           }
         });
         return Array.from(profileMap.values());
       }
-      
+
       function fetchEventsFromRelays(relays, filter, signal, timeout = 7000) {
-          return new Promise((resolve, reject) => {
-              if (signal.aborted) return reject(new DOMException('Aborted', 'AbortError'));
+        return new Promise((resolve, reject) => {
+          if (signal.aborted)
+            return reject(new DOMException("Aborted", "AbortError"));
 
-              const events = [];
-              const sub = pool.sub([...new Set(relays)], [filter]);
-              
-              const cleanup = () => {
-                  try { sub.unsub(); } catch(e) {}
-                  signal.removeEventListener('abort', onAbort);
-                  clearTimeout(timeoutId);
-              };
+          const events = [];
+          const sub = pool.sub([...new Set(relays)], [filter]);
 
-              const onAbort = () => {
-                  cleanup();
-                  reject(new DOMException('Aborted', 'AbortError'));
-              };
-              signal.addEventListener('abort', onAbort);
+          const cleanup = () => {
+            try {
+              sub.unsub();
+            } catch (e) {}
+            signal.removeEventListener("abort", onAbort);
+            clearTimeout(timeoutId);
+          };
 
-              const timeoutId = setTimeout(() => {
-                  cleanup();
-                  resolve(events);
-              }, timeout);
+          const onAbort = () => {
+            cleanup();
+            reject(new DOMException("Aborted", "AbortError"));
+          };
+          signal.addEventListener("abort", onAbort);
 
-              sub.on('event', event => {
-                  events.push(event);
-              });
+          const timeoutId = setTimeout(() => {
+            cleanup();
+            resolve(events);
+          }, timeout);
 
-              sub.on('eose', () => {
-                  // Don't resolve on EOSE, wait for full timeout to gather from all relays
-              });
+          sub.on("event", (event) => {
+            events.push(event);
           });
+
+          sub.on("eose", () => {
+            // Don't resolve on EOSE, wait for full timeout to gather from all relays
+          });
+        });
       }
-      
+
       async function resolveNip05(nip05, signal) {
         const match = nip05.match(nip05Regex);
         if (!match) return null;
         const [, localPart, domain] = match;
         try {
-          const url = `https://${domain}/.well-known/nostr.json?name=${encodeURIComponent(localPart)}`;
+          const url = `https://${domain}/.well-known/nostr.json?name=${encodeURIComponent(
+            localPart
+          )}`;
           const response = await fetchWithTimeout(url, { signal });
           if (!response.ok) return null;
           const data = await response.json();
@@ -599,11 +696,12 @@
             return { pubkey: data.names[localPart] };
           }
         } catch (error) {
-           if (error.name !== 'AbortError') console.error("NIP-05 resolution failed:", error);
+          if (error.name !== "AbortError")
+            console.error("NIP-05 resolution failed:", error);
         }
         return null;
       }
-      
+
       function updateStatus(message, hide = false, showRetry = false) {
         if (hide) {
           statusMessageElement.classList.add("hidden");
@@ -626,28 +724,41 @@
 
         profiles.forEach((profile) => {
           const cardElement = document.createElement(isFeatured ? "div" : "li");
-          cardElement.className = `${isFeatured ? "creator-card" : "result-item"} group`;
+          cardElement.className = `${
+            isFeatured ? "creator-card" : "result-item"
+          } group`;
           const profileHeaderDiv = document.createElement("div");
           profileHeaderDiv.className = "profile-header";
           const avatarImg = document.createElement("img");
           avatarImg.className = "avatar";
           const avatarLetter = (profile.name || "N")[0]?.toUpperCase();
-          avatarImg.src = profile.picture || `https://placehold.co/50x50/A0AEC0/FFFFFF?text=${avatarLetter}`;
+          avatarImg.src =
+            profile.picture ||
+            `https://placehold.co/50x50/A0AEC0/FFFFFF?text=${avatarLetter}`;
           avatarImg.alt = profile.name || "Nostr User";
-          avatarImg.onerror = function () { this.src = `https://placehold.co/50x50/A0AEC0/FFFFFF?text=${avatarLetter}`; };
+          avatarImg.onerror = function () {
+            this.src = `https://placehold.co/50x50/A0AEC0/FFFFFF?text=${avatarLetter}`;
+          };
           const infoDiv = document.createElement("div");
           infoDiv.className = "info";
           const nameElement = document.createElement("h3");
-          nameElement.textContent = profile.name || (profile.nip05 ? profile.nip05.split('@')[0] : "Unnamed User");
+          nameElement.textContent =
+            profile.name ||
+            (profile.nip05 ? profile.nip05.split("@")[0] : "Unnamed User");
           const npub = nip19.npubEncode(profile.pubkey);
-          const npubShort = `${npub.substring(0, 10)}...${npub.substring(npub.length - 5)}`;
+          const npubShort = `${npub.substring(0, 10)}...${npub.substring(
+            npub.length - 5
+          )}`;
           const npubElement = document.createElement("p");
           npubElement.innerHTML = `<strong>Npub:</strong> ${npubShort}`;
           npubElement.title = npub;
           const copyNpubButton = document.createElement("button");
           copyNpubButton.textContent = "Copy";
           copyNpubButton.className = "copy-button";
-          copyNpubButton.onclick = (e) => { e.stopPropagation(); copyToClipboard(npub, copyNpubButton); };
+          copyNpubButton.onclick = (e) => {
+            e.stopPropagation();
+            copyToClipboard(npub, copyNpubButton);
+          };
           npubElement.appendChild(copyNpubButton);
           infoDiv.appendChild(nameElement);
           infoDiv.appendChild(npubElement);
@@ -658,7 +769,10 @@
           }
           if (profile.about) {
             const aboutElement = document.createElement("p");
-            const aboutText = profile.about.length > (isFeatured ? 80 : 150) ? profile.about.substring(0, isFeatured ? 80 : 150) + "..." : profile.about;
+            const aboutText =
+              profile.about.length > (isFeatured ? 80 : 150)
+                ? profile.about.substring(0, isFeatured ? 80 : 150) + "..."
+                : profile.about;
             aboutElement.innerHTML = `<em>${escapeHtml(aboutText)}</em>`;
             aboutElement.title = profile.about;
             infoDiv.appendChild(aboutElement);
@@ -676,23 +790,38 @@
           const viewButton = document.createElement("button");
           viewButton.className = "action-button view-button";
           viewButton.textContent = "View Subscription Tiers";
-          viewButton.onclick = (e) => { e.stopPropagation(); window.parent.postMessage({ type: "viewProfile", pubkey: profile.pubkey }, "*"); };
+          viewButton.onclick = (e) => {
+            e.stopPropagation();
+            window.parent.postMessage(
+              { type: "viewProfile", pubkey: profile.pubkey },
+              "*"
+            );
+          };
           const messageButton = document.createElement("button");
           messageButton.className = "action-button message-button";
           messageButton.textContent = "Message";
           messageButton.onclick = (e) => {
             e.stopPropagation();
-            window.parent.postMessage({
-              type: "startChat",
-              pubkey: profile.pubkey,
-            }, "*");
+            window.parent.postMessage(
+              {
+                type: "startChat",
+                pubkey: profile.pubkey,
+              },
+              "*"
+            );
           };
           const donateButton = document.createElement("button");
           donateButton.className = "action-button donate-button";
           donateButton.textContent = "Donate";
-          donateButton.onclick = (e) => { e.stopPropagation(); window.parent.postMessage({ type: "donate", pubkey: profile.pubkey }, "*"); };
+          donateButton.onclick = (e) => {
+            e.stopPropagation();
+            window.parent.postMessage(
+              { type: "donate", pubkey: profile.pubkey },
+              "*"
+            );
+          };
           actionsContainer.appendChild(viewButton);
-actionsContainer.appendChild(messageButton);
+          actionsContainer.appendChild(messageButton);
           actionsContainer.appendChild(donateButton);
           cardElement.appendChild(actionsContainer);
           targetElement.appendChild(cardElement);
@@ -701,7 +830,12 @@ actionsContainer.appendChild(messageButton);
 
       function escapeHtml(unsafe) {
         if (unsafe === null || unsafe === undefined) return "";
-        return unsafe.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+        return unsafe
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#039;");
       }
 
       function copyToClipboard(text, buttonElement) {
@@ -714,7 +848,9 @@ actionsContainer.appendChild(messageButton);
           if (buttonElement) {
             const originalText = buttonElement.textContent;
             buttonElement.textContent = "Copied!";
-            setTimeout(() => { buttonElement.textContent = originalText; }, 2000);
+            setTimeout(() => {
+              buttonElement.textContent = originalText;
+            }, 2000);
           }
         } catch (err) {
           console.error("Failed to copy text: ", err);
@@ -723,20 +859,29 @@ actionsContainer.appendChild(messageButton);
       }
 
       document.addEventListener("DOMContentLoaded", async () => {
-        const featuredPubkeysHex = FEATURED_NPUBS.map(npub => {
-          try { return nip19.decode(npub).data; } catch (e) { return null; }
-        }).filter(hex => hex !== null);
+        const featuredPubkeysHex = FEATURED_NPUBS.map((npub) => {
+          try {
+            return nip19.decode(npub).data;
+          } catch (e) {
+            return null;
+          }
+        }).filter((hex) => hex !== null);
 
         if (featuredPubkeysHex.length > 0) {
-            featuredCreatorsLoaderElement.style.display = 'block';
-            const profiles = await fetchProfilesFromRelays(RELAYS, { kinds: [0], authors: featuredPubkeysHex }, new AbortController().signal);
-            featuredCreatorsLoaderElement.style.display = 'none';
-            if (profiles.length > 0) {
-                renderProfiles(profiles, featuredCreatorsGridElement, true);
-            } else {
-                featuredStatusMessageElement.textContent = "Could not load featured creators.";
-                featuredStatusMessageElement.classList.remove("hidden");
-            }
+          featuredCreatorsLoaderElement.style.display = "block";
+          const profiles = await fetchProfilesFromRelays(
+            RELAYS,
+            { kinds: [0], authors: featuredPubkeysHex },
+            new AbortController().signal
+          );
+          featuredCreatorsLoaderElement.style.display = "none";
+          if (profiles.length > 0) {
+            renderProfiles(profiles, featuredCreatorsGridElement, true);
+          } else {
+            featuredStatusMessageElement.textContent =
+              "Could not load featured creators.";
+            featuredStatusMessageElement.classList.remove("hidden");
+          }
         }
       });
 

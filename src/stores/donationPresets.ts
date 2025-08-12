@@ -90,7 +90,7 @@ export const useDonationPresetsStore = defineStore("donationPresets", {
         ? subscription.intervalDays
         : subscription?.frequency
         ? frequencyToDays(subscription.frequency)
-        : frequencyToDays('monthly');
+        : frequencyToDays("monthly");
       for (let i = 0; i < months; i++) {
         const locktime = base + i * interval * 24 * 60 * 60;
         const { locked } = await p2pkStore.sendToLock(
@@ -110,12 +110,12 @@ export const useDonationPresetsStore = defineStore("donationPresets", {
           creatorP2PK: "",
           mintUrl: "",
           amountPerInterval: amount,
-          frequency: subscription.frequency || 'monthly',
+          frequency: subscription.frequency || "monthly",
           intervalDays:
             subscription.intervalDays ??
             (subscription.frequency
               ? frequencyToDays(subscription.frequency)
-              : frequencyToDays('monthly')),
+              : frequencyToDays("monthly")),
           startDate: base,
           commitmentLength: months,
           intervals: tokens.map((t, idx) => ({

@@ -54,7 +54,7 @@ export async function buildTimedOutputs(
   count: number,
   creatorPk: string,
   startTimeSec: number,
-  intervalSec = 30 * 24 * 3600, // 30 days
+  intervalSec = 30 * 24 * 3600 // 30 days
 ): Promise<{ proofs: WalletProof[]; tokenStrings: string[] }> {
   if (count <= 0) throw new Error("count must be > 0");
   const unitAmount = Math.round(totalAmount / count);
@@ -201,8 +201,7 @@ export const useP2PKStore = defineStore("p2pk", {
           debug("p2pk token - locktime is active");
           if (n_sigs && n_sigs >= 1) {
             for (const pk of pubkeys) {
-              if (this.haveThisKey(pk))
-                return { pubkey: pk, locktime };
+              if (this.haveThisKey(pk)) return { pubkey: pk, locktime };
             }
           }
           return { pubkey: mainKey, locktime };
@@ -239,7 +238,11 @@ export const useP2PKStore = defineStore("p2pk", {
           return this.isValidPubkey(pk) ? pk : "";
         }
 
-        if (!Array.isArray(secretObject) || secretObject[0] !== "P2PK" || !secretObject[1]?.data) {
+        if (
+          !Array.isArray(secretObject) ||
+          secretObject[0] !== "P2PK" ||
+          !secretObject[1]?.data
+        ) {
           console.error("Secret is not a valid P2PK format.");
           return "";
         }
@@ -258,7 +261,12 @@ export const useP2PKStore = defineStore("p2pk", {
 
         return this.isValidPubkey(pk) ? pk : "";
       } catch (e) {
-        console.error("Failed to parse P2PK secret JSON:", e, "Secret was:", trimmedSecret);
+        console.error(
+          "Failed to parse P2PK secret JSON:",
+          e,
+          "Secret was:",
+          trimmedSecret
+        );
         return "";
       }
     },
@@ -281,7 +289,11 @@ export const useP2PKStore = defineStore("p2pk", {
           if (!Array.isArray(obj)) continue;
           if (obj[0] !== "P2PK") continue;
           // ignore HTLC style objects
-          if (obj[1] && typeof obj[1] === "object" && "receiverP2PK" in obj[1]) {
+          if (
+            obj[1] &&
+            typeof obj[1] === "object" &&
+            "receiverP2PK" in obj[1]
+          ) {
             continue;
           }
           return true;
@@ -422,7 +434,9 @@ export const useP2PKStore = defineStore("p2pk", {
       const wallet = walletStore.wallet;
       const sendTokensStore = useSendTokensStore();
       const bucketId = sendTokensStore.sendData.bucketId || DEFAULT_BUCKET_ID;
-      const proofs = mintStore.activeProofs.filter((p) => p.bucketId === bucketId);
+      const proofs = mintStore.activeProofs.filter(
+        (p) => p.bucketId === bucketId
+      );
       const info = mintStore.activeInfo || {};
       const nuts = Array.isArray((info as any).nut_supports)
         ? (info as any).nut_supports
@@ -444,18 +458,22 @@ export const useP2PKStore = defineStore("p2pk", {
       let sendProofs: any[] = [];
       const proofsStore = useProofsStore();
       try {
-        ({ keep: keepProofs, send: sendProofs } = await wallet.send(amount, proofsToSend, {
-          keysetId,
-          p2pk: { pubkey: ensureCompressed(receiverPubkey), locktime },
-        }));
+        ({ keep: keepProofs, send: sendProofs } = await wallet.send(
+          amount,
+          proofsToSend,
+          {
+            keysetId,
+            p2pk: { pubkey: ensureCompressed(receiverPubkey), locktime },
+          }
+        ));
         await proofsStore.removeProofs(proofsToSend);
         const bucketsStore = useBucketsStore();
         const tokenStr = useProofsStore().serializeProofs(sendProofs);
         const locked = useLockedTokensStore().addLockedToken({
           amount,
-  tokenString: tokenStr,
+          tokenString: tokenStr,
 
-  token:  tokenStr,
+          token: tokenStr,
           pubkey: receiverPubkey,
           locktime,
           bucketId: bucketsStore.ensureCreatorBucket(receiverPubkey),

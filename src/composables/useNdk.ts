@@ -16,7 +16,7 @@ export async function rebuildNdk(relays: string[], signer?: NDKSigner) {
 }
 
 export async function useNdk(
-  opts: { requireSigner?: boolean } = {},
+  opts: { requireSigner?: boolean } = {}
 ): Promise<NDK> {
   const { requireSigner = true } = opts;
   const nostr = useNostrStore();

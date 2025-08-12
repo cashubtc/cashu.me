@@ -1,13 +1,16 @@
-const fs = require('fs');
+const fs = require("fs");
 
-const file = 'quasar.config.js';
-let s = fs.readFileSync(file, 'utf8');
+const file = "quasar.config.js";
+let s = fs.readFileSync(file, "utf8");
 let changed = false;
 
 // 1) Ensure import for node polyfills
 if (!/from ['"]vite-plugin-node-polyfills['"]/.test(s)) {
   if (/^import .*;?/m.test(s)) {
-    s = s.replace(/^import .*;?/m, m => m + "\nimport { nodePolyfills } from 'vite-plugin-node-polyfills';");
+    s = s.replace(
+      /^import .*;?/m,
+      (m) => m + "\nimport { nodePolyfills } from 'vite-plugin-node-polyfills';"
+    );
   } else {
     s = "import { nodePolyfills } from 'vite-plugin-node-polyfills';\n" + s;
   }
@@ -39,23 +42,42 @@ s = ensureBuildBlock(s);
 if (/build\s*:\s*{/.test(s)) {
   // Insert extendViteConf if missing
   if (!/extendViteConf\s*\(/.test(s)) {
-    s = s.replace(/build\s*:\s*{/, "build: {\n      extendViteConf(viteConf) {\n        viteConf.plugins = viteConf.plugins || [];\n        viteConf.plugins.push(\n          nodePolyfills({\n            globals: { Buffer: true, global: true, process: true },\n            protocolImports: true\n          })\n        );\n        viteConf.optimizeDeps = viteConf.optimizeDeps || {};\n        const inc = new Set([...(viteConf.optimizeDeps.include || []), 'buffer', 'process']);\n        viteConf.optimizeDeps.include = Array.from(inc);\n        viteConf.resolve = viteConf.resolve || {};\n        viteConf.resolve.alias = Object.assign({}, viteConf.resolve.alias, { buffer: 'buffer', process: 'process/browser' });\n      },");
+    s = s.replace(
+      /build\s*:\s*{/,
+      "build: {\n      extendViteConf(viteConf) {\n        viteConf.plugins = viteConf.plugins || [];\n        viteConf.plugins.push(\n          nodePolyfills({\n            globals: { Buffer: true, global: true, process: true },\n            protocolImports: true\n          })\n        );\n        viteConf.optimizeDeps = viteConf.optimizeDeps || {};\n        const inc = new Set([...(viteConf.optimizeDeps.include || []), 'buffer', 'process']);\n        viteConf.optimizeDeps.include = Array.from(inc);\n        viteConf.resolve = viteConf.resolve || {};\n        viteConf.resolve.alias = Object.assign({}, viteConf.resolve.alias, { buffer: 'buffer', process: 'process/browser' });\n      },"
+    );
     changed = true;
   } else {
     // extendViteConf exists: minimally ensure our bits are present
     if (!/nodePolyfills\(/.test(s)) {
-      s = s.replace(/extendViteConf\s*\([^)]*\)\s*{/, match => match +
-        "\n        viteConf.plugins = viteConf.plugins || [];\n        viteConf.plugins.push(\n          nodePolyfills({\n            globals: { Buffer: true, global: true, process: true },\n            protocolImports: true\n          })\n        );\n");
+      s = s.replace(
+        /extendViteConf\s*\([^)]*\)\s*{/,
+        (match) =>
+          match +
+          "\n        viteConf.plugins = viteConf.plugins || [];\n        viteConf.plugins.push(\n          nodePolyfills({\n            globals: { Buffer: true, global: true, process: true },\n            protocolImports: true\n          })\n        );\n"
+      );
       changed = true;
     }
     if (!/optimizeDeps[^}]*include/.test(s)) {
-      s = s.replace(/extendViteConf\s*\([^)]*\)\s*{/, match => match +
-        "\n        viteConf.optimizeDeps = viteConf.optimizeDeps || {};\n        const inc = new Set([...(viteConf.optimizeDeps.include || []), 'buffer', 'process']);\n        viteConf.optimizeDeps.include = Array.from(inc);\n");
+      s = s.replace(
+        /extendViteConf\s*\([^)]*\)\s*{/,
+        (match) =>
+          match +
+          "\n        viteConf.optimizeDeps = viteConf.optimizeDeps || {};\n        const inc = new Set([...(viteConf.optimizeDeps.include || []), 'buffer', 'process']);\n        viteConf.optimizeDeps.include = Array.from(inc);\n"
+      );
       changed = true;
     }
-    if (!/resolve[^}]*alias/.test(s) || !/buffer['"]?\s*:/.test(s) || !/process['"]?\s*:/.test(s)) {
-      s = s.replace(/extendViteConf\s*\([^)]*\)\s*{/, match => match +
-        "\n        viteConf.resolve = viteConf.resolve || {};\n        viteConf.resolve.alias = Object.assign({}, viteConf.resolve.alias, { buffer: 'buffer', process: 'process/browser' });\n");
+    if (
+      !/resolve[^}]*alias/.test(s) ||
+      !/buffer['"]?\s*:/.test(s) ||
+      !/process['"]?\s*:/.test(s)
+    ) {
+      s = s.replace(
+        /extendViteConf\s*\([^)]*\)\s*{/,
+        (match) =>
+          match +
+          "\n        viteConf.resolve = viteConf.resolve || {};\n        viteConf.resolve.alias = Object.assign({}, viteConf.resolve.alias, { buffer: 'buffer', process: 'process/browser' });\n"
+      );
       changed = true;
     }
   }
@@ -63,7 +85,7 @@ if (/build\s*:\s*{/.test(s)) {
 
 if (changed) {
   fs.writeFileSync(file, s);
-  console.log('quasar.config.js repaired (polyfills, aliases, deps, boot).');
+  console.log("quasar.config.js repaired (polyfills, aliases, deps, boot).");
 } else {
-  console.log('quasar.config.js already ok; no changes made.');
+  console.log("quasar.config.js already ok; no changes made.");
 }

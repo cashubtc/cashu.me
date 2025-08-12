@@ -106,8 +106,11 @@
           :disable="!bucketProofs.length"
           @click="openSendDmDialog"
         >
-          {{ $t('BucketDetail.send_dm') }}
-          <InfoTooltip class="q-ml-xs" :text="$t('BucketDetail.tooltips.send_dm')" />
+          {{ $t("BucketDetail.send_dm") }}
+          <InfoTooltip
+            class="q-ml-xs"
+            :text="$t('BucketDetail.tooltips.send_dm')"
+          />
         </q-btn>
       </div>
     </div>
@@ -189,7 +192,9 @@ const bucketBalance = computed(() =>
 );
 const { activeUnit } = storeToRefs(mintsStore);
 const showSendTokens = storeToRefs(sendTokensStore).showSendTokens;
-const sendDmDialogRef = ref<InstanceType<typeof SendBucketDmDialog> | null>(null);
+const sendDmDialogRef = ref<InstanceType<typeof SendBucketDmDialog> | null>(
+  null
+);
 
 const selectedSecrets = ref<string[]>([]);
 const targetBucketId = ref<string | null>(null);

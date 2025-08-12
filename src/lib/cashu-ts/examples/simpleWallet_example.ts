@@ -208,8 +208,7 @@ const runWalletExample = async () => {
 					console.error(quote.error, quote.code, quote.detail);
 					return;
 				}
-                                if (quote.state === MeltQuoteState.PAID) {
-
+				if (quote.state === MeltQuoteState.PAID) {
 					console.log(`Ecash left: ${sumProofs(proofs)}`);
 					console.log(`Spent ecash notes: ${sumProofs(sentProofs)}`);
 

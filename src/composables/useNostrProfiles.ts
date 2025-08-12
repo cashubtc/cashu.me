@@ -15,7 +15,7 @@ function save(npub: string, profile: Profile) {
   try {
     localStorage.setItem(
       STORAGE_PREFIX + npub,
-      JSON.stringify({ profile, timestamp: Date.now() }),
+      JSON.stringify({ profile, timestamp: Date.now() })
     );
   } catch (e) {
     console.error(e);

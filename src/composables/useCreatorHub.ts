@@ -1,21 +1,21 @@
-import { ref, computed, watch, onMounted } from 'vue';
-import { useQuasar } from 'quasar';
-import { storeToRefs } from 'pinia';
-import { nip19 } from 'nostr-tools';
-import { useCreatorHubStore } from 'stores/creatorHub';
-import type { Tier } from 'stores/types';
+import { ref, computed, watch, onMounted } from "vue";
+import { useQuasar } from "quasar";
+import { storeToRefs } from "pinia";
+import { nip19 } from "nostr-tools";
+import { useCreatorHubStore } from "stores/creatorHub";
+import type { Tier } from "stores/types";
 import {
   useNostrStore,
   fetchNutzapProfile,
   publishDiscoveryProfile,
   RelayConnectionError,
   PublishTimeoutError,
-} from 'stores/nostr';
-import { useP2PKStore } from 'stores/p2pk';
-import { useMintsStore } from 'stores/mints';
-import { useCreatorProfileStore } from 'stores/creatorProfile';
-import { notifySuccess, notifyError } from 'src/js/notify';
-import { pingRelay } from 'src/utils/relayHealth';
+} from "stores/nostr";
+import { useP2PKStore } from "stores/p2pk";
+import { useMintsStore } from "stores/mints";
+import { useCreatorProfileStore } from "stores/creatorProfile";
+import { notifySuccess, notifyError } from "src/js/notify";
+import { pingRelay } from "src/utils/relayHealth";
 
 async function anyRelayReachable(urls: string[]): Promise<boolean> {
   const results = await Promise.all(urls.map(pingRelay));
@@ -46,21 +46,21 @@ export function useCreatorHub() {
     about: about.value,
   }));
 
-  const nsec = ref('');
+  const nsec = ref("");
   const isMobile = computed(() => $q.screen.lt.md);
   const splitterModel = ref(50);
-  const tab = ref<'profile' | 'tiers'>('profile');
+  const tab = ref<"profile" | "tiers">("profile");
 
   const loggedIn = computed(() => !!store.loggedInNpub);
   const tierList = computed<Tier[]>(() => store.getTierArray());
   const draggableTiers = ref<Tier[]>([]);
   const deleteDialog = ref(false);
-  const deleteId = ref('');
+  const deleteId = ref("");
   const showTierDialog = ref(false);
   const currentTier = ref<Partial<Tier>>({});
   const publishing = ref(false);
   const npub = computed(() =>
-    store.loggedInNpub ? nip19.npubEncode(store.loggedInNpub) : ''
+    store.loggedInNpub ? nip19.npubEncode(store.loggedInNpub) : ""
   );
 
   watch(
@@ -68,7 +68,7 @@ export function useCreatorHub() {
     (val) => {
       draggableTiers.value = [...val];
     },
-    { immediate: true },
+    { immediate: true }
   );
 
   async function loginNip07() {
@@ -104,7 +104,7 @@ export function useCreatorHub() {
       existing = await fetchNutzapProfile(store.loggedInNpub);
     } catch (e: any) {
       if (e instanceof RelayConnectionError) {
-        notifyError('Unable to connect to Nostr relays');
+        notifyError("Unable to connect to Nostr relays");
         return;
       }
       throw e;
@@ -112,7 +112,9 @@ export function useCreatorHub() {
     if (existing) {
       profilePub.value = existing.p2pkPubkey;
       profileMints.value = [...existing.trustedMints];
-      profileRelays.value = existing.relays ? [...existing.relays] : [...nostr.relays];
+      profileRelays.value = existing.relays
+        ? [...existing.relays]
+        : [...nostr.relays];
     } else {
       if (!profileStore.relays.length) {
         profileRelays.value = [...nostr.relays];
@@ -127,23 +129,23 @@ export function useCreatorHub() {
 
   async function publishFullProfile() {
     if (!profilePub.value) {
-      notifyError('Pay-to-public-key pubkey is required');
+      notifyError("Pay-to-public-key pubkey is required");
       return;
     }
 
     await nostr.initSignerIfNotSet();
 
     if (!nostr.signer) {
-      notifyError('Please connect a Nostr signer (NIP-07 or nsec)');
+      notifyError("Please connect a Nostr signer (NIP-07 or nsec)");
       return;
     }
 
     if (!profileRelays.value.length) {
-      notifyError('Please configure at least one Nostr relay');
+      notifyError("Please configure at least one Nostr relay");
       return;
     }
     if (!(await anyRelayReachable(profileRelays.value))) {
-      notifyError('Unable to connect to any configured Nostr relays');
+      notifyError("Unable to connect to any configured Nostr relays");
       return;
     }
     publishing.value = true;
@@ -160,15 +162,15 @@ export function useCreatorHub() {
           setTimeout(() => reject(new PublishTimeoutError()), timeoutMs)
         ),
       ]);
-      notifySuccess('Profile updated');
+      notifySuccess("Profile updated");
       profileStore.markClean();
     } catch (e: any) {
       if (e instanceof PublishTimeoutError) {
-        notifyError('Publishing timed out');
+        notifyError("Publishing timed out");
       } else {
-        let msg = e?.message || 'Failed to publish profile';
-        if (!nostr.signer) msg += ' (missing signer)';
-        if (!profileRelays.value.length) msg += ' (no relays)';
+        let msg = e?.message || "Failed to publish profile";
+        if (!nostr.signer) msg += " (missing signer)";
+        if (!profileRelays.value.length) msg += " (no relays)";
         notifyError(msg);
       }
     } finally {
@@ -176,13 +178,12 @@ export function useCreatorHub() {
     }
   }
 
-
   function addTier() {
     currentTier.value = {
-      name: '',
+      name: "",
       price_sats: 0,
-      description: '',
-      welcomeMessage: '',
+      description: "",
+      welcomeMessage: "",
     };
     showTierDialog.value = true;
   }
@@ -213,7 +214,7 @@ export function useCreatorHub() {
       store.removeTier(id);
       await store.publishTierDefinitions();
     } catch (e: any) {
-      notifyError(e?.message || 'Failed to delete tier');
+      notifyError(e?.message || "Failed to delete tier");
     }
   }
 

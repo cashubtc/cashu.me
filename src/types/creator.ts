@@ -15,7 +15,7 @@ export interface SubscribeTierOptions {
   startDate: number;
   relayList: string[];
   htlc?: boolean;
-  frequency?: import('../constants/subscriptionFrequency').SubscriptionFrequency;
+  frequency?: import("../constants/subscriptionFrequency").SubscriptionFrequency;
   intervalDays?: number;
   tierName?: string;
   benefits?: string[];

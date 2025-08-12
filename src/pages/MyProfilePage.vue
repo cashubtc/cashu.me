@@ -263,7 +263,6 @@ export default defineComponent({
       }
     }
 
-
     function openP2PKDialog() {
       if (!p2pkStore.p2pkKeys.length) {
         p2pkStore.createAndSelectNewKey().then(() => p2pkStore.showLastKey());

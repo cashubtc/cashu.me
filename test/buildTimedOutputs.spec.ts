@@ -27,7 +27,7 @@ describe("buildTimedOutputs", () => {
       3,
       "0202…abcd", // sample SEC hex
       1_700_000_000,
-      100,
+      100
     );
     expect(proofs).toHaveLength(3);
     proofs.forEach((p, idx) => {

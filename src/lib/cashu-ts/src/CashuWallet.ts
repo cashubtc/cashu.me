@@ -491,7 +491,7 @@ class CashuWallet {
 	 *  @param {SwapOptions} [options] - Optional parameters for configuring the swap operation
 	 * @returns promise of the change- and send-proofs
 	 */
-        async swap(amount: number, proofs: Array<Proof>, options?: SwapOptions): Promise<SendResponse> {
+	async swap(amount: number, proofs: Array<Proof>, options?: SwapOptions): Promise<SendResponse> {
 		let { outputAmounts } = options || {};
 		const { includeFees, keysetId, counter, pubkey, privkey, proofsWeHave, outputData, p2pk } =
 			options || {};
@@ -584,42 +584,40 @@ class CashuWallet {
 				splitProofsToSend.push(p);
 			}
 		});
-                return {
-                        keep: splitProofsToKeep,
-                        send: splitProofsToSend
-                };
-        }
+		return {
+			keep: splitProofsToKeep,
+			send: splitProofsToSend
+		};
+	}
 
-        /**
-         * Splits proofs and creates a single send output with a predefined secret.
-         * @param amount amount to send
-         * @param proofs proofs to split
-         * @param secret secret to use for the send output
-         * @param options optional swap options
-         */
-        async splitWithSecret(
-                amount: number,
-                proofs: Array<Proof>,
-                secret: string | Uint8Array,
-                options?: SwapOptions
-        ): Promise<SendResponse> {
-                const secretBytes = typeof secret === 'string' ? new TextEncoder().encode(secret) : secret;
-                const keyset = await this.getKeys(options?.keysetId);
-                const customOutput = this.createOutputDataFromSecret(amount, keyset, secretBytes);
-                const keepData = options?.outputData?.keep || this._keepFactory;
-                const sendData = options?.outputData?.send;
-                const newOptions: SwapOptions = {
-                        ...options,
-                        outputAmounts: { sendAmounts: [amount] },
-                        outputData: {
-                                keep: keepData,
-                                send: [customOutput].concat(
-                                        sendData && Array.isArray(sendData) ? sendData : []
-                                )
-                        }
-                };
-                return this.swap(amount, proofs, newOptions);
-        }
+	/**
+	 * Splits proofs and creates a single send output with a predefined secret.
+	 * @param amount amount to send
+	 * @param proofs proofs to split
+	 * @param secret secret to use for the send output
+	 * @param options optional swap options
+	 */
+	async splitWithSecret(
+		amount: number,
+		proofs: Array<Proof>,
+		secret: string | Uint8Array,
+		options?: SwapOptions
+	): Promise<SendResponse> {
+		const secretBytes = typeof secret === 'string' ? new TextEncoder().encode(secret) : secret;
+		const keyset = await this.getKeys(options?.keysetId);
+		const customOutput = this.createOutputDataFromSecret(amount, keyset, secretBytes);
+		const keepData = options?.outputData?.keep || this._keepFactory;
+		const sendData = options?.outputData?.send;
+		const newOptions: SwapOptions = {
+			...options,
+			outputAmounts: { sendAmounts: [amount] },
+			outputData: {
+				keep: keepData,
+				send: [customOutput].concat(sendData && Array.isArray(sendData) ? sendData : [])
+			}
+		};
+		return this.swap(amount, proofs, newOptions);
+	}
 
 	/**
 	 * Restores batches of deterministic proofs until no more signatures are returned from the mint
@@ -1261,15 +1259,15 @@ class CashuWallet {
 	 * @param pubkey? optionally locks ecash to pubkey. Will not be deterministic, even if counter is set!
 	 * @returns blinded messages, secrets, rs, and amounts
 	 */
-        private createOutputData(
-                amount: number,
-                keyset: MintKeys,
-                counter?: number,
-                pubkey?: string,
-                outputAmounts?: Array<number>,
-                p2pk?: { pubkey: string; locktime?: number; refundKeys?: Array<string> },
-                factory?: OutputDataFactory
-        ): Array<OutputDataLike> {
+	private createOutputData(
+		amount: number,
+		keyset: MintKeys,
+		counter?: number,
+		pubkey?: string,
+		outputAmounts?: Array<number>,
+		p2pk?: { pubkey: string; locktime?: number; refundKeys?: Array<string> },
+		factory?: OutputDataFactory
+	): Array<OutputDataLike> {
 		let outputData: Array<OutputDataLike>;
 		if (pubkey) {
 			outputData = OutputData.createP2PKData({ pubkey }, amount, keyset, outputAmounts);
@@ -1292,18 +1290,18 @@ class CashuWallet {
 		} else {
 			outputData = OutputData.createRandomData(amount, keyset, outputAmounts);
 		}
-                return outputData;
-        }
+		return outputData;
+	}
 
-        private createOutputDataFromSecret(
-                amount: number,
-                keyset: MintKeys,
-                secret: Uint8Array
-        ): OutputData {
-                const { r, B_ } = blindMessage(secret);
-                const blinded = new BlindedMessage(amount, B_, keyset.id).getSerializedBlindedMessage();
-                return new OutputData(blinded, r, secret);
-        }
+	private createOutputDataFromSecret(
+		amount: number,
+		keyset: MintKeys,
+		secret: Uint8Array
+	): OutputData {
+		const { r, B_ } = blindMessage(secret);
+		const blinded = new BlindedMessage(amount, B_, keyset.id).getSerializedBlindedMessage();
+		return new OutputData(blinded, r, secret);
+	}
 
 	/**
 	 * Creates NUT-08 blank outputs (fee returns) for a given fee reserve

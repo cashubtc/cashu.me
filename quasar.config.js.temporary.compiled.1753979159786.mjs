@@ -14,23 +14,34 @@
  **/
 
 var __getOwnPropNames = Object.getOwnPropertyNames;
-var __require = /* @__PURE__ */ ((x) => typeof require !== "undefined" ? require : typeof Proxy !== "undefined" ? new Proxy(x, {
-  get: (a, b) => (typeof require !== "undefined" ? require : a)[b]
-}) : x)(function(x) {
+var __require = /* @__PURE__ */ ((x) =>
+  typeof require !== "undefined"
+    ? require
+    : typeof Proxy !== "undefined"
+    ? new Proxy(x, {
+        get: (a, b) => (typeof require !== "undefined" ? require : a)[b],
+      })
+    : x)(function (x) {
   if (typeof require !== "undefined") return require.apply(this, arguments);
   throw Error('Dynamic require of "' + x + '" is not supported');
 });
-var __commonJS = (cb, mod) => function __require2() {
-  return mod || (0, cb[__getOwnPropNames(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;
-};
+var __commonJS = (cb, mod) =>
+  function __require2() {
+    return (
+      mod ||
+        (0, cb[__getOwnPropNames(cb)[0]])((mod = { exports: {} }).exports, mod),
+      mod.exports
+    );
+  };
 
 // quasar.config.js
 var require_quasar_config = __commonJS({
   "quasar.config.js"(exports, module) {
-    var __quasar_inject_dirname__ = "/home/simulacraproductions/Desktop/Simulacra_Productions/KA/CASHU/cashu.mecustomized";
+    var __quasar_inject_dirname__ =
+      "/home/simulacraproductions/Desktop/Simulacra_Productions/KA/CASHU/cashu.mecustomized";
     var { configure } = __require("quasar/wrappers");
     var path = __require("path");
-    module.exports = configure(function() {
+    module.exports = configure(function () {
       return {
         eslint: {
           // fix: true,
@@ -38,14 +49,21 @@ var require_quasar_config = __commonJS({
           // rawOptions: {},
           warnings: true,
           errors: true,
-          exclude: ["src/lib/cashu-ts/**"]
+          exclude: ["src/lib/cashu-ts/**"],
         },
         // https://v2.quasar.dev/quasar-cli/prefetch-feature
         // preFetch: true,
         // app boot file (/src/boot)
         // --> boot files are part of "main.js"
         // https://v2.quasar.dev/quasar-cli/boot-files
-        boot: ["polyfills", "ndk", "base", "global-components", "cashu", "i18n"],
+        boot: [
+          "polyfills",
+          "ndk",
+          "base",
+          "global-components",
+          "cashu",
+          "i18n",
+        ],
         // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#css
         css: ["app.scss", "base.scss", "buckets.scss"],
         // https://github.com/quasarframework/quasar/tree/dev/extras
@@ -54,7 +72,7 @@ var require_quasar_config = __commonJS({
         build: {
           target: {
             browser: ["esnext"],
-            node: "node16"
+            node: "node16",
           },
           vueRouterMode: "history",
           // available values: 'hash', 'history'
@@ -73,10 +91,13 @@ var require_quasar_config = __commonJS({
           extendViteConf(viteConf) {
             viteConf.resolve = viteConf.resolve || {};
             viteConf.resolve.alias = {
-              ...viteConf.resolve.alias || {},
-              "@cashu/cashu-ts": path.resolve(__quasar_inject_dirname__, "src/lib/cashu-ts/src/index.ts")
+              ...(viteConf.resolve.alias || {}),
+              "@cashu/cashu-ts": path.resolve(
+                __quasar_inject_dirname__,
+                "src/lib/cashu-ts/src/index.ts"
+              ),
             };
-          }
+          },
           // viteVuePluginOptions: {},
           // vitePlugins: [
           //   [ 'package-name', { ..options.. } ]
@@ -87,7 +108,7 @@ var require_quasar_config = __commonJS({
           https: true,
           open: true,
           // opens browser window automatically
-          port: 8080
+          port: 8080,
         },
         // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#framework
         framework: {
@@ -95,8 +116,8 @@ var require_quasar_config = __commonJS({
             brand: {
               dark: "#0e141b",
               "dark-page": "#0e141b",
-              accent: "#f54dd0"
-            }
+              accent: "#f54dd0",
+            },
           },
           iconSet: "material-icons",
           // Quasar icon set
@@ -108,7 +129,7 @@ var require_quasar_config = __commonJS({
           // components: [],
           // directives: [],
           // Quasar plugins
-          plugins: ["LocalStorage", "Notify", "Dialog"]
+          plugins: ["LocalStorage", "Notify", "Dialog"],
         },
         animations: "all",
         // --- includes all animations
@@ -138,9 +159,9 @@ var require_quasar_config = __commonJS({
           // The default port that the production server should use
           // (gets superseded if process.env.PORT is specified at runtime)
           middlewares: [
-            "render"
+            "render",
             // keep this as last one
-          ]
+          ],
         },
         // https://v2.quasar.dev/quasar-cli/developing-pwa/configuring-pwa
         pwa: {
@@ -152,8 +173,8 @@ var require_quasar_config = __commonJS({
           useCredentialsForManifestTag: false,
           workboxOptions: {
             skipWaiting: true,
-            clientsClaim: true
-          }
+            clientsClaim: true,
+          },
           // useFilenameHashes: true,
           // extendGenerateSWOptions (cfg) {}
           // extendInjectManifestOptions (cfg) {},
@@ -166,7 +187,7 @@ var require_quasar_config = __commonJS({
         },
         // Full list of options: https://v2.quasar.dev/quasar-cli/developing-capacitor-apps/configuring-capacitor
         capacitor: {
-          hideSplashscreen: false
+          hideSplashscreen: false,
         },
         // Full list of options: https://v2.quasar.dev/quasar-cli/developing-electron-apps/configuring-electron
         electron: {
@@ -187,17 +208,17 @@ var require_quasar_config = __commonJS({
           },
           builder: {
             // https://www.electron.build/configuration/configuration
-            appId: "me.cashu"
-          }
+            appId: "me.cashu",
+          },
         },
         // Full list of options: https://v2.quasar.dev/quasar-cli-vite/developing-browser-extensions/configuring-bex
         bex: {
-          contentScripts: ["my-content-script"]
+          contentScripts: ["my-content-script"],
           // extendBexScriptsConf (esbuildConf) {}
           // extendBexManifestJson (json) {}
-        }
+        },
       };
     });
-  }
+  },
 });
 export default require_quasar_config();

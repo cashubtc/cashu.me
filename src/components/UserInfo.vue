@@ -6,8 +6,18 @@
         <span v-else>{{ initials }}</span>
       </q-avatar>
       <div class="row items-center no-wrap">
-        <span class="text-caption ellipsis" style="max-width: 100px">{{ truncatedNpub }}</span>
-        <q-btn flat dense round icon="content_copy" size="sm" class="q-ml-xs" @click="copyPubkey" />
+        <span class="text-caption ellipsis" style="max-width: 100px">{{
+          truncatedNpub
+        }}</span>
+        <q-btn
+          flat
+          dense
+          round
+          icon="content_copy"
+          size="sm"
+          class="q-ml-xs"
+          @click="copyPubkey"
+        />
       </div>
     </div>
     <q-btn
@@ -24,10 +34,10 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
-import { useQuasar } from 'quasar';
-import { useNostrStore } from 'src/stores/nostr';
-import { shortenString } from 'src/js/string-utils';
+import { computed } from "vue";
+import { useQuasar } from "quasar";
+import { useNostrStore } from "src/stores/nostr";
+import { shortenString } from "src/js/string-utils";
 
 const $q = useQuasar();
 const nostr = useNostrStore();
@@ -38,12 +48,18 @@ const profile = computed(() => {
 });
 
 const initials = computed(() => {
-  const name = profile.value.display_name || profile.value.name || '';
+  const name = profile.value.display_name || profile.value.name || "";
   const parts = name.split(/\s+/).filter(Boolean);
-  return parts.slice(0, 2).map(w => w[0]).join('').toUpperCase();
+  return parts
+    .slice(0, 2)
+    .map((w) => w[0])
+    .join("")
+    .toUpperCase();
 });
 
-const truncatedNpub = computed(() => shortenString(nostr.npub, 12, 6) || nostr.npub);
+const truncatedNpub = computed(
+  () => shortenString(nostr.npub, 12, 6) || nostr.npub
+);
 
 function copyPubkey() {
   navigator.clipboard.writeText(nostr.npub);
@@ -51,6 +67,6 @@ function copyPubkey() {
 
 function toggleDark() {
   $q.dark.toggle();
-  $q.localStorage.set('cashu.darkMode', $q.dark.isActive);
+  $q.localStorage.set("cashu.darkMode", $q.dark.isActive);
 }
 </script>

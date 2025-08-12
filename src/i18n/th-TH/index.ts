@@ -756,7 +756,7 @@ export default {
         },
       },
     },
-    
+
     swap: {
       title: "แลกเปลี่ยน",
       overline: "การแลกเปลี่ยนระหว่าง Mints",
@@ -774,7 +774,6 @@ export default {
         },
       },
       actions: {
-        
         swap: {
           label: "@:global.actions.swap.label",
           in_progress: "@:MintSettings.swap.actions.swap.label",
@@ -968,18 +967,18 @@ export default {
         label_known_mint: "@:ReceiveTokenDialog.actions.receive.label",
         label_adding_mint: "กำลังเพิ่ม Mint…",
       },
-      
+
       swap: {
         label: "@:global.actions.swap.label",
         tooltip_text: "แลกเปลี่ยนไปยัง Mint ที่เชื่อถือได้",
         caption: "แลกเปลี่ยน { value }",
       },
-      
+
       cancel_swap: {
         label: "@:global.actions.cancel.label",
         tooltip_text: "ยกเลิกการแลกเปลี่ยน",
       },
-      
+
       confirm_swap: {
         label: "@:ReceiveTokenDialog.actions.swap.label",
         tooltip_text: "@:ReceiveTokenDialog.actions.swap.tooltip_text",
@@ -1359,7 +1358,7 @@ export default {
       },
     },
   },
-  
+
   swap: {
     in_progress_warning_text: "กำลังดำเนินการแลกเปลี่ยน",
     invalid_swap_data_error_text: "ข้อมูลการแลกเปลี่ยนไม่ถูกต้อง",
@@ -1425,7 +1424,7 @@ export default {
         description: "ค้นพบผู้สร้างเพื่อสนับสนุน",
         icon: "img:icons/find-creators.svg",
       },
-      
+
       myProfile: {
         description: "ดูและแก้ไขโปรไฟล์ของคุณ",
         icon: "person",
@@ -1490,7 +1489,7 @@ export default {
           creator:
             "Your public storefront as seen by visitors. Great for a quick audit of how your profile appears worldwide.",
         },
-        
+
         myProfile: {
           fan: "Show off your avatar, npub link and optional NIP-05. Personal stats: total zaps sent & received, bucket balances.",
           creator:

@@ -53,7 +53,7 @@ watch(
   (val) => {
     Object.assign(tierLocal, val);
   },
-  { immediate: true, deep: true },
+  { immediate: true, deep: true }
 );
 
 watch(
@@ -61,7 +61,7 @@ watch(
   () => {
     emit("update:tier", { ...tierLocal });
   },
-  { deep: true },
+  { deep: true }
 );
 
 function emitEdit() {

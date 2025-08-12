@@ -76,7 +76,6 @@ window.addEventListener("beforeunload", () => {
   isUnloading = true;
 });
 
-
 type KeysetCounter = {
   id: string;
   counter: number;
@@ -91,7 +90,7 @@ export const useWalletStore = defineStore("wallet", {
     const t = i18n.global.t;
     return {
       t: t,
-      
+
       keysetCounters: useLocalStorage(
         LOCAL_STORAGE_KEYS.CASHU_KEYSETCOUNTERS,
         [] as KeysetCounter[]
@@ -535,9 +534,7 @@ export const useWalletStore = defineStore("wallet", {
      *
      * @param {array} proofs
      */
-    attemptRedeem: async function (
-      tokenString: string,
-    ): Promise<boolean> {
+    attemptRedeem: async function (tokenString: string): Promise<boolean> {
       /*
       Receives a token that is prepared in the receiveToken – it is not yet in the history
       */
@@ -606,7 +603,9 @@ export const useWalletStore = defineStore("wallet", {
         );
 
         if (needsSig && !localPriv) {
-          throw new Error("You do not have the private key to unlock this token.");
+          throw new Error(
+            "You do not have the private key to unlock this token."
+          );
         }
 
         let privkey = localPriv || (nostrStore as any).activePrivkeyHex;
@@ -616,21 +615,24 @@ export const useWalletStore = defineStore("wallet", {
           const signed = await useWorkersStore().signWithRemote(proofs);
           // did we actually get any witness back?
           if (signed.some((p) => (p as any).witness?.signatures?.length > 0)) {
-  proofs = signed as any;
+            proofs = signed as any;
             remoteSigned = true;
           }
         }
-
-
 
         if (!privkey && needsSig && !remoteSigned) {
           useSignerStore().reset();
           const ui = useUiStore();
           ui.showMissingSignerModal = true;
-          await new Promise<void>(resolve => {
+          await new Promise<void>((resolve) => {
             const stop = watch(
               () => ui.showMissingSignerModal,
-              v => { if (!v) { stop(); resolve(); } }
+              (v) => {
+                if (!v) {
+                  stop();
+                  resolve();
+                }
+              }
             );
           });
           if (!useSignerStore().method) {
@@ -902,10 +904,9 @@ export const useWalletStore = defineStore("wallet", {
       }
       const request = this.payInvoiceData.invoice.bolt11;
       if (
-        useInvoiceHistoryStore()
-          .invoiceHistory.find(
+        useInvoiceHistoryStore().invoiceHistory.find(
           (i) => i.bolt11 === request && i.amount < 0 && i.status === "paid"
-          )
+        )
       ) {
         notifyError("Invoice already paid.");
         throw new Error("invoice already paid.");
@@ -1540,7 +1541,11 @@ export const useWalletStore = defineStore("wallet", {
         expired: false,
       };
       invoice.sections.forEach((tag) => {
-        if (typeof tag === "object" && tag !== null && Object.prototype.hasOwnProperty.call(tag, "name")) {
+        if (
+          typeof tag === "object" &&
+          tag !== null &&
+          Object.prototype.hasOwnProperty.call(tag, "name")
+        ) {
           if (tag.name === "amount") {
             cleanInvoice.msat = parseInt(tag.value, 10);
             cleanInvoice.sat = parseInt(tag.value, 10) / 1000;

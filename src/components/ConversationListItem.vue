@@ -4,7 +4,8 @@
     class="conversation-item hover:bg-grey-2 dark:hover:bg-grey-8"
     :class="{ selected: props.selected }"
     :style="{
-      borderLeft: '3px solid ' + (props.selected ? 'var(--q-primary)' : 'transparent')
+      borderLeft:
+        '3px solid ' + (props.selected ? 'var(--q-primary)' : 'transparent'),
     }"
     @click="handleClick"
   >
@@ -95,7 +96,7 @@
         :icon="isPinned ? 'star' : 'star_outline'"
         @click.stop="togglePin"
       >
-        <q-tooltip>{{ isPinned ? 'Unpin' : 'Pin' }}</q-tooltip>
+        <q-tooltip>{{ isPinned ? "Unpin" : "Pin" }}</q-tooltip>
       </q-btn>
       <q-btn
         flat
@@ -115,7 +116,7 @@
               <q-icon :name="isPinned ? 'star' : 'star_outline'" />
             </q-item-section>
             <q-item-section>
-              {{ isPinned ? 'Unpin' : 'Pin' }}
+              {{ isPinned ? "Unpin" : "Pin" }}
             </q-item-section>
           </q-item>
           <q-item clickable v-close-popup @click.stop="showRaw = !showRaw">

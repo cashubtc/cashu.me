@@ -49,7 +49,7 @@ export interface Subscription {
   creatorP2PK: string;
   mintUrl: string;
   amountPerInterval: number;
-  frequency: import('../constants/subscriptionFrequency').SubscriptionFrequency;
+  frequency: import("../constants/subscriptionFrequency").SubscriptionFrequency;
   /** Number of days between payments */
   intervalDays?: number;
   startDate: number;
@@ -262,15 +262,14 @@ export class CashuDexie extends Dexie {
           });
       });
 
-    this.version(10)
-      .stores({
-        proofs: "secret, id, C, amount, reserved, quote, bucketId, label",
-        profiles: "pubkey",
-        creatorsTierDefinitions: "&creatorNpub, eventId, updatedAt",
-        subscriptions: "&id, creatorNpub, tierId, status, createdAt, updatedAt",
-        lockedTokens:
-          "&id, tokenString, owner, tierId, intervalKey, unlockTs, refundUnlockTs, status, subscriptionEventId, subscriptionId, monthIndex, totalMonths",
-      });
+    this.version(10).stores({
+      proofs: "secret, id, C, amount, reserved, quote, bucketId, label",
+      profiles: "pubkey",
+      creatorsTierDefinitions: "&creatorNpub, eventId, updatedAt",
+      subscriptions: "&id, creatorNpub, tierId, status, createdAt, updatedAt",
+      lockedTokens:
+        "&id, tokenString, owner, tierId, intervalKey, unlockTs, refundUnlockTs, status, subscriptionEventId, subscriptionId, monthIndex, totalMonths",
+    });
 
     this.version(11)
       .stores({
@@ -357,101 +356,105 @@ export class CashuDexie extends Dexie {
           });
       });
 
-    this.version(14)
-      .upgrade(async (tx) => {
-        await tx
-          .table("lockedTokens")
-          .toCollection()
-          .modify((entry: any) => {
-            const pField2 = ["pre", "image"].join("");
-            const hField2 = "hash" + "lock";
-            delete (entry as any)[pField2];
-            delete (entry as any)[hField2];
-            if (entry.redeemed === undefined) entry.redeemed = false;
-          });
-      });
+    this.version(14).upgrade(async (tx) => {
+      await tx
+        .table("lockedTokens")
+        .toCollection()
+        .modify((entry: any) => {
+          const pField2 = ["pre", "image"].join("");
+          const hField2 = "hash" + "lock";
+          delete (entry as any)[pField2];
+          delete (entry as any)[hField2];
+          if (entry.redeemed === undefined) entry.redeemed = false;
+        });
+    });
 
-    this.version(15)
-      .upgrade(async (tx) => {
-        const pre = ["pre", "image"].join("");
-        const hl = "hash" + "lock";
-        const refundPk = "refund_" + "pubkey";
-        const recvPk = "receiver_" + "p2pk";
-        await tx
-          .table("lockedTokens")
-          .toCollection()
-          .modify((entry: any) => {
-            delete (entry as any)[pre];
-            delete (entry as any)[hl];
-            delete (entry as any)[refundPk];
-            delete (entry as any)[recvPk];
-            if (entry.redeemed === undefined) entry.redeemed = false;
-            if (entry.status === undefined) entry.status = "pending";
+    this.version(15).upgrade(async (tx) => {
+      const pre = ["pre", "image"].join("");
+      const hl = "hash" + "lock";
+      const refundPk = "refund_" + "pubkey";
+      const recvPk = "receiver_" + "p2pk";
+      await tx
+        .table("lockedTokens")
+        .toCollection()
+        .modify((entry: any) => {
+          delete (entry as any)[pre];
+          delete (entry as any)[hl];
+          delete (entry as any)[refundPk];
+          delete (entry as any)[recvPk];
+          if (entry.redeemed === undefined) entry.redeemed = false;
+          if (entry.status === undefined) entry.status = "pending";
+        });
+      await tx
+        .table("subscriptions")
+        .toCollection()
+        .modify((entry: any) => {
+          entry.intervals?.forEach((i: any) => {
+            delete i[pre];
+            delete i[hl];
+            delete i[refundPk];
+            delete i[recvPk];
+            if (i.redeemed === undefined) i.redeemed = false;
           });
-        await tx
-          .table("subscriptions")
-          .toCollection()
-          .modify((entry: any) => {
-            entry.intervals?.forEach((i: any) => {
-              delete i[pre];
-              delete i[hl];
-              delete i[refundPk];
-              delete i[recvPk];
-              if (i.redeemed === undefined) i.redeemed = false;
-            });
-          });
-      });
+        });
+    });
 
-    this.version(16)
-      .upgrade(async (tx) => {
-        const recvPk = "receiver_" + "p2pk";
-        const hl = "hash" + "lock";
-        const pre = ["pre", "image"].join("");
-        await tx
-          .table("lockedTokens")
-          .toCollection()
-          .modify((entry: any) => {
-            delete (entry as any)[recvPk];
-            delete (entry as any)[hl];
-            delete (entry as any)[pre];
-            if (entry.redeemed === undefined) entry.redeemed = false;
+    this.version(16).upgrade(async (tx) => {
+      const recvPk = "receiver_" + "p2pk";
+      const hl = "hash" + "lock";
+      const pre = ["pre", "image"].join("");
+      await tx
+        .table("lockedTokens")
+        .toCollection()
+        .modify((entry: any) => {
+          delete (entry as any)[recvPk];
+          delete (entry as any)[hl];
+          delete (entry as any)[pre];
+          if (entry.redeemed === undefined) entry.redeemed = false;
+        });
+      await tx
+        .table("subscriptions")
+        .toCollection()
+        .modify((entry: any) => {
+          entry.intervals?.forEach((i: any) => {
+            delete i[recvPk];
+            delete i[hl];
+            delete i[pre];
+            if (i.redeemed === undefined) i.redeemed = false;
           });
-        await tx
-          .table("subscriptions")
-          .toCollection()
-          .modify((entry: any) => {
-            entry.intervals?.forEach((i: any) => {
-              delete i[recvPk];
-              delete i[hl];
-              delete i[pre];
-              if (i.redeemed === undefined) i.redeemed = false;
-            });
-          });
-      });
+        });
+    });
 
-    this.version(17)
-      .upgrade(async (tx) => {
-        await tx.table("lockedTokens").toCollection().modify((entry: any) => {
+    this.version(17).upgrade(async (tx) => {
+      await tx
+        .table("lockedTokens")
+        .toCollection()
+        .modify((entry: any) => {
           if (entry.htlcHash === undefined) entry.htlcHash = null;
           if (entry.htlcSecret === undefined) entry.htlcSecret = null;
         });
-        await tx.table("subscriptions").toCollection().modify((entry: any) => {
+      await tx
+        .table("subscriptions")
+        .toCollection()
+        .modify((entry: any) => {
           entry.intervals?.forEach((i: any) => {
             if (i.htlcHash === undefined) i.htlcHash = null;
             if (i.htlcSecret === undefined) i.htlcSecret = null;
           });
         });
-      });
+    });
 
-    this.version(18)
-      .upgrade(async (tx) => {
-        await tx.table("subscriptions").toCollection().modify((entry: any) => {
+    this.version(18).upgrade(async (tx) => {
+      await tx
+        .table("subscriptions")
+        .toCollection()
+        .modify((entry: any) => {
           if (entry.tierName === undefined) entry.tierName = null;
           if (entry.benefits === undefined) entry.benefits = [];
           if (entry.creatorName === undefined) entry.creatorName = null;
           if (entry.creatorAvatar === undefined) entry.creatorAvatar = null;
         });
-      });
+    });
 
     this.version(19)
       .stores({
@@ -515,7 +518,10 @@ export class CashuDexie extends Dexie {
           .table("lockedTokens")
           .toCollection()
           .modify((entry: any) => {
-            if (entry.totalPeriods === undefined && entry.totalMonths !== undefined)
+            if (
+              entry.totalPeriods === undefined &&
+              entry.totalMonths !== undefined
+            )
               entry.totalPeriods = entry.totalMonths;
             if (entry.frequency === undefined) entry.frequency = "monthly";
             if (entry.intervalDays === undefined)
@@ -526,9 +532,15 @@ export class CashuDexie extends Dexie {
           .table("subscriptions")
           .toCollection()
           .modify((entry: any) => {
-            if (entry.totalPeriods === undefined && entry.totalMonths !== undefined)
+            if (
+              entry.totalPeriods === undefined &&
+              entry.totalMonths !== undefined
+            )
               entry.totalPeriods = entry.totalMonths;
-            if (entry.receivedPeriods === undefined && entry.receivedMonths !== undefined)
+            if (
+              entry.receivedPeriods === undefined &&
+              entry.receivedMonths !== undefined
+            )
               entry.receivedPeriods = entry.receivedMonths;
             if (entry.frequency === undefined) entry.frequency = "monthly";
             if (entry.intervalDays === undefined)
@@ -536,7 +548,10 @@ export class CashuDexie extends Dexie {
             entry.intervals?.forEach((i: any) => {
               if (i.totalPeriods === undefined && i.totalMonths !== undefined)
                 i.totalPeriods = i.totalMonths;
-              if (i.receivedPeriods === undefined && i.receivedMonths !== undefined)
+              if (
+                i.receivedPeriods === undefined &&
+                i.receivedMonths !== undefined
+              )
                 i.receivedPeriods = i.receivedMonths;
               if (i.frequency === undefined)
                 i.frequency = entry.frequency || "monthly";
@@ -562,19 +577,18 @@ export class CashuDexie extends Dexie {
       subscriberViews: "&name",
     });
 
-    this.version(23)
-      .stores({
-        proofs:
-          "secret, id, C, amount, reserved, quote, bucketId, label, description",
-        profiles: "pubkey",
-        creatorsTierDefinitions: "&creatorNpub, eventId, updatedAt",
-        subscriptions:
-          "&id, creatorNpub, tierId, status, createdAt, updatedAt, frequency, intervalDays",
-        lockedTokens:
-          "&id, tokenString, owner, tierId, intervalKey, unlockTs, status, subscriptionEventId, subscriptionId, monthIndex, totalPeriods, autoRedeem, frequency, intervalDays",
-        subscriberViews: "&name",
-        subscriberViewPrefs: "&id",
-      });
+    this.version(23).stores({
+      proofs:
+        "secret, id, C, amount, reserved, quote, bucketId, label, description",
+      profiles: "pubkey",
+      creatorsTierDefinitions: "&creatorNpub, eventId, updatedAt",
+      subscriptions:
+        "&id, creatorNpub, tierId, status, createdAt, updatedAt, frequency, intervalDays",
+      lockedTokens:
+        "&id, tokenString, owner, tierId, intervalKey, unlockTs, status, subscriptionEventId, subscriptionId, monthIndex, totalPeriods, autoRedeem, frequency, intervalDays",
+      subscriberViews: "&name",
+      subscriberViewPrefs: "&id",
+    });
   }
 }
 

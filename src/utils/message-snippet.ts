@@ -4,13 +4,16 @@ export interface SnippetInfo {
 }
 
 const PAYLOAD_MAP: Record<string, SnippetInfo> = {
-  cashu_subscription: { text: 'Subscription', icon: 'mdi-calendar' },
-  cashu_subscription_payment: { text: 'Subscription payment', icon: 'mdi-cash' },
-  cashu_subscription_claimed: { text: 'Payment claimed', icon: 'mdi-check' },
+  cashu_subscription: { text: "Subscription", icon: "mdi-calendar" },
+  cashu_subscription_payment: {
+    text: "Subscription payment",
+    icon: "mdi-cash",
+  },
+  cashu_subscription_claimed: { text: "Payment claimed", icon: "mdi-check" },
 };
 
 export function parseMessageSnippet(content: string): SnippetInfo {
-  if (!content) return { text: '' };
+  if (!content) return { text: "" };
   try {
     const obj = JSON.parse(content);
     const mapped = PAYLOAD_MAP[obj.type];

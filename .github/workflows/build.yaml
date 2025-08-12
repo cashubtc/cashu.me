@@ -3,7 +3,7 @@ name: Check build
 on: [push, pull_request]
 
 jobs:
-  build:                         # required check name
+  build: # required check name
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -14,13 +14,13 @@ jobs:
         uses: pnpm/action-setup@v4
         with:
           # If your package.json has "packageManager": "pnpm@x.y.z" you can omit version
-                    run_install: false
+          run_install: false
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'pnpm'
+          node-version: "20"
+          cache: "pnpm"
           cache-dependency-path: pnpm-lock.yaml
 
       - name: Install dependencies

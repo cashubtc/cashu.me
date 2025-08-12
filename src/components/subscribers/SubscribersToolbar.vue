@@ -3,9 +3,7 @@
     <q-toolbar>
       <!-- Left section -->
       <div class="row items-center q-gutter-sm">
-        <div class="text-h6">
-          Subscribers ({{ total }})
-        </div>
+        <div class="text-h6">Subscribers ({{ total }})</div>
         <q-select
           v-model="modelDateRange"
           :options="dateOptions"
@@ -52,12 +50,7 @@
             >
               <q-item-section>{{ v.name }}</q-item-section>
               <q-item-section side>
-                <q-btn
-                  flat
-                  dense
-                  icon="delete"
-                  @click.stop="remove(v.id)"
-                />
+                <q-btn flat dense icon="delete" @click.stop="remove(v.id)" />
               </q-item-section>
             </q-item>
             <q-separator />
@@ -95,41 +88,44 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
-import FilterChips from './FilterChips.vue';
-import DisplayMenu from '../common/DisplayMenu.vue';
-import { useSubscribersStore } from 'src/stores/subscribersStore';
+import { ref, computed, onMounted, onBeforeUnmount } from "vue";
+import FilterChips from "./FilterChips.vue";
+import DisplayMenu from "../common/DisplayMenu.vue";
+import { useSubscribersStore } from "src/stores/subscribersStore";
 
-const props = withDefaults(defineProps<{
-  total: number;
-  dateRange: string;
-  search: string;
-  filters: { key: string; label: string }[];
-  columns?: { name: string; label: string }[];
-}>(), {
-  columns: () => [],
-});
+const props = withDefaults(
+  defineProps<{
+    total: number;
+    dateRange: string;
+    search: string;
+    filters: { key: string; label: string }[];
+    columns?: { name: string; label: string }[];
+  }>(),
+  {
+    columns: () => [],
+  }
+);
 
 const emit = defineEmits<{
-  'update:dateRange': [string];
-  'update:search': [string];
-  'open-filters': [];
+  "update:dateRange": [string];
+  "update:search": [string];
+  "open-filters": [];
   export: [];
 }>();
 
 const dateOptions = [
-  { label: 'Last 7 days', value: '7d' },
-  { label: 'Last 30 days', value: '30d' },
+  { label: "Last 7 days", value: "7d" },
+  { label: "Last 30 days", value: "30d" },
 ];
 
 const modelDateRange = computed({
   get: () => props.dateRange,
-  set: (val: string) => emit('update:dateRange', val),
+  set: (val: string) => emit("update:dateRange", val),
 });
 
 const modelSearch = computed({
   get: () => props.search,
-  set: (val: string) => emit('update:search', val),
+  set: (val: string) => emit("update:search", val),
 });
 
 const searchRef = ref<{ focus: () => void } | null>(null);
@@ -138,7 +134,7 @@ const store = useSubscribersStore();
 const views = computed(() => store.savedViews);
 
 function saveCurrent() {
-  const name = window.prompt('View name?');
+  const name = window.prompt("View name?");
   if (name) {
     store.saveCurrentView(name);
   }
@@ -164,20 +160,20 @@ function resetLast() {
 
 function handleKey(event: KeyboardEvent) {
   const tag = (event.target as HTMLElement).tagName;
-  if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+  if (tag === "INPUT" || tag === "TEXTAREA") return;
 
-  if (event.key === '/') {
+  if (event.key === "/") {
     event.preventDefault();
     searchRef.value?.focus();
-  } else if (event.key === 'f') {
+  } else if (event.key === "f") {
     event.preventDefault();
-    emit('open-filters');
-  } else if (event.key === 'e') {
+    emit("open-filters");
+  } else if (event.key === "e") {
     event.preventDefault();
-    emit('export');
+    emit("export");
   }
 }
 
-onMounted(() => document.addEventListener('keydown', handleKey));
-onBeforeUnmount(() => document.removeEventListener('keydown', handleKey));
+onMounted(() => document.addEventListener("keydown", handleKey));
+onBeforeUnmount(() => document.removeEventListener("keydown", handleKey));
 </script>

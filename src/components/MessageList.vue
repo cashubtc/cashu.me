@@ -31,7 +31,7 @@ function showDateSeparator(idx: number) {
   const prev = props.messages[idx - 1];
   const prevDay = new Date(prev.created_at * 1000).toDateString();
   const currDay = new Date(
-    props.messages[idx].created_at * 1000,
+    props.messages[idx].created_at * 1000
   ).toDateString();
   return prevDay !== currDay;
 }
@@ -41,7 +41,7 @@ watch(
   () => {
     nextTick(() => bottom.value?.scrollIntoView({ behavior: "smooth" }));
   },
-  { deep: true },
+  { deep: true }
 );
 
 const formatDate = (ts: number) => new Date(ts * 1000).toLocaleString();

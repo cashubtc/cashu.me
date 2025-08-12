@@ -20,11 +20,7 @@
           >
             {{ $t("ErrorNotFound.links.docs") }}
           </a>
-          <a
-            href="https://cashu.me"
-            target="_blank"
-            rel="noopener"
-          >
+          <a href="https://cashu.me" target="_blank" rel="noopener">
             {{ $t("ErrorNotFound.links.tips") }}
           </a>
         </div>

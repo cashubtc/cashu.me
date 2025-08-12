@@ -426,156 +426,48 @@
     }
   ],
   "top_large_objects": [
-    [
-      "15.4 MB",
-      "assets/splash-dark.png"
-    ],
-    [
-      "5.9 MB",
-      "android/app/src/main/res/drawable-land-xxxhdpi/splash.png"
-    ],
-    [
-      "5.6 MB",
-      "android/app/src/main/res/drawable-port-xxxhdpi/splash.png"
-    ],
-    [
-      "3.7 MB",
-      "android/app/src/main/res/drawable-land-xxhdpi/splash.png"
-    ],
-    [
-      "3.5 MB",
-      "android/app/src/main/res/drawable-port-xxhdpi/splash.png"
-    ],
-    [
-      "2.2 MB",
-      "android/app/src/main/res/drawable-land-xhdpi/splash.png"
-    ],
-    [
-      "2.1 MB",
-      "android/app/src/main/res/drawable-port-xhdpi/splash.png"
-    ],
-    [
-      "946.7 KB",
-      "android/app/src/main/res/drawable-land-hdpi/splash.png"
-    ],
-    [
-      "899.1 KB",
-      "android/app/src/main/res/drawable-port-hdpi/splash.png"
-    ],
-    [
-      "540.9 KB",
-      "assets/icon-background.png"
-    ],
-    [
-      "409.3 KB",
-      "public/icons/apple-launch-2048x2732.png"
-    ],
-    [
-      "379.6 KB",
-      "android/app/src/main/res/drawable-land-mdpi/splash.png"
-    ],
-    [
-      "374.8 KB",
-      "assets/icon-only.png"
-    ],
-    [
-      "371.2 KB",
-      "icon-round.png"
-    ],
-    [
-      "364.7 KB",
-      "android/app/src/main/res/drawable-port-mdpi/splash.png"
-    ],
+    ["15.4 MB", "assets/splash-dark.png"],
+    ["5.9 MB", "android/app/src/main/res/drawable-land-xxxhdpi/splash.png"],
+    ["5.6 MB", "android/app/src/main/res/drawable-port-xxxhdpi/splash.png"],
+    ["3.7 MB", "android/app/src/main/res/drawable-land-xxhdpi/splash.png"],
+    ["3.5 MB", "android/app/src/main/res/drawable-port-xxhdpi/splash.png"],
+    ["2.2 MB", "android/app/src/main/res/drawable-land-xhdpi/splash.png"],
+    ["2.1 MB", "android/app/src/main/res/drawable-port-xhdpi/splash.png"],
+    ["946.7 KB", "android/app/src/main/res/drawable-land-hdpi/splash.png"],
+    ["899.1 KB", "android/app/src/main/res/drawable-port-hdpi/splash.png"],
+    ["540.9 KB", "assets/icon-background.png"],
+    ["409.3 KB", "public/icons/apple-launch-2048x2732.png"],
+    ["379.6 KB", "android/app/src/main/res/drawable-land-mdpi/splash.png"],
+    ["374.8 KB", "assets/icon-only.png"],
+    ["371.2 KB", "icon-round.png"],
+    ["364.7 KB", "android/app/src/main/res/drawable-port-mdpi/splash.png"],
     [
       "300.8 KB",
       "ios/App/App/Assets.xcassets/AppIcon.appiconset/AppIcon-512@2x.png"
     ],
-    [
-      "289.7 KB",
-      "public/icons/apple-launch-1668x2224.png"
-    ],
-    [
-      "289.5 KB",
-      "public/icons/apple-launch-1668x2388.png"
-    ],
-    [
-      "271.5 KB",
-      "public/icons/apple-launch-1620x2160.png"
-    ],
-    [
-      "269.1 KB",
-      "public/icons/apple-launch-2048x2732.png"
-    ],
-    [
-      "245.2 KB",
-      "public/icons/apple-launch-1536x2048.png"
-    ],
-    [
-      "241.3 KB",
-      "package-lock.json"
-    ],
-    [
-      "239.3 KB",
-      "package-lock.json"
-    ],
-    [
-      "239.3 KB",
-      "package-lock.json"
-    ],
-    [
-      "239.1 KB",
-      "package-lock.json"
-    ],
-    [
-      "239.1 KB",
-      "package-lock.json"
-    ],
-    [
-      "236.8 KB",
-      "package-lock.json"
-    ],
-    [
-      "220.0 KB",
-      "icon.png"
-    ],
-    [
-      "210.0 KB",
-      "package-lock.json"
-    ],
-    [
-      "180.5 KB",
-      "public/icons/apple-launch-1290x2796.png"
-    ],
-    [
-      "178.8 KB",
-      "pnpm-lock.yaml"
-    ],
-    [
-      "178.7 KB",
-      "pnpm-lock.yaml"
-    ],
-    [
-      "178.7 KB",
-      "pnpm-lock.yaml"
-    ],
-    [
-      "178.4 KB",
-      "public/icons/apple-launch-1284x2778.png"
-    ],
-    [
-      "172.2 KB",
-      "pnpm-lock.yaml.bak"
-    ]
+    ["289.7 KB", "public/icons/apple-launch-1668x2224.png"],
+    ["289.5 KB", "public/icons/apple-launch-1668x2388.png"],
+    ["271.5 KB", "public/icons/apple-launch-1620x2160.png"],
+    ["269.1 KB", "public/icons/apple-launch-2048x2732.png"],
+    ["245.2 KB", "public/icons/apple-launch-1536x2048.png"],
+    ["241.3 KB", "package-lock.json"],
+    ["239.3 KB", "package-lock.json"],
+    ["239.3 KB", "package-lock.json"],
+    ["239.1 KB", "package-lock.json"],
+    ["239.1 KB", "package-lock.json"],
+    ["236.8 KB", "package-lock.json"],
+    ["220.0 KB", "icon.png"],
+    ["210.0 KB", "package-lock.json"],
+    ["180.5 KB", "public/icons/apple-launch-1290x2796.png"],
+    ["178.8 KB", "pnpm-lock.yaml"],
+    ["178.7 KB", "pnpm-lock.yaml"],
+    ["178.7 KB", "pnpm-lock.yaml"],
+    ["178.4 KB", "public/icons/apple-launch-1284x2778.png"],
+    ["172.2 KB", "pnpm-lock.yaml.bak"]
   ],
   "top_large_files": [
-    [
-      "9.3 MB",
-      "src/lib/cashu-ts/node_modules/.bin/esbuild"
-    ],
-    [
-      "9.3 MB",
-      "src/lib/cashu-ts/node_modules/esbuild/bin/esbuild"
-    ],
+    ["9.3 MB", "src/lib/cashu-ts/node_modules/.bin/esbuild"],
+    ["9.3 MB", "src/lib/cashu-ts/node_modules/esbuild/bin/esbuild"],
     [
       "2.0 MB",
       "src/lib/cashu-ts/node_modules/vite/dist/node/chunks/dep-C6uTJdX2.js"
@@ -584,10 +476,7 @@
       "897.7 KB",
       "src/lib/cashu-ts/node_modules/rollup/dist/es/shared/node-entry.js"
     ],
-    [
-      "896.8 KB",
-      "src/lib/cashu-ts/node_modules/rollup/dist/shared/rollup.js"
-    ],
+    ["896.8 KB", "src/lib/cashu-ts/node_modules/rollup/dist/shared/rollup.js"],
     [
       "614.6 KB",
       "src/lib/cashu-ts/node_modules/@vitest/browser/dist/client/__vitest__/assets/index-B6hUSIXg.js"
@@ -596,54 +485,24 @@
       "614.6 KB",
       "src/lib/cashu-ts/node_modules/@vitest/ui/dist/client/assets/index-B6hUSIXg.js"
     ],
-    [
-      "540.8 KB",
-      "assets/icon-background.png"
-    ],
-    [
-      "514.0 KB",
-      "public/icons/apple-launch-2048x2732.png"
-    ],
-    [
-      "470.1 KB",
-      "pnpm-lock.yaml"
-    ],
-    [
-      "434.2 KB",
-      "src/lib/cashu-ts/package-lock.json"
-    ],
+    ["540.8 KB", "assets/icon-background.png"],
+    ["514.0 KB", "public/icons/apple-launch-2048x2732.png"],
+    ["470.1 KB", "pnpm-lock.yaml"],
+    ["434.2 KB", "src/lib/cashu-ts/package-lock.json"],
     [
       "412.9 KB",
       "src/lib/cashu-ts/node_modules/@vitest/browser/dist/client/__vitest_browser__/tester-BaiNqOPw.js"
     ],
-    [
-      "375.5 KB",
-      "icon.png"
-    ],
-    [
-      "375.5 KB",
-      "assets/icon-only.png"
-    ],
-    [
-      "372.3 KB",
-      "icon-round.png"
-    ],
-    [
-      "360.5 KB",
-      "public/icons/apple-launch-1668x2388.png"
-    ],
-    [
-      "355.1 KB",
-      "public/icons/apple-launch-1668x2224.png"
-    ],
+    ["375.5 KB", "icon.png"],
+    ["375.5 KB", "assets/icon-only.png"],
+    ["372.3 KB", "icon-round.png"],
+    ["360.5 KB", "public/icons/apple-launch-1668x2388.png"],
+    ["355.1 KB", "public/icons/apple-launch-1668x2224.png"],
     [
       "350.6 KB",
       "src/lib/cashu-ts/node_modules/vitest/dist/chunks/cli-api.DqsSTaIi.js"
     ],
-    [
-      "335.4 KB",
-      "public/icons/apple-launch-1620x2160.png"
-    ],
+    ["335.4 KB", "public/icons/apple-launch-1620x2160.png"],
     [
       "323.9 KB",
       "src/lib/cashu-ts/node_modules/vite/dist/node/chunks/dep-D-7KCb9p.js"
@@ -652,30 +511,15 @@
       "309.5 KB",
       "ios/App/App/Assets.xcassets/AppIcon.appiconset/AppIcon-512@2x.png"
     ],
-    [
-      "303.1 KB",
-      "public/icons/apple-launch-1536x2048.png"
-    ],
-    [
-      "248.6 KB",
-      "public/icons/apple-launch-1290x2796.png"
-    ],
+    ["303.1 KB", "public/icons/apple-launch-1536x2048.png"],
+    ["248.6 KB", "public/icons/apple-launch-1290x2796.png"],
     [
       "245.1 KB",
       "src/lib/cashu-ts/node_modules/rollup/dist/es/shared/watch.js"
     ],
-    [
-      "243.6 KB",
-      "public/icons/apple-launch-1284x2778.png"
-    ],
-    [
-      "235.4 KB",
-      "src/lib/cashu-ts/node_modules/rollup/dist/shared/index.js"
-    ],
-    [
-      "231.6 KB",
-      "public/icons/apple-launch-1242x2688.png"
-    ],
+    ["243.6 KB", "public/icons/apple-launch-1284x2778.png"],
+    ["235.4 KB", "src/lib/cashu-ts/node_modules/rollup/dist/shared/index.js"],
+    ["231.6 KB", "public/icons/apple-launch-1242x2688.png"],
     [
       "227.2 KB",
       "src/lib/cashu-ts/node_modules/vite/dist/node/chunks/dep-CEGXe0Sr.js"
@@ -684,30 +528,15 @@
       "226.0 KB",
       "src/lib/cashu-ts/node_modules/vitest/dist/chunks/resolveConfig.rBxzbVsl.js"
     ],
-    [
-      "219.1 KB",
-      "public/icons/apple-launch-1242x2208.png"
-    ],
-    [
-      "211.7 KB",
-      "public/icons/apple-launch-1179x2556.png"
-    ],
-    [
-      "208.7 KB",
-      "public/icons/apple-launch-1170x2532.png"
-    ],
-    [
-      "193.9 KB",
-      "public/icons/apple-launch-1125x2436.png"
-    ],
+    ["219.1 KB", "public/icons/apple-launch-1242x2208.png"],
+    ["211.7 KB", "public/icons/apple-launch-1179x2556.png"],
+    ["208.7 KB", "public/icons/apple-launch-1170x2532.png"],
+    ["193.9 KB", "public/icons/apple-launch-1125x2436.png"],
     [
       "186.5 KB",
       "src/lib/cashu-ts/node_modules/@vitest/browser/dist/client/__vitest__/bg.png"
     ],
-    [
-      "186.5 KB",
-      "src/lib/cashu-ts/node_modules/@vitest/ui/dist/client/bg.png"
-    ]
+    ["186.5 KB", "src/lib/cashu-ts/node_modules/@vitest/ui/dist/client/bg.png"]
   ],
   "lfs_summary": "0 LFS-tracked files",
   "remotes": {

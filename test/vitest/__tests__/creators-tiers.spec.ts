@@ -44,19 +44,18 @@ beforeEach(async () => {
 describe("fetchTierDefinitions fallback", () => {
   it("uses indexer when no relays healthy", async () => {
     filterMock.mockResolvedValue([]);
-    const fetchSpy = vi
-      .spyOn(global, "fetch")
-      .mockResolvedValue({
-        ok: true,
-        json: async () => ({
-          event: {
-            id: "1",
-            created_at: 1,
-            content: '[{"id":"t","name":"T","price_sats":1,"description":"d","benefits":[]}]',
-            tags: [["d", "tiers"]],
-          },
-        }),
-      } as any);
+    const fetchSpy = vi.spyOn(global, "fetch").mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        event: {
+          id: "1",
+          created_at: 1,
+          content:
+            '[{"id":"t","name":"T","price_sats":1,"description":"d","benefits":[]}]',
+          tags: [["d", "tiers"]],
+        },
+      }),
+    } as any);
     const store = useCreatorsStore();
     await store.fetchTierDefinitions("pub");
     expect(subMock).not.toHaveBeenCalled();
@@ -67,19 +66,18 @@ describe("fetchTierDefinitions fallback", () => {
   it("falls back immediately when subscription fails", async () => {
     filterMock.mockResolvedValue(["wss://relay"]);
     subMock.mockResolvedValue(false);
-    const fetchSpy = vi
-      .spyOn(global, "fetch")
-      .mockResolvedValue({
-        ok: true,
-        json: async () => ({
-          event: {
-            id: "1",
-            created_at: 1,
-            content: '[{"id":"t","name":"T","price_sats":1,"description":"d","benefits":[]}]',
-            tags: [["d", "tiers"]],
-          },
-        }),
-      } as any);
+    const fetchSpy = vi.spyOn(global, "fetch").mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        event: {
+          id: "1",
+          created_at: 1,
+          content:
+            '[{"id":"t","name":"T","price_sats":1,"description":"d","benefits":[]}]',
+          tags: [["d", "tiers"]],
+        },
+      }),
+    } as any);
     const store = useCreatorsStore();
     await store.fetchTierDefinitions("pub");
     expect(subMock).toHaveBeenCalled();
@@ -89,20 +87,18 @@ describe("fetchTierDefinitions fallback", () => {
 
   it("decodes npub and stores using hex", async () => {
     filterMock.mockResolvedValue([]);
-    const fetchSpy = vi
-      .spyOn(global, "fetch")
-      .mockResolvedValue({
-        ok: true,
-        json: async () => ({
-          event: {
-            id: "1",
-            created_at: 1,
-            content:
-              '[{"id":"t","name":"T","price_sats":1,"description":"d","benefits":[]}]',
-            tags: [["d", "tiers"]],
-          },
-        }),
-      } as any);
+    const fetchSpy = vi.spyOn(global, "fetch").mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        event: {
+          id: "1",
+          created_at: 1,
+          content:
+            '[{"id":"t","name":"T","price_sats":1,"description":"d","benefits":[]}]',
+          tags: [["d", "tiers"]],
+        },
+      }),
+    } as any);
     const { nip19 } = await import("nostr-tools");
     const hex = "f".repeat(64);
     const npub = nip19.npubEncode(hex);

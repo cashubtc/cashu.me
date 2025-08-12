@@ -24,9 +24,7 @@ import { subscriptionPayload } from "src/utils/receipt-utils";
 import { useCreatorsStore } from "./creators";
 import { frequencyToDays } from "src/constants/subscriptionFrequency";
 
-function parseSubscriptionPaymentPayload(
-  obj: any
-):
+function parseSubscriptionPaymentPayload(obj: any):
   | {
       token: string;
       unlock_time?: number;
@@ -212,7 +210,7 @@ export const useMessengerStore = defineStore("messenger", {
           );
           if (success && event) {
             msg.id = event.id;
-            msg.created_at = (event.created_at ?? Math.floor(Date.now()/1000));
+            msg.created_at = event.created_at ?? Math.floor(Date.now() / 1000);
             msg.status = "sent";
             this.pushOwnMessage(event as any);
             return { success: true, event } as any;
@@ -489,10 +487,9 @@ export const useMessengerStore = defineStore("messenger", {
           const unlockTs = sub.unlock_time ?? payload.unlockTime ?? 0;
           const creatorsStore = useCreatorsStore();
           const myPubkey = useNostrStore().pubkey;
-          const tierName =
-            creatorsStore.tiersMap[myPubkey || ""]?.find(
-              (t) => t.id === payload.tier_id,
-            )?.name;
+          const tierName = creatorsStore.tiersMap[myPubkey || ""]?.find(
+            (t) => t.id === payload.tier_id
+          )?.name;
           const entry: LockedToken = {
             id: uuidv4(),
             tokenString: sub.token,
@@ -560,9 +557,9 @@ export const useMessengerStore = defineStore("messenger", {
                     : proofs.reduce((s, p) => s + p.amount, 0);
                 useLockedTokensStore().addLockedToken({
                   amount,
-  tokenString: payload.token,
+                  tokenString: payload.token,
 
-  token:  payload.token,
+                  token: payload.token,
                   pubkey: event.pubkey,
                   locktime: payload.unlock_time ?? payload.unlockTime,
                   bucketId: bucket.id,
@@ -720,7 +717,8 @@ export const useMessengerStore = defineStore("messenger", {
             );
             if (success && event) {
               msg.id = event.id;
-              msg.created_at = (event.created_at ?? Math.floor(Date.now()/1000));
+              msg.created_at =
+                event.created_at ?? Math.floor(Date.now() / 1000);
               msg.status = "sent";
               this.pushOwnMessage(event as any);
               const idx = this.sendQueue.indexOf(msg);

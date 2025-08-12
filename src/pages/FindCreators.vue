@@ -32,13 +32,21 @@
           </div>
           <div class="text-subtitle2 q-mb-xs">Trusted mints</div>
           <ul class="q-pl-md q-mb-sm text-caption">
-            <li v-for="m in nutzapProfile.trustedMints" :key="m" style="word-break: break-all">
+            <li
+              v-for="m in nutzapProfile.trustedMints"
+              :key="m"
+              style="word-break: break-all"
+            >
               {{ m }}
             </li>
           </ul>
           <div class="text-subtitle2 q-mb-xs">Relays</div>
           <ul class="q-pl-md text-caption">
-            <li v-for="r in nutzapProfile.relays" :key="r" style="word-break: break-all">
+            <li
+              v-for="r in nutzapProfile.relays"
+              :key="r"
+              style="word-break: break-all"
+            >
               {{ r }}
             </li>
           </ul>
@@ -124,7 +132,11 @@ defineOptions({ components: { MediaPreview } });
 import { useSendTokensStore } from "stores/sendTokensStore";
 import { useDonationPresetsStore } from "stores/donationPresets";
 import { useCreatorsStore } from "stores/creators";
-import { useNostrStore, fetchNutzapProfile, RelayConnectionError } from "stores/nostr";
+import {
+  useNostrStore,
+  fetchNutzapProfile,
+  RelayConnectionError,
+} from "stores/nostr";
 import { notifyWarning } from "src/js/notify";
 import { useRouter, useRoute } from "vue-router";
 import { useMessengerStore } from "stores/messenger";
@@ -144,7 +156,7 @@ const showDonateDialog = ref(false);
 const selectedPubkey = ref("");
 const showTierDialog = ref(false);
 const loadingTiers = ref(false);
-const dialogPubkey = ref("");          // always 64-char hex
+const dialogPubkey = ref(""); // always 64-char hex
 const dialogNpub = computed(() => {
   const hex = dialogPubkey.value;
   if (hex.length === 64 && /^[0-9a-f]{64}$/i.test(hex))
@@ -186,13 +198,13 @@ function formatTs(ts: number): string {
   return `${d.getFullYear()}-${("0" + (d.getMonth() + 1)).slice(-2)}-${(
     "0" + d.getDate()
   ).slice(-2)} ${("0" + d.getHours()).slice(-2)}:${("0" + d.getMinutes()).slice(
-    -2,
+    -2
   )}`;
 }
 
 async function onMessage(ev: MessageEvent) {
   if (ev.data && ev.data.type === "donate" && ev.data.pubkey) {
-    selectedPubkey.value = ev.data.pubkey;         // keep hex
+    selectedPubkey.value = ev.data.pubkey; // keep hex
     showDonateDialog.value = true;
   } else if (ev.data && ev.data.type === "viewProfile" && ev.data.pubkey) {
     loadingTiers.value = true;
@@ -203,7 +215,7 @@ async function onMessage(ev: MessageEvent) {
       loadingTiers.value = false;
     }, 5000);
     await creators.fetchTierDefinitions(ev.data.pubkey);
-    dialogPubkey.value = ev.data.pubkey;           // keep hex
+    dialogPubkey.value = ev.data.pubkey; // keep hex
     try {
       const profile = await fetchNutzapProfile(ev.data.pubkey);
       nutzapProfile.value = profile;
@@ -228,7 +240,7 @@ async function onMessage(ev: MessageEvent) {
           messenger.startChat(pubkey);
           stop();
         }
-      },
+      }
     );
   }
 }
@@ -269,13 +281,7 @@ function retryFetchTiers() {
   creators.fetchTierDefinitions(dialogPubkey.value);
 }
 
-function confirmSubscribe({
-  bucketId,
-  months,
-  amount,
-  startDate,
-  total,
-}: any) {
+function confirmSubscribe({ bucketId, months, amount, startDate, total }: any) {
   // Nutzap transaction is handled within SubscribeDialog.
   // Close surrounding dialogs and process any additional UI updates here.
   showSubscribeDialog.value = false;
@@ -307,7 +313,7 @@ function handleDonate({
       months,
       amount,
       selectedPubkey.value,
-      bucketId,
+      bucketId
     );
     showDonateDialog.value = false;
   }

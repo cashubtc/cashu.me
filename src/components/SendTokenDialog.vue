@@ -349,8 +349,7 @@
                 style="font-size: 1rem"
               >
                 {{
-                  sendData.historyToken &&
-                  sendData.historyToken.amount < 0
+                  sendData.historyToken && sendData.historyToken.amount < 0
                     ? sendData.historyToken.status === "paid"
                       ? "Sent"
                       : "Pending"
@@ -457,9 +456,7 @@
                     dense
                     icon="link"
                     flat
-                    @click="
-                      copy(baseURL + '#token=' + sendData.tokensBase64)
-                    "
+                    @click="copy(baseURL + '#token=' + sendData.tokensBase64)"
                     :aria-label="
                       $t('SendTokenDialog.actions.copy_link.tooltip_text')
                     "
@@ -1183,9 +1180,7 @@ export default defineComponent({
             console.error(e);
           }
         }
-        this.sendData.p2pkPubkey = ensureCompressed(
-          this.sendData.p2pkPubkey
-        );
+        this.sendData.p2pkPubkey = ensureCompressed(this.sendData.p2pkPubkey);
         let { _, sendProofs } = await this.sendToLock(
           sendAmount,
           this.sendData.p2pkPubkey,
@@ -1276,7 +1271,9 @@ export default defineComponent({
             "FindCreators.notifications.donation_sent"
           ) as string,
           ok: {
-            label: this.$t("FindCreators.actions.back_to_search.label") as string,
+            label: this.$t(
+              "FindCreators.actions.back_to_search.label"
+            ) as string,
           },
         }).onOk(() => {
           this.showSendTokens = false;

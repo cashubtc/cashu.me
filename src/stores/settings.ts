@@ -31,7 +31,7 @@ export const useSettingsStore = defineStore("settings", {
       ),
       defaultNostrRelays: useLocalStorage<string[]>(
         "cashu.settings.defaultNostrRelays",
-        DEFAULT_RELAYS,
+        DEFAULT_RELAYS
       ),
       includeFeesInSendAmount: useLocalStorage<boolean>(
         "cashu.settings.includeFeesInSendAmount",

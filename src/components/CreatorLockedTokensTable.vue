@@ -2,9 +2,9 @@
   <div class="q-pa-xs" style="max-width: 500px; margin: 0 auto">
     <h6 class="q-mt-none q-mb-md">Creator Locked Tokens</h6>
     <div class="q-mb-sm" v-if="pendingTokens.length > 1">
-      <q-btn flat dense color="primary" @click="redeemAll"
-        >{{ $t('CreatorLockedTokensTable.redeem_all') }}</q-btn
-      >
+      <q-btn flat dense color="primary" @click="redeemAll">{{
+        $t("CreatorLockedTokensTable.redeem_all")
+      }}</q-btn>
     </div>
     <q-list bordered>
       <q-item v-for="token in paginatedTokens" :key="token.id">
@@ -25,8 +25,8 @@
             color="positive"
             rounded
             class="q-mr-sm"
-            ><q-icon name="check" /></q-badge
-          >
+            ><q-icon name="check"
+          /></q-badge>
           <q-btn
             flat
             dense
@@ -81,7 +81,7 @@ export default defineComponent({
         (t) =>
           t.owner === "creator" &&
           t.creatorNpub === nostrPubkey &&
-          t.tierId === this.bucketId,
+          t.tierId === this.bucketId
       );
     },
     maxPages() {
@@ -93,7 +93,9 @@ export default defineComponent({
       return this.filteredTokens.slice().reverse().slice(start, end);
     },
     pendingTokens() {
-      return this.filteredTokens.filter((t) => !t.redeemed && this.canRedeem(t));
+      return this.filteredTokens.filter(
+        (t) => !t.redeemed && this.canRedeem(t)
+      );
     },
   },
   methods: {
@@ -133,12 +135,15 @@ export default defineComponent({
       if (token.subscriptionId) {
         const sub = await cashuDb.subscriptions.get(token.subscriptionId);
         const idx = sub?.intervals.findIndex(
-          (i) => i.intervalKey === token.intervalKey || i.lockedTokenId === token.id,
+          (i) =>
+            i.intervalKey === token.intervalKey || i.lockedTokenId === token.id
         );
         if (sub && idx !== undefined && idx >= 0) {
           sub.intervals[idx].status = "claimed";
           sub.intervals[idx].redeemed = true;
-          await cashuDb.subscriptions.update(sub.id, { intervals: sub.intervals });
+          await cashuDb.subscriptions.update(sub.id, {
+            intervals: sub.intervals,
+          });
         }
       }
     },
