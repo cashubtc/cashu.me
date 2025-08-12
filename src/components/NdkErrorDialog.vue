@@ -52,7 +52,7 @@ const show = computed(() => !!errStore.error);
 const reason = computed(() => errStore.error?.reason ?? "unknown");
 const isLocked = computed(() => reason.value === "nip07-locked");
 const allowPaste = computed(
-  () => isLocked.value || reason.value === "no-signer"
+  () => isLocked.value || reason.value === "no-signer",
 );
 
 const nsec = ref("");

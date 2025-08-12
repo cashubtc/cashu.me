@@ -201,7 +201,7 @@ export default defineComponent({
     const bucketBalances = computed(() => bucketsStore.bucketBalances);
 
     const activeBuckets = computed(() =>
-      bucketList.value.filter((b) => !b.isArchived)
+      bucketList.value.filter((b) => !b.isArchived),
     );
 
     const activeBucketCount = computed(() => activeBuckets.value.length);
@@ -209,7 +209,7 @@ export default defineComponent({
     const totalActiveBalance = computed(() => {
       return activeBuckets.value.reduce(
         (sum, b) => sum + (bucketBalances.value[b.id] || 0),
-        0
+        0,
       );
     });
 
@@ -235,14 +235,14 @@ export default defineComponent({
           sorted.sort(
             (a, b) =>
               (bucketBalances.value[a.id] || 0) -
-              (bucketBalances.value[b.id] || 0)
+              (bucketBalances.value[b.id] || 0),
           );
           break;
         case "balance-desc":
           sorted.sort(
             (a, b) =>
               (bucketBalances.value[b.id] || 0) -
-              (bucketBalances.value[a.id] || 0)
+              (bucketBalances.value[a.id] || 0),
           );
           break;
         case "name-asc":
@@ -278,7 +278,7 @@ export default defineComponent({
     const toggleBucketSelection = (id: string) => {
       if (selectedBucketIds.value.includes(id)) {
         selectedBucketIds.value = selectedBucketIds.value.filter(
-          (b) => b !== id
+          (b) => b !== id,
         );
       } else {
         selectedBucketIds.value.push(id);
@@ -323,7 +323,7 @@ export default defineComponent({
         const draggedId = bucketIdData;
         if (draggedId && draggedId !== id) {
           const draggedItem = bucketsStore.bucketList.find(
-            (b) => b.id === draggedId
+            (b) => b.id === draggedId,
           );
           const targetItem = bucketsStore.bucketList.find((b) => b.id === id);
           if (draggedItem && targetItem) {

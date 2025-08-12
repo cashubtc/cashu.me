@@ -212,7 +212,7 @@ describe("CreatorSubscribersPage", () => {
     const start = (alice.nextRenewal ?? 0) - periodSec;
     const expectedProgress = Math.min(
       Math.max((now.getTime() / 1000 - start) / periodSec, 0),
-      1
+      1,
     );
     const expectedDueSoon =
       alice.status === "active" &&
@@ -222,7 +222,7 @@ describe("CreatorSubscribersPage", () => {
     expect(alice.progress).toBeCloseTo(expectedProgress);
     expect(alice.dueSoon).toBe(expectedDueSoon);
     expect(wrapper.vm.progressPercent(alice)).toBe(
-      Math.round(alice.progress * 100)
+      Math.round(alice.progress * 100),
     );
     expect(wrapper.vm.dueSoon(alice)).toBe(alice.dueSoon);
     vi.useRealTimers();

@@ -1,11 +1,11 @@
 import fs from "fs";
 
 const files = ["quasar.config.js", "quasar.config.ts"].filter((f) =>
-  fs.existsSync(f)
+  fs.existsSync(f),
 );
 if (!files.length) {
   console.error(
-    "Could not find quasar.config.js or quasar.config.ts in the repo root."
+    "Could not find quasar.config.js or quasar.config.ts in the repo root.",
   );
   process.exit(1);
 }
@@ -20,11 +20,11 @@ for (const file of files) {
   // Normalize allowed values (case-insensitive -> proper case)
   s = s.replace(
     /workboxMode\s*:\s*['"]generateSW['"]/gi,
-    "workboxMode: 'GenerateSW'"
+    "workboxMode: 'GenerateSW'",
   );
   s = s.replace(
     /workboxMode\s*:\s*['"]injectManifest['"]/gi,
-    "workboxMode: 'InjectManifest'"
+    "workboxMode: 'InjectManifest'",
   );
 
   // Clean up stray "strategy: 'generateSW'| 'injectManifest'" under PWA config (if any)
@@ -35,7 +35,7 @@ for (const file of files) {
   if (!/pwa\s*:\s*\{[\s\S]*?workboxMode\s*:/m.test(s)) {
     s = s.replace(
       /return\s*\{/,
-      (match) => `${match}\n  pwa: { workboxMode: 'GenerateSW' },`
+      (match) => `${match}\n  pwa: { workboxMode: 'GenerateSW' },`,
     );
   }
 

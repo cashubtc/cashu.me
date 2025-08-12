@@ -18,10 +18,10 @@ var __require = /* @__PURE__ */ ((x) =>
   typeof require !== "undefined"
     ? require
     : typeof Proxy !== "undefined"
-    ? new Proxy(x, {
-        get: (a, b) => (typeof require !== "undefined" ? require : a)[b],
-      })
-    : x)(function (x) {
+      ? new Proxy(x, {
+          get: (a, b) => (typeof require !== "undefined" ? require : a)[b],
+        })
+      : x)(function (x) {
   if (typeof require !== "undefined") return require.apply(this, arguments);
   throw Error('Dynamic require of "' + x + '" is not supported');
 });
@@ -94,7 +94,7 @@ var require_quasar_config = __commonJS({
               ...(viteConf.resolve.alias || {}),
               "@cashu/cashu-ts": path.resolve(
                 __quasar_inject_dirname__,
-                "src/lib/cashu-ts/src/index.ts"
+                "src/lib/cashu-ts/src/index.ts",
               ),
             };
           },

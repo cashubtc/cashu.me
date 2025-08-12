@@ -158,7 +158,7 @@ window.windowMixin = {
       type = "null",
       position = "top",
       caption = null,
-      color = null
+      color = null,
     ) {
       // failure
       this.$q.notify({
@@ -207,7 +207,7 @@ window.windowMixin = {
     if (this.$q.localStorage.getItem("cashu.theme")) {
       document.body.setAttribute(
         "data-theme",
-        this.$q.localStorage.getItem("cashu.theme")
+        this.$q.localStorage.getItem("cashu.theme"),
       );
     } else {
       this.changeColor("nostr");
@@ -223,7 +223,7 @@ window.windowMixin = {
       SafeArea.getStatusBarHeight().then(({ statusBarHeight }) => {
         document.documentElement.style.setProperty(
           `--safe-area-inset-top`,
-          `${statusBarHeight}px`
+          `${statusBarHeight}px`,
         );
       });
 
@@ -235,7 +235,7 @@ window.windowMixin = {
         for (const [key, value] of Object.entries(insets)) {
           document.documentElement.style.setProperty(
             `--safe-area-inset-${key}`,
-            `${value}px`
+            `${value}px`,
           );
         }
       });

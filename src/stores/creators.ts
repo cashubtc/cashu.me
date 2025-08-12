@@ -148,7 +148,7 @@ export const useCreatorsStore = defineStore("creators", {
               console.error(e);
               return null;
             }
-          })
+          }),
         );
 
         results.forEach((res) => {
@@ -207,7 +207,7 @@ export const useCreatorsStore = defineStore("creators", {
             ? settings.defaultNostrRelays
             : []),
           ...DEFAULT_RELAYS,
-        ])
+        ]),
       );
 
       // Filter out unreachable relays before subscribing
@@ -247,7 +247,7 @@ export const useCreatorsStore = defineStore("creators", {
                   (e: any) =>
                     e.kind === 30000 &&
                     Array.isArray(e.tags) &&
-                    e.tags.some((t: any[]) => t[0] === "d" && t[1] === "tiers")
+                    e.tags.some((t: any[]) => t[0] === "d" && t[1] === "tiers"),
                 )
               : null);
           if (!event) {
@@ -261,7 +261,7 @@ export const useCreatorsStore = defineStore("creators", {
               price_sats: t.price_sats ?? t.price ?? 0,
               ...(t.perks && !t.benefits ? { benefits: [t.perks] } : {}),
               media: t.media ? filterValidMedia(t.media) : [],
-            })
+            }),
           );
           this.tiersMap[hex] = tiersArray;
           await db.creatorsTierDefinitions.put({
@@ -299,7 +299,7 @@ export const useCreatorsStore = defineStore("creators", {
                 price_sats: t.price_sats ?? t.price ?? 0,
                 ...(t.perks && !t.benefits ? { benefits: [t.perks] } : {}),
                 media: t.media ? filterValidMedia(t.media) : [],
-              })
+              }),
             );
             this.tiersMap[hex] = tiersArray;
             await db.creatorsTierDefinitions.put({
@@ -313,7 +313,7 @@ export const useCreatorsStore = defineStore("creators", {
             console.error("Error parsing tier definitions JSON:", e);
           }
         },
-        healthyRelays
+        healthyRelays,
       );
 
       if (!subscribed) {
@@ -327,7 +327,7 @@ export const useCreatorsStore = defineStore("creators", {
       const creatorNpub = this.currentUserNpub;
       const created_at = Math.floor(Date.now() / 1000);
       const content = JSON.stringify(
-        tiersArray.map((t) => ({ ...t, price: t.price_sats }))
+        tiersArray.map((t) => ({ ...t, price: t.price_sats })),
       );
 
       const event: Partial<NostrEvent> = {

@@ -30,7 +30,7 @@
                         class="q-ml-xs"
                         :text="
                           $t(
-                            'RestoreView.seed_phrase.inputs.seed_phrase.tooltip'
+                            'RestoreView.seed_phrase.inputs.seed_phrase.tooltip',
                           )
                         "
                       />
@@ -188,7 +188,7 @@ export default defineComponent({
     return {
       mnemonicError: "",
       restoreAllMintsText: this.$i18n.t(
-        "RestoreView.actions.restore_all_mints.label"
+        "RestoreView.actions.restore_all_mints.label",
       ),
     };
   },
@@ -234,7 +234,7 @@ export default defineComponent({
       }
       try {
         this.restoreAllMintsText = this.$i18n.t(
-          "RestoreView.actions.restore.in_progress"
+          "RestoreView.actions.restore.in_progress",
         );
         await this.restoreMint(mintUrl);
       } catch (error) {
@@ -242,11 +242,11 @@ export default defineComponent({
         notifyError(
           this.$i18n.t("RestoreView.actions.restore.error", {
             error: error.message || error,
-          })
+          }),
         );
       } finally {
         this.restoreAllMintsText = this.$i18n.t(
-          "RestoreView.actions.restore_all_mints.label"
+          "RestoreView.actions.restore_all_mints.label",
         );
       }
     },
@@ -270,23 +270,23 @@ export default defineComponent({
             {
               index: ++i,
               length: this.mints.length,
-            }
+            },
           );
           await this.restoreMint(mint.url);
         }
         notifySuccess(
-          this.$i18n.t("RestoreView.actions.restore_all_mints.success")
+          this.$i18n.t("RestoreView.actions.restore_all_mints.success"),
         );
       } catch (error) {
         console.error("Error restoring mints:", error);
         notifyError(
           this.$i18n.t("RestoreView.actions.restore_all_mints.error", {
             error: error.message || error,
-          })
+          }),
         );
       } finally {
         this.restoreAllMintsText = this.$i18n.t(
-          "RestoreView.actions.restore_all_mints.label"
+          "RestoreView.actions.restore_all_mints.label",
         );
       }
     },

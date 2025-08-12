@@ -62,18 +62,18 @@ const bucketOptions = computed(() =>
   bucketList.value.map((b) => ({
     label: `${b.name} (${uiStore.formatCurrency(
       bucketBalances.value[b.id] ?? 0,
-      activeUnit.value
+      activeUnit.value,
     )})`,
     value: b.id,
-  }))
+  })),
 );
 
 const totalBalance = computed(() =>
-  Object.values(bucketBalances.value).reduce((sum, v) => sum + v, 0)
+  Object.values(bucketBalances.value).reduce((sum, v) => sum + v, 0),
 );
 
 const formattedTotalBalance = computed(() =>
-  uiStore.formatCurrency(totalBalance.value, activeUnit.value)
+  uiStore.formatCurrency(totalBalance.value, activeUnit.value),
 );
 
 function reset() {
@@ -106,7 +106,7 @@ async function confirm() {
     props.recipient,
     amount.value,
     bucketId.value,
-    memo.value.trim() || undefined
+    memo.value.trim() || undefined,
   );
   hideDialog();
 }

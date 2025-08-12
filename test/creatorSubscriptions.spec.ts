@@ -94,7 +94,7 @@ describe("creatorSubscriptions store", () => {
 
     const weekly = store.subscriptions.find((s) => s.subscriptionId === "subW");
     const biweekly = store.subscriptions.find(
-      (s) => s.subscriptionId === "subB"
+      (s) => s.subscriptionId === "subB",
     );
 
     expect(weekly?.totalPeriods).toBe(3);

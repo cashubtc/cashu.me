@@ -11,7 +11,7 @@ export function useClipboard() {
       },
       () => {
         toastError(t("copy_failed"));
-      }
+      },
     );
   };
 

@@ -97,7 +97,7 @@ ChartJS.register(
         ctx.fillText(String(value), x, y);
       });
     },
-  }
+  },
 );
 
 const props = defineProps<{ rows: CreatorSubscription[] }>();

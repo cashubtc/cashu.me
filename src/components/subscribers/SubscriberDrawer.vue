@@ -284,7 +284,7 @@ watch(
   () => props.sub?.subscriptionId,
   () => {
     if (model.value) loadPayments();
-  }
+  },
 );
 
 watch(model, (v) => {
@@ -297,7 +297,7 @@ watch(model, (v) => {
 });
 
 const storageKey = computed(
-  () => `sub-notes:${props.sub?.subscriptionId ?? ""}`
+  () => `sub-notes:${props.sub?.subscriptionId ?? ""}`,
 );
 const notes = useLocalStorage<string>(storageKey, props.notes ?? "");
 
@@ -305,7 +305,7 @@ watch(
   () => props.notes,
   (v) => {
     if (v !== undefined) notes.value = v;
-  }
+  },
 );
 
 watch(notes, (v) => emit("update:notes", v));

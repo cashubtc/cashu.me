@@ -31,7 +31,7 @@ export const useMigrationsStore = defineStore("migrations", {
     async runMigrations() {
       // Get migrations that need to be run (newer than current version)
       const pendingMigrations = this.migrations.filter(
-        (m) => m.version > this.currentVersion
+        (m) => m.version > this.currentVersion,
       );
 
       if (pendingMigrations.length === 0) {

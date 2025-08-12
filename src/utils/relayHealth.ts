@@ -45,7 +45,7 @@ export async function pingRelay(url: string): Promise<boolean> {
 
 export async function filterHealthyRelays(relays: string[]): Promise<string[]> {
   const results = await Promise.all(
-    relays.map(async (u) => ((await pingRelay(u)) ? u : null))
+    relays.map(async (u) => ((await pingRelay(u)) ? u : null)),
   );
   const healthy = results.filter((u): u is string => !!u);
   return healthy.length >= 2 ? healthy : FREE_RELAYS;

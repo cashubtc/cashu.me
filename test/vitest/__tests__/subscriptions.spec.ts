@@ -170,7 +170,7 @@ describe("Nutzap subscriptions", () => {
         tier_id: "nutzap",
         month_index: 1,
         total_months: 2,
-      }
+      },
     );
     const expected2 = subscriptionPayload(
       `tok-${calcUnlock(start, 1, 7)}`,
@@ -180,7 +180,7 @@ describe("Nutzap subscriptions", () => {
         tier_id: "nutzap",
         month_index: 2,
         total_months: 2,
-      }
+      },
     );
     expect(p1).toEqual(expected1);
     expect(p2).toEqual(expected2);
@@ -189,7 +189,7 @@ describe("Nutzap subscriptions", () => {
   it("queues message and sets boot error when sendDm throws", async () => {
     sendDm = vi.fn(async () => {
       throw new (await import("../../../src/boot/ndk")).NdkBootError(
-        "no-signer"
+        "no-signer",
       );
     });
     cashuDb.lockedTokens.bulkAdd = vi.fn();
@@ -253,10 +253,10 @@ describe("Nutzap subscriptions", () => {
     ] as any);
     await new Promise((r) => setTimeout(r, 10));
     const sub1 = subStore.subscriptions.find(
-      (s) => s.subscriptionId === "sub1"
+      (s) => s.subscriptionId === "sub1",
     );
     const sub2 = subStore.subscriptions.find(
-      (s) => s.subscriptionId === "sub2"
+      (s) => s.subscriptionId === "sub2",
     );
     expect(subStore.subscriptions.length).toBe(2);
     expect(sub1?.receivedPeriods).toBe(2);
@@ -319,7 +319,7 @@ describe("Nutzap subscriptions", () => {
   it("queues message and sets boot error when ndkSend throws", async () => {
     const mod = await import("../../../src/boot/ndk");
     vi.spyOn(mod, "ndkSend").mockRejectedValue(
-      new mod.NdkBootError("no-signer")
+      new mod.NdkBootError("no-signer"),
     );
     const subStore = useNutzapStore();
     sendDm = vi.fn(async () => ({ success: true }));

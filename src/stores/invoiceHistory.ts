@@ -8,7 +8,7 @@ export const useInvoiceHistoryStore = defineStore("invoiceHistory", {
   state: () => ({
     invoiceHistory: useLocalStorage<InvoiceHistory[]>(
       LOCAL_STORAGE_KEYS.CASHU_INVOICEHISTORY,
-      []
+      [],
     ),
   }),
   actions: {
@@ -35,7 +35,7 @@ export const useInvoiceHistoryStore = defineStore("invoiceHistory", {
     },
     updateOutgoingInvoiceInHistory(
       quote: MeltQuoteResponse,
-      options?: { status?: "pending" | "paid"; amount?: number }
+      options?: { status?: "pending" | "paid"; amount?: number },
     ) {
       this.invoiceHistory
         .filter((i) => i.quote === quote.quote)

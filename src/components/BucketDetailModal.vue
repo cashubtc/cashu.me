@@ -155,7 +155,7 @@ const tokensStore = useTokensStore();
 const uiStore = useUiStore();
 const { activeUnit } = storeToRefs(mintsStore);
 const sendDmDialogRef = ref<InstanceType<typeof SendBucketDmDialog> | null>(
-  null
+  null,
 );
 const editDialog = ref({
   show: false,
@@ -165,13 +165,15 @@ const editDialog = ref({
 });
 
 const bucket = computed(
-  () => bucketsStore.bucketList.find((b) => b.id === props.bucketId) || null
+  () => bucketsStore.bucketList.find((b) => b.id === props.bucketId) || null,
 );
 const bucketProofs = computed(() =>
-  proofsStore.proofs.filter((p) => p.bucketId === props.bucketId && !p.reserved)
+  proofsStore.proofs.filter(
+    (p) => p.bucketId === props.bucketId && !p.reserved,
+  ),
 );
 const bucketBalance = computed(() =>
-  bucketProofs.value.reduce((s, p) => s + p.amount, 0)
+  bucketProofs.value.reduce((s, p) => s + p.amount, 0),
 );
 
 const formatCurrency = (a: number, unit: string) =>

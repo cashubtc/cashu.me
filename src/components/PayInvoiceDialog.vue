@@ -28,7 +28,7 @@
                       formatCurrency(
                         payInvoiceData.meltQuote.response.amount,
                         activeUnit,
-                        true
+                        true,
                       )
                     }}
                   </template>
@@ -43,7 +43,7 @@
                     (bitcoinPrice / 100000000) *
                       payInvoiceData.meltQuote.response.amount,
                     "USD",
-                    true
+                    true,
                   )
                 }})
               </span>
@@ -98,8 +98,8 @@
               payInvoiceData.meltQuote.error != ''
                 ? $t('PayInvoiceDialog.invoice.actions.pay.error')
                 : !payInvoiceData.blocking
-                ? $t('PayInvoiceDialog.invoice.actions.pay.label')
-                : $t('PayInvoiceDialog.invoice.actions.pay.in_progress')
+                  ? $t('PayInvoiceDialog.invoice.actions.pay.label')
+                  : $t('PayInvoiceDialog.invoice.actions.pay.in_progress')
             "
             :loading="globalMutexLock && !payInvoiceData.blocking"
             class="q-px-lg"

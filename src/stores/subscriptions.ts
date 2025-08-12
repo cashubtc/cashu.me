@@ -18,7 +18,9 @@ export const useSubscriptionsStore = defineStore("subscriptions", () => {
   });
 
   async function addSubscription(
-    data: Omit<Subscription, "id" | "createdAt" | "updatedAt"> & { id?: string }
+    data: Omit<Subscription, "id" | "createdAt" | "updatedAt"> & {
+      id?: string;
+    },
   ) {
     const now = Math.floor(Date.now() / 1000);
     const entry: Subscription = {
@@ -42,7 +44,7 @@ export const useSubscriptionsStore = defineStore("subscriptions", () => {
 
   async function updateSubscription(
     id: string,
-    updates: Partial<Subscription>
+    updates: Partial<Subscription>,
   ) {
     await cashuDb.subscriptions.update(id, {
       ...updates,
@@ -70,7 +72,7 @@ export const useSubscriptionsStore = defineStore("subscriptions", () => {
 
   async function markIntervalRedeemed(
     subscriptionId: string,
-    monthIndex: number | null | undefined
+    monthIndex: number | null | undefined,
   ) {
     const sub = await cashuDb.subscriptions.get(subscriptionId);
     const idx = sub?.intervals.findIndex((i) => i.monthIndex === monthIndex);

@@ -60,7 +60,7 @@ export function useCreatorHub() {
   const currentTier = ref<Partial<Tier>>({});
   const publishing = ref(false);
   const npub = computed(() =>
-    store.loggedInNpub ? nip19.npubEncode(store.loggedInNpub) : ""
+    store.loggedInNpub ? nip19.npubEncode(store.loggedInNpub) : "",
   );
 
   watch(
@@ -68,7 +68,7 @@ export function useCreatorHub() {
     (val) => {
       draggableTiers.value = [...val];
     },
-    { immediate: true }
+    { immediate: true },
   );
 
   async function loginNip07() {
@@ -159,7 +159,7 @@ export function useCreatorHub() {
           relays: profileRelays.value,
         }),
         new Promise((_, reject) =>
-          setTimeout(() => reject(new PublishTimeoutError()), timeoutMs)
+          setTimeout(() => reject(new PublishTimeoutError()), timeoutMs),
         ),
       ]);
       notifySuccess("Profile updated");

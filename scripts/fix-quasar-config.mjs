@@ -5,9 +5,9 @@ function removeImportAndCall(s, modName, funcName) {
   s = s.replace(
     new RegExp(
       String.raw`^\s*import\s*\{\s*${funcName}\s*\}\s*from\s*['"]${modName}['"];\s*\n?`,
-      "m"
+      "m",
     ),
-    ""
+    "",
   );
 
   // Remove nodePolyfills( ... ) with balanced parentheses
@@ -54,7 +54,7 @@ function ensureBoot(s) {
   } else {
     s = s.replace(
       /return\s*\{/,
-      (match) => `${match}\n    boot: ['node-globals'],`
+      (match) => `${match}\n    boot: ['node-globals'],`,
     );
   }
   return s;
@@ -80,7 +80,7 @@ function ensureExtendViteConf(s) {
       viteConf.optimizeDeps = { ...(viteConf.optimizeDeps || {}), include: [ ...(viteConf.optimizeDeps?.include || []), 'buffer', 'process' ] };
 `;
         return `extendViteConf(viteConf) {${inject}\n${body}\n}`;
-      }
+      },
     );
   } else {
     s = s.replace(
@@ -93,7 +93,7 @@ function ensureExtendViteConf(s) {
       viteConf.define = { ...(viteConf.define || {}), global: 'globalThis' };
 
       viteConf.optimizeDeps = { ...(viteConf.optimizeDeps || {}), include: [ ...(viteConf.optimizeDeps?.include || []), 'buffer', 'process' ] };
-    },`
+    },`,
     );
   }
   return s;
@@ -103,7 +103,7 @@ function stripStrayGlobals(s) {
   // Remove naked "globals: { Buffer: true, global: true, process: true }" objects if left behind
   return s.replace(
     /\bglobals\s*:\s*\{\s*Buffer\s*:\s*true\s*,\s*global\s*:\s*true\s*,\s*process\s*:\s*true\s*\}\s*,?/g,
-    ""
+    "",
   );
 }
 

@@ -161,7 +161,7 @@
                   <q-item-label caption
                     >{{
                       $t(
-                        "Settings.lightning_address.automatic_claim.description"
+                        "Settings.lightning_address.automatic_claim.description",
                       )
                     }}
                   </q-item-label>
@@ -718,7 +718,7 @@
                   class="q-mr-sm cursor-pointer"
                   ><q-tooltip>{{
                     $t(
-                      "Settings.nostr_wallet_connect.relays.list.remove_tooltip"
+                      "Settings.nostr_wallet_connect.relays.list.remove_tooltip",
                     )
                   }}</q-tooltip></q-icon
                 >
@@ -845,7 +845,7 @@
               <q-item-label caption
                 >{{
                   $t(
-                    "Settings.hardware_features.webnfc.quick_access.description"
+                    "Settings.hardware_features.webnfc.quick_access.description",
                   )
                 }}
               </q-item-label>
@@ -1498,7 +1498,7 @@
                         <q-item-label class="q-px-sm" caption
                           >{{
                             $t(
-                              "Settings.advanced.developer.new_seed.description"
+                              "Settings.advanced.developer.new_seed.description",
                             )
                           }}
                         </q-item-label>
@@ -1508,7 +1508,7 @@
                       <span
                         >{{
                           $t(
-                            "Settings.advanced.developer.new_seed.confirm_question"
+                            "Settings.advanced.developer.new_seed.confirm_question",
                           )
                         }}
                       </span>
@@ -1557,7 +1557,7 @@
                     <q-item-label class="q-px-sm" caption
                       >{{
                         $t(
-                          "Settings.advanced.developer.remove_spent.description"
+                          "Settings.advanced.developer.remove_spent.description",
                         )
                       }}
                     </q-item-label>
@@ -1577,7 +1577,7 @@
                     <q-item-label class="q-px-sm" caption
                       >{{
                         $t(
-                          "Settings.advanced.developer.debug_console.description"
+                          "Settings.advanced.developer.debug_console.description",
                         )
                       }}
                     </q-item-label>
@@ -1597,7 +1597,7 @@
                     <q-item-label class="q-px-sm" caption
                       >{{
                         $t(
-                          "Settings.advanced.developer.export_proofs.description"
+                          "Settings.advanced.developer.export_proofs.description",
                         )
                       }}
                     </q-item-label>
@@ -1616,7 +1616,7 @@
                     <q-item-label class="q-px-sm" caption
                       >{{
                         $t(
-                          "Settings.advanced.developer.keyset_counters.description"
+                          "Settings.advanced.developer.keyset_counters.description",
                         )
                       }}
                     </q-item-label>
@@ -1662,7 +1662,7 @@
                     <q-item-label class="q-px-sm" caption
                       >{{
                         $t(
-                          "Settings.advanced.developer.unset_reserved.description"
+                          "Settings.advanced.developer.unset_reserved.description",
                         )
                       }}
                     </q-item-label>
@@ -1682,7 +1682,7 @@
                     <q-item-label class="q-px-sm" caption
                       >{{
                         $t(
-                          "Settings.advanced.developer.show_onboarding.description"
+                          "Settings.advanced.developer.show_onboarding.description",
                         )
                       }}
                     </q-item-label>
@@ -1709,7 +1709,7 @@
                     <q-item-label class="q-px-sm" caption
                       >{{
                         $t(
-                          "Settings.advanced.developer.reset_wallet.description"
+                          "Settings.advanced.developer.reset_wallet.description",
                         )
                       }}
                     </q-item-label>
@@ -1717,7 +1717,7 @@
                   <div class="row" v-if="confirmNuke">
                     <span>{{
                       $t(
-                        "Settings.advanced.developer.reset_wallet.confirm_question"
+                        "Settings.advanced.developer.reset_wallet.confirm_question",
                       )
                     }}</span>
                     <q-btn
@@ -1759,7 +1759,7 @@
                     <q-item-label class="q-px-sm" caption
                       >{{
                         $t(
-                          "Settings.advanced.developer.export_wallet.description"
+                          "Settings.advanced.developer.export_wallet.description",
                         )
                       }}
                     </q-item-label>
@@ -1916,7 +1916,7 @@ export default defineComponent({
       for (let mint of mints) {
         const mintIds = mint.keysets.map((keyset) => keyset.id);
         const keysetCounterThisMint = this.keysetCounters.filter((entry) =>
-          mintIds.includes(entry.id)
+          mintIds.includes(entry.id),
         );
         keysetCountersByMint[mint.url] = keysetCounterThisMint;
       }
@@ -2026,7 +2026,7 @@ export default defineComponent({
       // iterate over this.activeProofs in batches of 50 and check if they are spendable
       let wallet = useWalletStore().mintWallet(
         this.activeMintUrl,
-        this.activeUnit
+        this.activeUnit,
       );
       let proofs = this.activeProofs.flat();
       debug("Checking proofs", proofs);
@@ -2165,7 +2165,7 @@ export default defineComponent({
     },
     removeNostrRelay: function (relay) {
       this.defaultNostrRelays = this.defaultNostrRelays.filter(
-        (r) => r !== relay
+        (r) => r !== relay,
       );
       const profileStore = useCreatorProfileStore();
       profileStore.relays = profileStore.relays.filter((r) => r !== relay);

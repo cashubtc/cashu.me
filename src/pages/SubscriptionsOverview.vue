@@ -453,7 +453,7 @@ const creatorSubscriptionsStore = useCreatorSubscriptionsStore();
 const { activeUnit } = storeToRefs(mintsStore);
 const { sendQueue } = storeToRefs(nutzap);
 const { subscriptions: creatorSubscriptions } = storeToRefs(
-  creatorSubscriptionsStore
+  creatorSubscriptionsStore,
 );
 
 function pubkeyNpub(hex: string): string {
@@ -523,7 +523,7 @@ const rows = computed(() => {
         ? start + (totalPeriods - 1) * 30 * 24 * 60 * 60
         : null;
     const unlocked = tokens.filter(
-      (t) => !t.locktime || t.locktime <= nowSec
+      (t) => !t.locktime || t.locktime <= nowSec,
     ).length;
     const status = monthsLeft > 0 ? "active" : "expired";
     const bucket = bucketsStore.bucketList.find((b) => b.id === sub.tierId);
@@ -557,7 +557,7 @@ const soonRows = computed(() => rows.value.filter((r) => r.soon));
 
 const totalLocked = computed(() => rows.value.reduce((s, r) => s + r.total, 0));
 const monthlyTotal = computed(() =>
-  rows.value.reduce((s, r) => s + r.monthly, 0)
+  rows.value.reduce((s, r) => s + r.monthly, 0),
 );
 
 const profiles = ref<Record<string, any>>({});
@@ -696,7 +696,7 @@ function cancelSubscription(pubkey: string) {
 function extendSubscription(pubkey: string) {
   const row = rows.value.find((r) => r.creator === pubkey);
   const sub = subscriptionsStore.subscriptions.find(
-    (s) => s.creatorNpub === pubkey
+    (s) => s.creatorNpub === pubkey,
   );
   if (!row || !sub) return;
   $q.dialog({
@@ -775,7 +775,7 @@ function extendSubscription(pubkey: string) {
           subscriptionId: sub.id,
           monthIndex: sub.intervals.length + idx + 1,
           totalPeriods,
-        }))
+        })),
       );
       await subscriptionsStore.addSubscription({
         ...sub,
@@ -785,7 +785,7 @@ function extendSubscription(pubkey: string) {
       } as any);
       showToast(
         t("SubscriptionsOverview.notifications.extend_success"),
-        "positive"
+        "positive",
       );
     } catch (e: any) {
       showToast(e.message, "negative");
@@ -824,7 +824,7 @@ function exportTokens(pubkey: string) {
   URL.revokeObjectURL(url);
   showToast(
     t("SubscriptionsOverview.notifications.export_success"),
-    "positive"
+    "positive",
   );
 }
 
@@ -836,8 +836,8 @@ function confirmCancel() {
     .then(() =>
       showToast(
         t("SubscriptionsOverview.notifications.cancel_success"),
-        "positive"
-      )
+        "positive",
+      ),
     )
     .catch((e: any) => showToast(e.message, "negative"))
     .finally(() => {

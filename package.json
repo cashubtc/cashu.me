@@ -15,7 +15,7 @@
     "format": "prettier --write .",
     "checkformat": "prettier --check .",
     "test": "node --experimental-vm-modules node_modules/vitest/vitest.mjs",
-    "test:ci": "vitest run --passWithNoTests",
+    "test:ci": "vitest run -c vitest.skip.mts",
     "types": "tsc -p tsconfig.local.json --noEmit",
     "ci:verify": "pnpm run types && pnpm run lint && pnpm run build && pnpm run build:pwa",
     "lint:fix": "eslint . --fix"

@@ -40,7 +40,7 @@ const src = computed(() => {
 });
 
 const type = computed(() =>
-  src.value ? determineMediaType(src.value) : "image"
+  src.value ? determineMediaType(src.value) : "image",
 );
 </script>
 

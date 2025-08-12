@@ -139,10 +139,10 @@ const p2pkOptions = computed(() =>
   p2pkStore.p2pkKeys.map((k) => ({
     label: shortenString(k.publicKey, 16, 6),
     value: k.publicKey,
-  }))
+  })),
 );
 const selectedKeyShort = computed(() =>
-  profilePub.value ? shortenString(profilePub.value, 16, 6) : ""
+  profilePub.value ? shortenString(profilePub.value, 16, 6) : "",
 );
 
 async function generateP2PK() {

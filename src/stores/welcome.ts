@@ -21,11 +21,11 @@ export const useWelcomeStore = defineStore("welcome", {
       .value,
     seedPhraseValidated: useLocalStorage<boolean>(
       "cashu.welcome.seedPhraseValidated",
-      false
+      false,
     ),
     termsAccepted: useLocalStorage<boolean>(
       "cashu.welcome.termsAccepted",
-      false
+      false,
     ),
   }),
   getters: {

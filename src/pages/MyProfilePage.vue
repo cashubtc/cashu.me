@@ -211,7 +211,7 @@ export default defineComponent({
     const activeUnit = computed(() => mints.activeUnit);
     const bucketCount = computed(() => buckets.bucketList.length);
     const walletBalanceFormatted = computed(() =>
-      uiStore.formatCurrency(walletBalance.value, activeUnit.value)
+      uiStore.formatCurrency(walletBalance.value, activeUnit.value),
     );
 
     async function initProfile() {

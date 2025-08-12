@@ -86,19 +86,19 @@ watch(
   () => Array.from(store.status),
   (v) => {
     localStatuses.value = v as SubStatus[];
-  }
+  },
 );
 watch(
   () => Array.from(store.tier),
   (v) => {
     localTiers.value = v as string[];
-  }
+  },
 );
 watch(
   () => store.sort,
   (v) => {
     localSort.value = v;
-  }
+  },
 );
 
 function apply() {

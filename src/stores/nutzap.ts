@@ -67,7 +67,7 @@ export const useNutzapStore = defineStore("nutzap", {
     watchInitialized: false,
     sendQueue: useLocalStorage<NutzapQueuedSend[]>(
       "cashu.nutzap.sendQueue",
-      []
+      [],
     ),
   }),
 
@@ -90,11 +90,11 @@ export const useNutzapStore = defineStore("nutzap", {
       });
       const { success } = await messenger.sendDm(
         item.npub,
-        JSON.stringify(payload)
+        JSON.stringify(payload),
       );
       if (success) {
         const idx = this.sendQueue.findIndex(
-          (q) => q.createdAt === item.createdAt
+          (q) => q.createdAt === item.createdAt,
         );
         if (idx >= 0) this.sendQueue.splice(idx, 1);
       }
@@ -118,7 +118,7 @@ export const useNutzapStore = defineStore("nutzap", {
               this.listenerStarted = false;
               this.initListener(pubkey);
             }
-          }
+          },
         );
         this.watchInitialized = true;
       }
@@ -216,12 +216,12 @@ export const useNutzapStore = defineStore("nutzap", {
         const mint = wallet.findSpendableMint(price);
         if (!mint)
           throw new Error(
-            "Insufficient balance in a mint that the creator trusts."
+            "Insufficient balance in a mint that the creator trusts.",
           );
         const { sendProofs, locked } = await useP2PKStore().sendToLock(
           price,
           creator.cashuP2pk,
-          unlockDate
+          unlockDate,
         );
 
         const htlcData = htlc
@@ -242,10 +242,10 @@ export const useNutzapStore = defineStore("nutzap", {
                   month_index: i + 1,
                   total_months: months,
                 },
-                htlcData?.hash
-              )
+                htlcData?.hash,
+              ),
             ),
-            relayList
+            relayList,
           );
           if (!success) {
             this.queueSend({
@@ -351,7 +351,7 @@ export const useNutzapStore = defineStore("nutzap", {
         }
         if (!profile || !profile.p2pkPubkey) {
           throw new Error(
-            "Creator's Nutzap profile is missing or does not contain a P2PK key."
+            "Creator's Nutzap profile is missing or does not contain a P2PK key.",
           );
         }
         const creatorP2pk = profile.p2pkPubkey;
@@ -372,13 +372,13 @@ export const useNutzapStore = defineStore("nutzap", {
           const mint = wallet.findSpendableMint(amount, trustedMints);
           if (!mint)
             throw new Error(
-              "Insufficient balance in a mint that the creator trusts."
+              "Insufficient balance in a mint that the creator trusts.",
             );
 
           const { sendProofs, locked } = await useP2PKStore().sendToLock(
             amount,
             creatorP2pk,
-            unlockDate
+            unlockDate,
           );
           const token = proofsStore.serializeProofs(sendProofs);
 
@@ -391,9 +391,9 @@ export const useNutzapStore = defineStore("nutzap", {
                   tier_id: "nutzap",
                   month_index: i + 1,
                   total_months: months,
-                })
+                }),
               ),
-              trustedRelays
+              trustedRelays,
             );
             if (!success) {
               this.queueSend({

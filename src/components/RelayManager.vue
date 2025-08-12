@@ -90,14 +90,14 @@ const relayStatuses = computed(() =>
       status,
       nextReconnectAt,
     };
-  })
+  }),
 );
 
 watch(
   () => messenger.relays,
   (r) => {
     relayText.value = (r ?? []).join("\n");
-  }
+  },
 );
 
 const connect = async () => {

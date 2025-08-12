@@ -28,7 +28,7 @@
                     value: sendData.amount
                       ? formatCurrency(
                           sendData.amount * activeUnitCurrencyMultiplyer,
-                          activeUnit
+                          activeUnit,
                         )
                       : $t("SendTokenDialog.title_ecash_text"),
                   })
@@ -44,7 +44,7 @@
                   {{
                     formatCurrency(
                       sendData.paymentRequest.amount,
-                      sendData.paymentRequest.unit
+                      sendData.paymentRequest.unit,
                     )
                   }}
                 </span>
@@ -59,7 +59,7 @@
                       sendData.amount *
                       activeUnitCurrencyMultiplyer,
                     "USD",
-                    true
+                    true,
                   )
                 }})
               </span>
@@ -188,17 +188,17 @@
                     @click="pasteToP2PKField"
                     :aria-label="
                       $t(
-                        'SendTokenDialog.actions.paste_p2pk_pubkey.tooltip_text'
+                        'SendTokenDialog.actions.paste_p2pk_pubkey.tooltip_text',
                       )
                     "
                     :title="
                       $t(
-                        'SendTokenDialog.actions.paste_p2pk_pubkey.tooltip_text'
+                        'SendTokenDialog.actions.paste_p2pk_pubkey.tooltip_text',
                       )
                     "
                     ><q-tooltip>{{
                       $t(
-                        "SendTokenDialog.actions.paste_p2pk_pubkey.tooltip_text"
+                        "SendTokenDialog.actions.paste_p2pk_pubkey.tooltip_text",
                       )
                     }}</q-tooltip></q-btn
                   >
@@ -500,19 +500,19 @@
                     :aria-label="
                       ndefSupported
                         ? $t(
-                            'SendTokenDialog.actions.write_tokens_to_card.tooltips.ndef_supported_text'
+                            'SendTokenDialog.actions.write_tokens_to_card.tooltips.ndef_supported_text',
                           )
                         : $t(
-                            'SendTokenDialog.actions.write_tokens_to_card.tooltips.ndef_unsupported_text'
+                            'SendTokenDialog.actions.write_tokens_to_card.tooltips.ndef_unsupported_text',
                           )
                     "
                     :title="
                       ndefSupported
                         ? $t(
-                            'SendTokenDialog.actions.write_tokens_to_card.tooltips.ndef_supported_text'
+                            'SendTokenDialog.actions.write_tokens_to_card.tooltips.ndef_supported_text',
                           )
                         : $t(
-                            'SendTokenDialog.actions.write_tokens_to_card.tooltips.ndef_unsupported_text'
+                            'SendTokenDialog.actions.write_tokens_to_card.tooltips.ndef_unsupported_text',
                           )
                     "
                   >
@@ -520,10 +520,10 @@
                     <q-tooltip>{{
                       ndefSupported
                         ? $t(
-                            "SendTokenDialog.actions.write_tokens_to_card.tooltips.ndef_supported_text"
+                            "SendTokenDialog.actions.write_tokens_to_card.tooltips.ndef_supported_text",
                           )
                         : $t(
-                            "SendTokenDialog.actions.write_tokens_to_card.tooltips.ndef_unsupported_text"
+                            "SendTokenDialog.actions.write_tokens_to_card.tooltips.ndef_unsupported_text",
                           )
                     }}</q-tooltip>
                     <template v-slot:loading>
@@ -669,7 +669,7 @@ import { Dialog } from "quasar";
 import { useDmChatsStore } from "src/stores/dmChats";
 
 const VueQrcode = defineAsyncComponent(
-  () => import("@chenfengyuan/vue-qrcode")
+  () => import("@chenfengyuan/vue-qrcode"),
 );
 export default defineComponent({
   name: "SendTokenDialog",
@@ -755,7 +755,7 @@ export default defineComponent({
     },
     isCreatorP2PK() {
       const bucket = this.bucketList.find(
-        (b) => b.id === this.sendData.bucketId
+        (b) => b.id === this.sendData.bucketId,
       );
       return (
         !!bucket?.creatorPubkey &&
@@ -806,7 +806,7 @@ export default defineComponent({
         mintWallet,
         this.sendData.amount * this.activeUnitCurrencyMultiplyer,
         this.includeFeesInSendAmount,
-        this.sendData.bucketId
+        this.sendData.bucketId,
       );
       const feesToAdd = this.includeFeesInSendAmount
         ? this.getFeesForProofs(selectedProofs)
@@ -864,13 +864,13 @@ export default defineComponent({
         ) {
           if (!this.checkSentTokens) {
             debug(
-              "settingsStore.checkSentTokens is disabled, skipping token check"
+              "settingsStore.checkSentTokens is disabled, skipping token check",
             );
             return;
           }
           const unspent = this.checkTokenSpendable(
             this.sendData.historyToken,
-            false
+            false,
           );
           if (!unspent) {
             this.sendData.historyToken.status = "paid";
@@ -1110,7 +1110,7 @@ export default defineComponent({
                       */
                     default:
                       throw new Error(
-                        `Unknown NFC encoding: ${this.nfcEncoding}`
+                        `Unknown NFC encoding: ${this.nfcEncoding}`,
                       );
                   }
                   notifySuccess("Writing to NFC card...");
@@ -1122,11 +1122,11 @@ export default defineComponent({
                     })
                     .catch((err) => {
                       console.error(
-                        `NFC write failed: The card may not have enough capacity (needed ${records[0].data.length} bytes).`
+                        `NFC write failed: The card may not have enough capacity (needed ${records[0].data.length} bytes).`,
                       );
                       notifyError(
                         `The card may not have enough capacity (needed ${records[0].data.length} bytes).`,
-                        "NFC write failed"
+                        "NFC write failed",
                       );
                     });
                 } catch (err) {
@@ -1154,14 +1154,14 @@ export default defineComponent({
     },
     lockTokens: async function () {
       let sendAmount = Math.floor(
-        this.sendData.amount * this.activeUnitCurrencyMultiplyer
+        this.sendData.amount * this.activeUnitCurrencyMultiplyer,
       );
       try {
         // keep firstProofs, send scndProofs and delete them (invalidate=true)
         const mintWallet = this.mintWallet(this.activeMintUrl, this.activeUnit);
         const bucketId = this.sendData.bucketId;
         const proofsForBucket = this.activeProofs.filter(
-          (p) => p.bucketId === bucketId
+          (p) => p.bucketId === bucketId,
         );
         const p2pkInput = this.sendData.p2pkPubkey;
         if (
@@ -1184,7 +1184,7 @@ export default defineComponent({
         let { _, sendProofs } = await this.sendToLock(
           sendAmount,
           this.sendData.p2pkPubkey,
-          this.sendData.locktime || 0
+          this.sendData.locktime || 0,
         );
         // update UI
         this.sendData.tokens = sendProofs;
@@ -1218,19 +1218,19 @@ export default defineComponent({
             const { success, event } =
               await useNostrStore().sendNip04DirectMessage(
                 recipient,
-                dmContent
+                dmContent,
               );
             if (success && event) {
               useDmChatsStore().addOutgoing(event);
               Dialog.create({
                 message: this.$t(
-                  "wallet.notifications.nostr_dm_sent"
+                  "wallet.notifications.nostr_dm_sent",
                 ) as string,
               });
             } else {
               Dialog.create({
                 message: this.$t(
-                  "wallet.notifications.nostr_dm_failed"
+                  "wallet.notifications.nostr_dm_failed",
                 ) as string,
               });
             }
@@ -1238,7 +1238,7 @@ export default defineComponent({
             console.error(e);
             Dialog.create({
               message: this.$t(
-                "wallet.notifications.nostr_dm_failed"
+                "wallet.notifications.nostr_dm_failed",
               ) as string,
             });
           } finally {
@@ -1268,11 +1268,11 @@ export default defineComponent({
         this.sendData.historyToken = historyToken;
         Dialog.create({
           message: this.$t(
-            "FindCreators.notifications.donation_sent"
+            "FindCreators.notifications.donation_sent",
           ) as string,
           ok: {
             label: this.$t(
-              "FindCreators.actions.back_to_search.label"
+              "FindCreators.actions.back_to_search.label",
             ) as string,
           },
         }).onOk(() => {
@@ -1328,7 +1328,7 @@ export default defineComponent({
 
       try {
         let sendAmount = Math.floor(
-          this.sendData.amount * this.activeUnitCurrencyMultiplyer
+          this.sendData.amount * this.activeUnitCurrencyMultiplyer,
         );
         const mintWallet = this.mintWallet(this.activeMintUrl, this.activeUnit);
         const bucketId = this.sendData.bucketId;
@@ -1338,7 +1338,7 @@ export default defineComponent({
           sendAmount,
           true,
           this.includeFeesInSendAmount,
-          bucketId
+          bucketId,
         );
 
         // update UI
@@ -1372,19 +1372,19 @@ export default defineComponent({
             const { success, event } =
               await useNostrStore().sendNip04DirectMessage(
                 recipient,
-                dmContent2
+                dmContent2,
               );
             if (success && event) {
               useDmChatsStore().addOutgoing(event);
               Dialog.create({
                 message: this.$t(
-                  "wallet.notifications.nostr_dm_sent"
+                  "wallet.notifications.nostr_dm_sent",
                 ) as string,
               });
             } else {
               Dialog.create({
                 message: this.$t(
-                  "wallet.notifications.nostr_dm_failed"
+                  "wallet.notifications.nostr_dm_failed",
                 ) as string,
               });
             }
@@ -1392,7 +1392,7 @@ export default defineComponent({
             console.error(e);
             Dialog.create({
               message: this.$t(
-                "wallet.notifications.nostr_dm_failed"
+                "wallet.notifications.nostr_dm_failed",
               ) as string,
             });
           } finally {

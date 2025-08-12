@@ -10,7 +10,8 @@ if (!/from ['"]vite-plugin-node-polyfills['"]/.test(s)) {
   if (/^import .*;?/m.test(s)) {
     s = s.replace(
       /^import .*;?/m,
-      (m) => m + "\nimport { nodePolyfills } from 'vite-plugin-node-polyfills';"
+      (m) =>
+        m + "\nimport { nodePolyfills } from 'vite-plugin-node-polyfills';",
     );
   } else {
     s = "import { nodePolyfills } from 'vite-plugin-node-polyfills';\n" + s;
@@ -32,14 +33,14 @@ if (/vitePlugins\s*:\s*\[/.test(s)) {
   if (!/vitePlugins[^[]*\[[^\]]*nodePolyfills\(/.test(s)) {
     s = s.replace(
       /vitePlugins\s*:\s*\[/,
-      "vitePlugins: [\n        nodePolyfills({\n          globals: { Buffer: true, global: true, process: true },\n          protocolImports: true\n        }), "
+      "vitePlugins: [\n        nodePolyfills({\n          globals: { Buffer: true, global: true, process: true },\n          protocolImports: true\n        }), ",
     );
     changed = true;
   }
 } else {
   s = s.replace(
     /build\s*:\s*{/,
-    "build: {\n      vitePlugins: [\n        nodePolyfills({\n          globals: { Buffer: true, global: true, process: true },\n          protocolImports: true\n        })\n      ],"
+    "build: {\n      vitePlugins: [\n        nodePolyfills({\n          globals: { Buffer: true, global: true, process: true },\n          protocolImports: true\n        })\n      ],",
   );
   changed = true;
 }
@@ -48,21 +49,21 @@ if (/vitePlugins\s*:\s*\[/.test(s)) {
 if (!/optimizeDeps\s*:\s*{/.test(s)) {
   s = s.replace(
     /build\s*:\s*{/,
-    "build: {\n      optimizeDeps: { include: ['buffer', 'process'] },"
+    "build: {\n      optimizeDeps: { include: ['buffer', 'process'] },",
   );
   changed = true;
 } else {
   if (!/optimizeDeps[^}]*include\s*:\s*\[[^\]]*['"]buffer['"]/.test(s)) {
     s = s.replace(
       /optimizeDeps\s*:\s*{[^}]*include\s*:\s*\[/,
-      (m) => m + "'buffer', "
+      (m) => m + "'buffer', ",
     );
     changed = true;
   }
   if (!/optimizeDeps[^}]*include\s*:\s*\[[^\]]*['"]process['"]/.test(s)) {
     s = s.replace(
       /optimizeDeps\s*:\s*{[^}]*include\s*:\s*\[/,
-      (m) => m + "'process', "
+      (m) => m + "'process', ",
     );
     changed = true;
   }
@@ -71,7 +72,7 @@ if (!/optimizeDeps\s*:\s*{/.test(s)) {
 if (changed) {
   fs.writeFileSync(file, s);
   console.log(
-    "quasar.config.js patched with node polyfills plugin + optimizeDeps includes."
+    "quasar.config.js patched with node polyfills plugin + optimizeDeps includes.",
   );
 } else {
   console.log("quasar.config.js already configured for node polyfills.");

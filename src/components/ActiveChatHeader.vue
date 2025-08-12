@@ -99,7 +99,7 @@ watch(
   () => {
     loadProfile();
   },
-  { immediate: true }
+  { immediate: true },
 );
 
 const displayName = computed(() => {

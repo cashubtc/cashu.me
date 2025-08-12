@@ -107,7 +107,7 @@ const displayName = computed(
   () =>
     props.profile?.display_name ||
     props.profile?.name ||
-    props.subscription.subscriberNpub
+    props.subscription.subscriberNpub,
 );
 
 const nip05Domain = computed(() => {
@@ -125,7 +125,7 @@ const amountPerInterval = computed(() => {
 });
 
 const lifetimeTotal = computed(() =>
-  formatCurrency(props.subscription.totalAmount)
+  formatCurrency(props.subscription.totalAmount),
 );
 
 const statusColor = computed(() => {
@@ -135,21 +135,21 @@ const statusColor = computed(() => {
 });
 
 const statusTextColor = computed(() =>
-  props.subscription.status === "pending" ? "black" : "white"
+  props.subscription.status === "pending" ? "black" : "white",
 );
 
 const statusIcon = computed(() =>
   props.subscription.status === "active"
     ? "check"
     : props.subscription.status === "pending"
-    ? "schedule"
-    : "close"
+      ? "schedule"
+      : "close",
 );
 
 const renewsText = computed(() => {
   if (!props.subscription.nextRenewal) return "renews in —";
   return `renews in ${formatDistanceToNow(
-    props.subscription.nextRenewal * 1000
+    props.subscription.nextRenewal * 1000,
   )}`;
 });
 

@@ -57,7 +57,7 @@ export const useCreatorSubscriptionsStore = defineStore(
         .where("owner")
         .equals("creator")
         .and((t) => !!t.subscriptionId)
-        .toArray()
+        .toArray(),
     ).subscribe({
       next: (rows) => {
         const map = new Map<
@@ -79,7 +79,7 @@ export const useCreatorSubscriptionsStore = defineStore(
               tierName:
                 row.tierName ||
                 creatorsStore.tiersMap[row.creatorNpub || ""]?.find(
-                  (t) => t.id === row.tierId
+                  (t) => t.id === row.tierId,
                 )?.name ||
                 FALLBACK_TIER_NAME,
               frequency: daysToFrequency(intervalDays),
@@ -149,9 +149,9 @@ export const useCreatorSubscriptionsStore = defineStore(
       () => {
         fillMissingTierNames();
       },
-      { deep: true }
+      { deep: true },
     );
 
     return { subscriptions, loading };
-  }
+  },
 );

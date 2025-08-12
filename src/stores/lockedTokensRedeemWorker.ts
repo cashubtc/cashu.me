@@ -25,7 +25,7 @@ export const useLockedTokensRedeemWorker = defineStore(
         window.addEventListener("message", this.handleMessage);
         this.worker = setInterval(
           () => this.processTokens(),
-          this.checkInterval
+          this.checkInterval,
         );
         // run immediately
         this.processTokens();
@@ -60,7 +60,7 @@ export const useLockedTokensRedeemWorker = defineStore(
             (e: any) =>
               e.unlockTs === undefined &&
               typeof e.locktime === "number" &&
-              e.locktime <= now
+              e.locktime <= now,
           )
           .toArray();
 
@@ -108,7 +108,7 @@ export const useLockedTokensRedeemWorker = defineStore(
             ) {
               console.error(
                 "Mint or keyset mismatch for locked token",
-                entry.id
+                entry.id,
               );
               await cashuDb.lockedTokens
                 .where("tokenString")
@@ -145,7 +145,7 @@ export const useLockedTokensRedeemWorker = defineStore(
 
             const needsSig = proofs.some(
               (p) =>
-                typeof p.secret === "string" && p.secret.startsWith('["P2PK"')
+                typeof p.secret === "string" && p.secret.startsWith('["P2PK"'),
             );
             if (needsSig && !receiveStore.receiveData.p2pkPrivateKey) {
               postMessage({
@@ -167,10 +167,10 @@ export const useLockedTokensRedeemWorker = defineStore(
                     status: "processing" as any,
                     redeemed: true,
                   });
-                }
+                },
               );
               await receiveStore.enqueue(() =>
-                (wallet as any).receive(entry.tokenString)
+                (wallet as any).receive(entry.tokenString),
               );
               await cashuDb.lockedTokens.update(entry.id, {
                 status: "claimed",
@@ -180,12 +180,12 @@ export const useLockedTokensRedeemWorker = defineStore(
               if (entry.subscriptionId) {
                 try {
                   const sub = await cashuDb.subscriptions.get(
-                    entry.subscriptionId
+                    entry.subscriptionId,
                   );
                   const idx = sub?.intervals.findIndex(
                     (i) =>
                       i.intervalKey === entry.intervalKey ||
-                      i.lockedTokenId === entry.id
+                      i.lockedTokenId === entry.id,
                   );
                   if (sub && idx !== undefined && idx >= 0) {
                     sub.intervals[idx].status = "claimed";
@@ -213,7 +213,7 @@ export const useLockedTokensRedeemWorker = defineStore(
                   try {
                     await messenger.sendDm(
                       entry.creatorNpub,
-                      JSON.stringify(payload)
+                      JSON.stringify(payload),
                     );
                     notifySuccess("Subscription payment claimed");
                   } catch (e) {
@@ -226,7 +226,7 @@ export const useLockedTokensRedeemWorker = defineStore(
                 typeof err?.message === "string" &&
                 (err.message.includes("No private key or remote signer") ||
                   err.message.includes(
-                    "You do not have the private key to unlock this token."
+                    "You do not have the private key to unlock this token.",
                   ))
               ) {
                 postMessage({
@@ -243,5 +243,5 @@ export const useLockedTokensRedeemWorker = defineStore(
         }
       },
     },
-  }
+  },
 );

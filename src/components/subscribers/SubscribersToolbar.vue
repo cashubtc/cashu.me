@@ -103,7 +103,7 @@ const props = withDefaults(
   }>(),
   {
     columns: () => [],
-  }
+  },
 );
 
 const emit = defineEmits<{

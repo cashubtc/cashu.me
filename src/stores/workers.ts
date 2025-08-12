@@ -102,14 +102,14 @@ export const useWorkersStore = defineStore("workers", {
             return { ...p, witness: { signatures: [sig] } } as Proof;
           }
           return p;
-        })
+        }),
       );
     },
     checkTokenSpendableWorker: async function (historyToken: HistoryToken) {
       const settingsStore = useSettingsStore();
       if (!settingsStore.checkSentTokens) {
         debug(
-          "settingsStore.checkSentTokens is disabled, not kicking off checkTokenSpendableWorker"
+          "settingsStore.checkSentTokens is disabled, not kicking off checkTokenSpendableWorker",
         );
         return;
       }

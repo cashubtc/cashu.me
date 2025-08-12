@@ -34,7 +34,7 @@ function getProofs(decoded_token: Token): WalletProof[] {
     proofs,
     undefined,
     "unassigned",
-    ""
+    "",
   );
 }
 
@@ -82,7 +82,7 @@ function createP2PKHTLC(
   amount: number,
   receiverP2PK: string,
   months: number,
-  startDate: number
+  startDate: number,
 ) {
   const lockSecret = crypto.randomUUID();
   const token = JSON.stringify({

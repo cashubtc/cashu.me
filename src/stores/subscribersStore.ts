@@ -21,11 +21,11 @@ export const useSubscribersStore = defineStore("subscribers", {
     visibleColumns: useLocalStorage<string[]>("subscribers.visibleColumns", []),
     density: useLocalStorage<"comfortable" | "compact">(
       "subscribers.density",
-      "comfortable"
+      "comfortable",
     ),
     viewMode: useLocalStorage<"table" | "card">(
       "subscribers.viewMode",
-      "table"
+      "table",
     ),
     savedViews: [] as Array<{
       id: string;

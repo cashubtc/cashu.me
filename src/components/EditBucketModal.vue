@@ -111,14 +111,14 @@ const nameTaken = computed(() =>
     : bucketsStore.bucketList.some(
         (b) =>
           b.id !== props.bucket?.id &&
-          b.name.toLowerCase() === local.name.trim().toLowerCase()
-      )
+          b.name.toLowerCase() === local.name.trim().toLowerCase(),
+      ),
 );
 const canSave = computed(
   () =>
     local.name.trim().length > 0 &&
     !nameTaken.value &&
-    (local.goal === null || local.goal >= 0)
+    (local.goal === null || local.goal >= 0),
 );
 
 watch(
@@ -131,7 +131,7 @@ watch(
     local.goal = b.goal ?? null;
     local.creatorPubkey = b.creatorPubkey || "";
   },
-  { immediate: true, deep: true }
+  { immediate: true, deep: true },
 );
 
 watch(
@@ -144,7 +144,7 @@ watch(
       local.goal = props.bucket.goal ?? null;
       local.creatorPubkey = props.bucket.creatorPubkey || "";
     }
-  }
+  },
 );
 
 function onSave() {

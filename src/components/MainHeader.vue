@@ -306,17 +306,17 @@ export default defineComponent({
       $q.dark.toggle();
       $q.localStorage.set("cashu.darkMode", $q.dark.isActive);
       vm?.notifySuccess(
-        $q.dark.isActive ? "Dark mode enabled" : "Dark mode disabled"
+        $q.dark.isActive ? "Dark mode enabled" : "Dark mode disabled",
       );
     };
     const darkIcon = computed(() =>
-      $q.dark.isActive ? "wb_sunny" : "brightness_3"
+      $q.dark.isActive ? "wb_sunny" : "brightness_3",
     );
     const needsNostrLogin = computed(
-      () => !nostrStore.privateKeySignerPrivateKey
+      () => !nostrStore.privateKeySignerPrivateKey,
     );
     const isMessengerPage = computed(() =>
-      route.path.startsWith("/nostr-messenger")
+      route.path.startsWith("/nostr-messenger"),
     );
     const showBackButton = computed(() => isMessengerPage.value);
     const backRoute = computed(() => "/wallet");
@@ -379,7 +379,7 @@ export default defineComponent({
       console.log("toggleMessengerDrawer", messenger.drawerOpen);
       messenger.toggleDrawer();
       vm?.notify(
-        messenger.drawerOpen ? "Messenger closed" : "Messenger opened"
+        messenger.drawerOpen ? "Messenger closed" : "Messenger opened",
       );
     };
 
@@ -393,7 +393,7 @@ export default defineComponent({
         "countdown:",
         countdown.value,
         "mutex:",
-        uiStore.globalMutexLock
+        uiStore.globalMutexLock,
       );
       if (countdown.value > 0) {
         try {

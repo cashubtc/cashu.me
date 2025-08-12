@@ -70,7 +70,7 @@ export const useSubscriptionRedeemWorker = defineStore(
                 if (!mint) continue;
                 if (
                   !decoded.proofs.every((p) =>
-                    mint.keysets.some((k) => k.id === p.id)
+                    mint.keysets.some((k) => k.id === p.id),
                   )
                 )
                   continue;
@@ -90,7 +90,7 @@ export const useSubscriptionRedeemWorker = defineStore(
                 const keysetId = walletStore.getKeyset(mintUrl, unit);
                 const counter = walletStore.keysetCounter(keysetId);
                 const priv = p2pkStore.getPrivateKeyForP2PKEncodedToken(
-                  interval.tokenString
+                  interval.tokenString,
                 );
                 const received = await wallet.receive(interval.tokenString, {
                   counter,
@@ -102,7 +102,7 @@ export const useSubscriptionRedeemWorker = defineStore(
                   received,
                   undefined,
                   interval.tierId ?? DEFAULT_BUCKET_ID,
-                  "Subscription payment"
+                  "Subscription payment",
                 );
                 walletStore.increaseKeysetCounter(keysetId, received.length);
                 tokensStore.addPaidToken({
@@ -134,5 +134,5 @@ export const useSubscriptionRedeemWorker = defineStore(
         });
       },
     },
-  }
+  },
 );

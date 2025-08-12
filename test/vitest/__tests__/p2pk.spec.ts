@@ -46,10 +46,10 @@ describe("P2PK store", () => {
     const p2pk = useP2PKStore();
     const priv = secp.utils.randomPrivateKey();
     const compressed = Buffer.from(secp.getPublicKey(priv, true)).toString(
-      "hex"
+      "hex",
     );
     const uncompressed = Buffer.from(secp.getPublicKey(priv, false)).toString(
-      "hex"
+      "hex",
     );
 
     let secret = JSON.stringify(["P2PK", { data: compressed }]);
@@ -124,7 +124,7 @@ describe("P2PK store", () => {
     expect(wallet.send).toHaveBeenCalledWith(
       1,
       [{ secret: "s", amount: 1, id: "a", C: "c" }],
-      { keysetId: "kid", p2pk: { pubkey: "pk", locktime: 123 } }
+      { keysetId: "kid", p2pk: { pubkey: "pk", locktime: 123 } },
     );
   });
 
@@ -239,7 +239,7 @@ describe("P2PK store", () => {
         return (
           "cashuA" + Buffer.from(JSON.stringify(tokenObj)).toString("base64")
         );
-      }
+      },
     );
 
     walletStore.spendableProofs = vi.fn(() => [
@@ -270,7 +270,7 @@ describe("P2PK store", () => {
 
     const { locked } = await walletStore.sendToLock(100, "02aa", locktime);
     const decoded = JSON.parse(
-      Buffer.from(locked.tokenString.slice(6), "base64").toString()
+      Buffer.from(locked.tokenString.slice(6), "base64").toString(),
     );
     const secretObj = JSON.parse(decoded.token[0].proofs[0].secret);
     expect(secretObj[1].tags).toEqual([["locktime", String(locktime)]]);

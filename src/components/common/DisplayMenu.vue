@@ -70,7 +70,7 @@ const props = withDefaults(
     label: "Display",
     flat: true,
     icon: "view_module",
-  }
+  },
 );
 
 const emit = defineEmits<{

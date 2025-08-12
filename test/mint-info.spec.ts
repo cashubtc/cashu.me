@@ -13,7 +13,7 @@ describe("verifyMint", () => {
             "14": { supported: true },
           },
         }),
-      })) as any
+      })) as any,
     );
     expect(await verifyMint("https://mint")).toBe(true);
   });
@@ -23,7 +23,7 @@ describe("verifyMint", () => {
       "fetch",
       vi.fn(async () => {
         throw new Error("fail");
-      }) as any
+      }) as any,
     );
     expect(await verifyMint("https://mint")).toBe(false);
   });

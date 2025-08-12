@@ -9,7 +9,8 @@ if (!/from ['"]vite-plugin-node-polyfills['"]/.test(s)) {
   if (/^import .*;?/m.test(s)) {
     s = s.replace(
       /^import .*;?/m,
-      (m) => m + "\nimport { nodePolyfills } from 'vite-plugin-node-polyfills';"
+      (m) =>
+        m + "\nimport { nodePolyfills } from 'vite-plugin-node-polyfills';",
     );
   } else {
     s = "import { nodePolyfills } from 'vite-plugin-node-polyfills';\n" + s;
@@ -44,7 +45,7 @@ if (/build\s*:\s*{/.test(s)) {
   if (!/extendViteConf\s*\(/.test(s)) {
     s = s.replace(
       /build\s*:\s*{/,
-      "build: {\n      extendViteConf(viteConf) {\n        viteConf.plugins = viteConf.plugins || [];\n        viteConf.plugins.push(\n          nodePolyfills({\n            globals: { Buffer: true, global: true, process: true },\n            protocolImports: true\n          })\n        );\n        viteConf.optimizeDeps = viteConf.optimizeDeps || {};\n        const inc = new Set([...(viteConf.optimizeDeps.include || []), 'buffer', 'process']);\n        viteConf.optimizeDeps.include = Array.from(inc);\n        viteConf.resolve = viteConf.resolve || {};\n        viteConf.resolve.alias = Object.assign({}, viteConf.resolve.alias, { buffer: 'buffer', process: 'process/browser' });\n      },"
+      "build: {\n      extendViteConf(viteConf) {\n        viteConf.plugins = viteConf.plugins || [];\n        viteConf.plugins.push(\n          nodePolyfills({\n            globals: { Buffer: true, global: true, process: true },\n            protocolImports: true\n          })\n        );\n        viteConf.optimizeDeps = viteConf.optimizeDeps || {};\n        const inc = new Set([...(viteConf.optimizeDeps.include || []), 'buffer', 'process']);\n        viteConf.optimizeDeps.include = Array.from(inc);\n        viteConf.resolve = viteConf.resolve || {};\n        viteConf.resolve.alias = Object.assign({}, viteConf.resolve.alias, { buffer: 'buffer', process: 'process/browser' });\n      },",
     );
     changed = true;
   } else {
@@ -54,7 +55,7 @@ if (/build\s*:\s*{/.test(s)) {
         /extendViteConf\s*\([^)]*\)\s*{/,
         (match) =>
           match +
-          "\n        viteConf.plugins = viteConf.plugins || [];\n        viteConf.plugins.push(\n          nodePolyfills({\n            globals: { Buffer: true, global: true, process: true },\n            protocolImports: true\n          })\n        );\n"
+          "\n        viteConf.plugins = viteConf.plugins || [];\n        viteConf.plugins.push(\n          nodePolyfills({\n            globals: { Buffer: true, global: true, process: true },\n            protocolImports: true\n          })\n        );\n",
       );
       changed = true;
     }
@@ -63,7 +64,7 @@ if (/build\s*:\s*{/.test(s)) {
         /extendViteConf\s*\([^)]*\)\s*{/,
         (match) =>
           match +
-          "\n        viteConf.optimizeDeps = viteConf.optimizeDeps || {};\n        const inc = new Set([...(viteConf.optimizeDeps.include || []), 'buffer', 'process']);\n        viteConf.optimizeDeps.include = Array.from(inc);\n"
+          "\n        viteConf.optimizeDeps = viteConf.optimizeDeps || {};\n        const inc = new Set([...(viteConf.optimizeDeps.include || []), 'buffer', 'process']);\n        viteConf.optimizeDeps.include = Array.from(inc);\n",
       );
       changed = true;
     }
@@ -76,7 +77,7 @@ if (/build\s*:\s*{/.test(s)) {
         /extendViteConf\s*\([^)]*\)\s*{/,
         (match) =>
           match +
-          "\n        viteConf.resolve = viteConf.resolve || {};\n        viteConf.resolve.alias = Object.assign({}, viteConf.resolve.alias, { buffer: 'buffer', process: 'process/browser' });\n"
+          "\n        viteConf.resolve = viteConf.resolve || {};\n        viteConf.resolve.alias = Object.assign({}, viteConf.resolve.alias, { buffer: 'buffer', process: 'process/browser' });\n",
       );
       changed = true;
     }

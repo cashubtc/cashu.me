@@ -69,21 +69,21 @@ const buckets = useBucketsStore();
 
 const nameTaken = computed(() =>
   buckets.bucketList.some(
-    (b) => b.name.toLowerCase() === form.name.trim().toLowerCase()
-  )
+    (b) => b.name.toLowerCase() === form.name.trim().toLowerCase(),
+  ),
 );
 const canSave = computed(
   () =>
     form.name.trim().length > 0 &&
     !nameTaken.value &&
-    (form.goal === null || form.goal >= 0)
+    (form.goal === null || form.goal >= 0),
 );
 
 watch(
   () => form.name,
   (val) => {
     form.color = hashColor(val);
-  }
+  },
 );
 
 function reset() {

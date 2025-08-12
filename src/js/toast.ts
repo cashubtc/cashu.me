@@ -20,7 +20,7 @@ export function toast(message: string) {
 
 export function showToast(
   message: string,
-  type?: QNotifyCreateOptions["type"]
+  type?: QNotifyCreateOptions["type"],
 ) {
   Notify.create({ ...baseOpts, type, message });
 }

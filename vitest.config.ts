@@ -40,7 +40,7 @@ export default defineConfig({
       stores: path.resolve(__dirname, "src/stores"),
       "@cashu/cashu-ts": path.resolve(
         __dirname,
-        "src/lib/cashu-ts/src/index.ts"
+        "src/lib/cashu-ts/src/index.ts",
       ),
     },
   },

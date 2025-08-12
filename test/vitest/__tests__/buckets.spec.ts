@@ -20,14 +20,14 @@ describe("Buckets store", () => {
     const buckets = useBucketsStore();
     const initial = buckets.bucketList.length;
     const defaultBucket = buckets.bucketList.find(
-      (b) => b.id === DEFAULT_BUCKET_ID
+      (b) => b.id === DEFAULT_BUCKET_ID,
     );
     expect(defaultBucket?.name).toBe(DEFAULT_BUCKET_NAME);
 
     const bucket = buckets.addBucket({ name: "Test bucket" });
     expect(buckets.bucketList.length).toBe(initial + 1);
     expect(buckets.bucketList.find((b) => b.id === bucket.id)?.name).toBe(
-      "Test bucket"
+      "Test bucket",
     );
   });
 
@@ -39,7 +39,7 @@ describe("Buckets store", () => {
     })!;
     expect(bucket.creatorPubkey).toBe("pubkey");
     expect(
-      buckets.bucketList.find((b) => b.id === bucket.id)?.creatorPubkey
+      buckets.bucketList.find((b) => b.id === bucket.id)?.creatorPubkey,
     ).toBe("pubkey");
   });
 
@@ -48,15 +48,15 @@ describe("Buckets store", () => {
     const bucket = buckets.addBucket({ name: "Old" });
     buckets.editBucket(bucket.id, { name: "New" });
     expect(buckets.bucketList.find((b) => b.id === bucket.id)?.name).toBe(
-      "New"
+      "New",
     );
 
     const original = buckets.bucketList.find(
-      (b) => b.id === DEFAULT_BUCKET_ID
+      (b) => b.id === DEFAULT_BUCKET_ID,
     )?.name;
     buckets.editBucket(DEFAULT_BUCKET_ID, { name: "changed" });
     expect(
-      buckets.bucketList.find((b) => b.id === DEFAULT_BUCKET_ID)?.name
+      buckets.bucketList.find((b) => b.id === DEFAULT_BUCKET_ID)?.name,
     ).toBe(original);
   });
 
@@ -72,7 +72,7 @@ describe("Buckets store", () => {
         { id: "a", amount: 2, C: "c2", secret: "s2" },
       ],
       undefined,
-      bucket.id
+      bucket.id,
     );
 
     tokens.addPaidToken({
@@ -95,10 +95,10 @@ describe("Buckets store", () => {
     stored = await cashuDb.proofs.toArray();
     expect(stored.every((p) => p.bucketId === DEFAULT_BUCKET_ID)).toBe(true);
     expect(tokens.historyTokens.find((t) => t.token === "t1")?.bucketId).toBe(
-      DEFAULT_BUCKET_ID
+      DEFAULT_BUCKET_ID,
     );
     expect(tokens.historyTokens.find((t) => t.token === "t2")?.bucketId).toBe(
-      DEFAULT_BUCKET_ID
+      DEFAULT_BUCKET_ID,
     );
   });
 
@@ -174,7 +174,7 @@ describe("Buckets store", () => {
         { id: "a", amount: 4, C: "c2", secret: "s2" },
       ],
       undefined,
-      bucket.id
+      bucket.id,
     );
 
     await new Promise((r) => setTimeout(r, 20));
@@ -190,7 +190,7 @@ describe("Buckets store", () => {
   it("defaults isArchived to false and toggles", () => {
     const buckets = useBucketsStore();
     const defaultBucket = buckets.bucketList.find(
-      (b) => b.id === DEFAULT_BUCKET_ID
+      (b) => b.id === DEFAULT_BUCKET_ID,
     );
     expect(defaultBucket?.isArchived).toBe(false);
 
@@ -198,21 +198,21 @@ describe("Buckets store", () => {
     expect(bucket.isArchived).toBe(false);
     expect(buckets.activeBuckets.find((b) => b.id === bucket.id)).toBeDefined();
     expect(
-      buckets.archivedBuckets.find((b) => b.id === bucket.id)
+      buckets.archivedBuckets.find((b) => b.id === bucket.id),
     ).toBeUndefined();
 
     buckets.editBucket(bucket.id, { isArchived: true });
     expect(
-      buckets.archivedBuckets.find((b) => b.id === bucket.id)
+      buckets.archivedBuckets.find((b) => b.id === bucket.id),
     ).toBeDefined();
     expect(
-      buckets.activeBuckets.find((b) => b.id === bucket.id)
+      buckets.activeBuckets.find((b) => b.id === bucket.id),
     ).toBeUndefined();
 
     // default bucket cannot be archived
     buckets.editBucket(DEFAULT_BUCKET_ID, { isArchived: true });
     expect(
-      buckets.activeBuckets.find((b) => b.id === DEFAULT_BUCKET_ID)?.isArchived
+      buckets.activeBuckets.find((b) => b.id === DEFAULT_BUCKET_ID)?.isArchived,
     ).toBe(false);
   });
 });

@@ -58,7 +58,7 @@ const initials = computed(() => {
 });
 
 const truncatedNpub = computed(
-  () => shortenString(nostr.npub, 12, 6) || nostr.npub
+  () => shortenString(nostr.npub, 12, 6) || nostr.npub,
 );
 
 function copyPubkey() {

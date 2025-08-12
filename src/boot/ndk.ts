@@ -42,7 +42,7 @@ export async function safeConnect(ndk: NDK): Promise<Error | null> {
   } catch (e: any) {
     console.warn(
       "[NDK] connect failed, continuing in offline mode:",
-      e?.message
+      e?.message,
     );
     return e as Error;
   }
@@ -120,7 +120,7 @@ export async function createNdk(): Promise<NDK> {
 
 export async function rebuildNdk(
   relays: string[],
-  signer?: NDKSigner
+  signer?: NDKSigner,
 ): Promise<NDK> {
   const ndk = new NDK({ explicitRelayUrls: relays });
   mergeDefaultRelays(ndk);
@@ -147,7 +147,7 @@ export async function getNdk(): Promise<NDK> {
 export async function ndkSend(
   toNpub: string,
   plaintext: string,
-  relays: string[] = []
+  relays: string[] = [],
 ): Promise<boolean> {
   const nostr = useNostrStore();
   await nostr.initSignerIfNotSet();
@@ -155,7 +155,7 @@ export async function ndkSend(
   if (!ndk.signer) {
     throw new NdkBootError(
       "no-signer",
-      "Nostr identity required to send a direct message"
+      "Nostr identity required to send a direct message",
     );
   }
   const list = relays.length ? relays : ["wss://relay.damus.io"];
@@ -164,7 +164,7 @@ export async function ndkSend(
     plaintext,
     undefined,
     undefined,
-    list
+    list,
   );
   return success;
 }

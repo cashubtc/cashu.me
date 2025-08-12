@@ -49,7 +49,7 @@ watch(
   (val) => {
     draggableTiers.value = [...val];
   },
-  { immediate: true }
+  { immediate: true },
 );
 
 function updateOrder() {

@@ -24,17 +24,17 @@ describe("validateMedia", () => {
   it("normalizes youtube links", () => {
     const url = "https://youtu.be/abcd1234efg";
     expect(normalizeYouTube(url)).toBe(
-      "https://www.youtube.com/embed/abcd1234efg"
+      "https://www.youtube.com/embed/abcd1234efg",
     );
   });
 
   it("converts ipfs links to gateway", () => {
     const url = "ipfs://bafy123/file.png";
     expect(ipfsToGateway(url)).toBe(
-      "https://nftstorage.link/ipfs/bafy123/file.png"
+      "https://nftstorage.link/ipfs/bafy123/file.png",
     );
     expect(normalizeMediaUrl(url)).toBe(
-      "https://nftstorage.link/ipfs/bafy123/file.png"
+      "https://nftstorage.link/ipfs/bafy123/file.png",
     );
   });
 
@@ -48,7 +48,7 @@ describe("validateMedia", () => {
     expect(determineMediaType("https://example.com/video.mp4")).toBe("video");
     expect(determineMediaType("https://example.com/song.mp3")).toBe("audio");
     expect(determineMediaType("https://www.youtube.com/embed/id")).toBe(
-      "youtube"
+      "youtube",
     );
     expect(determineMediaType("https://example.com/image.png")).toBe("image");
     expect(determineMediaType("https://example.com/page")).toBe("iframe");

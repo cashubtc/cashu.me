@@ -26,13 +26,13 @@ export async function maybeRepublishNutzapProfile() {
   await nostrStore.initSignerIfNotSet();
   if (!nostrStore.signer) {
     throw new Error(
-      "No Nostr signer available. Unlock or connect a signer add-on (Nos2x/Alby) first."
+      "No Nostr signer available. Unlock or connect a signer add-on (Nos2x/Alby) first.",
     );
   }
   const ndk = await useNdk();
   if (!ndk) {
     throw new Error(
-      "You need to connect a Nostr signer before publishing tiers"
+      "You need to connect a Nostr signer before publishing tiers",
     );
   }
   let current = null;
@@ -129,7 +129,7 @@ export const useCreatorHubStore = defineStore("creatorHub", {
     },
     updateTier(
       id: string,
-      updates: Partial<Tier> & { price?: number; perks?: string }
+      updates: Partial<Tier> & { price?: number; perks?: string },
     ) {
       const existing = this.tiers[id];
       if (!existing) return;
@@ -142,8 +142,8 @@ export const useCreatorHubStore = defineStore("creatorHub", {
               intervalDays: frequencyToDays(updates.frequency as any),
             }
           : updates.intervalDays !== undefined
-          ? { intervalDays: updates.intervalDays }
-          : {}),
+            ? { intervalDays: updates.intervalDays }
+            : {}),
         ...(updates.price_sats === undefined && updates.price !== undefined
           ? { price_sats: updates.price }
           : {}),

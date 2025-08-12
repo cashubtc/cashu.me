@@ -169,7 +169,7 @@ describe("Nutzap store", () => {
         price: 1,
         startDate: 0,
         relayList: [],
-      })
+      }),
     ).rejects.toThrow("Creator profile missing Cashu P2PK key");
   });
 

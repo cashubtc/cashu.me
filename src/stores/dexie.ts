@@ -628,12 +628,12 @@ export const useDexieStore = defineStore("dexie", {
       debug(
         `Migrated ${cashuDb.proofs.count()} proofs. Before: ${
           parsedProofs.length
-        } proofs, After: ${(await proofsStore.getProofs()).length} proofs`
+        } proofs, After: ${(await proofsStore.getProofs()).length} proofs`,
       );
       debug(
         `Proofs sum before: ${proofsStore.sumProofs(
-          parsedProofs
-        )}, after: ${proofsStore.sumProofs(await proofsStore.getProofs())}`
+          parsedProofs,
+        )}, after: ${proofsStore.sumProofs(await proofsStore.getProofs())}`,
       );
       this.migratedToDexie = true;
       // remove proofs from localstorage

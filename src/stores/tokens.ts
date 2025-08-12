@@ -121,10 +121,10 @@ export const useTokensStore = defineStore("tokens", {
         newLabel?: string;
         newColor?: string;
         newDescription?: string;
-      }
+      },
     ): HistoryToken | undefined {
       const index = this.historyTokens.findIndex(
-        (t) => t.token === tokenToEdit
+        (t) => t.token === tokenToEdit,
       );
       if (index >= 0) {
         if (options) {
@@ -157,7 +157,7 @@ export const useTokensStore = defineStore("tokens", {
                 const proofsStore = useProofsStore();
                 proofsStore.updateProofLabels(
                   proofs.map((p) => p.secret),
-                  options.newLabel
+                  options.newLabel,
                 );
               }
             } catch (e) {
@@ -173,7 +173,7 @@ export const useTokensStore = defineStore("tokens", {
                 const proofsStore = useProofsStore();
                 proofsStore.updateProofDescriptions(
                   proofs.map((p) => p.secret),
-                  options.newDescription
+                  options.newDescription,
                 );
               }
             } catch (e) {
@@ -219,7 +219,7 @@ export const useTokensStore = defineStore("tokens", {
         newLabel?: string;
         newColor?: string;
         newDescription?: string;
-      }
+      },
     ): HistoryToken | undefined {
       const ht = this.findHistoryTokenBySecret(secret);
       if (!ht) return undefined;
@@ -227,7 +227,7 @@ export const useTokensStore = defineStore("tokens", {
     },
     setTokenPaid(token: string) {
       const index = this.historyTokens.findIndex(
-        (t) => t.token === token && t.status == "pending"
+        (t) => t.token === token && t.status == "pending",
       );
       if (index >= 0) {
         this.historyTokens[index].status = "paid";

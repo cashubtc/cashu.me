@@ -54,7 +54,7 @@ export async function buildTimedOutputs(
   count: number,
   creatorPk: string,
   startTimeSec: number,
-  intervalSec = 30 * 24 * 3600 // 30 days
+  intervalSec = 30 * 24 * 3600, // 30 days
 ): Promise<{ proofs: WalletProof[]; tokenStrings: string[] }> {
   if (count <= 0) throw new Error("count must be > 0");
   const unitAmount = Math.round(totalAmount / count);
@@ -81,7 +81,7 @@ export const useP2PKStore = defineStore("p2pk", {
     p2pkKeys: useLocalStorage<P2PKKey[]>(LOCAL_STORAGE_KEYS.CASHU_P2PKKEYS, []),
     showP2PkButtonInDrawer: useLocalStorage<boolean>(
       LOCAL_STORAGE_KEYS.CASHU_P2PK_SHOWP2PKBUTTONINDRAWER,
-      false
+      false,
     ),
     showP2PKDialog: false,
     showP2PKData: {} as P2PKKey,
@@ -123,7 +123,7 @@ export const useP2PKStore = defineStore("p2pk", {
     showLastKey: function () {
       if (this.p2pkKeys.length) {
         this.showP2PKData = JSON.parse(
-          JSON.stringify(this.p2pkKeys[this.p2pkKeys.length - 1])
+          JSON.stringify(this.p2pkKeys[this.p2pkKeys.length - 1]),
         );
         this.showP2PKDialog = true;
       }
@@ -265,7 +265,7 @@ export const useP2PKStore = defineStore("p2pk", {
           "Failed to parse P2PK secret JSON:",
           e,
           "Secret was:",
-          trimmedSecret
+          trimmedSecret,
         );
         return "";
       }
@@ -435,7 +435,7 @@ export const useP2PKStore = defineStore("p2pk", {
       const sendTokensStore = useSendTokensStore();
       const bucketId = sendTokensStore.sendData.bucketId || DEFAULT_BUCKET_ID;
       const proofs = mintStore.activeProofs.filter(
-        (p) => p.bucketId === bucketId
+        (p) => p.bucketId === bucketId,
       );
       const info = mintStore.activeInfo || {};
       const nuts = Array.isArray((info as any).nut_supports)
@@ -451,7 +451,7 @@ export const useP2PKStore = defineStore("p2pk", {
         wallet,
         amount,
         true,
-        bucketId
+        bucketId,
       );
       const keysetId = walletStore.getKeyset(wallet.mint.mintUrl, wallet.unit);
       let keepProofs: any[] = [];
@@ -464,7 +464,7 @@ export const useP2PKStore = defineStore("p2pk", {
           {
             keysetId,
             p2pk: { pubkey: ensureCompressed(receiverPubkey), locktime },
-          }
+          },
         ));
         await proofsStore.removeProofs(proofsToSend);
         const bucketsStore = useBucketsStore();
@@ -486,7 +486,7 @@ export const useP2PKStore = defineStore("p2pk", {
         if (error.message && error.message.includes("Token already spent")) {
           notifyError(
             "Selected proofs have already been spent. Correcting local state.",
-            "Balance Out of Sync"
+            "Balance Out of Sync",
           );
           await walletStore.reconcileSpentProofs(proofsToSend);
         } else {

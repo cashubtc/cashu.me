@@ -81,7 +81,7 @@ export default defineComponent({
         (t) =>
           t.owner === "creator" &&
           t.creatorNpub === nostrPubkey &&
-          t.tierId === this.bucketId
+          t.tierId === this.bucketId,
       );
     },
     maxPages() {
@@ -94,7 +94,7 @@ export default defineComponent({
     },
     pendingTokens() {
       return this.filteredTokens.filter(
-        (t) => !t.redeemed && this.canRedeem(t)
+        (t) => !t.redeemed && this.canRedeem(t),
       );
     },
   },
@@ -136,7 +136,7 @@ export default defineComponent({
         const sub = await cashuDb.subscriptions.get(token.subscriptionId);
         const idx = sub?.intervals.findIndex(
           (i) =>
-            i.intervalKey === token.intervalKey || i.lockedTokenId === token.id
+            i.intervalKey === token.intervalKey || i.lockedTokenId === token.id,
         );
         if (sub && idx !== undefined && idx >= 0) {
           sub.intervals[idx].status = "claimed";

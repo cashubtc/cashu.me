@@ -111,18 +111,20 @@ const modeOptions = [
 ];
 
 const bucketProofs = computed<WalletProof[]>(() =>
-  proofsStore.proofs.filter((p) => p.bucketId === props.bucketId && !p.reserved)
+  proofsStore.proofs.filter(
+    (p) => p.bucketId === props.bucketId && !p.reserved,
+  ),
 );
 
 const formattedBalance = computed(() =>
   uiStore.formatCurrency(
     bucketBalances.value[props.bucketId] ?? 0,
-    activeUnit.value
-  )
+    activeUnit.value,
+  ),
 );
 
 const isValidRecipient = computed(() =>
-  p2pkStore.isValidPubkey(recipient.value)
+  p2pkStore.isValidPubkey(recipient.value),
 );
 
 function formatCurrency(a: number, unit: string) {
@@ -182,11 +184,11 @@ async function confirm() {
       recipient.value,
       amount.value,
       props.bucketId,
-      memo.value.trim() || undefined
+      memo.value.trim() || undefined,
     );
   } else {
     const proofs = bucketProofs.value.filter((p) =>
-      selectedSecrets.value.includes(p.secret)
+      selectedSecrets.value.includes(p.secret),
     );
     if (!proofs.length) {
       hideDialog();
@@ -196,7 +198,7 @@ async function confirm() {
       recipient.value,
       proofs,
       props.bucketId,
-      memo.value.trim() || undefined
+      memo.value.trim() || undefined,
     );
   }
   hideDialog();

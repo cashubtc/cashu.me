@@ -36,12 +36,12 @@ export const useUiStore = defineStore("ui", {
     expandHistory: useLocalStorage("cashu.ui.expandHistory", true as boolean),
     expandProfileDetails: useLocalStorage(
       "cashu.ui.expandProfileDetails",
-      true as boolean
+      true as boolean,
     ),
     expandTierList: useLocalStorage("cashu.ui.expandTierList", true as boolean),
     expandP2PKKeys: useLocalStorage(
       "cashu.ui.expandP2PKKeys",
-      false as boolean
+      false as boolean,
     ),
     globalMutexLock: false,
     showDebugConsole: useLocalStorage("cashu.ui.showDebugConsole", false),
@@ -93,7 +93,7 @@ export const useUiStore = defineStore("ui", {
     formatCurrency: function (
       value: number,
       currency: string,
-      showBalance = false
+      showBalance = false,
     ) {
       if (currency == undefined) {
         currency = "sat";

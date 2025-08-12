@@ -26,7 +26,7 @@ const DrawerStub = defineComponent({
       h(
         "div",
         { class: "q-drawer", style: { width: props.width + "px" } },
-        slots.default ? slots.default() : []
+        slots.default ? slots.default() : [],
       );
   },
 });

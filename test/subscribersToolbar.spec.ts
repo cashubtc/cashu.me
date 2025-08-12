@@ -31,7 +31,7 @@ const QChipStub = defineComponent({
       h(
         "div",
         { class: "filter-chip", onClick: () => emit("remove") },
-        slots.default ? slots.default() : []
+        slots.default ? slots.default() : [],
       );
   },
 });

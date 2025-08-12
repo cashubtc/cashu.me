@@ -198,7 +198,7 @@ function formatTs(ts: number): string {
   return `${d.getFullYear()}-${("0" + (d.getMonth() + 1)).slice(-2)}-${(
     "0" + d.getDate()
   ).slice(-2)} ${("0" + d.getHours()).slice(-2)}:${("0" + d.getMinutes()).slice(
-    -2
+    -2,
   )}`;
 }
 
@@ -240,7 +240,7 @@ async function onMessage(ev: MessageEvent) {
           messenger.startChat(pubkey);
           stop();
         }
-      }
+      },
     );
   }
 }
@@ -313,7 +313,7 @@ function handleDonate({
       months,
       amount,
       selectedPubkey.value,
-      bucketId
+      bucketId,
     );
     showDonateDialog.value = false;
   }

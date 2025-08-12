@@ -116,7 +116,7 @@
           $t(
             filterPending
               ? 'HistoryTable.actions.show_all.label'
-              : 'HistoryTable.actions.filter_pending.label'
+              : 'HistoryTable.actions.filter_pending.label',
           )
         "
         class="q-ml-sm q-px-md"

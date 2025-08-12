@@ -33,7 +33,7 @@ export const useProofsStore = defineStore("proofs", {
     const updateActiveProofs = async () => {
       const mintStore = useMintsStore();
       const currentMint = mintStore.mints.find(
-        (m) => m.url === mintStore.activeMintUrl
+        (m) => m.url === mintStore.activeMintUrl,
       );
       if (!currentMint) {
         mintStore.activeProofs = [];
@@ -41,7 +41,7 @@ export const useProofsStore = defineStore("proofs", {
       }
 
       const unitKeysets = currentMint?.keysets?.filter(
-        (k) => k.unit === mintStore.activeUnit
+        (k) => k.unit === mintStore.activeUnit,
       );
       if (!unitKeysets || unitKeysets.length === 0) {
         mintStore.activeProofs = [];
@@ -74,7 +74,7 @@ export const useProofsStore = defineStore("proofs", {
     setReserved: async function (
       proofs: Proof[],
       reserved: boolean = true,
-      quote?: string
+      quote?: string,
     ) {
       const setQuote: string | undefined = reserved ? quote : undefined;
       await cashuDb.transaction("rw", cashuDb.proofs, async () => {
@@ -94,7 +94,7 @@ export const useProofsStore = defineStore("proofs", {
       quote?: string,
       bucketId: string = "unassigned",
       label: string = "",
-      description: string = ""
+      description: string = "",
     ): WalletProof[] {
       return proofs.map((p) => {
         return {
@@ -112,7 +112,7 @@ export const useProofsStore = defineStore("proofs", {
       quote?: string,
       bucketId: string = "unassigned",
       label: string = "",
-      description: string = ""
+      description: string = "",
     ) {
       const bucketsStore = useBucketsStore();
       const mintsStore = useMintsStore();
@@ -120,7 +120,7 @@ export const useProofsStore = defineStore("proofs", {
         let mintUrl: string | undefined;
         if (proofs.length) {
           const m = mintsStore.mints.find((mint) =>
-            mint.keysets.some((k) => k.id === proofs[0].id)
+            mint.keysets.some((k) => k.id === proofs[0].id),
           );
           mintUrl = m?.url;
         }
@@ -134,7 +134,7 @@ export const useProofsStore = defineStore("proofs", {
         quote,
         bucketId,
         label,
-        description
+        description,
       );
       await cashuDb.transaction("rw", cashuDb.proofs, async () => {
         walletProofs.forEach(async (p) => {
@@ -146,7 +146,7 @@ export const useProofsStore = defineStore("proofs", {
       const walletProofs = this.proofsToWalletProofs(
         proofs,
         undefined,
-        bucketId
+        bucketId,
       );
       await cashuDb.transaction("rw", cashuDb.proofs, async () => {
         walletProofs.forEach(async (p) => {
@@ -166,14 +166,14 @@ export const useProofsStore = defineStore("proofs", {
       let uniqueIds = [...new Set(proofs.map((p) => p.id))];
       // keysets with these uniqueIds
       let keysets = mintStore.mints.flatMap((m) =>
-        m.keysets.filter((k) => uniqueIds.includes(k.id))
+        m.keysets.filter((k) => uniqueIds.includes(k.id)),
       );
       if (keysets.length === 0) {
         throw new Error("No keysets found for proofs");
       }
       // mints that have any of the keyset.id
       let mints = mintStore.mints.filter((m) =>
-        m.keysets.some((k) => uniqueIds.includes(k.id))
+        m.keysets.some((k) => uniqueIds.includes(k.id)),
       );
       if (mints.length === 0) {
         throw new Error("No mints found for proofs");
@@ -206,7 +206,7 @@ export const useProofsStore = defineStore("proofs", {
       let uniqueIds = [...new Set(proofs.map((p) => p.id))];
       // mints that have any of the keyset IDs
       let mints_keysets = mintStore.mints.filter((m) =>
-        m.keysets.some((k) => uniqueIds.includes(k.id))
+        m.keysets.some((k) => uniqueIds.includes(k.id)),
       );
       // what we put into the JSON
       let mints = mints_keysets.map((m) => [{ url: m.url, ids: m.keysets }][0]);
@@ -215,7 +215,7 @@ export const useProofsStore = defineStore("proofs", {
     async moveProofs(secrets: string[], bucketId: string) {
       const bucketsStore = useBucketsStore();
       const bucketExists = bucketsStore.bucketList.find(
-        (b) => b.id === bucketId
+        (b) => b.id === bucketId,
       );
       if (!bucketExists) {
         throw new Error(`Bucket not found: ${bucketId}`);

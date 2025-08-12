@@ -201,7 +201,9 @@
         >
           <template #default="{ item: row }">
             <SubscriberCard
-              :subscription="{ tierName: row.tierName, subscriberNpub: row.npub } as any"
+              :subscription="
+                { tierName: row.tierName, subscriberNpub: row.npub } as any
+              "
               :status="row.status"
               :next-in="row.nextRenewal ? distToNow(row.nextRenewal) : '—'"
               :progress="progressPercent(row) / 100"
@@ -438,18 +440,18 @@ const { filtered, counts, activeTab, loading, profilesLoading, error } =
 // for the subscriber list and KPI counts throughout this page.
 
 const activeCount = computed(
-  () => filtered.value.filter((s) => s.status === "active").length
+  () => filtered.value.filter((s) => s.status === "active").length,
 );
 const pendingCount = computed(
-  () => filtered.value.filter((s) => s.status === "pending").length
+  () => filtered.value.filter((s) => s.status === "pending").length,
 );
 // Lifetime sats are included in the KPI row. Safeguard against undefined
 // values in case the field is missing from older data snapshots.
 const lifetimeRevenue = computed(() =>
   filtered.value.reduce(
     (sum, s) => sum + (typeof s.lifetimeSat === "number" ? s.lifetimeSat : 0),
-    0
-  )
+    0,
+  ),
 );
 
 // Controls the "Next week/month" KPI card. Clicking the card swaps
@@ -466,15 +468,15 @@ const kpiThisPeriodSat = computed(() => {
       (s) =>
         s.status === "active" &&
         typeof s.nextRenewal === "number" &&
-        s.nextRenewal <= end
+        s.nextRenewal <= end,
     )
     .reduce(
       (sum, s) => sum + (typeof s.amountSat === "number" ? s.amountSat : 0),
-      0
+      0,
     );
 });
 const formattedKpiThisPeriodSat = computed(() =>
-  kpiThisPeriodSat.value.toLocaleString()
+  kpiThisPeriodSat.value.toLocaleString(),
 );
 
 function togglePeriod() {
@@ -495,7 +497,7 @@ watch(
   () => viewStore.sort,
   (v) => {
     sort.value = v;
-  }
+  },
 );
 watch(sort, (v) => viewStore.applyFilters({ sort: v }));
 
@@ -508,7 +510,7 @@ const chartRows = computed(() => {
   const from = new Date(chartRange.value.from).getTime() / 1000;
   const to = new Date(chartRange.value.to).getTime() / 1000 + 24 * 60 * 60;
   return filtered.value.filter(
-    (r) => r.startDate && r.startDate >= from && r.startDate <= to
+    (r) => r.startDate && r.startDate >= from && r.startDate <= to,
   );
 });
 
@@ -564,7 +566,7 @@ const filterChips = computed(() => {
       type: "status",
       value: s,
       label: `${t("CreatorSubscribers.filters.status")}: ${t(
-        `CreatorSubscribers.status.${s}`
+        `CreatorSubscribers.status.${s}`,
       )}`,
     });
   }
@@ -584,7 +586,7 @@ const filterChips = computed(() => {
       type: "sort",
       value: viewStore.sort,
       label: `${t("CreatorSubscribers.filters.sort")}: ${t(
-        `CreatorSubscribers.filters.sortOptions.${viewStore.sort}`
+        `CreatorSubscribers.filters.sortOptions.${viewStore.sort}`,
       )}`,
     });
   }
@@ -668,7 +670,7 @@ watch(
     if (npubs.some((n) => !prevSet.has(n))) {
       void subStore.fetchProfiles();
     }
-  }
+  },
 );
 
 const columns = [

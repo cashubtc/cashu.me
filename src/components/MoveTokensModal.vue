@@ -127,7 +127,7 @@ const { bucketBalances } = storeToRefs(bucketsStore);
 const bucketList = computed(() => {
   if (props.bucketIds && props.bucketIds.length) {
     return bucketsStore.bucketList.filter((b) =>
-      props.bucketIds!.includes(b.id)
+      props.bucketIds!.includes(b.id),
     );
   }
   return bucketsStore.bucketList;
@@ -137,7 +137,7 @@ const proofsByBucket = computed<Record<string, WalletProof[]>>(() => {
   const map: Record<string, WalletProof[]> = {};
   bucketList.value.forEach((b) => {
     map[b.id] = proofsStore.proofs.filter(
-      (p) => p.bucketId === b.id && !p.reserved
+      (p) => p.bucketId === b.id && !p.reserved,
     );
   });
   return map;
@@ -161,7 +161,7 @@ const bucketOptions = computed(() =>
     value: b.id,
     color: b.color || DEFAULT_COLOR,
     balance: bucketBalances.value[b.id] ?? 0,
-  }))
+  })),
 );
 
 function formatCurrency(amount: number, unit: string) {
@@ -174,7 +174,7 @@ async function moveSelected() {
     return;
   }
   const bucketExists = bucketsStore.bucketList.find(
-    (b) => b.id === targetBucketId.value
+    (b) => b.id === targetBucketId.value,
   );
   if (!bucketExists) {
     notifyError(`Bucket not found: ${targetBucketId.value}`);

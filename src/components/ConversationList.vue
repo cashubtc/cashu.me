@@ -59,7 +59,7 @@ watch(
   () => props.search,
   (val) => {
     filterQuery.value = val || "";
-  }
+  },
 );
 
 const uniqueConversations = computed(() => {
@@ -78,11 +78,11 @@ const uniqueConversations = computed(() => {
 });
 
 const pinnedConversations = computed(() =>
-  uniqueConversations.value.filter((c) => c.pinned)
+  uniqueConversations.value.filter((c) => c.pinned),
 );
 
 const regularConversations = computed(() =>
-  uniqueConversations.value.filter((c) => !c.pinned)
+  uniqueConversations.value.filter((c) => !c.pinned),
 );
 
 const applyFilter = (list: typeof uniqueConversations.value) => {

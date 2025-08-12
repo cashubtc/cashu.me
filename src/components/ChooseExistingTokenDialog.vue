@@ -61,8 +61,8 @@ export default defineComponent({
 
     const tokens = computed(() =>
       historyTokens.value.filter(
-        (t) => t.bucketId === props.bucketId && t.status === "pending"
-      )
+        (t) => t.bucketId === props.bucketId && t.status === "pending",
+      ),
     );
 
     function selectToken(token: string) {

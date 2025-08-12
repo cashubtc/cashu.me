@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -25,7 +25,8 @@
         padding: 2rem;
         background-color: white;
         border-radius: 0.75rem; /* Tailwind rounded-xl */
-        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+        box-shadow:
+          0 10px 15px -3px rgba(0, 0, 0, 0.1),
           0 4px 6px -2px rgba(0, 0, 0, 0.05); /* Tailwind shadow-lg */
       }
       .search-input {
@@ -34,7 +35,9 @@
         border: 1px solid #e2e8f0; /* Tailwind gray-300 */
         border-radius: 0.5rem; /* Tailwind rounded-lg */
         font-size: 1rem;
-        transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        transition:
+          border-color 0.2s ease-in-out,
+          box-shadow 0.2s ease-in-out;
         color: #2d3748; /* Tailwind gray-800 */
       }
       .search-input:focus {
@@ -69,7 +72,8 @@
         gap: 0.5rem; /* Reduced gap for tighter layout within card */
       }
       .creator-card {
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.07),
+        box-shadow:
+          0 4px 6px -1px rgba(0, 0, 0, 0.07),
           0 2px 4px -1px rgba(0, 0, 0, 0.04);
         position: relative;
       }
@@ -81,7 +85,8 @@
         background-color: #f0f5ff; /* Lighter blue hover */
         border-color: #bee3f8; /* Tailwind blue-200 */
         transform: translateY(-2px);
-        box-shadow: 0 8px 25px -5px rgba(0, 0, 0, 0.1),
+        box-shadow:
+          0 8px 25px -5px rgba(0, 0, 0, 0.1),
           0 10px 10px -5px rgba(0, 0, 0, 0.04);
       }
       .profile-header {
@@ -289,7 +294,7 @@
       let storedRelays = [];
       try {
         const stored = window.localStorage.getItem(
-          "cashu.settings.defaultNostrRelays"
+          "cashu.settings.defaultNostrRelays",
         );
         storedRelays = JSON.parse(stored ?? "[]");
         if (!Array.isArray(storedRelays)) storedRelays = [];
@@ -322,13 +327,13 @@
       const retryButtonElement = document.getElementById("retryButton");
       const loaderElement = document.getElementById("loader");
       const featuredCreatorsGridElement = document.getElementById(
-        "featuredCreatorsGrid"
+        "featuredCreatorsGrid",
       );
       const featuredCreatorsLoaderElement = document.getElementById(
-        "featuredCreatorsLoader"
+        "featuredCreatorsLoader",
       );
       const featuredStatusMessageElement = document.getElementById(
-        "featuredStatusMessage"
+        "featuredStatusMessage",
       );
 
       const nip05Regex = /^([a-zA-Z0-9_.-]+)@([a-zA-Z0-9.-]+\.[a-zA-Z]{2,})$/;
@@ -402,7 +407,7 @@
           const profiles = await fetchProfilesFromRelays(
             RELAYS,
             filter,
-            signal
+            signal,
           );
           if (signal.aborted) return;
 
@@ -419,8 +424,8 @@
               error.message && error.message.includes("Failed to fetch")
                 ? "Network error: could not reach relays."
                 : error.name === "AbortError"
-                ? "Search timed out."
-                : `Search failed: ${error.message}`;
+                  ? "Search timed out."
+                  : `Search failed: ${error.message}`;
             updateStatus(msg, false, true);
           }
         } finally {
@@ -436,7 +441,7 @@
         let profiles = await fetchProfilesFromRelays(
           RELAYS,
           { kinds: [0], authors: [pubkey] },
-          signal
+          signal,
         );
         if (signal.aborted) return;
         if (profiles.length > 0) {
@@ -451,12 +456,12 @@
         if (signal.aborted) return;
         if (userRelays.length > 0) {
           updateStatus(
-            `Searching ${userRelays.length} newly discovered relays...`
+            `Searching ${userRelays.length} newly discovered relays...`,
           );
           profiles = await fetchProfilesFromRelays(
             userRelays,
             { kinds: [0], authors: [pubkey] },
-            signal
+            signal,
           );
           if (signal.aborted) return;
           if (profiles.length > 0) {
@@ -468,18 +473,18 @@
 
         // Tier 3: Use nostr.band indexer to find where user is active
         updateStatus(
-          "Still not found. Consulting nostr.band indexer for relay locations..."
+          "Still not found. Consulting nostr.band indexer for relay locations...",
         );
         const indexedRelays = await fetchRelayListFromIndexer(pubkey, signal);
         if (signal.aborted) return;
         if (indexedRelays.length > 0) {
           updateStatus(
-            `Found ${indexedRelays.length} potential relays from indexer. Searching...`
+            `Found ${indexedRelays.length} potential relays from indexer. Searching...`,
           );
           profiles = await fetchProfilesFromRelays(
             indexedRelays,
             { kinds: [0], authors: [pubkey] },
-            signal
+            signal,
           );
           if (signal.aborted) return;
           if (profiles.length > 0) {
@@ -501,7 +506,7 @@
 
         // Tier 5: The ultimate fallback, query the Primal.net API
         updateStatus(
-          "Last attempt: Consulting Primal, the most powerful indexer..."
+          "Last attempt: Consulting Primal, the most powerful indexer...",
         );
         profile = await fetchProfileFromPrimal(pubkey, signal);
         if (signal.aborted) return;
@@ -510,7 +515,7 @@
           updateStatus("", true);
         } else {
           updateStatus(
-            "Profile could not be found after exhaustive search on known relays, discovered relays, and multiple public indexers."
+            "Profile could not be found after exhaustive search on known relays, discovered relays, and multiple public indexers.",
           );
         }
       }
@@ -519,7 +524,7 @@
         try {
           const response = await fetchWithTimeout(
             `https://api.nostr.band/v0/profile?pubkey=${pubkey}`,
-            { signal }
+            { signal },
           );
           if (!response.ok) return null;
           const data = await response.json();
@@ -548,7 +553,7 @@
         try {
           const primalUrl = `https://primal-cache.snort.social/api/v1/eose/user/profile/${pubkey}`;
           const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(
-            primalUrl
+            primalUrl,
           )}`;
           const response = await fetchWithTimeout(proxyUrl, { signal });
           if (!response.ok) return null;
@@ -578,7 +583,7 @@
         try {
           const response = await fetchWithTimeout(
             `https://api.nostr.band/v0/relays/for_pubkey/${pubkey}`,
-            { signal }
+            { signal },
           );
           if (!response.ok) return [];
           const data = await response.json();
@@ -599,7 +604,7 @@
           RELAYS,
           filter,
           signal,
-          4000
+          4000,
         );
         if (events.length > 0) {
           return events[0].tags
@@ -636,7 +641,7 @@
               console.error(
                 "Failed to parse profile event content",
                 e,
-                event.content
+                event.content,
               );
             }
           }
@@ -687,7 +692,7 @@
         const [, localPart, domain] = match;
         try {
           const url = `https://${domain}/.well-known/nostr.json?name=${encodeURIComponent(
-            localPart
+            localPart,
           )}`;
           const response = await fetchWithTimeout(url, { signal });
           if (!response.ok) return null;
@@ -747,7 +752,7 @@
             (profile.nip05 ? profile.nip05.split("@")[0] : "Unnamed User");
           const npub = nip19.npubEncode(profile.pubkey);
           const npubShort = `${npub.substring(0, 10)}...${npub.substring(
-            npub.length - 5
+            npub.length - 5,
           )}`;
           const npubElement = document.createElement("p");
           npubElement.innerHTML = `<strong>Npub:</strong> ${npubShort}`;
@@ -794,7 +799,7 @@
             e.stopPropagation();
             window.parent.postMessage(
               { type: "viewProfile", pubkey: profile.pubkey },
-              "*"
+              "*",
             );
           };
           const messageButton = document.createElement("button");
@@ -807,7 +812,7 @@
                 type: "startChat",
                 pubkey: profile.pubkey,
               },
-              "*"
+              "*",
             );
           };
           const donateButton = document.createElement("button");
@@ -817,7 +822,7 @@
             e.stopPropagation();
             window.parent.postMessage(
               { type: "donate", pubkey: profile.pubkey },
-              "*"
+              "*",
             );
           };
           actionsContainer.appendChild(viewButton);
@@ -872,7 +877,7 @@
           const profiles = await fetchProfilesFromRelays(
             RELAYS,
             { kinds: [0], authors: featuredPubkeysHex },
-            new AbortController().signal
+            new AbortController().signal,
           );
           featuredCreatorsLoaderElement.style.display = "none";
           if (profiles.length > 0) {

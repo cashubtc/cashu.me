@@ -52,7 +52,7 @@ export const useCreatorSubscribersStore = defineStore("creatorSubscribers", {
           (s) =>
             s.name.toLowerCase().includes(q) ||
             s.npub.toLowerCase().includes(q) ||
-            s.nip05.toLowerCase().includes(q)
+            s.nip05.toLowerCase().includes(q),
         );
       }
 
@@ -113,7 +113,7 @@ export const useCreatorSubscribersStore = defineStore("creatorSubscribers", {
           (s) =>
             s.name.toLowerCase().includes(q) ||
             s.npub.toLowerCase().includes(q) ||
-            s.nip05.toLowerCase().includes(q)
+            s.nip05.toLowerCase().includes(q),
         );
       }
 
@@ -138,7 +138,7 @@ export const useCreatorSubscribersStore = defineStore("creatorSubscribers", {
           .where("owner")
           .equals("creator")
           .and((t) => !!t.subscriptionId && !!t.subscriberNpub)
-          .toArray()
+          .toArray(),
       ).subscribe({
         next: (rows) => {
           try {

@@ -85,7 +85,7 @@ describe("Donation presets", () => {
       validPub,
       "b",
       undefined,
-      true
+      true,
     )) as any[];
     expect(Array.isArray(res)).toBe(true);
     expect(res.length).toBe(2);

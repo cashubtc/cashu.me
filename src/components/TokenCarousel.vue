@@ -56,7 +56,7 @@ const props = defineProps<{
 const emit = defineEmits(["redeem"]);
 const slide = ref(0);
 const payments = computed(() =>
-  Array.isArray(props.payments) ? props.payments : [props.payments]
+  Array.isArray(props.payments) ? props.payments : [props.payments],
 );
 const now = ref(Date.now());
 let timer: any;

@@ -18,7 +18,7 @@ export function saveReceipt(msg: MessengerMessage) {
   };
   const fileName = `fundstr_${msg.subscriptionPayment.subscription_id}_${format(
     new Date(),
-    "yyyyMMdd-HHmmss"
+    "yyyyMMdd-HHmmss",
   )}.json`;
   exportFile(fileName, JSON.stringify(data, null, 2), "application/json");
 }
@@ -55,7 +55,7 @@ export function subscriptionPayload(
   token: string,
   unlock_time: number | null,
   meta: SubscriptionMeta,
-  htlc_hash?: string
+  htlc_hash?: string,
 ) {
   return {
     type: "cashu_subscription_payment" as const,
@@ -74,12 +74,12 @@ export function formatTimestamp(ts: number): string {
   return `${d.getFullYear()}-${("0" + (d.getMonth() + 1)).slice(-2)}-${
     "0" + d.getDate()
   }.slice(-2) ${("0" + d.getHours()).slice(-2)}:${("0" + d.getMinutes()).slice(
-    -2
+    -2,
   )}`;
 }
 
 export function parseSubscriptionDm(
-  text: string
+  text: string,
 ): SubscriptionDmPayload | undefined {
   try {
     const obj = JSON.parse(text);

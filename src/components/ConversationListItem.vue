@@ -160,7 +160,7 @@ export default defineComponent({
     const isOnline = computed(() => messenger.connected);
     const isPinned = computed(() => messenger.pinned[props.pubkey]);
     const unreadCount = computed(
-      () => messenger.unreadCounts[props.pubkey] || 0
+      () => messenger.unreadCounts[props.pubkey] || 0,
     );
     const profile = computed(() => {
       const entry: any = (nostr.profiles as any)[props.pubkey];
@@ -201,7 +201,7 @@ export default defineComponent({
     });
 
     const snippet = computed(() =>
-      parseMessageSnippet(props.lastMsg?.content || "")
+      parseMessageSnippet(props.lastMsg?.content || ""),
     );
 
     const handleClick = () => emit("click", nostr.resolvePubkey(props.pubkey));
@@ -295,7 +295,9 @@ export default defineComponent({
   font-weight: bold;
   font-size: 0.75rem;
   padding: 0 6px;
-  box-shadow: 0 0 0 2px var(--q-color-white), 0 2px 4px rgba(0, 0, 0, 0.15);
+  box-shadow:
+    0 0 0 2px var(--q-color-white),
+    0 2px 4px rgba(0, 0, 0, 0.15);
 }
 
 .timestamp-section {

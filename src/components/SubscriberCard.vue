@@ -51,6 +51,6 @@ const statusColor = computed(() => {
 });
 
 const statusTextColor = computed(() =>
-  props.status === "pending" ? "black" : "white"
+  props.status === "pending" ? "black" : "white",
 );
 </script>

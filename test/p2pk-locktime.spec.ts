@@ -46,7 +46,7 @@ describe("sendToLock locktime tag", () => {
     vi.spyOnProperty(walletStore, "wallet", "get").mockReturnValue(wallet);
     const { locked } = await walletStore.sendToLock(1, "02aa", 123);
     const decoded = JSON.parse(
-      Buffer.from(locked.tokenString.slice(6), "base64").toString()
+      Buffer.from(locked.tokenString.slice(6), "base64").toString(),
     );
     const secretObj = JSON.parse(decoded.token[0].proofs[0].secret);
     expect(secretObj[1].tags).toEqual([["locktime", "123"]]);

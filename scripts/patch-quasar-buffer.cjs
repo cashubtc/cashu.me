@@ -21,7 +21,7 @@ function ensureOptimizeDepsBuffer(src) {
     (m, p1, p2) => {
       changed = true;
       return p1 + `'buffer', ` + p2.slice(1);
-    }
+    },
   );
   if (changed) return src;
 
@@ -29,13 +29,13 @@ function ensureOptimizeDepsBuffer(src) {
   if (/build\s*:\s*{/.test(src)) {
     return src.replace(
       /build\s*:\s*{/,
-      "build: {\n      optimizeDeps: { include: ['buffer'] },"
+      "build: {\n      optimizeDeps: { include: ['buffer'] },",
     );
   }
   // Or add a minimal build block near return {
   return src.replace(
     /return\s*{/,
-    "return {\n    build: { optimizeDeps: { include: ['buffer'] } },"
+    "return {\n    build: { optimizeDeps: { include: ['buffer'] } },",
   );
 }
 
@@ -45,7 +45,7 @@ out = ensureOptimizeDepsBuffer(out);
 if (out !== s) {
   fs.writeFileSync(file, out);
   console.log(
-    "quasar.config.js patched for Buffer boot + optimizeDeps.include"
+    "quasar.config.js patched for Buffer boot + optimizeDeps.include",
   );
 } else {
   console.log("quasar.config.js already had Buffer settings; no change.");

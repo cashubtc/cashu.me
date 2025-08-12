@@ -589,13 +589,13 @@ export default {
         this.deferredPWAInstallPrompt = e;
         debug(
           `'beforeinstallprompt' event was fired.`,
-          this.getPwaDisplayMode()
+          this.getPwaDisplayMode(),
         );
       });
     },
     getPwaDisplayMode: function () {
       const isStandalone = window.matchMedia(
-        "(display-mode: standalone)"
+        "(display-mode: standalone)",
       ).matches;
       if (document.referrer.startsWith("android-app://")) {
         return "twa";
@@ -624,7 +624,7 @@ export default {
         sessionStorage.setItem(
           "tabId",
           Math.random().toString(36).substring(2) +
-            new Date().getTime().toString(36)
+            new Date().getTime().toString(36),
         );
       }
       const tabId = sessionStorage.getItem("tabId");
@@ -677,7 +677,7 @@ export default {
                 postMessage({ type: "retry-locked-token", tokenId });
               }
             }
-          }
+          },
         );
       }
     },
@@ -741,14 +741,14 @@ export default {
         } else {
           await this.initSigner();
           this.notifyWarning(
-            this.$t("settings.nostr.signing_extension.not_found")
+            this.$t("settings.nostr.signing_extension.not_found"),
           );
         }
       } else {
         await this.initSigner();
         if (this.signerType === SignerType.NIP07 && !hasExt) {
           this.notifyWarning(
-            this.$t("settings.nostr.signing_extension.not_found")
+            this.$t("settings.nostr.signing_extension.not_found"),
           );
         }
       }

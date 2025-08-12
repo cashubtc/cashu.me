@@ -25,7 +25,7 @@ if (import.meta.env.PROD) {
     },
     offline() {
       console.log(
-        "[PWA] No internet connection found. App is running in offline mode."
+        "[PWA] No internet connection found. App is running in offline mode.",
       );
     },
     error(error) {

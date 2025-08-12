@@ -36,7 +36,7 @@ function ensureBoot(src) {
   } else {
     src = src.replace(
       /return\s*\{/,
-      (match) => `${match}\n    boot: ['node-globals'],`
+      (match) => `${match}\n    boot: ['node-globals'],`,
     );
   }
   return src;
@@ -59,7 +59,7 @@ function ensureVitePlugins(src) {
         /vitePlugins\s*:\s*\[/,
         (m) =>
           m +
-          `nodePolyfills({ include: ['buffer', 'process'], protocolImports: true }), `
+          `nodePolyfills({ include: ['buffer', 'process'], protocolImports: true }), `,
       );
     }
   } else {
@@ -70,7 +70,7 @@ function ensureVitePlugins(src) {
         `${match}
     vitePlugins: [
       nodePolyfills({ include: ['buffer', 'process'], protocolImports: true }),
-    ],`
+    ],`,
     );
   }
   return src;
@@ -95,7 +95,7 @@ function ensureExtendViteConf(src) {
         ...(viteConf.optimizeDeps || {}),
         include: [ ...(viteConf.optimizeDeps?.include || []), 'buffer', 'process' ]
       };
-    `
+    `,
     );
   } else {
     src = src.replace(
@@ -113,7 +113,7 @@ function ensureExtendViteConf(src) {
         ...(viteConf.optimizeDeps || {}),
         include: [ ...(viteConf.optimizeDeps?.include || []), 'buffer', 'process' ]
       };
-    },`
+    },`,
     );
   }
   return src;

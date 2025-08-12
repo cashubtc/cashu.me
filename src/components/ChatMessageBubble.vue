@@ -122,7 +122,7 @@ const nostr = useNostrStore();
 const messenger = useMessengerStore();
 
 const avatarPubkey = computed(() =>
-  props.message.outgoing ? nostr.pubkey : props.message.pubkey
+  props.message.outgoing ? nostr.pubkey : props.message.pubkey,
 );
 const profile = ref<any>(null);
 const initials = computed(() => {
@@ -139,38 +139,38 @@ onMounted(async () => {
 });
 
 const time = computed(() =>
-  new Date(props.message.created_at * 1000).toLocaleString()
+  new Date(props.message.created_at * 1000).toLocaleString(),
 );
 const isoTime = computed(() =>
-  new Date(props.message.created_at * 1000).toISOString()
+  new Date(props.message.created_at * 1000).toISOString(),
 );
 const deliveryIcon = computed(() => {
   if (props.deliveryStatus === "failed") return mdiAlertCircleOutline;
   return props.deliveryStatus === "delivered" ? mdiCheckAll : mdiCheck;
 });
 const deliveryColor = computed(() =>
-  props.deliveryStatus === "failed" ? "negative" : undefined
+  props.deliveryStatus === "failed" ? "negative" : undefined,
 );
 
 const isDataUrl = computed(() => props.message.content.startsWith("data:"));
 const isImageDataUrl = computed(() =>
-  props.message.content.startsWith("data:image")
+  props.message.content.startsWith("data:image"),
 );
 const isHttpUrl = computed(() => /^https?:\/\//.test(props.message.content));
 const isImageLink = computed(
   () =>
     isHttpUrl.value &&
-    /\.(png|jpe?g|gif|webp|svg)$/i.test(props.message.content)
+    /\.(png|jpe?g|gif|webp|svg)$/i.test(props.message.content),
 );
 const imageSrc = computed(() =>
-  isImageDataUrl.value || isImageLink.value ? props.message.content : ""
+  isImageDataUrl.value || isImageLink.value ? props.message.content : "",
 );
 const isFile = computed(() => isDataUrl.value || isHttpUrl.value);
 const attachmentName = computed(
   () =>
     props.message.attachment?.name ||
     props.message.content.split("/").pop()?.split("?")[0] ||
-    "file"
+    "file",
 );
 
 const receiveStore = useReceiveTokensStore();
@@ -206,7 +206,7 @@ const unlockTime = computed(() => {
 });
 
 const unlockIso = computed(() =>
-  unlockTime.value ? new Date(unlockTime.value * 1000).toISOString() : ""
+  unlockTime.value ? new Date(unlockTime.value * 1000).toISOString() : "",
 );
 
 const remaining = computed(() => {
@@ -217,7 +217,7 @@ const remaining = computed(() => {
 const countdown = computed(() =>
   unlockTime.value
     ? formatDistanceToNow(unlockTime.value * 1000, { includeSeconds: true })
-    : ""
+    : "",
 );
 
 const receiverPubkeyNpub = computed(() => {
@@ -241,7 +241,7 @@ async function redeemPayment() {
     if (payment.subscription_id) {
       const sub = await cashuDb.subscriptions.get(payment.subscription_id);
       const idx = sub?.intervals.findIndex(
-        (i) => i.monthIndex === payment.month_index
+        (i) => i.monthIndex === payment.month_index,
       );
       if (sub && idx !== undefined && idx >= 0) {
         sub.intervals[idx].status = "claimed";

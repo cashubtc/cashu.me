@@ -9,7 +9,7 @@ export function normalizeYouTube(url: string): string {
   const idMatch = url
     .replace("https://", "")
     .match(
-      /(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|v\/|shorts\/))(\w{11})/i
+      /(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|v\/|shorts\/))(\w{11})/i,
     );
   if (idMatch) {
     return `https://www.youtube.com/embed/${idMatch[1]}`;
@@ -37,7 +37,7 @@ export function normalizeNostrEventUrl(url: string): string {
 
 export function isNostrEventUrl(url: string): boolean {
   return /^https:\/\/(primal\.net|snort\.social)\/e\/[a-z0-9]+/i.test(
-    url.trim()
+    url.trim(),
   );
 }
 
@@ -52,7 +52,7 @@ export function normalizeMediaUrl(url: string): string {
 }
 
 export function determineMediaType(
-  url: string
+  url: string,
 ): "youtube" | "video" | "audio" | "image" | "iframe" | "nostr" {
   const lower = url.toLowerCase();
   if (lower.includes("youtube.com/embed/")) {

@@ -37,14 +37,14 @@
               ~{{
                 formatCurrency(
                   (bitcoinPrice / 100000000) * localTier.price_sats,
-                  "USD"
+                  "USD",
                 )
               }}
               /
               {{
                 formatCurrency(
                   (bitcoinPrice / 100000000) * localTier.price_sats,
-                  "EUR"
+                  "EUR",
                 )
               }}
             </div>
@@ -226,19 +226,19 @@ export default defineComponent({
           localTier.frequency = "monthly";
         }
         localTier.intervalDays = frequencyToDays(
-          (localTier.frequency as SubscriptionFrequency) || "monthly"
+          (localTier.frequency as SubscriptionFrequency) || "monthly",
         );
       },
-      { immediate: true, deep: true }
+      { immediate: true, deep: true },
     );
 
     watch(
       () => localTier.frequency,
       (val) => {
         localTier.intervalDays = frequencyToDays(
-          (val as SubscriptionFrequency) || "monthly"
+          (val as SubscriptionFrequency) || "monthly",
         );
-      }
+      },
     );
 
     const save = async () => {
@@ -255,13 +255,13 @@ export default defineComponent({
         return;
       }
       localTier.intervalDays = frequencyToDays(
-        (localTier.frequency as SubscriptionFrequency) || "monthly"
+        (localTier.frequency as SubscriptionFrequency) || "monthly",
       );
       try {
         await nostr.initSignerIfNotSet();
         if (!nostr.signer) {
           notifyError(
-            "Please unlock or connect your Nostr signer before saving tiers"
+            "Please unlock or connect your Nostr signer before saving tiers",
           );
           return;
         }

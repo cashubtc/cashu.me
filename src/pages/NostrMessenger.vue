@@ -241,11 +241,11 @@ export default defineComponent({
       typeof ChatSendTokenDialog
     > | null>(null);
     const newChatDialogRef = ref<InstanceType<typeof NewChatDialog> | null>(
-      null
+      null,
     );
     const conversationSearch = ref("");
     const messages = computed(
-      () => messenger.conversations[selected.value] || []
+      () => messenger.conversations[selected.value] || [],
     );
 
     const miniList = computed(() => {
@@ -285,7 +285,7 @@ export default defineComponent({
     const connectedCount = computed(() => {
       if (!ndkRef.value) return 0;
       return Array.from(ndkRef.value.pool.relays.values()).filter(
-        (r) => r.connected
+        (r) => r.connected,
       ).length;
     });
 
@@ -316,7 +316,7 @@ export default defineComponent({
       (val) => {
         messenger.setCurrentConversation(val);
       },
-      { immediate: true }
+      { immediate: true },
     );
 
     const selectConversation = (pubkey: string) => {
@@ -336,7 +336,7 @@ export default defineComponent({
         | {
             text: string;
             attachment?: { dataUrl: string; name: string; type: string };
-          }
+          },
     ) => {
       if (!selected.value) return;
       if (typeof payload === "string") {
