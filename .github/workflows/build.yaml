@@ -3,25 +3,26 @@ name: Check build
 on: [push, pull_request]
 
 jobs:
-  build:
+  build:               # <-- must be "build" to satisfy the protected-branch rule
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # Install pnpm before setup-node when using cache: pnpm
+      # Install pnpm BEFORE setup-node when using cache: pnpm
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
+          # use your project’s pnpm version if you have "packageManager": "pnpm@x.y.z"
           version: 9
           run_install: false
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
-          cache: "pnpm"
+          node-version: '20'
+          cache: 'pnpm'
           cache-dependency-path: pnpm-lock.yaml
 
       - name: Install dependencies
