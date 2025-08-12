@@ -9,8 +9,12 @@ import {
   frequencyToDays,
 } from "../constants/subscriptionFrequency";
 import { useSubscribersStore } from "./subscribersStore";
+import pLimit from "p-limit";
 
 type Tab = "all" | Frequency | "pending" | "ended";
+
+const PROFILE_TIMEOUT_MS = 5_000;
+const PROFILE_CONCURRENCY = 8;
 
 export const useCreatorSubscribersStore = defineStore("creatorSubscribers", {
   state: () => ({
@@ -248,13 +252,36 @@ export const useCreatorSubscribersStore = defineStore("creatorSubscribers", {
       try {
         const unique = Array.from(new Set(this.subscribers.map((s) => s.npub)));
         const uncached = unique.filter((npub) => !this.profileCache[npub]);
-        for (const npub of uncached) {
-          const profile = await nostr.getProfile(npub);
-          this.profileCache[npub] = {
-            name: profile?.name || "",
-            nip05: profile?.nip05 || "",
-          };
-        }
+
+        const limit = pLimit(PROFILE_CONCURRENCY);
+        const tasks = uncached.map((npub) =>
+          limit(async () => {
+            try {
+              const profile: any = await Promise.race([
+                nostr.getProfile(npub),
+                new Promise<null>((resolve) =>
+                  setTimeout(() => resolve(null), PROFILE_TIMEOUT_MS),
+                ),
+              ]);
+              if (profile) {
+                this.profileCache[npub] = {
+                  name: profile.name || "",
+                  nip05: profile.nip05 || "",
+                };
+                await cashuDb.profiles.put({
+                  pubkey: nostr.resolvePubkey(npub),
+                  profile,
+                  fetchedAt: Math.floor(Date.now() / 1000),
+                });
+              }
+            } catch (err) {
+              console.error(err);
+            }
+          }),
+        );
+
+        await Promise.allSettled(tasks);
+
         this.subscribers = this.subscribers.map((s) => {
           const cached = this.profileCache[s.npub];
           return {
