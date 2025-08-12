@@ -79,12 +79,17 @@ vi.mock('../../../src/stores/creatorSubscriptions', () => ({
   }),
 }));
 
-const getProfileMock = vi.fn().mockResolvedValue(null);
+var fetchEventsMock: any;
 vi.mock('../../../src/stores/nostr', () => ({
   useNostrStore: () => ({
-    getProfile: getProfileMock,
+    initNdkReadOnly: vi.fn().mockResolvedValue(undefined),
+    resolvePubkey: (s: string) => s,
   }),
 }));
+vi.mock('../../../src/composables/useNdk', () => {
+  fetchEventsMock = vi.fn().mockResolvedValue(new Set());
+  return { useNdk: vi.fn().mockResolvedValue({ fetchEvents: fetchEventsMock }) };
+});
 
 vi.mock('vue-i18n', async (importOriginal) => {
   const actual = await importOriginal();
@@ -189,13 +194,13 @@ describe('CreatorSubscribersPage', () => {
     await wrapper.vm.$nextTick();
     await new Promise((r) => setTimeout(r, 0));
 
-    expect(getProfileMock).toHaveBeenCalledTimes(4);
+    expect(fetchEventsMock).toHaveBeenCalledTimes(1);
 
     const store = useCreatorSubscribersStore();
     await store.fetchProfiles();
     await new Promise((r) => setTimeout(r, 0));
 
-    expect(getProfileMock).toHaveBeenCalledTimes(4);
+    expect(fetchEventsMock).toHaveBeenCalledTimes(1);
   });
 });
 

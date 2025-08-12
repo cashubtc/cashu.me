@@ -52,8 +52,15 @@ const routerPush = vi.fn();
 vi.mock('vue-router', () => ({ useRouter: () => ({ push: routerPush }) }));
 vi.mock('src/utils/subscriberCsv', () => ({ default: vi.fn() }));
 vi.mock('src/stores/nostr', () => ({
-  useNostrStore: () => ({ getProfile: vi.fn().mockResolvedValue(null) }),
+  useNostrStore: () => ({
+    initNdkReadOnly: vi.fn().mockResolvedValue(undefined),
+    resolvePubkey: (s: string) => s,
+  }),
 }));
+vi.mock('src/composables/useNdk', () => {
+  const fetchEvents = vi.fn().mockResolvedValue(new Set());
+  return { useNdk: vi.fn().mockResolvedValue({ fetchEvents }) };
+});
 
 import { copyNpub } from 'src/utils/clipboard';
 import downloadCsv from 'src/utils/subscriberCsv';

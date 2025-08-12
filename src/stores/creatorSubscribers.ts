@@ -9,12 +9,9 @@ import {
   frequencyToDays,
 } from "../constants/subscriptionFrequency";
 import { useSubscribersStore } from "./subscribersStore";
-import pLimit from "p-limit";
+import { useNdk } from "../composables/useNdk";
 
 type Tab = "all" | Frequency | "pending" | "ended";
-
-const PROFILE_TIMEOUT_MS = 5_000;
-const PROFILE_CONCURRENCY = 8;
 
 export const useCreatorSubscribersStore = defineStore("creatorSubscribers", {
   state: () => ({
@@ -26,6 +23,7 @@ export const useCreatorSubscribersStore = defineStore("creatorSubscribers", {
     loading: false,
     profilesLoading: false,
     error: null as string | null,
+    profilesBatchFetchedAt: null as number | null,
   }),
   getters: {
     filtered(state): Subscriber[] {
@@ -250,38 +248,83 @@ export const useCreatorSubscribersStore = defineStore("creatorSubscribers", {
       const nostr = useNostrStore();
       this.profilesLoading = true;
       this.error = null;
+
       try {
         const unique = Array.from(new Set(this.subscribers.map((s) => s.npub)));
         const uncached = unique.filter((npub) => !this.profileCache[npub]);
 
-        const limit = pLimit(PROFILE_CONCURRENCY);
-        const tasks = uncached.map((npub) =>
-          limit(async () => {
-            try {
-              const profile: any = await Promise.race([
-                nostr.getProfile(npub),
-                new Promise<null>((resolve) =>
-                  setTimeout(() => resolve(null), PROFILE_TIMEOUT_MS),
-                ),
-              ]);
-              if (profile) {
-                this.profileCache[npub] = {
-                  name: profile.name || "",
-                  nip05: profile.nip05 || "",
-                };
-                await cashuDb.profiles.put({
-                  pubkey: nostr.resolvePubkey(npub),
-                  profile,
-                  fetchedAt: Math.floor(Date.now() / 1000),
-                });
-              }
-            } catch (err) {
-              console.error(err);
-            }
-          }),
-        );
+        if (!uncached.length) {
+          this.subscribers = this.subscribers.map((s) => {
+            const cached = this.profileCache[s.npub];
+            return {
+              ...s,
+              name: cached?.name || s.name || s.npub,
+              nip05: cached?.nip05 || s.nip05 || "",
+            };
+          });
+          return;
+        }
 
-        await Promise.allSettled(tasks);
+        if (!navigator.onLine && this.profilesBatchFetchedAt) {
+          this.subscribers = this.subscribers.map((s) => {
+            const cached = this.profileCache[s.npub];
+            return {
+              ...s,
+              name: cached?.name || s.name || s.npub,
+              nip05: cached?.nip05 || s.nip05 || "",
+            };
+          });
+          return;
+        }
+
+        try {
+          await nostr.initNdkReadOnly();
+        } catch (e) {
+          console.error(e);
+          this.subscribers = this.subscribers.map((s) => {
+            const cached = this.profileCache[s.npub];
+            return {
+              ...s,
+              name: cached?.name || s.name || s.npub,
+              nip05: cached?.nip05 || s.nip05 || "",
+            };
+          });
+          return;
+        }
+
+        const ndk = await useNdk({ requireSigner: false });
+        const authors = uncached.map((npub) => nostr.resolvePubkey(npub));
+        const events: Set<any> = await ndk.fetchEvents({ kinds: [0], authors });
+        const found = new Set<string>();
+
+        events.forEach((ev: any) => {
+          try {
+            const profile = JSON.parse(ev.content || "{}");
+            const npub = nip19.npubEncode(ev.pubkey);
+            this.profileCache[npub] = {
+              name: profile.name || "",
+              nip05: profile.nip05 || "",
+            };
+            cashuDb.profiles
+              .put({
+                pubkey: ev.pubkey,
+                profile,
+                fetchedAt: Math.floor(Date.now() / 1000),
+              })
+              .catch(console.error);
+            found.add(npub);
+          } catch (err) {
+            console.error(err);
+          }
+        });
+
+        for (const npub of uncached) {
+          if (!found.has(npub)) {
+            this.profileCache[npub] = { name: "", nip05: "" };
+          }
+        }
+
+        this.profilesBatchFetchedAt = Date.now();
 
         this.subscribers = this.subscribers.map((s) => {
           const cached = this.profileCache[s.npub];
@@ -294,6 +337,14 @@ export const useCreatorSubscribersStore = defineStore("creatorSubscribers", {
       } catch (e) {
         console.error(e);
         this.error = e instanceof Error ? e.message : String(e);
+        this.subscribers = this.subscribers.map((s) => {
+          const cached = this.profileCache[s.npub];
+          return {
+            ...s,
+            name: cached?.name || s.name || s.npub,
+            nip05: cached?.nip05 || s.nip05 || "",
+          };
+        });
       } finally {
         this.profilesLoading = false;
       }
