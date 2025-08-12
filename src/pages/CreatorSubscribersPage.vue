@@ -113,10 +113,10 @@
                 {{ chip.label }}
               </q-chip>
             </div>
-            <q-segmented
+            <q-btn-toggle
               v-model="activeTab"
               dense
-              color="primary"
+              toggle-color="primary"
               :options="tabOptions"
             />
           </div>
