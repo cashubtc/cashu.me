@@ -3,14 +3,14 @@
     <div class="text-h6 q-mb-sm">{{ $t("creatorHub.profileHeader") }}</div>
     <q-input
       v-model="display_nameLocal"
-      label="Display Name"
+      :label="$t('creatorHub.displayName')"
       dense
       outlined
-      :rules="[(v) => !!v || 'Required']"
+      :rules="[(v) => !!v || t('creatorHub.required')]"
     />
     <q-input
       v-model="pictureLocal"
-      label="Profile Picture URL"
+      :label="$t('creatorHub.profilePictureUrl')"
       dense
       outlined
       :rules="[urlRule]"
@@ -23,7 +23,7 @@
     />
     <q-input
       v-model="aboutLocal"
-      label="About"
+      :label="$t('creatorHub.about')"
       type="textarea"
       autogrow
       dense
@@ -41,24 +41,24 @@
         use-input
         fill-input
         input-debounce="0"
-        label="P2PK Public Key"
+        :label="$t('creatorHub.p2pkPublicKey')"
       >
         <template #append>
           <q-btn flat dense icon="add" @click="generateP2PK" />
         </template>
         <template #after-options>
           <q-item clickable @click="generateP2PK">
-            <q-item-section>Generate new key</q-item-section>
+          <q-item-section>{{ $t('creatorHub.generateNewKey') }}</q-item-section>
           </q-item>
         </template>
       </q-select>
       <div v-else class="row items-center q-gutter-sm">
-        <div class="text-caption">You don't have a P2PK Public key.</div>
+        <div class="text-caption">{{ $t('creatorHub.noP2pkPublicKey') }}</div>
         <q-btn
           flat
           dense
           color="primary"
-          label="Generate"
+          :label="$t('creatorHub.generate')"
           @click="generateP2PK"
         />
       </div>
@@ -78,12 +78,12 @@
       outlined
       persistent-hint
       :rules="[urlListRule]"
-      hint="Press Enter after typing each URL"
+      :hint="$t('creatorHub.urlListHint')"
     >
       <template #label>
         <div class="row items-center no-wrap">
-          <span>Trusted Mints</span>
-          <InfoTooltip class="q-ml-xs" text="Type a mint URL and press Enter" />
+          <span>{{ $t('creatorHub.trustedMints') }}</span>
+          <InfoTooltip class="q-ml-xs" :text="$t('creatorHub.mintUrlInfo')" />
         </div>
       </template>
     </q-select>
@@ -99,14 +99,14 @@
       outlined
       persistent-hint
       :rules="[urlListRule]"
-      hint="Press Enter after typing each URL"
+      :hint="$t('creatorHub.urlListHint')"
     >
       <template #label>
         <div class="row items-center no-wrap">
-          <span>Relays</span>
+          <span>{{ $t('creatorHub.relays') }}</span>
           <InfoTooltip
             class="q-ml-xs"
-            text="Type a relay URL and press Enter"
+            :text="$t('creatorHub.relayUrlInfo')"
           />
         </div>
       </template>
@@ -117,11 +117,13 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { storeToRefs } from "pinia";
+import { useI18n } from "vue-i18n";
 import InfoTooltip from "./InfoTooltip.vue";
 import { useCreatorProfileStore } from "stores/creatorProfile";
 import { useP2PKStore } from "stores/p2pk";
 import { shortenString } from "src/js/string-utils";
 
+const { t } = useI18n();
 const profileStore = useCreatorProfileStore();
 const p2pkStore = useP2PKStore();
 
@@ -178,7 +180,8 @@ const profileRelaysLocal = computed({
 });
 
 const validUrl = computed(() => /^https?:\/\/.+/.test(pictureLocal.value));
-const urlRule = (val: string) => /^https?:\/\/.+/.test(val) || "Invalid URL";
+const urlRule = (val: string) =>
+  /^https?:\/\/.+/.test(val) || t("creatorHub.invalidUrl");
 const urlListRule = (val: string[]) =>
-  val.every((u) => /^wss?:\/\//.test(u)) || "Invalid URL";
+  val.every((u) => /^wss?:\/\//.test(u)) || t("creatorHub.invalidUrl");
 </script>

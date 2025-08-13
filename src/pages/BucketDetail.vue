@@ -70,7 +70,7 @@
             <span>{{ $t("BucketDetail.inputs.target_bucket.label") }}</span>
             <InfoTooltip
               class="q-ml-xs"
-              :text="$t('BucketDetail.inputs.target_bucket.tooltip')"
+              :text="$t('BucketDetail.tooltips.target_bucket')"
             />
           </div>
         </template>
