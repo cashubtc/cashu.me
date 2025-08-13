@@ -17,7 +17,7 @@ export default defineConfig({
   test: {
     globals: true,
     environment: "jsdom",
-    setupFiles: ["./test/vitest/setup-pinia.js", "./test/vitest/setup-file.js"],
+    setupFiles: ["./test/vitest/setup-file.js"],
     exclude: [
       "src/lib/cashu-ts/test/**/*.ts",
       "src/lib/cashu-ts/test/integration.test.ts",
