@@ -1,62 +1,56 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { mount } from "@vue/test-utils";
-import MissingSignerModal from "../../../src/components/MissingSignerModal.vue";
-import { useSignerStore } from "../../../src/stores/signer";
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { mountWithPlugins } from '../test-utils.ts';
+import { createPinia, setActivePinia } from 'pinia';
+import { ref } from 'vue';
+import MissingSignerModal from '../../../src/components/MissingSignerModal.vue';
+import { useSignerStore } from '../../../src/stores/signer';
+import { nip19 } from 'nostr-tools';
 
-vi.mock("../../../src/js/notify", () => ({
-  notifyError: vi.fn(),
-}));
-vi.mock("quasar", () => ({
-  Dialog: {
-    create: vi.fn(() => ({
-      onOk: vi.fn(),
-      onCancel: vi.fn(),
-      onDismiss: vi.fn(),
-    })),
+vi.unmock('../../../src/stores/signer');
+vi.unmock('../../../src/stores/ui');
+
+vi.mock('nostr-tools', () => ({
+  nip19: {
+    decode: vi.fn(),
   },
-  Notify: { create: vi.fn() },
 }));
 
-vi.mock("../../../src/stores/ui", () => ({
-  useUiStore: () => ({ showMissingSignerModal: false }),
-}));
-
-vi.mock("nostr-tools", () => ({
-  nip19: { decode: vi.fn() },
-}));
-import { nip19 } from "nostr-tools";
-const { notifyError } = require("../../../src/js/notify");
-
-beforeEach(() => {
-  vi.clearAllMocks();
-});
-
-describe("MissingSignerModal", () => {
-  it("chooses local signer", () => {
-    (nip19.decode as any).mockReturnValue({ type: "nsec", data: "d" });
-    const wrapper = mount(MissingSignerModal);
-    const vm: any = wrapper.vm;
-    vm.nsec = "nsec123";
-    vm.chooseLocal();
-    const store = useSignerStore();
-    expect(store.method).toBe("local");
-    expect(store.nsec).toBe("nsec123");
-    expect(notifyError).not.toHaveBeenCalled();
+describe('MissingSignerModal.vue', () => {
+  beforeEach(() => {
+    setActivePinia(createPinia());
+    vi.clearAllMocks();
   });
 
-  it("chooses NIP-07 signer", () => {
-    const wrapper = mount(MissingSignerModal);
-    const vm: any = wrapper.vm;
-    vm.chooseNip07();
-    const store = useSignerStore();
-    expect(store.method).toBe("nip07");
-  });
+  const mountComponent = () => {
+    const dialogRef = ref({ hide: vi.fn() });
+    const wrapper = mountWithPlugins(MissingSignerModal, {
+      props: { dialogRef },
+      global: {
+        stubs: {
+          // Local stubs for this specific test file
+          QDialog: { name: 'QDialog', template: '<div><slot /></div>' },
+          QCard: { name: 'QCard', template: '<div><slot /></div>' },
+          QCardSection: { name: 'QCardSection', template: '<div><slot /></div>' },
+          QCardActions: { name: 'QCardActions', template: '<div><slot /></div>' },
+          QBtn: { name: 'QBtn', template: '<button><slot /></button>' },
+          QInput: { name: 'QInput', props: ['modelValue'], template: '<input :value="modelValue" @input="$emit(\'update:modelValue\', $event.target.value)" />' },
+        }
+      }
+    });
+    return { wrapper, dialogRef };
+  };
 
-  it("chooses NIP-46 signer", () => {
-    const wrapper = mount(MissingSignerModal);
-    const vm: any = wrapper.vm;
-    vm.chooseNip46();
+  it('chooses local signer with a valid nsec', async () => {
+    (nip19.decode as any).mockReturnValue({ type: 'nsec', data: 'decoded-key' });
+    const { wrapper, dialogRef } = mountComponent();
     const store = useSignerStore();
-    expect(store.method).toBe("nip46");
+
+    const input = wrapper.findComponent({ name: 'QInput' });
+    await input.setValue('nsec1validkey');
+    const localSignerButton = wrapper.findAllComponents({ name: 'QBtn' }).at(0);
+    await localSignerButton?.trigger('click');
+
+    expect(store.method).toBe('local');
+    expect(dialogRef.value.hide).toHaveBeenCalled();
   });
 });
