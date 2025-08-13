@@ -6,9 +6,11 @@
     :overlay="$q.screen.lt.md"
     bordered
     class="page-surface"
+    :width="drawerWidth"
+    style="min-width: 320px; max-width: 500px"
   >
     <div v-if="subscriber" class="column fit">
-      <div class="q-pa-md scroll">
+      <div class="q-pa-md scroll-y" style="overflow-x: hidden">
         <div class="row items-center q-gutter-x-md">
           <q-btn
             flat
@@ -28,7 +30,7 @@
           </div>
         </div>
         <q-bar class="card-bg q-mt-sm">
-          <div class="text-body2 monospace ellipsis">{{ subscriber.npub }}</div>
+          <div class="text-body2 monospace break-word">{{ subscriber.npub }}</div>
         </q-bar>
 
         <div class="q-mt-md">
@@ -36,42 +38,44 @@
             {{ t("CreatorSubscribers.drawer.tabs.overview") }}
           </div>
           <q-list bordered dense class="card-bg">
-            <q-item>
-              <q-item-section>{{
-                t("CreatorSubscribers.columns.tier")
-              }}</q-item-section>
-              <q-item-section side>{{ subscriber.tierName }}</q-item-section>
+            <q-item class="overview-row">
+              <q-item-section class="col-12 col-sm-6">
+                {{ t("CreatorSubscribers.columns.tier") }}
+              </q-item-section>
+              <q-item-section class="col-12 col-sm-6 text-right break-word">
+                {{ subscriber.tierName }}
+              </q-item-section>
             </q-item>
-            <q-item>
-              <q-item-section>{{
-                t("CreatorSubscribers.columns.frequency")
-              }}</q-item-section>
-              <q-item-section side>{{
-                t("CreatorSubscribers.frequency." + subscriber.frequency)
-              }}</q-item-section>
+            <q-item class="overview-row">
+              <q-item-section class="col-12 col-sm-6">
+                {{ t("CreatorSubscribers.columns.frequency") }}
+              </q-item-section>
+              <q-item-section class="col-12 col-sm-6 text-right break-word">
+                {{ t("CreatorSubscribers.frequency." + subscriber.frequency) }}
+              </q-item-section>
             </q-item>
-            <q-item>
-              <q-item-section>{{
-                t("CreatorSubscribers.columns.status")
-              }}</q-item-section>
-              <q-item-section side>{{
-                t("CreatorSubscribers.status." + subscriber.status)
-              }}</q-item-section>
+            <q-item class="overview-row">
+              <q-item-section class="col-12 col-sm-6">
+                {{ t("CreatorSubscribers.columns.status") }}
+              </q-item-section>
+              <q-item-section class="col-12 col-sm-6 text-right break-word">
+                {{ t("CreatorSubscribers.status." + subscriber.status) }}
+              </q-item-section>
             </q-item>
-            <q-item>
-              <q-item-section>{{
-                t("CreatorSubscribers.drawer.overview.amountPerInterval")
-              }}</q-item-section>
-              <q-item-section side>
+            <q-item class="overview-row">
+              <q-item-section class="col-12 col-sm-6">
+                {{ t("CreatorSubscribers.drawer.overview.amountPerInterval") }}
+              </q-item-section>
+              <q-item-section class="col-12 col-sm-6 text-right break-word">
                 {{ subscriber.amountSat }} sat /
                 {{ t("CreatorSubscribers.frequency." + subscriber.frequency) }}
               </q-item-section>
             </q-item>
-            <q-item>
-              <q-item-section>{{
-                t("CreatorSubscribers.drawer.overview.nextRenewal")
-              }}</q-item-section>
-              <q-item-section side>
+            <q-item class="overview-row">
+              <q-item-section class="col-12 col-sm-6">
+                {{ t("CreatorSubscribers.drawer.overview.nextRenewal") }}
+              </q-item-section>
+              <q-item-section class="col-12 col-sm-6 text-right break-word">
                 {{
                   subscriber.nextRenewal
                     ? formatDate(subscriber.nextRenewal)
@@ -79,21 +83,21 @@
                 }}
               </q-item-section>
             </q-item>
-            <q-item>
-              <q-item-section>{{
-                t("CreatorSubscribers.drawer.overview.lifetimeTotal")
-              }}</q-item-section>
-              <q-item-section side
-                >{{ subscriber.lifetimeSat }} sat</q-item-section
-              >
+            <q-item class="overview-row">
+              <q-item-section class="col-12 col-sm-6">
+                {{ t("CreatorSubscribers.drawer.overview.lifetimeTotal") }}
+              </q-item-section>
+              <q-item-section class="col-12 col-sm-6 text-right break-word">
+                {{ subscriber.lifetimeSat }} sat
+              </q-item-section>
             </q-item>
-            <q-item>
-              <q-item-section>{{
-                t("CreatorSubscribers.drawer.overview.since")
-              }}</q-item-section>
-              <q-item-section side>{{
-                formatDate(subscriber.startDate)
-              }}</q-item-section>
+            <q-item class="overview-row">
+              <q-item-section class="col-12 col-sm-6">
+                {{ t("CreatorSubscribers.drawer.overview.since") }}
+              </q-item-section>
+              <q-item-section class="col-12 col-sm-6 text-right break-word">
+                {{ formatDate(subscriber.startDate) }}
+              </q-item-section>
             </q-item>
           </q-list>
         </div>
@@ -103,9 +107,13 @@
             {{ t("CreatorSubscribers.drawer.tabs.payments") }}
           </div>
           <q-list bordered dense class="card-bg">
-            <q-item v-for="p in payments" :key="p.ts">
-              <q-item-section>{{ formatDate(p.ts) }}</q-item-section>
-              <q-item-section side>{{ p.amount }} sat</q-item-section>
+            <q-item v-for="p in payments" :key="p.ts" class="payment-row">
+              <q-item-section class="col-12 col-sm-6">
+                {{ formatDate(p.ts) }}
+              </q-item-section>
+              <q-item-section class="col-12 col-sm-6 text-right">
+                {{ p.amount }} sat
+              </q-item-section>
             </q-item>
           </q-list>
         </div>
@@ -115,9 +123,13 @@
             {{ t("CreatorSubscribers.drawer.activity") }}
           </div>
           <q-list bordered dense class="card-bg">
-            <q-item v-for="a in activity" :key="a.ts">
-              <q-item-section>{{ a.text }}</q-item-section>
-              <q-item-section side class="text-caption text-secondary">
+            <q-item v-for="a in activity" :key="a.ts" class="activity-row">
+              <q-item-section class="col-12 col-sm-8 break-word">
+                {{ a.text }}
+              </q-item-section>
+              <q-item-section
+                class="col-12 col-sm-4 text-right text-caption text-secondary"
+              >
                 {{ distToNow(a.ts) }}
               </q-item-section>
             </q-item>
@@ -158,12 +170,14 @@ import { computed } from "vue";
 import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
 import { format, formatDistanceToNow } from "date-fns";
+import { useQuasar } from "quasar";
 import type { Subscriber } from "src/types/subscriber";
 import { copyNpub } from "src/utils/clipboard";
 
 const props = defineProps<{
   modelValue: boolean;
   subscriber: Subscriber | null;
+  width?: number;
 }>();
 
 const emit = defineEmits<{
@@ -172,6 +186,11 @@ const emit = defineEmits<{
 
 const { t } = useI18n();
 const router = useRouter();
+const $q = useQuasar();
+
+const drawerWidth = computed(() =>
+  props.width ?? ($q.screen.lt.md ? 320 : 400),
+);
 
 function initials(name: string) {
   if (!name) return "";
@@ -246,5 +265,12 @@ const activity = computed(() => {
 }
 .break-word {
   word-break: break-all;
+  overflow-wrap: break-word;
+  white-space: normal;
+}
+.overview-row,
+.payment-row,
+.activity-row {
+  flex-wrap: wrap;
 }
 </style>
