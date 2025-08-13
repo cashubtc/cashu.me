@@ -225,154 +225,7 @@
         </q-menu>
       </q-page>
     </q-page-container>
-    <q-drawer
-      v-model="drawer"
-      side="right"
-      :overlay="$q.screen.lt.md"
-      bordered
-      class="page-surface"
-    >
-      <div v-if="current" class="column fit">
-        <div class="q-pa-md scroll">
-          <div class="row items-center q-gutter-sm">
-            <q-btn
-              flat
-              dense
-              round
-              icon="arrow_back"
-              aria-label="Back"
-              @click="drawer = false"
-              class="focus-outline"
-            />
-            <q-avatar size="64px">{{ initials(current.name) }}</q-avatar>
-            <div>
-              <div class="text-h6">{{ current.name }}</div>
-              <div class="text-body2 text-secondary">{{ current.nip05 }}</div>
-            </div>
-            <q-space />
-          </div>
-          <q-bar class="card-bg q-mt-sm">
-            <div class="text-body2 monospace ellipsis">{{ current.npub }}</div>
-          </q-bar>
-
-          <div class="q-mt-md">
-            <div class="text-subtitle2 q-mb-sm">
-              {{ t("CreatorSubscribers.drawer.tabs.overview") }}
-            </div>
-            <q-list bordered dense class="card-bg">
-              <q-item>
-                <q-item-section>{{
-                  t("CreatorSubscribers.columns.tier")
-                }}</q-item-section>
-                <q-item-section side>{{ current.tierName }}</q-item-section>
-              </q-item>
-              <q-item>
-                <q-item-section>{{
-                  t("CreatorSubscribers.columns.frequency")
-                }}</q-item-section>
-                <q-item-section side>{{
-                  t("CreatorSubscribers.frequency." + current.frequency)
-                }}</q-item-section>
-              </q-item>
-              <q-item>
-                <q-item-section>{{
-                  t("CreatorSubscribers.columns.status")
-                }}</q-item-section>
-                <q-item-section side>{{
-                  t("CreatorSubscribers.status." + current.status)
-                }}</q-item-section>
-              </q-item>
-              <q-item>
-                <q-item-section>{{
-                  t("CreatorSubscribers.drawer.overview.amountPerInterval")
-                }}</q-item-section>
-                <q-item-section side>
-                  {{ current.amountSat }} sat /
-                  {{ t("CreatorSubscribers.frequency." + current.frequency) }}
-                </q-item-section>
-              </q-item>
-              <q-item>
-                <q-item-section>{{
-                  t("CreatorSubscribers.drawer.overview.nextRenewal")
-                }}</q-item-section>
-                <q-item-section side>
-                  {{
-                    current.nextRenewal ? formatDate(current.nextRenewal) : "—"
-                  }}
-                </q-item-section>
-              </q-item>
-              <q-item>
-                <q-item-section>{{
-                  t("CreatorSubscribers.drawer.overview.lifetimeTotal")
-                }}</q-item-section>
-                <q-item-section side
-                  >{{ current.lifetimeSat }} sat</q-item-section
-                >
-              </q-item>
-              <q-item>
-                <q-item-section>{{
-                  t("CreatorSubscribers.drawer.overview.since")
-                }}</q-item-section>
-                <q-item-section side>{{
-                  formatDate(current.startDate)
-                }}</q-item-section>
-              </q-item>
-            </q-list>
-          </div>
-
-          <div class="q-mt-lg">
-            <div class="text-subtitle2 q-mb-sm">
-              {{ t("CreatorSubscribers.drawer.tabs.payments") }}
-            </div>
-            <q-list bordered dense class="card-bg">
-              <q-item v-for="p in payments" :key="p.ts">
-                <q-item-section>{{ formatDate(p.ts) }}</q-item-section>
-                <q-item-section side>{{ p.amount }} sat</q-item-section>
-              </q-item>
-            </q-list>
-          </div>
-
-          <div class="q-mt-lg">
-            <div class="text-subtitle2 q-mb-sm">
-              {{ t("CreatorSubscribers.drawer.activity") }}
-            </div>
-            <q-list bordered dense class="card-bg">
-              <q-item v-for="a in activity" :key="a.ts">
-                <q-item-section>{{ a.text }}</q-item-section>
-                <q-item-section side class="text-caption text-secondary">
-                  {{ distToNow(a.ts) }}
-                </q-item-section>
-              </q-item>
-            </q-list>
-          </div>
-        </div>
-        <q-separator class="divider-bg" />
-        <div class="q-pa-sm card-bg row q-gutter-sm justify-end">
-          <q-btn
-            flat
-            :label="t('CreatorSubscribers.drawer.actions.dm')"
-            :aria-label="t('CreatorSubscribers.drawer.actions.dm')"
-            @click="dmSubscriber"
-            class="focus-outline"
-          />
-          <q-btn
-            flat
-            :label="t('CreatorSubscribers.drawer.actions.copyNpub')"
-            :aria-label="t('CreatorSubscribers.drawer.actions.copyNpub')"
-            @click="copyCurrentNpub"
-            class="focus-outline"
-          />
-          <q-btn
-            flat
-            color="negative"
-            :label="t('CreatorSubscribers.drawer.actions.cancel')"
-            :aria-label="t('CreatorSubscribers.drawer.actions.cancel')"
-            @click="drawer = false"
-            class="focus-outline"
-          />
-        </div>
-      </div>
-    </q-drawer>
+    <SubscriberDrawer v-model="drawer" :subscriber="current" />
     <q-footer v-if="selected.length" class="bg-primary text-white">
       <div class="row items-center q-pa-sm q-gutter-sm full-width">
         <div>
@@ -414,10 +267,8 @@ import {
 } from "src/stores/subscribersStore";
 import { storeToRefs } from "pinia";
 import { useDebounceFn } from "@vueuse/core";
-import { format, formatDistanceToNow } from "date-fns";
 import { useQuasar } from "quasar";
 import type { QMenu } from "quasar";
-import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
 import type { Subscriber, Frequency, SubStatus } from "src/types/subscriber";
 import downloadCsv from "src/utils/subscriberCsv";
@@ -426,6 +277,7 @@ import SubscriberCard from "src/components/SubscriberCard.vue";
 import SubscriptionsCharts from "src/components/subscribers/SubscriptionsCharts.vue";
 import KpiCard from "src/components/subscribers/KpiCard.vue";
 import SubscribersTable from "src/components/subscribers/SubscribersTable.vue";
+import SubscriberDrawer from "src/components/subscribers/SubscriberDrawer.vue";
 import { copyNpub } from "src/utils/clipboard";
 
 const { t } = useI18n();
@@ -737,13 +589,6 @@ function dueSoon(r: Subscriber) {
 function rowClass(row: Subscriber) {
   return dueSoon(row) ? "due-soon" : "";
 }
-function distToNow(ts: number) {
-  return formatDistanceToNow(ts * 1000, { addSuffix: true });
-}
-function formatDate(ts: number) {
-  return format(ts * 1000, "PP p");
-}
-
 const drawer = ref(false);
 const current = ref<Subscriber | null>(null);
 function openDrawer(r: Subscriber) {
@@ -756,38 +601,6 @@ function showAvatarMenu(e: Event, row: Subscriber) {
   menuNpub.value = row.npub;
   avatarMenuRef.value?.show(e);
 }
-const router = useRouter();
-
-function copyCurrentNpub() {
-  if (!current.value) return;
-  copyNpub(current.value.npub);
-}
-
-function dmSubscriber() {
-  if (!current.value) return;
-  router.push({
-    path: "/nostr-messenger",
-    query: { pubkey: current.value.npub },
-  });
-}
-const payments = computed(() => {
-  const r = current.value;
-  if (!r) return [] as any[];
-  const interval =
-    r.frequency === "weekly" ? 7 : r.frequency === "biweekly" ? 14 : 30;
-  const last = (r.nextRenewal ?? r.startDate) - interval * 86400;
-  return [
-    { ts: last, amount: r.amountSat },
-    { ts: r.nextRenewal ?? r.startDate, amount: r.amountSat },
-  ];
-});
-const activity = computed(() => {
-  const r = current.value;
-  if (!r) return [] as any[];
-  const arr = [{ ts: r.startDate, text: "Started subscription" }];
-  if (r.nextRenewal) arr.push({ ts: r.nextRenewal, text: "Next renewal" });
-  return arr;
-});
 </script>
 
 <style scoped>
