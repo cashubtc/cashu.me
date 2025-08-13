@@ -1,3 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 // app global css in SCSS form
 @import "tokens.scss";
 @import "creator-hub.scss";
