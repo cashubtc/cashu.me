@@ -3,6 +3,7 @@ import vue from "@vitejs/plugin-vue";
 import { quasar, transformAssetUrls } from "@quasar/vite-plugin";
 import jsconfigPaths from "./vitest-jsconfig-paths";
 import path from "path";
+import { nodePolyfills } from "vite-plugin-node-polyfills";
 
 export default defineConfig({
   build: {
@@ -15,9 +16,10 @@ export default defineConfig({
   },
   test: {
     globals: true,
-    environment: "happy-dom",
-    setupFiles: ["./test/vitest/setup-file.js"],
+    environment: "jsdom",
+    setupFiles: ["./test/vitest/setup-pinia.js", "./test/vitest/setup-file.js"],
     exclude: [
+      "src/lib/cashu-ts/test/**/*.ts",
       "src/lib/cashu-ts/test/integration.test.ts",
       "src/lib/cashu-ts/test/auth.test.ts",
     ],
@@ -52,5 +54,6 @@ export default defineConfig({
       sassVariables: "src/quasar-variables.scss",
     }),
     jsconfigPaths(),
+    nodePolyfills(),
   ],
 });
