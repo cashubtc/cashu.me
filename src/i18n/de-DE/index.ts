@@ -39,10 +39,6 @@ export default {
       send: {
         label: "Senden",
       },
-      creatorHub: {
-        publish: "Publish Profile",
-        profileHeader: "Profile details",
-      },
       swap: {
         label: "Tauschen",
       },
@@ -114,6 +110,10 @@ export default {
           title: "Einstellungen",
           caption: "Wallet-Konfiguration",
         },
+      },
+      creatorHub: {
+        title: "Creator Hub",
+        caption: "Creator tools",
       },
       terms: {
         title: "Bedingungen",
@@ -1410,8 +1410,12 @@ export default {
     filter: {
       status: "Nach Status filtern",
       bucket: "Nach Bucket filtern",
+      frequency: "Filter by frequency",
     },
-  },
+    actions: {
+      retry_now: "Retry now",
+    },
+},
   SendBucketDmDialog: {
     title: "Send Bucket Tokens",
     inputs: {
@@ -1719,5 +1723,23 @@ export default {
       note_saved: "Note saved",
       note_save_failed: "Failed to save note",
     },
+  },
+  creatorHub: {
+    publish: "Publish Profile",
+    profileHeader: "Profile details",
+    displayName: "Display Name",
+    profilePictureUrl: "Profile Picture URL",
+    about: "About",
+    p2pkPublicKey: "P2PK Public Key",
+    generateNewKey: "Generate new key",
+    noP2pkPublicKey: "You don't have a P2PK Public key.",
+    generate: "Generate",
+    trustedMints: "Trusted Mints",
+    mintUrlInfo: "Type a mint URL and press Enter",
+    relays: "Relays",
+    relayUrlInfo: "Type a relay URL and press Enter",
+    urlListHint: "Press Enter after typing each URL",
+    required: "Required",
+    invalidUrl: "Invalid URL",
   },
 };

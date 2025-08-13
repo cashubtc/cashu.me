@@ -18,7 +18,7 @@
             <span>{{ $t("WelcomeSlide3.inputs.seed_phrase.label") }}</span>
             <InfoTooltip
               class="q-ml-xs"
-              :text="$t('WelcomeSlide3.tooltips.seed_phrase')"
+              :text="$t('WelcomeSlide3.inputs.seed_phrase.tooltip')"
             />
           </div>
         </template>

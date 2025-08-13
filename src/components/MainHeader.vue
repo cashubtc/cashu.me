@@ -162,10 +162,10 @@
         </q-item-section>
         <q-item-section>
           <q-item-label>{{
-            $t("MainHeader.menu.creatorHub.creatorHub.title")
+            $t("MainHeader.menu.creatorHub.title")
           }}</q-item-label>
           <q-item-label caption>{{
-            $t("MainHeader.menu.creatorHub.creatorHub.caption")
+            $t("MainHeader.menu.creatorHub.caption")
           }}</q-item-label>
         </q-item-section>
       </q-item>
