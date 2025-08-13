@@ -29,112 +29,131 @@
             </div>
           </div>
         </div>
-        <q-bar class="card-bg q-mt-sm">
-          <div class="text-body2 monospace break-word">{{ subscriber.npub }}</div>
-        </q-bar>
-
-        <div class="q-mt-md">
-          <div class="text-subtitle2 q-mb-sm">
-            {{ t("CreatorSubscribers.drawer.tabs.overview") }}
+        <q-expansion-item
+          class="q-mt-sm"
+          dense
+          expand-separator
+          header-class="card-bg"
+          label="npub"
+        >
+          <div class="q-pa-sm card-bg text-body2 monospace break-word">
+            {{ subscriber.npub }}
           </div>
-          <q-list bordered dense class="card-bg">
-            <q-item class="overview-row">
-              <q-item-section class="col-12 col-sm-6">
-                {{ t("CreatorSubscribers.columns.tier") }}
-              </q-item-section>
-              <q-item-section class="col-12 col-sm-6 text-right break-word">
-                {{ subscriber.tierName }}
-              </q-item-section>
-            </q-item>
-            <q-item class="overview-row">
-              <q-item-section class="col-12 col-sm-6">
-                {{ t("CreatorSubscribers.columns.frequency") }}
-              </q-item-section>
-              <q-item-section class="col-12 col-sm-6 text-right break-word">
-                {{ t("CreatorSubscribers.frequency." + subscriber.frequency) }}
-              </q-item-section>
-            </q-item>
-            <q-item class="overview-row">
-              <q-item-section class="col-12 col-sm-6">
-                {{ t("CreatorSubscribers.columns.status") }}
-              </q-item-section>
-              <q-item-section class="col-12 col-sm-6 text-right break-word">
-                {{ t("CreatorSubscribers.status." + subscriber.status) }}
-              </q-item-section>
-            </q-item>
-            <q-item class="overview-row">
-              <q-item-section class="col-12 col-sm-6">
-                {{ t("CreatorSubscribers.drawer.overview.amountPerInterval") }}
-              </q-item-section>
-              <q-item-section class="col-12 col-sm-6 text-right break-word">
-                {{ subscriber.amountSat }} sat /
-                {{ t("CreatorSubscribers.frequency." + subscriber.frequency) }}
-              </q-item-section>
-            </q-item>
-            <q-item class="overview-row">
-              <q-item-section class="col-12 col-sm-6">
-                {{ t("CreatorSubscribers.drawer.overview.nextRenewal") }}
-              </q-item-section>
-              <q-item-section class="col-12 col-sm-6 text-right break-word">
-                {{
-                  subscriber.nextRenewal
-                    ? formatDate(subscriber.nextRenewal)
-                    : "—"
-                }}
-              </q-item-section>
-            </q-item>
-            <q-item class="overview-row">
-              <q-item-section class="col-12 col-sm-6">
-                {{ t("CreatorSubscribers.drawer.overview.lifetimeTotal") }}
-              </q-item-section>
-              <q-item-section class="col-12 col-sm-6 text-right break-word">
-                {{ subscriber.lifetimeSat }} sat
-              </q-item-section>
-            </q-item>
-            <q-item class="overview-row">
-              <q-item-section class="col-12 col-sm-6">
-                {{ t("CreatorSubscribers.drawer.overview.since") }}
-              </q-item-section>
-              <q-item-section class="col-12 col-sm-6 text-right break-word">
-                {{ formatDate(subscriber.startDate) }}
-              </q-item-section>
-            </q-item>
-          </q-list>
-        </div>
+        </q-expansion-item>
 
-        <div class="q-mt-lg">
-          <div class="text-subtitle2 q-mb-sm">
-            {{ t("CreatorSubscribers.drawer.tabs.payments") }}
+        <q-expansion-item
+          class="q-mt-md"
+          dense
+          expand-separator
+          header-class="card-bg"
+          :label="t('CreatorSubscribers.drawer.tabs.overview')"
+          default-opened
+        >
+          <div class="card-bg">
+            <q-markup-table flat bordered dense class="overview-table">
+              <tbody>
+                <tr>
+                  <td>{{ t("CreatorSubscribers.columns.tier") }}</td>
+                  <td class="text-right break-word">{{ subscriber.tierName }}</td>
+                </tr>
+                <tr>
+                  <td>{{ t("CreatorSubscribers.columns.frequency") }}</td>
+                  <td class="text-right break-word">
+                    {{ t("CreatorSubscribers.frequency." + subscriber.frequency) }}
+                  </td>
+                </tr>
+                <tr>
+                  <td>{{ t("CreatorSubscribers.columns.status") }}</td>
+                  <td class="text-right break-word">
+                    {{ t("CreatorSubscribers.status." + subscriber.status) }}
+                  </td>
+                </tr>
+                <tr>
+                  <td>{{ t("CreatorSubscribers.drawer.overview.amountPerInterval") }}</td>
+                  <td class="text-right break-word">
+                    {{ subscriber.amountSat }} sat /
+                    {{ t("CreatorSubscribers.frequency." + subscriber.frequency) }}
+                  </td>
+                </tr>
+                <tr>
+                  <td>{{ t("CreatorSubscribers.drawer.overview.nextRenewal") }}</td>
+                  <td class="text-right break-word">
+                    {{
+                      subscriber.nextRenewal
+                        ? formatDate(subscriber.nextRenewal)
+                        : "—"
+                    }}
+                  </td>
+                </tr>
+                <tr>
+                  <td>{{ t("CreatorSubscribers.drawer.overview.lifetimeTotal") }}</td>
+                  <td class="text-right break-word">
+                    {{ subscriber.lifetimeSat }} sat
+                  </td>
+                </tr>
+                <tr>
+                  <td>{{ t("CreatorSubscribers.drawer.overview.since") }}</td>
+                  <td class="text-right break-word">
+                    {{ formatDate(subscriber.startDate) }}
+                  </td>
+                </tr>
+              </tbody>
+            </q-markup-table>
           </div>
-          <q-list bordered dense class="card-bg">
-            <q-item v-for="p in payments" :key="p.ts" class="payment-row">
-              <q-item-section class="col-12 col-sm-6">
-                {{ formatDate(p.ts) }}
-              </q-item-section>
-              <q-item-section class="col-12 col-sm-6 text-right">
-                {{ p.amount }} sat
-              </q-item-section>
-            </q-item>
-          </q-list>
-        </div>
+        </q-expansion-item>
 
-        <div class="q-mt-lg">
-          <div class="text-subtitle2 q-mb-sm">
-            {{ t("CreatorSubscribers.drawer.activity") }}
+        <q-expansion-item
+          class="q-mt-md"
+          dense
+          expand-separator
+          header-class="card-bg"
+          :label="t('CreatorSubscribers.drawer.tabs.payments')"
+          default-opened
+        >
+          <div class="card-bg">
+            <q-markup-table
+              v-if="payments.length"
+              flat
+              bordered
+              dense
+              class="payment-table"
+            >
+              <tbody>
+                <tr v-for="p in payments" :key="p.ts">
+                  <td>{{ formatDate(p.ts) }}</td>
+                  <td class="text-right">{{ p.amount }} sat</td>
+                </tr>
+              </tbody>
+            </q-markup-table>
+            <div v-else class="q-pa-sm text-secondary">
+              {{ t("CreatorSubscribers.drawer.payments.noPayments") }}
+            </div>
           </div>
-          <q-list bordered dense class="card-bg">
-            <q-item v-for="a in activity" :key="a.ts" class="activity-row">
-              <q-item-section class="col-12 col-sm-8 break-word">
-                {{ a.text }}
-              </q-item-section>
-              <q-item-section
-                class="col-12 col-sm-4 text-right text-caption text-secondary"
-              >
-                {{ distToNow(a.ts) }}
-              </q-item-section>
-            </q-item>
-          </q-list>
-        </div>
+        </q-expansion-item>
+
+        <q-expansion-item
+          class="q-mt-md"
+          dense
+          expand-separator
+          header-class="card-bg"
+          :label="t('CreatorSubscribers.drawer.activity')"
+          default-opened
+        >
+          <div class="card-bg">
+            <q-markup-table flat bordered dense class="activity-table">
+              <tbody>
+                <tr v-for="a in activity" :key="a.ts">
+                  <td class="break-word">{{ a.text }}</td>
+                  <td
+                    class="text-right text-caption text-secondary"
+                  >
+                    {{ distToNow(a.ts) }}
+                  </td>
+                </tr>
+              </tbody>
+            </q-markup-table>
+          </div>
+        </q-expansion-item>
       </div>
       <q-separator class="divider-bg" />
       <div class="q-pa-sm card-bg row q-gutter-sm justify-end">
@@ -268,9 +287,5 @@ const activity = computed(() => {
   overflow-wrap: break-word;
   white-space: normal;
 }
-.overview-row,
-.payment-row,
-.activity-row {
-  flex-wrap: wrap;
-}
+/* Tables use default styling; no additional rules needed */
 </style>
