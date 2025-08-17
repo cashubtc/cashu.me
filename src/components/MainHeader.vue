@@ -57,6 +57,17 @@
         </q-badge>
       </transition-group>
       <q-btn
+        v-if="route.meta.messengerUI"
+        flat
+        dense
+        round
+        icon="menu"
+        color="primary"
+        aria-label="Toggle Chat Menu"
+        @click="uiStore.showMessengerDrawer = !uiStore.showMessengerDrawer"
+        :disable="uiStore.globalMutexLock"
+      />
+      <q-btn
         flat
         dense
         round
@@ -132,6 +143,7 @@ import { defineComponent, ref } from "vue";
 import EssentialLink from "components/EssentialLink.vue";
 import { useUiStore } from "src/stores/ui";
 import { useI18n } from "vue-i18n";
+import { useRoute } from "vue-router";
 
 export default defineComponent({
   name: "MainHeader",
@@ -143,6 +155,7 @@ export default defineComponent({
     const leftDrawerOpen = ref(false);
     const uiStore = useUiStore();
     const { t } = useI18n();
+    const route = useRoute();
     const countdown = ref(0);
     let countdownInterval;
 
@@ -215,6 +228,7 @@ export default defineComponent({
       reload,
       countdown,
       uiStore,
+      route,
     };
   },
 });
