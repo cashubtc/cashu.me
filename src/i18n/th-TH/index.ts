@@ -540,6 +540,13 @@ export default {
     p4: {
       text: "Wallet นี้อยู่ในช่วงเบต้า เราไม่รับผิดชอบต่อบุคคลที่สูญเสียการเข้าถึงเงินทุน ใช้งานด้วยความเสี่ยงของคุณเอง! รหัสนี้เป็นโอเพนซอร์สและได้รับอนุญาตภายใต้ใบอนุญาต MIT",
     },
+    features: {
+      title: "Explore key features:",
+      creatorHub: "Creator Hub",
+      creatorHubDesc: "Manage your creator profile.",
+      subscriptions: "Subscriptions",
+      subscriptionsDesc: "Follow and manage creators you support.",
+    },
   },
   WelcomeSlide2: {
     title: "ติดตั้ง PWA",

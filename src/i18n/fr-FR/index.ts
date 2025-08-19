@@ -546,6 +546,13 @@ export default {
     p4: {
       text: "Ce portefeuille est en version bêta. Nous déclinons toute responsabilité en cas de perte d'accès aux fonds. Utilisez à vos propres risques ! Ce code est open-source et sous licence MIT.",
     },
+    features: {
+      title: "Explore key features:",
+      creatorHub: "Creator Hub",
+      creatorHubDesc: "Manage your creator profile.",
+      subscriptions: "Subscriptions",
+      subscriptionsDesc: "Follow and manage creators you support.",
+    },
   },
   WelcomeSlide2: {
     title: "Installer la PWA",

@@ -539,6 +539,13 @@ export default {
     p4: {
       text: "هذه المحفظة في مرحلة بيتا. لا نتحمل أي مسؤولية عن فقدان الأشخاص الوصول إلى أموالهم. استخدم على مسؤوليتك الخاصة! هذا الكود مفتوح المصدر ومرخص تحت رخصة MIT.",
     },
+    features: {
+      title: "Explore key features:",
+      creatorHub: "Creator Hub",
+      creatorHubDesc: "Manage your creator profile.",
+      subscriptions: "Subscriptions",
+      subscriptionsDesc: "Follow and manage creators you support.",
+    },
   },
   WelcomeSlide2: {
     title: "تثبيت PWA",

@@ -544,6 +544,13 @@ export default {
     p4: {
       text: "Bu cüzdan beta aşamasındadır. Fonlara erişimini kaybeden kişilerden sorumlu değiliz. Kendi sorumluluğunuzda kullanın! Bu kod açık kaynaklıdır ve MIT lisansı altında lisanslanmıştır.",
     },
+    features: {
+      title: "Explore key features:",
+      creatorHub: "Creator Hub",
+      creatorHubDesc: "Manage your creator profile.",
+      subscriptions: "Subscriptions",
+      subscriptionsDesc: "Follow and manage creators you support.",
+    },
   },
   WelcomeSlide2: {
     title: "PWA Yükle",

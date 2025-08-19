@@ -535,6 +535,13 @@ export default {
     p4: {
       text: "此钱包处于测试阶段。我们对用户丢失资金概不负责。使用风险自负！此代码是开源的，并在 MIT 许可证下获得许可。",
     },
+    features: {
+      title: "Explore key features:",
+      creatorHub: "Creator Hub",
+      creatorHubDesc: "Manage your creator profile.",
+      subscriptions: "Subscriptions",
+      subscriptionsDesc: "Follow and manage creators you support.",
+    },
   },
   WelcomeSlide2: {
     title: "安装 PWA",
