@@ -13,6 +13,25 @@
       <h2 class="q-mt-md">{{ $t("WelcomeSlide1.title") }}</h2>
       <div class="text-left">
         <p class="q-mt-sm">{{ $t("WelcomeSlide1.text") }}</p>
+        <div class="q-mt-lg">
+          <p>{{ $t("WelcomeSlide1.features.title") }}</p>
+          <ul class="q-pl-md">
+            <li>
+              <router-link to="/creator-hub">
+                {{ $t("WelcomeSlide1.features.creatorHub") }}
+              </router-link>
+              -
+              {{ $t("WelcomeSlide1.features.creatorHubDesc") }}
+            </li>
+            <li>
+              <router-link to="/subscriptions">
+                {{ $t("WelcomeSlide1.features.subscriptions") }}
+              </router-link>
+              -
+              {{ $t("WelcomeSlide1.features.subscriptionsDesc") }}
+            </li>
+          </ul>
+        </div>
         <q-expansion-item
           dense
           dense-toggle

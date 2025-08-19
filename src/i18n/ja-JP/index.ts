@@ -541,6 +541,13 @@ export default {
     p4: {
       text: "このウォレットはベータ版です。資金へのアクセスを失うことについて、当社は一切の責任を負いません。ご自身の責任で使用してください！このコードはオープンソースであり、MITライセンスの下でライセンスされています。",
     },
+    features: {
+      title: "Explore key features:",
+      creatorHub: "Creator Hub",
+      creatorHubDesc: "Manage your creator profile.",
+      subscriptions: "Subscriptions",
+      subscriptionsDesc: "Follow and manage creators you support.",
+    },
   },
   WelcomeSlide2: {
     title: "PWAをインストール",

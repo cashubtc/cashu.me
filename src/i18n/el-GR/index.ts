@@ -547,6 +547,13 @@ export default {
     p4: {
       text: "Αυτό το πορτοφόλι βρίσκεται σε έκδοση beta. Δεν φέρουμε καμία ευθύνη για άτομα που χάνουν την πρόσβαση στα κεφάλαιά τους. Χρησιμοποιήστε το με δική σας ευθύνη! Αυτός ο κώδικας είναι ανοιχτού κώδικα και διατίθεται με άδεια MIT.",
     },
+    features: {
+      title: "Explore key features:",
+      creatorHub: "Creator Hub",
+      creatorHubDesc: "Manage your creator profile.",
+      subscriptions: "Subscriptions",
+      subscriptionsDesc: "Follow and manage creators you support.",
+    },
   },
   WelcomeSlide2: {
     title: "Εγκατάσταση PWA",

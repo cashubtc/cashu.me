@@ -548,6 +548,13 @@ export default {
     p4: {
       text: "Diese Wallet ist in Beta. Wir übernehmen keine Verantwortung für den Verlust des Zugangs zu Geldern. Nutzung auf eigenes Risiko! Dieser Code ist quelloffen und unter der MIT-Lizenz lizenziert.",
     },
+    features: {
+      title: "Explore key features:",
+      creatorHub: "Creator Hub",
+      creatorHubDesc: "Manage your creator profile.",
+      subscriptions: "Subscriptions",
+      subscriptionsDesc: "Follow and manage creators you support.",
+    },
   },
   WelcomeSlide2: {
     title: "PWA installieren",

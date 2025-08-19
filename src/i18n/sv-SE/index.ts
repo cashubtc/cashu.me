@@ -542,6 +542,13 @@ export default {
     p4: {
       text: "Denna plånbok är i beta. Vi tar inget ansvar för att personer förlorar åtkomst till medel. Använd på egen risk! Denna kod är öppen källkod och licensierad under MIT-licensen.",
     },
+    features: {
+      title: "Explore key features:",
+      creatorHub: "Creator Hub",
+      creatorHubDesc: "Manage your creator profile.",
+      subscriptions: "Subscriptions",
+      subscriptionsDesc: "Follow and manage creators you support.",
+    },
   },
   WelcomeSlide2: {
     title: "Installera PWA",
