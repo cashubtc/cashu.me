@@ -474,7 +474,7 @@ export default {
         export_wallet: {
           button: "Export wallet data",
           description:
-            "Download a dump of your wallet. You can restore your wallet from this file in the welcome screen of a new wallet. This file will be out of sync if you keep using your wallet after exporting it.",
+            "Download a dump of your wallet. You can restore your wallet by dragging and dropping this file in the welcome screen of a new wallet. This file will be out of sync if you keep using your wallet after exporting it.",
         },
       },
     },

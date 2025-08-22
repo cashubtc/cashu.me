@@ -460,7 +460,7 @@ export default {
         export_wallet: {
           button: "Exporter les données du portefeuille",
           description:
-            "Téléchargez un dump de votre portefeuille. Vous pouvez restaurer votre portefeuille à partir de ce fichier sur l'écran d'accueil d'un nouveau portefeuille. Ce fichier sera désynchronisé si vous continuez à utiliser votre portefeuille après l'exportation.",
+            "Téléchargez un dump de votre portefeuille. Vous pouvez restaurer votre portefeuille en glissant et déposant ce fichier sur l'écran d'accueil d'un nouveau portefeuille. Ce fichier sera désynchronisé si vous continuez à utiliser votre portefeuille après l'exportation.",
         },
       },
     },

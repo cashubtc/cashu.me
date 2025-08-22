@@ -462,7 +462,7 @@ export default {
         export_wallet: {
           button: "Wallet-Daten exportieren",
           description:
-            "Laden Sie einen Dump Ihrer Wallet herunter. Sie können Ihre Wallet aus dieser Datei auf dem Willkommensbildschirm einer neuen Wallet wiederherstellen. Diese Datei ist nicht synchron, wenn Sie Ihre Wallet nach dem Export weiter verwenden.",
+            "Laden Sie einen Dump Ihrer Wallet herunter. Sie können Ihre Wallet wiederherstellen, indem Sie diese Datei per Drag & Drop auf den Willkommensbildschirm einer neuen Wallet ziehen. Diese Datei ist nicht synchron, wenn Sie Ihre Wallet nach dem Export weiter verwenden.",
         },
       },
     },
