@@ -14,6 +14,7 @@ import {
 import { Token } from "@cashu/cashu-ts";
 import { useSwapStore } from "./swap";
 import { Clipboard } from "@capacitor/clipboard";
+import { useCairoStore } from "./cairo";
 
 export const useReceiveTokensStore = defineStore("receiveTokensStore", {
   state: () => ({
@@ -22,6 +23,8 @@ export const useReceiveTokensStore = defineStore("receiveTokensStore", {
     receiveData: {
       tokensBase64: "",
       p2pkPrivateKey: "",
+      cairoExecutable: "",
+      cairoProgramInput: [] as any[],
     },
     scanningCard: false,
   }),
@@ -45,6 +48,7 @@ export const useReceiveTokensStore = defineStore("receiveTokensStore", {
       const walletStore = useWalletStore();
       const receiveStore = useReceiveTokensStore();
       const uiStore = useUiStore();
+      const cairoStore = useCairoStore();
       console.log("### receive tokens", receiveStore.receiveData.tokensBase64);
 
       if (receiveStore.receiveData.tokensBase64.length == 0) {
@@ -56,6 +60,12 @@ export const useReceiveTokensStore = defineStore("receiveTokensStore", {
         useP2PKStore().getPrivateKeyForP2PKEncodedToken(
           receiveStore.receiveData.tokensBase64
         );
+
+      // get the Cairo data if available
+      receiveStore.receiveData.cairoExecutable =
+        cairoStore.cairoReceiveData.executable;
+      receiveStore.receiveData.cairoProgramInput =
+        cairoStore.cairoReceiveData.programInput;
 
       const tokenJson = token.decode(receiveStore.receiveData.tokensBase64);
       if (tokenJson == undefined) {

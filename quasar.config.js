@@ -83,6 +83,10 @@ module.exports = configure(function (/* ctx */) {
       https: true,
       open: true, // opens browser window automatically
       port: 8080,
+      headers: {
+        "Cross-Origin-Opener-Policy": "same-origin",
+        "Cross-Origin-Embedder-Policy": "require-corp",
+      },
     },
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#framework
@@ -124,7 +128,13 @@ module.exports = configure(function (/* ctx */) {
       // ssrPwaHtmlFilename: 'offline.html', // do NOT use index.html as name!
       // will mess up SSR
 
-      // extendSSRWebserverConf (esbuildConf) {},
+      extendSSRWebserverConf(esbuildConf) {
+        // Add cross-origin isolation headers for production
+        esbuildConf.headers = {
+          "Cross-Origin-Opener-Policy": "same-origin",
+          "Cross-Origin-Embedder-Policy": "require-corp",
+        };
+      },
       // extendPackageJson (json) {},
 
       pwa: false,

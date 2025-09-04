@@ -938,6 +938,9 @@ export default {
       lock: {
         label: "@:global.actions.lock.label",
       },
+      cairo: {
+        label: "Cairo",
+      },
       nfc: {
         label: "NFC",
         scanning_text: "Scanning…",

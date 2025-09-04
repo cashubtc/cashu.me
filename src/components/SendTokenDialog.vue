@@ -855,6 +855,7 @@ export default defineComponent({
     ...mapActions(useWalletStore, [
       "send",
       "sendToLock",
+      "sendToCairoLock",
       "coinSelect",
       "spendableProofs",
       "getFeesForProofs",
@@ -1107,12 +1108,30 @@ export default defineComponent({
       try {
         // keep firstProofs, send scndProofs and delete them (invalidate=true)
         const mintWallet = this.mintWallet(this.activeMintUrl, this.activeUnit);
-        let { _, sendProofs } = await this.sendToLock(
-          this.activeProofs,
-          mintWallet,
-          sendAmount,
-          this.sendData.p2pkPubkey
-        );
+
+        let sendProofs;
+
+        if (this.sendData.lockType === "cairo") {
+          // Use Cairo lock
+          const result = await this.sendToCairoLock(
+            this.activeProofs,
+            mintWallet,
+            sendAmount,
+            this.sendData.cairoExecutable,
+            this.sendData.cairoExpectedOutput
+          );
+          sendProofs = result.sendProofs;
+        } else {
+          // Use P2PK lock (default)
+          const result = await this.sendToLock(
+            this.activeProofs,
+            mintWallet,
+            sendAmount,
+            this.sendData.p2pkPubkey
+          );
+          sendProofs = result.sendProofs;
+        }
+
         // update UI
         this.sendData.tokens = sendProofs;
 
@@ -1145,6 +1164,12 @@ export default defineComponent({
         this.sendData.p2pkPubkey &&
         this.isValidPubkey(this.sendData.p2pkPubkey)
       ) {
+        await this.lockTokens();
+        return;
+      }
+
+      // Check for Cairo lock type
+      if (this.sendData.lockType === "cairo") {
         await this.lockTokens();
         return;
       }

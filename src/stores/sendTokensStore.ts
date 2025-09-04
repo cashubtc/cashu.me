@@ -16,7 +16,7 @@ export const useSendTokensStore = defineStore("sendTokensStore", {
       // cairo spending condition fields
       lockType: "none", // one of: none | p2pk | cairo
       cairoExecutable: "",
-      cairoExpectedOutput: "",
+      cairoExpectedOutput: 0n,
       paymentRequest: undefined,
       historyToken: undefined,
     } as {
@@ -28,7 +28,7 @@ export const useSendTokensStore = defineStore("sendTokensStore", {
       p2pkPubkey: string;
       lockType: "none" | "p2pk" | "cairo";
       cairoExecutable: string;
-      cairoExpectedOutput: string;
+      cairoExpectedOutput: bigint;
       paymentRequest?: PaymentRequest;
       historyToken: HistoryToken | undefined;
     },
@@ -43,7 +43,7 @@ export const useSendTokensStore = defineStore("sendTokensStore", {
       this.sendData.p2pkPubkey = "";
       this.sendData.lockType = "none";
       this.sendData.cairoExecutable = "";
-      this.sendData.cairoExpectedOutput = "";
+      this.sendData.cairoExpectedOutput = 0n;
       this.sendData.paymentRequest = undefined;
       this.sendData.historyToken = undefined;
     },
