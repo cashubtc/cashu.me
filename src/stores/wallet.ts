@@ -347,6 +347,16 @@ export const useWalletStore = defineStore("wallet", {
     getFeesForProofs: function (proofs: Proof[]): number {
       return this.wallet.getFeesForProofs(proofs);
     },
+    sendToCairoLock: async function (
+      proofs: WalletProof[],
+      wallet: CashuWallet,
+      amount: number,
+      cairoExecutable: string,
+      cairoExpectedOutput: string
+    ) {
+      // Skeleton placeholder for Cairo lock. Hook up to wallet API once available.
+      throw new Error("Cairo spending condition not implemented yet");
+    },
     sendToLock: async function (
       proofs: WalletProof[],
       wallet: CashuWallet,

@@ -139,45 +139,92 @@
             enter-active-class="animated fadeIn"
             leave-active-class="animated fadeOut"
           >
-            <div v-if="showLockInput" class="row items-center no-wrap">
-              <div :class="!sendData.p2pkPubkey ? 'col-8' : 'col-12'">
-                <q-input
-                  v-model="sendData.p2pkPubkey"
-                  :label="
-                    sendData.p2pkPubkey && !isValidPubkey(sendData.p2pkPubkey)
-                      ? $t('SendTokenDialog.inputs.p2pk_pubkey.label_invalid')
-                      : $t('SendTokenDialog.inputs.p2pk_pubkey.label')
-                  "
-                  outlined
-                  clearable
-                  :color="
-                    sendData.p2pkPubkey && !isValidPubkey(sendData.p2pkPubkey)
-                      ? 'red'
-                      : ''
-                  "
-                  @keyup.enter="lockTokens"
-                ></q-input>
+            <div v-if="showLockInput">
+              <div class="row q-mb-md">
+                <div class="col-12">
+                  <q-btn-group push>
+                    <q-btn
+                      :color="sendData.lockType === 'p2pk' ? 'primary' : 'grey'"
+                      push
+                      label="P2PK"
+                      @click="sendData.lockType = 'p2pk'"
+                    />
+                    <q-btn
+                      :color="
+                        sendData.lockType === 'cairo' ? 'primary' : 'grey'
+                      "
+                      push
+                      label="Cairo"
+                      @click="sendData.lockType = 'cairo'"
+                    />
+                  </q-btn-group>
+                </div>
               </div>
-              <div class="col-4 q-mx-md">
-                <q-btn
-                  unelevated
-                  v-if="canPasteFromClipboard && !sendData.p2pkPubkey"
-                  icon="content_paste"
-                  @click="pasteToP2PKField"
-                  ><q-tooltip>{{
-                    $t("SendTokenDialog.actions.paste_p2pk_pubkey.tooltip_text")
-                  }}</q-tooltip></q-btn
-                >
-                <q-btn
-                  align="center"
-                  v-if="!sendData.p2pkPubkey"
-                  flat
-                  outline
-                  color="primary"
-                  round
-                  @click="showCamera"
-                  ><ScanIcon size="1.5em"
-                /></q-btn>
+
+              <div
+                v-if="sendData.lockType === 'p2pk'"
+                class="row items-center no-wrap"
+              >
+                <div :class="!sendData.p2pkPubkey ? 'col-8' : 'col-12'">
+                  <q-input
+                    v-model="sendData.p2pkPubkey"
+                    :label="
+                      sendData.p2pkPubkey && !isValidPubkey(sendData.p2pkPubkey)
+                        ? $t('SendTokenDialog.inputs.p2pk_pubkey.label_invalid')
+                        : $t('SendTokenDialog.inputs.p2pk_pubkey.label')
+                    "
+                    outlined
+                    clearable
+                    :color="
+                      sendData.p2pkPubkey && !isValidPubkey(sendData.p2pkPubkey)
+                        ? 'red'
+                        : ''
+                    "
+                    @keyup.enter="lockTokens"
+                  ></q-input>
+                </div>
+                <div class="col-4 q-mx-md">
+                  <q-btn
+                    unelevated
+                    v-if="canPasteFromClipboard && !sendData.p2pkPubkey"
+                    icon="content_paste"
+                    @click="pasteToP2PKField"
+                    ><q-tooltip>{{
+                      $t(
+                        "SendTokenDialog.actions.paste_p2pk_pubkey.tooltip_text"
+                      )
+                    }}</q-tooltip></q-btn
+                  >
+                  <q-btn
+                    align="center"
+                    v-if="!sendData.p2pkPubkey"
+                    flat
+                    outline
+                    color="primary"
+                    round
+                    @click="showCamera"
+                    ><ScanIcon size="1.5em"
+                  /></q-btn>
+                </div>
+              </div>
+
+              <div v-else class="row">
+                <div class="col-12">
+                  <q-input
+                    v-model="sendData.cairoExecutable"
+                    label="Cairo executable"
+                    outlined
+                    clearable
+                  ></q-input>
+                </div>
+                <div class="col-12 q-mt-sm">
+                  <q-input
+                    v-model="sendData.cairoExpectedOutput"
+                    label="Expected output"
+                    outlined
+                    clearable
+                  ></q-input>
+                </div>
               </div>
             </div>
           </transition>
@@ -236,7 +283,7 @@
                 class="q-ml-sm"
                 rounded
                 flat
-                @click="showLockInput = true"
+                @click="openLockInputs"
               >
                 <!-- <q-icon size="xs" class="q-mr-xs" name="lock" />  -->
                 {{ $t("SendTokenDialog.actions.lock.label") }}</q-btn
@@ -837,6 +884,12 @@ export default defineComponent({
     //     this.notifyError("No valid key");
     //   }
     // },
+    openLockInputs: function () {
+      this.showLockInput = true;
+      if (!this.sendData.lockType || this.sendData.lockType === "none") {
+        this.sendData.lockType = "p2pk";
+      }
+    },
     encodeToPeanut: function (token) {
       return (
         "🥜" +
