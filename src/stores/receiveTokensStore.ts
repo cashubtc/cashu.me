@@ -62,10 +62,8 @@ export const useReceiveTokensStore = defineStore("receiveTokensStore", {
         );
 
       // get the Cairo data if available
-      receiveStore.receiveData.cairoExecutable =
-        cairoStore.cairoReceiveData.executable;
-      receiveStore.receiveData.cairoProgramInput =
-        cairoStore.cairoReceiveData.programInput;
+      receiveStore.receiveData.cairoExecutable = cairoStore.cairoReceiveData.executable;
+      receiveStore.receiveData.cairoProgramInput = cairoStore.cairoReceiveData.programInput;
 
       const tokenJson = token.decode(receiveStore.receiveData.tokensBase64);
       if (tokenJson == undefined) {
@@ -85,6 +83,15 @@ export const useReceiveTokensStore = defineStore("receiveTokensStore", {
       try {
         const decodedToken = this.decodeToken(this.receiveData.tokensBase64);
         if (decodedToken) {
+          // Check if token has Cairo secrets
+          if (token.hasCairoSecrets(decodedToken)) {
+            // Show Cairo dialog to get executable and inputs
+            const cairoStore = useCairoStore();
+            cairoStore.cairoReceiveData.lockedToken = this.receiveData.tokensBase64;
+            cairoStore.showCairoReceiveDialog();
+            return true; // Don't auto-receive, wait for Cairo unlock
+          }
+          
           await this.receiveToken(this.receiveData.tokensBase64);
           return true;
         }

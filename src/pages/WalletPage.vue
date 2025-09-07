@@ -47,6 +47,7 @@
         </div>
         <ReceiveDialog v-model="showReceiveDialog" />
         <SendDialog v-model="showSendDialog" />
+        <CairoReceiveDialog v-model="showCairoDialog" />
       </div>
       <!-- ///////////////////////////////////////////
       ////////////////// TABLES /////////////////
@@ -217,6 +218,7 @@ import PayInvoiceDialog from "components/PayInvoiceDialog.vue";
 import InvoiceDetailDialog from "components/InvoiceDetailDialog.vue";
 import SendDialog from "components/SendDialog.vue";
 import ReceiveDialog from "components/ReceiveDialog.vue";
+import CairoReceiveDialog from "components/CairoReceiveDialog.vue";
 import QrcodeReader from "components/QrcodeReader.vue";
 import iOSPWAPrompt from "components/iOSPWAPrompt.vue";
 import AndroidPWAPrompt from "components/AndroidPWAPrompt.vue";
@@ -239,6 +241,7 @@ import { useNPCStore } from "src/stores/npubcash";
 import { useNPCV2Store } from "src/stores/npcv2";
 import { useNostrStore } from "src/stores/nostr";
 import { usePRStore } from "src/stores/payment-request";
+import { useCairoStore } from "src/stores/cairo";
 import { useDexieStore } from "src/stores/dexie";
 
 import { useStorageStore } from "src/stores/storage";
@@ -271,6 +274,7 @@ export default {
     QrcodeReader,
     SendDialog,
     ReceiveDialog,
+    CairoReceiveDialog,
     iOSPWAPrompt,
     AndroidPWAPrompt,
     ScanIcon,
@@ -344,6 +348,7 @@ export default {
     ]),
     ...mapState(useTokensStore, ["historyTokens"]),
     ...mapState(usePRStore, ["enablePaymentRequest"]),
+    ...mapState(useCairoStore, ["showCairoDialog"]),
     ...mapWritableState(useCameraStore, ["camera", "hasCamera"]),
     ...mapWritableState(useP2PKStore, ["showP2PKDialog"]),
     ...mapWritableState(useNWCStore, ["showNWCDialog", "nwcEnabled"]),

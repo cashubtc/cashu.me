@@ -89,18 +89,6 @@
             </div>
           </q-btn>
 
-          <q-btn class="full-width custom-btn" @click="handleCairoBtn">
-            <div class="row items-center full-width">
-              <div class="icon-background q-mr-md">
-                <CodeIcon />
-              </div>
-              <div class="text-left">
-                <div class="text-weight-bold custom-btn-text">
-                  {{ $t("ReceiveEcashDrawer.actions.cairo.label") }}
-                </div>
-              </div>
-            </div>
-          </q-btn>
 
           <q-btn
             v-if="ndefSupported && showNfcButtonInDrawer"
@@ -130,7 +118,6 @@
   </q-dialog>
   <P2PKDialog v-model="showP2PKDialog" />
   <PRDialog v-model="showPRDialog" />
-  <CairoReceiveDialog v-model="showCairoDialog" />
 </template>
 
 <script>
@@ -143,12 +130,10 @@ import { useTokensStore } from "src/stores/tokens";
 import { useCameraStore } from "src/stores/camera";
 import { useP2PKStore } from "src/stores/p2pk";
 import { usePRStore } from "src/stores/payment-request";
-import { useCairoStore } from "src/stores/cairo";
 import { useSettingsStore } from "../stores/settings";
 import token from "src/js/token";
 import P2PKDialog from "./P2PKDialog.vue";
 import PRDialog from "./PaymentRequestDialog.vue";
-import CairoReceiveDialog from "./CairoReceiveDialog.vue";
 
 import { mapActions, mapState, mapWritableState } from "pinia";
 import {
@@ -158,7 +143,6 @@ import {
   Lock as LockIcon,
   Nfc as NfcIcon,
   Scan as ScanIcon,
-  Code as CodeIcon,
 } from "lucide-vue-next";
 // import ChooseMint from "components/ChooseMint.vue";
 import TokenInformation from "components/TokenInformation.vue";
@@ -171,14 +155,12 @@ export default defineComponent({
   components: {
     P2PKDialog,
     PRDialog,
-    CairoReceiveDialog,
     ChevronLeftIcon,
     ClipboardIcon,
     FileTextIcon,
     LockIcon,
     ScanIcon,
     NfcIcon,
-    CodeIcon,
   },
   data: function () {
     return {
@@ -208,7 +190,6 @@ export default defineComponent({
     ...mapState(useCameraStore, ["hasCamera"]),
     ...mapState(useP2PKStore, ["p2pkKeys", "showP2PkButtonInDrawer"]),
     ...mapState(usePRStore, ["enablePaymentRequest"]),
-    ...mapState(useCairoStore, ["showCairoDialog"]),
     ...mapWritableState(useUiStore, ["showReceiveDialog"]),
     ...mapState(useCameraStore, ["lastScannedResult"]),
   },
@@ -220,10 +201,6 @@ export default defineComponent({
       "getPrivateKeyForP2PKEncodedToken",
       "generateKeypair",
       "showLastKey",
-    ]),
-    ...mapActions(useCairoStore, [
-      "showCairoReceiveDialog",
-      "hideCairoReceiveDialog",
     ]),
     ...mapActions(useMintsStore, ["addMint"]),
     ...mapActions(useReceiveTokensStore, [
@@ -259,10 +236,6 @@ export default defineComponent({
         this.generateKeypair();
       }
       this.showLastKey();
-      this.showReceiveEcashDrawer = false;
-    },
-    handleCairoBtn: function () {
-      this.showCairoReceiveDialog();
       this.showReceiveEcashDrawer = false;
     },
     handlePaymentRequestBtn: function () {

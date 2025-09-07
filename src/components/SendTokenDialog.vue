@@ -208,22 +208,75 @@
                 </div>
               </div>
 
-              <div v-else class="row">
-                <div class="col-12">
+              <div v-else class="cairo-send-section">
+                <!-- Cairo Lock Header -->
+                <div class="cairo-section-header q-mb-md">
+                  <q-icon name="code" size="sm" color="primary" class="q-mr-sm" />
+                  <span class="text-subtitle2 text-weight-medium text-white">Cairo Lock Configuration</span>
+                </div>
+
+                <!-- Executable Input -->
+                <div class="cairo-input-group q-mb-md">
+                  <div class="input-label q-mb-sm">
+                    <q-icon name="description" size="xs" color="primary" class="q-mr-xs" />
+                    <span class="text-caption text-grey-6">Cairo Executable</span>
+                  </div>
                   <q-input
                     v-model="sendData.cairoExecutable"
-                    label="Cairo executable"
                     outlined
                     clearable
-                  ></q-input>
+                    placeholder="Paste executable.json content or upload file"
+                    type="textarea"
+                    rows="3"
+                    bg-color="grey-10"
+                    color="primary"
+                    class="cairo-executable-input"
+                  >
+                    <template v-slot:append>
+                      <q-btn
+                        flat
+                        round
+                        dense
+                        icon="upload_file"
+                        color="primary"
+                        @click="browseExecutableFile"
+                        class="upload-btn"
+                      >
+                        <q-tooltip class="bg-primary">Upload executable.json file</q-tooltip>
+                      </q-btn>
+                    </template>
+                  </q-input>
+                  <input
+                    type="file"
+                    ref="executableFileUpload"
+                    accept=".json"
+                    @change="onExecutableFileUpload"
+                    style="display: none;"
+                  />
                 </div>
-                <div class="col-12 q-mt-sm">
+
+                <!-- Expected Output -->
+                <div class="cairo-input-group">
+                  <div class="input-label q-mb-sm">
+                    <q-icon name="output" size="xs" color="primary" class="q-mr-xs" />
+                    <span class="text-caption text-grey-6">Expected Output</span>
+                  </div>
                   <q-input
                     v-model="sendData.cairoExpectedOutput"
-                    label="Expected output"
                     outlined
                     clearable
-                  ></q-input>
+                    placeholder="Enter expected program output"
+                    bg-color="grey-10"
+                    color="primary"
+                    class="cairo-output-input"
+                  >
+                    <template v-slot:hint>
+                      <div class="text-caption text-grey-6">
+                        <q-icon name="info" size="xs" class="q-mr-xs" />
+                        Output that must match when unlocking this token
+                      </div>
+                    </template>
+                  </q-input>
                 </div>
               </div>
             </div>
@@ -1236,6 +1289,83 @@ export default defineComponent({
         }
       }
     },
+    browseExecutableFile: function () {
+      this.$refs.executableFileUpload.click();
+    },
+    onExecutableFileUpload: function () {
+      const file = this.$refs.executableFileUpload.files[0];
+      if (!file) return;
+
+      if (!file.name.endsWith('.json')) {
+        notifyError('Please select a JSON file');
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        try {
+          const content = event.target.result;
+          JSON.parse(content);
+          this.sendData.cairoExecutable = content;
+          notifySuccess('Executable file loaded successfully');
+        } catch (error) {
+          console.error('Invalid JSON file:', error);
+          notifyError('Invalid JSON file. Please check the file format.');
+        }
+      };
+      reader.readAsText(file);
+    },
   },
 });
 </script>
+
+<style scoped>
+/* Cairo Send Section Styling */
+.cairo-send-section {
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 12px;
+  padding: 20px;
+  border: 1px solid rgba(var(--q-primary), 0.2);
+}
+
+.cairo-section-header {
+  display: flex;
+  align-items: center;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.cairo-input-group {
+  margin-bottom: 16px;
+}
+
+.input-label {
+  display: flex;
+  align-items: center;
+  font-weight: 500;
+}
+
+.cairo-executable-input, .cairo-output-input {
+  font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
+}
+
+.cairo-executable-input :deep(.q-field__control) {
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.cairo-output-input :deep(.q-field__control) {
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.upload-btn {
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.upload-btn:hover {
+  background: rgba(var(--q-primary), 0.2);
+  transform: scale(1.05);
+}
+</style>
