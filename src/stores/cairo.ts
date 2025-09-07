@@ -17,7 +17,11 @@ export const useCairoStore = defineStore("cairo", {
     showCairoDialog: false,
   }),
   actions: {
-    setCairoReceiveData(executable: string, programInput: any[], lockedToken: string = "") {
+    setCairoReceiveData(
+      executable: string,
+      programInput: any[],
+      lockedToken: string = ""
+    ) {
       this.cairoReceiveData.executable = executable;
       this.cairoReceiveData.programInput = programInput;
       this.cairoReceiveData.lockedToken = lockedToken;

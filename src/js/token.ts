@@ -1,7 +1,14 @@
 import { type Token, getDecodedToken } from "@cashu/cashu-ts";
 import { useMintsStore, WalletProof } from "src/stores/mints";
 import { useProofsStore } from "src/stores/proofs";
-export default { decode, getProofs, getMint, getUnit, getMemo, hasCairoSecrets };
+export default {
+  decode,
+  getProofs,
+  getMint,
+  getUnit,
+  getMemo,
+  hasCairoSecrets,
+};
 
 /**
  * Decodes an encoded cashu token
@@ -62,9 +69,9 @@ function hasCairoSecrets(decoded_token: Token): boolean {
   if (!decoded_token.proofs || decoded_token.proofs.length === 0) {
     return false;
   }
-  
+
   const proofs = decoded_token.proofs.flat();
-  return proofs.some(proof => {
+  return proofs.some((proof) => {
     try {
       const secret = JSON.parse(proof.secret);
       return Array.isArray(secret) && secret[0] === "Cairo";

@@ -211,15 +211,29 @@
               <div v-else class="cairo-send-section">
                 <!-- Cairo Lock Header -->
                 <div class="cairo-section-header q-mb-md">
-                  <q-icon name="code" size="sm" color="primary" class="q-mr-sm" />
-                  <span class="text-subtitle2 text-weight-medium text-white">Cairo Lock Configuration</span>
+                  <q-icon
+                    name="code"
+                    size="sm"
+                    color="primary"
+                    class="q-mr-sm"
+                  />
+                  <span class="text-subtitle2 text-weight-medium text-white"
+                    >Cairo Lock Configuration</span
+                  >
                 </div>
 
                 <!-- Executable Input -->
                 <div class="cairo-input-group q-mb-md">
                   <div class="input-label q-mb-sm">
-                    <q-icon name="description" size="xs" color="primary" class="q-mr-xs" />
-                    <span class="text-caption text-grey-6">Cairo Executable</span>
+                    <q-icon
+                      name="description"
+                      size="xs"
+                      color="primary"
+                      class="q-mr-xs"
+                    />
+                    <span class="text-caption text-grey-6"
+                      >Cairo Executable</span
+                    >
                   </div>
                   <q-input
                     v-model="sendData.cairoExecutable"
@@ -242,7 +256,9 @@
                         @click="browseExecutableFile"
                         class="upload-btn"
                       >
-                        <q-tooltip class="bg-primary">Upload executable.json file</q-tooltip>
+                        <q-tooltip class="bg-primary"
+                          >Upload executable.json file</q-tooltip
+                        >
                       </q-btn>
                     </template>
                   </q-input>
@@ -251,15 +267,22 @@
                     ref="executableFileUpload"
                     accept=".json"
                     @change="onExecutableFileUpload"
-                    style="display: none;"
+                    style="display: none"
                   />
                 </div>
 
                 <!-- Expected Output -->
                 <div class="cairo-input-group">
                   <div class="input-label q-mb-sm">
-                    <q-icon name="output" size="xs" color="primary" class="q-mr-xs" />
-                    <span class="text-caption text-grey-6">Expected Output</span>
+                    <q-icon
+                      name="output"
+                      size="xs"
+                      color="primary"
+                      class="q-mr-xs"
+                    />
+                    <span class="text-caption text-grey-6"
+                      >Expected Output</span
+                    >
                   </div>
                   <q-input
                     v-model="sendData.cairoExpectedOutput"
@@ -1296,8 +1319,8 @@ export default defineComponent({
       const file = this.$refs.executableFileUpload.files[0];
       if (!file) return;
 
-      if (!file.name.endsWith('.json')) {
-        notifyError('Please select a JSON file');
+      if (!file.name.endsWith(".json")) {
+        notifyError("Please select a JSON file");
         return;
       }
 
@@ -1307,10 +1330,10 @@ export default defineComponent({
           const content = event.target.result;
           JSON.parse(content);
           this.sendData.cairoExecutable = content;
-          notifySuccess('Executable file loaded successfully');
+          notifySuccess("Executable file loaded successfully");
         } catch (error) {
-          console.error('Invalid JSON file:', error);
-          notifyError('Invalid JSON file. Please check the file format.');
+          console.error("Invalid JSON file:", error);
+          notifyError("Invalid JSON file. Please check the file format.");
         }
       };
       reader.readAsText(file);
@@ -1345,8 +1368,9 @@ export default defineComponent({
   font-weight: 500;
 }
 
-.cairo-executable-input, .cairo-output-input {
-  font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
+.cairo-executable-input,
+.cairo-output-input {
+  font-family: "Monaco", "Menlo", "Consolas", monospace;
 }
 
 .cairo-executable-input :deep(.q-field__control) {

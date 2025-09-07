@@ -12,7 +12,9 @@
           <q-icon name="code" size="md" color="primary" class="q-mr-md" />
           <div>
             <div class="text-h6 text-white">Unlock Cairo Token</div>
-            <div class="text-caption text-grey-6">Provide executable and inputs to unlock your token</div>
+            <div class="text-caption text-grey-6">
+              Provide executable and inputs to unlock your token
+            </div>
           </div>
         </div>
       </q-card-section>
@@ -20,27 +22,43 @@
       <q-card-section class="q-pa-lg">
         <!-- Browser Compatibility Indicator -->
         <div class="q-mb-lg">
-          <q-banner 
-            :class="compatibilityMessage.type === 'success' ? 'bg-positive text-white' : 'bg-warning text-black'"
+          <q-banner
+            :class="
+              compatibilityMessage.type === 'success'
+                ? 'bg-positive text-white'
+                : 'bg-warning text-black'
+            "
             rounded
             dense
             class="compatibility-banner"
           >
             <template v-slot:avatar>
-              <q-icon 
-                :name="compatibilityMessage.type === 'success' ? 'check_circle' : 'warning'" 
+              <q-icon
+                :name="
+                  compatibilityMessage.type === 'success'
+                    ? 'check_circle'
+                    : 'warning'
+                "
                 size="sm"
               />
             </template>
-            <div class="text-body2 text-weight-medium">{{ compatibilityMessage.message }}</div>
-            <div v-if="compatibilityMessage.details" class="text-caption q-mt-xs">
+            <div class="text-body2 text-weight-medium">
+              {{ compatibilityMessage.message }}
+            </div>
+            <div
+              v-if="compatibilityMessage.details"
+              class="text-caption q-mt-xs"
+            >
               <div>{{ compatibilityMessage.details.reason }}</div>
-              <div v-if="compatibilityMessage.details.recommendation" class="text-weight-bold">
+              <div
+                v-if="compatibilityMessage.details.recommendation"
+                class="text-weight-bold"
+              >
                 {{ compatibilityMessage.details.recommendation }}
               </div>
             </div>
             <!-- Debug info (collapsible) -->
-            <q-expansion-item 
+            <q-expansion-item
               v-if="compatibilityMessage.debugInfo"
               class="q-mt-sm debug-expansion"
               dense
@@ -48,13 +66,33 @@
               label="Debug Info"
             >
               <div class="q-pa-sm bg-grey-9 rounded-borders text-caption">
-                <div><strong>Browser:</strong> {{ compatibilityMessage.debugInfo.browser }}</div>
-                <div><strong>Version:</strong> {{ compatibilityMessage.debugInfo.version }}</div>
-                <div><strong>Version Number:</strong> {{ compatibilityMessage.debugInfo.versionNumber }}</div>
-                <div><strong>OS:</strong> {{ compatibilityMessage.debugInfo.os }}</div>
-                <div><strong>Architecture:</strong> {{ compatibilityMessage.debugInfo.arch }}</div>
-                <div><strong>Platform:</strong> {{ compatibilityMessage.debugInfo.platform }}</div>
-                <div class="text-wrap"><strong>User Agent:</strong> {{ compatibilityMessage.debugInfo.userAgent }}</div>
+                <div>
+                  <strong>Browser:</strong>
+                  {{ compatibilityMessage.debugInfo.browser }}
+                </div>
+                <div>
+                  <strong>Version:</strong>
+                  {{ compatibilityMessage.debugInfo.version }}
+                </div>
+                <div>
+                  <strong>Version Number:</strong>
+                  {{ compatibilityMessage.debugInfo.versionNumber }}
+                </div>
+                <div>
+                  <strong>OS:</strong> {{ compatibilityMessage.debugInfo.os }}
+                </div>
+                <div>
+                  <strong>Architecture:</strong>
+                  {{ compatibilityMessage.debugInfo.arch }}
+                </div>
+                <div>
+                  <strong>Platform:</strong>
+                  {{ compatibilityMessage.debugInfo.platform }}
+                </div>
+                <div class="text-wrap">
+                  <strong>User Agent:</strong>
+                  {{ compatibilityMessage.debugInfo.userAgent }}
+                </div>
               </div>
             </q-expansion-item>
           </q-banner>
@@ -62,73 +100,89 @@
 
         <!-- Input Fields -->
         <div v-if="!isProcessing" class="cairo-inputs">
-            <!-- Executable Input -->
-            <div class="col-12 q-mb-md">
-              <div class="input-section">
-                <div class="input-header">
-                  <q-icon name="description" size="sm" color="primary" class="q-mr-sm" />
-                  <span class="text-subtitle2 text-weight-medium">Cairo Executable</span>
-                </div>
-                <q-input
-                  v-model="cairoExecutable"
-                  outlined
-                  clearable
-                  placeholder="Paste executable.json content or upload file"
-                  type="textarea"
-                  rows="4"
-                  class="cairo-executable-input"
-                  bg-color="grey-10"
+          <!-- Executable Input -->
+          <div class="col-12 q-mb-md">
+            <div class="input-section">
+              <div class="input-header">
+                <q-icon
+                  name="description"
+                  size="sm"
                   color="primary"
-                >
-                  <template v-slot:append>
-                    <q-btn
-                      flat
-                      round
-                      dense
-                      icon="upload_file"
-                      color="primary"
-                      @click="browseExecutableFile"
-                      class="upload-btn"
-                    >
-                      <q-tooltip class="bg-primary">Upload executable.json file</q-tooltip>
-                    </q-btn>
-                  </template>
-                </q-input>
-                <input
-                  type="file"
-                  ref="executableFileUpload"
-                  accept=".json"
-                  @change="onExecutableFileUpload"
-                  style="display: none;"
+                  class="q-mr-sm"
                 />
-              </div>
-            </div>
-
-            <!-- Program Inputs -->
-            <div class="col-12">
-              <div class="input-section">
-                <div class="input-header">
-                  <q-icon name="functions" size="sm" color="primary" class="q-mr-sm" />
-                  <span class="text-subtitle2 text-weight-medium">Program Inputs</span>
-                </div>
-                <q-input
-                  v-model="cairoInput"
-                  outlined
-                  clearable
-                  placeholder="Enter comma-separated numbers (e.g., 123,456,789)"
-                  bg-color="grey-10"
-                  color="primary"
-                  class="cairo-input-field"
+                <span class="text-subtitle2 text-weight-medium"
+                  >Cairo Executable</span
                 >
-                  <template v-slot:hint>
-                    <div class="text-caption text-grey-6">
-                      <q-icon name="info" size="xs" class="q-mr-xs" />
-                      Optional: Provide inputs if your Cairo program requires them
-                    </div>
-                  </template>
-                </q-input>
               </div>
+              <q-input
+                v-model="cairoExecutable"
+                outlined
+                clearable
+                placeholder="Paste executable.json content or upload file"
+                type="textarea"
+                rows="4"
+                class="cairo-executable-input"
+                bg-color="grey-10"
+                color="primary"
+              >
+                <template v-slot:append>
+                  <q-btn
+                    flat
+                    round
+                    dense
+                    icon="upload_file"
+                    color="primary"
+                    @click="browseExecutableFile"
+                    class="upload-btn"
+                  >
+                    <q-tooltip class="bg-primary"
+                      >Upload executable.json file</q-tooltip
+                    >
+                  </q-btn>
+                </template>
+              </q-input>
+              <input
+                type="file"
+                ref="executableFileUpload"
+                accept=".json"
+                @change="onExecutableFileUpload"
+                style="display: none"
+              />
             </div>
+          </div>
+
+          <!-- Program Inputs -->
+          <div class="col-12">
+            <div class="input-section">
+              <div class="input-header">
+                <q-icon
+                  name="functions"
+                  size="sm"
+                  color="primary"
+                  class="q-mr-sm"
+                />
+                <span class="text-subtitle2 text-weight-medium"
+                  >Program Inputs</span
+                >
+              </div>
+              <q-input
+                v-model="cairoInput"
+                outlined
+                clearable
+                placeholder="Enter comma-separated numbers (e.g., 123,456,789)"
+                bg-color="grey-10"
+                color="primary"
+                class="cairo-input-field"
+              >
+                <template v-slot:hint>
+                  <div class="text-caption text-grey-6">
+                    <q-icon name="info" size="xs" class="q-mr-xs" />
+                    Optional: Provide inputs if your Cairo program requires them
+                  </div>
+                </template>
+              </q-input>
+            </div>
+          </div>
         </div>
 
         <!-- Loading state for Cairo proving -->
@@ -147,22 +201,23 @@
       </q-card-section>
 
       <!-- Action Buttons -->
-      <q-card-actions v-if="!isProcessing" align="between" class="cairo-dialog-actions">
-        <q-btn
-          flat
-          color="grey-6"
-          @click="closeDialog"
-          class="close-btn"
-        >
+      <q-card-actions
+        v-if="!isProcessing"
+        align="between"
+        class="cairo-dialog-actions"
+      >
+        <q-btn flat color="grey-6" @click="closeDialog" class="close-btn">
           <q-icon name="close" class="q-mr-sm" />
           Close
         </q-btn>
-        
+
         <q-btn
           unelevated
           color="primary"
           @click="unlockCairoToken"
-          :disable="!cairoExecutable.trim() || compatibilityMessage.type !== 'success'"
+          :disable="
+            !cairoExecutable.trim() || compatibilityMessage.type !== 'success'
+          "
           class="unlock-btn"
         >
           <q-icon name="lock_open" class="q-mr-sm" />
@@ -177,10 +232,7 @@
 import { defineComponent } from "vue";
 import { useCairoStore } from "src/stores/cairo";
 import { useReceiveTokensStore } from "src/stores/receiveTokensStore";
-import {
-  notifyError,
-  notifySuccess,
-} from "src/js/notify.ts";
+import { notifyError, notifySuccess } from "src/js/notify.ts";
 import { getCairoCompatibilityMessage } from "src/js/browser-compatibility.js";
 
 export default defineComponent({
@@ -222,8 +274,8 @@ export default defineComponent({
       const file = this.$refs.executableFileUpload.files[0];
       if (!file) return;
 
-      if (!file.name.endsWith('.json')) {
-        notifyError('Please select a JSON file');
+      if (!file.name.endsWith(".json")) {
+        notifyError("Please select a JSON file");
         return;
       }
 
@@ -233,30 +285,34 @@ export default defineComponent({
           const content = event.target.result;
           JSON.parse(content);
           this.cairoExecutable = content;
-          notifySuccess('Executable file loaded successfully');
+          notifySuccess("Executable file loaded successfully");
         } catch (error) {
-          console.error('Invalid JSON file:', error);
-          notifyError('Invalid JSON file. Please check the file format.');
+          console.error("Invalid JSON file:", error);
+          notifyError("Invalid JSON file. Please check the file format.");
         }
       };
       reader.readAsText(file);
     },
     async unlockCairoToken() {
       if (!this.cairoExecutable.trim()) {
-        notifyError('Please provide the executable');
+        notifyError("Please provide the executable");
         return;
       }
 
       // Check browser compatibility
-      if (this.compatibilityMessage.type !== 'success') {
-        notifyError('Your browser is not compatible with the Cairo prover. Please check the compatibility requirements.');
+      if (this.compatibilityMessage.type !== "success") {
+        notifyError(
+          "Your browser is not compatible with the Cairo prover. Please check the compatibility requirements."
+        );
         return;
       }
 
       // Parse the input string into bigint array
       const programInput = [];
       if (this.cairoInput.trim()) {
-        const inputParts = this.cairoInput.split(",").map(part => part.trim());
+        const inputParts = this.cairoInput
+          .split(",")
+          .map((part) => part.trim());
         for (const part of inputParts) {
           if (part) {
             try {
@@ -272,7 +328,7 @@ export default defineComponent({
 
       const cairoStore = useCairoStore();
       const receiveTokensStore = useReceiveTokensStore();
-      
+
       // Set processing state
       this.isProcessing = true;
       this.loadingStatus = "Executing...";
@@ -281,27 +337,31 @@ export default defineComponent({
       try {
         // Set the Cairo data
         cairoStore.setCairoReceiveData(
-          this.cairoExecutable, 
-          programInput, 
+          this.cairoExecutable,
+          programInput,
           cairoStore.cairoReceiveData.lockedToken
         );
 
         // Simulate proving phase
-        await new Promise(resolve => setTimeout(resolve, 1500));
+        await new Promise((resolve) => setTimeout(resolve, 1500));
         this.loadingStatus = "Proving...";
         this.loadingSubtext = "Generating cryptographic proof of execution";
-        
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        
+
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+
         // Attempt to receive the token
-        await receiveTokensStore.receiveToken(cairoStore.cairoReceiveData.lockedToken);
-        
-        notifySuccess('Cairo token unlocked successfully!');
+        await receiveTokensStore.receiveToken(
+          cairoStore.cairoReceiveData.lockedToken
+        );
+
+        notifySuccess("Cairo token unlocked successfully!");
         cairoStore.hideCairoReceiveDialog();
         this.show = false;
       } catch (error) {
-        console.error('Cairo unlock failed:', error);
-        notifyError('Failed to unlock Cairo token. Please check your executable and inputs.');
+        console.error("Cairo unlock failed:", error);
+        notifyError(
+          "Failed to unlock Cairo token. Please check your executable and inputs."
+        );
         this.isProcessing = false;
       }
     },
@@ -372,8 +432,9 @@ export default defineComponent({
   padding-left: 4px;
 }
 
-.cairo-executable-input, .cairo-input-field {
-  font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
+.cairo-executable-input,
+.cairo-input-field {
+  font-family: "Monaco", "Menlo", "Consolas", monospace;
 }
 
 .cairo-executable-input :deep(.q-field__control) {
@@ -456,7 +517,7 @@ export default defineComponent({
     max-width: 90vw;
     margin: 20px;
   }
-  
+
   .cairo-inputs {
     padding: 16px;
   }

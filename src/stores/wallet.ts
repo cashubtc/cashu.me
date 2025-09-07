@@ -369,7 +369,7 @@ export const useWalletStore = defineStore("wallet", {
         {
           keysetId,
           cairoSend: {
-            executable: cairoExecutable,
+            executable: cairoExecutable.replaceAll(/\s+/g, ""),
             expectedOutput: cairoExpectedOutput,
           },
         }

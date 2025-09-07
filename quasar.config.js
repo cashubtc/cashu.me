@@ -55,6 +55,22 @@ module.exports = configure(function (/* ctx */) {
       },
 
       vueRouterMode: "history", // available values: 'hash', 'history'
+      extendViteConf(viteConf) {
+        // Merge instead of overwrite
+        viteConf.optimizeDeps ||= {};
+        const excluded = new Set(viteConf.optimizeDeps.exclude || []);
+        // Cover both names just in case
+        for (const dep of ["@cashu/cashu-ts", "cashu-ts"]) excluded.add(dep);
+        viteConf.optimizeDeps.exclude = Array.from(excluded);
+
+        // If you ever run SSR mode, also ensure it’s not externalized/pre-bundled there
+        viteConf.ssr ||= {};
+        viteConf.ssr.noExternal = [
+          ...(viteConf.ssr.noExternal || []),
+          "@cashu/cashu-ts",
+          "cashu-ts",
+        ];
+      },
       // vueRouterBase,
       // vueDevtools,
       // vueOptionsAPI: false,
