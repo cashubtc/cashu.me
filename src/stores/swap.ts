@@ -56,7 +56,9 @@ export const useSwapStore = defineStore("swap", {
           swapAmountData.toUrl,
           mintStore.activeUnit
         );
-        const mintQuote = await walletStore.requestMint(
+        const mintQuote = await walletStore.requestMintBolt11(
+          // changed by refactor: requestMint -> requestMintBolt11
+
           swapAmountData.amount,
           toWallet
         );
@@ -80,7 +82,7 @@ export const useSwapStore = defineStore("swap", {
         await walletStore.melt(mintProofs, meltQuote, fromWallet);
 
         // settle invoice on other side
-        await walletStore.checkInvoice(mintQuote.quote);
+        await walletStore.checkInvoiceBolt11(mintQuote.quote);
       } catch (e) {
         console.error("Error swapping", e);
         notifyError(i18n.global.t("swap.swap_error_text"));
@@ -122,14 +124,17 @@ export const useSwapStore = defineStore("swap", {
         const proofs = token.getProofs(tokenJson);
         meltAmount -= fromWallet.getFeesForProofs(proofs);
 
-        const mintQuote = await walletStore.requestMint(meltAmount, toWallet);
+        const mintQuote = await walletStore.requestMintBolt11(
+          meltAmount,
+          toWallet
+        );
         const meltQuote = await walletStore.meltQuote(
           fromWallet,
           mintQuote.request
         );
         await walletStore.melt(proofs, meltQuote, fromWallet);
 
-        await walletStore.checkInvoice(mintQuote.quote);
+        await walletStore.checkInvoiceBolt11(mintQuote.quote);
       } catch (e) {
         console.error("Error swapping", e);
         notifyError(i18n.global.t("swap.swap_error_text"));

@@ -107,7 +107,7 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
         if (now > dueTime) {
           const walletStore = useWalletStore();
           try {
-            await walletStore.checkInvoice(q.quote, false);
+            await walletStore.checkInvoiceBolt11(q.quote, false);
             this.quotes.splice(i, 1);
           } catch (error) {
             q.lastChecked = now;
@@ -140,7 +140,7 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
       for (const q of quotesToCheck) {
         try {
           console.log(`Checking quote ${q.quote}`);
-          walletStore.mintOnPaid(q.quote, false, false);
+          walletStore.mintOnPaidBolt11(q.quote, false, false);
         } catch (error) {
           console.error(error);
         }

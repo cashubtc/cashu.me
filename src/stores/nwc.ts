@@ -189,7 +189,7 @@ export const useNWCStore = defineStore("nwc", {
       console.log("### expiry", expiry); // seconds
       // make invoice
       const walletStore = useWalletStore();
-      const quote = await walletStore.requestMint(
+      const quote = await walletStore.requestMintBolt11(
         amount / 1000,
         walletStore.wallet
       );
@@ -206,7 +206,7 @@ export const useNWCStore = defineStore("nwc", {
         };
       }
 
-      walletStore.mintOnPaid(quote.quote, false, true);
+      walletStore.mintOnPaidBolt11(quote.quote, false, true);
 
       return {
         result_type: nwcCommand.method,

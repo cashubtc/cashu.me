@@ -587,7 +587,7 @@ export const useWalletStore = defineStore("wallet", {
     meltQuote: meltQuoteBolt11,
     meltInvoiceData: meltInvoiceDataBolt11,
     melt: meltBolt11,
-    
+
     // Alias functions for bolt11 compatibility
     requestMintBolt11: requestMintBolt11,
     mintBolt11: mintBolt11,
@@ -732,7 +732,7 @@ export const useWalletStore = defineStore("wallet", {
       }
       return true;
     },
-    checkInvoice: async function (
+    checkInvoiceBolt11: async function (
       quote: string,
       verbose = true,
       hideInvoiceDetailsOnMint = true
@@ -782,7 +782,7 @@ export const useWalletStore = defineStore("wallet", {
         throw error;
       }
     },
-    checkOutgoingInvoice: async function (quote: string, verbose = true) {
+    checkOutgoingInvoiceBolt11: async function (quote: string, verbose = true) {
       const uIStore = useUiStore();
       const mintStore = useMintsStore();
       const invoice = this.invoiceHistory.find((i) => i.quote === quote);
@@ -910,7 +910,7 @@ export const useWalletStore = defineStore("wallet", {
         this.activeWebsocketConnections--;
       }
     },
-    mintOnPaid: async function (
+    mintOnPaidBolt11: async function (
       quote: string,
       verbose = true,
       kickOffInvoiceChecker = true,
@@ -1002,7 +1002,7 @@ export const useWalletStore = defineStore("wallet", {
       }
     },
     ////////////// UI HELPERS //////////////
-    addOutgoingPendingInvoiceToHistory: async function (
+    addOutgoingPendingInvoiceToHistoryBolt11: async function (
       quote: MeltQuoteResponse,
       mint: string,
       unit: string
@@ -1060,7 +1060,7 @@ export const useWalletStore = defineStore("wallet", {
         }
       }
     },
-    handleBolt11Invoice: async function () {
+    handleBolt11InvoiceBolt11: async function () {
       this.payInvoiceData.show = true;
       let invoice;
       try {
@@ -1135,15 +1135,15 @@ export const useWalletStore = defineStore("wallet", {
       this.payInvoiceData.input.request = req;
       if (req.toLowerCase().startsWith("lnbc")) {
         this.payInvoiceData.input.request = req;
-        await this.handleBolt11Invoice();
+        await this.handleBolt11InvoiceBolt11();
       } else if (req.toLowerCase().startsWith("lightning:")) {
         this.payInvoiceData.input.request = req.slice(10);
-        await this.handleBolt11Invoice();
+        await this.handleBolt11InvoiceBolt11();
       } else if (req.startsWith("bitcoin:")) {
         const lightningInvoice = req.match(/lightning=([^&]+)/);
         if (lightningInvoice) {
           this.payInvoiceData.input.request = lightningInvoice[1];
-          await this.handleBolt11Invoice();
+          await this.handleBolt11InvoiceBolt11();
         }
       } else if (req.toLowerCase().startsWith("lnurl:")) {
         this.payInvoiceData.input.request = req.slice(6);

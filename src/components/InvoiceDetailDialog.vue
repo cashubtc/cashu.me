@@ -262,9 +262,9 @@ export default defineComponent({
   },
   methods: {
     ...mapActions(useWalletStore, [
-      "requestMint",
+      "requestMintBolt11",
       "lnurlPaySecond",
-      "mintOnPaid",
+      "mintOnPaidBolt11",
     ]),
     ...mapActions(useMintsStore, ["toggleUnit"]),
     requestMintButton: async function () {
@@ -280,11 +280,11 @@ export default defineComponent({
           mintStore.activeMintUrl,
           mintStore.activeUnit
         );
-        const mintQuote = await this.requestMint(
+        const mintQuote = await this.requestMintBolt11(
           this.invoiceData.amount,
           mintWallet
         );
-        await this.mintOnPaid(mintQuote.quote);
+        await this.mintOnPaidBolt11(mintQuote.quote);
       } catch (e) {
         console.log("#### requestMintButton", e);
       } finally {
