@@ -2,6 +2,8 @@ import { currentDateStr } from "src/js/utils";
 import { useMintsStore, WalletProof } from "./mints";
 import { useProofsStore } from "./proofs";
 import { useUiStore } from "src/stores/ui";
+import { useSettingsStore } from "src/stores/settings";
+import { useWorkersStore } from "./workers";
 import {
   CashuWallet,
   MintQuotePayload,
@@ -22,6 +24,11 @@ import {
 } from "src/js/notify";
 import type { InvoiceHistory } from "./wallet";
 import { useInvoicesWorkerStore } from "./invoicesWorker";
+import * as bolt11Decoder from "light-bolt11-decoder";
+import * as _ from "underscore";
+import { date } from "quasar";
+import { notifyWarning } from "src/js/notify";
+
 
 let isUnloading = false;
 if (typeof window !== "undefined") {
@@ -624,11 +631,6 @@ export function updateOutgoingInvoiceInHistoryBolt11(
       }
     });
 }
-
-import * as bolt11Decoder from "light-bolt11-decoder";
-import * as _ from "underscore";
-import { date } from "quasar";
-import { notifyWarning } from "src/js/notify";
 
 export async function handleBolt11InvoiceBolt11(this: any) {
   this.payInvoiceData.show = true;
