@@ -62,6 +62,26 @@
             <ToggleUnit class="q-mt-md" />
           </div>
         </div>
+        <!-- BOLT12 amount entry if offer has no amount -->
+        <div v-if="payInvoiceData.invoice.bolt12" class="q-mb-md">
+          <q-input
+            filled
+            dense
+            v-model.number="payInvoiceData.input.amount"
+            type="number"
+            :label="`Amount (${tickerShort})`"
+            @keyup.enter="meltQuoteInvoiceData"
+          />
+          <div class="row q-mt-sm">
+            <q-btn
+              unelevated
+              color="primary"
+              :disabled="!payInvoiceData.input.amount"
+              @click="meltQuoteInvoiceData"
+              >Quote</q-btn
+            >
+          </div>
+        </div>
         <p class="text-wrap">
           <strong v-if="payInvoiceData.invoice.description"
             >{{ $t("PayInvoiceDialog.invoice.memo.label") }}:</strong

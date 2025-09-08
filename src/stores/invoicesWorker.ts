@@ -27,6 +27,11 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
         "cashu.worker.invoices.quotesQueue",
         []
       ),
+      // BOLT12 offers queue
+      bolt12Quotes: useLocalStorage<InvoiceQuote[]>(
+        "cashu.worker.invoices.bolt12QuotesQueue",
+        []
+      ),
       lastInvoiceCheckTime: 0,
       maxQuotesToCheckOnStartup: 10,
       lastPendingInvoiceCheck: useLocalStorage<number>(
@@ -76,6 +81,29 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
         this.quotes.splice(index, 1);
       }
     },
+    addBolt12OfferToChecker(quote: string) {
+      const existingIndex = this.bolt12Quotes.findIndex((q) => q.quote === quote);
+      if (existingIndex !== -1) {
+        this.bolt12Quotes.splice(existingIndex, 1);
+      }
+
+      if (this.bolt12Quotes.length >= this.maxLength) {
+        this.bolt12Quotes.shift();
+      }
+      this.bolt12Quotes.push({
+        quote,
+        addedAt: Date.now(),
+        lastChecked: 0,
+        checkCount: 0,
+      });
+      this.startInvoiceCheckerWorker();
+    },
+    removeBolt12OfferFromChecker(quote: string) {
+      const index = this.bolt12Quotes.findIndex((q) => q.quote === quote);
+      if (index !== -1) {
+        this.bolt12Quotes.splice(index, 1);
+      }
+    },
     dueTime(q: InvoiceQuote) {
       if (q.checkCount > this.keepIntervalConstantForNChecks) {
         return (
@@ -93,14 +121,18 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
     async processQuotes() {
       const now = Date.now();
       this.quotes = this.quotes.filter((q) => now - q.addedAt < this.maxAge);
+      this.bolt12Quotes = this.bolt12Quotes.filter(
+        (q) => now - q.addedAt < this.maxAge
+      );
 
-      if (this.quotes.length === 0) return;
+      if (this.quotes.length === 0 && this.bolt12Quotes.length === 0) return;
 
       // Global rate limit
       if (now - this.lastInvoiceCheckTime < this.checkInterval) {
         return;
       }
 
+      // First process one bolt11 quote if any
       for (let i = this.quotes.length - 1; i >= 0; i--) {
         const q = this.quotes[i];
         const dueTime = this.dueTime(q);
@@ -109,6 +141,26 @@ export const useInvoicesWorkerStore = defineStore("invoicesWorker", {
           try {
             await walletStore.checkInvoiceBolt11(q.quote, false);
             this.quotes.splice(i, 1);
+          } catch (error) {
+            q.lastChecked = now;
+            q.checkCount += 1;
+          }
+          this.lastInvoiceCheckTime = now;
+          break;
+        }
+      }
+
+      // Then process one bolt12 offer if any
+      for (let i = this.bolt12Quotes.length - 1; i >= 0; i--) {
+        const q = this.bolt12Quotes[i];
+        const dueTime = this.dueTime(q);
+        if (now > dueTime) {
+          const walletStore = useWalletStore();
+          try {
+            await walletStore.checkOfferAndMintBolt12(q.quote, false);
+            // Keep in queue for future payments as offers are reusable, but back off checks
+            q.lastChecked = now;
+            q.checkCount += 1;
           } catch (error) {
             q.lastChecked = now;
             q.checkCount += 1;

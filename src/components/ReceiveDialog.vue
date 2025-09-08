@@ -27,8 +27,8 @@
         </q-btn>
       </q-card-section>
 
-      <q-card-section class="q-pa-md">
-        <div class="q-gutter-y-md">
+  <q-card-section class="q-pa-md">
+    <div class="q-gutter-y-md">
           <q-btn
             class="full-width custom-btn"
             @click="toggleReceiveEcashDrawer"
@@ -45,23 +45,35 @@
             </div>
           </q-btn>
 
-          <q-btn class="full-width custom-btn" @click="showInvoiceCreateDialog">
-            <div class="row items-center full-width">
-              <div class="icon-background q-mr-md">
-                <ZapIcon />
-              </div>
-              <div class="text-left">
-                <div class="text-weight-bold custom-btn-text">
-                  {{ $t("ReceiveDialog.actions.lightning.label") }}
-                </div>
+        <q-btn class="full-width custom-btn" @click="showInvoiceCreateDialog">
+          <div class="row items-center full-width">
+            <div class="icon-background q-mr-md">
+              <ZapIcon />
+            </div>
+            <div class="text-left">
+              <div class="text-weight-bold custom-btn-text">
+                {{ $t("ReceiveDialog.actions.lightning.label") }}
               </div>
             </div>
-          </q-btn>
-        </div>
-      </q-card-section>
-    </q-card>
-  </q-dialog>
-  <ReceiveEcashDrawer />
+          </div>
+        </q-btn>
+
+        <q-btn class="full-width custom-btn" @click="showBolt12OfferCreateDialog">
+          <div class="row items-center full-width">
+            <div class="icon-background q-mr-md">
+              <ZapIcon />
+            </div>
+            <div class="text-left">
+              <div class="text-weight-bold custom-btn-text">Lightning Offer (BOLT12)</div>
+            </div>
+          </div>
+        </q-btn>
+    </div>
+  </q-card-section>
+</q-card>
+</q-dialog>
+<Bolt12OfferDetailsDialog />
+<ReceiveEcashDrawer />
 </template>
 
 <script>
@@ -72,6 +84,7 @@ import { useUiStore } from "src/stores/ui";
 import { useWalletStore } from "src/stores/wallet";
 import { useCameraStore } from "src/stores/camera";
 import ReceiveEcashDrawer from "src/components/ReceiveEcashDrawer.vue";
+import Bolt12OfferDetailsDialog from "src/components/Bolt12OfferDetailsDialog.vue";
 import { useMintsStore } from "src/stores/mints";
 import {
   notifyError,
@@ -106,6 +119,7 @@ export default defineComponent({
   computed: {
     ...mapWritableState(useUiStore, [
       "showInvoiceDetails",
+      "showBolt12OfferDetails",
       "showReceiveDialog",
       "showReceiveEcashDrawer",
     ]),
@@ -148,6 +162,21 @@ export default defineComponent({
       this.invoiceData.hash = "";
       this.invoiceData.memo = "";
       this.showInvoiceDetails = true;
+      this.showReceiveDialog = false;
+    },
+    showBolt12OfferCreateDialog: async function () {
+      if (!this.canReceivePayments) {
+        notifyWarning(
+          this.$i18n.t("ReceiveDialog.actions.lightning.error_no_mints")
+        );
+        this.showReceiveDialog = false;
+        return;
+      }
+      this.invoiceData.amount = "";
+      this.invoiceData.bolt11 = "";
+      this.invoiceData.hash = "";
+      this.invoiceData.memo = "";
+      this.showBolt12OfferDetails = true;
       this.showReceiveDialog = false;
     },
     ...mapActions(useCameraStore, ["closeCamera", "showCamera"]),

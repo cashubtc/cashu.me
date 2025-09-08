@@ -260,6 +260,7 @@ export default defineComponent({
       "checkTokenSpendable",
       "checkInvoiceBolt11",
       "checkOutgoingInvoiceBolt11",
+      "checkOfferAndMintBolt12",
     ]),
 
     handleLongPress(transaction) {
@@ -344,7 +345,12 @@ export default defineComponent({
       if (transaction.type === "ecash") {
         this.checkTokenSpendable(transaction);
       } else if (transaction.type === "lightning") {
-        if (transaction.amount > 0) {
+        // Heuristic: BOLT12 mint quote objects have amount_paid/amount_issued
+        const isBolt12 = transaction?.mintQuote &&
+          typeof transaction.mintQuote.amount_paid !== "undefined";
+        if (isBolt12) {
+          this.checkOfferAndMintBolt12(transaction.quote, true);
+        } else if (transaction.amount > 0) {
           this.checkInvoiceBolt11(transaction.quote, true);
         } else {
           this.checkOutgoingInvoiceBolt11(transaction.quote, true);

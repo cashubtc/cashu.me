@@ -26,6 +26,7 @@ export const useUiStore = defineStore("ui", {
     hideBalance: useLocalStorage<boolean>("cashu.ui.hideBalance", false),
     tickerLong: "Satoshis",
     showInvoiceDetails: false,
+    showBolt12OfferDetails: false,
     showSendDialog: false,
     showReceiveDialog: false,
     showReceiveEcashDrawer: false,

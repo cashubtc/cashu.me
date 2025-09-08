@@ -27,6 +27,13 @@ import {
   updateOutgoingInvoiceInHistoryBolt11,
   handleBolt11InvoiceBolt11,
 } from "./walletBolt11";
+import {
+  requestMintBolt12,
+  checkOfferAndMintBolt12,
+  meltQuoteInvoiceDataBolt12,
+  meltInvoiceDataBolt12,
+  meltBolt12,
+} from "./walletBolt12";
 
 import * as _ from "underscore";
 import token from "src/js/token";
@@ -587,12 +594,25 @@ export const useWalletStore = defineStore("wallet", {
       // }
     },
 
-    // Bolt11 minting and melting (delegated to bolt11 file)
+    // Minting and melting
     requestMint: requestMintBolt11,
     mint: mintBolt11,
-    meltQuoteInvoiceData: meltQuoteInvoiceDataBolt11,
+    // Dispatch to Bolt11 or Bolt12 depending on parsed input
+    meltQuoteInvoiceData: async function () {
+      if (this.payInvoiceData?.invoice && (this.payInvoiceData.invoice as any).bolt12) {
+        return await meltQuoteInvoiceDataBolt12.call(this);
+      } else {
+        return await meltQuoteInvoiceDataBolt11.call(this);
+      }
+    },
     meltQuote: meltQuoteBolt11,
-    meltInvoiceData: meltInvoiceDataBolt11,
+    meltInvoiceData: async function () {
+      if (this.payInvoiceData?.invoice && (this.payInvoiceData.invoice as any).bolt12) {
+        return await meltInvoiceDataBolt12.call(this);
+      } else {
+        return await meltInvoiceDataBolt11.call(this);
+      }
+    },
     melt: meltBolt11,
 
     // Alias functions for bolt11 compatibility
@@ -602,6 +622,11 @@ export const useWalletStore = defineStore("wallet", {
     meltQuoteBolt11: meltQuoteBolt11,
     meltInvoiceDataBolt11: meltInvoiceDataBolt11,
     meltBolt11: meltBolt11,
+    // Bolt12 explicit aliases
+    requestMintBolt12: requestMintBolt12,
+    meltQuoteInvoiceDataBolt12: meltQuoteInvoiceDataBolt12,
+    meltInvoiceDataBolt12: meltInvoiceDataBolt12,
+    meltBolt12: meltBolt12,
     // /check
     checkProofsSpendable: async function (
       proofs: Proof[],
@@ -753,6 +778,9 @@ export const useWalletStore = defineStore("wallet", {
     },
     checkOutgoingInvoiceBolt11: async function (quote: string, verbose = true) {
       return await checkOutgoingInvoiceBolt11.call(this, quote, verbose);
+    },
+    checkOfferAndMintBolt12: async function (quote: string, verbose = true) {
+      return await checkOfferAndMintBolt12.call(this, quote, verbose);
     },
     onTokenPaid: async function (historyToken: HistoryToken) {
       const sendTokensStore = useSendTokensStore();
@@ -916,6 +944,21 @@ export const useWalletStore = defineStore("wallet", {
       const prStore = usePRStore();
       await prStore.decodePaymentRequest(req);
     },
+    handleBolt12Offer: async function (offer: string) {
+      this.payInvoiceData.show = true;
+      const cleanOffer = {
+        bolt12: offer,
+        memo: "",
+        msat: 0,
+        sat: 0,
+        fsat: 0,
+        description: "",
+      } as any;
+      this.payInvoiceData.invoice = Object.freeze(cleanOffer);
+      if (this.payInvoiceData.input.amount && this.payInvoiceData.input.amount > 0) {
+        await this.meltQuoteInvoiceData();
+      }
+    },
     decodeRequest: async function (req: string) {
       const p2pkStore = useP2PKStore();
       req = req.trim();
@@ -924,14 +967,26 @@ export const useWalletStore = defineStore("wallet", {
         this.payInvoiceData.input.request = req;
         await this.handleBolt11InvoiceBolt11();
       } else if (req.toLowerCase().startsWith("lightning:")) {
-        this.payInvoiceData.input.request = req.slice(10);
-        await this.handleBolt11InvoiceBolt11();
+        const ln = req.slice(10);
+        if (ln.toLowerCase().startsWith("lno1")) {
+          await this.handleBolt12Offer(ln);
+        } else {
+          this.payInvoiceData.input.request = ln;
+          await this.handleBolt11InvoiceBolt11();
+        }
       } else if (req.startsWith("bitcoin:")) {
         const lightningInvoice = req.match(/lightning=([^&]+)/);
         if (lightningInvoice) {
-          this.payInvoiceData.input.request = lightningInvoice[1];
-          await this.handleBolt11InvoiceBolt11();
+          const ln = lightningInvoice[1];
+          if (ln.toLowerCase().startsWith("lno1")) {
+            await this.handleBolt12Offer(ln);
+          } else {
+            this.payInvoiceData.input.request = ln;
+            await this.handleBolt11InvoiceBolt11();
+          }
         }
+      } else if (req.toLowerCase().startsWith("lno1")) {
+        await this.handleBolt12Offer(req);
       } else if (req.toLowerCase().startsWith("lnurl:")) {
         this.payInvoiceData.input.request = req.slice(6);
         await this.lnurlPayFirst(this.payInvoiceData.input.request);
