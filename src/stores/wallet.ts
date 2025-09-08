@@ -849,6 +849,15 @@ export const useWalletStore = defineStore("wallet", {
         unit
       );
     },
+    removeOutgoingInvoiceFromHistoryBolt11: function (quote: string) {
+      return removeOutgoingInvoiceFromHistoryBolt11.call(this, quote);
+    },
+    updateOutgoingInvoiceInHistoryBolt11: function (
+      quote: MeltQuoteResponse,
+      options?: { status?: "pending" | "paid"; amount?: number }
+    ) {
+      return updateOutgoingInvoiceInHistoryBolt11.call(this, quote, options);
+    },
     removeOutgoingInvoiceFromHistory: function (quote: string) {
       const index = this.invoiceHistory.findIndex((i) => i.quote === quote);
       if (index >= 0) {
