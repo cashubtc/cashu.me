@@ -995,7 +995,7 @@ export const useWalletStore = defineStore("wallet", {
         this.payInvoiceData.invoice = null;
         this.payInvoiceData.input = {
           request: "",
-          amount: null,
+          amount: undefined,
           comment: "",
           quote: "",
         };
