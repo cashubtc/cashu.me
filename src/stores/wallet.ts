@@ -11,8 +11,7 @@ import { useSendTokensStore } from "src/stores/sendTokensStore";
 import { usePRStore } from "./payment-request";
 import { useWorkersStore } from "./workers";
 import { useInvoicesWorkerStore } from "./invoicesWorker";
-import * as nobleSecp256k1 from "@noble/secp256k1";
-import { bytesToHex } from "@noble/hashes/utils";
+
 import {
   requestMintBolt11,
   mintBolt11,
@@ -20,6 +19,13 @@ import {
   meltQuoteBolt11,
   meltInvoiceDataBolt11,
   meltBolt11,
+  checkInvoiceBolt11,
+  checkOutgoingInvoiceBolt11,
+  mintOnPaidBolt11,
+  addOutgoingPendingInvoiceToHistoryBolt11,
+  removeOutgoingInvoiceFromHistoryBolt11,
+  updateOutgoingInvoiceInHistoryBolt11,
+  handleBolt11InvoiceBolt11,
 } from "./walletBolt11";
 
 import * as _ from "underscore";
@@ -737,109 +743,15 @@ export const useWalletStore = defineStore("wallet", {
       verbose = true,
       hideInvoiceDetailsOnMint = true
     ) {
-      const uIStore = useUiStore();
-      uIStore.triggerActivityOrb();
-      const mintStore = useMintsStore();
-      const invoice = this.invoiceHistory.find((i) => i.quote === quote);
-      if (!invoice) {
-        throw new Error("invoice not found");
-      }
-      const mintWallet = this.mintWallet(invoice.mint, invoice.unit);
-      const mint = mintStore.mints.find((m) => m.url === invoice.mint);
-      if (!mint) {
-        throw new Error("mint not found");
-      }
-      try {
-        // check the state first
-        const state = (await mintWallet.checkMintQuote(quote)).state;
-        if (state == MintQuoteState.ISSUED) {
-          this.setInvoicePaid(quote);
-          return;
-        }
-        if (state != MintQuoteState.PAID) {
-          console.log("### mintQuote not paid yet");
-          if (verbose) {
-            notify(this.t("wallet.notifications.invoice_still_pending"));
-          }
-          throw new Error(`invoice state not paid: ${state}`);
-        }
-        const proofs = await this.mintBolt11(invoice, verbose);
-        if (hideInvoiceDetailsOnMint) {
-          uIStore.showInvoiceDetails = false;
-        }
-        useUiStore().vibrate();
-        notifySuccess(
-          this.t("wallet.notifications.received_lightning", {
-            amount: uIStore.formatCurrency(invoice.amount, invoice.unit),
-          })
-        );
-        return proofs;
-      } catch (error) {
-        // if (verbose) {
-        //   notify("Invoice still pending");
-        // }
-        console.log("Invoice still pending", invoice.quote);
-        throw error;
-      }
+      return await checkInvoiceBolt11.call(
+        this,
+        quote,
+        verbose,
+        hideInvoiceDetailsOnMint
+      );
     },
     checkOutgoingInvoiceBolt11: async function (quote: string, verbose = true) {
-      const uIStore = useUiStore();
-      const mintStore = useMintsStore();
-      const invoice = this.invoiceHistory.find((i) => i.quote === quote);
-      if (!invoice) {
-        throw new Error("invoice not found");
-      }
-      const mintWallet = this.mintWallet(invoice.mint, invoice.unit);
-      const mint = mintStore.mints.find((m) => m.url === invoice.mint);
-      if (!mint) {
-        throw new Error("mint not found");
-      }
-      const proofs: Proof[] = await proofsStore.getProofsForQuote(quote);
-      try {
-        // this is an outgoing invoice, we first do a getMintQuote to check if the invoice is paid
-        const meltQuote = await mintWallet.mint.checkMeltQuote(quote);
-        this.updateOutgoingInvoiceInHistory(meltQuote as MeltQuoteResponse);
-        if (meltQuote.state == MeltQuoteState.PENDING) {
-          console.log("### mintQuote not paid yet");
-          if (verbose) {
-            notify(this.t("wallet.notifications.invoice_still_pending"));
-          }
-          throw new Error("invoice not paid yet.");
-        } else if (meltQuote.state == MeltQuoteState.UNPAID) {
-          // we assume that the payment failed and we unset the proofs as reserved
-          await useProofsStore().setReserved(proofs, false);
-          this.removeOutgoingInvoiceFromHistory(quote);
-          notifyWarning(
-            this.t("wallet.notifications.lightning_payment_failed")
-          );
-        } else if (meltQuote.state == MeltQuoteState.PAID) {
-          // if the invoice is paid, we check if all proofs are spent and if so, we invalidate them and set the invoice state in the history to "paid"
-          const spentProofs = await this.checkProofsSpendable(
-            proofs,
-            mintWallet,
-            true
-          );
-          if (spentProofs != undefined && spentProofs.length == proofs.length) {
-            useUiStore().vibrate();
-            notifySuccess(
-              this.t("wallet.notifications.sent", {
-                amount: uIStore.formatCurrency(
-                  useProofsStore().sumProofs(proofs),
-                  invoice.unit
-                ),
-              })
-            );
-          }
-          // set invoice in history to paid
-          this.setInvoicePaid(quote);
-        }
-      } catch (error: any) {
-        if (verbose) {
-          notifyApiError(error);
-        }
-        console.log("Could not check quote", invoice.quote, error);
-        throw error;
-      }
+      return await checkOutgoingInvoiceBolt11.call(this, quote, verbose);
     },
     onTokenPaid: async function (historyToken: HistoryToken) {
       const sendTokensStore = useSendTokensStore();
@@ -916,90 +828,13 @@ export const useWalletStore = defineStore("wallet", {
       kickOffInvoiceChecker = true,
       hideInvoiceDetailsOnMint = true
     ) {
-      const mintStore = useMintsStore();
-      const settingsStore = useSettingsStore();
-      if (!settingsStore.checkIncomingInvoices) {
-        console.log(
-          "settingsStore.checkIncomingInvoices is disabled, skipping invoice check"
-        );
-        return;
-      }
-      const invoice = this.invoiceHistory.find((i) => i.quote === quote);
-      if (!invoice) {
-        throw new Error("invoice not found");
-      }
-      const mintWallet = this.mintWallet(invoice.mint, invoice.unit);
-      const mint = mintStore.mints.find((m) => m.url === invoice.mint);
-
-      if (!mint) {
-        throw new Error("mint not found");
-      }
-      // add to checker before we try a websocket
-      if (kickOffInvoiceChecker) {
-        if (useSettingsStore().periodicallyCheckIncomingInvoices) {
-          console.log(`Adding quote ${quote} to long-polling checker.`);
-          useInvoicesWorkerStore().addInvoiceToChecker(quote);
-        } else if (useSettingsStore().checkIncomingInvoices) {
-          console.log(`Adding quote ${quote} to old worker checker.`);
-          useWorkersStore().invoiceCheckWorker(quote);
-        }
-      }
-
-      if (
-        !settingsStore.useWebsockets ||
-        !mint.info?.nuts[17]?.supported ||
-        !mint.info?.nuts[17]?.supported.find(
-          (s) =>
-            s.method == "bolt11" &&
-            s.unit == invoice.unit &&
-            s.commands.indexOf("bolt11_mint_quote") != -1
-        )
-      ) {
-        console.log("Websockets not supported.");
-        return;
-      }
-      const uIStore = useUiStore();
-      try {
-        this.activeWebsocketConnections++;
-        uIStore.triggerActivityOrb();
-        const unsub = await mintWallet.onMintQuotePaid(
-          quote,
-          async (mintQuoteResponse: MintQuoteResponse) => {
-            console.log("Websocket: mint quote paid.");
-            let proofs;
-            try {
-              proofs = await this.mintBolt11(invoice, false);
-            } catch (error: any) {
-              console.error(error);
-              // notifyApiError(error);
-              throw error;
-            }
-
-            if (hideInvoiceDetailsOnMint) {
-              uIStore.showInvoiceDetails = false;
-            }
-            useUiStore().vibrate();
-            notifySuccess(
-              this.t("wallet.notifications.received_lightning", {
-                amount: uIStore.formatCurrency(invoice.amount, invoice.unit),
-              })
-            );
-            unsub();
-            return proofs;
-          },
-          async (error: any) => {
-            if (verbose) {
-              notifyApiError(error);
-            }
-            console.log("Invoice still pending", invoice.quote);
-            throw error;
-          }
-        );
-      } catch (error) {
-        console.log("Error in websocket subscription", error);
-      } finally {
-        this.activeWebsocketConnections--;
-      }
+      return await mintOnPaidBolt11.call(
+        this,
+        quote,
+        verbose,
+        kickOffInvoiceChecker,
+        hideInvoiceDetailsOnMint
+      );
     },
     ////////////// UI HELPERS //////////////
     addOutgoingPendingInvoiceToHistoryBolt11: async function (
@@ -1007,18 +842,12 @@ export const useWalletStore = defineStore("wallet", {
       mint: string,
       unit: string
     ) {
-      const mintStore = useMintsStore();
-      this.invoiceHistory.push({
-        amount: -(quote.amount + quote.fee_reserve),
-        bolt11: this.payInvoiceData.input.request,
-        quote: quote.quote,
-        memo: "Outgoing invoice",
-        date: currentDateStr(),
-        status: "pending",
-        mint: mint,
-        unit: unit,
-        meltQuote: quote,
-      });
+      return await addOutgoingPendingInvoiceToHistoryBolt11.call(
+        this,
+        quote,
+        mint,
+        unit
+      );
     },
     removeOutgoingInvoiceFromHistory: function (quote: string) {
       const index = this.invoiceHistory.findIndex((i) => i.quote === quote);
@@ -1061,59 +890,7 @@ export const useWalletStore = defineStore("wallet", {
       }
     },
     handleBolt11InvoiceBolt11: async function () {
-      this.payInvoiceData.show = true;
-      let invoice;
-      try {
-        invoice = bolt11Decoder.decode(this.payInvoiceData.input.request);
-      } catch (error) {
-        notifyWarning(
-          this.t("wallet.notifications.failed_to_decode_invoice"),
-          undefined,
-          3000
-        );
-        this.payInvoiceData.show = false;
-        throw error;
-      }
-      let cleanInvoice = {
-        bolt11: invoice.paymentRequest,
-        memo: "",
-        msat: 0,
-        sat: 0,
-        fsat: 0,
-        hash: "",
-        description: "",
-        timestamp: 0,
-        expireDate: "",
-        expired: false,
-      };
-      _.each(invoice.sections, (tag) => {
-        if (_.isObject(tag) && _.has(tag, "name")) {
-          if (tag.name === "amount") {
-            cleanInvoice.msat = parseInt(tag.value, 10);
-            cleanInvoice.sat = parseInt(tag.value, 10) / 1000;
-            cleanInvoice.fsat = cleanInvoice.sat;
-          } else if (tag.name === "payment_hash") {
-            cleanInvoice.hash = tag.value;
-          } else if (tag.name === "description") {
-            cleanInvoice.description = tag.value;
-          } else if (tag.name === "timestamp") {
-            cleanInvoice.timestamp = tag.value;
-          } else if (tag.name === "expiry") {
-            var expireDate = new Date(
-              (cleanInvoice.timestamp + tag.value) * 1000
-            );
-            cleanInvoice.expireDate = date.formatDate(
-              expireDate,
-              "YYYY-MM-DDTHH:mm:ss.SSSZ"
-            );
-            cleanInvoice.expired = false; // TODO
-          }
-        }
-      });
-
-      this.payInvoiceData.invoice = Object.freeze(cleanInvoice);
-      // get quote for this request
-      await this.meltQuoteInvoiceData();
+      return await handleBolt11InvoiceBolt11.call(this);
     },
     handleCashuToken: function () {
       this.payInvoiceData.show = false;
