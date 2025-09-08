@@ -96,7 +96,7 @@
                 ? $t('PayInvoiceDialog.invoice.actions.pay.label')
                 : $t('PayInvoiceDialog.invoice.actions.pay.in_progress')
             "
-            :loading="globalMutexLock && !payInvoiceData.blocking"
+            :loading="globalMutexLock || payInvoiceData.paying"
             class="q-px-lg"
           >
             <template v-slot:loading>

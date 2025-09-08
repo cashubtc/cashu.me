@@ -126,6 +126,7 @@ export const useWalletStore = defineStore("wallet", {
       activeWebsocketConnections: 0,
       payInvoiceData: {
         blocking: false,
+        paying: false,
         bolt11: "",
         show: false,
         meltQuote: {

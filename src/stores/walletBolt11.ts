@@ -238,8 +238,10 @@ export async function meltBolt11(
   silent?: boolean
 ) {
   const uIStore = useUiStore();
-  const proofsStore = useProofsStore();
+  // Ensure UI shows paying state for the whole payment lifecycle
+  this.payInvoiceData.paying = true;
 
+  const proofsStore = useProofsStore();
   console.log("#### meltBolt11()");
   const amount = quote.amount + quote.fee_reserve;
   let countChangeOutputs = 0;
@@ -360,13 +362,15 @@ export async function meltBolt11(
     // roll back proof management and keyset counter
     await proofsStore.setReserved(sendProofs, false);
     this.increaseKeysetCounter(keysetId, -keysetCounterIncrease);
-    this.removeOutgoingInvoiceFromHistory(quote.quote);
+    this.removeOutgoingInvoiceFromHistoryBolt11(quote.quote);
 
     console.error(error);
     this.handleOutputsHaveAlreadyBeenSignedError(keysetId, error);
     if (!silent) notifyApiError(error, "Payment failed");
     throw error;
   } finally {
+    // Always clear paying and unlock the mutex at the end
+    this.payInvoiceData.paying = false;
     uIStore.unlockMutex();
   }
 }
