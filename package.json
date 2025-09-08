@@ -62,7 +62,6 @@
     "autoprefixer": "^10.4.19",
     "electron": "^23.3.13",
     "electron-packager": "^15.5.2",
-    "esbuild-linux-64": "^0.14.51",
     "eslint": "^8.57.0",
     "eslint-config-prettier": "^8.10.0",
     "eslint-plugin-vue": "^9.26.0",
