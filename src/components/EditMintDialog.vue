@@ -64,7 +64,7 @@
   </q-dialog>
 </template>
 
-<script>
+<script lang="ts">
 import { defineComponent, ref, watch, computed } from "vue";
 import { useMintsStore } from "src/stores/mints";
 import { useQuasar } from "quasar";

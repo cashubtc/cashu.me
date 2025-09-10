@@ -44,7 +44,7 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
 import { useWelcomeStore } from "src/stores/welcome";
 import { useWalletStore } from "src/stores/wallet";
 import { ref, computed } from "vue";

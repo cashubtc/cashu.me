@@ -312,7 +312,7 @@
     @return-to-pay-dialog="handleReturnToPayDialog"
   />
 </template>
-<script>
+<script lang="ts">
 import { defineComponent } from "vue";
 import { useWalletStore } from "src/stores/wallet";
 import { useUiStore } from "src/stores/ui";

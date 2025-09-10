@@ -260,7 +260,7 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
 import { defineComponent } from "vue";
 import { mapActions, mapState, mapWritableState } from "pinia";
 import { useMintsStore, MintClass } from "src/stores/mints";

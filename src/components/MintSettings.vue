@@ -402,7 +402,7 @@
     </div>
   </div>
 </template>
-<script>
+<script lang="ts">
 import { ref, defineComponent, onMounted, onBeforeUnmount } from "vue";
 import { getShortUrl } from "src/js/wallet-helpers";
 import { mapActions, mapState, mapWritableState } from "pinia";

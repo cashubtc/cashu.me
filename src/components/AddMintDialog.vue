@@ -97,7 +97,7 @@
   </q-dialog>
 </template>
 
-<script>
+<script lang="ts">
 import { defineComponent, computed, ref } from "vue";
 import { useSettingsStore } from "src/stores/settings";
 import MintAuditInfo from "./MintAuditInfo.vue";

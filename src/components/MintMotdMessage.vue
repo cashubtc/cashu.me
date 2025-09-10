@@ -26,7 +26,7 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
 import { defineComponent } from "vue";
 import { X as XIcon, Info as InfoIcon } from "lucide-vue-next";
 import { useMintsStore } from "src/stores/mints";

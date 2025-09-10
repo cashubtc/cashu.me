@@ -149,7 +149,7 @@
     </div>
   </div>
 </template>
-<script>
+<script lang="ts">
 import * as _ from "underscore";
 import { defineComponent } from "vue";
 import { shortenString } from "src/js/string-utils";
