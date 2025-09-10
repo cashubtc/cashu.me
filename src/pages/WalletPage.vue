@@ -147,6 +147,8 @@
 
     <!-- INVOICE DETAILS  -->
     <InvoiceDetailDialog v-model="showInvoiceDetails" />
+    <!-- BOLT12 OFFER DETAILS -->
+    <Bolt12OfferDetailsDialog v-model="showBolt12OfferDetails" />
 
     <!-- SEND TOKENS DIALOG  -->
     <SendTokenDialog v-model="showSendTokens" />
@@ -215,6 +217,7 @@ import WelcomeDialog from "components/WelcomeDialog.vue";
 import SendTokenDialog from "components/SendTokenDialog.vue";
 import PayInvoiceDialog from "components/PayInvoiceDialog.vue";
 import InvoiceDetailDialog from "components/InvoiceDetailDialog.vue";
+import Bolt12OfferDetailsDialog from "components/Bolt12OfferDetailsDialog.vue";
 import SendDialog from "components/SendDialog.vue";
 import ReceiveDialog from "components/ReceiveDialog.vue";
 import QrcodeReader from "components/QrcodeReader.vue";
@@ -268,6 +271,7 @@ export default {
     ReceiveTokenDialog,
     PayInvoiceDialog,
     InvoiceDetailDialog,
+    Bolt12OfferDetailsDialog,
     QrcodeReader,
     SendDialog,
     ReceiveDialog,
@@ -315,6 +319,7 @@ export default {
     ...mapState(useUiStore, ["tickerShort"]),
     ...mapWritableState(useUiStore, [
       "showInvoiceDetails",
+      "showBolt12OfferDetails",
       "tab",
       "showSendDialog",
       "showReceiveDialog",

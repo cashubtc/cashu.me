@@ -72,7 +72,6 @@
   </q-card-section>
 </q-card>
 </q-dialog>
-<Bolt12OfferDetailsDialog />
 <ReceiveEcashDrawer />
 </template>
 
@@ -84,7 +83,6 @@ import { useUiStore } from "src/stores/ui";
 import { useWalletStore } from "src/stores/wallet";
 import { useCameraStore } from "src/stores/camera";
 import ReceiveEcashDrawer from "src/components/ReceiveEcashDrawer.vue";
-import Bolt12OfferDetailsDialog from "src/components/Bolt12OfferDetailsDialog.vue";
 import { useMintsStore } from "src/stores/mints";
 import {
   notifyError,
@@ -176,6 +174,7 @@ export default defineComponent({
       this.invoiceData.bolt11 = "";
       this.invoiceData.hash = "";
       this.invoiceData.memo = "";
+      console.log("### showBolt12OfferCreateDialog");
       this.showBolt12OfferDetails = true;
       this.showReceiveDialog = false;
     },
