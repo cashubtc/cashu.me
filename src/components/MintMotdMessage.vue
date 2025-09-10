@@ -56,9 +56,8 @@ export default defineComponent({
     const mintsStore = useMintsStore();
 
     const dismissMessage = () => {
-      mintsStore.mints.filter(
-        (m) => m.url === props.mintUrl
-      )[0].motdDismissed = true;
+      mintsStore.mints.filter((m) => m.url === props.mintUrl)[0].motdDismissed =
+        true;
       emit("dismiss");
     };
 
