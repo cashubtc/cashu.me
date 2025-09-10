@@ -291,9 +291,8 @@ export default {
           description: "Stocker l'URL de ce portefeuille avec le jeton",
         },
         binary: {
-          title: "Binaire brut",
-          description:
-            "Octets bruts au lieu de Base64. Rend les jetons ~33% plus courts.",
+          title: "Binaire",
+          description: "Stocker les jetons comme données binaires",
         },
         quick_access: {
           toggle: "Accès rapide à la NFC",

@@ -287,9 +287,8 @@ export default {
           description: "تخزين URL لهذه المحفظة مع الرمز",
         },
         binary: {
-          title: "ثنائي خام",
-          description:
-            "بايتات خام بدلاً من Base64. يجعل الرموز أقصر بحوالي 33%.",
+          title: "ثنائي",
+          description: "تخزين الرموز كبيانات ثنائية",
         },
         quick_access: {
           toggle: "وصول سريع إلى NFC",

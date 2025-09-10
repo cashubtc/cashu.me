@@ -290,9 +290,8 @@ export default {
           description: "Bu cüzdanın URL'sini token ile sakla",
         },
         binary: {
-          title: "Ham İkilik",
-          description:
-            "Base64 yerine ham baytlar. Token'ları yaklaşık %33 daha kısa yapar.",
+          title: "İkilik",
+          description: "Token'ları ikili veri olarak sakla",
         },
         quick_access: {
           toggle: "NFC'ye hızlı erişim",

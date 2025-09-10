@@ -286,9 +286,8 @@ export default {
           description: "Store URL to this wallet with token",
         },
         binary: {
-          title: "Raw Binary",
-          description:
-            "Raw bytes instead of Base64. Makes ~33% shorter tokens.",
+          title: "Binary",
+          description: "Store tokens as binary data",
         },
         quick_access: {
           toggle: "Quick access to NFC",

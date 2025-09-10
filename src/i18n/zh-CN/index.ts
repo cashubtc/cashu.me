@@ -286,8 +286,8 @@ export default {
           description: "存储此钱包的 URL 和 token",
         },
         binary: {
-          title: "原始二进制",
-          description: "原始字节而不是 Base64。使 token 短约 33%。",
+          title: "二进制",
+          description: "将令牌存储为二进制数据",
         },
         quick_access: {
           toggle: "NFC 快速访问",
