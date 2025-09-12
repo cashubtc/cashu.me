@@ -739,7 +739,7 @@ export default {
           label: "Προς",
         },
         amount: {
-          label: "Ποσό ({ ticker }))",
+          label: "Ποσό ({ ticker })",
         },
       },
       actions: {

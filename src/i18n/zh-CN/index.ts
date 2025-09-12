@@ -726,7 +726,7 @@ export default {
           label: "到",
         },
         amount: {
-          label: "金额 ({ ticker }))",
+          label: "金额 ({ ticker })",
         },
       },
       actions: {

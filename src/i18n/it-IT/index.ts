@@ -735,7 +735,7 @@ export default {
           label: "A",
         },
         amount: {
-          label: "Importo ({ ticker }))",
+          label: "Importo ({ ticker })",
         },
       },
       actions: {
