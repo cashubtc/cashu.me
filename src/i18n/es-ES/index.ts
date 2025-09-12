@@ -757,7 +757,7 @@ export default {
           label: "Hasta",
         },
         amount: {
-          label: "Cantidad ({ ticker }))",
+          label: "Cantidad ({ ticker })",
         },
       },
       actions: {

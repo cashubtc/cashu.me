@@ -735,7 +735,7 @@ export default {
           label: "إلى",
         },
         amount: {
-          label: "المبلغ ({ ticker }))",
+          label: "المبلغ ({ ticker })",
         },
       },
       actions: {
