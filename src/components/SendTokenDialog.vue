@@ -565,7 +565,7 @@
     </q-card>
   </q-dialog>
 </template>
-<script>
+<script lang="ts">
 import { defineComponent } from "vue";
 import { useSendTokensStore } from "src/stores/sendTokensStore";
 import { useWalletStore } from "src/stores/wallet";

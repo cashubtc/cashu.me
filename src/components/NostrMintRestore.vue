@@ -172,7 +172,7 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
 import { defineComponent } from "vue";
 import { mapState, mapActions } from "pinia";
 import { useNostrMintBackupStore } from "src/stores/nostrMintBackup";

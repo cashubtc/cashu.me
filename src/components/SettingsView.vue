@@ -1737,7 +1737,7 @@
   <!-- NWC DIALOG -->
   <NWCDialog v-model="showNWCDialog" />
 </template>
-<script>
+<script lang="ts">
 import { defineComponent } from "vue";
 import P2PKDialog from "./P2PKDialog.vue";
 import NWCDialog from "./NWCDialog.vue";

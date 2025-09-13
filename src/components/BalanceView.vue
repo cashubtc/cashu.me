@@ -151,7 +151,7 @@
   <!-- </q-card-section>
   </q-card> -->
 </template>
-<script>
+<script lang="ts">
 import { defineComponent, ref } from "vue";
 import { getShortUrl } from "src/js/wallet-helpers";
 import { mapState, mapWritableState, mapActions } from "pinia";

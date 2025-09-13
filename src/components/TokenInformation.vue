@@ -45,7 +45,7 @@
     </div>
   </div>
 </template>
-<script>
+<script lang="ts">
 import { defineComponent } from "vue";
 import { getShortUrl } from "src/js/wallet-helpers";
 import { mapActions, mapState } from "pinia";

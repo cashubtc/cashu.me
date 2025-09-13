@@ -96,7 +96,7 @@
   display: none;
 }
 </style>
-<script>
+<script lang="ts">
 import { defineComponent } from "vue";
 import { mapActions, mapState } from "pinia";
 import { useWalletStore } from "src/stores/wallet";

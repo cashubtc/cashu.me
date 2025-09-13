@@ -254,7 +254,7 @@
   </q-dialog>
 </template>
 
-<script>
+<script lang="ts">
 import { defineComponent } from "vue";
 import { useReceiveTokensStore } from "src/stores/receiveTokensStore";
 import { useWalletStore } from "src/stores/wallet";

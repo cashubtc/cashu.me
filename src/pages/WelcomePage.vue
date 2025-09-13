@@ -67,7 +67,7 @@
   </q-dialog>
 </template>
 
-<script>
+<script lang="ts">
 import { onMounted, ref } from "vue";
 import { useWelcomeStore } from "src/stores/welcome";
 import { useStorageStore } from "src/stores/storage";

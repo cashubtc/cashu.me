@@ -43,7 +43,7 @@
   </transition>
 </template>
 
-<script>
+<script lang="ts">
 import { defineComponent } from "vue";
 import { useUiStore } from "../stores/ui";
 import { mapWritableState } from "pinia";

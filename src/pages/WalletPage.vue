@@ -200,7 +200,7 @@
   padding-bottom: 15px;
 }
 </style>
-<script>
+<script lang="ts">
 import { date } from "quasar";
 import * as _ from "underscore";
 import { shortenString } from "src/js/string-utils";
