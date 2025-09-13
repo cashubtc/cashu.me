@@ -71,5 +71,16 @@ module.exports = {
       // We disable this rule and only keep it for Vue files
       rules: { "vue/no-unused-properties": "off" },
     },
+    {
+      files: ["*.vue"],
+      parser: "vue-eslint-parser",
+      parserOptions: {
+        parser: "@typescript-eslint/parser",
+      },
+      rules: {
+        // Disallow <script> blocks without lang="ts"
+        "vue/block-lang": ["error", { script: { lang: "ts" } }],
+      },
+    },
   ],
 };
