@@ -289,9 +289,8 @@ export default {
           description: "トークン付きでこのウォレットへのURLを保存",
         },
         binary: {
-          title: "生のバイナリ",
-          description:
-            "Base64の代わりに生のバイト。トークンが約33%短くなります。",
+          title: "バイナリ",
+          description: "トークンをバイナリデータとして保存",
         },
         quick_access: {
           toggle: "NFCへのクイックアクセス",

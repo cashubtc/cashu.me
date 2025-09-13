@@ -661,11 +661,6 @@
                 </q-item-label>
               </q-item-section>
             </q-item>
-            <!--
-              disable binary for now
-              TODO: re-enable once we can decode
-            -->
-            <!--
             <q-item clickable @click="nfcEncoding = 'binary'">
               <q-item-section avatar>
                 <q-icon
@@ -679,13 +674,16 @@
                 />
               </q-item-section>
               <q-item-section>
-                <q-item-label title>{{ $t("Settings.hardware_features.webnfc.binary.title") }}</q-item-label>
+                <q-item-label title>{{
+                  $t("Settings.hardware_features.webnfc.binary.title")
+                }}</q-item-label>
                 <q-item-label caption>
-                  {{ $t("Settings.hardware_features.webnfc.binary.description") }}
+                  {{
+                    $t("Settings.hardware_features.webnfc.binary.description")
+                  }}
                 </q-item-label>
               </q-item-section>
             </q-item>
-            -->
             <q-item>
               <q-toggle
                 v-model="showNfcButtonInDrawer"

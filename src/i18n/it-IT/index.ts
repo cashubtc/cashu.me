@@ -289,9 +289,8 @@ export default {
           description: "Memorizza URL a questo portafoglio con token",
         },
         binary: {
-          title: "Binario grezzo",
-          description:
-            "Byte grezzi invece di Base64. Rende i token ~33% più corti.",
+          title: "Binario",
+          description: "Memorizza i token come dati binari",
         },
         quick_access: {
           toggle: "Accesso rapido NFC",

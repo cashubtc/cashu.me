@@ -291,9 +291,8 @@ export default {
           description: "Αποθήκευση URL σε αυτό το πορτοφόλι με token",
         },
         binary: {
-          title: "Ακατέργαστο Δυαδικό",
-          description:
-            "Ακατέργαστα bytes αντί για Base64. Κάνει τα token ~33% μικρότερα.",
+          title: "Δυαδικό",
+          description: "Αποθήκευση tokens ως δυαδικά δεδομένα",
         },
         quick_access: {
           toggle: "Γρήγορη πρόσβαση σε NFC",
