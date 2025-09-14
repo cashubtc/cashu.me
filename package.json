@@ -17,18 +17,15 @@
     "test:ci": "vitest run"
   },
   "dependencies": {
-    "@capacitor/android": "^6.2.0",
     "@capacitor/clipboard": "^6.0.2",
     "@capacitor/core": "^6.2.0",
     "@capacitor/haptics": "^6.0.2",
-    "@capacitor/ios": "^6.0.0",
     "@cashu/cashu-ts": "^2.7.1",
     "@cashu/crypto": "^0.3.4",
     "@chenfengyuan/vue-qrcode": "^2.0.0",
     "@gandlaf21/bc-ur": "^1.1.12",
     "@nostr-dev-kit/ndk": "^2.8.1",
     "@quasar/extras": "^1.16.11",
-    "@quasar/icongenie": "^4.0.0",
     "@scure/bip39": "^1.4.0",
     "@vueuse/core": "^10.9.0",
     "axios": "^1.6.8",
@@ -50,9 +47,12 @@
     "vue-router": "^4.3.2"
   },
   "devDependencies": {
+    "@capacitor/android": "^6.2.0",
     "@capacitor/assets": "^3.0.5",
     "@capacitor/cli": "^6.2.0",
+    "@capacitor/ios": "^6.0.0",
     "@quasar/app-vite": "^1.9.3",
+    "@quasar/icongenie": "^4.0.0",
     "@types/node": "^20.12.11",
     "@types/underscore": "^1.11.15",
     "@types/uuid": "^10.0.0",
