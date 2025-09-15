@@ -9,6 +9,7 @@
     "dev": "quasar dev",
     "build": "quasar build",
     "build:pwa": "quasar build -m pwa",
+    "build:electron": "quasar build -m electron",
     "quasar": "quasar",
     "lint": "eslint --ext .js,.vue ./",
     "format": "prettier --write .",
