@@ -1,9 +1,9 @@
-name: Build
+name: Lint
 
 on: [push, pull_request]
 
 jobs:
-  build:
+  lint:
     runs-on: ubuntu-latest
 
     steps:
@@ -19,7 +19,5 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Run build
-        run: |
-          npm run build
-          npm run build:pwa
+      - name: Run lint
+        run: npm run lint
