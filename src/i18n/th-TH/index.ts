@@ -288,8 +288,8 @@ export default {
           description: "เก็บ URL ไปยัง Wallet นี้พร้อม token",
         },
         binary: {
-          title: "ไบนารีดิบ",
-          description: "ไบต์ดิบแทน Base64 ทำให้ token สั้นลงประมาณ 33%",
+          title: "ไบนารี",
+          description: "จัดเก็บโทเค็นเป็นข้อมูลไบนารี",
         },
         quick_access: {
           toggle: "เข้าถึง NFC ด่วน",

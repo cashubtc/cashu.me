@@ -292,9 +292,8 @@ export default {
           description: "URL zu dieser Wallet mit Token speichern",
         },
         binary: {
-          title: "Rohdaten (Binary)",
-          description:
-            "Rohe Bytes anstelle von Base64. Macht Token ~33% kürzer.",
+          title: "Binary",
+          description: "Token als Binärdaten speichern",
         },
         quick_access: {
           toggle: "Schnellzugriff auf NFC",

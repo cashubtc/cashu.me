@@ -289,8 +289,8 @@ export default {
           description: "Spara URL till denna plånbok med token",
         },
         binary: {
-          title: "Rå binär",
-          description: "Råa byte istället för Base64. Ger ~33% kortare tokens.",
+          title: "Binär",
+          description: "Lagra tokens som binärdata",
         },
         quick_access: {
           toggle: "Snabb åtkomst till NFC",

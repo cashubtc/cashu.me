@@ -582,7 +582,12 @@ import { Buffer } from "buffer";
 import { useCameraStore } from "src/stores/camera";
 import { useP2PKStore } from "src/stores/p2pk";
 import TokenInformation from "components/TokenInformation.vue";
-import { getDecodedToken, getEncodedTokenV4 } from "@cashu/cashu-ts";
+import {
+  getDecodedToken,
+  getEncodedTokenBinary,
+  getEncodedToken,
+  getEncodedTokenV4,
+} from "@cashu/cashu-ts";
 
 import { mapActions, mapState, mapWritableState } from "pinia";
 import ChooseMint from "components/ChooseMint.vue";
@@ -991,9 +996,8 @@ export default defineComponent({
                       ];
                       break;
                     case "binary":
-                      throw new Error("Binary encoding not supported yet");
-                    /*
-                      const data = null;
+                      const token = getDecodedToken(this.sendData.tokensBase64);
+                      const data = getEncodedTokenBinary(token);
                       records = [
                         {
                           recordType: "mime",
@@ -1002,7 +1006,6 @@ export default defineComponent({
                         },
                       ];
                       break;
-                      */
                     default:
                       throw new Error(
                         `Unknown NFC encoding: ${this.nfcEncoding}`

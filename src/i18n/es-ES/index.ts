@@ -305,9 +305,8 @@ export default {
           description: "Almacenar URL a esta billetera con el token",
         },
         binary: {
-          title: "Binario crudo",
-          description:
-            "Bytes crudos en lugar de Base64. Hace los tokens ~33% más cortos.",
+          title: "Binario",
+          description: "Almacenar tokens como datos binarios",
         },
         quick_access: {
           toggle: "Acceso rápido a NFC",
