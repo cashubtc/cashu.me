@@ -186,6 +186,17 @@ module.exports = configure(function (/* ctx */) {
         // protocol: 'myapp://path',
         // Windows only
         // win32metadata: { ... }
+        asar: true,
+        prune: true,
+        ignore: [
+          /(^|[\\/])node_modules([\\/]|$)/,
+          /(^|[\\/])screenshots([\\/]|$)/,
+          /(^|[\\/])package-lock\.json$/,
+          /(^|[\\/])yarn\.lock$/,
+          /(^|[\\/])pnpm-lock\.yaml$/,
+          /(^|[\\/])vitest\.config\.js$/,
+          /(^|[\\/])test([\\/]|$)/,
+        ],
       },
 
       builder: {
