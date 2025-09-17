@@ -965,8 +965,8 @@ export default defineComponent({
               console.log("> Scan started");
 
               this.ndef.onreadingerror = (error) => {
-                console.error(`Cannot read NDEF data! ${error}`);
-                notifyError("Cannot read data from the NFC tag");
+                console.error(`NFC read failed: ${error}`);
+                notifyError(`${err.message}`, "NFC read failed");
                 this.controller.abort();
                 this.scanningCard = false;
               };
