@@ -618,6 +618,8 @@ export default {
   },
 
   created: async function () {
+    console.log(`Git commit: ${GIT_COMMIT}`);
+
     // Initialize and run migrations
     const migrationsStore = useMigrationsStore();
     migrationsStore.initMigrations();
@@ -675,7 +677,7 @@ export default {
       window.location.href.split("?")[0].split("#")[0]
     );
     */
-    console.log(`hash: ${window.location.hash}`);
+    console.log(`location.hash: ${window.location.hash}`);
 
     // startup tasks
 

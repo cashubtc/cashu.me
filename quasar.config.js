@@ -9,6 +9,21 @@
 // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js
 
 const { configure } = require("quasar/wrappers");
+const { execSync } = require("child_process");
+
+function resolveGitCommit() {
+  try {
+    return execSync("git describe --always --dirty", {
+      cwd: __dirname,
+      stdio: "pipe",
+    })
+      .toString()
+      .trim();
+  } catch (err) {
+    console.warn("Unable to resolve git commit via `git describe`");
+    return "unknown";
+  }
+}
 
 module.exports = configure(function (/* ctx */) {
   return {
@@ -70,7 +85,10 @@ module.exports = configure(function (/* ctx */) {
       // polyfillModulePreload: true,
       // distDir
 
-      // extendViteConf (viteConf) {},
+      extendViteConf(viteConf) {
+        viteConf.define = viteConf.define || {};
+        viteConf.define.GIT_COMMIT = JSON.stringify(resolveGitCommit());
+      },
       // viteVuePluginOptions: {},
 
       // vitePlugins: [
