@@ -455,7 +455,7 @@ export default {
         export_wallet: {
           button: "Exportera plånboksdata",
           description:
-            "Ladda ner en dump av din plånbok. Du kan återställa din plånbok från den här filen i välkomstskärmen på en ny plånbok. Den här filen kommer att vara osynkroniserad om du fortsätter att använda din plånbok efter att ha exporterat den.",
+            "Ladda ner en dump av din plånbok. Du kan återställa din plånbok genom att dra och släppa den här filen i välkomstskärmen på en ny plånbok. Den här filen kommer att vara osynkroniserad om du fortsätter att använda din plånbok efter att ha exporterat den.",
         },
       },
     },
