@@ -67,39 +67,6 @@ npx capacitor-assets generate
 
 See [Configuring quasar.config.js](https://v2.quasar.dev/quasar-cli-webpack/quasar-config-js).
 
-### Cairo Spending Conditions
-
-The wallet supports receiving tokens with Cairo spending conditions. To receive Cairo-locked tokens:
-
-1. Click the "Receive" button in the wallet
-2. Click the "Cairo" button in the receive drawer
-3. Enter the Cairo executable code in the dialog
-4. Optionally enter program input values (comma-separated numbers)
-5. Click "Save" to store the Cairo data
-6. Paste or scan a Cairo-locked token
-7. The wallet will automatically use the stored Cairo data when redeeming the token
-
-The Cairo data is automatically cleared after successful token reception for security.
-
-### Cross-Origin Isolation
-
-The application is configured with cross-origin isolation enabled for enhanced security. This is achieved by setting the following headers:
-
-- `Cross-Origin-Opener-Policy: same-origin`
-- `Cross-Origin-Embedder-Policy: require-corp`
-
-These headers are automatically configured for:
-
-- **Development server**: Via Quasar devServer configuration
-- **Production server**: Via SSR configuration and nginx
-- **Docker deployment**: Via nginx configuration
-
-To verify the headers are working, run:
-
-```bash
-./test-headers.sh
-```
-
 ### Reverse proxy
 
 For Quasar Vue Router with history mode, add this fallback URL to allow refreshes: https://router.vuejs.org/guide/essentials/history-mode.html#HTML5-Mode
