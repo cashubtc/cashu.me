@@ -61,6 +61,12 @@ export const useReceiveTokensStore = defineStore("receiveTokensStore", {
       if (tokenJson == undefined) {
         throw new Error("no tokens provided.");
       }
+      // Trigger auto-rebalance after receive completes
+      try {
+        const { useRebalanceStore } = await import("./rebalance");
+        await useRebalanceStore().maybeRebalance();
+      } catch {}
+
       // check if we have all mints
       if (!this.knowThisMintOfTokenJson(tokenJson)) {
         // add the mint
@@ -108,6 +114,12 @@ export const useReceiveTokensStore = defineStore("receiveTokensStore", {
 
         if (
           historyToken &&
+      // Trigger auto-rebalance after swap receive-to-mint
+      try {
+        const { useRebalanceStore } = await import("./rebalance");
+        await useRebalanceStore().maybeRebalance();
+      } catch {}
+
           (historyToken.amount > 0 || historyToken.status === "paid")
         ) {
           if (verbose) notify("Token already in history.");
