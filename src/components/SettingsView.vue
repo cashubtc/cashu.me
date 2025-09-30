@@ -2074,6 +2074,12 @@ export default defineComponent({
         await this.initSigner();
         await this.generateNPCV2Connection();
       } else {
+      // Trigger auto-rebalance after seed change
+      try {
+        const { useRebalanceStore } = await import("src/stores/rebalance");
+        await useRebalanceStore().maybeRebalance(this.activeUnit);
+      } catch {}
+
         this.npcV2Address = "";
       }
     },
@@ -2132,6 +2138,11 @@ export default defineComponent({
       this.newMnemonic();
       await this.initSigner();
       await this.generateNPCConnection();
+      // Trigger auto-rebalance
+      try {
+        const { useRebalanceStore } = await import("src/stores/rebalance");
+        await useRebalanceStore().maybeRebalance(this.activeUnit);
+      } catch {}
     },
     shortUrl: function (url) {
       return getShortUrl(url);
