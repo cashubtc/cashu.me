@@ -673,6 +673,12 @@ export const useWalletStore = defineStore("wallet", {
         return proofs;
       } catch (error: any) {
         console.error(error);
+        // Trigger auto-rebalance after minting
+        try {
+          const { useRebalanceStore } = await import("./rebalance");
+          await useRebalanceStore().maybeRebalance();
+        } catch {}
+
         if (verbose) {
           notifyApiError(error);
         }
@@ -728,6 +734,12 @@ export const useWalletStore = defineStore("wallet", {
           mpp_amount * 1000
         );
       } else {
+        // Trigger auto-rebalance after successful melt
+        try {
+          const { useRebalanceStore } = await import("./rebalance");
+          await useRebalanceStore().maybeRebalance();
+        } catch {}
+
         data = await wallet.createMeltQuote(request);
       }
 
@@ -900,6 +912,12 @@ export const useWalletStore = defineStore("wallet", {
     // /check
     checkProofsSpendable: async function (
       proofs: Proof[],
+          // Trigger auto-rebalance after outgoing payment sent
+          try {
+            const { useRebalanceStore } = await import("./rebalance");
+            await useRebalanceStore().maybeRebalance();
+          } catch {}
+
       wallet: CashuWallet,
       update_history = false
     ) {
@@ -965,6 +983,12 @@ export const useWalletStore = defineStore("wallet", {
 
       const tokenJson = token.decode(historyToken.token);
       if (tokenJson == undefined) {
+        // Trigger auto-rebalance after successful melt (send)
+        try {
+          const { useRebalanceStore } = await import("./rebalance");
+          await useRebalanceStore().maybeRebalance();
+        } catch {}
+
         throw new Error("no tokens provided.");
       }
       const proofs = token.getProofs(tokenJson);
@@ -1007,6 +1031,12 @@ export const useWalletStore = defineStore("wallet", {
           if (historyToken2) {
             tokenStore.addPendingToken({
               amount: unspentAmount * Math.sign(historyToken2.amount),
+      // Trigger auto-rebalance after outgoing invoice confirmed paid
+      try {
+        const { useRebalanceStore } = await import("./rebalance");
+        await useRebalanceStore().maybeRebalance();
+      } catch {}
+
               token: serializedUnspentProofs,
               unit: historyToken2.unit,
               mint: historyToken2.mint,
@@ -1072,6 +1102,12 @@ export const useWalletStore = defineStore("wallet", {
         useUiStore().vibrate();
         notifySuccess(
           this.t("wallet.notifications.received_lightning", {
+        // Trigger auto-rebalance after minting via websocket path
+        try {
+          const { useRebalanceStore } = await import("./rebalance");
+          await useRebalanceStore().maybeRebalance();
+        } catch {}
+
             amount: uIStore.formatCurrency(invoice.amount, invoice.unit),
           })
         );
@@ -1278,6 +1314,12 @@ export const useWalletStore = defineStore("wallet", {
             }
 
             if (hideInvoiceDetailsOnMint) {
+            // Trigger auto-rebalance after websocket minting
+            try {
+              const { useRebalanceStore } = await import("./rebalance");
+              await useRebalanceStore().maybeRebalance();
+            } catch {}
+
               uIStore.showInvoiceDetails = false;
             }
             useUiStore().vibrate();
