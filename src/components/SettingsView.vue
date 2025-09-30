@@ -1199,6 +1199,60 @@
           <div class="divider-line"></div>
           <div class="divider-text">
             {{ $t("Settings.sections.appearance") }}
+    <!-- AUTO-REBALANCE SECTION -->
+    <div class="section-divider q-my-md">
+      <div class="divider-line"></div>
+      <div class="divider-text">Automatic Load Balancer</div>
+      <div class="divider-line"></div>
+    </div>
+
+    <div class="q-py-sm q-px-xs text-left" on-left>
+      <q-list padding>
+        <q-item>
+          <q-item-section>
+            <q-toggle v-model="autoRebalanceEnabled" label="Enable Auto-Rebalance" />
+          </q-item-section>
+        </q-item>
+        <q-item>
+          <q-item-section>
+            <div class="row q-col-gutter-md">
+              <div class="col-6">
+                <q-input type="number" dense outlined rounded v-model.number="autoRebalanceTolerancePct" label="Tolerance (%)" />
+              </div>
+              <div class="col-6">
+                <q-input type="number" dense outlined rounded v-model.number="autoRebalanceMinAmount" label="Min amount (unit)" />
+              </div>
+              <div class="col-6 q-pt-sm">
+                <q-input type="number" dense outlined rounded v-model.number="autoRebalanceFeeCapPct" label="Fee cap (%)" />
+              </div>
+              <div class="col-6 q-pt-sm">
+                <q-input type="number" dense outlined rounded v-model.number="autoRebalanceThrottleSec" label="Throttle (sec)" />
+              </div>
+            </div>
+          </q-item-section>
+        </q-item>
+        <q-item v-if="mints.length">
+          <q-item-section>
+            <div class="text-subtitle2 q-mb-sm">Reliable mints for {{ activeUnit }}</div>
+            <div v-for="mint in mints" :key="mint.url" class="q-mb-sm">
+              <div class="row items-center">
+                <div class="col-5 ellipsis">{{ mint.nickname || mint.info?.name || mint.url }}</div>
+                <div class="col-3">
+                  <q-toggle :model-value="isReliable(mint.url)" @update:model-value="(v)=>toggleReliable(mint.url,v)" label="Reliable" />
+                </div>
+                <div class="col-4">
+                  <q-slider :min="0" :max="100" :step="1" :disable="!isReliable(mint.url)" :model-value="getTargetPct(mint.url)" @update:model-value="(v)=>setTargetPct(mint.url,v)" label-always />
+                </div>
+              </div>
+            </div>
+            <div class="row q-pt-sm">
+              <q-btn outline color="primary" @click="rebalanceNow" label="Rebalance Now" />
+            </div>
+          </q-item-section>
+        </q-item>
+      </q-list>
+    </div>
+
           </div>
           <div class="divider-line"></div>
         </div>
@@ -1681,6 +1735,61 @@
                       flat
                       dense
                       class="q-ml-sm"
+
+    <!-- AUTO-REBALANCE SECTION -->
+    <div class="section-divider q-my-md">
+      <div class="divider-line"></div>
+      <div class="divider-text">Automatic Load Balancer</div>
+      <div class="divider-line"></div>
+    </div>
+
+    <div class="q-py-sm q-px-xs text-left" on-left>
+      <q-list padding>
+        <q-item>
+          <q-item-section>
+            <q-toggle v-model="autoRebalanceEnabled" label="Enable Auto-Rebalance" />
+          </q-item-section>
+        </q-item>
+        <q-item>
+          <q-item-section>
+            <div class="row q-col-gutter-md">
+              <div class="col-6">
+                <q-input type="number" dense outlined rounded v-model.number="autoRebalanceTolerancePct" label="Tolerance (%)" />
+              </div>
+              <div class="col-6">
+                <q-input type="number" dense outlined rounded v-model.number="autoRebalanceMinAmount" label="Min amount (unit)" />
+              </div>
+              <div class="col-6 q-pt-sm">
+                <q-input type="number" dense outlined rounded v-model.number="autoRebalanceFeeCapPct" label="Fee cap (%)" />
+              </div>
+              <div class="col-6 q-pt-sm">
+                <q-input type="number" dense outlined rounded v-model.number="autoRebalanceThrottleSec" label="Throttle (sec)" />
+              </div>
+            </div>
+          </q-item-section>
+        </q-item>
+        <q-item v-if="mints.length">
+          <q-item-section>
+            <div class="text-subtitle2 q-mb-sm">Reliable mints for {{ activeUnit }}</div>
+            <div v-for="mint in mints" :key="mint.url" class="q-mb-sm">
+              <div class="row items-center">
+                <div class="col-5 ellipsis">{{ mint.nickname || mint.info?.name || mint.url }}</div>
+                <div class="col-3">
+                  <q-toggle :model-value="isReliable(mint.url)" @update:model-value="(v)=>toggleReliable(mint.url,v)" label="Reliable" />
+                </div>
+                <div class="col-4">
+                  <q-slider :min="0" :max="100" :step="1" :disable="!isReliable(mint.url)" :model-value="getTargetPct(mint.url)" @update:model-value="(v)=>setTargetPct(mint.url,v)" label-always />
+                </div>
+              </div>
+            </div>
+            <div class="row q-pt-sm">
+              <q-btn outline color="primary" @click="rebalanceNow" label="Rebalance Now" />
+            </div>
+          </q-item-section>
+        </q-item>
+      </q-list>
+    </div>
+
                       color="primary"
                       @click="confirmNuke = false"
                       >{{
@@ -1860,6 +1969,13 @@ export default defineComponent({
       "bip177BitcoinSymbol",
       "multinutEnabled",
       "nostrMintBackupEnabled",
+      // Auto-Rebalance
+      "autoRebalanceEnabled",
+      "autoRebalanceTolerancePct",
+      "autoRebalanceMinAmount",
+      "autoRebalanceFeeCapPct",
+      "autoRebalanceThrottleSec",
+      "reliableMintsByUnit",
     ]),
     ...mapState(useP2PKStore, ["p2pkKeys"]),
     ...mapWritableState(useP2PKStore, [
@@ -2087,6 +2203,13 @@ export default defineComponent({
       await this.generateNPCConnection();
       await this.generateNPCV2Connection();
     },
+
+<script lang="ts">
+// NOTE: These are helper methods injected for the Auto-Rebalance UI block.
+// We place them after the main component to minimize intrusive changes.
+// In a refactor, consider moving into the main component methods and computed.
+</script>
+
     handleNsecClick: async function () {
       await this.initPrivateKeySigner();
       await this.generateNPCConnection();
@@ -2172,18 +2295,35 @@ export default defineComponent({
       //   window.location.reload();
       // }, 300);
     },
-    onCurrencyChange: async function (currency) {
-      // Fetch fresh rates if they're stale, since we get all currencies at once
-      const priceStore = usePriceStore();
-      if (
-        Date.now() - priceStore.bitcoinPriceLastUpdated >
-        priceStore.bitcoinPriceMinRefreshInterval
-      ) {
-        await this.fetchBitcoinPrice();
-      } else {
-        // Update the main bitcoinPrice to reflect the new currency selection
-        this.updateBitcoinPriceForCurrentCurrency();
-      }
+    isReliable(url: string) {
+      const list = this.reliableMintsByUnit?.[this.activeUnit] || [];
+      return !!list.find((e) => e.url === url && e.enabled);
+    },
+    toggleReliable(url: string, enabled: boolean) {
+      const unit = this.activeUnit;
+      const list = [...(this.reliableMintsByUnit?.[unit] || [])];
+      const idx = list.findIndex((e) => e.url === url);
+      if (idx >= 0) list[idx] = { ...list[idx], enabled };
+      else list.push({ url, targetPct: 0, enabled });
+      this.reliableMintsByUnit = { ...this.reliableMintsByUnit, [unit]: list };
+    },
+    getTargetPct(url: string): number {
+      const list = this.reliableMintsByUnit?.[this.activeUnit] || [];
+      return list.find((e) => e.url === url)?.targetPct || 0;
+    },
+    setTargetPct(url: string, v: number) {
+      const unit = this.activeUnit;
+      const list = [...(this.reliableMintsByUnit?.[unit] || [])];
+      const idx = list.findIndex((e) => e.url === url);
+      if (idx >= 0) list[idx] = { ...list[idx], targetPct: v };
+      else list.push({ url, targetPct: v, enabled: true });
+      this.reliableMintsByUnit = { ...this.reliableMintsByUnit, [unit]: list };
+    },
+    async rebalanceNow() {
+      const { useRebalanceStore } = await import("src/stores/rebalance");
+      const r = useRebalanceStore();
+      await r.maybeRebalance(this.activeUnit);
+      this.notifySuccess("Rebalance attempted. Check history for moves.");
     },
   },
   created: async function () {
