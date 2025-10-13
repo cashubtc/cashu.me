@@ -3,6 +3,8 @@ import { useMintsStore, MintClass } from "./mints";
 import { useSettingsStore } from "./settings";
 import { useWalletStore } from "./wallet";
 import { useSwapStore } from "./swap";
+import { notifyWarning, notifySuccess } from "../js/notify";
+import { i18n } from "../boot/i18n";
 
 export type TargetConfig = { url: string; targetPct: number; enabled: boolean };
 export type Allocation = { url: string; current: number; target: number; delta: number };
@@ -21,6 +23,12 @@ export const useRebalanceStore = defineStore("rebalance", {
   state: () => ({
     running: false as boolean,
     lastError: "" as string,
+    showRebalancePrompt: false as boolean,
+    rebalancePlan: null as Plan | null,
+    rebalanceInProgress: false as boolean,
+    currentTransferStatus: "" as string,
+    completedTransfers: 0 as number,
+    totalTransfers: 0 as number,
   }),
   actions: {
     getReliableTargets(unit: string): TargetConfig[] {
@@ -105,15 +113,20 @@ export const useRebalanceStore = defineStore("rebalance", {
       const unit = useMintsStore().activeUnit;
       return { unit, transfers, totalMove };
     },
-    async maybeRebalance(unit?: string) {
+    /**
+     * Detects if rebalancing is needed and prompts the user
+     * Called after mint/melt/receive operations
+     */
+    async checkAndPromptRebalance(unit?: string) {
       const settings = useSettingsStore();
       const mints = useMintsStore();
-      const wallet = useWalletStore();
       const swap = useSwapStore();
 
+      // Don't prompt if feature is disabled or conditions aren't met
       if (!settings.autoRebalanceEnabled) return;
       if (this.running || settings.rebalanceBlocking) return;
       if (swap.swapBlocking) return;
+      if (this.showRebalancePrompt) return; // Already showing prompt
       if (Date.now() - settings.lastRebalanceAt < settings.autoRebalanceThrottleSec * 1000)
         return;
 
@@ -132,32 +145,178 @@ export const useRebalanceStore = defineStore("rebalance", {
       const plan = this.buildPlan(allocs, settings.autoRebalanceMinAmount);
       if (plan.transfers.length === 0) return;
 
+      // Store the plan and show the prompt
+      this.rebalancePlan = plan;
+      this.showRebalancePrompt = true;
+    },
+
+    /**
+     * Execute the rebalance plan
+     * Called when user accepts the rebalance prompt
+     */
+    async executeRebalance() {
+      if (!this.rebalancePlan || this.rebalancePlan.transfers.length === 0) {
+        console.error("No rebalance plan to execute");
+        return;
+      }
+
+      const settings = useSettingsStore();
+      const wallet = useWalletStore();
+      const swap = useSwapStore();
+
+      this.rebalanceInProgress = true;
       this.running = true;
       settings.rebalanceBlocking = true;
+      this.completedTransfers = 0;
+      this.totalTransfers = this.rebalancePlan.transfers.length;
+
       try {
-        // Execute with simple fee-cap preflight per transfer
-        for (const t of plan.transfers) {
-          // Create destination invoice and source quote to check fee ratio
-          const toWallet = wallet.mintWallet(t.toUrl, activeUnit);
-          const fromWallet = wallet.mintWallet(t.fromUrl, activeUnit);
-          const mintQuote = await wallet.requestMint(t.amount, toWallet);
-          const meltQuote = await wallet.meltQuote(fromWallet, mintQuote.request);
-          const feePct = (meltQuote.fee_reserve / t.amount) * 100;
-          if (feePct > settings.autoRebalanceFeeCapPct) {
-            // Skip this transfer if too expensive; leave pending invoice record as-is
-            continue;
+        const activeUnit = this.rebalancePlan.unit;
+        
+        // Step 1: Get all quotes sequentially (can't be parallelized)
+        this.currentTransferStatus = "Getting quotes from mints...";
+        const quotePairs: Array<{
+          transfer: Transfer;
+          mintQuote: any;
+          meltQuote: any;
+          feePct: number;
+        }> = [];
+        const skippedTransfers: Array<{ index: number; reason: string }> = [];
+
+        for (let i = 0; i < this.rebalancePlan.transfers.length; i++) {
+          const t = this.rebalancePlan.transfers[i];
+          this.currentTransferStatus = `Getting quote ${i + 1}/${this.rebalancePlan.transfers.length}...`;
+          
+          try {
+            // Create destination invoice
+            const toWallet = wallet.mintWallet(t.toUrl, activeUnit);
+            const mintQuote = await wallet.requestMint(t.amount, toWallet);
+            
+            // Get source quote to check fee ratio
+            const fromWallet = wallet.mintWallet(t.fromUrl, activeUnit);
+            const meltQuote = await wallet.meltQuote(fromWallet, mintQuote.request);
+            const feePct = (meltQuote.fee_reserve / t.amount) * 100;
+            
+            if (feePct > settings.autoRebalanceFeeCapPct) {
+              const errorMsg = `Transfer ${i + 1} skipped: fee ${feePct.toFixed(2)}% exceeds cap of ${settings.autoRebalanceFeeCapPct}%`;
+              console.error(errorMsg);
+              skippedTransfers.push({ index: i + 1, reason: `High fee: ${feePct.toFixed(2)}%` });
+              continue; // Skip transfers that exceed fee cap, but continue with others
+            }
+            
+            quotePairs.push({ transfer: t, mintQuote, meltQuote, feePct });
+          } catch (e) {
+            const errorMsg = `Failed to get quotes for transfer ${i + 1}: ${e}`;
+            console.error(errorMsg);
+            skippedTransfers.push({ index: i + 1, reason: `Quote failed: ${e}` });
+            // Continue with other transfers
           }
-          await swap.mintAmountSwap({ fromUrl: t.fromUrl, toUrl: t.toUrl, amount: t.amount });
         }
+
+        // Step 2: Execute all transfers sequentially (swapBlocking prevents parallel execution)
+        this.currentTransferStatus = "Executing transfers...";
+        const results: Array<{ success: boolean; index: number; error?: any }> = [];
+        
+        for (let i = 0; i < quotePairs.length; i++) {
+          const pair = quotePairs[i];
+          this.currentTransferStatus = `Transfer ${i + 1}/${quotePairs.length}: ${pair.transfer.amount} from ${pair.transfer.fromUrl.split('/').pop()} to ${pair.transfer.toUrl.split('/').pop()}...`;
+          
+          try {
+            // Execute the melt with the pre-fetched quotes
+            const fromWallet = wallet.mintWallet(pair.transfer.fromUrl, activeUnit);
+            const mints = useMintsStore();
+            const mint = mints.mints.find((m) => m.url === pair.transfer.fromUrl);
+            if (!mint) {
+              throw new Error("Source mint not found");
+            }
+            const mintProofs = mints.mintUnitProofs(mint, fromWallet.unit);
+            
+            // Execute melt
+            await wallet.melt(mintProofs, pair.meltQuote, fromWallet);
+            
+            // Check if the destination mint received the payment
+            await wallet.checkInvoice(pair.mintQuote.quote);
+            
+            this.completedTransfers++;
+            results.push({ success: true, index: i });
+          } catch (e) {
+            console.error(`Transfer ${i + 1} failed:`, e);
+            results.push({ success: false, index: i, error: e });
+            // Continue with remaining transfers even if one fails
+          }
+        }
+
+        const successCount = results.filter((r) => r.success).length;
+        const failedCount = results.filter((r) => !r.success).length;
+        const totalPlanned = this.rebalancePlan.transfers.length;
+        
+        console.log(`Rebalance completed: ${successCount}/${quotePairs.length} transfers successful`);
+        if (skippedTransfers.length > 0) {
+          console.error(`${skippedTransfers.length} transfers skipped:`, skippedTransfers);
+        }
+        
         settings.lastRebalanceAt = Date.now();
+        this.lastError = "";
+        
+        // Build success message with warnings if applicable
+        let statusMsg = `✓ Rebalance completed: ${successCount}/${totalPlanned} transfers successful`;
+        if (skippedTransfers.length > 0 || failedCount > 0) {
+          const issues = [];
+          if (skippedTransfers.length > 0) issues.push(`${skippedTransfers.length} skipped`);
+          if (failedCount > 0) issues.push(`${failedCount} failed`);
+          statusMsg = `⚠ Rebalance completed with warnings: ${successCount}/${totalPlanned} successful (${issues.join(', ')})`;
+        }
+        this.currentTransferStatus = statusMsg;
+        
+        // Delay closing the dialog so user can see the success message
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+        
+        // Close the dialog
+        this.showRebalancePrompt = false;
+        
+        // Show notification based on results
+        if (successCount === totalPlanned) {
+          notifySuccess(
+            i18n.global.t("rebalance.notifications.completed_success", {
+              count: successCount,
+            })
+          );
+        } else if (successCount > 0) {
+          notifyWarning(
+            i18n.global.t("rebalance.notifications.completed_with_issues", {
+              successCount,
+              totalPlanned,
+              skippedCount: skippedTransfers.length,
+              failedCount,
+            })
+          );
+        } else {
+          notifyWarning(
+            i18n.global.t("rebalance.notifications.completed_failed", {
+              skippedCount: skippedTransfers.length,
+            })
+          );
+        }
       } catch (e: any) {
-        console.error("Auto-rebalance failed", e);
+        console.error("Rebalance execution failed", e);
         this.lastError = e?.message || String(e);
         throw e;
       } finally {
         settings.rebalanceBlocking = false;
         this.running = false;
+        this.rebalanceInProgress = false;
+        this.rebalancePlan = null;
+        this.currentTransferStatus = "";
+        this.completedTransfers = 0;
+        this.totalTransfers = 0;
       }
+    },
+
+    /**
+     * Manual rebalance trigger (for settings button)
+     */
+    async manualRebalance(unit?: string) {
+      await this.checkAndPromptRebalance(unit);
     },
   },
 });

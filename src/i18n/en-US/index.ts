@@ -1309,4 +1309,27 @@ export default {
     invalid_swap_data_error_text: "Invalid swap data",
     swap_error_text: "Error swapping",
   },
+  rebalance: {
+    prompt: {
+      title: "Rebalance Needed",
+      description:
+        "Your mint balances are imbalanced. Would you like to rebalance now?",
+      transfers_needed: "Transfers needed:",
+      balance_now: "Balance Now",
+      skip: "Skip",
+    },
+    progress: {
+      warning: "Rebalancing in progress",
+      do_not_close: "Do not close this dialog",
+      status: "Rebalancing...",
+      transfers_complete: "transfers complete",
+    },
+    notifications: {
+      completed_success: "Rebalance completed: all {count} transfers successful",
+      completed_with_issues:
+        "Rebalance completed with issues: {successCount}/{totalPlanned} transfers successful. {skippedCount, plural, =0 {} one {# skipped due to high fees. } other {# skipped due to high fees. }}{failedCount, plural, =0 {} one {# failed. } other {# failed. }}Check console for details.",
+      completed_failed:
+        "Rebalance failed: no transfers completed. {skippedCount, plural, =0 {Check console for details.} one {All # transfer skipped due to high fees.} other {All # transfers skipped due to high fees.}}",
+    },
+  },
 };

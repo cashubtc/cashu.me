@@ -672,7 +672,7 @@ export const useWalletStore = defineStore("wallet", {
         useInvoicesWorkerStore().removeInvoiceFromChecker(invoice.quote);
 
         // Trigger auto-rebalance after minting
-        await useRebalanceStore().maybeRebalance();
+        await useRebalanceStore().checkAndPromptRebalance();
 
         return proofs;
       } catch (error: any) {
@@ -1074,7 +1074,7 @@ export const useWalletStore = defineStore("wallet", {
           uIStore.showInvoiceDetails = false;
         }
         // Trigger auto-rebalance after minting via websocket path
-        await useRebalanceStore().maybeRebalance();
+        await useRebalanceStore().checkAndPromptRebalance();
         useUiStore().vibrate();
         notifySuccess(
           this.t("wallet.notifications.received_lightning", {
@@ -1285,7 +1285,7 @@ export const useWalletStore = defineStore("wallet", {
 
             if (hideInvoiceDetailsOnMint) {
               // Trigger auto-rebalance after websocket minting
-              await useRebalanceStore().maybeRebalance();
+              await useRebalanceStore().checkAndPromptRebalance();
               uIStore.showInvoiceDetails = false;
             }
             useUiStore().vibrate();

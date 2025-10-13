@@ -64,7 +64,7 @@ export const useReceiveTokensStore = defineStore("receiveTokensStore", {
       // Trigger auto-rebalance after receive completes
       try {
         const { useRebalanceStore } = await import("./rebalance");
-        await useRebalanceStore().maybeRebalance();
+        await useRebalanceStore().checkAndPromptRebalance();
       } catch {}
 
       // check if we have all mints

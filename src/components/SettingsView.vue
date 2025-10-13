@@ -1195,10 +1195,6 @@
           </div>
         </div>
 
-        <div class="section-divider q-my-md">
-          <div class="divider-line"></div>
-          <div class="divider-text">
-            {{ $t("Settings.sections.appearance") }}
     <!-- AUTO-REBALANCE SECTION -->
     <div class="section-divider q-my-md">
       <div class="divider-line"></div>
@@ -1211,53 +1207,69 @@
         <q-item>
           <q-item-section>
             <q-toggle v-model="autoRebalanceEnabled" label="Enable Auto-Rebalance" />
+            <q-item-label caption class="q-pt-sm">
+              When enabled, the system will automatically detect imbalances and prompt you to rebalance after mint/receive/melt operations.
+            </q-item-label>
           </q-item-section>
         </q-item>
-        <q-item>
-          <q-item-section>
-            <div class="row q-col-gutter-md">
-              <div class="col-6">
-                <q-input type="number" dense outlined rounded v-model.number="autoRebalanceTolerancePct" label="Tolerance (%)" />
-              </div>
-              <div class="col-6">
-                <q-input type="number" dense outlined rounded v-model.number="autoRebalanceMinAmount" label="Min amount (unit)" />
-              </div>
-              <div class="col-6 q-pt-sm">
-                <q-input type="number" dense outlined rounded v-model.number="autoRebalanceFeeCapPct" label="Fee cap (%)" />
-              </div>
-              <div class="col-6 q-pt-sm">
-                <q-input type="number" dense outlined rounded v-model.number="autoRebalanceThrottleSec" label="Throttle (sec)" />
-              </div>
-            </div>
-          </q-item-section>
-        </q-item>
-        <q-item v-if="mints.length">
-          <q-item-section>
-            <div class="text-subtitle2 q-mb-sm">Reliable mints for {{ activeUnit }}</div>
-            <div v-for="mint in mints" :key="mint.url" class="q-mb-sm">
-              <div class="row items-center">
-                <div class="col-5 ellipsis">{{ mint.nickname || mint.info?.name || mint.url }}</div>
-                <div class="col-3">
-                  <q-toggle :model-value="isReliable(mint.url)" @update:model-value="(v)=>toggleReliable(mint.url,v)" label="Reliable" />
+        
+        <div v-if="autoRebalanceEnabled">
+          <q-item>
+            <q-item-section>
+              <div class="row q-col-gutter-md">
+                <div class="col-6">
+                  <q-input type="number" dense outlined rounded v-model.number="autoRebalanceTolerancePct" label="Tolerance (%)" />
                 </div>
-                <div class="col-4">
-                  <q-slider :min="0" :max="100" :step="1" :disable="!isReliable(mint.url)" :model-value="getTargetPct(mint.url)" @update:model-value="(v)=>setTargetPct(mint.url,v)" label-always />
+                <div class="col-6">
+                  <q-input type="number" dense outlined rounded v-model.number="autoRebalanceMinAmount" label="Min amount (unit)" />
+                </div>
+                <div class="col-6 q-pt-sm">
+                  <q-input type="number" dense outlined rounded v-model.number="autoRebalanceFeeCapPct" label="Fee cap (%)" />
+                </div>
+                <div class="col-6 q-pt-sm">
+                  <q-input type="number" dense outlined rounded v-model.number="autoRebalanceThrottleSec" label="Throttle (sec)" />
                 </div>
               </div>
-            </div>
-            <div class="row q-pt-sm">
-              <q-btn outline color="primary" @click="rebalanceNow" label="Rebalance Now" />
-            </div>
-          </q-item-section>
-        </q-item>
+            </q-item-section>
+          </q-item>
+          <q-item v-if="mints.length">
+            <q-item-section>
+              <div class="text-subtitle2 q-mb-sm">Reliable mints for {{ activeUnit }}</div>
+              <div v-for="mint in mints" :key="mint.url" class="q-mb-sm">
+                <div class="row items-center">
+                  <div class="col-5 ellipsis">{{ mint.nickname || mint.info?.name || mint.url }}</div>
+                  <div class="col-3">
+                    <q-toggle :model-value="isReliable(mint.url)" @update:model-value="(v)=>toggleReliable(mint.url,v)" label="Reliable" />
+                  </div>
+                  <div class="col-4">
+                    <q-slider :min="0" :max="100" :step="1" :disable="!isReliable(mint.url)" :model-value="getTargetPct(mint.url)" @update:model-value="(v)=>setTargetPct(mint.url,v)" label-always />
+                  </div>
+                </div>
+              </div>
+              <div class="row q-pt-sm q-pb-md items-center">
+                <div class="col-auto q-mr-md">
+                  <q-badge color="positive" :label="'Total: ' + totalReliablePct + '%'" />
+                </div>
+                <div class="col-auto">
+                  <q-btn outline color="primary" @click="rebalanceNow" label="Rebalance Now" />
+                </div>
+              </div>
+            </q-item-section>
+          </q-item>
+        </div>
       </q-list>
     </div>
 
-          </div>
-          <div class="divider-line"></div>
-        </div>
+    <!-- APPEARANCE SECTION -->
+    <div class="section-divider q-my-md">
+      <div class="divider-line"></div>
+      <div class="divider-text">
+        {{ $t("Settings.sections.appearance") }}
+      </div>
+      <div class="divider-line"></div>
+    </div>
 
-        <!-- use numeric keyboard -->
+    <!-- use numeric keyboard -->
         <div class="q-py-sm q-px-xs text-left" on-left>
           <q-list padding>
             <q-item>
@@ -1736,59 +1748,6 @@
                       dense
                       class="q-ml-sm"
 
-    <!-- AUTO-REBALANCE SECTION -->
-    <div class="section-divider q-my-md">
-      <div class="divider-line"></div>
-      <div class="divider-text">Automatic Load Balancer</div>
-      <div class="divider-line"></div>
-    </div>
-
-    <div class="q-py-sm q-px-xs text-left" on-left>
-      <q-list padding>
-        <q-item>
-          <q-item-section>
-            <q-toggle v-model="autoRebalanceEnabled" label="Enable Auto-Rebalance" />
-          </q-item-section>
-        </q-item>
-        <q-item>
-          <q-item-section>
-            <div class="row q-col-gutter-md">
-              <div class="col-6">
-                <q-input type="number" dense outlined rounded v-model.number="autoRebalanceTolerancePct" label="Tolerance (%)" />
-              </div>
-              <div class="col-6">
-                <q-input type="number" dense outlined rounded v-model.number="autoRebalanceMinAmount" label="Min amount (unit)" />
-              </div>
-              <div class="col-6 q-pt-sm">
-                <q-input type="number" dense outlined rounded v-model.number="autoRebalanceFeeCapPct" label="Fee cap (%)" />
-              </div>
-              <div class="col-6 q-pt-sm">
-                <q-input type="number" dense outlined rounded v-model.number="autoRebalanceThrottleSec" label="Throttle (sec)" />
-              </div>
-            </div>
-          </q-item-section>
-        </q-item>
-        <q-item v-if="mints.length">
-          <q-item-section>
-            <div class="text-subtitle2 q-mb-sm">Reliable mints for {{ activeUnit }}</div>
-            <div v-for="mint in mints" :key="mint.url" class="q-mb-sm">
-              <div class="row items-center">
-                <div class="col-5 ellipsis">{{ mint.nickname || mint.info?.name || mint.url }}</div>
-                <div class="col-3">
-                  <q-toggle :model-value="isReliable(mint.url)" @update:model-value="(v)=>toggleReliable(mint.url,v)" label="Reliable" />
-                </div>
-                <div class="col-4">
-                  <q-slider :min="0" :max="100" :step="1" :disable="!isReliable(mint.url)" :model-value="getTargetPct(mint.url)" @update:model-value="(v)=>setTargetPct(mint.url,v)" label-always />
-                </div>
-              </div>
-            </div>
-            <div class="row q-pt-sm">
-              <q-btn outline color="primary" @click="rebalanceNow" label="Rebalance Now" />
-            </div>
-          </q-item-section>
-        </q-item>
-      </q-list>
-    </div>
 
                       color="primary"
                       @click="confirmNuke = false"
@@ -1990,7 +1949,7 @@ export default defineComponent({
       "showNWCData",
     ]),
     ...mapWritableState(useNostrStore, ["relays"]),
-    ...mapState(useMintsStore, ["activeMintUrl", "mints", "activeProofs"]),
+    ...mapState(useMintsStore, ["activeMintUrl", "mints", "activeProofs", "activeUnit"]),
     ...mapState(useNPCStore, ["npcLoading"]),
     ...mapState(useNostrStore, [
       "pubkey",
@@ -2053,6 +2012,11 @@ export default defineComponent({
         this.nwcEnabled = value;
       },
     },
+    totalReliablePct() {
+      const list = this.reliableMintsByUnit?.[this.activeUnit] || [];
+      const reliableMints = list.filter(e => e.enabled);
+      return reliableMints.reduce((sum, m) => sum + m.targetPct, 0);
+    },
   },
   watch: {
     enableNwc: function () {
@@ -2078,7 +2042,7 @@ export default defineComponent({
       // Trigger auto-rebalance after seed change
       try {
         const { useRebalanceStore } = await import("src/stores/rebalance");
-        await useRebalanceStore().maybeRebalance(this.activeUnit);
+        await useRebalanceStore().manualRebalance(this.activeUnit);
       } catch {}
 
         this.npcV2Address = "";
@@ -2142,7 +2106,7 @@ export default defineComponent({
       // Trigger auto-rebalance
       try {
         const { useRebalanceStore } = await import("src/stores/rebalance");
-        await useRebalanceStore().maybeRebalance(this.activeUnit);
+        await useRebalanceStore().manualRebalance(this.activeUnit);
       } catch {}
     },
     shortUrl: function (url) {
@@ -2308,8 +2272,58 @@ export default defineComponent({
       const unit = this.activeUnit;
       const list = [...(this.reliableMintsByUnit?.[unit] || [])];
       const idx = list.findIndex((e) => e.url === url);
-      if (idx >= 0) list[idx] = { ...list[idx], enabled };
-      else list.push({ url, targetPct: 0, enabled });
+      
+      if (idx >= 0) {
+        list[idx] = { ...list[idx], enabled };
+      } else {
+        list.push({ url, targetPct: 0, enabled });
+      }
+      
+      // Get all reliable mints after the toggle
+      const reliableMints = list.filter(e => e.enabled);
+      
+      if (reliableMints.length === 0) {
+        // No reliable mints, nothing to do
+        this.reliableMintsByUnit = { ...this.reliableMintsByUnit, [unit]: list };
+        return;
+      }
+      
+      // Redistribute to ensure total = 100%
+      if (reliableMints.length === 1) {
+        // Only one reliable mint, set it to 100%
+        const mintIdx = list.findIndex(e => e.url === reliableMints[0].url);
+        list[mintIdx] = { ...list[mintIdx], targetPct: 100 };
+      } else {
+        // Multiple reliable mints
+        const total = reliableMints.reduce((sum, m) => sum + m.targetPct, 0);
+        
+        if (total === 0) {
+          // All at 0, distribute evenly
+          const evenSplit = Math.floor(100 / reliableMints.length);
+          let leftover = 100 - (evenSplit * reliableMints.length);
+          reliableMints.forEach((mint, i) => {
+            const mintIdx = list.findIndex(e => e.url === mint.url);
+            const extra = i < leftover ? 1 : 0;
+            list[mintIdx] = { ...list[mintIdx], targetPct: evenSplit + extra };
+          });
+        } else if (total !== 100) {
+          // Redistribute proportionally to reach 100%
+          let allocated = 0;
+          reliableMints.forEach((mint, i) => {
+            const mintIdx = list.findIndex(e => e.url === mint.url);
+            if (i === reliableMints.length - 1) {
+              // Last mint gets whatever is left to avoid rounding errors
+              list[mintIdx] = { ...list[mintIdx], targetPct: 100 - allocated };
+            } else {
+              const proportion = mint.targetPct / total;
+              const newPct = Math.round(100 * proportion);
+              list[mintIdx] = { ...list[mintIdx], targetPct: newPct };
+              allocated += newPct;
+            }
+          });
+        }
+      }
+      
       this.reliableMintsByUnit = { ...this.reliableMintsByUnit, [unit]: list };
     },
     getTargetPct(url: string): number {
@@ -2320,14 +2334,64 @@ export default defineComponent({
       const unit = this.activeUnit;
       const list = [...(this.reliableMintsByUnit?.[unit] || [])];
       const idx = list.findIndex((e) => e.url === url);
+      
+      // Update the target mint's percentage
       if (idx >= 0) list[idx] = { ...list[idx], targetPct: v };
       else list.push({ url, targetPct: v, enabled: true });
+      
+      // Get all reliable mints for this unit
+      const reliableMints = list.filter(e => e.enabled);
+      
+      // If there are multiple reliable mints, enforce total = 100%
+      if (reliableMints.length > 1) {
+        const otherMints = reliableMints.filter(e => e.url !== url);
+        const remaining = 100 - v;
+        
+        if (remaining < 0) {
+          // If user tried to set > 100%, cap at 100% and set others to 0
+          const mintIdx = list.findIndex(e => e.url === url);
+          list[mintIdx] = { ...list[mintIdx], targetPct: 100 };
+          otherMints.forEach(mint => {
+            const idx = list.findIndex(e => e.url === mint.url);
+            list[idx] = { ...list[idx], targetPct: 0 };
+          });
+        } else if (remaining >= 0 && otherMints.length > 0) {
+          // Distribute the remaining percentage among other mints
+          const otherTotal = otherMints.reduce((sum, m) => sum + m.targetPct, 0);
+          
+          if (otherTotal > 0) {
+            // Scale proportionally based on existing values
+            let allocated = 0;
+            otherMints.forEach((mint, i) => {
+              const mintIdx = list.findIndex(e => e.url === mint.url);
+              if (i === otherMints.length - 1) {
+                // Last mint gets whatever is left to avoid rounding errors
+                list[mintIdx] = { ...list[mintIdx], targetPct: remaining - allocated };
+              } else {
+                const proportion = mint.targetPct / otherTotal;
+                const newPct = Math.round(remaining * proportion);
+                list[mintIdx] = { ...list[mintIdx], targetPct: newPct };
+                allocated += newPct;
+              }
+            });
+          } else {
+            // All others are 0, distribute evenly
+            const evenSplit = Math.floor(remaining / otherMints.length);
+            let leftover = remaining - (evenSplit * otherMints.length);
+            otherMints.forEach((mint, i) => {
+              const mintIdx = list.findIndex(e => e.url === mint.url);
+              const extra = i < leftover ? 1 : 0;
+              list[mintIdx] = { ...list[mintIdx], targetPct: evenSplit + extra };
+            });
+          }
+        }
+      }
+      
       this.reliableMintsByUnit = { ...this.reliableMintsByUnit, [unit]: list };
     },
     async rebalanceNow() {
       const r = await useRebalanceStore();
-      await r.maybeRebalance(this.activeUnit);
-      this.notifySuccess("Rebalance attempted. Check history for moves.");
+      await r.manualRebalance(this.activeUnit);
     },
   },
   created: async function () {
