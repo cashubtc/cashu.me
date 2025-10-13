@@ -106,7 +106,7 @@ export const useSettingsStore = defineStore("settings", {
       ),
       autoRebalanceFeeCapPct: useLocalStorage<number>(
         "cashu.settings.autoRebalanceFeeCapPct",
-        1
+        3
       ),
       autoRebalanceThrottleSec: useLocalStorage<number>(
         "cashu.settings.autoRebalanceThrottleSec",

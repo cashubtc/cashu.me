@@ -282,18 +282,28 @@ export const useRebalanceStore = defineStore("rebalance", {
             })
           );
         } else if (successCount > 0) {
+          // Build details string
+          const details = [];
+          if (skippedTransfers.length > 0) {
+            details.push(`${skippedTransfers.length} skipped due to high fees.`);
+          }
+          if (failedCount > 0) {
+            details.push(`${failedCount} failed.`);
+          }
           notifyWarning(
             i18n.global.t("rebalance.notifications.completed_with_issues", {
               successCount,
               totalPlanned,
-              skippedCount: skippedTransfers.length,
-              failedCount,
+              details: details.join(" "),
             })
           );
         } else {
+          const reason = skippedTransfers.length > 0
+            ? `All ${skippedTransfers.length} transfer(s) skipped due to high fees.`
+            : "Check console for details.";
           notifyWarning(
             i18n.global.t("rebalance.notifications.completed_failed", {
-              skippedCount: skippedTransfers.length,
+              reason,
             })
           );
         }

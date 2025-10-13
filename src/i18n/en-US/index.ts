@@ -1325,11 +1325,11 @@ export default {
       transfers_complete: "transfers complete",
     },
     notifications: {
-      completed_success: "Rebalance completed: all {count} transfers successful",
+      completed_success: "Rebalance completed: all {count} transfer(s) successful",
       completed_with_issues:
-        "Rebalance completed with issues: {successCount}/{totalPlanned} transfers successful. {skippedCount, plural, =0 {} one {# skipped due to high fees. } other {# skipped due to high fees. }}{failedCount, plural, =0 {} one {# failed. } other {# failed. }}Check console for details.",
+        "Rebalance completed with issues: {successCount}/{totalPlanned} transfer(s) successful. {details} Check console for details.",
       completed_failed:
-        "Rebalance failed: no transfers completed. {skippedCount, plural, =0 {Check console for details.} one {All # transfer skipped due to high fees.} other {All # transfers skipped due to high fees.}}",
+        "Rebalance failed: no transfers completed. {reason}",
     },
   },
 };
