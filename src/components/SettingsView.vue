@@ -1873,6 +1873,7 @@ import { useNPCV2Store } from "src/stores/npcv2";
 import { useNostrMintBackupStore } from "src/stores/nostrMintBackup";
 import { usePriceStore } from "src/stores/price";
 import { useI18n } from "vue-i18n";
+import { useRebalanceStore } from 'src/stores/rebalance';
 
 export default defineComponent({
   name: "SettingsView",
@@ -2214,13 +2215,6 @@ export default defineComponent({
       await this.generateNPCConnection();
       await this.generateNPCV2Connection();
     },
-
-<script lang="ts">
-// NOTE: These are helper methods injected for the Auto-Rebalance UI block.
-// We place them after the main component to minimize intrusive changes.
-// In a refactor, consider moving into the main component methods and computed.
-</script>
-
     handleNsecClick: async function () {
       await this.initPrivateKeySigner();
       await this.generateNPCConnection();
@@ -2331,8 +2325,7 @@ export default defineComponent({
       this.reliableMintsByUnit = { ...this.reliableMintsByUnit, [unit]: list };
     },
     async rebalanceNow() {
-      const { useRebalanceStore } = await import("src/stores/rebalance");
-      const r = useRebalanceStore();
+      const r = await useRebalanceStore();
       await r.maybeRebalance(this.activeUnit);
       this.notifySuccess("Rebalance attempted. Check history for moves.");
     },

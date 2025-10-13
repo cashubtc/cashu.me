@@ -114,12 +114,6 @@ export const useReceiveTokensStore = defineStore("receiveTokensStore", {
 
         if (
           historyToken &&
-      // Trigger auto-rebalance after swap receive-to-mint
-      try {
-        const { useRebalanceStore } = await import("./rebalance");
-        await useRebalanceStore().maybeRebalance();
-      } catch {}
-
           (historyToken.amount > 0 || historyToken.status === "paid")
         ) {
           if (verbose) notify("Token already in history.");
