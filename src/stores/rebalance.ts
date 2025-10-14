@@ -222,6 +222,14 @@ export const useRebalanceStore = defineStore("rebalance", {
           this.currentTransferStatus = `Transfer ${i + 1}/${quotePairs.length}: ${pair.transfer.amount} from ${pair.transfer.fromUrl.split('/').pop()} to ${pair.transfer.toUrl.split('/').pop()}...`;
           
           try {
+            // Label the invoices for crash recovery
+            // The mintQuote invoice already exists in invoiceHistory from requestMint()
+            // We need to add a label so we know it's part of a rebalance
+            const mintInvoice = wallet.invoiceHistory.find((inv) => inv.quote === pair.mintQuote.quote);
+            if (mintInvoice) {
+              mintInvoice.label = `Rebalance: → ${pair.transfer.toUrl.split('/').pop()}`;
+            }
+            
             // Execute the melt with the pre-fetched quotes
             const fromWallet = wallet.mintWallet(pair.transfer.fromUrl, activeUnit);
             const mints = useMintsStore();
@@ -231,11 +239,20 @@ export const useRebalanceStore = defineStore("rebalance", {
             }
             const mintProofs = mints.mintUnitProofs(mint, fromWallet.unit);
             
-            // Execute melt
-            await wallet.melt(mintProofs, pair.meltQuote, fromWallet);
+            // Set payInvoiceData so melt() can use it for history tracking
+            wallet.payInvoiceData.input.request = pair.mintQuote.request;
+            
+            // Execute melt (this will add the meltQuote to invoiceHistory)
+            await wallet.melt(mintProofs, pair.meltQuote, fromWallet, true); // silent=true
+            
+            // Label the melt invoice entry for crash recovery
+            const meltInvoice = wallet.invoiceHistory.find((inv) => inv.quote === pair.meltQuote.quote);
+            if (meltInvoice) {
+              meltInvoice.label = `Rebalance: ${pair.transfer.fromUrl.split('/').pop()} →`;
+            }
             
             // Check if the destination mint received the payment
-            await wallet.checkInvoice(pair.mintQuote.quote);
+            await wallet.checkInvoice(pair.mintQuote.quote, false, false); // verbose=false, hideInvoiceDetailsOnMint=false
             
             this.completedTransfers++;
             results.push({ success: true, index: i });
