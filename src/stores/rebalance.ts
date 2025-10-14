@@ -7,7 +7,12 @@ import { notifyWarning, notifySuccess } from "../js/notify";
 import { i18n } from "../boot/i18n";
 
 export type TargetConfig = { url: string; targetPct: number; enabled: boolean };
-export type Allocation = { url: string; current: number; target: number; delta: number };
+export type Allocation = {
+  url: string;
+  current: number;
+  target: number;
+  delta: number;
+};
 export type Transfer = { fromUrl: string; toUrl: string; amount: number };
 export type Plan = { unit: string; transfers: Transfer[]; totalMove: number };
 
@@ -49,7 +54,10 @@ export const useRebalanceStore = defineStore("rebalance", {
       });
       return map;
     },
-    targetsFromPct(total: number, targets: TargetConfig[]): Record<string, number> {
+    targetsFromPct(
+      total: number,
+      targets: TargetConfig[]
+    ): Record<string, number> {
       const out: Record<string, number> = {};
       targets.forEach((t) => {
         if (t.enabled) out[t.url] = Math.round((total * t.targetPct) / 100);
@@ -60,7 +68,9 @@ export const useRebalanceStore = defineStore("rebalance", {
       current: Record<string, number>,
       targets: Record<string, number>
     ): Allocation[] {
-      const urls = Array.from(new Set([...Object.keys(current), ...Object.keys(targets)]));
+      const urls = Array.from(
+        new Set([...Object.keys(current), ...Object.keys(targets)])
+      );
       return urls.map((url) => {
         const c = current[url] || 0;
         const tg = targets[url] || 0;
@@ -80,10 +90,7 @@ export const useRebalanceStore = defineStore("rebalance", {
       }
       return false;
     },
-    buildPlan(
-      allocations: Allocation[],
-      minAmount: number
-    ): Plan {
+    buildPlan(allocations: Allocation[], minAmount: number): Plan {
       const over = allocations
         .filter((a) => a.delta > 0)
         .sort((a, b) => b.delta - a.delta);
@@ -127,11 +134,16 @@ export const useRebalanceStore = defineStore("rebalance", {
       if (this.running || settings.rebalanceBlocking) return;
       if (swap.swapBlocking) return;
       if (this.showRebalancePrompt) return; // Already showing prompt
-      if (Date.now() - settings.lastRebalanceAt < settings.autoRebalanceThrottleSec * 1000)
+      if (
+        Date.now() - settings.lastRebalanceAt <
+        settings.autoRebalanceThrottleSec * 1000
+      )
         return;
 
       const activeUnit = unit || mints.activeUnit;
-      const targets = this.getReliableTargets(activeUnit).filter((t) => t.enabled);
+      const targets = this.getReliableTargets(activeUnit).filter(
+        (t) => t.enabled
+      );
       if (targets.length < 2) return;
 
       const total = this.computeTotalBalance(activeUnit);
@@ -140,7 +152,8 @@ export const useRebalanceStore = defineStore("rebalance", {
       const current = this.currentBalances(activeUnit);
       const targetAmounts = this.targetsFromPct(total, targets);
       const allocs = this.deviations(current, targetAmounts);
-      if (!this.isUnbalanced(allocs, settings.autoRebalanceTolerancePct, total)) return;
+      if (!this.isUnbalanced(allocs, settings.autoRebalanceTolerancePct, total))
+        return;
 
       const plan = this.buildPlan(allocs, settings.autoRebalanceMinAmount);
       if (plan.transfers.length === 0) return;
@@ -172,7 +185,7 @@ export const useRebalanceStore = defineStore("rebalance", {
 
       try {
         const activeUnit = this.rebalancePlan.unit;
-        
+
         // Step 1: Get all quotes sequentially (can't be parallelized)
         this.currentTransferStatus = "Getting quotes from mints...";
         const quotePairs: Array<{
@@ -185,75 +198,106 @@ export const useRebalanceStore = defineStore("rebalance", {
 
         for (let i = 0; i < this.rebalancePlan.transfers.length; i++) {
           const t = this.rebalancePlan.transfers[i];
-          this.currentTransferStatus = `Getting quote ${i + 1}/${this.rebalancePlan.transfers.length}...`;
-          
+          this.currentTransferStatus = `Getting quote ${i + 1}/${
+            this.rebalancePlan.transfers.length
+          }...`;
+
           try {
             // Create destination invoice
             const toWallet = wallet.mintWallet(t.toUrl, activeUnit);
             const mintQuote = await wallet.requestMint(t.amount, toWallet);
-            
+
             // Get source quote to check fee ratio
             const fromWallet = wallet.mintWallet(t.fromUrl, activeUnit);
-            const meltQuote = await wallet.meltQuote(fromWallet, mintQuote.request);
+            const meltQuote = await wallet.meltQuote(
+              fromWallet,
+              mintQuote.request
+            );
             const feePct = (meltQuote.fee_reserve / t.amount) * 100;
-            
+
             if (feePct > settings.autoRebalanceFeeCapPct) {
-              const errorMsg = `Transfer ${i + 1} skipped: fee ${feePct.toFixed(2)}% exceeds cap of ${settings.autoRebalanceFeeCapPct}%`;
+              const errorMsg = `Transfer ${i + 1} skipped: fee ${feePct.toFixed(
+                2
+              )}% exceeds cap of ${settings.autoRebalanceFeeCapPct}%`;
               console.error(errorMsg);
-              skippedTransfers.push({ index: i + 1, reason: `High fee: ${feePct.toFixed(2)}%` });
+              skippedTransfers.push({
+                index: i + 1,
+                reason: `High fee: ${feePct.toFixed(2)}%`,
+              });
               continue; // Skip transfers that exceed fee cap, but continue with others
             }
-            
+
             quotePairs.push({ transfer: t, mintQuote, meltQuote, feePct });
           } catch (e) {
             const errorMsg = `Failed to get quotes for transfer ${i + 1}: ${e}`;
             console.error(errorMsg);
-            skippedTransfers.push({ index: i + 1, reason: `Quote failed: ${e}` });
+            skippedTransfers.push({
+              index: i + 1,
+              reason: `Quote failed: ${e}`,
+            });
             // Continue with other transfers
           }
         }
 
         // Step 2: Execute all transfers sequentially (swapBlocking prevents parallel execution)
         this.currentTransferStatus = "Executing transfers...";
-        const results: Array<{ success: boolean; index: number; error?: any }> = [];
-        
+        const results: Array<{ success: boolean; index: number; error?: any }> =
+          [];
+
         for (let i = 0; i < quotePairs.length; i++) {
           const pair = quotePairs[i];
-          this.currentTransferStatus = `Transfer ${i + 1}/${quotePairs.length}: ${pair.transfer.amount} from ${pair.transfer.fromUrl.split('/').pop()} to ${pair.transfer.toUrl.split('/').pop()}...`;
-          
+          this.currentTransferStatus = `Transfer ${i + 1}/${
+            quotePairs.length
+          }: ${pair.transfer.amount} from ${pair.transfer.fromUrl
+            .split("/")
+            .pop()} to ${pair.transfer.toUrl.split("/").pop()}...`;
+
           try {
             // Label the invoices for crash recovery
             // The mintQuote invoice already exists in invoiceHistory from requestMint()
             // We need to add a label so we know it's part of a rebalance
-            const mintInvoice = wallet.invoiceHistory.find((inv) => inv.quote === pair.mintQuote.quote);
+            const mintInvoice = wallet.invoiceHistory.find(
+              (inv) => inv.quote === pair.mintQuote.quote
+            );
             if (mintInvoice) {
-              mintInvoice.label = `Rebalance: → ${pair.transfer.toUrl.split('/').pop()}`;
+              mintInvoice.label = `Rebalance: → ${pair.transfer.toUrl
+                .split("/")
+                .pop()}`;
             }
-            
+
             // Execute the melt with the pre-fetched quotes
-            const fromWallet = wallet.mintWallet(pair.transfer.fromUrl, activeUnit);
+            const fromWallet = wallet.mintWallet(
+              pair.transfer.fromUrl,
+              activeUnit
+            );
             const mints = useMintsStore();
-            const mint = mints.mints.find((m) => m.url === pair.transfer.fromUrl);
+            const mint = mints.mints.find(
+              (m) => m.url === pair.transfer.fromUrl
+            );
             if (!mint) {
               throw new Error("Source mint not found");
             }
             const mintProofs = mints.mintUnitProofs(mint, fromWallet.unit);
-            
+
             // Set payInvoiceData so melt() can use it for history tracking
             wallet.payInvoiceData.input.request = pair.mintQuote.request;
-            
+
             // Execute melt (this will add the meltQuote to invoiceHistory)
             await wallet.melt(mintProofs, pair.meltQuote, fromWallet, true); // silent=true
-            
+
             // Label the melt invoice entry for crash recovery
-            const meltInvoice = wallet.invoiceHistory.find((inv) => inv.quote === pair.meltQuote.quote);
+            const meltInvoice = wallet.invoiceHistory.find(
+              (inv) => inv.quote === pair.meltQuote.quote
+            );
             if (meltInvoice) {
-              meltInvoice.label = `Rebalance: ${pair.transfer.fromUrl.split('/').pop()} →`;
+              meltInvoice.label = `Rebalance: ${pair.transfer.fromUrl
+                .split("/")
+                .pop()} →`;
             }
-            
+
             // Check if the destination mint received the payment
             await wallet.checkInvoice(pair.mintQuote.quote, false, false); // verbose=false, hideInvoiceDetailsOnMint=false
-            
+
             this.completedTransfers++;
             results.push({ success: true, index: i });
           } catch (e) {
@@ -266,31 +310,39 @@ export const useRebalanceStore = defineStore("rebalance", {
         const successCount = results.filter((r) => r.success).length;
         const failedCount = results.filter((r) => !r.success).length;
         const totalPlanned = this.rebalancePlan.transfers.length;
-        
-        console.log(`Rebalance completed: ${successCount}/${quotePairs.length} transfers successful`);
+
+        console.log(
+          `Rebalance completed: ${successCount}/${quotePairs.length} transfers successful`
+        );
         if (skippedTransfers.length > 0) {
-          console.error(`${skippedTransfers.length} transfers skipped:`, skippedTransfers);
+          console.error(
+            `${skippedTransfers.length} transfers skipped:`,
+            skippedTransfers
+          );
         }
-        
+
         settings.lastRebalanceAt = Date.now();
         this.lastError = "";
-        
+
         // Build success message with warnings if applicable
         let statusMsg = `✓ Rebalance completed: ${successCount}/${totalPlanned} transfers successful`;
         if (skippedTransfers.length > 0 || failedCount > 0) {
           const issues = [];
-          if (skippedTransfers.length > 0) issues.push(`${skippedTransfers.length} skipped`);
+          if (skippedTransfers.length > 0)
+            issues.push(`${skippedTransfers.length} skipped`);
           if (failedCount > 0) issues.push(`${failedCount} failed`);
-          statusMsg = `⚠ Rebalance completed with warnings: ${successCount}/${totalPlanned} successful (${issues.join(', ')})`;
+          statusMsg = `⚠ Rebalance completed with warnings: ${successCount}/${totalPlanned} successful (${issues.join(
+            ", "
+          )})`;
         }
         this.currentTransferStatus = statusMsg;
-        
+
         // Delay closing the dialog so user can see the success message
         await new Promise((resolve) => setTimeout(resolve, 2000));
-        
+
         // Close the dialog
         this.showRebalancePrompt = false;
-        
+
         // Show notification based on results
         if (successCount === totalPlanned) {
           notifySuccess(
@@ -302,7 +354,9 @@ export const useRebalanceStore = defineStore("rebalance", {
           // Build details string
           const details = [];
           if (skippedTransfers.length > 0) {
-            details.push(`${skippedTransfers.length} skipped due to high fees.`);
+            details.push(
+              `${skippedTransfers.length} skipped due to high fees.`
+            );
           }
           if (failedCount > 0) {
             details.push(`${failedCount} failed.`);
@@ -315,9 +369,10 @@ export const useRebalanceStore = defineStore("rebalance", {
             })
           );
         } else {
-          const reason = skippedTransfers.length > 0
-            ? `All ${skippedTransfers.length} transfer(s) skipped due to high fees.`
-            : "Check console for details.";
+          const reason =
+            skippedTransfers.length > 0
+              ? `All ${skippedTransfers.length} transfer(s) skipped due to high fees.`
+              : "Check console for details.";
           notifyWarning(
             i18n.global.t("rebalance.notifications.completed_failed", {
               reason,

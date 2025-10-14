@@ -71,7 +71,7 @@ export const useReceiveTokensStore = defineStore("receiveTokensStore", {
       await walletStore.redeem();
       receiveStore.showReceiveTokens = false;
       uiStore.closeDialogs();
-      
+
       // Trigger auto-rebalance after receive completes (after proofs are added to store)
       try {
         const { useRebalanceStore } = await import("./rebalance");

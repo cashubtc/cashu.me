@@ -113,7 +113,10 @@ export const useSettingsStore = defineStore("settings", {
         60
       ),
       reliableMintsByUnit: useLocalStorage<
-        Record<string, Array<{ url: string; targetPct: number; enabled: boolean }>>
+        Record<
+          string,
+          Array<{ url: string; targetPct: number; enabled: boolean }>
+        >
       >("cashu.settings.reliableMintsByUnit", {}),
       lastRebalanceAt: useLocalStorage<number>(
         "cashu.settings.lastRebalanceAt",
