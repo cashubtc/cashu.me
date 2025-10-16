@@ -55,6 +55,7 @@ import { wordlist } from "@scure/bip39/wordlists/english";
 import { useSettingsStore } from "./settings";
 import { usePriceStore } from "./price";
 import { useI18n } from "vue-i18n";
+import { useRebalanceStore } from "./rebalance";
 // HACK: this is a workaround so that the catch block in the melt function does not throw an error when the user exits the app
 // before the payment is completed. This is necessary because the catch block in the melt function would otherwise remove all
 // quotes from the invoiceHistory and the user would not be able to pay the invoice again after reopening the app.
@@ -670,6 +671,9 @@ export const useWalletStore = defineStore("wallet", {
         this.setInvoicePaid(invoice.quote);
         useInvoicesWorkerStore().removeInvoiceFromChecker(invoice.quote);
 
+        // Trigger auto-rebalance after minting
+        await useRebalanceStore().checkAndPromptRebalance();
+
         return proofs;
       } catch (error: any) {
         console.error(error);
@@ -1069,6 +1073,8 @@ export const useWalletStore = defineStore("wallet", {
         if (hideInvoiceDetailsOnMint) {
           uIStore.showInvoiceDetails = false;
         }
+        // Trigger auto-rebalance after minting via websocket path
+        await useRebalanceStore().checkAndPromptRebalance();
         useUiStore().vibrate();
         notifySuccess(
           this.t("wallet.notifications.received_lightning", {
@@ -1278,6 +1284,8 @@ export const useWalletStore = defineStore("wallet", {
             }
 
             if (hideInvoiceDetailsOnMint) {
+              // Trigger auto-rebalance after websocket minting
+              await useRebalanceStore().checkAndPromptRebalance();
               uIStore.showInvoiceDetails = false;
             }
             useUiStore().vibrate();

@@ -90,6 +90,42 @@ export const useSettingsStore = defineStore("settings", {
         "cashu.settings.nostrMintBackupEnabled",
         false
       ),
+
+      // Automatic Load Balancer (Auto-rebalance) settings
+      autoRebalanceEnabled: useLocalStorage<boolean>(
+        "cashu.settings.autoRebalanceEnabled",
+        false
+      ),
+      autoRebalanceTolerancePct: useLocalStorage<number>(
+        "cashu.settings.autoRebalanceTolerancePct",
+        10
+      ),
+      autoRebalanceMinAmount: useLocalStorage<number>(
+        "cashu.settings.autoRebalanceMinAmount",
+        1000
+      ),
+      autoRebalanceFeeCapPct: useLocalStorage<number>(
+        "cashu.settings.autoRebalanceFeeCapPct",
+        3
+      ),
+      autoRebalanceThrottleSec: useLocalStorage<number>(
+        "cashu.settings.autoRebalanceThrottleSec",
+        60
+      ),
+      reliableMintsByUnit: useLocalStorage<
+        Record<
+          string,
+          Array<{ url: string; targetPct: number; enabled: boolean }>
+        >
+      >("cashu.settings.reliableMintsByUnit", {}),
+      lastRebalanceAt: useLocalStorage<number>(
+        "cashu.settings.lastRebalanceAt",
+        0
+      ),
+      rebalanceBlocking: useLocalStorage<boolean>(
+        "cashu.settings.rebalanceBlocking",
+        false
+      ),
     };
   },
 });

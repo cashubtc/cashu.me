@@ -47,6 +47,7 @@
         </div>
         <ReceiveDialog v-model="showReceiveDialog" />
         <SendDialog v-model="showSendDialog" />
+        <RebalancePromptDialog />
       </div>
       <!-- ///////////////////////////////////////////
       ////////////////// TABLES /////////////////
@@ -217,6 +218,7 @@ import PayInvoiceDialog from "components/PayInvoiceDialog.vue";
 import InvoiceDetailDialog from "components/InvoiceDetailDialog.vue";
 import SendDialog from "components/SendDialog.vue";
 import ReceiveDialog from "components/ReceiveDialog.vue";
+import RebalancePromptDialog from "components/RebalancePromptDialog.vue";
 import QrcodeReader from "components/QrcodeReader.vue";
 import iOSPWAPrompt from "components/iOSPWAPrompt.vue";
 import AndroidPWAPrompt from "components/AndroidPWAPrompt.vue";
@@ -271,6 +273,7 @@ export default {
     QrcodeReader,
     SendDialog,
     ReceiveDialog,
+    RebalancePromptDialog,
     iOSPWAPrompt,
     AndroidPWAPrompt,
     ScanIcon,
@@ -454,6 +457,7 @@ export default {
     },
     showParseDialog: function () {
       this.payInvoiceData.show = true;
+      this.payInvoiceData.meltQuote.response = null;
       this.payInvoiceData.invoice = null;
       this.payInvoiceData.lnurlpay = null;
       this.payInvoiceData.domain = "";

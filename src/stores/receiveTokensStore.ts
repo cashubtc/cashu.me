@@ -61,6 +61,7 @@ export const useReceiveTokensStore = defineStore("receiveTokensStore", {
       if (tokenJson == undefined) {
         throw new Error("no tokens provided.");
       }
+
       // check if we have all mints
       if (!this.knowThisMintOfTokenJson(tokenJson)) {
         // add the mint
@@ -70,6 +71,12 @@ export const useReceiveTokensStore = defineStore("receiveTokensStore", {
       await walletStore.redeem();
       receiveStore.showReceiveTokens = false;
       uiStore.closeDialogs();
+
+      // Trigger auto-rebalance after receive completes (after proofs are added to store)
+      try {
+        const { useRebalanceStore } = await import("./rebalance");
+        await useRebalanceStore().checkAndPromptRebalance();
+      } catch {}
     },
     receiveIfDecodes: async function () {
       try {

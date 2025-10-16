@@ -609,6 +609,7 @@ import {
   notify,
   notifyWarning,
 } from "src/js/notify.ts";
+import { useRebalanceStore } from "src/stores/rebalance";
 export default defineComponent({
   name: "SendTokenDialog",
   mixins: [windowMixin],
@@ -647,6 +648,8 @@ export default defineComponent({
       isV4Token: false,
       scanningCard: false,
       showExpandedButtons: false,
+
+      canSpendOffline: false,
     };
   },
   computed: {
@@ -678,6 +681,7 @@ export default defineComponent({
       "includeFeesInSendAmount",
       "nfcEncoding",
       "useNumericKeyboard",
+      "autoRebalanceEnabled",
     ]),
     ...mapState(usePriceStore, [
       "bitcoinPrice",
@@ -718,32 +722,12 @@ export default defineComponent({
     runnerActive: function () {
       return this.tokenWorkerRunning;
     },
-    canSpendOffline: function () {
-      if (!this.sendData.amount) {
-        return false;
-      }
-      // check if entered amount is the same as the result of coinSelect(spendableProofs(activeProofs), amount)
-      let spendableProofs = this.spendableProofs(this.activeProofs);
-      const mintWallet = useWalletStore().wallet;
-      let selectedProofs = this.coinSelect(
-        spendableProofs,
-        mintWallet,
-        this.sendData.amount * this.activeUnitCurrencyMultiplyer,
-        this.includeFeesInSendAmount
-      );
-      const feesToAdd = this.includeFeesInSendAmount
-        ? this.getFeesForProofs(selectedProofs)
-        : 0;
-      const sumSelectedProofs = selectedProofs
-        .flat()
-        .reduce((sum, el) => (sum += el.amount), 0);
-      return (
-        sumSelectedProofs ==
-        this.sendData.amount * this.activeUnitCurrencyMultiplyer + feesToAdd
-      );
-    },
   },
   watch: {
+    "sendData.amount": async function (newAmount) {
+      this.canSpendOffline = await this.computeCanSpendOffline();
+      await this.maybeSwitchActiveMint(newAmount);
+    },
     "sendData.tokensBase64": function (val) {
       this.showAnimatedQR = false;
       if (!val.length) {
@@ -809,6 +793,7 @@ export default defineComponent({
     },
   },
   methods: {
+    ...mapActions(useRebalanceStore, ["suggestSendingMint"]),
     ...mapActions(useWorkersStore, ["clearAllWorkers"]),
     ...mapActions(useWalletStore, [
       "send",
@@ -828,7 +813,7 @@ export default defineComponent({
     ]),
     ...mapActions(useP2PKStore, ["isValidPubkey", "maybeConvertNpub"]),
     ...mapActions(useCameraStore, ["closeCamera", "showCamera"]),
-    ...mapActions(useMintsStore, ["toggleUnit"]),
+    ...mapActions(useMintsStore, ["toggleUnit", "activateMintUrl"]),
     // decodeP2PKQR: function (res) {
     //   console.log("### SendToken qr", res);
     //   this.camera.data = res;
@@ -1158,6 +1143,50 @@ export default defineComponent({
       } catch (error) {
         if (error.name !== "AbortError") {
           console.error("Error sharing token:", error);
+        }
+      }
+    },
+    computeCanSpendOffline: async function () {
+      if (!this.sendData.amount) {
+        return false;
+      }
+      await useUiStore().lockMutex();
+      try {
+        // check if entered amount is the same as the result of coinSelect(spendableProofs(activeProofs), amount)
+        let spendableProofs = this.spendableProofs(this.activeProofs);
+        const mintWallet = useWalletStore().wallet;
+        let selectedProofs = this.coinSelect(
+          spendableProofs,
+          mintWallet,
+          this.sendData.amount * this.activeUnitCurrencyMultiplyer,
+          this.includeFeesInSendAmount
+        );
+        const feesToAdd = this.includeFeesInSendAmount
+          ? this.getFeesForProofs(selectedProofs)
+          : 0;
+        const sumSelectedProofs = selectedProofs
+          .flat()
+          .reduce((sum, el) => (sum += el.amount), 0);
+        return (
+          sumSelectedProofs ==
+          this.sendData.amount * this.activeUnitCurrencyMultiplyer + feesToAdd
+        );
+      } finally {
+        useUiStore().unlockMutex();
+      }
+    },
+    maybeSwitchActiveMint: async function (newAmount: number) {
+      if (this.autoRebalanceEnabled) {
+        const suggestedMint = this.suggestSendingMint(newAmount);
+        console.log(
+          `[AUTO-REBALANCER] SUGGESTED mint for sending: ${suggestedMint}`
+        );
+        if (suggestedMint && suggestedMint !== this.activeMintUrl) {
+          // Change the active mint
+          console.log(
+            `[AUTO-REBALANCER] ACTIVATING mint for sending: ${suggestedMint}`
+          );
+          this.activateMintUrl(suggestedMint);
         }
       }
     },

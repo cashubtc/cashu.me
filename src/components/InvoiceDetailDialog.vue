@@ -195,6 +195,7 @@ import { useMintsStore } from "src/stores/mints";
 import { useSettingsStore } from "../stores/settings";
 import { usePriceStore } from "src/stores/price";
 import NumericKeyboard from "components/NumericKeyboard.vue";
+import { useRebalanceStore } from "src/stores/rebalance";
 
 export default defineComponent({
   name: "InvoiceDetailDialog",
@@ -222,8 +223,15 @@ export default defineComponent({
         });
       }
     },
+    invoiceData: {
+      async handler(val) {
+        await this.maybeSwitchActiveMint(val.amount);
+      },
+      deep: true,
+    },
   },
   computed: {
+    ...mapState(useSettingsStore, ["autoRebalanceEnabled"]),
     ...mapState(useWalletStore, ["invoiceData"]),
     ...mapState(useMintsStore, [
       "activeUnit",
@@ -266,7 +274,8 @@ export default defineComponent({
       "lnurlPaySecond",
       "mintOnPaid",
     ]),
-    ...mapActions(useMintsStore, ["toggleUnit"]),
+    ...mapActions(useMintsStore, ["toggleUnit", "activateMintUrl"]),
+    ...mapActions(useRebalanceStore, ["suggestReceivingMint"]),
     requestMintButton: async function () {
       if (!this.invoiceData.amount) {
         return;
@@ -289,6 +298,21 @@ export default defineComponent({
         console.log("#### requestMintButton", e);
       } finally {
         this.createInvoiceButtonBlocked = false;
+      }
+    },
+    maybeSwitchActiveMint: async function (newAmount: number) {
+      if (this.autoRebalanceEnabled) {
+        const suggestedMint = this.suggestReceivingMint(newAmount);
+        console.log(
+          `[AUTO-REBALANCER] SUGGESTED mint for receiving: ${suggestedMint}`
+        );
+        if (suggestedMint && suggestedMint !== this.activeMintUrl) {
+          // Change the active mint
+          console.log(
+            `[AUTO-REBALANCER] ACTIVATING mint for receiving: ${suggestedMint}`
+          );
+          this.activateMintUrl(suggestedMint);
+        }
       }
     },
   },
