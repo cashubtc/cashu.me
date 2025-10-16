@@ -98,7 +98,7 @@ export const useSettingsStore = defineStore("settings", {
       ),
       autoRebalanceTolerancePct: useLocalStorage<number>(
         "cashu.settings.autoRebalanceTolerancePct",
-        3
+        10
       ),
       autoRebalanceMinAmount: useLocalStorage<number>(
         "cashu.settings.autoRebalanceMinAmount",
