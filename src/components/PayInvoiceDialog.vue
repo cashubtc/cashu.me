@@ -320,6 +320,7 @@ import { useCameraStore } from "src/stores/camera";
 import { useMintsStore, MintClass } from "src/stores/mints";
 import { useSettingsStore } from "src/stores/settings";
 import { usePriceStore } from "src/stores/price";
+import { useRebalanceStore } from "src/stores/rebalance";
 import { mapActions, mapState, mapWritableState } from "pinia";
 import ChooseMint from "components/ChooseMint.vue";
 import ToggleUnit from "components/ToggleUnit.vue";
@@ -341,7 +342,18 @@ export default defineComponent({
   data: function () {
     return {};
   },
+  activated: function () {
+    this.payInvoiceData.meltQuote.response = undefined;
+  },
   watch: {
+    payInvoiceData: {
+      async handler() {
+        const newAmount =
+          this.payInvoiceData?.meltQuote?.response?.amount ?? undefined;
+        if (newAmount) await this.maybeSwitchActiveMint(newAmount);
+      },
+      deep: true,
+    },
     activeMintUrl: async function () {
       if (this.payInvoiceData.show) {
         await this.meltQuoteInvoiceData();
@@ -355,7 +367,7 @@ export default defineComponent({
   },
   computed: {
     ...mapState(useUiStore, ["tickerShort", "globalMutexLock"]),
-    ...mapState(useSettingsStore, ["multinutEnabled"]),
+    ...mapState(useSettingsStore, ["multinutEnabled", "autoRebalanceEnabled"]),
     ...mapWritableState(useCameraStore, ["camera", "hasCamera"]),
     ...mapState(useWalletStore, ["payInvoiceData"]),
     ...mapState(useMintsStore, [
@@ -398,12 +410,14 @@ export default defineComponent({
     },
   },
   methods: {
+    ...mapActions(useRebalanceStore, ["suggestSendingMint"]),
     ...mapActions(useWalletStore, [
       "meltInvoiceData",
       "meltQuoteInvoiceData",
       "decodeRequest",
       "lnurlPaySecond",
     ]),
+    ...mapActions(useMintsStore, ["activateMintUrl"]),
     ...mapActions(useCameraStore, ["closeCamera", "showCamera"]),
     canPay: function () {
       if (!this.payInvoiceData.invoice) return false;
@@ -437,6 +451,21 @@ export default defineComponent({
     },
     handleReturnToPayDialog: function () {
       this.payInvoiceData.show = true;
+    },
+    maybeSwitchActiveMint: async function (newAmount: number) {
+      if (this.autoRebalanceEnabled) {
+        const suggestedMint = this.suggestSendingMint(newAmount);
+        console.log(
+          `[AUTO-REBALANCER] SUGGESTED mint for sending: ${suggestedMint}`
+        );
+        if (suggestedMint && suggestedMint !== this.activeMintUrl) {
+          // Change the active mint
+          console.log(
+            `[AUTO-REBALANCER] ACTIVATING mint for sending: ${suggestedMint}`
+          );
+          this.activateMintUrl(suggestedMint);
+        }
+      }
     },
   },
   created: function () {},

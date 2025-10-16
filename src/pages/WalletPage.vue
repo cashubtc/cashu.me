@@ -457,6 +457,7 @@ export default {
     },
     showParseDialog: function () {
       this.payInvoiceData.show = true;
+      this.payInvoiceData.meltQuote.response = null;
       this.payInvoiceData.invoice = null;
       this.payInvoiceData.lnurlpay = null;
       this.payInvoiceData.domain = "";

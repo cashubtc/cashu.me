@@ -400,5 +400,131 @@ export const useRebalanceStore = defineStore("rebalance", {
     async manualRebalance(unit?: string) {
       await this.checkAndPromptRebalance(unit);
     },
+
+    // Shared helper: compute sum of absolute percentage deviations for a given current map
+    _scoreDistribution(
+      total: number,
+      targetAmounts: Record<string, number>,
+      currentMap: Record<string, number>
+    ): number {
+      const urls = Object.keys(targetAmounts);
+      let sumAbsPctDev = 0;
+      for (const url of urls) {
+        const c = currentMap[url] || 0;
+        const tg = targetAmounts[url] || 0;
+        const pctC = total > 0 ? (c / total) * 100 : 0;
+        const pctT = total > 0 ? (tg / total) * 100 : 0;
+        sumAbsPctDev += Math.abs(pctC - pctT);
+      }
+      return sumAbsPctDev;
+    },
+
+    suggestSendingMint(amount = 0, unit?: string): string | null {
+      const settings = useSettingsStore();
+      const mints = useMintsStore();
+
+      const activeUnit = unit || mints.activeUnit;
+      const targets = this.getReliableTargets(activeUnit).filter(
+        (t) => t.enabled
+      );
+      if (targets.length === 0) return null;
+
+      const total = this.computeTotalBalance(activeUnit);
+      if (total <= 0) return null;
+
+      const current = this.currentBalances(activeUnit);
+      const targetAmounts = this.targetsFromPct(total, targets);
+
+      const required = Math.max(amount, settings.autoRebalanceMinAmount);
+
+      let bestUrl: string | null = null;
+      let bestScore = Infinity;
+      let bestRemainingExcess = -Infinity;
+
+      for (const t of targets) {
+        const url = t.url;
+        const available = current[url] || 0;
+        if (available < required) continue;
+
+        const modifiedCurrent: Record<string, number> = { ...current };
+        modifiedCurrent[url] = (modifiedCurrent[url] || 0) - required;
+
+        const score = this._scoreDistribution(
+          total,
+          targetAmounts,
+          modifiedCurrent
+        );
+        const remainingDelta =
+          (modifiedCurrent[url] || 0) - (targetAmounts[url] || 0);
+
+        if (
+          score < bestScore ||
+          (score === bestScore && remainingDelta > bestRemainingExcess)
+        ) {
+          bestScore = score;
+          bestUrl = url;
+          bestRemainingExcess = remainingDelta;
+        }
+      }
+
+      return bestUrl;
+    },
+
+    suggestReceivingMint(amount = 0, unit?: string): string | null {
+      const settings = useSettingsStore();
+      const mints = useMintsStore();
+
+      const activeUnit = unit || mints.activeUnit;
+      const targets = this.getReliableTargets(activeUnit).filter(
+        (t) => t.enabled
+      );
+      if (targets.length === 0) return null;
+
+      const total = this.computeTotalBalance(activeUnit);
+      if (total <= 0) return null;
+
+      const current = this.currentBalances(activeUnit);
+      const targetAmounts = this.targetsFromPct(total, targets);
+
+      const required = Math.max(amount, settings.autoRebalanceMinAmount);
+
+      let bestUrl: string | null = null;
+      let bestScore = Infinity;
+      let bestShortfallReduction = -Infinity;
+
+      for (const t of targets) {
+        const url = t.url;
+
+        const modifiedCurrent: Record<string, number> = { ...current };
+        modifiedCurrent[url] = (modifiedCurrent[url] || 0) + required;
+
+        const score = this._scoreDistribution(
+          total,
+          targetAmounts,
+          modifiedCurrent
+        );
+
+        const beforeShortfall = Math.max(
+          0,
+          (targetAmounts[url] || 0) - (current[url] || 0)
+        );
+        const afterShortfall = Math.max(
+          0,
+          (targetAmounts[url] || 0) - modifiedCurrent[url]
+        );
+        const shortfallReduction = beforeShortfall - afterShortfall;
+
+        if (
+          score < bestScore ||
+          (score === bestScore && shortfallReduction > bestShortfallReduction)
+        ) {
+          bestScore = score;
+          bestUrl = url;
+          bestShortfallReduction = shortfallReduction;
+        }
+      }
+
+      return bestUrl;
+    },
   },
 });
