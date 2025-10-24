@@ -63,7 +63,9 @@
               Creating…
             </template>
           </q-btn>
-          <q-btn v-close-popup rounded flat color="grey" class="q-ml-auto">Close</q-btn>
+          <q-btn v-close-popup rounded flat color="grey" class="q-ml-auto"
+            >Close</q-btn
+          >
         </div>
       </div>
 
@@ -152,18 +154,26 @@ export default defineComponent({
       "showNumericKeyboard",
     ]),
     displayUnit() {
-      return this.formatCurrency(this.invoiceData.amount || 0, this.invoiceData.unit, true);
+      return this.formatCurrency(
+        this.invoiceData.amount || 0,
+        this.invoiceData.unit,
+        true
+      );
     },
   },
   methods: {
-    ...mapActions(useWalletStore, ["requestMintBolt12", "checkOfferAndMintBolt12"]),
+    ...mapActions(useWalletStore, [
+      "requestMintBolt12",
+      "checkOfferAndMintBolt12",
+    ]),
     ...mapActions(useMintsStore, ["toggleUnit"]),
     requestOfferButton: async function () {
       try {
         this.showNumericKeyboard = false;
         const mintStore = useMintsStore();
         const amount =
-          (this.invoiceData.amount || 0) * this.activeUnitCurrencyMultiplyer || undefined;
+          (this.invoiceData.amount || 0) * this.activeUnitCurrencyMultiplyer ||
+          undefined;
         this.createOfferButtonBlocked = true;
         const mintWallet = useWalletStore().mintWallet(
           mintStore.activeMintUrl,
@@ -188,4 +198,3 @@ export default defineComponent({
   border-top-right-radius: 20px;
 }
 </style>
-
