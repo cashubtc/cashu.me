@@ -92,6 +92,42 @@
                       <div class="text-grey-6 mint-url">
                         {{ mint.url }}
                       </div>
+                      <div class="text-grey-5 q-mt-xs">
+                        <template
+                          v-if="
+                            getRecommendation(mint.url) &&
+                            getRecommendation(mint.url).averageRating !== null
+                          "
+                        >
+                          <span>
+                            ⭐
+                            {{
+                              getRecommendation(mint.url).averageRating.toFixed(
+                                2
+                              )
+                            }}
+                            ·
+                            {{ getRecommendation(mint.url).reviewsCount }}
+                            <span
+                              class="text-primary cursor-pointer"
+                              style="text-decoration: underline"
+                              @click.stop="openReviews(mint.url, mint)"
+                              >reviews</span
+                            >
+                          </span>
+                        </template>
+                        <template v-else>
+                          <span
+                            >No reviews yet ·
+                            <span
+                              class="text-primary cursor-pointer"
+                              style="text-decoration: underline"
+                              @click.stop="openCreateReview(mint)"
+                              >write a review</span
+                            >
+                          </span>
+                        </template>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -311,7 +347,17 @@
     <MintRatingsComponent
       :url="selectedRatingsUrl"
       :reviews="selectedReviews"
+      :allowCreateReview="true"
+      :mintInfo="selectedMintInfo"
       @close="showRatingsDialog = false"
+    />
+  </q-dialog>
+  <q-dialog v-model="showCreateReviewDialog" persistent>
+    <CreateMintReview
+      :mintUrl="selectedRatingsUrl"
+      :mintInfo="selectedMintInfo"
+      @published="showCreateReviewDialog = false"
+      @close="showCreateReviewDialog = false"
     />
   </q-dialog>
 </template>
@@ -335,6 +381,7 @@ import { EventBus } from "../js/eventBus";
 import AddMintDialog from "src/components/AddMintDialog.vue";
 import { useMintRecommendationsStore } from "src/stores/mintRecommendations";
 import MintRatingsComponent from "./MintRatingsComponent.vue";
+import CreateMintReview from "./CreateMintReview.vue";
 import MintDiscovery from "./MintDiscovery.vue";
 
 export default defineComponent({
@@ -344,6 +391,7 @@ export default defineComponent({
     AddMintDialog,
     MintRatingsComponent,
     MintDiscovery,
+    CreateMintReview,
   },
   props: {},
   setup() {
@@ -393,6 +441,8 @@ export default defineComponent({
       showRatingsDialog: false,
       selectedRatingsUrl: "",
       selectedReviews: [],
+      showCreateReviewDialog: false,
+      selectedMintInfo: null,
     };
   },
   computed: {
@@ -414,6 +464,9 @@ export default defineComponent({
     ...mapWritableState(useSwapStore, ["swapBlocking"]),
     discoverList() {
       return this.recommendations.filter((r) => !this.isExistingMint(r.url));
+    },
+    getRecommendation() {
+      return (url) => this.recommendations.find((r) => r.url === url);
     },
   },
   watch: {
@@ -592,12 +645,17 @@ export default defineComponent({
         console.error(e);
       }
     },
-    openReviews(url) {
+    openReviews(url, mint) {
       const rec = this.recommendations.find((r) => r.url === url);
       if (!rec) return;
       this.selectedRatingsUrl = url;
       this.selectedReviews = rec.reviews;
       this.showRatingsDialog = true;
+    },
+    openCreateReview(mint) {
+      this.selectedMintInfo = mint.info || null;
+      this.selectedRatingsUrl = mint.url;
+      this.showCreateReviewDialog = true;
     },
     getMintInfoFromCache(url) {
       return this.mintInfoCache.get(url);
