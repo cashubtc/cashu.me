@@ -71,9 +71,10 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, computed, ref, watch } from "vue";
+import { defineComponent, computed, ref } from "vue";
 import { useNostrStore } from "src/stores/nostr";
-import NDK, { NDKEvent, NDKKind, NostrEvent } from "@nostr-dev-kit/ndk";
+import NDK, { NDKEvent, NDKKind } from "@nostr-dev-kit/ndk";
+import { notifyError, notifySuccess } from "src/js/notify";
 
 export default defineComponent({
   name: "CreateMintReview",
@@ -97,10 +98,7 @@ export default defineComponent({
       () => rating.value >= 1 && rating.value <= 5 && !!props.mintUrl
     );
 
-    const ensureSigner = async () => {
-      if (!nostr.initialized) {
-        await nostr.initSigner();
-      }
+    const ensureNdk = async () => {
       if (!nostr.connected || !nostr.ndk) {
         nostr.initNdkReadOnly();
       }
@@ -118,7 +116,13 @@ export default defineComponent({
       if (!canPublish.value) return;
       submitting.value = true;
       try {
-        await ensureSigner();
+        await ensureNdk();
+        if (!nostr.signer) {
+          notifyError(
+            "Please connect a Nostr account in Settings to publish a review."
+          );
+          return;
+        }
         const ndk: NDK = nostr.ndk as any;
         const event = new NDKEvent(ndk);
         event.kind = 38000 as NDKKind;
@@ -131,13 +135,14 @@ export default defineComponent({
           (props.mintInfo as any)?.mintPubkey ||
           "";
         if (dIdentifier) event.tags.push(["d", dIdentifier]);
-        await event.sign();
-        ndk.connect();
+        await event.sign(nostr.signer as any);
+        if ((ndk as any).pool?.size === 0) ndk.connect();
         await event.publish();
         emit("published");
         emit("close");
       } catch (e) {
         console.error(e);
+        notifyError("Failed to publish review");
       } finally {
         submitting.value = false;
       }
