@@ -91,6 +91,9 @@ export const useMintRecommendationsStore = defineStore("mintRecommendations", {
       for (const ev of events) this.handleReviewEvent(ev);
       this.rebuildAggregates();
     },
+    clearRecommendations: function () {
+      this.recommendations.splice(0, this.recommendations.length);
+    },
     discover: async function (): Promise<MintRecommendation[]> {
       await this.fetchMintInfos();
       await this.fetchReviews();
@@ -109,7 +112,7 @@ export const useMintRecommendationsStore = defineStore("mintRecommendations", {
         { closeOnEose: false, groupable: false }
       );
       subInfos.on("event", (ev: NDKEvent) => {
-        console.log(`[mintRecs] live 38172 info ${ev.id} pubkey=${ev.pubkey} d=${ev.tagValue("d")}`);
+        // console.log(`[mintRecs] live 38172 info ${ev.id} pubkey=${ev.pubkey} d=${ev.tagValue("d")}`);
         this.handleMintInfoEvent(ev);
         this.rebuildAggregates();
       });
@@ -119,7 +122,7 @@ export const useMintRecommendationsStore = defineStore("mintRecommendations", {
         { closeOnEose: false, groupable: false }
       );
       subReviews.on("event", (ev: NDKEvent) => {
-        console.log(`[mintRecs] live 38000 review ${ev.id} from ${ev.pubkey}`);
+        // console.log(`[mintRecs] live 38000 review ${ev.id} from ${ev.pubkey}`);
         this.handleReviewEvent(ev);
         this.rebuildAggregates();
       });

@@ -159,7 +159,7 @@
 import { defineComponent, ref, computed, watch } from "vue";
 import { useMintRecommendationsStore } from "src/stores/mintRecommendations";
 import { useMintsStore, MintClass } from "src/stores/mints";
-import MintRatingsComponent from "./MintRatingsComponent.vue";
+import MintRatingsComponent from "../components/MintRatingsComponent.vue";
 import { notifyError, notifySuccess } from "src/js/notify";
 
 export default defineComponent({
@@ -223,11 +223,14 @@ export default defineComponent({
     const discover = async () => {
       discovering.value = true;
       try {
-        const found = await recsStore.discover();
-        if (!found || found.length === 0) notifyError("No mints found");
-        else notifySuccess(`Found ${found.length} mints`);
+        recsStore.clearRecommendations();
+        // Start live updates immediately
         recsStore.startSubscriptions();
+        // Fetch in background without blocking UI
+        void recsStore.fetchMintInfos();
+        void recsStore.fetchReviews();
       } finally {
+        // release spinner quickly; content will stream in
         discovering.value = false;
       }
     };
