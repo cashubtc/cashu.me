@@ -217,7 +217,7 @@ export default defineComponent({
       discovering.value = true;
       try {
         recsStore.clearDiscoveryCaches();
-        recsStore.clearRecommendations();
+        // recsStore.clearRecommendations();
         // Start live updates immediately
         recsStore.startSubscriptions();
         // Kick off initial fetches and keep spinner until both complete

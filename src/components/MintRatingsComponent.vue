@@ -59,11 +59,17 @@
                 />
                 <q-icon v-else name="account_circle" />
               </q-avatar>
-              <div class="text-caption text-grey-7">
-                {{ displayName(r.pubkey) }}
+              <div class="text-caption text-grey-7 row items-center">
+                <span>{{ displayName(r.pubkey) }}</span>
                 <span class="monospace q-ml-xs"
-                  >({{ shortPubkey(r.pubkey) }})</span
+                  >({{ shortNpub(r.pubkey) }})</span
                 >
+                <q-icon
+                  name="content_copy"
+                  size="14px"
+                  class="q-ml-xs cursor-pointer"
+                  @click="copyNpub(r.pubkey)"
+                />
               </div>
             </div>
             <div class="text-caption text-grey-6">
@@ -105,9 +111,10 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, watch } from "vue";
+import { defineComponent } from "vue";
 import { useNostrStore } from "src/stores/nostr";
 import NDK from "@nostr-dev-kit/ndk";
+import { nip19 } from "nostr-tools";
 
 export default defineComponent({
   name: "MintRatingsComponent",
@@ -127,6 +134,32 @@ export default defineComponent({
     shortPubkey(pk: string) {
       if (!pk) return "";
       return `${pk.slice(0, 8)}…${pk.slice(-4)}`;
+    },
+    npub(pk: string) {
+      try {
+        return nip19.npubEncode(pk);
+      } catch {
+        return this.shortPubkey(pk);
+      }
+    },
+    shortNpub(pk: string) {
+      const v = this.npub(pk);
+      if (!v) return "";
+      return `${v.slice(0, 12)}…${v.slice(-6)}`;
+    },
+    copyNpub(pk: string) {
+      try {
+        const v = this.npub(pk);
+        navigator.clipboard.writeText(v);
+        // @ts-ignore
+        this.$q?.notify &&
+          this.$q.notify({
+            message: "Copied",
+            color: "positive",
+            position: "top",
+            timeout: 800,
+          });
+      } catch {}
     },
     displayName(pk: string) {
       const p = (this as any).profiles[pk];

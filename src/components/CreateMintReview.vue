@@ -30,12 +30,19 @@
             spinner-size="xs"
           />
         </q-avatar>
-        <div>
-          Publishing as:
-          <span v-if="publisherName" class="text-white">{{
+        <div class="row items-center">
+          <span>Publishing as:</span>
+          <span v-if="publisherName" class="text-white q-ml-xs">{{
             publisherName
           }}</span>
-          <span v-else class="monospace q-ml-xs">{{ displayPubkey }}</span>
+          <span class="monospace q-ml-xs">({{ shortDisplayNpub }})</span>
+          <q-icon
+            v-if="displayNpub"
+            name="content_copy"
+            size="16px"
+            class="q-ml-xs cursor-pointer"
+            @click="copyText(displayNpub)"
+          />
         </div>
       </div>
 
@@ -98,6 +105,7 @@ import { defineComponent, computed, ref, onMounted } from "vue";
 import { useNostrStore } from "src/stores/nostr";
 import NDK, { NDKEvent, NDKKind } from "@nostr-dev-kit/ndk";
 import { notifyError, notifySuccess } from "src/js/notify";
+import { nip19 } from "nostr-tools";
 
 export default defineComponent({
   name: "CreateMintReview",
@@ -117,6 +125,19 @@ export default defineComponent({
     const displayPubkey = computed(() => {
       const pk = nostr.pubkey || nostr.seedSignerPublicKey || "";
       return pk ? `${pk.slice(0, 8)}…${pk.slice(-4)}` : "";
+    });
+    const displayNpub = computed(() => {
+      try {
+        if (!nostr.pubkey) return "";
+        return nip19.npubEncode(nostr.pubkey);
+      } catch {
+        return "";
+      }
+    });
+    const shortDisplayNpub = computed(() => {
+      const v = displayNpub.value;
+      if (!v) return "";
+      return `${v.slice(0, 12)}…${v.slice(-6)}`;
     });
 
     const canPublish = computed(
@@ -235,8 +256,16 @@ export default defineComponent({
       canPublish,
       publishReview,
       displayPubkey,
+      displayNpub,
+      shortDisplayNpub,
       publisherName,
       publisherPicture,
+      copyText: (t: string) => {
+        try {
+          navigator.clipboard.writeText(t);
+          notifySuccess("Copied to clipboard");
+        } catch {}
+      },
     };
   },
 });
