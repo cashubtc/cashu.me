@@ -253,11 +253,11 @@ export default defineComponent({
         recsStore.clearRecommendations();
         // Start live updates immediately
         recsStore.startSubscriptions();
-        // Fetch in background without blocking UI
-        void recsStore.fetchMintInfos();
-        void recsStore.fetchReviews();
+        // Kick off initial fetches and keep spinner until both complete
+        const pInfos = recsStore.fetchMintInfos();
+        const pReviews = recsStore.fetchReviews();
+        await Promise.allSettled([pInfos, pReviews]);
       } finally {
-        // release spinner quickly; content will stream in
         discovering.value = false;
       }
     };
