@@ -840,6 +840,22 @@
           </q-item-section>
         </q-item>
         <div>
+          <!-- nostr mint backup settings -->
+          <q-item>
+            <q-toggle
+              v-model="nostrMintBackupEnabled"
+              :label="$t('Settings.experimental.nostr_mint_backup.toggle')"
+              color="primary"
+              @update:model-value="onNostrMintBackupToggle"
+            >
+            </q-toggle>
+          </q-item>
+          <q-item class="q-pt-none">
+            <q-item-label caption>
+              {{ $t("Settings.experimental.nostr_mint_backup.description") }}
+            </q-item-label>
+          </q-item>
+
           <!-- periodically check incoming invoices -->
           <q-item>
             <q-toggle
@@ -1169,29 +1185,6 @@
                 </q-item-label>
               </q-toggle>
             </div>
-          </div>
-        </div>
-
-        <!-- nostr mint backup settings -->
-        <div class="row q-mx-md q-mt-md">
-          <div class="col-12">
-            <div class="row q-pt-md">
-              <q-toggle
-                v-model="nostrMintBackupEnabled"
-                :label="$t('Settings.experimental.nostr_mint_backup.toggle')"
-                color="primary"
-                @update:model-value="onNostrMintBackupToggle"
-              >
-                <q-badge
-                  color="primary"
-                  :label="$t('Settings.experimental.receive_swaps.badge')"
-                  class="q-mx-sm"
-                ></q-badge>
-              </q-toggle>
-            </div>
-            <q-item-label caption class="q-px-md">
-              {{ $t("Settings.experimental.nostr_mint_backup.description") }}
-            </q-item-label>
           </div>
         </div>
 

@@ -88,7 +88,7 @@ export const useSettingsStore = defineStore("settings", {
       ),
       nostrMintBackupEnabled: useLocalStorage<boolean>(
         "cashu.settings.nostrMintBackupEnabled",
-        false
+        true
       ),
     };
   },
