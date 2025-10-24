@@ -1,5 +1,5 @@
 <template>
-  <div class="nostr-mint-restore">
+  <div v-if="!autoAdd" class="nostr-mint-restore">
     <!-- Header -->
     <div class="q-px-xs text-left q-mt-md">
       <q-list padding>
@@ -192,6 +192,12 @@ export default defineComponent({
       type: Boolean,
       required: true,
     },
+    // If true, component renders no UI, starts searching immediately
+    // and auto-adds discovered mints to the wallet.
+    autoAdd: {
+      type: Boolean,
+      default: false,
+    },
   },
   data() {
     return {
@@ -234,6 +240,19 @@ export default defineComponent({
       handler(newMints) {
         if (newMints && newMints.length > 0) {
           this.fetchMintInfoForDiscoveredMints();
+          // In autoAdd mode, add newly discovered mints immediately
+          if (this.autoAdd) {
+            this.autoAddNewDiscoveredMints(newMints);
+          }
+        }
+      },
+      immediate: true,
+    },
+    // In autoAdd mode, when mnemonic becomes valid, start searching immediately
+    isMnemonicValid: {
+      handler(v) {
+        if (this.autoAdd && v && !this.hasSearched) {
+          this.searchForMints();
         }
       },
       immediate: true,
@@ -280,6 +299,24 @@ export default defineComponent({
         notifyError(this.$t("RestoreView.nostr_mints.add_error"));
       } finally {
         this.addingMints = false;
+      }
+    },
+
+    async autoAddNewDiscoveredMints(mints) {
+      try {
+        const mintsStore = useMintsStore();
+        for (const m of mints) {
+          const url = m.url;
+          if (!this.mintExists(url)) {
+            try {
+              await mintsStore.addMint({ url }, false);
+            } catch (e) {
+              console.error(`Auto-add mint failed for ${url}:`, e);
+            }
+          }
+        }
+      } catch (e) {
+        console.error("Auto-add discovered mints failed:", e);
       }
     },
 
@@ -370,6 +407,13 @@ export default defineComponent({
     isFetchingMintInfo(mintUrl) {
       return this.fetchingMintInfo.has(mintUrl);
     },
+  },
+
+  mounted() {
+    // In autoAdd mode, start searching right away if mnemonic is valid
+    if (this.autoAdd && this.isMnemonicValid && !this.hasSearched) {
+      this.searchForMints();
+    }
   },
 
   beforeUnmount() {

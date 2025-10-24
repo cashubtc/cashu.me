@@ -65,21 +65,6 @@
                   </div>
                 </div>
               </div>
-              <div class="row justify-between q-pb-md q-pl-lg q-pr-md">
-                <div class="col">
-                  <div class="row q-gutter-x-sm">
-                    <div
-                      v-for="unit in mintClass(mint).units"
-                      :key="unit"
-                      class="currency-unit-badge"
-                    >
-                      <span class="currency-unit-text">{{
-                        formatCurrency(mintClass(mint).unitBalance(unit), unit)
-                      }}</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
             </div>
           </q-item>
         </div>
@@ -135,6 +120,7 @@
         <NostrMintRestore
           :mnemonic="restore.mnemonicToRestore"
           :is-mnemonic-valid="isSeedValid"
+          :auto-add="true"
         />
       </div>
 
@@ -146,20 +132,22 @@
           <div class="divider-line"></div>
         </div>
         <div class="q-px-xs text-left">
-          <q-btn
-            class="q-ml-sm q-px-md"
-            color="primary"
-            rounded
-            outline
-            :loading="discovering"
-            @click="discover"
-          >
-            Discover
-            <template v-slot:loading>
-              <q-spinner-hourglass class="on-left" /> Discovering…
-            </template>
-          </q-btn>
-          <div v-if="discoverList.length > 0" class="q-mt-md">
+          <div class="row justify-center q-mb-md q-px-xl">
+            <q-btn
+              class="q-ml-sm q-px-md full-width"
+              color="primary"
+              rounded
+              outline
+              :loading="discovering"
+              @click="discover"
+            >
+              Discover
+              <template v-slot:loading>
+                <q-spinner-hourglass class="on-left" /> Discovering…
+              </template>
+            </q-btn>
+          </div>
+          <div v-if="discoverList.length > 0" class="q-my-lg">
             <q-item>
               <q-item-section>
                 <q-item-label overline
