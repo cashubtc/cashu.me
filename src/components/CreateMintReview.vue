@@ -22,8 +22,19 @@
         <div class="text-body1">{{ mintInfo?.name || "Mint" }}</div>
       </div>
 
-      <div class="q-mb-sm text-caption text-grey-6">
-        Publishing as: <span class="monospace">{{ displayPubkey }}</span>
+      <div class="q-mb-sm text-caption text-grey-6 row items-center">
+        <q-avatar v-if="publisherPicture" size="24px" class="q-mr-xs">
+          <q-img
+            :src="publisherPicture"
+            spinner-color="white"
+            spinner-size="xs"
+          />
+        </q-avatar>
+        <div>
+          Publishing as:
+          <span class="text-white">{{ publisherName || displayPubkey }}</span>
+          <span class="monospace q-ml-xs">({{ displayPubkey }})</span>
+        </div>
       </div>
 
       <div class="q-mt-sm">
@@ -54,16 +65,26 @@
     <q-separator />
 
     <q-card-actions align="right">
-      <q-btn flat label="Cancel" @click="$emit('close')" />
+      <q-btn
+        flat
+        rounded
+        class="q-px-md"
+        label="Cancel"
+        @click="$emit('close')"
+      />
       <q-btn
         color="primary"
         :disable="!canPublish"
         :loading="submitting"
         @click="publishReview"
+        rounded
+        class="q-px-md publish-btn"
+        style="min-width: 140px"
       >
-        Publish
+        <span class="nowrap">Publish</span>
         <template v-slot:loading>
-          <q-spinner-hourglass class="on-left" /> Publishing…
+          <q-spinner-hourglass class="on-left" />
+          <span class="nowrap">Publishing…</span>
         </template>
       </q-btn>
     </q-card-actions>
@@ -71,7 +92,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, computed, ref } from "vue";
+import { defineComponent, computed, ref, onMounted } from "vue";
 import { useNostrStore } from "src/stores/nostr";
 import NDK, { NDKEvent, NDKKind } from "@nostr-dev-kit/ndk";
 import { notifyError, notifySuccess } from "src/js/notify";
@@ -88,6 +109,8 @@ export default defineComponent({
     const rating = ref<number>(0);
     const review = ref<string>("");
     const submitting = ref(false);
+    const publisherName = ref<string>("");
+    const publisherPicture = ref<string>("");
 
     const displayPubkey = computed(() => {
       const pk = nostr.pubkey || nostr.seedSignerPublicKey || "";
@@ -138,6 +161,7 @@ export default defineComponent({
         await event.sign(nostr.signer as any);
         if ((ndk as any).pool?.size === 0) ndk.connect();
         await event.publish();
+        notifySuccess("Review published");
         emit("published");
         emit("close");
       } catch (e) {
@@ -148,6 +172,60 @@ export default defineComponent({
       }
     };
 
+    const prefillExisting = async () => {
+      try {
+        await ensureNdk();
+        const ndk: NDK = nostr.ndk as any;
+        if (!nostr.pubkey) return;
+        const filter: any = {
+          kinds: [38000 as NDKKind],
+          authors: [nostr.pubkey],
+          "#u": [props.mintUrl],
+          "#k": ["38172"],
+          limit: 1,
+        };
+        const events = await ndk.fetchEvents(filter);
+        let latest: any = null;
+        for (const ev of events) {
+          if (!latest || (ev.created_at || 0) > (latest.created_at || 0))
+            latest = ev;
+        }
+        if (latest) {
+          const m = (latest.content || "").match(
+            /\s*\[(\d)\s*\/\s*5\]\s*(.*)$/s
+          );
+          if (m) {
+            const r = parseInt(m[1], 10);
+            if (!isNaN(r)) rating.value = r;
+            review.value = (m[2] || "").trim();
+          } else {
+            review.value = latest.content || "";
+          }
+        }
+      } catch {}
+    };
+
+    const loadPublisherProfile = async () => {
+      try {
+        await ensureNdk();
+        const ndk: NDK = nostr.ndk as any;
+        if (!nostr.pubkey) return;
+        const user = ndk.getUser({ pubkey: nostr.pubkey });
+        await user.fetchProfile();
+        publisherName.value =
+          (user.profile as any)?.name ||
+          (user.profile as any)?.display_name ||
+          "";
+        publisherPicture.value =
+          (user.profile as any)?.image || (user.profile as any)?.picture || "";
+      } catch {}
+    };
+
+    onMounted(async () => {
+      await loadPublisherProfile();
+      await prefillExisting();
+    });
+
     return {
       rating,
       review,
@@ -155,6 +233,8 @@ export default defineComponent({
       canPublish,
       publishReview,
       displayPubkey,
+      publisherName,
+      publisherPicture,
     };
   },
 });
@@ -164,5 +244,11 @@ export default defineComponent({
 .monospace {
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
     "Liberation Mono", "Courier New", monospace;
+}
+.nowrap {
+  white-space: nowrap;
+}
+.publish-btn .q-btn__content {
+  white-space: nowrap;
 }
 </style>
