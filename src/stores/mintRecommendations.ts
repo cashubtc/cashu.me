@@ -53,6 +53,8 @@ export const useMintRecommendationsStore = defineStore("mintRecommendations", {
     mintsByIdentifier: new Map() as Map<MintIdentifier, MintInfo>,
     urlByIdentifier: new Map() as Map<MintIdentifier, string>,
     reviewsByIdentifier: new Map() as Map<MintIdentifier, MintReview[]>,
+    dToIdentifiers: new Map() as Map<string, Set<MintIdentifier>>, // d -> identifiers
+    urlReviews: new Map() as Map<string, MintReview[]>, // fallback direct url reviews
     // Aggregated list by URL
     recommendations: useLocalStorage<MintRecommendation[]>(
       "cashu.ndk.mintRecommendations.v2",
@@ -77,6 +79,7 @@ export const useMintRecommendationsStore = defineStore("mintRecommendations", {
       this.init();
       const filter: NDKFilter = { kinds: [38172 as NDKKind], limit: 5000 };
       const events = await this.ndk.fetchEvents(filter);
+      console.log(`[mintRecs] fetched ${events.size} cashu info events (38172)`);
       for (const ev of events) this.handleMintInfoEvent(ev);
       this.rebuildAggregates();
     },
@@ -84,12 +87,17 @@ export const useMintRecommendationsStore = defineStore("mintRecommendations", {
       this.init();
       const filter: NDKFilter = { kinds: [38000 as NDKKind], limit: 5000 };
       const events = await this.ndk.fetchEvents(filter);
+      console.log(`[mintRecs] fetched ${events.size} review events (38000)`);
       for (const ev of events) this.handleReviewEvent(ev);
       this.rebuildAggregates();
     },
     discover: async function (): Promise<MintRecommendation[]> {
       await this.fetchMintInfos();
       await this.fetchReviews();
+      console.log(`[mintRecs] discovered ${this.recommendations.length} mints after aggregation`);
+      this.recommendations.forEach((r) =>
+        console.log(`[mintRecs] rec: ${r.url} | avg=${r.averageRating?.toFixed?.(2) ?? 'n/a'} | reviews=${r.reviewsCount}`)
+      );
       return this.recommendations;
     },
     startSubscriptions: function () {
@@ -101,6 +109,7 @@ export const useMintRecommendationsStore = defineStore("mintRecommendations", {
         { closeOnEose: false, groupable: false }
       );
       subInfos.on("event", (ev: NDKEvent) => {
+        console.log(`[mintRecs] live 38172 info ${ev.id} pubkey=${ev.pubkey} d=${ev.tagValue("d")}`);
         this.handleMintInfoEvent(ev);
         this.rebuildAggregates();
       });
@@ -110,6 +119,7 @@ export const useMintRecommendationsStore = defineStore("mintRecommendations", {
         { closeOnEose: false, groupable: false }
       );
       subReviews.on("event", (ev: NDKEvent) => {
+        console.log(`[mintRecs] live 38000 review ${ev.id} from ${ev.pubkey}`);
         this.handleReviewEvent(ev);
         this.rebuildAggregates();
       });
@@ -135,19 +145,13 @@ export const useMintRecommendationsStore = defineStore("mintRecommendations", {
       };
       this.mintsByIdentifier.set(identifier, info);
       if (info.url) this.urlByIdentifier.set(identifier, info.url);
+      // map d -> identifiers
+      if (!this.dToIdentifiers.has(d)) this.dToIdentifiers.set(d, new Set());
+      this.dToIdentifiers.get(d)!.add(identifier);
+      console.log(`[mintRecs] info: d=${d} url=${info.url ?? 'n/a'} id=${identifier}`);
     },
     handleReviewEvent: function (ev: NDKEvent) {
       if (ev.kind !== 38000) return;
-      const aTag = ev.tags.find((t) => t[0] === "a");
-      if (!aTag) return;
-      const a = aTag[1] || "";
-      const parts = a.split(":");
-      if (parts.length < 3) return;
-      const kind = parseInt(parts[0], 10);
-      const pubkey = parts[1];
-      const d = parts.slice(2).join(":");
-      if (kind !== 38172) return; // only cashu mints
-      const identifier = makeIdentifier(kind, pubkey, d);
       const { rating, comment } = parseRatingAndComment(ev.content || "");
       const review: MintReview = {
         eventId: ev.id,
@@ -157,8 +161,58 @@ export const useMintRecommendationsStore = defineStore("mintRecommendations", {
         comment,
         raw: ev.rawEvent(),
       };
+
+      let attached = false;
+      const aTag = ev.tags.find((t) => t[0] === "a");
+      if (aTag) {
+        const a = aTag[1] || "";
+        const parts = a.split(":");
+        if (parts.length >= 3) {
+          const kind = parseInt(parts[0], 10);
+          const maybePubkey = parts[1];
+          const d = parts.slice(2).join(":");
+          if (kind === 38172) {
+            if (/^[0-9a-fA-F]{64}$/.test(maybePubkey)) {
+              const identifier = makeIdentifier(kind, maybePubkey, d);
+              this.attachReviewToIdentifier(identifier, review);
+              attached = true;
+              console.log(`[mintRecs] review ${ev.id} -> identifier ${identifier} (exact)`);
+            } else {
+              const set = this.dToIdentifiers.get(d);
+              if (set && set.size > 0) {
+                set.forEach((identifier) => this.attachReviewToIdentifier(identifier, review));
+                attached = true;
+                console.log(`[mintRecs] review ${ev.id} -> d ${d} mapped to ${set.size} identifiers`);
+              }
+            }
+          }
+        }
+      }
+
+      // Fallback: attach by URL(s) on review when available and k=38172
+      const kTag = ev.tags.find((t) => t[0] === "k");
+      if (!attached && kTag && kTag[1] === "38172") {
+        const uTags = ev.tags.filter((t) => t[0] === "u" && (t[2] === "cashu" || t.length >= 2));
+        for (const u of uTags) {
+          const url = u[1];
+          if (typeof url === "string" && url.startsWith("http")) {
+            const list = this.urlReviews.get(url) || [];
+            const withoutSameAuthor = list.filter((r) => r.pubkey !== review.pubkey);
+            withoutSameAuthor.push(review);
+            withoutSameAuthor.sort((a, b) => (a.created_at || 0) - (b.created_at || 0));
+            this.urlReviews.set(url, withoutSameAuthor);
+            attached = true;
+            console.log(`[mintRecs] review ${ev.id} -> url ${url} (fallback via u tag)`);
+          }
+        }
+      }
+
+      if (!attached) {
+        console.log(`[mintRecs] review ${ev.id} could not be attached to any mint`);
+      }
+    },
+    attachReviewToIdentifier: function (identifier: MintIdentifier, review: MintReview) {
       const existing = this.reviewsByIdentifier.get(identifier) || [];
-      // dedupe by same author and same identifier keeping latest created_at
       const withoutSameAuthor = existing.filter((r) => r.pubkey !== review.pubkey);
       withoutSameAuthor.push(review);
       withoutSameAuthor.sort((a, b) => (a.created_at || 0) - (b.created_at || 0));
@@ -171,6 +225,11 @@ export const useMintRecommendationsStore = defineStore("mintRecommendations", {
         const reviews = this.reviewsByIdentifier.get(identifier) || [];
         if (!urlToReviews.has(url)) urlToReviews.set(url, []);
         urlToReviews.get(url)!.push(...reviews);
+      }
+      // Merge in url-attached reviews
+      for (const [url, list] of this.urlReviews.entries()) {
+        if (!urlToReviews.has(url)) urlToReviews.set(url, []);
+        urlToReviews.get(url)!.push(...list);
       }
       // Build recommendations per URL
       const recs: MintRecommendation[] = [];
