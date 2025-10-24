@@ -8,6 +8,10 @@ export type WelcomeState = {
   currentSlide: number;
   seedPhraseValidated: boolean;
   termsAccepted: boolean;
+  onboardingPath: string; // 'new' | 'recover' | ''
+  seedEnteredValid: boolean;
+  mintSetupCompleted: boolean;
+  ecashRestoreCompleted: boolean;
 };
 
 // Define the Pinia store
@@ -23,25 +27,57 @@ export const useWelcomeStore = defineStore("welcome", {
       "cashu.welcome.termsAccepted",
       false
     ),
+    onboardingPath: useLocalStorage<string>("cashu.welcome.path", ""),
+    seedEnteredValid: useLocalStorage<boolean>(
+      "cashu.welcome.seedEnteredValid",
+      false
+    ),
+    mintSetupCompleted: useLocalStorage<boolean>(
+      "cashu.welcome.mintSetupCompleted",
+      false
+    ),
+    ecashRestoreCompleted: useLocalStorage<boolean>(
+      "cashu.welcome.ecashRestoreCompleted",
+      false
+    ),
   }),
   getters: {
     // Determines if the current slide is the last one
-    isLastSlide: (state) => state.currentSlide === 3, // Adjust if you have more slides
+    isLastSlide: (state) => {
+      // Slides:
+      // 0 Intro, 1 PWA, 2 Choice,
+      // New: 3 Seed, 4 Mints, 5 Terms
+      // Recover: 3 SeedIn, 4 Mints, 5 Restore, 6 Terms
+      if (state.onboardingPath === "recover") return state.currentSlide === 6;
+      if (state.onboardingPath === "new") return state.currentSlide === 5;
+      // before choosing a path
+      return false;
+    },
 
     // Determines if the user can proceed to the next slide
     canProceed: (state) => {
-      switch (state.currentSlide) {
-        case 0:
-          return true;
-        case 1:
-          return true; // Assuming no validation for PWA install
-        case 2:
-          return state.seedPhraseValidated;
-        case 3:
-          return state.termsAccepted;
-        default:
-          return false;
+      // 0 Intro
+      if (state.currentSlide === 0) return true;
+      // 1 PWA
+      if (state.currentSlide === 1) return true;
+      // 2 Choice
+      if (state.currentSlide === 2) return state.onboardingPath !== "";
+      // 3
+      if (state.currentSlide === 3) {
+        if (state.onboardingPath === "new") return state.seedPhraseValidated;
+        if (state.onboardingPath === "recover") return state.seedEnteredValid;
       }
+      // 4 (mints setup for both paths)
+      if (state.currentSlide === 4) return state.mintSetupCompleted || true;
+      // 5 (terms for new OR restore step for recover)
+      if (state.currentSlide === 5) {
+        if (state.onboardingPath === "new") return state.termsAccepted;
+        if (state.onboardingPath === "recover")
+          return state.ecashRestoreCompleted || true;
+      }
+      // 6 (terms for recover)
+      if (state.currentSlide === 6) return state.termsAccepted;
+      return false;
     },
 
     // Determines if the user can navigate to the previous slide
@@ -66,6 +102,9 @@ export const useWelcomeStore = defineStore("welcome", {
       // Redirect to home or desired route
       window.location.href =
         "/" + window.location.search + window.location.hash;
+    },
+    setPath(path: "new" | "recover") {
+      this.onboardingPath = path;
     },
 
     /**
@@ -98,6 +137,10 @@ export const useWelcomeStore = defineStore("welcome", {
       this.currentSlide = 0;
       this.termsAccepted = false;
       this.seedPhraseValidated = false;
+      this.onboardingPath = "";
+      this.seedEnteredValid = false;
+      this.mintSetupCompleted = false;
+      this.ecashRestoreCompleted = false;
     },
 
     /**

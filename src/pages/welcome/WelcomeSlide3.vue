@@ -47,7 +47,7 @@
 <script lang="ts">
 import { useWelcomeStore } from "src/stores/welcome";
 import { useWalletStore } from "src/stores/wallet";
-import { ref, computed } from "vue";
+import { ref, computed, onMounted } from "vue";
 import { useQuasar } from "quasar";
 
 export default {
@@ -58,6 +58,13 @@ export default {
     const walletStore = useWalletStore();
     const $q = useQuasar();
     let hideMnemonic = ref(true);
+
+    onMounted(() => {
+      // Ensure mnemonic is generated for new-wallet flow only
+      if (welcomeStore.onboardingPath === 'new' && !walletStore.mnemonic) {
+        walletStore.initializeMnemonic();
+      }
+    });
 
     const hiddenMnemonic = computed(() => {
       if (hideMnemonic.value) {

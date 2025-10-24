@@ -179,6 +179,9 @@ export const useWalletStore = defineStore("wallet", {
     },
   },
   actions: {
+    setMnemonicFromUser: function (mnemonic: string) {
+      this.mnemonic = mnemonic;
+    },
     mintWallet(url: string, unit: string): CashuWallet {
       // short-lived wallet for mint operations
       // note: the unit of the wallet will be activeUnit by default,
