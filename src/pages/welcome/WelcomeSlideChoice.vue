@@ -7,24 +7,30 @@
 
       <div class="row q-col-gutter-md q-mt-lg">
         <div class="col-12 col-md-6">
-          <q-card class="option-card cursor-pointer" @click="choose('recover')">
+          <q-card class="option-card">
             <q-card-section>
               <div class="row items-center q-gutter-sm">
                 <q-icon name="history" size="2em" color="primary" />
                 <div class="text-h6">Recover wallet</div>
               </div>
               <div class="text-subtitle2 q-mt-sm">Enter your seed phrase, restore mints and ecash.</div>
+              <div class="q-mt-md">
+                <q-btn color="primary" rounded label="Recover" @click="choose('recover')" data-testid="btn-recover" />
+              </div>
             </q-card-section>
           </q-card>
         </div>
         <div class="col-12 col-md-6">
-          <q-card class="option-card cursor-pointer" @click="choose('new')">
+          <q-card class="option-card">
             <q-card-section>
               <div class="row items-center q-gutter-sm">
                 <q-icon name="auto_awesome" size="2em" color="primary" />
                 <div class="text-h6">Create new wallet</div>
               </div>
               <div class="text-subtitle2 q-mt-sm">Generate a new seed and add mints.</div>
+              <div class="q-mt-md">
+                <q-btn color="primary" rounded label="Create" @click="choose('new')" data-testid="btn-new" />
+              </div>
             </q-card-section>
           </q-card>
         </div>
@@ -43,10 +49,8 @@ export default {
     const walletStore = useWalletStore();
     const choose = (path: 'new'|'recover') => {
       welcomeStore.setPath(path);
-      // For recover, ensure we don't accidentally use a generated mnemonic
-      if (path === 'recover') {
-        // Keep as-is; user will set seed in next slide
-      }
+      // advance to next stage immediately for snappier UX
+      welcomeStore.setCurrentSlide(3);
     };
     return { welcomeStore, walletStore, choose };
   }
@@ -60,4 +64,3 @@ export default {
 h2 { font-weight: bold; }
 p { font-size: large; }
 </style>
-
