@@ -168,7 +168,7 @@ export default defineComponent({
   props: {
     infoTimeoutMs: { type: Number, default: 5000 },
   },
-  setup() {
+  setup(props) {
     const recsStore = useMintRecommendationsStore();
     const mints = useMintsStore();
 
@@ -184,56 +184,28 @@ export default defineComponent({
       recommendations.value.filter((r) => !isExistingMint(r.url))
     );
 
-    // Fetch mint info and cache it for discovered mints
-    const mintInfoCache = ref(new Map<string, any>());
+    // Use store-persisted info
     const fetchingMintInfo = ref(new Set<string>());
-    const errorMints = ref(new Set<string>());
-    const infoTimers = ref(new Map<string, any>());
-    const getMintInfo = (url: string) => mintInfoCache.value.get(url);
-    const getMintIconUrlUrl = (url: string) => {
-      const info = getMintInfo(url);
-      return info && info.icon_url ? info.icon_url : null;
+    const getRec = (url: string) =>
+      recommendations.value.find((r) => r.url === url);
+    const getMintIconUrlUrl = (url: string) =>
+      getRec(url)?.info?.icon_url || null;
+    const getMintDisplayName = (url: string) =>
+      getRec(url)?.info?.name || url.replace(/^https?:\/\//, "");
+    const isFetchingMintInfo = (url: string) => {
+      const rec = getRec(url);
+      return rec ? !rec.info && !rec.error : fetchingMintInfo.value.has(url);
     };
-    const getMintDisplayName = (url: string) => {
-      const info = getMintInfo(url);
-      return info && info.name ? info.name : url.replace(/^https?:\/\//, "");
-    };
-    const isFetchingMintInfo = (url: string) => fetchingMintInfo.value.has(url);
-    const fetchMintInfo = async (url: string) => {
-      try {
-        const tempMint = { url, keys: [], keysets: [] } as any;
-        const info = await new MintClass(tempMint).api.getInfo();
-        mintInfoCache.value.set(url, info);
-        if (infoTimers.value.has(url)) {
-          clearTimeout(infoTimers.value.get(url));
-          infoTimers.value.delete(url);
-        }
-      } catch (e) {
-        mintInfoCache.value.set(url, null);
-      } finally {
-        fetchingMintInfo.value.delete(url);
-      }
-    };
-    const scheduleInfoTimeout = (url: string) => {
-      if (errorMints.value.has(url) || infoTimers.value.has(url)) return;
-      const id = setTimeout(() => {
-        if (!mintInfoCache.value.has(url)) {
-          errorMints.value.add(url);
-        }
-        infoTimers.value.delete(url);
-      }, (defineComponent as any).props?.infoTimeoutMs?.default ?? 5000);
-      infoTimers.value.set(url, id);
-    };
+
     const fetchMintInfoForDiscovered = () => {
       discoverList.value.forEach((rec) => {
-        if (
-          !mintInfoCache.value.has(rec.url) &&
-          !fetchingMintInfo.value.has(rec.url) &&
-          !errorMints.value.has(rec.url)
-        ) {
+        if (!fetchingMintInfo.value.has(rec.url)) {
           fetchingMintInfo.value.add(rec.url);
-          scheduleInfoTimeout(rec.url);
-          fetchMintInfo(rec.url);
+          // ask store to fetch/persist with timeout logic
+          recsStore.requestMintHttpInfo(
+            rec.url,
+            (defineComponent as any).props?.infoTimeoutMs?.default ?? 5000
+          );
         }
       });
     };
@@ -244,12 +216,7 @@ export default defineComponent({
     const discover = async () => {
       discovering.value = true;
       try {
-        // reset local caches and timers
-        mintInfoCache.value.clear();
-        fetchingMintInfo.value.clear();
-        errorMints.value.clear();
-        infoTimers.value.forEach((t) => clearTimeout(t));
-        infoTimers.value.clear();
+        recsStore.clearDiscoveryCaches();
         recsStore.clearRecommendations();
         // Start live updates immediately
         recsStore.startSubscriptions();
@@ -276,9 +243,7 @@ export default defineComponent({
       discovering,
       discover,
       discoverList: computed(() =>
-        recommendations.value.filter(
-          (r) => !isExistingMint(r.url) && !errorMints.value.has(r.url)
-        )
+        recommendations.value.filter((r) => !isExistingMint(r.url))
       ),
       getMintIconUrlUrl,
       isFetchingMintInfo,
@@ -289,7 +254,6 @@ export default defineComponent({
       showRatingsDialog,
       selectedRatingsUrl,
       selectedReviews,
-      errorMints,
     };
   },
 });

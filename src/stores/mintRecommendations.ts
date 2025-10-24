@@ -30,6 +30,8 @@ export type MintRecommendation = {
   reviewsCount: number;
   averageRating: number | null;
   reviews: MintReview[];
+  info?: any;
+  error?: boolean;
 };
 
 function makeIdentifier(kind: number, pubkey: string, d: string): MintIdentifier {
@@ -55,6 +57,11 @@ export const useMintRecommendationsStore = defineStore("mintRecommendations", {
     reviewsByIdentifier: new Map() as Map<MintIdentifier, MintReview[]>,
     dToIdentifiers: new Map() as Map<string, Set<MintIdentifier>>, // d -> identifiers
     urlReviews: new Map() as Map<string, MintReview[]>, // fallback direct url reviews
+    urlHttpInfo: new Map() as Map<string, any>,
+    urlError: new Set() as Set<string>,
+    infoTimers: new Map() as Map<string, any>,
+    inflightInfo: new Set() as Set<string>,
+    infoTimeoutMs: 5000,
     // Aggregated list by URL
     recommendations: useLocalStorage<MintRecommendation[]>(
       "cashu.ndk.mintRecommendations",
@@ -94,6 +101,16 @@ export const useMintRecommendationsStore = defineStore("mintRecommendations", {
     clearRecommendations: function () {
       this.recommendations.splice(0, this.recommendations.length);
     },
+    clearDiscoveryCaches: function () {
+      this.urlHttpInfo.clear();
+      this.urlError.clear();
+      this.inflightInfo.clear();
+      this.infoTimers.forEach((t) => clearTimeout(t));
+      this.infoTimers.clear();
+    },
+    setInfoTimeoutMs: function (ms: number) {
+      this.infoTimeoutMs = ms;
+    },
     discover: async function (): Promise<MintRecommendation[]> {
       await this.fetchMintInfos();
       await this.fetchReviews();
@@ -127,6 +144,36 @@ export const useMintRecommendationsStore = defineStore("mintRecommendations", {
         this.rebuildAggregates();
       });
       this.subsActive = true;
+    },
+    requestMintHttpInfo: async function (url: string, timeoutMs?: number) {
+      if (this.urlHttpInfo.has(url) || this.urlError.has(url) || this.inflightInfo.has(url)) return;
+      this.inflightInfo.add(url);
+      const ms = timeoutMs ?? this.infoTimeoutMs;
+      if (!this.infoTimers.has(url)) {
+        const id = setTimeout(() => {
+          if (!this.urlHttpInfo.has(url)) {
+            this.urlError.add(url);
+            this.rebuildAggregates();
+          }
+          this.infoTimers.delete(url);
+        }, ms);
+        this.infoTimers.set(url, id);
+      }
+      try {
+        const tempMint = { url, keys: [], keysets: [] } as any;
+        const mod = await import("src/stores/mints");
+        console.log(`[mintRecs] fetching info for ${url}`);
+        const info = await new (mod as any).MintClass(tempMint).api.getInfo();
+        this.urlHttpInfo.set(url, info);
+        const t = this.infoTimers.get(url);
+        if (t) clearTimeout(t);
+        this.infoTimers.delete(url);
+        this.rebuildAggregates();
+      } catch (e) {
+        // wait for timeout to mark error
+      } finally {
+        this.inflightInfo.delete(url);
+      }
     },
     handleMintInfoEvent: function (ev: NDKEvent) {
       if (ev.kind !== 38172) return; // cashu only
@@ -237,14 +284,21 @@ export const useMintRecommendationsStore = defineStore("mintRecommendations", {
       // Build recommendations per URL
       const recs: MintRecommendation[] = [];
       for (const [url, reviews] of urlToReviews.entries()) {
+        // schedule HTTP info if missing
+        if (!this.urlHttpInfo.has(url) && !this.inflightInfo.has(url) && !this.urlError.has(url)) {
+          this.requestMintHttpInfo(url);
+        }
         const ratings = reviews.map((r) => r.rating).filter((n): n is number => typeof n === "number");
         const avg = ratings.length ? ratings.reduce((a, b) => a + b, 0) / ratings.length : null;
-        recs.push({
+        const rec: MintRecommendation = {
           url,
           reviewsCount: reviews.length,
           averageRating: avg,
           reviews: reviews.sort((a, b) => (b.created_at || 0) - (a.created_at || 0)),
-        });
+          info: this.urlHttpInfo.get(url),
+          error: this.urlError.has(url),
+        };
+        if (!rec.error) recs.push(rec);
       }
       recs.sort((a, b) => (b.reviewsCount - a.reviewsCount) || ((b.averageRating || 0) - (a.averageRating || 0)));
       this.recommendations = recs;
