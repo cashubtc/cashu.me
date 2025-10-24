@@ -19,9 +19,9 @@
             }}</q-item-label>
           </q-item-section>
         </q-item>
-        <q-item class="q-pt-sm">
+        <q-item class="q-pt-sm" style="display: flex; justify-content: center">
           <q-btn
-            class="q-ml-sm q-px-md"
+            class="q-px-lg"
             color="primary"
             rounded
             outline
