@@ -12,6 +12,7 @@
     <div class="q-py-md q-px-xs text-left" on-left>
       <q-list padding>
         <!-- <q-item-label header>Your mints</q-item-label> -->
+        <!-- MINT CARDS -->
         <div v-for="mint in mints" :key="mint.url" class="q-px-md">
           <q-item
             :active="mint.url == activeMintUrl"
@@ -64,6 +65,17 @@
                 </q-badge>
               </div>
             </transition>
+
+            <!-- Top right more_vert icon -->
+            <div class="more-vert-icon">
+              <q-icon
+                name="more_vert"
+                @click.stop="showMintInfo(mint)"
+                color="white"
+                class="cursor-pointer"
+                size="1.3rem"
+              />
+            </div>
             <div class="full-width" style="position: relative">
               <div class="row items-center q-pa-md">
                 <div class="col">
@@ -92,48 +104,14 @@
                       <div class="text-grey-6 mint-url">
                         {{ mint.url }}
                       </div>
-                      <div class="text-grey-5 q-mt-xs">
-                        <template
-                          v-if="
-                            getRecommendation(mint.url) &&
-                            getRecommendation(mint.url).averageRating !== null
-                          "
-                        >
-                          <span>
-                            ⭐
-                            {{
-                              getRecommendation(mint.url).averageRating.toFixed(
-                                2
-                              )
-                            }}
-                            ·
-                            {{ getRecommendation(mint.url).reviewsCount }}
-                            <span
-                              class="text-primary cursor-pointer"
-                              style="text-decoration: underline"
-                              @click.stop="openReviews(mint.url, mint)"
-                              >reviews</span
-                            >
-                          </span>
-                        </template>
-                        <template v-else>
-                          <span
-                            >No reviews yet ·
-                            <span
-                              class="text-primary cursor-pointer"
-                              style="text-decoration: underline"
-                              @click.stop="openCreateReview(mint)"
-                              >write a review</span
-                            >
-                          </span>
-                        </template>
-                      </div>
                     </div>
                   </div>
                 </div>
               </div>
 
-              <div class="row justify-between q-pb-md q-pl-lg q-pr-md">
+              <div
+                class="row items-center justify-between q-pb-md q-pl-lg q-pr-md"
+              >
                 <div class="col">
                   <!-- Currency units with regular text styling -->
                   <div class="row q-gutter-x-sm">
@@ -153,15 +131,37 @@
                     </div>
                   </div>
                 </div>
-
-                <div class="col-auto">
-                  <q-icon
-                    name="more_vert"
-                    @click.stop="showMintInfo(mint)"
-                    color="white"
-                    class="cursor-pointer q-mr-sm"
-                    size="1.3rem"
-                  />
+                <div class="text-grey-5">
+                  <template
+                    v-if="
+                      getRecommendation(mint.url) &&
+                      getRecommendation(mint.url).averageRating !== null
+                    "
+                  >
+                    <span>
+                      ⭐
+                      {{ getRecommendation(mint.url).averageRating.toFixed(2) }}
+                      ·
+                      {{ getRecommendation(mint.url).reviewsCount }}
+                      <span
+                        class="text-primary cursor-pointer"
+                        style="text-decoration: underline"
+                        @click.stop="openReviews(mint.url, mint)"
+                        >reviews</span
+                      >
+                    </span>
+                  </template>
+                  <template v-else>
+                    <span
+                      >No reviews yet ·
+                      <span
+                        class="text-primary cursor-pointer"
+                        style="text-decoration: underline"
+                        @click.stop="openCreateReview(mint)"
+                        >write a review</span
+                      >
+                    </span>
+                  </template>
                 </div>
               </div>
             </div>
@@ -765,5 +765,13 @@ export default defineComponent({
   font-weight: 600;
   color: #ffffff;
   text-transform: uppercase;
+}
+
+/* More vert icon positioning */
+.more-vert-icon {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 10;
 }
 </style>
