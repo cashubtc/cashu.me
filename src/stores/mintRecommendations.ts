@@ -281,6 +281,18 @@ export const useMintRecommendationsStore = defineStore("mintRecommendations", {
         if (!urlToReviews.has(url)) urlToReviews.set(url, []);
         urlToReviews.get(url)!.push(...list);
       }
+
+      // If we have no aggregated reviews yet but we DO have existing recommendations
+      // (e.g. loaded from localStorage on app start), avoid wiping them.
+      if (urlToReviews.size === 0 && this.recommendations.length > 0) {
+        const persisted: MintRecommendation[] = this.recommendations.map((r) => {
+          const info = this.urlHttpInfo.get(r.url) ?? r.info;
+          const error = this.urlError.has(r.url);
+          return { ...r, info, error } as MintRecommendation;
+        }).filter((r) => !r.error);
+        this.recommendations = persisted;
+        return;
+      }
       // Build recommendations per URL
       const recs: MintRecommendation[] = [];
       for (const [url, reviews] of urlToReviews.entries()) {
