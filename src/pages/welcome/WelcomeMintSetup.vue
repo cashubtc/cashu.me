@@ -4,7 +4,9 @@
       <div class="text-center q-mb-md">
         <q-icon name="account_tree" size="4em" color="primary" />
         <h2 class="q-mt-xl">Add your mints</h2>
-        <p class="q-mt-sm">Discover mints on Nostr or add manually. You need at least one mint.</p>
+        <p class="q-mt-sm">
+          Discover mints on Nostr or add manually. You need at least one mint.
+        </p>
       </div>
 
       <!-- Your added mints -->
@@ -14,23 +16,50 @@
           <div class="divider-text">Your mints</div>
           <div class="divider-line"></div>
         </div>
-        <div v-if="mints.mints.length === 0" class="text-left q-mb-sm text-grey-6">
+        <div
+          v-if="mints.mints.length === 0"
+          class="text-left q-mb-sm text-grey-6"
+        >
           No mints added yet.
         </div>
-        <div v-for="mint in mints.mints" :key="mint.url" class="q-px-md q-mb-md">
+        <div
+          v-for="mint in mints.mints"
+          :key="mint.url"
+          class="q-px-md q-mb-md"
+        >
           <q-item
             class="mint-card cursor-pointer"
-            :style="{ 'border-radius': '10px', border: '1px solid rgba(128,128,128,0.2)', padding: '0px', position: 'relative' }"
+            :style="{
+              'border-radius': '10px',
+              border: '1px solid rgba(128,128,128,0.2)',
+              padding: '0px',
+              position: 'relative',
+            }"
           >
             <div class="full-width" style="position: relative">
               <div class="row items-center q-pa-md">
                 <div class="col">
                   <div class="row items-center">
-                    <q-avatar v-if="getMintIconUrlExisting(mint)" size="34px" class="q-mr-sm">
-                      <q-img spinner-color="white" spinner-size="xs" :src="getMintIconUrlExisting(mint)" alt="Mint Icon" style="height: 34px; max-width: 34px; font-size: 12px" />
+                    <q-avatar
+                      v-if="getMintIconUrlExisting(mint)"
+                      size="34px"
+                      class="q-mr-sm"
+                    >
+                      <q-img
+                        spinner-color="white"
+                        spinner-size="xs"
+                        :src="getMintIconUrlExisting(mint)"
+                        alt="Mint Icon"
+                        style="height: 34px; max-width: 34px; font-size: 12px"
+                      />
                     </q-avatar>
                     <div class="mint-info-container">
-                      <div v-if="mint.nickname || mint.info?.name" class="mint-name">{{ mint.nickname || mint.info?.name }}</div>
+                      <div
+                        v-if="mint.nickname || mint.info?.name"
+                        class="mint-name"
+                      >
+                        {{ mint.nickname || mint.info?.name }}
+                      </div>
                       <div class="text-grey-6 mint-url">{{ mint.url }}</div>
                     </div>
                   </div>
@@ -39,8 +68,14 @@
               <div class="row justify-between q-pb-md q-pl-lg q-pr-md">
                 <div class="col">
                   <div class="row q-gutter-x-sm">
-                    <div v-for="unit in mintClass(mint).units" :key="unit" class="currency-unit-badge">
-                      <span class="currency-unit-text">{{ formatCurrency(mintClass(mint).unitBalance(unit), unit) }}</span>
+                    <div
+                      v-for="unit in mintClass(mint).units"
+                      :key="unit"
+                      class="currency-unit-badge"
+                    >
+                      <span class="currency-unit-text">{{
+                        formatCurrency(mintClass(mint).unitBalance(unit), unit)
+                      }}</span>
                     </div>
                   </div>
                 </div>
@@ -81,7 +116,11 @@
           <q-btn
             flat
             :disable="addMintData.url.length === 0"
-            @click="addMintData.url.length > 0 ? sanitizeMintUrlAndShowAddDialog() : null"
+            @click="
+              addMintData.url.length > 0
+                ? sanitizeMintUrlAndShowAddDialog()
+                : null
+            "
             class="text-white"
             :class="{ 'text-grey-7': addMintData.url.length === 0 }"
           >
@@ -93,7 +132,10 @@
 
       <!-- Recovery-specific: search user mints on nostr using seed -->
       <div v-if="welcome.onboardingPath === 'recover'">
-        <NostrMintRestore :mnemonic="restore.mnemonicToRestore" :is-mnemonic-valid="isSeedValid" />
+        <NostrMintRestore
+          :mnemonic="restore.mnemonicToRestore"
+          :is-mnemonic-valid="isSeedValid"
+        />
       </div>
 
       <!-- Discover mints on nostr (global) -->
@@ -104,7 +146,14 @@
           <div class="divider-line"></div>
         </div>
         <div class="q-px-xs text-left">
-          <q-btn class="q-ml-sm q-px-md" color="primary" rounded outline :loading="discovering" @click="discover">
+          <q-btn
+            class="q-ml-sm q-px-md"
+            color="primary"
+            rounded
+            outline
+            :loading="discovering"
+            @click="discover"
+          >
             Discover
             <template v-slot:loading>
               <q-spinner-hourglass class="on-left" /> Discovering…
@@ -113,30 +162,80 @@
           <div v-if="discoverList.length > 0" class="q-mt-md">
             <q-item>
               <q-item-section>
-                <q-item-label overline>{{ discoverList.length }} recommendations</q-item-label>
-                <q-item-label caption>Popular mints other users recommended on Nostr.</q-item-label>
+                <q-item-label overline
+                  >{{ discoverList.length }} recommendations</q-item-label
+                >
+                <q-item-label caption
+                  >Popular mints other users recommended on Nostr.</q-item-label
+                >
               </q-item-section>
             </q-item>
             <div class="q-pt-sm">
-              <div v-for="rec in discoverList" :key="rec.url" class="q-px-md q-mb-md">
-                <q-item class="mint-card" :style="{ 'border-radius': '10px', border: '1px solid rgba(128,128,128,0.2)', padding: '0px', position: 'relative' }">
+              <div
+                v-for="rec in discoverList"
+                :key="rec.url"
+                class="q-px-md q-mb-md"
+              >
+                <q-item
+                  class="mint-card"
+                  :style="{
+                    'border-radius': '10px',
+                    border: '1px solid rgba(128,128,128,0.2)',
+                    padding: '0px',
+                    position: 'relative',
+                  }"
+                >
                   <div class="full-width" style="position: relative">
                     <div class="row items-center q-pa-md">
                       <div class="col">
                         <div class="row items-center">
-                          <q-avatar v-if="getMintIconUrl(rec.url)" size="34px" class="q-mr-sm">
-                            <q-img spinner-color="white" spinner-size="xs" :src="getMintIconUrl(rec.url)" alt="Mint Icon" style="height: 34px; max-width: 34px; font-size: 12px" />
+                          <q-avatar
+                            v-if="getMintIconUrl(rec.url)"
+                            size="34px"
+                            class="q-mr-sm"
+                          >
+                            <q-img
+                              spinner-color="white"
+                              spinner-size="xs"
+                              :src="getMintIconUrl(rec.url)"
+                              alt="Mint Icon"
+                              style="
+                                height: 34px;
+                                max-width: 34px;
+                                font-size: 12px;
+                              "
+                            />
                           </q-avatar>
-                          <q-spinner-dots v-else-if="isFetchingMintInfo(rec.url)" size="34px" color="grey-5" class="q-mr-sm" />
+                          <q-spinner-dots
+                            v-else-if="isFetchingMintInfo(rec.url)"
+                            size="34px"
+                            color="grey-5"
+                            class="q-mr-sm"
+                          />
                           <div class="mint-info-container">
-                            <div class="mint-name">{{ getMintDisplayName(rec.url) }}</div>
-                            <div class="text-grey-6 mint-url">{{ rec.url }}</div>
+                            <div class="mint-name">
+                              {{ getMintDisplayName(rec.url) }}
+                            </div>
+                            <div class="text-grey-6 mint-url">
+                              {{ rec.url }}
+                            </div>
                           </div>
                         </div>
                       </div>
                       <div class="col-auto">
-                        <q-badge :label="rec.count" color="primary" class="q-mr-sm" />
-                        <q-btn dense round flat icon="add" @click="addDiscovered(rec.url)" :disable="isExistingMint(rec.url)" />
+                        <q-badge
+                          :label="rec.count"
+                          color="primary"
+                          class="q-mr-sm"
+                        />
+                        <q-btn
+                          dense
+                          round
+                          flat
+                          icon="add"
+                          @click="addDiscovered(rec.url)"
+                          :disable="isExistingMint(rec.url)"
+                        />
                       </div>
                     </div>
                   </div>
@@ -148,7 +247,13 @@
       </div>
 
       <div class="q-mt-xl text-center">
-        <q-btn color="primary" rounded @click="markDone" :disable="mints.mints.length === 0">Continue</q-btn>
+        <q-btn
+          color="primary"
+          rounded
+          @click="markDone"
+          :disable="mints.mints.length === 0"
+          >Continue</q-btn
+        >
       </div>
 
       <AddMintDialog
@@ -163,18 +268,18 @@
 </template>
 
 <script lang="ts">
-import { computed, ref, watch } from 'vue';
-import { useWelcomeStore } from 'src/stores/welcome';
-import { useRestoreStore } from 'src/stores/restore';
-import { useMintsStore, MintClass } from 'src/stores/mints';
-import { useNostrStore } from 'src/stores/nostr';
-import { useUiStore } from 'src/stores/ui';
-import { notifyError, notifySuccess } from 'src/js/notify';
-import AddMintDialog from 'src/components/AddMintDialog.vue';
-import NostrMintRestore from 'src/components/NostrMintRestore.vue';
+import { computed, ref, watch } from "vue";
+import { useWelcomeStore } from "src/stores/welcome";
+import { useRestoreStore } from "src/stores/restore";
+import { useMintsStore, MintClass } from "src/stores/mints";
+import { useNostrStore } from "src/stores/nostr";
+import { useUiStore } from "src/stores/ui";
+import { notifyError, notifySuccess } from "src/js/notify";
+import AddMintDialog from "src/components/AddMintDialog.vue";
+import NostrMintRestore from "src/components/NostrMintRestore.vue";
 
 export default {
-  name: 'WelcomeMintSetup',
+  name: "WelcomeMintSetup",
   components: { AddMintDialog, NostrMintRestore },
   setup() {
     const welcome = useWelcomeStore();
@@ -186,7 +291,7 @@ export default {
     const discovering = ref(false);
 
     const isSeedValid = computed(() => {
-      const s = restore.mnemonicToRestore?.trim() || '';
+      const s = restore.mnemonicToRestore?.trim() || "";
       return s.split(/\s+/).length >= 12;
     });
 
@@ -200,14 +305,20 @@ export default {
     const sanitizeMintUrlAndShowAddDialog = () => {
       mints.showAddMintDialog = true;
     };
-    const addMintInternal = async (data: { url: string; nickname?: string }) => {
+    const addMintInternal = async (data: {
+      url: string;
+      nickname?: string;
+    }) => {
       await mints.addMint(data, true);
-      mints.addMintData = { url: '', nickname: '' } as any;
+      mints.addMintData = { url: "", nickname: "" } as any;
     };
 
     const mintRecommendations = computed(() => nostr.mintRecommendations);
-    const isExistingMint = (url: string) => mints.mints.some(m => m.url === url);
-    const discoverList = computed(() => mintRecommendations.value.filter((r) => !isExistingMint(r.url)));
+    const isExistingMint = (url: string) =>
+      mints.mints.some((m) => m.url === url);
+    const discoverList = computed(() =>
+      mintRecommendations.value.filter((r) => !isExistingMint(r.url))
+    );
     // Fetch mint info and cache it for discovered mints
     const mintInfoCache = ref(new Map<string, any>());
     const fetchingMintInfo = ref(new Set<string>());
@@ -218,7 +329,7 @@ export default {
     };
     const getMintDisplayName = (url: string) => {
       const info = getMintInfo(url);
-      return info && info.name ? info.name : url.replace(/^https?:\/\//, '');
+      return info && info.name ? info.name : url.replace(/^https?:\/\//, "");
     };
     const isFetchingMintInfo = (url: string) => fetchingMintInfo.value.has(url);
     const fetchMintInfo = async (url: string) => {
@@ -234,13 +345,18 @@ export default {
     };
     const fetchMintInfoForDiscovered = () => {
       discoverList.value.forEach((rec) => {
-        if (!mintInfoCache.value.has(rec.url) && !fetchingMintInfo.value.has(rec.url)) {
+        if (
+          !mintInfoCache.value.has(rec.url) &&
+          !fetchingMintInfo.value.has(rec.url)
+        ) {
           fetchingMintInfo.value.add(rec.url);
           fetchMintInfo(rec.url);
         }
       });
     };
-    watch(discoverList, () => fetchMintInfoForDiscovered(), { immediate: true });
+    watch(discoverList, () => fetchMintInfoForDiscovered(), {
+      immediate: true,
+    });
     const discover = async () => {
       discovering.value = true;
       try {
@@ -248,10 +364,12 @@ export default {
         let tries = 0;
         let found: any[] = [];
         while (found.length === 0 && tries < 5) {
-          try { found = await nostr.fetchMints(); } catch {}
+          try {
+            found = await nostr.fetchMints();
+          } catch {}
           tries++;
         }
-        if (found.length === 0) notifyError('No mints found');
+        if (found.length === 0) notifyError("No mints found");
         else notifySuccess(`Found ${found.length} mints`);
       } finally {
         discovering.value = false;
@@ -260,38 +378,76 @@ export default {
     const addDiscovered = async (url: string) => {
       await mints.addMint({ url }, true);
       // remove from discovered list to avoid duplicates
-      nostr.mintRecommendations = nostr.mintRecommendations.filter((r) => r.url !== url);
+      nostr.mintRecommendations = nostr.mintRecommendations.filter(
+        (r) => r.url !== url
+      );
     };
 
     const mintClass = (mint: any) => new MintClass(mint);
-    const formatCurrency = (amount: number, unit: string) => ui.formatCurrency(amount, unit);
-    const getMintIconUrlExisting = (mint: any) => mint?.info?.icon_url || undefined;
+    const formatCurrency = (amount: number, unit: string) =>
+      ui.formatCurrency(amount, unit);
+    const getMintIconUrlExisting = (mint: any) =>
+      mint?.info?.icon_url || undefined;
 
     const markDone = () => {
       welcome.mintSetupCompleted = true;
     };
 
     return {
-      welcome, restore, mints,
+      welcome,
+      restore,
+      mints,
       isSeedValid,
-      addMintData, showAddMintDialog, addMintBlocking,
-      sanitizeMintUrlAndShowAddDialog, addMintInternal,
-      mintRecommendations, discover, discovering,
+      addMintData,
+      showAddMintDialog,
+      addMintBlocking,
+      sanitizeMintUrlAndShowAddDialog,
+      addMintInternal,
+      mintRecommendations,
+      discover,
+      discovering,
       discoverList,
-      isExistingMint, addDiscovered,
-      getMintIconUrl, getMintDisplayName, isFetchingMintInfo, getMintInfo,
-      mintClass, formatCurrency, getMintIconUrlExisting,
+      isExistingMint,
+      addDiscovered,
+      getMintIconUrl,
+      getMintDisplayName,
+      isFetchingMintInfo,
+      getMintInfo,
+      mintClass,
+      formatCurrency,
+      getMintIconUrlExisting,
       markDone,
     };
-  }
-}
+  },
+};
 </script>
 
 <style scoped>
 @import "src/css/mintlist.css";
-.section-divider { display: flex; align-items: center; width: 100%; margin-bottom: 16px; }
-.divider-line { flex: 1; height: 1px; background-color: #48484a; }
-.divider-text { padding: 0 10px; font-size: 14px; font-weight: 600; color: #ffffff; text-transform: uppercase; }
-.mint-input .q-field__control { height: 54px; border-radius: 100px; }
-.mint-card { border: 1px solid rgba(128,128,128,0.2); border-radius: 10px; }
+.section-divider {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 16px;
+}
+.divider-line {
+  flex: 1;
+  height: 1px;
+  background-color: #48484a;
+}
+.divider-text {
+  padding: 0 10px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #ffffff;
+  text-transform: uppercase;
+}
+.mint-input .q-field__control {
+  height: 54px;
+  border-radius: 100px;
+}
+.mint-card {
+  border: 1px solid rgba(128, 128, 128, 0.2);
+  border-radius: 10px;
+}
 </style>
