@@ -51,10 +51,19 @@
           <div class="row items-center justify-between q-mb-xs">
             <div class="row items-center">
               <q-avatar size="28px" class="q-mr-sm">
-                <q-icon name="account_circle" />
+                <q-img
+                  v-if="profiles[r.pubkey]?.picture"
+                  :src="profiles[r.pubkey].picture"
+                  spinner-color="white"
+                  spinner-size="xs"
+                />
+                <q-icon v-else name="account_circle" />
               </q-avatar>
-              <div class="text-caption text-grey-7 monospace">
-                {{ shortPubkey(r.pubkey) }}
+              <div class="text-caption text-grey-7">
+                {{ displayName(r.pubkey) }}
+                <span class="monospace q-ml-xs"
+                  >({{ shortPubkey(r.pubkey) }})</span
+                >
               </div>
             </div>
             <div class="text-caption text-grey-6">
@@ -96,7 +105,9 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { defineComponent, watch } from "vue";
+import { useNostrStore } from "src/stores/nostr";
+import NDK from "@nostr-dev-kit/ndk";
 
 export default defineComponent({
   name: "MintRatingsComponent",
@@ -117,6 +128,31 @@ export default defineComponent({
       if (!pk) return "";
       return `${pk.slice(0, 8)}…${pk.slice(-4)}`;
     },
+    displayName(pk: string) {
+      const p = (this as any).profiles[pk];
+      return p?.name || this.shortPubkey(pk);
+    },
+    async ensureNdk() {
+      const nostr = useNostrStore();
+      if (!nostr.connected || !nostr.ndk) nostr.initNdkReadOnly();
+      return nostr.ndk as unknown as NDK;
+    },
+    async fetchProfileFor(pk: string) {
+      try {
+        const ndk = await this.ensureNdk();
+        // @ts-ignore
+        const user = ndk.getUser({ pubkey: pk });
+        // @ts-ignore
+        await user.fetchProfile();
+        const name =
+          (user.profile as any)?.name ||
+          (user.profile as any)?.display_name ||
+          "";
+        const picture =
+          (user.profile as any)?.image || (user.profile as any)?.picture || "";
+        this.profiles = { ...this.profiles, [pk]: { name, picture } };
+      } catch {}
+    },
   },
   data() {
     return {
@@ -134,6 +170,7 @@ export default defineComponent({
         value: v,
       })),
       page: 1,
+      profiles: {} as Record<string, { name?: string; picture?: string }>,
     };
   },
   computed: {
@@ -186,6 +223,26 @@ export default defineComponent({
     paged(): any[] {
       const start = (this.page - 1) * this.rowsPerPage;
       return this.sorted.slice(start, start + this.rowsPerPage);
+    },
+  },
+  mounted() {
+    const uniquePks = Array.from(
+      new Set((this.reviews || []).map((r: any) => r.pubkey))
+    );
+    uniquePks.forEach((pk) => this.fetchProfileFor(pk));
+  },
+  watch: {
+    reviews: {
+      handler() {
+        const uniquePks = Array.from(
+          new Set((this.reviews || []).map((r: any) => r.pubkey))
+        );
+        uniquePks.forEach((pk) => {
+          if (!this.profiles[pk]) this.fetchProfileFor(pk);
+        });
+      },
+      deep: true,
+      immediate: false,
     },
   },
 });
