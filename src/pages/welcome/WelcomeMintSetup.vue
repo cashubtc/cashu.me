@@ -16,6 +16,14 @@
           <div class="divider-text">Your mints</div>
           <div class="divider-line"></div>
         </div>
+        <!-- Restoring indicator during recover + Nostr search -->
+        <div
+          v-if="welcome.onboardingPath === 'recover' && restoringMints"
+          class="row items-center q-mb-md q-px-lg"
+        >
+          <q-spinner-dots size="24px" color="grey-5" class="q-mr-sm" />
+          <div class="text-grey-6">Restoring mints…</div>
+        </div>
         <div
           v-if="mints.mints.length === 0"
           class="text-left q-mb-sm text-grey-6"
@@ -87,15 +95,6 @@
             ref="mintInput"
             class="q-mb-md mint-input url-input"
           />
-          <q-input
-            rounded
-            outlined
-            v-model="addMintData.nickname"
-            placeholder="Nickname (optional)"
-            @keydown.enter.prevent="sanitizeMintUrlAndShowAddDialog"
-            ref="mintNicknameInput"
-            class="mint-input"
-          />
         </div>
         <div class="row justify-between items-center q-mt-xs">
           <q-btn
@@ -137,7 +136,6 @@
               class="q-ml-sm q-px-md full-width"
               color="primary"
               rounded
-              outline
               :loading="discovering"
               @click="discover"
             >
@@ -265,6 +263,7 @@ import { useUiStore } from "src/stores/ui";
 import { notifyError, notifySuccess } from "src/js/notify";
 import AddMintDialog from "src/components/AddMintDialog.vue";
 import NostrMintRestore from "src/components/NostrMintRestore.vue";
+import { useNostrMintBackupStore } from "src/stores/nostrMintBackup";
 
 export default {
   name: "WelcomeMintSetup",
@@ -274,6 +273,7 @@ export default {
     const restore = useRestoreStore();
     const mints = useMintsStore();
     const nostr = useNostrStore();
+    const nostrMintBackup = useNostrMintBackupStore();
     const ui = useUiStore();
 
     const discovering = ref(false);
@@ -282,6 +282,11 @@ export default {
       const s = restore.mnemonicToRestore?.trim() || "";
       return s.split(/\s+/).length >= 12;
     });
+
+    // Show spinner while the Nostr mint search is in progress in recover flow
+    const restoringMints = computed(
+      () => isSeedValid.value && nostrMintBackup.searchInProgress
+    );
 
     const addMintData = mints.addMintData; // reactive from store
     const showAddMintDialog = computed({
@@ -405,6 +410,7 @@ export default {
       formatCurrency,
       getMintIconUrlExisting,
       markDone,
+      restoringMints,
     };
   },
 };
