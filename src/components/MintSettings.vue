@@ -233,64 +233,51 @@
             </template>
           </q-btn>
         </q-item>
-        <div v-if="mintRecommendations.length > 0">
-          <!-- for each entry in mintRecommendations, display the url and the count how often it was recommended -->
+        <div v-if="discoverList.length > 0">
           <q-item>
             <q-item-section>
               <q-item-label overline>
                 {{
                   $t("MintSettings.discover.recommendations.overline", {
-                    length: mintRecommendations.length,
+                    length: discoverList.length,
                   })
-                }}</q-item-label
-              >
-              <q-item-label caption
-                ><i18n-t
-                  keypath="MintSettings.discover.recommendations.caption"
-                >
+                }}
+              </q-item-label>
+              <q-item-label caption>
+                <i18n-t keypath="MintSettings.discover.recommendations.caption">
                   <template v-slot:link>
-                    <a
-                      href="https://bitcoinmints.com"
-                      target="_blank"
-                      class="text-primary"
-                      >bitcoinmints.com</a
-                    >
+                    <a href="https://bitcoinmints.com" target="_blank" class="text-primary">bitcoinmints.com</a>
                   </template>
                 </i18n-t>
               </q-item-label>
             </q-item-section>
           </q-item>
-          <q-expansion-item
-            dense
-            dense-toggle
-            class="text-left"
-            :label="
-              $t('MintSettings.discover.recommendations.actions.browse.label')
-            "
-          >
-            <q-item v-for="mint in mintRecommendations" :key="mint.url">
-              <q-item-section
-                class="q-mx-none q-pl-none"
-                style="max-width: 1.05em"
-              >
-                <q-icon
-                  name="content_copy"
-                  @click="copyText(mint.url)"
-                  size="1em"
-                  color="grey"
-                  class="q-mr-xs cursor-pointer"
-                />
-              </q-item-section>
-              <q-item-section>
-                <q-item-label caption style="word-break: break-word">{{
-                  mint.url
-                }}</q-item-label>
-              </q-item-section>
-              <q-item-section side>
-                <q-badge :label="mint.count" color="primary" />
-              </q-item-section>
-            </q-item>
-          </q-expansion-item>
+          <div class="q-pt-sm">
+            <div v-for="rec in discoverList" :key="rec.url" class="q-px-md q-mb-md">
+              <q-item class="mint-card" :style="{ 'border-radius': '10px', border: '1px solid rgba(128,128,128,0.2)', padding: '0px', position: 'relative' }">
+                <div class="full-width" style="position: relative">
+                  <div class="row items-center q-pa-md">
+                    <div class="col">
+                      <div class="row items-center">
+                        <q-avatar v-if="getMintIconUrlUrl(rec.url)" size="34px" class="q-mr-sm">
+                          <q-img spinner-color="white" spinner-size="xs" :src="getMintIconUrlUrl(rec.url)" alt="Mint Icon" style="height: 34px; max-width: 34px; font-size: 12px" />
+                        </q-avatar>
+                        <q-spinner-dots v-else-if="isFetchingMintInfo(rec.url)" size="34px" color="grey-5" class="q-mr-sm" />
+                        <div class="mint-info-container">
+                          <div class="mint-name">{{ getMintDisplayName(rec.url) }}</div>
+                          <div class="text-grey-6 mint-url">{{ rec.url }}</div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-auto">
+                      <q-badge :label="rec.count" color="primary" class="q-mr-sm" />
+                      <q-btn dense round flat icon="add" @click="addDiscoveredMint(rec.url)" :disable="isExistingMint(rec.url)" />
+                    </div>
+                  </div>
+                </div>
+              </q-item>
+            </div>
+          </div>
         </div>
       </q-list>
     </div>
@@ -466,10 +453,12 @@ export default defineComponent({
         toUrl: {
           url: "",
           optionLabel: "",
-        },
-        amount: undefined,
+      },
+      amount: undefined,
       },
       activatingMintUrl: "",
+      mintInfoCache: new Map(),
+      fetchingMintInfo: new Set(),
     };
   },
   computed: {
@@ -482,12 +471,16 @@ export default defineComponent({
       "activeProofs",
       "addMintBlocking",
     ]),
-    ...mapState(useNostrStore, ["pubkey", "mintRecommendations"]),
+    ...mapState(useNostrStore, ["pubkey"]),
+    ...mapWritableState(useNostrStore, ["mintRecommendations"]),
     ...mapState(useWorkersStore, ["invoiceWorkerRunning"]),
     ...mapWritableState(useMintsStore, ["addMintData", "showAddMintDialog"]),
     ...mapState(useUiStore, ["tickerShort"]),
     ...mapState(useSwapStore, ["swapAmountData"]),
     ...mapWritableState(useSwapStore, ["swapBlocking"]),
+    discoverList() {
+      return this.mintRecommendations.filter((r) => !this.isExistingMint(r.url));
+    },
   },
   watch: {
     // if swapBlocking is true and invoiceWorkerRunning changes to false, then swapBlocking should be set to false
@@ -495,6 +488,13 @@ export default defineComponent({
       if (this.swapBlocking && !val) {
         this.swapBlocking = false;
       }
+    },
+    mintRecommendations: {
+      handler() {
+        this.fetchMintInfoForDiscoverList();
+      },
+      deep: true,
+      immediate: true,
     },
   },
   methods: {
@@ -650,6 +650,51 @@ export default defineComponent({
       } else {
         return undefined;
       }
+    },
+    // Discovery helpers
+    isExistingMint(url) {
+      return this.mints.some((m) => m.url === url);
+    },
+    async addDiscoveredMint(url) {
+      try {
+        await this.addMint({ url }, true);
+        this.mintRecommendations = this.mintRecommendations.filter((r) => r.url !== url);
+      } catch (e) {
+        console.error(e);
+      }
+    },
+    getMintInfoFromCache(url) {
+      return this.mintInfoCache.get(url);
+    },
+    getMintIconUrlUrl(url) {
+      const info = this.getMintInfoFromCache(url);
+      return info && info.icon_url ? info.icon_url : null;
+    },
+    getMintDisplayName(url) {
+      const info = this.getMintInfoFromCache(url);
+      return info && info.name ? info.name : url.replace(/^https?:\/\//, "");
+    },
+    isFetchingMintInfo(url) {
+      return this.fetchingMintInfo.has(url);
+    },
+    async fetchMintInfoForUrl(url) {
+      try {
+        const tempMint = { url, keys: [], keysets: [] };
+        const info = await new MintClass(tempMint).api.getInfo();
+        this.mintInfoCache.set(url, info);
+      } catch (e) {
+        this.mintInfoCache.set(url, null);
+      } finally {
+        this.fetchingMintInfo.delete(url);
+      }
+    },
+    fetchMintInfoForDiscoverList() {
+      this.discoverList.forEach((rec) => {
+        if (!this.mintInfoCache.has(rec.url) && !this.fetchingMintInfo.has(rec.url)) {
+          this.fetchingMintInfo.add(rec.url);
+          this.fetchMintInfoForUrl(rec.url);
+        }
+      });
     },
   },
   created: function () {},
