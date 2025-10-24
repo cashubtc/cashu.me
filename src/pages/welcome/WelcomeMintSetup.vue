@@ -205,15 +205,29 @@
                             <div class="text-grey-6 mint-url">
                               {{ rec.url }}
                             </div>
+                            <div
+                              class="text-grey-5 q-mt-xs"
+                              v-if="rec.averageRating !== null"
+                            >
+                              <span
+                                >⭐ {{ rec.averageRating.toFixed(2) }} ·
+                                {{ rec.reviewsCount }} reviews</span
+                              >
+                              <q-btn
+                                flat
+                                dense
+                                class="q-ml-sm text-primary"
+                                @click.stop="openReviews(rec.url)"
+                                >Reviews</q-btn
+                              >
+                            </div>
+                            <div class="text-grey-5 q-mt-xs" v-else>
+                              <span>No reviews yet</span>
+                            </div>
                           </div>
                         </div>
                       </div>
                       <div class="col-auto">
-                        <q-badge
-                          :label="rec.count"
-                          color="primary"
-                          class="q-mr-sm"
-                        />
                         <q-btn
                           dense
                           round
@@ -249,6 +263,13 @@
         :addMintBlocking="addMintBlocking"
         @add="addMintInternal"
       />
+      <q-dialog v-model="showRatingsDialog" persistent>
+        <MintRatingsComponent
+          :url="selectedRatingsUrl"
+          :reviews="selectedReviews"
+          @close="showRatingsDialog = false"
+        />
+      </q-dialog>
     </div>
   </div>
 </template>
@@ -264,19 +285,25 @@ import { notifyError, notifySuccess } from "src/js/notify";
 import AddMintDialog from "src/components/AddMintDialog.vue";
 import NostrMintRestore from "src/components/NostrMintRestore.vue";
 import { useNostrMintBackupStore } from "src/stores/nostrMintBackup";
+import { useMintRecommendationsStore } from "src/stores/mintRecommendations";
+import MintRatingsComponent from "../../components/MintRatingsComponent.vue";
 
 export default {
   name: "WelcomeMintSetup",
-  components: { AddMintDialog, NostrMintRestore },
+  components: { AddMintDialog, NostrMintRestore, MintRatingsComponent },
   setup() {
     const welcome = useWelcomeStore();
     const restore = useRestoreStore();
     const mints = useMintsStore();
     const nostr = useNostrStore();
+    const recsStore = useMintRecommendationsStore();
     const nostrMintBackup = useNostrMintBackupStore();
     const ui = useUiStore();
 
     const discovering = ref(false);
+    const showRatingsDialog = ref(false);
+    const selectedRatingsUrl = ref("");
+    const selectedReviews = ref<any[]>([]);
 
     const isSeedValid = computed(() => {
       const s = restore.mnemonicToRestore?.trim() || "";
@@ -306,11 +333,11 @@ export default {
       mints.addMintData = { url: "", nickname: "" } as any;
     };
 
-    const mintRecommendations = computed(() => nostr.mintRecommendations);
+    const recommendations = computed(() => recsStore.recommendations);
     const isExistingMint = (url: string) =>
       mints.mints.some((m) => m.url === url);
     const discoverList = computed(() =>
-      mintRecommendations.value.filter((r) => !isExistingMint(r.url))
+      recommendations.value.filter((r) => !isExistingMint(r.url))
     );
     // Fetch mint info and cache it for discovered mints
     const mintInfoCache = ref(new Map<string, any>());
@@ -353,27 +380,24 @@ export default {
     const discover = async () => {
       discovering.value = true;
       try {
-        await nostr.initNdkReadOnly();
-        let tries = 0;
-        let found: any[] = [];
-        while (found.length === 0 && tries < 5) {
-          try {
-            found = await nostr.fetchMints();
-          } catch {}
-          tries++;
-        }
-        if (found.length === 0) notifyError("No mints found");
+        const found = await recsStore.discover();
+        if (!found || found.length === 0) notifyError("No mints found");
         else notifySuccess(`Found ${found.length} mints`);
+        recsStore.startSubscriptions();
       } finally {
         discovering.value = false;
       }
     };
     const addDiscovered = async (url: string) => {
       await mints.addMint({ url }, true);
-      // remove from discovered list to avoid duplicates
-      nostr.mintRecommendations = nostr.mintRecommendations.filter(
-        (r) => r.url !== url
-      );
+    };
+
+    const openReviews = (url: string) => {
+      const rec = recommendations.value.find((r) => r.url === url);
+      if (!rec) return;
+      selectedRatingsUrl.value = url;
+      selectedReviews.value = rec.reviews;
+      showRatingsDialog.value = true;
     };
 
     const mintClass = (mint: any) => new MintClass(mint);
@@ -396,12 +420,13 @@ export default {
       addMintBlocking,
       sanitizeMintUrlAndShowAddDialog,
       addMintInternal,
-      mintRecommendations,
+      recommendations,
       discover,
       discovering,
       discoverList,
       isExistingMint,
       addDiscovered,
+      openReviews,
       getMintIconUrl,
       getMintDisplayName,
       isFetchingMintInfo,
@@ -411,6 +436,9 @@ export default {
       getMintIconUrlExisting,
       markDone,
       restoringMints,
+      showRatingsDialog,
+      selectedRatingsUrl,
+      selectedReviews,
     };
   },
 };

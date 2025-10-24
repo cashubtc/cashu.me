@@ -246,32 +246,95 @@
               <q-item-label caption>
                 <i18n-t keypath="MintSettings.discover.recommendations.caption">
                   <template v-slot:link>
-                    <a href="https://bitcoinmints.com" target="_blank" class="text-primary">bitcoinmints.com</a>
+                    <a
+                      href="https://bitcoinmints.com"
+                      target="_blank"
+                      class="text-primary"
+                      >bitcoinmints.com</a
+                    >
                   </template>
                 </i18n-t>
               </q-item-label>
             </q-item-section>
           </q-item>
           <div class="q-pt-sm">
-            <div v-for="rec in discoverList" :key="rec.url" class="q-px-md q-mb-md">
-              <q-item class="mint-card" :style="{ 'border-radius': '10px', border: '1px solid rgba(128,128,128,0.2)', padding: '0px', position: 'relative' }">
+            <div
+              v-for="rec in discoverList"
+              :key="rec.url"
+              class="q-px-md q-mb-md"
+            >
+              <q-item
+                class="mint-card"
+                :style="{
+                  'border-radius': '10px',
+                  border: '1px solid rgba(128,128,128,0.2)',
+                  padding: '0px',
+                  position: 'relative',
+                }"
+              >
                 <div class="full-width" style="position: relative">
                   <div class="row items-center q-pa-md">
                     <div class="col">
                       <div class="row items-center">
-                        <q-avatar v-if="getMintIconUrlUrl(rec.url)" size="34px" class="q-mr-sm">
-                          <q-img spinner-color="white" spinner-size="xs" :src="getMintIconUrlUrl(rec.url)" alt="Mint Icon" style="height: 34px; max-width: 34px; font-size: 12px" />
+                        <q-avatar
+                          v-if="getMintIconUrlUrl(rec.url)"
+                          size="34px"
+                          class="q-mr-sm"
+                        >
+                          <q-img
+                            spinner-color="white"
+                            spinner-size="xs"
+                            :src="getMintIconUrlUrl(rec.url)"
+                            alt="Mint Icon"
+                            style="
+                              height: 34px;
+                              max-width: 34px;
+                              font-size: 12px;
+                            "
+                          />
                         </q-avatar>
-                        <q-spinner-dots v-else-if="isFetchingMintInfo(rec.url)" size="34px" color="grey-5" class="q-mr-sm" />
+                        <q-spinner-dots
+                          v-else-if="isFetchingMintInfo(rec.url)"
+                          size="34px"
+                          color="grey-5"
+                          class="q-mr-sm"
+                        />
                         <div class="mint-info-container">
-                          <div class="mint-name">{{ getMintDisplayName(rec.url) }}</div>
+                          <div class="mint-name">
+                            {{ getMintDisplayName(rec.url) }}
+                          </div>
                           <div class="text-grey-6 mint-url">{{ rec.url }}</div>
+                          <div
+                            class="text-grey-5 q-mt-xs"
+                            v-if="rec.averageRating !== null"
+                          >
+                            <span
+                              >⭐ {{ rec.averageRating.toFixed(2) }} ·
+                              {{ rec.reviewsCount }} reviews</span
+                            >
+                            <q-btn
+                              flat
+                              dense
+                              class="q-ml-sm text-primary"
+                              @click.stop="openReviews(rec.url)"
+                              >Reviews</q-btn
+                            >
+                          </div>
+                          <div class="text-grey-5 q-mt-xs" v-else>
+                            <span>No reviews yet</span>
+                          </div>
                         </div>
                       </div>
                     </div>
                     <div class="col-auto">
-                      <q-badge :label="rec.count" color="primary" class="q-mr-sm" />
-                      <q-btn dense round flat icon="add" @click="addDiscoveredMint(rec.url)" :disable="isExistingMint(rec.url)" />
+                      <q-btn
+                        dense
+                        round
+                        flat
+                        icon="add"
+                        @click="addDiscoveredMint(rec.url)"
+                        :disable="isExistingMint(rec.url)"
+                      />
                     </div>
                   </div>
                 </div>
@@ -388,6 +451,13 @@
       </q-list>
     </div>
   </div>
+  <q-dialog v-model="showRatingsDialog" persistent>
+    <MintRatingsComponent
+      :url="selectedRatingsUrl"
+      :reviews="selectedReviews"
+      @close="showRatingsDialog = false"
+    />
+  </q-dialog>
 </template>
 <script lang="ts">
 import { ref, defineComponent, onMounted, onBeforeUnmount } from "vue";
@@ -407,12 +477,15 @@ import { useUiStore } from "src/stores/ui";
 import { notifyError, notifyWarning } from "src/js/notify";
 import { EventBus } from "../js/eventBus";
 import AddMintDialog from "src/components/AddMintDialog.vue";
+import { useMintRecommendationsStore } from "src/stores/mintRecommendations";
+import MintRatingsComponent from "./MintRatingsComponent.vue";
 
 export default defineComponent({
   name: "MintSettings",
   mixins: [windowMixin],
   components: {
     AddMintDialog,
+    MintRatingsComponent,
   },
   props: {},
   setup() {
@@ -453,12 +526,15 @@ export default defineComponent({
         toUrl: {
           url: "",
           optionLabel: "",
-      },
-      amount: undefined,
+        },
+        amount: undefined,
       },
       activatingMintUrl: "",
       mintInfoCache: new Map(),
       fetchingMintInfo: new Set(),
+      showRatingsDialog: false,
+      selectedRatingsUrl: "",
+      selectedReviews: [],
     };
   },
   computed: {
@@ -472,14 +548,14 @@ export default defineComponent({
       "addMintBlocking",
     ]),
     ...mapState(useNostrStore, ["pubkey"]),
-    ...mapWritableState(useNostrStore, ["mintRecommendations"]),
+    ...mapState(useMintRecommendationsStore, ["recommendations"]),
     ...mapState(useWorkersStore, ["invoiceWorkerRunning"]),
     ...mapWritableState(useMintsStore, ["addMintData", "showAddMintDialog"]),
     ...mapState(useUiStore, ["tickerShort"]),
     ...mapState(useSwapStore, ["swapAmountData"]),
     ...mapWritableState(useSwapStore, ["swapBlocking"]),
     discoverList() {
-      return this.mintRecommendations.filter((r) => !this.isExistingMint(r.url));
+      return this.recommendations.filter((r) => !this.isExistingMint(r.url));
     },
   },
   watch: {
@@ -489,7 +565,7 @@ export default defineComponent({
         this.swapBlocking = false;
       }
     },
-    mintRecommendations: {
+    recommendations: {
       handler() {
         this.fetchMintInfoForDiscoverList();
       },
@@ -503,7 +579,10 @@ export default defineComponent({
       "initNdkReadOnly",
       "getUserPubkey",
       "fetchEventsFromUser",
-      "fetchMints",
+    ]),
+    ...mapActions(useMintRecommendationsStore, [
+      "discover",
+      "startSubscriptions",
     ]),
     ...mapActions(useP2PKStore, ["generateKeypair", "showKeyDetails"]),
     ...mapActions(useMintsStore, [
@@ -594,32 +673,25 @@ export default defineComponent({
     },
     fetchMintsFromNdk: async function () {
       this.discoveringMints = true;
-      await this.initNdkReadOnly();
-      console.log("### fetch mints");
-      let maxTries = 5;
-      let tries = 0;
-      let mintUrls = [];
-      while (mintUrls.length == 0 && tries < maxTries) {
-        try {
-          mintUrls = await this.fetchMints();
-        } catch (e) {
-          console.log("Error fetching mints", e);
+      try {
+        const recs = await this.discover();
+        if (!recs || recs.length === 0) {
+          this.notifyError(
+            this.$i18n.t(
+              "MintSettings.discover.actions.discover.error_no_mints"
+            )
+          );
+        } else {
+          this.notifySuccess(
+            this.$i18n.t("MintSettings.discover.actions.discover.success", {
+              length: recs.length,
+            })
+          );
         }
-        tries++;
+        this.startSubscriptions();
+      } finally {
+        this.discoveringMints = false;
       }
-      if (mintUrls.length == 0) {
-        this.notifyError(
-          this.$i18n.t("MintSettings.discover.actions.discover.error_no_mints")
-        );
-      } else {
-        this.notifySuccess(
-          this.$i18n.t("MintSettings.discover.actions.discover.success", {
-            length: mintUrls.length,
-          })
-        );
-      }
-      console.log(mintUrls);
-      this.discoveringMints = false;
     },
     showMintInfo: async function (mint) {
       // Fetch fresh mint info before navigating
@@ -658,10 +730,16 @@ export default defineComponent({
     async addDiscoveredMint(url) {
       try {
         await this.addMint({ url }, true);
-        this.mintRecommendations = this.mintRecommendations.filter((r) => r.url !== url);
       } catch (e) {
         console.error(e);
       }
+    },
+    openReviews(url) {
+      const rec = this.recommendations.find((r) => r.url === url);
+      if (!rec) return;
+      this.selectedRatingsUrl = url;
+      this.selectedReviews = rec.reviews;
+      this.showRatingsDialog = true;
     },
     getMintInfoFromCache(url) {
       return this.mintInfoCache.get(url);
@@ -690,7 +768,10 @@ export default defineComponent({
     },
     fetchMintInfoForDiscoverList() {
       this.discoverList.forEach((rec) => {
-        if (!this.mintInfoCache.has(rec.url) && !this.fetchingMintInfo.has(rec.url)) {
+        if (
+          !this.mintInfoCache.has(rec.url) &&
+          !this.fetchingMintInfo.has(rec.url)
+        ) {
           this.fetchingMintInfo.add(rec.url);
           this.fetchMintInfoForUrl(rec.url);
         }

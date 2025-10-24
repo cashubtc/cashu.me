@@ -1870,7 +1870,6 @@ export default defineComponent({
     ...mapState(useNPCStore, ["npcLoading"]),
     ...mapState(useNostrStore, [
       "pubkey",
-      "mintRecommendations",
       "signerType",
       "seedSignerPrivateKeyNsec",
     ]),
