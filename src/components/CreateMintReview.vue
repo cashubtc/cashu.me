@@ -32,8 +32,10 @@
         </q-avatar>
         <div>
           Publishing as:
-          <span class="text-white">{{ publisherName || displayPubkey }}</span>
-          <span class="monospace q-ml-xs">({{ displayPubkey }})</span>
+          <span v-if="publisherName" class="text-white">{{
+            publisherName
+          }}</span>
+          <span v-else class="monospace q-ml-xs">{{ displayPubkey }}</span>
         </div>
       </div>
 
