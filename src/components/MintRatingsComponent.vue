@@ -1,27 +1,60 @@
 <template>
-  <q-card style="min-width: 360px; max-width: 700px; width: 100%">
+  <q-card style="min-width: 360px; max-width: 820px; width: 100%">
     <q-card-section class="row items-center justify-between">
-      <div class="text-h6">Mint Reviews</div>
+      <div class="row items-center">
+        <q-icon name="reviews" size="sm" color="primary" class="q-mr-sm" />
+        <div class="text-h6">Mint Reviews</div>
+      </div>
       <q-btn flat round dense icon="close" @click="$emit('close')" />
     </q-card-section>
     <q-separator />
+
     <q-card-section>
-      <div class="text-subtitle2 text-grey-6">{{ url }}</div>
+      <div class="q-mb-sm text-subtitle2 text-grey-6">{{ url }}</div>
+      <div class="row items-center justify-between">
+        <div class="row items-center">
+          <div class="text-body1">
+            <span v-if="hasAnyReviews">
+              ⭐ {{ averageDisplay }} · {{ totalReviews }} reviews
+            </span>
+            <span v-else class="text-grey-6">No reviews yet</span>
+          </div>
+        </div>
+        <div class="row items-center q-gutter-sm">
+          <q-toggle
+            v-model="onlyWithComment"
+            color="primary"
+            label="Comments only"
+          />
+          <q-select
+            dense
+            outlined
+            color="primary"
+            v-model="sortMode"
+            :options="sortOptions"
+            emit-value
+            map-options
+            style="min-width: 160px"
+          />
+        </div>
+      </div>
     </q-card-section>
+
     <q-separator />
+
     <q-card-section style="max-height: 60vh; overflow-y: auto">
-      <div v-if="!reviews || reviews.length === 0" class="text-grey-6">
-        No reviews yet.
+      <div v-if="!hasAnyReviews" class="text-grey-6">
+        No reviews to display.
       </div>
       <div v-else class="column q-gutter-md">
-        <div v-for="r in reviews" :key="r.eventId" class="q-pa-md review">
+        <div v-for="r in paged" :key="r.eventId" class="q-pa-md review">
           <div class="row items-center justify-between q-mb-xs">
             <div class="row items-center">
               <q-avatar size="28px" class="q-mr-sm">
                 <q-icon name="account_circle" />
               </q-avatar>
               <div class="text-caption text-grey-7 monospace">
-                {{ r.pubkey.slice(0, 8) }}…
+                {{ shortPubkey(r.pubkey) }}
               </div>
             </div>
             <div class="text-caption text-grey-6">
@@ -35,6 +68,27 @@
           <div class="text-body2" style="white-space: pre-wrap">
             {{ r.comment || "\u00A0" }}
           </div>
+        </div>
+
+        <div class="row justify-between items-center q-mt-sm">
+          <q-select
+            dense
+            outlined
+            color="primary"
+            v-model="rowsPerPage"
+            :options="rowsPerPageOptions"
+            emit-value
+            map-options
+            label="Rows"
+            style="width: 100px"
+          />
+          <q-pagination
+            v-model="page"
+            :max="totalPages"
+            color="primary"
+            max-pages="6"
+            boundary-numbers
+          />
         </div>
       </div>
     </q-card-section>
@@ -58,6 +112,80 @@ export default defineComponent({
       } catch {
         return "";
       }
+    },
+    shortPubkey(pk: string) {
+      if (!pk) return "";
+      return `${pk.slice(0, 8)}…${pk.slice(-4)}`;
+    },
+  },
+  data() {
+    return {
+      sortMode: "newest" as "newest" | "oldest" | "best" | "worst",
+      sortOptions: [
+        { label: "Newest", value: "newest" },
+        { label: "Oldest", value: "oldest" },
+        { label: "Best rating", value: "best" },
+        { label: "Worst rating", value: "worst" },
+      ],
+      onlyWithComment: false,
+      rowsPerPage: 10,
+      rowsPerPageOptions: [5, 10, 20, 50].map((v) => ({
+        label: String(v),
+        value: v,
+      })),
+      page: 1,
+    };
+  },
+  computed: {
+    hasAnyReviews(): boolean {
+      return Array.isArray(this.reviews) && this.reviews.length > 0;
+    },
+    totalReviews(): number {
+      return this.reviews?.length || 0;
+    },
+    ratingsOnly(): any[] {
+      return (this.reviews || []).filter(
+        (r: any) => typeof r.rating === "number"
+      );
+    },
+    average(): number | null {
+      const rs = this.ratingsOnly;
+      if (rs.length === 0) return null;
+      const sum = rs.reduce((acc: number, r: any) => acc + (r.rating || 0), 0);
+      return sum / rs.length;
+    },
+    averageDisplay(): string {
+      return this.average !== null ? this.average.toFixed(2) : "n/a";
+    },
+    filtered(): any[] {
+      let list = (this.reviews || []) as any[];
+      if (this.onlyWithComment)
+        list = list.filter((r) => (r.comment || "").trim().length > 0);
+      return list;
+    },
+    sorted(): any[] {
+      const list = [...this.filtered];
+      switch (this.sortMode) {
+        case "oldest":
+          list.sort((a, b) => (a.created_at || 0) - (b.created_at || 0));
+          break;
+        case "best":
+          list.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+          break;
+        case "worst":
+          list.sort((a, b) => (a.rating || 0) - (b.rating || 0));
+          break;
+        default:
+          list.sort((a, b) => (b.created_at || 0) - (a.created_at || 0));
+      }
+      return list;
+    },
+    totalPages(): number {
+      return Math.max(1, Math.ceil(this.sorted.length / this.rowsPerPage));
+    },
+    paged(): any[] {
+      const start = (this.page - 1) * this.rowsPerPage;
+      return this.sorted.slice(start, start + this.rowsPerPage);
     },
   },
 });
