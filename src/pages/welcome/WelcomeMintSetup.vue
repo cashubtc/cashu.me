@@ -209,17 +209,16 @@
                               class="text-grey-5 q-mt-xs"
                               v-if="rec.averageRating !== null"
                             >
-                              <span
-                                >⭐ {{ rec.averageRating.toFixed(2) }} ·
-                                {{ rec.reviewsCount }} reviews</span
-                              >
-                              <q-btn
-                                flat
-                                dense
-                                class="q-ml-sm text-primary"
-                                @click.stop="openReviews(rec.url)"
-                                >Reviews</q-btn
-                              >
+                              <span>
+                                ⭐ {{ rec.averageRating.toFixed(2) }} ·
+                                {{ rec.reviewsCount }}
+                                <span
+                                  class="text-primary cursor-pointer"
+                                  style="text-decoration: underline"
+                                  @click.stop="openReviews(rec.url)"
+                                  >reviews</span
+                                >
+                              </span>
                             </div>
                             <div class="text-grey-5 q-mt-xs" v-else>
                               <span>No reviews yet</span>
