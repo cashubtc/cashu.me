@@ -57,7 +57,7 @@ export const useMintRecommendationsStore = defineStore("mintRecommendations", {
     urlReviews: new Map() as Map<string, MintReview[]>, // fallback direct url reviews
     // Aggregated list by URL
     recommendations: useLocalStorage<MintRecommendation[]>(
-      "cashu.ndk.mintRecommendations.v2",
+      "cashu.ndk.mintRecommendations",
       []
     ),
     // Subscriptions running
@@ -148,7 +148,7 @@ export const useMintRecommendationsStore = defineStore("mintRecommendations", {
       // map d -> identifiers
       if (!this.dToIdentifiers.has(d)) this.dToIdentifiers.set(d, new Set());
       this.dToIdentifiers.get(d)!.add(identifier);
-      console.log(`[mintRecs] info: d=${d} url=${info.url ?? 'n/a'} id=${identifier}`);
+      // console.log(`[mintRecs] info: d=${d} url=${info.url ?? 'n/a'} id=${identifier}`);
     },
     handleReviewEvent: function (ev: NDKEvent) {
       if (ev.kind !== 38000) return;
@@ -176,13 +176,13 @@ export const useMintRecommendationsStore = defineStore("mintRecommendations", {
               const identifier = makeIdentifier(kind, maybePubkey, d);
               this.attachReviewToIdentifier(identifier, review);
               attached = true;
-              console.log(`[mintRecs] review ${ev.id} -> identifier ${identifier} (exact)`);
+              // console.log(`[mintRecs] review ${ev.id} -> identifier ${identifier} (exact)`);
             } else {
               const set = this.dToIdentifiers.get(d);
               if (set && set.size > 0) {
                 set.forEach((identifier) => this.attachReviewToIdentifier(identifier, review));
                 attached = true;
-                console.log(`[mintRecs] review ${ev.id} -> d ${d} mapped to ${set.size} identifiers`);
+                // console.log(`[mintRecs] review ${ev.id} -> d ${d} mapped to ${set.size} identifiers`);
               }
             }
           }
@@ -202,14 +202,14 @@ export const useMintRecommendationsStore = defineStore("mintRecommendations", {
             withoutSameAuthor.sort((a, b) => (a.created_at || 0) - (b.created_at || 0));
             this.urlReviews.set(url, withoutSameAuthor);
             attached = true;
-            console.log(`[mintRecs] review ${ev.id} -> url ${url} (fallback via u tag)`);
+            // console.log(`[mintRecs] review ${ev.id} -> url ${url} (fallback via u tag)`);
           }
         }
       }
 
-      if (!attached) {
-        console.log(`[mintRecs] review ${ev.id} could not be attached to any mint`);
-      }
+      // if (!attached) {
+      //   console.log(`[mintRecs] review ${ev.id} could not be attached to any mint`);
+      // }
     },
     attachReviewToIdentifier: function (identifier: MintIdentifier, review: MintReview) {
       const existing = this.reviewsByIdentifier.get(identifier) || [];

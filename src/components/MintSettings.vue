@@ -198,151 +198,8 @@
       </div>
     </div>
 
-    <!-- nostr -->
-    <div class="section-divider q-mb-md">
-      <div class="divider-line"></div>
-      <div class="divider-text">
-        {{ $t("MintSettings.discover.title") }}
-      </div>
-      <div class="divider-line"></div>
-    </div>
-    <div class="q-px-xs text-left" on-left>
-      <q-list padding>
-        <q-item>
-          <q-item-section>
-            <q-item-label overline>
-              {{ $t("MintSettings.discover.overline") }}</q-item-label
-            >
-            <q-item-label caption>{{
-              $t("MintSettings.discover.caption")
-            }}</q-item-label>
-          </q-item-section>
-        </q-item>
-        <q-item class="q-pt-sm">
-          <q-btn
-            class="q-ml-sm q-px-md"
-            color="primary"
-            rounded
-            outline
-            :loading="discoveringMints"
-            @click="fetchMintsFromNdk"
-            >{{ $t("MintSettings.discover.actions.discover.label") }}
-            <template v-slot:loading>
-              <q-spinner-hourglass class="on-left" />
-              {{ $t("MintSettings.discover.actions.discover.in_progress") }}
-            </template>
-          </q-btn>
-        </q-item>
-        <div v-if="discoverList.length > 0">
-          <q-item>
-            <q-item-section>
-              <q-item-label overline>
-                {{
-                  $t("MintSettings.discover.recommendations.overline", {
-                    length: discoverList.length,
-                  })
-                }}
-              </q-item-label>
-              <q-item-label caption>
-                <i18n-t keypath="MintSettings.discover.recommendations.caption">
-                  <template v-slot:link>
-                    <a
-                      href="https://bitcoinmints.com"
-                      target="_blank"
-                      class="text-primary"
-                      >bitcoinmints.com</a
-                    >
-                  </template>
-                </i18n-t>
-              </q-item-label>
-            </q-item-section>
-          </q-item>
-          <div class="q-pt-sm">
-            <div
-              v-for="rec in discoverList"
-              :key="rec.url"
-              class="q-px-md q-mb-md"
-            >
-              <q-item
-                class="mint-card"
-                :style="{
-                  'border-radius': '10px',
-                  border: '1px solid rgba(128,128,128,0.2)',
-                  padding: '0px',
-                  position: 'relative',
-                }"
-              >
-                <div class="full-width" style="position: relative">
-                  <div class="row items-center q-pa-md">
-                    <div class="col">
-                      <div class="row items-center">
-                        <q-avatar
-                          v-if="getMintIconUrlUrl(rec.url)"
-                          size="34px"
-                          class="q-mr-sm"
-                        >
-                          <q-img
-                            spinner-color="white"
-                            spinner-size="xs"
-                            :src="getMintIconUrlUrl(rec.url)"
-                            alt="Mint Icon"
-                            style="
-                              height: 34px;
-                              max-width: 34px;
-                              font-size: 12px;
-                            "
-                          />
-                        </q-avatar>
-                        <q-spinner-dots
-                          v-else-if="isFetchingMintInfo(rec.url)"
-                          size="34px"
-                          color="grey-5"
-                          class="q-mr-sm"
-                        />
-                        <div class="mint-info-container">
-                          <div class="mint-name">
-                            {{ getMintDisplayName(rec.url) }}
-                          </div>
-                          <div class="text-grey-6 mint-url">{{ rec.url }}</div>
-                          <div
-                            class="text-grey-5 q-mt-xs"
-                            v-if="rec.averageRating !== null"
-                          >
-                            <span>
-                              ⭐ {{ rec.averageRating.toFixed(2) }} ·
-                              {{ rec.reviewsCount }}
-                              <span
-                                class="text-primary cursor-pointer"
-                                style="text-decoration: underline"
-                                @click.stop="openReviews(rec.url)"
-                                >reviews</span
-                              >
-                            </span>
-                          </div>
-                          <div class="text-grey-5 q-mt-xs" v-else>
-                            <span>No reviews yet</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <div class="col-auto">
-                      <q-btn
-                        dense
-                        round
-                        flat
-                        icon="add"
-                        @click="addDiscoveredMint(rec.url)"
-                        :disable="isExistingMint(rec.url)"
-                      />
-                    </div>
-                  </div>
-                </div>
-              </q-item>
-            </div>
-          </div>
-        </div>
-      </q-list>
-    </div>
+    <!-- Mint discovery -->
+    <MintDiscovery />
 
     <div class="section-divider q-mb-md">
       <div class="divider-line"></div>
@@ -478,6 +335,7 @@ import { EventBus } from "../js/eventBus";
 import AddMintDialog from "src/components/AddMintDialog.vue";
 import { useMintRecommendationsStore } from "src/stores/mintRecommendations";
 import MintRatingsComponent from "./MintRatingsComponent.vue";
+import MintDiscovery from "./MintDiscovery.vue";
 
 export default defineComponent({
   name: "MintSettings",
@@ -485,6 +343,7 @@ export default defineComponent({
   components: {
     AddMintDialog,
     MintRatingsComponent,
+    MintDiscovery,
   },
   props: {},
   setup() {

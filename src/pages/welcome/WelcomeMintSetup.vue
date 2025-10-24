@@ -125,124 +125,7 @@
 
       <!-- Discover mints on nostr (global) -->
       <div class="q-mt-lg q-px-md">
-        <div class="section-divider q-mb-md">
-          <div class="divider-line"></div>
-          <div class="divider-text">Discover mints</div>
-          <div class="divider-line"></div>
-        </div>
-        <div class="q-px-xs text-left">
-          <div class="row justify-center q-mb-md q-px-xl">
-            <q-btn
-              class="q-ml-sm q-px-md full-width"
-              color="primary"
-              rounded
-              :loading="discovering"
-              @click="discover"
-            >
-              Discover
-              <template v-slot:loading>
-                <q-spinner-hourglass class="on-left" /> Discovering…
-              </template>
-            </q-btn>
-          </div>
-          <div v-if="discoverList.length > 0" class="q-my-lg">
-            <q-item>
-              <q-item-section>
-                <q-item-label overline
-                  >{{ discoverList.length }} recommendations</q-item-label
-                >
-                <q-item-label caption
-                  >Popular mints other users recommended on Nostr.</q-item-label
-                >
-              </q-item-section>
-            </q-item>
-            <div class="q-pt-sm">
-              <div
-                v-for="rec in discoverList"
-                :key="rec.url"
-                class="q-px-md q-mb-md"
-              >
-                <q-item
-                  class="mint-card"
-                  :style="{
-                    'border-radius': '10px',
-                    border: '1px solid rgba(128,128,128,0.2)',
-                    padding: '0px',
-                    position: 'relative',
-                  }"
-                >
-                  <div class="full-width" style="position: relative">
-                    <div class="row items-center q-pa-md">
-                      <div class="col">
-                        <div class="row items-center">
-                          <q-avatar
-                            v-if="getMintIconUrl(rec.url)"
-                            size="34px"
-                            class="q-mr-sm"
-                          >
-                            <q-img
-                              spinner-color="white"
-                              spinner-size="xs"
-                              :src="getMintIconUrl(rec.url)"
-                              alt="Mint Icon"
-                              style="
-                                height: 34px;
-                                max-width: 34px;
-                                font-size: 12px;
-                              "
-                            />
-                          </q-avatar>
-                          <q-spinner-dots
-                            v-else-if="isFetchingMintInfo(rec.url)"
-                            size="34px"
-                            color="grey-5"
-                            class="q-mr-sm"
-                          />
-                          <div class="mint-info-container">
-                            <div class="mint-name">
-                              {{ getMintDisplayName(rec.url) }}
-                            </div>
-                            <div class="text-grey-6 mint-url">
-                              {{ rec.url }}
-                            </div>
-                            <div
-                              class="text-grey-5 q-mt-xs"
-                              v-if="rec.averageRating !== null"
-                            >
-                              <span>
-                                ⭐ {{ rec.averageRating.toFixed(2) }} ·
-                                {{ rec.reviewsCount }}
-                                <span
-                                  class="text-primary cursor-pointer"
-                                  style="text-decoration: underline"
-                                  @click.stop="openReviews(rec.url)"
-                                  >reviews</span
-                                >
-                              </span>
-                            </div>
-                            <div class="text-grey-5 q-mt-xs" v-else>
-                              <span>No reviews yet</span>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <div class="col-auto">
-                        <q-btn
-                          dense
-                          round
-                          flat
-                          icon="add"
-                          @click="addDiscovered(rec.url)"
-                          :disable="isExistingMint(rec.url)"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </q-item>
-              </div>
-            </div>
-          </div>
-        </div>
+        <MintDiscovery />
       </div>
 
       <div class="q-mt-xl text-center">
@@ -262,13 +145,6 @@
         :addMintBlocking="addMintBlocking"
         @add="addMintInternal"
       />
-      <q-dialog v-model="showRatingsDialog" persistent>
-        <MintRatingsComponent
-          :url="selectedRatingsUrl"
-          :reviews="selectedReviews"
-          @close="showRatingsDialog = false"
-        />
-      </q-dialog>
     </div>
   </div>
 </template>
@@ -284,25 +160,18 @@ import { notifyError, notifySuccess } from "src/js/notify";
 import AddMintDialog from "src/components/AddMintDialog.vue";
 import NostrMintRestore from "src/components/NostrMintRestore.vue";
 import { useNostrMintBackupStore } from "src/stores/nostrMintBackup";
-import { useMintRecommendationsStore } from "src/stores/mintRecommendations";
-import MintRatingsComponent from "../../components/MintRatingsComponent.vue";
+import MintDiscovery from "../../components/MintDiscovery.vue";
 
 export default {
   name: "WelcomeMintSetup",
-  components: { AddMintDialog, NostrMintRestore, MintRatingsComponent },
+  components: { AddMintDialog, NostrMintRestore, MintDiscovery },
   setup() {
     const welcome = useWelcomeStore();
     const restore = useRestoreStore();
     const mints = useMintsStore();
     const nostr = useNostrStore();
-    const recsStore = useMintRecommendationsStore();
     const nostrMintBackup = useNostrMintBackupStore();
     const ui = useUiStore();
-
-    const discovering = ref(false);
-    const showRatingsDialog = ref(false);
-    const selectedRatingsUrl = ref("");
-    const selectedReviews = ref<any[]>([]);
 
     const isSeedValid = computed(() => {
       const s = restore.mnemonicToRestore?.trim() || "";
@@ -332,73 +201,6 @@ export default {
       mints.addMintData = { url: "", nickname: "" } as any;
     };
 
-    const recommendations = computed(() => recsStore.recommendations);
-    const isExistingMint = (url: string) =>
-      mints.mints.some((m) => m.url === url);
-    const discoverList = computed(() =>
-      recommendations.value.filter((r) => !isExistingMint(r.url))
-    );
-    // Fetch mint info and cache it for discovered mints
-    const mintInfoCache = ref(new Map<string, any>());
-    const fetchingMintInfo = ref(new Set<string>());
-    const getMintInfo = (url: string) => mintInfoCache.value.get(url);
-    const getMintIconUrl = (url: string) => {
-      const info = getMintInfo(url);
-      return info && info.icon_url ? info.icon_url : null;
-    };
-    const getMintDisplayName = (url: string) => {
-      const info = getMintInfo(url);
-      return info && info.name ? info.name : url.replace(/^https?:\/\//, "");
-    };
-    const isFetchingMintInfo = (url: string) => fetchingMintInfo.value.has(url);
-    const fetchMintInfo = async (url: string) => {
-      try {
-        const tempMint = { url, keys: [], keysets: [] } as any;
-        const info = await new MintClass(tempMint).api.getInfo();
-        mintInfoCache.value.set(url, info);
-      } catch (e) {
-        mintInfoCache.value.set(url, null);
-      } finally {
-        fetchingMintInfo.value.delete(url);
-      }
-    };
-    const fetchMintInfoForDiscovered = () => {
-      discoverList.value.forEach((rec) => {
-        if (
-          !mintInfoCache.value.has(rec.url) &&
-          !fetchingMintInfo.value.has(rec.url)
-        ) {
-          fetchingMintInfo.value.add(rec.url);
-          fetchMintInfo(rec.url);
-        }
-      });
-    };
-    watch(discoverList, () => fetchMintInfoForDiscovered(), {
-      immediate: true,
-    });
-    const discover = async () => {
-      discovering.value = true;
-      try {
-        const found = await recsStore.discover();
-        if (!found || found.length === 0) notifyError("No mints found");
-        else notifySuccess(`Found ${found.length} mints`);
-        recsStore.startSubscriptions();
-      } finally {
-        discovering.value = false;
-      }
-    };
-    const addDiscovered = async (url: string) => {
-      await mints.addMint({ url }, true);
-    };
-
-    const openReviews = (url: string) => {
-      const rec = recommendations.value.find((r) => r.url === url);
-      if (!rec) return;
-      selectedRatingsUrl.value = url;
-      selectedReviews.value = rec.reviews;
-      showRatingsDialog.value = true;
-    };
-
     const mintClass = (mint: any) => new MintClass(mint);
     const formatCurrency = (amount: number, unit: string) =>
       ui.formatCurrency(amount, unit);
@@ -419,25 +221,11 @@ export default {
       addMintBlocking,
       sanitizeMintUrlAndShowAddDialog,
       addMintInternal,
-      recommendations,
-      discover,
-      discovering,
-      discoverList,
-      isExistingMint,
-      addDiscovered,
-      openReviews,
-      getMintIconUrl,
-      getMintDisplayName,
-      isFetchingMintInfo,
-      getMintInfo,
       mintClass,
       formatCurrency,
       getMintIconUrlExisting,
       markDone,
       restoringMints,
-      showRatingsDialog,
-      selectedRatingsUrl,
-      selectedReviews,
     };
   },
 };
