@@ -45,16 +45,7 @@
                 }}
               </q-item-label>
               <q-item-label caption>
-                <i18n-t keypath="MintSettings.discover.recommendations.caption">
-                  <template v-slot:link>
-                    <a
-                      href="https://bitcoinmints.com"
-                      target="_blank"
-                      class="text-primary"
-                      >bitcoinmints.com</a
-                    >
-                  </template>
-                </i18n-t>
+                {{ $t("MintSettings.discover.recommendations.caption") }}
               </q-item-label>
             </q-item-section>
           </q-item>

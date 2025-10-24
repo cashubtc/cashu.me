@@ -709,7 +709,7 @@ export default {
       recommendations: {
         overline: "找到 { length } 个 Mints",
         caption:
-          "这些 Mints 是由其他 Nostr 用户推荐的。请在 { link } 查看评论。请小心谨慎，并在使用 Mint 之前自行研究。",
+          "这些 Mints 是由其他 Nostr 用户推荐的。请小心谨慎，并在使用 Mint 之前自行研究。",
         actions: {
           browse: {
             label: "点击浏览 Mints",

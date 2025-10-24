@@ -21,6 +21,16 @@
           </div>
         </div>
         <div class="row items-center q-gutter-sm">
+          <q-btn
+            v-if="allowCreateReview"
+            color="primary"
+            rounded
+            dense
+            class="q-ml-sm q-px-md"
+            @click="showCreateReviewDialog = true"
+          >
+            Write a review
+          </q-btn>
           <q-toggle
             v-model="onlyWithComment"
             color="primary"
@@ -44,7 +54,17 @@
 
     <q-card-section style="max-height: 60vh; overflow-y: auto">
       <div v-if="!hasAnyReviews" class="text-grey-6">
-        No reviews to display.
+        <div class="row items-center justify-between">
+          <div>No reviews to display.</div>
+          <q-btn
+            v-if="allowCreateReview"
+            color="primary"
+            rounded
+            class="q-ml-sm"
+            @click="showCreateReviewDialog = true"
+            >Write a review</q-btn
+          >
+        </div>
       </div>
       <div v-else class="column q-gutter-md">
         <div v-for="r in paged" :key="r.eventId" class="q-pa-md review">
@@ -108,6 +128,14 @@
       </div>
     </q-card-section>
   </q-card>
+  <q-dialog v-model="showCreateReviewDialog" persistent>
+    <CreateMintReview
+      :mintUrl="url"
+      :mintInfo="mintInfo"
+      @published="showCreateReviewDialog = false"
+      @close="showCreateReviewDialog = false"
+    />
+  </q-dialog>
 </template>
 
 <script lang="ts">
@@ -115,14 +143,18 @@ import { defineComponent } from "vue";
 import { useNostrStore } from "src/stores/nostr";
 import NDK from "@nostr-dev-kit/ndk";
 import { nip19 } from "nostr-tools";
+import CreateMintReview from "./CreateMintReview.vue";
 
 export default defineComponent({
   name: "MintRatingsComponent",
   props: {
     url: { type: String, required: true },
     reviews: { type: Array, required: true },
+    allowCreateReview: { type: Boolean, default: false },
+    mintInfo: { type: Object, required: false },
   },
   emits: ["close"],
+  components: { CreateMintReview },
   methods: {
     formatDate(ts: number) {
       try {
@@ -204,6 +236,7 @@ export default defineComponent({
       })),
       page: 1,
       profiles: {} as Record<string, { name?: string; picture?: string }>,
+      showCreateReviewDialog: false,
     };
   },
   computed: {
@@ -264,6 +297,7 @@ export default defineComponent({
     );
     uniquePks.forEach((pk) => this.fetchProfileFor(pk));
   },
+
   watch: {
     reviews: {
       handler() {

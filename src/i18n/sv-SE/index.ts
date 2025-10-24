@@ -717,7 +717,7 @@ export default {
       recommendations: {
         overline: "{ length } mints hittades",
         caption:
-          "Dessa mints rekommenderades av andra Nostr-användare. Läs recensioner på { link }. Var försiktig och gör din egen research innan du använder en mint.",
+          "Dessa mints rekommenderades av andra Nostr-användare. Var försiktig och gör din egen research innan du använder en mint.",
         actions: {
           browse: {
             label: "Klicka för att bläddra bland mints",

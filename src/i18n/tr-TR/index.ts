@@ -718,7 +718,7 @@ export default {
       recommendations: {
         overline: "{ length } nane bulundu",
         caption:
-          "Bu nane'ler diğer Nostr kullanıcıları tarafından önerildi. { link } adresinde yorumları okuyun. Dikkatli olun ve bir nane kullanmadan önce kendi araştırmanızı yapın.",
+          "Bu nane'ler diğer Nostr kullanıcıları tarafından önerildi. Dikkatli olun ve bir nane kullanmadan önce kendi araştırmanızı yapın.",
         actions: {
           browse: {
             label: "Nane'lere göz atmak için tıklayın",

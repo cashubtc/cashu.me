@@ -35,7 +35,7 @@
           <span v-if="publisherName" class="text-white q-ml-xs">{{
             publisherName
           }}</span>
-          <span class="monospace q-ml-xs">({{ shortDisplayNpub }})</span>
+          <span class="monospace q-ml-xs">{{ shortDisplayNpub }}</span>
           <q-icon
             v-if="displayNpub"
             name="content_copy"

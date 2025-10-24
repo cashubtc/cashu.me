@@ -764,7 +764,7 @@ export default {
       recommendations: {
         overline: "Found { length } mints",
         caption:
-          "These mints were recommended by other Nostr users. Read reviews at { link }. Be careful and do your own research before using a mint.",
+          "These mints were recommended by other Nostr users. Be careful and do your own research before using a mint.",
         actions: {
           browse: {
             label: "Click to browse mints",

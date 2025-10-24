@@ -723,7 +723,7 @@ export default {
       recommendations: {
         overline: "{ length } mints trouvées",
         caption:
-          "Ces mints ont été recommandées par d'autres utilisateurs Nostr. Lisez les avis sur { link }. Soyez prudent et faites vos propres recherches avant d'utiliser une mint.",
+          "Ces mints ont été recommandées par d'autres utilisateurs Nostr. Soyez prudent et faites vos propres recherches avant d'utiliser une mint.",
         actions: {
           browse: {
             label: "Cliquez pour parcourir les mints",

@@ -715,7 +715,7 @@ export default {
       recommendations: {
         overline: "พบ { length } Mints",
         caption:
-          "Mints เหล่านี้ถูกแนะนำโดยผู้ใช้ Nostr คนอื่น ๆ อ่านรีวิวได้ที่ { link } โปรดใช้ความระมัดระวังและทำการวิจัยของคุณเองก่อนใช้ Mint",
+          "Mints เหล่านี้ถูกแนะนำโดยผู้ใช้ Nostr คนอื่น ๆ โปรดใช้ความระมัดระวังและทำการวิจัยของคุณเองก่อนใช้ Mint",
         actions: {
           browse: {
             label: "คลิกเพื่อเรียกดู Mints",
