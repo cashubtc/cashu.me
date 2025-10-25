@@ -1,14 +1,33 @@
 <template>
   <div v-if="!autoAdd" class="nostr-mint-restore">
     <!-- Header -->
-    <div class="q-px-xs text-left q-mt-md">
+    <div class="q-px-xs text-left q-mt-lg">
       <q-list padding>
         <q-item>
           <q-item-section>
-            <q-item-label overline class="text-weight-bold">
+            <q-item-label
+              overline
+              class="text-weight-bold"
+              style="
+                font-size: 15.2px;
+                font-family: Inter, -apple-system, 'system-ui', 'Segoe UI',
+                  Roboto, 'Helvetica Neue', Arial, sans-serif;
+                font-weight: 600;
+                color: #ffffff;
+                text-transform: none;
+                margin-bottom: 8px;
+              "
+            >
               {{ $t("RestoreView.nostr_mints.label") }}
             </q-item-label>
-            <q-item-label caption>
+            <q-item-label
+              caption
+              style="
+                font-size: 0.9rem;
+                color: rgba(255, 255, 255, 0.8);
+                line-height: 1.4;
+              "
+            >
               {{ $t("RestoreView.nostr_mints.caption") }}
             </q-item-label>
           </q-item-section>
@@ -17,19 +36,23 @@
     </div>
 
     <!-- Search Button -->
-    <div class="q-pb-md q-px-xs text-left">
+    <div class="q-pb-lg q-pt-md q-px-xs text-left">
       <q-btn
-        class="q-ml-sm q-px-md"
-        color="secondary"
-        size="md"
+        class="full-width"
+        color="primary"
+        size="lg"
         rounded
-        dense
-        outline
         @click="searchForMints"
         :disabled="!isMnemonicValid || searchInProgress"
         :loading="searchInProgress"
+        style="
+          min-height: 48px;
+          font-weight: 500;
+          text-transform: none;
+          font-size: 0.95rem;
+        "
       >
-        <q-icon name="search" class="q-mr-sm" />
+        <q-icon name="search" size="20px" class="q-mr-sm" />
         {{ $t("RestoreView.nostr_mints.search_button") }}
       </q-btn>
     </div>
@@ -37,46 +60,68 @@
     <!-- Discovered Mints List -->
     <div v-if="availableMints.length > 0" class="q-px-xs">
       <!-- Add Selected Button (Primary Action) -->
-      <div class="primary-action-section q-px-sm q-pb-md">
+      <div class="primary-action-section q-pb-lg q-pt-md">
         <q-btn
           color="primary"
-          size="md"
+          size="lg"
           rounded
           @click="addSelectedMints"
           :loading="addingMints"
           :disabled="addingMints || selectedMints.length === 0"
-          class="q-px-lg"
+          class="full-width"
+          style="
+            min-height: 48px;
+            font-weight: 500;
+            text-transform: none;
+            font-size: 0.95rem;
+          "
         >
-          <q-icon name="add" class="q-mr-sm" />
-          {{
-            $t("RestoreView.nostr_mints.add_selected", {
-              count: selectedMints.length,
-            })
-          }}
+          <q-icon name="add" size="20px" class="q-mr-sm" />
+          <span
+            style="
+              white-space: nowrap;
+              overflow: hidden;
+              text-overflow: ellipsis;
+            "
+          >
+            {{
+              $t("RestoreView.nostr_mints.add_selected", {
+                count: selectedMints.length,
+              })
+            }}
+          </span>
         </q-btn>
       </div>
 
       <!-- Select All/Deselect All -->
-      <div class="selection-buttons q-px-sm q-pb-md">
+      <div class="selection-buttons q-pb-lg" style="display: flex; gap: 16px">
         <q-btn
           flat
-          dense
           size="md"
           color="primary"
           @click="selectAllMints"
           :disabled="allSelected"
-          class="q-mr-md q-px-md"
+          style="
+            flex: 1;
+            min-height: 40px;
+            font-weight: 500;
+            text-transform: none;
+          "
         >
           {{ $t("RestoreView.nostr_mints.select_all") }}
         </q-btn>
         <q-btn
           flat
-          dense
           size="md"
           color="grey"
           @click="deselectAllMints"
           :disabled="!anySelected"
-          class="q-px-md"
+          style="
+            flex: 1;
+            min-height: 40px;
+            font-weight: 500;
+            text-transform: none;
+          "
         >
           {{ $t("RestoreView.nostr_mints.deselect_all") }}
         </q-btn>
@@ -91,6 +136,18 @@
           @click="toggleMintSelection(mint.url)"
           class="mint-item"
           :class="{ 'mint-item-selected': mint.selected }"
+          :style="{
+            'border-radius': '12px',
+            border: mint.selected
+              ? '2px solid var(--q-primary)'
+              : '1px solid rgba(128, 128, 128, 0.2)',
+            'background-color': mint.selected
+              ? 'rgba(var(--q-primary-rgb), 0.1)'
+              : 'transparent',
+            padding: '16px',
+            'margin-bottom': '12px',
+            transition: 'all 0.2s ease',
+          }"
         >
           <q-item-section avatar>
             <q-checkbox
@@ -430,37 +487,24 @@ export default defineComponent({
 @import "src/css/mintlist.css";
 
 .discovered-mints-list {
-  max-height: 400px;
+  max-height: 500px;
   overflow-y: auto;
+  padding: 0 !important;
 }
 
 .nostr-mint-restore {
   border-top: 1px solid rgba(255, 255, 255, 0.1);
-  margin-top: 1rem;
+  margin-top: 2rem;
+  padding-top: 1rem;
 }
 
 /* Mint item styling - specific to NostrMintRestore */
 .mint-item {
   text-align: left;
-  border-radius: 10px;
-  border: 1px solid rgba(128, 128, 128, 0.2);
-  margin-bottom: 8px;
-  padding: 8px;
 }
 
 .mint-item:hover {
-  border-color: rgba(128, 128, 128, 0.4);
-}
-
-.mint-item.selected {
-  border-color: var(--q-primary);
-}
-
-/* Selection buttons styling */
-.selection-buttons {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
+  transform: translateY(-2px);
 }
 
 /* Primary action section */

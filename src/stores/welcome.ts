@@ -46,10 +46,10 @@ export const useWelcomeStore = defineStore("welcome", {
     isLastSlide: (state) => {
       // Slides:
       // 0 Intro, 1 PWA, 2 Choice,
-      // New: 3 Seed, 4 Mints, 5 Terms
-      // Recover: 3 SeedIn, 4 Mints, 5 Restore, 6 Terms
-      if (state.onboardingPath === "recover") return state.currentSlide === 6;
-      if (state.onboardingPath === "new") return state.currentSlide === 5;
+      // New: 3 Seed, 4 Mints (no more terms screen)
+      // Recover: 3 SeedIn, 4 Mints, 5 Restore (no more terms screen)
+      if (state.onboardingPath === "recover") return state.currentSlide === 5;
+      if (state.onboardingPath === "new") return state.currentSlide === 4;
       // before choosing a path
       return false;
     },
@@ -62,21 +62,18 @@ export const useWelcomeStore = defineStore("welcome", {
       if (state.currentSlide === 1) return true;
       // 2 Choice
       if (state.currentSlide === 2) return state.onboardingPath !== "";
-      // 3
+      // 3 (seed phrase for both paths)
       if (state.currentSlide === 3) {
         if (state.onboardingPath === "new") return state.seedPhraseValidated;
         if (state.onboardingPath === "recover") return state.seedEnteredValid;
       }
-      // 4 (mints setup for both paths)
+      // 4 (mints setup for both paths - last step for "new" path)
       if (state.currentSlide === 4) return state.mintSetupCompleted || true;
-      // 5 (terms for new OR restore step for recover)
+      // 5 (restore step for recover path - last step for "recover" path)
       if (state.currentSlide === 5) {
-        if (state.onboardingPath === "new") return state.termsAccepted;
         if (state.onboardingPath === "recover")
           return state.ecashRestoreCompleted || true;
       }
-      // 6 (terms for recover)
-      if (state.currentSlide === 6) return state.termsAccepted;
       return false;
     },
 
