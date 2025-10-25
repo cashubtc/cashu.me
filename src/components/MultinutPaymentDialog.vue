@@ -945,7 +945,13 @@ export default defineComponent({
               );
               const mintClass = new MintClass(mint);
               const proofs = mintClass.unitProofs(activeUnit);
-              const result = await this.melt(proofs, quote, mintWallet, true);
+              const result = await this.melt(
+                proofs,
+                quote,
+                mintWallet,
+                true,
+                true // ! RELEASE THE MUTEX !
+              );
 
               // Mark as success
               this.setMintState(mint.url, "success");
