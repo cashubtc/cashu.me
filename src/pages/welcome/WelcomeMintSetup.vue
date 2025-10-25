@@ -101,7 +101,7 @@
       </div>
 
       <!-- Discover mints on nostr (global) -->
-      <div class="q-mt-lg q-px-md">
+      <div>
         <MintDiscovery />
       </div>
     </div>
@@ -279,7 +279,7 @@ export default {
 }
 
 .mint-item {
-  padding: 16px;
+  padding: 12px 12px 12px 0px;
   border-radius: 12px;
   transition: all 0.2s ease;
   margin-bottom: 8px;

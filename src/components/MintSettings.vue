@@ -235,7 +235,7 @@
     </div>
 
     <!-- Mint discovery -->
-    <MintDiscovery />
+    <MintDiscovery class="q-px-md" />
 
     <div class="section-divider q-mb-md">
       <div class="divider-line"></div>

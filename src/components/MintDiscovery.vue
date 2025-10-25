@@ -34,9 +34,9 @@
       </div>
     </div>
 
-    <div v-if="discoverList.length > 0" class="q-px-xs text-left" on-left>
+    <div v-if="discoverList.length > 0" class="text-left" on-left>
       <q-list padding>
-        <q-item>
+        <q-item class="q-px-none">
           <q-item-section>
             <q-item-label overline>
               {{
@@ -54,7 +54,7 @@
           <div
             v-for="rec in discoverList"
             :key="rec.url"
-            class="q-px-md q-mb-md"
+            class="q-px-none q-mb-md"
           >
             <q-item
               class="mint-card"
