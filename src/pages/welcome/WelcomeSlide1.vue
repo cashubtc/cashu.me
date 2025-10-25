@@ -492,6 +492,13 @@ export default {
 
 .logo {
   margin-bottom: 30px;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .logo-image {
