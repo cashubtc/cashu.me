@@ -51,19 +51,6 @@
         >
           <WelcomeRestoreEcash />
         </q-carousel-slide>
-        <!-- Terms: new flow slide 5, recover flow slide 6 -->
-        <q-carousel-slide
-          :name="5"
-          v-if="welcomeStore.onboardingPath === 'new'"
-        >
-          <WelcomeSlide4 />
-        </q-carousel-slide>
-        <q-carousel-slide
-          :name="6"
-          v-if="welcomeStore.onboardingPath === 'recover'"
-        >
-          <WelcomeSlide4 />
-        </q-carousel-slide>
       </q-carousel>
 
       <div
@@ -114,7 +101,6 @@ import { useStorageStore } from "src/stores/storage";
 import WelcomeSlide1 from "./welcome/WelcomeSlide1.vue";
 import WelcomeSlide2 from "./welcome/WelcomeSlide2.vue";
 import WelcomeSlide3 from "./welcome/WelcomeSlide3.vue";
-import WelcomeSlide4 from "./welcome/WelcomeSlide4.vue";
 import WelcomeSlideChoice from "./welcome/WelcomeSlideChoice.vue";
 import WelcomeRecoverSeed from "./welcome/WelcomeRecoverSeed.vue";
 import WelcomeMintSetup from "./welcome/WelcomeMintSetup.vue";
@@ -126,7 +112,6 @@ export default {
     WelcomeSlide1,
     WelcomeSlide2,
     WelcomeSlide3,
-    WelcomeSlide4,
     WelcomeSlideChoice,
     WelcomeRecoverSeed,
     WelcomeMintSetup,

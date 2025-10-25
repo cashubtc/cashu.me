@@ -1,61 +1,62 @@
 <template>
-  <div class="q-pa-md flex flex-center">
-    <div class="text-center" style="max-width: 700px; width: 100%">
-      <q-icon name="account_balance_wallet" size="4em" color="primary" />
-      <h2 class="q-mt-xl">Set up your wallet</h2>
-      <p class="q-mt-sm">
+  <div class="choice-slide">
+    <!-- Main content area -->
+    <div class="content">
+      <!-- Header Icon -->
+      <div class="header-icon">
+        <q-icon name="account_balance_wallet" size="3em" color="primary" />
+      </div>
+
+      <!-- Title -->
+      <h1 class="title">Set up your wallet</h1>
+
+      <!-- Description -->
+      <p class="description">
         Do you want to recover from a seed phrase or create a new wallet?
       </p>
 
-      <div class="row q-col-gutter-md q-mt-lg">
-        <div class="col-12 col-md-6">
-          <q-card class="option-card full-height" style="min-height: 160px">
-            <q-card-section class="text-center column fit">
-              <div class="row items-center justify-center q-gutter-sm">
-                <q-icon name="history" size="2em" color="primary" />
-                <div class="text-h6">Recover wallet</div>
-              </div>
-              <div class="text-subtitle2 q-mt-sm">
-                Enter your seed phrase, restore mints and ecash.
-              </div>
-              <div class="q-mt-auto q-px-xl">
-                <q-btn
-                  color="primary"
-                  rounded
-                  label="Recover"
-                  @click="choose('recover')"
-                  data-testid="btn-recover"
-                  class="full-width"
-                />
-              </div>
-            </q-card-section>
-          </q-card>
+      <!-- Options -->
+      <div class="options-container">
+        <!-- Recover Option -->
+        <div class="option-card" @click="choose('recover')">
+          <div class="option-icon">
+            <q-icon name="history" size="2em" color="primary" />
+          </div>
+          <h3 class="option-title">Recover wallet</h3>
+          <p class="option-description">
+            Enter your seed phrase, restore mints and ecash.
+          </p>
+          <q-btn
+            color="primary"
+            rounded
+            label="Recover"
+            @click.stop="choose('recover')"
+            data-testid="btn-recover"
+            class="option-btn"
+          />
         </div>
-        <div class="col-12 col-md-6">
-          <q-card class="option-card full-height" style="min-height: 160px">
-            <q-card-section class="text-center column fit">
-              <div class="row items-center justify-center q-gutter-sm">
-                <q-icon name="auto_awesome" size="2em" color="primary" />
-                <div class="text-h6">Create new wallet</div>
-              </div>
-              <div class="text-subtitle2 q-mt-sm">
-                Generate a new seed and add mints.
-              </div>
-              <div class="q-mt-auto q-px-xl">
-                <q-btn
-                  color="primary"
-                  rounded
-                  label="Create"
-                  @click="choose('new')"
-                  data-testid="btn-new"
-                  class="full-width"
-                />
-              </div>
-            </q-card-section>
-          </q-card>
+
+        <!-- Create New Option -->
+        <div class="option-card" @click="choose('new')">
+          <div class="option-icon">
+            <q-icon name="auto_awesome" size="2em" color="primary" />
+          </div>
+          <h3 class="option-title">Create new wallet</h3>
+          <p class="option-description">Generate a new seed and add mints.</p>
+          <q-btn
+            color="primary"
+            rounded
+            label="Create"
+            @click.stop="choose('new')"
+            data-testid="btn-new"
+            class="option-btn"
+          />
         </div>
       </div>
     </div>
+
+    <!-- Spacer to match other slides -->
+    <div class="spacer"></div>
   </div>
 </template>
 
@@ -78,13 +79,146 @@ export default {
 </script>
 
 <style scoped>
+.choice-slide {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+  background: var(--q-dark);
+  color: white;
+  padding: 40px 20px 20px 20px;
+  box-sizing: border-box;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  flex: 1;
+}
+
+.spacer {
+  height: 76px; /* Height of controls (36px) + padding (20px) + gap (20px) */
+  flex-shrink: 0;
+}
+
+.header-icon {
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin: 0 0 16px 0;
+  color: white;
+  line-height: 1.2;
+}
+
+.description {
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.8);
+  margin: 0 0 32px 0;
+  text-align: left;
+  max-width: 400px;
+}
+
+.options-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  max-width: 400px;
+}
+
 .option-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 12px;
+  padding: 24px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: left;
 }
-h2 {
-  font-weight: bold;
+
+.option-card:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.12);
+  transform: translateY(-2px);
 }
-p {
-  font-size: large;
+
+.option-icon {
+  margin-bottom: 16px;
+  display: flex;
+  justify-content: center;
+}
+
+.option-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: white;
+  margin: 0 0 8px 0;
+  text-align: center;
+}
+
+.option-description {
+  font-size: 0.9rem;
+  line-height: 1.4;
+  color: rgba(255, 255, 255, 0.8);
+  margin: 0 0 20px 0;
+  text-align: center;
+}
+
+.option-btn {
+  width: 100%;
+  height: 40px;
+  font-weight: 600;
+  text-transform: none;
+  font-size: 0.95rem;
+  border-radius: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+}
+
+.option-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* Mobile adjustments */
+@media (max-width: 600px) {
+  .choice-slide {
+    padding: 30px 15px 15px 15px;
+  }
+
+  .title {
+    font-size: 1.6rem;
+  }
+
+  .description {
+    font-size: 0.9rem;
+    margin-bottom: 28px;
+  }
+
+  .option-card {
+    padding: 20px;
+  }
+
+  .option-title {
+    font-size: 1rem;
+  }
+
+  .option-description {
+    font-size: 0.85rem;
+  }
+
+  .option-btn {
+    height: 36px;
+    font-size: 0.9rem;
+  }
 }
 </style>
