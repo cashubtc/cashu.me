@@ -4,7 +4,9 @@
     <div class="content">
       <!-- Header Icon -->
       <div class="header-icon">
-        <q-icon name="vpn_key" size="3em" color="primary" />
+        <div class="icon-circle">
+          <q-icon name="vpn_key" size="2.5em" color="white" />
+        </div>
       </div>
 
       <!-- Title -->
@@ -15,21 +17,29 @@
         Paste or type your 12 word seed phrase to recover.
       </p>
 
-      <!-- Seed phrase input -->
+      <!-- Seed phrase input grid -->
       <div class="input-section">
-        <q-input
-          v-model="mnemonic"
-          outlined
-          autogrow
-          type="textarea"
-          :error="errorMsg !== ''"
-          :error-message="errorMsg"
-          class="seed-phrase"
-          label="Seed phrase"
-        />
+        <div class="words-grid">
+          <div v-for="index in 12" :key="index" class="word-input-wrapper">
+            <span class="word-number">{{ index }}</span>
+            <q-input
+              v-model="words[index - 1]"
+              outlined
+              dense
+              :ref="(el) => setInputRef(el, index - 1)"
+              @paste="handlePaste($event, index - 1)"
+              @input="handleInput(index - 1)"
+              class="word-input"
+              :placeholder="`Word ${index}`"
+            />
+          </div>
+        </div>
 
-        <!-- Paste button below input -->
-        <q-btn flat label="Paste" @click="paste" class="paste-btn" />
+        <!-- Paste button below inputs -->
+        <q-btn flat label="Paste all" @click="paste" class="paste-btn" />
+
+        <!-- Error message -->
+        <p v-if="errorMsg" class="error-msg">{{ errorMsg }}</p>
       </div>
 
       <!-- Disclaimer -->
@@ -41,7 +51,7 @@
 </template>
 
 <script lang="ts">
-import { computed, watch } from "vue";
+import { ref, computed, watch } from "vue";
 import { useWelcomeStore } from "src/stores/welcome";
 import { useRestoreStore } from "src/stores/restore";
 import { useWalletStore } from "src/stores/wallet";
@@ -55,40 +65,120 @@ export default {
     const wallet = useWalletStore();
     const ui = useUiStore();
 
-    const mnemonic = computed({
-      get: () => restore.mnemonicToRestore,
-      set: (v: string) => {
-        restore.mnemonicToRestore = v;
-      },
+    const words = ref<string[]>(Array(12).fill(""));
+    const inputRefs = ref<any[]>([]);
+
+    const setInputRef = (el: any, index: number) => {
+      if (el) {
+        inputRefs.value[index] = el;
+      }
+    };
+
+    // Combine individual words into mnemonic
+    const mnemonic = computed(() => {
+      return words.value
+        .filter((w) => w.trim())
+        .join(" ")
+        .trim();
     });
 
     const errorMsg = computed(() => {
-      if (!restore.mnemonicToRestore) return "";
-      const words = restore.mnemonicToRestore.trim().split(/\s+/);
-      return words.length === 12 ? "" : "Mnemonic should be 12 words.";
+      const filledWords = words.value.filter((w) => w.trim()).length;
+      if (filledWords === 0) return "";
+      if (filledWords < 12) return `${filledWords}/12 words entered`;
+      return "";
     });
 
-    watch(
-      () => restore.mnemonicToRestore,
-      (val) => {
-        const valid = !!val && val.trim().split(/\s+/).length >= 12;
-        welcome.seedEnteredValid = valid;
-        if (valid) {
-          // set wallet mnemonic so all subsequent ops use this seed
-          wallet.setMnemonicFromUser(val.trim());
-        }
-      },
-      { immediate: true }
-    );
+    // Watch mnemonic and update store
+    watch(mnemonic, (val) => {
+      restore.mnemonicToRestore = val;
+      const wordCount = val
+        .trim()
+        .split(/\s+/)
+        .filter((w) => w).length;
+      const valid = wordCount === 12;
+      welcome.seedEnteredValid = valid;
+      if (valid) {
+        wallet.setMnemonicFromUser(val.trim());
+      }
+    });
 
+    // Handle paste on individual input
+    const handlePaste = (event: ClipboardEvent, index: number) => {
+      event.preventDefault();
+      const pastedText = event.clipboardData?.getData("text") || "";
+      const pastedWords = pastedText.trim().split(/\s+/);
+
+      // If pasting multiple words, distribute them
+      if (pastedWords.length > 1) {
+        pastedWords.forEach((word, i) => {
+          if (index + i < 12) {
+            words.value[index + i] = word.trim();
+          }
+        });
+        // Focus next empty field or last field
+        const nextIndex = Math.min(index + pastedWords.length, 11);
+        setTimeout(() => {
+          inputRefs.value[nextIndex]?.focus();
+        }, 50);
+      } else {
+        // Single word paste
+        words.value[index] = pastedText.trim();
+        // Move to next field
+        if (index < 11) {
+          setTimeout(() => {
+            inputRefs.value[index + 1]?.focus();
+          }, 50);
+        }
+      }
+    };
+
+    // Handle input and auto-move to next field
+    const handleInput = (index: number) => {
+      const word = words.value[index];
+      // If word contains space, it might be multiple words pasted
+      if (word.includes(" ")) {
+        const splitWords = word.trim().split(/\s+/);
+        splitWords.forEach((w, i) => {
+          if (index + i < 12) {
+            words.value[index + i] = w.trim();
+          }
+        });
+      } else if (word.trim() && index < 11) {
+        // Auto-advance on space
+        if (word.endsWith(" ")) {
+          words.value[index] = word.trim();
+          setTimeout(() => {
+            inputRefs.value[index + 1]?.focus();
+          }, 50);
+        }
+      }
+    };
+
+    // Paste all from clipboard
     const paste = async () => {
       try {
         const text = await ui.pasteFromClipboard();
-        restore.mnemonicToRestore = (text || "").trim();
+        const pastedWords = (text || "").trim().split(/\s+/);
+        pastedWords.forEach((word, i) => {
+          if (i < 12) {
+            words.value[i] = word.trim();
+          }
+        });
       } catch {}
     };
 
-    return { welcome, restore, wallet, mnemonic, errorMsg, paste };
+    return {
+      welcome,
+      restore,
+      wallet,
+      words,
+      errorMsg,
+      paste,
+      handlePaste,
+      handleInput,
+      setInputRef,
+    };
   },
 };
 </script>
@@ -108,7 +198,7 @@ export default {
 .content {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
   text-align: left;
   flex: 1;
 }
@@ -116,7 +206,17 @@ export default {
 .header-icon {
   margin-bottom: 20px;
   display: flex;
-  justify-content: flex-start;
+  justify-content: center;
+  align-items: center;
+}
+
+.icon-circle {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  display: flex;
+  justify-content: center;
   align-items: center;
 }
 
@@ -126,6 +226,9 @@ export default {
   margin: 0 0 16px 0;
   color: white;
   line-height: 1.2;
+  text-align: left;
+  width: 100%;
+  max-width: 500px;
 }
 
 .description {
@@ -134,23 +237,82 @@ export default {
   color: rgba(255, 255, 255, 0.8);
   margin: 0 0 32px 0;
   text-align: left;
-  max-width: 400px;
+  max-width: 500px;
+  width: 100%;
 }
 
 .input-section {
   width: 100%;
-  max-width: 400px;
+  max-width: 500px;
   margin-bottom: 16px;
 }
 
-.seed-phrase {
-  font-size: 0.9rem;
-  font-family: monospace;
-  margin-bottom: 12px;
+.words-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin-bottom: 20px;
 }
 
-.seed-phrase :deep(.q-field__control) {
-  padding: 12px 12px !important;
+.word-input-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.word-number {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.4);
+  min-width: 22px;
+  text-align: right;
+  font-weight: 600;
+}
+
+.word-input {
+  flex: 1;
+  font-family: monospace;
+  font-size: 0.9rem;
+}
+
+.word-input :deep(.q-field__control) {
+  min-height: 44px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.2s ease;
+}
+
+.word-input :deep(.q-field__control):hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.word-input :deep(.q-field__native) {
+  padding: 0 12px;
+}
+
+.word-input :deep(.q-field--focused .q-field__control) {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(var(--q-primary-rgb), 0.5);
+  box-shadow: 0 0 0 2px rgba(var(--q-primary-rgb), 0.1);
+}
+
+.word-input :deep(input) {
+  font-family: monospace;
+  font-size: 0.9rem;
+  color: white;
+}
+
+.word-input :deep(input::placeholder) {
+  color: rgba(255, 255, 255, 0.3);
+  font-size: 0.85rem;
+}
+
+.error-msg {
+  font-size: 0.85rem;
+  color: rgba(255, 200, 87, 0.9);
+  margin: 8px 0 0 0;
+  line-height: 1.4;
 }
 
 .paste-btn {
@@ -195,6 +357,24 @@ export default {
 
   .input-section {
     max-width: 100%;
+  }
+
+  .words-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  .word-number {
+    font-size: 0.7rem;
+    min-width: 18px;
+  }
+
+  .word-input {
+    font-size: 0.85rem;
+  }
+
+  .word-input :deep(input) {
+    font-size: 0.85rem;
   }
 
   .paste-btn {
