@@ -87,7 +87,9 @@
           :label="$t('WelcomePage.actions.next.label')"
           :disable="!welcomeStore.canProceed"
           @click="welcomeStore.goToNextSlide"
-          v-if="welcomeStore.currentSlide > 0"
+          v-if="
+            welcomeStore.currentSlide > 0 && welcomeStore.currentSlide !== 2
+          "
         />
       </div>
     </q-card>

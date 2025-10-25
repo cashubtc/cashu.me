@@ -16,47 +16,44 @@
       </p>
 
       <!-- Options -->
-      <div class="options-container">
+      <div class="options">
         <!-- Recover Option -->
-        <div class="option-card" @click="choose('recover')">
-          <div class="option-icon">
-            <q-icon name="history" size="2em" color="primary" />
+        <div class="option" @click="choose('recover')">
+          <q-icon name="history" size="2em" color="primary" class="icon" />
+          <div class="text">
+            <h3 class="title">Recover wallet</h3>
+            <p class="subtitle">
+              Enter your seed phrase, restore mints and ecash.
+            </p>
+            <q-btn
+              outline
+              rounded
+              label="Recover"
+              @click.stop="choose('recover')"
+              data-testid="btn-recover"
+              class="btn"
+            />
           </div>
-          <h3 class="option-title">Recover wallet</h3>
-          <p class="option-description">
-            Enter your seed phrase, restore mints and ecash.
-          </p>
-          <q-btn
-            color="primary"
-            rounded
-            label="Recover"
-            @click.stop="choose('recover')"
-            data-testid="btn-recover"
-            class="option-btn"
-          />
         </div>
 
         <!-- Create New Option -->
-        <div class="option-card" @click="choose('new')">
-          <div class="option-icon">
-            <q-icon name="auto_awesome" size="2em" color="primary" />
+        <div class="option" @click="choose('new')">
+          <q-icon name="auto_awesome" size="2em" color="primary" class="icon" />
+          <div class="text">
+            <h3 class="title">Create new wallet</h3>
+            <p class="subtitle">Generate a new seed and add mints.</p>
+            <q-btn
+              outline
+              rounded
+              label="Create"
+              @click.stop="choose('new')"
+              data-testid="btn-new"
+              class="btn"
+            />
           </div>
-          <h3 class="option-title">Create new wallet</h3>
-          <p class="option-description">Generate a new seed and add mints.</p>
-          <q-btn
-            color="primary"
-            rounded
-            label="Create"
-            @click.stop="choose('new')"
-            data-testid="btn-new"
-            class="option-btn"
-          />
         </div>
       </div>
     </div>
-
-    <!-- Spacer to match other slides -->
-    <div class="spacer"></div>
   </div>
 </template>
 
@@ -93,20 +90,15 @@ export default {
 .content {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  text-align: center;
+  align-items: flex-start;
+  text-align: left;
   flex: 1;
-}
-
-.spacer {
-  height: 76px; /* Height of controls (36px) + padding (20px) + gap (20px) */
-  flex-shrink: 0;
 }
 
 .header-icon {
   margin-bottom: 20px;
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
   align-items: center;
 }
 
@@ -127,66 +119,54 @@ export default {
   max-width: 400px;
 }
 
-.options-container {
+.options {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 32px;
   width: 100%;
   max-width: 400px;
 }
 
-.option-card {
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 12px;
-  padding: 24px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  text-align: left;
-}
-
-.option-card:hover {
-  background: rgba(255, 255, 255, 0.06);
-  border-color: rgba(255, 255, 255, 0.12);
-  transform: translateY(-2px);
-}
-
-.option-icon {
-  margin-bottom: 16px;
+.option {
   display: flex;
-  justify-content: center;
+  align-items: flex-start;
+  gap: 16px;
+  cursor: pointer;
 }
 
-.option-title {
-  font-size: 1.1rem;
+.icon {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.text {
+  flex: 1;
+}
+
+.text .title {
+  font-size: 15.2px; /* Exact match to platform titles in WelcomeSlide2 */
+  font-family: Inter, -apple-system, "system-ui", "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
   font-weight: 600;
-  color: white;
+  color: #ffffff;
   margin: 0 0 8px 0;
-  text-align: center;
 }
 
-.option-description {
+.subtitle {
   font-size: 0.9rem;
-  line-height: 1.4;
   color: rgba(255, 255, 255, 0.8);
-  margin: 0 0 20px 0;
-  text-align: center;
+  margin: 0 0 8px 0;
+  line-height: 1.4;
 }
 
-.option-btn {
-  width: 100%;
+.btn {
+  width: auto;
+  min-width: 120px;
   height: 40px;
   font-weight: 600;
   text-transform: none;
   font-size: 0.95rem;
   border-radius: 20px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-  transition: all 0.3s ease;
-}
-
-.option-btn:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 /* Mobile adjustments */
