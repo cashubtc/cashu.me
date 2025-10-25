@@ -1,136 +1,133 @@
 <template>
-  <div>
-    <div class="section-divider q-mb-md">
-      <div class="divider-line"></div>
-      <div class="divider-text">
-        {{ $t("MintSettings.discover.title") }}
+  <div class="discover-section">
+    <div class="discover-card">
+      <div class="discover-content">
+        <q-icon
+          name="search"
+          size="2em"
+          color="primary"
+          class="discover-icon"
+        />
+        <div class="discover-text">
+          <h3 class="discover-title">
+            {{ $t("MintSettings.discover.title") }}
+          </h3>
+          <p class="discover-subtitle">
+            {{ $t("MintSettings.discover.caption") }}
+          </p>
+        </div>
       </div>
-      <div class="divider-line"></div>
+      <div class="discover-button">
+        <q-btn
+          flat
+          rounded
+          :loading="discovering"
+          @click="discover"
+          class="discover-btn"
+        >
+          <q-icon name="search" size="18px" class="q-mr-sm" />
+          <span>{{ $t("MintSettings.discover.actions.discover.label") }}</span>
+          <template v-slot:loading>
+            <q-spinner-hourglass class="on-left" />
+            {{ $t("MintSettings.discover.actions.discover.in_progress") }}
+          </template>
+        </q-btn>
+      </div>
     </div>
-    <div class="q-px-xs text-left" on-left>
+
+    <div v-if="discoverList.length > 0" class="q-px-xs text-left" on-left>
       <q-list padding>
         <q-item>
           <q-item-section>
             <q-item-label overline>
-              {{ $t("MintSettings.discover.overline") }}</q-item-label
-            >
-            <q-item-label caption>{{
-              $t("MintSettings.discover.caption")
-            }}</q-item-label>
+              {{
+                $t("MintSettings.discover.recommendations.overline", {
+                  length: discoverList.length,
+                })
+              }}
+            </q-item-label>
+            <q-item-label caption>
+              {{ $t("MintSettings.discover.recommendations.caption") }}
+            </q-item-label>
           </q-item-section>
         </q-item>
-        <q-item class="q-pt-sm" style="display: flex; justify-content: center">
-          <q-btn
-            class="q-px-lg"
-            color="primary"
-            rounded
-            outline
-            :loading="discovering"
-            @click="discover"
-            >{{ $t("MintSettings.discover.actions.discover.label") }}
-            <template v-slot:loading>
-              <q-spinner-hourglass class="on-left" />
-              {{ $t("MintSettings.discover.actions.discover.in_progress") }}
-            </template>
-          </q-btn>
-        </q-item>
-        <div v-if="discoverList.length > 0">
-          <q-item>
-            <q-item-section>
-              <q-item-label overline>
-                {{
-                  $t("MintSettings.discover.recommendations.overline", {
-                    length: discoverList.length,
-                  })
-                }}
-              </q-item-label>
-              <q-item-label caption>
-                {{ $t("MintSettings.discover.recommendations.caption") }}
-              </q-item-label>
-            </q-item-section>
-          </q-item>
-          <div class="q-pt-sm">
-            <div
-              v-for="rec in discoverList"
-              :key="rec.url"
-              class="q-px-md q-mb-md"
+        <div class="q-pt-sm">
+          <div
+            v-for="rec in discoverList"
+            :key="rec.url"
+            class="q-px-md q-mb-md"
+          >
+            <q-item
+              class="mint-card"
+              :style="{
+                'border-radius': '10px',
+                border: '1px solid rgba(128,128,128,0.2)',
+                padding: '0px',
+                position: 'relative',
+              }"
             >
-              <q-item
-                class="mint-card"
-                :style="{
-                  'border-radius': '10px',
-                  border: '1px solid rgba(128,128,128,0.2)',
-                  padding: '0px',
-                  position: 'relative',
-                }"
-              >
-                <div class="full-width" style="position: relative">
-                  <div class="row items-center q-pa-md">
-                    <div class="col">
-                      <div class="row items-center">
-                        <q-avatar
-                          v-if="getMintIconUrlUrl(rec.url)"
-                          size="34px"
-                          class="q-mr-sm"
-                        >
-                          <q-img
-                            spinner-color="white"
-                            spinner-size="xs"
-                            :src="getMintIconUrlUrl(rec.url)"
-                            alt="Mint Icon"
-                            style="
-                              height: 34px;
-                              max-width: 34px;
-                              font-size: 12px;
-                            "
-                          />
-                        </q-avatar>
-                        <q-spinner-dots
-                          v-else-if="isFetchingMintInfo(rec.url)"
-                          size="34px"
-                          color="grey-5"
-                          class="q-mr-sm"
+              <div class="full-width" style="position: relative">
+                <div class="row items-center q-pa-md">
+                  <div class="col">
+                    <div class="row items-center">
+                      <q-avatar
+                        v-if="getMintIconUrlUrl(rec.url)"
+                        size="34px"
+                        class="q-mr-sm"
+                      >
+                        <q-img
+                          spinner-color="white"
+                          spinner-size="xs"
+                          :src="getMintIconUrlUrl(rec.url)"
+                          alt="Mint Icon"
+                          style="height: 34px; max-width: 34px; font-size: 12px"
                         />
-                        <div class="mint-info-container">
-                          <div class="mint-name">
-                            {{ getMintDisplayName(rec.url) }}
-                          </div>
-                          <div class="text-grey-6 mint-url">{{ rec.url }}</div>
-                          <div
-                            class="text-grey-5 q-mt-xs"
-                            v-if="rec.averageRating !== null"
-                          >
-                            <span>
-                              ⭐ {{ rec.averageRating.toFixed(2) }} ·
-                              {{ rec.reviewsCount }}
-                              <span
-                                class="text-primary cursor-pointer"
-                                style="text-decoration: underline"
-                                @click.stop="openReviews(rec.url)"
-                                >reviews</span
-                              >
-                            </span>
-                          </div>
-                          <div class="text-grey-5 q-mt-xs" v-else>
-                            <span>No reviews yet</span>
-                          </div>
+                      </q-avatar>
+                      <q-spinner-dots
+                        v-else-if="isFetchingMintInfo(rec.url)"
+                        size="34px"
+                        color="grey-5"
+                        class="q-mr-sm"
+                      />
+                      <div class="mint-info-container">
+                        <div class="mint-name">
+                          {{ getMintDisplayName(rec.url) }}
+                        </div>
+                        <div class="text-grey-6 mint-url">{{ rec.url }}</div>
+                        <div
+                          class="text-grey-5 q-mt-xs"
+                          v-if="rec.averageRating !== null"
+                        >
+                          <span>
+                            ⭐ {{ rec.averageRating.toFixed(2) }} ·
+                            {{ rec.reviewsCount }}
+                            <span
+                              class="text-primary cursor-pointer"
+                              style="text-decoration: underline"
+                              @click.stop="openReviews(rec.url)"
+                              >reviews</span
+                            >
+                          </span>
+                        </div>
+                        <div class="text-grey-5 q-mt-xs" v-else>
+                          <span>No reviews yet</span>
                         </div>
                       </div>
                     </div>
-                    <div class="col-auto">
-                      <q-btn
-                        dense
-                        round
-                        flat
-                        icon="add"
-                        @click="addDiscovered(rec.url)"
-                        :disable="isExistingMint(rec.url)"
-                      />
-                    </div>
+                  </div>
+                  <div class="col-auto">
+                    <q-btn
+                      dense
+                      round
+                      flat
+                      icon="add"
+                      @click="addDiscovered(rec.url)"
+                      :disable="isExistingMint(rec.url)"
+                    />
                   </div>
                 </div>
-              </q-item>
-            </div>
+              </div>
+            </q-item>
           </div>
         </div>
       </q-list>
@@ -252,24 +249,74 @@ export default defineComponent({
 
 <style scoped>
 @import "src/css/mintlist.css";
-.section-divider {
-  display: flex;
-  align-items: center;
+
+.discover-section {
   width: 100%;
+  max-width: 500px;
+  margin-bottom: 24px;
+}
+
+.discover-card {
+  padding: 16px;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+  margin-bottom: 8px;
+}
+
+.discover-content {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
   margin-bottom: 16px;
 }
-.divider-line {
-  flex: 1;
-  height: 1px;
-  background-color: #48484a;
+
+.discover-icon {
+  flex-shrink: 0;
+  margin-top: 2px;
 }
-.divider-text {
-  padding: 0 10px;
-  font-size: 14px;
+
+.discover-text {
+  flex: 1;
+}
+
+.discover-title {
+  font-size: 15.2px;
+  font-family: Inter, -apple-system, "system-ui", "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
   font-weight: 600;
   color: #ffffff;
-  text-transform: uppercase;
+  margin: 0 0 8px 0;
 }
+
+.discover-subtitle {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.8);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.discover-button {
+  margin-top: 8px;
+}
+
+.discover-btn {
+  width: auto;
+  min-width: 120px;
+  height: 36px;
+  font-weight: 500;
+  text-transform: none;
+  font-size: 0.9rem;
+  border-radius: 18px;
+  color: var(--q-primary);
+  background: rgba(var(--q-primary-rgb), 0.1);
+  transition: all 0.2s ease;
+}
+
+.discover-btn:hover {
+  background: rgba(var(--q-primary-rgb), 0.2);
+  transform: translateY(-1px);
+}
+
 .mint-card {
   border: 1px solid rgba(128, 128, 128, 0.2);
   border-radius: 10px;

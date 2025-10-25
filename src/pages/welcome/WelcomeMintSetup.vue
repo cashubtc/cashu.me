@@ -1,21 +1,25 @@
 <template>
-  <div class="q-pa-md flex flex-center">
-    <div style="max-width: 900px; width: 100%">
-      <div class="text-center q-mb-md">
-        <q-icon name="account_tree" size="4em" color="primary" />
-        <h2 class="q-mt-xl">Add your mints</h2>
-        <p class="q-mt-sm">
-          Discover mints on Nostr or add manually. You need at least one mint.
-        </p>
+  <div class="mint-setup-slide">
+    <!-- Main content area -->
+    <div class="content">
+      <!-- Header Icon -->
+      <div class="header-icon">
+        <div class="icon-circle">
+          <q-icon name="account_tree" size="2.5em" color="white" />
+        </div>
       </div>
 
+      <!-- Title -->
+      <h1 class="title">Add your mints</h1>
+
+      <!-- Description -->
+      <p class="description">
+        Discover mints on Nostr or add manually. You need at least one mint.
+      </p>
+
       <!-- Your added mints -->
-      <div class="q-px-md">
-        <div class="section-divider q-mb-md">
-          <div class="divider-line"></div>
-          <div class="divider-text">Your mints</div>
-          <div class="divider-line"></div>
-        </div>
+      <div class="mints-section">
+        <h3 class="section-title">Your mints</h3>
         <!-- Restoring indicator during recover + Nostr search -->
         <div
           v-if="welcome.onboardingPath === 'recover' && restoringMints"
@@ -30,61 +34,34 @@
         >
           No mints added yet.
         </div>
-        <div
-          v-for="mint in mints.mints"
-          :key="mint.url"
-          class="q-px-md q-mb-md"
-        >
-          <q-item
-            class="mint-card cursor-pointer"
-            :style="{
-              'border-radius': '10px',
-              border: '1px solid rgba(128,128,128,0.2)',
-              padding: '0px',
-              position: 'relative',
-            }"
-          >
-            <div class="full-width" style="position: relative">
-              <div class="row items-center q-pa-md">
-                <div class="col">
-                  <div class="row items-center">
-                    <q-avatar
-                      v-if="getMintIconUrlExisting(mint)"
-                      size="34px"
-                      class="q-mr-sm"
-                    >
-                      <q-img
-                        spinner-color="white"
-                        spinner-size="xs"
-                        :src="getMintIconUrlExisting(mint)"
-                        alt="Mint Icon"
-                        style="height: 34px; max-width: 34px; font-size: 12px"
-                      />
-                    </q-avatar>
-                    <div class="mint-info-container">
-                      <div
-                        v-if="mint.nickname || mint.info?.name"
-                        class="mint-name"
-                      >
-                        {{ mint.nickname || mint.info?.name }}
-                      </div>
-                      <div class="text-grey-6 mint-url">{{ mint.url }}</div>
-                    </div>
-                  </div>
-                </div>
+        <div v-for="mint in mints.mints" :key="mint.url" class="mint-item">
+          <div class="mint-content">
+            <q-avatar
+              v-if="getMintIconUrlExisting(mint)"
+              size="34px"
+              class="mint-icon"
+            >
+              <q-img
+                spinner-color="white"
+                spinner-size="xs"
+                :src="getMintIconUrlExisting(mint)"
+                alt="Mint Icon"
+                style="height: 34px; max-width: 34px; font-size: 12px"
+              />
+            </q-avatar>
+            <div class="mint-info">
+              <div class="mint-name">
+                {{ mint.nickname || mint.info?.name }}
               </div>
+              <div class="mint-url">{{ mint.url }}</div>
             </div>
-          </q-item>
+          </div>
         </div>
       </div>
 
       <!-- Manual add mint -->
-      <div class="q-pt-xs q-px-md">
-        <div class="section-divider q-mb-md">
-          <div class="divider-line"></div>
-          <div class="divider-text">Add mint</div>
-          <div class="divider-line"></div>
-        </div>
+      <div class="add-mint-section">
+        <h3 class="section-title">Add mint</h3>
         <div class="add-mint-inputs">
           <q-input
             rounded
@@ -96,19 +73,19 @@
             class="q-mb-md mint-input url-input"
           />
         </div>
-        <div class="row justify-between items-center q-mt-xs">
+        <div class="add-mint-button">
           <q-btn
             flat
+            rounded
             :disable="addMintData.url.length === 0"
             @click="
               addMintData.url.length > 0
                 ? sanitizeMintUrlAndShowAddDialog()
                 : null
             "
-            class="text-white"
-            :class="{ 'text-grey-7': addMintData.url.length === 0 }"
+            class="add-mint-btn"
           >
-            <q-icon name="add" size="20px" class="q-mr-sm" />
+            <q-icon name="add" size="18px" class="q-mr-sm" />
             <span>Add mint</span>
           </q-btn>
         </div>
@@ -127,25 +104,15 @@
       <div class="q-mt-lg q-px-md">
         <MintDiscovery />
       </div>
-
-      <div class="q-mt-xl text-center">
-        <q-btn
-          color="primary"
-          rounded
-          @click="markDone"
-          :disable="mints.mints.length === 0"
-          >Continue</q-btn
-        >
-      </div>
-
-      <AddMintDialog
-        :addMintData="addMintData"
-        :showAddMintDialog="showAddMintDialog"
-        @update:showAddMintDialog="showAddMintDialog = $event"
-        :addMintBlocking="addMintBlocking"
-        @add="addMintInternal"
-      />
     </div>
+
+    <AddMintDialog
+      :addMintData="addMintData"
+      :showAddMintDialog="showAddMintDialog"
+      @update:showAddMintDialog="showAddMintDialog = $event"
+      :addMintBlocking="addMintBlocking"
+      @add="addMintInternal"
+    />
   </div>
 </template>
 
@@ -232,31 +199,198 @@ export default {
 </script>
 
 <style scoped>
-@import "src/css/mintlist.css";
-.section-divider {
+.mint-setup-slide {
   display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+  background: var(--q-dark);
+  color: white;
+  padding: 40px 20px 20px 20px;
+  box-sizing: border-box;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  width: 100%;
-  margin-bottom: 16px;
-}
-.divider-line {
+  text-align: left;
   flex: 1;
-  height: 1px;
-  background-color: #48484a;
 }
-.divider-text {
-  padding: 0 10px;
-  font-size: 14px;
+
+.header-icon {
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.icon-circle {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin: 0 0 16px 0;
+  color: white;
+  line-height: 1.2;
+  text-align: left;
+  width: 100%;
+  max-width: 500px;
+}
+
+.description {
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.8);
+  margin: 0 0 32px 0;
+  text-align: left;
+  max-width: 500px;
+  width: 100%;
+}
+
+.mints-section,
+.add-mint-section {
+  width: 100%;
+  max-width: 500px;
+  margin-bottom: 24px;
+}
+
+.section-title {
+  font-size: 15.2px;
+  font-family: Inter, -apple-system, "system-ui", "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
   font-weight: 600;
   color: #ffffff;
-  text-transform: uppercase;
+  margin: 0 0 16px 0;
 }
+
+.mint-item {
+  padding: 16px;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+  margin-bottom: 8px;
+}
+
+.mint-content {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.mint-icon {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.mint-info {
+  flex: 1;
+}
+
+.mint-name {
+  font-size: 15.2px;
+  font-family: Inter, -apple-system, "system-ui", "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  font-weight: 600;
+  color: #ffffff;
+  margin: 0 0 4px 0;
+}
+
+.mint-url {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.8);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.add-mint-inputs {
+  margin-bottom: 16px;
+}
+
+.add-mint-button {
+  margin-top: 12px;
+}
+
+.add-mint-btn {
+  width: auto;
+  min-width: 100px;
+  height: 36px;
+  font-weight: 500;
+  text-transform: none;
+  font-size: 0.9rem;
+  border-radius: 18px;
+  color: var(--q-primary);
+  background: rgba(var(--q-primary-rgb), 0.1);
+  transition: all 0.2s ease;
+}
+
+.add-mint-btn:hover {
+  background: rgba(var(--q-primary-rgb), 0.2);
+  transform: translateY(-1px);
+}
+
+.add-mint-btn:disabled {
+  color: rgba(255, 255, 255, 0.3);
+  background: transparent;
+  transform: none;
+}
+
 .mint-input .q-field__control {
-  height: 54px;
-  border-radius: 100px;
+  height: 44px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.2s ease;
 }
-.mint-card {
-  border: 1px solid rgba(128, 128, 128, 0.2);
-  border-radius: 10px;
+
+.mint-input .q-field__control:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.mint-input .q-field--focused .q-field__control {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(var(--q-primary-rgb), 0.5);
+  box-shadow: 0 0 0 2px rgba(var(--q-primary-rgb), 0.1);
+}
+
+/* Mobile adjustments */
+@media (max-width: 600px) {
+  .mint-setup-slide {
+    padding: 30px 15px 15px 15px;
+  }
+
+  .title {
+    font-size: 1.6rem;
+  }
+
+  .description {
+    font-size: 0.9rem;
+    margin-bottom: 28px;
+  }
+
+  .mints-section,
+  .add-mint-section {
+    max-width: 100%;
+  }
+
+  .section-title {
+    font-size: 14px;
+  }
+
+  .mint-name {
+    font-size: 14px;
+  }
+
+  .mint-url {
+    font-size: 0.85rem;
+  }
 }
 </style>
