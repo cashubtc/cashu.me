@@ -28,16 +28,41 @@
 
     <!-- Language selector at bottom -->
     <div class="language-section">
-      <q-select
-        v-model="selectedLanguage"
-        :options="languageOptions"
-        emit-value
-        dense
-        borderless
-        map-options
-        @update:model-value="changeLanguage"
-        class="welcome-language-select"
-      />
+      <div class="language-trigger" @click="toggleLanguageMenu">
+        <span class="language-text">{{ selectedLanguage }}</span>
+        <q-icon name="keyboard_arrow_up" class="language-icon" />
+      </div>
+    </div>
+
+    <!-- Custom full-width language menu -->
+    <div
+      v-if="showLanguageMenu"
+      class="language-menu-overlay"
+      @click="closeLanguageMenu"
+    >
+      <div class="language-menu" @click.stop>
+        <div class="language-menu-header">
+          <h3>Select Language</h3>
+          <q-btn
+            flat
+            round
+            icon="close"
+            @click="closeLanguageMenu"
+            class="close-btn"
+          />
+        </div>
+        <div class="language-options">
+          <div
+            v-for="option in languageOptions"
+            :key="option.value"
+            class="language-option"
+            :class="{ active: selectedLanguage === option.label }"
+            @click="selectLanguage(option)"
+          >
+            {{ option.label }}
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -50,6 +75,7 @@ export default {
   data() {
     return {
       selectedLanguage: "",
+      showLanguageMenu: false,
       languageOptions: [
         { label: "English", value: "en-US" },
         { label: "Español", value: "es-ES" },
@@ -74,6 +100,17 @@ export default {
     goToNext() {
       const welcomeStore = useWelcomeStore();
       welcomeStore.goToNextSlide();
+    },
+    toggleLanguageMenu() {
+      this.showLanguageMenu = !this.showLanguageMenu;
+    },
+    closeLanguageMenu() {
+      this.showLanguageMenu = false;
+    },
+    selectLanguage(option: any) {
+      this.selectedLanguage = option.label;
+      this.changeLanguage(option.value);
+      this.closeLanguageMenu();
     },
   },
   created() {
@@ -129,13 +166,14 @@ export default {
 .welcome-actions {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: stretch;
   flex: 1;
   justify-content: center;
+  width: 100%;
 }
 
 .welcome-next-btn {
-  min-width: 140px;
+  width: 100%;
   height: 44px;
   font-weight: 600;
   text-transform: none;
@@ -150,38 +188,132 @@ export default {
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
 }
 
-.welcome-language-select {
-  min-width: 100px;
+/* Language trigger button */
+.language-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: rgba(255, 255, 255, 0.7);
+  cursor: pointer;
+  transition: color 0.2s ease;
+  padding: 8px 16px;
+  border-radius: 8px;
 }
 
-.welcome-language-select :deep(.q-field__control) {
-  background: transparent;
-  border: none;
-  color: rgba(255, 255, 255, 0.7);
-  min-height: auto;
-  padding: 0;
+.language-trigger:hover {
+  color: rgba(255, 255, 255, 0.9);
 }
 
-.welcome-language-select :deep(.q-field__native) {
-  color: rgba(255, 255, 255, 0.7);
+.language-text {
   font-size: 0.9rem;
-  text-align: center;
-  padding: 0;
+  font-weight: 500;
 }
 
-.welcome-language-select :deep(.q-field__label) {
-  color: rgba(255, 255, 255, 0.5);
-  font-size: 0.85rem;
-}
-
-.welcome-language-select :deep(.q-field__dropdown-icon) {
-  color: rgba(255, 255, 255, 0.5);
+.language-icon {
   font-size: 1rem;
+  transition: transform 0.2s ease;
 }
 
-.welcome-language-select :deep(.q-field__marginal) {
-  height: auto;
-  padding: 0;
+.language-trigger:hover .language-icon {
+  transform: scale(1.1);
+}
+
+/* Full-width language menu overlay */
+.language-menu-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  z-index: 9999;
+  display: flex;
+  align-items: flex-end;
+  animation: fadeIn 0.3s ease;
+}
+
+.language-menu {
+  width: 100%;
+  background: rgba(20, 20, 20, 0.98);
+  backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px 20px 0 0;
+  height: 85vh;
+  overflow: hidden;
+  animation: slideUp 0.3s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.language-menu-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px 16px 24px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.language-menu-header h3 {
+  color: white;
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.close-btn {
+  color: rgba(255, 255, 255, 0.7) !important;
+}
+
+.language-options {
+  flex: 1;
+  overflow-y: auto;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.language-option {
+  padding: 16px 24px;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  text-align: center;
+}
+
+.language-option:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: white;
+}
+
+.language-option.active {
+  background: rgba(var(--q-primary-rgb), 0.2);
+  color: var(--q-primary);
+}
+
+.language-option:last-child {
+  border-bottom: none;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
 }
 
 .language-section {
@@ -214,7 +346,7 @@ export default {
   }
 
   .welcome-next-btn {
-    min-width: 120px;
+    width: 100%;
     height: 40px;
     font-size: 0.95rem;
   }
