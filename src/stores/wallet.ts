@@ -766,7 +766,8 @@ export const useWalletStore = defineStore("wallet", {
       proofs: WalletProof[],
       quote: MeltQuoteResponse,
       mintWallet: CashuWallet,
-      silent?: boolean
+      silent?: boolean,
+      releaseMutex?: boolean
     ) {
       const uIStore = useUiStore();
       const proofsStore = useProofsStore();
@@ -818,7 +819,7 @@ export const useWalletStore = defineStore("wallet", {
 
         // NOTE: if the user exits the app while we're in the API call, JS will emit an error that we would catch below!
         // We have to handle that case in the catch block below
-        uIStore.unlockMutex(); // Momentarely release the mutex (needed for concurrent melts)
+        if (releaseMutex) uIStore.unlockMutex(); // Momentarely release the mutex (needed for concurrent melts)
         let data;
         try {
           data = await mintWallet.meltProofs(quote, sendProofs, {
@@ -828,7 +829,7 @@ export const useWalletStore = defineStore("wallet", {
         } catch (error) {
           throw error;
         } finally {
-          await uIStore.lockMutex();
+          if (releaseMutex) await uIStore.lockMutex();
         }
 
         if (data.quote.state != MeltQuoteState.PAID) {
