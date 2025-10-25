@@ -4,7 +4,9 @@
     <div class="content">
       <!-- Header Icon -->
       <div class="header-icon">
-        <q-icon name="account_balance_wallet" size="3em" color="primary" />
+        <div class="icon-circle">
+          <q-icon name="account_balance_wallet" size="2.5em" color="white" />
+        </div>
       </div>
 
       <!-- Title -->
@@ -25,14 +27,6 @@
             <p class="subtitle">
               Enter your seed phrase, restore mints and ecash.
             </p>
-            <q-btn
-              outline
-              rounded
-              label="Recover"
-              @click.stop="choose('recover')"
-              data-testid="btn-recover"
-              class="btn"
-            />
           </div>
         </div>
 
@@ -42,14 +36,6 @@
           <div class="text">
             <h3 class="title">Create new wallet</h3>
             <p class="subtitle">Generate a new seed and add mints.</p>
-            <q-btn
-              outline
-              rounded
-              label="Create"
-              @click.stop="choose('new')"
-              data-testid="btn-new"
-              class="btn"
-            />
           </div>
         </div>
       </div>
@@ -90,7 +76,7 @@ export default {
 .content {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
   text-align: left;
   flex: 1;
 }
@@ -98,7 +84,17 @@ export default {
 .header-icon {
   margin-bottom: 20px;
   display: flex;
-  justify-content: flex-start;
+  justify-content: center;
+  align-items: center;
+}
+
+.icon-circle {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  display: flex;
+  justify-content: center;
   align-items: center;
 }
 
@@ -108,6 +104,9 @@ export default {
   margin: 0 0 16px 0;
   color: white;
   line-height: 1.2;
+  text-align: left;
+  width: 100%;
+  max-width: 400px;
 }
 
 .description {
@@ -117,6 +116,7 @@ export default {
   margin: 0 0 32px 0;
   text-align: left;
   max-width: 400px;
+  width: 100%;
 }
 
 .options {
@@ -132,6 +132,14 @@ export default {
   align-items: flex-start;
   gap: 16px;
   cursor: pointer;
+  padding: 16px;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+}
+
+.option:hover {
+  background: rgba(255, 255, 255, 0.05);
+  transform: translateY(-2px);
 }
 
 .icon {
@@ -159,16 +167,6 @@ export default {
   line-height: 1.4;
 }
 
-.btn {
-  width: auto;
-  min-width: 120px;
-  height: 40px;
-  font-weight: 600;
-  text-transform: none;
-  font-size: 0.95rem;
-  border-radius: 20px;
-}
-
 /* Mobile adjustments */
 @media (max-width: 600px) {
   .choice-slide {
@@ -184,21 +182,16 @@ export default {
     margin-bottom: 28px;
   }
 
-  .option-card {
-    padding: 20px;
+  .option {
+    padding: 12px;
   }
 
-  .option-title {
-    font-size: 1rem;
+  .text .title {
+    font-size: 14px;
   }
 
-  .option-description {
+  .subtitle {
     font-size: 0.85rem;
-  }
-
-  .option-btn {
-    height: 36px;
-    font-size: 0.9rem;
   }
 }
 </style>
