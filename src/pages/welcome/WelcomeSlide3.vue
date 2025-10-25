@@ -275,7 +275,7 @@ export default {
 
   .seed-text {
     font-size: 0.85rem;
-    padding-right: 70px;
+    padding-right: 50px;
   }
 
   .seed-actions {
