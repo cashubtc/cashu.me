@@ -15,6 +15,7 @@
         animated
         control-color="primary"
         class="flex-1"
+        style="height: 100%"
       >
         <q-carousel-slide :name="0">
           <WelcomeSlide1 />
@@ -26,11 +27,17 @@
           <WelcomeSlideChoice />
         </q-carousel-slide>
         <!-- New wallet flow: seed display at slide 3 -->
-        <q-carousel-slide :name="3" v-if="welcomeStore.onboardingPath === 'new'">
+        <q-carousel-slide
+          :name="3"
+          v-if="welcomeStore.onboardingPath === 'new'"
+        >
           <WelcomeSlide3 />
         </q-carousel-slide>
         <!-- Recover flow: seed input at slide 3 -->
-        <q-carousel-slide :name="3" v-else-if="welcomeStore.onboardingPath === 'recover'">
+        <q-carousel-slide
+          :name="3"
+          v-else-if="welcomeStore.onboardingPath === 'recover'"
+        >
           <WelcomeRecoverSeed />
         </q-carousel-slide>
         <!-- Mints setup at slide 4 (both paths) -->
@@ -38,14 +45,23 @@
           <WelcomeMintSetup />
         </q-carousel-slide>
         <!-- Recover flow: restore ecash at slide 5 -->
-        <q-carousel-slide :name="5" v-if="welcomeStore.onboardingPath === 'recover'">
+        <q-carousel-slide
+          :name="5"
+          v-if="welcomeStore.onboardingPath === 'recover'"
+        >
           <WelcomeRestoreEcash />
         </q-carousel-slide>
         <!-- Terms: new flow slide 5, recover flow slide 6 -->
-        <q-carousel-slide :name="5" v-if="welcomeStore.onboardingPath === 'new'">
+        <q-carousel-slide
+          :name="5"
+          v-if="welcomeStore.onboardingPath === 'new'"
+        >
           <WelcomeSlide4 />
         </q-carousel-slide>
-        <q-carousel-slide :name="6" v-if="welcomeStore.onboardingPath === 'recover'">
+        <q-carousel-slide
+          :name="6"
+          v-if="welcomeStore.onboardingPath === 'recover'"
+        >
           <WelcomeSlide4 />
         </q-carousel-slide>
       </q-carousel>
@@ -58,10 +74,10 @@
           v-if="welcomeStore.canGoPrev"
           @click="welcomeStore.goToPrevSlide"
         />
-        <!-- language selector -->
+        <!-- language selector (hidden on first slide since it's now in the slide itself) -->
         <div
           class="q-ml-md"
-          v-if="!welcomeStore.canGoPrev"
+          v-if="!welcomeStore.canGoPrev && welcomeStore.currentSlide > 0"
           style="position: relative; top: -5px"
         >
           <q-select
@@ -81,6 +97,7 @@
           :label="$t('WelcomePage.actions.next.label')"
           :disable="!welcomeStore.canProceed"
           @click="welcomeStore.goToNextSlide"
+          v-if="welcomeStore.currentSlide > 0"
         />
       </div>
     </q-card>
