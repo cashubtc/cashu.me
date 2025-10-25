@@ -14,28 +14,29 @@
     <!-- Description -->
     <p class="description">{{ $t("WelcomeSlide1.text") }}</p>
 
-    <!-- Bottom controls -->
-    <div class="controls">
-      <!-- Language selector -->
-      <q-select
-        v-model="selectedLanguage"
-        :options="languageOptions"
-        emit-value
-        dense
-        outlined
-        map-options
-        @update:model-value="changeLanguage"
-        class="language-select"
-      />
-
+    <!-- Welcome actions -->
+    <div class="welcome-actions">
       <!-- Next button -->
       <q-btn
         color="primary"
         rounded
         :label="$t('WelcomePage.actions.next.label')"
         @click="goToNext"
-        class="next-btn"
-        icon="arrow_forward"
+        class="welcome-next-btn"
+      />
+    </div>
+
+    <!-- Language selector at bottom -->
+    <div class="language-section">
+      <q-select
+        v-model="selectedLanguage"
+        :options="languageOptions"
+        emit-value
+        dense
+        borderless
+        map-options
+        @update:model-value="changeLanguage"
+        class="welcome-language-select"
       />
     </div>
   </div>
@@ -89,87 +90,106 @@ export default {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  align-items: center;
   height: 100%;
   background: var(--q-dark);
   color: white;
   padding: 40px 20px 20px 20px;
   box-sizing: border-box;
+  text-align: center;
 }
 
 .logo {
-  text-align: center;
-  margin-bottom: 20px;
+  margin-bottom: 30px;
 }
 
 .logo-image {
-  width: 60px;
-  height: 60px;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+  width: 80px;
+  height: 80px;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
 }
 
 .title {
-  font-size: 1.8rem;
+  font-size: 2.2rem;
   font-weight: 700;
-  margin: 0 0 15px 0;
+  margin: 0 0 20px 0;
   color: white;
   line-height: 1.2;
-  text-align: center;
+  letter-spacing: -0.02em;
 }
 
 .description {
-  font-size: 0.95rem;
-  line-height: 1.4;
+  font-size: 1.1rem;
+  line-height: 1.5;
   color: rgba(255, 255, 255, 0.8);
-  margin: 0 0 30px 0;
-  text-align: center;
-  max-width: 300px;
-  margin-left: auto;
-  margin-right: auto;
+  margin: 0 0 50px 0;
+  max-width: 350px;
 }
 
-.controls {
+.welcome-actions {
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
   align-items: center;
-  gap: 15px;
-  margin-top: auto;
-}
-
-.language-select {
   flex: 1;
-  max-width: 120px;
+  justify-content: center;
 }
 
-.language-select :deep(.q-field__control) {
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 8px;
-  color: white;
-  height: 36px;
-  min-height: 36px;
-}
-
-.language-select :deep(.q-field__native) {
-  color: white;
-  font-size: 0.9rem;
-}
-
-.language-select :deep(.q-field__label) {
-  color: rgba(255, 255, 255, 0.7);
-}
-
-.language-select :deep(.q-field__dropdown-icon) {
-  color: rgba(255, 255, 255, 0.7);
-}
-
-.next-btn {
-  flex: 1;
-  max-width: 120px;
-  height: 36px;
-  font-weight: 500;
+.welcome-next-btn {
+  min-width: 140px;
+  height: 44px;
+  font-weight: 600;
   text-transform: none;
+  font-size: 1rem;
+  border-radius: 22px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+}
+
+.welcome-next-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+}
+
+.welcome-language-select {
+  min-width: 100px;
+}
+
+.welcome-language-select :deep(.q-field__control) {
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.7);
+  min-height: auto;
+  padding: 0;
+}
+
+.welcome-language-select :deep(.q-field__native) {
+  color: rgba(255, 255, 255, 0.7);
   font-size: 0.9rem;
-  border-radius: 18px;
+  text-align: center;
+  padding: 0;
+}
+
+.welcome-language-select :deep(.q-field__label) {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.85rem;
+}
+
+.welcome-language-select :deep(.q-field__dropdown-icon) {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 1rem;
+}
+
+.welcome-language-select :deep(.q-field__marginal) {
+  height: auto;
+  padding: 0;
+}
+
+.language-section {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 10px 0;
+  flex-shrink: 0;
 }
 
 /* Mobile adjustments */
@@ -178,24 +198,29 @@ export default {
     padding: 30px 15px 15px 15px;
   }
 
+  .logo-image {
+    width: 70px;
+    height: 70px;
+  }
+
   .title {
-    font-size: 1.6rem;
+    font-size: 1.8rem;
   }
 
   .description {
-    font-size: 0.9rem;
-    max-width: 280px;
+    font-size: 1rem;
+    max-width: 300px;
+    margin-bottom: 40px;
   }
 
-  .controls {
-    flex-direction: column;
-    gap: 10px;
+  .welcome-next-btn {
+    min-width: 120px;
+    height: 40px;
+    font-size: 0.95rem;
   }
 
-  .language-select,
-  .next-btn {
-    width: 100%;
-    max-width: none;
+  .language-section {
+    padding: 8px 0;
   }
 }
 
