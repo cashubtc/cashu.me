@@ -243,8 +243,10 @@ export default {
 }
 
 .checkbox-section {
+  justify-content: center;
+  display: flex;
   width: 100%;
-  margin-top: 8px;
+  margin-bottom: 20px;
 }
 
 .validation-checkbox {
