@@ -169,7 +169,7 @@ export default {
 .title {
   font-size: 1.8rem;
   font-weight: 700;
-  margin: 0 0 20px 0;
+  margin: 0 0 16px 0;
   color: white;
   line-height: 1.2;
 }
@@ -181,13 +181,14 @@ export default {
 
 .intro-text {
   font-size: 0.95rem;
-  line-height: 1.4;
+  line-height: 1.5;
   color: rgba(255, 255, 255, 0.8);
-  margin: 0 0 25px 0;
+  margin: 0 0 20px 0;
+  text-align: left;
 }
 
 .platform-section {
-  margin-bottom: 20px;
+  margin-bottom: 16px;
   text-align: left;
 }
 
@@ -195,36 +196,37 @@ export default {
   font-size: 1rem;
   font-weight: 600;
   color: white;
-  margin: 0 0 10px 0;
+  margin: 0 0 8px 0;
 }
 
 .instruction-steps {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 .step {
   display: flex;
   align-items: flex-start;
-  gap: 8px;
+  gap: 10px;
   font-size: 0.9rem;
   line-height: 1.4;
-  color: rgba(255, 255, 255, 0.8);
+  color: rgba(255, 255, 255, 0.9);
 }
 
 .step-icon {
   color: var(--q-primary);
-  margin-top: 2px;
+  margin-top: 1px;
   flex-shrink: 0;
+  font-size: 1.05em;
 }
 
 .outro-text {
   font-size: 0.9rem;
   line-height: 1.4;
   color: rgba(255, 255, 255, 0.8);
-  margin: 20px 0 0 0;
-  text-align: center;
+  margin: 16px 0 0 0;
+  text-align: left;
 }
 
 .success-message {

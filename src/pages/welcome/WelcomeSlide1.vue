@@ -161,6 +161,7 @@ export default {
   color: rgba(255, 255, 255, 0.8);
   margin: 0 0 50px 0;
   max-width: 350px;
+  text-align: left;
 }
 
 .welcome-actions {

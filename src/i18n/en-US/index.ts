@@ -587,7 +587,7 @@ export default {
     title: "Install PWA",
     instruction: {
       intro: {
-        text: "For the best experience, use this wallet with your device's native web browser to install it as a Progressive Web App. Do this right now.",
+        text: "For the best experience, use this wallet with your device's native web browser to install it as a Progressive Web App.",
       },
       android: {
         title: "Android (Chrome)",
