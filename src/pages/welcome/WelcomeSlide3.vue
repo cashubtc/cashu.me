@@ -143,8 +143,9 @@ export default {
 .header-icon {
   margin-bottom: 20px;
   display: flex;
-  justify-content: flex-start;
+  justify-content: center;
   align-items: center;
+  width: 100%;
 }
 
 .icon-circle {
