@@ -66,7 +66,10 @@
         </q-carousel-slide>
       </q-carousel>
 
-      <div class="q-pa-md flex justify-between">
+      <div
+        class="q-pa-md flex justify-between"
+        v-if="welcomeStore.currentSlide > 0"
+      >
         <q-btn
           flat
           icon="arrow_left"
