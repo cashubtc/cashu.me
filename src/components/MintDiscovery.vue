@@ -1,35 +1,34 @@
 <template>
   <div class="discover-section">
     <div class="discover-card">
-      <div class="discover-content">
-        <q-icon
-          name="search"
-          size="2em"
-          color="primary"
-          class="discover-icon"
-        />
-        <div class="discover-text">
-          <h3 class="discover-title">
-            {{ $t("MintSettings.discover.title") }}
-          </h3>
-          <p class="discover-subtitle">
-            {{ $t("MintSettings.discover.caption") }}
-          </p>
-        </div>
+      <div class="discover-header">
+        <h3 class="discover-title">
+          {{ $t("MintSettings.discover.title") }}
+        </h3>
+        <p class="discover-subtitle">
+          {{ $t("MintSettings.discover.caption") }}
+        </p>
       </div>
       <div class="discover-button">
         <q-btn
-          flat
+          color="primary"
+          size="lg"
           rounded
           :loading="discovering"
           @click="discover"
-          class="discover-btn"
+          class="discover-btn full-width"
+          style="
+            min-height: 48px;
+            font-weight: 500;
+            text-transform: none;
+            font-size: 0.95rem;
+          "
         >
-          <q-icon name="search" size="18px" class="q-mr-sm" />
-          <span>{{ $t("MintSettings.discover.actions.discover.label") }}</span>
+          <q-icon name="search" size="20px" class="q-mr-sm" />
+          <span>Start Discovery</span>
           <template v-slot:loading>
             <q-spinner-hourglass class="on-left" />
-            {{ $t("MintSettings.discover.actions.discover.in_progress") }}
+            Searching...
           </template>
         </q-btn>
       </div>
@@ -257,26 +256,12 @@ export default defineComponent({
 }
 
 .discover-card {
-  padding: 16px;
-  border-radius: 12px;
-  transition: all 0.2s ease;
-  margin-bottom: 8px;
+  padding: 0;
+  margin-bottom: 24px;
 }
 
-.discover-content {
-  display: flex;
-  align-items: flex-start;
-  gap: 16px;
-  margin-bottom: 16px;
-}
-
-.discover-icon {
-  flex-shrink: 0;
-  margin-top: 2px;
-}
-
-.discover-text {
-  flex: 1;
+.discover-header {
+  margin-bottom: 20px;
 }
 
 .discover-title {
@@ -286,6 +271,7 @@ export default defineComponent({
   font-weight: 600;
   color: #ffffff;
   margin: 0 0 8px 0;
+  text-transform: none;
 }
 
 .discover-subtitle {
@@ -296,25 +282,11 @@ export default defineComponent({
 }
 
 .discover-button {
-  margin-top: 8px;
+  margin-top: 16px;
 }
 
 .discover-btn {
-  width: auto;
-  min-width: 120px;
-  height: 36px;
-  font-weight: 500;
-  text-transform: none;
-  font-size: 0.9rem;
-  border-radius: 18px;
-  color: var(--q-primary);
-  background: rgba(var(--q-primary-rgb), 0.1);
-  transition: all 0.2s ease;
-}
-
-.discover-btn:hover {
-  background: rgba(var(--q-primary-rgb), 0.2);
-  transform: translateY(-1px);
+  width: 100%;
 }
 
 .mint-card {

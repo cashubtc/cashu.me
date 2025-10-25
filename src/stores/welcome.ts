@@ -96,6 +96,8 @@ export const useWelcomeStore = defineStore("welcome", {
      */
     closeWelcome() {
       this.showWelcome = false;
+      // Reset the slide to the beginning for next time (if welcome is ever shown again)
+      this.currentSlide = 0;
       // Redirect to home or desired route
       window.location.href =
         "/" + window.location.search + window.location.hash;

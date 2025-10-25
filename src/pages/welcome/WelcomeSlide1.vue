@@ -444,6 +444,8 @@ export default {
     },
     goToNext() {
       const welcomeStore = useWelcomeStore();
+      // Mark terms as accepted since user is proceeding
+      welcomeStore.acceptTerms();
       welcomeStore.goToNextSlide();
     },
     toggleLanguageMenu() {

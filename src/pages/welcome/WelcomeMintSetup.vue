@@ -117,7 +117,7 @@
 </template>
 
 <script lang="ts">
-import { computed, ref, watch } from "vue";
+import { computed, ref, watch, onMounted } from "vue";
 import { useWelcomeStore } from "src/stores/welcome";
 import { useRestoreStore } from "src/stores/restore";
 import { useMintsStore, MintClass } from "src/stores/mints";
@@ -177,6 +177,12 @@ export default {
     const markDone = () => {
       welcome.mintSetupCompleted = true;
     };
+
+    // Mark mint setup as completed on mount since it's optional
+    // Users can proceed with or without adding mints
+    onMounted(() => {
+      welcome.mintSetupCompleted = true;
+    });
 
     return {
       welcome,
