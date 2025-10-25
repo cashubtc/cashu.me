@@ -1,33 +1,14 @@
 <template>
   <div style="max-width: 800px; margin: 0 auto">
     <!-- Mnemonic seed phrase input -->
-    <div class="q-px-xs text-left" on-left>
+    <div v-if="!onboarding" class="q-px-xs text-left" on-left>
       <q-list padding>
         <q-item>
           <q-item-section>
-            <q-item-label
-              overline
-              class="text-weight-bold"
-              style="
-                font-size: 15.2px;
-                font-family: Inter, -apple-system, 'system-ui', 'Segoe UI',
-                  Roboto, 'Helvetica Neue', Arial, sans-serif;
-                font-weight: 600;
-                color: #ffffff;
-                text-transform: none;
-                margin-bottom: 8px;
-              "
-            >
+            <q-item-label overline class="text-weight-bold">
               {{ $t("RestoreView.seed_phrase.label") }}
             </q-item-label>
-            <q-item-label
-              caption
-              style="
-                font-size: 0.9rem;
-                color: rgba(255, 255, 255, 0.8);
-                line-height: 1.4;
-              "
-            >
+            <q-item-label caption>
               {{ $t("RestoreView.seed_phrase.caption") }}
             </q-item-label>
             <div class="row q-pt-md">
@@ -61,33 +42,14 @@
     </div>
 
     <!-- Information about restoring mints -->
-    <div class="q-px-xs text-left q-mt-lg" on-left>
+    <div v-if="!onboarding" class="q-px-xs text-left" on-left>
       <q-list padding>
         <q-item>
           <q-item-section>
-            <q-item-label
-              overline
-              class="text-weight-bold"
-              style="
-                font-size: 15.2px;
-                font-family: Inter, -apple-system, 'system-ui', 'Segoe UI',
-                  Roboto, 'Helvetica Neue', Arial, sans-serif;
-                font-weight: 600;
-                color: #ffffff;
-                text-transform: none;
-                margin-bottom: 8px;
-              "
-            >
+            <q-item-label overline class="text-weight-bold">
               {{ $t("RestoreView.information.label") }}
             </q-item-label>
-            <q-item-label
-              caption
-              style="
-                font-size: 0.9rem;
-                color: rgba(255, 255, 255, 0.8);
-                line-height: 1.4;
-              "
-            >
+            <q-item-label caption>
               {{ $t("RestoreView.information.caption") }}
             </q-item-label>
           </q-item-section>
@@ -96,33 +58,14 @@
     </div>
 
     <!-- Information about adding mints -->
-    <div class="q-px-xs text-left q-mt-lg" on-left>
+    <div v-if="!onboarding" class="q-px-xs text-left q-mt-md" on-left>
       <q-list padding>
         <q-item>
           <q-item-section>
-            <q-item-label
-              overline
-              class="text-weight-bold"
-              style="
-                font-size: 15.2px;
-                font-family: Inter, -apple-system, 'system-ui', 'Segoe UI',
-                  Roboto, 'Helvetica Neue', Arial, sans-serif;
-                font-weight: 600;
-                color: #ffffff;
-                text-transform: none;
-                margin-bottom: 8px;
-              "
-            >
+            <q-item-label overline class="text-weight-bold">
               {{ $t("RestoreView.restore_mints.label") }}
             </q-item-label>
-            <q-item-label
-              caption
-              style="
-                font-size: 0.9rem;
-                color: rgba(255, 255, 255, 0.8);
-                line-height: 1.4;
-              "
-            >
+            <q-item-label caption>
               {{ $t("RestoreView.restore_mints.caption") }}
             </q-item-label>
           </q-item-section>
@@ -133,105 +76,80 @@
     <!-- List of mints with restore buttons and balance badges -->
     <div class="q-pb-md q-px-xs text-left" on-left>
       <!-- Restore Selected Mints Button (Primary Action) -->
-      <div
-        v-if="mints.length > 0"
-        class="primary-action-section q-pb-lg q-pt-md"
-      >
+      <div v-if="mints.length > 0" class="primary-action-section q-pb-md">
         <q-btn
           color="primary"
-          size="lg"
+          size="md"
           rounded
           @click="restoreSelectedMints"
           :disabled="
-            !isMnemonicValid || restoringState || selectedMintsCount === 0
+            (onboarding ? false : !isMnemonicValid) ||
+            restoringState ||
+            selectedMintsCount === 0
           "
           :loading="restoringState"
-          class="full-width"
-          style="
-            min-height: 48px;
-            font-weight: 500;
-            text-transform: none;
-            font-size: 0.95rem;
-          "
+          class="q-px-md"
         >
-          <q-icon name="restore" size="20px" class="q-mr-sm" />
-          <span
-            style="
-              white-space: nowrap;
-              overflow: hidden;
-              text-overflow: ellipsis;
-            "
-          >
-            {{
-              $t("RestoreView.actions.restore_selected_mints.label", {
-                count: selectedMintsCount,
-              })
-            }}
-          </span>
+          <q-icon name="restore" class="q-mr-sm" />
+          {{
+            $t("RestoreView.actions.restore_selected_mints.label", {
+              count: selectedMintsCount,
+            })
+          }}
         </q-btn>
       </div>
 
       <!-- Select All/Deselect All Buttons -->
       <div
-        v-if="mints.length > 0"
-        class="selection-buttons q-pb-lg"
-        style="display: flex; gap: 16px"
+        v-if="mints.length > 0 && !onboarding"
+        class="selection-buttons q-px-sm q-pb-md"
       >
         <q-btn
           flat
+          dense
           size="md"
           color="primary"
           @click="selectAllMints"
           :disabled="allSelected"
-          style="
-            flex: 1;
-            min-height: 40px;
-            font-weight: 500;
-            text-transform: none;
-          "
+          class="q-mr-md q-px-md"
         >
           {{ $t("RestoreView.actions.select_all.label") }}
         </q-btn>
         <q-btn
           flat
+          dense
           size="md"
           color="grey"
           @click="deselectAllMints"
           :disabled="!anySelected"
-          style="
-            flex: 1;
-            min-height: 40px;
-            font-weight: 500;
-            text-transform: none;
-          "
+          class="q-px-md"
         >
           {{ $t("RestoreView.actions.deselect_all.label") }}
         </q-btn>
       </div>
 
       <!-- Mints List with Card Design -->
-      <div class="q-pt-sm">
-        <div v-for="mint in mints" :key="mint.url" class="q-mb-lg">
+      <div class="q-pt-md">
+        <div v-for="mint in mints" :key="mint.url" class="q-mb-md">
           <q-item
             clickable
             @click="toggleMintSelection(mint.url)"
             class="mint-card cursor-pointer"
             :style="{
-              'border-radius': '12px',
+              'border-radius': '10px',
               border: selectedMints.has(mint.url)
-                ? '2px solid var(--q-primary)'
+                ? '1px solid var(--q-primary)'
                 : '1px solid rgba(128, 128, 128, 0.2)',
               padding: '0px',
               position: 'relative',
               'background-color': selectedMints.has(mint.url)
                 ? 'rgba(var(--q-primary-rgb), 0.1)'
                 : 'transparent',
-              transition: 'all 0.2s ease',
             }"
-            :disable="!isMnemonicValid || restoringState"
+            :disable="(onboarding ? false : !isMnemonicValid) || restoringState"
           >
             <div class="full-width" style="position: relative">
-              <div class="row items-center q-pa-lg">
+              <div class="row items-center q-pa-md">
                 <!-- Checkbox Section -->
                 <q-item-section avatar>
                   <q-checkbox
@@ -278,10 +196,7 @@
               </div>
 
               <!-- Balance and Restore Section -->
-              <div
-                class="row justify-between items-center q-pb-lg q-px-lg q-pt-md"
-                style="border-top: 1px solid rgba(255, 255, 255, 0.1)"
-              >
+              <div class="row justify-between q-pb-md q-pl-lg q-pr-md">
                 <div class="col">
                   <!-- Currency units with regular text styling -->
                   <div class="row q-gutter-x-sm">
@@ -290,10 +205,7 @@
                       :key="unit"
                       class="currency-unit-badge"
                     >
-                      <span
-                        class="currency-unit-text"
-                        style="font-size: 0.9rem; font-weight: 500"
-                      >
+                      <span class="currency-unit-text">
                         {{
                           formatCurrency(
                             mintClass(mint).unitBalance(unit),
@@ -305,32 +217,30 @@
                   </div>
 
                   <!-- Restore Progress -->
-                  <div v-if="restoringMint === mint.url" class="q-mt-md">
-                    <div
-                      class="text-grey-6 q-mb-xs"
-                      style="font-size: 0.85rem; font-weight: 500"
-                    >
+                  <div v-if="restoringMint === mint.url" class="q-mt-sm">
+                    <div class="text-grey-6 q-mb-xs" style="font-size: 12px">
                       {{ restoreStatus }}
                     </div>
                     <q-linear-progress
                       :value="restoreProgress"
                       color="primary"
-                      style="height: 6px; border-radius: 3px"
+                      style="height: 4px; border-radius: 2px"
                     />
                   </div>
                 </div>
 
-                <div class="col-auto">
+                <div v-if="!onboarding" class="col-auto">
                   <q-btn
-                    color="primary"
-                    size="md"
+                    color="secondary"
+                    size="sm"
                     rounded
+                    dense
                     flat
                     @click.stop="restoreMintForMint(mint.url)"
                     :disabled="!isMnemonicValid || restoringState"
                     :loading="restoringMint === mint.url"
                     icon="restore"
-                    style="min-width: 44px; min-height: 44px"
+                    class="q-px-sm"
                   >
                     <q-tooltip>{{
                       $t("RestoreView.actions.restore.label")
@@ -346,6 +256,7 @@
 
     <!-- Nostr Mint Restore Component -->
     <NostrMintRestore
+      v-if="!onboarding"
       :mnemonic="mnemonicToRestore"
       :is-mnemonic-valid="isMnemonicValid"
     />
@@ -367,6 +278,9 @@ export default defineComponent({
   mixins: [windowMixin],
   components: {
     NostrMintRestore,
+  },
+  props: {
+    onboarding: { type: Boolean, default: false },
   },
   data() {
     return {
@@ -409,6 +323,26 @@ export default defineComponent({
       return this.selectedMints.size;
     },
   },
+  mounted() {
+    if (this.onboarding) {
+      this.selectAllMints();
+    }
+  },
+  watch: {
+    mints: {
+      handler() {
+        if (this.onboarding) {
+          this.selectAllMints();
+        }
+      },
+      deep: true,
+    },
+    onboarding(newVal) {
+      if (newVal) {
+        this.selectAllMints();
+      }
+    },
+  },
   methods: {
     ...mapActions(useRestoreStore, ["restoreMint"]),
     ...mapActions(useUiStore, ["pasteFromClipboard"]),
@@ -449,7 +383,7 @@ export default defineComponent({
         return;
       }
 
-      if (!this.validateMnemonic()) {
+      if (!this.onboarding && !this.validateMnemonic()) {
         return;
       }
 
@@ -498,7 +432,7 @@ export default defineComponent({
       return true;
     },
     async restoreMintForMint(mintUrl) {
-      if (!this.validateMnemonic()) {
+      if (!this.onboarding && !this.validateMnemonic()) {
         return;
       }
       try {
@@ -577,6 +511,6 @@ export default defineComponent({
 .primary-action-section {
   display: flex;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: center;
 }
 </style>

@@ -20,7 +20,7 @@
 
       <!-- Restore View Component -->
       <div class="restore-content">
-        <RestoreView />
+        <RestoreView :onboarding="true" />
       </div>
     </div>
   </div>
