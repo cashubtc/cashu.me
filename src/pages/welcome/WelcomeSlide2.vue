@@ -3,8 +3,8 @@
   <div class="pwa-slide">
     <!-- Main content area -->
     <div class="content">
-      <!-- Icon -->
-      <div class="icon">
+      <!-- Header Image -->
+      <div class="header-image">
         <transition
           v-if="isPWA()"
           appear
@@ -12,7 +12,12 @@
         >
           <q-icon name="check_circle" size="3em" color="positive" />
         </transition>
-        <q-icon v-else name="download_for_offline" size="3em" color="primary" />
+        <img
+          v-else
+          src="/pwa-example.jpg"
+          alt="PWA Installation Example"
+          class="pwa-image"
+        />
       </div>
 
       <!-- Title -->
@@ -146,8 +151,19 @@ export default {
   flex-shrink: 0;
 }
 
-.icon {
+.header-image {
   margin-bottom: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.pwa-image {
+  max-width: 100%;
+  max-height: 200px;
+  width: auto;
+  height: auto;
+  object-fit: contain;
 }
 
 .title {
