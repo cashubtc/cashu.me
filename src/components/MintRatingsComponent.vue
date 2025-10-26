@@ -270,6 +270,10 @@ export default defineComponent({
       return nostr.ndk as unknown as NDK;
     },
     async fetchProfileFor(pk: string) {
+      // Skip if already loaded or currently loading
+      if (this.profiles[pk] || this.loadingProfiles.has(pk)) return;
+
+      this.loadingProfiles.add(pk);
       try {
         const ndk = await this.ensureNdk();
         // @ts-ignore
@@ -283,7 +287,22 @@ export default defineComponent({
         const picture =
           (user.profile as any)?.image || (user.profile as any)?.picture || "";
         this.profiles = { ...this.profiles, [pk]: { name, picture } };
-      } catch {}
+      } catch (error) {
+        console.warn(`Failed to fetch profile for ${pk}:`, error);
+      } finally {
+        this.loadingProfiles.delete(pk);
+      }
+    },
+    loadProfilesForPagedReviews() {
+      // Load profiles only for users currently shown in pagination
+      const uniquePks = Array.from(
+        new Set((this.paged || []).map((r: any) => r.pubkey))
+      );
+      uniquePks.forEach((pk) => {
+        if (pk && !this.profiles[pk] && !this.loadingProfiles.has(pk)) {
+          this.fetchProfileFor(pk);
+        }
+      });
     },
   },
   data() {
@@ -303,6 +322,7 @@ export default defineComponent({
       })),
       page: 1,
       profiles: {} as Record<string, { name?: string; picture?: string }>,
+      loadingProfiles: new Set<string>(),
       showCreateReviewDialog: false,
     };
   },
@@ -412,26 +432,34 @@ export default defineComponent({
       await recs.getReviewsForUrl(this.url);
     } catch {}
 
+    // Load profiles for currently visible reviews (non-blocking)
+    this.$nextTick(() => {
+      this.loadProfilesForPagedReviews();
+    });
+
     // Fetch latest reviews from Nostr in background (non-blocking)
     try {
       const recs = useMintRecommendationsStore();
       recs.fetchReviewsForUrl(this.url);
     } catch {}
-
-    const uniquePks = Array.from(
-      new Set((this.reviews || []).map((r: any) => r.pubkey))
-    );
-    uniquePks.forEach((pk) => this.fetchProfileFor(pk));
   },
 
   watch: {
-    reviews: {
+    paged: {
       handler() {
-        const uniquePks = Array.from(
-          new Set((this.reviews || []).map((r: any) => r.pubkey))
-        );
-        uniquePks.forEach((pk) => {
-          if (!this.profiles[pk]) this.fetchProfileFor(pk);
+        // Load profiles when pagination changes (new page, different reviews shown)
+        this.$nextTick(() => {
+          this.loadProfilesForPagedReviews();
+        });
+      },
+      deep: true,
+      immediate: false,
+    },
+    allReviews: {
+      handler() {
+        // Load profiles when reviews change (including from store)
+        this.$nextTick(() => {
+          this.loadProfilesForPagedReviews();
         });
       },
       deep: true,
@@ -444,6 +472,10 @@ export default defineComponent({
             const recs = useMintRecommendationsStore();
             // Load local reviews immediately
             await recs.getReviewsForUrl(newUrl);
+            // Load profiles for new reviews
+            this.$nextTick(() => {
+              this.loadProfilesForPagedReviews();
+            });
             // Fetch latest from Nostr in background
             recs.fetchReviewsForUrl(newUrl);
           }
