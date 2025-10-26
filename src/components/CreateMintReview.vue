@@ -62,6 +62,7 @@
           icon-half="star_half"
           icon="star"
           icon-selected="star"
+          :disable="prefilling || submitting"
         />
       </div>
 
@@ -73,6 +74,7 @@
           autogrow
           outlined
           :placeholder="'Share your experience'"
+          :disable="prefilling || submitting"
         />
       </div>
     </q-card-section>
@@ -89,7 +91,7 @@
       />
       <q-btn
         color="primary"
-        :disable="!canPublish"
+        :disable="!canPublish || prefilling"
         :loading="submitting"
         @click="publishReview"
         rounded
@@ -103,6 +105,9 @@
         </template>
       </q-btn>
     </q-card-actions>
+    <q-inner-loading :showing="prefilling">
+      <q-spinner-hourglass size="32px" />
+    </q-inner-loading>
   </q-card>
 </template>
 
@@ -112,6 +117,7 @@ import { useNostrStore } from "src/stores/nostr";
 import NDK, { NDKEvent, NDKKind } from "@nostr-dev-kit/ndk";
 import { notifyError, notifySuccess } from "src/js/notify";
 import { nip19 } from "nostr-tools";
+import { useMintRecommendationsStore } from "src/stores/mintRecommendations";
 
 export default defineComponent({
   name: "CreateMintReview",
@@ -125,6 +131,7 @@ export default defineComponent({
     const rating = ref<number>(0);
     const review = ref<string>("");
     const submitting = ref(false);
+    const prefilling = ref(false);
     const publisherName = ref<string>("");
     const publisherPicture = ref<string>("");
 
@@ -190,6 +197,13 @@ export default defineComponent({
         await event.sign(nostr.signer as any);
         if ((ndk as any).pool?.size === 0) ndk.connect();
         await event.publish();
+        // Immediately update recommendations store so UI reflects our review
+        try {
+          const recs = useMintRecommendationsStore();
+          // @ts-ignore NDKEvent
+          recs.handleReviewEvent(event as any);
+          recs.rebuildAggregates();
+        } catch {}
         notifySuccess("Review published");
         emit("published");
         emit("close");
@@ -203,6 +217,7 @@ export default defineComponent({
 
     const prefillExisting = async () => {
       try {
+        prefilling.value = true;
         await ensureNdk();
         const ndk: NDK = nostr.ndk as any;
         if (!nostr.pubkey) return;
@@ -231,7 +246,10 @@ export default defineComponent({
             review.value = latest.content || "";
           }
         }
-      } catch {}
+      } catch {
+      } finally {
+        prefilling.value = false;
+      }
     };
 
     const loadPublisherProfile = async () => {
@@ -259,6 +277,7 @@ export default defineComponent({
       rating,
       review,
       submitting,
+      prefilling,
       canPublish,
       publishReview,
       displayPubkey,

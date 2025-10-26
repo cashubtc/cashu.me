@@ -90,7 +90,15 @@
         </div>
       </div>
       <div v-else class="column q-gutter-md">
-        <div v-for="r in paged" :key="r.eventId" class="q-pa-md review">
+        <div
+          v-for="r in paged"
+          :key="r.eventId"
+          :class="[
+            'q-pa-md',
+            'review',
+            { 'own-review': r.pubkey === myPubkey },
+          ]"
+        >
           <div class="row items-center justify-between q-mb-xs">
             <div class="row items-center">
               <q-avatar size="28px" class="q-mr-sm">
@@ -173,6 +181,7 @@ import { useNostrStore } from "src/stores/nostr";
 import NDK from "@nostr-dev-kit/ndk";
 import { nip19 } from "nostr-tools";
 import CreateMintReview from "./CreateMintReview.vue";
+import { useMintRecommendationsStore } from "src/stores/mintRecommendations";
 
 export default defineComponent({
   name: "MintRatingsComponent",
@@ -269,14 +278,41 @@ export default defineComponent({
     };
   },
   computed: {
+    myPubkey(): string {
+      try {
+        const nostr = useNostrStore();
+        return nostr.pubkey || nostr.seedSignerPublicKey || "";
+      } catch {
+        return "";
+      }
+    },
+    storeReviews(): any[] {
+      try {
+        const recs = useMintRecommendationsStore().recommendations || [];
+        const rec = recs.find((r: any) => r.url === this.url);
+        return rec?.reviews || [];
+      } catch {
+        return [];
+      }
+    },
+    allReviews(): any[] {
+      const a = Array.isArray(this.reviews) ? this.reviews : [];
+      const b = Array.isArray(this.storeReviews) ? this.storeReviews : [];
+      // merge and de-duplicate by eventId
+      const map = new Map<string, any>();
+      [...a, ...b].forEach((r: any) => {
+        if (r && r.eventId) map.set(r.eventId, r);
+      });
+      return Array.from(map.values());
+    },
     hasAnyReviews(): boolean {
-      return Array.isArray(this.reviews) && this.reviews.length > 0;
+      return Array.isArray(this.allReviews) && this.allReviews.length > 0;
     },
     totalReviews(): number {
-      return this.reviews?.length || 0;
+      return this.allReviews?.length || 0;
     },
     ratingsOnly(): any[] {
-      return (this.reviews || []).filter(
+      return (this.allReviews || []).filter(
         (r: any) => typeof r.rating === "number"
       );
     },
@@ -290,7 +326,7 @@ export default defineComponent({
       return this.average !== null ? this.average.toFixed(2) : "n/a";
     },
     filtered(): any[] {
-      let list = (this.reviews || []) as any[];
+      let list = (this.allReviews || []) as any[];
       if (this.onlyWithComment)
         list = list.filter((r) => (r.comment || "").trim().length > 0);
       return list;
@@ -309,6 +345,14 @@ export default defineComponent({
           break;
         default:
           list.sort((a, b) => (b.created_at || 0) - (a.created_at || 0));
+      }
+      // Pin our own review to the top if present in the filtered list
+      if (this.myPubkey) {
+        const idx = list.findIndex((r) => r.pubkey === this.myPubkey);
+        if (idx > 0) {
+          const [mine] = list.splice(idx, 1);
+          list.unshift(mine);
+        }
       }
       return list;
     },
@@ -348,6 +392,10 @@ export default defineComponent({
 .review {
   border: 1px solid rgba(128, 128, 128, 0.2);
   border-radius: 8px;
+}
+.own-review {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(128, 128, 128, 0.35);
 }
 .monospace {
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
