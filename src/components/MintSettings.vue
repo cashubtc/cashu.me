@@ -345,6 +345,7 @@
   </div>
   <q-dialog v-model="showRatingsDialog" persistent>
     <MintRatingsComponent
+      :key="selectedRatingsUrl"
       :url="selectedRatingsUrl"
       :reviews="selectedReviews"
       :allowCreateReview="true"
@@ -354,6 +355,7 @@
   </q-dialog>
   <q-dialog v-model="showCreateReviewDialog" persistent>
     <CreateMintReview
+      :key="selectedRatingsUrl"
       :mintUrl="selectedRatingsUrl"
       :mintInfo="selectedMintInfo"
       @published="showCreateReviewDialog = false"
@@ -650,6 +652,7 @@ export default defineComponent({
       if (!rec) return;
       this.selectedRatingsUrl = url;
       this.selectedReviews = rec.reviews;
+      this.selectedMintInfo = mint.info || null;
       this.showRatingsDialog = true;
     },
     openCreateReview(mint) {
