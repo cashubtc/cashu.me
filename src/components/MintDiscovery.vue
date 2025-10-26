@@ -125,7 +125,7 @@
         :key="selectedRatingsUrl"
         :url="selectedRatingsUrl"
         :reviews="selectedReviews"
-        :allowCreateReview="true"
+        :allowCreateReview="allowCreateReview"
         :mintInfo="selectedMintInfo"
         @close="showRatingsDialog = false"
       />
@@ -147,6 +147,7 @@ export default defineComponent({
   props: {
     infoTimeoutMs: { type: Number, default: 5000 },
     autoDiscover: { type: Boolean, default: false },
+    allowCreateReview: { type: Boolean, default: true },
   },
   setup(props) {
     const recsStore = useMintRecommendationsStore();

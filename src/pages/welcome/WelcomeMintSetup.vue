@@ -102,7 +102,7 @@
 
       <!-- Discover mints on nostr (global) -->
       <div>
-        <MintDiscovery :autoDiscover="true" />
+        <MintDiscovery :autoDiscover="true" :allowCreateReview="false" />
       </div>
     </div>
 
