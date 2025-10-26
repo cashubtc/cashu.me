@@ -4,7 +4,7 @@
     <!-- Main content area -->
     <div class="content">
       <!-- Header Image -->
-      <div class="header-image">
+      <div class="header-image" :class="{ installing: isInstalling }">
         <transition
           v-if="isPWA()"
           appear
@@ -12,25 +12,43 @@
         >
           <q-icon name="check_circle" size="3em" color="positive" />
         </transition>
-        <img
-          v-else
-          src="/pwa-example.jpg"
-          alt="PWA Installation Example"
-          class="pwa-image"
-        />
+        <div v-else class="pwa-image-wrapper">
+          <img
+            src="/pwa-example.jpg"
+            alt="PWA Installation Example"
+            class="pwa-image"
+          />
+          <div v-if="isInstalling" class="installing-overlay">
+            <q-spinner color="primary" size="48px" />
+            <div class="installing-text">Installing…</div>
+          </div>
+        </div>
       </div>
 
       <!-- Title -->
       <h1 class="title">Install PWA</h1>
 
       <!-- Content based on PWA status -->
-      <div v-if="!isPWA()" class="instructions">
-        <p class="intro-text">
+      <div
+        v-if="!isPWA()"
+        class="instructions"
+        :class="{ 'fade-out': isInstalling }"
+      >
+        <div class="q-mb-md" v-if="canPromptInstall">
+          <q-btn
+            color="primary"
+            icon="add_box"
+            label="Install"
+            rounded
+            @click="promptInstall"
+          />
+        </div>
+        <p v-if="!wasInstalled" class="intro-text">
           {{ $t("WelcomeSlide2.instruction.intro.text") }}
         </p>
 
         <!-- Android Instructions -->
-        <div class="platform-section">
+        <div v-if="!wasInstalled && !isIos" class="platform-section">
           <h3 class="platform-title">
             {{ $t("WelcomeSlide2.instruction.android.title") }}
           </h3>
@@ -55,7 +73,7 @@
         </div>
 
         <!-- iOS Instructions -->
-        <div class="platform-section">
+        <div v-if="!wasInstalled && !isAndroid" class="platform-section">
           <h3 class="platform-title">
             {{ $t("WelcomeSlide2.instruction.ios.title") }}
           </h3>
@@ -77,20 +95,24 @@
           </div>
         </div>
 
-        <p class="outro-text">
+        <p v-if="!wasInstalled" class="outro-text">
           {{ $t("WelcomeSlide2.instruction.outro.text") }}
         </p>
       </div>
 
-      <!-- Success message when PWA is installed -->
-      <div v-if="isPWA()" class="success-message">
+      <!-- Success message when PWA is installed or installation confirmed -->
+      <div v-if="isPWA() || wasInstalled" class="success-message">
         <transition appear enter-active-class="animated tada">
           <h3 class="success-title">
             {{ $t("WelcomeSlide2.pwa.success.title") }}
           </h3>
         </transition>
-        <p class="success-text">
+        <p v-if="isPWA()" class="success-text">
           {{ $t("WelcomeSlide2.pwa.success.text") }}
+        </p>
+        <p v-else class="success-text">
+          You can now close this browser tab and open the app from your home
+          screen.
         </p>
       </div>
     </div>
@@ -99,12 +121,21 @@
     <div class="spacer"></div>
 
     <!-- PWA Prompts -->
-    <iOSPWAPrompt v-if="!isPWA()" />
-    <AndroidPWAPrompt v-if="!isPWA()" />
+    <iOSPWAPrompt v-if="!isPWA() && !wasInstalled && !isInstalling && isIos" />
+    <AndroidPWAPrompt
+      v-if="
+        !isPWA() &&
+        !wasInstalled &&
+        !isInstalling &&
+        !canPromptInstall &&
+        !isIos
+      "
+    />
   </div>
 </template>
 
 <script lang="ts">
+import { ref, onMounted, onBeforeUnmount, computed } from "vue";
 import iOSPWAPrompt from "components/iOSPWAPrompt.vue";
 import AndroidPWAPrompt from "components/AndroidPWAPrompt.vue";
 
@@ -116,11 +147,112 @@ export default {
   },
   setup() {
     const isPWA = () => {
-      return window.matchMedia("(display-mode: standalone)").matches;
+      return (
+        window.matchMedia("(display-mode: standalone)").matches ||
+        (navigator as any).standalone === true
+      );
     };
+
+    const deferredPrompt = ref<any | null>(null);
+    const canPromptInstall = ref(false);
+    const isInstalling = ref(false);
+    const wasInstalled = ref(false);
+    const installStartTs = ref<number | null>(null);
+    const minInstallDurationMs = 4000;
+    const isIos = computed(() => {
+      const ua = window.navigator.userAgent.toLowerCase();
+      return /iphone|ipad|ipod/.test(ua);
+    });
+    const isAndroid = computed(() => {
+      const ua = window.navigator.userAgent.toLowerCase();
+      return /android/.test(ua);
+    });
+
+    const handleBeforeInstallPrompt = (e: any) => {
+      // Prevent the mini-infobar on mobile
+      e.preventDefault();
+      deferredPrompt.value = e;
+      canPromptInstall.value = true;
+    };
+
+    const handleAppInstalled = () => {
+      deferredPrompt.value = null;
+      canPromptInstall.value = false;
+      const now = Date.now();
+      const elapsed = installStartTs.value ? now - installStartTs.value : 0;
+      const remaining = Math.max(0, minInstallDurationMs - elapsed);
+      window.setTimeout(() => {
+        wasInstalled.value = true;
+        isInstalling.value = false;
+        installStartTs.value = null;
+      }, remaining);
+    };
+
+    const promptInstall = async () => {
+      if (!deferredPrompt.value) return;
+      deferredPrompt.value.prompt();
+      try {
+        const { outcome } = await deferredPrompt.value.userChoice;
+        if (outcome === "accepted") {
+          // user accepted: show installing state until appinstalled or timeout
+          isInstalling.value = true;
+          installStartTs.value = Date.now();
+          // Fallback timeout to clear installing state if appinstalled doesn't fire
+          window.setTimeout(() => {
+            if (!isPWA()) {
+              isInstalling.value = false;
+              installStartTs.value = null;
+            }
+          }, 15000);
+        }
+      } finally {
+        // Chrome requires nulling after one use
+        deferredPrompt.value = null;
+        canPromptInstall.value = false;
+      }
+    };
+
+    onMounted(() => {
+      window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+      window.addEventListener("appinstalled", handleAppInstalled);
+      // Use globally captured event if it fired before this component mounted
+      const anyWindow = window as any;
+      if (anyWindow.__deferredBeforeInstallPrompt) {
+        deferredPrompt.value = anyWindow.__deferredBeforeInstallPrompt;
+        canPromptInstall.value = true;
+      }
+      const onBipAvailable = () => {
+        const w: any = window;
+        if (w.__deferredBeforeInstallPrompt) {
+          deferredPrompt.value = w.__deferredBeforeInstallPrompt;
+          canPromptInstall.value = true;
+        }
+      };
+      window.addEventListener("bip-available", onBipAvailable);
+      // Keep a reference for cleanup
+      (onMounted as any)._onBipAvailable = onBipAvailable;
+    });
+
+    onBeforeUnmount(() => {
+      window.removeEventListener(
+        "beforeinstallprompt",
+        handleBeforeInstallPrompt
+      );
+      window.removeEventListener("appinstalled", handleAppInstalled);
+      const refHandler = (onMounted as any)._onBipAvailable;
+      if (refHandler) {
+        window.removeEventListener("bip-available", refHandler);
+      }
+    });
 
     return {
       isPWA,
+      canPromptInstall,
+      promptInstall,
+      isIos,
+      isAndroid,
+      isInstalling,
+      wasInstalled,
     };
   },
 };
@@ -158,12 +290,36 @@ export default {
   align-items: center;
 }
 
+.header-image.installing {
+  margin-top: 15vh;
+}
+
 .pwa-image {
   max-width: 100%;
   max-height: 200px;
   width: auto;
   height: auto;
   object-fit: contain;
+}
+
+.pwa-image-wrapper {
+  position: relative;
+}
+
+.installing-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -65%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.installing-text {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.9);
 }
 
 .title {
@@ -177,6 +333,14 @@ export default {
 .instructions {
   max-width: 500px;
   width: 100%;
+}
+
+.instructions.fade-out {
+  opacity: 0;
+  height: 0;
+  margin: 0;
+  overflow: hidden;
+  transition: opacity 0.3s ease, height 0.3s ease, margin 0.3s ease;
 }
 
 .intro-text {
