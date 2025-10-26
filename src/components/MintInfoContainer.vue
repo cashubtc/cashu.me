@@ -5,16 +5,16 @@
         :src="iconUrl"
         spinner-color="white"
         spinner-size="xs"
-        :style="`height: ${avatarSize}; max-width: ${avatarSize}; font-size: 12px`"
+        :style="`height: ${avatarSize}; max-width: ${avatarSize}; font-size: 12px;`"
       >
         <template v-slot:error>
           <div
             class="row items-center justify-center"
-            style="height: 100%; width: 100%"
+            style="height: 100%; width: 100%; padding: 0px"
           >
             <q-icon
               name="account_balance"
-              color="grey-5"
+              color="grey-7"
               :size="fallbackIconSize"
             />
           </div>
