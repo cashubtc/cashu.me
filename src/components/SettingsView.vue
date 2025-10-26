@@ -449,7 +449,7 @@
               color="negative"
               @click="cancelCrawl"
             >
-              Cancel
+              Pause
             </q-btn>
             <q-btn
               v-if="!wotLoading"
