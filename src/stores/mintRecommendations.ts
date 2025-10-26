@@ -200,6 +200,44 @@ export const useMintRecommendationsStore = defineStore("mintRecommendations", {
       this.dToIdentifiers.get(d)!.add(identifier);
       // console.log(`[mintRecs] info: d=${d} url=${info.url ?? 'n/a'} id=${identifier}`);
     },
+    // Upsert helpers keep store consistent without full rebuilds
+    upsertReviewForUrl: function (url: string, review: MintReview) {
+      if (!url || !url.startsWith("http")) return;
+      // Update urlReviews map (dedupe by pubkey)
+      const list = this.urlReviews.get(url) || [];
+      const withoutSameAuthor = list.filter((r) => r.pubkey !== review.pubkey);
+      withoutSameAuthor.push(review);
+      withoutSameAuthor.sort((a, b) => (a.created_at || 0) - (b.created_at || 0));
+      this.urlReviews.set(url, withoutSameAuthor);
+
+      // Update aggregated recommendation entry in-place
+      const existingIdx = this.recommendations.findIndex((r) => r.url === url);
+      const aggregated = [...(withoutSameAuthor || [])];
+      const ratings = aggregated
+        .map((r) => r.rating)
+        .filter((n): n is number => typeof n === "number");
+      const avg = ratings.length
+        ? ratings.reduce((a, b) => a + b, 0) / ratings.length
+        : null;
+      const updated: MintRecommendation = {
+        url,
+        reviewsCount: aggregated.length,
+        averageRating: avg,
+        reviews: aggregated.slice().sort((a, b) => (b.created_at || 0) - (a.created_at || 0)),
+        info: this.urlHttpInfo.get(url),
+        error: this.urlError.has(url),
+      };
+      if (existingIdx >= 0) {
+        this.recommendations.splice(existingIdx, 1, updated);
+      } else {
+        this.recommendations.push(updated);
+      }
+      // keep global order roughly stable: high reviewsCount then avg
+      this.recommendations.sort(
+        (a, b) => b.reviewsCount - a.reviewsCount || (b.averageRating || 0) - (a.averageRating || 0)
+      );
+    },
+
     handleReviewEvent: function (ev: NDKEvent) {
       if (ev.kind !== 38000) return;
       const { rating, comment } = parseRatingAndComment(ev.content || "");
@@ -225,12 +263,18 @@ export const useMintRecommendationsStore = defineStore("mintRecommendations", {
             if (/^[0-9a-fA-F]{64}$/.test(maybePubkey)) {
               const identifier = makeIdentifier(kind, maybePubkey, d);
               this.attachReviewToIdentifier(identifier, review);
+              const url = this.urlByIdentifier.get(identifier);
+              if (url) this.upsertReviewForUrl(url, review);
               attached = true;
               // console.log(`[mintRecs] review ${ev.id} -> identifier ${identifier} (exact)`);
             } else {
               const set = this.dToIdentifiers.get(d);
               if (set && set.size > 0) {
-                set.forEach((identifier) => this.attachReviewToIdentifier(identifier, review));
+                set.forEach((identifier) => {
+                  this.attachReviewToIdentifier(identifier, review);
+                  const url = this.urlByIdentifier.get(identifier);
+                  if (url) this.upsertReviewForUrl(url, review);
+                });
                 attached = true;
                 // console.log(`[mintRecs] review ${ev.id} -> d ${d} mapped to ${set.size} identifiers`);
               }
@@ -246,11 +290,7 @@ export const useMintRecommendationsStore = defineStore("mintRecommendations", {
         for (const u of uTags) {
           const url = u[1];
           if (typeof url === "string" && url.startsWith("http")) {
-            const list = this.urlReviews.get(url) || [];
-            const withoutSameAuthor = list.filter((r) => r.pubkey !== review.pubkey);
-            withoutSameAuthor.push(review);
-            withoutSameAuthor.sort((a, b) => (a.created_at || 0) - (b.created_at || 0));
-            this.urlReviews.set(url, withoutSameAuthor);
+            this.upsertReviewForUrl(url, review);
             attached = true;
             // console.log(`[mintRecs] review ${ev.id} -> url ${url} (fallback via u tag)`);
           }
@@ -281,20 +321,8 @@ export const useMintRecommendationsStore = defineStore("mintRecommendations", {
         if (!urlToReviews.has(url)) urlToReviews.set(url, []);
         urlToReviews.get(url)!.push(...list);
       }
-
-      // If we have no aggregated reviews yet but we DO have existing recommendations
-      // (e.g. loaded from localStorage on app start), avoid wiping them.
-      if (urlToReviews.size === 0 && this.recommendations.length > 0) {
-        const persisted: MintRecommendation[] = this.recommendations.map((r) => {
-          const info = this.urlHttpInfo.get(r.url) ?? r.info;
-          const error = this.urlError.has(r.url);
-          return { ...r, info, error } as MintRecommendation;
-        }).filter((r) => !r.error);
-        this.recommendations = persisted;
-        return;
-      }
-      // Build recommendations per URL
-      const recs: MintRecommendation[] = [];
+      // Merge new aggregates into existing recommendations to avoid wiping others
+      const currentByUrl = new Map(this.recommendations.map((r) => [r.url, r] as [string, MintRecommendation]));
       for (const [url, reviews] of urlToReviews.entries()) {
         // schedule HTTP info if missing
         if (!this.urlHttpInfo.has(url) && !this.inflightInfo.has(url) && !this.urlError.has(url)) {
@@ -306,14 +334,16 @@ export const useMintRecommendationsStore = defineStore("mintRecommendations", {
           url,
           reviewsCount: reviews.length,
           averageRating: avg,
-          reviews: reviews.sort((a, b) => (b.created_at || 0) - (a.created_at || 0)),
+          reviews: reviews.slice().sort((a, b) => (b.created_at || 0) - (a.created_at || 0)),
           info: this.urlHttpInfo.get(url),
           error: this.urlError.has(url),
         };
-        if (!rec.error) recs.push(rec);
+        currentByUrl.set(url, rec);
       }
-      recs.sort((a, b) => (b.reviewsCount - a.reviewsCount) || ((b.averageRating || 0) - (a.averageRating || 0)));
-      this.recommendations = recs;
+      // Keep entries that were not part of this aggregate pass
+      const merged = Array.from(currentByUrl.values()).filter((r) => !r.error);
+      merged.sort((a, b) => b.reviewsCount - a.reviewsCount || (b.averageRating || 0) - (a.averageRating || 0));
+      this.recommendations = merged;
     },
   },
 });

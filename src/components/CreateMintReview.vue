@@ -202,7 +202,7 @@ export default defineComponent({
           const recs = useMintRecommendationsStore();
           // @ts-ignore NDKEvent
           recs.handleReviewEvent(event as any);
-          recs.rebuildAggregates();
+          // No full rebuild here; handleReviewEvent performs targeted upserts
         } catch {}
         notifySuccess("Review published");
         emit("published");
