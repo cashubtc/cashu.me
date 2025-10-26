@@ -363,12 +363,15 @@ export default defineComponent({
     },
     sorted(): any[] {
       const list = [...this.filtered];
-      // Sort: in-web-of-trust first, then by selected mode
-      const getHopScore = (pk: string) => (this.wotHop(pk) ? 1 : 0);
+      // Sort: by hop distance (1 before 2, etc.; non-WOT last), then by selected mode
+      const hopValue = (pk: string) => {
+        const hop = this.wotHop(pk);
+        return typeof hop === "number" ? hop : Number.POSITIVE_INFINITY;
+      };
       list.sort((a, b) => {
-        const aw = getHopScore(a.pubkey);
-        const bw = getHopScore(b.pubkey);
-        if (aw !== bw) return bw - aw; // WOT first
+        const ah = hopValue(a.pubkey);
+        const bh = hopValue(b.pubkey);
+        if (ah !== bh) return ah - bh; // closer hops first; non-WOT last
         switch (this.sortMode) {
           case "oldest":
             return (a.created_at || 0) - (b.created_at || 0);
