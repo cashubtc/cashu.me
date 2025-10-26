@@ -91,7 +91,20 @@
                         :src="getMintIconUrl(mint)"
                         alt="Mint Icon"
                         style="height: 34px; max-width: 34px; font-size: 12px"
-                      />
+                      >
+                        <template v-slot:error>
+                          <div
+                            class="row items-center justify-center"
+                            style="height: 100%; width: 100%"
+                          >
+                            <q-icon
+                              name="account_balance"
+                              color="grey-5"
+                              size="20px"
+                            />
+                          </div>
+                        </template>
+                      </q-img>
                     </q-avatar>
 
                     <div class="mint-info-container">

@@ -19,7 +19,16 @@
                 spinner-color="white"
                 spinner-size="xs"
                 style="height: 34px; max-width: 34px; font-size: 12px"
-              />
+              >
+                <template v-slot:error>
+                  <div
+                    class="row items-center justify-center"
+                    style="height: 100%; width: 100%"
+                  >
+                    <q-icon name="account_balance" color="grey-5" size="20px" />
+                  </div>
+                </template>
+              </q-img>
             </q-avatar>
             <div class="mint-info-container">
               <div v-if="mintInfo?.name" class="mint-name">
@@ -111,10 +120,17 @@
                 <q-icon v-else name="account_circle" />
               </q-avatar>
               <div class="text-caption row items-center">
-                <span class="text-grey-2">{{ displayName(r.pubkey) }}</span>
-                <span class="monospace text-grey-7 q-ml-xs"
-                  >({{ shortNpub(r.pubkey) }})</span
-                >
+                <template v-if="hasProfileName(r.pubkey)">
+                  <span class="text-grey-2">{{ displayName(r.pubkey) }}</span>
+                  <span class="monospace text-grey-7 q-ml-xs"
+                    >({{ shortNpub(r.pubkey) }})</span
+                  >
+                </template>
+                <template v-else>
+                  <span class="monospace text-grey-2">{{
+                    shortNpub(r.pubkey)
+                  }}</span>
+                </template>
                 <q-icon
                   name="content_copy"
                   size="14px"
@@ -234,6 +250,10 @@ export default defineComponent({
     displayName(pk: string) {
       const p = (this as any).profiles[pk];
       return p?.name || this.shortPubkey(pk);
+    },
+    hasProfileName(pk: string) {
+      const p = (this as any).profiles[pk];
+      return !!(p && p.name && String(p.name).trim().length > 0);
     },
     async ensureNdk() {
       const nostr = useNostrStore();

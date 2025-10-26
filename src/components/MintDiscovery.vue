@@ -80,7 +80,20 @@
                           :src="getMintIconUrlUrl(rec.url)"
                           alt="Mint Icon"
                           style="height: 34px; max-width: 34px; font-size: 12px"
-                        />
+                        >
+                          <template v-slot:error>
+                            <div
+                              class="row items-center justify-center"
+                              style="height: 100%; width: 100%"
+                            >
+                              <q-icon
+                                name="account_balance"
+                                color="grey-5"
+                                size="20px"
+                              />
+                            </div>
+                          </template>
+                        </q-img>
                       </q-avatar>
                       <q-spinner-dots
                         v-else-if="isFetchingMintInfo(rec.url)"
@@ -134,8 +147,11 @@
 
     <q-dialog v-model="showRatingsDialog" persistent>
       <MintRatingsComponent
+        :key="selectedRatingsUrl"
         :url="selectedRatingsUrl"
         :reviews="selectedReviews"
+        :allowCreateReview="true"
+        :mintInfo="selectedMintInfo"
         @close="showRatingsDialog = false"
       />
     </q-dialog>
@@ -163,6 +179,7 @@ export default defineComponent({
     const showRatingsDialog = ref(false);
     const selectedRatingsUrl = ref("");
     const selectedReviews = ref<any[]>([]);
+    const selectedMintInfo = ref<any | null>(null);
 
     const recommendations = computed(() => recsStore.recommendations);
     const isExistingMint = (url: string) =>
@@ -223,6 +240,7 @@ export default defineComponent({
       if (!rec) return;
       selectedRatingsUrl.value = url;
       selectedReviews.value = rec.reviews;
+      selectedMintInfo.value = rec.info || null;
       showRatingsDialog.value = true;
     };
 
@@ -241,6 +259,7 @@ export default defineComponent({
       showRatingsDialog,
       selectedRatingsUrl,
       selectedReviews,
+      selectedMintInfo,
     };
   },
 });
