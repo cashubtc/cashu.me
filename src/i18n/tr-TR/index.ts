@@ -568,6 +568,8 @@ export default {
   },
   WelcomeSlide2: {
     title: "PWA Yükle",
+    alt: { pwa_example: "PWA kurulum örneği" },
+    installing: "Yükleniyor…",
     instruction: {
       intro: {
         text: "En iyi deneyim için, cihazınızın yerel web tarayıcısını kullanarak bu cüzdanı Aşamalı Web Uygulaması olarak yükleyin. Bunu hemen yapın.",
@@ -604,6 +606,8 @@ export default {
       success: {
         title: "Başarılı!",
         text: "Cashu'yu PWA olarak kullanıyorsunuz. Diğer açık tarayıcı pencerelerini kapatın ve uygulamayı ana ekranınızdan kullanın.",
+        nextSteps:
+          "Artık bu sekmeyi kapatıp uygulamayı ana ekranınızdan açabilirsiniz.",
       },
     },
   },
@@ -639,6 +643,62 @@ export default {
       checkbox: {
         label: "Bu şartları ve koşulları okudum ve kabul ediyorum",
       },
+    },
+  },
+  WelcomeSlideChoice: {
+    title: "Cüzdanınızı ayarlayın",
+    text:
+      "Bir seed ifadesinden mi kurtarmak istersiniz yoksa yeni bir cüzdan mı oluşturmak istersiniz?",
+    options: {
+      new: {
+        title: "Yeni cüzdan oluştur",
+        subtitle: "Yeni bir seed oluşturun ve mint ekleyin.",
+      },
+      recover: {
+        title: "Cüzdanı kurtar",
+        subtitle: "Seed ifadenizi girin, mintleri ve ecash'i geri yükleyin.",
+      },
+    },
+  },
+  WelcomeMintSetup: {
+    title: "Mint ekle",
+    text:
+      "Mintler ecash göndermenize ve almanıza yardımcı olan sunuculardır. Keşfedilen bir minti seçin veya manuel ekleyin. Daha sonra da ekleyebilirsiniz.",
+    sections: { your_mints: "Mintleriniz" },
+    restoring: "Mintler geri yükleniyor…",
+    placeholder: { mint_url: "https://" },
+  },
+  WelcomeRecoverSeed: {
+    title: "Seed ifadenizi girin",
+    text: "Kurtarmak için 12 kelimelik seed ifadenizi yapıştırın veya yazın.",
+    inputs: { word: "Kelime { index }" },
+    actions: { paste_all: "Tümünü yapıştır" },
+    disclaimer:
+      "Seed ifadeniz yalnızca yerelde cüzdan anahtarlarını türetmek için kullanılır.",
+  },
+  WelcomeRestoreEcash: {
+    title: "Ecash'inizi geri yükleyin",
+    text:
+      "Yapılandırılmış mintlerinizde harcanmamış kanıtları tarayın ve cüzdanınıza ekleyin.",
+  },
+  MintRatings: {
+    title: "Mint yorumları",
+    reviews: "yorum",
+    no_reviews: "Hiç yorum bulunamadı",
+    no_reviews_to_display: "Gösterilecek yorum yok.",
+    no_rating: "Puan yok",
+    rows: "Satır",
+    actions: { write_review: "Yorum yaz" },
+  },
+  CreateMintReview: {
+    title: "Mint yorumu",
+    publishing_as: "Şu kişi olarak yayımlanıyor",
+    inputs: {
+      rating: { label: "Puan" },
+      review: { label: "Yorum (isteğe bağlı)" },
+    },
+    actions: {
+      publish: { label: "Yayımla", in_progress: "Yayımlanıyor…" },
     },
   },
   RestoreView: {

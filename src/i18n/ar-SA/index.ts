@@ -563,6 +563,8 @@ export default {
   },
   WelcomeSlide2: {
     title: "تثبيت PWA",
+    alt: { pwa_example: "مثال تثبيت PWA" },
+    installing: "جارٍ التثبيت…",
     instruction: {
       intro: {
         text: "للحصول على أفضل تجربة، استخدم هذه المحفظة مع متصفح الويب الأصلي لجهازك لتثبيتها كتطبيق ويب تقدمي. افعل هذا الآن.",
@@ -599,6 +601,8 @@ export default {
       success: {
         title: "نجاح!",
         text: "أنت تستخدم Cashu كتطبيق PWA. أغلق أي نوافذ متصفح أخرى مفتوحة واستخدم التطبيق من شاشتك الرئيسية.",
+        nextSteps:
+          "يمكنك الآن إغلاق هذا اللسان وفتح التطبيق من الشاشة الرئيسية.",
       },
     },
   },
@@ -634,6 +638,62 @@ export default {
       checkbox: {
         label: "لقد قرأت وأقبل هذه الشروط والأحكام",
       },
+    },
+  },
+  WelcomeSlideChoice: {
+    title: "إعداد محفظتك",
+    text:
+      "هل تريد الاستعادة من عبارة الاستعادة أم إنشاء محفظة جديدة؟",
+    options: {
+      new: {
+        title: "إنشاء محفظة جديدة",
+        subtitle: "توليد عبارة استعادة جديدة وإضافة mints.",
+      },
+      recover: {
+        title: "استعادة المحفظة",
+        subtitle: "أدخل عبارة الاستعادة، واستعد المِنْت و ecash.",
+      },
+    },
+  },
+  WelcomeMintSetup: {
+    title: "إضافة mints",
+    text:
+      "المِنْت خوادم تساعدك على إرسال واستلام ecash. اختر mint مكتشفًا أو أضِف واحدًا يدويًا. يمكنك التخطي والإضافة لاحقًا.",
+    sections: { your_mints: "المِنْت الخاصة بك" },
+    restoring: "جارٍ استعادة المِنْت…",
+    placeholder: { mint_url: "https://" },
+  },
+  WelcomeRecoverSeed: {
+    title: "أدخل عبارة الاستعادة",
+    text: "الصق أو اكتب عبارة من 12 كلمة للاستعادة.",
+    inputs: { word: "الكلمة { index }" },
+    actions: { paste_all: "لصق الكل" },
+    disclaimer:
+      "تُستخدم عبارة الاستعادة محليًا فقط لاشتقاق مفاتيح محفظتك.",
+  },
+  WelcomeRestoreEcash: {
+    title: "استعد ecash الخاصة بك",
+    text:
+      "ابحث عن البراهين غير المصروفة على المِنْت المُكوَّنة لديك وأضِفها إلى محفظتك.",
+  },
+  MintRatings: {
+    title: "مراجعات المِنْت",
+    reviews: "مراجعات",
+    no_reviews: "لا توجد مراجعات",
+    no_reviews_to_display: "لا توجد مراجعات للعرض.",
+    no_rating: "لا يوجد تقييم",
+    rows: "صفوف",
+    actions: { write_review: "اكتب مراجعة" },
+  },
+  CreateMintReview: {
+    title: "مراجعة المِنْت",
+    publishing_as: "النشر باسم",
+    inputs: {
+      rating: { label: "التقييم" },
+      review: { label: "مراجعة (اختياري)" },
+    },
+    actions: {
+      publish: { label: "نشر", in_progress: "جارٍ النشر…" },
     },
   },
   RestoreView: {

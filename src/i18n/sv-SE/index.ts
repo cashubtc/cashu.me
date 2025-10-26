@@ -567,6 +567,8 @@ export default {
   },
   WelcomeSlide2: {
     title: "Installera PWA",
+    alt: { pwa_example: "Exempel på PWA-installation" },
+    installing: "Installerar…",
     instruction: {
       intro: {
         text: "För bästa upplevelsen, använd denna plånbok med din enhets webbläsare för att installera den som en Progressive Web App. Gör detta nu.",
@@ -603,6 +605,8 @@ export default {
       success: {
         title: "Klart!",
         text: "Du använder Cashu som en PWA. Stäng alla andra öppna webbläsarfönster och använd appen från din startskärm.",
+        nextSteps:
+          "Du kan nu stänga denna flik och öppna appen från hemskärmen.",
       },
     },
   },
@@ -638,6 +642,63 @@ export default {
       checkbox: {
         label: "Jag har läst och accepterar dessa villkor",
       },
+    },
+  },
+  WelcomeSlideChoice: {
+    title: "Ställ in din plånbok",
+    text:
+      "Vill du återställa från en återställningsfras eller skapa en ny plånbok?",
+    options: {
+      new: {
+        title: "Skapa ny plånbok",
+        subtitle: "Generera en ny fras och lägg till mints.",
+      },
+      recover: {
+        title: "Återställ plånbok",
+        subtitle:
+          "Ange din återställningsfras, återställ mints och ecash.",
+      },
+    },
+  },
+  WelcomeMintSetup: {
+    title: "Lägg till mints",
+    text:
+      "Mints är servrar som hjälper dig skicka och ta emot ecash. Välj en upptäckt mint eller lägg till en manuellt. Du kan hoppa över och lägga till senare.",
+    sections: { your_mints: "Dina mints" },
+    restoring: "Återställer mints…",
+    placeholder: { mint_url: "https://" },
+  },
+  WelcomeRecoverSeed: {
+    title: "Ange din återställningsfras",
+    text: "Klistra in eller skriv din 12 ord långa fras för att återställa.",
+    inputs: { word: "Ord { index }" },
+    actions: { paste_all: "Klistra in alla" },
+    disclaimer:
+      "Din fras används endast lokalt för att härleda dina plånboksnycklar.",
+  },
+  WelcomeRestoreEcash: {
+    title: "Återställ ditt ecash",
+    text:
+      "Sök efter ospenderade proofs på dina konfigurerade mints och lägg till dem i plånboken.",
+  },
+  MintRatings: {
+    title: "Mint-recensioner",
+    reviews: "recensioner",
+    no_reviews: "Inga recensioner hittades",
+    no_reviews_to_display: "Inga recensioner att visa.",
+    no_rating: "Ingen betygsättning",
+    rows: "Rader",
+    actions: { write_review: "Skriv en recension" },
+  },
+  CreateMintReview: {
+    title: "Recensera mint",
+    publishing_as: "Publicerar som",
+    inputs: {
+      rating: { label: "Betyg" },
+      review: { label: "Recension (valfritt)" },
+    },
+    actions: {
+      publish: { label: "Publicera", in_progress: "Publicerar…" },
     },
   },
   RestoreView: {

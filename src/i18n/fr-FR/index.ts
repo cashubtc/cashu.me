@@ -571,6 +571,8 @@ export default {
   },
   WelcomeSlide2: {
     title: "Installer la PWA",
+    alt: { pwa_example: "Exemple d’installation PWA" },
+    installing: "Installation…",
     instruction: {
       intro: {
         text: "Pour la meilleure expérience, utilisez ce portefeuille avec le navigateur web natif de votre appareil pour l'installer en tant que Progressive Web App. Faites-le maintenant.",
@@ -607,6 +609,8 @@ export default {
       success: {
         title: "Succès !",
         text: "Vous utilisez Cashu comme PWA. Fermez les autres fenêtres de navigateur ouvertes et utilisez l'application depuis votre écran d'accueil.",
+        nextSteps:
+          "Vous pouvez maintenant fermer cet onglet et ouvrir l’application depuis votre écran d’accueil.",
       },
     },
   },
@@ -642,6 +646,63 @@ export default {
       checkbox: {
         label: "J'ai lu et j'accepte ces termes et conditions",
       },
+    },
+  },
+  WelcomeSlideChoice: {
+    title: "Configurez votre portefeuille",
+    text:
+      "Souhaitez-vous restaurer à partir d’une phrase de récupération ou créer un nouveau portefeuille ?",
+    options: {
+      new: {
+        title: "Créer un nouveau portefeuille",
+        subtitle: "Générez une nouvelle seed et ajoutez des mints.",
+      },
+      recover: {
+        title: "Restaurer le portefeuille",
+        subtitle:
+          "Saisissez votre phrase de récupération, restaurez les mints et l’ecash.",
+      },
+    },
+  },
+  WelcomeMintSetup: {
+    title: "Ajouter des mints",
+    text:
+      "Les mints sont des serveurs qui vous aident à envoyer et recevoir de l’ecash. Choisissez un mint découvert ou ajoutez-en un manuellement. Vous pouvez passer pour ajouter des mints plus tard.",
+    sections: { your_mints: "Vos mints" },
+    restoring: "Restauration des mints…",
+    placeholder: { mint_url: "https://" },
+  },
+  WelcomeRecoverSeed: {
+    title: "Saisissez votre phrase de récupération",
+    text: "Collez ou saisissez votre phrase de 12 mots pour restaurer.",
+    inputs: { word: "Mot { index }" },
+    actions: { paste_all: "Tout coller" },
+    disclaimer:
+      "Votre phrase de récupération est uniquement utilisée localement pour dériver les clés de votre portefeuille.",
+  },
+  WelcomeRestoreEcash: {
+    title: "Restaurez votre ecash",
+    text:
+      "Recherchez les preuves non dépensées sur vos mints configurés et ajoutez-les à votre portefeuille.",
+  },
+  MintRatings: {
+    title: "Avis sur le mint",
+    reviews: "avis",
+    no_reviews: "Aucun avis trouvé",
+    no_reviews_to_display: "Aucun avis à afficher.",
+    no_rating: "Aucune note",
+    rows: "Lignes",
+    actions: { write_review: "Rédiger un avis" },
+  },
+  CreateMintReview: {
+    title: "Évaluer le mint",
+    publishing_as: "Publier en tant que",
+    inputs: {
+      rating: { label: "Note" },
+      review: { label: "Avis (facultatif)" },
+    },
+    actions: {
+      publish: { label: "Publier", in_progress: "Publication…" },
     },
   },
   RestoreView: {

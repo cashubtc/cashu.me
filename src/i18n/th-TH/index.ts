@@ -565,6 +565,8 @@ export default {
   },
   WelcomeSlide2: {
     title: "ติดตั้ง PWA",
+    alt: { pwa_example: "ตัวอย่างการติดตั้ง PWA" },
+    installing: "กำลังติดตั้ง…",
     instruction: {
       intro: {
         text: "เพื่อประสบการณ์ที่ดีที่สุด ใช้ Wallet นี้กับเว็บเบราว์เซอร์พื้นฐานของอุปกรณ์ของคุณเพื่อติดตั้งเป็น Progressive Web App ทำสิ่งนี้ทันที",
@@ -601,6 +603,8 @@ export default {
       success: {
         title: "สำเร็จ!",
         text: "คุณกำลังใช้ Cashu เป็น PWA ปิดหน้าต่างเบราว์เซอร์อื่นที่เปิดอยู่และใช้แอปจากหน้าจอหลักของคุณ",
+        nextSteps:
+          "ตอนนี้คุณสามารถปิดแท็บนี้และเปิดแอปจากหน้าจอหลักได้",
       },
     },
   },
@@ -636,6 +640,62 @@ export default {
       checkbox: {
         label: "ฉันได้อ่านและยอมรับข้อกำหนดและเงื่อนไขเหล่านี้",
       },
+    },
+  },
+  WelcomeSlideChoice: {
+    title: "ตั้งค่ากระเป๋าเงินของคุณ",
+    text:
+      "คุณต้องการกู้คืนจากวลีสำหรับกู้คืนหรือสร้างกระเป๋าเงินใหม่?",
+    options: {
+      new: {
+        title: "สร้างกระเป๋าเงินใหม่",
+        subtitle: "สร้างวลีสำหรับกู้คืนใหม่และเพิ่ม Mint",
+      },
+      recover: {
+        title: "กู้คืนกระเป๋าเงิน",
+        subtitle: "ป้อนวลีสำหรับกู้คืนของคุณ กู้คืน Mint และ ecash",
+      },
+    },
+  },
+  WelcomeMintSetup: {
+    title: "เพิ่ม Mint",
+    text:
+      "Mint คือเซิร์ฟเวอร์ที่ช่วยให้คุณส่งและรับ ecash เลือก Mint ที่ค้นพบหรือเพิ่มด้วยตนเอง คุณสามารถข้ามและเพิ่มในภายหลังได้",
+    sections: { your_mints: "Mint ของคุณ" },
+    restoring: "กำลังกู้คืน Mint…",
+    placeholder: { mint_url: "https://" },
+  },
+  WelcomeRecoverSeed: {
+    title: "ป้อนวลีสำหรับกู้คืนของคุณ",
+    text: "วางหรือพิมพ์วลี 12 คำเพื่อกู้คืน",
+    inputs: { word: "คำ { index }" },
+    actions: { paste_all: "วางทั้งหมด" },
+    disclaimer:
+      "วลีสำหรับกู้คืนใช้เฉพาะในเครื่องเพื่อสร้างคีย์กระเป๋าเงินของคุณ",
+  },
+  WelcomeRestoreEcash: {
+    title: "กู้คืน ecash ของคุณ",
+    text:
+      "สแกนหา proof ที่ยังไม่ถูกใช้บน Mint ที่กำหนดค่าไว้และเพิ่มลงในกระเป๋าเงินของคุณ",
+  },
+  MintRatings: {
+    title: "รีวิว Mint",
+    reviews: "รีวิว",
+    no_reviews: "ไม่พบบทรีวิว",
+    no_reviews_to_display: "ไม่มีรีวิวที่จะแสดง",
+    no_rating: "ไม่มีคะแนน",
+    rows: "แถว",
+    actions: { write_review: "เขียนรีวิว" },
+  },
+  CreateMintReview: {
+    title: "รีวิว Mint",
+    publishing_as: "เผยแพร่เป็น",
+    inputs: {
+      rating: { label: "คะแนน" },
+      review: { label: "รีวิว (ไม่บังคับ)" },
+    },
+    actions: {
+      publish: { label: "เผยแพร่", in_progress: "กำลังเผยแพร่…" },
     },
   },
   RestoreView: {

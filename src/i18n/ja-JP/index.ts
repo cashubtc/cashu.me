@@ -565,6 +565,8 @@ export default {
   },
   WelcomeSlide2: {
     title: "PWAをインストール",
+    alt: { pwa_example: "PWA インストール例" },
+    installing: "インストール中…",
     instruction: {
       intro: {
         text: "最高の体験のため、このウォレットをデバイスのネイティブWebブラウザでProgressive Web Appとしてインストールしてください。今すぐこれを行ってください。",
@@ -601,6 +603,8 @@ export default {
       success: {
         title: "成功！",
         text: "CashuをPWAとして使用しています。他の開いているブラウザウィンドウをすべて閉じ、ホーム画面からアプリを使用してください。",
+        nextSteps:
+          "このブラウザタブを閉じて、ホーム画面からアプリを開けます。",
       },
     },
   },
@@ -636,6 +640,62 @@ export default {
       checkbox: {
         label: "これらの規約と条件を読み、同意します",
       },
+    },
+  },
+  WelcomeSlideChoice: {
+    title: "ウォレットをセットアップ",
+    text:
+      "シードフレーズから復元しますか？ それとも新しいウォレットを作成しますか？",
+    options: {
+      new: {
+        title: "新しいウォレットを作成",
+        subtitle: "新しいシードを生成してミントを追加します。",
+      },
+      recover: {
+        title: "ウォレットを復元",
+        subtitle: "シードフレーズを入力し、ミントとecashを復元します。",
+      },
+    },
+  },
+  WelcomeMintSetup: {
+    title: "ミントを追加",
+    text:
+      "ミントはecashの送受信を助けるサーバーです。検出されたミントを選ぶか、手動で追加できます。後で追加することもできます。",
+    sections: { your_mints: "あなたのミント" },
+    restoring: "ミントを復元中…",
+    placeholder: { mint_url: "https://" },
+  },
+  WelcomeRecoverSeed: {
+    title: "シードフレーズを入力",
+    text: "復元のために12語のシードフレーズを貼り付けるか入力してください。",
+    inputs: { word: "単語 { index }" },
+    actions: { paste_all: "すべて貼り付け" },
+    disclaimer:
+      "シードフレーズはローカルでのみ使用され、ウォレットの鍵を導出します。",
+  },
+  WelcomeRestoreEcash: {
+    title: "ecash を復元",
+    text:
+      "設定済みミントで未使用のproofをスキャンし、ウォレットに追加します。",
+  },
+  MintRatings: {
+    title: "ミントのレビュー",
+    reviews: "レビュー",
+    no_reviews: "レビューが見つかりません",
+    no_reviews_to_display: "表示するレビューはありません。",
+    no_rating: "評価なし",
+    rows: "行数",
+    actions: { write_review: "レビューを書く" },
+  },
+  CreateMintReview: {
+    title: "ミントをレビュー",
+    publishing_as: "次として公開",
+    inputs: {
+      rating: { label: "評価" },
+      review: { label: "レビュー（任意）" },
+    },
+    actions: {
+      publish: { label: "公開", in_progress: "公開中…" },
     },
   },
   RestoreView: {

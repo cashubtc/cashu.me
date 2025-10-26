@@ -568,6 +568,8 @@ export default {
   },
   WelcomeSlide2: {
     title: "Installa PWA",
+    alt: { pwa_example: "Esempio installazione PWA" },
+    installing: "Installazione…",
     instruction: {
       intro: {
         text: "Per la migliore esperienza, usa questo portafoglio con il browser web nativo del tuo dispositivo per installarlo come App Web Progressiva. Fallo subito.",
@@ -604,6 +606,8 @@ export default {
       success: {
         title: "Successo!",
         text: "Stai usando Cashu come PWA. Chiudi qualsiasi altra finestra del browser aperta e usa l'app dalla tua schermata home.",
+        nextSteps:
+          "Ora puoi chiudere questa scheda del browser e aprire l’app dalla schermata Home.",
       },
     },
   },
@@ -639,6 +643,63 @@ export default {
       checkbox: {
         label: "Ho letto e accetto questi termini e condizioni",
       },
+    },
+  },
+  WelcomeSlideChoice: {
+    title: "Configura il tuo portafoglio",
+    text:
+      "Vuoi recuperare da una frase seed o creare un nuovo portafoglio?",
+    options: {
+      new: {
+        title: "Crea nuovo portafoglio",
+        subtitle: "Genera una nuova seed e aggiungi mints.",
+      },
+      recover: {
+        title: "Recupera portafoglio",
+        subtitle:
+          "Inserisci la tua frase seed, ripristina mints ed ecash.",
+      },
+    },
+  },
+  WelcomeMintSetup: {
+    title: "Aggiungi mints",
+    text:
+      "I mints sono server che ti aiutano a inviare e ricevere ecash. Scegli un mint scoperto o aggiungine uno manualmente. Puoi saltare per aggiungere mints più tardi.",
+    sections: { your_mints: "I tuoi mints" },
+    restoring: "Ripristino mints…",
+    placeholder: { mint_url: "https://" },
+  },
+  WelcomeRecoverSeed: {
+    title: "Inserisci la tua frase seed",
+    text: "Incolla o digita la tua frase seed di 12 parole per recuperare.",
+    inputs: { word: "Parola { index }" },
+    actions: { paste_all: "Incolla tutto" },
+    disclaimer:
+      "La tua frase seed è usata solo localmente per derivare le chiavi del portafoglio.",
+  },
+  WelcomeRestoreEcash: {
+    title: "Ripristina il tuo ecash",
+    text:
+      "Scansiona le proofs non spese sui mints configurati e aggiungile al tuo portafoglio.",
+  },
+  MintRatings: {
+    title: "Recensioni del mint",
+    reviews: "recensioni",
+    no_reviews: "Nessuna recensione trovata",
+    no_reviews_to_display: "Nessuna recensione da mostrare.",
+    no_rating: "Nessuna valutazione",
+    rows: "Righe",
+    actions: { write_review: "Scrivi una recensione" },
+  },
+  CreateMintReview: {
+    title: "Recensisci il mint",
+    publishing_as: "Pubblicazione come",
+    inputs: {
+      rating: { label: "Valutazione" },
+      review: { label: "Recensione (opzionale)" },
+    },
+    actions: {
+      publish: { label: "Pubblica", in_progress: "Pubblicazione…" },
     },
   },
   RestoreView: {

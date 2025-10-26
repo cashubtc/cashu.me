@@ -560,6 +560,8 @@ export default {
   },
   WelcomeSlide2: {
     title: "安装 PWA",
+    alt: { pwa_example: "PWA 安装示例" },
+    installing: "正在安装…",
     instruction: {
       intro: {
         text: "为了获得最佳体验，请使用您设备的本地网络浏览器将此钱包安装为渐进式 Web 应用程序。请立即执行此操作。",
@@ -596,6 +598,8 @@ export default {
       success: {
         title: "成功！",
         text: "您正在使用 Cashu 作为 PWA。关闭所有其他打开的浏览器窗口，并从主屏幕使用该应用。",
+        nextSteps:
+          "您现在可以关闭此标签页，并从主屏幕打开应用。",
       },
     },
   },
@@ -631,6 +635,62 @@ export default {
       checkbox: {
         label: "我已阅读并接受这些条款和条件",
       },
+    },
+  },
+  WelcomeSlideChoice: {
+    title: "设置您的钱包",
+    text:
+      "您想从种子短语恢复，还是创建一个新钱包？",
+    options: {
+      new: {
+        title: "创建新钱包",
+        subtitle: "生成新的种子并添加 Mint。",
+      },
+      recover: {
+        title: "恢复钱包",
+        subtitle: "输入您的种子短语，恢复 Mints 和 ecash。",
+      },
+    },
+  },
+  WelcomeMintSetup: {
+    title: "添加 Mints",
+    text:
+      "Mint 是帮助您发送和接收 ecash 的服务器。选择一个已发现的 Mint 或手动添加。您也可以稍后添加。",
+    sections: { your_mints: "您的 Mints" },
+    restoring: "正在恢复 Mints…",
+    placeholder: { mint_url: "https://" },
+  },
+  WelcomeRecoverSeed: {
+    title: "输入您的种子短语",
+    text: "粘贴或输入您的 12 个词种子短语以进行恢复。",
+    inputs: { word: "第 { index } 个词" },
+    actions: { paste_all: "全部粘贴" },
+    disclaimer:
+      "您的种子短语仅在本地使用，用于派生您的钱包密钥。",
+  },
+  WelcomeRestoreEcash: {
+    title: "恢复您的 ecash",
+    text:
+      "扫描您配置的 Mints 上未花费的证明，并将其添加到您的钱包。",
+  },
+  MintRatings: {
+    title: "Mint 评价",
+    reviews: "条评价",
+    no_reviews: "未找到评价",
+    no_reviews_to_display: "暂无可显示的评价。",
+    no_rating: "暂无评分",
+    rows: "行",
+    actions: { write_review: "撰写评价" },
+  },
+  CreateMintReview: {
+    title: "评价 Mint",
+    publishing_as: "发布身份",
+    inputs: {
+      rating: { label: "评分" },
+      review: { label: "评价（可选）" },
+    },
+    actions: {
+      publish: { label: "发布", in_progress: "发布中…" },
     },
   },
   RestoreView: {
