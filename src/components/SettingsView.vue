@@ -2202,6 +2202,13 @@ export default defineComponent({
       this.deleteAllTables();
       // clear nostr user databases
       useNostrUserStore().clearAllDatabases();
+      // clear mint reviews database
+      try {
+        const { useMintRecommendationsStore } = await import(
+          "src/stores/mintRecommendations"
+        );
+        await useMintRecommendationsStore().clearAllDatabases();
+      } catch {}
       localStorage.clear();
       window.location.href = "/";
     },

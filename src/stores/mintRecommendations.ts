@@ -3,6 +3,7 @@ import NDK, { NDKEvent, NDKFilter, NDKKind } from "@nostr-dev-kit/ndk";
 import { useSettingsStore } from "./settings";
 import { useNostrStore } from "./nostr";
 import { useLocalStorage } from "@vueuse/core";
+import Dexie from "dexie";
 
 export type MintIdentifier = string; // `${kind}:${pubkey}:${d}`
 
@@ -51,6 +52,9 @@ export const useMintRecommendationsStore = defineStore("mintRecommendations", {
   state: () => ({
     ndk: {} as NDK,
     connected: false,
+    // Dexie DB handle
+    dbInitialized: false,
+    db: null as MintReviewsDB | null,
     // Maps
     mintsByIdentifier: new Map() as Map<MintIdentifier, MintInfo>,
     urlByIdentifier: new Map() as Map<MintIdentifier, string>,
@@ -62,6 +66,8 @@ export const useMintRecommendationsStore = defineStore("mintRecommendations", {
     infoTimers: new Map() as Map<string, any>,
     inflightInfo: new Set() as Set<string>,
     infoTimeoutMs: 5000,
+    // cached averages for performance (not persisted)
+    avgByUrl: new Map() as Map<string, { avg: number | null; count: number }>,
     // Aggregated list by URL
     recommendations: useLocalStorage<MintRecommendation[]>(
       "cashu.ndk.mintRecommendations",
@@ -71,6 +77,63 @@ export const useMintRecommendationsStore = defineStore("mintRecommendations", {
     subsActive: false,
   }),
   actions: {
+    initDb: async function () {
+      if (this.dbInitialized && this.db) return;
+      this.db = new MintReviewsDB();
+      await this.db.open();
+      this.dbInitialized = true;
+    },
+    ensureDbInitialized: async function () {
+      if (!this.dbInitialized || !this.db) await this.initDb();
+    },
+    migrateFromLocalStorage: async function () {
+      try {
+        await this.ensureDbInitialized();
+        const key = "cashu.ndk.mintRecommendations";
+        const raw = localStorage.getItem(key);
+        if (!raw) return;
+        const arr: any[] = JSON.parse(raw || "[]");
+        if (!Array.isArray(arr) || arr.length === 0) return;
+        const rows: { url: string; review: MintReview }[] = [];
+        const pruned: any[] = [];
+        arr.forEach((rec) => {
+          if (rec && typeof rec.url === "string") {
+            const url = rec.url as string;
+            const reviews = Array.isArray(rec.reviews) ? rec.reviews : [];
+            for (const r of reviews) {
+              if (r && r.eventId) {
+                rows.push({ url, review: r as MintReview });
+              }
+            }
+            // prune reviews from localStorage entry to keep only metadata
+            const { reviews: _omit, ...rest } = rec || {};
+            pruned.push({ ...rest, reviews: [] });
+          }
+        });
+        if (rows.length) {
+          const unique = new Map<string, { url: string; review: MintReview }>();
+          rows.forEach((row) => {
+            if (row.review && row.review.eventId && !unique.has(row.review.eventId)) {
+              unique.set(row.review.eventId, row);
+            }
+          });
+          const toPut = Array.from(unique.values()).map((row) => ({
+            eventId: row.review.eventId,
+            url: row.url,
+            pubkey: row.review.pubkey,
+            created_at: row.review.created_at,
+            rating: row.review.rating,
+            comment: row.review.comment,
+            raw: row.review.raw,
+          } as ReviewRow));
+          await (this.db as MintReviewsDB).reviews.bulkPut(toPut);
+        }
+        // Write pruned recommendations back (without reviews payload)
+        try {
+          localStorage.setItem(key, JSON.stringify(pruned));
+        } catch { }
+      } catch { }
+    },
     init: function () {
       if (this.connected) return;
       const settings = useSettingsStore();
@@ -81,6 +144,9 @@ export const useMintRecommendationsStore = defineStore("mintRecommendations", {
       this.ndk = nostr.ndk || new NDK({ explicitRelayUrls: settings.defaultNostrRelays });
       this.ndk.connect();
       this.connected = true;
+      // kick off DB and migration in background
+      this.ensureDbInitialized();
+      this.migrateFromLocalStorage();
     },
     fetchMintInfos: async function () {
       this.init();
@@ -265,6 +331,8 @@ export const useMintRecommendationsStore = defineStore("mintRecommendations", {
       withoutSameAuthor.push(review);
       withoutSameAuthor.sort((a, b) => (a.created_at || 0) - (b.created_at || 0));
       this.urlReviews.set(url, withoutSameAuthor);
+      // Persist to DB as one row per review
+      this.persistReviewRow(url, review);
 
       // Update aggregated recommendation entry in-place
       const existingIdx = this.recommendations.findIndex((r) => r.url === url);
@@ -275,11 +343,13 @@ export const useMintRecommendationsStore = defineStore("mintRecommendations", {
       const avg = ratings.length
         ? ratings.reduce((a, b) => a + b, 0) / ratings.length
         : null;
+      this.avgByUrl.set(url, { avg, count: aggregated.length });
       const updated: MintRecommendation = {
         url,
         reviewsCount: aggregated.length,
         averageRating: avg,
-        reviews: aggregated.slice().sort((a, b) => (b.created_at || 0) - (a.created_at || 0)),
+        // avoid persisting large review arrays into localStorage-backed recommendations
+        reviews: [],
         info: this.urlHttpInfo.get(url),
         error: this.urlError.has(url),
       };
@@ -394,11 +464,13 @@ export const useMintRecommendationsStore = defineStore("mintRecommendations", {
         }
         const ratings = uniq.map((r) => r.rating).filter((n): n is number => typeof n === "number");
         const avg = ratings.length ? ratings.reduce((a, b) => a + b, 0) / ratings.length : null;
+        this.avgByUrl.set(url, { avg, count: uniq.length });
         const rec: MintRecommendation = {
           url,
           reviewsCount: uniq.length,
           averageRating: avg,
-          reviews: uniq.slice().sort((a, b) => (b.created_at || 0) - (a.created_at || 0)),
+          // keep reviews out of localStorage-backed state
+          reviews: [],
           info: this.urlHttpInfo.get(url),
           error: this.urlError.has(url),
         };
@@ -409,7 +481,98 @@ export const useMintRecommendationsStore = defineStore("mintRecommendations", {
       merged.sort((a, b) => b.reviewsCount - a.reviewsCount || (b.averageRating || 0) - (a.averageRating || 0));
       this.recommendations = merged;
     },
+    // Persist a single review row to DB
+    persistReviewRow: async function (url: string, review: MintReview) {
+      try {
+        await this.ensureDbInitialized();
+        const row: ReviewRow = {
+          eventId: review.eventId,
+          url,
+          pubkey: review.pubkey,
+          created_at: review.created_at,
+          rating: review.rating,
+          comment: review.comment,
+          raw: review.raw,
+        };
+        await (this.db as MintReviewsDB).reviews.put(row);
+      } catch { }
+    },
+    // Load reviews for URL from DB; cache results in memory for UI
+    getReviewsForUrl: async function (url: string): Promise<MintReview[]> {
+      try {
+        await this.ensureDbInitialized();
+        if (!url) return [];
+        const rows = await (this.db as MintReviewsDB).reviews.where("url").equals(url).sortBy("created_at");
+        const list = rows.map((r) => ({
+          eventId: r.eventId,
+          pubkey: r.pubkey,
+          created_at: r.created_at,
+          rating: r.rating,
+          comment: r.comment,
+          raw: r.raw,
+        } as MintReview));
+        // sort ascending then we will reverse where needed for UI
+        list.sort((a, b) => (a.created_at || 0) - (b.created_at || 0));
+        this.urlReviews.set(url, list);
+        // update cached avg/count
+        const ratings = list.map((r) => r.rating).filter((n): n is number => typeof n === "number");
+        const avg = ratings.length ? ratings.reduce((a, b) => a + b, 0) / ratings.length : null;
+        this.avgByUrl.set(url, { avg, count: list.length });
+        this.rebuildAggregates();
+        return list;
+      } catch {
+        return [];
+      }
+    },
+    // Average helper computed on-demand (not persisted)
+    getAverageForUrl: function (url: string): number | null {
+      const cached = this.avgByUrl.get(url);
+      if (cached) return cached.avg;
+      const list = this.urlReviews.get(url) || [];
+      const ratings = list.map((r) => r.rating).filter((n): n is number => typeof n === "number");
+      const avg = ratings.length ? ratings.reduce((a, b) => a + b, 0) / ratings.length : null;
+      this.avgByUrl.set(url, { avg, count: list.length });
+      return avg;
+    },
+    getCountForUrl: function (url: string): number {
+      const cached = this.avgByUrl.get(url);
+      if (cached) return cached.count;
+      const list = this.urlReviews.get(url) || [];
+      this.avgByUrl.set(url, { avg: this.getAverageForUrl(url), count: list.length });
+      return list.length;
+    },
+    clearAllDatabases: async function () {
+      try {
+        await this.ensureDbInitialized();
+        await (this.db as MintReviewsDB).reviews.clear();
+      } catch { }
+      // reset in-memory caches
+      this.urlReviews.clear();
+      this.avgByUrl.clear();
+      // keep recommendations (mints) but zero out counts/averages quickly
+      this.rebuildAggregates();
+    },
   },
 });
 
+// Dexie DB for mint reviews persistence (one review per row)
+class MintReviewsDB extends Dexie {
+  reviews!: Dexie.Table<ReviewRow, string>;
+  constructor() {
+    super("mintReviews");
+    this.version(1).stores({
+      // primary key: eventId, indexes for url and created_at
+      reviews: "eventId, url, created_at",
+    });
+  }
+}
 
+type ReviewRow = {
+  eventId: string;
+  url: string;
+  pubkey: string;
+  created_at: number;
+  rating: number | null;
+  comment: string;
+  raw: any;
+};

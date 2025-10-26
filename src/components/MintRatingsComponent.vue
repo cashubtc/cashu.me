@@ -11,15 +11,21 @@
     <q-card-section>
       <div class="row items-center justify-between">
         <!-- Mint identity and average rating -->
-        <div class="row items-center" style="width: 100%">
-          <div class="row items-center" style="flex: 1; min-width: 0">
+        <div
+          class="row items-center"
+          style="width: 100%; flex-wrap: wrap; gap: 8px"
+        >
+          <div class="row items-center" style="flex: 1; min-width: 200px">
             <MintInfoContainer
               :iconUrl="mintInfo?.icon_url"
               :name="mintInfo?.name"
               :url="url"
             />
           </div>
-          <div class="text-body1 text-right" style="min-width: 200px">
+          <div
+            class="text-body1 text-right"
+            style="min-width: 200px; flex-shrink: 0"
+          >
             <span v-if="hasAnyReviews">
               ⭐ {{ averageDisplay }} · {{ totalReviews }} reviews
             </span>
@@ -41,13 +47,6 @@
           </q-btn>
           <q-space />
           <div class="row items-center" style="margin-left: auto">
-            <q-toggle
-              v-model="onlyWithComment"
-              color="primary"
-              dense
-              label="Comments only"
-              class="q-mx-md"
-            />
             <q-select
               dense
               outlined
@@ -318,9 +317,9 @@ export default defineComponent({
     },
     storeReviews(): any[] {
       try {
-        const recs = useMintRecommendationsStore().recommendations || [];
-        const rec = recs.find((r: any) => r.url === this.url);
-        return rec?.reviews || [];
+        const store = useMintRecommendationsStore();
+        const list = store.urlReviews?.get?.(this.url) || [];
+        return Array.isArray(list) ? list : [];
       } catch {
         return [];
       }
@@ -406,10 +405,19 @@ export default defineComponent({
       // Ensure WoT data is hydrated from IndexedDB on first load
       await useNostrUserStore().ensureDbInitialized();
     } catch {}
+
+    // Load local reviews immediately to show them instantly
     try {
-      // Ensure latest reviews are fetched for this mint when dialog opens
-      await useMintRecommendationsStore().fetchReviewsForUrl(this.url);
+      const recs = useMintRecommendationsStore();
+      await recs.getReviewsForUrl(this.url);
     } catch {}
+
+    // Fetch latest reviews from Nostr in background (non-blocking)
+    try {
+      const recs = useMintRecommendationsStore();
+      recs.fetchReviewsForUrl(this.url);
+    } catch {}
+
     const uniquePks = Array.from(
       new Set((this.reviews || []).map((r: any) => r.pubkey))
     );
@@ -432,8 +440,13 @@ export default defineComponent({
     url: {
       async handler(newUrl: string) {
         try {
-          if (newUrl)
-            await useMintRecommendationsStore().fetchReviewsForUrl(newUrl);
+          if (newUrl) {
+            const recs = useMintRecommendationsStore();
+            // Load local reviews immediately
+            await recs.getReviewsForUrl(newUrl);
+            // Fetch latest from Nostr in background
+            recs.fetchReviewsForUrl(newUrl);
+          }
         } catch {}
       },
       immediate: true,

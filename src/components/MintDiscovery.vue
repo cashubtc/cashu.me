@@ -84,11 +84,11 @@
                     <div class="row">
                       <div
                         class="text-grey-5 q-mt-xs"
-                        v-if="rec.averageRating !== null"
+                        v-if="avgFor(rec.url) !== null && countFor(rec.url) > 0"
                       >
                         <span>
-                          ⭐ {{ rec.averageRating.toFixed(2) }} ·
-                          {{ rec.reviewsCount }}
+                          ⭐ {{ (avgFor(rec.url) ?? 0).toFixed(2) }} ·
+                          {{ countFor(rec.url) }}
                           <span
                             class="text-primary cursor-pointer"
                             style="text-decoration: underline"
@@ -223,7 +223,8 @@ export default defineComponent({
       const rec = recommendations.value.find((r) => r.url === url);
       if (!rec) return;
       selectedRatingsUrl.value = url;
-      selectedReviews.value = rec.reviews;
+      // Reviews are loaded from IndexedDB via store inside the dialog
+      selectedReviews.value = [];
       selectedMintInfo.value = rec.info || null;
       showRatingsDialog.value = true;
     };
@@ -234,6 +235,8 @@ export default defineComponent({
       discoverList: computed(() =>
         recommendations.value.filter((r) => !isExistingMint(r.url))
       ),
+      avgFor: (url: string) => recsStore.getAverageForUrl(url),
+      countFor: (url: string) => recsStore.getCountForUrl(url),
       getMintIconUrlUrl,
       isFetchingMintInfo,
       getMintDisplayName,
