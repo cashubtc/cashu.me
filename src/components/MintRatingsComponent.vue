@@ -401,7 +401,11 @@ export default defineComponent({
       return this.sorted.slice(start, start + this.rowsPerPage);
     },
   },
-  mounted() {
+  async mounted() {
+    try {
+      // Ensure WoT data is hydrated from IndexedDB on first load
+      await useNostrUserStore().ensureDbInitialized();
+    } catch {}
     const uniquePks = Array.from(
       new Set((this.reviews || []).map((r: any) => r.pubkey))
     );
